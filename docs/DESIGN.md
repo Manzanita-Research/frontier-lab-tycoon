@@ -36,6 +36,13 @@ RollerCoaster Tycoon, but the park is a frontier AI lab. You lay paths, drop bui
 - **Vibes, 0 to 999,** are the park rating: happiness, visitors impressed, cleanliness (stubbed), hype, minus incidents and protests. They set how many visitors come, whether researchers apply and whether an investor writes a cheque. Five days below 0.2 happiness and a researcher walks out the gate with a box.
 - **The joke delivery is now diegetic:** the crowd tells you what to build.
 
+## The Race (FLT-9; spec: `docs/specs/FLT-9.md`)
+
+- **Six rival labs** are simulated machines with personalities (cadence, growth, openness, poaching, hype-hunger). Every 7 game days they act, the **Frontier Arena** leaderboard (a score from capability and hype) is re-ranked, and the news turns. Your rank shows in the top bar ("#4 on Arena ↑2").
+- **AI R&D multiplier:** agents make training faster. It is shown big, and it sets the **era**: Stumbling Agents, Coding Automation (2x), Superhuman Coder (5x), Intelligence Explosion (25x). Each era is a full-screen title card, new agent looks, its own jokes, faster events and fiercer rivals.
+- **Pressure cards:** an open-weights lab matches you and crashes your revenue for a month; a compute auction (about every 40 days) buys a Datacenter that needs a power plant (Gas Turbine: cheap and discourse, Solar Farm: pricey and hype); funding rounds arrive when the runway is short and the Vibes are up.
+- **The scenario is a 45-minute run:** release Frontier-4, reach Era 3, and be Top 3 on the Arena in Era 3, by the end of Y3.
+
 ## Satire (parody names only)
 
 This is AI-2027-shaped escalation played as affectionate farce. It punches at incentives and institutions, never at real people, companies or nationalities.
@@ -62,4 +69,4 @@ This is AI-2027-shaped escalation played as affectionate farce. It punches at in
 
 ## Later (not now)
 
-Eras and the intelligence explosion; safety versus capability; the Sandbox Escape chase; research tree; staff (SREs, janitor bots for slop, PR reps); poaching; more event arcs on the slice-2 card system; sound; and the ending where the superintelligence politely takes over running your park.
+Safety versus capability; the Sandbox Escape chase; research tree; staff (SREs, janitor bots for slop, PR reps); more event arcs on the slice-2 card system; sound; and the ending where the superintelligence politely takes over running your park.

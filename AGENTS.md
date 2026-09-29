@@ -29,7 +29,7 @@ pnpm check            # all three: run before every PR
 - `src/render/`: react-three-fiber scene. Reads sim state, never mutates it except through store actions.
 - `src/ui/`: DOM HUD over the canvas (stats, build palette, ticker, event cards, speed control). `src/ui/juice/`: odometers, sky, photo mode.
 - `src/render/fx/`: the juice layer (camera director, particles, day/night, photo mode). It only reads the World; see the last section of `docs/ARCHITECTURE.md`.
-- `src/sim/machines/`: the XState machines (training, economy, goals, event arcs, walkers). `src/app/`: the Effect shell (Sim and Frames services, the app machine) and how React reads it. See `docs/ARCHITECTURE.md`.
+- `src/sim/machines/`: the XState machines (training, economy, goals, event arcs, walkers, moods). `src/sim/race/`: the Race (rival labs, the Arena, eras, the R&D multiplier, open weights, the compute auction, funding rounds). `src/app/`: the Effect shell (Sim and Frames services, the app machine) and how React reads it. See `docs/ARCHITECTURE.md`.
 
 If you need to change a shared type in `src/sim/types.ts`, keep the change additive and mention it in your PR.
 

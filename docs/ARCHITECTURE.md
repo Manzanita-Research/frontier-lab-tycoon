@@ -33,8 +33,10 @@ flowchart LR
 | **training** | `src/sim/machines/training.ts` | `idle`, `training`, `releasing` | `DAY {halls, gain}`, `NAMED {name}` | `RELEASED`, `RUN_STARTED` | run, progress, cost, next model name |
 | **economy** | `.../economy.ts` | `solvent`, `runwayWarning`, `bailout`, `bankrupt` | `DAY {cash, day}` | `BAILOUT` | day of the last bridge round |
 | **goals** | `.../goals.ts` | `tracking`, `won`, `lost` (final) | `DAY {day, cash, values}` | `WON`, `LOST` | the three milestones, the day it ended |
-| **arc** (one per event card) | `.../arc.ts` | `calm`, `brewing`, `cardOpen`, `cooldown` | `DAY {day, ready, slotFree}`, `CHOOSE {choiceIndex}` | `RESOLVED` | choices, cooldown days, day last opened |
+| **arc** (one per event card) | `.../arc.ts` | `calm`, `brewing`, `cardOpen`, `cooldown` | `DAY {day, ready, slotFree, pace}`, `CHOOSE {choiceIndex}` | `RESOLVED` | choices, cooldown days, day last opened |
 | **walker** (one per walker) | `.../walker.ts` | `arriving`, `seeking`, `queuing`, `inside`, `loitering`, `wandering`, `choosing`, `leaving`, `quitting`, `picketing`, `gone` (final) | `ARRIVED`, `QUEUED`, `ADMITTED`, `GAVE_UP`, `LINGER`, `NEXT`, `TOUR_DONE`, `QUIT`, `CHOSE_BUILDING`, `CHOSE_WANDER`, `PROTEST_STARTED`, `SENT_HOME`, `EXITED` | none: the driver acts on the state entered | nothing (the need a walker is seeking, `visits` and `step` stay plain walker fields) |
+| **rival** (one per rival lab) | `src/sim/race/rival.ts` | `idle`, `training`, `releasing`, `cooldown` | `WEEK {aggro, pace, chase, four dice, name}`, `SHOCK {capability, hype, momentum}` | `RELEASED`, `POACH` | personality, capability, hype, weeks left, open weights?, momentum, latest model |
+| **era** | `src/sim/race/era.ts` | `era1`, `era2`, `era3`, `era4` | `DAY {mult}` | `ERA_REACHED` | the peak multiplier (the ratchet) |
 | **mood** (one per researcher and visitor) | `.../mood.ts` | `content`, `slumped`, `miserable`, `resigned` (final) | `LIFT`, `SLUMP`, `CRASH`, `DAY` | `RESIGNED` | the count of miserable days in a row |
 
 Arithmetic stays in plain functions: money per day, the training gain (`spend * (0.75 + 0.25 * morale)`), movement along a route, routing itself.
@@ -267,3 +269,43 @@ Decisions worth knowing:
 - **Debug knobs:** `?hour=22` pins the clock, `?photo` opens photo mode, and with `?debug=1` `window.__fx` exposes `{ fx, cinema, pool }`. `scripts/juice-shots.mjs` scripts the moments a URL can't (a release, a saved photo, frame times).
 
 Measured on the 1-vCPU Modal box: a full pool of 2,000 particles updates in 0.08 ms per frame, watching a 429-walker World costs 0.0005 ms per frame, and the SwiftShader frame time of the whole game is unchanged against the FLT-4 build (mean 117 ms with juice vs 126 to 132 ms without, both rasteriser-bound).
+
+## The Race (FLT-9): rivals, the Arena, eras
+
+```mermaid
+flowchart LR
+  D["dailyRace (each game day)"] --> M["R&D multiplier<br/>1 + agents x skill / max(1, researchers x 10)"]
+  M --> E["era machine<br/>era1 -> era2 -> era3 -> era4 (ratchet)"]
+  E -->|"ERA_REACHED: offer:eraN flag"| CARD
+  D -->|"every 7th day"| W["weekly()"]
+  W --> R["6 rival machines, WEEK events<br/>(dice and model name pre-rolled)"]
+  R -->|"RELEASED / POACH"| FX["news, hype, open-weights check,<br/>a researcher resigns"]
+  W --> A["Arena: re-rank, remember last week's places"]
+  FX -->|"free model within reach, you have revenue"| DROP["openDrop (-30% for 30 days)<br/>flag offer:openWeights"]
+  D -->|"day >= nextAuction"| AUC["flag offer:auction"]
+  D -->|"runway < 3 months, Vibes > 400"| FUND["flag offer:funding"]
+  DROP --> CARD
+  AUC --> CARD
+  FUND --> CARD
+  CARD["event cards (content/events.ts)<br/>one at a time, arcs as before"] -->|"race effect on a pick"| ACT["sim/race/actions.ts"]
+```
+
+Everything the race does is a machine plus a driver, in the same shape as the rest of the sim:
+
+- **Rivals** (`sim/race/rival.ts`) step once a week with a `WEEK` event that carries every die and the next model name, pre-rolled by the driver in a fixed order, so a rival transition never draws a random number. Personality (`content/rivals.ts`: cadence, growth, openness, poaching, hype-hunger) is data in the machine's context. A lab with cadence under two weeks never leaves `releasing`; a slow one takes a press-tour `cooldown`. Open weights: labs in the middle flip-flop (a lab that just went open is likelier to close up again). Era aggression (`content/eras.ts`) scales release size and shortens runs, and a rubber band (`chase`, the square root of how far ahead you are) keeps the race close: labs far behind you catch up faster, labs far ahead ease off.
+- **The R&D multiplier** (`sim/race/rd.ts`) is the spec's formula with `agentSkill = capability / 8`, using the capability the lab has *shipped plus the part of the next release training has already delivered*, so the number creeps up all through a run and an era can start mid-run. It multiplies training progress (`sim/training.ts`) and, from Era 2, makes each release a bigger leap: `(mult / 2) ^ 0.75`, capped at 4x. That is what turns "training gets faster" into a takeoff.
+- **Eras** are a ratchet (`sim/race/era.ts`): they only climb, so building a hall (more researchers, a lower multiplier) never shows a title card twice. Each era brings a full-screen card (an ordinary event card whose `kind` is `era`), agent looks (hard hats, halos, size and glow, in `render/Walkers.tsx`), its own thought and headline pools (`content/raceThoughts.ts`, `content/raceNews.ts`), shorter event cooldowns (the arc machine's `DAY` event gained `pace`) and more aggressive rivals.
+- **Cards are data.** The driver sets an `offer:*` flag when a card is due and the card's choices clear it; the existing arc machines queue and open them one at a time. `content/events.ts` gained one effect, `{ type: "race", action }`, whose handlers live in `sim/race/actions.ts`. The open-weights card opens a day after the drop, so the Arena shuffles and the screen shakes first.
+- **Buildings:** Datacenter (4x4, +60 compute a day) needs a Gas Turbine or Solar Farm each, and all three stay locked (`BuildingDef.locked`) until a compute auction is won; the win places a free Datacenter (or leaves a voucher when the campus has no room).
+
+### Numbers (1-vCPU Modal box)
+
+| Measurement | Result |
+|---|---|
+| `weekly()`: six rival transitions, Arena re-rank, headlines | about 0.2 ms, once every 140 ticks |
+| `dailyRace` on an ordinary day; `rdMultiplier`; the HUD's `raceView` | 13 us; 0.1 us at 40 walkers; 3 us |
+| The 500-walker perf test | unchanged within noise (0.23 to 0.28 ms; the budget stays 0.3, doubled under `CI`) |
+| A scripted player (`sim/playthrough.test.ts`, three seeds) | Era 2 around day 70 to 100, Era 3 and the win around day 450, first #1 around day 100 then back to #5 or #6, Era 4 around day 1000 |
+
+Test files now run one at a time (`fileParallelism: false` in `vite.config.ts`): on a 1-vCPU box the wall-clock perf tests were measuring their neighbours.
+
