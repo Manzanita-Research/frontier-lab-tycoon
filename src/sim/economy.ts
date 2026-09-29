@@ -5,6 +5,7 @@ import { step } from "./machines/run";
 import { economyMachine } from "./machines/economy";
 import { addToast, pushNews } from "./news";
 import { isReachable } from "./pathfind";
+import { addIncident } from "./vibes";
 import type { Rng } from "./rng";
 import type { GameState } from "./types";
 
@@ -39,6 +40,7 @@ export function dailyEconomy(state: GameState, rng: Rng) {
   for (const e of effects) {
     state.cash += e.amount;
     state.hype = Math.max(0, state.hype - 5);
+    addIncident(state, 0.5);
     pushNews(state, rng, "bailout");
     addToast(state, "Emergency bridge round: +$2M. The board has notes.", "bad");
   }

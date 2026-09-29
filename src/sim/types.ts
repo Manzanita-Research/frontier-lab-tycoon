@@ -1,12 +1,14 @@
 // Everything in GameState is plain and JSON-serializable.
 import type { BuildingKind } from "../content/buildings";
+import type { NeedKey } from "../content/needs";
 import type { ArcStored } from "./machines/arc";
 import type { EconomyStored } from "./machines/economy";
 import type { GoalsStored } from "./machines/goals";
+import type { MoodStored } from "./machines/mood";
 import type { TrainingStored } from "./machines/training";
 import type { WalkerStored } from "./machines/walker";
 
-export type { BuildingKind };
+export type { BuildingKind, NeedKey };
 export type WalkerKind = "researcher" | "agent" | "visitor" | "protester";
 export type WalkerMode = "walk" | "inside" | "leave";
 export type Tone = "good" | "bad" | "neutral" | "joke";
@@ -32,9 +34,29 @@ export interface Building extends Rect {
 export const TARGET_WANDER = -1;
 export const TARGET_GATE = 0;
 
+/** A walker's personnel file: what the inspector reads out as history. Counts only go up. */
+export interface WalkerStats {
+  /** Game day they joined (or first turned up). */
+  joined: number;
+  /** Kombuchas drunk, naps taken, snacks eaten, demos watched. */
+  sips: number;
+  naps: number;
+  snacks: number;
+  demos: number;
+  /** Poaching offers turned down, and the RIVALS index of the latest one. */
+  offers: number;
+  rival: number;
+}
+
 export interface Walker {
   id: number;
   kind: WalkerKind;
+  /** "Dr. Ada Gradient", "Agent-0042 'Sparky'". */
+  name: string;
+  /** "Member of Technical Staff", "Venture Capitalist", ... */
+  role: string;
+  /** Index into THEIR (her, his, their): assigned at random, used in headlines. */
+  pro: number;
   x: number;
   z: number;
   /** Position at the start of this tick, for render interpolation. */
@@ -46,7 +68,23 @@ export interface Walker {
   /** Building id, TARGET_GATE, or TARGET_WANDER. While 'inside', the building they're in. */
   targetId: number;
   timer: number;
+  /**
+   * The needs, each 0 to 1. Researchers use energy, focus and fomo; visitors patience and impressed; agents drift.
+   * Energy, focus, patience and impressed are good high; fomo and drift are bad high. The rest sit at 0.
+   */
   energy: number;
+  focus: number;
+  fomo: number;
+  patience: number;
+  impressed: number;
+  drift: number;
+  /** What they are heading somewhere for: a need, "work" (the day job) or "tour" (a visitor sightseeing). Empty when not seeking. */
+  need: NeedKey | "work" | "tour" | "";
+  /** The need they went looking for and found nothing that helps: "I can't find X" (cleared once something does). */
+  lost: NeedKey | "";
+  /** The mood machine: content, slumped, miserable or resigned. Drives the slump walk and, for researchers, quitting. */
+  mood: MoodStored;
+  stats: WalkerStats;
   /** Visitors: buildings left to tour before heading for the gate. */
   visits: number;
   /** Researchers: counts visits so they alternate between Hall and Cluster. */
@@ -107,6 +145,24 @@ export interface OpenEvent {
   day: number;
 }
 
+/** The park rating: 0 to 999, recalculated daily and smoothed. `parts` are the 0 to 1 inputs the tooltip explains. */
+export interface Vibes {
+  value: number;
+  /** Where the smoothing is heading. */
+  target: number;
+  /** Change over the last day; the trend arrow reads this. */
+  delta: number;
+  happiness: number;
+  impressed: number;
+  cleanliness: number;
+  hype: number;
+  /** Penalties, each 0 (none) to 1 (worst). */
+  incident: number;
+  protest: number;
+  /** The running incident score behind `incident`: quits, failed demos and bailouts add to it, it fades daily. */
+  incidents: number;
+}
+
 export interface Ledger {
   income: number;
   expenses: number;
@@ -122,8 +178,10 @@ export interface GameState {
   capability: number;
   /** Compute stockpile: clusters add it, training spends it. */
   compute: number;
-  /** 0 to 100. The park rating. */
+  /** 0 to 100. Buzz: one input to the Vibes. */
   hype: number;
+  /** The park rating (0 to 999): drives visitors, applicants and investor visits. */
+  vibes: Vibes;
   labName: string;
   grid: { w: number; h: number; paths: boolean[] };
   gate: Rect;

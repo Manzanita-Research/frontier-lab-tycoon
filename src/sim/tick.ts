@@ -1,6 +1,7 @@
 // The fixed-step loop: apply queued commands, move everyone, run the daily systems at midnight.
 import { applyCommands, type Command } from "./commands";
 import { TICKS_PER_DAY } from "./constants";
+import { dailyCrowd } from "./crowd";
 import { dailyEconomy } from "./economy";
 import { dailyEvents, openEventOf } from "./events";
 import { dailyGoals } from "./goals";
@@ -35,6 +36,7 @@ export function tick(state: GameState, commands: readonly Command[] = []) {
     dailyWalkers(state, rng);
     dailyDiscourse(state, rng);
     dailyNews(state, rng);
+    dailyCrowd(state, rng);
     dailyThoughts(state, rng);
     dailyGoals(state, rng);
     dailyEvents(state);
