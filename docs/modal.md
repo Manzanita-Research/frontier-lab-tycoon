@@ -10,7 +10,7 @@ From a lead thread on the Mini:
 bb thread spawn \
   --project proj_dvb9hes55f \
   --environment-provider modal-sandbox \
-  --provider claude-code --model claude-sonnet-5 --reasoning-level xhigh \
+  --provider claude-code --model claude-sonnet-5-5 --reasoning-level xhigh \
   --permission-mode auto \
   --parent-thread <lead thread id> \
   --title "explore · FLT-n <what>" \
@@ -18,7 +18,7 @@ bb thread spawn \
 bb tasks attach FLT-n --thread <new thread id>
 ```
 
-- Use `claude-opus-5-5` at `high` for architecture, the sim core, integration and taste-heavy work; use `claude-sonnet-5` at `xhigh` for well-scoped tasks.
+- Use `claude-opus-5-5` at `high` for architecture, the sim core, integration and taste-heavy work; use `claude-sonnet-5-5` at `xhigh` for well-scoped tasks. **Never** use `claude-sonnet-5`, `claude-opus-5` or older. The builder's first task comment states its exact model.
 - Start every prompt with the kind (`Kind: explore.`) and `House rules: <charter path>`, then the task key, and tell the builder to read `AGENTS.md` and `docs/DESIGN.md`.
 - Each spawn creates a fresh Modal machine. bb clones the repo, runs `.bb-env-setup.sh` (pnpm install + headless Chromium), and starts the agent.
 - Run at most 3–4 builders at once.
