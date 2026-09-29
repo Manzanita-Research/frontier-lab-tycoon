@@ -35,12 +35,12 @@ const STAGES = ["Preview", "Beta", "RC1", "Experimental", "Final", "Final-v2", "
 const pad = (n: number) => String(n).padStart(2, "0");
 
 /**
- * "Frontier-2", "Frontier-2.5-Reasoner", "Frontier-3-Mini-Pro-Preview-0925", ...
+ * "Frontier-2", "Frontier-3-Reasoner", "Frontier-4-Mini-Pro-Preview-0925", ...
  * Run 1 is the plain one; the names get sillier every release.
  */
 export function modelName(run: number, rng: Rng, day: number): string {
-  const version = 2 + (run - 1) * 0.5;
-  const base = `Frontier-${Number.isInteger(version) ? version : version.toFixed(1)}`;
+  // The third release is Frontier-4, which is what the scenario asks for.
+  const base = `Frontier-${1 + run}`;
   if (run <= 1) return base;
   if (run === 2) return `${base}-Reasoner`;
   const parts = [base];

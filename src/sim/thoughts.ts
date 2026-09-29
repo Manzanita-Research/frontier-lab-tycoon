@@ -1,6 +1,7 @@
 // Thought bubbles: the main joke delivery and the player's feedback channel.
+import { BUILDINGS } from "../content/buildings";
 import { THOUGHTS, type ThoughtCondition } from "../content/thoughts";
-import { THOUGHT_TICKS } from "./constants";
+import { CROWDING_PROTESTERS, THOUGHT_TICKS } from "./constants";
 import { fillTemplate } from "./format";
 import { isReachable } from "./pathfind";
 import { templateVars } from "./news";
@@ -15,8 +16,10 @@ export function activeConditions(state: GameState): Set<ThoughtCondition> {
   if (state.buildings.some((b) => b.kind === "hall")) c.add("training");
   if (state.day - (state.flags.lastRelease ?? -99) < 4) c.add("justReleased");
   if (state.hype > 70) c.add("highHype");
-  if (state.buildings.some((b) => !isReachable(state, b))) c.add("unreachable");
+  if (state.buildings.some((b) => !BUILDINGS[b.kind].scenery && !isReachable(state, b))) c.add("unreachable");
   if (state.walkers.filter((w) => w.mode !== "inside").length > 40) c.add("crowded");
+  if (state.waterDiscourse >= 12) c.add("discourse");
+  if (state.walkers.filter((w) => w.kind === "protester").length >= CROWDING_PROTESTERS) c.add("protest");
   return c;
 }
 
@@ -36,6 +39,7 @@ export function dailyThoughts(state: GameState, rng: Rng, force = false) {
 
   const conditions = activeConditions(state);
   let lines = THOUGHTS.filter((l) => l.kind === walker.kind && conditions.has(l.when));
+  if (lines.length === 0) return;
   const fresh = lines.filter((l) => !state.recentThoughts.includes(l.text));
   if (fresh.length > 0) lines = fresh;
   // Situational lines are the point; make them three times as likely as the evergreen pool.

@@ -1,5 +1,6 @@
 // Researchers, agents and visitors: who they are, where they go, what they say.
-import { MAX_AGENTS, WALK_SPEED } from "./constants";
+import { BUILDINGS } from "../content/buildings";
+import { CROWDING_PROTESTERS, MAX_AGENTS, WALK_SPEED } from "./constants";
 import {
   doorPoint,
   entrances,
@@ -15,8 +16,13 @@ import type { Rng } from "./rng";
 import { TARGET_GATE, TARGET_WANDER, type Building, type GameState, type Point, type Walker, type WalkerKind } from "./types";
 
 const ENERGY_DRAIN = 0.0025;
+/** Chance that a walker leaving a building hangs around outside it for a bit instead of rushing off. */
+const LOITER_CHANCE = 0.55;
+/** How close (in tiles) a researcher passes a Fountain to get the refreshing splash. */
+const FOUNTAIN_REACH = 1.35;
+const FOUNTAIN_REFRESH = 0.1;
 
-function newWalker(state: GameState, kind: WalkerKind, x: number, z: number, rng: Rng): Walker {
+export function newWalker(state: GameState, kind: WalkerKind, x: number, z: number, rng: Rng): Walker {
   return {
     id: state.nextId++,
     kind,
@@ -30,16 +36,22 @@ function newWalker(state: GameState, kind: WalkerKind, x: number, z: number, rng
     mode: "walk",
     timer: 0,
     energy: kind === "researcher" ? 0.35 + rng.next() * 0.65 : 1,
-    visits: kind === "visitor" ? rng.int(1, 2) : 0,
+    // A visitor tours 2 or 3 buildings, counting the first one they head for.
+    visits: kind === "visitor" ? rng.int(2, 3) : 0,
     step: rng.int(0, 1),
+    loiter: false,
+    fountain: 0,
+    homeX: x,
+    homeZ: z,
   };
 }
 
 const byId = (state: GameState, id: number): Building | undefined => state.buildings.find((b) => b.id === id);
 
+/** Buildings walkers can go into: connected to the gate, and not just scenery. */
 function reachableBuildings(state: GameState): Building[] {
   const { buildings } = getReach(state);
-  return state.buildings.filter((b) => buildings.has(b.id));
+  return state.buildings.filter((b) => buildings.has(b.id) && !BUILDINGS[b.kind].scenery);
 }
 
 function chooseTarget(state: GameState, w: Walker, rng: Rng): Building | null {
@@ -87,6 +99,7 @@ function wander(state: GameState, w: Walker, rng: Rng) {
 }
 
 function pickNext(state: GameState, w: Walker, rng: Rng) {
+  w.loiter = false;
   if (w.kind === "visitor") {
     if (w.visits <= 0) return startLeave(state, w);
     w.visits--;
@@ -94,6 +107,45 @@ function pickNext(state: GameState, w: Walker, rng: Rng) {
   const target = chooseTarget(state, w, rng);
   if (target && startRoute(state, w, target)) return;
   wander(state, w, rng);
+}
+
+/** Step out of the building and stand around near its door for a while. */
+function startLoiter(w: Walker, rng: Rng) {
+  w.mode = "walk";
+  w.targetId = TARGET_WANDER;
+  w.route = [];
+  w.loiter = true;
+  w.timer = rng.int(14, 40);
+}
+
+/** A small step onto a neighbouring path tile. */
+function loiterStep(state: GameState, w: Walker, rng: Rng) {
+  const tx = Math.floor(w.x);
+  const tz = Math.floor(w.z);
+  const options: Point[] = [];
+  for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
+    if (isPathTile(state, tx + dx, tz + dz)) options.push([tx + dx + 0.5, tz + dz + 0.5]);
+  }
+  if (options.length > 0) w.route = [rng.pick(options)];
+}
+
+/** Leaving a building (the timer ran out): sometimes loiter first, otherwise off to the next stop. */
+function finishStay(state: GameState, w: Walker, rng: Rng) {
+  if (rng.chance(LOITER_CHANCE)) startLoiter(w, rng);
+  else pickNext(state, w, rng);
+}
+
+/** Researchers get a splash of energy the first time they pass within reach of a Fountain. */
+function passFountains(w: Walker, fountains: Building[]) {
+  for (const f of fountains) {
+    if (Math.hypot(f.x + f.w / 2 - w.x, f.z + f.d / 2 - w.z) > FOUNTAIN_REACH) continue;
+    if (w.fountain !== f.id) {
+      w.fountain = f.id;
+      w.energy = Math.min(1, w.energy + FOUNTAIN_REFRESH);
+    }
+    return;
+  }
+  w.fountain = 0;
 }
 
 function arrive(state: GameState, w: Walker, rng: Rng) {
@@ -113,6 +165,7 @@ function arrive(state: GameState, w: Walker, rng: Rng) {
 /** Walkers caught out by a change to paths or buildings find a new way. */
 function repairWalkers(state: GameState, rng: Rng) {
   for (const w of state.walkers) {
+    if (w.kind === "protester") continue; // they stand on grass; protest.ts looks after them
     if (w.mode === "inside") {
       if (byId(state, w.targetId)) continue;
       const p = nearestPathTile(state, w.x, w.z);
@@ -134,7 +187,7 @@ function repairWalkers(state: GameState, rng: Rng) {
   }
 }
 
-function advance(w: Walker) {
+export function advance(w: Walker) {
   let budget = WALK_SPEED;
   while (budget > 1e-9 && w.route.length > 0) {
     const [tx, tz] = w.route[0]!;
@@ -173,7 +226,7 @@ function spawnVisitor(state: GameState, rng: Rng) {
 }
 
 export function visitorCap(state: GameState): number {
-  return Math.round(15 + state.hype * 0.6);
+  return Math.round(30 + state.hype * 1.2);
 }
 
 export function updateWalkers(state: GameState, rng: Rng) {
@@ -181,46 +234,63 @@ export function updateWalkers(state: GameState, rng: Rng) {
     state.flags.walkerVersion = state.version;
     repairWalkers(state, rng);
   }
-  const gone = new Set<number>();
+  const fountains = state.buildings.filter((b) => b.kind === "fountain");
+  let gone: Set<number> | null = null;
+  let visitors = 0;
+  let protesters = 0;
   for (const w of state.walkers) {
+    if (w.kind === "protester") {
+      protesters++; // protest.ts moves them
+      continue;
+    }
+    if (w.kind === "visitor") visitors++;
     w.px = w.x;
     w.pz = w.z;
-    if (w.kind === "researcher") w.energy = Math.max(0, w.energy - ENERGY_DRAIN);
+    if (w.kind === "researcher") {
+      w.energy = Math.max(0, w.energy - ENERGY_DRAIN);
+      if (fountains.length > 0 && w.mode !== "inside") passFountains(w, fountains);
+    }
     if (w.mode === "inside") {
-      if (--w.timer <= 0) pickNext(state, w, rng);
+      if (--w.timer <= 0) finishStay(state, w, rng);
       continue;
     }
     if (w.route.length === 0) {
-      if (w.mode === "leave") gone.add(w.id);
+      if (w.mode === "leave") (gone ??= new Set()).add(w.id);
       else if (w.targetId === TARGET_WANDER) {
         if (--w.timer <= 0) pickNext(state, w, rng);
+        else if (w.loiter && rng.chance(0.06)) loiterStep(state, w, rng);
       } else arrive(state, w, rng);
       continue;
     }
     advance(w);
     if (w.route.length === 0) {
-      if (w.mode === "leave") gone.add(w.id);
+      if (w.mode === "leave") (gone ??= new Set()).add(w.id);
       else arrive(state, w, rng);
     }
   }
-  if (gone.size > 0) state.walkers = state.walkers.filter((w) => !gone.has(w.id));
+  if (gone) state.walkers = state.walkers.filter((w) => !gone!.has(w.id));
 
-  const visitors = state.walkers.filter((w) => w.kind === "visitor").length;
-  if (visitors < visitorCap(state) && rng.chance(0.005 + state.hype * 0.0012)) spawnVisitor(state, rng);
+  // Twice the footfall of the first playable; a crowd at the gate halves it.
+  const crowdFactor = protesters >= CROWDING_PROTESTERS ? 0.5 : 1;
+  if (visitors < visitorCap(state) && rng.chance((0.01 + state.hype * 0.0024) * crowdFactor)) spawnVisitor(state, rng);
+}
+
+export function researcherTarget(state: GameState): number {
+  return 8 + 3 * state.buildings.filter((b) => b.kind === "hall").length;
 }
 
 export function agentTarget(state: GameState): number {
-  return Math.min(MAX_AGENTS, 4 + Math.floor(state.capability / 3) + state.agentBonus);
+  return Math.min(MAX_AGENTS, 6 + Math.floor(state.capability / 2) + state.agentBonus);
 }
 
-/** Agents pour out of a Compute Cluster (or wander in from the gate if there isn't one). */
-function spawnAgent(state: GameState, rng: Rng) {
-  const clusters = reachableBuildings(state).filter((b) => b.kind === "cluster");
-  const home = clusters.length > 0 ? rng.pick(clusters) : undefined;
+/** Agents pour out of a Compute Cluster, researchers out of a Training Hall (or wander in from the gate if there isn't one). */
+function spawnFrom(state: GameState, kind: "agent" | "researcher", rng: Rng) {
+  const homes = reachableBuildings(state).filter((b) => b.kind === (kind === "agent" ? "cluster" : "hall"));
+  const home = homes.length > 0 ? rng.pick(homes) : undefined;
   const door = home ? doorPoint(state, home) : null;
   const g = state.gate;
   const [x, z] = door ?? [g.x + g.w / 2, g.z + 0.6];
-  const w = newWalker(state, "agent", x, z, rng);
+  const w = newWalker(state, kind, x, z, rng);
   if (home && door) {
     w.mode = "inside";
     w.targetId = home.id;
@@ -232,12 +302,16 @@ function spawnAgent(state: GameState, rng: Rng) {
   state.walkers.push(w);
 }
 
-/** Once per day: grow the agent population toward its target, a few at a time. */
+/** Once per day: grow the researcher and agent populations toward their targets, a few at a time. */
 export function dailyWalkers(state: GameState, rng: Rng) {
-  const agents = state.walkers.filter((w) => w.kind === "agent").length;
-  const deficit = agentTarget(state) - agents;
-  const batch = Math.min(deficit, Math.max(1, Math.ceil(deficit / 10)));
-  for (let i = 0; i < batch; i++) spawnAgent(state, rng);
+  const count = (kind: WalkerKind) => state.walkers.filter((w) => w.kind === kind).length;
+  const grow = (kind: "agent" | "researcher", target: number) => {
+    const deficit = target - count(kind);
+    const batch = Math.min(deficit, Math.max(1, Math.ceil(deficit / 4)));
+    for (let i = 0; i < batch; i++) spawnFrom(state, kind, rng);
+  };
+  grow("researcher", researcherTarget(state));
+  grow("agent", agentTarget(state));
 }
 
 /** Population for a fresh game or a stress test: place walkers already mid-stride on the paths. */
