@@ -18,7 +18,10 @@ interface Row {
 /** The park rating, big, with a trend arrow and a tooltip that shows where every point came from. */
 export function Vibes() {
   const v = useApp(atoms.vibes);
-  const [open, setOpen] = useState(false);
+  // Open while hovered (a mouse) or after a tap (a finger); a tap outside closes it.
+  const [hover, setHover] = useState(false);
+  const [pinned, setPinned] = useState(false);
+  const open = hover || pinned;
   const root = useRef<HTMLDivElement>(null);
   const trend = trendOf(v);
 
@@ -26,7 +29,10 @@ export function Vibes() {
   useEffect(() => {
     if (!open) return;
     const away = (e: PointerEvent) => {
-      if (!root.current?.contains(e.target as Node)) setOpen(false);
+      if (!root.current?.contains(e.target as Node)) {
+        setHover(false);
+        setPinned(false);
+      }
     };
     window.addEventListener("pointerdown", away);
     return () => window.removeEventListener("pointerdown", away);
@@ -43,8 +49,8 @@ export function Vibes() {
   ];
 
   return (
-    <div className="vibes" ref={root} onPointerEnter={(e) => e.pointerType === "mouse" && setOpen(true)} onPointerLeave={(e) => e.pointerType === "mouse" && setOpen(false)}>
-      <button className={`vibes-btn trend-${trend}`} onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-label={`Vibes ${Math.round(v.value)}, ${trend === "flat" ? "steady" : trend === "up" ? "rising" : "falling"}`}>
+    <div className="vibes" ref={root} onPointerEnter={(e) => e.pointerType === "mouse" && setHover(true)} onPointerLeave={(e) => e.pointerType === "mouse" && setHover(false)}>
+      <button className={`vibes-btn trend-${trend}`} onClick={() => setPinned((p) => !p)} aria-expanded={open} aria-label={`Vibes ${Math.round(v.value)}, ${trend === "flat" ? "steady" : trend === "up" ? "rising" : "falling"}`}>
         <span className="vibes-label">Vibes</span>
         <span className="vibes-value">{Math.round(v.value)}</span>
         <span className="vibes-arrow" aria-hidden>

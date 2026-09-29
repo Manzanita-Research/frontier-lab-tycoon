@@ -25,7 +25,7 @@ export function causeOf(w: Walker): Cause {
       const tired = urgencyOf(w, "energy");
       const scattered = urgencyOf(w, "focus");
       const fomo = urgencyOf(w, "fomo");
-      const worst = Math.max(tired / 0.6, scattered / 0.6, fomo / 0.55);
+      const worst = Math.max(tired / 0.6, scattered / 0.6, fomo / 0.4);
       if (worst >= 1) return tired / 0.6 === worst ? "researcher.tired" : scattered / 0.6 === worst ? "researcher.scattered" : "researcher.fomo";
       return happinessOf(w) > 0.75 ? "researcher.glowing" : "researcher.meh";
     }

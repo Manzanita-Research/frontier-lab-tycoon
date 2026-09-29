@@ -11,7 +11,7 @@ import { pushNews } from "./news";
 import { blankVibes, initialVibes } from "./vibes";
 import { createRng } from "./rng";
 import { dailyThoughts } from "./thoughts";
-import { agentTarget, researcherTarget, seedWalkers } from "./walkers";
+import { agentTarget, researchersAtStart, seedWalkers } from "./walkers";
 import type { GameState } from "./types";
 
 export const GRID_SIZE = 24;
@@ -78,7 +78,7 @@ export function createInitialState(seed = 1): GameState {
   // Down front, so a gateway dropped beside the spine never hides it from the default camera.
   put("kombucha", 12, 19);
 
-  seedWalkers(state, "researcher", researcherTarget(state), rng);
+  seedWalkers(state, "researcher", researchersAtStart(state), rng);
   seedWalkers(state, "agent", agentTarget(state), rng);
   seedWalkers(state, "visitor", START_VISITORS, rng);
 

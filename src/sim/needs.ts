@@ -16,7 +16,7 @@ export const DRIFT_BASE = 0.0005;
 /** Drift creeps up a little faster the more capable the agents are. */
 export const DRIFT_PER_CAPABILITY = 0.000004;
 /** A rival shipping gives every researcher this much fomo. */
-export const RIVAL_FOMO = 0.3;
+export const RIVAL_FOMO = 0.45;
 /** A building has to give at least this much of a need to be worth a special trip for it. */
 export const MIN_GAIN = 0.3;
 
