@@ -2,6 +2,7 @@
 // answers event cards. Checks that the scenario is winnable on a sensible timeline and when the event lands.
 import { BUILDINGS, type PlaceableKind } from "../content/buildings";
 import { canPlace, type Command } from "./commands";
+import { outcomeOf } from "./goals";
 import { createInitialState } from "./state";
 import { TICKS_PER_DAY, tick } from "./tick";
 import type { GameState } from "./types";
@@ -26,13 +27,13 @@ export interface Report {
 
 export function playBot(seed: number, opts: { fountain?: boolean; days?: number; every?: number } = {}): Report {
   const s = createInitialState(seed);
-  const goalDays: (number | null)[] = s.goals.map(() => null);
+  const goalDays: (number | null)[] = s.goals.context.goals.map(() => null);
   let eventDay: number | null = null;
   let built = 0;
   let minCash = Infinity;
   const builds: string[] = [];
   const maxTicks = (opts.days ?? 400) * TICKS_PER_DAY;
-  for (let i = 0; i < maxTicks && s.outcome !== "lost"; i++) {
+  for (let i = 0; i < maxTicks && outcomeOf(s) !== "lost"; i++) {
     const cmds: Command[] = [];
     if (s.event) {
       eventDay ??= s.day;
@@ -50,12 +51,12 @@ export function playBot(seed: number, opts: { fountain?: boolean; days?: number;
     }
     tick(s, cmds);
     minCash = Math.min(minCash, s.cash);
-    s.goals.forEach((g, gi) => {
+    s.goals.context.goals.forEach((g, gi) => {
       if (g.met && goalDays[gi] === null) goalDays[gi] = s.day;
     });
-    if (s.outcome === "won") break;
+    if (outcomeOf(s) === "won") break;
   }
-  return { seed, outcome: s.outcome, endDay: s.day, eventDay, goalDays, builds: builds.join(" "), minCash };
+  return { seed, outcome: outcomeOf(s), endDay: s.day, eventDay, goalDays, builds: builds.join(" "), minCash };
 }
 
 describe("a reasonable player", () => {
@@ -81,10 +82,10 @@ describe("a reasonable player", () => {
 describe("an absent player", () => {
   it("loses at the deadline, having ignored the water", () => {
     const s = createInitialState(1);
-    for (let i = 0; i < 400 * TICKS_PER_DAY && s.outcome === "playing"; i++) {
+    for (let i = 0; i < 400 * TICKS_PER_DAY && outcomeOf(s) === "playing"; i++) {
       tick(s, s.event ? [{ type: "chooseEvent", eventId: s.event.id, choiceIndex: 2 }] : []);
     }
-    expect(s.outcome).toBe("lost");
+    expect(outcomeOf(s)).toBe("lost");
     expect(s.day).toBeLessThanOrEqual(360);
     expect(s.flags["event:waterDiscourse"]).toBeDefined();
   });

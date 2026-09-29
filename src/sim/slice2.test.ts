@@ -4,7 +4,7 @@ import { GOALS, SCENARIO } from "../content/goals";
 import { applyCommands, type Command } from "./commands";
 import { MAX_AGENTS } from "./constants";
 import { dailyEvents } from "./events";
-import { dailyGoals } from "./goals";
+import { dailyGoals, outcomeOf } from "./goals";
 import { dailyDiscourse, protesterCount, protesterTarget, syncProtesters } from "./protest";
 import { createRng } from "./rng";
 import { createInitialState } from "./state";
@@ -92,9 +92,9 @@ describe("crowd density", () => {
 describe("goals", () => {
   it("starts with the three scenario objectives, all unmet", () => {
     const s = createInitialState(1);
-    expect(s.outcome).toBe("playing");
-    expect(s.goals.map((g) => g.id)).toEqual(GOALS.map((g) => g.id));
-    expect(s.goals.every((g) => !g.met)).toBe(true);
+    expect(outcomeOf(s)).toBe("playing");
+    expect(s.goals.context.goals.map((g) => g.id)).toEqual(GOALS.map((g) => g.id));
+    expect(s.goals.context.goals.every((g) => !g.met)).toBe(true);
     expect(SCENARIO.deadlineDay).toBe(360);
   });
 
@@ -105,15 +105,15 @@ describe("goals", () => {
     s.ledger = { income: 140_000, expenses: 0, net: 140_000 };
     s.hype = 61;
     dailyGoals(s, rng);
-    expect(s.goals.map((g) => [g.value, g.met])).toEqual([
+    expect(s.goals.context.goals.map((g) => [g.value, g.met])).toEqual([
       [2, false],
       [140_000, false],
       [61, true],
     ]);
     s.hype = 30; // hype dips, but the milestone stays ticked
     dailyGoals(s, rng);
-    expect(s.goals[2]!.met).toBe(true);
-    expect(s.outcome).toBe("playing");
+    expect(s.goals.context.goals[2]!.met).toBe(true);
+    expect(outcomeOf(s)).toBe("playing");
   });
 
   it("wins the day all three are met, with a headline", () => {
@@ -122,7 +122,7 @@ describe("goals", () => {
     s.ledger = { income: 260_000, expenses: 0, net: 260_000 };
     s.hype = 64;
     dailyGoals(s, createRng(1));
-    expect(s.outcome).toBe("won");
+    expect(outcomeOf(s)).toBe("won");
     expect(s.news.at(-1)!.text).toContain("raising the milestones");
     expect(s.news.at(-1)!.text).toContain(s.labName);
   });
@@ -131,10 +131,10 @@ describe("goals", () => {
     const s = createInitialState(1);
     s.day = SCENARIO.deadlineDay - 1;
     dailyGoals(s, createRng(1));
-    expect(s.outcome).toBe("playing");
+    expect(outcomeOf(s)).toBe("playing");
     s.day = SCENARIO.deadlineDay;
     dailyGoals(s, createRng(1));
-    expect(s.outcome).toBe("lost");
+    expect(outcomeOf(s)).toBe("lost");
     expect(s.news.at(-1)!.text).toContain("NFTs of its own GPUs");
   });
 
@@ -143,7 +143,7 @@ describe("goals", () => {
     s.cash = -2_500_000;
     s.economy = { ...s.economy, context: { lastBailout: s.day } }; // the bridge round already happened
     dailyGoals(s, createRng(1));
-    expect(s.outcome).toBe("lost");
+    expect(outcomeOf(s)).toBe("lost");
     const t = s.tick;
     run(s, 2);
     expect(s.tick).toBe(t);
@@ -151,10 +151,10 @@ describe("goals", () => {
 
   it("keeps playing after a win without flipping to a loss at the deadline", () => {
     const s = createInitialState(1);
-    s.outcome = "won";
+    s.goals = { ...s.goals, value: "won" };
     s.day = SCENARIO.deadlineDay + 5;
     dailyGoals(s, createRng(1));
-    expect(s.outcome).toBe("won");
+    expect(outcomeOf(s)).toBe("won");
   });
 });
 
