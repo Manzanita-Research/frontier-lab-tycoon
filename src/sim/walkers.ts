@@ -12,8 +12,11 @@ import {
   bfsRoute,
   tileIndex,
 } from "./pathfind";
+import type { EventFromLogic } from "xstate";
+import { step } from "./machines/run";
+import { tourDone, walkerMachine, type WalkerPhase } from "./machines/walker";
 import type { Rng } from "./rng";
-import { TARGET_GATE, TARGET_WANDER, type Building, type GameState, type Point, type Walker, type WalkerKind } from "./types";
+import { TARGET_GATE, TARGET_WANDER, type Building, type GameState, type Point, type Walker, type WalkerKind, type WalkerMode } from "./types";
 
 const ENERGY_DRAIN = 0.0025;
 /** Chance that a walker leaving a building hangs around outside it for a bit instead of rushing off. */
@@ -33,13 +36,12 @@ export function newWalker(state: GameState, kind: WalkerKind, x: number, z: numb
     dir: rng.next() * Math.PI * 2,
     route: [],
     targetId: TARGET_WANDER,
-    mode: "walk",
     timer: 0,
     energy: kind === "researcher" ? 0.35 + rng.next() * 0.65 : 1,
     // A visitor tours 2 or 3 buildings, counting the first one they head for.
     visits: kind === "visitor" ? rng.int(2, 3) : 0,
     step: rng.int(0, 1),
-    loiter: false,
+    machine: { value: "wandering", context: {} },
     fountain: 0,
     homeX: x,
     homeZ: z,
@@ -52,6 +54,17 @@ const byId = (state: GameState, id: number): Building | undefined => state.build
 function reachableBuildings(state: GameState): Building[] {
   const { buildings } = getReach(state);
   return state.buildings.filter((b) => buildings.has(b.id) && !BUILDINGS[b.kind].scenery);
+}
+
+/** The old `mode` field as the renderer and thoughts see it. */
+export function modeOf(w: Walker): WalkerMode {
+  const phase = w.machine.value;
+  return phase === "inside" ? "inside" : phase === "leaving" ? "leave" : "walk";
+}
+
+/** Put a walker straight into a phase (spawning). */
+export function inPhase(w: Walker, phase: WalkerPhase) {
+  w.machine = { value: phase, context: {} };
 }
 
 function chooseTarget(state: GameState, w: Walker, rng: Rng): Building | null {
@@ -74,7 +87,6 @@ function startRoute(state: GameState, w: Walker, target: Building): boolean {
   if (!route) return false;
   w.route = route;
   w.targetId = target.id;
-  w.mode = "walk";
   return true;
 }
 
@@ -82,12 +94,10 @@ function startLeave(state: GameState, w: Walker) {
   const route = routeToRect(state, w.x, w.z, state.gate, true);
   w.route = route ?? [];
   w.targetId = TARGET_GATE;
-  w.mode = "leave";
   if (!route) w.route = [[w.x, w.z]];
 }
 
 function wander(state: GameState, w: Walker, rng: Rng) {
-  w.mode = "walk";
   w.targetId = TARGET_WANDER;
   w.route = [];
   w.timer = rng.int(6, 16);
@@ -98,23 +108,42 @@ function wander(state: GameState, w: Walker, rng: Rng) {
   if (route) w.route = route.map(([x, z]): Point => [x + 0.5, z + 0.5]);
 }
 
-function pickNext(state: GameState, w: Walker, rng: Rng) {
-  w.loiter = false;
-  if (w.kind === "visitor") {
-    if (w.visits <= 0) return startLeave(state, w);
-    w.visits--;
-  }
+/** The world work behind a PICK: route to a building, or wander when there is nowhere to go. */
+function pick(state: GameState, w: Walker, rng: Rng): "heading" | "wandering" {
   const target = chooseTarget(state, w, rng);
-  if (target && startRoute(state, w, target)) return;
+  if (target && startRoute(state, w, target)) return "heading";
   wander(state, w, rng);
+  return "wandering";
+}
+
+/** Send a walker's machine an event, then do the world work the state it entered implies (see machines/walker.ts). */
+function send(state: GameState, w: Walker, rng: Rng, event: EventFromLogic<typeof walkerMachine>) {
+  const before = w.machine.value;
+  w.machine = step(walkerMachine, w.machine, event).stored;
+  switch (w.machine.value) {
+    case "choosing":
+      send(state, w, rng, { type: pick(state, w, rng) === "heading" ? "CHOSE_BUILDING" : "CHOSE_WANDER" });
+      break;
+    case "loitering":
+      if (before === "inside") startLoiter(w, rng);
+      break;
+    case "leaving":
+      if (before !== "leaving") startLeave(state, w);
+      break;
+  }
+}
+
+/** Time to pick the next stop. A visitor whose tour is done leaves; a visitor who goes on uses up one visit. */
+function pickNext(state: GameState, w: Walker, rng: Rng) {
+  if (tourDone(w.kind, w.visits)) return send(state, w, rng, { type: "TOUR_DONE" });
+  if (w.kind === "visitor") w.visits--;
+  send(state, w, rng, { type: "NEXT" });
 }
 
 /** Step out of the building and stand around near its door for a while. */
 function startLoiter(w: Walker, rng: Rng) {
-  w.mode = "walk";
   w.targetId = TARGET_WANDER;
   w.route = [];
-  w.loiter = true;
   w.timer = rng.int(14, 40);
 }
 
@@ -131,7 +160,7 @@ function loiterStep(state: GameState, w: Walker, rng: Rng) {
 
 /** Leaving a building (the timer ran out): sometimes loiter first, otherwise off to the next stop. */
 function finishStay(state: GameState, w: Walker, rng: Rng) {
-  if (rng.chance(LOITER_CHANCE)) startLoiter(w, rng);
+  if (rng.chance(LOITER_CHANCE)) send(state, w, rng, { type: "LINGER" });
   else pickNext(state, w, rng);
 }
 
@@ -149,16 +178,16 @@ function passFountains(w: Walker, fountains: Building[]) {
 }
 
 function arrive(state: GameState, w: Walker, rng: Rng) {
-  if (w.mode === "leave") return; // handled by the caller: the visitor despawns
+  if (w.machine.value === "leaving") return; // handled by the caller: the visitor despawns
   if (w.targetId === TARGET_WANDER) {
     if (w.timer <= 0) w.timer = rng.int(6, 16);
     return;
   }
   const b = byId(state, w.targetId);
   if (!b) return pickNext(state, w, rng);
-  w.mode = "inside";
   w.timer = rng.int(15, 45);
   w.step++;
+  send(state, w, rng, { type: "ARRIVED" });
   if (b.kind === "kombucha") w.energy = 1;
 }
 
@@ -166,7 +195,7 @@ function arrive(state: GameState, w: Walker, rng: Rng) {
 function repairWalkers(state: GameState, rng: Rng) {
   for (const w of state.walkers) {
     if (w.kind === "protester") continue; // they stand on grass; protest.ts looks after them
-    if (w.mode === "inside") {
+    if (w.machine.value === "inside") {
       if (byId(state, w.targetId)) continue;
       const p = nearestPathTile(state, w.x, w.z);
       if (p) [w.x, w.z] = [p[0] + 0.5, p[1] + 0.5];
@@ -182,7 +211,7 @@ function repairWalkers(state: GameState, rng: Rng) {
     if (!routeBroken && !targetGone) continue;
     w.px = w.x;
     w.pz = w.z;
-    if (w.mode === "leave") startLeave(state, w);
+    if (w.machine.value === "leaving") startLeave(state, w);
     else pickNext(state, w, rng);
   }
 }
@@ -222,11 +251,18 @@ function spawnVisitor(state: GameState, rng: Rng) {
   w.route = route;
   w.targetId = target.id;
   w.visits--;
+  inPhase(w, "heading");
   state.walkers.push(w);
 }
 
 export function visitorCap(state: GameState): number {
   return Math.round(30 + state.hype * 1.2);
+}
+
+/** Walkers that reached the gate on their way out: the machine finishes, then they leave the World. */
+export function despawn(state: GameState, ids: ReadonlySet<number>) {
+  for (const w of state.walkers) if (ids.has(w.id)) w.machine = step(walkerMachine, w.machine, { type: "EXITED" }).stored;
+  state.walkers = state.walkers.filter((w) => !ids.has(w.id));
 }
 
 export function updateWalkers(state: GameState, rng: Rng) {
@@ -248,27 +284,28 @@ export function updateWalkers(state: GameState, rng: Rng) {
     w.pz = w.z;
     if (w.kind === "researcher") {
       w.energy = Math.max(0, w.energy - ENERGY_DRAIN);
-      if (fountains.length > 0 && w.mode !== "inside") passFountains(w, fountains);
+      if (fountains.length > 0 && w.machine.value !== "inside") passFountains(w, fountains);
     }
-    if (w.mode === "inside") {
+    const phase = w.machine.value;
+    if (phase === "inside") {
       if (--w.timer <= 0) finishStay(state, w, rng);
       continue;
     }
     if (w.route.length === 0) {
-      if (w.mode === "leave") (gone ??= new Set()).add(w.id);
+      if (phase === "leaving") (gone ??= new Set()).add(w.id);
       else if (w.targetId === TARGET_WANDER) {
         if (--w.timer <= 0) pickNext(state, w, rng);
-        else if (w.loiter && rng.chance(0.06)) loiterStep(state, w, rng);
+        else if (phase === "loitering" && rng.chance(0.06)) loiterStep(state, w, rng);
       } else arrive(state, w, rng);
       continue;
     }
     advance(w);
     if (w.route.length === 0) {
-      if (w.mode === "leave") (gone ??= new Set()).add(w.id);
+      if (phase === "leaving") (gone ??= new Set()).add(w.id);
       else arrive(state, w, rng);
     }
   }
-  if (gone) state.walkers = state.walkers.filter((w) => !gone!.has(w.id));
+  if (gone) despawn(state, gone);
 
   // Twice the footfall of the first playable; a crowd at the gate halves it.
   const crowdFactor = protesters >= CROWDING_PROTESTERS ? 0.5 : 1;
@@ -292,7 +329,7 @@ function spawnFrom(state: GameState, kind: "agent" | "researcher", rng: Rng) {
   const [x, z] = door ?? [g.x + g.w / 2, g.z + 0.6];
   const w = newWalker(state, kind, x, z, rng);
   if (home && door) {
-    w.mode = "inside";
+    inPhase(w, "inside");
     w.targetId = home.id;
     w.timer = rng.int(1, 8);
   } else {

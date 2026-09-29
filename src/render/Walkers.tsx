@@ -114,7 +114,7 @@ export function Walkers() {
     };
 
     for (const w of sim.walkers) {
-      if (w.mode === "inside") continue;
+      if (w.machine.value === "inside") continue;
       const slot = w.id % heading.length;
       heading[slot] = heading[slot]! + wrap(w.dir - heading[slot]!) * 0.25;
       const ry = heading[slot]!;

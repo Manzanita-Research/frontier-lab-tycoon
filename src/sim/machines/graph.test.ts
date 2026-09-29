@@ -8,6 +8,7 @@ import { arcMachine } from "./arc";
 import { economyMachine } from "./economy";
 import { goalsMachine } from "./goals";
 import { trainingMachine } from "./training";
+import { walkerMachine } from "./walker";
 
 const byValue = { serializeState: (s: { value: unknown }) => JSON.stringify(s.value) };
 
@@ -57,6 +58,14 @@ describe("machine graphs", () => {
     expect(r.unreachable).toEqual([]);
     expect(r.deadEnds).toEqual([]);
     expect(Object.entries(goalsMachine.states).filter(([, s]) => s.type === "final").map(([k]) => k).sort()).toEqual(["lost", "won"]);
+  });
+
+  it("a walker can reach every phase from a fresh spawn, and only `gone` is final", () => {
+    const events = ["ARRIVED", "LINGER", "NEXT", "TOUR_DONE", "CHOSE_BUILDING", "CHOSE_WANDER", "PROTEST_STARTED", "SENT_HOME", "EXITED"].map((type) => ({ type }));
+    const r = explore(walkerMachine, { events });
+    expect(r.unreachable).toEqual([]);
+    expect(r.deadEnds).toEqual([]);
+    expect(Object.entries(walkerMachine.states).filter(([, s]) => (s as { type?: string }).type === "final").map(([k]) => k)).toEqual(["gone"]);
   });
 
   it("training reaches idle, training and releasing", () => {
