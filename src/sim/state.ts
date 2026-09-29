@@ -8,6 +8,7 @@ import { economyMachine } from "./machines/economy";
 import { goalsMachine } from "./machines/goals";
 import { trainingMachine } from "./machines/training";
 import { pushNews } from "./news";
+import { blankVibes, initialVibes } from "./vibes";
 import { createRng } from "./rng";
 import { dailyThoughts } from "./thoughts";
 import { agentTarget, researcherTarget, seedWalkers } from "./walkers";
@@ -41,6 +42,7 @@ export function createInitialState(seed = 1): GameState {
     capability: START_CAPABILITY,
     compute: 0,
     hype: 30,
+    vibes: blankVibes(),
     labName: rng.pick(LAB_NAMES),
     grid: { w, h, paths },
     gate: { x: 11, z: 23, w: 2, d: 1 },
@@ -79,6 +81,8 @@ export function createInitialState(seed = 1): GameState {
   seedWalkers(state, "researcher", researcherTarget(state), rng);
   seedWalkers(state, "agent", agentTarget(state), rng);
   seedWalkers(state, "visitor", START_VISITORS, rng);
+
+  state.vibes = initialVibes(state);
 
   pushNews(state, rng, "start");
   pushNews(state, rng, "runStarted", { model: state.training.context.name });

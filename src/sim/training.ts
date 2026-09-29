@@ -6,6 +6,7 @@ import { formatMoney } from "./format";
 import { addToast, pushNews } from "./news";
 import { step, type Stepped } from "./machines/run";
 import { trainingMachine } from "./machines/training";
+import { happinessOf } from "./needs";
 import { isReachable } from "./pathfind";
 import type { Rng } from "./rng";
 import type { GameState } from "./types";
@@ -13,11 +14,11 @@ import type { GameState } from "./types";
 const COMPUTE_CAP = 500;
 const LAUNCH_BONUS_PER_GAIN = 15_000;
 
-/** Well-fed researchers train faster: 75% speed when everyone is drained, 100% when everyone is buzzing. */
+/** Happy researchers train faster: 75% speed when everyone is miserable, 100% when everyone is buzzing. */
 export function morale(state: GameState): number {
   const rs = state.walkers.filter((w) => w.kind === "researcher");
   if (rs.length === 0) return 0.7;
-  return rs.reduce((sum, w) => sum + w.energy, 0) / rs.length;
+  return rs.reduce((sum, w) => sum + happinessOf(w), 0) / rs.length;
 }
 
 export function computePerDay(state: GameState): number {

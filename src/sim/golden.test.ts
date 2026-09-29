@@ -1,6 +1,8 @@
-// Behaviour-preservation guard for the XState/Effect port (FLT-3). The digests below were recorded from the
-// hand-written sim before any system moved into a machine. If a port step changes one, it changed the game:
-// same seed + same commands must give the same numbers, RNG stream included.
+// Behaviour guard, first written for the XState/Effect port (FLT-3): same seed + same commands must give the same
+// numbers, RNG stream included. The FLT-3 digests were recorded from the hand-written sim before any system moved
+// into a machine, and the port kept them. FLT-8 (the Crowd) changes the game on purpose (names, needs, queues,
+// Vibes, new buildings, who spawns and when), so the digests below were re-recorded from that sim; the projection
+// now also covers the new walker fields and the Vibes.
 //
 // The digest reads the game through `view()`, not the raw state, so the persisted shape can change (machine
 // snapshots, moved fields) without touching the recorded values. Only `view()` follows the shape.
@@ -36,6 +38,7 @@ function view(s: GameState) {
     capability: s.capability,
     compute: s.compute,
     hype: s.hype,
+    vibes: s.vibes,
     outcome: outcomeOf(s),
     event: openEventOf(s),
     waterDiscourse: s.waterDiscourse,
@@ -62,7 +65,19 @@ function view(s: GameState) {
       targetId: w.targetId,
       mode: modeOf(w),
       timer: w.timer,
+      name: w.name,
+      role: w.role,
       energy: w.energy,
+      focus: w.focus,
+      fomo: w.fomo,
+      patience: w.patience,
+      impressed: w.impressed,
+      drift: w.drift,
+      need: w.need,
+      lost: w.lost,
+      mood: w.mood,
+      stats: w.stats,
+      phase: w.machine.value,
       visits: w.visits,
       step: w.step,
       loiter: w.machine.value === "loitering",
@@ -86,7 +101,7 @@ function spot(s: GameState, kind: PlaceableKind): [number, number] | null {
   return null;
 }
 
-const BUILD_ORDER: PlaceableKind[] = ["gateway", "cluster", "gateway", "hall", "cluster", "gateway", "cluster"];
+const BUILD_ORDER: PlaceableKind[] = ["gateway", "snack", "cluster", "nap", "gateway", "demo", "hall", "cluster", "gateway", "cluster"];
 
 /** A busy player: builds every 30 ticks, paves a bit, bulldozes a path, answers every event card differently. */
 function play(seed: number, ticks: number, checkpoints: number[]): Record<number, string> {
@@ -115,11 +130,11 @@ function play(seed: number, ticks: number, checkpoints: number[]): Record<number
 
 const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 
-// Recorded from the pre-port sim (origin/flt-3-slice-2 @ 8f9750a; sorted-flags projection).
+// Recorded from the Crowd sim (FLT-8). The pre-Crowd values are in git history (FLT-3, @ 8f9750a).
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "b09a4095", 800: "a274aab8", 1600: "c7c4a4ce", 2400: "c0ec8b46", 3200: "0f553eb8", 4000: "dfe20e6d" },
-  2: { 200: "2ed31fe1", 800: "e8b41e62", 1600: "55737f72", 2400: "47af9577", 3200: "37a3ccf0", 4000: "ef2f63a1" },
-  3: { 200: "932081b6", 800: "a3bd7a8e", 1600: "706c8480", 2400: "57759a6c", 3200: "dd7cd0e5", 4000: "64e21760" },
+  1: { 200: "80a68b68", 800: "8cd737f0", 1600: "d4494c7d", 2400: "602fdb95", 3200: "3e0b6a8d", 4000: "62ddacc0" },
+  2: { 200: "a11aef4b", 800: "73276f89", 1600: "930fce23", 2400: "1a32756a", 3200: "cecb39ba", 4000: "a30764d1" },
+  3: { 200: "1a8f671e", 800: "67efa3a2", 1600: "0df3ccd0", 2400: "3aafc850", 3200: "9e295cf1", 4000: "ab3d87be" },
 };
 
 describe("golden runs", () => {

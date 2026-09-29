@@ -10,7 +10,7 @@ import { Objectives } from "./Objectives";
 import { OutcomeCard } from "./OutcomeCard";
 
 const toolName = (t: Tool) => (t === "path" ? "Path" : t === "bulldoze" ? "Bulldoze" : BUILDINGS[t].name);
-const SHORT: Record<Tool, string> = { path: "Path", cluster: "Cluster", hall: "Training Hall", gateway: "Gateway", kombucha: "Kombucha", bulldoze: "Bulldoze" };
+const SHORT: Record<Tool, string> = { path: "Path", cluster: "Cluster", hall: "Training Hall", gateway: "Gateway", kombucha: "Kombucha", nap: "Nap Pods", snack: "Snack Wall", demo: "Demo Stage", bulldoze: "Bulldoze" };
 const toolPrice = (t: Tool) => (t === "path" ? PATH_PRICE : t === "bulldoze" ? 0 : BUILDINGS[t].price);
 
 function TopBar() {
@@ -211,7 +211,7 @@ export function HUD() {
         (document.activeElement as HTMLElement | null)?.blur?.();
         send({ type: "TOGGLE_PAUSE" });
       } else if (e.key === "Escape") send({ type: "SET_TOOL", tool: null });
-      else if (/^[1-6]$/.test(e.key)) send({ type: "SET_TOOL", tool: TOOLS[Number(e.key) - 1]! });
+      else if (/^[1-9]$/.test(e.key)) send({ type: "SET_TOOL", tool: TOOLS[Number(e.key) - 1]! });
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);

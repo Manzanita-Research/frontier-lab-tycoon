@@ -3,6 +3,7 @@ import { BUILDINGS } from "../content/buildings";
 import { THOUGHTS, type ThoughtCondition } from "../content/thoughts";
 import { CROWDING_PROTESTERS, THOUGHT_TICKS } from "./constants";
 import { fillTemplate } from "./format";
+import { causeOf, isLoud, lineFor } from "./mind";
 import { isReachable } from "./pathfind";
 import { templateVars } from "./news";
 import type { Rng } from "./rng";
@@ -36,7 +37,18 @@ export function dailyThoughts(state: GameState, rng: Rng, force = false) {
     speaking.every((o) => o !== w && Math.hypot(o.x - w.x, o.z - w.z) > 3);
   const candidates = state.walkers.filter((w) => modeOf(w) !== "inside" && clear(w));
   if (candidates.length === 0) return;
-  const walker = rng.pick(candidates);
+  // When someone has a need nagging them (or is walking out with a box), most bubbles go to them, with their own line.
+  const onScreen = new Set(state.thoughts.map((t) => t.text));
+  const loud = candidates.filter((w) => {
+    const cause = causeOf(w);
+    return isLoud(cause) && !onScreen.has(lineFor(state, cause, w));
+  });
+  const walker = rng.pick(loud.length > 0 && rng.chance(0.7) ? loud : candidates);
+  const cause = causeOf(walker);
+  if (isLoud(cause)) {
+    state.thoughts.push({ id: state.nextId++, walkerId: walker.id, kind: walker.kind, text: lineFor(state, cause, walker), expiresTick: state.tick + THOUGHT_TICKS });
+    return;
+  }
 
   const conditions = activeConditions(state);
   let lines = THOUGHTS.filter((l) => l.kind === walker.kind && conditions.has(l.when));

@@ -48,6 +48,39 @@ export const ICONS: Record<Tool, ReactElement> = {
       <circle cx="18" cy="23" r="1.6" fill="#fff3c4" />
     </svg>
   ),
+  nap: (
+    <svg {...S}>
+      <path d="M4 25 H28" stroke={ink} strokeWidth="2" />
+      <rect x="4" y="18" width="24" height="8" rx="3" fill="#f7eed6" stroke={ink} strokeWidth="2" />
+      <path d="M6 18 A10 9 0 0 1 26 18 Z" fill="#c9d6ff" stroke={ink} strokeWidth="2" />
+      <rect x="8" y="20" width="7" height="4" rx="2" fill="#7a8cff" />
+      <path d="M22 5 h5 l-5 6 h5" stroke={ink} strokeWidth="2" />
+      <path d="M13 8 h3 l-3 4 h3" stroke={ink} strokeWidth="1.6" />
+    </svg>
+  ),
+  snack: (
+    <svg {...S}>
+      <rect x="5" y="5" width="22" height="22" rx="3" fill="#f7eed6" stroke={ink} strokeWidth="2" />
+      <path d="M5 9 H27" stroke={ink} strokeWidth="2" />
+      <path d="M5 5 h22 v4 H5 Z" fill="#ffb020" stroke={ink} strokeWidth="2" />
+      <rect x="8" y="12" width="5" height="5" rx="1" fill="#ff6b4a" stroke={ink} strokeWidth="1.4" />
+      <rect x="14" y="12" width="5" height="5" rx="1" fill="#ffd24a" stroke={ink} strokeWidth="1.4" />
+      <rect x="20" y="12" width="5" height="5" rx="1" fill="#4fc36b" stroke={ink} strokeWidth="1.4" />
+      <rect x="8" y="19" width="5" height="5" rx="1" fill="#4f8ff0" stroke={ink} strokeWidth="1.4" />
+      <rect x="14" y="19" width="5" height="5" rx="1" fill="#b06cf0" stroke={ink} strokeWidth="1.4" />
+      <rect x="20" y="19" width="5" height="5" rx="1" fill="#ff8fb0" stroke={ink} strokeWidth="1.4" />
+    </svg>
+  ),
+  demo: (
+    <svg {...S}>
+      <rect x="5" y="4" width="22" height="14" rx="2" fill="#e2559a" stroke={ink} strokeWidth="2" />
+      <path d="M14 8 L20 11 L14 14 Z" fill="#fff8e6" stroke={ink} strokeWidth="1.4" />
+      <path d="M3 21 H29 V27 H3 Z" fill="#f7eed6" stroke={ink} strokeWidth="2" />
+      <path d="M3 21 H29" stroke="#e2559a" strokeWidth="3" />
+      <circle cx="9" cy="24.5" r="1.3" fill={ink} />
+      <circle cx="23" cy="24.5" r="1.3" fill={ink} />
+    </svg>
+  ),
   bulldoze: (
     <svg {...S}>
       <rect x="4" y="15" width="16" height="8" rx="2" fill="#ffd24a" stroke={ink} strokeWidth="2" />
