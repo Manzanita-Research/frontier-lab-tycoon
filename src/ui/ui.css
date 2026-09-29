@@ -1412,8 +1412,11 @@ button {
     font-size: 13px;
   }
   .vibes-tip {
-    left: 0;
-    width: calc(100vw - 32px);
+    position: fixed;
+    top: 84px;
+    left: 8px;
+    right: 8px;
+    width: auto;
   }
   .right-col {
     max-height: none;

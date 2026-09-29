@@ -29,11 +29,12 @@ function withWaterEvent(seed = 1): GameState {
 }
 
 describe("crowd density", () => {
-  it("targets 8 + 3 per hall researchers and 6 + capability/2 agents, capped at 400", () => {
+  it("seats 10 + 4 per hall researchers (applicants fill it) and 6 + capability/2 agents, capped at 400", () => {
     const s = createInitialState(1);
-    expect(researcherTarget(s)).toBe(11);
-    s.buildings.push({ id: 99, kind: "hall", x: 1, z: 1, w: 3, d: 3, placedTick: 0 });
+    expect(count(s, "researcher")).toBe(8 + 3);
     expect(researcherTarget(s)).toBe(14);
+    s.buildings.push({ id: 99, kind: "hall", x: 1, z: 1, w: 3, d: 3, placedTick: 0 });
+    expect(researcherTarget(s)).toBe(18);
     s.capability = 40;
     expect(agentTarget(s)).toBe(26);
     s.capability = 5000;

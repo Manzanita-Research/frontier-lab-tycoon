@@ -31,6 +31,16 @@ export function walkerAt(camera: THREE.Camera & { zoom?: number }, size: { width
   return best;
 }
 
+/** Where a walker is on screen (client pixels), for the `?debug=1` hook and the screenshot scripts. */
+function screenOf(camera: THREE.Camera, el: HTMLElement, id: number): [number, number] | null {
+  const w = sim.world.walkers.find((o) => o.id === id);
+  if (!w || w.machine.value === "inside") return null;
+  const a = sim.alpha;
+  const rect = el.getBoundingClientRect();
+  v.set(w.px + (w.x - w.px) * a - HALF, 0.55, w.pz + (w.z - w.pz) * a - HALF).project(camera);
+  return [rect.left + (v.x * 0.5 + 0.5) * rect.width, rect.top + (-v.y * 0.5 + 0.5) * rect.height];
+}
+
 /**
  * Tap a walker to open their card; tap empty ground to close it. Only when no build tool is active, and only for a
  * quick tap: a drag is the camera panning.
@@ -38,6 +48,10 @@ export function walkerAt(camera: THREE.Camera & { zoom?: number }, size: { width
 export function Pick() {
   const tool = useApp(atoms.tool);
   const { gl, camera, size } = useThree();
+  useEffect(() => {
+    const hook = (window as unknown as { __flt?: Record<string, unknown> }).__flt;
+    if (hook) hook.screenOf = (id: number) => screenOf(camera, gl.domElement, id);
+  }, [gl, camera]);
   useEffect(() => {
     if (tool) return;
     const el = gl.domElement;

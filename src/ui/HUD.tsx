@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { BUILDINGS, PATH_PRICE } from "../content/buildings";
 import { formatDate, formatMoney } from "../sim/format";
 import { appNow, atoms, send } from "../app/game";
@@ -188,9 +188,18 @@ function Toasts() {
   // The app machine expires each toast after 5.2 s; a click dismisses it early.
   const dismiss = (id: number) => send({ type: "DISMISS_TOAST", id });
   const hasGateway = useApp(atoms.hasGateway);
+  const selected = useApp(atoms.selected);
+  // Nobody knows the people are tappable until they try: a hint until they do (or it has been up for a while).
+  const [tapHint, setTapHint] = useState(true);
+  useEffect(() => {
+    if (selected !== null) setTapHint(false);
+    const t = setTimeout(() => setTapHint(false), 22_000);
+    return () => clearTimeout(t);
+  }, [selected]);
   return (
     <div className="toasts">
       {!hasGateway && <div className="toast panel hint">Build an API Gateway next to a path to start earning.</div>}
+      {tapHint && <div className="toast panel hint">Tap anyone to read their mind.</div>}
       {toasts.map((t) => (
         <button key={t.id} className={`toast panel ${t.tone}`} onClick={() => dismiss(t.id)}>
           {t.text}

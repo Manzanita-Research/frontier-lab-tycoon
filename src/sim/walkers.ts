@@ -357,10 +357,18 @@ function tickQueue(state: GameState, w: Walker, rng: Rng) {
   send(state, w, rng, { type: "GAVE_UP" });
 }
 
+/** Someone who couldn't find what they wanted stops saying so the moment a building that helps is connected. */
+function found(state: GameState, w: Walker): boolean {
+  if (!w.lost) return false;
+  const need = w.lost;
+  return reachableBuildings(state).some((b) => BUILDINGS[b.kind].hosts.includes(w.kind) && gainOf(BUILDINGS[b.kind], w, need) >= MIN_GAIN);
+}
+
 /** Walkers caught out by a change to paths or buildings find a new way. */
 function repairWalkers(state: GameState, rng: Rng) {
   for (const w of state.walkers) {
     if (w.kind === "protester") continue; // they stand on grass; protest.ts looks after them
+    if (found(state, w)) w.lost = "";
     if (w.machine.value === "inside") {
       if (byId(state, w.targetId)) continue;
       const p = nearestPathTile(state, w.x, w.z);
@@ -486,8 +494,14 @@ export function updateWalkers(state: GameState, rng: Rng) {
   if (visitors < visitorCap(state) && rng.chance(visitorChanceFor(state.vibes.value) * crowdFactor)) spawnFromGate(state, "visitor", rng);
 }
 
+const hallCount = (state: GameState) => state.buildings.filter((b) => b.kind === "hall").length;
+
+/** Researchers a new campus starts with. */
+export const researchersAtStart = (state: GameState) => 8 + 3 * hallCount(state);
+
+/** How many researchers the halls can seat: applicants keep coming (Vibes permitting) until the lab is this big. */
 export function researcherTarget(state: GameState): number {
-  return 8 + 3 * state.buildings.filter((b) => b.kind === "hall").length;
+  return 10 + 4 * hallCount(state);
 }
 
 export function agentTarget(state: GameState): number {
