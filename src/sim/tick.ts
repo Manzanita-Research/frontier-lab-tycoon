@@ -21,7 +21,7 @@ export { TICKS_PER_DAY };
 export function tick(state: GameState, commands: readonly Command[] = []) {
   const rng = createRng(state.rngState);
   applyCommands(state, commands, rng);
-  if (state.event || state.outcome === "lost") {
+  if (state.event || state.goals.value === "lost") {
     state.rngState = rng.state();
     return;
   }

@@ -3,6 +3,7 @@ import { LAB_NAMES, modelName } from "../content/names";
 import { createGoals } from "./goals";
 import { initialStored } from "./machines/run";
 import { economyMachine } from "./machines/economy";
+import { goalsMachine } from "./machines/goals";
 import { trainingMachine } from "./machines/training";
 import { pushNews } from "./news";
 import { createRng } from "./rng";
@@ -57,8 +58,7 @@ export function createInitialState(seed = 1): GameState {
     recentThoughts: [],
     agentBonus: 0,
     waterDiscourse: 0,
-    goals: createGoals(),
-    outcome: "playing",
+    goals: initialStored(goalsMachine, { goals: createGoals(), outcomeDay: null }),
     event: null,
   };
 

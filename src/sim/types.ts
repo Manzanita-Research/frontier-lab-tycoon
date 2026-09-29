@@ -1,6 +1,7 @@
 // Everything in GameState is plain and JSON-serializable.
 import type { BuildingKind } from "../content/buildings";
 import type { EconomyStored } from "./machines/economy";
+import type { GoalsStored } from "./machines/goals";
 import type { TrainingStored } from "./machines/training";
 
 export type { BuildingKind };
@@ -152,8 +153,8 @@ export interface GameState {
   agentBonus: number;
   /** Rises with compute clusters, decays daily; a quarter of it is the protester headcount (capped at 40). */
   waterDiscourse: number;
-  goals: GoalProgress[];
-  outcome: Outcome;
+  /** The scenario machine: tracking, won or lost, with the milestones and the day it ended in its context. */
+  goals: GoalsStored;
   /** At most one at a time; `tick` does nothing while it is open. */
   event: OpenEvent | null;
 }

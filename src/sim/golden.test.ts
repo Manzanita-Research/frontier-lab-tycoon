@@ -5,6 +5,7 @@
 // The digest reads the game through `view()`, not the raw state, so the persisted shape can change (machine
 // snapshots, moved fields) without touching the recorded values. Only `view()` follows the shape.
 import { canPlace, type Command } from "./commands";
+import { outcomeOf } from "./goals";
 import { createInitialState } from "./state";
 import { tick } from "./tick";
 import type { GameState } from "./types";
@@ -16,6 +17,7 @@ const sorted = (o: Record<string, unknown>) => Object.fromEntries(Object.entries
 function flagsOf(s: GameState): Record<string, unknown> {
   const flags: Record<string, unknown> = { ...s.flags };
   if (s.economy.context.lastBailout !== null) flags.lastBailout = s.economy.context.lastBailout;
+  if (s.goals.context.outcomeDay !== null) flags.outcomeDay = s.goals.context.outcomeDay;
   return flags;
 }
 
@@ -31,13 +33,13 @@ function view(s: GameState) {
     capability: s.capability,
     compute: s.compute,
     hype: s.hype,
-    outcome: s.outcome,
+    outcome: outcomeOf(s),
     event: s.event,
     waterDiscourse: s.waterDiscourse,
     ledger: s.ledger,
     training: s.training.context,
     models: s.models,
-    goals: s.goals,
+    goals: s.goals.context.goals,
     flags: sorted(flagsOf(s)),
     news: s.news,
     toasts: s.toasts,

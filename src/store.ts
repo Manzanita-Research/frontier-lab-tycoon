@@ -6,6 +6,7 @@ import { applyNow, tick, TICKS_PER_DAY } from "./sim/tick";
 import { canPlace, type Command } from "./sim/commands";
 import { computePerDay } from "./sim/training";
 import { runwayMonths } from "./sim/format";
+import { outcomeOf } from "./sim/goals";
 import { createRng } from "./sim/rng";
 import { createInitialState } from "./sim/state";
 import { buildingAt } from "./sim/pathfind";
@@ -80,8 +81,8 @@ function makeSnapshot(s: GameState, prev?: Snapshot): Snapshot {
     models: s.models.length,
     walkers: s.walkers.length,
     hasGateway: s.buildings.some((b) => b.kind === "gateway"),
-    goals: s.goals.map((g) => ({ ...g })),
-    outcome: s.outcome,
+    goals: s.goals.context.goals.map((g) => ({ ...g })),
+    outcome: outcomeOf(s),
     event: s.event ? { ...s.event } : null,
     protesters: protesterCount(s),
     discourse: s.waterDiscourse,
@@ -209,7 +210,7 @@ export const useStore = create<Store>((set, get) => ({
 
 /** Time stands still while an event card is up, or after the scenario ends and the card hasn't been dismissed. */
 const isHeld = (st: { sim: GameState; outcomeDismissed: boolean }) =>
-  st.sim.event !== null || (st.sim.outcome !== "playing" && !st.outcomeDismissed);
+  st.sim.event !== null || (outcomeOf(st.sim) !== "playing" && !st.outcomeDismissed);
 
 /** Starts the requestAnimationFrame loop. Returns a stop function. */
 export function startLoop(): () => void {
