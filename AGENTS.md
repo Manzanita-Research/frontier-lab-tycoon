@@ -27,7 +27,8 @@ pnpm check            # all three: run before every PR
 - `src/sim/`: pure TypeScript, deterministic, **no React, no three, no DOM, no Math.random** (use `src/sim/rng.ts`). A fixed-step `tick(state)` drives everything. Unit-test it.
 - `src/content/`: data only (buildings, research, rival labs, events, headlines, thoughts). Adding a joke should never need an engine change.
 - `src/render/`: react-three-fiber scene. Reads sim state, never mutates it except through store actions.
-- `src/ui/`: DOM HUD over the canvas (stats, build palette, ticker, event cards, speed control).
+- `src/ui/`: DOM HUD over the canvas (stats, build palette, ticker, event cards, speed control). `src/ui/juice/`: odometers, sky, photo mode.
+- `src/render/fx/`: the juice layer (camera director, particles, day/night, photo mode). It only reads the World; see the last section of `docs/ARCHITECTURE.md`.
 - `src/sim/machines/`: the XState machines (training, economy, goals, event arcs, walkers). `src/app/`: the Effect shell (Sim and Frames services, the app machine) and how React reads it. See `docs/ARCHITECTURE.md`.
 
 If you need to change a shared type in `src/sim/types.ts`, keep the change additive and mention it in your PR.

@@ -27,6 +27,10 @@ export interface Shot {
 
 export type Phase = "idle" | "in" | "hold" | "out";
 
+/** How far from the middle of the board the camera target may go (scene units). Shots are clamped to it. */
+export const PAN_LIMIT = 13;
+const clampPan = (v: number) => Math.max(-PAN_LIMIT, Math.min(PAN_LIMIT, v));
+
 const EPS_POS = 0.04;
 const EPS_ZOOM = 0.01;
 
@@ -59,7 +63,8 @@ export class Cinema {
     } else this.home = { ...view };
     this.shot = { back: true, ...shot };
     // Zoom is relative to where the player had it, so back-to-back shots don't compound.
-    this.goal = { x: shot.x, z: shot.z, zoom: this.home.zoom * (shot.zoom ?? 1) };
+    // (A goal the rig would clamp away could never be reached, and the shot would never end.)
+    this.goal = { x: clampPan(shot.x), z: clampPan(shot.z), zoom: this.home.zoom * (shot.zoom ?? 1) };
     this.phase = "in";
     this.timer = 0;
     this.released = false;

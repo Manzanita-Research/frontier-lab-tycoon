@@ -94,7 +94,7 @@ export function Walkers() {
   const agentGeo = useMemo(() => new RoundedBoxGeometry(0.34 * S, 0.34 * S, 0.3 * S, 3, 0.07 * S), []);
   const orbGeo = useMemo(() => new THREE.SphereGeometry(0.065 * S, 10, 8), []);
   const stickGeo = useMemo(() => new THREE.BoxGeometry(0.045, 1, 0.045), []);
-  const eyeGeo = useMemo(() => new THREE.BoxGeometry(0.2 * S, 0.05 * S, 0.05 * S), []);
+  const eyeGeo = useMemo(() => new THREE.BoxGeometry(0.17 * S, 0.042 * S, 0.05 * S), []);
 
   useFrame(({ clock, camera }) => {
     const sim = game.world;

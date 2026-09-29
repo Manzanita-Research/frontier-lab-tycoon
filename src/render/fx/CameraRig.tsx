@@ -5,11 +5,10 @@ import * as THREE from "three";
 import { appNow, atoms, debugParams } from "../../app/game";
 import { useApp } from "../../app/hooks";
 import { HALF } from "../coords";
-import { shakeOffset } from "./cinema";
+import { PAN_LIMIT, shakeOffset } from "./cinema";
 import { cinema, fx } from "./state";
 
 export const CAMERA_OFFSET = new THREE.Vector3(20, 20, 20);
-const PAN_LIMIT = 13;
 /** Keyboard pan speed in screen pixels per second, so it feels the same at every zoom. */
 const PAN_PX_PER_S = 640;
 const EDGE_PX = 12;
