@@ -2,7 +2,8 @@ import { MapControls } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useEffect, useRef, type ComponentRef } from "react";
 import * as THREE from "three";
-import { debugParams, useStore } from "../store";
+import { atoms, debugParams } from "../app/game";
+import { useApp } from "../app/hooks";
 import { Buildings } from "./buildings/Buildings";
 import { HALF } from "./coords";
 import { Confetti } from "./Confetti";
@@ -25,7 +26,7 @@ function initialZoom() {
 function CameraRig({ baseZoom }: { baseZoom: number }) {
   const controls = useRef<ComponentRef<typeof MapControls>>(null);
   const turn = useRef({ target: 0, current: 0 });
-  const tool = useStore((s) => s.tool);
+  const tool = useApp(atoms.tool);
   const painting = tool === "path" || tool === "bulldoze";
 
   useEffect(() => {

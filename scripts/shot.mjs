@@ -4,7 +4,7 @@
 //   pnpm build && (pnpm preview &) && sleep 2
 //   pnpm shot "http://localhost:4173/?page=gallery" docs/img/gallery.png --size 1440x900 --wait 3000
 //   pnpm shot "http://localhost:4173/" shots/phone.png --size 390x844 --mobile
-//   pnpm shot "http://localhost:4173/?debug=1" shots/x.png --eval "window.__flt.useStore.getState().sim.hype = 90"
+//   pnpm shot "http://localhost:4173/?debug=1" shots/x.png --eval "window.__flt.sim.world.hype = 90"
 //
 // First run on a new machine: `pnpm exec playwright install chromium-headless-shell`
 // (.bb-env-setup.sh already tries this). System libraries come from the Modal image.

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { GOALS, SCENARIO, type GoalDef } from "../content/goals";
 import { formatDate, formatMoney } from "../sim/format";
-import { useStore } from "../store";
+import { atoms } from "../app/game";
+import { useApp } from "../app/hooks";
 
 const defs = new Map(GOALS.map((g) => [g.id, g]));
 
@@ -20,8 +21,8 @@ function progressText(def: GoalDef, value: number): string {
 
 /** The scenario checklist, collapsible so it can get out of the way of the campus (and start folded on a phone). */
 export function Objectives() {
-  const goals = useStore((s) => s.snap.goals);
-  const day = useStore((s) => s.snap.day);
+  const goals = useApp(atoms.goals);
+  const day = useApp(atoms.day);
   const [open, setOpen] = useState(() => window.innerWidth > 640);
   const done = goals.filter((g) => g.met).length;
   const left = Math.max(0, SCENARIO.deadlineDay - day);

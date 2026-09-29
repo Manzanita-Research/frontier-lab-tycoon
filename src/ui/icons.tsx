@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import type { Tool } from "../store";
+import type { Tool } from "../app/hud";
 
 const S = { width: 30, height: 30, viewBox: "0 0 32 32", fill: "none", strokeLinejoin: "round", strokeLinecap: "round" } as const;
 const ink = "#3a2a1c";

@@ -1,7 +1,9 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { BUILDINGS, PATH_PRICE } from "../content/buildings";
 import { formatDate, formatMoney } from "../sim/format";
-import { SPEEDS, TOOLS, useStore, type Tool } from "../store";
+import { appNow, atoms, send } from "../app/game";
+import { SPEEDS, TOOLS, type Tool } from "../app/hud";
+import { useApp } from "../app/hooks";
 import { EventCard } from "./EventCard";
 import { ICONS } from "./icons";
 import { Objectives } from "./Objectives";
@@ -12,7 +14,7 @@ const SHORT: Record<Tool, string> = { path: "Path", cluster: "Cluster", hall: "T
 const toolPrice = (t: Tool) => (t === "path" ? PATH_PRICE : t === "bulldoze" ? 0 : BUILDINGS[t].price);
 
 function TopBar() {
-  const s = useStore((st) => st.snap);
+  const s = useApp(atoms.snap);
   const runwayLow = s.runway !== null && s.runway < 6;
   return (
     <div className="topbar panel">
@@ -48,7 +50,7 @@ function TopBar() {
 }
 
 function TrainingChip() {
-  const s = useStore((st) => st.snap);
+  const s = useApp(atoms.snap);
   if (!s.hasHall) {
     return (
       <div className="chip panel">
@@ -71,12 +73,11 @@ function TrainingChip() {
 }
 
 function SpeedControl() {
-  const speed = useStore((st) => st.speed);
-  const setSpeed = useStore((st) => st.setSpeed);
+  const speed = useApp(atoms.speed);
   return (
     <div className="speed panel" role="group" aria-label="Game speed">
       {SPEEDS.map((v) => (
-        <button key={v} className={speed === v ? "on" : ""} onClick={() => setSpeed(v)} aria-label={v === 0 ? "Pause" : `${v}x speed`}>
+        <button key={v} className={speed === v ? "on" : ""} onClick={() => send({ type: "SET_SPEED", speed: v })} aria-label={v === 0 ? "Pause" : `${v}x speed`}>
           {v === 0 ? <span className="pause-icon"><i /><i /></span> : `${v}×`}
         </button>
       ))}
@@ -85,9 +86,8 @@ function SpeedControl() {
 }
 
 function BuildBar() {
-  const tool = useStore((st) => st.tool);
-  const setTool = useStore((st) => st.setTool);
-  const cash = useStore((st) => st.snap.cash);
+  const tool = useApp(atoms.tool);
+  const cash = useApp(atoms.cash);
   const blurb = tool && tool !== "path" && tool !== "bulldoze" ? BUILDINGS[tool] : null;
   return (
     <div className="buildwrap">
@@ -113,7 +113,7 @@ function BuildBar() {
           const price = toolPrice(t);
           const broke = price > cash;
           return (
-            <button key={t} className={`tool ${tool === t ? "on" : ""} ${broke ? "broke" : ""}`} onClick={() => setTool(t)} disabled={broke && tool !== t} aria-pressed={tool === t} title={toolName(t)}>
+            <button key={t} className={`tool ${tool === t ? "on" : ""} ${broke ? "broke" : ""}`} onClick={() => send({ type: "SET_TOOL", tool: t })} disabled={broke && tool !== t} aria-pressed={tool === t} title={toolName(t)}>
               <span className="hot">{i + 1}</span>
               <span className="icon">{ICONS[t]}</span>
               <span className="tname">{SHORT[t]}</span>
@@ -148,7 +148,7 @@ function Ticker() {
       raf = requestAnimationFrame(frame);
       const dt = Math.min(0.1, (now - last) / 1000);
       last = now;
-      for (const n of useStore.getState().news) {
+      for (const n of appNow()?.news ?? []) {
         if (n.id > seenId) {
           seenId = n.id;
           history.push(n);
@@ -182,14 +182,10 @@ function Ticker() {
 }
 
 function Toasts() {
-  const toasts = useStore((st) => st.toasts);
-  const dismiss = useStore((st) => st.dismissToast);
-  useEffect(() => {
-    if (toasts.length === 0) return;
-    const timers = toasts.map((t) => setTimeout(() => dismiss(t.id), 5200));
-    return () => timers.forEach(clearTimeout);
-  }, [toasts, dismiss]);
-  const hasGateway = useStore((st) => st.snap.hasGateway);
+  const toasts = useApp(atoms.toasts);
+  // The app machine expires each toast after 5.2 s; a click dismisses it early.
+  const dismiss = (id: number) => send({ type: "DISMISS_TOAST", id });
+  const hasGateway = useApp(atoms.hasGateway);
   return (
     <div className="toasts">
       {!hasGateway && <div className="toast panel hint">Build an API Gateway next to a path to start earning.</div>}
@@ -206,16 +202,16 @@ export function HUD() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
-      const st = useStore.getState();
+      const st = appNow();
       // A card is up: it owns the keyboard (1 to 3 choose), and nothing else should move.
-      if (st.snap.event || (st.snap.outcome !== "playing" && !st.outcomeDismissed)) return;
+      if (!st || st.event || (st.outcome !== "playing" && !st.outcomeDismissed)) return;
       if (e.key === " ") {
         e.preventDefault();
         // A focused button would also treat Space as a click.
         (document.activeElement as HTMLElement | null)?.blur?.();
-        st.togglePause();
-      } else if (e.key === "Escape") st.setTool(null);
-      else if (/^[1-6]$/.test(e.key)) st.setTool(TOOLS[Number(e.key) - 1]!);
+        send({ type: "TOGGLE_PAUSE" });
+      } else if (e.key === "Escape") send({ type: "SET_TOOL", tool: null });
+      else if (/^[1-6]$/.test(e.key)) send({ type: "SET_TOOL", tool: TOOLS[Number(e.key) - 1]! });
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);

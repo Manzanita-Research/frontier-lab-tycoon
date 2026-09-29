@@ -1,7 +1,7 @@
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
-import { useStore } from "../../store";
+import { sim as game } from "../../app/game";
 import { CREAM, CREAM_DARK, boxGeo, std } from "../materials";
 import { Cyl } from "./Parts";
 
@@ -15,7 +15,7 @@ const RADIUS = 1.32;
 export function HallModel({ color }: { color: string }) {
   const ring = useRef<THREE.InstancedMesh>(null);
   const beacon = useRef<THREE.MeshBasicMaterial>(null);
-  const seen = useRef({ lit: -1, models: useStore.getState().sim.models.length, flash: 0 });
+  const seen = useRef({ lit: -1, models: game.world.models.length, flash: 0 });
   const dummy = useMemo(() => new THREE.Object3D(), []);
   const palette = useMemo(() => {
     const lit = new THREE.Color(color).lerp(new THREE.Color("#ffffff"), 0.45);
@@ -46,7 +46,7 @@ export function HallModel({ color }: { color: string }) {
   useFrame(({ clock }, dt) => {
     const mesh = ring.current;
     if (!mesh) return;
-    const { sim } = useStore.getState();
+    const sim = game.world;
     const st = seen.current;
     if (sim.models.length !== st.models) {
       st.models = sim.models.length;

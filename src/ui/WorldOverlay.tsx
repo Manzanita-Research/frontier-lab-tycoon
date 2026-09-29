@@ -4,7 +4,8 @@ import { HALF, rectCenter, worldX, worldZ } from "../render/coords";
 import { Anchored } from "../render/overlay";
 import { getReach } from "../sim/pathfind";
 import { formatMoney } from "../sim/format";
-import { getAlpha, useStore } from "../store";
+import { atoms, sim } from "../app/game";
+import { useApp } from "../app/hooks";
 import type { Thought } from "../sim/types";
 
 function Bubble({ thought }: { thought: Thought }) {
@@ -12,9 +13,9 @@ function Bubble({ thought }: { thought: Thought }) {
     <Anchored
       className={`bubble bubble-${thought.kind}`}
       pos={(out) => {
-        const w = useStore.getState().sim.walkers.find((o) => o.id === thought.walkerId);
+        const w = sim.world.walkers.find((o) => o.id === thought.walkerId);
         if (!w || w.machine.value === "inside") return false;
-        const a = getAlpha();
+        const a = sim.alpha;
         out.set(w.px + (w.x - w.px) * a - HALF, w.kind === "agent" ? 0.95 : 1.1, w.pz + (w.z - w.pz) * a - HALF);
         return true;
       }}
@@ -33,8 +34,8 @@ interface Live {
 
 /** "+$15K" floats up from each gateway that earned this day. */
 function CoinPops() {
-  const pops = useStore((s) => s.snap.pops);
-  const lastSeen = useRef(useStore.getState().snap.pops.at(-1)?.id ?? 0);
+  const pops = useApp(atoms.pops);
+  const lastSeen = useRef(pops.at(-1)?.id ?? 0);
   const [live, setLive] = useState<Live[]>([]);
   useEffect(() => {
     const fresh = pops.filter((p) => p.id > lastSeen.current);
@@ -64,10 +65,10 @@ function CoinPops() {
 
 /** Buildings nobody can walk to say so. */
 function NoPath() {
-  const buildings = useStore((s) => s.snap.buildings);
-  const version = useStore((s) => s.snap.version);
+  const buildings = useApp(atoms.buildings);
+  const version = useApp(atoms.version);
   const stranded = useMemo(() => {
-    const reach = getReach(useStore.getState().sim);
+    const reach = getReach(sim.world);
     return buildings.filter((b) => !reach.buildings.has(b.id));
     // `version` is what invalidates reachability.
   }, [buildings, version]);
@@ -92,12 +93,12 @@ function NoPath() {
 
 /** Why the ghost is red. */
 function Reason() {
-  const tool = useStore((s) => s.tool);
-  const hover = useStore((s) => s.hover);
-  const version = useStore((s) => s.snap.version);
-  const cash = useStore((s) => Math.floor(s.snap.cash / 10_000));
+  const tool = useApp(atoms.tool);
+  const hover = useApp(atoms.hover);
+  const version = useApp(atoms.version);
+  const cash = useApp(atoms.cashBucket);
   const ghost = useMemo(
-    () => computeGhost(useStore.getState().sim, tool, hover),
+    () => computeGhost(sim.world, tool, hover),
     // Recompute when the world or the wallet changes, not just the pointer.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [tool, hover, version, cash],
@@ -118,7 +119,7 @@ function Reason() {
 }
 
 export function WorldOverlay() {
-  const thoughts = useStore((s) => s.snap.thoughts);
+  const thoughts = useApp(atoms.thoughts);
   return (
     <div className="world">
       {thoughts.map((t) => (

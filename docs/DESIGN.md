@@ -50,7 +50,7 @@ This is AI-2027-shaped escalation played as affectionate farce. It punches at in
 - `src/content/`: data only (buildings, headlines, thoughts, names). Adding a joke never needs an engine change.
 - `src/render/`: R3F scene. It reads sim state in `useFrame` (instanced walkers) and never mutates state directly.
 - `src/ui/`: DOM HUD. It subscribes to a throttled snapshot (~5 Hz), not to every tick.
-- `src/store.ts`: zustand. It owns the sim state and runs the loop, with speed pause/1×/3×/10×.
+- `src/app/`: the app machine (XState, run by Effect) owns speed, the command queue and the loop, with speed pause/1×/3×/10×; see `docs/ARCHITECTURE.md`. There is no zustand.
 - Performance: 300+ walkers stay smooth on a laptop; instancing only, with no per-walker React components.
 
 ## Later (not now)

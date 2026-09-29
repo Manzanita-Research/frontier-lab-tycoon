@@ -1,15 +1,16 @@
 import { useEffect } from "react";
 import { eventById } from "../content/events";
 import { fillTemplate } from "../sim/format";
-import { useStore } from "../store";
+import { atoms, send } from "../app/game";
+import { useApp } from "../app/hooks";
 
 const TONE_LABEL = { bad: "Breaking", joke: "Developing", good: "Good news", neutral: "Update" } as const;
 
 /** A modal event card. The game is paused while it is open; keys 1 to 3 pick a choice. */
 export function EventCard() {
-  const open = useStore((s) => s.snap.event);
-  const labName = useStore((s) => s.snap.labName);
-  const choose = useStore((s) => s.chooseEvent);
+  const open = useApp(atoms.event);
+  const labName = useApp(atoms.labName);
+  const choose = (choiceIndex: number) => send({ type: "CHOOSE", choiceIndex });
   const def = open ? eventById(open.id) : undefined;
 
   useEffect(() => {
@@ -24,7 +25,8 @@ export function EventCard() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [def, choose]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [def]);
 
   if (!open || !def) return null;
   return (

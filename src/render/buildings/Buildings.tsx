@@ -2,7 +2,8 @@ import { useFrame } from "@react-three/fiber";
 import { useEffect, useRef, type ReactNode } from "react";
 import * as THREE from "three";
 import { BUILDINGS, type BuildingKind } from "../../content/buildings";
-import { useStore } from "../../store";
+import { atoms, sim as game } from "../../app/game";
+import { useApp } from "../../app/hooks";
 import { rectCenter } from "../coords";
 import { ghostMaterials } from "../materials";
 import { ClusterModel } from "./ClusterModel";
@@ -65,9 +66,9 @@ export function Ghost({ ok, children }: { ok: boolean; children: ReactNode }) {
 }
 
 export function Buildings() {
-  const buildings = useStore((s) => s.snap.buildings);
-  const labName = useStore((s) => s.snap.labName);
-  const sim = useStore.getState().sim;
+  const buildings = useApp(atoms.buildings);
+  const labName = useApp(atoms.labName);
+  const sim = game.world;
 
   return (
     <>

@@ -41,9 +41,6 @@ importers:
       xstate:
         specifier: 6.0.0-alpha.62
         version: 6.0.0-alpha.62
-      zustand:
-        specifier: ^5.0.8
-        version: 5.0.15(@types/react@19.3.0)(react@19.3.0)(use-sync-external-store@1.7.0(react@19.3.0))
     devDependencies:
       '@effect/vitest':
         specifier: 4.0.0-rc.118

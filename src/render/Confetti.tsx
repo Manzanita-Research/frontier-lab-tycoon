@@ -1,7 +1,7 @@
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
-import { useStore } from "../store";
+import { sim as game } from "../app/game";
 import { rectCenter } from "./coords";
 
 const COUNT = 90;
@@ -18,13 +18,13 @@ interface Bit {
 export function Confetti() {
   const mesh = useRef<THREE.InstancedMesh>(null);
   const bits = useMemo<Bit[]>(() => Array.from({ length: COUNT }, () => ({ p: new THREE.Vector3(), v: new THREE.Vector3(), spin: 0 })), []);
-  const state = useRef({ models: useStore.getState().sim.models.length, age: LIFE + 1 });
+  const state = useRef({ models: game.world.models.length, age: LIFE + 1 });
   const dummy = useMemo(() => new THREE.Object3D(), []);
 
   useFrame((_, dt) => {
     const m = mesh.current;
     if (!m) return;
-    const sim = useStore.getState().sim;
+    const sim = game.world;
     const st = state.current;
     if (sim.models.length !== st.models) {
       st.models = sim.models.length;

@@ -1,7 +1,9 @@
 import type { ThreeEvent } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import { BUILDINGS } from "../content/buildings";
-import { useStore, type Tool } from "../store";
+import { atoms, send, sim, use } from "../app/game";
+import type { Tool } from "../app/hud";
+import { useApp } from "../app/hooks";
 import { BuildingModel, Ghost } from "./buildings/Buildings";
 import { HALF, rectCenter } from "./coords";
 import { computeGhost } from "./ghost";
@@ -23,10 +25,10 @@ function tilesBetween(a: { x: number; z: number }, b: { x: number; z: number }) 
 }
 
 export function Placement() {
-  const tool = useStore((s) => s.tool);
-  const hover = useStore((s) => s.hover);
-  const version = useStore((s) => s.snap.version);
-  const cash = useStore((s) => Math.floor(s.snap.cash / 10_000));
+  const tool = useApp(atoms.tool);
+  const hover = useApp(atoms.hover);
+  const version = useApp(atoms.version);
+  const cash = useApp(atoms.cashBucket);
   const painting = useRef<{ x: number; z: number } | null>(null);
 
   useEffect(() => {
@@ -49,10 +51,9 @@ export function Placement() {
 
   const onMove = (e: ThreeEvent<PointerEvent>) => {
     const at = fromEvent(e);
-    const st = useStore.getState();
-    st.setHover(at);
+    send({ type: "SET_HOVER", hover: at });
     if (!at || !tool || !painting.current) return;
-    for (const t of tilesBetween(painting.current, at)) st.use(tool, t.x, t.z, true);
+    for (const t of tilesBetween(painting.current, at)) use(tool, t.x, t.z, true);
     painting.current = at;
   };
   const onDown = (e: ThreeEvent<PointerEvent>) => {
@@ -60,17 +61,17 @@ export function Placement() {
     const at = fromEvent(e);
     if (!at) return;
     painting.current = at;
-    useStore.getState().setHover(at);
-    useStore.getState().use(tool, at.x, at.z, true);
+    send({ type: "SET_HOVER", hover: at });
+    use(tool, at.x, at.z, true);
   };
   const onClick = (e: ThreeEvent<MouseEvent>) => {
     if (!tool || tool === "path" || tool === "bulldoze") return;
     const at = fromEvent(e);
-    if (at) useStore.getState().use(tool, at.x, at.z);
+    if (at) use(tool, at.x, at.z);
   };
 
   const ghost = useMemo(
-    () => computeGhost(useStore.getState().sim, tool, hover),
+    () => computeGhost(sim.world, tool, hover),
     // Recompute when the world or the wallet changes, not just the pointer.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [tool, hover, version, cash],
@@ -78,7 +79,7 @@ export function Placement() {
 
   return (
     <>
-      <mesh rotation-x={-Math.PI / 2} position={[0, 0.001, 0]} onPointerMove={onMove} onPointerDown={onDown} onClick={onClick} onPointerLeave={() => useStore.getState().setHover(null)}>
+      <mesh rotation-x={-Math.PI / 2} position={[0, 0.001, 0]} onPointerMove={onMove} onPointerDown={onDown} onClick={onClick} onPointerLeave={() => send({ type: "SET_HOVER", hover: null })}>
         <planeGeometry args={[80, 80]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
