@@ -3,7 +3,7 @@ import { canPlace } from "../sim/commands";
 import { buildingAt } from "../sim/pathfind";
 import type { GameState, Rect } from "../sim/types";
 import type { BuildingKind } from "../sim/types";
-import type { Tool } from "../store";
+import type { Tool } from "../app/hud";
 
 export interface Ghost {
   rect: Rect;

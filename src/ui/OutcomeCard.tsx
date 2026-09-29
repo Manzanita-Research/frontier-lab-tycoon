@@ -1,13 +1,14 @@
 import { SCENARIO } from "../content/goals";
 import { fillTemplate, formatDate, formatMoney } from "../sim/format";
-import { useStore } from "../store";
+import { atoms, send } from "../app/game";
+import { useApp } from "../app/hooks";
 
 /** The win / loss card: a parody headline, the stats, and the way on. */
 export function OutcomeCard() {
-  const s = useStore((st) => st.snap);
-  const dismissed = useStore((st) => st.outcomeDismissed);
-  const keepPlaying = useStore((st) => st.keepPlaying);
-  const newLab = useStore((st) => st.newLab);
+  const s = useApp(atoms.snap);
+  const dismissed = useApp(atoms.outcomeDismissed);
+  const keepPlaying = () => send({ type: "KEEP_PLAYING" });
+  const newLab = () => send({ type: "NEW_LAB" });
   if (s.outcome === "playing" || dismissed) return null;
   const won = s.outcome === "won";
   const headline = fillTemplate(won ? SCENARIO.winHeadline : SCENARIO.loseHeadline, { lab: s.labName });

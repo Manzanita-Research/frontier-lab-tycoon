@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { createRng } from "../sim/rng";
 import { GRID_SIZE } from "../sim/state";
-import { useStore } from "../store";
+import { atoms, sim } from "../app/game";
+import { useApp } from "../app/hooks";
 import { HALF, worldX, worldZ } from "./coords";
 import { boxGeo, CREAM, std } from "./materials";
 
@@ -50,7 +51,7 @@ const PATH_MAX = GRID_SIZE * GRID_SIZE;
 
 /** One raised cream slab per path tile. */
 export function Paths() {
-  const version = useStore((s) => s.snap.version);
+  const version = useApp(atoms.version);
   const ref = useRef<THREE.InstancedMesh>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
   const tints = useMemo(() => [new THREE.Color("#f4e9c9"), new THREE.Color("#efe2bd")], []);
@@ -58,7 +59,7 @@ export function Paths() {
   useEffect(() => {
     const mesh = ref.current;
     if (!mesh) return;
-    const { grid } = useStore.getState().sim;
+    const { grid } = sim.world;
     let n = 0;
     for (let i = 0; i < grid.paths.length; i++) {
       if (!grid.paths[i]) continue;

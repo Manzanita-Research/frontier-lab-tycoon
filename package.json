@@ -28,8 +28,7 @@
     "react-dom": "^19.1.0",
     "scheduler": "0.27.0",
     "three": "^0.180.0",
-    "xstate": "6.0.0-alpha.62",
-    "zustand": "^5.0.8"
+    "xstate": "6.0.0-alpha.62"
   },
   "devDependencies": {
     "@effect/vitest": "4.0.0-rc.118",

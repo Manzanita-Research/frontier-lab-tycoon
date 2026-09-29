@@ -14,6 +14,7 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "noEmit": true,
+    "paths": { "effect/unstable/reactivity": ["./node_modules/effect/dist/reactivity/index.d.ts"] },
     "types": ["vite/client", "vitest/globals"]
   },
   "include": ["src", "vite.config.ts"]

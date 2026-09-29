@@ -2,7 +2,7 @@ import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { SIGNS, SIGN_COLORS } from "../content/protest";
-import { getAlpha, useStore } from "../store";
+import { sim as game } from "../app/game";
 import { HALF } from "./coords";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import { FONT_STACK, glowTexture } from "./materials";
@@ -92,8 +92,8 @@ export function Walkers() {
   const stickGeo = useMemo(() => new THREE.BoxGeometry(0.045, 1, 0.045), []);
 
   useFrame(({ clock, camera }) => {
-    const { sim } = useStore.getState();
-    const a = getAlpha();
+    const sim = game.world;
+    const a = game.alpha;
     const t = clock.elapsedTime;
     // Placards turn to face the camera, so they read after a Q/E quarter-turn too.
     camera.getWorldDirection(dir);
