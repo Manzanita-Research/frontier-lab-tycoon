@@ -204,6 +204,8 @@ export function HUD() {
       const st = useStore.getState();
       if (e.key === " ") {
         e.preventDefault();
+        // A focused button would also treat Space as a click.
+        (document.activeElement as HTMLElement | null)?.blur?.();
         st.togglePause();
       } else if (e.key === "Escape") st.setTool(null);
       else if (/^[1-6]$/.test(e.key)) st.setTool(TOOLS[Number(e.key) - 1]!);

@@ -26,8 +26,11 @@ export function dailyThoughts(state: GameState, rng: Rng, force = false) {
   if (state.thoughts.length >= 3) return;
   if (!force && !rng.chance(0.85)) return;
 
-  const busy = new Set(state.thoughts.map((t) => t.walkerId));
-  const candidates = state.walkers.filter((w) => w.mode !== "inside" && !busy.has(w.id));
+  // Keep bubbles readable: never start one on top of another.
+  const speaking = state.walkers.filter((w) => state.thoughts.some((t) => t.walkerId === w.id));
+  const clear = (w: (typeof state.walkers)[number]) =>
+    speaking.every((o) => o !== w && Math.hypot(o.x - w.x, o.z - w.z) > 3);
+  const candidates = state.walkers.filter((w) => w.mode !== "inside" && clear(w));
   if (candidates.length === 0) return;
   const walker = rng.pick(candidates);
 

@@ -65,13 +65,13 @@ export function labelTexture(
 }
 
 /** Soft radial blob, used for the agents' ground glow. */
-export function glowTexture(color = "#3ff0ff"): THREE.CanvasTexture {
+export function glowTexture(color = "#2ee6ff"): THREE.CanvasTexture {
   const canvas = document.createElement("canvas");
   canvas.width = canvas.height = 64;
   const g = canvas.getContext("2d")!;
   const grad = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-  grad.addColorStop(0, color);
-  grad.addColorStop(0.45, color + "88");
+  grad.addColorStop(0, color + "e0");
+  grad.addColorStop(0.5, color + "70");
   grad.addColorStop(1, color + "00");
   g.fillStyle = grad;
   g.fillRect(0, 0, 64, 64);

@@ -5,6 +5,7 @@ import * as THREE from "three";
 import { debugParams, useStore } from "../store";
 import { Buildings } from "./buildings/Buildings";
 import { HALF } from "./coords";
+import { Confetti } from "./Confetti";
 import { Decor, Ground, Paths } from "./Ground";
 import { OverlayProjector } from "./overlay";
 import { Placement } from "./Placement";
@@ -16,7 +17,7 @@ const PAN_LIMIT = 13;
 function initialZoom() {
   const w = window.innerWidth;
   const h = window.innerHeight;
-  return debugParams.zoom ?? (w < 700 ? w / 26 : Math.min(w / 36, h / 21));
+  return debugParams.zoom ?? (w < 700 ? w / 22 : Math.min(w / 36, h / 21));
 }
 
 /** Pan, zoom (clamped), and Q/E quarter-turns with a short ease. */
@@ -121,6 +122,7 @@ export function Scene() {
       <Paths />
       <Buildings />
       <Walkers />
+      <Confetti />
       <OverlayProjector />
       <Placement />
       <CameraRig baseZoom={zoom} />
