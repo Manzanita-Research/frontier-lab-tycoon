@@ -4,8 +4,7 @@ import { buildingAt, inBounds, rectContains } from "./pathfind";
 import type { Rng } from "./rng";
 import { TARGET_GATE, type GameState, type Point, type Walker } from "./types";
 import { advance, despawn, newWalker } from "./walkers";
-import { step } from "./machines/run";
-import { walkerMachine } from "./machines/walker";
+import { stepWalker } from "./machines/walker";
 
 const DISCOURSE_PER_CLUSTER = 0.5;
 const DISCOURSE_DECAY = 0.3;
@@ -86,7 +85,7 @@ function pickHome(state: GameState, rng: Rng): Point {
 function spawnProtester(state: GameState, rng: Rng, placed: boolean) {
   const g = state.gate;
   const w = newWalker(state, "protester", g.x + 0.3 + rng.next() * (g.w - 0.6), g.z + 0.35 + rng.next() * 0.6, rng);
-  w.machine = step(walkerMachine, w.machine, { type: "PROTEST_STARTED" }).stored;
+  w.machine = stepWalker(w.machine, { type: "PROTEST_STARTED" });
   const [hx, hz] = pickHome(state, rng);
   w.homeX = hx;
   w.homeZ = hz;
@@ -103,7 +102,7 @@ function spawnProtester(state: GameState, rng: Rng, placed: boolean) {
 function sendHome(state: GameState, w: Walker, rng: Rng) {
   const g = state.gate;
   const gx = g.x + 0.4 + rng.next() * (g.w - 0.8);
-  w.machine = step(walkerMachine, w.machine, { type: "SENT_HOME" }).stored;
+  w.machine = stepWalker(w.machine, { type: "SENT_HOME" });
   w.targetId = TARGET_GATE;
   w.route = [...planRoute(state, w.x, w.z, gx, g.z - 0.3), [gx, g.z + 0.5], [gx, g.z + 2.2]];
 }

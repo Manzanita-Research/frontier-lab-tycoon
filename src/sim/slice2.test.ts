@@ -407,6 +407,6 @@ describe("content sanity", () => {
 
   it("sizes the visitor cap for a busier campus", () => {
     const s = createInitialState(1);
-    expect(visitorCap(s)).toBe(Math.round(30 + s.hype * 1.2));
+    expect(visitorCap(s)).toBe(Math.round(20 + s.vibes.value * 0.08));
   });
 });

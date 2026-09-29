@@ -13,8 +13,12 @@ import { FountainModel } from "./FountainModel";
 import { GatewayModel } from "./GatewayModel";
 import { HallModel } from "./HallModel";
 import { KombuchaModel } from "./KombuchaModel";
+import { NapModel } from "./NapModel";
+import { SnackModel } from "./SnackModel";
+import { DemoModel } from "./DemoModel";
 
-export function BuildingModel({ kind }: { kind: BuildingKind }) {
+/** `id` lets a model that reacts to the world (the Demo Stage screen) find its building; the placement ghost has none. */
+export function BuildingModel({ kind, id }: { kind: BuildingKind; id?: number }) {
   const color = BUILDINGS[kind].color;
   switch (kind) {
     case "cluster":
@@ -25,6 +29,12 @@ export function BuildingModel({ kind }: { kind: BuildingKind }) {
       return <GatewayModel color={color} />;
     case "kombucha":
       return <KombuchaModel color={color} />;
+    case "nap":
+      return <NapModel color={color} />;
+    case "snack":
+      return <SnackModel color={color} />;
+    case "demo":
+      return <DemoModel color={color} id={id} />;
     case "fountain":
       return <FountainModel color={color} />;
   }
@@ -92,7 +102,7 @@ export function Buildings() {
         return (
           <group key={b.id} position={[cx, 0, cz]}>
             <Squash delay={b.placedTick === 0 ? 0.25 + i * 0.16 : 0} phase={b.id * 1.9} at={[cx, cz]}>
-              <BuildingModel kind={b.kind} />
+              <BuildingModel kind={b.kind} id={b.id} />
             </Squash>
           </group>
         );

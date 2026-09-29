@@ -1,4 +1,4 @@
-// News ticker copy. Templates: {lab} {model} {rival} {cash}. Parody only.
+// News ticker copy. Templates: {lab} {model} {rival} {cash}; people headlines also get {name} {their} {amount}. Parody only.
 import type { BuildingKind } from "./buildings";
 import type { Tone } from "../sim/types";
 
@@ -14,6 +14,11 @@ export type NewsTrigger =
   | "protest"
   | "won"
   | "lost"
+  | "researcherLeft"
+  | "applicant"
+  | "demoOk"
+  | "demoFail"
+  | "investorPays"
   | `built:${BuildingKind}`;
 
 export interface Headline {
@@ -70,6 +75,34 @@ export const HEADLINES: Headline[] = [
   h("built:gateway", "good", "API Gateway launches; the docs are three tutorials that disagree"),
   h("built:kombucha", "good", "Kombucha Bar opens: vibes up 12%, bloating up 800%"),
   h("built:kombucha", "good", "Researchers form a queue at the Kombucha Bar. It is the most organized thing they have done"),
+
+  h("built:nap", "good", "Nap Pods open at {lab}; productivity is up, according to an anonymous and sleeping source"),
+  h("built:nap", "good", "{lab} installs Nap Pods; researchers call it 'asynchronous collaboration'"),
+  h("built:snack", "good", "Snack Wall unveiled at {lab}: focus up 30%, pretzel supply down 100%"),
+  h("built:snack", "good", "{lab}'s Snack Wall is 40% snacks and 60% liability waivers"),
+  h("built:demo", "good", "Demo Stage opens at {lab}; the model will attend in spirit"),
+  h("built:demo", "good", "{lab} builds a Demo Stage; first rehearsal was 'a huge success', per the person who wrote the script"),
+
+  // The crowd.
+  h("researcherLeft", "bad", "Researcher leaves {lab} to 'spend more time with {their} GPUs'"),
+  h("researcherLeft", "bad", "{name} quits {lab} via a 4,000-word blog post titled 'What I Learned Here (Legally, Nothing)'"),
+  h("researcherLeft", "bad", "{name} walks out of {lab} with a box, a plant and a strongly worded resignation about the kombucha"),
+  h("researcherLeft", "bad", "{lab} loses {name} to burnout; exit interview describes the vibes as 'load-bearing'"),
+  h("researcherLeft", "bad", "{name} leaves {lab} to found a startup, working title: 'Like {lab}, but the snacks are real'"),
+  h("applicant", "good", "{name} joins {lab}; first question: 'is the kombucha free, or is it equity?'"),
+  h("applicant", "good", "{lab} hires {name}, who asked for a signing bonus in tokens"),
+  h("applicant", "good", "Vibes draw applicants: {name} drove past two rivals to reach {lab}'s gate"),
+  h("demoOk", "good", "Demo went flawlessly (it was pre-recorded)"),
+  h("demoOk", "good", "{lab}'s live demo dazzles the crowd; sources confirm it was a very good recording"),
+  h("demoOk", "good", "{model} demo goes off without a hitch. The hitch was in rehearsal"),
+  h("demoOk", "good", "Demo Stage packed; audience impressed by the lighting, mostly"),
+  h("demoFail", "bad", "{lab}'s live demo freezes; presenter blames 'the Wi-Fi', then 'the sun'"),
+  h("demoFail", "bad", "Demo agent politely declines to demo, citing 'vibes'"),
+  h("demoFail", "bad", "{model} asked to demo; drafts a strongly worded memo instead"),
+  h("demoFail", "bad", "Live demo crashes at 'Hello'; audience applauds the honesty"),
+  h("investorPays", "good", "{name}, a Very Serious Investor, visits {lab}, 'gets it', and wires {amount} before anyone explains"),
+  h("investorPays", "good", "Investor {name} tours {lab}, nods at a GPU, and leaves a {amount} term sheet"),
+  h("investorPays", "good", "{name} of a Fund With Lore commits {amount}; asks whether the demo was pre-recorded, decides not to know"),
 
   // Training.
   h("runStarted", "neutral", "{lab} begins training {model}; the loss function has been asked to try harder"),

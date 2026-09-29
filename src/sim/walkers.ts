@@ -1,6 +1,14 @@
 // Researchers, agents and visitors: who they are, where they go, what they say.
-import { BUILDINGS } from "../content/buildings";
+import { BUILDINGS, type BuildingDef } from "../content/buildings";
+import { agentIdentity, protesterIdentity, researcherIdentity, THEIR, visitorIdentity, type Identity } from "../content/names";
+import { NEEDS, NEEDS_BY_KIND, type NeedKey } from "../content/needs";
 import { CROWDING_PROTESTERS, MAX_AGENTS, WALK_SPEED } from "./constants";
+import { showFor } from "./demo";
+import { formatMoney } from "./format";
+import { addToast, pushNews } from "./news";
+import { applyServes, gainOf, MIN_GAIN, mostUrgent, tickNeeds, urgencyOf } from "./needs";
+import { addIncident, APPLICANT_VIBES, visitorCapFor, visitorChanceFor } from "./vibes";
+import { CONTENT } from "./machines/mood";
 import {
   doorPoint,
   entrances,
@@ -13,22 +21,45 @@ import {
   tileIndex,
 } from "./pathfind";
 import type { EventFromLogic } from "xstate";
-import { step } from "./machines/run";
-import { tourDone, walkerMachine, type WalkerPhase } from "./machines/walker";
+import { stepWalker, tourDone, walkerMachine, type WalkerPhase } from "./machines/walker";
 import type { Rng } from "./rng";
 import { TARGET_GATE, TARGET_WANDER, type Building, type GameState, type Point, type Walker, type WalkerKind, type WalkerMode } from "./types";
 
-const ENERGY_DRAIN = 0.0025;
 /** Chance that a walker leaving a building hangs around outside it for a bit instead of rushing off. */
 const LOITER_CHANCE = 0.55;
 /** How close (in tiles) a researcher passes a Fountain to get the refreshing splash. */
 const FOUNTAIN_REACH = 1.6;
 const FOUNTAIN_REFRESH = 0.1;
+/** A building this many tiles away is worth half as much as one next door. */
+const GAIN_DISTANCE = 6;
+/** How long a researcher waits in a queue, in ticks; visitors wait `15 + 45 * patience`. */
+const RESEARCHER_QUEUE_TICKS = 40;
+/** Queuing visitors who give up lose this much patience. */
+const GAVE_UP_PATIENCE = 0.15;
+/** An investor who leaves at least this impressed writes a cheque. */
+const INVESTOR_IMPRESSED = 0.75;
+
+function identityFor(state: GameState, kind: WalkerKind, rng: Rng): Identity {
+  switch (kind) {
+    case "researcher":
+      return researcherIdentity(rng);
+    case "agent":
+      return agentIdentity((state.flags.agentSeq = (state.flags.agentSeq ?? 0) + 1), rng);
+    case "visitor":
+      return visitorIdentity(rng, state.vibes.value);
+    default:
+      return protesterIdentity(rng);
+  }
+}
 
 export function newWalker(state: GameState, kind: WalkerKind, x: number, z: number, rng: Rng): Walker {
+  const who = identityFor(state, kind, rng);
   return {
     id: state.nextId++,
     kind,
+    name: who.name,
+    role: who.role,
+    pro: who.pro,
     x,
     z,
     px: x,
@@ -38,10 +69,19 @@ export function newWalker(state: GameState, kind: WalkerKind, x: number, z: numb
     targetId: TARGET_WANDER,
     timer: 0,
     energy: kind === "researcher" ? 0.35 + rng.next() * 0.65 : 1,
+    focus: kind === "researcher" ? 0.5 + rng.next() * 0.5 : 1,
+    fomo: kind === "researcher" ? rng.next() * 0.15 : 0,
+    patience: kind === "visitor" ? 0.75 + rng.next() * 0.25 : 1,
+    impressed: kind === "visitor" ? 0.15 + (state.vibes.value / 999) * 0.2 + rng.next() * 0.1 : 0,
+    drift: kind === "agent" ? rng.next() * 0.3 : 0,
+    need: "",
+    lost: "",
+    mood: CONTENT,
+    stats: { joined: state.day, sips: 0, naps: 0, snacks: 0, demos: 0, offers: 0, rival: 0 },
     // A visitor tours 2 or 3 buildings, counting the first one they head for.
     visits: kind === "visitor" ? rng.int(2, 3) : 0,
     step: rng.int(0, 1),
-    machine: { value: "wandering", context: {} },
+    machine: { value: "arriving", context: {} },
     fountain: 0,
     homeX: x,
     homeZ: z,
@@ -67,19 +107,74 @@ export function inPhase(w: Walker, phase: WalkerPhase) {
   w.machine = { value: phase, context: {} };
 }
 
-function chooseTarget(state: GameState, w: Walker, rng: Rng): Building | null {
-  const pool = reachableBuildings(state).filter((b) => b.id !== w.targetId);
-  if (pool.length === 0) return null;
-  if (w.kind === "researcher") {
-    if (w.energy < 0.3) {
-      const bar = pool.filter((b) => b.kind === "kombucha");
-      if (bar.length > 0) return rng.pick(bar);
+/** The building that best meets `need` for `w`: how much it gives (plus a little for the other needs), over how far away it is. */
+function bestFor(w: Walker, pool: Building[], need: NeedKey, rng: Rng, minGain = MIN_GAIN): Building | null {
+  let best: Building | null = null;
+  let bestScore = 0;
+  for (const b of pool) {
+    const def = BUILDINGS[b.kind];
+    const gain = gainOf(def, w, need);
+    if (gain <= 0 || gain < minGain) continue;
+    let bonus = 0;
+    for (const other of NEEDS_BY_KIND[w.kind]) if (other !== need) bonus += urgencyOf(w, other) * gainOf(def, w, other) * 0.3;
+    const dist = Math.hypot(b.x + b.w / 2 - w.x, b.z + b.d / 2 - w.z);
+    const score = ((gain + bonus) / (1 + dist / GAIN_DISTANCE)) * (0.9 + rng.next() * 0.2);
+    if (score > bestScore) {
+      best = b;
+      bestScore = score;
     }
-    const wanted = w.step % 2 === 0 ? "hall" : "cluster";
-    const workplaces = pool.filter((b) => b.kind === wanted);
-    if (workplaces.length > 0) return rng.pick(workplaces);
   }
-  return rng.pick(pool);
+  return best;
+}
+
+/**
+ * RCT-style destination choice. Researchers and visitors find their most urgent need and go to the building that
+ * meets it best for the distance; if nothing reachable helps, they say so ("I can't find X": `w.lost`) and carry on
+ * with the day job or the tour. Agents just wander between workplaces. Sets `w.need` and `w.lost`.
+ */
+export function chooseTarget(state: GameState, w: Walker, rng: Rng): Building | null {
+  w.need = "";
+  const reachable = reachableBuildings(state).filter((b) => BUILDINGS[b.kind].hosts.includes(w.kind));
+  if (reachable.length === 0) return null;
+  // Somewhere new, unless the one they just left is the only choice.
+  const away = reachable.filter((b) => b.id !== w.targetId);
+  const pool = away.length > 0 ? away : reachable;
+  if (w.kind === "agent") {
+    w.need = "work";
+    return rng.pick(pool);
+  }
+  if (w.kind === "visitor") {
+    if (urgencyOf(w, "patience") >= NEEDS.patience.urgentAt) {
+      const rest = bestFor(w, pool, "patience", rng);
+      if (rest) {
+        w.need = "patience";
+        return rest;
+      }
+    }
+    w.need = "tour";
+    // Anyone who came to be impressed and can't find a show says so.
+    w.lost = w.impressed < 0.5 && !reachable.some((b) => BUILDINGS[b.kind].show) ? "impressed" : "";
+    return bestFor(w, pool, "impressed", rng, 0) ?? rng.pick(pool);
+  }
+  // Researchers.
+  w.lost = "";
+  const worst = mostUrgent(w);
+  if (worst && worst.urgency >= NEEDS[worst.need].urgentAt) {
+    const helpers = reachable.filter((b) => gainOf(BUILDINGS[b.kind], w, worst.need) >= MIN_GAIN);
+    if (helpers.length === 0) w.lost = worst.need;
+    else {
+      const elsewhere = helpers.filter((b) => b.id !== w.targetId);
+      const best = bestFor(w, elsewhere.length > 0 ? elsewhere : helpers, worst.need, rng);
+      if (best) {
+        w.need = worst.need;
+        return best;
+      }
+    }
+  }
+  w.need = "work";
+  const wanted = w.step % 2 === 0 ? "hall" : "cluster";
+  const workplaces = pool.filter((b) => b.kind === wanted);
+  return rng.pick(workplaces.length > 0 ? workplaces : pool);
 }
 
 function startRoute(state: GameState, w: Walker, target: Building): boolean {
@@ -109,33 +204,68 @@ function wander(state: GameState, w: Walker, rng: Rng) {
 }
 
 /** The world work behind a PICK: route to a building, or wander when there is nowhere to go. */
-function pick(state: GameState, w: Walker, rng: Rng): "heading" | "wandering" {
+function pick(state: GameState, w: Walker, rng: Rng): "seeking" | "wandering" {
   const target = chooseTarget(state, w, rng);
-  if (target && startRoute(state, w, target)) return "heading";
+  if (target && startRoute(state, w, target)) return "seeking";
+  w.need = "";
   wander(state, w, rng);
   return "wandering";
 }
 
+const exiting = (phase: WalkerPhase) => phase === "leaving" || phase === "quitting";
+
 /** Send a walker's machine an event, then do the world work the state it entered implies (see machines/walker.ts). */
 function send(state: GameState, w: Walker, rng: Rng, event: EventFromLogic<typeof walkerMachine>) {
   const before = w.machine.value;
-  w.machine = step(walkerMachine, w.machine, event).stored;
-  switch (w.machine.value) {
+  w.machine = stepWalker(w.machine, event);
+  const phase = w.machine.value;
+  // `need` is what they're on their way for; once they are in, out or off, it no longer applies.
+  if (phase !== "seeking" && phase !== "arriving" && phase !== "queuing" && phase !== "choosing") w.need = "";
+  switch (phase) {
     case "choosing":
-      send(state, w, rng, { type: pick(state, w, rng) === "heading" ? "CHOSE_BUILDING" : "CHOSE_WANDER" });
+      send(state, w, rng, { type: pick(state, w, rng) === "seeking" ? "CHOSE_BUILDING" : "CHOSE_WANDER" });
       break;
     case "loitering":
       if (before === "inside") startLoiter(w, rng);
       break;
     case "leaving":
-      if (before !== "leaving") startLeave(state, w);
+      if (before !== "leaving") {
+        startLeave(state, w);
+        if (w.kind === "visitor") departVisitor(state, w, rng);
+      }
+      break;
+    case "quitting":
+      if (before !== "quitting") startLeave(state, w);
       break;
   }
 }
 
-/** Time to pick the next stop. A visitor whose tour is done leaves; a visitor who goes on uses up one visit. */
+/** A researcher has had enough: box, gate, headline (the headline waits until they reach the gate). */
+export function resign(state: GameState, w: Walker, rng: Rng) {
+  send(state, w, rng, { type: "QUIT" });
+}
+
+/** An investor who liked what they saw leaves a cheque on the way out; everyone else just goes. */
+function departVisitor(state: GameState, w: Walker, rng: Rng) {
+  if (w.role !== "Venture Capitalist" || w.impressed < INVESTOR_IMPRESSED) return;
+  const amount = Math.round((20 + state.capability * 2) / 5) * 5_000;
+  state.cash += amount;
+  const g = state.gate;
+  state.pops.push({ id: state.nextId++, x: g.x + g.w / 2, z: g.z, amount, tick: state.tick });
+  pushNews(state, rng, "investorPays", { name: w.name, amount: formatMoney(amount) });
+  addToast(state, `${w.name} loved it: ${formatMoney(amount)} in the bank`, "good");
+}
+
+/** They reached the gate with the box: the headline, the toast, the dent in the Vibes. */
+function walkOut(state: GameState, w: Walker, rng: Rng) {
+  pushNews(state, rng, "researcherLeft", { name: w.name, their: THEIR[w.pro] });
+  addToast(state, `${w.name} handed in the box and left.`, "bad");
+  addIncident(state, 0.15);
+}
+
+/** Time to pick the next stop. A visitor whose tour is done (or whose patience is) leaves; one who goes on uses up a visit. */
 function pickNext(state: GameState, w: Walker, rng: Rng) {
-  if (tourDone(w.kind, w.visits)) return send(state, w, rng, { type: "TOUR_DONE" });
+  if (tourDone(w.kind, w.visits, w.patience)) return send(state, w, rng, { type: "TOUR_DONE" });
   if (w.kind === "visitor") w.visits--;
   send(state, w, rng, { type: "NEXT" });
 }
@@ -177,18 +307,54 @@ function passFountains(w: Walker, fountains: Building[]) {
   w.fountain = 0;
 }
 
+/** How many researchers and visitors are inside each building right now (agents walk through walls and don't count). */
+type Occupancy = Map<number, number>;
+const occupancy: Occupancy = new Map();
+
+function fillOccupancy(state: GameState) {
+  occupancy.clear();
+  for (const w of state.walkers) {
+    if (w.kind !== "agent" && w.machine.value === "inside") occupancy.set(w.targetId, (occupancy.get(w.targetId) ?? 0) + 1);
+  }
+}
+
+const hasRoom = (b: Building) => (occupancy.get(b.id) ?? 0) < BUILDINGS[b.kind].capacity;
+
+/** Let a walker into a building: the stay starts, the needs refill, the personnel file grows. */
+function enter(state: GameState, w: Walker, rng: Rng, b: Building, event: "ARRIVED" | "ADMITTED") {
+  const def: BuildingDef = BUILDINGS[b.kind];
+  w.timer = rng.int(def.stay[0], def.stay[1]);
+  w.step++;
+  if (w.kind !== "agent") occupancy.set(b.id, (occupancy.get(b.id) ?? 0) + 1);
+  send(state, w, rng, { type: event });
+  // A show works or flops for the whole audience; agents only watch.
+  applyServes(w, def, def.show && w.kind === "visitor" ? showFor(state, rng, b) : 1);
+  if (def.tally && w.kind !== "agent") w.stats[def.tally]++;
+}
+
 function arrive(state: GameState, w: Walker, rng: Rng) {
-  if (w.machine.value === "leaving") return; // handled by the caller: the visitor despawns
+  if (exiting(w.machine.value)) return; // handled by the caller: they leave the World
   if (w.targetId === TARGET_WANDER) {
     if (w.timer <= 0) w.timer = rng.int(6, 16);
     return;
   }
   const b = byId(state, w.targetId);
   if (!b) return pickNext(state, w, rng);
-  w.timer = rng.int(15, 45);
-  w.step++;
-  send(state, w, rng, { type: "ARRIVED" });
-  if (b.kind === "kombucha") w.energy = 1;
+  if (w.kind !== "agent" && !hasRoom(b)) {
+    w.timer = w.kind === "visitor" ? Math.round(15 + 45 * w.patience) : RESEARCHER_QUEUE_TICKS;
+    return send(state, w, rng, { type: "QUEUED" });
+  }
+  enter(state, w, rng, b, "ARRIVED");
+}
+
+/** At the front of a queue: get in if there's room, give up if patience has run out. */
+function tickQueue(state: GameState, w: Walker, rng: Rng) {
+  const b = byId(state, w.targetId);
+  if (!b) return pickNext(state, w, rng);
+  if (hasRoom(b)) return enter(state, w, rng, b, "ADMITTED");
+  if (--w.timer > 0) return;
+  if (w.kind === "visitor") w.patience = Math.max(0, w.patience - GAVE_UP_PATIENCE);
+  send(state, w, rng, { type: "GAVE_UP" });
 }
 
 /** Walkers caught out by a change to paths or buildings find a new way. */
@@ -211,7 +377,7 @@ function repairWalkers(state: GameState, rng: Rng) {
     if (!routeBroken && !targetGone) continue;
     w.px = w.x;
     w.pz = w.z;
-    if (w.machine.value === "leaving") startLeave(state, w);
+    if (exiting(w.machine.value)) startLeave(state, w);
     else pickNext(state, w, rng);
   }
 }
@@ -237,31 +403,33 @@ export function advance(w: Walker) {
   }
 }
 
-function spawnVisitor(state: GameState, rng: Rng) {
-  const targets = reachableBuildings(state);
+/** A newcomer through the gate: a visitor touring, or an applicant heading for a Training Hall. Null if there is nowhere to go. */
+function spawnFromGate(state: GameState, kind: "visitor" | "researcher", rng: Rng): Walker | null {
+  const targets = reachableBuildings(state).filter((b) => (kind === "researcher" ? b.kind === "hall" : BUILDINGS[b.kind].hosts.includes(kind)));
   const linked = getReach(state).tiles;
   const mouth = entrances(state, state.gate).filter((e) => linked[tileIndex(state, e.x, e.z)]);
-  if (targets.length === 0 || mouth.length === 0) return;
+  if (targets.length === 0 || mouth.length === 0) return null;
   const g = state.gate;
-  const w = newWalker(state, "visitor", g.x + g.w / 2, g.z + 0.6, rng);
-  const target = rng.pick(targets);
+  const w = newWalker(state, kind, g.x + g.w / 2, g.z + 0.6, rng);
+  const target = kind === "visitor" ? (chooseTarget(state, w, rng) ?? rng.pick(targets)) : rng.pick(targets);
   const e = rng.pick(mouth);
   const route = routeToRect(state, e.x + 0.5, e.z + 0.5, target);
-  if (!route) return;
+  if (!route) return null;
   w.route = route;
   w.targetId = target.id;
-  w.visits--;
-  inPhase(w, "heading");
+  w.need = kind === "visitor" ? "tour" : "work";
+  if (kind === "visitor") w.visits--;
   state.walkers.push(w);
+  return w;
 }
 
 export function visitorCap(state: GameState): number {
-  return Math.round(30 + state.hype * 1.2);
+  return visitorCapFor(state.vibes.value);
 }
 
 /** Walkers that reached the gate on their way out: the machine finishes, then they leave the World. */
 export function despawn(state: GameState, ids: ReadonlySet<number>) {
-  for (const w of state.walkers) if (ids.has(w.id)) w.machine = step(walkerMachine, w.machine, { type: "EXITED" }).stored;
+  for (const w of state.walkers) if (ids.has(w.id)) w.machine = stepWalker(w.machine, { type: "EXITED" });
   state.walkers = state.walkers.filter((w) => !ids.has(w.id));
 }
 
@@ -270,6 +438,7 @@ export function updateWalkers(state: GameState, rng: Rng) {
     state.flags.walkerVersion = state.version;
     repairWalkers(state, rng);
   }
+  fillOccupancy(state);
   const fountains = state.buildings.filter((b) => b.kind === "fountain");
   let gone: Set<number> | null = null;
   let visitors = 0;
@@ -282,17 +451,19 @@ export function updateWalkers(state: GameState, rng: Rng) {
     if (w.kind === "visitor") visitors++;
     w.px = w.x;
     w.pz = w.z;
-    if (w.kind === "researcher") {
-      w.energy = Math.max(0, w.energy - ENERGY_DRAIN);
-      if (fountains.length > 0 && w.machine.value !== "inside") passFountains(w, fountains);
-    }
+    tickNeeds(w, state.capability);
+    if (w.kind === "researcher" && fountains.length > 0 && w.machine.value !== "inside") passFountains(w, fountains);
     const phase = w.machine.value;
     if (phase === "inside") {
       if (--w.timer <= 0) finishStay(state, w, rng);
       continue;
     }
+    if (phase === "queuing") {
+      tickQueue(state, w, rng);
+      continue;
+    }
     if (w.route.length === 0) {
-      if (phase === "leaving") (gone ??= new Set()).add(w.id);
+      if (exiting(phase)) (gone ??= new Set()).add(w.id);
       else if (w.targetId === TARGET_WANDER) {
         if (--w.timer <= 0) pickNext(state, w, rng);
         else if (phase === "loitering" && rng.chance(0.06)) loiterStep(state, w, rng);
@@ -301,15 +472,18 @@ export function updateWalkers(state: GameState, rng: Rng) {
     }
     advance(w);
     if (w.route.length === 0) {
-      if (phase === "leaving") (gone ??= new Set()).add(w.id);
+      if (exiting(phase)) (gone ??= new Set()).add(w.id);
       else arrive(state, w, rng);
     }
   }
-  if (gone) despawn(state, gone);
+  if (gone) {
+    for (const w of state.walkers) if (gone.has(w.id) && w.machine.value === "quitting") walkOut(state, w, rng);
+    despawn(state, gone);
+  }
 
-  // Twice the footfall of the first playable; a crowd at the gate halves it.
+  // A crowd at the gate halves the footfall; Vibes set how much there is to halve.
   const crowdFactor = protesters >= CROWDING_PROTESTERS ? 0.5 : 1;
-  if (visitors < visitorCap(state) && rng.chance((0.01 + state.hype * 0.0024) * crowdFactor)) spawnVisitor(state, rng);
+  if (visitors < visitorCap(state) && rng.chance(visitorChanceFor(state.vibes.value) * crowdFactor)) spawnFromGate(state, "visitor", rng);
 }
 
 export function researcherTarget(state: GameState): number {
@@ -320,14 +494,14 @@ export function agentTarget(state: GameState): number {
   return Math.min(MAX_AGENTS, 6 + Math.floor(state.capability / 2) + state.agentBonus);
 }
 
-/** Agents pour out of a Compute Cluster, researchers out of a Training Hall (or wander in from the gate if there isn't one). */
-function spawnFrom(state: GameState, kind: "agent" | "researcher", rng: Rng) {
-  const homes = reachableBuildings(state).filter((b) => b.kind === (kind === "agent" ? "cluster" : "hall"));
+/** Agents pour out of a Compute Cluster (or wander in from the gate if there isn't one). */
+function spawnAgent(state: GameState, rng: Rng) {
+  const homes = reachableBuildings(state).filter((b) => b.kind === "cluster");
   const home = homes.length > 0 ? rng.pick(homes) : undefined;
   const door = home ? doorPoint(state, home) : null;
   const g = state.gate;
   const [x, z] = door ?? [g.x + g.w / 2, g.z + 0.6];
-  const w = newWalker(state, kind, x, z, rng);
+  const w = newWalker(state, "agent", x, z, rng);
   if (home && door) {
     inPhase(w, "inside");
     w.targetId = home.id;
@@ -339,16 +513,26 @@ function spawnFrom(state: GameState, kind: "agent" | "researcher", rng: Rng) {
   state.walkers.push(w);
 }
 
-/** Once per day: grow the researcher and agent populations toward their targets, a few at a time. */
+/** Good Vibes and room in a Training Hall bring applicants to the gate, a few a day at most. */
+function admitApplicants(state: GameState, rng: Rng, researchers: number) {
+  const vibes = state.vibes.value;
+  const room = researcherTarget(state) - researchers;
+  if (vibes <= APPLICANT_VIBES || room <= 0) return;
+  const batch = Math.min(room, 1 + Math.floor((vibes - APPLICANT_VIBES) / 300));
+  for (let i = 0; i < batch; i++) {
+    if (!rng.chance(0.5 + vibes / 2000)) continue;
+    const w = spawnFromGate(state, "researcher", rng);
+    if (w && rng.chance(0.35)) pushNews(state, rng, "applicant", { name: w.name });
+  }
+}
+
+/** Once per day: grow the agent and researcher populations toward their targets, a few at a time. */
 export function dailyWalkers(state: GameState, rng: Rng) {
   const count = (kind: WalkerKind) => state.walkers.filter((w) => w.kind === kind).length;
-  const grow = (kind: "agent" | "researcher", target: number) => {
-    const deficit = target - count(kind);
-    const batch = Math.min(deficit, Math.max(1, Math.ceil(deficit / 4)));
-    for (let i = 0; i < batch; i++) spawnFrom(state, kind, rng);
-  };
-  grow("researcher", researcherTarget(state));
-  grow("agent", agentTarget(state));
+  const deficit = agentTarget(state) - count("agent");
+  const batch = Math.min(deficit, Math.max(1, Math.ceil(deficit / 4)));
+  for (let i = 0; i < batch; i++) spawnAgent(state, rng);
+  admitApplicants(state, rng, count("researcher"));
 }
 
 /** Population for a fresh game or a stress test: place walkers already mid-stride on the paths. */

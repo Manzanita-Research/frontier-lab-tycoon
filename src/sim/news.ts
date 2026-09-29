@@ -8,6 +8,10 @@ import type { GameState, Tone } from "./types";
 export interface NewsVars {
   model?: string;
   rival?: string;
+  /** A person in the story, and how the headline refers to them: "her", "his" or "their". */
+  name?: string;
+  their?: string;
+  amount?: string;
 }
 
 export function addNews(state: GameState, text: string, tone: Tone) {
@@ -25,6 +29,9 @@ export function templateVars(state: GameState, vars: NewsVars, rng: Rng): Record
     model: vars.model ?? state.models[state.models.length - 1] ?? state.training.context.name,
     rival: vars.rival ?? rng.pick(RIVALS),
     cash: formatMoney(state.cash),
+    name: vars.name ?? "Someone",
+    their: vars.their ?? "their",
+    amount: vars.amount ?? "$0",
   };
 }
 
@@ -50,7 +57,11 @@ export function dailyNews(state: GameState, rng: Rng) {
     f.nextFiller = state.day + rng.int(5, 8);
   }
   if (state.day >= (f.nextRival ?? 0)) {
-    pushNews(state, rng, "rival");
+    // Remembered for the crowd: researchers get a bout of fomo, and some turn down a call from this lab.
+    const rival = rng.pick(RIVALS);
+    f.rivalIndex = RIVALS.indexOf(rival);
+    f.rivalShippedDay = state.day;
+    pushNews(state, rng, "rival", { rival });
     f.nextRival = state.day + rng.int(12, 20);
   }
   if (state.cash < 1_000_000 && state.day >= (f.nextLowCash ?? 0)) {

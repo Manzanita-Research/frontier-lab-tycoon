@@ -7,6 +7,7 @@ import { EVENTS, EVENT_COOLDOWN_DAYS } from "../../content/events";
 import { arcMachine } from "./arc";
 import { economyMachine } from "./economy";
 import { goalsMachine } from "./goals";
+import { moodMachine } from "./mood";
 import { trainingMachine } from "./training";
 import { walkerMachine } from "./walker";
 
@@ -61,11 +62,20 @@ describe("machine graphs", () => {
   });
 
   it("a walker can reach every phase from a fresh spawn, and only `gone` is final", () => {
-    const events = ["ARRIVED", "LINGER", "NEXT", "TOUR_DONE", "CHOSE_BUILDING", "CHOSE_WANDER", "PROTEST_STARTED", "SENT_HOME", "EXITED"].map((type) => ({ type }));
+    const events = ["ARRIVED", "QUEUED", "ADMITTED", "GAVE_UP", "QUIT", "LINGER", "NEXT", "TOUR_DONE", "CHOSE_BUILDING", "CHOSE_WANDER", "PROTEST_STARTED", "SENT_HOME", "EXITED"].map((type) => ({ type }));
     const r = explore(walkerMachine, { events });
     expect(r.unreachable).toEqual([]);
     expect(r.deadEnds).toEqual([]);
     expect(Object.entries(walkerMachine.states).filter(([, s]) => (s as { type?: string }).type === "final").map(([k]) => k)).toEqual(["gone"]);
+  });
+
+  it("a mood can reach every state, and only `resigned` is final", () => {
+    const events = ["LIFT", "SLUMP", "CRASH", "DAY"].map((type) => ({ type }));
+    // The five-day countdown lives in the context, so tell the explorer the counter is part of the state.
+    const r = explore(moodMachine, { input: {}, events, limit: 200, serializeState: (st: { value: unknown; context: unknown }) => JSON.stringify([st.value, st.context]) });
+    expect(r.unreachable).toEqual([]);
+    expect(r.deadEnds).toEqual([]);
+    expect(Object.entries(moodMachine.states).filter(([, s]) => (s as { type?: string }).type === "final").map(([k]) => k)).toEqual(["resigned"]);
   });
 
   it("training reaches idle, training and releasing", () => {

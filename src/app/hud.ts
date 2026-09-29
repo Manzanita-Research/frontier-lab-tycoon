@@ -8,8 +8,8 @@ import { outcomeOf } from "../sim/goals";
 import type { Building, GameState, GoalProgress, OpenEvent, Outcome, Pop, Thought, Tone } from "../sim/types";
 
 export type Tool = "path" | PlaceableKind | "bulldoze";
-/** Hotkeys 1-6 pick these in order. */
-export const TOOLS: Tool[] = ["path", "cluster", "hall", "gateway", "kombucha", "bulldoze"];
+/** Hotkeys 1-9 pick these in order. */
+export const TOOLS: Tool[] = ["path", "cluster", "hall", "gateway", "kombucha", "nap", "snack", "demo", "bulldoze"];
 export const SPEEDS = [0, 1, 3, 10] as const;
 export type Speed = (typeof SPEEDS)[number];
 
