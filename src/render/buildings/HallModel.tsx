@@ -1,10 +1,12 @@
 import { useFrame } from "@react-three/fiber";
-import { useEffect, useMemo, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { sim as game } from "../../app/game";
 import { Flag } from "../fx/Flag";
 import { fx } from "../fx/state";
 import { CREAM, CREAM_DARK, boxGeo, std } from "../materials";
+import { GenModel } from "../gen/GenModel";
+import { genPath } from "../gen/variants";
 import { Cyl, Glass } from "./Parts";
 
 const SEGMENTS = 48;
@@ -14,7 +16,7 @@ const RADIUS = 1.32;
  * A dome on a drum. The glowing ring around it fills with the current training
  * run's progress, the leading segment pulses, and a release makes the whole thing flash.
  */
-export function HallModel({ color }: { color: string }) {
+export function HallModel({ color, bare = false }: { color: string; bare?: boolean }) {
   const ring = useRef<THREE.InstancedMesh>(null);
   const beacon = useRef<THREE.MeshBasicMaterial>(null);
   const seen = useRef({ lit: -1, models: game.world.models.length, flash: 0 });
@@ -81,9 +83,11 @@ export function HallModel({ color }: { color: string }) {
     if (beacon.current) beacon.current.color.set(pulsing ? "#ffffff" : color).multiplyScalar(0.8 + 0.2 * Math.sin(t * 3));
   });
 
-  return (
-    <group>
-      <mesh geometry={boxGeo} material={std(CREAM_DARK)} position={[0, 0.08, 0]} scale={[2.86, 0.16, 2.86]} receiveShadow castShadow />
+  // FLT-13: a generated drum and dome can stand in for the procedural ones. The plinth, the flag and the progress ring
+  // stay procedural, and `bare` (the lab page) renders the swappable body alone.
+  const url = genPath("hall");
+  const body = (
+    <>
       <Cyl p={[0, 0.16, 0]} r={1.05} h={0.62} c={CREAM} />
       <mesh position={[0, 0.5, 0]} rotation-x={Math.PI / 2} material={std(color)} castShadow>
         <torusGeometry args={[1.05, 0.06, 6, 32]} />
@@ -95,15 +99,30 @@ export function HallModel({ color }: { color: string }) {
         const a = ((i + 0.5) / 10) * Math.PI * 2;
         return <Glass key={i} p={[Math.cos(a) * 1.06, 0.36, Math.sin(a) * 1.06]} s={[0.05, 0.2, 0.17]} rotY={-a} />;
       })}
-      <Flag position={[1.22, 0.16, 1.22]} color={color} pole={0.95} phase={1.3} rotationY={-0.6} />
       <Cyl p={[0, 1.78, 0]} r={0.03} h={0.42} c="#8a8fa0" />
       <mesh position={[0, 2.26, 0]} scale={0.1}>
         <sphereGeometry args={[1, 12, 8]} />
         <meshBasicMaterial ref={beacon} color={color} toneMapped={false} />
       </mesh>
-      <instancedMesh ref={ring} args={[boxGeo, undefined, SEGMENTS]} frustumCulled={false}>
-        <meshBasicMaterial toneMapped={false} />
-      </instancedMesh>
+    </>
+  );
+
+  return (
+    <group>
+      {!bare && <mesh geometry={boxGeo} material={std(CREAM_DARK)} position={[0, 0.08, 0]} scale={[2.86, 0.16, 2.86]} receiveShadow castShadow />}
+      {url ? (
+        <Suspense fallback={body}>
+          <GenModel url={url} position={[0, 0.16, 0]} />
+        </Suspense>
+      ) : (
+        body
+      )}
+      {!bare && <Flag position={[1.22, 0.16, 1.22]} color={color} pole={0.95} phase={1.3} rotationY={-0.6} />}
+      {!bare && (
+        <instancedMesh ref={ring} args={[boxGeo, undefined, SEGMENTS]} frustumCulled={false}>
+          <meshBasicMaterial toneMapped={false} />
+        </instancedMesh>
+      )}
     </group>
   );
 }

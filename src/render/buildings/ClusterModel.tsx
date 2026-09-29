@@ -1,9 +1,11 @@
 import { useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { Suspense, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { sim as game } from "../../app/game";
 import { fanSpeed, currentLoad } from "../fx/utilisation";
 import { CREAM, CREAM_DARK, boxGeo, glow } from "../materials";
+import { GenModel } from "../gen/GenModel";
+import { genPath } from "../gen/variants";
 import { B, Cyl } from "./Parts";
 
 const TOWERS = [
@@ -33,7 +35,8 @@ export function ClusterModel({ color }: { color: string }) {
     leds.forEach((m, i) => m.color.copy(Math.sin(t * (2.1 + i * 1.7) * busy + i * 2.3) > 0.1 ? LED_ON[i]! : LED_OFF));
   });
 
-  return (
+  const url = genPath("cluster");
+  const procedural = (
     <group>
       <B p={[0, 0, 0]} s={[1.86, 0.12, 1.86]} c={CREAM_DARK} />
       {TOWERS.map((t, i) => (
@@ -70,5 +73,14 @@ export function ClusterModel({ color }: { color: string }) {
         </group>
       </group>
     </group>
+  );
+
+  // FLT-13: a generated cluster replaces the whole thing. It is one static mesh, so the fan and the LEDs are gone.
+  return url ? (
+    <Suspense fallback={procedural}>
+      <GenModel url={url} />
+    </Suspense>
+  ) : (
+    procedural
   );
 }

@@ -3,6 +3,7 @@ import { Canvas } from "@react-three/fiber";
 import { Suspense, lazy, useRef } from "react";
 import { debugParams } from "../app/game";
 import { Buildings } from "./buildings/Buildings";
+import { Showcase } from "./buildings/Showcase";
 import { CAMERA_OFFSET, CameraRig } from "./fx/CameraRig";
 import { FxDirector } from "./fx/FxDirector";
 import { Lighting } from "./fx/Lighting";
@@ -50,6 +51,7 @@ export function Scene() {
       <Paths />
       <Lamps />
       <Buildings />
+      <Showcase />
       <Walkers />
       <ParticleLayer />
       <OverlayProjector />

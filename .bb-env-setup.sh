@@ -25,6 +25,11 @@ pnpm exec playwright install chromium-headless-shell >/dev/null 2>&1 \
   && echo "flt: chromium-headless-shell ready" \
   || echo "flt: chromium install skipped (run: pnpm exec playwright install chromium-headless-shell)"
 
+# Headless Blender for the FLT-13 generated-model experiment. Opt-in only (about 360 MB); never in the shared image.
+if [[ "${FLT_BLENDER:-0}" == "1" ]]; then
+  bash scripts/fal3d/install-blender.sh >/dev/null && echo "flt: blender ready (~/.cache/blender/blender-headless)" || echo "flt: blender install failed"
+fi
+
 # Git identity for commits made on cloud machines, only if none is set.
 git config user.name >/dev/null 2>&1 || git config user.name "FLT builder"
 git config user.email >/dev/null 2>&1 || git config user.email "591643+jem-computer@users.noreply.github.com"

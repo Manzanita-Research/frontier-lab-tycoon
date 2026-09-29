@@ -14,12 +14,17 @@ export interface DebugParams {
   hour: number | null;
   /** Open in photo mode. */
   photo: boolean;
+  /** FLT-13: `gen` swaps every generated model in; `hall,cluster,float` picks some; `hall:tripo-A` names a candidate. */
+  models: string | null;
+  /** FLT-13: put the Water Discourse parade float on the lawn at this tile (it is render-only, not a building). */
+  float: [number, number] | null;
 }
 
 export function readDebugParams(search = typeof window === "undefined" ? "" : window.location.search): DebugParams {
   const q = new URLSearchParams(search);
   const num = (k: string) => (q.has(k) && Number.isFinite(Number(q.get(k))) ? Number(q.get(k)) : null);
   const focus = q.get("focus")?.split(",").map(Number);
+  const floatAt = q.get("float")?.split(",").map(Number);
   return {
     seed: num("seed") ?? 1,
     warp: num("warp") ?? 0,
@@ -30,5 +35,7 @@ export function readDebugParams(search = typeof window === "undefined" ? "" : wi
     discourse: num("discourse") ?? 0,
     hour: num("hour"),
     photo: q.has("photo"),
+    models: q.get("models"),
+    float: floatAt && floatAt.length === 2 && floatAt.every(Number.isFinite) ? [floatAt[0]!, floatAt[1]!] : null,
   };
 }
