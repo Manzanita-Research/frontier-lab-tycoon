@@ -62,7 +62,7 @@ describe("crowd density", () => {
     let loitering = 0;
     for (let i = 0; i < 600; i++) {
       tick(s);
-      loitering = Math.max(loitering, s.walkers.filter((w) => w.loiter && w.mode !== "inside").length);
+      loitering = Math.max(loitering, s.walkers.filter((w) => w.machine.value === "loitering").length);
     }
     expect(loitering).toBeGreaterThan(3);
   });
@@ -184,7 +184,7 @@ describe("water discourse and protesters", () => {
     expect(protesterCount(s)).toBe(40);
     s.waterDiscourse = 12;
     dailyDiscourse(s, createRng(1));
-    expect(s.walkers.filter((w) => w.kind === "protester" && w.mode !== "leave")).toHaveLength(3);
+    expect(s.walkers.filter((w) => w.kind === "protester" && w.machine.value !== "leaving")).toHaveLength(3);
     run(s, 2); // the extras walk out through the gate and despawn
     expect(protesterCount(s)).toBe(3);
   });
@@ -197,7 +197,7 @@ describe("water discourse and protesters", () => {
       tick(s);
       for (const w of s.walkers) {
         if (w.kind !== "protester") continue;
-        expect(w.mode).not.toBe("inside");
+        expect(w.machine.value).not.toBe("inside");
         expect(s.buildings.some((b) => w.x >= b.x && w.x < b.x + b.w && w.z >= b.z && w.z < b.z + b.d)).toBe(false);
         if (i > 200) {
           expect(w.z).toBeGreaterThan(s.gate.z - 6.5);
@@ -360,7 +360,8 @@ describe("fountain", () => {
     const f = s.buildings.find((b) => b.kind === "fountain")!;
     const r = s.walkers.find((w) => w.kind === "researcher")!;
     s.walkers = [r];
-    Object.assign(r, { x: f.x + 0.5, z: f.z - 0.4, px: f.x + 0.5, pz: f.z - 0.4, energy: 0.5, mode: "walk", route: [], targetId: -1, timer: 999, fountain: 0 });
+    Object.assign(r, { x: f.x + 0.5, z: f.z - 0.4, px: f.x + 0.5, pz: f.z - 0.4, energy: 0.5, route: [], targetId: -1, timer: 999, fountain: 0 });
+    r.machine = { value: "wandering", context: {} };
     tick(s);
     expect(r.energy).toBeCloseTo(0.5 - 0.0025 + 0.1);
     tick(s);
@@ -372,7 +373,7 @@ describe("fountain", () => {
     applyCommands(s, [choose(s, 1)], createRng(1));
     const f = s.buildings.find((b) => b.kind === "fountain")!;
     run(s, 15);
-    expect(s.walkers.filter((w) => w.mode === "inside" && w.targetId === f.id)).toHaveLength(0);
+    expect(s.walkers.filter((w) => w.machine.value === "inside" && w.targetId === f.id)).toHaveLength(0);
   });
 });
 

@@ -4,6 +4,7 @@ import type { ArcStored } from "./machines/arc";
 import type { EconomyStored } from "./machines/economy";
 import type { GoalsStored } from "./machines/goals";
 import type { TrainingStored } from "./machines/training";
+import type { WalkerStored } from "./machines/walker";
 
 export type { BuildingKind };
 export type WalkerKind = "researcher" | "agent" | "visitor" | "protester";
@@ -44,15 +45,14 @@ export interface Walker {
   route: Point[];
   /** Building id, TARGET_GATE, or TARGET_WANDER. While 'inside', the building they're in. */
   targetId: number;
-  mode: WalkerMode;
   timer: number;
   energy: number;
   /** Visitors: buildings left to tour before heading for the gate. */
   visits: number;
   /** Researchers: counts visits so they alternate between Hall and Cluster. */
   step: number;
-  /** Standing around near the last building instead of heading somewhere. */
-  loiter: boolean;
+  /** The walker machine: heading, inside, loitering, wandering, leaving or picketing. */
+  machine: WalkerStored;
   /** Researchers: id of the Fountain they are currently walking past (0 for none), so it refreshes them once per pass. */
   fountain: number;
   /** Protesters: the spot they picket from. */

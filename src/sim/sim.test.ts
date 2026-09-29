@@ -163,7 +163,7 @@ describe("walkers", () => {
     for (let i = 0; i < 3000; i++) {
       tick(s);
       for (const w of s.walkers) {
-        if (w.mode === "inside" || w.kind === "protester") continue;
+        if (w.machine.value === "inside" || w.kind === "protester") continue;
         const tx = Math.floor(w.x);
         const tz = Math.floor(w.z);
         const onGate = tz === s.gate.z && tx >= s.gate.x && tx < s.gate.x + s.gate.w;

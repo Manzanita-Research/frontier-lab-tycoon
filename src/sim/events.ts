@@ -8,6 +8,7 @@ import { step } from "./machines/run";
 import { addNews, templateVars } from "./news";
 import { buildingAt, inBounds, isPathTile, rectContains } from "./pathfind";
 import { clampDiscourse, syncProtesters } from "./protest";
+import { modeOf } from "./walkers";
 import type { Rng } from "./rng";
 import type { GameState, OpenEvent } from "./types";
 
@@ -62,7 +63,7 @@ function placeNearGate(state: GameState, kind: BuildingKind) {
 
 function burstThoughts(state: GameState, rng: Rng, e: Extract<Effect, { type: "thought" }>) {
   const speaking = new Set(state.thoughts.map((t) => t.walkerId));
-  const pool = state.walkers.filter((w) => w.mode !== "inside" && !speaking.has(w.id) && (!e.kind || w.kind === e.kind));
+  const pool = state.walkers.filter((w) => modeOf(w) !== "inside" && !speaking.has(w.id) && (!e.kind || w.kind === e.kind));
   for (let i = 0; i < e.count && pool.length > 0; i++) {
     const [w] = pool.splice(rng.int(0, pool.length - 1), 1);
     state.thoughts.push({

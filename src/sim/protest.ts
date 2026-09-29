@@ -3,7 +3,9 @@ import { DISCOURSE_PER_PROTESTER, MAX_PROTESTERS } from "./constants";
 import { buildingAt, inBounds, rectContains } from "./pathfind";
 import type { Rng } from "./rng";
 import { TARGET_GATE, type GameState, type Point, type Walker } from "./types";
-import { advance, newWalker } from "./walkers";
+import { advance, despawn, newWalker } from "./walkers";
+import { step } from "./machines/run";
+import { walkerMachine } from "./machines/walker";
 
 const DISCOURSE_PER_CLUSTER = 0.5;
 const DISCOURSE_DECAY = 0.3;
@@ -84,6 +86,7 @@ function pickHome(state: GameState, rng: Rng): Point {
 function spawnProtester(state: GameState, rng: Rng, placed: boolean) {
   const g = state.gate;
   const w = newWalker(state, "protester", g.x + 0.3 + rng.next() * (g.w - 0.6), g.z + 0.35 + rng.next() * 0.6, rng);
+  w.machine = step(walkerMachine, w.machine, { type: "PROTEST_STARTED" }).stored;
   const [hx, hz] = pickHome(state, rng);
   w.homeX = hx;
   w.homeZ = hz;
@@ -100,7 +103,7 @@ function spawnProtester(state: GameState, rng: Rng, placed: boolean) {
 function sendHome(state: GameState, w: Walker, rng: Rng) {
   const g = state.gate;
   const gx = g.x + 0.4 + rng.next() * (g.w - 0.8);
-  w.mode = "leave";
+  w.machine = step(walkerMachine, w.machine, { type: "SENT_HOME" }).stored;
   w.targetId = TARGET_GATE;
   w.route = [...planRoute(state, w.x, w.z, gx, g.z - 0.3), [gx, g.z + 0.5], [gx, g.z + 2.2]];
 }
@@ -108,7 +111,7 @@ function sendHome(state: GameState, w: Walker, rng: Rng) {
 /** Bring the number of protesters at the gate in line with the discourse: newcomers march in, extras wander off. */
 export function syncProtesters(state: GameState, rng: Rng, placed = false) {
   const target = protesterTarget(state);
-  const staying = state.walkers.filter((w) => w.kind === "protester" && w.mode !== "leave");
+  const staying = state.walkers.filter((w) => w.kind === "protester" && w.machine.value !== "leaving");
   for (let i = staying.length; i < target; i++) spawnProtester(state, rng, placed);
   for (let extra = staying.length - target; extra > 0; extra--) {
     const [w] = staying.splice(rng.int(0, staying.length - 1), 1);
@@ -125,10 +128,10 @@ export function updateProtesters(state: GameState, rng: Rng) {
     w.pz = w.z;
     if (w.route.length > 0) {
       advance(w);
-      if (w.route.length === 0 && w.mode === "leave") (gone ??= new Set()).add(w.id);
+      if (w.route.length === 0 && w.machine.value === "leaving") (gone ??= new Set()).add(w.id);
       continue;
     }
-    if (w.mode === "leave") {
+    if (w.machine.value === "leaving") {
       (gone ??= new Set()).add(w.id);
       continue;
     }
@@ -141,5 +144,5 @@ export function updateProtesters(state: GameState, rng: Rng) {
     const [gx, gz] = standable(state, tx, tz) ? [tx, tz] : [w.homeX, w.homeZ];
     w.route = planRoute(state, w.x, w.z, gx, gz);
   }
-  if (gone) state.walkers = state.walkers.filter((w) => !gone!.has(w.id));
+  if (gone) despawn(state, gone);
 }

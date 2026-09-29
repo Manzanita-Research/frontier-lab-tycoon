@@ -13,7 +13,7 @@ function Bubble({ thought }: { thought: Thought }) {
       className={`bubble bubble-${thought.kind}`}
       pos={(out) => {
         const w = useStore.getState().sim.walkers.find((o) => o.id === thought.walkerId);
-        if (!w || w.mode === "inside") return false;
+        if (!w || w.machine.value === "inside") return false;
         const a = getAlpha();
         out.set(w.px + (w.x - w.px) * a - HALF, w.kind === "agent" ? 0.95 : 1.1, w.pz + (w.z - w.pz) * a - HALF);
         return true;

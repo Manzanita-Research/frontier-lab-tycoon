@@ -7,6 +7,7 @@ import { isReachable } from "./pathfind";
 import { templateVars } from "./news";
 import type { Rng } from "./rng";
 import type { GameState } from "./types";
+import { modeOf } from "./walkers";
 
 export function activeConditions(state: GameState): Set<ThoughtCondition> {
   const c = new Set<ThoughtCondition>(["always"]);
@@ -17,7 +18,7 @@ export function activeConditions(state: GameState): Set<ThoughtCondition> {
   if (state.day - (state.flags.lastRelease ?? -99) < 4) c.add("justReleased");
   if (state.hype > 70) c.add("highHype");
   if (state.buildings.some((b) => !BUILDINGS[b.kind].scenery && !isReachable(state, b))) c.add("unreachable");
-  if (state.walkers.filter((w) => w.mode !== "inside").length > 40) c.add("crowded");
+  if (state.walkers.filter((w) => modeOf(w) !== "inside").length > 40) c.add("crowded");
   if (state.waterDiscourse >= 12) c.add("discourse");
   if (state.walkers.filter((w) => w.kind === "protester").length >= CROWDING_PROTESTERS) c.add("protest");
   return c;
@@ -33,7 +34,7 @@ export function dailyThoughts(state: GameState, rng: Rng, force = false) {
   const speaking = state.walkers.filter((w) => state.thoughts.some((t) => t.walkerId === w.id));
   const clear = (w: (typeof state.walkers)[number]) =>
     speaking.every((o) => o !== w && Math.hypot(o.x - w.x, o.z - w.z) > 3);
-  const candidates = state.walkers.filter((w) => w.mode !== "inside" && clear(w));
+  const candidates = state.walkers.filter((w) => modeOf(w) !== "inside" && clear(w));
   if (candidates.length === 0) return;
   const walker = rng.pick(candidates);
 

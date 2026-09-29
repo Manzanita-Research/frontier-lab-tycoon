@@ -8,6 +8,7 @@ import { canPlace, type Command } from "./commands";
 import { openEventOf } from "./events";
 import { outcomeOf } from "./goals";
 import { createInitialState } from "./state";
+import { modeOf } from "./walkers";
 import { tick } from "./tick";
 import type { GameState } from "./types";
 import type { PlaceableKind } from "../content/buildings";
@@ -59,12 +60,12 @@ function view(s: GameState) {
       dir: w.dir,
       route: w.route,
       targetId: w.targetId,
-      mode: w.mode,
+      mode: modeOf(w),
       timer: w.timer,
       energy: w.energy,
       visits: w.visits,
       step: w.step,
-      loiter: w.loiter,
+      loiter: w.machine.value === "loitering",
       fountain: w.fountain,
       homeX: w.homeX,
       homeZ: w.homeZ,
