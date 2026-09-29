@@ -1,6 +1,6 @@
 // Clusters make compute, halls turn it into progress, finished runs become models.
 import { modelName } from "../content/names";
-import { COMPUTE_PER_CLUSTER, COMPUTE_PER_HALL } from "./constants";
+import { COMPUTE_PER_CLUSTER, COMPUTE_PER_HALL, RUN_COST_GROWTH } from "./constants";
 import { formatMoney } from "./format";
 import { addToast, pushNews } from "./news";
 import { isReachable } from "./pathfind";
@@ -51,7 +51,7 @@ export function dailyTraining(state: GameState, rng: Rng) {
 
     t.progress -= t.cost;
     t.run += 1;
-    t.cost = Math.round(t.cost * 1.6);
+    t.cost = Math.round(t.cost * RUN_COST_GROWTH);
     t.name = modelName(t.run, rng, state.day);
     pushNews(state, rng, "runStarted", { model: t.name });
   }

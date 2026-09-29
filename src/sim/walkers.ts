@@ -19,7 +19,7 @@ const ENERGY_DRAIN = 0.0025;
 /** Chance that a walker leaving a building hangs around outside it for a bit instead of rushing off. */
 const LOITER_CHANCE = 0.55;
 /** How close (in tiles) a researcher passes a Fountain to get the refreshing splash. */
-const FOUNTAIN_REACH = 1.35;
+const FOUNTAIN_REACH = 1.6;
 const FOUNTAIN_REFRESH = 0.1;
 
 export function newWalker(state: GameState, kind: WalkerKind, x: number, z: number, rng: Rng): Walker {

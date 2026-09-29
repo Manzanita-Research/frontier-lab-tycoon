@@ -2,9 +2,11 @@ export const TICKS_PER_DAY = 20;
 /** Tiles per tick. */
 export const WALK_SPEED = 0.12;
 export const RESEARCHER_SALARY = 1_000;
-export const REVENUE_PER_CAPABILITY = 1_200;
+export const REVENUE_PER_CAPABILITY = 1_000;
 export const COMPUTE_PER_CLUSTER = 10;
-export const COMPUTE_PER_HALL = 25;
+export const COMPUTE_PER_HALL = 15;
+/** Each training run costs this much more compute than the last. */
+export const RUN_COST_GROWTH = 3;
 export const MAX_AGENTS = 400;
 export const MAX_PROTESTERS = 40;
 /** Protesters per point of water discourse: one protester for every four. */

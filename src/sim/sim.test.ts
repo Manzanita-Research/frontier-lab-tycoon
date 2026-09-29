@@ -132,7 +132,7 @@ describe("training", () => {
     expect(s.capability).toBe(cap + 16);
     expect(s.cash).toBeGreaterThan(cash);
     expect(s.training.run).toBe(2);
-    expect(s.training.cost).toBe(480);
+    expect(s.training.cost).toBe(900);
     expect(s.training.name).toBe("Frontier-3-Reasoner");
     expect(s.news.some((n) => n.text.includes("Frontier-2"))).toBe(true);
     expect(s.toasts.some((t) => t.text.includes("Frontier-2"))).toBe(true);
