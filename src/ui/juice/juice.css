@@ -1,0 +1,45 @@
+/* Juice I: sky, photo mode, odometers, squish and slam-ins. Everything here is decoration; the game reads fine without it. */
+
+/* ---- Sky ---- */
+.sky {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(#8fd0ee 0%, #bfe6f7 45%, #fff5d6 100%);
+}
+.sky .stars {
+  position: absolute;
+  inset: 0;
+  opacity: calc(var(--night, 0) * 1.2 - 0.15);
+}
+.sky .stars i {
+  position: absolute;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 6px 1px rgba(200, 220, 255, 0.8);
+  animation: twinkle 3s ease-in-out infinite;
+}
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.25);
+  }
+}
+.sky .moon {
+  position: absolute;
+  right: 12%;
+  top: 9%;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: inset -14px 6px 0 0 #fff8dc, 0 0 30px 6px rgba(255, 248, 220, 0.35);
+  opacity: calc(var(--night, 0) * 1.4 - 0.3);
+  transform: rotate(-18deg);
+}
