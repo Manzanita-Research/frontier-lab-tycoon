@@ -22,6 +22,10 @@ export function HallModel({ color }: { color: string }) {
     return { lit, off: new THREE.Color("#5b5270"), hot: new THREE.Color("#ffffff") };
   }, [color]);
   const tmp = useMemo(() => new THREE.Color(), []);
+  const domeMat = useMemo(
+    () => new THREE.MeshStandardMaterial({ color: "#f6f0ff", emissive: "#cdbcff", emissiveIntensity: 0.22, roughness: 0.3, flatShading: true }),
+    [],
+  );
 
   useEffect(() => {
     const mesh = ring.current;
@@ -78,7 +82,7 @@ export function HallModel({ color }: { color: string }) {
       <mesh position={[0, 0.5, 0]} rotation-x={Math.PI / 2} material={std(color)} castShadow>
         <torusGeometry args={[1.05, 0.06, 6, 32]} />
       </mesh>
-      <mesh position={[0, 0.78, 0]} material={std("#f1ecff", 0.35)} castShadow receiveShadow>
+      <mesh position={[0, 0.78, 0]} material={domeMat} castShadow receiveShadow>
         <sphereGeometry args={[1.05, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2]} />
       </mesh>
       <Cyl p={[0, 1.78, 0]} r={0.03} h={0.42} c="#8a8fa0" />

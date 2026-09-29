@@ -50,7 +50,7 @@ export const HEADLINES: Headline[] = [
 
   // Rival releases, roughly every 12 to 20 days.
   h("rival", "bad", "{rival} releases open-weights model that matches {model}; your investors 'just have a few questions'"),
-  h("rival", "bad", "{rival} announces a 'reasoning model' that is the last model with a longer pause"),
+  h("rival", "bad", "{rival} announces a 'reasoning model' that is last year's model with a longer pause"),
   h("rival", "bad", "{rival} drops a model on your launch day. Again. It is not a coincidence, it is a personality"),
   h("rival", "bad", "{rival} poaches three of your researchers with a foosball table shaped like a data center"),
   h("rival", "joke", "{rival} ships a 10M-token context window; nobody finishes the first page"),

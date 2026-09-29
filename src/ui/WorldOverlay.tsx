@@ -51,7 +51,7 @@ function CoinPops() {
           key={p.id}
           className="coinpop"
           pos={(out) => {
-            out.set(worldX(p.x), 2.6, worldZ(p.z));
+            out.set(worldX(p.x), 2.6 + (p.id % 3) * 0.32, worldZ(p.z));
             return true;
           }}
         >

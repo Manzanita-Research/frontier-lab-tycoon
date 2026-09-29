@@ -206,5 +206,5 @@ export const debugParams = dbg;
 
 // `?debug=1` exposes the store for probes and screenshot scripts.
 if (typeof window !== "undefined" && new URLSearchParams(window.location.search).has("debug")) {
-  (window as unknown as { __flt: unknown }).__flt = { useStore };
+  (window as unknown as { __flt: unknown }).__flt = { useStore, tick };
 }

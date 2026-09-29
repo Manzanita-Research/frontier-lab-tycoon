@@ -3,6 +3,7 @@ import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { getAlpha, useStore } from "../store";
 import { HALF } from "./coords";
+import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import { glowTexture } from "./materials";
 
 const CAP = 512;
@@ -26,12 +27,14 @@ export function Walkers() {
   const aBody = useRef<THREE.InstancedMesh>(null);
   const aVisor = useRef<THREE.InstancedMesh>(null);
   const aGlow = useRef<THREE.InstancedMesh>(null);
+  const aOrb = useRef<THREE.InstancedMesh>(null);
   const vBody = useRef<THREE.InstancedMesh>(null);
   const vHead = useRef<THREE.InstancedMesh>(null);
   const glowMap = useMemo(() => glowTexture(), []);
   const glowGeo = useMemo(() => new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2), []);
   const visorGeo = useMemo(() => new THREE.BoxGeometry(0.25, 0.09, 0.07), []);
-  const agentGeo = useMemo(() => new THREE.BoxGeometry(0.32, 0.34, 0.28), []);
+  const agentGeo = useMemo(() => new RoundedBoxGeometry(0.34, 0.34, 0.3, 3, 0.07), []);
+  const orbGeo = useMemo(() => new THREE.SphereGeometry(0.065, 10, 8), []);
 
   useFrame(({ clock }) => {
     const { sim } = useStore.getState();
@@ -68,6 +71,7 @@ export function Walkers() {
         const i = na++;
         set(aBody.current, i, x, bob + 0.17, z, ry, 1, 1, 1);
         set(aVisor.current, i, x + Math.sin(ry) * 0.15, bob + 0.22, z + Math.cos(ry) * 0.15, ry, 1, 1, 1);
+        set(aOrb.current, i, x, bob + 0.5 + Math.sin(t * 6 + phase) * 0.015, z, 0, 1, 1, 1);
         set(aGlow.current, i, x, 0.03, z, 0, 1.1 + Math.sin(t * 3 + phase) * 0.1, 1, 1.1 + Math.sin(t * 3 + phase) * 0.1);
         continue;
       }
@@ -99,6 +103,7 @@ export function Walkers() {
     done(aBody.current, na);
     done(aVisor.current, na);
     done(aGlow.current, na);
+    done(aOrb.current, na);
     done(vBody.current, nv);
     done(vHead.current, nv);
   });
@@ -115,13 +120,16 @@ export function Walkers() {
       </instancedMesh>
 
       <instancedMesh ref={aBody} args={[agentGeo, undefined, CAP]} castShadow frustumCulled={false}>
-        <meshStandardMaterial color="#e9eef5" roughness={0.35} metalness={0.15} />
+        <meshStandardMaterial color="#f2f6fb" roughness={0.3} metalness={0.1} emissive="#1de9ff" emissiveIntensity={0.1} />
       </instancedMesh>
       <instancedMesh ref={aVisor} args={[visorGeo, undefined, CAP]} frustumCulled={false}>
         <meshBasicMaterial color="#3ff0ff" toneMapped={false} />
       </instancedMesh>
+      <instancedMesh ref={aOrb} args={[orbGeo, undefined, CAP]} frustumCulled={false}>
+        <meshBasicMaterial color="#5ff5ff" toneMapped={false} />
+      </instancedMesh>
       <instancedMesh ref={aGlow} args={[glowGeo, undefined, CAP]} frustumCulled={false} renderOrder={2}>
-        <meshBasicMaterial map={glowMap} transparent depthWrite={false} blending={THREE.AdditiveBlending} toneMapped={false} />
+        <meshBasicMaterial map={glowMap} transparent depthWrite={false} toneMapped={false} />
       </instancedMesh>
 
       <instancedMesh ref={vBody} args={[undefined, undefined, CAP]} castShadow frustumCulled={false}>

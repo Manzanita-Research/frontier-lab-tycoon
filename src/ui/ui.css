@@ -334,11 +334,8 @@ button {
 
 /* Toasts */
 .toasts {
-  position: absolute;
-  top: 132px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(460px, calc(100% - 20px));
+  align-self: center;
+  width: min(460px, 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -466,9 +463,9 @@ button {
   }
   .topbar {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 4px 10px;
-    padding: 7px 10px;
+    grid-template-columns: 1.35fr 1fr 0.9fr 0.8fr;
+    gap: 2px 8px;
+    padding: 6px 10px 7px;
     align-self: stretch;
   }
   .lab {
@@ -476,40 +473,58 @@ button {
     flex-direction: row;
     align-items: baseline;
     justify-content: space-between;
-    padding: 0 0 4px;
+    padding: 0 0 3px;
     border-right: 0;
     border-bottom: 3px dashed rgba(58, 42, 28, 0.25);
   }
   .lab-name {
-    font-size: 15px;
+    font-size: 14px;
+  }
+  .lab-date {
+    font-size: 12px;
   }
   .stat {
     min-width: 0;
   }
+  .stat .label {
+    font-size: 9.5px;
+  }
   .stat .value {
-    font-size: 17px;
+    font-size: 16px;
+  }
+  .stat .sub {
+    font-size: 10.5px;
   }
   .chip {
     min-width: 0;
     flex: 1;
+    padding: 6px 10px 7px;
   }
   .chip-title {
-    font-size: 13px;
+    font-size: 12.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .chip-sub {
+    display: none;
   }
   .speed button {
-    min-width: 36px;
+    min-width: 34px;
+    height: 32px;
   }
-  .toasts {
-    top: 178px;
+  .toast {
+    font-size: 13px;
+    padding: 7px 12px;
   }
   .tool {
-    width: 80px;
+    width: 78px;
   }
   .tool .tname {
     font-size: 10.5px;
   }
   .tip {
-    font-size: 12.5px;
+    font-size: 12px;
   }
   .bubble {
     max-width: 150px;

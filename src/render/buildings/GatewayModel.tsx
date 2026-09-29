@@ -30,7 +30,7 @@ export function GatewayModel({ color }: { color: string }) {
     const t = clock.elapsedTime;
     if (coin.current) {
       coin.current.rotation.y = t * 3;
-      coin.current.position.y = 2.72 + Math.sin(t * 2) * 0.05;
+      coin.current.position.y = 3.05 + Math.sin(t * 2) * 0.05;
     }
     if (portal.current) portal.current.opacity = 0.55 + 0.25 * Math.sin(t * 2.4);
   });
@@ -53,14 +53,15 @@ export function GatewayModel({ color }: { color: string }) {
         <planeGeometry args={[1, 1]} />
         <meshBasicMaterial ref={portal} map={portalMap} transparent opacity={0.6} side={THREE.DoubleSide} depthWrite={false} toneMapped={false} />
       </mesh>
-      <mesh position={[0, 2.38, 0]} geometry={boxGeo} material={std(CREAM_DARK)} scale={[1.62, 0.42, 0.14]} castShadow />
+      <B p={[0, 2.35, 0]} s={[0.16, 0.25, 0.1]} c={CREAM_DARK} />
+      <mesh position={[0, 2.75, 0]} geometry={boxGeo} material={std(CREAM_DARK)} scale={[1.62, 0.42, 0.14]} castShadow />
       {[0.076, -0.076].map((z) => (
-        <mesh key={z} position={[0, 2.38, z]} rotation-y={z < 0 ? Math.PI : 0} scale={[1.5, 0.34, 1]}>
+        <mesh key={z} position={[0, 2.75, z]} rotation-y={z < 0 ? Math.PI : 0} scale={[1.5, 0.34, 1]}>
           <planeGeometry args={[1, 1]} />
           <meshBasicMaterial map={sign} toneMapped={false} />
         </mesh>
       ))}
-      <group ref={coin} position={[0, 2.72, 0]}>
+      <group ref={coin} position={[0, 3.05, 0]}>
         <Cyl r={0.2} h={0.05} c="#ffd24a" rotation-x={Math.PI / 2} position-y={0.2} />
       </group>
     </group>
