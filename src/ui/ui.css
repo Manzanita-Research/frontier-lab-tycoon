@@ -514,6 +514,10 @@ button {
   font-size: 12px;
   font-weight: 700;
   opacity: 0.7;
+  white-space: nowrap;
+}
+.obj-left .short {
+  display: none;
 }
 .obj-left.bad {
   opacity: 1;
@@ -868,7 +872,7 @@ button {
     height: 32px;
   }
   .toasts {
-    top: 214px;
+    top: 222px;
     width: calc(100vw - 16px);
   }
   .toast {
@@ -901,7 +905,14 @@ button {
   }
   .obj-head {
     padding: 5px 10px;
+    gap: 6px;
     font-size: 13px;
+  }
+  .obj-left .long {
+    display: none;
+  }
+  .obj-left .short {
+    display: inline;
   }
   .modal-backdrop {
     padding: 8px;

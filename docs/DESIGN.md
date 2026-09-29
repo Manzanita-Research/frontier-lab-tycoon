@@ -22,6 +22,13 @@ RollerCoaster Tycoon, but the park is a frontier AI lab. You lay paths, drop bui
 4. A finished training run gets a ridiculous model name ("Frontier-4.5-Reasoner-Mini-Pro-Preview"), a headline, and a revenue bump.
 5. The ticker comments on everything you do.
 
+## Slice 2: crowd, goals, first event (spec: `docs/specs/slice-2-crowd-goals-protest.md`)
+
+- **Crowd:** researchers `8 + 3 × halls`, agents `6 + capability/2` (cap 400), visitors tour 2–3 buildings, and walkers loiter outside a building before moving on. Walkers draw 1.6× life size; agents get an additive glow disc.
+- **Goals:** `content/goals.ts` sets three milestones (3 releases, $250K/day, hype 60) and a day-360 deadline. `sim/goals.ts` checks daily and milestones latch. `state.outcome` is `playing`, `won` or `lost`, and `tick` stops for good on a loss.
+- **Events:** `content/events.ts` is data (`when` condition, up to 3 choices with effects). `sim/events.ts` opens at most one card per day-check and `tick` stands still until a `chooseEvent` command answers it. The Water Discourse stat (`+0.5 × clusters − 0.3` per day) sends `floor(discourse / 4)` protesters (max 40) to the gate. Choosing the fountain places free scenery beside the gate (scenery: `BUILDINGS[kind].scenery`, never visited).
+- **Balance knobs** live in `sim/constants.ts`: `RUN_COST_GROWTH`, `COMPUTE_PER_HALL`, `REVENUE_PER_CAPABILITY`. `sim/playthrough.test.ts` plays a scripted player through the scenario, so a retune that breaks the pacing fails a test.
+
 ## Satire (parody names only)
 
 This is AI-2027-shaped escalation played as affectionate farce. It punches at incentives and institutions, never at real people, companies or nationalities.
@@ -48,4 +55,4 @@ This is AI-2027-shaped escalation played as affectionate farce. It punches at in
 
 ## Later (not now)
 
-Eras and the intelligence explosion; safety versus capability; the Sandbox Escape chase; research tree; staff (SREs, janitor bots for slop, PR reps); scenario objectives; poaching; sound; and the ending where the superintelligence politely takes over running your park.
+Eras and the intelligence explosion; safety versus capability; the Sandbox Escape chase; research tree; staff (SREs, janitor bots for slop, PR reps); poaching; more event arcs on the slice-2 card system; sound; and the ending where the superintelligence politely takes over running your park.

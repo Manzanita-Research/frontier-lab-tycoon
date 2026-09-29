@@ -18,7 +18,7 @@ function initialZoom() {
   const w = window.innerWidth;
   const h = window.innerHeight;
   // Roughly a building per eighth of the screen width at 1440x900, with the whole gate-to-hall campus still in view.
-  return debugParams.zoom ?? (w < 700 ? w / 20 : Math.min(w / 30, h / 17.5));
+  return debugParams.zoom ?? (w < 700 ? w / 16 : Math.min(w / 30, h / 17.5));
 }
 
 /** Pan, zoom (clamped), and Q/E quarter-turns with a short ease. */
