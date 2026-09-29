@@ -1,0 +1,51 @@
+// Thought bubbles: the main joke delivery and the player's feedback channel.
+import { THOUGHTS, type ThoughtCondition } from "../content/thoughts";
+import { THOUGHT_TICKS } from "./constants";
+import { fillTemplate } from "./format";
+import { isReachable } from "./pathfind";
+import { templateVars } from "./news";
+import type { Rng } from "./rng";
+import type { GameState } from "./types";
+
+export function activeConditions(state: GameState): Set<ThoughtCondition> {
+  const c = new Set<ThoughtCondition>(["always"]);
+  const kombucha = state.buildings.filter((b) => b.kind === "kombucha");
+  if (!kombucha.some((b) => isReachable(state, b))) c.add("noKombucha");
+  if (state.cash < 1_000_000) c.add("lowCash");
+  if (state.buildings.some((b) => b.kind === "hall")) c.add("training");
+  if (state.day - (state.flags.lastRelease ?? -99) < 4) c.add("justReleased");
+  if (state.hype > 70) c.add("highHype");
+  if (state.buildings.some((b) => !isReachable(state, b))) c.add("unreachable");
+  if (state.walkers.filter((w) => w.mode !== "inside").length > 40) c.add("crowded");
+  return c;
+}
+
+/** Each day: expire old bubbles and maybe start one (at most 3 at a time, each ~3 game days). */
+export function dailyThoughts(state: GameState, rng: Rng, force = false) {
+  state.thoughts = state.thoughts.filter((t) => t.expiresTick > state.tick);
+  if (state.thoughts.length >= 3) return;
+  if (!force && !rng.chance(0.85)) return;
+
+  const busy = new Set(state.thoughts.map((t) => t.walkerId));
+  const candidates = state.walkers.filter((w) => w.mode !== "inside" && !busy.has(w.id));
+  if (candidates.length === 0) return;
+  const walker = rng.pick(candidates);
+
+  const conditions = activeConditions(state);
+  let lines = THOUGHTS.filter((l) => l.kind === walker.kind && conditions.has(l.when));
+  const fresh = lines.filter((l) => !state.recentThoughts.includes(l.text));
+  if (fresh.length > 0) lines = fresh;
+  // Situational lines are the point; make them three times as likely as the evergreen pool.
+  const weighted = lines.flatMap((l) => (l.when === "always" ? [l] : [l, l, l]));
+  const line = rng.pick(weighted);
+
+  state.thoughts.push({
+    id: state.nextId++,
+    walkerId: walker.id,
+    kind: walker.kind,
+    text: fillTemplate(line.text, templateVars(state, {}, rng)),
+    expiresTick: state.tick + THOUGHT_TICKS,
+  });
+  state.recentThoughts.push(line.text);
+  if (state.recentThoughts.length > 10) state.recentThoughts.shift();
+}
