@@ -118,10 +118,32 @@ function Reason() {
   );
 }
 
+/** The name of the walker whose card is open, on the ground beside them. */
+function NameTag() {
+  const inspect = useApp(atoms.inspect);
+  if (!inspect) return null;
+  return (
+    <Anchored
+      key={inspect.id}
+      className="nametag"
+      pos={(out) => {
+        const w = sim.world.walkers.find((o) => o.id === inspect.id);
+        if (!w || w.machine.value === "inside") return false;
+        const a = sim.alpha;
+        out.set(w.px + (w.x - w.px) * a - HALF, -0.05, w.pz + (w.z - w.pz) * a - HALF);
+        return true;
+      }}
+    >
+      {inspect.name}
+    </Anchored>
+  );
+}
+
 export function WorldOverlay() {
   const thoughts = useApp(atoms.thoughts);
   return (
     <div className="world">
+      <NameTag />
       {thoughts.map((t) => (
         <Bubble key={t.id} thought={t} />
       ))}

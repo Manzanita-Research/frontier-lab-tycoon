@@ -11,7 +11,7 @@ import { appMachine } from "./machine";
 import { framesManual, ManualFrames } from "./frames";
 import { createSimHandle, Sim, simLayer, type SimHandle } from "./sim";
 
-const handleFor = (seed = 1, warp = 0) => createSimHandle({ seed, warp, agents: 0, discourse: 0 });
+const handleFor = (seed = 1, warp = 0) => createSimHandle({ seed, warp, agents: 0, discourse: 0, researchers: 0 });
 
 /** Boot the app on `handle`, and hand back the actor and a frame pump. */
 const boot = (speed: Speed = 1) =>
@@ -147,6 +147,60 @@ describe("app machine", () => {
       yield* waitFor(actor, (s) => s.context.tool === null, { timeout: "1 second" });
       expect(snap.context.hover).toEqual({ x: 3, z: 4 });
       expect(actor.getSnapshot().context.hover).toBeNull();
+    }).pipe(provide(handle));
+  });
+
+  it.effect("selects a walker: the snapshot carries their card, Follow and Thoughts highlight come through, and closing clears it", () => {
+    const handle = handleFor(2);
+    return Effect.gen(function* () {
+      const { actor, sim, pump } = yield* boot(0);
+      const w = sim.world.walkers.find((o) => o.kind === "researcher")!;
+      yield* send(actor, { type: "SELECT", id: w.id });
+      yield* waitFor(actor, (st) => st.context.selected === w.id, { timeout: "1 second" });
+      yield* pump(4);
+      const snap = actor.getSnapshot().context.snap;
+      expect(snap.inspect?.id).toBe(w.id);
+      expect(snap.inspect?.name).toBe(w.name);
+      expect(snap.inspect?.needs.map((n) => n.key)).toEqual(["energy", "focus", "fomo"]);
+      expect(snap.inspect?.history).toHaveLength(3);
+      expect(sim.ui.selected).toBe(w.id);
+      expect(snap.board.length).toBeGreaterThan(0);
+
+      yield* send(actor, { type: "SET_FOLLOW", follow: true });
+      yield* waitFor(actor, (st) => st.context.follow, { timeout: "1 second" });
+      yield* pump(4);
+      expect(sim.ui.follow).toBe(true);
+      const top = snap.board[0]!;
+      yield* send(actor, { type: "HIGHLIGHT", key: top.key });
+      yield* waitFor(actor, (st) => st.context.highlight === top.key, { timeout: "1 second" });
+      yield* pump(4);
+      expect(sim.highlightIds.size).toBe(top.count);
+      yield* send(actor, { type: "HIGHLIGHT", key: top.key }); // the same row again switches it off
+      yield* waitFor(actor, (st) => st.context.highlight === null, { timeout: "1 second" });
+      yield* pump(4);
+      expect(sim.highlightIds.size).toBe(0);
+
+      yield* send(actor, { type: "SELECT", id: null });
+      yield* waitFor(actor, (st) => st.context.selected === null, { timeout: "1 second" });
+      yield* pump(4);
+      expect(actor.getSnapshot().context.snap.inspect).toBeNull();
+      expect(sim.ui.follow).toBe(false);
+    }).pipe(provide(handle));
+  });
+
+  it.effect("closes the card by itself when the selected walker leaves the map", () => {
+    const handle = handleFor(2);
+    return Effect.gen(function* () {
+      const { actor, sim, pump } = yield* boot(0);
+      const w = sim.world.walkers.find((o) => o.kind === "visitor")!;
+      yield* send(actor, { type: "SELECT", id: w.id });
+      yield* waitFor(actor, (st) => st.context.selected === w.id, { timeout: "1 second" });
+      yield* pump(4);
+      expect(actor.getSnapshot().context.selected).toBe(w.id);
+      sim.world.walkers = sim.world.walkers.filter((o) => o.id !== w.id);
+      yield* pump(4);
+      expect(actor.getSnapshot().context.selected).toBeNull();
+      expect(actor.getSnapshot().context.follow).toBe(false);
     }).pipe(provide(handle));
   });
 });

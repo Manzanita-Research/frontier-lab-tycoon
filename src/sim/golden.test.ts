@@ -132,9 +132,9 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 
 // Recorded from the Crowd sim (FLT-8). The pre-Crowd values are in git history (FLT-3, @ 8f9750a).
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "80a68b68", 800: "8cd737f0", 1600: "d4494c7d", 2400: "602fdb95", 3200: "3e0b6a8d", 4000: "62ddacc0" },
-  2: { 200: "a11aef4b", 800: "73276f89", 1600: "930fce23", 2400: "1a32756a", 3200: "cecb39ba", 4000: "a30764d1" },
-  3: { 200: "1a8f671e", 800: "67efa3a2", 1600: "0df3ccd0", 2400: "3aafc850", 3200: "9e295cf1", 4000: "ab3d87be" },
+  1: { 200: "316e9125", 800: "a0f309b6", 1600: "9374be10", 2400: "b6861a1e", 3200: "413719d6", 4000: "9cd345a4" },
+  2: { 200: "9cae08b8", 800: "bb59dd3e", 1600: "c69c0b0c", 2400: "d2332ef5", 3200: "9dbcb17d", 4000: "ef587581" },
+  3: { 200: "ea9b5d0d", 800: "6b03516a", 1600: "80b99a23", 2400: "e2a74724", 3200: "7ae1936e", 4000: "3564c288" },
 };
 
 describe("golden runs", () => {

@@ -2,16 +2,33 @@
 import type { PlaceableKind } from "../content/buildings";
 import { runwayMonths } from "../sim/format";
 import { protesterCount } from "../sim/protest";
+import { inspectWalker, type Inspect } from "../sim/inspect";
+import { thoughtBoard, type ThoughtRow } from "../sim/mind";
 import { computePerDay } from "../sim/training";
 import { openEventOf } from "../sim/events";
 import { outcomeOf } from "../sim/goals";
-import type { Building, GameState, GoalProgress, OpenEvent, Outcome, Pop, Thought, Tone } from "../sim/types";
+import type { Building, GameState, GoalProgress, OpenEvent, Outcome, Pop, Thought, Tone, Vibes } from "../sim/types";
 
 export type Tool = "path" | PlaceableKind | "bulldoze";
 /** Hotkeys 1-9 pick these in order. */
 export const TOOLS: Tool[] = ["path", "cluster", "hall", "gateway", "kombucha", "nap", "snack", "demo", "bulldoze"];
 export const SPEEDS = [0, 1, 3, 10] as const;
 export type Speed = (typeof SPEEDS)[number];
+
+/** What the player has selected: it lives in the app machine, and the World only reads it to build the snapshot. */
+export interface UiSelection {
+  /** The walker whose card is open. */
+  selected: number | null;
+  /** The camera is tracking `selected`. */
+  follow: boolean;
+  /** The Thoughts row (`kind|text`) whose walkers are lit up. */
+  highlight: string | null;
+}
+
+export const NO_SELECTION: UiSelection = { selected: null, follow: false, highlight: null };
+
+/** How many Thoughts rows the panel gets. */
+export const BOARD_ROWS = 14;
 
 export interface Snapshot {
   tick: number;
@@ -23,6 +40,7 @@ export interface Snapshot {
   runway: number | null;
   capability: number;
   hype: number;
+  vibes: Vibes;
   labName: string;
   hasHall: boolean;
   computePerDay: number;
@@ -40,6 +58,12 @@ export interface Snapshot {
   event: OpenEvent | null;
   protesters: number;
   discourse: number;
+  /** The Thoughts panel: everyone's thought, counted, most common first. */
+  board: ThoughtRow[];
+  /** The open inspector card, if a walker is selected and still here. */
+  inspect: Inspect | null;
+  /** The selection this snapshot was built for: the app only trusts `inspect: null` if it matches its own. */
+  selectedId: number | null;
 }
 
 export interface UiToast {
@@ -48,7 +72,7 @@ export interface UiToast {
   tone: Tone;
 }
 
-export function makeSnapshot(s: GameState, prev?: Snapshot): Snapshot {
+export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO_SELECTION): Snapshot {
   return {
     tick: s.tick,
     day: s.day,
@@ -59,6 +83,7 @@ export function makeSnapshot(s: GameState, prev?: Snapshot): Snapshot {
     runway: runwayMonths(s.cash, s.ledger.net),
     capability: s.capability,
     hype: s.hype,
+    vibes: { ...s.vibes },
     labName: s.labName,
     hasHall: s.buildings.some((b) => b.kind === "hall"),
     computePerDay: computePerDay(s),
@@ -75,5 +100,8 @@ export function makeSnapshot(s: GameState, prev?: Snapshot): Snapshot {
     event: openEventOf(s),
     protesters: protesterCount(s),
     discourse: s.waterDiscourse,
+    board: thoughtBoard(s).slice(0, BOARD_ROWS),
+    inspect: ui.selected === null ? null : inspectWalker(s, ui.selected),
+    selectedId: ui.selected,
   };
 }

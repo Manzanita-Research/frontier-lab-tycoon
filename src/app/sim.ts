@@ -10,8 +10,9 @@ import { createInitialState } from "../sim/state";
 import { applyNow, tick, TICKS_PER_DAY } from "../sim/tick";
 import { syncProtesters } from "../sim/protest";
 import type { GameState, NewsItem, OpenEvent, Outcome } from "../sim/types";
-import { fillAgents } from "../sim/walkers";
-import { makeSnapshot, type Snapshot, type UiToast } from "./hud";
+import { fillAgents, seedWalkers } from "../sim/walkers";
+import { walkersThinking } from "../sim/mind";
+import { makeSnapshot, NO_SELECTION, type Snapshot, type UiSelection, type UiToast } from "./hud";
 
 /** What the loop tells the app after touching the World. `snap`, `news` and `toasts` come with a publish. */
 export interface SyncReport {
@@ -22,6 +23,8 @@ export interface SyncReport {
   toasts: UiToast[];
 }
 
+const NO_IDS: ReadonlySet<number> = new Set();
+
 export class SimHandle {
   /** The live, mutable sim. Read it in useFrame; never subscribe to it. */
   world: GameState;
@@ -31,6 +34,10 @@ export class SimHandle {
   private lastSnap: Snapshot | undefined;
   private lastEvent: OpenEvent | null = null;
   private lastOutcome: Outcome = "playing";
+  /** What the player has selected; the app machine hands it over on every frame. Read by the renderer and the snapshot. */
+  ui: UiSelection = NO_SELECTION;
+  /** Walkers behind the lit-up Thoughts row, refreshed with each publish (about 5 Hz). */
+  highlightIds: ReadonlySet<number> = new Set();
 
   constructor(world: GameState) {
     this.world = world;
@@ -67,17 +74,19 @@ export class SimHandle {
     this.lastOutcome = outcome;
     if (!publish) return { event, outcome, toasts: [] };
     this.lastVersion = w.version;
-    this.lastSnap = makeSnapshot(w, this.lastSnap);
+    this.lastSnap = makeSnapshot(w, this.lastSnap, this.ui);
+    this.highlightIds = this.ui.highlight ? walkersThinking(w, this.ui.highlight) : NO_IDS;
     return { event, outcome, snap: this.lastSnap, news: w.news.slice(), toasts: w.toasts.splice(0).map((t) => ({ ...t })) };
   }
 }
 
 /** A living campus, warped forward and dressed up per the `?seed=&warp=&agents=&discourse=` debug knobs. */
-export function createSimHandle(dbg: Pick<DebugParams, "seed" | "warp" | "agents" | "discourse">): SimHandle {
+export function createSimHandle(dbg: Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers">): SimHandle {
   const sim = createInitialState(dbg.seed);
   for (let i = 0; i < dbg.warp * TICKS_PER_DAY; i++) tick(sim);
-  if (dbg.agents > 0 || dbg.discourse > 0) {
+  if (dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0) {
     const rng = createRng(sim.rngState);
+    if (dbg.researchers > 0) seedWalkers(sim, "researcher", dbg.researchers, rng);
     if (dbg.agents > 0) {
       sim.agentBonus = dbg.agents;
       fillAgents(sim, rng);

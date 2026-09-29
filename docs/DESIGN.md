@@ -29,6 +29,13 @@ RollerCoaster Tycoon, but the park is a frontier AI lab. You lay paths, drop bui
 - **Events:** `content/events.ts` is data (`when` condition, up to 3 choices with effects). `sim/events.ts` opens at most one card per day-check and `tick` stands still until a `chooseEvent` command answers it. The Water Discourse stat (`+0.5 × clusters − 0.3` per day) sends `floor(discourse / 4)` protesters (max 40) to the gate. Choosing the fountain places free scenery beside the gate (scenery: `BUILDINGS[kind].scenery`, never visited).
 - **Balance knobs** live in `sim/constants.ts`: `RUN_COST_GROWTH`, `COMPUTE_PER_HALL`, `REVENUE_PER_CAPABILITY`. `sim/playthrough.test.ts` plays a scripted player through the scenario, so a retune that breaks the pacing fails a test.
 
+## Slice 3: the Crowd (spec: `docs/specs/FLT-8.md`)
+
+- **Everyone has a name and a mind.** Researchers are "Dr. Ada Gradient" or "Kevin Backprop", agents are "Agent-0042 'Sparky'", visitors are investors, journalists, enterprise buyers and influencers. Tap any walker for a card: need bars, what they are thinking, three lines of history, a Follow button.
+- **Needs, and buildings that meet them.** Researchers have energy, focus and fomo (rivals shipping makes it spike); visitors patience and impressed; agents drift, which for now only tints them pink and changes what they say. Nap Pods, a Snack Wall and a Demo Stage join the palette. Full buildings grow queues. When nothing reachable helps, the walker says so ("No snack wall. I'm eating my own browser tabs.") and the Thoughts panel counts how many people agree.
+- **Vibes, 0 to 999,** are the park rating: happiness, visitors impressed, cleanliness (stubbed), hype, minus incidents and protests. They set how many visitors come, whether researchers apply and whether an investor writes a cheque. Five days below 0.2 happiness and a researcher walks out the gate with a box.
+- **The joke delivery is now diegetic:** the crowd tells you what to build.
+
 ## Satire (parody names only)
 
 This is AI-2027-shaped escalation played as affectionate farce. It punches at incentives and institutions, never at real people, companies or nationalities.

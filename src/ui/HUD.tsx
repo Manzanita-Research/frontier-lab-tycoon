@@ -6,9 +6,12 @@ import { SPEEDS, TOOLS, type Tool } from "../app/hud";
 import { useApp } from "../app/hooks";
 import { EventCard } from "./EventCard";
 import { ICONS } from "./icons";
+import { Inspector } from "./Inspector";
 import { Objectives } from "./Objectives";
 import { OutcomeCard } from "./OutcomeCard";
 import { Odometer } from "./juice/Odometer";
+import { Thoughts } from "./Thoughts";
+import { Vibes } from "./Vibes";
 
 const toolName = (t: Tool) => (t === "path" ? "Path" : t === "bulldoze" ? "Bulldoze" : BUILDINGS[t].name);
 const SHORT: Record<Tool, string> = { path: "Path", cluster: "Cluster", hall: "Training Hall", gateway: "Gateway", kombucha: "Kombucha", nap: "Nap Pods", snack: "Snack Wall", demo: "Demo Stage", bulldoze: "Bulldoze" };
@@ -23,6 +26,7 @@ function TopBar() {
         <div className="lab-name">{s.labName}</div>
         <div className="lab-date">{formatDate(s.day)}</div>
       </div>
+      <Vibes />
       <div className="stat cash">
         <span className="label">Cash</span>
         <Odometer className={`value ${s.cash < 0 ? "bad" : ""}`} value={s.cash} format={formatMoney} />
@@ -223,7 +227,11 @@ export function HUD() {
           <TrainingChip />
           <Objectives />
         </div>
-        <SpeedControl />
+        <div className="right-col">
+          <SpeedControl />
+          <Thoughts />
+          <Inspector />
+        </div>
       </div>
       <Toasts />
       <BuildBar />

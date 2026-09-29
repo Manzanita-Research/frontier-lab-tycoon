@@ -40,7 +40,7 @@ The game logic runs on **XState v6 (alpha) and Effect v4 (rc)**, joined by `@xst
 1. **All game logic is a machine:** walker behaviour, economy status, training runs, goals and each event arc. Arithmetic (money per day, movement along a route) stays in small pure functions that machines or the step loop call.
 2. **Sim machines advance with the pure `transition()`,** synchronously inside `Sim.step`. They are not actors. Each keeps a JSON `{ value, context }` in the World (rebuilt with `machine.resolveState`), so the determinism test and save/load keep working.
 3. **Game time is ticks, never wall clock.** No `after` delays in sim machines; express waits as tick/day counters in context, checked by guards on `TICK`/`DAY` events. `after` is fine only in UI-level machines (toasts).
-4. **Send walkers events only on discrete changes** (`ARRIVED`, `TIMER_DONE`, ...), never every tick. Movement stays a plain function. Keep the perf test (500 walkers, 0.3 ms/tick) green.
+4. **Send walkers events only on discrete changes** (`ARRIVED`, `TIMER_DONE`, ...), never every tick. Movement stays a plain function. Keep the perf tests (500 walkers, 0.3 ms/tick; 800 walkers, 0.5 ms/tick) green.
 5. **Effect owns the runtime:** the app actor, the loop fiber, services (`Context.Service`) and lifetimes (`ManagedRuntime`, disposed on unmount). Player input is `send(app, event)`; the app machine forwards it into the sim as a command.
 6. **React reads the app actor** through `@xstate/effect/atom` + `@effect/atom-react`, with the HUD snapshot throttled to about 5 Hz. One state system: no zustand.
 
