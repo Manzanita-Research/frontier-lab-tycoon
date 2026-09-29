@@ -337,8 +337,11 @@ button {
 
 /* Toasts */
 .toasts {
-  align-self: center;
-  width: min(460px, 100%);
+  position: absolute;
+  top: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(460px, calc(100vw - 20px));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -797,6 +800,15 @@ button {
   flex: 1;
 }
 
+/* Narrow desktops: keep the toasts clear of the left-hand panels */
+@media (min-width: 641px) and (max-width: 960px) {
+  .toasts {
+    left: 330px;
+    transform: none;
+    width: min(460px, calc(100vw - 340px));
+  }
+}
+
 /* Phones */
 @media (max-width: 640px) {
   .hud {
@@ -854,6 +866,10 @@ button {
   .speed button {
     min-width: 34px;
     height: 32px;
+  }
+  .toasts {
+    top: 214px;
+    width: calc(100vw - 16px);
   }
   .toast {
     font-size: 13px;

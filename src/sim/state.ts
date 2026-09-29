@@ -10,7 +10,7 @@ import type { GameState } from "./types";
 export const GRID_SIZE = 24;
 export const START_CASH = 5_000_000;
 const START_CAPABILITY = 10;
-const START_VISITORS = 10;
+const START_VISITORS = 18;
 
 /** A living campus at tick 0: gate, paths, one of each core building, a run 40% done, and a crowd mid-stride. */
 export function createInitialState(seed = 1): GameState {
