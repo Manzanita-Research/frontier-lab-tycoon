@@ -1,4 +1,5 @@
 import type { ThreeElements } from "@react-three/fiber";
+import { windowMat } from "../fx/glow";
 import { boxGeo, cylGeo, sphereGeo, std } from "../materials";
 import type { Material } from "three";
 
@@ -36,4 +37,9 @@ export function Cyl({ p = [0, 0, 0], r, h, c, mat, ...rest }: { p?: V3; r: numbe
 
 export function Ball({ p, r, c, mat }: { p: V3; r: number; c?: string; mat?: Material }) {
   return <mesh geometry={sphereGeo} material={mat ?? std(c ?? "#fff")} position={p} scale={r} castShadow />;
+}
+
+/** A window pane: cool glass by day, lit warm at night (shared material, see fx/glow.ts). Centred on `p`, no shadow. */
+export function Glass({ p, s, rotY = 0 }: { p: V3; s: V3; rotY?: number }) {
+  return <mesh geometry={boxGeo} material={windowMat} position={p} scale={s} rotation-y={rotY} />;
 }

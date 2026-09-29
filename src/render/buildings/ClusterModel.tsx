@@ -1,6 +1,8 @@
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
+import { sim as game } from "../../app/game";
+import { fanSpeed, currentLoad } from "../fx/utilisation";
 import { CREAM, CREAM_DARK, boxGeo, glow } from "../materials";
 import { B, Cyl } from "./Parts";
 
@@ -16,12 +18,19 @@ const LED_OFF = new THREE.Color("#1f3b34");
 /** Stacked racks with blinking LEDs and a spinning fan on the tallest one. */
 export function ClusterModel({ color }: { color: string }) {
   const fan = useRef<THREE.Group>(null);
+  const spin = useRef({ angle: 0, speed: 3 });
   const leds = useMemo(() => LED_ON.map((c) => glow("#" + c.getHexString())), []);
 
-  useFrame(({ clock }) => {
+  useFrame(({ clock }, dt) => {
     const t = clock.elapsedTime;
-    if (fan.current) fan.current.rotation.y = t * 9;
-    leds.forEach((m, i) => m.color.copy(Math.sin(t * (2.1 + i * 1.7) + i * 2.3) > 0.1 ? LED_ON[i]! : LED_OFF));
+    // The fan winds up when the halls are starving the racks and coasts down when there's spare compute.
+    const load = currentLoad(game.world);
+    const s = spin.current;
+    s.speed += (fanSpeed(load) - s.speed) * (1 - Math.exp(-1.8 * dt));
+    s.angle += s.speed * Math.min(dt, 0.1);
+    if (fan.current) fan.current.rotation.y = s.angle;
+    const busy = 1 + Math.min(1.5, load.util);
+    leds.forEach((m, i) => m.color.copy(Math.sin(t * (2.1 + i * 1.7) * busy + i * 2.3) > 0.1 ? LED_ON[i]! : LED_OFF));
   });
 
   return (

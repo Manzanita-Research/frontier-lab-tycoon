@@ -2,8 +2,10 @@ import { useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { sim as game } from "../../app/game";
+import { Flag } from "../fx/Flag";
+import { fx } from "../fx/state";
 import { CREAM, CREAM_DARK, boxGeo, std } from "../materials";
-import { Cyl } from "./Parts";
+import { Cyl, Glass } from "./Parts";
 
 const SEGMENTS = 48;
 const RADIUS = 1.32;
@@ -62,7 +64,9 @@ export function HallModel({ color }: { color: string }) {
         mesh.setColorAt(i, tmp.copy(palette.lit).lerp(palette.hot, wave));
       } else if (i < lit) {
         const head = i === lit - 1 ? 0.5 + 0.5 * Math.sin(t * 6) : 0;
-        mesh.setColorAt(i, tmp.copy(palette.lit).lerp(palette.hot, head * 0.8));
+        // A slow wave circles the lit part of the ring, so a run in progress visibly hums.
+        const hum = 0.5 + 0.5 * Math.sin(t * 2.6 - i * 0.4);
+        mesh.setColorAt(i, tmp.copy(palette.lit).lerp(palette.hot, Math.min(1, head * 0.8 + hum * 0.24)));
       } else if (i === lit) {
         // The segment currently "charging" breathes.
         mesh.setColorAt(i, tmp.copy(palette.off).lerp(palette.lit, 0.25 + 0.2 * Math.sin(t * 4)));
@@ -72,6 +76,8 @@ export function HallModel({ color }: { color: string }) {
     }
     st.lit = lit;
     if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+    // The dome glows from within at night, and swells a little with the run's progress.
+    domeMat.emissiveIntensity = 0.22 + 0.55 * fx.night + 0.1 * Math.sin(t * 2.2) * (lit / SEGMENTS);
     if (beacon.current) beacon.current.color.set(pulsing ? "#ffffff" : color).multiplyScalar(0.8 + 0.2 * Math.sin(t * 3));
   });
 
@@ -85,6 +91,11 @@ export function HallModel({ color }: { color: string }) {
       <mesh position={[0, 0.78, 0]} material={domeMat} castShadow receiveShadow>
         <sphereGeometry args={[1.05, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2]} />
       </mesh>
+      {Array.from({ length: 10 }, (_, i) => {
+        const a = ((i + 0.5) / 10) * Math.PI * 2;
+        return <Glass key={i} p={[Math.cos(a) * 1.06, 0.36, Math.sin(a) * 1.06]} s={[0.05, 0.2, 0.17]} rotY={-a} />;
+      })}
+      <Flag position={[1.22, 0.16, 1.22]} color={color} pole={0.95} phase={1.3} rotationY={-0.6} />
       <Cyl p={[0, 1.78, 0]} r={0.03} h={0.42} c="#8a8fa0" />
       <mesh position={[0, 2.26, 0]} scale={0.1}>
         <sphereGeometry args={[1, 12, 8]} />

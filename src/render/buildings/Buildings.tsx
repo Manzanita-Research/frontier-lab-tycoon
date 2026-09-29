@@ -5,6 +5,7 @@ import { BUILDINGS, type BuildingKind } from "../../content/buildings";
 import { atoms, sim as game } from "../../app/game";
 import { useApp } from "../../app/hooks";
 import { rectCenter } from "../coords";
+import { CHEER_SECONDS, fx } from "../fx/state";
 import { ghostMaterials } from "../materials";
 import { ClusterModel } from "./ClusterModel";
 import { GateModel } from "./GateModel";
@@ -29,8 +30,11 @@ export function BuildingModel({ kind }: { kind: BuildingKind }) {
   }
 }
 
-/** Squash-and-stretch pop when something lands. */
-function Squash({ children, delay = 0 }: { children: ReactNode; delay?: number }) {
+/**
+ * Squash-and-stretch pop when something lands, then an idle breath. On a release the buildings bounce in a ripple out
+ * from the Training Hall (`at` is this building's scene position).
+ */
+function Squash({ children, delay = 0, phase = 0, at }: { children: ReactNode; delay?: number; phase?: number; at?: [number, number] }) {
   const ref = useRef<THREE.Group>(null);
   const t0 = useRef(performance.now() / 1000 + delay);
   useFrame(() => {
@@ -39,7 +43,13 @@ function Squash({ children, delay = 0 }: { children: ReactNode; delay?: number }
     const t = performance.now() / 1000 - t0.current;
     if (t < 0) return void g.scale.set(0.001, 0.001, 0.001);
     if (t > 1.4) {
-      if (g.scale.y !== 1) g.scale.set(1, 1, 1);
+      // Idle: a slow breath, a percent or so, that never moves the base off the ground.
+      let k = Math.sin(fx.time * 1.6 + phase) * 0.011;
+      if (at) {
+        const c = fx.time - fx.cheerAt - Math.hypot(at[0] - fx.cheerX, at[1] - fx.cheerZ) * 0.07;
+        if (c > 0 && c < CHEER_SECONDS) k += Math.exp(-3.2 * c) * Math.abs(Math.sin(c * 9)) * 0.12;
+      }
+      g.scale.set(1 - k * 0.45, 1 + k, 1 - k * 0.45);
       return;
     }
     const k = Math.exp(-6 * t) * Math.cos(14 * t);
@@ -73,7 +83,7 @@ export function Buildings() {
   return (
     <>
       <group position={[rectCenter(sim.gate)[0], 0, rectCenter(sim.gate)[1]]}>
-        <Squash>
+        <Squash phase={0.4} at={rectCenter(sim.gate)}>
           <GateModel labName={labName} />
         </Squash>
       </group>
@@ -81,7 +91,7 @@ export function Buildings() {
         const [cx, cz] = rectCenter(b);
         return (
           <group key={b.id} position={[cx, 0, cz]}>
-            <Squash delay={b.placedTick === 0 ? 0.25 + i * 0.16 : 0}>
+            <Squash delay={b.placedTick === 0 ? 0.25 + i * 0.16 : 0} phase={b.id * 1.9} at={[cx, cz]}>
               <BuildingModel kind={b.kind} />
             </Squash>
           </group>

@@ -4,9 +4,8 @@ import { app, registry } from "./app/game";
 import { Scene } from "./render/Scene";
 import { HUD } from "./ui/HUD";
 import { WorldOverlay } from "./ui/WorldOverlay";
-import { Sky } from "./ui/juice/Sky";
+import { Juice, Sky } from "./ui/juice";
 import "./ui/ui.css";
-import "./ui/juice/juice.css";
 
 export function App() {
   // Mounting the actor atom starts the app machine and its frame loop; releasing it stops both.
@@ -18,6 +17,7 @@ export function App() {
         <Scene />
         <WorldOverlay />
         <HUD />
+        <Juice />
       </Suspense>
     </RegistryContext.Provider>
   );
