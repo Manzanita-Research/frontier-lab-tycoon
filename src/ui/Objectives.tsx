@@ -33,7 +33,11 @@ export function Objectives() {
         <span className="obj-count">
           {done}/{goals.length}
         </span>
-        <span className={`obj-left ${left <= 60 ? "bad" : ""}`}>{left} days left</span>
+        <span className={`obj-left ${left <= 60 ? "bad" : ""}`}>
+          {left}
+          <span className="long"> days left</span>
+          <span className="short">d</span>
+        </span>
       </button>
       {open && (
         <>
