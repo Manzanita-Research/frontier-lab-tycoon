@@ -34,7 +34,8 @@ flowchart LR
 | **economy** | `.../economy.ts` | `solvent`, `runwayWarning`, `bailout`, `bankrupt` | `DAY {cash, day}` | `BAILOUT` | day of the last bridge round |
 | **goals** | `.../goals.ts` | `tracking`, `won`, `lost` (final) | `DAY {day, cash, values}` | `WON`, `LOST` | the three milestones, the day it ended |
 | **arc** (one per event card) | `.../arc.ts` | `calm`, `brewing`, `cardOpen`, `cooldown` | `DAY {day, ready, slotFree}`, `CHOOSE {choiceIndex}` | `RESOLVED` | choices, cooldown days, day last opened |
-| **walker** (one per walker) | `.../walker.ts` | `heading`, `inside`, `loitering`, `wandering`, `choosing`, `leaving`, `picketing`, `gone` (final) | `ARRIVED`, `LINGER`, `NEXT`, `TOUR_DONE`, `CHOSE_BUILDING`, `CHOSE_WANDER`, `PROTEST_STARTED`, `SENT_HOME`, `EXITED` | none: the driver acts on the state entered | nothing (`visits`/`step` stay plain walker counters) |
+| **walker** (one per walker) | `.../walker.ts` | `arriving`, `seeking`, `queuing`, `inside`, `loitering`, `wandering`, `choosing`, `leaving`, `quitting`, `picketing`, `gone` (final) | `ARRIVED`, `QUEUED`, `ADMITTED`, `GAVE_UP`, `LINGER`, `NEXT`, `TOUR_DONE`, `QUIT`, `CHOSE_BUILDING`, `CHOSE_WANDER`, `PROTEST_STARTED`, `SENT_HOME`, `EXITED` | none: the driver acts on the state entered | nothing (the need a walker is seeking, `visits` and `step` stay plain walker fields) |
+| **mood** (one per researcher and visitor) | `.../mood.ts` | `content`, `slumped`, `miserable`, `resigned` (final) | `LIFT`, `SLUMP`, `CRASH`, `DAY` | `RESIGNED` | the count of miserable days in a row |
 
 Arithmetic stays in plain functions: money per day, the training gain (`spend * (0.75 + 0.25 * morale)`), movement along a route, routing itself.
 
@@ -97,26 +98,67 @@ The driver evaluates each card's condition against the World (`ready`) and tells
 
 ```mermaid
 stateDiagram-v2
-  [*] --> wandering
-  wandering --> picketing: PROTEST_STARTED
-  picketing --> leaving: SENT_HOME
-  heading --> inside: ARRIVED
+  [*] --> arriving
+  arriving --> inside: ARRIVED
+  seeking --> inside: ARRIVED
+  arriving --> queuing: QUEUED
+  seeking --> queuing: QUEUED
+  queuing --> inside: ADMITTED
+  queuing --> choosing: GAVE_UP
   inside --> loitering: LINGER
-  heading --> choosing: NEXT
+  arriving --> choosing: NEXT
+  seeking --> choosing: NEXT
   inside --> choosing: NEXT
   loitering --> choosing: NEXT
   wandering --> choosing: NEXT
-  choosing --> heading: CHOSE_BUILDING
+  choosing --> seeking: CHOSE_BUILDING
   choosing --> wandering: CHOSE_WANDER
-  heading --> leaving: TOUR_DONE
+  arriving --> leaving: TOUR_DONE
+  seeking --> leaving: TOUR_DONE
   inside --> leaving: TOUR_DONE
   loitering --> leaving: TOUR_DONE
   wandering --> leaving: TOUR_DONE
+  arriving --> quitting: QUIT
+  seeking --> quitting: QUIT
+  queuing --> quitting: QUIT
+  inside --> quitting: QUIT
+  loitering --> quitting: QUIT
+  wandering --> quitting: QUIT
   leaving --> gone: EXITED
+  quitting --> gone: EXITED
+  arriving --> picketing: PROTEST_STARTED
+  wandering --> picketing: PROTEST_STARTED
+  picketing --> leaving: SENT_HOME
   gone --> [*]
 ```
 
-The walker machine is declarative on purpose (see the numbers below). The dice and facts a decision needs are folded into which event the driver sends, in the original draw order: when a stay ends, the driver rolls `rng.chance(0.55)` and sends `LINGER`, or checks `tourDone(kind, visits)` and sends `TOUR_DONE` or `NEXT`. The world work a state implies runs when the driver sees it entered: `choosing` picks a building and routes to it (then answers `CHOSE_*`), `loitering` steps out, `leaving` routes to the gate. Walkers get events only on discrete changes; movement is a plain function.
+`arriving` is a newcomer on the way to a first stop (a visitor or an applicant through the gate, or anyone at the start of the game); `seeking` is every trip after that, and *which* need it is for lives in `Walker.need` (`seeking(need)` in the spec): `energy`, `focus`, `fomo`, `patience`, or `work`/`tour` for the day job and sightseeing. `queuing` is a full building's doorstep: researchers and visitors wait until a spot frees or patience runs out; agents ignore capacity.
+
+The walker machine is declarative on purpose (see the numbers below). The dice and facts a decision needs are folded into which event the driver sends: when a stay ends, the driver rolls `rng.chance(0.55)` and sends `LINGER`, or checks `tourDone(kind, visits, patience)` and sends `TOUR_DONE` or `NEXT`. The world work a state implies runs when the driver sees it entered: `choosing` scores the buildings (see below) and routes to the winner (then answers `CHOSE_*`), `loitering` steps out, `leaving` and `quitting` route to the gate. Walkers get events only on discrete changes; movement is a plain function.
+
+**Destination choice** (`chooseTarget` in `sim/walkers.ts`) is RCT's: find the walker's most urgent need, score every reachable building that hosts them by `(how much it gives of that need, plus a little for their other needs) / (1 + distance / 6)`, and go to the best. If no reachable building gives at least 0.3 of it, the walker is `lost` ("I can't find a snack") and carries on with the day job or the tour. All of it is data in `content/buildings.ts` (`serves`, `hosts`, `capacity`, `stay`).
+
+### Mood
+
+```mermaid
+stateDiagram-v2
+  direction LR
+  [*] --> content
+  content --> slumped: SLUMP
+  slumped --> content: LIFT
+  content --> miserable: CRASH
+  slumped --> miserable: CRASH
+  miserable --> content: LIFT
+  miserable --> slumped: SLUMP
+  miserable --> miserable: DAY [days < 5]
+  miserable --> resigned: DAY [5th in a row] / RESIGNED
+```
+
+The second machine on every researcher and visitor. Once a game day the driver (`sim/crowd.ts`) works out happiness from the needs and, if the mood it implies (`moodFor`: slump under 0.4 and back out above 0.5, miserable under 0.2) differs from the one the walker is in, sends the event; only a miserable researcher also gets a `DAY`. `slumped` and `miserable` are the slump walk in the renderer; the fifth miserable day in a row emits `RESIGNED` and the driver sends the walker machine `QUIT` (box, gate, headline, an incident for the Vibes). That is a few events a day for the whole crowd, never one per walker per tick.
+
+### Vibes
+
+Not a machine: arithmetic, in `sim/vibes.ts`. `value = 999 * (0.4 happiness + 0.2 visitors impressed + 0.15 cleanliness (stubbed at 1) + 0.15 hype/100 + 0.1 * (1 - penalty))`, where penalty is the mean of the incident score (resignations, failed demos, bailouts; fades 10% a day) and the protester count at the gate over 25. Recalculated daily and eased a quarter of the gap at a time. It sets the visitor cap and spawn chance, brings researcher applicants when it is above 350 and a Training Hall has room, and turns some visitors into investors.
 
 ### Economy, goals, training
 
@@ -166,11 +208,15 @@ A sim machine never touches the World and never draws random numbers:
 |---|---|
 | 500-walker tick (400 agents + crowd + 160 discourse), best of 3 x 200 ticks | **0.11 - 0.23 ms** over 5 runs (pre-port baseline 0.085 ms; budget 0.3 ms) |
 | Discrete walker events at that load | about 12 per tick (7.6 arrivals, 4.1 stay-overs, 4.2 next-stop picks) |
+| 800-walker tick (400 agents, 300 researchers queuing for three small buildings, visitors, 40 protesters), best of 3 x 200 ticks (FLT-8) | **0.25 - 0.48 ms** (budget 0.5) |
+| Walker events at that load | about 27 per tick, because a crowd that size fights over a nap pod: 8 queue joins and give-ups, 12 pick-a-stop events |
 | `transition()` with a plain `{ target }` (resolveState included) | 3 - 5 us |
 | `transition()` with a `matches` pattern | about 7 us |
 | `transition()` when the transition contains any function (`to`, a `context` mapper) | 14 - 20 us; 22 - 27 us when it also `emit`s |
 | `resolveState` + `transition()` + reading `{ value, context }` | 9.6 us on a small function machine |
 | `getPersistedSnapshot` + `restoreSnapshot` round trip, same machine | 37 us |
+
+The 800-walker budget needed one more trick. With the Crowd, a walker changes phase about 27 times a tick at that load, and 27 x 10 us was over half the budget. Because the walker machine has no context and no functions, a transition depends on nothing but the phase and the event type, so `stepWalker` (in `machines/walker.ts`) asks XState once per (phase, event) pair, remembers the answer, and returns it from then on: about 0.3 us instead of 10. `walker.test.ts` checks it against the real `step` for every pair. It only works because the machine stays context-free; the moment a walker machine needs a counter, that shortcut is gone (the mood machine, which has one, is only stepped a few times a day).
 
 Two design consequences: the World stores `{ value, context }` and rebuilds with `resolveState` (the official persist/restore pair is 4x slower and this runs hundreds of times per tick), and the walker machine contains no functions at all. The first version of it used function transitions to keep `visits`/`step` in context and to decide leave-or-pick inside the machine; it measured 0.45 - 0.54 ms per tick and failed the perf test, so those decisions moved into the driver's choice of event.
 

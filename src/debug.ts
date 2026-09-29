@@ -1,4 +1,4 @@
-// URL knobs for screenshots and stress tests, e.g. /?seed=3&warp=25&zoom=70&focus=12,14&agents=200&discourse=44
+// URL knobs for screenshots and stress tests, e.g. /?seed=3&warp=25&zoom=70&focus=12,14&agents=200&discourse=44&researchers=20
 export interface DebugParams {
   seed: number;
   /** Simulate this many game days before the first frame. */
@@ -10,6 +10,8 @@ export interface DebugParams {
   agents: number;
   /** Start with this much water discourse (and the protesters that come with it). */
   discourse: number;
+  /** Extra researchers on top of the hall-driven count (for Thoughts-panel and queue screenshots). */
+  researchers: number;
 }
 
 export function readDebugParams(search = typeof window === "undefined" ? "" : window.location.search): DebugParams {
@@ -24,5 +26,6 @@ export function readDebugParams(search = typeof window === "undefined" ? "" : wi
     focus: focus && focus.length === 2 && focus.every(Number.isFinite) ? [focus[0]!, focus[1]!] : null,
     agents: num("agents") ?? 0,
     discourse: num("discourse") ?? 0,
+    researchers: num("researchers") ?? 0,
   };
 }

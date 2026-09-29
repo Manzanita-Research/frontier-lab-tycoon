@@ -13,7 +13,7 @@ import { fromEffectEventStream, setupEffect } from "@xstate/effect";
 import type { Command } from "../sim/commands";
 import type { NewsItem, OpenEvent, Outcome, Tone } from "../sim/types";
 import { Frames } from "./frames";
-import type { Snapshot, Speed, Tool, UiToast } from "./hud";
+import type { Snapshot, Speed, Tool, UiSelection, UiToast } from "./hud";
 import { Sim, type SyncReport } from "./sim";
 
 export const TICKS_PER_SECOND = 10;
@@ -42,6 +42,12 @@ export const AppContext = Schema.Struct({
   news: opaque<readonly NewsItem[]>(),
   toasts: opaque<readonly UiToast[]>(),
   toastSeq: Schema.Number,
+  /** The walker whose inspector card is open (their id), if any. */
+  selected: Schema.NullOr(Schema.Number),
+  /** The camera is following `selected`. */
+  follow: Schema.Boolean,
+  /** The Thoughts row (`kind|text`) whose walkers are lit up, if any. */
+  highlight: Schema.NullOr(Schema.String),
 });
 export type AppContext = typeof AppContext.Type;
 
@@ -86,6 +92,12 @@ export const appMachine = setupEffect({
       KEEP_PLAYING: Schema.Struct({}),
       NEW_LAB: Schema.Struct({}),
       TOAST: Schema.Struct({ text: Schema.String, tone: opaque<Tone>() }),
+      /** Tap a walker (or tap away: null) to open or close the inspector. */
+      SELECT: Schema.Struct({ id: Schema.NullOr(Schema.Number) }),
+      /** The inspector's Follow button. */
+      SET_FOLLOW: Schema.Struct({ follow: Schema.Boolean }),
+      /** Tap a Thoughts row to light up who thinks it; tap it again to switch off. */
+      HIGHLIGHT: Schema.Struct({ key: Schema.NullOr(Schema.String) }),
       DISMISS_TOAST: Schema.Struct({ id: Schema.Number }),
       TOAST_EXPIRED: Schema.Struct({ id: Schema.Number }),
     },
@@ -96,7 +108,8 @@ export const appMachine = setupEffect({
     advance: (args) =>
       Effect.gen(function* () {
         const sim = yield* Sim;
-        const p = args.params as { n: number; commands: readonly Command[]; alpha: number; publish: boolean; now: number };
+        const p = args.params as { n: number; commands: readonly Command[]; alpha: number; publish: boolean; now: number; ui: UiSelection };
+        sim.ui = p.ui;
         sim.step(p.n, p.commands);
         sim.alpha = p.alpha;
         const report = sim.report(p.publish);
@@ -106,7 +119,8 @@ export const appMachine = setupEffect({
     hold: (args) =>
       Effect.gen(function* () {
         const sim = yield* Sim;
-        const p = args.params as { commands: readonly Command[]; publish: boolean; now: number };
+        const p = args.params as { commands: readonly Command[]; publish: boolean; now: number; ui: UiSelection };
+        sim.ui = p.ui;
         sim.alpha = 1;
         sim.applyNow(p.commands);
         const report = sim.report(p.publish);
@@ -137,6 +151,9 @@ export const appMachine = setupEffect({
     news: input.first.news ?? [],
     toasts: input.first.toasts.slice(-3),
     toastSeq: 1,
+    selected: null,
+    follow: false,
+    highlight: null,
   }),
   invoke: { src: "frameLoop" },
   initial: "playing",
@@ -153,7 +170,7 @@ export const appMachine = setupEffect({
               const banked = context.acc + event.dt * TICKS_PER_SECOND * context.speed;
               const n = Math.min(MAX_CATCHUP_TICKS, Math.floor(banked));
               const acc = n === MAX_CATCHUP_TICKS ? 0 : banked - n;
-              const params = { n, commands: n > 0 ? context.queue : [], alpha: acc, publish: event.now - context.lastPublishAt >= SNAPSHOT_MS, now: event.now };
+              const params = { n, commands: n > 0 ? context.queue : [], alpha: acc, publish: event.now - context.lastPublishAt >= SNAPSHOT_MS, now: event.now, ui: uiOf(context) };
               enq(actions.advance, { ...args, params });
               return { context: { ...context, acc, queue: n > 0 ? [] : context.queue } };
             },
@@ -188,6 +205,8 @@ export const appMachine = setupEffect({
         snap: report.snap ?? context.snap,
         news: report.news ?? context.news,
         lastPublishAt: report.snap ? now : context.lastPublishAt,
+        // The walker left the map (out the gate, or the game was reset): close the card.
+        ...(report.snap && context.selected !== null && report.snap.selectedId === context.selected && report.snap.inspect === null ? { selected: null, follow: false } : {}),
       };
       for (const t of fresh) enq.raise({ type: "TOAST_EXPIRED", id: t.id }, { id: `toast:${t.id}`, delay: TOAST_MS });
       return { context: next, target: phaseFor(next) };
@@ -215,10 +234,14 @@ export const appMachine = setupEffect({
       const next = { ...context, outcomeDismissed: true, speed: (context.speed === 0 ? 1 : context.speed) as Speed };
       return { context: next, target: phaseFor(next) };
     },
+    // Selection changes reset the publish timer, so the next frame publishes and the card opens straight away.
+    SELECT: ({ context, event }) => ({ context: { ...context, selected: event.id, follow: event.id === context.selected ? context.follow : false, lastPublishAt: 0 } }),
+    SET_FOLLOW: ({ context, event }) => (context.selected === null ? undefined : { context: { ...context, follow: event.follow, lastPublishAt: 0 } }),
+    HIGHLIGHT: ({ context, event }) => ({ context: { ...context, highlight: event.key === context.highlight ? null : event.key, lastPublishAt: 0 } }),
     NEW_LAB: (args, enq) => {
       const { context, actions } = args;
       enq(actions.newLab, args);
-      const next = { ...context, queue: [], acc: 0, toasts: [], outcomeDismissed: false, speed: 1 as Speed, tool: null, hover: null };
+      const next = { ...context, queue: [], acc: 0, toasts: [], outcomeDismissed: false, speed: 1 as Speed, tool: null, hover: null, selected: null, follow: false, highlight: null };
       return { context: next, target: ".playing.running" };
     },
     TOAST: ({ context, event }, enq) => {
@@ -238,10 +261,13 @@ export const appMachine = setupEffect({
   },
 });
 
+/** The selection as the sim handle wants it. */
+const uiOf = (c: AppContext): UiSelection => ({ selected: c.selected, follow: c.follow, highlight: c.highlight });
+
 /** Every frame outside `running`: time stands still, so only queued commands apply. */
 function heldFrame(context: AppContext, now: number) {
   return {
-    params: { commands: context.queue, publish: now - context.lastPublishAt >= SNAPSHOT_MS, now },
+    params: { commands: context.queue, publish: now - context.lastPublishAt >= SNAPSHOT_MS, now, ui: uiOf(context) },
     // Nothing banked and nothing queued: no new context, so subscribers are not woken at 60 Hz for nothing.
     next: context.acc === 0 && context.queue.length === 0 ? undefined : { context: { ...context, acc: 0, queue: [] } },
   };
