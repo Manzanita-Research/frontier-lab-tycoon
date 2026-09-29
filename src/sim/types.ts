@@ -153,7 +153,7 @@ export interface GameState {
   recentThoughts: string[];
   /** Debug/stress: extra agents on top of the capability-driven count. */
   agentBonus: number;
-  /** 0 to 100. Rises with compute clusters, decays daily; a quarter of it is the protester headcount. */
+  /** Rises with compute clusters, decays daily; a quarter of it is the protester headcount (capped at 40). */
   waterDiscourse: number;
   goals: GoalProgress[];
   outcome: Outcome;

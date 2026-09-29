@@ -52,8 +52,9 @@ export const EVENTS: EventDef[] = [
     title: "Viral post: every prompt drinks a bottle of water",
     body: "A screenshot claims each chatbot reply drinks a whole bottle of water. It has four million shares and zero citations. There are people at your gate now, with signs.",
     tone: "bad",
-    // The discourse stat only climbs once there is compute to be angry about; day 30 keeps the card off a brand-new campus.
-    when: { all: [{ stat: "waterDiscourse", atLeast: 30 }, { stat: "day", atLeast: 30 }] },
+    // The stat only climbs once there is compute to be angry about. Day 60 (two minutes at 1x) keeps the card
+    // off a brand-new campus, so the toy gets a little time before the world pushes back.
+    when: { all: [{ stat: "waterDiscourse", atLeast: 30 }, { stat: "day", atLeast: 60 }] },
     choices: [
       {
         label: "Publish a 90-page water report",
