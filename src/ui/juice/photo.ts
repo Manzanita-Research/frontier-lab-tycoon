@@ -150,6 +150,9 @@ export async function takePhoto(): Promise<Shot | null> {
   a.click();
   a.remove();
   const shot = { url, name, id: ++seq };
+  const prev = registry.get(shotAtom);
   registry.set(shotAtom, shot);
+  // The polaroid has moved on to the new photo; let the old one's memory go.
+  if (prev) setTimeout(() => URL.revokeObjectURL(prev.url), 1000);
   return shot;
 }
