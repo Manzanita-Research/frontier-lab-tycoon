@@ -1,6 +1,8 @@
 import { BUILDINGS, type BuildingKind } from "../content/buildings";
 import { LAB_NAMES, modelName } from "../content/names";
 import { createGoals } from "./goals";
+import { initialStored } from "./machines/run";
+import { trainingMachine } from "./machines/training";
 import { pushNews } from "./news";
 import { createRng } from "./rng";
 import { dailyThoughts } from "./thoughts";
@@ -40,7 +42,7 @@ export function createInitialState(seed = 1): GameState {
     gate: { x: 11, z: 23, w: 2, d: 1 },
     buildings: [],
     walkers: [],
-    training: { run: 1, progress: 120, cost: 300, name: modelName(1, rng, 0) },
+    training: initialStored(trainingMachine, { run: 1, progress: 120, cost: 300, name: modelName(1, rng, 0) }),
     models: [],
     news: [],
     thoughts: [],
@@ -73,7 +75,7 @@ export function createInitialState(seed = 1): GameState {
   seedWalkers(state, "visitor", START_VISITORS, rng);
 
   pushNews(state, rng, "start");
-  pushNews(state, rng, "runStarted", { model: state.training.name });
+  pushNews(state, rng, "runStarted", { model: state.training.context.name });
   for (let i = 0; i < 3; i++) dailyThoughts(state, rng, true);
 
   state.rngState = rng.state();

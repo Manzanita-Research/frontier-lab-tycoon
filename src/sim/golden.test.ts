@@ -26,7 +26,7 @@ function view(s: GameState) {
     event: s.event,
     waterDiscourse: s.waterDiscourse,
     ledger: s.ledger,
-    training: s.training,
+    training: s.training.context,
     models: s.models,
     goals: s.goals,
     flags: s.flags,

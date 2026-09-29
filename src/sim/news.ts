@@ -22,7 +22,7 @@ export function addToast(state: GameState, text: string, tone: Tone = "neutral")
 export function templateVars(state: GameState, vars: NewsVars, rng: Rng): Record<string, string> {
   return {
     lab: state.labName,
-    model: vars.model ?? state.models[state.models.length - 1] ?? state.training.name,
+    model: vars.model ?? state.models[state.models.length - 1] ?? state.training.context.name,
     rival: vars.rival ?? rng.pick(RIVALS),
     cash: formatMoney(state.cash),
   };

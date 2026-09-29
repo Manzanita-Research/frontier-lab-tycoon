@@ -72,7 +72,7 @@ function makeSnapshot(s: GameState, prev?: Snapshot): Snapshot {
     labName: s.labName,
     hasHall: s.buildings.some((b) => b.kind === "hall"),
     computePerDay: computePerDay(s),
-    training: { name: s.training.name, run: s.training.run, pct: Math.min(1, s.training.progress / s.training.cost) },
+    training: { name: s.training.context.name, run: s.training.context.run, pct: Math.min(1, s.training.context.progress / s.training.context.cost) },
     thoughts: s.thoughts.slice(),
     pops: s.pops.slice(),
     version: s.version,
