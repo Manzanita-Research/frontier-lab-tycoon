@@ -5,6 +5,7 @@
 // The digest reads the game through `view()`, not the raw state, so the persisted shape can change (machine
 // snapshots, moved fields) without touching the recorded values. Only `view()` follows the shape.
 import { canPlace, type Command } from "./commands";
+import { openEventOf } from "./events";
 import { outcomeOf } from "./goals";
 import { createInitialState } from "./state";
 import { tick } from "./tick";
@@ -18,6 +19,7 @@ function flagsOf(s: GameState): Record<string, unknown> {
   const flags: Record<string, unknown> = { ...s.flags };
   if (s.economy.context.lastBailout !== null) flags.lastBailout = s.economy.context.lastBailout;
   if (s.goals.context.outcomeDay !== null) flags.outcomeDay = s.goals.context.outcomeDay;
+  for (const [id, arc] of Object.entries(s.arcs)) if (arc.context.openedDay !== null) flags[`event:${id}`] = arc.context.openedDay;
   return flags;
 }
 
@@ -34,7 +36,7 @@ function view(s: GameState) {
     compute: s.compute,
     hype: s.hype,
     outcome: outcomeOf(s),
-    event: s.event,
+    event: openEventOf(s),
     waterDiscourse: s.waterDiscourse,
     ledger: s.ledger,
     training: s.training.context,
@@ -92,7 +94,8 @@ function play(seed: number, ticks: number, checkpoints: number[]): Record<number
   let built = 0;
   for (let i = 0; i < ticks; i++) {
     const cmds: Command[] = [];
-    if (s.event) cmds.push({ type: "chooseEvent", eventId: s.event.id, choiceIndex: (s.tick + seed) % 3 });
+    const open = openEventOf(s);
+    if (open) cmds.push({ type: "chooseEvent", eventId: open.id, choiceIndex: (s.tick + seed) % 3 });
     else if (i % 30 === 5 && built < BUILD_ORDER.length) {
       const kind = BUILD_ORDER[built]!;
       const at = spot(s, kind);

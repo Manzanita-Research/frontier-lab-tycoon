@@ -1,5 +1,6 @@
 // Everything in GameState is plain and JSON-serializable.
 import type { BuildingKind } from "../content/buildings";
+import type { ArcStored } from "./machines/arc";
 import type { EconomyStored } from "./machines/economy";
 import type { GoalsStored } from "./machines/goals";
 import type { TrainingStored } from "./machines/training";
@@ -155,6 +156,6 @@ export interface GameState {
   waterDiscourse: number;
   /** The scenario machine: tracking, won or lost, with the milestones and the day it ended in its context. */
   goals: GoalsStored;
-  /** At most one at a time; `tick` does nothing while it is open. */
-  event: OpenEvent | null;
+  /** One machine per event card, by event id. At most one is in `cardOpen`; `tick` does nothing while it is. */
+  arcs: Record<string, ArcStored>;
 }

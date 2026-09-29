@@ -3,7 +3,7 @@ import { EVENTS, eventById } from "../content/events";
 import { GOALS, SCENARIO } from "../content/goals";
 import { applyCommands, type Command } from "./commands";
 import { MAX_AGENTS } from "./constants";
-import { dailyEvents } from "./events";
+import { dailyEvents, openEventOf } from "./events";
 import { dailyGoals, outcomeOf } from "./goals";
 import { dailyDiscourse, protesterCount, protesterTarget, syncProtesters } from "./protest";
 import { createRng } from "./rng";
@@ -16,7 +16,7 @@ const count = (s: GameState, kind: string) => s.walkers.filter((w) => w.kind ===
 const run = (s: GameState, days: number, script: (s: GameState) => Command[] = () => []) => {
   for (let i = 0; i < days * TICKS_PER_DAY; i++) tick(s, i % TICKS_PER_DAY === 0 ? script(s) : []);
 };
-const choose = (s: GameState, index: number): Command => ({ type: "chooseEvent", eventId: s.event!.id, choiceIndex: index });
+const choose = (s: GameState, index: number): Command => ({ type: "chooseEvent", eventId: openEventOf(s)!.id, choiceIndex: index });
 
 /** A state with the water event open, cash and discourse known. */
 function withWaterEvent(seed = 1): GameState {
@@ -24,7 +24,7 @@ function withWaterEvent(seed = 1): GameState {
   s.day = 70;
   s.waterDiscourse = 34;
   dailyEvents(s);
-  expect(s.event?.id).toBe("waterDiscourse");
+  expect(openEventOf(s)?.id).toBe("waterDiscourse");
   return s;
 }
 
@@ -237,19 +237,19 @@ describe("events", () => {
     s.waterDiscourse = 29.9;
     s.day = 90;
     dailyEvents(s);
-    expect(s.event).toBeNull(); // not angry enough yet
+    expect(openEventOf(s)).toBeNull(); // not angry enough yet
     s.waterDiscourse = 31;
     s.day = 59;
     dailyEvents(s);
-    expect(s.event).toBeNull(); // too early in the run
+    expect(openEventOf(s)).toBeNull(); // too early in the run
     s.day = 60;
     dailyEvents(s);
-    expect(s.event).toEqual({ id: "waterDiscourse", day: 60 });
+    expect(openEventOf(s)).toEqual({ id: "waterDiscourse", day: 60 });
     const t = s.tick;
     run(s, 3);
     expect(s.tick).toBe(t);
     tick(s, [choose(s, 0)]);
-    expect(s.event).toBeNull();
+    expect(openEventOf(s)).toBeNull();
     expect(s.tick).toBe(t + 1);
   });
 
@@ -257,7 +257,7 @@ describe("events", () => {
     const s = withWaterEvent();
     applyCommands(s, [{ type: "chooseEvent", eventId: "drumCircle", choiceIndex: 0 }], createRng(1));
     applyCommands(s, [{ type: "chooseEvent", eventId: "waterDiscourse", choiceIndex: 7 }], createRng(1));
-    expect(s.event?.id).toBe("waterDiscourse");
+    expect(openEventOf(s)?.id).toBe("waterDiscourse");
   });
 
   it("choice 1: the water report costs $150K and cuts discourse by 20", () => {
@@ -267,7 +267,7 @@ describe("events", () => {
     expect(s.cash).toBe(cash - 150_000);
     expect(s.waterDiscourse).toBe(14);
     expect(s.news.at(-1)!.text).toContain("nobody reads past the abstract");
-    expect(s.event).toBeNull();
+    expect(openEventOf(s)).toBeNull();
   });
 
   it("choice 2: the Transparency Fountain costs $300K, cuts discourse by 35, adds hype and a free fountain by the gate", () => {
@@ -302,10 +302,10 @@ describe("events", () => {
     s.waterDiscourse = 50;
     s.day = 70 + 59;
     dailyEvents(s);
-    expect(s.event).toBeNull();
+    expect(openEventOf(s)).toBeNull();
     s.day = 70 + 60;
     dailyEvents(s);
-    expect(s.event?.id).toBe("waterDiscourse");
+    expect(openEventOf(s)?.id).toBe("waterDiscourse");
   });
 
   it("fires the drum circle 20 days after the player ignored the water, if discourse is still 40+", () => {
@@ -313,14 +313,14 @@ describe("events", () => {
     applyCommands(s, [choose(s, 2)], createRng(1));
     s.day = 70 + 19;
     dailyEvents(s);
-    expect(s.event).toBeNull();
+    expect(openEventOf(s)).toBeNull();
     s.day = 70 + 20;
     s.waterDiscourse = 39;
     dailyEvents(s);
-    expect(s.event).toBeNull();
+    expect(openEventOf(s)).toBeNull();
     s.waterDiscourse = 41;
     dailyEvents(s);
-    expect(s.event?.id).toBe("drumCircle");
+    expect(openEventOf(s)?.id).toBe("drumCircle");
     applyCommands(s, [choose(s, 0)], createRng(1));
     expect(s.flags.ignoredWater).toBeUndefined();
     expect(s.waterDiscourse).toBe(16);
@@ -332,7 +332,7 @@ describe("events", () => {
     s.waterDiscourse = 90;
     s.day = 200;
     dailyEvents(s);
-    expect(s.event?.id).toBe("waterDiscourse");
+    expect(openEventOf(s)?.id).toBe("waterDiscourse");
   });
 
   it("keeps every event within 1 to 3 choices, each with a hint", () => {
@@ -378,7 +378,7 @@ describe("fountain", () => {
 
 describe("determinism with events", () => {
   it("replays identically, event answers included", () => {
-    const answer = (s: GameState): Command[] => (s.event ? [choose(s, s.tick % 3)] : []);
+    const answer = (s: GameState): Command[] => (openEventOf(s) ? [choose(s, s.tick % 3)] : []);
     const play = () => {
       const s = createInitialState(9);
       s.waterDiscourse = 34;
@@ -388,7 +388,7 @@ describe("determinism with events", () => {
       return s;
     };
     const a = play();
-    expect(a.flags["event:waterDiscourse"]).toBeDefined();
+    expect(a.arcs.waterDiscourse!.context.openedDay).toBeDefined();
     expect(play()).toEqual(a);
     expect(JSON.parse(JSON.stringify(a))).toEqual(a);
   });
