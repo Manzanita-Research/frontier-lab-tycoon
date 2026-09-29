@@ -54,7 +54,7 @@ export function HallModel({ color }: { color: string }) {
     }
     st.flash = Math.max(0, st.flash - dt);
     const t = clock.elapsedTime;
-    const lit = Math.floor((sim.training.progress / sim.training.cost) * SEGMENTS);
+    const lit = Math.floor((sim.training.context.progress / sim.training.context.cost) * SEGMENTS);
     const pulsing = st.flash > 0;
     for (let i = 0; i < SEGMENTS; i++) {
       if (pulsing) {

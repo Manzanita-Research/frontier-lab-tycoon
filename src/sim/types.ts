@@ -1,5 +1,6 @@
 // Everything in GameState is plain and JSON-serializable.
 import type { BuildingKind } from "../content/buildings";
+import type { TrainingStored } from "./machines/training";
 
 export type { BuildingKind };
 export type WalkerKind = "researcher" | "agent" | "visitor" | "protester";
@@ -54,14 +55,6 @@ export interface Walker {
   /** Protesters: the spot they picket from. */
   homeX: number;
   homeZ: number;
-}
-
-export interface Training {
-  run: number;
-  progress: number;
-  cost: number;
-  /** Name of the model this run will produce. */
-  name: string;
 }
 
 export interface NewsItem {
@@ -133,7 +126,8 @@ export interface GameState {
   gate: Rect;
   buildings: Building[];
   walkers: Walker[];
-  training: Training;
+  /** The training machine: run, progress, cost and the next model name live in its context. */
+  training: TrainingStored;
   /** Names of released models. */
   models: string[];
   /** Last 50. */

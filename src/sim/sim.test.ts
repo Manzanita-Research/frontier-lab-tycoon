@@ -26,7 +26,7 @@ describe("initial state", () => {
     expect(s.walkers.filter((w) => w.kind === "agent")).toHaveLength(6 + 5);
     expect(s.walkers.filter((w) => w.kind === "visitor")).toHaveLength(18);
     expect(s.walkers.filter((w) => w.kind === "protester")).toHaveLength(0);
-    expect(s.training.progress / s.training.cost).toBeCloseTo(0.4);
+    expect(s.training.context.progress / s.training.context.cost).toBeCloseTo(0.4);
     expect(s.buildings.map((b) => b.kind).sort()).toEqual(["cluster", "hall", "kombucha"]);
     for (const b of s.buildings) expect(isReachable(s, b)).toBe(true);
     expect(s.thoughts.length).toBeGreaterThan(0);
@@ -123,7 +123,7 @@ describe("economy", () => {
 describe("training", () => {
   it("completes a run, raises capability, names the model and starts the next", () => {
     const s = withGateway();
-    s.training.progress = s.training.cost - 1;
+    s.training = { ...s.training, context: { ...s.training.context, progress: s.training.context.cost - 1 } };
     s.compute = 100;
     const cap = s.capability;
     const cash = s.cash;
@@ -131,9 +131,9 @@ describe("training", () => {
     expect(s.models).toEqual(["Frontier-2"]);
     expect(s.capability).toBe(cap + 16);
     expect(s.cash).toBeGreaterThan(cash);
-    expect(s.training.run).toBe(2);
-    expect(s.training.cost).toBe(900);
-    expect(s.training.name).toBe("Frontier-3-Reasoner");
+    expect(s.training.context.run).toBe(2);
+    expect(s.training.context.cost).toBe(900);
+    expect(s.training.context.name).toBe("Frontier-3-Reasoner");
     expect(s.news.some((n) => n.text.includes("Frontier-2"))).toBe(true);
     expect(s.toasts.some((t) => t.text.includes("Frontier-2"))).toBe(true);
   });
@@ -141,9 +141,9 @@ describe("training", () => {
   it("does nothing without a Training Hall", () => {
     const s = createInitialState(1);
     s.buildings = s.buildings.filter((b) => b.kind !== "hall");
-    const p = s.training.progress;
+    const p = s.training.context.progress;
     dailyTraining(s, createRng(1));
-    expect(s.training.progress).toBe(p);
+    expect(s.training.context.progress).toBe(p);
   });
 
   it("finishes run #1 within a minute of real time at 1x (10 ticks per second)", () => {
