@@ -208,8 +208,8 @@ A sim machine never touches the World and never draws random numbers:
 |---|---|
 | 500-walker tick (400 agents + crowd + 160 discourse), best of 3 x 200 ticks | **0.11 - 0.23 ms** over 5 runs (pre-port baseline 0.085 ms; budget 0.3 ms) |
 | Discrete walker events at that load | about 12 per tick (7.6 arrivals, 4.1 stay-overs, 4.2 next-stop picks) |
-| 800-walker tick (400 agents, 300 researchers queuing for three small buildings, visitors, 40 protesters), best of 3 x 200 ticks (FLT-8) | **0.25 - 0.48 ms** (budget 0.5) |
-| Walker events at that load | about 27 per tick, because a crowd that size fights over a nap pod: 8 queue joins and give-ups, 12 pick-a-stop events |
+| 800+ walker tick (400 agents, 300 researchers fighting over three small buildings, 110 visitors, 40 protesters; 850 at the start of each batch), best of 3 x 200 ticks (FLT-8) | **0.33 - 0.39 ms** over 3 runs (budget 0.5); the 500-walker test above is now 0.13 ms |
+| Walker events at that load | about 27 per tick, because a crowd that size fights over a nap pod: about 8 queue joins and give-ups, 12 pick-a-stop events (measured before the memo below) |
 | `transition()` with a plain `{ target }` (resolveState included) | 3 - 5 us |
 | `transition()` with a `matches` pattern | about 7 us |
 | `transition()` when the transition contains any function (`to`, a `context` mapper) | 14 - 20 us; 22 - 27 us when it also `emit`s |
