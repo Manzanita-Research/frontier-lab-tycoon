@@ -1,5 +1,9 @@
 import { StrictMode, Suspense, lazy, type ComponentType } from "react";
 import { createRoot } from "react-dom/client";
+import "@fontsource/nunito/latin-600.css";
+import "@fontsource/nunito/latin-700.css";
+import "@fontsource/nunito/latin-800.css";
+import "@fontsource/nunito/latin-900.css";
 import { App } from "./App";
 import "./index.css";
 
@@ -18,14 +22,22 @@ function resolvePage() {
 
 const Page = resolvePage();
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    {Page ? (
-      <Suspense fallback={null}>
-        <Page />
-      </Suspense>
-    ) : (
-      <App />
-    )}
-  </StrictMode>,
+// Canvas text (the gate sign, the placards) is drawn once, so wait for Nunito, but never for long.
+const fonts = Promise.race([
+  Promise.all([600, 700, 800, 900].map((w) => document.fonts.load(`${w} 16px Nunito`))),
+  new Promise((done) => setTimeout(done, 1500)),
+]).catch(() => undefined);
+
+void fonts.then(() =>
+  createRoot(document.getElementById("root")!).render(
+    <StrictMode>
+      {Page ? (
+        <Suspense fallback={null}>
+          <Page />
+        </Suspense>
+      ) : (
+        <App />
+      )}
+    </StrictMode>,
+  ),
 );

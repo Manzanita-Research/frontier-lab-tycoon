@@ -7,6 +7,7 @@ import { rectCenter } from "../coords";
 import { ghostMaterials } from "../materials";
 import { ClusterModel } from "./ClusterModel";
 import { GateModel } from "./GateModel";
+import { FountainModel } from "./FountainModel";
 import { GatewayModel } from "./GatewayModel";
 import { HallModel } from "./HallModel";
 import { KombuchaModel } from "./KombuchaModel";
@@ -22,6 +23,8 @@ export function BuildingModel({ kind }: { kind: BuildingKind }) {
       return <GatewayModel color={color} />;
     case "kombucha":
       return <KombuchaModel color={color} />;
+    case "fountain":
+      return <FountainModel color={color} />;
   }
 }
 

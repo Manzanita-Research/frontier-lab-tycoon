@@ -7,6 +7,6 @@ body,
   overflow: hidden;
   overscroll-behavior: none;
   touch-action: none;
-  font-family: ui-rounded, "SF Pro Rounded", system-ui, sans-serif;
+  font-family: ui-rounded, "SF Pro Rounded", "Nunito", "Varela Round", system-ui, sans-serif;
   background: linear-gradient(#8fd0ee 0%, #bfe6f7 45%, #eaf7ff 70%, #fff5d6 100%);
 }

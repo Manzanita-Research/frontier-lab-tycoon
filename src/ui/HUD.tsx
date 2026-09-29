@@ -2,7 +2,10 @@ import { useEffect, useLayoutEffect, useRef } from "react";
 import { BUILDINGS, PATH_PRICE } from "../content/buildings";
 import { formatDate, formatMoney } from "../sim/format";
 import { SPEEDS, TOOLS, useStore, type Tool } from "../store";
+import { EventCard } from "./EventCard";
 import { ICONS } from "./icons";
+import { Objectives } from "./Objectives";
+import { OutcomeCard } from "./OutcomeCard";
 
 const toolName = (t: Tool) => (t === "path" ? "Path" : t === "bulldoze" ? "Bulldoze" : BUILDINGS[t].name);
 const SHORT: Record<Tool, string> = { path: "Path", cluster: "Cluster", hall: "Training Hall", gateway: "Gateway", kombucha: "Kombucha", bulldoze: "Bulldoze" };
@@ -186,8 +189,10 @@ function Toasts() {
     const timers = toasts.map((t) => setTimeout(() => dismiss(t.id), 5200));
     return () => timers.forEach(clearTimeout);
   }, [toasts, dismiss]);
+  const hasGateway = useStore((st) => st.snap.hasGateway);
   return (
     <div className="toasts">
+      {!hasGateway && <div className="toast panel hint">Build an API Gateway next to a path to start earning.</div>}
       {toasts.map((t) => (
         <button key={t.id} className={`toast panel ${t.tone}`} onClick={() => dismiss(t.id)}>
           {t.text}
@@ -202,6 +207,8 @@ export function HUD() {
     const onKey = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
       const st = useStore.getState();
+      // A card is up: it owns the keyboard (1 to 3 choose), and nothing else should move.
+      if (st.snap.event || (st.snap.outcome !== "playing" && !st.outcomeDismissed)) return;
       if (e.key === " ") {
         e.preventDefault();
         // A focused button would also treat Space as a click.
@@ -218,12 +225,17 @@ export function HUD() {
     <div className="hud">
       <TopBar />
       <div className="hud-row">
-        <TrainingChip />
+        <div className="left-col">
+          <TrainingChip />
+          <Objectives />
+        </div>
         <SpeedControl />
       </div>
       <Toasts />
       <BuildBar />
       <Ticker />
+      <EventCard />
+      <OutcomeCard />
     </div>
   );
 }
