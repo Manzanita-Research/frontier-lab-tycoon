@@ -4,6 +4,8 @@ export const CREAM = "#f7eed6";
 export const CREAM_DARK = "#e5d6b0";
 export const INK = "#3a2a1c";
 
+export const FONT_STACK = `ui-rounded, "SF Pro Rounded", "Nunito", "Varela Round", system-ui, sans-serif`;
+
 export const boxGeo = new THREE.BoxGeometry(1, 1, 1);
 export const cylGeo = new THREE.CylinderGeometry(1, 1, 1, 24);
 export const sphereGeo = new THREE.SphereGeometry(1, 20, 14);
@@ -50,7 +52,7 @@ export function labelTexture(
   g.textAlign = "center";
   g.textBaseline = "middle";
   let size = h * 0.56;
-  const family = `ui-rounded, "SF Pro Rounded", system-ui, sans-serif`;
+  const family = FONT_STACK;
   g.font = `${weight} ${size}px ${family}`;
   while (g.measureText(text).width > w * 0.92 && size > 12) {
     size -= 4;

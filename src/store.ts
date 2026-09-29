@@ -9,8 +9,9 @@ import { runwayMonths } from "./sim/format";
 import { createRng } from "./sim/rng";
 import { createInitialState } from "./sim/state";
 import { buildingAt } from "./sim/pathfind";
+import { protesterCount, syncProtesters } from "./sim/protest";
 import { fillAgents } from "./sim/walkers";
-import type { Building, GameState, NewsItem, Pop, Thought, Tone } from "./sim/types";
+import type { Building, GameState, GoalProgress, NewsItem, OpenEvent, Outcome, Pop, Thought, Tone } from "./sim/types";
 
 export type Tool = "path" | PlaceableKind | "bulldoze";
 /** Hotkeys 1-6 pick these in order. */
@@ -43,6 +44,12 @@ export interface Snapshot {
   buildings: Building[];
   models: number;
   walkers: number;
+  hasGateway: boolean;
+  goals: GoalProgress[];
+  outcome: Outcome;
+  event: OpenEvent | null;
+  protesters: number;
+  discourse: number;
 }
 
 export interface UiToast {
@@ -72,6 +79,12 @@ function makeSnapshot(s: GameState, prev?: Snapshot): Snapshot {
     buildings: prev && prev.version === s.version ? prev.buildings : s.buildings.slice(),
     models: s.models.length,
     walkers: s.walkers.length,
+    hasGateway: s.buildings.some((b) => b.kind === "gateway"),
+    goals: s.goals.map((g) => ({ ...g })),
+    outcome: s.outcome,
+    event: s.event ? { ...s.event } : null,
+    protesters: protesterCount(s),
+    discourse: s.waterDiscourse,
   };
 }
 
@@ -84,6 +97,8 @@ interface Store {
   tool: Tool | null;
   hover: { x: number; z: number } | null;
   toasts: UiToast[];
+  /** True once the player has clicked "Keep playing" on the win card. */
+  outcomeDismissed: boolean;
   setSpeed(s: Speed): void;
   togglePause(): void;
   setTool(t: Tool | null): void;
@@ -93,16 +108,27 @@ interface Store {
   use(tool: Tool, x: number, z: number, quiet?: boolean): void;
   toast(text: string, tone?: Tone): void;
   dismissToast(id: number): void;
+  /** Answer the open event card. */
+  chooseEvent(choiceIndex: number): void;
+  keepPlaying(): void;
+  /** Start over with a fresh seed. */
+  newLab(): void;
 }
 
 function createGame() {
   const dbg = readDebugParams();
   const sim = createInitialState(dbg.seed);
   for (let i = 0; i < dbg.warp * TICKS_PER_DAY; i++) tick(sim);
-  if (dbg.agents > 0) {
-    sim.agentBonus = dbg.agents;
+  if (dbg.agents > 0 || dbg.discourse > 0) {
     const rng = createRng(sim.rngState);
-    fillAgents(sim, rng);
+    if (dbg.agents > 0) {
+      sim.agentBonus = dbg.agents;
+      fillAgents(sim, rng);
+    }
+    if (dbg.discourse > 0) {
+      sim.waterDiscourse = dbg.discourse;
+      syncProtesters(sim, rng, true);
+    }
     sim.rngState = rng.state();
   }
   return { sim, dbg };
@@ -111,6 +137,8 @@ function createGame() {
 const { sim: initialSim, dbg } = createGame();
 const queue: Command[] = [];
 let alpha = 1;
+/** Real time banked toward the next sim tick. */
+let acc = 0;
 /** How far between the previous tick and the current one the renderer should draw (0..1). */
 export const getAlpha = () => alpha;
 
@@ -124,6 +152,7 @@ export const useStore = create<Store>((set, get) => ({
   tool: null,
   hover: null,
   toasts: initialSim.toasts.splice(0).map((t) => ({ ...t })),
+  outcomeDismissed: false,
 
   setSpeed: (speed) => set({ speed }),
   togglePause: () => set((st) => ({ speed: st.speed === 0 ? 1 : 0 })),
@@ -154,14 +183,39 @@ export const useStore = create<Store>((set, get) => ({
     set((st) => ({ toasts: [...st.toasts.filter((t) => t.text !== text).slice(-2), { id, text, tone }] }));
   },
   dismissToast: (id) => set((st) => ({ toasts: st.toasts.filter((t) => t.id !== id) })),
+  chooseEvent: (choiceIndex) => {
+    const { sim } = get();
+    if (sim.event) queue.push({ type: "chooseEvent", eventId: sim.event.id, choiceIndex });
+  },
+  keepPlaying: () => set((st) => ({ outcomeDismissed: true, speed: st.speed === 0 ? 1 : st.speed })),
+  newLab: () => {
+    const seed = ((Date.now() ^ Math.imul(get().sim.seed, 2654435761)) >>> 0) || 1;
+    const sim = createInitialState(seed);
+    queue.length = 0;
+    acc = 0;
+    alpha = 1;
+    set({
+      sim,
+      snap: makeSnapshot(sim),
+      news: sim.news.slice(),
+      toasts: [],
+      outcomeDismissed: false,
+      speed: 1,
+      tool: null,
+      hover: null,
+    });
+  },
 }));
+
+/** Time stands still while an event card is up, or after the scenario ends and the card hasn't been dismissed. */
+const isHeld = (st: { sim: GameState; outcomeDismissed: boolean }) =>
+  st.sim.event !== null || (st.sim.outcome !== "playing" && !st.outcomeDismissed);
 
 /** Starts the requestAnimationFrame loop. Returns a stop function. */
 export function startLoop(): () => void {
   let raf = 0;
   let last = performance.now();
   let lastSnap = 0;
-  let acc = 0;
   let lastVersion = -1;
 
   const publish = (now: number) => {
@@ -180,10 +234,12 @@ export function startLoop(): () => void {
     raf = requestAnimationFrame(frame);
     const dt = Math.min(0.25, (now - last) / 1000);
     last = now;
-    const { sim, speed } = useStore.getState();
+    const st = useStore.getState();
+    const { sim, speed } = st;
 
-    if (speed === 0) {
+    if (speed === 0 || isHeld(st)) {
       alpha = 1;
+      acc = 0;
       if (queue.length > 0) applyNow(sim, queue.splice(0));
     } else {
       acc += dt * TICKS_PER_SECOND * speed;
