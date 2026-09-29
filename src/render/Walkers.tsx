@@ -85,7 +85,7 @@ export function Walkers() {
   const glowMap = useMemo(() => glowTexture(), []);
   const signMaps = useMemo(() => SIGNS.map((text, i) => signTexture(text, SIGN_COLORS[i % SIGN_COLORS.length]!)), []);
   const glowGeo = useMemo(() => new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2), []);
-  const boardGeo = useMemo(() => new THREE.PlaneGeometry(1.15, 0.65), []);
+  const boardGeo = useMemo(() => new THREE.PlaneGeometry(1.3, 0.73), []);
   const visorGeo = useMemo(() => new THREE.BoxGeometry(0.25 * S, 0.09 * S, 0.07 * S), []);
   const agentGeo = useMemo(() => new RoundedBoxGeometry(0.34 * S, 0.34 * S, 0.3 * S, 3, 0.07 * S), []);
   const orbGeo = useMemo(() => new THREE.SphereGeometry(0.065 * S, 10, 8), []);
@@ -151,7 +151,7 @@ export function Walkers() {
         const board = boards.current[which];
         if (board) {
           const k = nb[which]!++;
-          signDummy.position.set(x, 2.05 + bob + Math.abs(wave) * 0.15, z);
+          signDummy.position.set(x, 2.1 + bob + Math.abs(wave) * 0.15, z);
           signDummy.rotation.set(0, signYaw, wave);
           signDummy.scale.set(1, 1, 1);
           signDummy.updateMatrix();

@@ -24,7 +24,7 @@ describe("initial state", () => {
     expect(s.capability).toBe(10);
     expect(s.walkers.filter((w) => w.kind === "researcher")).toHaveLength(8 + 3);
     expect(s.walkers.filter((w) => w.kind === "agent")).toHaveLength(6 + 5);
-    expect(s.walkers.filter((w) => w.kind === "visitor")).toHaveLength(10);
+    expect(s.walkers.filter((w) => w.kind === "visitor")).toHaveLength(18);
     expect(s.walkers.filter((w) => w.kind === "protester")).toHaveLength(0);
     expect(s.training.progress / s.training.cost).toBeCloseTo(0.4);
     expect(s.buildings.map((b) => b.kind).sort()).toEqual(["cluster", "hall", "kombucha"]);

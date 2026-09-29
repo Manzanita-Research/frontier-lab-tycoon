@@ -33,8 +33,11 @@ export function dailyEvents(state: GameState) {
   }
 }
 
-/** Where a fountain goes, nearest the gate first: the tiles flanking the gate approach. */
-const GATE_SPOTS: [number, number][] = [[-1, -1], [2, -1], [-1, -2], [2, -2], [-1, 0], [2, 0], [-2, -1], [3, -1]];
+/**
+ * Where a fountain goes, nearest the gate first. Right of the approach comes first: the camera looks in from
+ * that side, so the fountain stands in front of the gate instead of hiding behind its pillar.
+ */
+const GATE_SPOTS: [number, number][] = [[2, -1], [2, 0], [2, -2], [3, -1], [-1, -1], [-1, -2], [-1, 0], [-2, -1]];
 
 function placeNearGate(state: GameState, kind: BuildingKind) {
   const g = state.gate;
