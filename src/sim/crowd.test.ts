@@ -238,6 +238,19 @@ describe("destination choice", () => {
     expect(v2.lost).toBe("");
   });
 
+  it("stops saying it can't find something the moment a building that helps is connected", () => {
+    const s = createInitialState(1);
+    const v = s.walkers.find((w) => w.kind === "visitor")!;
+    Object.assign(v, { impressed: 0.2, lost: "impressed", x: 11.5, z: 16.5, route: [], targetId: TARGET_WANDER });
+    const r = researchers(s)[0]!;
+    Object.assign(r, { focus: 0.05, lost: "focus" });
+    s.cash = 100_000_000;
+    applyCommands(s, [{ type: "placeBuilding", kind: "demo", x: 14, z: 17 }, { type: "placeBuilding", kind: "snack", x: 9, z: 17 }], createRng(1));
+    tick(s); // the new buildings bump the version; walkers re-check on the next tick
+    expect(v.lost).toBe("");
+    expect(r.lost).toBe("");
+  });
+
   it("sends a bored visitor for a seat and a snack before the next sight", () => {
     const s = campus("snack");
     const v = s.walkers.find((w) => w.kind === "visitor")!;
@@ -487,7 +500,7 @@ describe("Vibes", () => {
   it("brings applicants to the gate when Vibes are above 350 and a hall has room, and only then", () => {
     const withRoom = () => campus("hall");
     const s = withRoom();
-    expect(researcherTarget(s)).toBe(8 + 6);
+    expect(researcherTarget(s)).toBe(10 + 8);
     expect(count(s, "researcher")).toBe(11);
     s.vibes.value = 300;
     for (let i = 0; i < 20; i++) dailyWalkers(s, createRng(i));
@@ -507,11 +520,12 @@ describe("Vibes", () => {
     expect(Math.abs(newcomer.x - (g.gate.x + g.gate.w / 2))).toBeLessThan(3);
     expect(newcomer.z).toBeGreaterThan(g.gate.z - 4);
 
-    // A full hall means no room.
+    // Applicants keep coming until the halls are full, and then they stop.
     const full = createInitialState(1);
     full.vibes.value = 900;
-    for (let i = 0; i < 10; i++) dailyWalkers(full, createRng(i));
+    for (let i = 0; i < 40; i++) dailyWalkers(full, createRng(i));
     expect(count(full, "researcher")).toBe(researcherTarget(full));
+    expect(researcherTarget(full)).toBe(14);
   });
 });
 
