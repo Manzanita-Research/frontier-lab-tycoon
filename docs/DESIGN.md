@@ -189,3 +189,18 @@ The tick calls the engine once per game day and applies effects from news-only e
 - **The Sandbox Escape arc end to end, including the chase.** The Water Discourse runs as ambient protesters and headlines.
 - Works on a laptop and is okay on a phone.
 - Not yet: endings, save/load UI, the full research tree, lobbying, balance.
+
+## Task map
+
+FLT-3 (first playable) is the parent. Wave 1 runs in parallel because each task owns separate folders; wave 2 needs FLT-4's skeleton.
+
+| Task | Wave | Owns | Model |
+|---|---|---|---|
+| FLT-4 Game skeleton | 1 | `src/sim/*` core, `src/store.ts`, `src/App.tsx`, `src/render/*.tsx`, `src/content/buildings.ts`, `src/ui/dev/` | Opus |
+| FLT-5 Satire engine | 1 | `src/sim/events/**`, `src/content/{events,headlines,thoughts,rivals,names}` | Opus |
+| FLT-6 Art | 1 | `src/render/models/**`, `src/render/Lighting.tsx`, `src/render/gallery.page.tsx` | Opus |
+| FLT-7 HUD + sound | 1 | `src/ui/components/**`, `src/ui/sound.ts`, `src/ui/theme.css`, `src/ui/hud.page.tsx` | Sonnet |
+| FLT-8 Guests | 2 | `src/sim/guests/**`, `src/render/GuestsLayer.tsx`, `src/render/Bubbles.tsx` | Sonnet |
+| FLT-9 Integration + delight | 2 | wiring, the chase, balance, preview | Opus |
+
+Standalone demo pages: any `*.page.tsx` with a default export is served at `?page=<name>` (see `src/main.tsx`).

@@ -20,6 +20,11 @@ else
   pnpm install
 fi
 
+# Headless Chromium for `pnpm shot` screenshots. Optional: never fail setup.
+pnpm exec playwright install chromium-headless-shell >/dev/null 2>&1 \
+  && echo "flt: chromium-headless-shell ready" \
+  || echo "flt: chromium install skipped (run: pnpm exec playwright install chromium-headless-shell)"
+
 # Git identity for commits made on cloud machines, only if none is set.
 git config user.name >/dev/null 2>&1 || git config user.name "FLT builder"
 git config user.email >/dev/null 2>&1 || git config user.email "591643+jem-computer@users.noreply.github.com"
