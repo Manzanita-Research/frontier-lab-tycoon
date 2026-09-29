@@ -16,9 +16,9 @@ export interface NeedDef {
 }
 
 export const NEEDS: Record<NeedKey, NeedDef> = {
-  energy: { key: "energy", label: "Energy", goodWhenHigh: true, seeking: "a nap", urgentAt: 0.6 },
-  focus: { key: "focus", label: "Focus", goodWhenHigh: true, seeking: "a snack", urgentAt: 0.6 },
-  fomo: { key: "fomo", label: "FOMO", goodWhenHigh: false, seeking: "proof we're winning", urgentAt: 0.55 },
+  energy: { key: "energy", label: "Energy", goodWhenHigh: true, seeking: "a nap", urgentAt: 0.5 },
+  focus: { key: "focus", label: "Focus", goodWhenHigh: true, seeking: "a snack", urgentAt: 0.5 },
+  fomo: { key: "fomo", label: "FOMO", goodWhenHigh: false, seeking: "proof we're winning", urgentAt: 0.5 },
   patience: { key: "patience", label: "Patience", goodWhenHigh: true, seeking: "a seat and a snack", urgentAt: 0.6 },
   impressed: { key: "impressed", label: "Impressed", goodWhenHigh: true, seeking: "a demo", urgentAt: 0.5 },
   drift: { key: "drift", label: "Alignment drift", goodWhenHigh: false, seeking: "a system prompt", urgentAt: 2 },

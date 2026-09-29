@@ -52,6 +52,12 @@ export const atoms = {
   buildings: pick((c) => c.snap.buildings),
   thoughts: pick((c) => c.snap.thoughts),
   pops: pick((c) => c.snap.pops),
+  vibes: pick((c) => c.snap.vibes),
+  board: pick((c) => c.snap.board),
+  inspect: pick((c) => c.snap.inspect),
+  selected: pick((c) => c.selected),
+  follow: pick((c) => c.follow),
+  highlight: pick((c) => c.highlight),
 };
 
 /** The app's context right now, for handlers and frame callbacks that must not subscribe. Null until it has started. */

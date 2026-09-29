@@ -1,4 +1,4 @@
-// URL knobs for screenshots and stress tests, e.g. /?seed=3&warp=25&zoom=70&focus=12,14&agents=200&discourse=44&hour=22&photo
+// URL knobs for screenshots and stress tests, e.g. /?seed=3&warp=25&zoom=70&focus=12,14&agents=200&discourse=44&researchers=20&hour=22&photo
 export interface DebugParams {
   seed: number;
   /** Simulate this many game days before the first frame. */
@@ -14,6 +14,8 @@ export interface DebugParams {
   hour: number | null;
   /** Open in photo mode. */
   photo: boolean;
+  /** Extra researchers on top of the hall-driven count (for Thoughts-panel and queue screenshots). */
+  researchers: number;
 }
 
 export function readDebugParams(search = typeof window === "undefined" ? "" : window.location.search): DebugParams {
@@ -30,5 +32,6 @@ export function readDebugParams(search = typeof window === "undefined" ? "" : wi
     discourse: num("discourse") ?? 0,
     hour: num("hour"),
     photo: q.has("photo"),
+    researchers: num("researchers") ?? 0,
   };
 }
