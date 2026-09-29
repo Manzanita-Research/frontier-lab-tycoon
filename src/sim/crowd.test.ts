@@ -15,8 +15,6 @@ import { TARGET_WANDER } from "./types";
 import { dailyVibes, initialVibes, readVibes, trendOf, visitorCapFor, visitorChanceFor, vibesTarget } from "./vibes";
 import { chooseTarget, dailyWalkers, fillAgents, researcherTarget, seedWalkers } from "./walkers";
 import { syncProtesters } from "./protest";
-import { step } from "./machines/run";
-import { moodMachine } from "./machines/mood";
 
 const count = (s: GameState, kind: Walker["kind"]) => s.walkers.filter((w) => w.kind === kind).length;
 const researchers = (s: GameState) => s.walkers.filter((w) => w.kind === "researcher");
@@ -294,7 +292,6 @@ describe("queues", () => {
     expect(d.stats.snacks).toBe(1);
 
     // A second time round, nobody leaves and patience runs out.
-    const e = researchers(createInitialState(2))[0]!;
     d.machine = { value: "seeking", context: {} };
     d.targetId = wall.id;
     d.timer = 0;
@@ -304,7 +301,6 @@ describe("queues", () => {
       w.targetId = wall.id;
       w.timer = 500;
     }
-    void e;
     tick(s);
     expect(d.machine.value).toBe("queuing");
     d.timer = 1;
@@ -407,7 +403,6 @@ describe("leaving", () => {
     Object.assign(w, { energy: 0.2, focus: 0.2, fomo: 0.5 });
     dailyCrowd(s, createRng(1));
     expect(w.mood.value).toBe("slumped");
-    void step(moodMachine, w.mood, { type: "LIFT" });
   });
 });
 
@@ -614,7 +609,7 @@ describe("the Demo Stage", () => {
 });
 
 describe("thoughts", () => {
-  it("has 60+ need-keyed lines, every cause with at least one, and none read as a real name", () => {
+  it("has 60+ need-keyed lines, and every cause has at least as many lines as it spreads over", () => {
     const total = CAUSE_KEYS.reduce((n, k) => n + CAUSES[k].lines.length, 0);
     expect(total).toBeGreaterThanOrEqual(60);
     for (const k of CAUSE_KEYS) {
@@ -690,20 +685,28 @@ describe("determinism and scale", () => {
     const rng = createRng(11);
     s.capability = 4000; // agentTarget caps at 400
     fillAgents(s, rng);
-    seedWalkers(s, "researcher", 300, rng); // researchers stay; visitors tour and leave, so seed plenty
-    seedWalkers(s, "visitor", 140, rng);
     s.waterDiscourse = 160;
     syncProtesters(s, rng, true);
+    // Three small buildings for 300 researchers is a queue and a half: an unfair fight on purpose. Visitors leave and
+    // unhappy researchers quit, so the crowd is topped back up before each timed batch.
+    const topUp = () => {
+      seedWalkers(s, "researcher", Math.max(0, 300 - count(s, "researcher")), rng);
+      seedWalkers(s, "visitor", Math.max(0, 110 - count(s, "visitor")), rng);
+    };
+    topUp();
     expect(count(s, "agent")).toBe(400);
     for (let i = 0; i < 100; i++) tick(s); // warm up the JIT and spread the crowd out
-    expect(s.walkers.length).toBeGreaterThanOrEqual(800);
     let best = Infinity;
+    let smallest = Infinity;
     for (let attempt = 0; attempt < 3; attempt++) {
+      topUp();
+      smallest = Math.min(smallest, s.walkers.length);
       const t0 = performance.now();
       for (let i = 0; i < 200; i++) tick(s);
       best = Math.min(best, (performance.now() - t0) / 200);
     }
-    console.log(`800-walker tick: ${best.toFixed(3)} ms (best of 3 x 200 ticks), ${s.walkers.length} walkers`);
+    console.log(`800-walker tick: ${best.toFixed(3)} ms (best of 3 x 200 ticks), never fewer than ${smallest} walkers at the start of a batch`);
+    expect(smallest).toBeGreaterThanOrEqual(800);
     expect(best).toBeLessThan(0.5);
   });
 });
