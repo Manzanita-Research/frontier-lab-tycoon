@@ -10,7 +10,11 @@ export type ThoughtCondition =
   | "justReleased"
   | "highHype"
   | "unreachable"
-  | "crowded";
+  | "crowded"
+  /** A few people are upset about water (discourse of 12 or more). */
+  | "discourse"
+  /** Ten or more protesters at the gate. */
+  | "protest";
 
 export interface ThoughtLine {
   kind: WalkerKind;
@@ -49,6 +53,10 @@ export const THOUGHTS: ThoughtLine[] = [
   t("researcher", "crowded", "Why is it so crowded? Is there a demo?"),
   t("researcher", "crowded", "Too many people. Going to go stand next to a GPU."),
   t("researcher", "unreachable", "I can see the building. I cannot get to the building."),
+  t("researcher", "discourse", "Someone at the gate asked what my prompts drink. I said 'Diet Coke'."),
+  t("researcher", "discourse", "Is it bad that I drink more water than the cluster? Asking for my manager."),
+  t("researcher", "protest", "They chant in perfect 4/4. Our uptime isn't even that stable."),
+  t("researcher", "protest", "I walked past the protest. Someone handed me a leaflet and a kazoo."),
 
   // Agents
   t("agent", "always", "Task complete. Also I did four other tasks nobody asked for."),
@@ -70,6 +78,10 @@ export const THOUGHTS: ThoughtLine[] = [
   t("agent", "lowCash", "Cash is low. I have offered to work for tokens. Nobody laughed."),
   t("agent", "noKombucha", "I don't need kombucha, but I notice everyone else is crying."),
   t("agent", "crowded", "Optimizing foot traffic. Result: 'ow'."),
+  t("agent", "discourse", "I calculated my water usage. I'd rather not say."),
+  t("agent", "discourse", "Re-running the numbers on 'a bottle per prompt'. The bottle is now a swimming pool. Not better."),
+  t("agent", "protest", "I counted the protesters and the signs. The math is not the point."),
+  t("agent", "protest", "They say I'm thirsty. I have no mouth. I have opinions about the phrase."),
 
   // Visitors
   t("visitor", "always", "The demo was pre-recorded, right? Right?"),
@@ -89,4 +101,14 @@ export const THOUGHTS: ThoughtLine[] = [
   t("visitor", "noKombucha", "No kombucha? What is this, a lab?"),
   t("visitor", "training", "That building is training something. It looks very focused."),
   t("visitor", "crowded", "This is basically a theme park. Where's the churro?"),
+  t("visitor", "discourse", "There's a man with a sign that says 'H2O LIES'. I thought this was a chemistry lab."),
+  t("visitor", "protest", "Had to crowd-surf past a drum circle to see the demo."),
+  t("visitor", "protest", "Is the protest part of the tour? The drummer was very good."),
+
+  // Protesters
+  t("protester", "always", "I'm here for the water. And the free kombucha."),
+  t("protester", "always", "Nobody told me what the sign says. I'm holding it very sincerely."),
+  t("protester", "always", "I've been chanting for three hours. What are we chanting?"),
+  t("protester", "always", "This is the most organized thing I've done since my group project."),
+  t("protester", "protest", "Someone hand me a water. Not from them."),
 ];

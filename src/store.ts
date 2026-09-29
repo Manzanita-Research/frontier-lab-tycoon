@@ -1,6 +1,6 @@
 // Owns the sim state, runs the fixed-step loop, and hands the UI a throttled snapshot.
 import { create } from "zustand";
-import type { BuildingKind } from "./content/buildings";
+import type { PlaceableKind } from "./content/buildings";
 import { readDebugParams } from "./debug";
 import { applyNow, tick, TICKS_PER_DAY } from "./sim/tick";
 import { canPlace, type Command } from "./sim/commands";
@@ -12,7 +12,7 @@ import { buildingAt } from "./sim/pathfind";
 import { fillAgents } from "./sim/walkers";
 import type { Building, GameState, NewsItem, Pop, Thought, Tone } from "./sim/types";
 
-export type Tool = "path" | BuildingKind | "bulldoze";
+export type Tool = "path" | PlaceableKind | "bulldoze";
 /** Hotkeys 1-6 pick these in order. */
 export const TOOLS: Tool[] = ["path", "cluster", "hall", "gateway", "kombucha", "bulldoze"];
 export const SPEEDS = [0, 1, 3, 10] as const;

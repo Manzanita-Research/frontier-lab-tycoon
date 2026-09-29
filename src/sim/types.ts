@@ -2,7 +2,7 @@
 import type { BuildingKind } from "../content/buildings";
 
 export type { BuildingKind };
-export type WalkerKind = "researcher" | "agent" | "visitor";
+export type WalkerKind = "researcher" | "agent" | "visitor" | "protester";
 export type WalkerMode = "walk" | "inside" | "leave";
 export type Tone = "good" | "bad" | "neutral" | "joke";
 
@@ -47,6 +47,13 @@ export interface Walker {
   visits: number;
   /** Researchers: counts visits so they alternate between Hall and Cluster. */
   step: number;
+  /** Standing around near the last building instead of heading somewhere. */
+  loiter: boolean;
+  /** Researchers: id of the Fountain they are currently walking past (0 for none), so it refreshes them once per pass. */
+  fountain: number;
+  /** Protesters: the spot they picket from. */
+  homeX: number;
+  homeZ: number;
 }
 
 export interface Training {
@@ -85,6 +92,23 @@ export interface Toast {
   id: number;
   text: string;
   tone: Tone;
+}
+
+export interface GoalProgress {
+  id: string;
+  /** Current value of the metric (latched at the target once met). */
+  value: number;
+  target: number;
+  /** Milestones latch: once met, they stay met. */
+  met: boolean;
+}
+
+export type Outcome = "playing" | "won" | "lost";
+
+/** The event card that is open right now; the game is paused until the player picks a choice. */
+export interface OpenEvent {
+  id: string;
+  day: number;
 }
 
 export interface Ledger {
@@ -129,4 +153,10 @@ export interface GameState {
   recentThoughts: string[];
   /** Debug/stress: extra agents on top of the capability-driven count. */
   agentBonus: number;
+  /** 0 to 100. Rises with compute clusters, decays daily; a quarter of it is the protester headcount. */
+  waterDiscourse: number;
+  goals: GoalProgress[];
+  outcome: Outcome;
+  /** At most one at a time; `tick` does nothing while it is open. */
+  event: OpenEvent | null;
 }

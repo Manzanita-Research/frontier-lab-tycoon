@@ -57,6 +57,10 @@ export function dailyNews(state: GameState, rng: Rng) {
     pushNews(state, rng, "lowCash");
     f.nextLowCash = state.day + 15;
   }
+  if (state.waterDiscourse >= 12 && state.day >= (f.nextProtest ?? 0)) {
+    pushNews(state, rng, "protest");
+    f.nextProtest = state.day + rng.int(6, 9);
+  }
   if (state.hype > 70 && state.day >= (f.nextHighHype ?? 0)) {
     pushNews(state, rng, "highHype");
     f.nextHighHype = state.day + 20;

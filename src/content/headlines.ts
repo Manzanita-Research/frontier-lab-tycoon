@@ -11,6 +11,9 @@ export type NewsTrigger =
   | "lowCash"
   | "highHype"
   | "bailout"
+  | "protest"
+  | "won"
+  | "lost"
   | `built:${BuildingKind}`;
 
 export interface Headline {
@@ -84,6 +87,25 @@ export const HEADLINES: Headline[] = [
   h("lowCash", "bad", "{lab} considers selling mugs to extend runway; {cash} remaining"),
   h("lowCash", "bad", "Emergency all-hands: the free kombucha is now $4"),
   h("bailout", "bad", "Investors wire {lab} an emergency bridge round, plus a board seat and a fascinating set of questions"),
+
+  // Protesters at the gate (fires every week or so while there are a few).
+  h("protest", "joke", "Protesters outside {lab} chant 'H2O LIES'; a passing pigeon joins in"),
+  h("protest", "joke", "Protest at {lab}'s gate now has snacks, a playlist, and a permit that may be forged"),
+  h("protest", "joke", "Crowd outside {lab} demands transparency; {lab} responds with a 90-slide deck about transparency"),
+  h("protest", "joke", "Local coffee shop offers protesters a loyalty card; protesters accept, pending further outrage"),
+  h("protest", "joke", "Man holding 'MY GPU DRANK MY LATTE' sign explains it is a metaphor, and also his latte"),
+  h("protest", "joke", "Analysts call the protests 'bullish': they prove people know {lab} exists"),
+  h("protest", "bad", "{lab} spokesperson says water use is 'well within the range of things we won't discuss'"),
+  h("protest", "joke", "Drone footage shows the crowd at {lab}'s gate, unintentionally, forming a very sad droplet"),
+  h("protest", "joke", "Study finds most of the water in the discourse was recycled from an earlier discourse"),
+  h("protest", "joke", "Protesters and researchers share the kombucha queue; nobody brings up the water"),
+  h("protest", "joke", "Sign reading 'STOP THE LEAKS' confuses plumbers, who arrive in force"),
+  h("protest", "joke", "Hydration influencer livestreams from {lab}'s gate; views up, hydration unchanged"),
+  h("protest", "bad", "Drum circle at {lab}'s gate enters its third hour; the rhythm section requests a raise"),
+
+  // The scenario ending: "won" and "lost" are used for the outcome card and the ticker.
+  h("won", "good", "{lab} hits every milestone; board celebrates by raising the milestones"),
+  h("lost", "bad", "{lab} pivots to selling AI-generated NFTs of its own GPUs"),
 
   // Success is its own kind of trouble.
   h("highHype", "good", "{lab} hype at an all-time high; three people quit to start competing labs before lunch"),

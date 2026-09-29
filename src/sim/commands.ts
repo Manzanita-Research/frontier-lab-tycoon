@@ -1,5 +1,6 @@
 // Player actions. They are queued and applied at the start of the next tick.
 import { BUILDINGS, BULLDOZE_REFUND, PATH_PRICE, type BuildingKind } from "../content/buildings";
+import { chooseEvent } from "./events";
 import { addToast, pushNews } from "./news";
 import { buildingAt, edgeTiles, inBounds, isPathTile, rectContains, rectsOverlap, tileIndex } from "./pathfind";
 import type { Rng } from "./rng";
@@ -9,7 +10,8 @@ export type Command =
   | { type: "placePath"; x: number; z: number }
   | { type: "placeBuilding"; kind: BuildingKind; x: number; z: number }
   | { type: "bulldoze"; x: number; z: number }
-  | { type: "startTraining" };
+  | { type: "startTraining" }
+  | { type: "chooseEvent"; eventId: string; choiceIndex: number };
 
 export type PlaceResult = { ok: true } | { ok: false; reason: string };
 
@@ -82,6 +84,9 @@ export function applyCommands(state: GameState, commands: readonly Command[], rn
         break;
       case "bulldoze":
         bulldoze(state, c.x, c.z);
+        break;
+      case "chooseEvent":
+        chooseEvent(state, rng, c.eventId, c.choiceIndex);
         break;
       case "startTraining":
         if (!state.buildings.some((b) => b.kind === "hall")) addToast(state, "Build a Training Hall first.", "bad");

@@ -1,5 +1,6 @@
 import { BUILDINGS, PATH_PRICE } from "../content/buildings";
 import { applyCommands, canPlace, type Command } from "./commands";
+import { RESEARCHER_SALARY, REVENUE_PER_CAPABILITY } from "./constants";
 import { dailyEconomy } from "./economy";
 import { entrances, getReach, isReachable, isPathTile } from "./pathfind";
 import { createRng } from "./rng";
@@ -17,11 +18,14 @@ function withGateway(seed = 1): GameState {
 }
 
 describe("initial state", () => {
-  it("starts alive: buildings connected, 6 researchers, 5 agents, run 40% done", () => {
+  it("starts alive: buildings connected, a crowd on the paths, run 40% done", () => {
     const s = createInitialState(1);
     expect(s.cash).toBe(5_000_000);
-    expect(s.walkers.filter((w) => w.kind === "researcher")).toHaveLength(6);
-    expect(s.walkers.filter((w) => w.kind === "agent")).toHaveLength(5);
+    expect(s.capability).toBe(10);
+    expect(s.walkers.filter((w) => w.kind === "researcher")).toHaveLength(8 + 3);
+    expect(s.walkers.filter((w) => w.kind === "agent")).toHaveLength(6 + 5);
+    expect(s.walkers.filter((w) => w.kind === "visitor")).toHaveLength(10);
+    expect(s.walkers.filter((w) => w.kind === "protester")).toHaveLength(0);
     expect(s.training.progress / s.training.cost).toBeCloseTo(0.4);
     expect(s.buildings.map((b) => b.kind).sort()).toEqual(["cluster", "hall", "kombucha"]);
     for (const b of s.buildings) expect(isReachable(s, b)).toBe(true);
@@ -105,8 +109,9 @@ describe("economy", () => {
     const s = withGateway();
     const cash = s.cash;
     dailyEconomy(s, createRng(1));
-    const revenue = s.capability * 1500;
-    const upkeep = 8_000 + 5_000 + 1_000 + 3_000 + 6 * 1_000;
+    const researchers = s.walkers.filter((w) => w.kind === "researcher").length;
+    const revenue = s.capability * REVENUE_PER_CAPABILITY;
+    const upkeep = 8_000 + 5_000 + 1_000 + 3_000 + researchers * RESEARCHER_SALARY;
     expect(s.ledger.income).toBe(revenue);
     expect(s.ledger.expenses).toBe(upkeep);
     expect(s.cash).toBe(cash + revenue - upkeep);
@@ -128,7 +133,7 @@ describe("training", () => {
     expect(s.cash).toBeGreaterThan(cash);
     expect(s.training.run).toBe(2);
     expect(s.training.cost).toBe(480);
-    expect(s.training.name).toBe("Frontier-2.5-Reasoner");
+    expect(s.training.name).toBe("Frontier-3-Reasoner");
     expect(s.news.some((n) => n.text.includes("Frontier-2"))).toBe(true);
     expect(s.toasts.some((t) => t.text.includes("Frontier-2"))).toBe(true);
   });
@@ -158,7 +163,7 @@ describe("walkers", () => {
     for (let i = 0; i < 3000; i++) {
       tick(s);
       for (const w of s.walkers) {
-        if (w.mode === "inside") continue;
+        if (w.mode === "inside" || w.kind === "protester") continue;
         const tx = Math.floor(w.x);
         const tz = Math.floor(w.z);
         const onGate = tz === s.gate.z && tx >= s.gate.x && tx < s.gate.x + s.gate.w;

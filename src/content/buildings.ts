@@ -1,6 +1,8 @@
 // Building catalogue. Data only: adding a building should not need an engine change.
 
-export type BuildingKind = "cluster" | "hall" | "gateway" | "kombucha";
+export type BuildingKind = "cluster" | "hall" | "gateway" | "kombucha" | "fountain";
+/** What the build palette offers; scenery is placed by events, not by the player. */
+export type PlaceableKind = Exclude<BuildingKind, "fountain">;
 
 export interface BuildingDef {
   kind: BuildingKind;
@@ -12,6 +14,8 @@ export interface BuildingDef {
   blurb: string;
   /** Accent colour; the body of every building is cream. */
   color: string;
+  /** Decoration: walkers never visit it, and it needs no path. */
+  scenery?: boolean;
 }
 
 export const BUILDINGS: Record<BuildingKind, BuildingDef> = {
@@ -51,9 +55,20 @@ export const BUILDINGS: Record<BuildingKind, BuildingDef> = {
     blurb: "Fermented morale.",
     color: "#2fbfa0",
   },
+  fountain: {
+    kind: "fountain",
+    name: "Transparency Fountain",
+    size: [1, 1],
+    price: 0,
+    upkeepPerDay: 0,
+    blurb: "Water you can see through. Unlike the report.",
+    color: "#4fc3e8",
+    scenery: true,
+  },
 };
 
 export const BUILDING_KINDS = Object.keys(BUILDINGS) as BuildingKind[];
+export const PLACEABLE_KINDS = BUILDING_KINDS.filter((k): k is PlaceableKind => !BUILDINGS[k].scenery);
 
 export const PATH_PRICE = 10_000;
 export const BULLDOZE_REFUND = 0.5;
