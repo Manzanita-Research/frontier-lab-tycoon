@@ -203,19 +203,17 @@ export function CameraRig({ baseZoom }: { baseZoom: number }) {
     }
 
     // The director eases the target (and the camera with it) toward the shot, and zooms.
-    if (!fx.photo) {
-      const next = cinema.update({ x: c.target.x, z: c.target.z, zoom: cam.zoom }, dt);
-      if (next) {
-        const dx = next.x - c.target.x;
-        const dz = next.z - c.target.z;
-        c.target.x += dx;
-        c.target.z += dz;
-        c.object.position.x += dx;
-        c.object.position.z += dz;
-        cam.zoom = THREE.MathUtils.clamp(next.zoom, baseZoom * 0.55, baseZoom * 3.4);
-        cam.updateProjectionMatrix();
-      }
-    } else cinema.cancel();
+    const next = cinema.update({ x: c.target.x, z: c.target.z, zoom: cam.zoom }, dt);
+    if (next) {
+      const dx = next.x - c.target.x;
+      const dz = next.z - c.target.z;
+      c.target.x += dx;
+      c.target.z += dz;
+      c.object.position.x += dx;
+      c.object.position.z += dz;
+      cam.zoom = THREE.MathUtils.clamp(next.zoom, baseZoom * 0.55, baseZoom * 3.4);
+      cam.updateProjectionMatrix();
+    }
 
     const cx = THREE.MathUtils.clamp(c.target.x, -PAN_LIMIT, PAN_LIMIT);
     const cz = THREE.MathUtils.clamp(c.target.z, -PAN_LIMIT, PAN_LIMIT);

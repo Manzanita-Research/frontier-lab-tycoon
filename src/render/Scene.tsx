@@ -1,5 +1,6 @@
+import { useAtomValue } from "@effect/atom-react";
 import { Canvas } from "@react-three/fiber";
-import { useRef } from "react";
+import { Suspense, lazy, useRef } from "react";
 import { debugParams } from "../app/game";
 import { Buildings } from "./buildings/Buildings";
 import { CAMERA_OFFSET, CameraRig } from "./fx/CameraRig";
@@ -7,10 +8,23 @@ import { FxDirector } from "./fx/FxDirector";
 import { Lighting } from "./fx/Lighting";
 import { Lamps } from "./fx/Night";
 import { ParticleLayer } from "./fx/ParticleLayer";
+import { photoAtom } from "./fx/photoState";
 import { Decor, Ground, Paths } from "./Ground";
 import { OverlayProjector } from "./overlay";
 import { Placement } from "./Placement";
 import { Walkers } from "./Walkers";
+
+// Postprocessing is a chunk of its own, fetched the first time photo mode opens and mounted only while it is on.
+const PhotoFX = lazy(() => import("./fx/PhotoFX"));
+
+function PhotoLayer() {
+  const on = useAtomValue(photoAtom);
+  return on ? (
+    <Suspense fallback={null}>
+      <PhotoFX />
+    </Suspense>
+  ) : null;
+}
 
 function initialZoom() {
   const w = window.innerWidth;
@@ -41,6 +55,7 @@ export function Scene() {
       <OverlayProjector />
       <Placement />
       <CameraRig baseZoom={zoom} />
+      <PhotoLayer />
     </Canvas>
   );
 }

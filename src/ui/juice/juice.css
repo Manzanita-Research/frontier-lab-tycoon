@@ -43,3 +43,332 @@
   opacity: calc(var(--night, 0) * 1.4 - 0.3);
   transform: rotate(-18deg);
 }
+
+/* ---- Odometer: numbers roll, then flash ---- */
+.odo {
+  display: inline-block;
+  font-variant-numeric: tabular-nums;
+  transform-origin: left center;
+}
+.odo-up {
+  animation: odo-up 0.9s ease-out;
+}
+.odo-down {
+  animation: odo-down 0.9s ease-out;
+}
+@keyframes odo-up {
+  0% {
+    color: var(--good);
+    transform: scale(1.16);
+    text-shadow: 0 0 12px rgba(76, 195, 138, 0.9);
+  }
+  100% {
+    transform: none;
+    text-shadow: 0 0 0 rgba(76, 195, 138, 0);
+  }
+}
+@keyframes odo-down {
+  0% {
+    color: var(--bad);
+    transform: scale(1.16);
+    text-shadow: 0 0 12px rgba(214, 69, 47, 0.8);
+  }
+  100% {
+    transform: none;
+    text-shadow: 0 0 0 rgba(214, 69, 47, 0);
+  }
+}
+
+/* ---- Squish: every button gives when you press it ---- */
+button {
+  transition: transform 0.16s cubic-bezier(0.3, 1.8, 0.5, 1), background-color 0.12s, box-shadow 0.12s;
+}
+button:not(:disabled):active {
+  transform: scale(0.92, 0.86) translateY(2px) !important;
+  transition-duration: 0.04s;
+}
+
+/* ---- Toasts slide in from the side, with a little overshoot ---- */
+.toast {
+  animation: toast-slide 0.45s cubic-bezier(0.25, 1.5, 0.4, 1);
+}
+.toast.hint {
+  animation: toast-slide 0.45s cubic-bezier(0.25, 1.5, 0.4, 1), hint-bob 2.4s ease-in-out 0.5s infinite;
+}
+@keyframes toast-slide {
+  0% {
+    transform: translateX(-70px) scale(0.9);
+    opacity: 0;
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    transform: none;
+  }
+}
+
+/* ---- Cards slam in: big, late, then settle at a slight tilt, like a placard thrown on a desk ---- */
+.modal-backdrop {
+  animation: fade-in 0.2s ease-out;
+}
+.modal-card {
+  animation: card-slam 0.6s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+}
+.modal-card.event-card {
+  transform: rotate(-0.7deg);
+}
+@keyframes card-slam {
+  0% {
+    transform: translateY(-46px) scale(1.7) rotate(-7deg);
+    opacity: 0;
+  }
+  38% {
+    opacity: 1;
+  }
+  58% {
+    transform: translateY(6px) scale(0.965) rotate(1.4deg);
+  }
+  78% {
+    transform: translateY(-2px) scale(1.012) rotate(-1.2deg);
+  }
+  100% {
+    transform: rotate(-0.7deg);
+  }
+}
+.modal-card.outcome-card {
+  animation-name: card-slam-flat;
+}
+@keyframes card-slam-flat {
+  0% {
+    transform: translateY(-46px) scale(1.7) rotate(-5deg);
+    opacity: 0;
+  }
+  38% {
+    opacity: 1;
+  }
+  58% {
+    transform: translateY(6px) scale(0.965);
+  }
+  78% {
+    transform: translateY(-2px) scale(1.012);
+  }
+  100% {
+    transform: none;
+  }
+}
+.choice:not(:disabled):hover {
+  transform: translateX(3px) rotate(0.4deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .modal-card,
+  .toast,
+  .odo-up,
+  .odo-down,
+  .sky .stars i {
+    animation: none !important;
+  }
+}
+
+/* ---- Photo mode ---- */
+.hud {
+  transition: opacity 0.25s ease;
+}
+body.photo .hud {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0s 0.25s;
+}
+/* Bubbles stay (they are the jokes); the game's chrome goes. */
+body.photo .world .coinpop,
+body.photo .world .nopath,
+body.photo .world .reason {
+  display: none !important;
+}
+.bubble-night {
+  background: #eef0ff;
+  border-color: #3a3f7a;
+}
+.bubble-night::after {
+  border-color: #3a3f7a;
+}
+.bubble-night.bubble-agent {
+  background: #e6fcff;
+  border-color: #0a7d8c;
+}
+.photo-ui {
+  position: fixed;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  font-family: var(--font);
+  color: var(--ink);
+  font-weight: 800;
+}
+.photo-btn {
+  position: fixed;
+  z-index: 3;
+  right: 12px;
+  bottom: calc(44px + env(safe-area-inset-bottom));
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.photo-btn:hover {
+  background: var(--cream-2);
+  transform: rotate(-6deg) scale(1.06);
+}
+.photo-bar {
+  position: absolute;
+  left: 50%;
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 14px;
+  animation: bar-rise 0.4s cubic-bezier(0.25, 1.5, 0.4, 1);
+  max-width: calc(100vw - 16px);
+}
+@keyframes bar-rise {
+  from {
+    transform: translate(-50%, 90px);
+    opacity: 0;
+  }
+}
+.photo-times {
+  display: flex;
+  gap: 4px;
+}
+.photo-times button,
+.photo-done {
+  border: 0;
+  border-radius: 11px;
+  padding: 0 11px;
+  height: 36px;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 900;
+}
+.photo-times button:hover,
+.photo-done:hover {
+  background: var(--cream-2);
+}
+.photo-times button.on {
+  background: var(--ink);
+  color: var(--cream);
+}
+.photo-done {
+  background: var(--cream-2);
+}
+.shutter {
+  width: 62px;
+  height: 62px;
+  padding: 0;
+  border-radius: 50%;
+  border: 4px solid var(--ink);
+  background: #fff;
+  box-shadow: 0 4px 0 rgba(58, 42, 28, 0.85);
+  display: grid;
+  place-items: center;
+}
+.shutter span {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #ff6a4c;
+  border: 3px solid var(--ink);
+}
+.shutter:hover span {
+  background: #ff8467;
+}
+.shutter-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 8;
+  background: #fff;
+  pointer-events: none;
+  animation: shutter 0.5s ease-out forwards;
+}
+@keyframes shutter {
+  0% {
+    opacity: 0.95;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.polaroid {
+  position: fixed;
+  z-index: 9;
+  right: 18px;
+  bottom: 18px;
+  width: min(230px, 46vw);
+  padding: 8px 8px 0;
+  border: 0;
+  background: #fffdf4;
+  border-radius: 4px;
+  box-shadow: 0 3px 0 rgba(58, 42, 28, 0.5), 0 14px 30px rgba(58, 42, 28, 0.4);
+  transform: rotate(3.5deg);
+  pointer-events: auto;
+  animation: polaroid-drop 0.7s cubic-bezier(0.2, 1.3, 0.4, 1);
+  text-align: center;
+}
+.polaroid img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: #ddd;
+}
+.polaroid-cap {
+  display: block;
+  padding: 7px 2px 8px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@keyframes polaroid-drop {
+  0% {
+    transform: translateY(-40vh) rotate(-14deg) scale(1.25);
+    opacity: 0;
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(3.5deg);
+  }
+}
+@media (max-width: 640px) {
+  .photo-btn {
+    right: 8px;
+    bottom: auto;
+    top: 190px;
+    width: 46px;
+    height: 46px;
+  }
+  .photo-bar {
+    gap: 8px;
+    padding: 6px 8px;
+  }
+  .photo-times button {
+    padding: 0 7px;
+    font-size: 12.5px;
+  }
+  .shutter {
+    width: 54px;
+    height: 54px;
+  }
+  .shutter span {
+    width: 36px;
+    height: 36px;
+  }
+}

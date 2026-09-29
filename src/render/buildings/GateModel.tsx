@@ -1,4 +1,6 @@
 import { useMemo } from "react";
+import { Flag } from "../fx/Flag";
+import { lanternMat } from "../fx/glow";
 import { CREAM, CREAM_DARK, boxGeo, labelTexture, std } from "../materials";
 import { B, Ball } from "./Parts";
 
@@ -12,7 +14,8 @@ export function GateModel({ labName }: { labName: string }) {
           <B s={[0.38, 1.9, 0.44]} c={CREAM} />
           <B s={[0.46, 0.16, 0.52]} c="#ff8a4c" />
           <B p={[0, 1.9, 0]} s={[0.46, 0.12, 0.52]} c="#ff8a4c" />
-          <Ball p={[0, 2.16, 0]} r={0.13} c="#ffe08a" />
+          <Ball p={[0, 2.16, 0]} r={0.14} mat={lanternMat} />
+          <Flag position={[0, 2.28, 0]} color={x < 0 ? "#ff8a4c" : "#4f8ff0"} pole={0.62} width={0.46} height={0.26} phase={x} rotationY={x < 0 ? Math.PI : 0} />
         </group>
       ))}
       <B p={[0, 1.55, 0]} s={[2.5, 0.28, 0.4]} c={CREAM_DARK} />

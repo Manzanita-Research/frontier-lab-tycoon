@@ -8,6 +8,7 @@ import { EventCard } from "./EventCard";
 import { ICONS } from "./icons";
 import { Objectives } from "./Objectives";
 import { OutcomeCard } from "./OutcomeCard";
+import { Odometer } from "./juice/Odometer";
 
 const toolName = (t: Tool) => (t === "path" ? "Path" : t === "bulldoze" ? "Bulldoze" : BUILDINGS[t].name);
 const SHORT: Record<Tool, string> = { path: "Path", cluster: "Cluster", hall: "Training Hall", gateway: "Gateway", kombucha: "Kombucha", bulldoze: "Bulldoze" };
@@ -24,11 +25,8 @@ function TopBar() {
       </div>
       <div className="stat cash">
         <span className="label">Cash</span>
-        <span className={`value ${s.cash < 0 ? "bad" : ""}`}>{formatMoney(s.cash)}</span>
-        <span className={`sub ${s.net >= 0 ? "good" : "bad"}`}>
-          {s.net >= 0 ? "+" : "-"}
-          {formatMoney(Math.abs(s.net))}/day
-        </span>
+        <Odometer className={`value ${s.cash < 0 ? "bad" : ""}`} value={s.cash} format={formatMoney} />
+        <Odometer className={`sub ${s.net >= 0 ? "good" : "bad"}`} value={s.net} format={(n) => `${n >= 0 ? "+" : "-"}${formatMoney(Math.abs(n))}/day`} flash={false} />
       </div>
       <div className="stat">
         <span className="label">Runway</span>
@@ -36,11 +34,11 @@ function TopBar() {
       </div>
       <div className="stat">
         <span className="label">Capability</span>
-        <span className="value">{Math.round(s.capability)}</span>
+        <Odometer className="value" value={s.capability} />
       </div>
       <div className="stat hype">
         <span className="label">Hype</span>
-        <span className="value">{Math.round(s.hype)}</span>
+        <Odometer className="value" value={s.hype} />
         <span className="meter">
           <span style={{ width: `${s.hype}%` }} />
         </span>

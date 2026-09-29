@@ -5,9 +5,12 @@ import { SIGNS, SIGN_COLORS } from "../content/protest";
 import { sim as game } from "../app/game";
 import { HALF } from "./coords";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
+import { CHEER_SECONDS, fx } from "./fx/state";
 import { FONT_STACK, glowTexture } from "./materials";
 
 const CAP = 512;
+/** Every human gets a pair of glasses (one dark strip) so you can see which way they face and when they look around. */
+const EYE_CAP = CAP * 3;
 const SIGN_CAP = 64;
 /** Walkers are drawn 1.6x life size so a crowd reads at the default zoom. */
 const S = 1.6;
@@ -81,6 +84,7 @@ export function Walkers() {
   const pBody = useRef<THREE.InstancedMesh>(null);
   const pHead = useRef<THREE.InstancedMesh>(null);
   const pStick = useRef<THREE.InstancedMesh>(null);
+  const eyes = useRef<THREE.InstancedMesh>(null);
   const boards = useRef<(THREE.InstancedMesh | null)[]>([]);
   const glowMap = useMemo(() => glowTexture(), []);
   const signMaps = useMemo(() => SIGNS.map((text, i) => signTexture(text, SIGN_COLORS[i % SIGN_COLORS.length]!)), []);
@@ -90,6 +94,7 @@ export function Walkers() {
   const agentGeo = useMemo(() => new RoundedBoxGeometry(0.34 * S, 0.34 * S, 0.3 * S, 3, 0.07 * S), []);
   const orbGeo = useMemo(() => new THREE.SphereGeometry(0.065 * S, 10, 8), []);
   const stickGeo = useMemo(() => new THREE.BoxGeometry(0.045, 1, 0.045), []);
+  const eyeGeo = useMemo(() => new THREE.BoxGeometry(0.2 * S, 0.05 * S, 0.05 * S), []);
 
   useFrame(({ clock, camera }) => {
     const sim = game.world;
@@ -102,6 +107,7 @@ export function Walkers() {
     let na = 0;
     let nv = 0;
     let np = 0;
+    let ne = 0;
     const nb = new Array<number>(SIGNS.length).fill(0);
 
     const set = (m: THREE.InstancedMesh | null, i: number, x: number, y: number, z: number, ry: number, sx: number, sy: number, sz: number) => {
@@ -111,6 +117,12 @@ export function Walkers() {
       dummy.scale.set(sx, sy, sz);
       dummy.updateMatrix();
       m.setMatrixAt(i, dummy.matrix);
+    };
+
+    /** Glasses on the front of a head. */
+    const glasses = (x: number, y: number, z: number, yaw: number) => {
+      if (ne >= EYE_CAP) return;
+      set(eyes.current, ne++, x + Math.sin(yaw) * 0.112 * S, y + 0.02 * S, z + Math.cos(yaw) * 0.112 * S, yaw, 1, 1, 1);
     };
 
     for (const w of sim.walkers) {
@@ -126,22 +138,39 @@ export function Walkers() {
       const z = lerp(w.pz, w.z, a) - HALF + oz;
       const phase = w.id * 1.7;
 
+      // A model shipped: everyone hops, in a ripple out from the Training Hall, and turns to face the camera.
+      let hop = 0;
+      let land = 0;
+      let env = 0;
+      const c = t - fx.cheerAt - Math.hypot(x - fx.cheerX, z - fx.cheerZ) * 0.06;
+      if (c > 0 && c < CHEER_SECONDS) {
+        env = 1 - c / CHEER_SECONDS;
+        const u = Math.abs(Math.sin(c * 8.5 + phase * 0.25));
+        hop = u * 0.42 * env;
+        land = (1 - u) ** 6 * 0.2 * env;
+      }
+      // Idle walkers look around; cheering ones look at you.
+      const look = !walking && env === 0 ? Math.sin(t * 0.9 + phase * 1.3) * 0.95 * (0.5 + 0.5 * Math.sin(t * 0.31 + phase)) : 0;
+      const yaw = env > 0 ? ry + wrap(signYaw - ry) * Math.min(1, env * 1.6) : ry + look;
+      const breath = !walking && env === 0 ? Math.sin(t * 2.2 + phase) * 0.014 : 0;
+
       if (w.kind === "agent") {
-        const bob = (0.26 + Math.sin(t * 3 + phase) * 0.04) * S;
+        const bob = (0.26 + Math.sin(t * 3 + phase) * 0.04) * S + hop;
         const i = na++;
         set(aBody.current, i, x, bob + 0.17 * S, z, ry, 1, 1, 1);
         set(aVisor.current, i, x + Math.sin(ry) * 0.15 * S, bob + 0.22 * S, z + Math.cos(ry) * 0.15 * S, ry, 1, 1, 1);
         set(aOrb.current, i, x, bob + 0.5 * S + Math.sin(t * 6 + phase) * 0.015, z, 0, 1, 1, 1);
-        const pulse = 1.9 + Math.sin(t * 3 + phase) * 0.2;
+        const pulse = (1.9 + Math.sin(t * 3 + phase) * 0.2) * (1 + env * 0.4);
         set(aGlow.current, i, x, 0.03, z, 0, pulse, 1, pulse);
         continue;
       }
       if (w.kind === "protester") {
         // Chanting: a steady hop while standing, a march bob while walking, and a placard that waves.
-        const bob = (walking ? Math.abs(Math.sin(t * 10 + phase)) * 0.045 : Math.abs(Math.sin(t * 5 + phase)) * 0.05) * S;
+        const bob = (walking ? Math.abs(Math.sin(t * 10 + phase)) * 0.045 : Math.abs(Math.sin(t * 5 + phase)) * 0.05) * S + hop;
         const i = np++;
-        set(pBody.current, i, x, 0.26 * S + bob, z, ry, 1, 1, 1);
-        set(pHead.current, i, x, 0.66 * S + bob, z, ry, 1, 1, 1);
+        set(pBody.current, i, x, 0.26 * S + bob, z, ry, 1 + land * 0.6, 1 - land, 1 + land * 0.6);
+        set(pHead.current, i, x, 0.66 * S + bob - land * 0.1, z, ry, 1, 1, 1);
+        glasses(x, 0.66 * S + bob - land * 0.1, z, ry);
         pBody.current?.setColorAt(i, PICKET[w.id % PICKET.length]!);
         pHead.current?.setColorAt(i, SKIN[(w.id * 7) % SKIN.length]!);
         const wave = Math.sin(t * 5 + phase) * 0.14;
@@ -159,18 +188,22 @@ export function Walkers() {
         }
         continue;
       }
-      const bob = (walking ? Math.abs(Math.sin(t * 10 + phase)) * 0.045 : 0) * S;
-      const squash = walking ? 1 + Math.sin(t * 20 + phase) * 0.04 : 1;
+      const bob = (walking ? Math.abs(Math.sin(t * 10 + phase)) * 0.045 : Math.sin(t * 1.3 + phase) * 0.008) * S + hop;
+      const squash = (walking ? 1 + Math.sin(t * 20 + phase) * 0.04 : 1 + breath) - land;
+      const wide = 1 + land * 0.6;
+      const headY = 0.66 * S + bob - land * 0.1;
       if (w.kind === "researcher") {
         const i = nr++;
-        set(rBody.current, i, x, 0.26 * S + bob, z, ry, 1, squash, 1);
-        set(rHead.current, i, x, 0.66 * S + bob, z, ry, 1, 1, 1);
+        set(rBody.current, i, x, 0.26 * S + bob, z, yaw, wide, squash, wide);
+        set(rHead.current, i, x, headY, z, yaw, 1, 1, 1);
+        glasses(x, headY, z, yaw);
         rBody.current?.setColorAt(i, HOODIES[w.id % HOODIES.length]!);
         rHead.current?.setColorAt(i, SKIN[(w.id * 3) % SKIN.length]!);
       } else {
         const i = nv++;
-        set(vBody.current, i, x, 0.26 * S + bob, z, ry, 1, squash, 1);
-        set(vHead.current, i, x, 0.66 * S + bob, z, ry, 1, 1, 1);
+        set(vBody.current, i, x, 0.26 * S + bob, z, yaw, wide, squash, wide);
+        set(vHead.current, i, x, headY, z, yaw, 1, 1, 1);
+        glasses(x, headY, z, yaw);
         vBody.current?.setColorAt(i, SUITS[w.id % SUITS.length]!);
         vHead.current?.setColorAt(i, SKIN[(w.id * 5) % SKIN.length]!);
       }
@@ -193,6 +226,7 @@ export function Walkers() {
     done(pBody.current, np);
     done(pHead.current, np);
     done(pStick.current, np);
+    done(eyes.current, ne);
     boards.current.forEach((m, i) => done(m, nb[i] ?? 0));
   });
 
@@ -238,6 +272,10 @@ export function Walkers() {
         <sphereGeometry args={[0.125 * S, 12, 10]} />
         <meshStandardMaterial roughness={0.7} />
       </instancedMesh>
+      <instancedMesh ref={eyes} args={[eyeGeo, undefined, EYE_CAP]} frustumCulled={false}>
+        <meshStandardMaterial color="#2a1d14" roughness={0.5} />
+      </instancedMesh>
+
       <instancedMesh ref={pStick} args={[stickGeo, undefined, CAP]} castShadow frustumCulled={false}>
         <meshStandardMaterial color="#8a5a3a" roughness={0.9} />
       </instancedMesh>

@@ -1,8 +1,9 @@
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
+import { lanternMat } from "../fx/glow";
 import { CREAM, CREAM_DARK, std } from "../materials";
-import { B, Ball, Cyl } from "./Parts";
+import { B, Ball, Cyl, Glass } from "./Parts";
 
 const SLICES = 8;
 
@@ -37,6 +38,12 @@ export function KombuchaModel({ color }: { color: string }) {
       <B p={[0, 0.58, 0]} s={[0.8, 0.06, 0.7]} c={color} />
       <Cyl p={[-0.3, 0.64, -0.26]} r={0.03} h={0.4} c={CREAM_DARK} />
       <Cyl p={[0.3, 0.64, 0.26]} r={0.03} h={0.4} c={CREAM_DARK} />
+      <Glass p={[-0.1, 0.36, 0.312]} s={[0.4, 0.2, 0.02]} />
+      <Glass p={[0.372, 0.36, 0]} s={[0.02, 0.2, 0.36]} />
+      {Array.from({ length: 6 }, (_, i) => {
+        const a = (i / 6) * Math.PI * 2;
+        return <Ball key={i} p={[0.05 + Math.cos(a) * 0.6, 0.98, Math.sin(a) * 0.6]} r={0.04} mat={lanternMat} />;
+      })}
       {stripes}
       <Cyl p={[0.05, 0.64, 0]} r={0.15} h={0.62} mat={new THREE.MeshStandardMaterial({ color: "#d9902b", roughness: 0.25, transparent: true, opacity: 0.92 })} />
       <Cyl p={[0.05, 1.26, 0]} r={0.07} h={0.24} c="#c98322" />
