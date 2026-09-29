@@ -44,11 +44,36 @@ WebGL renders through SwiftShader (no GPU), so it's slow but accurate. For a liv
 - Finished builders: the lead archives the thread when its work has merged, which retires its machine. For a standalone machine: `bb machine remove <host> --yes`.
 - Check what's running: `bb machine list --json` and `bb modal machine inspect <host> --json`.
 
+## Measured on Sep 29 (FLT-1)
+
+| Step | Time |
+|---|---|
+| Sandbox allocated from a cached image | ~15 s |
+| bb bootstrap + clone + `.bb-env-setup.sh` (pnpm install 4 s, Chromium) | ~30 s total to "Provisioned thread" |
+| `pnpm check` (typecheck + test + build) | ~11 s |
+| `pnpm build` | ~4 s |
+| Pause (snapshot + stop) | ~12 s (once DNS cooperated) |
+| Resume from snapshot | ~6 s; files, node_modules and Chromium intact, setup not rerun |
+| Image rebuild after a Dockerfile change | a few minutes, once, then cached |
+
+Machines are **1 vCPU** by default (no size presets are configured in the Modal plugin settings).
+
 ## Cost (rough)
 
-_To be filled in after FLT-1's end-to-end run._
+Modal bills running sandboxes per second for CPU and memory. A 1-vCPU builder costs very roughly **$0.10–0.30 per running hour**, and paused machines cost only snapshot storage. A wave of 4 builders working ~2 hours comes to a few dollars. Check the Modal dashboard (app `bb-sandboxes`) for real numbers.
+
+## Credentials (FLT-only machine variables)
+
+`bb machine env list --project proj_dvb9hes55f`:
+- `CLAUDE_CODE_OAUTH_TOKEN`: Claude Code login for builders (from `claude setup-token`). **Cloud machines don't share the Mini's Claude login.** Without it, turns fail with "Not logged in".
+- `GH_TOKEN`: GitHub (repo + workflow). Since the bb server PATH fix, the server's built-in GitHub login also works, so this is a belt-and-braces override.
 
 ## Known issues
 
-- **Sep 29:** Modal bootstrap failed with HTTP 500 from `/install/bb-app.tgz`, because the bb server's launchd service had no PATH (`spawn npm ENOENT`). Fixed in the workshop (see FLT-1).
-- Inside the Mini's agent sandbox, `gh` can't verify GitHub's certificate through the proxy. Plain `git` and `curl` work. On Modal, `gh` uses `GH_TOKEN` directly.
+- **Claude Code version:** Opus 5.5 needs Claude Code ≥ 2.1.280. The Modal image now pins 2.1.284. A thread that started on an older binary keeps failing even after `bb machine provider-cli install <host> claude-code --action update`, because its provider process is cached. Start a fresh thread instead.
+- **Intermittent "Machine bootstrap command failed"** (2 of ~8 launches, no detail in logs). `bb thread retry <id>` fixed it every time.
+- **First pause failed** with `Name resolution failed for target dns:task-….w.modal.host` (the Mini resolves DNS through Tailscale MagicDNS). A retry a few minutes later succeeded, so it's likely negative caching of a brand-new hostname. If pauses keep failing, compute keeps running (and billing) until Modal's 24 h limit, so remove idle machines.
+- **Pasted secrets can pick up line breaks** (the Claude token did: `401 OAuth access token is invalid`). Strip whitespace before `bb machine env set`.
+- **Sep 29:** bootstrap returned HTTP 500 from `/install/bb-app.tgz`, because the bb server's launchd service had no PATH (`spawn npm ENOENT`). The workshop fixed it.
+- `bb connect expose` links answer 401 to curl. They need a browser that's signed in to bb, which is expected.
+- Inside the Mini's agent sandbox, `gh` can't verify GitHub's certificate through the proxy, but plain `git` and `curl` work. On Modal, `gh` works.
