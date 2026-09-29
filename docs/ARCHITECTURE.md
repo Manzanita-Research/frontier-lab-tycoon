@@ -188,3 +188,36 @@ Two design consequences: the World stores `{ value, context }` and rebuilds with
 - **Toasts expire per toast** (a delayed `raise` on the Effect clock, 5.2 s from when each was shown) instead of the old component effect that restarted every timer whenever the list changed. It is the one visible timing difference.
 - **Walker machine has no context.** See the numbers above.
 - **Machine events use plain data only** (no functions or handles), so `xstate/graph` can explore every machine; `src/sim/machines/graph.test.ts` asserts every state is reachable and only final states are dead ends.
+
+## The juice layer (FLT-6): render and UI only
+
+Everything that makes the campus feel alive lives in `src/render/fx/` and `src/ui/juice/`. It **reads** the World (`sim.world`, `sim.alpha`) and never writes to it, adds no sim events and changes no `src/sim/**` file, so the golden digests and the perf test are untouched.
+
+```mermaid
+flowchart LR
+  W[("sim.world")] -->|"each frame"| WATCH["watch.ts<br/>diff vs last frame"]
+  WATCH -->|"FxEvents: release, incident, placed,<br/>removed, path, earned, reset"| DIR["FxDirector<br/>(useFrame, priority -3)"]
+  DIR --> P["particles.ts<br/>pool of 2,000"] --> PL["ParticleLayer<br/>1 instanced draw call"]
+  DIR --> CIN["cinema.ts<br/>camera director + shake"] --> RIG["CameraRig<br/>MapControls, WASD, edge, dblclick"]
+  DIR --> FX["fx state: hour, night,<br/>cheerAt, earnAt"]
+  FX --> L["Lighting, lamps, windows,<br/>Sky, Walkers, models"]
+  UI["ui/juice: P key, camera button"] -->|"photoAtom"| PFX["PhotoFX (lazy)<br/>postprocessing"]
+```
+
+| Piece | File | What it does |
+|---|---|---|
+| Campus clock | `fx/clock.ts` | Pure. `hourAt(tick)`: one cycle per 10 game days (200 ticks), the game opens at 8am. `ambience(hour)` gives light colours and intensities, sky gradient, window and lamp glow. `chaseHour` low-passes the shown hour to 3 h/s, so 10x speed drifts through dusk instead of strobing. Tested to stay continuous and never darker than 35% of noon light. |
+| Watcher | `fx/watch.ts` | Compares the World with the previous frame and returns `FxEvent`s. The first poll of a World (load, `?warp=`, new lab) only records a baseline. This is how "release" and "event card" reach the juice layer with no sim change. |
+| Particles | `fx/particles.ts`, `ParticleLayer.tsx` | One struct-of-arrays pool (cap 2,000; ambient sparkles and dust are dropped when full so a confetti burst always gets in) drawn as camera-facing quads by one `InstancedBufferGeometry`. Kinds: confetti, coins, smoke and dust puffs, water droplets, four-point sparkles. Sparkles are additive, the rest premultiplied alpha. |
+| Camera director | `fx/cinema.ts`, `CameraRig.tsx` | `idle -> in -> hold -> out -> idle`. A shot remembers the player's view and eases back to it; any player input cancels it. A release goes to the Training Hall (2.6 s), an event card to the gate (held until the card closes, with the subject aimed above the card). `shake(strength)` adds trauma; the offset is trauma squared. |
+| Lights | `fx/Lighting.tsx`, `fx/glow.ts`, `fx/Night.tsx` | One directional light swings from sun to moon; shared window and lantern materials are updated once per frame, so every window and lamp lights together. Path lamps sit on every fourth path tile. |
+| Photo mode | `fx/PhotoFX.tsx`, `ui/juice/photo.ts` | `@react-three/postprocessing` (tilt-shift, ACES tone mapping, saturation, contrast, vignette) is a lazy chunk mounted **only** while photo mode is on. The sky becomes the scene background so the blur has something to blur into. The PNG is the composer's frame plus the thought bubbles that were on screen plus the stamp. |
+
+Decisions worth knowing:
+
+- **The camera director is a plain class, not a machine.** It is render code with no game logic in it, driven by frame `dt`; the rules about sim machines and tick-based time are about the sim.
+- **Photo mode is an Effect atom** (`photoAtom`), not a field on the app machine, so it adds no events to `appMachine` and can't collide with other UI state. It is mirrored into `fx.photo` for the render side.
+- **Night thoughts are client-side** (`content/night.ts`, shown by `ui/juice/NightThoughts.tsx`) because this slice may not touch `src/sim/**`. The file's header says how to make them ordinary sim thoughts later (add a `night` condition to `activeConditions`).
+- **Debug knobs:** `?hour=22` pins the clock, `?photo` opens photo mode, and with `?debug=1` `window.__fx` exposes `{ fx, cinema, pool }`. `scripts/juice-shots.mjs` scripts the moments a URL can't (a release, a saved photo, frame times).
+
+Measured on the 1-vCPU Modal box: a full pool of 2,000 particles updates in 0.08 ms per frame, watching a 429-walker World costs 0.0005 ms per frame, and the SwiftShader frame time of the whole game is unchanged against the FLT-4 build (mean 117 ms with juice vs 126 to 132 ms without, both rasteriser-bound).

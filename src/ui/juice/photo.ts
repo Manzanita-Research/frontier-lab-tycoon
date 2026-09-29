@@ -5,7 +5,7 @@ import { Atom } from "effect/unstable/reactivity";
 import { debugParams, registry, send, sim } from "../../app/game";
 import { photoAtom, photoBridge } from "../../render/fx/photoState";
 import { cinema, fx } from "../../render/fx/state";
-import { formatDate } from "../../sim/format";
+import { photoFileName, stampText } from "./stamp";
 
 /** The last photo taken, for the polaroid that drops into the corner. */
 export interface Shot {
@@ -32,13 +32,6 @@ export function setPhoto(on: boolean) {
 }
 
 export const togglePhoto = () => setPhoto(!isPhoto());
-
-/** "Y1 Mar 4": the stamp's date. */
-export const stampDate = (day: number) => formatDate(day).replace(" · ", " ");
-
-export const stampText = (lab: string, day: number) => `Frontier Lab Tycoon · ${lab} · ${stampDate(day)}`;
-
-const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
 /** Draw the DOM thought bubbles that are on screen onto the picture, so it matches what the player sees. */
 function drawBubbles(ctx: CanvasRenderingContext2D, scale: number) {
@@ -149,7 +142,7 @@ export async function takePhoto(): Promise<Shot | null> {
   const blob = await new Promise<Blob | null>((done) => out.toBlob(done, "image/png"));
   if (!blob) return null;
   const url = URL.createObjectURL(blob);
-  const name = `frontier-lab-tycoon-${slug(world.labName)}-${slug(stampDate(world.day))}.png`;
+  const name = photoFileName(world.labName, world.day);
   const a = document.createElement("a");
   a.href = url;
   a.download = name;

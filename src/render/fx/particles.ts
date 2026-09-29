@@ -219,9 +219,9 @@ const TAU = Math.PI * 2;
 export function confettiBurst(pool: ParticlePool, x: number, y: number, z: number, n = 120, power = 1) {
   for (let i = 0; i < n; i++) {
     const a = pool.rand(0, TAU);
-    const out = pool.rand(0.6, 3.4) * power;
+    const out = pool.rand(0.8, 3.9) * power;
     const c = CONFETTI[i % CONFETTI.length]!;
-    pool.spawn({ kind: Kind.Confetti, x, y, z, vx: Math.cos(a) * out, vy: pool.rand(4.5, 9.5) * power, vz: Math.sin(a) * out, life: pool.rand(2.2, 3.2), size: pool.rand(0.09, 0.15), gravity: 7, drag: 0.5, r: c[0], g: c[1], b: c[2], spin: pool.rand(-14, 14), bounce: 0 });
+    pool.spawn({ kind: Kind.Confetti, x, y, z, vx: Math.cos(a) * out, vy: pool.rand(3.2, 6.4) * power, vz: Math.sin(a) * out, life: pool.rand(2.4, 3.4), size: pool.rand(0.09, 0.15), gravity: 6.5, drag: 0.5, r: c[0], g: c[1], b: c[2], spin: pool.rand(-14, 14), bounce: 0 });
   }
 }
 
@@ -260,10 +260,10 @@ export function sparkle(pool: ParticlePool, x: number, y: number, z: number, col
 
 /** A firefly or a star: slow, warm, twinkling. */
 export function firefly(pool: ParticlePool, x: number, y: number, z: number) {
-  pool.spawn({ kind: Kind.Spark, x, y, z, vx: pool.rand(-0.3, 0.3), vy: pool.rand(-0.05, 0.2), vz: pool.rand(-0.3, 0.3), life: pool.rand(2.8, 4.6), size: pool.rand(0.13, 0.22), size1: 0.08, drag: 0.6, r: 1, g: 0.93, b: 0.55, alpha: 0.85 }, true);
+  pool.spawn({ kind: Kind.Spark, x, y, z, vx: pool.rand(-0.3, 0.3), vy: pool.rand(-0.05, 0.2), vz: pool.rand(-0.3, 0.3), life: pool.rand(2.8, 4.6), size: pool.rand(0.12, 0.2), size1: 0.07, drag: 0.6, r: 1, g: 0.93, b: 0.45, alpha: 1 }, true);
 }
 
 /** A star: high up, still, twinkling. */
 export function star(pool: ParticlePool, x: number, y: number, z: number) {
-  pool.spawn({ kind: Kind.Spark, x, y, z, life: pool.rand(1.6, 3.2), size: pool.rand(0.12, 0.22), size1: 0.1, r: 0.85, g: 0.92, b: 1, alpha: 0.8 }, true);
+  pool.spawn({ kind: Kind.Spark, x, y, z, life: pool.rand(1.6, 3.2), size: pool.rand(0.1, 0.17), size1: 0.08, r: 1, g: 0.97, b: 0.85, alpha: 1 }, true);
 }

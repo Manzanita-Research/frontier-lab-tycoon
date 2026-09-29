@@ -50,8 +50,8 @@ const FRAG = /* glsl */ `
       col += vec3(0.28) * (1.0 - smoothstep(0.0, 0.5, length(vUv - vec2(-0.3, 0.3))));
     } else if (vKind > 3.5) {                 // spark: a four-point star, added onto the scene
       float d = min(abs(vUv.x), abs(vUv.y));
-      float star = max(1.0 - smoothstep(0.0, 0.32, d) - smoothstep(0.55, 1.0, r), 0.0);
-      float core = 1.0 - smoothstep(0.0, 0.35, r);
+      float star = max(1.0 - smoothstep(0.0, 0.17, d) - smoothstep(0.3, 1.0, r), 0.0);
+      float core = 1.0 - smoothstep(0.0, 0.3, r);
       a *= clamp(star + core, 0.0, 1.0);
       additive = 1.0;
     } else {                                 // droplet: a bead with a highlight

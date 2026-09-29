@@ -6,6 +6,9 @@
 //   node scripts/juice-shots.mjs night    docs/img/flt-6/night.png
 //   node scripts/juice-shots.mjs photo    docs/img/flt-6/photo.png      (opens photo mode, saves the real PNG the shutter makes)
 //   node scripts/juice-shots.mjs phone    docs/img/flt-6/phone.png
+//   node scripts/juice-shots.mjs record   docs/img/flt-6/tour.webm     (video tour)
+//   node scripts/juice-shots.mjs coins    docs/img/flt-6/coins.png
+//   node scripts/juice-shots.mjs protest  docs/img/flt-6/protest.png
 //   node scripts/juice-shots.mjs fps                                     (frame times: photo mode off)
 import { chromium } from "playwright";
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -16,7 +19,8 @@ const base = process.env.URL ?? "http://localhost:4173/";
 const browser = await chromium.launch({ args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
 const mobile = mode === "phone";
 const ctx = await browser.newContext({
-  viewport: mobile ? { width: 390, height: 844 } : { width: 1440, height: 900 },
+  recordVideo: mode === "record" ? { dir: dirname(out ?? "docs/img/flt-6/x"), size: { width: 960, height: 600 } } : undefined,
+  viewport: mode === "record" ? { width: 960, height: 600 } : mobile ? { width: 390, height: 844 } : { width: 1440, height: 900 },
   deviceScaleFactor: mobile ? 2 : 1,
   isMobile: mobile,
   hasTouch: mobile,
@@ -45,6 +49,54 @@ if (mode === "release") {
     for (let i = 0; i < 20; i++) f.tick(w);
   });
   await page.waitForTimeout(Number(process.env.WAIT ?? 700));
+  await save(out);
+} else if (mode === "record") {
+  // A short tour for the PR: a release (camera swoops to the Hall, confetti, the crowd hops), night falls, then a photo.
+  await go("&zoom=52&hour=15");
+  await page.waitForTimeout(2500);
+  await page.evaluate(() => {
+    const f = window.__flt;
+    const w = f.sim.world;
+    w.compute = 400;
+    w.training.context.progress = w.training.context.cost - 1;
+    for (let i = 0; i < 20; i++) f.tick(w);
+  });
+  await page.waitForTimeout(7000);
+  await page.evaluate(() => (window.__fx.fx.hourOverride = 22.5));
+  await page.waitForTimeout(5000);
+  await page.keyboard.press("p");
+  await page.waitForTimeout(3500);
+  await page.keyboard.press("Enter");
+  await page.waitForTimeout(3500);
+  await page.keyboard.press("Escape");
+  await page.evaluate(() => (window.__fx.fx.hourOverride = null));
+  await page.waitForTimeout(1500);
+  const video = page.video();
+  await ctx.close();
+  await video.saveAs(out);
+  console.log("saved", out);
+} else if (mode === "coins") {
+  // Payday on a healthy lab with a gateway: a fountain of coins and the sign flickers.
+  await go("&zoom=95&focus=13,15.5&hour=13");
+  await page.waitForTimeout(1200);
+  await page.evaluate(() => {
+    const f = window.__flt;
+    const w = f.sim.world;
+    f.send({ type: "COMMAND", command: { type: "placeBuilding", kind: "gateway", x: 13, z: 17 } });
+    w.cash += 5_000_000;
+  });
+  await page.waitForTimeout(1500);
+  await page.evaluate(() => {
+    const f = window.__flt;
+    const w = f.sim.world;
+    w.capability = 120;
+    for (let i = 0; i < 20; i++) f.tick(w);
+  });
+  await page.waitForTimeout(Number(process.env.WAIT ?? 600));
+  await save(out);
+} else if (mode === "protest") {
+  await page.goto(`${base}?debug=1&seed=3&warp=70&discourse=44&zoom=95&focus=11.5,19&hour=13`, { waitUntil: "networkidle" });
+  await page.waitForTimeout(3500);
   await save(out);
 } else if (mode === "night") {
   await go("&zoom=78&focus=11.5,14&hour=22.5");
@@ -92,4 +144,4 @@ if (mode === "release") {
   process.exit(2);
 }
 if (errors.length) console.log(`page errors (${errors.length}):\n  ${errors.slice(0, 8).join("\n  ")}`);
-await browser.close();
+await browser.close().catch(() => {});

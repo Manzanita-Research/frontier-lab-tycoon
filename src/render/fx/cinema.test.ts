@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { approach, Cinema, shakeOffset, type View } from "./cinema";
+import { approach, Cinema, PAN_LIMIT, shakeOffset, type View } from "./cinema";
 
 /** Run the director for `seconds` at 60 fps, applying each result to `view` as the rig would. */
 function run(c: Cinema, view: View, seconds: number): View {
@@ -86,6 +86,15 @@ describe("camera director", () => {
     expect(c.phase).toBe("idle");
     expect(v.x).toBeCloseTo(5, 1);
     expect(v.zoom).toBeCloseTo(70, 0);
+  });
+
+  it("clamps a shot to the board, so it can still arrive and end", () => {
+    const c = new Cinema();
+    c.focus(start, { x: 40, z: -40, hold: 0, back: false });
+    const v = run(c, start, 4);
+    expect(c.phase).toBe("idle");
+    expect(v.x).toBeCloseTo(PAN_LIMIT, 1);
+    expect(v.z).toBeCloseTo(-PAN_LIMIT, 1);
   });
 
   it("shake: trauma adds up, is capped, decays to nothing, and small bumps stay small", () => {

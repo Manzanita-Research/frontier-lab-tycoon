@@ -1,5 +1,5 @@
 import { useFrame, useThree } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import type { OrthographicCamera } from "three";
 import { sim as game } from "../../app/game";
@@ -10,32 +10,58 @@ import { cinema, fx, shake } from "./state";
 import { currentLoad } from "./utilisation";
 import { createWatch, type FxEvent } from "./watch";
 
+// `?debug=1` exposes the juice state to probes and screenshot scripts (`get` is R3F's store getter: camera, controls).
+if (typeof window !== "undefined" && new URLSearchParams(window.location.search).has("debug")) {
+  (window as unknown as { __fx: { fx: typeof fx; cinema: typeof cinema; pool: typeof pool; get?: () => unknown } }).__fx = { fx, cinema, pool };
+}
+
 /** Walkers are drawn 1.6x life size (see Walkers.tsx); sparkles ride at the height of an agent's body. */
 const AGENT_Y = 0.55;
+const fwd = new THREE.Vector3();
 
 /**
  * The conductor of the juice: once per frame it advances the campus clock, asks `watch` what changed in the World,
  * and turns each change into particles, shakes, camera shots and crowd cheers. It only ever reads the sim.
  */
 export function FxDirector() {
-  const three = useThree();
+  const get = useThree((s) => s.get);
+  useEffect(() => {
+    const dbg = (window as unknown as { __fx?: { get?: () => unknown } }).__fx;
+    if (dbg) dbg.get = get;
+  }, [get]);
   const watch = useMemo(createWatch, []);
   const acc = useRef({ smoke: 0, spark: 0, drop: 0, fly: 0, star: 0 });
   const first = useRef(true);
 
   /** The camera's current view, for a shot to start from. */
   const view = () => {
-    const c = three.controls as unknown as { target: THREE.Vector3 } | null;
-    return { x: c?.target.x ?? 0, z: c?.target.z ?? 0, zoom: (three.camera as OrthographicCamera).zoom };
+    const { controls, camera } = get();
+    const target = (controls as unknown as { target: THREE.Vector3 } | null)?.target;
+    return { x: target?.x ?? 0, z: target?.z ?? 0, zoom: (camera as OrthographicCamera).zoom };
+  };
+
+  /**
+   * Where to aim the camera so the subject lands `up` of a screen height above the middle (an event card covers the
+   * middle; the crowd at the gate should be in the clear above it). Moves the target toward the camera side.
+   */
+  const aim = (x: number, z: number, zoomMul: number, up: number) => {
+    const { camera, size } = get();
+    camera.getWorldDirection(fwd);
+    const sinElevation = Math.max(0.2, -fwd.y);
+    fwd.y = 0;
+    fwd.normalize();
+    const d = (up * size.height) / ((camera as OrthographicCamera).zoom * zoomMul * sinElevation);
+    return { x: x - fwd.x * d, z: z - fwd.z * d };
   };
 
   const handle = (ev: FxEvent) => {
     switch (ev.type) {
       case "release": {
-        // Two cannons, one either side of the dome, and the whole crowd hops (Walkers reads `fx.cheerAt`).
-        confettiBurst(pool, ev.x - 0.9, 2.2, ev.z, 70);
-        confettiBurst(pool, ev.x + 0.9, 2.2, ev.z, 70);
-        if (ev.count > 1) confettiBurst(pool, ev.x, 2.6, ev.z, 60, 1.2);
+        // Three cannons (one either side of the dome and one on top) and the whole crowd hops (Walkers reads `fx.cheerAt`).
+        confettiBurst(pool, ev.x - 0.9, 2.2, ev.z, 80);
+        confettiBurst(pool, ev.x + 0.9, 2.2, ev.z, 80);
+        confettiBurst(pool, ev.x, 2.5, ev.z, 70, 1.25);
+        if (ev.count > 1) confettiBurst(pool, ev.x, 2.6, ev.z, 80, 1.3);
         fx.cheerAt = fx.time;
         fx.cheerX = ev.x;
         fx.cheerZ = ev.z;
@@ -45,7 +71,7 @@ export function FxDirector() {
       }
       case "incident":
         shake(0.8);
-        if (!fx.photo) cinema.focus(view(), { x: ev.x, z: ev.z - 1.5, zoom: 1.25, hold: null });
+        if (!fx.photo) cinema.focus(view(), { ...aim(ev.x, ev.z, 1.25, 0.3), zoom: 1.25, hold: null });
         return;
       case "incidentClosed":
         cinema.release();
