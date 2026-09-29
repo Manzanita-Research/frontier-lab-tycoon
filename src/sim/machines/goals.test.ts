@@ -1,5 +1,6 @@
 // The goals machine on its own: transition() only.
 import { initialStored, step } from "./run";
+import { SCENARIO } from "../../content/goals";
 import { goalsMachine } from "./goals";
 
 const goals = [
@@ -7,6 +8,7 @@ const goals = [
   { id: "revenue", value: 0, target: 250_000, met: false },
   { id: "hype", value: 0, target: 60, met: false },
 ];
+const DEADLINE = SCENARIO.deadlineDay;
 const fresh = () => initialStored(goalsMachine, { goals, outcomeDay: null });
 const day = (stored: ReturnType<typeof fresh>, d: number, cash: number, values: Record<string, number>) => step(goalsMachine, stored, { type: "DAY", day: d, cash, values });
 
@@ -33,11 +35,11 @@ describe("goals machine", () => {
   });
 
   it("loses at the deadline unless it was already won", () => {
-    expect(day(fresh(), 359, 1e6, {}).stored.value).toBe("tracking");
-    const r = day(fresh(), 360, 1e6, {});
+    expect(day(fresh(), DEADLINE - 1, 1e6, {}).stored.value).toBe("tracking");
+    const r = day(fresh(), DEADLINE, 1e6, {});
     expect(r.stored.value).toBe("lost");
-    expect(r.effects).toEqual([{ type: "LOST", day: 360 }]);
-    expect(day(fresh(), 360, 1e6, { release: 3, revenue: 250_000, hype: 60 }).stored.value).toBe("won");
+    expect(r.effects).toEqual([{ type: "LOST", day: DEADLINE }]);
+    expect(day(fresh(), DEADLINE, 1e6, { release: 3, revenue: 250_000, hype: 60 }).stored.value).toBe("won");
   });
 
   it("loses when cash sinks below the floor", () => {

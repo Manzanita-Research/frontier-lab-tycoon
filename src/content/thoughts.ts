@@ -1,6 +1,7 @@
 // Thought bubbles. `when` is a condition evaluated each day; 'always' lines are the fallback pool.
 // Templates: {lab} {model}. Parody only.
 import type { WalkerKind } from "../sim/types";
+import { RACE_THOUGHTS, type RaceThoughtCondition } from "./raceThoughts";
 
 export type ThoughtCondition =
   | "always"
@@ -14,7 +15,9 @@ export type ThoughtCondition =
   /** A few people are upset about water (discourse of 12 or more). */
   | "discourse"
   /** Ten or more protesters at the gate. */
-  | "protest";
+  | "protest"
+  /** The race: the current era, an open-weights drop, an unpowered datacenter, the top of the Arena. */
+  | RaceThoughtCondition;
 
 export interface ThoughtLine {
   kind: WalkerKind;
@@ -111,4 +114,6 @@ export const THOUGHTS: ThoughtLine[] = [
   t("protester", "always", "I've been chanting for three hours. What are we chanting?"),
   t("protester", "always", "This is the most organized thing I've done since my group project."),
   t("protester", "protest", "Someone hand me a water. Not from them."),
+
+  ...RACE_THOUGHTS,
 ];

@@ -2,8 +2,8 @@
 import type { NeedKey } from "./needs";
 import type { WalkerKind } from "../sim/types";
 
-export type BuildingKind = "cluster" | "hall" | "gateway" | "kombucha" | "nap" | "snack" | "demo" | "fountain";
-/** What the build palette offers; scenery is placed by events, not by the player. */
+export type BuildingKind = "cluster" | "hall" | "gateway" | "kombucha" | "nap" | "snack" | "demo" | "fountain" | "datacenter" | "gas" | "solar";
+/** What the build palette can offer; scenery is placed by events, not by the player. */
 export type PlaceableKind = Exclude<BuildingKind, "fountain">;
 
 export interface BuildingDef {
@@ -30,6 +30,8 @@ export interface BuildingDef {
   show?: boolean;
   /** Which personnel-file counter a stay here bumps ("Drank 14 kombuchas"). */
   tally?: "sips" | "naps" | "snacks" | "demos";
+  /** Hidden from the palette (and refused by the sim) until a compute auction unlocks it. */
+  locked?: boolean;
 }
 
 export const BUILDINGS: Record<BuildingKind, BuildingDef> = {
@@ -144,10 +146,55 @@ export const BUILDINGS: Record<BuildingKind, BuildingDef> = {
     stay: [0, 0],
     serves: {},
   },
+  datacenter: {
+    kind: "datacenter",
+    name: "Datacenter",
+    size: [4, 4],
+    price: 2_500_000,
+    upkeepPerDay: 18_000,
+    blurb: "Forty thousand GPUs and one very large fan. Without a power plant it is an expensive bunker.",
+    color: "#3a6fd8",
+    locked: true,
+    // Agents stream in and out of it like a cluster (they ignore capacity); nobody else has business there.
+    hosts: ["agent"],
+    capacity: 0,
+    stay: [30, 60],
+    serves: {},
+  },
+  gas: {
+    kind: "gas",
+    name: "Gas Turbine",
+    size: [2, 2],
+    price: 350_000,
+    upkeepPerDay: 6_000,
+    blurb: "Cheap power for a Datacenter. The neighbours will have discourse.",
+    color: "#e0704a",
+    locked: true,
+    hosts: [],
+    capacity: 0,
+    stay: [0, 0],
+    serves: {},
+  },
+  solar: {
+    kind: "solar",
+    name: "Solar Farm",
+    size: [3, 3],
+    price: 1_400_000,
+    upkeepPerDay: 2_000,
+    blurb: "Pricey power for a Datacenter. Everyone's favourite photo op.",
+    color: "#f2b134",
+    locked: true,
+    hosts: [],
+    capacity: 0,
+    stay: [0, 0],
+    serves: {},
+  },
 };
 
 export const BUILDING_KINDS = Object.keys(BUILDINGS) as BuildingKind[];
 export const PLACEABLE_KINDS = BUILDING_KINDS.filter((k): k is PlaceableKind => !BUILDINGS[k].scenery);
+/** The race's buildings: they show up in the palette once a compute auction has been won. */
+export const RACE_KINDS = BUILDING_KINDS.filter((k): k is PlaceableKind => !!BUILDINGS[k].locked);
 
 export const PATH_PRICE = 10_000;
 export const BULLDOZE_REFUND = 0.5;

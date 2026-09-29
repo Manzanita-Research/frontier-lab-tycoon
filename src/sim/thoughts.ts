@@ -5,6 +5,7 @@ import { CROWDING_PROTESTERS, THOUGHT_TICKS } from "./constants";
 import { fillTemplate } from "./format";
 import { causeOf, isLoud, lineFor } from "./mind";
 import { isReachable } from "./pathfind";
+import { raceConditions } from "./race/conditions";
 import { templateVars } from "./news";
 import type { Rng } from "./rng";
 import type { GameState } from "./types";
@@ -22,6 +23,7 @@ export function activeConditions(state: GameState): Set<ThoughtCondition> {
   if (state.walkers.filter((w) => modeOf(w) !== "inside").length > 40) c.add("crowded");
   if (state.waterDiscourse >= 12) c.add("discourse");
   if (state.walkers.filter((w) => w.kind === "protester").length >= CROWDING_PROTESTERS) c.add("protest");
+  for (const race of raceConditions(state)) c.add(race);
   return c;
 }
 

@@ -4,6 +4,8 @@ import { GOALS, type GoalMetric } from "../content/goals";
 import { step } from "./machines/run";
 import { goalsMachine } from "./machines/goals";
 import { pushNews } from "./news";
+import { ARENA_SIZE } from "../content/rivals";
+import { eraOfState } from "./race/race";
 import type { Rng } from "./rng";
 import type { GameState, GoalProgress, Outcome } from "./types";
 
@@ -11,6 +13,10 @@ const METRICS: Record<GoalMetric, (s: GameState) => number> = {
   runs: (s) => s.models.length,
   revenue: (s) => s.ledger.income,
   hype: (s) => s.hype,
+  era: (s) => eraOfState(s),
+  // Places from the bottom: last of seven is 1, #1 is 7, so a bigger number is always better.
+  // Only counts from Era 3 on: a top-3 place in the stumbling days would tick the box before the race has started.
+  arena: (s) => (eraOfState(s) >= 3 ? ARENA_SIZE + 1 - s.race.rank : 0),
 };
 
 export function createGoals(): GoalProgress[] {

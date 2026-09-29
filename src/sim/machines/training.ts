@@ -3,7 +3,7 @@
 // emitted effects to the World in order.
 import { Schema } from "effect";
 import { setupEffect } from "@xstate/effect";
-import { RUN_COST_GROWTH } from "../constants";
+import { runCostGrowth } from "../constants";
 import type { Stored } from "./run";
 
 export const TrainingContext = Schema.Struct({
@@ -56,7 +56,7 @@ export const trainingMachine = setupEffect({
     releasing: {
       on: {
         NAMED: ({ context, event }, enq) => {
-          const next = { run: context.run + 1, progress: context.progress - context.cost, cost: Math.round(context.cost * RUN_COST_GROWTH), name: event.name };
+          const next = { run: context.run + 1, progress: context.progress - context.cost, cost: Math.round(context.cost * runCostGrowth(context.run)), name: event.name };
           enq.emit({ type: "RUN_STARTED", model: next.name });
           if (next.progress >= next.cost) {
             enq.emit({ type: "RELEASED", model: next.name, run: next.run, gain: releaseGain(next.run) });

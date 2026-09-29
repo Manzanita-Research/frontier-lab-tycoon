@@ -58,6 +58,9 @@ export const atoms = {
   selected: pick((c) => c.selected),
   follow: pick((c) => c.follow),
   highlight: pick((c) => c.highlight),
+  race: pick((c) => c.snap.race),
+  /** Template variables for the open card ({valuation}, {bidLow}, {dropRival}, ...). */
+  cardVars: pick((c) => c.snap.race.vars),
 };
 
 /** The app's context right now, for handlers and frame callbacks that must not subscribe. Null until it has started. */

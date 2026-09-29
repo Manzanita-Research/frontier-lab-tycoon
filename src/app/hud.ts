@@ -6,12 +6,15 @@ import { inspectWalker, type Inspect } from "../sim/inspect";
 import { thoughtBoard, type ThoughtRow } from "../sim/mind";
 import { computePerDay } from "../sim/training";
 import { openEventOf } from "../sim/events";
+import { raceView, type RaceView } from "../sim/race/view";
 import { outcomeOf } from "../sim/goals";
 import type { Building, GameState, GoalProgress, OpenEvent, Outcome, Pop, Thought, Tone, Vibes } from "../sim/types";
 
 export type Tool = "path" | PlaceableKind | "bulldoze";
 /** Hotkeys 1-9 pick these in order. */
 export const TOOLS: Tool[] = ["path", "cluster", "hall", "gateway", "kombucha", "nap", "snack", "demo", "bulldoze"];
+/** The race's buildings: in the palette (between the core buildings and Bulldoze, no hotkey) once an auction unlocks them. */
+export const RACE_TOOLS: Tool[] = ["datacenter", "gas", "solar"];
 export const SPEEDS = [0, 1, 3, 10] as const;
 export type Speed = (typeof SPEEDS)[number];
 
@@ -64,6 +67,8 @@ export interface Snapshot {
   inspect: Inspect | null;
   /** The selection this snapshot was built for: the app only trusts `inspect: null` if it matches its own. */
   selectedId: number | null;
+  /** The Race: multiplier, era, the Arena, the open-weights drop, power. */
+  race: RaceView;
 }
 
 export interface UiToast {
@@ -103,5 +108,6 @@ export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO
     board: thoughtBoard(s).slice(0, BOARD_ROWS),
     inspect: ui.selected === null ? null : inspectWalker(s, ui.selected),
     selectedId: ui.selected,
+    race: raceView(s),
   };
 }

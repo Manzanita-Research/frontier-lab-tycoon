@@ -81,6 +81,35 @@ export const ICONS: Record<Tool, ReactElement> = {
       <circle cx="23" cy="24.5" r="1.3" fill={ink} />
     </svg>
   ),
+  datacenter: (
+    <svg {...S}>
+      <rect x="3" y="12" width="26" height="15" rx="2.5" fill="#f7eed6" stroke={ink} strokeWidth="2" />
+      <rect x="3" y="12" width="26" height="4.5" rx="2" fill="#3a6fd8" stroke={ink} strokeWidth="2" />
+      <circle cx="9" cy="8" r="3.4" fill="#dfe7f2" stroke={ink} strokeWidth="1.8" />
+      <circle cx="17" cy="8" r="3.4" fill="#dfe7f2" stroke={ink} strokeWidth="1.8" />
+      <circle cx="25" cy="8" r="3.4" fill="#dfe7f2" stroke={ink} strokeWidth="1.8" />
+      <rect x="7" y="20" width="4" height="3" rx="1" fill="#3fd98a" />
+      <rect x="14" y="20" width="4" height="3" rx="1" fill="#3fd98a" />
+      <rect x="21" y="20" width="4" height="3" rx="1" fill="#ffd24a" />
+    </svg>
+  ),
+  gas: (
+    <svg {...S}>
+      <rect x="4" y="18" width="18" height="10" rx="4" fill="#f7eed6" stroke={ink} strokeWidth="2" />
+      <rect x="20" y="4" width="6" height="24" rx="1.5" fill="#e0704a" stroke={ink} strokeWidth="2" />
+      <rect x="20" y="4" width="6" height="4" fill="#3a2a1c" />
+      <circle cx="10" cy="23" r="2.4" fill="#e0704a" />
+      <path d="M23 2 q-2 -2 0 -3" stroke="#b9b0a0" strokeWidth="2" />
+    </svg>
+  ),
+  solar: (
+    <svg {...S}>
+      <path d="M4 22 L10 10 H28 L22 22 Z" fill="#3b78d8" stroke={ink} strokeWidth="2" />
+      <path d="M8.3 16 H24.3 M13 22 L18.5 10 M17.5 22 L23 10 M7 22 L12.8 10" stroke="#cfe3ff" strokeWidth="1.2" />
+      <path d="M13 22 V28 M20 22 V28 M9 28 H24" stroke={ink} strokeWidth="2" />
+      <circle cx="6" cy="6" r="3" fill="#f2b134" stroke={ink} strokeWidth="1.6" />
+    </svg>
+  ),
   bulldoze: (
     <svg {...S}>
       <rect x="4" y="15" width="16" height="8" rx="2" fill="#ffd24a" stroke={ink} strokeWidth="2" />

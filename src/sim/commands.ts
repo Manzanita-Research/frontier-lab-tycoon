@@ -17,6 +17,14 @@ export type PlaceResult = { ok: true } | { ok: false; reason: string };
 
 const no = (reason: string): PlaceResult => ({ ok: false, reason });
 
+/** What `kind` costs right now: a compute auction win leaves a free voucher for one of them. */
+export function buildPrice(state: GameState, kind: BuildingKind): number {
+  return state.flags[`free:${kind}`] !== undefined ? 0 : BUILDINGS[kind].price;
+}
+
+/** Locked buildings (the race's Datacenter and power plants) stay locked until a compute auction is won. */
+export const isUnlocked = (state: GameState, kind: BuildingKind): boolean => !BUILDINGS[kind].locked || state.flags[`unlocked:${kind}`] !== undefined;
+
 /** Can `kind` (or a path tile) go at (x, z)? For buildings, (x, z) is the top-left tile of the footprint. */
 export function canPlace(state: GameState, kind: BuildingKind | "path", x: number, z: number): PlaceResult {
   if (kind === "path") {
@@ -27,6 +35,7 @@ export function canPlace(state: GameState, kind: BuildingKind | "path", x: numbe
     return { ok: true };
   }
   const def = BUILDINGS[kind];
+  if (!isUnlocked(state, kind)) return no("Win a compute auction to unlock this");
   const rect: Rect = { x, z, w: def.size[0], d: def.size[1] };
   if (!inBounds(state, x, z) || !inBounds(state, x + rect.w - 1, z + rect.d - 1)) return no("Out of bounds");
   if (rectsOverlap(rect, state.gate) || state.buildings.some((b) => rectsOverlap(rect, b))) {
@@ -36,14 +45,15 @@ export function canPlace(state: GameState, kind: BuildingKind | "path", x: numbe
     for (let j = z; j < z + rect.d; j++) if (isPathTile(state, i, j)) return no("Something's already there");
   }
   if (!edgeTiles(state, rect).some((e) => isPathTile(state, e.x, e.z))) return no("Needs a path next to it");
-  if (state.cash < def.price) return no("Not enough cash");
+  if (state.cash < buildPrice(state, kind)) return no("Not enough cash");
   return { ok: true };
 }
 
-function placeBuilding(state: GameState, rng: Rng, kind: BuildingKind, x: number, z: number) {
+export function placeBuilding(state: GameState, rng: Rng, kind: BuildingKind, x: number, z: number) {
   if (!canPlace(state, kind, x, z).ok) return;
   const def = BUILDINGS[kind];
-  state.cash -= def.price;
+  state.cash -= buildPrice(state, kind);
+  delete state.flags[`free:${kind}`];
   state.buildings.push({ id: state.nextId++, kind, x, z, w: def.size[0], d: def.size[1], placedTick: state.tick });
   state.version++;
   const first = state.flags[`built:${kind}`] === undefined;

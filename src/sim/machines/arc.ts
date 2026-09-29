@@ -23,9 +23,9 @@ export const arcMachine = setupEffect({
     events: {
       /**
        * The daily check. `ready` = the card's condition holds today; `slotFree` = no other card is open
-       * (only one at a time, earlier arcs go first).
+       * (only one at a time, earlier arcs go first). `pace` scales the cooldown: the later eras run faster (1 = normal).
        */
-      DAY: Schema.Struct({ day: Schema.Number, ready: Schema.Boolean, slotFree: Schema.Boolean }),
+      DAY: Schema.Struct({ day: Schema.Number, ready: Schema.Boolean, slotFree: Schema.Boolean, pace: Schema.Number }),
       /** The player picked a choice on the open card. */
       CHOOSE: Schema.Struct({ choiceIndex: Schema.Number }),
     },
@@ -56,7 +56,7 @@ export const arcMachine = setupEffect({
     cooldown: {
       on: {
         DAY: ({ context, event }) => {
-          if (context.openedDay !== null && event.day - context.openedDay < context.cooldownDays) return;
+          if (context.openedDay !== null && event.day - context.openedDay < context.cooldownDays * event.pace) return;
           return evaluate(context, event);
         },
       },

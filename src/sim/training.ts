@@ -8,6 +8,8 @@ import { step, type Stepped } from "./machines/run";
 import { trainingMachine } from "./machines/training";
 import { happinessOf } from "./needs";
 import { isReachable } from "./pathfind";
+import { datacenterCompute } from "./race/power";
+import { rdMultiplier, releaseBoost } from "./race/rd";
 import type { Rng } from "./rng";
 import type { GameState } from "./types";
 
@@ -22,7 +24,7 @@ export function morale(state: GameState): number {
 }
 
 export function computePerDay(state: GameState): number {
-  return state.buildings.filter((b) => b.kind === "cluster").length * COMPUTE_PER_CLUSTER;
+  return state.buildings.filter((b) => b.kind === "cluster").length * COMPUTE_PER_CLUSTER + datacenterCompute(state);
 }
 
 /** Once a game day: clusters fill the stockpile, halls spend it, and the machine decides what that adds up to. */
@@ -33,7 +35,8 @@ export function dailyTraining(state: GameState, rng: Rng) {
   if (halls > 0) {
     const spend = Math.min(COMPUTE_PER_HALL * halls, state.compute);
     state.compute -= spend;
-    gain = spend * (0.75 + 0.25 * morale(state));
+    // The R&D multiplier: agents doing research make every unit of compute go further.
+    gain = spend * (0.75 + 0.25 * morale(state)) * rdMultiplier(state);
   }
   feed(state, rng, { type: "DAY", halls, gain });
 }
@@ -56,13 +59,15 @@ function feed(state: GameState, rng: Rng, first: EventFromLogic<typeof trainingM
 function apply(state: GameState, rng: Rng, e: EmittedFrom<typeof trainingMachine>) {
   switch (e.type) {
     case "RELEASED": {
-      state.capability += e.gain;
+      // The R&D multiplier makes the leap bigger (sqrt of it), so the takeoff is felt in what a release adds.
+      const gain = e.gain * releaseBoost(rdMultiplier(state));
+      state.capability += gain;
       state.hype = Math.min(100, state.hype + 15);
       state.models.push(e.model);
       state.flags.lastRelease = state.day;
 
       const gateways = state.buildings.filter((b) => b.kind === "gateway" && isReachable(state, b)).length;
-      const bonus = LAUNCH_BONUS_PER_GAIN * e.gain * Math.min(3, gateways);
+      const bonus = LAUNCH_BONUS_PER_GAIN * gain * Math.min(3, gateways);
       state.cash += bonus;
       addToast(
         state,

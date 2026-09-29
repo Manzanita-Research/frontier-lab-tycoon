@@ -4,6 +4,7 @@ import { buildingAt, inBounds, rectContains } from "./pathfind";
 import type { Rng } from "./rng";
 import { TARGET_GATE, type GameState, type Point, type Walker } from "./types";
 import { advance, despawn, newWalker } from "./walkers";
+import { gasDiscourse } from "./race/power";
 import { stepWalker } from "./machines/walker";
 
 const DISCOURSE_PER_CLUSTER = 0.5;
@@ -25,7 +26,7 @@ export const clampDiscourse = (n: number) => Math.max(0, n);
 /** Each compute cluster adds to the discourse; it fades on its own. Then the crowd follows the number. */
 export function dailyDiscourse(state: GameState, rng: Rng) {
   const clusters = state.buildings.filter((b) => b.kind === "cluster").length;
-  state.waterDiscourse = clampDiscourse(state.waterDiscourse + DISCOURSE_PER_CLUSTER * clusters - DISCOURSE_DECAY);
+  state.waterDiscourse = clampDiscourse(state.waterDiscourse + DISCOURSE_PER_CLUSTER * clusters + gasDiscourse(state) - DISCOURSE_DECAY);
   syncProtesters(state, rng);
 }
 

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createInitialState } from "../../sim/state";
+import { perfBudget } from "../../sim/testkit";
 import { tick } from "../../sim/tick";
 import { ambience } from "./clock";
 import { CAP, coinFountain, confettiBurst, ParticlePool } from "./particles";
@@ -30,7 +31,7 @@ describe("juice per-frame cost", () => {
       for (let i = 0; i < 5 && pool.count < CAP; i++) confettiBurst(pool, 0, 2, 0, 50);
       pool.update(1 / 60);
     });
-    expect(ms).toBeLessThan(1.5);
+    expect(ms).toBeLessThan(perfBudget(1.5));
   });
 
   it("watching a busy World (500 walkers) costs a fraction of a millisecond per frame", () => {
@@ -40,13 +41,13 @@ describe("juice per-frame cost", () => {
     const watch = createWatch();
     watch.poll(w);
     const ms = median(200, () => void watch.poll(w));
-    expect(ms).toBeLessThan(0.3);
+    expect(ms).toBeLessThan(perfBudget(0.3));
   });
 
   it("the ambient light is a handful of multiplications", () => {
     const ms = median(200, () => {
       for (let h = 0; h < 24; h += 0.1) ambience(h);
     });
-    expect(ms).toBeLessThan(1);
+    expect(ms).toBeLessThan(perfBudget(1));
   });
 });

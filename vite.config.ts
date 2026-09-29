@@ -25,6 +25,9 @@ export default defineConfig({
     server: { deps: { inline: ["@xstate/effect"] } },
     globals: true,
     environment: "node",
+    // The wall-clock perf tests share a 1-vCPU box with every other test file: run the files one at a time so
+    // they measure the sim, not the neighbours.
+    fileParallelism: false,
     include: ["src/**/*.test.ts"],
   },
 });

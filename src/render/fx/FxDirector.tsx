@@ -7,6 +7,7 @@ import { HALF, rectCenter } from "../coords";
 import { chaseHour, hourAt, nightAmount } from "./clock";
 import { coinFountain, confettiBurst, droplet, dustBurst, firefly, particles as pool, smokePuff, sparkle, star } from "./particles";
 import { cinema, fx, shake } from "./state";
+import { GAS_STACK, GAS_STACK_TOP } from "../buildings/GasTurbineModel";
 import { currentLoad } from "./utilisation";
 import { createWatch, type FxEvent } from "./watch";
 
@@ -30,7 +31,7 @@ export function FxDirector() {
     if (dbg) dbg.get = get;
   }, [get]);
   const watch = useMemo(createWatch, []);
-  const acc = useRef({ smoke: 0, spark: 0, drop: 0, fly: 0, star: 0 });
+  const acc = useRef({ smoke: 0, spark: 0, drop: 0, fly: 0, star: 0, gas: 0 });
   const first = useRef(true);
 
   /** The camera's current view, for a shot to start from. */
@@ -70,15 +71,45 @@ export function FxDirector() {
         return;
       }
       case "incident":
+        if (ev.id.startsWith("era")) {
+          // An era begins: the whole campus in one shot, cannons all round, and everybody jumps.
+          shake(1);
+          for (const [dx, dz] of [[-6, -4], [6, -4], [-6, 5], [6, 5], [0, 0]] as const) confettiBurst(pool, dx, 2.4, dz, 90, 1.35);
+          fx.cheerAt = fx.time;
+          fx.cheerX = 0;
+          fx.cheerZ = 0;
+          if (!fx.photo) cinema.focus(view(), { x: 0, z: 1, zoom: 0.8, hold: null });
+          return;
+        }
         shake(0.8);
         if (!fx.photo) cinema.focus(view(), { ...aim(ev.x, ev.z, 1.25, 0.3), zoom: 1.25, hold: null });
         return;
+      case "rank": {
+        // The Arena moved you. A fall is a shove; a climb is a small cheer; the top is a party.
+        if (ev.to > ev.from) shake(Math.min(0.7, 0.25 + 0.12 * (ev.to - ev.from)));
+        else if (ev.to === 1) {
+          confettiBurst(pool, ev.x - 0.9, 2.2, ev.z, 70);
+          confettiBurst(pool, ev.x + 0.9, 2.2, ev.z, 70);
+          confettiBurst(pool, ev.x, 2.5, ev.z, 60, 1.25);
+          fx.cheerAt = fx.time;
+          fx.cheerX = ev.x;
+          fx.cheerZ = ev.z;
+          shake(0.2);
+        } else confettiBurst(pool, ev.x, 2.3, ev.z, 26, 1.05);
+        return;
+      }
       case "incidentClosed":
         cinema.release();
         return;
       case "placed":
         dustBurst(pool, ev.x, ev.z, Math.max(ev.w, ev.d) * 0.62, 8 + ev.w * ev.d * 3);
         shake(0.1);
+        if (ev.kind === "datacenter") {
+          // The auction prize lands: fly to it, and celebrate on the roof.
+          confettiBurst(pool, ev.x, 2.6, ev.z, 80, 1.3);
+          shake(0.45);
+          if (!fx.photo) cinema.focus(view(), { x: ev.x, z: ev.z, zoom: 1.3, hold: 2.4 });
+        }
         return;
       case "removed":
         dustBurst(pool, ev.x, ev.z, Math.max(ev.w, ev.d) * 0.62, 12 + ev.w * ev.d * 5);
@@ -169,6 +200,17 @@ export function FxDirector() {
       }
       a.smoke = Math.min(a.smoke, 3);
     } else a.smoke = 0;
+
+    // Every Gas Turbine puffs smoke from its stack.
+    a.gas += dt * 2.4;
+    for (let n = 0; a.gas >= 1 && n < 4; n++, a.gas--) {
+      const turbines = world.buildings.filter((b) => b.kind === "gas");
+      if (turbines.length === 0) break;
+      const b = turbines[Math.floor(pool.rand() * turbines.length)]!;
+      const [cx, cz] = rectCenter(b);
+      smokePuff(pool, cx + GAS_STACK[0] + pool.rand(-0.04, 0.04), GAS_STACK_TOP, cz + GAS_STACK[1] + pool.rand(-0.04, 0.04));
+    }
+    a.gas = Math.min(a.gas, 3);
 
     // Night: fireflies drift over the lawn and stars twinkle high up.
     if (fx.night > 0.3) {
