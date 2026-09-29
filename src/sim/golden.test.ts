@@ -10,6 +10,15 @@ import { tick } from "./tick";
 import type { GameState } from "./types";
 import type { PlaceableKind } from "../content/buildings";
 
+const sorted = (o: Record<string, unknown>) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)));
+
+/** The flag bag as the pre-port sim kept it: values that moved into machine contexts are folded back in here. */
+function flagsOf(s: GameState): Record<string, unknown> {
+  const flags: Record<string, unknown> = { ...s.flags };
+  if (s.economy.context.lastBailout !== null) flags.lastBailout = s.economy.context.lastBailout;
+  return flags;
+}
+
 /** Everything a player could observe or that feeds the next tick, in a shape-independent form. */
 function view(s: GameState) {
   return {
@@ -29,7 +38,7 @@ function view(s: GameState) {
     training: s.training.context,
     models: s.models,
     goals: s.goals,
-    flags: s.flags,
+    flags: sorted(flagsOf(s)),
     news: s.news,
     toasts: s.toasts,
     thoughts: s.thoughts,
@@ -100,11 +109,11 @@ function play(seed: number, ticks: number, checkpoints: number[]): Record<number
 
 const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 
-// Recorded from the pre-port sim (origin/flt-3-slice-2 @ 8f9750a).
+// Recorded from the pre-port sim (origin/flt-3-slice-2 @ 8f9750a; sorted-flags projection).
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "611ac035", 800: "3d0c5434", 1600: "eff0376e", 2400: "9cb16cc2", 3200: "2a885c18", 4000: "97353ad7" },
-  2: { 200: "855e5f57", 800: "92b2ddb2", 1600: "d6e561c2", 2400: "f3e9e0a1", 3200: "5c72e52a", 4000: "ad5d3007" },
-  3: { 200: "6754f24a", 800: "be2f434c", 1600: "08adf11e", 2400: "26369288", 3200: "b8cde705", 4000: "618bc1ae" },
+  1: { 200: "b09a4095", 800: "a274aab8", 1600: "c7c4a4ce", 2400: "c0ec8b46", 3200: "0f553eb8", 4000: "dfe20e6d" },
+  2: { 200: "2ed31fe1", 800: "e8b41e62", 1600: "55737f72", 2400: "47af9577", 3200: "37a3ccf0", 4000: "ef2f63a1" },
+  3: { 200: "932081b6", 800: "a3bd7a8e", 1600: "706c8480", 2400: "57759a6c", 3200: "dd7cd0e5", 4000: "64e21760" },
 };
 
 describe("golden runs", () => {

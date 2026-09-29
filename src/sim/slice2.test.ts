@@ -141,7 +141,7 @@ describe("goals", () => {
   it("loses when cash sinks below -$2M, and freezes time afterwards", () => {
     const s = createInitialState(1);
     s.cash = -2_500_000;
-    s.flags.lastBailout = s.day; // the bridge round already happened
+    s.economy = { ...s.economy, context: { lastBailout: s.day } }; // the bridge round already happened
     dailyGoals(s, createRng(1));
     expect(s.outcome).toBe("lost");
     const t = s.tick;

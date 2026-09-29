@@ -2,6 +2,7 @@ import { BUILDINGS, type BuildingKind } from "../content/buildings";
 import { LAB_NAMES, modelName } from "../content/names";
 import { createGoals } from "./goals";
 import { initialStored } from "./machines/run";
+import { economyMachine } from "./machines/economy";
 import { trainingMachine } from "./machines/training";
 import { pushNews } from "./news";
 import { createRng } from "./rng";
@@ -42,6 +43,7 @@ export function createInitialState(seed = 1): GameState {
     gate: { x: 11, z: 23, w: 2, d: 1 },
     buildings: [],
     walkers: [],
+    economy: initialStored(economyMachine, { lastBailout: null }),
     training: initialStored(trainingMachine, { run: 1, progress: 120, cost: 300, name: modelName(1, rng, 0) }),
     models: [],
     news: [],
