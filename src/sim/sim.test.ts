@@ -205,7 +205,7 @@ describe("determinism", () => {
   });
 
   it("never calls Math.random", () => {
-    const sources = import.meta.glob<string>("./*.ts", { query: "?raw", import: "default", eager: true });
+    const sources = import.meta.glob<string>("./**/*.ts", { query: "?raw", import: "default", eager: true });
     for (const [file, src] of Object.entries(sources)) {
       if (file.endsWith(".test.ts")) continue;
       const code = src.split("\n").filter((line) => !line.trim().startsWith("//")).join("\n");
