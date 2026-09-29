@@ -32,6 +32,19 @@ pnpm check            # all three: run before every PR
 
 If you need to change a shared type in `src/sim/types.ts`, keep the change additive and mention it in your PR.
 
+## XState + Effect
+
+The game logic runs on **XState v6 (alpha) and Effect v4 (rc)**, joined by `@xstate/effect`. Versions are pinned exactly (no `^`); they churn daily, so never bump one without saying so in your PR. Read `.claude/skills/effect` (Kit Langton's Effect v4 skill) before writing Effect code, and `docs/ARCHITECTURE.md` for the machine map. Spec: `docs/specs/architecture-xstate-effect.md`. The six rules:
+
+1. **All game logic is a machine:** walker behaviour, economy status, training runs, goals and each event arc. Arithmetic (money per day, movement along a route) stays in small pure functions that machines or the step loop call.
+2. **Sim machines advance with the pure `transition()`,** synchronously inside `Sim.step`. They are not actors. Each keeps a JSON `{ value, context }` in the World (rebuilt with `machine.resolveState`), so the determinism test and save/load keep working.
+3. **Game time is ticks, never wall clock.** No `after` delays in sim machines; express waits as tick/day counters in context, checked by guards on `TICK`/`DAY` events. `after` is fine only in UI-level machines (toasts).
+4. **Send walkers events only on discrete changes** (`ARRIVED`, `TIMER_DONE`, ...), never every tick. Movement stays a plain function. Keep the perf test (500 walkers, 0.3 ms/tick) green.
+5. **Effect owns the runtime:** the app actor, the loop fiber, services (`Context.Service`) and lifetimes (`ManagedRuntime`, disposed on unmount). Player input is `send(app, event)`; the app machine forwards it into the sim as a command.
+6. **React reads the app actor** through `@xstate/effect/atom` + `@effect/atom-react`, with the HUD snapshot throttled to about 5 Hz. One state system: no zustand.
+
+House style for sim machines: transitions are pure and never draw random numbers. The driver pre-rolls dice, in the original draw order, and passes them in the event (`{ type: "TIMER_DONE", loiter: rng.chance(...) }`). Side effects on the World are `enq`'d actions that the driver runs in order after each `transition()`. `src/sim/golden.test.ts` pins the RNG stream and the World for three seeds, so a port step that changes a number fails loudly.
+
 ## PRs
 
 - Open a real PR from your branch into `main`. CI runs typecheck, tests and build.
