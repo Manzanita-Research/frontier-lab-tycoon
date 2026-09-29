@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { BUILDINGS, PATH_PRICE } from "../content/buildings";
 import { formatDate, formatMoney } from "../sim/format";
 import { appNow, atoms, send } from "../app/game";
-import { SPEEDS, TOOLS, type Tool } from "../app/hud";
+import { RACE_TOOLS, SPEEDS, TOOLS, type Tool } from "../app/hud";
 import { useApp } from "../app/hooks";
 import { EventCard } from "./EventCard";
 import { ICONS } from "./icons";
@@ -12,9 +12,11 @@ import { OutcomeCard } from "./OutcomeCard";
 import { Odometer } from "./juice/Odometer";
 import { Thoughts } from "./Thoughts";
 import { Vibes } from "./Vibes";
+import { RacePanel } from "./race/RacePanel";
+import { RaceStats } from "./race/RaceStats";
 
 const toolName = (t: Tool) => (t === "path" ? "Path" : t === "bulldoze" ? "Bulldoze" : BUILDINGS[t].name);
-const SHORT: Record<Tool, string> = { path: "Path", cluster: "Cluster", hall: "Training Hall", gateway: "Gateway", kombucha: "Kombucha", nap: "Nap Pods", snack: "Snack Wall", demo: "Demo Stage", bulldoze: "Bulldoze" };
+const SHORT: Record<Tool, string> = { path: "Path", cluster: "Cluster", hall: "Training Hall", gateway: "Gateway", kombucha: "Kombucha", nap: "Nap Pods", snack: "Snack Wall", demo: "Demo Stage", datacenter: "Datacenter", gas: "Gas Turbine", solar: "Solar Farm", bulldoze: "Bulldoze" };
 const toolPrice = (t: Tool) => (t === "path" ? PATH_PRICE : t === "bulldoze" ? 0 : BUILDINGS[t].price);
 
 function TopBar() {
@@ -47,6 +49,7 @@ function TopBar() {
           <span style={{ width: `${s.hype}%` }} />
         </span>
       </div>
+      <RaceStats />
     </div>
   );
 }
@@ -90,7 +93,10 @@ function SpeedControl() {
 function BuildBar() {
   const tool = useApp(atoms.tool);
   const cash = useApp(atoms.cash);
+  const race = useApp(atoms.race);
   const blurb = tool && tool !== "path" && tool !== "bulldoze" ? BUILDINGS[tool] : null;
+  // The core tools, then whatever a compute auction has unlocked, then the bulldozer at the end as always.
+  const palette: Tool[] = [...TOOLS.filter((t) => t !== "bulldoze"), ...RACE_TOOLS.filter((t) => t !== "bulldoze" && t !== "path" && race.unlocked.includes(t)), "bulldoze"];
   return (
     <div className="buildwrap">
       {(blurb || tool === "path" || tool === "bulldoze") && (
@@ -111,15 +117,17 @@ function BuildBar() {
         </div>
       )}
       <div className="buildbar panel">
-        {TOOLS.map((t, i) => {
-          const price = toolPrice(t);
+        {palette.map((t) => {
+          const isFree = t !== "path" && t !== "bulldoze" && race.free.includes(t);
+          const price = isFree ? 0 : toolPrice(t);
           const broke = price > cash;
+          const hotkey = TOOLS.indexOf(t) + 1;
           return (
-            <button key={t} className={`tool ${tool === t ? "on" : ""} ${broke ? "broke" : ""}`} onClick={() => send({ type: "SET_TOOL", tool: t })} disabled={broke && tool !== t} aria-pressed={tool === t} title={toolName(t)}>
-              <span className="hot">{i + 1}</span>
+            <button key={t} className={`tool ${RACE_TOOLS.includes(t) ? "race" : ""} ${tool === t ? "on" : ""} ${broke ? "broke" : ""}`} onClick={() => send({ type: "SET_TOOL", tool: t })} disabled={broke && tool !== t} aria-pressed={tool === t} title={toolName(t)}>
+              <span className="hot">{hotkey > 0 ? hotkey : "·"}</span>
               <span className="icon">{ICONS[t]}</span>
               <span className="tname">{SHORT[t]}</span>
-              <span className="price">{t === "bulldoze" ? "refund 50%" : formatMoney(price)}</span>
+              <span className={`price ${isFree ? "free" : ""}`}>{t === "bulldoze" ? "refund 50%" : isFree ? "FREE" : formatMoney(price)}</span>
             </button>
           );
         })}
@@ -240,6 +248,7 @@ export function HUD() {
           <SpeedControl />
           <Thoughts />
           <Inspector />
+          <RacePanel />
         </div>
       </div>
       <Toasts />

@@ -8,6 +8,9 @@ import { rectCenter } from "../coords";
 import { CHEER_SECONDS, fx } from "../fx/state";
 import { ghostMaterials } from "../materials";
 import { ClusterModel } from "./ClusterModel";
+import { DatacenterModel } from "./DatacenterModel";
+import { GasTurbineModel } from "./GasTurbineModel";
+import { SolarFarmModel } from "./SolarFarmModel";
 import { GateModel } from "./GateModel";
 import { FountainModel } from "./FountainModel";
 import { GatewayModel } from "./GatewayModel";
@@ -37,6 +40,12 @@ export function BuildingModel({ kind, id }: { kind: BuildingKind; id?: number })
       return <DemoModel color={color} id={id} />;
     case "fountain":
       return <FountainModel color={color} />;
+    case "datacenter":
+      return <DatacenterModel color={color} />;
+    case "gas":
+      return <GasTurbineModel color={color} />;
+    case "solar":
+      return <SolarFarmModel color={color} />;
   }
 }
 

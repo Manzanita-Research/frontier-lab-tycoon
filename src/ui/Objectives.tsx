@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { GOALS, SCENARIO, type GoalDef } from "../content/goals";
+import { ARENA_SIZE } from "../content/rivals";
 import { formatDate, formatMoney } from "../sim/format";
 import { atoms } from "../app/game";
 import { useApp } from "../app/hooks";
@@ -16,6 +17,11 @@ function progressText(def: GoalDef, value: number): string {
       return `Training runs ${Math.floor(shown)} / ${def.target}`;
     case "points":
       return `Hype ${Math.floor(shown)} / ${def.target}`;
+    case "era":
+      return `Era ${Math.floor(shown)} / ${def.target}`;
+    case "rank":
+      if (value <= 0) return "Counts from Era 3";
+      return value >= def.target ? `Arena #${ARENA_SIZE + 1 - Math.floor(value)} (top ${ARENA_SIZE + 1 - def.target} reached)` : `Arena #${ARENA_SIZE + 1 - Math.floor(value)}, need top ${ARENA_SIZE + 1 - def.target}`;
   }
 }
 

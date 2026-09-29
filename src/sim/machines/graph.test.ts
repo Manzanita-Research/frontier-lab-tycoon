@@ -6,6 +6,9 @@ import { getAdjacencyMap } from "xstate/graph";
 import { EVENTS, EVENT_COOLDOWN_DAYS } from "../../content/events";
 import { arcMachine } from "./arc";
 import { economyMachine } from "./economy";
+import { RIVAL_BY_ID } from "../../content/rivals";
+import { eraMachine } from "../race/era";
+import { rivalMachine } from "../race/rival";
 import { goalsMachine } from "./goals";
 import { moodMachine } from "./mood";
 import { trainingMachine } from "./training";
@@ -29,9 +32,9 @@ describe("machine graphs", () => {
   it("every event arc reaches all four states, and none but the loop is a dead end", () => {
     for (const def of EVENTS) {
       const input = { choices: def.choices.length, cooldownDays: def.cooldown ?? EVENT_COOLDOWN_DAYS, openedDay: null };
-      const days = [0, 1, 200];
+      const days = [0, 1, 200, 200_000]; // the last one is past the era cards' once-only cooldown
       const events = [
-        ...days.flatMap((day) => [true, false].flatMap((ready) => [true, false].map((slotFree) => ({ type: "DAY" as const, day, ready, slotFree })))),
+        ...days.flatMap((day) => [true, false].flatMap((ready) => [true, false].map((slotFree) => ({ type: "DAY" as const, day, ready, slotFree, pace: 1 })))),
         ...def.choices.map((_, choiceIndex) => ({ type: "CHOOSE" as const, choiceIndex })),
       ];
       const r = explore(arcMachine, { input, events });
@@ -76,6 +79,25 @@ describe("machine graphs", () => {
     expect(r.unreachable).toEqual([]);
     expect(r.deadEnds).toEqual([]);
     expect(Object.entries(moodMachine.states).filter(([, s]) => (s as { type?: string }).type === "final").map(([k]) => k)).toEqual(["resigned"]);
+  });
+
+  it("a rival can reach idle, training, releasing and cooldown", () => {
+    const d = RIVAL_BY_ID.anthro;
+    const input = { id: d.id, personality: d.personality, capability: 20, hype: 40, baseHype: 40, weeks: 0, releases: 0, open: false, momentum: 1, model: "", lastRelease: -1 };
+    const week = { type: "WEEK" as const, week: 1, aggro: 1, pace: 1, chase: 1, lengthRoll: 0.5, gainRoll: 0.5, openRoll: 0.5, poachRoll: 0.9, name: "M" };
+    const events = [week, { ...week, pace: 50 }, { type: "SHOCK" as const, capability: -1, hype: -1, momentum: -0.1 }];
+    const r = explore(rivalMachine, { input, events, limit: 200 });
+    expect(r.unreachable).toEqual([]);
+    // (no dead-end check: states are compared by value, and a run counts its weeks down in the context, which the
+    // explorer holds at whatever it was on first arrival. rival.test.ts walks a whole cycle instead.)
+  });
+
+  it("the era ratchet reaches all four eras, and only climbs", () => {
+    const events = [1, 2.5, 6, 40].map((mult) => ({ type: "DAY" as const, mult }));
+    const r = explore(eraMachine, { input: { peak: 1 }, events });
+    expect(r.unreachable).toEqual([]);
+    // era4 can only loop on itself, which the dead-end check reports: that is the top of the ratchet, not a bug.
+    expect(r.deadEnds).toEqual(["era4"]);
   });
 
   it("training reaches idle, training and releasing", () => {

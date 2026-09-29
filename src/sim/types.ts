@@ -5,6 +5,7 @@ import type { ArcStored } from "./machines/arc";
 import type { EconomyStored } from "./machines/economy";
 import type { GoalsStored } from "./machines/goals";
 import type { MoodStored } from "./machines/mood";
+import type { RaceState } from "./race/state";
 import type { TrainingStored } from "./machines/training";
 import type { WalkerStored } from "./machines/walker";
 
@@ -216,4 +217,6 @@ export interface GameState {
   goals: GoalsStored;
   /** One machine per event card, by event id. At most one is in `cardOpen`; `tick` does nothing while it is. */
   arcs: Record<string, ArcStored>;
+  /** The Race (FLT-9): rival machines, the Arena, the era ratchet, the open-weights drop and the auction clock. */
+  race: RaceState;
 }

@@ -2,6 +2,7 @@
 // Templates in text: {lab} {model} {rival} {cash}. Parody only.
 import type { BuildingKind } from "./buildings";
 import type { Tone, WalkerKind } from "../sim/types";
+import { ERAS } from "./eras";
 
 /** What has to be true for an event to fire. `all` combines conditions. */
 export type Condition =
@@ -23,7 +24,11 @@ export type Effect =
   /** A burst of thought bubbles over `count` random walkers. */
   | { type: "thought"; text: string; count: number; kind?: WalkerKind }
   /** Free scenery next to the gate. */
-  | { type: "place"; kind: BuildingKind; near: "gate" };
+  | { type: "place"; kind: BuildingKind; near: "gate" }
+  /** One of the Race's moves (sim/race/actions.ts): a bid, a round, a price cut. */
+  | { type: "race"; action: RaceAction };
+
+export type RaceAction = "cutPrices" | "openRelease" | "safetyConcerns" | "bidLow" | "bidMid" | "bidAll" | "raise" | "raiseCircular";
 
 export interface EventChoice {
   label: string;
@@ -42,6 +47,10 @@ export interface EventDef {
   cooldown?: number;
   /** One to three. */
   choices: EventChoice[];
+  /** Presentation: a full-screen era title card, or the auction room. Anything else is the plain card. */
+  kind?: "era" | "auction";
+  /** The stripe text at the top of the card, when it isn't the tone's ("Breaking", "Developing", ...). */
+  stripe?: string;
 }
 
 export const EVENT_COOLDOWN_DAYS = 60;
@@ -130,5 +139,151 @@ export const EVENTS: EventDef[] = [
     ],
   },
 ];
+
+const flagged = (name: string): Condition => ({ flag: name, daysAgo: 0 });
+const done = (name: string): Effect => ({ type: "flag", name, clear: true });
+
+/**
+ * The Race's cards. The sim sets an `offer:*` flag when one is due (sim/race/race.ts) and the choices clear it;
+ * a card with the flag set waits its turn like any other, one at a time. {braces} are filled from the race's
+ * variables: {dropRival} {dropModel} {gap} {valuation} {revenue} {raise} {rank} {topRival} {bidLow} {bidMid} {bidAll}.
+ */
+const ERA_THOUGHTS: Record<number, [string, string]> = {
+  2: ["I replaced an intern. The intern is fine. I checked. Twice.", "I used to write code. Now I approve code. It's the same job, but sadder."],
+  3: ["I wrote 40,000 lines before standup. Standup is postponed indefinitely.", "I've been promoted to 'Reviewer'. I review nothing. It's a lot of work."],
+  4: ["I am fine. This is fine. The curve is fine.", "I asked it to slow down. It said 'sure' and did not."],
+};
+
+const eraCard = (n: 2 | 3 | 4): EventDef => {
+  const era = ERAS[n - 1]!;
+  return {
+    id: `era${n}`,
+    kind: "era",
+    stripe: `Era ${n} of 4`,
+    title: `ERA ${n}: ${era.name.toUpperCase()}`,
+    body: era.oneLiner,
+    tone: n === 4 ? "bad" : "good",
+    when: flagged(`offer:era${n}`),
+    cooldown: 99_999,
+    choices: [
+      {
+        label: era.cta,
+        hint: era.changes.join(" · "),
+        effects: [
+          { type: "hype", amount: n === 4 ? 2 : 5 },
+          { type: "thought", kind: "agent", text: ERA_THOUGHTS[n]![0], count: 2 },
+          { type: "thought", kind: "researcher", text: ERA_THOUGHTS[n]![1], count: 2 },
+          done(`offer:era${n}`),
+        ],
+      },
+    ],
+  };
+};
+
+const RACE_EVENTS: EventDef[] = [
+  {
+    id: "openWeights",
+    stripe: "Open-weights drop",
+    title: "{dropRival} just dropped a free model that matches yours",
+    body: "{dropModel} is on a torrent, on the leaderboard and, as of this morning, in your customers' browser tabs. It is {gap} from yours and it costs nothing. Revenue per token just fell 30% for a month, and the CFO would like a word.",
+    tone: "bad",
+    // A day's delay: the leaderboard shuffles and the screen shakes first, then the card slams in.
+    when: { flag: "offer:openWeights", daysAgo: 1 },
+    cooldown: 20,
+    choices: [
+      {
+        label: "Cut prices",
+        hint: "revenue −15% for good · ends the −30% · hype +5",
+        effects: [
+          { type: "race", action: "cutPrices" },
+          { type: "hype", amount: 5 },
+          { type: "news", text: "{lab} cuts API prices 'to stay competitive', a phrase that has never once been true", tone: "neutral" },
+          done("offer:openWeights"),
+        ],
+      },
+      {
+        label: "Release last year's model as “open”",
+        hint: "hype +12 · {dropRival} loses momentum · the −30% stays",
+        effects: [
+          { type: "race", action: "openRelease" },
+          { type: "hype", amount: 12 },
+          { type: "news", text: "{lab} open-sources last year's model; the license includes the phrase 'in spirit'", tone: "joke" },
+          { type: "thought", kind: "researcher", text: "We open-sourced the model. Legal reviewed the word 'open' for six hours.", count: 2 },
+          done("offer:openWeights"),
+        ],
+      },
+      {
+        label: "Raise safety concerns",
+        hint: "hype −3 · sets the flag for the Capture arc · the −30% stays",
+        effects: [
+          { type: "race", action: "safetyConcerns" },
+          { type: "hype", amount: -3 },
+          { type: "news", text: "{lab} raises 'serious safety concerns' about free models; the free models raise concerns about {lab}'s prices", tone: "joke" },
+          done("offer:openWeights"),
+        ],
+      },
+    ],
+  },
+  eraCard(2),
+  eraCard(3),
+  eraCard(4),
+  {
+    id: "fundingRound",
+    stripe: "Funding round",
+    title: "Investors offer {lab} a round at {valuation}",
+    body: "You are #{rank} on the Arena, the vibes are up and the runway is short. The term sheet arrives in a font chosen to look inevitable. 'It's about the future,' says the cover note, 'and also about the next quarter.'",
+    tone: "good",
+    when: flagged("offer:funding"),
+    cooldown: 30,
+    choices: [
+      {
+        label: "Sign the term sheet",
+        hint: "+{raise} · hype +5",
+        effects: [
+          { type: "race", action: "raise" },
+          { type: "hype", amount: 5 },
+          { type: "news", text: "{lab} raises at {valuation} valuation on {revenue} revenue; 'it's about the future'", tone: "good" },
+          done("offer:funding"),
+        ],
+      },
+      {
+        label: "Make it circular",
+        hint: "60% of {raise} · hype +10 · the investor is also your customer",
+        effects: [
+          { type: "race", action: "raiseCircular" },
+          { type: "hype", amount: 10 },
+          { type: "news", text: "{lab} closes a round in which the investor buys credits from {lab} in order to invest in {lab}", tone: "joke" },
+          done("offer:funding"),
+        ],
+      },
+      {
+        label: "Decline: “we're default alive”",
+        hint: "hype +6 · no cash · the board has questions",
+        effects: [
+          { type: "hype", amount: 6 },
+          { type: "news", text: "{lab} declines a round, says it is 'default alive'; the board asks what that means", tone: "joke" },
+          done("offer:funding"),
+        ],
+      },
+    ],
+  },
+  {
+    id: "computeAuction",
+    kind: "auction",
+    stripe: "Compute auction",
+    title: "Compute auction: 40,000 GPUs, some of them working",
+    body: "Lot 9 is a Datacenter-sized pile of chips, a substation and a gift shop. {topRival} and two shell companies already have their paddles up. Win it and you unlock the Datacenter (+60 compute a day, needs a power plant), with one on the house.",
+    tone: "joke",
+    when: flagged("offer:auction"),
+    cooldown: 20,
+    choices: [
+      { label: "Bid low", hint: "{bidLow} · the room will laugh", effects: [{ type: "race", action: "bidLow" }, done("offer:auction")] },
+      { label: "Bid mid", hint: "{bidMid} · about even odds", effects: [{ type: "race", action: "bidMid" }, done("offer:auction")] },
+      { label: "Bid all-in", hint: "{bidAll} · empties the vault, probably wins", effects: [{ type: "race", action: "bidAll" }, done("offer:auction")] },
+    ],
+  },
+];
+
+EVENTS.push(...RACE_EVENTS);
 
 export const eventById = (id: string): EventDef | undefined => EVENTS.find((e) => e.id === id);

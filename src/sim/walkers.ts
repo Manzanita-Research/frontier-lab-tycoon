@@ -540,7 +540,7 @@ function admitApplicants(state: GameState, rng: Rng, researchers: number) {
   }
 }
 
-/** Once per day: grow the agent and researcher populations toward their targets, a few at a time. */
+/** Once per day: grow the researcher and agent populations toward their targets, a few at a time. */
 export function dailyWalkers(state: GameState, rng: Rng) {
   const count = (kind: WalkerKind) => state.walkers.filter((w) => w.kind === kind).length;
   const deficit = agentTarget(state) - count("agent");

@@ -10,6 +10,8 @@ import { FONT_STACK, glowTexture } from "./materials";
 import { Follow } from "./follow";
 import { HOODIES, PICKET, SKIN, SUITS } from "./look";
 import { Pick } from "./Pick";
+import { eraDef } from "../content/eras";
+import { eraOfState } from "../sim/race/race";
 
 const CAP = 512;
 /** Every human gets a pair of glasses (one dark strip) so you can see which way they face and when they look around. */
@@ -25,12 +27,19 @@ const suits = new Map(Object.entries(SUITS).map(([role, c]) => [role, color(c)])
 const FALLBACK_SUIT = color("#8a93a3");
 /** A slumped walker is drained of colour: blue-grey. */
 const SLUMP_TINT = color("#7d879f");
-/** Agents glow cyan while aligned, violet as they drift, and hot pink once they've drifted for good. */
-const DRIFT_STOPS = ["#3ff0ff", "#a07cff", "#ff4f8a"].map(color);
+/** Agents glow in their era's colour while aligned (cyan at first), violet as they drift, and hot pink once they've drifted for good. */
+const DRIFT_VIOLET = color("#a07cff");
+const DRIFT_PINK = color("#ff4f8a");
 const HIGHLIGHT = color("#ffbe1a");
 const SELECT = color("#ffffff");
 const tint = new THREE.Color();
 const driftColor = new THREE.Color();
+/** Agent looks by era (content/eras.ts): body, visor, orb and glow tints, size, hard hat, halo. */
+const LOOKS = [1, 2, 3, 4].map((n) => {
+  const a = eraDef(n).agents;
+  return { body: new THREE.Color(a.body), visor: new THREE.Color(a.visor), glow: new THREE.Color(a.glow), scale: a.scale, hat: a.hat, halo: a.halo };
+});
+const HAT = new THREE.Color("#ffc21a");
 
 const dummy = new THREE.Object3D();
 // Yaw first, then lean in the walker's own frame.
@@ -94,6 +103,8 @@ export function Walkers() {
   const aVisor = useRef<THREE.InstancedMesh>(null);
   const aGlow = useRef<THREE.InstancedMesh>(null);
   const aOrb = useRef<THREE.InstancedMesh>(null);
+  const aHat = useRef<THREE.InstancedMesh>(null);
+  const aHalo = useRef<THREE.InstancedMesh>(null);
   const vBody = useRef<THREE.InstancedMesh>(null);
   const vHead = useRef<THREE.InstancedMesh>(null);
   const pBody = useRef<THREE.InstancedMesh>(null);
@@ -112,6 +123,8 @@ export function Walkers() {
   const visorGeo = useMemo(() => new THREE.BoxGeometry(0.25 * S, 0.09 * S, 0.07 * S), []);
   const agentGeo = useMemo(() => new RoundedBoxGeometry(0.34 * S, 0.34 * S, 0.3 * S, 3, 0.07 * S), []);
   const orbGeo = useMemo(() => new THREE.SphereGeometry(0.065 * S, 10, 8), []);
+  const hatGeo = useMemo(() => new THREE.SphereGeometry(0.2 * S, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2), []);
+  const agentHaloGeo = useMemo(() => new THREE.TorusGeometry(0.2 * S, 0.02 * S, 6, 20).rotateX(Math.PI / 2), []);
   const stickGeo = useMemo(() => new THREE.BoxGeometry(0.045, 1, 0.045), []);
   const eyeGeo = useMemo(() => new THREE.BoxGeometry(0.17 * S, 0.042 * S, 0.05 * S), []);
   const boxGeo = useMemo(() => new RoundedBoxGeometry(0.34, 0.26, 0.3, 2, 0.03), []);
@@ -127,6 +140,8 @@ export function Walkers() {
     const signYaw = Math.atan2(-dir.x, -dir.z);
     let nr = 0;
     let na = 0;
+    let nh = 0;
+    let no = 0;
     let nv = 0;
     let np = 0;
     let ne = 0;
@@ -134,6 +149,8 @@ export function Walkers() {
     let nl = 0;
     let picked: { x: number; z: number } | null = null;
     const nb = new Array<number>(SIGNS.length).fill(0);
+    // The agents look like the era: hard hats in Coding Automation, halos after that, bigger and brighter each time.
+    const agentLook = LOOKS[eraOfState(sim) - 1]!;
 
     const set = (m: THREE.InstancedMesh | null, i: number, x: number, y: number, z: number, ry: number, sx: number, sy: number, sz: number, rx = 0) => {
       if (!m) return;
@@ -182,20 +199,32 @@ export function Walkers() {
       const breath = !walking && env === 0 ? Math.sin(t * 2.2 + phase) * 0.014 : 0;
 
       if (w.kind === "agent") {
-        const bob = (0.26 + Math.sin(t * 3 + phase) * 0.04) * S + hop;
+        const k = agentLook.scale;
+        const bob = (0.26 + Math.sin(t * 3 + phase) * 0.04) * S * k + hop;
         const i = na++;
-        set(aBody.current, i, x, bob + 0.17 * S, z, ry, 1, 1, 1);
-        set(aVisor.current, i, x + Math.sin(ry) * 0.15 * S, bob + 0.22 * S, z + Math.cos(ry) * 0.15 * S, ry, 1, 1, 1);
-        set(aOrb.current, i, x, bob + 0.5 * S + Math.sin(t * 6 + phase) * 0.015, z, 0, 1, 1, 1);
-        const pulse = (1.9 + Math.sin(t * 3 + phase) * 0.2) * (1 + env * 0.4);
+        set(aBody.current, i, x, bob + 0.17 * S * k, z, ry, k, k, k);
+        set(aVisor.current, i, x + Math.sin(ry) * 0.15 * S * k, bob + 0.22 * S * k, z + Math.cos(ry) * 0.15 * S * k, ry, k, k, k);
+        set(aOrb.current, i, x, bob + 0.5 * S * k + Math.sin(t * 6 + phase) * 0.015, z, 0, k, k, k);
+        const pulse = (1.9 + Math.sin(t * 3 + phase) * 0.2) * (1 + env * 0.4) * k;
         set(aGlow.current, i, x, 0.03, z, 0, pulse, 1, pulse);
-        // Drift shows: cyan while aligned, through violet, to hot pink.
-        const d = w.drift * (DRIFT_STOPS.length - 1);
-        const k = Math.min(DRIFT_STOPS.length - 2, Math.floor(d));
-        driftColor.copy(DRIFT_STOPS[k]!).lerp(DRIFT_STOPS[k + 1]!, d - k);
+        aBody.current?.setColorAt(i, agentLook.body);
+        // Drift shows: the era's own colour while aligned, through violet, to hot pink.
+        const d = w.drift * 2;
+        const stage = Math.min(1, Math.floor(d));
+        const from = stage === 0 ? agentLook.visor : DRIFT_VIOLET;
+        driftColor.copy(from).lerp(stage === 0 ? DRIFT_VIOLET : DRIFT_PINK, d - stage);
         aVisor.current?.setColorAt(i, driftColor);
         aOrb.current?.setColorAt(i, driftColor);
-        aGlow.current?.setColorAt(i, driftColor);
+        aGlow.current?.setColorAt(i, d < 0.01 ? agentLook.glow : driftColor);
+        if (agentLook.hat) {
+          set(aHat.current, nh, x, bob + 0.33 * S * k, z, ry, k, k, k);
+          aHat.current?.setColorAt(nh++, HAT);
+        }
+        if (agentLook.halo) {
+          const pulseH = 1 + Math.sin(t * 4 + phase) * 0.06;
+          set(aHalo.current, no, x, bob + 0.66 * S * k + Math.sin(t * 2.5 + phase) * 0.03, z, t * 1.5 + phase, k * pulseH, k, k * pulseH);
+          aHalo.current?.setColorAt(no++, agentLook.glow);
+        }
         continue;
       }
       if (w.kind === "protester") {
@@ -297,6 +326,8 @@ export function Walkers() {
     done(aVisor.current, na);
     done(aGlow.current, na);
     done(aOrb.current, na);
+    done(aHat.current, nh);
+    done(aHalo.current, no);
     done(vBody.current, nv);
     done(vHead.current, nv);
     done(pBody.current, np);
@@ -320,12 +351,18 @@ export function Walkers() {
       </instancedMesh>
 
       <instancedMesh ref={aBody} args={[agentGeo, undefined, CAP]} castShadow frustumCulled={false}>
-        <meshStandardMaterial color="#f2f6fb" roughness={0.3} metalness={0.1} emissive="#1de9ff" emissiveIntensity={0.1} />
+        <meshStandardMaterial color="#ffffff" roughness={0.3} metalness={0.1} emissive="#1de9ff" emissiveIntensity={0.1} />
       </instancedMesh>
       <instancedMesh ref={aVisor} args={[visorGeo, undefined, CAP]} frustumCulled={false}>
         <meshBasicMaterial color="#ffffff" toneMapped={false} />
       </instancedMesh>
       <instancedMesh ref={aOrb} args={[orbGeo, undefined, CAP]} frustumCulled={false}>
+        <meshBasicMaterial color="#ffffff" toneMapped={false} />
+      </instancedMesh>
+      <instancedMesh ref={aHat} args={[hatGeo, undefined, CAP]} castShadow frustumCulled={false}>
+        <meshStandardMaterial color="#ffffff" roughness={0.45} />
+      </instancedMesh>
+      <instancedMesh ref={aHalo} args={[agentHaloGeo, undefined, CAP]} frustumCulled={false}>
         <meshBasicMaterial color="#ffffff" toneMapped={false} />
       </instancedMesh>
       {/* A faint additive disc under every agent, so the swarm reads from across the map. */}

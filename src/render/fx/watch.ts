@@ -18,6 +18,8 @@ export type FxEvent =
   | { type: "path"; x: number; z: number; added: boolean }
   /** A gateway got paid. */
   | { type: "earned"; amount: number; x: number; z: number }
+  /** The weekly Arena update moved you: `from` and `to` are places (1 is the top). */
+  | { type: "rank"; from: number; to: number; x: number; z: number }
   /** A different World (new lab): forget everything. */
   | { type: "reset" };
 
@@ -31,6 +33,7 @@ export function createWatch(): Watch {
   let seen: GameState | null = null;
   let models = 0;
   let card: string | null = null;
+  let rank = 0;
   let version = -1;
   let popId = 0;
   let paths = new Uint8Array(0);
@@ -40,6 +43,7 @@ export function createWatch(): Watch {
     seen = w;
     models = w.models.length;
     card = openEventOf(w)?.id ?? null;
+    rank = w.race.rank;
     version = w.version;
     popId = w.pops.reduce((m, p) => Math.max(m, p.id), 0);
     paths = Uint8Array.from(w.grid.paths, (p) => (p ? 1 : 0));
@@ -62,6 +66,13 @@ export function createWatch(): Watch {
           out.push({ type: "release", x, z, count: w.models.length - models });
         }
         models = w.models.length;
+      }
+
+      if (w.race.rank !== rank) {
+        const hall = w.buildings.find((b) => b.kind === "hall");
+        const [x, z] = hall ? rectCenter(hall) : rectCenter(w.gate);
+        out.push({ type: "rank", from: rank, to: w.race.rank, x, z });
+        rank = w.race.rank;
       }
 
       const open = openEventOf(w)?.id ?? null;

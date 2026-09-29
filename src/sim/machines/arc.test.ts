@@ -3,7 +3,7 @@ import { initialStored, step } from "./run";
 import { arcMachine } from "./arc";
 
 const fresh = () => initialStored(arcMachine, { choices: 3, cooldownDays: 60, openedDay: null });
-const day = (stored: ReturnType<typeof fresh>, d: number, ready: boolean, slotFree = true) => step(arcMachine, stored, { type: "DAY", day: d, ready, slotFree });
+const day = (stored: ReturnType<typeof fresh>, d: number, ready: boolean, slotFree = true, pace = 1) => step(arcMachine, stored, { type: "DAY", day: d, ready, slotFree, pace });
 
 describe("event arc machine", () => {
   it("waits in calm until its condition holds", () => {
@@ -43,6 +43,13 @@ describe("event arc machine", () => {
     expect(day(cooling, 129, true).stored.value).toBe("cooldown");
     expect(day(cooling, 130, true).stored).toMatchObject({ value: "cardOpen", context: { openedDay: 130 } });
     expect(day(cooling, 130, false).stored.value).toBe("calm");
+  });
+
+  it("shortens the cooldown with the era's pace", () => {
+    const cooling = step(arcMachine, day(fresh(), 70, true).stored, { type: "CHOOSE", choiceIndex: 0 }).stored;
+    expect(day(cooling, 100, true, true, 0.4).stored.value).toBe("cardOpen"); // 30 days >= 60 x 0.4
+    expect(day(cooling, 93, true, true, 0.4).stored.value).toBe("cooldown"); // 23 days < 24
+    expect(day(cooling, 100, true, true, 1).stored.value).toBe("cooldown");
   });
 
   it("ignores a pick when no card is open", () => {

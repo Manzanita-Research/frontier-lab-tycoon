@@ -7,6 +7,7 @@
 // The digest reads the game through `view()`, not the raw state, so the persisted shape can change (machine
 // snapshots, moved fields) without touching the recorded values. Only `view()` follows the shape.
 import { canPlace, type Command } from "./commands";
+import { eventById } from "../content/events";
 import { openEventOf } from "./events";
 import { outcomeOf } from "./goals";
 import { createInitialState } from "./state";
@@ -111,7 +112,7 @@ function play(seed: number, ticks: number, checkpoints: number[]): Record<number
   for (let i = 0; i < ticks; i++) {
     const cmds: Command[] = [];
     const open = openEventOf(s);
-    if (open) cmds.push({ type: "chooseEvent", eventId: open.id, choiceIndex: (s.tick + seed) % 3 });
+    if (open) cmds.push({ type: "chooseEvent", eventId: open.id, choiceIndex: (s.tick + seed) % eventById(open.id)!.choices.length });
     else if (i % 30 === 5 && built < BUILD_ORDER.length) {
       const kind = BUILD_ORDER[built]!;
       const at = spot(s, kind);
@@ -130,11 +131,14 @@ function play(seed: number, ticks: number, checkpoints: number[]): Record<number
 
 const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 
-// Recorded from the Crowd sim (FLT-8). The pre-Crowd values are in git history (FLT-3, @ 8f9750a).
+// Recorded from the pre-port sim (origin/flt-3-slice-2 @ 8f9750a; sorted-flags projection) and re-recorded by FLT-9,
+// which changes the game on purpose: rivals, the Arena, eras, the R&D multiplier (training runs faster), bigger
+// leaps per release, Training Halls that convert 30 compute a day, and a compute auction on day 40 that this
+// script answers like any other card. The port itself was verified against the original numbers in FLT-3.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "94478b29", 800: "175c1a29", 1600: "7f186203", 2400: "8d6e1cb3", 3200: "b2753bd3", 4000: "b9ce46ff" },
-  2: { 200: "5a5b230b", 800: "7d8bc251", 1600: "36e0d00d", 2400: "acb01204", 3200: "261717a3", 4000: "04edca1d" },
-  3: { 200: "ffcf9192", 800: "1290635e", 1600: "7a653115", 2400: "1bc93b38", 3200: "48649646", 4000: "59a81866" },
+  1: { 200: "ad2f2688", 800: "802dc3b9", 1600: "a8dc30e1", 2400: "8a4e0509", 3200: "f7c66459", 4000: "502ed97f" },
+  2: { 200: "efa3eff8", 800: "b238e095", 1600: "e458650d", 2400: "f2580b06", 3200: "7cb379e5", 4000: "e8a4633c" },
+  3: { 200: "dbc1eb2d", 800: "8093e903", 1600: "f82a6a35", 2400: "5348a141", 3200: "9c7f7b03", 4000: "b7df570b" },
 };
 
 describe("golden runs", () => {

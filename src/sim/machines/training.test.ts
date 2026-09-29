@@ -1,5 +1,6 @@
 // The training machine on its own: transition() only, no World, no rng, no actor.
 import { initialStored, step } from "./run";
+import { runCostGrowth } from "../constants";
 import { trainingMachine, releaseGain } from "./training";
 
 const start = { run: 1, progress: 120, cost: 300, name: "Frontier-2" };
@@ -22,7 +23,7 @@ describe("training machine", () => {
     expect(stored.value).toBe("releasing");
     expect(effects).toEqual([{ type: "RELEASED", model: "Frontier-2", run: 1, gain: releaseGain(1) }]);
     const named = step(trainingMachine, stored, { type: "NAMED", name: "Frontier-3-Reasoner" });
-    expect(named.stored).toEqual({ value: "training", context: { run: 2, progress: 0, cost: 900, name: "Frontier-3-Reasoner" } });
+    expect(named.stored).toEqual({ value: "training", context: { run: 2, progress: 0, cost: 300 * runCostGrowth(1), name: "Frontier-3-Reasoner" } });
     expect(named.effects).toEqual([{ type: "RUN_STARTED", model: "Frontier-3-Reasoner" }]);
   });
 
@@ -32,7 +33,7 @@ describe("training machine", () => {
     expect(second.stored.value).toBe("releasing");
     expect(second.effects.map((e) => e.type)).toEqual(["RUN_STARTED", "RELEASED"]);
     expect(second.effects[1]).toEqual({ type: "RELEASED", model: "B", run: 2, gain: releaseGain(2) });
-    expect(second.stored.context).toMatchObject({ run: 2, progress: 990, cost: 30 });
+    expect(second.stored.context).toMatchObject({ run: 2, progress: 990, cost: 10 * runCostGrowth(1) });
   });
 
   it("goes idle with no hall, freezes progress, and resumes when a hall returns", () => {

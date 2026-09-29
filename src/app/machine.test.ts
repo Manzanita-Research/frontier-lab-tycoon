@@ -3,6 +3,7 @@ import { it } from "@effect/vitest";
 import { Effect, Layer } from "effect";
 import { TestClock } from "effect/testing";
 import { createEffectActor, send, waitFor } from "@xstate/effect";
+import { SCENARIO } from "../content/goals";
 import { openEventOf } from "../sim/events";
 import { createInitialState } from "../sim/state";
 import { tick } from "../sim/tick";
@@ -101,8 +102,8 @@ describe("app machine", () => {
 
   it.effect("shows the outcome card on a loss, holds until a new lab, and a new lab starts fresh", () => {
     const handle = handleFor(1);
-    handle.world.day = 361;
-    handle.world.tick = 361 * 20 - 1;
+    handle.world.day = SCENARIO.deadlineDay + 1;
+    handle.world.tick = (SCENARIO.deadlineDay + 1) * 20 - 1;
     return Effect.gen(function* () {
       const { actor, sim, pump } = yield* boot();
       yield* pump(3);

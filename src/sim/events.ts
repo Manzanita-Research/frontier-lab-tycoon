@@ -8,6 +8,10 @@ import { step } from "./machines/run";
 import { addNews, templateVars } from "./news";
 import { buildingAt, inBounds, isPathTile, rectContains } from "./pathfind";
 import { clampDiscourse, syncProtesters } from "./protest";
+import { eraDef } from "../content/eras";
+import { applyRaceAction } from "./race/actions";
+import { eraOfState } from "./race/race";
+import { raceVars } from "./race/finance";
 import { modeOf } from "./walkers";
 import type { Rng } from "./rng";
 import type { GameState, OpenEvent } from "./types";
@@ -23,7 +27,9 @@ export function conditionHolds(state: GameState, c: Condition): boolean {
 
 /** The card on screen right now, if any: the arc that is in `cardOpen`. */
 export function openEventOf(state: GameState): OpenEvent | null {
-  for (const [id, arc] of Object.entries(state.arcs)) {
+  // Runs every tick: a plain loop, no entries() arrays.
+  for (const id in state.arcs) {
+    const arc = state.arcs[id]!;
     if (arc.value === "cardOpen") return { id, day: arc.context.openedDay! };
   }
   return null;
@@ -34,9 +40,12 @@ export function openEventOf(state: GameState): OpenEvent | null {
  * cooldown is over takes the screen, and the rest wait their turn as `brewing`. The game pauses until it is answered.
  */
 export function dailyEvents(state: GameState) {
+  if (state.goals.value === "lost") return; // a lost game opens no new cards
   let slotFree = openEventOf(state) === null;
+  // Later eras crowd the calendar: cooldowns shrink.
+  const pace = eraDef(eraOfState(state)).pace;
   for (const def of EVENTS) {
-    const { stored } = step(arcMachine, state.arcs[def.id]!, { type: "DAY", day: state.day, ready: conditionHolds(state, def.when), slotFree });
+    const { stored } = step(arcMachine, state.arcs[def.id]!, { type: "DAY", day: state.day, ready: conditionHolds(state, def.when), slotFree, pace });
     state.arcs[def.id] = stored;
     if (stored.value === "cardOpen") slotFree = false;
   }
@@ -61,7 +70,7 @@ function placeNearGate(state: GameState, kind: BuildingKind) {
   }
 }
 
-function burstThoughts(state: GameState, rng: Rng, e: Extract<Effect, { type: "thought" }>) {
+function burstThoughts(state: GameState, rng: Rng, e: Extract<Effect, { type: "thought" }>, vars: Record<string, string>) {
   const speaking = new Set(state.thoughts.map((t) => t.walkerId));
   const pool = state.walkers.filter((w) => modeOf(w) !== "inside" && !speaking.has(w.id) && (!e.kind || w.kind === e.kind));
   for (let i = 0; i < e.count && pool.length > 0; i++) {
@@ -70,13 +79,13 @@ function burstThoughts(state: GameState, rng: Rng, e: Extract<Effect, { type: "t
       id: state.nextId++,
       walkerId: w!.id,
       kind: w!.kind,
-      text: fillTemplate(e.text, templateVars(state, {}, rng)),
+      text: fillTemplate(e.text, { ...templateVars(state, {}, rng), ...vars }),
       expiresTick: state.tick + THOUGHT_TICKS,
     });
   }
 }
 
-function applyEffect(state: GameState, rng: Rng, e: Effect) {
+function applyEffect(state: GameState, rng: Rng, e: Effect, vars: Record<string, string>) {
   switch (e.type) {
     case "cash":
       state.cash += e.amount;
@@ -97,13 +106,16 @@ function applyEffect(state: GameState, rng: Rng, e: Effect) {
       else state.flags[e.name] = state.day;
       break;
     case "news":
-      addNews(state, fillTemplate(e.text, templateVars(state, {}, rng)), e.tone ?? "neutral");
+      addNews(state, fillTemplate(e.text, { ...templateVars(state, {}, rng), ...vars }), e.tone ?? "neutral");
       break;
     case "thought":
-      burstThoughts(state, rng, e);
+      burstThoughts(state, rng, e, vars);
       break;
     case "place":
       placeNearGate(state, e.kind);
+      break;
+    case "race":
+      applyRaceAction(state, rng, e.action);
       break;
   }
 }
@@ -115,6 +127,8 @@ export function chooseEvent(state: GameState, rng: Rng, eventId: string, choiceI
   if (!def || !arc || openEventOf(state)?.id !== eventId) return;
   const { stored, effects } = step(arcMachine, arc, { type: "CHOOSE", choiceIndex });
   state.arcs[eventId] = stored;
-  for (const e of effects) for (const effect of def.choices[e.choiceIndex]!.effects) applyEffect(state, rng, effect);
+  // The race's numbers are read once, before any effect moves them: a card's own text is about how things stood.
+  const vars = raceVars(state);
+  for (const e of effects) for (const effect of def.choices[e.choiceIndex]!.effects) applyEffect(state, rng, effect, vars);
   if (effects.length > 0) syncProtesters(state, rng);
 }

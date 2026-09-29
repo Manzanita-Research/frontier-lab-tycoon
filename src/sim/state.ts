@@ -9,6 +9,7 @@ import { goalsMachine } from "./machines/goals";
 import { trainingMachine } from "./machines/training";
 import { pushNews } from "./news";
 import { blankVibes, initialVibes } from "./vibes";
+import { createRace } from "./race/state";
 import { createRng } from "./rng";
 import { dailyThoughts } from "./thoughts";
 import { agentTarget, researchersAtStart, seedWalkers } from "./walkers";
@@ -58,11 +59,13 @@ export function createInitialState(seed = 1): GameState {
     ledger: { income: 0, expenses: 0, net: 0 },
     version: 1,
     nextId: 1,
-    flags: { nextFiller: 3, nextRival: 14 },
+    // The old generic "rival" headlines are retired: the six rival labs of the Race (sim/race) make the real news.
+    flags: { nextFiller: 3, nextRival: 1e9 },
     recentThoughts: [],
     agentBonus: 0,
     waterDiscourse: 0,
     goals: initialStored(goalsMachine, { goals: createGoals(), outcomeDay: null }),
+    race: createRace({ capability: START_CAPABILITY, hype: 30 }),
     arcs: Object.fromEntries(
       EVENTS.map((def) => [def.id, initialStored(arcMachine, { choices: def.choices.length, cooldownDays: def.cooldown ?? EVENT_COOLDOWN_DAYS, openedDay: null })]),
     ),

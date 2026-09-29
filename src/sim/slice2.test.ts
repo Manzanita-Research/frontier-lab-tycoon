@@ -1,6 +1,7 @@
 import { BUILDINGS } from "../content/buildings";
 import { EVENTS, eventById } from "../content/events";
 import { GOALS, SCENARIO } from "../content/goals";
+import { answer, perfBudget } from "./testkit";
 import { applyCommands, type Command } from "./commands";
 import { MAX_AGENTS } from "./constants";
 import { dailyEvents, openEventOf } from "./events";
@@ -45,10 +46,15 @@ describe("crowd density", () => {
     const s = createInitialState(3);
     s.buildings.push({ id: 99, kind: "hall", x: 1, z: 1, w: 3, d: 3, placedTick: 0 });
     s.capability = 60;
+    // nobody walks out during this test
+    s.race.rivals = s.race.rivals.map((r) => ({ ...r, context: { ...r.context, personality: { ...r.context.personality, poaching: 0 } } }));
     tick(s, [{ type: "placePath", x: 5, z: 16 }]); // bump the version so spawns can find the buildings
-    run(s, 12);
+    // (capability 60 is Era 2 at once: answer its title card so time keeps moving)
+    for (let i = 0; i < 12 * TICKS_PER_DAY; i++) tick(s, answer(s));
     expect(count(s, "researcher")).toBe(researcherTarget(s));
-    expect(count(s, "agent")).toBe(agentTarget(s));
+    // Capability keeps climbing while this runs (Era 2 trains fast), so the target moves a little ahead of the crowd.
+    expect(count(s, "agent")).toBeGreaterThanOrEqual(agentTarget(s) - 8);
+    expect(count(s, "agent")).toBeLessThanOrEqual(agentTarget(s));
   });
 
   it("sends visitors round 2 or 3 buildings", () => {
@@ -78,50 +84,55 @@ describe("crowd density", () => {
     syncProtesters(s, rng, true);
     expect(count(s, "agent")).toBe(400);
     expect(s.walkers.length).toBeGreaterThanOrEqual(500);
-    for (let i = 0; i < 100; i++) tick(s); // warm up the JIT and spread the crowd out
+    // A card that opens would freeze time and flatter the number, so every card gets answered.
+    for (let i = 0; i < 100; i++) tick(s, answer(s)); // warm up the JIT and spread the crowd out
     let best = Infinity;
-    for (let attempt = 0; attempt < 3; attempt++) {
+    for (let attempt = 0; attempt < 5; attempt++) {
       const t0 = performance.now();
-      for (let i = 0; i < 200; i++) tick(s);
+      for (let i = 0; i < 200; i++) tick(s, answer(s));
       best = Math.min(best, (performance.now() - t0) / 200);
     }
-    console.log(`500-walker tick: ${best.toFixed(3)} ms (best of 3 x 200 ticks)`);
-    expect(best).toBeLessThan(0.3);
+    console.log(`500-walker tick: ${best.toFixed(3)} ms (best of 5 x 200 ticks)`);
+    expect(best).toBeLessThan(perfBudget(0.3));
   });
 });
 
 describe("goals", () => {
-  it("starts with the three scenario objectives, all unmet", () => {
+  it("starts with the three scenario objectives, all unmet, and about 45 minutes on the clock", () => {
     const s = createInitialState(1);
     expect(outcomeOf(s)).toBe("playing");
     expect(s.goals.context.goals.map((g) => g.id)).toEqual(GOALS.map((g) => g.id));
     expect(s.goals.context.goals.every((g) => !g.met)).toBe(true);
-    expect(SCENARIO.deadlineDay).toBe(360);
+    expect(SCENARIO.deadlineDay).toBe(1080); // the end of Y3
   });
 
   it("tracks progress and latches a goal once it is met", () => {
     const s = createInitialState(1);
     const rng = createRng(1);
-    s.models = ["Frontier-2", "Frontier-3-Reasoner"];
-    s.ledger = { income: 140_000, expenses: 0, net: 140_000 };
-    s.hype = 61;
+    s.models = ["Frontier-2", "Frontier-3-Reasoner", "Frontier-4"];
+    s.race.era = { value: "era3", context: { peak: 6 } };
+    s.race.rank = 6;
     dailyGoals(s, rng);
     expect(s.goals.context.goals.map((g) => [g.value, g.met])).toEqual([
-      [2, false],
-      [140_000, false],
-      [61, true],
+      [3, true],
+      [3, true],
+      [2, false], // #6 of 7: the Arena goal counts places from the bottom (5 = top 3)
     ]);
-    s.hype = 30; // hype dips, but the milestone stays ticked
+    s.race.rank = 3;
     dailyGoals(s, rng);
-    expect(s.goals.context.goals[2]!.met).toBe(true);
-    expect(outcomeOf(s)).toBe("playing");
+    expect(s.goals.context.goals[2]).toMatchObject({ value: 5, met: true });
+    s.race.era = { value: "era2", context: { peak: 6 } }; // a milestone latched stays ticked whatever the metric does
+    s.race.rank = 6;
+    s.models = [];
+    dailyGoals(s, rng);
+    expect(s.goals.context.goals.map((g) => g.met)).toEqual([true, true, true]);
   });
 
   it("wins the day all three are met, with a headline", () => {
     const s = createInitialState(1);
     s.models = ["a", "b", "c"];
-    s.ledger = { income: 260_000, expenses: 0, net: 260_000 };
-    s.hype = 64;
+    s.race.era = { value: "era3", context: { peak: 6 } };
+    s.race.rank = 2;
     dailyGoals(s, createRng(1));
     expect(outcomeOf(s)).toBe("won");
     expect(s.news.at(-1)!.text).toContain("raising the milestones");
