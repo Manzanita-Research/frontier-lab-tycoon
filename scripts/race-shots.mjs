@@ -73,6 +73,7 @@ const bigLab = async () => {
     w.ledger = { income: 90_000, expenses: 30_000, net: 60_000 };
     w.cash = 12_000_000;
     w.hype = 68;
+    w.vibes = { ...w.vibes, value: 640 };
     w.capability = 42; // still Era 1: the crowd hasn't grown into the agents yet
     w.models = ["Frontier-2", "Frontier-3-Reasoner", "Frontier-4"];
   });
@@ -101,7 +102,8 @@ if (mode === "shuffle" || mode === "drop" || mode === "record") {
     const s = rival("sirocco");
     s.value = "training";
     s.context.weeks = 1;
-    s.context.capability = 40;
+    s.context.capability = 44;
+    s.context.hype = 72;
     toWeek();
     day();
   });
@@ -166,12 +168,12 @@ if (mode === "shuffle" || mode === "drop" || mode === "record") {
 } else if (mode === "funding") {
   await go("&zoom=70&focus=12,14");
   await wait(1000);
-  await bigLab();
+  // The opening campus burns $25K a day with no revenue: short of runway, and popular.
   await run(function () {
-    w.cash = 600_000;
-    w.ledger = { income: 40_000, expenses: 140_000, net: -100_000 };
-    w.capability = 60;
+    w.cash = 450_000;
+    w.capability = 40;
     w.hype = 62;
+    w.vibes = { ...w.vibes, value: 640 };
     day();
     day();
   });
@@ -230,5 +232,5 @@ if (mode === "shuffle" || mode === "drop" || mode === "record") {
   await wait(1500);
   await save(out);
 }
-if (mode !== "record") await browser.close();
+await browser.close();
 if (errors.length) console.log(`page errors (${errors.length}):\n  ${errors.slice(0, 8).join("\n  ")}`);

@@ -18,11 +18,8 @@ export function revenueFactor(state: GameState): number {
   return (openDropActive(state) ? OPEN_DROP_FACTOR : 1) * PRICE_CUT_FACTOR ** state.race.priceCuts;
 }
 
-/**
- * The Vibes score (0 to 999) that gates funding rounds. Hype stands in until The Crowd (FLT-8) lands: hype is 0
- * to 100, so ten times it gives the same range.
- */
-export const vibesOf = (state: GameState): number => Math.round(state.hype * 10);
+/** The Vibes score (0 to 999, the Crowd's park rating) that gates funding rounds. */
+export const vibesOf = (state: GameState): number => Math.round(state.vibes.value);
 
 export const FUNDING_VIBES = 400;
 export const FUNDING_RUNWAY_MONTHS = 3;

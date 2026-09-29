@@ -437,6 +437,7 @@ describe("funding rounds", () => {
     const s = createInitialState(seed);
     s.cash = 600_000;
     s.hype = 55;
+    s.vibes = { ...s.vibes, value: 550 };
     s.capability = 46;
     s.ledger = { income: 20_000, expenses: 90_000, net: -70_000 };
     s.day = 50;
@@ -449,7 +450,7 @@ describe("funding rounds", () => {
     flush.cash = 40_000_000;
     expect(fundingDue(flush)).toBe(false); // runway is fine
     const meh = broke();
-    meh.hype = 30;
+    meh.vibes = { ...meh.vibes, value: 300 };
     expect(fundingDue(meh)).toBe(false); // nobody wants a lab with no vibes
     const profitable = broke();
     profitable.ledger = { income: 90_000, expenses: 20_000, net: 70_000 };
