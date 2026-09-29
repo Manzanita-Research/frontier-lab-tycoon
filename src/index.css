@@ -8,24 +8,5 @@ body,
   overscroll-behavior: none;
   touch-action: none;
   font-family: ui-rounded, "SF Pro Rounded", system-ui, sans-serif;
-  background: #1b2a1f;
-}
-
-.title {
-  position: fixed;
-  top: 16px;
-  left: 16px;
-  color: #fff8e1;
-  text-shadow: 0 2px 0 #1b2a1f;
-  pointer-events: none;
-}
-
-.title h1 {
-  margin: 0;
-  font-size: 28px;
-}
-
-.title p {
-  margin: 4px 0 0;
-  opacity: 0.85;
+  background: linear-gradient(#8fd0ee 0%, #bfe6f7 45%, #eaf7ff 70%, #fff5d6 100%);
 }
