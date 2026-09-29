@@ -2,6 +2,7 @@
 // answers event cards. Checks that the scenario is winnable on a sensible timeline and when the event lands.
 import { BUILDINGS, type PlaceableKind } from "../content/buildings";
 import { canPlace, type Command } from "./commands";
+import { openEventOf } from "./events";
 import { outcomeOf } from "./goals";
 import { createInitialState } from "./state";
 import { TICKS_PER_DAY, tick } from "./tick";
@@ -35,9 +36,9 @@ export function playBot(seed: number, opts: { fountain?: boolean; days?: number;
   const maxTicks = (opts.days ?? 400) * TICKS_PER_DAY;
   for (let i = 0; i < maxTicks && outcomeOf(s) !== "lost"; i++) {
     const cmds: Command[] = [];
-    if (s.event) {
+    if (openEventOf(s)) {
       eventDay ??= s.day;
-      cmds.push({ type: "chooseEvent", eventId: s.event.id, choiceIndex: opts.fountain === false ? 0 : s.cash > 900_000 ? 1 : 0 });
+      cmds.push({ type: "chooseEvent", eventId: openEventOf(s)!.id, choiceIndex: opts.fountain === false ? 0 : s.cash > 900_000 ? 1 : 0 });
     } else if (i % (TICKS_PER_DAY * (opts.every ?? 1)) === 0 && built < ORDER.length) {
       const kind = ORDER[built]!;
       if (s.cash >= BUILDINGS[kind].price + RESERVE) {
@@ -83,10 +84,10 @@ describe("an absent player", () => {
   it("loses at the deadline, having ignored the water", () => {
     const s = createInitialState(1);
     for (let i = 0; i < 400 * TICKS_PER_DAY && outcomeOf(s) === "playing"; i++) {
-      tick(s, s.event ? [{ type: "chooseEvent", eventId: s.event.id, choiceIndex: 2 }] : []);
+      tick(s, openEventOf(s) ? [{ type: "chooseEvent", eventId: openEventOf(s)!.id, choiceIndex: 2 }] : []);
     }
     expect(outcomeOf(s)).toBe("lost");
     expect(s.day).toBeLessThanOrEqual(360);
-    expect(s.flags["event:waterDiscourse"]).toBeDefined();
+    expect(s.arcs.waterDiscourse!.context.openedDay).toBeDefined();
   });
 });

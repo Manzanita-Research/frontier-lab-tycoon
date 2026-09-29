@@ -2,7 +2,7 @@
 import { applyCommands, type Command } from "./commands";
 import { TICKS_PER_DAY } from "./constants";
 import { dailyEconomy } from "./economy";
-import { dailyEvents } from "./events";
+import { dailyEvents, openEventOf } from "./events";
 import { dailyGoals } from "./goals";
 import { dailyNews } from "./news";
 import { dailyDiscourse, updateProtesters } from "./protest";
@@ -21,7 +21,7 @@ export { TICKS_PER_DAY };
 export function tick(state: GameState, commands: readonly Command[] = []) {
   const rng = createRng(state.rngState);
   applyCommands(state, commands, rng);
-  if (state.event || state.goals.value === "lost") {
+  if (openEventOf(state) || state.goals.value === "lost") {
     state.rngState = rng.state();
     return;
   }

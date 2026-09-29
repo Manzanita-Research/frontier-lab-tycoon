@@ -6,6 +6,7 @@ import { applyNow, tick, TICKS_PER_DAY } from "./sim/tick";
 import { canPlace, type Command } from "./sim/commands";
 import { computePerDay } from "./sim/training";
 import { runwayMonths } from "./sim/format";
+import { openEventOf } from "./sim/events";
 import { outcomeOf } from "./sim/goals";
 import { createRng } from "./sim/rng";
 import { createInitialState } from "./sim/state";
@@ -83,7 +84,7 @@ function makeSnapshot(s: GameState, prev?: Snapshot): Snapshot {
     hasGateway: s.buildings.some((b) => b.kind === "gateway"),
     goals: s.goals.context.goals.map((g) => ({ ...g })),
     outcome: outcomeOf(s),
-    event: s.event ? { ...s.event } : null,
+    event: openEventOf(s),
     protesters: protesterCount(s),
     discourse: s.waterDiscourse,
   };
@@ -186,7 +187,8 @@ export const useStore = create<Store>((set, get) => ({
   dismissToast: (id) => set((st) => ({ toasts: st.toasts.filter((t) => t.id !== id) })),
   chooseEvent: (choiceIndex) => {
     const { sim } = get();
-    if (sim.event) queue.push({ type: "chooseEvent", eventId: sim.event.id, choiceIndex });
+    const open = openEventOf(sim);
+    if (open) queue.push({ type: "chooseEvent", eventId: open.id, choiceIndex });
   },
   keepPlaying: () => set((st) => ({ outcomeDismissed: true, speed: st.speed === 0 ? 1 : st.speed })),
   newLab: () => {
@@ -210,7 +212,7 @@ export const useStore = create<Store>((set, get) => ({
 
 /** Time stands still while an event card is up, or after the scenario ends and the card hasn't been dismissed. */
 const isHeld = (st: { sim: GameState; outcomeDismissed: boolean }) =>
-  st.sim.event !== null || (outcomeOf(st.sim) !== "playing" && !st.outcomeDismissed);
+  openEventOf(st.sim) !== null || (outcomeOf(st.sim) !== "playing" && !st.outcomeDismissed);
 
 /** Starts the requestAnimationFrame loop. Returns a stop function. */
 export function startLoop(): () => void {

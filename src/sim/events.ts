@@ -1,13 +1,15 @@
 // Event cards: checked once a day, one open at a time, resolved by a chooseEvent command.
 import { BUILDINGS, type BuildingKind } from "../content/buildings";
-import { EVENTS, EVENT_COOLDOWN_DAYS, eventById, type Condition, type Effect } from "../content/events";
+import { EVENTS, eventById, type Condition, type Effect } from "../content/events";
 import { THOUGHT_TICKS, DISCOURSE_PER_PROTESTER } from "./constants";
 import { fillTemplate } from "./format";
+import { arcMachine } from "./machines/arc";
+import { step } from "./machines/run";
 import { addNews, templateVars } from "./news";
 import { buildingAt, inBounds, isPathTile, rectContains } from "./pathfind";
 import { clampDiscourse, syncProtesters } from "./protest";
 import type { Rng } from "./rng";
-import type { GameState } from "./types";
+import type { GameState, OpenEvent } from "./types";
 
 export function conditionHolds(state: GameState, c: Condition): boolean {
   if ("all" in c) return c.all.every((sub) => conditionHolds(state, sub));
@@ -18,18 +20,24 @@ export function conditionHolds(state: GameState, c: Condition): boolean {
   return state[c.stat] >= c.atLeast;
 }
 
-const cooldownKey = (id: string) => `event:${id}`;
+/** The card on screen right now, if any: the arc that is in `cardOpen`. */
+export function openEventOf(state: GameState): OpenEvent | null {
+  for (const [id, arc] of Object.entries(state.arcs)) {
+    if (arc.value === "cardOpen") return { id, day: arc.context.openedDay! };
+  }
+  return null;
+}
 
-/** Opens the first event whose condition holds and whose cooldown is over. The game pauses until it is answered. */
+/**
+ * The daily check. Every arc hears about it, in content order; the first whose condition holds and whose
+ * cooldown is over takes the screen, and the rest wait their turn as `brewing`. The game pauses until it is answered.
+ */
 export function dailyEvents(state: GameState) {
-  if (state.event) return;
+  let slotFree = openEventOf(state) === null;
   for (const def of EVENTS) {
-    const last = state.flags[cooldownKey(def.id)];
-    if (last !== undefined && state.day - last < (def.cooldown ?? EVENT_COOLDOWN_DAYS)) continue;
-    if (!conditionHolds(state, def.when)) continue;
-    state.event = { id: def.id, day: state.day };
-    state.flags[cooldownKey(def.id)] = state.day;
-    return;
+    const { stored } = step(arcMachine, state.arcs[def.id]!, { type: "DAY", day: state.day, ready: conditionHolds(state, def.when), slotFree });
+    state.arcs[def.id] = stored;
+    if (stored.value === "cardOpen") slotFree = false;
   }
 }
 
@@ -102,9 +110,10 @@ function applyEffect(state: GameState, rng: Rng, e: Effect) {
 /** Applies the picked choice and closes the card. Ignores stale or invalid picks. */
 export function chooseEvent(state: GameState, rng: Rng, eventId: string, choiceIndex: number) {
   const def = eventById(eventId);
-  const choice = def?.choices[choiceIndex];
-  if (!state.event || state.event.id !== eventId || !choice) return;
-  for (const effect of choice.effects) applyEffect(state, rng, effect);
-  state.event = null;
-  syncProtesters(state, rng);
+  const arc = state.arcs[eventId];
+  if (!def || !arc || openEventOf(state)?.id !== eventId) return;
+  const { stored, effects } = step(arcMachine, arc, { type: "CHOOSE", choiceIndex });
+  state.arcs[eventId] = stored;
+  for (const e of effects) for (const effect of def.choices[e.choiceIndex]!.effects) applyEffect(state, rng, effect);
+  if (effects.length > 0) syncProtesters(state, rng);
 }

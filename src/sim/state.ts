@@ -1,7 +1,9 @@
 import { BUILDINGS, type BuildingKind } from "../content/buildings";
+import { EVENTS, EVENT_COOLDOWN_DAYS } from "../content/events";
 import { LAB_NAMES, modelName } from "../content/names";
 import { createGoals } from "./goals";
 import { initialStored } from "./machines/run";
+import { arcMachine } from "./machines/arc";
 import { economyMachine } from "./machines/economy";
 import { goalsMachine } from "./machines/goals";
 import { trainingMachine } from "./machines/training";
@@ -59,7 +61,9 @@ export function createInitialState(seed = 1): GameState {
     agentBonus: 0,
     waterDiscourse: 0,
     goals: initialStored(goalsMachine, { goals: createGoals(), outcomeDay: null }),
-    event: null,
+    arcs: Object.fromEntries(
+      EVENTS.map((def) => [def.id, initialStored(arcMachine, { choices: def.choices.length, cooldownDays: def.cooldown ?? EVENT_COOLDOWN_DAYS, openedDay: null })]),
+    ),
   };
 
   const put = (kind: BuildingKind, x: number, z: number) => {
