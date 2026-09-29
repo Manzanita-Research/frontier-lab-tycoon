@@ -52,4 +52,4 @@ Effect (ManagedRuntime, browser)
 
 ## Done when
 
-`pnpm check` is green, the game plays the same as before the port, the PR describes the machine map (a Mermaid statechart of the app machine and the Water Discourse arc goes in `docs/ARCHITECTURE.md`), the preview link is posted on FLT-3, and the PR is **merged** once it's green with evidence (Jem allows FLT merges). If the merge is blocked by a permission check, say so and leave it for the lead.
+`pnpm check` is green, the game plays the same as before the port, the PR describes the machine map (a Mermaid statechart of the app machine and the Water Discourse arc goes in `docs/ARCHITECTURE.md`), the preview link is posted on FLT-3, and the PR is open and green with evidence. **Don't merge it yourself;** a human merges.
