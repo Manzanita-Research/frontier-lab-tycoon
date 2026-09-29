@@ -1,6 +1,8 @@
 // Runs once per game day: pay the bills, collect the API revenue, let hype drift.
 import { BUILDINGS } from "../content/buildings";
 import { REVENUE_PER_CAPABILITY, RESEARCHER_SALARY, TICKS_PER_DAY } from "./constants";
+import { step } from "./machines/run";
+import { economyMachine } from "./machines/economy";
 import { addToast, pushNews } from "./news";
 import { isReachable } from "./pathfind";
 import type { Rng } from "./rng";
@@ -32,10 +34,11 @@ export function dailyEconomy(state: GameState, rng: Rng) {
   state.hype = Math.max(0, Math.min(100, state.hype + Math.sign(gap) * Math.min(1, Math.abs(gap))));
 
   // Going broke is a joke, not a game over: the investors always have a few questions and $2M.
-  if (state.cash < 0 && state.day - (state.flags.lastBailout ?? -99) > 20) {
-    state.cash += 2_000_000;
+  const { stored, effects } = step(economyMachine, state.economy, { type: "DAY", cash: state.cash, day: state.day });
+  state.economy = stored;
+  for (const e of effects) {
+    state.cash += e.amount;
     state.hype = Math.max(0, state.hype - 5);
-    state.flags.lastBailout = state.day;
     pushNews(state, rng, "bailout");
     addToast(state, "Emergency bridge round: +$2M. The board has notes.", "bad");
   }

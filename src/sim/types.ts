@@ -1,5 +1,6 @@
 // Everything in GameState is plain and JSON-serializable.
 import type { BuildingKind } from "../content/buildings";
+import type { EconomyStored } from "./machines/economy";
 import type { TrainingStored } from "./machines/training";
 
 export type { BuildingKind };
@@ -126,6 +127,8 @@ export interface GameState {
   gate: Rect;
   buildings: Building[];
   walkers: Walker[];
+  /** The economy machine: solvent, runwayWarning, bailout or bankrupt, plus the day of the last bridge round. */
+  economy: EconomyStored;
   /** The training machine: run, progress, cost and the next model name live in its context. */
   training: TrainingStored;
   /** Names of released models. */
