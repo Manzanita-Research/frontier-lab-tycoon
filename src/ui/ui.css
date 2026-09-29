@@ -527,7 +527,9 @@ button {
     font-size: 12px;
   }
   .bubble {
-    max-width: 150px;
-    font-size: 11.5px;
+    max-width: 130px;
+    padding: 4px 8px;
+    font-size: 10.5px;
+    border-radius: 11px;
   }
 }
