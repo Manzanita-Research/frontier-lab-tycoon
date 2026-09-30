@@ -313,7 +313,7 @@ export function Arena({ arena, leapfrog, layout, actions }: SlotPropsMap["Arena"
           active={tab}
           onChange={setTab}
           tabs={[
-            { id: "perf", label: "Performance" },
+            { id: "perf", label: t("stats.tab.arena") },
             { id: "bench", label: launched ? `${t("bench.tab")} •` : t("bench.tab") },
           ]}
         />

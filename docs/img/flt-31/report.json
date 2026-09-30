@@ -1,0 +1,88 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "1d06715a6c35b93ad0606520f24e060e534f7494"
+  },
+  "head": {
+    "branch": "flt-31-leapfrog-ui",
+    "sha": "5f32f41",
+    "dirty": false
+  },
+  "seconds": 256.605,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "leap-board",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-31/before/leap-board.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-31/after/leap-board.png",
+      "title": "Release Leapfrog: the benchmark leaderboard mid-drop (a lab launched, another answers tomorrow)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-31/compare/leap-board.png",
+      "changed": 0.215141975308642
+    },
+    {
+      "scene": "leap-solved",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-31/before/leap-solved.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-31/after/leap-solved.png",
+      "title": "Release Leapfrog: a benchmark has just been solved (struck through, stamped SOLVED, a harder one on the board)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-31/compare/leap-solved.png",
+      "changed": 0.18860185185185185
+    },
+    {
+      "scene": "leap-voice",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-31/before/leap-voice.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-31/after/leap-voice.png",
+      "title": "Release Leapfrog: the news cycle, 40 days of it (Network Traffic in Frontier 95)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-31/compare/leap-voice.png",
+      "changed": 0.22824845679012346
+    },
+    {
+      "scene": "leap-shipnow",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-31/before/leap-shipnow.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-31/after/leap-shipnow.png",
+      "title": "Release Leapfrog: \"Ship now at 94% ready\" (a rival just dropped)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-31/compare/leap-shipnow.png",
+      "changed": 0.2520756172839506
+    },
+    {
+      "scene": "leap-dog",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-31/before/leap-dog.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-31/after/leap-dog.png",
+      "title": "Release Leapfrog: a dog walks onto the launch livestream",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-31/compare/leap-dog.png",
+      "changed": 0.3274212962962963
+    },
+    {
+      "scene": "leap-chart",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-31/before/leap-chart.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-31/after/leap-chart.png",
+      "title": "Release Leapfrog: the presenter shows the wrong chart",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-31/compare/leap-chart.png",
+      "changed": 0.3353094135802469
+    },
+    {
+      "scene": "leap-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-31/before/leap-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-31/after/leap-phone.png",
+      "title": "Release Leapfrog: the forced-response card on a phone",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-31/compare/leap-phone.png",
+      "changed": 0.2924375683558148
+    },
+    {
+      "scene": "leap-phone-board",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-31/before/leap-phone-board.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-31/after/leap-phone-board.png",
+      "title": "Release Leapfrog: the leaderboard on a phone (Task Mangler opened)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-31/compare/leap-phone-board.png",
+      "changed": 0.384688297484506
+    }
+  ],
+  "errors": []
+}

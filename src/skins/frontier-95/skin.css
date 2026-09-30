@@ -1909,17 +1909,17 @@
     }
     .bench-table th,
     .bench-table td {
-      padding: 8px 4px 3px;
+      padding: 8px 3px 3px;
       text-align: center;
       font-weight: normal;
       white-space: nowrap;
     }
     .bench-table thead th {
-      padding: 4px 4px 3px;
+      padding: 4px 3px 3px;
       position: relative;
       background: var(--g);
       box-shadow: var(--btn);
-      font-size: 13px;
+      font-size: 12px;
       letter-spacing: 0;
       opacity: 1;
     }
@@ -2620,7 +2620,8 @@
 }
 @keyframes frontier-95-rowflash {
   50% {
-    filter: invert(1);
+    background: #ffff80;
+    color: #000;
   }
 }
 @keyframes frontier-95-dog {

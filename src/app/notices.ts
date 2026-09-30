@@ -96,8 +96,9 @@ export function summaryText(h: Held): string {
   const parts: string[] = [];
   if (h.launches > 0) parts.push(`${plural(h.launches, "lab", "labs")} launched`);
   if (h.records > 0) parts.push(`${h.records} of your records fell`);
+  // Anything else that mattered (a lost #1, a solved benchmark) only gets a mention when there is nothing bigger to say.
   const other = h.matters.filter((m) => m.kind !== "record").length;
-  if (other > 0) parts.push(`${plural(other, "more thing", "more things")} happened`);
+  if (parts.length === 0 && other > 0) parts.push(`${plural(other, "thing", "things")} happened`);
   const joined = parts.length > 1 ? `${parts.slice(0, -1).join(", ")} and ${parts.at(-1)}` : (parts[0] ?? "Things happened");
   return `${joined} while you were busy.${h.launches > 0 || h.records > 0 ? " Receipts: the Benchmarks tab." : ""}`;
 }

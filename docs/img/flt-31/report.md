@@ -1,0 +1,13 @@
+
+| Scene | Before (`main` @ 1d06715) | After (`flt-31-leapfrog-ui` @ 5f32f41) |
+|---|---|---|
+| **leap-board**<br>21.5% px differ | ![leap-board](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-31-leapfrog-ui/docs/img/flt-31/before/leap-board.png?raw=true) | ![leap-board](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-31-leapfrog-ui/docs/img/flt-31/after/leap-board.png?raw=true) |
+| **leap-solved**<br>18.9% px differ | ![leap-solved](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-31-leapfrog-ui/docs/img/flt-31/before/leap-solved.png?raw=true) | ![leap-solved](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-31-leapfrog-ui/docs/img/flt-31/after/leap-solved.png?raw=true) |
+| **leap-voice**<br>22.8% px differ | ![leap-voice](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-31-leapfrog-ui/docs/img/flt-31/before/leap-voice.png?raw=true) | ![leap-voice](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-31-leapfrog-ui/docs/img/flt-31/after/leap-voice.png?raw=true) |
+| **leap-shipnow**<br>25.2% px differ | ![leap-shipnow](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-31-leapfrog-ui/docs/img/flt-31/before/leap-shipnow.png?raw=true) | ![leap-shipnow](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-31-leapfrog-ui/docs/img/flt-31/after/leap-shipnow.png?raw=true) |
+| **leap-dog**<br>32.7% px differ | ![leap-dog](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-31-leapfrog-ui/docs/img/flt-31/before/leap-dog.png?raw=true) | ![leap-dog](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-31-leapfrog-ui/docs/img/flt-31/after/leap-dog.png?raw=true) |
+| **leap-chart**<br>33.5% px differ | ![leap-chart](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-31-leapfrog-ui/docs/img/flt-31/before/leap-chart.png?raw=true) | ![leap-chart](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-31-leapfrog-ui/docs/img/flt-31/after/leap-chart.png?raw=true) |
+| **leap-phone**<br>29.2% px differ | ![leap-phone](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-31-leapfrog-ui/docs/img/flt-31/before/leap-phone.png?raw=true) | ![leap-phone](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-31-leapfrog-ui/docs/img/flt-31/after/leap-phone.png?raw=true) |
+| **leap-phone-board**<br>38.5% px differ | ![leap-phone-board](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-31-leapfrog-ui/docs/img/flt-31/before/leap-phone-board.png?raw=true) | ![leap-phone-board](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-31-leapfrog-ui/docs/img/flt-31/after/leap-phone-board.png?raw=true) |
+
+_pnpm shots: 8 scene(s) in 256.6s (16/16 captures ok)._

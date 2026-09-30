@@ -31,22 +31,19 @@ const browser = await chromium.launch({ args: ["--use-angle=swiftshader", "--ena
 const rows = [];
 for (const speed of speeds) {
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
-  await page.goto(`${url}/?debug=1&seed=${seed}&warp=${warp}&speed=${speed}&hour=13`, { waitUntil: "networkidle" });
+  await page.goto(`${url}/?debug=1&seed=${seed}&warp=${warp}&speed=${speed}&hour=13`, { waitUntil: "load", timeout: 90_000 });
   await page.waitForFunction(() => window.__flt?.app, null, { timeout: 60_000 });
   await page.evaluate(() => {
     const { registry, app, send, sim } = window.__flt;
     window.__seen = new Map();
     window.__day0 = sim.world.day;
-    registry.subscribe(
-      app.snapshot,
-      (r) => {
-        const ctx = r?.value?.context;
-        if (!ctx) return;
-        for (const t of ctx.toasts) if (!window.__seen.has(t.id)) window.__seen.set(t.id, t.text);
-        if (ctx.event) send({ type: "CHOOSE", choiceIndex: 0 });
-      },
-      { immediate: true },
-    );
+    // Poll rather than subscribe: answering a card from inside a snapshot callback feeds back into the snapshot.
+    setInterval(() => {
+      const ctx = registry.get(app.snapshot)?.value?.context;
+      if (!ctx) return;
+      for (const t of ctx.toasts) if (!window.__seen.has(t.id)) window.__seen.set(t.id, t.text);
+      if (ctx.event) send({ type: "CHOOSE", choiceIndex: 0 });
+    }, 100);
   });
   await page.waitForTimeout(seconds * 1000);
   const { toasts, days } = await page.evaluate(() => ({ toasts: [...window.__seen.values()], days: window.__flt.sim.world.day - window.__day0 }));

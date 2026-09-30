@@ -9,7 +9,7 @@ import { Ico } from "./icons";
 import { Blocks, Btn, Win } from "./parts";
 
 /** The leaderboard itself, as Task Mangler's Benchmarks tab shows it: a sunken list with a status bar under it. */
-export function Benchmarks({ leapfrog }: SlotPropsMap["Benchmarks"]) {
+export function Benchmarks({ leapfrog, layout }: SlotPropsMap["Benchmarks"]) {
   const t = useT();
   return (
     <div className="f95-bench">
@@ -20,7 +20,40 @@ export function Benchmarks({ leapfrog }: SlotPropsMap["Benchmarks"]) {
         {leapfrog.drop ? `${leapfrog.drop.text}. ` : ""}
         {leapfrog.nextText || t("bench.empty")}
       </div>
+      {/* No room in the tray for a Network Traffic icon on a phone: the graph lives under the table instead. */}
+      {layout.compact && <Traffic leapfrog={leapfrog} />}
     </div>
+  );
+}
+
+/** The news cycle as a dial-up monitor: the graph, who has what, and who owns the cycle. */
+function Traffic({ leapfrog }: { leapfrog: SlotPropsMap["Voice"]["leapfrog"] }) {
+  const t = useT();
+  const { voice } = leapfrog;
+  const arrow = { up: "▲", down: "▼", flat: "" }[voice.trend];
+  return (
+    <>
+      <div className="f95-netgraph inset">
+        <VoiceGraph voice={voice} width={288} height={104} className="f95-vg" />
+        <span className="f95-netlabel" aria-hidden>
+          {t("voice.graph")}
+        </span>
+      </div>
+      <ul className="f95-netkey">
+        {voice.shares.slice(0, 4).map((s) => (
+          <li key={s.id} className={s.you ? "you" : ""}>
+            <i style={{ background: s.color }} aria-hidden />
+            <span>{s.you ? t("voice.you") : s.short}</span>
+            <b>{s.pctText}</b>
+            {s.you && arrow && <em className={voice.trend}>{arrow}</em>}
+          </li>
+        ))}
+      </ul>
+      <div className="f95-status">
+        {voice.headline}
+        {voice.streak > 1 ? ` (${voice.streak} days)` : ""}
+      </div>
+    </>
   );
 }
 
@@ -30,9 +63,9 @@ export function Benchmarks({ leapfrog }: SlotPropsMap["Benchmarks"]) {
  */
 export function Voice({ leapfrog, layout }: SlotPropsMap["Voice"]) {
   const t = useT();
-  const [open, setOpen] = useState(!layout.compact && layout.tall);
+  const [open, setOpen] = useState(layout.tall);
   const { voice } = leapfrog;
-  const arrow = { up: "▲", down: "▼", flat: "" }[voice.trend];
+  if (layout.compact) return null;
   return (
     <>
       <button type="button" className={`f95-s net ${open ? "on" : ""}`} onClick={() => setOpen((o) => !o)} aria-pressed={open} aria-label={`${t("voice.title")}: ${voice.headline}`} title={`Network Traffic: ${t("voice.you")} ${voice.yoursText} of the news cycle`}>
@@ -55,26 +88,7 @@ export function Voice({ leapfrog, layout }: SlotPropsMap["Voice"]) {
             <span>View</span>
             <span>Help</span>
           </div>
-          <div className="f95-netgraph inset">
-            <VoiceGraph voice={voice} width={288} height={104} className="f95-vg" />
-            <span className="f95-netlabel" aria-hidden>
-              {t("voice.graph")}
-            </span>
-          </div>
-          <ul className="f95-netkey">
-            {voice.shares.slice(0, 4).map((s) => (
-              <li key={s.id} className={s.you ? "you" : ""}>
-                <i style={{ background: s.color }} aria-hidden />
-                <span>{s.you ? t("voice.you") : s.short}</span>
-                <b>{s.pctText}</b>
-                {s.you && arrow && <em className={voice.trend}>{arrow}</em>}
-              </li>
-            ))}
-          </ul>
-          <div className="f95-status">
-            {voice.headline}
-            {voice.streak > 1 ? ` (${voice.streak} days)` : ""}
-          </div>
+          <Traffic leapfrog={leapfrog} />
         </Win>
       )}
     </>

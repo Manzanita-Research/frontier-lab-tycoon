@@ -388,7 +388,18 @@
           "tick": 14
         },
         {
-          "wait": 1200
+          "send": {
+            "type": "KEEP_PLAYING"
+          }
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 1500
         }
       ]
     },
