@@ -16,6 +16,7 @@ import type { BillState } from "./capture/state";
 import type { PromisesState } from "./promises/state";
 import type { NeedKey } from "../content/needs";
 import type { DisastersState } from "./disasters/types";
+import type { EndingsState } from "./endings/state";
 import type { ArcStored } from "./machines/arc";
 import type { ModArcStored } from "./modArcs";
 import type { EconomyStored } from "./machines/economy";
@@ -225,7 +226,8 @@ export interface GoalProgress {
   met: boolean;
 }
 
-export type Outcome = "playing" | "won" | "lost";
+/** "ended": an ending (FLT-11) has reached its front page. */
+export type Outcome = "playing" | "won" | "lost" | "ended";
 
 /** A note on the lab's file for the auditors (FLT-19's report card reads them): which grade, how many grades, why. */
 export interface AuditorNote {
@@ -380,4 +382,6 @@ export interface GameState {
   disguises?: Record<string, string>;
   /** FLT-19: the Evals Without Borders pack; absent until enabled. */
   auditors?: AuditorsState;
+  /** FLT-11: The Memo and the endings; absent until `enableEndings` (older saves and baseline runs keep the win/lose-only game). */
+  endings?: EndingsState;
 }

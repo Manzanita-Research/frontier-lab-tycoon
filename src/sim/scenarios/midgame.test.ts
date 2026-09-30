@@ -26,7 +26,8 @@ describe("midgame scenario", () => {
     // FLT-52: and the Hearing, the yacht summit, Defection, the Poaching War, Evals Without Borders, Regulatory Capture
     // and the Promise Tracker.
     // FLT-33/25: the earned factions wake with the campus and argue all 480 days; the water crowd escalates through its arc.
-    expect(digest(s)).toBe("c4310492");
+    // FLT-11 adds The Memo's dormant arc (arcs.memo); take it out and the World hashes to the old c4310492.
+    expect(digest(s)).toBe("36f6a4a9");
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);

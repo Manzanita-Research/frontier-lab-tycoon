@@ -30,6 +30,7 @@ import { pendingConfirmOf, persistentWarnings, type PendingConfirm } from "../si
 import { calmStart, CALM_START_DAY, disasterMenu, disastersView, type MenuRow, type RunView } from "../sim/disasters/driver";
 import type { Risk } from "../sim/disasters/types";
 import type { Building, GameState, GoalProgress, OpenEvent, Outcome, Pop, StaffJob, Thought, Tone, Vibes } from "../sim/types";
+import { endingsView, type EndingsView } from "../sim/endings/view";
 
 export type Tool = "path" | PlaceableKind | "security" | "bulldoze";
 /** Hotkeys 1-9 pick these in order. */
@@ -118,6 +119,8 @@ export interface Snapshot {
   bill: CaptureView;
   /** The Promise Tracker (FLT-23): the docket, the senators' promises and votes, the Truth-o-meters. */
   promises: PromisesView;
+  /** The endings (FLT-11): the front page, the run summary, The Takeover's manager. Null when they're off. */
+  endings: EndingsView | null;
   /** Operations: staff, slop, broken buildings, queues. */
   ops: OpsView;
   /** Meetings in progress (a VC and your researcher by the Kombucha Bar, FLT-26): who, and what they say, visitor first. */
@@ -250,6 +253,7 @@ export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO
     yacht: yachtView(s),
     bill: captureView(s),
     promises: promisesView(s),
+    endings: endingsView(s),
     ops: opsView(s),
     chats: talking(s).map((m) => {
       const guest = s.walkers.find((w) => w.id === m.guestId);

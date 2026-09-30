@@ -22,6 +22,14 @@ import { createInitialState } from "../../sim/state";
 import { stageDrama, type DramaMoment } from "../../sim/defection/demo";
 import { OPEN_FAST, runFactions } from "../../sim/factions/headless";
 import { dramaViewModel, NO_DRAMA_UI, type FeedPackData } from "../../drama/feed";
+import { stageEndingMoment } from "../../sim/endings/demo";
+
+const staged = new Map<string, GameState>();
+/** An ending's scene (`memo`, `takeover`, `thanks`, `front-<id>`), staged once per test run: they start from the mid-game campus. */
+export function fixtureEnding(moment: string): GameState {
+  if (!staged.has(moment)) staged.set(moment, stageEndingMoment(moment));
+  return staged.get(moment)!;
+}
 
 /** A busy campus a few game days in, with thoughts, a crowd and a run in flight (the real opening is quieter: see `openingWorld`). */
 export function fixtureWorld(days = 12, seed = 3): GameState {
@@ -221,6 +229,8 @@ export interface FixtureOptions {
   photo?: boolean;
   staff?: boolean;
   outcome?: "won" | "lost" | null;
+  /** An ending's scene (FLT-11): `takeover` (the autopilot at work), `thanks`, or `front-<id>` (the last front page). */
+  ending?: string;
   /** A spend waiting for a yes or a no. */
   confirm?: boolean;
   /** Help ▸ How to play is open. */
@@ -251,7 +261,7 @@ export function fixtureStaged(o: Pick<FixtureOptions, "papers" | "collusion">): 
 }
 
 export function fixtureSnapshot(o: FixtureOptions = {}): Snapshot {
-  const w = o.world ?? (o.audit ? fixtureAudit(o.audit) : o.leapfrog ? fixtureLeapfrog().world : o.factions ? fixtureFactions() : o.papers || o.collusion ? fixtureStaged(o) : o.disaster ? fixtureDisaster() : o.circus ? fixtureCircus(o.circus) : o.senate ? fixtureSenate(o.senate) : fixtureWorld());
+  const w = o.world ?? (o.ending ? fixtureEnding(o.ending) : o.audit ? fixtureAudit(o.audit) : o.leapfrog ? fixtureLeapfrog().world : o.factions ? fixtureFactions() : o.papers || o.collusion ? fixtureStaged(o) : o.disaster ? fixtureDisaster() : o.circus ? fixtureCircus(o.circus) : o.senate ? fixtureSenate(o.senate) : fixtureWorld());
   const selected = o.selected === undefined ? (w.walkers.find((x) => x.kind === "researcher" && (!o.factions || x.faction))?.id ?? null) : o.selected;
   const snap = makeSnapshot(w, undefined, { selected, follow: false, highlight: null });
   const pendingConfirm = o.confirm

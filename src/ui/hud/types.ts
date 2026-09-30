@@ -804,6 +804,79 @@ export interface OutcomeVM {
   note: string;
 }
 
+/** One number on the run summary: "📅 412 days". */
+export interface EndingStatVM {
+  key: "days" | "vibes" | "models" | "protesters" | "escaped";
+  emoji: string;
+  label: string;
+  text: string;
+}
+
+/**
+ * How the lab ended (FLT-11): a Frontier Times front page, the run summary, and the share card. Only while the front
+ * page is up (`outcome === "ended"` and not waved away with Keep watching).
+ */
+export interface EndingVM {
+  /** "takeover" | "regulated" | "acquihired" | "captured" | "pivot" (more may come from mods). */
+  id: string;
+  /** "The Takeover". */
+  title: string;
+  tone: "good" | "bad" | "neutral";
+  /** Keep watching is offered (time goes on); otherwise only New lab / Today's lab. */
+  keepPlaying: boolean;
+  lab: string;
+  paper: {
+    masthead: string;
+    kicker: string;
+    headline: string;
+    deck: string;
+    /** The campus as it looked when the paper went to press (a data URL), or null until the photo is in. */
+    photo: string | null;
+    caption: string;
+    subs: string[];
+    classified: string;
+    /** The last line: "Thanks for playing. We'll take it from here." */
+    signoff: string;
+    /** "Y3 · Mar 4". */
+    date: string;
+    /** "Vol. 3 · No. 64". */
+    issue: string;
+  };
+  /** Days, peak Vibes, models released, peak protesters, agents escaped. */
+  stats: EndingStatVM[];
+  /** 🟦🟦🟩🟨🟥🤖: the run by era, in squares. */
+  strip: string;
+  /** The whole run summary, as `copySummary()` puts it on the clipboard. */
+  summary: string;
+  /** "Today's lab · Sep 30, 2026", or null for an ordinary seed. */
+  daily: string | null;
+  /** The share card (1200×630 PNG): its preview once made, and what the last share did. */
+  share: ShareVM;
+}
+
+export interface ShareVM {
+  /** "idle" | "making" | "ready" (the card is made) | "shared" | "saved" (downloaded) | "copied" (the summary) | "error". */
+  status: "idle" | "making" | "ready" | "shared" | "saved" | "copied" | "error";
+  /** The card, as an object URL, once made. */
+  card: string | null;
+  /** This device shares files (a phone): the button says Share, not Download. */
+  native: boolean;
+  /** A line to show under the buttons ("Saved frontier-lab-takeover.png"), or null. */
+  note: string | null;
+}
+
+/** The Takeover while it plays: the lab is managed by its own model, and the cursor is not yours. */
+export interface TakeoverVM {
+  /** "Frontier-9". */
+  manager: string;
+  /** "Frontier Lab Tycoon (managed by Frontier-9)": the title bar, the tab and the banner. */
+  title: string;
+  /** Buildings the manager has placed. */
+  placed: number;
+  /** The last card: "Thanks for playing. We'll take it from here.", or null before it. */
+  thanks: string | null;
+}
+
 export interface EditionRowVM {
   id: string;
   type: "paper" | "chat";
@@ -1349,6 +1422,10 @@ export interface HudVM {
   outcome: OutcomeVM | null;
   /** Evals Without Borders: the countdown and the tour. */
   audit: AuditVM;
+  /** How the lab ended: the front page, the run summary and the share card (FLT-11). Null until one comes out. */
+  ending?: EndingVM | null;
+  /** The Takeover under way (or kept watching): who is in charge now. Null otherwise. */
+  takeover?: TakeoverVM | null;
   newsroom: NewsroomVM;
   sound: SoundVM;
   photoMode: PhotoVM;
@@ -1414,6 +1491,12 @@ export interface HudActions {
   setSafetySpend(level: number): void;
   keepPlaying(): void;
   newLab(): void;
+  /** Today's lab: a new lab on today's seed, the same campus as everyone else's today. */
+  playDaily?(): void;
+  /** The ending's share card: the Web Share sheet on phones, a PNG download elsewhere. */
+  shareEnding?(): void;
+  /** The run summary onto the clipboard. */
+  copySummary?(): void;
   // The payroll.
   closeStaff(): void;
   hire(job: string): void;
