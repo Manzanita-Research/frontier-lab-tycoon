@@ -1,0 +1,115 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "842add9ad50ac8b6d8b6e8d77d3eeb302237f1e7"
+  },
+  "head": {
+    "branch": "flt-69-bird-app",
+    "sha": "d12890b",
+    "dirty": false
+  },
+  "seconds": 296.965,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "bird",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/before/bird.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/after/bird.png",
+      "title": "FLT-69: Bird Reader 1.0 open on the timeline: today's posts climbing, the week's log, the preview pane",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/compare/bird.png",
+      "changed": 0.15911033950617284
+    },
+    {
+      "scene": "bird-banger",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/before/bird-banger.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/after/bird-banger.png",
+      "title": "FLT-69: a banger going viral (the VIRAL! burst, the tray bird flapping)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/compare/bird-banger.png",
+      "changed": 0.1509074074074074
+    },
+    {
+      "scene": "bird-cancel",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/before/bird-cancel.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/after/bird-cancel.png",
+      "title": "FLT-69: a cancel that stuck: the Comms Desk drowning, the queue",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/compare/bird-cancel.png",
+      "changed": 0.13962422839506172
+    },
+    {
+      "scene": "bird-buddies",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/before/bird-buddies.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/after/bird-buddies.png",
+      "title": "FLT-69: the Contact List (tiers as ICQ groups) and a Posting Policy with the three levers",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/compare/bird-buddies.png",
+      "changed": 0.16672685185185185
+    },
+    {
+      "scene": "bird-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/before/bird-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/after/bird-phone.png",
+      "title": "FLT-69: Bird Reader on a phone, the cancel moment",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/compare/bird-phone.png",
+      "changed": 0.5237232652813222
+    },
+    {
+      "scene": "bird-base",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/before/bird-base.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/after/bird-base.png",
+      "title": "FLT-69: the base Bird App panel, open",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/compare/bird-base.png",
+      "changed": 0.16357561728395062
+    },
+    {
+      "scene": "bird-homepage",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/before/bird-homepage.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/after/bird-homepage.png",
+      "title": "FLT-69: Homepage '98's Bird App: sign our guestbook",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/compare/bird-homepage.png",
+      "changed": 0.14638117283950616
+    },
+    {
+      "scene": "bird-almanac",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/before/bird-almanac.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/after/bird-almanac.png",
+      "title": "FLT-69: Field Almanac's Bird App: a birding log",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/compare/bird-almanac.png",
+      "changed": 0.13884182098765432
+    },
+    {
+      "scene": "bird-disc",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/before/bird-disc.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/after/bird-disc.png",
+      "title": "FLT-69: Discovery Disc '96's Bird App: an encyclopedia",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/compare/bird-disc.png",
+      "changed": 0.17859413580246913
+    },
+    {
+      "scene": "bird-karaoke",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/before/bird-karaoke.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/after/bird-karaoke.png",
+      "title": "FLT-69: Karaoke Night's Bird App: the lyric screen",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/compare/bird-karaoke.png",
+      "changed": 0.1989753086419753
+    },
+    {
+      "scene": "bird-swag",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/before/bird-swag.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/after/bird-swag.png",
+      "title": "FLT-69: Swag Drop's Bird App: a merch drop",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-69/compare/bird-swag.png",
+      "changed": 0.18563734567901236
+    }
+  ],
+  "errors": []
+}
