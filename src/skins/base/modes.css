@@ -181,6 +181,9 @@
     }
     .runbox-file {
       font: 14px var(--flt-font-mono);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .runbox-name {
       font-weight: var(--flt-font-weight);

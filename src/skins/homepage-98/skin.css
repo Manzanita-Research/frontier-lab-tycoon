@@ -2193,3 +2193,26 @@
     }
   }
 }
+@media (max-width: 640px) {
+  [data-skin="homepage-98"] {
+    /* On a phone the Sitemap and the address bar take a full line under the arrows. */
+    .gc-row.view-facilities,
+    .gc-row.view-run {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+    .gc-row.view-run {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .gc-row.view-run .gc-back {
+      align-self: flex-start;
+    }
+    .gc-run {
+      max-width: none;
+    }
+    .gc-section h4 {
+      font-size: 12px;
+    }
+  }
+}
