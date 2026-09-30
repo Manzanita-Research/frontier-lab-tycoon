@@ -5,7 +5,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { test } from "node:test";
 import { aiScore, parseFeed } from "../scripts/drama-fetch.mjs";
-import { shapeCheck } from "../scripts/drama-run.mjs";
+import { packText, shapeCheck } from "../scripts/drama-run.mjs";
 import { root } from "./lint.mjs";
 
 test("parses RSS items and Atom entries", () => {
@@ -46,6 +46,15 @@ test("shape: one card, 5-10 headlines, 5-10 thoughts, prefixed ids, nothing else
   assert.match(shapeCheck(pack(day, { rivals: { remove: ["anthro"] } }), day).join(), /at most one rival tweak/);
   assert.match(shapeCheck({ ...pack(day), id: "drama-2026-01-01" }, day).join(), /id must be/);
   assert.match(shapeCheck({ ...pack(day), skin: {} }, day).join(), /no skin/);
+});
+
+test("the PR body shows the pack's copy", () => {
+  const mod = JSON.parse(readFileSync(join(root, "drama/fixtures/good/mod.json"), "utf8"));
+  mod.content.events = { add: [{ id: "x", title: "Price War", body: "Line one.\nLine two.", choices: [{ label: "Cut", hint: "Hype +1" }] }] };
+  const text = packText(mod);
+  assert.match(text, /^\*\*Card: Price War\*\*\n\n> Line one\.\n> Line two\.\n\n- Cut _\(Hype \+1\)_$/m);
+  assert.match(text, /^\*\*Headlines\*\*\n\n- /m);
+  assert.match(text, /^\*\*Thoughts\*\*\n\n- /m);
 });
 
 test("the author's check tool speaks MCP and runs the real checks", async () => {

@@ -8,6 +8,7 @@ pnpm drama --no-pr --keep-room   # stop before the PR, keep the author's room to
 pnpm drama fetch                 # just the candidates, into drama/.work/<date>/candidates.md
 pnpm drama check <pack dir>      # flt-mod check + linter + shape, the same thing the author calls
 pnpm drama pr --date <date>      # (re)open the PR for an existing mods/drama/<date>/
+pnpm drama body --date <date>    # rewrite drama/.work/<date>/pr-body.md only (for gh pr edit)
 pnpm drama:lint <pack dir>       # the parody linter alone
 ```
 
