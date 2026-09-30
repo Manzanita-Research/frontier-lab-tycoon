@@ -38,7 +38,6 @@ const Pack = Schema.Struct({
     jailbreak: numbers("era", "chance", "min", "max", "minDrift"),
     aftermath: numbers("minDays", "maxDays", "stories"),
     fallout: numbers("hype", "lessonDecayDays"),
-    ending: numbers("threshold"),
   }) }),
 });
 

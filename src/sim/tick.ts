@@ -13,12 +13,14 @@ import { applyCaptureChoices, dailyCapture } from "./capture/driver";
 import { TICKS_PER_DAY } from "./constants";
 import { dailyBreakdowns } from "./breakdowns";
 import { dailyDisasters, updateDisasters } from "./disasters/driver";
+import { declineBuilding } from "./endings/autopilot";
+import { dailyEndings, endingHalts, endingsOwnTheGame, updateEndings } from "./endings/driver";
 import { dailyCrowd } from "./crowd";
 import { dailyEconomy } from "./economy";
 import { dailyEvents, openEventOf } from "./events";
 import { dailyGoals } from "./goals";
 import { updateGroups } from "./groups";
-import { dailyNews } from "./news";
+import { dailyNews, replying } from "./news";
 import { dailyPapers } from "./race/papers/driver";
 import { dailyLeapfrog } from "./race/leapfrog/driver";
 import { dailyRace } from "./race/race";
@@ -44,7 +46,8 @@ export { TICKS_PER_DAY };
 
 /**
  * Advance one tick, mutating `state` in place. Same state + same commands = same result.
- * Time stands still while an event card is open (commands still apply, so the answer gets in) and after a loss.
+ * Time stands still while an event card is open (commands still apply, so the answer gets in), after a loss, and after
+ * an ending that doesn't let you carry on.
  * `def` is the run's resolved mod definition (FLT-37); without one the sim reads the session's (the base game unless the app loaded mods).
  */
 export function tick(state: GameState, commands: readonly Command[] = [], def?: GameDefinition | null) {
@@ -53,13 +56,19 @@ export function tick(state: GameState, commands: readonly Command[] = [], def?: 
 
 function step(state: GameState, commands: readonly Command[]) {
   const rng = createRng(state.rngState);
-  applyCommands(state, commands, rng);
+  replying(state, () => {
+    commands = declineBuilding(state, commands);
+    applyCommands(state, commands, rng);
+  });
   if (commands.length > 0) { updateTutorial(state); observeGuardrails(state); }
-  if (systemUnlocked(state, "collusion")) applyCollusionChoices(state);
-  applyCircusChoices(state);
-  applyPackChoices(state);
-  if (systemUnlocked(state, "auditors")) applyAuditorChoices(state);
-  if (pendingConfirmOf(state) || openEventOf(state) || state.goals.value === "lost") {
+  // Answers to cards are replies too (FLT-51): the toasts they send are never held back.
+  replying(state, () => {
+    if (systemUnlocked(state, "collusion")) applyCollusionChoices(state);
+    applyCircusChoices(state);
+    applyPackChoices(state);
+    if (systemUnlocked(state, "auditors")) applyAuditorChoices(state);
+  });
+  if (pendingConfirmOf(state) || openEventOf(state) || state.goals.value === "lost" || endingHalts(state)) {
     state.rngState = rng.state();
     return;
   }
@@ -75,6 +84,7 @@ function step(state: GameState, commands: readonly Command[]) {
   if (systemUnlocked(state, "disasters")) updateDisasters(state);
   updateMeetings(state);
   if (systemUnlocked(state, "defection")) updateDefection(state);
+  if (state.endings) updateEndings(state, rng);
   if (state.tick % TICKS_PER_DAY === 0) {
     state.day++;
     if (systemUnlocked(state, "disasters")) dailyDisasters(state);
@@ -105,7 +115,8 @@ function step(state: GameState, commands: readonly Command[]) {
     // FLT-59: before the day's bubbles, so an agent brooding about the fence has the floor.
     if (systemUnlocked(state, "escape")) dailyEscape(state);
     dailyThoughts(state, rng);
-    dailyGoals(state, rng);
+    if (state.endings) dailyEndings(state, rng);
+    if (!endingsOwnTheGame(state)) dailyGoals(state, rng);
     if (defs().arcs.length > 0) dailyModArcs(state, rng);
     if (systemUnlocked(state, "auditors")) dailyAuditors(state);
     if (systemUnlocked(state, "events")) dailyEvents(state);
@@ -124,13 +135,16 @@ export function applyNow(state: GameState, commands: readonly Command[], def?: G
 
 function now(state: GameState, commands: readonly Command[]) {
   const rng = createRng(state.rngState);
-  applyCommands(state, commands, rng);
+  replying(state, () => applyCommands(state, declineBuilding(state, commands), rng));
   updateTutorial(state);
   observeGuardrails(state);
-  if (systemUnlocked(state, "collusion")) applyCollusionChoices(state);
-  applyCircusChoices(state);
-  applyPackChoices(state);
-  if (systemUnlocked(state, "auditors")) applyAuditorChoices(state);
+  // Answers to cards are replies too (FLT-51): the toasts they send are never held back.
+  replying(state, () => {
+    if (systemUnlocked(state, "collusion")) applyCollusionChoices(state);
+    applyCircusChoices(state);
+    applyPackChoices(state);
+    if (systemUnlocked(state, "auditors")) applyAuditorChoices(state);
+  });
   updateCoach(state);
   state.rngState = rng.state();
 }

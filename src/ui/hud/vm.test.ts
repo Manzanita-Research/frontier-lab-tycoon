@@ -394,3 +394,38 @@ describe("the discourse (FLT-33)", () => {
     for (const b of fx.bubbles) if (b.faction) expect(fx.factions.rows.map((r) => r.id)).toContain(b.faction.id);
   });
 });
+
+describe("endings (FLT-11)", () => {
+  it("shows the last front page only once it's out, as plain JSON, with the five stats and the run summary", () => {
+    const vm = hudViewModel(fixtureInput({ ending: "front-regulated", selected: null }));
+    assertPlain(vm);
+    expect(vm.outcome).toBeNull();
+    expect(vm.ending).toMatchObject({ id: "regulated", title: "Regulated Utility", keepPlaying: true });
+    expect(vm.ending!.paper.masthead).toBe("The Frontier Times");
+    expect(vm.ending!.paper.headline).not.toMatch(/\{\w+\}/);
+    expect(vm.ending!.stats.map((s) => s.key)).toEqual(["days", "vibes", "models", "protesters", "escaped"]);
+    expect(vm.ending!.summary).toContain(vm.ending!.lab);
+    expect(vm.ending!.summary).toContain(vm.ending!.strip);
+    expect(vm.ending!.share).toEqual({ status: "idle", card: null, native: false, note: null });
+    // Dismissed (Keep watching): gone.
+    expect(hudViewModel({ ...fixtureInput({ ending: "front-regulated", selected: null }), outcomeDismissed: true }).ending).toBeNull();
+    // An ordinary game: none.
+    expect(hudViewModel(fixtureInput()).ending).toBeNull();
+  }, 30_000);
+
+  it("names the manager in the title while The Takeover's autopilot builds, then says thanks", () => {
+    const vm = hudViewModel(fixtureInput({ ending: "takeover", selected: null }));
+    expect(vm.ending).toBeNull();
+    expect(vm.takeover).toMatchObject({ title: `Frontier Lab Tycoon (managed by ${vm.takeover!.manager})`, thanks: null });
+    expect(vm.takeover!.placed).toBeGreaterThanOrEqual(2);
+    expect(hudViewModel(fixtureInput({ ending: "thanks", selected: null })).takeover!.thanks).toBe("Thanks for playing. We'll take it from here.");
+  }, 30_000);
+
+  it("passes the share card and the campus photo through", () => {
+    const input = { ...fixtureInput({ ending: "front-acquihired", selected: null }), share: { photo: "data:image/webp;base64,x", status: "ready" as const, card: "blob:card", native: true, note: null } };
+    const vm = hudViewModel(input);
+    expect(vm.ending!.paper.photo).toBe("data:image/webp;base64,x");
+    expect(vm.ending!.share).toEqual({ status: "ready", card: "blob:card", native: true, note: null });
+    expect(vm.ending!.keepPlaying).toBe(false);
+  }, 30_000);
+});

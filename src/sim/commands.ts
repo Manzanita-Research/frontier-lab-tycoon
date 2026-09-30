@@ -185,7 +185,7 @@ export function applyCommands(state: GameState, commands: readonly Command[], rn
       case "disaster": {
         if (!systemUnlocked(state, "disasters")) break;
         const r = triggerDisaster(state, c.id, { forced: true });
-        if (!r.ok) addToast(state, r.reason, "bad");
+        if (!r.ok) addToast(state, r.reason, "bad", { source: "disaster", importance: "you" });
         break;
       }
       case "setRisk":
@@ -204,7 +204,7 @@ export function applyCommands(state: GameState, commands: readonly Command[], rn
         if (systemUnlocked(state, "escape")) catchAgent(state, c.id);
         break;
       case "startTraining":
-        if (!state.buildings.some((b) => b.kind === "hall")) addToast(state, "Build a Training Hall first.", "bad");
+        if (!state.buildings.some((b) => b.kind === "hall")) addToast(state, "Build a Training Hall first.", "bad", { source: "build", importance: "you" });
         break;
     }
   }

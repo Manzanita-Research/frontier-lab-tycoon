@@ -41,6 +41,28 @@ export function Toast({ toast, actions }: SlotPropsMap["Toast"]) {
       </div>
     );
   }
+  if (toast.batch) {
+    // The pile (FLT-51), in the paperclip's own words; the worst of it first, the rest on the ticker.
+    const worst = toast.batch.filter((b) => b.tone === "bad");
+    const lines = [...worst, ...toast.batch.filter((b) => b.tone !== "bad")];
+    const more = lines.length - BATCH_LINES;
+    return (
+      <button type="button" className={`f95-toast f95-batch ${toast.tone}`} onClick={() => actions.dismissToast(toast.id)} title="Click to dismiss">
+        <Ico name={TONE_ICON[toast.tone]} size={18} />
+        <span>
+          <b>It looks like {toast.batch.length} things happened while you were busy.</b>
+          <ul>
+            {lines.slice(0, BATCH_LINES).map((b) => (
+              <li key={b.text} className={b.tone}>
+                {b.text}
+              </li>
+            ))}
+          </ul>
+          {more > 0 && <i>...and {more} more on the ticker. Would you like help with that?</i>}
+        </span>
+      </button>
+    );
+  }
   return (
     <button type="button" className={`f95-toast ${toast.tone}`} onClick={() => actions.dismissToast(toast.id)} title="Click to dismiss">
       <Ico name={TONE_ICON[toast.tone]} size={18} />
@@ -48,6 +70,9 @@ export function Toast({ toast, actions }: SlotPropsMap["Toast"]) {
     </button>
   );
 }
+
+/** A batch lists this many; the rest are on the ticker. */
+const BATCH_LINES = 4;
 
 const REPLIES: Record<string, string> = {
   align: "Alignment: loading. Estimated time remaining: unknown. Would you like to speed this up? (See: Grueling.)",

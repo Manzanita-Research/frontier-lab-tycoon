@@ -1,7 +1,13 @@
 // URL knobs for screenshots and stress tests, e.g. /?seed=3&warp=25&zoom=70&focus=12,14&agents=200&discourse=44&researchers=20&hour=22&photo&moment=shuffle
 // and, for disasters (FLT-17): /?disaster=rogueSwarm&dz=14&dzPick=0&risk=chaos
+import { dailySeed, dateKey } from "./sim/daily";
+
 export interface DebugParams {
   seed: number;
+  /** `?seed=daily`: Today's lab, the date key its seed came from (the player's local date). */
+  daily: string | null;
+  /** The endings (FLT-11) are on unless `?endings=off`. */
+  endings: boolean;
   /** Simulate this many game days before the first frame. */
   warp: number;
   speed: number | null;
@@ -56,12 +62,21 @@ export interface DebugParams {
   ladder: { level: 1 | 2 | 3 | 4 | 5; coach: number | null; unlock: boolean } | null;
 }
 
+/** Today's date key on the player's clock ("2026-09-30"), for Today's lab. */
+export function todayKey(now = new Date()): string {
+  return dateKey(now.getFullYear(), now.getMonth() + 1, now.getDate());
+}
+
 export function readDebugParams(search = typeof window === "undefined" ? "" : window.location.search): DebugParams {
   const q = new URLSearchParams(search);
   const num = (k: string) => (q.has(k) && Number.isFinite(Number(q.get(k))) ? Number(q.get(k)) : null);
   const focus = q.get("focus")?.split(",").map(Number);
+  // `&date=2026-09-30` pins the day (screenshots, or yesterday's lab).
+  const daily = q.get("seed") === "daily" ? (/^\d{4}-\d\d-\d\d$/.test(q.get("date") ?? "") ? q.get("date")! : todayKey()) : null;
   return {
-    seed: num("seed") ?? 1,
+    seed: daily ? dailySeed(daily) : num("seed") ?? 1,
+    daily,
+    endings: q.get("endings") !== "off",
     warp: num("warp") ?? 0,
     speed: num("speed"),
     zoom: num("zoom"),

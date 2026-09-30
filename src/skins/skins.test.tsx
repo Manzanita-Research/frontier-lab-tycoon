@@ -95,6 +95,10 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
       return { skins: { ...main.skins, open: true }, actions };
     case "Outcome":
       return { outcome: vms.outcome!.outcome!, actions };
+    case "Ending":
+      return { ending: vms.ending!.ending!, layout: vms.ending!.layout, actions };
+    case "Takeover":
+      return { takeover: vms.takeover!.takeover!, layout: vms.takeover!.layout, actions };
     case "NewsControls":
       return { newsroom: main.newsroom, sound: main.sound, skins: main.skins, actions };
     case "NewsArrival":
@@ -198,6 +202,10 @@ const vms: Record<string, HudVM> = {
   dramaIntro: vmOf({ drama: "intro" }),
   dramaEmpty: vmOf({ drama: "empty" }),
   dramaPhone: vmOf({ drama: "feed", width: 390, height: 844 }),
+  takeover: vmOf({ ending: "takeover", selected: null }),
+  thanks: vmOf({ ending: "thanks", selected: null }),
+  ending: vmOf({ ending: "front-takeover", selected: null }),
+  endingPhone: vmOf({ ending: "front-acquihired", selected: null, width: 390, height: 844 }),
 };
 
 const usable = catalog.filter((e) => e.ok).map((e) => e.folder);
@@ -409,6 +417,20 @@ describe.each([BASE_ID, ...usable])("skin %s", (id) => {
     expect(intro).toContain(escape(vms.dramaIntro!.drama.on!.title));
     expect(intro).toContain(escape(vms.dramaIntro!.drama.on!.event!.title));
     expect(html(skin, <Modals vm={vms.dramaEmpty!} actions={actions} />).length).toBeGreaterThan(100);
+  });
+
+  it("prints the ending's front page with the run's stats, and The Takeover's title while the autopilot works (FLT-11)", async () => {
+    const { skin } = await prepareSkin(id);
+    for (const vm of [vms.ending!, vms.endingPhone!]) {
+      const out = html(skin, <Modals vm={vm} actions={actions} />);
+      expect(out).toContain(escape(vm.ending!.paper.headline));
+      expect(out).toContain(escape(vm.ending!.lab));
+      for (const st of vm.ending!.stats) expect(out).toContain(escape(st.text));
+      expect(out).toMatch(/role="(alert)?dialog"/);
+    }
+    const t = html(skin, <Modals vm={vms.takeover!} actions={actions} />);
+    expect(t).toContain(escape(vms.takeover!.takeover!.manager));
+    expect(html(skin, <Modals vm={vms.thanks!} actions={actions} />)).toContain(escape(vms.thanks!.takeover!.thanks!));
   });
 
   it("uses the skin's own strings", async () => {

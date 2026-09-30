@@ -17,6 +17,8 @@ import { isChase, isOver, stepRunner, type RunnerEvent, type RunnerPhase } from 
 import type { EscapeState, Runner } from "./state";
 
 const R = ESCAPE.rules;
+/** FLT-51: the run and how it ends are about you (toasts); what the ones that got out do later is the world's (the ticker). */
+const YOU = { source: "escape", importance: "you" } as const;
 const HEADLINES = ESCAPE.content.headlines.add;
 /** How far inside the fence it paces, and how far inside it aims before it vaults. */
 const PACE_INSET = 1.2;
@@ -343,10 +345,10 @@ function bolt(s: GameState, e: EscapeState, r: Runner, w: Walker, rng: Rng) {
   const crew = e.runners.filter((o) => o.jail && o !== r);
   if (!r.jail) {
     const h = say(s, "run", rng, { name: r.name });
-    addToast(s, h.text, h.tone);
+    addToast(s, h.text, h.tone, YOU);
   } else if (crew.every((o) => o.machine.value === "brooding" || o.machine.value === "pacing")) {
     const h = say(s, "jailbreak", rng, { count: String(crew.length + 1) });
-    addToast(s, h.text, h.tone);
+    addToast(s, h.text, h.tone, YOU);
   }
 }
 
@@ -377,7 +379,7 @@ function run(s: GameState, e: EscapeState, r: Runner, w: Walker, dice: () => Rng
       for (const g of guardsOf(s, r)) g.chase = { runner: w.id, x: w.x, z: w.z, jog: 0 };
       think(s, r, "tackled");
       const h = say(s, "tackled", dice(), { name: r.name });
-      addToast(s, h.text, h.tone);
+      addToast(s, h.text, h.tone, YOU);
       return;
     }
   }
@@ -389,7 +391,7 @@ function run(s: GameState, e: EscapeState, r: Runner, w: Walker, dice: () => Rng
     release(s, r);
     think(s, r, "trapped");
     const h = say(s, "trapped", dice(), { name: r.name });
-    addToast(s, h.text, h.tone);
+    addToast(s, h.text, h.tone, YOU);
     return;
   }
   escaped(s, e, r, w, dice());
@@ -403,6 +405,7 @@ function escaped(s: GameState, e: EscapeState, r: Runner, w: Walker, rng: Rng) {
   s.walkers = s.walkers.filter((o) => o.id !== w.id);
   s.thoughts = s.thoughts.filter((t) => t.walkerId !== w.id);
   e.escaped++;
+  if (s.endings) s.endings.agentsEscaped++;
   e.lessons++;
   e.lessonDay = s.day;
   e.lastRun = s.day;
@@ -412,7 +415,7 @@ function escaped(s: GameState, e: EscapeState, r: Runner, w: Walker, rng: Rng) {
   const news = say(s, "escaped", rng, { name: r.name });
   addNews(s, news.text, news.tone);
   const toast = say(s, "escapedToast", rng, { name: r.name, escaped: String(e.escaped) });
-  addToast(s, toast.text, toast.tone);
+  addToast(s, toast.text, toast.tone, YOU);
   if (e.lessons === 2) {
     const l = say(s, "lessons", rng, {});
     addNews(s, l.text, l.tone);
@@ -440,7 +443,7 @@ function putBack(s: GameState, e: EscapeState, r: Runner, w: Walker, rng: Rng, h
   e.history.push({ day: s.day, name: r.name, outcome: how });
   if (how === "grabbed") {
     const h = say(s, "caught", rng, { name: r.name });
-    addToast(s, h.text, h.tone);
+    addToast(s, h.text, h.tone, YOU);
   }
 }
 

@@ -26,8 +26,11 @@ describe("midgame scenario", () => {
     // FLT-52: and the Hearing, the yacht summit, Defection, the Poaching War, Evals Without Borders, Regulatory Capture
     // and the Promise Tracker.
     // FLT-33/25: the earned factions wake with the campus and argue all 480 days; the water crowd escalates through its arc.
-    // FLT-59: and the Sandbox Escape. Nobody guards this fence, so a few agents get out (9 by the opening, now day 460).
-    expect(digest(s)).toBe("2d50d1f0");
+    // FLT-11 adds The Memo's dormant arc (arcs.memo); take it out and the World hashes to the old c4310492.
+    // FLT-51 tags every toast (source, importance, reply); without the tags it was the World FLT-52 pinned (36f6a4a9).
+    // FLT-59 adds the Sandbox Escape. Nobody guards this fence, so a few agents get out (9 by the opening, now day 460).
+    expect(digest({ ...s, toasts: s.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) })).toBe("aa82a789");
+    expect(digest(s)).toBe("ed7b09a4");
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);

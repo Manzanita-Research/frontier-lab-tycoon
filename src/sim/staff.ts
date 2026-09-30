@@ -93,7 +93,7 @@ export function hire(state: GameState, job: StaffJob) {
     zone: [],
     machine: staffStart(),
   });
-  addToast(state, fillTemplate(def.hired, { name }), "good");
+  addToast(state, fillTemplate(def.hired, { name }), "good", { source: "staff", importance: "you" });
 }
 
 /** Let someone go: they walk back to the gate with a box. */
@@ -106,7 +106,7 @@ export function fire(state: GameState, id: number) {
   const g = state.gate;
   const route = routeToRect(state, ...fromTile(state, s), g, true);
   s.route = route ?? [[g.x + g.w / 2, g.z]];
-  addToast(state, fillTemplate(STAFF[s.job].fired, { name: s.name }), "neutral");
+  addToast(state, fillTemplate(STAFF[s.job].fired, { name: s.name }), "neutral", { source: "staff", importance: "you" });
 }
 
 /** Paint (or erase) one tile of a staffer's patrol zone. */

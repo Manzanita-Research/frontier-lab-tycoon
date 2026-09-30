@@ -110,9 +110,6 @@
       "fallout": {
         "hype": -4,
         "lessonDecayDays": 20
-      },
-      "ending": {
-        "threshold": 10
       }
     }
   }

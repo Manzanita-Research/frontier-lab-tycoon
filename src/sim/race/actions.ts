@@ -34,18 +34,18 @@ export function applyRaceAction(state: GameState, rng: Rng, action: RaceAction) 
     case "cutPrices":
       race.priceCuts++;
       race.openDrop = null;
-      addToast(state, "API prices cut. Revenue -15% for good; the -30% is history.", "neutral");
+      addToast(state, "API prices cut. Revenue -15% for good; the -30% is history.", "neutral", { source: "race", importance: "you" });
       return;
     case "openRelease": {
       const id = race.openDrop?.rival ?? "sirocco";
       state.flags.openModel = state.day;
       shockRival(state, id, { capability: 0, hype: -15, momentum: -0.45 });
-      addToast(state, `${defs().rivalById[id as RivalId]?.name ?? "The rival"} loses momentum. The community is 'cautiously into it'.`, "good");
+      addToast(state, `${defs().rivalById[id as RivalId]?.name ?? "The rival"} loses momentum. The community is 'cautiously into it'.`, "good", { source: "race", importance: "you" });
       return;
     }
     case "safetyConcerns":
       state.flags.raisedSafety = state.day;
-      addToast(state, "You raised safety concerns. Somebody in Washington wrote that down.", "neutral");
+      addToast(state, "You raised safety concerns. Somebody in Washington wrote that down.", "neutral", { source: "race", importance: "you" });
       return;
     case "bidLow":
       return resolveAuction(state, rng, "low");
@@ -99,7 +99,7 @@ function grantDatacenter(state: GameState, rng: Rng) {
   const spot = findSpot(state, "datacenter");
   // Won at auction, not asked for: no spending check (FLT-16) on a free building.
   if (spot) placeBuilding(state, rng, "datacenter", spot[0], spot[1], true);
-  else addToast(state, "No room for the Datacenter. It's yours, free, wherever you make room.", "neutral");
+  else addToast(state, "No room for the Datacenter. It's yours, free, wherever you make room.", "neutral", { source: "race", importance: "you" });
 }
 
 /** Bid against the rivals. Only the winner pays. The rivals' best bid is rolled here, at the moment of the pick. */
@@ -116,11 +116,11 @@ export function resolveAuction(state: GameState, rng: Rng, bid: Bid) {
     state.hype = Math.min(100, state.hype + 4);
     grantDatacenter(state, rng);
     raceNews(state, rng, "auctionWon");
-    addToast(state, `SOLD! ${formatMoney(offer)} for a Datacenter. Now find it some power.`, "good");
+    addToast(state, `SOLD! ${formatMoney(offer)} for a Datacenter. Now find it some power.`, "good", { source: "race", importance: "you" });
   } else {
     shockRival(state, rival_.id, { capability: 5, hype: 3, momentum: 0 });
     raceNews(state, rng, "auctionLost", { rival: rival_.name });
-    addToast(state, `Outbid by ${rival_.name}. Your ${formatMoney(offer)} stays in the vault.`, "bad");
+    addToast(state, `Outbid by ${rival_.name}. Your ${formatMoney(offer)} stays in the vault.`, "bad", { source: "race", importance: "you" });
   }
 }
 

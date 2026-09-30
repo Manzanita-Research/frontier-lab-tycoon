@@ -3,6 +3,7 @@ import { ESCAPE, loadEscapePack } from "../../content/escape";
 import { createSimHandle } from "../../app/sim";
 import { chaseSpeedOf } from "../../app/machine";
 import { readDebugParams } from "../../debug";
+import { enableEndings } from "../endings/state";
 import { staffOf } from "../staff";
 import { answer, createTestCampus } from "../testkit";
 import { applyNow, tick, TICKS_PER_DAY } from "../tick";
@@ -33,7 +34,6 @@ const noGuards = (s: GameState) => { s.staff = s.staff.filter((g) => g.job !== "
 
 describe("the pack", () => {
   it("loads, with a line for every moment and a headline for every trigger", () => {
-    expect(ESCAPE.rules.ending.threshold).toBe(10);
     expect(() => loadEscapePack(escapeJson)).not.toThrow();
   });
   it("refuses a pack missing a trigger's headline", () => {
@@ -251,5 +251,59 @@ describe("the app's slow-down", () => {
     expect(chaseSpeedOf({ speed: 1, chaseSpeed: 3 }, false)).toEqual({ speed: 3, chaseSpeed: null });
     expect(chaseSpeedOf({ speed: 0, chaseSpeed: null }, true)).toEqual({ speed: 0, chaseSpeed: null });
     expect(chaseSpeedOf({ speed: 1, chaseSpeed: null }, true)).toEqual({ speed: 1, chaseSpeed: null });
+  });
+});
+
+describe("the Escaped ending", () => {
+  /** Let one agent out, nobody in the way, then see the next morning. */
+  function letOneOut(s: GameState, frontier = false) {
+    noGuards(s);
+    const [r] = startEscape(s, { pace: true });
+    r!.frontier = frontier;
+    until(s, () => s.escape!.runners.length === 0, 400);
+    const day = s.day;
+    until(s, () => s.day > day, TICKS_PER_DAY + 1);
+  }
+
+  it("comes at ten escapes, counted for the run summary, and ends in one last jailbreak", () => {
+    const s = lab();
+    enableEndings(s);
+    s.escape!.escaped = 8;
+    letOneOut(s);
+    expect(s.escape!.escaped).toBe(9);
+    expect(s.endings!.agentsEscaped).toBe(1);
+    expect(s.endings!.run).toBeNull();
+    letOneOut(s);
+    expect(s.endings!.id).toBe("escaped");
+    // Its first beat lets five more loose at once, and the paper goes to press a few days on.
+    expect(s.escape!.runners.length).toBeGreaterThanOrEqual(3);
+    until(s, () => s.endings!.endedDay !== null, 8 * TICKS_PER_DAY);
+    expect(s.endings!.endedDay).not.toBeNull();
+  });
+
+  it("comes at once if the newest model's agent gets out in Era 4, and not before Era 4", () => {
+    const early = lab();
+    enableEndings(early);
+    letOneOut(early, true);
+    expect(early.escape!.frontierOut).toBe(false);
+    expect(early.endings!.run).toBeNull();
+
+    const s = lab();
+    enableEndings(s);
+    s.race.era = { value: "era4", context: { peak: Math.max(30, s.race.mult) } } as typeof s.race.era;
+    letOneOut(s, true);
+    expect(s.escape!.frontierOut).toBe(true);
+    expect(s.endings!.id).toBe("escaped");
+  });
+
+  it("tags the run's toasts as yours and leaves the aftermath to the news", () => {
+    const s = lab();
+    const toasts: GameState["toasts"] = [];
+    noGuards(s);
+    startEscape(s, { pace: true });
+    for (let i = 0; i < 400 && s.escape!.runners.length; i++) { tick(s, answer(s)); toasts.push(...s.toasts); }
+    const ours = toasts.filter((t) => t.source === "escape");
+    expect(ours.length).toBeGreaterThan(0);
+    expect(ours.every((t) => t.importance === "you")).toBe(true);
   });
 });

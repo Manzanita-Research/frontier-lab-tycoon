@@ -67,7 +67,7 @@ export function draftClause(s: GameState, clause: string, on: boolean): boolean 
   if (!b?.enabled || b.machine.value !== "invited" || !clauseById(clause)) return false;
   if (!on) return (b.draft = b.draft.filter((c) => c !== clause)), true;
   if (b.draft.includes(clause)) return true;
-  if (b.draft.length >= R.pick) return void addToast(s, `The staffer says ${R.pick} clauses is "already a lot of clauses".`, "neutral"), false;
+  if (b.draft.length >= R.pick) return void addToast(s, `The staffer says ${R.pick} clauses is "already a lot of clauses".`, "neutral", { source: "politics", importance: "you" }), false;
   b.draft = [...b.draft, clause];
   return true;
 }

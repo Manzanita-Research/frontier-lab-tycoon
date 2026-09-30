@@ -1253,6 +1253,24 @@
     + .f95-toast {
       border-top: 1px dotted #808080;
     }
+    /* A pile of notices (FLT-51): the header in ink, each line in its own tone. */
+    &.f95-batch {
+      color: inherit;
+      ul {
+        margin: 4px 0 2px;
+        padding-left: 16px;
+        list-style: square;
+      }
+      li.bad {
+        color: var(--flt-color-bad);
+      }
+      li.good {
+        color: var(--flt-color-good);
+      }
+      i {
+        color: #444;
+      }
+    }
   }
   .f95-clip {
     width: 58px;
@@ -4412,5 +4430,148 @@
 @keyframes frontier-95-drama-blink {
   50% {
     color: #fff;
+  }
+}
+
+/* ---- the end (FLT-11): the last paper in Internet Exploder, the run in NoteBad, and The Takeover's title bar ---- */
+[data-skin="frontier-95"] {
+  .f95-end {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 10px;
+    align-items: start;
+    width: min(1180px, calc(100vw - 20px));
+    max-height: calc(100dvh - 20px);
+    > .f95-win {
+      min-width: 0;
+    }
+    &.compact {
+      grid-template-columns: minmax(0, 1fr);
+      overflow: auto;
+      max-height: calc(100dvh - 20px);
+      .f95-end-paper {
+        max-height: none;
+      }
+      .f95-paper {
+        padding: 12px 14px;
+      }
+    }
+  }
+  .f95-end-paper {
+    width: auto;
+    max-height: calc(100dvh - 20px);
+    .f95-paper {
+      position: relative;
+    }
+    .bottom.single {
+      grid-template-columns: 1fr;
+    }
+  }
+  .f95-end-signoff {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 2px solid #000;
+    text-align: center;
+    font-size: 20px;
+  }
+  .f95-end-paper figure {
+    position: relative;
+  }
+  .f95-end-stamp {
+    position: absolute;
+    bottom: 48px;
+    right: 10px;
+    background: #ffffffcc;
+    padding: 4px 12px;
+    border: 4px solid #c00000;
+    color: #c00000;
+    font-family: var(--flt-font-numbers);
+    font-size: 28px;
+    text-transform: uppercase;
+    transform: rotate(-8deg);
+    opacity: 0.85;
+    pointer-events: none;
+    &.tone-good {
+      color: #008000;
+      border-color: #008000;
+    }
+    &.tone-neutral {
+      color: #000080;
+      border-color: #000080;
+    }
+  }
+  .f95-end-run {
+    max-height: calc(100dvh - 20px);
+    display: flex;
+    flex-direction: column;
+  }
+  .f95-end-body {
+    display: grid;
+    gap: 8px;
+    padding: 10px;
+    overflow: auto;
+  }
+  .f95-end-daily {
+    color: #000080;
+    text-transform: uppercase;
+    font-size: 13px;
+  }
+  .f95-end-lab {
+    font-size: 20px;
+    font-weight: normal;
+  }
+  .f95-end-strip {
+    font-size: 15px;
+    line-height: 1.2;
+    letter-spacing: -1px;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .f95-end-facts {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+    div {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    dd {
+      min-width: 48px;
+      text-align: right;
+    }
+  }
+  .f95-end-buttons {
+    display: grid;
+    gap: 6px;
+    .f95-btn {
+      width: 100%;
+    }
+  }
+  .f95-end-card {
+    width: 100%;
+    display: block;
+  }
+  .f95-takeover {
+    position: fixed;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 60;
+    width: min(560px, calc(100vw - 12px));
+    background: var(--g);
+    box-shadow: inset -1px -1px 0 var(--dk), inset 1px 1px 0 var(--hl), inset -2px -2px 0 var(--sh), inset 2px 2px 0 var(--lt);
+    padding: 3px;
+    pointer-events: none;
+    text-align: center;
+    animation: frontier-95-blink 1s steps(1) 3;
+    small {
+      display: block;
+      padding: 2px 4px;
+    }
+  }
+  .f95-takeover-thanks {
+    pointer-events: none;
+    z-index: 65;
   }
 }

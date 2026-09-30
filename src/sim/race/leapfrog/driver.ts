@@ -203,7 +203,7 @@ function declareSolved(state: GameState, rng: Rng, e: BenchEntry, holder: string
     pushVoice(state, id, R.voice.sotaPush);
   }
   if (holder) pushVoice(state, holder, R.voice.sotaPush);
-  addToast(state, `${e.def.short} is solved. Everyone is back to ${vars.pct}% on ${next.short}.`, "neutral");
+  addToast(state, `${e.def.short} is solved. Everyone is back to ${vars.pct}% on ${next.short}.`, "neutral", { source: "leapfrog", importance: holder === YOU ? "you" : "world" });
 }
 
 /** The pack's replacement for a solved benchmark, or (if a mod never named one) a tougher "(Extended)" version of it. */
@@ -314,8 +314,8 @@ export function handleDrop(state: GameState, rng: Rng, slot: "lead" | "answer") 
     const fn = claim.maxx ? ` (*${rng.pick(LEAPFROG.footnotes)})` : "";
     packNews(state, rng, "sota", { rival: def.name, model: pending.model, bench, fn });
   }
-  for (const c of claims) if (c.prevHolder === YOU) addToast(state, `${def.name} took your record on ${defs().benchById[c.bench]?.short ?? c.bench}.`, "bad");
-  addToast(state, slot === "lead" ? `${def.name} launched ${pending.model}. The news cycle is theirs.` : `${def.name} answers ${leadName} a day later: ${pending.model}.`, "bad");
+  for (const c of claims) if (c.prevHolder === YOU) addToast(state, `${def.name} took your record on ${defs().benchById[c.bench]?.short ?? c.bench}.`, "bad", { source: "leapfrog", importance: "you" });
+  addToast(state, slot === "lead" ? `${def.name} launched ${pending.model}. The news cycle is theirs.` : `${def.name} answers ${leadName} a day later: ${pending.model}.`, "bad", { source: "leapfrog" });
 
   pushVoice(state, pending.id, slot === "lead" ? R.voice.leadPush : R.voice.answerPush);
   pushVoice(state, pending.id, R.voice.sotaPush * claims.length);
@@ -389,11 +389,11 @@ export function ownRelease(state: GameState, rng: Rng, opts: { early: boolean; r
       state.hype = Math.min(100, state.hype + R.response.counterHype);
       state.cash += Math.round(state.ledger.income * 7 * R.response.counterBonus);
       packNews(state, rng, "counterStrong", { model, rival: lastRival });
-      addToast(state, `Counter-launch lands: ${model} takes the news cycle back.`, "good");
+      addToast(state, `Counter-launch lands: ${model} takes the news cycle back.`, "good", { source: "leapfrog", importance: "you" });
     } else {
       push = R.response.counterSoftPush;
       packNews(state, rng, "counterSoft", { model, rival: lastRival });
-      addToast(state, `The counter-launch is out, and a bit... comparable.`, "neutral");
+      addToast(state, `The counter-launch is out, and a bit... comparable.`, "neutral", { source: "leapfrog", importance: "you" });
     }
   }
 
@@ -406,10 +406,10 @@ export function ownRelease(state: GameState, rng: Rng, opts: { early: boolean; r
       addIncident(state, R.response.bugIncident);
       push *= 0.4;
       packNews(state, rng, "bug", vars);
-      addToast(state, `${model} has a launch bug. It insists it doesn't.`, "bad");
+      addToast(state, `${model} has a launch bug. It insists it doesn't.`, "bad", { source: "leapfrog", importance: "you" });
     } else {
       packNews(state, rng, "shipped", vars);
-      addToast(state, `${model} is out at ${vars.ready}%: the news cycle is yours (for now).`, "good");
+      addToast(state, `${model} is out at ${vars.ready}%: the news cycle is yours (for now).`, "good", { source: "leapfrog", importance: "you" });
     }
   }
   pushVoice(state, YOU, push + R.voice.ownSotaPush * claims.length);
@@ -433,7 +433,7 @@ function livestream(state: GameState, rng: Rng, model: string, ready: number, fo
       packNews(state, rng, "flawless", { model });
       state.hype = Math.min(100, state.hype + L.flawlessHype);
       pushVoice(state, YOU, L.flawlessPush);
-      addToast(state, "The launch livestream goes flawlessly. (It was pre-recorded.)", "good");
+      addToast(state, "The launch livestream goes flawlessly. (It was pre-recorded.)", "good", { source: "leapfrog" });
       continue;
     }
     const def = defs().mishapById(e.kind);
@@ -489,7 +489,7 @@ export function dailyLeapfrog(state: GameState, rng: Rng) {
     if (e.type === "OWNED") {
       lf.stats.owned++;
       packNews(state, rng, "cycleOwned", { who: nameOf(state, e.lab) });
-      addToast(state, e.lab === YOU ? "You own the news cycle. Enjoy it: it lasts about four days." : `${nameOf(state, e.lab)} owns the news cycle.`, e.lab === YOU ? "good" : "bad");
+      addToast(state, e.lab === YOU ? "You own the news cycle. Enjoy it: it lasts about four days." : `${nameOf(state, e.lab)} owns the news cycle.`, e.lab === YOU ? "good" : "bad", { source: "leapfrog" });
     } else if (!taken.has(e.lab)) {
       packNews(state, rng, "cycleLost", { who: nameOf(state, e.lab) });
     }

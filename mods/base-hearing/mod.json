@@ -32,7 +32,8 @@
                   "type": "toast",
                   "params": {
                     "text": "Subpoena! {lab}'s CEO testifies before the Senate in 3 days.",
-                    "tone": "bad"
+                    "tone": "bad",
+                    "importance": "you"
                   }
                 },
                 {
