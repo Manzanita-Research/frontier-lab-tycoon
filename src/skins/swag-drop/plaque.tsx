@@ -1,6 +1,6 @@
 // The paper plaque and the instrument beside it: the lab's numbers as enamel pins, and the training run as a dial.
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { ALL_VISIBLE, Odometer, money, useCoach, useT } from "../kit";
+import { ALL_VISIBLE, Odometer, money, useCoach, useT, useWidget } from "../kit";
 import type { StatsVM } from "../../ui/hud/types";
 import type { SlotPropsMap } from "../types";
 import { Glyph } from "./icons";
@@ -108,6 +108,7 @@ export function Stats({ stats, layout, visible = ALL_VISIBLE, actions }: SlotPro
   const coach = useCoach();
   const compact = layout.compact;
   const [expanded, setExpanded] = useState(false);
+  useWidget(["properties", "finance"], () => setExpanded(true));
   const a = stats.arena;
   return (
     <div className={`sd-plaque ${compact ? "compact" : ""} ${compact && expanded ? "expanded" : ""}`}>

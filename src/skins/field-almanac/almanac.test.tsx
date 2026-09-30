@@ -142,9 +142,14 @@ describe("Field Almanac", () => {
   });
 
   it("the shelf has an engraving, a price and the hotkey for every tool, and Bulldoze is Clear land", () => {
-    const out = html(<Shelf items={vm.buildItems} teasers={[]} actions={actions} done={() => {}} />);
-    // One engraving per tool, then Help's.
-    expect(out.match(/fa-well/g)?.length).toBe(vm.buildItems.length + 1);
+    // The top shelf is the tools, Facilities, Run… and Help; Facilities is a back engraving and every building (FLT-63).
+    const top = html(<Shelf items={vm.buildItems} teasers={[]} actions={actions} done={() => {}} />);
+    const guide = html(<Shelf items={vm.buildItems} teasers={[]} actions={actions} done={() => {}} view="facilities" />);
+    const out = top + guide;
+    expect(out.match(/fa-well/g)?.length).toBe(vm.buildItems.length + 4);
+    expect(top).toContain('data-testid="start-facilities"');
+    expect(top).toContain("Facilities");
+    expect(guide).toContain("Plate I.");
     expect(out).toContain("Clear land");
     expect(out).toContain('aria-pressed="true"'); // the tool in hand
     for (const it of vm.buildItems) if (it.hotkey !== null) expect(out).toContain(`>${it.hotkey}<`);
@@ -157,7 +162,7 @@ describe("Field Almanac", () => {
     expect(shut.match(/fa-well/g)?.length).toBe(1);
     expect(shut).toContain('aria-expanded="false"');
     const teasers = [{ label: "2 more", hint: "Ship your first model" }];
-    const open = html(<Shelf items={vm.buildItems.slice(0, 2)} teasers={teasers} actions={actions} done={() => {}} />);
+    const open = html(<Shelf items={vm.buildItems.slice(0, 2)} teasers={teasers} actions={actions} done={() => {}} />) + html(<Shelf items={vm.buildItems.slice(0, 2)} teasers={teasers} actions={actions} done={() => {}} view="facilities" />);
     expect(open).toContain("fa-tool locked");
     expect(open).toContain("2 more");
     expect(open).toContain("Ship your first model");
@@ -168,7 +173,7 @@ describe("Field Almanac", () => {
     const out = html(<Docked vm={vm} actions={actions} />);
     for (const hook of ["start", "training", "stat:runway", "goals"]) expect(out).toContain(`data-coach="${hook}"`);
     // One per tool in the open shelf: rendered from the view-model as given, so an unlock filter or a mod's tool needs nothing here.
-    const shelf = html(<Shelf items={vm.buildItems} teasers={[]} actions={actions} done={() => {}} />);
+    const shelf = html(<Shelf items={vm.buildItems} teasers={[]} actions={actions} done={() => {}} />) + html(<Shelf items={vm.buildItems} teasers={[]} actions={actions} done={() => {}} view="facilities" />);
     for (const it of vm.buildItems) expect(shelf).toContain(`data-coach="build:${it.kind}"`);
     // ...and the run under observation carries it whether or not there is a Training Hall yet.
     expect(html(<slot.Training training={{ ...vm.training, hasHall: false }} actions={actions} />)).toContain('data-coach="training"');

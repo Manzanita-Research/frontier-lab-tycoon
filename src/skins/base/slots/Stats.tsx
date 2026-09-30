@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ALL_VISIBLE, Odometer, money, useAutoPause, useCoach } from "../../kit";
+import { ALL_VISIBLE, Odometer, money, useAutoPause, useCoach, useWidget } from "../../kit";
 import { useT } from "../../context";
 import type { SlotPropsMap } from "../../types";
 import { RaceStats } from "./RaceStats";
@@ -12,6 +12,7 @@ export function Stats({ stats, layout, visible = ALL_VISIBLE, actions }: SlotPro
   const compact = layout.compact;
   // On a phone the bar is one row (Vibes, cash, runway); a tap on the caret opens the rest.
   const [expanded, setExpanded] = useState(false);
+  useWidget(["properties", "finance"], () => setExpanded(true));
   useAutoPause(actions, "stats", compact && expanded);
   return (
     <div className={`topbar panel ${compact ? "compact" : ""} ${compact && expanded ? "expanded" : ""}`}>

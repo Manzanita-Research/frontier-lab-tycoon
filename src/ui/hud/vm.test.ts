@@ -5,6 +5,7 @@ import { fixtureEnding, fixtureInput, fixtureWorld, FIXTURE_CHAT, FIXTURE_PAPER 
 import { CALM_START_DAY } from "../../sim/disasters/driver";
 import { SKIN_API_VERSION } from "./types";
 import { hudViewModel, SHIPPED_DAYS, TICKER_ITEMS } from "./vm";
+import { agoText, modMismatch } from "./saves.vm";
 
 /** Every value in a view-model must survive JSON: that is what makes it a contract a skin can rely on. */
 function assertPlain(v: unknown, path = "vm") {
@@ -428,6 +429,81 @@ describe("endings (FLT-11)", () => {
     expect(vm.ending!.share).toEqual({ status: "ready", card: "blob:card", native: true, note: null });
     expect(vm.ending!.keepPlaying).toBe(false);
   }, 30_000);
+});
+
+describe("placement modes and the Start menu (FLT-63)", () => {
+  it("names the tool in hand as a mode: a building is one-shot, the path and bulldozer are sticky", () => {
+    expect(hudViewModel(fixtureInput({ tool: "cluster" })).mode).toMatchObject({ kind: "building", tool: "cluster", sticky: false });
+    expect(hudViewModel(fixtureInput({ tool: "path" })).mode).toMatchObject({ kind: "path", sticky: true });
+    expect(hudViewModel(fixtureInput({ tool: null })).mode).toBeNull();
+  });
+
+  it("puts every build item in a Facilities group, with Path and the Staff tile where the menu expects them", () => {
+    const items = hudViewModel(fixtureInput({})).buildItems;
+    expect(items.every((it) => it.group)).toBe(true);
+    expect(items.find((it) => it.isPath)!.group).toBe("tools");
+    expect(items.find((it) => it.kind === "cluster")!.group).toBe("compute");
+    expect(items.find((it) => it.kind === "hall")!.group).toBe("research");
+    expect(items.find((it) => it.kind === "staff")?.group ?? "offices").toBe("offices");
+  });
+
+  it("lists only the widgets the lab has earned, each with a file to type into Run", () => {
+    const widgets = hudViewModel(fixtureInput({})).widgets!;
+    const ids = widgets.map((w) => w.id);
+    expect(ids).toContain("properties");
+    expect(ids).toContain("drama");
+    expect(new Set(widgets.map((w) => w.file)).size).toBe(widgets.length);
+    expect(widgets.every((w) => /^[a-z]+\.[a-z]{3}$/.test(w.file))).toBe(true);
+  });
+});
+
+describe("saves (FLT-65)", () => {
+  it("lists the autosave and three slots, with dates, ages and sizes", () => {
+    const vm = hudViewModel(fixtureInput({ saves: "window" }));
+    assertPlain(vm.saves);
+    expect(vm.saves.open).toBe(true);
+    expect(vm.saves.slots.map((s) => s.label)).toEqual(["Autosave", "Slot 1", "Slot 2", "Slot 3"]);
+    expect(vm.saves.slots[0]!.save).toMatchObject({ lab: "Gradient Descent Labs", date: "Y2 · Mar 5", ago: "3 hours ago", size: "45K", skin: "Frontier 95" });
+    expect(vm.saves.slots[1]!.save).toMatchObject({ ago: "2 days ago", size: "5K", mods: ["every-lab-is-steve"] });
+    expect(vm.saves.slots[2]).toMatchObject({ save: null, broken: "Scrambled" });
+    expect(vm.saves.slots[3]).toMatchObject({ save: null, broken: null });
+    expect(vm.saves.storage.text).toBe("50K of about 5 MB");
+    expect(vm.saves.current.lab).toBe(vm.stats.labName);
+  });
+
+  it("says Welcome back with the autosave, and nothing without one", () => {
+    expect(hudViewModel(fixtureInput({ saves: "welcome" })).saves.welcome).toMatchObject({ lab: "Gradient Descent Labs", date: "Y2 · Mar 5" });
+    const none = hudViewModel(fixtureInput());
+    expect(none.saves.welcome).toBeNull();
+    expect(none.saves.open).toBe(false);
+    assertPlain(none.saves);
+  });
+
+  it("passes the mods question and private browsing through", () => {
+    expect(hudViewModel(fixtureInput({ saves: "prompt" })).saves.modPrompt).toMatchObject({ canFetch: true, missing: ["every-lab-is-steve 1.0.0"] });
+    expect(hudViewModel(fixtureInput({ saves: "private" })).saves.available).toBe(false);
+  });
+});
+
+describe("saves helpers (FLT-65)", () => {
+  const now = Date.parse("2026-09-30T15:00:00Z");
+  const at = (ms: number) => new Date(now - ms).toISOString();
+  it("says how long ago, in words", () => {
+    expect(agoText(at(30_000), now)).toBe("just now");
+    expect(agoText(at(12 * 60_000), now)).toBe("12 minutes ago");
+    expect(agoText(at(3_600_000), now)).toBe("an hour ago");
+    expect(agoText(at(30 * 3_600_000), now)).toBe("yesterday");
+    expect(agoText(at(40 * 86_400_000), now)).toBe("2026-08-21");
+    expect(agoText("not a date", now)).toBe("some time ago");
+  });
+
+  it("asks about mods only when they differ", () => {
+    const save = { lab: "Lab", mods: [{ id: "steve", version: "1.0.0", hash: "aa", source: "/mods/steve.json" }] } as unknown as Parameters<typeof modMismatch>[0];
+    expect(modMismatch(save, [{ id: "steve", hash: "aa" }])).toBeNull();
+    expect(modMismatch(save, [])).toEqual({ lab: "Lab", missing: ["steve 1.0.0"], extra: [], canFetch: true });
+    expect(modMismatch(save, [{ id: "steve", hash: "bb", name: "Steve 2" }])).toMatchObject({ extra: ["Steve 2"], canFetch: true });
+    expect(modMismatch({ ...save, mods: [] }, [{ id: "steve", hash: "aa" }])).toMatchObject({ missing: [], extra: ["steve"], canFetch: false });
+  });
 });
 
 describe("no dead ends, streaks and friend links (FLT-57)", () => {

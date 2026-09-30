@@ -1,7 +1,7 @@
 // The console: a lilac plastic body with a glowing screen in it. The lab name and date on top, Vibes as the big pink score,
 // cash, runway and capability as glowing numbers, hype as a VU meter, and the race's two chips (the Arena, AI R&D).
 import { useEffect, useRef, useState } from "react";
-import { ALL_VISIBLE, Odometer, money } from "../kit";
+import { ALL_VISIBLE, Odometer, money, useWidget } from "../kit";
 import { useCoach, useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import type { StatsVM } from "../../ui/hud/types";
@@ -69,6 +69,7 @@ export function Stats({ stats, layout, visible = ALL_VISIBLE, actions }: SlotPro
   const compact = layout.compact;
   // On a phone the console is one row (Vibes, cash, runway); the caret opens the rest.
   const [expanded, setExpanded] = useState(false);
+  useWidget(["properties", "finance"], () => setExpanded(true));
   const a = stats.arena;
   const lit = Math.round((Math.max(0, Math.min(100, stats.hype.value)) / 100) * VU_BARS);
   return (

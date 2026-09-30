@@ -216,7 +216,14 @@ async function closeStart() {
 }
 async function pickTool(name) {
   const menu = await openStart();
-  const item = menu.getByRole("menuitem").filter({ hasText: name }).first();
+  let item = menu.getByRole("menuitem").filter({ hasText: name }).first();
+  // FLT-63: buildings live in Start ▸ Facilities ▸ (Path and Bulldoze stay on top).
+  const facilities = menu.locator("[data-testid=start-facilities]").first();
+  if (!(await item.count()) && (await facilities.count())) {
+    await press(facilities);
+    await page.waitForTimeout(250);
+    item = menu.getByRole("menuitem").filter({ hasText: name }).first();
+  }
   if (!(await item.count()) || !(await item.isEnabled())) {
     await closeStart();
     return false;

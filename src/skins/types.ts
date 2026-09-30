@@ -2,10 +2,10 @@
 // nothing else in the game: no `src/sim/**`, no store, no three.
 import type { ComponentType, ReactNode } from "react";
 import type {
-  ArenaVM, AuditVM, BeatVM, BillVM, TrackerVM, ReportCardVM, BubbleVM, FactionsVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, DramaDocVM, DramaVM, EraCardVM, EventVM, HearingVM, HudActions, HudVM, LeakVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
+  ArenaVM, AuditVM, BeatVM, BillVM, TrackerVM, ReportCardVM, BubbleVM, FactionsVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, DramaDocVM, DramaVM, SaveSummaryVM, SavesVM, EraCardVM, EventVM, HearingVM, HudActions, HudVM, LeakVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
   ModsVM, SkinOfferVM, NewsroomVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StatsVM, ThoughtRowVM, TickerItemVM,
   StaffVM, TeaserVM, ProgressVM, ToastVM, TrainingVM, UnlockCardVM, VisibleVM, HelpVM, PapersVM, PaperMomentVM, CrumbWikiVM, DisastersVM,
-  EndingVM, TakeoverVM, TrayItemVM, MemoVM, ChallengeVM,
+  EndingVM, TakeoverVM, TrayItemVM, WidgetVM, PlaceModeVM, MemoVM, ChallengeVM,
 } from "../ui/hud/types";
 import type { Rect } from "./kit/place";
 
@@ -68,6 +68,8 @@ export const SLOT_NAMES = [
   "Drama",
   "Memo",
   "Challenge",
+  "Welcome",
+  "SaveLoad",
 ] as const;
 export type SlotName = (typeof SLOT_NAMES)[number];
 
@@ -92,7 +94,7 @@ export interface SlotPropsMap {
   Objectives: { objectives: ObjectivesVM; progress?: ProgressVM; visible?: VisibleVM; layout: LayoutVM; actions: HudActions };
   Inspector: { inspector: InspectorVM; layout: LayoutVM; actions: HudActions };
   /** The build panel: `items` are only what is unlocked, `teasers` the locked ones, one row per milestone ("2 more · Ship your first model"). Report each opening with `actions.buildPanel(true)`. */
-  BuildBar: { items: BuildItemVM[]; tip: BuildTipVM | null; teasers?: TeaserVM[]; layout: LayoutVM; actions: HudActions; /** For a Start menu with a Disasters entry (FLT-32): `disasters.enabled` says it is earned. */ disasters?: DisastersVM };
+  BuildBar: { items: BuildItemVM[]; tip: BuildTipVM | null; teasers?: TeaserVM[]; layout: LayoutVM; actions: HudActions; /** For a Start menu with a Disasters entry (FLT-32): `disasters.enabled` says it is earned. */ disasters?: DisastersVM; /** FLT-63: what "Run…" can open (`vm.widgets`). */ widgets?: WidgetVM[]; /** FLT-63: the mode the pointer is in, so the tool in hand can say how to put it down. */ mode?: PlaceModeVM | null };
   Speed: { speed: SpeedVM; stats: StatsVM; actions: HudActions };
   /** The payroll panel (hire, fire, paint patrol zones). Only rendered while `staff.open`. */
   Staff: { staff: StaffVM; actions: HudActions };
@@ -217,6 +219,17 @@ export interface SlotPropsMap {
   WindowTray: { tray: TrayItemVM[]; layout: LayoutVM; actions: HudActions };
   /** Today's Drama while `drama.open`: the newest pack, the archive, Play (`actions.playDrama(id)`, a new lab) and switch off (`actions.removeMod(on.id)`). `drama.intro` is the "now playing" card for a pack that has just loaded. Close with `actions.closeDrama()`. */
   Drama: { drama: DramaVM; actions: HudActions };
+  /**
+   * "Welcome back" (FLT-65), while `saves.welcome` is set: `actions.continueSave()` loads the autosave, `actions.dismissWelcome()`
+   * plays the new lab behind it. Modal; time is held.
+   */
+  Welcome: { welcome: SaveSummaryVM; saves: SavesVM; actions: HudActions };
+  /**
+   * The Save/Load window (FLT-65), drawn while `saves.open`, `saves.modPrompt` or `saves.dragging`: the slots (`saveTo`, `loadFrom`,
+   * `deleteSave`, `exportSave`), Export and Import (`exportSave("current")`, `importSave(file)`), the question about a save's mods
+   * (`fetchModsAndLoad`, `loadWithoutMods`, `cancelModPrompt`), and where to drop a file. Modal; time is held.
+   */
+  SaveLoad: { saves: SavesVM; actions: HudActions };
 }
 
 export type SlotComponents = { [K in SlotName]: ComponentType<SlotPropsMap[K]> };

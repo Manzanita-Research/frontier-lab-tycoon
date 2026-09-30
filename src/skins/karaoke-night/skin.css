@@ -3157,3 +3157,54 @@
     transform: rotate(360deg);
   }
 }
+
+/* ---- FLT-63: the arcade's Facilities rows and the Run… box ---- */
+[data-skin="karaoke-night"] {
+  .kn-tray.view-facilities {
+    align-items: flex-end;
+    padding-top: 10px;
+  }
+  .kn-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: none;
+  }
+  .kn-row + .kn-row {
+    padding-left: 10px;
+    border-left: 2px dotted color-mix(in srgb, var(--kn-cyan) 55%, transparent);
+  }
+  .kn-rowname {
+    align-self: flex-start;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--kn-screen);
+    font: 900 11px var(--kn-display);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--kn-cyan);
+    white-space: nowrap;
+    margin-bottom: 4px;
+  }
+  .kn-rowkeys {
+    display: flex;
+    gap: 10px;
+  }
+  .kn-tray.view-run {
+    align-items: flex-start;
+  }
+  .kn-run {
+    width: min(460px, calc(100vw - 140px));
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--kn-screen);
+    color: var(--flt-color-text);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    .runbox-prompt {
+      color: var(--kn-cyan);
+    }
+    .runbox-list {
+      max-height: min(240px, 34dvh);
+    }
+  }
+}

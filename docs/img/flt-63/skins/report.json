@@ -1,0 +1,23 @@
+{
+  "base": null,
+  "head": {
+    "branch": "flt-63-place-menu",
+    "sha": "ee90ec9",
+    "dirty": false
+  },
+  "seconds": 120.411,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "flt63-facilities",
+      "gallery": true,
+      "count": 6
+    },
+    {
+      "scene": "flt63-run",
+      "gallery": true,
+      "count": 6
+    }
+  ],
+  "errors": []
+}

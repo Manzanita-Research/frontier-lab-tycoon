@@ -1,7 +1,7 @@
 // Frontier 95's Release Leapfrog: the Benchmarks tab in Task Mangler, the "Network Traffic" window (and its tray icon),
 // the forced-response gauges and the launch livestream that "has stopped responding".
 import { useState } from "react";
-import { BenchTable, VoiceGraph } from "../kit";
+import { BenchTable, useWidget, VoiceGraph } from "../kit";
 import { useT } from "../context";
 import type { ResponseVM, StreamVM } from "../../ui/hud/types";
 import type { SlotPropsMap } from "../types";
@@ -65,6 +65,7 @@ function Traffic({ leapfrog }: { leapfrog: SlotPropsMap["Voice"]["leapfrog"] }) 
 export function Voice({ leapfrog, layout }: SlotPropsMap["Voice"]) {
   const t = useT();
   const [open, setOpen] = useState(false);
+  useWidget("traffic", () => setOpen(true));
   const { voice } = leapfrog;
   if (layout.compact) return null;
   return (
