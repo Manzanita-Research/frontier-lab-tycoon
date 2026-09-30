@@ -12,3 +12,5 @@ export { VoiceGraph } from "./VoiceGraph";
 export { placeBalloon, type Placement, type Rect, type Side } from "./place";
 export { ALL_VISIBLE } from "./visible";
 export { Evidence } from "./Evidence";
+export { PaperMomentBody } from "./PaperMomentBody";
+export { CrumbWikiBody, TalkPage } from "./CrumbWikiBody";

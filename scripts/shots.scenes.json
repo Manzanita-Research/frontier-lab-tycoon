@@ -72,10 +72,12 @@
       "paper-drop",
       "paper-scoop",
       "paper-award",
+      "papers-panel",
       "paper-phone"
     ],
     "collusion": [
       "collusion-sign",
+      "collusion-traffic",
       "collusion-phone",
       "collusion-scandal"
     ],
@@ -457,6 +459,30 @@
       "viewport": "390x844",
       "mobile": true
     },
+    "papers-panel": {
+      "title": "Publish or Perish: the papers window open (the scoop moment closed first)",
+      "query": {
+        "warp": 0,
+        "moment": "paper-scoop",
+        "leapfrog": "off"
+      },
+      "steps": [
+        {
+          "click": ".f95-moment [data-g='close'], .paper-moment .moment-buttons .plain",
+          "optional": true
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": ".f95-papers:not(.open) .f95-tb, .papers-chip",
+          "optional": true
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
     "collusion-sign": {
       "title": "Agent Collusion: the first Security memo (existing event-card slot)",
       "query": {
@@ -477,6 +503,19 @@
       },
       "viewport": "390x844",
       "mobile": true,
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "collusion-traffic": {
+      "title": "Agent Collusion: POSTs off the Compute Cluster and Kombucha After Dark",
+      "query": {
+        "moment": "collusion-traffic",
+        "warp": null,
+        "hour": 23
+      },
       "steps": [
         {
           "wait": 800

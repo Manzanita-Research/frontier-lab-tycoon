@@ -486,3 +486,70 @@
     width: auto;
   }
 }
+
+/* ---- Agent collusion's signs over the campus (FLT-46): the packets, the night out, the inquiry ---- */
+.packet {
+  transform: translate(-50%, -50%);
+  font: 700 10px var(--flt-font-mono);
+  letter-spacing: 0.04em;
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: #101410;
+  color: #7dff9a;
+  box-shadow: 0 0 0 1px #7dff9a55;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.aftersign,
+.inquirysign {
+  transform: translate(-50%, -100%);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.aftersign {
+  display: grid;
+  justify-items: center;
+  padding: 3px 10px 4px;
+  border-radius: 6px;
+  background: #1b0f2e;
+  color: #ff7de0;
+  border: 2px solid #ff7de0;
+  box-shadow: 0 0 10px #ff7de088;
+  font: 700 13px var(--flt-font-display);
+  b {
+    font-style: italic;
+  }
+  small {
+    font: 11px var(--flt-font-mono);
+    color: #ffd0f4;
+  }
+}
+.inquirysign {
+  padding: 3px 8px;
+  background: #fff6c8;
+  color: #3a2a00;
+  border: 2px solid #3a2a00;
+  font: 700 12px var(--flt-font-mono);
+}
+.aftersign {
+  animation: aftersign-buzz 2.4s steps(1) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .aftersign {
+    animation: none;
+  }
+}
+:root[data-motion="reduced"] .aftersign {
+  animation: none;
+}
+@keyframes aftersign-buzz {
+  0%,
+  92%,
+  96% {
+    opacity: 1;
+  }
+  94%,
+  98% {
+    opacity: 0.55;
+  }
+}
