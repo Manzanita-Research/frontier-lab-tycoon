@@ -1,0 +1,70 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "1d06715a6c35b93ad0606520f24e060e534f7494"
+  },
+  "head": {
+    "branch": "flt-14-port-geocities",
+    "sha": "0030d3b",
+    "dirty": true
+  },
+  "seconds": 142.749,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "overview",
+      "skin": "geocities",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/geocities/before/overview@geocities.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/geocities/after/overview@geocities.png",
+      "title": "The campus, mid-morning, paused",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/geocities/compare/overview@geocities.png",
+      "changed": 0.9708024691358025
+    },
+    {
+      "scene": "inspector",
+      "skin": "geocities",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/geocities/before/inspector@geocities.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/geocities/after/inspector@geocities.png",
+      "title": "Tap a researcher: the inspector opens",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/geocities/compare/inspector@geocities.png",
+      "changed": 0.9701805555555556
+    },
+    {
+      "scene": "event",
+      "skin": "geocities",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/geocities/before/event@geocities.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/geocities/after/event@geocities.png",
+      "title": "An event card lands (the Water Discourse)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/geocities/compare/event@geocities.png",
+      "changed": 0.9708935185185186
+    },
+    {
+      "scene": "menu",
+      "skin": "geocities",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/geocities/before/menu@geocities.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/geocities/after/menu@geocities.png",
+      "title": "The Start menu / build bar open",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/geocities/compare/menu@geocities.png",
+      "changed": 0.970832561728395
+    },
+    {
+      "scene": "phone",
+      "skin": "geocities",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/geocities/before/phone@geocities.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/geocities/after/phone@geocities.png",
+      "title": "The same campus on a phone (390x844)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/geocities/compare/phone@geocities.png",
+      "changed": 0.9667221108275611
+    },
+    {
+      "scene": "photo",
+      "skin": "geocities",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/geocities/before/photo@geocities.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/geocities/after/photo@geocities.png",
+      "title": "Photo mode",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/geocities/compare/photo@geocities.png",
+      "changed": 0.9709560185185185
+    }
+  ],
+  "errors": []
+}

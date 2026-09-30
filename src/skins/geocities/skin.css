@@ -16,7 +16,7 @@
   --gc-parch: radial-gradient(rgba(160, 120, 40, 0.12) 1px, transparent 1.5px);
   --gc-rainbow: linear-gradient(90deg, #f00 0 16.6%, #f80 0 33.3%, #fd0 0 50%, #0b0 0 66.6%, #06f 0 83.3%, #80f 0);
   --gc-star: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
-  --gc-bottom: 176px;
+  --gc-bottom: 164px;
   -webkit-font-smoothing: auto;
 
   .hud-host *,
@@ -720,7 +720,7 @@
     list-style: none;
     margin: 8px 0 0;
     padding: 0;
-    max-height: min(170px, 22dvh);
+    max-height: min(124px, 16dvh);
     overflow-y: auto;
     scrollbar-width: thin;
     display: flex;
@@ -1252,7 +1252,7 @@
       justify-content: center;
       flex-wrap: wrap;
     }
-    .choice {
+    .gc-choice {
       justify-content: flex-start;
       gap: 10px;
       text-align: left;
@@ -1841,6 +1841,14 @@
       right: 6px;
       bottom: 40px;
     }
+    .bubble.gc-gb {
+      max-width: 172px;
+      padding: 4px 8px;
+      font-size: 15px;
+      b {
+        font-size: 13px;
+      }
+    }
     .gc-event {
       h2 {
         font-size: 21px;
@@ -2006,7 +2014,7 @@
     .gc-fb,
     .gc-form .gc-fb,
     .gc-badge,
-    .gc-choices .choice {
+    .gc-choices .gc-choice {
       min-height: 44px;
     }
     .gc-b88 {

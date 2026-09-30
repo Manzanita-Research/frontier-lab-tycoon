@@ -28,7 +28,7 @@ export function Toast({ toast, actions }: SlotPropsMap["Toast"]) {
   }
   const close = () => actions.dismissToast(toast.id);
   return (
-    <Pop title={TITLE[toast.tone]} className={`gc-toast ${toast.tone}`} onClose={close}>
+    <Pop title={TITLE[toast.tone]} className={`gc-toast ${toast.tone}`} role="status" onClose={close}>
       <div>{toast.text}</div>
       <button type="button" className="gc-link" onClick={close}>
         Click here!!!
@@ -84,7 +84,7 @@ export function EventCard({ event, actions }: SlotPropsMap["EventCard"]) {
         )}
         <div className="gc-choices">
           {event.choices.map((c, i) => (
-            <button key={c.label} type="button" className="gc-fb choice" onClick={() => actions.choose(event.id, i)}>
+            <button key={c.label} type="button" className="gc-fb gc-choice" onClick={() => actions.choose(event.id, i)}>
               <span className="gc-key">{c.key}</span>
               <span className="tx">
                 <b>{c.label}</b>

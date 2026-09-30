@@ -199,6 +199,8 @@ export function Objectives({ objectives, layout }: SlotPropsMap["Objectives"]) {
   const t = useT();
   // Open on a tall desktop; on a laptop or a phone the construction site keeps to itself until you ask.
   const [open, setOpen] = useState(() => layout.tall && !layout.compact);
+  // The goal to go for next gets the sticker.
+  const next = objectives.items.find((g) => !g.met);
   return (
     <section className="gc-goals">
       <hr className="gc-rainbow" />
@@ -220,7 +222,7 @@ export function Objectives({ objectives, layout }: SlotPropsMap["Objectives"]) {
                   </>
                 ) : (
                   <>
-                    <Fake visited={i % 2 === 1}>{g.label}</Fake> ({g.progress})
+                    <Fake visited={i % 2 === 1}>{g.label}</Fake> ({g.progress}){g.id === next?.id && <New />}
                   </>
                 )}
               </li>

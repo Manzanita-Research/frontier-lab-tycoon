@@ -1,0 +1,52 @@
+{
+  "_": "Extra scenes for the GeoCities port: the standard `skins` set opens on the Launch Livestream card for this seed, so these answer it first. Run: pnpm shots --no-before --skin geocities --scenes-file docs/img/flt-14-ports/geocities/scenes.json --scenes home,home-inspector,... --out docs/img/flt-14-ports/geocities/extra",
+  "scenes": {
+    "home": {
+      "title": "The lab's home page (the Livestream card answered)",
+      "steps": [{ "send": { "type": "CHOOSE", "choiceIndex": 1 } }, { "wait": 900 }]
+    },
+    "home-inspector": {
+      "title": "About Me: tap a researcher",
+      "steps": [{ "send": { "type": "CHOOSE", "choiceIndex": 1 } }, { "select": "researcher:Ada Gradient" }, { "wait": 900 }]
+    },
+    "home-counter": {
+      "title": "Where the hits come from (tap the hit counter)",
+      "steps": [{ "send": { "type": "CHOOSE", "choiceIndex": 1 } }, { "click": ".gc-counter", "optional": true }, { "wait": 500 }]
+    },
+    "home-ring": {
+      "title": "The WebRing: a tool in hand",
+      "steps": [{ "send": { "type": "CHOOSE", "choiceIndex": 1 } }, { "click": "[data-kind=\"hall\"]", "optional": true }, { "wait": 500 }]
+    },
+    "home-egg": {
+      "title": "Best viewed in Netscrape Navigator 3.0 (click the badge)",
+      "steps": [{ "send": { "type": "CHOOSE", "choiceIndex": 1 } }, { "click": ".gc-badge", "optional": true }, { "wait": 500 }]
+    },
+    "era": {
+      "title": "A new era arrives as the prize popup",
+      "query": { "moment": "era" },
+      "steps": [
+        { "send": { "type": "CHOOSE", "choiceIndex": 1 } },
+        { "eval": "(f, w) => { w.capability = 90; for (let i = 0; i < 2; i++) { w.tick = Math.floor(w.tick / 20) * 20 + 19; f.tick(w); } }" },
+        { "wait": 2500 }
+      ]
+    },
+    "phone-home": {
+      "title": "The home page on a phone (390x844)",
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [{ "send": { "type": "CHOOSE", "choiceIndex": 1 } }, { "wait": 900 }]
+    },
+    "phone-inspector": {
+      "title": "About Me, as a phone sheet",
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [{ "send": { "type": "CHOOSE", "choiceIndex": 1 } }, { "select": "researcher:Ada Gradient" }, { "wait": 900 }]
+    },
+    "phone-event": {
+      "title": "The event card on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": []
+    }
+  }
+}
