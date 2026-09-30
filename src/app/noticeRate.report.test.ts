@@ -44,6 +44,8 @@ function measure(speed: 1 | 3 | 10) {
     const actor = yield* createEffectActor(appMachine, { input: { speed, first } });
     const seen = new Set<number>();
     const shown: string[] = [];
+    // Answers to the cards this player clicks (never held back), counted apart from the rest.
+    let replies = 0;
     const startDay = handle.world.day;
     for (let f = 0; f < MINUTES * 60 * FPS; f++) {
       frames.emit(1 / FPS);
@@ -52,13 +54,14 @@ function measure(speed: 1 | 3 | 10) {
       for (const t of c.toasts) if (!seen.has(t.id)) {
         seen.add(t.id);
         shown.push(t.text);
+        if ((t as { reply?: true }).reply) replies++;
       }
       if (c.event) actor.send({ type: "CHOOSE", choiceIndex: 0 });
     }
     const days = handle.world.day - startDay;
     const perMin = (n: number) => (n / MINUTES).toFixed(1);
     console.log(
-      `NOTICE_RATE ${speed}x: ${MINUTES} real min, ${days} game days | sim sent ${raw} (${perMin(raw)}/min) | toasts shown ${shown.length} (${perMin(shown.length)}/min)\n` +
+      `NOTICE_RATE ${speed}x: ${MINUTES} real min, ${days} game days | sim sent ${raw} (${perMin(raw)}/min) | toasts shown ${shown.length} (${perMin(shown.length)}/min), of them replies ${replies} (${perMin(replies)}/min)\n` +
         `  by source: ${JSON.stringify(bySource)}\n  shown: ${JSON.stringify(shown.slice(0, 40))}`,
     );
   }).pipe(Effect.provide(Layer.mergeAll(simLayer(handle), framesManual)));

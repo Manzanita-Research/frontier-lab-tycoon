@@ -34,6 +34,13 @@ for (const speed of speeds) {
   const query = scenario ? `scenario=${scenario}` : `seed=${seed}&warp=${warp}&speed=${speed}&hour=13`;
   await page.goto(`${url}/?debug=1&${query}`, { waitUntil: "load", timeout: 90_000 });
   await page.waitForFunction(() => window.__flt?.app, null, { timeout: 60_000 });
+  // The actor only listens once the app has mounted: keep asking for the speed until it sticks.
+  await page.waitForFunction((speed) => {
+    const { registry, app, send } = window.__flt;
+    if (registry.get(app.snapshot)?.value?.context?.speed === speed) return true;
+    send({ type: "SET_SPEED", speed });
+    return false;
+  }, speed, { timeout: 90_000, polling: 500 });
   await page.evaluate((speed) => {
     const { registry, app, send, sim } = window.__flt;
     window.__seen = new Map();

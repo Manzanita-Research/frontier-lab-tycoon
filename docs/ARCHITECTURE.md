@@ -559,13 +559,16 @@ than 15 s apart.
 
 ### Numbers (1-vCPU Modal box)
 
-Toasts on screen per real minute in `?scenario=midgame`, through the real app machine (`src/app/noticeRate.report.test.ts`,
-3 real minutes a speed, cards answered with their first choice). The sim sends the same toasts on both branches.
+Toasts on screen per real minute in `?scenario=midgame` with the FLT-52 wave merged, before (`flt-wave-2`) and after.
+Logic: the real app machine with manual frames (`src/app/noticeRate.report.test.ts`, 3 real minutes a speed, every card
+answered with its first choice); the sim sends the same toasts on both branches. UI: the built game in headless Chromium
+(`scripts/toast-count.mjs --scenario midgame`, 60 s a speed; SwiftShader only manages about 53 game days a minute at 10x).
 
-| Speed | Game days / min | Sim sends / min | Shown before | Shown after |
-|---|---|---|---|---|
-| 1x | 10 | 15.7 | 13.3 | 2.7 |
-| 3x | 30 | 42.0 | 37.3 | 4.0 |
-| 10x | 100 | 136.3 | 117.0 | 7.3 |
+| Speed | Game days / min | Sim sends / min | Logic: before | Logic: after (of them, answers to your cards) | UI: before | UI: after |
+|---|---|---|---|---|---|---|
+| 1x | 10 | 15.3 | 12.7 | 1.7 (1.0) | 7 | 1 |
+| 3x | 30 | 47.0 | 41.0 | 5.0 (3.0) | 25 | 3 |
+| 10x | 100 | 139.7 | 119.7 | 12.0 (8.3) | 74 | 8 |
 
-At 10x the held `you` toasts are four a minute (the window); the rest are replies to what the player did.
+Everything that is not an answer to a card is held to four a minute by the window, at any speed. The world notices are
+still there, on the ticker.
