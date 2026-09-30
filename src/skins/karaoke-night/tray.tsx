@@ -18,13 +18,14 @@ export function BuildBar({ items, tip, actions }: SlotPropsMap["BuildBar"]) {
           {tip.upkeepText && <small>{tip.upkeepText}</small>}
         </div>
       )}
-      <div className="kn-tray kn-plastic" role="toolbar" aria-label={t("build.menuTitle")}>
+      <div className="kn-tray kn-plastic" role="toolbar" aria-label={t("build.menuTitle")} data-coach="start">
         {items.map((it) => {
           const [face, rim] = buttonColours(it.kind);
           return (
             <button
               key={it.kind}
               type="button"
+              data-coach={`build:${it.kind}`}
               className={`kn-ab ${it.selected ? "on" : ""} ${it.affordable ? "" : "poor"} ${it.race ? "race" : ""}`}
               style={{ "--c": face, "--cd": rim } as CSSProperties}
               onClick={() => actions.place(it.kind)}

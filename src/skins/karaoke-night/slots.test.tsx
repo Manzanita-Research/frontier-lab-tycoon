@@ -93,6 +93,17 @@ describe("Karaoke Night", () => {
     for (const it of items) if (it.hotkey !== null) expect(out).toContain(`<span class="kn-k">${it.hotkey}</span>`);
   });
 
+  it("carries the coach-mark hooks the playable tutorial spotlights, and renders the build items it is given", () => {
+    const docked = html(<Docked vm={vm} actions={actions} />);
+    for (const hook of ["start", "training", "stat:runway", "goals"]) expect(docked).toContain(`data-coach="${hook}"`);
+    for (const it of vm.buildItems) expect(docked).toContain(`data-coach="build:${it.kind}"`);
+    // The training element keeps its hook in both states, and the tray shows exactly the items it is handed (unlocks filter the list upstream).
+    expect(html(<slot.Training training={{ ...vm.training, hasHall: false }} actions={actions} />)).toContain('data-coach="training"');
+    const some = vm.buildItems.slice(0, 3);
+    const tray = html(<slot.BuildBar items={some} tip={null} layout={vm.layout} actions={actions} />);
+    expect(tray.match(/data-coach="build:/g)?.length).toBe(3);
+  });
+
   it("names a toast for how it feels: a release gets the stars", () => {
     const say = (text: string, tone: "good" | "bad" | "joke" | "neutral" | "hint") => html(<slot.Toast toast={{ id: 1, text, tone }} actions={actions} />);
     expect(say("Frontier-2 is out! Launch week: +$70K", "good")).toContain("NEW RELEASE!");

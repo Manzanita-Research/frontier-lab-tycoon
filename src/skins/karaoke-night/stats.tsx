@@ -88,7 +88,7 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
             <Odometer className={`kn-v ${stats.cash.negative ? "hot" : "gold"}`} value={stats.cash.value} format={money} flash={false} />
             <Odometer className={`kn-s ${stats.net.good ? "mint" : "hot"}`} value={stats.net.value} format={perDay} flash={false} />
           </div>
-          <div className="kn-st kn-runway">
+          <div className="kn-st kn-runway" data-coach="stat:runway">
             <span className="kn-l">{t("stats.runway")}</span>
             <span className={`kn-v ${stats.runway.warning ? "hot" : "gold"}`}>{stats.runway.text}</span>
             <span className={`kn-s ${stats.runway.warning ? "hot" : "dim"}`}>{stats.runway.warning ? "LOW!" : "COMFY"}</span>
