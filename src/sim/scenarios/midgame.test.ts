@@ -31,11 +31,13 @@ describe("midgame scenario", () => {
     // FLT-56: the auditors huddle before they leave and the grade lingers, which moves the opening a few days, and the
     // Hearing's twelve new questions change what the senators ask. Phase 2: the motions' passes and fails nudge the
     // factions and last longer.
+    // FLT-69: the Bird App wakes with the campus and posts all 480 days (its aura feeds Hype, visitors and applicants).
+    // With the pack asleep (enableBirdApp a no-op) the World hashes to the previous 083910db / 4b179e05 exactly.
     // Rename (#71): Very Safe SI is Super Super AI (id supersuper) and MetaMeta's full name changed; names and ids are in the World.
     expect({
       untagged: digest({ ...s, toasts: s.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) }),
       full: digest(s),
-    }).toEqual({ untagged: "083910db", full: "4b179e05" }); // were 06ccd627 / 31b29e51 on the train before the rename
+    }).toEqual({ untagged: "aab90a10", full: "0cc57da6" }); // were 083910db / 4b179e05 before FLT-69, 06ccd627 / 31b29e51 on the train before the rename
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);

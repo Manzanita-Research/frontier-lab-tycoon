@@ -191,10 +191,14 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // Merge train 2: FLT-56 (#68) re-recorded these on the old ladder, where its conga line, the auditors' huddle, the
 // Hearing's docket and the motions' stakes all ran in this script. Under FLT-58's ladder none of those packs wakes
 // here, so FLT-56 moves nothing and the train's values stand; its changes are pinned by the midgame digest.
+// FLT-69 wakes the Bird App at Level 3 (1380 / 1340 / 1360 here) and moves the Comms Rep from Level 5 to Level 3, so
+// 1600 on moves on every seed. With `flags.birdappOff` set, and the Level 3 card's two new items ("Comms Rep",
+// "birdapp") left out of the digest, all three seeds reproduce the previous values digit for digit (1600 / 2400 / 3200
+// / 4000: 927ac8ca 5f82d6d0 156351fa 510c4ee9, 7f4c5dc5 4e24ec1b 49356bf5 a8747659, 52d334c3 c82c786a 94e585db 7191754a).
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "c403ae9a", 800: "c9a777bd", 1600: "927ac8ca", 2400: "5f82d6d0", 3200: "156351fa", 4000: "510c4ee9" },
-  2: { 200: "766f3295", 800: "aec1b296", 1600: "7f4c5dc5", 2400: "4e24ec1b", 3200: "49356bf5", 4000: "a8747659" },
-  3: { 200: "b43cb9be", 800: "510d3b99", 1600: "52d334c3", 2400: "c82c786a", 3200: "94e585db", 4000: "7191754a" },
+  1: { 200: "c403ae9a", 800: "c9a777bd", 1600: "d161a2de", 2400: "0d4ab433", 3200: "6a42c70d", 4000: "a8c3c272" },
+  2: { 200: "766f3295", 800: "aec1b296", 1600: "134bb0b4", 2400: "ef092d2e", 3200: "8d0efa6d", 4000: "79752054" },
+  3: { 200: "b43cb9be", 800: "510d3b99", 1600: "5060e350", 2400: "72f059a8", 3200: "2bb3a82e", 4000: "507c167c" },
 };
 
 describe("golden runs", () => {
