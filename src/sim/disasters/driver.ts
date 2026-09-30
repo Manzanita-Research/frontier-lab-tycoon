@@ -18,10 +18,15 @@ import { DISASTERS, disasterById, PACKS } from "./pack";
 import { RISKS, type DisasterDef, type DisasterRun, type DisastersState, type Json, type Risk, type TimedEffect } from "./types";
 import { validatePack } from "./validate";
 
-/** What a new game starts with. Tests start with disasters off (`createInitialState`), and the app sets this on a new lab. */
-// Off until players can see and change the setting (FLT-32 Disasters menu) and the calm-start
-// grace period covers disasters (no random disaster before the first release). Then "rare".
-export const DEFAULT_RISK: Risk = "off";
+/**
+ * What a new game starts with. Tests start with disasters off (`createInitialState`), and the app sets this on a new lab.
+ * The player sees and changes it in the Disasters menu (FLT-32), and the calm start below keeps the first months quiet.
+ */
+export const DEFAULT_RISK: Risk = "rare";
+
+/** The calm start (FLT-32): no random disaster before the lab's first release, nor before this day. The menu still works. */
+export const CALM_START_DAY = 60;
+export const calmStart = (state: GameState): boolean => state.models.length === 0 || state.day < CALM_START_DAY;
 
 /**
  * Odds per day that *something* goes wrong, for a lab of average risk (the mean weight of the disasters that could
@@ -268,7 +273,7 @@ export function dailyDisasters(state: GameState) {
     for (const e of d.effects) if (e.kind === "drain" && live(state, e)) state.compute = Math.max(0, state.compute * (1 - e.value));
     d.effects = d.effects.filter((e) => live(state, e));
   }
-  if (d.risk === "off" || d.runs.length >= MAX_RUNNING[d.risk] || state.day - d.lastStart < SPACING[d.risk] || state.goals.value === "lost") return;
+  if (d.risk === "off" || calmStart(state) || d.runs.length >= MAX_RUNNING[d.risk] || state.day - d.lastStart < SPACING[d.risk] || state.goals.value === "lost") return;
   const quicken = d.risk === "chaos" ? CHAOS_QUICKENING : 1;
   const eligible = definitions().filter(
     (def) =>
