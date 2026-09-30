@@ -18,9 +18,9 @@ Run `MIDGAME_REPORT=1 pnpm vitest run src/sim/scenarios/midgame.test.ts --disabl
 | Cash | $11,051,208 |
 | Fresh rival launch | Superintelligence-Preview-12 (MetaMeta, day 426) |
 | Fresh SOTA claims | 1 |
-| Whole-World FNV-1a golden | 9497cacc |
+| Whole-World FNV-1a golden | 8906ff9f |
 
-Every path connects to the gate; every building is reachable. All campus walkers and staff stand on paths or within a building footprint (the gate counts as a building). The protest apron is paved through player commands; protesters normally may walk on grass. A JSON-cloned World resumes normally. A second full replay deep-equals the first. Existing sim golden digests were not changed. All buildings are repaired at the opening so the outage camera swoop does not obscure the curated camera.
+Every path connects to the gate; every building is reachable. All campus walkers and staff stand on paths or within a building footprint (the gate counts as a building). The protest apron is paved through player commands; protesters normally may walk on grass. A JSON-cloned World resumes normally. A second full replay deep-equals the first. Existing sim golden digests were not changed. The new scenario digest includes FLT-18's registered dormant card arcs after merging main; all reported gameplay numbers are unchanged. All buildings are repaired at the opening so the outage camera swoop does not obscure the curated camera.
 
 Three existing content lines are selected for an opening presentation overlay, anchored to real outdoor speakers. The mutable World retains its natural thoughts; the overlay persists across paused publishes and ordinary sim thoughts return on the first resumed tick:
 
