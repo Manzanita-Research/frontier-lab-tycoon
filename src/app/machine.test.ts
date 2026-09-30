@@ -39,7 +39,7 @@ describe("app machine", () => {
     return Effect.gen(function* () {
       const { actor, sim, pump } = yield* boot();
       yield* pump(40);
-      expect(actor.getSnapshot().matches({ playing: "running" })).toBe(true);
+      expect(actor.getSnapshot().matches({ playing: "paused" })).toBe(true);
       expect(actor.getSnapshot().context.speed).toBe(1);
       expect(sim.world.tick).toBe(0);
       yield* send(actor, { type: "COMMAND", command: { type: "buildPanelOpened" } });
@@ -51,6 +51,10 @@ describe("app machine", () => {
       yield* send(actor, { type: "SELECT", id: sim.world.walkers[0]!.id });
       yield* pump(120);
       expect(sim.world.tick - before).toBeGreaterThanOrEqual(60);
+      const replayAt = sim.world.tick;
+      yield* send(actor, { type: "COMMAND", command: { type: "coachReplay" } });
+      yield* pump(10);
+      expect(sim.world.tick).toBeGreaterThan(replayAt);
       yield* send(actor, { type: "SET_SPEED", speed: 0 });
       yield* pump(4);
       const held = sim.world.tick;
@@ -184,7 +188,7 @@ describe("app machine", () => {
       expect(actor.getSnapshot().context.outcome).toBe("lost");
       yield* send(actor, { type: "NEW_LAB" });
       yield* pump(3);
-      yield* waitFor(actor, (s) => s.matches({ playing: "running" }), { timeout: "1 second" });
+      yield* waitFor(actor, (s) => s.matches({ playing: "paused" }), { timeout: "1 second" });
       expect(actor.getSnapshot().context.speed).toBe(1);
       expect(actor.getSnapshot().context.outcome).toBe("playing");
       expect(sim.world.day).toBeLessThan(2);

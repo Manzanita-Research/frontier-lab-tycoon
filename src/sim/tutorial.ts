@@ -1,3 +1,4 @@
+import { levelOf } from "./progression";
 import { coachCommand } from "./coach";
 import { TUTORIAL, TUTORIAL_DONE, type TutorialStep, type TutorialTarget } from "../content/tutorial";
 import { tutorialMachine } from "./machines/tutorial";
@@ -51,5 +52,6 @@ export function continueTutorial(state: GameState, skip = false) {
 
 /** Pressure waits for a launch and a route to revenue; removing a gateway later cannot switch fires off. */
 export function pressureReady(state: GameState): boolean {
+  if (state.progression) return levelOf(state) >= 3;
   return state.day >= 40 && state.models.length > 0 && (state.flags.firstRevenue !== undefined || state.buildings.some((b) => b.kind === "gateway" && isReachable(state, b)));
 }

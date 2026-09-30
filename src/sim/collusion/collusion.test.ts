@@ -3,9 +3,9 @@ import { createMachine } from "xstate";
 import { getShortestPaths } from "xstate/graph";
 import { eventById } from "../../content/events";
 import { YOU } from "../../content/rivals";
-import { createInitialState } from "../state";
+import { createTestCampus as createInitialState } from "../testkit";
 import { applyNow, tick } from "../tick";
-import { answer, perfBudget, runDays } from "../testkit";
+import { answer, perfBudget, runDays, readyForPressure } from "../testkit";
 import { createRng } from "../rng";
 import { hire, atDivert } from "../staff";
 import { dailyEvents, openEventOf } from "../events";
@@ -26,6 +26,7 @@ const day = (n: number, more: Partial<SwarmDay> = {}): SwarmDay => ({ type: "DAY
 function staged(stage: SwarmStage = "spreading") {
   const s = createInitialState(3);
   enableCollusion(s);
+  readyForPressure(s);
   s.day = 120; s.tick = 2400;
   s.collusion!.machine = { value: stage, context: { ...freshSwarm().context, seededDay: 110, score: stage === "organized" ? 70 : 20, noticed: true } };
   return s;

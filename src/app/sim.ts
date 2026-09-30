@@ -79,11 +79,13 @@ export class SimHandle {
     this.openingThoughts = undefined;
     const risk = this.world.disasters.risk;
     const collusion = this.world.collusion?.enabled;
+    const leapfrogOff = this.world.flags.leapfrogOff;
+    const papersOff = this.world.flags.papersOff;
     this.world = createInitialState(seed);
     setRisk(this.world, risk);
-    if (this.leapfrog) enableLeapfrog(this.world);
+    if (leapfrogOff) this.world.flags.leapfrogOff = leapfrogOff;
     if (collusion) enableCollusion(this.world);
-    if (this.papers) enablePapers(this.world);
+    if (papersOff) this.world.flags.papersOff = papersOff;
     this.alpha = 1;
   }
 

@@ -1,8 +1,9 @@
 // Evidence harness: actual ticks and commands, every card answered. No forced stage or exposure day.
 import { BUILDINGS, type PlaceableKind } from "../../content/buildings";
+import { pendingConfirmOf } from "../guardrails";
 import { openEventOf } from "../events";
 import { outcomeOf } from "../goals";
-import { createInitialState } from "../state";
+import { createTestCampus as createInitialState } from "../testkit";
 import { answer, countOf, findSpot, layPaths } from "../testkit";
 import { tick, TICKS_PER_DAY } from "../tick";
 import type { Command } from "../commands";
@@ -23,7 +24,9 @@ export function runCollusionYear(seed: number, policy: Policy) {
   for (let i = 0; s.day < 365 && outcomeOf(s) !== "lost" && i < 365 * TICKS_PER_DAY * 3; i++) {
     let commands: Command[] = [];
     const open = openEventOf(s);
-    if (open) {
+    const pending = pendingConfirmOf(s);
+    if (pending) commands = [s.cash >= pending.cost + 400_000 ? { ...pending.command, confirmed: true } : { type: "cancelConfirm" }];
+    else if (open) {
       let pick = open.id === "computeAuction" ? 1 : open.id === "waterDiscourse" && s.cash > 900_000 ? 1 : 0;
       if (open.id === SIGN_CARD) {
         firstSign ??= s.day;

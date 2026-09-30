@@ -78,12 +78,24 @@
       "collusion-sign",
       "collusion-phone",
       "collusion-scandal"
+    ],
+    "coach": [
+      "coach-path",
+      "coach-hall",
+      "coach-phone"
     ]
   },
   "scenes": {
     "midgame": {
       "title": "FLT-48 Part A: the scripted mid-game campus, paused near Y2 Mar",
-      "query": { "scenario": "midgame", "warp": null, "seed": 48, "focus": "11.5,14.5", "zoom": 43, "skin": "frontier-95" },
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
       "steps": []
     },
     "overview": {
@@ -463,6 +475,140 @@
       "steps": [
         {
           "wait": 800
+        }
+      ]
+    },
+    "coach-path": {
+      "title": "Coach suggests a connected path from the gate",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "11,19",
+        "zoom": 55
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        }
+      ]
+    },
+    "coach-hall": {
+      "title": "Coach suggests a Training Hall beside the paid path",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "11,19",
+        "zoom": 55
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 17
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 16
+            }
+          }
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "coach-phone": {
+      "title": "Coach path anchors on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "11,19",
+        "zoom": 29
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
         }
       ]
     }

@@ -9,7 +9,7 @@ import { outcomeOf } from "../../goals";
 import type { Command } from "../../commands";
 import { slopStats } from "../../slop";
 import { staffOf } from "../../staff";
-import { createInitialState } from "../../state";
+import { createTestCampus as createInitialState } from "../../testkit";
 import { countOf, findSpot, layPaths } from "../../testkit";
 import { TICKS_PER_DAY, tick } from "../../tick";
 import type { GameState } from "../../types";

@@ -25,7 +25,7 @@ export function progressOf(s: GameState): ProgressView {
   const active = rows(s).find((r) => r.level === level)!;
   const { current } = goalValue(s);
   return { level, levelName: active.name,
-    unlocked: { buildings: unlockedRows(s).flatMap((r) => [...r.buildings]), staff: unlockedRows(s).flatMap((r) => [...r.staff]), systems: unlockedRows(s).flatMap((r) => [...r.systems]) },
+    unlocked: { buildings: [...new Set([...unlockedRows(s).flatMap((r) => [...r.buildings]), ...Object.keys(BUILDINGS).filter((k) => level >= 4 && s.flags[`unlocked:${k}`] !== undefined) as BuildingKind[]])], staff: unlockedRows(s).flatMap((r) => [...r.staff]), systems: unlockedRows(s).flatMap((r) => [...r.systems]) },
     goal: { text: active.goal.text, current, target: active.goal.target },
     teasers: rows(s).filter((r) => r.level > level).flatMap((r) => [...r.buildings, ...r.staff].map(() => ({ label: "???", hint: active.goal.text }))),
   };

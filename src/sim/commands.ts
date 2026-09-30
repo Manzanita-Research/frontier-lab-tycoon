@@ -117,7 +117,7 @@ export function applyCommands(state: GameState, commands: readonly Command[], rn
       case "coachSkip": case "coachReplay": case "coachClick":
         coachCommand(state, c.type); break;
       case "dismissUnlock": state.unlockCards?.shift(); break;
-      case "buildPanelOpened": state.flags.coachBuildOpened = state.tick; break;
+      case "buildPanelOpened": state.flags.started ??= state.tick; state.flags.coachBuildOpened = state.tick; break;
       case "placePath":
         if (canPlace(state, "path", c.x, c.z).ok && guardSpending(state, c)) {
           state.cash -= PATH_PRICE;

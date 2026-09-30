@@ -1,3 +1,4 @@
+import { enableCollusion } from "./collusion/driver";
 import { PROGRESSION } from "../content/progression";
 import { makeSnapshot } from "../app/hud";
 import { canPlace } from "./commands";
@@ -7,7 +8,7 @@ import { createInitialState } from "./state";
 import { applyNow, tick } from "./tick";
 import { createRng } from "./rng";
 import { seedWalkers } from "./walkers";
-import { rectContains } from "./pathfind";
+import { rectContains, routeToRect } from "./pathfind";
 
 describe("the playable ladder", () => {
   it("gates placement and hiring, then unlocks five levels and queues every card", () => {
@@ -35,9 +36,10 @@ describe("the playable ladder", () => {
   });
   it("keeps locked systems asleep, and visitors wait for a gateway", () => {
     const s = createInitialState(1); s.day = 100; s.waterDiscourse = 80; s.disasters.risk = "chaos";
-    const before = structuredClone({ race: s.race, leapfrog: s.leapfrog, disasters: s.disasters });
+    enableCollusion(s);
+    const before = structuredClone({ race: s.race, leapfrog: s.leapfrog, disasters: s.disasters, collusion: s.collusion });
     for (let i = 0; i < 100; i++) tick(s);
-    expect({ race: s.race, leapfrog: s.leapfrog, disasters: s.disasters }).toEqual(before);
+    expect({ race: s.race, leapfrog: s.leapfrog, disasters: s.disasters, collusion: s.collusion }).toEqual(before);
     expect(s.walkers.some((w) => w.kind === "visitor" || w.kind === "protester")).toBe(false);
     expect(s.slop.some(Boolean)).toBe(false); expect(s.buildings[0]?.reliability).toBe(1);
     expect(Object.values(s.arcs).some((a) => a.value === "cardOpen")).toBe(false);
@@ -63,6 +65,15 @@ describe("people have somewhere to be", () => {
       }
     }
     expect(moved).toBe(true);
+  });
+  it("gives each walker its own route and invalidates destination routes after construction", () => {
+    const s = createInitialState(1), cluster = s.buildings[0]!;
+    const first = routeToRect(s, 11.5, 22.5, cluster)!;
+    const expected = structuredClone(first);
+    first[0]![0] = 99; first.shift();
+    expect(routeToRect(s, 11.5, 22.5, cluster)).toEqual(expected);
+    applyNow(s, [{ type: "bulldoze", x: 11, z: 20 }]);
+    expect(routeToRect(s, 11.5, 22.5, cluster)).toBeNull();
   });
   it("patrols the fence and waits in a comms break spot until protesters exist", () => {
     const s = createInitialState(1); delete s.progression;

@@ -165,9 +165,9 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // wait for earned levels; the busy-player script first builds a Hall so it can earn access to a Gateway.
 // Path exploration and the Comms break post change deterministic route draws from this new opening.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "d10fec8f", 800: "fa914dd6", 1600: "6252c4b4", 2400: "d98bad07", 3200: "210fd155", 4000: "fda3baff" },
-  2: { 200: "475146e8", 800: "6781531f", 1600: "fa99af05", 2400: "1e8846e7", 3200: "e43ee79f", 4000: "e1b6e66f" },
-  3: { 200: "9a7c3fc3", 800: "9ade2350", 1600: "86a06e4e", 2400: "969fe608", 3200: "33a87d11", 4000: "97bbc578" },
+  1: { 200: "a559ea28", 800: "ed628bb9", 1600: "bef75afa", 2400: "a01d1390", 3200: "7a3d787d", 4000: "6a0686fc" },
+  2: { 200: "e548b1af", 800: "552cae60", 1600: "3f400add", 2400: "2868f2da", 3200: "5080b683", 4000: "c0ae2826" },
+  3: { 200: "58bb415c", 800: "920699d6", 1600: "d35c1c03", 2400: "02ba6f9a", 3200: "bcfd9788", 4000: "9ec9a141" },
 };
 
 describe("golden runs", () => {

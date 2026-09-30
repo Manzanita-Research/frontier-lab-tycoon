@@ -162,7 +162,7 @@ export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO
     papers: papersView(s),
     ops: opsView(s),
     assistant: assistantOf(s),
-    firstBuildPending: !!s.coach && s.flags.coachBuildOpened === undefined && s.flags.firstBuild === undefined,
+    firstBuildPending: !!s.coach && s.flags.started === undefined && s.flags.firstBuild === undefined,
     pendingConfirm: pendingConfirmOf(s),
     warnings: persistentWarnings(s),
     releaseGoal: releaseGoalText(s),

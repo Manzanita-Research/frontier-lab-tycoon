@@ -219,7 +219,7 @@ function startLeave(state: GameState, w: Walker) {
 function wander(state: GameState, w: Walker, rng: Rng) {
   w.targetId = TARGET_WANDER;
   w.route = [];
-  w.timer = 1;
+  w.timer = state.progression ? 1 : rng.int(6, 16);
   const tiles = reachablePathTiles(state);
   if (tiles.length === 0) return;
   const away = tiles.filter(([x, z]) => Math.abs(x + 0.5 - w.x) + Math.abs(z + 0.5 - w.z) >= 2);
@@ -231,7 +231,7 @@ function wander(state: GameState, w: Walker, rng: Rng) {
 /** The world work behind a PICK: route to a building, or wander when there is nowhere to go. */
 function pick(state: GameState, w: Walker, rng: Rng): "seeking" | "wandering" {
   const target = chooseTarget(state, w, rng);
-  const stroll = w.kind === "researcher" && w.need === "work" && hostsFor(state, w.kind).filter((b) => b.kind === "cluster" || b.kind === "hall").length < 2 && rng.chance(0.35);
+  const stroll = !!state.progression && state.progression.context.level <= 2 && w.kind === "researcher" && w.need === "work" && hostsFor(state, w.kind).filter((b) => b.kind === "cluster" || b.kind === "hall").length < 2 && rng.chance(0.35);
   if (!stroll && target && startRoute(state, w, target)) return "seeking";
   w.need = "";
   wander(state, w, rng);
@@ -561,9 +561,10 @@ function spawnFromGate(state: GameState, kind: "visitor" | "researcher", rng: Rn
   const linked = getReach(state).tiles;
   const mouth = entrances(state, state.gate).filter((e) => linked[tileIndex(state, e.x, e.z)]);
   if (targets.length === 0 || mouth.length === 0) return null;
-  const e = rng.pick(mouth);
-  const w = newWalker(state, kind, e.x + 0.5, e.z + 0.5, rng);
+  const g = state.gate;
+  const w = newWalker(state, kind, g.x + g.w / 2, g.z + 0.6, rng);
   const target = kind === "visitor" ? (chooseTarget(state, w, rng) ?? rng.pick(targets)) : rng.pick(targets);
+  const e = rng.pick(mouth);
   const route = routeToRect(state, e.x + 0.5, e.z + 0.5, target);
   if (!route) return null;
   w.route = route;
