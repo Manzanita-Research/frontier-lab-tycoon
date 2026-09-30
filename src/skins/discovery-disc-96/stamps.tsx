@@ -1,7 +1,8 @@
 // The Build Stamps: a Kid Pix-style tray of rubber stamps, one per thing you can build.
 import { useState, type ReactNode } from "react";
-import { useCoach, useT } from "../context";
+import { RunBox, useCoach, useStartMenu, useT, type StartView } from "../kit";
 import type { SlotPropsMap } from "../types";
+import type { BuildItemVM, WidgetVM } from "../../ui/hud/types";
 import { Icon } from "./art";
 
 const INK = "#111";
@@ -92,6 +93,20 @@ const ART: Record<string, ReactNode> = {
       <circle cx="16" cy="21" r="2" fill={INK} />
     </>
   ),
+  exhibits: (
+    <>
+      <path d="M3 12 16 4l13 8Z" fill="#E4002B" strokeWidth="2.5" {...S} />
+      <path d="M5 12h22v3H5ZM3 26h26v3H3Z" fill="#fff" strokeWidth="2.5" {...S} />
+      <path d="M8.5 15v11M14 15v11M18 15v11M23.5 15v11" fill="none" strokeWidth="2.5" {...S} />
+    </>
+  ),
+  goto: (
+    <>
+      <circle cx="16" cy="16" r="12" fill="#7fd0ff" strokeWidth="2.5" {...S} />
+      <path d="M21 11 13.5 13.5 11 21l7.5-2.5Z" fill="#E4002B" strokeWidth="2.2" {...S} />
+    </>
+  ),
+  back: <path d="M18 5 7 16l11 11v-6h8V11h-8Z" fill="#1FA24A" strokeWidth="2.5" {...S} />,
   help: (
     <>
       <circle cx="16" cy="16" r="12" fill="#FFD400" strokeWidth="2.5" {...S} />
@@ -124,56 +139,117 @@ export function StampArt({ kind }: { kind: string }) {
   );
 }
 
-/** The stamps in the open tray, then the ones still in the box (locked, with what unlocks them), then Help. */
-export function Stamps({ items, teasers, onPick, onHelp, actions }: { items: SlotPropsMap["BuildBar"]["items"]; teasers: NonNullable<SlotPropsMap["BuildBar"]["teasers"]>; onPick: () => void; onHelp: () => void; actions: SlotPropsMap["BuildBar"]["actions"] }) {
+/**
+ * The open tray. The top row is the tools (Path, Bulldoze), EXHIBITS (Facilities: the buildings, one labelled drawer per
+ * group, then the ones still in the box) and GO TO… (the widgets, in a Run box), then Help.
+ */
+export function Stamps({ items, teasers, widgets = [], onPick, onHelp, actions, view }: { items: SlotPropsMap["BuildBar"]["items"]; teasers: NonNullable<SlotPropsMap["BuildBar"]["teasers"]>; widgets?: WidgetVM[]; onPick: () => void; onHelp: () => void; actions: SlotPropsMap["BuildBar"]["actions"]; view?: StartView }) {
   const t = useT();
   const coach = useCoach();
+  const menu = useStartMenu(items, view);
+  const stamp = (it: BuildItemVM) => (
+    <button
+      key={it.kind}
+      type="button"
+      {...coach.attrs(`build:${it.kind}`)}
+      className={`dd-stamp ${it.selected ? "on" : ""} ${it.affordable ? "" : "poor"} ${it.race ? "race" : ""} ${it.panel ? "dd-staff-tool" : ""}`}
+      onClick={() => {
+        actions.place(it.kind);
+        onPick();
+      }}
+      disabled={!it.affordable && !it.selected}
+      aria-pressed={it.selected}
+      title={it.name}
+    >
+      {it.hotkey !== null && <span className="dd-key">{it.hotkey}</span>}
+      <StampArt kind={it.kind} />
+      <span className="dd-sname">{it.short}</span>
+      <span className={`dd-price ${it.free ? "free" : ""}`}>{it.isBulldoze ? "½" : it.kind === "staff" ? t("staff.hire") : it.free ? t("build.free") : it.priceText}</span>
+      {it.race && <span className="dd-prize" aria-hidden><Icon name="trophy" size={14} /></span>}
+    </button>
+  );
+  const back = (
+    <button type="button" className="dd-stamp dd-back-stamp" onClick={() => menu.setView("top")}>
+      <StampArt kind="back" />
+      <span className="dd-sname">{t("run.back")}</span>
+    </button>
+  );
   return (
-    <div className="dd-tray-row" role="toolbar" aria-label={t("build.menuTitle")}>
-            {items.map((it) => (
-              <button
-                key={it.kind}
-                type="button"
-                {...coach.attrs(`build:${it.kind}`)}
-                className={`dd-stamp ${it.selected ? "on" : ""} ${it.affordable ? "" : "poor"} ${it.race ? "race" : ""} ${it.panel ? "dd-staff-tool" : ""}`}
-                onClick={() => {
-                  actions.place(it.kind);
-                  onPick();
-                }}
-                disabled={!it.affordable && !it.selected}
-                aria-pressed={it.selected}
-                title={it.name}
-              >
-                {it.hotkey !== null && <span className="dd-key">{it.hotkey}</span>}
-                <StampArt kind={it.kind} />
-                <span className="dd-sname">{it.short}</span>
-                <span className={`dd-price ${it.free ? "free" : ""}`}>{it.isBulldoze ? "½" : it.kind === "staff" ? t("staff.hire") : it.free ? t("build.free") : it.priceText}</span>
-                {it.race && <span className="dd-prize" aria-hidden><Icon name="trophy" size={14} /></span>}
-              </button>
-            ))}
-            {/* Not yet: stamps still in the box, and what unlocks them. */}
-            {teasers.map((teaser, i) => (
-              <div key={`${teaser.label}-${i}`} className="dd-stamp locked" aria-disabled title={`${t("build.locked")}: ${teaser.hint}`}>
-                <StampArt kind="locked" />
-                <span className="dd-sname">{teaser.label}</span>
-                <span className="dd-price">{teaser.hint}</span>
+    <div className={`dd-tray-row view-${menu.view}`} role="toolbar" aria-label={t("build.menuTitle")}>
+      {menu.view === "top" && (
+        <>
+          {menu.tools.map(stamp)}
+          <button type="button" className="dd-stamp dd-folder-stamp" data-testid="start-facilities" onClick={() => menu.setView("facilities")} {...menu.facilities}>
+            <StampArt kind="exhibits" />
+            <span className="dd-sname">{t("build.facilities")}</span>
+            <span className="dd-price">{t("build.facilitiesCount", { n: menu.count })}</span>
+          </button>
+          <button
+            type="button"
+            className="dd-stamp dd-folder-stamp"
+            data-testid="start-run"
+            onClick={() => {
+              if (items.some((it) => it.selected && !it.panel)) actions.place(null);
+              menu.setView("run");
+            }}
+          >
+            <StampArt kind="goto" />
+            <span className="dd-sname">{t("build.run")}</span>
+            <span className="dd-price">{t("build.runCount", { n: widgets.length })}</span>
+          </button>
+          <button type="button" className="dd-stamp dd-help-stamp" onClick={onHelp}>
+            <StampArt kind="help" />
+            <span className="dd-sname">{t("build.help")}</span>
+            <span className="dd-price">{t("help.title")}</span>
+          </button>
+        </>
+      )}
+      {menu.view === "facilities" && (
+        <>
+          {back}
+          {menu.groups.map((g) => (
+            <div key={g.id} className="dd-drawer" role="group" aria-label={t(`build.group.${g.id}`)}>
+              <span className="dd-drawer-name">{t(`build.group.${g.id}`)}</span>
+              <div className="dd-drawer-stamps">{g.items.map(stamp)}</div>
+            </div>
+          ))}
+          {/* Not yet: stamps still in the box, and what unlocks them. */}
+          {teasers.length > 0 && (
+            <div className="dd-drawer" role="group" aria-label={t("build.locked")}>
+              <span className="dd-drawer-name">{t("build.locked")}</span>
+              <div className="dd-drawer-stamps">
+                {teasers.map((teaser, i) => (
+                  <div key={`${teaser.label}-${i}`} className="dd-stamp locked" aria-disabled title={`${t("build.locked")}: ${teaser.hint}`}>
+                    <StampArt kind="locked" />
+                    <span className="dd-sname">{teaser.label}</span>
+                    <span className="dd-price">{teaser.hint}</span>
+                  </div>
+                ))}
               </div>
-            ))}
-            <button
-              type="button"
-              className="dd-stamp dd-help-stamp"
-              onClick={onHelp}
-            >
-              <StampArt kind="help" />
-              <span className="dd-sname">{t("build.help")}</span>
-              <span className="dd-price">{t("help.title")}</span>
-            </button>
-          </div>
+            </div>
+          )}
+        </>
+      )}
+      {menu.view === "run" && (
+        <>
+          {back}
+          <RunBox
+            className="dd-run"
+            placeholder="thoughts.txt"
+            widgets={widgets}
+            onRun={(id) => {
+              onPick();
+              actions.openWidget(id);
+            }}
+          />
+        </>
+      )}
+    </div>
   );
 }
 
 /** The tray: a starry blue box of rubber stamps behind a red "BUILD STAMPS" tab you press to open it. Number keys 1 to 9 pick a stamp. */
-export function BuildBar({ items, tip, teasers = [], layout, actions }: SlotPropsMap["BuildBar"]) {
+export function BuildBar({ items, tip, teasers = [], widgets = [], layout, actions }: SlotPropsMap["BuildBar"]) {
   const t = useT();
   const coach = useCoach();
   const [open, setOpen] = useState(false);
@@ -196,7 +272,7 @@ export function BuildBar({ items, tip, teasers = [], layout, actions }: SlotProp
           {t("build.menuTitle")}
           {held && !open ? ` · ${held.short}` : ""}
         </button>
-        {open && <Stamps items={items} teasers={teasers} onPick={() => toggle(false)} onHelp={() => { actions.openHelp(); toggle(false); }} actions={actions} />}
+        {open && <Stamps items={items} teasers={teasers} widgets={widgets} onPick={() => toggle(false)} onHelp={() => { actions.openHelp(); toggle(false); }} actions={actions} />}
       </div>
     </div>
   );

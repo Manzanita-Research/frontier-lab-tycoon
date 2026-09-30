@@ -23,7 +23,7 @@ describe("facilityGroups", () => {
 
 describe("runFile", () => {
   it("opens a widget by file, bare name, title, alias or a long enough prefix", () => {
-    for (const typed of ["thoughts.txt", "THOUGHTS", "  thoughts.exe ", "labprops.cpl", "C:\\WINDOWS\\drama.exe", "Today's Drama", "skin", "mod"]) {
+    for (const typed of ["thoughts.txt", "THOUGHTS", "  thoughts.exe ", "labprops.cpl", "C:\\WINDOWS\\drama.exe", "http://www.drama.html/", "Today's Drama", "skin", "mod"]) {
       expect(runFile(typed, widgets).ok, typed).toBe(true);
     }
     expect(runFile("tho", widgets)).toMatchObject({ ok: true, widget: { id: "thoughts" } });

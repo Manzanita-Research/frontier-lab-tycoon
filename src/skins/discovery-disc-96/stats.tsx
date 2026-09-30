@@ -1,7 +1,7 @@
 // The banner and the clip-art stickers: Vibes is a gold star, cash a green circle, runway a "hurry!" circle, and
 // capability, hype, the Arena and the R&D multiplier are pills and bursts stuck on at odd angles.
 import { useEffect, useRef, useState } from "react";
-import { ALL_VISIBLE, Odometer, money } from "../kit";
+import { ALL_VISIBLE, Odometer, money, useWidget } from "../kit";
 import { useCoach, useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import type { StatsVM } from "../../ui/hud/types";
@@ -73,6 +73,7 @@ export function Stats({ stats, layout, visible = ALL_VISIBLE, actions }: SlotPro
   const coach = useCoach();
   const compact = layout.compact;
   const [expanded, setExpanded] = useState(false);
+  useWidget(["properties", "finance"], () => setExpanded(true));
   const rw = stats.runway;
   const a = stats.arena;
   const months = rw.months === null ? "∞" : rw.months.toFixed(1);

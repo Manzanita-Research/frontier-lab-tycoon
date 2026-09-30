@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BenchTable } from "../../kit";
+import { BenchTable, useWidget } from "../../kit";
 import { useT } from "../../context";
 import type { SlotPropsMap } from "../../types";
 
@@ -7,6 +7,7 @@ import type { SlotPropsMap } from "../../types";
 export function Benchmarks({ leapfrog, layout }: SlotPropsMap["Benchmarks"]) {
   const t = useT();
   const [open, setOpen] = useState(!layout.compact);
+  useWidget("benchmarks", () => setOpen(true));
   const lead = leapfrog.rows.find((r) => r.you);
   const sub = `${lead ? `${lead.wins} SOTA · ` : ""}${layout.compact ? `${t("voice.title")} ${leapfrog.voice.yoursText}` : leapfrog.nextText}`;
   return (

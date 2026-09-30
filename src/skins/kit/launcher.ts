@@ -86,13 +86,20 @@ const REPLIES: readonly [RegExp, string, string][] = [
   [/^(hello|hi|help me)$/, "Run", "Hello. This is a Run box, not a chat window. That's next quarter."],
 ];
 
-const norm = (s: string) => s.trim().toLowerCase().replace(/^["']|["']$/g, "").replace(/^[a-z]:[\\/]+(windows[\\/]+)?/, "");
+const norm = (s: string) =>
+  s
+    .trim()
+    .toLowerCase()
+    .replace(/^["']|["']$/g, "")
+    .replace(/^(https?:\/\/)?(www\.)?/, "")
+    .replace(/\/+$/, "")
+    .replace(/^[a-z]:[\\/]+(windows[\\/]+)?/, "");
 
 /** What a Run box does with `typed`: open a widget (by file, name, id or alias) or say why not. */
 export function runFile(typed: string, widgets: readonly WidgetVM[]): RunResult {
   const q = norm(typed);
   if (!q) return { ok: false, title: "Run", text: "Type the name of a program, folder or widget, and the lab will open it for you." };
-  const bare = q.replace(/\.(exe|com|txt|doc|xls|cpl|hlp|bat|lnk)$/, "");
+  const bare = q.replace(/\.(exe|com|txt|doc|xls|cpl|hlp|bat|lnk|html?)$/, "");
   const hit =
     widgets.find((w) => w.file === q) ??
     widgets.find((w) => w.id === bare || w.file.replace(/\.\w+$/, "") === bare || w.name.toLowerCase() === bare || w.aliases.includes(bare)) ??
