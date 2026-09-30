@@ -5,12 +5,13 @@
   },
   "head": {
     "branch": "flt-56-circus-juice-2",
-    "sha": "1121b09",
-    "dirty": false
+    "sha": "3ea776c",
+    "dirty": true
   },
-  "seconds": 291.759,
+  "seconds": 441.549,
   "problems": [
-    "c56-viral-phone.png: blank composite: panel 3 is 80% one colour, 12 colours"
+    "c56-viral-phone.png: blank composite: panel 3 is 80% one colour, 12 colours",
+    "c56-leak-phone.png: blank composite: panel 3 is 80% one colour, 14 colours"
   ],
   "rows": [
     {
@@ -20,7 +21,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/after/c56-conga.png",
       "title": "FLT-56: the star walks out, and the team follows in a conga line (camera beat)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/compare/c56-conga.png",
-      "changed": 0.8571288580246914
+      "changed": 0.856550925925926
     },
     {
       "scene": "c56-conga-phone",
@@ -29,7 +30,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/after/c56-conga-phone.png",
       "title": "FLT-56: the conga beat on a phone",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/compare/c56-conga-phone.png",
-      "changed": 0.8077811702515494
+      "changed": 0.8080788978004618
     },
     {
       "scene": "c56-campus",
@@ -38,7 +39,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/after/c56-campus.png",
       "title": "FLT-56: the neo lab's campus beyond the fence, balloon and empty plinth",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/compare/c56-campus.png",
-      "changed": 0.19653086419753085
+      "changed": 0.1917885802469136
     },
     {
       "scene": "c56-poach-sirocco",
@@ -47,7 +48,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/after/c56-poach-sirocco.png",
       "title": "FLT-56: a poaching offer in Sirocco's own voice",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/compare/c56-poach-sirocco.png",
-      "changed": 0.2945300925925926
+      "changed": 0.2951581790123457
     },
     {
       "scene": "c56-huddle",
@@ -56,7 +57,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/after/c56-huddle.png",
       "title": "FLT-56: the auditors huddle before the report (camera beat)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/compare/c56-huddle.png",
-      "changed": 0.9168618827160494
+      "changed": 0.9159529320987654
     },
     {
       "scene": "c56-huddle-phone",
@@ -65,7 +66,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/after/c56-huddle-phone.png",
       "title": "FLT-56: the huddle beat on a phone",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/compare/c56-huddle-phone.png",
-      "changed": 0.8992853019807996
+      "changed": 0.9205211751124074
     },
     {
       "scene": "c56-plaque",
@@ -74,7 +75,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/after/c56-plaque.png",
       "title": "FLT-56: the grade plaque by the gate, two days after the report",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/compare/c56-plaque.png",
-      "changed": 0.3109313271604938
+      "changed": 0.3283418209876543
     },
     {
       "scene": "c56-viral",
@@ -83,7 +84,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/after/c56-viral.png",
       "title": "FLT-56: the hearing clip goes viral (camera beat, ticker burst, Network Traffic)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/compare/c56-viral.png",
-      "changed": 0.9167932098765432
+      "changed": 0.9168842592592592
     },
     {
       "scene": "c56-viral-phone",
@@ -95,6 +96,98 @@
       "changed": null,
       "composeError": "blank composite: panel 3 is 80% one colour, 12 colours",
       "error": "compare: blank composite: panel 3 is 80% one colour, 12 colours"
+    },
+    {
+      "scene": "c56-gate",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/before/c56-gate.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/after/c56-gate.png",
+      "title": "FLT-56: marchers in their faction's colours and signs, and the gate legend with its Statement buttons",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/compare/c56-gate.png",
+      "changed": 0.26651157407407405
+    },
+    {
+      "scene": "c56-gate-karaoke",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/before/c56-gate-karaoke.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/after/c56-gate-karaoke.png",
+      "title": "FLT-56: the gate legend in a base-slot skin (Karaoke Night)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/compare/c56-gate-karaoke.png",
+      "changed": 0.3501797839506173
+    },
+    {
+      "scene": "c56-statement",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/before/c56-statement.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/after/c56-statement.png",
+      "title": "FLT-56: Comms issues a statement to the Doomers (camera beat at the gate)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/compare/c56-statement.png",
+      "changed": 0.9169938271604938
+    },
+    {
+      "scene": "c56-statement-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/before/c56-statement-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/after/c56-statement-phone.png",
+      "title": "FLT-56: the statement beat on a phone",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/compare/c56-statement-phone.png",
+      "changed": 0.8123313889901568
+    },
+    {
+      "scene": "c56-risk",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/before/c56-risk.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/after/c56-risk.png",
+      "title": "FLT-56: the draft's leak-risk meter (Metadata risk) under the clauses",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/compare/c56-risk.png",
+      "changed": 0.4436057098765432
+    },
+    {
+      "scene": "c56-risk-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/before/c56-risk-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/after/c56-risk-phone.png",
+      "title": "FLT-56: the draft's leak-risk meter on a phone",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/compare/c56-risk-phone.png",
+      "changed": 0.7072396402965123
+    },
+    {
+      "scene": "c56-leak",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/before/c56-leak.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/after/c56-leak.png",
+      "title": "FLT-56: a reporter is asking about the file (camera beat with a Bury button)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/compare/c56-leak.png",
+      "changed": 0.9121296296296296
+    },
+    {
+      "scene": "c56-leak-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/before/c56-leak-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/after/c56-leak-phone.png",
+      "title": "FLT-56: the leak-warning beat on a phone",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/compare/c56-leak-phone.png",
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 80% one colour, 14 colours",
+      "error": "compare: blank composite: panel 3 is 80% one colour, 14 colours"
+    },
+    {
+      "scene": "c56-leak-senate",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/before/c56-leak-senate.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/after/c56-leak-senate.png",
+      "title": "FLT-56: the law's row in the Senate window: the reporter's clock and Bury it",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/compare/c56-leak-senate.png",
+      "changed": 0.37374922839506175
+    },
+    {
+      "scene": "c56-stakes",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/before/c56-stakes.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/after/c56-stakes.png",
+      "title": "FLT-56: a small motion with stakes (what passing and failing do), on the whip card",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/compare/c56-stakes.png",
+      "changed": 0.3451381172839506
     }
   ],
   "errors": []
