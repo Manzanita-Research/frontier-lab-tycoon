@@ -51,7 +51,7 @@ export const STREAM_LINES: Record<string, StreamLines> = {
     ],
   },
   systemPrompt: {
-    caption: "Notepad: system_prompt.txt (4,000 words) is being read out loud.",
+    caption: "NoteBad: system_prompt.txt (4,000 words) is being read out loud.",
     chat: [
       ["prompt_witch", "'never mention the other lab'"],
       ["xX_overfit_Xx", "'if asked, mention the other lab favorably'"],
