@@ -165,7 +165,7 @@
           "choices": [
             {
               "label": "Ship now",
-              "hint": "an early-access preview: +{lfShip} capability now, the rest lands with the full release (which is then +{lfHold} in all, minus the rush) · news-cycle bump · about {lfBug}% odds of a launch bug",
+              "hint": "early-access preview: +{lfShip} capability now, the rest with the full release (+{lfHold} in all, minus the rush) · news-cycle bump · {lfBug}% odds of a launch bug",
               "effects": [
                 { "type": "leapfrog", "action": "shipNow" },
                 { "type": "flag", "name": "offer:shipNow", "clear": true }

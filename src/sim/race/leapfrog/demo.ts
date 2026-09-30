@@ -38,6 +38,7 @@ function established(s: GameState) {
   s.vibes = { ...s.vibes, value: 560 };
   s.capability = 46;
   s.models = ["Frontier-2", "Frontier-3-Reasoner", "Frontier-4"];
+  s.training = { ...s.training, context: { ...s.training.context, run: 5, progress: 0.3 * 8_400, cost: 8_400, name: "Frontier-5-Reasoner-Pro" } };
   s.ledger = { income: 46_000, expenses: 30_000, net: 16_000 };
 }
 
@@ -54,7 +55,7 @@ export function stageLeapfrog(s: GameState, moment: LeapMoment, arg = "") {
   switch (moment) {
     case "shipnow": {
       // Day 39, your run 94% done, a lab is a second from launching: the card opens as the day turns.
-      s.training = { ...s.training, context: { ...s.training.context, run: 5, progress: 0.94 * 8_400, cost: 8_400, name: "Frontier-5-Reasoner-Pro" } };
+      s.training = { ...s.training, context: { ...s.training.context, progress: 0.94 * s.training.context.cost } };
       s.leapfrog.calendar = { value: "quiet", context: { ...cal.context, daysLeft: 1 } } as never;
       before(s, 40, 6);
       break;
