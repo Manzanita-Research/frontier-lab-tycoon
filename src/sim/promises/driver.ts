@@ -7,7 +7,7 @@ import { eventById } from "../../content/events";
 import { arcMachine } from "../machines/arc";
 import { initialStored, step } from "../machines/run";
 import { fillTemplate, formatMoney } from "../format";
-import { addNews, addToast } from "../news";
+import { addNews, addToast, type ToastTag } from "../news";
 import { openEventOf } from "../events";
 import { createRng, type Rng } from "../rng";
 import { runVerb, STATS } from "../verbs";
@@ -20,6 +20,8 @@ import type { PromisesState } from "./state";
 
 const R = PROMISES.rules;
 const OWNER = "promises";
+/** The lobby desk's answers (FLT-51): the Senate is politics, and each one answers what you just did. */
+const SENATE: ToastTag = { source: "politics", importance: "you" };
 const CARD_IDS = PROMISES.content.events.add.map((e) => e.id);
 // Lazy, like the yacht's (FLT-52): verbs -> commands -> this driver is a cycle, so nothing from verbs runs at load.
 let measure: string[] | undefined;
@@ -159,13 +161,13 @@ export function lobbySenator(s: GameState, senator: string): boolean {
   const fee = R.senators[senator]?.lobby;
   if (!p?.enabled || fee === undefined) return false;
   const c = p.machine.context;
-  if (!LIVE.includes(p.machine.value)) return void addToast(s, "The Senate is in recess. Your lobbyists are at the beach.", "neutral"), false;
-  if (c.lobbied.includes(senator)) return void addToast(s, `${nameOf(senator)} has already been "informed".`, "neutral"), false;
-  if (s.cash < fee) return void addToast(s, `Your lobbyists want ${formatMoney(fee)} up front.`, "bad"), false;
+  if (!LIVE.includes(p.machine.value)) return void addToast(s, "The Senate is in recess. Your lobbyists are at the beach.", "neutral", SENATE), false;
+  if (c.lobbied.includes(senator)) return void addToast(s, `${nameOf(senator)} has already been "informed".`, "neutral", SENATE), false;
+  if (s.cash < fee) return void addToast(s, `Your lobbyists want ${formatMoney(fee)} up front.`, "bad", SENATE), false;
   const rng = createRng(p.rngState);
   send(s, rng, { type: "CHOSE", tick: s.tick, day: s.day, roll: 0, stats: {}, choice: `lobby:${senator}` });
   p.rngState = rng.state();
-  addToast(s, R.senators[senator]!.line, "neutral");
+  addToast(s, R.senators[senator]!.line, "neutral", SENATE);
   return true;
 }
 

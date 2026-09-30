@@ -342,12 +342,13 @@ describe("app machine", () => {
     const handle = handleFor();
     return Effect.gen(function* () {
       const { actor, sim, pump } = yield* boot(0);
-      sim.world.toasts.push({ id: 900, text: "Frontier-2 is out! Build an API Gateway to sell it.", tone: "good" });
+      sim.world.toasts.push({ id: 900, text: "Frontier-2 is out! Build an API Gateway to sell it.", tone: "good", source: "training", importance: "you", reply: true });
       yield* pump(6);
-      sim.world.toasts.push({ id: 901, text: "Frontier-2 is out! Build an API Gateway to sell it.", tone: "good" });
+      sim.world.toasts.push({ id: 901, text: "Frontier-2 is out! Build an API Gateway to sell it.", tone: "good", source: "training", importance: "you", reply: true });
       yield* pump(6);
       const texts = actor.getSnapshot().context.toasts.map((t) => t.text);
       expect(texts.filter((t) => t.startsWith("Frontier-2 is out"))).toHaveLength(1);
+      expect(texts).toHaveLength(1);
     }).pipe(provide(handle));
   });
 });

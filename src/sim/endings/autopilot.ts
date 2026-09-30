@@ -88,7 +88,7 @@ export function updateAutopilot(state: GameState, e: EndingsState, rng: Rng) {
     if (place(state, rng, t.kind as BuildingKind | "path", t.x, t.z)) {
       a.placed++;
       if (e.run) e.run.vars.placed = String(a.placed);
-      if (a.placed === 1) addToast(state, fillTemplate(rules.paid, e.run?.vars ?? {}), "joke");
+      if (a.placed === 1) addToast(state, fillTemplate(rules.paid, e.run?.vars ?? {}), "joke", { source: "endings", importance: "you" });
     }
     a.nextTick = state.tick + Math.max(1, rules.everyTicks - rules.aimTicks);
   }
@@ -108,6 +108,6 @@ const HANDS_OFF = new Set<Command["type"]>(["placePath", "placeBuilding", "bulld
 export function declineBuilding(state: GameState, commands: readonly Command[]): readonly Command[] {
   const e = state.endings;
   if (!e?.autopilot.on || !commands.some((c) => HANDS_OFF.has(c.type))) return commands;
-  addToast(state, fillTemplate(ENDING_RULES.autopilot.refusal, e.run?.vars ?? {}), "neutral");
+  addToast(state, fillTemplate(ENDING_RULES.autopilot.refusal, e.run?.vars ?? {}), "neutral", { source: "endings", importance: "you" });
   return commands.filter((c) => !HANDS_OFF.has(c.type));
 }

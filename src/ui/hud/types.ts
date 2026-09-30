@@ -240,6 +240,12 @@ export interface ToastVM {
    * "warn" is a standing warning ("Your entrance isn't connected...") that stays until the cause is fixed.
    */
   tone: ToneVM | "hint" | "warn";
+  /**
+   * A batch summary (FLT-51): the `you` notices that piled up while the one-per-15-seconds window was shut, oldest first.
+   * `text` already says how many and leads with the worst, so a skin that ignores this still reads fine; a skin with room
+   * can list them.
+   */
+  batch?: { text: string; tone: ToneVM }[];
 }
 
 export type HintId = "gateway" | "tap";

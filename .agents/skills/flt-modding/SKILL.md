@@ -181,7 +181,7 @@ counts `security`, `sre`, `comms`, `janitor`, and `sreAttending`. (`burning` and
 | `hype.delta`, `trust.delta`, `heat.delta` | `amount` | adds to the stat, clamped 0 to 100 |
 | `discourse.delta` | `amount` | the water discourse: 4 points is one protester at the gate (they march in at the next midnight, once protests are unlocked). It fades by 0.3 a day and each compute cluster adds 0.5 |
 | `news` | `text`, `tone?` | a ticker headline; fills `{lab}`, `{model}`, `{rival}`, `{cash}` |
-| `toast` | `text`, `tone?` | a toast over the map |
+| `toast` | `text`, `tone?`, `importance?`, `source?` | a notice. `importance: "world"` (the default) puts it on the ticker; `"you"` makes it a toast over the map, rate-limited to one per 15 real seconds (what piles up comes out as one "N things happened while you were busy" toast). `source` defaults to `mod:<your id>`; set it (`ops`, `staff`, `economy`, `event`, ...) only to file it with a base system |
 | `card` | `id` | opens that card from `content.events` (yours or a base one) whatever its `when`; it waits if another card is open. The answer comes back as `CHOSE` |
 | `flag.set` / `flag.clear` | `name` | sets a flag (to today's day number) / clears it. Card `when` and `flag.is` read flags |
 | `compute.drain` | `pct`, `days?` | lose `pct`% of the compute stockpile and output each day |
@@ -189,7 +189,7 @@ counts `security`, `sre`, `comms`, `janitor`, and `sreAttending`. (`burning` and
 | `revenue.mult` | `mult`, `days?` | multiply API revenue (0 stops it) |
 | `auditor.odds` | `mult`, `days?` | multiply the odds of an auditor's visit |
 | `effects.end` | `kind?` | end this arc's open-ended effects (`drain`, `spike`, `revenue`, `auditor`) |
-| `building.fire` / `building.offline` | `building` (a kind, or `$office`), `text?` (offline) | breaks the best working building of that kind until an SRE fixes it |
+| `building.fire` / `building.offline` | `building` (a kind, or `$office`), `text?`, `importance?`, `source?` (offline; its toast is `you` by default) | breaks the best working building of that kind until an SRE fixes it |
 | `building.wear` | `building`, `to` (0 to 1) | caps its reliability |
 | `building.ensure` | `kind`, `text?` | a free one arrives beside the gate if the lab has none |
 | `staff.divert` | `job` (`janitor`, `sre`, `comms`, `security`), `to` (a building kind, `$office` or `gate`), `fraction?` (default 1), `jog?` | pulls that share of the job's current staff off their posts; they stay away until `staff.release` |

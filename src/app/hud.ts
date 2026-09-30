@@ -29,7 +29,7 @@ import { assistantOf, type AssistantMessage } from "../sim/tutorial";
 import { pendingConfirmOf, persistentWarnings, type PendingConfirm } from "../sim/guardrails";
 import { calmStart, CALM_START_DAY, disasterMenu, disastersView, type MenuRow, type RunView } from "../sim/disasters/driver";
 import type { Risk } from "../sim/disasters/types";
-import type { Building, GameState, GoalProgress, OpenEvent, Outcome, Pop, StaffJob, Thought, Tone, Vibes } from "../sim/types";
+import type { Building, GameState, GoalProgress, OpenEvent, Outcome, Pop, StaffJob, Thought, Tone, Vibes, Importance, NoticeSource } from "../sim/types";
 import { endingsView, type EndingsView } from "../sim/endings/view";
 
 export type Tool = "path" | PlaceableKind | "security" | "bulldoze";
@@ -163,6 +163,12 @@ export interface UiToast {
   id: number;
   text: string;
   tone: Tone;
+  /** The sim's tags (FLT-51); `src/app/notices.ts` routes on them. */
+  source?: NoticeSource;
+  importance?: Importance;
+  reply?: true;
+  /** A batch summary: the `you` toasts that piled up while the window was shut, oldest first. */
+  batch?: readonly { text: string; tone: Tone; source?: NoticeSource }[];
 }
 
 function disastersOf(s: GameState): DisastersSnapshot {

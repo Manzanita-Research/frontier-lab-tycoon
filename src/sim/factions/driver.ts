@@ -64,7 +64,7 @@ export function setSafetySpend(state: GameState, level: number) {
   signalFactions(state, to > f.safety ? "safetyUp" : "safetyDown");
   f.pending = f.pending.filter((s) => s !== (to > f.safety ? "safetyDown" : "safetyUp"));
   f.safety = to;
-  addToast(state, to === 0 ? "Safety budget cut to nothing. The Safetyists felt that." : `Safety budget: ${SAFETY_LABELS[to]} (${formatMoney(SAFETY_COST[to]!)}/day, training ${Math.round(SAFETY_DRAG[to]! * 100)}% slower).`, to === 0 ? "bad" : "neutral");
+  addToast(state, to === 0 ? "Safety budget cut to nothing. The Safetyists felt that." : `Safety budget: ${SAFETY_LABELS[to]} (${formatMoney(SAFETY_COST[to]!)}/day, training ${Math.round(SAFETY_DRAG[to]! * 100)}% slower).`, to === 0 ? "bad" : "neutral", { source: "factions", importance: "you" });
 }
 
 /** Queue a signal for midnight (the `faction.signal` verb, the safety budget, a hearing in another pack). */
