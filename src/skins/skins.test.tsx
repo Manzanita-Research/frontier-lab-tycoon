@@ -99,7 +99,7 @@ const usable = catalog.filter((e) => e.ok).map((e) => e.folder);
 
 describe("the catalog", () => {
   it("finds the six shipped skins, all valid", () => {
-    expect(usable.sort()).toEqual(["discovery-disc-96", "field-almanac", "frontier-95", "geocities", "karaoke-night", "swag-drop"]);
+    expect(usable.sort()).toEqual(["discovery-disc-96", "field-almanac", "frontier-95", "homepage-98", "karaoke-night", "swag-drop"]);
     expect(refusedSkins()).toEqual([]);
     expect(skinList().map((s) => s.id)[0]).toBe("frontier-95");
   });

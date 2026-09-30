@@ -22,7 +22,7 @@ export const NO_SKINS: SkinPickerVM = {
   original: null,
   list: [
     { id: "frontier-95", name: "Frontier 95", author: "Frontier Lab Tycoon", description: "The lab as a 1995 desktop.", version: "1.0.0", preview: "" },
-    { id: "geocities", name: "GeoCities", author: "Frontier Lab Tycoon", description: "The lab's home page.", version: "1.0.0", preview: "" },
+    { id: "homepage-98", name: "Homepage '98", author: "Frontier Lab Tycoon", description: "The lab's home page.", version: "1.0.0", preview: "" },
   ],
   rejected: [],
 };

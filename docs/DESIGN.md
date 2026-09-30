@@ -72,7 +72,7 @@ This is AI-2027-shaped escalation played as affectionate farce. It punches at in
 - A bright, low-poly toy diorama: warm sun, soft shadows, saturated greens, cream buildings with one accent color each. Not pixel art. **Don't copy** the inspiration image.
 - Researchers are little capsule people in hoodies. Agents are small robots with a **cyan glow**.
 - Juice: squash-and-stretch when something is placed, coin pops, smooth camera.
-- The HUD is readable over the scene and works on a phone. It is a **skin**: the default is Frontier 95 (a 1995 desktop: Lab Properties, a Start menu, a file-copy dialog for training), and Swag Drop, Karaoke Night, Field Almanac, Discovery Disc '96 and GeoCities ship beside it. The warm, chunky toy look is the base skin (`?skin=base`). See `docs/SKINS.md`.
+- The HUD is readable over the scene and works on a phone. It is a **skin**: the default is Frontier 95 (a 1995 desktop: Lab Properties, a Start menu, a file-copy dialog for training), and Swag Drop, Karaoke Night, Field Almanac, Discovery Disc '96 and Homepage '98 ship beside it. The warm, chunky toy look is the base skin (`?skin=base`). See `docs/SKINS.md`.
 
 ## Architecture
 
