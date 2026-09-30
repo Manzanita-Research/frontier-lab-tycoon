@@ -27,7 +27,7 @@ import { SKIN_API_VERSION } from "./types";
 import { HELP_BUILDINGS, HELP_LOOP, HELP_NUMBERS, HELP_TITLE } from "../../content/help";
 import { playableOf, type PlayableInput } from "./playable";
 import type {
-  ArenaVM, BenchCellVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HudVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
+  ArenaVM, BenchCellVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HearingMoveVM, HearingVM, HudVM, LeakVM, SenatorVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
   ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, ResponseVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, StreamVM, ThoughtRowVM, TrainingVM, TrendVM, VoiceVM, WalkerKindVM,
 } from "./types";
 
@@ -301,7 +301,8 @@ function eventOf(i: HudInput): { event: EventVM | null; era: HudVM["eraCard"] } 
   const open = i.snap.event;
   const def = open ? eventById(open.id) : undefined;
   if (!open || !def) return { event: null, era: null };
-  const vars = { ...i.snap.race.vars, lab: i.snap.labName };
+  const hearing = def.kind === "hearing" ? hearingOf(i.snap) : null;
+  const vars = { ...i.snap.race.vars, lab: i.snap.labName, senator: hearing?.asking?.name ?? "The chair" };
   if (def.kind === "era") {
     const n = Number(def.id.replace("era", ""));
     const era = ERAS[n - 1]!;
@@ -319,13 +320,54 @@ function eventOf(i: HudInput): { event: EventVM | null; era: HudVM["eraCard"] } 
       body: fillTemplate(def.body, vars),
       tone: def.tone,
       stripe: def.stripe ?? TONE_LABEL[def.tone],
-      kind: def.kind === "auction" || def.kind === "response" || def.kind === "stream" ? def.kind : "plain",
+      kind: def.kind === "auction" || def.kind === "response" || def.kind === "stream" || def.kind === "hearing" || def.kind === "leak" ? def.kind : "plain",
       choices: def.choices.map((c, k) => ({ label: c.label, hint: fillTemplate(c.hint, vars), key: k + 1 })),
       paddles: def.kind === "auction" ? rivals.map((r, k) => ({ id: r.id, name: r.short, color: r.color, number: 200 + ((r.score * 7 + k * 31) % 800) })) : [],
       response: def.kind === "response" ? responseOf(i.snap, vars) : null,
       stream: def.kind === "stream" ? streamOf(i.snap, def.id, vars) : null,
+      hearing,
+      leak: def.kind === "leak" ? leakOf(i.snap) : null,
     },
   };
+}
+
+const MOVE_LABEL: Record<HearingMoveVM["meter"], string> = { trust: "Trust", capture: "Capture", hype: "Hype", heat: "Heat" };
+const arrows = (n: number) => (n > 0 ? "▲" : "▼").repeat(Math.abs(n) >= 8 ? 3 : Math.abs(n) >= 4 ? 2 : 1);
+
+/** The Hearing's witness table: the senators, the meters, and what each answer would move. */
+function hearingOf(s: Snapshot): HearingVM | null {
+  const h = s.hearing;
+  if (!h.enabled) return null;
+  const senators: SenatorVM[] = h.senators.map((sen) => ({ id: sen.id, name: sen.name, role: sen.role, seat: sen.seat, look: { ...sen.look }, asking: sen.asking, answered: sen.answered }));
+  const labels = { ...MOVE_LABEL, trust: h.labels.trust, capture: h.labels.capture };
+  const answers = (h.current?.options ?? []).map((o) => ({
+    style: o.key,
+    moves: (["trust", "capture", "hype", "heat"] as const).filter((m) => o[m] !== 0).map((m) => ({
+      meter: m, label: labels[m], amount: o[m], arrows: arrows(o[m]), good: m === "capture" ? null : m === "heat" ? o[m] < 0 : o[m] > 0,
+    })),
+  }));
+  const asked = Math.min(h.asked + 1, h.total);
+  return {
+    stage: h.stage,
+    topic: h.topic,
+    senators,
+    asking: senators.find((x) => x.asking) ?? null,
+    asked,
+    total: h.total,
+    progressText: h.verdict ? "Adjourned" : `Question ${asked} of ${h.total}`,
+    trust: { label: h.labels.trust, value: h.trust, text: String(Math.round(h.trust)) },
+    capture: { label: h.labels.capture, value: h.capture, text: String(Math.round(h.capture)) },
+    answers,
+    verdict: h.verdict,
+  };
+}
+
+/** The yacht's leaked group chat, as the lab's rivals wrote it. */
+function leakOf(s: Snapshot): LeakVM | null {
+  const y = s.yacht;
+  if (!y.enabled || y.chat.length === 0) return null;
+  const members = [...new Set(y.chat.filter((m) => !m.system && m.from !== "yacht").map((m) => m.name))];
+  return { yachtName: y.yachtName, groupName: y.groupName, rsvp: y.rsvp ?? "sign", members: `${members.join(", ")} + the yacht`, messages: y.chat.map((m) => ({ ...m })) };
 }
 
 function thoughtsOf(i: HudInput): ThoughtRowVM[] {

@@ -4,6 +4,7 @@ import { makeSnapshot, type Snapshot } from "../../app/hud";
 import { frontPage, recap, type Edition } from "../../newsroom/edition";
 import { createTestCampus } from "../../sim/testkit";
 import { enableLeapfrog } from "../../sim/race/leapfrog/driver";
+import { stageCircus, type CircusMoment } from "../../sim/circus/demo";
 import { leapfrogView } from "../../sim/race/leapfrog/view";
 import { answer } from "../../sim/testkit";
 import { tick } from "../../sim/tick";
@@ -48,6 +49,13 @@ export function fixtureLeapfrog(days = 48, seed = 3): { world: GameState; motion
   return { world: s, motion: view };
 }
 
+/** The busy campus with The Hearing or the yacht summit staged on it: the card that moment wants is on screen. */
+export function fixtureCircus(moment: CircusMoment, seed = 3): GameState {
+  const s = fixtureWorld(12, seed);
+  stageCircus(s, moment);
+  return s;
+}
+
 export const NO_SKINS: SkinPickerVM = {
   open: false,
   reducedMotion: false,
@@ -79,6 +87,8 @@ export interface FixtureOptions {
   world?: GameState;
   /** Release Leapfrog on, 48 days in, with its leaderboard, news cycle and history. */
   leapfrog?: boolean;
+  /** The Hearing (a question, or the gavel) or the yacht summit (the invitation, or the leaked chat) on screen. */
+  circus?: CircusMoment;
   selected?: number | null;
   event?: string | null;
   tool?: string | null;
@@ -99,7 +109,7 @@ export interface FixtureOptions {
 }
 
 export function fixtureSnapshot(o: FixtureOptions = {}): Snapshot {
-  const w = o.world ?? (o.leapfrog ? fixtureLeapfrog().world : fixtureWorld());
+  const w = o.world ?? (o.leapfrog ? fixtureLeapfrog().world : o.circus ? fixtureCircus(o.circus) : fixtureWorld());
   const selected = o.selected === undefined ? (w.walkers.find((x) => x.kind === "researcher")?.id ?? null) : o.selected;
   const snap = makeSnapshot(w, undefined, { selected, follow: false, highlight: null });
   const pendingConfirm = o.confirm

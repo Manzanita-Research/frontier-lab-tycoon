@@ -367,6 +367,60 @@ export interface StreamVM {
   chat: { who: string; text: string }[];
 }
 
+/** One senator at the witness table (FLT-21). `look` is colours for a capsule portrait (the kit's `Senator` draws it). */
+export interface SenatorVM {
+  id: string;
+  name: string;
+  role: string;
+  seat: string;
+  look: { skin: string; suit: string; hair: string; tie: string; glasses: boolean };
+  /** Asking the question on the table now. */
+  asking: boolean;
+  /** How the lab answered them this session ("earnest", "slick", "chaotic"), or null. */
+  answered: string | null;
+}
+
+/** What one answer would move, beside its button: signed points, and arrows ("▲▲", "▼"). */
+export interface HearingMoveVM {
+  meter: "trust" | "capture" | "hype" | "heat";
+  label: string;
+  amount: number;
+  arrows: string;
+  /** Good for the lab's image (more trust, more hype, less heat). Capture is neither: it reads as "sly". */
+  good: boolean | null;
+}
+
+/** The Hearing's card (a question, or the gavel at the end). The card's `choices` are the answers, in order. */
+export interface HearingVM {
+  /** "inSession" while questions are asked; the verdict id ("viral", "captured", "commended", "grilled") at the gavel. */
+  stage: string;
+  topic: string;
+  senators: SenatorVM[];
+  /** The senator asking, or null at the gavel. */
+  asking: SenatorVM | null;
+  /** "Question 2 of 3". */
+  asked: number;
+  total: number;
+  progressText: string;
+  /** The two meters, 0 to 100. */
+  trust: { label: string; value: number; text: string };
+  capture: { label: string; value: number; text: string };
+  /** Per answer (same order as `choices`): its style ("earnest", "slick", "chaotic") and what it would move. */
+  answers: { style: string; moves: HearingMoveVM[] }[];
+  /** At the gavel: how it went. */
+  verdict: { id: string; title: string; line: string } | null;
+}
+
+/** The leaked group chat (FLT-24): the yacht's name, the group's, and who said what. */
+export interface LeakVM {
+  yachtName: string;
+  groupName: string;
+  /** "sign", "intern" or "decline": which chat leaked. */
+  rsvp: string;
+  members: string;
+  messages: { from: string; name: string; color: string; you: boolean; system: boolean; time: string; text: string }[];
+}
+
 export interface EventVM {
   id: string;
   title: string;
@@ -374,12 +428,16 @@ export interface EventVM {
   tone: ToneVM;
   /** The top-stripe text: "Breaking", "Developing", ... */
   stripe: string;
-  /** "response" and "stream" are Release Leapfrog's cards: `response` / `stream` carry their extra data. */
-  kind: "plain" | "auction" | "response" | "stream";
+  /** "response" and "stream" are Release Leapfrog's cards: `response` / `stream` carry their extra data. "hearing" (FLT-21) and "leak" (FLT-24) carry `hearing` / `leak`. */
+  kind: "plain" | "auction" | "response" | "stream" | "hearing" | "leak";
   choices: ChoiceVM[];
   paddles: AuctionPaddleVM[];
   response: ResponseVM | null;
   stream: StreamVM | null;
+  /** The Hearing's witness table, on its question and gavel cards (optional: older fixtures leave it out). */
+  hearing?: HearingVM | null;
+  /** The leaked group chat, on the yacht's leak card. */
+  leak?: LeakVM | null;
 }
 
 export interface ThoughtRowVM {
