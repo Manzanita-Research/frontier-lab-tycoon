@@ -1114,7 +1114,7 @@ export interface FactionsVM {
   /** Newest first. */
   log: FactionLogVM[];
   /** Crowds at the gate right now; the water crowd has id "". */
-  gate: { id: string; name: string; color: string; count: number }[];
+  gate: GateCrowdVM[];
   /** "At the gate: 18 Water Discourse vs 12 Water Truthers Truthers", or "". */
   gateText: string;
   /** The folded panel's one line: "2 fans · 3 upset · Doomers marching". */
@@ -1123,6 +1123,29 @@ export interface FactionsVM {
   fans: number;
   angry: number;
   safety: { level: number; options: SafetyOptionVM[] };
+  /** FLT-56: the Comms statement, the lever the gate legend pulls (`actions.issueStatement(faction)`). */
+  statement: StatementVM;
+}
+
+/** One crowd at the gate (FLT-33), for the panel and the legend by the gate (FLT-56). */
+export interface GateCrowdVM {
+  id: string;
+  name: string;
+  color: string;
+  count: number;
+  /** A faction's crowd can be addressed with a statement; the water crowd is nobody's to address. */
+  addressable: boolean;
+}
+
+/** FLT-56: what a statement costs and whether Comms can put one out now. */
+export interface StatementVM {
+  ready: boolean;
+  /** "$15K". */
+  costText: string;
+  /** "Ready", or "Comms needs 3 days". */
+  waitText: string;
+  /** "Your Comms Rep writes it" or "The intern writes it (no Comms Rep)". */
+  writerText: string;
 }
 
 export interface SkinInfoVM {
@@ -1430,6 +1453,8 @@ export interface HudActions {
   toggleFactions(): void;
   /** FLT-33: the safety budget, 0 (none) to 3 (lavish). Costs money every day and slows training; the Safetyists notice. */
   setSafetySpend(level: number): void;
+  /** FLT-56: Comms puts out a statement to one faction (the gate legend). Costs money, then a cooldown; the sim may refuse with a toast. */
+  issueStatement(faction: string): void;
   keepPlaying(): void;
   newLab(): void;
   // The payroll.

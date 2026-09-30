@@ -58,6 +58,7 @@ export const SLOT_NAMES = [
   "ReportCard",
   "AuditPin",
   "Beat",
+  "GateLegend",
   "DramaButton",
   "Drama",
 ] as const;
@@ -153,6 +154,12 @@ export interface SlotPropsMap {
    * and keep the bars still under reduced motion.
    */
   Beat: { beat: BeatVM; actions: HudActions };
+  /**
+   * Who is at the gate (FLT-56): the game pins it over the gate while a faction marches there. One row per crowd in
+   * `factions.gate` (its colour, count and name); an `addressable` one offers `actions.issueStatement(id)`, which costs
+   * `factions.statement.costText` and is off while `!factions.statement.ready`.
+   */
+  GateLegend: { factions: FactionsVM; actions: HudActions };
   SkinPicker: { skins: SkinPickerVM; actions: HudActions };
   Outcome: { outcome: OutcomeVM; actions: HudActions };
   /** The News Room button is earned (`visible.news`); mute, the mixer and the skin picker are not. */

@@ -7,6 +7,7 @@ import { hudActions } from "./actions";
 import { AuditLayer } from "./AuditLayer";
 import { BubbleLayer } from "./BubbleLayer";
 import { CoachLayer } from "./CoachLayer";
+import { GateLayer } from "./GateLayer";
 import { loadedSkinAtom } from "./state";
 import { BeatLayer, Docked, Modals, PhotoLayer } from "./tree";
 import { useHudEffects } from "./useHudEffects";
@@ -31,6 +32,7 @@ function Hud({ source }: { source: AppSource }) {
     <SkinProvider skin={skin}>
       <BubbleLayer bubbles={vm.bubbles} actions={hudActions} />
       <AuditLayer audit={vm.audit} actions={hudActions} />
+      <GateLayer factions={vm.factions} actions={hudActions} photo={vm.photoMode.on} />
       <div className="hud-host">
         <Docked vm={vm} actions={hudActions} />
         <BeatLayer vm={vm} actions={hudActions} />

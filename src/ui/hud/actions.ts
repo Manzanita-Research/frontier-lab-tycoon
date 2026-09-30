@@ -87,6 +87,7 @@ export const hudActions: HudActions = {
   closeCrumbWiki: dismiss,
   toggleFactions: () => registry.set(factionsOpenAtom, !registry.get(factionsOpenAtom)),
   setSafetySpend: (level) => send({ type: "COMMAND", command: { type: "setSafetySpend", level } }),
+  issueStatement: (faction) => send({ type: "COMMAND", command: { type: "issueStatement", faction } }),
   keepPlaying: () => send({ type: "KEEP_PLAYING" }),
   newLab: () => send({ type: "NEW_LAB" }),
 

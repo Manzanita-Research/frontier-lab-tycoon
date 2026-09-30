@@ -7,6 +7,7 @@ import type { GameState } from "../types";
 import type { FactionMood, Relation } from "./machines";
 import { SAFETY_COST, SAFETY_DRAG, SAFETY_LABELS } from "./stance";
 import type { FactionLogItem } from "./state";
+import { statementOffer } from "./statement";
 
 export interface FactionRowView {
   id: string;
@@ -41,9 +42,11 @@ export interface FactionsView {
   /** Who is at the gate: the water crowd (id "") and each faction's crowd. */
   gate: { id: string; name: string; color: string; count: number }[];
   safety: { level: number; options: { label: string; cost: number; drag: number }[] };
+  /** FLT-56: the Comms statement: its price, days until the next one (0: ready), and whether a Comms Rep writes it. */
+  statement: { cost: number; wait: number; staffed: boolean };
 }
 
-const OFF: FactionsView = { enabled: false, protests: false, rows: [], stance: [], relations: [], log: [], gate: [], safety: { level: 0, options: [] } };
+const OFF: FactionsView = { enabled: false, protests: false, rows: [], stance: [], relations: [], log: [], gate: [], safety: { level: 0, options: [] }, statement: { cost: 0, wait: 0, staffed: false } };
 
 /** The water crowd's colour at the gate: blue, obviously. */
 const WATER = { name: "Water Discourse", color: "#3fa7d6" };
@@ -92,5 +95,6 @@ export function factionsView(state: GameState): FactionsView {
     log: f.log.slice().reverse(),
     gate,
     safety: { level: f.safety, options: SAFETY_LABELS.map((label, i) => ({ label, cost: SAFETY_COST[i]!, drag: SAFETY_DRAG[i]! })) },
+    statement: statementOffer(state),
   };
 }

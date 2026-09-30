@@ -1,7 +1,6 @@
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
-import { SIGNS, SIGN_COLORS } from "../content/protest";
 import { sim as game } from "../app/game";
 import { HALF } from "./coords";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
@@ -10,7 +9,7 @@ import { beatRun } from "./fx/beatState";
 import { reducedMotion } from "../skins/kit/motion";
 import { FONT_STACK, glowTexture } from "./materials";
 import { Follow } from "./follow";
-import { HOODIES, PICKET, SKIN, SUITS } from "./look";
+import { crowdColor, HOODIES, PICKET, placards, SKIN, SUITS } from "./look";
 import { Pick } from "./Pick";
 import { eraDef } from "../content/eras";
 import { eraOfState } from "../sim/race/race";
@@ -55,7 +54,7 @@ const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 const wrap = (a: number) => Math.atan2(Math.sin(a), Math.cos(a));
 
 /** A placard: colour board, ink border, bold text wrapped to at most three lines. */
-function signTexture(text: string, bg: string): THREE.CanvasTexture {
+function signTexture(text: string, bg: string, ink: string): THREE.CanvasTexture {
   const w = 320;
   const h = 180;
   const canvas = document.createElement("canvas");
@@ -66,7 +65,7 @@ function signTexture(text: string, bg: string): THREE.CanvasTexture {
   g.fillRect(0, 0, w, h);
   g.fillStyle = bg;
   g.fillRect(9, 9, w - 18, h - 18);
-  g.fillStyle = "#b3261e";
+  g.fillStyle = ink;
   g.textAlign = "center";
   g.textBaseline = "middle";
   const words = text.split(" ");
@@ -120,7 +119,18 @@ export function Walkers() {
   const hide = useRef<THREE.InstancedMesh>(null);
   const tape = useRef<THREE.InstancedMesh>(null);
   const glowMap = useMemo(() => glowTexture("#ffffff"), []);
-  const signMaps = useMemo(() => SIGNS.map((text, i) => signTexture(text, SIGN_COLORS[i % SIGN_COLORS.length]!)), []);
+  // FLT-56: the water crowd's placards and each faction's own, in its colours. A faction's marchers carry theirs.
+  const signs = useMemo(() => {
+    const all = placards();
+    const byCrowd = new Map<string, number[]>();
+    all.forEach((p, i) => byCrowd.set(p.crowd, [...(byCrowd.get(p.crowd) ?? []), i]));
+    const bodies = new Map<string, THREE.Color>();
+    for (const crowd of byCrowd.keys()) {
+      const c = crowdColor(crowd);
+      if (c) bodies.set(crowd, color(c));
+    }
+    return { all, byCrowd, bodies, maps: all.map((p) => signTexture(p.text, p.bg, p.ink)) };
+  }, []);
   const glowGeo = useMemo(() => new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2), []);
   const haloGeo = useMemo(() => new THREE.RingGeometry(0.5, 0.72, 28).rotateX(-Math.PI / 2), []);
   const boardGeo = useMemo(() => new THREE.PlaneGeometry(1.3, 0.73), []);
@@ -155,7 +165,7 @@ export function Walkers() {
     let nx = 0;
     let nl = 0;
     let picked: { x: number; z: number } | null = null;
-    const nb = new Array<number>(SIGNS.length).fill(0);
+    const nb = new Array<number>(signs.all.length).fill(0);
     // The agents look like the era: hard hats in Coding Automation, halos after that, bigger and brighter each time.
     const agentLook = LOOKS[eraOfState(sim) - 1]!;
     const boxed = sim.disguises?.agent === "box";
@@ -265,12 +275,14 @@ export function Walkers() {
         set(pBody.current, i, x, 0.26 * S + bob, z, ry, 1 + land * 0.6, 1 - land, 1 + land * 0.6);
         set(pHead.current, i, x, 0.66 * S + bob - land * 0.1, z, ry, 1, 1, 1);
         glasses(x, 0.66 * S + bob - land * 0.1, z, ry);
-        pBody.current?.setColorAt(i, picket[w.id % picket.length]!);
+        // A faction's marchers wear its colour (FLT-56); the water crowd, whatever it had on.
+        pBody.current?.setColorAt(i, (w.crowd && signs.bodies.get(w.crowd)) || picket[w.id % picket.length]!);
         pHead.current?.setColorAt(i, skins[(w.id * 7) % skins.length]!);
         const wave = Math.sin(t * 5 + phase) * 0.14;
         // The pole runs from the fist up to the board.
         set(pStick.current, i, x, 1.25 + bob, z, 0, 1, 1, 1);
-        const which = w.id % SIGNS.length;
+        const own = signs.byCrowd.get(w.crowd ?? "") ?? signs.byCrowd.get("")!;
+        const which = own[w.id % own.length]!;
         const board = boards.current[which];
         if (board) {
           const k = nb[which]!++;
@@ -352,6 +364,8 @@ export function Walkers() {
     const done = (m: THREE.InstancedMesh | null, n: number) => {
       if (!m) return;
       m.count = n;
+      // Forty-odd placard meshes, most of them empty most of the time: an empty one skips its draw.
+      m.visible = n > 0;
       m.instanceMatrix.needsUpdate = true;
       if (m.instanceColor) m.instanceColor.needsUpdate = true;
     };
@@ -431,9 +445,9 @@ export function Walkers() {
       <instancedMesh ref={pStick} args={[stickGeo, undefined, CAP]} castShadow frustumCulled={false}>
         <meshStandardMaterial color="#8a5a3a" roughness={0.9} />
       </instancedMesh>
-      {SIGNS.map((text, i) => (
-        <instancedMesh key={text} ref={(m) => void (boards.current[i] = m)} args={[boardGeo, undefined, SIGN_CAP]} frustumCulled={false}>
-          <meshBasicMaterial map={signMaps[i]} toneMapped={false} side={THREE.DoubleSide} />
+      {signs.all.map((p, i) => (
+        <instancedMesh key={`${p.crowd}:${p.text}`} ref={(m) => void (boards.current[i] = m)} args={[boardGeo, undefined, SIGN_CAP]} frustumCulled={false}>
+          <meshBasicMaterial map={signs.maps[i]} toneMapped={false} side={THREE.DoubleSide} />
         </instancedMesh>
       ))}
 

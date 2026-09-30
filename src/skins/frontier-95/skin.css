@@ -3907,6 +3907,58 @@
   .audit-anchor {
     transform: translate(-50%, -100%);
   }
+  /* Who's Outside (FLT-56): the crowds at the gate and Comms' Statement… button. */
+  .gate-anchor {
+    transform: translate(-50%, 8px);
+    pointer-events: auto;
+  }
+  .f95-gatelegend {
+    width: max-content;
+    min-width: 200px;
+    max-width: 280px;
+    .f95-tb {
+      padding: 1px 2px;
+      min-height: 0;
+    }
+    .f95-tt {
+      font-size: 13px;
+    }
+    .f95-status {
+      font-size: 12px;
+    }
+  }
+  .f95-gatelegend-in {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    padding: 4px 6px;
+    list-style: none;
+    font-size: 14px;
+    line-height: 1.1;
+    li {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    i {
+      flex: none;
+      width: 11px;
+      height: 11px;
+      border: 1px solid #000;
+    }
+    .nm {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .f95-btn {
+      min-width: 0;
+      padding: 1px 6px;
+      font-size: 12px;
+    }
+  }
   .f95-auditpin {
     width: max-content;
     min-width: 188px;
