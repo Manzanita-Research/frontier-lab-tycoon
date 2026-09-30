@@ -52,6 +52,8 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
+          # Today's Drama (FLT-34) publishes the packs in origin/main's tree, never the branch's: the build needs main.
+          fetch-depth: 0
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:

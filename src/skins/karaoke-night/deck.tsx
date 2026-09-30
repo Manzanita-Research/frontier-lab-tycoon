@@ -2,7 +2,7 @@
 // row of small keys for the News Room, sound, the mixer and the skin picker. Plus the "EXTRA!" sticker when the paper lands.
 import { useState } from "react";
 import { useT } from "../context";
-import { ALL_VISIBLE } from "../kit";
+import { ALL_VISIBLE, DramaIcon } from "../kit";
 import type { SlotPropsMap } from "../types";
 import { Star, Tape, ToolIcon } from "./art";
 
@@ -79,5 +79,17 @@ export function NewsArrival({ arrival, actions }: SlotPropsMap["NewsArrival"]) {
         </button>
       </span>
     </aside>
+  );
+}
+
+/** Today's Drama: a request slip on the deck. */
+export function DramaButton({ drama, actions }: SlotPropsMap["DramaButton"]) {
+  const t = useT();
+  return (
+    <button type="button" className={`kn-key kn-drama${drama.on ? " on" : ""}`} onClick={() => actions.openDrama()} aria-label={t("drama.open")} title={t("drama.open")}>
+      <DramaIcon size={20} />
+      <span className="kn-key-label">{t("drama.button")}</span>
+      {drama.on ? <b className="kn-unread">{t("drama.on")}</b> : drama.fresh && <b className="kn-unread">{t("drama.new")}</b>}
+    </button>
   );
 }

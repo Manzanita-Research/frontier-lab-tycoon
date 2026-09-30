@@ -80,6 +80,7 @@ export function BuildBar({ items, tip, teasers = [], disasters, actions }: SlotP
     if (next) actions.buildPanel(true);
   };
   const [settings, setSettings] = useState(false);
+  const [programs, setPrograms] = useState(false);
   const [confirm, setConfirm] = useState<Confirm>(null);
   const root = useRef<HTMLDivElement>(null);
 
@@ -152,6 +153,22 @@ export function BuildBar({ items, tip, teasers = [], disasters, actions }: SlotP
                   <span>{t("build.bulldoze")}…</span>
                   <span className="hk" />
                   <span className="p">½ back</span>
+                </button>
+              </li>
+            )}
+            <li>
+              <button type="button" role="menuitem" aria-expanded={programs} onClick={() => setPrograms(!programs)}>
+                <Ico name="programs" size={24} />
+                <span>Programs</span>
+                <span className="hk" />
+                <span className={`p arrow ${programs ? "down" : ""}`} aria-hidden />
+              </button>
+            </li>
+            {programs && (
+              <li className="sub">
+                <button type="button" role="menuitem" onClick={() => { setOpen(false); actions.openDrama(); }}>
+                  <Ico name="drama" size={16} />
+                  <span>{t("drama.button")}</span>
                 </button>
               </li>
             )}
@@ -294,6 +311,18 @@ export function NewsControls({ newsroom, sound, visible = ALL_VISIBLE, actions }
         <Ico name={sound.muted ? "mute" : "sound"} size={18} />
       </button>
     </>
+  );
+}
+
+/** Today's Drama in the tray: a megaphone, with a red "!" when there's a pack you haven't opened. */
+export function DramaButton({ drama, actions }: SlotPropsMap["DramaButton"]) {
+  const t = useT();
+  const label = drama.on ? `${t("drama.open")} (${drama.on.title} is on)` : t("drama.open");
+  return (
+    <button type="button" className={`f95-s drama ${drama.fresh ? "fresh" : ""} ${drama.on ? "on" : ""}`} onClick={() => actions.openDrama()} aria-label={label} title={label}>
+      <Ico name="drama" size={18} />
+      {drama.fresh && <b className="f95-badge-n">!</b>}
+    </button>
   );
 }
 

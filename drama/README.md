@@ -24,3 +24,16 @@ pnpm drama:lint <pack dir>       # the parody linter alone
 | `fixtures/good/` | A known-good pack for the tests. |
 
 **From the skill alone.** The author is headless `claude -p --restricted`, running in a scratch room outside the checkout. Its file tools can't leave the room, it has no shell, and it validates through one MCP tool, `check` (`scripts/drama-mcp.mjs`). Its whole world is `BRIEF.md`, `SKILL.md` (`.agents/skills/flt-modding`) and `candidates.md`. `drama/.work/<date>/agent.json` records what it read and did.
+
+## Publishing: the Today's Drama button (part 2)
+
+A pack goes public when Jem **merges** its PR, and not before. The build (`scripts/drama-feed.mjs`, a Vite plugin) reads `mods/drama/*/mod.json` from **main's git tree** (`origin/main`, else `main`), never from the working tree. A Drama PR's own preview therefore still shows only what main has, and an unmerged edit to an old pack never ships. It writes:
+
+| Path on the site | What it is |
+| --- | --- |
+| `/mods/drama/index.json` | `{ apiVersion: 1, packs: [...] }`, newest first. Each entry has `id`, `date`, `title`, `description`, `url`, three `teasers`, the event card's `title` and first `day`, and `counts`. |
+| `/mods/drama/latest.json` | `{ apiVersion: 1, pack }`: the newest entry, or `null`. |
+| `/mods/drama/<date>/mod.json` | The pack, byte for byte as merged. The button loads this through `?mod=`. |
+| `/mods/drama-fixture/...` | The same shape, built from `fixtures/feed/` (three rehearsal packs). Add `?drama=fixture` to the address to read it; tests and screenshots do. |
+
+`node scripts/drama-feed.mjs [--ref <ref>]` prints what a build would publish. The deploy job checks out with full history so the build has main; a checkout without it publishes an empty feed and warns. The game asks for `latest.json` a moment after start (the NEW badge) and for `index.json` when the window opens (the archive). Playing a pack reloads with its `?mod=`, which starts a new lab; the Mod Manager's "Switch off" reloads without it.

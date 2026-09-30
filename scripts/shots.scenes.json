@@ -140,6 +140,15 @@
       "defection-phone",
       "poach-phone"
     ],
+    "daily-drama": [
+      "drama-intro",
+      "drama-nudge",
+      "drama-programs",
+      "drama-window",
+      "drama-playing",
+      "drama-base",
+      "drama-phone"
+    ],
     "auditors": [
       "audit-notice",
       "audit-countdown",
@@ -163,6 +172,7 @@
       "wave-promises",
       "senate-draft",
       "wave-factions",
+      "wave-drama",
       "wave-mods",
       "wave-phone"
     ],
@@ -1185,11 +1195,11 @@
           "click": "[data-testid=start-button]"
         },
         {
-          "click": ".f95-startwrap button[role=menuitem][aria-expanded]",
+          "click": ".f95-startwrap button[role=menuitem]:has-text(\"Settings\")",
           "optional": true
         },
         {
-          "click": ".f95-startwrap li.sub ~ li.sub ~ li.sub button",
+          "click": ".f95-startwrap li.sub button:has-text(\"Mods\")",
           "optional": true
         },
         {
@@ -1876,11 +1886,11 @@
           "click": "[data-testid=start-button]"
         },
         {
-          "click": ".f95-startwrap button[role=menuitem][aria-expanded]",
+          "click": ".f95-startwrap button[role=menuitem]:has-text(\"Settings\")",
           "optional": true
         },
         {
-          "click": ".f95-startwrap li.sub ~ li.sub ~ li.sub button",
+          "click": ".f95-startwrap li.sub button:has-text(\"Mods\")",
           "optional": true
         },
         {
@@ -2027,6 +2037,28 @@
         },
         {
           "wait": 500
+        }
+      ]
+    },
+    "wave-drama": {
+      "title": "FLT-52 at Level 5: Today's Drama (FLT-34) opened from its button on the mid-game campus, with the rehearsal feed",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95",
+        "drama": "fixture"
+      },
+      "steps": [
+        {
+          "wait": 400
+        },
+        {
+          "click": "button[aria-label^=\"Open Today\"]",
+          "optional": true
+        },
+        {
+          "wait": 1500
         }
       ]
     },
@@ -2178,6 +2210,140 @@
         "moment": "factions"
       },
       "steps": []
+    },
+    "drama-intro": {
+      "title": "FLT-34: a Drama pack has just loaded (fixture feed): the ON AIR card says what's coming",
+      "query": {
+        "drama": "fixture",
+        "mod": "/mods/drama-fixture/2026-09-29/mod.json"
+      },
+      "steps": [
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "drama-nudge": {
+      "title": "FLT-34: a new pack is out (mid-game lab, once the tap hint has gone): the tray megaphone gets a \"!\" and the paperclip has opinions",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95",
+        "drama": "fixture"
+      },
+      "steps": [
+        {
+          "wait": 23500
+        }
+      ]
+    },
+    "drama-programs": {
+      "title": "FLT-34: Start ▸ Programs ▸ Today's Drama",
+      "query": {
+        "drama": "fixture"
+      },
+      "steps": [
+        {
+          "click": "[data-testid=start-button]"
+        },
+        {
+          "click": ".f95-startwrap button[role=menuitem]:has-text(\"Programs\")",
+          "optional": true
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "drama-window": {
+      "title": "FLT-34: Today's Drama: the latest pack's card and the archive",
+      "query": {
+        "drama": "fixture"
+      },
+      "steps": [
+        {
+          "wait": 400
+        },
+        {
+          "click": "button[aria-label^=\"Open Today\"]",
+          "optional": true
+        },
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "drama-playing": {
+      "title": "FLT-34: the window with a pack playing, and Mods… offering to switch it off",
+      "query": {
+        "drama": "fixture",
+        "mod": "/mods/drama-fixture/2026-09-29/mod.json"
+      },
+      "steps": [
+        {
+          "wait": 1500
+        },
+        {
+          "click": "button:has-text(\"Let's go\")",
+          "optional": true
+        },
+        {
+          "click": "[data-testid=start-button]"
+        },
+        {
+          "click": ".f95-startwrap button[role=menuitem]:has-text(\"Settings\")",
+          "optional": true
+        },
+        {
+          "click": ".f95-startwrap li.sub button:has-text(\"Mods\")",
+          "optional": true
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "drama-base": {
+      "title": "FLT-34: the base skin's Today's Drama button and card",
+      "query": {
+        "drama": "fixture",
+        "skin": "base"
+      },
+      "steps": [
+        {
+          "wait": 400
+        },
+        {
+          "click": "button[aria-label^=\"Open Today\"]",
+          "optional": true
+        },
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "drama-phone": {
+      "title": "FLT-34: Today's Drama on a phone (390x844)",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "drama": "fixture"
+      },
+      "steps": [
+        {
+          "wait": 400
+        },
+        {
+          "click": "button[aria-label^=\"Open Today\"]",
+          "optional": true
+        },
+        {
+          "wait": 1500
+        }
+      ]
     }
   }
 }

@@ -1,7 +1,7 @@
 // The keyboard on the desk: the build palette, the speed keys, the camera and the news/sound/skin dock, all keycaps.
 // A keycap is a cream face over a darker front band; pressing it sinks it (CSS: `.on` and `:active`).
 import { useState, type ReactNode } from "react";
-import { ALL_VISIBLE, useCoach, useT } from "../kit";
+import { ALL_VISIBLE, DramaIcon, useCoach, useT } from "../kit";
 import type { SlotPropsMap } from "../types";
 import { Glyph, KEY_ICONS } from "./icons";
 
@@ -206,6 +206,19 @@ export function NewsControls({ newsroom, sound, skins, visible = ALL_VISIBLE, ac
           <Cap face={<Glyph name="skin" />} />
         </button>
       )}
+    </div>
+  );
+}
+
+/** Today's Drama: one more keycap by the camera, with a sticker when there's a new pack. */
+export function DramaButton({ drama, actions }: SlotPropsMap["DramaButton"]) {
+  const t = useT();
+  return (
+    <div className="sd-tray solo">
+      <button type="button" className={`sd-key camera drama${drama.on ? " on" : ""}`} onClick={() => actions.openDrama()} aria-label={t("drama.open")} title={t("drama.open")}>
+        <Cap face={<DramaIcon size={24} stroke={2.2} />} />
+        {drama.on ? <b className="sd-unread">{t("drama.on")}</b> : drama.fresh && <b className="sd-unread">{t("drama.new")}</b>}
+      </button>
     </div>
   );
 }

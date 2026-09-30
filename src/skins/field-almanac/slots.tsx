@@ -7,8 +7,8 @@ import { Objectives, Training } from "./notes";
 import { Bubble, Inspector } from "./specimen";
 import { BuildBar } from "./shelf";
 import { Ticker, Toast } from "./dispatch";
-import { NewsControls, PhotoButton, Speed, ThoughtsPanel } from "./controls";
+import { DramaButton, NewsControls, PhotoButton, Speed, ThoughtsPanel } from "./controls";
 import { Benchmarks, Voice } from "./leaderboard";
 
-const slots: SkinSlots = { Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Bubble, ThoughtsPanel, Ticker, Toast, Benchmarks, Voice, NewsControls, PhotoButton };
+const slots: SkinSlots = { Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Bubble, ThoughtsPanel, Ticker, Toast, Benchmarks, Voice, NewsControls, PhotoButton, DramaButton };
 export default slots;
