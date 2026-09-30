@@ -38,10 +38,11 @@ export function wakeSenate(s: GameState, capture = 40) {
   s.capture = Math.max(s.capture ?? 0, capture);
 }
 
-/** Lobby every senator leaning against the lab on the motion on the docket. */
+/** Lobby every senator not yet lobbied on the motion on the docket (a lean is only odds: only the lobbyists make it sure). */
 export function lobbyAll(s: GameState) {
   const v = promisesView(s);
-  for (const sen of v.senators) if (!sen.lobbied && sen.leaning !== v.motion?.labSide) applyNow(s, [{ type: "lobby", senator: sen.id }]);
+  if (!v.lobbying) return;
+  for (const sen of v.senators) if (!sen.lobbied) applyNow(s, [{ type: "lobby", senator: sen.id }]);
 }
 
 /**
@@ -67,25 +68,18 @@ export function stageSenate(s: GameState, moment: SenateMoment) {
   applyNow(s, [{ type: "draftClause", clause: "threshold", on: true }, { type: "draftClause", clause: "permit", on: true }]);
   if (moment === "bill") return;
   applyNow(s, answer(s, 0));
-  until(s, (s) => s.bill!.machine.value !== "floor" || showing(WHIP_CARD)(s));
-  lobbyAll(s);
-  until(s, (s) => s.bill!.machine.value !== "floor" || !!openEventOf(s));
-  for (let i = 0; i < 20 && s.bill!.machine.value === "floor"; i++) {
-    const open = openEventOf(s);
-    if (open) applyNow(s, answer(s, 0));
+  // The floor: the lobbyists see everyone leaning the wrong way, every card is answered, until the roll call.
+  for (let i = 0; i < 60 * TICKS_PER_DAY && s.bill!.machine.value === "floor"; i++) {
     lobbyAll(s);
-    until(s, (s) => s.bill!.machine.value !== "floor" || !!openEventOf(s));
+    tick(s, openEventOf(s) ? answer(s) : []);
   }
-  if (openEventOf(s)) applyNow(s, answer(s, 0));
   if (moment === "bill-law") {
     // Three weeks of law, the Senate's own cards answered, and a quiet screen for the shot.
     const aged = (s: GameState) => s.bill!.lawDay !== null && s.day >= s.bill!.lawDay + 21;
-    for (let k = 0; k < 12 && !(aged(s) && !openEventOf(s)); k++) {
-      until(s, (s) => aged(s) || !!openEventOf(s), 30);
-      if (openEventOf(s)) applyNow(s, answer(s, 0));
-    }
+    for (let i = 0; i < 40 * TICKS_PER_DAY && !(aged(s) && !openEventOf(s)); i++) tick(s, openEventOf(s) ? answer(s) : []);
     return;
   }
+  if (openEventOf(s)) tick(s, answer(s));
   s.flags["capture:leak"] = s.day;
   until(s, showing(EXPOSED_CARD), 5);
 }

@@ -12,6 +12,8 @@ export interface TrackerSenatorView {
   id: string;
   name: string;
   role: string;
+  seat: string;
+  look: { skin: string; suit: string; hair: string; tie: string; glasses: boolean };
   /** What they promised about the motion on the docket ("aye", "nay" or "both"), and the quote. */
   said: "aye" | "nay" | "both" | null;
   line: string;
@@ -62,7 +64,7 @@ export function promisesView(s: GameState): PromisesView {
       const pledge = m?.promises[sen.id];
       const truth = truthScore(rec.kept, rec.broken);
       return {
-        id: sen.id, name: sen.name, role: sen.role,
+        id: sen.id, name: sen.name, role: sen.role, seat: sen.seat, look: { ...sen.look },
         said: pledge?.says ?? null, line: pledge ? fillTemplate(pledge.line, { lab: s.labName, motion: m!.title }) : "",
         leaning: m && live ? leaning(s, m, sen.id, c.lobbied) : null,
         odds: m ? (c.lobbied.includes(sen.id) ? 1 : labOdds(s, m, sen.id)) : 0,

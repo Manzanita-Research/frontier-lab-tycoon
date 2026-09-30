@@ -47,19 +47,26 @@ export function Docked({ vm, actions }: { vm: HudVM; actions: HudActions }) {
   );
 }
 
-/** A card opens in the slot its kind asks for: the livestream, the witness table, the leaked chat, or the plain card. */
-function EventModal({ event, actions, slots: { EventCard, Livestream, Hearing, LeakedChat } }: { event: EventVM; actions: HudActions; slots: Pick<SlotComponents, "EventCard" | "Livestream" | "Hearing" | "LeakedChat"> }) {
+type ModalSlots = Pick<SlotComponents, "EventCard" | "Livestream" | "Hearing" | "LeakedChat" | "Bill" | "PromiseTracker">;
+
+/** A card opens in the slot its kind asks for: the livestream, the witness table, the leaked chat, the bill, the Promise Tracker, or the plain card. */
+function EventModal({ vm, event, actions, slots: { EventCard, Livestream, Hearing, LeakedChat, Bill, PromiseTracker } }: { vm: HudVM; event: EventVM; actions: HudActions; slots: ModalSlots }) {
   if (event.stream) return <Livestream event={event} stream={event.stream} actions={actions} />;
   if (event.hearing) return <Hearing event={event} hearing={event.hearing} actions={actions} />;
   if (event.leak) return <LeakedChat event={event} leak={event.leak} actions={actions} />;
+  if (event.bill) return <Bill event={event} bill={event.bill} actions={actions} />;
+  if (event.tracker) return <PromiseTracker event={event} tracker={event.tracker} bill={vm.senate.bill} layout={vm.layout} actions={actions} />;
   return <EventCard event={event} actions={actions} />;
 }
 
 export function Modals({ vm, actions }: { vm: HudVM; actions: HudActions }) {
-  const { EventCard, Livestream, Hearing, LeakedChat, Confirm, UnlockCard, HowToPlay, EraCard, Outcome, NewsRoom, Mixer, SkinPicker } = useSkin().slots;
+  const { EventCard, Livestream, Hearing, LeakedChat, Bill, PromiseTracker, Confirm, UnlockCard, HowToPlay, EraCard, Outcome, NewsRoom, Mixer, SkinPicker } = useSkin().slots;
   return (
     <>
-      {vm.event && <EventModal event={vm.event} actions={actions} slots={{ EventCard, Livestream, Hearing, LeakedChat }} />}
+      {vm.senate.open && vm.senate.tracker && !vm.event?.tracker && (
+        <PromiseTracker event={null} tracker={vm.senate.tracker} bill={vm.senate.bill} layout={vm.layout} actions={actions} />
+      )}
+      {vm.event && <EventModal vm={vm} event={vm.event} actions={actions} slots={{ EventCard, Livestream, Hearing, LeakedChat, Bill, PromiseTracker }} />}
       {vm.confirm && <Confirm confirm={vm.confirm} actions={actions} />}
       {vm.unlock && <UnlockCard unlock={vm.unlock} actions={actions} />}
       {vm.help && <HowToPlay help={vm.help} actions={actions} />}

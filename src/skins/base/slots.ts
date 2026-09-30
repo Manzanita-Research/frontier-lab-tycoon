@@ -43,11 +43,13 @@ import { Voice } from "./slots/Voice";
 import { Livestream } from "./slots/Livestream";
 import { Hearing } from "./slots/Hearing";
 import { LeakedChat } from "./slots/LeakedChat";
+import { Bill } from "./slots/Bill";
+import { PromiseTracker } from "./slots/PromiseTracker";
 import { Training } from "./slots/Training";
 import { Layout } from "./Layout";
 
 export const baseSlots: SlotComponents = {
   Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, Bubble, ThoughtsPanel, Ticker, Toast, Assistant,
-  EventCard, Confirm, Coach, UnlockCard, HowToPlay, Arena, Benchmarks, Voice, Livestream, Hearing, LeakedChat, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, NewsControls,
+  EventCard, Confirm, Coach, UnlockCard, HowToPlay, Arena, Benchmarks, Voice, Livestream, Hearing, LeakedChat, Bill, PromiseTracker, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, NewsControls,
   NewsArrival, NewsRoom, Mixer,
 };

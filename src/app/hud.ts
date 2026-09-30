@@ -15,6 +15,8 @@ import { leapfrogView, type LeapfrogView } from "../sim/race/leapfrog/view";
 import { papersView, type PapersView } from "../sim/race/papers/view";
 import { hearingView, type HearingView } from "../sim/hearing/view";
 import { yachtView, type YachtView } from "../sim/yacht/view";
+import { captureView, type CaptureView } from "../sim/capture/view";
+import { promisesView, type PromisesView } from "../sim/promises/view";
 import { raceView, type RaceView } from "../sim/race/view";
 import { outcomeOf, releaseGoalText } from "../sim/goals";
 import { estimateLedger } from "../sim/economy";
@@ -101,6 +103,10 @@ export interface Snapshot {
   hearing: HearingView;
   /** The yacht summit (FLT-24): the RSVP, the leaked group chat, the ending. */
   yacht: YachtView;
+  /** Regulatory Capture (FLT-22): the bill the lab was asked to draft, the law in force, the leak odds. */
+  bill: CaptureView;
+  /** The Promise Tracker (FLT-23): the docket, the senators' promises and votes, the Truth-o-meters. */
+  promises: PromisesView;
   /** Operations: staff, slop, broken buildings, queues. */
   ops: OpsView;
   assistant: AssistantMessage | null;
@@ -168,6 +174,8 @@ export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO
     papers: papersView(s),
     hearing: hearingView(s),
     yacht: yachtView(s),
+    bill: captureView(s),
+    promises: promisesView(s),
     ops: opsView(s),
     assistant: assistantOf(s),
     firstBuildPending: !!s.coach && s.flags.started === undefined && s.flags.firstBuild === undefined,

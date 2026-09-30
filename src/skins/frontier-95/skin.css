@@ -3097,3 +3097,273 @@
     transform: rotate(-12deg) scale(2.5);
   }
 }
+
+/* Regulatory Capture (FLT-22): WordPerfectly 6.0 with Track Changes on. The Promise Tracker (FLT-23): Excess 95. */
+[data-skin="frontier-95"] {
+  .f95-bill {
+    width: min(660px, 100%);
+  }
+  .f95-xls {
+    width: min(720px, 100%);
+  }
+  .f95-menubar {
+    display: flex;
+    gap: 14px;
+    padding: 2px 8px;
+    font-size: 14px;
+    .f95-trk {
+      margin-left: auto;
+      padding: 0 4px;
+      border: 1px solid var(--sh);
+      background: #fff;
+      color: #c00000;
+      font-weight: bold;
+    }
+  }
+  .f95-docwrap {
+    position: relative;
+    margin: 0 4px;
+    padding: 10px;
+    max-height: 44dvh;
+    overflow: auto;
+    background: #808080;
+  }
+  .f95-page-sheet {
+    padding: 14px 16px 16px 22px;
+    background: #fff;
+    color: #000;
+    font-family: "Times New Roman", Times, serif;
+    font-size: 15px;
+    box-shadow: 3px 3px 0 #000;
+    h3 {
+      margin: 0 0 6px;
+      text-align: center;
+      font-size: 17px;
+      text-transform: uppercase;
+      text-decoration: underline;
+    }
+  }
+  .f95-enact {
+    margin: 0 0 8px;
+    font-style: italic;
+  }
+  .f95-clauses {
+    margin: 0;
+    padding: 0 0 0 18px;
+    li {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 180px;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    li.ins {
+      border-left: 2px solid #c00000;
+      margin-left: -10px;
+      padding-left: 8px;
+    }
+    li.ins .f95-clause > span {
+      color: #c00000;
+      text-decoration: underline;
+    }
+    li.del .f95-clause > span {
+      color: #606060;
+    }
+    li.del {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  .f95-clause {
+    display: flex;
+    gap: 6px;
+    align-items: flex-start;
+    cursor: pointer;
+    input {
+      margin-top: 3px;
+    }
+  }
+  .f95-fx {
+    display: block;
+    color: #000080;
+    font-family: var(--flt-font-ui);
+    font-size: 12px;
+    text-decoration: none;
+  }
+  .f95-balloon {
+    align-self: start;
+    padding: 3px 5px;
+    border: 1px solid #c00000;
+    background: #ffe0e0;
+    color: #000;
+    font-family: var(--flt-font-ui);
+    font-size: 12px;
+    line-height: 1.25;
+    b {
+      color: #c00000;
+    }
+  }
+  .f95-props {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    width: min(300px, 80%);
+    transform: rotate(-2deg);
+    box-shadow: 4px 4px 0 #000;
+    dl {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 3px 8px;
+      margin: 0;
+      padding: 8px 10px;
+      font-size: 14px;
+    }
+    dd {
+      margin: 0;
+    }
+    .hot {
+      background: #ffe000;
+      font-weight: bold;
+    }
+  }
+  .f95-formula {
+    display: grid;
+    grid-template-columns: 44px auto minmax(0, 1fr);
+    gap: 4px;
+    align-items: center;
+    margin: 4px;
+    font-size: 13px;
+    .ref,
+    code {
+      padding: 1px 4px;
+      background: #fff;
+      color: #000;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .fx {
+      font-style: italic;
+      font-weight: bold;
+    }
+  }
+  .f95-sheetwrap {
+    margin: 0 4px;
+    background: #fff;
+    overflow: auto;
+  }
+  .f95-sheet {
+    width: 100%;
+    border-collapse: collapse;
+    color: #000;
+    font-size: 13px;
+    th {
+      min-width: 22px;
+      padding: 1px 4px;
+      border: 1px solid #808080;
+      background: var(--flt-color-panel);
+      font-weight: normal;
+      text-align: center;
+    }
+    td {
+      padding: 2px 5px;
+      border: 1px solid #c0c0c0;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    tr.hdr td {
+      font-weight: bold;
+      background: #ffffe0;
+    }
+    tr.lobbied td.who {
+      background: #fff0c0;
+    }
+    tr.motion td,
+    tr.law td {
+      white-space: normal;
+      font-size: 12px;
+    }
+    tr.law td {
+      background: #ffe0e0;
+    }
+    td.who {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      span {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.1;
+      }
+    }
+    small {
+      color: #606060;
+      font-size: 11px;
+    }
+    .side-aye {
+      color: #008000;
+      font-weight: bold;
+    }
+    .side-nay {
+      color: #c00000;
+      font-weight: bold;
+    }
+    .side-both {
+      color: #806000;
+      font-weight: bold;
+    }
+    td.kept {
+      background: #c0ffc0;
+      font-weight: bold;
+    }
+    td.broken {
+      background: #ff8080;
+      color: #000;
+      font-weight: bold;
+    }
+    td.truth {
+      min-width: 150px;
+      .f95-prog {
+        display: block;
+        height: 12px;
+      }
+      span {
+        display: block;
+        font-size: 12px;
+      }
+    }
+  }
+  .f95-cellface {
+    width: 22px;
+    height: 30px;
+    flex: none;
+  }
+  .f95-cellbtn {
+    min-width: 0;
+    padding: 1px 6px;
+    font-size: 12px;
+  }
+  .f95-sheettabs {
+    display: flex;
+    gap: 2px;
+    margin: 0 4px;
+    font-size: 12px;
+    span {
+      padding: 1px 8px;
+      border: 1px solid var(--sh);
+      border-top: none;
+      background: var(--flt-color-panel);
+    }
+    .on {
+      background: #fff;
+      font-weight: bold;
+    }
+  }
+  @media (max-width: 640px) {
+    .f95-clauses li {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .f95-sheet td.truth {
+      min-width: 110px;
+    }
+  }
+}

@@ -27,7 +27,7 @@ import { SKIN_API_VERSION } from "./types";
 import { HELP_BUILDINGS, HELP_LOOP, HELP_NUMBERS, HELP_TITLE } from "../../content/help";
 import { playableOf, type PlayableInput } from "./playable";
 import type {
-  ArenaVM, BenchCellVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HearingMoveVM, HearingVM, HudVM, LeakVM, SenatorVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
+  ArenaVM, BenchCellVM, BillVM, SenateVM, TrackerVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HearingMoveVM, HearingVM, HudVM, LeakVM, SenatorVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
   ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, ResponseVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, StreamVM, ThoughtRowVM, TrainingVM, TrendVM, VoiceVM, WalkerKindVM,
 } from "./types";
 
@@ -53,6 +53,8 @@ export interface HudInput {
   /** The Staff panel is open, and whose patrol zone is being painted. */
   staffOpen: boolean;
   zone: number | null;
+  /** The Senate window (FLT-22/23) is open. Optional: closed. */
+  senateOpen?: boolean;
   arena: { open: boolean; alert: boolean; flinch: boolean; moved: Record<string, "up" | "down"> };
   /** Release Leapfrog's real-time flourishes (row flashes, blinking badges, solved columns kept on the board, news-cycle history). Optional: none is fine. */
   leapfrog?: MotionView;
@@ -258,7 +260,29 @@ function buildOf(i: HudInput): { items: BuildItemVM[]; tip: BuildTipVM | null } 
     built: 0,
     isBulldoze: false,
     isPath: false,
+    panel: true,
   });
+  // The Senate (FLT-23): the Promise Tracker and the bill, once the lab has been to its first hearing.
+  if (s.promises.enabled) {
+    const due = s.promises.stage === "campaign" || s.promises.stage === "rollCall" || s.bill.stage === "invited";
+    items.push({
+      kind: "senate",
+      name: "Senate",
+      short: "Senate",
+      blurb: "Three senators, their promises, and what it costs to change their minds.",
+      price: 0,
+      priceText: s.bill.stage === "invited" ? "draft due" : due ? "vote soon" : "in recess",
+      free: false,
+      affordable: true,
+      hotkey: null,
+      selected: i.senateOpen ?? false,
+      race: false,
+      built: 0,
+      isBulldoze: false,
+      isPath: false,
+      panel: true,
+    });
+  }
   const t = i.tool;
   let tip: BuildTipVM | null = null;
   if (t === "path") tip = { kind: t, name: "Path", text: "Drag to lay paths. Buildings need one beside them or nobody visits.", upkeepText: "Right-drag to pan." };
@@ -302,7 +326,7 @@ function eventOf(i: HudInput): { event: EventVM | null; era: HudVM["eraCard"] } 
   const def = open ? eventById(open.id) : undefined;
   if (!open || !def) return { event: null, era: null };
   const hearing = def.kind === "hearing" ? hearingOf(i.snap) : null;
-  const vars = { ...i.snap.race.vars, lab: i.snap.labName, senator: hearing?.asking?.name ?? "The chair" };
+  const vars = { ...i.snap.race.vars, lab: i.snap.labName, senator: hearing?.asking?.name ?? "The chair", act: i.snap.bill.act || "the bill", motion: i.snap.promises.motion?.title ?? "the motion" };
   if (def.kind === "era") {
     const n = Number(def.id.replace("era", ""));
     const era = ERAS[n - 1]!;
@@ -320,19 +344,105 @@ function eventOf(i: HudInput): { event: EventVM | null; era: HudVM["eraCard"] } 
       body: fillTemplate(def.body, vars),
       tone: def.tone,
       stripe: def.stripe ?? TONE_LABEL[def.tone],
-      kind: def.kind === "auction" || def.kind === "response" || def.kind === "stream" || def.kind === "hearing" || def.kind === "leak" ? def.kind : "plain",
+      kind: def.kind === "auction" || def.kind === "response" || def.kind === "stream" || def.kind === "hearing" || def.kind === "leak" || def.kind === "bill" || def.kind === "vote" ? def.kind : "plain",
       choices: def.choices.map((c, k) => ({ label: c.label, hint: fillTemplate(c.hint, vars), key: k + 1 })),
       paddles: def.kind === "auction" ? rivals.map((r, k) => ({ id: r.id, name: r.short, color: r.color, number: 200 + ((r.score * 7 + k * 31) % 800) })) : [],
       response: def.kind === "response" ? responseOf(i.snap, vars) : null,
       stream: def.kind === "stream" ? streamOf(i.snap, def.id, vars) : null,
       hearing,
       leak: def.kind === "leak" ? leakOf(i.snap) : null,
+      bill: def.kind === "bill" ? billOf(i.snap) : null,
+      tracker: def.kind === "vote" ? trackerOf(i.snap) : null,
     },
   };
 }
 
 const MOVE_LABEL: Record<HearingMoveVM["meter"], string> = { trust: "Trust", capture: "Capture", hype: "Hype", heat: "Heat" };
 const arrows = (n: number) => (n > 0 ? "▲" : "▼").repeat(Math.abs(n) >= 8 ? 3 : Math.abs(n) >= 4 ? 2 : 1);
+
+const SIDE_TEXT = { aye: "Aye", nay: "Nay", both: "Both" } as const;
+const BILL_STATUS: Record<string, string> = {
+  invited: "Draft", declined: "Shredded", floor: "On the floor", failed: "Voted down", law: "In force", exposed: "Exposed", fallout: "Fallout", sunset: "Sunset", quiet: "Nothing on the desk",
+};
+
+/** Regulatory Capture's bill (FLT-22): the draft, the law, and what it does to each rival. */
+export function billOf(s: Snapshot): BillVM | null {
+  const b = s.bill;
+  if (!b.enabled || !b.act) return null;
+  const clauses = b.clauses.map((c) => ({ ...c }));
+  const picked = clauses.filter((c) => c.on).length;
+  const rivals = b.rivals.map((r) => ({
+    id: r.id,
+    name: r.name,
+    tags: [
+      ...(r.growth < 1 ? [`grows ${Math.round((1 - r.growth) * 100)}% slower`] : []),
+      ...(r.pace < 1 ? [`trains ${Math.round((1 - r.pace) * 100)}% slower`] : []),
+      ...(r.closed ? ["ships closed"] : []),
+    ],
+  }));
+  return {
+    stage: b.stage,
+    act: b.act,
+    fileName: `${b.act.replace(/[^A-Za-z0-9]+/g, "_").replace(/^_|_$/g, "")}_FINAL_v3.doc`,
+    author: b.author,
+    reporter: b.reporter,
+    clauses,
+    editable: b.stage === "invited",
+    picked,
+    pick: b.pick,
+    pickText: `${picked} of ${b.pick} clauses`,
+    status: b.stage === "law" && b.lawDays !== null ? `In force · day ${b.lawDays}` : (BILL_STATUS[b.stage] ?? b.stage),
+    tally: b.ayes === null ? null : `${b.ayes}–${3 - b.ayes}`,
+    leakText: b.stage === "law" ? `${(b.leakOdds * 100).toFixed(b.leakOdds < 0.1 ? 1 : 0)}% a day` : null,
+    rivals,
+  };
+}
+
+const TRACKER_STATUS: Record<string, string> = { recess: "In recess", dormant: "In recess", rollCall: "Roll call today" };
+
+/** The Promise Tracker (FLT-23): the motion, three senators, what they said and how they will vote. */
+export function trackerOf(s: Snapshot): TrackerVM | null {
+  const p = s.promises;
+  if (!p.enabled) return null;
+  const last = p.last ? { title: p.last.title, passed: p.last.passed, tally: `${p.last.ayes}–${p.last.nays}` } : null;
+  const status =
+    p.stage === "campaign" ? (p.daysUntilVote === 0 ? "Roll call tomorrow" : `Roll call in ${p.daysUntilVote} day${p.daysUntilVote === 1 ? "" : "s"}`)
+    : (p.stage === "passed" || p.stage === "failed") && last ? `${last.passed ? "Passed" : "Failed"} ${last.tally}`
+    : (TRACKER_STATUS[p.stage] ?? p.stage);
+  return {
+    stage: p.stage,
+    motion: p.motion ? { ...p.motion, labSideText: `${s.labName} wants ${SIDE_TEXT[p.motion.labSide]}` } : null,
+    status,
+    lobbying: p.lobbying,
+    senators: p.senators.map((sen) => ({
+      id: sen.id,
+      name: sen.name,
+      role: sen.role,
+      seat: sen.seat,
+      look: { ...sen.look },
+      said: sen.said,
+      saidText: sen.said ? SIDE_TEXT[sen.said] : "-",
+      line: sen.line,
+      leaning: sen.leaning,
+      oddsText: p.motion ? pct(sen.odds) : "-",
+      lobbied: sen.lobbied,
+      feeText: formatMoney(sen.fee),
+      canLobby: p.lobbying && !sen.lobbied && s.cash >= sen.fee,
+      truth: sen.truth,
+      truthText: sen.truth === null ? "-" : `${sen.truth}%`,
+      truthLabel: sen.truthLabel,
+      record: `${sen.kept} kept · ${sen.broken} broken`,
+      recent: sen.log.slice(-4).map((r) => ({ title: r.title, said: SIDE_TEXT[r.said], voted: SIDE_TEXT[r.voted], kept: r.kept, lobbied: r.lobbied })),
+    })),
+    last,
+    held: p.held,
+  };
+}
+
+function senateOf(i: HudInput): SenateVM {
+  const tracker = trackerOf(i.snap);
+  return { open: (i.senateOpen ?? false) && tracker !== null, tracker, bill: billOf(i.snap) };
+}
 
 /** The Hearing's witness table: the senators, the meters, and what each answer would move. */
 function hearingOf(s: Snapshot): HearingVM | null {
@@ -638,14 +748,14 @@ function confirmOf(s: Snapshot): ConfirmVM | null {
 
 function helpOf(items: readonly BuildItemVM[]): HudVM["help"] {
   const buildings = items
-    .filter((it) => !it.isBulldoze && it.kind !== "staff")
+    .filter((it) => !it.isBulldoze && !it.panel)
     .map((it) => ({ kind: it.kind, name: it.name, line: HELP_BUILDINGS[it.kind] ?? `${it.name}: ${it.blurb ?? ""}`.trim() }));
   return { title: HELP_TITLE, loop: [...HELP_LOOP], buildings, numbers: HELP_NUMBERS.map((n) => ({ ...n })) };
 }
 
 /** What the lab has earned: only these tools are in the build panel (the bulldozer always is), and the Staff tile follows the payroll. */
 function earnedItems(items: BuildItemVM[], play: PlayableInput): BuildItemVM[] {
-  return items.filter((it) => (it.isBulldoze ? true : it.kind === "staff" ? play.visible.staff : it.isPath || play.buildings.has(it.kind)));
+  return items.filter((it) => (it.isBulldoze ? true : it.kind === "staff" ? play.visible.staff : it.kind === "senate" ? true : it.isPath || play.buildings.has(it.kind)));
 }
 
 export function hudViewModel(i: HudInput): HudVM {
@@ -663,6 +773,7 @@ export function hudViewModel(i: HudInput): HudVM {
     buildTip: build.tip,
     speed: speedOf(i.speed),
     staff: staffOf(i, play.staff),
+    senate: senateOf(i),
     bubbles: bubblesOf(i),
     ticker: i.news.slice(-TICKER_ITEMS).map((n) => ({ id: n.id, text: n.text, tone: n.tone })),
     toasts: spokenToasts(i).map((t) => ({ id: t.id, text: t.text, tone: t.tone })),

@@ -93,6 +93,12 @@ const TOOLS: Record<string, ReactElement> = {
       <path {...accent(PLUM)} d="M13 17l3 7 3-7" />
     </>
   ),
+  senate: (
+    <>
+      <path {...line} d="M9 15a7 6.5 0 0 1 14 0ZM6 15h20v3H6ZM4 25h24v3H4ZM9 18v7M13.5 18v7M18.5 18v7M23 18v7" />
+      <path {...accent(PLUM)} d="M16 8.5V4h4" />
+    </>
+  ),
 };
 
 /** The shelf's engraving for a tool id; a mod's new tool gets a plain crate. */

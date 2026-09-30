@@ -7,7 +7,7 @@ import type { Cue } from "../../audio/score";
 import { fx } from "../../render/fx/state";
 import { roomAtom, skipNews, viewRoom } from "../../newsroom/state";
 import { setPhoto, takePhoto } from "../juice/photo";
-import { arenaOpenAtom, chatCountAtom, helpOpenAtom, photoFlashAtom, photoTimeAtom, staffOpenAtom } from "./state";
+import { arenaOpenAtom, chatCountAtom, helpOpenAtom, photoFlashAtom, photoTimeAtom, senateOpenAtom, staffOpenAtom } from "./state";
 import { skinActions } from "./skinControl";
 import type { StaffJob } from "../../sim/types";
 import type { HudActions } from "./types";
@@ -18,6 +18,7 @@ export const hudActions: HudActions = {
   place: (kind) => {
     // "staff" is a tile in the palette that opens the payroll instead of picking a tool.
     if (kind === "staff") return void registry.set(staffOpenAtom, !registry.get(staffOpenAtom));
+    if (kind === "senate") return void registry.set(senateOpenAtom, !registry.get(senateOpenAtom));
     send({ type: "SET_TOOL", tool: kind as Tool | null });
   },
   setSpeed: (n) => {
@@ -73,6 +74,10 @@ export const hudActions: HudActions = {
     if (id === null ? painting !== null : id !== painting) send({ type: "SET_ZONE", id });
   },
   clearZone: (id) => send({ type: "COMMAND", command: { type: "clearZone", id } }),
+
+  closeSenate: () => registry.set(senateOpenAtom, false),
+  lobby: (senator) => send({ type: "COMMAND", command: { type: "lobby", senator } }),
+  draftClause: (clause, on) => send({ type: "COMMAND", command: { type: "draftClause", clause, on } }),
 
   openNews: () => viewRoom("archive"),
   viewNews: (idOrArchive) => {

@@ -175,6 +175,7 @@ function useNewsDesk(snap: Snapshot) {
  */
 function useOverlays(vm: HudVM) {
   useAutoPause("staff", vm.staff.open);
+  useAutoPause("senate", vm.senate.open);
   useAutoPause("mixer", vm.sound.open);
   useAutoPause("arena", vm.arena.open && vm.layout.compact);
 }

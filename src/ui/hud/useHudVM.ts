@@ -12,7 +12,7 @@ import { skinList } from "../../skins/registry";
 import type { LeapfrogView } from "../../sim/race/leapfrog/view";
 import { shotAtom } from "../juice/photo";
 import { newMotion, NO_MOTION, stepMotion, type Motion, type MotionView } from "./leapfrogMotion";
-import { arenaOpenAtom, chatCountAtom, helpOpenAtom, photoFlashAtom, photoTimeAtom, skinUiAtom, staffOpenAtom } from "./state";
+import { arenaOpenAtom, chatCountAtom, helpOpenAtom, photoFlashAtom, photoTimeAtom, senateOpenAtom, skinUiAtom, staffOpenAtom } from "./state";
 import { playableFixture } from "./previewLadder";
 import type { HudVM } from "./types";
 import { hudViewModel } from "./vm";
@@ -170,6 +170,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
   const shot = useAtomValue(shotAtom);
   const skinUi = useAtomValue(skinUiAtom);
   const staffOpen = useAtomValue(staffOpenAtom);
+  const senateOpen = useAtomValue(senateOpenAtom);
   const helpOpen = useAtomValue(helpOpenAtom);
   const viewport = useViewport();
   const tapHint = useTapHint(selected);
@@ -197,6 +198,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         tapHint,
         toldGateway: toldGateway.current,
         staffOpen,
+        senateOpen,
         zone,
         arena: { open: arenaOpen, alert: motion.alert, flinch: motion.flinch, moved: motion.moved },
         leapfrog,
@@ -215,7 +217,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         },
         viewport,
       }),
-    [shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, motion, leapfrog, room, chatCount, helpOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, skinUi, list, viewport, staffOpen, zone],
+    [shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, motion, leapfrog, room, chatCount, helpOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, skinUi, list, viewport, staffOpen, senateOpen, zone],
   );
   return vm;
 }

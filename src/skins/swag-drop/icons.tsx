@@ -108,6 +108,13 @@ export const KEY_ICONS: Record<string, ReactElement> = {
       <path d="M6 28c1-6 5-9 10-9s9 3 10 9Z" fill="#2FB36E" stroke="currentColor" strokeWidth={W} />
     </svg>
   ),
+  senate: (
+    <svg {...K}>
+      <path d="M9 15a7 6.5 0 0 1 14 0Z" fill="#F2B53A" stroke="currentColor" strokeWidth={W} />
+      <path d="M6 15h20v3H6ZM4 25h24v3H4Z" fill="#fff" stroke="currentColor" strokeWidth={W} />
+      <path d="M9 18v7M13.5 18v7M18.5 18v7M23 18v7M16 4v4" stroke="currentColor" strokeWidth={W} />
+    </svg>
+  ),
 };
 
 const G = {

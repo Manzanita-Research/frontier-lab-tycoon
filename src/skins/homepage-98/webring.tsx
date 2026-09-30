@@ -23,11 +23,12 @@ const RING: Record<string, string> = {
   solar: "#0050a0",
   bulldoze: "#404040",
   staff: "#007060",
+  senate: "#303078",
 };
 
-/** The tool Prev (-1) or Next (1) lands on: round the ring, skipping the payroll tile and anything you cannot afford. */
+/** The tool Prev (-1) or Next (1) lands on: round the ring, skipping the payroll and Senate tiles and anything you cannot afford. */
 export function ringStep(items: readonly BuildItemVM[], dir: 1 | -1): string | null {
-  const ring = items.filter((i) => i.kind !== "staff" && (i.affordable || i.selected));
+  const ring = items.filter((i) => !i.panel && (i.affordable || i.selected));
   if (ring.length === 0) return null;
   const at = ring.findIndex((i) => i.selected);
   const next = at === -1 ? (dir === 1 ? ring[0]! : ring[ring.length - 1]!) : ring[(at + dir + ring.length) % ring.length]!;

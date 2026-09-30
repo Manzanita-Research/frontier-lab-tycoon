@@ -37,3 +37,6 @@ export const helpOpenAtom = Atom.make(false);
 
 /** Is the Staff panel open? UI-only state, kept as an Effect atom like the rest of what React reads. */
 export const staffOpenAtom = Atom.make(false);
+
+/** Is the Senate window (the Promise Tracker and the bill, FLT-22/23) open? UI-only state. */
+export const senateOpenAtom = Atom.make(false);

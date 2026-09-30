@@ -2,7 +2,7 @@
 // nothing else in the game: no `src/sim/**`, no store, no three.
 import type { ComponentType, ReactNode } from "react";
 import type {
-  ArenaVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, EraCardVM, EventVM, HearingVM, HudActions, HudVM, LeakVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
+  ArenaVM, BillVM, BubbleVM, TrackerVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, EraCardVM, EventVM, HearingVM, HudActions, HudVM, LeakVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
   NewsroomVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StatsVM, ThoughtRowVM, TickerItemVM,
   StaffVM, TeaserVM, ProgressVM, ToastVM, TrainingVM, UnlockCardVM, VisibleVM, HelpVM,
 } from "../ui/hud/types";
@@ -34,6 +34,8 @@ export const SLOT_NAMES = [
   "Livestream",
   "Hearing",
   "LeakedChat",
+  "Bill",
+  "PromiseTracker",
   "EraCard",
   "FrontPage",
   "GroupChat",
@@ -106,6 +108,19 @@ export interface SlotPropsMap {
   Hearing: { event: EventVM; hearing: HearingVM; actions: HudActions };
   /** The yacht summit's leaked group chat (FLT-24): the rivals' messages with a LEAKED stamp, and the three replies. Opens instead of EventCard for `event.kind === "leak"`; answer with `actions.choose`. */
   LeakedChat: { event: EventVM; leak: LeakVM; actions: HudActions };
+  /**
+   * Regulatory Capture's bill (FLT-22): the draft the lab was asked to write (tick clauses with `actions.draftClause`,
+   * up to `bill.pick`), and the leak ("Author: {lab} Legal"). Opens instead of EventCard for `event.kind === "bill"`;
+   * answer with `actions.choose`.
+   */
+  Bill: { event: EventVM; bill: BillVM; actions: HudActions };
+  /**
+   * The Promise Tracker (FLT-23): the motion on the docket and three senators (what they promised, how they lean, the
+   * lobbyists' fee through `actions.lobby`, their Truth-o-meter). Opens instead of EventCard for `event.kind === "vote"`
+   * (answer with `actions.choose`), and as a window from the build palette's "senate" tile with `event` null (close with
+   * `actions.closeSenate`). `bill` is the law in force, if any, for a skin that shows it alongside.
+   */
+  PromiseTracker: { event: EventVM | null; tracker: TrackerVM; bill: BillVM | null; layout: LayoutVM; actions: HudActions };
   EraCard: { era: EraCardVM; actions: HudActions };
   FrontPage: { paper: PaperVM; actions: HudActions };
   GroupChat: { chat: ChatVM; actions: HudActions };

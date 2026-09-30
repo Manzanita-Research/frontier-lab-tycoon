@@ -470,7 +470,7 @@
         {
           "id": "capture-draft",
           "title": "Could your team take a first pass at the bill?",
-          "body": "A Senate staffer has sent over a blank document: {act}_FINAL_v1.doc. Pick two clauses. Nobody ever checks the file properties.",
+          "body": "A Senate staffer has emailed over a blank template for {act}, subject line \"quick favour\". Pick two clauses. Nobody ever checks the file properties.",
           "tone": "neutral",
           "kind": "bill",
           "stripe": "Regulatory Capture",
