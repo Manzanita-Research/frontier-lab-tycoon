@@ -7,6 +7,7 @@ import { arcMachine } from "../machines/arc";
 import { compileChart, stepChart, type ChartEvent } from "../machines/packChart";
 import { initialStored } from "../machines/run";
 import { happinessOf } from "../needs";
+import { poachAppeal } from "../birdapp/effects";
 import { addNews } from "../news";
 import { foundNeoLab, neoLabById } from "../neolabs/driver";
 import { createRng, type Rng } from "../rng";
@@ -100,8 +101,8 @@ export function offerPoach(s: GameState, from: { from: string; name: string; sho
   const [lo, hi] = R.bigPoachers.includes(from.from) ? R.targets.big : R.targets.other;
   // Never below the floor: an offer takes at most the researchers above it.
   const n = Math.min(rng.int(lo, hi), staff.length - R.targets.floor);
-  // The least happy are the ones who pick up the phone.
-  const targets = [...staff].sort((a, b) => happinessOf(a) - happinessOf(b) || a.id - b.id).slice(0, Math.max(1, n));
+  // The Bird App's big accounts (and its cancelled, FLT-69) get the first call; then the least happy pick up the phone.
+  const targets = [...staff].sort((a, b) => poachAppeal(s, b.id) - poachAppeal(s, a.id) || happinessOf(a) - happinessOf(b) || a.id - b.id).slice(0, Math.max(1, n));
   p.offer = { day: s.day, from: from.from, name: from.name, short: from.short, targets: targets.map((w) => w.id), names: targets.map((w) => w.name) };
   p.tally.offers++;
   const asks = POACHING.content.thoughts.add.filter((t) => t.when === "offer");

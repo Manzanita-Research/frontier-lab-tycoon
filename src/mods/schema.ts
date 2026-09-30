@@ -1,6 +1,7 @@
 import { Effect, Schema, SchemaIssue, Struct } from "effect";
 import { BenchmarkSchema, MishapSchema } from "../content/leapfrog";
 import { FactionSchema } from "../content/factions";
+import { BirdArchetypeSchema, BirdEventSchema, BirdPostSchema, BirdRowSchema } from "../content/birdapp";
 import { HUD_PANELS, SYSTEM_IDS } from "../content/progression";
 
 const text = Schema.NonEmptyString;
@@ -128,6 +129,13 @@ const PartialArc = Schema.Struct({ id, ...Struct.map(Struct.omit(Arc.fields, ["i
 /** events accepts today's choice cards and the documented data-only statecharts. arcs is also an explicit section. */
 export const EventOrArc = Schema.Union([EventCard, Arc]);
 const EventPatch = Schema.Struct({ add: Schema.optionalKey(Schema.Array(EventOrArc)), override: Schema.optionalKey(Schema.Array(Schema.Union([PartialEvent, PartialArc]))), remove: Schema.optionalKey(Schema.Array(id)) });
+const partialOf = <const F extends Schema.Struct.Fields>(fields: F) => Schema.Struct({ id, ...Struct.map(Struct.omit(fields, ["id"]), Schema.optionalKey) });
+/** FLT-69: the Bird App's rows are archetypes, posts and reactions, told apart by `kind`. */
+const BirdPatch = Schema.Struct({
+  add: Schema.optionalKey(Schema.Array(BirdRowSchema)),
+  override: Schema.optionalKey(Schema.Array(Schema.Union([partialOf(BirdArchetypeSchema.fields), partialOf(BirdPostSchema.fields), partialOf(BirdEventSchema.fields)]))),
+  remove: Schema.optionalKey(Schema.Array(id)),
+});
 // Adds need an id even where the original game uses a dictionary or anonymous lines.
 const identifiedBuilding = Schema.Struct({ id, ...Building.fields });
 const identifiedHeadline = Schema.Struct({ ...Headline.fields, id, trigger: Schema.optionalKey(text) });
@@ -157,6 +165,7 @@ export const ContentPatch = Schema.Struct({
   disasters: Schema.optionalKey(patch(Disaster)),
   benchmarks: Schema.optionalKey(patch(BenchmarkSchema)), mishaps: Schema.optionalKey(patch(MishapSchema)),
   factions: Schema.optionalKey(patch(FactionSchema)),
+  birdapp: Schema.optionalKey(BirdPatch),
 });
 /** A bundled font: an asset id (the family is the id), or FLT-14's `{ family, src }` with `src` an asset id. */
 export const SkinFont = Schema.Union([text, Schema.Struct({
@@ -248,7 +257,7 @@ export function suggest(word: string, candidates: readonly string[]): string {
   const best = candidates.map((value) => ({ value, distance: distance(word, value) })).sort((a, b) => a.distance - b.distance)[0];
   return best && best.distance <= 2 ? ` (did you mean "${best.value}"?)` : "";
 }
-const fieldNames = ["apiVersion", "id", "name", "version", "author", "description", "skin", "content", "assets", "audio", "looks", "cues", "music", ...Object.keys(Look.fields), ...Object.keys(LookPart.fields), "family", "src", "add", "override", "remove", ...Object.keys(ContentPatch.fields), ...Object.keys(Rival.fields), ...Object.keys(Building.fields), ...Object.keys(SkinData.fields), "choices", "effects", "type", "amount", "cash", "hype", "discourse", "protesters", "flag", "news", "thought", "place", "race", "text", "tone", "trigger", "when", "presentation", "good", "bad", "neutral", "joke", "walker", "flow", "sprite", "offmap", "initial", "states", "entry", "exit", "on", "guard", "actions", "target", "params", "blurb", "odds", "requires", "cards", "difficulty", "replaces", "weight", "voice", "headline", ...Object.keys(FactionSchema.fields), "faction", "relation"];
+const fieldNames = ["apiVersion", "id", "name", "version", "author", "description", "skin", "content", "assets", "audio", "looks", "cues", "music", ...Object.keys(Look.fields), ...Object.keys(LookPart.fields), "family", "src", "add", "override", "remove", ...Object.keys(ContentPatch.fields), ...Object.keys(Rival.fields), ...Object.keys(Building.fields), ...Object.keys(SkinData.fields), "choices", "effects", "type", "amount", "cash", "hype", "discourse", "protesters", "flag", "news", "thought", "place", "race", "text", "tone", "trigger", "when", "presentation", "good", "bad", "neutral", "joke", "walker", "flow", "sprite", "offmap", "initial", "states", "entry", "exit", "on", "guard", "actions", "target", "params", "blurb", "odds", "requires", "cards", "difficulty", "replaces", "weight", "voice", "headline", ...Object.keys(FactionSchema.fields), "faction", "relation", ...Object.keys(BirdArchetypeSchema.fields), ...Object.keys(BirdPostSchema.fields), ...Object.keys(BirdEventSchema.fields)];
 function pathString(path: ReadonlyArray<PropertyKey | { readonly key: PropertyKey }>): string {
   return path.reduce<string>((s, part) => {
     const key = typeof part === "object" ? part.key : part;

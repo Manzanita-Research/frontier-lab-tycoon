@@ -62,6 +62,8 @@ export function stageEndingMoment(moment: string): GameState {
   if (moment === "memo-countdown") {
     offerMemo(s);
     until(s, (w) => w.day >= w.flags["memo:offered"]! + 2, 3);
+    // A card that opened at that midnight would hide the countdown: answer it (a tick, not a day).
+    until(s, (w) => !openEventOf(w), 1);
     return s;
   }
   if (moment === "memo-race" || moment === "memo-slow") {

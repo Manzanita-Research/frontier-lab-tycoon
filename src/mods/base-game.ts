@@ -10,6 +10,7 @@ import { DISASTERS } from "../sim/disasters/pack";
 import { LEAPFROG } from "../content/leapfrog";
 import { RIVAL_DEFS } from "../content/rivals";
 import { BASE_ARCS, FACTIONS } from "../content/factions";
+import { BIRDAPP } from "../content/birdapp";
 import * as Names from "../content/names";
 import { MAX_STAFF, MAX_PER_JOB } from "../content/staff";
 import * as Constants from "../sim/constants";
@@ -31,7 +32,7 @@ export const baseContent: ContentApi = {
   progression: PROGRESSION, coach: COACH,
   buildings: BUILDINGS, rivals: RIVAL_DEFS, headlines: HEADLINES, thoughts: THOUGHTS, events: EVENTS, goals: GOALS,
   arcs: BASE_ARCS, endings: [], tips: [], disasters: DISASTERS as unknown as ContentApi["disasters"],
-  benchmarks: LEAPFROG.benchmarks, mishaps: LEAPFROG.mishaps, factions: FACTIONS,
+  benchmarks: LEAPFROG.benchmarks, mishaps: LEAPFROG.mishaps, factions: FACTIONS, birdapp: BIRDAPP,
   walkerKinds: [
     { id: "researcher", name: "Researcher", presentation: "walker", needs: ["energy", "focus", "fomo"] },
     { id: "visitor", name: "Visitor", presentation: "walker", needs: ["patience", "impressed"] },

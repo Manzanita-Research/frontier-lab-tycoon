@@ -53,6 +53,8 @@ export interface DebugParams {
   promises: boolean;
   /** Factions (FLT-33) are on unless `?factions=off`. */
   factions: boolean;
+  /** The Bird App (FLT-69) wakes at Level 3 unless `?birdapp=off`. */
+  birdapp: boolean;
   /** The Water Discourse escalation (FLT-25) runs unless `?water=off` (the plain water crowd stays). */
   water: boolean;
   /**
@@ -103,6 +105,7 @@ export function readDebugParams(search = typeof window === "undefined" ? "" : wi
     capture: q.get("capture") !== "off",
     promises: q.get("promises") !== "off",
     factions: q.get("factions") !== "off",
+    birdapp: q.get("birdapp") !== "off",
     water: q.get("water") !== "off",
     ladder: q.has("debug") && num("ladder") !== null && num("ladder")! >= 1 && num("ladder")! <= 5 ? { level: Math.round(num("ladder")!) as 1 | 2 | 3 | 4 | 5, coach: num("coach"), unlock: q.has("unlock") } : null,
   };

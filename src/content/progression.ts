@@ -3,9 +3,9 @@ import type { StaffJob } from "../sim/types";
 
 export type Level = 1 | 2 | 3 | 4 | 5;
 /** Every system a ladder row can unlock (the mod schema's list too). `factions` is FLT-33: the meters at Level 4. */
-export const SYSTEM_IDS = ["breakdowns", "slop", "leapfrog", "arena", "rnd", "news", "events", "protests", "disasters", "papers", "collusion", "hearing", "yacht", "defection", "poaching", "auditors", "capture", "promises", "factions"] as const;
+export const SYSTEM_IDS = ["breakdowns", "slop", "leapfrog", "arena", "rnd", "news", "events", "protests", "disasters", "papers", "collusion", "hearing", "yacht", "defection", "poaching", "auditors", "capture", "promises", "factions", "birdapp"] as const;
 export type SystemId = (typeof SYSTEM_IDS)[number];
-export const HUD_PANELS = ["revenue", "vibes", "arena", "rnd", "thoughts", "news", "staff", "events", "papers", "disasters", "factions"] as const;
+export const HUD_PANELS = ["revenue", "vibes", "arena", "rnd", "thoughts", "news", "staff", "events", "papers", "disasters", "factions", "birdapp"] as const;
 export type HudPanel = (typeof HUD_PANELS)[number];
 export interface ProgressionLevel {
   id: string;
@@ -25,9 +25,9 @@ export interface ProgressionLevel {
 export const PROGRESSION: readonly ProgressionLevel[] = [
   { id: "garage", level: 1, name: "Garage", buildings: ["hall", "cluster"], staff: [], systems: [], panels: [], goal: { text: "Ship your first model", metric: "models", target: 1 } },
   { id: "business", level: 2, name: "Open for business", buildings: ["gateway", "kombucha"], staff: [], systems: [], panels: ["revenue", "vibes"], goal: { text: "Earn $40K a day and give 12 visitors the tour", metric: "business", target: 40_000, visitors: 12 } },
-  { id: "team", level: 3, name: "Growing team", buildings: ["nap", "snack"], staff: ["sre", "janitor"], systems: ["breakdowns", "slop"], panels: ["thoughts", "staff"], goal: { text: "Hire an SRE and a Janitor Bot: mop 20 puddles and fix what breaks", metric: "ops", target: 20 } },
+  { id: "team", level: 3, name: "Growing team", buildings: ["nap", "snack"], staff: ["sre", "janitor", "comms"], systems: ["breakdowns", "slop", "birdapp"], panels: ["thoughts", "staff", "birdapp"], goal: { text: "Hire an SRE and a Janitor Bot: mop 20 puddles and fix what breaks", metric: "ops", target: 20 } },
   { id: "race", level: 4, name: "The Race", buildings: [], staff: [], systems: ["leapfrog", "arena", "rnd", "news", "factions"], panels: ["arena", "rnd", "news", "factions"], goal: { text: "Top 3 on the Arena", metric: "arena", target: 3 } },
-  { id: "scrutiny", level: 5, name: "Scrutiny", buildings: ["demo", "security"], staff: ["security", "comms"], systems: ["protests", "events", "disasters", "papers", "collusion", "hearing", "yacht", "defection", "poaching", "auditors", "promises", "capture"], panels: ["events", "papers", "disasters"], goal: { text: "Ship 3 models", metric: "models", target: 3 } },
+  { id: "scrutiny", level: 5, name: "Scrutiny", buildings: ["demo", "security"], staff: ["security"], systems: ["protests", "events", "disasters", "papers", "collusion", "hearing", "yacht", "defection", "poaching", "auditors", "promises", "capture"], panels: ["events", "papers", "disasters"], goal: { text: "Ship 3 models", metric: "models", target: 3 } },
 ];
 export interface UnlockCard { id: string; title: string; body: string; items: string[] }
 export interface ProgressView {

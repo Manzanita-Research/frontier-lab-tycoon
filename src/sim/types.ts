@@ -9,6 +9,7 @@ import type { YachtState } from "./yacht/state";
 import type { DefectionState } from "./defection/state";
 import type { NeoLabsState } from "./neolabs/state";
 import type { Meeting } from "./meetings";
+import type { BirdAppState } from "./birdapp/state";
 import type { PoachingState } from "./poaching/state";
 import type { AuditorsState } from "./auditors/state";
 import type { VisitorGroup } from "./groups";
@@ -217,7 +218,7 @@ export interface Pop {
  */
 export type NoticeSource =
   | "leapfrog" | "ops" | "staff" | "economy" | "coach" | "event" | "disaster" | "papers" | "collusion" | "hearing" | "politics"
-  | "defection" | "auditors" | "factions" | "race" | "training" | "crowd" | "build" | "endings" | "mods" | `mod:${string}`;
+  | "defection" | "auditors" | "factions" | "race" | "training" | "crowd" | "build" | "endings" | "mods" | "birdapp" | `mod:${string}`;
 
 /** `you`: it is about you, or needs you (a toast). `world`: it happened out there (the ticker, and the panel that owns it). */
 export type Importance = "you" | "world";
@@ -388,6 +389,8 @@ export interface GameState {
   defection?: DefectionState;
   /** FLT-20 Poaching War: opt-in pack, same rules. */
   poaching?: PoachingState;
+  /** FLT-69 the Bird App: researchers who post. Absent until the pack wakes (Level 3), or with `?birdapp=off`. */
+  birdapp?: BirdAppState;
   /** Labs your own people founded (FLT-26, FLT-20): on the Arena beside the built-in rivals. */
   neoLabs?: NeoLabsState;
   /** A visitor talking to one of your people somewhere visible (sim/meetings.ts, the `people.meet` verb). */

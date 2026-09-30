@@ -24,7 +24,7 @@ export const ACTION_NAMES = [
   "building.fire", "building.offline", "building.wear", "building.ensure", "hype.delta", "trust.delta", "voice.push", "heat.delta", "capture.delta", "discourse.delta",
   "cash.delta", "rival.leap", "rival.growth", "rival.pace", "rival.closed", "camera.focus", "camera.beat", "shake", "sound.cue", "news", "toast", "card", "faction.delta", "relation.delta",
   "faction.signal", "faction.rally", "faction.disperse", "flag.set", "flag.clear",
-  "people.meet", "people.quit", "people.pay", "people.cheer",
+  "people.meet", "people.quit", "people.pay", "people.cheer", "birdapp.post",
   "visitors.arrive", "visitors.leave", "walkers.disguise", "walkers.reveal",
 ] as const;
 export type GuardName = (typeof GUARD_NAMES)[number];

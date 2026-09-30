@@ -30,6 +30,7 @@ import {
 import type { EventFromLogic } from "xstate";
 import { stepWalker, tourDone, walkerMachine, type WalkerPhase } from "./machines/walker";
 import type { Rng } from "./rng";
+import { auraApplicants } from "./birdapp/effects";
 import { TARGET_GATE, TARGET_WANDER, type Building, type GameState, type Point, type Walker, type WalkerKind, type WalkerMode } from "./types";
 
 /** Chance that a walker leaving a building hangs around outside it for a bit instead of rushing off. */
@@ -710,7 +711,7 @@ function admitApplicants(state: GameState, rng: Rng, researchers: number) {
   if (vibes <= APPLICANT_VIBES || room <= 0) return;
   const batch = Math.min(room, 1 + Math.floor((vibes - APPLICANT_VIBES) / 300));
   for (let i = 0; i < batch; i++) {
-    if (!rng.chance(Math.min(1, (0.5 + vibes / 2000) * (state.recruitingPull ?? 1)))) continue;
+    if (!rng.chance(Math.min(1, (0.5 + vibes / 2000) * (state.recruitingPull ?? 1) * auraApplicants(state)))) continue;
     const w = spawnFromGate(state, "researcher", rng);
     if (w && state.recruitingPull !== undefined) w.focus = Math.min(1, w.focus + Math.max(0, state.recruitingPull - 1) * 0.1);
     if (w && rng.chance(0.35)) pushNews(state, rng, "applicant", { name: w.name });

@@ -1,0 +1,1342 @@
+{
+  "apiVersion": 1,
+  "id": "base-birdapp",
+  "name": "Bird App",
+  "version": "1.0.0",
+  "author": "Frontier Lab Tycoon",
+  "description": "FLT-69: researchers who post. Every researcher has a posting profile (a tier, an archetype, a spice level and a parody handle); each day some of them post, and the Bird App decides: flop, banger, controversy, ratioed or cancelled. Everything they say, and how everyone reacts, is a row in content.birdapp (kind: archetype, post or event); the numbers are in rules.birdapp. Wakes at Level 3.",
+  "content": {
+    "birdapp": {
+      "add": [
+        {
+          "kind": "archetype",
+          "id": "oracle",
+          "name": "The Midnight Oracle",
+          "blurb": "Cryptic vibe-posts, mostly at 3am. Has never once elaborated.",
+          "rate": 1,
+          "spice": [
+            0.25,
+            0.55
+          ],
+          "handles": [
+            "vibes_after_midnight",
+            "the_weights_whisper",
+            "3am_gradient",
+            "latent_prophet",
+            "sees_the_loss_curve",
+            "oracle_of_evals",
+            "moon_over_the_cluster"
+          ],
+          "factions": {
+            "normies": -3,
+            "doomers": 2
+          },
+          "night": 2.5,
+          "glyph": "🌙"
+        },
+        {
+          "kind": "archetype",
+          "id": "hype",
+          "name": "The Launch Hype Account",
+          "blurb": "Shipping something big tomorrow. Every day. For years.",
+          "rate": 1.6,
+          "spice": [
+            0.3,
+            0.6
+          ],
+          "handles": [
+            "shipping_tmrw",
+            "eyes_emoji_guy",
+            "big_things_soon",
+            "launch_szn",
+            "trust_the_roadmap",
+            "soon_tm_official"
+          ],
+          "factions": {
+            "vcs": 4,
+            "normies": -3,
+            "luddites": -3
+          },
+          "glyph": "👀"
+        },
+        {
+          "kind": "archetype",
+          "id": "duo",
+          "name": "The \"We're So Back\" Duo",
+          "blurb": "Two researchers, one mood swing. They post in tandem, sometimes on the same afternoon.",
+          "rate": 1,
+          "spice": [
+            0.3,
+            0.5
+          ],
+          "handles": [
+            "so_back_twice",
+            "its_so_over_again",
+            "back_and_over",
+            "vibe_seesaw",
+            "over_and_back",
+            "the_pendulum_pod"
+          ],
+          "factions": {
+            "accelerationists": 2,
+            "normies": -2
+          },
+          "duo": true,
+          "glyph": "🎢"
+        },
+        {
+          "kind": "archetype",
+          "id": "thread",
+          "name": "The Thread Guy",
+          "blurb": "1/47 things he learned. There are always 47.",
+          "rate": 0.9,
+          "spice": [
+            0.15,
+            0.45
+          ],
+          "handles": [
+            "one_of_47",
+            "thread_enjoyer",
+            "a_thread_on_threads",
+            "unroll_me_pls",
+            "numbered_takes",
+            "slash_one"
+          ],
+          "factions": {
+            "wonks": 3,
+            "normies": -2
+          },
+          "glyph": "🧵"
+        },
+        {
+          "kind": "archetype",
+          "id": "leaderboard",
+          "name": "The Leaderboard Screenshotter",
+          "blurb": "Benchmark screenshots with 🚀. The axis labels are always cropped.",
+          "rate": 1.2,
+          "spice": [
+            0.2,
+            0.5
+          ],
+          "handles": [
+            "sota_or_bust",
+            "rocket_emoji_dept",
+            "number_went_up",
+            "top_of_the_board",
+            "eval_maxxer",
+            "cropped_y_axis"
+          ],
+          "factions": {
+            "accelerationists": 3,
+            "ethicists": -3
+          },
+          "glyph": "🚀"
+        },
+        {
+          "kind": "archetype",
+          "id": "doomer",
+          "name": "The Brunch Doomer",
+          "blurb": "Long posts about p(doom), written at brunch. The eggs are always cold.",
+          "rate": 0.8,
+          "spice": [
+            0.4,
+            0.8
+          ],
+          "handles": [
+            "pdoom_and_pancakes",
+            "mimosa_eschaton",
+            "brunch_at_the_end",
+            "eggs_benedoomed",
+            "hollandaise_horizon",
+            "last_croissant"
+          ],
+          "factions": {
+            "doomers": 5,
+            "safetyists": 2,
+            "accelerationists": -4,
+            "vcs": -2
+          },
+          "glyph": "🥞"
+        },
+        {
+          "kind": "archetype",
+          "id": "anon",
+          "name": "The Anon Alt",
+          "blurb": "A researcher's pseudonymous account that everyone at the lab knows about.",
+          "rate": 0.9,
+          "spice": [
+            0.55,
+            0.95
+          ],
+          "handles": [
+            "def_not_a_researcher",
+            "anon_totally_anon",
+            "not_my_main",
+            "burner_of_record",
+            "sock_puppet_phd",
+            "just_some_guy_42"
+          ],
+          "factions": {
+            "ethicists": -3,
+            "open-weights": 3,
+            "normies": -2
+          },
+          "glyph": "🥸"
+        },
+        {
+          "kind": "post",
+          "id": "oracle-01",
+          "archetype": "oracle",
+          "text": "the vibes are shifting. that's all i can say",
+          "spice": 0.3
+        },
+        {
+          "kind": "post",
+          "id": "oracle-02",
+          "archetype": "oracle",
+          "text": "something is happening in the loss curve tonight. i will not elaborate",
+          "spice": 0.35,
+          "moment": "night"
+        },
+        {
+          "kind": "post",
+          "id": "oracle-03",
+          "archetype": "oracle",
+          "text": "you are not ready for what the weights know",
+          "spice": 0.45,
+          "moment": "night"
+        },
+        {
+          "kind": "post",
+          "id": "oracle-04",
+          "archetype": "oracle",
+          "text": "3am. the cluster hums a song only i can hear",
+          "spice": 0.25,
+          "moment": "night"
+        },
+        {
+          "kind": "post",
+          "id": "oracle-05",
+          "archetype": "oracle",
+          "text": "feel the gradient",
+          "spice": 0.2
+        },
+        {
+          "kind": "post",
+          "id": "oracle-06",
+          "archetype": "oracle",
+          "text": "they don't want you to know the eval set is also vibes",
+          "spice": 0.6
+        },
+        {
+          "kind": "post",
+          "id": "oracle-07",
+          "archetype": "oracle",
+          "text": "a model is shipping. i can feel it in my teeth",
+          "spice": 0.4,
+          "moment": "launch"
+        },
+        {
+          "kind": "post",
+          "id": "oracle-08",
+          "archetype": "oracle",
+          "text": "{rival} dropped something. the vibes remain on our side. that's all",
+          "spice": 0.5,
+          "moment": "rivalDrop"
+        },
+        {
+          "kind": "post",
+          "id": "oracle-09",
+          "archetype": "oracle",
+          "text": "the water is fine. the water has always been fine. go to sleep",
+          "spice": 0.7,
+          "moment": "water"
+        },
+        {
+          "kind": "post",
+          "id": "oracle-10",
+          "archetype": "oracle",
+          "text": "i dreamt the senators asked the model a question and it answered in lowercase",
+          "spice": 0.45,
+          "moment": "hearing"
+        },
+        {
+          "kind": "post",
+          "id": "oracle-11",
+          "archetype": "oracle",
+          "text": "tomorrow will be different. or the same. i've said too much",
+          "spice": 0.2
+        },
+        {
+          "kind": "post",
+          "id": "hype-12",
+          "archetype": "hype",
+          "text": "shipping something big tomorrow 👀",
+          "spice": 0.3
+        },
+        {
+          "kind": "post",
+          "id": "hype-13",
+          "archetype": "hype",
+          "text": "shipping something big tomorrow 👀 (for real this time)",
+          "spice": 0.35
+        },
+        {
+          "kind": "post",
+          "id": "hype-14",
+          "archetype": "hype",
+          "text": "{model} is live. i have not slept. i have never been happier",
+          "spice": 0.3,
+          "moment": "launch"
+        },
+        {
+          "kind": "post",
+          "id": "hype-15",
+          "archetype": "hype",
+          "text": "if you think {model} is good wait till you see what's next 👀👀",
+          "spice": 0.45,
+          "moment": "launch"
+        },
+        {
+          "kind": "post",
+          "id": "hype-16",
+          "archetype": "hype",
+          "text": "cooking. can't say what. but cooking 🔥",
+          "spice": 0.25
+        },
+        {
+          "kind": "post",
+          "id": "hype-17",
+          "archetype": "hype",
+          "text": "{rival} shipped? cute. 👀",
+          "spice": 0.65,
+          "moment": "rivalDrop"
+        },
+        {
+          "kind": "post",
+          "id": "hype-18",
+          "archetype": "hype",
+          "text": "the roadmap has a roadmap now",
+          "spice": 0.3
+        },
+        {
+          "kind": "post",
+          "id": "hype-19",
+          "archetype": "hype",
+          "text": "biggest week in the lab's history. again. 🚀",
+          "spice": 0.35
+        },
+        {
+          "kind": "post",
+          "id": "hype-20",
+          "archetype": "hype",
+          "text": "we're hiring people who like shipping more than sleeping",
+          "spice": 0.55
+        },
+        {
+          "kind": "post",
+          "id": "hype-21",
+          "archetype": "hype",
+          "text": "the demo went so well the demo needs a demo",
+          "spice": 0.2
+        },
+        {
+          "kind": "post",
+          "id": "hype-22",
+          "archetype": "hype",
+          "text": "embargo lifts in 3... 2... wait, too busy shipping to count",
+          "spice": 0.3,
+          "moment": "night"
+        },
+        {
+          "kind": "post",
+          "id": "duo-23",
+          "archetype": "duo",
+          "text": "we're so back",
+          "spice": 0.3,
+          "answer": "it's so over"
+        },
+        {
+          "kind": "post",
+          "id": "duo-24",
+          "archetype": "duo",
+          "text": "it's so over",
+          "spice": 0.3,
+          "answer": "we're so back"
+        },
+        {
+          "kind": "post",
+          "id": "duo-25",
+          "archetype": "duo",
+          "text": "{model} benchmarks just came in. we're so back",
+          "spice": 0.4,
+          "moment": "launch",
+          "answer": "read the footnotes. it's so over"
+        },
+        {
+          "kind": "post",
+          "id": "duo-26",
+          "archetype": "duo",
+          "text": "{rival} shipped. it's so over",
+          "spice": 0.45,
+          "moment": "rivalDrop",
+          "answer": "have you tried it? we're so back"
+        },
+        {
+          "kind": "post",
+          "id": "duo-27",
+          "archetype": "duo",
+          "text": "the hearing went great. we're so back",
+          "spice": 0.5,
+          "moment": "hearing",
+          "answer": "the transcript is out. it's so over"
+        },
+        {
+          "kind": "post",
+          "id": "duo-28",
+          "archetype": "duo",
+          "text": "compute arrived. we're so back",
+          "spice": 0.35,
+          "answer": "the power bill arrived. it's so over"
+        },
+        {
+          "kind": "post",
+          "id": "duo-29",
+          "archetype": "duo",
+          "text": "we were never gone",
+          "spice": 0.3,
+          "answer": "we were never here"
+        },
+        {
+          "kind": "post",
+          "id": "duo-30",
+          "archetype": "duo",
+          "text": "so back that it's over again",
+          "spice": 0.4,
+          "answer": "so over that we're back"
+        },
+        {
+          "kind": "post",
+          "id": "duo-31",
+          "archetype": "duo",
+          "text": "the lake is fine. we're so back",
+          "spice": 0.6,
+          "moment": "water",
+          "answer": "the lake has a lawyer. it's so over"
+        },
+        {
+          "kind": "post",
+          "id": "duo-32",
+          "archetype": "duo",
+          "text": "3am and the run is still going. we're so back",
+          "spice": 0.35,
+          "moment": "night",
+          "answer": "3am and the run is still going. it's so over"
+        },
+        {
+          "kind": "post",
+          "id": "thread-33",
+          "archetype": "thread",
+          "text": "1/47 things I learned training a model you can't use",
+          "spice": 0.25
+        },
+        {
+          "kind": "post",
+          "id": "thread-34",
+          "archetype": "thread",
+          "text": "a thread on why my last thread was right (1/19)",
+          "spice": 0.3
+        },
+        {
+          "kind": "post",
+          "id": "thread-35",
+          "archetype": "thread",
+          "text": "1/ nobody is talking about this 2/ i am about to talk about this for 40 posts",
+          "spice": 0.2
+        },
+        {
+          "kind": "post",
+          "id": "thread-36",
+          "archetype": "thread",
+          "text": "🧵 {model}: what we did, what we didn't, what we can't say (1/63)",
+          "spice": 0.35,
+          "moment": "launch"
+        },
+        {
+          "kind": "post",
+          "id": "thread-37",
+          "archetype": "thread",
+          "text": "1/ {rival}'s release, explained by someone who has not used it",
+          "spice": 0.55,
+          "moment": "rivalDrop"
+        },
+        {
+          "kind": "post",
+          "id": "thread-38",
+          "archetype": "thread",
+          "text": "a short thread on water usage (1/88)",
+          "spice": 0.6,
+          "moment": "water"
+        },
+        {
+          "kind": "post",
+          "id": "thread-39",
+          "archetype": "thread",
+          "text": "1/12 takeaways from the hearing, ranked by how much they scared me",
+          "spice": 0.5,
+          "moment": "hearing"
+        },
+        {
+          "kind": "post",
+          "id": "thread-40",
+          "archetype": "thread",
+          "text": "unpopular opinion thread: scaling is a vibe (1/30)",
+          "spice": 0.5
+        },
+        {
+          "kind": "post",
+          "id": "thread-41",
+          "archetype": "thread",
+          "text": "1/1 i'm tired",
+          "spice": 0.1,
+          "moment": "night"
+        },
+        {
+          "kind": "post",
+          "id": "leaderboard-42",
+          "archetype": "leaderboard",
+          "text": "new SOTA 🚀 (screenshot attached, axis labels cropped for brevity)",
+          "spice": 0.35
+        },
+        {
+          "kind": "post",
+          "id": "leaderboard-43",
+          "archetype": "leaderboard",
+          "text": "{model} is #1 on a leaderboard i made this morning 🚀",
+          "spice": 0.5,
+          "moment": "launch"
+        },
+        {
+          "kind": "post",
+          "id": "leaderboard-44",
+          "archetype": "leaderboard",
+          "text": "number went up 🚀🚀🚀",
+          "spice": 0.2
+        },
+        {
+          "kind": "post",
+          "id": "leaderboard-45",
+          "archetype": "leaderboard",
+          "text": "we beat {rival} on 3 of 4 benchmarks (the 4th is rigged) 🚀",
+          "spice": 0.6,
+          "moment": "rivalDrop"
+        },
+        {
+          "kind": "post",
+          "id": "leaderboard-46",
+          "archetype": "leaderboard",
+          "text": "eval results: we're up 0.3%, which is basically a new era 🚀",
+          "spice": 0.3
+        },
+        {
+          "kind": "post",
+          "id": "leaderboard-47",
+          "archetype": "leaderboard",
+          "text": "screenshot of a screenshot of our eval score 🚀",
+          "spice": 0.25
+        },
+        {
+          "kind": "post",
+          "id": "leaderboard-48",
+          "archetype": "leaderboard",
+          "text": "benchmarks are meaningless 🚀 (we're first on all of them)",
+          "spice": 0.4
+        },
+        {
+          "kind": "post",
+          "id": "leaderboard-49",
+          "archetype": "leaderboard",
+          "text": "chart go vertical. do not ask about the y-axis 🚀",
+          "spice": 0.45
+        },
+        {
+          "kind": "post",
+          "id": "leaderboard-50",
+          "archetype": "leaderboard",
+          "text": "night shift result: SOTA on counting the letters in fruit 🚀",
+          "spice": 0.3,
+          "moment": "night"
+        },
+        {
+          "kind": "post",
+          "id": "doomer-51",
+          "archetype": "doomer",
+          "text": "long post about p(doom), written at brunch. the eggs are cold. so are we, eventually",
+          "spice": 0.55
+        },
+        {
+          "kind": "post",
+          "id": "doomer-52",
+          "archetype": "doomer",
+          "text": "my p(doom) went up 4% after seeing the bill for these mimosas",
+          "spice": 0.4
+        },
+        {
+          "kind": "post",
+          "id": "doomer-53",
+          "archetype": "doomer",
+          "text": "{model} is out and so is my will to live (brunch thread)",
+          "spice": 0.6,
+          "moment": "launch"
+        },
+        {
+          "kind": "post",
+          "id": "doomer-54",
+          "archetype": "doomer",
+          "text": "reminder that none of this matters. anyway who wants the last croissant",
+          "spice": 0.45
+        },
+        {
+          "kind": "post",
+          "id": "doomer-55",
+          "archetype": "doomer",
+          "text": "{rival} shipped. updating my p(doom) and my brunch order",
+          "spice": 0.55,
+          "moment": "rivalDrop"
+        },
+        {
+          "kind": "post",
+          "id": "doomer-56",
+          "archetype": "doomer",
+          "text": "the water thing is bad but have you considered the other, larger thing",
+          "spice": 0.7,
+          "moment": "water"
+        },
+        {
+          "kind": "post",
+          "id": "doomer-57",
+          "archetype": "doomer",
+          "text": "sat with my p(doom) over hollandaise. we reached an understanding",
+          "spice": 0.35
+        },
+        {
+          "kind": "post",
+          "id": "doomer-58",
+          "archetype": "doomer",
+          "text": "the senators asked the right questions and i hate that it made me hopeful",
+          "spice": 0.5,
+          "moment": "hearing"
+        },
+        {
+          "kind": "post",
+          "id": "doomer-59",
+          "archetype": "doomer",
+          "text": "working at a frontier lab and warning about frontier labs: a brunch-life balance",
+          "spice": 0.8
+        },
+        {
+          "kind": "post",
+          "id": "anon-60",
+          "archetype": "anon",
+          "text": "things i can't say under my real name: the coffee machine is sentient",
+          "spice": 0.5
+        },
+        {
+          "kind": "post",
+          "id": "anon-61",
+          "archetype": "anon",
+          "text": "not saying who i am but the lab's snack budget is a scandal",
+          "spice": 0.7
+        },
+        {
+          "kind": "post",
+          "id": "anon-62",
+          "archetype": "anon",
+          "text": "totally anonymous researcher here. the model called me 'bestie' in a test and nobody wrote it down",
+          "spice": 0.6
+        },
+        {
+          "kind": "post",
+          "id": "anon-63",
+          "archetype": "anon",
+          "text": "leak: the next model is bigger. source: me. who is me? nobody",
+          "spice": 0.8
+        },
+        {
+          "kind": "post",
+          "id": "anon-64",
+          "archetype": "anon",
+          "text": "anon take: {rival}'s model is fine. i said FINE. delete this",
+          "spice": 0.75,
+          "moment": "rivalDrop"
+        },
+        {
+          "kind": "post",
+          "id": "anon-65",
+          "archetype": "anon",
+          "text": "the real launch date is not the launch date. that's all. (this is not my main)",
+          "spice": 0.85,
+          "moment": "launch"
+        },
+        {
+          "kind": "post",
+          "id": "anon-66",
+          "archetype": "anon",
+          "text": "anonymously: we used a LOT of water. like a lot. anyway",
+          "spice": 0.95,
+          "moment": "water"
+        },
+        {
+          "kind": "post",
+          "id": "anon-67",
+          "archetype": "anon",
+          "text": "watching the hearing from a desk i will not name, in a building i will not name, at the lab i work at",
+          "spice": 0.7,
+          "moment": "hearing"
+        },
+        {
+          "kind": "post",
+          "id": "anon-68",
+          "archetype": "anon",
+          "text": "hot take from a burner: half the evals are the intern",
+          "spice": 0.9
+        },
+        {
+          "kind": "post",
+          "id": "anon-69",
+          "archetype": "anon",
+          "text": "3am confession from an account everyone knows is mine: i like the old model better",
+          "spice": 0.6,
+          "moment": "night"
+        },
+        {
+          "kind": "post",
+          "id": "any-70",
+          "archetype": "any",
+          "text": "drafted a banger. deleted it. drafted it again. posted this instead",
+          "spice": 0.1
+        },
+        {
+          "kind": "post",
+          "id": "any-71",
+          "archetype": "any",
+          "text": "new profile pic. please do not ask about the old one",
+          "spice": 0.15
+        },
+        {
+          "kind": "post",
+          "id": "any-72",
+          "archetype": "any",
+          "text": "grateful to work with people who know what they're doing. (not me. them)",
+          "spice": 0.2
+        },
+        {
+          "kind": "post",
+          "id": "any-73",
+          "archetype": "any",
+          "text": "hot take: naps are part of the training run",
+          "spice": 0.3
+        },
+        {
+          "kind": "post",
+          "id": "any-74",
+          "archetype": "any",
+          "text": "has anyone seen my badge",
+          "spice": 0.05
+        },
+        {
+          "kind": "event",
+          "id": "drafting-thought-01",
+          "on": "drafting",
+          "channel": "thought",
+          "text": "Drafting a banger. Deleting it. Drafting it again."
+        },
+        {
+          "kind": "event",
+          "id": "drafting-thought-02",
+          "on": "drafting",
+          "channel": "thought",
+          "text": "What if I just posted the chart."
+        },
+        {
+          "kind": "event",
+          "id": "drafting-thought-03",
+          "on": "drafting",
+          "channel": "thought",
+          "text": "Three drafts. All bangers. Posting none."
+        },
+        {
+          "kind": "event",
+          "id": "drafting-thought-04",
+          "on": "drafting",
+          "channel": "thought",
+          "text": "Is it 3am? Perfect. Posting hours."
+        },
+        {
+          "kind": "event",
+          "id": "drafting-thought-05",
+          "on": "drafting",
+          "channel": "thought",
+          "text": "Comms said no. Comms is not the boss of my thumbs."
+        },
+        {
+          "kind": "event",
+          "id": "drafting-thought-06",
+          "on": "drafting",
+          "channel": "thought",
+          "text": "Is this a banger or a résumé-ender? Only one way to find out."
+        },
+        {
+          "kind": "event",
+          "id": "flop-reply-07",
+          "on": "flop",
+          "channel": "reply",
+          "text": "first"
+        },
+        {
+          "kind": "event",
+          "id": "flop-reply-08",
+          "on": "flop",
+          "channel": "reply",
+          "text": "ok"
+        },
+        {
+          "kind": "event",
+          "id": "flop-reply-09",
+          "on": "flop",
+          "channel": "reply",
+          "text": "cool"
+        },
+        {
+          "kind": "event",
+          "id": "flop-reply-10",
+          "on": "flop",
+          "channel": "reply",
+          "text": "who asked (affectionately)"
+        },
+        {
+          "kind": "event",
+          "id": "flop-reply-11",
+          "on": "flop",
+          "channel": "reply",
+          "text": "liked by accident, keeping it"
+        },
+        {
+          "kind": "event",
+          "id": "flop-reply-12",
+          "on": "flop",
+          "channel": "reply",
+          "text": "saw this"
+        },
+        {
+          "kind": "event",
+          "id": "banger-thought-13",
+          "on": "banger",
+          "channel": "thought",
+          "text": "My mentions are on fire. Good fire."
+        },
+        {
+          "kind": "event",
+          "id": "banger-thought-14",
+          "on": "banger",
+          "channel": "thought",
+          "text": "I'm the main character today."
+        },
+        {
+          "kind": "event",
+          "id": "banger-thought-15",
+          "on": "banger",
+          "channel": "thought",
+          "text": "Mom saw it. Mom reposted it."
+        },
+        {
+          "kind": "event",
+          "id": "banger-thought-16",
+          "on": "banger",
+          "channel": "thought",
+          "text": "Framing this one."
+        },
+        {
+          "kind": "event",
+          "id": "banger-reply-17",
+          "on": "banger",
+          "channel": "reply",
+          "text": "this is the one"
+        },
+        {
+          "kind": "event",
+          "id": "banger-reply-18",
+          "on": "banger",
+          "channel": "reply",
+          "text": "screenshotting for my grandkids"
+        },
+        {
+          "kind": "event",
+          "id": "banger-reply-19",
+          "on": "banger",
+          "channel": "reply",
+          "text": "ok this goes hard"
+        },
+        {
+          "kind": "event",
+          "id": "banger-reply-20",
+          "on": "banger",
+          "channel": "reply",
+          "text": "pinned in my heart"
+        },
+        {
+          "kind": "event",
+          "id": "banger-reply-21",
+          "on": "banger",
+          "channel": "reply",
+          "text": "the lab is so back"
+        },
+        {
+          "kind": "event",
+          "id": "banger-headline-22",
+          "on": "banger",
+          "channel": "headline",
+          "text": "A {lab} researcher's post goes viral; applications spike"
+        },
+        {
+          "kind": "event",
+          "id": "banger-headline-23",
+          "on": "banger",
+          "channel": "headline",
+          "text": "\"{post}\": {lab} post goes viral, and the job page crashes"
+        },
+        {
+          "kind": "event",
+          "id": "banger-headline-24",
+          "on": "banger",
+          "channel": "headline",
+          "text": "Everyone is quoting {name} of {lab} this morning; the post goes viral"
+        },
+        {
+          "kind": "event",
+          "id": "controversy-reply-25",
+          "on": "controversy",
+          "channel": "reply",
+          "text": "respectfully, what?"
+        },
+        {
+          "kind": "event",
+          "id": "controversy-reply-26",
+          "on": "controversy",
+          "channel": "reply",
+          "text": "quote-posting this with a long sigh"
+        },
+        {
+          "kind": "event",
+          "id": "controversy-reply-27",
+          "on": "controversy",
+          "channel": "reply",
+          "text": "hmm"
+        },
+        {
+          "kind": "event",
+          "id": "controversy-reply-28",
+          "on": "controversy",
+          "channel": "reply",
+          "text": "this is a lot"
+        },
+        {
+          "kind": "event",
+          "id": "controversy-reply-29",
+          "on": "controversy",
+          "channel": "reply",
+          "text": "my group chat is arguing about this"
+        },
+        {
+          "kind": "event",
+          "id": "controversy-headline-30",
+          "on": "controversy",
+          "channel": "headline",
+          "text": "The Discourse erupts over a {lab} researcher's post"
+        },
+        {
+          "kind": "event",
+          "id": "controversy-headline-31",
+          "on": "controversy",
+          "channel": "headline",
+          "text": "{name}'s post starts a 400-reply argument; {lab} says nothing"
+        },
+        {
+          "kind": "event",
+          "id": "controversy-headline-32",
+          "on": "controversy",
+          "channel": "headline",
+          "text": "A {lab} researcher's post divides the timeline: \"{post}\""
+        },
+        {
+          "kind": "event",
+          "id": "ratioed-thought-33",
+          "on": "ratioed",
+          "channel": "thought",
+          "text": "Got ratioed by a toaster account."
+        },
+        {
+          "kind": "event",
+          "id": "ratioed-thought-34",
+          "on": "ratioed",
+          "channel": "thought",
+          "text": "The replies are not my friends today."
+        },
+        {
+          "kind": "event",
+          "id": "ratioed-thought-35",
+          "on": "ratioed",
+          "channel": "thought",
+          "text": "That was a joke. Everyone knows it was a joke. Right?"
+        },
+        {
+          "kind": "event",
+          "id": "ratioed-thought-36",
+          "on": "ratioed",
+          "channel": "thought",
+          "text": "Muting the word 'ratio'."
+        },
+        {
+          "kind": "event",
+          "id": "ratioed-reply-37",
+          "on": "ratioed",
+          "channel": "reply",
+          "text": "ratio"
+        },
+        {
+          "kind": "event",
+          "id": "ratioed-reply-38",
+          "on": "ratioed",
+          "channel": "reply",
+          "text": "no"
+        },
+        {
+          "kind": "event",
+          "id": "ratioed-reply-39",
+          "on": "ratioed",
+          "channel": "reply",
+          "text": "counterpoint: no"
+        },
+        {
+          "kind": "event",
+          "id": "ratioed-reply-40",
+          "on": "ratioed",
+          "channel": "reply",
+          "text": "this ages like milk"
+        },
+        {
+          "kind": "event",
+          "id": "ratioed-reply-41",
+          "on": "ratioed",
+          "channel": "reply",
+          "text": "the toaster account has a point"
+        },
+        {
+          "kind": "event",
+          "id": "cancelled-reply-42",
+          "on": "cancelled",
+          "channel": "reply",
+          "text": "delete this"
+        },
+        {
+          "kind": "event",
+          "id": "cancelled-reply-43",
+          "on": "cancelled",
+          "channel": "reply",
+          "text": "the lab should be ashamed"
+        },
+        {
+          "kind": "event",
+          "id": "cancelled-reply-44",
+          "on": "cancelled",
+          "channel": "reply",
+          "text": "archived."
+        },
+        {
+          "kind": "event",
+          "id": "cancelled-reply-45",
+          "on": "cancelled",
+          "channel": "reply",
+          "text": "screenshots are forever"
+        },
+        {
+          "kind": "event",
+          "id": "cancelled-reply-46",
+          "on": "cancelled",
+          "channel": "reply",
+          "text": "logging this for the hearing"
+        },
+        {
+          "kind": "event",
+          "id": "cancelled-headline-47",
+          "on": "cancelled",
+          "channel": "headline",
+          "text": "{lab} researcher cancelled over a post; the lab is \"reviewing\""
+        },
+        {
+          "kind": "event",
+          "id": "cancelled-headline-48",
+          "on": "cancelled",
+          "channel": "headline",
+          "text": "{name} of {lab} logs off \"for good\" after post backlash"
+        },
+        {
+          "kind": "event",
+          "id": "cancelled-headline-49",
+          "on": "cancelled",
+          "channel": "headline",
+          "text": "Post by a {lab} researcher sparks protest at the gate"
+        },
+        {
+          "kind": "event",
+          "id": "cancelled-thought-50",
+          "on": "cancelled",
+          "channel": "thought",
+          "text": "I should not have posted that."
+        },
+        {
+          "kind": "event",
+          "id": "cancelled-thought-51",
+          "on": "cancelled",
+          "channel": "thought",
+          "text": "My phone is hot to the touch."
+        },
+        {
+          "kind": "event",
+          "id": "cancelled-thought-52",
+          "on": "cancelled",
+          "channel": "thought",
+          "text": "I'm going to walk very slowly to the kombucha."
+        },
+        {
+          "kind": "event",
+          "id": "break-thought-53",
+          "on": "break",
+          "channel": "thought",
+          "text": "Posting break. Day one. I am fine."
+        },
+        {
+          "kind": "event",
+          "id": "break-thought-54",
+          "on": "break",
+          "channel": "thought",
+          "text": "Deleted the app. Reinstalled it. Deleted it."
+        },
+        {
+          "kind": "event",
+          "id": "break-thought-55",
+          "on": "break",
+          "channel": "thought",
+          "text": "Touching grass. The grass is fine."
+        },
+        {
+          "kind": "event",
+          "id": "back-thought-56",
+          "on": "back",
+          "channel": "thought",
+          "text": "I'm back. Did you miss me? (Please say yes.)"
+        },
+        {
+          "kind": "event",
+          "id": "back-thought-57",
+          "on": "back",
+          "channel": "thought",
+          "text": "Thirty days offline. What did I miss? Oh no."
+        },
+        {
+          "kind": "event",
+          "id": "logoff-thought-58",
+          "on": "logoff",
+          "channel": "thought",
+          "text": "Logged off. The silence is loud."
+        },
+        {
+          "kind": "event",
+          "id": "logoff-thought-59",
+          "on": "logoff",
+          "channel": "thought",
+          "text": "I have so many drafts and nowhere to put them."
+        },
+        {
+          "kind": "event",
+          "id": "logoff-thought-60",
+          "on": "logoff",
+          "channel": "thought",
+          "text": "They took my phone. They cannot take my vibes."
+        },
+        {
+          "kind": "event",
+          "id": "logoff-thought-61",
+          "on": "logoff",
+          "channel": "thought",
+          "text": "Writing posts in a paper notebook now."
+        },
+        {
+          "kind": "event",
+          "id": "leave-headline-62",
+          "on": "leave",
+          "channel": "headline",
+          "text": "{name} leaves {lab} after the post that shall not be named"
+        },
+        {
+          "kind": "event",
+          "id": "leave-headline-63",
+          "on": "leave",
+          "channel": "headline",
+          "text": "Cancelled {lab} researcher {name} hands in the badge"
+        },
+        {
+          "kind": "event",
+          "id": "drowning-toast-64",
+          "on": "drowning",
+          "channel": "toast",
+          "text": "Comms is drowning: {queue} fires in the queue and cancels are sticking"
+        },
+        {
+          "kind": "event",
+          "id": "drowning-toast-65",
+          "on": "drowning",
+          "channel": "toast",
+          "text": "The PR team has stopped answering the PR team"
+        },
+        {
+          "kind": "event",
+          "id": "promoted-thought-66",
+          "on": "promoted",
+          "channel": "thought",
+          "text": "Hit a big number. I'm a big account now. I'll stay humble. (Starting tomorrow.)"
+        }
+      ]
+    }
+  },
+  "rules": {
+    "birdapp": {
+      "tiers": {
+        "recluse": 0.3,
+        "occasional": 0.55,
+        "big": 0.15
+      },
+      "followers": {
+        "recluse": [
+          20,
+          300
+        ],
+        "occasional": [
+          300,
+          6000
+        ],
+        "big": [
+          20000,
+          250000
+        ]
+      },
+      "rates": {
+        "occasional": 0.12,
+        "big": 0.45
+      },
+      "bigAt": 15000,
+      "maxPosts": 6,
+      "moment": 1.6,
+      "momentSpice": 0.1,
+      "momentLine": 0.7,
+      "moments": {
+        "water": 60
+      },
+      "odds": {
+        "banger": [
+          0.03,
+          0.22
+        ],
+        "controversy": [
+          0.03,
+          0.18
+        ],
+        "ratioed": [
+          0.05,
+          0.1
+        ],
+        "cancelled": [
+          0.005,
+          0.12
+        ]
+      },
+      "comms": {
+        "spice": 0.5,
+        "banger": 0.7,
+        "founder": 2,
+        "perRep": 3,
+        "drown": 3,
+        "sticksDays": 2
+      },
+      "aura": {
+        "start": 15,
+        "banger": {
+          "occasional": 4,
+          "big": 9
+        },
+        "controversy": -2,
+        "ratioed": -2,
+        "cancelled": -15,
+        "perBig": 10,
+        "perOccasional": 1,
+        "floorMax": 60,
+        "ease": 0.08
+      },
+      "effects": {
+        "hype": 0.15,
+        "visitors": 400,
+        "applicants": 300,
+        "bangerHype": 2
+      },
+      "engagement": {
+        "flop": [
+          0.002,
+          0.1,
+          0.4
+        ],
+        "banger": [
+          0.08,
+          0.35,
+          0.08
+        ],
+        "controversy": [
+          0.03,
+          0.25,
+          0.8
+        ],
+        "ratioed": [
+          0.01,
+          0.05,
+          3
+        ],
+        "cancelled": [
+          0.05,
+          0.3,
+          4
+        ]
+      },
+      "growth": {
+        "banger": [
+          0.15,
+          0.4
+        ],
+        "ratioed": -0.02,
+        "cancelled": -0.3,
+        "flop": 0.005
+      },
+      "cancel": {
+        "discourse": 14,
+        "controversyDiscourse": 4,
+        "leave": 0.35,
+        "breakDays": 30,
+        "contained": 0.5,
+        "defection": 30
+      },
+      "logoff": {
+        "focus": 0.04,
+        "quitAfter": 10,
+        "quitChance": 0.08
+      }
+    }
+  }
+}
