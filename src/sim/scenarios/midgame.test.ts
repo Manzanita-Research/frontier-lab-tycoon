@@ -23,7 +23,7 @@ describe("midgame scenario", () => {
     // paid confirmations. Changed movement/attendance draws shift the real opening day.
     // FLT-33/25: the water escalation now runs as a base arc during the replay, and the factions arrive, settled, at
     // the opening moment.
-    expect(digest(s)).toBe("f3bc23b6");
+    expect(digest(s)).toBe("a88b590d");
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);

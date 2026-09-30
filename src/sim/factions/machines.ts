@@ -121,6 +121,26 @@ export const factionMoodMachine = setupEffect({
 export type FactionMoodStored = Stored<typeof factionMoodMachine>;
 export type FactionMood = FactionMoodStored["value"];
 
+/**
+ * A DAY that changes nothing but the meter, done without `transition()`: most days most factions stay put, and ten
+ * machine steps a midnight are not free. Returns null when the day crosses a line, and then the driver steps the
+ * machine. Mirrors each state's "stay" branch above exactly (a test checks it against the machine).
+ */
+export function quietMoodDay(stored: FactionMoodStored, meter: number, march: number | null): FactionMoodStored | null {
+  const c = stored.context;
+  switch (stored.value) {
+    case "calm":
+      return meter < FAN_AT && meter > UPSET_AT ? { ...stored, context: { meter, since: -1 } } : null;
+    case "fan":
+      return meter >= FAN_UNTIL ? { ...stored, context: { ...c, meter } } : null;
+    case "upset":
+      return (march === null || meter > march) && meter < UPSET_UNTIL ? { ...stored, context: { ...c, meter } } : null;
+    case "protesting":
+      return march !== null && meter < march + MARCH_SLACK ? { ...stored, context: { ...c, meter } } : null;
+  }
+  return null;
+}
+
 const RelationContext = Schema.Struct({ value: Schema.Number, wasAllied: Schema.Boolean });
 
 export const relationMachine = setupEffect({
@@ -187,3 +207,17 @@ export const relationMachine = setupEffect({
 });
 export type RelationStored = Stored<typeof relationMachine>;
 export type Relation = RelationStored["value"];
+
+/** The relation's "stay" branches without `transition()` (45 pairs a midnight); null when the value crosses a line. */
+export function quietRelationDay(stored: RelationStored, value: number): RelationStored | null {
+  const stay = { ...stored, context: { ...stored.context, value } };
+  switch (stored.value) {
+    case "cordial":
+      return value < ALLY_AT && value > FEUD_AT ? stay : null;
+    case "allied":
+      return value > FEUD_AT && value >= ALLY_UNTIL ? stay : null;
+    case "feuding":
+      return value < FEUD_UNTIL ? stay : null;
+  }
+  return null;
+}

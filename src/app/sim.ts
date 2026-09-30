@@ -85,6 +85,7 @@ export class SimHandle {
     const leapfrogOff = this.world.flags.leapfrogOff;
     const papersOff = this.world.flags.papersOff;
     const factionsOff = this.world.flags.factionsOff;
+    const off = Object.entries(this.world.flags).filter(([k]) => k.startsWith("arcOff:"));
     const mods = this.world.mods;
     this.world = createInitialState(seed, "garage", this.def);
     if (mods) this.world.mods = mods;
@@ -93,6 +94,7 @@ export class SimHandle {
     if (collusion) enableCollusion(this.world);
     if (papersOff) this.world.flags.papersOff = papersOff;
     if (factionsOff) this.world.flags.factionsOff = factionsOff;
+    for (const [k, v] of off) this.world.flags[k] = v;
     this.alpha = 1;
   }
 
@@ -122,7 +124,7 @@ export class SimHandle {
   }
 }
 
-type SimDebug = Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean; factions?: boolean };
+type SimDebug = Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean; factions?: boolean; water?: boolean };
 
 /**
  * A living campus, warped forward and dressed up per the `?seed=&warp=&agents=&discourse=` debug knobs.
@@ -139,6 +141,7 @@ function stage(dbg: SimDebug): GameState {
   if (dbg.leapfrog === false) sim.flags.leapfrogOff = 1;
   if (dbg.papers === false) sim.flags.papersOff = 1;
   if (dbg.factions === false) sim.flags.factionsOff = 1;
+  if (dbg.water === false) sim.flags["arcOff:water-escalation"] = 1;
   const leap = parseLeapMoment(dbg.moment);
   if (dbg.warp > 0 || dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0 || dbg.moment || dbg.disaster) { continueTutorial(sim, true); delete sim.progression; }
   if (!sim.progression && dbg.leapfrog) enableLeapfrog(sim);

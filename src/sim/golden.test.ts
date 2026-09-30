@@ -169,9 +169,9 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // path arguments take thought ids and bubbles (their dice are their own, so the main RNG stream is untouched until
 // the thoughts differ), and the Water Discourse now escalates through the base-water arc.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "d3826cd0", 800: "ed628bb9", 1600: "99ff23f2", 2400: "77ad6ac3", 3200: "d6d3f7cd", 4000: "fcb962a0" },
-  2: { 200: "e548b1af", 800: "552cae60", 1600: "4f1b2dfe", 2400: "bb128d64", 3200: "198f5fd6", 4000: "738ff8c7" },
-  3: { 200: "58bb415c", 800: "920699d6", 1600: "38b133b9", 2400: "34f6417a", 3200: "0c447605", 4000: "0c833168" },
+  1: { 200: "d3826cd0", 800: "ed628bb9", 1600: "83b73f59", 2400: "7e4a0c23", 3200: "1bd2f316", 4000: "d8736350" },
+  2: { 200: "e548b1af", 800: "552cae60", 1600: "728f7138", 2400: "d1746fea", 3200: "68af6edc", 4000: "9cdf214e" },
+  3: { 200: "58bb415c", 800: "920699d6", 1600: "ee2f6f97", 2400: "91673d73", 3200: "9549e60e", 4000: "db5c6350" },
 };
 
 describe("golden runs", () => {

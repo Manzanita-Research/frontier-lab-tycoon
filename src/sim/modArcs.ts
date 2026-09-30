@@ -188,9 +188,11 @@ function runCalls(state: GameState, rng: Rng, owner: string, calls: readonly Cal
 
 /**
  * An arc that `requires` systems sleeps until they are all unlocked (FLT-33): the factions' arcs until Level 4 turns
- * the factions on, the water escalation until the protests. It keeps its place while asleep.
+ * the factions on, the water escalation until the protests. It keeps its place while asleep. `flags["arcOff:<id>"]`
+ * switches one off for the run (`?water=off` is the water escalation's).
  */
 function awake(state: GameState, arc: ArcData): boolean {
+  if (state.flags[`arcOff:${arc.id}`] !== undefined) return false;
   for (const system of arc.requires ?? []) {
     if (!systemUnlocked(state, system)) return false;
     if (system === "factions" && !state.factions) return false;

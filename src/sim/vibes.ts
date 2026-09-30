@@ -69,11 +69,14 @@ export function initialVibes(state: GameState): Vibes {
 /** A placeholder for the moment before there is a crowd to read. */
 export const blankVibes = (): Vibes => ({ value: 500, target: 500, delta: 0, happiness: 0.6, impressed: 0.4, cleanliness: 1, hype: 0.3, incident: 0, protest: 0, incidents: 0 });
 
-/** Something went wrong in front of everyone: a resignation, a demo flop, a bailout. */
-export function addIncident(state: GameState, amount: number) {
+/**
+ * Something went wrong in front of everyone: a resignation, a demo flop, a bailout. `discourse: false` keeps it off the
+ * factions' radar (a broken snack wall dents the Vibes but is not a safety story).
+ */
+export function addIncident(state: GameState, amount: number, discourse = true) {
   state.vibes.incidents += amount;
   // FLT-33: the factions hear about it at midnight.
-  if (state.factions) state.factions.incidents += amount;
+  if (discourse && state.factions) state.factions.incidents += amount;
 }
 
 /** Once a day: fade the incidents, read the room, ease toward it. */

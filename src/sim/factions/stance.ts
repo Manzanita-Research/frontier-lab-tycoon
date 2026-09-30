@@ -44,9 +44,11 @@ export function readStance(state: GameState, f: FactionsState): Record<Axis, num
   const net = state.ledger.net;
   return {
     speed: clamp1(Math.tanh(f.pace) + training - 0.25 * f.safety),
-    safety: clamp1(-0.45 + 0.4 * f.safety + talked - Math.tanh(f.trouble)),
+    // A lab that never had an incident and spends nothing on safety is still "a bit cavalier"; a lavish budget carries a lab
+    // through a run of bad days, but not an endless one.
+    safety: clamp1(-0.3 + 0.4 * f.safety + talked - 0.5 * Math.tanh(f.trouble / 3)),
     openness: clamp1((policy === "Open" ? 0.6 : policy === "Closed" ? -0.6 : 0) + Math.tanh(f.openness)),
-    fairness: clamp1(0.3 - state.waterDiscourse / 50 - 0.15 * count("gas") + 0.12 * count("solar") + 0.1 * count("fountain") + 0.15 * comms),
+    fairness: clamp1(0.3 - state.waterDiscourse / 120 - 0.15 * count("gas") + 0.12 * count("solar") + 0.1 * count("fountain") + 0.15 * comms),
     profit: clamp1(0.6 * Math.tanh(net / 60_000) + (state.hype / 100) * 0.5 - 0.15),
   };
 }

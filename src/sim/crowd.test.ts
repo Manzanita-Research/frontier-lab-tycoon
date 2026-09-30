@@ -16,6 +16,8 @@ import { TARGET_WANDER } from "./types";
 import { dailyVibes, initialVibes, readVibes, trendOf, visitorCapFor, visitorChanceFor, vibesTarget } from "./vibes";
 import { chooseTarget, dailyWalkers, fillAgents, researcherTarget, seedWalkers } from "./walkers";
 import { syncProtesters } from "./protest";
+import { enableFactions } from "./factions/state";
+import { settleFactions } from "./factions/driver";
 
 const count = (s: GameState, kind: Walker["kind"]) => s.walkers.filter((w) => w.kind === kind).length;
 const researchers = (s: GameState) => s.walkers.filter((w) => w.kind === "researcher");
@@ -682,12 +684,18 @@ describe("determinism and scale", () => {
     expect(a.walkers.every((w) => w.name.length > 0)).toBe(true);
   });
 
-  it("keeps 800 walkers under 0.5 ms per tick", () => {
+  // FLT-33: and again with the factions on, a fast lab's worth of them marching, and the paths arguing.
+  for (const factions of [false, true]) it(`keeps 800 walkers under 0.5 ms per tick${factions ? " with the factions on" : ""}`, () => {
     const s = campus("nap", "snack", "demo");
     const rng = createRng(11);
     s.capability = 4000; // agentTarget caps at 400
     fillAgents(s, rng);
     s.waterDiscourse = 160;
+    if (factions) {
+      enableFactions(s);
+      s.factions!.pace = 3;
+      settleFactions(s);
+    }
     syncProtesters(s, rng, true);
     // Three small buildings for 300 researchers is a queue and a half: an unfair fight on purpose. Visitors leave and
     // unhappy researchers quit, so the crowd is topped back up before each timed batch.
@@ -711,7 +719,8 @@ describe("determinism and scale", () => {
       best = Math.min(best, (performance.now() - t0) / 200);
       expect(s.day).toBeGreaterThan(day); // it really ran
     }
-    console.log(`800-walker tick: ${best.toFixed(3)} ms (best of 3 x 200 ticks), never fewer than ${smallest} walkers at the start of a batch`);
+    if (factions) expect(s.walkers.some((w) => w.crowd !== undefined)).toBe(true);
+    console.log(`800-walker tick${factions ? " (factions on)" : ""}: ${best.toFixed(3)} ms (best of 3 x 200 ticks), never fewer than ${smallest} walkers at the start of a batch`);
     expect(smallest).toBeGreaterThanOrEqual(800);
     expect(best).toBeLessThan(perfBudget(0.5)); // a shared CI runner gets double, like the other wall-clock budgets
   });

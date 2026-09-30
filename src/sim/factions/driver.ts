@@ -15,7 +15,7 @@ import { systemUnlocked } from "../progression";
 import { createRng, type Rng } from "../rng";
 import type { GameState, Tone, Walker } from "../types";
 import { modeOf } from "../walkers";
-import { factionMoodMachine, relationMachine } from "./machines";
+import { factionMoodMachine, quietMoodDay, quietRelationDay, relationMachine } from "./machines";
 import { readStance, SAFETY_COST, SAFETY_DRAG, SAFETY_LABELS, updateStance } from "./stance";
 import { baseRelationOf, nudgeFaction, pairKey, seenNow, type FactionsState } from "./state";
 
@@ -26,6 +26,8 @@ const EASE = 0.05;
 /** Relations: how fast two strongly-felt factions drift together (same side) or apart, and the pull home. */
 const DRIFT = 1.2;
 const HOMING = 0.015;
+/** A fan and an angry faction pull apart this many times faster: one of them is cheering what the other is marching against. */
+const SPLIT = 3;
 const LOG_SIZE = 12;
 /** What a tote bag does for a marching faction's meter. */
 const TOTE_CALM = 3;
@@ -131,7 +133,8 @@ export function dailyFactions(state: GameState) {
     let meter = stored.context.meter + (targetOf(def, f.stance) - stored.context.meter) * EASE;
     for (const r of def.grievances) if (r.amount !== 0 && today.has(r.on)) ((meter += r.amount), (f.why[def.id] = { text: r.text, day: state.day, amount: r.amount }));
     for (const r of def.cheers) if (r.amount !== 0 && today.has(r.on)) ((meter += r.amount), (f.why[def.id] = { text: r.text, day: state.day, amount: r.amount }));
-    let r = step(factionMoodMachine, stored, { type: "DAY", meter: clamp100(meter), day: state.day, march: marchLine(def) });
+    const quiet = quietMoodDay(stored, clamp100(meter), marchLine(def));
+    let r = quiet ? { stored: quiet, effects: [] } : step(factionMoodMachine, stored, { type: "DAY", meter: clamp100(meter), day: state.day, march: marchLine(def) });
     for (const e of r.effects) onMood(state, f, rng, def, e);
     if (today.has("release")) {
       const launch = step(factionMoodMachine, r.stored, { type: "RELEASE" });
@@ -225,8 +228,15 @@ function relations(state: GameState, f: FactionsState, rng: Rng, all: readonly F
       const mb = f.moods[b.id]?.context.meter ?? 0;
       let v = stored.context.value;
       // Two factions that both feel strongly about you drift together if they feel the same way, apart if not.
-      if (Math.abs(ma) > 25 && Math.abs(mb) > 25) v += Math.sign(ma) * Math.sign(mb) * DRIFT * (Math.min(Math.abs(ma), Math.abs(mb)) / 100);
+      const split = (f.moods[a.id]?.value === "fan" && f.moods[b.id]?.value !== "calm" && f.moods[b.id]?.value !== "fan")
+        || (f.moods[b.id]?.value === "fan" && f.moods[a.id]?.value !== "calm" && f.moods[a.id]?.value !== "fan");
+      if (Math.abs(ma) > 25 && Math.abs(mb) > 25) v += Math.sign(ma) * Math.sign(mb) * DRIFT * (split ? SPLIT : 1) * (Math.min(Math.abs(ma), Math.abs(mb)) / 100);
       v += (baseRelationOf(a.id, b.id) - v) * HOMING;
+      const still = quietRelationDay(stored, clamp100(v));
+      if (still) {
+        f.relations[key] = still;
+        continue;
+      }
       const r = step(relationMachine, stored, { type: "DAY", value: clamp100(v) });
       f.relations[key] = r.stored;
       // The louder of the two gets the headline.

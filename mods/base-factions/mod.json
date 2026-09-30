@@ -1639,7 +1639,7 @@
             },
             {
               "label": "Offer a three-week pause (over the holidays)",
-              "hint": "Doomers +5 · Doomers and Safetyists fall out over it",
+              "hint": "Doomers +5 · the Doomers and Safetyists split over it",
               "effects": [
                 {
                   "type": "faction",
@@ -1650,7 +1650,7 @@
                   "type": "relation",
                   "a": "doomers",
                   "b": "safetyists",
-                  "amount": -45
+                  "amount": -150
                 },
                 {
                   "type": "news",
@@ -1677,7 +1677,7 @@
                   "type": "relation",
                   "a": "doomers",
                   "b": "safetyists",
-                  "amount": -25
+                  "amount": -60
                 },
                 {
                   "type": "news",
