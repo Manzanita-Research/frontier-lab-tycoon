@@ -100,6 +100,11 @@ export const atoms = {
   zone: pick((c) => c.zone),
   /** Template variables for the open card ({valuation}, {bidLow}, {dropRival}, ...). */
   cardVars: pick((c) => c.snap.race.vars),
+  /** The Takeover's manager ("Frontier-9") while the autopilot builds, and how many buildings it has put down. */
+  managedBy: pick((c) => c.snap.endings?.managedBy ?? null),
+  autopilotPlaced: pick((c) => c.snap.endings?.placed ?? 0),
+  /** The endings' presentation cues (the Look), for the scene. */
+  endingLook: pick((c) => c.snap.endings?.look ?? null),
 };
 
 /** The app's context right now, for handlers and frame callbacks that must not subscribe. Null until it has started. */

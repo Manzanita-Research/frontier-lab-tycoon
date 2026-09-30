@@ -13,6 +13,7 @@ import { enableHearing } from "../hearing/driver";
 import { enableYacht } from "../yacht/driver";
 import { enablePromises } from "../promises/driver";
 import { promisesView } from "../promises/view";
+import { enableEndings } from "../endings/state";
 import { enableCapture } from "./driver";
 import { DRAFT_CARD, EXPOSED_CARD } from "./pack";
 
@@ -24,6 +25,8 @@ export interface SenatePolicy {
   exposed?: number;
   capture?: boolean;
   promises?: boolean;
+  /** FLT-11's endings awake too; the run stops at the front page. */
+  endings?: boolean;
 }
 
 export function runSenateYear(seed: number, policy: SenatePolicy, days = 365) {
@@ -34,10 +37,11 @@ export function runSenateYear(seed: number, policy: SenatePolicy, days = 365) {
   enableYacht(s);
   if (policy.promises !== false) enablePromises(s);
   if (policy.capture !== false) enableCapture(s);
+  if (policy.endings) enableEndings(s);
   layPaths(s);
   const cards: { day: number; id: string; pick: number }[] = [];
   let lobbied = 0;
-  for (let i = 0; s.day < days && outcomeOf(s) !== "lost" && i < days * TICKS_PER_DAY * 3; i++) {
+  for (let i = 0; s.day < days && outcomeOf(s) !== "lost" && outcomeOf(s) !== "ended" && i < days * TICKS_PER_DAY * 3; i++) {
     const open = openEventOf(s);
     const cmds: Command[] = [];
     let pick = 0;

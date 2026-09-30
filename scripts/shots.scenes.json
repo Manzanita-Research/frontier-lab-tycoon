@@ -197,6 +197,20 @@
       "argue",
       "factions-chip",
       "factions-phone"
+    ],
+    "endings": [
+      "memo",
+      "takeover",
+      "takeover-95",
+      "thanks",
+      "front-takeover",
+      "front-regulated",
+      "front-acquihired",
+      "front-captured",
+      "front-pivot",
+      "front-95",
+      "front-phone",
+      "front-phone-share"
     ]
   },
   "scenes": {
@@ -2342,6 +2356,162 @@
         },
         {
           "wait": 1500
+        }
+      ]
+    },
+    "memo": {
+      "title": "FLT-11: The Memo, the Era 4 fork (Race or Slow Down)",
+      "query": {
+        "warp": null,
+        "moment": "memo"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "takeover": {
+      "title": "FLT-11: The Takeover: the title is not yours, the cursor moves by itself",
+      "query": {
+        "warp": null,
+        "moment": "takeover"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "takeover-95": {
+      "title": "FLT-11: The Takeover in Frontier 95",
+      "query": {
+        "warp": null,
+        "moment": "takeover",
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "thanks": {
+      "title": "FLT-11: 'Thanks for playing. We'll take it from here.'",
+      "query": {
+        "warp": null,
+        "moment": "thanks"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "front-takeover": {
+      "title": "FLT-11: The Takeover's front page and share card",
+      "query": {
+        "warp": null,
+        "moment": "front-takeover"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "front-regulated": {
+      "title": "FLT-11: Regulated Utility's front page (the campus goes beige)",
+      "query": {
+        "warp": null,
+        "moment": "front-regulated"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "front-acquihired": {
+      "title": "FLT-11: Acqui-hired's front page",
+      "query": {
+        "warp": null,
+        "moment": "front-acquihired"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "front-captured": {
+      "title": "FLT-11: Captured's front page",
+      "query": {
+        "warp": null,
+        "moment": "front-captured"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "front-pivot": {
+      "title": "FLT-11: The Pivot's front page",
+      "query": {
+        "warp": null,
+        "moment": "front-pivot"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "front-95": {
+      "title": "FLT-11: an ending in Frontier 95 (Internet Exploder + NoteBad)",
+      "query": {
+        "warp": null,
+        "moment": "front-captured",
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "front-phone": {
+      "title": "FLT-11: an ending on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "moment": "front-acquihired"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "front-phone-share": {
+      "title": "FLT-11: an ending on a phone, scrolled to Share and the card",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "moment": "front-acquihired"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        },
+        {
+          "eval": "() => { const el = document.querySelector('.f95-end-run, .ending-side'); if (el) el.scrollIntoView({ block: 'start' }); }"
+        },
+        {
+          "wait": 500
         }
       ]
     }
