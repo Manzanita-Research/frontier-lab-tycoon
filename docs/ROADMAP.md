@@ -40,6 +40,8 @@ The FLT-13 Fal 3D experiment is done; its recommendation is hybrid, and rolling 
 | then | FLT-27 | **Release Leapfrog**, the heartbeat of The Race: rival drops on a relentless paired cadence, a live parody benchmark leaderboard, "ship now at 94% or lose the news cycle", share-of-voice, livestream chaos, benchmark saturation | first after the bones |
 | then | FLT-5 | **The Circus**, 10 standalone mechanics, each a built-in content pack (mod example) | see below |
 | then | FLT-28 | **Publishing Papers**: open vs. closed trade-off, arXive drops with "…Is All You Need" titles, citations, getting scooped the day before, best-paper awards | alongside the Circus |
+| then | FLT-33 | **Factions**: the discourse as a sim (accelerationists, safetyists, doomers, ethicists, luddites, open-weights maxis, VCs, wonks, normies). Beliefs, grievances, per-faction meters, path arguments, faction protests, coalitions and schisms. Affectionate satire of everyone | after the bones |
+| then | FLT-34 | **Daily Drama**: a daily agent turns the day's AI news into a small parody content pack (FLT-15 format), validated and linted. Jem reviews before it publishes to a "Today's Drama" button | needs FLT-15 M2 + Codex on Modal |
 | later | FLT-11 | **Endings + share card + daily seed** | |
 
 **The Circus (FLT-5 sub-tasks):**
