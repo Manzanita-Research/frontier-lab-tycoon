@@ -407,7 +407,7 @@ flowchart LR
 |---|---|
 | `dailyLeapfrog` (calendar, a drop, records, voice), per game day | about 0.1 ms, once every 20 ticks |
 | `leapfrogView` (the HUD's 5 Hz part) | about 0.03 ms |
-| 365 headless days, three seeds (the playthrough bot's build order) | 37 to 38 lead drops, 20 to 25 answered the next day, gaps of 7 to 13 days, 3 to 6 forced-response cards, 1 to 2 benchmarks solved, about 150 SOTA claims of which about 30 are benchmaxxed |
+| 365 headless days, three seeds (the playthrough bot's build order) | 37 to 40 lead drops, 21 to 23 answered the next day, gaps of 7 to 13 days, 5 to 7 forced-response cards, 1 to 2 benchmarks solved, about 160 SOTA claims of which about 35 are benchmaxxed |
 | 700 days, pack on vs off, same seeds | same outcome (won), Era 2 at day 48 to 101 vs 68 to 73, Era 3 at day 487 to 510 vs 466 to 489 |
 
 The full table, the first launches, a leaderboard and a ticker sample are in `docs/evidence/flt-27/report.md` (`LEAPFROG_REPORT=1 pnpm vitest run src/sim/race/leapfrog/report.test.ts`). The 500- and 800-walker perf tests are unchanged (the pack is off in them).

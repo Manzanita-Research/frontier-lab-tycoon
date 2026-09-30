@@ -53,6 +53,12 @@
       "menu",
       "phone",
       "photo"
+    ],
+    "leapfrog": [
+      "leap-shipnow",
+      "leap-dog",
+      "leap-chart",
+      "leap-phone"
     ]
   },
   "scenes": {
@@ -181,6 +187,68 @@
         "moment": "funding",
         "warp": null
       }
+    },
+    "leap-shipnow": {
+      "title": "Release Leapfrog: \"Ship now at 94% ready\" (a rival just dropped)",
+      "query": {
+        "moment": "shipnow",
+        "warp": null
+      },
+      "steps": [
+        {
+          "tick": 14
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "leap-dog": {
+      "title": "Release Leapfrog: a dog walks onto the launch livestream",
+      "query": {
+        "moment": "stream:dog",
+        "warp": null
+      },
+      "steps": [
+        {
+          "tick": 14
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "leap-chart": {
+      "title": "Release Leapfrog: the presenter shows the wrong chart",
+      "query": {
+        "moment": "stream:wrongChart",
+        "warp": null
+      },
+      "steps": [
+        {
+          "tick": 14
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "leap-phone": {
+      "title": "Release Leapfrog: the forced-response card on a phone",
+      "query": {
+        "moment": "shipnow",
+        "warp": null
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "tick": 14
+        },
+        {
+          "wait": 800
+        }
+      ]
     }
   }
 }
