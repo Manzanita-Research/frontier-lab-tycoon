@@ -264,6 +264,19 @@ describe("the pack as a system", () => {
     const { s } = staged();
     expect(candidates(s).length).toBeLessThanOrEqual(R.eligibility.candidates);
   });
+  it("picks the same top few as sorting everyone by score, then id (FLT-39)", () => {
+    const { s } = staged();
+    const d = s.defection!;
+    const staff = s.walkers.filter((w) => w.kind === "researcher" && !["quitting", "leaving", "gone"].includes(w.machine.value)); // the driver's onStaff
+    expect(staff.length).toBeGreaterThan(R.eligibility.candidates + 2);
+    for (let round = 0; round < 50; round++) {
+      // Few distinct scores, so ties are common; some zero (not candidates at all) and some missing.
+      d.scores = {};
+      staff.forEach((w, i) => { if ((i + round) % 7 !== 0) d.scores[w.id] = ((i * 31 + round * 17) % 5) * 12.5; });
+      const want = staff.filter((w) => (d.scores[w.id] ?? 0) > 0).sort((a, b) => (d.scores[b.id] ?? 0) - (d.scores[a.id] ?? 0) || a.id - b.id).slice(0, R.eligibility.candidates);
+      expect(candidates(s).map((w) => w.id)).toEqual(want.map((w) => w.id));
+    }
+  });
 });
 
 describe("review moments", () => {

@@ -80,11 +80,29 @@ export function scoreDelta(o: { happiness: number; seniority: number; passedOver
   return delta > 0 ? delta * (1 + k.bump * o.bumps) : delta;
 }
 
-/** The top candidates, highest score first. */
+/** The top candidates, highest score first (ties: lowest id). */
 export function candidates(s: GameState): Walker[] {
   const d = s.defection;
   if (!d) return [];
-  return researchers(s).filter((w) => (d.scores[w.id] ?? 0) > 0).sort((a, b) => (d.scores[b.id] ?? 0) - (d.scores[a.id] ?? 0) || a.id - b.id).slice(0, R.eligibility.candidates);
+  const n = R.eligibility.candidates;
+  const ranked = researchers(s).filter((w) => (d.scores[w.id] ?? 0) > 0);
+  if (!Number.isInteger(n) || n < 0) return ranked.sort((a, b) => (d.scores[b.id] ?? 0) - (d.scores[a.id] ?? 0) || a.id - b.id).slice(0, n);
+  // The first few of the sorted list, without sorting all of it (FLT-39): the order is total, so it is the same few.
+  const top: Walker[] = [];
+  const scores: number[] = [];
+  for (const w of ranked) {
+    const score = d.scores[w.id]!;
+    let i = top.length;
+    while (i > 0 && (score > scores[i - 1]! || (score === scores[i - 1] && w.id < top[i - 1]!.id))) i--;
+    if (i >= n) continue;
+    top.splice(i, 0, w);
+    scores.splice(i, 0, score);
+    if (top.length > n) {
+      top.pop();
+      scores.pop();
+    }
+  }
+  return top;
 }
 
 function updateScores(s: GameState) {
