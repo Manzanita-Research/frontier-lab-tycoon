@@ -1,14 +1,14 @@
 {
   "base": {
     "ref": "origin/main",
-    "sha": "ff42bfe971be66a242bcbb8b71f8101197ac08cf"
+    "sha": "deb7d601138ef4e226ba7cb77768f05d8f3aaa87"
   },
   "head": {
     "branch": "flt-14-port-field-almanac",
-    "sha": "c1d1360",
-    "dirty": false
+    "sha": "24ce18d",
+    "dirty": true
   },
-  "seconds": 176.73,
+  "seconds": 178.681,
   "problems": [
     "photo@field-almanac.png: blank composite: panel 3 is 53% one colour, 8 colours"
   ],
@@ -20,7 +20,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/field-almanac/after/overview@field-almanac.png",
       "title": "The campus, mid-morning, paused",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/field-almanac/compare/overview@field-almanac.png",
-      "changed": 0.25722993827160495
+      "changed": 0.3200401234567901
     },
     {
       "scene": "inspector",
@@ -29,7 +29,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/field-almanac/after/inspector@field-almanac.png",
       "title": "Tap a researcher: the inspector opens",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/field-almanac/compare/inspector@field-almanac.png",
-      "changed": 0.2805570987654321
+      "changed": 0.3421381172839506
     },
     {
       "scene": "event",
@@ -38,7 +38,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/field-almanac/after/event@field-almanac.png",
       "title": "An event card lands (the Water Discourse)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/field-almanac/compare/event@field-almanac.png",
-      "changed": 0.8549336419753086
+      "changed": 0.8429591049382716
     },
     {
       "scene": "menu",
@@ -47,7 +47,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/field-almanac/after/menu@field-almanac.png",
       "title": "The Start menu / build bar open",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/field-almanac/compare/menu@field-almanac.png",
-      "changed": 0.2798310185185185
+      "changed": 0.34470524691358023
     },
     {
       "scene": "phone",
@@ -56,7 +56,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/field-almanac/after/phone@field-almanac.png",
       "title": "The same campus on a phone (390x844)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/field-almanac/compare/phone@field-almanac.png",
-      "changed": 0.27642256045692065
+      "changed": 0.28441639324340745
     },
     {
       "scene": "photo",
