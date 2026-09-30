@@ -5,10 +5,10 @@
   },
   "head": {
     "branch": "flt-48-hero-shots",
-    "sha": "77ad34a",
+    "sha": "2baa99e",
     "dirty": true
   },
-  "seconds": 47.842,
+  "seconds": 38.35,
   "problems": [],
   "rows": [
     {
@@ -18,7 +18,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-48/hero/midgame/after/midgame.png",
       "title": "FLT-48 Part A: the scripted mid-game campus, paused near Y2 Mar",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-48/hero/midgame/compare/midgame.png",
-      "changed": 0.040853395061728394
+      "changed": 0.04401697530864197
     }
   ],
   "errors": []
