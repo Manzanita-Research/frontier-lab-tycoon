@@ -4,7 +4,7 @@
   "name": "Swag Drop",
   "author": "Frontier Lab Tycoon",
   "version": "1.0.0",
-  "description": "The HUD as a frontier lab's desk merch: enamel-pin stats, sticky-note OKRs, keycap build buttons and a terminal ticker.",
+  "description": "The HUD as a frontier lab's desk merch: enamel-pin stats, sticky-note OKRs, keycap build buttons, a lanyard ID badge, a corkboard of thoughts and a terminal ticker.",
   "preview": "assets/preview.jpg",
   "slots": [
     "Layout",
