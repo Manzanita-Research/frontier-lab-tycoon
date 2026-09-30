@@ -4,6 +4,10 @@ A browser tycoon game about running a frontier AI lab. Build compute, keep your 
 
 Built with React, react-three-fiber and a deterministic TypeScript simulation. See [docs/DESIGN.md](docs/DESIGN.md) for the design and [AGENTS.md](AGENTS.md) for how to work on it.
 
+**[Play Frontier Lab Tycoon](https://flt-prod.manzanita.workers.dev)** — a public link, with no sign-in needed.
+
+GitHub deploys checked merges to `main` to Cloudflare Workers static assets through Alchemy. Same-repository PRs get a preview link in a bot comment; closing the PR removes the preview. Deployment setup and pinned infrastructure dependencies live in [infra/README.md](infra/README.md).
+
 ```sh
 pnpm install
 pnpm dev

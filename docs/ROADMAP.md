@@ -25,10 +25,10 @@ The test for every feature: **does it make a moment worth a screenshot within 30
 | 1 | FLT-6 | **Juice I**: camera director, particles, day/night, photo mode, odometers | 1 | Render-only, parallel-safe with FLT-8 |
 | 2 | FLT-10 | **Operations**: staff, slop, breakdowns, queues | 1 | Gives the crowd problems to solve |
 | 2 | FLT-9 | **The Race**: rivals, leaderboard, eras, R&D multiplier, open weights, compute auction | 1 | Pressure and pacing for a 45-minute run |
-| 3 | FLT-5 | **The Circus**: Sandbox Escape chase, Hearing, Capture, Promise Tracker, Collusion, Poaching | 1 | The jokes people send |
+| 3 | FLT-5 | **The Circus**: Sandbox Escape chase, Hearing, Capture, Promise Tracker, Collusion, Poaching; Jev Worker API follows static hosting | 1 | The jokes people send |
 | 3 | FLT-7 | **Sound + News Room**: synth kit, Frontier Times, group-chat recap | 1 | The news cycle as content |
 | 4 | FLT-11 | **Endings + Share**: five endings, front-page share card, daily seed | 1 | The screenshot people send |
-| any | FLT-12 | **Public link** (ship): a static host so friends can play without bb | 1, small | Needs a hosting decision from Jem |
+| any | FLT-12 | **Public link** (ship): [public Worker](https://flt-prod.manzanita.workers.dev), Alchemy deployment from GitHub, PR previews and cleanup | 1, done | Friends can play without bb |
 
 FLT-3 (the first playable) closes when slice 2's PR (#4) merges.
 

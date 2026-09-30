@@ -1,0 +1,128 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, reopened, synchronize, closed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-${{ github.event_name == 'pull_request' && format('refs/pull/{0}/merge', github.event.number) || github.ref }}
+  cancel-in-progress: false
+
+env:
+  CI: "true"
+  STAGE: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || 'prod' }}
+
+jobs:
+  check:
+    if: github.event.action != 'closed' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            infra/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --dir infra install --frozen-lockfile
+      - run: pnpm check
+      - run: pnpm --dir infra typecheck
+
+  deploy:
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            infra/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --dir infra install --frozen-lockfile
+      - name: Skip stale commits and closed PRs
+        id: current
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const expected = context.payload.pull_request?.head.sha ?? context.sha;
+            let current;
+            if (context.eventName === 'pull_request') {
+              const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: context.issue.number });
+              current = pr.state === 'open' && pr.head.repo?.full_name === `${owner}/${repo}` && pr.head.sha === expected;
+            } else {
+              const { data: branch } = await github.rest.repos.getBranch({ owner, repo, branch: 'main' });
+              current = branch.commit.sha === expected;
+            }
+            core.setOutput('deploy', String(current));
+            if (!current) core.notice('Skipping a superseded commit or closed preview.');
+      - name: Deploy assets with Alchemy
+        if: steps.current.outputs.deploy == 'true'
+        run: pnpm --dir infra exec alchemy deploy --stage "$STAGE" --yes
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PULL_REQUEST: ${{ github.event.number }}
+          GITHUB_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+
+  cleanup:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: infra/pnpm-lock.yaml
+      - run: pnpm --dir infra install --frozen-lockfile
+      - name: Refuse production destruction
+        run: |
+          if [ "$STAGE" = "prod" ] || ! [[ "$STAGE" =~ ^pr-[1-9][0-9]*$ ]]; then
+            printf '%s\n' 'ERROR: cleanup only accepts pr-<number>; cannot destroy prod.' >&2
+            exit 1
+          fi
+      - name: Skip reopened PRs
+        id: closed
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.get({ ...context.repo, pull_number: context.issue.number });
+            core.setOutput('destroy', String(pr.state === 'closed'));
+      - name: Destroy preview with Alchemy
+        if: steps.closed.outputs.destroy == 'true'
+        run: pnpm --dir infra exec alchemy destroy --stage "$STAGE" --yes
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PULL_REQUEST: ${{ github.event.number }}
