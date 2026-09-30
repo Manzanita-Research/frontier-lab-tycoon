@@ -1,4 +1,5 @@
 // Researchers, agents and visitors: who they are, where they go, what they say.
+import { systemUnlocked } from "./progression";
 import { BUILDINGS, type BuildingDef } from "../content/buildings";
 import { agentIdentity, protesterIdentity, researcherIdentity, THEIR, visitorIdentity, type Identity } from "../content/names";
 import { NEEDS, NEEDS_BY_KIND, type NeedKey } from "../content/needs";
@@ -218,10 +219,11 @@ function startLeave(state: GameState, w: Walker) {
 function wander(state: GameState, w: Walker, rng: Rng) {
   w.targetId = TARGET_WANDER;
   w.route = [];
-  w.timer = rng.int(6, 16);
+  w.timer = 1;
   const tiles = reachablePathTiles(state);
   if (tiles.length === 0) return;
-  const [gx, gz] = rng.pick(tiles);
+  const away = tiles.filter(([x, z]) => Math.abs(x + 0.5 - w.x) + Math.abs(z + 0.5 - w.z) >= 2);
+  const [gx, gz] = rng.pick(away.length ? away : tiles);
   const route = bfsRoute(state, [Math.floor(w.x), Math.floor(w.z)], new Set([tileIndex(state, gx, gz)]));
   if (route) w.route = route.map(([x, z]): Point => [x + 0.5, z + 0.5]);
 }
@@ -229,7 +231,8 @@ function wander(state: GameState, w: Walker, rng: Rng) {
 /** The world work behind a PICK: route to a building, or wander when there is nowhere to go. */
 function pick(state: GameState, w: Walker, rng: Rng): "seeking" | "wandering" {
   const target = chooseTarget(state, w, rng);
-  if (target && startRoute(state, w, target)) return "seeking";
+  const stroll = w.kind === "researcher" && w.need === "work" && hostsFor(state, w.kind).filter((b) => b.kind === "cluster" || b.kind === "hall").length < 2 && rng.chance(0.35);
+  if (!stroll && target && startRoute(state, w, target)) return "seeking";
   w.need = "";
   wander(state, w, rng);
   return "wandering";
@@ -498,10 +501,15 @@ function found(state: GameState, w: Walker): boolean {
 }
 
 /** Walkers caught out by a change to paths or buildings find a new way. */
-function repairWalkers(state: GameState, rng: Rng) {
+function repairWalkers(state: GameState, rng: Rng, grew: boolean) {
   for (const w of state.walkers) {
     if (w.kind === "protester") continue; // they stand on grass; protest.ts looks after them
     if (found(state, w)) w.lost = "";
+    if (grew && (w.machine.value === "wandering" || w.machine.value === "loitering")) {
+      wander(state, w, rng);
+      w.machine = stepWalker(w.machine, { type: "NEXT" });
+      w.machine = stepWalker(w.machine, { type: "CHOSE_WANDER" });
+    }
     if (w.machine.value === "inside") {
       const home = byId(state, w.targetId);
       if (home && !home.broken) continue;
@@ -553,10 +561,9 @@ function spawnFromGate(state: GameState, kind: "visitor" | "researcher", rng: Rn
   const linked = getReach(state).tiles;
   const mouth = entrances(state, state.gate).filter((e) => linked[tileIndex(state, e.x, e.z)]);
   if (targets.length === 0 || mouth.length === 0) return null;
-  const g = state.gate;
-  const w = newWalker(state, kind, g.x + g.w / 2, g.z + 0.6, rng);
-  const target = kind === "visitor" ? (chooseTarget(state, w, rng) ?? rng.pick(targets)) : rng.pick(targets);
   const e = rng.pick(mouth);
+  const w = newWalker(state, kind, e.x + 0.5, e.z + 0.5, rng);
+  const target = kind === "visitor" ? (chooseTarget(state, w, rng) ?? rng.pick(targets)) : rng.pick(targets);
   const route = routeToRect(state, e.x + 0.5, e.z + 0.5, target);
   if (!route) return null;
   w.route = route;
@@ -580,9 +587,13 @@ export function despawn(state: GameState, ids: ReadonlySet<number>) {
 export function updateWalkers(state: GameState, rng: Rng) {
   if (state.flags.walkerVersion !== state.version) {
     state.flags.walkerVersion = state.version;
-    repairWalkers(state, rng);
+    const paths = getReach(state).tiles.filter(Boolean).length;
+    const grew = state.flags.walkerPathCount !== undefined && paths > state.flags.walkerPathCount;
+    state.flags.walkerPathCount = paths;
+    repairWalkers(state, rng, grew);
   }
   fillOccupancy(state);
+  const slopOn = systemUnlocked(state, "slop");
   const disconnected = !entranceConnected(state);
   const fountains = state.buildings.filter((b) => b.kind === "fountain");
   let gone: Set<number> | null = null;
@@ -603,8 +614,8 @@ export function updateWalkers(state: GameState, rng: Rng) {
     tickNeeds(w, state.capability);
     // Slop (sim/slop.ts): drifted agents drop it, everyone else gets a little grumpier for standing in it.
     if (w.kind === "agent") {
-      if ((state.tick + w.id) % 7 === 0) dropSlop(state, w);
-    } else messTick(state, w);
+      if (slopOn && (state.tick + w.id) % 7 === 0) dropSlop(state, w);
+    } else if (slopOn) messTick(state, w);
     if (w.kind === "researcher" && fountains.length > 0 && w.machine.value !== "inside") passFountains(w, fountains);
     const phase = w.machine.value;
     if (phase === "inside") {
@@ -692,6 +703,7 @@ export function dailyWalkers(state: GameState, rng: Rng) {
   const batch = Math.min(deficit, Math.max(1, Math.ceil(deficit / 4)));
   for (let i = 0; i < batch; i++) spawnAgent(state, rng);
   admitApplicants(state, rng, count("researcher"));
+  if (state.flags.firstGateway === undefined && !state.buildings.some((b) => b.kind === "gateway")) return;
   const demand = visitorDemand(state);
   const crowdFactor = count("protester") >= CROWDING_PROTESTERS ? 0.5 : 1;
   const rate = demand.perDay * crowdFactor;

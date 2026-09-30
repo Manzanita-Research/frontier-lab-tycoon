@@ -1,4 +1,5 @@
-import { createInitialState } from "./state";
+import { createInitialState as createOpening } from "./state";
+const createInitialState = (seed: number) => { const s = createOpening(seed); delete s.progression; return s; };
 import { applyNow, tick, TICKS_PER_DAY } from "./tick";
 import { canPlace } from "./commands";
 import { entranceConnected, gateAccessTiles, getReach, isReachable } from "./pathfind";

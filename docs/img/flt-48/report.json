@@ -1,0 +1,25 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "e92465c43fd3c8588d4ad93ef2d13f773fce5113"
+  },
+  "head": {
+    "branch": "flt-48-midgame-scenario",
+    "sha": "40529d9",
+    "dirty": true
+  },
+  "seconds": 46.008,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "midgame",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_f48fpspysg-1/project-proj-dvb9hes55f/docs/img/flt-48/before/midgame.png",
+      "after": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_f48fpspysg-1/project-proj-dvb9hes55f/docs/img/flt-48/after/midgame.png",
+      "title": "FLT-48 Part A: the scripted mid-game campus, paused near Y2 Mar",
+      "compare": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_f48fpspysg-1/project-proj-dvb9hes55f/docs/img/flt-48/compare/midgame.png",
+      "changed": 0.22507947530864197
+    }
+  ],
+  "errors": []
+}

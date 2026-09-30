@@ -166,7 +166,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
   const list = useMemo(() => skinList(), []);
 
   // `?debug=1&ladder=N`: show a rung of the ladder without playing up to it (skins, screenshots). Never in a normal game.
-  const shown = useMemo(() => (debugParams.ladder ? { ...snap, ...playableFixture(debugParams.ladder.level, debugParams.ladder.coach, debugParams.ladder.unlock) } : snap), [snap]);
+  const shown = useMemo(() => (debugParams.ladder ? ({ ...snap, ...playableFixture(debugParams.ladder.level, debugParams.ladder.coach, debugParams.ladder.unlock) } as unknown as Snapshot) : snap), [snap]);
   const vm = useMemo(
     () =>
       hudViewModel({

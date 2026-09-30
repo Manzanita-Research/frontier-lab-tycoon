@@ -1,4 +1,7 @@
 // Everything in GameState is plain and JSON-serializable.
+import type { CoachStored } from "./machines/coach";
+import type { ProgressionStored } from "./machines/progression";
+import type { ProgressionLevel, UnlockCard } from "../content/progression";
 import type { BuildingKind } from "../content/buildings";
 import type { CollusionState, Investigation } from "./collusion/state";
 import type { NeedKey } from "../content/needs";
@@ -224,6 +227,10 @@ export interface Ledger {
 }
 
 export interface GameState {
+  coach?: CoachStored;
+  progression?: ProgressionStored;
+  progressionContent?: readonly ProgressionLevel[];
+  unlockCards?: UnlockCard[];
   seed: number;
   rngState: number;
   tick: number;

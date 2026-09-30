@@ -5,7 +5,7 @@ import { Skin } from "./services/skin";
 import { Assets } from "./services/assets";
 import { Audio } from "./services/audio";
 import { Vocabulary } from "./services/vocabulary";
-import { Arc, Building, Ending, EntityKind, EventOrArc, Goal, Headline, ModError, NamePool, Rival, Thought, Tip, decodeManifest, type ModManifest } from "./schema";
+import { Progression, Arc, Building, Ending, EntityKind, EventOrArc, Goal, Headline, ModError, NamePool, Rival, Thought, Tip, decodeManifest, type ModManifest } from "./schema";
 import { contentKey, patchById } from "./patch";
 import { sanitizeCss } from "./css";
 import { validateAssets } from "./assets";
@@ -20,6 +20,7 @@ function applyContent(below: ContentApi, mod: ModManifest): ContentApi {
   for (const row of buildings) if (row.id !== row.kind) throw new ModError({ path: "content.buildings", detail: `building id "${row.id}" must equal kind "${row.kind}"` });
   return {
     ...below,
+    progression: patchById("progression", below.progression, p.progression, (row) => row.id, Schema.decodeUnknownSync(Progression)),
     buildings: Object.fromEntries(buildings.map(({ id, ...row }) => [id, row])),
     rivals: patchById("rivals", below.rivals, p.rivals, (row) => row.id, Schema.decodeUnknownSync(Rival)),
     headlines: p.headlines ? patchById("headlines", below.headlines.map((row, i) => ({ ...row, id: contentKey("headlines", row, i) })), p.headlines, (row) => row.id, (input) => Schema.decodeUnknownSync(Schema.Struct({ ...Headline.fields, id: Schema.String }))({ trigger: "filler", ...toObject(input) })) : below.headlines,

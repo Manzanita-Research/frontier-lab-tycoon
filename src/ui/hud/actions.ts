@@ -9,7 +9,6 @@ import { roomAtom, skipNews, viewRoom } from "../../newsroom/state";
 import { setPhoto, takePhoto } from "../juice/photo";
 import { arenaOpenAtom, chatCountAtom, helpOpenAtom, photoFlashAtom, photoTimeAtom, staffOpenAtom } from "./state";
 import { skinActions } from "./skinControl";
-import type { Command } from "../../sim/commands";
 import type { StaffJob } from "../../sim/types";
 import type { HudActions } from "./types";
 
@@ -45,16 +44,16 @@ export const hudActions: HudActions = {
   },
   cancelSpend: () => send({ type: "COMMAND", command: { type: "cancelConfirm" } }),
 
-  // The coach and the "New!" card (FLT-49's commands; `as Command` until they are in the union).
-  coachSkip: () => send({ type: "COMMAND", command: { type: "coachSkip" } as unknown as Command }),
+  // The coach and the "New!" card (FLT-49's commands).
+  coachSkip: () => send({ type: "COMMAND", command: { type: "coachSkip" } }),
   coachReplay: () => {
     registry.set(helpOpenAtom, false);
-    send({ type: "COMMAND", command: { type: "coachReplay" } as unknown as Command });
+    send({ type: "COMMAND", command: { type: "coachReplay" } });
   },
-  dismissUnlock: () => send({ type: "COMMAND", command: { type: "dismissUnlock" } as unknown as Command }),
+  dismissUnlock: () => send({ type: "COMMAND", command: { type: "dismissUnlock" } }),
   // The first coach step waits for the build panel to open: tell the game each time it does.
   buildPanel: (open) => {
-    if (open) send({ type: "COMMAND", command: { type: "buildPanelOpened" } as unknown as Command });
+    if (open) send({ type: "COMMAND", command: { type: "buildPanelOpened" } });
   },
   openHelp: () => registry.set(helpOpenAtom, true),
   closeHelp: () => registry.set(helpOpenAtom, false),

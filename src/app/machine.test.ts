@@ -34,47 +34,45 @@ const boot = (speed: Speed = 1) =>
 const provide = (handle: SimHandle) => Effect.provide(Layer.mergeAll(simLayer(handle), framesManual));
 
 describe("app machine", () => {
-  it.effect("a clean game opens at 1× and runs: the opening's messages do not hold time (only menus, cards and the spending check do)", () => {
+  it.effect("opens paused at 1×, then the first build click starts time and coach marks never hold it", () => {
     const handle = new SimHandle(createInitialState(1));
     return Effect.gen(function* () {
       const { actor, sim, pump } = yield* boot();
       yield* pump(40);
       expect(actor.getSnapshot().matches({ playing: "running" })).toBe(true);
       expect(actor.getSnapshot().context.speed).toBe(1);
-      expect(actor.getSnapshot().context.snap.assistant?.step).toBe("path");
+      expect(sim.world.tick).toBe(0);
+      yield* send(actor, { type: "COMMAND", command: { type: "buildPanelOpened" } });
+      yield* pump(20);
       expect(sim.world.tick).toBeGreaterThan(0);
-      // Choosing the tool the message points at is still a valid acknowledgement, and it changes nothing about the clock.
-      yield* send(actor, { type: "SET_TOOL", tool: "path" });
-      yield* pump(8);
-      expect(actor.getSnapshot().context.speed).toBe(1);
-      expect(actor.getSnapshot().matches({ playing: "running" })).toBe(true);
-      yield* send(actor, { type: "COMMAND", command: { type: "placePath", x: 11, z: 18 } });
-      yield* pump(8);
-      expect(actor.getSnapshot().context.snap.assistant?.step).toBe("hall");
-      expect(actor.getSnapshot().matches({ playing: "running" })).toBe(true);
+      expect(actor.getSnapshot().context.snap.coach?.id).toBe("path");
+      const before = sim.world.tick;
+      yield* send(actor, { type: "SET_OVERLAY", id: "build", open: true });
+      yield* send(actor, { type: "SELECT", id: sim.world.walkers[0]!.id });
+      yield* pump(120);
+      expect(sim.world.tick - before).toBeGreaterThanOrEqual(60);
+      yield* send(actor, { type: "SET_SPEED", speed: 0 });
+      yield* pump(4);
+      const held = sim.world.tick;
+      yield* send(actor, { type: "COMMAND", command: { type: "coachReplay" } });
+      yield* pump(10);
+      expect(sim.world.tick).toBe(held);
     }).pipe(provide(handle));
   });
 
-  it.effect("overlapping menus and cards hold time without losing a chosen speed or queued inputs", () => {
+  it.effect("menus and inspection keep time running, while the player's pause persists", () => {
     const handle = handleFor();
     return Effect.gen(function* () {
       const { actor, sim, pump } = yield* boot(3);
       yield* send(actor, { type: "SET_OVERLAY", id: "staff", open: true });
       yield* send(actor, { type: "SET_OVERLAY", id: "thoughts", open: true });
-      yield* waitFor(actor, (st) => st.context.overlays.length === 2, { timeout: "1 second" });
       yield* pump(20);
-      expect(sim.world.tick).toBe(0);
+      expect(sim.world.tick).toBeGreaterThan(0);
       yield* send(actor, { type: "COMMAND", command: { type: "hire", job: "sre" } });
-      yield* send(actor, { type: "SET_OVERLAY", id: "staff", open: false });
       yield* pump(10);
       expect(sim.world.staff).toHaveLength(1);
-      expect(sim.world.tick).toBe(0);
-      yield* send(actor, { type: "SET_OVERLAY", id: "thoughts", open: false });
-      yield* pump(10);
-      expect(sim.world.tick).toBeGreaterThan(0);
       expect(actor.getSnapshot().context.speed).toBe(3);
       yield* send(actor, { type: "SET_SPEED", speed: 0 });
-      yield* send(actor, { type: "SET_OVERLAY", id: "staff", open: true });
       yield* send(actor, { type: "SET_OVERLAY", id: "staff", open: false });
       yield* pump(10);
       expect(actor.getSnapshot().matches({ playing: "paused" })).toBe(true);
@@ -97,6 +95,7 @@ describe("app machine", () => {
     const handle = new SimHandle(createInitialState(1));
     handle.world.cash = 100_000;
     handle.applyNow([{ type: "skipTutorial" }]);
+    delete handle.world.progression; delete handle.world.coach;
     return Effect.gen(function* () {
       const { actor, sim, pump } = yield* boot(3);
       yield* pump(1); // let the manual frame stream subscribe before queuing the proposal

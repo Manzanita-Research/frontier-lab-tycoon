@@ -1,3 +1,4 @@
+import { pressureReady } from "../tutorial";
 // The Race's driver: once a game day it checks the R&D multiplier and the era ratchet, calls the weekly cycle
 // every seventh day (rivals act, the Arena is re-ranked, the news turns) and decides which cards are due
 // (open-weights drop, compute auction, funding round). The rivals and the era are machines; this applies what
@@ -8,7 +9,6 @@ import { RIVAL_BY_ID, type RivalDef, type RivalId } from "../../content/rivals";
 import type { EmittedFrom } from "xstate";
 import { fillTemplate } from "../format";
 import { step } from "../machines/run";
-import { pressureReady } from "../tutorial";
 import { addNews, addToast, templateVars } from "../news";
 import type { Rng } from "../rng";
 import type { GameState } from "../types";
