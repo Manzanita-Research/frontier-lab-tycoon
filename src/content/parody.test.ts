@@ -1,6 +1,3 @@
-import { readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
-
 // Parody names only (AGENTS.md). Every content string, skin string and window title the game can show: the content
 // tables, the 2D UI and all six skins (code, JSON and CSS), and every base pack under mods/. The defection test keeps
 // its narrower check on its own two packs; this one covers the rest, so a real product name fails wherever it lands.
@@ -11,22 +8,12 @@ const REAL = [
 // Our parodies that contain (or sit next to) a real name. They are removed before the scan.
 const ALLOWED = ["Outlook Excess", "WordSad", "WordPerfectly", "NoteBad"];
 
-const root = join(__dirname, "../..");
-const SOURCES = /\.(ts|tsx|json|css)$/;
-
-function files(dir: string, keep: RegExp): string[] {
-  return (readdirSync(join(root, dir), { recursive: true }) as string[])
-    .filter((f) => keep.test(f) && !/\.test\.tsx?$/.test(f))
-    .map((f) => join(dir, f));
-}
-
-const packs = readdirSync(join(root, "mods")).filter((d) => d.startsWith("base-"));
-const scanned = [
-  ...files("src/content", SOURCES),
-  ...files("src/ui", SOURCES),
-  ...files("src/skins", SOURCES),
-  ...packs.flatMap((p) => files(join("mods", p), /\.json$/)),
-];
+const sources = import.meta.glob<string>(
+  ["./**/*.{ts,json}", "../ui/**/*.{ts,tsx,json,css}", "../skins/**/*.{ts,tsx,json,css}", "../../mods/base-*/**/*.json", "!**/*.test.{ts,tsx}"],
+  { query: "?raw", import: "default", eager: true },
+);
+const scanned = Object.keys(sources);
+const packs = [...new Set(scanned.flatMap((f) => /^\.\.\/\.\.\/mods\/(base-[^/]+)\//.exec(f)?.[1] ?? []))];
 
 /** Every real name in `text`, once the allowed parodies are taken out. */
 function realNames(text: string): string[] {
@@ -41,13 +28,14 @@ describe("parody names only", () => {
   });
   it("reads the content, the UI, all six skins and every base pack", () => {
     for (const skin of ["base", "frontier-95", "homepage-98", "discovery-disc-96", "field-almanac", "karaoke-night", "swag-drop"]) {
-      expect(scanned.some((f) => f.startsWith(join("src/skins", skin))), skin).toBe(true);
+      expect(scanned.some((f) => f.startsWith(`../skins/${skin}/`)), skin).toBe(true);
     }
-    expect(packs.length).toBeGreaterThanOrEqual(10);
-    for (const p of packs) expect(scanned).toContain(join("mods", p, "mod.json"));
+    expect(sources["../skins/frontier-95/skin.css"]).toContain('[data-skin="frontier-95"]');
+    expect(packs.length).toBeGreaterThanOrEqual(13);
+    for (const p of packs) expect(scanned).toContain(`../../mods/${p}/mod.json`);
   });
   it("names no real product, app, site or lab anywhere the player can read", () => {
-    const found = scanned.flatMap((f) => realNames(readFileSync(join(root, f), "utf8")).map((name) => `${f}: ${name}`));
+    const found = scanned.flatMap((f) => realNames(sources[f]!).map((name) => `${f}: ${name}`));
     expect(found).toEqual([]);
   });
 });
