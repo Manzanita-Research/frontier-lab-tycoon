@@ -4,6 +4,7 @@ export { Marquee } from "./Marquee";
 export { Portrait } from "./Portrait";
 export { Senator } from "./Senator";
 export { Dialog } from "./Dialog";
+export { ImportButton } from "./ImportButton";
 export { DramaIcon } from "./DramaIcon";
 export { money } from "./format";
 export { reducedMotion } from "./motion";

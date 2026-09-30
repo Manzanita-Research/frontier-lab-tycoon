@@ -8,15 +8,17 @@
 // Effect actions do the impure part through the Sim service and report back with SYNCED, which is where card and
 // outcome changes move the machine. Player input is just an event: choosing a card is `CHOOSE`, and the machine
 // forwards it into the sim as a `chooseEvent` command on the next tick.
-import { Clock, Effect, Schema, Stream } from "effect";
+import { Clock, Effect, Option, Schema, Stream } from "effect";
 import { fromEffectEventStream, setupEffect } from "@xstate/effect";
 import type { Command } from "../sim/commands";
 import { dailySeed } from "../sim/daily";
-import type { NewsItem, OpenEvent, Outcome, Tone } from "../sim/types";
+import type { GameState, NewsItem, OpenEvent, Outcome, Tone } from "../sim/types";
 import { Frames } from "./frames";
 import type { Snapshot, Speed, Tool, UiSelection, UiToast } from "./hud";
 import { gateToasts, mergeWire, newGate, WIRE_MAX, type NoticeGate, type WireItem } from "./notices";
 import { Sim, type SyncReport } from "./sim";
+import { Saves, type SaveWhy } from "./saves";
+import type { SlotId } from "../save";
 
 /** Twenty sim ticks per day, six real seconds at 1×. */
 export const TICKS_PER_SECOND = 20 / 6;
@@ -25,6 +27,8 @@ export const SNAPSHOT_MS = 200;
 export const TOAST_MS = 5200;
 /** A batch summary is a list: it gets longer to be read. */
 export const BATCH_TOAST_MS = 9000;
+/** The autosave runs when the calendar turns a month (30 game days: three minutes at 1×). */
+export const AUTOSAVE_DAYS = 30;
 
 /** A type-only schema: the context carries these shapes as they are, with nothing to validate at runtime. */
 const opaque = <T>() => Schema.declare<T>((_value): _value is T => true);
@@ -119,6 +123,10 @@ export const appMachine = setupEffect({
       CHOOSE: Schema.Struct({ choiceIndex: Schema.Number }),
       KEEP_PLAYING: Schema.Struct({}),
       NEW_LAB: Schema.Struct({}),
+      /** Carry on from a save (FLT-65): the decoded World replaces the live one. */
+      LOAD_LAB: Schema.Struct({ world: opaque<GameState>() }),
+      /** Write the World to a save slot now: the autosave (`why`: month, hide, ending) or a slot the player picked. */
+      SAVE: Schema.Struct({ slot: opaque<SlotId>(), why: opaque<SaveWhy>() }),
       /** Today's lab: a new lab on the date's seed ("2026-09-30"), the same campus for everyone that day. */
       DAILY_LAB: Schema.Struct({ daily: Schema.String }),
       TOAST: Schema.Struct({ text: Schema.String, tone: opaque<Tone>() }),
@@ -168,6 +176,27 @@ export const appMachine = setupEffect({
         sim.reset(daily ? dailySeed(daily) : ((ms ^ Math.imul(sim.world.seed, 2654435761)) >>> 0) || 1, daily);
         const report = sim.report(true, true);
         if (report) args.self.send({ type: "SYNCED", report, now: 0 });
+      }),
+    /** A save's World becomes the live one. */
+    loadLab: (args) =>
+      Effect.gen(function* () {
+        const sim = yield* Sim;
+        if (args.event.type !== "LOAD_LAB") return;
+        sim.load(args.event.world);
+        const report = sim.report(true, true);
+        if (report) args.self.send({ type: "SYNCED", report, now: 0 });
+      }),
+    /**
+     * Save the World as it stands (copied in one synchronous stringify, so ticks can carry on while it compresses).
+     * Without a Saves service (tests, a headless shell) this does nothing.
+     */
+    save: (args) =>
+      Effect.gen(function* () {
+        const saves = yield* Effect.serviceOption(Saves);
+        if (Option.isNone(saves)) return;
+        const sim = yield* Sim;
+        const p = args.params as { slot: SlotId; why: SaveWhy };
+        yield* saves.value.save(sim.world, p.slot, p.why, (text, tone) => args.self.send({ type: "TOAST", text, tone }));
       }),
   },
 }).createMachine({
@@ -234,7 +263,8 @@ export const appMachine = setupEffect({
 } } },
   },
   on: {
-    SYNCED: ({ context, event }, enq) => {
+    SYNCED: (args, enq) => {
+      const { context, event } = args;
       const { report, now } = event;
       // One policy for every notice: what is about you is a toast (one per window), the world's news is for the ticker.
       const gated = gateToasts(context.gate, report.toasts, {
@@ -265,6 +295,11 @@ export const appMachine = setupEffect({
         ...(report.snap && context.zone !== null && !report.snap.ops.staff.some((o) => o.id === context.zone) ? { zone: null } : {}),
       };
       for (const t of fresh) enq.raise({ type: "TOAST_EXPIRED", id: t.id }, { id: `toast:${t.id}`, delay: t.batch ? BATCH_TOAST_MS : TOAST_MS });
+      // The autosave: each new month, and the moment the lab ends (won, lost, or one of the endings' front pages).
+      // A month is the calendar turning by one; a jump (a save loading, a new lab) is not the player's month ending.
+      const why: SaveWhy | null = report.outcome !== "playing" && report.outcome !== context.outcome && context.outcome === "playing" ? "ending"
+        : report.snap && Math.floor(report.snap.day / AUTOSAVE_DAYS) === Math.floor(context.snap.day / AUTOSAVE_DAYS) + 1 ? "month" : null;
+      if (why) enq(args.actions.save, { ...args, params: { slot: "auto", why } });
       return { context: next, target: phaseFor(next) };
     },
     SET_SPEED: ({ context, event }) => {
@@ -324,6 +359,13 @@ export const appMachine = setupEffect({
       const { context, actions } = args;
       enq(actions.newLab, args);
       return { context: freshLab(context), target: ".playing.running" };
+    },
+    LOAD_LAB: (args, enq) => {
+      enq(args.actions.loadLab, args);
+      return { context: freshLab(args.context), target: ".playing.running" };
+    },
+    SAVE: (args, enq) => {
+      enq(args.actions.save, { ...args, params: { slot: args.event.slot, why: args.event.why } });
     },
     TOAST: ({ context, event }, enq) => {
       const id = 1_000_000 + context.toastSeq;

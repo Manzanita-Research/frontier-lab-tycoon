@@ -11,6 +11,7 @@ import { setPhoto, takePhoto } from "../juice/photo";
 import { copySummary, playDaily, shareEnding } from "../share/share";
 import { arenaOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, senateOpenAtom, staffOpenAtom } from "./state";
 import { skinActions } from "./skinControl";
+import { savesActions } from "./saves";
 import type { StaffJob } from "../../sim/types";
 import type { HudActions } from "./types";
 
@@ -128,6 +129,8 @@ export const hudActions: HudActions = {
   closeMods: () => registry.set(modsOpenAtom, false),
   // Today's Drama (FLT-34): the window, and the two reloads that switch a pack on or a mod off.
   ...dramaActions,
+  // Saves (FLT-65): the Save/Load window, Welcome back, export and import.
+  ...savesActions,
   setMuted: (muted) => setMixer({ muted }),
   setVolume: (channel, value) => setMixer({ [channel]: Math.max(0, Math.min(1, value)) }),
   playCue: (cue) => playCue(cue as Cue),

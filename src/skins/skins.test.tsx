@@ -136,11 +136,17 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
       return { drama: vms.dramaFresh!.drama, actions };
     case "Drama":
       return { drama: vms.drama!.drama, actions };
+    case "Welcome":
+      return { welcome: vms.welcome!.saves.welcome!, saves: vms.welcome!.saves, actions };
+    case "SaveLoad":
+      return { saves: vms.saves!.saves, actions };
   }
 }
 
 const vms: Record<string, HudVM> = {
   main: vmOf({ tool: "cluster" }),
+  welcome: vmOf({ saves: "welcome" }),
+  saves: vmOf({ saves: "window" }),
   event: vmOf({ event: "waterDiscourse" }),
   confirm: vmOf({ confirm: true }),
   coached: vmOf({ level: 1, coach: 0, unlock: true }),
