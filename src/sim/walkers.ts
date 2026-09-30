@@ -6,7 +6,8 @@ import { defs } from "./defs";
 import { NEEDS, NEEDS_BY_KIND, type NeedKey } from "../content/needs";
 import { CROWDING_PROTESTERS, MAX_AGENTS, WALK_SPEED } from "./constants";
 import { showFor } from "./demo";
-import { formatMoney } from "./format";
+import { QUIT_LINES } from "../content/toastGroups";
+import { fillTemplate, formatMoney } from "./format";
 import { addToast, pushNews } from "./news";
 import { applyServes, gainOf, MIN_GAIN, mostUrgent, tickNeeds, urgencyOf } from "./needs";
 import { addIncident, APPLICANT_VIBES } from "./vibes";
@@ -292,7 +293,8 @@ function walkOut(state: GameState, w: Walker, rng: Rng) {
     return;
   }
   pushNews(state, rng, "researcherLeft", { name: w.name, their: defs().names.THEIR[w.pro] ?? "their" });
-  addToast(state, `${w.name} handed in the box and left.`, "bad", { source: "staff", importance: "you" });
+  const line = QUIT_LINES[w.id % QUIT_LINES.length]!;
+  addToast(state, fillTemplate(line, { name: w.name, their: defs().names.THEIR[w.pro] ?? "their" }), "bad", { source: "staff", importance: "you", group: { kind: "quit", who: w.name } });
   addIncident(state, 0.15);
 }
 

@@ -110,7 +110,7 @@ function poach(s: GameState, lab: NeoLab, rng: Rng) {
   s.race.poached++;
   lab.poached++;
   addNews(s, say(s, lab, rng, lab.lines.poach, { name: gone.name }), "bad");
-  addToast(s, `${lab.name} poached ${gone.name}. ${lab.founder} sends a heart emoji.`, "bad", { source: "defection", importance: "you" });
+  addToast(s, `${lab.name} poached ${gone.name}. ${lab.founder} sends a heart emoji.`, "bad", { source: "defection", importance: "you", group: { kind: "poached", who: gone.name } });
 }
 
 /** Once a day; the labs move on the Arena's weekly beat, before the Race re-ranks it. */

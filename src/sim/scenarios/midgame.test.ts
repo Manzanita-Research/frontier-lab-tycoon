@@ -30,11 +30,12 @@ describe("midgame scenario", () => {
     // FLT-51 tags every toast (source, importance, reply); without the tags it is the World FLT-52 pinned, number for number.
     // FLT-54: the card budget spaces the cards (and the World keeps its pacer), so the whole run moves; the rename (#71) put
     // Super Super AI (id supersuper) and MetaMeta's full name in the World too. Were 36f6a4a9 / 6c24ddd0 before both.
-    // The unread badges then tag the Arena, Papers and Discourse headlines with their panel (NewsItem.panel).
+    // The unread badges then tag the Arena, Papers and Discourse headlines with their panel (NewsItem.panel);
+    // the quit, poach and record toasts carry their group (Toast.group), and a quit picks its line from QUIT_LINES.
     expect({
       untagged: digest({ ...s, toasts: s.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) }),
       full: digest(s),
-    }).toEqual({ untagged: "204e1b1f", full: "047ddc71" });
+    }).toEqual({ untagged: "ec5a8e62", full: "758e1278" });
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);

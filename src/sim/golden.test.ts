@@ -212,11 +212,11 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // itself moved nothing here: before the script changed, every checkpoint held. 200 and 800 hold; 1600 on moves on every
 // seed (the Level 3 hires land before it). The rival rename (#71) then moved 2400 on: the packs Level 5 wakes carry the
 // rivals' names and ids; FLT-54's unread badges then tag the Arena, Papers and Discourse headlines with their panel
-// (NewsItem.panel), which moves 2400 on again.
+// (NewsItem.panel), and the record-taken toasts carry their group (Toast.group, folded by the app): 2400 on again.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "c403ae9a", 800: "c9a777bd", 1600: "bb207932", 2400: "b89b8b1a", 3200: "35c78d01", 4000: "2d21f49b" },
-  2: { 200: "766f3295", 800: "aec1b296", 1600: "1fad47b0", 2400: "cfff751b", 3200: "66a6ed0a", 4000: "36d78e2e" },
-  3: { 200: "b43cb9be", 800: "510d3b99", 1600: "52fba8d3", 2400: "7559e279", 3200: "3aa02327", 4000: "8711e1bc" },
+  1: { 200: "c403ae9a", 800: "c9a777bd", 1600: "bb207932", 2400: "d4245f34", 3200: "4326019f", 4000: "62cc0481" },
+  2: { 200: "766f3295", 800: "aec1b296", 1600: "1fad47b0", 2400: "b2610444", 3200: "40b53f19", 4000: "c4d06eab" },
+  3: { 200: "b43cb9be", 800: "510d3b99", 1600: "52fba8d3", 2400: "9ceb3027", 3200: "d28ffdac", 4000: "796549f6" },
 };
 
 describe("golden runs", () => {

@@ -226,6 +226,9 @@ export type NoticeSource =
 /** `you`: it is about you, or needs you (a toast). `world`: it happened out there (the ticker, and the panel that owns it). */
 export type Importance = "you" | "world";
 
+/** Toasts of one kind that come in bursts (FLT-54): the app folds a pile of them into one line naming them all. */
+export type ToastGroup = "quit" | "poached" | "record";
+
 /** Drained by the store into UI toasts. `source` and `importance` are optional only so older saves still load (FLT-51). */
 export interface Toast {
   id: number;
@@ -235,6 +238,8 @@ export interface Toast {
   importance?: Importance;
   /** Sent while a player command was applied: the answer to something you just did, so the app shows it at once. */
   reply?: true;
+  /** Which burst it belongs to, and the name it adds to the pile (FLT-54; `content/toastGroups.ts`). */
+  group?: { kind: ToastGroup; who: string };
 }
 
 export interface GoalProgress {

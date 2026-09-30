@@ -314,7 +314,11 @@ export function handleDrop(state: GameState, rng: Rng, slot: "lead" | "answer") 
     const fn = claim.maxx ? ` (*${rng.pick(LEAPFROG.footnotes)})` : "";
     packNews(state, rng, "sota", { rival: def.name, model: pending.model, bench, fn });
   }
-  for (const c of claims) if (c.prevHolder === YOU) addToast(state, `${def.name} took your record on ${defs().benchById[c.bench]?.short ?? c.bench}.`, "bad", { source: "leapfrog", importance: "you" });
+  for (const c of claims) {
+    if (c.prevHolder !== YOU) continue;
+    const short = defs().benchById[c.bench]?.short ?? c.bench;
+    addToast(state, `${def.name} took your record on ${short}.`, "bad", { source: "leapfrog", importance: "you", group: { kind: "record", who: short } });
+  }
   addToast(state, slot === "lead" ? `${def.name} launched ${pending.model}. The news cycle is theirs.` : `${def.name} answers ${leadName} a day later: ${pending.model}.`, "bad", { source: "leapfrog" });
 
   pushVoice(state, pending.id, slot === "lead" ? R.voice.leadPush : R.voice.answerPush);
