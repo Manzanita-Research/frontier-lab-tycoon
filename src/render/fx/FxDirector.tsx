@@ -20,6 +20,8 @@ if (typeof window !== "undefined" && new URLSearchParams(window.location.search)
 
 /** Walkers are drawn 1.6x life size (see Walkers.tsx); sparkles ride at the height of an agent's body. */
 const AGENT_Y = 0.55;
+/** A runner's trail: brighter than the ambient one, and the colour of a drifted agent's visor going cyan to pink. */
+const TRAIL: readonly [number, number, number][] = [[0.3, 0.97, 1], [1, 0.42, 0.72]];
 const fwd = new THREE.Vector3();
 
 /**
@@ -33,11 +35,23 @@ export function FxDirector() {
     if (dbg) dbg.get = get;
   }, [get]);
   const watch = useMemo(createWatch, []);
-  const acc = useRef({ smoke: 0, spark: 0, drop: 0, fly: 0, star: 0, gas: 0, fire: 0, embers: 0, glint: 0, suds: 0 });
+  const acc = useRef({ smoke: 0, spark: 0, drop: 0, fly: 0, star: 0, gas: 0, fire: 0, embers: 0, glint: 0, suds: 0, trail: 0 });
   /** Broken buildings we have already put on a show for, and how many jobs each staffer had done last frame. */
   const brokenSeen = useRef(new Set<number>());
   const doneSeen = useRef(new Map<number, number>());
   const first = useRef(true);
+  /** The runner the camera is following (FLT-59), or null. */
+  const follow = useRef<number | null>(null);
+  // Esc skips the chase shot: the camera stays where it is and the player has it back.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || follow.current === null) return;
+      follow.current = null;
+      cinema.cancel();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   /** The camera's current view, for a shot to start from. */
   const view = () => {
@@ -115,6 +129,25 @@ export function FxDirector() {
         return;
       case "cue":
         return; // the sound layer plays these
+      case "escape":
+        // The Sandbox Escape (FLT-59): the camera goes after the first runner and keeps it in frame; dust where the
+        // guard lands on it and where the hand puts it down; a pink pop where one clears the fence.
+        if (ev.beat === "bolt") {
+          shake(0.15);
+          if (follow.current === null && !fx.photo && cinema.focus(view(), { x: ev.x, z: ev.z, zoom: 1.3, hold: 3.2, rate: 2.6 })) follow.current = ev.walker;
+        } else if (ev.beat === "grab") {
+          for (let i = 0; i < 12; i++) sparkle(pool, ev.x + pool.rand(-0.3, 0.3), pool.rand(0.3, 1.4), ev.z + pool.rand(-0.3, 0.3), [1, 0.95, 0.6]);
+        } else if (ev.beat === "tackle") {
+          dustBurst(pool, ev.x, ev.z, 0.55, 16);
+          shake(0.3);
+        } else if (ev.beat === "drop") {
+          dustBurst(pool, ev.x, ev.z, 0.4, 10);
+          shake(0.08);
+        } else {
+          for (let i = 0; i < 24; i++) sparkle(pool, ev.x + pool.rand(-0.4, 0.4), pool.rand(0.2, 1.6), ev.z + pool.rand(-0.4, 0.4), TRAIL[1]);
+        }
+        if (ev.beat !== "bolt" && ev.beat !== "grab" && follow.current === ev.walker) follow.current = null;
+        return;
       case "placed":
         dustBurst(pool, ev.x, ev.z, Math.max(ev.w, ev.d) * 0.62, 8 + ev.w * ev.d * 3);
         shake(0.1);
@@ -142,6 +175,7 @@ export function FxDirector() {
       case "reset":
         pool.clear();
         cinema.cancel();
+        follow.current = null;
         fx.cheerAt = -1e9;
         fx.earnAt = -1e9;
         brokenSeen.current.clear();
@@ -189,6 +223,29 @@ export function FxDirector() {
       }
     }
     a.spark = Math.min(a.spark, 2);
+
+    // The Sandbox Escape (FLT-59): a runner leaves a bright trail, and the camera keeps it in the middle of the shot.
+    const runners = world.escape?.runners;
+    if (runners && runners.length > 0) {
+      const al = game.alpha;
+      for (const r of runners) {
+        const phase = r.machine.value;
+        if (phase !== "running" && phase !== "carried") continue;
+        const w = walkers.find((o) => o.id === r.walker);
+        if (!w) continue;
+        const x = w.px + (w.x - w.px) * al - HALF;
+        const z = w.pz + (w.z - w.pz) * al - HALF;
+        // The trail streams out behind it (against its heading), so it reads as a dash even on a paused frame.
+        a.trail += phase === "running" ? dt * 110 : 0;
+        for (let n = 0; a.trail >= 1 && n < 6; n++, a.trail--) {
+          const d = pool.rand(0.1, 2.4);
+          sparkle(pool, x - Math.sin(w.dir) * d, AGENT_Y + pool.rand(-0.15, 0.25) - d * 0.12, z - Math.cos(w.dir) * d, TRAIL[pool.rand() < 0.7 ? 0 : 1]!);
+        }
+        if (follow.current === r.walker) cinema.retarget(x, z);
+      }
+      a.trail = Math.min(a.trail, 6);
+    }
+    if (follow.current !== null && !cinema.active) follow.current = null;
 
     // Water over the protesters: droplets thrown up over the crowd and falling back.
     a.drop += dt * Math.min(22, protesters * 0.7);

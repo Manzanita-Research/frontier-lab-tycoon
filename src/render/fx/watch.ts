@@ -26,6 +26,11 @@ export type FxEvent =
   | { type: "shake"; strength: number }
   /** A disaster asked for a sound cue (an SFX name from audio/score.ts). */
   | { type: "cue"; cue: string }
+  /**
+   * The Sandbox Escape (FLT-59), in scene coordinates: an agent bolts for the fence (`walker` for the camera to follow),
+   * the hand picks it up, a guard tackles it, the hand puts it down, or it clears the fence.
+   */
+  | { type: "escape"; beat: "bolt" | "grab" | "tackle" | "drop" | "out"; walker: number; x: number; z: number }
   /** A different World (new lab): forget everything. */
   | { type: "reset" };
 
@@ -45,6 +50,8 @@ export function createWatch(): Watch {
   let cueId = 0;
   let paths = new Uint8Array(0);
   let buildings = new Map<number, Building>();
+  /** Each runner's last phase, where it was and where the hand is taking it (tiles), by walker id. */
+  let runners = new Map<number, Seen>();
 
   const baseline = (w: GameState) => {
     seen = w;
@@ -56,6 +63,7 @@ export function createWatch(): Watch {
     cueId = w.disasters.cues.reduce((m, c) => Math.max(m, c.id), 0);
     paths = Uint8Array.from(w.grid.paths, (p) => (p ? 1 : 0));
     buildings = new Map(w.buildings.map((b) => [b.id, b]));
+    runners = runnersOf(w);
   };
 
   return {
@@ -127,6 +135,27 @@ export function createWatch(): Watch {
         else out.push({ type: "cue", cue: c.cue });
       }
 
+      if (runners.size > 0 || (w.escape?.runners.length ?? 0) > 0) {
+        const now = runnersOf(w);
+        const beat = (b: Extract<FxEvent, { type: "escape" }>["beat"], id: number, r: { x: number; z: number }) =>
+          out.push({ type: "escape", beat: b, walker: id, x: worldX(r.x), z: worldZ(r.z) });
+        for (const [id, r] of now) {
+          const was = runners.get(id)?.phase;
+          if (r.phase === was) continue;
+          if (r.phase === "running") beat("bolt", id, r);
+          else if (r.phase === "carried") beat("grab", id, r);
+          else if (r.phase === "tackled") beat("tackle", id, r);
+          else if (r.phase === "escaped") beat("out", id, r);
+        }
+        for (const [id, r] of runners) {
+          if (now.has(id)) continue;
+          // Gone from the list: put down (if it was in the hand), or over the fence (the walker went with it).
+          if (r.phase === "carried") beat("drop", id, { x: r.tx, z: r.tz });
+          else if (r.phase === "running" && !w.walkers.some((o) => o.id === id)) beat("out", id, r);
+        }
+        runners = now;
+      }
+
       for (const p of w.pops) {
         if (p.id > popId) {
           popId = p.id;
@@ -136,4 +165,15 @@ export function createWatch(): Watch {
       return out;
     },
   };
+}
+
+interface Seen { phase: string; x: number; z: number; tx: number; tz: number }
+
+function runnersOf(w: GameState): Map<number, Seen> {
+  const out = new Map<number, Seen>();
+  for (const r of w.escape?.runners ?? []) {
+    const at = w.walkers.find((o) => o.id === r.walker) ?? r.pace;
+    out.set(r.walker, { phase: r.machine.value, x: at.x, z: at.z, tx: r.carry?.x1 ?? at.x, tz: r.carry?.z1 ?? at.z });
+  }
+  return out;
 }

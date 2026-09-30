@@ -444,6 +444,38 @@ function EndingLabels() {
   );
 }
 
+/**
+ * An agent running for the fence says what to do about it, and one in the hand has the hand over it (FLT-59). The
+ * grab itself is in Pick.tsx; the lift is in Walkers.tsx.
+ */
+function GrabTags() {
+  const runners = useApp(atoms.runners);
+  if (!runners) return null;
+  return (
+    <>
+      {runners.split(",").map((tag) => {
+        const id = Number(tag.slice(0, -1));
+        const held = tag.endsWith("c");
+        return (
+          <Anchored
+            key={tag}
+            className={held ? "grabhand" : "grabit"}
+            pos={(out) => {
+              const w = sim.world.walkers.find((o) => o.id === id);
+              if (!w) return false;
+              const a = sim.alpha;
+              out.set(w.px + (w.x - w.px) * a - HALF, held ? 2.75 : 2.3, w.pz + (w.z - w.pz) * a - HALF);
+              return true;
+            }}
+          >
+            {held ? "🤏" : "✋ GRAB IT!"}
+          </Anchored>
+        );
+      })}
+    </>
+  );
+}
+
 /** The world's own labels: names, coin pops, warnings. Thought bubbles are the skin's (see hud/BubbleLayer). */
 export function WorldOverlay() {
   return (
@@ -460,6 +492,7 @@ export function WorldOverlay() {
         <DisasterLabels />
         <Reason />
         <EndingLabels />
+        <GrabTags />
       </div>
       {/* Above the HUD: it is using your mouse now. */}
       <div className="world ghost-layer">

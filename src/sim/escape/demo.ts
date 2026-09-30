@@ -1,6 +1,7 @@
 // Review moments for the Sandbox Escape (FLT-59): `?moment=escape-warning|escape-run|escape-carry|escape-jailbreak|
 // escape-honeypot`. They use the same tick and command paths as play. No renderer or UI dependencies.
 import { canPlace } from "../commands";
+import { openEventOf } from "../events";
 import { createRng } from "../rng";
 import { answer } from "../testkit";
 import { applyNow, tick, TICKS_PER_DAY } from "../tick";
@@ -30,6 +31,10 @@ export function escapeLab(s: GameState, honeypot = false) {
   place("security", [[15, 17], [8, 17], [13, 17]]);
   if (honeypot) place("honeypot", [[17, 9], [16, 11], [6, 9]]);
   applyNow(s, [{ type: "hire", job: "security" }, { type: "hire", job: "security" }]);
+  // They walk a patch by their office, a sprint away from the south fence, so a run has a chase in it.
+  for (const g of s.staff.filter((o) => o.job === "security")) {
+    for (let x = 14; x <= 17; x++) for (let z = 15; z <= 18; z++) applyNow(s, [{ type: "paintZone", id: g.id, x, z, on: true }]);
+  }
   s.models = ["Frontier-2", "Frontier-3-Reasoner", "Frontier-4"];
   s.capability = 48;
   s.hype = 62;
@@ -53,6 +58,12 @@ const phaseIs = (...phases: RunnerPhase[]) => (s: GameState) => !!s.escape?.runn
 const ticks = (s: GameState, n: number) => until(s, () => false, n / TICKS_PER_DAY);
 
 export function stageEscape(s: GameState, moment: EscapeMoment) {
+  run(s, moment);
+  // The shot is the fence, not whatever the Senate wanted to ask at the same moment: answer it without a tick.
+  for (let i = 0; i < 4 && openEventOf(s); i++) applyNow(s, answer(s));
+}
+
+function run(s: GameState, moment: EscapeMoment) {
   escapeLab(s, moment === "escape-honeypot");
   const [lead] = startEscape(s, { pace: true, count: moment === "escape-jailbreak" ? 4 : 1 });
   if (!lead) return;

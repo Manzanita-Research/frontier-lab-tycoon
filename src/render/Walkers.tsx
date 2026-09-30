@@ -12,6 +12,8 @@ import { HOODIES, PICKET, SKIN, SUITS } from "./look";
 import { Pick } from "./Pick";
 import { eraDef } from "../content/eras";
 import { eraOfState } from "../sim/race/race";
+import { ESCAPE } from "../content/escape";
+import type { Runner } from "../sim/escape/state";
 
 const CAP = 512;
 /** Every human gets a pair of glasses (one dark strip) so you can see which way they face and when they look around. */
@@ -158,6 +160,9 @@ export function Walkers() {
     const agentLook = LOOKS[eraOfState(sim) - 1]!;
     const boxed = sim.disguises?.agent === "box";
     let nk = 0;
+    // The Sandbox Escape (FLT-59): who is running, in the hand, or flat on the lawn under a guard.
+    const runners = sim.escape?.runners;
+    const escapes = runners && runners.length > 0 ? new Map<number, Runner>(runners.map((r) => [r.walker, r])) : null;
 
     const set = (m: THREE.InstancedMesh | null, i: number, x: number, y: number, z: number, ry: number, sx: number, sy: number, sz: number, rx = 0) => {
       if (!m) return;
@@ -225,10 +230,25 @@ export function Walkers() {
       }
       if (w.kind === "agent") {
         const k = agentLook.scale;
-        const bob = (0.26 + Math.sin(t * 3 + phase) * 0.04) * S * k + hop;
+        // Running: a hard forward lean and a quick bob. In the hand: lifted up and dangling. Tackled: face down.
+        const run = escapes?.get(w.id)?.machine.value;
+        let bob = (0.26 + Math.sin(t * 3 + phase) * 0.04) * S * k + hop;
+        let tilt = 0;
+        if (run === "running") {
+          bob = (0.24 + Math.abs(Math.sin(t * 16 + phase)) * 0.08) * S * k;
+          tilt = 0.38;
+        } else if (run === "carried") {
+          const r = escapes!.get(w.id)!;
+          const u = Math.min(1, Math.max(0, 1 - (r.timer - a) / ESCAPE.rules.catch.carryTicks));
+          bob += ESCAPE.rules.catch.lift * Math.min(1, Math.sin(Math.PI * u) * 2.5);
+          tilt = Math.sin(t * 9 + phase) * 0.28;
+        } else if (run === "tackled") {
+          bob = 0.1 * S * k;
+          tilt = 1.35;
+        }
         const i = na++;
-        set(aBody.current, i, x, bob + 0.17 * S * k, z, ry, k, k, k);
-        set(aVisor.current, i, x + Math.sin(ry) * 0.15 * S * k, bob + 0.22 * S * k, z + Math.cos(ry) * 0.15 * S * k, ry, k, k, k);
+        set(aBody.current, i, x, bob + 0.17 * S * k, z, ry, k, k, k, tilt);
+        set(aVisor.current, i, x + Math.sin(ry) * 0.15 * S * k, bob + 0.22 * S * k, z + Math.cos(ry) * 0.15 * S * k, ry, k, k, k, tilt);
         set(aOrb.current, i, x, bob + 0.5 * S * k + Math.sin(t * 6 + phase) * 0.015, z, 0, k, k, k);
         const pulse = (1.9 + Math.sin(t * 3 + phase) * 0.2) * (1 + env * 0.4) * k;
         set(aGlow.current, i, x, 0.03, z, 0, pulse, 1, pulse);

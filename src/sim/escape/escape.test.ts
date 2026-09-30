@@ -89,6 +89,8 @@ describe("the warning", () => {
 describe("the run", () => {
   it("bolts for a fence point away from the gate, slows the game (chase) and sends the nearest guards", () => {
     const s = lab();
+    // The moments' guards walk a patch by their office; these walk the fence, as hired guards do.
+    applyNow(s, staffOf(s, "security").map((g) => ({ type: "clearZone" as const, id: g.id })));
     const [r] = startEscape(s, { pace: true });
     until(s, () => phase(r!) === "running", 200);
     expect(phase(r!)).toBe("running");
