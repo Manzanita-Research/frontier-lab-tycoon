@@ -19,7 +19,10 @@ export async function check(input, runner) {
   const start = performance.now();
   const decoded = await Effect.runPromise(decodeManifest(manifest));
   const definition = await Effect.runPromise(resolveGameDefinition(composeMods([decoded]).layer));
-  const arcs = [...definition.content.arcs, ...definition.content.events.filter((event) => !("choices" in event))].map(checkArcGraph);
+  const arcsOf = (def) => [...def.content.arcs, ...def.content.events.filter((event) => !("choices" in event))];
+  // The base game's own arcs (FLT-25/33) run in every check; the report marks the ones the mod left alone.
+  const baseArcs = new Map(arcsOf(await Effect.runPromise(resolveGameDefinition(composeMods([]).layer))).map((arc) => [arc.id, JSON.stringify(arc)]));
+  const arcs = arcsOf(definition).map((arc) => ({ ...checkArcGraph(arc), base: baseArcs.get(arc.id) === JSON.stringify(arc) }));
   const { report, replay, conflicts, presentation, mod } = await checkMod(manifest);
   const digest = (state) => createHash("sha256").update(JSON.stringify(state)).digest("hex");
   if (digest(report.state) !== digest(replay.state)) throw new Error("deterministic replay differs");
@@ -29,9 +32,12 @@ export async function check(input, runner) {
 export function printReport(report) {
   console.log(`PASS ${report.mod.id}@${report.mod.version}: ${report.days} days, ${report.ticks} ticks, ${report.cardsAnswered} cards answered, ${report.models} releases`);
   console.log(`Replay identical: ${report.digest}; cash $${Math.round(report.cash)}; ${report.elapsedMs} ms`);
-  console.log(`Arc reachability: ${report.arcs.length} arcs checked with xstate/graph (structural, guards/actions omitted)`);
-  for (const arc of report.arcs) console.log(`  ${arc.id}: ${arc.states} states, ${arc.configurations} configurations`);
-  if (Object.keys(report.arcStates ?? {}).length > 0) console.log(`Arcs ran in the sim: ${Object.entries(report.arcStates).map(([id, at]) => `${id} ended in "${at}"`).join(", ")}`);
+  const base = new Set(report.arcs.filter((arc) => arc.base).map((arc) => arc.id));
+  const own = report.arcs.filter((arc) => !arc.base);
+  console.log(`Arc reachability: ${report.arcs.length} arcs checked with xstate/graph (structural, guards/actions omitted)${base.size ? `, ${base.size} of them the base game's, unchanged` : ""}`);
+  for (const arc of own) console.log(`  ${arc.id}: ${arc.states} states, ${arc.configurations} configurations`);
+  const ran = Object.entries(report.arcStates ?? {}).filter(([id]) => !base.has(id));
+  if (ran.length > 0) console.log(`Your arcs ran in the sim: ${ran.map(([id, at]) => `${id} ended in "${at}"`).join(", ")}`);
   console.log(`Executed: ${report.coverage.executed.join(", ") || "nothing changed from the base game"} (the real sim ran with your definition)`);
   if (report.coverage.inert.length > 0) console.log(`Validated but not read by any system yet: ${report.coverage.inert.join(", ")}`);
   const p = report.presentation;
