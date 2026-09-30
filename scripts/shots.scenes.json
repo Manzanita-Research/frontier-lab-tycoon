@@ -82,7 +82,10 @@
     "coach": [
       "coach-path",
       "coach-hall",
-      "coach-phone"
+      "coach-phone",
+      "coach-swag",
+      "coach-almanac",
+      "coach-karaoke"
     ],
     "swag-drop": [
       "desk",
@@ -899,6 +902,108 @@
         },
         {
           "wait": 500
+        }
+      ]
+    },
+    "coach-swag": {
+      "title": "Playable opening coach: swag-drop",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "11,19",
+        "zoom": 55,
+        "skin": "swag-drop"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        }
+      ]
+    },
+    "coach-almanac": {
+      "title": "Playable opening coach: field-almanac",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "11,19",
+        "zoom": 55,
+        "skin": "field-almanac"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        }
+      ]
+    },
+    "coach-karaoke": {
+      "title": "Playable opening coach: karaoke-night",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "11,19",
+        "zoom": 55,
+        "skin": "karaoke-night"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
         }
       ]
     }
