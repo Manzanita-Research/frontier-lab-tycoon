@@ -162,6 +162,7 @@
       "wave-auditors",
       "wave-promises",
       "senate-draft",
+      "wave-factions",
       "wave-mods",
       "wave-phone"
     ],
@@ -2008,6 +2009,24 @@
       "steps": [
         {
           "wait": 900
+        }
+      ]
+    },
+    "wave-factions": {
+      "title": "FLT-52 at Level 5: the Discourse Monitor (FLT-33 factions, awake since The Race) opened on the mid-game campus",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "click": ".f95-s.disc:not(.on), .factions:not(.open) .factions-head",
+          "optional": true
+        },
+        {
+          "wait": 500
         }
       ]
     },
