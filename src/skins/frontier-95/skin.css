@@ -426,8 +426,9 @@
       }
     }
     &.burst {
+      /* Below the title bar, so the window's ✕ stays visible (FLT-58). */
       right: -10px;
-      top: -14px;
+      top: 34px;
       padding: 5px 10px;
       background: #e00000;
       color: #fff;
@@ -1383,6 +1384,8 @@
     display: grid;
     gap: 2px;
     width: 100%;
+    /* As wide as the other notes: a long goal wraps instead of stretching the column. */
+    max-width: 250px;
     padding: 6px 10px 8px;
     border: 1px solid #000;
     background: #fff27a;
@@ -1395,6 +1398,9 @@
     }
     b {
       font-size: 17px;
+    }
+    .f95-goalnum {
+      font-size: 15px;
     }
   }
   .f95-goalbar {
@@ -3162,6 +3168,9 @@
     }
     .f95-post {
       width: 100%;
+      &.goal {
+        max-width: none;
+      }
       &.head {
         min-height: 44px;
         display: flex;

@@ -123,7 +123,7 @@ function step(state: GameState, commands: readonly Command[]) {
     updateProgression(state);
     updateTutorial(state);
     observeGuardrails(state);
-  }
+  } else updateProgression(state);
   updateCoach(state, true);
   state.rngState = rng.state();
 }

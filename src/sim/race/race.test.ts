@@ -15,7 +15,7 @@ import { answer, layPaths } from "../testkit";
 import { TICKS_PER_DAY, tick } from "../tick";
 import type { GameState } from "../types";
 import { refreshBoard } from "./arena";
-import { bidAmount, auctionUnit, fundingDue, openDropActive, raiseAmount, revenueFactor, valuation } from "./finance";
+import { auctionBlocked, bidAmount, auctionUnit, fundingDue, openDropActive, raiseAmount, revenueFactor, valuation } from "./finance";
 import { datacenterCompute, gasDiscourse, powerOf, solarHype } from "./power";
 import { dailyRace, eraOfState, weekly } from "./race";
 import { rdMultiplier, multiplierFor, releaseBoost, workingCapability } from "./rd";
@@ -580,3 +580,19 @@ describe("debug moments (?moment=)", () => {
   });
 });
 
+
+describe("unaffordable auction bids (FLT-58)", () => {
+  it("greys out the bids bigger than the bank, with the reason, and never the low one", () => {
+    const s = createBaseCampus(1);
+    s.cash = bidAmount(s, "all") + 1;
+    expect(auctionBlocked(s)).toEqual([null, null, null]);
+    s.cash = bidAmount(s, "mid") + 1;
+    const [low, mid, all] = auctionBlocked(s);
+    expect(low).toBeNull();
+    expect(mid).toBeNull();
+    expect(all).toMatch(/is more than the .* you have/);
+    s.cash = 0;
+    expect(auctionBlocked(s)[0]).toBeNull();
+    expect(auctionBlocked(s).slice(1).every((r) => r !== null)).toBe(true);
+  });
+});

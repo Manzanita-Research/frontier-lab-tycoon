@@ -220,14 +220,14 @@ describe("the pack as a system", () => {
     expect(s.defection).toBeUndefined();
     expect(PROGRESSION.find((r) => r.level === 5)!.systems).toEqual(expect.arrayContaining(["defection", "poaching"]));
     s.progression = { value: "growing", context: { level: 4 } } as never;
-    s.race.rank = 5;
+    s.race.rank = 3; // Level 4's goal: Top 3 on the Arena
     updateProgression(s);
     expect(s.defection?.enabled).toBe(true);
     expect(s.poaching?.enabled).toBe(true);
     const off = createInitialState(4);
     off.flags.defectionOff = 1;
     off.progression = { value: "growing", context: { level: 4 } } as never;
-    off.race.rank = 5;
+    off.race.rank = 3;
     updateProgression(off);
     expect(off.defection).toBeUndefined();
   });

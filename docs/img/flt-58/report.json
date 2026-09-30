@@ -1,0 +1,61 @@
+{
+  "base": {
+    "ref": "origin/flt-47-playable",
+    "sha": "158f23ea046981a2b78231b952e68569cc88887c"
+  },
+  "head": {
+    "branch": "flt-58-ladder-fix",
+    "sha": "2a05d59",
+    "dirty": true
+  },
+  "seconds": 125.708,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "first-wait",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/flt-58-ladder-fix/docs/img/flt-58/before/first-wait.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/flt-58-ladder-fix/docs/img/flt-58/after/first-wait.png",
+      "title": "FLT-58: the first minute, while the first model trains (seed 3, 2.5 days after the Hall)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/flt-58-ladder-fix/docs/img/flt-58/compare/first-wait.png",
+      "changed": 0.9295092592592593
+    },
+    {
+      "scene": "first-peek",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/flt-58-ladder-fix/docs/img/flt-58/before/first-peek.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/flt-58-ladder-fix/docs/img/flt-58/after/first-peek.png",
+      "title": "FLT-58: the first minute after ▶▶: the coach points at a researcher's mind",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/flt-58-ladder-fix/docs/img/flt-58/compare/first-peek.png",
+      "changed": 0.9296983024691358
+    },
+    {
+      "scene": "coach-card",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/flt-58-ladder-fix/docs/img/flt-58/before/coach-card.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/flt-58-ladder-fix/docs/img/flt-58/after/coach-card.png",
+      "title": "FLT-58: the first model ships and Level 2's card opens while the coach has a step",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/flt-58-ladder-fix/docs/img/flt-58/compare/coach-card.png",
+      "changed": 0.9607013888888889
+    },
+    {
+      "scene": "auction",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/flt-58-ladder-fix/docs/img/flt-58/before/auction.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/flt-58-ladder-fix/docs/img/flt-58/after/auction.png",
+      "title": "The Race: the compute auction (the card opens at midnight, 6 ticks in)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/flt-58-ladder-fix/docs/img/flt-58/compare/auction.png",
+      "changed": 0.013866512345679012
+    },
+    {
+      "scene": "auction-broke",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/flt-58-ladder-fix/docs/img/flt-58/before/auction-broke.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/flt-58-ladder-fix/docs/img/flt-58/after/auction-broke.png",
+      "title": "FLT-58: the compute auction when the bank can't cover the big bids",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/flt-58-ladder-fix/docs/img/flt-58/compare/auction-broke.png",
+      "changed": 0.014564814814814815
+    }
+  ],
+  "errors": []
+}

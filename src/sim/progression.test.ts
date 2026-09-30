@@ -28,15 +28,23 @@ describe("the playable ladder", () => {
     expect(progressOf(s)).toMatchObject({ level: 2, levelName: "Open for business" });
     expect(canPlace(s, "gateway", 12, 20).ok).toBe(true);
     expect(makeSnapshot(s).hud.visible).toMatchObject({ revenue: true, vibes: true, staff: false, news: false });
-    s.ledger.income = 20_000; updateProgression(s);
+    // Level 2 asks for both halves: the money and the visitors shown round.
+    s.ledger.income = 40_000; s.flags.visitorsServed = 11; updateProgression(s); expect(progressOf(s).level).toBe(2);
+    expect(progressOf(s).goal.status).toBe("$40K of $40K a day · 11 of 12 visitors");
+    s.flags.visitorsServed = 12; updateProgression(s); expect(progressOf(s).level).toBe(3);
     expect(canHire(s, "sre").ok).toBe(true); expect(systemUnlocked(s, "breakdowns")).toBe(true);
-    seedWalkers(s, "researcher", 5, createRng(2));
-    s.vibes.value = 499; updateProgression(s); expect(progressOf(s).level).toBe(3);
-    s.vibes.value = 500; updateProgression(s); expect(progressOf(s).level).toBe(4);
+    // Level 3: the first spill and the first breakdown are booked for right after it opens, so the hires have work.
+    expect(s.flags.firstSpillDay).toBe(s.day + 1); expect(s.flags.firstBreakdownDay).toBe(s.day + 3);
+    s.flags.mopped = 20; updateProgression(s); expect(progressOf(s).level).toBe(3);
+    hire(s, "sre"); hire(s, "janitor"); updateProgression(s); expect(progressOf(s).level).toBe(3);
+    expect(progressOf(s).goal.status).toBe("SRE ✓ · Janitor ✓ · fixed ✗ · 20 of 20 puddles");
+    s.flags.repaired = 1; updateProgression(s); expect(progressOf(s).level).toBe(4);
     expect(s.leapfrog.enabled).toBe(true);
     expect(s.auditors).toBeUndefined();
-    s.race.rank = 6; updateProgression(s); expect(progressOf(s).level).toBe(4);
-    s.race.rank = 5; updateProgression(s); expect(progressOf(s).level).toBe(5);
+    // Level 4: the field was seeded so you start behind most of it, and the goal is the podium.
+    expect(s.race.rank).toBeGreaterThan(3);
+    s.race.rank = 4; updateProgression(s); expect(progressOf(s).level).toBe(4);
+    s.race.rank = 3; updateProgression(s); expect(progressOf(s).level).toBe(5);
     expect(canHire(s, "security").ok).toBe(true); expect(s.papers?.enabled).toBe(true);
     // Collusion is on the Scrutiny rung, so earning it wakes the pack (it used to stay asleep in normal play).
     expect(s.collusion?.enabled).toBe(true);
@@ -51,7 +59,7 @@ describe("the playable ladder", () => {
     const s = createInitialState(1);
     s.progression = { value: "complete", context: { level: 5 } };
     const line = () => hudViewModel({ ...fixtureInput(), snap: makeSnapshot(s) }).progress.goal.line;
-    expect(line()).toBe("Ship model #3 · 0/3");
+    expect(line()).toBe("Ship 3 models · 0 of 3");
     s.models.push("A", "B", "C");
     const set = (patch: Record<string, { value?: number; met?: boolean }>) => {
       s.goals = { ...s.goals, context: { ...s.goals.context, goals: s.goals.context.goals.map((g) => ({ ...g, ...patch[g.id] })) } };
@@ -71,7 +79,7 @@ describe("the playable ladder", () => {
     expect(s.leapfrog.enabled).toBe(false);
     updateProgression(s); // nothing met: no level-up, nothing wakes
     expect(s.leapfrog.enabled).toBe(false);
-    s.race.rank = 5; updateProgression(s);
+    s.race.rank = 3; updateProgression(s);
     expect(progressOf(s).level).toBe(5);
     expect(s.papers?.enabled).toBe(true);
     expect(s.collusion?.enabled ?? false).toBe(false);
@@ -107,14 +115,14 @@ describe("the playable ladder", () => {
     expect(systemUnlocked(s, id)).toBe(false);
     updateProgression(s);
     expect(awake(s)).toBe(false);
-    s.race.rank = 5; updateProgression(s);
+    s.race.rank = 3; updateProgression(s);
     expect(progressOf(s).level).toBe(5);
     expect(systemUnlocked(s, id)).toBe(true);
     expect(awake(s)).toBe(true);
     const off = createInitialState(4);
     off.flags[`${id}Off`] = 1;
     off.progression = { value: "growing", context: { level: 4 } };
-    off.race.rank = 5; updateProgression(off);
+    off.race.rank = 3; updateProgression(off);
     expect(progressOf(off).level).toBe(5);
     expect(awake(off)).toBe(false);
     // A campus (every rung earned) starts with it awake; a garage without.
@@ -128,8 +136,9 @@ describe("the playable ladder", () => {
       const s = createInitialState(4);
       if (off) s.flags.factionsOff = 1;
       s.progression = { value: "growing", context: { level: 3 } };
-      seedWalkers(s, "researcher", 8, createRng(2));
-      s.vibes.value = 500;
+      // FLT-58's Level 3 goal: an SRE and a Janitor Bot on the payroll, 20 puddles mopped, and the first breakdown fixed.
+      hire(s, "sre"); hire(s, "janitor");
+      s.flags.mopped = 20; s.flags.repaired = 1;
       expect(s.factions).toBeUndefined();
       updateProgression(s);
       expect(progressOf(s).level).toBe(4);
@@ -148,7 +157,7 @@ describe("the playable ladder", () => {
   it("names every wave pack on the New! card, in words", () => {
     const s = createInitialState(4);
     s.progression = { value: "growing", context: { level: 4 } };
-    s.race.rank = 5; updateProgression(s);
+    s.race.rank = 3; updateProgression(s);
     const card = makeSnapshot(s).unlockCard!;
     for (const id of WAVE) expect(card.items).toContain(id);
     const shown = playableOf({ unlockCard: card }).unlock!.items;
@@ -159,11 +168,11 @@ describe("the playable ladder", () => {
     const s = createInitialState(1);
     expect(progressOf(s).teasers).toEqual([
       { label: "2 more", hint: "Ship your first model" },
-      { label: "4 more", hint: "Earn $20K a day" },
-      { label: "6 more", hint: "Top 5 on the Arena" },
+      { label: "4 more", hint: "Earn $40K a day and give 12 visitors the tour" },
+      { label: "6 more", hint: "Top 3 on the Arena" },
     ]);
     s.models.push("Fixture-1"); updateProgression(s);
-    expect(progressOf(s).teasers.map((t) => t.hint)).toEqual(["Earn $20K a day", "Top 5 on the Arena"]);
+    expect(progressOf(s).teasers.map((t) => t.hint)).toEqual(["Earn $40K a day and give 12 visitors the tour", "Top 3 on the Arena"]);
   });
   it("reads modded goal thresholds from identified data rows", () => {
     const def = { content: { ...baseContent, progression: PROGRESSION.map((r) => r.level === 1 ? { ...r, goal: { ...r.goal, target: 2 } } : r) }, rules: baseRules, vocabulary: baseVocabulary };

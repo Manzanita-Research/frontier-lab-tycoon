@@ -15,7 +15,7 @@ function Choices({ event, actions }: { event: EventVM; actions: HudActions }) {
   return (
     <div className="kn-choices">
       {event.choices.map((c, i) => (
-        <button key={c.label} type="button" className="kn-choice" style={{ ["--c" as string]: KEY_COLOURS[i % KEY_COLOURS.length] }} onClick={() => actions.choose(event.id, i)}>
+        <button key={c.label} type="button" className="kn-choice" disabled={!!c.disabled} title={c.disabled} style={{ ["--c" as string]: KEY_COLOURS[i % KEY_COLOURS.length] }} onClick={() => actions.choose(event.id, i)}>
           <span className="kn-choice-key">{c.key}</span>
           <span className="kn-choice-text">
             <b>{c.label}</b>

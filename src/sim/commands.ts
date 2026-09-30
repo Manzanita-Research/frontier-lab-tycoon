@@ -23,6 +23,8 @@ import { catchAgent } from "./escape/driver";
 
 export type Command =
   | { type: "coachSkip" | "coachReplay" | "coachClick" | "dismissUnlock" | "buildPanelOpened" }
+  /** The coach saw you do what it asked while a model trains (FLT-58): press ▶▶, or open somebody's card to read their mind. */
+  | { type: "coachSaw"; what: "speed" } | { type: "coachSaw"; what: "mind"; id: number }
   | { type: "placePath"; x: number; z: number; confirmed?: boolean }
   | { type: "placeBuilding"; kind: BuildingKind; x: number; z: number; confirmed?: boolean }
   | { type: "cancelConfirm" }
@@ -134,6 +136,10 @@ export function applyCommands(state: GameState, commands: readonly Command[], rn
         coachCommand(state, c.type); break;
       case "dismissUnlock": state.unlockCards?.shift(); break;
       case "buildPanelOpened": state.flags.started ??= state.tick; state.flags.coachBuildOpened = state.tick; break;
+      case "coachSaw":
+        if (c.what === "speed") state.flags.coachSpedUp ??= state.tick;
+        else if (state.walkers.some((w) => w.id === c.id) || state.staff.some((w) => w.id === c.id)) state.flags.coachMindRead ??= state.tick;
+        break;
       case "placePath":
         if (canPlace(state, "path", c.x, c.z).ok && guardSpending(state, c)) {
           state.cash -= PATH_PRICE;

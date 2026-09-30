@@ -1,15 +1,16 @@
 import { useState } from "react";
-import { ALL_VISIBLE, DramaIcon, useT } from "../kit";
+import { ALL_VISIBLE, DramaIcon, useCoach, useT } from "../kit";
 import type { SlotPropsMap } from "../types";
 import { BubbleIcon, Caret, LeafIcon, LensIcon, LetterIcon, MixerIcon, PauseIcon, SoundIcon } from "./icons";
 
 /** Pause, 1×, 3×, 10× as round-ended buttons; the one that is running is ink. (The Layout puts the lens beside them.) */
 export function Speed({ speed, actions }: SlotPropsMap["Speed"]) {
   const t = useT();
+  const coach = useCoach();
   return (
     <div className="fa-speed" role="group" aria-label={t("speed.label")}>
       {speed.options.map((o) => (
-        <button key={o.value} className={o.active ? "on" : ""} onClick={() => actions.setSpeed(o.value)} aria-label={t(o.key)} aria-pressed={o.active}>
+        <button key={o.value} className={o.active ? "on" : ""} {...(o.value === 3 ? coach.attrs("speed") : {})} onClick={() => actions.setSpeed(o.value)} aria-label={t(o.key)} aria-pressed={o.active}>
           {o.value === 0 ? <PauseIcon /> : t(`speed.short.${o.value}`)}
         </button>
       ))}

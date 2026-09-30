@@ -11,6 +11,8 @@ import { enableEscape } from "./escape/driver";
 import type { BuildingKind } from "../content/buildings";
 import { enableCapture } from "./capture/driver";
 import { enablePromises } from "./promises/driver";
+import { seedField } from "./race/arena";
+import { formatMoney } from "./format";
 import { STAFF } from "../content/staff";
 import { HUD_PANELS, type HudPanel, type Level, type ProgressView, type SystemId } from "../content/progression";
 import { progressionMachine } from "./machines/progression";
@@ -61,19 +63,51 @@ function enablePacks(s: GameState, systems: readonly SystemId[]) {
 export function enableEarnedPacks(s: GameState) {
   enablePacks(s, s.progression ? unlockedRows(s).flatMap((r) => [...r.systems]) : rows(s).flatMap((r) => [...r.systems]));
 }
+/** Days after Level 3 opens that the first thing breaks, so the SRE has a reason to exist (FLT-58). */
+export const FIRST_BREAKDOWN_DAYS = 3;
+/** And the day after it opens, the first slop (sim/slop.ts `firstSpill`), so the Janitor Bot does too. */
+export const FIRST_SPILL_DAYS = 1;
+const staffed = (s: GameState, job: StaffJob) => s.staff.some((w) => w.job === job && w.machine.value !== "leaving" && w.machine.value !== "gone");
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+
 function goalValue(s: GameState) {
   const goal = rows(s).find((r) => r.level === levelOf(s))!.goal;
-  const current = goal.metric === "models" ? s.models.length : goal.metric === "revenue" ? s.ledger.income : goal.metric === "team" ? s.walkers.filter((w) => w.kind === "researcher" && w.machine.value !== "quitting").length : s.race.rank;
-  const met = goal.metric === "arena" ? current > 0 && current <= goal.target : current >= goal.target;
-  return { goal, current, met: met && (goal.vibes === undefined || s.vibes.value >= goal.vibes) };
+  switch (goal.metric) {
+    case "business": {
+      const served = s.flags.visitorsServed ?? 0;
+      const visitors = goal.visitors ?? 0;
+      const status = `${formatMoney(s.ledger.income)} of ${formatMoney(goal.target)} a day · ${Math.min(served, visitors)} of ${visitors} visitors`;
+      // One number for the bar: each half of the goal is worth half of it.
+      const current = Math.round(goal.target * (Math.min(1, s.ledger.income / goal.target) + (visitors > 0 ? Math.min(1, served / visitors) : 1)) / 2);
+      return { goal, current, status, met: s.ledger.income >= goal.target && served >= visitors };
+    }
+    case "ops": {
+      // Keep it clean and running: the people who do it on the payroll, the puddles mopped, and nothing left broken.
+      const mopped = s.flags.mopped ?? 0;
+      const fixed = (s.flags.repaired ?? 0) > 0 && !s.buildings.some((b) => b.broken);
+      const hires = [staffed(s, "sre") ? "SRE ✓" : "SRE ✗", staffed(s, "janitor") ? "Janitor ✓" : "Janitor ✗", fixed ? "fixed ✓" : "fixed ✗"].join(" · ");
+      return { goal, current: mopped, status: `${hires} · ${Math.min(mopped, goal.target)} of ${plural(goal.target, "puddle", "puddles")}`, met: mopped >= goal.target && fixed && staffed(s, "sre") && staffed(s, "janitor") };
+    }
+    case "arena": {
+      const current = s.race.rank;
+      return { goal, current, status: `#${current} now`, met: current > 0 && current <= goal.target };
+    }
+    case "revenue":
+      return { goal, current: s.ledger.income, status: `${formatMoney(s.ledger.income)} of ${formatMoney(goal.target)} a day`, met: s.ledger.income >= goal.target };
+    default: {
+      const current = goal.metric === "models" ? s.models.length : s.walkers.filter((w) => w.kind === "researcher" && w.machine.value !== "quitting").length;
+      return { goal, current, status: `${Math.min(current, goal.target)} of ${goal.target}`, met: current >= goal.target && (goal.vibes === undefined || s.vibes.value >= goal.vibes) };
+    }
+  }
 }
 export function progressOf(s: GameState): ProgressView {
   const level = levelOf(s);
   const active = rows(s).find((r) => r.level === level)!;
-  const { current, met } = goalValue(s);
+  const { current, met, status } = goalValue(s);
   return { level, levelName: active.name,
     unlocked: { buildings: [...new Set([...unlockedRows(s).flatMap((r) => [...r.buildings]), ...defs().buildingKinds.filter((k) => level >= 4 && s.flags[`unlocked:${k}`] !== undefined) as BuildingKind[]])], staff: unlockedRows(s).flatMap((r) => [...r.staff]), systems: unlockedRows(s).flatMap((r) => [...r.systems]) },
-    goal: met && !rows(s).some((r) => r.level > level) ? afterLadder(s) : { text: active.goal.text, current, target: active.goal.target },
+    goal: met && !rows(s).some((r) => r.level > level) ? afterLadder(s)
+      : { text: active.goal.text, current: active.goal.metric === "arena" ? current : Math.min(current, active.goal.target), target: active.goal.target, status, ...(active.goal.metric === "arena" ? { lowerIsBetter: true } : {}) },
     teasers: teasers(s, level),
   };
 }
@@ -96,7 +130,10 @@ export function visibleHud(s: GameState): { visible: Record<HudPanel, boolean> }
   const panels = unlockedRows(s).flatMap((r) => [...r.panels]);
   return { visible: Object.fromEntries(HUD_PANELS.map((p) => [p, !s.progression || panels.includes(p)])) as Record<HudPanel, boolean> };
 }
-/** One card per earned level, in order, even when several facts become true on one day. */
+/**
+ * One card per earned level, in order, even when several facts become true on one day. Checked every tick, so the goal line
+ * moves on the tick a goal is met.
+ */
 export function updateProgression(s: GameState) {
   if (!s.progression || levelOf(s) === 5) return;
   const result = step(progressionMachine, s.progression, { type: "CHECK", met: goalValue(s).met });
@@ -104,6 +141,10 @@ export function updateProgression(s: GameState) {
   for (const event of result.effects) {
     const row = rows(s).find((r) => r.level === event.level)!;
     enablePacks(s, row.systems);
+    // The Race: the field did not stand still while you were in the garage. You start behind most of it.
+    if (row.systems.includes("arena")) seedField(s);
+    if (row.systems.includes("breakdowns")) s.flags.firstBreakdownDay ??= s.day + FIRST_BREAKDOWN_DAYS;
+    if (row.systems.includes("slop")) s.flags.firstSpillDay ??= s.day + FIRST_SPILL_DAYS;
     const items = [...row.buildings.map((k) => defs().buildings[k]?.name ?? k), ...row.staff.map((k) => STAFF[k].title), ...row.systems];
     s.unlockCards ??= [];
     s.unlockCards.push({ id: row.id, title: `New! ${row.name}`, body: row.goal.text, items });

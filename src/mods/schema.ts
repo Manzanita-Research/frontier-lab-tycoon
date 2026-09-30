@@ -139,7 +139,7 @@ export const Progression = Schema.Struct({
   staff: Schema.Array(Schema.Literals(["janitor", "sre", "comms", "security"])),
   systems: Schema.Array(Schema.Literals(SYSTEM_IDS)),
   panels: Schema.Array(Schema.Literals(HUD_PANELS)),
-  goal: Schema.Struct({ text, metric: Schema.Literals(["models", "revenue", "team", "arena"]), target: positive, vibes: Schema.optionalKey(nonnegative) }),
+  goal: Schema.Struct({ text, metric: Schema.Literals(["models", "revenue", "team", "arena", "business", "ops"]), target: positive, vibes: Schema.optionalKey(nonnegative), visitors: Schema.optionalKey(nonnegative) }),
 });
 export const CoachLine = Schema.Struct({
   id, text,

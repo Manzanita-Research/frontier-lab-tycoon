@@ -118,7 +118,7 @@ try {
 
     // (b) People walk once there is a path. The coach moving past the path step is the signal: no privileged access
     // to construction state. Anyone who turns up later is measured from where they were first seen.
-    if (pathTick === null && ["hall", "training", "gateway", "runway", "goals"].includes(probe.coachId)) pathTick = probe.tick;
+    if (pathTick === null && ["hall", "speed", "peek", "training", "gateway", "runway", "goals"].includes(probe.coachId)) pathTick = probe.tick;
     if (pathTick !== null && !result.checks.walkerMoved) {
       for (const w of probe.walkers) {
         const from = pathPositions.get(w.id);
@@ -136,8 +136,9 @@ try {
     }
     if (now - firstClick > WALL_CAP) throw new Error(`Timed out after ${WALL_CAP / 60_000} minutes at game day ${days(probe).toFixed(2)} (coach ${probe.coachId}); passed so far: ${Object.keys(result.checks).join(", ") || "none"}`);
 
-    // Training waits for release; runway/goals wait for their timers. Only Start and construction marks ask for a click.
-    if (now - lastClick >= 600 && ["start", "path", "hall", "gateway"].includes(probe.coachId)) {
+    // Training waits for release; runway/goals wait for their timers. Start, construction marks, ▶▶ and the researcher
+    // the coach points at (FLT-58) ask for a click.
+    if (now - lastClick >= 600 && ["start", "path", "hall", "speed", "peek", "gateway"].includes(probe.coachId)) {
       // These are the only allowed controls. A confirm is the sole exception in the contract.
       const confirm = page.getByRole("button", { name: /^(OK|Build anyway|Hire anyway|Go ahead)$/i }).first();
       const tile = page.locator("[data-coach-tile]:visible").first();

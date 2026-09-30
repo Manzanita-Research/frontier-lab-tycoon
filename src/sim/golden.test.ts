@@ -180,13 +180,18 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // Then the factions and the Water Discourse arc (FLT-33/25). Level 4 lands at 940 / 980 / 880: its rung now names the
 // factions, which wake and first move the World 4 ticks later (944 / 984 / 884). The base-water arc's documentary crew
 // (a new card, Level 5) first moves it at 1963 / 2043 / 2343 (2323 / 2383 / 2403 with the factions off). 200 and 800 hold.
-// Then the Sandbox Escape (FLT-59), on Scrutiny too: the Level 5 card names the Sandbox, the Honeypot and the escape, and
-// the pack draws its own dice (its own stream) from the next day, so only its state and the card move at first; its
-// thoughts, runs and escapes follow. 1600 on moves on every seed; 200 and 800 hold.
+// FLT-58 moves the ladder on purpose: the first run is a small model (100 compute, not 300), progression is checked every
+// tick, Level 2 counts visitors served, Level 3 scripts the first spill and breakdown, Level 4 seeds the Arena field, and
+// the coach has two more steps. So the opening ships sooner and every later checkpoint follows from that.
+// On the merge train (FLT-52) these are FLT-58's own numbers, digit for digit: under the new ladder this script reaches
+// Level 2 at tick 240 / 240 / 220 and Level 3 at 1380 / 1340 / 1360, and never earns Level 4 in 4000 ticks (its tick-300
+// hires land while staff is still locked, so the ops goal never has its SRE and Janitor). No Race or Scrutiny pack wakes,
+// so none of the wave moves a checkpoint. The wave's packs are pinned by the midgame digest (every pack awake for 480
+// days) and by each pack's own determinism test.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "d3826cd0", 800: "ed628bb9", 1600: "b6044e68", 2400: "2731365d", 3200: "f1b7867e", 4000: "812100b5" },
-  2: { 200: "e548b1af", 800: "552cae60", 1600: "665b9892", 2400: "a2510113", 3200: "35f1335d", 4000: "4909af45" },
-  3: { 200: "58bb415c", 800: "920699d6", 1600: "b3f89e91", 2400: "93c30b84", 3200: "9b97d0c2", 4000: "5c99d78f" },
+  1: { 200: "c403ae9a", 800: "c9a777bd", 1600: "927ac8ca", 2400: "5f82d6d0", 3200: "156351fa", 4000: "510c4ee9" },
+  2: { 200: "766f3295", 800: "aec1b296", 1600: "7f4c5dc5", 2400: "4e24ec1b", 3200: "49356bf5", 4000: "a8747659" },
+  3: { 200: "b43cb9be", 800: "510d3b99", 1600: "52d334c3", 2400: "c82c786a", 3200: "94e585db", 4000: "7191754a" },
 };
 
 describe("golden runs", () => {

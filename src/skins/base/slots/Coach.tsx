@@ -24,7 +24,7 @@ function Buddy() {
  * clear of the ticker and the top bar; on a phone it docks to the top or the bottom, whichever is away from the target.
  * No Continue button: the line waits for you to do the thing.
  */
-export function Coach({ coach, anchor, panel, layout, actions }: SlotPropsMap["Coach"]) {
+export function Coach({ coach, anchor, panel, avoid, layout, actions }: SlotPropsMap["Coach"]) {
   const t = useT();
   const ref = useRef<HTMLElement>(null);
   const [size, setSize] = useState({ w: 340, h: 104 });
@@ -33,7 +33,7 @@ export function Coach({ coach, anchor, panel, layout, actions }: SlotPropsMap["C
     if (b && (Math.abs(b.width - size.w) > 1 || Math.abs(b.height - size.h) > 1)) setSize({ w: b.width, h: b.height });
   }, [coach.id, layout.width, layout.height, size.w, size.h]);
   const view = { w: layout.width, h: layout.height };
-  const place = layout.compact ? placeBalloon(anchor, size, view, { gap: 12, panel, prefer: ["top", "bottom"], margin: { top: 56, bottom: 8, left: 8, right: 8 } }) : placeBalloon(anchor, size, view, { gap: 20, panel, margin: { top: 76, bottom: 48, left: 12, right: 12 } });
+  const place = layout.compact ? placeBalloon(anchor, size, view, { gap: 12, panel, avoid, prefer: ["top", "bottom"], margin: { top: 56, bottom: 8, left: 8, right: 8 } }) : placeBalloon(anchor, size, view, { gap: 20, panel, avoid, margin: { top: 76, bottom: 48, left: 12, right: 12 } });
   return (
     <aside
       key={coach.id}
