@@ -259,6 +259,7 @@ If your slot needs copy that has no key, write it into the slot (as Frontier 95 
 | `arena.title` | Frontier Arena |
 | `arena.week` | Week {n} |
 | `arena.loading` | Week 1 loading |
+| `arena.leak` | your weights |
 | `arena.eraPill` | ERA {n} · {name} |
 | `arena.faster` | faster than humans alone |
 | `arena.drop` | Free model out: revenue −30% for {days}d |
@@ -283,6 +284,20 @@ If your slot needs copy that has no key, write it into the slot (as Frontier 95 
 | `response.ship` | Ship now |
 | `response.full` | Full release |
 | `response.bug` | Launch bug odds |
+| `disasters.title` | Disasters |
+| `disasters.open` | Disasters |
+| `disasters.lede` | Other tycoon games had tornadoes. You have these. |
+| `disasters.risk` | Random disasters |
+| `disasters.menu` | Start one now |
+| `disasters.active` | Under way |
+| `disasters.ask` | Start a {name}? |
+| `disasters.yes` | Do it. For science. |
+| `disasters.no` | Never mind |
+| `disasters.close` | Close |
+| `disasters.trust` | Public trust |
+| `disasters.heat` | Regulator heat |
+| `disasters.alert` | Disaster |
+| `disasters.more` | Disasters… |
 | `eraCard.bsod` | An era has occurred. |
 | `outcome.keepPlaying` | Keep playing |
 | `outcome.newLab` | New lab |
@@ -383,8 +398,10 @@ A slot is a React component. Each gets **its slice of the view-model plus `actio
 | `NewsArrival` | `{ arrival, actions }` | "The Frontier Times is here" (`viewNews(id)`, `skipNews()`). |
 | `NewsRoom` | `{ newsroom, actions }` | The News Room modal: the archive, and the open paper or chat (compose `useSlots().FrontPage` / `.GroupChat`, or draw your own). |
 | `Mixer` | `{ sound, actions }` | The sound mixer modal. |
+| `DisasterMenu` | `{ disasters, actions }` | The Disasters menu (FLT-32), SimCity-style: the random-disaster setting (`disasters.risks`, Off / Rare / Normal / Chaos; `actions.setRisk(key)`), the list you can start one from (`disasters.menu`: name, blurb, `tags`, `available` or the `reason` it is not, `active`), and the Trust and Heat meters. Starting one must **ask first** ("Start a GPU Fire?"), with the safe answer as the default; then `actions.triggerDisaster(id)`. `actions.closeDisasters()` shuts it; time is held while it is open. Frontier 95's is a Control Panel applet with radio buttons and a Yes/No box. |
+| `DisasterAlert` | `{ disasters, layout, actions }` | Docked. What is going wrong now: each run in `disasters.running` (`stage` warning / active / response / aftermath, `phaseLabel`, a funny `line`, cleanup `progress`), and `disasters.understaffed` (who has been pulled off their post; `all` means nobody is left, like an unguarded gate). With nothing going on it is a quiet way into the menu (`actions.openDisasters()`). Frontier 95's is a Win95 fatal-error box. Only rendered once `vm.visible.disasters`. |
 
-The **docked** slots (`Layout` receives them pre-rendered) are `Stats`, `Training`, `Objectives`, `Inspector`, `BuildBar`, `Speed`, `Staff`, `ThoughtsPanel`, `Ticker`, `Toasts` (one `Toast` at a time: the newest toast, or the standing hint when nobody is talking), `Assistant`, `Arena`, `Benchmarks`, `Voice`, `NewsControls`, `NewsArrival` and `PhotoButton`. The modal slots (`EventCard`, `Livestream`, `EraCard`, `Outcome`, `NewsRoom`, `Mixer`, `SkinPicker`) and `PhotoOverlay` are rendered by the game when there is something to show.
+The **docked** slots (`Layout` receives them pre-rendered) are `Stats`, `Training`, `Objectives`, `Inspector`, `BuildBar`, `Speed`, `Staff`, `ThoughtsPanel`, `Ticker`, `Toasts` (one `Toast` at a time: the newest toast, or the standing hint when nobody is talking), `Assistant`, `Arena`, `Benchmarks`, `Voice`, `NewsControls`, `NewsArrival`, `PhotoButton` and `DisasterAlert`. The modal slots (`EventCard`, `Livestream`, `EraCard`, `Outcome`, `NewsRoom`, `Mixer`, `SkinPicker`, `DisasterMenu`) and `PhotoOverlay` are rendered by the game when there is something to show.
 
 ## Writing slots.tsx
 

@@ -326,6 +326,8 @@ export interface RunView {
   phase: string;
   /** Cleanup progress, 0 to 1 (0 outside a state with staff-hours). */
   progress: number;
+  /** The job putting in staff-hours in this state, or null if nobody is. */
+  job: string | null;
   /** Game days since it began. */
   days: number;
 }
@@ -336,6 +338,7 @@ export const disastersView = (state: GameState): RunView[] =>
     name: disasterById(r.id)?.name ?? r.id,
     phase: r.machine.value,
     progress: r.machine.context.progress,
+    job: disasterById(r.id)?.states[r.machine.value]?.work?.job ?? null,
     days: Math.floor((state.tick - r.startedTick) / TICKS_PER_DAY),
   }));
 

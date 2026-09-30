@@ -35,5 +35,8 @@ export const loadedSkinAtom = Atom.keepAlive(Atom.make<LoadedSkin>({ id: "base",
 /** Is Help ▸ How to play open? UI-only state. */
 export const helpOpenAtom = Atom.make(false);
 
+/** Is the Disasters menu open (FLT-32)? UI-only state. */
+export const disastersOpenAtom = Atom.make(false);
+
 /** Is the Staff panel open? UI-only state, kept as an Effect atom like the rest of what React reads. */
 export const staffOpenAtom = Atom.make(false);

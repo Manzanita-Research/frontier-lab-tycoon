@@ -5,8 +5,9 @@ import { frontPage, recap, type Edition } from "../../newsroom/edition";
 import { createTestCampus } from "../../sim/testkit";
 import { enableLeapfrog } from "../../sim/race/leapfrog/driver";
 import { leapfrogView } from "../../sim/race/leapfrog/view";
-import { answer } from "../../sim/testkit";
-import { tick } from "../../sim/tick";
+import { answer, readyForPressure } from "../../sim/testkit";
+import { applyNow, tick } from "../../sim/tick";
+import { triggerDisaster } from "../../sim/disasters/driver";
 import type { GameState } from "../../sim/types";
 import { newMotion, stepMotion, type MotionView } from "./leapfrogMotion";
 import type { SkinPickerVM } from "./types";
@@ -46,6 +47,22 @@ export function fixtureLeapfrog(days = 48, seed = 3): { world: GameState; motion
     view = { ...view, ghosts: [{ column: { ...first, id: `${first.id}-retired`, status: "saturated" }, cells, until: now + 20_000 }] };
   }
   return { world: s, motion: view };
+}
+
+/**
+ * A lab mid-disaster (FLT-32): a Rogue Agent Swarm, its card answered, Security at the Security Office pulling the plug
+ * (so the gate is unguarded), a weights leak lifting a rival on the Arena, and trust and heat moved off their start.
+ */
+export function fixtureDisaster(seed = 3): GameState {
+  const s = fixtureWorld(12, seed);
+  readyForPressure(s);
+  s.cash = 50_000_000;
+  applyNow(s, [{ type: "hire", job: "security" }, { type: "hire", job: "security" }, { type: "hire", job: "sre" }]);
+  for (let i = 0; i < 40; i++) tick(s);
+  triggerDisaster(s, "rogueSwarm");
+  triggerDisaster(s, "weightsLeak");
+  for (let i = 0; i < 1200 && !s.disasters.runs.some((r) => r.id === "rogueSwarm" && r.machine.value.startsWith("cleanup") && r.machine.context.progress > 0.2); i++) tick(s, answer(s));
+  return s;
 }
 
 export const NO_SKINS: SkinPickerVM = {
@@ -93,13 +110,17 @@ export interface FixtureOptions {
   help?: boolean;
   /** Standing warnings. */
   warnings?: string[];
+  /** Mid-disaster (see `fixtureDisaster`). */
+  disaster?: boolean;
+  /** The Disasters menu is open. */
+  disastersOpen?: boolean;
   width?: number;
   height?: number;
   skins?: Partial<SkinPickerVM>;
 }
 
 export function fixtureSnapshot(o: FixtureOptions = {}): Snapshot {
-  const w = o.world ?? (o.leapfrog ? fixtureLeapfrog().world : fixtureWorld());
+  const w = o.world ?? (o.leapfrog ? fixtureLeapfrog().world : o.disaster ? fixtureDisaster() : fixtureWorld());
   const selected = o.selected === undefined ? (w.walkers.find((x) => x.kind === "researcher")?.id ?? null) : o.selected;
   const snap = makeSnapshot(w, undefined, { selected, follow: false, highlight: null });
   const pendingConfirm = o.confirm
@@ -140,6 +161,7 @@ export function fixtureInput(o: FixtureOptions = {}): HudInput {
     },
     chatCount: o.chatCount ?? 2,
     helpOpen: o.help ?? false,
+    disastersOpen: o.disastersOpen ?? false,
     mixer: { open: false, ready: true, muted: false, master: 0.7, music: 0.3, sfx: 0.65 },
     photo: { on: o.photo ?? false, time: "live", shot: { id: 1, url: "data:image/png;base64,", name: "frontier-lab-tycoon-campus.png" }, flash: 1 },
     skins: { ...NO_SKINS, ...o.skins },

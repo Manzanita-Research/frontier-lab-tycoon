@@ -81,6 +81,7 @@
   "arena.title": "Frontier Arena",
   "arena.week": "Week {n}",
   "arena.loading": "Week 1 loading",
+  "arena.leak": "your weights",
   "arena.eraPill": "ERA {n} · {name}",
   "arena.faster": "faster than humans alone",
   "arena.drop": "Free model out: revenue −30% for {days}d",
@@ -139,5 +140,19 @@
   "response.ready": "Ready",
   "response.ship": "Ship now",
   "response.full": "Full release",
-  "response.bug": "Launch bug odds"
+  "response.bug": "Launch bug odds",
+  "disasters.title": "Disasters",
+  "disasters.open": "Disasters",
+  "disasters.lede": "Other tycoon games had tornadoes. You have these.",
+  "disasters.risk": "Random disasters",
+  "disasters.menu": "Start one now",
+  "disasters.active": "Under way",
+  "disasters.ask": "Start a {name}?",
+  "disasters.yes": "Do it. For science.",
+  "disasters.no": "Never mind",
+  "disasters.close": "Close",
+  "disasters.trust": "Public trust",
+  "disasters.heat": "Regulator heat",
+  "disasters.alert": "Disaster",
+  "disasters.more": "Disasters…"
 }

@@ -406,6 +406,8 @@ export interface ArenaRowVM {
   color: string;
   moved: "up" | "down" | null;
   title: string;
+  /** Lifted by a weights leak of yours that is still under way (FLT-32): mark it. */
+  leak: boolean;
 }
 
 export interface ArenaVM {
@@ -671,6 +673,91 @@ export interface LayoutVM {
   tall: boolean;
 }
 
+// ---- Disasters (FLT-32): the menu, the alert for what is under way, who it pulled off their post, trust and heat.
+
+export type RiskVM = "off" | "rare" | "normal" | "chaos";
+
+export interface RiskOptionVM {
+  key: RiskVM;
+  label: string;
+  blurb: string;
+  active: boolean;
+}
+
+export interface DisasterTagVM {
+  /** The content's tag ("fire", "rivals", ...): skins pick an icon by it, and show `label` for one they do not know. */
+  key: string;
+  label: string;
+}
+
+/** One row of the Disasters menu. */
+export interface DisasterRowVM {
+  id: string;
+  name: string;
+  blurb: string;
+  tags: DisasterTagVM[];
+  /** Under way right now. */
+  active: boolean;
+  /** Can be started now; if not, `reason` says why. */
+  available: boolean;
+  reason: string | null;
+}
+
+/** Where a disaster is: a skin can colour by it. The content's own state name is `phase`. */
+export type DisasterStageVM = "warning" | "active" | "response" | "aftermath" | "done";
+
+export interface DisasterRunVM {
+  id: string;
+  name: string;
+  phase: string;
+  stage: DisasterStageVM;
+  /** "Warning", "Spreading", "Cleaning up"... */
+  phaseLabel: string;
+  /** One line, in the game's voice, about what is happening now. */
+  line: string;
+  /** Staff-hours done, 0 to 1, while somebody is working on it; null otherwise. */
+  progress: number | null;
+  /** "Security 42%", or null. */
+  progressText: string | null;
+  days: number;
+  daysText: string;
+}
+
+/** A job with people pulled off their post by a disaster: "2 of 3 Security on the swarm. The gate is unguarded." */
+export interface UnderstaffedVM {
+  job: string;
+  title: string;
+  diverted: number;
+  total: number;
+  /** Everyone of the job is away (a gate with no guard, fires nobody fixes). */
+  all: boolean;
+  text: string;
+}
+
+export interface MeterVM {
+  /** 0 to 100 */
+  value: number;
+  /** A word for where it is ("Wary", "Hearings"). */
+  word: string;
+  text: string;
+}
+
+export interface DisastersVM {
+  /** Earned yet (Scrutiny). Draw nothing of this while false. */
+  enabled: boolean;
+  /** The menu is open. */
+  open: boolean;
+  risk: RiskVM;
+  risks: RiskOptionVM[];
+  /** Why random disasters are holding off ("...until your first release"), or null once they can come. */
+  calm: string | null;
+  menu: DisasterRowVM[];
+  running: DisasterRunVM[];
+  understaffed: UnderstaffedVM[];
+  trust: MeterVM;
+  heat: MeterVM;
+}
+
 export interface HudVM {
   apiVersion: typeof SKIN_API_VERSION;
   stats: StatsVM;
@@ -710,6 +797,8 @@ export interface HudVM {
   sound: SoundVM;
   photoMode: PhotoVM;
   skins: SkinPickerVM;
+  /** Disasters (FLT-32): `enabled: false` until the lab earns them. */
+  disasters: DisastersVM;
   layout: LayoutVM;
 }
 
@@ -746,6 +835,12 @@ export interface HudActions {
   /** Hold time while a panel of yours is open (`id` names it; `false` lets go). Use `useAutoPause` from the kit. */
   holdTime(id: string, open: boolean): void;
   toggleArena(): void;
+  // Disasters (FLT-32).
+  openDisasters(): void;
+  closeDisasters(): void;
+  /** Start one now (ask first: the slot's job). Closes the menu. */
+  triggerDisaster(id: string): void;
+  setRisk(risk: RiskVM): void;
   keepPlaying(): void;
   newLab(): void;
   // The payroll.

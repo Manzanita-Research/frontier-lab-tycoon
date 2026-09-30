@@ -40,12 +40,13 @@ export function Arena({ arena }: SlotPropsMap["Arena"]) {
           </div>
           <div className="arena-rows" style={{ height: arena.rows.length * ROW }}>
             {arena.rows.map((row) => (
-              <div key={row.id} className={`arena-row ${row.you ? "you" : ""} ${row.moved ? `moved-${row.moved}` : ""}`} style={{ transform: `translateY(${(row.rank - 1) * ROW}px)` }} title={row.title}>
+              <div key={row.id} className={`arena-row ${row.you ? "you" : ""} ${row.leak ? "leak" : ""} ${row.moved ? `moved-${row.moved}` : ""}`} style={{ transform: `translateY(${(row.rank - 1) * ROW}px)` }} title={row.title}>
                 <span className="ar-rank">{row.rank}</span>
                 <i className="ar-dot" style={{ background: row.color }} />
                 <span className="ar-name">
                   {row.short}
                   {row.open && <em className="ar-open">open</em>}
+                  {row.leak && <em className="ar-leak">{t("arena.leak")}</em>}
                 </span>
                 <span className="ar-score">{row.score}</span>
                 <span className={`ar-delta ${row.delta > 0 ? "good" : "bad"}`}>{row.deltaText}</span>

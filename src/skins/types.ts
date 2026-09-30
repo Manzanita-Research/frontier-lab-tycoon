@@ -4,7 +4,7 @@ import type { ComponentType, ReactNode } from "react";
 import type {
   ArenaVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, EraCardVM, EventVM, HudActions, HudVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
   NewsroomVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StatsVM, ThoughtRowVM, TickerItemVM,
-  StaffVM, TeaserVM, ProgressVM, ToastVM, TrainingVM, UnlockCardVM, VisibleVM, HelpVM,
+  StaffVM, TeaserVM, ProgressVM, ToastVM, TrainingVM, UnlockCardVM, VisibleVM, HelpVM, DisastersVM,
 } from "../ui/hud/types";
 import type { Rect } from "./kit/place";
 
@@ -43,11 +43,13 @@ export const SLOT_NAMES = [
   "NewsArrival",
   "NewsRoom",
   "Mixer",
+  "DisasterMenu",
+  "DisasterAlert",
 ] as const;
 export type SlotName = (typeof SLOT_NAMES)[number];
 
 /** The slots that sit in the HUD all the time, already rendered, for the Layout to place. */
-export const DOCKED_SLOTS = ["Stats", "Training", "Objectives", "Inspector", "BuildBar", "Speed", "Staff", "ThoughtsPanel", "Ticker", "Toasts", "Assistant", "Arena", "Benchmarks", "Voice", "NewsControls", "NewsArrival", "PhotoButton"] as const;
+export const DOCKED_SLOTS = ["Stats", "Training", "Objectives", "Inspector", "BuildBar", "Speed", "Staff", "ThoughtsPanel", "Ticker", "Toasts", "Assistant", "Arena", "Benchmarks", "Voice", "NewsControls", "NewsArrival", "PhotoButton", "DisasterAlert"] as const;
 export type DockedSlot = (typeof DOCKED_SLOTS)[number];
 
 /** What the Layout receives: the docked slots as elements (or null when there is nothing to show) plus the whole VM. */
@@ -61,13 +63,13 @@ export interface LayoutProps {
 export interface SlotPropsMap {
   Layout: LayoutProps;
   /** `visible` (absent means everything) says which numbers are earned yet: at level 1 only cash, runway and the date show. */
-  Stats: { stats: StatsVM; layout: LayoutVM; visible?: VisibleVM; actions: HudActions };
+  Stats: { stats: StatsVM; layout: LayoutVM; visible?: VisibleVM; actions: HudActions; /** Trust and regulator heat live here too (FLT-32), once `disasters.enabled`. */ disasters?: DisastersVM };
   Training: { training: TrainingVM; actions: HudActions };
   /** `progress.goal` is the one goal in front of you ("Ship your first model · 0/1"); the scenario list is `objectives`, shown once `visible.arena`. */
   Objectives: { objectives: ObjectivesVM; progress?: ProgressVM; visible?: VisibleVM; layout: LayoutVM; actions: HudActions };
   Inspector: { inspector: InspectorVM; layout: LayoutVM; actions: HudActions };
   /** The build panel: `items` are only what is unlocked, `teasers` the locked ones ("??? · ship your first model"). Report each opening with `actions.buildPanel(true)`. */
-  BuildBar: { items: BuildItemVM[]; tip: BuildTipVM | null; teasers?: TeaserVM[]; layout: LayoutVM; actions: HudActions };
+  BuildBar: { items: BuildItemVM[]; tip: BuildTipVM | null; teasers?: TeaserVM[]; layout: LayoutVM; actions: HudActions; /** For a Start menu with a Disasters entry (FLT-32): `disasters.enabled` says it is earned. */ disasters?: DisastersVM };
   Speed: { speed: SpeedVM; stats: StatsVM; actions: HudActions };
   /** The payroll panel (hire, fire, paint patrol zones). Only rendered while `staff.open`. */
   Staff: { staff: StaffVM; actions: HudActions };
@@ -112,6 +114,10 @@ export interface SlotPropsMap {
   NewsArrival: { arrival: NonNullable<NewsroomVM["arrival"]>; actions: HudActions };
   NewsRoom: { newsroom: NewsroomVM; actions: HudActions };
   Mixer: { sound: SoundVM; actions: HudActions };
+  /** The Disasters menu (FLT-32): the random-disaster setting, and a list to start one from (ask first). Modal, while `disasters.open`; time is held. */
+  DisasterMenu: { disasters: DisastersVM; actions: HudActions };
+  /** What is going wrong now (FLT-32): disasters under way, their stage and cleanup, who is pulled off their post. Docked, once `disasters.enabled`; with nothing running it may be the way into the menu (the base's is), or nothing. */
+  DisasterAlert: { disasters: DisastersVM; layout: LayoutVM; actions: HudActions };
 }
 
 export type SlotComponents = { [K in SlotName]: ComponentType<SlotPropsMap[K]> };

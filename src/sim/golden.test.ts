@@ -5,6 +5,8 @@
 // now also covers the new walker fields and the Vibes. FLT-10 (Operations) did it again: slop, breakdowns (a random
 // draw per building per day), queues you can see, and staff; the script below now hires a few, and the projection
 // covers the slop, the payroll and every building's reliability.
+// FLT-32 put the Security Office on the Scrutiny rung, so its unlock card lists one more item: the digests from the
+// card on (it arrives between ticks 800 and 1600) moved for that alone: same RNG state and world at 4000, one more item.
 //
 // The digest reads the game through `view()`, not the raw state, so the persisted shape can change (machine
 // snapshots, moved fields) without touching the recorded values. Only `view()` follows the shape.
@@ -165,9 +167,9 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // wait for earned levels; the busy-player script first builds a Hall so it can earn access to a Gateway.
 // Path exploration and the Comms break post change deterministic route draws from this new opening.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "a559ea28", 800: "ed628bb9", 1600: "bef75afa", 2400: "a01d1390", 3200: "7a3d787d", 4000: "6a0686fc" },
-  2: { 200: "e548b1af", 800: "552cae60", 1600: "3f400add", 2400: "2868f2da", 3200: "5080b683", 4000: "c0ae2826" },
-  3: { 200: "58bb415c", 800: "920699d6", 1600: "d35c1c03", 2400: "02ba6f9a", 3200: "bcfd9788", 4000: "9ec9a141" },
+  1: { 200: "a559ea28", 800: "ed628bb9", 1600: "96b99f64", 2400: "b95a0f2e", 3200: "2844974f", 4000: "9c61677e" },
+  2: { 200: "e548b1af", 800: "552cae60", 1600: "6629389f", 2400: "19294b30", 3200: "bd080f81", 4000: "f0b55bfc" },
+  3: { 200: "58bb415c", 800: "920699d6", 1600: "e9c7db35", 2400: "0ec44a30", 3200: "8512ab36", 4000: "95d2cf0f" },
 };
 
 describe("golden runs", () => {

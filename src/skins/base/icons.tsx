@@ -109,6 +109,14 @@ export const ICONS: Record<string, ReactElement> = {
       <circle cx="6" cy="6" r="3" fill="#f2b134" stroke={ink} strokeWidth="1.6" />
     </svg>
   ),
+  security: (
+    <svg {...S}>
+      <rect x="3" y="12" width="26" height="16" rx="1.5" fill="#dfe6fb" stroke={ink} strokeWidth="2" />
+      <path d="M16 3 L25 6.5 V13 C25 19 21 22.5 16 24.5 C11 22.5 7 19 7 13 V6.5 Z" fill="#3b5bdb" stroke={ink} strokeWidth="2" />
+      <path d="M12 13.5 L15 16.5 L20.5 10.5" stroke="#fff" strokeWidth="2.4" fill="none" />
+      <rect x="21" y="22" width="5" height="6" fill="#f2b134" stroke={ink} strokeWidth="1.6" />
+    </svg>
+  ),
   bulldoze: (
     <svg {...S}>
       <rect x="4" y="15" width="16" height="8" rx="2" fill="#ffd24a" stroke={ink} strokeWidth="2" />
