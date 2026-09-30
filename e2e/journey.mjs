@@ -302,6 +302,7 @@ try {
   let lastAct = 0;
   let lastCoachClick = 0;
   let heldSince = 0;
+  let staffLeftOpen = false; // the policy's own Staff Manager, left up when a card took the close click
   const toastSeen = new Set();
   const toastTimes = []; // real ms of each new toast seen while running at 1×
   let levelToasts = 0;
@@ -432,7 +433,8 @@ try {
       heldSince ||= now;
       if (now - heldSince > HELD_MS) {
         const held = probe.overlays.join(",");
-        if (!result.held.some((h) => h.overlays === held)) {
+        if (staffLeftOpen && held === "staff") log("Closing the Staff Manager the policy left open");
+        else if (!result.held.some((h) => h.overlays === held)) {
           const shot = await still(`${out}/moments/held-${slug(held)}.png`);
           result.held.push({ overlays: held, gameDay: gameDays(probe), level: probe.progress.level, shot });
           log(`Time held by ${held}: closing it`);
@@ -579,6 +581,8 @@ try {
     }
     const close = page.locator("section.f95-staff:visible [data-g=close]").first();
     if (await close.count()) await press(close);
+    await page.waitForTimeout(200);
+    staffLeftOpen = (await page.locator("section.f95-staff:visible").count()) > 0;
     return ok;
   }
 
@@ -631,7 +635,7 @@ ${r.failures.map((f) => `- **${f.kind}** (level ${f.level ?? "?"}, game day ${f.
 ${r.cards.map((c) => `- day ${c.gameDay}, L${c.level}: ${c.id} → ${c.choice}`).join("\n") || "none"}
 
 ## Flat moments: a real minute at 1× with nothing new (${r.flat.length})
-${r.flat.map((f) => `- day ${f.gameDay}, L${f.level}${f.coach ? `, coach step "${f.coach}"` : ""}${f.training ? `, training ${f.training.name} ${f.training.pct}%` : ""}: ${f.shot}`).join("\n") || "none"}
+${r.flat.map((f) => `- day ${f.gameDay}, L${f.level}${f.coach ? `, coach step "${f.coach}"` : ""}${f.training ? `, training ${f.training.name} ${Math.round(f.training.pct * 100)}%` : ""}: ${f.shot}`).join("\n") || "none"}
 
 ## Windows that held time on their own (${r.held.length})
 ${r.held.map((h) => `- day ${h.gameDay}, L${h.level}: ${h.overlays}`).join("\n") || "none"}
