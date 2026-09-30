@@ -1,11 +1,23 @@
 // Parody names only (AGENTS.md). Every content string, skin string and window title the game can show: the content
 // tables, the 2D UI and all six skins (code, JSON and CSS), and every base pack under mods/. The defection test keeps
 // its narrower check on its own two packs; this one covers the rest, so a real product name fails wherever it lands.
+import { BIRDAPP, birdContent } from "./birdapp";
+import { makeHandle } from "../sim/birdapp/driver";
+import { createRng } from "../sim/rng";
+
 const REAL = [
   "Copilot", "Internet Explorer", "Notepad", "WordPad", "LinkedIn", "Excel", "PowerPoint", "Outlook", "Slack", "Twitter",
   "Windows 95", "Windows 98", "Clippy", "Microsoft", "OpenAI", "Anthropic", "DeepMind", "Google", "Gmail", "ChatGPT",
   // Real labs our old rival names contained (renamed before prod: Super Super AI, MetaMeta Metaintelligence Labs).
   "Safe Superintelligence", "Meta Superintelligence", "SSI",
+];
+// Bird App handles (FLT-69) are lowercase and squashed ("the_weights_whisper"), so they get their own list: real labs,
+// products and apps, real people's names and handles, and nationalities (a handle is an identity; none of ours is real).
+const REAL_HANDLES = [
+  "openai", "anthropic", "deepmind", "google", "microsoft", "nvidia", "meta_ai", "xai", "mistral", "huggingface", "chatgpt",
+  "gpt4", "gpt5", "claude", "gemini", "llama", "grok", "copilot", "twitter", "tweet", "bluesky", "mastodon", "reddit",
+  "sama", "altman", "elon", "musk", "zuck", "amodei", "hassabis", "karpathy", "lecun", "hinton", "sutskever", "bengio",
+  "american", "chinese", "british", "french", "german", "russian", "indian", "canadian", "japanese", "korean",
 ];
 // Our parodies that contain (or sit next to) a real name. They are removed before the scan.
 const ALLOWED = ["Outlook Excess", "WordSad", "WordPerfectly", "NoteBad"];
@@ -22,6 +34,12 @@ function realNames(text: string): string[] {
   const clean = ALLOWED.reduce((t, ok) => t.split(ok).join(""), text);
   return REAL.filter((name) => new RegExp(`\\b${name.replace(" ", "\\s+")}\\b`).test(clean));
 }
+
+/** Every real name or handle in a lowercase handle, underscores and digits ignored. */
+const realHandle = (handle: string) => {
+  const squashed = handle.toLowerCase().replace(/[^a-z]/g, "");
+  return REAL_HANDLES.filter((name) => squashed.includes(name.replace(/[^a-z]/g, "")));
+};
 
 describe("parody names only", () => {
   it("knows a real name from our parodies", () => {
@@ -42,6 +60,16 @@ describe("parody names only", () => {
   });
   it("names no real product, app, site or lab anywhere the player can read", () => {
     const found = scanned.flatMap((f) => realNames(sources[f]!).map((name) => `${f}: ${name}`));
+    expect(found).toEqual([]);
+  });
+  it("the Bird App's handles, stems and generated, name nobody real (FLT-69)", () => {
+    expect(realHandle("@elon_fan_account")).toEqual(["elon"]);
+    expect(realHandle("not_my_main")).toEqual([]);
+    const rng = createRng(69);
+    const bird = birdContent(BIRDAPP);
+    const handles = bird.archetypes.flatMap((a) => [...a.handles, ...Array.from({ length: 200 }, () => makeHandle(rng, a.handles, () => false))]);
+    const quoted = BIRDAPP.flatMap((r) => ("text" in r ? r.text.match(/@\w+/g) ?? [] : []));
+    const found = [...handles, ...quoted].flatMap((h) => realHandle(h).map((name) => `${h}: ${name}`));
     expect(found).toEqual([]);
   });
 });
