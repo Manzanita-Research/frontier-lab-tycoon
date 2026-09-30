@@ -172,6 +172,7 @@
       "wave-promises",
       "senate-draft",
       "wave-factions",
+      "wave-drama",
       "wave-mods",
       "wave-phone"
     ],
@@ -2036,6 +2037,28 @@
         },
         {
           "wait": 500
+        }
+      ]
+    },
+    "wave-drama": {
+      "title": "FLT-52 at Level 5: Today's Drama (FLT-34) opened from its button on the mid-game campus, with the rehearsal feed",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95",
+        "drama": "fixture"
+      },
+      "steps": [
+        {
+          "wait": 400
+        },
+        {
+          "click": "button[aria-label^=\"Open Today\"]",
+          "optional": true
+        },
+        {
+          "wait": 1500
         }
       ]
     },
