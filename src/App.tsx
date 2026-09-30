@@ -2,6 +2,7 @@ import { RegistryContext } from "@effect/atom-react";
 import { Suspense, useEffect } from "react";
 import { app, registry } from "./app/game";
 import { Scene } from "./render/Scene";
+import { NewsRoom } from "./ui/newsroom/NewsRoom";
 import { HUD } from "./ui/HUD";
 import { WorldOverlay } from "./ui/WorldOverlay";
 import { Juice, Sky } from "./ui/juice";
@@ -18,6 +19,7 @@ export function App() {
         <WorldOverlay />
         <HUD />
         <Juice />
+        <NewsRoom />
       </Suspense>
     </RegistryContext.Provider>
   );

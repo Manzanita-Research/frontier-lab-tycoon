@@ -22,6 +22,8 @@ export default defineConfig({
   test: {
     // Run @xstate/effect through vite so the alias above applies to its imports too.
     server: { deps: { inline: ["@xstate/effect"] } },
+    // Timing-budget tests need an idle CPU, especially on the 1-vCPU Modal builders.
+    fileParallelism: false,
     globals: true,
     environment: "node",
     // The wall-clock perf tests share a 1-vCPU box with every other test file: run the files one at a time so

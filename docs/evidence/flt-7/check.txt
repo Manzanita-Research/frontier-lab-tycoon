@@ -1,0 +1,80 @@
+
+> frontier-lab-tycoon@0.0.0 check /tmp/flt7
+> pnpm typecheck && pnpm test && pnpm build
+
+
+> frontier-lab-tycoon@0.0.0 typecheck /tmp/flt7
+> tsc --noEmit
+
+
+> frontier-lab-tycoon@0.0.0 test /tmp/flt7
+> vitest run
+
+
+ RUN  v5.0.2 /tmp/flt7
+
+ ✓ src/sim/sim.test.ts (18 tests) 1083ms
+   ✓ walkers (2)
+     ✓ stay on paths (or the gate apron) and out of harm for a few thousand ticks 801ms
+stdout | src/sim/slice2.test.ts > crowd density > keeps 500 walkers (400 agents) under 0.3 ms per tick
+500-walker tick: 0.197 ms (best of 3 x 200 ticks)
+
+ ✓ src/sim/slice2.test.ts (30 tests) 858ms
+ ✓ src/sim/golden.test.ts (3 tests) 616ms
+ ✓ src/sim/playthrough.test.ts (3 tests) 234ms
+ ✓ src/render/fx/perf.test.ts (3 tests) 168ms
+ ✓ src/app/machine.test.ts (7 tests) 140ms
+ ✓ src/render/fx/watch.test.ts (6 tests) 56ms
+ ✓ src/render/fx/utilisation.test.ts (4 tests) 30ms
+ ✓ src/newsroom/edition.test.ts (7 tests) 29ms
+ ✓ src/sim/machines/graph.test.ts (5 tests) 18ms
+ ✓ src/render/fx/particles.test.ts (6 tests) 20ms
+ ✓ src/sim/rng.test.ts (2 tests) 20ms
+ ✓ src/render/fx/clock.test.ts (8 tests) 29ms
+ ✓ src/machines/effect-smoke.test.ts (2 tests) 20ms
+ ✓ src/sim/machines/arc.test.ts (7 tests) 16ms
+ ✓ src/sim/machines/economy.test.ts (6 tests) 15ms
+ ✓ src/sim/machines/training.test.ts (6 tests) 14ms
+ ✓ src/sim/machines/goals.test.ts (5 tests) 14ms
+ ✓ src/sim/machines/walker.test.ts (5 tests) 10ms
+ ✓ src/render/fx/cinema.test.ts (9 tests) 10ms
+ ✓ src/render/fx/night.test.ts (2 tests) 10ms
+ ✓ src/audio/score.test.ts (2 tests) 6ms
+ ✓ src/newsroom/archive.test.ts (2 tests) 5ms
+ ✓ src/ui/juice/stamp.test.ts (2 tests) 3ms
+
+ Test Files  24 passed (24)
+      Tests  150 passed (150)
+   Start at  00:51:24
+   Duration  12.10s (import 55%, tests 36%, transform 8%, worker 2%)
+
+    Isolate  24 workers spawned · ~101ms startup each (spawn + environment, per file)
+             at least ~2.32s faster with isolate: false — reuses workers across files instead of one per file
+
+
+> frontier-lab-tycoon@0.0.0 build /tmp/flt7
+> tsc --noEmit && vite build
+
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 998 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                         0.49 kB │ gzip:   0.31 kB
+dist/assets/nunito-latin-700-normal-Dort48En.woff2     16.23 kB
+dist/assets/nunito-latin-800-normal-Dz8SOQK_.woff2     16.52 kB
+dist/assets/nunito-latin-600-normal-Br8yIETf.woff2     16.56 kB
+dist/assets/nunito-latin-900-normal-BVB1fGs6.woff2     16.68 kB
+dist/assets/nunito-latin-700-normal-OcDqTBcA.woff      19.99 kB
+dist/assets/nunito-latin-800-normal-D-J0wlBY.woff      20.36 kB
+dist/assets/nunito-latin-900-normal-CVn49sIn.woff      20.47 kB
+dist/assets/nunito-latin-600-normal-Cd0eNu1l.woff      20.49 kB
+dist/assets/index-Cue3s-la.css                         29.66 kB │ gzip:   7.67 kB
+dist/assets/PhotoFX-C8Aav8sw.js                        88.81 kB │ gzip:  24.96 kB
+dist/assets/index-C2QUwRYe.js                       1,528.05 kB │ gzip: 450.93 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 6.12s
