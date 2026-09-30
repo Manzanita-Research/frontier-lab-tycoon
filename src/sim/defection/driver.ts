@@ -62,9 +62,11 @@ export function disableDefection(s: GameState) {
   for (const key of [...CHOICES, ...MANIFESTO_CHOICES]) delete s.flags[PICK_PREFIX + key];
 }
 
+/** The day the longest-serving researcher joined (worked out once a day, not once per researcher: FLT-39). */
+const firstJoined = (staff: Walker[]): number => Math.min(...staff.map((o) => o.stats.joined));
+
 /** How long they have been here against the longest-serving researcher: the spec's "seniority", 0 to 1. */
-function seniorityOf(s: GameState, w: Walker, staff: Walker[]): number {
-  const first = Math.min(...staff.map((o) => o.stats.joined));
+function seniorityOf(s: GameState, w: Walker, staff: Walker[], first = firstJoined(staff)): number {
   const span = s.day - first;
   return span <= 0 ? 0 : Math.max(0, Math.min(1, (s.day - w.stats.joined) / span));
 }
@@ -99,9 +101,10 @@ function updateScores(s: GameState) {
   d.models = s.models.length;
   const rivalHype = Math.max(0, ...s.race.rivals.map((r) => r.context.hype));
   const era = eraOfState(s);
+  const first = firstJoined(staff);
   for (const w of staff) {
     if (s.day - w.stats.joined < R.eligibility.minTenureDays) continue;
-    const delta = scoreDelta({ happiness: happinessOf(w), seniority: seniorityOf(s, w, staff), passedOver: d.passedOver[w.id] ?? 0, rivalHype, era, bumps: d.bumps[w.id] ?? 0 });
+    const delta = scoreDelta({ happiness: happinessOf(w), seniority: seniorityOf(s, w, staff, first), passedOver: d.passedOver[w.id] ?? 0, rivalHype, era, bumps: d.bumps[w.id] ?? 0 });
     // The VCs' attention is its own push.
     const courted = d.subject?.id === w.id && d.machine.value === "courted" ? R.score.courtBoost : 0;
     d.scores[w.id] = Math.max(0, Math.min(100, (d.scores[w.id] ?? 0) + delta + courted));

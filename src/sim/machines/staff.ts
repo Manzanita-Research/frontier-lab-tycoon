@@ -8,7 +8,7 @@
 //   (anything but leaving) --FIRED--> leaving --EXITED--> gone
 import { Schema } from "effect";
 import { setupEffect } from "@xstate/effect";
-import { step, type Stored } from "./run";
+import { remembered, type Stored } from "./run";
 import type { EventFromLogic } from "xstate";
 
 export const staffMachine = setupEffect({
@@ -53,7 +53,9 @@ export type StaffPhase = StaffStored["value"];
 
 export const staffStart = (): StaffStored => ({ value: "arriving", context: {} });
 
-/** Send one event; the machine has no context and no effects, so this is just the next phase. */
+const remember = remembered(staffMachine);
+
+/** Send one event; the machine has no context and no effects, so this is just the next phase (remembered: FLT-39). */
 export function stepStaff(stored: StaffStored, event: EventFromLogic<typeof staffMachine>): StaffStored {
-  return step(staffMachine, { value: stored.value, context: {} }, event).stored;
+  return remember({ value: stored.value, context: {} }, event).stored;
 }

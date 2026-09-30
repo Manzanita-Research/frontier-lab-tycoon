@@ -4,7 +4,7 @@
 // choice's effects; this decides when a card opens, which picks count, and when it may come back.
 import { Schema } from "effect";
 import { setupEffect } from "@xstate/effect";
-import type { Stored } from "./run";
+import { remembered, type Stored } from "./run";
 
 export const ArcContext = Schema.Struct({
   /** Choices on the card: a pick outside 0..choices-1 is ignored. */
@@ -65,6 +65,12 @@ export const arcMachine = setupEffect({
 });
 
 export type ArcStored = Stored<typeof arcMachine>;
+
+/**
+ * `step(arcMachine, ...)`, remembered (FLT-39): on the daily check most cards are calm, share a shape and hear the same
+ * DAY, so one answer serves them all.
+ */
+export const stepArc = remembered(arcMachine);
 
 function evaluate(context: ArcContext, event: { day: number; ready: boolean; slotFree: boolean }) {
   if (!event.ready) return { target: "calm" };

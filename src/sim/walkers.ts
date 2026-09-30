@@ -543,7 +543,9 @@ function repairWalkers(state: GameState, rng: Rng, grew: boolean) {
 export function advance(w: Walker) {
   let budget = WALK_SPEED;
   while (budget > 1e-9 && w.route.length > 0) {
-    const [tx, tz] = w.route[0]!;
+    const next = w.route[0]!; // not `const [tx, tz] =`: destructuring walks the array iterator, a fifth of this loop
+    const tx = next[0];
+    const tz = next[1];
     const dx = tx - w.x;
     const dz = tz - w.z;
     // Tile-space distances are small: avoid hypot's overflow scaling in the hottest 800-walker loop.
