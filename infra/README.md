@@ -43,3 +43,16 @@ The first deploy bootstraps the state-store if absent; an existing account state
 Destroy a preview only by naming its exact stage: `CI=true pnpm --dir infra exec alchemy destroy --stage pr-N --yes`. Production destruction is outside this workflow.
 
 The future Jev API belongs to FLT-5; this stack adds static hosting only.
+
+## Custom domain (prod only)
+
+When the repo variable `FLT_CUSTOM_DOMAIN` is set (e.g. `gh variable set FLT_CUSTOM_DOMAIN --body frontierlabtycoon.com`), prod serves the game on **`app.<domain>`**. The apex and `www` answer with a **302** to `app.<domain>` (path and query kept) from a tiny `flt-apex-redirect` Worker. That redirect is temporary, until a marketing site takes the apex: delete the `ApexRedirect` block to hand the apex over. PR previews stay on `workers.dev`.
+
+Only set the variable after the zone exists in the Cloudflare account and the deploy token has these permissions, **scoped to that zone** (the token already has Account → Workers Scripts → Edit):
+
+- Zone → Zone → Read
+- Zone → DNS → Edit
+- Zone → Workers Routes → Edit
+- Zone → Single Redirect → Edit (not needed by the 302 Worker, but kept so a redirect rule can replace it later)
+
+Unset the variable to stop managing the domains. Alchemy then leaves existing attachments alone.
