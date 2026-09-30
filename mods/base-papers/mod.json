@@ -1,0 +1,29 @@
+{
+  "apiVersion": 1,
+  "id": "base-papers",
+  "name": "Publish or Perish (or Both)",
+  "version": "1.0.0",
+  "description": "The arXive is on fire. Reviewer Two has a suggestion.",
+  "content": {
+    "names": { "add": [
+      { "id": "papers-titles", "values": ["{Technique} Is All You Need", "Scaling Laws for {Thing}", "On the Emergent {Ability} of Large {Models}", "Attention Is Not All You Need, Actually", "{N} Tricks for {Goal}: A Survey Nobody Asked For"] },
+      { "id": "papers-techniques", "values": ["Gradient Origami", "Selective Forgetting", "Recursive Coffee", "Committee Distillation"] },
+      { "id": "papers-things", "values": ["Stumbling Agents", "Coding Automation", "Superhuman Coders", "Intelligence Explosions"] },
+      { "id": "papers-abilities", "values": ["Meeting Attendance", "Confident Shrugging", "Calendar Negotiation", "Footnote Generation"] },
+      { "id": "papers-models", "values": ["Language Models", "Spreadsheet Oracles", "Reasoning Toasters"] },
+      { "id": "papers-goals", "values": ["Fewer Meetings", "More Benchmarks", "Infinite Appendix"] },
+      { "id": "papers-preprint", "values": ["arXive"] },
+      { "id": "papers-venues", "values": ["NeurOops", "ICML-ish", "International Conference on Reviewer Two"] },
+      { "id": "papers-awards", "values": ["Golden Footnote", "Best Paper (Appendix Not Read)", "Reviewer Two's Reluctant Approval"] }
+    ] },
+    "headlines": { "add": [
+      { "id": "papers-drop", "trigger": "papers:drop", "text": "{lab} drops '{title}' on arXive; {authors} authors, one working PDF", "tone": "good" },
+      { "id": "papers-review", "trigger": "papers:review", "text": "'{title}' submitted to {venue}. Reviewer Two will need {days} days", "tone": "neutral" },
+      { "id": "papers-accepted", "trigger": "papers:accepted", "text": "{venue} accepts '{title}'. The rebuttal was longer than the paper", "tone": "good" },
+      { "id": "papers-scoop", "trigger": "papers:scoop", "text": "{rival} publishes '{title}' 18 hours before you. Independent work, identical footnotes", "tone": "bad" },
+      { "id": "papers-award", "trigger": "papers:award", "text": "'{title}' wins {award} at {venue}. The trophy has more citations than the abstract", "tone": "good" },
+      { "id": "papers-critique", "trigger": "papers:critique", "text": "Critique thread on '{title}': the ablation was the entire model", "tone": "bad" },
+      { "id": "papers-policy", "trigger": "papers:policy", "text": "{lab} publication policy: {policy}. The researchers have updated their bookmarks", "tone": "neutral" }
+    ] }
+  }
+}

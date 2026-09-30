@@ -20,6 +20,8 @@ export interface DebugParams {
   researchers: number;
   /** Release Leapfrog (FLT-27) is on unless `?leapfrog=off`. */
   leapfrog: boolean;
+  /** Publishing Papers is on unless ?papers=off. */
+  papers: boolean;
 }
 
 export function readDebugParams(search = typeof window === "undefined" ? "" : window.location.search): DebugParams {
@@ -39,5 +41,6 @@ export function readDebugParams(search = typeof window === "undefined" ? "" : wi
     moment: q.get("moment"),
     researchers: num("researchers") ?? 0,
     leapfrog: q.get("leapfrog") !== "off",
+    papers: q.get("papers") !== "off",
   };
 }

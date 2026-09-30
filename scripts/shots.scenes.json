@@ -59,6 +59,12 @@
       "leap-dog",
       "leap-chart",
       "leap-phone"
+    ],
+    "papers": [
+      "paper-drop",
+      "paper-scoop",
+      "paper-award",
+      "paper-phone"
     ]
   },
   "scenes": {
@@ -249,6 +255,60 @@
           "wait": 800
         }
       ]
+    },
+    "paper-drop": {
+      "title": "Publishing Papers: drop through existing ticker and toast",
+      "query": {
+        "warp": 0,
+        "moment": "paper-drop",
+        "leapfrog": "off"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { if (w.papers?.enabled) { const n = w.news.at(-1); f.send({ type: 'TOAST', text: n.text, tone: n.tone }); } }"
+        }
+      ]
+    },
+    "paper-scoop": {
+      "title": "Publishing Papers: scoop through existing ticker and toast",
+      "query": {
+        "warp": 0,
+        "moment": "paper-scoop",
+        "leapfrog": "off"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { if (w.papers?.enabled) { const n = w.news.at(-1); f.send({ type: 'TOAST', text: n.text, tone: n.tone }); } }"
+        }
+      ]
+    },
+    "paper-award": {
+      "title": "Publishing Papers: award through existing ticker and toast",
+      "query": {
+        "warp": 0,
+        "moment": "paper-award",
+        "leapfrog": "off"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { if (w.papers?.enabled) { const n = w.news.at(-1); f.send({ type: 'TOAST', text: n.text, tone: n.tone }); } }"
+        }
+      ]
+    },
+    "paper-phone": {
+      "title": "Publishing Papers: drop through existing ticker and toast",
+      "query": {
+        "warp": 0,
+        "moment": "paper-drop",
+        "leapfrog": "off"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { if (w.papers?.enabled) { const n = w.news.at(-1); f.send({ type: 'TOAST', text: n.text, tone: n.tone }); } }"
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
     }
   }
 }

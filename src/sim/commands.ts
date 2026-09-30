@@ -1,5 +1,7 @@
 // Player actions. They are queued and applied at the start of the next tick.
 import { BUILDINGS, BULLDOZE_REFUND, PATH_PRICE, type BuildingKind } from "../content/buildings";
+import { publishPaper, setPublicationPolicy } from "./race/papers/driver";
+import type { PublicationPolicy } from "./race/papers/policy";
 import { chooseEvent } from "./events";
 import { addToast, pushNews } from "./news";
 import { clearSlop } from "./slop";
@@ -9,6 +11,8 @@ import type { Rng } from "./rng";
 import type { GameState, Rect, StaffJob } from "./types";
 
 export type Command =
+  | { type: "setPublicationPolicy"; policy: PublicationPolicy }
+  | { type: "publishPaper"; id: number; route: "preprint" | "review" }
   | { type: "placePath"; x: number; z: number }
   | { type: "placeBuilding"; kind: BuildingKind; x: number; z: number }
   | { type: "bulldoze"; x: number; z: number }
@@ -118,6 +122,12 @@ export function applyCommands(state: GameState, commands: readonly Command[], rn
         break;
       case "clearZone":
         clearZone(state, c.id);
+        break;
+      case "setPublicationPolicy":
+        setPublicationPolicy(state, c.policy, rng);
+        break;
+      case "publishPaper":
+        publishPaper(state, c.id, c.route, rng);
         break;
       case "startTraining":
         if (!state.buildings.some((b) => b.kind === "hall")) addToast(state, "Build a Training Hall first.", "bad");
