@@ -212,6 +212,11 @@ const SMOKE = rgb("#c9ccd8");
 const DUST = rgb("#e8d5a8");
 const WATER = rgb("#9fe3ff");
 const CYAN = rgb("#5ff5ff");
+const FIRE = ["#ff7a1a", "#ffb02e", "#ff4d2e"].map(rgb);
+const ASH = rgb("#55555f");
+const SUDS = rgb("#f2fbff");
+const GLINT = rgb("#eceaff");
+const TOTE = ["#c77dff", "#ff8ac7", "#ffd24a", "#5fe08a"].map(rgb);
 
 const TAU = Math.PI * 2;
 
@@ -266,4 +271,48 @@ export function firefly(pool: ParticlePool, x: number, y: number, z: number) {
 /** A star: high up, still, twinkling. */
 export function star(pool: ParticlePool, x: number, y: number, z: number) {
   pool.spawn({ kind: Kind.Spark, x, y, z, life: pool.rand(1.6, 3.2), size: pool.rand(0.1, 0.17), size1: 0.08, r: 1, g: 0.97, b: 0.85, alpha: 1 }, true);
+}
+
+/** A lick of flame: orange, quick, shrinking as it rises. */
+export function flame(pool: ParticlePool, x: number, y: number, z: number) {
+  const c = FIRE[Math.floor(pool.rand(0, FIRE.length))]!;
+  pool.spawn({ kind: Kind.Puff, x: x + pool.rand(-0.14, 0.14), y, z: z + pool.rand(-0.14, 0.14), vx: pool.rand(-0.15, 0.15), vy: pool.rand(1.0, 1.9), vz: pool.rand(-0.15, 0.15), life: pool.rand(0.55, 1.0), size: pool.rand(0.28, 0.42), size1: 0.06, drag: 0.5, r: c[0], g: c[1], b: c[2], alpha: 0.95 });
+}
+
+/** Black smoke off a fire: darker and slower than a cluster's steam. */
+export function ashPuff(pool: ParticlePool, x: number, y: number, z: number) {
+  pool.spawn({ kind: Kind.Puff, x: x + pool.rand(-0.12, 0.12), y, z: z + pool.rand(-0.12, 0.12), vx: pool.rand(-0.1, 0.5), vy: pool.rand(1.0, 1.7), vz: pool.rand(-0.35, 0.1), life: pool.rand(2.2, 3.2), size: 0.28, size1: 1.25, drag: 0.4, r: ASH[0], g: ASH[1], b: ASH[2], alpha: 0.7 });
+}
+
+/** A hot spark thrown off a breakdown. */
+export function ember(pool: ParticlePool, x: number, y: number, z: number) {
+  const c = FIRE[1]!;
+  pool.spawn({ kind: Kind.Spark, x, y, z, vx: pool.rand(-1.1, 1.1), vy: pool.rand(1.2, 3), vz: pool.rand(-1.1, 1.1), life: pool.rand(0.5, 0.9), size: pool.rand(0.09, 0.15), size1: 0.02, gravity: 5, drag: 0.4, r: c[0], g: c[1], b: c[2] }, true);
+}
+
+/** The glint of fresh slop: a four-point twinkle, off-white with a hint of violet. */
+export function slopGlint(pool: ParticlePool, x: number, y: number, z: number) {
+  pool.spawn({ kind: Kind.Spark, x: x + pool.rand(-0.02, 0.02), y, z: z + pool.rand(-0.02, 0.02), vx: 0, vy: pool.rand(0.05, 0.25), vz: 0, life: pool.rand(0.8, 1.4), size: pool.rand(0.13, 0.2), size1: 0.03, drag: 1, r: GLINT[0], g: GLINT[1], b: GLINT[2] }, true);
+}
+
+/** Suds from a mop: soft white puffs that pop. */
+export function suds(pool: ParticlePool, x: number, z: number) {
+  pool.spawn({ kind: Kind.Puff, x: x + pool.rand(-0.15, 0.15), y: 0.14, z: z + pool.rand(-0.15, 0.15), vx: pool.rand(-0.3, 0.3), vy: pool.rand(0.4, 0.9), vz: pool.rand(-0.3, 0.3), life: pool.rand(0.5, 0.9), size: 0.1, size1: 0.28, drag: 1.5, r: SUDS[0], g: SUDS[1], b: SUDS[2], alpha: 0.85 }, true);
+}
+
+/** A few bits of tote-bag confetti. */
+export function toteBurst(pool: ParticlePool, x: number, y: number, z: number, n = 16) {
+  for (let i = 0; i < n; i++) {
+    const a = pool.rand(0, TAU);
+    const out = pool.rand(0.4, 1.8);
+    const c = TOTE[i % TOTE.length]!;
+    pool.spawn({ kind: Kind.Confetti, x, y, z, vx: Math.cos(a) * out, vy: pool.rand(2.4, 4.4), vz: Math.sin(a) * out, life: pool.rand(1.2, 1.8), size: pool.rand(0.07, 0.11), gravity: 6.5, drag: 0.5, r: c[0], g: c[1], b: c[2], spin: pool.rand(-14, 14), bounce: 0 });
+  }
+}
+
+/** A puff of ash and embers when something gives out. */
+export function blowout(pool: ParticlePool, x: number, y: number, z: number) {
+  for (let i = 0; i < 14; i++) ashPuff(pool, x, y, z);
+  for (let i = 0; i < 22; i++) ember(pool, x, y, z);
+  for (let i = 0; i < 10; i++) flame(pool, x, y, z);
 }

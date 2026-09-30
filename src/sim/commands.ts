@@ -2,15 +2,23 @@
 import { BUILDINGS, BULLDOZE_REFUND, PATH_PRICE, type BuildingKind } from "../content/buildings";
 import { chooseEvent } from "./events";
 import { addToast, pushNews } from "./news";
+import { clearSlop } from "./slop";
+import { canHire, clearZone, fire, hire, paintZone } from "./staff";
 import { buildingAt, edgeTiles, inBounds, isPathTile, rectContains, rectsOverlap, tileIndex } from "./pathfind";
 import type { Rng } from "./rng";
-import type { GameState, Rect } from "./types";
+import type { GameState, Rect, StaffJob } from "./types";
 
 export type Command =
   | { type: "placePath"; x: number; z: number }
   | { type: "placeBuilding"; kind: BuildingKind; x: number; z: number }
   | { type: "bulldoze"; x: number; z: number }
   | { type: "startTraining" }
+  /** Put someone on the payroll (FLT-10): they walk in through the gate. */
+  | { type: "hire"; job: StaffJob }
+  | { type: "fire"; id: number }
+  /** Paint (`on`) or erase one tile of a staffer's patrol zone; `clearZone` wipes it. */
+  | { type: "paintZone"; id: number; x: number; z: number; on: boolean }
+  | { type: "clearZone"; id: number }
   | { type: "chooseEvent"; eventId: string; choiceIndex: number };
 
 export type PlaceResult = { ok: true } | { ok: false; reason: string };
@@ -54,7 +62,7 @@ export function placeBuilding(state: GameState, rng: Rng, kind: BuildingKind, x:
   const def = BUILDINGS[kind];
   state.cash -= buildPrice(state, kind);
   delete state.flags[`free:${kind}`];
-  state.buildings.push({ id: state.nextId++, kind, x, z, w: def.size[0], d: def.size[1], placedTick: state.tick });
+  state.buildings.push({ id: state.nextId++, kind, x, z, w: def.size[0], d: def.size[1], placedTick: state.tick, reliability: 1, broken: false, brokenTick: 0 });
   state.version++;
   const first = state.flags[`built:${kind}`] === undefined;
   state.flags[`built:${kind}`] = state.day;
@@ -74,6 +82,7 @@ function bulldoze(state: GameState, x: number, z: number) {
   }
   if (isPathTile(state, x, z)) {
     state.grid.paths[tileIndex(state, x, z)] = false;
+    clearSlop(state, tileIndex(state, x, z));
     state.cash += Math.round(PATH_PRICE * BULLDOZE_REFUND);
     state.version++;
   }
@@ -97,6 +106,18 @@ export function applyCommands(state: GameState, commands: readonly Command[], rn
         break;
       case "chooseEvent":
         chooseEvent(state, rng, c.eventId, c.choiceIndex);
+        break;
+      case "hire":
+        if (canHire(state, c.job).ok) hire(state, c.job);
+        break;
+      case "fire":
+        fire(state, c.id);
+        break;
+      case "paintZone":
+        paintZone(state, c.id, c.x, c.z, c.on);
+        break;
+      case "clearZone":
+        clearZone(state, c.id);
         break;
       case "startTraining":
         if (!state.buildings.some((b) => b.kind === "hall")) addToast(state, "Build a Training Hall first.", "bad");

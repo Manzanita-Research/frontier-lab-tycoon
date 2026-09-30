@@ -19,6 +19,7 @@ import { KombuchaModel } from "./KombuchaModel";
 import { NapModel } from "./NapModel";
 import { SnackModel } from "./SnackModel";
 import { DemoModel } from "./DemoModel";
+import { BrokenFx } from "./BrokenFx";
 
 /** `id` lets a model that reacts to the world (the Demo Stage screen) find its building; the placement ghost has none. */
 export function BuildingModel({ kind, id }: { kind: BuildingKind; id?: number }) {
@@ -113,6 +114,7 @@ export function Buildings() {
             <Squash delay={b.placedTick === 0 ? 0.25 + i * 0.16 : 0} phase={b.id * 1.9} at={[cx, cz]}>
               <BuildingModel kind={b.kind} id={b.id} />
             </Squash>
+            <BrokenFx id={b.id} kind={b.kind} w={b.w} d={b.d} />
           </group>
         );
       })}

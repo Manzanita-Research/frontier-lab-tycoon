@@ -349,3 +349,86 @@ export function ThoughtsPanel({ rows, layout, actions }: SlotPropsMap["ThoughtsP
     </Win>
   );
 }
+
+/** "Staff Manager": hire and fire, and paint patrol zones. Opens from Start ▸ Staff. */
+export function Staff({ staff, actions }: SlotPropsMap["Staff"]) {
+  const t = useT();
+  const [tab, setTab] = useState<"hire" | "roster">("hire");
+  if (staff.painting) {
+    const p = staff.painting;
+    return (
+      <Win className="f95-staff painting" title="Patrol zone" icon="staff" buttons={[{ g: "close", label: "Done", onClick: () => actions.paintZone(null) }]}>
+        <div className="f95-page">
+          <p className="f95-paintmsg">
+            <b>{p.name}</b> · drag on the map to paint their patrol zone; drag from a painted tile to erase. {p.zone > 0 ? `${p.zone} tiles.` : "Empty means the whole campus."}
+          </p>
+          <div className="f95-row">
+            {p.zone > 0 && <Btn onClick={() => actions.clearZone(p.id)}>Clear</Btn>}
+            <Btn def onClick={() => actions.paintZone(null)}>
+              Done
+            </Btn>
+          </div>
+        </div>
+      </Win>
+    );
+  }
+  return (
+    <Win className="f95-staff" title="Staff Manager" icon="staff" buttons={[{ g: "close", label: t("inspector.close"), onClick: () => actions.closeStaff() }]}>
+      <Tabs
+        label="Staff"
+        active={tab}
+        onChange={setTab}
+        tabs={[
+          { id: "hire", label: "Hire" },
+          { id: "roster", label: `Roster (${staff.count})` },
+        ]}
+      />
+      <div className="f95-page" role="tabpanel">
+        {tab === "hire" ? (
+          <ul className="f95-hire inset">
+            {staff.jobs.map((j) => (
+              <li key={j.job}>
+                <i className="swatch" style={{ background: j.color }} aria-hidden />
+                <span>
+                  <b>{j.title}</b> <small>{j.salaryText}</small>
+                  <small className="blurb">{j.blurb}</small>
+                </span>
+                <Btn disabled={!j.canHire} title={j.reason} onClick={() => actions.hire(j.job)}>
+                  {t("staff.hire")}
+                  {j.count > 0 ? ` (${j.count})` : ""}
+                </Btn>
+              </li>
+            ))}
+          </ul>
+        ) : staff.roster.length === 0 ? (
+          <p className="f95-hint">Nobody on the payroll yet. Hire someone on the other tab.</p>
+        ) : (
+          <ul className="f95-hire inset">
+            {staff.roster.map((s) => (
+              <li key={s.id} className={s.leaving ? "leaving" : ""}>
+                <i className="swatch" style={{ background: s.color }} aria-hidden />
+                <span>
+                  <b>{s.name}</b> <small>{s.title}</small>
+                  <small className="blurb">
+                    {s.status} · {s.zone > 0 ? `zone: ${s.zone} tiles` : "whole campus"}
+                  </small>
+                </span>
+                <span className="f95-pair">
+                  <Btn disabled={s.leaving} onClick={() => actions.paintZone(s.id)} title="Paint a patrol zone on the map">
+                    {t("staff.zone")}
+                  </Btn>
+                  <Btn disabled={s.leaving} onClick={() => actions.fire(s.id)}>
+                    {t("staff.fire")}
+                  </Btn>
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+      <div className="f95-status">
+        {staff.payrollText} · {staff.slopPct}% slop{staff.broken > 0 ? ` · ${staff.broken} out of order` : ""}
+      </div>
+    </Win>
+  );
+}

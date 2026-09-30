@@ -4,40 +4,45 @@
 // couple of game days. Lines live in content/needThoughts.ts.
 import { CAUSES, type Cause } from "../content/needThoughts";
 import { RIVAL_SHORT } from "../content/names";
+import { hourAt, isNight } from "./daylight";
 import { fillTemplate } from "./format";
 import { happinessOf, urgencyOf } from "./needs";
+import { MESS_THOUGHT } from "./slop";
 import type { GameState, Walker, WalkerKind } from "./types";
 
 const ROTATE_DAYS = 2;
 
 /** Loud causes are the ones worth a thought bubble: something is wrong, or someone is leaving. */
-const QUIET = new Set<Cause>(["researcher.meh", "researcher.glowing", "visitor.meh", "visitor.impressed", "agent.aligned", "protester.chant"]);
+const QUIET = new Set<Cause>(["researcher.meh", "researcher.glowing", "researcher.night", "visitor.meh", "visitor.impressed", "visitor.night", "agent.aligned", "agent.night", "protester.chant"]);
 export const isLoud = (cause: Cause) => !QUIET.has(cause);
 
-/** Why this walker is thinking what they are thinking. */
-export function causeOf(w: Walker): Cause {
+/** Why this walker is thinking what they are thinking. After dark (`night`), a walker with nothing on their mind is still at it. */
+export function causeOf(w: Walker, night = false): Cause {
   const phase = w.machine.value;
   switch (w.kind) {
     case "researcher": {
       if (phase === "quitting") return "researcher.boxing";
       if (phase === "queuing") return "researcher.queue";
+      if (w.mess >= MESS_THOUGHT) return "researcher.slop";
       if (w.lost === "energy" || w.lost === "focus" || w.lost === "fomo") return `researcher.lost.${w.lost}`;
       const tired = urgencyOf(w, "energy");
       const scattered = urgencyOf(w, "focus");
       const fomo = urgencyOf(w, "fomo");
       const worst = Math.max(tired / 0.6, scattered / 0.6, fomo / 0.4);
       if (worst >= 1) return tired / 0.6 === worst ? "researcher.tired" : scattered / 0.6 === worst ? "researcher.scattered" : "researcher.fomo";
+      if (night) return "researcher.night";
       return happinessOf(w) > 0.75 ? "researcher.glowing" : "researcher.meh";
     }
     case "visitor":
       if (phase === "queuing") return "visitor.queue";
+      if (w.mess >= MESS_THOUGHT) return "visitor.slop";
       if (w.lost === "impressed") return "visitor.lost.impressed";
       if (w.patience < 0.3) return "visitor.bored";
       if (w.impressed > 0.7) return "visitor.impressed";
       if (w.impressed < 0.22) return "visitor.unimpressed";
-      return "visitor.meh";
+      return night ? "visitor.night" : "visitor.meh";
     case "agent":
-      return w.drift < 0.3 ? "agent.aligned" : w.drift < 0.65 ? "agent.drifting" : "agent.drifted";
+      return w.drift < 0.3 ? (night ? "agent.night" : "agent.aligned") : w.drift < 0.65 ? "agent.drifting" : "agent.drifted";
     default:
       return "protester.chant";
   }
@@ -53,7 +58,10 @@ export function lineFor(state: GameState, cause: Cause, w: Walker): string {
   return text.includes("{") ? fillTemplate(text, { lab: state.labName, rival: rivalName(state) }) : text;
 }
 
-export const thoughtOf = (state: GameState, w: Walker): string => lineFor(state, causeOf(w), w);
+/** It is dark on campus right now (the campus clock: sim/daylight.ts). */
+export const isNightNow = (state: GameState): boolean => isNight(hourAt(state.tick));
+
+export const thoughtOf = (state: GameState, w: Walker): string => lineFor(state, causeOf(w, isNightNow(state)), w);
 
 export interface ThoughtRow {
   /** `kind|text`: what the panel highlights by. */

@@ -10,8 +10,8 @@ import { roomAtom } from "../../newsroom/state";
 import { photoAtom } from "../../render/fx/photoState";
 import { skinList } from "../../skins/registry";
 import { shotAtom } from "../juice/photo";
-import { arenaOpenAtom, chatCountAtom, nightBubbleAtom, photoFlashAtom, photoTimeAtom, skinUiAtom } from "./state";
-import type { BubbleVM, HudVM } from "./types";
+import { arenaOpenAtom, chatCountAtom, photoFlashAtom, photoTimeAtom, skinUiAtom, staffOpenAtom } from "./state";
+import type { HudVM } from "./types";
 import { hudViewModel } from "./vm";
 
 /** The window size, updated on resize (a phone turning around changes the layout). */
@@ -95,6 +95,7 @@ export type AppSource = {
   follow: boolean;
   highlight: string | null;
   selected: number | null;
+  zone: number | null;
   outcomeDismissed: boolean;
 };
 
@@ -112,6 +113,7 @@ const appSourceAtom = Atom.make((get): AsyncResult.AsyncResult<AppSource, never>
     follow: v(atoms.follow),
     highlight: v(atoms.highlight),
     selected: v(atoms.selected),
+    zone: v(atoms.zone),
     outcomeDismissed: v(atoms.outcomeDismissed),
   });
 });
@@ -139,7 +141,7 @@ export function useAppSource(): AppSource | null {
   return src;
 }
 
-export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, selected, outcomeDismissed }: AppSource): HudVM {
+export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, selected, zone, outcomeDismissed }: AppSource): HudVM {
   const arenaOpen = useAtomValue(arenaOpenAtom);
   const room = useAtomValue(roomAtom);
   const chatCount = useAtomValue(chatCountAtom);
@@ -151,9 +153,13 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
   const flash = useAtomValue(photoFlashAtom);
   const shot = useAtomValue(shotAtom);
   const skinUi = useAtomValue(skinUiAtom);
-  const night = useAtomValue(nightBubbleAtom);
+  const staffOpen = useAtomValue(staffOpenAtom);
   const viewport = useViewport();
   const tapHint = useTapHint(selected);
+  // "Build an API Gateway..." twice is one hint too many: once a toast has said it, the standing hint is redundant.
+  const toldGateway = useRef(false);
+  const newest = toasts.at(-1);
+  if (newest && /API Gateway/i.test(newest.text)) toldGateway.current = true;
   const motion = useArenaMotion(snap.race.board, snap.race.rank);
   const list = useMemo(() => skinList(), []);
 
@@ -169,6 +175,9 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         news,
         outcomeDismissed,
         tapHint,
+        toldGateway: toldGateway.current,
+        staffOpen,
+        zone,
         arena: { open: arenaOpen, alert: motion.alert, flinch: motion.flinch, moved: motion.moved },
         room,
         chatCount,
@@ -183,9 +192,8 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
           rejected: skinUi.refused,
         },
         viewport,
-        nightBubble: night as BubbleVM | null,
       }),
-    [snap, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, motion, room, chatCount, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, skinUi, list, viewport, night],
+    [snap, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, motion, room, chatCount, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, skinUi, list, viewport, staffOpen, zone],
   );
   return vm;
 }

@@ -47,13 +47,14 @@ function screenOf(camera: THREE.Camera, el: HTMLElement, id: number): [number, n
  */
 export function Pick() {
   const tool = useApp(atoms.tool);
+  const zone = useApp(atoms.zone);
   const { gl, camera, size } = useThree();
   useEffect(() => {
     const hook = (window as unknown as { __flt?: Record<string, unknown> }).__flt;
     if (hook) hook.screenOf = (id: number) => screenOf(camera, gl.domElement, id);
   }, [gl, camera]);
   useEffect(() => {
-    if (tool) return;
+    if (tool || zone !== null) return;
     const el = gl.domElement;
     let down: { x: number; y: number; t: number } | null = null;
     const onDown = (e: PointerEvent) => {
@@ -74,6 +75,6 @@ export function Pick() {
       el.removeEventListener("pointerdown", onDown);
       el.removeEventListener("pointerup", onUp);
     };
-  }, [tool, gl, camera, size]);
+  }, [tool, zone, gl, camera, size]);
   return null;
 }

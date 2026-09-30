@@ -7,14 +7,15 @@ export function ThoughtsPanel({ rows, layout, actions }: SlotPropsMap["ThoughtsP
   const t = useT();
   const [open, setOpen] = useState(() => !layout.compact);
   return (
-    <section className={`thoughts panel ${open ? "open" : ""}`} aria-label={t("thoughts.title")}>
-      <button className="thoughts-head" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
+    <section className={`thoughts panel ${open ? "open" : ""} ${layout.compact ? "compact" : ""}`} aria-label={t("thoughts.title")}>
+      <button className="thoughts-head" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-label={layout.compact ? `${t("thoughts.title")}, ${rows.length} kinds` : undefined}>
         <span className="thoughts-icon" aria-hidden>
           <i />
           <i />
           <i />
         </span>
         <span className="thoughts-title">{t("thoughts.title")}</span>
+        {layout.compact && <span className="icon-badge">{rows.reduce((n, r) => n + r.count, 0)}</span>}
         <span className={`thoughts-caret ${open ? "open" : ""}`} aria-hidden />
       </button>
       {open && (

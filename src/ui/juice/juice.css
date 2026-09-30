@@ -185,17 +185,6 @@ body.photo .world .nopath,
 body.photo .world .reason {
   display: none !important;
 }
-.bubble-night {
-  background: #eef0ff;
-  border-color: #3a3f7a;
-}
-.bubble-night::after {
-  border-color: #3a3f7a;
-}
-.bubble-night.bubble-agent {
-  background: #e6fcff;
-  border-color: #0a7d8c;
-}
 .photo-ui {
   position: fixed;
   inset: 0;

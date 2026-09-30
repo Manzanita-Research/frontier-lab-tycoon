@@ -7,7 +7,18 @@ export function Objectives({ objectives, layout }: SlotPropsMap["Objectives"]) {
   const t = useT();
   const [open, setOpen] = useState(() => !layout.compact);
   return (
-    <div className={`objectives panel ${open ? "open" : ""}`}>
+    <div className={`objectives panel ${open ? "open" : ""} ${layout.compact ? "compact" : ""}`}>
+      {layout.compact && (
+        <button className="icon-btn" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-label={`${t("objectives.title")}, ${objectives.done} of ${objectives.total} done, ${objectives.daysLeft} ${t("objectives.daysLeft")}`}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <rect x="4" y="3" width="16" height="18" rx="3" fill="var(--flt-color-inset)" />
+            <path d="M8 9l2 2 3.5-3.5M8 16h8" />
+          </svg>
+          <span className="icon-badge">
+            {objectives.done}/{objectives.total}
+          </span>
+        </button>
+      )}
       <button className="obj-head" onClick={() => setOpen(!open)} aria-expanded={open}>
         <span className="caret" aria-hidden="true" />
         <span className="obj-title">{t("objectives.title")}</span>

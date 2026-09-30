@@ -1,7 +1,9 @@
 // Thought bubbles: the main joke delivery and the player's feedback channel.
 import { BUILDINGS } from "../content/buildings";
 import { THOUGHTS, type ThoughtCondition } from "../content/thoughts";
+import { FIRST_NIGHT_LINE } from "../content/night";
 import { CROWDING_PROTESTERS, THOUGHT_TICKS } from "./constants";
+import { hourAt, isNight } from "./daylight";
 import { fillTemplate } from "./format";
 import { causeOf, isLoud, lineFor } from "./mind";
 import { isReachable } from "./pathfind";
@@ -13,6 +15,8 @@ import { modeOf } from "./walkers";
 
 export function activeConditions(state: GameState): Set<ThoughtCondition> {
   const c = new Set<ThoughtCondition>(["always"]);
+  // The campus lamps are lit (content/night.ts): someone is still shipping.
+  if (isNight(hourAt(state.tick))) c.add("night");
   const kombucha = state.buildings.filter((b) => b.kind === "kombucha");
   if (!kombucha.some((b) => isReachable(state, b))) c.add("noKombucha");
   if (state.cash < 1_000_000) c.add("lowCash");
@@ -39,6 +43,15 @@ export function dailyThoughts(state: GameState, rng: Rng, force = false) {
     speaking.every((o) => o !== w && Math.hypot(o.x - w.x, o.z - w.z) > 3);
   const candidates = state.walkers.filter((w) => modeOf(w) !== "inside" && clear(w));
   if (candidates.length === 0) return;
+  // The first night of a game always has its punchline.
+  if (!state.flags.firstNight && isNight(hourAt(state.tick))) {
+    const who = candidates.find((w) => w.kind === FIRST_NIGHT_LINE.kind);
+    if (who) {
+      state.flags.firstNight = 1;
+      state.thoughts.push({ id: state.nextId++, walkerId: who.id, kind: who.kind, text: FIRST_NIGHT_LINE.text, expiresTick: state.tick + THOUGHT_TICKS });
+      return;
+    }
+  }
   // When someone has a need nagging them (or is walking out with a box), most bubbles go to them, with their own line.
   const onScreen = new Set(state.thoughts.map((t) => t.text));
   const loud = candidates.filter((w) => {

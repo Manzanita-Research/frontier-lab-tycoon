@@ -1,20 +1,14 @@
-// The campus clock. Pure: game tick in, lighting out. Nothing here imports three, so it is unit-tested directly.
+// The campus lighting. Pure: hour in, colours out. Nothing here imports three, so it is unit-tested directly.
 //
-// One day/night cycle lasts CYCLE_DAYS game days. The game opens at 8am. Everything is a smooth function of the
-// hour, so a paused game holds still and a 10x game can be low-passed by the caller (see `chaseHour`).
-import { TICKS_PER_DAY } from "../../sim/constants";
+// The clock itself (which hour it is, whether it is night) lives in the sim (sim/daylight.ts) so the thoughts can read
+// it. Everything here is a smooth function of the hour, so a paused game holds still and a 10x game can be low-passed
+// by the caller (see `chaseHour`).
+import { CYCLE_DAYS, CYCLE_TICKS, START_HOUR, hourAt, isNight, nightAmount, smooth } from "../../sim/daylight";
 
-export const CYCLE_DAYS = 10;
-export const CYCLE_TICKS = CYCLE_DAYS * TICKS_PER_DAY;
-export const START_HOUR = 8;
+export { CYCLE_DAYS, CYCLE_TICKS, START_HOUR, hourAt, isNight, nightAmount };
 
 export type RGB = readonly [number, number, number];
 
-const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
-const smooth = (a: number, b: number, x: number) => {
-  const t = clamp01((x - a) / (b - a));
-  return t * t * (3 - 2 * t);
-};
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 const mix = (a: RGB, b: RGB, t: number): RGB => [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)];
 
@@ -25,23 +19,12 @@ export function hex(c: string): RGB {
 }
 export const css = (c: RGB) => `rgb(${Math.round(c[0] * 255)}, ${Math.round(c[1] * 255)}, ${Math.round(c[2] * 255)})`;
 
-/** Hour of day in [0, 24) for a (fractional) sim tick. */
-export function hourAt(tick: number): number {
-  const h = (START_HOUR + (tick / CYCLE_TICKS) * 24) % 24;
-  return h < 0 ? h + 24 : h;
-}
-
 /** Wall-clock label, "2:05 am". */
 export function clockLabel(hour: number): string {
   const total = Math.floor(hour * 60) % (24 * 60);
   const h = Math.floor(total / 60);
   const m = total % 60;
   return `${h % 12 === 0 ? 12 : h % 12}:${String(m).padStart(2, "0")} ${h < 12 ? "am" : "pm"}`;
-}
-
-/** 0 in daylight, 1 at night: dusk 18:30 to 21:00, dawn 4:30 to 7:00. */
-export function nightAmount(hour: number): number {
-  return hour >= 12 ? smooth(18.5, 21, hour) : 1 - smooth(4.5, 7, hour);
 }
 
 /** Bumps at sunrise and sunset, fading as the night takes over. */
@@ -151,6 +134,3 @@ export function brightness(a: Ambience): number {
   const lum = (c: RGB) => 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
   return a.hemiIntensity * lum(a.hemiSky) + a.sunIntensity * lum(a.sunColor);
 }
-
-/** Night is when the thought pool changes its tune (the campus is lit and someone is still shipping). */
-export const isNight = (hour: number) => nightAmount(hour) > 0.6;

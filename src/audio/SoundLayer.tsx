@@ -7,13 +7,13 @@ import { fx } from "../render/fx/state";
 import { worldX, worldZ } from "../render/coords";
 import { SoundKit, synthCue } from "./SoundKit";
 import { audioReadyAtom, bindSound, mixerAtom } from "./state";
-import { breakdownSignature, worldEra } from "./world";
+import { soundCues, soundSnapshot } from "./world";
 import { CUES, type Cue } from "./score";
 
 export function SoundLayer() {
   const kit = useRef<SoundKit | null>(null);
   const watch = useRef(createWatch());
-  const last = useRef({ sample: -10, era: worldEra(sim.world), broken: breakdownSignature(sim.world) });
+  const last = useRef({ sample: -10, ...soundSnapshot(sim.world) });
   const position = useRef(new Vector3());
   useEffect(() => {
     const sound = new SoundKit(registry.get(mixerAtom));
@@ -60,18 +60,16 @@ export function SoundLayer() {
         case "release": sound.cue("release"); break;
         case "incident": sound.cue("card"); break;
         case "incidentClosed": sound.cue("choice"); break;
-        case "reset": last.current.era = worldEra(world); last.current.broken = breakdownSignature(world); break;
+        case "reset": Object.assign(last.current, soundSnapshot(world)); break;
       }
     }
     if (clock.elapsedTime - last.current.sample < 0.2) return;
     last.current.sample = clock.elapsedTime;
-    const era = worldEra(world);
-    const broken = breakdownSignature(world);
-    if (era !== last.current.era) { sound.cue("era"); last.current.era = era; }
-    if (broken !== last.current.broken) {
-      if (broken.split(",").some((id) => id && !last.current.broken.split(",").includes(id))) sound.cue("breakdown");
-      last.current.broken = broken;
-    }
+    const now = soundSnapshot(world);
+    for (const cue of soundCues(last.current, now)) sound.cue(cue);
+    last.current.era = now.era;
+    last.current.broken = now.broken;
+    const era = now.era;
     let density = 0; let protesters = 0;
     for (const w of world.walkers) {
       if (w.kind === "protester") protesters++;

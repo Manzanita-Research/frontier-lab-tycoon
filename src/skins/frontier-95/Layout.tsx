@@ -12,6 +12,7 @@ export function Layout({ slots }: SlotPropsMap["Layout"]) {
         {slots.Objectives}
       </div>
       <div className="f95-right">
+        {slots.Staff}
         {slots.Inspector}
         {slots.Arena}
         {slots.ThoughtsPanel}

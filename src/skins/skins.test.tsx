@@ -34,11 +34,13 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
     case "Objectives":
       return { objectives: main.objectives, layout: main.layout, actions };
     case "Inspector":
-      return { inspector: main.inspector!, actions };
+      return { inspector: main.inspector!, layout: main.layout, actions };
     case "BuildBar":
       return { items: main.buildItems, tip: main.buildTip, layout: main.layout, actions };
     case "Speed":
       return { speed: main.speed, stats: main.stats, actions };
+    case "Staff":
+      return { staff: { ...main.staff, open: true }, actions };
     case "Bubble":
       return { bubble: main.bubbles[0]!, actions };
     case "ThoughtsPanel":
@@ -90,6 +92,7 @@ const vms: Record<string, HudVM> = {
   photo: vmOf({ photo: true }),
   phone: vmOf({ width: 390, height: 844 }),
   nobody: vmOf({ selected: null }),
+  staff: vmOf({ staff: true }),
 };
 
 const usable = catalog.filter((e) => e.ok).map((e) => e.folder);

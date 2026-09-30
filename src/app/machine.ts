@@ -48,6 +48,8 @@ export const AppContext = Schema.Struct({
   follow: Schema.Boolean,
   /** The Thoughts row (`kind|text`) whose walkers are lit up, if any. */
   highlight: Schema.NullOr(Schema.String),
+  /** The staffer whose patrol zone is being painted (their id), if any: dragging on the map paints it. */
+  zone: Schema.NullOr(Schema.Number),
 });
 export type AppContext = typeof AppContext.Type;
 
@@ -71,7 +73,8 @@ export function phaseFor(c: AppContext): Phase {
   return c.speed === 0 ? ".playing.paused" : ".playing.running";
 }
 
-const addToasts = (c: AppContext, fresh: readonly UiToast[]) => ({ ...c, toasts: [...c.toasts, ...fresh].slice(-3) });
+/** The same words twice are one toast (the newer replaces the older); the HUD shows only the newest, so keep just a few. */
+const addToasts = (c: AppContext, fresh: readonly UiToast[]) => ({ ...c, toasts: [...c.toasts.filter((t) => !fresh.some((f) => f.text === t.text)), ...fresh].slice(-3) });
 
 export const appMachine = setupEffect({
   schemas: {
@@ -98,6 +101,8 @@ export const appMachine = setupEffect({
       SET_FOLLOW: Schema.Struct({ follow: Schema.Boolean }),
       /** Tap a Thoughts row to light up who thinks it; tap it again to switch off. */
       HIGHLIGHT: Schema.Struct({ key: Schema.NullOr(Schema.String) }),
+      /** Start (or stop, with null) painting a staffer's patrol zone. */
+      SET_ZONE: Schema.Struct({ id: Schema.NullOr(Schema.Number) }),
       DISMISS_TOAST: Schema.Struct({ id: Schema.Number }),
       TOAST_EXPIRED: Schema.Struct({ id: Schema.Number }),
     },
@@ -154,6 +159,7 @@ export const appMachine = setupEffect({
     selected: null,
     follow: false,
     highlight: null,
+    zone: null,
   }),
   invoke: { src: "frameLoop" },
   initial: "playing",
@@ -207,6 +213,8 @@ export const appMachine = setupEffect({
         lastPublishAt: report.snap ? now : context.lastPublishAt,
         // The walker left the map (out the gate, or the game was reset): close the card.
         ...(report.snap && context.selected !== null && report.snap.selectedId === context.selected && report.snap.inspect === null ? { selected: null, follow: false } : {}),
+        // The staffer whose zone was being painted has been let go.
+        ...(report.snap && context.zone !== null && !report.snap.ops.staff.some((o) => o.id === context.zone) ? { zone: null } : {}),
       };
       for (const t of fresh) enq.raise({ type: "TOAST_EXPIRED", id: t.id }, { id: `toast:${t.id}`, delay: TOAST_MS });
       return { context: next, target: phaseFor(next) };
@@ -219,12 +227,14 @@ export const appMachine = setupEffect({
       const next = { ...context, speed: (context.speed === 0 ? 1 : 0) as Speed };
       return { context: next, target: phaseFor(next) };
     },
-    SET_TOOL: ({ context, event }) => ({ context: { ...context, tool: context.tool === event.tool ? null : event.tool, hover: null } }),
+    SET_TOOL: ({ context, event }) => ({ context: { ...context, tool: context.tool === event.tool ? null : event.tool, hover: null, zone: null } }),
+    SET_ZONE: ({ context, event }) => ({ context: { ...context, zone: event.id === context.zone ? null : event.id, tool: null, hover: null } }),
     SET_HOVER: ({ context, event }) => {
       if (context.hover?.x === event.hover?.x && context.hover?.z === event.hover?.z) return;
       return { context: { ...context, hover: event.hover } };
     },
-    COMMAND: ({ context, event }) => ({ context: { ...context, queue: [...context.queue, event.command] } }),
+    // A player command publishes the snapshot on the very next frame, so a hire or a painted tile shows straight away.
+    COMMAND: ({ context, event }) => ({ context: { ...context, queue: [...context.queue, event.command], lastPublishAt: 0 } }),
     CHOOSE: ({ context, event }) => {
       if (!context.event) return;
       const command: Command = { type: "chooseEvent", eventId: context.event.id, choiceIndex: event.choiceIndex };
@@ -241,7 +251,7 @@ export const appMachine = setupEffect({
     NEW_LAB: (args, enq) => {
       const { context, actions } = args;
       enq(actions.newLab, args);
-      const next = { ...context, queue: [], acc: 0, toasts: [], outcomeDismissed: false, speed: 1 as Speed, tool: null, hover: null, selected: null, follow: false, highlight: null };
+      const next = { ...context, queue: [], acc: 0, toasts: [], outcomeDismissed: false, speed: 1 as Speed, tool: null, hover: null, selected: null, follow: false, highlight: null, zone: null };
       return { context: next, target: ".playing.running" };
     },
     TOAST: ({ context, event }, enq) => {

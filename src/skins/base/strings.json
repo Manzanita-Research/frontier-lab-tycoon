@@ -92,5 +92,14 @@
   "skin.title": "Choose a skin",
   "skin.apply": "Apply",
   "skin.cancel": "Cancel",
-  "skin.reduceMotion": "Reduce motion"
+  "skin.reduceMotion": "Reduce motion",
+  "staff.title": "Staff",
+  "staff.painting": "Painting a patrol zone",
+  "staff.hire": "Hire",
+  "staff.fire": "Fire",
+  "staff.zone": "Zone",
+  "stats.moreStats": "More stats",
+  "stats.fewerStats": "Fewer stats",
+  "inspector.fold": "Fold the card",
+  "inspector.more": "Show more"
 }

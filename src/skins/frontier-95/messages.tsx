@@ -18,7 +18,7 @@ const readTipsOff = () => {
 /** A yellow tooltip with a 1px black border and a bold speaker line. The root keeps the `bubble` class so photo mode can copy it. */
 export function Bubble({ bubble }: SlotPropsMap["Bubble"]) {
   return (
-    <div className={`bubble f95-tip bubble-${bubble.kind} ${bubble.night ? "bubble-night" : ""}`}>
+    <div className={`bubble f95-tip bubble-${bubble.kind}`}>
       <b>{bubble.speaker || bubble.kind}</b>
       {bubble.text}
     </div>
@@ -56,9 +56,9 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
   const [tip, setTip] = useState<number | null>(null);
   const [reply, setReply] = useState<string | null>(null);
   const phone = vm.layout.compact;
-  // On a phone the balloon shows one hint and the newest toast at most: the campus needs the room.
-  const hints = phone ? vm.hints.slice(0, 1) : vm.hints;
-  const toasts = phone ? vm.toasts.slice(-1) : vm.toasts;
+  // One at a time, the newest toast winning; the game only sends a hint while nobody is talking.
+  const hints = vm.hints;
+  const toasts = vm.toasts.slice(-1);
   const busy = toasts.length > 0 || hints.length > 0;
 
   // When it is quiet, the clip offers a tip every so often (never on a phone, where the campus needs the room).

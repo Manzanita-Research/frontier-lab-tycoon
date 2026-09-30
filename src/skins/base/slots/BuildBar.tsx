@@ -16,7 +16,7 @@ export function BuildBar({ items, tip, actions }: SlotPropsMap["BuildBar"]) {
         {items.map((it) => (
           <button
             key={it.kind}
-            className={`tool ${it.race ? "race" : ""} ${it.selected ? "on" : ""} ${it.affordable ? "" : "broke"}`}
+            className={`tool ${it.kind === "staff" ? "staff-tool" : ""} ${it.race ? "race" : ""} ${it.selected ? "on" : ""} ${it.affordable ? "" : "broke"}`}
             onClick={() => actions.place(it.kind)}
             disabled={!it.affordable && !it.selected}
             aria-pressed={it.selected}

@@ -86,6 +86,8 @@ export interface NeedVM {
   /** 0 to 1 */
   value: number;
   pct: number;
+  /** How much it is shouting, 0 (fine) to 1 (desperate); this is what `tone` is cut from. */
+  urgency: number;
   /** "ok" is fine, "warn" is nagging, "bad" is shouting. */
   tone: "ok" | "warn" | "bad";
 }
@@ -170,8 +172,50 @@ export interface BubbleVM {
   /** Who is thinking it (their name). */
   speaker: string;
   text: string;
-  /** A client-side night thought rather than a sim one. */
-  night: boolean;
+}
+
+export interface StaffRowVM {
+  id: number;
+  /** "janitor" | "sre" | "comms" | "security" */
+  job: string;
+  title: string;
+  name: string;
+  /** What they are up to. */
+  status: string;
+  /** A CSS colour for the job's swatch. */
+  color: string;
+  /** Tiles in their patrol zone (0: the whole campus). */
+  zone: number;
+  leaving: boolean;
+}
+
+export interface StaffJobVM {
+  job: string;
+  title: string;
+  blurb: string;
+  salary: number;
+  salaryText: string;
+  count: number;
+  max: number;
+  canHire: boolean;
+  /** Why not, when `canHire` is false. */
+  reason: string;
+  color: string;
+}
+
+/** The payroll: hire and fire, and paint patrol zones. It opens from the build palette's "staff" tile. */
+export interface StaffVM {
+  open: boolean;
+  count: number;
+  payroll: number;
+  payrollText: string;
+  /** The staffer whose patrol zone is being painted on the map, if any. */
+  painting: StaffRowVM | null;
+  jobs: StaffJobVM[];
+  roster: StaffRowVM[];
+  /** Whole percent of the paths that are slopped, and how many buildings are out of order. */
+  slopPct: number;
+  broken: number;
 }
 
 export interface TickerItemVM {
@@ -403,6 +447,7 @@ export interface HudVM {
   buildItems: BuildItemVM[];
   buildTip: BuildTipVM | null;
   speed: SpeedVM;
+  staff: StaffVM;
   bubbles: BubbleVM[];
   ticker: TickerItemVM[];
   toasts: ToastVM[];
@@ -421,7 +466,7 @@ export interface HudVM {
 
 /** Everything a skin may ask the game to do. Each one is safe to call at any time; the game ignores what does not apply. */
 export interface HudActions {
-  /** Pick a build tool ("path", "cluster", ..., "bulldoze"). Picking the selected one puts it away; `null` clears. */
+  /** Pick a build tool ("path", "cluster", ..., "bulldoze"). Picking the selected one puts it away; `null` clears. `"staff"` opens or closes the payroll. */
   place(kind: BuildKindVM | null): void;
   setSpeed(speed: number): void;
   togglePause(): void;
@@ -439,6 +484,13 @@ export interface HudActions {
   toggleArena(): void;
   keepPlaying(): void;
   newLab(): void;
+  // The payroll.
+  closeStaff(): void;
+  hire(job: string): void;
+  fire(staffId: number): void;
+  /** Start painting a staffer's patrol zone on the map (`null` stops). */
+  paintZone(staffId: number | null): void;
+  clearZone(staffId: number): void;
   // The news room.
   openNews(): void;
   /** Open an edition by id, or the archive with "archive". */

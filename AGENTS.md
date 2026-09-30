@@ -29,7 +29,7 @@ pnpm check            # all three: run before every PR
 - `src/render/`: react-three-fiber scene. Reads sim state, never mutates it except through store actions.
 - `src/ui/`: DOM HUD over the canvas (stats, build palette, ticker, event cards, speed control). `src/ui/juice/`: odometers, sky, photo mode.
 - `src/render/fx/`: the juice layer (camera director, particles, day/night, photo mode). It only reads the World; see the last section of `docs/ARCHITECTURE.md`.
-- `src/sim/machines/`: the XState machines (training, economy, goals, event arcs, walkers, moods). `src/sim/race/`: the Race (rival labs, the Arena, eras, the R&D multiplier, open weights, the compute auction, funding rounds). `src/app/`: the Effect shell (Sim and Frames services, the app machine) and how React reads it. See `docs/ARCHITECTURE.md`.
+- `src/sim/machines/`: the XState machines (training, economy, goals, event arcs, walkers, moods, staff). `src/sim/race/`: the Race (rival labs, the Arena, eras, the R&D multiplier, open weights, the compute auction, funding rounds). `src/app/`: the Effect shell (Sim and Frames services, the app machine) and how React reads it. See `docs/ARCHITECTURE.md`.
 
 If you need to change a shared type in `src/sim/types.ts`, keep the change additive and mention it in your PR.
 
@@ -46,7 +46,13 @@ The game logic runs on **XState v6 (alpha) and Effect v4 (rc)**, joined by `@xst
 
 House style for sim machines: transitions are pure and never draw random numbers. The driver pre-rolls dice, in the original draw order, and passes them in the event (`{ type: "TIMER_DONE", loiter: rng.chance(...) }`). Side effects on the World are `enq`'d actions that the driver runs in order after each `transition()`. `src/sim/golden.test.ts` pins the RNG stream and the World for three seeds, so a port step that changes a number fails loudly.
 
+## Entities: don't assume everything walks
+
+Only people (visitors, staff, researchers) are sure to be walkers. Agents, compute, data, tokens and models may later be shown as flows, sprites or not at all (see the Open questions in `docs/ROADMAP.md`). Keep an entity's **presentation** separate from its sim logic, and write mechanics against entities and stats rather than against walkers.
+
 ## PRs
+
+- **Before/after screenshots (Jem's rule).** Any PR that changes something **visible** (the 2D UI, the 3D scene, skins, events, on-screen text) includes **before/after screenshots of the same scene**: same seed, same camera and scene, same viewport, taken from `main` and from your branch. Use `pnpm shots` once it exists (FLT-35); until then use `pnpm shot` with the same URL on both builds. Put them in the PR body as pairs (before | after), plus a phone shot if the layout changed. **Logic-only PRs** show tests or a sim/headless report instead.
 
 - Open a real PR from your branch into `main`. CI runs typecheck, tests and build.
 - Put evidence in the PR: test output, and for anything visual, a screenshot (see `docs/modal.md` for headless screenshots) or a `bb connect expose` link.

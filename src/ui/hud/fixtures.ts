@@ -44,6 +44,7 @@ export interface FixtureOptions {
   view?: "archive" | Edition | null;
   chatCount?: number;
   photo?: boolean;
+  staff?: boolean;
   outcome?: "won" | "lost" | null;
   width?: number;
   height?: number;
@@ -75,6 +76,9 @@ export function fixtureInput(o: FixtureOptions = {}): HudInput {
     ],
     outcomeDismissed: false,
     tapHint: true,
+    toldGateway: false,
+    staffOpen: o.staff ?? false,
+    zone: null,
     arena: { open: true, alert: false, flinch: false, moved: {} },
     room: {
       archive: [FIXTURE_PAPER, FIXTURE_CHAT],
@@ -87,6 +91,5 @@ export function fixtureInput(o: FixtureOptions = {}): HudInput {
     photo: { on: o.photo ?? false, time: "live", shot: { id: 1, url: "data:image/png;base64,", name: "frontier-lab-tycoon-campus.png" }, flash: 1 },
     skins: { ...NO_SKINS, ...o.skins },
     viewport: { width: o.width ?? 1440, height: o.height ?? 900 },
-    nightBubble: { id: 9, walkerId: snap.thoughts[0]?.walkerId ?? 1, kind: "researcher", speaker: "Someone Awake", text: "It's 2am. Still shipping.", night: true },
   };
 }

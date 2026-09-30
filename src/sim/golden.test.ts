@@ -2,7 +2,9 @@
 // numbers, RNG stream included. The FLT-3 digests were recorded from the hand-written sim before any system moved
 // into a machine, and the port kept them. FLT-8 (the Crowd) changes the game on purpose (names, needs, queues,
 // Vibes, new buildings, who spawns and when), so the digests below were re-recorded from that sim; the projection
-// now also covers the new walker fields and the Vibes.
+// now also covers the new walker fields and the Vibes. FLT-10 (Operations) did it again: slop, breakdowns (a random
+// draw per building per day), queues you can see, and staff; the script below now hires a few, and the projection
+// covers the slop, the payroll and every building's reliability.
 //
 // The digest reads the game through `view()`, not the raw state, so the persisted shape can change (machine
 // snapshots, moved fields) without touching the recorded values. Only `view()` follows the shape.
@@ -53,6 +55,8 @@ function view(s: GameState) {
     thoughts: s.thoughts,
     pops: s.pops,
     buildings: s.buildings,
+    slop: s.slop.reduce((acc, level, i) => (level ? acc + `${i}:${level},` : acc), ""),
+    staff: s.staff.map((o) => ({ id: o.id, job: o.job, name: o.name, x: o.x, z: o.z, phase: o.machine.value, task: o.task, done: o.done, zone: o.zone })),
     paths: s.grid.paths.reduce((acc, on, i) => (on ? acc + `${i},` : acc), ""),
     walkers: s.walkers.map((w) => ({
       id: w.id,
@@ -78,6 +82,8 @@ function view(s: GameState) {
       lost: w.lost,
       mood: w.mood,
       stats: w.stats,
+      mess: w.mess,
+      queue: [w.queued, w.qtile, w.qslot],
       phase: w.machine.value,
       visits: w.visits,
       step: w.step,
@@ -122,6 +128,10 @@ function play(seed: number, ticks: number, checkpoints: number[]): Record<number
       }
     }
     if (i === 250) cmds.push({ type: "placePath", x: 5, z: 16 });
+    // Operations: a Janitor Bot, an SRE and a guard, one of them with a patrol zone.
+    if (i === 300) cmds.push({ type: "hire", job: "janitor" }, { type: "hire", job: "sre" });
+    if (i === 900) cmds.push({ type: "hire", job: "security" }, { type: "hire", job: "comms" });
+    if (i === 1000) for (const x of [8, 9, 10]) cmds.push({ type: "paintZone", id: s.staff[0]!.id, x, z: 16, on: true });
     if (i === 700) cmds.push({ type: "bulldoze", x: 13, z: 16 });
     tick(s, cmds);
     if (checkpoints.includes(i + 1)) out[i + 1] = digest(s);
@@ -131,14 +141,14 @@ function play(seed: number, ticks: number, checkpoints: number[]): Record<number
 
 const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 
-// Recorded from the pre-port sim (origin/flt-3-slice-2 @ 8f9750a; sorted-flags projection) and re-recorded by FLT-9,
-// which changes the game on purpose: rivals, the Arena, eras, the R&D multiplier (training runs faster), bigger
+// Recorded from the pre-port sim (origin/flt-3-slice-2 @ 8f9750a; sorted-flags projection), re-recorded by FLT-9 and
+// again by FLT-10. FLT-9 changes the game on purpose: rivals, the Arena, eras, the R&D multiplier (training runs faster), bigger
 // leaps per release, Training Halls that convert 30 compute a day, and a compute auction on day 40 that this
 // script answers like any other card. The port itself was verified against the original numbers in FLT-3.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "6c02dc69", 800: "c0779fb9", 1600: "cc54b4b7", 2400: "e5d16521", 3200: "ab51327a", 4000: "1ea2a555" },
-  2: { 200: "efa3eff8", 800: "b238e095", 1600: "e458650d", 2400: "f2580b06", 3200: "7cb379e5", 4000: "e8a4633c" },
-  3: { 200: "dbc1eb2d", 800: "8093e903", 1600: "f82a6a35", 2400: "5348a141", 3200: "9c7f7b03", 4000: "b7df570b" },
+  1: { 200: "59465b3c", 800: "1a89bf0c", 1600: "4a013429", 2400: "35cb7214", 3200: "10103d71", 4000: "41405c46" },
+  2: { 200: "c1dcb803", 800: "9295e431", 1600: "3d5c8221", 2400: "36a58fde", 3200: "a0b5244c", 4000: "7ee4edf6" },
+  3: { 200: "72c61121", 800: "f81dee8f", 1600: "4a9b231c", 2400: "ad7cc54e", 3200: "767d1481", 4000: "3757a512" },
 };
 
 describe("golden runs", () => {

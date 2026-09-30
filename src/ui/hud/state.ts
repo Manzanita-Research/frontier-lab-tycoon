@@ -32,5 +32,5 @@ export const skinUiAtom = Atom.keepAlive(Atom.make<SkinUi>({ active: "base", pic
 /** The skin's components and copy: what the host renders. Starts as the base until the first skin has loaded. */
 export const loadedSkinAtom = Atom.keepAlive(Atom.make<LoadedSkin>({ id: "base", name: "Base", slots: baseSlots, strings: { ...BASE_STRINGS } }));
 
-/** A client-side night thought (NightThoughts publishes it, the view-model carries it to the Bubble slot). */
-export const nightBubbleAtom = Atom.make<import("./types").BubbleVM | null>(null);
+/** Is the Staff panel open? UI-only state, kept as an Effect atom like the rest of what React reads. */
+export const staffOpenAtom = Atom.make(false);

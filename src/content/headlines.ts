@@ -1,6 +1,7 @@
 // News ticker copy. Templates: {lab} {model} {rival} {cash}; people headlines also get {name} {their} {amount}. Parody only.
 import type { BuildingKind } from "./buildings";
 import type { Tone } from "../sim/types";
+import { OPS_HEADLINES, type OpsTrigger } from "./ops";
 import { RACE_HEADLINES, type RaceTrigger } from "./raceNews";
 
 export type NewsTrigger =
@@ -21,6 +22,7 @@ export type NewsTrigger =
   | "demoFail"
   | "investorPays"
   | RaceTrigger
+  | OpsTrigger
   | `built:${BuildingKind}`;
 
 export interface Headline {
@@ -33,6 +35,7 @@ const h = (trigger: NewsTrigger, tone: Tone, text: string): Headline => ({ trigg
 
 export const HEADLINES: Headline[] = [
   ...RACE_HEADLINES,
+  ...OPS_HEADLINES,
   h("start", "neutral", "{lab} opens its doors with {cash} in seed money and a roadmap made entirely of vibes"),
 
   // Filler: the daily weather of a frontier lab.

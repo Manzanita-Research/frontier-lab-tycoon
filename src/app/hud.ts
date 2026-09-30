@@ -6,6 +6,7 @@ import { inspectWalker, type Inspect } from "../sim/inspect";
 import { thoughtBoard, type ThoughtRow } from "../sim/mind";
 import { computePerDay, trainingEtaDays } from "../sim/training";
 import { openEventOf } from "../sim/events";
+import { opsView, type OpsView } from "../sim/opsView";
 import { raceView, type RaceView } from "../sim/race/view";
 import { outcomeOf } from "../sim/goals";
 import type { Building, GameState, GoalProgress, OpenEvent, Outcome, Pop, Thought, Tone, Vibes } from "../sim/types";
@@ -77,6 +78,8 @@ export interface Snapshot {
   selectedId: number | null;
   /** The Race: multiplier, era, the Arena, the open-weights drop, power. */
   race: RaceView;
+  /** Operations: staff, slop, broken buildings, queues. */
+  ops: OpsView;
 }
 
 export interface UiToast {
@@ -131,5 +134,6 @@ export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO
     inspect: ui.selected === null ? null : inspectWalker(s, ui.selected),
     selectedId: ui.selected,
     race: raceView(s),
+    ops: opsView(s),
   };
 }

@@ -41,6 +41,7 @@ export function IconSprite() {
         <symbol id="f95i-tool-fill" viewBox="0 0 24 24" {...S}><path d="M6 12l6-7 7 7-6 6z" fill="#fff" stroke="#000" /><path d="M19 15c2 3 0 5 0 5s-2-2 0-5z" fill="#0000c0" /></symbol>
         <symbol id="f95i-tool-line" viewBox="0 0 24 24" {...S}><path d="M4 19L20 5" stroke="#000" strokeWidth="2" /></symbol>
         <symbol id="f95i-tool-zoom" viewBox="0 0 24 24" {...S}><circle cx="10" cy="10" r="6" fill="#c0e0ff" stroke="#000" strokeWidth="2" /><path d="M15 15l6 6" stroke="#000" strokeWidth="3" /></symbol>
+        <symbol id="f95i-staff" viewBox="0 0 24 24" {...S}><circle cx="12" cy="14" r="5" fill="#ffd9b8" stroke="#000" /><path d="M6 12a6 6 0 0 1 12 0z" fill="#ffc21a" stroke="#000" /><rect x="4" y="11" width="16" height="2" fill="#ffc21a" stroke="#000" /><path d="M6 23q6-6 12 0" fill="#ff8a2b" stroke="#000" /></symbol>
         <symbol id="f95i-chart" viewBox="0 0 24 24" {...S}><rect x="2" y="3" width="20" height="18" fill="#fff" stroke="#000" /><path d="M5 17l4-6 4 3 6-8" fill="none" stroke="#e00000" strokeWidth="2" /></symbol>
       </defs>
     </svg>

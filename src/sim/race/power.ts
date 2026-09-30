@@ -22,6 +22,7 @@ export function powerOf(state: Pick<GameState, "buildings">): Power {
   let gas = 0;
   let solar = 0;
   for (const b of state.buildings) {
+    if (b.broken) continue; // a Datacenter or plant that is down is not running
     if (b.kind === "datacenter") datacenters++;
     else if (b.kind === "gas") gas++;
     else if (b.kind === "solar") solar++;

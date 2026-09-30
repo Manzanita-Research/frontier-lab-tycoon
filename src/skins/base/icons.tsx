@@ -118,4 +118,14 @@ export const ICONS: Record<string, ReactElement> = {
       <circle cx="17" cy="26" r="2.5" fill={ink} />
     </svg>
   ),
+  staff: (
+    <svg {...S}>
+      <circle cx="16" cy="18" r="7" fill="#ffd9b8" stroke={ink} strokeWidth="2" />
+      <path d="M8.5 16 A7.5 7.5 0 0 1 23.5 16 Z" fill="#ffc21a" stroke={ink} strokeWidth="2" />
+      <rect x="6.5" y="15.5" width="19" height="3" rx="1.5" fill="#ffc21a" stroke={ink} strokeWidth="2" />
+      <rect x="11" y="18.5" width="4" height="2.4" rx="1" fill={ink} />
+      <rect x="17" y="18.5" width="4" height="2.4" rx="1" fill={ink} />
+      <path d="M8 29 Q16 23 24 29" fill="#ff8a2b" stroke={ink} strokeWidth="2" />
+    </svg>
+  ),
 };

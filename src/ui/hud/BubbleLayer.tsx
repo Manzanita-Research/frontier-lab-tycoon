@@ -14,7 +14,8 @@ export function BubbleLayer({ bubbles, actions }: { bubbles: HudVM["bubbles"]; a
     <div className="world">
       {bubbles.map((b) => (
         <Anchored
-          key={`${b.night ? "n" : "t"}${b.id}`}
+          bubble
+          key={b.id}
           pos={(out) => {
             const w = sim.world.walkers.find((o) => o.id === b.walkerId);
             if (!w || w.machine.value === "inside") return false;

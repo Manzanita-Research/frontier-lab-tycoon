@@ -4,6 +4,8 @@ import type { SlotComponents } from "../types";
 import "./base.css";
 import "./race.css";
 import "./news.css";
+import "./ops.css";
+import "./compact.css";
 import { Arena } from "./slots/Arena";
 import { Assistant } from "./slots/Assistant";
 import { BuildBar } from "./slots/BuildBar";
@@ -23,6 +25,7 @@ import { PhotoButton } from "./slots/PhotoButton";
 import { PhotoOverlay } from "./slots/PhotoOverlay";
 import { SkinPicker } from "./slots/SkinPicker";
 import { Speed } from "./slots/Speed";
+import { Staff } from "./slots/Staff";
 import { Stats } from "./slots/Stats";
 import { ThoughtsPanel } from "./slots/ThoughtsPanel";
 import { Ticker } from "./slots/Ticker";
@@ -31,7 +34,7 @@ import { Training } from "./slots/Training";
 import { Layout } from "./Layout";
 
 export const baseSlots: SlotComponents = {
-  Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Bubble, ThoughtsPanel, Ticker, Toast, Assistant,
+  Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, Bubble, ThoughtsPanel, Ticker, Toast, Assistant,
   EventCard, Arena, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, NewsControls,
   NewsArrival, NewsRoom, Mixer,
 };

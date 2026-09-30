@@ -204,4 +204,51 @@ describe("app machine", () => {
       expect(actor.getSnapshot().context.follow).toBe(false);
     }).pipe(provide(handle));
   });
+
+  it.effect("hires through a COMMAND, shows the new staffer in the HUD snapshot, and paints their zone until they are let go", () => {
+    const handle = handleFor();
+    return Effect.gen(function* () {
+      const { actor, sim, pump } = yield* boot(0);
+      yield* pump(1);
+      yield* send(actor, { type: "COMMAND", command: { type: "hire", job: "janitor" } });
+      yield* pump(6);
+      const ops = () => actor.getSnapshot().context.snap.ops;
+      expect(ops().staff).toHaveLength(1);
+      expect(ops().payroll).toBe(2_000);
+      expect(ops().jobs.find((j) => j.job === "janitor")!.count).toBe(1);
+      const id = ops().staff[0]!.id;
+
+      // Painting mode: SET_ZONE picks the staffer, drops the build tool, and a second SET_ZONE for the same one stops it.
+      yield* send(actor, { type: "SET_TOOL", tool: "path" });
+      yield* send(actor, { type: "SET_ZONE", id });
+      yield* waitFor(actor, (st) => st.context.zone === id, { timeout: "1 second" });
+      expect(actor.getSnapshot().context.tool).toBeNull();
+      yield* send(actor, { type: "COMMAND", command: { type: "paintZone", id, x: 8, z: 16, on: true } });
+      yield* pump(6);
+      expect(sim.world.staff[0]!.zone).toHaveLength(1);
+      expect(ops().staff[0]!.zone).toBe(1);
+      yield* send(actor, { type: "SET_TOOL", tool: "cluster" }); // picking a build tool leaves zone mode
+      yield* waitFor(actor, (st) => st.context.zone === null, { timeout: "1 second" });
+
+      // Fire them while their zone is being painted: the mode ends by itself once they are gone.
+      yield* send(actor, { type: "SET_ZONE", id });
+      yield* waitFor(actor, (st) => st.context.zone === id, { timeout: "1 second" });
+      sim.world.staff = [];
+      yield* pump(4);
+      expect(actor.getSnapshot().context.zone).toBeNull();
+    }).pipe(provide(handle));
+  });
+
+  it.effect("a toast that says the same thing again replaces the older one instead of stacking", () => {
+    const handle = handleFor();
+    return Effect.gen(function* () {
+      const { actor, sim, pump } = yield* boot(0);
+      sim.world.toasts.push({ id: 900, text: "Frontier-2 is out! Build an API Gateway to sell it.", tone: "good" });
+      yield* pump(6);
+      sim.world.toasts.push({ id: 901, text: "Frontier-2 is out! Build an API Gateway to sell it.", tone: "good" });
+      yield* pump(6);
+      const texts = actor.getSnapshot().context.toasts.map((t) => t.text);
+      expect(texts.filter((t) => t.startsWith("Frontier-2 is out"))).toHaveLength(1);
+    }).pipe(provide(handle));
+  });
 });

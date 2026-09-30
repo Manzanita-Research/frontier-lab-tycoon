@@ -7,14 +7,19 @@ import type { Cue } from "../../audio/score";
 import { fx } from "../../render/fx/state";
 import { roomAtom, skipNews, viewRoom } from "../../newsroom/state";
 import { setPhoto, takePhoto } from "../juice/photo";
-import { arenaOpenAtom, chatCountAtom, photoFlashAtom, photoTimeAtom } from "./state";
+import { arenaOpenAtom, chatCountAtom, photoFlashAtom, photoTimeAtom, staffOpenAtom } from "./state";
 import { skinActions } from "./skinControl";
+import type { StaffJob } from "../../sim/types";
 import type { HudActions } from "./types";
 
 const TIME_HOURS: Record<string, number | null> = { live: null, day: 13, golden: 18.3, night: 22.5 };
 
 export const hudActions: HudActions = {
-  place: (kind) => send({ type: "SET_TOOL", tool: kind as Tool | null }),
+  place: (kind) => {
+    // "staff" is a tile in the palette that opens the payroll instead of picking a tool.
+    if (kind === "staff") return void registry.set(staffOpenAtom, !registry.get(staffOpenAtom));
+    send({ type: "SET_TOOL", tool: kind as Tool | null });
+  },
   setSpeed: (n) => {
     if ((SPEEDS as readonly number[]).includes(n)) send({ type: "SET_SPEED", speed: n as Speed });
   },
@@ -35,6 +40,18 @@ export const hudActions: HudActions = {
   toggleArena: () => registry.set(arenaOpenAtom, !registry.get(arenaOpenAtom)),
   keepPlaying: () => send({ type: "KEEP_PLAYING" }),
   newLab: () => send({ type: "NEW_LAB" }),
+
+  closeStaff: () => {
+    send({ type: "SET_ZONE", id: null });
+    registry.set(staffOpenAtom, false);
+  },
+  hire: (job) => send({ type: "COMMAND", command: { type: "hire", job: job as StaffJob } }),
+  fire: (id) => send({ type: "COMMAND", command: { type: "fire", id } }),
+  paintZone: (id) => {
+    const painting = appNow()?.zone ?? null;
+    if (id === null ? painting !== null : id !== painting) send({ type: "SET_ZONE", id });
+  },
+  clearZone: (id) => send({ type: "COMMAND", command: { type: "clearZone", id } }),
 
   openNews: () => viewRoom("archive"),
   viewNews: (idOrArchive) => {

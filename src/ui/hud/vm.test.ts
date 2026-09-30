@@ -47,7 +47,7 @@ describe("hudViewModel", () => {
 
   it("lists the build palette with prices, hotkeys, affordability and the selected tool", () => {
     const kinds = vm.buildItems.map((b) => b.kind);
-    expect(kinds).toEqual(["path", "cluster", "hall", "gateway", "kombucha", "nap", "snack", "demo", "bulldoze"]);
+    expect(kinds).toEqual(["path", "cluster", "hall", "gateway", "kombucha", "nap", "snack", "demo", "bulldoze", "staff"]);
     const cluster = vm.buildItems.find((b) => b.kind === "cluster")!;
     expect(cluster).toMatchObject({ name: BUILDINGS.cluster.name, hotkey: 2, selected: true, price: BUILDINGS.cluster.price, priceText: formatMoney(BUILDINGS.cluster.price) });
     expect(vm.buildItems.filter((b) => b.selected)).toHaveLength(1);
@@ -66,11 +66,9 @@ describe("hudViewModel", () => {
     expect(hudViewModel({ ...input, speed: 0 }).speed.paused).toBe(true);
   });
 
-  it("turns thoughts into bubbles with speakers, and adds the night thought", () => {
+  it("turns thoughts into bubbles with speakers", () => {
     expect(vm.bubbles.length).toBeGreaterThan(0);
-    const real = vm.bubbles.filter((b) => !b.night);
-    expect(real.every((b) => b.speaker.length > 0 && b.text.length > 0)).toBe(true);
-    expect(vm.bubbles.at(-1)).toMatchObject({ night: true, text: "It's 2am. Still shipping." });
+    expect(vm.bubbles.every((b) => b.speaker.length > 0 && b.text.length > 0)).toBe(true);
   });
 
   it("carries the training run, the ETA and the SHIPPED! window", () => {
@@ -99,9 +97,23 @@ describe("hudViewModel", () => {
     expect(hudViewModel(fixtureInput({ selected: null })).inspector).toBeNull();
   });
 
-  it("shows hints until they come true", () => {
-    expect(vm.hints).toEqual(["gateway", "tap"]);
-    expect(hudViewModel({ ...input, tapHint: false }).hints).toEqual(["gateway"]);
+  it("shows one hint at a time, and none while a toast is talking", () => {
+    const quiet = { ...input, toasts: [] };
+    expect(hudViewModel(quiet).hints).toEqual(["gateway"]);
+    expect(hudViewModel({ ...quiet, toldGateway: true }).hints).toEqual(["tap"]);
+    expect(hudViewModel({ ...quiet, toldGateway: true, tapHint: false }).hints).toEqual([]);
+    expect(vm.toasts.length).toBeGreaterThan(0);
+    expect(vm.hints).toEqual([]);
+  });
+
+  it("describes the payroll and offers it as a tile in the palette", () => {
+    const staffTile = vm.buildItems.at(-1)!;
+    expect(staffTile).toMatchObject({ kind: "staff", name: "Staff", hotkey: null, selected: false, affordable: true });
+    expect(hudViewModel(fixtureInput({ staff: true })).buildItems.at(-1)!.selected).toBe(true);
+    expect(vm.staff.open).toBe(false);
+    expect(vm.staff.jobs.map((j) => j.job)).toEqual(["janitor", "sre", "comms", "security"]);
+    expect(vm.staff.jobs.every((j) => j.salaryText.endsWith("/day") && /^#|rgb|hsl/.test(j.color))).toBe(true);
+    expect(vm.staff.payrollText).toBe("nobody on the payroll");
   });
 
   it("caps the ticker to the newest headlines", () => {

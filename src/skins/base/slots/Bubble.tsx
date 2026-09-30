@@ -5,5 +5,5 @@ import type { SlotPropsMap } from "../../types";
  * `bubble` so photo mode can copy it onto the picture.
  */
 export function Bubble({ bubble }: SlotPropsMap["Bubble"]) {
-  return <div className={`bubble bubble-${bubble.kind} ${bubble.night ? "bubble-night" : ""}`}>{bubble.text}</div>;
+  return <div className={`bubble bubble-${bubble.kind}`}>{bubble.text}</div>;
 }

@@ -94,7 +94,7 @@ export function BuildBar({ items, tip, actions }: SlotPropsMap["BuildBar"]) {
   const buildings = items.filter((i) => !i.isBulldoze);
   const bulldoze = items.find((i) => i.isBulldoze);
   const quick = buildings
-    .filter((i) => !i.isPath)
+    .filter((i) => !i.isPath && i.kind !== "staff")
     .map((it, order) => ({ it, order }))
     .sort((a, b) => b.it.built - a.it.built || a.order - b.order)
     .slice(0, 3)

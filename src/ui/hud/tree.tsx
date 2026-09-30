@@ -8,16 +8,18 @@ import type { HudActions, HudVM, ToastVM } from "./types";
 export function Docked({ vm, actions }: { vm: HudVM; actions: HudActions }) {
   const { slots } = useSkin();
   const t = useT();
-  const { Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, ThoughtsPanel, Ticker, Toast, Assistant, Arena, NewsControls, NewsArrival, PhotoButton } = slots;
-  // Hints are toasts that stay until they come true.
-  const stack: ToastVM[] = [...vm.hints.map((h, i): ToastVM => ({ id: -1 - i, text: t(`hint.${h}`), tone: "hint" })), ...vm.toasts];
+  const { Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, ThoughtsPanel, Ticker, Toast, Assistant, Arena, NewsControls, NewsArrival, PhotoButton } = slots;
+  // One toast at a time, the newest winning; a standing hint only shows while nobody is talking.
+  const newest = vm.toasts.at(-1);
+  const stack: ToastVM[] = newest ? [newest] : vm.hints.map((h, i): ToastVM => ({ id: -1 - i, text: t(`hint.${h}`), tone: "hint" }));
   const nodes: Record<DockedSlot, ReactNode> = {
     Stats: <Stats stats={vm.stats} layout={vm.layout} actions={actions} />,
     Training: <Training training={vm.training} actions={actions} />,
     Objectives: <Objectives objectives={vm.objectives} layout={vm.layout} actions={actions} />,
-    Inspector: vm.inspector ? <Inspector inspector={vm.inspector} actions={actions} /> : null,
+    Inspector: vm.inspector ? <Inspector inspector={vm.inspector} layout={vm.layout} actions={actions} /> : null,
     BuildBar: <BuildBar items={vm.buildItems} tip={vm.buildTip} layout={vm.layout} actions={actions} />,
     Speed: <Speed speed={vm.speed} stats={vm.stats} actions={actions} />,
+    Staff: vm.staff.open ? <Staff staff={vm.staff} actions={actions} /> : null,
     ThoughtsPanel: <ThoughtsPanel rows={vm.thoughtsPanel} layout={vm.layout} actions={actions} />,
     Ticker: <Ticker items={vm.ticker} actions={actions} />,
     Toasts: (

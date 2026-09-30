@@ -12,6 +12,8 @@ export interface NewsVars {
   name?: string;
   their?: string;
   amount?: string;
+  /** Slop, as a whole percent (FLT-10). */
+  pct?: string;
 }
 
 export function addNews(state: GameState, text: string, tone: Tone) {
@@ -32,6 +34,7 @@ export function templateVars(state: GameState, vars: NewsVars, rng: Rng): Record
     name: vars.name ?? "Someone",
     their: vars.their ?? "their",
     amount: vars.amount ?? "$0",
+    pct: vars.pct ?? "0",
   };
 }
 

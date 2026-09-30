@@ -37,6 +37,7 @@ flowchart LR
 | **walker** (one per walker) | `.../walker.ts` | `arriving`, `seeking`, `queuing`, `inside`, `loitering`, `wandering`, `choosing`, `leaving`, `quitting`, `picketing`, `gone` (final) | `ARRIVED`, `QUEUED`, `ADMITTED`, `GAVE_UP`, `LINGER`, `NEXT`, `TOUR_DONE`, `QUIT`, `CHOSE_BUILDING`, `CHOSE_WANDER`, `PROTEST_STARTED`, `SENT_HOME`, `EXITED` | none: the driver acts on the state entered | nothing (the need a walker is seeking, `visits` and `step` stay plain walker fields) |
 | **rival** (one per rival lab) | `src/sim/race/rival.ts` | `idle`, `training`, `releasing`, `cooldown` | `WEEK {aggro, pace, chase, four dice, name}`, `SHOCK {capability, hype, momentum}` | `RELEASED`, `POACH` | personality, capability, hype, weeks left, open weights?, momentum, latest model |
 | **era** | `src/sim/race/era.ts` | `era1`, `era2`, `era3`, `era4` | `DAY {mult}` | `ERA_REACHED` | the peak multiplier (the ratchet) |
+| **staff** (one per staffer) | `src/sim/machines/staff.ts` | `arriving`, `idle`, `going`, `working`, `leaving`, `gone` (final) | `ARRIVED`, `TASK`, `DONE`, `LOST`, `FIRED`, `EXITED` | none: the driver acts on the state entered | nothing (the task, route, patrol zone and counters stay plain fields on the staffer) |
 | **mood** (one per researcher and visitor) | `.../mood.ts` | `content`, `slumped`, `miserable`, `resigned` (final) | `LIFT`, `SLUMP`, `CRASH`, `DAY` | `RESIGNED` | the count of miserable days in a row |
 
 Arithmetic stays in plain functions: money per day, the training gain (`spend * (0.75 + 0.25 * morale)`), movement along a route, routing itself.
@@ -254,7 +255,7 @@ flowchart LR
 
 | Piece | File | What it does |
 |---|---|---|
-| Campus clock | `fx/clock.ts` | Pure. `hourAt(tick)`: one cycle per 10 game days (200 ticks), the game opens at 8am. `ambience(hour)` gives light colours and intensities, sky gradient, window and lamp glow. `chaseHour` low-passes the shown hour to 3 h/s, so 10x speed drifts through dusk instead of strobing. Tested to stay continuous and never darker than 35% of noon light. |
+| Campus clock | `fx/clock.ts` (the time part is `sim/daylight.ts`) | Pure. `hourAt(tick)`: one cycle per 30 game days (600 ticks; FLT-10 slowed it from 10, the lamps were flipping too often), the game opens at 8am. `ambience(hour)` gives light colours and intensities, sky gradient, window and lamp glow. `chaseHour` low-passes the shown hour to 3 h/s, so 10x speed drifts through dusk instead of strobing. Tested to stay continuous and never darker than 35% of noon light. |
 | Watcher | `fx/watch.ts` | Compares the World with the previous frame and returns `FxEvent`s. The first poll of a World (load, `?warp=`, new lab) only records a baseline. This is how "release" and "event card" reach the juice layer with no sim change. |
 | Particles | `fx/particles.ts`, `ParticleLayer.tsx` | One struct-of-arrays pool (cap 2,000; ambient sparkles and dust are dropped when full so a confetti burst always gets in) drawn as camera-facing quads by one `InstancedBufferGeometry`. Kinds: confetti, coins, smoke and dust puffs, water droplets, four-point sparkles. Sparkles are additive, the rest premultiplied alpha. |
 | Camera director | `fx/cinema.ts`, `CameraRig.tsx` | `idle -> in -> hold -> out -> idle`. A shot remembers the player's view and eases back to it; any player input cancels it. A release goes to the Training Hall (2.6 s), an event card to the gate (held until the card closes, with the subject aimed above the card). `shake(strength)` adds trauma; the offset is trauma squared. |
@@ -265,7 +266,7 @@ Decisions worth knowing:
 
 - **The camera director is a plain class, not a machine.** It is render code with no game logic in it, driven by frame `dt`; the rules about sim machines and tick-based time are about the sim.
 - **Photo mode is an Effect atom** (`photoAtom`), not a field on the app machine, so it adds no events to `appMachine` and can't collide with other UI state. It is mirrored into `fx.photo` for the render side.
-- **Night thoughts are client-side** (`content/night.ts`, shown by `ui/juice/NightThoughts.tsx`) because this slice may not touch `src/sim/**`. The file's header says how to make them ordinary sim thoughts later (add a `night` condition to `activeConditions`).
+- **Night thoughts** were client-side at first (`ui/juice/NightThoughts.tsx`); FLT-10 moved them into the sim. `sim/daylight.ts` (the clock, now shared) sets the `night` thought condition, `content/night.ts` feeds both the bubbles and the Thoughts panel, and the first night of a game is always "It's 2am. Still shipping."
 - **Debug knobs:** `?hour=22` pins the clock, `?photo` opens photo mode, and with `?debug=1` `window.__fx` exposes `{ fx, cinema, pool }`. `scripts/juice-shots.mjs` scripts the moments a URL can't (a release, a saved photo, frame times).
 
 Measured on the 1-vCPU Modal box: a full pool of 2,000 particles updates in 0.08 ms per frame, watching a 429-walker World costs 0.0005 ms per frame, and the SwiftShader frame time of the whole game is unchanged against the FLT-4 build (mean 117 ms with juice vs 126 to 132 ms without, both rasteriser-bound).
@@ -310,4 +311,44 @@ Everything the race does is a machine plus a driver, in the same shape as the re
 Debug scenes: `?moment=shuffle` (you are #1, a week turns, three labs pass you and a free model drops), `?moment=era`, `?moment=era3`, `?moment=auction` and `?moment=funding` stage the game about a second before the thing happens (`sim/race/demo.ts`); `scripts/race-shots.mjs` drives the same moments for screenshots.
 
 Test files now run one at a time (`fileParallelism: false` in `vite.config.ts`): on a 1-vCPU box the wall-clock perf tests were measuring their neighbours.
+
+## Operations (FLT-10): staff, slop, breakdowns, queues
+
+```mermaid
+flowchart LR
+  A["drifted agents<br/>(drift > 0.6)"] -->|"1 drop per 7-21 ticks"| S[("world.slop<br/>0..3 a tile")]
+  S -->|"share of path tiles"| V["Vibes: cleanliness (15%)<br/>headline at 20%"]
+  S -->|"standing in it: mess 0..1"| H["happiness -0.08 at most<br/>'This path is covered in slop.'"]
+  J["Janitor Bot<br/>(staff machine)"] -->|"walks to the nearest puddle, mops it"| S
+  B["dailyBreakdowns<br/>reliability -0.5%/day<br/>chance = (1-r) x use x 0.2"] -->|"building.broken"| F["no compute, training or revenue;<br/>nobody goes in; fire, smoke, alarm"]
+  R["SRE (staff machine)"] -->|"runs to it, fixes it in 2-4 hours: r = 0.9"| F
+  C["no SRE for 5 days"] -->|"contractor: -$60K, r = 0.8"| F
+  Q["full building"] -->|"QUEUED"| L["a line on the path:<br/>two tiles of it per person, FIFO,<br/>patience -> GAVE_UP"]
+  P["Comms Rep"] -->|"-2 discourse a day each while there are protesters"| D["Water Discourse"]
+```
+
+- **Staff** (`sim/staff.ts`, `sim/machines/staff.ts`, `content/staff.ts`) are `state.staff`, not walkers: each has a position, a route, a task and a painted patrol zone (tile indices; empty means the whole campus) and one machine. The driver looks for work every 3 ticks while they are `idle` (the nearest slopped tile, broken building or protester, in the zone, not claimed by a colleague), sends `TASK`, walks them there (`going`), sends `ARRIVED`, works for a few ticks (`working`), does the world work (`finish`) and sends `DONE`. `hire`, `fire`, `paintZone` and `clearZone` are commands; salaries are part of the daily expenses; nothing in staff draws a random number except where a patrol picks a tile. Security walks the fence (`FENCE` waypoints) and is the hook FLT-5's escaped agents look for (`guardsOn`).
+- **Slop** (`sim/slop.ts`): `world.slop` is a level (0 to 3) per grid tile. `dropSlop`/`messTick` run inside the walker loop (a second pass over 800 walkers cost more than the arithmetic itself). Mess is a smooth 0..1 exposure, not a flag: the daily mood check reads happiness at midnight, and an on/off flag flipped whole crowds between slumped and content from one day to the next.
+- **Breakdowns** (`sim/breakdowns.ts`): `Building` gained `reliability`, `broken` and `brokenTick`. A broken building is skipped by `reachableBuildings` (nobody goes in; anyone inside is thrown out on the next `version`), makes no compute (`computePerDay`, `powerOf`), trains nothing (`dailyTraining`) and earns nothing (`dailyEconomy`). `state.version` is bumped on break and repair, so the walkers re-plan.
+- **Queues** (`sim/queues.ts`, `sim/walkers.ts`): a full building's doorstep forms a line on the path tiles leading away from the entrance (`chainFor` walks straight on, then turns), one person every `SLOT_SPACING` (0.66 tile) along it. Admission is FIFO across a building's lines; walkers walking up to a building with a line stop at its tail; only the front of a line longer than the path ever shuffles (the rest share the last place). The 800-walker test has 300 researchers fighting for three small buildings, so this is the expensive case.
+- **Debug scenes:** `?moment=ops` (the screenshot moment: slop, a Janitor Bot, a cluster on fire, an SRE jogging toward it, the status page), `?moment=queue` and `?moment=slop` (`sim/opsDemo.ts`); `scripts/ops-shots.mjs` drives them for screenshots, including the phone HUD.
+
+### The UI side
+
+- The **Staff panel** (`ui/ops/Staff.tsx`) opens from the last tile of the build palette and is not part of the right-hand column. **Painting a zone** is app state (`zone` in the app machine, `SET_ZONE`): while it is set, a left drag on the map paints tiles into that staffer's zone (or erases, if it started on a painted tile), and `Placement`, `Pick` and the camera rig treat it like a build tool.
+- **Toasts:** the HUD shows one at a time, the newest winning; the same words twice are one toast; the standing hints ("Build an API Gateway...") stand down when a toast has said it. Every player command now publishes the HUD snapshot on the very next frame.
+- **Thought bubbles** (`render/bubbles.ts`, `render/overlay.tsx`): at most three on screen, the closest to the camera win, and bubbles whose screen rectangles overlap are nudged up until they clear.
+- **Phone compact mode** (`ui/useCompact.ts`, `ui/compact.css`, at 640 px and narrower): the top bar is one row (Vibes, cash, runway; a caret opens the rest), Objectives and Thoughts are icon buttons that open over the map, and the inspector is a short bottom sheet (name, the most urgent need, the thought; swipe up or tap the handle for more, swipe down to fold it and again to close it).
+- **Sound:** `audio/world.ts` reads the real era (`eraOfState`) and the buildings' `broken` flag, so the era sting and the music key change fire, and the breakdown alarm plays for every new fire (`soundCues` is the pure diff, tested).
+
+### Numbers (1-vCPU Modal box)
+
+| Measurement | Result |
+|---|---|
+| 800+ walker tick (the FLT-8 stress test: 400 fully drifted agents, 300 researchers, 110 visitors, 40 protesters) | **0.36 - 0.51 ms** over 12 runs, against 0.30 - 0.35 on main measured the same way (budget 0.5, doubled under `CI`). It got the same treatment from the test: an event card had frozen the clock (`tick` stands still while a card is open), so the old version of this test was measuring nothing; it now answers every card and checks that days passed. |
+| 500-walker tick | 0.13 ms (unchanged) |
+| `updateStaff` with 10 staff, `dailyBreakdowns`, `opsView` (the HUD's 5 Hz snapshot part), `slopStats` | 5 us, 12 us, 24 us, 1 us |
+| A scripted player (`sim/playthrough.test.ts`, which now hires staff) | Era 2 around day 70, Era 3 and the win around day 470 to 520, Era 4 around day 1060 to 1110 (about 60 days later than before: repairs, slop and salaries are not free) |
+
+Determinism: the goldens (`sim/golden.test.ts`) were re-recorded on purpose: every building draws a breakdown die each day, and the script now hires a few staff and paints a zone, so the digests also cover slop, the payroll and every building's reliability.
 

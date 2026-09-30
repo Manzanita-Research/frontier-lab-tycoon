@@ -9,6 +9,7 @@ import { causeOf, thoughtBoard, thoughtOf, walkersThinking } from "./mind";
 import { applyServes, happinessOf, moodFor, RIVAL_FOMO, tickNeeds } from "./needs";
 import { createRng } from "./rng";
 import { createInitialState } from "./state";
+import { answer, perfBudget } from "./testkit";
 import { tick } from "./tick";
 import type { GameState, Walker } from "./types";
 import { TARGET_WANDER } from "./types";
@@ -695,18 +696,22 @@ describe("determinism and scale", () => {
     };
     topUp();
     expect(count(s, "agent")).toBe(400);
-    for (let i = 0; i < 100; i++) tick(s); // warm up the JIT and spread the crowd out
+    // (An event card stops the clock until it is answered, so every tick answers whatever is open: otherwise a card that
+    // happens to open in the first fifteen days would turn this into a test of doing nothing.)
+    for (let i = 0; i < 100; i++) tick(s, answer(s)); // warm up the JIT and spread the crowd out
     let best = Infinity;
     let smallest = Infinity;
     for (let attempt = 0; attempt < 3; attempt++) {
       topUp();
       smallest = Math.min(smallest, s.walkers.length);
       const t0 = performance.now();
-      for (let i = 0; i < 200; i++) tick(s);
+      const day = s.day;
+      for (let i = 0; i < 200; i++) tick(s, answer(s));
       best = Math.min(best, (performance.now() - t0) / 200);
+      expect(s.day).toBeGreaterThan(day); // it really ran
     }
     console.log(`800-walker tick: ${best.toFixed(3)} ms (best of 3 x 200 ticks), never fewer than ${smallest} walkers at the start of a batch`);
     expect(smallest).toBeGreaterThanOrEqual(800);
-    expect(best).toBeLessThan(0.5);
+    expect(best).toBeLessThan(perfBudget(0.5)); // a shared CI runner gets double, like the other wall-clock budgets
   });
 });

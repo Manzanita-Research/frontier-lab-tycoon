@@ -7,6 +7,7 @@ import type { Snapshot, Tool } from "../../app/hud";
 import { RACE_TOOLS, SPEEDS, TOOLS } from "../../app/hud";
 import { BUILDINGS, PATH_PRICE } from "../../content/buildings";
 import { ERAS } from "../../content/eras";
+import { STAFF } from "../../content/staff";
 import { eventById } from "../../content/events";
 import { GOALS, SCENARIO, type GoalDef } from "../../content/goals";
 import { FRIENDS } from "../../content/newsroom";
@@ -22,7 +23,7 @@ import { trendOf, VIBES_MAX, WEIGHTS } from "../../sim/vibes";
 import { SKIN_API_VERSION } from "./types";
 import type {
   ArenaVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, EditionRowVM, EventVM, HudVM, InspectorVM, NeedVM, NewsroomVM,
-  ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StatsVM, ThoughtRowVM, TrainingVM, WalkerKindVM,
+  ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, ThoughtRowVM, TrainingVM, WalkerKindVM,
 } from "./types";
 
 /** How many game days after a release the "SHIPPED!" sticker stays up. */
@@ -42,6 +43,11 @@ export interface HudInput {
   outcomeDismissed: boolean;
   /** "Tap anyone to read their mind" is still showing. */
   tapHint: boolean;
+  /** A toast has already told the player about the API Gateway, so the standing hint would be a repeat. */
+  toldGateway: boolean;
+  /** The Staff panel is open, and whose patrol zone is being painted. */
+  staffOpen: boolean;
+  zone: number | null;
   arena: { open: boolean; alert: boolean; flinch: boolean; moved: Record<string, "up" | "down"> };
   room: { archive: readonly Edition[]; view: "archive" | Edition | null; unread: readonly string[]; storage: boolean };
   /** How many chat messages have arrived so far. */
@@ -50,8 +56,6 @@ export interface HudInput {
   photo: { on: boolean; time: string; shot: { id: number; url: string; name: string } | null; flash: number };
   skins: SkinPickerVM;
   viewport: { width: number; height: number };
-  /** A client-side night thought, if one is showing. */
-  nightBubble: BubbleVM | null;
 }
 
 const goalDefs = new Map(GOALS.map((g) => [g.id, g]));
@@ -193,7 +197,7 @@ function inspectorOf(who: Inspect | null, following: boolean, lab: string): Insp
     status: who.status,
     thought: who.thought,
     history: [...who.history],
-    needs: who.needs.map((n) => ({ key: n.key, label: n.label, value: n.value, pct: Math.round(n.value * 100), tone: barTone(n) })),
+    needs: who.needs.map((n) => ({ key: n.key, label: n.label, value: n.value, pct: Math.round(n.value * 100), urgency: n.goodWhenHigh ? 1 - n.value : n.value, tone: barTone(n) })),
     portrait: { kind: who.kind, body: look.body, head: look.head, happiness: who.happiness, drift },
     following,
     badge: String(who.id).padStart(4, "0"),
@@ -227,12 +231,46 @@ function buildOf(i: HudInput): { items: BuildItemVM[]; tip: BuildTipVM | null } 
       isPath: t === "path",
     };
   });
+  const ops = s.ops;
+  items.push({
+    kind: "staff",
+    name: "Staff",
+    short: `Staff${ops.staff.length > 0 ? ` (${ops.staff.length})` : ""}`,
+    blurb: "Hire Janitor Bots, SREs, Comms Reps and Security.",
+    price: 0,
+    priceText: ops.staff.length > 0 ? `${formatMoney(ops.payroll)}/day` : "hire",
+    free: false,
+    affordable: true,
+    hotkey: null,
+    selected: i.staffOpen,
+    race: false,
+    built: 0,
+    isBulldoze: false,
+    isPath: false,
+  });
   const t = i.tool;
   let tip: BuildTipVM | null = null;
   if (t === "path") tip = { kind: t, name: "Path", text: "Drag to lay paths. Buildings need one beside them or nobody visits.", upkeepText: "Right-drag to pan." };
   else if (t === "bulldoze") tip = { kind: t, name: "Bulldoze", text: "Click or drag over things to remove them. Refunds half.", upkeepText: null };
   else if (t) tip = { kind: t, name: BUILDINGS[t].name, text: BUILDINGS[t].blurb, upkeepText: `Upkeep ${formatMoney(BUILDINGS[t].upkeepPerDay)}/day. Needs a path beside it.` };
   return { items, tip };
+}
+
+function staffOf(i: HudInput): StaffVM {
+  const ops = i.snap.ops;
+  const row = (o: (typeof ops.staff)[number]): StaffRowVM => ({ id: o.id, job: o.job, title: o.title, name: o.name, status: o.status, color: STAFF[o.job].color, zone: o.zone, leaving: o.leaving });
+  const painting = i.zone === null ? null : ops.staff.find((o) => o.id === i.zone);
+  return {
+    open: i.staffOpen,
+    count: ops.staff.length,
+    payroll: ops.payroll,
+    payrollText: ops.staff.length > 0 ? `${formatMoney(ops.payroll)}/day` : "nobody on the payroll",
+    painting: painting ? row(painting) : null,
+    jobs: ops.jobs.map((j): StaffJobVM => ({ job: j.job, title: j.title, blurb: j.blurb, salary: j.salary, salaryText: `${formatMoney(j.salary)}/day`, count: j.count, max: j.max, canHire: j.canHire, reason: j.reason, color: STAFF[j.job].color })),
+    roster: ops.staff.map(row),
+    slopPct: ops.slopPct,
+    broken: ops.broken.length,
+  };
 }
 
 function speedOf(value: number): SpeedVM {
@@ -244,9 +282,7 @@ function speedOf(value: number): SpeedVM {
 }
 
 function bubblesOf(i: HudInput): BubbleVM[] {
-  const out: BubbleVM[] = i.snap.thoughts.map((t) => ({ id: t.id, walkerId: t.walkerId, kind: t.kind, speaker: i.snap.speakers[t.walkerId] ?? "", text: t.text, night: false }));
-  if (i.nightBubble) out.push(i.nightBubble);
-  return out;
+  return i.snap.thoughts.map((t) => ({ id: t.id, walkerId: t.walkerId, kind: t.kind, speaker: i.snap.speakers[t.walkerId] ?? "", text: t.text }));
 }
 
 function eventOf(i: HudInput): { event: EventVM | null; era: HudVM["eraCard"] } {
@@ -418,10 +454,12 @@ export function hudViewModel(i: HudInput): HudVM {
     buildItems: build.items,
     buildTip: build.tip,
     speed: speedOf(i.speed),
+    staff: staffOf(i),
     bubbles: bubblesOf(i),
     ticker: i.news.slice(-TICKER_ITEMS).map((n) => ({ id: n.id, text: n.text, tone: n.tone })),
     toasts: i.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })),
-    hints: [...(i.snap.hasGateway ? [] : (["gateway"] as const)), ...(i.tapHint ? (["tap"] as const) : [])],
+    // One hint at a time, and none while a toast is talking; the gateway hint is redundant once a toast has said it.
+    hints: i.toasts.length > 0 ? [] : !i.snap.hasGateway && !i.toldGateway ? ["gateway"] : i.tapHint ? ["tap"] : [],
     event,
     thoughtsPanel: thoughtsOf(i),
     arena: arenaOf(i),

@@ -267,6 +267,15 @@ If your slot needs copy that has no key, write it into the slot (as Frontier 95 
 | `skin.apply` | Apply |
 | `skin.cancel` | Cancel |
 | `skin.reduceMotion` | Reduce motion |
+| `staff.title` | Staff |
+| `staff.painting` | Painting a patrol zone |
+| `staff.hire` | Hire |
+| `staff.fire` | Fire |
+| `staff.zone` | Zone |
+| `stats.moreStats` | More stats |
+| `stats.fewerStats` | Fewer stats |
+| `inspector.fold` | Fold the card |
+| `inspector.more` | Show more |
 
 ## skin.css
 
@@ -306,8 +315,9 @@ A slot is a React component. Each gets **its slice of the view-model plus `actio
 | `Inspector` | `{ inspector, actions }` | The card for the tapped walker: portrait, needs, thought, history, Follow. Only rendered when there is a selection. |
 | `BuildBar` | `{ items, tip, layout, actions }` | The build palette. `items[].kind` is the tool id and the icon id; `actions.place(kind)`. Hotkeys 1–9 are handled by the game. |
 | `Speed` | `{ speed, stats, actions }` | Pause / 1× / 3× / 10×. Label them with `t(option.key)`. |
+| `Staff` | `{ staff, actions }` | The payroll panel: hire, fire, and paint patrol zones (`staff.painting` is the staffer whose zone is being painted on the map). Rendered only while `staff.open`; it opens from the `staff` tile in the build palette (`buildItems` ends with `{ kind: "staff" }`; `actions.place("staff")` toggles the panel), so every `BuildBar` should draw that tile like any other. |
 | `Bubble` | `{ bubble, actions }` | **One** thought bubble. The game pins whatever you render to the walker on every frame, so do not position it. **The root element must have the class `bubble`**: photo mode copies it onto the picture. |
-| `ThoughtsPanel` | `{ rows, layout, actions }` | Everybody's thoughts, counted; `actions.highlight(row.key)` lights up who thinks it. |
+| `ThoughtsPanel` | `{ rows, layout, actions }` | Everybody's thoughts, counted; `actions.highlight(row.key)` lights up who thinks it. On a phone (`layout.compact`) the base folds it to an icon. |
 | `Ticker` | `{ items, actions }` | The news tape. Use `kit`'s `<Marquee items>`. |
 | `Toast` | `{ toast, actions }` | One toast. `toast.tone === "hint"` is a standing hint (not dismissable). |
 | `Assistant` | `{ vm, actions }` | A helper character that hosts hints and toasts. The base draws nothing here; Frontier 95's paperclip lives here. |
@@ -325,7 +335,7 @@ A slot is a React component. Each gets **its slice of the view-model plus `actio
 | `NewsRoom` | `{ newsroom, actions }` | The News Room modal: the archive, and the open paper or chat (compose `useSlots().FrontPage` / `.GroupChat`, or draw your own). |
 | `Mixer` | `{ sound, actions }` | The sound mixer modal. |
 
-The **docked** slots (`Layout` receives them pre-rendered) are `Stats`, `Training`, `Objectives`, `Inspector`, `BuildBar`, `Speed`, `ThoughtsPanel`, `Ticker`, `Toasts` (the stack of `Toast`s, hints first), `Assistant`, `Arena`, `NewsControls`, `NewsArrival` and `PhotoButton`. The modal slots (`EventCard`, `EraCard`, `Outcome`, `NewsRoom`, `Mixer`, `SkinPicker`) and `PhotoOverlay` are rendered by the game when there is something to show.
+The **docked** slots (`Layout` receives them pre-rendered) are `Stats`, `Training`, `Objectives`, `Inspector`, `BuildBar`, `Speed`, `Staff`, `ThoughtsPanel`, `Ticker`, `Toasts` (one `Toast` at a time: the newest toast, or the standing hint when nobody is talking), `Assistant`, `Arena`, `NewsControls`, `NewsArrival` and `PhotoButton`. The modal slots (`EventCard`, `EraCard`, `Outcome`, `NewsRoom`, `Mixer`, `SkinPicker`) and `PhotoOverlay` are rendered by the game when there is something to show.
 
 ## Writing slots.tsx
 
@@ -357,6 +367,7 @@ What a slot may import: `react`; `../types` and `../../ui/hud/types` (types only
 - **Render from props.** No reading the store, no timers that touch the game. UI-only state (an open tab, whether the Start menu is open) is `useState` inside the slot.
 - **Do not call `window` during render** (the tests render on the server). Read `layout.compact` / `layout.phone` from the props for responsive defaults; use `useEffect` for anything with the DOM.
 - **Keep numbers cheap.** The view-model refreshes about 5 times a second. Use `<Odometer>` (it writes the DOM directly) for numbers that roll, and CSS for animation. Never animate with React state at frame rate.
+- **Thought bubbles are laid out by the game.** At most three show at once, and they nudge apart so they never overlap; the game measures your `Bubble` element to do that, so keep its size honest (no absolute children that escape the box).
 - **Keys and focus.** The game owns hotkeys (1–9, Space, Esc, P, and 1–3 on cards). For your own popups use `kit`'s `<Dialog>`, which traps Tab, closes on Esc and keeps the game's hotkeys out while it is open. A non-modal popup (a menu) should not swallow keys.
 - Be accessible: real `<button>`s, `aria-label`s on icon-only controls, `role="dialog"` on modals, `aria-pressed` on toggles.
 - Parody names only: no real companies, products or people in anything a player can read.
@@ -371,7 +382,7 @@ interface HudVM {
   stats; training; objectives;           // numbers and text, already formatted ("$4.04M", "5.0 mo")
   inspector: InspectorVM | null;         // null when nobody is selected
   buildItems; buildTip;                  // the palette, and the tooltip for the tool in hand
-  speed; bubbles; ticker; toasts; hints; // hints: "gateway" | "tap" (their copy is strings hint.gateway / hint.tap)
+  speed; bubbles; ticker; toasts; hints; // hints: at most one of "gateway" | "tap", and none while a toast is up (their copy is strings hint.gateway / hint.tap)
   event: EventVM | null;                 // a modal card; the era card is separate:
   eraCard: EraCardVM | null;
   thoughtsPanel; arena; outcome;
@@ -382,7 +393,7 @@ interface HudVM {
 
 Numbers come as numbers (`cash.value`) **and** formatted text (`cash.text`), so you can roll an odometer and still have a caption. Colours the game owns (the walker's `portrait.body`, an Arena lab's `color`) come as CSS colour strings.
 
-`HudActions` is everything a skin can ask for: `place(kind)`, `setSpeed(n)`, `togglePause()`, `choose(eventId, i)`, `continueEra()`, `select(id)`, `follow(id, on?)`, `closeInspector()`, `highlight(key)`, `dismissToast(id)`, `toggleArena()`, `keepPlaying()`, `newLab()`, the news-room ones (`openNews`, `viewNews`, `closeNews`, `skipNews`, `revealChat`), sound (`openMixer`, `closeMixer`, `setMuted`, `setVolume`, `playCue`), photo mode (`setPhoto`, `setPhotoTime`, `takePhoto`) and skins (`openSkinPicker`, `previewSkin`, `applySkin`, `cancelSkinPicker`, `setReducedMotion`). Each is safe to call at any time; the game ignores what does not apply.
+`HudActions` is everything a skin can ask for: `place(kind)`, `setSpeed(n)`, `togglePause()`, `choose(eventId, i)`, `continueEra()`, `select(id)`, `follow(id, on?)`, `closeInspector()`, `highlight(key)`, the payroll (`closeStaff`, `hire(job)`, `fire(id)`, `paintZone(id | null)`, `clearZone(id)`), `dismissToast(id)`, `toggleArena()`, `keepPlaying()`, `newLab()`, the news-room ones (`openNews`, `viewNews`, `closeNews`, `skipNews`, `revealChat`), sound (`openMixer`, `closeMixer`, `setMuted`, `setVolume`, `playCue`), photo mode (`setPhoto`, `setPhotoTime`, `takePhoto`) and skins (`openSkinPicker`, `previewSkin`, `applySkin`, `cancelSkinPicker`, `setReducedMotion`). Each is safe to call at any time; the game ignores what does not apply.
 
 Changing the contract: keep changes **additive** (new fields, new actions) and add a fixture to `src/ui/hud/fixtures.ts` + a test in `vm.test.ts`. A breaking change means bumping `SKIN_API_VERSION` and every `skin.json`.
 

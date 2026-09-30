@@ -14,7 +14,7 @@ export interface DebugParams {
   hour: number | null;
   /** Open in photo mode. */
   photo: boolean;
-  /** Stage a race moment a second before it happens: shuffle, era, era3, auction or funding (sim/race/demo.ts). */
+  /** Stage a moment for a link or a screenshot: a race one (shuffle, era, era3, auction, funding: sim/race/demo.ts) or an operations one (ops, queue, slop: sim/opsDemo.ts). */
   moment: string | null;
   /** Extra researchers on top of the hall-driven count (for Thoughts-panel and queue screenshots). */
   researchers: number;
