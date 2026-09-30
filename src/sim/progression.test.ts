@@ -46,6 +46,16 @@ describe("the playable ladder", () => {
     expect(s.slop.some(Boolean)).toBe(false); expect(s.buildings[0]?.reliability).toBe(1);
     expect(Object.values(s.arcs).some((a) => a.value === "cardOpen")).toBe(false);
   });
+  it("teases what is locked as one row per milestone, not one ??? per item", () => {
+    const s = createInitialState(1);
+    expect(progressOf(s).teasers).toEqual([
+      { label: "2 more", hint: "Ship your first model" },
+      { label: "4 more", hint: "Earn $20K a day" },
+      { label: "3 more", hint: "Top 5 on the Arena" },
+    ]);
+    s.models.push("Fixture-1"); updateProgression(s);
+    expect(progressOf(s).teasers.map((t) => t.hint)).toEqual(["Earn $20K a day", "Top 5 on the Arena"]);
+  });
   it("reads modded goal thresholds from identified data rows", () => {
     const s = createInitialState(1);
     s.progressionContent = PROGRESSION.map((r) => r.level === 1 ? { ...r, goal: { ...r.goal, target: 2 } } : r);

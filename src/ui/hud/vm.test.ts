@@ -226,7 +226,7 @@ describe("Playable v1: what the lab has earned, the coach, and Help", () => {
   it("shows only the unlocked tools in the build panel (the bulldozer always), and teases the rest", () => {
     const one = level(1);
     expect(one.buildItems.map((b) => b.kind)).toEqual(["path", "cluster", "hall", "bulldoze"]);
-    expect(one.progress.teasers.map((t) => t.hint)).toContain("ship your first model");
+    expect(one.progress.teasers).toContainEqual({ label: "2 more", hint: "Ship your first model" });
     expect(level(2).buildItems.map((b) => b.kind)).toEqual(["path", "cluster", "hall", "gateway", "kombucha", "bulldoze"]);
     expect(level(3).buildItems.map((b) => b.kind)).toContain("staff");
     expect(one.buildItems.map((b) => b.kind)).not.toContain("staff");
