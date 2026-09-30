@@ -16,7 +16,7 @@ import { addIncident } from "../../vibes";
 import { announceRelease, eraOfState, modelName } from "../race";
 import { opensThisTime, rivalMachine } from "../rival";
 import { rivalRules } from "../rules";
-import { benchMachine, isOpen, scoreFor } from "./benchmark";
+import { benchMachine, isOpen, quietScores, scoreFor } from "./benchmark";
 import { calendarMachine } from "./calendar";
 import { livestreamMachine } from "./livestream";
 import { capOf, hasProduct, hypeOf, labIds, nameOf, pushVoice, rivalOf, shiftTrust } from "./ops";
@@ -119,7 +119,8 @@ export function refreshRecords(state: GameState, rng: Rng): Claim[] {
     const e = lf.benchmarks[i]!;
     if (!isOpen(e.machine)) continue;
     const { best, holder } = recordOf(state, e);
-    const { stored, effects } = step(benchMachine, e.machine, { type: "SCORES", best, holder, day: state.day });
+    const quiet = quietScores(e.machine, { best, holder });
+    const { stored, effects } = quiet ? { stored: quiet, effects: [] } : step(benchMachine, e.machine, { type: "SCORES", best, holder, day: state.day });
     e.machine = stored;
     for (const fx of effects) {
       switch (fx.type) {

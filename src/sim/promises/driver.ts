@@ -171,10 +171,12 @@ export function lobbySenator(s: GameState, senator: string): boolean {
   return true;
 }
 
+const DONE_FLAG = `${PICK_PREFIX}done`;
+
 /** The tracker's cards only close: their one pick is consumed at once, including while paused. */
 export function applyPromisesChoices(s: GameState) {
-  if (!s.promises?.enabled) return;
-  delete s.flags[`${PICK_PREFIX}done`];
+  if (!s.promises?.enabled || s.flags[DONE_FLAG] === undefined) return;
+  delete s.flags[DONE_FLAG];
 }
 
 export function dailyPromises(s: GameState) {

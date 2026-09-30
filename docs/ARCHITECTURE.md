@@ -249,6 +249,59 @@ The 800-walker budget needed one more trick. With the Crowd, a walker changes ph
 
 Two design consequences: the World stores `{ value, context }` and rebuilds with `resolveState` (the official persist/restore pair is 4x slower and this runs hundreds of times per tick), and the walker machine contains no functions at all. The first version of it used function transitions to keep `visits`/`step` in context and to decide leave-or-pick inside the machine; it measured 0.45 - 0.54 ms per tick and failed the perf test, so those decisions moved into the driver's choice of event.
 
+### Every pack awake: the busy lab and the per-system budget (FLT-39)
+
+The Crowd's 800-walker test times the walkers. The **busy lab** (`src/sim/perf/busyLab.ts`) times everything else as well: the same crowd (400 agents, 300 researchers fighting over three small buildings, 110 visitors, 40 protesters) on a campus with the ladder complete, so every system is earned and every pack is awake. It also has the factions marching at a fast lab's pace, six staff, a rogue swarm loose, Evals Without Borders on a tour, and the endings on. The Memo gets Slow Down, so Regulated's chart runs every tick. `tick()` takes an optional stopwatch (`setTickProbe`) that laps after each system; with no stopwatch set, each lap is a null check.
+
+```sh
+npx vitest run src/sim/perf/busyLab.test.ts --silent=false                 # the table, 400 ticks
+FLT_PROFILE=1 npx vitest run src/sim/perf/busyLab.test.ts --silent=false   # 4000 ticks, for the numbers below
+```
+
+`busyLab.test.ts` is the per-pack budget:
+
+- Every system except the walkers must average under **0.06 ms a tick**. A daily system's day counts spread over the day's 20 ticks.
+- The walkers must stay under 0.4 ms, and the whole tick under 0.5 ms strict.
+- A second test runs the Takeover: The Memo answered Race, and the autopilot building until the campus is full. Its per-tick mean must stay under 0.06 ms, and no tick may take 2 ms.
+
+A pack that starts eating the budget fails the test by name.
+
+**Warm up before you time.** On one vCPU the JIT compiles on the same core as the tick. With every pack's code to compile, the first thousand ticks of a fresh process run up to 1.5 times slower than the rest, and a second lab built in the same warmed-up process runs its first days about a quarter faster. The test plays 1400 ticks before it starts the clock.
+
+The table: mean and p95 µs per tick, seed 1, 4000 ticks, 1-vCPU Modal box. "Before" is the train with FLT-11 merged (`212ef6c`), with only the stopwatch and the busy lab added. Systems under 3 µs both times are left out (about 25 µs between them). Each lap carries about 1 µs of stopwatch, so the whole-tick row reads higher than the strict number.
+
+| System | Before mean | Before p95 | After mean | After p95 |
+|---|---:|---:|---:|---:|
+| walkers | 272.8 | 361.4 | 228.4 | 323.4 |
+| daily:events | 76.3 | 1116.8 | 5.7 | 49.7 |
+| daily:crowd | 57.3 | 463.0 | 9.9 | 129.9 |
+| staff | 41.3 | 75.5 | 20.6 | 46.4 |
+| daily:defection | 32.1 | 367.7 | 13.6 | 178.8 |
+| daily:modArcs | 24.2 | 234.0 | 5.9 | 51.8 |
+| choices | 23.5 | 28.5 | 9.1 | 10.2 |
+| protesters | 13.1 | 27.8 | 9.2 | 27.0 |
+| daily:leapfrog | 13.0 | 89.5 | 12.5 | 86.9 |
+| commands | 11.7 | 2.1 | 7.0 | 2.4 |
+| daily:papers | 11.3 | 189.6 | 2.7 | 40.5 |
+| daily:factions | 7.7 | 100.4 | 7.5 | 84.1 |
+| daily:race | 6.6 | 32.9 | 6.7 | 30.7 |
+| daily:economy | 5.9 | 78.5 | 6.8 | 84.6 |
+| factions | 5.6 | 6.8 | 4.9 | 6.1 |
+| **whole tick (stopwatch on)** | **652.9** | **4127.8** | **398.4** | **1774.2** |
+| **strict tick (stopwatch off, best of 3 x 200), 3 runs** | **0.602–0.624 ms** | | **0.384–0.397 ms** | |
+| endings in the Takeover (mean, worst tick), 3 runs | 544–551 µs, 13.5–14.1 ms | | 18–20 µs, 0.43–0.46 ms | |
+
+Where the time went, and what took it back. None of it changes behaviour: the goldens are byte-identical.
+
+- **XState on quiet days.** Every arc, mod arc, paper and leaderboard entry was put through `transition()` every day, even to be told "stay put". That costs 10–20 µs each in the dev build. Each now has a *quiet* function beside its machine (`quietArcDay`, `Compiled.quiet`, `quietPaperDay`, `quietScores`). It mirrors the branches that stay put and emit nothing, and it returns `null` whenever the machine has something to decide. Every quiet function has a test that checks each of its answers against `step`, and that fails if the shortcut is never taken. Context-free machines (mood, staff) instead remember their answers (`remembered` in `machines/run.ts`, `stepStaff`), as the walker machine already did.
+- **Array destructuring in hot loops.** `const [x, z] = point` walks the array iterator. In `advance()` that was a fifth of the walker loop; the BFS, the route checks and the pick flags were the same. Index access instead.
+- **Routes outlived nothing.** A breakdown or a repair bumps `version`, and that emptied the route cache: about 70 times per 100 days, 5,600 BFS misses per 2000 ticks. A route reads only the paths and the target's footprint, so the cache now survives a bump that leaves the paths alone. `pathfind.test.ts` breaks and repairs buildings and compares every route with a fresh search. The BFS reuses typed buffers.
+- **O(n²) and full sorts.** Defection's seniority compared every researcher with every other; now it's one pass. Its top three candidates come from a top-K pick, not a full sort (a test checks the pick against the sort, ties included).
+- **Per-tick overhead.** `systemUnlocked` works out each level's systems once. The card picks' flag names are spelt once (`src/sim/picks.ts`). An applier with no pick waiting returns before it builds an RNG. `updateProgression` now runs every tick (FLT-58); while the goal is unmet it skips `transition()`, which took it from 15–21 µs a tick at Levels 1–4 to under 1 µs.
+- **The Takeover's autopilot** looked for a spot for eleven kinds every 24 ticks, and each `findSpot` ran `canPlace` on every tile of the grid: 13 ms on one tick in 24 once the campus was full. `findSpot` now checks what `canPlace` answers the same way on every tile (locked, can't afford) once. It then skips footprints that cover a path, a building or the gate, and footprints with no path beside them. `canPlace` still decides every footprint that's left, and `race/findSpot.test.ts` checks the spots against the plain scan.
+
+**What's left** is the walker loop itself: about 230 µs for 800 walkers, roughly 170 ns per walker per tick. It is memory-bound, with monomorphic shapes (checked). Its biggest parts are the queue sort in `fillOccupancy`, `tickQueue`, and the repair pass after each breakdown. The next step would be typed arrays for positions, which means changing the shared `Walker` type the renderer reads. The Crowd's 800-walker test is under the 0.35 ms target. The busy lab, which also carries every pack and an ending, is not.
+
 ## Alpha-stack notes
 
 - **`@xstate/effect@0.1.0-alpha.5/atom` does not load against `effect@4.0.0-rc.118`.** It imports `effect/unstable/reactivity`; rc.118 (and `@effect/atom-react@rc.118`) expose `effect/reactivity`. There is no newer `@xstate/effect`. Workaround, with no version change: an alias in `vite.config.ts` (`effect/unstable/reactivity` to `effect/reactivity`), `server.deps.inline: ["@xstate/effect"]` so vitest applies it, and a matching `paths` entry in `tsconfig.json`. The atom API behaves the same in our use (actor start, `snapshot`, `send`, `select`). Drop all three the day a release fixes the import.
