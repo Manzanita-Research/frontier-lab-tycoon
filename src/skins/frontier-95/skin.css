@@ -1532,6 +1532,21 @@
     max-height: calc(100dvh - 20px);
     overflow: auto;
   }
+  .f95-skinoffer {
+    width: min(460px, 100%);
+    .f95-msgbody p + p {
+      margin-top: 8px;
+    }
+  }
+  .f95-skinoffer-preview {
+    flex: none;
+    width: 96px;
+    height: 72px;
+    object-fit: cover;
+    box-shadow: var(--sunk);
+    padding: 2px;
+    background: var(--flt-color-panelAlt);
+  }
   .f95-msgbody {
     display: flex;
     gap: 14px;
@@ -3934,6 +3949,58 @@
   .audit-anchor {
     transform: translate(-50%, -100%);
   }
+  /* Who's Outside (FLT-56): the crowds at the gate and Comms' Statement… button. */
+  .gate-anchor {
+    transform: translate(-50%, 8px);
+    pointer-events: auto;
+  }
+  .f95-gatelegend {
+    width: max-content;
+    min-width: 200px;
+    max-width: 280px;
+    .f95-tb {
+      padding: 1px 2px;
+      min-height: 0;
+    }
+    .f95-tt {
+      font-size: 13px;
+    }
+    .f95-status {
+      font-size: 12px;
+    }
+  }
+  .f95-gatelegend-in {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    padding: 4px 6px;
+    list-style: none;
+    font-size: 14px;
+    line-height: 1.1;
+    li {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    i {
+      flex: none;
+      width: 11px;
+      height: 11px;
+      border: 1px solid #000;
+    }
+    .nm {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .f95-btn {
+      min-width: 0;
+      padding: 1px 6px;
+      font-size: 12px;
+    }
+  }
   .f95-auditpin {
     width: max-content;
     min-width: 188px;
@@ -4007,6 +4074,30 @@
 [data-skin="frontier-95"] {
   .f95-bill {
     width: min(660px, 100%);
+  }
+  .f95-leakrisk {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    margin: 4px 6px 0;
+    font-size: 12px;
+    .f95-prog {
+      flex: 1 1 120px;
+    }
+    &.hot b {
+      color: #c00000;
+    }
+  }
+  .f95-leakwarn {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    margin-top: 3px;
+    b {
+      color: #c00000;
+    }
   }
   .f95-xls {
     width: min(720px, 100%);
@@ -4189,6 +4280,14 @@
     }
     tr.law td {
       background: #ffe0e0;
+    }
+    .f95-stakes {
+      display: flex;
+      flex-direction: column;
+      margin-top: 2px;
+      b {
+        color: #000080;
+      }
     }
     td.who {
       display: flex;
@@ -4582,5 +4681,177 @@
   .f95-takeover-thanks {
     pointer-events: none;
     z-index: 65;
+  }
+}
+
+/* ---- FLT-57: what now, the streak, a friend's result, The Memo as a file copy, the challenge as a message box ---- */
+[data-skin="frontier-95"] {
+  .f95-end-labno {
+    color: #000080;
+    font-size: 15px;
+  }
+  .f95-end-streak {
+    color: #800000;
+    font-size: 17px;
+  }
+  .f95-end-versus {
+    display: grid;
+    gap: 2px;
+    padding: 6px 8px;
+    background: #fff;
+    &.verdict-win b {
+      color: #008000;
+    }
+    &.verdict-lose b {
+      color: #c00000;
+    }
+  }
+  .f95-end-next {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding: 4px 8px 8px;
+    border: 0;
+    box-shadow: inset -1px -1px 0 var(--hl), inset 1px 1px 0 var(--sh), inset -2px -2px 0 var(--sh), inset 2px 2px 0 var(--hl);
+    legend {
+      padding: 0 4px;
+    }
+    p {
+      margin: 0;
+      line-height: 1.2;
+    }
+    > .f95-btn {
+      width: 100%;
+    }
+  }
+  .f95-end-nextname {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--flt-font-numbers);
+    word-break: break-word;
+  }
+  .f95-end-perks {
+    padding: 0;
+  }
+  .f95-end-jump {
+    position: fixed;
+    left: 50%;
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%);
+    z-index: 71;
+    padding: 8px 20px;
+    font-size: 18px;
+  }
+  .f95-memo-copy {
+    position: fixed;
+    bottom: 44px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 55;
+    width: min(360px, calc(100vw - 12px));
+    pointer-events: none;
+    &.soon .f95-tt {
+      animation: frontier-95-blink 1s steps(1) infinite;
+    }
+  }
+  .f95-memo-body {
+    display: grid;
+    gap: 4px;
+    padding: 8px 10px;
+    p {
+      margin: 0;
+    }
+    small {
+      color: var(--flt-color-textDim);
+    }
+    .f95-prog {
+      width: 100%;
+    }
+  }
+  .f95-memo-fly {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    height: 26px;
+  }
+  .f95-memo-paper {
+    position: absolute;
+    left: 20px;
+    top: 0;
+    animation: frontier-95-fly 1.6s steps(8) infinite;
+  }
+  .f95-memo-line {
+    font-style: italic;
+  }
+  .f95-memo-extra {
+    width: min(640px, 100%);
+    max-height: calc(100dvh - 20px);
+    display: flex;
+    flex-direction: column;
+    .f95-paper {
+      overflow: auto;
+      h2 {
+        margin: 4px 0;
+      }
+    }
+    .f95-row {
+      padding: 8px;
+      justify-content: flex-end;
+    }
+  }
+  .f95-memo-quotes {
+    display: grid;
+    gap: 6px;
+    blockquote {
+      margin: 0;
+      padding-left: 8px;
+      border-left: 3px solid #000;
+    }
+    p {
+      margin: 0;
+    }
+    cite {
+      font-style: normal;
+      font-size: 13px;
+    }
+  }
+  .f95-memo-effects {
+    margin: 4px 0;
+    padding-left: 20px;
+  }
+  .f95-challenge {
+    width: min(460px, 100%);
+    .f95-row {
+      padding: 8px 14px 12px;
+      justify-content: center;
+    }
+  }
+  .f95-challenge-result {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 12px 0 8px;
+    .f95-end-stamp.static {
+      position: static;
+      font-size: 20px;
+      padding: 2px 10px;
+    }
+    &.tone-good .f95-end-stamp {
+      color: #008000;
+      border-color: #008000;
+    }
+    &.tone-neutral .f95-end-stamp {
+      color: #000080;
+      border-color: #000080;
+    }
+  }
+  .f95-challenge-note {
+    color: var(--flt-color-textDim);
+  }
+}
+@keyframes frontier-95-fly {
+  to {
+    left: calc(100% - 40px);
   }
 }

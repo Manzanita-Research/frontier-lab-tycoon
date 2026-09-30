@@ -9,7 +9,7 @@ import { Modals } from "./tree";
 import type { HudActions, HudVM } from "./types";
 import { hudViewModel } from "./vm";
 
-type Moment = "bill" | "bill-law" | "bill-exposed" | "vote" | "rollcall";
+type Moment = "bill" | "bill-law" | "bill-leak" | "bill-exposed" | "vote" | "rollcall";
 const vmOf = (senate: Moment, senateOpen = false) => hudViewModel(fixtureInput({ senate, senateOpen }));
 const actions = new Proxy({}, { get: () => () => undefined }) as HudActions;
 
@@ -41,6 +41,21 @@ describe("the bill", () => {
     expect(tags).toContain("ships closed");
     expect(tags.some((t) => /grows \d+% slower/.test(t))).toBe(true);
   });
+  it("FLT-56: the draft has a leak-risk meter, and the law a reporter with a Bury button (in the beat, too)", () => {
+    const draft = vmOf("bill").event!.bill!;
+    expect(draft.risk).toBeGreaterThan(0);
+    expect(draft.riskText).toMatch(/^\d+% before the sunset$/);
+    expect(draft.riskLabel).not.toBe("");
+    expect(draft.warning).toBeNull();
+    expect(vmOf("bill-law", true).senate.bill!.warning).toBeNull();
+    const input = fixtureInput({ senate: "bill-leak", senateOpen: true });
+    const law = hudViewModel(input).senate.bill!;
+    expect(law.warning).toMatchObject({ text: expect.stringMatching(/is asking about the file$/), daysText: expect.stringMatching(/^The story runs in \d+ days$/), buryText: expect.stringMatching(/^Bury it \(\$/), canBury: true });
+    const vm = hudViewModel({ ...input, senateOpen: false, beat: { id: 1, kind: "leak", caption: "c", sub: "" } });
+    expect(vm.beat?.kicker).toBe("Someone is asking about the file");
+    expect(vm.beat?.action).toEqual({ id: "bury", label: law.warning!.buryText, enabled: true });
+    expect(hudViewModel({ ...input, beat: { id: 1, kind: "exit", caption: "c", sub: "" } }).beat?.action ?? null).toBeNull();
+  });
   it("leaks: the file properties name the lab's lawyers", () => {
     const e = vmOf("bill-exposed").event!;
     expect(e.id).toBe("capture-exposed");
@@ -60,6 +75,9 @@ describe("the Promise Tracker", () => {
     expect(tr.lobbying).toBe(true);
     expect(tr.status).toMatch(/^Roll call in \d days?$/);
     expect(tr.motion?.labSideText).toMatch(/ wants (Aye|Nay)$/);
+    // FLT-56: what the motion does either way.
+    expect(tr.motion?.stakes?.pass).toBeTruthy();
+    expect(tr.motion?.stakes?.fail).toBeTruthy();
     expect(tr.senators).toHaveLength(3);
     expect(tr.senators.filter((s) => s.lobbied)).toHaveLength(1);
     for (const s of tr.senators) {
@@ -104,8 +122,11 @@ describe("in the skins", () => {
     expect(draft).toContain("bill-card");
     expect((draft.match(/type="checkbox"/g) ?? []).length).toBe(5);
     expect(await render("base", vmOf("bill-exposed"))).toContain("bill-props");
+    expect(draft).toContain("bill-risk");
+    expect(await render("base", vmOf("bill-leak", true))).toMatch(/bill-warning.*Bury it/s);
     const vote = await render("base", vmOf("vote"));
     expect(vote).toContain("tracker-card");
+    expect(vote).toContain("If it passes");
     expect(vote).toMatch(/Lobby \$/);
   });
   it("Frontier 95: WordPerfectly with track changes, and PROMISES.XLS", async () => {
@@ -113,6 +134,9 @@ describe("in the skins", () => {
     expect(draft).toContain("WordPerfectly 6.0");
     expect(draft).toContain("Track changes: ON");
     expect(draft).toContain("Comment [LL1]:");
+    expect(draft).toContain("Metadata risk:");
+    expect(await render("frontier-95", vmOf("bill-leak", true))).toMatch(/#REF!.*Bury it/s);
+    expect(await render("frontier-95", vmOf("vote"))).toContain("=IF(PASS)");
     const leak = await render("frontier-95", vmOf("bill-exposed"));
     expect(leak).toContain("Properties");
     expect(leak).toMatch(/Author:.*Legal/s);

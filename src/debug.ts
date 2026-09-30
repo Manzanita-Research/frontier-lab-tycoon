@@ -21,7 +21,9 @@ export interface DebugParams {
   hour: number | null;
   /** Open in photo mode. */
   photo: boolean;
-  /** Stage a moment for a link or a screenshot: a race one (shuffle, era, era3, auction, funding: sim/race/demo.ts) an operations one (ops, queue, slop: sim/opsDemo.ts), a Release Leapfrog one (shipnow, pair, stream[:mishap], solved: sim/race/leapfrog/demo.ts), a Circus one (hearing, hearing-verdict, yacht-invite, yacht-leak: sim/circus/demo.ts) or a drama one (defection-chat, defection-card, defection-exit, defection-manifesto, defection-arena, poach-offer: sim/defection/demo.ts) or a Senate one (bill, bill-law, bill-exposed, vote, rollcall: sim/capture/demo.ts) or a discourse one (factions, counterprotest, argue: sim/factions/demo.ts). */
+  /** Hold a camera beat (FLT-56) until it is skipped, and replay the latest one the staged moment left behind: `?moment=defection-exit&beat`. */
+  beat: boolean;
+  /** Stage a moment for a link or a screenshot: a race one (shuffle, era, era3, auction, funding: sim/race/demo.ts) an operations one (ops, queue, slop: sim/opsDemo.ts), a Release Leapfrog one (shipnow, pair, stream[:mishap], solved: sim/race/leapfrog/demo.ts), a Circus one (hearing, hearing-verdict, yacht-invite, yacht-leak: sim/circus/demo.ts) or a drama one (defection-chat, defection-card, defection-exit, defection-manifesto, defection-arena, poach-offer: sim/defection/demo.ts) or a Senate one (bill, bill-law, bill-leak, bill-exposed, vote, rollcall: sim/capture/demo.ts) or a discourse one (factions, counterprotest, argue: sim/factions/demo.ts). */
   moment: string | null;
   /** Extra researchers on top of the hall-driven count (for Thoughts-panel and queue screenshots). */
   researchers: number;
@@ -83,6 +85,7 @@ export function readDebugParams(search = typeof window === "undefined" ? "" : wi
     discourse: num("discourse") ?? 0,
     hour: num("hour"),
     photo: q.has("photo"),
+    beat: q.has("beat"),
     moment: q.get("moment"),
     researchers: num("researchers") ?? 0,
     disaster: q.get("disaster"),

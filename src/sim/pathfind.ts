@@ -77,33 +77,53 @@ const NEIGHBORS: Tile[] = [
   [0, -1],
 ];
 
+// bfsRoute's scratch, reused from call to call: a tile is seen when its stamp is this call's.
+let stamps = new Int32Array(0);
+let parents = new Int32Array(0);
+let queue = new Int32Array(0);
+let stamp = 0;
+const DX = [1, -1, 0, 0];
+const DZ = [0, 0, 1, -1];
+
 /** Shortest path-tile route from start to the nearest goal tile, inclusive of both. */
 export function bfsRoute(s: GameState, start: Tile, goals: Set<number>): Tile[] | null {
   if (!isPathTile(s, start[0], start[1])) return null;
-  const n = s.grid.w * s.grid.h;
-  const parent = new Int32Array(n).fill(-2);
-  const queue = new Int32Array(n);
+  const { w, h, paths } = s.grid;
+  const n = w * h;
+  if (stamps.length < n) {
+    stamps = new Int32Array(n);
+    parents = new Int32Array(n);
+    queue = new Int32Array(n);
+    stamp = 0;
+  }
+  if (++stamp === 0x7fffffff) {
+    stamps.fill(0);
+    stamp = 1;
+  }
   let head = 0;
   let tail = 0;
   const startIdx = tileIndex(s, start[0], start[1]);
-  parent[startIdx] = -1;
+  stamps[startIdx] = stamp;
+  parents[startIdx] = -1;
   queue[tail++] = startIdx;
   while (head < tail) {
     const cur = queue[head++]!;
     if (goals.has(cur)) {
       const route: Tile[] = [];
-      for (let i = cur; i !== -1; i = parent[i]!) route.push([i % s.grid.w, Math.floor(i / s.grid.w)]);
+      for (let i = cur; i !== -1; i = parents[i]!) route.push([i % w, Math.floor(i / w)]);
       return route.reverse();
     }
-    const cx = cur % s.grid.w;
-    const cz = Math.floor(cur / s.grid.w);
-    for (const [dx, dz] of NEIGHBORS) {
-      const nx = cx + dx;
-      const nz = cz + dz;
-      if (!isPathTile(s, nx, nz)) continue;
-      const ni = tileIndex(s, nx, nz);
-      if (parent[ni] !== -2) continue;
-      parent[ni] = cur;
+    const cx = cur % w;
+    const cz = Math.floor(cur / w);
+    // NEIGHBORS' order, by index: destructuring each pair walked the array iterator (FLT-39).
+    for (let k = 0; k < 4; k++) {
+      const nx = cx + DX[k]!;
+      const nz = cz + DZ[k]!;
+      if (nx < 0 || nz < 0 || nx >= w || nz >= h) continue;
+      const ni = nz * w + nx;
+      if (paths[ni] !== true || stamps[ni] === stamp) continue;
+      stamps[ni] = stamp;
+      parents[ni] = cur;
       queue[tail++] = ni;
     }
   }
@@ -199,11 +219,19 @@ export function nearestPathTile(s: GameState, x: number, z: number): Tile | null
  */
 // Destination geometry only changes with the World version. Keep route templates outside
 // the persisted sim and hand each walker its own mutable waypoint list.
-const rectRoutes = new WeakMap<GameState, { version: number; targets: WeakMap<Rect, Map<number | string, Point[] | null>> }>();
+// A route reads nothing but the path tiles and the target's footprint (the cache is per footprint object), and most
+// new versions leave the paths alone (a breakdown, a repair, a card): those keep the routes (FLT-39).
+const rectRoutes = new WeakMap<GameState, { version: number; w: number; paths: boolean[]; targets: WeakMap<Rect, Map<number | string, Point[] | null>> }>();
+const samePaths = (a: boolean[], b: boolean[]) => {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+  return true;
+};
 export function routeToRect(s: GameState, fromX: number, fromZ: number, target: Rect, isGate = false): Point[] | null {
   let cache = rectRoutes.get(s);
+  if (cache && cache.version !== s.version && cache.w === s.grid.w && samePaths(cache.paths, s.grid.paths)) cache.version = s.version;
   if (!cache || cache.version !== s.version) {
-    cache = { version: s.version, targets: new WeakMap() };
+    cache = { version: s.version, w: s.grid.w, paths: s.grid.paths.slice(), targets: new WeakMap() };
     rectRoutes.set(s, cache);
   }
   let routes = cache.targets.get(target);

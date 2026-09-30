@@ -8,7 +8,7 @@ import { OFFICE_TOOLS, RACE_TOOLS, SPEEDS, TOOLS } from "../../app/hud";
 import { PATH_PRICE } from "../../content/buildings";
 import { ERAS } from "../../content/eras";
 import { STAFF } from "../../content/staff";
-import { DRAMA_LETTERS } from "../../content/events";
+import { dramaLetter } from "../../content/events";
 import { SCENARIO, type GoalDef } from "../../content/goals";
 import { FRIENDS } from "../../content/newsroom";
 import { LEAPFROG } from "../../content/leapfrog";
@@ -30,11 +30,14 @@ import { papersOf, paperMomentOf } from "./papers";
 import { collusionOf, crumbWikiOf, investigationOf } from "./collusion";
 import { factionChips, factionsOf } from "./factions";
 import type { FactionChipVM } from "./types";
+import { challengeLine, challengeQuery, compareRuns, VERDICT_TEXT, type Challenge } from "../share/link";
+import { streakText } from "../share/streak";
+import { ENDING_RULES, endingById } from "../../sim/endings/pack";
 import type {
   ArenaRowVM, DramaDocVM,
-  ArenaVM, AuditVM, BillVM, SenateVM, TrackerVM, GoalVM, ReportCardVM, ToneVM, BenchCellVM, DisasterRunVM, DisastersVM, DisasterStageVM, MeterVM, RiskVM, UnderstaffedVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HearingMoveVM, HearingVM, HudVM, LeakVM, SenatorVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
+  ArenaVM, AuditVM, BeatVM, BillVM, SenateVM, TrackerVM, GoalVM, ReportCardVM, ToneVM, BenchCellVM, DisasterRunVM, DisastersVM, DisasterStageVM, MeterVM, RiskVM, UnderstaffedVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HearingMoveVM, HearingVM, HudVM, LeakVM, SenatorVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
   DramaVM, ModsVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, ResponseVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, StreamVM, ThoughtRowVM, TrainingVM, TrendVM, VoiceVM, WalkerKindVM,
-  EndingVM, ShareVM, TakeoverVM,
+  EndingVM, ShareVM, TakeoverVM, MemoVM, ChallengeVM,
 } from "./types";
 import { defs } from "../../sim/defs";
 
@@ -82,8 +85,12 @@ export interface HudInput {
   dismissed?: readonly string[];
   /** The Disasters menu is open (FLT-32). */
   disastersOpen?: boolean;
+  /** FLT-55: what mod looks call a walker ("Golden Retriever"), by look target ("protester", "visitor:Journalist"). Optional: none. */
+  lookLabels?: Readonly<Record<string, string>>;
   mixer: { open: boolean; ready: boolean; muted: boolean; master: number; music: number; sfx: number };
   photo: { on: boolean; time: string; shot: { id: number; url: string; name: string } | null; flash: number };
+  /** A camera beat's caption (FLT-56). Optional: none. */
+  beat?: { id: number; kind: string; caption: string; sub: string } | null;
   skins: SkinPickerVM;
   /** The Mod Manager. Optional: none means no mods and the window shut. */
   mods?: ModsVM;
@@ -92,6 +99,8 @@ export interface HudInput {
   viewport: { width: number; height: number };
   /** The ending's share card and the campus photo its front page prints (FLT-11). Optional: none is fine. */
   share?: { photo: string | null } & ShareVM;
+  /** FLT-57: days played in a row, a friend's challenge from the URL (and whether its banner is up), the Memo extra already read, and this page's address for friend links. Optional: none is fine. */
+  social?: { streak: number; challenge: Challenge | null; challengeOpen: boolean; memoSeen: string | null; linkBase: string | null };
 }
 
 
@@ -112,6 +121,9 @@ export function goalProgressText(def: GoalDef, value: number): string {
       return value >= def.target ? `Arena #${defs().arenaSize + 1 - Math.floor(value)} (top ${defs().arenaSize + 1 - def.target} reached)` : `Arena #${defs().arenaSize + 1 - Math.floor(value)}, need top ${defs().arenaSize + 1 - def.target}`;
   }
 }
+
+/** The top bar of a camera beat (FLT-56), by kind. */
+const BEAT_KICKER: Record<string, string> = { exit: "Breaking · a departure", huddle: "The auditors are conferring", viral: "Live · trending now", statement: "A statement from Comms", leak: "Someone is asking about the file" };
 
 const TONE_LABEL = { bad: "Breaking", joke: "Developing", good: "Good news", neutral: "Update" } as const;
 const MOOD = { content: "Content", slumped: "Slumped", miserable: "Miserable", resigned: "Resigned" } as const;
@@ -219,7 +231,7 @@ function objectivesOf(s: Snapshot): ObjectivesVM {
   };
 }
 
-function inspectorOf(who: Inspect | null, following: boolean, lab: string, chips: ReadonlyMap<string, FactionChipVM>): InspectorVM | null {
+function inspectorOf(who: Inspect | null, following: boolean, lab: string, chips: ReadonlyMap<string, FactionChipVM>, labels: Readonly<Record<string, string>> = {}): InspectorVM | null {
   if (!who) return null;
   const drift = who.kind === "agent" ? (who.needs.find((n) => n.key === "drift")?.value ?? 0) : 0;
   const look = lookOf(who);
@@ -229,7 +241,7 @@ function inspectorOf(who: Inspect | null, following: boolean, lab: string, chips
     name: who.name,
     role: who.role,
     kind: who.kind,
-    kindLabel: KIND[who.kind],
+    kindLabel: labels[`${who.kind}:${who.role}`] ?? labels[who.kind] ?? KIND[who.kind],
     mood: who.mood,
     moodLabel: MOOD[who.mood],
     status: who.status,
@@ -360,7 +372,8 @@ function bubblesOf(i: HudInput, chips: ReadonlyMap<string, FactionChipVM>): Bubb
 
 /** A drama card's document, filled in from the pack's template. */
 function dramaOf(id: string, vars: Record<string, string>): DramaDocVM | null {
-  const l = DRAMA_LETTERS.get(id);
+  // A poaching offer is in the poacher's own voice (FLT-56).
+  const l = dramaLetter(id, vars.poacherId);
   if (!l) return null;
   const f = (s: string) => fillTemplate(s, vars);
   return { style: l.style, file: f(l.file), from: f(l.from), to: f(l.to), subject: f(l.subject), lines: l.lines.map(f).filter((x) => x.trim().length > 0), sign: f(l.sign) };
@@ -416,6 +429,12 @@ const BILL_STATUS: Record<string, string> = {
   invited: "Draft", declined: "Shredded", floor: "On the floor", failed: "Voted down", law: "In force", exposed: "Exposed", fallout: "Fallout", sunset: "Sunset", quiet: "Nothing on the desk",
 };
 
+/** The button a beat offers while it plays (FLT-56): the leak's "Bury it", while the reporter is still asking. */
+function beatActionOf(kind: string, s: Snapshot): BeatVM["action"] {
+  const w = kind === "leak" ? billOf(s)?.warning : null;
+  return w ? { id: "bury", label: w.buryText, enabled: w.canBury } : null;
+}
+
 /** Regulatory Capture's bill (FLT-22): the draft, the law, and what it does to each rival. */
 export function billOf(s: Snapshot): BillVM | null {
   const b = s.bill;
@@ -445,6 +464,17 @@ export function billOf(s: Snapshot): BillVM | null {
     status: b.stage === "law" && b.lawDays !== null ? `In force · day ${b.lawDays}` : (BILL_STATUS[b.stage] ?? b.stage),
     tally: b.ayes === null ? null : `${b.ayes}–${3 - b.ayes}`,
     leakText: b.stage === "law" ? `${(b.leakOdds * 100).toFixed(b.leakOdds < 0.1 ? 1 : 0)}% a day` : null,
+    risk: b.risk,
+    riskText: `${Math.round(b.risk * 100)}% before the sunset`,
+    riskLabel: b.riskLabel,
+    warning: b.warning
+      ? {
+          text: `${b.reporter} is asking about the file`,
+          daysText: b.warning.daysLeft === 0 ? "The story runs tomorrow" : `The story runs in ${b.warning.daysLeft} day${b.warning.daysLeft === 1 ? "" : "s"}`,
+          buryText: `Bury it (${formatMoney(b.warning.cost)})`,
+          canBury: s.cash >= b.warning.cost,
+        }
+      : null,
     rivals,
   };
 }
@@ -462,7 +492,7 @@ export function trackerOf(s: Snapshot): TrackerVM | null {
     : (TRACKER_STATUS[p.stage] ?? p.stage);
   return {
     stage: p.stage,
-    motion: p.motion ? { ...p.motion, labSideText: `${s.labName} wants ${SIDE_TEXT[p.motion.labSide]}` } : null,
+    motion: p.motion ? { ...p.motion, stakes: p.motion.stakes ? { ...p.motion.stakes } : null, labSideText: `${s.labName} wants ${SIDE_TEXT[p.motion.labSide]}` } : null,
     status,
     lobbying: p.lobbying,
     senators: p.senators.map((sen) => ({
@@ -563,6 +593,7 @@ function auditOf(s: Snapshot): AuditVM {
     : a.stage !== "visit" || a.visitors === 0 ? null
     : evals ? "Running their own evals"
     : a.phase === "inspecting" && a.stop ? `Inspecting the ${a.stop.name}`
+    : a.phase === "huddling" ? "Comparing notes. Nobody breathe."
     : a.phase === "leaving" ? "Leaving, with footnotes"
     : a.stop ? `On their way to the ${a.stop.name}` : null;
   const progress = a.progress === null ? null : Math.max(0, Math.min(1, a.progress));
@@ -831,6 +862,13 @@ function endingOf(i: HudInput): EndingVM | null {
   const st = view.stats;
   const n = (x: number) => Math.round(x).toLocaleString("en-US");
   const { photo = null, ...share } = i.share ?? { ...NO_SHARE, photo: null };
+  const social = i.social;
+  const result = { ending: e.id, day: st.days, vibes: st.peakVibes, models: st.models };
+  const link = `${social?.linkBase ?? ""}?${challengeQuery({ ...result, seed: view.seed, daily: view.dailyKey })}`;
+  const streak = social && social.streak >= 2 ? { days: social.streak, text: streakText(social.streak) } : null;
+  const friend = challengeOn(i);
+  const verdict = friend ? compareRuns(result, friend) : null;
+  const versus = friend && verdict ? { line: challengeLine(friend), verdict, text: VERDICT_TEXT[verdict] } : null;
   return {
     id: e.id,
     title: e.title,
@@ -846,9 +884,72 @@ function endingOf(i: HudInput): EndingVM | null {
       { key: "escaped", emoji: "🏃", label: "Agents escaped", text: n(st.agentsEscaped) },
     ],
     strip: view.strip,
-    summary: view.summary,
+    // The clipboard gets the streak, the head-to-head and the link too: the summary is what lands in the group chat.
+    summary: [view.summary, ...(streak ? [`🔥 ${streak.text}`] : []), ...(versus ? [`🆚 ${versus.text}`] : []), `Beat it: ${link}`].join("\n"),
     daily: view.daily ? `Today's lab · ${view.daily}` : null,
     share,
+    labNumber: view.labNumber,
+    next: e.next,
+    refound: view.refound ? { name: view.refound.name, labNumber: view.refound.labNumber, perks: view.refound.perks.map((p) => ({ ...p })) } : null,
+    streak,
+    versus,
+    link,
+  };
+}
+
+/** The friend's challenge applies while this is their lab: the same seed, and the first lab on it. */
+function challengeOn(i: HudInput): Challenge | null {
+  const c = i.social?.challenge;
+  const view = i.snap.endings;
+  return c && view && view.seed === c.seed && view.labNumber === 1 ? c : null;
+}
+
+/** The banner a friend's link opens on: "Your friend's lab was Captured on day 212. Beat it?" */
+function challengeOf(i: HudInput): ChallengeVM | null {
+  const c = challengeOn(i);
+  if (!c || !i.social?.challengeOpen || i.snap.endings?.ending) return null;
+  const def = endingById(c.ending);
+  const n = (x: number) => Math.round(x).toLocaleString("en-US");
+  return {
+    line: challengeLine(c),
+    ask: "Beat it?",
+    ending: def?.title ?? c.ending,
+    tone: def?.tone ?? "neutral",
+    stats: `${n(c.vibes)} peak Vibes · ${c.models === 1 ? "1 model" : `${n(c.models)} models`}`,
+    daily: i.snap.endings?.daily ? `Today's lab · ${i.snap.endings.daily}` : null,
+    cta: "Beat it",
+  };
+}
+
+/** The Memo: its countdown while it's coming (hidden under the card itself), then its extra edition until it's read. */
+function memoOf(i: HudInput): MemoVM | null {
+  const m = i.snap.endings?.memo;
+  if (!m || i.snap.endings?.ending) return null;
+  const key = `${i.snap.endings!.seed}:${m.day}`;
+  if (m.phase === "coming") {
+    if (i.snap.event) return null;
+    const when = m.daysLeft === 0 ? "today" : m.daysLeft === 1 ? "tomorrow" : `${m.daysLeft} days`;
+    const progress = 1 - Math.min(1, m.daysLeft / ENDING_RULES.memo.countdownDays);
+    return { phase: "coming", key, daysLeft: m.daysLeft, progress, title: `The Memo · ${when}`, line: m.line, extra: null };
+  }
+  // A late edition, not a standing one: a game loaded a week after the Memo doesn't reprint it.
+  if (!m.extra || !m.choice || i.social?.memoSeen === key || i.snap.day - m.day > 2) return null;
+  return {
+    phase: "extra",
+    key,
+    daysLeft: 0,
+    progress: 1,
+    title: "The Memo",
+    line: m.chip ?? "",
+    extra: {
+      masthead: "The Frontier Times",
+      kicker: m.extra.kicker,
+      headline: m.extra.headline,
+      deck: m.extra.deck,
+      choice: m.label ?? m.choice,
+      effects: [...m.effects],
+      reactions: m.reactions.map((r) => ({ name: r.name, role: r.role, text: r.text })),
+    },
   };
 }
 
@@ -988,7 +1089,7 @@ export function hudViewModel(i: HudInput): HudVM {
     stats: statsOf(i),
     training: trainingOf(i.snap),
     objectives: objectivesOf(i.snap),
-    inspector: inspectorOf(i.snap.inspect, i.follow, i.snap.labName, chips),
+    inspector: inspectorOf(i.snap.inspect, i.follow, i.snap.labName, chips, i.lookLabels),
     buildItems: items,
     buildTip: build.tip,
     speed: speedOf(i.speed),
@@ -1026,9 +1127,13 @@ export function hudViewModel(i: HudInput): HudVM {
     audit: auditOf(i.snap),
     ending: endingOf(i),
     takeover: takeoverOf(i),
+    memo: memoOf(i),
+    challenge: challengeOf(i),
     newsroom: newsroomOf(i),
     sound: soundOf(i),
     photoMode: photoOf(i),
+    // A card needs the player: the beat makes way. Photo mode hides it with the rest of the HUD.
+    beat: i.beat && !event && !era && !i.photo.on ? { ...i.beat, kicker: BEAT_KICKER[i.beat.kind] ?? "Meanwhile", skipLabel: "Skip »", action: beatActionOf(i.beat.kind, i.snap) } : null,
     skins: i.skins,
     mods: i.mods ?? NO_MODS_VM,
     disasters: disastersOf(i, play.visible.disasters),

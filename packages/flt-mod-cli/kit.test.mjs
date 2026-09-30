@@ -42,12 +42,15 @@ test("private modder kit works against the actual game contract", async (t) => {
         const { decodeManifest } = await runner.import(resolve(gameRoot, "src/mods/schema.ts"));
         const { composeMods } = await runner.import(resolve(gameRoot, "src/mods/loader.ts"));
         const { resolveGameDefinition } = await runner.import(resolve(gameRoot, "src/mods/game-definition.ts"));
+        const { checkPresentation } = await runner.import(resolve(gameRoot, "src/mods/check.ts"));
         const { Effect } = await runner.import("effect");
         for (const [index, [, json]] of examples.entries()) {
           const part = JSON.parse(json);
-          const manifest = await Effect.runPromise(decodeManifest({ apiVersion: 1, id: `example-${index}`, name: "Example", version: "1.0.0", ...(part.skin ? part : { content: part }) }));
+          const topLevel = ["skin", "audio", "looks", "assets"].some((key) => key in part);
+          const manifest = await Effect.runPromise(decodeManifest({ apiVersion: 1, id: `example-${index}`, name: "Example", version: "1.0.0", ...(topLevel ? part : { content: part }) }));
           const definition = await Effect.runPromise(resolveGameDefinition(composeMods([manifest]).layer));
           definition.content.arcs.forEach(checkArcGraph);
+          if (topLevel) await checkPresentation(manifest);
         }
       });
       await t.test("scaffold test command and inlined bundle work outside the workspace", async () => {

@@ -23,6 +23,7 @@ import { promisesView, type PromisesView } from "../sim/promises/view";
 import { factionsView, type FactionsView } from "../sim/factions/view";
 import { raceView, type RaceView } from "../sim/race/view";
 import { auditView, type AuditView } from "../sim/auditors/view";
+import { neoCampusView, sameCampuses, type NeoCampusView } from "../sim/neolabs/view";
 import { memberById } from "../sim/groups";
 import { outcomeOf, releaseGoalText } from "../sim/goals";
 import { estimateLedger } from "../sim/economy";
@@ -126,6 +127,8 @@ export interface Snapshot {
   endings: EndingsView | null;
   /** Operations: staff, slop, broken buildings, queues. */
   ops: OpsView;
+  /** FLT-56: the neo labs' campuses beyond the fence (the first few), each with its valuation balloon. */
+  neo: NeoCampusView[];
   /** Meetings in progress (a VC and your researcher by the Kombucha Bar, FLT-26): who, and what they say, visitor first. */
   /** Meetings in their talking phase; `names` is who says it, guest (their role, e.g. "Venture Capitalist") then host. */
   chats: { id: number; hostId: number; guestId: number; names: [string, string]; lines: string[] }[];
@@ -217,6 +220,11 @@ function speakersOf(s: GameState): Record<number, string> {
   return out;
 }
 
+function neoOf(s: GameState, prev?: Snapshot): NeoCampusView[] {
+  const next = neoCampusView(s);
+  return prev && sameCampuses(prev.neo, next) ? prev.neo : next;
+}
+
 export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO_SELECTION): Snapshot {
   const books = estimateLedger(s);
   return {
@@ -265,6 +273,7 @@ export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO
     promises: promisesView(s),
     endings: endingsView(s),
     ops: opsView(s),
+    neo: neoOf(s, prev),
     chats: talking(s).map((m) => {
       const guest = s.walkers.find((w) => w.id === m.guestId);
       const host = s.walkers.find((w) => w.id === m.hostId);

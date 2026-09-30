@@ -44,6 +44,38 @@ export function BillRivals({ bill }: { bill: BillVM }) {
   );
 }
 
+/** FLT-56: the draft's leak-risk meter: the odds the file properties leak before the sunset, if these clauses become law. */
+export function BillRisk({ bill }: { bill: BillVM }) {
+  const pct = Math.round(Math.max(0, Math.min(1, bill.risk)) * 100);
+  return (
+    <div className={`bill-risk ${bill.risk >= 0.3 ? "hot" : ""}`}>
+      <span className="bill-risk-label">Leak risk</span>
+      <span className="bill-risk-bar" role="progressbar" aria-label="Leak risk" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct}>
+        <i style={{ width: `${pct}%` }} />
+      </span>
+      <span className="bill-risk-text">
+        <b>{bill.riskText}</b> {bill.riskLabel}
+      </span>
+    </div>
+  );
+}
+
+/** FLT-56: a reporter is asking about the law's file: the clock, and the button that buries the story. */
+export function BillWarning({ bill, actions }: { bill: BillVM; actions: HudActions }) {
+  const w = bill.warning;
+  if (!w) return null;
+  return (
+    <div className="bill-warning" role="alert">
+      <span>
+        <b>{w.text}.</b> {w.daysText}.
+      </span>
+      <button disabled={!w.canBury} onClick={() => actions.buryLeak()}>
+        {w.buryText}
+      </button>
+    </div>
+  );
+}
+
 /** The bill a Senate staffer asked the lab to "take a first pass" at, and the day someone read its file properties. */
 export function Bill({ event, bill, actions }: SlotPropsMap["Bill"]) {
   const t = useT();
@@ -65,6 +97,7 @@ export function Bill({ event, bill, actions }: SlotPropsMap["Bill"]) {
               <b className="bill-act">{bill.act}</b>
             </header>
             <BillClauses bill={bill} actions={actions} />
+            {bill.editable && <BillRisk bill={bill} />}
             {exposed && (
               <dl className="bill-props">
                 <dt>Author</dt>

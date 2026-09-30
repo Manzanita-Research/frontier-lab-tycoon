@@ -77,6 +77,11 @@ interface Compiled {
   stats: string[];
   flags: string[];
   rolls: boolean;
+  /**
+   * No transition of the leaf or its parents holds for this beat, so the machine would stay put and emit nothing: the
+   * driver can skip `transition()` (FLT-39; most arcs sit out most midnights). The same walk the handler does.
+   */
+  quiet: (stored: ModArcStored, event: ArcEvent) => boolean;
 }
 
 const asCall = (c: NamedCallData): Call => c as Call;
@@ -106,7 +111,8 @@ function emitAll(enq: Enq, calls: readonly (NamedCallData | Call)[] | undefined)
 
 const cache = new WeakMap<ArcData, Compiled>();
 
-function compile(arc: ArcData): Compiled {
+/** An arc's machine and what the driver needs to feed it (exported for its tests). */
+export function compile(arc: ArcData): Compiled {
   const hit = cache.get(arc);
   if (hit) return hit;
   const nodes = new Map<string, ArcNode>();
@@ -131,6 +137,16 @@ function compile(arc: ArcData): Compiled {
   const states: Record<string, unknown> = {};
   const leaves = new Set<string>();
   const done = new Set<string>();
+  // Each leaf's own state and its parents, deepest first, and every state's transitions by event: built once.
+  const chains = new Map<string, string[]>();
+  const on = new Map<string, Record<"DAY" | "CHOSE", Transition[]>>();
+  for (const [path, node] of nodes) on.set(path, { DAY: transitionsOf(node, "DAY"), CHOSE: transitionsOf(node, "CHOSE") });
+  const envOf = (context: ModArcStored["context"], event: ArcEvent): GuardEnv => ({
+    tick: event.tick, day: event.day, roll: event.roll, stats: event.stats, flags: event.flags,
+    // An arc only hears midnights and answers, so it counts `after`/`every` from the start of the day it began.
+    ctx: { enteredTick: context.enteredTick - (context.enteredTick % TICKS_PER_DAY), progress: 0, hours: 0 },
+    ...(event.type === "CHOSE" ? { card: event.card, choice: event.choice } : {}),
+  });
   for (const [path, node] of nodes) {
     for (const kind of Object.keys(node.on ?? {})) for (const t of transitionsOf(node, kind)) if (t.guard) guards.push(...[t.guard].flat());
     if (node.states) continue;
@@ -142,15 +158,11 @@ function compile(arc: ArcData): Compiled {
       continue;
     }
     const chain = chainOf(path);
+    chains.set(key, chain);
     const handler = (kind: "DAY" | "CHOSE") => ({ context, event }: { context: ModArcStored["context"]; event: ArcEvent }, enq: Enq) => {
-      const env: GuardEnv = {
-        tick: event.tick, day: event.day, roll: event.roll, stats: event.stats, flags: event.flags,
-        // An arc only hears midnights and answers, so it counts `after`/`every` from the start of the day it began.
-        ctx: { enteredTick: context.enteredTick - (context.enteredTick % TICKS_PER_DAY), progress: 0, hours: 0 },
-        ...(event.type === "CHOSE" ? { card: event.card, choice: event.choice } : {}),
-      };
+      const env = envOf(context, event);
       for (const from of chain) {
-        for (const t of transitionsOf(nodes.get(from)!, kind)) {
+        for (const t of on.get(from)![kind]) {
           if (!passes(t.guard, env)) continue;
           emitAll(enq, t.actions);
           if (t.target === undefined) return { context };
@@ -177,6 +189,13 @@ function compile(arc: ArcData): Compiled {
     stats: [...statsIn(guards)],
     flags: [...flagsIn(guards)],
     rolls: usesChance(guards),
+    quiet: (stored, event) => {
+      const chain = chains.get(stored.value);
+      if (!chain) return false;
+      const env = envOf(stored.context, event);
+      for (const from of chain) for (const t of on.get(from)![event.type]) if (passes(t.guard, env)) return false;
+      return true;
+    },
   };
   cache.set(arc, compiled);
   return compiled;
@@ -224,6 +243,7 @@ function heard(state: GameState, rng: Rng, arc: ArcData, event: { type: "DAY" } 
   const flags: Record<string, number> = {};
   for (const name of c.flags) if (state.flags[name] !== undefined) flags[name] = state.flags[name]!;
   const beat: ArcBeat = { tick: state.tick, day: state.day, roll: c.rolls ? rng.next() : 0, stats, flags };
+  if (c.quiet(stored, { ...beat, ...event })) return;
   const r = step(c.machine, stored as never, { ...beat, ...event } as never) as Stepped<AnyStateMachine>;
   all[arc.id] = r.stored as unknown as ModArcStored;
   for (const e of r.effects as unknown as { type: string; verb: string; params: Record<string, Json> }[]) {

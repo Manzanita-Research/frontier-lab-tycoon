@@ -1,6 +1,5 @@
 // The daily pass over the crowd: rivals rattle the researchers, moods shift, resignations land, the Vibes update.
-import { step } from "./machines/run";
-import { moodMachine, type MoodLevel } from "./machines/mood";
+import { stepMood, type MoodLevel } from "./machines/mood";
 import { moodFor, happinessOf, RIVAL_FOMO } from "./needs";
 import type { Rng } from "./rng";
 import { dailyVibes } from "./vibes";
@@ -30,9 +29,9 @@ function settleMood(state: GameState, w: Walker, rng: Rng) {
   const now = w.mood.value;
   if (now === "resigned") return;
   const want = moodFor(happinessOf(w), now);
-  if (want !== now) w.mood = step(moodMachine, w.mood, { type: EVENT[want as Exclude<MoodLevel, "resigned">] }).stored;
+  if (want !== now) w.mood = stepMood(w.mood, { type: EVENT[want as Exclude<MoodLevel, "resigned">] }).stored;
   if (w.kind !== "researcher" || w.mood.value !== "miserable") return;
-  const day = step(moodMachine, w.mood, { type: "DAY" });
+  const day = stepMood(w.mood, { type: "DAY" });
   w.mood = day.stored;
   if (day.effects.length > 0) resign(state, w, rng);
 }
