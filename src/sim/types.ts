@@ -4,6 +4,8 @@ import type { ProgressionStored } from "./machines/progression";
 import type { UnlockCard } from "../content/progression";
 import type { BuildingKind } from "../content/buildings";
 import type { CollusionState, Investigation } from "./collusion/state";
+import type { HearingState } from "./hearing/state";
+import type { YachtState } from "./yacht/state";
 import type { NeedKey } from "../content/needs";
 import type { DisastersState } from "./disasters/types";
 import type { ArcStored } from "./machines/arc";
@@ -308,6 +310,12 @@ export interface GameState {
   disasters: DisastersState;
   /** FLT-18: opt-in Swarm pack; absent preserves legacy saves and baseline runs. */
   collusion?: CollusionState;
+  /** Regulatory capture, 0 to 100 (the `capture` stat; `capture.delta` moves it). Absent means 0. FLT-21 moves it, FLT-22 reads it. */
+  capture?: number;
+  /** FLT-21 The Hearing: absent until the pack is enabled (Level 5, Scrutiny). */
+  hearing?: HearingState;
+  /** FLT-24 the yacht summit: absent until the pack is enabled (Level 5, Scrutiny). */
+  yacht?: YachtState;
   /** Generic inquiries started by the Vocabulary; the owning machine completes them. */
   investigations?: Record<string, Investigation>;
 }

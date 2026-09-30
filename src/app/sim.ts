@@ -19,6 +19,7 @@ import { isOpsMoment, stageOps } from "../sim/opsDemo";
 import { isPaperMoment, stagePapers } from "../sim/race/papers/demo";
 import { parseLeapMoment, stageLeapfrog } from "../sim/race/leapfrog/demo";
 import { isCollusionMoment, stageCollusion } from "../sim/collusion/demo";
+import { isCircusMoment, stageCircus } from "../sim/circus/demo";
 import { walkersThinking } from "../sim/mind";
 import { makeSnapshot, NO_SELECTION, type Snapshot, type UiSelection, type UiToast } from "./hud";
 import { continueTutorial } from "../sim/tutorial";
@@ -114,7 +115,7 @@ export class SimHandle {
   }
 }
 
-type SimDebug = Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean; collusion?: boolean };
+type SimDebug = Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean; collusion?: boolean; hearing?: boolean; yacht?: boolean };
 
 /**
  * A living campus, warped forward and dressed up per the `?seed=&warp=&agents=&discourse=` debug knobs.
@@ -131,6 +132,8 @@ function stage(dbg: SimDebug): GameState {
   if (dbg.leapfrog === false) sim.flags.leapfrogOff = 1;
   if (dbg.papers === false) sim.flags.papersOff = 1;
   if (dbg.collusion === false) sim.flags.collusionOff = 1;
+  if (dbg.hearing === false) sim.flags.hearingOff = 1;
+  if (dbg.yacht === false) sim.flags.yachtOff = 1;
   const leap = parseLeapMoment(dbg.moment);
   if (dbg.warp > 0 || dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0 || dbg.moment || dbg.disaster) { continueTutorial(sim, true); delete sim.progression; }
   // No ladder means every system is earned: wake every pack that isn't switched off.
@@ -142,6 +145,7 @@ function stage(dbg: SimDebug): GameState {
   else if (leap) stageLeapfrog(sim, leap.moment, leap.arg);
   else if (isCollusionMoment(dbg.moment)) stageCollusion(sim, dbg.moment);
   else if (isPaperMoment(dbg.moment)) stagePapers(sim, dbg.moment);
+  else if (isCircusMoment(dbg.moment)) stageCircus(sim, dbg.moment);
   if (dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0) {
     const rng = createRng(sim.rngState);
     if (dbg.researchers > 0) seedWalkers(sim, "researcher", dbg.researchers, rng);

@@ -2,7 +2,7 @@
 // nothing else in the game: no `src/sim/**`, no store, no three.
 import type { ComponentType, ReactNode } from "react";
 import type {
-  ArenaVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, EraCardVM, EventVM, HudActions, HudVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
+  ArenaVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, EraCardVM, EventVM, HearingVM, HudActions, HudVM, LeakVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
   ModsVM, NewsroomVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StatsVM, ThoughtRowVM, TickerItemVM,
   StaffVM, TeaserVM, ProgressVM, ToastVM, TrainingVM, UnlockCardVM, VisibleVM, HelpVM, PapersVM, PaperMomentVM, CrumbWikiVM, DisastersVM,
 } from "../ui/hud/types";
@@ -32,6 +32,8 @@ export const SLOT_NAMES = [
   "Benchmarks",
   "Voice",
   "Livestream",
+  "Hearing",
+  "LeakedChat",
   "EraCard",
   "FrontPage",
   "GroupChat",
@@ -106,6 +108,10 @@ export interface SlotPropsMap {
   Voice: { leapfrog: LeapfrogVM; layout: LayoutVM; actions: HudActions };
   /** The launch livestream mishap card (the dog, the wrong chart). Opens instead of EventCard for `event.kind === "stream"`; answer it with `actions.choose`. */
   Livestream: { event: EventVM; stream: StreamVM; actions: HudActions };
+  /** The Hearing (FLT-21): a senator's question at the witness table (three senators, the Trust and Capture meters, answers that show what they move), and the gavel with the verdict. Opens instead of EventCard for `event.kind === "hearing"`; answer with `actions.choose`. */
+  Hearing: { event: EventVM; hearing: HearingVM; actions: HudActions };
+  /** The yacht summit's leaked group chat (FLT-24): the rivals' messages with a LEAKED stamp, and the three replies. Opens instead of EventCard for `event.kind === "leak"`; answer with `actions.choose`. */
+  LeakedChat: { event: EventVM; leak: LeakVM; actions: HudActions };
   EraCard: { era: EraCardVM; actions: HudActions };
   FrontPage: { paper: PaperVM; actions: HudActions };
   GroupChat: { chat: ChatVM; actions: HudActions };

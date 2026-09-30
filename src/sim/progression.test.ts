@@ -36,6 +36,7 @@ describe("the playable ladder", () => {
     expect(canHire(s, "security").ok).toBe(true); expect(s.papers?.enabled).toBe(true);
     // Collusion is on the Scrutiny rung, so earning it wakes the pack (it used to stay asleep in normal play).
     expect(s.collusion?.enabled).toBe(true);
+    expect(s.hearing?.enabled).toBe(true); expect(s.yacht?.enabled).toBe(true);
     s.cash = 350_000; expect(canPlace(s, "security", 12, 19).ok).toBe(true);
     expect(s.unlockCards?.map((c) => c.id)).toEqual(["business", "team", "race", "scrutiny"]);
     applyNow(s, [{ type: "dismissUnlock" }]); expect(makeSnapshot(s).unlockCard?.id).toBe("team");
@@ -67,6 +68,7 @@ describe("the playable ladder", () => {
     expect(s.walkers.some((w) => w.kind === "visitor" || w.kind === "protester")).toBe(false);
     expect(s.slop.some(Boolean)).toBe(false); expect(s.buildings[0]?.reliability).toBe(1);
     expect(Object.values(s.arcs).some((a) => a.value === "cardOpen")).toBe(false);
+    expect(s.hearing).toBeUndefined(); expect(s.yacht).toBeUndefined();
   });
   it("teases what is locked as one row per milestone, not one ??? per item", () => {
     const s = createInitialState(1);

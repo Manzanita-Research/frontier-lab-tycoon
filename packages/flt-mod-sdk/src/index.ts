@@ -13,10 +13,10 @@ export type { NewsTrigger as HeadlineTrigger } from "../../../src/content/headli
 export type Mod = typeof ModManifest.Type;
 export type ContentPatch = NonNullable<Mod["content"]>;
 /** The Vocabulary a mod arc may call (the game's src/sim/verbs.ts; a test keeps these lists equal). */
-export const GUARD_NAMES = ["after", "every", "progress.gte", "stat.gte", "stat.lte", "chance", "choice", "day.after", "flag.is", "not", "any"] as const;
+export const GUARD_NAMES = ["after", "every", "progress.gte", "stat.gte", "stat.lte", "chance", "choice", "day.after", "flag.is", "not", "any", "all"] as const;
 export const ACTION_NAMES = [
   "investigate.start", "staff.divert", "staff.release", "compute.drain", "cost.spike", "revenue.mult", "auditor.odds", "effects.end",
-  "building.fire", "building.offline", "building.wear", "building.ensure", "hype.delta", "trust.delta", "heat.delta", "discourse.delta",
+  "building.fire", "building.offline", "building.wear", "building.ensure", "hype.delta", "trust.delta", "heat.delta", "capture.delta", "discourse.delta",
   "cash.delta", "rival.leap", "camera.focus", "shake", "sound.cue", "news", "toast", "card", "flag.set", "flag.clear",
 ] as const;
 export type GuardName = (typeof GUARD_NAMES)[number];

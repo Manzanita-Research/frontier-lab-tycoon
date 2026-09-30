@@ -141,6 +141,10 @@ export const STATS: Record<string, (state: GameState, run: DisasterRun | null) =
   sreAttending: (s) => staffOf(s, "sre").filter((o) => (o.machine.value === "going" || o.machine.value === "working") && s.buildings.some((b) => b.id === o.task && b.broken)).length,
   trust: (s) => s.disasters.trust,
   heat: (s) => s.disasters.heat,
+  /** Disasters begun, all time. */
+  disasters: (s) => s.disasters.started,
+  /** Regulatory capture, 0 to 100 (FLT-21's hearings move it; FLT-22 reads it). */
+  capture: (s) => s.capture ?? 0,
   /** This disaster's fires (or outages) still going. */
   burning: (s, run) => (run ? run.fires.filter((id) => s.buildings.some((b) => b.id === id && b.broken)).length : 0),
   /** How many other working buildings of the target's kind a fire could spread to. */
@@ -226,6 +230,7 @@ export const GUARDS: Record<string, GuardDef> = {
   },
   not: { doc: "The other guard does not hold.", spec: { guard: "call" }, test: (env, p) => !passes(p.guard as Call, env) },
   any: { doc: "At least one of these guards holds (a plain list of guards means all of them).", spec: { guards: "calls" }, test: (env, p) => (p.guards as Call[]).some((g) => passes(g, env)) },
+  all: { doc: "Every one of these guards holds (for a transition, whose `guard` is a single call).", spec: { guards: "calls" }, test: (env, p) => (p.guards as Call[]).every((g) => passes(g, env)) },
 };
 export const GUARD_NAMES = Object.keys(GUARDS);
 
@@ -467,6 +472,11 @@ export const VERBS: Record<string, VerbDef> = {
     spec: { amount: "number" },
     run: (env, p) => void (env.state.disasters.heat = clamp100(env.state.disasters.heat + (p.amount as number))),
   },
+  "capture.delta": {
+    doc: "Add to regulatory capture (0 to 100, starts at 0): how much of the rulebook the lab wrote. FLT-22 reads it.",
+    spec: { amount: "number" },
+    run: (env, p) => void (env.state.capture = clamp100((env.state.capture ?? 0) + (p.amount as number))),
+  },
   "discourse.delta": {
     doc: "Add to the water discourse (the stat behind the protesters at the gate; 4 points is one protester).",
     spec: { amount: "number" },
@@ -549,7 +559,9 @@ export function runVerb(env: VerbEnv, call: Call) {
 }
 
 /** Errors for one call, each starting with the JSON path. Empty when it is fine. */
-export function checkCall(call: Call, kind: "verb" | "guard", path: string): string[] {
+const NO_LOCAL: ReadonlySet<string> = new Set();
+/** `local` names stats a mechanic measures itself and passes in its beat (the Circus charts' session tallies). */
+export function checkCall(call: Call, kind: "verb" | "guard", path: string, local: ReadonlySet<string> = NO_LOCAL): string[] {
   if (!isCall(call as Json)) return [`${path}: expected a name or { type, params }`];
   const { type, params } = normalize(call);
   const table = kind === "verb" ? VERBS : GUARDS;
@@ -564,9 +576,9 @@ export function checkCall(call: Call, kind: "verb" | "guard", path: string): str
     if (why) errors.push(`${path}: ${why}`);
   }
   if (kind === "guard") {
-    for (const key of ["guard"] as const) if (isCall(params[key])) errors.push(...checkCall(params[key] as Call, "guard", `${path}.params.${key}`));
-    if (Array.isArray(params.guards)) (params.guards as Call[]).forEach((g, i) => errors.push(...checkCall(g, "guard", `${path}.params.guards[${i}]`)));
-    if (type.startsWith("stat.") && typeof params.stat === "string" && !(params.stat in STATS)) {
+    for (const key of ["guard"] as const) if (isCall(params[key])) errors.push(...checkCall(params[key] as Call, "guard", `${path}.params.${key}`, local));
+    if (Array.isArray(params.guards)) (params.guards as Call[]).forEach((g, i) => errors.push(...checkCall(g, "guard", `${path}.params.guards[${i}]`, local)));
+    if (type.startsWith("stat.") && typeof params.stat === "string" && !(params.stat in STATS) && !local.has(params.stat)) {
       const hint = closest(params.stat, STAT_NAMES);
       errors.push(`${path}.params.stat: unknown stat "${params.stat}"${hint ? ` (did you mean "${hint}"?)` : ""}`);
     }

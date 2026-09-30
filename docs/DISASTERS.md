@@ -72,6 +72,7 @@ Guards (pure; `stat.*` read the lab's stats by name):
 | `flag.is` | flag: string, set?: boolean | The flag is set (or, with `set: false`, is not). Only mod arcs see flags: a disaster's beat carries none. |
 | `not` | guard: call | The other guard does not hold. |
 | `any` | guards: calls | At least one of these guards holds (a plain list of guards means all of them). |
+| `all` | guards: calls | Every one of these guards holds (for a transition, whose `guard` is a single call). |
 
 Verbs (run by the driver, in order, after each transition):
 
@@ -91,6 +92,7 @@ Verbs (run by the driver, in order, after each transition):
 | `hype.delta` | amount: number | Add to hype (0 to 100). |
 | `trust.delta` | amount: number | Add to public trust (0 to 100, starts at 50). |
 | `heat.delta` | amount: number | Add to regulatory heat (0 to 100, starts at 0). FLT-19's auditors read it. |
+| `capture.delta` | amount: number | Add to regulatory capture (0 to 100, starts at 0): how much of the rulebook the lab wrote. The Hearing (FLT-21) moves it; FLT-22 reads it. |
 | `discourse.delta` | amount: number | Add to the water discourse (the stat behind the protesters at the gate; 4 points is one protester). |
 | `cash.delta` | amount: number | Add to (or, negative, take from) the bank. |
 | `rival.leap` | relative: number, open?: boolean | The most open-weights lab jumps to `relative` times yours (-0.1 is 10% below your capability; it never goes down) and, with `open`, ships open weights. Sets `{leapRival}` and `{leapModel}` for the disaster's headlines. |
@@ -103,7 +105,7 @@ Verbs (run by the driver, in order, after each transition):
 | `flag.set` | name: string | Set a flag to today's day number. |
 | `flag.clear` | name: string | Clear a flag. |
 
-Stats a guard, `requires` or `odds.scale` can read: day, capability, hype, cash, compute, discourse, models, agents, clusters, halls, gateways, gas, solar, datacenters, broken, security, sre, comms, janitor, sreAttending, trust, heat, burning, adjacent.
+Stats a guard, `requires` or `odds.scale` can read: day, capability, hype, cash, compute, discourse, models, agents, clusters, halls, gateways, gas, solar, datacenters, broken, security, sre, comms, janitor, sreAttending, trust, heat, disasters (begun, all time), capture, burning, adjacent. A mechanic that measures its own stats (The Hearing's session tallies) passes them to `checkCall`/`checkChart` as local names.
 
 Building references in verbs: `$target` (the building the disaster is about), `$adjacent` (the nearest other working building of its kind that this disaster has not touched), `$office` (the Security Office), `gate`, or a building kind. `to`/`on` take the same.
 
@@ -148,7 +150,7 @@ The setting is `state.disasters.risk`: `off`, `rare`, `normal`, `chaos` (the `se
 ## Hand-offs
 
 - **FLT-32 (UI):** the Disasters menu is `disasterMenu(state)` (id, name, blurb, tags, active, available, reason) plus the two commands; "asks for confirmation" is the UI's. `disastersView(state)` gives the running ones (phase, progress 0..1, days) for a `DisasterAlert` slot. The palette tile for the Security Office. Icons for `tags`.
-- **FLT-19 (auditors):** read `auditorOdds(state)` (x2 for 60 days after a swarm) and `state.disasters.heat` / `.trust` (0..100). Nothing else in the sim reads them yet.
+- **FLT-19 (auditors):** read `auditorOdds(state)` (x2 for 60 days after a swarm) and `state.disasters.heat` / `.trust` (0..100). The Hearing (FLT-21) moves trust too, and adds `state.capture`; FLT-19 can summon the lab by setting any `subpoena:*` flag.
 - **FLT-15 M1b:** `pack.ts` reads the JSON directly; switching to `Content.disasters` is mechanical (`DisasterDef` is already the section shape, guards and verbs are already named calls, and `vocabulary` matches the `Vocabulary` service). The pack's cards are pushed into `EVENTS` at load (`content/events.ts`), as the Race's are.
 - **Not built:** Datacenter Flood (a copy of the fire with `building.offline` and `discourse.delta`; needs a Datacenter, which needs an auction) and Benchmark Contamination (the Arena is FLT-27's); `visitors.arrive` and `investigate.start` from the spec's example list wait for the mechanics that call them (FLT-18/19).
 

@@ -2,6 +2,7 @@
 export { Odometer } from "./Odometer";
 export { Marquee } from "./Marquee";
 export { Portrait } from "./Portrait";
+export { Senator } from "./Senator";
 export { Dialog } from "./Dialog";
 export { money } from "./format";
 export { reducedMotion } from "./motion";

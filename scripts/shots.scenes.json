@@ -120,6 +120,14 @@
       "dz-h98-leak",
       "dz-phone",
       "dz-swag-phone"
+    ],
+    "circus": [
+      "hearing",
+      "hearing-gavel",
+      "hearing-phone",
+      "yacht-invite",
+      "yacht-leak",
+      "yacht-leak-phone"
     ]
   },
   "scenes": {
@@ -1341,6 +1349,82 @@
         },
         {
           "wait": 500
+        }
+      ]
+    },
+    "hearing": {
+      "title": "FLT-21 The Hearing: the second senator asks, one chaotic answer on the record",
+      "query": {
+        "moment": "hearing",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "hearing-gavel": {
+      "title": "FLT-21 The Hearing: the gavel (chaotic, chaotic, earnest goes viral)",
+      "query": {
+        "moment": "hearing-verdict",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "hearing-phone": {
+      "title": "FLT-21 The Hearing on a phone",
+      "query": {
+        "moment": "hearing",
+        "warp": null
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "yacht-invite": {
+      "title": "FLT-24 The yacht summit invitation (existing event-card slot)",
+      "query": {
+        "moment": "yacht-invite",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "yacht-leak": {
+      "title": "FLT-24 The leaked group chat",
+      "query": {
+        "moment": "yacht-leak",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "yacht-leak-phone": {
+      "title": "FLT-24 The leaked group chat on a phone",
+      "query": {
+        "moment": "yacht-leak",
+        "warp": null
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "wait": 1200
         }
       ]
     }

@@ -80,7 +80,7 @@ src/skins/<id>/
     fonts/         # woff2 / woff / ttf / otf, each with its licence text beside it
     ...            # images, icons; reference them from skin.css with url(./assets/x.png)
 src/skins/base/    # the base skin: tokens.json, strings.json, base.css, and a complete set of slots
-src/skins/kit/     # helpers a skin may import (Odometer, Marquee, Portrait, Dialog, money, reducedMotion)
+src/skins/kit/     # helpers a skin may import (Odometer, Marquee, Portrait, Senator, Dialog, money, reducedMotion)
 src/skins/schema.ts, registry.ts, types.ts   # the loader; you do not edit these
 ```
 
@@ -414,6 +414,8 @@ A slot is a React component. Each gets **its slice of the view-model plus `actio
 | `Benchmarks` | `{ leapfrog, layout, actions }` | The benchmark leaderboard (Release Leapfrog): labs down the side, benchmarks across, your row highlighted, SOTA badges that blink when a record changes hands, benchmaxxed scores asterisked with the excuse underneath, solved benchmarks struck through and stamped SOLVED. Draw it with `kit`'s `<BenchTable leapfrog>` (semantic `bench-*` classes) or your own. Docked: the base Layout puts it under the Arena; a Layout may skip it if `Arena` hosts it. `null` while the pack is off. |
 | `Voice` | `{ leapfrog, layout, actions }` | The share-of-voice meter: who has the news cycle (`leapfrog.voice`: shares, owner, trend, and `series` for a graph: `kit`'s `<VoiceGraph voice>`). Docked. Frontier 95: a tray icon and a "Network Traffic" window. `null` while the pack is off. |
 | `Livestream` | `{ event, stream, actions }` | The launch livestream mishap card (the dog on stage, the wrong chart). Opens instead of `EventCard` when `event.kind === "stream"`; `stream` has the caption, viewer count and chat lines; answer with `actions.choose`. |
+| `Hearing` | `{ event, hearing, actions }` | The Hearing (FLT-21): a question at the witness table, or the gavel. Opens instead of `EventCard` when `event.kind === "hearing"`. `hearing` has the three senators (name, seat, `look` colours for the kit's `Senator` portrait, who is `asking`, how each was `answered`), the Trust and Capture meters, `progressText`, per-answer `moves` (label, arrows, `good`: `null` for Capture, which reads as sly) in the same order as `event.choices`, and `verdict` at the gavel. |
+| `LeakedChat` | `{ event, leak, actions }` | The yacht summit's leaked group chat (FLT-24). Opens instead of `EventCard` when `event.kind === "leak"`. `leak` has the group's name, `members`, and `messages` (`name`, rival `color`, `you` for the player's own lines, `system` for "X joined" lines, `time`, `text`); answer with `actions.choose`. |
 | `EraCard` | `{ era, actions }` | The full-screen era title card. `actions.continueEra()`; Enter, Space and (after 0.7 s) any key work. |
 | `FrontPage` | `{ paper, actions }` | The weekly paper. |
 | `GroupChat` | `{ chat, actions }` | The monthly recap chat (messages arrive one by one; `chat.typing`). |
@@ -432,7 +434,7 @@ A slot is a React component. Each gets **its slice of the view-model plus `actio
 | `DisasterMenu` | `{ disasters, actions }` | The Disasters menu (FLT-32), SimCity-style: the random-disaster setting (`disasters.risks`, Off / Rare / Normal / Chaos; `actions.setRisk(key)`), the list you can start one from (`disasters.menu`: name, blurb, `tags`, `available` or the `reason` it is not, `active`), and the Trust and Heat meters. Starting one must **ask first** ("Start a GPU Fire?"), with the safe answer as the default; then `actions.triggerDisaster(id)`. `actions.closeDisasters()` shuts it; time is held while it is open. Frontier 95's is a Control Panel applet with radio buttons and a Yes/No box. |
 | `DisasterAlert` | `{ disasters, layout, actions }` | Docked. What is going wrong now: each run in `disasters.running` (`stage` warning / active / response / aftermath, `phaseLabel`, a funny `line`, cleanup `progress`), and `disasters.understaffed` (who has been pulled off their post; `all` means nobody is left, like an unguarded gate). With nothing going on it is a quiet way into the menu (`actions.openDisasters()`). Frontier 95's is a Win95 fatal-error box. Only rendered once `vm.visible.disasters`. |
 
-The **docked** slots (`Layout` receives them pre-rendered) are `Stats`, `Training`, `Objectives`, `Inspector`, `BuildBar`, `Speed`, `Staff`, `ThoughtsPanel`, `Ticker`, `Toasts` (one `Toast` at a time: the newest toast, or the standing hint when nobody is talking), `Assistant`, `Arena`, `Benchmarks`, `Voice`, `Papers`, `NewsControls`, `NewsArrival`, `PhotoButton` and `DisasterAlert`. The modal slots (`EventCard`, `Livestream`, `EraCard`, `Outcome`, `NewsRoom`, `Mixer`, `ModManager`, `SkinPicker`, `PaperMoment`, `CrumbWiki`, `DisasterMenu`) and `PhotoOverlay` are rendered by the game when there is something to show.
+The **docked** slots (`Layout` receives them pre-rendered) are `Stats`, `Training`, `Objectives`, `Inspector`, `BuildBar`, `Speed`, `Staff`, `ThoughtsPanel`, `Ticker`, `Toasts` (one `Toast` at a time: the newest toast, or the standing hint when nobody is talking), `Assistant`, `Arena`, `Benchmarks`, `Voice`, `Papers`, `NewsControls`, `NewsArrival`, `PhotoButton` and `DisasterAlert`. The modal slots (`EventCard`, `Livestream`, `Hearing`, `LeakedChat`, `EraCard`, `Outcome`, `NewsRoom`, `Mixer`, `ModManager`, `SkinPicker`, `PaperMoment`, `CrumbWiki`, `DisasterMenu`) and `PhotoOverlay` are rendered by the game when there is something to show.
 
 ## Writing slots.tsx
 
@@ -459,7 +461,7 @@ const slots: SkinSlots = { Stats };
 export default slots;
 ```
 
-What a slot may import: `react`; `../types` and `../../ui/hud/types` (types only); `../kit` (Odometer, Marquee, Portrait, Dialog, BenchTable, VoiceGraph, money, reducedMotion, useT, useSlots, useSkin, useAutoPause, useCoach, ALL_VISIBLE, placeBalloon); files in its own folder. **Nothing else in the game.** Rules for slots:
+What a slot may import: `react`; `../types` and `../../ui/hud/types` (types only); `../kit` (Odometer, Marquee, Portrait, Senator, Dialog, BenchTable, VoiceGraph, money, reducedMotion, useT, useSlots, useSkin, useAutoPause, useCoach, ALL_VISIBLE, placeBalloon); files in its own folder. **Nothing else in the game.** Rules for slots:
 
 - **Render from props.** No reading the store, no timers that touch the game. UI-only state (an open tab, whether the Start menu is open) is `useState` inside the slot.
 - **Do not call `window` during render** (the tests render on the server). Read `layout.compact` / `layout.phone` from the props for responsive defaults; use `useEffect` for anything with the DOM.

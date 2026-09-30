@@ -517,3 +517,17 @@ flowchart LR
 | The existing perf tests | unchanged within noise (the 800-walker test reads 0.66 to 0.78 ms on this box for both `main` and the branch, against its 0.5 budget, doubled on CI) |
 
 Determinism: the disasters draw from `state.disasters.rngState`, not the main stream, and tests start with the setting `off`, so the golden digests and the playthrough tests are untouched. A separate test runs 90 days of chaos twice and compares the World byte for byte, and another saves and loads a World mid-swarm.
+
+## The Circus (FLT-21 The Hearing, FLT-24 the yacht summit)
+
+Two packs, `mods/base-hearing` and `mods/base-yacht` (see their READMEs), share one small compiler, `src/sim/circus/chart.ts`. It turns a pack's JSON chart into an XState machine whose guards and actions are the Vocabulary's (`src/sim/verbs.ts`). `compileChart(chart).step(stored, beat)` is a pure `transition()`. It returns the new `{ value, context }` and the `CALL`s it emitted, which the driver runs through `runVerb` in order. Beats are `DAY` (once a day, with pre-rolled dice and measured stats) and `CHOSE` (a card's pick, sent the moment the pick flag appears, paused or not).
+
+- **Vocabulary additions:**
+  - an `all` guard (every sub-guard holds)
+  - a `capture.delta` verb
+  - a `disasters` stat (disasters begun, all time) and a `capture` stat
+
+  `checkChart(chart, localStats)` lets a chart name its own context counters (the Hearing's `sessionTrust`, `chaos`, ...) without them being flagged as unknown.
+- **Gating:** both packs wake at Level 5 Scrutiny (`updateProgression`), each with an off flag (`hearingOff`, `yachtOff`; `?hearing=off`, `?yacht=off`). They are absent on a new World, so a save from before FLT-21 loads unchanged.
+- **Determinism:** each pack has its own random stream. The golden digests from tick 1600 changed only because Level 5 now wakes the packs. With both off flags set, the old digests reproduce exactly.
+- **HUD:** `EventVM.kind` gains `"hearing"` and `"leak"`, carrying `hearing: HearingVM` and `leak: LeakVM`. The modal tree routes them to the `Hearing` and `LeakedChat` slots (the base draws both; Frontier 95 has CapitolCam 1.0 and Chat-o-Matic 95). The kit's `Senator` draws a capsule portrait from a senator's `look` colours.

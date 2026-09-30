@@ -8,10 +8,11 @@ import { FrontPage, GroupChat, Mixer, ModManager, NewsRoom, PhotoOverlay, SkinPi
 import { Benchmarks, Livestream, Voice } from "./leapfrog";
 import { CrumbWiki, PaperMoment, Papers } from "./papers";
 import { DisasterAlert, DisasterMenu } from "./disasters";
+import { Hearing, LeakedChat } from "./circus";
 
 const slots: SkinSlots = {
   Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, Bubble, ThoughtsPanel, Ticker, Toast, Assistant,
-  EventCard, Confirm, Coach, UnlockCard, HowToPlay, Arena, Benchmarks, Voice, Livestream, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, NewsControls,
+  EventCard, Confirm, Coach, UnlockCard, HowToPlay, Arena, Benchmarks, Voice, Livestream, Hearing, LeakedChat, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, NewsControls,
   NewsArrival, NewsRoom, Mixer, ModManager, Papers, PaperMoment, CrumbWiki, DisasterMenu, DisasterAlert,
 };
 export default slots;
