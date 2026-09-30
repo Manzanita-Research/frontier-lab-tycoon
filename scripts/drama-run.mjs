@@ -13,7 +13,7 @@
 // 5. pr      commit mods/drama/<date>/ on a fresh branch from origin/main (a temporary worktree, so the current
 //            checkout is untouched) and open "Daily Drama: <summary>". The source link lives in the PR body only.
 //
-// Steps run alone too: `fetch`, `check <pack dir>`, `pr` (e.g. after a human edits the pack).
+// Steps run alone too: `fetch`, `check <pack dir>`, `pr` (e.g. after a human edits the pack), `body` (rewrite pr-body.md only).
 import { spawn } from "node:child_process";
 import { createWriteStream, existsSync } from "node:fs";
 import { cp, mkdir, mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
@@ -196,7 +196,27 @@ async function checkStep() {
   return { ok: ok && problems.length === 0, transcript, pr };
 }
 
-function prBody({ pr, transcript, agent }) {
+/** The pack's copy as markdown, so the review happens in the PR body rather than in JSON. */
+export function packText(mod) {
+  const c = mod.content ?? {};
+  const quote = (text) => String(text).split("\n").map((l) => `> ${l}`).join("\n");
+  const lines = [];
+  for (const card of c.events?.add ?? []) {
+    lines.push(`**Card: ${card.title ?? card.id}**`, "", quote(card.body ?? ""), "");
+    for (const choice of card.choices ?? []) lines.push(`- ${choice.label}${choice.hint ? ` _(${choice.hint})_` : ""}`);
+    lines.push("");
+  }
+  for (const [kind, list] of Object.entries(c)) if (!["events", "headlines", "thoughts", "rivals"].includes(kind)) lines.push(`**${kind}:** ${(list.add ?? []).map((x) => `\`${x.id}\``).join(", ")}`, "");
+  if (c.headlines?.add?.length) lines.push("**Headlines**", "", ...c.headlines.add.map((h) => `- ${h.text}`), "");
+  if (c.thoughts?.add?.length) lines.push("**Thoughts**", "", ...c.thoughts.add.map((t) => `- ${t.text}`), "");
+  for (const rival of c.rivals?.override ?? []) {
+    const { id, ...fields } = rival;
+    lines.push(`**Rival tweak:** \`${id}\` ${Object.entries(fields).map(([k, v]) => `${k} → "${v}"`).join(", ")}`, "");
+  }
+  return lines.join("\n").trim();
+}
+
+function prBody({ pr, transcript, agent, mod }) {
   const lines = [
     `**Daily Drama for ${date}.** Needs Jem's review before it merges or publishes (FLT-34). Don't merge on green CI.`,
     "",
@@ -209,6 +229,7 @@ function prBody({ pr, transcript, agent }) {
   ];
   const newNames = transcript.match(/^New parody names \(the pack's glossary\.json\): (.*)$/m)?.[1] ?? "none";
   const warnings = transcript.split("\n").filter((l) => l.startsWith("  ! "));
+  if (mod) lines.push("### The pack", "", packText(mod), "");
   lines.push(`**New parody names this pack invents** (declared in \`glossary.json\`; please eyeball): ${newNames}`);
   if (warnings.length) lines.push("", "**Linter warnings (ambiguous words, not failures):**", "```", ...warnings, "```");
   lines.push(
@@ -223,7 +244,7 @@ function prBody({ pr, transcript, agent }) {
     lines.push(
       "",
       "### How it was made",
-      `Headless \`${agent.model}\` in a scratch room outside the checkout (\`claude -p --restricted\`: file tools confined to the room, no shell; its one bridge to the game is a \`check\` tool). Its whole world: \`BRIEF.md\` (drama/pick.md), \`SKILL.md\` (.agents/skills/flt-modding), \`candidates.md\`. It read: ${agent.reads.map((r) => `\`${r}\``).join(", ")}; called \`check\` ${agent.checks} times; ${agent.turns ?? "?"} turns${agent.costUsd ? `, $${agent.costUsd.toFixed(2)}` : ""}.`,
+      `Headless \`${agent.model}\` in a scratch room outside the checkout (\`claude -p --restricted\`: file tools confined to the room, no shell; its one bridge to the game is a \`check\` tool). Its whole world: \`BRIEF.md\` (drama/pick.md), \`SKILL.md\` (.agents/skills/flt-modding), \`candidates.md\`. It read: ${agent.reads.map((r) => `\`${r}\``).join(", ")}; called \`check\` ${agent.checks} time${agent.checks === 1 ? "" : "s"}; ${agent.turns ?? "?"} turns${agent.costUsd ? `, $${agent.costUsd.toFixed(2)}` : ""}.`,
     );
   lines.push("", "🤖 Generated with [Claude Code](https://claude.com/claude-code)");
   return lines.join("\n");
@@ -245,7 +266,7 @@ async function prStep({ transcript, pr, agent }) {
     if (commit.code !== 0) throw new Error(commit.out);
     const push = await inTree("push", "--quiet", "-u", "origin", branch);
     if (push.code !== 0) throw new Error(push.out);
-    const body = prBody({ pr, transcript, agent });
+    const body = prBody({ pr, transcript, agent, mod: JSON.parse(await readFile(join(packDir, "mod.json"), "utf8")) });
     await writeFile(join(work, "pr-body.md"), body);
     const created = await run("gh", ["pr", "create", "--base", "main", "--head", branch, "--title", title, "--body-file", join(work, "pr-body.md")], { cwd: tree, quiet: true });
     if (created.code !== 0) throw new Error(created.out);
@@ -266,14 +287,20 @@ async function main() {
     return ok ? 0 : 1;
   }
   if (command === "fetch") return await fetchStep(), 0;
-  if (command === "pr") {
+  if (command === "pr" || command === "body") {
     const { ok, transcript, pr } = await checkStep();
     if (!ok) { console.log(transcript); return 1; }
     const agent = existsSync(join(work, "agent.json")) ? JSON.parse(await readFile(join(work, "agent.json"), "utf8")) : null;
+    if (command === "body") {
+      // Rewrites the PR body only (for `gh pr edit <n> --body-file`), without committing or opening anything.
+      await writeFile(join(work, "pr-body.md"), prBody({ pr, transcript, agent, mod: JSON.parse(await readFile(join(packDir, "mod.json"), "utf8")) }));
+      say(`wrote ${relative(root, join(work, "pr-body.md"))}`);
+      return 0;
+    }
     say(`opened ${await prStep({ transcript, pr, agent })}`);
     return 0;
   }
-  if (command !== "all") throw new Error(`unknown step ${command}: all | fetch | check [dir] | pr`);
+  if (command !== "all") throw new Error(`unknown step ${command}: all | fetch | check [dir] | pr | body`);
 
   await mkdir(work, { recursive: true });
   await fetchStep();
