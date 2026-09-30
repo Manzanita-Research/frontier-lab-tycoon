@@ -25,12 +25,12 @@ function until(s: GameState, want: (id: string) => boolean, days = 90) {
   }
 }
 
-/** The lab is called in (a subpoena, so no waiting for the debut) and testifies. "hearing": one chaotic answer given,
+/** The lab is called in for its debut (the pack woke three weeks ago) and testifies. "hearing": one chaotic answer given,
  * the second senator asking. "hearing-verdict": chaotic, chaotic, earnest, which goes viral, and the gavel is up. */
 export function stageHearing(s: GameState, moment: "hearing" | "hearing-verdict") {
   if (!s.models.length) s.models.push("Frontier-1");
   enableHearing(s);
-  s.flags["subpoena:demo"] = s.day;
+  s.hearing!.enabledDay = s.day - 21;
   const picks = moment === "hearing" ? [2] : [2, 2, 0];
   until(s, isHearingCard);
   for (const pick of picks) {

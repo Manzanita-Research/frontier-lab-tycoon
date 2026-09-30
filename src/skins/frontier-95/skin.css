@@ -3046,18 +3046,18 @@
   }
   .f95-leaked {
     position: absolute;
-    top: 45%;
-    left: 50%;
+    right: 14px;
+    bottom: 18px;
     padding: 0 14px;
     border: 5px solid #e00000;
     color: #e00000;
     font-family: var(--flt-font-display);
-    font-size: 48px;
+    font-size: 40px;
     font-weight: bold;
     letter-spacing: 0.1em;
     opacity: 0.85;
     pointer-events: none;
-    transform: translate(-50%, -50%) rotate(-12deg);
+    transform: rotate(-12deg);
     animation: frontier-95-stamp 0.4s steps(3) 0.3s both;
   }
   @media (prefers-reduced-motion: reduce) {
@@ -3087,13 +3087,13 @@
       max-height: 180px;
     }
     .f95-leaked {
-      font-size: 34px;
+      font-size: 30px;
     }
   }
 }
 @keyframes frontier-95-stamp {
   from {
     opacity: 0;
-    transform: translate(-50%, -50%) rotate(-12deg) scale(2.5);
+    transform: rotate(-12deg) scale(2.5);
   }
 }
