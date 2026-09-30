@@ -20,7 +20,7 @@ const R = COLLUSION.rules;
 const OWNER = "collusion";
 const SIGN_HEADLINES = COLLUSION.content.headlines.add.filter((h) => h.trigger !== "inquiryFailed");
 
-/** Enabling is explicit while the UI task follows. Baseline init and its RNG do not change. */
+/** The pack switch: the ladder flips it when Scrutiny is earned (sim/progression.ts). Baseline init and its RNG do not change. */
 export function enableCollusion(s: GameState) {
   if (!s.collusion) s.collusion = {
     enabled: true, rngState: (s.seed ^ 0x4352554d) >>> 0, machine: freshSwarm(),

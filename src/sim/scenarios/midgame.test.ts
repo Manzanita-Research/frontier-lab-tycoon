@@ -21,7 +21,8 @@ describe("midgame scenario", () => {
     expect(again).toEqual(s);
     // FLT-49 preserves the full starter-campus preset, completes its ladder, and replays
     // paid confirmations. Changed movement/attendance draws shift the real opening day.
-    expect(digest(s)).toBe("8aab011b");
+    // FLT-37: the campus it starts from wakes every earned pack, so Papers and Collusion now run in its 480 days too.
+    expect(digest(s)).toBe("3b2af327");
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);

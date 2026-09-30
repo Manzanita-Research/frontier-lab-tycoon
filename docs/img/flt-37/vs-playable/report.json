@@ -5,10 +5,10 @@
   },
   "head": {
     "branch": "flt-37-mods-live",
-    "sha": "e631c60",
+    "sha": "fd3096a",
     "dirty": true
   },
-  "seconds": 64.023,
+  "seconds": 81.326,
   "problems": [],
   "rows": [
     {
@@ -18,7 +18,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/vs-playable/after/overview.png",
       "title": "The campus, mid-morning, paused",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/vs-playable/compare/overview.png",
-      "changed": 0.0011126543209876542
+      "changed": 0.0013804012345679012
     },
     {
       "scene": "phone",
@@ -27,7 +27,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/vs-playable/after/phone.png",
       "title": "The same campus on a phone (390x844)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/vs-playable/compare/phone.png",
-      "changed": 0.0022056142909223477
+      "changed": 0.0028337282780410743
     },
     {
       "scene": "mod-steve",
@@ -36,7 +36,16 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/vs-playable/after/mod-steve.png",
       "title": "FLT-37: ?mod=every-lab-is-steve, the Arena is three Steves (main ignores ?mod=)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/vs-playable/compare/mod-steve.png",
-      "changed": 0.009631172839506173
+      "changed": 0.010766975308641975
+    },
+    {
+      "scene": "midgame",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/vs-playable/before/midgame.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/vs-playable/after/midgame.png",
+      "title": "FLT-48 Part A: the scripted mid-game campus, paused near Y2 Mar",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/vs-playable/compare/midgame.png",
+      "changed": 0.09351774691358025
     }
   ],
   "errors": []

@@ -13,6 +13,7 @@ import { trainingMachine } from "./machines/training";
 import { coachMachine } from "./machines/coach";
 import { progressionMachine } from "./machines/progression";
 import { pushNews } from "./news";
+import { enableEarnedPacks } from "./progression";
 import { newSlop } from "./slop";
 import { blankVibes, initialVibes } from "./vibes";
 import { createLeapfrog } from "./race/leapfrog/state";
@@ -119,5 +120,7 @@ function create(seed: number, opening: "garage" | "campus"): GameState {
   for (let i = 0; i < 3; i++) dailyThoughts(state, rng, true);
 
   state.rngState = rng.state();
+  // Systems the run starts with already earned (a campus, or a first rung a mod gave one) wake their packs now.
+  enableEarnedPacks(state);
   return state;
 }

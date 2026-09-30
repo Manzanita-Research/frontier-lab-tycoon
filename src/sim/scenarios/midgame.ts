@@ -4,7 +4,6 @@ import { canPlace, type Command } from "../commands";
 import { openEventOf } from "../events";
 import { outcomeOf } from "../goals";
 import { buildingAt, isPathTile, rectContains } from "../pathfind";
-import { enableLeapfrog } from "../race/leapfrog/driver";
 import { createInitialState } from "../state";
 import { applyNow, tick, TICKS_PER_DAY } from "../tick";
 import type { GameState, Thought, WalkerKind } from "../types";
@@ -84,11 +83,9 @@ export function walkerOnCampus(s: GameState): boolean {
 
 export function createMidgameScenario(): GameState {
   const s = createInitialState(MIDGAME_SEED, "campus");
-  // The curated mid-game scenario starts with every system earned. Its paid replay remains unchanged.
-  s.progression = { value: "complete", context: { level: 5 } };
+  // The curated mid-game scenario starts with every system earned (the campus opening already woke every pack).
   s.coach = { value: "skipped", context: { index: 0, elapsed: 0 } };
   s.flags.coachBuildOpened = 0;
-  enableLeapfrog(s);
   pave(s);
   for (let i = 0; s.day < 480 && i < 500 * TICKS_PER_DAY && outcomeOf(s) !== "lost"; i++) {
     let cmds = answer(s);
