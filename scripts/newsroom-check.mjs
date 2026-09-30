@@ -136,6 +136,8 @@ await page.reload({ waitUntil: 'networkidle' });
 await page.waitForFunction(() => window.__press && window.__press.room().archive.length >= 2);
 mark('Paper and chat archived and restored after reload; typing dots, all four friends and Mom line visible');
 
+// Release the desktop renderer before the phone pass on CPU-only Modal machines.
+await page.close();
 const phone = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
 phone.on('pageerror', e => errors.push(String(e)));
 await phone.goto(`${base}/?debug=1&skin=base&speed=0&warp=20&newsdemo=chat`, { waitUntil: 'networkidle' });
