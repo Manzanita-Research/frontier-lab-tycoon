@@ -2769,3 +2769,49 @@
     transform: translateX(-2px);
   }
 }
+/* The Bird App (FLT-69) as a bird-watching log: ruled sightings in italic ink, a rare sighting stamped in gold. */
+[data-skin="field-almanac"] {
+  .birdapp.open {
+    background: var(--flt-color-panel);
+  }
+  .birdapp-head b {
+    font-family: var(--flt-font-display);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 16px;
+  }
+  .birdapp .bird-post {
+    border-bottom: 1px solid var(--fa-hair);
+    background: repeating-linear-gradient(transparent 0 17px, color-mix(in srgb, var(--fa-hair) 50%, transparent) 17px 18px);
+  }
+  .birdapp .bird-post p {
+    font-family: var(--flt-font-display);
+    font-style: italic;
+    font-size: 13px;
+  }
+  .birdapp .bird-av {
+    border-color: var(--fa-sage);
+    background: var(--fa-paper);
+  }
+  .birdapp-aurabar i {
+    background: linear-gradient(90deg, var(--fa-sage), var(--fa-plum));
+  }
+  .birdapp .bird-viral {
+    border: 1px solid var(--fa-gold-text);
+    border-radius: 999px;
+    background: var(--fa-gold);
+    color: var(--fa-ink);
+    font-family: var(--flt-font-display);
+    font-style: italic;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .birdapp h4 {
+    font-family: var(--flt-font-display);
+    font-style: italic;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 13px;
+  }
+}

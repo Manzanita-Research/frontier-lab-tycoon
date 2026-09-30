@@ -22,7 +22,8 @@
     "Arena",
     "EraCard",
     "Outcome",
-    "NewsControls", "DramaButton",
+    "NewsControls",
+    "DramaButton",
     "NewsArrival",
     "PhotoButton"
   ],
@@ -117,6 +118,24 @@
     "objectives.title": "My Goals",
     "thoughts.title": "Guestbook",
     "news.button": "Newsletter",
-    "news.open": "Open the Newsletter"
+    "news.open": "Open the Newsletter",
+    "birdapp.title": "Sign our Guestbook!",
+    "birdapp.aura": "Cool-o-meter",
+    "birdapp.timeline": "Entries",
+    "birdapp.posters": "Webring",
+    "birdapp.comms": "Webmaster",
+    "birdapp.live": "NEW!",
+    "birdapp.log": "Past entries",
+    "birdapp.empty": "Be the first to sign our guestbook!",
+    "birdapp.quiet": "No flames in the webmaster's inbox.",
+    "birdapp.viral": "HOT!",
+    "birdapp.ratio": "flame war brewing",
+    "birdapp.reviewed": "approved by the webmaster",
+    "birdapp.outcome.flop": "0 hits",
+    "birdapp.outcome.banger": "COOL SITE!!",
+    "birdapp.outcome.controversy": "Flame war",
+    "birdapp.outcome.ratioed": "Flamed",
+    "birdapp.outcome.cancelled": "BANNED",
+    "birdapp.outcome.live": "NEW!"
   }
 }

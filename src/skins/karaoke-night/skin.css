@@ -3157,3 +3157,45 @@
     transform: rotate(360deg);
   }
 }
+/* The Bird App (FLT-69) as a lyric screen: the post on the mic in big sung letters, ENCORE! in neon. */
+[data-skin="karaoke-night"] {
+  .birdapp-head b {
+    font-family: var(--kn-display, var(--flt-font-display));
+    color: var(--kn-lemon);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .birdapp .bird-post.outcome-live {
+    padding: 6px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--kn-screen, #0a0620);
+  }
+  .birdapp .bird-post.outcome-live p {
+    color: var(--kn-cyan);
+    font-family: var(--kn-display, var(--flt-font-display));
+    font-size: 14px;
+    text-align: center;
+    text-shadow: 0 0 6px color-mix(in srgb, var(--kn-cyan) 60%, transparent);
+  }
+  .birdapp h4 {
+    color: var(--kn-pink);
+    opacity: 1;
+  }
+  .birdapp-aurabar i {
+    background: linear-gradient(90deg, var(--kn-pink), var(--kn-lemon));
+  }
+  .birdapp .bird-viral {
+    border: 2px solid var(--kn-pink);
+    border-radius: 6px;
+    background: #140a2a;
+    color: var(--kn-pink-hi);
+    text-shadow: 0 0 6px var(--kn-pink);
+    animation: karaoke-night-blink 0.9s steps(2) infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .birdapp .bird-viral {
+      animation: none;
+    }
+  }
+}

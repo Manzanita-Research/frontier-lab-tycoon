@@ -5012,7 +5012,7 @@
       bottom: 4px;
       padding: 2px 8px;
       font-size: 16px;
-      animation: frontier-95-stamp 0.3s steps(3);
+      animation: frontier-95-birdstamp 0.3s steps(3);
     }
   }
   .f95-bird-text {
@@ -5244,7 +5244,7 @@
     transform: translateY(-2px) rotate(-8deg);
   }
 }
-@keyframes frontier-95-stamp {
+@keyframes frontier-95-birdstamp {
   from {
     transform: rotate(-8deg) scale(2);
     opacity: 0;
