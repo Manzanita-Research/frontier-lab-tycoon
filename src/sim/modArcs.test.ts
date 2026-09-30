@@ -13,6 +13,8 @@ import { answer } from "./testkit";
 import { applyNow, tick } from "./tick";
 import type { GameState } from "./types";
 import { GUARD_NAMES, VERB_NAMES } from "./verbs";
+import { compile } from "./modArcs";
+import { step } from "./machines/run";
 import { ACTION_NAMES as SDK_ACTIONS, GUARD_NAMES as SDK_GUARDS } from "../../packages/flt-mod-sdk/src/index";
 import { BASE_ARCS, FACTIONS } from "../content/factions";
 
@@ -219,5 +221,41 @@ describe("mod arcs (FLT-37)", () => {
       expect(defs().mishapById("steveMic")?.voice).toBe(-2);
     });
     await expect(resolve([mod("bad", { benchmarks: { add: [{ id: "x", name: "X", short: "X", kind: "score", difficulty: 1, replaces: "mmlo" }] } })])).rejects.toThrow('did you mean "mmlu"');
+  });
+
+  it("skips transition() only on a beat where the machine would stay put and say nothing (FLT-39)", () => {
+    const arcs = [...BASE_ARCS, ...((starter.content.arcs as { add?: unknown[] }).add ?? []) as ArcData[]];
+    let quiet = 0;
+    let loud = 0;
+    for (const arc of arcs) {
+      const c = compile(arc);
+      const cards = ["water", "nope", ...(JSON.stringify(arc).match(/"card":"[^"]+"/g) ?? []).map((m) => m.slice(8, -1))];
+      for (const value of c.leaves) {
+        if (c.done.has(value)) continue;
+        for (const enteredTick of [0, 25, 400])
+          for (const day of [1, 2, 21, 40, 90])
+            for (const roll of [0, 0.35, 0.95])
+              for (const level of [0, 20, 45, 70, 101]) {
+                const tick = day * 20;
+                const stats = Object.fromEntries(c.stats.map((name, i) => [name, (level * (i + 1)) % 120]));
+                const flags = Object.fromEntries(c.flags.filter((_, i) => (level + i) % 2 === 0).map((name) => [name, day - 1]));
+                const beat = { tick, day, roll, stats, flags };
+                const events = [{ type: "DAY", ...beat }, ...cards.flatMap((card) => ["0", "1"].map((choice) => ({ type: "CHOSE", card, choice, ...beat })))];
+                for (const event of events) {
+                  const stored = { value, context: { enteredTick } };
+                  if (!c.quiet(stored, event as never)) {
+                    loud++;
+                    continue;
+                  }
+                  quiet++;
+                  const r = step(c.machine, stored as never, event as never);
+                  expect(r.effects, `${arc.id} ${value} ${event.type}`).toEqual([]);
+                  expect(r.stored, `${arc.id} ${value} ${event.type}`).toStrictEqual(stored);
+                }
+              }
+      }
+    }
+    expect(quiet).toBeGreaterThan(1000);
+    expect(loud).toBeGreaterThan(100); // and it does not call every beat quiet
   });
 });

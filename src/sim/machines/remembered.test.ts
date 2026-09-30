@@ -1,6 +1,7 @@
-// FLT-39: `remembered(machine)` must answer exactly as `step(machine, ...)` does, first time and every time after.
+// FLT-39: the shortcuts past `transition()` must answer exactly as `step(machine, ...)` does: `remembered(machine)`,
+// first time and every time after, and the event arcs' quiet day.
 import { remembered, step } from "./run";
-import { arcMachine, stepArc, type ArcStored } from "./arc";
+import { arcMachine, dayArc, quietArcDay, type ArcStored } from "./arc";
 import { moodMachine, QUIT_DAYS, stepMood, type MoodStored } from "./mood";
 import { staffMachine, stepStaff, type StaffStored } from "./staff";
 
@@ -36,6 +37,7 @@ describe("remembered steps", () => {
   });
 
   it("answers as the arc machine does, for every phase, cooldown and daily check, and for picks", () => {
+    const stepArc = remembered(arcMachine);
     for (const value of ["calm", "brewing", "cardOpen", "cooldown"] as const)
       for (const openedDay of [null, 0, 3, 10])
         for (const cooldownDays of [0, 5])
@@ -47,6 +49,31 @@ describe("remembered steps", () => {
                   for (const pace of [1, 0.5]) same(arcMachine, stepArc, stored as never, { type: "DAY", day, ready, slotFree, pace } as never);
             for (const choiceIndex of [-1, 0, 1.5, 2, 3]) same(arcMachine, stepArc, stored as never, { type: "CHOOSE", choiceIndex } as never);
           }
+  });
+
+  it("takes the arcs' quiet day only when the machine would leave the card as it is", () => {
+    let quiet = 0;
+    for (const value of ["calm", "brewing", "cardOpen", "cooldown"] as const)
+      for (const openedDay of [null, 0, 3, 10])
+        for (const cooldownDays of [0, 5, 7])
+          for (const choices of [1, 3]) {
+            const stored: ArcStored = { value, context: { choices, cooldownDays, openedDay } };
+            for (const day of [0, 4, 8, 12, 13, 40])
+              for (const ready of [false, true])
+                for (const slotFree of [false, true])
+                  for (const pace of [1, 0.5, 0.75]) {
+                    const event = { type: "DAY", day, ready, slotFree, pace } as const;
+                    const want = step(arcMachine, stored, event);
+                    const got = quietArcDay(stored, event);
+                    if (got) {
+                      quiet++;
+                      expect(want.effects).toEqual([]);
+                      expect(got).toStrictEqual(want.stored);
+                    }
+                    expect(dayArc(stored, event)).toStrictEqual(want.stored);
+                  }
+          }
+    expect(quiet).toBeGreaterThan(500); // the shortcut is taken, not just never wrong
   });
 
   it("keeps undefined, NaN, Infinity and -0 apart in its key", () => {

@@ -3,7 +3,7 @@ import type { BuildingKind } from "../content/buildings";
 import type { Condition, Effect } from "../content/events";
 import { THOUGHT_TICKS, DISCOURSE_PER_PROTESTER } from "./constants";
 import { fillTemplate } from "./format";
-import { arcMachine, stepArc } from "./machines/arc";
+import { arcMachine, dayArc } from "./machines/arc";
 import { initialStored, step } from "./machines/run";
 import { EVENT_COOLDOWN_DAYS } from "../content/events";
 import { nudgeFaction, nudgeRelation } from "./factions/state";
@@ -54,7 +54,7 @@ export function dailyEvents(state: GameState) {
   for (const def of defs().events) {
     // A save from before a pack added this card (the factions' cards, a mod's) starts its machine now.
     state.arcs[def.id] ??= initialStored(arcMachine, { choices: def.choices.length, cooldownDays: def.cooldown ?? EVENT_COOLDOWN_DAYS, openedDay: null });
-    const { stored } = stepArc(state.arcs[def.id]!, { type: "DAY", day: state.day, ready: pressureReady(state) && (conditionHolds(state, def.when) || state.flags[askFlag(def.id)] !== undefined), slotFree, pace });
+    const stored = dayArc(state.arcs[def.id]!, { type: "DAY", day: state.day, ready: pressureReady(state) && (conditionHolds(state, def.when) || state.flags[askFlag(def.id)] !== undefined), slotFree, pace });
     state.arcs[def.id] = stored;
     if (stored.value === "cardOpen") slotFree = false;
   }
