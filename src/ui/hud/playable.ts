@@ -36,6 +36,19 @@ export interface PlayableInput {
   laddered: boolean;
 }
 
+/**
+ * The "New!" card lists what a level brings, and the logic sends systems as ids. Name them for people; `null` is a secret the
+ * card must not spoil (collusion is only ever seen through its signs).
+ */
+const SYSTEM_NAMES: Record<string, string | null> = {
+  breakdowns: "Breakdowns", slop: "Slop", leapfrog: "Benchmark leaderboard", arena: "The Arena", rnd: "R&D multiplier", news: "The Frontier Times",
+  events: "Event cards", protests: "Protests", disasters: "Disasters", papers: "Papers: publish or perish", collusion: null,
+};
+const unlockOf = (card: UnlockCardVM): UnlockCardVM => ({
+  ...card,
+  items: card.items.flatMap((item) => (item in SYSTEM_NAMES ? (SYSTEM_NAMES[item] === null ? [] : [SYSTEM_NAMES[item]!]) : [item])),
+});
+
 const everything = (on: boolean): VisibleVM => Object.fromEntries(HUD_PANELS.map((p) => [p, on])) as VisibleVM;
 
 export function playableOf(snap: object): PlayableInput {
@@ -54,7 +67,7 @@ export function playableOf(snap: object): PlayableInput {
     teasers: progress?.teasers ?? [],
     visible,
     coach: coach && { ...coach },
-    unlock: p.unlockCard ?? null,
+    unlock: p.unlockCard ? unlockOf(p.unlockCard) : null,
     laddered: progress !== undefined,
   };
 }

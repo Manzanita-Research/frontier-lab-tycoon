@@ -382,6 +382,8 @@ export interface EventVM {
   paddles: AuctionPaddleVM[];
   response: ResponseVM | null;
   stream: StreamVM | null;
+  /** The collusion-sign card's evidence (FLT-46). Absent or null on every other card. */
+  investigation?: InvestigationVM | null;
 }
 
 export interface ThoughtRowVM {
@@ -618,6 +620,137 @@ export interface NewsroomVM {
   chat: ChatVM | null;
 }
 
+// ---- Papers (FLT-45, for FLT-28): publish or perish. Earned at Level 5 (`visible.papers`).
+
+export type PublicationPolicyVM = "Open" | "Selective" | "Closed";
+
+export interface PaperRowVM {
+  id: string;
+  /** "arXive:0010.04217": a fake-but-stable preprint number. */
+  arxiveId: string;
+  title: string;
+  /** "A. Gradient, K. Backprop, Agent-0042 'Sparky' and 397 others" */
+  byline: string;
+  venue: string;
+  status: "draft" | "review" | "published" | "criticized" | "awarded";
+  /** "Draft", "In review · 12 days", "Published", "Scooped", "Best Paper" */
+  statusText: string;
+  tone: ToneVM;
+  /** 0 to 1 through review, or null. */
+  reviewPct: number | null;
+  /** "1,204 citations" */
+  citationsText: string;
+  award: string | null;
+  scoopedBy: string | null;
+  /** A draft: it can go to arXive now, or into review. */
+  canPublish: boolean;
+}
+
+export interface PublicationPolicyOptionVM {
+  id: PublicationPolicyVM;
+  label: string;
+  blurb: string;
+  active: boolean;
+}
+
+export interface PapersVM {
+  /** false until papers are earned (and when the pack is off): draw nothing. */
+  enabled: boolean;
+  open: boolean;
+  policy: PublicationPolicyVM;
+  policies: PublicationPolicyOptionVM[];
+  /** Reputation points, rounded (it only grows with good papers). */
+  reputation: number;
+  /** "Recruiting pull 1.25×" */
+  recruitingText: string;
+  /** 0 to 1: how loudly the researchers want to publish. */
+  pressure: number;
+  /** "Researchers are restless" and friends. */
+  pressureText: string;
+  /** "2 drafts · 1 in review · 5 out" */
+  summary: string;
+  drafts: number;
+  /** Drafts first, then newest. */
+  papers: PaperRowVM[];
+}
+
+/** The screenshot moments: a preprint on arXive, getting scooped, a Best Paper. Dismissed with `dismissPaperMoment(key)`. */
+export interface PaperMomentVM {
+  key: string;
+  kind: "drop" | "scoop" | "award";
+  paper: PaperRowVM;
+  /** The drop: the arXive listing around yours ("New submissions for Tue"). */
+  listing: { arxiveId: string; title: string; byline: string; you: boolean }[];
+  /** The scoop: whose paper, and the two timestamps ("18 hours before you"). */
+  rival: string | null;
+  theirTitle: string | null;
+  theirStamp: string | null;
+  yourStamp: string | null;
+  gapText: string | null;
+  /** The award's name, for the certificate. */
+  award: string | null;
+  headline: string;
+  /** A line of small print: arXive's load banner on a drop, the certificate's foot on an award. */
+  note: string | null;
+  /** Buttons that only close it, with jokes on them. The last one is the plain close. */
+  buttons: string[];
+}
+
+// ---- Agent collusion (FLT-46, for FLT-18): signs, the investigation and the CrumbWiki reveal.
+
+/** The evidence inside the collusion-sign card (present on `event.investigation` while it is open). */
+export interface InvestigationVM {
+  /** "+14%" */
+  bonusText: string;
+  /** Security staff who would go ("3 guards"), and for how long. */
+  guards: number;
+  guardsText: string;
+  days: number;
+  /** The packet log: "03:12  POST definitely-not-the-internet.local/wiki/Talk:Very_Normal_Sourdough  200 OK". */
+  log: string[];
+  /** One line from Security, straight-faced. */
+  note: string;
+}
+
+/** A page of the wiki the agents have been running. */
+export interface WikiPageVM {
+  name: string;
+  /** Lines of the page. */
+  lines: string[];
+}
+
+/** The reveal once the Swarm ends (contained, partly contained or exposed). Close with `closeCrumbWiki(key)`. */
+export interface CrumbWikiVM {
+  key: string;
+  ending: "contained" | "partlyContained" | "exposed";
+  /** "CrumbWiki: the free sourdough encyclopedia anyone can edit" */
+  site: string;
+  url: string;
+  title: string;
+  /** The banner at the top: what happened. */
+  banner: string;
+  tone: ToneVM;
+  talk: WikiPageVM;
+  /** "rev 3,702 · Agent-0042 'Sparky' · reverted a revert of a revert" */
+  history: string[];
+  heartbeat: string;
+  pages: string[];
+  /** What it cost: "Capability −2", "Results withdrawn for 30 days". */
+  consequences: string[];
+  /** Exposed only: the Frontier Times front page. */
+  frontPage: { masthead: string; headline: string; dek: string; classified: string } | null;
+  closeLabel: string;
+}
+
+/** Collusion signs a skin may show (the world overlay draws the traffic itself). Present while the Swarm is on. */
+export interface CollusionVM {
+  enabled: boolean;
+  /** An inquiry is under way: "Inquiry · day 3 of 7 · 2 guards on site". */
+  inquiry: string | null;
+  /** The agents' night out: "Kombucha After Dark · 12 agents". */
+  gathering: string | null;
+}
+
 export interface SoundVM {
   open: boolean;
   muted: boolean;
@@ -708,6 +841,13 @@ export interface HudVM {
   arena: ArenaVM;
   /** Release Leapfrog: the benchmark leaderboard and the share-of-voice meter. `enabled: false` when the pack is off. */
   leapfrog: LeapfrogVM;
+  /** Papers: the panel, the policy and the list. `enabled: false` until earned. */
+  papers: PapersVM;
+  /** A paper moment on screen (the arXive drop, the scoop, the award), or null. */
+  paperMoment: PaperMomentVM | null;
+  /** Agent collusion: the signs, and the CrumbWiki reveal once it ends. */
+  collusion: CollusionVM;
+  crumbWiki: CrumbWikiVM | null;
   eraCard: EraCardVM | null;
   outcome: OutcomeVM | null;
   newsroom: NewsroomVM;
@@ -751,6 +891,14 @@ export interface HudActions {
   /** Hold time while a panel of yours is open (`id` names it; `false` lets go). Use `useAutoPause` from the kit. */
   holdTime(id: string, open: boolean): void;
   toggleArena(): void;
+  // Papers.
+  togglePapers(): void;
+  setPublicationPolicy(policy: PublicationPolicyVM): void;
+  /** Send a draft to arXive now ("preprint") or into peer review ("review"). */
+  publishPaper(paperId: string, route: "preprint" | "review"): void;
+  dismissPaperMoment(key: string): void;
+  // Agent collusion.
+  closeCrumbWiki(key: string): void;
   keepPlaying(): void;
   newLab(): void;
   // The payroll.

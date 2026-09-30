@@ -91,6 +91,12 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
       return { newsroom: vms.archive!.newsroom, actions };
     case "Mixer":
       return { sound: { ...main.sound, open: true }, actions };
+    case "Papers":
+      return { papers: vms.papers!.papers, layout: vms.papers!.layout, actions };
+    case "PaperMoment":
+      return { moment: vms.scoop!.paperMoment!, actions };
+    case "CrumbWiki":
+      return { wiki: vms.scandal!.crumbWiki!, actions };
   }
 }
 
@@ -118,6 +124,12 @@ const vms: Record<string, HudVM> = {
   phone: vmOf({ width: 390, height: 844 }),
   nobody: vmOf({ selected: null }),
   staff: vmOf({ staff: true }),
+  papers: vmOf({ papers: "panel" }),
+  drop: vmOf({ papers: "drop" }),
+  scoop: vmOf({ papers: "scoop" }),
+  award: vmOf({ papers: "award" }),
+  sign: vmOf({ collusion: "sign" }),
+  scandal: vmOf({ collusion: "scandal" }),
 };
 
 const usable = catalog.filter((e) => e.ok).map((e) => e.folder);
@@ -176,6 +188,28 @@ describe.each([BASE_ID, ...usable])("skin %s", (id) => {
     for (const c of vms.event!.event!.choices) expect(card).toContain(escape(c.label));
     const era = html(skin, <Modals vm={vms.era!} actions={actions} />);
     expect(era).toContain(escape(vms.era!.eraCard!.line));
+  });
+
+  it("draws Papers once earned, and the paper and collusion moments (FLT-45, FLT-46)", async () => {
+    const { skin } = await prepareSkin(id);
+    const panel = html(skin, <Docked vm={vms.papers!} actions={actions} />);
+    expect(vms.papers!.papers.open).toBe(true);
+    expect(panel).toContain(escape(vms.papers!.papers.papers[0]!.title));
+    for (const p of vms.papers!.papers.policies) expect(panel).toContain(escape(p.label));
+    // Not earned yet (Level 4): nothing at all, not even the chip.
+    const locked = hudViewModel({ ...fixtureInput({ papers: "panel", level: 4 }) });
+    expect(html(skin, <Docked vm={locked} actions={actions} />)).not.toContain(escape(vms.papers!.papers.papers[0]!.title));
+    const scoop = html(skin, <Modals vm={vms.scoop!} actions={actions} />);
+    expect(scoop).toContain(escape(vms.scoop!.paperMoment!.rival!));
+    expect(scoop).toContain(escape(vms.scoop!.paperMoment!.gapText!));
+    expect(html(skin, <Modals vm={vms.award!} actions={actions} />)).toContain(escape(vms.award!.paperMoment!.award!));
+    expect(html(skin, <Modals vm={vms.drop!} actions={actions} />)).toContain(escape(vms.drop!.paperMoment!.paper.arxiveId));
+    const sign = html(skin, <Modals vm={vms.sign!} actions={actions} />);
+    expect(sign).toContain(escape(vms.sign!.event!.title));
+    expect(sign).toContain("POST definitely-not-the-internet.local");
+    const scandal = html(skin, <Modals vm={vms.scandal!} actions={actions} />);
+    expect(scandal).toContain(escape(vms.scandal!.crumbWiki!.frontPage!.headline));
+    expect(scandal).toContain("Talk");
   });
 
   it("asks before a spend that leaves under three months of runway, in a modal of its own", async () => {

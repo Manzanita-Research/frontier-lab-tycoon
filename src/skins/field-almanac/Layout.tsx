@@ -37,6 +37,7 @@ export function Layout({ vm, slots }: SlotPropsMap["Layout"]) {
         {slots.NewsArrival}
         {slots.Inspector}
         {slots.Arena}
+        {slots.Papers}
         {compact ? (
           <div className="fa-pills">
             {slots.Benchmarks}

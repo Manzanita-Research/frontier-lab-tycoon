@@ -12,7 +12,7 @@ import { skinList } from "../../skins/registry";
 import type { LeapfrogView } from "../../sim/race/leapfrog/view";
 import { shotAtom } from "../juice/photo";
 import { newMotion, NO_MOTION, stepMotion, type Motion, type MotionView } from "./leapfrogMotion";
-import { arenaOpenAtom, chatCountAtom, helpOpenAtom, photoFlashAtom, photoTimeAtom, skinUiAtom, staffOpenAtom } from "./state";
+import { arenaOpenAtom, chatCountAtom, dismissedAtom, helpOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, skinUiAtom, staffOpenAtom } from "./state";
 import { playableFixture } from "./previewLadder";
 import type { HudVM } from "./types";
 import { hudViewModel } from "./vm";
@@ -171,6 +171,8 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
   const skinUi = useAtomValue(skinUiAtom);
   const staffOpen = useAtomValue(staffOpenAtom);
   const helpOpen = useAtomValue(helpOpenAtom);
+  const papersOpen = useAtomValue(papersOpenAtom);
+  const dismissed = useAtomValue(dismissedAtom);
   const viewport = useViewport();
   const tapHint = useTapHint(selected);
   // "Build an API Gateway..." twice is one hint too many: once a toast has said it, the standing hint is redundant.
@@ -203,6 +205,8 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         room,
         chatCount,
         helpOpen,
+        papersOpen,
+        dismissed,
         mixer: { open: mixerOpen, ready: audioReady, muted: mixer.muted, master: mixer.master, music: mixer.music, sfx: mixer.sfx },
         photo: { on: photoOn, time: photoTime, shot, flash },
         skins: {
@@ -215,7 +219,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         },
         viewport,
       }),
-    [shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, motion, leapfrog, room, chatCount, helpOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, skinUi, list, viewport, staffOpen, zone],
+    [shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, motion, leapfrog, room, chatCount, helpOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, skinUi, list, viewport, staffOpen, zone, papersOpen, dismissed],
   );
   return vm;
 }

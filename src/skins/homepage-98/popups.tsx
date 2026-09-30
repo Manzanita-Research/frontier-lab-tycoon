@@ -1,6 +1,7 @@
 // Everything that interrupts you: guestbook entries over people's heads, toasts as pop-up windows ("Click here!!!"),
 // the event card, the era card as a prize notification, the win/lose card and "you've got mail".
 import { useT } from "../context";
+import { Evidence } from "../kit";
 import type { SlotPropsMap } from "../types";
 import { New, Pop } from "./parts";
 import { Spark } from "./icons";
@@ -83,6 +84,7 @@ export function EventCard({ event, actions }: SlotPropsMap["EventCard"]) {
             </tbody>
           </table>
         )}
+        {event.investigation && <Evidence investigation={event.investigation} />}
         <div className="gc-choices">
           {event.choices.map((c, i) => (
             <button key={c.label} type="button" className="gc-fb gc-choice" onClick={() => actions.choose(event.id, i)}>

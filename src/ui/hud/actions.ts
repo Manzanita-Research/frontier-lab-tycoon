@@ -7,10 +7,15 @@ import type { Cue } from "../../audio/score";
 import { fx } from "../../render/fx/state";
 import { roomAtom, skipNews, viewRoom } from "../../newsroom/state";
 import { setPhoto, takePhoto } from "../juice/photo";
-import { arenaOpenAtom, chatCountAtom, helpOpenAtom, photoFlashAtom, photoTimeAtom, staffOpenAtom } from "./state";
+import { arenaOpenAtom, chatCountAtom, dismissedAtom, helpOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, staffOpenAtom } from "./state";
 import { skinActions } from "./skinControl";
 import type { StaffJob } from "../../sim/types";
 import type { HudActions } from "./types";
+
+const dismiss = (key: string) => {
+  const seen = registry.get(dismissedAtom);
+  if (!seen.includes(key)) registry.set(dismissedAtom, [...seen.slice(-31), key]);
+};
 
 const TIME_HOURS: Record<string, number | null> = { live: null, day: 13, golden: 18.3, night: 22.5 };
 
@@ -60,6 +65,16 @@ export const hudActions: HudActions = {
   closeHelp: () => registry.set(helpOpenAtom, false),
   holdTime: (id, open) => send({ type: "SET_OVERLAY", id, open }),
   toggleArena: () => registry.set(arenaOpenAtom, !registry.get(arenaOpenAtom)),
+  togglePapers: () => registry.set(papersOpenAtom, !registry.get(papersOpenAtom)),
+  setPublicationPolicy: (policy) => {
+    if (policy === "Open" || policy === "Selective" || policy === "Closed") send({ type: "COMMAND", command: { type: "setPublicationPolicy", policy } });
+  },
+  publishPaper: (paperId, route) => {
+    const id = Number(paperId);
+    if (Number.isInteger(id) && (route === "preprint" || route === "review")) send({ type: "COMMAND", command: { type: "publishPaper", id, route } });
+  },
+  dismissPaperMoment: dismiss,
+  closeCrumbWiki: dismiss,
   keepPlaying: () => send({ type: "KEEP_PLAYING" }),
   newLab: () => send({ type: "NEW_LAB" }),
 

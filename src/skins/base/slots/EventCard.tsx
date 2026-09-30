@@ -2,6 +2,7 @@ import { useT } from "../../context";
 import type { EventVM, HudActions, ResponseVM } from "../../../ui/hud/types";
 import type { SlotPropsMap } from "../../types";
 import { AuctionStrip } from "./AuctionStrip";
+import { Evidence } from "../../kit";
 
 /** The numbers behind "Ship now at 94% ready": how baked the run is, what shipping now adds, the odds of a launch bug. */
 export function ResponseGauges({ response }: { response: ResponseVM }) {
@@ -63,6 +64,7 @@ export function EventCard({ event, actions }: SlotPropsMap["EventCard"]) {
           <p>{event.body}</p>
           {event.kind === "auction" && <AuctionStrip paddles={event.paddles} />}
           {event.response && <ResponseGauges response={event.response} />}
+          {event.investigation && <Evidence investigation={event.investigation} />}
           <Choices event={event} actions={actions} />
         </div>
       </div>

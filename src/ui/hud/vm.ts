@@ -26,6 +26,8 @@ import { NO_MOTION, type MotionView } from "./leapfrogMotion";
 import { SKIN_API_VERSION } from "./types";
 import { HELP_BUILDINGS, HELP_LOOP, HELP_NUMBERS, HELP_TITLE } from "../../content/help";
 import { playableOf, type PlayableInput } from "./playable";
+import { papersOf, paperMomentOf } from "./papers";
+import { collusionOf, crumbWikiOf, investigationOf } from "./collusion";
 import type {
   ArenaVM, BenchCellVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HudVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
   ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, ResponseVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, StreamVM, ThoughtRowVM, TrainingVM, TrendVM, VoiceVM, WalkerKindVM,
@@ -61,6 +63,10 @@ export interface HudInput {
   chatCount: number;
   /** Help ▸ How to play is open. */
   helpOpen: boolean;
+  /** The Papers window is open (absent: folded). */
+  papersOpen?: boolean;
+  /** Paper moments and CrumbWiki reveals already closed, by key. */
+  dismissed?: readonly string[];
   mixer: { open: boolean; ready: boolean; muted: boolean; master: number; music: number; sfx: number };
   photo: { on: boolean; time: string; shot: { id: number; url: string; name: string } | null; flash: number };
   skins: SkinPickerVM;
@@ -324,6 +330,7 @@ function eventOf(i: HudInput): { event: EventVM | null; era: HudVM["eraCard"] } 
       paddles: def.kind === "auction" ? rivals.map((r, k) => ({ id: r.id, name: r.short, color: r.color, number: 200 + ((r.score * 7 + k * 31) % 800) })) : [],
       response: def.kind === "response" ? responseOf(i.snap, vars) : null,
       stream: def.kind === "stream" ? streamOf(i.snap, def.id, vars) : null,
+      investigation: investigationOf(i.snap, def.id),
     },
   };
 }
@@ -612,7 +619,7 @@ export function hudViewModel(i: HudInput): HudVM {
   const items = earnedItems(build.items, play);
   const { event, era } = eventOf(i);
   return {
-    unlockCard: i.snap.unlockCard, hud: i.snap.hud,
+    unlockCard: play.unlock, hud: i.snap.hud,
     apiVersion: SKIN_API_VERSION,
     stats: statsOf(i),
     training: trainingOf(i.snap),
@@ -648,6 +655,11 @@ export function hudViewModel(i: HudInput): HudVM {
     thoughtsPanel: thoughtsOf(i),
     arena: arenaOf(i),
     leapfrog: leapfrogOf(i),
+    papers: papersOf(i.snap, play.visible.papers, i.papersOpen ?? false),
+    // A card, an era or the ending outranks a paper moment: it waits (the day window allowing) until they close.
+    paperMoment: event || era ? null : paperMomentOf(i.snap, play.visible.papers, i.dismissed ?? []),
+    collusion: collusionOf(i.snap),
+    crumbWiki: event || era ? null : crumbWikiOf(i.snap, i.dismissed ?? []),
     eraCard: era,
     outcome: outcomeOf(i),
     newsroom: newsroomOf(i),

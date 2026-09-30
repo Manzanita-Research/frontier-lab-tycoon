@@ -41,10 +41,14 @@ import { Toast } from "./slots/Toast";
 import { Voice } from "./slots/Voice";
 import { Livestream } from "./slots/Livestream";
 import { Training } from "./slots/Training";
+import { Papers } from "./slots/Papers";
+import { PaperMoment } from "./slots/PaperMoment";
+import { CrumbWiki } from "./slots/CrumbWiki";
+import "./papers.css";
 import { Layout } from "./Layout";
 
 export const baseSlots: SlotComponents = {
   Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, Bubble, ThoughtsPanel, Ticker, Toast, Assistant,
   EventCard, Confirm, Coach, UnlockCard, HowToPlay, Arena, Benchmarks, Voice, Livestream, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, NewsControls,
-  NewsArrival, NewsRoom, Mixer,
+  NewsArrival, NewsRoom, Mixer, Papers, PaperMoment, CrumbWiki,
 };

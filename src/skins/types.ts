@@ -4,7 +4,7 @@ import type { ComponentType, ReactNode } from "react";
 import type {
   ArenaVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, EraCardVM, EventVM, HudActions, HudVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM, CoachVM, ConfirmVM,
   NewsroomVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StatsVM, ThoughtRowVM, TickerItemVM,
-  StaffVM, TeaserVM, ProgressVM, ToastVM, TrainingVM, UnlockCardVM, VisibleVM, HelpVM,
+  StaffVM, TeaserVM, ProgressVM, ToastVM, TrainingVM, UnlockCardVM, VisibleVM, HelpVM, PapersVM, PaperMomentVM, CrumbWikiVM,
 } from "../ui/hud/types";
 import type { Rect } from "./kit/place";
 
@@ -43,11 +43,14 @@ export const SLOT_NAMES = [
   "NewsArrival",
   "NewsRoom",
   "Mixer",
+  "Papers",
+  "PaperMoment",
+  "CrumbWiki",
 ] as const;
 export type SlotName = (typeof SLOT_NAMES)[number];
 
 /** The slots that sit in the HUD all the time, already rendered, for the Layout to place. */
-export const DOCKED_SLOTS = ["Stats", "Training", "Objectives", "Inspector", "BuildBar", "Speed", "Staff", "ThoughtsPanel", "Ticker", "Toasts", "Assistant", "Arena", "Benchmarks", "Voice", "NewsControls", "NewsArrival", "PhotoButton"] as const;
+export const DOCKED_SLOTS = ["Stats", "Training", "Objectives", "Inspector", "BuildBar", "Speed", "Staff", "ThoughtsPanel", "Ticker", "Toasts", "Assistant", "Arena", "Benchmarks", "Voice", "NewsControls", "NewsArrival", "PhotoButton", "Papers"] as const;
 export type DockedSlot = (typeof DOCKED_SLOTS)[number];
 
 /** What the Layout receives: the docked slots as elements (or null when there is nothing to show) plus the whole VM. */
@@ -112,6 +115,15 @@ export interface SlotPropsMap {
   NewsArrival: { arrival: NonNullable<NewsroomVM["arrival"]>; actions: HudActions };
   NewsRoom: { newsroom: NewsroomVM; actions: HudActions };
   Mixer: { sound: SoundVM; actions: HudActions };
+  /**
+   * Papers (FLT-45): a chip that opens a window with the publication policy and the list; drafts go to arXive or peer review from
+   * here. Docked, and only rendered once earned (`visible.papers` and `papers.enabled`). `papers.open` says which to draw.
+   */
+  Papers: { papers: PapersVM; layout: LayoutVM; actions: HudActions };
+  /** The screenshot moments: the arXive listing, the scoop (their timestamp and yours) and the award certificate. Modal. */
+  PaperMoment: { moment: PaperMomentVM; actions: HudActions };
+  /** The CrumbWiki reveal when the agents' collusion ends: the talk page, the revision history and (exposed) the front page. Modal. */
+  CrumbWiki: { wiki: CrumbWikiVM; actions: HudActions };
 }
 
 export type SlotComponents = { [K in SlotName]: ComponentType<SlotPropsMap[K]> };
