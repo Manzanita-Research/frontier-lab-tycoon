@@ -7,6 +7,7 @@ import "./news.css";
 import "./ops.css";
 import "./leapfrog.css";
 import "./factions.css";
+import "./birdapp.css";
 import "./compact.css";
 import "./notices.css";
 import "./playable.css";
@@ -33,6 +34,7 @@ import { HowToPlay } from "./slots/HowToPlay";
 import { UnlockCard } from "./slots/UnlockCard";
 import { EventCard } from "./slots/EventCard";
 import { Factions } from "./slots/Factions";
+import { BirdApp } from "./slots/BirdApp";
 import { FrontPage } from "./slots/FrontPage";
 import { GroupChat } from "./slots/GroupChat";
 import { Inspector } from "./slots/Inspector";
@@ -77,6 +79,6 @@ import { Layout } from "./Layout";
 
 export const baseSlots: SlotComponents = {
   Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, Bubble, ThoughtsPanel, Ticker, Toast, Assistant,
-  EventCard, Confirm, Coach, UnlockCard, HowToPlay, Arena, Benchmarks, Voice, Factions, Livestream, Hearing, LeakedChat, DramaCard, Bill, PromiseTracker, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, Ending, Takeover, NewsControls,
+  EventCard, Confirm, Coach, UnlockCard, HowToPlay, Arena, Benchmarks, Voice, Factions, BirdApp, Livestream, Hearing, LeakedChat, DramaCard, Bill, PromiseTracker, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, Ending, Takeover, NewsControls,
   NewsArrival, NewsRoom, Mixer, ModManager, ModSkinOffer, Papers, PaperMoment, CrumbWiki, DisasterMenu, DisasterAlert, ReportCard, AuditPin, Beat, GateLegend, DramaButton, Drama, Memo, Challenge,
 };

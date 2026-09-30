@@ -283,6 +283,27 @@ If your slot needs copy that has no key, write it into the slot (as Frontier 95 
 | `factions.log` | Lately |
 | `factions.safety` | Safety budget |
 | `factions.none` | Nobody is feuding. Give it a week. |
+| `birdapp.title` | The Bird App (FLT-69: the Bird App) |
+| `birdapp.aura` | Aura |
+| `birdapp.timeline` | Timeline |
+| `birdapp.posters` | Posters |
+| `birdapp.comms` | Comms desk |
+| `birdapp.live` | Live |
+| `birdapp.log` | Landed |
+| `birdapp.empty` | Nobody has posted yet. Give it until 3am. |
+| `birdapp.quiet` | The queue is empty. Comms is eating lunch. |
+| `birdapp.viral` | VIRAL |
+| `birdapp.ratio` | ratio forming |
+| `birdapp.reviewed` | cleared by Comms |
+| `birdapp.lever.cook` | Let them cook (FLT-69: the levers' labels; the trade-off comes from the VM) |
+| `birdapp.lever.comms` | Run it by Comms |
+| `birdapp.lever.logoff` | Please log off |
+| `birdapp.outcome.flop` | Flopped |
+| `birdapp.outcome.banger` | Banger |
+| `birdapp.outcome.controversy` | Discourse |
+| `birdapp.outcome.ratioed` | Ratioed |
+| `birdapp.outcome.cancelled` | Cancelled |
+| `birdapp.outcome.live` | Live (a post that has not landed) |
 | `gate.title` | At the gate (FLT-56: the GateLegend) |
 | `gate.address` | Statement |
 | `gate.statement` | A statement: |
@@ -429,6 +450,7 @@ A slot is a React component. Each gets **its slice of the view-model plus `actio
 | `Benchmarks` | `{ leapfrog, layout, actions }` | The benchmark leaderboard (Release Leapfrog): labs down the side, benchmarks across, your row highlighted, SOTA badges that blink when a record changes hands, benchmaxxed scores asterisked with the excuse underneath, solved benchmarks struck through and stamped SOLVED. Draw it with `kit`'s `<BenchTable leapfrog>` (semantic `bench-*` classes) or your own. Docked: the base Layout puts it under the Arena; a Layout may skip it if `Arena` hosts it. `null` while the pack is off. |
 | `Voice` | `{ leapfrog, layout, actions }` | The share-of-voice meter: who has the news cycle (`leapfrog.voice`: shares, owner, trend, and `series` for a graph: `kit`'s `<VoiceGraph voice>`). Docked. Frontier 95: a tray icon and a "Network Traffic" window. `null` while the pack is off. |
 | `Factions` | `{ factions, layout, actions }` | The discourse (FLT-33): every faction's approval meter (`factions.rows`: colour, `meter` −100..100, `mood`, `moodLabel`, `why`, who is marching), the lab's `stance` on five axes, `relations` (allies, feuds, a `schism`, which goes first), `gateText` (who is at the gate), the `log`, and the safety budget (`safety.options`; `actions.setSafetySpend(level)`). `factions.open` folds it; `actions.toggleFactions()` flips it. Docked. `kit` has `<FactionChip>`, `<FactionMeter>`, `<StanceTrack>`, and `factionAttrs(faction)` for a bubble's root (`inspector.faction` and `bubble.faction` are the same chip). Frontier 95: a megaphone in the tray and a "Discourse Monitor" window. `null` until Level 4 (or with `?factions=off`). |
+| `BirdApp` | `{ birdapp, layout, actions }` | The Bird App (FLT-69): researchers who post. Folded, `birdapp.headline` and the Aura (`aura` 0..100, `auraText`), plus `spotlight` (the newest banger or cancel, if it is fresh). Open: `auraEffects` and `auraHistory` (30 midnights; `kit` has `<AuraSpark>`), today's `moments`, the `live` posts (their `likes`/`reposts`/`replies` climb toward midnight; `viral` is the sticker, `ratioing` a ratio forming), `typing`, the landed `log` (`outcome`, `outcomeText`, `tone`, `handledText`), the `posters` (tier, followers, the `banger`/`cancel` odds for `<BirdMeter>`, `hot` when a cancel made them a poaching target, and three `levers` with the `tradeoff` to print on each: `actions.setBirdLever(id, lever)`), and the Comms desk (`comms.desk` calm/busy/drowning, `queue`, `capacityText`, `load`). `<BirdPostCard>` draws one post. `birdapp.open` folds it; `actions.toggleBirdApp()` flips it. Docked. Frontier 95: a bird in the tray and "Bird Reader 1.0". `null` until Level 3 (or with `?birdapp=off`). |
 | `Livestream` | `{ event, stream, actions }` | The launch livestream mishap card (the dog on stage, the wrong chart). Opens instead of `EventCard` when `event.kind === "stream"`; `stream` has the caption, viewer count and chat lines; answer with `actions.choose`. |
 | `Hearing` | `{ event, hearing, actions }` | The Hearing (FLT-21): a question at the witness table, or the gavel. Opens instead of `EventCard` when `event.kind === "hearing"`. `hearing` has the three senators (name, seat, `look` colours for the kit's `Senator` portrait, who is `asking`, how each was `answered`), the Trust and Capture meters, `progressText`, per-answer `moves` (label, arrows, `good`: `null` for Capture, which reads as sly) in the same order as `event.choices`, and `verdict` at the gavel. |
 | `LeakedChat` | `{ event, leak, actions }` | The yacht summit's leaked group chat (FLT-24). Opens instead of `EventCard` when `event.kind === "leak"`. `leak` has the group's name, `members`, and `messages` (`name`, rival `color`, `you` for the player's own lines, `system` for "X joined" lines, `time`, `text`); answer with `actions.choose`. |

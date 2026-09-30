@@ -434,16 +434,31 @@ export function dailyBirdApp(s: GameState) {
  * the beat's first person if they post, else a poster of `archetype`, else anyone who posts. It lands at midnight like
  * any other post; `outcome` decides how, or the odds for its `spice` do. Nothing while the pack is asleep.
  */
-export function postNow(s: GameState, rng: Rng, o: { text: string; spice?: number; archetype?: string; outcome?: BirdOutcome; by?: number }) {
+export function postNow(s: GameState, rng: Rng, o: { text?: string; spice?: number; archetype?: string; outcome?: BirdOutcome; by?: number }): BirdPostRecord | null {
   const b = s.birdapp;
-  if (!b?.enabled) return;
+  if (!b?.enabled) return null;
   const active = Object.values(b.posters).filter((p) => posting(p.machine.value) && p.lever !== "logoff");
   const named = o.by !== undefined ? active.find((p) => p.id === o.by) : undefined;
   const typed = o.archetype ? active.filter((p) => p.archetype === o.archetype) : [];
   const p = named ?? (typed.length > 0 ? rng.pick(typed) : active.length > 0 ? rng.pick(active) : undefined);
   const w = p ? s.walkers.find((x) => x.id === p.id) : undefined;
-  if (!p || !w) return;
-  schedule(s, b, rng, p, w.name, o.text, "birdapp.post", o.spice ?? 0.5, null, s.tick + 1, undefined, o.outcome);
+  if (!p || !w) return null;
+  if (o.text !== undefined) return schedule(s, b, rng, p, w.name, o.text, "birdapp.post", o.spice ?? 0.5, null, s.tick + 1, undefined, o.outcome);
+  // No text (the debug scenes): one of their archetype's own lines.
+  const line = pickLine(rng, p.archetype, b.moments);
+  return line ? schedule(s, b, rng, p, w.name, fillTemplate(line.text, vars(s)), line.id, line.spice, line.moment ?? null, s.tick + 1, undefined, o.outcome) : null;
+}
+
+/** For the debug scenes (demo.ts): today's posts land now, or the Comms desk works its queue now, as midnight would. */
+export function landNow(s: GameState, what: "posts" | "comms") {
+  const b = s.birdapp;
+  if (!b?.enabled) return;
+  const rng = createRng(b.rngState);
+  const staff = new Map<number, Walker>();
+  for (const w of s.walkers) if (onStaff(w)) staff.set(w.id, w);
+  if (what === "posts") settle(s, b, rng, staff);
+  else workQueue(s, b, rng, staff);
+  b.rngState = rng.state();
 }
 
 /** The player's lever on one poster. "Please log off" deletes the drafts they have not posted yet. */

@@ -18,6 +18,7 @@ import { isMoment, stageMoment } from "../sim/race/demo";
 import { isOpsMoment, stageOps } from "../sim/opsDemo";
 import { isPaperMoment, stagePapers } from "../sim/race/papers/demo";
 import { isFactionMoment, stageFactions } from "../sim/factions/demo";
+import { isBirdMoment, stageBird } from "../sim/birdapp/demo";
 import { parseLeapMoment, stageLeapfrog } from "../sim/race/leapfrog/demo";
 import { isCollusionMoment, stageCollusion } from "../sim/collusion/demo";
 import { isCircusMoment, stageCircus } from "../sim/circus/demo";
@@ -181,6 +182,7 @@ function stage(dbg: SimDebug): GameState {
   else if (isAuditMoment(dbg.moment)) stageAudit(sim, dbg.moment);
   else if (isSenateMoment(dbg.moment)) stageSenate(sim, dbg.moment);
   else if (isFactionMoment(dbg.moment)) stageFactions(sim, dbg.moment);
+  else if (isBirdMoment(dbg.moment)) stageBird(sim, dbg.moment);
   if (dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0) {
     const rng = createRng(sim.rngState);
     if (dbg.researchers > 0) seedWalkers(sim, "researcher", dbg.researchers, rng);

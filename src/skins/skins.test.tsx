@@ -69,6 +69,8 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
       return { leapfrog: vms.lf!.leapfrog, layout: vms.lf!.layout, actions };
     case "Factions":
       return { factions: vms.fx!.factions, layout: vms.fx!.layout, actions };
+    case "BirdApp":
+      return { birdapp: vms.bird!.birdapp, layout: vms.bird!.layout, actions };
     case "Livestream":
       return { event: vms.stream!.event!, stream: vms.stream!.event!.stream!, actions };
     case "Hearing":
@@ -171,6 +173,9 @@ const vms: Record<string, HudVM> = {
   fx: vmOf({ factions: true, factionsOpen: true }),
   fxFolded: vmOf({ factions: true }),
   fxPhone: vmOf({ factions: true, factionsOpen: true, width: 390, height: 844 }),
+  bird: vmOf({ bird: "bird", birdOpen: true }),
+  birdFolded: vmOf({ bird: "bird-banger" }),
+  birdCancel: vmOf({ bird: "bird-cancel", birdOpen: true, width: 390, height: 844 }),
   shipNow: vmOf({ leapfrog: true, event: "shipNow" }),
   stream: vmOf({ leapfrog: true, event: "stream:dog" }),
   auction: vmOf({ event: "computeAuction" }),

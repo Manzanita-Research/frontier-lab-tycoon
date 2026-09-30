@@ -8,7 +8,7 @@ import type { EventVM, HudActions, HudVM, ToastVM } from "./types";
 export function Docked({ vm, actions }: { vm: HudVM; actions: HudActions }) {
   const { slots } = useSkin();
   const t = useT();
-  const { Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, ThoughtsPanel, Ticker, Toast, Assistant, Arena, Benchmarks, Voice, Factions, NewsControls, NewsArrival, PhotoButton, Papers, DisasterAlert, DramaButton } = slots;
+  const { Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, ThoughtsPanel, Ticker, Toast, Assistant, Arena, Benchmarks, Voice, Factions, BirdApp, NewsControls, NewsArrival, PhotoButton, Papers, DisasterAlert, DramaButton } = slots;
   // One toast at a time, the newest winning; a standing hint only shows while nobody is talking.
   const newest = vm.toasts.at(-1);
   const talking: ToastVM[] = newest ? [newest] : vm.hints.map((h, i): ToastVM => ({ id: -1 - i, text: t(`hint.${h}`), tone: "hint" }));
@@ -37,6 +37,7 @@ export function Docked({ vm, actions }: { vm: HudVM; actions: HudActions }) {
     Benchmarks: vm.leapfrog.enabled ? <Benchmarks leapfrog={vm.leapfrog} layout={vm.layout} actions={actions} /> : null,
     Voice: vm.leapfrog.enabled ? <Voice leapfrog={vm.leapfrog} layout={vm.layout} actions={actions} /> : null,
     Factions: vm.factions.enabled && vm.visible.factions ? <Factions factions={vm.factions} layout={vm.layout} actions={actions} /> : null,
+    BirdApp: vm.birdapp.enabled && vm.visible.birdapp ? <BirdApp birdapp={vm.birdapp} layout={vm.layout} actions={actions} /> : null,
     NewsControls: <NewsControls newsroom={vm.newsroom} sound={vm.sound} skins={vm.skins} visible={vm.visible} actions={actions} />,
     NewsArrival: vm.newsroom.arrival && vm.visible.news ? <NewsArrival arrival={vm.newsroom.arrival} actions={actions} /> : null,
     PhotoButton: <PhotoButton photo={vm.photoMode} actions={actions} />,

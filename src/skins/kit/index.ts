@@ -18,3 +18,4 @@ export { PaperMomentBody } from "./PaperMomentBody";
 export { CrumbWikiBody, TalkPage } from "./CrumbWikiBody";
 export { FactionChip, FactionMeter, StanceTrack, factionAttrs } from "./Factions";
 export { useJumpTo } from "./jump";
+export { AuraSpark, BirdCounts, BirdMeter, BirdPostCard } from "./BirdApp";
