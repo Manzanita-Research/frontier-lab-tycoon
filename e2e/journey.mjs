@@ -56,7 +56,7 @@ const page = await browser.newPage({ viewport, deviceScaleFactor: 1 });
 const errors = [];
 page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
 page.on("pageerror", (error) => errors.push(error.message));
-const result = { url: url.href, viewport, levels: [], failures: [], cards: [], held: [], purchases: [], refused: [], samples: [], clicks: { ok: 0, forced: 0, gone: 0 } };
+const result = { url: url.href, viewport, levels: [], failures: [], cards: [], held: [], purchases: [], refused: [], ownToasts: [], samples: [], clicks: { ok: 0, forced: 0, gone: 0 } };
 let firstClick = 0;
 let start = null;
 let tpd = 20;
@@ -111,11 +111,14 @@ async function press(target) {
 
 // ── the map ─────────────────────────────────────────────────────────────────────────────────────────────────────────
 const HALF = 12;
-/** Tile (x, z)'s middle on screen, through the camera the probe lends; null off the canvas. */
-function screenOf(view, x, z) {
+/**
+ * The middle of a footprint of w×d tiles at (x, z) on screen, through the camera the probe lends; null off the canvas.
+ * The game anchors a building at round(pointer − size/2), so aim at the footprint's middle, not its first tile's.
+ */
+function screenOf(view, x, z, w = 1, d = 1) {
   if (!view?.rect || view.matrix.length !== 16) return null;
   const m = view.matrix;
-  const X = x + 0.5 - HALF, Z = z + 0.5 - HALF;
+  const X = x + w / 2 - HALF, Z = z + d / 2 - HALF;
   const cx = m[0] * X + m[8] * Z + m[12], cy = m[1] * X + m[9] * Z + m[13], cw = m[3] * X + m[11] * Z + m[15];
   const px = view.rect.left + ((cx / cw + 1) / 2) * view.rect.width;
   const py = view.rect.top + ((1 - cy / cw) / 2) * view.rect.height;
@@ -293,7 +296,10 @@ try {
       if (probe.speed === 1 && !probe.paused) toastTimes.push(now);
     }
     while (toastTimes.length && now - toastTimes[0] > 60_000) toastTimes.shift();
-    if (toastTimes.length > TOAST_STORM) await fail("toast storm", `${toastTimes.length} toasts in one real minute at 1× (level ${probe.progress.level}): ${probe.toasts.map((t) => t.text).join(" / ")}`, probe);
+    if (toastTimes.length > TOAST_STORM) {
+      await fail("toast storm", `${toastTimes.length} toasts in one real minute at 1× (level ${probe.progress.level}): ${probe.toasts.map((t) => t.text).join(" / ")}`, probe);
+      toastTimes.length = 0; // one failure per storm, not one per poll
+    }
 
     // Windows: none empty; nothing on the coach or the confirm.
     const wins = await windows();
@@ -414,6 +420,13 @@ try {
     if (now - lastAct > 1200 && !probe.paused) {
       lastAct = now;
       await act(probe);
+      // Whatever toasted while the policy clicked is its own doing: keep it out of the storm count, but keep it.
+      for (const t of (await probeNow()).toasts) {
+        const key = `${t.id}|${t.text}`;
+        if (toastSeen.has(key)) continue;
+        toastSeen.add(key);
+        result.ownToasts.push({ gameDay: gameDays(probe), level: probe.progress.level, text: t.text });
+      }
     }
     await page.waitForTimeout(250);
   }
@@ -423,8 +436,8 @@ try {
     const lvl = p.progress.level;
     const list = WANTS[Math.min(lvl, 5)] ?? [];
     const have = (kind) => kind.startsWith("staff:") ? p.staff.filter((j) => j === kind.slice(6)).length : p.map.buildings.filter((b) => b.kind === kind).length;
-    // Wants from the level below still count (a Level 3 player still wants the Gateways it skipped).
-    const all = [...(WANTS[lvl - 1] ?? []), ...list];
+    // This level's goal first; then wants from the level below (a Level 3 player still wants the Gateways it skipped).
+    const all = [...list, ...(WANTS[lvl - 1] ?? [])];
     for (const [kind, count] of all) {
       if (have(kind) >= count) continue;
       const key = `${kind}#${count}`;
@@ -458,7 +471,7 @@ try {
     for (const [x, z] of options.slice(0, 6)) {
       const fresh = await probeNow();
       if (fresh.pendingConfirm || fresh.event) break;
-      const at = screenOf(fresh.view, x, z);
+      const at = screenOf(fresh.view, x, z, ...(SIZE[kind] ?? [2, 2]));
       if (!at || !(await onCanvas(at))) continue;
       await page.mouse.click(at[0], at[1]);
       await page.waitForTimeout(500);
@@ -567,6 +580,9 @@ ${r.cards.map((c) => `- day ${c.gameDay}, L${c.level}: ${c.id} → ${c.choice}`)
 
 ## Windows that held time on their own (${r.held.length})
 ${r.held.map((h) => `- day ${h.gameDay}, L${h.level}: ${h.overlays}`).join("\n") || "none"}
+
+## Toasts from the policy's own clicks (${r.ownToasts.length}, not counted as a storm)
+${[...new Set(r.ownToasts.map((t) => t.text))].map((t) => `- ${t} (×${r.ownToasts.filter((o) => o.text === t).length})`).join("\n") || "none"}
 
 ## Purchases (${r.purchases.length}); confirms (${r.refused.length})
 ${r.purchases.map((p) => `day ${p.gameDay} ${p.kind}`).join(" · ")}
