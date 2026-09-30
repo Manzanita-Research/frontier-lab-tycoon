@@ -2,7 +2,7 @@
 // Personality drives the rival machine (sim/race/rival.ts); the copy is what the news ticker says about them.
 // Templates: {rival} {model} {lab}. Parody names only, no nationalities.
 
-export type RivalId = "anthro" | "openish" | "metameta" | "vssi" | "sirocco" | "macrohard";
+export type RivalId = "anthro" | "openish" | "metameta" | "supersuper" | "sirocco" | "macrohard";
 
 /** The five knobs that make each lab itself. */
 export interface Personality {
@@ -88,7 +88,7 @@ export const RIVAL_DEFS: RivalDef[] = [
   },
   {
     id: "metameta",
-    name: "MetaMeta Superintelligence Labs",
+    name: "MetaMeta Metaintelligence Labs",
     short: "MetaMeta",
     color: "#4f7fe0",
     tagline: "Poaches with $100M offers. Flip-flops on open weights.",
@@ -111,9 +111,9 @@ export const RIVAL_DEFS: RivalDef[] = [
     },
   },
   {
-    id: "vssi",
-    name: "Very Safe Superintelligence Inc.",
-    short: "Very Safe SI",
+    id: "supersuper",
+    name: "Very Very Super Super Intelligence",
+    short: "Super Super AI",
     color: "#7a63c9",
     tagline: "No product. $30B valuation.",
     startCapability: 12,
@@ -128,6 +128,7 @@ export const RIVAL_DEFS: RivalDef[] = [
         "{rival} raises at $30B on a promise to be safe first and exist later",
         "{rival} unveils a 'straight shot' strategy; the shot is not yet visible",
         "{rival} says it will release nothing, safely, at scale",
+        "{rival} adds a third 'Super' to its name; valuation up 50%",
       ],
       poach: ["{rival} hires a {lab} researcher for a job description that reads 'think, quietly'"],
     },

@@ -34,8 +34,8 @@ The pack must be **parody only**. No real company, lab, product, model, person, 
 | --- | --- | --- |
 | `anthro` | Anthropomorphic | Safety-first. Ships late. Writes essays. Models: Sestina. |
 | `openish` | Open-ish AI | Ships every week. Product sprawl. Models: Chatty. |
-| `metameta` | MetaMeta Superintelligence Labs (MetaMeta) | Poaches with $100M offers. Flip-flops on open weights. |
-| `vssi` | Very Safe Superintelligence Inc. (Very Safe SI) | No product. $30B valuation. |
+| `metameta` | MetaMeta Metaintelligence Labs (MetaMeta) | Poaches with $100M offers. Flip-flops on open weights. |
+| `supersuper` | Very Very Super Super Intelligence (Super Super AI) | No product. $30B valuation. |
 | `sirocco` | Sirocco | Open weights, released by torrent link at 3am. Models: Zephyr. |
 | `macrohard` | Macrohard | BigCo. Bundles everything into spreadsheet software. Models: Pivot-Table. |
 
