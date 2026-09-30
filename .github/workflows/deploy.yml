@@ -91,7 +91,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PULL_REQUEST: ${{ github.event.number }}
           DEPLOY_REVISION: ${{ github.event.pull_request.head.sha || github.sha }}
-          FLT_CUSTOM_DOMAIN: ${{ vars.FLT_CUSTOM_DOMAIN }}
 
       - name: Read the deployed preview URL
         if: github.event_name == 'pull_request' && steps.current.outputs.deploy == 'true'
@@ -112,7 +111,7 @@ jobs:
         # Where players are: app.<zone> once the custom domain is on (#70), else the workers.dev name.
         run: echo "url=${PROD_URL}" >> "$GITHUB_OUTPUT"
         env:
-          PROD_URL: ${{ vars.FLT_CUSTOM_DOMAIN && format('https://app.{0}/', vars.FLT_CUSTOM_DOMAIN) || 'https://flt-prod.manzanita.workers.dev/' }}
+          PROD_URL: https://app.frontierlabtycoon.com/
 
   # On a PR: its preview. On main: prod, after the deploy has gone out (FLT-62). It never blocks a deploy, but a failure
   # fails the run, so a broken landing shows red on main.
