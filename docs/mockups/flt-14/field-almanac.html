@@ -1,0 +1,163 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..800,100;1,9..144,300..800,100&family=Figtree:wght@400;500;600;700&display=block" rel="stylesheet">
+<style>
+:root{
+  --paper:rgba(252,248,240,.9); --ink:#22313A; --ink-soft:rgba(34,49,58,.6); --hair:rgba(34,49,58,.14);
+  --sage:#6F9B78; --terra:#D2703F; --dusk:#5B7DB1; --gold:#C79A2B; --plum:#8A6BB8; --rose:#C8505A;
+  --serif:"Fraunces",Georgia,serif; --sans:"Figtree",system-ui,sans-serif;
+  --shadow:0 1px 0 rgba(255,255,255,.7) inset,0 18px 40px -18px rgba(34,49,58,.45),0 2px 6px rgba(34,49,58,.08);
+}
+*{box-sizing:border-box} html,body{margin:0;width:1440px;height:900px;overflow:hidden}
+body{background:url(bg.png) 0 0/1440px 900px no-repeat;font-family:var(--sans);color:var(--ink);position:relative}
+.glass{background:var(--paper);backdrop-filter:blur(10px) saturate(1.1);border-radius:16px;box-shadow:var(--shadow);border:1px solid rgba(255,255,255,.6)}
+.sc{font-variant:all-small-caps;letter-spacing:.08em;font-weight:600;color:var(--ink-soft);font-size:14px}
+.serif{font-family:var(--serif);font-variation-settings:"SOFT" 100}
+
+/* header strip */
+.head{position:absolute;left:20px;top:18px;display:flex;align-items:center;gap:22px;padding:12px 22px 12px 14px}
+.ring{width:74px;height:74px;position:relative}
+.ring svg{position:absolute;inset:0}
+.ring .n{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--serif);font-weight:600;font-size:24px;font-variation-settings:"SOFT" 100,"opsz" 48}
+.ring .n small{position:absolute;bottom:12px;font-family:var(--sans);font-size:9px;letter-spacing:.14em;color:var(--ink-soft)}
+.title .name{font-family:var(--serif);font-style:italic;font-weight:500;font-size:25px;font-variation-settings:"SOFT" 100,"opsz" 72;line-height:1}
+.title .date{margin-top:5px}
+.div{width:1px;align-self:stretch;background:var(--hair)}
+.stat .v{font-family:var(--serif);font-weight:600;font-size:26px;font-variation-settings:"SOFT" 100,"opsz" 48;font-variant-numeric:tabular-nums lining-nums;line-height:1.05}
+.stat .d{font-size:12px;font-weight:600}
+
+/* left notes */
+.notes{position:absolute;left:20px;top:132px;width:276px;padding:16px 18px 18px}
+.notes h3{margin:0 0 2px;font-family:var(--serif);font-weight:500;font-style:italic;font-size:20px;font-variation-settings:"SOFT" 100}
+.prog{height:4px;border-radius:4px;background:var(--hair);margin:10px 0 6px;overflow:hidden}
+.prog i{display:block;height:100%;width:42%;background:var(--plum)}
+.meta{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-soft)}
+.rule{height:1px;background:var(--hair);margin:16px 0 12px}
+.check{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:start;margin:10px 0;font-size:15px;line-height:1.25}
+.check .b{width:16px;height:16px;border:1.5px solid var(--ink);border-radius:4px;margin-top:2px;position:relative}
+.check.done .b{background:var(--sage);border-color:var(--sage)} .check.done .b::after{content:"";position:absolute;left:4px;top:1px;width:5px;height:9px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.check.done .t{color:var(--ink-soft);text-decoration:line-through;text-decoration-color:rgba(34,49,58,.35)}
+.check small{display:block;font-size:12px;color:var(--ink-soft);margin-top:2px}
+
+/* speed */
+.speed{position:absolute;right:20px;top:18px;display:flex;padding:5px;gap:2px;border-radius:999px}
+.speed span{min-width:48px;height:38px;border-radius:999px;display:grid;place-items:center;font-weight:600;font-size:14px;color:var(--ink-soft)}
+.speed span.on{background:var(--ink);color:#fff}
+
+/* specimen card */
+.spec{position:absolute;right:20px;top:78px;width:314px;padding:18px 20px 20px}
+.spec .sc{font-size:13px}
+.spec h2{margin:6px 0 0;font-family:var(--serif);font-weight:600;font-size:27px;line-height:1.05;font-variation-settings:"SOFT" 100,"opsz" 72}
+.spec .latin{font-family:var(--serif);font-style:italic;font-size:15px;color:var(--ink-soft);margin-top:4px}
+.spec .role{font-size:13px;font-weight:600;margin-top:8px}
+.plate{margin:14px 0 6px;height:92px;border-radius:12px;background:linear-gradient(160deg,#f3e7d4,#e9dcc4);position:relative;overflow:hidden;border:1px solid var(--hair)}
+.plate::before{content:"";position:absolute;left:50%;top:18px;width:34px;height:34px;margin-left:-17px;border-radius:50%;background:#b07a55}
+.plate::after{content:"";position:absolute;left:50%;bottom:-6px;width:64px;height:40px;margin-left:-32px;border-radius:32px 32px 6px 6px;background:var(--sage)}
+.plate .fig{position:absolute;left:10px;top:8px;font-size:11px;font-style:italic;font-family:var(--serif);color:var(--ink-soft)}
+.need{display:grid;grid-template-columns:62px 1fr 34px;gap:10px;align-items:center;font-size:13px;margin:7px 0}
+.line{height:4px;border-radius:4px;background:var(--hair);overflow:hidden} .line i{display:block;height:100%}
+.need .v{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink-soft)}
+blockquote{margin:14px 0 14px;padding:0 0 0 14px;border-left:2px solid var(--terra);font-family:var(--serif);font-style:italic;font-size:17px;line-height:1.3;font-variation-settings:"SOFT" 100}
+.follow{height:44px;border-radius:999px;background:var(--ink);color:#fff;display:grid;place-items:center;font-weight:600;font-size:15px}
+
+/* toast */
+.toast{position:absolute;left:560px;top:118px;display:flex;align-items:center;gap:12px;padding:10px 18px 10px 12px;border-radius:999px}
+.seal{width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#e0645f,#a8323a);box-shadow:inset 0 0 0 3px rgba(255,255,255,.25);display:grid;place-items:center;color:#fff;font-family:var(--serif);font-style:italic;font-size:14px}
+.toast .t{font-family:var(--serif);font-size:17px;font-variation-settings:"SOFT" 100}
+
+/* bubbles */
+.bub{position:absolute;padding:10px 14px 11px;background:#FCF8F0;border-radius:14px;box-shadow:0 10px 24px -12px rgba(34,49,58,.5),0 0 0 1px rgba(34,49,58,.06);font-family:var(--serif);font-style:italic;font-size:15px;line-height:1.28;font-variation-settings:"SOFT" 100}
+.bub .who{display:block;font-family:var(--sans);font-style:normal;font-variant:all-small-caps;letter-spacing:.08em;font-size:13px;font-weight:600;color:var(--k);margin-bottom:1px}
+.bub::after{content:"";position:absolute;left:var(--tx,40%);bottom:-7px;width:14px;height:14px;background:#FCF8F0;transform:rotate(45deg);border-radius:0 0 4px 0}
+
+/* shelf */
+.shelf{position:absolute;left:50%;bottom:58px;transform:translateX(-50%);display:flex;gap:6px;padding:10px 14px 12px;border-radius:22px}
+.tool{width:80px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0 4px;border-radius:14px}
+.tool .ic{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:#fff;box-shadow:0 0 0 1px var(--hair),0 4px 10px -6px rgba(34,49,58,.4)}
+.tool .ic svg{width:26px;height:26px}
+.tool .n{font-size:12.5px;font-weight:600}
+.tool .p{font-variant:all-small-caps;letter-spacing:.06em;font-size:13px;color:var(--ink-soft);font-weight:600}
+.tool.on{background:rgba(34,49,58,.07)} .tool.on .ic{background:var(--ink);box-shadow:0 0 0 3px rgba(34,49,58,.15)}
+.tool.poor{opacity:.45}
+
+/* dispatches */
+.disp{position:absolute;left:0;right:0;bottom:0;height:44px;background:rgba(252,248,240,.94);backdrop-filter:blur(8px);border-top:1px solid var(--hair);display:flex;align-items:center;gap:18px;padding:0 20px;white-space:nowrap;overflow:hidden}
+.disp .lbl{font-family:var(--serif);font-weight:700;font-size:15px;letter-spacing:.02em;border-right:1px solid var(--hair);padding-right:18px}
+.disp .it{font-family:var(--serif);font-size:16px;font-variation-settings:"SOFT" 100}
+.disp .fl{color:var(--terra);font-size:15px}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:8px;vertical-align:middle}
+</style></head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs>
+  <symbol id="i-path" viewBox="0 0 32 32"><path d="M4 18 16 24 28 18 16 12Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M4 18v3l12 6 12-6v-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+  <symbol id="i-cluster" viewBox="0 0 32 32"><rect x="6" y="7" width="9" height="19" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="17" y="11" width="9" height="15" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9 12h3M9 16h3M20 16h3" stroke="#5B7DB1" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-hall" viewBox="0 0 32 32"><path d="M6 24a10 10 0 0 1 20 0" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3 25h26" stroke="#8A6BB8" stroke-width="2.2" stroke-linecap="round"/><path d="M16 14V8" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-gate" viewBox="0 0 32 32"><path d="M8 27V15a8 8 0 0 1 16 0v12M12 27V16a4 4 0 0 1 8 0v11" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-kom" viewBox="0 0 32 32"><path d="M13 4h6v5l3 4v14H10V13l3-4Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M10 18h12" stroke="#C79A2B" stroke-width="1.8"/></symbol>
+  <symbol id="i-nap" viewBox="0 0 32 32"><rect x="4" y="13" width="24" height="11" rx="5.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M20 5h5l-5 5h5" stroke="currentColor" stroke-width="1.6" fill="none"/></symbol>
+  <symbol id="i-demo" viewBox="0 0 32 32"><rect x="5" y="6" width="22" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M14 10v6l5-3Z" fill="#D2703F"/><path d="M11 26h10M16 20v6" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-doze" viewBox="0 0 32 32"><rect x="9" y="10" width="13" height="9" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="11" cy="24" r="2.6" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="21" cy="24" r="2.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M22 14l5 3" stroke="currentColor" stroke-width="1.6"/></symbol>
+</defs></svg>
+
+<div class="head glass">
+  <div class="ring"><svg viewBox="0 0 74 74"><circle cx="37" cy="37" r="31" fill="none" stroke="rgba(34,49,58,.12)" stroke-width="5"/><circle cx="37" cy="37" r="31" fill="none" stroke="#6F9B78" stroke-width="5" stroke-linecap="round" stroke-dasharray="124 195" transform="rotate(-90 37 37)"/></svg><div class="n">636<small>VIBES</small></div></div>
+  <div class="title"><div class="name">Mostly Harmless Compute</div><div class="date sc">Year one · January 30th</div></div>
+  <div class="div"></div>
+  <div class="stat"><div class="sc">Cash</div><div class="v">$4.33M</div><div class="d" style="color:var(--rose)">− $25K a day</div></div>
+  <div class="stat"><div class="sc">Runway</div><div class="v" style="color:var(--rose)">5.8 mo</div><div class="d" style="color:var(--ink-soft)">getting short</div></div>
+  <div class="stat"><div class="sc">Capability</div><div class="v">26</div><div class="d" style="color:var(--plum)">Frontier-2</div></div>
+  <div class="stat"><div class="sc">Hype</div><div class="v">44</div><div class="d" style="color:var(--sage)">↑ rising</div></div>
+</div>
+
+<div class="toast glass"><span class="seal">F</span><span class="t"><i>Frontier-2</i> has been released.</span><span class="sc" style="font-size:13px">+15 hype</span></div>
+
+<div class="notes glass">
+  <div class="sc">Field notes · training run II</div>
+  <h3>Frontier-3-Reasoner</h3>
+  <div class="prog"><i></i></div>
+  <div class="meta"><span>42% complete</span><span>+10 compute a day</span></div>
+  <div class="rule"></div>
+  <div class="sc">This year's objectives · 333 days</div>
+  <div class="check done"><span class="b"></span><span class="t">Release Frontier-2</span></div>
+  <div class="check"><span class="b"></span><span class="t">Reach $250K a day in revenue<small>$0 of $250K</small></span></div>
+  <div class="check"><span class="b"></span><span class="t">Hype of 60 or more<small>44 of 60</small></span></div>
+</div>
+
+<div class="speed glass"><span>❚❚</span><span class="on">1×</span><span>3×</span><span>10×</span><span>◎</span></div>
+
+<div class="spec glass">
+  <div class="sc">Specimen no. 42 · Researcher</div>
+  <h2>Dr. Ada Gradient</h2>
+  <div class="latin">Homo researchus, var. overcaffeinata</div>
+  <div class="role">Member of Technical Staff · <span style="color:var(--gold)">slumped</span></div>
+  <div class="plate"><span class="fig">fig. 1: observed near the Kombucha Bar</span></div>
+  <div class="need"><span>Energy</span><span class="line"><i style="width:12%;background:var(--rose)"></i></span><span class="v">12%</span></div>
+  <div class="need"><span>Focus</span><span class="line"><i style="width:90%;background:var(--sage)"></i></span><span class="v">90%</span></div>
+  <div class="need"><span>FOMO</span><span class="line"><i style="width:5%;background:var(--terra)"></i></span><span class="v">5%</span></div>
+  <blockquote>“The kombucha is warm and so is my equity.”</blockquote>
+  <div class="follow">Follow Dr. Gradient</div>
+</div>
+
+<div class="bub" style="left:224px;top:514px;width:244px;--k:var(--dusk);--tx:96px"><span class="who">Visitor · journalist</span>I'm a journalist. My piece is called ‘AI: Hot or Not?’</div>
+<div class="bub" style="left:90px;top:596px;width:244px;--k:var(--dusk);--tx:100px"><span class="who">Visitor · venture capital</span>I'm here to ‘get exposure to AI’. Where do I sign for the AI?</div>
+<div class="bub" style="left:856px;top:222px;width:184px;font-size:13.5px;--k:#2a9fb3;--tx:70px"><span class="who">Agent-0042 “Sparky”</span>I asked for a dinner recipe. It gave me a research agenda.</div>
+
+<div class="shelf glass">
+  <div class="tool"><div class="ic"><svg><use href="#i-path"/></svg></div><span class="n">Path</span><span class="p">$10k</span></div>
+  <div class="tool"><div class="ic"><svg><use href="#i-cluster"/></svg></div><span class="n">Cluster</span><span class="p">$600k</span></div>
+  <div class="tool on"><div class="ic" style="color:#fff"><svg><use href="#i-hall"/></svg></div><span class="n">Training Hall</span><span class="p">$900k</span></div>
+  <div class="tool"><div class="ic"><svg><use href="#i-gate"/></svg></div><span class="n">Gateway</span><span class="p">$400k</span></div>
+  <div class="tool"><div class="ic"><svg><use href="#i-kom"/></svg></div><span class="n">Kombucha</span><span class="p">$120k</span></div>
+  <div class="tool"><div class="ic"><svg><use href="#i-nap"/></svg></div><span class="n">Nap Pods</span><span class="p">$200k</span></div>
+  <div class="tool poor"><div class="ic"><svg><use href="#i-demo"/></svg></div><span class="n">Demo Stage</span><span class="p">$5.5m</span></div>
+  <div class="tool"><div class="ic"><svg><use href="#i-doze"/></svg></div><span class="n">Clear land</span><span class="p">half back</span></div>
+</div>
+
+<div class="disp">
+  <span class="lbl">Dispatches</span>
+  <span class="it"><span class="dot" style="background:var(--terra)"></span>Training run for Frontier-3 kicks off; interns told not to touch the big red button, or the green one</span><span class="fl">❦</span>
+  <span class="it"><span class="dot" style="background:var(--rose)"></span>Sirocco releases open-weights model via torrent link at 3am</span><span class="fl">❦</span>
+  <span class="it"><span class="dot" style="background:var(--sage)"></span>Senator asks whether Frontier-2 is “in the cloud or in the computer”</span>
+</div>
+</body></html>

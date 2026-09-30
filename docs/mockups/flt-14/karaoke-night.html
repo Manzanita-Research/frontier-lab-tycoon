@@ -1,0 +1,193 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&family=Nunito:wght@600;700;800;900&display=block" rel="stylesheet">
+<style>
+:root{
+  --plum:#2A1740; --plum-2:#3B2159; --screen:#170C27; --lilac:#C9B8FF; --lilac-d:#8F78E8;
+  --pink:#FF5FA2; --lemon:#FFE45C; --mint:#5CF2C9; --cyan:#4FE3FF; --red:#FF4D6D; --cream:#FFF6FB;
+  --pix:"Pixelify Sans",monospace; --body:"Nunito",system-ui,sans-serif;
+}
+*{box-sizing:border-box} html,body{margin:0;width:1440px;height:900px;overflow:hidden}
+body{background:url(bg.png) 0 0/1440px 900px no-repeat;font-family:var(--body);color:var(--cream);position:relative}
+.plastic{border-radius:22px;background:linear-gradient(180deg,#d9cbff 0%,#b9a4ff 48%,#a58cff 100%);
+  box-shadow:inset 0 3px 0 rgba(255,255,255,.7),inset 0 -5px 0 rgba(86,56,190,.45),0 14px 26px -12px rgba(42,23,64,.75);padding:9px}
+.screen{background:radial-gradient(120% 90% at 50% 0%,#2a1848 0%,var(--screen) 70%);border-radius:14px;box-shadow:inset 0 0 0 2px rgba(0,0,0,.35),inset 0 0 24px rgba(255,95,162,.18);position:relative;overflow:hidden}
+.screen::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 1px,transparent 1px 3px);pointer-events:none}
+.pix{font-family:var(--pix);letter-spacing:.02em}
+.glow-p{color:var(--pink);text-shadow:0 0 10px rgba(255,95,162,.75)}
+.glow-y{color:var(--lemon);text-shadow:0 0 10px rgba(255,228,92,.6)}
+.glow-m{color:var(--mint);text-shadow:0 0 10px rgba(92,242,201,.6)}
+.glow-c{color:var(--cyan);text-shadow:0 0 10px rgba(79,227,255,.6)}
+.glow-r{color:var(--red);text-shadow:0 0 10px rgba(255,77,109,.7)}
+
+/* console top */
+.console{position:absolute;left:16px;top:14px;width:640px}
+.console .screen{display:grid;grid-template-columns:auto 1fr;gap:18px;padding:12px 18px 14px}
+.lab{grid-column:1/-1;display:flex;justify-content:space-between;align-items:baseline}
+.lab .n{font-size:24px;font-weight:700}
+.lab .d{font-size:14px;color:var(--lilac)}
+.vibes{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 12px 2px;border-right:2px dashed rgba(201,184,255,.25)}
+.vibes .v{font-size:58px;line-height:.9}
+.vibes .l{font-size:13px;color:var(--lilac);margin-top:4px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;align-content:center}
+.st .l{font-size:12px;color:var(--lilac);text-transform:uppercase}
+.st .v{font-size:27px;line-height:1.1}
+.st .s{font-size:12px}
+.vu{display:flex;gap:3px;align-items:flex-end;height:30px;margin-top:2px}
+.vu i{width:7px;background:var(--mint);box-shadow:0 0 6px rgba(92,242,201,.6)} .vu i.y{background:var(--lemon)} .vu i.r{background:var(--pink)} .vu i.o{background:rgba(201,184,255,.18);box-shadow:none}
+.blink{animation:none}
+
+/* now training + queue */
+.left{position:absolute;left:16px;top:212px;width:300px;display:flex;flex-direction:column;gap:12px}
+.left .screen{padding:12px 14px}
+.np{font-size:13px;color:var(--lilac)}
+.np b{color:var(--pink)}
+.song{font-size:22px;margin:4px 0 8px}
+.pbar{height:14px;background:#2d1a48;border-radius:3px;display:flex;gap:2px;padding:2px}
+.pbar i{flex:1;background:var(--pink);box-shadow:0 0 6px rgba(255,95,162,.7)} .pbar i.o{background:#3a2560;box-shadow:none}
+.time{display:flex;justify-content:space-between;font-size:12px;color:var(--lilac);margin-top:5px}
+.q{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:7px}
+.q li{display:grid;grid-template-columns:26px 1fr auto;align-items:center;gap:8px;font-family:var(--body);font-weight:800;font-size:14px}
+.q .no{font-family:var(--pix);font-size:16px;color:var(--lemon)}
+.q .done{color:rgba(255,246,251,.45);text-decoration:line-through}
+.q .p{font-family:var(--pix);font-size:13px;color:var(--mint)}
+
+/* transport */
+.transport{position:absolute;right:16px;top:14px;display:flex;gap:8px;padding:9px 10px}
+.tb{width:54px;height:46px;border-radius:12px;display:grid;place-items:center;font-family:var(--pix);font-size:18px;color:var(--plum);
+  background:linear-gradient(#fff,#efe7ff);box-shadow:inset 0 -4px 0 #cdbdf5,0 3px 0 rgba(42,23,64,.35)}
+.tb.on{background:linear-gradient(#ff87bb,#ff4f98);color:#fff;box-shadow:inset 0 -4px 0 #c22a6d,0 0 16px rgba(255,95,162,.8)}
+
+/* contestant card */
+.card{position:absolute;right:16px;top:98px;width:318px}
+.card .screen{padding:14px 16px 16px}
+.p2{display:flex;justify-content:space-between;font-size:13px;color:var(--lilac)}
+.who{display:flex;gap:12px;margin-top:8px;align-items:center}
+.ava{width:64px;height:64px;image-rendering:pixelated;border-radius:6px;background:#ffd9c7;position:relative;box-shadow:0 0 0 3px var(--pink),0 0 16px rgba(255,95,162,.6)}
+.ava svg{width:64px;height:64px}
+.who h2{margin:0;font-family:var(--pix);font-weight:700;font-size:25px;line-height:1}
+.who .r{font-weight:800;font-size:13px;color:var(--lilac);margin-top:4px}
+.tag{display:inline-block;margin-top:6px;font-family:var(--pix);font-size:12px;padding:2px 8px;border-radius:4px;background:var(--lemon);color:var(--plum)}
+.meter{display:grid;grid-template-columns:70px 1fr 40px;gap:8px;align-items:center;margin-top:8px;font-family:var(--pix);font-size:13px}
+.hearts{display:flex;gap:3px} .hearts i{width:14px;height:12px;background:var(--pink);clip-path:polygon(0 25%,25% 0,50% 25%,75% 0,100% 25%,100% 50%,50% 100%,0 50%)} .hearts i.o{background:#3a2560}
+.hearts.m i{background:var(--mint)} .hearts.m i.o{background:#3a2560} .hearts.y i{background:var(--lemon)} .hearts.y i.o{background:#3a2560}
+.lyric{margin-top:12px;padding:10px 12px;border-radius:10px;background:#2b1747;font-weight:800;font-size:16px;line-height:1.25;color:#fff}
+.lyric .pix{display:block;font-size:12px;color:var(--pink);margin-bottom:3px}
+.btn{margin-top:12px;height:46px;border-radius:14px;display:grid;place-items:center;font-family:var(--pix);font-size:20px;color:#fff;background:linear-gradient(#ff87bb,#ff4f98);box-shadow:inset 0 -5px 0 #c22a6d,0 0 18px rgba(255,95,162,.55)}
+
+/* star toast */
+.star{position:absolute;left:676px;top:22px;padding:10px 22px 10px 18px;border-radius:14px;background:var(--lemon);color:var(--plum);transform:rotate(-2deg);
+  box-shadow:inset 0 -4px 0 #e0b928,0 0 0 4px #fff,0 0 26px rgba(255,228,92,.8)}
+.star .pix{font-size:20px;font-weight:700}
+.star small{display:block;font-weight:900;font-size:12px;margin-top:1px}
+
+/* bubbles: pixel-stepped corners */
+.bub{position:absolute;padding:10px 14px;background:#fff;color:#2A1740;font-weight:800;font-size:14.5px;line-height:1.25;
+  clip-path:polygon(0 8px,4px 8px,4px 4px,8px 4px,8px 0,calc(100% - 8px) 0,calc(100% - 8px) 4px,calc(100% - 4px) 4px,calc(100% - 4px) 8px,100% 8px,100% calc(100% - 8px),calc(100% - 4px) calc(100% - 8px),calc(100% - 4px) calc(100% - 4px),calc(100% - 8px) calc(100% - 4px),calc(100% - 8px) 100%,8px 100%,8px calc(100% - 4px),4px calc(100% - 4px),4px calc(100% - 8px),0 calc(100% - 8px));
+  filter:drop-shadow(0 4px 0 rgba(42,23,64,.35))}
+.bub .pix{display:block;font-size:12px;font-weight:600;color:var(--k);margin-bottom:2px}
+.tail{position:absolute;width:12px;height:12px;background:#fff;box-shadow:4px 4px 0 #fff,8px 8px 0 #fff}
+
+/* arcade build bar */
+.tray{position:absolute;left:50%;bottom:62px;transform:translateX(-50%);display:flex;gap:12px;padding:12px 16px 14px}
+.ab{width:82px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.ab .btnr{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;position:relative;
+  background:radial-gradient(circle at 38% 30%,rgba(255,255,255,.85) 0 14%,transparent 15%),radial-gradient(circle at 50% 60%,var(--c) 0 62%,var(--cd) 63%);
+  box-shadow:0 5px 0 var(--cd),0 7px 0 rgba(42,23,64,.35)}
+.ab .btnr svg{width:30px;height:30px;filter:drop-shadow(0 1px 0 rgba(0,0,0,.25))}
+.ab .btnr .k{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:6px;background:var(--plum);color:var(--lemon);font-family:var(--pix);font-size:13px;display:grid;place-items:center}
+.ab .lcd{width:82px;border-radius:6px;background:var(--screen);text-align:center;padding:3px 2px 4px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.ab .lcd b{display:block;font-family:var(--body);font-weight:900;font-size:11px;color:#fff;white-space:nowrap}
+.ab .lcd span{font-family:var(--pix);font-size:13px;color:var(--mint)}
+.ab.on .btnr{box-shadow:0 2px 0 var(--cd),0 0 0 4px #fff,0 0 22px var(--c);transform:translateY(3px)}
+.ab.poor{opacity:.55;filter:saturate(.3)}
+
+/* karaoke ticker */
+.kara{position:absolute;left:0;right:0;bottom:0;height:54px;background:linear-gradient(180deg,#24123a,#170c27);display:flex;align-items:center;gap:16px;padding:0 18px;box-shadow:0 -2px 0 rgba(201,184,255,.35)}
+.kara .lbl{font-family:var(--pix);font-size:15px;color:var(--plum);background:var(--lemon);padding:4px 10px;border-radius:6px;white-space:nowrap}
+.line{position:relative;font-weight:900;font-size:21px;white-space:nowrap;color:rgba(255,246,251,.55)}
+.line .sung{color:var(--pink);text-shadow:0 0 12px rgba(255,95,162,.7)}
+.ball{position:absolute;top:-10px;width:11px;height:11px;border-radius:50%;background:var(--lemon);box-shadow:0 0 10px var(--lemon)}
+.next{font-weight:800;font-size:15px;color:rgba(201,184,255,.55);white-space:nowrap}
+</style></head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs>
+  <symbol id="i-path" viewBox="0 0 32 32"><path d="M4 20 16 26 28 20 16 14Z" fill="#fff" opacity=".6"/><path d="M4 14 16 20 28 14 16 8Z" fill="#fff"/></symbol>
+  <symbol id="i-cluster" viewBox="0 0 32 32"><rect x="5" y="8" width="10" height="18" rx="2" fill="#fff"/><rect x="17" y="12" width="10" height="14" rx="2" fill="#fff"/><path d="M8 13h4M8 17h4M20 17h4M20 21h4" stroke="#170C27" stroke-width="2"/></symbol>
+  <symbol id="i-hall" viewBox="0 0 32 32"><path d="M5 24a11 11 0 0 1 22 0Z" fill="#fff"/><rect x="3" y="24" width="26" height="3" fill="#fff"/><rect x="15" y="6" width="2" height="7" fill="#fff"/></symbol>
+  <symbol id="i-gate" viewBox="0 0 32 32"><path d="M7 27V14a9 9 0 0 1 18 0v13h-5V15a4 4 0 0 0-8 0v12Z" fill="#fff"/></symbol>
+  <symbol id="i-kom" viewBox="0 0 32 32"><path d="M13 4h6v5l3 4v14H10V13l3-4Z" fill="#fff"/></symbol>
+  <symbol id="i-nap" viewBox="0 0 32 32"><rect x="4" y="12" width="24" height="12" rx="6" fill="#fff"/><path d="M20 5h5l-5 5h5" stroke="#fff" stroke-width="2.4" fill="none"/></symbol>
+  <symbol id="i-demo" viewBox="0 0 32 32"><rect x="5" y="6" width="22" height="14" rx="2" fill="#fff"/><path d="M14 10v6l5-3Z" fill="#FF5FA2"/><rect x="15" y="20" width="2" height="6" fill="#fff"/><rect x="10" y="25" width="12" height="2" fill="#fff"/></symbol>
+  <symbol id="i-doze" viewBox="0 0 32 32"><rect x="9" y="10" width="14" height="10" rx="2" fill="#fff"/><circle cx="11" cy="24" r="3" fill="#fff"/><circle cx="21" cy="24" r="3" fill="#fff"/></symbol>
+</defs></svg>
+
+<div class="console plastic"><div class="screen">
+  <div class="lab"><span class="n pix glow-y">MOSTLY HARMLESS COMPUTE</span><span class="d pix">Y1 · JAN 30</span></div>
+  <div class="vibes"><span class="v pix glow-p">636</span><span class="l pix">♥ VIBES ▲</span></div>
+  <div class="stats">
+    <div class="st"><div class="l pix">Cash</div><div class="v pix glow-y">$4.33M</div><div class="s pix glow-r">-$25K/DAY</div></div>
+    <div class="st"><div class="l pix">Runway</div><div class="v pix glow-r">5.8MO</div><div class="s pix" style="color:var(--lilac)">LOW!</div></div>
+    <div class="st"><div class="l pix">Capability</div><div class="v pix glow-c">26</div><div class="s pix" style="color:var(--lilac)">FRONTIER-2</div></div>
+    <div class="st"><div class="l pix">Hype</div><div class="vu"><i style="height:30%"></i><i style="height:45%"></i><i style="height:55%"></i><i class="y" style="height:70%"></i><i class="y" style="height:80%"></i><i class="o" style="height:90%"></i><i class="o" style="height:100%"></i></div></div>
+  </div>
+</div></div>
+
+<div class="star"><span class="pix">★ NEW RELEASE! ★</span><small>Frontier-2 shipped · +15 hype</small></div>
+
+<div class="left">
+  <div class="plastic"><div class="screen">
+    <div class="np pix">♪ NOW TRAINING <b>· RUN #2</b></div>
+    <div class="song pix glow-m">Frontier-3-Reasoner</div>
+    <div class="pbar"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="o"></i><i class="o"></i><i class="o"></i><i class="o"></i><i class="o"></i><i class="o"></i><i class="o"></i><i class="o"></i><i class="o"></i><i class="o"></i><i class="o"></i><i class="o"></i></div>
+    <div class="time pix"><span>42%</span><span>+10 COMPUTE/DAY</span></div>
+  </div></div>
+  <div class="plastic"><div class="screen">
+    <div class="np pix">♫ UP NEXT · OKRS · 333 DAYS</div>
+    <ul class="q">
+      <li><span class="no">01</span><span class="done">Release Frontier-2</span><span class="p">✓</span></li>
+      <li><span class="no">02</span><span>Reach $250K/day revenue</span><span class="p">0%</span></li>
+      <li><span class="no">03</span><span>Hype 60+</span><span class="p">73%</span></li>
+    </ul>
+  </div></div>
+</div>
+
+<div class="transport plastic"><div class="tb">❚❚</div><div class="tb on">▶</div><div class="tb">▶▶</div><div class="tb">▶▶▶</div><div class="tb">◉</div></div>
+
+<div class="card plastic"><div class="screen">
+  <div class="p2 pix"><span>♥ CONTESTANT #0042</span><span class="glow-y">SLUMPED</span></div>
+  <div class="who">
+    <div class="ava"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><rect width="16" height="16" fill="#ffd9c7"/><rect x="4" y="2" width="8" height="3" fill="#3b2415"/><rect x="4" y="5" width="8" height="5" fill="#b07a55"/><rect x="5" y="7" width="2" height="1" fill="#2A1740"/><rect x="9" y="7" width="2" height="1" fill="#2A1740"/><rect x="3" y="11" width="10" height="5" fill="#2f7d5b"/><rect x="6" y="9" width="4" height="1" fill="#7a4a30"/></svg></div>
+    <div><h2 class="glow-p">DR. ADA GRADIENT</h2><div class="r">Member of Technical Staff</div><span class="tag">RESEARCHER</span></div>
+  </div>
+  <div class="meter"><span style="color:var(--lilac)">ENERGY</span><span class="hearts"><i></i><i class="o"></i><i class="o"></i><i class="o"></i><i class="o"></i><i class="o"></i><i class="o"></i><i class="o"></i></span><span class="glow-r">12%</span></div>
+  <div class="meter"><span style="color:var(--lilac)">FOCUS</span><span class="hearts m"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="o"></i></span><span class="glow-m">90%</span></div>
+  <div class="meter"><span style="color:var(--lilac)">FOMO</span><span class="hearts y"><i></i><i class="o"></i><i class="o"></i><i class="o"></i><i class="o"></i><i class="o"></i><i class="o"></i><i class="o"></i></span><span class="glow-y">5%</span></div>
+  <div class="lyric"><span class="pix">♪ NOW THINKING</span>“The kombucha is warm and so is my equity.”</div>
+  <div class="btn">▶ FOLLOW</div>
+</div></div>
+
+<div class="bub" style="left:222px;top:512px;width:246px;--k:#8F78E8"><span class="pix">VISITOR · JOURNALIST</span>I'm a journalist. My piece is called 'AI: Hot or Not?'</div>
+<div class="tail" style="left:320px;top:578px"></div>
+<div class="bub" style="left:88px;top:596px;width:246px;--k:#8F78E8"><span class="pix">VISITOR · VC</span>I'm here to 'get exposure to AI'. Where do I sign for the AI?</div>
+<div class="bub" style="left:856px;top:224px;width:184px;font-size:13px;--k:#1bb8d6"><span class="pix">AGENT-0042 "SPARKY"</span>I asked for a dinner recipe. It gave me a research agenda.</div>
+<div class="tail" style="left:930px;top:300px"></div>
+
+<div class="tray plastic">
+  <div class="ab"><div class="btnr" style="--c:#8F78E8;--cd:#5d45b8"><svg><use href="#i-path"/></svg><span class="k">1</span></div><div class="lcd"><b>Path</b><span>$10K</span></div></div>
+  <div class="ab"><div class="btnr" style="--c:#4FC3FF;--cd:#1f86c2"><svg><use href="#i-cluster"/></svg><span class="k">2</span></div><div class="lcd"><b>Cluster</b><span>$600K</span></div></div>
+  <div class="ab on"><div class="btnr" style="--c:#FF5FA2;--cd:#c22a6d"><svg><use href="#i-hall"/></svg><span class="k">3</span></div><div class="lcd"><b>Training Hall</b><span>$900K</span></div></div>
+  <div class="ab"><div class="btnr" style="--c:#FF9A5C;--cd:#c9632a"><svg><use href="#i-gate"/></svg><span class="k">4</span></div><div class="lcd"><b>Gateway</b><span>$400K</span></div></div>
+  <div class="ab"><div class="btnr" style="--c:#FFD84D;--cd:#c9a21c"><svg><use href="#i-kom"/></svg><span class="k">5</span></div><div class="lcd"><b>Kombucha</b><span>$120K</span></div></div>
+  <div class="ab"><div class="btnr" style="--c:#5CF2C9;--cd:#1fb58c"><svg><use href="#i-nap"/></svg><span class="k">6</span></div><div class="lcd"><b>Nap Pods</b><span>$200K</span></div></div>
+  <div class="ab poor"><div class="btnr" style="--c:#FF7BAC;--cd:#c24a78"><svg><use href="#i-demo"/></svg><span class="k">7</span></div><div class="lcd"><b>Demo Stage</b><span>$5.5M</span></div></div>
+  <div class="ab"><div class="btnr" style="--c:#B9B0C9;--cd:#7d728f"><svg><use href="#i-doze"/></svg><span class="k">9</span></div><div class="lcd"><b>Bulldoze</b><span>½ BACK</span></div></div>
+</div>
+
+<div class="kara">
+  <span class="lbl">♪ AI NEWS KARAOKE</span>
+  <span class="line"><span class="ball" style="left:354px"></span><span class="sung">Training run for Frontier-3 kicks off; interns told </span>not to touch the big red button, or the green one</span>
+  <span class="next">♪ Sirocco releases open weights at 3am…</span>
+</div>
+</body></html>
