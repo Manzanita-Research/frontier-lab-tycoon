@@ -210,7 +210,8 @@ export function lintText(text, { world = loadWorld(), pack = new Set(), path = "
 
   for (const [regex, what] of LINKS) for (const m of text.matchAll(regex)) hit(errors, m[0], `${what}: Drama packs never link or tag anyone`);
 
-  // The game's own parody names that contain a real fragment ("Very Safe Superintelligence Inc.") are blanked first.
+  // The game's own parody names that contain a real fragment (glossary `phrases`) are blanked first. None do today:
+  // "Very Safe Superintelligence Inc." and "MetaMeta Superintelligence Labs" were renamed because they did.
   let masked = text;
   for (const phrase of world.phrases) masked = masked.split(phrase).join(" ".repeat(phrase.length));
 
