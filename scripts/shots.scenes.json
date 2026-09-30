@@ -160,6 +160,8 @@
       "wave-defection",
       "wave-poaching",
       "wave-auditors",
+      "wave-promises",
+      "senate-draft",
       "wave-mods",
       "wave-phone"
     ],
@@ -1824,6 +1826,23 @@
       "steps": [
         {
           "eval": "(f, w) => { for (let i = 0; i < 120 * 20; i++) { const open = Object.keys(w.arcs).find((a) => w.arcs[a].value === 'cardOpen'); if (open === 'audit-notice') return; f.tick(w, open ? [{ type: 'chooseEvent', eventId: open, choiceIndex: 0 }] : []); } }"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "wave-promises": {
+      "title": "FLT-52 at Level 5: played on from the mid-game, the Promise Tracker's whip card (~day 467)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { for (let i = 0; i < 120 * 20; i++) { const open = Object.keys(w.arcs).find((a) => w.arcs[a].value === 'cardOpen'); if (open === 'promises-whip') return; f.tick(w, open ? [{ type: 'chooseEvent', eventId: open, choiceIndex: 0 }] : []); } }"
         },
         {
           "wait": 800

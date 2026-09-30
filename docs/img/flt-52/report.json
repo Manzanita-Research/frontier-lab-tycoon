@@ -5,10 +5,10 @@
   },
   "head": {
     "branch": "flt-wave-2",
-    "sha": "ea48ad3",
+    "sha": "21ce2c3",
     "dirty": true
   },
-  "seconds": 321.567,
+  "seconds": 373.934,
   "problems": [],
   "rows": [
     {
@@ -18,7 +18,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-52/after/wave-campus.png",
       "title": "FLT-52: the Level 5 mid-game campus every wave pack wakes on (?scenario=midgame)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-52/compare/wave-campus.png",
-      "changed": 0.3346689814814815
+      "changed": 0.3326226851851852
     },
     {
       "scene": "wave-papers",
@@ -27,7 +27,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-52/after/wave-papers.png",
       "title": "FLT-52 at Level 5: Publish or Perish, the Papers window opened on the mid-game campus",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-52/compare/wave-papers.png",
-      "changed": 0.33564043209876543
+      "changed": 0.3381689814814815
     },
     {
       "scene": "collusion-sign",
@@ -36,7 +36,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-52/after/collusion-sign.png",
       "title": "Agent Collusion: the first Security memo (existing event-card slot)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-52/compare/collusion-sign.png",
-      "changed": 0.26787037037037037
+      "changed": 0.2723742283950617
     },
     {
       "scene": "wave-disasters",
@@ -45,7 +45,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-52/after/wave-disasters.png",
       "title": "FLT-52 at Level 5: Start ▸ Settings ▸ Disasters… on the mid-game campus",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-52/compare/wave-disasters.png",
-      "changed": 0.483287037037037
+      "changed": 0.48728935185185185
     },
     {
       "scene": "hearing",
@@ -54,7 +54,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-52/after/hearing.png",
       "title": "FLT-21 The Hearing: the second senator asks, one chaotic answer on the record",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-52/compare/hearing.png",
-      "changed": 0.3607199074074074
+      "changed": 0.36591743827160494
     },
     {
       "scene": "yacht-invite",
@@ -63,7 +63,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-52/after/yacht-invite.png",
       "title": "FLT-24 The yacht summit invitation (existing event-card slot)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-52/compare/yacht-invite.png",
-      "changed": 0.2549135802469136
+      "changed": 0.25918672839506174
     },
     {
       "scene": "wave-defection",
@@ -72,7 +72,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-52/after/wave-defection.png",
       "title": "FLT-52 at Level 5: played on from the mid-game, the resignation letter (~day 490)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-52/compare/wave-defection.png",
-      "changed": 0.5761388888888889
+      "changed": 0.5797345679012346
     },
     {
       "scene": "wave-poaching",
@@ -81,7 +81,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-52/after/wave-poaching.png",
       "title": "FLT-52 at Level 5: played on from the mid-game, the Poaching War's recruiter email turns up (~day 483)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-52/compare/wave-poaching.png",
-      "changed": 0.575991512345679
+      "changed": 0.577658950617284
     },
     {
       "scene": "wave-auditors",
@@ -90,7 +90,25 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-52/after/wave-auditors.png",
       "title": "FLT-52 at Level 5: played on from the mid-game, Evals Without Borders' warning (~day 507)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-52/compare/wave-auditors.png",
-      "changed": 0.5810339506172839
+      "changed": 0.5817692901234568
+    },
+    {
+      "scene": "wave-promises",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-52/before/wave-promises.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-52/after/wave-promises.png",
+      "title": "FLT-52 at Level 5: played on from the mid-game, the Promise Tracker's whip card (~day 467)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-52/compare/wave-promises.png",
+      "changed": 0.5738233024691358
+    },
+    {
+      "scene": "senate-draft",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-52/before/senate-draft.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-52/after/senate-draft.png",
+      "title": "FLT-22 Regulatory Capture: the staffer's draft, two clauses ticked (track changes on)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-52/compare/senate-draft.png",
+      "changed": 0.4238587962962963
     },
     {
       "scene": "wave-mods",
@@ -99,7 +117,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-52/after/wave-mods.png",
       "title": "FLT-52 at Level 5: Start ▸ Settings ▸ Mods… on the mid-game campus with two mods loaded",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-52/compare/wave-mods.png",
-      "changed": 0.44447839506172837
+      "changed": 0.44369984567901233
     },
     {
       "scene": "wave-phone",
@@ -108,7 +126,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-52/after/wave-phone.png",
       "title": "FLT-52 at Level 5: the resignation letter on a phone",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-52/compare/wave-phone.png",
-      "changed": 0.8143828229432495
+      "changed": 0.8364154210718192
     }
   ],
   "errors": []
