@@ -32,7 +32,7 @@ export function createTestCampus(seed = 1): GameState {
     s.flags[`built:${kind}`] = 0;
   }
   s.version++;
-  s.training = { value: "training", context: { ...s.training.context, progress: 120 } };
+  s.training = { value: "training", context: { ...s.training.context, progress: 120, cost: 300 } }; // a full-size run, not the ladder's small first one
   s.walkers = [];
   const rng = createRng(s.rngState);
   seedWalkers(s, "researcher", 11, rng);

@@ -221,7 +221,7 @@ export function Objectives({ objectives, progress, visible = ALL_VISIBLE, layout
         </div>
         <ul>
           <li>
-            <Fake visited={false}>{goal.text}</Fake> ({Math.min(goal.current, goal.target)}/{goal.target}) <New />
+            <Fake visited={false}>{goal.text}</Fake> ({goal.progressText}) <New />
           </li>
         </ul>
       </section>

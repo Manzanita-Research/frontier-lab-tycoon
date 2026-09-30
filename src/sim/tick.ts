@@ -172,7 +172,8 @@ function step(state: GameState, commands: readonly Command[]) {
     updateTutorial(state);
     observeGuardrails(state);
     probe?.lap("daily:progression");
-  }
+  } else updateProgression(state);
+  probe?.lap("progression");
   updateCoach(state, true);
   probe?.lap("coach");
   state.rngState = rng.state();

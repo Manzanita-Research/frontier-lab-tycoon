@@ -138,14 +138,33 @@ export function use(tool: Tool, x: number, z: number, quiet = false) {
   send({ type: "COMMAND", command: tool === "path" ? { type: "placePath", x, z } : { type: "placeBuilding", kind: tool, x, z } });
 }
 
+/**
+ * What the camera shows, for the probe: the view-projection matrix (column-major) and the canvas rect in CSS pixels.
+ * The scene lends it (`render/ProbeView`), so an e2e player can find a tile wherever the director has moved the camera.
+ */
+export const probeView: { view: (() => { matrix: number[]; rect: { left: number; top: number; width: number; height: number } }) | null } = { view: null };
+
 // Always-on read-only contract: copied values, no URL switches or mutation handles.
 if (typeof window !== "undefined") {
   (window as unknown as { __fltProbe: () => unknown }).__fltProbe = () => {
     const w = sim.world;
     const c = appNow();
+    const snap = c?.snap;
     return { date: w.day, day: w.day, tick: w.tick, ticksPerDay: TICKS_PER_DAY, paused: c ? c.speed === 0 || autoPaused(c) || !!c.event : true, speed: c?.speed ?? initialSpeed,
       walkers: [...w.walkers.map((p) => ({ id: p.id, kind: p.kind, x: p.x, z: p.z, mode: p.machine.value })), ...w.staff.map((p) => ({ id: p.id, kind: p.job, x: p.x, z: p.z, mode: p.machine.value }))],
-      gate: { x: w.gate.x, z: w.gate.z }, coachId: c?.snap.coach?.id ?? null };
+      gate: { x: w.gate.x, z: w.gate.z }, coachId: c?.snap.coach?.id ?? null,
+      // FLT-53, the journey test: what the HUD shows, and the map a player sees, as plain copies.
+      progress: snap ? { level: snap.progress.level, name: snap.progress.levelName, goal: { ...snap.progress.goal }, unlocked: { buildings: [...snap.progress.unlocked.buildings], staff: [...snap.progress.unlocked.staff] } } : null,
+      cash: w.cash, runway: snap?.runway ?? null, income: snap?.income ?? 0, net: snap?.net ?? 0, vibes: w.vibes.value, models: w.models.length, rank: w.race.rank,
+      researchers: w.walkers.filter((p) => p.kind === "researcher" && p.machine.value !== "quitting").length,
+      staff: w.staff.filter((p) => p.machine.value !== "leaving" && p.machine.value !== "gone").map((p) => p.job),
+      training: snap ? { name: snap.training.name, pct: snap.training.pct, etaDays: snap.training.etaDays } : null,
+      event: snap?.event?.id ?? null, unlockCard: snap?.unlockCard?.title ?? null,
+      pendingConfirm: snap?.pendingConfirm ? { kind: snap.pendingConfirm.kind, message: snap.pendingConfirm.message } : null,
+      outcome: c ? { outcome: c.outcome, dismissed: c.outcomeDismissed } : null, overlays: c ? [...c.overlays] : [], warnings: snap ? [...snap.warnings] : [],
+      toasts: c ? c.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) : [],
+      map: { w: w.grid.w, h: w.grid.h, paths: w.grid.paths.flatMap((p, i) => (p ? [i] : [])), gate: { ...w.gate }, buildings: w.buildings.map((b) => ({ id: b.id, kind: b.kind, x: b.x, z: b.z, w: b.w, d: b.d, broken: b.broken })) },
+      view: probeView.view?.() ?? null };
   };
   window.addEventListener("click", () => send({ type: "COMMAND", command: { type: "coachClick" } }));
 }

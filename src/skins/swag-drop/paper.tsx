@@ -119,7 +119,7 @@ export function EventCard({ event, actions }: SlotPropsMap["EventCard"]) {
           {event.investigation && <Evidence investigation={event.investigation} />}
           <div className="sd-choices">
             {event.choices.map((c, i) => (
-              <button key={c.label} type="button" className="sd-choice" onClick={() => actions.choose(event.id, i)}>
+              <button key={c.label} type="button" className="sd-choice" disabled={!!c.disabled} title={c.disabled} onClick={() => actions.choose(event.id, i)}>
                 <span className="sd-keycap">{c.key}</span>
                 <span className="txt">
                   <b>{c.label}</b>

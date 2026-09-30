@@ -215,7 +215,8 @@ export function Objectives({ objectives, progress, visible = ALL_VISIBLE, layout
       {goal && (
         <div className="f95-post goal" {...coach.attrs("goals")} role="status">
           <small>{t("objectives.goal")}</small>
-          <b>{goal.line}</b>
+          <b>{goal.text}</b>
+          <span className="f95-goalnum">{goal.progressText}</span>
           <span className="f95-goalbar" aria-hidden>
             <i style={{ width: `${goal.ratio * 100}%` }} />
           </span>

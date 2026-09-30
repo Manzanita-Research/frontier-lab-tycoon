@@ -1,17 +1,18 @@
 // The tape deck: Stop / Play / Fast forward / Encore as chunky white keys, the record key (photo mode) beside them, and a
 // row of small keys for the News Room, sound, the mixer and the skin picker. Plus the "EXTRA!" sticker when the paper lands.
 import { useState } from "react";
-import { useT } from "../context";
+import { useCoach, useT } from "../context";
 import { ALL_VISIBLE, DramaIcon } from "../kit";
 import type { SlotPropsMap } from "../types";
 import { Star, Tape, ToolIcon } from "./art";
 
 export function Speed({ speed, actions }: SlotPropsMap["Speed"]) {
   const t = useT();
+  const coach = useCoach();
   return (
     <div className="kn-speed" role="group" aria-label={t("speed.label")}>
       {speed.options.map((o) => (
-        <button key={o.value} type="button" className={`kn-key ${o.active ? "on" : ""}`} onClick={() => actions.setSpeed(o.value)} aria-pressed={o.active} aria-label={t(o.key)} title={t(o.key)}>
+        <button key={o.value} type="button" className={`kn-key ${o.active ? "on" : ""}`} {...(o.value === 3 ? coach.attrs("speed") : {})} onClick={() => actions.setSpeed(o.value)} aria-pressed={o.active} aria-label={t(o.key)} title={t(o.key)}>
           <Tape n={o.value} />
         </button>
       ))}

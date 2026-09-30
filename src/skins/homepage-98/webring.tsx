@@ -149,11 +149,12 @@ const SPEED_WORDS: Record<number, string> = { 0: "Pause", 1: "Play", 3: "Fast", 
 /** "Speed: [Pause] [Play] [Fast] [Faster!!]": grey form buttons, Play pressed in. */
 export function Speed({ speed, actions }: SlotPropsMap["Speed"]) {
   const t = useT();
+  const coach = useCoach();
   return (
     <div className="gc-form gc-speed" role="group" aria-label={t("speed.label")}>
       <span className="gc-flabel">Speed:</span>
       {speed.options.map((o) => (
-        <button key={o.value} type="button" className={`gc-fb ${o.active ? "on" : ""}`} onClick={() => actions.setSpeed(o.value)} aria-label={t(o.key)} aria-pressed={o.active}>
+        <button key={o.value} type="button" className={`gc-fb ${o.active ? "on" : ""}`} {...(o.value === 3 ? coach.attrs("speed") : {})} onClick={() => actions.setSpeed(o.value)} aria-label={t(o.key)} aria-pressed={o.active}>
           {SPEED_WORDS[o.value] ?? t(`speed.short.${o.value}`)}
         </button>
       ))}

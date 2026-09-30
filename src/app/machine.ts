@@ -268,7 +268,9 @@ export const appMachine = setupEffect({
       return { context: next, target: phaseFor(next) };
     },
     SET_SPEED: ({ context, event }) => {
-      const next = { ...context, speed: event.speed };
+      // The coach asked for ▶▶ while the first model trains (FLT-58).
+      const saw = event.speed > 1 && context.snap.coach?.id === "speed";
+      const next = { ...context, speed: event.speed, queue: saw ? [...context.queue, { type: "coachSaw", what: "speed" } as const] : context.queue };
       return { context: next, target: phaseFor(next) };
     },
     TOGGLE_PAUSE: ({ context }) => {
@@ -296,7 +298,8 @@ export const appMachine = setupEffect({
     // A player command publishes the snapshot on the very next frame, so a hire or a painted tile shows straight away.
     COMMAND: ({ context, event }) => ({ context: { ...context, speed: event.command.type === "buildPanelOpened" && context.snap.firstBuildPending ? 1 : context.speed, queue: [...context.queue, event.command], lastPublishAt: 0 } }),
     CHOOSE: ({ context, event }) => {
-      if (!context.event) return;
+      // A greyed-out choice (a bid you can't afford) can't be taken by key either.
+      if (!context.event || context.snap.eventBlocked?.[event.choiceIndex]) return;
       const command: Command = { type: "chooseEvent", eventId: context.event.id, choiceIndex: event.choiceIndex };
       return { context: { ...context, queue: [...context.queue, command] } };
     },
@@ -306,7 +309,9 @@ export const appMachine = setupEffect({
     },
     // Selection changes reset the publish timer, so the next frame publishes and the card opens straight away.
     SELECT: ({ context, event }) => {
-      const next = { ...context, selected: event.id, follow: event.id === context.selected ? context.follow : false, lastPublishAt: 0, acc: 0 };
+      // ...and then to read somebody's mind: anybody's card counts (the sim checks it is a person, not a building).
+      const queue: readonly Command[] = event.id !== null && context.snap.coach?.id === "peek" ? [...context.queue, { type: "coachSaw", what: "mind", id: event.id }] : context.queue;
+      const next = { ...context, selected: event.id, follow: event.id === context.selected ? context.follow : false, lastPublishAt: 0, acc: 0, queue };
       return { context: next, target: phaseFor(next) };
     },
     SET_FOLLOW: ({ context, event }) => (context.selected === null ? undefined : { context: { ...context, follow: event.follow, lastPublishAt: 0 } }),

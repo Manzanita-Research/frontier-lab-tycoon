@@ -145,7 +145,8 @@ function statsOf(i: HudInput): StatsVM {
   const s = i.snap;
   const v = s.vibes;
   const race = s.race;
-  const runwayLow = s.runway !== null && s.runway < 6;
+  // "Low" means the same as the spending dialog: under three months (FLT-58: six fired in the first minutes of a healthy lab).
+  const runwayLow = s.runway !== null && s.runway < 3;
   const date = formatDate(s.day);
   return {
     labName: s.labName,
@@ -389,7 +390,10 @@ function eventOf(i: HudInput): { event: EventVM | null; era: HudVM["eraCard"] } 
       tone: def.tone,
       stripe: def.stripe ?? TONE_LABEL[def.tone],
       kind: def.kind === "auction" || def.kind === "response" || def.kind === "stream" || def.kind === "hearing" || def.kind === "leak" || def.kind === "drama" || def.kind === "bill" || def.kind === "vote" ? def.kind : def.kind === "report" && i.snap.audit.report ? "report" : "plain",
-      choices: def.choices.map((c, k) => ({ label: c.label, hint: fillTemplate(c.hint, vars), key: k + 1 })),
+      choices: def.choices.map((c, k) => {
+        const blocked = i.snap.eventBlocked?.[k];
+        return blocked ? { label: c.label, hint: blocked, key: k + 1, disabled: blocked } : { label: c.label, hint: fillTemplate(c.hint, vars), key: k + 1 };
+      }),
       paddles: def.kind === "auction" ? rivals.map((r, k) => ({ id: r.id, name: r.short, color: r.color, number: 200 + ((r.score * 7 + k * 31) % 800) })) : [],
       response: def.kind === "response" ? responseOf(i.snap, vars) : null,
       stream: def.kind === "stream" ? streamOf(i.snap, def.id, vars) : null,
@@ -958,10 +962,13 @@ function helpOf(items: readonly BuildItemVM[]): HudVM["help"] {
 }
 
 /** The note's one goal: the ladder rung's, or once the ladder is done the next open objective ("Top 3 on the Arena in Era 3 · Arena #6, need top 3"). */
-function goalOf({ text, current, target, objective }: PlayableInput["goal"]): GoalVM {
+function goalOf({ text, current, target, status, lowerIsBetter, objective }: PlayableInput["goal"]): GoalVM {
   const def = objective ? defs().goals.find((d) => d.id === objective) : undefined;
-  const progress = def?.unit === "rank" ? goalProgressText(def, current) : `${Math.min(current, target)}/${target}`;
-  return { text, current, target, line: text ? `${text} · ${progress}` : "", ratio: target > 0 ? Math.max(0, Math.min(1, current / target)) : 0 };
+  // The sim says the progress in words when a count alone would not ("$26K of $40K a day · 3 of 12 visitors").
+  const progress = status ?? (def?.unit === "rank" ? goalProgressText(def, current) : `${Math.min(current, target)}/${target}`);
+  // A rank goal: #6 of a Top 3 is half way.
+  const ratio = target > 0 ? Math.max(0, Math.min(1, lowerIsBetter ? (current > 0 ? target / current : 0) : current / target)) : 0;
+  return { text, current, target, line: text ? `${text} · ${progress}` : "", progressText: progress, ratio };
 }
 
 /** What the lab has earned: only these tools are in the build panel (the bulldozer always is), and the Staff tile follows the payroll. */

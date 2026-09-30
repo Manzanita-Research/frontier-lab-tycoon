@@ -24,7 +24,11 @@ export interface PlaceOptions {
   prefer?: readonly Side[];
   /** The popup the target sits in (a build menu): the balloon keeps off all of it, still level with the target. */
   panel?: Rect | null;
+  /** Open windows to keep off: a side whose balloon would cover one only counts if no other side is clear of them all. */
+  avoid?: readonly Rect[];
 }
+
+const overlaps = (a: Rect, b: Rect) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
 
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
 
@@ -41,7 +45,12 @@ export function placeBalloon(anchor: Rect | null, size: { w: number; h: number }
   const y1 = view.h - m.bottom;
   const inX = (x: number) => clamp(x, x0, Math.max(x0, x1 - size.w));
   const inY = (y: number) => clamp(y, y0, Math.max(y0, y1 - size.h));
-  if (!anchor) return { x: inX(x1 - size.w), y: inY(y1 - size.h), side: "none" };
+  if (!anchor) {
+    // No target: the bottom-right corner, or the first other corner clear of the open windows.
+    const corners = [[x1 - size.w, y1 - size.h], [x0, y1 - size.h], [x1 - size.w, y0], [x0, y0]].map(([x, y]) => ({ x: inX(x!), y: inY(y!) }));
+    const corner = corners.find((c) => !opts.avoid?.some((r) => overlaps({ ...c, ...size }, r))) ?? corners[0]!;
+    return { ...corner, side: "none" };
+  }
   const cx = anchor.x + anchor.w / 2;
   const cy = anchor.y + anchor.h / 2;
   // The balloon clears the whole popup when the target is in one, but stays level with the target itself.
@@ -55,7 +64,8 @@ export function placeBalloon(anchor: Rect | null, size: { w: number; h: number }
   // Beside a target on the side that faces the middle of the screen; above it when it (or its popup) sits low on the screen.
   const low = box.y + box.h / 2 > view.h * 0.7;
   const order: readonly Side[] = opts.prefer ?? (low ? ["top", cx < view.w / 2 ? "right" : "left", "left", "right", "bottom"] : cx < view.w * 0.5 ? ["right", "bottom", "top", "left"] : ["left", "bottom", "top", "right"]);
-  const fit = order.find((s) => at[s].room >= 0);
+  const clear = (s: Side) => !opts.avoid?.some((r) => overlaps({ x: inX(at[s].x), y: inY(at[s].y), w: size.w, h: size.h }, r));
+  const fit = order.find((s) => at[s].room >= 0 && clear(s)) ?? order.find((s) => at[s].room >= 0);
   const side = fit ?? (Object.keys(at) as Side[]).sort((a, b) => at[b].room - at[a].room)[0]!;
   return { x: inX(at[side].x), y: inY(at[side].y), side };
 }

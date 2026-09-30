@@ -37,7 +37,7 @@ export function Choices({ event, actions }: { event: EventVM; actions: HudAction
   return (
     <div className="choices">
       {event.choices.map((c, i) => (
-        <button key={c.label} className="choice" onClick={() => actions.choose(event.id, i)}>
+        <button key={c.label} className="choice" disabled={!!c.disabled} title={c.disabled} onClick={() => actions.choose(event.id, i)}>
           <span className="choice-key">{c.key}</span>
           <span className="choice-text">
             <b>{c.label}</b>

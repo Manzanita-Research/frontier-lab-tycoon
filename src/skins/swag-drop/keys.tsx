@@ -141,10 +141,11 @@ export function BuildBar({ items, tip, teasers = [], actions }: SlotPropsMap["Bu
 /** Pause / 1× / 3× / 10× as four keys in a dark tray. The camera key (PhotoButton) sits in the fifth space. */
 export function Speed({ speed, actions }: SlotPropsMap["Speed"]) {
   const t = useT();
+  const coach = useCoach();
   return (
     <div className="sd-tray" role="group" aria-label={t("speed.label")}>
       {speed.options.map((o) => (
-        <button key={o.value} type="button" className={`sd-key spd ${o.active ? "on" : ""}`} onClick={() => actions.setSpeed(o.value)} aria-label={t(o.key)} aria-pressed={o.active}>
+        <button key={o.value} type="button" className={`sd-key spd ${o.active ? "on" : ""}`} {...(o.value === 3 ? coach.attrs("speed") : {})} onClick={() => actions.setSpeed(o.value)} aria-label={t(o.key)} aria-pressed={o.active}>
           <Cap
             face={
               o.value === 0 ? (

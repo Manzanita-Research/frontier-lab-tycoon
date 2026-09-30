@@ -13,7 +13,7 @@ export interface PlayableSnapshot {
     level: number;
     levelName: string;
     unlocked: { buildings: readonly string[]; staff: readonly string[]; systems: readonly string[] };
-    goal: { text: string; current: number; target: number; objective?: string };
+    goal: { text: string; current: number; target: number; status?: string; lowerIsBetter?: boolean; objective?: string };
     teasers: readonly { label: string; hint: string }[];
   };
   coach?: (CoachVM & { suggest?: unknown }) | null;
@@ -27,7 +27,7 @@ export interface PlayableInput {
   buildings: ReadonlySet<string>;
   staff: ReadonlySet<string>;
   systems: readonly string[];
-  goal: { text: string; current: number; target: number; objective?: string };
+  goal: { text: string; current: number; target: number; status?: string; lowerIsBetter?: boolean; objective?: string };
   teasers: readonly { label: string; hint: string }[];
   visible: VisibleVM;
   coach: CoachVM | null;
@@ -68,7 +68,7 @@ export function playableOf(snap: object): PlayableInput {
     goal: progress?.goal ?? { text: "", current: 0, target: 1 },
     teasers: progress?.teasers ?? [],
     visible,
-    coach: coach && { id: coach.id, step: coach.step, of: coach.of, text: coach.text, target: coach.target, waitFor: coach.waitFor, canSkip: coach.canSkip },
+    coach: coach && { id: coach.id, step: coach.step, of: coach.of, text: coach.text, target: coach.target, waitFor: coach.waitFor, canSkip: coach.canSkip, ...(coach.dim ? { dim: true } : {}) },
     unlock: p.unlockCard ? unlockOf(p.unlockCard) : null,
     laddered: progress !== undefined,
   };
