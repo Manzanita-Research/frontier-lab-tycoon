@@ -1,0 +1,193 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=JetBrains+Mono:wght@500;700;800&display=block" rel="stylesheet">
+<style>
+:root{
+  --paper:#FFF8EC; --paper-shade:#F1E4CF; --ink:#1E2A2F; --ink-soft:rgba(30,42,47,.62);
+  --cap-top:#F4EEE4; --cap-side:#CDBFA9; --signal:#FF6B35; --agent:#22D3EE; --good:#2FB36E;
+  --bad:#E5484D; --gold:#F2B53A; --research:#8B7CF6; --sticky:#FFE27A;
+  --shadow-1:0 1px 0 rgba(30,42,47,.08),0 6px 14px -6px rgba(30,42,47,.35);
+  --shadow-2:0 2px 0 rgba(30,42,47,.08),0 16px 30px -10px rgba(30,42,47,.5);
+  --grain:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.12 0 0 0 0 0.16 0 0 0 0 0.18 0 0 0 .06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  --display:"Bricolage Grotesque",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box} html,body{margin:0;width:1440px;height:900px;overflow:hidden}
+body{background:url(bg.png) 0 0/1440px 900px no-repeat;font-family:var(--display);color:var(--ink);position:relative}
+.paper{background:var(--grain),var(--paper);border-radius:10px;box-shadow:inset 0 -3px 0 var(--paper-shade),var(--shadow-1)}
+.mono{font-family:var(--mono);text-transform:uppercase;letter-spacing:.04em}
+
+/* Lab plaque */
+.plaque{position:absolute;left:18px;top:16px;padding:12px 16px 14px;display:flex;flex-direction:column;gap:10px;transform:rotate(-.4deg)}
+.plaque .head{display:flex;align-items:baseline;gap:12px}
+.plaque h1{margin:0;font-weight:800;font-size:22px;letter-spacing:-.01em}
+.plaque .date{font-size:11px;font-weight:700;color:var(--ink-soft)}
+.pins{display:flex;gap:14px;align-items:flex-end}
+.pin{display:flex;flex-direction:column;align-items:center;gap:5px}
+.badge{position:relative;border-radius:999px;display:grid;place-items:center;font-weight:800;font-variant-numeric:tabular-nums;
+  background:radial-gradient(circle at 35% 28%,rgba(255,255,255,.75) 0 18%,transparent 19%),linear-gradient(160deg,#fffdf8,#f3e6cf);
+  box-shadow:inset 0 0 0 3px var(--rim,var(--ink)),inset 0 0 0 6px #fff7e8,inset 0 -4px 0 6px rgba(0,0,0,.06),0 3px 0 rgba(30,42,47,.18),0 8px 14px -8px rgba(30,42,47,.6)}
+.badge.hero{width:92px;height:92px;font-size:31px;--rim:var(--signal);background:radial-gradient(circle at 34% 26%,rgba(255,255,255,.55) 0 16%,transparent 17%),linear-gradient(160deg,#ff8a5c,#f25a22);color:#fff;text-shadow:0 2px 0 rgba(120,30,0,.35)}
+.badge.hero small{position:absolute;bottom:14px;font-size:10px;font-family:var(--mono);letter-spacing:.06em}
+.badge.sm{min-width:74px;height:48px;padding:0 12px;border-radius:999px;font-size:20px}
+.pin .lbl{font-size:10px;font-weight:800;color:var(--ink-soft)}
+.delta{font-family:var(--mono);font-size:10px;font-weight:800;padding:2px 6px;border-radius:999px;background:#fde3e3;color:#b3262b;position:absolute;top:-8px;right:-14px;box-shadow:0 2px 0 rgba(0,0,0,.08)}
+.up{position:absolute;right:6px;top:10px;font-size:13px;color:#fff}
+.gauge{width:74px;height:48px}
+
+/* Clipboard */
+.clip{position:absolute;left:18px;top:196px;width:252px;display:flex;flex-direction:column;gap:12px}
+.train{padding:12px 14px 14px}
+.train .row{display:flex;justify-content:space-between;align-items:baseline}
+.train .k{font-size:10px;font-weight:800;color:var(--research)}
+.train .name{font-weight:800;font-size:17px;margin:4px 0 8px}
+.bar{height:14px;border-radius:999px;background:#ece2d1;box-shadow:inset 0 2px 0 rgba(0,0,0,.08);overflow:hidden}
+.bar i{display:block;height:100%;width:42%;border-radius:999px;background:repeating-linear-gradient(-45deg,var(--research) 0 8px,#a497ff 8px 16px)}
+.okr-h{font-size:10px;font-weight:800;color:var(--ink-soft);margin:4px 0 -4px 4px}
+.stickies{display:flex;flex-direction:column;gap:8px}
+.sticky{background:var(--sticky);padding:10px 12px 12px 34px;position:relative;font-size:14px;font-weight:600;line-height:1.2;
+  box-shadow:0 1px 0 rgba(0,0,0,.05),0 10px 14px -10px rgba(30,42,47,.55);border-radius:2px 2px 10px 2px}
+.sticky:nth-child(1){transform:rotate(-1.4deg)} .sticky:nth-child(2){transform:rotate(1deg);background:#FFD9A8} .sticky:nth-child(3){transform:rotate(-.6deg);background:#CFF3C9}
+.sticky small{display:block;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--ink-soft);margin-top:4px;text-transform:uppercase}
+.box{position:absolute;left:10px;top:11px;width:16px;height:16px;border:2px solid var(--ink);border-radius:4px}
+.sticky.done .box::after{content:"";position:absolute;left:1px;top:-6px;width:18px;height:14px;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 14'><path d='M1 8 L6 12 L17 1' fill='none' stroke='%23E5484D' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/></svg>") no-repeat}
+
+/* keycaps */
+.cap{position:relative;display:grid;place-items:center;background:var(--cap-top);border-radius:12px;
+  box-shadow:inset 0 2px 0 #fff,0 5px 0 var(--cap-side),0 6px 0 rgba(30,42,47,.25),0 12px 16px -8px rgba(30,42,47,.55)}
+.cap .leg{position:absolute;left:7px;top:5px;font-family:var(--mono);font-size:10px;font-weight:800;color:var(--ink-soft)}
+.cap.on{background:var(--signal);color:#fff;box-shadow:inset 0 2px 0 rgba(255,255,255,.4),0 2px 0 #c44716,0 3px 0 rgba(30,42,47,.25),0 0 0 4px rgba(255,107,53,.25),0 8px 16px -6px rgba(255,107,53,.8);transform:translateY(3px)}
+.cap.on .leg{color:rgba(255,255,255,.8)}
+.speed{position:absolute;z-index:5;right:18px;top:18px;background:rgba(42,56,62,.55)!important;display:flex;gap:10px;padding:10px 12px 14px;border-radius:14px;background:rgba(30,42,47,.16)}
+.speed .cap{width:50px;height:46px;font-family:var(--mono);font-weight:800;font-size:15px}
+
+/* ID badge */
+.strap{position:absolute;left:1266px;top:-10px;width:26px;height:150px;background:repeating-linear-gradient(90deg,var(--signal) 0 26px);transform:rotate(3deg);transform-origin:top;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.strap span{position:absolute;left:4px;top:10px;writing-mode:vertical-rl;font-family:var(--mono);font-size:9px;font-weight:800;color:#fff;letter-spacing:.12em}
+.clipm{position:absolute;left:1262px;top:128px;width:38px;height:26px;border-radius:6px 6px 10px 10px;background:linear-gradient(#e9eef0,#aeb8bd);box-shadow:0 2px 0 rgba(0,0,0,.2);transform:rotate(2deg)}
+.idcard{position:absolute;left:1122px;top:146px;width:300px;padding:0 0 16px;transform:rotate(2deg);overflow:hidden}
+.idcard .top{height:34px;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-radius:10px 10px 0 0}
+.idcard .top b{font-size:10px;font-family:var(--mono);letter-spacing:.08em}
+.idcard .hole{width:44px;height:8px;border-radius:99px;background:var(--paper)}
+.who{display:flex;gap:12px;padding:14px 16px 8px}
+.photo{width:64px;height:76px;border-radius:8px;background:linear-gradient(180deg,#ffd9c7,#ff9a76);position:relative;box-shadow:inset 0 0 0 2px var(--ink)}
+.photo::before{content:"";position:absolute;left:18px;top:14px;width:28px;height:28px;border-radius:50%;background:#8a5a3c;box-shadow:inset 0 -3px 0 rgba(0,0,0,.2)}
+.photo::after{content:"";position:absolute;left:10px;bottom:0;width:44px;height:22px;border-radius:22px 22px 6px 6px;background:#2f7d5b}
+.who h2{margin:2px 0 0;font-size:21px;font-weight:800;line-height:1.05}
+.who .role{font-size:10px;font-weight:700;color:var(--ink-soft);margin-top:5px}
+.chips{display:flex;gap:6px;margin-top:8px}
+.chip{font-family:var(--mono);font-size:9.5px;font-weight:800;padding:3px 7px;border-radius:999px;background:#ffe9b8;color:#8a5800}
+.chip.b{background:#e9e1d2;color:var(--ink)}
+.bat{display:grid;grid-template-columns:62px 1fr 38px;align-items:center;gap:8px;padding:5px 16px;font-size:10px;font-weight:800}
+.cell{height:14px;border-radius:4px;border:2px solid var(--ink);position:relative;padding:1px;display:flex;gap:2px}
+.cell::after{content:"";position:absolute;right:-5px;top:3px;width:3px;height:5px;background:var(--ink);border-radius:0 2px 2px 0}
+.cell i{flex:1;border-radius:1px;background:#e8dfcf} .cell i.f{background:var(--good)} .cell.low i.f{background:var(--bad)} .cell.fomo i.f{background:var(--signal)}
+.bat .v{font-family:var(--mono);text-align:right}
+.quote{margin:10px 16px 12px;padding:10px 12px;border-radius:8px;background:#fff;box-shadow:inset 0 0 0 1.5px rgba(30,42,47,.14);font-size:15px;font-weight:600;line-height:1.25}
+.quote .mono{display:block;font-size:9.5px;font-weight:800;color:var(--ink-soft);margin-bottom:4px}
+.follow{margin:0 16px;height:44px;font-weight:800;font-size:16px;color:#fff;background:var(--signal);box-shadow:inset 0 2px 0 rgba(255,255,255,.35),0 5px 0 #c44716,0 12px 16px -8px rgba(196,71,22,.8)}
+
+/* sticker toast */
+.sticker{position:absolute;left:560px;top:22px;transform:rotate(-3deg);background:#fff;border-radius:999px;padding:6px;box-shadow:0 10px 20px -8px rgba(30,42,47,.6)}
+.sticker div{border-radius:999px;background:var(--good);color:#fff;padding:10px 20px;font-weight:800;font-size:17px;display:flex;gap:10px;align-items:center}
+.sticker em{font-style:normal;font-family:var(--mono);font-size:10px;background:rgba(255,255,255,.22);padding:3px 7px;border-radius:99px}
+
+/* bubbles (cover the baked-in old ones) */
+.bub{position:absolute;background:#fff;border-radius:12px;padding:9px 12px 9px 15px;font-size:14px;font-weight:600;line-height:1.22;box-shadow:var(--shadow-1);max-width:236px}
+.bub::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:4px;border-radius:0 4px 4px 0;background:var(--k)}
+.bub::after{content:"";position:absolute;left:var(--tx,50%);bottom:-8px;width:16px;height:16px;background:#fff;transform:rotate(45deg);border-radius:3px;box-shadow:3px 3px 4px -2px rgba(30,42,47,.25)}
+.bub b{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.06em;color:var(--ink-soft);margin-bottom:2px;text-transform:uppercase}
+
+/* keycap build bar */
+.deck{position:absolute;left:50%;bottom:52px;transform:translateX(-50%);display:flex;gap:10px;padding:12px 14px 18px;border-radius:16px;
+  background:linear-gradient(#3a4a51,#26333a);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 16px 30px -12px rgba(0,0,0,.6)}
+.deck .cap{width:84px;height:76px;align-content:center;gap:3px;padding-top:6px}
+.deck .cap svg{width:30px;height:30px}
+.deck .cap .nm{font-size:11.5px;font-weight:700}
+.deck .cap .pr{position:absolute;bottom:-2px;font-family:var(--mono);font-size:9.5px;font-weight:800;color:#6e5f49}
+.deck .cap.on .pr{color:#fff}
+.deck .cap.poor{filter:saturate(.3);opacity:.72}
+.deck .cap.poor .leg::after{content:" 💸"}
+
+/* ticker */
+.ticker{position:absolute;left:0;right:0;bottom:0;height:40px;background:var(--ink);display:flex;align-items:center;gap:18px;padding-left:14px;overflow:hidden;white-space:nowrap}
+.stamp{font-family:var(--mono);font-size:11px;font-weight:800;color:var(--signal);border:2px solid var(--signal);padding:2px 8px;border-radius:4px;transform:rotate(-4deg)}
+.ticker .it{font-family:var(--mono);font-size:13px;font-weight:500;color:#F5EEE2;display:flex;align-items:center;gap:8px}
+.tone{width:18px;height:18px;border-radius:5px;display:grid;place-items:center;font-size:10px;font-weight:800;color:#fff}
+</style></head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+ <defs>
+  <symbol id="i-path" viewBox="0 0 32 32"><path d="M4 20 16 26 28 20 16 14Z" fill="#F2D9A8" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M4 14 16 20 28 14 16 8Z" fill="#fff" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+  <symbol id="i-cluster" viewBox="0 0 32 32"><rect x="5" y="8" width="10" height="18" rx="2" fill="#7FB2F0" stroke="currentColor" stroke-width="2"/><rect x="17" y="12" width="10" height="14" rx="2" fill="#7FB2F0" stroke="currentColor" stroke-width="2"/><path d="M8 13h4M8 17h4M20 17h4M20 21h4" stroke="#22D3EE" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-hall" viewBox="0 0 32 32"><path d="M5 24a11 11 0 0 1 22 0Z" fill="#E9E3FF" stroke="currentColor" stroke-width="2"/><path d="M3 25h26" stroke="#8B7CF6" stroke-width="3" stroke-linecap="round"/><path d="M16 13V7" stroke="currentColor" stroke-width="2"/><circle cx="16" cy="6" r="2" fill="#8B7CF6"/></symbol>
+  <symbol id="i-gate" viewBox="0 0 32 32"><path d="M7 27V14a9 9 0 0 1 18 0v13h-5V15a4 4 0 0 0-8 0v12Z" fill="#FFB38F" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+  <symbol id="i-kom" viewBox="0 0 32 32"><path d="M13 4h6v5l3 4v14H10V13l3-4Z" fill="#F2B53A" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><rect x="12" y="16" width="8" height="6" rx="1" fill="#fff" stroke="currentColor" stroke-width="1.5"/></symbol>
+  <symbol id="i-nap" viewBox="0 0 32 32"><rect x="4" y="12" width="24" height="12" rx="6" fill="#CFE6FF" stroke="currentColor" stroke-width="2"/><path d="M20 5h5l-5 5h5" stroke="currentColor" stroke-width="2" fill="none" stroke-linejoin="round"/></symbol>
+  <symbol id="i-demo" viewBox="0 0 32 32"><rect x="5" y="6" width="22" height="14" rx="2" fill="#FF7BAC" stroke="currentColor" stroke-width="2"/><path d="M14 10v6l5-3Z" fill="#fff"/><path d="M10 26h12M16 20v6" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-doze" viewBox="0 0 32 32"><rect x="9" y="10" width="14" height="10" rx="2" fill="#FFD166" stroke="currentColor" stroke-width="2"/><path d="M3 22h26" stroke="currentColor" stroke-width="2"/><circle cx="11" cy="24" r="3" fill="#fff" stroke="currentColor" stroke-width="2"/><circle cx="21" cy="24" r="3" fill="#fff" stroke="currentColor" stroke-width="2"/><path d="M23 14l5 3" stroke="currentColor" stroke-width="2"/></symbol>
+ </defs>
+</svg>
+
+<div class="plaque paper">
+  <div class="head"><h1>Mostly Harmless Compute</h1><span class="date mono">Y1 · Jan 30 · Day 30</span></div>
+  <div class="pins">
+    <div class="pin"><div class="badge hero">636<small>VIBES</small><span class="up">▲</span></div></div>
+    <div class="pin"><div class="badge sm" style="--rim:var(--gold)">$4.33M<span class="delta">−$25K/d</span></div><span class="lbl mono">Cash</span></div>
+    <div class="pin"><div class="badge sm" style="--rim:var(--bad);color:var(--bad)">5.8 mo</div><span class="lbl mono">Runway</span></div>
+    <div class="pin"><div class="badge sm" style="--rim:var(--research)">26</div><span class="lbl mono">Capability</span></div>
+    <div class="pin"><div class="badge sm" style="--rim:var(--signal)"><svg class="gauge" viewBox="0 0 74 48"><path d="M14 38a23 23 0 0 1 46 0" fill="none" stroke="#e7dccb" stroke-width="7" stroke-linecap="round"/><path d="M14 38a23 23 0 0 1 30-21.9" fill="none" stroke="#FF6B35" stroke-width="7" stroke-linecap="round"/><text x="37" y="40" text-anchor="middle" font-family="Bricolage Grotesque" font-weight="800" font-size="17" fill="#1E2A2F">44</text></svg></div><span class="lbl mono">Hype</span></div>
+  </div>
+</div>
+
+<div class="sticker"><div>🎉 Frontier-2 shipped! <em>+15 hype</em></div></div>
+
+<div class="clip">
+  <div class="train paper">
+    <div class="row"><span class="k mono">● Training run #2</span><span class="mono" style="font-size:10px;font-weight:800">42%</span></div>
+    <div class="name">Frontier-3-Reasoner</div>
+    <div class="bar"><i></i></div>
+  </div>
+  <div class="okr-h mono">Q1 OKRs · 333 days left</div>
+  <div class="stickies">
+    <div class="sticky done"><span class="box"></span>Release Frontier-2<small>Shipped · Jan 28</small></div>
+    <div class="sticky"><span class="box"></span>Reach $250K/day revenue<small>$0 / $250K</small></div>
+    <div class="sticky"><span class="box"></span>Hype 60+<small>44 / 60</small></div>
+  </div>
+</div>
+
+<div class="speed"><div class="cap"><span>❚❚</span></div><div class="cap on">1×</div><div class="cap">3×</div><div class="cap">10×</div><div class="cap" style="width:50px">📷</div></div>
+
+<div class="strap"><span>MOSTLY HARMLESS · ALL-HANDS ACCESS · </span></div>
+<div class="idcard paper">
+  <div class="top"><b>ALL-HANDS ACCESS</b><span class="hole"></span><b>#0042</b></div>
+  <div class="who"><div class="photo"></div><div><h2>Dr. Ada Gradient</h2><div class="role mono">Member of Technical Staff</div><div class="chips"><span class="chip">SLUMPED</span><span class="chip b">RESEARCHER</span></div></div></div>
+  <div class="bat"><span class="mono">Energy</span><span class="cell low"><i class="f"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="v">12%</span></div>
+  <div class="bat"><span class="mono">Focus</span><span class="cell"><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i></i></span><span class="v">90%</span></div>
+  <div class="bat"><span class="mono">FOMO</span><span class="cell fomo"><i class="f"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="v">5%</span></div>
+  <div class="quote"><span class="mono">Thinking</span>“The kombucha is warm and so is my equity.”</div>
+  <div class="cap follow">Follow</div>
+</div>
+
+<div class="bub" style="left:226px;top:516px;--k:#3B4A6B;--tx:104px;width:238px"><b>Visitor · Journalist</b>I'm a journalist. My piece is called 'AI: Hot or Not?'</div>
+<div class="bub" style="left:92px;top:598px;--k:#3B4A6B;--tx:98px;width:238px"><b>Visitor · VC</b>I'm here to 'get exposure to AI'. Where do I sign for the AI?</div>
+<div class="bub" style="left:858px;top:226px;--k:#22D3EE;--tx:70px;width:178px;font-size:12.5px"><b>Agent-0042 “Sparky”</b>I asked for a dinner recipe. It gave me a research agenda.</div>
+
+<div class="deck">
+  <div class="cap"><span class="leg">1</span><svg><use href="#i-path"/></svg><span class="nm">Path</span><span class="pr">$10K</span></div>
+  <div class="cap"><span class="leg">2</span><svg><use href="#i-cluster"/></svg><span class="nm">Cluster</span><span class="pr">$600K</span></div>
+  <div class="cap on"><span class="leg">3</span><svg style="color:#fff"><use href="#i-hall"/></svg><span class="nm">Training Hall</span><span class="pr">$900K</span></div>
+  <div class="cap"><span class="leg">4</span><svg><use href="#i-gate"/></svg><span class="nm">Gateway</span><span class="pr">$400K</span></div>
+  <div class="cap"><span class="leg">5</span><svg><use href="#i-kom"/></svg><span class="nm">Kombucha</span><span class="pr">$120K</span></div>
+  <div class="cap"><span class="leg">6</span><svg><use href="#i-nap"/></svg><span class="nm">Nap Pods</span><span class="pr">$200K</span></div>
+  <div class="cap poor"><span class="leg">7</span><svg><use href="#i-demo"/></svg><span class="nm">Demo Stage</span><span class="pr">$5.5M</span></div>
+  <div class="cap"><span class="leg">9</span><svg><use href="#i-doze"/></svg><span class="nm">Bulldoze</span><span class="pr">½ back</span></div>
+</div>
+
+<div class="ticker">
+  <span class="stamp">NEWS</span>
+  <span class="it"><span class="tone" style="background:var(--signal)">✦</span>Training run for Frontier-3 kicks off; interns told not to touch the big red button, or the green one</span>
+  <span class="it"><span class="tone" style="background:var(--bad)">▼</span>Sirocco releases open-weights model via torrent link at 3am</span>
+  <span class="it"><span class="tone" style="background:var(--good)">▲</span>Senator asks whether Frontier-2 is “in the cloud or in the computer”</span>
+</div>
+</body></html>

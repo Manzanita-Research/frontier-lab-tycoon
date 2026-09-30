@@ -1,0 +1,137 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tinos:ital,wght@0,400;0,700;1,400&family=Jersey+10&family=VT323&display=block" rel="stylesheet">
+<style>
+:root{--link:#0000EE;--vis:#551A8B;--ink:#000;--serif:"Tinos","Times New Roman",serif;--pix:"Jersey 10",monospace;--mono:"VT323",monospace}
+*{box-sizing:border-box}html,body{margin:0;width:1440px;height:900px;overflow:hidden}
+body{background:url(bg.png) 0 0/1440px 900px no-repeat;font-family:var(--serif);font-size:17px;color:var(--ink);position:relative}
+a{color:var(--link);text-decoration:underline}a.v{color:var(--vis)}
+/* tiles */
+.sky{background-color:#bfe3ff;background-image:radial-gradient(ellipse 16px 8px at 20px 20px,#fff 60%,transparent 62%),radial-gradient(ellipse 12px 6px at 32px 16px,#fff 60%,transparent 62%),radial-gradient(ellipse 14px 7px at 62px 52px,#fff 60%,transparent 62%),radial-gradient(ellipse 10px 5px at 72px 48px,#fff 60%,transparent 62%);background-size:84px 70px}
+.parch{background-color:#fff8dc;background-image:radial-gradient(rgba(160,120,40,.12) 1px,transparent 1.5px);background-size:9px 9px}
+.box{position:absolute;border:3px ridge #b0b0b0;padding:10px 12px}
+table.t{border-collapse:separate;border-spacing:2px;border:2px outset #ccc;background:#fff}
+table.t td{border:1px inset #ccc;padding:3px 8px;font-size:16px}
+.rainbow{height:6px;border:0;margin:8px 0;background:linear-gradient(90deg,#f00 0 16.6%,#f80 0 33.3%,#fd0 0 50%,#0b0 0 66.6%,#06f 0 83.3%,#80f 0)}
+.blink{color:#f00;font-weight:bold}
+.new{display:inline-block;background:#f00;color:#ff0;font-family:var(--pix);font-size:16px;padding:0 4px;transform:rotate(-6deg);border:1px solid #000}
+/* header */
+.hdr{left:12px;top:10px;width:640px;text-align:center}
+.hdr h1{margin:0;font-size:31px;color:#8000c0;text-shadow:2px 2px 0 #ffd400;font-style:italic}
+.spark{color:#ffb800}
+.counter{display:inline-flex;gap:2px;background:#000;padding:3px;border:2px inset #999;vertical-align:middle}
+.counter span{width:22px;height:30px;display:grid;place-items:center;background:linear-gradient(#333 0 48%,#111 52%);color:#fff;font-family:var(--mono);font-size:30px}
+.counter span.hot{color:#ff4040}
+.hdr .sub{font-size:16px;margin-top:4px}
+.stats{margin:8px auto 0}
+/* construction */
+.uc{left:12px;top:252px;width:330px}
+.tape{height:14px;background:repeating-linear-gradient(-45deg,#ffd400 0 12px,#000 12px 24px);border:1px solid #000}
+.uc h3{margin:6px 0 2px;font-size:21px;display:flex;align-items:center;gap:8px}
+.worker{width:34px;height:34px}
+.pbar{border:2px inset #999;background:#fff;height:22px;padding:2px;display:flex;gap:2px}.pbar i{width:10px;background:#000080}
+.uc ul{margin:6px 0 0;padding-left:22px}
+.uc li{margin:3px 0}
+/* about me */
+.about{left:1036px;top:66px;width:392px}
+.about h2{margin:0 0 6px;font-size:23px;color:#c00060;text-align:center}
+.about .grid{display:grid;grid-template-columns:100px 1fr;gap:10px}
+.photo{border:4px ridge #c0a060;background:#ffd9b0;width:100px;height:118px}
+.about .lj{font-family:var(--mono);font-size:19px;line-height:1.1;margin-top:6px}
+.meter{display:grid;grid-template-columns:70px 1fr 42px;gap:6px;align-items:center;margin-top:4px;font-size:16px}
+.meter .m{height:14px;border:1px solid #000;background:#fff}.meter .m i{display:block;height:100%}
+.gbook{margin-top:10px;border:2px dashed #8000c0;padding:6px 8px;background:#fffbe0;font-style:italic}
+.btns{display:flex;gap:6px;margin-top:10px;justify-content:center}
+.fb{font-family:Arial,sans-serif;font-size:15px;padding:4px 12px;background:#e0e0e0;border:2px outset #fff;color:#000}
+.fb.on{border-style:inset;background:#c8c8c8}
+/* guestbook bubbles */
+.gb{position:absolute;background:#fffff0;border:2px solid #000080;padding:6px 10px;font-size:16px;line-height:1.2}
+.gb b{display:block;font-size:14px;color:var(--vis)}
+.gb::after{content:"";position:absolute;left:var(--tx,40%);bottom:-12px;border:6px solid transparent;border-top:6px solid #000080}
+/* speed form */
+.speed{position:absolute;right:12px;top:12px;display:flex;gap:4px;align-items:center;background:#e0e0e0;border:2px outset #fff;padding:6px 8px;font-family:Arial,sans-serif;font-size:15px}
+/* webring build bar */
+.ring{left:50%;transform:translateX(-50%);bottom:50px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 12px}
+.ring .nav{font-size:16px}
+.ring .row{display:flex;gap:6px}
+.b88{width:132px;height:46px;border:2px solid #000;display:grid;grid-template-columns:36px 1fr;align-items:center;font-family:var(--pix);font-size:17px;line-height:.95;padding:2px 4px;image-rendering:pixelated}
+.b88 svg{width:30px;height:30px}
+.b88 small{display:block;font-family:var(--mono);font-size:17px;color:#ff0}
+.b88.on{outline:3px dashed #f00;outline-offset:2px}
+.b88.poor{filter:grayscale(1);opacity:.5}
+/* marquee */
+.mq{position:absolute;left:0;right:0;bottom:0;height:40px;background:#000080;color:#ffff00;display:flex;align-items:center;gap:30px;padding:0 12px;white-space:nowrap;overflow:hidden;font-size:19px;font-weight:bold;border-top:3px ridge #b0b0b0}
+.mq .l{background:#f00;color:#fff;font-family:var(--pix);font-weight:400;font-size:20px;padding:0 6px}
+/* popup */
+.pop{position:absolute;left:676px;top:12px;width:300px;background:#fff;border:2px outset #ddd;box-shadow:none}
+.pop .tt{background:#000080;color:#fff;font-family:Arial,sans-serif;font-size:14px;font-weight:bold;padding:2px 6px;display:flex;justify-content:space-between}
+.pop .c{padding:8px 10px;font-size:17px;text-align:center}
+</style></head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs>
+ <symbol id="i-path" viewBox="0 0 24 24" shape-rendering="crispEdges"><path d="M2 14 12 19 22 14 12 9Z" fill="#e8c37a" stroke="#000"/></symbol>
+ <symbol id="i-cluster" viewBox="0 0 24 24" shape-rendering="crispEdges"><rect x="3" y="4" width="8" height="17" fill="#39f" stroke="#000"/><rect x="13" y="8" width="8" height="13" fill="#39f" stroke="#000"/><path d="M5 8h4M5 12h4M15 12h4" stroke="#0f0"/></symbol>
+ <symbol id="i-hall" viewBox="0 0 24 24" shape-rendering="crispEdges"><path d="M3 19a9 9 0 0 1 18 0z" fill="#fff" stroke="#000"/><rect x="1" y="19" width="22" height="3" fill="#a0f" stroke="#000"/></symbol>
+ <symbol id="i-gate" viewBox="0 0 24 24" shape-rendering="crispEdges"><path d="M4 22V10a8 8 0 0 1 16 0v12h-4V11a4 4 0 0 0-8 0v11z" fill="#f80" stroke="#000"/></symbol>
+ <symbol id="i-kom" viewBox="0 0 24 24" shape-rendering="crispEdges"><path d="M9 2h6v4l3 3v13H6V9l3-3z" fill="#fd0" stroke="#000"/></symbol>
+ <symbol id="i-nap" viewBox="0 0 24 24" shape-rendering="crispEdges"><rect x="2" y="10" width="20" height="9" rx="4" fill="#8cf" stroke="#000"/><path d="M15 3h5l-5 5h5" stroke="#fff" fill="none"/></symbol>
+ <symbol id="i-demo" viewBox="0 0 24 24" shape-rendering="crispEdges"><rect x="3" y="3" width="18" height="12" fill="#f4a" stroke="#000"/><path d="M10 6v6l5-3z" fill="#fff"/></symbol>
+ <symbol id="i-doze" viewBox="0 0 24 24" shape-rendering="crispEdges"><rect x="6" y="7" width="11" height="8" fill="#fd0" stroke="#000"/><circle cx="8" cy="19" r="2.5" fill="#fff" stroke="#000"/><circle cx="16" cy="19" r="2.5" fill="#fff" stroke="#000"/></symbol>
+</defs></svg>
+
+<div class="box sky hdr">
+  <h1><span class="spark">✧</span> Welcome to Mostly Harmless Compute's Home Page!!! <span class="spark">✧</span></h1>
+  <div class="sub">You are visitor # <span class="counter"><span>0</span><span>0</span><span>0</span><span class="hot">6</span><span class="hot">3</span><span class="hot">6</span></span> &nbsp;← that's our <b>Vibes</b>! <span class="new">NEW!</span></div>
+  <table class="t stats"><tr><td>💰 Cash</td><td><b>$4.33M</b> <span style="color:#c00">(-$25K/day)</span></td><td>⏳ Runway</td><td class="blink">5.8 months!!</td><td>🧠 Capability</td><td><b>26</b></td><td>📣 Hype</td><td><b>44</b></td></tr></table>
+  <div style="font-size:14px;margin-top:4px">Y1 · Jan 30 · last updated today · <a class="v" href="#">Sign my guestbook!</a></div>
+</div>
+
+<div class="pop"><div class="tt"><span>Frontier-2 Released!!</span><span>✕</span></div><div class="c">🎉 <b>Frontier-2</b> is out!!! <a href="#">Click here</a> to see what it can do!!!<br><span style="font-size:14px">(+15 hype)</span></div></div>
+
+<div class="box parch uc">
+  <div class="tape"></div>
+  <h3><svg class="worker" viewBox="0 0 17 17" shape-rendering="crispEdges"><rect x="5" y="1" width="7" height="3" fill="#fd0" stroke="#000" stroke-width=".6"/><rect x="6" y="4" width="5" height="4" fill="#fc9"/><rect x="5" y="8" width="7" height="6" fill="#f80"/><rect x="3" y="9" width="2" height="5" fill="#fc9"/><rect x="12" y="6" width="1" height="9" fill="#840"/><rect x="11" y="5" width="4" height="2" fill="#999"/></svg>Under Construction!</h3>
+  <div><b>Frontier-3-Reasoner</b> is being trained. Pardon our dust!!</div>
+  <div class="pbar" style="margin:6px 0"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <div style="font-size:15px">42% · +10 compute/day</div>
+  <hr class="rainbow">
+  <b>My Goals for Q1!!</b>
+  <ul><li><s>Release Frontier-2</s> ✔ <span class="new">DONE</span></li><li><a href="#">Reach $250K/day revenue</a> ($0 so far)</li><li><a class="v" href="#">Hype 60+</a> (44/60)</li></ul>
+</div>
+
+<div class="speed"><span>Speed:</span><button class="fb">Pause</button><button class="fb on">Play</button><button class="fb">Fast</button><button class="fb">Faster!!</button></div>
+
+<div class="box sky about">
+  <h2>~*~ About Me ~*~</h2>
+  <div class="grid">
+    <svg class="photo" viewBox="0 0 25 30" shape-rendering="crispEdges"><rect width="25" height="30" fill="#ffd9b0"/><rect x="7" y="3" width="11" height="4" fill="#3b2415"/><rect x="7" y="7" width="11" height="8" fill="#c68a5a"/><rect x="9" y="10" width="2" height="1" fill="#000"/><rect x="14" y="10" width="2" height="1" fill="#000"/><rect x="10" y="13" width="5" height="1" fill="#803020"/><rect x="4" y="17" width="17" height="13" fill="#1fa24a"/></svg>
+    <div><b style="font-size:21px">Dr. Ada Gradient</b><br>Member of Technical Staff<br><span class="lj">current mood: 😴 slumped<br>current music: GPU fans</span></div>
+  </div>
+  <div class="meter"><span>Energy</span><span class="m"><i style="width:12%;background:#f00"></i></span><span>12%</span></div>
+  <div class="meter"><span>Focus</span><span class="m"><i style="width:90%;background:#0a0"></i></span><span>90%</span></div>
+  <div class="meter"><span>FOMO</span><span class="m"><i style="width:5%;background:#f80"></i></span><span>5%</span></div>
+  <div class="gbook">Latest thought: “The kombucha is warm and so is my equity.”</div>
+  <div class="btns"><button class="fb">Follow Ada</button><button class="fb">Sign her guestbook</button></div>
+</div>
+
+<div class="gb" style="left:224px;top:514px;width:246px;--tx:100px"><b>Visitor (journalist) wrote:</b>I'm a journalist. My piece is called 'AI: Hot or Not?'</div>
+<div class="gb" style="left:90px;top:596px;width:246px;--tx:100px"><b>Visitor (VC) wrote:</b>I'm here to 'get exposure to AI'. Where do I sign for the AI?</div>
+<div class="gb" style="left:856px;top:222px;width:186px;font-size:14.5px;--tx:70px"><b>Agent-0042 wrote:</b>I asked for a dinner recipe. It gave me a research agenda.</div>
+
+<div class="box parch ring">
+  <div class="nav">[ <a href="#">&lt;&lt; Prev</a> | <b>✧ The AI Labs WebRing ✧</b> — build something! | <a class="v" href="#">Next &gt;&gt;</a> ]</div>
+  <div class="row">
+    <span class="b88" style="background:#008000;color:#fff"><svg><use href="#i-path"/></svg><span>PATH<small>$10K</small></span></span>
+    <span class="b88" style="background:#000080;color:#fff"><svg><use href="#i-cluster"/></svg><span>CLUSTER<small>$600K</small></span></span>
+    <span class="b88 on" style="background:#800080;color:#fff"><svg><use href="#i-hall"/></svg><span>TRAINING HALL<small>$900K</small></span></span>
+    <span class="b88" style="background:#c04000;color:#fff"><svg><use href="#i-gate"/></svg><span>GATEWAY<small>$400K</small></span></span>
+    <span class="b88" style="background:#806000;color:#fff"><svg><use href="#i-kom"/></svg><span>KOMBUCHA<small>$120K</small></span></span>
+    <span class="b88" style="background:#006080;color:#fff"><svg><use href="#i-nap"/></svg><span>NAP PODS<small>$200K</small></span></span>
+    <span class="b88 poor" style="background:#a00050;color:#fff"><svg><use href="#i-demo"/></svg><span>DEMO STAGE<small>$5.5M</small></span></span>
+    <span class="b88" style="background:#404040;color:#fff"><svg><use href="#i-doze"/></svg><span>BULLDOZE<small>½ back</small></span></span>
+  </div>
+</div>
+
+<div class="mq"><span class="l">NEWS!!</span>★ Training run for Frontier-3 kicks off; interns told not to touch the big red button, or the green one ★ Sirocco releases open-weights model via torrent link at 3am ★ Best viewed in Netscape Navigator 3.0 ★</div>
+</body></html>
