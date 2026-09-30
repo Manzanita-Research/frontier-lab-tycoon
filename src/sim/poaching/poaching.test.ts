@@ -62,6 +62,8 @@ describe("an offer", () => {
     const vars = poachingVars(s);
     expect(vars.poacher).toBe("MetaMeta Superintelligence Labs");
     expect(vars.poachCount).toBe(String(offer.targets.length));
+    // The card's hints quote the chart's own numbers, nested guards included.
+    expect(vars.vibesNeeded).toBe("550");
   });
   it("a smaller lab asks for one or two", () => {
     const s = staged("sirocco");

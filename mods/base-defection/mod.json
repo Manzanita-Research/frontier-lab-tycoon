@@ -183,7 +183,7 @@
                       {
                         "type": "news",
                         "params": {
-                          "text": "{lab} hands out equity; {defName}'s team updates their LinkedIn headlines to 'owner'",
+                          "text": "{lab} hands out equity; {defName}'s team updates their LinkedOut headlines to 'owner'",
                           "tone": "good"
                         }
                       },
@@ -477,7 +477,7 @@
               ]
             },
             {
-              "label": "Subtweet the manifesto",
+              "label": "Vaguepost about the manifesto",
               "hint": "Hype +4 · trust -3 · they will remember",
               "effects": [
                 {
@@ -487,7 +487,7 @@
                 },
                 {
                   "type": "flag",
-                  "name": "defection:pick:subtweet"
+                  "name": "defection:pick:vaguepost"
                 }
               ]
             },
@@ -552,13 +552,13 @@
           "id": "defection-congratulate",
           "trigger": "congratulate",
           "tone": "good",
-          "text": "{lab} congratulates {neoName}. The replies are 40% hearts and 60% 'is this a subtweet?'"
+          "text": "{lab} congratulates {neoName}. The replies are 40% hearts and 60% 'is this a vaguepost?'"
         },
         {
-          "id": "defection-subtweet",
-          "trigger": "subtweet",
+          "id": "defection-vaguepost",
+          "trigger": "vaguepost",
           "tone": "joke",
-          "text": "{lab} posts 'responsibly means slower, actually'. {neoName} quote-tweets it with a chart."
+          "text": "{lab} posts 'responsibly means slower, actually'. {neoName} quote-posts it with a chart."
         },
         {
           "id": "defection-silence",

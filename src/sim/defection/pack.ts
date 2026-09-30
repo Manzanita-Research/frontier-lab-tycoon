@@ -65,4 +65,4 @@ export const CARD = "defection-card";
 export const MANIFESTO_CARD = "defection-manifesto";
 export const PICK_PREFIX = "defection:pick:";
 export const CHOICES = ["counter", "equity", "title", "goodbye"] as const;
-export const MANIFESTO_CHOICES = ["congratulate", "subtweet", "silence"] as const;
+export const MANIFESTO_CHOICES = ["congratulate", "vaguepost", "silence"] as const;

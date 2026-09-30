@@ -23,11 +23,23 @@ const byId = (s: GameState, id: number) => s.walkers.find((w) => w.id === id);
 
 /** What the chart pays each person on a match, and the Vibes the mission speech needs (for the card's hints). */
 const chartNumber = (verb: string, key: string): number => {
+  type Node = { type?: string; params?: Record<string, unknown> } | string;
+  const find = (c: Node): number | null => {
+    if (typeof c === "string") return null;
+    if (c.type === verb && verb !== "stat.gte" && typeof c.params?.[key] === "number") return c.params[key] as number;
+    if (c.type === "stat.gte" && verb === "stat.gte" && c.params?.stat === key) return c.params.value as number;
+    // Combined guards ("and", "or", "not") keep theirs under `params.guards`.
+    for (const g of (c.params?.guards as Node[] | undefined) ?? []) {
+      const n = find(g);
+      if (n !== null) return n;
+    }
+    return null;
+  };
   for (const t of [POACHING.chart.states.offered?.on?.CHOSE ?? []].flat()) {
     if (typeof t === "string") continue;
     for (const c of [...(t.actions ?? []), ...[t.guard ?? []].flat()]) {
-      if (typeof c !== "string" && c.type === verb && typeof c.params?.[key] === "number") return c.params[key] as number;
-      if (typeof c !== "string" && c.type === "stat.gte" && verb === "stat.gte" && c.params?.stat === key) return c.params.value as number;
+      const n = find(c as Node);
+      if (n !== null) return n;
     }
   }
   return 0;

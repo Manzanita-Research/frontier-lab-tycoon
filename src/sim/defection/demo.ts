@@ -82,7 +82,7 @@ export function stageDrama(s: GameState, moment: DramaMoment) {
   if (moment === "defection-exit") return;
   until(s, cardIs(MANIFESTO_CARD), 4);
   if (moment === "defection-manifesto") return;
-  applyNow(s, answer(s, MANIFESTO_CHOICES.indexOf("subtweet")));
+  applyNow(s, answer(s, MANIFESTO_CHOICES.indexOf("vaguepost")));
   // A week later: the new lab is on the board and has decided you are the one to beat.
   until(s, () => false, 7);
 }

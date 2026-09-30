@@ -167,8 +167,9 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // FLT-47 polish rewords three thoughts (parody rule: no real brands); seed 1 shows one at tick 200. Text only, same RNG stream.
 // FLT-26/FLT-20 re-record from the Level 5 unlock on: Scrutiny now also wakes Defection and the Poaching War
 // (the unlock card lists them, VC meetings and scores follow). Checkpoints 200 and 800 (before Level 5) are unchanged.
+// Seed 1 at 1600/4000 shows one of their headlines, reworded for the parody rule (text only, same RNG stream).
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "d3826cd0", 800: "ed628bb9", 1600: "6def810a", 2400: "20da5887", 3200: "0a46ad2c", 4000: "7830b447" },
+  1: { 200: "d3826cd0", 800: "ed628bb9", 1600: "0b772375", 2400: "20da5887", 3200: "0a46ad2c", 4000: "0447195c" },
   2: { 200: "e548b1af", 800: "552cae60", 1600: "d20ba769", 2400: "cd22cee7", 3200: "d1f89e56", 4000: "095f9038" },
   3: { 200: "58bb415c", 800: "920699d6", 1600: "442cf741", 2400: "04d57be8", 3200: "f5254552", 4000: "61693bc1" },
 };

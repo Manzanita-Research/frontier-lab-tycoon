@@ -19,6 +19,8 @@ import { applyDefectionChoices, candidates, dailyDefection, enableDefection, dis
 import { CARD, CHOICES, DEFECTION, loadDefectionPack, MANIFESTO_CARD } from "./pack";
 import { runDefectionYear } from "./headless";
 import { stageDrama, type DramaMoment } from "./demo";
+import defectionJson from "../../../mods/base-defection/mod.json";
+import poachingJson from "../../../mods/base-poaching/mod.json";
 
 const R = DEFECTION.rules;
 const researchers = (s: GameState) => s.walkers.filter((w) => w.kind === "researcher");
@@ -67,6 +69,10 @@ describe("the Defection chart", () => {
   it("parody names only: every lab-name template and manifesto is made up", () => {
     const words = [...DEFECTION.names.friendly, ...DEFECTION.names.hostile, ...DEFECTION.manifestos.friendly, ...DEFECTION.manifestos.hostile].join(" ");
     for (const real of ["OpenAI", "Anthropic", "Google", "DeepMind", "Meta ", "xAI", "Mistral", "Microsoft", "Thinking Machines", "SSI"]) expect(words).not.toContain(real);
+  });
+  it("parody names only: nothing either pack says names a real app or site", () => {
+    const text = JSON.stringify([defectionJson, poachingJson]);
+    for (const real of ["Slack", "LinkedIn", "tweet", "Twitter", "WordPad", "Notepad", "Outlook\"", "Zoom", "Gmail"]) expect(text, real).not.toContain(real);
   });
 });
 
@@ -184,7 +190,7 @@ describe("the card", () => {
     // "I have concerns" is a coin flip: both happen.
     expect(outcomes).toEqual(new Set(["works", "fails"]));
   });
-  it("the manifesto card: congratulate softens them, a subtweet makes a nemesis", () => {
+  it("the manifesto card: congratulate softens them, a vaguepost makes a nemesis", () => {
     for (const [choice, check] of [
       [0, (s: GameState, poaching: number) => expect(s.neoLabs!.labs[0]!.rival.context.personality.poaching).toBeCloseTo(poaching / 2)],
       [1, (s: GameState) => expect(s.neoLabs!.labs[0]!.nemesis).toBe(true)],

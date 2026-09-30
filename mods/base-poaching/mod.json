@@ -164,7 +164,7 @@
                       {
                         "type": "news",
                         "params": {
-                          "text": "{poachNames} leave {lab} for {poacher}; the farewell Slack message has 300 heart emoji",
+                          "text": "{poachNames} leave {lab} for {poacher}; the farewell post in #general has 300 heart emoji",
                           "tone": "neutral"
                         }
                       }

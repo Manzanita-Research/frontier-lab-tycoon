@@ -282,7 +282,7 @@ export function applyDefectionChoices(s: GameState) {
       s.hype = Math.min(100, s.hype + 2);
       const ctx = lab.rival.context;
       lab.rival = { ...lab.rival, context: { ...ctx, personality: { ...ctx.personality, poaching: ctx.personality.poaching / 2 } } };
-    } else if (choice === "subtweet") {
+    } else if (choice === "vaguepost") {
       s.hype = Math.min(100, s.hype + 4);
       shiftTrust(s, -3);
       lab.nemesis = true;
