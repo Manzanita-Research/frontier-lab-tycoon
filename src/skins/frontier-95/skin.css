@@ -3017,8 +3017,19 @@
     color: #c00000;
     font-weight: 700;
   }
-  .f95-drama-archive .f95-modlist [role="listitem"] {
-    grid-template-columns: 20px 1fr auto auto;
+  .f95-drama-archive .f95-modlist {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    [role="listitem"] {
+      grid-template-columns: 20px 1fr auto auto;
+      column-gap: 10px;
+      row-gap: 0;
+      padding: 3px 2px 5px;
+    }
+    [role="listitem"] > span {
+      color: var(--sh);
+    }
   }
   .f95-modoff {
     min-width: 0;
