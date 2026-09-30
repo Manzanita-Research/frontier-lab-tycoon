@@ -127,6 +127,11 @@
     "shadow.pop": "3px 3px 0 #1E2A2F"
   },
   "strings": {
+    "build.run": "Launch…",
+    "run.title": "Launch",
+    "run.prompt": "Type a widget's name and the deck launches it.",
+    "build.facilitiesCount": "{n} keys",
+    "build.runCount": "{n} apps",
     "ticker.label": "$ tail -f news",
     "objectives.title": "OKRs",
     "training.title": "Training run",

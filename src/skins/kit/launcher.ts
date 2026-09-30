@@ -1,7 +1,8 @@
 // FLT-63: the Start menu's two halves, shared by every skin. `facilityGroups` sorts the build items into the
 // "Facilities ▸" submenu; `useWidget` lets a slot that keeps its own open state (a folded window, a tab) hear that
 // Run… asked for it; `runFile` reads what a player typed into a Run box.
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useCoach } from "../context";
 import type { BuildItemVM, FacilityGroupVM, WidgetVM } from "../../ui/hud/types";
 
 // ---- Facilities ▸ ------------------------------------------------------------------------------------------------
@@ -24,6 +25,22 @@ export function facilityGroups(items: readonly BuildItemVM[]): { tools: BuildIte
 /** The coach points at a building inside the submenu: the submenu's own entry stands in for it while it is shut. */
 export const coachInFacilities = (target: string | null, items: readonly BuildItemVM[]): boolean =>
   !!target?.startsWith("build:") && items.some((it) => `build:${it.kind}` === target && !it.isPath && !it.isBulldoze && it.group !== "tools");
+
+/** Where an open build panel is: the top level (tools, Facilities, Run…), inside Facilities, or in the Run box. */
+export type StartView = "top" | "facilities" | "run";
+
+/**
+ * A build panel that drills in (the skins without a flyout): the view, the grouped items, and the Facilities entry's
+ * coach hook (it stands in for a building the coach points at until you go in). Mount it inside the open panel, so
+ * shutting the panel resets it to the top.
+ */
+export function useStartMenu(items: readonly BuildItemVM[], initial: StartView = "top") {
+  const coach = useCoach();
+  const [view, setView] = useState<StartView>(initial);
+  const { tools, groups } = facilityGroups(items);
+  const facilities = coach.attrs("start:facilities", view === "top" && coach.intoPanel(items) && coachInFacilities(coach.target, items));
+  return { view, setView, tools, groups, facilities, count: groups.reduce((n, g) => n + g.items.length, 0) };
+}
 
 // ---- Run… --------------------------------------------------------------------------------------------------------
 

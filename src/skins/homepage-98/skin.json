@@ -112,6 +112,14 @@
     "shadow.pop": "none"
   },
   "strings": {
+    "build.facilities": "Sitemap",
+    "build.run": "Go to URL…",
+    "run.title": "Address",
+    "run.prompt": "Type a page's address. Best viewed at 800×600.",
+    "run.open": "Address:",
+    "run.ok": "Go",
+    "build.facilitiesCount": "{n} pages",
+    "build.runCount": "{n} links",
     "ticker.label": "WHAT'S NEW!!!",
     "training.title": "Under Construction",
     "objectives.title": "My Goals",

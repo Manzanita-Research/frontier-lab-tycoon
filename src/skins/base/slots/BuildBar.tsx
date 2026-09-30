@@ -119,7 +119,7 @@ export function BuildBar({ items, tip, teasers = [], widgets = [], actions }: Sl
                   <Folder />
                 </span>
                 <span className="tname">{t("build.facilities")}</span>
-                <span className="price">{groups.reduce((n, g) => n + g.items.length, 0)}</span>
+                <span className="price">{t("build.facilitiesCount", { n: groups.reduce((n, g) => n + g.items.length, 0) })}</span>
               </button>
               <button role="menuitem" className="tool folder-tool" data-testid="start-run" onClick={() => { if (held) actions.place(null); setView("run"); }}>
                 <span className="hot">▸</span>
@@ -127,7 +127,7 @@ export function BuildBar({ items, tip, teasers = [], widgets = [], actions }: Sl
                   <Prompt />
                 </span>
                 <span className="tname">{t("build.run")}</span>
-                <span className="price">{widgets.length}</span>
+                <span className="price">{t("build.runCount", { n: widgets.length })}</span>
               </button>
               <button
                 role="menuitem"

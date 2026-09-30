@@ -3058,3 +3058,52 @@
     background: #ffc9c0;
   }
 }
+
+/* ---- FLT-63: the deck's Fn (Facilities) and Launch… (Run) keys ---- */
+[data-skin="swag-drop"] {
+  .sd-key.build.folder .face {
+    background: #ffe9a8;
+  }
+  .sd-key.build.back .face {
+    background: var(--sd-shade);
+  }
+  .sd-deck.view-facilities {
+    align-items: flex-end;
+  }
+  .sd-keygroup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: none;
+  }
+  .sd-keygroup + .sd-keygroup {
+    padding-left: 10px;
+    border-left: 2px dashed color-mix(in srgb, var(--sd-ink) 35%, transparent);
+  }
+  .sd-keygroup-name {
+    font: 800 10.5px var(--sd-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--sd-paper);
+    white-space: nowrap;
+  }
+  .sd-keygroup-keys {
+    display: flex;
+    gap: 8px;
+  }
+  .sd-deck.view-run {
+    align-items: flex-start;
+    overflow: visible;
+  }
+  .sd-run {
+    width: min(460px, calc(100vw - 150px));
+    padding: 10px 12px 12px;
+    background: var(--sd-paper);
+    border: 2px solid var(--sd-ink);
+    border-radius: 10px;
+    box-shadow: 3px 3px 0 var(--sd-ink);
+  }
+  .sd-run .runbox-list {
+    max-height: min(260px, 38dvh);
+  }
+}
