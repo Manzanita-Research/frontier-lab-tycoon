@@ -307,5 +307,7 @@ Everything the race does is a machine plus a driver, in the same shape as the re
 | The 500-walker perf test | unchanged within noise (0.23 to 0.28 ms; the budget stays 0.3, doubled under `CI`) |
 | A scripted player (`sim/playthrough.test.ts`, three seeds) | Era 2 around day 70 to 100, Era 3 and the win around day 450, first #1 around day 100 then back to #5 or #6, Era 4 around day 1000 |
 
+Debug scenes: `?moment=shuffle` (you are #1, a week turns, three labs pass you and a free model drops), `?moment=era`, `?moment=era3`, `?moment=auction` and `?moment=funding` stage the game about a second before the thing happens (`sim/race/demo.ts`); `scripts/race-shots.mjs` drives the same moments for screenshots.
+
 Test files now run one at a time (`fileParallelism: false` in `vite.config.ts`): on a 1-vCPU box the wall-clock perf tests were measuring their neighbours.
 
