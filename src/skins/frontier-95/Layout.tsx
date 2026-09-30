@@ -13,6 +13,8 @@ export function Layout({ slots }: SlotPropsMap["Layout"]) {
       <IconSprite />
       <div className="f95-left">
         {slots.Stats}
+        {/* on a phone the error box sits under the lab bar; on a desktop, at the top of the side column (CSS picks one) */}
+        {slots.DisasterAlert}
         {slots.Training}
         {slots.Objectives}
       </div>

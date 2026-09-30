@@ -2,7 +2,7 @@
 
 /* The menu */
 .disaster-menu {
-  width: min(460px, calc(100vw - 24px));
+  width: min(700px, calc(100vw - 24px));
 }
 .disaster-menu .card-body {
   max-height: min(70vh, 620px);
@@ -66,6 +66,8 @@
 }
 .dz-list {
   display: grid;
+  /* two columns wherever they fit, so the whole menu (meters and Close too) fits a laptop screen without scrolling */
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
   gap: 6px;
   margin: 0;
   padding: 0;
@@ -161,21 +163,22 @@
 }
 .dz-meters {
   display: grid;
-  gap: 6px;
+  /* one grid for both meters, so the two bars line up whatever the labels say */
+  grid-template-columns: max-content 1fr max-content;
+  align-items: center;
+  gap: 6px 8px;
+  font-size: 12px;
   margin: 12px 0 10px;
   padding: 8px 10px;
   border-radius: 10px;
   background: var(--cream-2);
 }
 .dz-meter {
-  display: grid;
-  grid-template-columns: 44px 1fr auto;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
+  display: contents;
 }
 .dz-meter-label {
   font-weight: 900;
+  white-space: nowrap;
 }
 .dz-meter-bar {
   height: 8px;

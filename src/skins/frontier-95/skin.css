@@ -712,6 +712,11 @@
       background: var(--flt-color-selection);
       color: var(--flt-color-selectionText);
     }
+    /* the rival running your leaked weights (FLT-32) */
+    .f95-leak {
+      color: var(--flt-color-bad);
+      font-style: normal;
+    }
     &.moved-up span:last-child,
     .up {
       color: var(--flt-color-good);
@@ -1668,6 +1673,9 @@
     display: grid;
     gap: 4px;
     pointer-events: auto;
+  }
+  .f95-left > .f95-dz-stack {
+    display: none;
   }
   .f95-dz-err {
     width: 100%;
@@ -2795,6 +2803,12 @@
     }
     .f95-notes {
       width: 100%;
+    }
+    .f95-left > .f95-dz-stack {
+      display: grid;
+    }
+    .f95-side > .f95-dz-stack {
+      display: none;
     }
     .f95-post {
       width: 100%;

@@ -12,7 +12,7 @@ export function Layout({ vm, slots }: SlotPropsMap["Layout"]) {
         {slots.Training}
         {slots.Objectives}
       </div>
-      <div className={`sd-right ${slots.Inspector ? "badge-open" : ""} ${vm.arena.open ? "arena-open" : ""}`}>
+      <div className={`sd-right ${slots.Inspector ? "badge-open" : ""} ${vm.arena.open ? "arena-open" : ""} ${vm.disasters.running.length + vm.disasters.understaffed.length > 0 ? "dz-on" : ""}`}>
         <div className="sd-keys">
           {slots.Speed}
           {slots.PhotoButton}

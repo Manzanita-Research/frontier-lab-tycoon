@@ -386,12 +386,12 @@ export function Arena({ arena, leapfrog, layout, actions }: SlotPropsMap["Arena"
             <span role="columnheader">{t("arena.colDelta")}</span>
           </div>
           {arena.rows.map((r) => (
-            <div key={r.id} className={`f95-lrow ${r.you ? "you" : ""} ${r.moved ? `moved-${r.moved}` : ""}`} role="row" title={r.title}>
+            <div key={r.id} className={`f95-lrow ${r.you ? "you" : ""} ${r.leak ? "leak" : ""} ${r.moved ? `moved-${r.moved}` : ""}`} role="row" title={r.title}>
               <span role="cell">
                 {r.rank}. {r.short}
                 {r.open && <em> (open)</em>}
               </span>
-              <span role="cell">{r.model ?? "—"}</span>
+              <span role="cell">{r.leak ? <em className="f95-leak">{t("arena.leak")}</em> : (r.model ?? "—")}</span>
               <span role="cell">{r.score}</span>
               <span role="cell" className={r.delta > 0 ? "up" : r.delta < 0 ? "down" : ""}>
                 {r.deltaText || "–"}
