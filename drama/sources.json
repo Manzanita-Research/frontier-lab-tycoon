@@ -1,0 +1,23 @@
+{
+  "_about": "Public feeds the Daily Drama run reads (scripts/drama-fetch.mjs). Real outlets are fine HERE: this list, and the source link in the Drama PR body, are the only places real names appear. They never reach a mod. `weight` nudges the candidate ordering (the agent still picks). `window` is how far back to look, in hours.",
+  "window": 36,
+  "userAgent": "FLT-DailyDrama/1.0 (+parody game; one fetch a day)",
+  "sources": [
+    { "id": "hn", "name": "Hacker News front page", "url": "https://hnrss.org/frontpage?points=100", "kind": "aggregator", "weight": 1.0, "aiOnly": true },
+    { "id": "techmeme", "name": "Techmeme", "url": "https://www.techmeme.com/feed.xml", "kind": "aggregator", "weight": 1.2, "aiOnly": true },
+    { "id": "techcrunch-ai", "name": "TechCrunch AI", "url": "https://techcrunch.com/category/artificial-intelligence/feed/", "kind": "news", "weight": 1.0 },
+    { "id": "verge-ai", "name": "The Verge AI", "url": "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml", "kind": "news", "weight": 1.0 },
+    { "id": "ars", "name": "Ars Technica tech", "url": "https://feeds.arstechnica.com/arstechnica/technology-lab", "kind": "news", "weight": 0.8, "aiOnly": true },
+    { "id": "wired-ai", "name": "Wired AI", "url": "https://www.wired.com/feed/tag/ai/latest/rss", "kind": "news", "weight": 0.9 },
+    { "id": "mittr-ai", "name": "MIT Technology Review AI", "url": "https://www.technologyreview.com/topic/artificial-intelligence/feed", "kind": "news", "weight": 0.7 },
+    { "id": "404", "name": "404 Media", "url": "https://www.404media.co/rss/", "kind": "news", "weight": 0.8, "aiOnly": true },
+    { "id": "willison", "name": "Simon Willison's weblog", "url": "https://simonwillison.net/atom/everything/", "kind": "blog", "weight": 0.9 },
+    { "id": "importai", "name": "Import AI (newsletter)", "url": "https://importai.substack.com/feed", "kind": "newsletter", "weight": 0.7 },
+    { "id": "interconnects", "name": "Interconnects (newsletter)", "url": "https://www.interconnects.ai/feed", "kind": "newsletter", "weight": 0.7 },
+    { "id": "localllama", "name": "r/LocalLLaMA top of the day", "url": "https://www.reddit.com/r/LocalLLaMA/top/.rss?t=day", "kind": "forum", "weight": 0.8 },
+    { "id": "lobsters-ai", "name": "Lobsters: ai", "url": "https://lobste.rs/t/ai.rss", "kind": "forum", "weight": 0.5 },
+    { "id": "sfstandard", "name": "SF Standard", "url": "https://sfstandard.com/feed/", "kind": "local", "weight": 0.9 },
+    { "id": "missionlocal", "name": "Mission Local", "url": "https://missionlocal.org/feed/", "kind": "local", "weight": 0.6, "aiOnly": true }
+  ],
+  "aiKeywords": ["ai", "a.i.", "artificial intelligence", "llm", "llms", "model", "models", "chatbot", "agent", "agents", "gpu", "gpus", "chip", "chips", "data center", "datacenter", "compute", "benchmark", "openai", "anthropic", "deepmind", "gemini", "claude", "chatgpt", "gpt", "llama", "grok", "mistral", "deepseek", "nvidia", "open weights", "open-source", "open source", "training", "inference", "robotaxi", "robot", "startup", "valuation", "funding", "lab", "superintelligence", "agi", "safety", "alignment", "copyright", "lawsuit", "regulation", "billboard", "hiring", "poach", "acquihire", "tokens", "pricing", "subscription"]
+}

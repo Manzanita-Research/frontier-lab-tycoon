@@ -47,13 +47,18 @@ function useSpotlight(target: string | null): { rect: Rect | null; panel: Rect |
       return;
     }
     let raf = 0;
+    let checked = 0;
     let last: { rect: Rect | null; panel: Rect | null } = { rect: null, panel: null };
-    const frame = () => {
-      const rect = measureTarget(target);
-      const panel = rect ? measurePanel(target) : null;
-      if (!sameRect(rect, last.rect) || !sameRect(panel, last.panel)) {
-        last = { rect, panel };
-        setFound(last);
+    // Ten looks a second are plenty to follow a menu or a window; asking the layout every frame costs the map frames on a slow machine.
+    const frame = (now: number) => {
+      if (now - checked >= 90) {
+        checked = now;
+        const rect = measureTarget(target);
+        const panel = rect ? measurePanel(target) : null;
+        if (!sameRect(rect, last.rect) || !sameRect(panel, last.panel)) {
+          last = { rect, panel };
+          setFound(last);
+        }
       }
       raf = requestAnimationFrame(frame);
     };
@@ -63,21 +68,26 @@ function useSpotlight(target: string | null): { rect: Rect | null; panel: Rect |
   return found;
 }
 
-/** The dimming with a hole in it, and the pulsing ring round the hole. */
+/**
+ * The dimming with a hole in it, and the pulsing ring round the hole. The dimming is drawn once (it repaints only when the box
+ * moves) and the ring is its own small layer that pulses by transform and opacity, so nothing repaints per frame over the map.
+ */
 function Spotlight({ rect }: { rect: Rect }) {
   const hole = { x: rect.x - PAD, y: rect.y - PAD, width: rect.w + PAD * 2, height: rect.h + PAD * 2 };
   const id = useRef(`coach-hole-${Math.random().toString(36).slice(2, 8)}`).current;
   return (
-    <svg className="coach-scrim" aria-hidden width="100%" height="100%" data-testid="coach-scrim">
-      <defs>
-        <mask id={id}>
-          <rect width="100%" height="100%" fill="white" />
-          <rect {...hole} rx="10" fill="black" />
-        </mask>
-      </defs>
-      <rect width="100%" height="100%" style={{ fill: "var(--flt-color-scrim)" }} mask={`url(#${id})`} />
-      <rect className="coach-ring" {...hole} rx="10" fill="none" style={{ stroke: "var(--flt-color-highlight)" }} strokeWidth="3" />
-    </svg>
+    <>
+      <svg className="coach-scrim" aria-hidden width="100%" height="100%" data-testid="coach-scrim">
+        <defs>
+          <mask id={id}>
+            <rect width="100%" height="100%" fill="white" />
+            <rect {...hole} rx="10" fill="black" />
+          </mask>
+        </defs>
+        <rect width="100%" height="100%" style={{ fill: "var(--flt-color-scrim)" }} mask={`url(#${id})`} />
+      </svg>
+      <div className="coach-ring" aria-hidden style={{ left: hole.x, top: hole.y, width: hole.width, height: hole.height }} />
+    </>
   );
 }
 
