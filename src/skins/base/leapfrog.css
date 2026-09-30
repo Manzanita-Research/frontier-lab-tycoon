@@ -419,7 +419,18 @@
 }
 @media (max-width: 640px) {
   .bench {
-    width: calc(100vw - 16px);
+    width: 100%;
+  }
+  /* Open, it is a sheet over the middle of the map, above the build bar and the ticker (like the Arena). */
+  .bench.open {
+    position: fixed;
+    z-index: 4;
+    left: 8px;
+    right: 8px;
+    bottom: calc(env(safe-area-inset-bottom) + 178px);
+    width: auto;
+    max-height: 56vh;
+    overflow: auto;
   }
   .voice {
     width: 100%;

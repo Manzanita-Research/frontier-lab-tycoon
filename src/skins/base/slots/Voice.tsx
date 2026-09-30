@@ -8,6 +8,8 @@ export function Voice({ leapfrog, layout }: SlotPropsMap["Voice"]) {
   const t = useT();
   const [open, setOpen] = useState(false);
   const { voice } = leapfrog;
+  // On a phone the campus needs the room: the Benchmarks strip carries the news-cycle share instead.
+  if (layout.compact) return null;
   const arrow = { up: "▲", down: "▼", flat: "" }[voice.trend];
   return (
     <section className={`voice panel ${voice.youOwn ? "owned" : ""}`} aria-label={t("voice.title")}>
@@ -23,7 +25,7 @@ export function Voice({ leapfrog, layout }: SlotPropsMap["Voice"]) {
         ))}
       </div>
       <p className="voice-line">{voice.headline}</p>
-      {open && !layout.compact && <VoiceGraph voice={voice} width={248} height={70} className="voice-graph" />}
+      {open && <VoiceGraph voice={voice} width={248} height={70} className="voice-graph" />}
     </section>
   );
 }
