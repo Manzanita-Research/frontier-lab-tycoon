@@ -12,7 +12,7 @@ import { syncProtesters } from "../sim/protest";
 import { setRisk } from "../sim/disasters/driver";
 import { stageDisaster } from "../sim/disasters/demo";
 import { RISKS, type Risk } from "../sim/disasters/types";
-import type { GameState, NewsItem, OpenEvent, Outcome } from "../sim/types";
+import type { GameState, NewsItem, OpenEvent, Outcome, Thought } from "../sim/types";
 import { fillAgents, seedWalkers } from "../sim/walkers";
 import { isMoment, stageMoment } from "../sim/race/demo";
 import { isOpsMoment, stageOps } from "../sim/opsDemo";
@@ -51,6 +51,10 @@ export class SimHandle {
   highlightIds: ReadonlySet<number> = new Set();
   /** Release Leapfrog's pack is loaded (a new lab gets it too). */
   leapfrog: boolean;
+  /** A scripted opening can start the news tape on an existing headline, without rewriting World history. */
+  newsStartId = 0;
+  /** A paused scenario's curated bubbles. Ordinary sim bubbles return on the first resumed tick. */
+  openingThoughts?: { tick: number; thoughts: Thought[] };
 
   constructor(world: GameState, leapfrog = false, public papers = world.papers?.enabled ?? false) {
     this.world = world;
@@ -69,6 +73,8 @@ export class SimHandle {
 
   /** Start over with a fresh seed (the random-disaster setting carries over to the new lab). */
   reset(seed: number) {
+    this.newsStartId = 0;
+    this.openingThoughts = undefined;
     const risk = this.world.disasters.risk;
     const collusion = this.world.collusion?.enabled;
     this.world = createInitialState(seed);
@@ -94,9 +100,10 @@ export class SimHandle {
     this.lastOutcome = outcome;
     if (!publish) return { event, outcome, toasts: [] };
     this.lastVersion = w.version;
-    this.lastSnap = makeSnapshot(w, this.lastSnap, this.ui);
+    const presented = this.openingThoughts?.tick === w.tick ? { ...w, thoughts: this.openingThoughts.thoughts } : w;
+    this.lastSnap = makeSnapshot(presented, this.lastSnap, this.ui);
     this.highlightIds = this.ui.highlight ? walkersThinking(w, this.ui.highlight) : NO_IDS;
-    return { event, outcome, snap: this.lastSnap, news: w.news.slice(), toasts: w.toasts.splice(0).map((t) => ({ ...t })) };
+    return { event, outcome, snap: this.lastSnap, news: w.news.filter((n) => n.id >= this.newsStartId), toasts: w.toasts.splice(0).map((t) => ({ ...t })) };
   }
 }
 
