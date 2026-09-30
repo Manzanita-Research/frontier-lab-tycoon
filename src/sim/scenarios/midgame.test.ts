@@ -21,7 +21,9 @@ describe("midgame scenario", () => {
     expect(again).toEqual(s);
     // FLT-49 preserves the full starter-campus preset, completes its ladder, and replays
     // paid confirmations. Changed movement/attendance draws shift the real opening day.
-    expect(digest(s)).toBe("8aab011b");
+    // FLT-33/25: the water escalation now runs as a base arc during the replay, and the factions arrive, settled, at
+    // the opening moment.
+    expect(digest(s)).toBe("f3bc23b6");
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);
@@ -31,7 +33,8 @@ describe("midgame scenario", () => {
     expect(s.buildings.length).toBeLessThanOrEqual(20);
     // Operations staff are rendered walkers too; count both populations, rather than inventing agent bonuses.
     expect(s.walkers.length + s.staff.length).toBeGreaterThanOrEqual(150);
-    expect(s.walkers.filter((w) => w.kind === "protester").length).toBe(40);
+    // The water crowd at its cap; FLT-25's counter-protest may have brought the Water Truthers Truthers too.
+    expect(s.walkers.filter((w) => w.kind === "protester" && w.crowd === undefined).length).toBe(40);
     expect(eraOfState(s)).toBe(2);
     const ready = s.training.context.progress / s.training.context.cost;
     expect(ready).toBeGreaterThanOrEqual(0.6);

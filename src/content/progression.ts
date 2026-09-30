@@ -2,9 +2,11 @@ import type { BuildingKind } from "./buildings";
 import type { StaffJob } from "../sim/types";
 
 export type Level = 1 | 2 | 3 | 4 | 5;
-export type SystemId = "breakdowns" | "slop" | "leapfrog" | "arena" | "rnd" | "news" | "events" | "protests" | "disasters" | "papers" | "collusion";
-export type HudPanel = "revenue" | "vibes" | "arena" | "rnd" | "thoughts" | "news" | "staff" | "events" | "papers" | "disasters";
-export const HUD_PANELS: HudPanel[] = ["revenue", "vibes", "arena", "rnd", "thoughts", "news", "staff", "events", "papers", "disasters"];
+/** Every system a ladder row can unlock (the mod schema's list too). `factions` is FLT-33: the meters at Level 4. */
+export const SYSTEM_IDS = ["breakdowns", "slop", "leapfrog", "arena", "rnd", "news", "events", "protests", "disasters", "papers", "collusion", "factions"] as const;
+export type SystemId = (typeof SYSTEM_IDS)[number];
+export const HUD_PANELS = ["revenue", "vibes", "arena", "rnd", "thoughts", "news", "staff", "events", "papers", "disasters", "factions"] as const;
+export type HudPanel = (typeof HUD_PANELS)[number];
 export interface ProgressionLevel {
   id: string;
   level: Level;
@@ -20,7 +22,7 @@ export const PROGRESSION: readonly ProgressionLevel[] = [
   { id: "garage", level: 1, name: "Garage", buildings: ["hall", "cluster"], staff: [], systems: [], panels: [], goal: { text: "Ship your first model", metric: "models", target: 1 } },
   { id: "business", level: 2, name: "Open for business", buildings: ["gateway", "kombucha"], staff: [], systems: [], panels: ["revenue", "vibes"], goal: { text: "Earn $20K a day", metric: "revenue", target: 20_000 } },
   { id: "team", level: 3, name: "Growing team", buildings: ["nap", "snack"], staff: ["sre", "janitor"], systems: ["breakdowns", "slop"], panels: ["thoughts", "staff"], goal: { text: "8 researchers and Vibes ≥ 500", metric: "team", target: 8, vibes: 500 } },
-  { id: "race", level: 4, name: "The Race", buildings: [], staff: [], systems: ["leapfrog", "arena", "rnd", "news"], panels: ["arena", "rnd", "news"], goal: { text: "Top 5 on the Arena", metric: "arena", target: 5 } },
+  { id: "race", level: 4, name: "The Race", buildings: [], staff: [], systems: ["leapfrog", "arena", "rnd", "news", "factions"], panels: ["arena", "rnd", "news", "factions"], goal: { text: "Top 5 on the Arena", metric: "arena", target: 5 } },
   { id: "scrutiny", level: 5, name: "Scrutiny", buildings: ["demo"], staff: ["security", "comms"], systems: ["protests", "events", "disasters", "papers", "collusion"], panels: ["events", "papers", "disasters"], goal: { text: "Ship model #3", metric: "models", target: 3 } },
 ];
 export interface UnlockCard { id: string; title: string; body: string; items: string[] }

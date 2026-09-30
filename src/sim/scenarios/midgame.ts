@@ -5,6 +5,8 @@ import { openEventOf } from "../events";
 import { outcomeOf } from "../goals";
 import { buildingAt, isPathTile, rectContains } from "../pathfind";
 import { enableLeapfrog } from "../race/leapfrog/driver";
+import { enableFactions } from "../factions/state";
+import { settleFactions } from "../factions/driver";
 import { createInitialState } from "../state";
 import { applyNow, tick, TICKS_PER_DAY } from "../tick";
 import type { GameState, Thought, WalkerKind } from "../types";
@@ -115,7 +117,12 @@ export function createMidgameScenario(): GameState {
     if (s.day >= 420 && s.day <= 480 && ready >= 0.6 && ready <= 0.8 &&
       s.leapfrog.last?.day === s.day && s.leapfrog.last.claims.length &&
       s.buildings.every((b) => !b.broken) && !openEventOf(s) &&
-      s.news.some((n) => n.day === s.day && sotaHeadline.test(n.text))) return s;
+      s.news.some((n) => n.day === s.day && sotaHeadline.test(n.text))) {
+      // FLT-33: the factions arrive with opinions already formed (the replay above never sees them, so it is unchanged).
+      enableFactions(s);
+      settleFactions(s);
+      return s;
+    }
   }
   throw new Error(`Mid-game scenario could not reach its opening moment: day ${s.day}, tick ${s.tick}, outcome ${outcomeOf(s)}, cash ${s.cash}, confirm ${JSON.stringify(s.guardrails?.context.pendingConfirm)}, buildings ${s.buildings.map(b => b.kind)}`);
 }

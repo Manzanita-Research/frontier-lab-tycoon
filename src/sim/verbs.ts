@@ -21,7 +21,10 @@ import { dailyEvents } from "./events";
 import { fillTemplate } from "./format";
 import { step } from "./machines/run";
 import { addNews, addToast, templateVars } from "./news";
-import { clampDiscourse } from "./protest";
+import { clampDiscourse, syncProtesters } from "./protest";
+import { SIGNALS } from "../content/factions";
+import { signalFactions } from "./factions/driver";
+import { factionStat, nudgeFaction, nudgeRelation, pairKey } from "./factions/state";
 import { findSpot } from "./race/actions";
 import { rivalMachine } from "./race/rival";
 import type { Rng } from "./rng";
@@ -150,6 +153,11 @@ export const STATS: Record<string, (state: GameState, run: DisasterRun | null) =
 };
 export const STAT_NAMES = Object.keys(STATS);
 
+/** A stat by name: the table above, or a faction's meter (`faction:<id>`) and a relation (`rel:<a>|<b>`) (FLT-33). */
+export function statValue(state: GameState, name: string): number {
+  return STATS[name]?.(state, null) ?? factionStat(state, name) ?? 0;
+}
+
 // ---- Guards --------------------------------------------------------------------------------------------------
 
 /** What a guard sees. */
@@ -223,6 +231,27 @@ export const GUARDS: Record<string, GuardDef> = {
     spec: { flag: "string", set: "boolean?" },
     test: (env, p) => (env.flags?.[p.flag as string] !== undefined) === (p.set ?? true),
   },
+  "faction.gte": {
+    doc: "A faction's meter (−100 fed up to 100 adoring; content.factions) is at least `value`. 0 while the factions are off.",
+    spec: { faction: "string", value: "number" },
+    test: (env, p) => (env.stats[`faction:${p.faction as string}`] ?? 0) >= (p.value as number),
+  },
+  "faction.lte": {
+    doc: "A faction's meter is at most `value`.",
+    spec: { faction: "string", value: "number" },
+    test: (env, p) => (env.stats[`faction:${p.faction as string}`] ?? 0) <= (p.value as number),
+  },
+  "relation.gte": {
+    doc: "How factions `a` and `b` feel about each other (−100 feud to 100 allies) is at least `value`.",
+    spec: { a: "string", b: "string", value: "number" },
+    test: (env, p) => (env.stats[`rel:${pairKey(p.a as string, p.b as string)}`] ?? 0) >= (p.value as number),
+  },
+  "relation.lte": {
+    doc: "How factions `a` and `b` feel about each other is at most `value`.",
+    spec: { a: "string", b: "string", value: "number" },
+    test: (env, p) => (env.stats[`rel:${pairKey(p.a as string, p.b as string)}`] ?? 0) <= (p.value as number),
+  },
+  answered: { doc: "On a mod arc's CHOSE beat: the player answered the card `card` (any choice).", spec: { card: "string" }, test: (env, p) => env.card === p.card },
   not: { doc: "The other guard does not hold.", spec: { guard: "call" }, test: (env, p) => !passes(p.guard as Call, env) },
   any: { doc: "At least one of these guards holds (a plain list of guards means all of them).", spec: { guards: "calls" }, test: (env, p) => (p.guards as Call[]).some((g) => passes(g, env)) },
 };
@@ -531,6 +560,43 @@ export const VERBS: Record<string, VerbDef> = {
       dailyEvents(state);
     },
   },
+  "faction.delta": {
+    doc: "Nudge a faction's meter (−100 to 100) now; its mood catches up at midnight. Nothing while the factions are off.",
+    spec: { faction: "string", amount: "number", text: "string?" },
+    run: (env, p) => nudgeFaction(env.state, p.faction as string, p.amount as number, typeof p.text === "string" ? say(env, p.text) : undefined),
+  },
+  "relation.delta": {
+    doc: "Nudge how factions `a` and `b` feel about each other (−100 feud to 100 allies). A pair that was allied and falls to −55 is a schism.",
+    spec: { a: "string", b: "string", amount: "number" },
+    run: (env, p) => nudgeRelation(env.state, p.a as string, p.b as string, p.amount as number),
+  },
+  "faction.signal": {
+    doc: "Tell every faction something happened (`lobby`, `hearing`, `release`, ...: SIGNALS in content/factions.ts); their grievances and cheers react at midnight.",
+    spec: { signal: "string" },
+    verify: (p) => ((SIGNALS as readonly string[]).includes(p.signal as string) ? null : `unknown signal "${p.signal as string}"${closest(p.signal as string, SIGNALS) ? ` (did you mean "${closest(p.signal as string, SIGNALS)}"?)` : ""}`),
+    run: (env, p) => signalFactions(env.state, p.signal as string),
+  },
+  "faction.rally": {
+    doc: "A faction brings a crowd to the gate to shout at other crowds (`against`: faction ids; the water crowd always counts). Its size is `share` of the water crowd (default 0.5), at least `size` (default 3). The two sides take either side of the path. Works with the factions off: it only needs the faction's content.",
+    spec: { faction: "string", against: "strings?", share: "number?", size: "number?" },
+    run: (env, p) => {
+      const { state } = env;
+      const rallies = (state.rallies ??= []);
+      const rally = { faction: p.faction as string, against: (p.against as string[] | undefined) ?? [], share: num(p.share, 0.5), min: num(p.size, 3), day: state.day };
+      state.rallies = [...rallies.filter((r) => r.faction !== rally.faction), rally];
+      syncProtesters(state, env.rng);
+    },
+  },
+  "faction.disperse": {
+    doc: "End a faction's rally: its crowd goes home.",
+    spec: { faction: "string" },
+    run: (env, p) => {
+      const { state } = env;
+      if (!state.rallies) return;
+      state.rallies = state.rallies.filter((r) => r.faction !== p.faction);
+      syncProtesters(state, env.rng);
+    },
+  },
   "flag.set": { doc: "Set a flag to today's day number.", spec: { name: "string" }, run: (env, p) => void (env.state.flags[p.name as string] = env.state.day) },
   "flag.clear": { doc: "Clear a flag.", spec: { name: "string" }, run: (env, p) => void delete env.state.flags[p.name as string] },
 };
@@ -579,6 +645,8 @@ export function statsIn(guard: Call | Call[] | undefined, into = new Set<string>
   }
   const { type, params } = normalize(guard);
   if (type.startsWith("stat.") && typeof params.stat === "string") into.add(params.stat);
+  if (type.startsWith("faction.") && typeof params.faction === "string") into.add(`faction:${params.faction}`);
+  if (type.startsWith("relation.") && typeof params.a === "string" && typeof params.b === "string") into.add(`rel:${pairKey(params.a, params.b)}`);
   if (isCall(params.guard)) statsIn(params.guard as Call, into);
   if (Array.isArray(params.guards)) statsIn(params.guards as Call[], into);
   return into;

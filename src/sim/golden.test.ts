@@ -165,10 +165,13 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // wait for earned levels; the busy-player script first builds a Hall so it can earn access to a Gateway.
 // Path exploration and the Comms break post change deterministic route draws from this new opening.
 // FLT-47 polish rewords three thoughts (parody rule: no real brands); seed 1 shows one at tick 200. Text only, same RNG stream.
+// FLT-33/25 re-records from 1600 on, on purpose: Level 4 (reached between 800 and 1000) turns the factions on, whose
+// path arguments take thought ids and bubbles (their dice are their own, so the main RNG stream is untouched until
+// the thoughts differ), and the Water Discourse now escalates through the base-water arc.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "d3826cd0", 800: "ed628bb9", 1600: "bef75afa", 2400: "a01d1390", 3200: "7a3d787d", 4000: "6a0686fc" },
-  2: { 200: "e548b1af", 800: "552cae60", 1600: "3f400add", 2400: "2868f2da", 3200: "5080b683", 4000: "c0ae2826" },
-  3: { 200: "58bb415c", 800: "920699d6", 1600: "d35c1c03", 2400: "02ba6f9a", 3200: "bcfd9788", 4000: "9ec9a141" },
+  1: { 200: "d3826cd0", 800: "ed628bb9", 1600: "99ff23f2", 2400: "77ad6ac3", 3200: "d6d3f7cd", 4000: "fcb962a0" },
+  2: { 200: "e548b1af", 800: "552cae60", 1600: "4f1b2dfe", 2400: "bb128d64", 3200: "198f5fd6", 4000: "738ff8c7" },
+  3: { 200: "58bb415c", 800: "920699d6", 1600: "38b133b9", 2400: "34f6417a", 3200: "0c447605", 4000: "0c833168" },
 };
 
 describe("golden runs", () => {

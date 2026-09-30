@@ -26,6 +26,7 @@ import { updateTutorial } from "./tutorial";
 import { observeGuardrails, pendingConfirmOf } from "./guardrails";
 import { defs, withDefs } from "./defs";
 import { dailyModArcs } from "./modArcs";
+import { dailyFactions, updateFactions } from "./factions/driver";
 import type { GameDefinition } from "../mods/game-definition";
 
 export { TICKS_PER_DAY };
@@ -51,6 +52,7 @@ function step(state: GameState, commands: readonly Command[]) {
   state.tick++;
   updateWalkers(state, rng);
   if (systemUnlocked(state, "protests")) updateProtesters(state, rng);
+  if (state.factions && systemUnlocked(state, "factions")) updateFactions(state);
   updateStaff(state, rng);
   if (systemUnlocked(state, "collusion")) updateCollusion(state);
   if (systemUnlocked(state, "disasters")) updateDisasters(state);
@@ -69,6 +71,7 @@ function step(state: GameState, commands: readonly Command[]) {
     if (systemUnlocked(state, "arena")) dailyRace(state, rng);
     if (systemUnlocked(state, "leapfrog")) dailyLeapfrog(state, rng);
     if (systemUnlocked(state, "papers")) dailyPapers(state, rng);
+    if (state.factions && systemUnlocked(state, "factions")) dailyFactions(state);
     dailyThoughts(state, rng);
     dailyGoals(state, rng);
     if (defs().arcs.length > 0) dailyModArcs(state, rng);

@@ -21,9 +21,10 @@ import { TICKS_PER_DAY } from "./constants";
 import { defs } from "./defs";
 import type { Call, Json } from "./disasters/types";
 import { step, type Stepped } from "./machines/run";
-import type { Rng } from "./rng";
+import { createRng, type Rng } from "./rng";
 import type { GameState } from "./types";
-import { flagsIn, normalize, passes, runVerb, STATS, statsIn, usesChance, type GuardEnv } from "./verbs";
+import { flagsIn, normalize, passes, runVerb, statsIn, statValue, usesChance, type GuardEnv } from "./verbs";
+import { systemUnlocked } from "./progression";
 
 type ArcNode = ArcData["states"][string];
 type Transition = { target?: string; guard?: Call | Call[]; actions?: readonly Call[] };
@@ -185,7 +186,28 @@ function runCalls(state: GameState, rng: Rng, owner: string, calls: readonly Cal
   for (const call of calls) runVerb({ state, rng, run: null, owner }, call);
 }
 
-function hear(state: GameState, rng: Rng, arc: ArcData, event: { type: "DAY" } | { type: "CHOSE"; card: string; choice: string }) {
+/**
+ * An arc that `requires` systems sleeps until they are all unlocked (FLT-33): the factions' arcs until Level 4 turns
+ * the factions on, the water escalation until the protests. It keeps its place while asleep.
+ */
+function awake(state: GameState, arc: ArcData): boolean {
+  for (const system of arc.requires ?? []) {
+    if (!systemUnlocked(state, system)) return false;
+    if (system === "factions" && !state.factions) return false;
+  }
+  return true;
+}
+
+function hear(state: GameState, main: Rng, arc: ArcData, event: { type: "DAY" } | { type: "CHOSE"; card: string; choice: string }) {
+  if (!awake(state, arc)) return;
+  // A faction's arc rolls the factions' own dice, so the factions never move a draw in the main stream.
+  const own = arc.requires?.includes("factions") && state.factions ? createRng(state.factions.rngState) : null;
+  const rng = own ?? main;
+  heard(state, rng, arc, event);
+  if (own && state.factions) state.factions.rngState = own.state();
+}
+
+function heard(state: GameState, rng: Rng, arc: ArcData, event: { type: "DAY" } | { type: "CHOSE"; card: string; choice: string }) {
   const c = compile(arc);
   const all = (state.modArcs ??= {});
   let stored = all[arc.id];
@@ -196,7 +218,7 @@ function hear(state: GameState, rng: Rng, arc: ArcData, event: { type: "DAY" } |
   }
   if (c.done.has(stored.value)) return;
   const stats: Record<string, number> = {};
-  for (const name of c.stats) stats[name] = STATS[name]?.(state, null) ?? 0;
+  for (const name of c.stats) stats[name] = statValue(state, name);
   const flags: Record<string, number> = {};
   for (const name of c.flags) if (state.flags[name] !== undefined) flags[name] = state.flags[name]!;
   const beat: ArcBeat = { tick: state.tick, day: state.day, roll: c.rolls ? rng.next() : 0, stats, flags };

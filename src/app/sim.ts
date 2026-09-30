@@ -19,6 +19,7 @@ import { isOpsMoment, stageOps } from "../sim/opsDemo";
 import { isPaperMoment, stagePapers } from "../sim/race/papers/demo";
 import { enablePapers } from "../sim/race/papers/driver";
 import { enableLeapfrog } from "../sim/race/leapfrog/driver";
+import { enableFactions } from "../sim/factions/state";
 import { parseLeapMoment, stageLeapfrog } from "../sim/race/leapfrog/demo";
 import { isCollusionMoment, stageCollusion } from "../sim/collusion/demo";
 import { enableCollusion } from "../sim/collusion/driver";
@@ -83,6 +84,7 @@ export class SimHandle {
     const collusion = this.world.collusion?.enabled;
     const leapfrogOff = this.world.flags.leapfrogOff;
     const papersOff = this.world.flags.papersOff;
+    const factionsOff = this.world.flags.factionsOff;
     const mods = this.world.mods;
     this.world = createInitialState(seed, "garage", this.def);
     if (mods) this.world.mods = mods;
@@ -90,6 +92,7 @@ export class SimHandle {
     if (leapfrogOff) this.world.flags.leapfrogOff = leapfrogOff;
     if (collusion) enableCollusion(this.world);
     if (papersOff) this.world.flags.papersOff = papersOff;
+    if (factionsOff) this.world.flags.factionsOff = factionsOff;
     this.alpha = 1;
   }
 
@@ -119,7 +122,7 @@ export class SimHandle {
   }
 }
 
-type SimDebug = Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean };
+type SimDebug = Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean; factions?: boolean };
 
 /**
  * A living campus, warped forward and dressed up per the `?seed=&warp=&agents=&discourse=` debug knobs.
@@ -135,10 +138,12 @@ function stage(dbg: SimDebug): GameState {
   const sim = createInitialState(dbg.seed);
   if (dbg.leapfrog === false) sim.flags.leapfrogOff = 1;
   if (dbg.papers === false) sim.flags.papersOff = 1;
+  if (dbg.factions === false) sim.flags.factionsOff = 1;
   const leap = parseLeapMoment(dbg.moment);
   if (dbg.warp > 0 || dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0 || dbg.moment || dbg.disaster) { continueTutorial(sim, true); delete sim.progression; }
   if (!sim.progression && dbg.leapfrog) enableLeapfrog(sim);
   if (!sim.progression && dbg.papers) enablePapers(sim);
+  if (!sim.progression && dbg.factions) enableFactions(sim);
   for (let i = 0; i < dbg.warp * TICKS_PER_DAY; i++) tick(sim);
   if (dbg.moment === "jem-opening" || dbg.moment === "jem-confirm") stageFirstRun(sim, dbg.moment);
   else if (isMoment(dbg.moment)) stageMoment(sim, dbg.moment);

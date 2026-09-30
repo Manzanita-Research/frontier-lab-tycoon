@@ -16,6 +16,7 @@ import { buildingUnlocked, systemUnlocked } from "./progression";
 import { coachCommand } from "./coach";
 import { continueTutorial } from "./tutorial";
 import { defs } from "./defs";
+import { setSafetySpend } from "./factions/driver";
 
 export type Command =
   | { type: "coachSkip" | "coachReplay" | "coachClick" | "dismissUnlock" | "buildPanelOpened" }
@@ -38,7 +39,9 @@ export type Command =
   /** Trigger a disaster on purpose (the Disasters menu, after its confirmation; the `?disaster=` hook). A refusal is a toast. */
   | { type: "disaster"; id: string }
   /** The random-disaster setting: off, rare, normal or chaos. */
-  | { type: "setRisk"; risk: Risk };
+  | { type: "setRisk"; risk: Risk }
+  /** FLT-33: the safety budget, 0 (none) to 3 (lavish). Costs money daily and slows training; the factions notice. */
+  | { type: "setSafetySpend"; level: number };
 
 export type PlaceResult = { ok: true } | { ok: false; reason: string };
 
@@ -178,6 +181,9 @@ export function applyCommands(state: GameState, commands: readonly Command[], rn
       }
       case "setRisk":
         if (systemUnlocked(state, "disasters")) setRisk(state, c.risk);
+        break;
+      case "setSafetySpend":
+        if (state.factions && systemUnlocked(state, "factions")) setSafetySpend(state, c.level);
         break;
       case "startTraining":
         if (!state.buildings.some((b) => b.kind === "hall")) addToast(state, "Build a Training Hall first.", "bad");

@@ -70,6 +70,11 @@ Guards (pure; `stat.*` read the lab's stats by name):
 | `choice` | is: string, card?: string | The player picked this choice: its `key` on a disaster's card, its position (`"0"`, `"1"`, ...) on a mod's. A mod arc hears every card, so name it with `card`. |
 | `day.after` | day: number | Today is later than day `day`. Mostly for mod arcs (sim/modArcs.ts), which step once a day. |
 | `flag.is` | flag: string, set?: boolean | The flag is set (or, with `set: false`, is not). Only mod arcs see flags: a disaster's beat carries none. |
+| `faction.gte` | faction: string, value: number | A faction's meter (−100 fed up to 100 adoring; `content.factions`, FLT-33) is at least `value`. 0 while the factions are off. |
+| `faction.lte` | faction: string, value: number | A faction's meter is at most `value`. |
+| `relation.gte` | a: string, b: string, value: number | How factions `a` and `b` feel about each other (−100 feud to 100 allies) is at least `value`. |
+| `relation.lte` | a: string, b: string, value: number | How factions `a` and `b` feel about each other is at most `value`. |
+| `answered` | card: string | On a mod arc's CHOSE beat: the player answered the card `card` (any choice). |
 | `not` | guard: call | The other guard does not hold. |
 | `any` | guards: calls | At least one of these guards holds (a plain list of guards means all of them). |
 
@@ -100,10 +105,17 @@ Verbs (run by the driver, in order, after each transition):
 | `news` | text: string, tone?: string | A ticker headline. `{lab}`, `{model}`, `{rival}`, `{cash}` and `{target}` are filled in, plus whatever the disaster's verbs set (`{leapRival}`). |
 | `toast` | text: string, tone?: string | A toast over the map (same template variables as `news`). |
 | `card` | id: string | Open one of the disaster's event cards (`cards[].id`); from a mod arc, any card in `content.events` by id, whatever its own `when` says (it waits if another card is open). The machine hears the player's pick as a CHOSE beat. |
+| `faction.delta` | faction: string, amount: number, text?: string | Nudge a faction's meter now (its mood catches up at midnight); `text` becomes the reason the Factions panel quotes. Nothing while the factions are off. |
+| `relation.delta` | a: string, b: string, amount: number | Nudge how two factions feel about each other. A pair that was allied and falls to −55 is a schism. |
+| `faction.signal` | signal: string | Tell every faction something happened (`lobby`, `hearing`, `release`, ...: `SIGNALS` in content/factions.ts). Their grievances and cheers react at midnight. |
+| `faction.rally` | faction: string, against?: strings, share?: number, size?: number | A faction brings a crowd to the gate to shout at other crowds (`against` factions, and always the water crowd), `share` of the water crowd's size (default 0.5), at least `size` (default 3). The two sides take either side of the path and trade the factions' `duels` lines. Needs only the faction's content, not the factions system. |
+| `faction.disperse` | faction: string | End a faction's rally: its crowd goes home. |
 | `flag.set` | name: string | Set a flag to today's day number. |
 | `flag.clear` | name: string | Clear a flag. |
 
-Stats a guard, `requires` or `odds.scale` can read: day, capability, hype, cash, compute, discourse, models, agents, clusters, halls, gateways, gas, solar, datacenters, broken, security, sre, comms, janitor, sreAttending, trust, heat, burning, adjacent.
+Stats a guard, `requires` or `odds.scale` can read: day, capability, hype, cash, compute, discourse, models, agents, clusters, halls, gateways, gas, solar, datacenters, broken, security, sre, comms, janitor, sreAttending, trust, heat, burning, adjacent. A mod arc's guards can also read `faction:<id>` and `rel:<a>|<b>` through the `faction.*` and `relation.*` guards.
+
+An arc may say `"requires": ["factions", "events"]` (any of the ladder's system ids): it sleeps until they are all unlocked, and a `factions` arc also until the factions are on. A factions arc rolls the factions' own dice, so it never moves a draw in the main stream.
 
 Building references in verbs: `$target` (the building the disaster is about), `$adjacent` (the nearest other working building of its kind that this disaster has not touched), `$office` (the Security Office), `gate`, or a building kind. `to`/`on` take the same.
 

@@ -14,6 +14,7 @@ import { applyNow, tick } from "./tick";
 import type { GameState } from "./types";
 import { GUARD_NAMES, VERB_NAMES } from "./verbs";
 import { ACTION_NAMES as SDK_ACTIONS, GUARD_NAMES as SDK_GUARDS } from "../../packages/flt-mod-sdk/src/index";
+import { BASE_ARCS } from "../content/factions";
 
 const mod = (id: string, content: ModManifest["content"] = {}): ModManifest => ({ apiVersion: 1, id, name: id, version: "1.0.0", content });
 const resolve = async (mods: readonly unknown[]): Promise<GameDefinition> => {
@@ -59,10 +60,13 @@ const arc: ArcData = {
 };
 
 describe("mod arcs (FLT-37)", () => {
-  it("an unmodded run has no arc state at all", () => {
+  it("an unmodded run only carries the base game's own arcs (FLT-25's water escalation, the factions')", () => {
     const s = createInitialState(1, "campus");
     for (let i = 0; i < 200; i++) tick(s);
-    expect(s.modArcs).toBeUndefined();
+    const base = new Set(BASE_ARCS.map((a) => a.id));
+    for (const id of Object.keys(s.modArcs ?? {})) expect(base.has(id)).toBe(true);
+    // The factions are off in a bare World, so their arcs sleep and store nothing.
+    expect(Object.keys(s.modArcs ?? {}).some((id) => id.startsWith("fx:"))).toBe(false);
   });
 
   it("step at midnight, run their actions in order, open cards and hear the answer", async () => {

@@ -72,6 +72,8 @@ export const blankVibes = (): Vibes => ({ value: 500, target: 500, delta: 0, hap
 /** Something went wrong in front of everyone: a resignation, a demo flop, a bailout. */
 export function addIncident(state: GameState, amount: number) {
   state.vibes.incidents += amount;
+  // FLT-33: the factions hear about it at midnight.
+  if (state.factions) state.factions.incidents += amount;
 }
 
 /** Once a day: fade the incidents, read the room, ease toward it. */
