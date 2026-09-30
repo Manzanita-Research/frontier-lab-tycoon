@@ -1,76 +1,2030 @@
-/* Discovery Disc '96 (stub): primaries, thick outlines, hard shadows, stickers. */
+/*
+ * Discovery Disc '96: an edutainment CD-ROM. Bright primaries, thick black outlines, hard offset shadows, graph paper,
+ * clip-art stickers. The slots live in this folder (Layout.tsx, stats.tsx, ...); the rest of the game's UI is the base's
+ * markup dressed here. Type is Jersey 10 for anything big and Comic Neue for anything you read.
+ */
 [data-skin="discovery-disc-96"] {
-  .topbar {
-    background: linear-gradient(90deg, var(--flt-color-panel), #fff1a8);
+  --dd-ink: var(--flt-x-ink);
+  --dd-red: var(--flt-x-red);
+  --dd-yellow: var(--flt-x-yellow);
+  --dd-blue: var(--flt-x-blue);
+  --dd-green: var(--flt-x-green);
+  --dd-lime: var(--flt-x-greenBright);
+  --dd-purple: var(--flt-x-purple);
+  --dd-orange: var(--flt-x-orange);
+  --dd-paper: var(--flt-x-paper);
+  --dd-display: var(--flt-font-display);
+  --dd-grid: linear-gradient(rgba(26, 91, 214, 0.13) 1px, transparent 1px), linear-gradient(90deg, rgba(26, 91, 214, 0.13) 1px, transparent 1px);
+  --dd-tray-h: 118px;
+  --dd-ticker-h: 48px;
+  font-synthesis: none;
+
+  /* ---------- shared bits ---------- */
+  .dd-hud,
+  .dd-worksheet,
+  .dd-cert {
+    font-family: var(--flt-font-ui);
+    font-weight: 700;
+    color: var(--dd-ink);
   }
-  .vibes-value {
-    font-size: 46px;
+  .dd-hud h4,
+  .dd-ws-body h2,
+  .dd-rtitle h2 {
+    font-family: var(--dd-display);
+    font-weight: 400;
+    letter-spacing: 0.02em;
   }
-  .stat .value {
-    font-size: 26px;
+  .dd-icon {
+    flex: none;
+    display: block;
   }
-  .vibes-btn::after {
-    content: "";
-    display: inline-block;
-    width: 26px;
-    height: 26px;
-    margin-left: 6px;
-    background: var(--flt-color-panelAlt);
-    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  .dd-graph,
+  .dd-chart,
+  .dd-badge-in {
+    background-color: var(--dd-paper);
+    background-image: var(--dd-grid);
+    background-size: 14px 14px;
   }
-  .buildbar .tool {
-    background: var(--flt-color-inset);
-    border: 3px solid var(--flt-color-line);
-    border-radius: 14px;
-    box-shadow: 3px 3px 0 var(--flt-color-line);
-    &:nth-child(4n + 1) {
-      background: #ffe9a8;
+  button {
+    font-family: inherit;
+  }
+  button:focus-visible {
+    outline: 4px solid var(--dd-purple);
+    outline-offset: 2px;
+  }
+  .dd-hud {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  /* ---------- top left: banner, stickers, star chart ---------- */
+  .dd-left {
+    position: absolute;
+    left: 14px;
+    top: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    max-width: calc(100vw - 28px);
+  }
+  .dd-stats {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .dd-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 100%;
+  }
+  .dd-globe {
+    flex: none;
+    width: 60px;
+    height: 60px;
+    filter: drop-shadow(3px 3px 0 var(--dd-ink));
+    animation: discovery-disc-96-spin 24s linear infinite;
+  }
+  .dd-ribbon {
+    display: block;
+    min-width: 0;
+    filter: drop-shadow(5px 5px 0 var(--dd-ink));
+    .edge {
+      display: block;
+      padding: 3px 4px 3px 3px;
+      background: var(--dd-ink);
+      clip-path: polygon(0 0, 100% 0, calc(100% - 12px) 50%, 100% 100%, 0 100%);
     }
-    &:nth-child(4n + 2) {
-      background: #d5ecff;
+    b {
+      display: block;
+      padding: 5px 30px 3px 14px;
+      background: var(--dd-red);
+      color: #fff;
+      font: 400 40px/1 var(--dd-display);
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      clip-path: polygon(0 0, 100% 0, calc(100% - 12px) 50%, 100% 100%, 0 100%);
     }
-    &:nth-child(4n + 3) {
-      background: #d8f6dc;
+  }
+  .dd-date {
+    flex: none;
+    padding: 3px 10px;
+    border: 3px solid var(--dd-ink);
+    background: var(--dd-yellow);
+    box-shadow: 3px 3px 0 var(--dd-ink);
+    font-size: 17px;
+    line-height: 1.2;
+    transform: rotate(-3deg);
+    white-space: nowrap;
+  }
+
+  /* Stickers */
+  .dd-stickers {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px 16px;
+    pointer-events: none;
+  }
+  .dd-stk {
+    pointer-events: auto;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    padding: 0;
+    text-align: center;
+    color: var(--dd-ink);
+    border: 3px solid var(--dd-ink);
+    box-shadow: 4px 4px 0 var(--dd-ink);
+    line-height: 1;
+    transform: rotate(var(--rot, 0deg));
+    transition: transform var(--flt-motion-fast) var(--flt-motion-ease);
+    .n {
+      font: 400 34px/1 var(--flt-font-numbers);
+      letter-spacing: 0.02em;
     }
-    &:nth-child(4n) {
-      background: #f3e2ff;
+    .l {
+      display: block;
+      margin-top: 3px;
+      font-size: 13px;
+      line-height: 1.05;
+    }
+    &:hover {
+      transform: rotate(var(--rot, 0deg)) scale(1.05);
+    }
+  }
+  .dd-circ {
+    width: 104px;
+    height: 104px;
+    border-radius: 50%;
+    padding: 6px;
+  }
+  .dd-cash {
+    --rot: -2deg;
+    background: var(--dd-green);
+    color: #fff;
+    .net {
+      white-space: nowrap;
+    }
+    &.neg {
+      background: var(--dd-red);
+    }
+  }
+  .dd-runway {
+    --rot: 2deg;
+    background: #fff;
+    border-color: var(--dd-green);
+    .n {
+      color: var(--dd-green);
+      font-size: 36px;
+    }
+    .l {
+      color: var(--dd-ink);
+    }
+    .hurry {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      margin-top: 2px;
+      font-size: 13px;
+      color: #c4141c;
+      animation: discovery-disc-96-shake 0.9s ease-in-out infinite;
+    }
+    &.warn {
+      border-color: var(--dd-red);
+      .n {
+        color: #c4141c;
+      }
+    }
+  }
+  .dd-pill {
+    padding: 8px 14px 9px;
+    border-radius: 12px;
+    min-width: 92px;
+  }
+  .dd-cap {
+    --rot: 3deg;
+    background: var(--dd-purple);
+    color: #fff;
+  }
+  .dd-hype {
+    --rot: -4deg;
+    background: var(--dd-orange);
+    .l {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+  }
+  .dd-arena {
+    --rot: 2deg;
+    background: var(--dd-blue);
+    color: #fff;
+    cursor: pointer;
+    font: inherit;
+    .n {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 6px;
+    }
+    .delta {
+      font: 700 14px var(--flt-font-ui);
+      &.good {
+        color: #9ff0b3;
+      }
+      &.bad {
+        color: #ffc2b8;
+      }
+    }
+    .l {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+    }
+    &.top .n {
+      color: var(--dd-yellow);
+    }
+    &.flinch {
+      animation: discovery-disc-96-shake 0.5s ease-in-out;
+    }
+  }
+  .dd-burst {
+    --rot: -6deg;
+    position: relative;
+    width: 116px;
+    height: 116px;
+    border: 0;
+    box-shadow: none;
+    background: none;
+    filter: drop-shadow(3px 3px 0 var(--dd-ink));
+    svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      polygon {
+        fill: #fff;
+        stroke: var(--dd-ink);
+        stroke-width: 3px;
+        stroke-linejoin: round;
+        vector-effect: non-scaling-stroke;
+      }
+    }
+    .txt {
+      position: relative;
+      display: grid;
+      place-items: center;
+      padding: 0 12px;
+    }
+    .n {
+      color: var(--dd-blue);
+      font-size: 32px;
+    }
+    .l {
+      font-size: 11px;
+      margin-top: 1px;
+    }
+  }
+  .dd-more {
+    display: none;
+  }
+
+  /* The Vibes star */
+  .dd-vibes {
+    position: relative;
+    pointer-events: auto;
+  }
+  .dd-star {
+    position: relative;
+    display: block;
+    width: 152px;
+    height: 146px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    color: var(--dd-ink);
+    transition: transform var(--flt-motion-fast) var(--flt-motion-ease);
+    &:hover {
+      transform: rotate(-3deg) scale(1.04);
+    }
+    &.trend-up {
+      animation: discovery-disc-96-wobble 2.4s ease-in-out infinite;
+    }
+  }
+  .dd-star-art {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    .sh {
+      fill: var(--dd-ink);
+    }
+    .fg {
+      fill: var(--dd-yellow);
+      stroke: var(--dd-ink);
+      stroke-width: 3px;
+      stroke-linejoin: round;
+      vector-effect: non-scaling-stroke;
+    }
+  }
+  .dd-star-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-top: 16px;
+    .n {
+      font: 400 42px/0.9 var(--flt-font-numbers);
+      letter-spacing: 0.02em;
+    }
+    .l {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      margin-top: 2px;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+  }
+  .dd-trend {
+    fill: var(--dd-ink);
+    &.up {
+      fill: var(--dd-green);
+    }
+    &.down {
+      fill: #c4141c;
+    }
+  }
+  .dd-vibes-tip {
+    position: absolute;
+    z-index: 30;
+    top: calc(100% - 6px);
+    left: 0;
+    width: 340px;
+    padding: 10px 12px 12px;
+    background-color: var(--dd-paper);
+    background-image: var(--dd-grid);
+    background-size: 14px 14px;
+    border: 3px solid var(--dd-ink);
+    box-shadow: 5px 5px 0 var(--dd-ink);
+    border-radius: 6px;
+    &.compact {
+      position: fixed;
+      left: 8px;
+      right: 8px;
+      top: 128px;
+      width: auto;
+    }
+  }
+  .dd-tip-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 4px;
+    font: 400 24px/1 var(--dd-display);
+    span {
+      font: 700 14px var(--flt-font-ui);
+      color: var(--flt-color-textDim);
+    }
+  }
+  .dd-vrow {
+    display: grid;
+    grid-template-columns: 1fr 84px 38px;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 0;
+    border-top: 2px dashed #999;
+    font-size: 14px;
+    line-height: 1.15;
+    small {
+      display: block;
+      font-size: 12px;
+      color: var(--flt-color-textDim);
+    }
+  }
+  .dd-vbar {
+    display: block;
+    height: 12px;
+    border: 2px solid var(--dd-ink);
+    background: #fff;
+    position: relative;
+    i {
+      position: absolute;
+      inset: 0 auto 0 0;
+      background: var(--dd-lime);
+      &.neg {
+        background: var(--dd-red);
+      }
+    }
+  }
+  .dd-vpts {
+    text-align: right;
+    font: 400 20px/1 var(--flt-font-numbers);
+    &.bad {
+      color: #c4141c;
+    }
+  }
+  .dd-tip-foot {
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 2px dashed #999;
+    font-size: 13px;
+    line-height: 1.25;
+    color: var(--flt-color-textDim);
+  }
+
+  /* ---------- the Star Chart (Training + Objectives) ---------- */
+  .dd-chart {
+    position: relative;
+    pointer-events: auto;
+    width: 330px;
+    max-width: 100%;
+    padding: 10px 12px 12px;
+    border: 3px solid var(--dd-ink);
+    border-radius: 6px;
+    box-shadow: 5px 5px 0 var(--dd-ink);
+    .dd-training h4,
+    .dd-goals h4 {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: 0;
+      font-size: 26px;
+      line-height: 1;
+    }
+  }
+  .dd-model {
+    margin-top: 4px;
+    font-size: 18px;
+    line-height: 1.15;
+  }
+  .dd-bar {
+    display: block;
+    position: relative;
+    height: 18px;
+    margin: 5px 0 3px;
+    border: 3px solid var(--dd-ink);
+    background: #fff;
+    i {
+      position: absolute;
+      inset: 0 auto 0 0;
+      background: repeating-linear-gradient(90deg, var(--dd-purple) 0 12px, #9d6be0 12px 24px);
+      transition: width var(--flt-motion-slow) var(--flt-motion-ease);
+    }
+  }
+  .dd-trainfoot {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 14px;
+  }
+  .dd-eta {
+    font-size: 13px;
+    color: var(--flt-color-textDim);
+  }
+  .dd-empty {
+    margin: 6px 0 0;
+    font-size: 15px;
+    line-height: 1.25;
+  }
+  .dd-shipped {
+    position: absolute;
+    top: 6px;
+    right: -14px;
+    padding: 2px 10px 0;
+    border: 3px solid var(--dd-ink);
+    background: var(--dd-red);
+    color: #fff;
+    box-shadow: 3px 3px 0 var(--dd-ink);
+    font: 400 24px/1.1 var(--dd-display);
+    transform: rotate(8deg);
+    animation: discovery-disc-96-wobble 1.2s ease-in-out infinite;
+  }
+  .dd-goals {
+    margin-top: 12px;
+  }
+  .dd-goals-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    text-align: left;
+    color: inherit;
+    cursor: pointer;
+    h4 {
+      flex: 1;
+      white-space: nowrap;
+    }
+  }
+  .dd-count {
+    padding: 1px 8px 0;
+    border: 3px solid var(--dd-ink);
+    background: var(--dd-yellow);
+    font: 400 20px/1.1 var(--dd-display);
+  }
+  .dd-days {
+    padding: 0 6px 0 0;
+    font-size: 13px;
+    &.urgent {
+      color: #c4141c;
+    }
+  }
+  .dd-goal-list {
+    list-style: none;
+    margin: 4px 0 0;
+    padding: 0;
+    li {
+      display: grid;
+      grid-template-columns: 1fr 38px;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 0;
+      border-top: 2px dashed #999;
+      font-size: 16px;
+      line-height: 1.15;
+    }
+    small {
+      display: block;
+      font-size: 13px;
+      color: var(--flt-color-textDim);
+    }
+    .dd-bar {
+      height: 12px;
+      border-width: 2px;
+      margin: 3px 0 0;
+    }
+  }
+  .dd-staricon {
+    flex: none;
+    display: block;
+    overflow: visible;
+    &.on {
+      animation: discovery-disc-96-pop 0.6s cubic-bezier(0.3, 1.6, 0.5, 1);
+    }
+  }
+  .dd-due {
+    margin-top: 4px;
+    padding-top: 5px;
+    border-top: 2px dashed #999;
+    text-align: right;
+    font-size: 13px;
+    color: var(--flt-color-textDim);
+  }
+
+  /* ---------- top right: Pace, the round buttons, the badge, the race ---------- */
+  .dd-right {
+    position: absolute;
+    right: 14px;
+    top: 12px;
+    bottom: calc(var(--dd-ticker-h) + var(--dd-tray-h) + 30px);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 12px;
+    width: min(430px, calc(100vw - 28px));
+    pointer-events: none;
+  }
+  .dd-pace {
+    pointer-events: auto;
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px 6px 12px;
+    border: 3px solid var(--dd-ink);
+    border-radius: 6px;
+    background: var(--dd-paper);
+    box-shadow: 5px 5px 0 var(--dd-ink);
+  }
+  .dd-pace-l {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 15px;
+  }
+  .dd-pb {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 38px;
+    padding: 4px 10px;
+    border: 3px solid var(--dd-ink);
+    background: #fff;
+    box-shadow: 3px 3px 0 var(--dd-ink);
+    color: var(--dd-ink);
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    &:hover {
+      background: var(--dd-yellow);
+    }
+    &:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0 var(--dd-ink);
     }
     &.on {
-      background: var(--flt-color-panelAlt);
+      background: var(--dd-green);
+      color: #fff;
       transform: translate(2px, 2px);
-      box-shadow: 1px 1px 0 var(--flt-color-line);
+      box-shadow: 1px 1px 0 var(--dd-ink);
     }
   }
-  .ticker {
-    background: var(--flt-color-accent);
-    color: var(--flt-color-accentText);
-    border-top-color: var(--flt-color-line);
+  .dd-toolbar {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-right: 4px;
   }
-  .ticker-tag {
-    background: var(--flt-color-panelAlt);
-    color: var(--flt-color-line);
-    border: 2px solid var(--flt-color-line);
+  .dd-tools {
+    display: flex;
+    gap: 10px;
   }
-  .tick,
-  .tick.neutral,
-  .tick.good,
-  .tick.bad {
-    color: var(--flt-color-accentText);
+  .dd-tool {
+    pointer-events: auto;
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    border: 3px solid var(--dd-ink);
+    border-radius: 50%;
+    background: var(--dd-yellow);
+    box-shadow: 3px 3px 0 var(--dd-ink);
+    color: var(--dd-ink);
+    cursor: pointer;
+    transition: transform var(--flt-motion-fast) var(--flt-motion-ease);
+    &:hover {
+      transform: translateY(-2px) rotate(-6deg);
+    }
+    &:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0 var(--dd-ink);
+    }
+    &.news {
+      background: var(--dd-yellow);
+    }
+    &.sound {
+      background: var(--dd-lime);
+    }
+    &.mixer {
+      background: var(--dd-orange);
+    }
+    &.skin {
+      background: #b98af0;
+    }
+    &.cam {
+      background: #ff6b6b;
+    }
+  }
+  .dd-unread {
+    position: absolute;
+    top: -9px;
+    right: -9px;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 5px;
+    border: 3px solid var(--dd-ink);
+    border-radius: 12px;
+    background: var(--dd-red);
+    color: #fff;
+    font: 400 17px/18px var(--dd-display);
+    text-align: center;
+  }
+  .dd-extra {
+    pointer-events: auto;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 6px 10px;
+    flex: none;
+    width: 350px;
+    max-width: 100%;
+    padding: 8px 10px 10px;
+    border: 3px solid var(--dd-ink);
+    border-radius: 6px;
+    background: #fff7c2;
+    box-shadow: 5px 5px 0 var(--dd-ink);
+    font-size: 15px;
+    line-height: 1.2;
+    animation: discovery-disc-96-drop 0.5s cubic-bezier(0.3, 1.5, 0.45, 1);
+  }
+  .dd-extra-tag {
+    padding: 0 8px;
+    border: 3px solid var(--dd-ink);
+    background: var(--dd-red);
+    color: #fff;
+    font: 400 22px/1.2 var(--dd-display);
+    transform: rotate(-3deg);
+  }
+  .dd-extra-btns {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 8px;
+    button {
+      min-height: 40px;
+      padding: 2px 14px;
+      border: 3px solid var(--dd-ink);
+      background: #fff;
+      box-shadow: 3px 3px 0 var(--dd-ink);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      &.read {
+        background: var(--dd-blue);
+        color: #fff;
+      }
+    }
+  }
+  .dd-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 14px;
+    width: calc(350px + 14px);
+    max-width: calc(100% + 14px);
+    min-height: 0;
+    margin-right: -8px;
+    padding: 22px 8px 10px 0;
+    margin-top: -12px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--dd-ink) transparent;
+    > * {
+      flex: none;
+    }
+  }
+
+  /* The Field Trip Badge */
+  .dd-badge {
+    pointer-events: auto;
+    position: relative;
+    width: 350px;
+    max-width: 100%;
+    border: 3px solid var(--dd-ink);
+    border-radius: 6px;
+    background: var(--dd-paper);
+    box-shadow: 5px 5px 0 var(--dd-ink);
+    animation: discovery-disc-96-drop 0.45s cubic-bezier(0.3, 1.5, 0.45, 1);
+  }
+  .dd-hole {
+    position: absolute;
+    left: 50%;
+    top: -19px;
+    width: 40px;
+    height: 26px;
+    margin-left: -20px;
+    border: 3px solid var(--dd-ink);
+    border-radius: 8px;
+    background: #ccc;
+    box-shadow: inset 0 4px 0 rgba(255, 255, 255, 0.55);
+  }
+  .dd-badge-top {
+    position: relative;
+    padding: 14px 52px 8px 14px;
+    background: var(--dd-green);
+    border-bottom: 3px solid var(--dd-ink);
+    color: #fff;
+    h4 {
+      margin: 0 0 2px;
+      font-size: 26px;
+      line-height: 1;
+    }
+    small {
+      display: block;
+      font-size: 14px;
+      line-height: 1.2;
+    }
+  }
+  .dd-x {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 3px solid var(--dd-ink);
+    border-radius: 50%;
+    background: #fff;
+    color: var(--dd-ink);
+    box-shadow: 2px 2px 0 var(--dd-ink);
+    cursor: pointer;
+    &:hover {
+      background: var(--dd-yellow);
+    }
+    &:active {
+      transform: translate(2px, 2px);
+      box-shadow: none;
+    }
+  }
+  .dd-badge-in {
+    padding: 10px 14px 14px;
+  }
+  .dd-who {
+    display: grid;
+    grid-template-columns: 84px 1fr;
+    align-items: center;
+    gap: 12px;
+  }
+  .dd-photo {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 84px;
+    height: 100px;
+    padding-bottom: 14px;
+    border: 3px solid var(--dd-ink);
+    background: var(--dd-yellow);
+    overflow: hidden;
+  }
+  .dd-portrait {
+    width: 72px;
+    height: 72px;
+  }
+  .dd-id {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 1px 0;
+    background: var(--dd-ink);
+    color: #fff;
+    font: 400 14px/1.1 var(--dd-display);
+    text-align: center;
+    letter-spacing: 0.06em;
+  }
+  .dd-name {
+    font: 400 30px/0.95 var(--dd-display);
+    letter-spacing: 0.02em;
+    overflow-wrap: anywhere;
+  }
+  .dd-role {
+    margin-top: 4px;
+    font-size: 15px;
+    line-height: 1.15;
+  }
+  .dd-mood {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+    font-size: 15px;
+    &.mood-content {
+      color: var(--dd-green);
+    }
+    &.mood-slumped {
+      color: #a04a00;
+    }
+    &.mood-miserable {
+      color: #c4141c;
+    }
+    &.mood-resigned {
+      color: var(--flt-color-textDim);
+    }
+  }
+  .dd-kind {
+    margin-left: 4px;
+    padding: 0 8px;
+    border: 2px solid var(--dd-ink);
+    border-radius: 999px;
+    background: var(--dd-purple);
+    color: #fff;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .dd-status {
+    margin-top: 8px;
+    font-size: 14px;
+    line-height: 1.2;
+    color: var(--flt-color-textDim);
+  }
+  .dd-therms {
+    display: grid;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .dd-therm {
+    display: grid;
+    grid-template-columns: 78px 1fr 44px;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+  }
+  .dd-tp {
+    text-align: right;
+  }
+  .dd-th {
+    position: relative;
+    display: block;
+    height: 18px;
+    border: 3px solid var(--dd-ink);
+    border-radius: 10px;
+    background: #fff;
+    overflow: hidden;
+    i {
+      display: block;
+      height: 100%;
+      background: var(--dd-lime);
+      transition: width var(--flt-motion-slow) var(--flt-motion-ease);
+    }
+    &.warn i {
+      background: var(--dd-orange);
+    }
+    &.bad i {
+      background: var(--dd-red);
+    }
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(90deg, transparent 0 calc(10% - 1px), rgba(17, 17, 17, 0.35) calc(10% - 1px) 10%);
+    }
+  }
+  .dd-fact {
+    margin-top: 10px;
+    padding: 8px 10px;
+    border: 3px dashed var(--dd-ink);
+    background: #fff7c2;
+    font-size: 16px;
+    line-height: 1.2;
+    b {
+      display: block;
+      font: 400 21px/1 var(--dd-display);
+      color: #c4141c;
+    }
+    q {
+      display: block;
+      margin-top: 2px;
+      quotes: "\201C" "\201D";
+    }
+  }
+  .dd-log {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+    font-size: 13px;
+    line-height: 1.25;
+    color: var(--flt-color-textDim);
+    li {
+      position: relative;
+      padding-left: 14px;
+      &::before {
+        content: "";
+        position: absolute;
+        left: 2px;
+        top: 5px;
+        width: 7px;
+        height: 7px;
+        background: var(--dd-blue);
+        transform: rotate(45deg);
+      }
+    }
+  }
+  .dd-go {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    min-height: 46px;
+    margin-top: 10px;
+    padding: 4px;
+    border: 3px solid var(--dd-ink);
+    background: var(--dd-blue);
+    color: #fff;
+    box-shadow: 4px 4px 0 var(--dd-ink);
+    font: 400 26px/1 var(--dd-display);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    cursor: pointer;
+    &:hover {
+      background: #2f72ee;
+    }
+    &:active {
+      transform: translate(3px, 3px);
+      box-shadow: 1px 1px 0 var(--dd-ink);
+    }
+    &.on {
+      background: var(--dd-green);
+      font-size: 19px;
+      text-transform: none;
+    }
+  }
+  .dd-handle {
+    display: none;
+  }
+
+  /* ---------- bottom: the guide bot, the Build Stamps, the ticker ---------- */
+  .dd-bottom {
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    bottom: calc(var(--dd-ticker-h) + 14px);
+    display: flex;
+    align-items: flex-end;
+    gap: 14px;
+    pointer-events: none;
+  }
+  .dd-assistant {
+    position: relative;
+    flex: none;
+    width: 360px;
+    min-height: 112px;
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    pointer-events: none;
+  }
+  .dd-guide {
+    pointer-events: auto;
+    flex: none;
+    width: 92px;
+    height: 112px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    filter: drop-shadow(3px 3px 0 rgba(17, 17, 17, 0.35));
+    &:hover .dd-robot {
+      transform: rotate(-4deg) scale(1.04);
+    }
+  }
+  .dd-robot {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    transition: transform var(--flt-motion-fast) var(--flt-motion-ease);
+  }
+  .dd-assistant.talking .dd-robot-body {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    animation: discovery-disc-96-hop 0.7s ease-in-out infinite alternate;
+  }
+  .dd-bulb {
+    animation: discovery-disc-96-blink 1.6s steps(1) infinite;
+  }
+  .dd-say {
+    position: relative;
+    pointer-events: auto;
+    margin-bottom: 8px;
+    animation: discovery-disc-96-drop 0.4s cubic-bezier(0.3, 1.5, 0.45, 1);
+    &::before {
+      content: "";
+      position: absolute;
+      left: -13px;
+      bottom: 22px;
+      width: 14px;
+      height: 16px;
+      background: var(--dd-ink);
+      clip-path: polygon(100% 0, 0 60%, 100% 100%);
+    }
+    &::after {
+      content: "";
+      position: absolute;
+      left: -8px;
+      bottom: 25px;
+      width: 12px;
+      height: 10px;
+      background: #fff;
+      clip-path: polygon(100% 0, 0 60%, 100% 100%);
+    }
+  }
+  .dd-say-body {
+    display: block;
+    max-width: 252px;
+    padding: 9px 14px 10px;
+    border: 3px solid var(--dd-ink);
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 4px 4px 0 var(--dd-ink);
+    color: var(--dd-ink);
+    font-size: 17px;
     font-weight: 700;
+    line-height: 1.2;
+    text-align: left;
+    b {
+      display: block;
+      margin-bottom: 1px;
+      font: 400 25px/1 var(--dd-display);
+      letter-spacing: 0.02em;
+      color: #c4141c;
+    }
   }
-  .speed button.on {
-    background: var(--flt-color-accent);
-    color: var(--flt-color-accentText);
+  button.dd-say-body {
+    cursor: pointer;
+    &:hover {
+      background: #fff7c2;
+    }
   }
-  .bar span,
-  .obj-bar span {
-    background: repeating-linear-gradient(45deg, var(--flt-color-meterFrom) 0 10px, var(--flt-color-meterTo) 10px 20px);
+  .dd-assistant.tone-good .dd-say-body b {
+    color: var(--dd-green);
   }
-  .modal-card .card-stripe {
-    background: var(--flt-color-panelAlt);
-    color: var(--flt-color-line);
+  .dd-assistant.tone-joke .dd-say-body b {
+    color: var(--dd-purple);
   }
-  .bubble {
-    border-radius: 22px;
+
+  .dd-stamps {
+    position: relative;
+    flex: 0 1 auto;
+    min-width: 0;
+    pointer-events: none;
+  }
+  .dd-tray {
+    position: relative;
+    pointer-events: auto;
+    padding: 14px 10px 8px;
+    border: 3px solid var(--dd-ink);
+    border-radius: 6px;
+    background-color: var(--dd-blue);
+    background-image: radial-gradient(#fff 1.2px, transparent 1.6px), radial-gradient(var(--dd-yellow) 1.2px, transparent 1.6px);
+    background-size: 26px 26px, 38px 38px;
+    background-position: 0 0, 13px 19px;
+    box-shadow: 5px 5px 0 var(--dd-ink);
+  }
+  .dd-tray-label {
+    position: absolute;
+    top: -17px;
+    left: 14px;
+    padding: 0 8px;
+    border: 3px solid var(--dd-ink);
+    background: var(--dd-red);
+    color: #fff;
+    font: 400 20px/1.2 var(--dd-display);
+    letter-spacing: 0.04em;
+    transform: rotate(-1deg);
+    text-transform: uppercase;
+  }
+  .dd-tray-row {
+    display: flex;
+    gap: 8px;
+    padding: 2px 2px 8px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--dd-yellow) transparent;
+  }
+  .dd-stamp {
+    position: relative;
+    flex: 1 1 78px;
+    min-width: 68px;
+    max-width: 88px;
+    height: 88px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    padding: 2px 2px 0;
+    border: 3px solid var(--dd-ink);
+    background: #fff;
+    box-shadow: 3px 3px 0 var(--dd-ink);
+    color: var(--dd-ink);
+    font-size: 13px;
+    line-height: 1.05;
+    text-align: center;
+    cursor: pointer;
+    transition: transform var(--flt-motion-fast) var(--flt-motion-ease);
+    &:hover:not(:disabled) {
+      transform: translateY(-3px) rotate(1deg);
+    }
+    &:active:not(:disabled) {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0 var(--dd-ink);
+    }
+    &.on {
+      background: var(--dd-yellow);
+      transform: translate(2px, 2px) rotate(-2deg);
+      box-shadow: 1px 1px 0 var(--dd-ink);
+    }
+    &.poor {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+    &.race {
+      border-style: dashed;
+      background: #f3e6ff;
+    }
+    &.race.on {
+      background: var(--dd-yellow);
+    }
+  }
+  .dd-stamp-art {
+    width: 34px;
+    height: 34px;
+    flex: none;
+  }
+  .dd-sname {
+    display: block;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+  .dd-price {
+    font: 400 19px/1 var(--dd-display);
+    color: var(--dd-green);
+    letter-spacing: 0.02em;
+    &.free {
+      color: var(--dd-purple);
+    }
+  }
+  .dd-key {
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    min-width: 16px;
+    padding: 0 3px;
+    background: var(--dd-ink);
+    color: #fff;
+    font-size: 11px;
+    line-height: 15px;
+  }
+  .dd-prize {
+    position: absolute;
+    top: 0;
+    right: 1px;
+  }
+  .dd-stamp-tip {
+    position: absolute;
+    left: 0;
+    bottom: calc(100% + 20px);
+    width: max-content;
+    max-width: min(460px, calc(100vw - 40px));
+    padding: 8px 14px 9px;
+    border: 3px solid var(--dd-ink);
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 4px 4px 0 var(--dd-ink);
+    font-size: 15px;
+    line-height: 1.2;
+    pointer-events: auto;
+    b {
+      font: 400 22px/1 var(--dd-display);
+      color: #c4141c;
+      margin-right: 4px;
+    }
+    em {
+      display: block;
+      font-style: normal;
+      font-size: 13px;
+      color: var(--flt-color-textDim);
+    }
+    &::after {
+      content: "";
+      position: absolute;
+      left: 42px;
+      bottom: -16px;
+      width: 20px;
+      height: 16px;
+      background: linear-gradient(to bottom right, #fff 0 50%, transparent 50%);
+      border-left: 3px solid var(--dd-ink);
+      transform: skewX(-32deg);
+    }
+  }
+
+  /* The DID YOU KNOW? tape */
+  .dd-ticker {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: calc(var(--dd-ticker-h) + env(safe-area-inset-bottom));
+    padding: 0 14px env(safe-area-inset-bottom);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    overflow: hidden;
+    pointer-events: auto;
+    background: var(--dd-yellow);
+    border-top: 3px solid var(--dd-ink);
+    color: var(--dd-ink);
+    font-size: 18px;
+    white-space: nowrap;
+  }
+  .dd-ticker-tag {
+    flex: none;
+    padding: 1px 10px 0;
+    border: 3px solid var(--dd-ink);
+    background: var(--dd-red);
+    color: #fff;
+    font: 400 24px/1.15 var(--dd-display);
+    letter-spacing: 0.03em;
+    transform: rotate(-2deg);
+  }
+  .dd-ticker-view {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .dd-ticker-track {
+    display: flex;
+    width: max-content;
+    will-change: transform;
+  }
+  .dd-ticker .tick {
+    flex: none;
+    padding-right: 30px;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--dd-ink);
+    &::before {
+      content: "";
+      display: inline-block;
+      width: 15px;
+      height: 15px;
+      margin-right: 14px;
+      vertical-align: -1px;
+      background: var(--dd-red);
+      opacity: 1;
+      transform: none;
+      clip-path: polygon(50% 0, 61% 34%, 98% 35%, 68% 56%, 79% 92%, 50% 70%, 21% 92%, 32% 56%, 2% 35%, 39% 34%);
+    }
+    &.good {
+      color: #0b5d24;
+    }
+    &.bad {
+      color: #a50f16;
+    }
+    &.joke::before {
+      background: var(--dd-purple);
+    }
+  }
+
+  /* ---------- thought bubbles in the world ---------- */
+  .dd-bubble {
+    max-width: 232px;
+    padding: 7px 12px 8px;
+    border: 3px solid var(--dd-ink);
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 3px 3px 0 var(--dd-ink);
+    color: var(--dd-ink);
+    font: 700 15px/1.2 var(--flt-font-ui);
+    text-align: left;
+    small {
+      display: block;
+      margin-bottom: 1px;
+      font-size: 12.5px;
+      line-height: 1.15;
+      color: var(--dd-blue);
+    }
+    &::after {
+      width: 14px;
+      height: 14px;
+      bottom: -10px;
+      left: 46%;
+      border-right: 3px solid var(--dd-ink);
+      border-bottom: 3px solid var(--dd-ink);
+      border-radius: 0 0 5px 0;
+    }
+    &.bubble-agent {
+      border-color: #0a6d7c;
+      background: #e6fcff;
+      small {
+        color: #0a6d7c;
+      }
+      &::after {
+        border-color: #0a6d7c;
+      }
+    }
+    &.bubble-protester {
+      border-color: #a50f16;
+      background: #fff0ee;
+      small {
+        color: #a50f16;
+      }
+      &::after {
+        border-color: #a50f16;
+      }
+    }
+    &.bubble-visitor small {
+      color: var(--dd-purple);
+    }
+  }
+
+  /* ---------- the toast card (the guide bot normally reads these out) ---------- */
+  .dd-toast {
+    display: block;
+    max-width: 420px;
+    padding: 9px 14px 10px;
+    border: 3px solid var(--dd-ink);
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 4px 4px 0 var(--dd-ink);
+    font-size: 16px;
+    font-weight: 700;
+    text-align: left;
+    color: var(--dd-ink);
+    pointer-events: auto;
+    b {
+      display: block;
+      font: 400 24px/1 var(--dd-display);
+      color: #c4141c;
+    }
+    &.good b {
+      color: var(--dd-green);
+    }
+  }
+
+  /* ---------- modal cards ---------- */
+  .dd-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    display: grid;
+    place-items: center;
+    padding: 12px;
+    pointer-events: auto;
+    background-color: rgba(17, 17, 17, 0.5);
+    background-image: radial-gradient(rgba(255, 255, 255, 0.18) 1.5px, transparent 2px);
+    background-size: 30px 30px;
+    animation: discovery-disc-96-fade 0.25s ease-out;
+  }
+  .dd-worksheet {
+    --tone: var(--dd-blue);
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    width: min(580px, calc(100vw - 56px));
+    max-height: calc(100dvh - 24px);
+    border: 3px solid var(--dd-ink);
+    border-radius: 6px;
+    background-color: var(--dd-paper);
+    box-shadow: 8px 8px 0 var(--dd-ink);
+    animation: discovery-disc-96-drop 0.55s cubic-bezier(0.3, 1.5, 0.45, 1);
+    &.tone-good {
+      --tone: var(--dd-green);
+    }
+    &.tone-bad {
+      --tone: var(--dd-red);
+    }
+    &.tone-joke {
+      --tone: var(--dd-purple);
+    }
+  }
+  .dd-ws-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 16px;
+    background: var(--tone);
+    border-bottom: 3px solid var(--dd-ink);
+    color: #fff;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .dd-paused {
+    padding: 0 9px;
+    border: 2px solid var(--dd-ink);
+    background: var(--dd-yellow);
+    color: var(--dd-ink);
+    font: 400 17px/1.3 var(--dd-display);
+    letter-spacing: 0.04em;
+    transform: rotate(-2deg);
+  }
+  .dd-rtitle {
+    position: relative;
+    margin: 18px -22px 0;
+    padding: 9px 34px 5px;
+    border: 3px solid var(--dd-ink);
+    background: var(--dd-red);
+    box-shadow: 4px 4px 0 var(--dd-ink);
+    color: #fff;
+    text-align: center;
+    z-index: 1;
+    h2 {
+      margin: 0;
+      font-size: 34px;
+      line-height: 1.02;
+      text-wrap: balance;
+    }
+    &::before,
+    &::after {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      bottom: -16px;
+      width: 26px;
+      height: 16px;
+      background: #8f0c12;
+      border: 3px solid var(--dd-ink);
+      border-top: 0;
+    }
+    &::before {
+      left: 8px;
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 60%, 0 100%);
+    }
+    &::after {
+      right: 8px;
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 60%, 0 100%);
+    }
+    &.won {
+      background: var(--dd-green);
+      &::before,
+      &::after {
+        background: #0a5a20;
+      }
+    }
+    &.lost {
+      background: var(--dd-purple);
+      &::before,
+      &::after {
+        background: #4f2687;
+      }
+    }
+    &.era {
+      background: var(--dd-blue);
+      &::before,
+      &::after {
+        background: #0e3a8c;
+      }
+    }
+  }
+  .dd-ws-body {
+    min-height: 0;
+    padding: 20px 20px 20px 20px;
+    overflow-y: auto;
+    background-image: repeating-linear-gradient(transparent 0 27px, rgba(26, 91, 214, 0.2) 27px 28px), linear-gradient(90deg, transparent 44px, rgba(217, 23, 31, 0.45) 44px 46px, transparent 46px);
+    p {
+      margin: 0 0 14px 34px;
+      font-size: 18px;
+      line-height: 28px;
+    }
+  }
+  .dd-worksheet::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background-image: radial-gradient(circle at 18px 25%, #6aa9d4 0 7px, var(--dd-ink) 7px 10px, transparent 10.5px), radial-gradient(circle at 18px 75%, #6aa9d4 0 7px, var(--dd-ink) 7px 10px, transparent 10.5px);
+  }
+  .dd-circle-one {
+    margin: 0 0 8px 34px;
+    font: 400 23px/28px var(--dd-display);
+    letter-spacing: 0.03em;
+    color: var(--dd-blue);
+    text-transform: uppercase;
+  }
+  .dd-answers {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-left: 34px;
+  }
+  .dd-answer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 56px;
+    padding: 8px 14px 8px 8px;
+    border: 3px solid var(--dd-ink);
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 4px 4px 0 var(--dd-ink);
+    color: var(--dd-ink);
+    text-align: left;
+    cursor: pointer;
+    transition: transform var(--flt-motion-fast) var(--flt-motion-ease);
+    --pick: var(--dd-red);
+    &.a1 {
+      --pick: var(--dd-blue);
+    }
+    &.a2 {
+      --pick: var(--dd-green);
+    }
+    &::after {
+      content: "";
+      position: absolute;
+      inset: -6px -8px;
+      border: 3px solid var(--dd-red);
+      border-radius: 46% 54% 52% 48% / 60% 52% 48% 40%;
+      opacity: 0;
+      transform: rotate(-1deg) scale(0.96);
+      transition: opacity var(--flt-motion-fast), transform var(--flt-motion-fast);
+      pointer-events: none;
+    }
+    &:hover,
+    &:focus-visible {
+      background: #fff7c2;
+      transform: translate(-1px, -1px);
+      &::after {
+        opacity: 1;
+        transform: rotate(-1deg) scale(1);
+      }
+    }
+    &:active {
+      transform: translate(3px, 3px);
+      box-shadow: 1px 1px 0 var(--dd-ink);
+    }
+  }
+  .dd-letter {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border: 3px solid var(--dd-ink);
+    border-radius: 50%;
+    background: var(--pick);
+    color: #fff;
+    font: 400 28px/1 var(--dd-display);
+  }
+  .dd-answer-text {
+    display: block;
+    b {
+      display: block;
+      font-size: 17px;
+      line-height: 1.15;
+    }
+    small {
+      display: block;
+      margin-top: 1px;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--flt-color-textDim);
+    }
+  }
+  .dd-paddles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 14px 34px;
+    padding: 0;
+    list-style: none;
+    li {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 2px 10px 2px 3px;
+      border: 3px solid var(--dd-ink);
+      border-radius: 999px;
+      background: #fff;
+      font-size: 14px;
+    }
+    .num {
+      display: grid;
+      place-items: center;
+      min-width: 26px;
+      height: 26px;
+      border: 2px solid var(--dd-ink);
+      border-radius: 50%;
+      background: var(--paddle, var(--dd-yellow));
+      color: #fff;
+      font: 400 17px/1 var(--dd-display);
+      text-shadow: 0 0 2px #000, 0 0 2px #000;
+    }
+  }
+
+  /* Certificates: the new-era card and the win / lose card */
+  .dd-era {
+    background-color: rgba(26, 91, 214, 0.78);
+    overflow: hidden;
+  }
+  .dd-rays {
+    position: absolute;
+    inset: -50%;
+    background: repeating-conic-gradient(from 0deg, rgba(255, 212, 0, 0.32) 0 9deg, transparent 9deg 18deg);
+    -webkit-mask-image: radial-gradient(circle, #000 0 30%, transparent 62%);
+    mask-image: radial-gradient(circle, #000 0 30%, transparent 62%);
+    animation: discovery-disc-96-spin 60s linear infinite;
+    pointer-events: none;
+  }
+  .dd-cert {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: min(560px, calc(100vw - 48px));
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+    padding: 22px 30px 26px;
+    border: 3px solid var(--dd-ink);
+    border-radius: 6px;
+    background-color: var(--dd-paper);
+    background-image: var(--dd-grid);
+    background-size: 14px 14px;
+    box-shadow: 8px 8px 0 var(--dd-ink);
+    text-align: center;
+    animation: discovery-disc-96-drop 0.6s cubic-bezier(0.3, 1.5, 0.45, 1);
+    > * {
+      position: relative;
+      max-width: 100%;
+    }
+    .dd-rtitle {
+      align-self: stretch;
+      margin-top: 10px;
+      margin-inline: -34px;
+    }
+  }
+  .dd-kicker {
+    font: 400 26px/1 var(--dd-display);
+    letter-spacing: 0.08em;
+    color: var(--dd-blue);
+    text-transform: uppercase;
+  }
+  .dd-medal {
+    position: relative;
+    width: 128px;
+    height: 128px;
+    margin: 6px 0 4px;
+    filter: drop-shadow(4px 4px 0 var(--dd-ink));
+    animation: discovery-disc-96-slam 0.7s cubic-bezier(0.3, 1.6, 0.5, 1) 0.15s backwards;
+    svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      polygon {
+        fill: var(--dd-yellow);
+        stroke: var(--dd-ink);
+        stroke-width: 3px;
+        stroke-linejoin: round;
+        vector-effect: non-scaling-stroke;
+      }
+    }
+    span {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding-top: 6px;
+      font: 400 76px/1 var(--flt-font-numbers);
+    }
+  }
+  .dd-era-line {
+    margin: 12px 0 6px;
+    font-size: 18px;
+    line-height: 1.3;
+  }
+  .dd-unlocks {
+    align-self: stretch;
+    margin: 6px 0 0;
+    padding: 0;
+    list-style: none;
+    text-align: left;
+    li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 0;
+      border-top: 2px dashed #999;
+      font-size: 16px;
+      line-height: 1.2;
+    }
+  }
+  .dd-levels {
+    display: flex;
+    gap: 6px;
+    margin: 12px 0 4px;
+  }
+  .dd-continue {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 52px;
+    margin-top: 12px;
+    padding: 4px 26px 2px;
+    border: 3px solid var(--dd-ink);
+    background: var(--dd-green);
+    color: #fff;
+    box-shadow: 5px 5px 0 var(--dd-ink);
+    font: 400 30px/1 var(--dd-display);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    cursor: pointer;
+    &:hover {
+      background: var(--dd-lime);
+      color: var(--dd-ink);
+    }
+    &:active {
+      transform: translate(4px, 4px);
+      box-shadow: 1px 1px 0 var(--dd-ink);
+    }
+    &.plain {
+      background: #fff;
+      color: var(--dd-ink);
+    }
+    .dd-key {
+      position: static;
+      display: inline-grid;
+      place-items: center;
+      width: 26px;
+      height: 26px;
+      padding: 0;
+      border: 2px solid var(--dd-ink);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--dd-ink);
+      font: 400 20px/1 var(--dd-display);
+    }
+  }
+  .dd-outcome {
+    padding-top: 0;
+    .dd-ws-head {
+      align-self: stretch;
+      margin: 0 -30px;
+      max-width: none;
+    }
+  }
+  .dd-outcome-stars {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 14px;
+  }
+  .dd-report {
+    align-self: stretch;
+    margin: 14px 0 6px;
+    div {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 5px 0;
+      border-top: 2px dashed #999;
+      font-size: 16px;
+    }
+    dt {
+      text-align: left;
+    }
+    dd {
+      margin: 0;
+      font: 400 22px/1 var(--flt-font-numbers);
+      &.bad {
+        color: #c4141c;
+      }
+    }
+  }
+  .dd-note {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 8px 0 0;
+    text-align: left;
+    font-size: 16px;
+    line-height: 1.25;
+  }
+  .dd-note-bot {
+    flex: none;
+    width: 58px;
+    height: 70px;
+  }
+  .dd-outcome-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  /* ---------- the rest of the game's UI, dressed (the base's markup) ---------- */
+  .panel {
+    background-color: var(--dd-paper);
+    border-radius: 6px;
+  }
+
+  /* ---------- reduced motion (the OS setting, or the switch in the skin picker) ---------- */
+  &[data-motion="reduced"] {
+    .dd-globe,
+    .dd-star,
+    .dd-rays,
+    .dd-shipped,
+    .dd-bulb,
+    .dd-robot-body,
+    .hurry,
+    .dd-arena.flinch,
+    .dd-staricon,
+    .dd-badge,
+    .dd-extra,
+    .dd-say,
+    .dd-backdrop,
+    .dd-worksheet,
+    .dd-cert,
+    .dd-medal {
+      animation: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .dd-globe,
+    .dd-star,
+    .dd-rays,
+    .dd-shipped,
+    .dd-bulb,
+    .dd-robot-body,
+    .hurry,
+    .dd-arena.flinch,
+    .dd-staricon,
+    .dd-badge,
+    .dd-extra,
+    .dd-say,
+    .dd-backdrop,
+    .dd-worksheet,
+    .dd-cert,
+    .dd-medal {
+      animation: none;
+    }
+  }
+}
+
+@keyframes discovery-disc-96-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes discovery-disc-96-wobble {
+  0%,
+  100% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(2deg);
+  }
+}
+@keyframes discovery-disc-96-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-2px) rotate(-2deg);
+  }
+  75% {
+    transform: translateX(2px) rotate(2deg);
+  }
+}
+@keyframes discovery-disc-96-pop {
+  0% {
+    transform: scale(0.3) rotate(-30deg);
+  }
+  70% {
+    transform: scale(1.25) rotate(8deg);
+  }
+  100% {
+    transform: none;
+  }
+}
+@keyframes discovery-disc-96-drop {
+  0% {
+    transform: translateY(-26px) scale(0.9);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(4px) scale(1.02);
+    opacity: 1;
+  }
+  100% {
+    transform: none;
+  }
+}
+@keyframes discovery-disc-96-slam {
+  0% {
+    transform: scale(2.4) rotate(-20deg);
+    opacity: 0;
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes discovery-disc-96-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes discovery-disc-96-hop {
+  to {
+    transform: translateY(-4px) rotate(1.5deg);
+  }
+}
+@keyframes discovery-disc-96-blink {
+  50% {
+    opacity: 0.25;
   }
 }
