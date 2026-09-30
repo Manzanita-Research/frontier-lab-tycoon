@@ -559,9 +559,10 @@ export const VERBS: Record<string, VerbDef> = {
   },
   shake: { doc: "Shake the screen, `strength` 0 to 1.", spec: { strength: "number" }, run: (env, p) => pushCue(env.state, { type: "shake", strength: Math.max(0, Math.min(1, p.strength as number)) }) },
   "sound.cue": {
-    doc: "Play a sound cue: `alarm` (FLT-7's breakdown alarm), `card`, `era` or `release`.",
+    doc: "Play a sound cue: `alarm` (FLT-7's breakdown alarm), `card`, `era`, `release`, any other base cue (`coin`, `protest.grow`, `ui.click`, ...), or one a mod's `audio.cues` adds (`gr.bark`). An unknown name plays nothing.",
     spec: { cue: "string" },
-    verify: (p) => (["alarm", "card", "era", "release"].includes(p.cue as string) ? null : "`cue` is alarm, card, era or release"),
+    // Mod cues live in the presentation, not the sim, so this checks the name's shape; `flt-mod check` checks it exists.
+    verify: (p) => (/^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*$/.test(p.cue as string) ? null : "`cue` is a cue name like card, alarm or protest.grow"),
     run: (env, p) => pushCue(env.state, { type: "sound", cue: p.cue === "alarm" ? "breakdown" : (p.cue as string) }),
   },
   news: {

@@ -9,6 +9,7 @@ import { composeMods, type Conflict } from "../mods/loader";
 import { ModError, type ModManifest } from "../mods/schema";
 import { browserObjectUrls, materialise, resolvePresentation, type ObjectUrls, type Presentation } from "../mods/presentation";
 import type { RunMods } from "../sim/types";
+import type { Note } from "../audio/score";
 
 export interface LoadedMod {
   id: string;
@@ -34,9 +35,11 @@ export interface ModSession {
   run: RunMods | null;
   /** FLT-55: the mods' skins, assets (as `blob:` URLs), sound cues and walker looks. Null for the base game. Never in the World. */
   presentation: Presentation | null;
+  /** The mods' own sound cues (added, or replacing the base's), later mods winning. The base game's are in `src/audio/score.ts`. */
+  cues: Readonly<Record<string, readonly Note[]>>;
 }
 
-export const NO_MODS: ModSession = { def: null, mods: [], conflicts: [], errors: [], run: null, presentation: null };
+export const NO_MODS: ModSession = { def: null, mods: [], conflicts: [], errors: [], run: null, presentation: null, cues: {} };
 
 /** Owns the session's `blob:` URLs: they are revoked when the page goes away for good (not into the back/forward cache). */
 const assetScope = Effect.runSync(Scope.make());
@@ -71,7 +74,7 @@ export async function loadModSession(search: string, options: { baseUrl?: string
       id: manifest.id, name: manifest.name, version: manifest.version, author: manifest.author, description: manifest.description, source, hash: contentHash(manifest),
       ...(manifest.skin ? { skin: manifest.skin.id } : {}),
     }));
-    return { def, mods, conflicts, errors, run: { mods: mods.map(({ id, version, hash }) => ({ id, version, hash })), contentHash: contentHash(def.content) }, presentation };
+    return { def, mods, conflicts, errors, run: { mods: mods.map(({ id, version, hash }) => ({ id, version, hash })), contentHash: contentHash(def.content) }, presentation, cues: Object.assign({}, ...manifests.map((m) => m.manifest.audio?.cues ?? {})) };
   } catch (error) {
     return { ...NO_MODS, errors: [...errors, `${manifests.map((m) => m.manifest.id).join(" + ")}: ${describe(error)}`] };
   }

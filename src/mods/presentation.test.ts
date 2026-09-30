@@ -133,3 +133,19 @@ describe("FLT-55 presentation boundary", () => {
     expect(composeMods([{ ...base, looks: { protester: dog } } as ModManifest, { ...other, looks: { protester: dog } } as ModManifest]).conflicts).toMatchObject([{ path: "looks.protester", earlier: "test", later: "other" }]);
   });
 });
+
+describe("FLT-55 mod cues", () => {
+  const note = { at: 0, hz: 440, gain: 0.2, duration: 0.1, wave: "square" };
+  it.each([
+    [{ ...note, duration: 60 }, "a minute-long drone"],
+    [{ ...note, at: 30 }, "a cue that starts half a minute late"],
+    [{ ...note, hz: 5 }, "an inaudible rumble"],
+    [{ ...note, hz: 40000 }, "a dog whistle"],
+    [{ ...note, gain: 2 }, "more than full volume"],
+  ])("rejects %j (%s)", async (bad) => {
+    await expect(decode({ ...base, audio: { cues: { "gr.bark": [bad] } } })).rejects.toThrow();
+  });
+  it("caps a cue at 32 notes", async () => {
+    await expect(decode({ ...base, audio: { cues: { "gr.bark": Array(33).fill(note) } } })).rejects.toThrow();
+  });
+});

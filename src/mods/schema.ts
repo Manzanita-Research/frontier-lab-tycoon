@@ -170,7 +170,11 @@ export type SkinData = typeof SkinData.Type;
 export const Note = Schema.Struct({ at: nonnegative, hz: positive, endHz: Schema.optionalKey(positive), duration: positive, gain: fraction, wave: Schema.Literals(["sine", "square", "sawtooth", "triangle", "noise"]) });
 /** A cue name: lower-case words joined by dots or dashes ("protest.grow", "ui.click", "gr-bark"). */
 export const CueName = text.check(Schema.isPattern(/^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*$/));
-export const AudioSection = Schema.Struct({ cues: Schema.optionalKey(Schema.Record(CueName, Schema.Array(Note).check(Schema.isBetweenLength(0, 32)))), music: Schema.optionalKey(strings) });
+/** A mod's note: audible pitches, and nothing that starts or rings for longer than five seconds (a cue is a moment, not a drone). */
+const hz = number.check(Schema.isBetween({ minimum: 20, maximum: 20000 }));
+const seconds = number.check(Schema.isBetween({ minimum: 0, maximum: 5 }));
+export const CueNote = Schema.Struct({ ...Note.fields, at: seconds, hz, endHz: Schema.optionalKey(hz), duration: seconds.check(Schema.isGreaterThan(0)) });
+export const AudioSection = Schema.Struct({ cues: Schema.optionalKey(Schema.Record(CueName, Schema.Array(CueNote).check(Schema.isBetweenLength(0, 32)))), music: Schema.optionalKey(strings) });
 
 const vec3 = Schema.Tuple([number, number, number]);
 const size3 = Schema.Tuple([positive, positive, positive]);
