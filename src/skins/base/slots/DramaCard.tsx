@@ -32,7 +32,7 @@ export function DramaCard({ event, drama, actions }: SlotPropsMap["DramaCard"]) 
   const t = useT();
   return (
     <div className="modal-backdrop">
-      <div className={`modal-card event-card drama-card tone-${event.tone}`} role="dialog" aria-modal="true" aria-label={event.title}>
+      <div className={`modal-card event-card drama-doc-card tone-${event.tone}`} role="dialog" aria-modal="true" aria-label={event.title}>
         <div className="card-stripe">
           <span>{event.stripe}</span>
           <span className="paused">{t("event.paused")}</span>

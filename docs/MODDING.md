@@ -19,6 +19,8 @@ Copy optional `mod.example.ts` to `mod.ts` to use `@flt/mod-sdk`; directory comm
 scaffold test checks `mod.json`. Bundle with an explicit `mod.json` output to
 regenerate that file. Local assets are inlined; remote assets are rejected.
 `dev` serves CORS on 5174 and prints the game link (`?mod=http://localhost:5174/mod.json`); reload the page to pick up edits (no hot reload).
+The Mod Manager's Remove reloads without that mod. Today's Drama (FLT-34) is the first
+published mod feed: merged Daily Drama packs at `/mods/drama/`, loaded by the same `?mod=` (see `drama/README.md` ▸ Publishing).
 
 ## 1. Principle: data first, code last
 

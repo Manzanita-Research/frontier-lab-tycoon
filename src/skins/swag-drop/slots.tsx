@@ -3,7 +3,7 @@
 import type { SkinSlots } from "../types";
 import { Arena } from "./arena";
 import { Inspector } from "./badge";
-import { BuildBar, NewsControls, PhotoButton, Speed } from "./keys";
+import { BuildBar, DramaButton, NewsControls, PhotoButton, Speed } from "./keys";
 import { Layout } from "./Layout";
 import { Objectives, ThoughtsPanel } from "./notes";
 import { Bubble, EraCard, EventCard, Outcome, Ticker, Toast } from "./paper";
@@ -27,5 +27,6 @@ const slots: SkinSlots = {
   Outcome,
   PhotoButton,
   NewsControls,
+  DramaButton,
 };
 export default slots;

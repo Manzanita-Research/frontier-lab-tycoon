@@ -21,6 +21,9 @@ export function ModManager({ mods, actions }: SlotPropsMap["ModManager"]) {
           <ol className="mod-list">
             {mods.list.map((m) => (
               <li key={m.id}>
+                <button className="mod-off" onClick={() => actions.removeMod(m.id)} title="Reloads without it: a new lab">
+                  {m.drama ? "Switch off" : "Remove"}
+                </button>
                 <b>{m.name}</b> <span>v{m.version}</span>
                 {m.description && <small>{m.description}</small>}
                 <code>
