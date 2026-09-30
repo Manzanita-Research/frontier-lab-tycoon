@@ -1,4 +1,4 @@
-// GeoCities' clip art: 24×24 pixel icons as one SVG sprite (rendered once, by the Layout), the digging worker, and the
+// Homepage '98's clip art: 24×24 pixel icons as one SVG sprite (rendered once, by the Layout), the digging worker, and the
 // pixel mugshot for the About Me page. Flat colours and 1px black outlines, the way a 1998 hobbyist drew them.
 import type { PortraitVM } from "../../ui/hud/types";
 

@@ -1,4 +1,4 @@
-// GeoCities' components: the lab's home page, from the header's hit counter to the WebRing along the bottom.
+// Homepage '98's components: the lab's home page, from the header's hit counter to the WebRing along the bottom.
 // The slots not listed here (Staff, the News Room and its papers, the mixer, photo mode, the skin picker) are the base's,
 // dressed by skin.css.
 import type { SkinSlots } from "../types";

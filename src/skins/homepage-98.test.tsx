@@ -1,4 +1,4 @@
-// GeoCities' own behaviour: the hit counter, the ring, the pop-ups. (skins.test.tsx already renders every slot of every skin.)
+// Homepage '98's own behaviour: the hit counter, the ring, the pop-ups. (skins.test.tsx already renders every slot of every skin.)
 import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { fixtureInput } from "../ui/hud/fixtures";
@@ -6,16 +6,16 @@ import type { BuildItemVM, HudActions, HudVM } from "../ui/hud/types";
 import { hudViewModel } from "../ui/hud/vm";
 import { SkinProvider } from "./context";
 import { prepareSkin } from "./registry";
-import { ringStep } from "./geocities/webring";
+import { ringStep } from "./homepage-98/webring";
 import type { LoadedSkin, SlotPropsMap } from "./types";
 
 const actions = new Proxy({}, { get: () => () => undefined }) as HudActions;
 const vm = (): HudVM => hudViewModel(fixtureInput({ width: 1440, height: 900 }));
 const html = (skin: LoadedSkin, node: React.ReactNode) => renderToString(<SkinProvider skin={skin}>{node}</SkinProvider>).replace(/<!-- -->/g, "");
 
-describe("geocities", () => {
+describe("homepage-98", () => {
   it("welcomes you to the lab's home page and shows Vibes as a six-digit hit counter", async () => {
-    const { skin } = await prepareSkin("geocities");
+    const { skin } = await prepareSkin("homepage-98");
     const v = vm();
     const Stats = skin.slots.Stats;
     const out = html(skin, <Stats stats={{ ...v.stats, vibes: { ...v.stats.vibes, value: 636, trend: "up" } }} layout={v.layout} actions={actions} />);
@@ -27,7 +27,7 @@ describe("geocities", () => {
   });
 
   it("pads a small score to six digits, and says OUCH when it falls", async () => {
-    const { skin } = await prepareSkin("geocities");
+    const { skin } = await prepareSkin("homepage-98");
     const v = vm();
     const Stats = skin.slots.Stats;
     const out = html(skin, <Stats stats={{ ...v.stats, vibes: { ...v.stats.vibes, value: 0, trend: "down" } }} layout={v.layout} actions={actions} />);
@@ -37,7 +37,7 @@ describe("geocities", () => {
   });
 
   it("spells out an infinite runway (the infinity sign is not in every font)", async () => {
-    const { skin } = await prepareSkin("geocities");
+    const { skin } = await prepareSkin("homepage-98");
     const v = vm();
     const Stats = skin.slots.Stats;
     const out = html(skin, <Stats stats={{ ...v.stats, runway: { months: null, text: "∞", warning: false } }} layout={v.layout} actions={actions} />);
@@ -46,7 +46,7 @@ describe("geocities", () => {
   });
 
   it("titles a toast by its mood, and offers to make it go away", async () => {
-    const { skin } = await prepareSkin("geocities");
+    const { skin } = await prepareSkin("homepage-98");
     const Toast = skin.slots.Toast as React.ComponentType<SlotPropsMap["Toast"]>;
     const bad = html(skin, <Toast toast={{ id: 1, text: "GPU fire", tone: "bad" }} actions={actions} />);
     expect(bad).toContain("WARNING!!!");
@@ -57,7 +57,7 @@ describe("geocities", () => {
   });
 
   it("guestbook entries keep the `bubble` class the game pins and photo mode copies", async () => {
-    const { skin } = await prepareSkin("geocities");
+    const { skin } = await prepareSkin("homepage-98");
     const v = vm();
     const Bubble = skin.slots.Bubble;
     const b = v.bubbles[0]!;

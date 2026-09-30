@@ -1,4 +1,4 @@
-// The small parts every GeoCities slot is made of: the NEW! sticker, a link that goes nowhere, and the pop-up window.
+// The small parts every Homepage '98 slot is made of: the NEW! sticker, a link that goes nowhere, and the pop-up window.
 import type { ReactNode } from "react";
 
 /** The sticker on things that just changed. Blinks, unless the player asked it not to. */

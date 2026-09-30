@@ -1,5 +1,5 @@
 {
-  "_": "Extra scenes for the GeoCities port: the standard `skins` set opens on the Launch Livestream card for this seed, so these answer it first. Run: pnpm shots --no-before --skin geocities --scenes-file docs/img/flt-14-ports/geocities/scenes.json --scenes home,home-inspector,... --out docs/img/flt-14-ports/geocities/extra",
+  "_": "Extra scenes for the Homepage '98 port: the standard `skins` set opens on the Launch Livestream card for this seed, so these answer it first. Run: pnpm shots --no-before --skin homepage-98 --scenes-file docs/img/flt-14-ports/homepage-98/scenes.json --scenes home,home-inspector,... --out docs/img/flt-14-ports/homepage-98/extra",
   "scenes": {
     "home": {
       "title": "The lab's home page (the Livestream card answered)",
