@@ -46,13 +46,13 @@ describe("mod foundations", () => {
   });
   it("adds, overrides, removes, and retains unmentioned fields", async () => {
     const def = await resolve([mod("one", {
-      rivals: { add: [{ ...RIVAL_DEFS[0]!, id: "steve", name: "Steve" }], override: [{ id: "anthro", name: "Steve Senior" }], remove: ["vssi"] },
+      rivals: { add: [{ ...RIVAL_DEFS[0]!, id: "steve", name: "Steve" }], override: [{ id: "anthro", name: "Steve Senior" }], remove: ["supersuper"] },
       headlines: { add: [{ id: "hello", tone: "joke", text: "Steve ships" }] },
       buildings: { override: [{ id: "cluster", name: "Steve's Compute" }] },
       walkerKinds: { override: [{ id: "agent", presentation: "flow" }] },
     })]);
     expect(def.content.rivals[0]).toEqual({ ...RIVAL_DEFS[0], name: "Steve Senior" });
-    expect(def.content.rivals.some((r) => r.id === "vssi")).toBe(false);
+    expect(def.content.rivals.some((r) => r.id === "supersuper")).toBe(false);
     expect(def.content.rivals.at(-1)?.id).toBe("steve");
     expect(def.content.headlines.at(-1)).toEqual({ id: "hello", tone: "joke", text: "Steve ships", trigger: "filler" });
     expect(def.content.buildings.cluster?.name).toBe("Steve's Compute");

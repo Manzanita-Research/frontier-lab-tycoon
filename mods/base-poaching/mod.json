@@ -433,10 +433,10 @@
         },
         {
           "card": "poaching-offer",
-          "poacher": "vssi",
+          "poacher": "supersuper",
           "style": "letter",
           "file": "Very Secure Mail",
-          "from": "Office of the Founder <no-reply@verysafe.example>",
+          "from": "Office of the Founder <no-reply@supersuper.example>",
           "to": "{poachNames}",
           "subject": "[REDACTED]",
           "lines": [

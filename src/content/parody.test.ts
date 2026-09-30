@@ -4,6 +4,8 @@
 const REAL = [
   "Copilot", "Internet Explorer", "Notepad", "WordPad", "LinkedIn", "Excel", "PowerPoint", "Outlook", "Slack", "Twitter",
   "Windows 95", "Windows 98", "Clippy", "Microsoft", "OpenAI", "Anthropic", "DeepMind", "Google", "Gmail", "ChatGPT",
+  // Real labs our old rival names contained (renamed before prod: Super Super AI, MetaMeta Metaintelligence Labs).
+  "Safe Superintelligence", "Meta Superintelligence", "SSI",
 ];
 // Our parodies that contain (or sit next to) a real name. They are removed before the scan.
 const ALLOWED = ["Outlook Excess", "WordSad", "WordPerfectly", "NoteBad"];
@@ -25,6 +27,10 @@ describe("parody names only", () => {
   it("knows a real name from our parodies", () => {
     expect(realNames('title: "RUN.TXT - Notepad", "Internet Explorer 3.0", "Macrohard Copilot for Copilot"')).toEqual(["Copilot", "Internet Explorer", "Notepad"]);
     expect(realNames("Outlook Excess, WordSad, WordPerfectly, NoteBad, Internet Exploder 3.0, LinkedOut, Excellent, the outlook")).toEqual([]);
+    expect(realNames("Very Safe Superintelligence Inc., Meta Superintelligence Labs, SSI")).toEqual(["Safe Superintelligence", "Meta Superintelligence", "SSI"]);
+    // Word boundaries mean "MetaMeta Superintelligence" would slip past this scan (and the Drama lint), which is why
+    // MetaMeta's full name was changed by hand (#71): it contained a real lab's name as a substring.
+    expect(realNames("Very Very Super Super Intelligence, Super Super AI, MetaMeta Metaintelligence Labs, SSID")).toEqual([]);
   });
   it("reads the content, the UI, all six skins and every base pack", () => {
     for (const skin of ["base", "frontier-95", "homepage-98", "discovery-disc-96", "field-almanac", "karaoke-night", "swag-drop"]) {
