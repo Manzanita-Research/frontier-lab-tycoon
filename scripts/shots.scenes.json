@@ -73,9 +73,19 @@
       "paper-scoop",
       "paper-award",
       "paper-phone"
+    ],
+    "collusion": [
+      "collusion-sign",
+      "collusion-phone",
+      "collusion-scandal"
     ]
   },
   "scenes": {
+    "midgame": {
+      "title": "FLT-48 Part A: the scripted mid-game campus, paused near Y2 Mar",
+      "query": { "scenario": "midgame", "warp": null, "seed": 48, "focus": "11.5,14.5", "zoom": 43, "skin": "frontier-95" },
+      "steps": []
+    },
     "overview": {
       "title": "The campus, mid-morning, paused",
       "steps": []
@@ -417,6 +427,44 @@
       ],
       "viewport": "390x844",
       "mobile": true
+    },
+    "collusion-sign": {
+      "title": "Agent Collusion: the first Security memo (existing event-card slot)",
+      "query": {
+        "moment": "collusion-sign",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "collusion-phone": {
+      "title": "The same Security memo on a phone",
+      "query": {
+        "moment": "collusion-sign",
+        "warp": null
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "collusion-scandal": {
+      "title": "Agent Collusion: exposed, the existing ticker carries the scandal headline",
+      "query": {
+        "moment": "collusion-scandal",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
     }
   }
 }
