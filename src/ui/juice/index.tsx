@@ -1,15 +1,6 @@
-import { PhotoButton, PhotoUI } from "./Photo";
 import { Sky } from "./Sky";
 import "./juice.css";
 
+// What is left of the juice layer's UI: the sky behind the canvas. The camera button and photo mode's controls are the
+// skin's (PhotoButton, PhotoOverlay slots); night thoughts are ordinary thoughts now (see sim/thoughts.ts).
 export { Sky };
-
-/** Everything the juice layer adds on top of the HUD: the camera button, photo mode's controls. */
-export function Juice() {
-  return (
-    <>
-      <PhotoButton />
-      <PhotoUI />
-    </>
-  );
-}

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Evidence shots for FLT-10 (Operations). The game is staged with ?moment= (sim/opsDemo.ts) and paused (?speed=0), and the
-// script drives the rest through window.__flt (?debug=1).
+// script drives the rest through window.__flt (?debug=1&skin=base).
 //
 //   pnpm build && (pnpm preview &) && sleep 2
 //   node scripts/ops-shots.mjs moment       docs/img/flt-10/moment.png      (slop, a Janitor Bot, a cluster on fire, an SRE jogging, the status page)
@@ -32,7 +32,7 @@ const page = await ctx.newPage();
 const errors = [];
 page.on("pageerror", (e) => errors.push(String(e)));
 page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
-const go = (q = "", hour = 13) => page.goto(`${base}?debug=1&seed=3&speed=0&hour=${hour}${q}`, { waitUntil: "networkidle" });
+const go = (q = "", hour = 13) => page.goto(`${base}?debug=1&skin=base&seed=3&speed=0&hour=${hour}${q}`, { waitUntil: "networkidle" });
 const wait = (ms) => page.waitForTimeout(ms);
 const save = async (path) => {
   mkdirSync(dirname(path), { recursive: true });

@@ -1,0 +1,82 @@
+/* Field Almanac (stub): frosted paper, hairlines, an italic serif for the small print. */
+[data-skin="field-almanac"] {
+  .panel {
+    background: color-mix(in srgb, var(--flt-color-panel) 88%, transparent);
+    backdrop-filter: blur(6px);
+  }
+  .lab-name,
+  .obj-title,
+  .thoughts-title,
+  .arena-head b,
+  .insp-name,
+  .card-body h2 {
+    font-family: var(--flt-font-display);
+    font-weight: 700;
+  }
+  .stat .label,
+  .vibes-label,
+  .insp-thought-label {
+    font-family: var(--flt-font-display);
+    font-style: italic;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 13px;
+  }
+  .buildbar .tool {
+    background: transparent;
+    border: 1px solid var(--flt-color-line);
+    box-shadow: none;
+    &.on {
+      background: var(--flt-color-panelAlt);
+      border-color: var(--flt-color-accent);
+    }
+  }
+  .ticker {
+    background: var(--flt-color-panelAlt);
+    color: var(--flt-color-text);
+    font-family: var(--flt-font-display);
+    border-top-width: 1px;
+  }
+  .ticker-tag {
+    background: transparent;
+    color: var(--flt-color-accent);
+    font-style: italic;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 15px;
+  }
+  .tick,
+  .tick.neutral {
+    color: var(--flt-color-text);
+    font-style: italic;
+    font-weight: 400;
+    &::before {
+      content: "❦";
+      width: auto;
+      height: auto;
+      background: none;
+      transform: none;
+      opacity: 0.6;
+      margin-right: 14px;
+    }
+  }
+  .tick.good {
+    color: var(--flt-color-good);
+  }
+  .tick.bad {
+    color: var(--flt-color-bad);
+  }
+  .inspector::before {
+    content: "fig. 1";
+    display: block;
+    font-family: var(--flt-font-display);
+    font-style: italic;
+    font-size: 12px;
+    color: var(--flt-color-textDim);
+  }
+  .bubble {
+    font-family: var(--flt-font-display);
+    font-weight: 400;
+    font-style: italic;
+  }
+}
