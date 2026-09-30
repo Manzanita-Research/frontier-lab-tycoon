@@ -272,6 +272,21 @@
       "c56-leak-phone",
       "c56-leak-senate",
       "c56-stakes"
+    ],
+    "birdapp": [
+      "bird",
+      "bird-banger",
+      "bird-cancel",
+      "bird-buddies",
+      "bird-phone"
+    ],
+    "birdapp-skins": [
+      "bird-base",
+      "bird-homepage",
+      "bird-almanac",
+      "bird-disc",
+      "bird-karaoke",
+      "bird-swag"
     ]
   },
   "scenes": {
@@ -3617,6 +3632,154 @@
       ],
       "viewport": "390x844",
       "mobile": true
+    },
+    "bird": {
+      "title": "FLT-69: Bird Reader 1.0 open on the timeline: today's posts climbing, the week's log, the preview pane",
+      "query": {
+        "moment": "bird",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-banger": {
+      "title": "FLT-69: a banger going viral (the VIRAL! burst, the tray bird flapping)",
+      "query": {
+        "moment": "bird-banger",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-cancel": {
+      "title": "FLT-69: a cancel that stuck: the Comms Desk drowning, the queue",
+      "query": {
+        "moment": "bird-cancel",
+        "warp": null
+      },
+      "steps": [
+        {
+          "click": ".f95-bird .f95-tab:nth-child(3)",
+          "optional": true
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "bird-buddies": {
+      "title": "FLT-69: the Contact List (tiers as ICQ groups) and a Posting Policy with the three levers",
+      "query": {
+        "moment": "bird",
+        "warp": null
+      },
+      "steps": [
+        {
+          "click": ".f95-bird .f95-tab:nth-child(2)",
+          "optional": true
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "bird-phone": {
+      "title": "FLT-69: Bird Reader on a phone, the cancel moment",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "moment": "bird-cancel",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-base": {
+      "title": "FLT-69: the base Bird App panel, open",
+      "query": {
+        "moment": "bird",
+        "warp": null,
+        "skin": "base"
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-homepage": {
+      "title": "FLT-69: Homepage '98's Bird App: sign our guestbook",
+      "query": {
+        "moment": "bird-banger",
+        "warp": null,
+        "skin": "homepage-98"
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-almanac": {
+      "title": "FLT-69: Field Almanac's Bird App: a birding log",
+      "query": {
+        "moment": "bird-banger",
+        "warp": null,
+        "skin": "field-almanac"
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-disc": {
+      "title": "FLT-69: Discovery Disc '96's Bird App: an encyclopedia",
+      "query": {
+        "moment": "bird-banger",
+        "warp": null,
+        "skin": "discovery-disc-96"
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-karaoke": {
+      "title": "FLT-69: Karaoke Night's Bird App: the lyric screen",
+      "query": {
+        "moment": "bird-banger",
+        "warp": null,
+        "skin": "karaoke-night"
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-swag": {
+      "title": "FLT-69: Swag Drop's Bird App: a merch drop",
+      "query": {
+        "moment": "bird-banger",
+        "warp": null,
+        "skin": "swag-drop"
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
     }
   }
 }
