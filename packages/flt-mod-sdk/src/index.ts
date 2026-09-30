@@ -16,7 +16,7 @@ export type GuardName = "stat.gte" | "flag.is" | "day.after" | "chance";
 export type ActionName = "effect.cash" | "effect.hype" | "effect.discourse" | "news" | "card" | "spawn.protesters" | "flag.set";
 
 /** Trusted authoring, followed by the same strict schema validation used for shared JSON. */
-export function defineMod<const M extends Mod>(mod: M): M {
+export function defineMod(mod: Mod): Mod {
   Schema.decodeUnknownSync(ModManifest, { onExcessProperty: "error" })(mod);
   return mod;
 }

@@ -39,7 +39,7 @@ missing-id/duplicate-add errors. Buildings require **id equal to kind**.
   `AGENT_NICKNAMES`, `VISITOR_ROLES`, `LAB_NAMES`.
 - Thought conditions: `always`, `noKombucha`, `lowCash`, `training`, `justReleased`,
   `highHype`, `unreachable`, `crowded`, `discourse`, `protest`, `night`, `era1`,
-  `era2`, `era3`, `era4`, `openWeights`, `unpowered`, `topArena` (use SDK
+  `era2`, `era3`, `era4`, `openDrop`, `unpowered`, `top`, `rankFell` (use SDK
   `ThoughtCondition` for the exact baseline; checker rejects unknown conditions).
 - Headlines: omit `trigger` for `filler`; common triggers `start`, `rival`,
   `runStarted`, `runDone`, `protest`, `built:<building-id>`.

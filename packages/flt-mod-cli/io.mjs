@@ -3,10 +3,12 @@ import { dirname, extname, isAbsolute, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createServer } from "vite";
 
-export const gameRoot = fileURLToPath(new URL("../../", import.meta.url));
+export const gameRoot = resolve(fileURLToPath(new URL("../../", import.meta.url)));
 export const MAX_MANIFEST_BYTES = 3 * 1024 * 1024;
 export async function withGameRuntime(use) {
-  const server = await createServer({ root: gameRoot, server: { middlewareMode: true }, appType: "custom" });
+  // Keep Schema filters and decoders in one module graph. Mixing native Effect
+  // with Vite's transformed Effect can misapply synchronous checks after imports.
+  const server = await createServer({ root: gameRoot, server: { middlewareMode: true }, appType: "custom", ssr: { noExternal: ["effect"] } });
   try { return await use(server.environments.ssr.runner); }
   finally { await server.close(); }
 }
@@ -34,7 +36,8 @@ export async function loadManifest(input, runner) {
     : JSON.parse(await readFile(path, "utf8"));
   if (!manifest || typeof manifest !== "object") throw new Error("expected a manifest object (default export in mod.ts)");
   let assetBytes = 0;
-  for (const [id, value] of Object.entries(manifest.assets ?? {})) {
+  for (const assets of [manifest.assets, manifest.skin?.assets]) {
+  for (const [id, value] of Object.entries(assets ?? {})) {
     if (typeof value !== "string") throw new Error(`assets.${id}: expected a path or data URL`);
     if (value.startsWith("data:")) continue;
     if (/^[a-z][a-z0-9+.-]*:/i.test(value)) throw new Error(`assets.${id}: remote assets are unsupported`);
@@ -43,7 +46,8 @@ export async function loadManifest(input, runner) {
     if (!mime) throw new Error(`assets.${id}: unsupported asset type`);
     assetBytes += (await stat(assetPath)).size;
     if (assetBytes > 2 * 1024 * 1024) throw new Error("bundled assets exceed 2 MB per mod");
-    manifest.assets[id] = `data:${mime};base64,${(await readFile(assetPath)).toString("base64")}`;
+    assets[id] = `data:${mime};base64,${(await readFile(assetPath)).toString("base64")}`;
+  }
   }
   if (Buffer.byteLength(JSON.stringify(manifest)) > MAX_MANIFEST_BYTES) throw new Error("manifest exceeds 3 MB after bundling");
   return { manifest, path };
