@@ -39,7 +39,7 @@ export function EventCard({ event, actions }: SlotPropsMap["EventCard"]) {
           <div className="dd-circle-one">Circle one answer:</div>
           <div className="dd-answers">
             {event.choices.map((c, i) => (
-              <button key={c.label} type="button" className={`dd-answer a${i % 3}`} onClick={() => actions.choose(event.id, i)}>
+              <button key={c.label} type="button" className={`dd-answer a${i % 3}`} disabled={!!c.disabled} title={c.disabled} onClick={() => actions.choose(event.id, i)}>
                 <span className="dd-letter">{c.key}</span>
                 <span className="dd-answer-text">
                   <b>{c.label}</b>

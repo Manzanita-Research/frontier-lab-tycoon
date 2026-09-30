@@ -228,11 +228,12 @@ const SPEED_GLYPHS: Record<number, number> = { 1: 1, 3: 2, 10: 3 };
 /** Speed in the tray, labelled with pace words as tooltips (Rest, Steady, Strenuous, Grueling), and the clock. */
 export function Speed({ speed, stats, actions }: SlotPropsMap["Speed"]) {
   const t = useT();
+  const coach = useCoach();
   return (
     <>
       <div className="f95-speed" role="group" aria-label={t("speed.label")}>
         {speed.options.map((o) => (
-          <button key={o.value} type="button" className={`f95-s ${o.active ? "on" : ""}`} title={t(o.key)} aria-label={t(o.key)} aria-pressed={o.active} onClick={() => actions.setSpeed(o.value)}>
+          <button key={o.value} type="button" className={`f95-s ${o.active ? "on" : ""}`} title={t(o.key)} aria-label={t(o.key)} aria-pressed={o.active} {...(o.value === 3 ? coach.attrs("speed") : {})} onClick={() => actions.setSpeed(o.value)}>
             <svg width="16" height="14" viewBox="0 0 16 14" shapeRendering="crispEdges" aria-hidden>
               {o.value === 0 ? (
                 <>

@@ -426,8 +426,9 @@
       }
     }
     &.burst {
+      /* Below the title bar, so the window's ✕ stays visible (FLT-58). */
       right: -10px;
-      top: -14px;
+      top: 34px;
       padding: 5px 10px;
       background: #e00000;
       color: #fff;

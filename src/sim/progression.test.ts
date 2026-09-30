@@ -23,14 +23,22 @@ describe("the playable ladder", () => {
     expect(progressOf(s)).toMatchObject({ level: 2, levelName: "Open for business" });
     expect(canPlace(s, "gateway", 12, 20).ok).toBe(true);
     expect(makeSnapshot(s).hud.visible).toMatchObject({ revenue: true, vibes: true, staff: false, news: false });
-    s.ledger.income = 20_000; updateProgression(s);
+    // Level 2 asks for both halves: the money and the visitors shown round.
+    s.ledger.income = 40_000; s.flags.visitorsServed = 11; updateProgression(s); expect(progressOf(s).level).toBe(2);
+    expect(progressOf(s).goal.status).toBe("$40K of $40K a day · 11 of 12 visitors");
+    s.flags.visitorsServed = 12; updateProgression(s); expect(progressOf(s).level).toBe(3);
     expect(canHire(s, "sre").ok).toBe(true); expect(systemUnlocked(s, "breakdowns")).toBe(true);
-    seedWalkers(s, "researcher", 5, createRng(2));
-    s.vibes.value = 499; updateProgression(s); expect(progressOf(s).level).toBe(3);
-    s.vibes.value = 500; updateProgression(s); expect(progressOf(s).level).toBe(4);
+    // Level 3: the first spill and the first breakdown are booked for right after it opens, so the hires have work.
+    expect(s.flags.firstSpillDay).toBe(s.day + 1); expect(s.flags.firstBreakdownDay).toBe(s.day + 3);
+    s.flags.mopped = 20; updateProgression(s); expect(progressOf(s).level).toBe(3);
+    hire(s, "sre"); hire(s, "janitor"); updateProgression(s); expect(progressOf(s).level).toBe(3);
+    expect(progressOf(s).goal.status).toBe("SRE ✓ · Janitor ✓ · fixed ✗ · 20 of 20 puddles");
+    s.flags.repaired = 1; updateProgression(s); expect(progressOf(s).level).toBe(4);
     expect(s.leapfrog.enabled).toBe(true);
-    s.race.rank = 6; updateProgression(s); expect(progressOf(s).level).toBe(4);
-    s.race.rank = 5; updateProgression(s); expect(progressOf(s).level).toBe(5);
+    // Level 4: the field was seeded so you start behind most of it, and the goal is the podium.
+    expect(s.race.rank).toBeGreaterThan(3);
+    s.race.rank = 4; updateProgression(s); expect(progressOf(s).level).toBe(4);
+    s.race.rank = 3; updateProgression(s); expect(progressOf(s).level).toBe(5);
     expect(canHire(s, "security").ok).toBe(true); expect(s.papers?.enabled).toBe(true);
     s.cash = 350_000; expect(canPlace(s, "security", 12, 19).ok).toBe(true);
     expect(s.unlockCards?.map((c) => c.id)).toEqual(["business", "team", "race", "scrutiny"]);
@@ -50,11 +58,11 @@ describe("the playable ladder", () => {
     const s = createInitialState(1);
     expect(progressOf(s).teasers).toEqual([
       { label: "2 more", hint: "Ship your first model" },
-      { label: "4 more", hint: "Earn $20K a day" },
-      { label: "3 more", hint: "Top 5 on the Arena" },
+      { label: "4 more", hint: "Earn $40K a day and give 12 visitors the tour" },
+      { label: "3 more", hint: "Top 3 on the Arena" },
     ]);
     s.models.push("Fixture-1"); updateProgression(s);
-    expect(progressOf(s).teasers.map((t) => t.hint)).toEqual(["Earn $20K a day", "Top 5 on the Arena"]);
+    expect(progressOf(s).teasers.map((t) => t.hint)).toEqual(["Earn $40K a day and give 12 visitors the tour", "Top 3 on the Arena"]);
   });
   it("reads modded goal thresholds from identified data rows", () => {
     const s = createInitialState(1);

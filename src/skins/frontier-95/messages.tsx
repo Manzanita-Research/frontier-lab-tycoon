@@ -218,7 +218,7 @@ function Clip() {
  * Skip tutorial that never goes away. It waits for you to do the thing (no Next), and it never pauses the game. On a phone it docks to
  * the top or the bottom, whichever is away from the target.
  */
-export function Coach({ coach, anchor, panel, layout, actions }: SlotPropsMap["Coach"]) {
+export function Coach({ coach, anchor, panel, avoid, layout, actions }: SlotPropsMap["Coach"]) {
   const t = useT();
   const ref = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 360, h: 120 });
@@ -229,7 +229,7 @@ export function Coach({ coach, anchor, panel, layout, actions }: SlotPropsMap["C
   // The taskbar is 42px, and the news strip and the top windows are not to be covered either.
   const view = { w: layout.width, h: layout.height };
   // On a phone it spans the screen, straight above the target (or below it, for something at the top).
-  const place = layout.compact ? placeBalloon(anchor, size, view, { gap: 12, panel, prefer: ["top", "bottom"], margin: { top: 52, bottom: 8, left: 4, right: 4 } }) : placeBalloon(anchor, size, view, { gap: 18, panel, margin: { top: 12, bottom: 52, left: 10, right: 10 } });
+  const place = layout.compact ? placeBalloon(anchor, size, view, { gap: 12, panel, avoid, prefer: ["top", "bottom"], margin: { top: 52, bottom: 8, left: 4, right: 4 } }) : placeBalloon(anchor, size, view, { gap: 18, panel, avoid, margin: { top: 12, bottom: 52, left: 10, right: 10 } });
   return (
     <div key={coach.id} ref={ref} className={`f95-coach ${layout.compact ? "docked" : ""}`} style={layout.compact ? { top: place.y } : { left: place.x, top: place.y }} role="status" aria-live="polite" aria-label={t("assistant.title")}>
       <div className="f95-balloon">
@@ -346,7 +346,7 @@ export function EventCard({ event, actions }: SlotPropsMap["EventCard"]) {
         {event.response && <Gauges response={event.response} />}
         <div className="f95-choices">
           {event.choices.map((c, i) => (
-            <Btn key={c.label} def={i === 0} onClick={() => actions.choose(event.id, i)} autoFocus={i === 0}>
+            <Btn key={c.label} def={i === 0} disabled={!!c.disabled} title={c.disabled} onClick={() => actions.choose(event.id, i)} autoFocus={i === 0}>
               <span className="k">{c.key}</span>
               <span className="tx">
                 <b>{c.label}</b>

@@ -85,7 +85,7 @@ export function EventCard({ event, actions }: SlotPropsMap["EventCard"]) {
         )}
         <div className="gc-choices">
           {event.choices.map((c, i) => (
-            <button key={c.label} type="button" className="gc-fb gc-choice" onClick={() => actions.choose(event.id, i)}>
+            <button key={c.label} type="button" className="gc-fb gc-choice" disabled={!!c.disabled} title={c.disabled} onClick={() => actions.choose(event.id, i)}>
               <span className="gc-key">{c.key}</span>
               <span className="tx">
                 <b>{c.label}</b>

@@ -408,6 +408,8 @@ function enter(state: GameState, w: Walker, rng: Rng, b: Building, event: "ARRIV
   // A show works or flops for the whole audience; agents only watch.
   applyServes(w, def, def.show && w.kind === "visitor" ? showFor(state, rng, b) : 1);
   if (def.tally && w.kind !== "agent") w.stats[def.tally]++;
+  // Level 2's goal counts visitors let in somewhere, not the ones who gave up in a queue (FLT-58); only while it is the goal.
+  if (w.kind === "visitor" && state.progression?.context.level === 2) state.flags.visitorsServed = (state.flags.visitorsServed ?? 0) + 1;
 }
 
 /** Join the line at the tail: the tick they got there, the entrance tile the line forms on, and no place in it yet. */
