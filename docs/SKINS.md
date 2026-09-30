@@ -243,7 +243,7 @@ If your slot needs copy that has no key, write it into the slot (as Frontier 95 
 | `confirm.title` | Spend it anyway? |
 | `confirm.cost` | Cost |
 | `confirm.runway` | Runway after |
-| `confirm.ok` | Do it anyway |
+| `confirm.ok` | Go ahead |
 | `confirm.cancel` | Keep the runway |
 | `assistant.title` | Assistant |
 | `coach.step` | {n} of {total} |

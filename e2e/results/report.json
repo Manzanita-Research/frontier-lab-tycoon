@@ -1,0 +1,8019 @@
+{
+  "url": "http://localhost:4173/",
+  "checks": {
+    "walkerMovedMs": 5251,
+    "threeDaysMs": 18333
+  },
+  "samples": [
+    {
+      "ms": 178,
+      "date": 0,
+      "day": 0,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.5,
+          "mode": "wandering"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 22.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.5,
+          "z": 20.5,
+          "mode": "seeking"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "path"
+    },
+    {
+      "ms": 580,
+      "date": 0,
+      "day": 0,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.38,
+          "z": 19.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.62,
+          "mode": "wandering"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 22.38,
+          "mode": "seeking"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.38,
+          "z": 20.5,
+          "mode": "seeking"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "path"
+    },
+    {
+      "ms": 833,
+      "date": 0,
+      "day": 0,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.260000000000002,
+          "z": 19.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.740000000000002,
+          "mode": "wandering"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 22.259999999999998,
+          "mode": "seeking"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.260000000000002,
+          "z": 20.5,
+          "mode": "seeking"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "path"
+    },
+    {
+      "ms": 1391,
+      "date": 0,
+      "day": 0,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.140000000000002,
+          "z": 19.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.860000000000003,
+          "mode": "wandering"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 22.139999999999997,
+          "mode": "seeking"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.140000000000002,
+          "z": 20.5,
+          "mode": "seeking"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "path"
+    },
+    {
+      "ms": 1781,
+      "date": 0,
+      "day": 0,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.62,
+          "mode": "wandering"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.899999999999995,
+          "mode": "seeking"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "path"
+    },
+    {
+      "ms": 2164,
+      "date": 0,
+      "day": 0,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.5,
+          "mode": "wandering"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.779999999999994,
+          "mode": "seeking"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "hall"
+    },
+    {
+      "ms": 2417,
+      "date": 0,
+      "day": 0,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.62,
+          "mode": "wandering"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.659999999999993,
+          "mode": "seeking"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "hall"
+    },
+    {
+      "ms": 2791,
+      "date": 0,
+      "day": 0,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.740000000000002,
+          "mode": "wandering"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.539999999999992,
+          "mode": "seeking"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "hall"
+    },
+    {
+      "ms": 3046,
+      "date": 0,
+      "day": 0,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.860000000000003,
+          "mode": "wandering"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.41999999999999,
+          "mode": "seeking"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 3423,
+      "date": 0,
+      "day": 0,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.980000000000004,
+          "mode": "wandering"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.29999999999999,
+          "mode": "seeking"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 3676,
+      "date": 0,
+      "day": 0,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.100000000000005,
+          "mode": "wandering"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.17999999999999,
+          "mode": "seeking"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 4085,
+      "date": 0,
+      "day": 0,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.340000000000007,
+          "mode": "wandering"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.939999999999987,
+          "mode": "seeking"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 4339,
+      "date": 0,
+      "day": 0,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.340000000000007,
+          "mode": "wandering"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.939999999999987,
+          "mode": "seeking"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 4747,
+      "date": 0,
+      "day": 0,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.58000000000001,
+          "mode": "wandering"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.699999999999985,
+          "mode": "seeking"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 5004,
+      "date": 0,
+      "day": 0,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.70000000000001,
+          "mode": "wandering"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.579999999999984,
+          "mode": "seeking"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 5479,
+      "date": 0,
+      "day": 0,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.82000000000001,
+          "mode": "wandering"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.459999999999985,
+          "z": 20.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 5730,
+      "date": 0,
+      "day": 0,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.940000000000012,
+          "mode": "wandering"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.339999999999986,
+          "z": 20.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 6117,
+      "date": 1,
+      "day": 1,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 22.180000000000014,
+          "mode": "wandering"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 12.5,
+          "z": 22.5,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 22.5,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 6381,
+      "date": 1,
+      "day": 1,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 22.180000000000014,
+          "mode": "wandering"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 12.5,
+          "z": 22.5,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 22.5,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 6785,
+      "date": 1,
+      "day": 1,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 22.420000000000016,
+          "mode": "wandering"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 12.260000000000002,
+          "z": 22.5,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 22.259999999999998,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 7038,
+      "date": 1,
+      "day": 1,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 22.420000000000016,
+          "mode": "wandering"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 12.260000000000002,
+          "z": 22.5,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 22.259999999999998,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 7415,
+      "date": 1,
+      "day": 1,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.660000000000014,
+          "z": 22.5,
+          "mode": "wandering"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 12.020000000000003,
+          "z": 22.5,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 22.019999999999996,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 7669,
+      "date": 1,
+      "day": 1,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.780000000000014,
+          "z": 22.5,
+          "mode": "wandering"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.900000000000004,
+          "z": 22.5,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.899999999999995,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 8104,
+      "date": 1,
+      "day": 1,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.900000000000013,
+          "z": 22.5,
+          "mode": "wandering"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.780000000000005,
+          "z": 22.5,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.779999999999994,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 8357,
+      "date": 1,
+      "day": 1,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 12.020000000000012,
+          "z": 22.5,
+          "mode": "wandering"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.660000000000005,
+          "z": 22.5,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.659999999999993,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 8756,
+      "date": 1,
+      "day": 1,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 12.140000000000011,
+          "z": 22.5,
+          "mode": "wandering"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.540000000000006,
+          "z": 22.5,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.539999999999992,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 9014,
+      "date": 1,
+      "day": 1,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 12.26000000000001,
+          "z": 22.5,
+          "mode": "wandering"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 22.420000000000005,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.41999999999999,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 9422,
+      "date": 1,
+      "day": 1,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 12.38000000000001,
+          "z": 22.5,
+          "mode": "wandering"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 22.300000000000004,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.29999999999999,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 9675,
+      "date": 1,
+      "day": 1,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 12.5,
+          "z": 22.5,
+          "mode": "wandering"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 22.180000000000003,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.17999999999999,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 10077,
+      "date": 1,
+      "day": 1,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 12.38,
+          "z": 22.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.94,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.939999999999987,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 10331,
+      "date": 1,
+      "day": 1,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 12.38,
+          "z": 22.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.94,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.939999999999987,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 10729,
+      "date": 1,
+      "day": 1,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 12.140000000000002,
+          "z": 22.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.7,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.699999999999985,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 10982,
+      "date": 1,
+      "day": 1,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 12.140000000000002,
+          "z": 22.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.7,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.699999999999985,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 11379,
+      "date": 1,
+      "day": 1,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.900000000000004,
+          "z": 22.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.459999999999997,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.459999999999983,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 11632,
+      "date": 1,
+      "day": 1,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.780000000000005,
+          "z": 22.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.339999999999996,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.339999999999982,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 12027,
+      "date": 1,
+      "day": 1,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.660000000000005,
+          "z": 22.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.219999999999995,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.21999999999998,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 12280,
+      "date": 2,
+      "day": 2,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.540000000000006,
+          "z": 22.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.099999999999994,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.09999999999998,
+          "mode": "arriving"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 12.5,
+          "z": 22.5,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 22.5,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 12689,
+      "date": 2,
+      "day": 2,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 22.420000000000005,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.979999999999993,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.97999999999998,
+          "mode": "arriving"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 12.38,
+          "z": 22.5,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 22.38,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 12941,
+      "date": 2,
+      "day": 2,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 22.300000000000004,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.859999999999992,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.859999999999978,
+          "mode": "arriving"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 12.260000000000002,
+          "z": 22.5,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 22.259999999999998,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 13368,
+      "date": 2,
+      "day": 2,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 22.060000000000002,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.61999999999999,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.619999999999976,
+          "mode": "arriving"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 12.020000000000003,
+          "z": 22.5,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 22.019999999999996,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 13621,
+      "date": 2,
+      "day": 2,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 22.060000000000002,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.61999999999999,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.619999999999976,
+          "mode": "arriving"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 12.020000000000003,
+          "z": 22.5,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 22.019999999999996,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 14076,
+      "date": 2,
+      "day": 2,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.82,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.38,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.38,
+          "mode": "arriving"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.780000000000005,
+          "z": 22.5,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.779999999999994,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 14330,
+      "date": 2,
+      "day": 2,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.7,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.259999999999998,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.259999999999998,
+          "mode": "arriving"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.660000000000005,
+          "z": 22.5,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.659999999999993,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 14698,
+      "date": 2,
+      "day": 2,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.58,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.139999999999997,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.139999999999997,
+          "mode": "arriving"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.540000000000006,
+          "z": 22.5,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.539999999999992,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 14951,
+      "date": 2,
+      "day": 2,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.459999999999997,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.219999999999999,
+          "z": 20.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.019999999999996,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.019999999999996,
+          "mode": "arriving"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 22.420000000000005,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.41999999999999,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 15301,
+      "date": 2,
+      "day": 2,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.339999999999996,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.339999999999998,
+          "z": 20.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.899999999999995,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.899999999999995,
+          "mode": "arriving"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 22.300000000000004,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.29999999999999,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 15555,
+      "date": 2,
+      "day": 2,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.219999999999995,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.459999999999997,
+          "z": 20.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.779999999999994,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.779999999999994,
+          "mode": "arriving"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 22.180000000000003,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.17999999999999,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 15972,
+      "date": 2,
+      "day": 2,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.144566881162492,
+          "z": 19.38858279709377,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.099999999999994,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.5,
+          "z": 20.42,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.659999999999993,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.659999999999993,
+          "mode": "arriving"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 22.060000000000002,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.059999999999988,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 16225,
+      "date": 2,
+      "day": 2,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.189133762324984,
+          "z": 19.277165594187537,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.979999999999993,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.5,
+          "z": 20.3,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.539999999999992,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.539999999999992,
+          "mode": "arriving"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.94,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.939999999999987,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 16627,
+      "date": 2,
+      "day": 2,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.278267524649968,
+          "z": 19.054331188375073,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.73999999999999,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.5,
+          "z": 20.06,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.29999999999999,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.700000000000006,
+          "z": 18.5,
+          "mode": "arriving"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.7,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.699999999999985,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 16880,
+      "date": 2,
+      "day": 2,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.278267524649968,
+          "z": 19.054331188375073,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.73999999999999,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.5,
+          "z": 20.06,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.29999999999999,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.700000000000006,
+          "z": 18.5,
+          "mode": "arriving"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.7,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.699999999999985,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 17330,
+      "date": 2,
+      "day": 2,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.367401286974955,
+          "z": 18.83149678256261,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.5,
+          "z": 19.819999999999997,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.059999999999988,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.459999999999997,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.459999999999983,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 17584,
+      "date": 2,
+      "day": 2,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.411968168137447,
+          "z": 18.720079579656378,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.38,
+          "z": 20.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.5,
+          "z": 19.699999999999996,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.939999999999987,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.339999999999996,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.339999999999982,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 18080,
+      "date": 2,
+      "day": 2,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.45653504929994,
+          "z": 18.608662376750146,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.260000000000002,
+          "z": 20.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.5,
+          "z": 19.579999999999995,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.819999999999986,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.219999999999995,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.21999999999998,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 18333,
+      "date": 3,
+      "day": 3,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.140000000000002,
+          "z": 20.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.5,
+          "z": 19.459999999999994,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.699999999999985,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.099999999999994,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.09999999999998,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 18738,
+      "date": 3,
+      "day": 3,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.5,
+          "z": 19.21999999999999,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.540000000000015,
+          "z": 18.5,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.859999999999992,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.859999999999978,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 18994,
+      "date": 3,
+      "day": 3,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.5,
+          "z": 19.21999999999999,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.540000000000015,
+          "z": 18.5,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.859999999999992,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.859999999999978,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 19453,
+      "date": 3,
+      "day": 3,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.5,
+          "z": 18.97999999999999,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.780000000000014,
+          "z": 18.5,
+          "mode": "arriving"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.61999999999999,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.619999999999976,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 19707,
+      "date": 3,
+      "day": 3,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.62,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.5,
+          "z": 18.85999999999999,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.5,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.5,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 20175,
+      "date": 3,
+      "day": 3,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.740000000000002,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.5,
+          "z": 18.739999999999988,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.38,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.38,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 20428,
+      "date": 3,
+      "day": 3,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.860000000000003,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.5,
+          "z": 18.619999999999987,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.259999999999998,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.259999999999998,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 20803,
+      "date": 3,
+      "day": 3,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.980000000000004,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.5,
+          "z": 18.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.139999999999997,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.139999999999997,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 21056,
+      "date": 3,
+      "day": 3,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.100000000000005,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.62,
+          "z": 18.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.019999999999996,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.019999999999996,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 21445,
+      "date": 3,
+      "day": 3,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.340000000000007,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.859999999999998,
+          "z": 18.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.779999999999994,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.779999999999994,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 21698,
+      "date": 3,
+      "day": 3,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.340000000000007,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.859999999999998,
+          "z": 18.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.779999999999994,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.779999999999994,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 22127,
+      "date": 3,
+      "day": 3,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.539999999999992,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.539999999999992,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 22381,
+      "date": 3,
+      "day": 3,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.41999999999999,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.580000000000007,
+          "z": 18.5,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 22820,
+      "date": 3,
+      "day": 3,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.29999999999999,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.700000000000006,
+          "z": 18.5,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 23074,
+      "date": 3,
+      "day": 3,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.17999999999999,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.820000000000006,
+          "z": 18.5,
+          "mode": "arriving"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 23520,
+      "date": 3,
+      "day": 3,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.059999999999988,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 23772,
+      "date": 3,
+      "day": 3,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.939999999999987,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 24141,
+      "date": 4,
+      "day": 4,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.339999999999998,
+          "z": 20.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.699999999999985,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 24394,
+      "date": 4,
+      "day": 4,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.339999999999998,
+          "z": 20.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.699999999999985,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 24935,
+      "date": 4,
+      "day": 4,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.420000000000003,
+          "z": 20.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.540000000000015,
+          "z": 18.5,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 25189,
+      "date": 4,
+      "day": 4,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.300000000000004,
+          "z": 20.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.660000000000014,
+          "z": 18.5,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 25537,
+      "date": 4,
+      "day": 4,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.180000000000005,
+          "z": 20.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.780000000000014,
+          "z": 18.5,
+          "mode": "arriving"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 25791,
+      "date": 4,
+      "day": 4,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.38,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 26176,
+      "date": 4,
+      "day": 4,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.259999999999998,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 26430,
+      "date": 4,
+      "day": 4,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.139999999999997,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 26943,
+      "date": 4,
+      "day": 4,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.899999999999995,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.660000000000002,
+          "z": 18.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.810866237675016,
+          "z": 18.722834405812463,
+          "mode": "loitering"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 27196,
+      "date": 4,
+      "day": 4,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.779999999999994,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.540000000000003,
+          "z": 18.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.766299356512524,
+          "z": 18.834251608718695,
+          "mode": "loitering"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 27579,
+      "date": 4,
+      "day": 4,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.659999999999993,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.5,
+          "z": 18.58,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.721732475350032,
+          "z": 18.945668811624927,
+          "mode": "loitering"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 27835,
+      "date": 4,
+      "day": 4,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.539999999999992,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.5,
+          "z": 18.7,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.677165594187539,
+          "z": 19.05708601453116,
+          "mode": "loitering"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 28287,
+      "date": 4,
+      "day": 4,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.5,
+          "z": 18.82,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.632598713025045,
+          "z": 19.16850321743739,
+          "mode": "loitering"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.855433118837508,
+          "z": 18.61141720290623,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 28539,
+      "date": 4,
+      "day": 4,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.5,
+          "z": 18.94,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.588031831862553,
+          "z": 19.279920420343622,
+          "mode": "loitering"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.810866237675016,
+          "z": 18.722834405812463,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 28990,
+      "date": 4,
+      "day": 4,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.740000000000002,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.5,
+          "z": 19.180000000000003,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.721732475350032,
+          "z": 18.945668811624927,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 29243,
+      "date": 4,
+      "day": 4,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.740000000000002,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.5,
+          "z": 19.180000000000003,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.721732475350032,
+          "z": 18.945668811624927,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 29673,
+      "date": 4,
+      "day": 4,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.980000000000004,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.219999999999999,
+          "z": 20.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.5,
+          "z": 19.420000000000005,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.632598713025045,
+          "z": 19.16850321743739,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 29928,
+      "date": 4,
+      "day": 4,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.100000000000005,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.339999999999998,
+          "z": 20.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.459999999999996,
+          "z": 19.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.588031831862553,
+          "z": 19.279920420343622,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 30428,
+      "date": 5,
+      "day": 5,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.340000000000007,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.42,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.219999999999997,
+          "z": 19.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 30682,
+      "date": 5,
+      "day": 5,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.340000000000007,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.42,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.219999999999997,
+          "z": 19.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 31126,
+      "date": 5,
+      "day": 5,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.18,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.259999999999998,
+          "mode": "loitering"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 31380,
+      "date": 5,
+      "day": 5,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 20.06,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.139999999999997,
+          "mode": "loitering"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 31793,
+      "date": 5,
+      "day": 5,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.939999999999998,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.019999999999996,
+          "mode": "loitering"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.38,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.780000000000001,
+          "z": 18.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 32048,
+      "date": 5,
+      "day": 5,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.819999999999997,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.899999999999995,
+          "mode": "loitering"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.259999999999998,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.660000000000002,
+          "z": 18.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 32493,
+      "date": 5,
+      "day": 5,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.699999999999996,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.779999999999994,
+          "mode": "loitering"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.139999999999997,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.540000000000003,
+          "z": 18.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 32749,
+      "date": 5,
+      "day": 5,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.38,
+          "z": 19.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.579999999999995,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.659999999999993,
+          "mode": "loitering"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.019999999999996,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.58,
+          "mode": "seeking"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 33219,
+      "date": 5,
+      "day": 5,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.140000000000002,
+          "z": 19.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.339999999999993,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.779999999999994,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.82,
+          "mode": "seeking"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 33472,
+      "date": 5,
+      "day": 5,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.21999999999999,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.659999999999993,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.94,
+          "mode": "seeking"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 33899,
+      "date": 5,
+      "day": 5,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.09999999999999,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.539999999999992,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.060000000000002,
+          "mode": "seeking"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.855433118837508,
+          "z": 18.38858279709377,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 34152,
+      "date": 5,
+      "day": 5,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.97999999999999,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.180000000000003,
+          "mode": "seeking"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.810866237675016,
+          "z": 18.277165594187537,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 34563,
+      "date": 5,
+      "day": 5,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.85999999999999,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.300000000000004,
+          "mode": "seeking"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.766299356512524,
+          "z": 18.165748391281305,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 34817,
+      "date": 5,
+      "day": 5,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.739999999999988,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "inside"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.62,
+          "z": 18.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.420000000000005,
+          "mode": "seeking"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.721732475350032,
+          "z": 18.054331188375073,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 35252,
+      "date": 5,
+      "day": 5,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.859999999999998,
+          "z": 18.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.339999999999996,
+          "z": 19.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.632598713025045,
+          "z": 17.83149678256261,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 35510,
+      "date": 5,
+      "day": 5,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.859999999999998,
+          "z": 18.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.339999999999996,
+          "z": 19.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.632598713025045,
+          "z": 17.83149678256261,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 36008,
+      "date": 5,
+      "day": 5,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.739999999999998,
+          "z": 18.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.38,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.54346495070006,
+          "z": 17.608662376750146,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 36264,
+      "date": 6,
+      "day": 6,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.859999999999998,
+          "z": 18.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.259999999999998,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 17.5,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 36660,
+      "date": 6,
+      "day": 6,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 20.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.139999999999997,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 17.5,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 36914,
+      "date": 6,
+      "day": 6,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.144566881162492,
+          "z": 20.61141720290623,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.019999999999996,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 17.5,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 37292,
+      "date": 6,
+      "day": 6,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.189133762324984,
+          "z": 20.722834405812463,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 17.899999999999995,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 17.5,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 37545,
+      "date": 6,
+      "day": 6,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.233700643487476,
+          "z": 20.834251608718695,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 17.779999999999994,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 17.5,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 37939,
+      "date": 6,
+      "day": 6,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.322834405812461,
+          "z": 21.05708601453116,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 17.539999999999992,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 17.38,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 38192,
+      "date": 6,
+      "day": 6,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.322834405812461,
+          "z": 21.05708601453116,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 17.539999999999992,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 17.38,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 38609,
+      "date": 6,
+      "day": 6,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.411968168137447,
+          "z": 21.279920420343622,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 17.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 17.139999999999997,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 38866,
+      "date": 6,
+      "day": 6,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.45653504929994,
+          "z": 21.391337623249854,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 17.38,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 17.019999999999996,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 39313,
+      "date": 6,
+      "day": 6,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 17.259999999999998,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 16.899999999999995,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 39567,
+      "date": 6,
+      "day": 6,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 17.139999999999997,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 16.779999999999994,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 40034,
+      "date": 6,
+      "day": 6,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.219999999999999,
+          "z": 19.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 17.019999999999996,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 16.659999999999993,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 40288,
+      "date": 6,
+      "day": 6,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.339999999999998,
+          "z": 19.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 16.899999999999995,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 16.539999999999992,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 40671,
+      "date": 6,
+      "day": 6,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.42,
+          "mode": "seeking"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 16.659999999999993,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 16.5,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 40928,
+      "date": 6,
+      "day": 6,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.42,
+          "mode": "seeking"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 16.659999999999993,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 16.5,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 41283,
+      "date": 6,
+      "day": 6,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.18,
+          "mode": "seeking"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 16.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 16.5,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 41539,
+      "date": 6,
+      "day": 6,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 19.18,
+          "mode": "seeking"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 16.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "inside"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 16.5,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 41991,
+      "date": 6,
+      "day": 6,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.939999999999998,
+          "mode": "seeking"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 16.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.219999999999999,
+          "z": 19.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 16.5,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    },
+    {
+      "ms": 42244,
+      "date": 7,
+      "day": 7,
+      "paused": false,
+      "speed": 1,
+      "walkers": [
+        {
+          "id": 2,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 18.819999999999997,
+          "mode": "seeking"
+        },
+        {
+          "id": 3,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 4,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 21.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 5,
+          "kind": "agent",
+          "x": 11.1,
+          "z": 19.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 11,
+          "kind": "researcher",
+          "x": 11.9,
+          "z": 18.5,
+          "mode": "inside"
+        },
+        {
+          "id": 12,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 16.5,
+          "mode": "loitering"
+        },
+        {
+          "id": 15,
+          "kind": "researcher",
+          "x": 11.339999999999998,
+          "z": 19.5,
+          "mode": "seeking"
+        },
+        {
+          "id": 17,
+          "kind": "researcher",
+          "x": 11.5,
+          "z": 16.5,
+          "mode": "loitering"
+        }
+      ],
+      "gate": {
+        "x": 11,
+        "z": 23
+      },
+      "coachId": "training"
+    }
+  ],
+  "passed": false,
+  "error": "TimeoutError: locator.click: Timeout 1500ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-coach-active]:visible').first()\u001b[22m\n\u001b[2m    - locator resolved to <section data-coach-active=\"\" data-coach=\"training\" class=\"f95-win f95-copy\" aria-label=\"Training Frontier-2…\">…</section>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n"
+}

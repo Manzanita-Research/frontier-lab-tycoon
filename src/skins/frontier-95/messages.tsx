@@ -166,7 +166,7 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
 const ICON_BY_TONE = { bad: "error", joke: "warn", good: "info", neutral: "info" } as const;
 
 /**
- * "This leaves 1.8 months of runway": a Win95 warning box. Yes does it; No (the default, and Escape, and the close box, and a
+ * "This leaves 1.8 months of runway": a Win95 warning box. OK does it; Cancel (the default, and Escape, and the close box, and a
  * click outside) keeps the runway. Time is held while it is up.
  */
 export function Confirm({ confirm, actions }: SlotPropsMap["Confirm"]) {
@@ -174,7 +174,7 @@ export function Confirm({ confirm, actions }: SlotPropsMap["Confirm"]) {
   const no = () => actions.cancelSpend();
   return (
     <Dialog label="Lab Manager" close={no} layerClass="f95-layer f95-dim" dialogClass="f95-dialogbox">
-      <Win className="f95-msgbox tone-bad" title="Lab Manager" icon="warn" buttons={[{ g: "close", label: "No", onClick: no }]} role="alertdialog" label="Lab Manager: are you sure?">
+      <Win className="f95-msgbox tone-bad" title="Lab Manager" icon="warn" buttons={[{ g: "close", label: "Cancel", onClick: no }]} role="alertdialog" label="Lab Manager: are you sure?">
         <div className="f95-msgbody">
           <Ico name="warn" size={36} />
           <div>
@@ -187,9 +187,9 @@ export function Confirm({ confirm, actions }: SlotPropsMap["Confirm"]) {
           </div>
         </div>
         <div className="f95-row">
-          <Btn onClick={() => actions.confirmSpend()}>Yes</Btn>
+          <Btn onClick={() => actions.confirmSpend()}>OK</Btn>
           <Btn def autoFocus onClick={no}>
-            No
+            Cancel
           </Btn>
         </div>
         <div className="f95-status">{t("event.paused")}</div>
