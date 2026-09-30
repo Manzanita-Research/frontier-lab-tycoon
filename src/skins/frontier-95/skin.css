@@ -4683,6 +4683,220 @@
     z-index: 65;
   }
 }
+/* Save/Load and the Welcome screen (FLT-65): Save As on a floppy, and the first-boot welcome. */
+[data-skin="frontier-95"] {
+  .f95-layer:has(.f95-saves),
+  .f95-layer:has(.f95-welcome) {
+    z-index: 95;
+  }
+  .f95-welcome {
+    width: min(520px, 100%);
+  }
+  .f95-welcome-body {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    padding: 12px 10px 4px;
+  }
+  .f95-welcome-main h2 {
+    margin: 0 0 10px;
+    font: normal 26px var(--flt-font-display);
+    b {
+      font-weight: bold;
+    }
+  }
+  .f95-welcome-tip {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    background: #ffffe1;
+    font-size: 15px;
+    p {
+      margin: 4px 0 0;
+    }
+  }
+  .f95-welcome-side {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-top: 42px;
+    .f95-btn {
+      min-width: 110px;
+    }
+  }
+  .f95-welcome-small {
+    margin: 4px 10px 8px;
+    font-size: 13px;
+    color: var(--flt-color-textDim);
+  }
+  .f95-saves {
+    width: min(620px, 100%);
+    max-height: calc(100dvh - 20px);
+    overflow: auto;
+    &.dragging .f95-savelist {
+      outline: 2px dotted var(--dk);
+      outline-offset: -4px;
+    }
+  }
+  .f95-savein {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 6px 4px;
+    font-size: 15px;
+    .f95-combo {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #fff;
+      padding: 2px 24px 2px 4px;
+      min-width: 170px;
+    }
+    .f95-hint {
+      margin: 0 0 0 auto;
+    }
+  }
+  .f95-savebody {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    padding: 4px 6px;
+  }
+  .f95-savelist {
+    background: #fff;
+    padding: 2px;
+    min-height: 132px;
+    font-size: 15px;
+  }
+  .f95-saverow {
+    display: grid;
+    grid-template-columns: 128px minmax(0, 1fr) 96px 92px 44px;
+    gap: 6px;
+    padding: 2px 6px;
+    cursor: default;
+    align-items: center;
+    span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .name {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .size {
+      text-align: right;
+    }
+    &.head {
+      background: var(--g);
+      box-shadow: var(--btn);
+      margin: -2px -2px 2px;
+      padding: 3px 8px;
+    }
+    &.empty i {
+      color: var(--sh);
+    }
+    &.on {
+      background: var(--flt-color-selection);
+      color: var(--flt-color-selectionText);
+      i {
+        color: inherit;
+      }
+    }
+    &:focus-visible {
+      outline: 1px dotted currentColor;
+      outline-offset: -2px;
+    }
+  }
+  .f95-saveside {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    .f95-btn {
+      min-width: 96px;
+    }
+  }
+  .f95-bin,
+  .f95-savemods {
+    margin: 4px 6px;
+    box-shadow: var(--etched);
+    p {
+      margin: 0 0 4px;
+    }
+  }
+  .f95-savedisk {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 6px 0;
+    font-size: 15px;
+    .f95-prog {
+      height: 20px;
+    }
+  }
+  .f95-saveio {
+    align-items: center;
+    .f95-hint {
+      margin: 0;
+    }
+  }
+  .f95-import {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    &[aria-disabled] {
+      color: var(--sh);
+      cursor: default;
+    }
+  }
+  .f95-dropveil {
+    position: fixed;
+    inset: 0;
+    z-index: 95;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+    background-image: repeating-conic-gradient(rgba(0, 0, 0, 0.25) 0 25%, transparent 0 50%);
+    background-size: 4px 4px;
+    span {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 22px;
+      background: var(--g);
+      box-shadow: var(--raised);
+      outline: 2px dotted var(--dk);
+      outline-offset: -8px;
+      font-size: 18px;
+    }
+  }
+  @media (max-width: 560px) {
+    .f95-welcome-body,
+    .f95-savebody {
+      grid-template-columns: 1fr;
+    }
+    .f95-welcome-side,
+    .f95-saveside {
+      flex-direction: row;
+      flex-wrap: wrap;
+      padding-top: 0;
+    }
+    .f95-saverow {
+      grid-template-columns: 128px minmax(0, 1fr) 44px;
+      span:nth-child(3),
+      span:nth-child(4) {
+        display: none;
+      }
+    }
+    .f95-savein .f95-hint {
+      display: none;
+    }
+  }
+}
 
 /* ---- FLT-57: what now, the streak, a friend's result, The Memo as a file copy, the challenge as a message box ---- */
 [data-skin="frontier-95"] {

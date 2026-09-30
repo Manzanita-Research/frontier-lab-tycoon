@@ -11,6 +11,7 @@ import { GateLayer } from "./GateLayer";
 import { loadedSkinAtom } from "./state";
 import { BeatLayer, Docked, Modals, PhotoLayer } from "./tree";
 import { useHudEffects } from "./useHudEffects";
+import { useSaves } from "./saves";
 import { useAppSource, useHudVM, type AppSource } from "./useHudVM";
 
 /** Everything the 2D UI shows, drawn by the active skin. Waits for the app actor's first state. */
@@ -23,6 +24,7 @@ function Hud({ source }: { source: AppSource }) {
   const skin = useAtomValue(loadedSkinAtom);
   const vm = useHudVM(source);
   useHudEffects(vm, source.snap);
+  useSaves();
   // `?debug=1`: count renders, to show the HUD re-renders at the snapshot rate (about 5 Hz) and not per frame.
   const renders = useRef(0);
   renders.current++;
