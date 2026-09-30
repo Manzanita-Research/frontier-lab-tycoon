@@ -52,8 +52,19 @@ The FLT-13 Fal 3D experiment is done; its recommendation is hybrid, and rolling 
 - FLT-25 Protests grow
 - FLT-26 **Defection**: top researchers spin out a rival lab
 
+## Open questions (Jem's design notes; bones first, decide later)
+
+1. **A cute homage to RollerCoaster Tycoon.** Jem loves RCT. Welcome RCT touches wherever they fit naturally: park-rating feel, guest thoughts, queues, handymen, the finance chart, awards and scenario goals. Don't force them in.
+2. **Not everything is a human walking between buildings.**
+   - Walkers make sense for **visitors** (users, protesters, journalists, VCs, auditors) and **employees**.
+   - Other things in an AI lab may read better another way. **Agents, compute, data, tokens and models** could be abstract flows (particles along paths or cables), sprites or icons on buildings, meters, or not on the map at all.
+   - This is undecided. Today agents are walkers; that may change.
+
+**Standing rule until these are decided:** keep the entity model flexible. Don't assume every actor is a walker. A thing in the world should have a `presentation` (e.g. `walker | flow | sprite | offmap`) that is separate from its sim logic, so changing how agents or compute are *shown* doesn't touch the rules. New mechanics describe effects on entities and stats, not on "walkers" specifically, unless they really are people on foot.
+
 ## Rules for every slice
 
+- **Don't assume every actor is a walker** (see Open questions): keep presentation separate from sim logic.
 - Specs live in the task description. The builder copies it to `docs/specs/<task>.md` in its PR.
 - **Parody names only.** Every line should land on first read, and short beats long.
 - Sim logic is XState machines stepped purely inside the tick; Effect runs the app (see `docs/specs/architecture-xstate-effect.md`). Deterministic tests, a perf budget, `pnpm check` green.
