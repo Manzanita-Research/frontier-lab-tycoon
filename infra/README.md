@@ -7,7 +7,7 @@ Production: **https://flt-prod.manzanita.workers.dev**. The Worker serves the ro
 `.github/workflows/deploy.yml` runs on merges to `main` and same-repository PRs. Its `check` job runs `pnpm check` and the infra typecheck before `deploy` can receive Cloudflare credentials. The original `ci.yml` also runs unchanged.
 
 - `main` → stage `prod`, Worker `flt-prod`.
-- Open/reopened/updated PR → stage `pr-N`, Worker `flt-pr-N`, a stable `GitHub.Comment` with URL and short head SHA.
+- Open/reopened/updated PR → stage `pr-N`, Worker `flt-pr-N`, a stable `GitHub.Comment` with URL and short head SHA. `DEPLOY_REVISION` carries that explicit head SHA; GitHub's reserved `GITHUB_SHA` describes its synthetic merge commit on PR events.
 - Closed/merged PR → cleanup checks out trusted `main` and destroys only `pr-N`. It refuses `prod` and malformed stages, and skips a PR that has reopened.
 - Deploy and cleanup share a normalized PR concurrency key, including merged PR close events whose GitHub ref changes to `main`. In-progress runs finish before cleanup. Live head/open checks skip superseded commits and closed PRs; production checks the current `main` SHA before deploying.
 - Fork PRs get the ordinary game CI checks, but no deployment credentials or previews.

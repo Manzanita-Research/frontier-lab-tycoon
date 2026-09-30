@@ -2,6 +2,7 @@ import * as Alchemy from "alchemy";
 import * as Cloudflare from "alchemy/Cloudflare";
 import * as GitHub from "alchemy/GitHub";
 import * as Output from "alchemy/Output";
+import * as Config from "effect/Config";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import { fileURLToPath } from "node:url";
@@ -29,13 +30,14 @@ export default Alchemy.Stack(
 
     const github = yield* GitHub.GitHubEnv;
     if (github?.pr && stack.stage === `pr-${github.pr}`) {
+      const revision = yield* Config.String("DEPLOY_REVISION").pipe(Config.withDefault(github.sha));
       yield* GitHub.Comment("preview-comment", {
         owner: github.owner,
         repository: github.repository,
         issueNumber: github.pr,
         body: Output.interpolate`## Preview deployed
 
-[Play this preview](${site.url}) · commit ${github.sha.slice(0, 7)}
+[Play this preview](${site.url}) · commit ${revision.slice(0, 7)}
 
 This comment updates on each push. The preview is removed when the PR closes.`,
       });
