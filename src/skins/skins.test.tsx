@@ -54,7 +54,13 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
     case "EventCard":
       return { event: vms.event!.event!, actions };
     case "Arena":
-      return { arena: main.arena, actions };
+      return { arena: main.arena, leapfrog: vms.lf!.leapfrog, layout: main.layout, actions };
+    case "Benchmarks":
+      return { leapfrog: vms.lf!.leapfrog, layout: vms.lf!.layout, actions };
+    case "Voice":
+      return { leapfrog: vms.lf!.leapfrog, layout: vms.lf!.layout, actions };
+    case "Livestream":
+      return { event: vms.stream!.event!, stream: vms.stream!.event!.stream!, actions };
     case "EraCard":
       return { era: vms.era!.eraCard!, actions };
     case "FrontPage":
@@ -83,6 +89,10 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
 const vms: Record<string, HudVM> = {
   main: vmOf({ tool: "cluster" }),
   event: vmOf({ event: "waterDiscourse" }),
+  lf: vmOf({ leapfrog: true }),
+  lfPhone: vmOf({ leapfrog: true, width: 390, height: 844 }),
+  shipNow: vmOf({ leapfrog: true, event: "shipNow" }),
+  stream: vmOf({ leapfrog: true, event: "stream:dog" }),
   auction: vmOf({ event: "computeAuction" }),
   era: vmOf({ event: "era2" }),
   outcome: vmOf({ outcome: "won" }),
@@ -99,7 +109,7 @@ const usable = catalog.filter((e) => e.ok).map((e) => e.folder);
 
 describe("the catalog", () => {
   it("finds the six shipped skins, all valid", () => {
-    expect(usable.sort()).toEqual(["discovery-disc-96", "field-almanac", "frontier-95", "geocities", "karaoke-night", "swag-drop"]);
+    expect(usable.sort()).toEqual(["discovery-disc-96", "field-almanac", "frontier-95", "homepage-98", "karaoke-night", "swag-drop"]);
     expect(refusedSkins()).toEqual([]);
     expect(skinList().map((s) => s.id)[0]).toBe("frontier-95");
   });
