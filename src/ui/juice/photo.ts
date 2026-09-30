@@ -76,7 +76,7 @@ function drawBubbles(ctx: CanvasRenderingContext2D, scale: number) {
     ctx.stroke();
     // Text, word by word at the exact place the browser laid it out.
     ctx.fillStyle = cs.color;
-    ctx.font = `${cs.fontWeight} ${fontPx}px ${cs.fontFamily}`;
+    ctx.font = `${cs.fontStyle} ${cs.fontWeight} ${fontPx}px ${cs.fontFamily}`;
     ctx.textBaseline = "alphabetic";
     const node = el.firstChild;
     if (node && node.nodeType === Node.TEXT_NODE) {

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Odometer, money, useT } from "../kit";
 import type { SlotPropsMap } from "../types";
 import type { StatsVM } from "../../ui/hud/types";
-import { Caret } from "./icons";
+import { Caret, InfinityIcon } from "./icons";
 import { almanacDate } from "./lore";
 
 const RING = 2 * Math.PI * 31;
@@ -120,7 +120,7 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
       </div>
       <div className="fa-stat fa-runway">
         <span className="fa-sc">{t("stats.runway")}</span>
-        <span className={`fa-v ${stats.runway.warning ? "bad" : ""}`}>{stats.runway.text}</span>
+        <span className={`fa-v ${stats.runway.warning ? "bad" : ""}`}>{stats.runway.months === null ? <InfinityIcon /> : stats.runway.text}</span>
         <span className={`fa-d ${stats.runway.warning ? "bad" : "dim"}`}>{runwayCaption(stats.runway)}</span>
       </div>
       <div className="fa-stat fa-capability">

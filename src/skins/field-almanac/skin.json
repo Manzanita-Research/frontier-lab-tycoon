@@ -141,11 +141,9 @@
     "build.free": "free",
     "stats.arenaOn": "on the Arena",
     "stats.arenaTop": "on top, for now",
-    "news.button": "Reading room",
-    "news.open": "Open the reading room",
-    "news.paused": "Reading room · campus paused",
     "event.paused": "At rest",
     "hint.tap": "Tap anyone to add them to your field notes.",
-    "hint.gateway": "Build an API Gateway beside a path, and the revenue will follow."
+    "hint.gateway": "Build an API Gateway beside a path, and the revenue will follow.",
+    "arena.eraPill": "Era {n} · {name}"
   }
 }

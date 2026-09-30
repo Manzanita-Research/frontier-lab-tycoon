@@ -210,3 +210,10 @@ export const Caret = ({ open }: { open: boolean }) => (
     <path d="m3 4.5 3 3 3-3" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
+
+/** Infinity, drawn: the runway of a lab that earns more than it spends (the "∞" glyph is in neither bundled font). */
+export const InfinityIcon = () => (
+  <svg viewBox="0 0 32 16" width="30" height="15" aria-label="no end in sight" role="img" className="fa-inf">
+    <path d="M16 8c-2.4-3.4-4.6-5-7-5a5 5 0 0 0 0 10c2.4 0 4.6-1.6 7-5Zm0 0c2.4 3.4 4.6 5 7 5a5 5 0 0 0 0-10c-2.4 0-4.6 1.6-7 5Z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+  </svg>
+);
