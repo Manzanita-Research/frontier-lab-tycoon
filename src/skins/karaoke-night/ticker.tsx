@@ -78,18 +78,15 @@ function sing(line: HTMLElement, ball: HTMLElement, hop: HTMLElement, timing: Re
   if (nodes.length !== timing.words.length || typeof line.animate !== "function") return () => undefined;
   const { total } = timing;
 
-  // The highlight: each word's lit copy is wiped in from the left over the time the word takes.
+  // The highlight: each word's lit copy is wiped in from the left over the time the word takes. The wipe is two
+  // transforms (the window slides in while the text slides back), so it runs off the main thread like the ball.
   nodes.forEach((node, i) => {
     const lit = node.querySelector<HTMLElement>(".kn-lit");
+    const text = lit?.firstElementChild as HTMLElement | null;
     const w = timing.words[i]!;
-    anims.push(
-      lit!.animate([{ clipPath: "inset(-12px calc(100% + 12px) -12px -12px)" }, { clipPath: "inset(-12px -12px -12px -12px)" }], {
-        delay: w.from,
-        duration: Math.max(60, w.to - w.from),
-        easing: "linear",
-        fill: "both",
-      }),
-    );
+    const opts: KeyframeAnimationOptions = { delay: w.from, duration: Math.max(60, w.to - w.from), easing: "linear", fill: "both" };
+    anims.push(lit!.animate([{ transform: "translateX(-100%)" }, { transform: "translateX(0)" }], opts));
+    anims.push(text!.animate([{ transform: "translateX(100%)" }, { transform: "translateX(0)" }], opts));
   });
 
   // The ball: it slides along the words at the pace of the highlight (x, y follow the word), while the inner disc hops.
@@ -219,7 +216,7 @@ export function Ticker({ items }: SlotPropsMap["Ticker"]) {
                 <span className="kn-w">
                   {w}
                   <span className="kn-lit" aria-hidden>
-                    {w}
+                    <span>{w}</span>
                   </span>
                 </span>{" "}
               </Fragment>

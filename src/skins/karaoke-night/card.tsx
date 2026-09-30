@@ -4,7 +4,7 @@
 import { useRef, useState } from "react";
 import { useT } from "../context";
 import type { SlotPropsMap } from "../types";
-import { D, Face, Heart, Note, Tape } from "./art";
+import { Face, Heart, Note, Tape } from "./art";
 
 /** Swipe distance (px) that counts as a swipe on the phone sheet. */
 const SWIPE = 28;
@@ -43,7 +43,7 @@ export function Inspector({ inspector: who, layout, actions }: SlotPropsMap["Ins
       <div className="kn-screen">
         <div className="kn-p2">
           <span>
-            <Heart /> <D>{`CONTESTANT #${who.badge}`}</D>
+            <Heart /> CONTESTANT #{who.badge}
           </span>
           <button type="button" className="kn-x" onClick={() => actions.closeInspector()} aria-label={t("inspector.close")}>
             ×
@@ -55,7 +55,7 @@ export function Inspector({ inspector: who, layout, actions }: SlotPropsMap["Ins
           </div>
           <div className="kn-who-text">
             <h2 className="kn-name">
-              <D>{who.name}</D>
+              {who.name}
             </h2>
             <div className="kn-role">{who.role}</div>
             <div className="kn-tags">
@@ -77,9 +77,7 @@ export function Inspector({ inspector: who, layout, actions }: SlotPropsMap["Ins
                       <i key={i} className={i < lit ? "on" : ""} />
                     ))}
                   </span>
-                  <span className="kn-mp">
-                    <D>{`${n.pct}%`}</D>
-                  </span>
+                  <span className="kn-mp">{n.pct}%</span>
                 </div>
               );
             })}
@@ -98,7 +96,7 @@ export function Inspector({ inspector: who, layout, actions }: SlotPropsMap["Ins
               <ul>
                 {who.history.map((h) => (
                   <li key={h}>
-                    <D>{h}</D>
+                    {h}
                   </li>
                 ))}
               </ul>

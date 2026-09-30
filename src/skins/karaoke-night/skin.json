@@ -4,7 +4,7 @@
   "name": "Karaoke Night",
   "author": "Frontier Lab Tycoon",
   "version": "1.0.0",
-  "description": "A karaoke machine runs the lab: lilac plastic, glowing screens, pixel numerals, a song queue for objectives and AI News Karaoke along the bottom, with a bouncing ball.",
+  "description": "A karaoke machine runs the lab: lilac plastic, glowing screens, pixel scoreboard type, a song queue for objectives and AI News Karaoke along the bottom, with a bouncing ball.",
   "preview": "assets/preview.jpg",
   "slots": [
     "Layout",
@@ -25,22 +25,6 @@
     "PhotoButton"
   ],
   "fonts": [
-    {
-      "family": "Pixelify Sans",
-      "src": "assets/fonts/pixelify-sans-latin-400-normal.woff2",
-      "weight": 400,
-      "style": "normal",
-      "license": "OFL-1.1",
-      "licenseFile": "assets/fonts/pixelify-sans-LICENSE.txt"
-    },
-    {
-      "family": "Pixelify Sans",
-      "src": "assets/fonts/pixelify-sans-latin-700-normal.woff2",
-      "weight": 700,
-      "style": "normal",
-      "license": "OFL-1.1",
-      "licenseFile": "assets/fonts/pixelify-sans-LICENSE.txt"
-    },
     {
       "family": "Jersey 10",
       "src": "assets/fonts/jersey-10-latin-400-normal.woff2",
@@ -104,9 +88,9 @@
     "color.meterFrom": "#FF5FA2",
     "color.meterTo": "#FF5FA2",
     "font.ui": "\"Nunito\", system-ui, sans-serif",
-    "font.display": "\"Pixelify Sans\", \"Nunito\", sans-serif",
-    "font.numbers": "\"Jersey 10\", \"Pixelify Sans\", monospace",
-    "font.mono": "\"Pixelify Sans\", monospace",
+    "font.display": "\"Jersey 10\", \"Nunito\", sans-serif",
+    "font.numbers": "\"Jersey 10\", monospace",
+    "font.mono": "\"Jersey 10\", monospace",
     "radius.panel": "22px",
     "radius.button": "12px",
     "radius.pill": "999px",

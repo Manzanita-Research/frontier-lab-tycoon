@@ -1,28 +1,8 @@
 // Karaoke Night's little pictures: music notes, stars and hearts, the tape-deck symbols, the arcade buttons' icons and the
-// contestant's pixel face. All inline SVG (no emoji, no font glyphs: Pixelify has no notes or stars, and a headless
-// machine would show empty boxes), plus `D`, which sets every run of digits in Jersey 10 so Pixelify's 5 and S never meet.
+// contestant's pixel face. All inline SVG (no emoji, no font glyphs: the pixel faces have no notes or stars, and a
+// headless machine would show empty boxes).
 import type { ReactNode } from "react";
 import type { PortraitVM } from "../../ui/hud/types";
-
-/**
- * Digits in Jersey 10, whatever face the words around them are in: "Frontier-3" reads Frontier-<3>. Text without a digit
- * is left alone. With digits, the pieces are hidden from screen readers and one plain copy is read instead.
- */
-export function D({ children }: { children: string }) {
-  const parts = children.split(/(\d+)/);
-  if (parts.length === 1) return <>{children}</>;
-  return (
-    <>
-      <span aria-hidden>
-        {parts.map((p, i) => (i % 2 === 1 ? <span key={i} className="kn-d">{p}</span> : p))}
-      </span>
-      <span className="kn-sr">{children}</span>
-    </>
-  );
-}
-
-/** The same, for a string that may not be a string yet (an optional label). */
-export const digits = (s: string | null | undefined): ReactNode => (s ? <D>{s}</D> : null);
 
 type GlyphProps = { className?: string };
 const G = { "aria-hidden": true, focusable: false } as const;

@@ -5,7 +5,7 @@ import { Odometer, money } from "../kit";
 import { useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import type { StatsVM } from "../../ui/hud/types";
-import { D, digits, Heart, Trend } from "./art";
+import { Heart, Trend } from "./art";
 
 const VU_BARS = 10;
 const perDay = (n: number) => `${n >= 0 ? "+" : "-"}${money(Math.abs(n))}/day`;
@@ -40,7 +40,7 @@ function Vibes({ vibes }: { vibes: StatsVM["vibes"] }) {
       {open && (
         <div className="kn-scorecard" role="tooltip">
           <div className="kn-scorecard-title">
-            {t("vibes.tipTitle")} <span><D>{`${vibes.value} of ${vibes.max}`}</D></span>
+            {t("vibes.tipTitle")} <span>{`${vibes.value} of ${vibes.max}`}</span>
           </div>
           {vibes.rows.map((r) => (
             <div key={r.label} className="kn-vrow">
@@ -75,10 +75,10 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
       <div className="kn-screen">
         <div className="kn-lab">
           <span className="kn-lab-name">
-            <D>{stats.labName}</D>
+            {stats.labName}
           </span>
           <span className="kn-lab-date">
-            <D>{stats.date}</D>
+            {stats.date}
           </span>
         </div>
         <Vibes vibes={stats.vibes} />
@@ -97,7 +97,7 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
             <span className="kn-l">{t("stats.capability")}</span>
             <Odometer className="kn-v cyan" value={stats.capability.value} flash={false} />
             <span className="kn-s dim" title={stats.capability.latestModel ?? undefined}>
-              {digits(stats.capability.latestModel)}
+              {stats.capability.latestModel}
             </span>
           </div>
           <div className="kn-st kn-hype">
@@ -119,11 +119,11 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
           >
             <span className="kn-l">{t("stats.arena")}</span>
             <span className="kn-v pink">
-              <D>{`#${a.rank}`}</D>
+              {`#${a.rank}`}
               {a.rankDelta !== 0 && (
                 <span className={`kn-delta ${a.tone}`}>
                   <Trend trend={a.rankDelta > 0 ? "up" : "down"} />
-                  <D>{String(Math.abs(a.rankDelta))}</D>
+                  {String(Math.abs(a.rankDelta))}
                 </span>
               )}
             </span>
@@ -132,7 +132,7 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
           <div className="kn-st kn-rd">
             <span className="kn-l">{t("stats.rd")}</span>
             <Odometer className="kn-v mint" value={stats.rd.mult} format={(n) => `${n.toFixed(1)}×`} flash={false} />
-            <span className="kn-s dim">{digits(t("stats.era", { n: stats.rd.era }))}</span>
+            <span className="kn-s dim">{t("stats.era", { n: stats.rd.era })}</span>
           </div>
         </div>
         {compact && (

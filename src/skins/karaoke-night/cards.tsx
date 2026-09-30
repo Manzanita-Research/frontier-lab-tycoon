@@ -3,7 +3,7 @@
 import { Fragment } from "react";
 import { useT } from "../context";
 import type { SlotPropsMap } from "../types";
-import { D, Note, Notes, Star, Tape } from "./art";
+import { Note, Notes, Star, Tape } from "./art";
 
 const KEY_COLOURS = ["#FF5FA2", "#4FE3FF", "#FFE45C"];
 
@@ -20,7 +20,7 @@ export function EventCard({ event, actions }: SlotPropsMap["EventCard"]) {
             <span className="kn-paused">{t("event.paused")}</span>
           </div>
           <h2 className="kn-event-title">
-            <D>{event.title}</D>
+            {event.title}
           </h2>
           <p className="kn-event-body">{event.body}</p>
           {event.kind === "auction" && (
@@ -28,7 +28,7 @@ export function EventCard({ event, actions }: SlotPropsMap["EventCard"]) {
               {event.paddles.map((p) => (
                 <li key={p.id} style={{ ["--paddle" as string]: p.color }}>
                   <span className="kn-paddle-n">
-                    <D>{String(p.number)}</D>
+                    {String(p.number)}
                   </span>
                   {p.name}
                 </li>
@@ -42,7 +42,7 @@ export function EventCard({ event, actions }: SlotPropsMap["EventCard"]) {
                 <span className="kn-choice-text">
                   <b>{c.label}</b>
                   <small>
-                    <D>{c.hint}</D>
+                    {c.hint}
                   </small>
                 </span>
               </button>
@@ -71,7 +71,7 @@ export function EraCard({ era, actions }: SlotPropsMap["EraCard"]) {
               <Fragment key={i}>
                 {i > 0 && " "}
                 <span style={{ animationDelay: `${0.3 + i * 0.12}s` }}>
-                  <D>{word}</D>
+                  {word}
                 </span>
               </Fragment>
             ))}
@@ -111,18 +111,18 @@ export function Outcome({ outcome, actions }: SlotPropsMap["Outcome"]) {
               <Star /> {outcome.stripe}
             </span>
             <span className="kn-paused">
-              <D>{outcome.date}</D>
+              {outcome.date}
             </span>
           </div>
           <h2 className="kn-event-title">
-            <D>{outcome.headline}</D>
+            {outcome.headline}
           </h2>
           <dl className="kn-score-board">
             {outcome.stats.map((s) => (
               <div key={s.label} className={s.bad ? "bad" : ""}>
                 <dt>{s.label}</dt>
                 <dd>
-                  <D>{s.text}</D>
+                  {s.text}
                 </dd>
               </div>
             ))}

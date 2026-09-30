@@ -1,7 +1,10 @@
 /*
- * Karaoke Night: a karaoke machine runs the lab. Flat lilac plastic bodies with dark screens set into them, pixel display
- * type (Pixelify Sans) for headings, Jersey 10 for every digit (Pixelify's 5 and S look alike), Nunito for reading, and
- * glow kept to a whisper: small text-shadows on the numbers and the sung words, never a big blur.
+ * Karaoke Night: a karaoke machine runs the lab. Flat lilac plastic bodies with dark screens set into them, Jersey 10
+ * (a chunky scoreboard pixel face) for headings, labels and every number, Nunito for reading, and glow kept to a whisper:
+ * small text-shadows on the numbers and the sung words, never a big blur.
+ *
+ * Why not Pixelify Sans, as the stub had? Its capital C is closed up like an O ("OASH", "Oompute") and its 5 and S look
+ * alike; Jersey 10 keeps C, O, 5 and S apart, so one face does the display type and the digits.
  *
  * The slots live in this folder (Layout.tsx, stats.tsx, ticker.tsx, ...); the rest of the game's UI is the base's markup
  * dressed here (`.panel` is a screen in a plastic bezel).
@@ -62,22 +65,6 @@
     position: absolute;
     inset: 0;
     pointer-events: none;
-  }
-  /* Every digit in Jersey 10, a touch larger so it stands level with Pixelify's capitals. */
-  .kn-d {
-    font-family: var(--kn-num);
-    font-weight: 400;
-    font-size: 1.14em;
-    line-height: 1;
-  }
-  .kn-sr {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    clip-path: inset(50%);
-    white-space: nowrap;
   }
   .kn-glyph {
     flex: none;
@@ -154,6 +141,7 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
+    max-height: calc(100dvh - 14px - var(--kn-ticker-h) - var(--kn-tray-h) - 34px);
     pointer-events: none;
   }
   .kn-console {
@@ -178,14 +166,14 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font: 700 24px/1.15 var(--kn-display);
+    font: 400 29px/1.15 var(--kn-display);
     letter-spacing: 0.02em;
     color: var(--kn-lemon);
     text-shadow: 0 0 8px rgba(255, 228, 92, 0.4);
   }
   .kn-lab-date {
     flex: none;
-    font: 700 14px var(--kn-display);
+    font: 400 17px var(--kn-display);
     color: var(--flt-color-textDim);
     white-space: nowrap;
   }
@@ -219,7 +207,7 @@
     align-items: center;
     gap: 5px;
     margin-top: 5px;
-    font: 700 13px var(--kn-display);
+    font: 400 16px var(--kn-display);
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--flt-color-textDim);
@@ -250,7 +238,7 @@
     text-align: left;
   }
   .kn-l {
-    font: 700 12px var(--kn-display);
+    font: 400 15px var(--kn-display);
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--flt-color-textDim);
@@ -263,7 +251,7 @@
     text-transform: uppercase;
   }
   .kn-s {
-    font: 700 12px var(--kn-display);
+    font: 400 15px var(--kn-display);
     letter-spacing: 0.04em;
     text-transform: uppercase;
     white-space: nowrap;
@@ -281,10 +269,12 @@
     align-items: flex-end;
     gap: 3px;
     height: 34px;
+    max-width: 110px;
     margin-top: 3px;
     i {
-      flex: none;
-      width: 8px;
+      flex: 1 1 0;
+      min-width: 0;
+      max-width: 8px;
       background: rgba(201, 184, 255, 0.2);
       &.on {
         background: var(--kn-mint);
@@ -346,7 +336,7 @@
     justify-content: space-between;
     gap: 8px;
     margin-bottom: 6px;
-    font: 700 14px var(--kn-display);
+    font: 400 17px var(--kn-display);
     color: var(--kn-lemon);
     span {
       color: var(--flt-color-textDim);
@@ -397,11 +387,25 @@
   }
 
   /* ---------- NOW TRAINING and UP NEXT ---------- */
+  /* Song and queue: if the window is short they scroll (and fade at the edge) rather than run under the arcade. */
   .kn-under {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
+    min-height: 0;
+    padding: 4px 8px 26px;
+    margin: -4px -8px -26px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    pointer-events: none;
+    mask-image: linear-gradient(#000 calc(100% - 24px), transparent);
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    > * {
+      flex: none;
+    }
   }
   .kn-training,
   .kn-queue {
@@ -416,7 +420,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    font: 700 13px var(--kn-display);
+    font: 400 16px var(--kn-display);
     letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--flt-color-textDim);
@@ -432,7 +436,7 @@
   }
   .kn-song {
     margin: 4px 0 8px;
-    font: 700 22px/1.1 var(--kn-display);
+    font: 400 27px/1.1 var(--kn-display);
     color: var(--kn-mint);
     text-shadow: 0 0 8px rgba(92, 242, 201, 0.4);
     overflow-wrap: anywhere;
@@ -464,7 +468,7 @@
     justify-content: space-between;
     gap: 8px;
     margin-top: 5px;
-    font: 700 12px var(--kn-display);
+    font: 400 15px var(--kn-display);
     letter-spacing: 0.04em;
     color: var(--flt-color-textDim);
   }
@@ -480,7 +484,7 @@
     border-radius: 6px;
     background: var(--kn-lemon);
     color: var(--kn-plum);
-    font: 700 15px var(--kn-display);
+    font: 400 18px var(--kn-display);
     box-shadow:
       inset 0 -3px 0 var(--kn-lemon-lo),
       0 0 0 3px #fff;
@@ -561,7 +565,7 @@
   }
   .kn-queue-by {
     margin-top: 8px;
-    font: 700 12px var(--kn-display);
+    font: 400 15px var(--kn-display);
     letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--flt-color-textDim);
@@ -656,7 +660,7 @@
   .kn-key.news {
     width: auto;
     padding: 0 12px;
-    font: 700 13px var(--kn-display);
+    font: 400 16px var(--kn-display);
     text-transform: uppercase;
     letter-spacing: 0.04em;
   }
@@ -700,7 +704,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    font: 700 17px var(--kn-display);
+    font: 400 21px var(--kn-display);
   }
   .kn-extra-text {
     flex-basis: 100%;
@@ -718,7 +722,7 @@
       border-radius: 8px;
       background: rgba(42, 23, 64, 0.14);
       color: var(--kn-plum);
-      font: 700 15px var(--kn-display);
+      font: 400 18px var(--kn-display);
       cursor: pointer;
       &.read {
         background: var(--kn-plum);
@@ -759,7 +763,7 @@
     justify-content: space-between;
     align-items: center;
     gap: 8px;
-    font: 700 13px var(--kn-display);
+    font: 400 16px var(--kn-display);
     letter-spacing: 0.04em;
     color: var(--flt-color-textDim);
     .kn-glyph {
@@ -806,7 +810,7 @@
   }
   .kn-name {
     margin: 0;
-    font: 700 22px/1.05 var(--kn-display);
+    font: 400 27px/1.05 var(--kn-display);
     letter-spacing: 0.02em;
     text-transform: uppercase;
     color: var(--kn-pink);
@@ -831,7 +835,7 @@
     border-radius: 4px;
     background: var(--kn-lemon);
     color: var(--kn-plum);
-    font: 700 12px var(--kn-display);
+    font: 400 15px var(--kn-display);
     letter-spacing: 0.04em;
     text-transform: uppercase;
     &.kn-mood.content {
@@ -858,7 +862,7 @@
     align-items: center;
     gap: 8px;
     margin-top: 8px;
-    font: 700 13px var(--kn-display);
+    font: 400 16px var(--kn-display);
     &.warn {
       --hc: var(--kn-lemon);
     }
@@ -913,7 +917,7 @@
     align-items: center;
     gap: 5px;
     margin-bottom: 3px;
-    font: 700 12px var(--kn-display);
+    font: 400 15px var(--kn-display);
     letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--kn-pink);
@@ -927,7 +931,7 @@
       min-height: 28px;
       list-style: none;
       cursor: pointer;
-      font: 700 12px var(--kn-display);
+      font: 400 15px var(--kn-display);
       letter-spacing: 0.06em;
       text-transform: uppercase;
       color: var(--flt-color-textDim);
@@ -969,7 +973,7 @@
     border-radius: 14px;
     background: var(--kn-pink-hi);
     color: var(--kn-plum);
-    font: 700 20px var(--kn-display);
+    font: 400 24px var(--kn-display);
     letter-spacing: 0.04em;
     box-shadow:
       inset 0 -5px 0 var(--kn-pink-lo),
@@ -1024,7 +1028,7 @@
     line-height: 1.3;
     text-align: center;
     b {
-      font: 700 15px var(--kn-display);
+      font: 400 18px var(--kn-display);
       color: var(--kn-lemon);
     }
     small {
@@ -1218,7 +1222,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    font: 700 20px/1.15 var(--kn-display);
+    font: 400 24px/1.15 var(--kn-display);
     letter-spacing: 0.03em;
   }
   .kn-toast-t {
@@ -1253,7 +1257,7 @@
     border-radius: 6px;
     background: var(--kn-lemon);
     color: var(--kn-plum);
-    font: 700 15px var(--kn-display);
+    font: 400 18px var(--kn-display);
     letter-spacing: 0.04em;
     white-space: nowrap;
     box-shadow: 0 3px 0 var(--kn-lemon-lo);
@@ -1304,17 +1308,22 @@
   }
   .kn-lit {
     position: absolute;
-    left: 0;
-    top: 0;
-    white-space: nowrap;
-    color: var(--sung);
-    text-shadow: 0 0 10px color-mix(in srgb, var(--sung) 45%, transparent);
-    clip-path: inset(-12px calc(100% + 12px) -12px -12px);
+    inset: 0;
+    overflow: hidden;
+    transform: translateX(-100%);
     pointer-events: none;
+    > span {
+      display: block;
+      white-space: nowrap;
+      transform: translateX(100%);
+      color: var(--sung);
+      text-shadow: 0 0 6px color-mix(in srgb, var(--sung) 45%, transparent);
+    }
   }
   .kn-line[data-still] {
-    .kn-lit {
-      clip-path: none;
+    .kn-lit,
+    .kn-lit > span {
+      transform: none;
     }
     .kn-ball {
       display: none;
@@ -1404,7 +1413,7 @@
   .kn-bub-who {
     display: block;
     margin-bottom: 2px;
-    font: 700 12px var(--kn-display);
+    font: 400 15px var(--kn-display);
     letter-spacing: 0.04em;
     text-transform: uppercase;
     color: #6b4fd6;
@@ -1469,7 +1478,7 @@
     border-radius: 14px 14px 0 0;
     background: var(--stripe);
     color: var(--kn-plum);
-    font: 700 14px var(--kn-display);
+    font: 400 17px var(--kn-display);
     letter-spacing: 0.06em;
     text-transform: uppercase;
   }
@@ -1483,12 +1492,12 @@
     border-radius: 6px;
     background: var(--kn-plum);
     color: var(--kn-lemon);
-    font: 700 12px var(--kn-display);
+    font: 400 15px var(--kn-display);
     white-space: nowrap;
   }
   .kn-event-title {
     margin: 14px 18px 8px;
-    font: 700 26px/1.12 var(--kn-display);
+    font: 400 32px/1.12 var(--kn-display);
     letter-spacing: 0.02em;
     color: var(--kn-lemon);
     text-shadow: 0 0 8px rgba(255, 228, 92, 0.35);
@@ -1584,7 +1593,7 @@
       line-height: 1.15;
     }
     small {
-      font: 700 13px var(--kn-display);
+      font: 400 16px var(--kn-display);
       letter-spacing: 0.02em;
       color: var(--kn-mint);
     }
@@ -1600,7 +1609,7 @@
     border-radius: 14px;
     background: var(--kn-pink-hi);
     color: var(--kn-plum);
-    font: 700 22px var(--kn-display);
+    font: 400 27px var(--kn-display);
     letter-spacing: 0.04em;
     box-shadow:
       inset 0 -5px 0 var(--kn-pink-lo),
@@ -1643,7 +1652,7 @@
       background: #2b1747;
     }
     dt {
-      font: 700 12px var(--kn-display);
+      font: 400 15px var(--kn-display);
       letter-spacing: 0.05em;
       text-transform: uppercase;
       color: var(--flt-color-textDim);
@@ -1685,7 +1694,7 @@
     justify-content: center;
     align-items: center;
     gap: 8px;
-    font: 700 15px var(--kn-display);
+    font: 400 18px var(--kn-display);
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--kn-lemon);
@@ -1698,7 +1707,7 @@
   }
   .kn-era-title {
     margin: 4px 0 10px;
-    font: 700 34px/1.1 var(--kn-display);
+    font: 400 41px/1.1 var(--kn-display);
     letter-spacing: 0.02em;
     color: var(--kn-lemon);
     text-shadow: 0 0 8px rgba(255, 228, 92, 0.35);
@@ -1781,10 +1790,15 @@
   .rd-label,
   .staff-title {
     font-family: var(--kn-display);
-    font-weight: 700;
-    letter-spacing: 0.02em;
+    font-weight: 400;
+    letter-spacing: 0.04em;
   }
   .thoughts-head {
+    font-size: 18px;
+    color: var(--kn-lemon);
+  }
+  .staff-title {
+    font-size: 21px;
     color: var(--kn-lemon);
   }
   .thought-row {
@@ -1838,7 +1852,7 @@
   }
   .rd-label {
     opacity: 1;
-    font-size: 12px;
+    font-size: 15px;
     color: var(--flt-color-textDim);
   }
   .era-pill {
@@ -1846,7 +1860,7 @@
     border-radius: 4px;
     background: var(--era);
     color: var(--kn-plum);
-    font: 700 12px var(--kn-display);
+    font: 400 15px var(--kn-display);
     letter-spacing: 0.02em;
     text-shadow: none;
   }
@@ -1860,8 +1874,7 @@
   .rd-sub,
   .era-next {
     opacity: 1;
-    font-family: var(--kn-display);
-    font-weight: 700;
+    font-size: 12.5px;
     color: var(--flt-color-textDim);
   }
   .era-meter {
@@ -1871,15 +1884,14 @@
   .drop-banner {
     background: var(--flt-color-bad);
     color: var(--kn-plum);
-    font-family: var(--kn-display);
   }
   .arena-head b {
-    font-size: 15px;
+    font-size: 19px;
     color: var(--kn-lemon);
   }
   .arena-head span {
     opacity: 1;
-    font-family: var(--kn-display);
+    font-size: 12px;
     color: var(--flt-color-textDim);
   }
   .arena-row {
@@ -1914,7 +1926,12 @@
   .ar-open {
     background: var(--kn-mint);
     color: var(--kn-plum);
-    font-family: var(--kn-display);
+  }
+  .nametag {
+    background: var(--kn-pink);
+    color: var(--kn-plum);
+    font: 400 16px var(--kn-display);
+    letter-spacing: 0.03em;
   }
   .toast.panel {
     background: var(--kn-lemon);
@@ -1949,7 +1966,7 @@
       background: none;
       border-bottom: 2px dashed rgba(201, 184, 255, 0.25);
       color: var(--kn-lemon);
-      font: 700 17px var(--kn-display);
+      font: 400 21px var(--kn-display);
       button {
         width: 36px;
         height: 36px;
@@ -1972,13 +1989,12 @@
     min-height: 44px;
     background: var(--kn-pink-hi);
     color: var(--kn-plum);
-    font: 700 17px var(--kn-display);
+    font: 400 21px var(--kn-display);
     letter-spacing: 0.04em;
     box-shadow: inset 0 -4px 0 var(--kn-pink-lo);
   }
   .mixer-slider {
     color: var(--flt-color-text);
-    font-family: var(--kn-display);
     input {
       accent-color: var(--kn-pink);
     }
@@ -1989,7 +2005,6 @@
   }
   .sound-audition summary {
     color: var(--flt-color-textDim);
-    font-family: var(--kn-display);
   }
   .sound-audition button {
     background: #2b1747;
@@ -2002,6 +2017,8 @@
     border-color: rgba(185, 164, 255, 0.35);
     b {
       font-family: var(--kn-display);
+      font-size: 19px;
+      font-weight: 400;
       color: var(--kn-lemon);
     }
     small {
@@ -2024,7 +2041,7 @@
     color: var(--kn-plum);
     box-shadow: inset 0 -4px 0 var(--kn-key-lo);
     b {
-      font: 700 18px var(--kn-display);
+      font: 400 22px var(--kn-display);
     }
     &.primary {
       background: var(--kn-pink-hi);
@@ -2094,6 +2111,537 @@
       right: calc(16px + var(--kn-rail) + 12px);
       justify-content: center;
       padding: 0;
+    }
+  }
+
+  /* ---------- short windows (a 13-inch laptop): the panels give up their second lines ---------- */
+  @media (min-width: 641px) and (max-height: 820px) {
+    .kn-console .kn-screen {
+      padding: 8px 16px 9px;
+    }
+    .kn-score {
+      font-size: 58px;
+    }
+    .kn-vu {
+      height: 28px;
+    }
+    .kn-song {
+      margin: 2px 0 6px;
+      font-size: 20px;
+    }
+    .kn-q-text small,
+    .kn-status,
+    .kn-liner {
+      display: none;
+    }
+    .kn-q {
+      gap: 7px;
+    }
+    .kn-lyric {
+      margin-top: 8px;
+    }
+    .kn-follow {
+      margin-top: 8px;
+    }
+  }
+
+  /* ---------- tablets and small laptops ---------- */
+  @media (max-width: 960px) {
+    .kn-v {
+      font-size: 26px;
+    }
+    .kn-score {
+      font-size: 56px;
+    }
+    .kn-lab-name {
+      font-size: 20px;
+    }
+  }
+
+  /* ---------- phones: one row of console, one strip of deck, the song, and the campus ---------- */
+  @media (max-width: 640px) {
+    --kn-ticker-h: 64px;
+    /* The arcade (about 110px) plus the gap the AI News Karaoke tab sits in. */
+    --kn-tray-h: 132px;
+    .kn-hud {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      grid-auto-rows: min-content;
+      align-content: start;
+      gap: 6px;
+      padding: max(8px, env(safe-area-inset-top)) 8px 0;
+    }
+    .kn-left,
+    .kn-under,
+    .kn-right,
+    .kn-stack {
+      display: contents;
+    }
+    .kn-console {
+      order: 1;
+      grid-column: 1 / -1;
+    }
+    .kn-deck {
+      order: 2;
+      grid-column: 1 / -1;
+    }
+    .kn-training {
+      order: 3;
+      grid-column: 1;
+    }
+    .kn-queue {
+      order: 4;
+      grid-column: 2;
+    }
+    .kn-stack > .thoughts {
+      order: 5;
+      grid-column: 3;
+    }
+    .kn-extra {
+      order: 6;
+      grid-column: 1 / -1;
+      align-self: auto;
+    }
+    .kn-plastic {
+      padding: 4px;
+      border-radius: 16px;
+      box-shadow:
+        inset 0 2px 0 var(--kn-hi),
+        inset 0 -4px 0 var(--kn-lo),
+        0 4px 0 rgba(23, 12, 39, 0.5);
+    }
+    .kn-screen {
+      border-radius: 11px;
+    }
+
+    /* The console: Vibes, cash and runway in one row; the caret opens the rest. */
+    .kn-console .kn-screen {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 6px 4px 10px;
+    }
+    .kn-console.compact:not(.expanded) {
+      .kn-lab,
+      .kn-cap,
+      .kn-hype,
+      .kn-arena,
+      .kn-rd,
+      .kn-l {
+        display: none;
+      }
+    }
+    .kn-console.compact .kn-vibes {
+      padding-right: 0;
+      border-right: 0;
+    }
+    .kn-console.compact .kn-vibes-btn {
+      min-width: 0;
+      padding: 0 4px;
+    }
+    .kn-console.compact .kn-score {
+      font-size: 42px;
+    }
+    .kn-console.compact .kn-vibes-label {
+      margin-top: 1px;
+      font-size: 11px;
+    }
+    .kn-console.compact .kn-stats {
+      flex: 1;
+      display: flex;
+      gap: 12px;
+      min-width: 0;
+    }
+    .kn-console.compact .kn-st {
+      flex: 1;
+      min-width: 0;
+    }
+    .kn-console.compact .kn-v {
+      font-size: 24px;
+    }
+    .kn-console.compact .kn-s {
+      font-size: 11px;
+    }
+    .kn-more {
+      flex: none;
+      display: grid;
+      place-items: center;
+      width: 40px;
+      height: 44px;
+      border: 0;
+      border-radius: 10px;
+      background: var(--flt-color-panelAlt);
+      color: var(--kn-lemon);
+      cursor: pointer;
+      .kn-trend {
+        width: 14px;
+        height: 14px;
+      }
+    }
+    .kn-console.compact.expanded .kn-screen {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 4px 10px;
+      padding: 6px 10px 6px;
+    }
+    .kn-console.compact.expanded .kn-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px 8px;
+    }
+    .kn-console.compact.expanded .kn-l {
+      font-size: 11px;
+    }
+    .kn-console.compact.expanded .kn-more {
+      grid-column: 1 / -1;
+      width: 100%;
+      height: 32px;
+    }
+    .kn-lab-name {
+      font-size: 18px;
+    }
+    .kn-scorecard {
+      left: -4px;
+      width: min(340px, calc(100vw - 24px));
+    }
+
+    /* The deck: tape keys, record, News Room and a "more" key in one strip. */
+    .kn-deck {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 4px 6px 6px;
+    }
+    .kn-deck-row {
+      gap: 4px;
+    }
+    .kn-speed {
+      gap: 4px;
+    }
+    .kn-key {
+      width: 44px;
+      height: 44px;
+    }
+    .kn-key.news {
+      width: 44px;
+      padding: 0;
+    }
+    .kn-key-label {
+      display: none;
+    }
+    .kn-key.fold {
+      display: grid;
+    }
+    .kn-tools {
+      position: relative;
+      gap: 4px;
+    }
+    .kn-tools-more {
+      display: none;
+      position: absolute;
+      top: calc(100% + 12px);
+      right: 0;
+      z-index: 8;
+      padding: 6px;
+      border-radius: 14px;
+      background: var(--kn-plastic);
+      box-shadow:
+        inset 0 3px 0 var(--kn-hi),
+        inset 0 -4px 0 var(--kn-lo),
+        0 5px 0 rgba(23, 12, 39, 0.5);
+    }
+    .kn-tools.open .kn-tools-more {
+      display: flex;
+    }
+
+    /* NOW TRAINING: just the song and its bar. */
+    .kn-training {
+      width: auto;
+      .kn-screen {
+        padding: 5px 10px 6px;
+      }
+      .kn-np,
+      .kn-time {
+        display: none;
+      }
+      .kn-song {
+        margin: 0 0 4px;
+        font-size: 16px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .kn-pbar {
+        height: 10px;
+        padding: 1px 2px;
+      }
+    }
+    .kn-stamp {
+      top: -10px;
+      font-size: 13px;
+    }
+
+    /* UP NEXT and Requests fold to a badge; open, they cover the middle of the map. */
+    .kn-queue {
+      width: auto;
+      .kn-screen {
+        padding: 2px 6px;
+      }
+      &:not(.open) {
+        .kn-queue-title,
+        .kn-queue-days {
+          display: none;
+        }
+      }
+      &.open {
+        position: fixed;
+        z-index: 6;
+        left: 8px;
+        right: 8px;
+        top: 214px;
+        width: auto;
+        max-height: 56vh;
+        overflow-y: auto;
+        .kn-queue-days .long {
+          display: none;
+        }
+        .kn-queue-days .short {
+          display: inline;
+        }
+      }
+    }
+    .kn-queue-head {
+      min-height: 44px;
+    }
+    .kn-stack > .thoughts {
+      width: auto;
+      min-width: 0;
+      align-self: stretch;
+      &:not(.open) {
+        .thoughts-title,
+        .thoughts-caret {
+          display: none;
+        }
+        .thoughts-head {
+          height: 100%;
+          min-height: 44px;
+          padding: 4px 8px;
+        }
+      }
+      &.open {
+        position: fixed;
+        z-index: 6;
+        left: 8px;
+        right: 8px;
+        top: 214px;
+        width: auto;
+        max-height: 56vh;
+      }
+    }
+    .thoughts-list {
+      max-height: calc(56vh - 56px);
+    }
+    .kn-extra {
+      transform: none;
+      max-width: none;
+    }
+
+    /* The contestant card is a short bottom sheet: swipe up for the rest, down to fold it. */
+    .kn-card.sheet {
+      position: fixed;
+      z-index: 30;
+      left: 8px;
+      right: 8px;
+      bottom: calc(var(--kn-ticker-h) + var(--kn-tray-h) + 8px);
+      width: auto;
+      &.more {
+        max-height: 62vh;
+        overflow-y: auto;
+      }
+      .kn-screen {
+        padding: 6px 12px 10px;
+      }
+      .kn-ava {
+        width: 44px;
+        height: 44px;
+        box-shadow: 0 0 0 2px var(--kn-pink);
+      }
+      .kn-name {
+        font-size: 17px;
+      }
+      .kn-role {
+        margin-top: 2px;
+        font-size: 12px;
+      }
+      .kn-who {
+        margin-top: 2px;
+      }
+      .kn-lyric {
+        margin-top: 8px;
+        font-size: 14px;
+      }
+      .kn-meter {
+        margin-top: 6px;
+      }
+    }
+    .kn-card.sheet:not(.more) .kn-tags {
+      display: none;
+    }
+    .kn-handle {
+      display: grid;
+      place-items: center;
+      height: 16px;
+      margin-bottom: 2px;
+      touch-action: none;
+      cursor: grab;
+      i {
+        width: 38px;
+        height: 5px;
+        border-radius: 3px;
+        background: rgba(42, 23, 64, 0.45);
+      }
+    }
+
+    /* The arcade: smaller buttons, the LCDs keep the name and the price. */
+    .kn-bottom {
+      padding: 0 6px 22px;
+      gap: 6px;
+    }
+    .kn-tip {
+      padding: 5px 12px 6px;
+      font-size: 12px;
+    }
+    .kn-tray {
+      gap: 6px;
+      padding: 11px 10px 6px;
+    }
+    .kn-ab {
+      width: 68px;
+      gap: 5px;
+    }
+    .kn-btnr {
+      width: 42px;
+      height: 42px;
+    }
+    .kn-bicon {
+      width: 24px;
+      height: 24px;
+    }
+    .kn-k {
+      top: -6px;
+      right: -6px;
+      width: 19px;
+      height: 19px;
+      font-size: 14px;
+    }
+    .kn-lcd {
+      width: 68px;
+      padding: 2px 2px 3px;
+      b {
+        font-size: 10.5px;
+        line-height: 1.2;
+      }
+      span {
+        font-size: 15px;
+      }
+    }
+    .staff {
+      left: 8px;
+      bottom: calc(var(--kn-ticker-h) + var(--kn-tray-h) + 12px);
+    }
+    .race-panel {
+      bottom: calc(var(--kn-ticker-h) + var(--kn-tray-h) + 12px);
+    }
+
+    /* Toasts float just over the arcade. */
+    .kn-toasts-host {
+      bottom: calc(var(--kn-ticker-h) + var(--kn-tray-h) + 12px);
+      z-index: 40;
+    }
+    /* The standing hint steps aside while the contestant sheet is up. */
+    .kn-hud:has(.kn-card.sheet) .kn-toast.hint {
+      display: none;
+    }
+    .kn-toast {
+      max-width: calc(100vw - 24px);
+      padding: 8px 16px 10px 14px;
+    }
+    .kn-toast-h {
+      font-size: 17px;
+    }
+    .kn-toast.hint {
+      padding: 6px 14px 8px;
+      .kn-toast-h {
+        display: none;
+      }
+    }
+    .kn-toast-t {
+      font-size: 12.5px;
+    }
+
+    /* AI News Karaoke: two lines of lyrics, the label stuck on the top edge. */
+    .kn-ticker {
+      padding: 4px 10px env(safe-area-inset-bottom);
+    }
+    .kn-label {
+      position: absolute;
+      left: 12px;
+      bottom: 100%;
+      padding: 3px 10px 2px;
+      border-radius: 8px 8px 0 0;
+      font-size: 12px;
+      box-shadow: none;
+    }
+    .kn-line {
+      padding-top: 10px;
+    }
+
+    /* The cards. */
+    .kn-backdrop {
+      padding: 8px;
+    }
+    .kn-event-title {
+      margin: 10px 12px 6px;
+      font-size: 21px;
+    }
+    .kn-event-body {
+      margin: 0 12px 10px;
+      font-size: 14px;
+    }
+    .kn-choices,
+    .kn-outcome-buttons,
+    .kn-score-board,
+    .kn-paddles {
+      margin-left: 10px;
+      margin-right: 10px;
+    }
+    .kn-paddles {
+      margin-bottom: 10px;
+    }
+    .kn-choice-text b {
+      font-size: 15px;
+    }
+    .kn-score-board {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .kn-outcome-buttons {
+      flex-direction: column-reverse;
+    }
+    .kn-era-card .kn-screen {
+      padding: 12px 12px 14px;
+    }
+    .kn-era-num {
+      font-size: 92px;
+    }
+    .kn-era-title {
+      font-size: 26px;
+    }
+    .kn-era-line {
+      font-size: 14.5px;
+    }
+    .kn-era-list li {
+      font-size: 13.5px;
     }
   }
 }

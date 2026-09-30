@@ -3,7 +3,7 @@
 import type { CSSProperties } from "react";
 import { useT } from "../context";
 import type { SlotPropsMap } from "../types";
-import { BuildIcon, buttonColours, D } from "./art";
+import { BuildIcon, buttonColours } from "./art";
 
 export function BuildBar({ items, tip, actions }: SlotPropsMap["BuildBar"]) {
   const t = useT();
@@ -12,7 +12,7 @@ export function BuildBar({ items, tip, actions }: SlotPropsMap["BuildBar"]) {
       {tip && (
         <div className="kn-tip" role="status">
           <b>
-            <D>{tip.name}</D>
+            {tip.name}
           </b>
           <span>{tip.text}</span>
           {tip.upkeepText && <small>{tip.upkeepText}</small>}
@@ -40,7 +40,7 @@ export function BuildBar({ items, tip, actions }: SlotPropsMap["BuildBar"]) {
               <span className="kn-lcd">
                 <b>{it.short}</b>
                 <span className={it.free ? "free" : ""}>
-                  <D>{it.isBulldoze ? "50% BACK" : it.free ? t("build.free") : it.priceText.toUpperCase()}</D>
+                  {it.isBulldoze ? "50% BACK" : it.free ? t("build.free") : it.priceText.toUpperCase()}
                 </span>
               </span>
             </button>

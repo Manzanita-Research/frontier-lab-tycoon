@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import type { SlotPropsMap } from "../types";
 import type { ToastVM } from "../../ui/hud/types";
-import { D, Note, Star } from "./art";
+import { Note, Star } from "./art";
 
 /** What a toast is called: a release gets the stars, everything else a karaoke word for its mood. */
 function heading(toast: ToastVM): ReactNode {
@@ -68,7 +68,7 @@ export function Bubble({ bubble }: SlotPropsMap["Bubble"]) {
     <div className={`bubble kn-bubble bubble-${bubble.kind}`}>
       <div className="kn-bub-body">
         <span className="kn-bub-who">
-          <D>{who}</D>
+          {who}
         </span>
         {bubble.text}
       </div>
