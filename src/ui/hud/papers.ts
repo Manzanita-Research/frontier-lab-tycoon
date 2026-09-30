@@ -3,8 +3,9 @@
 // stable across frames, saves and screenshots without drawing a random number.
 import type { Snapshot } from "../../app/hud";
 import { AGENT_NICKNAMES, FIRST_NAMES, LAST_NAMES, RIVAL_SHORT } from "../../content/names";
+import { RIVAL_BY_ID, type RivalId } from "../../content/rivals";
 import {
-  ARXIVE_BANNER, ARXIVE_FILLER, AWARD_BUTTONS, AWARD_FOOT, DROP_BUTTONS, POLICY_COPY, PRESSURE_LINES, SCOOP_BUTTONS, SCOOP_TITLES,
+  ARXIVE_BANNER, ARXIVE_FILLER, AWARD_BUTTONS, AWARD_FOOT, DROP_BUTTONS, PAPERS_NONE, POLICY_COPY, PRESSURE_LINES, SCOOP_BUTTONS, SCOOP_TITLES,
 } from "../../content/paperDesk";
 import type { PaperMomentVM, PaperRowVM, PapersVM, PublicationPolicyVM } from "./types";
 
@@ -44,7 +45,7 @@ function statusOf(p: PaperView): Pick<PaperRowVM, "statusText" | "tone"> {
       return { statusText: "Draft · waiting on you", tone: "neutral" };
     case "review":
       return p.scoopedBy
-        ? { statusText: `Scooped by ${p.scoopedBy} · still in review`, tone: "bad" }
+        ? { statusText: `Scooped by ${rivalName(p.scoopedBy)} · still in review`, tone: "bad" }
         : { statusText: `In review at ${p.venue} · ${p.daysLeft ?? 0} day${p.daysLeft === 1 ? "" : "s"} left`, tone: "neutral" };
     case "published":
       return p.route === "preprint" ? { statusText: "On arXive", tone: "good" } : { statusText: `Published at ${p.venue}`, tone: "good" };
@@ -69,7 +70,7 @@ export function paperRow(p: PaperView, day: number): PaperRowVM {
     reviewPct: p.status === "review" && span > 0 ? Math.max(0, Math.min(1, 1 - (p.daysLeft ?? 0) / span)) : null,
     citationsText: `${count(citations)} citation${citations === 1 ? "" : "s"}`,
     award: p.award,
-    scoopedBy: p.scoopedBy,
+    scoopedBy: p.scoopedBy && rivalName(p.scoopedBy),
     canPublish: p.status === "draft",
   };
 }
@@ -91,12 +92,14 @@ export function papersOf(snap: Snapshot, earned: boolean, open: boolean): Papers
     recruitingText: `Recruiting pull ${v.recruitingPull.toFixed(2)}×`,
     pressure,
     pressureText: PRESSURE_LINES.find(([at]) => pressure >= at)?.[1] ?? "",
-    summary: `${drafts} draft${drafts === 1 ? "" : "s"} · ${review} in review · ${out} out`,
+    summary: list.length === 0 ? PAPERS_NONE : `${drafts} draft${drafts === 1 ? "" : "s"} · ${review} in review · ${out} out`,
     drafts,
     papers: sorted.map((p) => paperRow(p, snap.day)),
   };
 }
 
+/** A rival's display name from its id (the sim stores ids). */
+const rivalName = (id: string) => RIVAL_BY_ID[id as RivalId]?.short ?? id;
 const rivalBy = (n: number) => `${pick(RIVAL_SHORT, n, 3)} et al.`;
 
 /** The newest moment still on screen: an award beats a scoop beats a drop on the same day. */
@@ -126,7 +129,7 @@ export function paperMomentOf(snap: Snapshot, earned: boolean, dismissed: readon
     return { ...base, listing: [...others.slice(start, start + 2), mine, ...others.slice(start + 2, start + 4)], headline: `${snap.labName} drops '${paper.title}' on arXive`, note: ARXIVE_BANNER, buttons: [...DROP_BUTTONS] };
   }
   if (m.kind === "scoop") {
-    const rival = m.p.scoopedBy!;
+    const rival = rivalName(m.p.scoopedBy!);
     const minute = pad(hash(m.p.id, 11) % 60, 2);
     return {
       ...base,

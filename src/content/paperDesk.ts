@@ -10,6 +10,9 @@ export const POLICY_COPY = {
 } as const;
 
 /** How loudly the researchers want to publish, by publish pressure (0 to 1). */
+/** The summary before the lab has written anything up. */
+export const PAPERS_NONE = "Nothing written up yet. Suspicious, for a lab.";
+
 export const PRESSURE_LINES: readonly [number, string][] = [
   [0.75, "Researchers are drafting an open letter about the open letters"],
   [0.5, "Researchers keep leaving LaTeX open on shared screens"],

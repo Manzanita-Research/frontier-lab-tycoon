@@ -2911,8 +2911,15 @@
       align-items: center;
       min-height: 26px;
     }
-    .f95-facts {
-      margin: 0;
+  }
+  .f95-papers-facts {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+    .f95-papers-rep {
+      padding: 2px 8px;
+      font-family: var(--flt-font-numbers);
+      font-size: 22px;
     }
   }
   .f95-papers-blurb {

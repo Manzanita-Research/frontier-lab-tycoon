@@ -14,7 +14,7 @@
   text-align: left;
 }
 .papers-chip span {
-  font-size: 11px;
+  font-size: 13px;
   opacity: 0.75;
 }
 .papers-chip.has-drafts b::after {
@@ -29,7 +29,7 @@
   max-height: 46vh;
   padding: 8px 10px;
   color: var(--flt-color-text);
-  font-size: 12px;
+  font-size: 14px;
 }
 .papers-head {
   display: flex;
@@ -38,7 +38,7 @@
 }
 .papers-summary {
   flex: 1;
-  font-size: 11px;
+  font-size: 13px;
   opacity: 0.7;
 }
 .papers-x {
@@ -72,20 +72,20 @@
 }
 .papers-blurb {
   margin: 0;
-  font-size: 11px;
+  font-size: 13px;
   opacity: 0.8;
 }
 .papers-facts {
   display: flex;
   justify-content: space-between;
-  font-size: 11px;
+  font-size: 13px;
 }
 .papers-pressure {
   display: grid;
   grid-template-columns: auto 1fr;
   align-items: center;
   gap: 2px 6px;
-  font-size: 11px;
+  font-size: 13px;
 }
 .papers-pressure small {
   grid-column: 1 / -1;
@@ -124,7 +124,7 @@
   display: flex;
   justify-content: space-between;
   gap: 6px;
-  font-size: 10px;
+  font-size: 12px;
 }
 .paper-id {
   font-family: var(--flt-font-mono);
@@ -141,12 +141,12 @@
   font-weight: 800;
 }
 .paper-title {
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.2;
 }
 .paper-byline,
 .paper-cites {
-  font-size: 10px;
+  font-size: 12px;
   opacity: 0.7;
 }
 .paper-actions {
@@ -162,7 +162,7 @@
   color: var(--flt-color-accentText);
   font: inherit;
   font-weight: 800;
-  font-size: 11px;
+  font-size: 13px;
   cursor: pointer;
 }
 .paper-go.plain {
@@ -171,7 +171,7 @@
 }
 .papers-empty {
   margin: 4px 0;
-  font-size: 11px;
+  font-size: 13px;
   opacity: 0.7;
 }
 
@@ -182,7 +182,7 @@
 .arxive {
   border: 1px solid color-mix(in srgb, var(--flt-color-line) 40%, transparent);
   background: var(--flt-color-panel);
-  font-size: 12px;
+  font-size: 14px;
 }
 .arxive-load {
   padding: 4px 8px;
@@ -215,10 +215,10 @@
 }
 .arxive-id {
   font-family: var(--flt-font-mono);
-  font-size: 10px;
+  font-size: 12px;
 }
 .arxive-by {
-  font-size: 10px;
+  font-size: 12px;
 }
 .arxive-you {
   align-self: flex-start;
@@ -228,7 +228,7 @@
   color: var(--flt-color-accentText);
   font-style: normal;
   font-weight: 800;
-  font-size: 10px;
+  font-size: 12px;
   text-transform: uppercase;
 }
 .scoop {
@@ -252,13 +252,13 @@
   opacity: 0.75;
 }
 .scoop-label {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
   text-transform: uppercase;
 }
 .scoop-stamp {
   font-family: var(--flt-font-mono);
-  font-size: 11px;
+  font-size: 13px;
 }
 .scoop-gap {
   display: flex;
@@ -266,7 +266,7 @@
   justify-content: center;
   text-align: center;
   max-width: 96px;
-  font-size: 11px;
+  font-size: 13px;
 }
 .scoop-gap b {
   color: var(--flt-color-bad);
@@ -291,13 +291,13 @@
 }
 .cert-small {
   font-style: italic;
-  font-size: 12px;
+  font-size: 14px;
 }
 .cert-title {
   font-size: 16px;
 }
 .cert-by {
-  font-size: 11px;
+  font-size: 13px;
 }
 .cert-award {
   color: #8a5a00;
@@ -305,7 +305,7 @@
 }
 .cert-foot {
   margin-top: 4px;
-  font-size: 10px;
+  font-size: 12px;
   opacity: 0.8;
 }
 .moment-buttons {
@@ -321,7 +321,7 @@
 /* ---- The investigation evidence (inside the collusion-sign card) ---- */
 .evidence {
   margin: 8px 0 10px;
-  font-size: 12px;
+  font-size: 14px;
 }
 .evidence-top {
   display: flex;
@@ -337,7 +337,7 @@
 }
 .evidence-label {
   margin-top: 6px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
   text-transform: uppercase;
   opacity: 0.7;
@@ -349,7 +349,7 @@
   overflow: hidden;
   background: #101410;
   color: #7dff9a;
-  font: 10px/1.45 var(--flt-font-mono);
+  font: 12px/1.45 var(--flt-font-mono);
   white-space: pre;
   text-overflow: ellipsis;
 }
@@ -365,7 +365,7 @@
 .wiki-url {
   padding: 5px 12px;
   background: var(--flt-color-inset);
-  font: 11px var(--flt-font-mono);
+  font: 13px var(--flt-font-mono);
   border-bottom: 1px solid color-mix(in srgb, var(--flt-color-line) 30%, transparent);
   overflow: hidden;
   white-space: nowrap;
@@ -373,7 +373,7 @@
 }
 .wiki {
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 13px;
+  font-size: 15px;
   color: var(--flt-color-text);
 }
 .wiki-front {
@@ -398,14 +398,14 @@
 }
 .wiki-front p {
   margin: 0;
-  font-size: 12px;
+  font-size: 14px;
 }
 .wiki-classified {
   display: inline-block;
   margin-top: 6px;
   padding: 3px 8px;
   border: 1px dashed #111;
-  font-size: 11px;
+  font-size: 13px;
 }
 .wiki-banner {
   padding: 6px 10px;
@@ -421,7 +421,7 @@
 }
 .wiki-site {
   margin: 8px 0 4px;
-  font-size: 11px;
+  font-size: 13px;
   font-style: italic;
   opacity: 0.7;
 }
@@ -439,38 +439,42 @@
 .wiki-talk h4,
 .wiki-side h4 {
   margin: 8px 0 2px;
-  font-size: 12px;
+  font-size: 14px;
 }
 .wiki-talk p {
   margin: 2px 0;
-  font-size: 12px;
+  font-size: 14px;
 }
 .wiki-heartbeat {
   margin: 0;
   padding: 4px 6px;
   background: var(--flt-color-inset);
-  font: 11px var(--flt-font-mono);
+  font: 13px var(--flt-font-mono);
   white-space: pre-wrap;
 }
 .wiki-history,
 .wiki-pages {
   margin: 0;
   padding-left: 14px;
-  font-size: 10px;
+  font-size: 12px;
 }
 .wiki-pages {
   font-family: var(--flt-font-mono);
 }
 .wiki-cost {
   margin-top: 10px;
-  font-size: 12px;
+  font-size: 14px;
 }
 .wiki-cost ul {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 12px;
+  gap: 4px 16px;
   margin: 2px 0 0;
-  padding-left: 14px;
+  padding: 0;
+  list-style: none;
+}
+.wiki-cost li::before {
+  content: "• ";
 }
 @media (max-width: 560px) {
   .wiki-cols {

@@ -4,7 +4,7 @@ import { CrumbWikiBody, Dialog, PaperMomentBody, useAutoPause } from "../kit";
 import { useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import { Ico } from "./icons";
-import { Blocks, Btn, Win } from "./parts";
+import { Blocks, Btn, Field, Win } from "./parts";
 import { useStackWindow } from "./stack";
 
 /** "Publish or Perish": the policy as radio buttons, the reputation, the pressure bar and every paper, drafts first. */
@@ -38,18 +38,14 @@ export function Papers({ papers, actions }: SlotPropsMap["Papers"]) {
             </label>
           ))}
         </fieldset>
-        <dl className="f95-facts small">
-          <div>
-            <dt>{t("papers.reputation")}</dt>
-            <dd className="inset">{papers.reputation}</dd>
-          </div>
-          <div>
-            <dt>{t("papers.pressure")}</dt>
-            <dd>
-              <Blocks value={papers.pressure} label={papers.pressureText} tone="red" />
-            </dd>
-          </div>
-        </dl>
+        <div className="f95-papers-facts">
+          <Field label={t("papers.reputation")}>
+            <span className="inset f95-papers-rep">{papers.reputation}</span>
+          </Field>
+          <Field label={t("papers.pressure")} sub={papers.pressureText} warn={papers.pressure >= 0.7}>
+            <Blocks value={papers.pressure} label={papers.pressureText} tone="red" />
+          </Field>
+        </div>
       </div>
       {active && <p className="f95-papers-blurb">{active.blurb}</p>}
       <div className="f95-papers-list inset" role="list" aria-label={t("papers.title")}>
@@ -112,7 +108,7 @@ export function PaperMoment({ moment, actions }: SlotPropsMap["PaperMoment"]) {
           <Ico name={MOMENT_ICON[moment.kind]} size={36} />
           <div>
             <h2>{moment.headline}</h2>
-            <p>{t(`moment.${moment.kind}`)}</p>
+            {moment.kind !== "drop" && <p>{t(`moment.${moment.kind}`)}</p>}
           </div>
         </div>
         <div className="f95-moment-page inset">
