@@ -1,6 +1,6 @@
 // Small helpers the sim tests share. Not game code.
-import { BUILDINGS, type PlaceableKind } from "../content/buildings";
-import { eventById } from "../content/events";
+import type { PlaceableKind } from "../content/buildings";
+import { defs } from "./defs";
 import { canPlace, type Command } from "./commands";
 import { openEventOf } from "./events";
 import { applyNow, TICKS_PER_DAY, tick } from "./tick";
@@ -27,7 +27,7 @@ export function createTestCampus(seed = 1): GameState {
   for (let x = 8; x <= 15; x++) path(x, 10);
   s.buildings = [];
   for (const [kind, x, z] of [["cluster", 8, 11], ["hall", 12, 11], ["kombucha", 12, 19]] as const) {
-    const [w, d] = BUILDINGS[kind].size;
+    const [w, d] = defs().buildings[kind].size;
     s.buildings.push({ id: s.nextId++, kind, x, z, w, d, placedTick: 0, reliability: 1, broken: false, brokenTick: 0 });
     s.flags[`built:${kind}`] = 0;
   }
@@ -61,7 +61,7 @@ export function answer(s: GameState, pick: number | ((id: string, choices: numbe
   if (pendingConfirmOf(s)) return [{ type: "cancelConfirm" }];
   const open = openEventOf(s);
   if (!open) return [];
-  const choices = eventById(open.id)!.choices.length;
+  const choices = defs().eventById(open.id)!.choices.length;
   const choiceIndex = typeof pick === "function" ? pick(open.id, choices) : pick;
   return [{ type: "chooseEvent", eventId: open.id, choiceIndex: Math.min(choiceIndex, choices - 1) }];
 }
@@ -91,5 +91,5 @@ export function layPaths(s: GameState) {
   s.version++;
 }
 
-export const price = (kind: PlaceableKind) => BUILDINGS[kind].price;
+export const price = (kind: PlaceableKind) => defs().buildings[kind].price;
 export const countOf = (s: GameState, kind: string) => s.buildings.filter((b) => b.kind === kind).length;

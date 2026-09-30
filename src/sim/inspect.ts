@@ -1,12 +1,11 @@
 // What the inspector card shows about one walker: a plain snapshot, so React never touches the live World.
-import { BUILDINGS } from "../content/buildings";
 import { NEEDS, NEEDS_BY_KIND, type NeedKey } from "../content/needs";
 import type { MoodLevel } from "./machines/mood";
 import { formatDate } from "./format";
 import { thoughtOf } from "./mind";
 import { happinessOf } from "./needs";
 import type { GameState, Walker, WalkerKind } from "./types";
-import { RIVAL_SHORT } from "../content/names";
+import { defs } from "./defs";
 
 export interface NeedBar {
   key: NeedKey;
@@ -38,7 +37,7 @@ const times = (n: number) => (n === 1 ? "once" : n === 2 ? "twice" : `${n} times
 /** What they are up to, in a few words. */
 export function statusOf(state: GameState, w: Walker): string {
   const building = w.targetId > 0 ? state.buildings.find((b) => b.id === w.targetId) : undefined;
-  const name = building ? BUILDINGS[building.kind].name : "";
+  const name = building ? defs().buildings[building.kind].name : "";
   switch (w.machine.value) {
     case "arriving":
       return w.kind === "researcher" ? "Here for an interview" : w.kind === "visitor" ? "Just arrived" : "Booting up";
@@ -76,7 +75,7 @@ function historyOf(state: GameState, w: Walker): [string, string, string] {
       ];
       habits.sort((a, b) => b[0] - a[0]);
       const top = habits[0]![0] > 0 ? habits[0]![1] : "Has not had a proper break yet";
-      const offer = stats.offers > 0 ? `Turned down ${RIVAL_SHORT[stats.rival] ?? "a rival"} ${times(stats.offers)}` : habits[1]![0] > 0 ? habits[1]![1] : "Has never been poached. Asks about it weekly";
+      const offer = stats.offers > 0 ? `Turned down ${defs().names.RIVAL_SHORT[stats.rival] ?? "a rival"} ${times(stats.offers)}` : habits[1]![0] > 0 ? habits[1]![1] : "Has never been poached. Asks about it weekly";
       return [`Joined ${when}`, top, offer];
     }
     case "visitor": {

@@ -4,12 +4,12 @@ import { pressureReady } from "../tutorial";
 // (open-weights drop, compute auction, funding round). The rivals and the era are machines; this applies what
 // they emit to the World, draws the dice and pre-rolls them into the events, in a fixed order.
 import { eraDef } from "../../content/eras";
-import { HEADLINES, type NewsTrigger } from "../../content/headlines";
-import { RIVAL_BY_ID, type RivalDef, type RivalId } from "../../content/rivals";
+import type { NewsTrigger } from "../../content/headlines";
+import type { RivalDef, RivalId } from "../../content/rivals";
 import type { EmittedFrom } from "xstate";
 import { fillTemplate } from "../format";
 import { step } from "../machines/run";
-import { addNews, addToast, templateVars } from "../news";
+import { addNews, addToast, headlinePool, templateVars } from "../news";
 import type { Rng } from "../rng";
 import type { GameState } from "../types";
 import { resign } from "../walkers";
@@ -20,6 +20,7 @@ import { eraMachine, eraNumber } from "./era";
 import { fundingDue, openDropActive, OPEN_DROP_DAYS, raceVars } from "./finance";
 import { rdMultiplier } from "./rd";
 import { rivalMachine } from "./rival";
+import { defs } from "../defs";
 
 /** Cash a poach costs: the recruiter's fee for the replacement. */
 export const POACH_FEE = 100_000;
@@ -38,7 +39,7 @@ export const eraOfState = (state: GameState): number => eraNumber(state.race.era
 
 /** Headline from the shared pool for `trigger`, with the race's variables, avoiding what the ticker just showed. */
 export function raceNews(state: GameState, rng: Rng, trigger: NewsTrigger, vars: Record<string, string> = {}) {
-  const pool = HEADLINES.filter((h) => h.trigger === trigger);
+  const pool = headlinePool(state, rng, trigger);
   if (pool.length === 0) return;
   const shown = new Set(state.news.map((n) => n.text));
   const all = { ...templateVars(state, { rival: vars.rival, model: vars.model }, rng), ...raceVars(state), ...vars };
@@ -63,7 +64,7 @@ export function dailyRace(state: GameState, rng: Rng) {
   }
 
   if (race.openDrop && state.day >= race.openDrop.until) {
-    addToast(state, `${RIVAL_BY_ID[race.openDrop.rival as RivalId]?.name ?? "The rival"}'s free model has settled in. Revenue is back.`, "good");
+    addToast(state, `${defs().rivalById[race.openDrop.rival as RivalId]?.name ?? "The rival"}'s free model has settled in. Revenue is back.`, "good");
     race.openDrop = null;
   }
   if (state.day > 0 && state.day % 7 === 0) weekly(state, rng);
@@ -99,7 +100,7 @@ export function weekly(state: GameState, rng: Rng) {
   const era = eraDef(eraOfState(state));
   for (let i = 0; i < race.rivals.length; i++) {
     const before = race.rivals[i]!;
-    const def = RIVAL_BY_ID[before.context.id as RivalId];
+    const def = defs().rivalById[before.context.id as RivalId];
     const event = {
       type: "WEEK" as const,
       week: race.week,
@@ -132,7 +133,7 @@ export function weekly(state: GameState, rng: Rng) {
     raceNews(state, rng, "rankDown", { rank: String(rank) });
     if (rank - before >= 2) addToast(state, `Down ${rank - before} places: #${rank} on the Arena.`, "bad");
   } else if (rng.chance(0.5)) {
-    raceNews(state, rng, "weekly", { rival: RIVAL_BY_ID[rng.pick(race.rivals).context.id as RivalId].name });
+    raceNews(state, rng, "weekly", { rival: defs().rivalById[rng.pick(race.rivals).context.id as RivalId].name });
   }
   if (rng.chance(0.4)) raceNews(state, rng, `era:${eraOfState(state)}` as NewsTrigger);
 }

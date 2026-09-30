@@ -1,14 +1,16 @@
 import { enableLeapfrog } from "./race/leapfrog/driver";
 import { enablePapers } from "./race/papers/driver";
-import { BUILDINGS, type BuildingKind } from "../content/buildings";
+import type { BuildingKind } from "../content/buildings";
 import { STAFF } from "../content/staff";
-import { HUD_PANELS, PROGRESSION, type HudPanel, type Level, type ProgressView, type SystemId } from "../content/progression";
+import { HUD_PANELS, type HudPanel, type Level, type ProgressView, type SystemId } from "../content/progression";
 import { progressionMachine } from "./machines/progression";
 import { step } from "./machines/run";
+import { defs } from "./defs";
 import type { GameState, StaffJob } from "./types";
 
-type ProgressState = Pick<GameState, "progression" | "progressionContent">;
-const rows = (s: ProgressState) => s.progressionContent ?? PROGRESSION;
+type ProgressState = Pick<GameState, "progression">;
+// The ladder is content: a mod can retune a goal or move an unlock (FLT-37).
+const rows = (_s: ProgressState) => defs().progression;
 export const levelOf = (s: ProgressState): Level => (s.progression?.context.level ?? 5) as Level;
 const unlockedRows = (s: ProgressState) => rows(s).filter((r) => r.level <= levelOf(s));
 export const systemUnlocked = (s: ProgressState, id: SystemId): boolean => !s.progression || unlockedRows(s).some((r) => r.systems.includes(id));
@@ -16,7 +18,7 @@ export const staffUnlocked = (s: GameState, job: StaffJob): boolean => !s.progre
 // Offices are hidden infrastructure created by incident verbs, not palette unlocks.
 export const buildingUnlocked = (s: GameState, kind: BuildingKind): boolean => !s.progression ||
   unlockedRows(s).some((r) => r.buildings.includes(kind)) ||
-  (BUILDINGS[kind].office === true && (systemUnlocked(s, "disasters") || systemUnlocked(s, "collusion"))) ||
+  (defs().buildings[kind]?.office === true && (systemUnlocked(s, "disasters") || systemUnlocked(s, "collusion"))) ||
   (levelOf(s) >= 4 && s.flags[`unlocked:${kind}`] !== undefined);
 function goalValue(s: GameState) {
   const goal = rows(s).find((r) => r.level === levelOf(s))!.goal;
@@ -29,7 +31,7 @@ export function progressOf(s: GameState): ProgressView {
   const active = rows(s).find((r) => r.level === level)!;
   const { current } = goalValue(s);
   return { level, levelName: active.name,
-    unlocked: { buildings: [...new Set([...unlockedRows(s).flatMap((r) => [...r.buildings]), ...Object.keys(BUILDINGS).filter((k) => level >= 4 && s.flags[`unlocked:${k}`] !== undefined) as BuildingKind[]])], staff: unlockedRows(s).flatMap((r) => [...r.staff]), systems: unlockedRows(s).flatMap((r) => [...r.systems]) },
+    unlocked: { buildings: [...new Set([...unlockedRows(s).flatMap((r) => [...r.buildings]), ...defs().buildingKinds.filter((k) => level >= 4 && s.flags[`unlocked:${k}`] !== undefined) as BuildingKind[]])], staff: unlockedRows(s).flatMap((r) => [...r.staff]), systems: unlockedRows(s).flatMap((r) => [...r.systems]) },
     goal: { text: active.goal.text, current, target: active.goal.target },
     teasers: rows(s).filter((r) => r.level > level).flatMap((r) => [...r.buildings, ...r.staff].map(() => ({ label: "???", hint: active.goal.text }))),
   };
@@ -47,7 +49,7 @@ export function updateProgression(s: GameState) {
     const row = rows(s).find((r) => r.level === event.level)!;
     if (row.systems.includes("leapfrog") && !s.flags.leapfrogOff) enableLeapfrog(s);
     if (row.systems.includes("papers") && !s.flags.papersOff) enablePapers(s);
-    const items = [...row.buildings.map((k) => BUILDINGS[k].name), ...row.staff.map((k) => STAFF[k].title), ...row.systems];
+    const items = [...row.buildings.map((k) => defs().buildings[k]?.name ?? k), ...row.staff.map((k) => STAFF[k].title), ...row.systems];
     s.unlockCards ??= [];
     s.unlockCards.push({ id: row.id, title: `New! ${row.name}`, body: row.goal.text, items });
   }

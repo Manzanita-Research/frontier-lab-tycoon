@@ -1,17 +1,17 @@
 // Staging for `?disaster=<id>` (the dev hook and the screenshot script): the game is set up a moment before something is worth
 // looking at. Pure sim and deterministic, like sim/opsDemo.ts; the game itself never uses it.
-import { eventById } from "../../content/events";
 import type { Command } from "../commands";
 import { openEventOf } from "../events";
 import { applyNow, tick } from "../tick";
 import type { GameState } from "../types";
 import { triggerDisaster } from "./driver";
+import { defs } from "../defs";
 
 /** The command that answers the open card with choice `pick` (or nothing when no card is open). */
 function answerWith(s: GameState, pick: number): Command[] {
   const open = openEventOf(s);
   if (!open) return [];
-  return [{ type: "chooseEvent", eventId: open.id, choiceIndex: Math.min(pick, eventById(open.id)!.choices.length - 1) }];
+  return [{ type: "chooseEvent", eventId: open.id, choiceIndex: Math.min(pick, defs().eventById(open.id)!.choices.length - 1) }];
 }
 
 /**

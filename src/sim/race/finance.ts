@@ -1,11 +1,12 @@
 // Money in the race: what the revenue factor is, what a funding round is worth, what an auction costs.
-import { arenaScore, RIVAL_BY_ID, YOU, type RivalId } from "../../content/rivals";
+import { arenaScore, YOU, type RivalId } from "../../content/rivals";
 import { formatMoney, runwayMonths } from "../format";
 import type { GameState } from "../types";
 import { rankOf } from "./arena";
 import { valuationFactor } from "./leapfrog/factors";
 import { leapfrogVars } from "./leapfrog/vars";
 import { evalBonus } from "../collusion/scores";
+import { defs } from "../defs";
 
 /** Revenue while an open-weights rival is eating it. */
 export const OPEN_DROP_FACTOR = 0.7;
@@ -60,7 +61,7 @@ export function raceVars(state: GameState): Record<string, string> {
   const { race } = state;
   const top = race.board.find((r) => r.id !== YOU)!;
   const drop = race.openDrop;
-  const nameOf = (id: string) => RIVAL_BY_ID[id as RivalId]?.name ?? id;
+  const nameOf = (id: string) => defs().rivalById[id as RivalId]?.name ?? id;
   const rivalScore = drop ? (race.board.find((r) => r.id === drop.rival)?.score ?? 0) : 0;
   const mine = arenaScore(state.capability, state.hype);
   return {

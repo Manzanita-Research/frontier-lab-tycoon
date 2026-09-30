@@ -1,7 +1,7 @@
 // A headless Release Leapfrog run: a scripted, sensible player plays a lab for N days with the pack on and the report says
 // what happened (the launch rhythm, the cards, the records, the saturations, the news cycle). Used by the tests and,
 // with LEAPFROG_REPORT=1, to write the sim report that goes in the PR. Not game code.
-import { BUILDINGS, type PlaceableKind } from "../../../content/buildings";
+import type { PlaceableKind } from "../../../content/buildings";
 import { BENCH_BY_ID } from "../../../content/leapfrog";
 import { openEventOf } from "../../events";
 import { pendingConfirmOf } from "../../guardrails";
@@ -16,6 +16,7 @@ import type { GameState } from "../../types";
 import { eraOfState } from "../race";
 import { enableLeapfrog } from "./driver";
 import { leapfrogView, type LeapfrogView } from "./view";
+import { defs } from "../../defs";
 
 const RESERVE = 400_000;
 
@@ -108,7 +109,7 @@ export function runHeadless(seed: number, opts: HeadlessOptions = {}): HeadlessR
       else if (clusters + 6 * datacenters < 3 * halls) kind = "cluster";
       else if (halls < Math.min(7, 3 + Math.floor(s.day / 90))) kind = "hall";
       else if (clusters < 12) kind = "cluster";
-      if (kind && s.cash >= BUILDINGS[kind].price + RESERVE) {
+      if (kind && s.cash >= defs().buildings[kind].price + RESERVE) {
         const spot = findSpot(s, kind);
         if (spot) cmds.push({ type: "placeBuilding", kind, x: spot[0], z: spot[1] });
       }

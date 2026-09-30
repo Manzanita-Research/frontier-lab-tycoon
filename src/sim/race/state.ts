@@ -1,11 +1,11 @@
 // The race's slice of the World. Plain JSON, like everything in GameState.
-import { RIVAL_DEFS } from "../../content/rivals";
 import { arenaScore, YOU } from "../../content/rivals";
 import { initialStored } from "../machines/run";
 import type { GameState } from "../types";
 import { collusionScore } from "../collusion/scores";
 import { eraMachine, type EraStored } from "./era";
 import { rivalMachine, type RivalStored } from "./rival";
+import { defs } from "../defs";
 
 export interface BoardRow {
   id: string;
@@ -25,7 +25,7 @@ export interface RaceState {
   era: EraStored;
   /** The R&D multiplier as of the last daily check. */
   mult: number;
-  /** One machine per rival, in RIVAL_DEFS order. */
+  /** One machine per rival, in defs().rivals order. */
   rivals: RivalStored[];
   /** The Frontier Arena as of the last weekly update, best first. */
   board: BoardRow[];
@@ -63,7 +63,7 @@ export function rankBoard(state: Pick<GameState, "capability" | "hype"> & Partia
 export const ranksOf = (board: BoardRow[]): Record<string, number> => Object.fromEntries(board.map((r, i) => [r.id, i + 1]));
 
 export function createRace(state: Pick<GameState, "capability" | "hype">): RaceState {
-  const rivals = RIVAL_DEFS.map((d) =>
+  const rivals = defs().rivals.map((d) =>
     initialStored(rivalMachine, {
       id: d.id,
       personality: d.personality,

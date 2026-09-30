@@ -1,5 +1,6 @@
 import { Layer, Schema, Stream } from "effect";
 import { PROGRESSION } from "../content/progression";
+import { COACH } from "../content/coach";
 import { BUILDINGS, PATH_PRICE, BULLDOZE_REFUND } from "../content/buildings";
 import { EVENTS, EVENT_COOLDOWN_DAYS } from "../content/events";
 import { GOALS } from "../content/goals";
@@ -22,7 +23,7 @@ import { baseTables } from "./tables";
 import { Note } from "./schema";
 
 export const baseContent: ContentApi = {
-  progression: PROGRESSION,
+  progression: PROGRESSION, coach: COACH,
   buildings: BUILDINGS, rivals: RIVAL_DEFS, headlines: HEADLINES, thoughts: THOUGHTS, events: EVENTS, goals: GOALS,
   arcs: [], endings: [], tips: [],
   walkerKinds: [

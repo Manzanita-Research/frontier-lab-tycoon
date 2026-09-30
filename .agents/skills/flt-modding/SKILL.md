@@ -86,9 +86,10 @@ PNG/JPEG/WebP/GIF, fonts or GLB into data URLs (2 MiB aggregate; no remote asset
 ```json
 {"thoughts":{"add":[{"id":"dog-opinion","kind":"protester","when":"always","text":"I support open treats. I oppose closed doors."},{"id":"dog-water","kind":"protester","when":"protest","text":"Water bowl transparency NOW."}]}}
 ```
-4. A new building needs its entire data record.
+4. A new building needs its entire data record and a rung on the unlock ladder
+(`progression`), or the checker rejects it: a building no level unlocks could never be built.
 ```json
-{"buildings":{"add":[{"id":"opinion-booth","kind":"opinion-booth","name":"Opinion Booth","size":[1,1],"price":1000,"upkeepPerDay":10,"blurb":"Unlimited opinions. Two seats.","color":"#d8ac48","hosts":["researcher"],"capacity":2,"stay":[2,4],"serves":{"researcher":{"focus":0.2}}}]}}
+{"buildings":{"add":[{"id":"opinion-booth","kind":"opinion-booth","name":"Opinion Booth","size":[1,1],"price":1000,"upkeepPerDay":10,"blurb":"Unlimited opinions. Two seats.","color":"#d8ac48","hosts":["researcher"],"capacity":2,"stay":[2,4],"serves":{"researcher":{"focus":0.2}}}]},"progression":{"override":[{"id":"business","buildings":["gateway","kombucha","opinion-booth"]}]}}
 ```
 5. A two-step arc with a card; both records have unique ids. The card can be
 validated today; the arc-to-card params contract awaits M1b.

@@ -1,9 +1,10 @@
 // News ticker: event-driven headlines plus timed filler and rival releases.
-import { HEADLINES, type NewsTrigger } from "../content/headlines";
-import { RIVALS } from "../content/names";
+import type { NewsTrigger } from "../content/headlines";
 import type { Rng } from "./rng";
 import { fillTemplate, formatMoney } from "./format";
 import type { GameState, Tone } from "./types";
+import { defs, type HeadlineLine } from "./defs";
+import { STATS } from "./verbs";
 
 export interface NewsVars {
   model?: string;
@@ -29,7 +30,7 @@ export function templateVars(state: GameState, vars: NewsVars, rng: Rng): Record
   return {
     lab: state.labName,
     model: vars.model ?? state.models[state.models.length - 1] ?? state.training.context.name,
-    rival: vars.rival ?? rng.pick(RIVALS),
+    rival: vars.rival ?? rng.pick(defs().names.RIVALS),
     cash: formatMoney(state.cash),
     name: vars.name ?? "Someone",
     their: vars.their ?? "their",
@@ -38,9 +39,27 @@ export function templateVars(state: GameState, vars: NewsVars, rng: Rng): Record
   };
 }
 
+/** A mod headline's `when` (FLT-37). Base lines have none, so the base game never rolls a die here. */
+function holds(state: GameState, when: NonNullable<HeadlineLine["when"]>, rng: Rng): boolean {
+  if ("stat.gte" in when) {
+    const [stat, value] = when["stat.gte"];
+    const read = STATS[stat === "waterDiscourse" ? "discourse" : stat];
+    return read !== undefined && read(state, null) >= value;
+  }
+  if ("flag.is" in when) return (state.flags[when["flag.is"][0]] !== undefined) === when["flag.is"][1];
+  if ("day.after" in when) return state.day > when["day.after"];
+  return rng.chance(when.chance);
+}
+
+/** The headlines for a trigger whose conditions hold today, in content order. */
+export function headlinePool(state: GameState, rng: Rng, trigger: string): readonly HeadlineLine[] {
+  const all = defs().headlinesFor(trigger);
+  return all.some((h) => h.when) ? all.filter((h) => !h.when || holds(state, h.when, rng)) : all;
+}
+
 /** Picks a headline for the trigger, avoiding ones the ticker already showed. */
 export function pushNews(state: GameState, rng: Rng, trigger: NewsTrigger, vars: NewsVars = {}) {
-  const pool = HEADLINES.filter((h) => h.trigger === trigger);
+  const pool = headlinePool(state, rng, trigger);
   if (pool.length === 0) return;
   const shown = new Set(state.news.map((n) => n.text));
   for (let attempt = 0; attempt < 5; attempt++) {
@@ -61,8 +80,8 @@ export function dailyNews(state: GameState, rng: Rng) {
   }
   if (state.day >= (f.nextRival ?? 0)) {
     // Remembered for the crowd: researchers get a bout of fomo, and some turn down a call from this lab.
-    const rival = rng.pick(RIVALS);
-    f.rivalIndex = RIVALS.indexOf(rival);
+    const rival = rng.pick(defs().names.RIVALS);
+    f.rivalIndex = defs().names.RIVALS.indexOf(rival);
     f.rivalShippedDay = state.day;
     pushNews(state, rng, "rival", { rival });
     f.nextRival = state.day + rng.int(12, 20);

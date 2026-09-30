@@ -1,10 +1,9 @@
 // Pure presentation transforms. No sim mutation, random draws, clocks or browser APIs.
-import { EVENTS } from "../content/events";
-import { HEADLINES, type NewsTrigger } from "../content/headlines";
+import type { NewsTrigger } from "../content/headlines";
 import { LEAPFROG, type PackTrigger } from "../content/leapfrog";
 import { CLASSIFIEDS, DESK_STORIES, EVENT_STORY_KIND, REACTIONS, STORY_PRIORITY, type Friend, type StoryKind } from "../content/newsroom";
-import { RIVALS } from "../content/names";
 import type { NewsItem } from "../sim/types";
+import { defs } from "../sim/defs";
 
 export interface Story { id: number; day: number; text: string; kind: StoryKind }
 export interface FrontPage {
@@ -44,14 +43,16 @@ const pattern = (text: string, kind: StoryKind) => ({
   kind,
   re: new RegExp(`^${text.split(/\{\w+\}/).map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join(".+?")}$`),
 });
-const patterns = [
-  ...HEADLINES.map((h) => pattern(h.text, triggerKind(h.trigger))),
+// Built from the session's content (mods can add headlines and events), once per definition.
+let built: { from: ReturnType<typeof defs>; patterns: ReturnType<typeof pattern>[] } | null = null;
+const patternsOf = (d = defs()) => (built?.from === d ? built.patterns : (built = { from: d, patterns: [
+  ...d.headlines.map((h) => pattern(h.text, triggerKind(h.trigger))),
   ...LEAPFROG.headlines.map((h) => pattern(h.text, packKind(h.trigger))),
   ...LEAPFROG.mishaps.map((m) => pattern(m.headline, "cycle" as StoryKind)),
-  ...EVENTS.flatMap((e) => e.choices.flatMap((c) => c.effects.flatMap((f) => f.type === "news" ? [pattern(f.text, EVENT_STORY_KIND[e.id] ?? "filler")] : []))),
-];
+  ...d.events.flatMap((e) => e.choices.flatMap((c) => c.effects.flatMap((f) => f.type === "news" ? [pattern(f.text, EVENT_STORY_KIND[e.id] ?? "filler")] : []))),
+] }).patterns);
 export function storyFromNews(n: NewsItem): Story {
-  const match = patterns.find((p) => p.re.test(n.text));
+  const match = patternsOf().find((p) => p.re.test(n.text));
   const kind = match?.kind ?? (/breakdown|broke|offline|alarm/i.test(n.text) ? "breakdown" : /era|takeoff|explosion/i.test(n.text) ? "era" : /protest|water discourse/i.test(n.text) ? "protest" : "filler");
   return { id: n.id, day: n.day, text: n.text, kind };
 }
@@ -74,7 +75,7 @@ export function frontPage(stories: readonly Story[], day: number, lab: string): 
     caption: `${lab}, photographed at press time. The lawn remains cautiously optimistic.`,
     classified: CLASSIFIEDS[Math.floor(day / 7) % CLASSIFIEDS.length]!,
     // Fictional sentiment index, not simulated trading. Stable across reopening an edition.
-    stocks: RIVALS.slice(0, 4).map((name, i) => ({ name, price: (80 + ((day * 13 + i * 41) % 240) / 10).toFixed(2), change: ((day + i * 7) % 23) - 11 })),
+    stocks: defs().names.RIVALS.slice(0, 4).map((name, i) => ({ name, price: (80 + ((day * 13 + i * 41) % 240) / 10).toFixed(2), change: ((day + i * 7) % 23) - 11 })),
   };
 }
 

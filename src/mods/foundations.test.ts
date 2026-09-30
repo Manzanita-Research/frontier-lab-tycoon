@@ -18,7 +18,8 @@ import { Assets } from "./services/assets";
 import { Audio } from "./services/audio";
 import { GameEvents } from "./services/game-events";
 import { baseTables } from "./tables";
-import { runHeadless, injectDefinition } from "./headless";
+import { runHeadless } from "./headless";
+import { withDefs } from "../sim/defs";
 import { createInitialState } from "../sim/state";
 import steve from "../../mods/examples/every-lab-is-steve/mod.json";
 import headlines from "../../mods/examples/headline-pack/mod.json";
@@ -64,12 +65,14 @@ describe("mod foundations", () => {
       progression: { override: [{ id: "garage", goal: { text: "Ship two models", metric: "models", target: 2 } }] },
     })));
     const def = await resolve([manifest]);
-    const state = createInitialState(42);
-    expect(injectDefinition(state, def).applied).toContain("progression: unlock ladder");
-    state.models.push("Fixture-1"); updateProgression(state);
-    expect(progressOf(state)).toMatchObject({ level: 1, goal: { text: "Ship two models", target: 2 } });
-    state.models.push("Fixture-2"); updateProgression(state);
-    expect(progressOf(state).level).toBe(2);
+    const state = createInitialState(42, "garage", def);
+    withDefs(def, () => {
+      state.models.push("Fixture-1"); updateProgression(state);
+      expect(progressOf(state)).toMatchObject({ level: 1, goal: { text: "Ship two models", target: 2 } });
+      state.models.push("Fixture-2"); updateProgression(state);
+      expect(progressOf(state).level).toBe(2);
+    });
+    expect(baseContent.progression[0]?.goal.target).toBe(1);
     await expect(resolve([mod("missing-level", { progression: { remove: ["team"] } })])).rejects.toThrow();
   });
   it("wraps the supplied service, stacks in order, and preserves other services", async () => {
@@ -152,13 +155,12 @@ describe("mod foundations", () => {
       expect(report.ticks).toBe(365 * 20);
       expect(report.cardsAnswered).toBeGreaterThan(0);
       expect(report.state).toEqual(runHeadless(def).state);
-      expect(report.injection.deferred.length).toBeGreaterThan(0);
+      expect(report.coverage).toEqual({ executed: [input === steve ? "rivals" : "headlines"], inert: [] });
     }
   });
-  it("injects compatible rival and goal fields without altering global modules", async () => {
+  it("starts rivals and goals from the definition without altering global modules", async () => {
     const def = await resolve([mod("tuning", { rivals: { override: [{ id: "anthro", startCapability: 77, personality: { ...RIVAL_DEFS[0]!.personality, growth: 23 } }] }, goals: { override: [{ id: "release", target: 4 }] } })]);
-    const state = createInitialState(42);
-    expect(injectDefinition(state, def).applied).toHaveLength(2);
+    const state = createInitialState(42, "garage", def);
     expect(state.race.rivals[0]?.context.capability).toBe(77);
     expect(state.race.rivals[0]?.context.personality.growth).toBe(23);
     expect(state.goals.context.goals[0]?.target).toBe(4);

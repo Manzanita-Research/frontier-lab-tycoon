@@ -1,9 +1,9 @@
 // Playable v1's side of the snapshot, read defensively. The logic (FLT-49) puts `progress`, `coach`, `unlockCard` and `hud` on the
 // Snapshot; a snapshot without them (an older save, a debug link, a fixture that predates the ladder) means "everything is
 // earned and nobody is coaching", so the game plays as it always did. Pure: no atoms, no DOM.
-import { BUILDINGS } from "../../content/buildings";
 import { STAFF } from "../../content/staff";
 import type { CoachVM, HudPanelId, UnlockCardVM, VisibleVM } from "./types";
+import { defs } from "../../sim/defs";
 
 export const HUD_PANELS: readonly HudPanelId[] = ["revenue", "vibes", "arena", "rnd", "thoughts", "news", "staff", "events", "papers", "disasters"];
 
@@ -47,7 +47,7 @@ export function playableOf(snap: object): PlayableInput {
   return {
     level: progress?.level ?? 5,
     levelName: progress?.levelName ?? "",
-    buildings: new Set(progress ? progress.unlocked.buildings : [...Object.keys(BUILDINGS), "path"]),
+    buildings: new Set(progress ? progress.unlocked.buildings : [...Object.keys(defs().buildings), "path"]),
     staff: new Set(progress ? progress.unlocked.staff : Object.keys(STAFF)),
     systems: progress?.unlocked.systems ?? [],
     goal: progress?.goal ?? { text: "", current: 0, target: 1 },

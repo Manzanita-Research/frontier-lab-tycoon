@@ -1,8 +1,8 @@
 // What the race's cards do, beyond the effects any card can have (cash, hype, news, flags). One entry per choice
 // in content/events.ts; the driver draws the dice here, at the moment of the pick.
-import { BUILDINGS, RACE_KINDS, type BuildingKind } from "../../content/buildings";
+import type { BuildingKind } from "../../content/buildings";
 import type { RaceAction } from "../../content/events";
-import { RIVAL_BY_ID, type RivalId } from "../../content/rivals";
+import type { RivalId } from "../../content/rivals";
 import { eraDef } from "../../content/eras";
 import { canPlace, placeBuilding } from "../commands";
 import { formatMoney } from "../format";
@@ -13,6 +13,7 @@ import type { GameState } from "../types";
 import { bidAmount, auctionUnit, BID_MULTIPLES, raiseAmount, type Bid } from "./finance";
 import { eraOfState, raceNews } from "./race";
 import { rivalMachine } from "./rival";
+import { defs } from "../defs";
 
 /** Days between compute auctions at era 1; later eras run faster. */
 export const AUCTION_GAP_DAYS = 40;
@@ -39,7 +40,7 @@ export function applyRaceAction(state: GameState, rng: Rng, action: RaceAction) 
       const id = race.openDrop?.rival ?? "sirocco";
       state.flags.openModel = state.day;
       shockRival(state, id, { capability: 0, hype: -15, momentum: -0.45 });
-      addToast(state, `${RIVAL_BY_ID[id as RivalId]?.name ?? "The rival"} loses momentum. The community is 'cautiously into it'.`, "good");
+      addToast(state, `${defs().rivalById[id as RivalId]?.name ?? "The rival"} loses momentum. The community is 'cautiously into it'.`, "good");
       return;
     }
     case "safetyConcerns":
@@ -74,7 +75,7 @@ const centre = (state: GameState): [number, number] => {
 
 /** The free spot nearest the middle of the campus that fits `kind` and touches a path, or null if it is full. */
 export function findSpot(state: GameState, kind: BuildingKind): [number, number] | null {
-  const [w, d] = BUILDINGS[kind].size;
+  const [w, d] = defs().buildings[kind].size;
   const [cx, cz] = centre(state);
   let best: [number, number] | null = null;
   let bestDist = Infinity;
@@ -93,7 +94,7 @@ export function findSpot(state: GameState, kind: BuildingKind): [number, number]
 
 /** The auction is won: unlock the race's buildings, and place a free Datacenter (or hand over the voucher). */
 function grantDatacenter(state: GameState, rng: Rng) {
-  for (const kind of RACE_KINDS) if (state.flags[`unlocked:${kind}`] === undefined) state.flags[`unlocked:${kind}`] = state.day;
+  for (const kind of defs().raceKinds) if (state.flags[`unlocked:${kind}`] === undefined) state.flags[`unlocked:${kind}`] = state.day;
   state.flags["free:datacenter"] = 1;
   const spot = findSpot(state, "datacenter");
   // Won at auction, not asked for: no spending check (FLT-16) on a free building.
@@ -109,7 +110,7 @@ export function resolveAuction(state: GameState, rng: Rng, bid: Bid) {
   const rival = unit * (RIVAL_BID_LOW + RIVAL_BID_SPAN * rng.next());
   race.nextAuction = state.day + Math.round(AUCTION_GAP_DAYS * eraDef(eraOfState(state)).pace);
   const top = race.board.filter((r) => r.id !== "you");
-  const rival_ = RIVAL_BY_ID[top[rng.int(0, Math.min(2, top.length - 1))]!.id as RivalId];
+  const rival_ = defs().rivalById[top[rng.int(0, Math.min(2, top.length - 1))]!.id as RivalId];
   if (offer >= rival) {
     state.cash -= offer;
     state.hype = Math.min(100, state.hype + 4);

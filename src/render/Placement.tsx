@@ -1,6 +1,5 @@
 import type { ThreeEvent } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
-import { BUILDINGS } from "../content/buildings";
 import { atoms, send, sim, use } from "../app/game";
 import type { Tool } from "../app/hud";
 import { useApp } from "../app/hooks";
@@ -8,11 +7,12 @@ import { BuildingModel, Ghost } from "./buildings/Buildings";
 import { HALF, rectCenter } from "./coords";
 import { computeGhost } from "./ghost";
 import { boxGeo, ghostMaterials } from "./materials";
+import { defs } from "../sim/defs";
 
 /** Where a tool would land for a pointer at continuous grid position (px, pz). */
 function anchor(tool: Tool, px: number, pz: number): { x: number; z: number } {
   if (tool === "path" || tool === "bulldoze") return { x: Math.floor(px), z: Math.floor(pz) };
-  const [w, d] = BUILDINGS[tool].size;
+  const [w, d] = defs().buildings[tool].size;
   return { x: Math.round(px - w / 2), z: Math.round(pz - d / 2) };
 }
 

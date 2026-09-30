@@ -2,7 +2,6 @@
 // breaks with chance (1 - reliability) x utilisation x 0.2. A broken building stops working (no compute, no training,
 // no revenue, nobody goes in) and burns until an SRE walks over and fixes it, which puts its reliability back to 90%.
 // If nobody does, an emergency contractor turns up after a few days and charges for it.
-import { BUILDINGS } from "../content/buildings";
 import { COMPUTE_PER_CLUSTER, COMPUTE_PER_HALL, TICKS_PER_DAY } from "./constants";
 import { formatMoney } from "./format";
 import { addIncident } from "./vibes";
@@ -11,6 +10,7 @@ import type { NewsTrigger } from "../content/headlines";
 import type { Rng } from "./rng";
 import type { Building, GameState } from "./types";
 import { pressureReady } from "./tutorial";
+import { defs } from "./defs";
 
 export const RELIABILITY_LOSS = 0.005;
 export const BREAKDOWN_FACTOR = 0.2;
@@ -25,7 +25,7 @@ export const CONTRACTOR_FEE = 60_000;
 export const CONTRACTOR_REPAIRED_TO = 0.8;
 
 /** Buildings that wear out (not scenery). */
-export const wearsOut = (b: Building): boolean => !BUILDINGS[b.kind].scenery;
+export const wearsOut = (b: Building): boolean => !defs().buildings[b.kind].scenery;
 
 /** How hard a building is being worked, 0 to 1 (never below the floor): clusters by how much the halls ask of them, public buildings by how full they are. */
 export function utilisationOf(state: GameState, b: Building, halls: number, clusters: number, inside: Map<number, number>): number {
@@ -41,7 +41,7 @@ export function utilisationOf(state: GameState, b: Building, halls: number, clus
     case "solar":
       return 0.7;
     default: {
-      const cap = BUILDINGS[b.kind].capacity;
+      const cap = defs().buildings[b.kind].capacity;
       return clamp(cap > 0 ? (inside.get(b.id) ?? 0) / cap : 0);
     }
   }
@@ -70,7 +70,7 @@ function breakDown(state: GameState, rng: Rng, b: Building) {
   pushNews(state, rng, `breakdown:${b.kind}` as NewsTrigger);
   // The status page is never wrong, because it is never updated.
   if (b.kind === "cluster" || b.kind === "gateway" || b.kind === "hall" || b.kind === "datacenter") pushNews(state, rng, "statusPage");
-  addToast(state, `${BUILDINGS[b.kind].name} is out of order. ${state.staff.some((s) => s.job === "sre") ? "An SRE is on it." : "Hire an SRE."}`, "bad");
+  addToast(state, `${defs().buildings[b.kind].name} is out of order. ${state.staff.some((s) => s.job === "sre") ? "An SRE is on it." : "Hire an SRE."}`, "bad");
 }
 
 /** Put a building back in service. */
@@ -111,5 +111,5 @@ function callContractor(state: GameState, rng: Rng, b: Building) {
   state.cash -= CONTRACTOR_FEE;
   repairBuilding(state, b, CONTRACTOR_REPAIRED_TO);
   pushNews(state, rng, "contractor", { amount: formatMoney(CONTRACTOR_FEE) });
-  addToast(state, `A contractor fixed the ${BUILDINGS[b.kind].name} for ${formatMoney(CONTRACTOR_FEE)}. It was a wire. An SRE is $4K a day.`, "bad");
+  addToast(state, `A contractor fixed the ${defs().buildings[b.kind].name} for ${formatMoney(CONTRACTOR_FEE)}. It was a wire. An SRE is $4K a day.`, "bad");
 }

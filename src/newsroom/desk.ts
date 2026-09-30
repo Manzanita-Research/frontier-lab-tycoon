@@ -1,8 +1,8 @@
-import { EVENTS, eventById } from "../content/events";
 import { EVENT_STORY_KIND } from "../content/newsroom";
 import { openEventOf } from "../sim/events";
 import type { GameState } from "../sim/types";
 import { frontPage, recap, storyFromNews, type Edition, type Story } from "./edition";
+import { defs } from "../sim/defs";
 
 /** Display-only press clock. At boundaries, assemble the completed period, then retain the current month's notes. */
 export class NewsDesk {
@@ -29,8 +29,8 @@ export class NewsDesk {
     const open = openEventOf(world);
     if (open && !this.cards.has(`${open.id}:${open.day}`)) {
       this.cards.add(`${open.id}:${open.day}`);
-      const def = eventById(open.id);
-      if (def) this.stories.push({ id: -10000 - EVENTS.findIndex((e) => e.id === open.id) * 1000 - open.day, day: open.day, text: def.title, kind: EVENT_STORY_KIND[open.id] ?? "filler" });
+      const def = defs().eventById(open.id);
+      if (def) this.stories.push({ id: -10000 - defs().events.findIndex((e) => e.id === open.id) * 1000 - open.day, day: open.day, text: def.title, kind: EVENT_STORY_KIND[open.id] ?? "filler" });
     }
     const editions: Edition[] = [];
     // No historical editions fabricated on load/warp. Subsequent boundaries use their precise period.

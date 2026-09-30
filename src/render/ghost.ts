@@ -1,9 +1,9 @@
-import { BUILDINGS } from "../content/buildings";
 import { canPlace } from "../sim/commands";
 import { buildingAt } from "../sim/pathfind";
 import type { GameState, Rect } from "../sim/types";
 import type { BuildingKind } from "../sim/types";
 import type { Tool } from "../app/hud";
+import { defs } from "../sim/defs";
 
 export interface Ghost {
   rect: Rect;
@@ -23,13 +23,13 @@ export function computeGhost(sim: GameState, tool: Tool | null, hover: { x: numb
     return {
       rect: b ?? { x: hover.x, z: hover.z, w: 1, d: 1 },
       ok: false,
-      reason: b ? `Bulldoze ${BUILDINGS[b.kind].name}` : "Bulldoze path",
+      reason: b ? `Bulldoze ${defs().buildings[b.kind].name}` : "Bulldoze path",
       kind: null,
       bulldoze: true,
     };
   }
   const res = tool === "path" ? canPlace(sim, "path", hover.x, hover.z) : canPlace(sim, tool, hover.x, hover.z);
-  const [w, d] = tool === "path" ? [1, 1] : BUILDINGS[tool].size;
+  const [w, d] = tool === "path" ? [1, 1] : defs().buildings[tool].size;
   return {
     rect: { x: hover.x, z: hover.z, w, d },
     ok: res.ok,

@@ -1,5 +1,5 @@
 import type { EventFromLogic } from "xstate";
-import { BUILDINGS, PATH_PRICE } from "../content/buildings";
+import { PATH_PRICE } from "../content/buildings";
 import { STAFF } from "../content/staff";
 import { ENTRANCE_WARNING, REDUNDANT_HALL, RUNWAY_NUDGE, runwayConfirmation } from "../content/guardrails";
 import type { Command } from "./commands";
@@ -12,6 +12,7 @@ import { entranceConnected, tileIndex } from "./pathfind";
 import { computePerDay } from "./training";
 import { COMPUTE_PER_HALL } from "./constants";
 import type { GameState } from "./types";
+import { defs } from "./defs";
 
 export type SpendingCommand = Extract<Command, { type: "placeBuilding" | "placePath" | "hire" }>;
 export interface PendingConfirm {
@@ -42,8 +43,8 @@ export function spendingForecast(s: GameState, c: SpendingCommand): { cost: numb
     projected = { ...s, version: s.version + 1, grid: { ...s.grid, paths } };
   }
   if (c.type === "placeBuilding") {
-    cost = s.flags[`free:${c.kind}`] !== undefined ? 0 : BUILDINGS[c.kind].price;
-    const [w, d] = BUILDINGS[c.kind].size;
+    cost = s.flags[`free:${c.kind}`] !== undefined ? 0 : defs().buildings[c.kind].price;
+    const [w, d] = defs().buildings[c.kind].size;
     projected = { ...s, version: s.version + 1, buildings: [...s.buildings, { id: -1, kind: c.kind, x: c.x, z: c.z, w, d, placedTick: s.tick, reliability: 1, broken: false, brokenTick: 0 }] };
   }
   const researchers = Math.max(s.walkers.filter((w) => w.kind === "researcher").length, 3 + 4 * projected.buildings.filter((b) => b.kind === "hall").length);

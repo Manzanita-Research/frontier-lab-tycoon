@@ -3,7 +3,7 @@
 // they share. Off by default in `createInitialState`; `enableLeapfrog` is the "pack loaded" switch (FLT-15's loader will
 // flip it from the mod list).
 import { LEAPFROG, type BenchmarkDef } from "../../../content/leapfrog";
-import { RIVAL_DEFS, YOU } from "../../../content/rivals";
+import { YOU } from "../../../content/rivals";
 import { initialStored } from "../../machines/run";
 import type { GameState } from "../../types";
 import { benchMachine, type BenchStored } from "./benchmark";
@@ -11,6 +11,7 @@ import { calendarMachine, type CalendarStored } from "./calendar";
 import { livestreamMachine, type LivestreamStored } from "./livestream";
 import { responseMachine, type ResponseStored } from "./response";
 import { voiceMachine, type VoiceStored } from "./voice";
+import { defs } from "../../defs";
 
 /** A finished model waiting for its launch date, one per lab (a newer one adds to it). */
 export interface PendingLaunch {
@@ -117,12 +118,12 @@ export const benchStored = (def: BenchmarkDef, day: number): BenchStored =>
 export const baselineOf = (hype: number): number => R.voice.baseline + R.voice.baselinePerHype * hype;
 
 export function createLeapfrog(): LeapfrogState {
-  const ids = [YOU, ...RIVAL_DEFS.map((d) => d.id)];
+  const ids = [YOU, ...defs().rivals.map((d) => d.id)];
   const labs: Record<string, LabClaims> = {};
   for (const id of ids) labs[id] = { maxx: {}, leaked: "", flash: -1, advance: 0 };
   // Everyone starts at the level their hype would settle at, so the first days aren't a jump.
   const attention: Record<string, number> = { [YOU]: baselineOf(30) / (1 - R.voice.decay) };
-  for (const d of RIVAL_DEFS) attention[d.id] = baselineOf(d.startHype) / (1 - R.voice.decay);
+  for (const d of defs().rivals) attention[d.id] = baselineOf(d.startHype) / (1 - R.voice.decay);
   const c = R.cadence;
   return {
     enabled: false,

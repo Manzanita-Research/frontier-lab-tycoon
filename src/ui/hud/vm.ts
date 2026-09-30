@@ -5,15 +5,13 @@
 // Pure: no atoms, no DOM, no clocks, no random numbers. It is unit-tested against fixture snapshots (vm.test.ts).
 import type { Snapshot, Tool } from "../../app/hud";
 import { RACE_TOOLS, SPEEDS, TOOLS } from "../../app/hud";
-import { BUILDINGS, PATH_PRICE } from "../../content/buildings";
+import { PATH_PRICE } from "../../content/buildings";
 import { ERAS } from "../../content/eras";
 import { STAFF } from "../../content/staff";
-import { eventById } from "../../content/events";
-import { GOALS, SCENARIO, type GoalDef } from "../../content/goals";
+import { SCENARIO, type GoalDef } from "../../content/goals";
 import { FRIENDS } from "../../content/newsroom";
 import { LEAPFROG } from "../../content/leapfrog";
 import { STREAM_FALLBACK, STREAM_LINES } from "../../content/livestream";
-import { ARENA_SIZE } from "../../content/rivals";
 import { CUES } from "../../audio/score";
 import type { Edition } from "../../newsroom/edition";
 import { hourAt, clockLabel } from "../../render/fx/clock";
@@ -30,6 +28,7 @@ import type {
   ArenaVM, BenchCellVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HudVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
   ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, ResponseVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, StreamVM, ThoughtRowVM, TrainingVM, TrendVM, VoiceVM, WalkerKindVM,
 } from "./types";
+import { defs } from "../../sim/defs";
 
 /** How many game days after a release the "SHIPPED!" sticker stays up. */
 export const SHIPPED_DAYS = 3;
@@ -67,7 +66,6 @@ export interface HudInput {
   viewport: { width: number; height: number };
 }
 
-const goalDefs = new Map(GOALS.map((g) => [g.id, g]));
 
 /** "Revenue $140K / $250K per day", "Runs 2 / 3", "Hype 47 / 60". */
 export function goalProgressText(def: GoalDef, value: number): string {
@@ -83,7 +81,7 @@ export function goalProgressText(def: GoalDef, value: number): string {
       return `Era ${Math.floor(shown)} / ${def.target}`;
     case "rank":
       if (value <= 0) return "Counts from Era 3";
-      return value >= def.target ? `Arena #${ARENA_SIZE + 1 - Math.floor(value)} (top ${ARENA_SIZE + 1 - def.target} reached)` : `Arena #${ARENA_SIZE + 1 - Math.floor(value)}, need top ${ARENA_SIZE + 1 - def.target}`;
+      return value >= def.target ? `Arena #${defs().arenaSize + 1 - Math.floor(value)} (top ${defs().arenaSize + 1 - def.target} reached)` : `Arena #${defs().arenaSize + 1 - Math.floor(value)}, need top ${defs().arenaSize + 1 - def.target}`;
   }
 }
 
@@ -105,8 +103,8 @@ export const PHOTO_TIMES = [
   { key: "night", label: "Night" },
 ];
 
-const toolName = (t: Tool) => (t === "path" ? "Path" : t === "bulldoze" ? "Bulldoze" : BUILDINGS[t].name);
-const toolPrice = (t: Tool) => (t === "path" ? PATH_PRICE : t === "bulldoze" ? 0 : BUILDINGS[t].price);
+const toolName = (t: Tool) => (t === "path" ? "Path" : t === "bulldoze" ? "Bulldoze" : defs().buildings[t].name);
+const toolPrice = (t: Tool) => (t === "path" ? PATH_PRICE : t === "bulldoze" ? 0 : defs().buildings[t].price);
 const arrow = (delta: number) => (delta > 0 ? `↑${delta}` : delta < 0 ? `↓${-delta}` : "–");
 const pts = (n: number) => Math.round(n * VIBES_MAX);
 
@@ -184,7 +182,7 @@ function objectivesOf(s: Snapshot): ObjectivesVM {
     urgent: left <= 60,
     deadline: formatDate(SCENARIO.deadlineDay),
     items: s.goals.map((g) => {
-      const def = goalDefs.get(g.id)!;
+      const def = defs().goals.find((d) => d.id === g.id)!;
       // The release goal names the run actually training ("Ship 3 models (0/3), next: Frontier-2"), so its own progress line goes.
       const release = g.id === "release";
       return { id: g.id, label: release ? s.releaseGoal : def.label, progress: release ? "" : goalProgressText(def, g.value), ratio: Math.max(0, Math.min(1, g.value / g.target)), met: g.met };
@@ -229,7 +227,7 @@ function buildOf(i: HudInput): { items: BuildItemVM[]; tip: BuildTipVM | null } 
       kind: t,
       name: toolName(t),
       short: SHORT[t],
-      blurb: t === "path" || t === "bulldoze" ? null : BUILDINGS[t].blurb,
+      blurb: t === "path" || t === "bulldoze" ? null : defs().buildings[t].blurb,
       price,
       priceText: t === "bulldoze" ? "refund 50%" : isFree ? "FREE" : formatMoney(price),
       free: isFree,
@@ -263,7 +261,7 @@ function buildOf(i: HudInput): { items: BuildItemVM[]; tip: BuildTipVM | null } 
   let tip: BuildTipVM | null = null;
   if (t === "path") tip = { kind: t, name: "Path", text: "Drag to lay paths. Buildings need one beside them or nobody visits.", upkeepText: "Right-drag to pan." };
   else if (t === "bulldoze") tip = { kind: t, name: "Bulldoze", text: "Click or drag over things to remove them. Refunds half.", upkeepText: null };
-  else if (t) tip = { kind: t, name: BUILDINGS[t].name, text: BUILDINGS[t].blurb, upkeepText: `Upkeep ${formatMoney(BUILDINGS[t].upkeepPerDay)}/day. Needs a path beside it.` };
+  else if (t) tip = { kind: t, name: defs().buildings[t].name, text: defs().buildings[t].blurb, upkeepText: `Upkeep ${formatMoney(defs().buildings[t].upkeepPerDay)}/day. Needs a path beside it.` };
   return { items, tip };
 }
 
@@ -299,7 +297,7 @@ function bubblesOf(i: HudInput): BubbleVM[] {
 
 function eventOf(i: HudInput): { event: EventVM | null; era: HudVM["eraCard"] } {
   const open = i.snap.event;
-  const def = open ? eventById(open.id) : undefined;
+  const def = open ? defs().eventById(open.id) : undefined;
   if (!open || !def) return { event: null, era: null };
   const vars = { ...i.snap.race.vars, lab: i.snap.labName };
   if (def.kind === "era") {

@@ -31,9 +31,8 @@ export function printReport(report) {
   console.log(`Replay identical: ${report.digest}; cash $${Math.round(report.cash)}; ${report.elapsedMs} ms`);
   console.log(`Arc reachability: ${report.arcs.length} arcs checked with xstate/graph (structural, guards/actions omitted)`);
   for (const arc of report.arcs) console.log(`  ${arc.id}: ${arc.states} states, ${arc.configurations} configurations`);
-  console.log(`M1a applied: ${report.injection.applied.join("; ") || "base simulation only"}`);
-  console.log(`M1b deferred: ${report.injection.deferred.join("; ") || "none"}`);
-  console.log("Coverage: schema, composition, assets, structural arcs, existing World injection. Deferred content is not executed until M1b.");
+  console.log(`Executed: ${report.coverage.executed.join(", ") || "nothing changed from the base game"} (the real sim ran with your definition)`);
+  if (report.coverage.inert.length > 0) console.log(`Validated but not read by any system yet: ${report.coverage.inert.join(", ")}`);
 }
 export async function bundle(directory, output, runner) {
   const { manifest } = await loadManifest(directory, runner);
@@ -81,7 +80,7 @@ export async function main(args = process.argv.slice(2)) {
   if (command === "dev") {
     const server = await serve(resolve(input));
     console.log("Serving mod with CORS on http://localhost:5174/mod.json");
-    console.log("Open your game with ?mod=http://localhost:5174/mod.json&dev=1 (serving only; game loading/hot-reload awaits M1b)");
+    console.log("Open your game with ?mod=http://localhost:5174/mod.json (reload the page to pick up edits)");
     const stop = () => server.close(() => process.exit());
     process.once("SIGINT", stop); process.once("SIGTERM", stop);
     return;

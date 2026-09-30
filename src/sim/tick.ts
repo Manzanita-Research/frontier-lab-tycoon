@@ -24,14 +24,21 @@ import { updateCoach } from "./coach";
 import { systemUnlocked, updateProgression } from "./progression";
 import { updateTutorial } from "./tutorial";
 import { observeGuardrails, pendingConfirmOf } from "./guardrails";
+import { withDefs } from "./defs";
+import type { GameDefinition } from "../mods/game-definition";
 
 export { TICKS_PER_DAY };
 
 /**
  * Advance one tick, mutating `state` in place. Same state + same commands = same result.
  * Time stands still while an event card is open (commands still apply, so the answer gets in) and after a loss.
+ * `def` is the run's resolved mod definition (FLT-37); without one the sim reads the session's (the base game unless the app loaded mods).
  */
-export function tick(state: GameState, commands: readonly Command[] = []) {
+export function tick(state: GameState, commands: readonly Command[] = [], def?: GameDefinition | null) {
+  withDefs(def, () => step(state, commands));
+}
+
+function step(state: GameState, commands: readonly Command[]) {
   const rng = createRng(state.rngState);
   applyCommands(state, commands, rng);
   if (commands.length > 0) { updateTutorial(state); observeGuardrails(state); }
@@ -73,7 +80,11 @@ export function tick(state: GameState, commands: readonly Command[] = []) {
 }
 
 /** Apply commands without advancing time (building while paused). Walkers re-route on the next tick. */
-export function applyNow(state: GameState, commands: readonly Command[]) {
+export function applyNow(state: GameState, commands: readonly Command[], def?: GameDefinition | null) {
+  withDefs(def, () => now(state, commands));
+}
+
+function now(state: GameState, commands: readonly Command[]) {
   const rng = createRng(state.rngState);
   applyCommands(state, commands, rng);
   updateTutorial(state);

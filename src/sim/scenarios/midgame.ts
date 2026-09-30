@@ -1,7 +1,5 @@
 // A scripted player, not a save-file fixture: every building, hire and release goes through the ordinary sim.
-import { BUILDINGS, type PlaceableKind } from "../../content/buildings";
-import { eventById } from "../../content/events";
-import { THOUGHTS } from "../../content/thoughts";
+import type { PlaceableKind } from "../../content/buildings";
 import { canPlace, type Command } from "../commands";
 import { openEventOf } from "../events";
 import { outcomeOf } from "../goals";
@@ -10,6 +8,7 @@ import { enableLeapfrog } from "../race/leapfrog/driver";
 import { createInitialState } from "../state";
 import { applyNow, tick, TICKS_PER_DAY } from "../tick";
 import type { GameState, Thought, WalkerKind } from "../types";
+import { defs } from "../defs";
 
 export const MIDGAME_SEED = 48;
 export const MIDGAME_CAMERA = { focus: [11.5, 14.5] as [number, number], zoom: 43 };
@@ -30,7 +29,7 @@ export function midgameOpeningThoughts(s: GameState): Thought[] {
   ];
   const chosen: number[] = [];
   return picks.map((pick, i) => {
-    const line = THOUGHTS.find((t) => t.kind === pick.kind && t.text === pick.text);
+    const line = defs().thoughts.find((t) => t.kind === pick.kind && t.text === pick.text);
     const speaker = s.walkers.filter((w) => w.kind === pick.kind && w.machine.value !== "inside" && !chosen.includes(w.id))
       .sort((a, b) => Math.hypot(a.x - pick.near[0], a.z - pick.near[1]) - Math.hypot(b.x - pick.near[0], b.z - pick.near[1]) || a.id - b.id)[0];
     if (!line || !speaker) throw new Error(`Mid-game opening thought is missing: ${pick.kind}`);
@@ -66,7 +65,7 @@ function build(s: GameState): Command[] {
   else if (n("cluster") < Math.min(5, 2 * halls)) kind = "cluster";
   else if (halls < 5) kind = "hall";
   else if (n("demo") < 1) kind = "demo";
-  if (!kind || s.buildings.length >= 20 || s.cash < BUILDINGS[kind].price + 400_000) return [];
+  if (!kind || s.buildings.length >= 20 || s.cash < defs().buildings[kind].price + 400_000) return [];
   const at = spot(s, kind);
   return at ? [{ type: "placeBuilding", kind, x: at[0], z: at[1] }] : [];
 }
@@ -76,7 +75,7 @@ function answer(s: GameState): Command[] {
   if (!open) return [];
   // Hold the run, bid low at auctions, and leave the Water Discourse unresolved in the world (not a modal).
   const choice = open.id === "shipNow" ? 1 : open.id === "computeAuction" ? 0 : open.id === "waterDiscourse" ? 2 : 0;
-  return [{ type: "chooseEvent", eventId: open.id, choiceIndex: Math.min(choice, eventById(open.id)!.choices.length - 1) }];
+  return [{ type: "chooseEvent", eventId: open.id, choiceIndex: Math.min(choice, defs().eventById(open.id)!.choices.length - 1) }];
 }
 
 export function walkerOnCampus(s: GameState): boolean {
@@ -104,7 +103,7 @@ export function createMidgameScenario(): GameState {
     if (s.day === 350 && s.tick % TICKS_PER_DAY === 0) pave(s, true);
     // A paid refresh before the curated opening: ordinary demolition refunds and replacement costs.
     if (s.day === 390 && s.tick % TICKS_PER_DAY === 0) {
-      for (const b of [...s.buildings]) if (b.reliability < 0.8 && s.cash > BUILDINGS[b.kind].price + 400_000) {
+      for (const b of [...s.buildings]) if (b.reliability < 0.8 && s.cash > defs().buildings[b.kind].price + 400_000) {
         applyNow(s, [{ type: "bulldoze", x: b.x, z: b.z }, { type: "placeBuilding", kind: b.kind, x: b.x, z: b.z, confirmed: true }]);
       }
     }

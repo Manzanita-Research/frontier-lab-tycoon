@@ -1,5 +1,7 @@
 import { enableCollusion } from "./collusion/driver";
 import { PROGRESSION } from "../content/progression";
+import { baseContent, baseRules, baseVocabulary } from "../mods/base-game";
+import { withDefs } from "./defs";
 import { makeSnapshot } from "../app/hud";
 import { canPlace } from "./commands";
 import { progressOf, systemUnlocked, updateProgression } from "./progression";
@@ -47,10 +49,12 @@ describe("the playable ladder", () => {
     expect(Object.values(s.arcs).some((a) => a.value === "cardOpen")).toBe(false);
   });
   it("reads modded goal thresholds from identified data rows", () => {
-    const s = createInitialState(1);
-    s.progressionContent = PROGRESSION.map((r) => r.level === 1 ? { ...r, goal: { ...r.goal, target: 2 } } : r);
-    s.models.push("Fixture-1"); updateProgression(s); expect(progressOf(s).level).toBe(1);
-    s.models.push("Fixture-2"); updateProgression(s); expect(progressOf(s).level).toBe(2);
+    const def = { content: { ...baseContent, progression: PROGRESSION.map((r) => r.level === 1 ? { ...r, goal: { ...r.goal, target: 2 } } : r) }, rules: baseRules, vocabulary: baseVocabulary };
+    const s = createInitialState(1, "garage", def);
+    withDefs(def, () => {
+      s.models.push("Fixture-1"); updateProgression(s); expect(progressOf(s).level).toBe(1);
+      s.models.push("Fixture-2"); updateProgression(s); expect(progressOf(s).level).toBe(2);
+    });
   });
 });
 describe("people have somewhere to be", () => {

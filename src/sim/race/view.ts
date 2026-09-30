@@ -1,12 +1,12 @@
 // What the HUD reads about the race: a small plain snapshot, rebuilt with each publish (about 5 Hz).
 import { eraDef, ERAS } from "../../content/eras";
-import { RACE_KINDS, type BuildingKind } from "../../content/buildings";
-import { ARENA_SIZE } from "../../content/rivals";
+import type { BuildingKind } from "../../content/buildings";
 import type { GameState } from "../types";
 import { boardView, type BoardView } from "./arena";
 import { openDropActive, raceVars } from "./finance";
 import { powerOf } from "./power";
 import { eraOfState } from "./race";
+import { defs } from "../defs";
 
 export interface RaceView {
   era: number;
@@ -49,12 +49,12 @@ export function raceView(s: GameState): RaceView {
     eraPct,
     rank: s.race.rank,
     rankDelta: s.race.rankDelta,
-    total: ARENA_SIZE,
+    total: defs().arenaSize,
     week: s.race.week,
     board: boardView(s),
     drop: drop && openDropActive(s) ? { rival: drop.rival, model: drop.model, daysLeft: Math.max(0, drop.until - s.day) } : null,
-    unlocked: RACE_KINDS.filter((k) => s.flags[`unlocked:${k}`] !== undefined),
-    free: RACE_KINDS.filter((k) => s.flags[`free:${k}`] !== undefined),
+    unlocked: defs().raceKinds.filter((k) => s.flags[`unlocked:${k}`] !== undefined),
+    free: defs().raceKinds.filter((k) => s.flags[`free:${k}`] !== undefined),
     power: { datacenters: power.datacenters, powered: power.powered, gas: power.gas, solar: power.solar },
     vars: raceVars(s),
   };

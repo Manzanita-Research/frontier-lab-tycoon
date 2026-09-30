@@ -1,5 +1,5 @@
 // Evidence harness: actual ticks and commands, every card answered. No forced stage or exposure day.
-import { BUILDINGS, type PlaceableKind } from "../../content/buildings";
+import type { PlaceableKind } from "../../content/buildings";
 import { pendingConfirmOf } from "../guardrails";
 import { openEventOf } from "../events";
 import { outcomeOf } from "../goals";
@@ -11,6 +11,7 @@ import { enableLeapfrog } from "../race/leapfrog/driver";
 import { enableCollusion } from "./driver";
 import { SIGN_CARD } from "./pack";
 import { evalBonus } from "./scores";
+import { defs } from "../defs";
 export type Policy = "off" | "ignore" | "early" | "late";
 export function runCollusionYear(seed: number, policy: Policy) {
   const s = createInitialState(seed);
@@ -49,7 +50,7 @@ export function runCollusionYear(seed: number, policy: Policy) {
       else if (clusters + 6 * datacenters < 3 * halls) kind = "cluster";
       else if (halls < Math.min(7, 3 + Math.floor(s.day / 90))) kind = "hall";
       else if (clusters < 12) kind = "cluster";
-      if (kind && s.cash >= BUILDINGS[kind].price + 400_000) {
+      if (kind && s.cash >= defs().buildings[kind].price + 400_000) {
         const spot = findSpot(s, kind);
         if (spot) commands = [{ type: "placeBuilding", kind, x: spot[0], z: spot[1] }];
       }

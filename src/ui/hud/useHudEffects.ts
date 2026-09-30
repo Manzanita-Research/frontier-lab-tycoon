@@ -13,9 +13,9 @@ import { loadRoom, pressCamera, publish, resetRoom, roomAtom, viewRoom } from ".
 import { fx } from "../../render/fx/state";
 import { debugParams } from "../../app/game";
 import { setPhoto, takePhoto, togglePhoto } from "../juice/photo";
-import { eventById } from "../../content/events";
 import { chatCountAtom } from "./state";
 import type { HudVM } from "./types";
+import { defs } from "../../sim/defs";
 
 const ERA_GRACE_MS = 700;
 const desk = new NewsDesk();
@@ -35,7 +35,7 @@ function useHotkeys(vm: HudVM) {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
       const st = appNow();
       if (!st) return;
-      const def = st.event ? eventById(st.event.id) : undefined;
+      const def = st.event ? defs().eventById(st.event.id) : undefined;
       if (st.event && def) {
         // A card is up: it owns the keyboard. Keys 1 to 3 choose; an era card takes any key once it has landed.
         if (def.kind === "era") {

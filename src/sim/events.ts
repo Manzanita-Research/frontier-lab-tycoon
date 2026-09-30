@@ -1,6 +1,6 @@
 // Event cards: checked once a day, one open at a time, resolved by a chooseEvent command.
-import { BUILDINGS, type BuildingKind } from "../content/buildings";
-import { EVENTS, eventById, type Condition, type Effect } from "../content/events";
+import type { BuildingKind } from "../content/buildings";
+import type { Condition, Effect } from "../content/events";
 import { THOUGHT_TICKS, DISCOURSE_PER_PROTESTER } from "./constants";
 import { fillTemplate } from "./format";
 import { arcMachine } from "./machines/arc";
@@ -17,6 +17,7 @@ import { modeOf } from "./walkers";
 import type { Rng } from "./rng";
 import type { GameState, OpenEvent } from "./types";
 import { pressureReady } from "./tutorial";
+import { defs } from "./defs";
 
 export function conditionHolds(state: GameState, c: Condition): boolean {
   if ("all" in c) return c.all.every((sub) => conditionHolds(state, sub));
@@ -46,7 +47,7 @@ export function dailyEvents(state: GameState) {
   let slotFree = openEventOf(state) === null;
   // Later eras crowd the calendar: cooldowns shrink.
   const pace = eraDef(eraOfState(state)).pace;
-  for (const def of EVENTS) {
+  for (const def of defs().events) {
     const { stored } = step(arcMachine, state.arcs[def.id]!, { type: "DAY", day: state.day, ready: pressureReady(state) && conditionHolds(state, def.when), slotFree, pace });
     state.arcs[def.id] = stored;
     if (stored.value === "cardOpen") slotFree = false;
@@ -65,7 +66,7 @@ function placeNearGate(state: GameState, kind: BuildingKind) {
     const x = g.x + dx;
     const z = g.z + dz;
     if (!inBounds(state, x, z) || isPathTile(state, x, z) || buildingAt(state, x, z) || rectContains(g, x, z)) continue;
-    const def = BUILDINGS[kind];
+    const def = defs().buildings[kind];
     state.buildings.push({ id: state.nextId++, kind, x, z, w: def.size[0], d: def.size[1], placedTick: state.tick, reliability: 1, broken: false, brokenTick: 0 });
     state.version++;
     return;
@@ -129,7 +130,7 @@ function applyEffect(state: GameState, rng: Rng, e: Effect, vars: Record<string,
 
 /** Applies the picked choice and closes the card. Ignores stale or invalid picks. */
 export function chooseEvent(state: GameState, rng: Rng, eventId: string, choiceIndex: number) {
-  const def = eventById(eventId);
+  const def = defs().eventById(eventId);
   const arc = state.arcs[eventId];
   if (!def || !arc || openEventOf(state)?.id !== eventId) return;
   const { stored, effects } = step(arcMachine, arc, { type: "CHOOSE", choiceIndex });

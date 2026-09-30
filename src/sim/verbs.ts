@@ -10,8 +10,8 @@
 //
 // FLT-30's `Vocabulary` service (src/mods/services/vocabulary.ts) is `{ guards: string[], effects: string[] }`:
 // `vocabulary` at the bottom has exactly that shape, so wrapping it in the Layer is mechanical.
-import { BUILDINGS, type BuildingKind } from "../content/buildings";
-import { RIVAL_BY_ID, type RivalId } from "../content/rivals";
+import type { BuildingKind } from "../content/buildings";
+import type { RivalId } from "../content/rivals";
 import { cardId, offerFlag } from "./disasters/names";
 import type { Call, Cue, DisasterRun, Json, TimedEffect } from "./disasters/types";
 import { TICKS_PER_DAY } from "./constants";
@@ -27,6 +27,7 @@ import { rivalMachine } from "./race/rival";
 import type { Rng } from "./rng";
 import { atDivert, divertStaff, releaseStaff, staffOf } from "./staff";
 import type { Building, GameState, StaffJob, Tone } from "./types";
+import { defs } from "./defs";
 
 /** A tick is 1.2 game hours (20 to a day). */
 export const HOURS_PER_TICK = 24 / TICKS_PER_DAY;
@@ -281,7 +282,7 @@ function say(env: VerbEnv, text: string): string {
   const { state, run } = env;
   const target = run ? state.buildings.find((b) => b.id === run.target) : undefined;
   const vars: Record<string, string> = { ...templateVars(state, {}, env.rng), ...(run?.vars ?? {}) };
-  if (target) vars.target = BUILDINGS[target.kind].name;
+  if (target) vars.target = defs().buildings[target.kind].name;
   return fillTemplate(text, vars);
 }
 
@@ -421,7 +422,7 @@ export const VERBS: Record<string, VerbDef> = {
   "building.ensure": {
     doc: "Make sure a building of `kind` exists: if the lab has none, one arrives free beside the gate (upkeep still applies).",
     spec: { kind: "string", text: "string?" },
-    verify: (p) => (p.kind as string) in BUILDINGS ? null : `unknown building "${p.kind as string}"`,
+    verify: (p) => (p.kind as string) in defs().buildings ? null : `unknown building "${p.kind as string}"`,
     run: (env, p) => {
       const { state, rng } = env;
       const kind = p.kind as BuildingKind;
@@ -432,7 +433,7 @@ export const VERBS: Record<string, VerbDef> = {
       // Granted by the incident, not asked for: no "the board will have questions" (FLT-16's spending check) on a free building.
       if (at) placeBuilding(state, rng, kind, at[0], at[1], true);
       delete state.flags[`free:${kind}`];
-      if (!at) return void addToast(state, `No room for a ${BUILDINGS[kind].name}. The incident room is the gate.`, "neutral");
+      if (!at) return void addToast(state, `No room for a ${defs().buildings[kind].name}. The incident room is the gate.`, "neutral");
       if (typeof p.text === "string") addToast(state, say(env, p.text), "neutral");
     },
   },
@@ -473,7 +474,7 @@ export const VERBS: Record<string, VerbDef> = {
       const shocked = step(rivalMachine, rival, { type: "SHOCK", capability: gain, hype: 0, momentum: 0 }).stored;
       race.rivals[pick] = p.open ? { ...shocked, context: { ...shocked.context, open: true } } : shocked;
       if (run) {
-        run.vars.leapRival = RIVAL_BY_ID[rival.context.id as RivalId]?.name ?? rival.context.id;
+        run.vars.leapRival = defs().rivalById[rival.context.id as RivalId]?.name ?? rival.context.id;
         run.vars.leapModel = rival.context.model || "a model that is suspiciously familiar";
       }
     },

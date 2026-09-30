@@ -13,14 +13,14 @@ test("private modder kit works against the actual game contract", async (t) => {
   const directory = await mkdtemp(resolve(tmpdir(), "flt-kit-test-"));
   try {
     await withGameRuntime(async (runner) => {
-      await t.test("both M1a examples replay 365 actual days", async () => {
+      await t.test("both examples run 365 actual days with their content executed", async () => {
         for (const example of ["every-lab-is-steve", "headline-pack"]) {
           const report = await check(resolve(gameRoot, `mods/examples/${example}/mod.json`), runner);
           assert.equal(report.days, 365);
           assert.equal(report.ticks, 7300);
           assert.ok(report.cardsAnswered > 0);
           assert.equal(report.deterministic, true);
-          assert.ok(report.injection.deferred.length > 0);
+          assert.deepEqual(report.coverage, { executed: [example === "every-lab-is-steve" ? "rivals" : "headlines"], inert: [] });
         }
       });
       await t.test("SDK, typed template and every section validate", async () => {

@@ -118,14 +118,21 @@ const identifiedHeadline = Schema.Struct({ ...Headline.fields, id, trigger: Sche
 const identifiedThought = Schema.Struct({ ...Thought.fields, id });
 export const Progression = Schema.Struct({
   id, level: Schema.Literals([1, 2, 3, 4, 5]), name: text,
-  buildings: Schema.Array(Schema.Literals(["cluster", "hall", "gateway", "kombucha", "nap", "snack", "demo", "fountain", "datacenter", "gas", "solar"])),
+  // Any building kind, including a mod's own (validation checks it exists).
+  buildings: Schema.Array(text),
   staff: Schema.Array(Schema.Literals(["janitor", "sre", "comms", "security"])),
   systems: Schema.Array(Schema.Literals(["breakdowns", "slop", "leapfrog", "arena", "rnd", "news", "events", "protests", "disasters", "papers", "collusion"])),
   panels: Schema.Array(Schema.Literals(["revenue", "vibes", "arena", "rnd", "thoughts", "news", "staff", "events", "papers", "disasters"])),
   goal: Schema.Struct({ text, metric: Schema.Literals(["models", "revenue", "team", "arena"]), target: positive, vibes: Schema.optionalKey(nonnegative) }),
 });
+export const CoachLine = Schema.Struct({
+  id, text,
+  target: Schema.Literals(["start", "build:path", "build:hall", "training", "build:gateway", "stat:runway", "goals", "map:suggest"]),
+  waitFor: Schema.Literals(["action", "timer"]),
+  trigger: Schema.Literals(["buildPanelOpened", "pathConnected", "hallBuilt", "released", "gatewayBuilt", "timer"]),
+});
 export const ContentPatch = Schema.Struct({
-  progression: Schema.optionalKey(patch(Progression)),
+  progression: Schema.optionalKey(patch(Progression)), coach: Schema.optionalKey(patch(CoachLine)),
   buildings: Schema.optionalKey(patch(identifiedBuilding)), rivals: Schema.optionalKey(patch(Rival)),
   headlines: Schema.optionalKey(patch(identifiedHeadline)), thoughts: Schema.optionalKey(patch(identifiedThought)),
   events: Schema.optionalKey(EventPatch), arcs: Schema.optionalKey(patch(Arc)),

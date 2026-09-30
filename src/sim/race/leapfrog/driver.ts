@@ -4,7 +4,7 @@
 // drawn here, in a fixed order, and none are drawn at all while the pack is off.
 import { BENCH_BY_ID, LEAPFROG, mishapById, successorOf, type BenchmarkDef, type PackTrigger } from "../../../content/leapfrog";
 import { eraDef } from "../../../content/eras";
-import { RIVAL_BY_ID, YOU, type RivalId } from "../../../content/rivals";
+import { YOU, type RivalId } from "../../../content/rivals";
 import { fillTemplate } from "../../format";
 import { step } from "../../machines/run";
 import { addNews, addToast } from "../../news";
@@ -23,6 +23,7 @@ import { responseMachine } from "./response";
 import { benchStored, type BenchEntry, type Claim, type DropRecord, type PendingLaunch } from "./state";
 import { bugChance, readiness } from "./vars";
 import { voiceMachine } from "./voice";
+import { defs } from "../../defs";
 
 const R = LEAPFROG.rules;
 
@@ -236,7 +237,7 @@ function weighted<T>(items: readonly T[], weights: readonly number[], roll: numb
 
 /** A small update from a lab with nothing finished: a lab launches something even when nothing is ready ("Chatty-5-mini-turbo"). */
 function pointRelease(state: GameState, rng: Rng, id: string): PendingLaunch {
-  const def = RIVAL_BY_ID[id as RivalId];
+  const def = defs().rivalById[id as RivalId];
   const ctx = rivalOf(state, id)!.context;
   const era = eraDef(eraOfState(state));
   const gain = def.personality.growth * 0.45 * era.rivalGrowth;
@@ -281,7 +282,7 @@ export function handleDrop(state: GameState, rng: Rng, slot: "lead" | "answer") 
   const leadLab = slot === "answer" && lf.last ? lf.last.lab : "";
   const pending = pickLaunch(state, rng, slot, leadLab);
   if (!pending) return;
-  const def = RIVAL_BY_ID[pending.id as RivalId];
+  const def = defs().rivalById[pending.id as RivalId];
   const race = state.race;
   const at = race.rivals.findIndex((r) => r.context.id === pending.id);
   const { stored, effects } = step(rivalMachine, race.rivals[at]!, {

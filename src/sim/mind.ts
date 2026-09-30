@@ -3,12 +3,12 @@
 // time; everyone with the same cause thinks the same line (or one of `spread` lines), and the line rotates every
 // couple of game days. Lines live in content/needThoughts.ts.
 import { CAUSES, type Cause } from "../content/needThoughts";
-import { RIVAL_SHORT } from "../content/names";
 import { hourAt, isNight } from "./daylight";
 import { fillTemplate } from "./format";
 import { happinessOf, urgencyOf } from "./needs";
 import { MESS_THOUGHT } from "./slop";
 import type { GameState, Walker, WalkerKind } from "./types";
+import { defs } from "./defs";
 
 const ROTATE_DAYS = 2;
 
@@ -48,7 +48,7 @@ export function causeOf(w: Walker, night = false): Cause {
   }
 }
 
-const rivalName = (state: GameState) => RIVAL_SHORT[state.flags.rivalIndex ?? 0] ?? "A rival";
+const rivalName = (state: GameState) => defs().names.RIVAL_SHORT[state.flags.rivalIndex ?? 0] ?? "A rival";
 
 /** The line for a cause as this walker would say it right now. */
 export function lineFor(state: GameState, cause: Cause, w: Walker): string {

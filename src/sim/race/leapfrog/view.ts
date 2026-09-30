@@ -3,12 +3,13 @@
 // (FLT-31 does that); the World's `race.board` (the Frontier Arena) stays as it was.
 import type { LabKind } from "../../../content/leapfrog";
 import { LEAPFROG, BENCH_BY_ID } from "../../../content/leapfrog";
-import { RIVAL_BY_ID, YOU, type RivalId } from "../../../content/rivals";
+import { YOU, type RivalId } from "../../../content/rivals";
 import type { GameState } from "../../types";
 import { honestScore, shownScore } from "./driver";
 import { labIds, nameOf } from "./ops";
 import { bugChance, readiness, shipGains } from "./vars";
 import { sharesOf } from "./voice";
+import { defs } from "../../defs";
 
 export interface BenchColumn {
   id: string;
@@ -78,7 +79,7 @@ export interface LeapfrogView {
   stats: { drops: number; leads: number; answers: number; sota: number; maxxed: number; solved: number; owned: number; streams: number; mishaps: number };
 }
 
-const colorOf = (id: string): string => (id === YOU ? "#ff8a4c" : (RIVAL_BY_ID[id as RivalId]?.color ?? "#888"));
+const colorOf = (id: string): string => (id === YOU ? "#ff8a4c" : (defs().rivalById[id as RivalId]?.color ?? "#888"));
 
 const OFF: LeapfrogView = {
   enabled: false,
@@ -108,17 +109,17 @@ export function leapfrogView(state: GameState): LeapfrogView {
   }));
 
   const rows: LeaderRow[] = labIds(state).map((id) => {
-    const product = id === YOU || RIVAL_BY_ID[id as RivalId]?.models != null;
+    const product = id === YOU || defs().rivalById[id as RivalId]?.models != null;
     const claims = lf.labs[id]!;
     const scores = open.map((e) => (product ? shownScore(state, id, e.def) : null));
     const maxx = open.map((e) => product && claims.maxx[e.def.id] !== undefined && claims.maxx[e.def.id]! > (honestScore(state, id, e.def) ?? 0) + 1e-9);
     const sota = open.map((e) => e.machine.context.holder === id && e.machine.value !== "saturated");
     const model =
-      id === YOU ? (state.models[state.models.length - 1] ?? "") : (RIVAL_BY_ID[id as RivalId].models ? (state.race.rivals.find((r) => r.context.id === id)!.context.model || `${RIVAL_BY_ID[id as RivalId].models!.base} (current)`) : "");
+      id === YOU ? (state.models[state.models.length - 1] ?? "") : (defs().rivalById[id as RivalId].models ? (state.race.rivals.find((r) => r.context.id === id)!.context.model || `${defs().rivalById[id as RivalId].models!.base} (current)`) : "");
     return {
       id,
       name: nameOf(state, id),
-      short: id === YOU ? state.labName : RIVAL_BY_ID[id as RivalId].short,
+      short: id === YOU ? state.labName : defs().rivalById[id as RivalId].short,
       color: colorOf(id),
       you: id === YOU,
       kind: id === YOU ? "you" : (LEAPFROG.labs[id]?.kind ?? "frontier"),

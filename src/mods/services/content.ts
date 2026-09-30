@@ -5,6 +5,8 @@ import type { baseTables } from "../tables";
 
 export interface ContentApi {
   readonly progression: readonly import("../../content/progression").ProgressionLevel[];
+  /** The first-run coach marks, in order (content/coach.ts). */
+  readonly coach: readonly import("../../content/coach").CoachLine[];
   readonly buildings: Readonly<Record<string, BuildingData>>;
   readonly rivals: ReadonlyArray<RivalData>;
   readonly headlines: ReadonlyArray<HeadlineData>;

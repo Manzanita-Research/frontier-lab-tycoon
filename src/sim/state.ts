@@ -1,6 +1,8 @@
-import { BUILDINGS, type BuildingKind } from "../content/buildings";
-import { EVENTS, EVENT_COOLDOWN_DAYS } from "../content/events";
-import { LAB_NAMES, modelName } from "../content/names";
+import type { BuildingKind } from "../content/buildings";
+import { EVENT_COOLDOWN_DAYS } from "../content/events";
+import { modelName } from "../content/names";
+import type { GameDefinition } from "../mods/game-definition";
+import { defs, withDefs } from "./defs";
 import { createDisasters } from "./disasters/driver";
 import { createGoals } from "./goals";
 import { initialStored } from "./machines/run";
@@ -24,8 +26,16 @@ export const GRID_SIZE = 24;
 export const START_CASH = 5_000_000;
 const START_CAPABILITY = 10;
 
-/** A quiet campus: the gate, a short connected stub, compute, three researchers and one agent. */
-export function createInitialState(seed = 1, opening: "garage" | "campus" = "garage"): GameState {
+/**
+ * A quiet campus: the gate, a short connected stub, compute, three researchers and one agent.
+ * `def` is the run's resolved mod definition (FLT-37): rivals, goals, event arcs and names come from it.
+ */
+export function createInitialState(seed = 1, opening: "garage" | "campus" = "garage", def?: GameDefinition | null): GameState {
+  return withDefs(def, () => create(seed, opening));
+}
+
+function create(seed: number, opening: "garage" | "campus"): GameState {
+  const content = defs();
   const rng = createRng(seed);
   const w = GRID_SIZE;
   const h = GRID_SIZE;
@@ -51,7 +61,7 @@ export function createInitialState(seed = 1, opening: "garage" | "campus" = "gar
     compute: 0,
     hype: 30,
     vibes: blankVibes(),
-    labName: rng.pick(LAB_NAMES),
+    labName: rng.pick(content.names.LAB_NAMES),
     grid: { w, h, paths },
     gate: { x: 11, z: 23, w: 2, d: 1 },
     buildings: [],
@@ -81,12 +91,12 @@ export function createInitialState(seed = 1, opening: "garage" | "campus" = "gar
     unlockCards: [],
     disasters: createDisasters(seed),
     arcs: Object.fromEntries(
-      EVENTS.map((def) => [def.id, initialStored(arcMachine, { choices: def.choices.length, cooldownDays: def.cooldown ?? EVENT_COOLDOWN_DAYS, openedDay: null })]),
+      content.events.map((def) => [def.id, initialStored(arcMachine, { choices: def.choices.length, cooldownDays: def.cooldown ?? EVENT_COOLDOWN_DAYS, openedDay: null })]),
     ),
   };
 
   const put = (kind: BuildingKind, x: number, z: number) => {
-    const [bw, bd] = BUILDINGS[kind].size;
+    const [bw, bd] = content.buildings[kind].size;
     state.buildings.push({ id: state.nextId++, kind, x, z, w: bw, d: bd, placedTick: 0, reliability: 1, broken: false, brokenTick: 0 });
     state.flags[`built:${kind}`] = 0;
   };

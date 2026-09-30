@@ -1,6 +1,5 @@
 // Thought bubbles: the main joke delivery and the player's feedback channel.
-import { BUILDINGS } from "../content/buildings";
-import { THOUGHTS, type ThoughtCondition } from "../content/thoughts";
+import type { ThoughtCondition } from "../content/thoughts";
 import { FIRST_NIGHT_LINE } from "../content/night";
 import { CROWDING_PROTESTERS, THOUGHT_TICKS } from "./constants";
 import { hourAt, isNight } from "./daylight";
@@ -12,6 +11,7 @@ import { templateVars } from "./news";
 import type { Rng } from "./rng";
 import type { GameState } from "./types";
 import { modeOf } from "./walkers";
+import { defs } from "./defs";
 
 export function activeConditions(state: GameState): Set<ThoughtCondition> {
   const c = new Set<ThoughtCondition>(["always"]);
@@ -23,7 +23,7 @@ export function activeConditions(state: GameState): Set<ThoughtCondition> {
   if (state.buildings.some((b) => b.kind === "hall")) c.add("training");
   if (state.day - (state.flags.lastRelease ?? -99) < 4) c.add("justReleased");
   if (state.hype > 70) c.add("highHype");
-  if (state.buildings.some((b) => !BUILDINGS[b.kind].scenery && !isReachable(state, b))) c.add("unreachable");
+  if (state.buildings.some((b) => !defs().buildings[b.kind].scenery && !isReachable(state, b))) c.add("unreachable");
   if (state.walkers.filter((w) => modeOf(w) !== "inside").length > 40) c.add("crowded");
   if (state.waterDiscourse >= 12) c.add("discourse");
   if (state.walkers.filter((w) => w.kind === "protester").length >= CROWDING_PROTESTERS) c.add("protest");
@@ -66,7 +66,7 @@ export function dailyThoughts(state: GameState, rng: Rng, force = false) {
   }
 
   const conditions = activeConditions(state);
-  let lines = THOUGHTS.filter((l) => l.kind === walker.kind && conditions.has(l.when));
+  let lines = defs().thoughts.filter((l) => l.kind === walker.kind && conditions.has(l.when));
   if (lines.length === 0) return;
   const fresh = lines.filter((l) => !state.recentThoughts.includes(l.text));
   if (fresh.length > 0) lines = fresh;

@@ -16,6 +16,14 @@ export function validateContent(content: ContentApi, vocabulary: VocabularyApi):
   if (content.progression.length !== 5 || new Set(content.progression.map((r) => r.level)).size !== 5) throw new ModError({ path: "content.progression", detail: "expected exactly one row for each level 1–5" });
   const kinds = content.walkerKinds.map((kind) => kind.id);
   const buildings = Object.keys(content.buildings);
+  if (content.coach.length === 0) throw new ModError({ path: "content.coach", detail: "expected at least one coach line (remove the tutorial by overriding lines, not by emptying it)" });
+  content.progression.forEach((row, i) => row.buildings.forEach((kind, j) => known(kind, buildings, `content.progression[${i}].buildings[${j}]`)));
+  // FLT-37: a new building is locked until a ladder row unlocks it; say so instead of letting it vanish from the palette.
+  const laddered = new Set<string>(content.progression.flatMap((row) => row.buildings));
+  for (const [id, building] of Object.entries(content.buildings)) {
+    if (building.scenery || Reflect.get(building, "office") === true || building.locked || laddered.has(id)) continue;
+    throw new ModError({ path: `content.buildings.${id}`, detail: `no progression row unlocks "${id}"; add it to a level, e.g. content.progression.override [{ "id": "business", "buildings": ["gateway", "kombucha", "${id}"] }]` });
+  }
   for (const [id, building] of Object.entries(content.buildings)) {
     building.hosts.forEach((kind, i) => known(kind, kinds, `content.buildings.${id}.hosts[${i}]`));
     for (const [kind, serves] of Object.entries(building.serves)) {

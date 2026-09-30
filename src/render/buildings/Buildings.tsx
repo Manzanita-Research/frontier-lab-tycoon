@@ -1,7 +1,7 @@
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useRef, type ReactNode } from "react";
 import * as THREE from "three";
-import { BUILDINGS, type BuildingKind } from "../../content/buildings";
+import type { BuildingKind } from "../../content/buildings";
 import { atoms, sim as game } from "../../app/game";
 import { useApp } from "../../app/hooks";
 import { rectCenter } from "../coords";
@@ -21,10 +21,11 @@ import { SnackModel } from "./SnackModel";
 import { SecurityOfficeModel } from "./SecurityOfficeModel";
 import { DemoModel } from "./DemoModel";
 import { BrokenFx } from "./BrokenFx";
+import { defs } from "../../sim/defs";
 
 /** `id` lets a model that reacts to the world (the Demo Stage screen) find its building; the placement ghost has none. */
 export function BuildingModel({ kind, id }: { kind: BuildingKind; id?: number }) {
-  const color = BUILDINGS[kind].color;
+  const color = defs().buildings[kind].color;
   switch (kind) {
     case "cluster":
       return <ClusterModel color={color} />;
