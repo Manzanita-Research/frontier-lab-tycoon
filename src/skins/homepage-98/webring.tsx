@@ -1,8 +1,8 @@
 // The navigation: the build palette as the AI Labs WebRing (88×31 buttons, Prev/Next), the speed buttons as a grey web
 // form, the news as a navy marquee with a badge you are not supposed to click, and the little utilities as form buttons.
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { Marquee, reducedMotion } from "../kit";
-import { useT } from "../context";
+import { ALL_VISIBLE, Marquee, reducedMotion } from "../kit";
+import { useCoach, useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import type { BuildItemVM } from "../../ui/hud/types";
 import { Gci, Spark } from "./icons";
@@ -35,8 +35,16 @@ export function ringStep(items: readonly BuildItemVM[], dir: 1 | -1): string | n
 }
 
 /** The build palette. Prev and Next walk the tool in your hand around the ring, and it never runs out. */
-export function BuildBar({ items, tip, actions }: SlotPropsMap["BuildBar"]) {
+export function BuildBar({ items, tip, teasers = [], actions }: SlotPropsMap["BuildBar"]) {
   const t = useT();
+  const coach = useCoach();
+  const [open, setOpen] = useState(false);
+  const toggle = (next: boolean) => {
+    setOpen(next);
+    actions.buildPanel(next);
+  };
+  // While the coach points at a button and the ring is shut, the "Build something" link stands in for it.
+  const inside = coach.target?.startsWith("build:") ?? false;
   const strip = useRef<HTMLDivElement>(null);
   const selected = items.find((i) => i.selected)?.kind;
 
@@ -68,22 +76,31 @@ export function BuildBar({ items, tip, actions }: SlotPropsMap["BuildBar"]) {
           <span className="mid">
             {" "}
             | <b className="gc-ringname"><Spark /> The AI Labs WebRing <Spark /></b>
-            <span className="gc-build"> — {t("build.menuTitle").toLowerCase()} something!</span> |{" "}
+            <button type="button" className="gc-link gc-build" aria-expanded={open} onClick={() => toggle(!open)} {...coach.attrs("start", !open && inside)}>
+              {" "}
+              — {t("build.menuTitle").toLowerCase()} something!
+            </button>{" "}
+            |{" "}
           </span>
           <button type="button" className="gc-link v next" onClick={() => step(1)} aria-label="Next tool">
             <span>Next &gt;&gt;</span>
           </button>
           <span className="br"> ]</span>
         </div>
+        {open && (
         <div className="gc-row" ref={strip}>
           {items.map((it) => (
             <button
               key={it.kind}
               type="button"
               data-kind={it.kind}
+              {...coach.attrs(`build:${it.kind}`)}
               className={`gc-b88 ${it.selected ? "on" : ""} ${it.affordable ? "" : "poor"} ${it.race ? "race" : ""}`}
               style={{ "--ring": RING[it.kind] ?? "#303030" } as CSSProperties}
-              onClick={() => actions.place(it.kind)}
+              onClick={() => {
+                actions.place(it.kind);
+                toggle(false);
+              }}
               disabled={!it.affordable && !it.selected}
               aria-pressed={it.selected}
               title={it.name}
@@ -96,7 +113,30 @@ export function BuildBar({ items, tip, actions }: SlotPropsMap["BuildBar"]) {
               </span>
             </button>
           ))}
+          {/* Not yet: the buttons you do not have, and what earns them. */}
+          {teasers.map((teaser, i) => (
+            <div key={`${teaser.label}-${i}`} className="gc-b88 locked" aria-disabled title={`${t("build.locked")}: ${teaser.hint}`}>
+              <span className="tx">
+                <span className="nm">{teaser.label}</span>
+                <small>{teaser.hint}</small>
+              </span>
+            </div>
+          ))}
+          <button
+            type="button"
+            className="gc-b88 help"
+            onClick={() => {
+              actions.openHelp();
+              toggle(false);
+            }}
+          >
+            <span className="tx">
+              <span className="nm">{t("build.help")}</span>
+              <small>{t("help.title")}</small>
+            </span>
+          </button>
         </div>
+        )}
       </div>
     </div>
   );
@@ -153,15 +193,17 @@ export function Ticker({ items }: SlotPropsMap["Ticker"]) {
 }
 
 /** News Room, sound, mixer and the skin picker: the "site menu" row of form buttons. */
-export function NewsControls({ newsroom, sound, skins, actions }: SlotPropsMap["NewsControls"]) {
+export function NewsControls({ newsroom, sound, skins, visible = ALL_VISIBLE, actions }: SlotPropsMap["NewsControls"]) {
   const t = useT();
   return (
     <div className="gc-form gc-menu">
-      <button type="button" className="gc-fb" onClick={() => actions.openNews()} aria-label={t("news.open")}>
-        <Gci name="note" size={18} />
-        <span className="lbl">{t("news.button")}</span>
-        {newsroom.unread > 0 && <b className="gc-unread">{newsroom.unread}</b>}
-      </button>
+      {visible.news && (
+        <button type="button" className="gc-fb" onClick={() => actions.openNews()} aria-label={t("news.open")}>
+          <Gci name="note" size={18} />
+          <span className="lbl">{t("news.button")}</span>
+          {newsroom.unread > 0 && <b className="gc-unread">{newsroom.unread}</b>}
+        </button>
+      )}
       <button type="button" className="gc-fb" onClick={() => actions.setMuted(!sound.muted)} aria-label={sound.muted ? t("sound.unmute") : t("sound.mute")} aria-pressed={sound.muted}>
         <Gci name={sound.muted ? "muted" : "speaker"} size={18} />
       </button>

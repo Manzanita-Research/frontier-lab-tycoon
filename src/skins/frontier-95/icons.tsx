@@ -42,6 +42,8 @@ export function IconSprite() {
         <symbol id="f95i-tool-line" viewBox="0 0 24 24" {...S}><path d="M4 19L20 5" stroke="#000" strokeWidth="2" /></symbol>
         <symbol id="f95i-tool-zoom" viewBox="0 0 24 24" {...S}><circle cx="10" cy="10" r="6" fill="#c0e0ff" stroke="#000" strokeWidth="2" /><path d="M15 15l6 6" stroke="#000" strokeWidth="3" /></symbol>
         <symbol id="f95i-staff" viewBox="0 0 24 24" {...S}><circle cx="12" cy="14" r="5" fill="#ffd9b8" stroke="#000" /><path d="M6 12a6 6 0 0 1 12 0z" fill="#ffc21a" stroke="#000" /><rect x="4" y="11" width="16" height="2" fill="#ffc21a" stroke="#000" /><path d="M6 23q6-6 12 0" fill="#ff8a2b" stroke="#000" /></symbol>
+        <symbol id="f95i-lock" viewBox="0 0 24 24" {...S}><rect x="5" y="11" width="14" height="10" fill="#c0c0c0" stroke="#000" /><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="#000" strokeWidth="2" /><rect x="11" y="15" width="2" height="3" fill="#000" /></symbol>
+        <symbol id="f95i-help" viewBox="0 0 24 24" {...S}><circle cx="12" cy="12" r="10" fill="#ffe000" stroke="#000" /><path d="M9 9.5a3 3 0 1 1 4.5 2.6c-1 .6-1.500 1.200-1.500 2.400" fill="none" stroke="#000" strokeWidth="2" /><rect x="11" y="16.500" width="2" height="2" fill="#000" /></symbol>
         <symbol id="f95i-chart" viewBox="0 0 24 24" {...S}><rect x="2" y="3" width="20" height="18" fill="#fff" stroke="#000" /><path d="M5 17l4-6 4 3 6-8" fill="none" stroke="#e00000" strokeWidth="2" /></symbol>
       </defs>
     </svg>

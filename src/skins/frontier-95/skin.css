@@ -1272,6 +1272,211 @@
     display: none;
   }
 
+  /* ---- Playable v1: the coach, the goal, the locked teasers, the New! box, Help ---- */
+  .f95-coachwrap {
+    display: contents;
+  }
+  .f95-coach {
+    position: fixed;
+    z-index: 44;
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    pointer-events: auto;
+    .f95-balloon {
+      width: 310px;
+      margin: 0;
+      padding: 8px 10px 7px;
+      &::after {
+        right: -8px;
+        bottom: 16px;
+        border: 6px solid transparent;
+        border-left: 8px solid #000;
+        border-right: 0;
+        border-top-width: 6px;
+      }
+    }
+    .f95-clip {
+      display: block;
+      flex: none;
+      width: 44px;
+      height: 50px;
+      pointer-events: none;
+      svg {
+        width: 100%;
+        height: 100%;
+        image-rendering: pixelated;
+      }
+      &.wiggle svg {
+        animation: frontier-95-wiggle 0.5s steps(4) 3;
+      }
+    }
+  }
+  .f95-saying {
+    margin: 2px 0 7px;
+    font-size: 17px;
+    line-height: 1.15;
+  }
+  .f95-coachfoot {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    small {
+      font-size: 14px;
+      color: #444;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+  }
+  .f95-skip {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    font-size: 15px;
+    color: #000080;
+    text-decoration: underline;
+    cursor: pointer;
+    &:hover {
+      color: #0000c0;
+    }
+    &:focus-visible {
+      outline: 1px dotted #000;
+      outline-offset: 2px;
+    }
+  }
+  /* The one goal: a single sticky note with a blocky bar. */
+  .f95-post.goal {
+    display: grid;
+    gap: 2px;
+    width: 100%;
+    padding: 6px 10px 8px;
+    border: 1px solid #000;
+    background: #fff27a;
+    text-align: left;
+    small {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #555;
+    }
+    b {
+      font-size: 17px;
+    }
+  }
+  .f95-goalbar {
+    display: block;
+    height: 10px;
+    margin-top: 4px;
+    border: 1px solid #000;
+    background: #fff;
+    i {
+      display: block;
+      height: 100%;
+      background: repeating-linear-gradient(90deg, #000080 0 8px, transparent 8px 10px);
+    }
+  }
+  .f95-menu li.locked button {
+    color: #7a7a7a;
+    cursor: default;
+    &:hover {
+      background: transparent;
+      color: #7a7a7a;
+    }
+  }
+  .f95-unlock {
+    position: fixed;
+    z-index: 30;
+    top: 38%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(440px, calc(100vw - 20px));
+    pointer-events: auto;
+  }
+  .f95-unlockitems {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px 14px;
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+    li::before {
+      content: "";
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      margin-right: 8px;
+      background: #000080;
+    }
+  }
+  .f95-help {
+    width: min(580px, 100%);
+    max-height: calc(100dvh - 30px);
+    overflow: auto;
+    pointer-events: auto;
+  }
+  .f95-helpbody {
+    margin: 4px;
+    padding: 8px 14px 10px;
+    background: #fff;
+    max-height: min(60vh, 460px);
+    overflow: auto;
+    user-select: text;
+    h3 {
+      margin: 10px 0 3px;
+      font-size: 17px;
+      font-weight: bold;
+      color: #000080;
+      &:first-child {
+        margin-top: 0;
+      }
+    }
+    ol,
+    ul {
+      margin: 0;
+      padding-left: 22px;
+      line-height: 1.2;
+    }
+    li {
+      margin: 2px 0;
+    }
+    dl {
+      margin: 0;
+    }
+    dt {
+      display: inline;
+      font-weight: bold;
+      &::after {
+        content: ":";
+      }
+    }
+    dd {
+      display: inline;
+      margin: 0 0 0 4px;
+    }
+    div {
+      margin: 2px 0;
+    }
+  }
+  @media (max-width: 640px) {
+    .f95-coach.docked {
+      left: 4px;
+      right: 4px;
+      .f95-balloon {
+        flex: 1;
+        width: auto;
+        min-width: 0;
+      }
+      &.dock-bottom {
+        bottom: calc(var(--taskbar) + 30px + 52px);
+      }
+      &.dock-top {
+        top: 52px;
+      }
+    }
+  }
+
   /* ---- message boxes, the blue screen, the shutdown joke ---- */
   .f95-layer {
     position: fixed;

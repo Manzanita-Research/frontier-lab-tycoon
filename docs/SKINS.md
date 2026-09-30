@@ -106,7 +106,7 @@ Token values are written into a stylesheet, so they may not contain `{ } ; < >`,
 
 Tokens are CSS custom properties named `--flt-<category>-<name>` (`color.panel` → `--flt-color-panel`). The base defines all of them; a skin overrides some. In your own CSS, read them with `var(--flt-color-panel)`. Categories: `color.*`, `font.*`, `space.*`, `radius.*`, `border.*`, `bevel.*` (so a Win95 bevel is four colours, not a hack), `shadow.*` and `motion.*`.
 
-**Motion and reduced motion.** Use `var(--flt-motion-base)` for durations. Under `prefers-reduced-motion: reduce`, or when the player ticks "Reduce motion" in the skin picker (`<html data-motion="reduced">`), the loader swaps `--flt-motion-fast|base|slow` for their `motion.reduced.*` variants. Keyframe animations you write yourself must switch off under the same two conditions (see Frontier 95's CSS for the pattern).
+**Motion and reduced motion.** Use `var(--flt-motion-base)` for durations. Under `prefers-reduced-motion: reduce`, or when the player ticks "Reduce motion" in the skin picker (`<html data-motion="reduced">`), the loader swaps `--flt-motion-fast|base|slow|pulse` for their `motion.reduced.*` variants. Keyframe animations you write yourself must switch off under the same two conditions (see Frontier 95's CSS for the pattern).
 
 **Contrast is tested** for every skin: `color.text` ≥ 4.5:1 on `color.panel`, `color.panelAlt` and `color.inset`; `color.textDim` ≥ 4.5:1 on the panel; `color.numeral` ≥ 3:1 on `color.numeralBg`; and the tooltip, selection, title-bar and accent pairs ≥ 4.5:1.
 
@@ -133,6 +133,8 @@ Tokens are CSS custom properties named `--flt-<category>-<name>` (`color.panel` 
 | `color.tipText` | `--flt-color-tipText` | `#3a2a1c` |  | Text on tooltips. ≥ 4.5:1. |
 | `color.selection` | `--flt-color-selection` | `#3a2a1c` |  | Selected rows, dark chips, the ticker. Paired with `color.selectionText`. |
 | `color.selectionText` | `--flt-color-selectionText` | `#fff3d6` |  | Text on `color.selection`. ≥ 4.5:1. |
+| `color.highlight` | `--flt-color-highlight` | `#7a3cff` |  | The ring the coach draws round the one thing to click (and its pulse). ≥ 3:1 on the panel. |
+| `color.scrim` | `--flt-color-scrim` | `rgba(22, 20, 46, 0.58)` |  | The dimming over everything but the coach's spotlight. |
 | `color.meterFrom` | `--flt-color-meterFrom` | `#ffb347` |  | Progress meters: the start of the gradient (a flat skin sets both ends the same). |
 | `color.meterTo` | `--flt-color-meterTo` | `#ff6a4c` |  | Progress meters: the end of the gradient. |
 | `font.ui` | `--flt-font-ui` | `ui-rounded, "SF Pro Rounded", "Nunito", "Varela Round", system-ui, sans-serif` | **yes** | Body font stack. |
@@ -161,9 +163,11 @@ Tokens are CSS custom properties named `--flt-<category>-<name>` (`color.panel` 
 | `motion.base` | `--flt-motion-base` | `240ms` |  | Normal transition. |
 | `motion.slow` | `--flt-motion-slow` | `700ms` |  | Long transition. |
 | `motion.ease` | `--flt-motion-ease` | `cubic-bezier(0.2, 0.8, 0.2, 1)` |  | Easing curve. |
+| `motion.pulse` | `--flt-motion-pulse` | `1600ms` |  | One pulse of the coach's ring. |
 | `motion.reduced.fast` | `--flt-motion-reduced-fast` | `0ms` |  | What `motion.fast` becomes under reduced motion (the OS setting or the Display dialog's switch). |
 | `motion.reduced.base` | `--flt-motion-reduced-base` | `0ms` |  | Reduced variant of `motion.base`. |
 | `motion.reduced.slow` | `--flt-motion-reduced-slow` | `0ms` |  | Reduced variant of `motion.slow`. |
+| `motion.reduced.pulse` | `--flt-motion-reduced-pulse` | `0ms` |  | Reduced variant of `motion.pulse` (the ring stays, it stops pulsing). |
 
 ## Strings
 
@@ -201,6 +205,7 @@ If your slot needs copy that has no key, write it into the slot (as Frontier 95 
 | `training.noCompute` | No compute! Build a Compute Cluster. |
 | `objectives.title` | Objectives |
 | `objectives.daysLeft` | days left |
+| `objectives.goal` | Next goal |
 | `objectives.by` | By {date} |
 | `inspector.title` | {name} |
 | `inspector.close` | Close |
@@ -209,6 +214,11 @@ If your slot needs copy that has no key, write it into the slot (as Frontier 95 
 | `inspector.following` | Following. Tap to let go |
 | `inspector.ok` | OK |
 | `build.menuTitle` | Build |
+| `build.open` | Build |
+| `build.close` | Close |
+| `build.locked` | Locked |
+| `build.help` | Help |
+| `build.putAway` | Put the tool away |
 | `build.refund` | refund 50% |
 | `build.free` | FREE |
 | `build.bulldoze` | Bulldoze |
@@ -236,6 +246,15 @@ If your slot needs copy that has no key, write it into the slot (as Frontier 95 
 | `confirm.ok` | Do it anyway |
 | `confirm.cancel` | Keep the runway |
 | `assistant.title` | Assistant |
+| `coach.step` | {n} of {total} |
+| `coach.skip` | Skip tutorial |
+| `unlock.ok` | Got it |
+| `help.title` | How to play |
+| `help.loop` | The loop |
+| `help.buildings` | What you can build |
+| `help.numbers` | The numbers |
+| `help.replay` | Replay tutorial |
+| `help.close` | Close |
 | `event.paused` | Paused |
 | `arena.title` | Frontier Arena |
 | `arena.week` | Week {n} |
@@ -315,11 +334,11 @@ A slot is a React component. Each gets **its slice of the view-model plus `actio
 | Slot | Props | What it draws |
 |---|---|---|
 | `Layout` | `{ vm, actions, slots }` | Places the *docked* slots (below). `slots` holds each one already rendered, or `null` when there is nothing to show (no walker selected, no news arrival). A skin that moves things about (Frontier 95 puts the speed buttons in a taskbar tray) is a `Layout`. |
-| `Stats` | `{ stats, layout, actions }` | Lab name, date, Vibes (with its "where the points come from" breakdown), cash, runway, capability, hype, the Arena chip and R&D multiplier. |
+| `Stats` | `{ stats, layout, visible, actions }` | Lab name, date, Vibes (with its "where the points come from" breakdown), cash, runway, capability, hype, the Arena chip and R&D multiplier. |
 | `Training` | `{ training, actions }` | The current training run, its progress and ETA, "SHIPPED" moment (`training.justShipped`). |
-| `Objectives` | `{ objectives, layout, actions }` | The three scenario milestones and the deadline. |
+| `Objectives` | `{ objectives, progress, visible, layout, actions }` | The three scenario milestones and the deadline. |
 | `Inspector` | `{ inspector, actions }` | The card for the tapped walker: portrait, needs, thought, history, Follow. Only rendered when there is a selection. |
-| `BuildBar` | `{ items, tip, layout, actions }` | The build palette. `items[].kind` is the tool id and the icon id; `actions.place(kind)`. Hotkeys 1–9 are handled by the game. |
+| `BuildBar` | `{ items, tip, teasers, layout, actions }` | The build palette. `items[].kind` is the tool id and the icon id; `actions.place(kind)`. Hotkeys 1–9 are handled by the game. |
 | `Speed` | `{ speed, stats, actions }` | Pause / 1× / 3× / 10×. Label them with `t(option.key)`. |
 | `Staff` | `{ staff, actions }` | The payroll panel: hire, fire, and paint patrol zones (`staff.painting` is the staffer whose zone is being painted on the map). Rendered only while `staff.open`; it opens from the `staff` tile in the build palette (`buildItems` ends with `{ kind: "staff" }`; `actions.place("staff")` toggles the panel), so every `BuildBar` should draw that tile like any other. |
 | `Bubble` | `{ bubble, actions }` | **One** thought bubble. The game pins whatever you render to the walker on every frame, so do not position it. **The root element must have the class `bubble`**: photo mode copies it onto the picture. |
@@ -329,6 +348,9 @@ A slot is a React component. Each gets **its slice of the view-model plus `actio
 | `Assistant` | `{ vm, actions }` | A helper character that hosts hints, toasts and standing warnings (`vm.warnings`). The base draws nothing here; Frontier 95's paperclip lives here. |
 | `Confirm` | `{ confirm, actions }` | A modal: a spend (a hire, a build, a path) that would leave the lab under three months of runway, held for a yes or a no. `confirm.message`, `costText` and `runwayText` say what it is; `actions.confirmSpend()` goes ahead, `actions.cancelSpend()` keeps the runway (make that the default: focus it, and Escape or a click outside give it). Time is held while it is up. A skin that does not draw its own gets the base's, so the game can never wait on a box nobody can answer. Frontier 95's is a Win95 warning box. |
 | `EventCard` | `{ event, actions }` | The modal news card. `actions.choose(event.id, i)`; the 1–3 keys are handled by the game. |
+| `Coach` | `{ coach, anchor, layout, actions }` | The balloon of a **coach mark** (the paperclip in Frontier 95; a card in the base): `coach.text` (one line), `coach.step` of `coach.of`, and a **Skip tutorial** (`actions.coachSkip()`). No Continue button: it waits for the player to do the thing, and never pauses the game. The host draws the dimming and the ring (and finds what to light: see `useCoach` below); `anchor` is where the lit thing is on screen (`null` if it is not there), so put the balloon beside it, never on it (`placeBalloon` from the kit does that). Not docked: the host renders it over everything. |
+| `UnlockCard` | `{ unlock, actions }` | The small "New!" card that comes with a level-up (`unlock.title`, `body` and the `items` you can build now). `actions.dismissUnlock()` closes it; the game does not wait for it. |
+| `HowToPlay` | `{ help, actions }` | Help ▸ How to play: one window with the loop in five lines (`help.loop`), a line for each unlocked building and what cash, runway, Vibes and hype mean. `actions.coachReplay()` is its "Replay tutorial", `actions.closeHelp()` closes it. |
 | `Arena` | `{ arena, actions }` | The R&D multiplier and era, and the Frontier Arena leaderboard (`arena.open` folded or open; `actions.toggleArena()`). |
 | `EraCard` | `{ era, actions }` | The full-screen era title card. `actions.continueEra()`; Enter, Space and (after 0.7 s) any key work. |
 | `FrontPage` | `{ paper, actions }` | The weekly paper. |
@@ -337,7 +359,7 @@ A slot is a React component. Each gets **its slice of the view-model plus `actio
 | `PhotoOverlay` | `{ photo, actions }` | Photo mode's controls (time of day, shutter, exit) and the "photo saved" thumbnail. Rendered outside the HUD layer so hiding the HUD does not hide it. Draw only at the edges: the campus is the picture. |
 | `SkinPicker` | `{ skins, actions }` | The skin picker. `previewSkin(id)` switches live, `applySkin()` keeps it, `cancelSkinPicker()` goes back. |
 | `Outcome` | `{ outcome, actions }` | The win / lose card (`keepPlaying`, `newLab`). |
-| `NewsControls` | `{ newsroom, sound, skins, actions }` | The News Room button (with unread count), mute, and (base) the skin picker button. |
+| `NewsControls` | `{ newsroom, sound, skins, visible, actions }` | The News Room button (with unread count), mute, and (base) the skin picker button. |
 | `NewsArrival` | `{ arrival, actions }` | "The Frontier Times is here" (`viewNews(id)`, `skipNews()`). |
 | `NewsRoom` | `{ newsroom, actions }` | The News Room modal: the archive, and the open paper or chat (compose `useSlots().FrontPage` / `.GroupChat`, or draw your own). |
 | `Mixer` | `{ sound, actions }` | The sound mixer modal. |
@@ -369,7 +391,7 @@ const slots: SkinSlots = { Stats };
 export default slots;
 ```
 
-What a slot may import: `react`; `../types` and `../../ui/hud/types` (types only); `../kit` (Odometer, Marquee, Portrait, Dialog, money, reducedMotion, useT, useSlots, useSkin, useAutoPause); files in its own folder. **Nothing else in the game.** Rules for slots:
+What a slot may import: `react`; `../types` and `../../ui/hud/types` (types only); `../kit` (Odometer, Marquee, Portrait, Dialog, money, reducedMotion, useT, useSlots, useSkin, useAutoPause, useCoach, ALL_VISIBLE, placeBalloon); files in its own folder. **Nothing else in the game.** Rules for slots:
 
 - **Render from props.** No reading the store, no timers that touch the game. UI-only state (an open tab, whether the Start menu is open) is `useState` inside the slot.
 - **Do not call `window` during render** (the tests render on the server). Read `layout.compact` / `layout.phone` from the props for responsive defaults; use `useEffect` for anything with the DOM.
@@ -378,6 +400,16 @@ What a slot may import: `react`; `../types` and `../../ui/hud/types` (types only
 - **Keys and focus.** The game owns hotkeys (1–9, Space, Esc, P, and 1–3 on cards). For your own popups use `kit`'s `<Dialog>`, which traps Tab, closes on Esc and keeps the game's hotkeys out while it is open. A non-modal popup (a menu) should not swallow keys.
 - Be accessible: real `<button>`s, `aria-label`s on icon-only controls, `role="dialog"` on modals, `aria-pressed` on toggles.
 - Parody names only: no real companies, products or people in anything a player can read.
+
+## Playable v1: the ladder, the coach and the build panel
+
+The lab starts small and grows (`vm.progress`, `vm.visible`), and a coach teaches the first minutes (`vm.coach`). What a skin draws:
+
+- **Draw only what is earned.** `vm.buildItems` is already just the unlocked tools (the bulldozer always); `progress.teasers` are the locked ones for the build panel ("🔒 ??? · ship your first model": draw them dim and inert, with `label` and `hint`). `vm.visible` says which HUD panels exist yet: `revenue` (the per-day line, the Finance tab), `vibes` (Vibes, capability, hype), `arena`, `rnd` (the AI R&D number), `thoughts`, `news` (the News Room button and arrivals), `staff`, `events`, `papers`, `disasters`. The host already leaves the Arena, Thoughts, Staff and news arrival slots out of the layout when they are not earned, and the training bar until a hall stands; `Stats`, `Objectives` and `NewsControls` get `visible` so they can hide parts of themselves (`ALL_VISIBLE` from the kit is the default when none is given). At level 1 only cash, runway, the date, the speed buttons, the training bar, the goal and the ticker show.
+- **The build menu is a panel you open** (the Start menu in Frontier 95, a Build button and a panel in the base): the unlocked items, then the teasers, then Help (`actions.openHelp()`). Tell the game each time it opens with `actions.buildPanel(true)`: the first coach step waits for it.
+- **One goal** in front of you: `progress.goal.line` ("Ship your first model · 0/1"; `ratio` for a bar). The scenario checklist (`objectives`) only shows once `visible.arena`.
+- **The coach** is drawn by the host (the dimming, the ring round the target, both tokens: `color.highlight`, `color.scrim`, `motion.pulse`) and by your `Coach` slot (the balloon). The target is whatever carries `data-coach-active`. Mark every thing the coach can point at, in **every skin**, with the kit's `useCoach`: `const coach = useCoach(); <button {...coach.attrs("build:path")}>`. The ids are `start` (whatever opens the build panel), `build:<kind>` (each tool), `training` (the training bar), `stat:runway`, `goals` and `map:suggest` (the map's ghost tiles, marked by the game). `coach.attrs(id, alsoActive)` lets a shut container stand in for what is inside it: a closed Start menu is the active target while the coach points at one of its items, so the spotlight never has nothing to light. The stranger test clicks only `[data-coach-active]`, so a skin that forgets the hooks cannot be played by it.
+- **"New!"** is the `UnlockCard` slot, **Help** is `HowToPlay` (its words are `content/help.ts`).
 
 ## Panels that hold time
 
@@ -393,7 +425,7 @@ interface HudVM {
   stats; training; objectives;           // numbers and text, already formatted ("$4.04M", "5.0 mo")
   inspector: InspectorVM | null;         // null when nobody is selected
   buildItems; buildTip;                  // the palette, and the tooltip for the tool in hand
-  speed; bubbles; ticker; toasts; hints; warnings; confirm; // warnings: standing problems (`toast` tone "warn" in the base's stack); confirm: a spend waiting for a yes or no; hints: at most one of "gateway" | "tap", and none while a toast is up (their copy is strings hint.gateway / hint.tap)
+  speed; bubbles; ticker; toasts; hints; warnings; confirm; progress; visible; coach; unlock; help; // progress: the ladder rung, the goal, the teasers; visible: which panels are earned; coach: the coach mark; unlock: the "New!" card; help: the open How to play; warnings: standing problems (`toast` tone "warn" in the base's stack); confirm: a spend waiting for a yes or no; hints: at most one of "gateway" | "tap", and none while a toast is up (their copy is strings hint.gateway / hint.tap)
   event: EventVM | null;                 // a modal card; the era card is separate:
   eraCard: EraCardVM | null;
   thoughtsPanel; arena; outcome;
@@ -404,7 +436,7 @@ interface HudVM {
 
 Numbers come as numbers (`cash.value`) **and** formatted text (`cash.text`), so you can roll an odometer and still have a caption. Colours the game owns (the walker's `portrait.body`, an Arena lab's `color`) come as CSS colour strings.
 
-`HudActions` is everything a skin can ask for: `place(kind)`, `setSpeed(n)`, `togglePause()`, `choose(eventId, i)`, `continueEra()`, `select(id)`, `follow(id, on?)`, `closeInspector()`, `highlight(key)`, the payroll (`closeStaff`, `hire(job)`, `fire(id)`, `paintZone(id | null)`, `clearZone(id)`), `dismissToast(id)`, the spend check (`confirmSpend()`, `cancelSpend()`), `holdTime(id, open)` (use the kit's `useAutoPause`), `toggleArena()`, `keepPlaying()`, `newLab()`, the news-room ones (`openNews`, `viewNews`, `closeNews`, `skipNews`, `revealChat`), sound (`openMixer`, `closeMixer`, `setMuted`, `setVolume`, `playCue`), photo mode (`setPhoto`, `setPhotoTime`, `takePhoto`) and skins (`openSkinPicker`, `previewSkin`, `applySkin`, `cancelSkinPicker`, `setReducedMotion`). Each is safe to call at any time; the game ignores what does not apply.
+`HudActions` is everything a skin can ask for: `place(kind)`, `setSpeed(n)`, `togglePause()`, `choose(eventId, i)`, `continueEra()`, `select(id)`, `follow(id, on?)`, `closeInspector()`, `highlight(key)`, the payroll (`closeStaff`, `hire(job)`, `fire(id)`, `paintZone(id | null)`, `clearZone(id)`), `dismissToast(id)`, the coach and the cards (`coachSkip()`, `coachReplay()`, `dismissUnlock()`, `buildPanel(open)`, `openHelp()`, `closeHelp()`), the spend check (`confirmSpend()`, `cancelSpend()`), `holdTime(id, open)` (use the kit's `useAutoPause`), `toggleArena()`, `keepPlaying()`, `newLab()`, the news-room ones (`openNews`, `viewNews`, `closeNews`, `skipNews`, `revealChat`), sound (`openMixer`, `closeMixer`, `setMuted`, `setVolume`, `playCue`), photo mode (`setPhoto`, `setPhotoTime`, `takePhoto`) and skins (`openSkinPicker`, `previewSkin`, `applySkin`, `cancelSkinPicker`, `setReducedMotion`). Each is safe to call at any time; the game ignores what does not apply.
 
 Changing the contract: keep changes **additive** (new fields, new actions) and add a fixture to `src/ui/hud/fixtures.ts` + a test in `vm.test.ts`. A breaking change means bumping `SKIN_API_VERSION` and every `skin.json`.
 

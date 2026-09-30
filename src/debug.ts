@@ -30,6 +30,11 @@ export interface DebugParams {
   leapfrog: boolean;
   /** Publishing Papers is on unless ?papers=off. */
   papers: boolean;
+  /**
+   * Preview a rung of the Playable v1 ladder without playing to it (screenshots, skins): `?debug=1&ladder=1` is level 1,
+   * `&coach=0` puts the first of the seven coach lines up, `&unlock` the "New!" card. Only with `debug`.
+   */
+  ladder: { level: 1 | 2 | 3 | 4 | 5; coach: number | null; unlock: boolean } | null;
 }
 
 export function readDebugParams(search = typeof window === "undefined" ? "" : window.location.search): DebugParams {
@@ -54,5 +59,6 @@ export function readDebugParams(search = typeof window === "undefined" ? "" : wi
     risk: q.get("risk"),
     leapfrog: q.get("leapfrog") !== "off",
     papers: q.get("papers") !== "off",
+    ladder: q.has("debug") && num("ladder") !== null && num("ladder")! >= 1 && num("ladder")! <= 5 ? { level: Math.round(num("ladder")!) as 1 | 2 | 3 | 4 | 5, coach: num("coach"), unlock: q.has("unlock") } : null,
   };
 }

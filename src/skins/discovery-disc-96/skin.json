@@ -86,6 +86,7 @@
     "color.tipText": "#111111",
     "color.selection": "#1A5BD6",
     "color.selectionText": "#FFFFFF",
+    "color.highlight": "#D6006F",
     "color.meterFrom": "#1FA24A",
     "color.meterTo": "#1FA24A",
     "font.ui": "\"Comic Neue\", \"Comic Sans MS\", cursive, sans-serif",

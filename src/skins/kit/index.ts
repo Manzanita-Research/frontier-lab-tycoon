@@ -5,5 +5,7 @@ export { Portrait } from "./Portrait";
 export { Dialog } from "./Dialog";
 export { money } from "./format";
 export { reducedMotion } from "./motion";
-export { useT, useSlots, useSkin } from "../context";
+export { useT, useSlots, useSkin, useCoach, type CoachApi } from "../context";
 export { useAutoPause } from "./autopause";
+export { placeBalloon, type Placement, type Rect, type Side } from "./place";
+export { ALL_VISIBLE } from "./visible";

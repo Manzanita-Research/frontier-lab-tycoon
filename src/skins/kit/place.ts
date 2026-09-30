@@ -1,0 +1,57 @@
+// Where a coach balloon goes: beside the thing it points at, never on it, always on screen and clear of the taskbar. Pure, so it
+// is tested without a DOM.
+export interface Rect {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+export type Side = "right" | "left" | "top" | "bottom";
+
+export interface Placement {
+  x: number;
+  y: number;
+  /** Which side of the target the balloon sits on, so a skin can point its tail back at it. */
+  side: Side | "none";
+}
+
+export interface PlaceOptions {
+  /** Space kept between the balloon and its target. */
+  gap?: number;
+  /** Space kept clear at each edge of the screen (the taskbar, the top bar). A number is all four. */
+  margin?: number | { top?: number; right?: number; bottom?: number; left?: number };
+  /** Sides to try, in order. The default faces the middle of the screen: a target in the bottom row gets its balloon above it. */
+  prefer?: readonly Side[];
+}
+
+const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
+
+/**
+ * Put a balloon of `size` next to `anchor` on the first side that fits inside `view` (less the margins), `gap` away from it. If it
+ * fits nowhere it is clamped onto the screen on the side with the most room. With no anchor it sits in the bottom-right corner.
+ */
+export function placeBalloon(anchor: Rect | null, size: { w: number; h: number }, view: { w: number; h: number }, opts: PlaceOptions = {}): Placement {
+  const gap = opts.gap ?? 16;
+  const m = typeof opts.margin === "number" ? { top: opts.margin, right: opts.margin, bottom: opts.margin, left: opts.margin } : { top: 12, right: 12, bottom: 12, left: 12, ...opts.margin };
+  const x0 = m.left;
+  const y0 = m.top;
+  const x1 = view.w - m.right;
+  const y1 = view.h - m.bottom;
+  const inX = (x: number) => clamp(x, x0, Math.max(x0, x1 - size.w));
+  const inY = (y: number) => clamp(y, y0, Math.max(y0, y1 - size.h));
+  if (!anchor) return { x: inX(x1 - size.w), y: inY(y1 - size.h), side: "none" };
+  const cx = anchor.x + anchor.w / 2;
+  const cy = anchor.y + anchor.h / 2;
+  const at: Record<Side, { x: number; y: number; room: number }> = {
+    right: { x: anchor.x + anchor.w + gap, y: cy - size.h / 2, room: x1 - (anchor.x + anchor.w + gap) - size.w },
+    left: { x: anchor.x - gap - size.w, y: cy - size.h / 2, room: anchor.x - gap - size.w - x0 },
+    top: { x: cx - size.w / 2, y: anchor.y - gap - size.h, room: anchor.y - gap - size.h - y0 },
+    bottom: { x: cx - size.w / 2, y: anchor.y + anchor.h + gap, room: y1 - (anchor.y + anchor.h + gap) - size.h },
+  };
+  // Beside a target on the side that faces the middle of the screen; above it when it is in the bottom row.
+  const low = cy > view.h * 0.78;
+  const order: readonly Side[] = opts.prefer ?? (low ? ["top", cx < view.w / 2 ? "right" : "left", "left", "right", "bottom"] : cx < view.w * 0.5 ? ["right", "bottom", "top", "left"] : ["left", "bottom", "top", "right"]);
+  const fit = order.find((s) => at[s].room >= 0);
+  const side = fit ?? (Object.keys(at) as Side[]).sort((a, b) => at[b].room - at[a].room)[0]!;
+  return { x: inX(at[side].x), y: inY(at[side].y), side };
+}

@@ -55,6 +55,12 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
       return { event: vms.event!.event!, actions };
     case "Confirm":
       return { confirm: vms.confirm!.confirm!, actions };
+    case "Coach":
+      return { coach: vms.coached!.coach!, anchor: { x: 4, y: 862, w: 72, h: 32 }, layout: vms.coached!.layout, actions };
+    case "UnlockCard":
+      return { unlock: vms.coached!.unlock!, actions };
+    case "HowToPlay":
+      return { help: vms.help!.help!, actions };
     case "Arena":
       return { arena: main.arena, actions };
     case "EraCard":
@@ -86,6 +92,8 @@ const vms: Record<string, HudVM> = {
   main: vmOf({ tool: "cluster" }),
   event: vmOf({ event: "waterDiscourse" }),
   confirm: vmOf({ confirm: true }),
+  coached: vmOf({ level: 1, coach: 0, unlock: true }),
+  help: vmOf({ level: 2, help: true }),
   // Nobody else is talking: a skin with one speech balloon (Chip, in Discovery Disc) shows a standing warning when it is quiet.
   warned: hudViewModel({ ...fixtureInput({ warnings: ["Your entrance isn't connected to any paths. Visitors are forming a very orderly queue to nowhere."] }), toasts: [] }),
   auction: vmOf({ event: "computeAuction" }),

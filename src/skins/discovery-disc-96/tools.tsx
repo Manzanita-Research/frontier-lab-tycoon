@@ -1,7 +1,7 @@
 // The small controls: the Oregon Trail Pace buttons, the "DID YOU KNOW?" tape, and the row of round sticker buttons
 // (News Room, sound, mixer, skins, camera).
 import { useState } from "react";
-import { Marquee } from "../kit";
+import { ALL_VISIBLE, Marquee } from "../kit";
 import { useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import { Icon } from "./art";
@@ -46,16 +46,18 @@ export function Ticker({ items }: SlotPropsMap["Ticker"]) {
   );
 }
 
-export function NewsControls({ newsroom, sound, skins, actions }: SlotPropsMap["NewsControls"]) {
+export function NewsControls({ newsroom, sound, skins, visible = ALL_VISIBLE, actions }: SlotPropsMap["NewsControls"]) {
   const t = useT();
   // On a phone the sound, mixer and skin buttons fold behind one "more" button (CSS decides; on a desktop it's hidden).
   const [open, setOpen] = useState(false);
   return (
     <div className={`dd-tools ${open ? "open" : ""}`} role="group" aria-label="Tools">
-      <button type="button" className="dd-tool news" onClick={() => actions.openNews()} aria-label={t("news.open")} title={t("news.button")}>
-        <Icon name="news" size={26} />
-        {newsroom.unread > 0 && <b className="dd-unread">{newsroom.unread}</b>}
-      </button>
+      {visible.news && (
+        <button type="button" className="dd-tool news" onClick={() => actions.openNews()} aria-label={t("news.open")} title={t("news.button")}>
+          <Icon name="news" size={26} />
+          {newsroom.unread > 0 && <b className="dd-unread">{newsroom.unread}</b>}
+        </button>
+      )}
       <button type="button" className="dd-tool dd-fold" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-label="More tools" title="More tools">
         <Icon name="more" size={26} />
       </button>

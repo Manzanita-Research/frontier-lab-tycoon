@@ -7,8 +7,9 @@ import type { Cue } from "../../audio/score";
 import { fx } from "../../render/fx/state";
 import { roomAtom, skipNews, viewRoom } from "../../newsroom/state";
 import { setPhoto, takePhoto } from "../juice/photo";
-import { arenaOpenAtom, chatCountAtom, photoFlashAtom, photoTimeAtom, staffOpenAtom } from "./state";
+import { arenaOpenAtom, chatCountAtom, helpOpenAtom, photoFlashAtom, photoTimeAtom, staffOpenAtom } from "./state";
 import { skinActions } from "./skinControl";
+import type { Command } from "../../sim/commands";
 import type { StaffJob } from "../../sim/types";
 import type { HudActions } from "./types";
 
@@ -43,6 +44,20 @@ export const hudActions: HudActions = {
     if (pending) send({ type: "COMMAND", command: { ...pending.command, confirmed: true } });
   },
   cancelSpend: () => send({ type: "COMMAND", command: { type: "cancelConfirm" } }),
+
+  // The coach and the "New!" card (FLT-49's commands; `as Command` until they are in the union).
+  coachSkip: () => send({ type: "COMMAND", command: { type: "coachSkip" } as unknown as Command }),
+  coachReplay: () => {
+    registry.set(helpOpenAtom, false);
+    send({ type: "COMMAND", command: { type: "coachReplay" } as unknown as Command });
+  },
+  dismissUnlock: () => send({ type: "COMMAND", command: { type: "dismissUnlock" } as unknown as Command }),
+  // The first coach step waits for the build panel to open: tell the game each time it does.
+  buildPanel: (open) => {
+    if (open) send({ type: "COMMAND", command: { type: "buildPanelOpened" } as unknown as Command });
+  },
+  openHelp: () => registry.set(helpOpenAtom, true),
+  closeHelp: () => registry.set(helpOpenAtom, false),
   holdTime: (id, open) => send({ type: "SET_OVERLAY", id, open }),
   toggleArena: () => registry.set(arenaOpenAtom, !registry.get(arenaOpenAtom)),
   keepPlaying: () => send({ type: "KEEP_PLAYING" }),

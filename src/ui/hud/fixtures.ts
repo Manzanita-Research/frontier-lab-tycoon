@@ -7,6 +7,7 @@ import { tick } from "../../sim/tick";
 import type { GameState } from "../../sim/types";
 import type { SkinPickerVM } from "./types";
 import type { HudInput } from "./vm";
+import { playableFixture } from "./previewLadder";
 
 /** A busy campus a few game days in, with thoughts, a crowd and a run in flight (the real opening is quieter: see `openingWorld`). */
 export function fixtureWorld(days = 12, seed = 3): GameState {
@@ -37,6 +38,12 @@ export const FIXTURE_PAPER = frontPage(STORIES, 28, "Mostly Harmless Compute");
 export const FIXTURE_CHAT = recap(STORIES, 30, "Mostly Harmless Compute");
 
 export interface FixtureOptions {
+  /** Playable v1: put the snapshot on this rung of the ladder (absent: everything is earned). */
+  level?: 1 | 2 | 3 | 4 | 5;
+  /** Which of the seven coach lines is up (0-based), or none. */
+  coach?: number | null;
+  /** The "New!" card is up. */
+  unlock?: boolean;
   world?: GameState;
   selected?: number | null;
   event?: string | null;
@@ -48,6 +55,8 @@ export interface FixtureOptions {
   outcome?: "won" | "lost" | null;
   /** A spend waiting for a yes or a no. */
   confirm?: boolean;
+  /** Help ▸ How to play is open. */
+  help?: boolean;
   /** Standing warnings. */
   warnings?: string[];
   width?: number;
@@ -62,7 +71,8 @@ export function fixtureSnapshot(o: FixtureOptions = {}): Snapshot {
   const pendingConfirm = o.confirm
     ? { kind: "hire" as const, cost: 4_000, runwayAfter: 1.8, message: "This leaves 1.8 months of runway. The board will have questions.", command: { type: "hire" as const, job: "sre" as const } }
     : snap.pendingConfirm;
-  return { ...snap, event: o.event ? { id: o.event, day: snap.day } : snap.event, outcome: o.outcome ?? snap.outcome, pendingConfirm, warnings: o.warnings ?? snap.warnings };
+  const ladder = o.level ? playableFixture(o.level, o.coach ?? null, o.unlock ?? false) : {};
+  return { ...snap, ...ladder, event: o.event ? { id: o.event, day: snap.day } : snap.event, outcome: o.outcome ?? snap.outcome, pendingConfirm, warnings: o.warnings ?? snap.warnings };
 }
 
 export function fixtureInput(o: FixtureOptions = {}): HudInput {
@@ -94,6 +104,7 @@ export function fixtureInput(o: FixtureOptions = {}): HudInput {
       storage: true,
     },
     chatCount: o.chatCount ?? 2,
+    helpOpen: o.help ?? false,
     mixer: { open: false, ready: true, muted: false, master: 0.7, music: 0.3, sfx: 0.65 },
     photo: { on: o.photo ?? false, time: "live", shot: { id: 1, url: "data:image/png;base64,", name: "frontier-lab-tycoon-campus.png" }, flash: 1 },
     skins: { ...NO_SKINS, ...o.skins },

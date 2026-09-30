@@ -1,6 +1,6 @@
 // The Build Stamps: a Kid Pix-style tray of rubber stamps, one per thing you can build.
-import type { ReactNode } from "react";
-import { useT } from "../context";
+import { useState, type ReactNode } from "react";
+import { useCoach, useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import { Icon } from "./art";
 
@@ -79,6 +79,20 @@ const ART: Record<string, ReactNode> = {
       <circle cx="21" cy="25" r="3.5" fill="#fff" strokeWidth="2.5" {...S} />
     </>
   ),
+  locked: (
+    <>
+      <rect x="7" y="14" width="18" height="14" rx="2" fill="#bbb" strokeWidth="2.5" {...S} />
+      <path d="M11 14v-3a5 5 0 0 1 10 0v3" fill="none" strokeWidth="2.5" {...S} />
+      <circle cx="16" cy="21" r="2" fill={INK} />
+    </>
+  ),
+  help: (
+    <>
+      <circle cx="16" cy="16" r="12" fill="#FFD400" strokeWidth="2.5" {...S} />
+      <path d="M12 13a4 4 0 1 1 6 3.4c-1.300.8-2 1.600-2 3" fill="none" strokeWidth="2.5" {...S} />
+      <circle cx="16" cy="24" r="1.600" fill={INK} />
+    </>
+  ),
   staff: (
     <>
       <circle cx="16" cy="19" r="6.5" fill="#f0c090" strokeWidth="2.5" {...S} />
@@ -97,9 +111,66 @@ export function StampArt({ kind }: { kind: string }) {
   );
 }
 
-/** The tray: a starry blue box of rubber stamps with a red "BUILD STAMPS" tab. Number keys 1 to 9 pick a stamp. */
-export function BuildBar({ items, tip, layout, actions }: SlotPropsMap["BuildBar"]) {
+/** The stamps in the open tray, then the ones still in the box (locked, with what unlocks them), then Help. */
+export function Stamps({ items, teasers, onPick, onHelp, actions }: { items: SlotPropsMap["BuildBar"]["items"]; teasers: NonNullable<SlotPropsMap["BuildBar"]["teasers"]>; onPick: () => void; onHelp: () => void; actions: SlotPropsMap["BuildBar"]["actions"] }) {
   const t = useT();
+  const coach = useCoach();
+  return (
+    <div className="dd-tray-row" role="toolbar" aria-label={t("build.menuTitle")}>
+            {items.map((it) => (
+              <button
+                key={it.kind}
+                type="button"
+                {...coach.attrs(`build:${it.kind}`)}
+                className={`dd-stamp ${it.selected ? "on" : ""} ${it.affordable ? "" : "poor"} ${it.race ? "race" : ""} ${it.kind === "staff" ? "dd-staff-tool" : ""}`}
+                onClick={() => {
+                  actions.place(it.kind);
+                  onPick();
+                }}
+                disabled={!it.affordable && !it.selected}
+                aria-pressed={it.selected}
+                title={it.name}
+              >
+                {it.hotkey !== null && <span className="dd-key">{it.hotkey}</span>}
+                <StampArt kind={it.kind} />
+                <span className="dd-sname">{it.short}</span>
+                <span className={`dd-price ${it.free ? "free" : ""}`}>{it.isBulldoze ? "½" : it.kind === "staff" ? t("staff.hire") : it.free ? t("build.free") : it.priceText}</span>
+                {it.race && <span className="dd-prize" aria-hidden><Icon name="trophy" size={14} /></span>}
+              </button>
+            ))}
+            {/* Not yet: stamps still in the box, and what unlocks them. */}
+            {teasers.map((teaser, i) => (
+              <div key={`${teaser.label}-${i}`} className="dd-stamp locked" aria-disabled title={`${t("build.locked")}: ${teaser.hint}`}>
+                <StampArt kind="locked" />
+                <span className="dd-sname">{teaser.label}</span>
+                <span className="dd-price">{teaser.hint}</span>
+              </div>
+            ))}
+            <button
+              type="button"
+              className="dd-stamp dd-help-stamp"
+              onClick={onHelp}
+            >
+              <StampArt kind="help" />
+              <span className="dd-sname">{t("build.help")}</span>
+              <span className="dd-price">{t("help.title")}</span>
+            </button>
+          </div>
+  );
+}
+
+/** The tray: a starry blue box of rubber stamps behind a red "BUILD STAMPS" tab you press to open it. Number keys 1 to 9 pick a stamp. */
+export function BuildBar({ items, tip, teasers = [], layout, actions }: SlotPropsMap["BuildBar"]) {
+  const t = useT();
+  const coach = useCoach();
+  const [open, setOpen] = useState(false);
+  const toggle = (next: boolean) => {
+    setOpen(next);
+    actions.buildPanel(next);
+  };
+  const held = items.find((it) => it.selected && it.kind !== "staff");
+  // While the coach points at a stamp and the tray is shut, the tab stands in for it.
+  const inside = coach.target?.startsWith("build:") ?? false;
   return (
     <div className={`dd-stamps ${layout.compact ? "compact" : ""}`}>
       {tip && (
@@ -107,27 +178,12 @@ export function BuildBar({ items, tip, layout, actions }: SlotPropsMap["BuildBar
           <b>{tip.name}</b> {tip.text} {tip.upkeepText && <em>{tip.upkeepText}</em>}
         </div>
       )}
-      <div className="dd-tray">
-        <span className="dd-tray-label">{t("build.menuTitle")}</span>
-        <div className="dd-tray-row" role="toolbar" aria-label={t("build.menuTitle")}>
-          {items.map((it) => (
-            <button
-              key={it.kind}
-              type="button"
-              className={`dd-stamp ${it.selected ? "on" : ""} ${it.affordable ? "" : "poor"} ${it.race ? "race" : ""} ${it.kind === "staff" ? "dd-staff-tool" : ""}`}
-              onClick={() => actions.place(it.kind)}
-              disabled={!it.affordable && !it.selected}
-              aria-pressed={it.selected}
-              title={it.name}
-            >
-              {it.hotkey !== null && <span className="dd-key">{it.hotkey}</span>}
-              <StampArt kind={it.kind} />
-              <span className="dd-sname">{it.short}</span>
-              <span className={`dd-price ${it.free ? "free" : ""}`}>{it.isBulldoze ? "½" : it.kind === "staff" ? t("staff.hire") : it.free ? t("build.free") : it.priceText}</span>
-              {it.race && <span className="dd-prize" aria-hidden><Icon name="trophy" size={14} /></span>}
-            </button>
-          ))}
-        </div>
+      <div className={`dd-tray ${open ? "" : "closed"}`}>
+        <button type="button" className="dd-tray-label" aria-expanded={open} onClick={() => toggle(!open)} {...coach.attrs("start", !open && inside)}>
+          {t("build.menuTitle")}
+          {held && !open ? ` · ${held.short}` : ""}
+        </button>
+        {open && <Stamps items={items} teasers={teasers} onPick={() => toggle(false)} onHelp={() => { actions.openHelp(); toggle(false); }} actions={actions} />}
       </div>
     </div>
   );

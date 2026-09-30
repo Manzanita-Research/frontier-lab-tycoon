@@ -1,8 +1,8 @@
 // The banner and the clip-art stickers: Vibes is a gold star, cash a green circle, runway a "hurry!" circle, and
 // capability, hype, the Arena and the R&D multiplier are pills and bursts stuck on at odd angles.
 import { useEffect, useRef, useState } from "react";
-import { Odometer, money } from "../kit";
-import { useT } from "../context";
+import { ALL_VISIBLE, Odometer, money } from "../kit";
+import { useCoach, useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import type { StatsVM } from "../../ui/hud/types";
 import { burstPoints, Globe, Icon, STAR_POINTS, Trend } from "./art";
@@ -68,8 +68,9 @@ function VibesStar({ vibes, compact }: { vibes: StatsVM["vibes"]; compact: boole
   );
 }
 
-export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
+export function Stats({ stats, layout, visible = ALL_VISIBLE, actions }: SlotPropsMap["Stats"]) {
   const t = useT();
+  const coach = useCoach();
   const compact = layout.compact;
   const [expanded, setExpanded] = useState(false);
   const rw = stats.runway;
@@ -87,15 +88,15 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
         <span className="dd-date">{stats.date}</span>
       </div>
       <div className="dd-stickers">
-        <VibesStar vibes={stats.vibes} compact={compact} />
+        {visible.vibes && <VibesStar vibes={stats.vibes} compact={compact} />}
         <div className={`dd-stk dd-circ dd-cash ${stats.cash.negative ? "neg" : ""}`} title={`${t("stats.cash")} ${stats.cash.text}`}>
           <Odometer className="n" value={stats.cash.value} format={money} flash={false} />
           <span className="l">
             {t("stats.cash")}
-            <span className="net"> · {stats.net.text}</span>
+            {visible.revenue && <span className="net"> · {stats.net.text}</span>}
           </span>
         </div>
-        <div className={`dd-stk dd-circ dd-runway ${rw.warning ? "warn" : ""}`}>
+        <div className={`dd-stk dd-circ dd-runway ${rw.warning ? "warn" : ""}`} {...coach.attrs("stat:runway")}>
           <span className="n">{months}</span>
           <span className="l">
             months<span className="long"> of {t("stats.runway").toLowerCase()}</span>
@@ -106,21 +107,26 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
             </span>
           )}
         </div>
-        {compact && (
+        {compact && (visible.vibes || visible.arena) && (
           <button type="button" className="dd-more" onClick={() => setExpanded((e) => !e)} aria-expanded={expanded} aria-label={expanded ? t("stats.fewerStats") : t("stats.moreStats")}>
             <Icon name="chevron" size={26} />
           </button>
         )}
-        <div className="dd-stk dd-pill dd-cap" title={stats.capability.latestModel ?? undefined}>
-          <Odometer className="n" value={stats.capability.value} flash={false} />
-          <span className="l">{t("stats.capability").toLowerCase()}</span>
-        </div>
-        <div className="dd-stk dd-pill dd-hype">
-          <Odometer className="n" value={stats.hype.value} flash={false} />
-          <span className="l">
-            {t("stats.hype").toLowerCase()} <Icon name="megaphone" size={16} />
-          </span>
-        </div>
+        {visible.vibes && (
+          <>
+            <div className="dd-stk dd-pill dd-cap" title={stats.capability.latestModel ?? undefined}>
+              <Odometer className="n" value={stats.capability.value} flash={false} />
+              <span className="l">{t("stats.capability").toLowerCase()}</span>
+            </div>
+            <div className="dd-stk dd-pill dd-hype">
+              <Odometer className="n" value={stats.hype.value} flash={false} />
+              <span className="l">
+                {t("stats.hype").toLowerCase()} <Icon name="megaphone" size={16} />
+              </span>
+            </div>
+          </>
+        )}
+        {visible.arena && (
         <button
           type="button"
           className={`dd-stk dd-pill dd-arena ${a.flinch ? "flinch" : ""} ${a.top ? "top" : ""}`}
@@ -136,6 +142,8 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
             <Icon name="trophy" size={16} /> {a.top ? t("stats.arenaTop") : t("stats.arenaOn")}
           </span>
         </button>
+        )}
+        {visible.rnd && (
         <div className="dd-stk dd-burst" title={`${t("stats.rd")} ${stats.rd.multText}`}>
           <svg viewBox="-2 -2 104 104" aria-hidden focusable="false">
             <polygon points={BURST} />
@@ -148,6 +156,7 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
             </span>
           </span>
         </div>
+        )}
       </div>
     </div>
   );

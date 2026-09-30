@@ -2,10 +2,11 @@
 // nothing else in the game: no `src/sim/**`, no store, no three.
 import type { ComponentType, ReactNode } from "react";
 import type {
-  ArenaVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EraCardVM, EventVM, HudActions, HudVM, InspectorVM, LayoutVM,
+  ArenaVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, EraCardVM, EventVM, HudActions, HudVM, InspectorVM, LayoutVM,
   NewsroomVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StatsVM, ThoughtRowVM, TickerItemVM,
-  StaffVM, ToastVM, TrainingVM,
+  StaffVM, TeaserVM, ProgressVM, ToastVM, TrainingVM, UnlockCardVM, VisibleVM, HelpVM,
 } from "../ui/hud/types";
+import type { Rect } from "./kit/place";
 
 /** Every slot a skin may replace. `Layout` places the others. */
 export const SLOT_NAMES = [
@@ -24,6 +25,9 @@ export const SLOT_NAMES = [
   "Assistant",
   "EventCard",
   "Confirm",
+  "Coach",
+  "UnlockCard",
+  "HowToPlay",
   "Arena",
   "EraCard",
   "FrontPage",
@@ -53,11 +57,14 @@ export interface LayoutProps {
 /** Props of every slot. Each gets its slice of the view-model and the actions. */
 export interface SlotPropsMap {
   Layout: LayoutProps;
-  Stats: { stats: StatsVM; layout: LayoutVM; actions: HudActions };
+  /** `visible` (absent means everything) says which numbers are earned yet: at level 1 only cash, runway and the date show. */
+  Stats: { stats: StatsVM; layout: LayoutVM; visible?: VisibleVM; actions: HudActions };
   Training: { training: TrainingVM; actions: HudActions };
-  Objectives: { objectives: ObjectivesVM; layout: LayoutVM; actions: HudActions };
+  /** `progress.goal` is the one goal in front of you ("Ship your first model · 0/1"); the scenario list is `objectives`, shown once `visible.arena`. */
+  Objectives: { objectives: ObjectivesVM; progress?: ProgressVM; visible?: VisibleVM; layout: LayoutVM; actions: HudActions };
   Inspector: { inspector: InspectorVM; layout: LayoutVM; actions: HudActions };
-  BuildBar: { items: BuildItemVM[]; tip: BuildTipVM | null; layout: LayoutVM; actions: HudActions };
+  /** The build panel: `items` are only what is unlocked, `teasers` the locked ones ("??? · ship your first model"). Report each opening with `actions.buildPanel(true)`. */
+  BuildBar: { items: BuildItemVM[]; tip: BuildTipVM | null; teasers?: TeaserVM[]; layout: LayoutVM; actions: HudActions };
   Speed: { speed: SpeedVM; stats: StatsVM; actions: HudActions };
   /** The payroll panel (hire, fire, paint patrol zones). Only rendered while `staff.open`. */
   Staff: { staff: StaffVM; actions: HudActions };
@@ -72,6 +79,12 @@ export interface SlotPropsMap {
   EventCard: { event: EventVM; actions: HudActions };
   /** A spend waiting for a yes or a no (it would leave under three months of runway). Modal; time is held while it is up. */
   Confirm: { confirm: ConfirmVM; actions: HudActions };
+  /** The coach mark's balloon (the paperclip in Frontier 95). The host draws the dimming and the ring; `anchor` is where the spotlit thing is on screen, or null. */
+  Coach: { coach: CoachVM; anchor: Rect | null; layout: LayoutVM; actions: HudActions };
+  /** The small "New!" card that comes with a level-up. */
+  UnlockCard: { unlock: UnlockCardVM; actions: HudActions };
+  /** Help ▸ How to play: one window. `actions.closeHelp()`, and `actions.coachReplay()` for "Replay tutorial". */
+  HowToPlay: { help: HelpVM; actions: HudActions };
   Arena: { arena: ArenaVM; actions: HudActions };
   EraCard: { era: EraCardVM; actions: HudActions };
   FrontPage: { paper: PaperVM; actions: HudActions };
@@ -80,7 +93,8 @@ export interface SlotPropsMap {
   PhotoOverlay: { photo: PhotoVM; actions: HudActions };
   SkinPicker: { skins: SkinPickerVM; actions: HudActions };
   Outcome: { outcome: OutcomeVM; actions: HudActions };
-  NewsControls: { newsroom: NewsroomVM; sound: SoundVM; skins: SkinPickerVM; actions: HudActions };
+  /** The News Room button is earned (`visible.news`); mute, the mixer and the skin picker are not. */
+  NewsControls: { newsroom: NewsroomVM; sound: SoundVM; skins: SkinPickerVM; visible?: VisibleVM; actions: HudActions };
   NewsArrival: { arrival: NonNullable<NewsroomVM["arrival"]>; actions: HudActions };
   NewsRoom: { newsroom: NewsroomVM; actions: HudActions };
   Mixer: { sound: SoundVM; actions: HudActions };
