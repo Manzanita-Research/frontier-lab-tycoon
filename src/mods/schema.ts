@@ -190,7 +190,8 @@ export const LookPart = Schema.Struct({
   color: text,
   /** Darken (below 0) or lighten (above 0) the colour, -1 to 1. */
   shade: Schema.optionalKey(number.check(Schema.isBetween({ minimum: -1, maximum: 1 }))),
-  motion: Schema.optionalKey(Schema.Literals(["wag", "nod", "flop", "sway"])),
+  /** wag (a tail), nod (a head), flop (an ear), sway, or step / step-alt (legs, in turn, while walking). */
+  motion: Schema.optionalKey(Schema.Literals(["wag", "nod", "flop", "sway", "step", "step-alt"])),
 });
 export type LookPartData = typeof LookPart.Type;
 /** How a walker kind or role looks (FLT-55). Exactly one of `recipe`, `sprite`, `glb` or `tint`. Presentation only. */
@@ -199,15 +200,15 @@ export const Look = Schema.Struct({
   sprite: Schema.optionalKey(text),
   glb: Schema.optionalKey(text),
   tint: Schema.optionalKey(Schema.Struct({ body: Schema.optionalKey(text), head: Schema.optionalKey(text) })),
-  /** Per-walker colours for `"coat"` parts, and the sprite's or model's tint. */
+  /** Per-walker colours for `"coat"` parts, and a per-walker tint on a sprite. */
   coats: Schema.optionalKey(Schema.Array(text).check(Schema.isBetweenLength(1, 16))),
-  /** A sprite's width and height in tiles (default 1 x 1). */
+  /** A sprite's width and height in tiles (default 0.9 x 1.2, about a person); a model is fitted to the height. */
   size: Schema.optionalKey(Schema.Tuple([positive, positive])),
   scale: Schema.optionalKey(positive),
   gait: Schema.optionalKey(Schema.Literals(["walk", "trot", "hop", "float"])),
   /** Protest placards for this look (protesters only): short lines, 1 to 12 of them. */
   signs: Schema.optionalKey(Schema.Array(text.check(Schema.isMaxLength(40))).check(Schema.isBetweenLength(1, 12))),
-  /** Placard height in tiles (default 2.1, a person holding it up). */
+  /** Placard height in tiles (default: held up just above the top of the look; a small look gets a smaller placard). */
   signHeight: Schema.optionalKey(positive),
   /** What the inspector calls one ("Golden Retriever"). */
   label: Schema.optionalKey(text.check(Schema.isMaxLength(40))),

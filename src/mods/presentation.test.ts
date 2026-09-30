@@ -2,6 +2,7 @@
 // strings as text) and each looks rule gets a test, and the base game's presentation stays empty of mod looks.
 import { Effect, Exit, Scope } from "effect";
 import { validateAssets } from "./assets";
+import { checkPresentation } from "./check";
 import { composeMods } from "./loader";
 import { materialise, resolvePresentation, type ObjectUrls } from "./presentation";
 import { decodeManifest, type ModManifest } from "./schema";
@@ -147,5 +148,32 @@ describe("FLT-55 mod cues", () => {
   });
   it("caps a cue at 32 notes", async () => {
     await expect(decode({ ...base, audio: { cues: { "gr.bark": Array(33).fill(note) } } })).rejects.toThrow();
+  });
+});
+
+describe("FLT-55 flt-mod check: the presentation half", () => {
+  const arc = (cue: string) => ({ content: { arcs: { add: [{ id: "a", initial: "s", states: { s: { entry: [{ type: "sound.cue", params: { cue } }] } } }] } } });
+  const note = { at: 0, hz: 440, gain: 0.2, duration: 0.1, wave: "square" };
+  it("passes the example mod and says what it brings", async () => {
+    const { default: retriever } = await import("../../mods/examples/golden-retriever-protest/mod.json");
+    const report = await checkPresentation(await decode(retriever));
+    expect(report.skin).toMatchObject({ id: "good-boy-95", extends: "frontier-95", asks: true });
+    expect(report.cues.added).toContain("gr.bark");
+    expect(report.cues.replaced).toEqual(expect.arrayContaining(["protest.grow", "ui.click"]));
+    expect(report.looks).toEqual([expect.objectContaining({ target: "protester", form: "recipe" })]);
+  });
+  it("finds a cue an arc plays that nothing defines, and accepts base, hook and own cues", async () => {
+    await expect(checkPresentation(await decode({ ...base, ...arc("gr.bark") }))).rejects.toThrow(/content\.arcs\.add\[0\]\.states\.s\.entry\[0\]\.params\.cue.*no sound cue "gr\.bark"/);
+    for (const cue of ["alarm", "card", "protest.grow"]) await expect(checkPresentation(await decode({ ...base, ...arc(cue) }))).resolves.toBeDefined();
+    await expect(checkPresentation(await decode({ ...base, ...arc("gr.bark"), audio: { cues: { "gr.bark": [note] } } }))).resolves.toBeDefined();
+  });
+  it("refuses a skin that takes a built-in id or extends one that doesn't exist", async () => {
+    await expect(checkPresentation(await decode({ ...base, skin: { id: "frontier-95", name: "X" } }))).rejects.toThrow(/skin\.id.*built-in/);
+    await expect(checkPresentation(await decode({ ...base, skin: { id: "x", name: "X", extends: "frontier-96" } }))).rejects.toThrow(/skin\.extends.*no built-in skin "frontier-96"/);
+  });
+  it("applies the 2 MB cap and the no-remote-files rule", async () => {
+    const big = `data:image/png;base64,${"AAAA".repeat(700_000)}`;
+    await expect(checkPresentation({ ...base, assets: { a: big } })).rejects.toThrow("2 MB");
+    await expect(checkPresentation({ ...base, assets: { a: "https://cdn.invalid/a.png" } })).rejects.toThrow("remote files");
   });
 });

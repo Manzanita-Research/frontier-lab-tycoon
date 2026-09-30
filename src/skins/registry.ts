@@ -1,13 +1,12 @@
 // The skin registry: finds every skins/<id>/skin.json, validates it, and loads only the active skin's slots, CSS and
 // fonts (Vite splits each into its own chunk). Adding a skin is adding a folder: nothing here lists them.
-import { BASE_STRINGS, BASE_TOKENS, tokenVar, validateManifest, type SkinManifest } from "./schema";
+import { BASE_ID, BASE_STRINGS, BASE_TOKENS, modSkinErrors, tokenVar, validateManifest, type SkinManifest } from "./schema";
 import { baseSlots } from "./base/slots";
 import { SLOT_NAMES, type LoadedSkin, type SkinSlots, type SlotComponents } from "./types";
 import type { SkinInfoVM } from "../ui/hud/types";
 import type { SkinData } from "../mods/schema";
 
-/** The skin that is just the base: no skin.json, no custom slots. Used only when the default itself is refused. */
-export const BASE_ID = "base";
+export { BASE_ID };
 export const DEFAULT_SKIN = "frontier-95";
 export const STORAGE_KEY = "flt.skin";
 export const MOTION_KEY = "flt.motion";
@@ -71,10 +70,7 @@ export function registerModSkins(skins: Readonly<Record<string, SkinData>>, owne
   for (const [id, data] of Object.entries(skins)) {
     const mod = owners[id];
     if (!mod) continue; // Not from a mod: the base game's own entry.
-    const errors: string[] = [];
-    if (id === BASE_ID || catalog.some((e) => e.folder === id)) errors.push(`id: "${id}" is a built-in skin's id; give the mod's skin its own`);
-    const parent = data.extends ?? BASE_ID;
-    if (parent !== BASE_ID && !builtIn.includes(parent)) errors.push(`extends: no built-in skin "${parent}" (there are ${[BASE_ID, ...builtIn].join(", ")})`);
+    const errors = modSkinErrors(id, data.extends, catalog.map((e) => e.folder), builtIn);
     if (errors.length > 0) modRefused.push({ id: `${mod.id}/${id}`, errors });
     else modSkins.set(id, { id, data, mod });
   }

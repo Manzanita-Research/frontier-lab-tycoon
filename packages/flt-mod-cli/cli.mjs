@@ -20,12 +20,11 @@ export async function check(input, runner) {
   const decoded = await Effect.runPromise(decodeManifest(manifest));
   const definition = await Effect.runPromise(resolveGameDefinition(composeMods([decoded]).layer));
   const arcs = [...definition.content.arcs, ...definition.content.events.filter((event) => !("choices" in event))].map(checkArcGraph);
-  const { report, replay, conflicts, mod } = await checkMod(manifest);
+  const { report, replay, conflicts, presentation, mod } = await checkMod(manifest);
   const digest = (state) => createHash("sha256").update(JSON.stringify(state)).digest("hex");
   if (digest(report.state) !== digest(replay.state)) throw new Error("deterministic replay differs");
   const { state, ...numbers } = report;
-  const unapplied = ["skin", "assets", "audio"].filter((key) => manifest[key] !== undefined && manifest[key] !== null);
-  return { ok: true, path, mod, ...numbers, conflicts, arcs, unapplied, deterministic: true, digest: digest(state), elapsedMs: Math.round(performance.now() - start) };
+  return { ok: true, path, mod, ...numbers, conflicts, arcs, presentation, deterministic: true, digest: digest(state), elapsedMs: Math.round(performance.now() - start) };
 }
 export function printReport(report) {
   console.log(`PASS ${report.mod.id}@${report.mod.version}: ${report.days} days, ${report.ticks} ticks, ${report.cardsAnswered} cards answered, ${report.models} releases`);
@@ -35,7 +34,12 @@ export function printReport(report) {
   if (Object.keys(report.arcStates ?? {}).length > 0) console.log(`Arcs ran in the sim: ${Object.entries(report.arcStates).map(([id, at]) => `${id} ended in "${at}"`).join(", ")}`);
   console.log(`Executed: ${report.coverage.executed.join(", ") || "nothing changed from the base game"} (the real sim ran with your definition)`);
   if (report.coverage.inert.length > 0) console.log(`Validated but not read by any system yet: ${report.coverage.inert.join(", ")}`);
-  if (report.unapplied?.length > 0) console.log(`Validated but not applied by the game yet: ${report.unapplied.join(", ")}`);
+  const p = report.presentation;
+  if (!p) return;
+  if (p.assets.count > 0) console.log(`Assets: ${p.assets.count} bundled, ${(p.assets.bytes / 1024).toFixed(1)} KB of the 2 MB cap (served as blob: URLs)`);
+  if (p.skin) console.log(`Skin: ${p.skin.id} ("${p.skin.name}", extends ${p.skin.extends})${p.skin.asks ? "; asks the player to put it on" : "; in the picker and at ?skin=" + p.skin.id}`);
+  if (p.cues.added.length + p.cues.replaced.length > 0) console.log(`Sound: ${[p.cues.added.length ? `adds ${p.cues.added.join(", ")}` : "", p.cues.replaced.length ? `replaces ${p.cues.replaced.join(", ")}` : ""].filter(Boolean).join("; ")}${p.cues.played.length ? `; arcs play ${p.cues.played.join(", ")}` : ""}`);
+  for (const look of p.looks) console.log(`Look: ${look.target} is a ${look.form} (${look.detail})`);
 }
 export async function bundle(directory, output, runner) {
   const { manifest } = await loadManifest(directory, runner);

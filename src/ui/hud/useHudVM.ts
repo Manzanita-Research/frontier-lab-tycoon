@@ -187,6 +187,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
   const leapfrog = useLeapfrogMotion(snap);
   const list = useMemo(() => skinList(), []);
   // The session's mods are fixed at start (main.tsx loads `?mod=` before the game exists); only the window opens and shuts.
+  const lookLabels = useMemo(() => Object.fromEntries(Object.entries(modSession().presentation?.looks ?? {}).flatMap(([target, look]) => (look.label ? [[target, look.label]] : []))), []);
   const mods = useMemo(() => {
     const m = modSession();
     return {
@@ -224,6 +225,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         papersOpen,
         dismissed,
         disastersOpen,
+        lookLabels,
         mixer: { open: mixerOpen, ready: audioReady, muted: mixer.muted, master: mixer.master, music: mixer.music, sfx: mixer.sfx },
         photo: { on: photoOn, time: photoTime, shot, flash },
         skins: {
