@@ -19,6 +19,14 @@ export default Alchemy.Stack(
       return yield* Effect.die(new Error(`Unsupported deployment stage: ${stack.stage}`));
     }
 
+    // Custom domain, prod only. FLT_CUSTOM_DOMAIN is the zone (e.g. frontierlabtycoon.com)
+    // and stays empty until the zone and token permissions exist, so deploys never
+    // depend on it. The game lives on app.<zone>; the apex and www 302 to it through
+    // a tiny redirect Worker until a marketing site takes the apex (easy to undo).
+    // PR previews stay on workers.dev.
+    const customDomain = yield* Config.String("FLT_CUSTOM_DOMAIN").pipe(Config.withDefault(""));
+    const useDomain = stack.stage === "prod" && customDomain !== "";
+
     const site = yield* Cloudflare.Website.StaticSite("Website", {
       name: `flt-${stack.stage}`,
       cwd: fileURLToPath(new URL("../", import.meta.url)),
@@ -26,7 +34,22 @@ export default Alchemy.Stack(
       outdir: "dist",
       workersDev: true,
       assets: { notFoundHandling: "single-page-application" },
+      ...(useDomain ? { domain: { name: `app.${customDomain}` } } : {}),
     });
+
+    if (useDomain) {
+      yield* Cloudflare.Worker("ApexRedirect", {
+        name: "flt-apex-redirect",
+        script: `export default {
+  fetch(request) {
+    const url = new URL(request.url);
+    return Response.redirect("https://app.${customDomain}" + url.pathname + url.search, 302);
+  },
+};
+`,
+        domain: { name: customDomain, aliases: [`www.${customDomain}`] },
+      });
+    }
 
     const github = yield* GitHub.GitHubEnv;
     if (github?.pr && stack.stage === `pr-${github.pr}`) {
