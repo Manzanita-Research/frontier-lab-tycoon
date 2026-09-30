@@ -217,3 +217,11 @@ export const InfinityIcon = () => (
     <path d="M16 8c-2.4-3.4-4.6-5-7-5a5 5 0 0 0 0 10c2.4 0 4.6-1.6 7-5Zm0 0c2.4 3.4 4.6 5 7 5a5 5 0 0 0 0-10c-2.4 0-4.6 1.6-7 5Z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
   </svg>
 );
+
+/** A little ruled table: the leaderboard. */
+export const TableIcon = () => (
+  <Icon>
+    <rect {...stroke} x="3.5" y="4.5" width="17" height="15" rx="2" />
+    <path {...stroke} d="M3.5 9.5h17M9 9.5v10M3.5 14.5h17" />
+  </Icon>
+);

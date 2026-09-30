@@ -18,6 +18,8 @@
     "ThoughtsPanel",
     "Ticker",
     "Toast",
+    "Benchmarks",
+    "Voice",
     "NewsControls",
     "PhotoButton"
   ],
@@ -144,6 +146,7 @@
     "event.paused": "At rest",
     "hint.tap": "Tap anyone to add them to your field notes.",
     "hint.gateway": "Build an API Gateway beside a path, and the revenue will follow.",
-    "arena.eraPill": "Era {n} · {name}"
+    "arena.eraPill": "Era {n} · {name}",
+    "bench.title": "Leaderboard"
   }
 }

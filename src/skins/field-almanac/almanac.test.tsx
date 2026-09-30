@@ -155,6 +155,22 @@ describe("Field Almanac", () => {
     expect(out).toContain("Dispatches");
   });
 
+  it("the leaderboard folds to a strip with the record count (the next launch in its tooltip); the news cycle is one bar and a headline", () => {
+    const lf = hudViewModel(fixtureInput({ leapfrog: true }));
+    expect(lf.leapfrog.enabled).toBe(true);
+    const bench = html(<slot.Benchmarks leapfrog={lf.leapfrog} layout={{ ...lf.layout, compact: false }} actions={actions} />);
+    expect(bench).toContain("fa-bench-head");
+    expect(bench).toContain("SOTA");
+    expect(bench).toContain(`title="${lf.leapfrog.nextText.replace(/'/g, "&#x27;")}"`); // the next launch is the strip's tooltip
+    expect(bench).not.toContain("<table"); // folded
+    const phone = html(<slot.Benchmarks leapfrog={lf.leapfrog} layout={{ ...lf.layout, compact: true, phone: true }} actions={actions} />);
+    expect(phone).toMatch(/class="fa-bench [^"]*compact/);
+    const voice = html(<slot.Voice leapfrog={lf.leapfrog} layout={{ ...lf.layout, compact: false }} actions={actions} />);
+    expect(voice).toContain("fa-voice-bar");
+    expect(voice).toContain(lf.leapfrog.voice.headline.replace(/'/g, "&#x27;"));
+    expect(html(<slot.Voice leapfrog={lf.leapfrog} layout={{ ...lf.layout, compact: true, phone: true }} actions={actions} />)).toBe("");
+  });
+
   it("draws every engraving itself: no emoji on the screen, and nothing that needs a symbol font", () => {
     const out = html(<Docked vm={vm} actions={actions} />);
     expect(out).not.toMatch(/\p{Extended_Pictographic}/u);

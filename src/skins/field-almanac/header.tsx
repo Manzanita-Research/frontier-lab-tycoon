@@ -126,7 +126,9 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
       <div className="fa-stat fa-capability">
         <span className="fa-sc">{t("stats.capability")}</span>
         <Odometer className="fa-v" value={stats.capability.value} flash={false} />
-        <span className="fa-d plum">{stats.capability.latestModel ?? "no release yet"}</span>
+        <span className="fa-d plum" title={stats.capability.latestModel ?? undefined}>
+          {stats.capability.latestModel ?? "no release yet"}
+        </span>
       </div>
       <div className="fa-stat fa-hype">
         <span className="fa-sc">{t("stats.hype")}</span>

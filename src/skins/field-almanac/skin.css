@@ -116,6 +116,11 @@
     grid-column: 1;
     grid-row: 2;
     align-self: start;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    min-height: 0;
     pointer-events: none;
   }
   .fa-right {
@@ -259,6 +264,9 @@
   .fa-d {
     font-size: 13px;
     font-weight: 600;
+    max-width: 130px;
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
     &.dim {
       font-weight: 600;
@@ -1783,6 +1791,306 @@
   .queuelabel.long {
     background: #f7e1c4;
   }
+  /* ---------- Release Leapfrog: the leaderboard, the news cycle, the forced response and the livestream ---------- */
+  .fa-bench {
+    width: 276px;
+    pointer-events: none;
+  }
+  .fa-bench-head {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    width: 100%;
+    min-height: 44px;
+    padding: 0 14px;
+    color: var(--fa-ink);
+    text-align: left;
+    font: inherit;
+    .fa-ico {
+      flex: none;
+      color: var(--fa-soft);
+    }
+  }
+  .fa-bench-title {
+    font-family: var(--flt-font-display);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 17px;
+    white-space: nowrap;
+  }
+  .fa-bench.flashing .fa-bench-title::after {
+    content: "";
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-left: 7px;
+    border-radius: 50%;
+    background: var(--fa-rose);
+    vertical-align: 2px;
+    animation: field-almanac-blink 0.9s steps(2, jump-none) infinite;
+  }
+  .fa-bench-sub {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    color: var(--fa-soft);
+    font-size: 13px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .fa-bench-drawer {
+    position: fixed;
+    left: 20px;
+    bottom: calc(184px + env(safe-area-inset-bottom));
+    z-index: 4;
+    width: min(620px, calc(100vw - 360px));
+    max-height: calc(100vh - 330px);
+    padding: 16px 18px 14px;
+    overflow: auto;
+    background: #fbf7ee;
+    pointer-events: auto;
+    animation: field-almanac-settle var(--flt-motion-base) var(--flt-motion-ease);
+  }
+  .fa-bench-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 12px;
+    padding-right: 38px;
+    i {
+      font-family: var(--flt-font-display);
+      font-weight: 500;
+      font-size: 20px;
+    }
+  }
+  .fa-bench-drop {
+    margin: 4px 0 0;
+    font-family: var(--flt-font-display);
+    font-style: italic;
+    font-size: 14px;
+    color: var(--fa-soft);
+  }
+  .bench-table {
+    font-size: 13.5px;
+    border-spacing: 0 4px;
+    th,
+    td {
+      font-weight: 600;
+    }
+  }
+  .bench-lab {
+    background: #fbf7ee;
+    font-family: var(--flt-font-display);
+    font-weight: 500;
+  }
+  .bench-dot {
+    border: 0;
+    box-shadow: 0 0 0 1px rgba(34, 49, 58, 0.25);
+  }
+  .bench-col {
+    font-variant: all-small-caps;
+    font-size: 14px;
+    letter-spacing: 0.06em;
+    opacity: 1;
+    color: var(--fa-soft);
+    &.new .bench-name {
+      color: var(--flt-color-good);
+    }
+  }
+  .bench-new {
+    background: var(--fa-sage);
+    color: #14301a;
+    font-size: 9px;
+    font-variant: normal;
+  }
+  .bench-stamp {
+    border: 1.5px solid var(--flt-color-bad);
+    border-radius: 999px;
+    padding: 0 7px;
+    color: var(--flt-color-bad);
+    font-family: var(--flt-font-display);
+    font-style: italic;
+    font-variant: normal;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    background: rgba(251, 247, 238, 0.85);
+  }
+  .bench-row .bench-lab {
+    border-radius: 10px 0 0 10px;
+  }
+  .bench-row.you > * {
+    background: rgba(111, 155, 120, 0.16);
+  }
+  .bench-row.you .bench-lab {
+    box-shadow: inset 1px 0 0 var(--fa-sage), inset 0 1px 0 var(--fa-sage), inset 0 -1px 0 var(--fa-sage);
+  }
+  .bench-row.you td:last-child {
+    box-shadow: inset -1px 0 0 var(--fa-sage), inset 0 1px 0 var(--fa-sage), inset 0 -1px 0 var(--fa-sage);
+    border-radius: 0 10px 10px 0;
+  }
+  .bench-row.you td:not(:last-child) {
+    box-shadow: inset 0 1px 0 var(--fa-sage), inset 0 -1px 0 var(--fa-sage);
+  }
+  .bench-cell.sota .bench-score {
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: rgba(199, 154, 43, 0.24);
+    color: var(--fa-ink);
+    box-shadow: inset 0 0 0 1px var(--fa-gold);
+  }
+  .bench-badge {
+    top: -7px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: var(--fa-ink);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+  }
+  .bench-cell.flash .bench-badge {
+    background: var(--flt-color-bad);
+  }
+  .bench-score sup {
+    font-size: 11px;
+    color: var(--flt-color-bad);
+  }
+  .bench-foot,
+  .bench-empty {
+    font-family: var(--flt-font-display);
+    font-style: italic;
+    font-size: 13.5px;
+    opacity: 1;
+    color: var(--fa-soft);
+  }
+  .bench-row.flash > * {
+    animation: none;
+  }
+
+  /* The news cycle */
+  .fa-voice {
+    width: 276px;
+    padding: 12px 16px 12px;
+  }
+  .fa-voice-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    i {
+      font-family: var(--flt-font-display);
+      font-weight: 500;
+      font-size: 17px;
+    }
+  }
+  .fa-voice-you {
+    font-size: 13px;
+    font-weight: 600;
+    &.up {
+      color: var(--flt-color-good);
+    }
+    &.down {
+      color: var(--flt-color-bad);
+    }
+  }
+  .fa-voice-bar {
+    display: flex;
+    height: 8px;
+    margin: 8px 0 6px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--fa-hair);
+    i {
+      display: block;
+      min-width: 2px;
+      transition: width var(--flt-motion-slow);
+      & + i {
+        border-left: 1px solid #fbf7ee;
+      }
+    }
+  }
+  .fa-voice.owned .fa-voice-bar {
+    box-shadow: 0 0 0 1.5px var(--fa-gold);
+  }
+  .fa-voice-line {
+    margin: 0;
+    font-family: var(--flt-font-display);
+    font-style: italic;
+    font-size: 14px;
+    line-height: 1.3;
+    color: var(--fa-soft);
+  }
+  .fa-voice-graph {
+    display: block;
+    width: 100%;
+    height: 70px;
+    margin-top: 8px;
+    border: 1px solid var(--fa-hair);
+    border-radius: 10px;
+    background: #fff;
+  }
+  .vg-grid {
+    stroke: rgba(34, 49, 58, 0.1);
+  }
+
+  /* The forced response: the gauges above the choices */
+  .response-gauges {
+    gap: 10px;
+  }
+  .rg {
+    border: 1px solid var(--fa-hair);
+    border-radius: 12px;
+    background: #fff;
+  }
+  .rg-label {
+    font-variant: all-small-caps;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: none;
+    opacity: 1;
+    color: var(--fa-soft);
+  }
+  .rg-big {
+    font-weight: 600;
+    font-size: 28px;
+  }
+  .rg-sub {
+    font-size: 13px;
+    opacity: 1;
+    color: var(--fa-soft);
+  }
+  .rg-meter {
+    height: 4px;
+    border: 0;
+    background: var(--fa-hair);
+    i {
+      background: var(--fa-plum);
+    }
+  }
+  .rg-bug.risky .rg-big {
+    color: var(--flt-color-bad);
+  }
+
+  /* The launch livestream stays a dark screen (it is a video), framed like a plate */
+  .stream-frame {
+    border: 1px solid rgba(34, 49, 58, 0.5);
+    border-radius: 12px;
+  }
+  .stream-screen b {
+    border: 0;
+    border-radius: 8px;
+    box-shadow: none;
+    font-family: var(--flt-font-display);
+    font-weight: 600;
+  }
+
 
   /* ---------- Room to breathe on a short screen ---------- */
   /* With a specimen on the table the rest of the column steps aside unless there is room for all of it. */
@@ -1969,8 +2277,12 @@
     }
 
     /* Field notes shrink to a strip and a clipboard button */
+    .fa-left {
+      align-items: stretch;
+    }
     .fa-notes {
-      width: auto;
+      width: 100%;
+      min-width: 0;
       padding: 0;
       background: none;
       border: 0;
@@ -1981,7 +2293,42 @@
       align-items: flex-start;
       gap: 8px;
     }
+    .fa-pills {
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    .fa-bench {
+      width: auto;
+      pointer-events: auto;
+    }
+    .fa-bench-head {
+      min-height: 44px;
+      padding: 0 12px;
+      border-radius: 999px;
+      gap: 6px;
+      width: auto;
+      .fa-bench-title,
+      .fa-caret {
+        display: none;
+      }
+      .fa-bench-sub {
+        flex: none;
+        font-weight: 600;
+        color: var(--fa-ink);
+      }
+    }
+    .fa-bench-drawer {
+      left: 8px;
+      right: 8px;
+      bottom: calc(150px + env(safe-area-inset-bottom));
+      width: auto;
+      max-height: 56vh;
+      z-index: 7;
+    }
     .fa-training {
+      min-width: 0;
       align-self: stretch;
       padding: 8px 14px 10px;
       border: 1px solid rgba(255, 255, 255, 0.6);
@@ -2272,7 +2619,9 @@
     .modal-card,
     .odo.odo-up,
     .odo.odo-down,
-    .fa-arena.flinch {
+    .fa-arena.flinch,
+    .fa-bench-drawer,
+    .fa-bench.flashing .fa-bench-title::after {
       animation: none;
     }
     .fa-seal,
@@ -2288,7 +2637,9 @@
     .modal-card,
     .odo.odo-up,
     .odo.odo-down,
-    .fa-arena.flinch {
+    .fa-arena.flinch,
+    .fa-bench-drawer,
+    .fa-bench.flashing .fa-bench-title::after {
       animation: none;
     }
     .fa-seal,
@@ -2303,6 +2654,11 @@
   from {
     opacity: 0;
     transform: translateY(-8px);
+  }
+}
+@keyframes field-almanac-blink {
+  50% {
+    opacity: 0.15;
   }
 }
 @keyframes field-almanac-bob {
