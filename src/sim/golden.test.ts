@@ -14,6 +14,7 @@ import { canPlace, type Command } from "./commands";
 import { eventById } from "../content/events";
 import { openEventOf } from "./events";
 import { outcomeOf } from "./goals";
+import { levelOf } from "./progression";
 import { createInitialState } from "./state";
 import { modeOf } from "./walkers";
 import { tick } from "./tick";
@@ -117,12 +118,16 @@ function spot(s: GameState, kind: PlaceableKind): [number, number] | null {
 }
 
 const BUILD_ORDER: PlaceableKind[] = ["hall", "gateway", "kombucha", "snack", "cluster", "nap", "gateway", "hall", "cluster", "gateway"];
+/** FLT-54: The Race's climb, once Level 4 names the Arena: compute and halls, while the money lasts. */
+const CLIMB: PlaceableKind[] = ["cluster", "cluster", "hall", "cluster", "cluster", "hall", "cluster", "gateway"];
 
 /** A busy player: builds every 30 ticks, paves a bit, bulldozes a path, answers every event card differently. */
-function play(seed: number, ticks: number, checkpoints: number[]): Record<number, string> {
+function play(seed: number, ticks: number, checkpoints: number[], levels?: Record<number, number>): Record<number, string> {
   const s = createInitialState(seed);
   const out: Record<number, string> = {};
   let built = 0;
+  let climbed = 0;
+  let staffed = false;
   for (let i = 0; i < ticks; i++) {
     const cmds: Command[] = [];
     if (i === 0) {
@@ -139,16 +144,28 @@ function play(seed: number, ticks: number, checkpoints: number[]): Record<number
         cmds.push({ type: "placeBuilding", kind, x: at[0], z: at[1] });
         built++;
       }
+    } else if (i % 30 === 5 && levelOf(s) >= 4 && climbed < CLIMB.length && s.cash > 1_500_000) {
+      const at = spot(s, CLIMB[climbed]!);
+      if (at) {
+        cmds.push({ type: "placeBuilding", kind: CLIMB[climbed]!, x: at[0], z: at[1] });
+        climbed++;
+      }
     }
     if (i === 250) cmds.push({ type: "placePath", x: 5, z: 16 });
     // Operations: a Janitor Bot, an SRE and a guard, one of them with a patrol zone.
     if (i === 300) cmds.push({ type: "hire", job: "janitor" }, { type: "hire", job: "sre" });
+    // FLT-54: the tick-300 hires bounce off the locked Staff Manager; hire again once Level 3 earns it.
+    if (!staffed && levelOf(s) >= 3) {
+      cmds.push({ type: "hire", job: "janitor" }, { type: "hire", job: "sre" });
+      staffed = true;
+    }
     if (i === 900) cmds.push({ type: "hire", job: "security" }, { type: "hire", job: "comms" });
     if (i === 1000 && s.staff[0]) for (const x of [8, 9, 10]) cmds.push({ type: "paintZone", id: s.staff[0]!.id, x, z: 16, on: true });
     if (i === 700) cmds.push({ type: "bulldoze", x: 13, z: 16 });
     // This stress script deliberately approves its own spending; ordinary play uses the 3-month dialog.
     tick(s, cmds.map((c) => c.type === "placeBuilding" || c.type === "placePath" || c.type === "hire" ? { ...c, confirmed: true } : c));
     if (checkpoints.includes(i + 1)) out[i + 1] = digest(s);
+    if (levels && levels[levelOf(s)] === undefined) levels[levelOf(s)] = i + 1;
   }
   return out;
 }
@@ -188,17 +205,25 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // hires land while staff is still locked, so the ops goal never has its SRE and Janitor). No Race or Scrutiny pack wakes,
 // so none of the wave moves a checkpoint. The wave's packs are pinned by the midgame digest (every pack awake for 480
 // days) and by each pack's own determinism test.
+// FLT-54 teaches the script the ladder: it hires its Janitor Bot and SRE again the tick Level 3 earns the Staff Manager
+// (1380 / 1340 / 1360), and at Level 4 it climbs the Arena (eight more clusters, halls and a gateway, while it has $1.5M
+// to spare). Level 4 lands at 1670 / 1613 / 1612 and Level 5 at 2240 on every seed (2380 / 2520 / 2380 without the
+// climb), so Scrutiny's staggered wake-ups (6 to 86 days after the rung) all play inside the 4000 ticks. The card budget
+// itself moved nothing here: before the script changed, every checkpoint held. 200 and 800 hold; 1600 on moves on every
+// seed (the Level 3 hires land before it).
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "c403ae9a", 800: "c9a777bd", 1600: "927ac8ca", 2400: "5f82d6d0", 3200: "156351fa", 4000: "510c4ee9" },
-  2: { 200: "766f3295", 800: "aec1b296", 1600: "7f4c5dc5", 2400: "4e24ec1b", 3200: "49356bf5", 4000: "a8747659" },
-  3: { 200: "b43cb9be", 800: "510d3b99", 1600: "52d334c3", 2400: "c82c786a", 3200: "94e585db", 4000: "7191754a" },
+  1: { 200: "c403ae9a", 800: "c9a777bd", 1600: "bb207932", 2400: "6f4d8320", 3200: "9c108571", 4000: "df3ed8b4" },
+  2: { 200: "766f3295", 800: "aec1b296", 1600: "1fad47b0", 2400: "b7a2ca78", 3200: "3eeee88f", 4000: "4b80a9a7" },
+  3: { 200: "b43cb9be", 800: "510d3b99", 1600: "52fba8d3", 2400: "668e23fb", 3200: "7e9afb24", 4000: "33e374a9" },
 };
 
 describe("golden runs", () => {
   for (const seed of [1, 2, 3]) {
     it(`seed ${seed} reproduces the recorded digests at every checkpoint`, () => {
-      const actual = play(seed, 4000, CHECKPOINTS);
+      const levels: Record<number, number> = {};
+      const actual = play(seed, 4000, CHECKPOINTS, levels);
       expect(actual).toEqual(GOLDEN[seed]);
+      expect(levels[5]).toBeLessThanOrEqual(2400);
     });
   }
 });
