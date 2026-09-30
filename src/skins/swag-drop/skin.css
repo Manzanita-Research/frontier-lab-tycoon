@@ -844,6 +844,10 @@
   .sd-key .pr {
     font: 800 11px var(--sd-mono);
     color: var(--sd-ink);
+    white-space: nowrap;
+  }
+  .sd-key.k-bulldoze .pr {
+    font-size: 9.5px;
   }
   .sd-key.build.on .leg {
     color: var(--sd-ink);
@@ -2322,6 +2326,17 @@
     border: 2px solid var(--sd-ink);
     border-radius: 2px;
     box-shadow: 4px 4px 0 var(--sd-ink);
+  }
+
+  /* Three auction prizes make it fourteen keys: squeeze them so the tray still fits a laptop. */
+  .sd-deck:has(.sd-key.race) {
+    gap: 8px;
+  }
+  .sd-deck:has(.sd-key.race) .sd-key.build {
+    width: 72px;
+  }
+  .sd-deck:has(.sd-key.race) .sd-key.build .nm {
+    font-size: 10.5px;
   }
 
   /* ---- smaller windows: shorter keys, a shorter keyboard tray ---- */
