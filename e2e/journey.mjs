@@ -254,7 +254,8 @@ async function windows(confirmOpen = false) {
       const media = el.querySelector("img, svg, canvas, input, [role=progressbar], ul li");
       const coach = el.matches("[role=status][aria-label^='Assistant']");
       const confirm = confirmOpen && el.matches("[role=alertdialog]");
-      return { label: el.getAttribute("aria-label") || title || el.className, title, coach, confirm, empty: body.length < 2 && !media, box: { x: r.left, y: r.top, w: r.width, h: r.height } };
+      const modal = el.matches("[aria-modal=true], [role=alertdialog]") || !!el.querySelector("[aria-modal=true]");
+      return { label: el.getAttribute("aria-label") || title || el.className, title, coach, confirm, modal, empty: body.length < 2 && !media, box: { x: r.left, y: r.top, w: r.width, h: r.height } };
     });
   }, [WIN, confirmOpen]);
 }
@@ -273,6 +274,10 @@ function overlap(a, b) {
 }
 /** A persistent HUD panel (the lab window, the goal note) is part of the screen, not a window that appeared. */
 const SKIP_EMPTY = /collapsed|f95-strip/;
+/** FLT-54: the middle 40% × 40% of the viewport is the campus; after Level 5 no window that is not a modal card may sit on it. */
+const centre = () => ({ x: viewport.width * 0.3, y: viewport.height * 0.3, w: viewport.width * 0.4, h: viewport.height * 0.4 });
+const OVERLAP_MS = 500; // how long the coach (or a confirm) may sit on a window before it is an overlap
+const CARD_SPAN_DAYS = 5; // FLT-54: after Level 5, at most one card per this many game days
 
 // ── the run ─────────────────────────────────────────────────────────────────────────────────────────────────────────
 let probe = null;
@@ -310,6 +315,8 @@ try {
   const toastTimes = []; // real ms of each new toast seen while running at 1×
   let levelToasts = 0;
   const cardSeen = new Set();
+  const centreSeen = new Set();
+  const overlapSince = new Map();
   const retryAt = new Map(); // want key → game tick
   let reachedAt = null;
   let lastSample = 0;
@@ -354,13 +361,32 @@ try {
     // Windows: none empty; nothing on the coach or the confirm.
     const wins = await windows(!!probe.pendingConfirm);
     for (const w of wins) if (w.empty && !SKIP_EMPTY.test(w.label)) await fail("empty window", `"${w.label}" renders empty`, probe);
+    if (reachedAt !== null) {
+      // FLT-54: at most two windows the game opened, and the campus centre clear of anything that is not a modal card.
+      const auto = probe.windows?.auto ?? [];
+      result.maxAuto = Math.max(result.maxAuto ?? 0, auto.length);
+      if (auto.length > 2 && !centreSeen.has("budget")) { centreSeen.add("budget"); await fail("window budget", `${auto.length} windows the game opened are up at once: ${auto.join(", ")}`, probe); }
+      for (const w of wins) {
+        if (w.modal || w.coach || w.confirm || (staffLeftOpen && /staff/i.test(w.label)) || !overlap(w.box, centre()) || centreSeen.has(w.label)) continue;
+        centreSeen.add(w.label);
+        await fail("campus centre", `"${w.label}" covers the campus centre (${Math.round(w.box.x)},${Math.round(w.box.y)} ${Math.round(w.box.w)}×${Math.round(w.box.h)})`, probe);
+      }
+    }
+    // An overlap counts once it lasts OVERLAP_MS: the coach looks for new windows ten times a second and steps aside, so
+    // a window that just opened under it is a frame or two of catching up, not a covered window.
+    const overlapping = new Set();
     for (const key of wins.filter((w) => w.coach || w.confirm)) {
       for (const other of wins) {
         if (other === key || other.coach || other.confirm) continue;
         const o = overlap(key.box, other.box);
-        if (o) await fail("overlap", `${key.coach ? "The coach" : "The confirm"} and "${other.label}" overlap by ${o.w.toFixed(0)}×${o.h.toFixed(0)} px ("${(await topAt(o.x, o.y)) ?? "the scene"}" on top)`, probe);
+        if (!o) continue;
+        const pair = `${key.label}|${other.label}`;
+        overlapping.add(pair);
+        if (!overlapSince.has(pair)) overlapSince.set(pair, now);
+        if (now - overlapSince.get(pair) >= OVERLAP_MS) await fail("overlap", `${key.coach ? "The coach" : "The confirm"} and "${other.label}" overlap by ${o.w.toFixed(0)}×${o.h.toFixed(0)} px ("${(await topAt(o.x, o.y)) ?? "the scene"}" on top)`, probe);
       }
     }
+    for (const pair of overlapSince.keys()) if (!overlapping.has(pair)) overlapSince.delete(pair);
 
     // Flat moments: reported with a still, not failed (the player may simply be waiting on a model).
     const change = `${probe.progress.level}|${probe.map.buildings.length}|${probe.models}|${cardSeen.size}|${toastSeen.size}|${probe.event}|${probe.coachId}`;
@@ -378,6 +404,13 @@ try {
       const toastsPerMinute = +(levelToasts / Math.max(1 / 60, (now - levelAt) / 60_000)).toFixed(1);
       level = probe.progress.level;
       await page.waitForTimeout(600); // let the "New!" card draw
+      // An era that turns with the level is a blue screen on purpose: keep it as the era's moment, and show the level past it.
+      const bsodUp = page.locator(".f95-bsod-go:visible").first();
+      if (await bsodUp.count()) {
+        await still(`${out}/moments/era-${level}-${gameDays(probe).toFixed(0)}.png`);
+        await press(bsodUp);
+        await page.waitForTimeout(600);
+      }
       const shot = await still(`${out}/levels/level-${level}.png`);
       const [lo, hi] = LEVEL_WINDOW[level] ?? [0, Infinity];
       if (levelDays < lo || levelDays > hi) await fail(levelDays < lo ? "short level" : "slow level", `Level ${level - 1} → ${level} took ${levelDays.toFixed(1)} game days (window ${lo}–${hi})`, probe);
@@ -601,6 +634,14 @@ try {
     return ok;
   }
 
+  // FLT-54: after Level 5, at most one card per CARD_SPAN_DAYS game days (half a day of slack for how often we look).
+  if (reachedAt !== null) {
+    const from = gameDays({ tick: reachedAt });
+    const late = result.cards.filter((c) => c.gameDay >= from);
+    const tight = late.slice(1).map((c, i) => [late[i], c]).filter(([a, b]) => b.gameDay - a.gameDay < CARD_SPAN_DAYS - 0.5);
+    result.afterLevel5 = { days: +(gameDays(probe) - from).toFixed(1), cards: late.length, tightestGap: late.length > 1 ? Math.min(...late.slice(1).map((c, i) => +(c.gameDay - late[i].gameDay).toFixed(1))) : null, maxAuto: result.maxAuto ?? 0 };
+    for (const [a, b] of tight) await fail("card pace", `Cards ${a.id} (day ${a.gameDay}) and ${b.id} (day ${b.gameDay}) are under ${CARD_SPAN_DAYS} game days apart`, null);
+  }
   result.passed = result.failures.length === 0;
 } catch (error) {
   result.passed = false;
@@ -646,6 +687,7 @@ Final: ${JSON.stringify(r.final)}
 ## Failures (${r.failures.length})
 ${r.failures.map((f) => `- **${f.kind}** (level ${f.level ?? "?"}, game day ${f.gameDay ?? "?"}): ${f.message}`).join("\n") || "none"}
 
+${r.afterLevel5 ? `After Level 5: ${r.afterLevel5.days} game days, ${r.afterLevel5.cards} cards (tightest gap ${r.afterLevel5.tightestGap ?? "n/a"} days), at most ${r.afterLevel5.maxAuto} windows the game opened at once.\n` : ""}
 ## Cards answered (${r.cards.length})
 ${r.cards.map((c) => `- day ${c.gameDay}, L${c.level}: ${c.id} → ${c.choice}`).join("\n") || "none"}
 
