@@ -215,6 +215,13 @@
     "notices": [
       "notice-burst",
       "notice-burst-base"
+    ],
+    "flt-58": [
+      "first-wait",
+      "first-peek",
+      "coach-card",
+      "auction",
+      "auction-broke"
     ]
   },
   "scenes": {
@@ -368,11 +375,19 @@
       }
     },
     "auction": {
-      "title": "The Race: the compute auction",
+      "title": "The Race: the compute auction (the card opens at midnight, 6 ticks in)",
       "query": {
         "moment": "auction",
         "warp": null
-      }
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { for (let i = 0; i < 20; i++) f.tick(w); }"
+        },
+        {
+          "wait": 600
+        }
+      ]
     },
     "funding": {
       "title": "The Race: a funding round",
@@ -2554,6 +2569,333 @@
         },
         {
           "wait": 1200
+        }
+      ]
+    },
+    "first-wait": {
+      "title": "FLT-58: the first minute, while the first model trains (seed 3, 2.5 days after the Hall)",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "11,17",
+        "zoom": 50
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 17
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 16
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placeBuilding",
+              "kind": "hall",
+              "x": 12,
+              "z": 16
+            }
+          }
+        },
+        {
+          "wait": 400
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "eval": "(f, w) => { for (let i = 0; i < 50; i++) f.tick(w); }"
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "first-peek": {
+      "title": "FLT-58: the first minute after ▶▶: the coach points at a researcher's mind",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "11,17",
+        "zoom": 50
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 17
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 16
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placeBuilding",
+              "kind": "hall",
+              "x": 12,
+              "z": 16
+            }
+          }
+        },
+        {
+          "wait": 400
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "eval": "(f, w) => { for (let i = 0; i < 50; i++) f.tick(w); }"
+        },
+        {
+          "wait": 600
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 3
+          }
+        },
+        {
+          "wait": 150
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "coach-card": {
+      "title": "FLT-58: the first model ships and Level 2's card opens while the coach has a step",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "11,17",
+        "zoom": 50
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 17
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 16
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placeBuilding",
+              "kind": "hall",
+              "x": 12,
+              "z": 16
+            }
+          }
+        },
+        {
+          "wait": 400
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "eval": "(f, w) => { for (let i = 0; i < 50; i++) f.tick(w); }"
+        },
+        {
+          "wait": 600
+        },
+        {
+          "eval": "(f, w) => { w.training.context.progress = w.training.context.cost - 0.01; for (let i = 0; i < 30; i++) f.tick(w); }"
+        },
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "auction-broke": {
+      "title": "FLT-58: the compute auction when the bank can't cover the big bids",
+      "query": {
+        "moment": "auction",
+        "warp": null
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { for (let i = 0; i < 20; i++) f.tick(w); }"
+        },
+        {
+          "eval": "(f, w) => { w.cash = 1_500_000; }"
+        },
+        {
+          "wait": 600
         }
       ]
     }

@@ -1,4 +1,5 @@
-// The coach mark: everything is dimmed except the one thing to click, and the active skin's `Coach` slot says the line. Skin
+// The coach mark: on a build step everything is dimmed except the one thing to click (on the others only the ring shows), and the
+// active skin's `Coach` slot says the line. It steps aside while a card or a dialog is up, and keeps off open windows. Skin
 // independent on purpose: what to light is found by `[data-coach-active]` (every skin marks its targets with the kit's
 // `useCoach`), so a new skin gets the spotlight for free. The dimming never eats a click: the player can always do the thing.
 import { useEffect, useRef, useState } from "react";
@@ -38,25 +39,48 @@ export function measureTarget(target: string): Rect | null {
   return x1 > x0 && y1 > y0 ? { x: x0, y: y0, w: x1 - x0, h: y1 - y0 } : null;
 }
 
+/**
+ * The open windows (marked `data-coach-avoid`) the balloon must not cover, less the one the target is in: it is pointing at that.
+ */
+export function measureAvoid(): Rect[] {
+  if (typeof document === "undefined") return [];
+  const out: Rect[] = [];
+  for (const el of document.querySelectorAll<HTMLElement>("[data-coach-avoid]")) {
+    if (el.matches("[data-coach-active]") || el.querySelector("[data-coach-active]")) continue;
+    const b = el.getBoundingClientRect();
+    if (b.width > 0 && b.height > 0) out.push({ x: b.left, y: b.top, w: b.width, h: b.height });
+  }
+  return out;
+}
+
+const sameRects = (a: Rect[], b: Rect[]) => a.length === b.length && a.every((r, i) => sameRect(r, b[i]!));
+
+interface Found {
+  rect: Rect | null;
+  panel: Rect | null;
+  avoid: Rect[];
+}
+
 /** Follow the target (a menu opening, a window moving) without re-rendering per frame: state changes only when a box moves. */
-function useSpotlight(target: string | null): { rect: Rect | null; panel: Rect | null } {
-  const [found, setFound] = useState<{ rect: Rect | null; panel: Rect | null }>({ rect: null, panel: null });
+function useSpotlight(target: string | null): Found {
+  const [found, setFound] = useState<Found>({ rect: null, panel: null, avoid: [] });
   useEffect(() => {
     if (!target) {
-      setFound({ rect: null, panel: null });
+      setFound({ rect: null, panel: null, avoid: [] });
       return;
     }
     let raf = 0;
     let checked = 0;
-    let last: { rect: Rect | null; panel: Rect | null } = { rect: null, panel: null };
+    let last: Found = { rect: null, panel: null, avoid: [] };
     // Ten looks a second are plenty to follow a menu or a window; asking the layout every frame costs the map frames on a slow machine.
     const frame = (now: number) => {
       if (now - checked >= 90) {
         checked = now;
         const rect = measureTarget(target);
         const panel = rect ? measurePanel(target) : null;
-        if (!sameRect(rect, last.rect) || !sameRect(panel, last.panel)) {
-          last = { rect, panel };
+        const avoid = measureAvoid();
+        if (!sameRect(rect, last.rect) || !sameRect(panel, last.panel) || !sameRects(avoid, last.avoid)) {
+          last = { rect, panel, avoid };
           setFound(last);
         }
       }
@@ -72,12 +96,12 @@ function useSpotlight(target: string | null): { rect: Rect | null; panel: Rect |
  * The dimming with a hole in it, and the pulsing ring round the hole. The dimming is drawn once (it repaints only when the box
  * moves) and the ring is its own small layer that pulses by transform and opacity, so nothing repaints per frame over the map.
  */
-function Spotlight({ rect }: { rect: Rect }) {
+function Spotlight({ rect, dim }: { rect: Rect; dim: boolean }) {
   const hole = { x: rect.x - PAD, y: rect.y - PAD, width: rect.w + PAD * 2, height: rect.h + PAD * 2 };
   const id = useRef(`coach-hole-${Math.random().toString(36).slice(2, 8)}`).current;
   return (
     <>
-      <svg className="coach-scrim" aria-hidden width="100%" height="100%" data-testid="coach-scrim">
+      {dim && <svg className="coach-scrim" aria-hidden width="100%" height="100%" data-testid="coach-scrim">
         <defs>
           <mask id={id}>
             <rect width="100%" height="100%" fill="white" />
@@ -85,7 +109,7 @@ function Spotlight({ rect }: { rect: Rect }) {
           </mask>
         </defs>
         <rect width="100%" height="100%" style={{ fill: "var(--flt-color-scrim)" }} mask={`url(#${id})`} />
-      </svg>
+      </svg>}
       <div className="coach-ring" aria-hidden style={{ left: hole.x, top: hole.y, width: hole.width, height: hole.height }} />
     </>
   );
@@ -101,15 +125,18 @@ function spotlightTarget(vm: HudVM): string | null {
   return target;
 }
 
+/** A card or a dialog has the floor: the coach waits until it is closed rather than talk over it (FLT-58). */
+export const coachWaits = (vm: HudVM): boolean => !!(vm.unlock || vm.event || vm.confirm || vm.eraCard || vm.outcome);
+
 export function CoachLayer({ vm, actions }: { vm: HudVM; actions: HudActions }) {
   const { Coach } = useSkin().slots;
-  const coach = vm.coach;
-  const { rect, panel } = useSpotlight(spotlightTarget(vm));
+  const coach = coachWaits(vm) ? null : vm.coach;
+  const { rect, panel, avoid } = useSpotlight(coach ? spotlightTarget(vm) : null);
   if (!coach) return null;
   return (
     <>
-      {rect && <Spotlight rect={rect} />}
-      <Coach coach={coach} anchor={rect && { x: rect.x - PAD, y: rect.y - PAD, w: rect.w + PAD * 2, h: rect.h + PAD * 2 }} panel={panel} layout={vm.layout} actions={actions} />
+      {rect && <Spotlight rect={rect} dim={coach.dim === true} />}
+      <Coach coach={coach} anchor={rect && { x: rect.x - PAD, y: rect.y - PAD, w: rect.w + PAD * 2, h: rect.h + PAD * 2 }} panel={panel} avoid={avoid} layout={vm.layout} actions={actions} />
     </>
   );
 }

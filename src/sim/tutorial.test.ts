@@ -7,7 +7,7 @@ const paths = [18, 17, 16].map((z) => ({ type: "placePath" as const, x: 11, z })
 describe("the coach", () => {
   it("advances on successful actions, release, and game-visible timers", () => {
     const s = createInitialState(1);
-    expect(coachOf(s)).toMatchObject({ id: "start", step: 1, of: 7 });
+    expect(coachOf(s)).toMatchObject({ id: "start", step: 1, of: 9 });
     applyNow(s, [{ type: "coachClick" }, { type: "continueTutorial" }]);
     expect(coachOf(s)?.id).toBe("start");
     applyNow(s, [{ type: "buildPanelOpened" }]);
@@ -17,6 +17,14 @@ describe("the coach", () => {
     applyNow(s, paths);
     expect(coachOf(s)?.id).toBe("hall");
     applyNow(s, [{ type: "placeBuilding", kind: "hall", x: 12, z: 16 }]);
+    expect(coachOf(s)?.id).toBe("speed");
+    applyNow(s, [{ type: "coachSaw", what: "mind", id: -1 }]);
+    expect(coachOf(s)?.id).toBe("speed");
+    applyNow(s, [{ type: "coachSaw", what: "speed" }]);
+    expect(coachOf(s)?.id).toBe("peek");
+    applyNow(s, [{ type: "coachSaw", what: "mind", id: -1 }]);
+    expect(coachOf(s)?.id).toBe("peek");
+    applyNow(s, [{ type: "coachSaw", what: "mind", id: s.walkers.find((w) => w.kind === "researcher")!.id }]);
     expect(coachOf(s)?.id).toBe("training");
     for (let i = 0; i < 800 && !s.models.length; i++) tick(s);
     expect(s.models.length).toBe(1);
@@ -27,7 +35,7 @@ describe("the coach", () => {
     expect(coachOf(s)?.id).toBe("runway");
     tick(s); expect(coachOf(s)?.id).toBe("goals");
     applyNow(s, [{ type: "coachClick" }]); expect(coachOf(s)).toBeNull();
-    expect(COACH).toHaveLength(7);
+    expect(COACH).toHaveLength(9);
   });
   it("skip/replay survive JSON, and applying commands while paused does not advance timers", () => {
     const s = createInitialState(2);
@@ -36,7 +44,7 @@ describe("the coach", () => {
     const loaded = JSON.parse(JSON.stringify(s));
     expect(coachOf(loaded)).toBeNull(); expect(s.rngState).toBe(rng);
     applyNow(loaded, [{ type: "coachReplay" }]); expect(coachOf(loaded)?.id).toBe("start");
-    s.coach = { value: "active", context: { index: 5, elapsed: 0 } };
+    s.coach = { value: "active", context: { index: 7, elapsed: 0 } };
     for (let i = 0; i < 40; i++) applyNow(s, []);
     expect(coachOf(s)?.id).toBe("runway");
     delete loaded.coach; expect(coachOf(loaded)).toBeNull();
@@ -49,7 +57,7 @@ describe("the coach", () => {
     const before = s.tick; tick(s);
     expect(s.tick).toBe(before + 1); expect(coachOf(s)?.id).toBe("start");
     applyNow(s, [{ type: "buildPanelOpened" }]);
-    expect(coachOf(s)?.id).toBe("training");
+    expect(coachOf(s)?.id).toBe("speed");
   });
   it("replays all machines and RNG exactly after a save/load", () => {
     const s = createInitialState(3);

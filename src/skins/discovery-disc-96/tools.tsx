@@ -2,7 +2,7 @@
 // (News Room, sound, mixer, skins, camera).
 import { useState } from "react";
 import { ALL_VISIBLE, DramaIcon, Marquee } from "../kit";
-import { useT } from "../context";
+import { useCoach, useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import { Icon } from "./art";
 
@@ -16,6 +16,7 @@ const CAPTION: Record<number, string> = {
 /** Rest / Steady / Strenuous / Grueling, like the wagon party's pace on the trail. */
 export function Speed({ speed, actions }: SlotPropsMap["Speed"]) {
   const t = useT();
+  const coach = useCoach();
   return (
     <div className="dd-pace" role="group" aria-label={t("speed.label")}>
       <div className="dd-pace-row">
@@ -23,7 +24,7 @@ export function Speed({ speed, actions }: SlotPropsMap["Speed"]) {
           <Icon name="wagon" size={28} /> {t("speed.label")}:
         </span>
         {speed.options.map((o) => (
-          <button key={o.value} type="button" className={`dd-pb ${o.active ? "on" : ""}`} onClick={() => actions.setSpeed(o.value)} aria-pressed={o.active} title={CAPTION[o.value]}>
+          <button key={o.value} type="button" className={`dd-pb ${o.active ? "on" : ""}`} {...(o.value === 3 ? coach.attrs("speed") : {})} onClick={() => actions.setSpeed(o.value)} aria-pressed={o.active} title={CAPTION[o.value]}>
             {o.value === 0 && <Icon name="pause" size={14} />}
             {t(o.key)}
           </button>

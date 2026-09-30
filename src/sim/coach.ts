@@ -1,10 +1,13 @@
 import type { CoachLine, CoachMark } from "../content/coach";
 import { canPlace } from "./commands";
+import { progressOf } from "./progression";
 import { coachMachine } from "./machines/coach";
 import { initialStored, step } from "./machines/run";
 import { entrances, getReach, isReachable } from "./pathfind";
 import type { GameState } from "./types";
 import { defs } from "./defs";
+
+const lowerFirst = (t: string) => t.charAt(0).toLowerCase() + t.slice(1);
 
 export function coachOf(s: GameState): CoachMark | null {
   if (!s.coach || s.coach.value !== "active") return null;
@@ -12,6 +15,7 @@ export function coachOf(s: GameState): CoachMark | null {
   const line = defs().coach[index];
   if (!line) return null;
   const mark: CoachMark = { ...line, step: index + 1, of: defs().coach.length, canSkip: true };
+  if (mark.text.includes("{goal}")) mark.text = mark.text.replace("{goal}", lowerFirst(progressOf(s).goal.text));
   if (line.id === "path") {
     const tiles: [number, number][] = [];
     for (let z = 18; z >= 15; z--) if (canPlace(s, "path", 11, z).ok) tiles.push([11, z]);
@@ -37,6 +41,9 @@ export function updateCoach(s: GameState, ticked = false) {
     const matches: boolean = line.trigger === "buildPanelOpened" ? s.flags.coachBuildOpened !== undefined || (s.flags.coachReplayAt === undefined && s.flags.firstPath !== undefined)
       : line.trigger === "pathConnected" ? s.flags.firstPath !== undefined && reach!.filter(Boolean).length >= 8
       : line.trigger === "hallBuilt" ? s.buildings.some((b) => b.kind === "hall" && isReachable(s, b))
+      // Seen, or overtaken: a model that ships first ends the wait these two fill.
+      : line.trigger === "spedUp" ? s.flags.coachSpedUp !== undefined || s.models.length > 0
+      : line.trigger === "mindRead" ? s.flags.coachMindRead !== undefined || s.models.length > 0
       : line.trigger === "released" ? s.models.length > 0
       : line.trigger === "gatewayBuilt" ? s.buildings.some((b) => b.kind === "gateway" && isReachable(s, b)) : false;
     if (!matches) break;
