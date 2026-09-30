@@ -35,7 +35,7 @@
         { "id": "anthro", "kind": "frontier", "bias": { "gpqa": 1.12, "hle": 1.1, "humaneval": 0.95, "swe": 0.94, "arena": 0.9 } },
         { "id": "openish", "kind": "frontier", "bias": { "arena": 1.15, "humaneval": 1.06, "gpqa": 0.9, "hle": 0.92 } },
         { "id": "metameta", "kind": "frontier", "bias": { "mmlu": 1.1, "arena": 1.05, "arc": 0.9 } },
-        { "id": "vssi", "kind": "neo", "bias": {} },
+        { "id": "supersuper", "kind": "neo", "bias": {} },
         { "id": "sirocco", "kind": "open", "bias": { "arc": 1.12, "swe": 1.05, "gpqa": 0.92 } },
         { "id": "macrohard", "kind": "bigco", "bias": { "swe": 1.12, "mmlu": 1.05, "hle": 0.9 } }
       ]

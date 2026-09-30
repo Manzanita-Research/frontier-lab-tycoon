@@ -27,7 +27,8 @@ describe("parody names only", () => {
   it("knows a real name from our parodies", () => {
     expect(realNames('title: "RUN.TXT - Notepad", "Internet Explorer 3.0", "Macrohard Copilot for Copilot"')).toEqual(["Copilot", "Internet Explorer", "Notepad"]);
     expect(realNames("Outlook Excess, WordSad, WordPerfectly, NoteBad, Internet Exploder 3.0, LinkedOut, Excellent, the outlook")).toEqual([]);
-    expect(realNames("Very Safe Superintelligence Inc., MetaMeta Superintelligence Labs, VSSI")).toEqual(["Safe Superintelligence", "Meta Superintelligence"]);
+    expect(realNames("Very Safe Superintelligence Inc., Meta Superintelligence Labs, SSI")).toEqual(["Safe Superintelligence", "Meta Superintelligence", "SSI"]);
+    // Word boundaries: "MetaMeta Superintelligence" slips past this scan; the Drama lint's substring check catches it.
     expect(realNames("Very Very Super Super Intelligence, Super Super AI, MetaMeta Metaintelligence Labs, SSID")).toEqual([]);
   });
   it("reads the content, the UI, all six skins and every base pack", () => {

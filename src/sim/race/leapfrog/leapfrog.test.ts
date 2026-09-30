@@ -605,17 +605,17 @@ describe("the news cycle", () => {
     expect(valuation(s)).toBeLessThan(trusting * 0.85);
   });
 
-  it("very safe superintelligence has no product, so it never appears on a benchmark, but its stunts move the room", () => {
+  it("Super Super AI has no product, so it never appears on a benchmark, but its stunts move the room", () => {
     const s = on();
     const v = leapfrogView(s);
-    const row = v.rows.find((r) => r.id === "vssi")!;
+    const row = v.rows.find((r) => r.id === "supersuper")!;
     expect(row.scores.every((x) => x === null)).toBe(true);
     expect(row.model).toBe("");
-    const before = s.leapfrog.voice.context.attention.vssi!;
-    setRival(s, "vssi", "training", { weeks: 1 });
+    const before = s.leapfrog.voice.context.attention.supersuper!;
+    setRival(s, "supersuper", "training", { weeks: 1 });
     s.day = 7;
     weekly(s, createRng(2)); // its "release" is a stunt headline
-    expect(s.leapfrog.voice.context.attention.vssi).toBeGreaterThan(before);
+    expect(s.leapfrog.voice.context.attention.supersuper).toBeGreaterThan(before);
   });
 });
 

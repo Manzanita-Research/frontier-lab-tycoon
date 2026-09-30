@@ -28,8 +28,11 @@ describe("midgame scenario", () => {
     // FLT-33/25: the earned factions wake with the campus and argue all 480 days; the water crowd escalates through its arc.
     // FLT-11 adds The Memo's dormant arc (arcs.memo); take it out and the World hashes to the old c4310492.
     // FLT-51 tags every toast (source, importance, reply); without the tags it is the World FLT-52 pinned, number for number.
-    expect(digest({ ...s, toasts: s.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) })).toBe("36f6a4a9");
-    expect(digest(s)).toBe("6c24ddd0");
+    // Rename (#71): Very Safe SI is Super Super AI (id supersuper) and MetaMeta's full name changed; names and ids are in the World.
+    expect({
+      untagged: digest({ ...s, toasts: s.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) }),
+      full: digest(s),
+    }).toEqual({ untagged: "36f6a4a9", full: "6c24ddd0" });
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);
