@@ -791,7 +791,7 @@
     flex-direction: column;
     align-items: center;
     gap: 12px;
-    padding: 0 12px;
+    padding: 0 12px 0 274px; /* the news dock owns the bottom-left corner */
   }
   .sd-deck {
     pointer-events: auto;
@@ -2322,6 +2322,57 @@
     border: 2px solid var(--sd-ink);
     border-radius: 2px;
     box-shadow: 4px 4px 0 var(--sd-ink);
+  }
+
+  /* ---- smaller windows: shorter keys, a shorter keyboard tray ---- */
+  @media (max-width: 1300px) {
+    .sd-key.build {
+      width: 76px;
+      height: 88px;
+    }
+    .sd-deck {
+      gap: 8px;
+    }
+  }
+  @media (max-height: 800px) {
+    .sd-key.build {
+      width: 72px;
+      height: 80px;
+    }
+    .sd-key.build .band {
+      height: 17px;
+    }
+    .sd-right {
+      max-height: calc(100vh - 176px);
+    }
+    .sd-right.badge-open .sd-cork-list {
+      display: none;
+    }
+    .sd-status {
+      display: none;
+    }
+    .sd-face {
+      gap: 5px;
+      padding-bottom: 10px;
+    }
+    .sd-quote {
+      padding: 5px 10px 6px;
+      font-size: 14px;
+    }
+  }
+
+  /* ---- small laptops and tablets: the plaque wraps rather than run under the right-hand column ---- */
+  @media (min-width: 641px) and (max-width: 1080px) {
+    .sd-left {
+      max-width: calc(100vw - 350px);
+    }
+    .toasts {
+      top: auto;
+      bottom: calc(196px + env(safe-area-inset-bottom));
+      left: 50%;
+      width: min(440px, calc(100vw - 700px));
+      min-width: 260px;
+    }
   }
 
   /* ---- phones ---- */
