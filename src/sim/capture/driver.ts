@@ -15,7 +15,7 @@ import { arcMachine } from "../machines/arc";
 import { initialStored, step } from "../machines/run";
 import { fillTemplate, formatMoney } from "../format";
 import { addNews, addToast } from "../news";
-import { openEventOf } from "../events";
+import { cardAllowed, openEventOf } from "../events";
 import { createRng, type Rng } from "../rng";
 import { runVerb, STATS } from "../verbs";
 import { chartStats, type Beat } from "../circus/chart";
@@ -89,9 +89,9 @@ export function draftClause(s: GameState, clause: string, on: boolean): boolean 
   return true;
 }
 
-/** Put a card on screen now, if nothing else has it. */
+/** Put a card on screen now, if nothing else has it. The invitation waits for the card budget (FLT-54); the exposé does not. */
 function openCard(s: GameState, id: string) {
-  if (openEventOf(s)) return;
+  if (openEventOf(s) || (id === DRAFT_CARD && !cardAllowed(s, id, "normal"))) return;
   s.arcs[id] = step(arcMachine, armCard(id), { type: "DAY", day: s.day, ready: true, slotFree: true, pace: 1 }).stored;
 }
 
@@ -294,6 +294,6 @@ export function dailyCapture(s: GameState) {
   }
   send(s, rng, { type: "DAY", tick: s.tick, day: s.day, roll: 0, stats });
   // The draft or the leak may have waited behind another card.
-  if (b.machine.value === "invited" && !openEventOf(s)) openCard(s, DRAFT_CARD);
+  if (b.machine.value === "invited") openCard(s, DRAFT_CARD);
   b.rngState = rng.state();
 }

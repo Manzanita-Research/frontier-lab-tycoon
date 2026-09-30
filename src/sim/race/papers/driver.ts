@@ -18,7 +18,7 @@ function announce(s: GameState, rng: Rng, trigger: string, paper?: Paper, vars: 
   const line = rng.pick(lines);
   const text = fillTemplate(line.text, { lab: s.labName, title: paper?.title ?? "", authors: String(paper?.authors ?? 0),
     venue: paper?.venue ?? "", days: String(P.reviewDays), ...vars });
-  addNews(s, text, line.tone);
+  addNews(s, text, line.tone, "papers");
   addToast(s, text, line.tone, { source: "papers" });
 }
 

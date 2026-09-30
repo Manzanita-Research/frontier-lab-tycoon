@@ -81,7 +81,7 @@ describe("remembered steps", () => {
     for (const value of ["growing", "complete"] as const)
       for (let level = 0; level <= 6; level++) {
         const stored: ProgressionStored = { value, context: { level } };
-        const { stored: next, effects } = step(progressionMachine, stored, { type: "CHECK", met: false });
+        const { stored: next, effects } = step(progressionMachine, stored, { type: "CHECK", met: false, day: 0, wakes: [] });
         expect(effects).toEqual([]);
         expect(next).toStrictEqual(stored);
       }

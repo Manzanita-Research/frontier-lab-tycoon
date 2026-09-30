@@ -1,5 +1,5 @@
 // Review moments use the same card/tick paths as play. No renderer or UI dependencies.
-import { openEventOf } from "../events";
+import { openEventOf, unpaced } from "../events";
 import { answer } from "../testkit";
 import { hire } from "../staff";
 import { applyNow, tick } from "../tick";
@@ -13,6 +13,7 @@ export function isCollusionMoment(value: string | null | undefined): value is ty
   return (COLLUSION_MOMENTS as readonly unknown[]).includes(value);
 }
 export function stageCollusion(s: GameState, moment: typeof COLLUSION_MOMENTS[number]) {
+  unpaced(s);
   for (let i = 0; i < 100; i++) tick(s, answer(s));
   enableCollusion(s);
   s.cash = Math.max(s.cash, 12_000_000);
