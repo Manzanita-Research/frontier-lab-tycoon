@@ -208,13 +208,16 @@
   }
   .fa-title {
     min-width: 0;
+    max-width: 340px;
   }
   .fa-lab {
+    overflow: hidden;
+    text-overflow: ellipsis;
     font-family: var(--flt-font-display);
     font-style: italic;
     font-weight: 500;
     font-size: 25px;
-    line-height: 1.05;
+    line-height: 1.15;
     white-space: nowrap;
   }
   .fa-date {
@@ -676,15 +679,15 @@
     color: var(--fa-soft);
   }
   .fa-needs {
-    margin-top: 4px;
+    display: grid;
+    grid-template-columns: max-content minmax(40px, 1fr) max-content;
+    align-items: center;
+    gap: 7px 10px;
+    margin-top: 10px;
+    font-size: 13px;
   }
   .fa-need {
-    display: grid;
-    grid-template-columns: 62px 1fr 38px;
-    gap: 10px;
-    align-items: center;
-    margin: 7px 0;
-    font-size: 13px;
+    display: contents;
   }
   .fa-line {
     height: 4px;
@@ -1809,8 +1812,9 @@
       margin: 10px 0;
       font-size: 16px;
     }
-    .fa-need {
-      margin: 5px 0;
+    .fa-needs {
+      gap: 5px 10px;
+      margin-top: 8px;
     }
     .fa-right:has(.fa-spec) .race-panel {
       display: none;
@@ -2130,8 +2134,8 @@
       .fa-role {
         margin-top: 4px;
       }
-      .fa-need {
-        margin: 6px 0 0;
+      .fa-needs {
+        margin-top: 6px;
       }
       .fa-quote {
         margin: 8px 0 2px;
