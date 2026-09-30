@@ -107,7 +107,7 @@
       "mod-retriever",
       "mod-manager"
     ],
-    "factions": [
+    "discourse": [
       "factions",
       "factions-base",
       "factions-karaoke",
