@@ -41,6 +41,7 @@ import type {
   EndingVM, ShareVM, TakeoverVM, MemoVM, ChallengeVM,
 } from "./types";
 import { defs } from "../../sim/defs";
+import { NO_SAVES_VM, savesViewModel, type SavesInput } from "./saves.vm";
 
 /** How many game days after a release the "SHIPPED!" sticker stays up. */
 export const SHIPPED_DAYS = 3;
@@ -97,6 +98,8 @@ export interface HudInput {
   mods?: ModsVM;
   /** Today's Drama (FLT-34). Optional: none means nothing fetched and the window shut. */
   drama?: DramaVM;
+  /** Saving and loading (FLT-65). Optional: none means the window shut and nothing to continue. */
+  saves?: SavesInput;
   viewport: { width: number; height: number };
   /** The ending's share card and the campus photo its front page prints (FLT-11). Optional: none is fine. */
   share?: { photo: string | null } & ShareVM;
@@ -1141,6 +1144,7 @@ export function hudViewModel(i: HudInput): HudVM {
     beat: i.beat && !event && !era && !i.photo.on ? { ...i.beat, kicker: BEAT_KICKER[i.beat.kind] ?? "Meanwhile", skipLabel: "Skip »", action: beatActionOf(i.beat.kind, i.snap) } : null,
     skins: i.skins,
     mods: i.mods ?? NO_MODS_VM,
+    saves: i.saves ? savesViewModel(i.saves, { lab: i.snap.labName, day: i.snap.day }) : { ...NO_SAVES_VM, current: { lab: i.snap.labName, date: formatDate(i.snap.day) } },
     disasters: disastersOf(i, play.visible.disasters),
     drama: i.drama ?? NO_DRAMA_VM,
     layout: { width: i.viewport.width, height: i.viewport.height, phone: i.viewport.width <= 480, compact: i.viewport.width <= 640, tall: i.viewport.height >= 800 },

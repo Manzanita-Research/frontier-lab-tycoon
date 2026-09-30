@@ -1411,6 +1411,68 @@ export interface ModsVM {
   contentHash: string | null;
 }
 
+/** A save, as the Save/Load window and "Welcome back" show it (FLT-65). */
+export interface SaveSummaryVM {
+  /** "Gradient Descent Labs" */
+  lab: string;
+  /** "Y2 · Mar 5" */
+  date: string;
+  day: number;
+  /** "3 hours ago", "just now", "2 days ago" */
+  ago: string;
+  /** "45K" */
+  size: string;
+  /** The skin it was saved in ("Frontier 95"), or null. Loading puts it back on. */
+  skin: string | null;
+  /** Ids of the mods it was made with. */
+  mods: string[];
+}
+
+/** One row of the Save/Load window: the autosave or a manual slot. */
+export interface SaveSlotVM {
+  /** "auto", "1", "2", "3": what `saveTo`, `loadFrom`, `deleteSave` and `exportSave` take. */
+  slot: string;
+  /** "Autosave", "Slot 1" */
+  label: string;
+  /** Null for an empty slot. */
+  save: SaveSummaryVM | null;
+  /** Something is there that isn't a readable save ("Scrambled"), or null. */
+  broken: string | null;
+}
+
+/** A save made with mods this session doesn't have (or without ones it has). */
+export interface SaveModPromptVM {
+  lab: string;
+  /** Mods the save needs that aren't running ("my-mod 1.2.0"). */
+  missing: string[];
+  /** Mods running now that the save was made without. */
+  extra: string[];
+  /** Every missing mod came with its `?mod=` link, so "Reload with its mods" can fetch them. */
+  canFetch: boolean;
+}
+
+/** Saving and loading (FLT-65): the Save/Load window, "Welcome back", and the prompt about mods. */
+export interface SavesVM {
+  open: boolean;
+  /** False when the browser keeps nothing (private browsing): the slots are off, Export and Import still work. */
+  available: boolean;
+  /** The autosave, then slots 1 to 3. */
+  slots: SaveSlotVM[];
+  /** The lab playing now: what Save writes. */
+  current: { lab: string; date: string };
+  /** "Welcome back": the autosave to continue, or null. Time holds while it is up. */
+  welcome: SaveSummaryVM | null;
+  /** A load, save or import is under way. */
+  busy: boolean;
+  /** What just happened ("Saved to slot 2.", "That file isn't a lab save."), or null. */
+  status: { text: string; tone: ToneVM } | null;
+  modPrompt: SaveModPromptVM | null;
+  /** How much of the browser's room the saves take: "92K of about 5 MB", and 0 to 1. */
+  storage: { text: string; used: number };
+  /** A file is being dragged over the page: show where to drop it. */
+  dragging: boolean;
+}
+
 /** One published Daily Drama pack (FLT-34): a small parody mod about the day's industry news, merged after review. */
 export interface DramaPackVM {
   id: string;
@@ -1634,6 +1696,8 @@ export interface HudVM {
   beat: BeatVM | null;
   skins: SkinPickerVM;
   mods: ModsVM;
+  /** Saving and loading (FLT-65). */
+  saves: SavesVM;
   /** Disasters (FLT-32): `enabled: false` until the lab earns them. */
   disasters: DisastersVM;
   /** Today's Drama (FLT-34). */
@@ -1772,4 +1836,24 @@ export interface HudActions {
   closeDrama(): void;
   /** Load a published Drama pack by id (reloads with it in `?mod=`: a new lab). */
   playDrama(id: string): void;
+  // Saves (FLT-65). `slot` is a SaveSlotVM's `slot`.
+  openSaves(): void;
+  closeSaves(): void;
+  /** Save the lab playing now to a slot (over what is there). */
+  saveTo(slot: string): void;
+  loadFrom(slot: string): void;
+  deleteSave(slot: string): void;
+  /** Download a slot, or the lab playing now (`"current"`), as a `.fltsave` file. */
+  exportSave(slot: string): void;
+  /** Load a `.fltsave` file (a file picker's, or a drop's). */
+  importSave(file: File): void;
+  /** "Welcome back": load the autosave. */
+  continueSave(): void;
+  /** "Welcome back": play the new lab instead. */
+  dismissWelcome(): void;
+  /** The mods prompt: reload with the save's mods, then load it. */
+  fetchModsAndLoad(): void;
+  /** The mods prompt: load it with the mods running now. */
+  loadWithoutMods(): void;
+  cancelModPrompt(): void;
 }

@@ -11,6 +11,7 @@ Production: **https://flt-prod.manzanita.workers.dev**. The Worker serves the ro
 - Closed/merged PR → cleanup checks out trusted `main` and destroys only `pr-N`. It refuses `prod` and malformed stages, and skips a PR that has reopened.
 - Deploy and cleanup share a normalized PR concurrency key, including merged PR close events whose GitHub ref changes to `main`. In-progress runs finish before cleanup. Live head/open checks skip superseded commits and closed PRs; production checks the current `main` SHA before deploying.
 - Fork PRs get the ordinary game CI checks, but no deployment credentials or previews.
+- **Runners:** [Blacksmith](https://blacksmith.sh) on the Manzanita-Research org: `blacksmith-2vcpu-ubuntu-2404` for check, deploy and cleanup; `blacksmith-4vcpu-ubuntu-2404` for the browser e2e jobs (stranger, journey).
 
 ### One app, previews of it
 
@@ -40,8 +41,8 @@ pnpm install --frozen-lockfile
 pnpm --dir infra install --frozen-lockfile
 pnpm check
 pnpm --dir infra typecheck
-printf %s "$CLOUDFLARE_API_TOKEN" | gh secret set CLOUDFLARE_API_TOKEN --repo jem-computer/frontier-lab-tycoon
-printf %s "$CLOUDFLARE_ACCOUNT_ID" | gh secret set CLOUDFLARE_ACCOUNT_ID --repo jem-computer/frontier-lab-tycoon
+printf %s "$CLOUDFLARE_API_TOKEN" | gh secret set CLOUDFLARE_API_TOKEN --repo Manzanita-Research/frontier-lab-tycoon
+printf %s "$CLOUDFLARE_ACCOUNT_ID" | gh secret set CLOUDFLARE_ACCOUNT_ID --repo Manzanita-Research/frontier-lab-tycoon
 CI=true pnpm --dir infra exec alchemy deploy --stage prod --yes
 ```
 

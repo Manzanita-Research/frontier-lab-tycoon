@@ -72,7 +72,7 @@ function ShutDown({ lab, onClose }: { lab: string; onClose: () => void }) {
 /** Where Frontier 95 draws each Run… widget from its own sprite. */
 const WIDGET_ICONS: Record<string, string> = {
   properties: "info", finance: "chart", arena: "globe", benchmarks: "chart", thoughts: "chat", traffic: "net", discourse: "megaphone",
-  papers: "doc", news: "news", staff: "staff", senate: "senate", disasters: "siren", drama: "drama", mods: "programs", display: "display",
+  papers: "doc", news: "news", staff: "staff", senate: "senate", disasters: "siren", drama: "drama", saves: "floppy", mods: "programs", display: "display",
   sound: "sound", help: "help",
 };
 const widgetIcon = (w: WidgetVM) => WIDGET_ICONS[w.id] ?? "doc";
@@ -319,6 +319,13 @@ export function BuildBar({ items, tip, teasers = [], disasters, widgets = [], ac
               <button type="button" role="menuitem" data-testid="start-run" onClick={() => { setOpen(false); if (held) actions.place(null); setRun(true); }}>
                 <Ico name="run" size={24} />
                 <span>{t("build.run")}</span>
+              </button>
+            </li>
+            <li {...hoverShut}>
+              <button type="button" role="menuitem" data-testid="start-saves" onClick={() => launch("saves")}>
+                <Ico name="floppy" size={24} />
+                <span>{t("saves.open")}…</span>
+                <span className="hk">Ctrl+S</span>
               </button>
             </li>
             <li {...hoverShut}>

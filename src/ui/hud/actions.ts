@@ -13,6 +13,7 @@ import { copyLink, copySummary, playDaily, shareEnding } from "../share/share";
 import { dismissChallenge, dismissMemo } from "../share/social";
 import { arenaOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, senateOpenAtom, staffOpenAtom } from "./state";
 import { skinActions } from "./skinControl";
+import { savesActions } from "./saves";
 import type { StaffJob } from "../../sim/types";
 import type { HudActions } from "./types";
 import { announceWidget } from "../../skins/kit/launcher";
@@ -144,6 +145,8 @@ export const hudActions: HudActions = {
   closeMods: () => registry.set(modsOpenAtom, false),
   // Today's Drama (FLT-34): the window, and the two reloads that switch a pack on or a mod off.
   ...dramaActions,
+  // Saves (FLT-65): the Save/Load window, Welcome back, export and import.
+  ...savesActions,
   setMuted: (muted) => setMixer({ muted }),
   setVolume: (channel, value) => setMixer({ [channel]: Math.max(0, Math.min(1, value)) }),
   playCue: (cue) => playCue(cue as Cue),
@@ -181,6 +184,7 @@ export const hudActions: HudActions = {
       senate: () => registry.set(senateOpenAtom, true),
       disasters: () => registry.set(disastersOpenAtom, true),
       drama: () => hudActions.openDrama(),
+      saves: () => savesActions.openSaves(),
       mods: () => registry.set(modsOpenAtom, true),
       display: () => hudActions.openSkinPicker(),
       sound: () => registry.set(mixerOpenAtom, true),

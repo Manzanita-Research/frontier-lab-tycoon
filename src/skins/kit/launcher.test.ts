@@ -27,6 +27,8 @@ describe("runFile", () => {
       expect(runFile(typed, widgets).ok, typed).toBe(true);
     }
     expect(runFile("tho", widgets)).toMatchObject({ ok: true, widget: { id: "thoughts" } });
+    // FLT-65's Save/Load window, from Run… as well as Ctrl+S and the Start menu.
+    for (const typed of ["save.exe", "save", "load", "floppy"]) expect(runFile(typed, widgets), typed).toMatchObject({ ok: true, widget: { id: "saves" } });
   });
 
   it("says something about the things people will type, and 'Cannot find' about the rest", () => {

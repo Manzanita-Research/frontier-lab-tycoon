@@ -228,6 +228,12 @@
       "auction",
       "auction-broke"
     ],
+    "saves": [
+      "saves-welcome",
+      "saves-window",
+      "menu",
+      "saves-phone"
+    ],
     "flt-57": [
       "end-acquihired",
       "end-acquihired-almanac",
@@ -2958,6 +2964,41 @@
         },
         {
           "wait": 600
+        }
+      ]
+    },
+    "saves-welcome": {
+      "title": "FLT-65: a returning player's start screen (Welcome back, from a pretend save shelf)",
+      "query": {
+        "saves": "demo"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "saves-window": {
+      "title": "FLT-65: the Save/Load window on a pretend shelf (autosave, a v1 save, two empty slots)",
+      "query": {
+        "saves": "window"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "saves-phone": {
+      "title": "FLT-65: the Save/Load window on a phone (390x844)",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "saves": "window"
+      },
+      "steps": [
+        {
+          "wait": 800
         }
       ]
     },

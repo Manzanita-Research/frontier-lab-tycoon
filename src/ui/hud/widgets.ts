@@ -30,6 +30,7 @@ const WIDGETS: readonly (Row & { when: (w: WidgetGate) => boolean })[] = [
   { id: "senate", name: "Senate", file: "senate.exe", blurb: "The Promise Tracker and the bill on the docket.", icon: "senate", aliases: ["tracker", "promises", "bill"], when: (w) => w.senate },
   { id: "disasters", name: "Disasters", file: "disasters.cpl", blurb: "How often things catch fire. Or start one now.", icon: "disasters", aliases: ["disaster", "chaos"], when: (w) => w.disasters },
   { id: "drama", name: "Today's Drama", file: "drama.exe", blurb: "Today's scandal, as a playable pack.", icon: "drama", aliases: ["daily"], when: () => true },
+  { id: "saves", name: "Save / Load", file: "save.exe", blurb: "Save As, Open, and the autosave. On a 3½-inch floppy.", icon: "saves", aliases: ["save", "load", "saves", "floppy"], when: () => true },
   { id: "mods", name: "Mods", file: "mods.cpl", blurb: "What's loaded, and what clashes.", icon: "mods", aliases: ["mod"], when: () => true },
   { id: "display", name: "Display", file: "display.cpl", blurb: "Change the whole look (the skin).", icon: "display", aliases: ["skin", "skins", "theme"], when: () => true },
   { id: "sound", name: "Sound", file: "sound.cpl", blurb: "Volume, music and the mute button.", icon: "sound", aliases: ["audio", "volume", "mixer"], when: () => true },

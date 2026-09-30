@@ -190,7 +190,9 @@ function useNewsDesk(snap: Snapshot) {
     const result = desk.poll(sim.world);
     if (result.reset) {
       pressCamera.pending.length = 0;
-      resetRoom();
+      // A loaded save (FLT-65) is a lab coming back: its archive is still on the shelf. A new lab starts a fresh one.
+      if (sim.loaded === sim.world) loadRoom();
+      else resetRoom();
     }
     if (result.editions.length) pressCamera.pending.push(result.editions);
   }, [snap]);
@@ -243,6 +245,8 @@ function useOverlays(vm: HudVM) {
   useAutoPause("mixer", vm.sound.open);
   useAutoPause("arena", vm.arena.open && vm.layout.compact);
   useAutoPause("drama", vm.drama.open);
+  useAutoPause("saves", vm.saves.open || vm.saves.modPrompt !== null);
+  useAutoPause("welcome", vm.saves.welcome !== null);
 }
 
 export function useHudEffects(vm: HudVM, snap: Snapshot) {
