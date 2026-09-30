@@ -1369,7 +1369,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    margin: 4px 16px 4px;
+    margin: auto 16px 4px;
   }
   .sd-key.wide {
     flex: 1;
