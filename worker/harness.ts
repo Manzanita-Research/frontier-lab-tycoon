@@ -43,7 +43,15 @@ async function bundle() {
   return out.outputFiles[0]!.text;
 }
 
-export async function startWorker(profile: HfProfile) {
+export interface WorkerOptions {
+  /** The host a player types (and Better Auth allows); `localhost` in tests. */
+  host?: string;
+  /** The static assets. Tests get a stub that names the path it was asked for. */
+  assets?: (req: MfRequest) => MfResponse | Promise<MfResponse>;
+}
+
+export async function startWorker(profile: HfProfile, { host = HOST, assets }: WorkerOptions = {}) {
+  const origin = `http://${host}`;
   const hf: HfLog = { tokenRequests: [], userinfo: [] };
   const mf = new Miniflare({
     // Listed by hand: the bundle keeps a few dynamic `import()`s that Miniflare's module walker can't follow.
@@ -51,11 +59,11 @@ export async function startWorker(profile: HfProfile) {
     compatibilityDate: "2026-08-04",
     compatibilityFlags: ["nodejs_compat"],
     // Miniflare reaches workerd over 127.0.0.1:<port>; this makes the Worker see the host a player would have typed.
-    upstream: ORIGIN,
+    upstream: origin,
     d1Databases: ["DB"],
     r2Buckets: ["SAVES"],
     bindings: {
-      AUTH_HOSTS: HOST,
+      AUTH_HOSTS: host,
       AUTH_PROTOCOL: "http",
       BETTER_AUTH_SECRET: "test-secret-that-is-at-least-32-characters-long",
       HF_CLIENT_ID: "test-client",
@@ -63,7 +71,7 @@ export async function startWorker(profile: HfProfile) {
     },
     serviceBindings: {
       // The static assets: tell a test which path fell through to them.
-      ASSETS: (req: MfRequest) => new MfResponse(`asset ${new URL(req.url).pathname}`, { headers: { "content-type": "text/html" } }),
+      ASSETS: assets ?? ((req: MfRequest) => new MfResponse(`asset ${new URL(req.url).pathname}`, { headers: { "content-type": "text/html" } })),
     },
     // Every fetch the Worker makes to the outside world lands here: this is the mocked Hugging Face.
     outboundService: async (req: MfRequest) => {
@@ -90,8 +98,13 @@ export async function startWorker(profile: HfProfile) {
     }
   }
   const saves = await mf.getR2Bucket("SAVES");
-  const fetch = (path: string, init: RequestInit = {}) =>
-    mf.dispatchFetch(`${ORIGIN}${path}`, init as never) as unknown as Promise<Response>;
+  // Every request looks like a browser behind Cloudflare, so a test can check that none of it is kept.
+  const fetch = (path: string, init: RequestInit = {}) => {
+    const headers = new Headers(init.headers);
+    headers.set("user-agent", "Mozilla/5.0 (Frontier 95; Paperclip)");
+    headers.set("cf-connecting-ip", "203.0.113.7");
+    return mf.dispatchFetch(`${origin}${path}`, { ...init, headers } as never) as unknown as Promise<Response>;
+  };
   return { mf, db, saves, hf, fetch };
 }
 

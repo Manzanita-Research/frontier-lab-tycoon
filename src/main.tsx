@@ -56,3 +56,9 @@ void Promise.all([fonts, skin, app]).then(([, , App]) =>
     </StrictMode>,
   ),
 );
+
+// Accounts (FLT-67): compiled in only when the prod deploy builds with VITE_FLT_AUTH=on (docs/ACCOUNTS.md). Otherwise
+// this statement and everything under src/account/ are dropped from the bundle, which stays byte-identical.
+if (import.meta.env.VITE_FLT_AUTH === "on" && !Page) {
+  void Promise.all([skin, app]).then(() => import("./account/boot")).then((m) => m.bootAccount());
+}

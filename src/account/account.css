@@ -1,0 +1,108 @@
+/* Accounts (FLT-67). Loaded only in builds with VITE_FLT_AUTH=on. The root is a second .hud-host above the game's. */
+.flt-account {
+  z-index: 3;
+}
+
+/* ---- Frontier 95: the log-on box ---- */
+[data-skin="frontier-95"] {
+  .f95-logon {
+    width: min(520px, 100%);
+    max-height: calc(100dvh - 20px);
+    overflow: auto;
+  }
+  .f95-logon-body {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px;
+    > .f95-ico,
+    > .f95-logon-avatar {
+      flex: none;
+      width: 40px;
+      height: 40px;
+    }
+  }
+  .f95-logon-avatar {
+    box-shadow: var(--sunk);
+    padding: 2px;
+    background: #fff;
+    image-rendering: pixelated;
+  }
+  .f95-logon-text {
+    flex: 1;
+    min-width: 0;
+    p {
+      margin: 0 0 8px;
+      line-height: 1.25;
+    }
+  }
+  .f95-logon-fine {
+    font-size: 13px;
+    color: var(--dk);
+    opacity: 0.8;
+  }
+  .f95-logon-notice {
+    display: flex;
+    gap: 6px;
+    align-items: flex-start;
+    padding: 4px 6px;
+    box-shadow: var(--sunk);
+    background: #fff;
+  }
+  .f95-logon-buttons {
+    flex: none;
+    display: grid;
+    gap: 6px;
+    .f95-btn {
+      min-width: 92px;
+    }
+  }
+  @media (max-width: 560px) {
+    .f95-logon-body {
+      flex-wrap: wrap;
+    }
+    .f95-logon-buttons {
+      width: 100%;
+      grid-auto-flow: column;
+      justify-content: end;
+    }
+  }
+}
+
+/* ---- every other skin, until it draws its own: a chip and the base event card ---- */
+.flt-account-chip {
+  position: fixed;
+  top: max(8px, env(safe-area-inset-top));
+  left: 50%;
+  translate: -50% 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border: var(--flt-border-width) var(--flt-border-style) var(--flt-color-line);
+  border-radius: 999px;
+  background: var(--flt-color-panel);
+  color: var(--flt-color-text);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  pointer-events: auto;
+  box-shadow: var(--flt-shadow-panel);
+  img {
+    border-radius: 50%;
+  }
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+}
+.flt-account-card {
+  max-width: 440px;
+}
+.flt-account-fine {
+  font-size: 0.85em;
+  opacity: 0.75;
+}
+.flt-account-notice {
+  font-weight: 700;
+}

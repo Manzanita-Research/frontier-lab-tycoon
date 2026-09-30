@@ -58,9 +58,19 @@ export function authOptions(env: Env, database: BetterAuthOptions["database"] = 
       },
     },
     account: {
-      // The HF access token is only used once, to read the profile at sign-in; nothing calls HF on the player's behalf.
+      // The HF access token is only used once, to read the profile at sign-in; nothing calls HF on the player's behalf,
+      // so the hooks below drop it (encrypted too, in case a hook is ever bypassed).
       storeAccountCookie: false,
       encryptOAuthTokens: true,
+    },
+    // What the privacy line promises: an id, a name, an avatar, a username and saves. Sessions keep no IP address or
+    // browser string, and the account row keeps no Hugging Face tokens.
+    databaseHooks: {
+      session: { create: { before: async (session) => ({ data: { ...session, ipAddress: null, userAgent: null } }) } },
+      account: {
+        create: { before: async (account) => ({ data: { ...account, ...NO_TOKENS } }) },
+        update: { before: async (account) => ({ data: { ...account, ...NO_TOKENS } }) },
+      },
     },
     advanced: {
       useSecureCookies: protocol === "https",
@@ -71,6 +81,8 @@ export function authOptions(env: Env, database: BetterAuthOptions["database"] = 
     telemetry: { enabled: false },
   };
 }
+
+const NO_TOKENS = { accessToken: null, refreshToken: null, idToken: null, accessTokenExpiresAt: null, refreshTokenExpiresAt: null };
 
 export const makeAuth = (env: Env) => betterAuth(authOptions(env));
 export type Auth = ReturnType<typeof makeAuth>;

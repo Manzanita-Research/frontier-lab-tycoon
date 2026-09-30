@@ -101,6 +101,16 @@ describe("Hugging Face sign-in (Better Auth, mocked HF OAuth server)", () => {
     expect(dump).not.toContain("ada@example.test");
   });
 
+  it("keeps no IP address, browser string or Hugging Face token", async () => {
+    await signIn();
+    await signIn();
+    const sessions = await w.db.prepare("SELECT ipAddress, userAgent FROM session").all();
+    expect(sessions.results.length).toBeGreaterThan(0);
+    for (const row of sessions.results) expect(row).toEqual({ ipAddress: null, userAgent: null });
+    const accounts = await w.db.prepare("SELECT providerId, accessToken, refreshToken, idToken FROM account").all();
+    expect(accounts.results).toEqual([{ providerId: "huggingface", accessToken: null, refreshToken: null, idToken: null }]);
+  });
+
   it("won't let a player rename themselves: the profile is Hugging Face's", async () => {
     const { jar } = await signIn();
     const res = await w.fetch("/api/auth/update-user", {
