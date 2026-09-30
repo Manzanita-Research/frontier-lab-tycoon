@@ -27,6 +27,7 @@ function staged(stage: SwarmStage = "spreading") {
   const s = createInitialState(3);
   enableCollusion(s);
   readyForPressure(s);
+  s.progression = { value: "complete", context: { level: 5 } }; // pack mechanics on an earned campus
   s.day = 120; s.tick = 2400;
   s.collusion!.machine = { value: stage, context: { ...freshSwarm().context, seededDay: 110, score: stage === "organized" ? 70 : 20, noticed: true } };
   return s;

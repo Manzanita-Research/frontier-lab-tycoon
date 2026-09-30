@@ -16,6 +16,7 @@ describe("the playable ladder", () => {
     expect(s.buildings.map((b) => b.kind)).toEqual(["cluster"]);
     expect(canPlace(s, "hall", 12, 19).ok).toBe(true);
     expect(canPlace(s, "gateway", 12, 20).ok).toBe(false);
+    expect(canPlace(s, "security", 12, 19).ok).toBe(false);
     applyNow(s, [{ type: "placeBuilding", kind: "gateway", x: 12, z: 20 }, { type: "hire", job: "sre" }]);
     expect(s.buildings).toHaveLength(1); expect(s.staff).toHaveLength(0);
     s.models.push("Fixture-1"); updateProgression(s);
@@ -31,6 +32,7 @@ describe("the playable ladder", () => {
     s.race.rank = 6; updateProgression(s); expect(progressOf(s).level).toBe(4);
     s.race.rank = 5; updateProgression(s); expect(progressOf(s).level).toBe(5);
     expect(canHire(s, "security").ok).toBe(true); expect(s.papers?.enabled).toBe(true);
+    s.cash = 350_000; expect(canPlace(s, "security", 12, 19).ok).toBe(true);
     expect(s.unlockCards?.map((c) => c.id)).toEqual(["business", "team", "race", "scrutiny"]);
     applyNow(s, [{ type: "dismissUnlock" }]); expect(makeSnapshot(s).unlockCard?.id).toBe("team");
   });

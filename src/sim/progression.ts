@@ -13,7 +13,11 @@ export const levelOf = (s: ProgressState): Level => (s.progression?.context.leve
 const unlockedRows = (s: ProgressState) => rows(s).filter((r) => r.level <= levelOf(s));
 export const systemUnlocked = (s: ProgressState, id: SystemId): boolean => !s.progression || unlockedRows(s).some((r) => r.systems.includes(id));
 export const staffUnlocked = (s: GameState, job: StaffJob): boolean => !s.progression || unlockedRows(s).some((r) => r.staff.includes(job));
-export const buildingUnlocked = (s: GameState, kind: BuildingKind): boolean => !s.progression || unlockedRows(s).some((r) => r.buildings.includes(kind)) || (levelOf(s) >= 4 && s.flags[`unlocked:${kind}`] !== undefined);
+// Offices are hidden infrastructure created by incident verbs, not palette unlocks.
+export const buildingUnlocked = (s: GameState, kind: BuildingKind): boolean => !s.progression ||
+  unlockedRows(s).some((r) => r.buildings.includes(kind)) ||
+  (BUILDINGS[kind].office === true && (systemUnlocked(s, "disasters") || systemUnlocked(s, "collusion"))) ||
+  (levelOf(s) >= 4 && s.flags[`unlocked:${kind}`] !== undefined);
 function goalValue(s: GameState) {
   const goal = rows(s).find((r) => r.level === levelOf(s))!.goal;
   const current = goal.metric === "models" ? s.models.length : goal.metric === "revenue" ? s.ledger.income : goal.metric === "team" ? s.walkers.filter((w) => w.kind === "researcher" && w.machine.value !== "quitting").length : s.race.rank;
