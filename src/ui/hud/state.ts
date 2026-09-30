@@ -32,6 +32,9 @@ export const skinUiAtom = Atom.keepAlive(Atom.make<SkinUi>({ active: "base", pic
 /** The skin's components and copy: what the host renders. Starts as the base until the first skin has loaded. */
 export const loadedSkinAtom = Atom.keepAlive(Atom.make<LoadedSkin>({ id: "base", name: "Base", slots: baseSlots, strings: { ...BASE_STRINGS } }));
 
+/** Is Start ▸ Settings ▸ Mods… open? UI-only state. */
+export const modsOpenAtom = Atom.make(false);
+
 /** Is Help ▸ How to play open? UI-only state. */
 export const helpOpenAtom = Atom.make(false);
 

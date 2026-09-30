@@ -12,7 +12,7 @@ import { syncProtesters } from "../sim/protest";
 import { setRisk } from "../sim/disasters/driver";
 import { stageDisaster } from "../sim/disasters/demo";
 import { RISKS, type Risk } from "../sim/disasters/types";
-import type { GameState, NewsItem, OpenEvent, Outcome, Thought } from "../sim/types";
+import type { GameState, NewsItem, OpenEvent, Outcome, RunMods, Thought } from "../sim/types";
 import { fillAgents, seedWalkers } from "../sim/walkers";
 import { isMoment, stageMoment } from "../sim/race/demo";
 import { isOpsMoment, stageOps } from "../sim/opsDemo";
@@ -26,6 +26,8 @@ import { walkersThinking } from "../sim/mind";
 import { makeSnapshot, NO_SELECTION, type Snapshot, type UiSelection, type UiToast } from "./hud";
 import { continueTutorial } from "../sim/tutorial";
 import { stageFirstRun } from "../sim/firstRunDemo";
+import { withDefs } from "../sim/defs";
+import type { GameDefinition } from "../mods/game-definition";
 
 /** What the loop tells the app after touching the World. `snap`, `news` and `toasts` come with a publish. */
 export interface SyncReport {
@@ -58,19 +60,19 @@ export class SimHandle {
   /** A paused scenario's curated bubbles. Ordinary sim bubbles return on the first resumed tick. */
   openingThoughts?: { tick: number; thoughts: Thought[] };
 
-  constructor(world: GameState, leapfrog = false, public papers = world.papers?.enabled ?? false) {
+  constructor(world: GameState, leapfrog = false, public papers = world.papers?.enabled ?? false, public readonly def: GameDefinition | null = null) {
     this.world = world;
     this.leapfrog = leapfrog;
   }
 
   /** Advance `n` ticks; queued commands apply on the first one. */
   step(n: number, commands: readonly Command[]) {
-    for (let i = 0; i < n; i++) tick(this.world, i === 0 && commands.length > 0 ? commands : undefined);
+    for (let i = 0; i < n; i++) tick(this.world, i === 0 && commands.length > 0 ? commands : undefined, this.def);
   }
 
   /** Apply commands without advancing time (building while paused or with a card open). */
   applyNow(commands: readonly Command[]) {
-    if (commands.length > 0) applyNow(this.world, commands);
+    if (commands.length > 0) applyNow(this.world, commands, this.def);
   }
 
   /** Start over with a fresh seed (the random-disaster setting carries over to the new lab). */
@@ -81,7 +83,9 @@ export class SimHandle {
     const collusion = this.world.collusion?.enabled;
     const leapfrogOff = this.world.flags.leapfrogOff;
     const papersOff = this.world.flags.papersOff;
-    this.world = createInitialState(seed);
+    const mods = this.world.mods;
+    this.world = createInitialState(seed, "garage", this.def);
+    if (mods) this.world.mods = mods;
     setRisk(this.world, risk);
     if (leapfrogOff) this.world.flags.leapfrogOff = leapfrogOff;
     if (collusion) enableCollusion(this.world);
@@ -94,6 +98,10 @@ export class SimHandle {
    * changed; a change of card or outcome is always reported. Returns null when there is nothing new.
    */
   report(publishDue: boolean, force = false): SyncReport | null {
+    return withDefs(this.def, () => this.sync(publishDue, force));
+  }
+
+  private sync(publishDue: boolean, force: boolean): SyncReport | null {
     const w = this.world;
     const event = openEventOf(w);
     const outcome = outcomeOf(w);
@@ -111,10 +119,19 @@ export class SimHandle {
   }
 }
 
-/** A living campus, warped forward and dressed up per the `?seed=&warp=&agents=&discourse=` debug knobs. */
-export function createSimHandle(
-  dbg: Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean },
-): SimHandle {
+type SimDebug = Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean };
+
+/**
+ * A living campus, warped forward and dressed up per the `?seed=&warp=&agents=&discourse=` debug knobs.
+ * `def` is the session's resolved mod definition (FLT-37) and `mods` its identity, kept in the World with the run.
+ */
+export function createSimHandle(dbg: SimDebug, def: GameDefinition | null = null, mods: RunMods | null = null): SimHandle {
+  const sim = withDefs(def, () => stage(dbg));
+  if (mods) sim.mods = mods;
+  return new SimHandle(sim, sim.leapfrog.enabled, undefined, def);
+}
+
+function stage(dbg: SimDebug): GameState {
   const sim = createInitialState(dbg.seed);
   if (dbg.leapfrog === false) sim.flags.leapfrogOff = 1;
   if (dbg.papers === false) sim.flags.papersOff = 1;
@@ -146,7 +163,7 @@ export function createSimHandle(
   // `?warp=` link is the same lab it always was), and `?disaster=<id>` starts one a moment before the shot.
   if ((RISKS as readonly string[]).includes(dbg.risk ?? "")) setRisk(sim, dbg.risk as Risk);
   if (dbg.disaster) stageDisaster(sim, dbg.disaster, dbg.dz ?? 0, dbg.dzPick ?? null);
-  return new SimHandle(sim, sim.leapfrog.enabled);
+  return sim;
 }
 
 export class Sim extends Context.Service<Sim, SimHandle>()("@flt/Sim") {}

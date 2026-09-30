@@ -185,6 +185,12 @@ export function BuildBar({ items, tip, teasers = [], actions }: SlotPropsMap["Bu
                     <span>Sound…</span>
                   </button>
                 </li>
+                <li className="sub">
+                  <button type="button" role="menuitem" onClick={() => { setOpen(false); actions.openMods(); }}>
+                    <span />
+                    <span>Mods…</span>
+                  </button>
+                </li>
               </>
             )}
             <li>

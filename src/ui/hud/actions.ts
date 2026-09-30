@@ -7,7 +7,7 @@ import type { Cue } from "../../audio/score";
 import { fx } from "../../render/fx/state";
 import { roomAtom, skipNews, viewRoom } from "../../newsroom/state";
 import { setPhoto, takePhoto } from "../juice/photo";
-import { arenaOpenAtom, chatCountAtom, helpOpenAtom, photoFlashAtom, photoTimeAtom, staffOpenAtom } from "./state";
+import { arenaOpenAtom, chatCountAtom, helpOpenAtom, modsOpenAtom, photoFlashAtom, photoTimeAtom, staffOpenAtom } from "./state";
 import { skinActions } from "./skinControl";
 import type { StaffJob } from "../../sim/types";
 import type { HudActions } from "./types";
@@ -90,6 +90,8 @@ export const hudActions: HudActions = {
 
   openMixer: () => registry.set(mixerOpenAtom, true),
   closeMixer: () => registry.set(mixerOpenAtom, false),
+  openMods: () => registry.set(modsOpenAtom, true),
+  closeMods: () => registry.set(modsOpenAtom, false),
   setMuted: (muted) => setMixer({ muted }),
   setVolume: (channel, value) => setMixer({ [channel]: Math.max(0, Math.min(1, value)) }),
   playCue: (cue) => playCue(cue as Cue),

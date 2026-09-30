@@ -1,9 +1,10 @@
 /// <reference types="vitest/config" />
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { exampleMods } from "./scripts/vite-example-mods.mjs";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), exampleMods()],
   resolve: {
     alias: {
       // @xstate/effect 0.1.0-alpha.5 was built against effect rc.115, where the reactivity module lived under

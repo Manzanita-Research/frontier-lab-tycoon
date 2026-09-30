@@ -12,7 +12,9 @@ import { headlinePool } from "./news";
 import { boardView } from "./race/arena";
 import { createRng } from "./rng";
 import { createInitialState } from "./state";
-import { answer } from "./testkit";
+import { answer, findSpot } from "./testkit";
+import type { PlaceableKind } from "../content/buildings";
+import starter from "../../templates/create-flt-mod/mod.json";
 import { applyNow, tick } from "./tick";
 import type { GameState } from "./types";
 
@@ -95,6 +97,21 @@ describe("the resolved definition (FLT-37)", () => {
     expect(pool()).toContain("Every Steve agrees");
     expect(pool()).not.toContain("This line never runs");
     expect(play(2, 60, def).news.some((n) => n.text === "This line never runs")).toBe(false);
+  });
+
+  it("a mod building is bought, placed and visited like any other", async () => {
+    const def = await resolve([starter]);
+    const s = createInitialState(1, "campus", def);
+    const spot = withDefs(def, () => findSpot(s, "opinion-booth" as PlaceableKind));
+    expect(spot).not.toBeNull();
+    const cash = s.cash;
+    applyNow(s, [{ type: "placeBuilding", kind: "opinion-booth" as PlaceableKind, x: spot![0], z: spot![1] }], def);
+    expect(s.buildings.some((b) => b.kind === ("opinion-booth" as string))).toBe(true);
+    expect(s.cash).toBe(cash - 1000);
+    // Unmodded, the same command is refused: the kind does not exist.
+    const base = createInitialState(1, "campus");
+    applyNow(base, [{ type: "placeBuilding", kind: "opinion-booth" as PlaceableKind, x: spot![0], z: spot![1] }]);
+    expect(base.buildings.some((b) => b.kind === ("opinion-booth" as string))).toBe(false);
   });
 
   it("the session definition is what code outside a tick sees", async () => {

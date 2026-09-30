@@ -91,6 +91,17 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
       return { newsroom: vms.archive!.newsroom, actions };
     case "Mixer":
       return { sound: { ...main.sound, open: true }, actions };
+    case "ModManager":
+      return {
+        mods: {
+          open: true,
+          list: [{ id: "every-lab-is-steve", name: "Every Lab Is Named Steve", version: "1.0.0", source: "/mods/examples/every-lab-is-steve/mod.json", hash: "f3b023e9" }],
+          conflicts: ["content.rivals.anthro: a (override), then b (override); b wins"],
+          errors: ["/nope.json: HTTP 404"],
+          contentHash: "02778d7b",
+        },
+        actions,
+      };
   }
 }
 

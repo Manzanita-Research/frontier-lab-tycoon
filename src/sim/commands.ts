@@ -61,7 +61,10 @@ export function canPlace(state: GameState, kind: BuildingKind | "path", x: numbe
     if (state.cash < PATH_PRICE) return no("Not enough cash");
     return { ok: true };
   }
-  const def = defs().buildings[kind];
+  const buildings = defs().buildings;
+  // A kind this run's definition does not have (a stale link, a mod that is no longer loaded).
+  if (!Object.hasOwn(buildings, kind)) return no("There's no such building here");
+  const def = buildings[kind];
   const rect: Rect = { x, z, w: def.size[0], d: def.size[1] };
   if (gateAccessTiles(state).some(([gx, gz]) => rectContains(rect, gx, gz))) return no("Keep the entrance access clear; it belongs to the queue to somewhere.");
   if (!isUnlocked(state, kind)) return no(defs().buildings[kind].locked ? "Win a compute auction to unlock this" : "Meet your next goal to unlock this");

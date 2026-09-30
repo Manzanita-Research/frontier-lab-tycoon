@@ -12,7 +12,8 @@ import { skinList } from "../../skins/registry";
 import type { LeapfrogView } from "../../sim/race/leapfrog/view";
 import { shotAtom } from "../juice/photo";
 import { newMotion, NO_MOTION, stepMotion, type Motion, type MotionView } from "./leapfrogMotion";
-import { arenaOpenAtom, chatCountAtom, helpOpenAtom, photoFlashAtom, photoTimeAtom, skinUiAtom, staffOpenAtom } from "./state";
+import { arenaOpenAtom, chatCountAtom, helpOpenAtom, modsOpenAtom, photoFlashAtom, photoTimeAtom, skinUiAtom, staffOpenAtom } from "./state";
+import { modSession } from "../../app/mods";
 import { playableFixture } from "./previewLadder";
 import type { HudVM } from "./types";
 import { hudViewModel } from "./vm";
@@ -171,6 +172,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
   const skinUi = useAtomValue(skinUiAtom);
   const staffOpen = useAtomValue(staffOpenAtom);
   const helpOpen = useAtomValue(helpOpenAtom);
+  const modsOpen = useAtomValue(modsOpenAtom);
   const viewport = useViewport();
   const tapHint = useTapHint(selected);
   // "Build an API Gateway..." twice is one hint too many: once a toast has said it, the standing hint is redundant.
@@ -180,6 +182,17 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
   const motion = useArenaMotion(snap.race.board, snap.race.rank);
   const leapfrog = useLeapfrogMotion(snap);
   const list = useMemo(() => skinList(), []);
+  // The session's mods are fixed at start (main.tsx loads `?mod=` before the game exists); only the window opens and shuts.
+  const mods = useMemo(() => {
+    const m = modSession();
+    return {
+      open: modsOpen,
+      list: m.mods.map((mod) => ({ ...mod })),
+      conflicts: m.conflicts.map((c) => `${c.path}: ${c.earlier} (${c.earlierOperation}), then ${c.later} (${c.laterOperation}); ${c.later} wins`),
+      errors: [...m.errors],
+      contentHash: m.run?.contentHash ?? null,
+    };
+  }, [modsOpen]);
 
   // `?debug=1&ladder=N`: show a rung of the ladder without playing up to it (skins, screenshots). Never in a normal game.
   const shown = useMemo(() => (debugParams.ladder ? { ...snap, ...playableFixture(debugParams.ladder.level, debugParams.ladder.coach, debugParams.ladder.unlock) } : snap), [snap]);
@@ -213,9 +226,10 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
           list,
           rejected: skinUi.refused,
         },
+        mods,
         viewport,
       }),
-    [shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, motion, leapfrog, room, chatCount, helpOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, skinUi, list, viewport, staffOpen, zone],
+    [shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, motion, leapfrog, room, chatCount, helpOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, skinUi, list, mods, viewport, staffOpen, zone],
   );
   return vm;
 }

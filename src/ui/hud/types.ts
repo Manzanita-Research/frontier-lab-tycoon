@@ -649,6 +649,32 @@ export interface SkinInfoVM {
   preview: string;
 }
 
+/** One loaded mod, as the Mod Manager lists it. */
+export interface ModInfoVM {
+  id: string;
+  name: string;
+  version: string;
+  author?: string;
+  description?: string;
+  /** The `?mod=` value it came from. */
+  source: string;
+  /** Content hash of its manifest (8 hex digits), saved with the run. */
+  hash: string;
+}
+
+/** Start ▸ Settings ▸ Mods… (FLT-37): what `?mod=` loaded, what clashed and what failed. Mods only load from the URL. */
+export interface ModsVM {
+  open: boolean;
+  /** In load order; later mods win a clash. */
+  list: ModInfoVM[];
+  /** "content.rivals.anthro: every-lab-is-steve, then my-mod (later wins)". */
+  conflicts: string[];
+  /** A mod that failed to load is skipped; the rest still load. */
+  errors: string[];
+  /** Hash of the whole resolved content, or null when running the base game. */
+  contentHash: string | null;
+}
+
 export interface SkinPickerVM {
   open: boolean;
   /** The player asked for less motion (the Display dialog's switch); the OS setting counts too. */
@@ -714,6 +740,7 @@ export interface HudVM {
   sound: SoundVM;
   photoMode: PhotoVM;
   skins: SkinPickerVM;
+  mods: ModsVM;
   layout: LayoutVM;
 }
 
@@ -787,4 +814,7 @@ export interface HudActions {
   /** Go back to the skin the picker opened on and close it. */
   cancelSkinPicker(): void;
   setReducedMotion(on: boolean): void;
+  // Mods.
+  openMods(): void;
+  closeMods(): void;
 }

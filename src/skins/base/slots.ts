@@ -24,6 +24,7 @@ import { FrontPage } from "./slots/FrontPage";
 import { GroupChat } from "./slots/GroupChat";
 import { Inspector } from "./slots/Inspector";
 import { Mixer } from "./slots/Mixer";
+import { ModManager } from "./slots/ModManager";
 import { NewsArrival } from "./slots/NewsArrival";
 import { NewsControls } from "./slots/NewsControls";
 import { NewsRoom } from "./slots/NewsRoom";
@@ -46,5 +47,5 @@ import { Layout } from "./Layout";
 export const baseSlots: SlotComponents = {
   Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, Bubble, ThoughtsPanel, Ticker, Toast, Assistant,
   EventCard, Confirm, Coach, UnlockCard, HowToPlay, Arena, Benchmarks, Voice, Livestream, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, NewsControls,
-  NewsArrival, NewsRoom, Mixer,
+  NewsArrival, NewsRoom, Mixer, ModManager,
 };

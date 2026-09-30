@@ -3,7 +3,7 @@
 import type { ComponentType, ReactNode } from "react";
 import type {
   ArenaVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, EraCardVM, EventVM, HudActions, HudVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM, CoachVM, ConfirmVM,
-  NewsroomVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StatsVM, ThoughtRowVM, TickerItemVM,
+  ModsVM, NewsroomVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StatsVM, ThoughtRowVM, TickerItemVM,
   StaffVM, TeaserVM, ProgressVM, ToastVM, TrainingVM, UnlockCardVM, VisibleVM, HelpVM,
 } from "../ui/hud/types";
 import type { Rect } from "./kit/place";
@@ -43,6 +43,7 @@ export const SLOT_NAMES = [
   "NewsArrival",
   "NewsRoom",
   "Mixer",
+  "ModManager",
 ] as const;
 export type SlotName = (typeof SLOT_NAMES)[number];
 
@@ -112,6 +113,8 @@ export interface SlotPropsMap {
   NewsArrival: { arrival: NonNullable<NewsroomVM["arrival"]>; actions: HudActions };
   NewsRoom: { newsroom: NewsroomVM; actions: HudActions };
   Mixer: { sound: SoundVM; actions: HudActions };
+  /** Start ▸ Settings ▸ Mods… while `mods.open`: what `?mod=` loaded, clashes and failures. Close with `actions.closeMods()`. */
+  ModManager: { mods: ModsVM; actions: HudActions };
 }
 
 export type SlotComponents = { [K in SlotName]: ComponentType<SlotPropsMap[K]> };

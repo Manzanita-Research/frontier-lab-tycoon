@@ -26,12 +26,14 @@ import { HELP_BUILDINGS, HELP_LOOP, HELP_NUMBERS, HELP_TITLE } from "../../conte
 import { playableOf, type PlayableInput } from "./playable";
 import type {
   ArenaVM, BenchCellVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HudVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
-  ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, ResponseVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, StreamVM, ThoughtRowVM, TrainingVM, TrendVM, VoiceVM, WalkerKindVM,
+  ModsVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, ResponseVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, StreamVM, ThoughtRowVM, TrainingVM, TrendVM, VoiceVM, WalkerKindVM,
 } from "./types";
 import { defs } from "../../sim/defs";
 
 /** How many game days after a release the "SHIPPED!" sticker stays up. */
 export const SHIPPED_DAYS = 3;
+/** No `?mod=`: the base game, the Mod Manager shut. */
+export const NO_MODS_VM: ModsVM = { open: false, list: [], conflicts: [], errors: [], contentHash: null };
 /** The newest headlines a ticker carries. */
 export const TICKER_ITEMS = 24;
 
@@ -63,6 +65,8 @@ export interface HudInput {
   mixer: { open: boolean; ready: boolean; muted: boolean; master: number; music: number; sfx: number };
   photo: { on: boolean; time: string; shot: { id: number; url: string; name: string } | null; flash: number };
   skins: SkinPickerVM;
+  /** The Mod Manager. Optional: none means no mods and the window shut. */
+  mods?: ModsVM;
   viewport: { width: number; height: number };
 }
 
@@ -652,6 +656,7 @@ export function hudViewModel(i: HudInput): HudVM {
     sound: soundOf(i),
     photoMode: photoOf(i),
     skins: i.skins,
+    mods: i.mods ?? NO_MODS_VM,
     layout: { width: i.viewport.width, height: i.viewport.height, phone: i.viewport.width <= 480, compact: i.viewport.width <= 640, tall: i.viewport.height >= 800 },
   };
 }

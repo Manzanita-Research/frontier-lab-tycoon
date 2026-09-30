@@ -1958,6 +1958,47 @@
   .f95-display {
     width: min(470px, 100%);
   }
+  .f95-mods {
+    width: min(460px, 100%);
+    p {
+      margin: 0;
+    }
+    code {
+      font-size: 11px;
+      overflow-wrap: anywhere;
+    }
+    fieldset {
+      display: grid;
+    }
+    fieldset.bad legend {
+      color: var(--flt-color-bad);
+    }
+  }
+  .f95-modlist {
+    background: #fff;
+    min-height: 72px;
+    max-height: 180px;
+    overflow: auto;
+    padding: 4px;
+    [role="listitem"] {
+      display: grid;
+      grid-template-columns: 20px 1fr auto auto;
+      gap: 6px;
+      align-items: center;
+      padding: 2px 0;
+    }
+    small {
+      grid-column: 2 / -1;
+      color: var(--sh);
+    }
+    .hash {
+      font-family: monospace;
+    }
+    .empty {
+      color: var(--sh);
+      padding: 4px;
+    }
+  }
   .f95-monitor {
     width: 220px;
     height: 170px;

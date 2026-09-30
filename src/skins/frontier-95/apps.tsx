@@ -6,6 +6,7 @@ import { useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import { Ico } from "./icons";
 import { Btn, Tabs, Win } from "./parts";
+import { EXAMPLE_MOD } from "../base/slots/ModManager";
 
 /** The weekly paper, in a 1996 browser. */
 export function FrontPage({ paper, actions }: SlotPropsMap["FrontPage"]) {
@@ -229,6 +230,62 @@ export function Mixer({ sound, actions }: SlotPropsMap["Mixer"]) {
         </div>
         <div className="f95-row">
           <Btn def onClick={() => actions.closeMixer()}>
+            OK
+          </Btn>
+        </div>
+      </Win>
+    </Dialog>
+  );
+}
+
+/** Control Panel ▸ Add/Remove Mods. Nothing can be added from here: in 1995 you edited the address bar, and so do you. */
+export function ModManager({ mods, actions }: SlotPropsMap["ModManager"]) {
+  return (
+    <Dialog label="Add/Remove Mods" close={actions.closeMods} layerClass="f95-layer f95-dim" dialogClass="f95-dialogbox">
+      <Win className="f95-mods" title="Add/Remove Mods Properties" icon="folder" buttons={[{ g: "close", label: "Close", onClick: () => actions.closeMods() }]}>
+        <div className="f95-mixbody">
+          <p>
+            Mods load from the address bar: add <code>?mod=</code> and the URL of a <code>mod.json</code>, then reload. Later mods win a clash.
+          </p>
+          <div className="inset f95-modlist" role="list" aria-label="Loaded mods">
+            {mods.list.length === 0 ? (
+              <div className="empty">(none) Every lab is still itself.</div>
+            ) : (
+              mods.list.map((m) => (
+                <div key={m.id} role="listitem">
+                  <Ico name="doc" size={18} />
+                  <b>{m.name}</b>
+                  <span>{m.version}</span>
+                  <span className="hash">#{m.hash}</span>
+                  {m.description && <small>{m.description}</small>}
+                </div>
+              ))
+            )}
+          </div>
+          {mods.conflicts.length > 0 && (
+            <fieldset>
+              <legend>Clashes</legend>
+              {mods.conflicts.map((c) => (
+                <code key={c}>{c}</code>
+              ))}
+            </fieldset>
+          )}
+          {mods.errors.length > 0 && (
+            <fieldset className="bad">
+              <legend>
+                <Ico name="error" size={16} /> Didn't load
+              </legend>
+              {mods.errors.map((e) => (
+                <code key={e}>{e}</code>
+              ))}
+            </fieldset>
+          )}
+          <small>
+            {mods.contentHash ? `This run's content: #${mods.contentHash}. ` : ""}Try <a href={EXAMPLE_MOD}>Every Lab Is Named Steve</a>.
+          </small>
+        </div>
+        <div className="f95-row">
+          <Btn def onClick={() => actions.closeMods()}>
             OK
           </Btn>
         </div>

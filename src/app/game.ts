@@ -16,13 +16,16 @@ import { framesBrowser } from "./frames";
 import { SPEEDS, type Speed, type Tool } from "./hud";
 import { appMachine, autoPaused, type AppContext } from "./machine";
 import { createSimHandle, SimHandle, simLayer } from "./sim";
+import { modSession } from "./mods";
 
 const midgame = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("scenario") === "midgame";
 const params = readDebugParams();
 export const debugParams = midgame ? { ...params, focus: params.focus ?? MIDGAME_CAMERA.focus, zoom: params.zoom ?? MIDGAME_CAMERA.zoom } : params;
 
 /** The one live World. The renderer reads `sim.world` and `sim.alpha` straight from useFrame. */
-export const sim = midgame ? new SimHandle(createMidgameScenario(), true) : createSimHandle(debugParams);
+/** `?mod=` was resolved before this module loaded (main.tsx); the World is created from that definition. */
+const mods = modSession();
+export const sim = midgame ? new SimHandle(createMidgameScenario(), true, undefined, mods.def) : createSimHandle(debugParams, mods.def, mods.run);
 if (midgame) {
   sim.newsStartId = midgameOpeningNews(sim.world)[0]!.id;
   sim.openingThoughts = { tick: sim.world.tick, thoughts: midgameOpeningThoughts(sim.world) };
@@ -40,6 +43,9 @@ if (midgame) {
   // Presentation only: open the ticker on the selected real headline, and skip historical construction toasts.
   first.toasts = [];
 }
+// Say which mods are running, and whether any failed (the details are in Start ▸ Settings ▸ Mods…). Ids below zero never meet the World's.
+if (mods.mods.length > 0) first.toasts.push({ id: -1, text: `Mods on: ${mods.mods.map((m) => m.name).join(", ")}`, tone: "good" });
+if (mods.errors.length > 0) first.toasts.push({ id: -2, text: `${mods.errors.length === 1 ? "A mod" : `${mods.errors.length} mods`} didn't load. See Start, Settings, Mods…`, tone: "bad" });
 export const app = createActorAtoms(runtime, appMachine, { input: { speed: initialSpeed, first } });
 
 /** Owns the atoms' lifetimes. Mount `app.actor` to start the loop; dispose it to stop everything. */
@@ -135,5 +141,5 @@ if (typeof window !== "undefined" && new URLSearchParams(window.location.search)
   // `disaster(id)` and `risk(setting)` are the dev hooks for FLT-17: the same commands the Disasters menu will send.
   const disaster = (id: string) => send({ type: "COMMAND", command: { type: "disaster", id } });
   const risk = (setting: "off" | "rare" | "normal" | "chaos") => send({ type: "COMMAND", command: { type: "setRisk", risk: setting } });
-  (window as unknown as { __flt: unknown }).__flt = { sim, send, registry, app, tick, disaster, risk };
+  (window as unknown as { __flt: unknown }).__flt = { sim, send, registry, app, tick, disaster, risk, mods };
 }
