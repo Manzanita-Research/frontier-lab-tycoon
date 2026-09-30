@@ -2193,8 +2193,8 @@
     }
   }
 }
-@media (max-width: 640px) {
-  [data-skin="homepage-98"] {
+[data-skin="homepage-98"] {
+  @media (max-width: 640px) {
     /* On a phone the Sitemap and the address bar take a full line under the arrows. */
     .gc-row.view-facilities,
     .gc-row.view-run {
