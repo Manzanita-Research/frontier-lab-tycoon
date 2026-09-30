@@ -1,8 +1,8 @@
 // Switching skins: load, apply, remember. The picker's preview/apply/cancel semantics live here so they survive a
 // change of skin (the SkinPicker slot itself is replaced when the skin changes).
-import { registry } from "../../app/game";
+import { bootNotice, registry, send } from "../../app/game";
 import { modSession } from "../../app/mods";
-import { BASE_ID, DEFAULT_SKIN, MOTION_KEY, STORAGE_KEY, SkinRefused, applyPrepared, initialSkinId, modSkin, prepareSkin, registerModSkins, skinList } from "../../skins/registry";
+import { BASE_ID, DEFAULT_SKIN, MIGRATED_NOTICE, MOTION_KEY, STORAGE_KEY, SkinRefused, applyPrepared, bootChoice, modSkin, pickToSave, saveSkinChoice, prepareSkin, registerModSkins, skinList } from "../../skins/registry";
 import { loadedSkinAtom, skinUiAtom, type SkinUi } from "./state";
 
 const ui = () => registry.get(skinUiAtom);
@@ -42,7 +42,9 @@ export async function showSkin(id: string, opts: { persist?: boolean } = {}): Pr
       await applyPrepared(prepared);
       registry.set(loadedSkinAtom, prepared.skin);
       setUi({ active: candidate, refused: ui().refused.filter((r) => r.id !== candidate) });
-      if (opts.persist && candidate === id) remember(STORAGE_KEY, id);
+      // `persist` (a loaded save's skin, FLT-65) sticks only for a listed built-in skin, like the picker's OK (FLT-71).
+      const pick = opts.persist && candidate === id ? pickToSave(id) : null;
+      if (pick) remember(STORAGE_KEY, pick);
       return candidate;
     } catch (e) {
       refuse(e, candidate);
@@ -61,7 +63,8 @@ function askedFor(): string | null {
 }
 
 /**
- * First paint: `?skin=`, then what the player last chose, then Frontier 95. Also restores the reduced-motion switch.
+ * First paint: `?skin=` (for this visit only), then what the player last chose, then Frontier 95. A saved pick of a skin that
+ * has since been hidden moves to Frontier 95, once, with a notice (FLT-71). Also restores the reduced-motion switch.
  * FLT-55: the session's mod skins are registered first (so `?skin=<mod skin>` works). A mod that asks for its skin
  * gets it only after the player says yes; the answer is remembered, and an explicit `?skin=` never asks.
  */
@@ -74,12 +77,31 @@ export async function bootSkin(): Promise<void> {
   const explicit = new URLSearchParams(window.location.search).get("skin");
   const asked = askedFor();
   const answer = asked ? recall(OFFER_KEY + asked) : null;
-  await showSkin(asked && !explicit && answer === "yes" ? asked : initialSkinId(window.location.search, recall(STORAGE_KEY)));
+  const choice = bootChoice(window.location.search, recall(STORAGE_KEY));
+  if (choice.save) remember(STORAGE_KEY, choice.save);
+  const wearsMod = !!asked && !explicit && answer === "yes";
+  await showSkin(wearsMod ? asked : choice.id);
+  if (choice.notice && !wearsMod) onceMigrated(bootNotice);
   if (asked && !explicit && answer === null) {
     const skin = modSkin(asked)!;
     const info = skinList().find((s) => s.id === asked);
     setUi({ offer: { skin: asked, name: skin.data.name, mod: skin.mod.id, modName: skin.mod.name, description: info?.description ?? "", preview: info?.preview ?? "" } });
   }
+}
+
+/** "Frontier 95 is back as your desktop.", at most once per profile, whether the hidden skin came from the saved pick or a save. */
+const MIGRATED_KEY = "flt.skin.migrated";
+function onceMigrated(show: (text: string) => void) {
+  if (recall(MIGRATED_KEY)) return;
+  remember(MIGRATED_KEY, "1");
+  show(MIGRATED_NOTICE);
+}
+
+/** Loading a save (FLT-65) puts its skin back, or Frontier 95 when that skin is hidden now (see `saveSkinChoice`). */
+export async function restoreSaveSkin(saved: string | null | undefined): Promise<void> {
+  const choice = saveSkinChoice(saved, ui().active);
+  if (choice.id) await showSkin(choice.id, { persist: true });
+  if (choice.notice) onceMigrated((text) => send({ type: "TOAST", text, tone: "neutral" }));
 }
 
 function applyMotion(on: boolean) {
@@ -100,7 +122,9 @@ export const skinActions = {
     // A mod skin is remembered as a yes to that mod's skin; a built-in one is the player's skin, and turns a mod's down.
     if (modSkin(active)) remember(OFFER_KEY + active, "yes");
     else {
-      remember(STORAGE_KEY, active);
+      // Only a listed skin is saved: an unlisted one reached by `?skin=` stays a visit (FLT-71).
+      const pick = pickToSave(active);
+      if (pick) remember(STORAGE_KEY, pick);
       const asked = askedFor();
       if (asked) remember(OFFER_KEY + asked, "no");
     }

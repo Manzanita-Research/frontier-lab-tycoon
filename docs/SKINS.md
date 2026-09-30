@@ -80,7 +80,7 @@ src/skins/<id>/
     fonts/         # woff2 / woff / ttf / otf, each with its licence text beside it
     ...            # images, icons; reference them from skin.css with url(./assets/x.png)
 src/skins/base/    # the base skin: tokens.json, strings.json, base.css, and a complete set of slots
-src/skins/kit/     # helpers a skin may import (Odometer, Marquee, Portrait, Senator, Dialog, money, reducedMotion)
+src/skins/kit/     # helpers a skin may import (Odometer, Marquee, Portrait, Senator, Dialog, SpeedGlyph, money, reducedMotion)
 src/skins/schema.ts, registry.ts, types.ts   # the loader; you do not edit these
 ```
 
@@ -95,8 +95,9 @@ Only the **active** skin's CSS, slots and fonts are loaded (Vite splits them int
 | `name`, `author`, `description` | string | Shown in the skin picker. |
 | `version` | `"1.2.3"` | Semver. |
 | `preview` | `"assets/preview.<ext>"` | Picker thumbnail. |
+| `unlisted` | `true` (optional) | Keeps the skin out of the player's picker until it passes a taste review. It still loads with `?skin=<id>`. Unhiding is deleting the line. |
 | `tokens` | `{ "color.panel": "#fff", ... }` | See [Tokens](#tokens). All **required** tokens must be present; the rest fall back to the base. Names must be known tokens, or your own under the `x.` prefix (`"x.sparkle": "#f0f"` → `--flt-x-sparkle`). |
-| `strings` | `{ "speed.pause": "Rest" }` | Relabels UI copy. Keys must exist in the [strings table](#strings). |
+| `strings` | `{ "help.title": "Field Guide" }` | Relabels UI copy. Keys must exist in the [strings table](#strings). Titles and body copy only: see [Rules](#rules) for control labels. |
 | `fonts` | `[{ family, src, weight?, style?, license, licenseFile }]` | Bundled files only. `src` and `licenseFile` are paths inside the skin folder. Licence must be OFL, Apache, MIT or CC0. |
 | `slots` | `["Stats", ...]` | The slots your `slots.tsx` replaces. `[]` for a tokens+CSS skin. Must match the exports of `slots.tsx` exactly. |
 
@@ -171,7 +172,7 @@ Tokens are CSS custom properties named `--flt-<category>-<name>` (`color.panel` 
 
 ## Strings
 
-Skins may re-label copy by key: `"speed.pause": "Rest"`, `"inspector.title": "Properties of {name}"`, `"ticker.label": "PointPast News »"`. `{name}`-style placeholders are filled in by the game (keep them). A slot reads a string with `const t = useT(); t("speed.pause")` or `t("inspector.title", { name })`. **Game content (headlines, thoughts, event text) is not a skin concern**: it comes through the view-model and is the same in every skin.
+Skins may re-label copy by key: `"inspector.title": "Properties of {name}"`, `"ticker.label": "PointPast News »"`. `{name}`-style placeholders are filled in by the game (keep them). A slot reads a string with `const t = useT(); t("speed.pause")` or `t("inspector.title", { name })`. **Game content (headlines, thoughts, event text) is not a skin concern**: it comes through the view-model and is the same in every skin.
 
 If your slot needs copy that has no key, write it into the slot (as Frontier 95 does for its Shut Down dialog); do not invent keys in `skin.json` (unknown keys are refused).
 
@@ -604,13 +605,16 @@ node scripts/skin-shots.mjs docs/img/my-skin --skin midnight             # the s
 node scripts/skin-shots.mjs /tmp/m --skin midnight --only e --measure    # phone, and how much campus is left visible
 ```
 
-Which skin loads: `?skin=<id>`, then `localStorage["flt.skin"]` (set by the picker's OK), then `frontier-95`. `?skin=base` loads the bare base skin, which is handy for debugging a skin against its foundation. Switching in the picker is live and does not reset the game.
+Which skin loads: `?skin=<id>`, then `localStorage["flt.skin"]` (set by the picker's OK), then `frontier-95`. A `?skin=` link is for that visit only: it is never saved unless the player picks that skin in the picker, and an unlisted skin is never saved at all. `?skin=base` loads the bare base skin, which is handy for debugging a skin against its foundation. Switching in the picker is live and does not reset the game.
+
+The picker lists the skins without `unlisted` (today Frontier 95) and then **Classic**, the base skin. A saved pick of an unlisted skin (from before FLT-71 hid five of them) is rewritten to `frontier-95` once, with the notice "Frontier 95 is back as your desktop." (`bootChoice` in `registry.ts`; `src/skins/picker.test.ts`). Loading a save puts its skin back (a listed skin, Classic, or a mod's skin while its mod is loaded); a save made in a hidden skin gets Frontier 95 instead (`saveSkinChoice`). The notice is shown at most once per profile.
 
 The six standard scenes (a: overview 1440×900, b: inspector open, c: the Water Discourse card, d: build bar / Start menu open, e: phone 390×844, f: photo mode) are the evidence every skin PR carries.
 
 ## Rules
 
 - **Parody names only.** No real companies, products or people in anything a player can read (Frontier 95 says "Internet Exploder", "ICU", "Task Mangler", "Paint Job"; the mockups' real names never reach the screen).
+- **Core controls keep their plain names in every skin:** Start, OK, Cancel, Pause, the speed buttons (drawn with the kit's `SpeedGlyph`, one to three triangles), Build, Settings, Help, Close. The coach says "Click Start", so the button says Start. Put the flavour in titles, tooltips and body copy. `src/skins/controls.test.tsx` checks the strings and the buttons the coach points at.
 - Skins never import the sim, the store or three.
 - Bundle fonts with licences; no hot-linking; no remote assets.
 - Keep the contrast, tap-target, focus and reduced-motion rules above.

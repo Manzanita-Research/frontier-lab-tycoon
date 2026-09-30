@@ -51,9 +51,9 @@ describe("Discovery Disc '96", () => {
     expect(out).toContain("MY STAR CHART");
   });
 
-  it("Pace uses the trail's words and says how the party feels", () => {
+  it("Pace keeps plain buttons and puts the trail talk in the caption", () => {
     const out = html(<slot.Speed speed={vm.speed} stats={vm.stats} actions={actions} />);
-    for (const word of ["Rest", "Steady", "Strenuous", "Grueling"]) expect(out).toContain(word);
+    for (const word of ["Pause", "aria-label=\"3× speed\"", "The interns are getting tired."]) expect(out).toContain(word);
     expect(out).toContain("Pace");
     expect(out).toMatch(/dd-pace-cap/);
   });
@@ -72,9 +72,9 @@ describe("Discovery Disc '96", () => {
     expect(out).toMatch(/^<div class="bubble /);
   });
 
-  it("the Build Stamps tray is a tab you press to open (the coach's first target)", () => {
+  it("the Build Stamps tray is a Start tab you press to open (the coach's first target)", () => {
     const out = html(<slot.BuildBar items={vm.buildItems} tip={vm.buildTip} teasers={[]} layout={vm.layout} actions={actions} />);
-    expect(out).toContain("BUILD STAMPS");
+    expect(out).toMatch(/data-coach="start">Start\b/);
     expect(out).toContain('aria-expanded="false"');
     expect(out).toContain('data-coach="start"');
     expect(out).not.toContain("dd-stamp-art");

@@ -15,6 +15,7 @@
     "             { \"eval\": \"(f, w) => { ... }\" }                            f = window.__flt, w = f.sim.world",
     "             { \"type\": \"text\", \"into\": \"css selector\", \"enter\": true }       fill a field (FLT-63: the Run box)",
     "             { \"drag\": [[x, z], ...], \"hold\": true }                       a real mouse drag over tiles; hold = button still down",
+    "  storage  { key: value } put in localStorage before the page loads (a returning player's saved pick, e.g. \"flt.skin\").",
     "  sets     named lists for --scenes (`standard` is the default; `all` is every scene)."
   ],
   "defaults": {
@@ -292,6 +293,12 @@
       "flt63-phone-facilities",
       "flt63-phone-run",
       "flt63-phone-done"
+    ],
+    "flt-71": [
+      "coach-disc",
+      "fresh",
+      "migrated",
+      "picker"
     ],
     "flt54": [
       "flt54-l4",
@@ -3903,6 +3910,110 @@
             "type": "SET_TOOL",
             "tool": "path"
           }
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "coach-disc": {
+      "title": "Discovery Disc '96 at the first coach line: \"Click Start.\" and the button it points at",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "11,19",
+        "zoom": 55,
+        "skin": "discovery-disc-96"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        }
+      ]
+    },
+    "fresh": {
+      "title": "A fresh profile: nothing saved, no ?skin=, the first coach line",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "11,19",
+        "zoom": 55
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        }
+      ]
+    },
+    "migrated": {
+      "title": "A returning player whose saved pick was Discovery Disc '96 (now hidden), no ?skin=, tutorial skipped (Frontier 95's paperclip holds toasts while the coach talks)",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "11,19",
+        "zoom": 55
+      },
+      "storage": {
+        "flt.skin": "discovery-disc-96"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "coachSkip"
+            }
+          }
+        },
+        {
+          "wait": 500
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        }
+      ]
+    },
+    "picker": {
+      "title": "Start ▸ Settings ▸ Display…: the skin picker",
+      "steps": [
+        {
+          "click": "[data-testid=\"start-button\"]"
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": "[role=menuitem]:has-text(\"Settings\")"
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": "[role=menuitem]:has-text(\"Display\")"
         },
         {
           "wait": 600
