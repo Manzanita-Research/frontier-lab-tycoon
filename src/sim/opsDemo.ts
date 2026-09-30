@@ -47,7 +47,9 @@ export function stageOps(s: GameState, moment: OpsMoment) {
       s.walkers = s.walkers.filter((w, i) => (w.kind === "agent" && i % 2 === 0) || i % 5 === 0);
       s.thoughts = [];
       slopTheCampus(s, 0.85);
-      applyNow(s, [{ type: "hire", job: "janitor" }, { type: "hire", job: "sre" }]);
+      // A gateway that earns, so the lab looks like it has something to lose.
+      applyNow(s, [{ type: "placeBuilding", kind: "gateway", x: 15, z: 14 }, { type: "hire", job: "janitor" }, { type: "hire", job: "sre" }]);
+      s.ledger = { income: 96_000, expenses: 41_000, net: 55_000 };
       const [bot, sre] = s.staff;
       place(s, bot!.id, 8.5, 16.5);
       place(s, sre!.id, 11.5, 16.5);

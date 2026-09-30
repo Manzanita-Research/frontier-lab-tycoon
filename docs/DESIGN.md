@@ -43,6 +43,14 @@ RollerCoaster Tycoon, but the park is a frontier AI lab. You lay paths, drop bui
 - **Pressure cards:** an open-weights lab matches you and crashes your revenue for a month; a compute auction (about every 40 days) buys a Datacenter that needs a power plant (Gas Turbine: cheap and discourse, Solar Farm: pricey and hype); funding rounds arrive when the runway is short and the Vibes are up.
 - **The scenario is a 45-minute run:** release Frontier-4, reach Era 3, and be Top 3 on the Arena in Era 3, by the end of Y3.
 
+## Operations (FLT-10; spec: `docs/specs/FLT-10.md`)
+
+- **Slop:** agents that have drifted drop grey, glittering slop on the paths (up to three deep a tile). Walking through it lowers happiness and makes people say "This path is covered in slop."; the share of slopped paths is the Vibes' cleanliness, and past 20% the ticker announces the campus is "{pct}% slop by volume".
+- **Staff** (the Staff tile at the end of the palette): Janitor Bots ($2K a day) mop, SREs ($4K) run to broken buildings and fix them, Comms Reps ($3K) hand protesters tote bags (discourse -2 a day each), Security ($3K) walks the fence. Each can be given a painted patrol zone, RCT-style.
+- **Breakdowns:** buildings wear out (0.5% reliability a day) and the busy ones catch fire first. A broken building stops working and burns until an SRE arrives (or, after five days, an expensive contractor). The ticker says "GPU fire contained; GPUs less so." and, right after, "Status page: all systems operational."
+- **Queues:** a full building grows a visible line on the path, and people leave it when their patience runs out ("This queue is longer than our context window.").
+- Ops is the pressure that keeps a rich lab honest: the better it does, the more agents, the more slop, the more staff. A lab that ignores it is fine for a while (about a hundred days) and then slides.
+
 ## Satire (parody names only)
 
 This is AI-2027-shaped escalation played as affectionate farce. It punches at incentives and institutions, never at real people, companies or nationalities.
@@ -69,4 +77,4 @@ This is AI-2027-shaped escalation played as affectionate farce. It punches at in
 
 ## Later (not now)
 
-Safety versus capability; the Sandbox Escape chase; research tree; staff (SREs, janitor bots for slop, PR reps); more event arcs on the slice-2 card system; sound; and the ending where the superintelligence politely takes over running your park.
+Safety versus capability; the Sandbox Escape chase (Security is already on the fence for it); research tree; more event arcs on the slice-2 card system; and the ending where the superintelligence politely takes over running your park.
