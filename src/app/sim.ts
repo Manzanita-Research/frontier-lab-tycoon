@@ -33,6 +33,8 @@ import { enableEarnedPacks, PACK_OFF_FLAGS } from "../sim/progression";
 import type { GameDefinition } from "../mods/game-definition";
 import { enableEndings } from "../sim/endings/state";
 import { isEndingMoment, stageEndingMoment } from "../sim/endings/demo";
+import { applyLineage, perkById } from "../sim/endings/lineage";
+import type { PerkId } from "../sim/endings/pack";
 
 /** What the loop tells the app after touching the World. `snap`, `news` and `toasts` come with a publish. */
 export interface SyncReport {
@@ -101,6 +103,13 @@ export class SimHandle {
     for (const f of off) this.world.flags[f] = 1;
     if (this.endings) enableEndings(this.world, daily);
     this.alpha = 1;
+  }
+
+  /** Found a new lab (FLT-57): a fresh seed, the sequel's name, and the one perk the player kept. */
+  refound(seed: number, perk: string) {
+    const prev = this.world;
+    this.reset(seed, null);
+    applyLineage(this.world, prev, (perkById(perk)?.id ?? "founder") as PerkId);
   }
 
   /**

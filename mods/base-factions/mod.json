@@ -3639,5 +3639,41 @@
         }
       ]
     }
+  },
+  "rules": {
+    "statement": {
+      "cost": 15000,
+      "cooldownDays": 7,
+      "calm": 18,
+      "calmUnstaffed": 8,
+      "backlash": 6,
+      "lines": [
+        "We hear you. We have always heard you. As of this morning, we are also listening.",
+        "{lab} takes the concerns of the {faction} very seriously, which is why we have written this sentence.",
+        "Mistakes were made. By whom is a matter for the ongoing review.",
+        "To the {faction}: we see you. Literally. You are outside our window.",
+        "We paused to reflect. The reflection is complete. Thank you for your patience.",
+        "{lab} is committed to doing better, from what we believe is a very strong baseline.",
+        "We are sorry you feel that way, and we are sorry in a way that is legally distinct from an apology."
+      ],
+      "formats": [
+        "a screenshot of a notes app",
+        "a 14-part thread",
+        "a video filmed in a parked car",
+        "a PDF with no text layer",
+        "a blog post with comments turned off",
+        "a statement read aloud by the model itself"
+      ],
+      "headline": "{lab} addresses the {faction} in {format}",
+      "backlashHeadline": "{other} demand their own statement from {lab}, \"in a nicer font\"",
+      "backlashWhy": "{lab} said sorry to the {faction}. Where is ours?",
+      "why": "{lab} put out a statement. It was {format}.",
+      "toast": "Statement sent. The {faction} are \"reading it\".",
+      "toastUnstaffed": "No Comms Rep, so the intern wrote it. The {faction} spotted the typo.",
+      "cooling": "Comms needs {days} more days before anyone will read another statement.",
+      "broke": "A statement costs {cost}. Comms is waiting on the invoice.",
+      "caption": "{lab} issues a statement to the {faction}",
+      "sub": "\"{line}\""
+    }
   }
 }

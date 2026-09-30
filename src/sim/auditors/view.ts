@@ -16,7 +16,7 @@ export interface AuditView {
   /** Auditors on campus, and their names. */
   visitors: number;
   names: string[];
-  /** The group's phase: walking, inspecting, evaluating or leaving (null when nobody is here). */
+  /** The group's phase: walking, inspecting, evaluating, huddling (FLT-56) or leaving (null when nobody is here). */
   phase: string | null;
   /** The stop they are at (or walking to): its kind and whether it is the evals stop. */
   stop: { building: number; kind: string; name: string; evals: boolean } | null;

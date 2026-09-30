@@ -53,7 +53,16 @@ export type StaffPhase = StaffStored["value"];
 
 export const staffStart = (): StaffStored => ({ value: "arriving", context: {} });
 
-/** Send one event; the machine has no context and no effects, so this is just the next phase. */
+const memo = new Map<StaffPhase, Map<string, StaffPhase>>();
+
+/**
+ * Send one event. The machine has no context and no effects, so the next phase depends on nothing but the phase and
+ * the event type: XState answers each pair once and the answer is remembered, like `stepWalker` (FLT-39).
+ */
 export function stepStaff(stored: StaffStored, event: EventFromLogic<typeof staffMachine>): StaffStored {
-  return step(staffMachine, { value: stored.value, context: {} }, event).stored;
+  let events = memo.get(stored.value);
+  if (!events) memo.set(stored.value, (events = new Map()));
+  let next = events.get(event.type);
+  if (next === undefined) events.set(event.type, (next = step(staffMachine, { value: stored.value, context: {} }, event).stored.value));
+  return { value: next, context: {} };
 }

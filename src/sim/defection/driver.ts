@@ -19,6 +19,7 @@ import type { GameState, Walker } from "../types";
 import { runVerb, type VerbEnv } from "../verbs";
 import { CARD, CHOICES, DEFECTION, MANIFESTO_CARD, MANIFESTO_CHOICES, PICK_PREFIX } from "./pack";
 import type { DefectionStage, DefectionState, DefectionSubject } from "./state";
+import { picked, picks } from "../picks";
 
 const R = DEFECTION.rules;
 const OWNER = "defection";
@@ -62,9 +63,11 @@ export function disableDefection(s: GameState) {
   for (const key of [...CHOICES, ...MANIFESTO_CHOICES]) delete s.flags[PICK_PREFIX + key];
 }
 
+/** The day the longest-serving researcher joined (worked out once a day, not once per researcher: FLT-39). */
+const firstJoined = (staff: Walker[]): number => Math.min(...staff.map((o) => o.stats.joined));
+
 /** How long they have been here against the longest-serving researcher: the spec's "seniority", 0 to 1. */
-function seniorityOf(s: GameState, w: Walker, staff: Walker[]): number {
-  const first = Math.min(...staff.map((o) => o.stats.joined));
+function seniorityOf(s: GameState, w: Walker, staff: Walker[], first = firstJoined(staff)): number {
   const span = s.day - first;
   return span <= 0 ? 0 : Math.max(0, Math.min(1, (s.day - w.stats.joined) / span));
 }
@@ -77,11 +80,29 @@ export function scoreDelta(o: { happiness: number; seniority: number; passedOver
   return delta > 0 ? delta * (1 + k.bump * o.bumps) : delta;
 }
 
-/** The top candidates, highest score first. */
+/** The top candidates, highest score first (ties: lowest id). */
 export function candidates(s: GameState): Walker[] {
   const d = s.defection;
   if (!d) return [];
-  return researchers(s).filter((w) => (d.scores[w.id] ?? 0) > 0).sort((a, b) => (d.scores[b.id] ?? 0) - (d.scores[a.id] ?? 0) || a.id - b.id).slice(0, R.eligibility.candidates);
+  const n = R.eligibility.candidates;
+  const ranked = researchers(s).filter((w) => (d.scores[w.id] ?? 0) > 0);
+  if (!Number.isInteger(n) || n < 0) return ranked.sort((a, b) => (d.scores[b.id] ?? 0) - (d.scores[a.id] ?? 0) || a.id - b.id).slice(0, n);
+  // The first few of the sorted list, without sorting all of it (FLT-39): the order is total, so it is the same few.
+  const top: Walker[] = [];
+  const scores: number[] = [];
+  for (const w of ranked) {
+    const score = d.scores[w.id]!;
+    let i = top.length;
+    while (i > 0 && (score > scores[i - 1]! || (score === scores[i - 1] && w.id < top[i - 1]!.id))) i--;
+    if (i >= n) continue;
+    top.splice(i, 0, w);
+    scores.splice(i, 0, score);
+    if (top.length > n) {
+      top.pop();
+      scores.pop();
+    }
+  }
+  return top;
 }
 
 function updateScores(s: GameState) {
@@ -99,9 +120,10 @@ function updateScores(s: GameState) {
   d.models = s.models.length;
   const rivalHype = Math.max(0, ...s.race.rivals.map((r) => r.context.hype));
   const era = eraOfState(s);
+  const first = firstJoined(staff);
   for (const w of staff) {
     if (s.day - w.stats.joined < R.eligibility.minTenureDays) continue;
-    const delta = scoreDelta({ happiness: happinessOf(w), seniority: seniorityOf(s, w, staff), passedOver: d.passedOver[w.id] ?? 0, rivalHype, era, bumps: d.bumps[w.id] ?? 0 });
+    const delta = scoreDelta({ happiness: happinessOf(w), seniority: seniorityOf(s, w, staff, first), passedOver: d.passedOver[w.id] ?? 0, rivalHype, era, bumps: d.bumps[w.id] ?? 0 });
     // The VCs' attention is its own push.
     const courted = d.subject?.id === w.id && d.machine.value === "courted" ? R.score.courtBoost : 0;
     d.scores[w.id] = Math.max(0, Math.min(100, (d.scores[w.id] ?? 0) + delta + courted));
@@ -125,6 +147,9 @@ function followersOf(s: GameState, subject: DefectionSubject, roll: number, loud
   return (pool.length ? pool : team.slice(0, 1)).slice(0, Math.min(n, R.exit.maxFollowers)).map((w) => w.id);
 }
 
+/** The seed round the VCs have lined up, in $B (FLT-56): the caption's punchline and the neo lab's balloon. No dice. */
+export const seedRound = (sub: Pick<DefectionSubject, "seniority" | "team">) => Math.max(1, Math.round(1 + sub.seniority * 6 + sub.team.length * 0.5));
+
 const listNames = (names: string[]) => names.length <= 1 ? (names[0] ?? "nobody") : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
 const oddsText = (p: number) => (p <= 0.55 ? "a coin flip" : p >= 0.85 ? "it usually works" : "it probably works");
 
@@ -139,6 +164,7 @@ export function defectionVars(s: GameState): Record<string, string> {
     const team = sub.team.filter((id) => { const w = byId(s, id); return !!w && onStaff(w) && happinessOf(w) < R.exit.followerHappiness; }).length;
     Object.assign(out, {
       defName: sub.name, defTheir: THEIR[sub.pro] ?? "their", defRole: sub.role, defReason: reason?.text ?? "",
+      defLeaving: reason?.leaving ?? "focus on safety", defSeed: `$${seedRound(sub)}B`,
       defTitleOdds: oddsText(reason?.titleOdds ?? 0.5),
       defFollowers: team >= 2 ? `${team} of ${THEIR[sub.pro] ?? "their"} team are rumoured to be going too.` : team === 1 ? "One of the team is rumoured to be going too." : "The team seems settled. For now.",
     });
@@ -158,7 +184,8 @@ function send(s: GameState, rng: Rng, event: ChartEvent, people: { meet?: number
   const { stored, calls } = stepChart<DefectionStage>(defectionMachine, d.machine, event);
   d.machine = stored;
   for (const call of calls) {
-    const who = call.verb === "people.meet" ? people.meet : call.verb === "people.cheer" ? people.cheer : call.verb === "people.quit" ? people.quit : undefined;
+    // A beat that follows people (the conga out of the gate) follows the ones walking out.
+    const who = call.verb === "people.meet" ? people.meet : call.verb === "people.cheer" ? people.cheer : call.verb === "people.quit" || call.verb === "camera.beat" ? people.quit : undefined;
     const env: VerbEnv = { state: s, rng, run: null, owner: OWNER, people: who, vars };
     if (call.verb === "people.meet") {
       // Each call is a fresh visit, so fresh lines.
@@ -234,13 +261,16 @@ function think(s: GameState, walkerId: number, kind: Walker["kind"], text: strin
 }
 
 /** Consume the card's picks right after chooseEvent (paused or not). */
+const CHOICE_FLAGS = picks(PICK_PREFIX, CHOICES);
+const MANIFESTO_FLAGS = picks(PICK_PREFIX, MANIFESTO_CHOICES);
+
 export function applyDefectionChoices(s: GameState) {
   const d = s.defection;
-  if (!d?.enabled) return;
+  if (!d?.enabled || (!picked(s.flags, CHOICE_FLAGS) && !picked(s.flags, MANIFESTO_FLAGS))) return;
   const rng = createRng(d.rngState);
-  for (const choice of CHOICES) {
-    if (s.flags[PICK_PREFIX + choice] === undefined) continue;
-    delete s.flags[PICK_PREFIX + choice];
+  for (const { key: choice, flag } of CHOICE_FLAGS) {
+    if (s.flags[flag] === undefined) continue;
+    delete s.flags[flag];
     const sub = d.subject;
     if (!sub || d.machine.value !== "deciding") continue;
     // Dice first, in a fixed order, whatever the pick.
@@ -251,8 +281,10 @@ export function applyDefectionChoices(s: GameState) {
     const loud = choice === "title" && !titleWorks;
     const followers = followersOf(s, sub, followerRoll, loud);
     const team = sub.team.filter((id) => { const w = byId(s, id); return !!w && onStaff(w); });
+    const names = followers.map((id) => byId(s, id)?.name ?? "").filter(Boolean);
+    const defConga = names.length === 0 ? "Nobody follows. They take two boxes." : `${listNames(names)} ${names.length === 1 ? "follows" : "follow"} in a conga line, carrying boxes.`;
     const { next } = send(s, rng, { type: "CHOSE", choice, day: s.day, tick: s.tick, stats: statsFor(s, d, { titleWorks }) },
-      { meet: [sub.id], cheer: [sub.id, ...team], quit: [sub.id, ...followers] }, defectionVars(s));
+      { meet: [sub.id], cheer: [sub.id, ...team], quit: [sub.id, ...followers] }, { ...defectionVars(s), defConga });
     d.resolved = s.day;
     if (next === "watching") {
       d.scores[sub.id] = 0;
@@ -265,6 +297,7 @@ export function applyDefectionChoices(s: GameState) {
       d.exit = {
         day: s.day, founderId: sub.id, founder: sub.name, pro: sub.pro, followerIds: followers,
         followers: followers.map((id) => byId(s, id)?.name ?? ""), mood: next === "farewell" ? "friendly" : "hostile", loss, lab: null,
+        reason: sub.reason, seed: seedRound(sub),
       };
       delete d.scores[sub.id];
       for (const id of followers) delete d.scores[id];
@@ -274,9 +307,9 @@ export function applyDefectionChoices(s: GameState) {
   }
   const x = d.exit;
   const lab = x?.lab ? neoLabById(s, x.lab) : undefined;
-  for (const choice of MANIFESTO_CHOICES) {
-    if (s.flags[PICK_PREFIX + choice] === undefined) continue;
-    delete s.flags[PICK_PREFIX + choice];
+  for (const { key: choice, flag } of MANIFESTO_FLAGS) {
+    if (s.flags[flag] === undefined) continue;
+    delete s.flags[flag];
     if (!lab) continue;
     if (choice === "congratulate") {
       s.hype = Math.min(100, s.hype + 2);
@@ -303,7 +336,7 @@ export function updateDefection(s: GameState) {
     founder: { id: x.founderId, name: x.founder }, followers: x.followers, origin: "defection", mood: x.mood,
     names: DEFECTION.names[x.mood], manifestos: DEFECTION.manifestos[x.mood],
     capability: s.capability * R.spinout.startShare * (friendly ? 1 : R.spinout.hostileBoost), hype: R.spinout.startHype,
-    personality: R.personality[x.mood], lines: DEFECTION.content.neoLines,
+    personality: R.personality[x.mood], lines: DEFECTION.content.neoLines, seed: x.seed,
   });
   x.lab = lab.id;
   const rng = createRng(s.defection.rngState);

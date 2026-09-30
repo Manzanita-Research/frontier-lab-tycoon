@@ -55,6 +55,8 @@ export const AppContext = Schema.Struct({
   /** The world notices the notice policy sent to the ticker, newest last. */
   wire: opaque<readonly WireItem[]>(),
   toasts: opaque<readonly UiToast[]>(),
+  /** A camera beat is on (FLT-56): the toasts wait here, their timers not started, and come out when it ends. */
+  held: Schema.NullOr(opaque<readonly UiToast[]>()),
   toastSeq: Schema.Number,
   /** The `you` toasts the notice policy is holding for its window (see `notices.ts`). */
   gate: opaque<NoticeGate>(),
@@ -103,7 +105,9 @@ export function pauseReasonOf(c: AppContext): PauseReason | null {
 }
 
 /** The same words twice are one toast (the newer replaces the older); the HUD shows only the newest, so keep just a few. */
-const addToasts = (c: AppContext, fresh: readonly UiToast[]) => ({ ...c, toasts: [...c.toasts.filter((t) => !fresh.some((f) => f.text === t.text)), ...fresh].slice(-3) });
+const merged = (old: readonly UiToast[], fresh: readonly UiToast[]) => [...old.filter((t) => !fresh.some((f) => f.text === t.text)), ...fresh].slice(-3);
+/** New toasts join the queue while a beat holds them, and the screen otherwise. */
+const addToasts = (c: AppContext, fresh: readonly UiToast[]): AppContext => (c.held ? { ...c, held: merged(c.held, fresh) } : { ...c, toasts: merged(c.toasts, fresh) });
 
 export const appMachine = setupEffect({
   schemas: {
@@ -129,7 +133,11 @@ export const appMachine = setupEffect({
       SAVE: Schema.Struct({ slot: opaque<SlotId>(), why: opaque<SaveWhy>() }),
       /** Today's lab: a new lab on the date's seed ("2026-09-30"), the same campus for everyone that day. */
       DAILY_LAB: Schema.Struct({ daily: Schema.String }),
+      /** Found a new lab (FLT-57): the sequel to the one that just ended, on a fresh seed, keeping one perk. */
+      FOUND_LAB: Schema.Struct({ perk: Schema.String }),
       TOAST: Schema.Struct({ text: Schema.String, tone: opaque<Tone>() }),
+      /** A camera beat started (on) or ended: hold the toasts off the shot, then let them out. */
+      HOLD_TOASTS: Schema.Struct({ on: Schema.Boolean }),
       /** Tap a walker (or tap away: null) to open or close the inspector. */
       SELECT: Schema.Struct({ id: Schema.NullOr(Schema.Number) }),
       /** The inspector's Follow button. */
@@ -173,7 +181,9 @@ export const appMachine = setupEffect({
         const sim = yield* Sim;
         const ms = yield* Clock.currentTimeMillis;
         const daily = args.event.type === "DAILY_LAB" ? args.event.daily : null;
-        sim.reset(daily ? dailySeed(daily) : ((ms ^ Math.imul(sim.world.seed, 2654435761)) >>> 0) || 1, daily);
+        const seed = daily ? dailySeed(daily) : ((ms ^ Math.imul(sim.world.seed, 2654435761)) >>> 0) || 1;
+        if (args.event.type === "FOUND_LAB") sim.refound(seed, args.event.perk);
+        else sim.reset(seed, daily);
         const report = sim.report(true, true);
         if (report) args.self.send({ type: "SYNCED", report, now: 0 });
       }),
@@ -215,6 +225,7 @@ export const appMachine = setupEffect({
     headlines: input.first.news ?? [],
     wire: [],
     toasts: input.first.toasts.slice(-3),
+    held: null,
     toastSeq: 1,
     gate: newGate(),
     selected: null,
@@ -294,7 +305,7 @@ export const appMachine = setupEffect({
         // The staffer whose zone was being painted has been let go.
         ...(report.snap && context.zone !== null && !report.snap.ops.staff.some((o) => o.id === context.zone) ? { zone: null } : {}),
       };
-      for (const t of fresh) enq.raise({ type: "TOAST_EXPIRED", id: t.id }, { id: `toast:${t.id}`, delay: t.batch ? BATCH_TOAST_MS : TOAST_MS });
+      if (!context.held) for (const t of fresh) enq.raise({ type: "TOAST_EXPIRED", id: t.id }, { id: `toast:${t.id}`, delay: t.batch ? BATCH_TOAST_MS : TOAST_MS });
       // The autosave: each new month, and the moment the lab ends (won, lost, or one of the endings' front pages).
       // A month is the calendar turning by one; a jump (a save loading, a new lab) is not the player's month ending.
       const why: SaveWhy | null = report.outcome !== "playing" && report.outcome !== context.outcome && context.outcome === "playing" ? "ending"
@@ -355,6 +366,10 @@ export const appMachine = setupEffect({
       enq(args.actions.newLab, args);
       return { context: freshLab(args.context), target: ".playing.running" };
     },
+    FOUND_LAB: (args, enq) => {
+      enq(args.actions.newLab, args);
+      return { context: freshLab(args.context), target: ".playing.running" };
+    },
     NEW_LAB: (args, enq) => {
       const { context, actions } = args;
       enq(actions.newLab, args);
@@ -369,9 +384,19 @@ export const appMachine = setupEffect({
     },
     TOAST: ({ context, event }, enq) => {
       const id = 1_000_000 + context.toastSeq;
-      enq.raise({ type: "TOAST_EXPIRED", id }, { id: `toast:${id}`, delay: TOAST_MS });
-      const kept = context.toasts.filter((t) => t.text !== event.text).slice(-2);
-      return { context: { ...context, toasts: [...kept, { id, text: event.text, tone: event.tone }], toastSeq: context.toastSeq + 1 } };
+      if (!context.held) enq.raise({ type: "TOAST_EXPIRED", id }, { id: `toast:${id}`, delay: TOAST_MS });
+      return { context: { ...addToasts(context, [{ id, text: event.text, tone: event.tone }]), toastSeq: context.toastSeq + 1 } };
+    },
+    HOLD_TOASTS: ({ context, event }, enq) => {
+      if (event.on === !!context.held) return;
+      // On: what is showing steps off the shot with the rest of the HUD, and waits with a fresh clock.
+      if (event.on) {
+        for (const t of context.toasts) enq.cancel(`toast:${t.id}`);
+        return { context: { ...context, toasts: [], held: context.toasts } };
+      }
+      const held = context.held ?? [];
+      for (const t of held) enq.raise({ type: "TOAST_EXPIRED", id: t.id }, { id: `toast:${t.id}`, delay: t.batch ? BATCH_TOAST_MS : TOAST_MS });
+      return { context: { ...context, toasts: merged(context.toasts, held), held: null } };
     },
     DISMISS_TOAST: ({ context, event }, enq) => {
       enq.cancel(`toast:${event.id}`);
@@ -385,7 +410,7 @@ export const appMachine = setupEffect({
 });
 
 /** The app's side of a new lab: nothing queued, nothing selected, running at 1x. */
-const freshLab = (context: AppContext): AppContext => ({ ...context, queue: [], acc: 0, toasts: [], gate: newGate(), wire: [], headlines: [], outcomeDismissed: false, speed: 1, tool: null, hover: null, selected: null, follow: false, highlight: null, zone: null, overlays: [] });
+const freshLab = (context: AppContext): AppContext => ({ ...context, queue: [], acc: 0, toasts: [], held: null, gate: newGate(), wire: [], headlines: [], outcomeDismissed: false, speed: 1, tool: null, hover: null, selected: null, follow: false, highlight: null, zone: null, overlays: [] });
 
 /** The selection as the sim handle wants it. */
 const uiOf = (c: AppContext): UiSelection => ({ selected: c.selected, follow: c.follow, highlight: c.highlight });

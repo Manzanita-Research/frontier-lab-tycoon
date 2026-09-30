@@ -6,6 +6,7 @@
 //
 //   walking --ARRIVED--> inspecting --NEXT--> walking
 //   walking --EVALS--> evaluating --NEXT--> walking
+//   inspecting | evaluating | walking --HUDDLE--> huddling --HOME--> leaving   (FLT-56: they compare notes first)
 //   inspecting | evaluating | walking --HOME--> leaving --EXITED--> gone
 import { Schema } from "effect";
 import { setupEffect } from "@xstate/effect";
@@ -23,6 +24,8 @@ export const groupMachine = setupEffect({
       EVALS: Schema.Struct({}),
       /** The dwell is over and there is another stop. */
       NEXT: Schema.Struct({}),
+      /** No more stops, and the kind confers before it goes (FLT-56): a huddle where they stand. */
+      HUDDLE: Schema.Struct({}),
       /** No more stops (or the owner called it off): back to the gate. */
       HOME: Schema.Struct({}),
       /** Out through the gate. */
@@ -34,11 +37,13 @@ export const groupMachine = setupEffect({
   initial: "walking",
   states: {
     /** Single file along the paths to the next stop. */
-    walking: { on: { ARRIVED: { target: "inspecting" }, EVALS: { target: "evaluating" }, HOME: { target: "leaving" } } },
+    walking: { on: { ARRIVED: { target: "inspecting" }, EVALS: { target: "evaluating" }, HUDDLE: { target: "huddling" }, HOME: { target: "leaving" } } },
     /** Fanned out along the front of a building, writing things down. */
-    inspecting: { on: { NEXT: { target: "walking" }, HOME: { target: "leaving" } } },
+    inspecting: { on: { NEXT: { target: "walking" }, HUDDLE: { target: "huddling" }, HOME: { target: "leaving" } } },
     /** The same, with a progress bar: their evals, on your hardware. */
-    evaluating: { on: { NEXT: { target: "walking" }, HOME: { target: "leaving" } } },
+    evaluating: { on: { NEXT: { target: "walking" }, HUDDLE: { target: "huddling" }, HOME: { target: "leaving" } } },
+    /** In a tight ring, facing in, comparing notes (FLT-56). */
+    huddling: { on: { HOME: { target: "leaving" } } },
     leaving: { on: { EXITED: { target: "gone" } } },
     gone: { type: "final" },
   },

@@ -188,6 +188,9 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // hires land while staff is still locked, so the ops goal never has its SRE and Janitor). No Race or Scrutiny pack wakes,
 // so none of the wave moves a checkpoint. The wave's packs are pinned by the midgame digest (every pack awake for 480
 // days) and by each pack's own determinism test.
+// Merge train 2: FLT-56 (#68) re-recorded these on the old ladder, where its conga line, the auditors' huddle, the
+// Hearing's docket and the motions' stakes all ran in this script. Under FLT-58's ladder none of those packs wakes
+// here, so FLT-56 moves nothing and the train's values stand; its changes are pinned by the midgame digest.
 const GOLDEN: Record<number, Record<number, string>> = {
   1: { 200: "c403ae9a", 800: "c9a777bd", 1600: "927ac8ca", 2400: "5f82d6d0", 3200: "156351fa", 4000: "510c4ee9" },
   2: { 200: "766f3295", 800: "aec1b296", 1600: "7f4c5dc5", 2400: "4e24ec1b", 3200: "49356bf5", 4000: "a8747659" },

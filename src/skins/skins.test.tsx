@@ -1,7 +1,7 @@
 // Every skin renders every slot from a fixture view-model without throwing, and its files are what the format says.
 import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { fixtureDefection, fixtureInput, FIXTURE_CHAT, FIXTURE_PAPER } from "../ui/hud/fixtures";
+import { fixtureDefection, fixtureEnding, fixtureInput, FIXTURE_CHAT, FIXTURE_PAPER } from "../ui/hud/fixtures";
 import { Docked, Modals, PhotoLayer } from "../ui/hud/tree";
 import type { HudActions, HudVM } from "../ui/hud/types";
 import { hudViewModel } from "../ui/hud/vm";
@@ -89,6 +89,17 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
       return { chat: vms.chat!.newsroom.chat!, actions };
     case "PhotoButton":
       return { photo: main.photoMode, actions };
+    case "GateLegend":
+      return {
+        factions: {
+          ...main.factions, enabled: true, protests: true,
+          gate: [{ id: "", name: "Water Discourse", color: "#3fa7d6", count: 14, addressable: false }, { id: "doomers", name: "Doomers", color: "#6b5b95", count: 9, addressable: true }],
+          statement: { ready: true, costText: "$15K", waitText: "Ready", writerText: "The intern writes it (no Comms Rep)" },
+        },
+        actions,
+      };
+    case "Beat":
+      return { beat: { id: 1, kind: "exit", kicker: "Breaking · a departure", caption: "Dr. Ada Gradient is leaving to “focus on safety” (and a $4B seed round)", sub: "Kevin Backprop follows in a conga line, carrying boxes.", skipLabel: "Skip »", action: null }, actions };
     case "PhotoOverlay":
       return { photo: vms.photo!.photoMode, actions };
     case "SkinPicker":
@@ -118,6 +129,8 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
         },
         actions,
       };
+    case "ModSkinOffer":
+      return { offer: { skin: "good-boy-95", name: "Good Boy 95", mod: "golden-retriever-protest", modName: "Golden Retriever Protest", description: "Every window is a good window.", preview: "" }, actions };
     case "Papers":
       return { papers: vms.papers!.papers, layout: vms.papers!.layout, actions };
     case "PaperMoment":
@@ -136,6 +149,10 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
       return { drama: vms.dramaFresh!.drama, actions };
     case "Drama":
       return { drama: vms.drama!.drama, actions };
+    case "Memo":
+      return { memo: vms.memoExtra!.memo!, layout: vms.memoExtra!.layout, actions };
+    case "Challenge":
+      return { challenge: vms.challenge!.challenge!, layout: vms.challenge!.layout, actions };
     case "Welcome":
       return { welcome: vms.welcome!.saves.welcome!, saves: vms.welcome!.saves, actions };
     case "SaveLoad":
@@ -212,7 +229,18 @@ const vms: Record<string, HudVM> = {
   thanks: vmOf({ ending: "thanks", selected: null }),
   ending: vmOf({ ending: "front-takeover", selected: null }),
   endingPhone: vmOf({ ending: "front-acquihired", selected: null, width: 390, height: 844 }),
+  // FLT-57: The Memo's countdown and its extra edition, a friend's challenge, and a second lab's end with a streak and a verdict.
+  memoCountdown: vmOf({ ending: "memo-countdown", selected: null }),
+  memoExtra: vmOf({ ending: "memo-race", selected: null }),
+  challenge: vmOf({ ending: "memo-countdown", selected: null, social: { challenge: friend("memo-countdown"), challengeOpen: true } }),
+  lab2: vmOf({ ending: "lab2", selected: null, social: { streak: 7 } }),
+  versus: vmOf({ ending: "front-captured", selected: null, width: 390, height: 844, social: { streak: 3, challenge: friend("front-captured") } }),
 };
+
+/** A friend's result on the same seed as a staged moment. */
+function friend(moment: string) {
+  return { ending: "captured", day: 212, vibes: 88, models: 7, seed: fixtureEnding(moment).seed, daily: null };
+}
 
 const usable = catalog.filter((e) => e.ok).map((e) => e.folder);
 
@@ -437,6 +465,42 @@ describe.each([BASE_ID, ...usable])("skin %s", (id) => {
     const t = html(skin, <Modals vm={vms.takeover!} actions={actions} />);
     expect(t).toContain(escape(vms.takeover!.takeover!.manager));
     expect(html(skin, <Modals vm={vms.thanks!} actions={actions} />)).toContain(escape(vms.thanks!.takeover!.thanks!));
+  });
+
+  it("ends every ending on a next action: a new lab and its perks, or time going on; and shows the streak, the verdict and the friend link (FLT-57)", async () => {
+    const { skin } = await prepareSkin(id);
+    for (const vm of [vms.endingPhone!, vms.lab2!]) {
+      const out = html(skin, <Modals vm={vm} actions={actions} />);
+      const e = vm.ending!;
+      expect(e.next.action).toBe("refound");
+      expect(out).toContain(escape(e.next.prompt));
+      expect(out).toContain(escape(e.refound!.name));
+      for (const p of e.refound!.perks) {
+        expect(out).toContain(escape(p.label));
+        expect(out).toContain(escape(p.blurb));
+      }
+    }
+    expect(html(skin, <Modals vm={vms.lab2!} actions={actions} />)).toMatch(/Lab #(<!-- -->)?2/);
+    expect(html(skin, <Modals vm={vms.lab2!} actions={actions} />)).toContain(escape(vms.lab2!.ending!.streak!.text));
+    const kept = html(skin, <Modals vm={vms.versus!} actions={actions} />);
+    expect(kept).toContain(escape(vms.versus!.ending!.next.label));
+    expect(kept).toContain(escape(vms.versus!.ending!.versus!.text));
+    expect(kept).toMatch(/challenge link/i);
+  });
+
+  it("counts The Memo down, prints its extra edition, and puts a friend's challenge up (FLT-57)", async () => {
+    const { skin } = await prepareSkin(id);
+    const coming = html(skin, <Modals vm={vms.memoCountdown!} actions={actions} />);
+    expect(coming).toContain(escape(vms.memoCountdown!.memo!.line));
+    expect(coming).not.toMatch(/role="(alert)?dialog"/);
+    const extra = vms.memoExtra!.memo!.extra!;
+    const out = html(skin, <Modals vm={vms.memoExtra!} actions={actions} />);
+    expect(out).toContain(escape(extra.headline));
+    for (const r of extra.reactions) expect(out).toContain(escape(r.name));
+    for (const e of extra.effects) expect(out).toContain(escape(e));
+    const c = html(skin, <Modals vm={vms.challenge!} actions={actions} />);
+    expect(c).toContain(escape(vms.challenge!.challenge!.line));
+    expect(c).toContain(escape(vms.challenge!.challenge!.cta));
   });
 
   it("uses the skin's own strings", async () => {

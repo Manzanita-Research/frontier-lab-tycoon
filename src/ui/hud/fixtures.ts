@@ -282,6 +282,8 @@ export interface FixtureOptions {
   skins?: Partial<SkinPickerVM>;
   /** Today's Drama (absent: nothing fetched yet, the window shut). */
   drama?: "feed" | "intro" | "empty" | "fresh";
+  /** FLT-57: a streak, a friend's challenge (and whether its banner is up), the Memo extra already read. */
+  social?: Partial<NonNullable<HudInput["social"]>>;
   /** FLT-65: the Save/Load window open on a full shelf, "Welcome back", the question about mods, or no storage at all. */
   saves?: "window" | "welcome" | "prompt" | "private";
 }
@@ -348,5 +350,6 @@ export function fixtureInput(o: FixtureOptions = {}): HudInput {
     drama: o.drama ? fixtureDrama(o.drama) : undefined,
     saves: o.saves ? fixtureSaves(o.saves) : undefined,
     viewport: { width: o.width ?? 1440, height: o.height ?? 900 },
+    social: { streak: 0, challenge: null, challengeOpen: false, memoSeen: null, linkBase: "https://frontier.example/", ...o.social },
   };
 }

@@ -46,6 +46,8 @@ export interface Founding {
   hype: number;
   personality: Personality;
   lines: { readonly [K in keyof NeoLab["lines"]]: readonly string[] };
+  /** The seed round, in $B (FLT-56's balloon). */
+  seed?: number;
 }
 
 /** A new lab joins the Arena today. Returns it (the caller writes the headline). */
@@ -81,6 +83,7 @@ export function foundNeoLab(s: GameState, f: Founding): NeoLab {
       weeks: 0, releases: 0, open: false, momentum: 1, model: "", lastRelease: -1,
     }),
     lines: { release: [...f.lines.release], poach: [...f.lines.poach], nemesis: [...f.lines.nemesis], goodwill: [...f.lines.goodwill] },
+    ...(f.seed !== undefined ? { seed: f.seed } : {}),
   };
   n.labs.push(lab);
   n.rngState = rng.state();
