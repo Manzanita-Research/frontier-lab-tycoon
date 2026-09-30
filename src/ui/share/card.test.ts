@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
+import type { EndingVM } from "../hud/types";
 import { hudViewModel } from "../hud/vm";
 import { fixtureInput } from "../hud/fixtures";
 import { CARD_H, CARD_W, CHROMED_SKINS, cardTheme, contrastOn, drawCard, fit, wrap } from "./card";
@@ -33,12 +34,16 @@ function recorder() {
   return { ctx: ctx as unknown as CanvasRenderingContext2D, texts };
 }
 
-const ending = (moment: string) => {
-  const vm = hudViewModel(fixtureInput({ ending: moment }));
-  return vm.ending!;
-};
+const MOMENTS = ["front-takeover", "front-regulated", "front-acquihired", "front-captured", "front-pivot"];
+const endings = new Map<string, EndingVM>();
+const ending = (moment: string) => endings.get(moment)!;
 
 describe("share card (FLT-11)", () => {
+  // Staging each ending plays a lab to it: seconds each on a CI runner, so once, up front.
+  beforeAll(() => {
+    for (const m of MOMENTS) endings.set(m, hudViewModel(fixtureInput({ ending: m })).ending!);
+  }, 120_000);
+
   it("wraps by words and fits at the biggest size that keeps to the line budget", () => {
     expect(wrap("a bb ccc dddd", 4, (s) => s.length)).toEqual(["a bb", "ccc", "dddd"]);
     expect(fit("Lab Achieves Safety; Nobody Notices", 500, 2, [44, 40, 36], measureAt).size).toBe(44);
@@ -61,7 +66,7 @@ describe("share card (FLT-11)", () => {
 
   for (const skin of ["base", ...CHROMED_SKINS]) {
     it(`prints every ending in ${skin} with the headline, the lab and the five stats inside 1200×630`, () => {
-      for (const moment of ["front-takeover", "front-regulated", "front-acquihired", "front-captured", "front-pivot"]) {
+      for (const moment of MOMENTS) {
         const e = ending(moment);
         const { ctx, texts } = recorder();
         drawCard(ctx, cardTheme(skin, {}), e, null);
