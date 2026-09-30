@@ -294,6 +294,39 @@ export function ModManager({ mods, actions }: SlotPropsMap["ModManager"]) {
   );
 }
 
+/** FLT-55: a mod's skin, found like new hardware in 1995. Nothing is installed until the player clicks Yes. */
+export function ModSkinOffer({ offer, actions }: SlotPropsMap["ModSkinOffer"]) {
+  const no = () => actions.declineSkinOffer();
+  return (
+    <Dialog label="Found New Skin" close={no} layerClass="f95-layer f95-dim" dialogClass="f95-dialogbox">
+      <Win className="f95-msgbox f95-skinoffer" title="Found New Skin" icon="display" buttons={[{ g: "close", label: "No", onClick: no }]} role="alertdialog" label={`Found New Skin: ${offer.name}`}>
+        <div className="f95-msgbody">
+          {offer.preview ? <img className="f95-skinoffer-preview" src={offer.preview} alt="" /> : <Ico name="display" size={36} />}
+          <div>
+            <p>
+              Windows has found new skin:
+              <br />
+              <b>{offer.name}</b>
+            </p>
+            <p>
+              <small>
+                Provided by {offer.modName}. {offer.description}
+              </small>
+            </p>
+            <p>Do you want to install it now? You can change it later in Display Properties.</p>
+          </div>
+        </div>
+        <div className="f95-row">
+          <Btn def autoFocus onClick={() => actions.acceptSkinOffer()}>
+            Yes
+          </Btn>
+          <Btn onClick={no}>No</Btn>
+        </div>
+      </Win>
+    </Dialog>
+  );
+}
+
 const PALETTE = ["#000000", "#808080", "#800000", "#808000", "#008000", "#008080", "#000080", "#800080", "#ffffff", "#c0c0c0", "#ff0000", "#ffff00", "#00ff00", "#00ffff", "#0000ff", "#ff00ff"];
 
 /** Photo mode: the picture is the canvas of a paint program. The frame is only the edges; the campus shows through. */

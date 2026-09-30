@@ -112,6 +112,8 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
         },
         actions,
       };
+    case "ModSkinOffer":
+      return { offer: { skin: "good-boy-95", name: "Good Boy 95", mod: "golden-retriever-protest", modName: "Golden Retriever Protest", description: "Every window is a good window.", preview: "" }, actions };
     case "Papers":
       return { papers: vms.papers!.papers, layout: vms.papers!.layout, actions };
     case "PaperMoment":

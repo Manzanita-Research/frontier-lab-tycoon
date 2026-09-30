@@ -79,9 +79,9 @@ describe("FLT-55 presentation boundary", () => {
   });
 
   it("keeps skin strings as data: a string is never parsed as markup", async () => {
-    const mod = await decode({ ...base, skin: { id: "s", name: "S", strings: { "title": "<img src=x onerror=alert(1)>" } } });
+    const mod = await decode({ ...base, skin: { id: "s", name: "S", strings: { "stats.cash": "<img src=x onerror=alert(1)>" } } });
     const skin = await Effect.runPromise(Skin.pipe(Effect.provide(composeMods([mod]).layer)));
-    expect(skin.skins.s!.strings?.title).toBe("<img src=x onerror=alert(1)>");
+    expect(skin.skins.s!.strings?.["stats.cash"]).toBe("<img src=x onerror=alert(1)>");
   });
 
   it("resolves looks for walker kinds and roles, with one form each", async () => {

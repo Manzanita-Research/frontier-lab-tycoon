@@ -233,6 +233,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
           original: skinUi.picker.original,
           list,
           rejected: skinUi.refused,
+          offer: skinUi.offer,
         },
         mods,
         viewport,

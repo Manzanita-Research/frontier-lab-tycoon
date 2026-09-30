@@ -1016,6 +1016,21 @@ export interface SkinInfoVM {
   version: string;
   /** URL of the preview image (may be empty). */
   preview: string;
+  /** FLT-55: the name of the mod it came from (`?mod=`), absent for a built-in skin. */
+  mod?: string;
+}
+
+/** FLT-55: a mod asks to put on its own skin. Nothing changes until the player says yes. */
+export interface SkinOfferVM {
+  /** The skin's id and name ("good-boy-95", "Good Boy 95"). */
+  skin: string;
+  name: string;
+  /** The mod asking. */
+  mod: string;
+  modName: string;
+  description: string;
+  /** Preview image URL (may be empty). */
+  preview: string;
 }
 
 /** One loaded mod, as the Mod Manager lists it. */
@@ -1055,6 +1070,8 @@ export interface SkinPickerVM {
   list: SkinInfoVM[];
   /** Skins that were refused, with the reason. */
   rejected: { id: string; errors: string[] }[];
+  /** FLT-55: a mod's request to switch to its skin, waiting on the player (the `ModSkinOffer` slot). */
+  offer?: SkinOfferVM | null;
 }
 
 export interface LayoutVM {
@@ -1298,6 +1315,10 @@ export interface HudActions {
   /** Go back to the skin the picker opened on and close it. */
   cancelSkinPicker(): void;
   setReducedMotion(on: boolean): void;
+  /** FLT-55: say yes to a mod's skin offer (it shows, and is remembered for that mod). */
+  acceptSkinOffer(): void;
+  /** Say no: the skin stays in the picker, and this mod will not ask again. */
+  declineSkinOffer(): void;
   // Mods.
   openMods(): void;
   closeMods(): void;

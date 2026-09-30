@@ -1508,6 +1508,21 @@
     max-height: calc(100dvh - 20px);
     overflow: auto;
   }
+  .f95-skinoffer {
+    width: min(460px, 100%);
+    .f95-msgbody p + p {
+      margin-top: 8px;
+    }
+  }
+  .f95-skinoffer-preview {
+    flex: none;
+    width: 96px;
+    height: 72px;
+    object-fit: cover;
+    box-shadow: var(--sunk);
+    padding: 2px;
+    background: var(--flt-color-panelAlt);
+  }
   .f95-msgbody {
     display: flex;
     gap: 14px;

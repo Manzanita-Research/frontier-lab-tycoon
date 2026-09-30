@@ -19,6 +19,8 @@ export interface LoadedMod {
   /** Where it came from: the `?mod=` value. */
   source: string;
   hash: string;
+  /** FLT-55: the id of the skin it brings, if any. */
+  skin?: string;
 }
 
 export interface ModSession {
@@ -67,6 +69,7 @@ export async function loadModSession(search: string, options: { baseUrl?: string
     const { presentation } = await Effect.runPromise(Scope.provide(materialise(resolved, options.objectUrls ?? browserObjectUrls), options.scope ?? assetScope));
     const mods = manifests.map(({ manifest, source }) => ({
       id: manifest.id, name: manifest.name, version: manifest.version, author: manifest.author, description: manifest.description, source, hash: contentHash(manifest),
+      ...(manifest.skin ? { skin: manifest.skin.id } : {}),
     }));
     return { def, mods, conflicts, errors, run: { mods: mods.map(({ id, version, hash }) => ({ id, version, hash })), contentHash: contentHash(def.content) }, presentation };
   } catch (error) {

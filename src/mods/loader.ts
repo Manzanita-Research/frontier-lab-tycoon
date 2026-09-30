@@ -14,6 +14,8 @@ import { sanitizeCss } from "./css";
 import { ownAsset, validateAssets } from "./assets";
 import { VISITOR_ROLES } from "../content/names";
 import { validateContent } from "./validation";
+import baseTokens from "../skins/base/tokens.json";
+import baseStrings from "../skins/base/strings.json";
 
 function applyContent(below: ContentApi, mod: ModManifest): ContentApi {
   const p = mod.content;
@@ -115,6 +117,10 @@ function checkSkin(value: SkinData, own: Readonly<Record<string, string>>) {
   for (const [key, val] of Object.entries(value.tokens ?? {})) {
     if (!TOKEN.test(key) || /[;{}<>\\]|url\s*\(|@import|expression\s*\(/i.test(val)) throw new ModError({ path: `skin.tokens.${key}`, detail: "expected a token name (\"color.accent\" or \"--ink\") and a single value without URLs" });
     sanitizeCss(`:root {--t:${val}}`, value.id, own);
+    if (!key.startsWith("--") && !key.startsWith("x.") && !Object.hasOwn(baseTokens, key)) throw new ModError({ path: `skin.tokens.${key}`, detail: `unknown token "${key}"${suggest(key, Object.keys(baseTokens))} (the tokens are listed in docs/SKINS.md; your own start with "x.")` });
+  }
+  for (const key of Object.keys(value.strings ?? {})) {
+    if (!Object.hasOwn(baseStrings, key)) throw new ModError({ path: `skin.strings.${key}`, detail: `unknown string "${key}"${suggest(key, Object.keys(baseStrings))} (the keys are in src/skins/base/strings.json)` });
   }
   (value.fonts ?? []).forEach((font, i) => ownAsset(own, typeof font === "string" ? font : font.src, "font", `skin.fonts[${i}]`));
   if (value.preview !== undefined) ownAsset(own, value.preview, "image", "skin.preview");
