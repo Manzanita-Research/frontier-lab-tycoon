@@ -3398,6 +3398,59 @@
     width: 100%;
   }
 }
+
+/* ---- FLT-63: Facilities as labelled drawers, and Run… ---- */
+[data-skin="discovery-disc-96"] {
+  .dd-tray-row.view-facilities {
+    align-items: flex-end;
+    gap: 10px;
+  }
+  .dd-drawer {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .dd-drawer-name {
+    align-self: flex-start;
+    padding: 1px 8px;
+    border: 2px solid var(--dd-ink);
+    border-radius: 999px;
+    background: var(--dd-yellow);
+    color: var(--dd-ink);
+    font: 400 14px/1.1 var(--dd-display);
+    white-space: nowrap;
+  }
+  .dd-drawer-stamps {
+    display: flex;
+    gap: 8px;
+  }
+  .dd-drawer .dd-stamp {
+    flex: 0 0 78px;
+  }
+  .dd-folder-stamp {
+    background: var(--dd-paper);
+  }
+  .dd-folder-stamp .dd-price {
+    font-size: 15px;
+    color: var(--dd-blue);
+  }
+  .dd-tray-row.view-run {
+    align-items: flex-start;
+    overflow: visible;
+  }
+  .dd-run {
+    flex: 1;
+    max-width: 520px;
+    padding: 8px 10px;
+    border: 2px solid var(--dd-ink);
+    border-radius: 10px;
+    background: var(--dd-paper);
+    box-shadow: 3px 3px 0 var(--dd-ink);
+    .runbox-list {
+      max-height: min(220px, 32dvh);
+    }
+
 /* The Bird App (FLT-69) as an encyclopedia: entries on a page, a FUN FACT! burst, a dispute in red ink. */
 [data-skin="discovery-disc-96"] {
   .birdapp-head b {

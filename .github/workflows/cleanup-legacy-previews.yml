@@ -1,0 +1,54 @@
+name: Cleanup legacy per-PR Workers
+
+# One-off: before the switch to Workers Previews of the single app Worker, each PR deployed its own
+# `flt-pr-N` Worker. This destroys those stages' Alchemy state (and so their Workers). Prod is refused.
+on:
+  workflow_dispatch:
+    inputs:
+      stages:
+        description: "Space-separated PR stages to destroy, e.g. pr-49 pr-64"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  destroy:
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: infra/pnpm-lock.yaml
+      - run: pnpm --dir infra install --frozen-lockfile
+      - name: Destroy each legacy PR stage
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STAGES: ${{ inputs.stages }}
+        run: |
+          for stage in $STAGES; do
+            if ! [[ "$stage" =~ ^pr-[1-9][0-9]*$ ]]; then
+              echo "ERROR: refusing '$stage' (only pr-<number>; never prod)" >&2; exit 1
+            fi
+          done
+          for stage in $STAGES; do
+            echo "::group::destroy $stage"
+            pnpm --dir infra exec alchemy destroy --stage "$stage" --yes
+            echo "::endgroup::"
+          done
+      - name: List the account's Workers (names only)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          curl -fsS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts" \
+            | jq -r '.result[].id' | grep -E '^flt-' | sort

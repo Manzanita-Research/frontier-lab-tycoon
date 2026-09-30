@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       url:
-        description: "The build to play (no params), e.g. https://flt-pr-60.manzanita.workers.dev"
+        description: "The build to play (no params), e.g. https://pr-60-flt-prod.manzanita.workers.dev"
         required: true
         default: "https://flt-prod.manzanita.workers.dev"
       minutes:
@@ -24,7 +24,7 @@ env:
 
 jobs:
   journey:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4

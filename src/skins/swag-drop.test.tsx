@@ -61,12 +61,19 @@ describe("Swag Drop", () => {
     expect(html).toContain('data-coach="training"');
     expect(html).toContain('data-coach="stat:runway"');
     expect(html).toContain('data-coach="goals"');
-    // One `build:<kind>` per item the VM gives, in the open deck (the palette is filtered by unlock level, so nothing is hard-coded).
-    const deck = renderToString(
-      <SkinProvider skin={skin}>
-        <Deck items={vm.buildItems} teasers={[]} actions={actions} done={() => {}} />
-      </SkinProvider>,
-    );
+    // One `build:<kind>` per item the VM gives, in the open deck: the tools on top, the buildings behind Fn (FLT-63). The
+    // palette is filtered by unlock level, so nothing is hard-coded.
+    const deck = (["top", "facilities"] as const)
+      .map((view) =>
+        renderToString(
+          <SkinProvider skin={skin}>
+            <Deck items={vm.buildItems} teasers={[]} actions={actions} done={() => {}} view={view} />
+          </SkinProvider>,
+        ),
+      )
+      .join("");
+    expect(deck).toContain('data-testid="start-facilities"');
+    expect(deck).toContain('data-testid="start-run"');
     for (const it of vm.buildItems) expect(deck).toContain(`data-coach="build:${it.kind}"`);
   });
 

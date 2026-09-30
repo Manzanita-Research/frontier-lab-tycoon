@@ -3,7 +3,7 @@
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult, Atom } from "effect/unstable/reactivity";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { atoms, debugParams, registry } from "../../app/game";
+import { atoms, debugParams, registry, saveDesk } from "../../app/game";
 import type { Snapshot } from "../../app/hud";
 import { audioReadyAtom, mixerAtom, mixerOpenAtom } from "../../audio/state";
 import { roomAtom } from "../../newsroom/state";
@@ -22,6 +22,10 @@ import { dramaAtom } from "../../drama/state";
 import { playableFixture } from "./previewLadder";
 import type { HudVM } from "./types";
 import { hudViewModel } from "./vm";
+import { savesAtom } from "./saves";
+import type { SavesInput } from "./saves.vm";
+
+const saveDeskAvailable = () => saveDesk.store.available;
 
 /** The window size, updated on resize (a phone turning around changes the layout). */
 export function useViewport() {
@@ -210,6 +214,11 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
     };
   }, [modsOpen]);
   const drama = useMemo(() => dramaViewModel(dramaUi, modSession().mods, location.href, new Date()), [dramaUi]);
+  const savesUi = useAtomValue(savesAtom);
+  const saves = useMemo((): SavesInput => {
+    const { prompt, listing, ...rest } = savesUi;
+    return { ...rest, listing, available: saveDeskAvailable(), modPrompt: prompt?.vm ?? null, skinNames: Object.fromEntries(list.map((s) => [s.id, s.name])) };
+  }, [savesUi, list]);
 
   // `?debug=1&ladder=N`: show a rung of the ladder without playing up to it (skins, screenshots). Never in a normal game.
   const shown = useMemo(() => (debugParams.ladder ? ({ ...snap, ...playableFixture(debugParams.ladder.level, debugParams.ladder.coach, debugParams.ladder.unlock) } as unknown as Snapshot) : snap), [snap]);
@@ -254,11 +263,12 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         },
         mods,
         drama,
+        saves,
         viewport,
         share,
         social,
       }),
-    [share, social, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, beat, skinUi, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, birdAppOpen, drama],
+    [share, social, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, beat, skinUi, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, birdAppOpen, drama, saves],
   );
   return vm;
 }

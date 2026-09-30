@@ -15,6 +15,8 @@ import type { GameState } from "../../sim/types";
 import { newMotion, stepMotion, type MotionView } from "./leapfrogMotion";
 import type { SkinPickerVM } from "./types";
 import type { HudInput } from "./vm";
+import type { SavesInput } from "./saves.vm";
+import { SLOTS, type SaveMeta } from "../../save";
 import { playableFixture } from "./previewLadder";
 import { stagePapers } from "../../sim/race/papers/demo";
 import { stageCollusion } from "../../sim/collusion/demo";
@@ -208,6 +210,36 @@ export const FIXTURE_DRAMA_FEED: FeedPackData[] = [
 ];
 
 /** Today's Drama in a few moments: the window open on the feed, the "now playing" card, a feed with nothing in it. */
+/** The fixture's clock for saves: "3 hours ago" and "yesterday" stay put. */
+export const FIXTURE_NOW = Date.parse("2026-09-30T15:00:00Z");
+
+const fixtureMeta = (lab: string, day: number, hoursAgo: number, size: number, skin: string | null, mods: string[] = []): SaveMeta => ({
+  kind: "fltsave", v: 2, savedAt: new Date(FIXTURE_NOW - hoursAgo * 3_600_000).toISOString(), seed: 7, lab, day, tick: day * 20, enc: "gzip64", skin, size,
+  mods: mods.map((id) => ({ id, version: "1.0.0", hash: "f3b023e9" })),
+});
+
+/** FLT-65: the saves shelf the fixtures show. */
+export function fixtureSaves(kind: "window" | "welcome" | "prompt" | "private"): SavesInput {
+  const auto = fixtureMeta("Gradient Descent Labs", 424, 3, 44_700, "frontier-95");
+  return {
+    open: kind === "window" || kind === "prompt" || kind === "private",
+    available: kind !== "private",
+    listing: kind === "private" ? SLOTS.map((slot) => ({ slot, meta: null })) : [
+      { slot: "auto", meta: auto },
+      { slot: "1", meta: fixtureMeta("Mostly Harmless Compute", 45, 50, 5_300, "frontier-95", ["every-lab-is-steve"]) },
+      { slot: "2", meta: null, broken: "Scrambled" },
+      { slot: "3", meta: null },
+    ],
+    welcome: kind === "welcome" ? auto : null,
+    busy: false,
+    status: kind === "window" ? { text: 'Saved "Gradient Descent Labs" to slot 1.', tone: "good" } : null,
+    modPrompt: kind === "prompt" ? { lab: "Mostly Harmless Compute", missing: ["every-lab-is-steve 1.0.0"], extra: [], canFetch: true } : null,
+    dragging: false,
+    skinNames: { "frontier-95": "Frontier 95" },
+    now: FIXTURE_NOW,
+  };
+}
+
 export function fixtureDrama(kind: "feed" | "intro" | "empty" | "fresh"): NonNullable<HudInput["drama"]> {
   const href = "https://flt.test/?drama=fixture";
   const playing = [{ id: "drama-2026-09-29", name: "Daily Drama: The Perk Arms Race", source: FIXTURE_DRAMA_FEED[0]!.url }];
@@ -273,6 +305,8 @@ export interface FixtureOptions {
   drama?: "feed" | "intro" | "empty" | "fresh";
   /** FLT-57: a streak, a friend's challenge (and whether its banner is up), the Memo extra already read. */
   social?: Partial<NonNullable<HudInput["social"]>>;
+  /** FLT-65: the Save/Load window open on a full shelf, "Welcome back", the question about mods, or no storage at all. */
+  saves?: "window" | "welcome" | "prompt" | "private";
 }
 
 /** A World with a papers or collusion moment staged on it, through the same code the `?moment=` links use. */
@@ -336,6 +370,7 @@ export function fixtureInput(o: FixtureOptions = {}): HudInput {
     skins: { ...NO_SKINS, ...o.skins },
     leapfrog: lf?.motion,
     drama: o.drama ? fixtureDrama(o.drama) : undefined,
+    saves: o.saves ? fixtureSaves(o.saves) : undefined,
     viewport: { width: o.width ?? 1440, height: o.height ?? 900 },
     social: { streak: 0, challenge: null, challengeOpen: false, memoSeen: null, linkBase: "https://frontier.example/", ...o.social },
   };

@@ -29,7 +29,7 @@ flowchart LR
 
 | Machine | File | States | Events in | Emits / effects | Owns (context) |
 |---|---|---|---|---|---|
-| **app** | `src/app/machine.ts` | `playing.{running,paused}`, `eventOpen`, `gameOver` | `FRAME`, `SYNCED`, `SET_SPEED`, `TOGGLE_PAUSE`, `SET_TOOL`, `SET_HOVER`, `COMMAND`, `CHOOSE`, `KEEP_PLAYING`, `NEW_LAB`, `TOAST*` | Effect actions `advance`, `hold`, `newLab`; delayed `TOAST_EXPIRED` | speed, command queue, frame accumulator, tool, hover, toasts, the 5 Hz HUD snapshot |
+| **app** | `src/app/machine.ts` | `playing.{running,paused}`, `eventOpen`, `gameOver` | `FRAME`, `SYNCED`, `SET_SPEED`, `TOGGLE_PAUSE`, `SET_TOOL`, `SET_HOVER`, `COMMAND`, `CHOOSE`, `KEEP_PLAYING`, `NEW_LAB`, `LOAD_LAB`, `SAVE`, `TOAST*` | Effect actions `advance`, `hold`, `newLab`, `loadLab`, `save` (FLT-65, the `Saves` service); delayed `TOAST_EXPIRED` | speed, command queue, frame accumulator, tool, hover, toasts, the 5 Hz HUD snapshot |
 | **training** | `src/sim/machines/training.ts` | `idle`, `training`, `releasing` | `DAY {halls, gain}`, `NAMED {name}` | `RELEASED`, `RUN_STARTED` | run, progress, cost, next model name |
 | **tutorial** | `src/sim/machines/tutorial.ts` | `path`, `hall`, `gateway`, `hire`, `release`, `done`, `skipped` | `FACTS`, `CONTINUE`, `SKIP` | `FINISHED` (one launch toast) | acknowledgement of the current step; stored in `World.tutorial` |
 | **guardrails** | `src/sim/machines/guardrails.ts` | `clear`, `confirming` | `REQUEST`, `CLEAR`, `OBSERVE`, `HALL` | low-runway nudge, redundant-Hall hint | exact pending spending command, low-runway and disconnected-gate warning flags; additive optional `World.guardrails` |
@@ -68,7 +68,7 @@ stateDiagram-v2
   eventOpen --> playing: SYNCED [card answered]
   playing --> gameOver: SYNCED [won or lost, not dismissed]
   eventOpen --> gameOver: SYNCED [outcome, card answered]
-  gameOver --> playing: KEEP_PLAYING / NEW_LAB
+  gameOver --> playing: KEEP_PLAYING / NEW_LAB / LOAD_LAB
   note right of eventOpen
     CHOOSE queues a chooseEvent command;
     FRAME applies it without advancing time
@@ -222,6 +222,10 @@ stateDiagram-v2
     idle --> training: DAY [hall built]
   }
 ```
+
+### Saves (FLT-65)
+
+`LOAD_LAB { world }` swaps a loaded World in from any state and resumes; `SAVE { slot, why }` hands the current World to the `Saves` service (`src/app/saves.ts`, the SaveDesk). The machine autosaves on `SYNCED` when the month turns over or the outcome leaves `playing`; `game.ts` sends `SAVE` on tab hide. The format and the slots are `src/save/`; see `docs/SAVES.md`.
 
 ## How a machine is driven
 

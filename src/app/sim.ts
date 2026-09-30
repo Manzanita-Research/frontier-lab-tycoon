@@ -70,6 +70,8 @@ export class SimHandle {
 
   /** The endings (FLT-11) are on: a new lab gets them too. */
   endings: boolean;
+  /** The World a save put here (FLT-65), so the News Room reopens its archive instead of wiping it. */
+  loaded: GameState | null = null;
 
   constructor(world: GameState, leapfrog = false, public papers = world.papers?.enabled ?? false, public readonly def: GameDefinition | null = null) {
     this.world = world;
@@ -109,6 +111,23 @@ export class SimHandle {
     const prev = this.world;
     this.reset(seed, null);
     applyLineage(this.world, prev, (perkById(perk)?.id ?? "founder") as PerkId);
+  }
+
+  /**
+   * Carry on from a save (FLT-65): the World replaces the live one as it is, so the next tick is the tick it would
+   * have been. The handle's own switches follow the World (a save knows whether its packs are on).
+   */
+  load(world: GameState) {
+    this.newsStartId = 0;
+    this.openingThoughts = undefined;
+    this.world = world;
+    this.loaded = world;
+    this.leapfrog = world.leapfrog.enabled;
+    this.papers = world.papers?.enabled ?? false;
+    this.endings = !!world.endings;
+    this.lastSnap = undefined;
+    this.lastVersion = -1;
+    this.alpha = 1;
   }
 
   /**

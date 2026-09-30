@@ -1,7 +1,7 @@
 // The two Release Leapfrog panels: the benchmark leaderboard as the machine's HIGH SCORES board, and the news cycle as an
 // audience-applause meter (who is getting the big cheer this week).
 import { useState } from "react";
-import { BenchTable, VoiceGraph } from "../kit";
+import { BenchTable, VoiceGraph, useWidget } from "../kit";
 import { useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import { Notes, Trend } from "./art";
@@ -10,6 +10,7 @@ export function Benchmarks({ leapfrog, layout }: SlotPropsMap["Benchmarks"]) {
   const t = useT();
   // Open on a desktop; a phone folds it to a badge that opens the board over the map.
   const [open, setOpen] = useState(() => !layout.compact);
+  useWidget("benchmarks", () => setOpen(true));
   const lead = leapfrog.rows.find((r) => r.you);
   const wins = lead?.wins ?? 0;
   const sub = `${wins} ${t("bench.sota")} · ${leapfrog.nextText}`;
@@ -38,6 +39,7 @@ export function Benchmarks({ leapfrog, layout }: SlotPropsMap["Benchmarks"]) {
 export function Voice({ leapfrog, layout }: SlotPropsMap["Voice"]) {
   const t = useT();
   const [open, setOpen] = useState(false);
+  useWidget("traffic", () => setOpen(true));
   const { voice } = leapfrog;
   // On a phone the campus needs the room: the board's strip carries the news-cycle share instead.
   if (layout.compact) return null;

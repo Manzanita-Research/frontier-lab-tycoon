@@ -13,6 +13,8 @@
     "             { \"tick\": n }                                               n sim ticks",
     "             { \"click\": \"css selector\", \"optional\": true }",
     "             { \"eval\": \"(f, w) => { ... }\" }                            f = window.__flt, w = f.sim.world",
+    "             { \"type\": \"text\", \"into\": \"css selector\", \"enter\": true }       fill a field (FLT-63: the Run box)",
+    "             { \"drag\": [[x, z], ...], \"hold\": true }                       a real mouse drag over tiles; hold = button still down",
     "  sets     named lists for --scenes (`standard` is the default; `all` is every scene)."
   ],
   "defaults": {
@@ -226,6 +228,12 @@
       "auction",
       "auction-broke"
     ],
+    "saves": [
+      "saves-welcome",
+      "saves-window",
+      "menu",
+      "saves-phone"
+    ],
     "flt-57": [
       "end-acquihired",
       "end-acquihired-almanac",
@@ -272,6 +280,18 @@
       "c56-leak-phone",
       "c56-leak-senate",
       "c56-stakes"
+    ],
+    "flt63": [
+      "flt63-facilities",
+      "flt63-run",
+      "flt63-run-agi",
+      "flt63-start",
+      "flt63-run-save",
+      "flt63-path",
+      "flt63-hall",
+      "flt63-phone-facilities",
+      "flt63-phone-run",
+      "flt63-phone-done"
     ],
     "birdapp": [
       "bird",
@@ -1297,7 +1317,7 @@
           "optional": true
         },
         {
-          "click": ".f95-startwrap li.sub button:has-text(\"Mods\")",
+          "click": ".f95-startwrap .f95-fly button:has-text(\"Mods\")",
           "optional": true
         },
         {
@@ -1988,7 +2008,7 @@
           "optional": true
         },
         {
-          "click": ".f95-startwrap li.sub button:has-text(\"Mods\")",
+          "click": ".f95-startwrap .f95-fly button:has-text(\"Mods\")",
           "optional": true
         },
         {
@@ -2396,7 +2416,7 @@
           "optional": true
         },
         {
-          "click": ".f95-startwrap li.sub button:has-text(\"Mods\")",
+          "click": ".f95-startwrap .f95-fly button:has-text(\"Mods\")",
           "optional": true
         },
         {
@@ -2961,6 +2981,41 @@
         },
         {
           "wait": 600
+        }
+      ]
+    },
+    "saves-welcome": {
+      "title": "FLT-65: a returning player's start screen (Welcome back, from a pretend save shelf)",
+      "query": {
+        "saves": "demo"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "saves-window": {
+      "title": "FLT-65: the Save/Load window on a pretend shelf (autosave, a v1 save, two empty slots)",
+      "query": {
+        "saves": "window"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "saves-phone": {
+      "title": "FLT-65: the Save/Load window on a phone (390x844)",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "saves": "window"
+      },
+      "steps": [
+        {
+          "wait": 800
         }
       ]
     },
@@ -3632,6 +3687,234 @@
       ],
       "viewport": "390x844",
       "mobile": true
+    },
+    "flt63-facilities": {
+      "title": "FLT-63: Start ▸ Facilities ▸ open (the buildings, grouped)",
+      "steps": [
+        {
+          "click": "[data-coach=start]"
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": "[data-testid=start-facilities]",
+          "optional": true
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "flt63-run": {
+      "title": "FLT-63: Start ▸ Run… (the widget launcher)",
+      "steps": [
+        {
+          "click": "[data-coach=start]"
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": "[data-testid=start-run]",
+          "optional": true
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "flt63-run-agi": {
+      "title": "FLT-63: Run… agi.exe",
+      "steps": [
+        {
+          "click": "[data-coach=start]"
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": "[data-testid=start-run]",
+          "optional": true
+        },
+        {
+          "wait": 600
+        },
+        {
+          "type": "agi.exe",
+          "into": "[data-testid=run-input]",
+          "enter": true,
+          "optional": true
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "flt63-start": {
+      "title": "FLT-63 + FLT-65: the Start menu open (Facilities ▸, Run…, Save / Load…)",
+      "steps": [
+        {
+          "click": "[data-coach=start]"
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "flt63-run-save": {
+      "title": "FLT-63 + FLT-65: Run… save.exe opens the floppy window",
+      "steps": [
+        {
+          "click": "[data-coach=start]"
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": "[data-testid=start-run]",
+          "optional": true
+        },
+        {
+          "wait": 600
+        },
+        {
+          "type": "save.exe",
+          "into": "[data-testid=run-input]",
+          "enter": true,
+          "optional": true
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt63-path": {
+      "title": "FLT-63: the path tool mid-run, with the mode hint at the pointer",
+      "steps": [
+        {
+          "send": {
+            "type": "SET_TOOL",
+            "tool": "path"
+          }
+        },
+        {
+          "wait": 300
+        },
+        {
+          "drag": [
+            [
+              12,
+              21
+            ],
+            [
+              12,
+              20
+            ],
+            [
+              12,
+              19
+            ],
+            [
+              12,
+              18
+            ],
+            [
+              12,
+              17
+            ],
+            [
+              12,
+              16
+            ]
+          ],
+          "hold": true
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "flt63-hall": {
+      "title": "FLT-63: a Training Hall in hand (one-shot; Shift keeps it)",
+      "steps": [
+        {
+          "send": {
+            "type": "SET_TOOL",
+            "tool": "hall"
+          }
+        },
+        {
+          "wait": 300
+        },
+        {
+          "drag": [
+            [
+              17,
+              19
+            ]
+          ]
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "flt63-phone-facilities": {
+      "title": "FLT-63: phone: Start ▸ Facilities ▸ opens in place",
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "click": "[data-coach=start]"
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": "[data-testid=start-facilities]",
+          "optional": true
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "flt63-phone-run": {
+      "title": "FLT-63: phone: Run…",
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "click": "[data-coach=start]"
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": "[data-testid=start-run]",
+          "optional": true
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "flt63-phone-done": {
+      "title": "FLT-63: phone: the path tool in hand, and the Done button",
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "send": {
+            "type": "SET_TOOL",
+            "tool": "path"
+          }
+        },
+        {
+          "wait": 600
+        }
+      ]
     },
     "bird": {
       "title": "FLT-69: Bird Reader 1.0 open on the timeline: today's posts climbing, the week's log, the preview pane",

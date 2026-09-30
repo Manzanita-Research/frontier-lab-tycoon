@@ -1,8 +1,9 @@
 // The keyboard on the desk: the build palette, the speed keys, the camera and the news/sound/skin dock, all keycaps.
 // A keycap is a cream face over a darker front band; pressing it sinks it (CSS: `.on` and `:active`).
 import { useState, type ReactNode } from "react";
-import { ALL_VISIBLE, DramaIcon, useCoach, useT } from "../kit";
+import { ALL_VISIBLE, DramaIcon, RunBox, useCoach, useStartMenu, useT, type StartView } from "../kit";
 import type { SlotPropsMap } from "../types";
+import type { BuildItemVM } from "../../ui/hud/types";
 import { Glyph, KEY_ICONS } from "./icons";
 
 /** A keycap's two parts. `band` is the front edge (the price on the build keys). */
@@ -28,73 +29,183 @@ const HelpGlyph = () => (
   </svg>
 );
 
-/** What is inside the open deck: the unlocked keys, the blank ones and Help. `done` shuts the deck. */
-export function Deck({ items, teasers = [], actions, done }: Pick<SlotPropsMap["BuildBar"], "items" | "teasers" | "actions"> & { done: () => void }) {
+const BackGlyph = () => (
+  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="M14 6l-6 6 6 6" />
+  </svg>
+);
+const FnGlyph = () => (
+  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <rect x="3" y="4" width="7.5" height="7.5" rx="1.5" />
+    <rect x="13.5" y="4" width="7.5" height="7.5" rx="1.5" />
+    <rect x="3" y="14.5" width="7.5" height="7.5" rx="1.5" />
+    <path d="M17.25 15v6M14.25 18h6" />
+  </svg>
+);
+const RunGlyph = () => (
+  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <rect x="3" y="4" width="18" height="16" rx="2.5" />
+    <path d="M7 10l3 2-3 2M12.5 15h4.5" />
+  </svg>
+);
+
+/**
+ * What is inside the open deck. The top row is the tools (Path, Bulldoze), Facilities (the buildings, in
+ * labelled clusters of keys) and Run… (the widgets, in a Run box), then Help. `done` shuts the deck.
+ */
+export function Deck({ items, teasers = [], widgets = [], actions, done, view }: Pick<SlotPropsMap["BuildBar"], "items" | "teasers" | "actions" | "widgets"> & { done: () => void; view?: StartView }) {
   const t = useT();
   const coach = useCoach();
+  const menu = useStartMenu(items, view);
+  const key = (it: BuildItemVM) => (
+    <button
+      key={it.kind}
+      type="button"
+      className={`sd-key build k-${it.kind} ${it.race ? "race" : ""} ${it.selected ? "on" : ""} ${it.affordable ? "" : "broke"}`}
+      onClick={() => {
+        actions.place(it.kind);
+        done();
+      }}
+      disabled={!it.affordable && !it.selected}
+      aria-pressed={it.selected}
+      title={it.name}
+      {...coach.attrs(`build:${it.kind}`)}
+    >
+      <Cap
+        face={
+          <>
+            <span className="leg">{it.hotkey ?? "·"}</span>
+            <span className="pic">{KEY_ICONS[it.kind] ?? KEY_ICONS.path}</span>
+            <span className="nm">{it.short}</span>
+          </>
+        }
+        band={<span className={`pr ${it.free ? "free" : ""}`}>{it.isBulldoze ? t("build.refund") : it.free ? t("build.free") : it.priceText}</span>}
+      />
+    </button>
+  );
+  const back = (
+    <button type="button" className="sd-key build back" onClick={() => menu.setView("top")}>
+      <Cap
+        face={
+          <>
+            <span className="pic">
+              <BackGlyph />
+            </span>
+            <span className="nm">{t("run.back")}</span>
+          </>
+        }
+      />
+    </button>
+  );
   return (
-    <div className="sd-deck" role="toolbar" aria-label={t("build.menuTitle")} data-coach-panel>
-      {items.map((it) => (
-        <button
-          key={it.kind}
-          type="button"
-          className={`sd-key build k-${it.kind} ${it.race ? "race" : ""} ${it.selected ? "on" : ""} ${it.affordable ? "" : "broke"}`}
-          onClick={() => {
-            actions.place(it.kind);
-            done();
-          }}
-          disabled={!it.affordable && !it.selected}
-          aria-pressed={it.selected}
-          title={it.name}
-          {...coach.attrs(`build:${it.kind}`)}
-        >
-          <Cap
-            face={
-              <>
-                <span className="leg">{it.hotkey ?? "·"}</span>
-                <span className="pic">{KEY_ICONS[it.kind] ?? KEY_ICONS.path}</span>
-                <span className="nm">{it.short}</span>
-              </>
-            }
-            band={<span className={`pr ${it.free ? "free" : ""}`}>{it.isBulldoze ? t("build.refund") : it.free ? t("build.free") : it.priceText}</span>}
+    <div className={`sd-deck view-${menu.view}`} role="toolbar" aria-label={t("build.menuTitle")} data-coach-panel>
+      {menu.view === "top" && (
+        <>
+          {menu.tools.map(key)}
+          <button type="button" className="sd-key build folder" data-testid="start-facilities" onClick={() => menu.setView("facilities")} {...menu.facilities}>
+            <Cap
+              face={
+                <>
+                  <span className="leg">fn</span>
+                  <span className="pic">
+                    <FnGlyph />
+                  </span>
+                  <span className="nm">{t("build.facilities")}</span>
+                </>
+              }
+              band={<span className="pr">{t("build.facilitiesCount", { n: menu.count })}</span>}
+            />
+          </button>
+          <button
+            type="button"
+            className="sd-key build folder"
+            data-testid="start-run"
+            onClick={() => {
+              if (items.some((it) => it.selected && !it.panel)) actions.place(null);
+              menu.setView("run");
+            }}
+          >
+            <Cap
+              face={
+                <>
+                  <span className="leg">run</span>
+                  <span className="pic">
+                    <RunGlyph />
+                  </span>
+                  <span className="nm">{t("build.run")}</span>
+                </>
+              }
+              band={<span className="pr">{t("build.runCount", { n: widgets.length })}</span>}
+            />
+          </button>
+          <button
+            type="button"
+            className="sd-key build help"
+            onClick={() => {
+              actions.openHelp();
+              done();
+            }}
+          >
+            <Cap
+              face={
+                <>
+                  <span className="pic">
+                    <HelpGlyph />
+                  </span>
+                  <span className="nm">{t("build.help")}</span>
+                </>
+              }
+              band={<span className="pr">{t("help.title")}</span>}
+            />
+          </button>
+        </>
+      )}
+      {menu.view === "facilities" && (
+        <>
+          {back}
+          {menu.groups.map((g) => (
+            <div key={g.id} className="sd-keygroup" role="group" aria-label={t(`build.group.${g.id}`)}>
+              <span className="sd-keygroup-name">{t(`build.group.${g.id}`)}</span>
+              <div className="sd-keygroup-keys">{g.items.map(key)}</div>
+            </div>
+          ))}
+          {teasers.length > 0 && (
+            <div className="sd-keygroup" role="group" aria-label={t("build.locked")}>
+              <span className="sd-keygroup-name">{t("build.locked")}</span>
+              <div className="sd-keygroup-keys">
+                {teasers.map((teaser, i) => (
+                  <div key={`${teaser.label}-${i}`} className="sd-key build locked" aria-disabled title={`${t("build.locked")}: ${teaser.hint}`}>
+                    <Cap
+                      face={
+                        <>
+                          <span className="pic">
+                            <LockGlyph />
+                          </span>
+                          <span className="nm">{teaser.label}</span>
+                        </>
+                      }
+                      band={<span className="pr">{teaser.hint}</span>}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+      {menu.view === "run" && (
+        <>
+          {back}
+          <RunBox
+            className="sd-run"
+            widgets={widgets}
+            onRun={(id) => {
+              done();
+              actions.openWidget(id);
+            }}
           />
-        </button>
-      ))}
-      {teasers.map((teaser, i) => (
-        <div key={`${teaser.label}-${i}`} className="sd-key build locked" aria-disabled title={`${t("build.locked")}: ${teaser.hint}`}>
-          <Cap
-            face={
-              <>
-                <span className="pic">
-                  <LockGlyph />
-                </span>
-                <span className="nm">{teaser.label}</span>
-              </>
-            }
-            band={<span className="pr">{teaser.hint}</span>}
-          />
-        </div>
-      ))}
-      <button
-        type="button"
-        className="sd-key build help"
-        onClick={() => {
-          actions.openHelp();
-          done();
-        }}
-      >
-        <Cap
-          face={
-            <>
-              <span className="pic">
-                <HelpGlyph />
-              </span>
-              <span className="nm">{t("build.help")}</span>
-            </>
-          }
-          band={<span className="pr">{t("help.title")}</span>}
-        />
-      </button>
+        </>
+      )}
     </div>
   );
 }
@@ -103,7 +214,7 @@ export function Deck({ items, teasers = [], actions, done }: Pick<SlotPropsMap["
  * The build keys, behind one "Build" keycap you press: only the tools you have unlocked (one key each, its price on the front
  * band, its hotkey as the legend), then the keys still blank (locked, with what unlocks them), then Help.
  */
-export function BuildBar({ items, tip, teasers = [], actions }: SlotPropsMap["BuildBar"]) {
+export function BuildBar({ items, tip, teasers = [], widgets = [], actions }: SlotPropsMap["BuildBar"]) {
   const t = useT();
   const coach = useCoach();
   const [open, setOpen] = useState(false);
@@ -120,7 +231,7 @@ export function BuildBar({ items, tip, teasers = [], actions }: SlotPropsMap["Bu
           <b>{tip.name}</b> {tip.text} {tip.upkeepText && <span className="dim">{tip.upkeepText}</span>}
         </div>
       )}
-      {open && <Deck items={items} teasers={teasers} actions={actions} done={() => toggle(false)} />}
+      {open && <Deck items={items} teasers={teasers} widgets={widgets} actions={actions} done={() => toggle(false)} />}
       <div className="sd-deck sd-deck-closed">
         <button type="button" className={`sd-key build k-path open ${open ? "on" : ""}`} aria-expanded={open} aria-haspopup="true" onClick={() => toggle(!open)} {...coach.attrs("start", !open && inside)}>
           <Cap

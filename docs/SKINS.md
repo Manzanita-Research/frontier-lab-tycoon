@@ -226,6 +226,31 @@ If your slot needs copy that has no key, write it into the slot (as Frontier 95 
 | `build.display` | Display… |
 | `build.shutdown` | Shut Down Lab… |
 | `build.placing` | Placing {name} |
+| `build.facilities` | Facilities |
+| `build.group.compute` | Compute & Power |
+| `build.group.research` | Research & Revenue |
+| `build.group.amenities` | Amenities |
+| `build.group.offices` | Staff & Offices |
+| `build.run` | Run… |
+| `build.facilitiesCount` | {n} buildings |
+| `build.runCount` | {n} widgets |
+| `build.groupNo` | {n}. |
+| `run.title` | Run |
+| `run.prompt` | Type the name of a widget, and the lab will open it for you. |
+| `run.open` | Open: |
+| `run.ok` | OK |
+| `run.cancel` | Cancel |
+| `run.none` | No widget called that yet. Press OK anyway: it might be funny. |
+| `run.back` | Back |
+| `mode.building` | Placing {name} · Esc to stop building |
+| `mode.path` | Drawing path · Esc to stop building |
+| `mode.bulldoze` | Bulldozing · Esc to stop |
+| `mode.zone` | Painting {name} · Esc to stop |
+| `mode.subBuilding` | Shift-click to place another · right-click cancels |
+| `mode.subPath` | Drag to lay a run · right-click also stops |
+| `mode.subBulldoze` | Drag to clear a run · right-click also stops |
+| `mode.subZone` | Drag over tiles · right-click also stops |
+| `mode.done` | Done |
 | `speed.label` | Game speed |
 | `speed.pause` | Pause |
 | `speed.1` | 1× speed |
@@ -340,6 +365,7 @@ If your slot needs copy that has no key, write it into the slot (as Frontier 95 
 | `news.paused` | News Room · campus paused |
 | `drama.button` | Today's Drama |
 | `drama.open` | Open Today's Drama |
+| `saves.open` | Save / Load |
 | `drama.new` | NEW |
 | `drama.on` | ON AIR |
 | `news.close` | Back to campus × |
@@ -485,8 +511,10 @@ A slot is a React component. Each gets **its slice of the view-model plus `actio
 | `Drama` | `{ drama, actions }` | The Today's Drama window, while `drama.open`: `drama.latest` as a short card (title, `dateText`, `ago`, `teasers`, `summary`, `event`), `drama.archive` (older packs), `drama.on` (the pack playing in this lab), `drama.status` (`loading` / `error` / `ready`; an empty ready feed is normal). `drama.intro` means a pack has just loaded: say what's coming. `playDrama(id)` starts a new lab with it, `closeDrama()` closes and clears the NEW badge. |
 | `Memo` | `{ memo, layout, actions }` | The Memo (FLT-57). `memo.phase` `"coming"`: a countdown (`title`, today's `line`, `daysLeft`, `progress` 0 to 1), not modal, out of the way at the top. `"extra"`: the extra edition once a box is ticked (`extra.headline`, `deck`, `choice`, the three `reactions` with names, the lingering `effects`): modal, holds time (`useAutoPause`), closed with `dismissMemo(memo.key)`. |
 | `Challenge` | `{ challenge, layout, actions }` | A friend's link opened the game on their seed (FLT-57): `challenge.line` ("Your friend's lab was Captured on day 212."), `ask`, their `ending` (and `tone`) and `stats`. Modal, holds time, one button labelled `cta` that calls `dismissChallenge()`. |
+| `Welcome` | `{ welcome, saves, actions }` | "Welcome back" (FLT-65), while `saves.welcome` is set: a returning player's autosave (`welcome.lab`, `date`, `ago`). `continueSave()` loads it, `dismissWelcome()` plays the new lab instead. Say plainly that a new lab takes over the autosave after a month. Time is held. |
+| `SaveLoad` | `{ saves, actions }` | The Save/Load window (FLT-65), rendered while `saves.open`, `saves.modPrompt` or `saves.dragging`. `saves.slots` is the autosave then slots 1 to 3 (`save` is null when empty, `broken` when unreadable): `saveTo(slot)` (not the autosave), `loadFrom(slot)`, `exportSave(slot)`, `deleteSave(slot)`. `exportSave("current")` and `importSave(file)` (the kit's `ImportButton`) move a lab as a `.fltsave` file. With `saves.modPrompt`, ask first: `fetchModsAndLoad()` (only if `canFetch`), `loadWithoutMods()`, `cancelModPrompt()`. With only `saves.dragging`, show where to drop a file. `saves.available` is false in private browsing: the slots are off, files still work. Time is held. Open it with `openSaves()` from somewhere in your chrome (Ctrl+S / ⌘S opens it in every skin). |
 
-The **docked** slots (`Layout` receives them pre-rendered) are `Stats`, `Training`, `Objectives`, `Inspector`, `BuildBar`, `Speed`, `Staff`, `ThoughtsPanel`, `Ticker`, `Toasts` (one `Toast` at a time: the newest toast, or the standing hint when nobody is talking), `Assistant`, `Arena`, `Benchmarks`, `Voice`, `Factions`, `Papers`, `NewsControls`, `NewsArrival`, `PhotoButton`, `DisasterAlert` and `DramaButton`. `AuditPin` and `GateLegend` are pinned into the scene like `Bubble`. The modal slots (`EventCard`, `Livestream`, `Hearing`, `LeakedChat`, `DramaCard`, `ReportCard`, `Bill`, `PromiseTracker`, `EraCard`, `Outcome`, `Ending`, `Takeover`, `Memo`, `Challenge`, `NewsRoom`, `Mixer`, `ModManager`, `ModSkinOffer`, `Drama`, `SkinPicker`, `PaperMoment`, `CrumbWiki`, `DisasterMenu`) and `PhotoOverlay` and `Beat` are rendered by the game when there is something to show.
+The **docked** slots (`Layout` receives them pre-rendered) are `Stats`, `Training`, `Objectives`, `Inspector`, `BuildBar`, `Speed`, `Staff`, `ThoughtsPanel`, `Ticker`, `Toasts` (one `Toast` at a time: the newest toast, or the standing hint when nobody is talking), `Assistant`, `Arena`, `Benchmarks`, `Voice`, `Factions`, `Papers`, `NewsControls`, `NewsArrival`, `PhotoButton`, `DisasterAlert` and `DramaButton`. `AuditPin` and `GateLegend` are pinned into the scene like `Bubble`. The modal slots (`EventCard`, `Livestream`, `Hearing`, `LeakedChat`, `DramaCard`, `ReportCard`, `Bill`, `PromiseTracker`, `EraCard`, `Outcome`, `Ending`, `Takeover`, `Memo`, `Challenge`, `NewsRoom`, `Mixer`, `ModManager`, `ModSkinOffer`, `Drama`, `SkinPicker`, `PaperMoment`, `CrumbWiki`, `DisasterMenu`, `Welcome`, `SaveLoad`) and `PhotoOverlay` and `Beat` are rendered by the game when there is something to show.
 
 ## Writing slots.tsx
 
@@ -561,7 +589,7 @@ interface HudVM {
 
 Numbers come as numbers (`cash.value`) **and** formatted text (`cash.text`), so you can roll an odometer and still have a caption. Colours the game owns (the walker's `portrait.body`, an Arena lab's `color`) come as CSS colour strings.
 
-`HudActions` is everything a skin can ask for: `place(kind)`, `setSpeed(n)`, `togglePause()`, `choose(eventId, i)`, `continueEra()`, `select(id)`, `follow(id, on?)`, `closeInspector()`, `highlight(key)`, the payroll (`closeStaff`, `hire(job)`, `fire(id)`, `paintZone(id | null)`, `clearZone(id)`), `dismissToast(id)`, the coach and the cards (`coachSkip()`, `coachReplay()`, `dismissUnlock()`, `buildPanel(open)`, `openHelp()`, `closeHelp()`), the spend check (`confirmSpend()`, `cancelSpend()`), `holdTime(id, open)` (use the kit's `useAutoPause`), `toggleArena()`, `keepPlaying()`, `newLab()`, the news-room ones (`openNews`, `viewNews`, `closeNews`, `skipNews`, `revealChat`), sound (`openMixer`, `closeMixer`, `setMuted`, `setVolume`, `playCue`), photo mode (`setPhoto`, `setPhotoTime`, `takePhoto`) skins (`openSkinPicker`, `previewSkin`, `applySkin`, `cancelSkinPicker`, `setReducedMotion`) mods (`openMods`, `closeMods`, `removeMod`) and Today's Drama (`openDrama`, `closeDrama`, `playDrama`). Each is safe to call at any time; the game ignores what does not apply.
+`HudActions` is everything a skin can ask for: `place(kind)`, `setSpeed(n)`, `togglePause()`, `choose(eventId, i)`, `continueEra()`, `select(id)`, `follow(id, on?)`, `closeInspector()`, `highlight(key)`, the payroll (`closeStaff`, `hire(job)`, `fire(id)`, `paintZone(id | null)`, `clearZone(id)`), `dismissToast(id)`, the coach and the cards (`coachSkip()`, `coachReplay()`, `dismissUnlock()`, `buildPanel(open)`, `openHelp()`, `closeHelp()`), the spend check (`confirmSpend()`, `cancelSpend()`), `holdTime(id, open)` (use the kit's `useAutoPause`), `toggleArena()`, `keepPlaying()`, `newLab()`, the news-room ones (`openNews`, `viewNews`, `closeNews`, `skipNews`, `revealChat`), sound (`openMixer`, `closeMixer`, `setMuted`, `setVolume`, `playCue`), photo mode (`setPhoto`, `setPhotoTime`, `takePhoto`) skins (`openSkinPicker`, `previewSkin`, `applySkin`, `cancelSkinPicker`, `setReducedMotion`) mods (`openMods`, `closeMods`, `removeMod`) Today's Drama (`openDrama`, `closeDrama`, `playDrama`) and saves (`openSaves`, `closeSaves`, `saveTo`, `loadFrom`, `deleteSave`, `exportSave`, `importSave`, `continueSave`, `dismissWelcome`, `fetchModsAndLoad`, `loadWithoutMods`, `cancelModPrompt`). Each is safe to call at any time; the game ignores what does not apply.
 
 Changing the contract: keep changes **additive** (new fields, new actions) and add a fixture to `src/ui/hud/fixtures.ts` + a test in `vm.test.ts`. A breaking change means bumping `SKIN_API_VERSION` and every `skin.json`.
 

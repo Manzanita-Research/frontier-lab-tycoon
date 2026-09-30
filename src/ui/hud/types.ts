@@ -147,6 +147,51 @@ export interface BuildItemVM {
   isPath: boolean;
   /** A tile that opens a window instead of picking a tool ("staff", "senate"): never the tool in your hand. */
   panel?: boolean;
+  /**
+   * FLT-63: where it goes in the Start menu. `tools` (Path, Bulldoze) stay at the top level; the rest are the groups of
+   * the "Facilities ▸" submenu, in this order: `compute`, `research`, `amenities`, `offices`. The kit's `facilityGroups`
+   * sorts a list of items into them. Absent: `amenities`.
+   */
+  group?: FacilityGroupVM;
+}
+
+/** FLT-63: the Start menu's groups. See `BuildItemVM.group`. */
+export type FacilityGroupVM = "tools" | "compute" | "research" | "amenities" | "offices";
+
+/**
+ * FLT-63: the tool in your hand, as a mode: what the hint says and how it ends. `sticky` modes (Path, Bulldoze, painting a
+ * patrol zone) stay on after each tile; a building drops out after one placement (Shift keeps it). Esc, a right-click, the
+ * tool again or another tool always ends it. The host draws the hint ("Esc to stop building") near the pointer, or a
+ * **Done ✕** button on touch screens; a skin only restyles `.mode-hint` / `.mode-done`, and may relabel them (strings
+ * `mode.*`).
+ */
+export interface PlaceModeVM {
+  kind: "path" | "bulldoze" | "building" | "zone";
+  /** The tool ("path", "hall", ...), or null while painting a zone. */
+  tool: BuildKindVM | null;
+  /** "Path", "Training Hall", "Kevin's patrol". */
+  name: string;
+  sticky: boolean;
+}
+
+/**
+ * FLT-63: a UI widget the Start menu's "Run…" can open (the Run dialog in Frontier 95): a window, a panel or a tab.
+ * `actions.openWidget(id)` opens it (never shuts it), and a slot that keeps its own open state hears about it through
+ * the kit's `useWidget(id, open)`. Only what the lab has earned is listed.
+ */
+export interface WidgetVM {
+  /** "properties", "finance", "arena", "benchmarks", "thoughts", "traffic", "discourse", "papers", "news", "staff", "senate", "disasters", "drama", "mods", "help", "display", "sound". */
+  id: string;
+  /** "Thoughts" */
+  name: string;
+  /** What to type in a Run box: "thoughts.txt", "arena.exe". */
+  file: string;
+  /** One line for the list. */
+  blurb: string;
+  /** An icon id (the build icons' ids plus the widgets' own: "arena", "thoughts", "news", ...). */
+  icon: string;
+  /** Other names a Run box accepts ("finance", "money"). Lower case. */
+  aliases: string[];
 }
 
 export interface BuildTipVM {
@@ -1482,6 +1527,68 @@ export interface ModsVM {
   contentHash: string | null;
 }
 
+/** A save, as the Save/Load window and "Welcome back" show it (FLT-65). */
+export interface SaveSummaryVM {
+  /** "Gradient Descent Labs" */
+  lab: string;
+  /** "Y2 · Mar 5" */
+  date: string;
+  day: number;
+  /** "3 hours ago", "just now", "2 days ago" */
+  ago: string;
+  /** "45K" */
+  size: string;
+  /** The skin it was saved in ("Frontier 95"), or null. Loading puts it back on. */
+  skin: string | null;
+  /** Ids of the mods it was made with. */
+  mods: string[];
+}
+
+/** One row of the Save/Load window: the autosave or a manual slot. */
+export interface SaveSlotVM {
+  /** "auto", "1", "2", "3": what `saveTo`, `loadFrom`, `deleteSave` and `exportSave` take. */
+  slot: string;
+  /** "Autosave", "Slot 1" */
+  label: string;
+  /** Null for an empty slot. */
+  save: SaveSummaryVM | null;
+  /** Something is there that isn't a readable save ("Scrambled"), or null. */
+  broken: string | null;
+}
+
+/** A save made with mods this session doesn't have (or without ones it has). */
+export interface SaveModPromptVM {
+  lab: string;
+  /** Mods the save needs that aren't running ("my-mod 1.2.0"). */
+  missing: string[];
+  /** Mods running now that the save was made without. */
+  extra: string[];
+  /** Every missing mod came with its `?mod=` link, so "Reload with its mods" can fetch them. */
+  canFetch: boolean;
+}
+
+/** Saving and loading (FLT-65): the Save/Load window, "Welcome back", and the prompt about mods. */
+export interface SavesVM {
+  open: boolean;
+  /** False when the browser keeps nothing (private browsing): the slots are off, Export and Import still work. */
+  available: boolean;
+  /** The autosave, then slots 1 to 3. */
+  slots: SaveSlotVM[];
+  /** The lab playing now: what Save writes. */
+  current: { lab: string; date: string };
+  /** "Welcome back": the autosave to continue, or null. Time holds while it is up. */
+  welcome: SaveSummaryVM | null;
+  /** A load, save or import is under way. */
+  busy: boolean;
+  /** What just happened ("Saved to slot 2.", "That file isn't a lab save."), or null. */
+  status: { text: string; tone: ToneVM } | null;
+  modPrompt: SaveModPromptVM | null;
+  /** How much of the browser's room the saves take: "92K of about 5 MB", and 0 to 1. */
+  storage: { text: string; used: number };
+  /** A file is being dragged over the page: show where to drop it. */
+  dragging: boolean;
+}
+
 /** One published Daily Drama pack (FLT-34): a small parody mod about the day's industry news, merged after review. */
 export interface DramaPackVM {
   id: string;
@@ -1646,6 +1753,10 @@ export interface HudVM {
   inspector: InspectorVM | null;
   buildItems: BuildItemVM[];
   buildTip: BuildTipVM | null;
+  /** FLT-63: the mode the pointer is in (a tool in hand, or painting a patrol zone), or null. */
+  mode?: PlaceModeVM | null;
+  /** FLT-63: what the Start menu's "Run…" can open, in list order. */
+  widgets?: WidgetVM[];
   speed: SpeedVM;
   staff: StaffVM;
   /** The Senate window: the Promise Tracker and the bill (FLT-22/23). `tracker` is null until the pack wakes. */
@@ -1703,6 +1814,8 @@ export interface HudVM {
   beat: BeatVM | null;
   skins: SkinPickerVM;
   mods: ModsVM;
+  /** Saving and loading (FLT-65). */
+  saves: SavesVM;
   /** Disasters (FLT-32): `enabled: false` until the lab earns them. */
   disasters: DisastersVM;
   /** Today's Drama (FLT-34). */
@@ -1714,6 +1827,8 @@ export interface HudVM {
 export interface HudActions {
   /** Pick a build tool ("path", "cluster", ..., "bulldoze"). Picking the selected one puts it away; `null` clears. `"staff"` opens or closes the payroll, `"senate"` the Senate window. */
   place(kind: BuildKindVM | null): void;
+  /** FLT-63: open a widget from `vm.widgets` (Run…). Opens, never toggles shut; an unknown or unearned id does nothing. */
+  openWidget(id: string): void;
   setSpeed(speed: number): void;
   togglePause(): void;
   /** Answer the open event card. */
@@ -1843,4 +1958,24 @@ export interface HudActions {
   closeDrama(): void;
   /** Load a published Drama pack by id (reloads with it in `?mod=`: a new lab). */
   playDrama(id: string): void;
+  // Saves (FLT-65). `slot` is a SaveSlotVM's `slot`.
+  openSaves(): void;
+  closeSaves(): void;
+  /** Save the lab playing now to a slot (over what is there). */
+  saveTo(slot: string): void;
+  loadFrom(slot: string): void;
+  deleteSave(slot: string): void;
+  /** Download a slot, or the lab playing now (`"current"`), as a `.fltsave` file. */
+  exportSave(slot: string): void;
+  /** Load a `.fltsave` file (a file picker's, or a drop's). */
+  importSave(file: File): void;
+  /** "Welcome back": load the autosave. */
+  continueSave(): void;
+  /** "Welcome back": play the new lab instead. */
+  dismissWelcome(): void;
+  /** The mods prompt: reload with the save's mods, then load it. */
+  fetchModsAndLoad(): void;
+  /** The mods prompt: load it with the mods running now. */
+  loadWithoutMods(): void;
+  cancelModPrompt(): void;
 }

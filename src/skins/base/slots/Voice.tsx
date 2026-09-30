@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { VoiceGraph } from "../../kit";
+import { VoiceGraph, useWidget } from "../../kit";
 import { useT } from "../../context";
 import type { SlotPropsMap } from "../../types";
 
@@ -7,6 +7,7 @@ import type { SlotPropsMap } from "../../types";
 export function Voice({ leapfrog, layout }: SlotPropsMap["Voice"]) {
   const t = useT();
   const [open, setOpen] = useState(false);
+  useWidget("traffic", () => setOpen(true));
   const { voice } = leapfrog;
   // On a phone the campus needs the room: the Benchmarks strip carries the news-cycle share instead.
   if (layout.compact) return null;

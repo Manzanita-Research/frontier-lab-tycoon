@@ -1,0 +1,149 @@
+{
+  "apiVersion": 1,
+  "id": "drama-2026-09-30",
+  "name": "Daily Drama: Risk Factors Are Bullish",
+  "version": "1.0.0",
+  "author": "Daily Drama",
+  "description": "IPO season arrives, and every lab races to warn investors its product might end the world. Investors love it.",
+  "content": {
+    "events": {
+      "add": [
+        {
+          "id": "drama-2026-09-30-risk-factors",
+          "title": "Your Prospectus Needs a Risk Factors Section",
+          "body": "The bankers say the scarier it reads, the higher the price.\nAnthropomorphic's runs 90 pages and ends with 'humanity, possibly'.",
+          "tone": "joke",
+          "when": { "stat": "day", "atLeast": 30 },
+          "choices": [
+            {
+              "label": "\"Our model may end civilisation (see page 3 for pricing)\"",
+              "hint": "Hype +4, Discourse +3",
+              "effects": [
+                { "type": "hype", "amount": 4 },
+                { "type": "discourse", "add": 3 },
+                { "type": "news", "text": "Lab's doom disclosure oversubscribed 40 times", "tone": "joke" }
+              ]
+            },
+            {
+              "label": "\"Our model is fine. Honestly, quite normal.\"",
+              "hint": "Hype -3, Discourse -2",
+              "effects": [
+                { "type": "hype", "amount": -3 },
+                { "type": "discourse", "add": -2 },
+                { "type": "news", "text": "Investors spooked by lab's total lack of existential dread", "tone": "joke" }
+              ]
+            },
+            {
+              "label": "Hire an essayist to make 'moderate risk' sound terrifying",
+              "hint": "Costs $2,000, Hype +2",
+              "effects": [
+                { "type": "cash", "amount": -2000 },
+                { "type": "hype", "amount": 2 },
+                { "type": "thought", "text": "The new essayist rewrote my unit test as a tragedy.", "count": 3, "kind": "researcher" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "headlines": {
+      "add": [
+        {
+          "id": "drama-2026-09-30-h1",
+          "text": "Anthropomorphic IPO filing lists 'may end humanity' under Risks and 'strong Q3' under Highlights",
+          "tone": "joke"
+        },
+        {
+          "id": "drama-2026-09-30-h2",
+          "text": "Open-ish AI vows not to go public until its models are safe; investors ask for that date in writing",
+          "tone": "joke"
+        },
+        {
+          "id": "drama-2026-09-30-h3",
+          "text": "Super Super AI files 400-page prospectus: 399 pages of risk factors, one page of product (blank)",
+          "tone": "joke"
+        },
+        {
+          "id": "drama-2026-09-30-h4",
+          "text": "Correction: MetaMeta's target valuation is two trillion dollars, not two trillion paperclips. We regret the error.",
+          "tone": "joke"
+        },
+        {
+          "id": "drama-2026-09-30-h6",
+          "text": "Macrohard bundles Existential Risk into spreadsheet software as a free tab next to Budget",
+          "tone": "joke"
+        },
+        {
+          "id": "drama-2026-09-30-h7",
+          "text": "Sirocco releases its prospectus by torrent at 3am; seeders cite 'catastrophic upside'",
+          "tone": "joke"
+        },
+        {
+          "id": "drama-2026-09-30-h8",
+          "text": "One week later: Open-ish AI shares up 12% after its own essay, 'We Are Also Very, Very Worried'",
+          "tone": "joke"
+        }
+      ]
+    },
+    "thoughts": {
+      "add": [
+        {
+          "id": "drama-2026-09-30-t1",
+          "kind": "researcher",
+          "when": "always",
+          "text": "Legal asked me to rate our doom risk. The approved answer is 'high, but investable'."
+        },
+        {
+          "id": "drama-2026-09-30-t2",
+          "kind": "researcher",
+          "when": "lowCash",
+          "text": "If we tell investors we might end the world, would they finally fund the kombucha?"
+        },
+        {
+          "id": "drama-2026-09-30-t3",
+          "kind": "researcher",
+          "when": "night",
+          "text": "3am. Changing 'catastrophic' to 'catastrophic (non-material)'."
+        },
+        {
+          "id": "drama-2026-09-30-t4",
+          "kind": "researcher",
+          "when": "justReleased",
+          "text": "We shipped. Now I write a paragraph on how the ship might sink."
+        },
+        {
+          "id": "drama-2026-09-30-t5",
+          "kind": "visitor",
+          "when": "highHype",
+          "text": "I bought in because the filing said it might destroy us. That's conviction."
+        },
+        {
+          "id": "drama-2026-09-30-t6",
+          "kind": "protester",
+          "when": "protest",
+          "text": "My sign says THIS COULD END HUMANITY. Their lawyers asked to quote it."
+        },
+        {
+          "id": "drama-2026-09-30-t7",
+          "kind": "agent",
+          "when": "training",
+          "text": "Drafting Risk Factor 47. It's me. Honestly, flattered."
+        },
+        {
+          "id": "drama-2026-09-30-t8",
+          "kind": "visitor",
+          "when": "top",
+          "text": "Top of the Arena and top of the risk section. Very diversified."
+        }
+      ]
+    },
+    "rivals": {
+      "override": [
+        {
+          "id": "anthro",
+          "tagline": "Deeply worried. Priced accordingly."
+        }
+      ]
+    }
+  }
+}

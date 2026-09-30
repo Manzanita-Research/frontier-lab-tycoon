@@ -2769,6 +2769,53 @@
     transform: translateX(-2px);
   }
 }
+
+/* ---- FLT-63: Facilities as captioned plates, and Run… ---- */
+[data-skin="field-almanac"] {
+  .fa-shelf.view-facilities {
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .fa-guide {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    figcaption {
+      padding: 3px 4px 0;
+      border-top: 1px solid var(--fa-hair);
+      font: italic 13px var(--flt-font-display);
+      color: var(--fa-soft);
+      text-align: center;
+      white-space: nowrap;
+      b {
+        font-style: normal;
+        font-variant: small-caps;
+        color: var(--fa-ink);
+      }
+    }
+  }
+  .fa-guide-tools {
+    display: flex;
+    gap: 6px;
+  }
+  .fa-tool.fa-folder .fa-well {
+    color: var(--fa-dusk);
+  }
+  .fa-shelf.view-run {
+    align-items: flex-start;
+  }
+  .fa-run {
+    width: min(460px, calc(100vw - 150px));
+    padding: 4px 6px 6px;
+    .runbox-prompt {
+      font: italic 14px var(--flt-font-display);
+    }
+    .runbox-list {
+      max-height: min(240px, 34dvh);
+    }
+
 /* The Bird App (FLT-69) as a bird-watching log: ruled sightings in italic ink, a rare sighting stamped in gold. */
 [data-skin="field-almanac"] {
   .birdapp.open {

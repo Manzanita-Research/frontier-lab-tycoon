@@ -1,6 +1,6 @@
 // Frontier 95's windows: Lab Properties, the copy dialog, sticky notes, Properties of a walker, Task Mangler, Thoughts.txt.
 import { useState } from "react";
-import { ALL_VISIBLE, Odometer, money, useAutoPause, useSlots } from "../kit";
+import { ALL_VISIBLE, Odometer, money, useAutoPause, useSlots, useWidget } from "../kit";
 import { useCoach, useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import { Ico, PixelPortrait } from "./icons";
@@ -16,6 +16,11 @@ export function Stats({ stats, layout, visible = ALL_VISIBLE, disasters, actions
   const [tab, setTab] = useState<StatsTab>("general");
   const [collapsed, setCollapsed] = useState(layout.compact);
   useAutoPause(actions, "stats", layout.compact && !collapsed);
+  // Start ▸ Run… "labprops.cpl" or "finance.xls": unfold, on the right tab.
+  useWidget(["properties", "finance"], (id) => {
+    setCollapsed(false);
+    setTab(id === "finance" && visible.revenue ? "finance" : "general");
+  });
   const title = t("stats.window", { lab: stats.labName });
   const trend = { up: "▲", down: "▼", flat: "" }[stats.vibes.trend];
   const tabs: { id: StatsTab; label: string }[] = [
@@ -350,6 +355,7 @@ export function Arena({ arena, leapfrog, layout, actions }: SlotPropsMap["Arena"
   const bench = leapfrog.enabled;
   // With Release Leapfrog on, the leaderboard is the live part of the race: it opens first, and the tab lights up on a launch.
   const [tab, setTab] = useState<"perf" | "bench">("bench");
+  useWidget(["arena", "benchmarks"], (id) => setTab(id === "benchmarks" ? "bench" : "perf"));
   const onBench = bench && tab === "bench" && arena.open;
   const launched = leapfrog.rows.some((r) => r.flash);
   return (
@@ -420,6 +426,7 @@ export function ThoughtsPanel({ rows, layout, actions }: SlotPropsMap["ThoughtsP
   const [open, setOpen] = useState(() => !layout.compact);
   useAutoPause(actions, "thoughts", layout.compact && open);
   useStackWindow("thoughts", !open, (minimised) => setOpen(!minimised));
+  useWidget("thoughts", () => setOpen(true));
   return (
     <Win className={`f95-thoughts ${open ? "open" : ""}`} title={`${t("thoughts.title")}.txt`} icon="doc" onTitleClick={() => setOpen(!open)} buttons={[{ g: "min", label: open ? "Minimize" : "Restore", onClick: () => setOpen(!open) }]}>
       {open && (
