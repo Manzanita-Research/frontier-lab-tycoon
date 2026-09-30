@@ -37,7 +37,7 @@ export function IntroRoot({ intro, loadGame }: { intro: Intro; loadGame: LoadGam
     const g = loadGame();
     void Promise.all([g.skin.then((m) => m.bootSkin()), g.App]).then(([, Game]) => {
       const q = new URLSearchParams(window.location.search);
-      for (const k of ["intro", "beat", "sheet", "tilt", "fx", "fps", "motion"]) q.delete(k);
+      for (const k of ["intro", "beat", "sheet", "tilt", "fx", "fps", "motion", "hold"]) q.delete(k);
       const search = q.toString();
       history.pushState({ flt: "game" }, "", `/${search ? `?${search}` : ""}`);
       // Back returns to the shelf: the game owns the page from here, so the simplest honest way back is a reload.

@@ -121,13 +121,14 @@ export function Kiosk({ beat, context, send, weightsKey }: StageProps & { weight
   return (
     <group>
       {/* The counter */}
-      <mesh position={[2.4, COUNTER_Y / 2, 0.6]}>
-        <boxGeometry args={[2.5, COUNTER_Y, 0.85]} />
-        <meshStandardMaterial color="#6d5a8a" roughness={0.8} />
+      <mesh position={[2.4, (COUNTER_Y - 0.02) / 2, 0.6]}>
+        <boxGeometry args={[2.5, COUNTER_Y - 0.02, 0.85]} />
+        <meshStandardMaterial color="#ece8dd" roughness={0.8} />
       </mesh>
+      {/* The laminate top: purple, so paper reads against it */}
       <mesh position={[2.4, COUNTER_Y - 0.01, 0.6]}>
         <boxGeometry args={[2.56, 0.02, 0.9]} />
-        <meshStandardMaterial color="#ece8dd" roughness={0.55} />
+        <meshStandardMaterial color="#6d5a8a" roughness={0.55} />
       </mesh>
       <mesh position={[2.4, COUNTER_Y * 0.55, 1.026]}>
         <planeGeometry args={[2.3, 0.22]} />

@@ -11,8 +11,8 @@ export const DURATIONS: Record<string, number> = { pulling: 1.8, unwrapping: 2.1
 export const BOOT_BEATS = new Set(["disc", "warmup", "post", "splash", "dive"]);
 
 // ---- Layout, in metres. The shelf is at x = 0, the demo counter to its right. ----
-export const SHELF_W = 2.0;
-export const SHELF_TOPS = [0.3, 0.75, 1.2] as const;
+export const SHELF_W = 1.5;
+export const SHELF_TOPS = [0.32, 0.7, 1.08] as const;
 export const HERO_SIZE = [0.26, 0.32, 0.08] as const;
 export const COUNTER_Y = 0.9;
 export const HERO_ON_SHELF = new THREE.Vector3(0, SHELF_TOPS[1] + HERO_SIZE[1] / 2 + 0.002, 0.03);

@@ -9,7 +9,7 @@ import { SHELF, type ShelfBox } from "../content";
 import { canvasTexture, dampTo, frameDt, pose, SHELF_TOPS, SHELF_W, useClock, type Pose, type StageProps } from "./rig";
 
 const DEPTH = 0.38;
-const TOP = 1.7;
+const TOP = 1.46;
 
 export function Store({ beat, context, send }: StageProps) {
   const tex = useMemo(() => {
@@ -93,7 +93,7 @@ export function Store({ beat, context, send }: StageProps) {
 /** Where a shelf box stands: x along the shelf, on its shelf, pushed to the front. */
 function shelfPose(b: ShelfBox): Pose {
   const [, h] = b.size;
-  const x = b.at * (SHELF_W / 2 - 0.16);
+  const x = b.at * (SHELF_W / 2 - 0.13);
   return pose([x, SHELF_TOPS[b.shelf] + h / 2 + 0.001, 0.04]);
 }
 
@@ -163,7 +163,7 @@ function ShelfItem({ box, beat, peeking, anyPeek, send }: { box: ShelfBox; beat:
 /** The aisle over: another shelf, full of boxes nobody picks, in one draw call. */
 function NextAisle() {
   const ref = useRef<THREE.InstancedMesh>(null);
-  const N = 42;
+  const N = 36;
   useEffect(() => {
     const m = ref.current;
     if (!m) return;
@@ -173,9 +173,9 @@ function NextAisle() {
     const palette = ["#c8102e", "#0b3d91", "#ffe14d", "#58b24f", "#8a5ae2", "#111111", "#f07ab8", "#3aa0ff", "#e08a1e"];
     let i = 0;
     for (let s = 0; s < 3; s++)
-      for (let j = 0; j < 14 && i < N; j++, i++) {
+      for (let j = 0; j < 12 && i < N; j++, i++) {
         const h = 0.22 + rng.next() * 0.08;
-        o.position.set(-3.55 + j * 0.145 + rng.next() * 0.01, SHELF_TOPS[s]! + h / 2, 0.02);
+        o.position.set(-2.95 + j * 0.13 + rng.next() * 0.01, SHELF_TOPS[s]! + h / 2, 0.02);
         o.rotation.set(0, (rng.next() - 0.5) * 0.08, 0);
         o.scale.set(0.12 + rng.next() * 0.03, h, 0.06);
         o.updateMatrix();
@@ -192,16 +192,16 @@ function NextAisle() {
         <meshStandardMaterial roughness={0.6} />
       </instancedMesh>
       {SHELF_TOPS.map((y) => (
-        <mesh key={y} position={[-2.6, y - 0.0125, 0]}>
-          <boxGeometry args={[2.1, 0.025, DEPTH]} />
+        <mesh key={y} position={[-2.2, y - 0.0125, 0]}>
+          <boxGeometry args={[1.6, 0.025, DEPTH]} />
           <meshStandardMaterial color="#b5b8be" roughness={0.5} />
         </mesh>
       ))}
-      <mesh position={[-2.6, TOP / 2, -0.17]}>
-        <planeGeometry args={[2.1, TOP]} />
+      <mesh position={[-2.2, TOP / 2, -0.17]}>
+        <planeGeometry args={[1.6, TOP]} />
         <meshStandardMaterial color="#9c8360" roughness={0.9} />
       </mesh>
-      <mesh position={[-1.25, 0.25, 0.9]} rotation={[0, 0.3, 0]}>
+      <mesh position={[-1.05, 0.25, 0.85]} rotation={[0, 0.3, 0]}>
         <cylinderGeometry args={[0.28, 0.24, 0.5, 20, 1, true]} />
         <meshStandardMaterial color="#c8102e" side={THREE.DoubleSide} roughness={0.6} />
       </mesh>

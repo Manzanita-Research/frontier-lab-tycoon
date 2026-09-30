@@ -1,7 +1,8 @@
 // The big box's 3D stage (FLT-70 M0, greybox): the store, the shelf, our box, what's in it, and the demo kiosk. Its own
 // chunk, so the reduced-motion still box never loads three. Uses the game's stack: R3F, drei-free here, postprocessing.
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Bloom, EffectComposer, Noise, Vignette } from "@react-three/postprocessing";
+import { Bloom, EffectComposer, Noise, ToneMapping, Vignette } from "@react-three/postprocessing";
+import { ToneMappingMode } from "postprocessing";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import type { Intro } from "../actor";
@@ -53,7 +54,7 @@ export default function Stage({ intro, beat, context }: Props) {
 
   return (
     <div ref={wrap} style={{ position: "absolute", inset: 0, cursor: coa ? "grab" : undefined }}>
-      <Canvas dpr={[1, 2]} camera={{ fov: FOV, near: 0.01, far: 40, position: [0, 1.1, 2.3] }} gl={{ antialias: !intro.params.fx, powerPreference: "high-performance" }}>
+      <Canvas dpr={[1, 2]} camera={{ fov: FOV, near: 0.05, far: 40, position: [0, 1.1, 2.3] }} gl={{ antialias: !intro.params.fx, powerPreference: "high-performance" }}>
         <ClockContext.Provider value={clock}>
           <Director intro={intro} beat={beat} clock={clock} fps={fps} />
           <CameraRig beat={beat} context={context} />
@@ -68,9 +69,11 @@ export default function Stage({ intro, beat, context }: Props) {
           <Kiosk beat={beat} context={context} send={intro.send} weightsKey={intro.params.key} />
           {intro.params.fx && (
             <EffectComposer multisampling={4}>
-              <Bloom mipmapBlur intensity={0.7} luminanceThreshold={0.85} luminanceSmoothing={0.2} />
+              <Bloom mipmapBlur intensity={0.7} luminanceThreshold={1.5} luminanceSmoothing={0.1} />
               <Noise opacity={0.035} />
               <Vignette offset={0.3} darkness={0.55} />
+              {/* The composer renders to a target, where three skips tone mapping: put it back, or paper clips to white. */}
+              <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
             </EffectComposer>
           )}
         </ClockContext.Provider>
@@ -83,14 +86,14 @@ export default function Stage({ intro, beat, context }: Props) {
 /** Runs the beat clock, sends SETTLED when a scripted beat is over, and measures the frame rate. */
 function Director({ intro, beat, clock, fps }: { intro: Intro; beat: string; clock: { current: Clock }; fps: { current: HTMLDivElement | null } }) {
   const gl = useThree((s) => s.gl);
-  const meter = useRef({ frames: 0, since: performance.now(), fps: 0 });
+  const meter = useRef({ frames: 0, since: performance.now(), fps: 0, calls: 0, tris: 0 });
   const beatRef = useRef(beat);
   beatRef.current = beat;
   const sent = useRef<string | null>(null);
 
   useEffect(() => {
     const w = window as unknown as { __intro?: unknown };
-    w.__intro = { send: intro.send, state: () => intro.now()?.value, fps: () => meter.current.fps, info: () => ({ calls: gl.info.render.calls, triangles: gl.info.render.triangles }) };
+    w.__intro = { send: intro.send, state: () => intro.now()?.value, fps: () => meter.current.fps, info: () => ({ calls: meter.current.calls, triangles: meter.current.tris }) };
     return () => void delete w.__intro;
   }, [intro, gl]);
 
@@ -100,13 +103,18 @@ function Director({ intro, beat, clock, fps }: { intro: Intro; beat: string; clo
     const c = clock.current;
     // The first frame snaps everything into place; from the second on, things move.
     if (frames.current++ > 0) c.snap = false;
+    // Count the whole frame (scene and postprocessing passes), not just the last pass.
+    gl.info.autoReset = false;
+    meter.current.calls = gl.info.render.calls;
+    meter.current.tris = gl.info.render.triangles;
+    gl.info.reset();
     if (c.beat !== beatRef.current) {
       c.beat = beatRef.current;
       c.t = 0;
       sent.current = null;
     } else if (!c.snap) c.t += Math.min(dt, 0.25);
     const dur = DURATIONS[c.beat];
-    if (dur !== undefined && c.t >= dur && sent.current !== c.beat) {
+    if (dur !== undefined && c.t >= dur && sent.current !== c.beat && !intro.params.hold) {
       sent.current = c.beat;
       intro.send({ type: "SETTLED" });
     }
@@ -117,7 +125,7 @@ function Director({ intro, beat, clock, fps }: { intro: Intro; beat: string; clo
       m.fps = (m.frames * 1000) / (now - m.since);
       m.frames = 0;
       m.since = now;
-      if (fps.current && !fps.current.hidden) fps.current.textContent = `${m.fps.toFixed(1)} fps\n${gl.info.render.calls} calls\n${(gl.info.render.triangles / 1000).toFixed(1)}k tris`;
+      if (fps.current && !fps.current.hidden) fps.current.textContent = `${m.fps.toFixed(1)} fps\n${m.calls} calls\n${(m.tris / 1000).toFixed(1)}k tris`;
     }
   }, -2);
   return null;
@@ -142,8 +150,8 @@ function CameraRig({ beat, context }: { beat: string; context: IntroContext }) {
       case "shelf": {
         const peek = !!context.peek;
         goalLook.set(0, peek ? 0.85 : 0.92, 0);
-        const w = aspect < 1 ? 1.15 : 2.5;
-        pos.set(peek && aspect >= 1 ? 0.35 : 0, 1.12, fit(w, 1.75, aspect));
+        const w = aspect < 1 ? 1.0 : 2.3;
+        pos.set(peek && aspect >= 1 ? 0.3 : 0, 1.1, fit(w, 1.95, aspect));
         break;
       }
       case "pulling":
@@ -157,9 +165,11 @@ function CameraRig({ beat, context }: { beat: string; context: IntroContext }) {
         break;
       case "unwrapping":
       case "open": {
-        goalLook.set(TRAY.x, 0.9, TRAY.z + 0.02);
+        // On a wide screen the whole view slides right, clear of the contents list.
+        const dx = aspect < 1 ? 0 : -0.14;
+        goalLook.set(TRAY.x + dx, 0.9, TRAY.z + 0.02);
         const d = fit(aspect < 1 ? 0.95 : 1.35, 1.0, aspect);
-        pos.set(TRAY.x + (aspect < 1 ? 0 : -0.12), 0.9 + d * 0.72, TRAY.z + d * 0.7);
+        pos.set(TRAY.x + dx * 2, 0.9 + d * 0.72, TRAY.z + d * 0.7);
         lambda = beat === "unwrapping" ? 2.4 : 3.2;
         break;
       }
@@ -198,8 +208,11 @@ function CameraRig({ beat, context }: { beat: string; context: IntroContext }) {
     camera.position.lerp(pos, a);
     look.lerp(goalLook, a);
     camera.lookAt(look);
-    if (camera.fov !== FOV) {
+    // A near plane at 5 cm keeps the manual's stacked sheets from z-fighting; only the dive into the CRT needs closer.
+    const near = beat === "dive" ? 0.005 : 0.05;
+    if (camera.fov !== FOV || camera.near !== near) {
       camera.fov = FOV;
+      camera.near = near;
       camera.updateProjectionMatrix();
     }
   }, -1);

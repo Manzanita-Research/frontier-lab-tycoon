@@ -33,6 +33,13 @@ export function wrap(g: CanvasRenderingContext2D, text: string, width: number): 
   return out;
 }
 
+/** Set a font at `size`, or smaller if `text` would be wider than `width`. */
+function fitFont(g: CanvasRenderingContext2D, text: string, width: number, weight: number, size: number, family = UI_FONT) {
+  g.font = `${weight} ${size}px ${family}`;
+  const w = g.measureText(text).width;
+  if (w > width) g.font = `${weight} ${(size * width) / w}px ${family}`;
+}
+
 /** Text that shrinks until it fits `width` in at most `maxLines` lines. Returns the height used. */
 function fitText(g: CanvasRenderingContext2D, text: string, x: number, y: number, width: number, size: number, weight: number, maxLines: number, family = UI_FONT, lead = 1.02): number {
   let s = size;
@@ -405,8 +412,10 @@ export function paintSign(c = canvas(1024, 160)): HTMLCanvasElement {
   g.textBaseline = "middle";
   g.font = `900 ${H * 0.4}px ${UI_FONT}`;
   g.fillText(STORE.name, W * 0.03, H * 0.42);
+  // The aisle name takes what's left of the line, shrunk to fit.
+  const room = W * 0.94 - g.measureText(STORE.name).width - W * 0.05;
   g.textAlign = "right";
-  g.font = `800 ${H * 0.22}px ${UI_FONT}`;
+  fitFont(g, STORE.aisle, room, 800, H * 0.22);
   g.fillText(STORE.aisle, W * 0.97, H * 0.42);
   g.fillStyle = "#c8102e";
   g.textAlign = "center";
@@ -806,7 +815,7 @@ export function paintCoaText(key: string, c = canvas(1400, 1000)): HTMLCanvasEle
   g.fillStyle = "#12352a";
   g.font = `800 ${H * 0.034}px ${UI_FONT}`;
   g.fillText(COA.keyLabel, x0 + W * 0.01, H * 0.67);
-  g.font = `400 ${H * 0.058}px ${RETRO_FONT}`;
+  fitFont(g, key, W * 0.56, 400, H * 0.058, RETRO_FONT);
   g.fillStyle = "#000";
   g.fillText(key, x0 + W * 0.01, H * 0.765);
   g.font = `700 ${H * 0.026}px ${UI_FONT}`;
@@ -829,20 +838,23 @@ export function paintBios(c: HTMLCanvasElement, lines: number, mem: number, key:
   g.textBaseline = "top";
   // the energy-star-ish logo, top right: an invented one
   g.fillStyle = "#3aa0ff";
-  g.fillRect(W - 120, 16, 96, 56);
+  g.fillRect(W - 140, 36, 96, 56);
   g.fillStyle = "#ffe14d";
   g.font = `400 ${size * 1.6}px ${RETRO_FONT}`;
-  g.fillText("F95", W - 106, 28);
+  g.fillText("F95", W - 126, 48);
   g.font = `400 ${size}px ${RETRO_FONT}`;
   g.fillStyle = "#c0c0c0";
-  BIOS.header.forEach((l, i) => g.fillText(l, 16, 16 + i * (size + 4)));
+  // Generous margins: the tube's curve eats the corners.
+  const X = 44;
+  const Y = 40;
+  BIOS.header.forEach((l, i) => g.fillText(l, X, Y + i * (size + 4)));
   const all = BIOS.lines.map((l) => l.replace("{mem}", String(mem)).replace("{key}", key));
   all.slice(0, lines).forEach((l, i) => {
     g.fillStyle = l.includes("GENUINE") || l.includes("640K") ? "#ffffff" : "#c0c0c0";
-    g.fillText(l, 16, 16 + (BIOS.header.length + i) * (size + 4));
+    g.fillText(l, X, Y + (BIOS.header.length + i) * (size + 4));
   });
   g.fillStyle = "#c0c0c0";
-  g.fillText(BIOS.footer, 16, H - size - 16);
+  g.fillText(BIOS.footer, X, H - size - Y);
 }
 
 /** The Frontier 95 splash: teal sky, the flag-less logo (an invented one: four panes and a comet), "Starting...". */

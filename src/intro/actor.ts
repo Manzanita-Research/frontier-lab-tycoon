@@ -20,6 +20,8 @@ export type IntroParams = {
   fx: boolean;
   /** `?fps=1` shows the frame counter. */
   fps: boolean;
+  /** `?hold=1` stays on the start beat (screenshots): scripted beats play but don't move on. */
+  hold: boolean;
 };
 
 export function readParams(loc: { search: string }, storage: Storage | null, reducedMotion: boolean): IntroParams {
@@ -36,6 +38,7 @@ export function readParams(loc: { search: string }, storage: Storage | null, red
     tilt: tilt && tilt.length === 2 && tilt.every(Number.isFinite) ? [tilt[0]!, tilt[1]!] : null,
     fx: q.get("fx") !== "0",
     fps: q.get("fps") === "1",
+    hold: q.get("hold") === "1",
   };
 }
 

@@ -9,7 +9,7 @@ import { PAGES, SHEETS } from "../manual";
 import { canvasTexture, frameDt, k, useClock } from "./rig";
 
 const SEGMENTS = 22;
-const GAP = 0.0012;
+const GAP = 0.0025;
 
 export function Book3D({ page, w, h }: { page: number; w: number; h: number }) {
   const clock = useClock();

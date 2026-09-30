@@ -161,7 +161,7 @@ export function HeroBox({ beat, context, send }: StageProps) {
         <mesh material={[art.side, art.side, art.side, art.side, art.frontMat, art.plain]}>
           <boxGeometry args={[W, H, LID]} />
         </mesh>
-        <mesh position={[W * 0.3, H * 0.33, LID / 2 + 0.0015]} rotation={[0, 0, 0.2]}>
+        <mesh position={[W * 0.36, H * 0.07, LID / 2 + 0.0015]} rotation={[0, 0, 0.2]}>
           <planeGeometry args={[0.075, 0.075]} />
           <meshStandardMaterial map={art.fresh} transparent alphaTest={0.3} roughness={0.4} />
         </mesh>
