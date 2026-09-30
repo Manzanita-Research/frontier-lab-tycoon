@@ -103,6 +103,8 @@ export interface PortraitVM {
 
 export interface InspectorVM {
   id: number;
+  /** The lab they work for (or are visiting). */
+  lab: string;
   name: string;
   role: string;
   kind: WalkerKindVM;

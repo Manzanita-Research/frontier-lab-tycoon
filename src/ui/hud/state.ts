@@ -25,10 +25,12 @@ export interface SkinUi {
   reducedMotion: boolean;
 }
 
-export const skinUiAtom = Atom.make<SkinUi>({ active: "base", picker: { open: false, original: null }, refused: [], reducedMotion: false });
+// keepAlive: the boot sequence sets these before React has mounted anything, and an atom nobody subscribes to would
+// forget its value.
+export const skinUiAtom = Atom.keepAlive(Atom.make<SkinUi>({ active: "base", picker: { open: false, original: null }, refused: [], reducedMotion: false }));
 
 /** The skin's components and copy: what the host renders. Starts as the base until the first skin has loaded. */
-export const loadedSkinAtom = Atom.make<LoadedSkin>({ id: "base", name: "Base", slots: baseSlots, strings: { ...BASE_STRINGS } });
+export const loadedSkinAtom = Atom.keepAlive(Atom.make<LoadedSkin>({ id: "base", name: "Base", slots: baseSlots, strings: { ...BASE_STRINGS } }));
 
 /** A client-side night thought (NightThoughts publishes it, the view-model carries it to the Bubble slot). */
 export const nightBubbleAtom = Atom.make<import("./types").BubbleVM | null>(null);

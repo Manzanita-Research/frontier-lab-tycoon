@@ -23,6 +23,7 @@ const opt = (name, fallback) => {
 const skin = opt("skin", null);
 const only = opt("only", "a,b,c,d,e,f").split(",");
 const prefix = opt("prefix", "");
+const measure = rest.includes("--measure");
 const base = opt("url", process.env.URL ?? "http://localhost:4173/");
 mkdirSync(outDir, { recursive: true });
 
@@ -46,6 +47,20 @@ async function scene(key, fn, { mobile = false, query = "" } = {}) {
   await page.waitForTimeout(1800);
   await fn(page);
   await page.waitForTimeout(1500);
+  if (measure) {
+    // How much of the screen is still the campus? Sample a grid and count points where the canvas is what you'd hit.
+    const free = await page.evaluate(() => {
+      let hit = 0, n = 0;
+      const cols = 40, rows = 80;
+      for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) {
+        const el = document.elementFromPoint(((i + 0.5) / cols) * innerWidth, ((j + 0.5) / rows) * innerHeight);
+        n++;
+        if (!el || el.tagName === "CANVAS" || el.tagName === "BODY" || el.tagName === "HTML" || el.id === "root") hit++;
+      }
+      return hit / n;
+    });
+    console.log(`campus visible at rest (${key}): ${(free * 100).toFixed(1)}%`);
+  }
   const path = `${outDir}/${prefix}${key}-${NAMES[key]}${mobile && key !== "e" ? "-phone" : ""}.png`;
   await page.screenshot({ path });
   console.log("saved", path);

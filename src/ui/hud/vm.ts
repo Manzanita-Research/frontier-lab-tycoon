@@ -177,12 +177,13 @@ function objectivesOf(s: Snapshot): ObjectivesVM {
   };
 }
 
-function inspectorOf(who: Inspect | null, following: boolean): InspectorVM | null {
+function inspectorOf(who: Inspect | null, following: boolean, lab: string): InspectorVM | null {
   if (!who) return null;
   const drift = who.kind === "agent" ? (who.needs.find((n) => n.key === "drift")?.value ?? 0) : 0;
   const look = lookOf(who);
   return {
     id: who.id,
+    lab,
     name: who.name,
     role: who.role,
     kind: who.kind,
@@ -413,7 +414,7 @@ export function hudViewModel(i: HudInput): HudVM {
     stats: statsOf(i),
     training: trainingOf(i.snap),
     objectives: objectivesOf(i.snap),
-    inspector: inspectorOf(i.snap.inspect, i.follow),
+    inspector: inspectorOf(i.snap.inspect, i.follow, i.snap.labName),
     buildItems: build.items,
     buildTip: build.tip,
     speed: speedOf(i.speed),

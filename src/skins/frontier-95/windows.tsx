@@ -1,0 +1,351 @@
+// Frontier 95's windows: Lab Properties, the copy dialog, sticky notes, Properties of a walker, Task Mangler, Thoughts.txt.
+import { useState } from "react";
+import { Odometer, money } from "../kit";
+import { useT } from "../context";
+import type { SlotPropsMap } from "../types";
+import { Ico, PixelPortrait } from "./icons";
+import { Blocks, Btn, Field, Sticker, Tabs, Win } from "./parts";
+
+type StatsTab = "general" | "finance" | "arena" | "vibes";
+
+/** "Lab Properties": tabs, a Minesweeper-style LED for Vibes, inset fields and a blocky Hype bar. */
+export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
+  const t = useT();
+  const [tab, setTab] = useState<StatsTab>("general");
+  const [collapsed, setCollapsed] = useState(layout.compact);
+  const title = t("stats.window", { lab: stats.labName });
+  const trend = { up: "▲", down: "▼", flat: "" }[stats.vibes.trend];
+  const led = (
+    <span className="f95-led" aria-label={`${t("stats.vibes")} ${stats.vibes.value}`}>
+      <Odometer value={stats.vibes.value} format={(n) => String(Math.max(0, Math.round(n))).padStart(3, "0")} flash={false} />
+    </span>
+  );
+
+  if (collapsed) {
+    // A single title-bar-height strip (always on a phone until tapped): Vibes, cash and runway at a glance.
+    return (
+      <section className="f95-win f95-lab collapsed" aria-label={title}>
+        <button type="button" className="f95-tb f95-strip" onClick={() => setCollapsed(false)} aria-expanded={false} aria-label={`${title}. ${t("stats.vibes")} ${stats.vibes.value}, ${t("stats.cash")} ${stats.cash.text}, ${t("stats.runway")} ${stats.runway.text}. Tap to open.`}>
+          <Ico name="hall" size={18} />
+          <span className="f95-tt">
+            <b className="f95-strip-led">{String(stats.vibes.value).padStart(3, "0")}</b> {trend} · {stats.cash.text} · <span className={stats.runway.warning ? "warn" : ""}>{stats.runway.text}</span>
+          </span>
+          <span className="f95-b" data-g="max" aria-hidden>
+            <span className="f95-glyph" />
+          </span>
+        </button>
+      </section>
+    );
+  }
+
+  return (
+    <Win
+      className={`f95-lab ${layout.compact ? "sheet" : ""}`}
+      title={title}
+      icon="hall"
+      buttons={[
+        { g: "min", label: "Minimize", onClick: () => setCollapsed(true) },
+        { g: "max", label: "Maximize", onClick: () => setCollapsed(true) },
+        { g: "close", label: "Close", onClick: () => setCollapsed(true) },
+      ]}
+    >
+      <Tabs
+        label="Lab Properties"
+        active={tab}
+        onChange={setTab}
+        tabs={[
+          { id: "general", label: t("stats.tab.general") },
+          { id: "finance", label: t("stats.tab.finance") },
+          { id: "arena", label: t("stats.tab.arena") },
+          { id: "vibes", label: t("stats.tab.vibes") },
+        ]}
+      />
+      <div className="f95-page" role="tabpanel">
+        {tab === "general" && (
+          <div className="f95-statrow">
+            <Field label={t("stats.vibes")} sub={<>{trend} {stats.date}</>}>
+              {led}
+            </Field>
+            <Field label={t("stats.cash")} sub={<span className={stats.net.good ? "" : "bad"}>{stats.net.good ? "▲" : "▼"} {stats.net.text}</span>}>
+              <Odometer className={`f95-v inset ${stats.cash.negative ? "bad" : ""}`} value={stats.cash.value} format={money} />
+            </Field>
+            <Field label={t("stats.runway")} sub={stats.runway.warning ? "⚠ Low" : "OK"} warn={stats.runway.warning}>
+              <span className={`f95-v inset ${stats.runway.warning ? "bad" : ""}`}>{stats.runway.text}</span>
+            </Field>
+            <Field label={t("stats.capability")} sub={stats.capability.latestModel ?? "No model yet"}>
+              <Odometer className="f95-v inset" value={stats.capability.value} />
+            </Field>
+            <Field label={t("stats.hype")} sub={`${Math.round(stats.hype.value)} / 100`}>
+              <Blocks value={stats.hype.value / 100} label={t("stats.hype")} />
+            </Field>
+          </div>
+        )}
+        {tab === "finance" && (
+          <dl className="f95-facts">
+            <dt>Income</dt>
+            <dd className="inset">{stats.finance.incomeText}/day</dd>
+            <dt>Expenses</dt>
+            <dd className="inset">{stats.finance.expensesText}/day</dd>
+            <dt>Net</dt>
+            <dd className={`inset ${stats.net.good ? "" : "bad"}`}>{stats.net.text}</dd>
+            <dt>{t("stats.cash")}</dt>
+            <dd className={`inset ${stats.cash.negative ? "bad" : ""}`}>{stats.cash.text}</dd>
+            <dt>{t("stats.runway")}</dt>
+            <dd className={`inset ${stats.runway.warning ? "bad" : ""}`}>{stats.runway.text}</dd>
+          </dl>
+        )}
+        {tab === "arena" && (
+          <dl className="f95-facts">
+            <dt>{t("stats.arena")}</dt>
+            <dd className="inset">
+              #{stats.arena.rank} {stats.arena.rankDelta === 0 ? "" : stats.arena.deltaText} {stats.arena.top ? "· on top. for now" : ""}
+            </dd>
+            <dt>{t("stats.rd")}</dt>
+            <dd className="inset">{stats.rd.multText}</dd>
+            <dt>Era</dt>
+            <dd className="inset">{stats.rd.era}</dd>
+            <dt />
+            <dd>
+              <Btn onClick={() => actions.toggleArena()}>{stats.arena.open ? "Hide Task Mangler" : "Show Task Mangler"}</Btn>
+            </dd>
+          </dl>
+        )}
+        {tab === "vibes" && (
+          <div className="f95-vibes">
+            <p className="f95-hint">
+              {t("vibes.tipTitle")}: {stats.vibes.value} of {stats.vibes.max}
+            </p>
+            {stats.vibes.rows.map((r) => (
+              <div key={r.label} className="f95-vrow">
+                <span>
+                  {r.label} {r.note && <small>{r.note}</small>}
+                </span>
+                <Blocks value={r.fill} label={r.label} tone={r.points < 0 ? "red" : "navy"} />
+                <b className={r.points < 0 ? "bad" : ""}>{r.points > 0 ? "+" : ""}{r.points}</b>
+              </div>
+            ))}
+            <p className="f95-hint">{t("vibes.tipFoot", { target: stats.vibes.target })}</p>
+          </div>
+        )}
+      </div>
+      {stats.vibes.value > 600 && <Sticker kind="star">SUPER<br />VIBES</Sticker>}
+    </Win>
+  );
+}
+
+/** The file-copy dialog: "Copying the internet into Frontier-3…", with a Cancel that never quite works. */
+export function Training({ training }: SlotPropsMap["Training"]) {
+  const t = useT();
+  const eta = training.etaDays === null ? "estimating time remaining…" : t("training.eta", { n: training.etaDays });
+  return (
+    <Win className="f95-copy" title={training.hasHall ? t("training.window", { name: training.name }) : "Nothing to copy"} icon="doc" buttons={[{ g: "close", label: "Close", disabled: true }]}>
+      <div className="f95-copybody">
+        {training.hasHall ? (
+          <>
+            <div className="f95-anim" aria-hidden>
+              <Ico name="cluster" size={26} />
+              <span className="f95-dots" />
+              <Ico name="doc" size={22} />
+              <Ico name="doc" size={22} />
+              <span className="f95-dots" />
+              <Ico name="hall" size={26} />
+            </div>
+            <div className="f95-copying">{t("training.copying", { name: training.name })}</div>
+            <Blocks value={training.pct} label={training.name} />
+            <div className="f95-copyfoot">
+              <span>
+                {training.pctText} · {eta}
+              </span>
+              <Btn disabled className="cancel">
+                {t("training.cancel")}
+              </Btn>
+            </div>
+            <div className="f95-hint">{training.computePerDay > 0 ? t("training.compute", { n: training.computePerDay }) : t("training.noCompute")}</div>
+          </>
+        ) : (
+          <div className="f95-msg">
+            <Ico name="warn" size={32} />
+            <span>{t("training.noHall")}</span>
+          </div>
+        )}
+      </div>
+      {training.justShipped && <Sticker kind="burst">{t("training.shipped")}</Sticker>}
+    </Win>
+  );
+}
+
+/** Desktop sticky notes: flat yellow, 1px border. */
+export function Objectives({ objectives, layout }: SlotPropsMap["Objectives"]) {
+  const t = useT();
+  const [open, setOpen] = useState(() => !layout.compact);
+  return (
+    <div className="f95-notes">
+      <button type="button" className="f95-post head" onClick={() => setOpen(!open)} aria-expanded={open}>
+        <b>{t("objectives.title")}</b>
+        <span className="cnt">
+          {objectives.done}/{objectives.total}
+        </span>
+        <small className={objectives.urgent ? "bad" : ""}>
+          {objectives.daysLeft} {t("objectives.daysLeft")}
+        </small>
+      </button>
+      {open && (
+        <ul>
+          {objectives.items.map((g, i) => (
+            <li key={g.id} className={`f95-post ${g.met ? "done" : ""}`} style={{ transform: `rotate(${[-1, 1, -0.5][i % 3]}deg)` }}>
+              <span className="f95-check" aria-hidden />
+              <span>
+                {g.label}
+                <small>{g.progress}</small>
+              </span>
+            </li>
+          ))}
+          <li className="f95-post foot">{t("objectives.by", { date: objectives.deadline })}</li>
+        </ul>
+      )}
+    </div>
+  );
+}
+
+/** "Properties of Dr. Ada Gradient": the laminated ID badge, blocky need bars, the thought in a read-only box. */
+export function Inspector({ inspector: who, actions }: SlotPropsMap["Inspector"]) {
+  const t = useT();
+  const [tab, setTab] = useState<"general" | "history">("general");
+  return (
+    <Win
+      className="f95-props"
+      title={t("inspector.title", { name: who.name })}
+      icon="info"
+      buttons={[
+        { g: "help", label: "Help" },
+        { g: "close", label: t("inspector.close"), onClick: () => actions.closeInspector() },
+      ]}
+      role="dialog"
+      label={`${who.name}, ${who.role}`}
+    >
+      <Tabs label="Properties" active={tab} onChange={setTab} tabs={[{ id: "general", label: "General" }, { id: "history", label: "History" }]} />
+      <div className="f95-page" role="tabpanel">
+        {tab === "general" ? (
+          <>
+            <div className="f95-badge">
+              <div className="hd">
+                <span>{who.lab.toUpperCase()}</span>
+                <span>{who.kind === "researcher" ? "ALL-HANDS ACCESS" : who.kind === "visitor" ? "VISITOR" : who.kind === "agent" ? "AGENT ACCESS" : "OUTSIDE THE GATE"}</span>
+              </div>
+              <div className="bd">
+                <PixelPortrait kind={who.portrait.kind} body={who.portrait.body} head={who.portrait.head} happiness={who.portrait.happiness} drift={who.portrait.drift} />
+                <div>
+                  <h3>{who.name}</h3>
+                  <div className="r">{who.role}</div>
+                  <div className="r">
+                    Badge #{who.badge} · {who.kindLabel} · {who.moodLabel}
+                  </div>
+                  <div className="bar" aria-hidden />
+                </div>
+              </div>
+              <span className="holo" aria-hidden />
+            </div>
+            <div className="f95-status">{who.status}</div>
+            {who.needs.map((n) => (
+              <div key={n.key} className="f95-need">
+                <span>{n.label}</span>
+                <Blocks value={n.value} label={n.label} tone={n.tone === "bad" ? "red" : "navy"} />
+                <span>{n.pct}%</span>
+              </div>
+            ))}
+            <div className="f95-think inset" aria-label={t("inspector.thinking")}>
+              “{who.thought}”
+            </div>
+          </>
+        ) : (
+          <ul className="f95-history inset">
+            {who.history.map((h) => (
+              <li key={h}>{h}</li>
+            ))}
+          </ul>
+        )}
+        <div className="f95-row">
+          <Btn def onClick={() => actions.follow(who.id, !who.following)} aria-pressed={who.following}>
+            {who.following ? `${t("inspector.follow")} ✓` : t("inspector.follow")}
+          </Btn>
+          <Btn onClick={() => actions.closeInspector()}>{t("inspector.ok")}</Btn>
+          <Btn onClick={() => actions.closeInspector()}>Cancel</Btn>
+        </div>
+      </div>
+    </Win>
+  );
+}
+
+/** "Task Mangler": the Frontier Arena as a process list (Lab, Model, Score, Δ), with the R&D multiplier as the performance line. */
+export function Arena({ arena, actions }: SlotPropsMap["Arena"]) {
+  const t = useT();
+  const rd = arena.rd;
+  return (
+    <Win
+      className={`f95-tasks ${arena.open ? "open" : ""} ${arena.alert ? "alert" : ""}`}
+      title={
+        <>
+          Task Mangler<span className="f95-long"> — {t("arena.title")}</span>
+        </>
+      }
+      label="Task Mangler"
+      icon="chart"
+      onTitleClick={() => actions.toggleArena()}
+      buttons={[{ g: "min", label: arena.open ? "Minimize" : "Restore", onClick: () => actions.toggleArena() }]}
+    >
+      <div className="f95-perf">
+        <span>
+          {t("stats.rd")} <b>{rd.multText}</b>
+        </span>
+        <span className="f95-era">{t("arena.eraPill", { n: rd.era, name: rd.eraName })}</span>
+        <Blocks value={rd.eraPct} label={rd.nextText} />
+        <small>{rd.nextText}</small>
+      </div>
+      {arena.open && (
+        <div className="f95-listwrap inset" role="table" aria-label={t("arena.title")}>
+          <div className="f95-lhead" role="row">
+            <span role="columnheader">{t("arena.colLab")}</span>
+            <span role="columnheader">{t("arena.colModel")}</span>
+            <span role="columnheader">{t("arena.colScore")}</span>
+            <span role="columnheader">{t("arena.colDelta")}</span>
+          </div>
+          {arena.rows.map((r) => (
+            <div key={r.id} className={`f95-lrow ${r.you ? "you" : ""} ${r.moved ? `moved-${r.moved}` : ""}`} role="row" title={r.title}>
+              <span role="cell">
+                {r.rank}. {r.short}
+                {r.open && <em> (open)</em>}
+              </span>
+              <span role="cell">{r.model ?? "—"}</span>
+              <span role="cell">{r.score}</span>
+              <span role="cell" className={r.delta > 0 ? "up" : r.delta < 0 ? "down" : ""}>
+                {r.deltaText || "–"}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="f95-status">{rd.drop ? t("arena.drop", { days: rd.drop.daysLeft }) : arena.week === 0 ? t("arena.loading") : t("arena.week", { n: arena.week })}</div>
+    </Win>
+  );
+}
+
+/** "Thoughts.txt": everybody's thought, counted. Click a line to light up who thinks it. */
+export function ThoughtsPanel({ rows, layout, actions }: SlotPropsMap["ThoughtsPanel"]) {
+  const t = useT();
+  const [open, setOpen] = useState(() => !layout.compact);
+  return (
+    <Win className={`f95-thoughts ${open ? "open" : ""}`} title={`${t("thoughts.title")}.txt`} icon="doc" onTitleClick={() => setOpen(!open)} buttons={[{ g: "min", label: open ? "Minimize" : "Restore", onClick: () => setOpen(!open) }]}>
+      {open && (
+        <ul className="f95-thoughtlist inset">
+          {rows.map((r) => (
+            <li key={r.key}>
+              <button type="button" className={r.highlighted ? "on" : ""} onClick={() => actions.highlight(r.key)} aria-pressed={r.highlighted}>
+                <b>{r.count}</b> {r.noun}: “{r.text}”
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Win>
+  );
+}
