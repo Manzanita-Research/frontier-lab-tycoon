@@ -137,7 +137,7 @@ if (mode === "shuffle" || mode === "drop" || mode === "record") {
   await wait(1000);
   await bigLab();
   await run(function () {
-    w.capability = 320;
+    w.capability = 90;
     day();
     day();
   });

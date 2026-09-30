@@ -20,6 +20,7 @@ import { datacenterCompute, gasDiscourse, powerOf, solarHype } from "./power";
 import { dailyRace, eraOfState, weekly } from "./race";
 import { rdMultiplier, multiplierFor, releaseBoost, workingCapability } from "./rd";
 import { rankBoard } from "./state";
+import { stageMoment } from "./demo";
 import { raceView } from "./view";
 import { resolveAuction, winChance } from "./actions";
 import { eraNumber } from "./era";
@@ -547,3 +548,33 @@ describe("the race in a running game", () => {
     expect(v.vars.bidMid).toMatch(/^\$/);
   });
 });
+
+describe("debug moments (?moment=)", () => {
+  const stageAndRun = (moment: Parameters<typeof stageMoment>[1], ticks: number) => {
+    const s = createInitialState(3);
+    stageMoment(s, moment);
+    for (let i = 0; i < ticks; i++) tick(s);
+    return s;
+  };
+
+  it("shuffle: you are #1, then a week turns, three labs pass you and Sirocco's free model opens the card", () => {
+    const s = createInitialState(3);
+    stageMoment(s, "shuffle");
+    expect(s.race.rank).toBe(1);
+    expect(s.day).toBe(13);
+    for (let i = 0; i < 20; i++) tick(s);
+    expect(s.race.rank).toBeGreaterThanOrEqual(3);
+    expect(s.race.rankDelta).toBeLessThan(0);
+    expect(s.race.openDrop?.rival).toBe("sirocco");
+    for (let i = 0; i < 40 && !openEventOf(s); i++) tick(s);
+    expect(openEventOf(s)?.id).toBe("openWeights");
+  });
+
+  it("era, era3, auction and funding each open their card within a second or two", () => {
+    expect(openEventOf(stageAndRun("era", 20))?.id).toBe("era2");
+    expect(openEventOf(stageAndRun("era3", 20))?.id).toBe("era3");
+    expect(openEventOf(stageAndRun("auction", 20))?.id).toBe("computeAuction");
+    expect(openEventOf(stageAndRun("funding", 20))?.id).toBe("fundingRound");
+  });
+});
+

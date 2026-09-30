@@ -11,6 +11,7 @@ import { applyNow, tick, TICKS_PER_DAY } from "../sim/tick";
 import { syncProtesters } from "../sim/protest";
 import type { GameState, NewsItem, OpenEvent, Outcome } from "../sim/types";
 import { fillAgents, seedWalkers } from "../sim/walkers";
+import { isMoment, stageMoment } from "../sim/race/demo";
 import { walkersThinking } from "../sim/mind";
 import { makeSnapshot, NO_SELECTION, type Snapshot, type UiSelection, type UiToast } from "./hud";
 
@@ -81,9 +82,10 @@ export class SimHandle {
 }
 
 /** A living campus, warped forward and dressed up per the `?seed=&warp=&agents=&discourse=` debug knobs. */
-export function createSimHandle(dbg: Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers">): SimHandle {
+export function createSimHandle(dbg: Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & { moment?: string | null }): SimHandle {
   const sim = createInitialState(dbg.seed);
   for (let i = 0; i < dbg.warp * TICKS_PER_DAY; i++) tick(sim);
+  if (isMoment(dbg.moment)) stageMoment(sim, dbg.moment);
   if (dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0) {
     const rng = createRng(sim.rngState);
     if (dbg.researchers > 0) seedWalkers(sim, "researcher", dbg.researchers, rng);
