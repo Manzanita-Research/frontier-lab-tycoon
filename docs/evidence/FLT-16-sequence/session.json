@@ -1,0 +1,86 @@
+{
+  "url": "http://localhost:4173/",
+  "speed": "1× throughout",
+  "viewport": "1440×900",
+  "seed": "default (1)",
+  "errors": [],
+  "log": [
+    {
+      "minute": 0,
+      "elapsedSeconds": 4,
+      "date": "Y1 · Jan 1",
+      "cash": "$5M",
+      "message": "Extend the path from the gate; even a frontier lab needs a way in."
+    },
+    {
+      "minute": 1,
+      "elapsedSeconds": 63,
+      "date": "Y1 · Jan 1",
+      "cash": "$4.76M",
+      "message": "Build a Training Hall beside that path; the loss can start going down."
+    },
+    {
+      "minute": 2,
+      "elapsedSeconds": 124,
+      "date": "Y1 · Jan 4",
+      "cash": "$3.42M",
+      "message": "Let run #1 finish; your first model is nearly ready for its unnecessary press release."
+    },
+    {
+      "minute": 3,
+      "elapsedSeconds": 184,
+      "date": "Y1 · Jan 14",
+      "cash": "$3.13M",
+      "message": "Let run #1 finish; your first model is nearly ready for its unnecessary press release."
+    },
+    {
+      "minute": 4,
+      "elapsedSeconds": 244,
+      "date": "Y1 · Jan 23",
+      "cash": "$2.68M",
+      "message": "Let run #1 finish; your first model is nearly ready for its unnecessary press release."
+    },
+    {
+      "minute": 5,
+      "elapsedSeconds": 303,
+      "date": "Y1 · Feb 2",
+      "cash": "$2.5M",
+      "message": "Let run #1 finish; your first model is nearly ready for its unnecessary press release."
+    },
+    {
+      "minute": 6,
+      "elapsedSeconds": 368,
+      "date": "Y1 · Feb 12",
+      "cash": "$2.12M",
+      "message": ""
+    },
+    {
+      "minute": 7,
+      "elapsedSeconds": 426,
+      "date": "Y1 · Feb 20",
+      "cash": "$1.72M",
+      "message": ""
+    },
+    {
+      "minute": 8,
+      "elapsedSeconds": 484,
+      "date": "Y1 · Feb 29",
+      "cash": "$1.05M",
+      "message": ""
+    },
+    {
+      "minute": 9,
+      "elapsedSeconds": 551,
+      "date": "Y1 · Mar 9",
+      "cash": "$4.67M",
+      "message": ""
+    },
+    {
+      "minute": 10,
+      "elapsedSeconds": 604,
+      "date": "Y1 · Mar 17",
+      "cash": "$4.58M",
+      "message": ""
+    }
+  ]
+}

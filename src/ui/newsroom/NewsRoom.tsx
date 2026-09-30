@@ -1,7 +1,7 @@
 import { useAtomValue } from "@effect/atom-react";
 import { useEffect, useRef } from "react";
-import { appNow, atoms, registry, send, sim } from "../../app/game";
-import { useApp } from "../../app/hooks";
+import { atoms, registry, sim } from "../../app/game";
+import { useApp, useAutoPause } from "../../app/hooks";
 import { mixerAtom, mixerOpenAtom, playCue, setMixer } from "../../audio/state";
 import { NewsDesk } from "../../newsroom/desk";
 import { frontPage, recap } from "../../newsroom/edition";
@@ -20,6 +20,7 @@ export function NewsRoom() {
   const mixer = useAtomValue(mixerAtom);
   const demoOpened = useRef(false);
   const pausedForReading = room.view !== null;
+  useAutoPause("newsroom", pausedForReading);
   useEffect(() => { loadRoom(); }, []);
   useEffect(() => {
     const result = desk.poll(sim.world);
@@ -28,10 +29,7 @@ export function NewsRoom() {
   }, [snap]);
   useEffect(() => {
     if (!pausedForReading) return;
-    const speed = appNow()?.speed ?? 1;
-    send({ type: "SET_SPEED", speed: 0 });
     playCue("card");
-    return () => { if (appNow()?.speed === 0) send({ type: "SET_SPEED", speed }); };
   }, [pausedForReading]);
   useEffect(() => {
     if (!new URLSearchParams(location.search).has("debug")) return;

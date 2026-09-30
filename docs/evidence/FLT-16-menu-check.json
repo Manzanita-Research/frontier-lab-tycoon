@@ -1,0 +1,19 @@
+{
+  "method": "Production preview, no URL parameters, ordinary UI clicks; read the HUD date before and after eight seconds with each dialog open and closed.",
+  "checks": [
+    {
+      "name": "News Room",
+      "held": "Y1 · Jan 2",
+      "resumed": "Y1 · Jan 3",
+      "selectedSpeed": "1×",
+      "result": "pass"
+    },
+    {
+      "name": "Sound mixer",
+      "held": "Y1 · Jan 3",
+      "resumed": "Y1 · Jan 4",
+      "selectedSpeed": "1×",
+      "result": "pass"
+    }
+  ]
+}

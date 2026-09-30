@@ -9,6 +9,7 @@ import { outcomeOf } from "../sim/goals";
 import { rankBoard, ranksOf } from "../sim/race/state";
 import { createInitialState } from "../sim/state";
 import { tick, TICKS_PER_DAY } from "../sim/tick";
+import { pacingCommands } from "../sim/pacing";
 import type { Command } from "../sim/commands";
 import type { GameState } from "../sim/types";
 import { answer } from "../sim/testkit";
@@ -72,8 +73,12 @@ export function runHeadless(def: GameDefinition, options: { days?: number; seed?
   if (!Number.isInteger(days) || days < 1 || days > 3650) throw new ModError({ path: "days", detail: "expected 1–3650 whole days" });
   const state = createInitialState(seed);
   const injection = injectDefinition(state, def);
-  // Existing public commands can place a revenue building. This avoids an idle, gateway-free campus going broke.
-  const setup: Command[] = [{ type: "placeBuilding", kind: "gateway", x: 8, z: 17 }, { type: "hire", job: "sre" }];
+  // The quiet opening has no Hall or long paths: pay for the connected campus this harness exercises.
+  const setup: Command[] = [...pacingCommands(state),
+    { type: "placeBuilding", kind: "hall", x: 12, z: 11 },
+    { type: "placeBuilding", kind: "gateway", x: 7, z: 17 },
+    { type: "placeBuilding", kind: "kombucha", x: 12, z: 19 },
+    { type: "hire", job: "sre" }];
   let attempts = 0;
   let cardsAnswered = 0;
   while (state.day < days && attempts < days * TICKS_PER_DAY * 3) {
