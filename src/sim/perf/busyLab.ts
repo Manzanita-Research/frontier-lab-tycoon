@@ -6,6 +6,7 @@ import { applyNow, setTickProbe, tick } from "../tick";
 import { answer, createTestCampus, readyForPressure } from "../testkit";
 import { createRng } from "../rng";
 import { enableEarnedPacks } from "../progression";
+import { enableEndings } from "../endings/state";
 import { fillAgents, seedWalkers } from "../walkers";
 import { syncProtesters } from "../protest";
 import { settleFactions } from "../factions/driver";
@@ -19,19 +20,29 @@ const count = (s: GameState, kind: Walker["kind"]) => s.walkers.filter((w) => w.
 const SPOTS: [BuildingKind, number, number][] = [["nap", 6, 17], ["snack", 9, 17], ["demo", 14, 17]];
 const HIRES: StaffJob[] = ["janitor", "janitor", "sre", "sre", "comms", "security"];
 
+export interface BusyLab {
+  s: GameState;
+  /** Refill the crowd (visitors leave and unhappy researchers quit): before each timed batch. */
+  topUp: () => void;
+  /** One tick, answering every card: the first choice, but The Memo as the lab was told to. */
+  play: () => void;
+}
+
 /**
  * 800+ walkers on the test campus with the ladder complete, so every system is earned and every pack is awake:
  * 400 agents, 300 researchers fighting over three small buildings, 110 visitors, 40 protesters, the factions marching at
- * a fast lab's pace, six staff, a rogue swarm loose and Evals Without Borders on a tour. `topUp` refills the crowd
- * (visitors leave and unhappy researchers quit) before each timed batch.
+ * a fast lab's pace, six staff, a rogue swarm loose and Evals Without Borders on a tour. The endings are on, and in Era 4
+ * The Memo gets `memo`'s answer: Slow Down starts Regulated, whose chart then runs every tick; Race, with the lab ahead in
+ * the Arena, starts the Takeover, whose autopilot builds a new building every day or so until the campus is full.
  */
-export function busyLab(seed = 1): { s: GameState; topUp: () => void } {
+export function busyLab(seed = 1, memo: "race" | "slow" = "slow"): BusyLab {
   const s = createTestCampus(seed);
   s.cash = 1_000_000_000;
   applyNow(s, SPOTS.map(([kind, x, z]) => ({ type: "placeBuilding" as const, kind, x, z })));
   readyForPressure(s);
   s.progression = { value: "complete", context: { level: 5 } };
   enableEarnedPacks(s);
+  enableEndings(s);
   const rng = createRng(11);
   s.capability = 4000; // agentTarget caps at 400
   fillAgents(s, rng);
@@ -48,7 +59,8 @@ export function busyLab(seed = 1): { s: GameState; topUp: () => void } {
     s.cash = Math.max(s.cash, 100_000_000);
   };
   topUp();
-  return { s, topUp };
+  const pick = (id: string) => (id === "memo" ? (memo === "race" ? 0 : 1) : 0);
+  return { s, topUp, play: () => tick(s, answer(s, pick)) };
 }
 
 export interface SystemTiming {
@@ -71,8 +83,8 @@ export interface TickProfile {
   systems: SystemTiming[];
 }
 
-/** Run `ticks` ticks of `s` (answering every card, and calling `every` each `batch` ticks) with the stopwatch on, and total each system. */
-export function profileTicks(s: GameState, ticks: number, every?: () => void, batch = 200): TickProfile {
+/** Play `ticks` ticks of the lab (topping it up each `batch` ticks) with the stopwatch on, and total each system. */
+export function profileTicks({ topUp, play }: BusyLab, ticks: number, batch = 200): TickProfile {
   const names: string[] = [];
   const index = new Map<string, number>();
   let row = new Float64Array(64);
@@ -97,8 +109,8 @@ export function profileTicks(s: GameState, ticks: number, every?: () => void, ba
   });
   try {
     for (let t = 0; t < ticks; t++) {
-      if (every && t % batch === 0) every();
-      tick(s, answer(s));
+      if (t % batch === 0) topUp();
+      play();
       rows.push(row);
       row = new Float64Array(64);
     }
@@ -138,12 +150,12 @@ export function profileTable(p: TickProfile): string {
 }
 
 /** The strict number, measured like the Crowd's 800-walker test: best of `batches` x `ticks` ticks, the crowd topped up before each. */
-export function timeTicks(s: GameState, topUp: () => void, batches = 3, ticks = 200): number {
+export function timeTicks({ topUp, play }: BusyLab, batches = 3, ticks = 200): number {
   let best = Infinity;
   for (let b = 0; b < batches; b++) {
     topUp();
     const t0 = performance.now();
-    for (let i = 0; i < ticks; i++) tick(s, answer(s));
+    for (let i = 0; i < ticks; i++) play();
     best = Math.min(best, (performance.now() - t0) / ticks);
   }
   return best;

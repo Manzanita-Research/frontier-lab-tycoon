@@ -4,12 +4,12 @@ import type { BuildingKind } from "../../content/buildings";
 import type { RaceAction } from "../../content/events";
 import type { RivalId } from "../../content/rivals";
 import { eraDef } from "../../content/eras";
-import { canPlace, placeBuilding } from "../commands";
+import { buildPrice, canPlace, isUnlocked, placeBuilding } from "../commands";
 import { formatMoney } from "../format";
 import { step } from "../machines/run";
 import { addToast } from "../news";
 import type { Rng } from "../rng";
-import type { GameState } from "../types";
+import type { GameState, Rect } from "../types";
 import { bidAmount, auctionUnit, BID_MULTIPLES, raiseAmount, type Bid } from "./finance";
 import { eraOfState, raceNews } from "./race";
 import { rivalMachine } from "./rival";
@@ -73,15 +73,50 @@ const centre = (state: GameState): [number, number] => {
   return [x / state.buildings.length, z / state.buildings.length];
 };
 
+/**
+ * FLT-39: the tiles no building may cover (paths, buildings, the gate and the entrance access in front of it), so
+ * `findSpot` asks `canPlace` only about footprints clear of them: a full campus made the Takeover's autopilot run every
+ * check on every tile for every kind. Only ever a quick no: `canPlace` still has the last word on the rest.
+ */
+function blockedTiles(state: GameState): Uint8Array {
+  const { w, h, paths } = state.grid;
+  const out = new Uint8Array(w * h);
+  for (let i = 0; i < w * h; i++) if (paths[i] === true) out[i] = 1;
+  const mark = (r: Rect) => {
+    for (let z = Math.max(0, r.z); z < Math.min(h, r.z + r.d); z++) for (let x = Math.max(0, r.x); x < Math.min(w, r.x + r.w); x++) out[z * w + x] = 1;
+  };
+  mark(state.gate);
+  for (const b of state.buildings) mark(b);
+  mark({ x: state.gate.x, z: state.gate.z - 1, w: state.gate.w, d: 1 });
+  return out;
+}
+
+function clear(blocked: Uint8Array, gw: number, x: number, z: number, w: number, d: number): boolean {
+  for (let j = z; j < z + d; j++) for (let i = x; i < x + w; i++) if (blocked[j * gw + i] === 1) return false;
+  return true;
+}
+
+/** Does a path run along the footprint's edge (`canPlace`'s "Needs a path next to it", without the list of edges)? */
+function touchesPath(state: GameState, x: number, z: number, w: number, d: number): boolean {
+  const { w: gw, h: gh, paths } = state.grid;
+  for (let i = x; i < x + w; i++) if ((z > 0 && paths[(z - 1) * gw + i] === true) || (z + d < gh && paths[(z + d) * gw + i] === true)) return true;
+  for (let j = z; j < z + d; j++) if ((x > 0 && paths[j * gw + x - 1] === true) || (x + w < gw && paths[j * gw + x + w] === true)) return true;
+  return false;
+}
+
 /** The free spot nearest the middle of the campus that fits `kind` and touches a path, or null if it is full. */
 export function findSpot(state: GameState, kind: BuildingKind): [number, number] | null {
   const [w, d] = defs().buildings[kind].size;
+  // Asked of every tile by `canPlace`, answered the same everywhere.
+  if (!isUnlocked(state, kind) || state.cash < buildPrice(state, kind)) return null;
   const [cx, cz] = centre(state);
+  const blocked = blockedTiles(state);
+  const gw = state.grid.w;
   let best: [number, number] | null = null;
   let bestDist = Infinity;
   for (let z = 0; z <= state.grid.h - d; z++) {
-    for (let x = 0; x <= state.grid.w - w; x++) {
-      if (!canPlace(state, kind, x, z).ok) continue;
+    for (let x = 0; x <= gw - w; x++) {
+      if (!clear(blocked, gw, x, z, w, d) || !touchesPath(state, x, z, w, d) || !canPlace(state, kind, x, z).ok) continue;
       const dist = Math.hypot(x + w / 2 - cx, z + d / 2 - cz);
       if (dist < bestDist) {
         bestDist = dist;
