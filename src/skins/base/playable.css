@@ -19,16 +19,23 @@
   }
 }
 .coach-ring {
+  position: fixed;
+  z-index: 41;
+  box-sizing: border-box;
+  border: 3px solid var(--flt-color-highlight);
+  border-radius: 10px;
+  pointer-events: none;
+  will-change: transform, opacity;
   animation: coach-pulse var(--flt-motion-pulse) ease-in-out infinite;
 }
 @keyframes coach-pulse {
   0%,
   100% {
-    stroke-width: 3;
+    transform: scale(1);
     opacity: 1;
   }
   50% {
-    stroke-width: 6;
+    transform: scale(1.05);
     opacity: 0.55;
   }
 }

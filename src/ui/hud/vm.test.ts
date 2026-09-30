@@ -211,9 +211,10 @@ describe("Playable v1: what the lab has earned, the coach, and Help", () => {
   const level = (n: 1 | 2 | 3 | 4 | 5, more: Parameters<typeof fixtureInput>[0] = {}) => hudViewModel(fixtureInput({ level: n, ...more }));
 
   it("carries no ladder as 'everything is earned': the game plays as it always did", () => {
+    // A snapshot from before the ladder (an older save, a link): none of the playable fields.
     const input = fixtureInput();
-    for (const key of ["progress", "coach", "unlockCard", "hud"]) Reflect.deleteProperty(input.snap, key);
-    const vm = hudViewModel(input);
+    const { progress: _p, coach: _c, unlockCard: _u, hud: _h, ...old } = input.snap;
+    const vm = hudViewModel({ ...input, snap: old as typeof input.snap });
     expect(Object.values(vm.visible).every(Boolean)).toBe(true);
     expect(vm.buildItems.map((b) => b.kind)).toContain("demo");
     expect(vm.coach).toBeNull();
@@ -225,7 +226,7 @@ describe("Playable v1: what the lab has earned, the coach, and Help", () => {
   it("shows only the unlocked tools in the build panel (the bulldozer always), and teases the rest", () => {
     const one = level(1);
     expect(one.buildItems.map((b) => b.kind)).toEqual(["path", "cluster", "hall", "bulldoze"]);
-    expect(one.progress.teasers.map((t) => t.hint)).toContain("ship your first model");
+    expect(one.progress.teasers).toContainEqual({ label: "2 more", hint: "Ship your first model" });
     expect(level(2).buildItems.map((b) => b.kind)).toEqual(["path", "cluster", "hall", "gateway", "kombucha", "bulldoze"]);
     expect(level(3).buildItems.map((b) => b.kind)).toContain("staff");
     expect(one.buildItems.map((b) => b.kind)).not.toContain("staff");

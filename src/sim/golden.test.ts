@@ -164,8 +164,9 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // FLT-49 intentionally records the new starting coach/progression state. Systems and purchases now
 // wait for earned levels; the busy-player script first builds a Hall so it can earn access to a Gateway.
 // Path exploration and the Comms break post change deterministic route draws from this new opening.
+// FLT-47 polish rewords three thoughts (parody rule: no real brands); seed 1 shows one at tick 200. Text only, same RNG stream.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "a559ea28", 800: "ed628bb9", 1600: "bef75afa", 2400: "a01d1390", 3200: "7a3d787d", 4000: "6a0686fc" },
+  1: { 200: "d3826cd0", 800: "ed628bb9", 1600: "bef75afa", 2400: "a01d1390", 3200: "7a3d787d", 4000: "6a0686fc" },
   2: { 200: "e548b1af", 800: "552cae60", 1600: "3f400add", 2400: "2868f2da", 3200: "5080b683", 4000: "c0ae2826" },
   3: { 200: "58bb415c", 800: "920699d6", 1600: "d35c1c03", 2400: "02ba6f9a", 3200: "bcfd9788", 4000: "9ec9a141" },
 };

@@ -71,6 +71,7 @@
   .f95-stack {
     display: flex;
     flex-direction: column;
+    align-items: flex-end;
     gap: 10px;
     > * {
       flex: 0 0 auto;
@@ -2635,7 +2636,10 @@
   /* ---- narrower desktops ---- */
   @media (max-width: 1040px) and (min-width: 641px) {
     .f95-side {
-      width: min(340px, calc(100vw - 20px));
+      width: min(560px, calc(100vw - 20px));
+    }
+    .f95-stack > .f95-win {
+      width: min(340px, 100%);
     }
     .f95-left {
       width: calc(100vw - 370px);
@@ -2723,6 +2727,10 @@
     .f95-stack > * {
       flex: 1 1 0;
       min-width: 0;
+    }
+    .f95-stack > .f95-win,
+    .f95-stack > .f95-tasks.wide {
+      width: auto;
     }
     .f95-props,
     .f95-staff,

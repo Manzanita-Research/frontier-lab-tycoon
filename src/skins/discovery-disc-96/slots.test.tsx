@@ -81,12 +81,13 @@ describe("Discovery Disc '96", () => {
   });
 
   it("the open tray is buttons with a picture each, a price and the hotkey, then the locked stamps, then Help", () => {
-    const teasers = [{ label: "???", hint: "ship your first model" }];
+    const teasers = [{ label: "2 more", hint: "Ship your first model" }];
     const out = html(<Stamps items={vm.buildItems} teasers={teasers} onPick={() => undefined} onHelp={() => undefined} actions={actions} />);
     // One picture per stamp, one for the locked one and one for Help.
     expect(out.match(/dd-stamp-art/g)?.length).toBe(vm.buildItems.length + 2);
     expect(out).toContain('aria-pressed="true"'); // the tool in hand
-    expect(out).toContain("ship your first model");
+    expect(out).toContain("2 more");
+    expect(out).toContain("Ship your first model");
     for (const it of vm.buildItems) {
       expect(out).toContain(`data-coach="build:${it.kind}"`);
       if (it.hotkey !== null) expect(out).toContain(`>${it.hotkey}<`);

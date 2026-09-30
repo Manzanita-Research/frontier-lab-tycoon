@@ -1,8 +1,6 @@
 // A stand-in for the ladder the logic (FLT-49) sends: the five rungs of the plan (FLT-47) as snapshot additions. For fixtures, the
 // skin tests, and screenshot links (`?debug=1&ladder=1&coach=0`) that show a rung without playing up to it. Not game logic: the real
 // unlocks, goals and coach lines live in the sim's content.
-import type { Snapshot } from "../../app/hud";
-
 /** The ladder as the plan draws it (FLT-47), for fixtures and screenshots: what is unlocked, the goal, the teasers, what is shown. */
 const LADDER = [
   { name: "Garage", buildings: ["path", "cluster", "hall"], staff: [], goal: ["Ship your first model", 0, 1], show: [] },
@@ -12,11 +10,12 @@ const LADDER = [
   { name: "Scrutiny", buildings: ["path", "cluster", "hall", "gateway", "kombucha", "nap", "snack", "demo"], staff: ["sre", "janitor", "security", "comms"], goal: ["Ship model #3", 1, 3], show: ["revenue", "vibes", "thoughts", "staff", "arena", "rnd", "news", "events", "papers", "disasters"] },
 ] as const;
 
+// One row per milestone, as the sim groups them: how many things it unlocks, and the goal that earns them.
 const TEASERS = [
-  [{ label: "???", hint: "ship your first model" }, { label: "???", hint: "earn your first $" }, { label: "7 more…", hint: "" }],
-  [{ label: "???", hint: "earn $20K a day" }, { label: "4 more…", hint: "" }],
-  [{ label: "???", hint: "reach 8 researchers" }, { label: "3 more…", hint: "" }],
-  [{ label: "???", hint: "make the Arena's top 5" }],
+  [{ label: "2 more", hint: "Ship your first model" }, { label: "4 more", hint: "Earn $20K a day" }, { label: "3 more", hint: "Reach the Top 5 on the Arena" }],
+  [{ label: "4 more", hint: "Earn $20K a day" }, { label: "3 more", hint: "Reach the Top 5 on the Arena" }],
+  [{ label: "3 more", hint: "Reach the Top 5 on the Arena" }],
+  [{ label: "3 more", hint: "Reach the Top 5 on the Arena" }],
   [],
 ] as const;
 
@@ -31,7 +30,7 @@ export const COACH_LINES = [
 ] as const;
 
 /** The Playable v1 additions to a snapshot, as the logic (FLT-49) sends them. */
-export function playableFixture(level: 1 | 2 | 3 | 4 | 5, coach: number | null = null, unlock = false): Pick<Snapshot, "progress" | "coach" | "unlockCard" | "hud"> {
+export function playableFixture(level: 1 | 2 | 3 | 4 | 5, coach: number | null = null, unlock = false) {
   const l = LADDER[level - 1]!;
   const panels = ["revenue", "vibes", "arena", "rnd", "thoughts", "news", "staff", "events", "papers", "disasters"] as const;
   const c = coach === null ? null : COACH_LINES[coach]!;
@@ -39,7 +38,7 @@ export function playableFixture(level: 1 | 2 | 3 | 4 | 5, coach: number | null =
     progress: {
       level,
       levelName: l.name,
-      unlocked: { buildings: [...l.buildings].filter((k) => k !== "path"), staff: [...l.staff], systems: [] },
+      unlocked: { buildings: [...l.buildings], staff: [...l.staff], systems: [] as string[] },
       goal: { text: l.goal[0], current: l.goal[1], target: l.goal[2] },
       teasers: TEASERS[level - 1]!.map((t) => ({ ...t })),
     },

@@ -9,6 +9,7 @@ import { readDebugParams } from "../debug";
 import { DEFAULT_RISK, setRisk } from "../sim/disasters/driver";
 import { buildingAt } from "../sim/pathfind";
 import { canPlace } from "../sim/commands";
+import { TICKS_PER_DAY } from "../sim/constants";
 import { withDefs } from "../sim/defs";
 import { tick } from "../sim/tick";
 import { createMidgameScenario, MIDGAME_CAMERA, midgameOpeningNews, midgameOpeningThoughts } from "../sim/scenarios/midgame";
@@ -131,7 +132,7 @@ if (typeof window !== "undefined") {
   (window as unknown as { __fltProbe: () => unknown }).__fltProbe = () => {
     const w = sim.world;
     const c = appNow();
-    return { date: w.day, day: w.day, paused: c ? c.speed === 0 || autoPaused(c) || !!c.event : true, speed: c?.speed ?? initialSpeed,
+    return { date: w.day, day: w.day, tick: w.tick, ticksPerDay: TICKS_PER_DAY, paused: c ? c.speed === 0 || autoPaused(c) || !!c.event : true, speed: c?.speed ?? initialSpeed,
       walkers: [...w.walkers.map((p) => ({ id: p.id, kind: p.kind, x: p.x, z: p.z, mode: p.machine.value })), ...w.staff.map((p) => ({ id: p.id, kind: p.job, x: p.x, z: p.z, mode: p.machine.value }))],
       gate: { x: w.gate.x, z: w.gate.z }, coachId: c?.snap.coach?.id ?? null };
   };

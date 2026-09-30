@@ -16,7 +16,7 @@ export interface PlayableSnapshot {
     goal: { text: string; current: number; target: number };
     teasers: readonly { label: string; hint: string }[];
   };
-  coach?: CoachVM | null;
+  coach?: (CoachVM & { suggest?: unknown }) | null;
   unlockCard?: UnlockCardVM | null;
   hud?: { visible: Partial<Record<HudPanelId, boolean>> };
 }
@@ -53,7 +53,7 @@ export function playableOf(snap: object): PlayableInput {
     goal: progress?.goal ?? { text: "", current: 0, target: 1 },
     teasers: progress?.teasers ?? [],
     visible,
-    coach: coach && { ...coach },
+    coach: coach && { id: coach.id, step: coach.step, of: coach.of, text: coach.text, target: coach.target, waitFor: coach.waitFor, canSkip: coach.canSkip },
     unlock: p.unlockCard ?? null,
     laddered: progress !== undefined,
   };

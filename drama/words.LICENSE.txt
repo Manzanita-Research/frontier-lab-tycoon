@@ -1,0 +1,17 @@
+drama/words.txt.gz: the lowercase English words (no proper nouns) from SCOWL 2020.12.07, sizes 10 to 50, American and British spellings. Rebuild: in scowl-2020.12.07/final, LC_ALL=C cat english-words.{10,20,35,40,50} american-words.{10,20,35,40,50} british-words.{10,20,35,40,50} | grep -E '^[a-z]+$' | sort -u | gzip -9 -n
+
+The collective work is Copyright 2000-2018 by Kevin Atkinson as well
+as any of the copyrights mentioned below:
+
+  Copyright 2000-2018 by Kevin Atkinson
+
+  Permission to use, copy, modify, distribute and sell these word
+  lists, the associated scripts, the output created from the scripts,
+  and its documentation for any purpose is hereby granted without fee,
+  provided that the above copyright notice appears in all copies and
+  that both that copyright notice and this permission notice appear in
+  supporting documentation. Kevin Atkinson makes no representations
+  about the suitability of this array for any purpose. It is provided
+  "as is" without express or implied warranty.
+
+The full SCOWL copyright and its component notices: http://wordlist.aspell.net/scowl-readme/

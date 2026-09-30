@@ -16,11 +16,13 @@
    - Keep perf within budget (report the strict numbers).
 4. **3D ghost suggestion:** for `coach.suggest`, render translucent ghost tiles or a building footprint (render layer, 3D), with `[data-coach-tile]` DOM anchors at the projected positions. Clicking one places it. Pick sensible tiles: a straight path of 3–4 tiles from the gate into the campus, and the hall adjacent to that path.
 5. **The stranger e2e test** (`e2e/stranger.mjs`, Playwright) runs against a URL with **no params** at 1×. It clicks only `[data-coach-active]` / `[data-coach-tile]` elements (and the confirm OK if one appears). It fails if:
-   - (a) the date doesn't advance at least 3 days within 60 s after the first click
-   - (b) within 15 s after the path exists, no walker has moved at least 2 tiles
-   - (c) any walker sits on the gate tile for more than 5 s
-   - (d) the coach doesn't reach the Gateway step within 6 minutes of wall time (using ▶▶ if the coach spotlights it)
+   - (a) the date doesn't advance at least 3 game days after the first click
+   - (b) within 2 game days after the path exists, no walker has moved at least 2 tiles
+   - (c) any walker stays on the gate tile for more than 12 game hours
+   - (d) the coach doesn't reach the Gateway step (using ▶▶ if the coach spotlights it)
    - (e) there are any console errors
+
+   Every check is measured in **game time** (the probe's `tick`), so a slow runner that draws fewer frames still plays the same game (FLT-50 moved it off wall time). Wall-clock limits are only timeouts: 15 minutes for the run, 3 minutes of game time standing still. In CI it renders at 1024×640 and a device scale of 1; a click waits 5 s, with one forced retry only while the control is still visible and enabled.
 
    **Wire it into CI:** a job in `.github/workflows/deploy.yml` that runs after the PR preview deploys, against that preview URL. Also add `pnpm e2e:stranger --url <url>` for local runs.
 6. Tests: the ladder gating, coach progression by action, no pause, wandering and staff posts, and determinism. Goldens are re-recorded **only** where the start state changed (say why).
@@ -56,5 +58,5 @@ hud: { visible: Record<HudPanel, boolean> }       // HudPanel = "revenue"|"vibes
 ### Hooks for the stranger test (both builders)
 - Every coach target element carries `data-coach="<id>"`, and the active one also has `data-coach-active`. This applies in **every skin** (base, Frontier 95, and every ported skin's custom slots).
 - The 3D ghost suggestion renders DOM anchors at each suggested tile's projected screen position: `[data-coach-tile="x,z"]` (clickable, which places the suggested thing).
-- A **read-only** probe, `window.__fltProbe()`, returns `{date, day, paused, speed, walkers:[{id,kind,x,z,mode}], gate:{x,z}, coachId}`. It's always present, has no side effects, and needs no URL param.
+- A **read-only** probe, `window.__fltProbe()`, returns `{date, day, tick, ticksPerDay, paused, speed, walkers:[{id,kind,x,z,mode}], gate:{x,z}, coachId}`. It's always present, has no side effects, and needs no URL param.
 

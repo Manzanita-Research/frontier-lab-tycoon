@@ -11,6 +11,7 @@ import { SkinProvider } from "../context";
 import { read } from "../files";
 import { prepareSkin } from "../registry";
 import type { LoadedSkin } from "../types";
+import { Arcade } from "./tray";
 import { pick, rating, schedule } from "./ticker";
 
 const actions = new Proxy({}, { get: () => () => undefined }) as HudActions;
@@ -85,9 +86,10 @@ describe("Karaoke Night", () => {
 
   it("the arcade has a round button with an LCD tag for each tool, and greys out what you cannot afford", () => {
     const items = vm.buildItems.map((it, i) => (i === 1 ? { ...it, affordable: false, selected: false } : it));
-    const out = html(<slot.BuildBar items={items} tip={vm.buildTip} layout={vm.layout} actions={actions} />);
-    expect(out.match(/class="kn-btnr"/g)?.length).toBe(items.length);
-    expect(out.match(/class="kn-lcd"/g)?.length).toBe(items.length);
+    const out = html(<Arcade items={items} teasers={[]} actions={actions} done={() => {}} />);
+    // One per tool, then Help's.
+    expect(out.match(/class="kn-btnr"/g)?.length).toBe(items.length + 1);
+    expect(out.match(/class="kn-lcd"/g)?.length).toBe(items.length + 1);
     expect(out).toContain('aria-pressed="true"');
     expect(out).toMatch(/kn-ab\s+poor/);
     for (const it of items) if (it.hotkey !== null) expect(out).toContain(`<span class="kn-k">${it.hotkey}</span>`);
@@ -96,12 +98,25 @@ describe("Karaoke Night", () => {
   it("carries the coach-mark hooks the playable tutorial spotlights, and renders the build items it is given", () => {
     const docked = html(<Docked vm={vm} actions={actions} />);
     for (const hook of ["start", "training", "stat:runway", "goals"]) expect(docked).toContain(`data-coach="${hook}"`);
-    for (const it of vm.buildItems) expect(docked).toContain(`data-coach="build:${it.kind}"`);
-    // The training element keeps its hook in both states, and the tray shows exactly the items it is handed (unlocks filter the list upstream).
+    // One per tool in the open arcade (the BUILD button is shut until pressed).
+    const open = html(<Arcade items={vm.buildItems} teasers={[]} actions={actions} done={() => {}} />);
+    for (const it of vm.buildItems) expect(open).toContain(`data-coach="build:${it.kind}"`);
+    // The training element keeps its hook in both states, and the arcade shows exactly the items it is handed (unlocks filter the list upstream).
     expect(html(<slot.Training training={{ ...vm.training, hasHall: false }} actions={actions} />)).toContain('data-coach="training"');
     const some = vm.buildItems.slice(0, 3);
-    const tray = html(<slot.BuildBar items={some} tip={null} layout={vm.layout} actions={actions} />);
+    const tray = html(<Arcade items={some} teasers={[]} actions={actions} done={() => {}} />);
     expect(tray.match(/data-coach="build:/g)?.length).toBe(3);
+  });
+
+  it("the arcade is one BUILD button until pressed; locked buttons and Help sit inside it", () => {
+    const shut = html(<slot.BuildBar items={vm.buildItems} tip={null} layout={vm.layout} actions={actions} />);
+    expect(shut.match(/class="kn-btnr"/g)?.length).toBe(1);
+    expect(shut).toContain('aria-expanded="false"');
+    const open = html(<Arcade items={vm.buildItems.slice(0, 2)} teasers={[{ label: "2 more", hint: "Ship your first model" }]} actions={actions} done={() => {}} />);
+    expect(open).toContain("kn-ab locked");
+    expect(open).toContain("2 more");
+    expect(open).toContain("SHIP YOUR FIRST MODEL");
+    expect(open).toContain("kn-ab help");
   });
 
   it("names a toast for how it feels: a release gets the stars", () => {

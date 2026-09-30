@@ -1,18 +1,34 @@
-import { useCoach, ALL_VISIBLE } from "../kit";
 // Things stuck to the wall: the OKRs as sticky notes and the Thoughts as a corkboard with push-pins.
 import { useState } from "react";
-import { useT } from "../kit";
+import { ALL_VISIBLE, useCoach, useT } from "../kit";
 import type { SlotPropsMap } from "../types";
 import { Glyph } from "./icons";
 
 /** The scenario checklist as three sticky notes. Folds to a tab (and starts folded on a phone) so the campus stays visible. */
-export function Objectives({ objectives, layout, progress, visible = ALL_VISIBLE }: SlotPropsMap["Objectives"]) {
-  const coachApi = useCoach();
+export function Objectives({ objectives, progress, visible = ALL_VISIBLE, layout }: SlotPropsMap["Objectives"]) {
   const t = useT();
+  const coach = useCoach();
   const [open, setOpen] = useState(() => !layout.compact);
-  if (progress?.goal.text && !visible.arena) return <div className="sd-okrs" {...coachApi.attrs("goals")}><div>{progress.goal.line}</div></div>;
+  const goal = progress?.goal.line ? progress.goal : null;
+  if (goal && !visible.arena) {
+    // One sticky note: the goal in front of you. The OKRs come with the race.
+    return (
+      <div className="sd-okrs open sd-goal-one" {...coach.attrs("goals")} role="status">
+        <ul className="sd-notes">
+          <li className="sd-sticky c0">
+            <span className="box" aria-hidden />
+            <small>{t("objectives.goal")}</small>
+            <b>{goal.line}</b>
+            <span className="prog" aria-hidden>
+              <span style={{ width: `${Math.round(goal.ratio * 100)}%` }} />
+            </span>
+          </li>
+        </ul>
+      </div>
+    );
+  }
   return (
-    <div className={`sd-okrs ${open ? "open" : ""} ${layout.compact ? "compact" : ""}`} {...coachApi.attrs("goals")}>
+    <div className={`sd-okrs ${open ? "open" : ""} ${layout.compact ? "compact" : ""}`} {...(goal ? coach.attrs("goals") : {})}>
       <button
         type="button"
         className="sd-okr-head"
@@ -40,7 +56,7 @@ export function Objectives({ objectives, layout, progress, visible = ALL_VISIBLE
                   {g.met && <Glyph name="check" />}
                 </span>
                 <b>{g.label}</b>
-                <small>{g.progress}</small>
+                {g.progress && <small>{g.progress}</small>}
                 <span className="prog" aria-hidden>
                   <span style={{ width: `${Math.round(g.ratio * 100)}%` }} />
                 </span>

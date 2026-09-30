@@ -33,8 +33,17 @@ export function progressOf(s: GameState): ProgressView {
   return { level, levelName: active.name,
     unlocked: { buildings: [...new Set([...unlockedRows(s).flatMap((r) => [...r.buildings]), ...defs().buildingKinds.filter((k) => level >= 4 && s.flags[`unlocked:${k}`] !== undefined) as BuildingKind[]])], staff: unlockedRows(s).flatMap((r) => [...r.staff]), systems: unlockedRows(s).flatMap((r) => [...r.systems]) },
     goal: { text: active.goal.text, current, target: active.goal.target },
-    teasers: rows(s).filter((r) => r.level > level).flatMap((r) => [...r.buildings, ...r.staff].map(() => ({ label: "???", hint: active.goal.text }))),
+    teasers: teasers(s, level),
   };
+}
+/** What is still locked, one row per milestone that unlocks it ("2 more · Ship your first model"), not one "???" per item. */
+function teasers(s: GameState, level: Level): ProgressView["teasers"] {
+  const all = rows(s);
+  return all.filter((r) => r.level > level).flatMap((r) => {
+    const count = r.buildings.length + r.staff.length;
+    const earnedBy = all.filter((p) => p.level < r.level).at(-1)!;
+    return count === 0 ? [] : [{ label: `${count} more`, hint: earnedBy.goal.text }];
+  });
 }
 export function visibleHud(s: GameState): { visible: Record<HudPanel, boolean> } {
   const panels = unlockedRows(s).flatMap((r) => [...r.panels]);

@@ -1,6 +1,5 @@
-import { ALL_VISIBLE } from "../kit";
 import { useState } from "react";
-import { useT } from "../kit";
+import { ALL_VISIBLE, useT } from "../kit";
 import type { SlotPropsMap } from "../types";
 import { BubbleIcon, Caret, LeafIcon, LensIcon, LetterIcon, MixerIcon, PauseIcon, SoundIcon } from "./icons";
 
@@ -30,15 +29,17 @@ export function PhotoButton({ photo, actions }: SlotPropsMap["PhotoButton"]) {
 }
 
 /** The reading room (the News Room, with its unread count), the sound switch, the mixer and the way to the skin picker. */
-export function NewsControls({ newsroom, sound, skins, actions, visible = ALL_VISIBLE }: SlotPropsMap["NewsControls"]) {
+export function NewsControls({ newsroom, sound, skins, visible = ALL_VISIBLE, actions }: SlotPropsMap["NewsControls"]) {
   const t = useT();
   return (
     <div className="fa-tools fa-paper" role="group">
-      {visible.news && (<button className="wide" onClick={() => actions.openNews()} aria-label={t("news.open")}>
-        <LetterIcon />
-        <span>{t("news.button")}</span>
-        {newsroom.unread > 0 && <b className="fa-unread">{newsroom.unread}</b>}
-      </button>)}
+      {visible.news && (
+        <button className="wide" onClick={() => actions.openNews()} aria-label={t("news.open")}>
+          <LetterIcon />
+          <span>{t("news.button")}</span>
+          {newsroom.unread > 0 && <b className="fa-unread">{newsroom.unread}</b>}
+        </button>
+      )}
       <button onClick={() => actions.setMuted(!sound.muted)} aria-label={sound.muted ? t("sound.unmute") : t("sound.mute")} aria-pressed={sound.muted}>
         <SoundIcon muted={sound.muted} />
       </button>

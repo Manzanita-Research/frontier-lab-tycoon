@@ -259,7 +259,7 @@ export interface ConfirmVM {
 export type HudPanelId = "revenue" | "vibes" | "arena" | "rnd" | "thoughts" | "news" | "staff" | "events" | "papers" | "disasters";
 export type VisibleVM = Record<HudPanelId, boolean>;
 
-/** A locked item the build panel teases: "??? · ship your first model". */
+/** What the build panel teases as locked: one row per milestone, how many it unlocks and the goal that earns them ("2 more · Ship your first model"). */
 export interface TeaserVM {
   label: string;
   hint: string;
@@ -277,7 +277,6 @@ export interface GoalVM {
 }
 
 export interface ProgressVM {
-  unlocked: { buildings: string[]; staff: string[]; systems: string[] };
   /** 1 to 5: "Garage", "Open for business", "Growing team", "The Race", "Scrutiny". */
   level: number;
   levelName: string;
@@ -300,7 +299,6 @@ export interface CoachVM {
   /** An "info" line (waitFor "timer") fades on its own; the others wait for the action. */
   waitFor: "action" | "timer";
   canSkip: boolean;
-  suggest?: { kind: "path"; tiles: [number, number][] } | { kind: "building"; building: string; x: number; z: number };
 }
 
 /** The small "New!" card that comes with a level-up. */
@@ -700,8 +698,6 @@ export interface LayoutVM {
 }
 
 export interface HudVM {
-  unlockCard: UnlockCardVM | null;
-  hud: { visible: VisibleVM };
   apiVersion: typeof SKIN_API_VERSION;
   stats: StatsVM;
   training: TrainingVM;
@@ -746,7 +742,6 @@ export interface HudVM {
 
 /** Everything a skin may ask the game to do. Each one is safe to call at any time; the game ignores what does not apply. */
 export interface HudActions {
-  openBuild(): void;
   /** Pick a build tool ("path", "cluster", ..., "bulldoze"). Picking the selected one puts it away; `null` clears. `"staff"` opens or closes the payroll. */
   place(kind: BuildKindVM | null): void;
   setSpeed(speed: number): void;
