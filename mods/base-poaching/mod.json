@@ -363,13 +363,38 @@
         "{rival}'s founder {founder} posts a leaderboard with {lab} circled in red"
       ],
       "goodwill": []
+    },
+    "letters": {
+      "add": [
+        {
+          "card": "poaching-offer",
+          "style": "email",
+          "file": "Outlook Excess",
+          "from": "Talent Team <talent@{poacherShort}.example>",
+          "to": "{poachNames}",
+          "subject": "Quick chat? 🚀 (confidential) (not confidential)",
+          "lines": [
+            "Hi {poachFirst},",
+            "I came across your work and was genuinely blown away. We're building superintelligence and we'd love your help with it, specifically.",
+            "The package is $100M over four years, a private chef and a desk six feet from the founder (bring headphones).",
+            "Can you start Monday? Can your friends? I've cc'd your friends."
+          ],
+          "sign": "Warmly, aggressively,\nTalent @ {poacher}"
+        }
+      ]
     }
   },
   "rules": {
     "poaching": {
       "targets": {
-        "big": [2, 4],
-        "other": [1, 2],
+        "big": [
+          2,
+          4
+        ],
+        "other": [
+          1,
+          2
+        ],
         "floor": 5
       },
       "bigPoachers": [

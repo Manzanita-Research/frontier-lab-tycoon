@@ -15,6 +15,11 @@ export const Chart = Schema.Struct({ id: S, initial: S, states: Schema.Record(S,
 const Pool = Schema.Struct({ add: Schema.Array(Schema.Struct({ id: S, values: Schema.Array(S) })) });
 const Personality = numbers("cadence", "growth", "openness", "poaching", "hypeHunger");
 export const NeoLines = Schema.Struct({ release: Schema.Array(S), poach: Schema.Array(S), nemesis: Schema.Array(S), goodwill: Schema.Array(S) });
+/** What a drama card looks like on screen: the resignation letter, the recruiter's email, the manifesto. Templates, like the card. */
+export const Letter = Schema.Struct({
+  card: S, style: Schema.Literals(["letter", "email", "manifesto"]), file: S, from: S, to: S, subject: S, lines: Schema.Array(S), sign: S,
+});
+export type Letter = typeof Letter.Type;
 const Pack = Schema.Struct({
   apiVersion: Schema.Literal(1), id: S, version: S,
   content: Schema.Struct({
@@ -26,6 +31,7 @@ const Pack = Schema.Struct({
     labNames: Pool,
     manifestos: Pool,
     neoLines: NeoLines,
+    letters: Schema.Struct({ add: Schema.Array(Letter) }),
   }),
   rules: Schema.Struct({ defection: Schema.Struct({
     eligibility: numbers("minResearchers", "minTenureDays", "candidates"),

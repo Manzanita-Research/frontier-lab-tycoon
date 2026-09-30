@@ -1,7 +1,7 @@
 // Every skin renders every slot from a fixture view-model without throwing, and its files are what the format says.
 import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { fixtureInput, FIXTURE_CHAT, FIXTURE_PAPER } from "../ui/hud/fixtures";
+import { fixtureDrama, fixtureInput, FIXTURE_CHAT, FIXTURE_PAPER } from "../ui/hud/fixtures";
 import { Docked, Modals, PhotoLayer } from "../ui/hud/tree";
 import type { HudActions, HudVM } from "../ui/hud/types";
 import { hudViewModel } from "../ui/hud/vm";
@@ -69,6 +69,8 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
       return { leapfrog: vms.lf!.leapfrog, layout: vms.lf!.layout, actions };
     case "Livestream":
       return { event: vms.stream!.event!, stream: vms.stream!.event!.stream!, actions };
+    case "Drama":
+      return { event: vms.resign!.event!, drama: vms.resign!.event!.drama!, actions };
     case "EraCard":
       return { era: vms.era!.eraCard!, actions };
     case "FrontPage":
@@ -118,6 +120,11 @@ const vms: Record<string, HudVM> = {
   phone: vmOf({ width: 390, height: 844 }),
   nobody: vmOf({ selected: null }),
   staff: vmOf({ staff: true }),
+  vcChat: vmOf({ world: fixtureDrama("defection-chat") }),
+  resign: vmOf({ world: fixtureDrama("defection-card") }),
+  manifesto: vmOf({ world: fixtureDrama("defection-manifesto") }),
+  nemesis: vmOf({ world: fixtureDrama("defection-arena") }),
+  poach: vmOf({ world: fixtureDrama("poach-offer") }),
 };
 
 const usable = catalog.filter((e) => e.ok).map((e) => e.folder);
@@ -176,6 +183,21 @@ describe.each([BASE_ID, ...usable])("skin %s", (id) => {
     for (const c of vms.event!.event!.choices) expect(card).toContain(escape(c.label));
     const era = html(skin, <Modals vm={vms.era!} actions={actions} />);
     expect(era).toContain(escape(vms.era!.eraCard!.line));
+  });
+
+  it("shows the drama cards' documents and all their choices, and says the VC's pitch out loud", async () => {
+    const { skin } = await prepareSkin(id);
+    for (const name of ["resign", "manifesto", "poach"]) {
+      const vm = vms[name]!;
+      expect(vm.event?.kind, name).toBe("drama");
+      const out = html(skin, <Modals vm={vm} actions={actions} />);
+      expect(out, `${id}/${name}`).toContain(escape(vm.event!.title));
+      for (const c of vm.event!.choices) expect(out, `${id}/${name}`).toContain(escape(c.label));
+      expect(out, `${id}/${name}`).toContain(escape(vm.event!.drama!.lines[0]!));
+      expect(out, `${id}/${name} left a placeholder`).not.toMatch(/\{\w+\}/);
+    }
+    expect(vms.resign!.event!.choices).toHaveLength(4);
+    expect(vms.vcChat!.bubbles.filter((b) => b.speech)).toHaveLength(2);
   });
 
   it("asks before a spend that leaves under three months of runway, in a modal of its own", async () => {

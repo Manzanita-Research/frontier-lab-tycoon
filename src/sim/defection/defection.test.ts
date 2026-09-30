@@ -18,6 +18,7 @@ import type { GameState, Walker } from "../types";
 import { applyDefectionChoices, candidates, dailyDefection, enableDefection, disableDefection, scoreDelta } from "./driver";
 import { CARD, CHOICES, DEFECTION, loadDefectionPack, MANIFESTO_CARD } from "./pack";
 import { runDefectionYear } from "./headless";
+import { stageDrama, type DramaMoment } from "./demo";
 
 const R = DEFECTION.rules;
 const researchers = (s: GameState) => s.walkers.filter((w) => w.kind === "researcher");
@@ -256,5 +257,19 @@ describe("the pack as a system", () => {
   it("candidates are the top few by score", () => {
     const { s } = staged();
     expect(candidates(s).length).toBeLessThanOrEqual(R.eligibility.candidates);
+  });
+});
+
+describe("review moments", () => {
+  const at = (m: DramaMoment) => { const s = createInitialState(7); delete s.progression; delete s.coach; delete s.tutorial; stageDrama(s, m); return s; };
+  it("each lands where its name says", () => {
+    expect(at("defection-chat").meetings?.some((m) => m.phase === "talking")).toBe(true);
+    expect(openEventOf(at("defection-card"))?.id).toBe(CARD);
+    const exit = at("defection-exit");
+    expect(exit.walkers.filter((w) => w.machine.value === "quitting").length).toBeGreaterThanOrEqual(2);
+    expect(openEventOf(at("defection-manifesto"))?.id).toBe(MANIFESTO_CARD);
+    const arena = at("defection-arena");
+    expect(arena.neoLabs?.labs[0]?.nemesis).toBe(true);
+    expect(openEventOf(at("poach-offer"))?.id).toBe("poaching-offer");
   });
 });

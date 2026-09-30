@@ -172,6 +172,8 @@ export interface BubbleVM {
   /** Who is thinking it (their name). */
   speaker: string;
   text: string;
+  /** Said out loud to the person beside them, not thought (a VC's pitch by the Kombucha Bar): a skin may draw a speech balloon. */
+  speech?: boolean;
 }
 
 export interface StaffRowVM {
@@ -374,12 +376,28 @@ export interface EventVM {
   tone: ToneVM;
   /** The top-stripe text: "Breaking", "Developing", ... */
   stripe: string;
-  /** "response" and "stream" are Release Leapfrog's cards: `response` / `stream` carry their extra data. */
-  kind: "plain" | "auction" | "response" | "stream";
+  /** "response" and "stream" are Release Leapfrog's cards: `response` / `stream` carry their extra data. "drama" (FLT-26, FLT-20) carries `drama`. */
+  kind: "plain" | "auction" | "response" | "stream" | "drama";
   choices: ChoiceVM[];
   paddles: AuctionPaddleVM[];
   response: ResponseVM | null;
   stream: StreamVM | null;
+  /** The document a drama card is about: the resignation letter, the recruiter's email, the manifesto. */
+  drama?: DramaVM | null;
+}
+
+/** A drama card's document (Defection, the Poaching War). Every string is filled in; `lines` are paragraphs. */
+export interface DramaVM {
+  /** letter: a resignation letter someone is still drafting. email: a recruiter's offer. manifesto: a new lab's one-pager. */
+  style: "letter" | "email" | "manifesto";
+  /** What the file would be called ("resignation_DRAFT_v7.doc", "MANIFESTO.txt"). */
+  file: string;
+  from: string;
+  to: string;
+  subject: string;
+  lines: string[];
+  /** The sign-off; may contain a line break. */
+  sign: string;
 }
 
 export interface ThoughtRowVM {
@@ -406,6 +424,10 @@ export interface ArenaRowVM {
   color: string;
   moved: "up" | "down" | null;
   title: string;
+  /** A lab your own people founded (FLT-26, FLT-20): NEW for its first two weeks, NEMESIS once it has it in for you, ALUMNI after. */
+  tag?: "new" | "nemesis" | "alumni" | null;
+  /** "NEW", "NEMESIS", "ALUMNI" */
+  tagText?: string;
 }
 
 export interface ArenaVM {

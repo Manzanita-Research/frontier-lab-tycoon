@@ -11,6 +11,7 @@ import { thoughtBoard, type ThoughtRow } from "../sim/mind";
 import { computePerDay, trainingEtaDays } from "../sim/training";
 import { openEventOf } from "../sim/events";
 import { opsView, type OpsView } from "../sim/opsView";
+import { talking } from "../sim/meetings";
 import { leapfrogView, type LeapfrogView } from "../sim/race/leapfrog/view";
 import { papersView, type PapersView } from "../sim/race/papers/view";
 import { raceView, type RaceView } from "../sim/race/view";
@@ -97,6 +98,8 @@ export interface Snapshot {
   papers: PapersView;
   /** Operations: staff, slop, broken buildings, queues. */
   ops: OpsView;
+  /** Meetings in progress (a VC and your researcher by the Kombucha Bar, FLT-26): who, and what they say, visitor first. */
+  chats: { id: number; hostId: number; guestId: number; lines: string[] }[];
   assistant: AssistantMessage | null;
   firstBuildPending: boolean;
   pendingConfirm: PendingConfirm | null;
@@ -161,6 +164,7 @@ export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO
     leapfrog: leapfrogView(s),
     papers: papersView(s),
     ops: opsView(s),
+    chats: talking(s).map((m) => ({ id: m.id, hostId: m.hostId, guestId: m.guestId, lines: m.lines.slice() })),
     assistant: assistantOf(s),
     firstBuildPending: !!s.coach && s.flags.started === undefined && s.flags.firstBuild === undefined,
     pendingConfirm: pendingConfirmOf(s),

@@ -382,6 +382,7 @@ export function Arena({ arena, leapfrog, layout, actions }: SlotPropsMap["Arena"
               <span role="cell">
                 {r.rank}. {r.short}
                 {r.open && <em> (open)</em>}
+                {r.tag && <em className={`f95-tag tag-${r.tag}`}> {r.tagText}</em>}
               </span>
               <span role="cell">{r.model ?? "—"}</span>
               <span role="cell">{r.score}</span>

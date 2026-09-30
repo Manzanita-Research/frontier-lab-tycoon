@@ -2395,6 +2395,115 @@
   .f95-stream {
     width: min(640px, 100%);
   }
+  .f95-tag {
+    font-style: normal;
+    font-size: 13px;
+    &.tag-new {
+      color: var(--flt-color-good);
+    }
+    &.tag-nemesis {
+      color: var(--flt-color-bad);
+      animation: frontier-95-blink 1s steps(2) infinite;
+    }
+  }
+  .f95-tip.speech {
+    background: #fff;
+    b::after {
+      content: " says:";
+      font-weight: normal;
+    }
+  }
+  /* FLT-26/FLT-20 drama cards: the document is the card's picture. */
+  .f95-drama {
+    width: min(600px, 100%);
+    .f95-page {
+      margin: 4px 6px;
+      max-height: 38vh;
+      overflow: auto;
+      background: #fff;
+      color: #000;
+      p {
+        margin: 0 0 8px;
+      }
+    }
+    .f95-sign {
+      white-space: pre-line;
+    }
+  }
+  .f95-wordbar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 8px 4px;
+    box-shadow: var(--etched);
+    .f95-font {
+      padding: 1px 6px;
+      background: #fff;
+      font-size: 14px;
+    }
+    b,
+    i,
+    u {
+      width: 20px;
+      text-align: center;
+      font-family: "Times New Roman", Times, serif;
+    }
+  }
+  .f95-wordpad {
+    padding: 10px 0;
+    background: #808080 !important;
+    .f95-paper {
+      margin: 0 auto;
+      width: calc(100% - 32px);
+      padding: 18px 22px;
+      background: #fff;
+      box-shadow: 2px 2px 0 #000;
+      font-family: "Times New Roman", Times, serif;
+      font-size: 17px;
+      line-height: 1.3;
+    }
+    .f95-subject {
+      font-weight: bold;
+      text-decoration: underline;
+    }
+  }
+  .f95-mailhead {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 3px 8px;
+    align-items: center;
+    margin: 4px 6px 0;
+    dt {
+      text-align: right;
+      font-size: 15px;
+    }
+    dd {
+      margin: 0;
+      padding: 1px 6px;
+      background: #fff;
+      color: #000;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+  .f95-mail {
+    padding: 10px 12px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 15px;
+  }
+  .f95-notepad {
+    padding: 8px 10px;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 15px;
+    line-height: 1.3;
+    white-space: pre-wrap;
+    .f95-cursor {
+      width: 8px;
+      height: 16px;
+      background: #000;
+    }
+  }
   .f95-player {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 190px;
@@ -2795,6 +2904,13 @@
     }
     .f95-msgbox {
       width: 100%;
+    }
+    .f95-drama .f95-page {
+      max-height: 30vh;
+    }
+    .f95-wordpad .f95-paper {
+      padding: 12px 14px;
+      font-size: 15px;
     }
     .f95-player {
       grid-template-columns: 1fr;

@@ -12,6 +12,8 @@ import { newMotion, stepMotion, type MotionView } from "./leapfrogMotion";
 import type { SkinPickerVM } from "./types";
 import type { HudInput } from "./vm";
 import { playableFixture } from "./previewLadder";
+import { createInitialState } from "../../sim/state";
+import { stageDrama, type DramaMoment } from "../../sim/defection/demo";
 
 /** A busy campus a few game days in, with thoughts, a crowd and a run in flight (the real opening is quieter: see `openingWorld`). */
 export function fixtureWorld(days = 12, seed = 3): GameState {
@@ -46,6 +48,16 @@ export function fixtureLeapfrog(days = 48, seed = 3): { world: GameState; motion
     view = { ...view, ghosts: [{ column: { ...first, id: `${first.id}-retired`, status: "saturated" }, cells, until: now + 20_000 }] };
   }
   return { world: s, motion: view };
+}
+
+/** A lab staged at one of Defection's or the Poaching War's moments (the VC chat, a card, the exit, the new rival). */
+export function fixtureDrama(moment: DramaMoment, seed = 7): GameState {
+  const s = createInitialState(seed);
+  delete s.progression;
+  delete s.coach;
+  delete s.tutorial;
+  stageDrama(s, moment);
+  return s;
 }
 
 export const NO_SKINS: SkinPickerVM = {

@@ -33,7 +33,7 @@ export interface BoardView {
   model: string;
   open: boolean;
   /** A lab your own people founded (FLT-26, FLT-20): who, why, and whether it has it in for you. */
-  neo?: { founder: string; manifesto: string; nemesis: boolean; friendly: boolean; origin: string };
+  neo?: { founder: string; manifesto: string; nemesis: boolean; friendly: boolean; origin: string; founded: number };
 }
 
 export function boardView(state: GameState): BoardView[] {
@@ -47,7 +47,7 @@ export function boardView(state: GameState): BoardView[] {
     const neo = neoLabById(state, row.id);
     if (neo) {
       const c = neo.rival.context;
-      return { id: row.id, name: neo.name, short: neo.short, color: neo.color, score: row.score, rank, delta, you: false, model: c.model, open: c.open, neo: { founder: neo.founder, manifesto: neo.manifesto, nemesis: neo.nemesis, friendly: neo.mood === "friendly", origin: neo.origin } };
+      return { id: row.id, name: neo.name, short: neo.short, color: neo.color, score: row.score, rank, delta, you: false, model: c.model, open: c.open, neo: { founder: neo.founder, manifesto: neo.manifesto, nemesis: neo.nemesis, friendly: neo.mood === "friendly", origin: neo.origin, founded: neo.founded } };
     }
     const def = RIVAL_BY_ID[row.id as RivalId];
     const ctx = race.rivals.find((r) => r.context.id === row.id)!.context;

@@ -1,0 +1,92 @@
+/* Drama cards (FLT-26 Defection, FLT-20 Poaching War): the document the card is about. */
+.drama-card .card-body {
+  max-height: min(84vh, 760px);
+  overflow-y: auto;
+}
+.drama-doc {
+  position: relative;
+  margin: 0 0 12px;
+  padding: 12px 14px 10px;
+  border: 2px solid var(--flt-color-line);
+  border-radius: 6px;
+  background: #fffdf6;
+  color: #231f1a;
+  font-size: 13px;
+  line-height: 1.4;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.2);
+}
+.drama-doc p {
+  margin: 0 0 6px;
+}
+.drama-file {
+  margin: -4px 0 6px;
+  font-size: 11px;
+  opacity: 0.6;
+}
+.drama-letter {
+  font-family: Georgia, "Times New Roman", serif;
+  transform: rotate(-0.6deg);
+}
+.drama-subject {
+  margin-bottom: 6px;
+  font-weight: 700;
+  color: #b71c1c;
+}
+.drama-sign {
+  white-space: pre-line;
+  font-style: italic;
+}
+.drama-headers {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 10px;
+  margin: 0 0 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+.drama-headers dt {
+  font-weight: 700;
+  opacity: 0.7;
+}
+.drama-headers dd {
+  margin: 0;
+}
+.drama-manifesto {
+  font-family: ui-monospace, "Courier New", monospace;
+  background: #1c1a22;
+  color: #f4efe6;
+  text-align: center;
+}
+.drama-manifesto h3 {
+  margin: 4px 0 8px;
+  font-size: 20px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.drama-manifesto p:nth-of-type(1) {
+  font-size: 15px;
+  font-weight: 700;
+}
+/* Arena tags for labs your people founded. */
+.arena-tag {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 0 4px;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+  background: var(--flt-color-accent, #ff8a4c);
+  color: #fff;
+}
+.arena-tag.tag-nemesis {
+  background: #b71c1c;
+}
+.arena-tag.tag-alumni {
+  background: #6b6470;
+}
+/* Said out loud, not thought. */
+.bubble.speech {
+  border-radius: 10px;
+}

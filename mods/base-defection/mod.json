@@ -712,6 +712,41 @@
         "{founder} of {rival} recommends {lab} to a room of investors 'as a place I learned a lot'",
         "{rival} sends {lab} a fruit basket; the card says 'no hard feelings, some soft ones'"
       ]
+    },
+    "letters": {
+      "add": [
+        {
+          "card": "defection-card",
+          "style": "letter",
+          "file": "resignation_DRAFT_v7.doc",
+          "from": "{defName}",
+          "to": "{lab} leadership",
+          "subject": "Resignation (DRAFT v7, do not send)",
+          "lines": [
+            "Dear {lab},",
+            "It has been the privilege of my career to scale your models, your GPU budget and, briefly, the kombucha tap.",
+            "After a lot of reflection, and one coffee by the Kombucha Bar with some very nice people in quarter-zips, I have decided it is time to explore what's next.",
+            "The reason, if anyone asks: {defReason}.",
+            "{defFollowers}"
+          ],
+          "sign": "With gratitude and a non-compete I have not read,\n{defName}"
+        },
+        {
+          "card": "defection-manifesto",
+          "style": "manifesto",
+          "file": "MANIFESTO.txt",
+          "from": "{neoFounder}",
+          "to": "The world",
+          "subject": "{neoName}",
+          "lines": [
+            "{neoName}",
+            "\"{neoManifesto}\"",
+            "Founded by {neoFounder}, with {neoFollowers}.",
+            "We have a seed round, a logo and a whiteboard. We are hiring. (We are hiring your team.)"
+          ],
+          "sign": "— the founders, from a borrowed garage"
+        }
+      ]
     }
   },
   "rules": {
@@ -732,7 +767,13 @@
         "bump": 0.6,
         "courtBoost": 0.8
       },
-      "eras": [0, 0, 0.1, 0.5, 0.3],
+      "eras": [
+        0,
+        0,
+        0.1,
+        0.5,
+        0.3
+      ],
       "thresholds": {
         "courtScore": 45,
         "cardScore": 80,

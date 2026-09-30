@@ -2,7 +2,7 @@
 import { Schema } from "effect";
 import json from "../../../mods/base-poaching/mod.json";
 import { Headline, Thought } from "../../mods/schema";
-import { Chart, DramaCard, NeoLines } from "../defection/pack";
+import { Chart, DramaCard, Letter, NeoLines } from "../defection/pack";
 
 const N = Schema.Finite;
 const S = Schema.NonEmptyString;
@@ -18,6 +18,7 @@ const Pack = Schema.Struct({
     labNames: Pool,
     manifestos: Pool,
     neoLines: NeoLines,
+    letters: Schema.Struct({ add: Schema.Array(Letter) }),
   }),
   rules: Schema.Struct({ poaching: Schema.Struct({
     /** How many researchers one offer goes to: the big spenders' range, everyone else's, and the FLT-9 floor. */

@@ -6,7 +6,7 @@ import { ERAS } from "./eras";
 import { cardEvents } from "../sim/disasters/pack";
 import { LEAPFROG } from "./leapfrog";
 import { COLLUSION } from "../sim/collusion/pack";
-import { DEFECTION } from "../sim/defection/pack";
+import { DEFECTION, type Letter } from "../sim/defection/pack";
 import { POACHING } from "../sim/poaching/pack";
 
 /** What has to be true for an event to fire. `all` combines conditions. */
@@ -307,3 +307,5 @@ EVENTS.push(...COLLUSION.content.events.add as EventDef[]);
 EVENTS.push(...DEFECTION.content.events.add as EventDef[], ...POACHING.content.events.add as EventDef[]);
 
 export const eventById = (id: string): EventDef | undefined => EVENTS.find((e) => e.id === id);
+/** How each drama card looks on screen (the letter, the email, the manifesto): templates from the packs, by card id. */
+export const DRAMA_LETTERS: ReadonlyMap<string, Letter> = new Map([...DEFECTION.content.letters.add, ...POACHING.content.letters.add].map((l) => [l.card, l]));
