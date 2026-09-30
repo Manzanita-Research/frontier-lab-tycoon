@@ -1,14 +1,14 @@
 {
   "base": {
     "ref": "origin/main",
-    "sha": "46f564a97f613bd8548a0d304bc6383b9097f3d6"
+    "sha": "00b8c60bdeb6679ae2cd69c310664855e2baebc4"
   },
   "head": {
     "branch": "flt-37-mods-live",
-    "sha": "aae6120",
-    "dirty": true
+    "sha": "e631c60",
+    "dirty": false
   },
-  "seconds": 120.199,
+  "seconds": 119.958,
   "problems": [],
   "rows": [
     {
@@ -18,7 +18,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/after/overview.png",
       "title": "The campus, mid-morning, paused",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/compare/overview.png",
-      "changed": 0.21557098765432098
+      "changed": 0.19211805555555556
     },
     {
       "scene": "phone",
@@ -27,7 +27,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/after/phone.png",
       "title": "The same campus on a phone (390x844)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/compare/phone.png",
-      "changed": 0.22034572852108397
+      "changed": 0.22133916636286305
     },
     {
       "scene": "mod-steve",
@@ -36,7 +36,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/after/mod-steve.png",
       "title": "FLT-37: ?mod=every-lab-is-steve, the Arena is three Steves (main ignores ?mod=)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/compare/mod-steve.png",
-      "changed": 0.22350385802469136
+      "changed": 0.20022376543209877
     },
     {
       "scene": "mod-steve-phone",
@@ -45,7 +45,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/after/mod-steve-phone.png",
       "title": "FLT-37: the Steve mod on a phone",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/compare/mod-steve-phone.png",
-      "changed": 0.22324629359581966
+      "changed": 0.2229629967189209
     },
     {
       "scene": "mod-retriever",
@@ -54,7 +54,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/after/mod-retriever.png",
       "title": "FLT-37: the fresh agent's golden-retriever mod, first midnight of a new game (toast and camera to the gate)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/compare/mod-retriever.png",
-      "changed": 0.9771527777777778
+      "changed": 0.7644868827160494
     },
     {
       "scene": "mod-manager",
@@ -63,7 +63,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/after/mod-manager.png",
       "title": "FLT-37: Start, Settings, Mods… with two mods loaded",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/compare/mod-manager.png",
-      "changed": 0.32664583333333336
+      "changed": 0.30830246913580245
     }
   ],
   "errors": []
