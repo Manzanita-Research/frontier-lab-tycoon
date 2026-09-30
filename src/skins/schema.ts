@@ -74,6 +74,8 @@ export const SkinManifest = Schema.Struct({
   preview: Schema.String.check(Schema.isPattern(/^assets\/preview\.(png|jpe?g|webp|gif|svg)$/i)),
   /** The slots this skin replaces with its own components (its `slots.tsx` exports exactly these). */
   slots: Schema.Array(Schema.String),
+  /** Kept out of the player's Display picker (still reachable with `?skin=<id>`) until it passes a taste review. Unhiding is deleting this line. */
+  unlisted: Schema.optionalKey(Schema.Boolean),
 });
 export type SkinManifest = typeof SkinManifest.Type;
 

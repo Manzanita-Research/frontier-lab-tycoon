@@ -1,4 +1,5 @@
 import { useCoach, useT } from "../../context";
+import { SpeedGlyph } from "../../kit/SpeedGlyph";
 import type { SlotPropsMap } from "../../types";
 
 export function Speed({ speed, actions }: SlotPropsMap["Speed"]) {
@@ -14,7 +15,7 @@ export function Speed({ speed, actions }: SlotPropsMap["Speed"]) {
               <i />
             </span>
           ) : (
-            t(`speed.short.${o.value}`)
+            <SpeedGlyph value={o.value} />
           )}
         </button>
       ))}

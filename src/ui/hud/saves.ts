@@ -9,8 +9,7 @@ import { modSession } from "../../app/mods";
 import { welcomesYou, type SaveResult } from "../../app/saves";
 import { downloadSave, encodeSave, isSlot, loadWorld, readSaveFile, saveFileName, type SaveError, type SaveFile, type SaveMeta, type SlotId, type SlotListing } from "../../save";
 import { formatDate } from "../../sim/format";
-import { skinList } from "../../skins/registry";
-import { showSkin } from "./skinControl";
+import { restoreSaveSkin } from "./skinControl";
 import { skinUiAtom } from "./state";
 import type { HudActions, SaveModPromptVM, ToneVM } from "./types";
 import { modMismatch } from "./saves.vm";
@@ -48,7 +47,7 @@ function finish(save: SaveFile) {
       onSuccess: (world) => {
         saveDesk.held = false;
         send({ type: "LOAD_LAB", world });
-        if (save.skin && save.skin !== registry.get(skinUiAtom).active && skinList().some((s) => s.id === save.skin)) void showSkin(save.skin, { persist: true });
+        void restoreSaveSkin(save.skin);
         say(`Loaded "${save.lab}", ${formatDate(save.day)}.`, "good", { open: false, welcome: null, prompt: null });
         send({ type: "TOAST", text: `Welcome back to ${save.lab}. It's ${formatDate(save.day)}.`, tone: "good" });
       },
