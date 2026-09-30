@@ -124,6 +124,10 @@ export interface DisastersSnapshot {
   diverted: { job: StaffJob; diverted: number; total: number; by: string }[];
   /** Rivals a weights leak lifted, while it is still under way (the Arena marks them). */
   leaked: string[];
+  /** Staffers pulled off their post (their map tags go red). */
+  divertedIds: number[];
+  /** Where each disaster has sent people: a building id, or 0 for the gate. The map puts the cleanup's progress there. */
+  sites: { owner: string; to: number; job: StaffJob }[];
 }
 
 export interface UiToast {
@@ -135,6 +139,8 @@ export interface UiToast {
 function disastersOf(s: GameState): DisastersSnapshot {
   const d = s.disasters;
   const diverted: DisastersSnapshot["diverted"] = [];
+  const divertedIds: number[] = [];
+  const sites: DisastersSnapshot["sites"] = [];
   for (const o of s.staff) {
     if (o.machine.value === "leaving") continue;
     let row = diverted.find((r) => r.job === o.job);
@@ -143,6 +149,8 @@ function disastersOf(s: GameState): DisastersSnapshot {
     if (o.divert) {
       row.diverted++;
       row.by ||= o.divert.owner;
+      divertedIds.push(o.id);
+      if (!sites.some((x) => x.owner === o.divert!.owner && x.to === o.divert!.to)) sites.push({ owner: o.divert.owner, to: o.divert.to, job: o.job });
     }
   }
   return {
@@ -155,6 +163,8 @@ function disastersOf(s: GameState): DisastersSnapshot {
     heat: d.heat,
     diverted: diverted.filter((r) => r.diverted > 0),
     leaked: d.runs.flatMap((r) => (r.id === "weightsLeak" && r.vars.leapRivalId && r.machine.value !== "done" ? [r.vars.leapRivalId] : [])),
+    divertedIds,
+    sites,
   };
 }
 

@@ -10,7 +10,7 @@ import { useStackWindow } from "./stack";
 type StatsTab = "general" | "finance" | "arena" | "vibes";
 
 /** "Lab Properties": tabs, a Minesweeper-style LED for Vibes, inset fields and a blocky Hype bar. */
-export function Stats({ stats, layout, visible = ALL_VISIBLE, actions }: SlotPropsMap["Stats"]) {
+export function Stats({ stats, layout, visible = ALL_VISIBLE, disasters, actions }: SlotPropsMap["Stats"]) {
   const t = useT();
   const coach = useCoach();
   const [tab, setTab] = useState<StatsTab>("general");
@@ -110,6 +110,14 @@ export function Stats({ stats, layout, visible = ALL_VISIBLE, actions }: SlotPro
             <dd className={`inset ${stats.cash.negative ? "bad" : ""}`}>{stats.cash.text}</dd>
             <dt>{t("stats.runway")}</dt>
             <dd className={`inset ${stats.runway.warning ? "bad" : ""}`}>{stats.runway.text}</dd>
+            {disasters?.enabled && (
+              <>
+                <dt>{t("disasters.trust")}</dt>
+                <dd className={`inset ${disasters.trust.value < 40 ? "bad" : ""}`}>{disasters.trust.text}</dd>
+                <dt>{t("disasters.heat")}</dt>
+                <dd className={`inset ${disasters.heat.value >= 60 ? "bad" : ""}`}>{disasters.heat.text}</dd>
+              </>
+            )}
           </dl>
         )}
         {tab === "arena" && (

@@ -321,6 +321,11 @@ describe("the Disasters view (FLT-32)", () => {
     const sec = mid.disasters.understaffed.find((u) => u.job === "security")!;
     expect(sec).toMatchObject({ all: true, diverted: sec.total });
     expect(sec.text).toBe("All Security on the Rogue Agent Swarm. GATE UNGUARDED.");
+    // The map's half: who goes red, and where the swarm's cleanup is (the Security Office).
+    const snap = fixtureInput({ disaster: true }).snap;
+    expect(snap.disasters.divertedIds).toHaveLength(snap.disasters.diverted.reduce((n, d) => n + d.diverted, 0));
+    const site = snap.disasters.sites.find((x) => x.owner === "rogueSwarm" && x.job === "security")!;
+    expect(snap.buildings.find((b) => b.id === site.to)?.kind).toBe("security");
   });
 
   it("marks the rival running on your leaked weights in the Arena", () => {

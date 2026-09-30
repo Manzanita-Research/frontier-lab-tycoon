@@ -19,6 +19,7 @@ export function Layout({ vm, slots }: SlotPropsMap["Layout"]) {
         </div>
         {slots.ThoughtsPanel}
         {slots.Inspector}
+        {slots.DisasterAlert}
         {slots.Arena}
       </div>
       {slots.Toasts}

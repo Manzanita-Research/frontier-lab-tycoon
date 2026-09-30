@@ -17,6 +17,7 @@ export function Layout({ slots }: SlotPropsMap["Layout"]) {
         {slots.Objectives}
       </div>
       <div className="f95-side">
+        {slots.DisasterAlert}
         <WindowStack>
           {slots.Staff}
           {slots.Inspector}

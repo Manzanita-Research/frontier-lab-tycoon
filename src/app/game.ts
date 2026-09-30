@@ -81,6 +81,7 @@ export const atoms = {
   ops: pick((c) => c.snap.ops),
   staffCount: pick((c) => c.snap.ops.staff.length),
   payroll: pick((c) => c.snap.ops.payroll),
+  disasters: pick((c) => c.snap.disasters),
   /** The staffer whose patrol zone is being painted, or null. */
   zone: pick((c) => c.zone),
   /** Template variables for the open card ({valuation}, {bidLow}, {dropRival}, ...). */

@@ -4,8 +4,8 @@ import type { WalkerKind } from "../sim/types";
 
 export type BuildingKind = "cluster" | "hall" | "gateway" | "kombucha" | "nap" | "snack" | "demo" | "fountain" | "datacenter" | "gas" | "solar" | "security";
 /**
- * What the build palette can offer; scenery is placed by events, not by the player, and the Security Office (FLT-17) is
- * placed by a disaster or the `placeBuilding` command until the palette gets its tile (FLT-32).
+ * What the core build palette offers; scenery is placed by events, not by the player. The Security Office (FLT-17) is an
+ * office: the palette adds it after these once the Scrutiny rung unlocks it (`OFFICE_TOOLS` in app/hud.ts, FLT-32).
  */
 export type PlaceableKind = Exclude<BuildingKind, "fountain" | "security">;
 
@@ -35,7 +35,7 @@ export interface BuildingDef {
   tally?: "sips" | "naps" | "snacks" | "demos";
   /** Hidden from the palette (and refused by the sim) until a compute auction unlocks it. */
   locked?: boolean;
-  /** A staff building: walkers never visit it, and it is not on the palette yet (disasters send staff there). */
+  /** A staff building: walkers never visit it (disasters send staff there). On the palette from Scrutiny (FLT-32). */
   office?: boolean;
 }
 
