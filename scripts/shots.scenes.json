@@ -100,6 +100,12 @@
       "desk-phone-badge",
       "desk-phone-okr",
       "desk-phone-more"
+    ],
+    "mods": [
+      "mod-steve",
+      "mod-steve-phone",
+      "mod-retriever",
+      "mod-manager"
     ]
   },
   "scenes": {
@@ -1004,6 +1010,73 @@
         },
         {
           "wait": 250
+        }
+      ]
+    },
+    "mod-steve": {
+      "title": "FLT-37: ?mod=every-lab-is-steve, the Arena is three Steves (main ignores ?mod=)",
+      "query": {
+        "mod": "/mods/examples/every-lab-is-steve/mod.json"
+      },
+      "steps": []
+    },
+    "mod-steve-phone": {
+      "title": "FLT-37: the Steve mod on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "mod": "/mods/examples/every-lab-is-steve/mod.json"
+      },
+      "steps": []
+    },
+    "mod-manager": {
+      "title": "FLT-37: Start, Settings, Mods… with two mods loaded",
+      "query": {
+        "mod": [
+          "/mods/examples/every-lab-is-steve/mod.json",
+          "/mods/examples/headline-pack/mod.json"
+        ]
+      },
+      "steps": [
+        {
+          "click": "[data-testid=start-button]"
+        },
+        {
+          "click": ".f95-startwrap button[role=menuitem][aria-expanded]",
+          "optional": true
+        },
+        {
+          "click": ".f95-startwrap li.sub ~ li.sub ~ li.sub button",
+          "optional": true
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "mod-retriever": {
+      "title": "FLT-37: the fresh agent's golden-retriever mod, first midnight of a new game (toast and camera to the gate)",
+      "query": {
+        "warp": null,
+        "mod": "/mods/examples/golden-retriever-protest/mod.json"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "skipTutorial"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "eval": "(f, w) => { while (w.day < 1) f.tick(w); }"
+        },
+        {
+          "wait": 1200
         }
       ]
     }

@@ -191,7 +191,11 @@ for (const n of sceneNames) if (!sceneData.scenes[n]) die(`unknown scene "${n}".
 function sceneUrl(base, scene, skin) {
   const q = new URLSearchParams();
   const put = (obj) => {
-    for (const [k, v] of Object.entries(obj ?? {})) v === null ? q.delete(k) : q.set(k, String(v));
+    for (const [k, v] of Object.entries(obj ?? {})) {
+      q.delete(k);
+      // An array repeats the parameter (`"mod": [a, b]` is `?mod=a&mod=b`).
+      if (v !== null) for (const x of [v].flat()) q.append(k, String(x));
+    }
   };
   put(sceneData.defaults.query);
   put(scene.query);

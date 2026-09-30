@@ -1,0 +1,62 @@
+{
+  "apiVersion": 1,
+  "id": "golden-retriever-protest",
+  "name": "Golden Retriever Protest",
+  "version": "1.0.0",
+  "description": "The protesters at the gate are all golden retrievers. Good dogs, firm demands.",
+  "content": {
+    "thoughts": {
+      "add": [
+        {"id": "gr-always", "kind": "protester", "when": "always", "text": "I support open treats. I oppose closed doors."},
+        {"id": "gr-protest", "kind": "protester", "when": "protest", "text": "Water bowl transparency NOW. (wags tail)"},
+        {"id": "gr-discourse", "kind": "protester", "when": "discourse", "text": "Woof. That is my whole position paper."},
+        {"id": "gr-night", "kind": "protester", "when": "night", "text": "Protesting until someone throws the ball."},
+        {"id": "gr-crowded", "kind": "protester", "when": "crowded", "text": "So many friends at the gate! Best protest ever!"},
+        {"id": "gr-hype", "kind": "protester", "when": "highHype", "text": "Is that a new model? Does it fetch?"}
+      ]
+    },
+    "headlines": {
+      "add": [
+        {"id": "gr-protest-news", "trigger": "protest", "text": "Protesters outside {lab} confirmed to be golden retrievers; demands include belly rubs", "tone": "joke"},
+        {"id": "gr-filler-1", "text": "Golden retriever protest at {lab} remains peaceful, slightly damp", "tone": "joke"},
+        {"id": "gr-filler-2", "text": "Gate picket leader accepts tennis ball, forgets grievance, asks for another", "tone": "joke"}
+      ]
+    },
+    "arcs": {
+      "add": [
+        {
+          "id": "gr-arrival",
+          "initial": "waiting",
+          "states": {
+            "waiting": {
+              "on": {
+                "DAY": {
+                  "target": "barking",
+                  "guard": {"type": "day.after", "params": {"day": 0}}
+                }
+              }
+            },
+            "barking": {
+              "entry": [
+                {"type": "toast", "params": {"text": "Protesters have gathered at the gate. They are all golden retrievers.", "tone": "joke"}},
+                {"type": "news", "params": {"text": "Golden retrievers picket {lab}: 'We just want to be involved'", "tone": "joke"}},
+                {"type": "discourse.delta", "params": {"amount": 8}},
+                {"type": "camera.focus", "params": {"on": "gate", "zoom": 1.5, "hold": 3}},
+                {"type": "sound.cue", "params": {"cue": "card"}}
+              ],
+              "on": {
+                "DAY": {
+                  "guard": {"type": "every", "params": {"days": 5}},
+                  "actions": [
+                    {"type": "discourse.delta", "params": {"amount": 4}},
+                    {"type": "toast", "params": {"text": "Another good dog joins the picket line.", "tone": "joke"}}
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

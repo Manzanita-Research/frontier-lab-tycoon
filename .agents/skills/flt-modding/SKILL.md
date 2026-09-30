@@ -34,6 +34,29 @@ Add `?mod=<url of a mod.json>` to the game's address and reload:
 - A public gist: `?mod=gist:<hex id>` (its `mod.json`, or its only `.fltmod.json`).
 - Several: repeat the parameter (`?mod=a.json&mod=b.json`). They load in order; later mods wrap earlier ones.
 
+**When the player sees it.** A game day is about 6 seconds at 1x speed (a tick is
+1.2 game hours, 20 ticks a day). A new game starts in the garage and unlocks
+systems as the player climbs the ladder (`progression`): the Arena board and the
+news ticker at level 4 (`race`), protesters, random cards and disasters at level 5
+(`scrutiny`). Arcs run from day one, and their toasts, camera moves and the cards
+they open show at any level (in the default skin a toast waits while the first-run
+tutorial is on screen: a player who has skipped or finished it sees it at once). Rival renames show on the Arena board once it is
+unlocked. Reaching level 5 takes a while (several models and a top-5 Arena rank),
+so a mod that needs a late system in the first minutes should move it down the
+ladder itself: override a level and list the system there, e.g.
+`"progression":{"override":[{"id":"garage","level":1,"name":"Garage","buildings":["hall","cluster"],"staff":[],"systems":["protests"],"panels":[],"goal":{"text":"Ship your first model","metric":"models","target":1}}]}`
+(override replaces the whole entry, so copy the base fields). With that and an arc that
+adds 8+ discourse on the first DAY, protesters stand at the gate on day 1 of a new game.
+To look at a late-game mod straight away without changing the ladder, add
+`&scenario=midgame` (a campus 480 days in, every system unlocked):
+`?mod=/mods/examples/every-lab-is-steve/mod.json&scenario=midgame`.
+
+**The starter `mod.json` shows every section, not every effect.** Its `walkerKinds`
+"Golden Retriever" sprite, `endings`, `tips` and `skin` validate but change nothing on
+screen yet, and `names.DOG_NAMES` is a pool nothing draws from (only the name pools
+listed below are read). Delete what you don't use; `check` lists the sections left
+that nothing reads.
+
 A mod that fails to fetch or decode is skipped and the rest still load; if the set
 fails to compose, the game starts unmodded. Either way the reason is listed in the
 Mod Manager (Frontier 95: Start menu, **Mods…**), which also lists what loaded.
@@ -71,15 +94,19 @@ missing-id/duplicate-add errors. Buildings require **id equal to kind**.
   `LAST_NAMES`, `RESEARCHER_ROLES`, `AGENT_NICKNAMES`, `RIVALS`, `RIVAL_SHORT`,
   `THEIR`. An override replaces the whole pool. (`VISITOR_ROLES` validates but is not read yet.)
 - Entities (`walkerKinds` is a historical section name): `researcher`, `agent`,
-  `visitor`, `protester`. Keep `presentation: walker | flow | sprite | offmap`
-  separate from mechanics. Don't assume every actor walks. (Validated; not read yet.)
+  `visitor`, `protester` (rename one with `override`; `add` is for new ids). Keep
+  `presentation: walker | flow | sprite | offmap` separate from mechanics. Don't
+  assume every actor walks. **Validated but not read yet: a mod cannot change how a
+  walker looks or what it is called on the map.** Make a crowd feel different through
+  its thoughts, headlines, toasts, cards and arcs.
 - Thought conditions: `always`, `noKombucha`, `lowCash`, `training`, `justReleased`,
   `highHype`, `unreachable`, `crowded`, `discourse`, `protest`, `night`, `era1`,
   `era2`, `era3`, `era4`, `openDrop`, `unpowered`, `top`, `rankFell` (use SDK
   `ThoughtCondition` for the exact baseline; checker rejects unknown conditions).
   Thought `kind` is `researcher`, `agent`, `visitor` or `protester`.
 - Headlines: omit `trigger` for `filler`; common triggers `start`, `rival`,
-  `runStarted`, `runDone`, `protest`, `built:<building-id>`. Optional `when` (one of):
+  `runStarted`, `runDone`, `protest`, `built:<building-id>`. `start` fires as a game
+  begins (the ticker itself unlocks at level 4, so it is the first line only on a late start). Optional `when` (one of):
   `{"stat.gte":["hype",50]}`, `{"flag.is":["agreed",true]}`, `{"day.after":30}`,
   `{"chance":0.5}`. Text fills `{lab}`, `{model}`, `{rival}`, `{cash}`.
 - Legacy anonymous line keys: `base-headlines-N`, `base-thoughts-N` (zero-based
@@ -105,7 +132,8 @@ Choice effects (a different format from arc actions): `{type:"cash",amount:100}`
 has optional `initial` + `states` (compound), `type:"final"`, `entry`, `exit`
 (lists of actions) and `on`. Transitions are a target string or
 `{target?, guard?, actions?}`, or an array of these tried in order (the first
-whose guard holds wins). `guard` is one guard or a list that must all hold. Targets name a sibling (or a sibling's descendant,
+whose guard holds wins). `guard` is one guard or a list that must all hold; a
+transition with no guard always fires. Targets name a sibling (or a sibling's descendant,
 `sibling.child`); `.child` enters a child of the source. No `after` delays,
 actors, inline JS, parallel states or random calls. The checker's graph test is
 structural: it ignores whether guards can fire.
@@ -151,7 +179,7 @@ counts `security`, `sre`, `comms`, `janitor`, and `sreAttending`. (`burning` and
 | --- | --- | --- |
 | `cash.delta` | `amount` | adds to the bank (negative takes) |
 | `hype.delta`, `trust.delta`, `heat.delta` | `amount` | adds to the stat, clamped 0 to 100 |
-| `discourse.delta` | `amount` | the water discourse (4 points is one protester at the gate) |
+| `discourse.delta` | `amount` | the water discourse: 4 points is one protester at the gate (they march in at the next midnight, once protests are unlocked). It fades by 0.3 a day and each compute cluster adds 0.5 |
 | `news` | `text`, `tone?` | a ticker headline; fills `{lab}`, `{model}`, `{rival}`, `{cash}` |
 | `toast` | `text`, `tone?` | a toast over the map |
 | `card` | `id` | opens that card from `content.events` (yours or a base one) whatever its `when`; it waits if another card is open. The answer comes back as `CHOSE` |
@@ -167,7 +195,7 @@ counts `security`, `sre`, `comms`, `janitor`, and `sreAttending`. (`burning` and
 | `staff.divert` | `job` (`janitor`, `sre`, `comms`, `security`), `to` (a building kind, `$office` or `gate`), `fraction?` (default 1), `jog?` | pulls that share of the job's current staff off their posts; they stay away until `staff.release` |
 | `staff.release` | `job?` | sends this arc's diverted staff back |
 | `rival.leap` | `relative`, `open?` | the most open-weights rival jumps to (1 + `relative`) × your capability; `open` ships open weights |
-| `camera.focus` | `on` (`gate`, `$office` or a kind), `zoom?`, `hold?` (seconds) | flies the camera there (not in photo mode) |
+| `camera.focus` | `on` (`gate`, `$office` or a kind), `zoom?` (times closer, default 1.3; 1 = no zoom), `hold?` (seconds, default 2.4) | flies the camera there (not in photo mode) |
 | `shake` | `strength` (0 to 1) | shakes the screen |
 | `sound.cue` | `cue` (`alarm`, `card`, `era`, `release`) | plays a cue |
 | `investigate.start` | `id`, `days`, `job`, `to` | starts an inquiry; advanced, read by the collusion system |
