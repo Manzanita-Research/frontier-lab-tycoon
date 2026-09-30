@@ -531,3 +531,21 @@ Two packs, `mods/base-hearing` and `mods/base-yacht` (see their READMEs), share 
 - **Gating:** both packs wake at Level 5 Scrutiny (`updateProgression`), each with an off flag (`hearingOff`, `yachtOff`; `?hearing=off`, `?yacht=off`). They are absent on a new World, so a save from before FLT-21 loads unchanged.
 - **Determinism:** each pack has its own random stream. The golden digests from tick 1600 changed only because Level 5 now wakes the packs. With both off flags set, the old digests reproduce exactly.
 - **HUD:** `EventVM.kind` gains `"hearing"` and `"leak"`, carrying `hearing: HearingVM` and `leak: LeakVM`. The modal tree routes them to the `Hearing` and `LeakedChat` slots (the base draws both; Frontier 95 has CapitolCam 1.0 and Chat-o-Matic 95). The kit's `Senator` draws a capsule portrait from a senator's `look` colours.
+
+## The Senate (FLT-22 Regulatory Capture, FLT-23 the Promise Tracker)
+
+Two more Circus packs, `mods/base-capture` and `mods/base-promises` (see their READMEs), are compiled by the same `src/sim/circus/chart.ts` and use The Hearing's three senators. The Tracker is the Senate's floor: motions come up, senators promise, the lab may lobby, and the roll call is rolled. Capture's bill is one of those motions. The bill is tabled with `tableMotion`, heard at the next recess ahead of the docket, and voted with the same dice and lobbying, through the Tracker's `BILL_MOTION`. With the Tracker off, Capture rolls the same `castVotes` itself.
+
+- **Race hooks:**
+  - The Vocabulary gains `rival.growth`, `rival.pace` and `rival.closed`. These are timed effects with a `who` selector: rival ids, `below`, `above`, `open`, and `!x` to exclude.
+  - `src/sim/race/rules.ts` `rivalRules(state, lab)` folds them into three factors. The weekly cycle multiplies a release's gain by `growth`. The launch calendar multiplies the era's pace by `pace`, and `closed` turns open-weights drops into closed ones.
+  - With none in play, every factor is 1 and the race is bit-for-bit unchanged.
+  - A law's clauses are these effects owned by `capture`, and `effects.end` strikes them when the bill is exposed or sunsets.
+- **More Vocabulary:** `auditor.odds` and `auditor.note` (the exposed bill leaves a note on the lab's file for FLT-19's report card, in `state.auditorNotes`) and a `hearings` stat.
+- **Gating:** both wake at Level 5 Scrutiny, each with an off flag (`captureOff`, `promisesOff`; `?capture=off`, `?promises=off`). Neither acts before the lab's first hearing. `s.bill`, `s.promises` and `s.auditorNotes` are optional, so old saves load unchanged.
+- **Determinism:** each pack has its own random stream. The golden digests from tick 1600 changed only because Level 5 now wakes the packs. With the off flags set, the old digests reproduce. The midgame digest changes only by the four new idle card arcs.
+- **Commands:** `lobby { senator }` and `draftClause { clause, on }`. The draft's ticks live in `s.bill.draft` until the lab sends it, and the machine's fold keeps at most `pick` of them.
+- **HUD:**
+  - `EventVM.kind` gains `"bill"` and `"vote"`, carrying `bill: BillVM` and `tracker: TrackerVM`.
+  - `HudVM.senate` is `{ open, tracker, bill }`. The Senate build-bar tile (a `panel: true` tile, like Staff, so every skin keeps it out of the hotbar) opens the Tracker between votes.
+  - The modal tree routes to two new slots, `Bill` and `PromiseTracker`. The base draws both. Frontier 95 draws WordPerfectly 6.0 with track changes, where the margin comments give the plain-English truth and the Properties dialog is the leak, and Excess 95 with PROMISES.XLS.
