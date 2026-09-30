@@ -1,0 +1,43 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "46f564a97f613bd8548a0d304bc6383b9097f3d6"
+  },
+  "head": {
+    "branch": "flt-49-playable-logic",
+    "sha": "b363558",
+    "dirty": true
+  },
+  "seconds": 104.583,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "coach-swag",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49-integrated-ports/before/coach-swag.png",
+      "after": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49-integrated-ports/after/coach-swag.png",
+      "title": "Playable opening coach: swag-drop",
+      "compare": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49-integrated-ports/compare/coach-swag.png",
+      "changed": 0.8970563271604939
+    },
+    {
+      "scene": "coach-almanac",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49-integrated-ports/before/coach-almanac.png",
+      "after": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49-integrated-ports/after/coach-almanac.png",
+      "title": "Playable opening coach: field-almanac",
+      "compare": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49-integrated-ports/compare/coach-almanac.png",
+      "changed": 0.9665516975308642
+    },
+    {
+      "scene": "coach-karaoke",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49-integrated-ports/before/coach-karaoke.png",
+      "after": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49-integrated-ports/after/coach-karaoke.png",
+      "title": "Playable opening coach: karaoke-night",
+      "compare": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49-integrated-ports/compare/coach-karaoke.png",
+      "changed": 0.8378101851851851
+    }
+  ],
+  "errors": []
+}

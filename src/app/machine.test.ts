@@ -95,6 +95,27 @@ describe("app machine", () => {
     }).pipe(provide(handle));
   });
 
+  it.effect("keeps six seconds at 1× equal to one game day at two rendered frames per second", () => {
+    const handle = handleFor(3);
+    return Effect.gen(function* () {
+      const { sim, pump } = yield* boot();
+      yield* pump(12, 0.5);
+      expect(sim.world.tick).toBe(20);
+      const direct = createTestCampus(3);
+      for (let i = 0; i < 20; i++) tick(direct);
+      expect(JSON.stringify(sim.world)).toBe(JSON.stringify(direct));
+    }).pipe(provide(handle));
+  });
+
+  it.effect("bounds a resumed tab's long frame instead of charging for all its hidden time", () => {
+    const handle = handleFor(3);
+    return Effect.gen(function* () {
+      const { sim, pump } = yield* boot();
+      yield* pump(1, 300);
+      expect(sim.world.tick).toBe(3);
+    }).pipe(provide(handle));
+  });
+
   it.effect("a spending proposal pauses at the chosen speed, then cancellation resumes without a catch-up bill", () => {
     const handle = new SimHandle(createInitialState(1));
     handle.world.cash = 100_000;
