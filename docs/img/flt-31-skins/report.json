@@ -1,0 +1,23 @@
+{
+  "base": null,
+  "head": {
+    "branch": "flt-31-leapfrog-ui",
+    "sha": "f260479",
+    "dirty": true
+  },
+  "seconds": 169.694,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "leap-board",
+      "gallery": true,
+      "count": 6
+    },
+    {
+      "scene": "leap-shipnow",
+      "gallery": true,
+      "count": 6
+    }
+  ],
+  "errors": []
+}
