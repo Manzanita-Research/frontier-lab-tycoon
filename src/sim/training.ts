@@ -24,13 +24,14 @@ export function morale(state: GameState): number {
 }
 
 export function computePerDay(state: GameState): number {
-  return state.buildings.filter((b) => b.kind === "cluster").length * COMPUTE_PER_CLUSTER + datacenterCompute(state);
+  return state.buildings.filter((b) => b.kind === "cluster" && !b.broken).length * COMPUTE_PER_CLUSTER + datacenterCompute(state);
 }
 
 /** Once a game day: clusters fill the stockpile, halls spend it, and the machine decides what that adds up to. */
 export function dailyTraining(state: GameState, rng: Rng) {
   state.compute = Math.min(COMPUTE_CAP, state.compute + computePerDay(state));
-  const halls = state.buildings.filter((b) => b.kind === "hall").length;
+  // A hall that is on fire trains nothing.
+  const halls = state.buildings.filter((b) => b.kind === "hall" && !b.broken).length;
   let gain = 0;
   if (halls > 0) {
     const spend = Math.min(COMPUTE_PER_HALL * halls, state.compute);

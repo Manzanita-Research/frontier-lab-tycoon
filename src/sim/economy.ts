@@ -7,6 +7,7 @@ import { addToast, pushNews } from "./news";
 import { isReachable } from "./pathfind";
 import { addIncident } from "./vibes";
 import { revenueFactor } from "./race/finance";
+import { payroll } from "./staff";
 import { solarHype } from "./race/power";
 import type { Rng } from "./rng";
 import type { GameState } from "./types";
@@ -18,12 +19,13 @@ export function hypeResting(state: GameState): number {
 
 export function dailyEconomy(state: GameState, rng: Rng) {
   const researchers = state.walkers.filter((w) => w.kind === "researcher").length;
-  let expenses = researchers * RESEARCHER_SALARY;
+  let expenses = researchers * RESEARCHER_SALARY + payroll(state);
   let income = 0;
   const factor = revenueFactor(state);
   for (const b of state.buildings) {
     expenses += BUILDINGS[b.kind].upkeepPerDay;
-    if (b.kind !== "gateway" || !isReachable(state, b)) continue;
+    // A gateway that is down earns nothing (and the status page says all is well).
+    if (b.kind !== "gateway" || b.broken || !isReachable(state, b)) continue;
     const amount = Math.round(state.capability * REVENUE_PER_CAPABILITY * factor);
     if (amount <= 0) continue;
     income += amount;

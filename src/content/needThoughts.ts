@@ -3,6 +3,13 @@
 // "23 researchers: 'The kombucha is warm and so is my equity.'". Lines rotate every couple of game days.
 // Templates: {lab} {rival}. Parody only.
 
+import { NIGHT_THOUGHTS } from "./night";
+import { SLOP_LINES } from "./ops";
+import type { WalkerKind } from "../sim/types";
+
+/** The night pool (content/night.ts) for one kind of walker. */
+const night = (kind: WalkerKind) => NIGHT_THOUGHTS.filter((n) => n.kind === kind).map((n) => n.text);
+
 export interface CauseLines {
   /** How many lines are on the go at once. Need-driven causes use 1 so the whole crowd agrees; loose moods use more. */
   spread: number;
@@ -17,16 +24,21 @@ export type Cause =
   | "researcher.lost.focus"
   | "researcher.lost.fomo"
   | "researcher.queue"
+  | "researcher.slop"
+  | "researcher.night"
   | "researcher.boxing"
   | "researcher.glowing"
   | "researcher.meh"
   | "visitor.bored"
   | "visitor.queue"
+  | "visitor.slop"
+  | "visitor.night"
   | "visitor.impressed"
   | "visitor.unimpressed"
   | "visitor.lost.impressed"
   | "visitor.meh"
   | "agent.aligned"
+  | "agent.night"
   | "agent.drifting"
   | "agent.drifted"
   | "protester.chant";
@@ -89,6 +101,7 @@ export const CAUSES: Record<Cause, CauseLines> = {
   "researcher.queue": {
     spread: 1,
     lines: [
+      "This queue is longer than our context window.",
       "This queue has its own loss curve.",
       "I've been in line so long I've started training on it.",
       "Somebody has been in that nap pod for twelve minutes. Somebody is fine-tuning in there.",
@@ -104,6 +117,12 @@ export const CAUSES: Record<Cause, CauseLines> = {
       "I'm taking the mug. The mug knows what it did.",
     ],
   },
+  "researcher.slop": { spread: 1, lines: [...SLOP_LINES.researcher] },
+  "visitor.slop": { spread: 1, lines: [...SLOP_LINES.visitor] },
+  // After dark, whoever has nothing nagging them is still at it (content/night.ts). Three lines on the go at once.
+  "researcher.night": { spread: 3, lines: night("researcher") },
+  "visitor.night": { spread: 2, lines: night("visitor") },
+  "agent.night": { spread: 2, lines: night("agent") },
   "researcher.glowing": {
     spread: 2,
     lines: [
@@ -138,6 +157,7 @@ export const CAUSES: Record<Cause, CauseLines> = {
   "visitor.queue": {
     spread: 1,
     lines: [
+      "This queue is longer than our context window.",
       "I skipped a Series A meeting for this queue.",
       "Is this the queue for the demo, or the queue for the queue?",
       "The person in front of me is a journalist. Nothing is moving.",

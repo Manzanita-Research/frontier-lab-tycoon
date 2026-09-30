@@ -1,8 +1,6 @@
-// Night-only thought pool. The campus clock (render/fx/clock.ts) says when it's night; the juice layer shows one of
-// these over a walker's head every so often while the lights are on. Data only: adding a joke never needs code.
-//
-// Hook for the sim: to make these ordinary sim thoughts, add "night" to ThoughtCondition (content/thoughts.ts), have
-// `activeConditions` (sim/thoughts.ts) set it when `isNight(hourAt(state.tick))`, and move these lines into THOUGHTS.
+// Night-only thought pool. The campus clock (sim/daylight.ts) says when it's night; these are ordinary sim thoughts
+// then: bubbles (the "night" condition in content/thoughts.ts) and, for anyone with nothing else on their mind, what
+// the Thoughts panel shows (`*.night` in content/needThoughts.ts). Data only: adding a joke never needs code.
 import type { WalkerKind } from "../sim/types";
 
 export interface NightLine {
@@ -10,7 +8,7 @@ export interface NightLine {
   text: string;
 }
 
-/** Shown first, every session, so the very first night always has its punchline. */
+/** Shown first, on the first night of every game, so it always has its punchline (sim/thoughts.ts). */
 export const FIRST_NIGHT_LINE: NightLine = { kind: "researcher", text: "It's 2am. Still shipping." };
 
 const n = (kind: WalkerKind, text: string): NightLine => ({ kind, text });

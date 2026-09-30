@@ -8,6 +8,7 @@ import { economyMachine } from "./machines/economy";
 import { goalsMachine } from "./machines/goals";
 import { trainingMachine } from "./machines/training";
 import { pushNews } from "./news";
+import { newSlop } from "./slop";
 import { blankVibes, initialVibes } from "./vibes";
 import { createRace } from "./race/state";
 import { createRng } from "./rng";
@@ -66,6 +67,8 @@ export function createInitialState(seed = 1): GameState {
     waterDiscourse: 0,
     goals: initialStored(goalsMachine, { goals: createGoals(), outcomeDay: null }),
     race: createRace({ capability: START_CAPABILITY, hype: 30 }),
+    slop: newSlop(w, h),
+    staff: [],
     arcs: Object.fromEntries(
       EVENTS.map((def) => [def.id, initialStored(arcMachine, { choices: def.choices.length, cooldownDays: def.cooldown ?? EVENT_COOLDOWN_DAYS, openedDay: null })]),
     ),
@@ -73,7 +76,7 @@ export function createInitialState(seed = 1): GameState {
 
   const put = (kind: BuildingKind, x: number, z: number) => {
     const [bw, bd] = BUILDINGS[kind].size;
-    state.buildings.push({ id: state.nextId++, kind, x, z, w: bw, d: bd, placedTick: 0 });
+    state.buildings.push({ id: state.nextId++, kind, x, z, w: bw, d: bd, placedTick: 0, reliability: 1, broken: false, brokenTick: 0 });
     state.flags[`built:${kind}`] = 0;
   };
   put("cluster", 8, 11);

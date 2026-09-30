@@ -1,12 +1,15 @@
 // The fixed-step loop: apply queued commands, move everyone, run the daily systems at midnight.
 import { applyCommands, type Command } from "./commands";
 import { TICKS_PER_DAY } from "./constants";
+import { dailyBreakdowns } from "./breakdowns";
 import { dailyCrowd } from "./crowd";
 import { dailyEconomy } from "./economy";
 import { dailyEvents, openEventOf } from "./events";
 import { dailyGoals } from "./goals";
 import { dailyNews } from "./news";
 import { dailyRace } from "./race/race";
+import { dailySlop, updateSlop } from "./slop";
+import { updateStaff } from "./staff";
 import { dailyDiscourse, updateProtesters } from "./protest";
 import { createRng } from "./rng";
 import { dailyThoughts } from "./thoughts";
@@ -30,13 +33,17 @@ export function tick(state: GameState, commands: readonly Command[] = []) {
   state.tick++;
   updateWalkers(state, rng);
   updateProtesters(state, rng);
+  updateSlop(state);
+  updateStaff(state, rng);
   if (state.tick % TICKS_PER_DAY === 0) {
     state.day++;
     dailyEconomy(state, rng);
     dailyTraining(state, rng);
     dailyWalkers(state, rng);
+    dailyBreakdowns(state, rng);
     dailyDiscourse(state, rng);
     dailyNews(state, rng);
+    dailySlop(state, rng);
     dailyCrowd(state, rng);
     dailyRace(state, rng);
     dailyThoughts(state, rng);

@@ -97,7 +97,7 @@ export const BUILDINGS: Record<BuildingKind, BuildingDef> = {
     blurb: "Horizontal thought leadership.",
     color: "#7a8cff",
     hosts: ["researcher"],
-    capacity: 3,
+    capacity: 6,
     stay: [40, 70],
     serves: { researcher: { energy: 0.95 } },
     tally: "naps",

@@ -11,6 +11,7 @@ import { eraMachine } from "../race/era";
 import { rivalMachine } from "../race/rival";
 import { goalsMachine } from "./goals";
 import { moodMachine } from "./mood";
+import { staffMachine } from "./staff";
 import { trainingMachine } from "./training";
 import { walkerMachine } from "./walker";
 
@@ -70,6 +71,14 @@ describe("machine graphs", () => {
     expect(r.unreachable).toEqual([]);
     expect(r.deadEnds).toEqual([]);
     expect(Object.entries(walkerMachine.states).filter(([, s]) => (s as { type?: string }).type === "final").map(([k]) => k)).toEqual(["gone"]);
+  });
+
+  it("a staffer can reach every phase from the gate, and only `gone` is final", () => {
+    const events = ["ARRIVED", "TASK", "DONE", "LOST", "FIRED", "EXITED"].map((type) => ({ type }));
+    const r = explore(staffMachine, { events });
+    expect(r.unreachable).toEqual([]);
+    expect(r.deadEnds).toEqual([]);
+    expect(Object.entries(staffMachine.states).filter(([, s]) => (s as { type?: string }).type === "final").map(([k]) => k)).toEqual(["gone"]);
   });
 
   it("a mood can reach every state, and only `resigned` is final", () => {

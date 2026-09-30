@@ -1,8 +1,9 @@
-// Vibes, 0 to 999: the park rating. Weights: average happiness 40%, visitors impressed 20%, cleanliness 15% (a stub
-// at 1 until FLT-10), hype 15%, and the last 10% is what is left after the incident and protest penalties. Recalculated
+// Vibes, 0 to 999: the park rating. Weights: average happiness 40%, visitors impressed 20%, cleanliness 15% (how much
+// of the path is slop, FLT-10), hype 15%, and the last 10% is what is left after the incident and protest penalties. Recalculated
 // once a game day and eased toward, so one bad afternoon dents it rather than crashes it.
 import type { GameState, Vibes } from "./types";
 import { happinessOf } from "./needs";
+import { cleanlinessOf } from "./slop";
 
 export const VIBES_MAX = 999;
 export const WEIGHTS = { happiness: 0.4, impressed: 0.2, cleanliness: 0.15, hype: 0.15, penalties: 0.1 } as const;
@@ -39,8 +40,8 @@ export function readVibes(state: GameState) {
   return {
     happiness: people > 0 ? happy / people : NEUTRAL_HAPPINESS,
     impressed: visitors > 0 ? impressed / visitors : NEUTRAL_IMPRESSED,
-    // Nobody makes a mess yet: FLT-10 (janitor bots, slop) turns this into a real number.
-    cleanliness: 1,
+    // Slop on the paths (sim/slop.ts): a spotless campus is 1, half the paths slopped is 0.
+    cleanliness: cleanlinessOf(state),
     hype: state.hype / 100,
     incident: Math.min(1, state.vibes.incidents),
     protest: Math.min(1, protesters / PROTEST_WORST),
