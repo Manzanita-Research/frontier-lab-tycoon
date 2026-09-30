@@ -18,7 +18,7 @@ describe("the FLT_AUTH switch", () => {
     const stack = readFileSync(new URL("./alchemy.run.ts", import.meta.url), "utf8");
     // Every account resource, the Worker script, its secrets and the build flag live inside the `auth ?` branch.
     const branch = stack.slice(stack.indexOf("const accounts = auth"), stack.indexOf(": {};", stack.indexOf("const accounts = auth")));
-    for (const piece of ["main:", "D1.Database", "R2.Bucket", ...AUTH_SECRETS.map((s) => `Config.Redacted("${s}")`), 'VITE_FLT_AUTH: "on"']) {
+    for (const piece of ["main: fileURLToPath", "D1.Database", "R2.Bucket", ...AUTH_SECRETS.map((s) => `Config.Redacted("${s}")`), 'VITE_FLT_AUTH: "on"']) {
       expect(branch).toContain(piece);
       expect(stack.split(piece).length - 1).toBe(1);
     }
