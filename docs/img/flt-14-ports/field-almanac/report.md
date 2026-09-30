@@ -1,0 +1,14 @@
+
+> **⚠ 1 blank or failed output(s), do not use these as evidence:**
+> - photo@field-almanac.png: blank composite: panel 3 is 53% one colour, 8 colours
+
+| Scene | Before (`main` @ ff42bfe) | After (`flt-14-port-field-almanac` @ c1d1360) |
+|---|---|---|
+| **overview** (field-almanac)<br>25.7% px differ | ![overview@field-almanac](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-14-port-field-almanac/docs/img/flt-14-ports/field-almanac/before/overview@field-almanac.png?raw=true) | ![overview@field-almanac](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-14-port-field-almanac/docs/img/flt-14-ports/field-almanac/after/overview@field-almanac.png?raw=true) |
+| **inspector** (field-almanac)<br>28.1% px differ | ![inspector@field-almanac](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-14-port-field-almanac/docs/img/flt-14-ports/field-almanac/before/inspector@field-almanac.png?raw=true) | ![inspector@field-almanac](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-14-port-field-almanac/docs/img/flt-14-ports/field-almanac/after/inspector@field-almanac.png?raw=true) |
+| **event** (field-almanac)<br>85.5% px differ | ![event@field-almanac](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-14-port-field-almanac/docs/img/flt-14-ports/field-almanac/before/event@field-almanac.png?raw=true) | ![event@field-almanac](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-14-port-field-almanac/docs/img/flt-14-ports/field-almanac/after/event@field-almanac.png?raw=true) |
+| **menu** (field-almanac)<br>28.0% px differ | ![menu@field-almanac](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-14-port-field-almanac/docs/img/flt-14-ports/field-almanac/before/menu@field-almanac.png?raw=true) | ![menu@field-almanac](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-14-port-field-almanac/docs/img/flt-14-ports/field-almanac/after/menu@field-almanac.png?raw=true) |
+| **phone** (field-almanac)<br>27.6% px differ | ![phone@field-almanac](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-14-port-field-almanac/docs/img/flt-14-ports/field-almanac/before/phone@field-almanac.png?raw=true) | ![phone@field-almanac](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-14-port-field-almanac/docs/img/flt-14-ports/field-almanac/after/phone@field-almanac.png?raw=true) |
+| **photo** (field-almanac)<br>⚠ compare: blank composite: panel 3 is 53% one colour, 8 colours | ![photo@field-almanac](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-14-port-field-almanac/docs/img/flt-14-ports/field-almanac/before/photo@field-almanac.png?raw=true) | ![photo@field-almanac](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-14-port-field-almanac/docs/img/flt-14-ports/field-almanac/after/photo@field-almanac.png?raw=true) |
+
+_pnpm shots: 6 scene(s), 1 skin(s) in 176.7s (12/12 captures ok, 1 PROBLEM(S))._
