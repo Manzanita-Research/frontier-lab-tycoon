@@ -2,6 +2,8 @@ import { useAtomValue } from "@effect/atom-react";
 import { Canvas } from "@react-three/fiber";
 import { Suspense, lazy, useRef } from "react";
 import { debugParams } from "../app/game";
+import { SoundLayer } from "../audio/SoundLayer";
+import { PressCamera } from "./PressCamera";
 import { Buildings } from "./buildings/Buildings";
 import { CAMERA_OFFSET, CameraRig } from "./fx/CameraRig";
 import { FxDirector } from "./fx/FxDirector";
@@ -44,6 +46,7 @@ export function Scene() {
       camera={{ position: CAMERA_OFFSET.toArray(), zoom, near: -100, far: 200 }}
     >
       <FxDirector />
+      <SoundLayer />
       <Lighting />
       <Ground />
       <Decor />
@@ -56,6 +59,7 @@ export function Scene() {
       <Placement />
       <CameraRig baseZoom={zoom} />
       <PhotoLayer />
+      <PressCamera />
     </Canvas>
   );
 }
