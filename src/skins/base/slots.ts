@@ -66,10 +66,12 @@ import { CrumbWiki } from "./slots/CrumbWiki";
 import "./papers.css";
 import { DisasterAlert } from "./slots/DisasterAlert";
 import { DisasterMenu } from "./slots/DisasterMenu";
+import { WindowTray } from "./slots/WindowTray";
+import "./tray.css";
 import { Layout } from "./Layout";
 
 export const baseSlots: SlotComponents = {
   Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, Bubble, ThoughtsPanel, Ticker, Toast, Assistant,
   EventCard, Confirm, Coach, UnlockCard, HowToPlay, Arena, Benchmarks, Voice, Factions, Livestream, Hearing, LeakedChat, DramaCard, Bill, PromiseTracker, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, Ending, Takeover, NewsControls,
-  NewsArrival, NewsRoom, Mixer, ModManager, Papers, PaperMoment, CrumbWiki, DisasterMenu, DisasterAlert, ReportCard, AuditPin, DramaButton, Drama,
+  NewsArrival, NewsRoom, Mixer, ModManager, Papers, PaperMoment, CrumbWiki, DisasterMenu, DisasterAlert, ReportCard, AuditPin, DramaButton, Drama, WindowTray,
 };

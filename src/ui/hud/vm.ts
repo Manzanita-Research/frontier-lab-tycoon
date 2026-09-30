@@ -19,7 +19,7 @@ import { hourAt, clockLabel } from "../../render/fx/clock";
 import { lookOf } from "../../render/look";
 import { fillTemplate, formatDate, formatMoney } from "../../sim/format";
 import type { Inspect, NeedBar } from "../../sim/inspect";
-import type { NewsItem, Tone, WalkerKind } from "../../sim/types";
+import type { NewsItem, NewsPanel, Tone, WalkerKind } from "../../sim/types";
 import { trendOf, VIBES_MAX, WEIGHTS } from "../../sim/vibes";
 import { NO_MOTION, type MotionView } from "./leapfrogMotion";
 import { SKIN_API_VERSION } from "./types";
@@ -29,6 +29,8 @@ import { playableOf, type PlayableInput } from "./playable";
 import { papersOf, paperMomentOf } from "./papers";
 import { collusionOf, crumbWikiOf, investigationOf } from "./collusion";
 import { factionChips, factionsOf } from "./factions";
+import { unreadOf, windowed } from "./tray";
+import type { Budget } from "./windows";
 import type { FactionChipVM } from "./types";
 import type {
   ArenaRowVM, DramaDocVM,
@@ -92,6 +94,11 @@ export interface HudInput {
   viewport: { width: number; height: number };
   /** The ending's share card and the campus photo its front page prints (FLT-11). Optional: none is fine. */
   share?: { photo: string | null } & ShareVM;
+  /**
+   * The window budget (FLT-54) and the newest headline id the player has seen with each panel open. Absent: every window
+   * the game wants is up and nothing is unread (the host applies the budget itself, after it has stepped it).
+   */
+  windows?: { budget: Budget; seen: Partial<Record<NewsPanel, number>> };
 }
 
 
@@ -977,6 +984,11 @@ function earnedItems(items: BuildItemVM[], play: PlayableInput): BuildItemVM[] {
 }
 
 export function hudViewModel(i: HudInput): HudVM {
+  const vm = rawViewModel(i);
+  return i.windows ? windowed(vm, i.windows.budget, unreadOf(i.news, i.windows.seen)) : vm;
+}
+
+function rawViewModel(i: HudInput): HudVM {
   const play = playableOf(i.snap);
   const build = buildOf(i);
   const items = earnedItems(build.items, play);
@@ -1009,6 +1021,7 @@ export function hudViewModel(i: HudInput): HudVM {
     visible: play.visible,
     coach: play.coach,
     unlock: play.unlock,
+    tray: [],
     help: i.helpOpen ? helpOf(items) : null,
     confirm: confirmOf(i.snap),
     event,

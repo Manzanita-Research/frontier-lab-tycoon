@@ -4,6 +4,8 @@ import { debugParams } from "../../app/game";
 import type { LoadedSkin } from "../../skins/types";
 import { baseSlots } from "../../skins/base/slots";
 import { BASE_STRINGS } from "../../skins/schema";
+import type { NewsPanel } from "../../sim/types";
+import type { Budget } from "./windows";
 
 /** Open on a desktop-sized screen, folded on a phone or a short window (the Arena chip toggles it either way). */
 export const arenaOpenAtom = Atom.make(typeof window === "undefined" ? true : window.innerWidth > 640 && window.innerHeight >= 800);
@@ -55,3 +57,10 @@ export const dismissedAtom = Atom.make<readonly string[]>([]);
 
 /** Is the Senate window (the Promise Tracker and the bill, FLT-22/23) open? UI-only state. */
 export const senateOpenAtom = Atom.make(false);
+
+/** FLT-54: the windows the game opened by itself and where each one stands (`windows.ts`). */
+export const windowBudgetAtom = Atom.keepAlive(Atom.make<Budget>([]));
+/** FLT-54: the newest headline about each panel the player has had open, for the unread badges. */
+export const seenNewsAtom = Atom.keepAlive(Atom.make<Partial<Record<NewsPanel, number>>>({}));
+/** FLT-54: the rank drop that last called the Arena up (a key), or null. The budget decides whether it opens. */
+export const arenaCallAtom = Atom.make<string | null>(null);

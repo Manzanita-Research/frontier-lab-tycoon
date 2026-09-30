@@ -3,7 +3,7 @@
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult, Atom } from "effect/unstable/reactivity";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { atoms, debugParams, registry } from "../../app/game";
+import { atoms, debugParams, probeHud, registry } from "../../app/game";
 import type { Snapshot } from "../../app/hud";
 import { audioReadyAtom, mixerAtom, mixerOpenAtom } from "../../audio/state";
 import { roomAtom } from "../../newsroom/state";
@@ -13,7 +13,10 @@ import type { LeapfrogView } from "../../sim/race/leapfrog/view";
 import { shotAtom } from "../juice/photo";
 import { useShareInput } from "../share/share";
 import { newMotion, NO_MOTION, stepMotion, type Motion, type MotionView } from "./leapfrogMotion";
-import { arenaOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, senateOpenAtom, skinUiAtom, staffOpenAtom } from "./state";
+import { arenaCallAtom, arenaOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, seenNewsAtom, senateOpenAtom, skinUiAtom, staffOpenAtom, windowBudgetAtom } from "./state";
+import { newestOf, unreadOf, wantsOf, windowed } from "./tray";
+import { autoUp, nextClose, stepBudget } from "./windows";
+import { hudActions } from "./actions";
 import { modSession } from "../../app/mods";
 import { dramaPath, dramaViewModel } from "../../drama/feed";
 import { dramaAtom } from "../../drama/state";
@@ -47,6 +50,7 @@ function useTapHint(selected: number | null) {
 }
 
 const RANK_MS = 2800;
+let drops = 0;
 
 /**
  * Rows that changed place light up for a moment, a drop for you shakes the panel and opens it, and the Arena chip
@@ -73,7 +77,8 @@ function useArenaMotion(board: readonly { id: string; rank: number }[], rank: nu
     setMoved(flashed);
     if (flashed.you === "down") {
       setAlert(true);
-      registry.set(arenaOpenAtom, true);
+      // Ask for the Arena: the window budget (FLT-54) opens it, or puts it on the taskbar if two windows are already up.
+      registry.set(arenaCallAtom, `drop:${++drops}`);
     }
     const t = window.setTimeout(() => {
       setMoved({});
@@ -249,5 +254,57 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
       }),
     [share, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, skinUi, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, drama],
   );
+  return useWindowBudget(vm, news);
+}
+
+/**
+ * FLT-54's window budget, applied to the view-model: steps the budget with what the game wants up (at most two, the
+ * rest on the taskbar), wakes up when a window is due to close itself, and keeps each panel's unread count.
+ */
+function useWindowBudget(raw: HudVM, news: AppSource["news"]): HudVM {
+  const stored = useAtomValue(windowBudgetAtom);
+  const seen = useAtomValue(seenNewsAtom);
+  const arenaCall = useAtomValue(arenaCallAtom);
+  const [now, setNow] = useState(0);
+  // Stepped during render so no frame shows a third window; saved to the atom (where the actions read it) after.
+  const budget = useMemo(() => stepBudget(stored, wantsOf(raw, arenaCall), performance.now()), [stored, raw, arenaCall, now]);
+  useEffect(() => {
+    if (budget !== stored) registry.set(windowBudgetAtom, budget);
+  }, [budget, stored]);
+  useEffect(() => {
+    const at = nextClose(budget);
+    if (at === null) return;
+    const t = window.setTimeout(() => setNow(performance.now()), Math.max(0, at - performance.now()) + 20);
+    return () => window.clearTimeout(t);
+  }, [budget]);
+  // A New! card whose moment has passed is dismissed for real, or the next one would wait behind it. Once per card.
+  const dismissed = useRef<string | null>(null);
+  useEffect(() => {
+    const card = raw.unlock;
+    if (!card || dismissed.current === card.id) return;
+    if (budget.some((w) => w.id === "unlock" && w.key === card.id && w.state === "closed")) {
+      dismissed.current = card.id;
+      hudActions.dismissUnlock();
+    }
+  }, [budget, raw.unlock]);
+  const vm = useMemo(() => windowed(raw, budget, unreadOf(news, seen)), [raw, budget, news, seen]);
+  // A panel that is open has read its news.
+  useEffect(() => {
+    const newest = newestOf(news);
+    const open = { arena: vm.arena.open, papers: vm.papers.open, factions: vm.factions.open };
+    const next = { ...seen };
+    let changed = false;
+    for (const p of ["arena", "papers", "factions"] as const) {
+      if (open[p] && newest[p] !== undefined && newest[p] !== seen[p]) {
+        next[p] = newest[p];
+        changed = true;
+      }
+    }
+    if (changed) registry.set(seenNewsAtom, next);
+  }, [news, seen, vm.arena.open, vm.papers.open, vm.factions.open]);
+  // The journey test (FLT-53) reads what the budget holds up and what waits on the taskbar.
+  useEffect(() => {
+    probeHud.windows = () => ({ auto: autoUp(registry.get(windowBudgetAtom)), tray: vm.tray.map((t) => ({ id: t.id, flashing: t.flashing, unread: t.unread })) });
+  }, [vm.tray]);
   return vm;
 }

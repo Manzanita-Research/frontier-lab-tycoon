@@ -79,8 +79,9 @@
     > .f95-win {
       width: min(400px, 100%);
     }
+    /* The benchmark table wants room, but not the middle of a 1440×900 screen (FLT-54): the table scrolls instead. */
     > .f95-tasks.wide {
-      width: 100%;
+      width: min(100%, max(400px, calc(30vw - 10px)));
     }
   }
 
@@ -903,6 +904,65 @@
     background: repeating-conic-gradient(var(--lt) 0 25%, var(--g) 0 50%) 0 0 / 2px 2px;
     white-space: nowrap;
   }
+  /* FLT-54: windows waiting their turn, as taskbar buttons that flash navy (the way a 1995 program asked for you), and
+     folded windows with unread news (a red dot and the count). */
+  .f95-waiting {
+    display: flex;
+    gap: 3px;
+    min-width: 0;
+    flex: 0 1 auto;
+    overflow: hidden;
+  }
+  .f95-wait {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    height: 32px;
+    max-width: 190px;
+    padding: 0 8px;
+    border: 0;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    background: var(--g);
+    box-shadow: var(--btn);
+    white-space: nowrap;
+    pointer-events: auto;
+    span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    &.flashing {
+      animation: f95-wait-flash 1s steps(1, end) infinite;
+    }
+    &:active {
+      box-shadow: var(--pressed);
+    }
+  }
+  @keyframes f95-wait-flash {
+    50% {
+      background: var(--navy);
+      color: var(--flt-color-accentText);
+    }
+  }
+  .f95-unread {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    color: var(--flt-color-bad);
+    &::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--flt-color-bad);
+    }
+  }
+  &[data-motion="reduced"] .f95-wait.flashing {
+    animation: none;
+    background: var(--navy);
+    color: var(--flt-color-accentText);
+  }
   .f95-tooltip {
     position: absolute;
     bottom: calc(100% + 6px);
@@ -1423,10 +1483,11 @@
       color: #7a7a7a;
     }
   }
+  /* Just above the taskbar, off the campus (FLT-54: nothing the game opens by itself covers the middle of the screen). */
   .f95-unlock {
     position: fixed;
     z-index: 30;
-    top: 38%;
+    bottom: calc(var(--taskbar) + 12px);
     left: 50%;
     transform: translateX(-50%);
     width: min(440px, calc(100vw - 20px));
@@ -3266,6 +3327,7 @@
     }
     .f95-qs,
     .f95-task span,
+    .f95-wait span,
     .f95-clock,
     .f95-s.snd {
       display: none;

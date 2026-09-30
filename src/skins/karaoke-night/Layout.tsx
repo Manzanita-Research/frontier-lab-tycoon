@@ -24,6 +24,7 @@ export function Layout({ slots }: SlotPropsMap["Layout"]) {
           </div>
           {slots.NewsControls}
           {slots.DramaButton}
+          {slots.WindowTray}
         </div>
         {slots.NewsArrival}
         <div className="kn-stack">

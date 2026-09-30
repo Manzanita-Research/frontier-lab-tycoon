@@ -59,11 +59,12 @@ function Traffic({ leapfrog }: { leapfrog: SlotPropsMap["Voice"]["leapfrog"] }) 
 
 /**
  * The share-of-voice meter: a tray icon (its two lights blink on every launch) and a "Network Traffic" window, the news
- * cycle drawn as the line graph a 1995 dial-up monitor would. Open on a desktop, folded on a phone (tap the icon).
+ * cycle drawn as the line graph a 1995 dial-up monitor would. Folded to its tray icon until you click it (FLT-54: the game
+ * opens at most two windows by itself, and this one is not news).
  */
 export function Voice({ leapfrog, layout }: SlotPropsMap["Voice"]) {
   const t = useT();
-  const [open, setOpen] = useState(layout.tall);
+  const [open, setOpen] = useState(false);
   const { voice } = leapfrog;
   if (layout.compact) return null;
   return (

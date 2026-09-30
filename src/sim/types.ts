@@ -173,11 +173,15 @@ export interface Staffer {
   divert?: { owner: string; to: number; jog: number };
 }
 
+/** The panel a headline is about, so the HUD can badge it when the news only reached the ticker (FLT-54). */
+export type NewsPanel = "arena" | "papers" | "factions";
+
 export interface NewsItem {
   id: number;
   day: number;
   text: string;
   tone: Tone;
+  panel?: NewsPanel;
 }
 
 export interface Thought {

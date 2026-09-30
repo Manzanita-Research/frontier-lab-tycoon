@@ -666,6 +666,8 @@ export interface ArenaRowVM {
 
 export interface ArenaVM {
   open: boolean;
+  /** Headlines about the race since the player last had the Arena open (FLT-54): badge the folded window with a dot and the count. */
+  unread?: number;
   alert: boolean;
   week: number;
   rd: {
@@ -982,6 +984,8 @@ export interface PapersVM {
   /** false until papers are earned (and when the pack is off): draw nothing. */
   enabled: boolean;
   open: boolean;
+  /** Headlines about your papers since the window was last open (FLT-54). */
+  unread?: number;
   policy: PublicationPolicyVM;
   policies: PublicationPolicyOptionVM[];
   /** Reputation points, rounded (it only grows with good papers). */
@@ -1175,6 +1179,8 @@ export interface FactionsVM {
   enabled: boolean;
   /** The panel is open (`actions.toggleFactions()`). */
   open: boolean;
+  /** Headlines about the discourse since the panel was last open (FLT-54). */
+  unread?: number;
   /** Protests are unlocked (Level 5): factions march on the gate. */
   protests: boolean;
   rows: FactionRowVM[];
@@ -1386,6 +1392,18 @@ export interface DisastersVM {
   heat: MeterVM;
 }
 
+/** What can sit on the taskbar (FLT-54): a window the game opened that is waiting its turn, or a panel with unread news. */
+export type TrayIdVM = "arena" | "news" | "unlock" | "paper" | "wiki" | "papers" | "factions";
+export interface TrayItemVM {
+  id: TrayIdVM;
+  /** The plain name ("Arena", "Frontier Times", the New! card's title). A skin may call it its own thing. */
+  label: string;
+  /** A window the game opened while two others were up: it waits here, flashing, until clicked (`actions.openTray(id)`). */
+  flashing: boolean;
+  /** Headlines about it that only reached the ticker since it was last open: draw a dot and the count. 0 for none. */
+  unread: number;
+}
+
 export interface HudVM {
   apiVersion: typeof SKIN_API_VERSION;
   stats: StatsVM;
@@ -1412,6 +1430,8 @@ export interface HudVM {
   coach: CoachVM | null;
   /** The "New!" card, or null. */
   unlock: UnlockCardVM | null;
+  /** The taskbar's waiting windows and unread panels (FLT-54), in the order they arrived. Docked: `WindowTray`. */
+  tray: TrayItemVM[];
   /** Help ▸ How to play, while it is open. */
   help: HelpVM | null;
   /** A spend waiting for a yes or a no (also holds time). */
@@ -1483,6 +1503,8 @@ export interface HudActions {
   /** Hold time while a panel of yours is open (`id` names it; `false` lets go). Use `useAutoPause` from the kit. */
   holdTime(id: string, open: boolean): void;
   toggleArena(): void;
+  /** A `WindowTray` button: bring up the waiting window, or open the panel (which marks its news read). */
+  openTray(id: TrayIdVM): void;
   // Papers.
   togglePapers(): void;
   setPublicationPolicy(policy: PublicationPolicyVM): void;

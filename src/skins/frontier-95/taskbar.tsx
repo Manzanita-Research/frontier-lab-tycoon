@@ -254,6 +254,38 @@ export function BuildBar({ items, tip, teasers = [], disasters, actions }: SlotP
   );
 }
 
+/** What each waiting window is called on a 1995 taskbar, and its icon. */
+const TASKS: Record<SlotPropsMap["WindowTray"]["tray"][number]["id"], { name: string; icon: string }> = {
+  arena: { name: "Task Mangler", icon: "chart" },
+  news: { name: "Frontier Times", icon: "news" },
+  unlock: { name: "Frontier 95", icon: "info" },
+  paper: { name: "arXive", icon: "doc" },
+  wiki: { name: "CrumbWiki", icon: "globe" },
+  papers: { name: "Publish or Perish", icon: "doc" },
+  factions: { name: "Discourse Monitor", icon: "megaphone" },
+};
+
+/**
+ * FLT-54: the windows the game opened while two were already up wait here as taskbar buttons that flash navy, the way a
+ * 1995 program asked for you; a folded window with news the ticker already told gets a red dot and the count.
+ */
+export function WindowTray({ tray, actions }: SlotPropsMap["WindowTray"]) {
+  return (
+    <span className="f95-waiting" role="group" aria-label="Waiting windows">
+      {tray.map((item) => {
+        const task = TASKS[item.id];
+        return (
+          <button key={item.id} type="button" className={`f95-wait${item.flashing ? " flashing" : ""}`} onClick={() => actions.openTray(item.id)} title={item.unread > 0 ? `${task.name}: ${item.unread} new` : `${task.name}: ${item.label}`}>
+            <Ico name={task.icon} size={16} />
+            <span>{task.name}</span>
+            {item.unread > 0 && <b className="f95-unread">{item.unread > 9 ? "9+" : item.unread}</b>}
+          </button>
+        );
+      })}
+    </span>
+  );
+}
+
 const SPEED_GLYPHS: Record<number, number> = { 1: 1, 3: 2, 10: 3 };
 
 /** Speed in the tray, labelled with pace words as tooltips (Rest, Steady, Strenuous, Grueling), and the clock. */

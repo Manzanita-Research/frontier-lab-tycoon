@@ -136,6 +136,8 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
       return { drama: vms.dramaFresh!.drama, actions };
     case "Drama":
       return { drama: vms.drama!.drama, actions };
+    case "WindowTray":
+      return { tray: [{ id: "paper", label: "Scooped!", flashing: true, unread: 0 }, { id: "arena", label: "Arena", flashing: false, unread: 3 }], layout: main.layout, actions };
   }
 }
 

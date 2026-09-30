@@ -2,7 +2,7 @@
 import type { NewsTrigger } from "../content/headlines";
 import type { Rng } from "./rng";
 import { fillTemplate, formatMoney } from "./format";
-import type { GameState, Importance, NoticeSource, Tone } from "./types";
+import type { GameState, Importance, NewsPanel, NoticeSource, Tone } from "./types";
 import { defs, type HeadlineLine } from "./defs";
 import { STATS } from "./verbs";
 
@@ -17,8 +17,9 @@ export interface NewsVars {
   pct?: string;
 }
 
-export function addNews(state: GameState, text: string, tone: Tone) {
-  state.news.push({ id: state.nextId++, day: state.day, text, tone });
+/** `panel`: the HUD panel the headline is about (the Arena, Papers, the discourse), for its unread badge. */
+export function addNews(state: GameState, text: string, tone: Tone, panel?: NewsPanel) {
+  state.news.push({ id: state.nextId++, day: state.day, text, tone, ...(panel ? { panel } : {}) });
   if (state.news.length > 50) state.news.splice(0, state.news.length - 50);
 }
 
