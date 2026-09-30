@@ -4,9 +4,10 @@ import { runwayMonths } from "../sim/format";
 import { protesterCount } from "../sim/protest";
 import { inspectWalker, type Inspect } from "../sim/inspect";
 import { thoughtBoard, type ThoughtRow } from "../sim/mind";
-import { computePerDay } from "../sim/training";
+import { computePerDay, trainingEtaDays } from "../sim/training";
 import { openEventOf } from "../sim/events";
 import { opsView, type OpsView } from "../sim/opsView";
+import { leapfrogView, type LeapfrogView } from "../sim/race/leapfrog/view";
 import { raceView, type RaceView } from "../sim/race/view";
 import { outcomeOf } from "../sim/goals";
 import type { Building, GameState, GoalProgress, OpenEvent, Outcome, Pop, Thought, Tone, Vibes } from "../sim/types";
@@ -48,7 +49,15 @@ export interface Snapshot {
   labName: string;
   hasHall: boolean;
   computePerDay: number;
-  training: { name: string; run: number; pct: number };
+  training: { name: string; run: number; pct: number; /** Days left at today's pace, or null. */ etaDays: number | null };
+  /** The newest model's name ("Frontier-2"), or null before the first release. */
+  latestModel: string | null;
+  /** The day of the last release, for the "SHIPPED!" sticker. */
+  lastRelease: number | null;
+  /** Who is thinking each bubble: walker id → name. */
+  speakers: Record<number, string>;
+  /** Gross income and expenses per day (the ledger), for the Finance tab. */
+  ledger: { income: number; expenses: number };
   thoughts: Thought[];
   pops: Pop[];
   version: number;
@@ -70,6 +79,8 @@ export interface Snapshot {
   selectedId: number | null;
   /** The Race: multiplier, era, the Arena, the open-weights drop, power. */
   race: RaceView;
+  /** Release Leapfrog (FLT-27): the benchmark leaderboard, the share-of-voice meter and the last launch. `enabled: false` when the pack is off. */
+  leapfrog: LeapfrogView;
   /** Operations: staff, slop, broken buildings, queues. */
   ops: OpsView;
 }
@@ -78,6 +89,16 @@ export interface UiToast {
   id: number;
   text: string;
   tone: Tone;
+}
+
+/** Names of the walkers who are thinking out loud, so a bubble can say who said it. */
+function speakersOf(s: GameState): Record<number, string> {
+  const out: Record<number, string> = {};
+  if (s.thoughts.length === 0) return out;
+  const names = new Map<number, string>();
+  for (const w of s.walkers) names.set(w.id, w.name);
+  for (const t of s.thoughts) out[t.walkerId] = names.get(t.walkerId) ?? "";
+  return out;
 }
 
 export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO_SELECTION): Snapshot {
@@ -95,7 +116,11 @@ export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO
     labName: s.labName,
     hasHall: s.buildings.some((b) => b.kind === "hall"),
     computePerDay: computePerDay(s),
-    training: { name: s.training.context.name, run: s.training.context.run, pct: Math.min(1, s.training.context.progress / s.training.context.cost) },
+    training: { name: s.training.context.name, run: s.training.context.run, pct: Math.min(1, s.training.context.progress / s.training.context.cost), etaDays: trainingEtaDays(s) },
+    latestModel: s.models.at(-1) ?? null,
+    lastRelease: s.flags.lastRelease ?? null,
+    speakers: speakersOf(s),
+    ledger: { income: s.ledger.income, expenses: s.ledger.expenses },
     thoughts: s.thoughts.slice(),
     pops: s.pops.slice(),
     version: s.version,
@@ -112,6 +137,7 @@ export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO
     inspect: ui.selected === null ? null : inspectWalker(s, ui.selected),
     selectedId: ui.selected,
     race: raceView(s),
+    leapfrog: leapfrogView(s),
     ops: opsView(s),
   };
 }

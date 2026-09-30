@@ -9,6 +9,7 @@ import { step, type Stepped } from "./machines/run";
 import { trainingMachine } from "./machines/training";
 import { happinessOf } from "./needs";
 import { isReachable } from "./pathfind";
+import { settlePreview } from "./race/leapfrog/ops";
 import { datacenterCompute } from "./race/power";
 import { rdMultiplier, releaseBoost } from "./race/rd";
 import type { Rng } from "./rng";
@@ -29,6 +30,20 @@ export function computePerDay(state: GameState): number {
   return (state.buildings.filter((b) => b.kind === "cluster" && !b.broken).length * COMPUTE_PER_CLUSTER + datacenterCompute(state)) * computeFactor(state);
 }
 
+/**
+ * Days until the current run finishes at today's pace (the HUD's "about 18 days remaining"), or null when nothing is
+ * training. Pure and read-only: it mirrors `dailyTraining`'s arithmetic without touching the World or the rng.
+ */
+export function trainingEtaDays(state: GameState): number | null {
+  const halls = state.buildings.filter((b) => b.kind === "hall").length;
+  if (halls === 0) return null;
+  const spend = Math.min(COMPUTE_PER_HALL * halls, state.compute + computePerDay(state));
+  const gain = spend * (0.75 + 0.25 * morale(state)) * rdMultiplier(state);
+  if (gain <= 0) return null;
+  const { cost, progress } = state.training.context;
+  return Math.max(0, Math.ceil((cost - progress) / gain));
+}
+
 /** Once a game day: clusters fill the stockpile, halls spend it, and the machine decides what that adds up to. */
 export function dailyTraining(state: GameState, rng: Rng) {
   state.compute = Math.min(COMPUTE_CAP, state.compute + computePerDay(state));
@@ -42,6 +57,11 @@ export function dailyTraining(state: GameState, rng: Rng) {
     gain = spend * (0.75 + 0.25 * morale(state)) * rdMultiplier(state);
   }
   feed(state, rng, { type: "DAY", halls, gain });
+}
+
+/** Ship the run in progress now as a preview that lands `scale` of the release; the run carries on (Release Leapfrog's "ship now"). Only from `training`. */
+export function shipEarly(state: GameState, rng: Rng, scale: number) {
+  feed(state, rng, { type: "SHIP_NOW", scale });
 }
 
 /**
@@ -63,7 +83,8 @@ function apply(state: GameState, rng: Rng, e: EmittedFrom<typeof trainingMachine
   switch (e.type) {
     case "RELEASED": {
       // The R&D multiplier makes the leap bigger (sqrt of it), so the takeoff is felt in what a release adds.
-      const gain = e.gain * releaseBoost(rdMultiplier(state));
+      // A preview already paid out part of this release (Release Leapfrog's "ship now"): only the rest lands.
+      const gain = settlePreview(state, e.gain * releaseBoost(rdMultiplier(state)));
       state.capability += gain;
       state.hype = Math.min(100, state.hype + 15);
       state.models.push(e.model);

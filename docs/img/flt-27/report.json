@@ -1,0 +1,52 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "15475da515a4379603e1fa25370d60dcd585a670"
+  },
+  "head": {
+    "branch": "flt-27-leapfrog-sim",
+    "sha": "0966005",
+    "dirty": true
+  },
+  "seconds": 94.623,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "leap-shipnow",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-27/before/leap-shipnow.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-27/after/leap-shipnow.png",
+      "title": "Release Leapfrog: \"Ship now at 94% ready\" (a rival just dropped)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-27/compare/leap-shipnow.png",
+      "changed": 0.4487445987654321
+    },
+    {
+      "scene": "leap-dog",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-27/before/leap-dog.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-27/after/leap-dog.png",
+      "title": "Release Leapfrog: a dog walks onto the launch livestream",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-27/compare/leap-dog.png",
+      "changed": 0.4484699074074074
+    },
+    {
+      "scene": "leap-chart",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-27/before/leap-chart.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-27/after/leap-chart.png",
+      "title": "Release Leapfrog: the presenter shows the wrong chart",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-27/compare/leap-chart.png",
+      "changed": 0.446991512345679
+    },
+    {
+      "scene": "leap-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-27/before/leap-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-27/after/leap-phone.png",
+      "title": "Release Leapfrog: the forced-response card on a phone",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-27/compare/leap-phone.png",
+      "changed": 0.6686839227123588
+    }
+  ],
+  "errors": []
+}

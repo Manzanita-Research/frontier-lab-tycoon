@@ -30,7 +30,7 @@ const page = await ctx.newPage();
 const errors = [];
 page.on("pageerror", (e) => errors.push(String(e)));
 page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
-const go = (q) => page.goto(`${base}?debug=1&seed=3&warp=25${q}`, { waitUntil: "networkidle" });
+const go = (q) => page.goto(`${base}?debug=1&skin=base&seed=3&warp=25${q}`, { waitUntil: "networkidle" });
 const save = async (path) => {
   mkdirSync(dirname(path), { recursive: true });
   await page.screenshot({ path });
@@ -95,7 +95,7 @@ if (mode === "release") {
   await page.waitForTimeout(Number(process.env.WAIT ?? 600));
   await save(out);
 } else if (mode === "protest") {
-  await page.goto(`${base}?debug=1&seed=3&warp=70&discourse=44&zoom=95&focus=11.5,19&hour=13`, { waitUntil: "networkidle" });
+  await page.goto(`${base}?debug=1&skin=base&seed=3&warp=70&discourse=44&zoom=95&focus=11.5,19&hour=13`, { waitUntil: "networkidle" });
   await page.waitForTimeout(3500);
   await save(out);
 } else if (mode === "night") {

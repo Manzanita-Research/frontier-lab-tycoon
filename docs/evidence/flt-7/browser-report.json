@@ -3,8 +3,8 @@
     {
       "cue": "place",
       "variation": 0,
-      "rms": 0.02032435225919434,
-      "peak": 0.43426987528800964,
+      "rms": 0.021842741750001463,
+      "peak": 0.47889119386672974,
       "duration": 2
     },
     {
@@ -17,15 +17,15 @@
     {
       "cue": "bulldoze",
       "variation": 0,
-      "rms": 0.018832269477103054,
-      "peak": 0.3873497545719147,
+      "rms": 0.019849302280972137,
+      "peak": 0.30331748723983765,
       "duration": 2
     },
     {
       "cue": "card",
       "variation": 0,
-      "rms": 0.014674718734010297,
-      "peak": 0.29774945974349976,
+      "rms": 0.017873055195308758,
+      "peak": 0.4164505898952484,
       "duration": 2
     },
     {
@@ -38,14 +38,14 @@
     {
       "cue": "release",
       "variation": 0,
-      "rms": 0.02350219795514029,
-      "peak": 0.17037120461463928,
+      "rms": 0.0235021979537887,
+      "peak": 0.17037121951580048,
       "duration": 2
     },
     {
       "cue": "era",
       "variation": 0,
-      "rms": 0.02806062631841175,
+      "rms": 0.028060626327400105,
       "peak": 0.18033044040203094,
       "duration": 2
     },
@@ -60,11 +60,11 @@
   "beds": [
     {
       "name": "quiet",
-      "crowd": 0.5858175135415498,
+      "crowd": 0.592576670732568,
       "protesters": 0,
       "training": 0.4,
       "night": 0,
-      "era": "seed"
+      "era": "1"
     },
     {
       "name": "crowded",
@@ -72,7 +72,7 @@
       "protesters": 0,
       "training": 0.4,
       "night": 0,
-      "era": "seed"
+      "era": "1"
     },
     {
       "name": "protest-night",
@@ -80,20 +80,14 @@
       "protesters": 15,
       "training": 0.4,
       "night": 1,
-      "era": "seed"
+      "era": "1"
     }
   ],
   "checks": [
     "Audio locked before input, running after first pointerdown",
     "Every cue exercised through the real mixer controls and rendered offline",
     "Mute and all mixer settings survive reload",
-    "Placement, bulldoze and release cues fired from real world observation",
-    "Crowd follows camera position and scales with density; >10 protest chant; night crickets; rising training hum; era and breakdown compatibility adapters",
-    "Natural week publication; reading pauses campus; Escape restores speed",
-    "Natural month publication at day 30",
-    "Live camera photo loaded at 640px; lead plus three stories, classifieds and rival ticker",
-    "Paper and chat archived and restored after reload; typing dots, all four friends and Mom line visible",
-    "390px phone paper and chat: no horizontal overflow, dismissal reachable"
+    "Placement, bulldoze and release cues fired from real world observation"
   ],
   "errors": []
 }

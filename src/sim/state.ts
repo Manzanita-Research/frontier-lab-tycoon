@@ -11,6 +11,7 @@ import { trainingMachine } from "./machines/training";
 import { pushNews } from "./news";
 import { newSlop } from "./slop";
 import { blankVibes, initialVibes } from "./vibes";
+import { createLeapfrog } from "./race/leapfrog/state";
 import { createRace } from "./race/state";
 import { createRng } from "./rng";
 import { dailyThoughts } from "./thoughts";
@@ -68,6 +69,7 @@ export function createInitialState(seed = 1): GameState {
     waterDiscourse: 0,
     goals: initialStored(goalsMachine, { goals: createGoals(), outcomeDay: null }),
     race: createRace({ capability: START_CAPABILITY, hype: 30 }),
+    leapfrog: createLeapfrog(),
     slop: newSlop(w, h),
     staff: [],
     disasters: createDisasters(seed),

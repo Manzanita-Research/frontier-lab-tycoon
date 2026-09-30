@@ -3,6 +3,8 @@ import { arenaScore, RIVAL_BY_ID, YOU, type RivalId } from "../../content/rivals
 import { formatMoney, runwayMonths } from "../format";
 import type { GameState } from "../types";
 import { rankOf } from "./arena";
+import { valuationFactor } from "./leapfrog/factors";
+import { leapfrogVars } from "./leapfrog/vars";
 
 /** Revenue while an open-weights rival is eating it. */
 export const OPEN_DROP_FACTOR = 0.7;
@@ -38,7 +40,7 @@ export const annualRevenue = (state: GameState): number => state.ledger.income *
 /** What investors say the lab is worth: capability squared, hype, and where you sit on the Arena. */
 export function valuation(state: GameState): number {
   const rank = rankOf(state.race.board);
-  return Math.round(state.capability ** 2 * 1_400_000 * (0.5 + state.hype / 100) * Math.max(0.5, 1.6 - 0.13 * rank));
+  return Math.round(state.capability ** 2 * 1_400_000 * (0.5 + state.hype / 100) * Math.max(0.5, 1.6 - 0.13 * rank) * valuationFactor(state));
 }
 
 /** The cash the round brings in: half a percent of the valuation, and never less than two months of gross burn. */
@@ -72,5 +74,7 @@ export function raceVars(state: GameState): Record<string, string> {
     dropRival: drop ? nameOf(drop.rival) : "",
     dropModel: drop?.model ?? "",
     gap: drop ? `${Math.abs(rivalScore - mine)} points` : "",
+    // Release Leapfrog's cards ({lfRival}, {lfReady}, ...): empty while the pack is off.
+    ...leapfrogVars(state),
   };
 }

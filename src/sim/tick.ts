@@ -8,6 +8,7 @@ import { dailyEconomy } from "./economy";
 import { dailyEvents, openEventOf } from "./events";
 import { dailyGoals } from "./goals";
 import { dailyNews } from "./news";
+import { dailyLeapfrog } from "./race/leapfrog/driver";
 import { dailyRace } from "./race/race";
 import { dailySlop } from "./slop";
 import { updateStaff } from "./staff";
@@ -48,6 +49,7 @@ export function tick(state: GameState, commands: readonly Command[] = []) {
     dailySlop(state, rng);
     dailyCrowd(state, rng);
     dailyRace(state, rng);
+    dailyLeapfrog(state, rng);
     dailyThoughts(state, rng);
     dailyGoals(state, rng);
     dailyEvents(state);
