@@ -1,6 +1,6 @@
 // Switching skins: load, apply, remember. The picker's preview/apply/cancel semantics live here so they survive a
 // change of skin (the SkinPicker slot itself is replaced when the skin changes).
-import { registry, toast } from "../../app/game";
+import { bootNotice, registry } from "../../app/game";
 import { BASE_ID, DEFAULT_SKIN, MIGRATED_NOTICE, MOTION_KEY, STORAGE_KEY, SkinRefused, applyPrepared, bootChoice, pickToSave, prepareSkin } from "../../skins/registry";
 import { loadedSkinAtom, skinUiAtom, type SkinUi } from "./state";
 
@@ -58,7 +58,7 @@ export async function bootSkin(): Promise<void> {
   const choice = bootChoice(window.location.search, recall(STORAGE_KEY));
   if (choice.save) remember(STORAGE_KEY, choice.save);
   await showSkin(choice.id);
-  if (choice.notice) toast(MIGRATED_NOTICE);
+  if (choice.notice) bootNotice(MIGRATED_NOTICE);
 }
 
 function applyMotion(on: boolean) {

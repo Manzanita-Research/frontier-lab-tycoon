@@ -385,6 +385,7 @@ async function capture(side, sceneName, skin) {
         const tick = () => (window.__shotFrames++, requestAnimationFrame(tick));
         requestAnimationFrame(tick);
       });
+      if (scene.storage) await page.addInitScript((kv) => { for (const [k, v] of Object.entries(kv)) localStorage.setItem(k, v); }, scene.storage);
       await page.goto(sceneUrl(side.url, scene, sk), { waitUntil: "networkidle" });
       await page.waitForFunction(() => window.__flt?.sim?.world, null, { timeout: 60_000 });
       const frames = Number(args.frames ?? scene.frames ?? sceneData.defaults.frames);
