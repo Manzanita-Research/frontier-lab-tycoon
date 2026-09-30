@@ -1,16 +1,16 @@
 {
   "base": {
     "ref": "origin/main",
-    "sha": "17724078eeab199a0767c52d20ab666c149e06bd"
+    "sha": "deb7d601138ef4e226ba7cb77768f05d8f3aaa87"
   },
   "head": {
     "branch": "flt-14-port-swag-drop",
-    "sha": "8b405da",
+    "sha": "970dbdb",
     "dirty": true
   },
-  "seconds": 157.586,
+  "seconds": 164.131,
   "problems": [
-    "photo@swag-drop.png: blank composite: panel 3 is 53% one colour, 12 colours"
+    "photo@swag-drop.png: blank composite: panel 3 is 53% one colour, 13 colours"
   ],
   "rows": [
     {
@@ -20,7 +20,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/after/overview@swag-drop.png",
       "title": "The campus, mid-morning, paused",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/compare/overview@swag-drop.png",
-      "changed": 0.3408888888888889
+      "changed": 0.4169483024691358
     },
     {
       "scene": "inspector",
@@ -29,7 +29,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/after/inspector@swag-drop.png",
       "title": "Tap a researcher: the inspector opens",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/compare/inspector@swag-drop.png",
-      "changed": 0.38108256172839505
+      "changed": 0.45925540123456793
     },
     {
       "scene": "event",
@@ -38,7 +38,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/after/event@swag-drop.png",
       "title": "An event card lands (the Water Discourse)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/compare/event@swag-drop.png",
-      "changed": 0.7494251543209877
+      "changed": 0.7290555555555556
     },
     {
       "scene": "menu",
@@ -47,7 +47,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/after/menu@swag-drop.png",
       "title": "The Start menu / build bar open",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/compare/menu@swag-drop.png",
-      "changed": 0.36707793209876544
+      "changed": 0.44167515432098764
     },
     {
       "scene": "phone",
@@ -56,7 +56,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/after/phone@swag-drop.png",
       "title": "The same campus on a phone (390x844)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/compare/phone@swag-drop.png",
-      "changed": 0.4376792441365901
+      "changed": 0.43158722201968647
     },
     {
       "scene": "photo",
@@ -66,8 +66,8 @@
       "title": "Photo mode",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/compare/photo@swag-drop.png",
       "changed": null,
-      "composeError": "blank composite: panel 3 is 53% one colour, 12 colours",
-      "error": "compare: blank composite: panel 3 is 53% one colour, 12 colours"
+      "composeError": "blank composite: panel 3 is 53% one colour, 13 colours",
+      "error": "compare: blank composite: panel 3 is 53% one colour, 13 colours"
     }
   ],
   "errors": []
