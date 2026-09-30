@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { createMachine } from "xstate";
 import { getShortestPaths } from "xstate/graph";
-import { eventById } from "../../content/events";
+import { dramaLetter, eventById } from "../../content/events";
+import { fillTemplate } from "../format";
 import { RIVAL_DEFS } from "../../content/rivals";
 import { createTestCampus, answer, readyForPressure } from "../testkit";
 import { applyNow, tick, TICKS_PER_DAY } from "../tick";
@@ -138,5 +139,25 @@ describe("a year of it", () => {
     expect(letgo.poaching!.lost).toBeGreaterThan(0);
     expect(match.poaching!.lost).toBe(0);
     expect(match.poaching!.matched).toBeGreaterThan(0);
+  });
+});
+
+describe("FLT-56: each lab poaches in its own voice", () => {
+  it("every built-in rival and every neo lab has its own letter, filled in with no placeholders left", () => {
+    const letters = new Set<string>();
+    for (const r of RIVAL_DEFS) {
+      const s = staged(r.id);
+      const vars = poachingVars(s);
+      expect(vars.poacherId).toBe(r.id);
+      const l = dramaLetter(CARD, vars.poacherId)!;
+      expect(l.poacher).toBe(r.id);
+      const text = [l.from, l.subject, ...l.lines, l.sign].map((x) => fillTemplate(x, vars)).join("\n");
+      expect(text).not.toMatch(/\{\w+\}/);
+      letters.add(l.subject);
+    }
+    expect(letters.size).toBe(RIVAL_DEFS.length);
+    expect(dramaLetter(CARD, "neo:3")?.poacher).toBe("neo");
+    expect(dramaLetter(CARD)?.poacher).toBeUndefined();
+    expect(dramaLetter(CARD, "somebody-new")?.poacher).toBeUndefined();
   });
 });

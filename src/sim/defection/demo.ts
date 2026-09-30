@@ -1,7 +1,8 @@
 // Review moments for Defection (FLT-26) and the Poaching War (FLT-20): `?moment=defection-chat|defection-card|
-// defection-exit|defection-manifesto|defection-arena|poach-offer`. They use the same card and tick paths as play.
+// defection-exit|defection-manifesto|defection-arena|poach-offer[:<rival id>]`. They use the same card and tick paths as play.
 // No renderer or UI dependencies.
 import { canPlace } from "../commands";
+import { RIVAL_DEFS } from "../../content/rivals";
 import { dailyEvents, openEventOf } from "../events";
 import { createRng } from "../rng";
 import { answer } from "../testkit";
@@ -9,12 +10,14 @@ import { applyNow, tick, TICKS_PER_DAY } from "../tick";
 import type { GameState } from "../types";
 import { seedWalkers } from "../walkers";
 import { enablePoaching, offerPoach } from "../poaching/driver";
+import { CARD as POACH_CARD } from "../poaching/pack";
 import { dailyDefection, enableDefection } from "./driver";
 import { CARD, CHOICES, MANIFESTO_CARD, MANIFESTO_CHOICES } from "./pack";
 
 export const DRAMA_MOMENTS = ["defection-chat", "defection-card", "defection-exit", "defection-manifesto", "defection-arena", "poach-offer"] as const;
 export type DramaMoment = (typeof DRAMA_MOMENTS)[number];
-export const isDramaMoment = (m: string | null | undefined): m is DramaMoment => (DRAMA_MOMENTS as readonly unknown[]).includes(m);
+/** `poach-offer:<rival id>` is the offer in that lab's voice (FLT-56). */
+export const isDramaMoment = (m: string | null | undefined): m is DramaMoment => (DRAMA_MOMENTS as readonly unknown[]).includes(m) || !!m?.startsWith("poach-offer:");
 
 /** A lab a year in: paths, a Hall, a gateway, the Kombucha Bar, ten researchers and three releases. */
 function busyLab(s: GameState) {
@@ -56,12 +59,19 @@ const cardIs = (id: string) => (s: GameState) => openEventOf(s)?.id === id;
 
 export function stageDrama(s: GameState, moment: DramaMoment) {
   busyLab(s);
-  if (moment === "poach-offer") {
+  if (moment.startsWith("poach-offer")) {
+    const id = moment.split(":")[1] ?? "metameta";
+    const rival = RIVAL_DEFS.find((r) => r.id === id) ?? RIVAL_DEFS.find((r) => r.id === "metameta")!;
     enablePoaching(s);
     // The unhappiest few are who MetaMeta calls: make sure somebody is.
     s.walkers.filter((w) => w.kind === "researcher").slice(0, 3).forEach((w) => { w.energy = 0.25; w.focus = 0.3; });
-    offerPoach(s, { from: "metameta", name: "MetaMeta Superintelligence Labs", short: "MetaMeta" });
+    offerPoach(s, { from: rival.id, name: rival.name, short: rival.short });
     dailyEvents(s);
+    // Whatever else the lab gets asked first (the app's launch livestream, say) is answered: the letter is the card.
+    for (let i = 0; i < 6 && openEventOf(s) && openEventOf(s)!.id !== POACH_CARD; i++) {
+      applyNow(s, answer(s));
+      dailyEvents(s);
+    }
     return;
   }
   enableDefection(s);

@@ -8,7 +8,7 @@ import { OFFICE_TOOLS, RACE_TOOLS, SPEEDS, TOOLS } from "../../app/hud";
 import { PATH_PRICE } from "../../content/buildings";
 import { ERAS } from "../../content/eras";
 import { STAFF } from "../../content/staff";
-import { DRAMA_LETTERS } from "../../content/events";
+import { dramaLetter } from "../../content/events";
 import { SCENARIO, type GoalDef } from "../../content/goals";
 import { FRIENDS } from "../../content/newsroom";
 import { LEAPFROG } from "../../content/leapfrog";
@@ -349,7 +349,8 @@ function bubblesOf(i: HudInput): BubbleVM[] {
 
 /** A drama card's document, filled in from the pack's template. */
 function dramaOf(id: string, vars: Record<string, string>): DramaVM | null {
-  const l = DRAMA_LETTERS.get(id);
+  // A poaching offer is in the poacher's own voice (FLT-56).
+  const l = dramaLetter(id, vars.poacherId);
   if (!l) return null;
   const f = (s: string) => fillTemplate(s, vars);
   return { style: l.style, file: f(l.file), from: f(l.from), to: f(l.to), subject: f(l.subject), lines: l.lines.map(f).filter((x) => x.trim().length > 0), sign: f(l.sign) };

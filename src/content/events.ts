@@ -321,4 +321,12 @@ EVENTS.push(...CAPTURE.content.events.add as EventDef[]);
 
 export const eventById = (id: string): EventDef | undefined => EVENTS.find((e) => e.id === id);
 /** How each drama card looks on screen (the letter, the email, the manifesto): templates from the packs, by card id. */
-export const DRAMA_LETTERS: ReadonlyMap<string, Letter> = new Map([...DEFECTION.content.letters.add, ...POACHING.content.letters.add].map((l) => [l.card, l]));
+export const DRAMA_LETTERS: ReadonlyMap<string, Letter> = new Map([...DEFECTION.content.letters.add, ...POACHING.content.letters.add].filter((l) => !l.poacher).map((l) => [l.card, l]));
+/** The same, in one lab's voice (FLT-56): by `card/poacher`, where the poacher is a rival id or "neo". */
+const VOICED_LETTERS: ReadonlyMap<string, Letter> = new Map([...DEFECTION.content.letters.add, ...POACHING.content.letters.add].filter((l) => l.poacher).map((l) => [`${l.card}/${l.poacher}`, l]));
+
+/** The letter for a drama card, in the voice of the lab sending it if it has one (`from` is a rival or neo lab id). */
+export function dramaLetter(card: string, from?: string): Letter | undefined {
+  const voice = from ? (VOICED_LETTERS.get(`${card}/${from}`) ?? (from.startsWith("neo:") ? VOICED_LETTERS.get(`${card}/neo`) : undefined)) : undefined;
+  return voice ?? DRAMA_LETTERS.get(card);
+}
