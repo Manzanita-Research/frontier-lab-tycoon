@@ -1,0 +1,56 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "deb7d601138ef4e226ba7cb77768f05d8f3aaa87"
+  },
+  "head": {
+    "branch": "flt-50-playable-ui",
+    "sha": "8bba4a0",
+    "dirty": true
+  },
+  "seconds": 90.067,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "coach-start",
+      "skin": "homepage-98",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/homepage-98/before/coach-start@homepage-98.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/homepage-98/after/coach-start@homepage-98.png",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/homepage-98/compare/coach-start@homepage-98.png",
+      "changed": 0.9671026234567901
+    },
+    {
+      "scene": "coach-path",
+      "skin": "homepage-98",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/homepage-98/before/coach-path@homepage-98.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/homepage-98/after/coach-path@homepage-98.png",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/homepage-98/compare/coach-path@homepage-98.png",
+      "changed": 0.9635246913580247
+    },
+    {
+      "scene": "coach-hall",
+      "skin": "homepage-98",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/homepage-98/before/coach-hall@homepage-98.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/homepage-98/after/coach-hall@homepage-98.png",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/homepage-98/compare/coach-hall@homepage-98.png",
+      "changed": 0.9756327160493827
+    },
+    {
+      "scene": "level-3",
+      "skin": "homepage-98",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/homepage-98/before/level-3@homepage-98.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/homepage-98/after/level-3@homepage-98.png",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/homepage-98/compare/level-3@homepage-98.png",
+      "changed": 0.4316203703703704
+    },
+    {
+      "scene": "phone-start",
+      "skin": "homepage-98",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/homepage-98/before/phone-start@homepage-98.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/homepage-98/after/phone-start@homepage-98.png",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/homepage-98/compare/phone-start@homepage-98.png",
+      "changed": 0.4566046907279135
+    }
+  ],
+  "errors": []
+}
