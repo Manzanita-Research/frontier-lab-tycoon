@@ -1,6 +1,7 @@
 import { BUILDINGS, type BuildingKind } from "../content/buildings";
 import { EVENTS, EVENT_COOLDOWN_DAYS } from "../content/events";
 import { LAB_NAMES, modelName } from "../content/names";
+import { createDisasters } from "./disasters/driver";
 import { createGoals } from "./goals";
 import { initialStored } from "./machines/run";
 import { arcMachine } from "./machines/arc";
@@ -69,6 +70,7 @@ export function createInitialState(seed = 1): GameState {
     race: createRace({ capability: START_CAPABILITY, hype: 30 }),
     slop: newSlop(w, h),
     staff: [],
+    disasters: createDisasters(seed),
     arcs: Object.fromEntries(
       EVENTS.map((def) => [def.id, initialStored(arcMachine, { choices: def.choices.length, cooldownDays: def.cooldown ?? EVENT_COOLDOWN_DAYS, openedDay: null })]),
     ),

@@ -3,6 +3,7 @@
 import type { BuildingKind } from "./buildings";
 import type { Tone, WalkerKind } from "../sim/types";
 import { ERAS } from "./eras";
+import { cardEvents } from "../sim/disasters/pack";
 
 /** What has to be true for an event to fire. `all` combines conditions. */
 export type Condition =
@@ -285,5 +286,7 @@ const RACE_EVENTS: EventDef[] = [
 ];
 
 EVENTS.push(...RACE_EVENTS);
+// FLT-17: the cards the disasters open (mods/base-disasters). They wait for their offer flag like the Race's cards do.
+EVENTS.push(...cardEvents());
 
 export const eventById = (id: string): EventDef | undefined => EVENTS.find((e) => e.id === id);

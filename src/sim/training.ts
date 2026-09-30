@@ -2,6 +2,7 @@
 import type { EmittedFrom, EventFromLogic } from "xstate";
 import { modelName } from "../content/names";
 import { COMPUTE_PER_CLUSTER, COMPUTE_PER_HALL } from "./constants";
+import { computeFactor } from "./disasters/driver";
 import { formatMoney } from "./format";
 import { addToast, pushNews } from "./news";
 import { step, type Stepped } from "./machines/run";
@@ -24,7 +25,8 @@ export function morale(state: GameState): number {
 }
 
 export function computePerDay(state: GameState): number {
-  return state.buildings.filter((b) => b.kind === "cluster" && !b.broken).length * COMPUTE_PER_CLUSTER + datacenterCompute(state);
+  // A rogue swarm (FLT-17) steals a share of it: computeFactor is 1 when nothing is draining the lab.
+  return (state.buildings.filter((b) => b.kind === "cluster" && !b.broken).length * COMPUTE_PER_CLUSTER + datacenterCompute(state)) * computeFactor(state);
 }
 
 /** Once a game day: clusters fill the stockpile, halls spend it, and the machine decides what that adds up to. */

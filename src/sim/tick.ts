@@ -2,6 +2,7 @@
 import { applyCommands, type Command } from "./commands";
 import { TICKS_PER_DAY } from "./constants";
 import { dailyBreakdowns } from "./breakdowns";
+import { dailyDisasters, updateDisasters } from "./disasters/driver";
 import { dailyCrowd } from "./crowd";
 import { dailyEconomy } from "./economy";
 import { dailyEvents, openEventOf } from "./events";
@@ -34,8 +35,10 @@ export function tick(state: GameState, commands: readonly Command[] = []) {
   updateWalkers(state, rng);
   updateProtesters(state, rng);
   updateStaff(state, rng);
+  updateDisasters(state);
   if (state.tick % TICKS_PER_DAY === 0) {
     state.day++;
+    dailyDisasters(state);
     dailyEconomy(state, rng);
     dailyTraining(state, rng);
     dailyWalkers(state, rng);
