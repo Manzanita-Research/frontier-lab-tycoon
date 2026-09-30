@@ -156,10 +156,11 @@ describe("Field Almanac", () => {
     const shut = html(<slot.BuildBar items={vm.buildItems} tip={null} layout={vm.layout} actions={actions} />);
     expect(shut.match(/fa-well/g)?.length).toBe(1);
     expect(shut).toContain('aria-expanded="false"');
-    const teasers = [{ label: "Compute Cage", hint: "Ship a model" }];
+    const teasers = [{ label: "2 more", hint: "Ship your first model" }];
     const open = html(<Shelf items={vm.buildItems.slice(0, 2)} teasers={teasers} actions={actions} done={() => {}} />);
     expect(open).toContain("fa-tool locked");
-    expect(open).toContain("Ship a model");
+    expect(open).toContain("2 more");
+    expect(open).toContain("Ship your first model");
     expect(open).toContain("How to play");
   });
 
