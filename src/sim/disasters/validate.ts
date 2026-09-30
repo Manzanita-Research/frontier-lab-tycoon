@@ -1,9 +1,9 @@
 // Friendly checking of a disaster pack: every complaint starts with the JSON path, as docs/MODDING.md §2 promises
 // ("content.disasters.add[0].states.cleanup.on.TICK[1].guard: unknown guard "afterr" (did you mean "after"?)").
 // `flt-mod check` (FLT-15 M2) will call this for the `disasters` section.
-import { BUILDINGS } from "../../content/buildings";
 import { checkCall } from "../verbs";
 import type { Call, DisasterDef, DisasterPack, StateNode, TransitionDef } from "./types";
+import { defs } from "../defs";
 
 const EFFECTS = ["cash", "hype", "discourse", "protesters", "flag", "news", "thought", "place", "race"];
 const ID = /^[A-Za-z][\w-]*$/;
@@ -59,7 +59,7 @@ export function validateDisaster(def: DisasterDef, path: string): string[] {
   if (!def.odds || !(def.odds.weight >= 0)) errors.push(`${path}.odds.weight: expected a number, 0 or more`);
   for (const [i, s] of (def.odds?.scale ?? []).entries()) errors.push(...checkCall({ type: "stat.gte", params: { stat: s.stat, value: 0 } }, "guard", `${path}.odds.scale[${i}]`));
   if (def.requires) errors.push(...(Array.isArray(def.requires.guard) ? callErrors(def.requires.guard, "guard", `${path}.requires.guard`) : checkCall(def.requires.guard, "guard", `${path}.requires.guard`)));
-  if (def.target && !(def.target.kind in BUILDINGS)) errors.push(`${path}.target.kind: unknown building "${def.target.kind}"`);
+  if (def.target && !(def.target.kind in defs().buildings)) errors.push(`${path}.target.kind: unknown building "${def.target.kind}"`);
   if (!def.states || typeof def.states !== "object") return [...errors, `${path}.states: expected an object`];
   if (!(def.initial in def.states)) errors.push(`${path}.initial: no state "${def.initial}"`);
 

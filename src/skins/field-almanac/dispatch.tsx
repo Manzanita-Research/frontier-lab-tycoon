@@ -26,9 +26,10 @@ export function Ticker({ items }: SlotPropsMap["Ticker"]) {
  * and does not go away when clicked.
  */
 export function Toast({ toast, actions }: SlotPropsMap["Toast"]) {
-  if (toast.tone === "hint") {
+  // A hint is a standing tip and a warning a standing problem: neither can be waved away, they go when it comes true / is fixed.
+  if (toast.tone === "hint" || toast.tone === "warn") {
     return (
-      <div className="fa-toast fa-paper hint">
+      <div className={`fa-toast fa-paper ${toast.tone === "warn" ? "bad" : "hint"}`} role={toast.tone === "warn" ? "status" : undefined}>
         <QuillIcon />
         <span className="fa-toast-text">{toast.text}</span>
       </div>

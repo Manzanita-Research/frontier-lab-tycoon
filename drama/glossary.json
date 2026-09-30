@@ -1,0 +1,20 @@
+{
+  "_about": "Extra words the Daily Drama linter accepts, on top of what it harvests from the game itself (every capitalised word in src/content and mods/base-*, and every lowercase word in src, docs and mods). `names`: parody proper nouns and generic acronyms that are safe anywhere. `words`: everyday words the harvest happens to miss. `phrases`: the game's own parody names that contain a real fragment; the denylist skips them. A Drama pack declares its own new parody names in mods/drama/<date>/glossary.json instead, so the reviewer sees them listed in the PR; a Drama PR never edits this file.",
+  "names": [
+    "AI", "AGI", "ASI", "LLM", "LLMs", "GPU", "GPUs", "CPU", "TPUs", "API", "APIs", "SDK", "CEO", "CEOs", "CTO", "CFO", "COO", "VP", "VPs",
+    "HR", "PR", "IPO", "VC", "VCs", "RLHF", "RL", "SOTA", "OK", "FAQ", "ASAP", "TL", "DR", "TLDR", "FOMO", "NDA", "NDAs", "KPI", "KPIs",
+    "OKR", "OKRs", "ROI", "ARR", "MRR", "B2B", "SaaS", "DM", "DMs", "PDF", "PDFs", "URL", "ETA", "MVP", "QA", "UI", "UX", "IRL", "LOL",
+    "PhD", "PhDs", "Q1", "Q2", "Q3", "Q4", "TPS", "FLOPs", "FLOP", "TB", "GB", "MW", "GW", "AM", "PM", "RSVP", "DIY", "FYI", "ETA",
+    "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
+    "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December",
+    "Frontier", "Lab", "Labs", "Inc", "LLC", "Corp", "Co", "Ltd", "Dr", "Mr", "Ms", "Mx", "Jr", "Sr",
+    "Series", "Seed", "Demo Day", "Launch Week", "Dev Day", "Keynote", "Arena", "Leaderboard", "Discourse"
+  ],
+  "phrases": [],
+  "words": [
+    "startup", "startups", "unicorn", "decacorn", "keynote", "livestream", "leaderboard", "benchmark", "benchmarks", "roadmap",
+    "pivot", "rebrand", "rebrands", "rebranded", "layoffs", "offsite", "offsites", "all-hands", "onboarding", "hackathon",
+    "vibes", "vibe", "podcast", "podcasts", "newsletter", "newsletters", "influencer", "influencers", "subpoena", "lawsuit",
+    "lawsuits", "regulator", "regulators", "lobbyist", "lobbyists", "billionaire", "billionaires", "valuation", "valuations"
+  ]
+}

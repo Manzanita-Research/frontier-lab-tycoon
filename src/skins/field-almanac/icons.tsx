@@ -78,6 +78,12 @@ const TOOLS: Record<string, ReactElement> = {
       <circle cx="9" cy="8" r="3" {...accent(GOLD)} />
     </>
   ),
+  security: (
+    <>
+      <path {...line} d="M16 4 25 8v7c0 6-4 10-9 12-5-2-9-6-9-12V8Z" />
+      <path {...accent(DUSK, 2)} d="M12 15l3 3 6-6" />
+    </>
+  ),
   bulldoze: (
     <>
       <rect {...line} x="9" y="10" width="13" height="9" rx="2" />
@@ -91,6 +97,12 @@ const TOOLS: Record<string, ReactElement> = {
       <circle {...line} cx="16" cy="10" r="4" />
       <path {...line} d="M7 27a9 9 0 0 1 18 0" />
       <path {...accent(PLUM)} d="M13 17l3 7 3-7" />
+    </>
+  ),
+  senate: (
+    <>
+      <path {...line} d="M9 15a7 6.5 0 0 1 14 0ZM6 15h20v3H6ZM4 25h24v3H4ZM9 18v7M13.5 18v7M18.5 18v7M23 18v7" />
+      <path {...accent(PLUM)} d="M16 8.5V4h4" />
     </>
   ),
 };

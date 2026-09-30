@@ -1,7 +1,8 @@
 // The Star Chart: what the lab is researching now, and the three scenario goals as stars that fill in when they're met.
 // The Layout wraps both in one sheet of graph paper.
 import { useState } from "react";
-import { useT } from "../context";
+import { useCoach, useT } from "../context";
+import { ALL_VISIBLE } from "../kit";
 import type { SlotPropsMap } from "../types";
 import { Icon, StarIcon } from "./art";
 
@@ -17,9 +18,10 @@ export function StripeBar({ value, label }: { value: number; label: string }) {
 
 export function Training({ training }: SlotPropsMap["Training"]) {
   const t = useT();
+  const coach = useCoach();
   if (!training.hasHall) {
     return (
-      <section className="dd-training empty" aria-label={t("training.title")}>
+      <section className="dd-training empty" aria-label={t("training.title")} {...coach.attrs("training")}>
         <h4>
           <Icon name="flask" size={26} /> {t("training.title")}
         </h4>
@@ -28,7 +30,7 @@ export function Training({ training }: SlotPropsMap["Training"]) {
     );
   }
   return (
-    <section className="dd-training" aria-label={t("training.title")}>
+    <section className="dd-training" aria-label={t("training.title")} {...coach.attrs("training")}>
       <h4>
         <Icon name="flask" size={26} /> {t("training.title")}
       </h4>
@@ -44,11 +46,30 @@ export function Training({ training }: SlotPropsMap["Training"]) {
   );
 }
 
-export function Objectives({ objectives, layout }: SlotPropsMap["Objectives"]) {
+export function Objectives({ objectives, progress, visible = ALL_VISIBLE, layout }: SlotPropsMap["Objectives"]) {
   const t = useT();
+  const coach = useCoach();
+  const goal = progress?.goal.line ? progress.goal : null;
+  const list = !goal || visible.arena;
   const [open, setOpen] = useState(() => !layout.compact);
+  if (!list && goal) {
+    // The one goal in front of you: a single star, until the race brings the chart.
+    return (
+      <section className="dd-goals dd-goal-one open" {...coach.attrs("goals")} role="status">
+        <div className="dd-goal-body">
+          <div className="dd-goal-text">
+            <small>
+              <StarIcon on={false} size={20} /> {t("objectives.goal")}
+            </small>
+            <b>{goal.line}</b>
+            <StripeBar value={goal.ratio} label={goal.text} />
+          </div>
+        </div>
+      </section>
+    );
+  }
   return (
-    <section className={`dd-goals ${open ? "open" : ""}`}>
+    <section className={`dd-goals ${open ? "open" : ""}`} {...(goal ? coach.attrs("goals") : {})}>
       <button type="button" className="dd-goals-head" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
         <StarIcon on size={26} />
         <h4>{t("objectives.title")}</h4>
@@ -66,7 +87,7 @@ export function Objectives({ objectives, layout }: SlotPropsMap["Objectives"]) {
               <li key={g.id} className={g.met ? "met" : ""}>
                 <span className="dd-goal-text">
                   <b>{g.label}</b>
-                  <small>{g.progress}</small>
+                  {g.progress && <small>{g.progress}</small>}
                   <StripeBar value={g.ratio} label={g.label} />
                 </span>
                 <StarIcon on={g.met} size={34} />

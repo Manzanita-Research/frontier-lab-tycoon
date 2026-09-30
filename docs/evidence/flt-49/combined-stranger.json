@@ -1,0 +1,19 @@
+{
+  "url": "http://127.0.0.1:53149/",
+  "checks": {
+    "walkerMovedMs": 6086,
+    "threeDaysMs": 20384,
+    "gatewayMs": 217660,
+    "noGateLoiter": true,
+    "consoleErrors": 0
+  },
+  "clickRetries": 2,
+  "passed": true,
+  "sources": {
+    "logic": "b0c05353854a6dec50acabd44a78a8624b79b164",
+    "ui": "74940c204a0cf242d2f8325468159076d66d1748",
+    "method": "Temporary source copy overlays FLT-50 UI/HUD/debug/help onto the FLT-49 head; local no-param URL at 1x. No changes to the UI builder branch.",
+    "runnerSha256": "b0bf549b84dd44c84d15696cf89ca3503205d20c0784397f13983318e7e87e8c"
+  },
+  "samples": 521
+}

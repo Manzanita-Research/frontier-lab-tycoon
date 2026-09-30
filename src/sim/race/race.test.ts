@@ -10,12 +10,12 @@ import { computePerDay, dailyTraining } from "../training";
 import { hypeResting } from "../economy";
 import { dailyDiscourse } from "../protest";
 import { createRng, type Rng } from "../rng";
-import { createInitialState } from "../state";
+import { readyForPressure, createTestCampus as createBaseCampus } from "../testkit";
 import { answer, layPaths } from "../testkit";
 import { TICKS_PER_DAY, tick } from "../tick";
 import type { GameState } from "../types";
 import { refreshBoard } from "./arena";
-import { bidAmount, auctionUnit, fundingDue, openDropActive, raiseAmount, revenueFactor, valuation } from "./finance";
+import { auctionBlocked, bidAmount, auctionUnit, fundingDue, openDropActive, raiseAmount, revenueFactor, valuation } from "./finance";
 import { datacenterCompute, gasDiscourse, powerOf, solarHype } from "./power";
 import { dailyRace, eraOfState, weekly } from "./race";
 import { rdMultiplier, multiplierFor, releaseBoost, workingCapability } from "./rd";
@@ -26,6 +26,8 @@ import { resolveAuction, winChance } from "./actions";
 import { eraNumber } from "./era";
 
 /** A dice roll that never varies: `next()` is always `v`. */
+const createInitialState = (seed = 1) => { const s = createBaseCampus(seed); readyForPressure(s); return s; };
+
 const fixed = (v: number): Rng => ({ next: () => v, int: (lo) => lo, chance: (p) => v < p, pick: (items) => items[0]!, state: () => 1 });
 const choose = (s: GameState, index: number) => applyCommands(s, [{ type: "chooseEvent", eventId: openEventOf(s)!.id, choiceIndex: index }], createRng(9));
 const rival = (s: GameState, id: string) => s.race.rivals.find((r) => r.context.id === id)!;
@@ -135,10 +137,10 @@ describe("eras", () => {
   it("opens a full-screen title card the day the multiplier crosses 2x, with the spec's one-liner", () => {
     const s = createInitialState(1);
     s.capability = 200; // eleven agents at skill 20 over eleven researchers: 3x
-    s.day = 3;
+    s.day = 43;
     dailyRace(s, createRng(1));
     expect(eraOfState(s)).toBe(2);
-    expect(s.flags["offer:era2"]).toBe(3);
+    expect(s.flags["offer:era2"]).toBe(43);
     dailyEvents(s);
     expect(openEventOf(s)?.id).toBe("era2");
     const card = EVENTS.find((e) => e.id === "era2")!;
@@ -532,7 +534,7 @@ describe("the race in a running game", () => {
       return s;
     };
     const a = run();
-    expect(a.race.week).toBe(22);
+    expect(a.race.week).toBe(Math.floor(a.day / 7) - Math.floor(40 / 7));
     expect(run()).toEqual(a);
     expect(JSON.parse(JSON.stringify(a))).toEqual(a);
     expect(eraNumber(a.race.era)).toBeGreaterThanOrEqual(1);
@@ -561,7 +563,7 @@ describe("debug moments (?moment=)", () => {
     const s = createInitialState(3);
     stageMoment(s, "shuffle");
     expect(s.race.rank).toBe(1);
-    expect(s.day).toBe(13);
+    expect(s.day).toBe(48);
     for (let i = 0; i < 20; i++) tick(s);
     expect(s.race.rank).toBeGreaterThanOrEqual(3);
     expect(s.race.rankDelta).toBeLessThan(0);
@@ -578,3 +580,19 @@ describe("debug moments (?moment=)", () => {
   });
 });
 
+
+describe("unaffordable auction bids (FLT-58)", () => {
+  it("greys out the bids bigger than the bank, with the reason, and never the low one", () => {
+    const s = createBaseCampus(1);
+    s.cash = bidAmount(s, "all") + 1;
+    expect(auctionBlocked(s)).toEqual([null, null, null]);
+    s.cash = bidAmount(s, "mid") + 1;
+    const [low, mid, all] = auctionBlocked(s);
+    expect(low).toBeNull();
+    expect(mid).toBeNull();
+    expect(all).toMatch(/is more than the .* you have/);
+    s.cash = 0;
+    expect(auctionBlocked(s)[0]).toBeNull();
+    expect(auctionBlocked(s).slice(1).every((r) => r !== null)).toBe(true);
+  });
+});

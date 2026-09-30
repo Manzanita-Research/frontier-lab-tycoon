@@ -1,0 +1,38 @@
+{
+  "_": [
+    "Playable v1 (FLT-50) scenes for `pnpm shots --scenes-file scripts/shots.playable.json --scenes coach-start,... --skin frontier-95`.",
+    "They start from a clean opening (no warp) and use `?ladder=N&coach=K&unlock` (src/debug.ts) to put the HUD on a rung of the ladder,",
+    "so the pairs line up on any build: `main` ignores those params and shows its old HUD (the 'before'), this branch shows the coach."
+  ],
+  "sets": {
+    "playable": ["coach-start", "coach-path", "coach-hall", "coach-training", "coach-gateway", "coach-goal", "new-card", "how-to-play", "level-3", "phone-start", "phone-path"],
+    "playable-desktop": ["coach-start", "coach-path", "coach-hall", "coach-training", "coach-gateway", "coach-goal", "new-card", "how-to-play", "level-3"]
+  },
+  "scenes": {
+    "coach-start": { "query": { "warp": null, "ladder": 1, "coach": 0 }, "steps": [{ "wait": 400 }] },
+    "coach-path": { "query": { "warp": null, "ladder": 1, "coach": 1 }, "steps": [{ "click": "[data-testid=start-button], .build-open, .dd-tray-label, .gc-build", "optional": true }, { "wait": 500 }] },
+    "coach-hall": { "query": { "warp": null, "ladder": 1, "coach": 2 }, "steps": [{ "click": "[data-testid=start-button], .build-open, .dd-tray-label, .gc-build", "optional": true }, { "wait": 500 }] },
+    "coach-training": {
+      "query": { "warp": null, "ladder": 1, "coach": 3 },
+      "steps": [
+        { "send": { "type": "COMMAND", "command": { "type": "placePath", "x": 11, "z": 18 } } },
+        { "send": { "type": "COMMAND", "command": { "type": "placeBuilding", "kind": "hall", "x": 12, "z": 18 } } },
+        { "tick": 30 },
+        { "wait": 600 }
+      ]
+    },
+    "coach-gateway": {
+      "query": { "warp": null, "ladder": 2, "coach": 4 },
+      "steps": [{ "click": "[data-testid=start-button], .build-open, .dd-tray-label, .gc-build", "optional": true }, { "wait": 500 }]
+    },
+    "coach-goal": { "query": { "warp": null, "ladder": 2, "coach": 6 }, "steps": [{ "wait": 400 }] },
+    "new-card": { "query": { "warp": null, "ladder": 2, "unlock": 1 }, "steps": [{ "wait": 500 }] },
+    "how-to-play": {
+      "query": { "warp": null, "ladder": 3 },
+      "steps": [{ "click": "[data-testid=start-button], .build-open, .dd-tray-label, .gc-build", "optional": true }, { "wait": 400 }, { "click": ".f95-menu li:nth-last-child(3) button, .help-tool, .dd-help-stamp, .gc-b88.help", "optional": true }, { "wait": 500 }]
+    },
+    "level-3": { "query": { "warp": null, "ladder": 3 }, "steps": [{ "wait": 400 }] },
+    "phone-start": { "viewport": "390x844", "mobile": true, "query": { "warp": null, "ladder": 1, "coach": 0 }, "steps": [{ "wait": 400 }] },
+    "phone-path": { "viewport": "390x844", "mobile": true, "query": { "warp": null, "ladder": 1, "coach": 1 }, "steps": [{ "click": "[data-testid=start-button], .build-open, .dd-tray-label, .gc-build", "optional": true }, { "wait": 500 }] }
+  }
+}

@@ -1,0 +1,619 @@
+{
+  "apiVersion": 1,
+  "id": "base-yacht",
+  "name": "Corporate Collusion: the yacht summit",
+  "version": "1.0.0",
+  "author": "Frontier Lab Tycoon",
+  "description": "A Voluntary Safety Summit on a yacht, a leaked group chat thirty days later, and three ways to handle it. FLT-15 section shape, direct-loaded until M1b.",
+  "content": {
+    "arcs": {
+      "add": [
+        {
+          "id": "yacht",
+          "initial": "quiet",
+          "states": {
+            "quiet": {
+              "on": {
+                "DAY": {
+                  "target": "invited",
+                  "guard": {
+                    "type": "all",
+                    "params": {
+                      "guards": [
+                        {
+                          "type": "after",
+                          "params": {
+                            "days": 12
+                          }
+                        },
+                        {
+                          "type": "stat.gte",
+                          "params": {
+                            "stat": "models",
+                            "value": 1
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "invited": {
+              "entry": [
+                {
+                  "type": "flag.set",
+                  "params": {
+                    "name": "offer:yacht-invite"
+                  }
+                },
+                {
+                  "type": "sound.cue",
+                  "params": {
+                    "cue": "card"
+                  }
+                }
+              ],
+              "on": {
+                "CHOSE": [
+                  {
+                    "target": "signed",
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "sign"
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "hype.delta",
+                        "params": {
+                          "amount": 12
+                        }
+                      },
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "Six labs sign the Voluntary Safety Commitments aboard the MY Fiduciary Duty; the commitments are mostly vibes",
+                          "tone": "joke"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "target": "signed",
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "intern"
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "hype.delta",
+                        "params": {
+                          "amount": 6
+                        }
+                      },
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "{lab} sends an intern to the yacht summit; the intern signs everything, including a menu",
+                          "tone": "joke"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "target": "declined",
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "decline"
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "hype.delta",
+                        "params": {
+                          "amount": -3
+                        }
+                      },
+                      {
+                        "type": "trust.delta",
+                        "params": {
+                          "amount": 2
+                        }
+                      },
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "{lab} skips the yacht summit, citing seasickness; the other labs call it \"not a team player\"",
+                          "tone": "neutral"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "signed": {
+              "on": {
+                "DAY": {
+                  "target": "leaked",
+                  "guard": {
+                    "type": "after",
+                    "params": {
+                      "days": 30
+                    }
+                  }
+                }
+              }
+            },
+            "declined": {
+              "on": {
+                "DAY": {
+                  "target": "leaked",
+                  "guard": {
+                    "type": "after",
+                    "params": {
+                      "days": 30
+                    }
+                  }
+                }
+              }
+            },
+            "leaked": {
+              "entry": [
+                {
+                  "type": "flag.set",
+                  "params": {
+                    "name": "offer:yacht-leak"
+                  }
+                },
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "LEAKED: the yacht summit's group chat shows six labs agreeing to cap researcher pay at \"reasonable\"",
+                    "tone": "bad"
+                  }
+                },
+                {
+                  "type": "heat.delta",
+                  "params": {
+                    "amount": 10
+                  }
+                },
+                {
+                  "type": "sound.cue",
+                  "params": {
+                    "cue": "card"
+                  }
+                },
+                {
+                  "type": "shake",
+                  "params": {
+                    "strength": 0.3
+                  }
+                }
+              ],
+              "on": {
+                "CHOSE": [
+                  {
+                    "target": "denied",
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "deny"
+                      }
+                    }
+                  },
+                  {
+                    "target": "apologised",
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "apologise"
+                      }
+                    }
+                  },
+                  {
+                    "target": "blamed",
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "blame"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "denied": {
+              "type": "final",
+              "entry": [
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "{lab} denies the group chat exists; the group chat posts a screenshot of itself",
+                    "tone": "bad"
+                  }
+                },
+                {
+                  "type": "trust.delta",
+                  "params": {
+                    "amount": -8
+                  }
+                },
+                {
+                  "type": "heat.delta",
+                  "params": {
+                    "amount": 12
+                  }
+                },
+                {
+                  "type": "flag.set",
+                  "params": {
+                    "name": "subpoena:yacht"
+                  }
+                }
+              ]
+            },
+            "apologised": {
+              "type": "final",
+              "entry": [
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "{lab} apologises and pays researchers back pay, in yacht-club vouchers",
+                    "tone": "good"
+                  }
+                },
+                {
+                  "type": "trust.delta",
+                  "params": {
+                    "amount": 6
+                  }
+                },
+                {
+                  "type": "cash.delta",
+                  "params": {
+                    "amount": -2000000
+                  }
+                },
+                {
+                  "type": "hype.delta",
+                  "params": {
+                    "amount": -4
+                  }
+                }
+              ]
+            },
+            "blamed": {
+              "type": "final",
+              "entry": [
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "{lab}: \"The yacht made us do it.\" The yacht has retained counsel",
+                    "tone": "joke"
+                  }
+                },
+                {
+                  "type": "hype.delta",
+                  "params": {
+                    "amount": 8
+                  }
+                },
+                {
+                  "type": "heat.delta",
+                  "params": {
+                    "amount": 6
+                  }
+                },
+                {
+                  "type": "trust.delta",
+                  "params": {
+                    "amount": -2
+                  }
+                },
+                {
+                  "type": "flag.set",
+                  "params": {
+                    "name": "subpoena:yacht"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "events": {
+      "add": [
+        {
+          "id": "yacht-invite",
+          "title": "You're invited: the Voluntary Safety Summit",
+          "body": "Six labs, one yacht (the MY Fiduciary Duty) and a set of commitments nobody has to keep. Dress code: nautical, non-binding.",
+          "tone": "good",
+          "stripe": "RSVP · life vests provided",
+          "when": {
+            "flag": "offer:yacht-invite",
+            "daysAgo": 0
+          },
+          "cooldown": 30,
+          "choices": [
+            {
+              "label": "Sign the commitments",
+              "hint": "Hype ▲▲ · binding on nobody",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "offer:yacht-invite",
+                  "clear": true
+                },
+                {
+                  "type": "flag",
+                  "name": "yacht:pick:sign"
+                }
+              ]
+            },
+            {
+              "label": "Send an intern to sign",
+              "hint": "Hype ▲ · the intern gets a lanyard",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "offer:yacht-invite",
+                  "clear": true
+                },
+                {
+                  "type": "flag",
+                  "name": "yacht:pick:intern"
+                }
+              ]
+            },
+            {
+              "label": "Decline (seasick)",
+              "hint": "Trust ▲ · Hype ▼ · they'll talk about you",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "offer:yacht-invite",
+                  "clear": true
+                },
+                {
+                  "type": "flag",
+                  "name": "yacht:pick:decline"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "yacht-leak",
+          "kind": "leak",
+          "title": "LEAKED: the summit's group chat",
+          "body": "Someone forwarded the summit's group chat to a reporter. It has timestamps. It has your lab in it.",
+          "tone": "bad",
+          "stripe": "Leaked",
+          "when": {
+            "flag": "offer:yacht-leak",
+            "daysAgo": 0
+          },
+          "cooldown": 30,
+          "choices": [
+            {
+              "label": "Deny everything",
+              "hint": "Trust ▼ · Heat ▲ · the Senate will want a word",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "offer:yacht-leak",
+                  "clear": true
+                },
+                {
+                  "type": "flag",
+                  "name": "yacht:pick:deny"
+                }
+              ]
+            },
+            {
+              "label": "Apologise",
+              "hint": "Trust ▲ · −$2M back pay · Hype ▼",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "offer:yacht-leak",
+                  "clear": true
+                },
+                {
+                  "type": "flag",
+                  "name": "yacht:pick:apologise"
+                }
+              ]
+            },
+            {
+              "label": "Blame the yacht",
+              "hint": "Hype ▲ · the yacht gets subpoenaed",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "offer:yacht-leak",
+                  "clear": true
+                },
+                {
+                  "type": "flag",
+                  "name": "yacht:pick:blame"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "headlines": {
+      "add": [
+        {
+          "id": "yacht-fix-1",
+          "trigger": "priceFixing",
+          "text": "Six labs raise API prices by exactly 3% at exactly 9:00; they call it \"a coincidence of vibes\"",
+          "tone": "joke"
+        },
+        {
+          "id": "yacht-fix-2",
+          "trigger": "priceFixing",
+          "text": "Antitrust regulators ask to question the yacht; the yacht declines to disembark",
+          "tone": "joke"
+        },
+        {
+          "id": "yacht-fix-3",
+          "trigger": "priceFixing",
+          "text": "The industry salary cap turns out to be a single emoji: 🤝",
+          "tone": "joke"
+        },
+        {
+          "id": "yacht-fix-4",
+          "trigger": "priceFixing",
+          "text": "Leaked memo renames \"price fixing\" to \"price aligning\", for safety",
+          "tone": "joke"
+        },
+        {
+          "id": "yacht-fix-5",
+          "trigger": "priceFixing",
+          "text": "Rival labs' \"independent\" pricing pages all share the same typo",
+          "tone": "joke"
+        },
+        {
+          "id": "yacht-fix-6",
+          "trigger": "priceFixing",
+          "text": "Researchers form a union; it meets on a slightly smaller yacht",
+          "tone": "joke"
+        },
+        {
+          "id": "yacht-fix-7",
+          "trigger": "priceFixing",
+          "text": "Yacht spotted drifting in circles; analysts call it \"the market\"",
+          "tone": "joke"
+        },
+        {
+          "id": "yacht-fix-8",
+          "trigger": "priceFixing",
+          "text": "\"We do not coordinate,\" say six labs, in unison",
+          "tone": "joke"
+        }
+      ]
+    }
+  },
+  "rules": {
+    "yacht": {
+      "yachtName": "MY Fiduciary Duty",
+      "groupName": "Frontier Friends ⛵",
+      "chat": {
+        "signed": [
+          {
+            "from": "metameta",
+            "time": "21:02",
+            "text": "ok so we're agreed. researcher pay capped at \"reasonable\""
+          },
+          {
+            "from": "openish",
+            "time": "21:03",
+            "text": "define reasonable"
+          },
+          {
+            "from": "supersuper",
+            "time": "21:03",
+            "text": "whatever we paid in 2019. minus vibes"
+          },
+          {
+            "from": "sirocco",
+            "time": "21:04",
+            "text": "non-binding obviously 😇"
+          },
+          {
+            "from": "you",
+            "time": "21:04",
+            "text": "👍"
+          },
+          {
+            "from": "anthro",
+            "time": "21:06",
+            "text": "reminder: this chat is covered by yacht-client privilege"
+          },
+          {
+            "from": "macrohard",
+            "time": "21:06",
+            "text": "is that a thing"
+          },
+          {
+            "from": "anthro",
+            "time": "21:07",
+            "text": "it is on a yacht"
+          },
+          {
+            "from": "yacht",
+            "time": "21:09",
+            "text": "⚓ please leave me out of this"
+          },
+          {
+            "from": "metameta",
+            "time": "21:10",
+            "text": "delete this chat after reading"
+          }
+        ],
+        "declined": [
+          {
+            "from": "metameta",
+            "time": "21:02",
+            "text": "did {lab} ever rsvp"
+          },
+          {
+            "from": "sirocco",
+            "time": "21:02",
+            "text": "they said seasick lol"
+          },
+          {
+            "from": "supersuper",
+            "time": "21:03",
+            "text": "cap applies to them anyway. adding them"
+          },
+          {
+            "from": "system",
+            "time": "21:03",
+            "text": "{lab} was added to the group"
+          },
+          {
+            "from": "openish",
+            "time": "21:04",
+            "text": "welcome aboard!! (figuratively)"
+          },
+          {
+            "from": "you",
+            "time": "21:05",
+            "text": "who is this"
+          },
+          {
+            "from": "anthro",
+            "time": "21:06",
+            "text": "reminder: this chat is covered by yacht-client privilege"
+          },
+          {
+            "from": "yacht",
+            "time": "21:09",
+            "text": "⚓ please leave me out of this"
+          },
+          {
+            "from": "metameta",
+            "time": "21:10",
+            "text": "delete this chat after reading"
+          }
+        ]
+      },
+      "ticker": {
+        "days": 40,
+        "every": 5
+      }
+    }
+  }
+}

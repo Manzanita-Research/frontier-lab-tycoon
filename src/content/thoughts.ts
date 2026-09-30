@@ -3,6 +3,7 @@
 import type { WalkerKind } from "../sim/types";
 import { NIGHT_THOUGHTS } from "./night";
 import { RACE_THOUGHTS, type RaceThoughtCondition } from "./raceThoughts";
+import { ENDING_RULES } from "../sim/endings/pack";
 
 export type ThoughtCondition =
   | "always"
@@ -20,7 +21,10 @@ export type ThoughtCondition =
   /** After dark: the lamps are on and someone is still at it (content/night.ts). */
   | "night"
   /** The race: the current era, an open-weights drop, an unpowered datacenter, the top of the Arena. */
-  | RaceThoughtCondition;
+  | RaceThoughtCondition
+  /** The Memo came back ticked RACE, or SLOW DOWN (FLT-57; the lines are the endings pack's). */
+  | "memoRace"
+  | "memoSlow";
 
 export interface ThoughtLine {
   kind: WalkerKind;
@@ -39,11 +43,11 @@ export const THOUGHTS: ThoughtLine[] = [
   t("researcher", "always", "Someone renamed the eval 'vibes-bench'. It's the only one we pass."),
   t("researcher", "always", "Reviewer 2 asked whether we tried 'making it bigger'."),
   t("researcher", "always", "I'm not saying the model is sentient. It just hasn't replied since Tuesday."),
-  t("researcher", "always", "Standup took 4 minutes. The Slack thread about standup took 4 hours."),
+  t("researcher", "always", "Standup took 4 minutes. The group chat about standup took 4 hours."),
   t("researcher", "always", "We're the good guys. It says so in the mission statement."),
   t("researcher", "always", "I trained on the test set. Just a little. For safety."),
   t("researcher", "always", "My manager is an agent now. Excellent listener. Terrible at Fridays."),
-  t("researcher", "noKombucha", "No kombucha. Updating my LinkedIn."),
+  t("researcher", "noKombucha", "No kombucha. Updating my résumé. Aggressively."),
   t("researcher", "noKombucha", "Where is the kombucha? I run on fermented morale."),
   t("researcher", "noKombucha", "Zero kombucha, zero productivity. Coincidence?"),
   t("researcher", "lowCash", "The runway looks short. So do my options."),
@@ -101,7 +105,7 @@ export const THOUGHTS: ThoughtLine[] = [
   t("visitor", "always", "Nice campus. Where do they keep the AGI? I have parking questions."),
   t("visitor", "highHype", "The line was three hours. Totally worth it, I assume."),
   t("visitor", "highHype", "Everyone's talking about {lab}. Nobody says what it does."),
-  t("visitor", "justReleased", "Is that the new {model}? I saw the tweet. I did not read the tweet."),
+  t("visitor", "justReleased", "Is that the new {model}? I saw the post. I did not read the post."),
   t("visitor", "lowCash", "Is this place solvent? Asking for my landlord. I mean my fund."),
   t("visitor", "unreachable", "Signs would help. Paths would help more."),
   t("visitor", "noKombucha", "No kombucha? What is this, a lab?"),
@@ -120,4 +124,6 @@ export const THOUGHTS: ThoughtLine[] = [
 
   ...NIGHT_THOUGHTS.map((n) => t(n.kind, "night", n.text)),
   ...RACE_THOUGHTS,
+  ...ENDING_RULES.memo.race.thoughts.map((l) => t(l.kind, "memoRace", l.text)),
+  ...ENDING_RULES.memo.slow.thoughts.map((l) => t(l.kind, "memoSlow", l.text)),
 ];

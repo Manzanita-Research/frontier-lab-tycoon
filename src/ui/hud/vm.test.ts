@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { BUILDINGS } from "../../content/buildings";
 import { formatMoney } from "../../sim/format";
-import { fixtureInput, fixtureWorld, FIXTURE_CHAT, FIXTURE_PAPER } from "./fixtures";
+import { fixtureEnding, fixtureInput, fixtureWorld, FIXTURE_CHAT, FIXTURE_PAPER } from "./fixtures";
+import { CALM_START_DAY } from "../../sim/disasters/driver";
 import { SKIN_API_VERSION } from "./types";
 import { hudViewModel, SHIPPED_DAYS, TICKER_ITEMS } from "./vm";
 
@@ -47,7 +48,7 @@ describe("hudViewModel", () => {
 
   it("lists the build palette with prices, hotkeys, affordability and the selected tool", () => {
     const kinds = vm.buildItems.map((b) => b.kind);
-    expect(kinds).toEqual(["path", "cluster", "hall", "gateway", "kombucha", "nap", "snack", "demo", "bulldoze", "staff"]);
+    expect(kinds).toEqual(["path", "cluster", "hall", "gateway", "kombucha", "nap", "snack", "demo", "security", "bulldoze", "staff"]);
     const cluster = vm.buildItems.find((b) => b.kind === "cluster")!;
     expect(cluster).toMatchObject({ name: BUILDINGS.cluster.name, hotkey: 2, selected: true, price: BUILDINGS.cluster.price, priceText: formatMoney(BUILDINGS.cluster.price) });
     expect(vm.buildItems.filter((b) => b.selected)).toHaveLength(1);
@@ -84,7 +85,13 @@ describe("hudViewModel", () => {
 
   it("describes the objectives", () => {
     expect(vm.objectives.total).toBe(3);
-    expect(vm.objectives.items.every((g) => g.progress.length > 0 && g.ratio >= 0 && g.ratio <= 1)).toBe(true);
+    expect(vm.objectives.items.every((g) => g.ratio >= 0 && g.ratio <= 1)).toBe(true);
+    // The release goal names the run in flight and carries its own count, so it has no separate progress line.
+    const release = vm.objectives.items.find((g) => g.id === "release")!;
+    expect(release.label).toBe(input.snap.releaseGoal);
+    expect(release.label).toMatch(/^Ship 3 models \(\d\/3\), next: /);
+    expect(release.progress).toBe("");
+    expect(vm.objectives.items.filter((g) => g.id !== "release").every((g) => g.progress.length > 0)).toBe(true);
     expect(vm.objectives.daysLeft).toBeGreaterThan(0);
   });
 
@@ -177,5 +184,307 @@ describe("hudViewModel", () => {
     const perCall = (performance.now() - t0) / 500;
     // The HUD builds one every 200 ms at most; a millisecond would already be a lot.
     expect(perCall).toBeLessThan(1);
+  });
+});
+
+describe("the spend check, the standing warnings and the release goal, as a skin sees them", () => {
+  it("shows a spend waiting for a yes or a no as plain data, and nothing when nothing waits", () => {
+    expect(hudViewModel(fixtureInput()).confirm).toBeNull();
+    const vm = hudViewModel(fixtureInput({ confirm: true }));
+    expect(vm.confirm).toEqual({ kind: "hire", cost: 4000, costText: "$4K", runwayAfter: 1.8, runwayText: "1.8 mo", message: "This leaves 1.8 months of runway. The board will have questions." });
+    assertPlain(vm.confirm);
+  });
+
+  it("carries standing warnings, and shows a toast that repeats one only once", () => {
+    const warning = "Your entrance isn't connected to any paths. Visitors are forming a very orderly queue to nowhere.";
+    const quiet = hudViewModel(fixtureInput());
+    expect(quiet.warnings).toEqual([]);
+    const input = fixtureInput({ warnings: [warning] });
+    expect(hudViewModel(input).warnings).toEqual([warning]);
+    const echoed = hudViewModel({ ...input, toasts: [{ id: 5, text: warning, tone: "bad" }] });
+    expect(echoed.toasts).toEqual([]);
+    // Other toasts are untouched.
+    expect(hudViewModel({ ...input, toasts: [{ id: 6, text: "Something else", tone: "joke" }] }).toasts.map((t) => t.text)).toEqual(["Something else"]);
+  });
+});
+
+describe("Playable v1: what the lab has earned, the coach, and Help", () => {
+  const level = (n: 1 | 2 | 3 | 4 | 5, more: Parameters<typeof fixtureInput>[0] = {}) => hudViewModel(fixtureInput({ level: n, ...more }));
+
+  it("carries no ladder as 'everything is earned': the game plays as it always did", () => {
+    // A snapshot from before the ladder (an older save, a link): none of the playable fields.
+    const input = fixtureInput();
+    const { progress: _p, coach: _c, unlockCard: _u, hud: _h, ...old } = input.snap;
+    const vm = hudViewModel({ ...input, snap: old as typeof input.snap });
+    expect(Object.values(vm.visible).every(Boolean)).toBe(true);
+    expect(vm.buildItems.map((b) => b.kind)).toContain("demo");
+    expect(vm.coach).toBeNull();
+    expect(vm.unlock).toBeNull();
+    expect(vm.progress.teasers).toEqual([]);
+    expect(vm.progress.goal.line).toBe("");
+  });
+
+  it("shows only the unlocked tools in the build panel (the bulldozer always), and teases the rest", () => {
+    const one = level(1);
+    expect(one.buildItems.map((b) => b.kind)).toEqual(["path", "cluster", "hall", "bulldoze"]);
+    expect(one.progress.teasers).toContainEqual({ label: "2 more", hint: "Ship your first model" });
+    expect(level(2).buildItems.map((b) => b.kind)).toEqual(["path", "cluster", "hall", "gateway", "kombucha", "bulldoze"]);
+    expect(level(3).buildItems.map((b) => b.kind)).toContain("staff");
+    expect(one.buildItems.map((b) => b.kind)).not.toContain("staff");
+    expect(level(5).progress.teasers).toEqual([]);
+  });
+
+  it("hires only the kinds of staff the lab has unlocked", () => {
+    expect(level(3, { staff: true }).staff.jobs.map((j) => j.job).sort()).toEqual(["janitor", "sre"]);
+    expect(level(5, { staff: true }).staff.jobs.map((j) => j.job).sort()).toEqual(["comms", "janitor", "security", "sre"]);
+  });
+
+  it("says which HUD panels exist yet, rung by rung", () => {
+    expect(Object.values(level(1).visible).some(Boolean)).toBe(false);
+    expect(level(2).visible).toMatchObject({ revenue: true, vibes: true, thoughts: false, arena: false });
+    expect(level(3).visible).toMatchObject({ thoughts: true, staff: true, arena: false, news: false });
+    expect(level(4).visible).toMatchObject({ arena: true, rnd: true, news: true, events: false });
+    expect(Object.values(level(5).visible).every(Boolean)).toBe(true);
+  });
+
+  it("puts the one goal on one line, with a ratio", () => {
+    const g = level(1).progress.goal;
+    expect(g).toMatchObject({ text: "Ship your first model", current: 0, target: 1, line: "Ship your first model · 0/1", progressText: "0/1", ratio: 0 });
+    expect(level(2).progress.goal.line).toBe("Earn $20K a day · 4000/20000");
+    expect(level(2).progress.goal.ratio).toBeCloseTo(0.2);
+  });
+
+  it("passes the coach mark and the New! card through as plain data", () => {
+    const vm = level(1, { coach: 0, unlock: true });
+    expect(vm.coach).toEqual({ id: "start", step: 1, of: 7, text: "Welcome to your lab. Everything you build starts here. Click Start.", target: "start", waitFor: "action", canSkip: true });
+    expect(vm.unlock).toMatchObject({ title: "New items available!", items: ["API Gateway", "Kombucha Bar"] });
+    assertPlain(vm.coach);
+    assertPlain(vm.unlock);
+    expect(level(1).coach).toBeNull();
+  });
+
+  it("holds the standing hints back while the coach speaks, and the Gateway hint while the Gateway is locked", () => {
+    const quiet = { toasts: [] };
+    expect(hudViewModel({ ...fixtureInput({ level: 1 }), ...quiet }).hints).toEqual(["tap"]);
+    expect(hudViewModel({ ...fixtureInput({ level: 1, coach: 1 }), ...quiet }).hints).toEqual([]);
+    expect(hudViewModel({ ...fixtureInput({ level: 2 }), ...quiet, snap: { ...fixtureInput({ level: 2 }).snap, hasGateway: false } }).hints).toEqual(["gateway"]);
+  });
+
+  it("writes Help from what is unlocked: the loop, one plain line per building, what the numbers mean", () => {
+    expect(level(1).help).toBeNull();
+    const help = level(2, { help: true }).help!;
+    expect(help.loop).toHaveLength(5);
+    expect(help.buildings.map((b) => b.kind)).toEqual(["path", "cluster", "hall", "gateway", "kombucha"]);
+    expect(help.buildings.find((b) => b.kind === "gateway")!.line).toMatch(/^API Gateway: sells your models/);
+    expect(help.buildings.map((b) => b.kind)).not.toContain("nap");
+    expect(help.numbers.map((n) => n.name)).toEqual(["Cash", "Runway", "Vibes", "Hype"]);
+    // Instructions, not jokes: the world keeps those.
+    for (const line of [...help.loop, ...help.buildings.map((b) => b.line)]) expect(line).not.toMatch(/venture capital into heat|loss goes down/i);
+  });
+});
+
+describe("the Disasters view (FLT-32)", () => {
+  const mid = hudViewModel(fixtureInput({ disaster: true, disastersOpen: true }));
+
+  it("is earned at Scrutiny: hidden before it, and the menu cannot open while it is", () => {
+    const four = hudViewModel(fixtureInput({ level: 4, disastersOpen: true }));
+    expect(four.disasters.enabled).toBe(false);
+    expect(four.disasters.open).toBe(false);
+    expect(four.buildItems.map((b) => b.kind)).not.toContain("security");
+    const five = hudViewModel(fixtureInput({ level: 5, disastersOpen: true }));
+    expect(five.disasters.enabled).toBe(true);
+    expect(five.disasters.open).toBe(true);
+    expect(five.buildItems.map((b) => b.kind)).toContain("security");
+  });
+
+  it("offers the four settings with one checked, and every disaster, greyed with a reason while it is under way", () => {
+    expect(mid.disasters.risks.map((r) => r.label)).toEqual(["Off", "Rare", "Normal", "Chaos"]);
+    expect(mid.disasters.risks.filter((r) => r.active).map((r) => r.key)).toEqual([mid.disasters.risk]);
+    const swarm = mid.disasters.menu.find((m) => m.id === "rogueSwarm")!;
+    expect(swarm).toMatchObject({ active: true, available: false });
+    expect(swarm.reason).toMatch(/under way/);
+    expect(mid.disasters.menu.find((m) => m.id === "gpuFire")).toMatchObject({ active: false, available: true });
+    for (const m of mid.disasters.menu) for (const t of m.tags) expect(t.label).not.toBe("");
+  });
+
+  it("says what is going wrong, in the game's voice, with the cleanup's progress", () => {
+    const swarm = mid.disasters.running.find((r) => r.id === "rogueSwarm")!;
+    expect(swarm.stage).toBe("response");
+    expect(swarm.phaseLabel).toBe("Cleaning up");
+    expect(swarm.line).toMatch(/revoking keys/);
+    expect(swarm.progress).toBeGreaterThan(0);
+    expect(swarm.progressText).toMatch(/^Security \d+%$/);
+    expect(mid.disasters.running.find((r) => r.id === "weightsLeak")?.phaseLabel).toBe("Lawyering");
+  });
+
+  it("names who was pulled off their post, and shouts when nobody is left", () => {
+    const sec = mid.disasters.understaffed.find((u) => u.job === "security")!;
+    expect(sec).toMatchObject({ all: true, diverted: sec.total });
+    expect(sec.text).toBe("All Security on the Rogue Agent Swarm. GATE UNGUARDED.");
+    // The map's half: who goes red, and where the swarm's cleanup is (the Security Office).
+    const snap = fixtureInput({ disaster: true }).snap;
+    expect(snap.disasters.divertedIds).toHaveLength(snap.disasters.diverted.reduce((n, d) => n + d.diverted, 0));
+    const site = snap.disasters.sites.find((x) => x.owner === "rogueSwarm" && x.job === "security")!;
+    expect(snap.buildings.find((b) => b.id === site.to)?.kind).toBe("security");
+  });
+
+  it("marks the rival running on your leaked weights in the Arena", () => {
+    const leaked = mid.arena.rows.filter((r) => r.leak);
+    expect(leaked.map((r) => r.id)).toEqual(["sirocco"]);
+    expect(leaked[0]!.title).toMatch(/leaked weights/);
+    expect(hudViewModel(fixtureInput()).arena.rows.some((r) => r.leak)).toBe(false);
+  });
+
+  it("puts a word on trust and heat", () => {
+    expect(mid.disasters.trust.text).toBe(`${mid.disasters.trust.value} · ${mid.disasters.trust.word}`);
+    expect(mid.disasters.heat.word).not.toBe("");
+  });
+
+  it("promises a calm start while the lab has shipped nothing, and says nothing about it when risk is off", () => {
+    const w = fixtureWorld();
+    w.disasters.risk = "rare";
+    w.models = [];
+    expect(hudViewModel(fixtureInput({ world: w })).disasters.calm).not.toBeNull();
+    w.disasters.risk = "off";
+    expect(hudViewModel(fixtureInput({ world: w })).disasters.calm).toBeNull();
+    expect(CALM_START_DAY).toBeGreaterThan(0);
+  });
+});
+
+describe("the discourse (FLT-33)", () => {
+  const fx = hudViewModel(fixtureInput({ factions: true, factionsOpen: true }));
+
+  it("is plain JSON, like the rest of the view-model", () => {
+    assertPlain(fx);
+    assertPlain(hudViewModel(fixtureInput({ factions: true })));
+  });
+
+  it("is off (and draws nothing) until the factions are on", () => {
+    const vm = hudViewModel(fixtureInput());
+    expect(vm.factions.enabled).toBe(false);
+    expect(vm.inspector?.faction ?? null).toBeNull();
+  });
+
+  it("gives every faction a meter, a mood in words and a reason, and says who is at the gate", () => {
+    const f = fx.factions;
+    expect(f.enabled && f.open).toBe(true);
+    expect(f.rows.length).toBeGreaterThanOrEqual(10);
+    for (const r of f.rows) {
+      expect(r.meter).toBeGreaterThanOrEqual(-100);
+      expect(r.meter).toBeLessThanOrEqual(100);
+      expect(r.meterText).toMatch(/^([+−]\d+|0)$/);
+      expect(["Fans", "Upset", "Marching", "Furious online", "Calm"]).toContain(r.moodLabel);
+    }
+    expect(f.fans + f.angry).toBeGreaterThan(0);
+    expect(f.headline).not.toBe("");
+    expect(f.stance.map((s) => s.axis)).toEqual(["speed", "safety", "openness", "fairness", "profit"]);
+    expect(f.safety.options.filter((o) => o.active)).toHaveLength(1);
+    if (f.gate.length) expect(f.gateText).toMatch(/^At the gate: \d+ /);
+  });
+
+  it("puts a schism first among the relations", () => {
+    const rel = fx.factions.relations;
+    const i = rel.findIndex((r) => r.schism);
+    if (i >= 0) expect(rel.slice(0, i).every((r) => r.schism)).toBe(true);
+    expect(rel.every((r) => r.state === "allied" || r.state === "feuding")).toBe(true);
+  });
+
+  it("chips the selected walker and every bubble said as a faction", () => {
+    expect(fx.inspector?.faction).toMatchObject({ id: expect.any(String), color: expect.stringMatching(/^#/) });
+    for (const b of fx.bubbles) if (b.faction) expect(fx.factions.rows.map((r) => r.id)).toContain(b.faction.id);
+  });
+});
+
+describe("endings (FLT-11)", () => {
+  it("shows the last front page only once it's out, as plain JSON, with the five stats and the run summary", () => {
+    const vm = hudViewModel(fixtureInput({ ending: "front-regulated", selected: null }));
+    assertPlain(vm);
+    expect(vm.outcome).toBeNull();
+    expect(vm.ending).toMatchObject({ id: "regulated", title: "Regulated Utility", keepPlaying: true });
+    expect(vm.ending!.paper.masthead).toBe("The Frontier Times");
+    expect(vm.ending!.paper.headline).not.toMatch(/\{\w+\}/);
+    expect(vm.ending!.stats.map((s) => s.key)).toEqual(["days", "vibes", "models", "protesters", "escaped"]);
+    expect(vm.ending!.summary).toContain(vm.ending!.lab);
+    expect(vm.ending!.summary).toContain(vm.ending!.strip);
+    expect(vm.ending!.share).toEqual({ status: "idle", card: null, native: false, note: null });
+    // Dismissed (Keep watching): gone.
+    expect(hudViewModel({ ...fixtureInput({ ending: "front-regulated", selected: null }), outcomeDismissed: true }).ending).toBeNull();
+    // An ordinary game: none.
+    expect(hudViewModel(fixtureInput()).ending).toBeNull();
+  }, 30_000);
+
+  it("names the manager in the title while The Takeover's autopilot builds, then says thanks", () => {
+    const vm = hudViewModel(fixtureInput({ ending: "takeover", selected: null }));
+    expect(vm.ending).toBeNull();
+    expect(vm.takeover).toMatchObject({ title: `Frontier Lab Tycoon (managed by ${vm.takeover!.manager})`, thanks: null });
+    expect(vm.takeover!.placed).toBeGreaterThanOrEqual(2);
+    expect(hudViewModel(fixtureInput({ ending: "thanks", selected: null })).takeover!.thanks).toBe("Thanks for playing. We'll take it from here.");
+  }, 30_000);
+
+  it("passes the share card and the campus photo through", () => {
+    const input = { ...fixtureInput({ ending: "front-acquihired", selected: null }), share: { photo: "data:image/webp;base64,x", status: "ready" as const, card: "blob:card", native: true, note: null } };
+    const vm = hudViewModel(input);
+    expect(vm.ending!.paper.photo).toBe("data:image/webp;base64,x");
+    expect(vm.ending!.share).toEqual({ status: "ready", card: "blob:card", native: true, note: null });
+    expect(vm.ending!.keepPlaying).toBe(false);
+  }, 30_000);
+});
+
+describe("no dead ends, streaks and friend links (FLT-57)", () => {
+  const friend = (moment: string, over: Partial<{ ending: string; day: number; vibes: number; models: number }> = {}) => ({
+    ending: "captured", day: 212, vibes: 88, models: 7, seed: fixtureEnding(moment).seed, daily: null, ...over,
+  });
+
+  it("the Acqui-hired front page offers a new lab with three perks, and a link that carries the result and nothing else", () => {
+    const vm = hudViewModel(fixtureInput({ ending: "front-acquihired", selected: null }));
+    assertPlain(vm);
+    const e = vm.ending!;
+    expect(e.next).toMatchObject({ action: "refound", label: "Found a new lab" });
+    expect(e.refound!.perks.map((p) => p.id)).toEqual(["founder", "loyal", "seed"]);
+    expect(e.labNumber).toBe(1);
+    expect(e.streak).toBeNull();
+    expect(e.versus).toBeNull();
+    const url = new URL(e.link);
+    expect([...url.searchParams.keys()]).toEqual(["seed", "vs"]);
+    expect(url.searchParams.get("vs")).toMatch(/^acquihired\.\d+\.\d+\.\d+$/);
+    expect(e.link).not.toContain(encodeURIComponent(e.lab.split(" ")[0]!));
+    expect(e.summary.split("\n").at(-1)).toBe(`Beat it: ${e.link}`);
+  });
+
+  it("a second lab says so, and the streak goes on the summary from two days up", () => {
+    const vm = hudViewModel(fixtureInput({ ending: "lab2", selected: null, social: { streak: 7 } }));
+    expect(vm.ending!.labNumber).toBe(2);
+    expect(vm.ending!.refound!.labNumber).toBe(3);
+    expect(vm.ending!.streak).toEqual({ days: 7, text: "7-day streak" });
+    expect(vm.ending!.summary).toContain("🔥 7-day streak");
+    expect(vm.ending!.summary.split("\n")[0]).toContain("Lab #2");
+    expect(hudViewModel(fixtureInput({ ending: "lab2", selected: null, social: { streak: 1 } })).ending!.streak).toBeNull();
+  });
+
+  it("a friend's challenge: a banner on their seed until it's answered, then a verdict on the front page", () => {
+    const c = friend("memo-countdown");
+    const vm = hudViewModel(fixtureInput({ ending: "memo-countdown", selected: null, social: { challenge: c, challengeOpen: true } }));
+    expect(vm.challenge).toEqual({ line: "Your friend's lab was Captured on day 212.", ask: "Beat it?", ending: "Captured", tone: "neutral", stats: "88 peak Vibes · 7 models", daily: null, cta: "Beat it" });
+    expect(hudViewModel(fixtureInput({ ending: "memo-countdown", selected: null, social: { challenge: c, challengeOpen: false } })).challenge).toBeNull();
+    // Another seed is another lab: no banner.
+    expect(hudViewModel(fixtureInput({ ending: "memo-countdown", selected: null, social: { challenge: { ...c, seed: c.seed + 1 }, challengeOpen: true } })).challenge).toBeNull();
+    // Acqui-hired (bad) beats nobody who was Regulated (neutral); against another bad ending, holding out longer wins.
+    const end = (ch: ReturnType<typeof friend>) => hudViewModel(fixtureInput({ ending: "front-acquihired", selected: null, social: { challenge: ch } })).ending!.versus!;
+    expect(end(friend("front-acquihired", { ending: "regulated" }))).toMatchObject({ verdict: "lose", text: "Your friend's lab wins. Rematch?" });
+    expect(end(friend("front-acquihired", { ending: "acquihired", day: 1 }))).toMatchObject({ verdict: "win", line: "Your friend's lab was Acqui-hired on day 1." });
+  });
+
+  it("The Memo: a countdown (hidden under the card itself), then an extra edition once, for a couple of days", () => {
+    const coming = hudViewModel(fixtureInput({ ending: "memo-countdown", selected: null })).memo!;
+    expect(coming).toMatchObject({ phase: "coming", daysLeft: 3, title: "The Memo · 3 days", line: "Legal has read it. Legal has gone home.", extra: null });
+    expect(coming.progress).toBeCloseTo(0.4);
+    expect(hudViewModel(fixtureInput({ ending: "memo", selected: null })).memo).toBeNull();
+    const extra = hudViewModel(fixtureInput({ ending: "memo-race", selected: null })).memo!;
+    expect(extra.phase).toBe("extra");
+    expect(extra.extra!.choice).toBe("Race");
+    expect(extra.extra!.reactions).toHaveLength(3);
+    expect(hudViewModel(fixtureInput({ ending: "memo-race", selected: null, social: { memoSeen: extra.key } })).memo).toBeNull();
+    const later = fixtureInput({ ending: "memo-race", selected: null });
+    expect(hudViewModel({ ...later, snap: { ...later.snap, day: later.snap.day + 3 } }).memo).toBeNull();
   });
 });

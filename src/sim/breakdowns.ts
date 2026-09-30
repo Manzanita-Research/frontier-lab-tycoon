@@ -2,7 +2,6 @@
 // breaks with chance (1 - reliability) x utilisation x 0.2. A broken building stops working (no compute, no training,
 // no revenue, nobody goes in) and burns until an SRE walks over and fixes it, which puts its reliability back to 90%.
 // If nobody does, an emergency contractor turns up after a few days and charges for it.
-import { BUILDINGS } from "../content/buildings";
 import { COMPUTE_PER_CLUSTER, COMPUTE_PER_HALL, TICKS_PER_DAY } from "./constants";
 import { formatMoney } from "./format";
 import { addIncident } from "./vibes";
@@ -10,6 +9,8 @@ import { addToast, pushNews } from "./news";
 import type { NewsTrigger } from "../content/headlines";
 import type { Rng } from "./rng";
 import type { Building, GameState } from "./types";
+import { pressureReady } from "./tutorial";
+import { defs } from "./defs";
 
 export const RELIABILITY_LOSS = 0.005;
 export const BREAKDOWN_FACTOR = 0.2;
@@ -23,8 +24,11 @@ export const CONTRACTOR_FEE = 60_000;
 /** The contractor's fix is a patch job. */
 export const CONTRACTOR_REPAIRED_TO = 0.8;
 
+/** What gives out first on the ladder, in order of preference: the funniest thing that is there. */
+const FIRST_TO_BREAK = ["kombucha", "gateway", "cluster"] as const;
+
 /** Buildings that wear out (not scenery). */
-export const wearsOut = (b: Building): boolean => !BUILDINGS[b.kind].scenery;
+export const wearsOut = (b: Building): boolean => !defs().buildings[b.kind].scenery;
 
 /** How hard a building is being worked, 0 to 1 (never below the floor): clusters by how much the halls ask of them, public buildings by how full they are. */
 export function utilisationOf(state: GameState, b: Building, halls: number, clusters: number, inside: Map<number, number>): number {
@@ -40,7 +44,7 @@ export function utilisationOf(state: GameState, b: Building, halls: number, clus
     case "solar":
       return 0.7;
     default: {
-      const cap = BUILDINGS[b.kind].capacity;
+      const cap = defs().buildings[b.kind].capacity;
       return clamp(cap > 0 ? (inside.get(b.id) ?? 0) / cap : 0);
     }
   }
@@ -60,7 +64,8 @@ export function breakBuilding(state: GameState, b: Building) {
   state.version++;
   state.flags.breakdowns = (state.flags.breakdowns ?? 0) + 1;
   state.flags.lastBreakdown = b.id;
-  addIncident(state, 0.12);
+  // Ops trouble, not a safety story: the factions do not count it (FLT-33).
+  addIncident(state, 0.12, false);
 }
 
 /** Fire in the cluster, an outage at the gateway: the headline, the status page joke, the toast, and the ripple through the crowd. */
@@ -69,7 +74,7 @@ function breakDown(state: GameState, rng: Rng, b: Building) {
   pushNews(state, rng, `breakdown:${b.kind}` as NewsTrigger);
   // The status page is never wrong, because it is never updated.
   if (b.kind === "cluster" || b.kind === "gateway" || b.kind === "hall" || b.kind === "datacenter") pushNews(state, rng, "statusPage");
-  addToast(state, `${BUILDINGS[b.kind].name} is out of order. ${state.staff.some((s) => s.job === "sre") ? "An SRE is on it." : "Hire an SRE."}`, "bad");
+  addToast(state, `${defs().buildings[b.kind].name} is out of order. ${state.staff.some((s) => s.job === "sre") ? "An SRE is on it." : "Hire an SRE."}`, "bad", { source: "ops", importance: state.staff.some((s) => s.job === "sre") ? "world" : "you" });
 }
 
 /** Put a building back in service. */
@@ -85,6 +90,15 @@ const attended = (state: GameState, b: Building) => state.staff.some((s) => s.jo
 
 /** Once a day: everything wears a little, and some of it gives out. */
 export function dailyBreakdowns(state: GameState, rng: Rng) {
+  if (!pressureReady(state)) return;
+  // On the ladder the first breakdown is a lesson, not a dice roll: a few days after SREs can be hired, the Kombucha Bar
+  // (or failing that the Gateway, or the Cluster) gives out, and nothing else breaks before it (FLT-58).
+  if (state.flags.firstBreakdownDay !== undefined && state.flags.breakdowns === undefined) {
+    if (state.day < state.flags.firstBreakdownDay) return;
+    const first = FIRST_TO_BREAK.map((kind) => state.buildings.find((b) => b.kind === kind && !b.broken)).find(Boolean);
+    if (first) breakDown(state, rng, first);
+    return;
+  }
   const inside = new Map<number, number>();
   for (const w of state.walkers) if (w.kind !== "agent" && w.machine.value === "inside") inside.set(w.targetId, (inside.get(w.targetId) ?? 0) + 1);
   let halls = 0;
@@ -109,5 +123,5 @@ function callContractor(state: GameState, rng: Rng, b: Building) {
   state.cash -= CONTRACTOR_FEE;
   repairBuilding(state, b, CONTRACTOR_REPAIRED_TO);
   pushNews(state, rng, "contractor", { amount: formatMoney(CONTRACTOR_FEE) });
-  addToast(state, `A contractor fixed the ${BUILDINGS[b.kind].name} for ${formatMoney(CONTRACTOR_FEE)}. It was a wire. An SRE is $4K a day.`, "bad");
+  addToast(state, `A contractor fixed the ${defs().buildings[b.kind].name} for ${formatMoney(CONTRACTOR_FEE)}. It was a wire. An SRE is $4K a day.`, "bad", { source: "ops" });
 }

@@ -1,4 +1,5 @@
 import { sim } from "../../app/game";
+import { memberById } from "../../sim/groups";
 import { HALF } from "../../render/coords";
 import { Anchored } from "../../render/overlay";
 import { useSlots } from "../../skins/context";
@@ -15,11 +16,19 @@ export function BubbleLayer({ bubbles, actions }: { bubbles: HudVM["bubbles"]; a
       {bubbles.map((b) => (
         <Anchored
           bubble
+          first={b.speech}
           key={b.id}
           pos={(out) => {
-            const w = sim.world.walkers.find((o) => o.id === b.walkerId);
-            if (!w || w.machine.value === "inside") return false;
             const a = sim.alpha;
+            const w = sim.world.walkers.find((o) => o.id === b.walkerId);
+            if (!w) {
+              // A visitor group's member (an auditor): not a walker, but the same interpolation.
+              const m = memberById(sim.world, b.walkerId)?.member;
+              if (!m) return false;
+              out.set(m.px + (m.x - m.px) * a - HALF, 1.25, m.pz + (m.z - m.pz) * a - HALF);
+              return true;
+            }
+            if (w.machine.value === "inside") return false;
             out.set(w.px + (w.x - w.px) * a - HALF, w.kind === "agent" ? 0.95 : 1.1, w.pz + (w.z - w.pz) * a - HALF);
             return true;
           }}

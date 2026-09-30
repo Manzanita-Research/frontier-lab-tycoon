@@ -1,4 +1,4 @@
-import { RIVAL_BY_ID, type RivalId } from "../../../content/rivals";
+import type { RivalId } from "../../../content/rivals";
 import { fillTemplate } from "../../format";
 import { initialStored, step } from "../../machines/run";
 import { addNews, addToast } from "../../news";
@@ -8,8 +8,9 @@ import { eraOfState } from "../race";
 import { rivalMachine } from "../rival";
 import { P, PAPERS_PACK, pool } from "./content";
 import { policyMachine, type PublicationPolicy } from "./policy";
-import { publicationMachine } from "./publication";
+import { dayPaper, publicationMachine } from "./publication";
 import { createPapers, type Paper } from "./state";
+import { defs } from "../../defs";
 
 function announce(s: GameState, rng: Rng, trigger: string, paper?: Paper, vars: Record<string, string> = {}) {
   const lines = PAPERS_PACK.content?.headlines?.add?.filter((n) => n.trigger === `papers:${trigger}`) ?? [];
@@ -18,7 +19,7 @@ function announce(s: GameState, rng: Rng, trigger: string, paper?: Paper, vars: 
   const text = fillTemplate(line.text, { lab: s.labName, title: paper?.title ?? "", authors: String(paper?.authors ?? 0),
     venue: paper?.venue ?? "", days: String(P.reviewDays), ...vars });
   addNews(s, text, line.tone);
-  addToast(s, text, line.tone);
+  addToast(s, text, line.tone, { source: "papers" });
 }
 
 function updatePull(s: GameState) {
@@ -135,14 +136,14 @@ export function dailyPapers(s: GameState, rng: Rng) {
       ? s.race.rivals[Math.min(s.race.rivals.length - 1, Math.floor(scoopRoll / P.scoopChance * s.race.rivals.length))]!.context.id : "";
     const eligible = paper.machine.value === "review" && s.day === ctx.dueDay && ctx.importance >= P.awardImportance && !ctx.scoopedBy;
     const award = eligible && awardRoll < P.awardChance ? rng.pick(pool("awards")) : "";
-    const result = step(publicationMachine, paper.machine, { type: "DAY", day: s.day, scoopRival, scoopValue: P.scoopValue, award,
+    const result = dayPaper(paper.machine, { day: s.day, scoopRival, scoopValue: P.scoopValue, award,
       citationGain: Math.max(0, Math.floor(P.citationsPerImportance * ctx.value * (0.5 + citationRoll))), critiqueValue: P.critiqueValue });
     paper.machine = result.stored;
     for (const e of result.effects) {
       if (e.type === "PUBLISHED") published(s, rng, paper, e.review);
       else if (e.type === "SCOOPED") {
         ps.scoops++;
-        announce(s, rng, "scoop", paper, { rival: RIVAL_BY_ID[e.rival as RivalId]?.name ?? e.rival });
+        announce(s, rng, "scoop", paper, { rival: defs().rivalById[e.rival as RivalId]?.name ?? e.rival });
       } else if (e.type === "AWARDED") {
         ps.awards++;
         ps.reputation += P.awardReputation * paper.machine.context.value;

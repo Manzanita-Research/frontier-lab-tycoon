@@ -5,11 +5,11 @@ import { Stats } from "./stats";
 import { Objectives, Training } from "./queue";
 import { Inspector } from "./card";
 import { BuildBar } from "./tray";
-import { NewsArrival, NewsControls, PhotoButton, Speed } from "./deck";
+import { DramaButton, NewsArrival, NewsControls, PhotoButton, Speed } from "./deck";
 import { Ticker } from "./ticker";
 import { Bubble, Toast } from "./toast";
 import { EraCard, EventCard, Livestream, Outcome } from "./cards";
 import { Benchmarks, Voice } from "./board";
 
-const slots: SkinSlots = { Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Bubble, Ticker, Toast, EventCard, Livestream, Benchmarks, Voice, EraCard, Outcome, NewsControls, NewsArrival, PhotoButton };
+const slots: SkinSlots = { Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Bubble, Ticker, Toast, EventCard, Livestream, Benchmarks, Voice, EraCard, Outcome, NewsControls, NewsArrival, PhotoButton, DramaButton };
 export default slots;

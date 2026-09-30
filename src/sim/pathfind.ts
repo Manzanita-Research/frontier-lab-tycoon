@@ -29,6 +29,21 @@ export function rectsOverlap(a: Rect, b: Rect): boolean {
   return a.x < b.x + b.w && b.x < a.x + a.w && a.z < b.z + b.d && b.z < a.z + a.d;
 }
 
+/** The front of the entrance is always reserved, even if its paths are bulldozed. */
+export function gateAccessTiles(s: GameState): Tile[] {
+  return Array.from({ length: s.gate.w }, (_, i): Tile => [s.gate.x + i, s.gate.z - 1]);
+}
+
+export function entranceConnected(s: GameState): boolean {
+  return getReach(s).connected;
+}
+
+/** A little deterministic amble across the two reserved entrance tiles; no random draws or teleporting. */
+export function gateAmble(s: GameState, id: number): Point[] {
+  const angle = id * 2.399963229728653 + Math.floor(s.tick / 12) * 0.7;
+  return [[s.gate.x + s.gate.w / 2 + Math.cos(angle) * 0.75, s.gate.z - 0.5 + Math.sin(angle) * 0.38]];
+}
+
 export function buildingAt(s: GameState, x: number, z: number): Building | undefined {
   return s.buildings.find((b) => rectContains(b, x, z));
 }
@@ -62,33 +77,53 @@ const NEIGHBORS: Tile[] = [
   [0, -1],
 ];
 
+// bfsRoute's scratch, reused from call to call: a tile is seen when its stamp is this call's.
+let stamps = new Int32Array(0);
+let parents = new Int32Array(0);
+let queue = new Int32Array(0);
+let stamp = 0;
+const DX = [1, -1, 0, 0];
+const DZ = [0, 0, 1, -1];
+
 /** Shortest path-tile route from start to the nearest goal tile, inclusive of both. */
 export function bfsRoute(s: GameState, start: Tile, goals: Set<number>): Tile[] | null {
   if (!isPathTile(s, start[0], start[1])) return null;
-  const n = s.grid.w * s.grid.h;
-  const parent = new Int32Array(n).fill(-2);
-  const queue = new Int32Array(n);
+  const { w, h, paths } = s.grid;
+  const n = w * h;
+  if (stamps.length < n) {
+    stamps = new Int32Array(n);
+    parents = new Int32Array(n);
+    queue = new Int32Array(n);
+    stamp = 0;
+  }
+  if (++stamp === 0x7fffffff) {
+    stamps.fill(0);
+    stamp = 1;
+  }
   let head = 0;
   let tail = 0;
   const startIdx = tileIndex(s, start[0], start[1]);
-  parent[startIdx] = -1;
+  stamps[startIdx] = stamp;
+  parents[startIdx] = -1;
   queue[tail++] = startIdx;
   while (head < tail) {
     const cur = queue[head++]!;
     if (goals.has(cur)) {
       const route: Tile[] = [];
-      for (let i = cur; i !== -1; i = parent[i]!) route.push([i % s.grid.w, Math.floor(i / s.grid.w)]);
+      for (let i = cur; i !== -1; i = parents[i]!) route.push([i % w, Math.floor(i / w)]);
       return route.reverse();
     }
-    const cx = cur % s.grid.w;
-    const cz = Math.floor(cur / s.grid.w);
-    for (const [dx, dz] of NEIGHBORS) {
-      const nx = cx + dx;
-      const nz = cz + dz;
-      if (!isPathTile(s, nx, nz)) continue;
-      const ni = tileIndex(s, nx, nz);
-      if (parent[ni] !== -2) continue;
-      parent[ni] = cur;
+    const cx = cur % w;
+    const cz = Math.floor(cur / w);
+    // NEIGHBORS' order, by index: destructuring each pair walked the array iterator (FLT-39).
+    for (let k = 0; k < 4; k++) {
+      const nx = cx + DX[k]!;
+      const nz = cz + DZ[k]!;
+      if (nx < 0 || nz < 0 || nx >= w || nz >= h) continue;
+      const ni = nz * w + nx;
+      if (paths[ni] !== true || stamps[ni] === stamp) continue;
+      stamps[ni] = stamp;
+      parents[ni] = cur;
       queue[tail++] = ni;
     }
   }
@@ -127,6 +162,7 @@ export interface Reach {
   tiles: Uint8Array;
   /** Ids of buildings with an entrance connected to the gate. */
   buildings: Set<number>;
+  connected: boolean;
 }
 
 const reachCache = new WeakMap<GameState, Reach>();
@@ -137,13 +173,15 @@ export function getReach(s: GameState): Reach {
   if (cached && cached.version === s.version) return cached;
   const tiles = floodFill(
     s,
-    entrances(s, s.gate).map((e): Tile => [e.x, e.z]),
+    gateAccessTiles(s).filter(([x, z]) => !buildingAt(s, x, z)),
   );
   const buildings = new Set<number>();
   for (const b of s.buildings) {
     if (entrances(s, b).some((e) => tiles[tileIndex(s, e.x, e.z)])) buildings.add(b.id);
   }
-  const reach: Reach = { version: s.version, tiles, buildings };
+  const mouths = new Set(gateAccessTiles(s).map(([x, z]) => tileIndex(s, x, z)));
+  const connected = tiles.some((on, i) => !!on && !mouths.has(i));
+  const reach: Reach = { version: s.version, tiles, buildings, connected };
   reachCache.set(s, reach);
   return reach;
 }
@@ -179,17 +217,39 @@ export function nearestPathTile(s: GameState, x: number, z: number): Tile | null
  * Waypoints from a position to a building (or the gate): tile centres along the
  * path, then a last "door" point just inside the wall. Null when there is no route.
  */
+// Destination geometry only changes with the World version. Keep route templates outside
+// the persisted sim and hand each walker its own mutable waypoint list.
+// A route reads nothing but the path tiles and the target's footprint (the cache is per footprint object), and most
+// new versions leave the paths alone (a breakdown, a repair, a card): those keep the routes (FLT-39).
+const rectRoutes = new WeakMap<GameState, { version: number; w: number; paths: boolean[]; targets: WeakMap<Rect, Map<number | string, Point[] | null>> }>();
+const samePaths = (a: boolean[], b: boolean[]) => {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+  return true;
+};
 export function routeToRect(s: GameState, fromX: number, fromZ: number, target: Rect, isGate = false): Point[] | null {
+  let cache = rectRoutes.get(s);
+  if (cache && cache.version !== s.version && cache.w === s.grid.w && samePaths(cache.paths, s.grid.paths)) cache.version = s.version;
+  if (!cache || cache.version !== s.version) {
+    cache = { version: s.version, w: s.grid.w, paths: s.grid.paths.slice(), targets: new WeakMap() };
+    rectRoutes.set(s, cache);
+  }
+  let routes = cache.targets.get(target);
+  if (!routes) { routes = new Map(); cache.targets.set(target, routes); }
+  const fx = Math.floor(fromX), fz = Math.floor(fromZ);
+  const key = inBounds(s, fx, fz) ? tileIndex(s, fx, fz) * 2 + Number(isGate) : `${fx},${fz},${Number(isGate)}`;
+  if (routes.has(key)) return routes.get(key)?.map(([x, z]): Point => [x, z]) ?? null;
   const ents = entrances(s, target);
-  if (ents.length === 0) return null;
+  if (ents.length === 0) { routes.set(key, null); return null; }
   const goals = new Set(ents.map((e) => tileIndex(s, e.x, e.z)));
   const tiles = bfsRoute(s, [Math.floor(fromX), Math.floor(fromZ)], goals);
-  if (!tiles) return null;
+  if (!tiles) { routes.set(key, null); return null; }
   const points: Point[] = tiles.map(([x, z]) => [x + 0.5, z + 0.5]);
   const last = tiles[tiles.length - 1]!;
   const edge = ents.find((e) => e.x === last[0] && e.z === last[1])!;
   const reach = isGate ? 0.9 : 0.4;
   points.push([last[0] + 0.5 + edge.dx * reach, last[1] + 0.5 + edge.dz * reach]);
+  routes.set(key, points.map(([x, z]): Point => [x, z]));
   return points;
 }
 

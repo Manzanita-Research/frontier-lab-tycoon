@@ -1,0 +1,178 @@
+{
+  "apiVersion": 1,
+  "id": "drama-2026-09-29",
+  "name": "Daily Drama: The Perk Arms Race",
+  "version": "1.0.0",
+  "author": "Daily Drama (fixture)",
+  "description": "The labs stop competing on models and start competing on snacks. By Friday, one of them is offering a moon.",
+  "content": {
+    "events": {
+      "add": [
+        {
+          "id": "drama-2026-09-29-perks",
+          "title": "Your Researchers Have Seen the Other Lab's Snack Wall",
+          "body": "Across the road, MetaMeta put in a sushi conveyor belt that loops through a ball pit.\nThree of your researchers are 'just popping over for lunch'.",
+          "tone": "joke",
+          "when": {
+            "stat": "day",
+            "atLeast": 20
+          },
+          "choices": [
+            {
+              "label": "Match it: a conveyor belt, but for kombucha",
+              "hint": "Costs $3,000, Hype +3",
+              "effects": [
+                {
+                  "type": "cash",
+                  "amount": -3000
+                },
+                {
+                  "type": "hype",
+                  "amount": 3
+                },
+                {
+                  "type": "news",
+                  "text": "Lab installs kombucha conveyor belt; nobody has reached the end of it",
+                  "tone": "joke"
+                }
+              ]
+            },
+            {
+              "label": "Offer equity in the kombucha",
+              "hint": "Hype +1, Discourse +1",
+              "effects": [
+                {
+                  "type": "hype",
+                  "amount": 1
+                },
+                {
+                  "type": "discourse",
+                  "add": 1
+                },
+                {
+                  "type": "thought",
+                  "text": "My vesting schedule is measured in scobies now.",
+                  "count": 3,
+                  "kind": "researcher"
+                }
+              ]
+            },
+            {
+              "label": "Remind everyone our snacks are free too",
+              "hint": "Hype -2",
+              "effects": [
+                {
+                  "type": "hype",
+                  "amount": -2
+                },
+                {
+                  "type": "news",
+                  "text": "Lab reminds staff its snacks are free; staff remind lab they are also stale",
+                  "tone": "joke"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "headlines": {
+      "add": [
+        {
+          "id": "drama-2026-09-29-h1",
+          "text": "MetaMeta offers researchers a private chef, a private gym and a private moon (moon pending)",
+          "tone": "joke"
+        },
+        {
+          "id": "drama-2026-09-29-h2",
+          "text": "Open-ish AI answers with unlimited nap pods; output flat, dreams 40% more agentic",
+          "tone": "joke"
+        },
+        {
+          "id": "drama-2026-09-29-h3",
+          "text": "Anthropomorphic's only perk is a sincere handwritten letter about your potential; three researchers cry",
+          "tone": "joke"
+        },
+        {
+          "id": "drama-2026-09-29-h4",
+          "text": "Super Super AI hires zero researchers, offers each of them a castle anyway",
+          "tone": "joke"
+        },
+        {
+          "id": "drama-2026-09-29-h5",
+          "text": "Macrohard bundles a free massage chair with every spreadsheet licence",
+          "tone": "joke"
+        },
+        {
+          "id": "drama-2026-09-29-h6",
+          "text": "Sirocco open-sources its snack wall; by 3am it has been forked into a smoothie bar",
+          "tone": "joke"
+        },
+        {
+          "id": "drama-2026-09-29-h7",
+          "text": "Recruiter: 'Pay is table stakes now. Candidates ask about the ball pit first.'",
+          "tone": "joke"
+        },
+        {
+          "id": "drama-2026-09-29-h8",
+          "text": "Industry now spends more on oat milk than on chips, say analysts (the analysts are rounding)",
+          "tone": "joke"
+        }
+      ]
+    },
+    "thoughts": {
+      "add": [
+        {
+          "id": "drama-2026-09-29-t1",
+          "kind": "researcher",
+          "when": "always",
+          "text": "Got a counteroffer in the form of a golden retriever. I'm listening."
+        },
+        {
+          "id": "drama-2026-09-29-t2",
+          "kind": "researcher",
+          "when": "lowCash",
+          "text": "Our perk is 'the mission'. Their perk is a sushi conveyor belt."
+        },
+        {
+          "id": "drama-2026-09-29-t3",
+          "kind": "researcher",
+          "when": "night",
+          "text": "3am. Touring the other lab's nap pods, for research."
+        },
+        {
+          "id": "drama-2026-09-29-t4",
+          "kind": "visitor",
+          "when": "highHype",
+          "text": "I'm not here to invest. I'm here for the snack wall."
+        },
+        {
+          "id": "drama-2026-09-29-t5",
+          "kind": "agent",
+          "when": "training",
+          "text": "They offered me a nap pod. I don't sleep. I took it anyway."
+        },
+        {
+          "id": "drama-2026-09-29-t6",
+          "kind": "protester",
+          "when": "protest",
+          "text": "My sign says END THE PERK WAR. I'm also here for the free coffee."
+        },
+        {
+          "id": "drama-2026-09-29-t7",
+          "kind": "researcher",
+          "when": "justReleased",
+          "text": "We shipped. Do we get the moon now?"
+        }
+      ]
+    },
+    "rivals": {
+      "override": [
+        {
+          "id": "metameta",
+          "tagline": "Poaches with $100M offers and a moon (pending)."
+        }
+      ]
+    }
+  }
+}

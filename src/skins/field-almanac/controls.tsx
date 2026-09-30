@@ -1,15 +1,16 @@
 import { useState } from "react";
-import { useT } from "../kit";
+import { ALL_VISIBLE, DramaIcon, useCoach, useT } from "../kit";
 import type { SlotPropsMap } from "../types";
 import { BubbleIcon, Caret, LeafIcon, LensIcon, LetterIcon, MixerIcon, PauseIcon, SoundIcon } from "./icons";
 
 /** Pause, 1×, 3×, 10× as round-ended buttons; the one that is running is ink. (The Layout puts the lens beside them.) */
 export function Speed({ speed, actions }: SlotPropsMap["Speed"]) {
   const t = useT();
+  const coach = useCoach();
   return (
     <div className="fa-speed" role="group" aria-label={t("speed.label")}>
       {speed.options.map((o) => (
-        <button key={o.value} className={o.active ? "on" : ""} onClick={() => actions.setSpeed(o.value)} aria-label={t(o.key)} aria-pressed={o.active}>
+        <button key={o.value} className={o.active ? "on" : ""} {...(o.value === 3 ? coach.attrs("speed") : {})} onClick={() => actions.setSpeed(o.value)} aria-label={t(o.key)} aria-pressed={o.active}>
           {o.value === 0 ? <PauseIcon /> : t(`speed.short.${o.value}`)}
         </button>
       ))}
@@ -29,15 +30,17 @@ export function PhotoButton({ photo, actions }: SlotPropsMap["PhotoButton"]) {
 }
 
 /** The reading room (the News Room, with its unread count), the sound switch, the mixer and the way to the skin picker. */
-export function NewsControls({ newsroom, sound, skins, actions }: SlotPropsMap["NewsControls"]) {
+export function NewsControls({ newsroom, sound, skins, visible = ALL_VISIBLE, actions }: SlotPropsMap["NewsControls"]) {
   const t = useT();
   return (
     <div className="fa-tools fa-paper" role="group">
-      <button className="wide" onClick={() => actions.openNews()} aria-label={t("news.open")}>
-        <LetterIcon />
-        <span>{t("news.button")}</span>
-        {newsroom.unread > 0 && <b className="fa-unread">{newsroom.unread}</b>}
-      </button>
+      {visible.news && (
+        <button className="wide" onClick={() => actions.openNews()} aria-label={t("news.open")}>
+          <LetterIcon />
+          <span>{t("news.button")}</span>
+          {newsroom.unread > 0 && <b className="fa-unread">{newsroom.unread}</b>}
+        </button>
+      )}
       <button onClick={() => actions.setMuted(!sound.muted)} aria-label={sound.muted ? t("sound.unmute") : t("sound.mute")} aria-pressed={sound.muted}>
         <SoundIcon muted={sound.muted} />
       </button>
@@ -84,5 +87,19 @@ export function ThoughtsPanel({ rows, layout, actions }: SlotPropsMap["ThoughtsP
         </ul>
       )}
     </section>
+  );
+}
+
+/** Today's Drama: a slip of paper pinned under the tools. */
+export function DramaButton({ drama, actions }: SlotPropsMap["DramaButton"]) {
+  const t = useT();
+  return (
+    <div className="fa-tools fa-paper fa-drama" role="group">
+      <button className="wide" onClick={() => actions.openDrama()} aria-label={t("drama.open")}>
+        <DramaIcon size={18} stroke={2} />
+        <span>{t("drama.button")}</span>
+        {drama.on ? <b className="fa-unread">{t("drama.on")}</b> : drama.fresh && <b className="fa-unread">{t("drama.new")}</b>}
+      </button>
+    </div>
   );
 }

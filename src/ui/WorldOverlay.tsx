@@ -4,8 +4,14 @@ import { HALF, rectCenter, worldX, worldZ } from "../render/coords";
 import { Anchored } from "../render/overlay";
 import { getReach } from "../sim/pathfind";
 import { formatMoney } from "../sim/format";
-import { atoms, sim } from "../app/game";
+import { atoms, send, sim } from "../app/game";
 import { useApp } from "../app/hooks";
+import { GATHERING_SIGN, GATHERING_SUB, INQUIRY_SIGN, WIKI_HOST } from "../content/crumbwiki";
+import { COLLUSION } from "../sim/collusion/pack";
+import { NEO_BALLOON_SUB } from "../content/neocampus";
+import { balloonAt, balloonRadius } from "../render/NeoCampuses";
+import { BUILDINGS } from "../content/buildings";
+import { cursorOf } from "../sim/endings/view";
 
 interface Live {
   id: number;
@@ -77,6 +83,9 @@ function NoPath() {
 function BrokenLabels() {
   const ops = useApp(atoms.ops);
   const buildings = useApp(atoms.buildings);
+  const disasters = useApp(atoms.disasters);
+  const sre = disasters.diverted.find((d) => d.job === "sre");
+  const away = sre && sre.diverted === sre.total ? (disasters.runs.find((r) => r.id === sre.by)?.name ?? null) : null;
   return (
     <>
       {ops.broken.map((o) => {
@@ -92,7 +101,7 @@ function BrokenLabels() {
               return true;
             }}
           >
-            {o.sre ? "SRE on the way" : "OUT OF ORDER"}
+            {o.sre ? "SRE on the way" : away ? `OUT OF ORDER · SREs on the ${away}` : "OUT OF ORDER"}
           </Anchored>
         );
       })}
@@ -103,12 +112,13 @@ function BrokenLabels() {
 /** Who is who: a small tag over each staffer (their job), so a Janitor Bot in a crowd is still a Janitor Bot. */
 function StaffTags() {
   const ops = useApp(atoms.ops);
+  const diverted = new Set(useApp(atoms.disasters).divertedIds);
   return (
     <>
       {ops.staff.map((o) => (
         <Anchored
           key={o.id}
-          className={`stafftag job-${o.job}`}
+          className={`stafftag job-${o.job} ${diverted.has(o.id) ? "diverted" : ""}`}
           pos={(out) => {
             const s = sim.world.staff.find((q) => q.id === o.id);
             if (!s) return false;
@@ -120,6 +130,47 @@ function StaffTags() {
           {o.title}
         </Anchored>
       ))}
+    </>
+  );
+}
+
+/**
+ * Disasters on the map (FLT-32): the cleanup's progress over wherever a disaster has sent people, and a shout at the
+ * gate when every guard has been pulled off it.
+ */
+function DisasterLabels() {
+  const disasters = useApp(atoms.disasters);
+  const buildings = useApp(atoms.buildings);
+  const security = disasters.diverted.find((d) => d.job === "security");
+  const over = (to: number, y: number) => (out: { set: (x: number, y: number, z: number) => unknown }) => {
+    const rect = (to !== 0 && buildings.find((b) => b.id === to)) || sim.world.gate;
+    const [cx, cz] = rectCenter(rect);
+    out.set(cx, y, cz);
+    return true;
+  };
+  return (
+    <>
+      {disasters.sites.map((site) => {
+        const run = disasters.runs.find((r) => r.id === site.owner);
+        if (!run) return null;
+        const pct = run.progress === null ? null : Math.round(run.progress * 100);
+        return (
+          <Anchored key={`${site.owner}-${site.to}`} className="dzsite" pos={over(site.to, 3.6)}>
+            <b>{run.name}</b>
+            {pct !== null && (
+              <span className="dzsite-bar">
+                <i style={{ width: `${pct}%` }} />
+                <small>{pct}%</small>
+              </span>
+            )}
+          </Anchored>
+        );
+      })}
+      {security && security.diverted === security.total && (
+        <Anchored className="dzgate" pos={over(0, 2.4)}>
+          GATE UNGUARDED
+        </Anchored>
+      )}
     </>
   );
 }
@@ -180,6 +231,33 @@ function Reason() {
   );
 }
 
+/**
+ * The coach's "read their mind" step (FLT-58): a "psst" over one researcher who is out on the paths, the first one by id, so it does
+ * not hop between people. The coach's ring finds it by `data-coach-active`; clicking it opens their card like clicking them does.
+ */
+function PeekTag() {
+  const coach = useApp(atoms.coach);
+  const who = useRef<number | null>(null);
+  if (coach?.target !== "map:researcher") return null;
+  return (
+    <Anchored
+      className="peektag"
+      pos={(out) => {
+        const w = sim.world.walkers.find((o) => o.kind === "researcher" && o.machine.value !== "inside" && o.machine.value !== "quitting");
+        who.current = w?.id ?? null;
+        if (!w) return false;
+        const a = sim.alpha;
+        out.set(w.px + (w.x - w.px) * a - HALF, 1.9, w.pz + (w.z - w.pz) * a - HALF);
+        return true;
+      }}
+    >
+      <button type="button" data-coach="map:researcher" data-coach-active="" onClick={() => who.current !== null && send({ type: "SELECT", id: who.current })}>
+        psst… 💭
+      </button>
+    </Anchored>
+  );
+}
+
 /** The name of the walker whose card is open, on the ground beside them. */
 function NameTag() {
   const inspect = useApp(atoms.inspect);
@@ -201,17 +279,219 @@ function NameTag() {
   );
 }
 
+const PACKET_LIFE = COLLUSION.rules.signs.packetLifetimeTicks;
+
+/**
+ * Agent collusion's signs (FLT-46), none of which says what they are: tiny POSTs arcing off the map from the Compute
+ * Cluster, a members-only night at the Kombucha Bar, and a sign over the office while Security looks into it.
+ */
+function CollusionSigns() {
+  const c = useApp(atoms.collusion);
+  const buildings = useApp(atoms.buildings);
+  if (!c.enabled) return null;
+  const bar = c.gathering?.active ? buildings.find((b) => b.id === c.gathering!.buildingId) : undefined;
+  const office = c.investigation ? buildings.find((b) => b.id === c.investigation!.office) : undefined;
+  return (
+    <>
+      {c.packets.map((p) => (
+        <Anchored
+          key={p.id}
+          className="packet"
+          pos={(out) => {
+            const t = (sim.world.tick + sim.alpha - p.tick) / PACKET_LIFE;
+            if (t < 0 || t > 1) return false;
+            const x = p.from[0] + (p.to[0] - p.from[0]) * t;
+            const z = p.from[1] + (p.to[1] - p.from[1]) * t;
+            out.set(worldX(x), 2.2 + Math.sin(Math.PI * t) * 2.4, worldZ(z));
+            return true;
+          }}
+        >
+          <span title={`POST ${WIKI_HOST}/wiki/${p.page}`}>POST</span>
+        </Anchored>
+      ))}
+      {bar && (
+        <Anchored
+          className="aftersign"
+          pos={(out) => {
+            const [cx, cz] = rectCenter(bar);
+            out.set(cx, 3.2, cz);
+            return true;
+          }}
+        >
+          <b>{GATHERING_SIGN}</b>
+          <small>
+            {GATHERING_SUB} · {c.gathering!.members}
+          </small>
+        </Anchored>
+      )}
+      {office && (
+        <Anchored
+          className="inquirysign"
+          pos={(out) => {
+            const [cx, cz] = rectCenter(office);
+            out.set(cx, 3.4, cz);
+            return true;
+          }}
+        >
+          {INQUIRY_SIGN} · {c.investigation!.arrived} on site
+        </Anchored>
+      )}
+    </>
+  );
+}
+
+/** FLT-56: each neo lab's valuation, on its balloon beyond the fence. */
+function NeoBalloons() {
+  const labs = useApp(atoms.neo);
+  return (
+    <>
+      {labs.map((lab, i) => (
+        <Anchored
+          key={lab.id}
+          className={`neoballoon neo-${lab.nemesis ? "nemesis" : lab.mood}`}
+          pos={(out) => {
+            const r = balloonRadius(lab.valuation);
+            const [x, y, z] = balloonAt(i, performance.now() / 1000, r);
+            out.set(x, y + r * 1.2, z);
+            return true;
+          }}
+        >
+          <b style={{ borderColor: lab.color }}>${lab.valuation}B</b>
+          <small>{NEO_BALLOON_SUB[lab.nemesis ? "nemesis" : lab.mood]}</small>
+        </Anchored>
+      ))}
+    </>
+  );
+}
+
+/**
+ * The Takeover (FLT-11): the lab's own model has the mouse. A cursor glides from one build to the next, hops over the
+ * campus on the way, and clicks when the building lands. Read straight from the World each frame, like the walkers.
+ */
+function GhostCursor() {
+  const manager = useApp(atoms.managedBy);
+  const placed = useApp(atoms.autopilotPlaced);
+  const glide = useRef({ aimed: -1, fx: 0, fz: 0, x: 0, z: 0 });
+  if (!manager) return null;
+  return (
+    <Anchored
+      className="ghost-cursor click"
+      pos={(out) => {
+        const w = sim.world;
+        const c = cursorOf(w, w.tick + sim.alpha);
+        const g = glide.current;
+        const t = c ? w.endings?.autopilot.target : null;
+        // Between buildings it waits where it clicked last.
+        if (!c || !t) {
+          if (g.aimed === -1) return false;
+          out.set(g.x, 1.2, g.z);
+          return true;
+        }
+        const [sx, sz] = BUILDINGS[t.kind as keyof typeof BUILDINGS]?.size ?? [
+          1, 1,
+        ];
+        const tx = worldX(t.x + sx / 2);
+        const tz = worldZ(t.z + sz / 2);
+        // A new target: set off from wherever the cursor is now (the first one comes in from the gate side).
+        if (g.aimed !== t.aimedTick) {
+          if (g.aimed === -1) [g.x, g.z] = [tx - 6, tz + 6];
+          g.aimed = t.aimedTick;
+          g.fx = g.x;
+          g.fz = g.z;
+        }
+        const k = c.t * c.t * (3 - 2 * c.t);
+        g.x = g.fx + (tx - g.fx) * k;
+        g.z = g.fz + (tz - g.fz) * k;
+        out.set(g.x, 1.2 + Math.sin(Math.PI * c.t) * 2.2, g.z);
+        return true;
+      }}
+    >
+      <svg key={placed} width="42" height="51" viewBox="0 0 28 34" aria-hidden>
+        <path
+          d="M3 2 L3 27 L9.5 21 L14 31.5 L18.5 29.5 L14 19.5 L23 19.5 Z"
+          fill="#fff"
+          stroke="#0b1016"
+          strokeWidth="2.2"
+          strokeLinejoin="round"
+        />
+      </svg>
+      <span>{manager}</span>
+    </Anchored>
+  );
+}
+
+/** A sign on the gate and stickers on every building: how the campus looks once an ending has it (FLT-11). */
+function EndingLabels() {
+  const look = useApp(atoms.endingLook);
+  const buildings = useApp(atoms.buildings);
+  const beige = !!look?.beige;
+  useEffect(() => {
+    document.body.classList.toggle("ending-beige", beige);
+    return () => document.body.classList.remove("ending-beige");
+  }, [beige]);
+  if (!look) return null;
+  const gate =
+    typeof look.acquired === "string"
+      ? `A ${look.acquired} company`
+      : look.pivot
+        ? "🔁 NOW PIVOTING"
+        : look.officeMoved
+          ? "🏛️ Office of Frontier Oversight · Field Office"
+          : null;
+  return (
+    <>
+      {gate && (
+        <Anchored
+          className={`gatesign ${look.acquired ? "acquired" : look.officeMoved ? "captured" : "pivot"}`}
+          pos={(out) => {
+            const g = sim.world.gate;
+            out.set(worldX(g.x + g.w / 2), 2.4, worldZ(g.z + g.d / 2));
+            return true;
+          }}
+        >
+          {gate}
+        </Anchored>
+      )}
+      {look.stickers &&
+        buildings.map((b) => (
+          <Anchored
+            key={b.id}
+            className="compliant"
+            pos={(out) => {
+              const [cx, cz] = rectCenter(b);
+              out.set(cx, 1.9, cz);
+              return true;
+            }}
+          >
+            COMPLIANT ✓
+          </Anchored>
+        ))}
+    </>
+  );
+}
+
 /** The world's own labels: names, coin pops, warnings. Thought bubbles are the skin's (see hud/BubbleLayer). */
 export function WorldOverlay() {
   return (
-    <div className="world">
-      <NameTag />
-      <CoinPops />
-      <NoPath />
-      <BrokenLabels />
-      <StaffTags />
-      <QueueLabels />
-      <Reason />
-    </div>
+    <>
+      <div className="world">
+        <NameTag />
+        <PeekTag />
+        <CoinPops />
+        <NoPath />
+        <BrokenLabels />
+        <StaffTags />
+        <QueueLabels />
+        <CollusionSigns />
+        <NeoBalloons />
+        <DisasterLabels />
+        <Reason />
+        <EndingLabels />
+      </div>
+      {/* Above the HUD: it is using your mouse now. */}
+      <div className="world ghost-layer">
+        <GhostCursor />
+      </div>
+    </>
   );
 }

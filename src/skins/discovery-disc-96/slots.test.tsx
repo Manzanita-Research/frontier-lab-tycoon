@@ -10,6 +10,7 @@ import { SkinProvider } from "../context";
 import { prepareSkin } from "../registry";
 import type { LoadedSkin } from "../types";
 import { firstName } from "./badge";
+import { Stamps } from "./stamps";
 import { burstPoints, STAR_POINTS } from "./art";
 
 const actions = new Proxy({}, { get: () => () => undefined }) as HudActions;
@@ -71,12 +72,26 @@ describe("Discovery Disc '96", () => {
     expect(out).toMatch(/^<div class="bubble /);
   });
 
-  it("the Build Stamps are buttons with a picture each, a price and the hotkey", () => {
-    const out = html(<slot.BuildBar items={vm.buildItems} tip={vm.buildTip} layout={vm.layout} actions={actions} />);
-    expect(out.match(/dd-stamp-art/g)?.length).toBe(vm.buildItems.length);
+  it("the Build Stamps tray is a tab you press to open (the coach's first target)", () => {
+    const out = html(<slot.BuildBar items={vm.buildItems} tip={vm.buildTip} teasers={[]} layout={vm.layout} actions={actions} />);
     expect(out).toContain("BUILD STAMPS");
+    expect(out).toContain('aria-expanded="false"');
+    expect(out).toContain('data-coach="start"');
+    expect(out).not.toContain("dd-stamp-art");
+  });
+
+  it("the open tray is buttons with a picture each, a price and the hotkey, then the locked stamps, then Help", () => {
+    const teasers = [{ label: "2 more", hint: "Ship your first model" }];
+    const out = html(<Stamps items={vm.buildItems} teasers={teasers} onPick={() => undefined} onHelp={() => undefined} actions={actions} />);
+    // One picture per stamp, one for the locked one and one for Help.
+    expect(out.match(/dd-stamp-art/g)?.length).toBe(vm.buildItems.length + 2);
     expect(out).toContain('aria-pressed="true"'); // the tool in hand
-    for (const it of vm.buildItems) if (it.hotkey !== null) expect(out).toContain(`>${it.hotkey}<`);
+    expect(out).toContain("2 more");
+    expect(out).toContain("Ship your first model");
+    for (const it of vm.buildItems) {
+      expect(out).toContain(`data-coach="build:${it.kind}"`);
+      if (it.hotkey !== null) expect(out).toContain(`>${it.hotkey}<`);
+    }
   });
 
   it("draws every icon itself: no emoji anywhere on the screen", () => {

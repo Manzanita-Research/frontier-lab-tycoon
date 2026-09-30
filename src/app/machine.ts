@@ -11,16 +11,20 @@
 import { Clock, Effect, Schema, Stream } from "effect";
 import { fromEffectEventStream, setupEffect } from "@xstate/effect";
 import type { Command } from "../sim/commands";
+import { dailySeed } from "../sim/daily";
 import type { NewsItem, OpenEvent, Outcome, Tone } from "../sim/types";
 import { Frames } from "./frames";
 import type { Snapshot, Speed, Tool, UiSelection, UiToast } from "./hud";
-import { gateToasts, newGate, type NoticeGate } from "./notices";
+import { gateToasts, mergeWire, newGate, WIRE_MAX, type NoticeGate, type WireItem } from "./notices";
 import { Sim, type SyncReport } from "./sim";
 
-export const TICKS_PER_SECOND = 10;
+/** Twenty sim ticks per day, six real seconds at 1×. */
+export const TICKS_PER_SECOND = 20 / 6;
 export const MAX_CATCHUP_TICKS = 40;
 export const SNAPSHOT_MS = 200;
 export const TOAST_MS = 5200;
+/** A batch summary is a list: it gets longer to be read. */
+export const BATCH_TOAST_MS = 9000;
 
 /** A type-only schema: the context carries these shapes as they are, with nothing to validate at runtime. */
 const opaque = <T>() => Schema.declare<T>((_value): _value is T => true);
@@ -40,10 +44,17 @@ export const AppContext = Schema.Struct({
   outcome: opaque<Outcome>(),
   /** The HUD's view of the World, refreshed at about 5 Hz. */
   snap: opaque<Snapshot>(),
+  /** The ticker: the sim's headlines with the world notices merged in (see `notices.ts`). */
   news: opaque<readonly NewsItem[]>(),
+  /** The sim's own headlines, as last published. */
+  headlines: opaque<readonly NewsItem[]>(),
+  /** The world notices the notice policy sent to the ticker, newest last. */
+  wire: opaque<readonly WireItem[]>(),
   toasts: opaque<readonly UiToast[]>(),
+  /** A camera beat is on (FLT-56): the toasts wait here, their timers not started, and come out when it ends. */
+  held: Schema.NullOr(opaque<readonly UiToast[]>()),
   toastSeq: Schema.Number,
-  /** What Release Leapfrog's launches have held back from the toast stack (see `notices.ts`). */
+  /** The `you` toasts the notice policy is holding for its window (see `notices.ts`). */
   gate: opaque<NoticeGate>(),
   /** The walker whose inspector card is open (their id), if any. */
   selected: Schema.NullOr(Schema.Number),
@@ -53,6 +64,8 @@ export const AppContext = Schema.Struct({
   highlight: Schema.NullOr(Schema.String),
   /** The staffer whose patrol zone is being painted (their id), if any: dragging on the map paints it. */
   zone: Schema.NullOr(Schema.Number),
+  /** Independently owned menus: closing one cannot resume time beneath another. */
+  overlays: opaque<readonly string[]>(),
 });
 export type AppContext = typeof AppContext.Type;
 
@@ -73,11 +86,24 @@ const outcomeHeld = (c: AppContext) => c.outcome !== "playing" && !c.outcomeDism
 export function phaseFor(c: AppContext): Phase {
   if (c.event) return ".eventOpen";
   if (outcomeHeld(c)) return ".gameOver";
-  return c.speed === 0 ? ".playing.paused" : ".playing.running";
+  return c.speed === 0 || autoPaused(c) ? ".playing.paused" : ".playing.running";
+}
+
+export const autoPaused = (c: AppContext): boolean => c.snap.firstBuildPending || !!c.snap.pendingConfirm;
+
+/** Why time is standing still, for the "Paused" indicator: null while the clock runs. A card beats the pause button, which beats the auto-pauses. */
+export type PauseReason = "card" | "player" | "tutorial" | "build" | "menu" | "inspector";
+export function pauseReasonOf(c: AppContext): PauseReason | null {
+  if (c.event || outcomeHeld(c) || c.snap.pendingConfirm) return "card";
+  if (c.speed === 0) return "player";
+  if (c.snap.firstBuildPending) return "build";
+  return null;
 }
 
 /** The same words twice are one toast (the newer replaces the older); the HUD shows only the newest, so keep just a few. */
-const addToasts = (c: AppContext, fresh: readonly UiToast[]) => ({ ...c, toasts: [...c.toasts.filter((t) => !fresh.some((f) => f.text === t.text)), ...fresh].slice(-3) });
+const merged = (old: readonly UiToast[], fresh: readonly UiToast[]) => [...old.filter((t) => !fresh.some((f) => f.text === t.text)), ...fresh].slice(-3);
+/** New toasts join the queue while a beat holds them, and the screen otherwise. */
+const addToasts = (c: AppContext, fresh: readonly UiToast[]): AppContext => (c.held ? { ...c, held: merged(c.held, fresh) } : { ...c, toasts: merged(c.toasts, fresh) });
 
 export const appMachine = setupEffect({
   schemas: {
@@ -97,7 +123,13 @@ export const appMachine = setupEffect({
       CHOOSE: Schema.Struct({ choiceIndex: Schema.Number }),
       KEEP_PLAYING: Schema.Struct({}),
       NEW_LAB: Schema.Struct({}),
+      /** Today's lab: a new lab on the date's seed ("2026-09-30"), the same campus for everyone that day. */
+      DAILY_LAB: Schema.Struct({ daily: Schema.String }),
+      /** Found a new lab (FLT-57): the sequel to the one that just ended, on a fresh seed, keeping one perk. */
+      FOUND_LAB: Schema.Struct({ perk: Schema.String }),
       TOAST: Schema.Struct({ text: Schema.String, tone: opaque<Tone>() }),
+      /** A camera beat started (on) or ended: hold the toasts off the shot, then let them out. */
+      HOLD_TOASTS: Schema.Struct({ on: Schema.Boolean }),
       /** Tap a walker (or tap away: null) to open or close the inspector. */
       SELECT: Schema.Struct({ id: Schema.NullOr(Schema.Number) }),
       /** The inspector's Follow button. */
@@ -106,6 +138,7 @@ export const appMachine = setupEffect({
       HIGHLIGHT: Schema.Struct({ key: Schema.NullOr(Schema.String) }),
       /** Start (or stop, with null) painting a staffer's patrol zone. */
       SET_ZONE: Schema.Struct({ id: Schema.NullOr(Schema.Number) }),
+      SET_OVERLAY: Schema.Struct({ id: Schema.String, open: Schema.Boolean }),
       DISMISS_TOAST: Schema.Struct({ id: Schema.Number }),
       TOAST_EXPIRED: Schema.Struct({ id: Schema.Number }),
     },
@@ -139,7 +172,10 @@ export const appMachine = setupEffect({
       Effect.gen(function* () {
         const sim = yield* Sim;
         const ms = yield* Clock.currentTimeMillis;
-        sim.reset(((ms ^ Math.imul(sim.world.seed, 2654435761)) >>> 0) || 1);
+        const daily = args.event.type === "DAILY_LAB" ? args.event.daily : null;
+        const seed = daily ? dailySeed(daily) : ((ms ^ Math.imul(sim.world.seed, 2654435761)) >>> 0) || 1;
+        if (args.event.type === "FOUND_LAB") sim.refound(seed, args.event.perk);
+        else sim.reset(seed, daily);
         const report = sim.report(true, true);
         if (report) args.self.send({ type: "SYNCED", report, now: 0 });
       }),
@@ -157,13 +193,17 @@ export const appMachine = setupEffect({
     outcome: input.first.outcome,
     snap: input.first.snap!,
     news: input.first.news ?? [],
+    headlines: input.first.news ?? [],
+    wire: [],
     toasts: input.first.toasts.slice(-3),
+    held: null,
     toastSeq: 1,
     gate: newGate(),
     selected: null,
     follow: false,
     highlight: null,
     zone: null,
+    overlays: [],
   }),
   invoke: { src: "frameLoop" },
   initial: "playing",
@@ -173,7 +213,7 @@ export const appMachine = setupEffect({
       states: {
         running: {
           // Booted with the speed at 0 (a `?speed=0` link): start paused.
-          always: ({ context }) => (context.speed === 0 ? { target: "paused" } : undefined),
+          always: ({ context }) => (context.speed === 0 || autoPaused(context) ? { target: "paused" } : undefined),
           on: {
             FRAME: (args, enq) => {
               const { context, event, actions } = args;
@@ -207,50 +247,70 @@ export const appMachine = setupEffect({
   on: {
     SYNCED: ({ context, event }, enq) => {
       const { report, now } = event;
-      // Rival launches are for the leaderboard and the ticker: only what matters to the player becomes a toast.
+      // One policy for every notice: what is about you is a toast (one per window), the world's news is for the ticker.
       const gated = gateToasts(context.gate, report.toasts, {
         now,
-        speed: context.speed,
+        day: report.snap?.day ?? context.snap.day,
         leapfrog: report.snap?.leapfrog,
         rank: report.snap ? { prev: context.snap.race.rank, next: report.snap.race.rank, top: report.snap.race.board.find((r) => r.rank === 1)?.short ?? "" } : null,
         seq: context.toastSeq,
       });
       const fresh = gated.toasts;
+      const wire = gated.wire.length > 0 ? [...context.wire, ...gated.wire].slice(-WIRE_MAX) : context.wire;
       const next: AppContext = {
         ...addToasts(context, fresh),
         gate: gated.gate,
         toastSeq: gated.seq,
         event: report.event,
         outcome: report.outcome,
+        // A new outcome is shown even if the last one was waved away (won, kept playing, and now an ending's front page).
+        outcomeDismissed: report.outcome === context.outcome ? context.outcomeDismissed : false,
         snap: report.snap ?? context.snap,
-        news: report.news ?? context.news,
+        headlines: report.news ?? context.headlines,
+        wire,
+        news: report.news || wire !== context.wire ? mergeWire(report.news ?? context.headlines, wire) : context.news,
         lastPublishAt: report.snap ? now : context.lastPublishAt,
         // The walker left the map (out the gate, or the game was reset): close the card.
         ...(report.snap && context.selected !== null && report.snap.selectedId === context.selected && report.snap.inspect === null ? { selected: null, follow: false } : {}),
         // The staffer whose zone was being painted has been let go.
         ...(report.snap && context.zone !== null && !report.snap.ops.staff.some((o) => o.id === context.zone) ? { zone: null } : {}),
       };
-      for (const t of fresh) enq.raise({ type: "TOAST_EXPIRED", id: t.id }, { id: `toast:${t.id}`, delay: TOAST_MS });
+      if (!context.held) for (const t of fresh) enq.raise({ type: "TOAST_EXPIRED", id: t.id }, { id: `toast:${t.id}`, delay: t.batch ? BATCH_TOAST_MS : TOAST_MS });
       return { context: next, target: phaseFor(next) };
     },
     SET_SPEED: ({ context, event }) => {
-      const next = { ...context, speed: event.speed };
+      // The coach asked for ▶▶ while the first model trains (FLT-58).
+      const saw = event.speed > 1 && context.snap.coach?.id === "speed";
+      const next = { ...context, speed: event.speed, queue: saw ? [...context.queue, { type: "coachSaw", what: "speed" } as const] : context.queue };
       return { context: next, target: phaseFor(next) };
     },
     TOGGLE_PAUSE: ({ context }) => {
       const next = { ...context, speed: (context.speed === 0 ? 1 : 0) as Speed };
       return { context: next, target: phaseFor(next) };
     },
-    SET_TOOL: ({ context, event }) => ({ context: { ...context, tool: context.tool === event.tool ? null : event.tool, hover: null, zone: null } }),
+    SET_TOOL: ({ context, event }) => {
+      const tool = context.tool === event.tool ? null : event.tool;
+      const queue: readonly Command[] = tool ? [...context.queue, { type: "buildPanelOpened" }] : context.queue;
+      return { context: { ...context, tool, hover: null, zone: null, queue, speed: context.snap.firstBuildPending && tool ? 1 : context.speed, lastPublishAt: 0 } };
+    },
+    SET_OVERLAY: ({ context, event }) => {
+      const overlays = context.overlays.filter((id) => id !== event.id);
+      if (event.open) overlays.push(event.id);
+      const build = event.open && /start|build|menu/.test(event.id);
+      const queue: readonly Command[] = build ? [...context.queue, { type: "buildPanelOpened" }] : context.queue;
+      const next = { ...context, overlays, queue, speed: build && context.snap.firstBuildPending ? 1 as Speed : context.speed };
+      return { context: next, target: phaseFor(next) };
+    },
     SET_ZONE: ({ context, event }) => ({ context: { ...context, zone: event.id === context.zone ? null : event.id, tool: null, hover: null } }),
     SET_HOVER: ({ context, event }) => {
       if (context.hover?.x === event.hover?.x && context.hover?.z === event.hover?.z) return;
       return { context: { ...context, hover: event.hover } };
     },
     // A player command publishes the snapshot on the very next frame, so a hire or a painted tile shows straight away.
-    COMMAND: ({ context, event }) => ({ context: { ...context, queue: [...context.queue, event.command], lastPublishAt: 0 } }),
+    COMMAND: ({ context, event }) => ({ context: { ...context, speed: event.command.type === "buildPanelOpened" && context.snap.firstBuildPending ? 1 : context.speed, queue: [...context.queue, event.command], lastPublishAt: 0 } }),
     CHOOSE: ({ context, event }) => {
-      if (!context.event) return;
+      // A greyed-out choice (a bid you can't afford) can't be taken by key either.
+      if (!context.event || context.snap.eventBlocked?.[event.choiceIndex]) return;
       const command: Command = { type: "chooseEvent", eventId: context.event.id, choiceIndex: event.choiceIndex };
       return { context: { ...context, queue: [...context.queue, command] } };
     },
@@ -259,20 +319,42 @@ export const appMachine = setupEffect({
       return { context: next, target: phaseFor(next) };
     },
     // Selection changes reset the publish timer, so the next frame publishes and the card opens straight away.
-    SELECT: ({ context, event }) => ({ context: { ...context, selected: event.id, follow: event.id === context.selected ? context.follow : false, lastPublishAt: 0 } }),
+    SELECT: ({ context, event }) => {
+      // ...and then to read somebody's mind: anybody's card counts (the sim checks it is a person, not a building).
+      const queue: readonly Command[] = event.id !== null && context.snap.coach?.id === "peek" ? [...context.queue, { type: "coachSaw", what: "mind", id: event.id }] : context.queue;
+      const next = { ...context, selected: event.id, follow: event.id === context.selected ? context.follow : false, lastPublishAt: 0, acc: 0, queue };
+      return { context: next, target: phaseFor(next) };
+    },
     SET_FOLLOW: ({ context, event }) => (context.selected === null ? undefined : { context: { ...context, follow: event.follow, lastPublishAt: 0 } }),
     HIGHLIGHT: ({ context, event }) => ({ context: { ...context, highlight: event.key === context.highlight ? null : event.key, lastPublishAt: 0 } }),
+    DAILY_LAB: (args, enq) => {
+      enq(args.actions.newLab, args);
+      return { context: freshLab(args.context), target: ".playing.running" };
+    },
+    FOUND_LAB: (args, enq) => {
+      enq(args.actions.newLab, args);
+      return { context: freshLab(args.context), target: ".playing.running" };
+    },
     NEW_LAB: (args, enq) => {
       const { context, actions } = args;
       enq(actions.newLab, args);
-      const next = { ...context, queue: [], acc: 0, toasts: [], gate: newGate(), outcomeDismissed: false, speed: 1 as Speed, tool: null, hover: null, selected: null, follow: false, highlight: null, zone: null };
-      return { context: next, target: ".playing.running" };
+      return { context: freshLab(context), target: ".playing.running" };
     },
     TOAST: ({ context, event }, enq) => {
       const id = 1_000_000 + context.toastSeq;
-      enq.raise({ type: "TOAST_EXPIRED", id }, { id: `toast:${id}`, delay: TOAST_MS });
-      const kept = context.toasts.filter((t) => t.text !== event.text).slice(-2);
-      return { context: { ...context, toasts: [...kept, { id, text: event.text, tone: event.tone }], toastSeq: context.toastSeq + 1 } };
+      if (!context.held) enq.raise({ type: "TOAST_EXPIRED", id }, { id: `toast:${id}`, delay: TOAST_MS });
+      return { context: { ...addToasts(context, [{ id, text: event.text, tone: event.tone }]), toastSeq: context.toastSeq + 1 } };
+    },
+    HOLD_TOASTS: ({ context, event }, enq) => {
+      if (event.on === !!context.held) return;
+      // On: what is showing steps off the shot with the rest of the HUD, and waits with a fresh clock.
+      if (event.on) {
+        for (const t of context.toasts) enq.cancel(`toast:${t.id}`);
+        return { context: { ...context, toasts: [], held: context.toasts } };
+      }
+      const held = context.held ?? [];
+      for (const t of held) enq.raise({ type: "TOAST_EXPIRED", id: t.id }, { id: `toast:${t.id}`, delay: t.batch ? BATCH_TOAST_MS : TOAST_MS });
+      return { context: { ...context, toasts: merged(context.toasts, held), held: null } };
     },
     DISMISS_TOAST: ({ context, event }, enq) => {
       enq.cancel(`toast:${event.id}`);
@@ -284,6 +366,9 @@ export const appMachine = setupEffect({
     },
   },
 });
+
+/** The app's side of a new lab: nothing queued, nothing selected, running at 1x. */
+const freshLab = (context: AppContext): AppContext => ({ ...context, queue: [], acc: 0, toasts: [], held: null, gate: newGate(), wire: [], headlines: [], outcomeDismissed: false, speed: 1, tool: null, hover: null, selected: null, follow: false, highlight: null, zone: null, overlays: [] });
 
 /** The selection as the sim handle wants it. */
 const uiOf = (c: AppContext): UiSelection => ({ selected: c.selected, follow: c.follow, highlight: c.highlight });

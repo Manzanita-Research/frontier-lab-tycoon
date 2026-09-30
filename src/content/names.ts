@@ -19,8 +19,8 @@ export const LAB_NAMES = [
 export const RIVALS = [
   "Anthropomorphic",
   "Open-ish AI",
-  "MetaMeta Superintelligence Labs",
-  "Very Safe Superintelligence Inc.",
+  "MetaMeta Metaintelligence Labs",
+  "Very Very Super Super Intelligence",
   "Sirocco",
   "Macrohard",
   "Vaporware Labs",
@@ -33,7 +33,7 @@ export const RIVAL_SHORT = [
   "Anthropomorphic",
   "Open-ish AI",
   "MetaMeta",
-  "Very Safe",
+  "Super Super",
   "Sirocco",
   "Macrohard",
   "Vaporware",
@@ -130,29 +130,38 @@ export interface Identity {
   pro: number;
 }
 
+/** The word pools behind the names. A mod can swap them (FLT-37); the algorithms below stay put. */
+export interface PeoplePools {
+  FIRST_NAMES: readonly string[];
+  LAST_NAMES: readonly string[];
+  RESEARCHER_ROLES: readonly string[];
+  AGENT_NICKNAMES: readonly string[];
+}
+const BASE_PEOPLE: PeoplePools = { FIRST_NAMES, LAST_NAMES, RESEARCHER_ROLES, AGENT_NICKNAMES };
+
 /** "Dr. Ada Gradient" or "Kevin Backprop", plus a job title. */
-export function researcherIdentity(rng: Rng): Identity {
-  const name = `${rng.chance(0.3) ? "Dr. " : ""}${rng.pick(FIRST_NAMES)} ${rng.pick(LAST_NAMES)}`;
-  return { name, role: rng.pick(RESEARCHER_ROLES), pro: rng.int(0, 2) };
+export function researcherIdentity(rng: Rng, pools: PeoplePools = BASE_PEOPLE): Identity {
+  const name = `${rng.chance(0.3) ? "Dr. " : ""}${rng.pick(pools.FIRST_NAMES)} ${rng.pick(pools.LAST_NAMES)}`;
+  return { name, role: rng.pick(pools.RESEARCHER_ROLES), pro: rng.int(0, 2) };
 }
 
 /** "Agent-0042 'Sparky'". `n` is the running agent number. */
-export function agentIdentity(n: number, rng: Rng): Identity {
-  return { name: `Agent-${pad4(n)} '${rng.pick(AGENT_NICKNAMES)}'`, role: "Autonomous Agent", pro: 2 };
+export function agentIdentity(n: number, rng: Rng, pools: PeoplePools = BASE_PEOPLE): Identity {
+  return { name: `Agent-${pad4(n)} '${rng.pick(pools.AGENT_NICKNAMES)}'`, role: "Autonomous Agent", pro: 2 };
 }
 
 /**
  * A visitor's name and line of work. Investors turn up more often when the lab has good vibes:
  * `vibes` is 0 to 999.
  */
-export function visitorIdentity(rng: Rng, vibes: number): Identity {
+export function visitorIdentity(rng: Rng, vibes: number, pools: PeoplePools = BASE_PEOPLE): Identity {
   const vc = 0.06 + (vibes / 999) * 0.14;
   const r = rng.next();
   const role: VisitorRole = r < vc ? "Venture Capitalist" : r < vc + (1 - vc) / 3 ? "Journalist" : r < vc + ((1 - vc) * 2) / 3 ? "Enterprise Buyer" : "Influencer";
-  return { name: `${rng.pick(FIRST_NAMES)} ${rng.pick(LAST_NAMES)}`, role, pro: rng.int(0, 2) };
+  return { name: `${rng.pick(pools.FIRST_NAMES)} ${rng.pick(pools.LAST_NAMES)}`, role, pro: rng.int(0, 2) };
 }
 
 /** A protester: a first name and the sign they were handed. */
-export function protesterIdentity(rng: Rng): Identity {
-  return { name: `${rng.pick(FIRST_NAMES)} ${rng.pick(LAST_NAMES)}`, role: "Concerned Citizen", pro: rng.int(0, 2) };
+export function protesterIdentity(rng: Rng, pools: PeoplePools = BASE_PEOPLE): Identity {
+  return { name: `${rng.pick(pools.FIRST_NAMES)} ${rng.pick(pools.LAST_NAMES)}`, role: "Concerned Citizen", pro: rng.int(0, 2) };
 }

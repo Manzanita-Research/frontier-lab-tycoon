@@ -79,6 +79,18 @@ export const benchMachine = setupEffect({
 
 export type BenchStored = Stored<typeof benchMachine>;
 
+/**
+ * The leaderboard re-read with nothing new on it (FLT-39): the same best, the same holder, below the solved line, and
+ * already in the state that best puts it in. The machine would stay put and say nothing, so the driver can skip
+ * `transition()`. Null when the machine has to decide.
+ */
+export function quietScores(stored: BenchStored, event: { best: number; holder: string }): BenchStored | null {
+  const c = stored.context;
+  if (event.best !== c.best || event.holder !== c.holder || !(event.best < c.solvedAt)) return null;
+  if (stored.value === "crowded") return stored;
+  return stored.value === "live" && event.best < c.crowdedAt ? stored : null;
+}
+
 /** A record needs to beat the old one by more than this (a rounding error is not a claim). */
 const EPS = 0.04;
 

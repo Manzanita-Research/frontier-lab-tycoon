@@ -1,0 +1,486 @@
+/*
+ * Playable v1 (FLT-50): the coach mark (dimming, ring, balloon), the build panel with its locked teasers, the one-line goal, the
+ * "New!" card and Help ▸ How to play. Everything reads tokens (--flt-*), so the tokens-only skins get all of it for free.
+ */
+
+/* ---- the coach's dimming and ring (drawn by the host, whatever the skin) ---- */
+.coach-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  animation: coach-fade var(--flt-motion-slow) var(--flt-motion-ease);
+}
+@keyframes coach-fade {
+  from {
+    opacity: 0;
+  }
+}
+.coach-ring {
+  position: fixed;
+  z-index: 41;
+  box-sizing: border-box;
+  border: 3px solid var(--flt-color-highlight);
+  border-radius: 10px;
+  pointer-events: none;
+  will-change: transform, opacity;
+  animation: coach-pulse var(--flt-motion-pulse) ease-in-out infinite;
+}
+@keyframes coach-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.55;
+  }
+}
+
+/* ---- the coach's balloon ---- */
+.coach {
+  position: fixed;
+  z-index: 44;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: min(340px, calc(100vw - 24px));
+  padding: 10px 14px 9px 10px;
+  pointer-events: auto;
+  animation: coach-in var(--flt-motion-slow) cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+@keyframes coach-in {
+  from {
+    transform: translateY(10px) scale(0.94);
+    opacity: 0;
+  }
+}
+.coach-face {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--flt-color-panelAlt);
+  border: 2px solid color-mix(in srgb, var(--flt-color-line) 30%, transparent);
+}
+.coach-body {
+  min-width: 0;
+  flex: 1;
+}
+.coach-say {
+  margin: 1px 0 6px;
+  font-size: 15.5px;
+  line-height: 1.3;
+}
+.coach-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.coach-step {
+  font-size: 12px;
+  color: var(--flt-color-textDim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.coach-skip {
+  padding: 3px 2px;
+  border: 0;
+  background: transparent;
+  color: var(--flt-color-textDim);
+  font-size: 12.5px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.coach-skip:hover {
+  color: var(--flt-color-text);
+}
+.coach button:focus-visible,
+.buildwrap button:focus-visible,
+.unlock-card button:focus-visible,
+.help-card button:focus-visible {
+  outline: 3px solid var(--flt-color-highlight);
+  outline-offset: 2px;
+}
+/* A tail toward what it points at. */
+.coach::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: var(--flt-color-panel);
+  transform: rotate(45deg);
+}
+.coach.side-right::after {
+  left: -8px;
+  top: 30px;
+  border-left: var(--flt-border-width) var(--flt-border-style) var(--flt-color-line);
+  border-bottom: var(--flt-border-width) var(--flt-border-style) var(--flt-color-line);
+}
+.coach.side-left::after {
+  right: -8px;
+  top: 30px;
+  border-right: var(--flt-border-width) var(--flt-border-style) var(--flt-color-line);
+  border-top: var(--flt-border-width) var(--flt-border-style) var(--flt-color-line);
+}
+.coach.side-top::after {
+  bottom: -8px;
+  left: 50%;
+  margin-left: -7px;
+  border-right: var(--flt-border-width) var(--flt-border-style) var(--flt-color-line);
+  border-bottom: var(--flt-border-width) var(--flt-border-style) var(--flt-color-line);
+}
+.coach.side-bottom::after {
+  top: -8px;
+  left: 50%;
+  margin-left: -7px;
+  border-left: var(--flt-border-width) var(--flt-border-style) var(--flt-color-line);
+  border-top: var(--flt-border-width) var(--flt-border-style) var(--flt-color-line);
+}
+.coach.side-none::after {
+  display: none;
+}
+
+/* ---- the build panel: one button, and what is inside ---- */
+.buildbar.bar-closed {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  overflow: visible;
+}
+.build-open,
+.build-held {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 18px;
+  border: var(--flt-border-width) var(--flt-border-style) var(--flt-color-line);
+  border-radius: var(--flt-radius-button);
+  background: var(--flt-color-accent);
+  color: var(--flt-color-accentText);
+  font-size: 16px;
+  font-weight: 900;
+  box-shadow: var(--flt-shadow-pop);
+}
+.build-open.on {
+  background: var(--flt-color-selection);
+  color: var(--flt-color-selectionText);
+}
+.build-held {
+  background: var(--flt-color-panelAlt);
+  color: var(--flt-color-text);
+  font-size: 14px;
+  padding: 0 12px;
+}
+.build-held .icon {
+  display: inline-grid;
+  width: 22px;
+  height: 22px;
+}
+.build-held .icon svg {
+  width: 100%;
+  height: 100%;
+}
+.build-held .x {
+  font-size: 20px;
+  line-height: 1;
+}
+.buildmenu {
+  width: min(560px, calc(100vw - 20px));
+  max-height: min(60vh, 520px);
+  overflow-y: auto;
+  padding: 8px;
+  animation: menu-up var(--flt-motion-base) var(--flt-motion-ease);
+}
+@keyframes menu-up {
+  from {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+}
+.buildmenu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 6px;
+}
+.buildmenu .tool {
+  width: auto;
+}
+.buildmenu .tool.locked {
+  cursor: default;
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--flt-color-line) 45%, transparent);
+  background: transparent;
+  color: var(--flt-color-textDim);
+  box-shadow: none;
+}
+.buildmenu .tool.locked .price {
+  color: var(--flt-color-textDim);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.15;
+  white-space: normal;
+}
+.buildmenu .tool.help-tool {
+  border-style: dashed;
+}
+
+/* ---- the one goal in front of you ---- */
+.goal {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  min-width: 250px;
+  padding: 8px 14px 12px 12px;
+  overflow: hidden;
+}
+.goal-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--flt-color-accent);
+  color: var(--flt-color-accentText);
+}
+.goal-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.2;
+}
+.goal-text small {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--flt-color-textDim);
+}
+.goal-text b {
+  font-size: 14px;
+}
+.goal-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 6px;
+  background: var(--flt-color-inset);
+}
+.goal-bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--flt-color-meterFrom), var(--flt-color-meterTo));
+  transition: width var(--flt-motion-slow);
+}
+
+/* ---- the "New!" card ---- */
+.unlock-card {
+  position: fixed;
+  z-index: 30;
+  top: 38%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  width: min(420px, calc(100vw - 24px));
+  padding: 0;
+  overflow: hidden;
+  pointer-events: auto;
+  animation: unlock-in var(--flt-motion-slow) cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+@keyframes unlock-in {
+  from {
+    transform: translate(-50%, -18px) scale(0.85);
+    opacity: 0;
+  }
+}
+.unlock-burst {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 72px;
+  background: var(--flt-color-accent);
+  color: var(--flt-color-accentText);
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  transform-origin: center;
+}
+.unlock-burst span {
+  display: block;
+  transform: rotate(-8deg);
+  animation: unlock-wobble 1.4s ease-in-out 0.3s 3;
+}
+@keyframes unlock-wobble {
+  50% {
+    transform: rotate(6deg) scale(1.12);
+  }
+}
+.unlock-body {
+  padding: 10px 14px 12px 0;
+}
+.unlock-body h2 {
+  margin: 0 0 2px;
+  font-size: 17px;
+}
+.unlock-body p {
+  margin: 0 0 6px;
+  font-size: 14px;
+  line-height: 1.3;
+}
+.unlock-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 10px;
+  padding: 0;
+  list-style: none;
+}
+.unlock-items li {
+  padding: 3px 10px;
+  border-radius: var(--flt-radius-pill);
+  background: var(--flt-color-panelAlt);
+  border: 2px solid color-mix(in srgb, var(--flt-color-line) 35%, transparent);
+  font-size: 13px;
+}
+.unlock-ok {
+  padding: 6px 18px;
+  border: var(--flt-border-width) var(--flt-border-style) var(--flt-color-line);
+  border-radius: var(--flt-radius-button);
+  background: var(--flt-color-accent);
+  color: var(--flt-color-accentText);
+  font-weight: 900;
+  box-shadow: var(--flt-shadow-pop);
+}
+
+/* ---- Help ▸ How to play ---- */
+.help-card {
+  --stripe: var(--flt-color-accent);
+  width: min(560px, 100%);
+}
+.help-card .card-stripe {
+  color: var(--flt-color-accentText);
+}
+.help-x {
+  border: 0;
+  background: transparent;
+  font-size: 22px;
+  line-height: 1;
+  color: inherit;
+}
+.help-body h3 {
+  margin: 14px 0 4px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--flt-color-textDim);
+}
+.help-body h3:first-child {
+  margin-top: 0;
+}
+.help-body ol,
+.help-body ul {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 15px;
+  line-height: 1.35;
+}
+.help-body li {
+  margin: 3px 0;
+}
+.help-body dl {
+  margin: 0;
+  display: grid;
+  gap: 4px;
+}
+.help-body dt {
+  display: inline;
+  font-weight: 900;
+}
+.help-body dt::after {
+  content: ":";
+}
+.help-body dd {
+  display: inline;
+  margin: 0 0 0 4px;
+  font-size: 15px;
+}
+.help-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+.help-buttons .choice {
+  flex: 1;
+}
+
+@media (max-width: 640px) {
+  .goal {
+    min-width: 0;
+    flex: 1;
+  }
+  .goal-text b {
+    font-size: 13px;
+  }
+  .coach.docked {
+    left: 8px;
+    right: 8px;
+    width: auto;
+  }
+  .coach.docked::after {
+    display: none;
+  }
+  .coach-say {
+    font-size: 14px;
+  }
+  .buildmenu {
+    max-height: 52vh;
+  }
+  .buildmenu-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .unlock-card {
+    top: 100px;
+  }
+}
+@media (pointer: coarse) {
+  .coach-skip,
+  .unlock-ok,
+  .build-open,
+  .build-held {
+    min-height: 44px;
+  }
+}
+
+/* Reduced motion: keep the ring (it is the pointer), stop it pulsing; nothing else needs to move. */
+@media (prefers-reduced-motion: reduce) {
+  .coach-ring,
+  .coach,
+  .coach-scrim,
+  .buildmenu,
+  .unlock-card,
+  .unlock-burst span {
+    animation: none;
+  }
+}
+:root[data-motion="reduced"] {
+  .coach-ring,
+  .coach,
+  .coach-scrim,
+  .buildmenu,
+  .unlock-card,
+  .unlock-burst span {
+    animation: none;
+  }
+}

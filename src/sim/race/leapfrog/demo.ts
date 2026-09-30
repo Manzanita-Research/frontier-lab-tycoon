@@ -1,7 +1,7 @@
 // Debug scenes for Release Leapfrog (`?moment=shipnow|pair|stream[:mishap]|solved`): the game is staged a moment before
 // something happens, so a link or a screenshot script lands right on it. Pure sim, deterministic, the way a player could
 // have got there; the game itself doesn't use it.
-import { LEAPFROG } from "../../../content/leapfrog";
+import { defs } from "../../defs";
 import { canPlace } from "../../commands";
 import { createRng } from "../../rng";
 import { applyNow, TICKS_PER_DAY } from "../../tick";
@@ -73,7 +73,7 @@ export function stageLeapfrog(s: GameState, moment: LeapMoment, arg = "") {
       s.day = 60;
       s.models = [...s.models, "Frontier-5-Reasoner-Pro"];
       s.capability += 14;
-      ownRelease(s, rng, { early: false, ready: 1, mishap: LEAPFROG.mishaps.some((m) => m.id === arg) ? arg : "dog" });
+      ownRelease(s, rng, { early: false, ready: 1, mishap: defs().mishaps.some((m) => m.id === arg) ? arg : "dog" });
       before(s, 61, 6);
       break;
     }

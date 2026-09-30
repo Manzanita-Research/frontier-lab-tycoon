@@ -4,6 +4,7 @@ import { debugParams } from "../../app/game";
 import type { LoadedSkin } from "../../skins/types";
 import { baseSlots } from "../../skins/base/slots";
 import { BASE_STRINGS } from "../../skins/schema";
+import type { SkinOfferVM } from "./types";
 
 /** Open on a desktop-sized screen, folded on a phone or a short window (the Arena chip toggles it either way). */
 export const arenaOpenAtom = Atom.make(typeof window === "undefined" ? true : window.innerWidth > 640 && window.innerHeight >= 800);
@@ -23,14 +24,37 @@ export interface SkinUi {
   /** Skins that were refused at load time (a bad slots.tsx, a missing font), with why. */
   refused: { id: string; errors: string[] }[];
   reducedMotion: boolean;
+  /** FLT-55: a mod's skin waiting for the player's yes or no. */
+  offer: SkinOfferVM | null;
 }
 
 // keepAlive: the boot sequence sets these before React has mounted anything, and an atom nobody subscribes to would
 // forget its value.
-export const skinUiAtom = Atom.keepAlive(Atom.make<SkinUi>({ active: "base", picker: { open: false, original: null }, refused: [], reducedMotion: false }));
+export const skinUiAtom = Atom.keepAlive(Atom.make<SkinUi>({ active: "base", picker: { open: false, original: null }, refused: [], reducedMotion: false, offer: null }));
 
 /** The skin's components and copy: what the host renders. Starts as the base until the first skin has loaded. */
 export const loadedSkinAtom = Atom.keepAlive(Atom.make<LoadedSkin>({ id: "base", name: "Base", slots: baseSlots, strings: { ...BASE_STRINGS } }));
 
+/** Is Start ▸ Settings ▸ Mods… open? UI-only state. */
+export const modsOpenAtom = Atom.make(false);
+
+/** Is Help ▸ How to play open? UI-only state. */
+export const helpOpenAtom = Atom.make(false);
+
+/** Is the Disasters menu open (FLT-32)? UI-only state. */
+export const disastersOpenAtom = Atom.make(false);
+
+/** FLT-33: is the Factions panel open? Folded to one line until you ask (a `?moment=factions` link opens it). */
+export const factionsOpenAtom = Atom.make(debugParams.moment === "factions" || debugParams.moment === "counterprotest");
+
 /** Is the Staff panel open? UI-only state, kept as an Effect atom like the rest of what React reads. */
 export const staffOpenAtom = Atom.make(false);
+
+/** Is the Papers window open? Folded to a chip until the player opens it. */
+export const papersOpenAtom = Atom.make(false);
+
+/** Paper moments and CrumbWiki reveals the player has closed this visit (their keys). */
+export const dismissedAtom = Atom.make<readonly string[]>([]);
+
+/** Is the Senate window (the Promise Tracker and the bill, FLT-22/23) open? UI-only state. */
+export const senateOpenAtom = Atom.make(false);

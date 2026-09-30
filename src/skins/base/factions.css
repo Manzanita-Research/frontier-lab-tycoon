@@ -1,0 +1,413 @@
+/* The discourse (FLT-33): the Factions panel, and the kit's faction chip, meter and stance track that any skin may use. */
+
+/* ---- kit parts ---- */
+.faction-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  padding: 1px 7px 1px 4px;
+  border: 1.5px solid var(--faction, var(--flt-color-line));
+  border-radius: 999px;
+  background: var(--flt-color-panelAlt);
+  color: var(--flt-color-text);
+  font-size: 11px;
+  line-height: 1.4;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.faction-chip i {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--faction, var(--flt-color-line));
+}
+.faction-chip b {
+  font-weight: 800;
+}
+.faction-chip em {
+  font-style: normal;
+  opacity: 0.75;
+}
+.faction-chip[data-mood="upset"] em,
+.faction-chip[data-mood="protesting"] em {
+  color: var(--bad);
+  opacity: 1;
+}
+.faction-chip[data-mood="fan"] em {
+  color: var(--good);
+  opacity: 1;
+}
+.faction-meter {
+  position: relative;
+  display: block;
+  height: 8px;
+  border: 1.5px solid var(--flt-color-line);
+  border-radius: 5px;
+  background: var(--flt-color-inset);
+  overflow: hidden;
+}
+.faction-meter::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1.5px;
+  background: var(--flt-color-line);
+}
+.faction-meter i {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--faction);
+  transition: width 0.6s ease-out;
+}
+.faction-stance {
+  display: grid;
+  grid-template-columns: 62px 1fr 62px;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+}
+.faction-stance .lo {
+  text-align: right;
+  opacity: 0.7;
+}
+.faction-stance .hi {
+  opacity: 0.7;
+}
+.faction-stance .track {
+  position: relative;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--flt-color-inset);
+  border: 1px solid var(--flt-color-line);
+}
+.faction-stance .track i {
+  position: absolute;
+  top: 50%;
+  width: 11px;
+  height: 11px;
+  margin: -5.5px 0 0 -5.5px;
+  border: 2px solid var(--flt-color-line);
+  border-radius: 50%;
+  background: var(--orange);
+  transition: left 0.6s ease-out;
+}
+
+/* ---- the panel ---- */
+.factions {
+  width: 272px;
+  padding: 7px 10px 8px;
+  pointer-events: auto;
+}
+/* Open, it floats over the bottom-left like a popover: the left column is already full of the Race by Level 4. */
+.factions.open {
+  position: fixed;
+  left: 12px;
+  bottom: 44px;
+  z-index: 12;
+  width: 310px;
+  max-height: min(calc(100vh - 170px), 600px);
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.28);
+}
+@media (max-width: 640px) {
+  .factions {
+    width: auto;
+  }
+  .factions.open {
+    left: 8px;
+    right: 8px;
+    bottom: 96px;
+    width: auto;
+    max-height: 58vh;
+  }
+}
+.factions-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+.factions-sub {
+  flex: 1;
+  min-width: 0;
+  font-size: 11px;
+  opacity: 0.7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.factions-fold {
+  opacity: 0.6;
+}
+.factions-dots {
+  display: flex;
+  gap: 5px;
+  margin-top: 6px;
+}
+.factions-dots i {
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid var(--flt-color-line);
+  border-radius: 50%;
+  opacity: 0.55;
+}
+.factions-dots i[data-mood="fan"] {
+  opacity: 1;
+  box-shadow: 0 0 0 2px var(--good);
+}
+.factions-dots i[data-mood="upset"],
+.factions-dots i[data-mood="protesting"] {
+  opacity: 1;
+  box-shadow: 0 0 0 2px var(--bad);
+}
+.factions-dots i[data-mood="protesting"] {
+  animation: factions-pulse 1.2s ease-in-out infinite;
+}
+@keyframes factions-pulse {
+  50% {
+    transform: scale(1.25);
+  }
+}
+.factions-gate {
+  margin: 6px 0 0;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--bad);
+}
+.factions-body h4 {
+  margin: 9px 0 4px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.65;
+}
+.factions-rows {
+  display: grid;
+  gap: 4px;
+  margin: 7px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.factions-rows li {
+  display: grid;
+  grid-template-columns: 78px 1fr 64px;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+.factions-rows .faction-chip {
+  overflow: hidden;
+}
+.factions-mood {
+  text-align: right;
+  opacity: 0.7;
+}
+.factions-rows li[data-mood="fan"] .factions-mood {
+  color: var(--good);
+  opacity: 1;
+  font-weight: 800;
+}
+.factions-rows li[data-mood="upset"] .factions-mood,
+.factions-rows li[data-mood="protesting"] .factions-mood {
+  color: var(--bad);
+  opacity: 1;
+  font-weight: 800;
+}
+.factions-why {
+  grid-column: 1 / -1;
+  margin: -1px 0 2px 6px;
+  font-size: 10.5px;
+  font-style: italic;
+  opacity: 0.75;
+}
+.factions-stance {
+  display: grid;
+  gap: 3px;
+}
+.factions-axis {
+  display: grid;
+  grid-template-columns: 58px 1fr;
+  align-items: center;
+  font-size: 11px;
+}
+.factions-rel {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.factions-rel li {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+}
+.factions-rel em {
+  margin-left: auto;
+  font-style: normal;
+  font-weight: 800;
+}
+.factions-rel li.allied em {
+  color: var(--good);
+}
+.factions-rel li.feuding em,
+.factions-rel li.schism em {
+  color: var(--bad);
+}
+.factions-empty {
+  margin: 0;
+  font-size: 11px;
+  opacity: 0.7;
+}
+.factions-safety {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+}
+.factions-safety button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3px 2px;
+  border: 1.5px solid var(--flt-color-line);
+  border-radius: 7px;
+  background: var(--flt-color-panelAlt);
+  color: inherit;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+.factions-safety button.on {
+  background: var(--orange);
+  color: var(--flt-color-accentText);
+}
+.factions-safety small {
+  font-size: 9.5px;
+  opacity: 0.8;
+}
+.factions-log {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 10.5px;
+}
+.factions-log li i {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 3px;
+  border-radius: 50%;
+  vertical-align: 1px;
+}
+.factions-log li.bad {
+  color: var(--bad);
+}
+
+/* ---- bubbles said as a faction: a stripe in their colour ---- */
+.bubble[data-faction] {
+  border-left: 4px solid var(--faction);
+}
+.bubble-faction {
+  display: block;
+  margin-bottom: 1px;
+  color: var(--faction);
+  font-size: 0.78em;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .factions-dots i[data-mood="protesting"] {
+    animation: none;
+  }
+}
+
+/* ---- who is at the gate (FLT-56): the legend pinned over it, with the Comms lever ---- */
+.gate-anchor {
+  transform: translate(-50%, 8px);
+  pointer-events: auto;
+}
+.gate-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: max-content;
+  max-width: 220px;
+  padding: 5px 8px 6px;
+  border: 2px solid var(--flt-color-line);
+  border-radius: var(--flt-radius-md, 10px);
+  background: var(--flt-color-panel);
+  color: var(--flt-color-text);
+  font: 700 11px/1.25 var(--font);
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--flt-color-line) 60%, transparent);
+}
+.gate-legend-title {
+  font-size: 9.5px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.gate-legend ul {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.gate-legend li {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.gate-legend li i {
+  flex: none;
+  width: 11px;
+  height: 11px;
+  border: 1.5px solid var(--flt-color-line);
+  border-radius: 3px;
+  background: var(--faction);
+}
+.gate-legend-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.gate-legend button {
+  flex: none;
+  padding: 1px 6px;
+  border: 1.5px solid var(--faction);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--faction) 18%, var(--flt-color-panel));
+  color: var(--flt-color-text);
+  font: 800 10px/1.3 var(--font);
+  cursor: pointer;
+}
+.gate-legend button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.gate-legend-foot {
+  font-size: 9.5px;
+  font-weight: 600;
+  opacity: 0.7;
+}

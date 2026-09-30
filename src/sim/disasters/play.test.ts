@@ -7,18 +7,17 @@ import type { Command } from "../commands";
 import { openEventOf } from "../events";
 import { computePerDay } from "../training";
 import { guardsOn } from "../staff";
-import { createInitialState } from "../state";
-import { answer, findSpot, layPaths } from "../testkit";
+import { answer, findSpot, layPaths, createTestCampus, readyForPressure } from "../testkit";
 import { applyNow, TICKS_PER_DAY, tick } from "../tick";
 import type { GameState } from "../types";
 import { stepDisaster, startStored } from "./compile";
-import { auditorOdds, canTrigger, computeFactor, disastersView, revenueEffect, setRisk, triggerDisaster, upkeepFactor } from "./driver";
+import { auditorOdds, CALM_START_DAY, canTrigger, computeFactor, dailyDisasters, disastersView, revenueEffect, setRisk, triggerDisaster, upkeepFactor } from "./driver";
 import { disasterById } from "./pack";
 import type { Risk } from "./types";
 
 /** A working lab: a second cluster and a gateway on generous paths, plenty of cash, and (optionally) a crew. */
-function lab(seed = 3, crew: { security?: number; sre?: number } = { security: 2, sre: 1 }): GameState {
-  const s = createInitialState(seed);
+function lab(seed = 3, crew: { security?: number; sre?: number } = { security: 2, sre: 1 }, pressure = true): GameState {
+  const s = createTestCampus(seed);
   s.cash = 50_000_000;
   layPaths(s);
   for (const kind of ["gateway", "cluster"] as const) {
@@ -29,6 +28,10 @@ function lab(seed = 3, crew: { security?: number; sre?: number } = { security: 2
   for (let i = 0; i < (crew.security ?? 0); i++) hires.push({ type: "hire", job: "security" });
   for (let i = 0; i < (crew.sre ?? 0); i++) hires.push({ type: "hire", job: "sre" });
   applyNow(s, hires);
+  // Pressure (cards, disasters) waits for a first launch and a gateway (FLT-16): stage it, this is not an onboarding test.
+  if (pressure) readyForPressure(s);
+  // ...and keep the other card that turns up once pressure is on (the compute auction) out of these scripts.
+  s.race.nextAuction = Number.MAX_SAFE_INTEGER;
   for (let i = 0; i < 60; i++) tick(s);
   return s;
 }
@@ -263,7 +266,7 @@ describe("Weights Leak", () => {
     const cash = sue.cash;
     triggerDisaster(sue, "weightsLeak");
     expect(play(sue, "weightsLeak", 0)).toEqual(["warning", "active", "sue", "aftermath"]);
-    expect(sue.cash).toBeLessThan(cash - 100_000);
+    expect(sue.cash).toBeLessThan(cash - 50_000); // the lawsuit is $150K, less what the gateway earns meanwhile
   });
 
   it("the lawsuit is one roll after four days: 30% to win (the machine, with the die handed to it)", () => {
@@ -436,8 +439,9 @@ describe("random disasters", () => {
   });
 
   it("stays quiet through the first weeks (nothing has a minimum day before 30), and the dice come from their own stream", () => {
-    const off = lab(3);
-    const on = lab(3);
+    // The clock has not been moved on for these two: it is the first weeks, before anything is unlocked.
+    const off = lab(3, undefined, false);
+    const on = lab(3, undefined, false);
     setRisk(on, "normal");
     for (let i = 0; i < 25 * TICKS_PER_DAY; i++) {
       tick(off, answer(off));
@@ -447,6 +451,25 @@ describe("random disasters", () => {
     // The main random stream is untouched by the setting.
     expect(on.rngState).toBe(off.rngState);
     expect(JSON.stringify({ ...on, disasters: null })).toBe(JSON.stringify({ ...off, disasters: null }));
+  });
+
+  it("keeps a calm start (FLT-32): nothing random before the first release, nor before day 60; the menu still works", () => {
+    const days = (s: GameState, from: number, to: number) => {
+      for (s.day = from; s.day < to; s.day++) dailyDisasters(s);
+    };
+    const s = lab(4);
+    setRisk(s, "chaos");
+    s.models = []; // no release yet: a whole year of chaos, and nothing
+    days(s, 0, 400);
+    expect(s.disasters.started).toBe(0);
+    s.models = ["Fixture-1-Preview"]; // a release, but still the first weeks
+    days(s, 0, CALM_START_DAY);
+    expect(s.disasters.started).toBe(0);
+    days(s, CALM_START_DAY, 400);
+    expect(s.disasters.started).toBeGreaterThan(0);
+    const menu = lab(4);
+    menu.models = [];
+    expect(triggerDisaster(menu, "rogueSwarm").ok).toBe(true); // the menu is not the dice
   });
 
   it("is deterministic: same seed, setting and answers give the same game, and it survives a save and load mid-disaster", { timeout: 60_000 }, () => {

@@ -4,18 +4,26 @@ _FLT-15. Written by the FLT lead (Opus 5.5). Companion: `docs/EFFECT-FOR-MODDERS
 
 **The test:** someone asks their coding agent *"make me a Frontier Lab Tycoon mod where the protesters are all golden retrievers"*, gets a working mod in minutes, and sends a friend a link that opens the game with it loaded.
 
-## Current implementation (M1a + M2)
+## Current implementation (M1a + M1b + M1c + M2)
 
-This page describes the intended design. M1a foundations and the private M2 kit
-are available; live loading and full content execution await M1b. See
-`src/mods/README.md` for the precise coverage. Start with `pnpm create-mod my-mod`,
+This page describes the intended design. M1a foundations, M1b live integration
+(FLT-37) and the private M2 kit are in: a mod loads with `?mod=<url>` on any build
+(`?mod=/mods/examples/every-lab-is-steve/mod.json` renames the Arena), its content
+runs in the sim, and the Frontier 95 Mod Manager (Start, Mods…) lists what loaded
+and why anything failed. M1c (FLT-55) applies the presentation: a mod's skin joins the
+picker (and opens with `?skin=<id>`, or is offered to the player), its bundled images, fonts and
+`.glb` files are served as `blob:` URLs, its sound cues reach the sound kit, and its `looks`
+redraw walkers (a primitive recipe, a sprite, a model or a tint, per kind, role or faction).
+`?mod=/mods/examples/golden-retriever-protest/mod.json` is the showcase. See `src/mods/README.md` for the precise coverage. Start with `pnpm create-mod my-mod`,
 then `pnpm --dir my-mod test`. From the game checkout, `pnpm flt-mod check <path>`,
 `pnpm flt-mod bundle <dir>` and `pnpm flt-mod dev <dir>` use the private source-linked
 kit. The scaffold includes the mod-authoring skill and every v1 content section.
 Copy optional `mod.example.ts` to `mod.ts` to use `@flt/mod-sdk`; directory commands prefer it, while the
 scaffold test checks `mod.json`. Bundle with an explicit `mod.json` output to
 regenerate that file. Local assets are inlined; remote assets are rejected.
-`dev` serves CORS on 5174 and prints the future game link; game hot-reload is M1b.
+`dev` serves CORS on 5174 and prints the game link (`?mod=http://localhost:5174/mod.json`); reload the page to pick up edits (no hot reload).
+The Mod Manager's Remove reloads without that mod. Today's Drama (FLT-34) is the first
+published mod feed: merged Daily Drama packs at `/mods/drama/`, loaded by the same `?mod=` (see `drama/README.md` ▸ Publishing).
 
 ## 1. Principle: data first, code last
 
@@ -63,7 +71,9 @@ One `mod.json`, validated on load with **Effect Schema**. Errors are friendly an
     "buildings": { "add": [ /* data: size, price, upkeep, effects; model = "primitive recipe" or a bundled .glb (FLT-13 pipeline) */ ] },
     "disasters": { "add": [ /* JSON statecharts (FLT-17): warning, active, cleanup, aftermath; see docs/DISASTERS.md and mods/base-disasters */ ] }
   },
-  "assets": { "sign.png": "data:image/png;base64,…" }
+  "assets": { "sign.png": "data:image/png;base64,…" },
+  "audio": { "cues": { "protest.grow": [{ "at": 0, "hz": 300, "endHz": 560, "duration": 0.1, "gain": 0.1, "wave": "square" }] } },
+  "looks": { "protester": { "tint": { "body": "#3a7bd5" }, "signs": ["HYDRATE RESPONSIBLY"] } }  // FLT-55: recipe, sprite, glb or tint per kind, role or faction
 }
 ```
 

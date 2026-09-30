@@ -14,6 +14,8 @@ import { moodMachine } from "./mood";
 import { staffMachine } from "./staff";
 import { trainingMachine } from "./training";
 import { walkerMachine } from "./walker";
+import { tutorialMachine } from "./tutorial";
+import { guardrailsMachine } from "./guardrails";
 
 const byValue = { serializeState: (s: { value: unknown }) => JSON.stringify(s.value) };
 
@@ -30,6 +32,23 @@ function explore(machine: AnyStateMachine, options: Record<string, unknown>) {
 }
 
 describe("machine graphs", () => {
+  it("a spending confirmation can open and clear", () => {
+    const r = explore(guardrailsMachine, {
+      input: { pendingConfirm: null, lowRunway: false, gateDisconnected: false },
+      events: [{ type: "REQUEST", pendingConfirm: { kind: "hire", cost: 0, runwayAfter: 1, message: "Runway", command: { type: "hire", job: "sre" } } }, { type: "CLEAR" }],
+    });
+    expect(r.unreachable).toEqual([]);
+    expect(r.deadEnds).toEqual([]);
+  });
+  it("the tutorial can reach every step, completion and skip", () => {
+    const events = [
+      { type: "FACTS", path: true, hall: true, revenue: true, hired: true, released: true },
+      { type: "CONTINUE" }, { type: "SKIP" },
+    ];
+    const r = explore(tutorialMachine, { events });
+    expect(r.unreachable).toEqual([]);
+    expect(r.deadEnds).toEqual([]);
+  });
   it("every event arc reaches all four states, and none but the loop is a dead end", () => {
     for (const def of EVENTS) {
       const input = { choices: def.choices.length, cooldownDays: def.cooldown ?? EVENT_COOLDOWN_DAYS, openedDay: null };
@@ -93,7 +112,7 @@ describe("machine graphs", () => {
   it("a rival can reach idle, training, releasing and cooldown", () => {
     const d = RIVAL_BY_ID.anthro;
     const input = { id: d.id, personality: d.personality, capability: 20, hype: 40, baseHype: 40, weeks: 0, releases: 0, open: false, momentum: 1, model: "", lastRelease: -1 };
-    const week = { type: "WEEK" as const, week: 1, aggro: 1, pace: 1, chase: 1, lengthRoll: 0.5, gainRoll: 0.5, openRoll: 0.5, poachRoll: 0.9, name: "M" };
+    const week = { type: "WEEK" as const, week: 1, aggro: 1, pace: 1, chase: 1, lengthRoll: 0.5, gainRoll: 0.5, openRoll: 0.5, poachRoll: 0.9, name: "M", closed: false };
     const events = [week, { ...week, pace: 50 }, { type: "SHOCK" as const, capability: -1, hype: -1, momentum: -0.1 }];
     const r = explore(rivalMachine, { input, events, limit: 200 });
     expect(r.unreachable).toEqual([]);

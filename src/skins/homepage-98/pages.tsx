@@ -1,8 +1,8 @@
 // The lab's home page: the header with the hit counter, Under Construction, My Goals, About Me, the guestbook and the
 // Top Sites table. Everything is a table, a rule or a link, because it is 1998 and CSS is a rumour.
 import { useEffect, useRef, useState } from "react";
-import { Odometer, money } from "../kit";
-import { useT } from "../context";
+import { ALL_VISIBLE, FactionChip, Odometer, money } from "../kit";
+import { useCoach, useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import type { StatsVM } from "../../ui/hud/types";
 import { Gci, MoodFace, Mugshot, Spark, Worker } from "./icons";
@@ -75,8 +75,9 @@ function Counter({ vibes }: { vibes: StatsVM["vibes"] }) {
 }
 
 /** The header: "Welcome to {lab}'s Home Page!!!", the hit counter (Vibes), and a bordered table of the numbers. */
-export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
+export function Stats({ stats, layout, visible = ALL_VISIBLE, actions }: SlotPropsMap["Stats"]) {
   const t = useT();
+  const coach = useCoach();
   const compact = layout.compact;
   const [more, setMore] = useState(false);
   const [signed, setSigned] = useState(false);
@@ -86,7 +87,7 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
       <h1>
         <Spark /> Welcome to {stats.labName}&apos;s Home Page!!! <Spark />
       </h1>
-      <Counter vibes={stats.vibes} />
+      {visible.vibes && <Counter vibes={stats.vibes} />}
       <table className="gc-t gc-stats">
         <tbody>
           <tr>
@@ -96,9 +97,9 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
             </td>
             <td className="v cash">
               <Odometer className={stats.cash.negative ? "bad" : ""} value={stats.cash.value} format={money} />
-              <Odometer className={`net ${stats.net.good ? "good" : "bad"}`} value={stats.net.value} format={(n) => `(${n >= 0 ? "+" : "-"}${money(Math.abs(n))}/day)`} flash={false} />
+              {visible.revenue && <Odometer className={`net ${stats.net.good ? "good" : "bad"}`} value={stats.net.value} format={(n) => `(${n >= 0 ? "+" : "-"}${money(Math.abs(n))}/day)`} flash={false} />}
             </td>
-            <td className="k">
+            <td className="k" {...coach.attrs("stat:runway")}>
               <Gci name="hourglass" />
               {t("stats.runway")}
             </td>
@@ -108,21 +109,25 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
                 {stats.runway.warning ? "!!" : ""}
               </span>
             </td>
-            <td className="k more-1">
-              <Gci name="brain" />
-              {t("stats.capability")}
-            </td>
-            <td className="v more-1">
-              <Odometer value={stats.capability.value} />
-            </td>
-            <td className="k more-1">
-              <Gci name="megaphone" />
-              {t("stats.hype")}
-            </td>
-            <td className="v more-1">
-              <Odometer value={stats.hype.value} />
-            </td>
-            {compact && (
+            {visible.vibes && (
+              <>
+                <td className="k more-1">
+                  <Gci name="brain" />
+                  {t("stats.capability")}
+                </td>
+                <td className="v more-1">
+                  <Odometer value={stats.capability.value} />
+                </td>
+                <td className="k more-1">
+                  <Gci name="megaphone" />
+                  {t("stats.hype")}
+                </td>
+                <td className="v more-1">
+                  <Odometer value={stats.hype.value} />
+                </td>
+              </>
+            )}
+            {compact && (visible.vibes || visible.arena) && (
               <td className="tog">
                 <button type="button" className="gc-fb tog" onClick={() => setMore((m) => !m)} aria-expanded={more} aria-label={more ? t("stats.fewerStats") : t("stats.moreStats")}>
                   {more ? "−" : "+"}
@@ -130,6 +135,7 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
               </td>
             )}
           </tr>
+          {(visible.arena || visible.rnd) && (
           <tr className="row2">
             <td className="k">
               <Gci name="trophy" />
@@ -150,6 +156,7 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
               <Odometer value={stats.rd.mult} format={(n) => `${n.toFixed(1)}×`} /> <small>{t("stats.era", { n: stats.rd.era })}</small>
             </td>
           </tr>
+          )}
         </tbody>
       </table>
       <div className="gc-foot">
@@ -165,9 +172,10 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
 /** Under Construction: hazard tape, a worker digging, the model that is being trained and a bar of blue blocks. */
 export function Training({ training }: SlotPropsMap["Training"]) {
   const t = useT();
+  const coach = useCoach();
   const pct = Math.floor(training.pct * 100);
   return (
-    <section className="gc-uc" aria-label={t("training.title")}>
+    <section className="gc-uc" aria-label={t("training.title")} {...coach.attrs("training")}>
       <div className="gc-tape" aria-hidden />
       <h3>
         <Worker />
@@ -195,14 +203,32 @@ export function Training({ training }: SlotPropsMap["Training"]) {
 }
 
 /** "My Goals for Q1!!": the milestones as a bulleted list of links, with a DONE badge on the ones that came true. */
-export function Objectives({ objectives, layout }: SlotPropsMap["Objectives"]) {
+export function Objectives({ objectives, progress, visible = ALL_VISIBLE, layout }: SlotPropsMap["Objectives"]) {
   const t = useT();
+  const coach = useCoach();
+  const goal = progress?.goal.line ? progress.goal : null;
   // Open on a tall desktop; on a laptop or a phone the construction site keeps to itself until you ask.
   const [open, setOpen] = useState(() => layout.tall && !layout.compact);
   // The goal to go for next gets the sticker.
   const next = objectives.items.find((g) => !g.met);
+  if (goal && !visible.arena) {
+    // One goal, until the race brings the milestones back.
+    return (
+      <section className="gc-goals" {...coach.attrs("goals")} role="status">
+        <hr className="gc-rainbow" />
+        <div className="gc-goalhead">
+          <b>My Goal for Q1!!</b>
+        </div>
+        <ul>
+          <li>
+            <Fake visited={false}>{goal.text}</Fake> ({goal.progressText}) <New />
+          </li>
+        </ul>
+      </section>
+    );
+  }
   return (
-    <section className="gc-goals">
+    <section className="gc-goals" {...(goal ? coach.attrs("goals") : {})}>
       <hr className="gc-rainbow" />
       <button type="button" className="gc-goalhead" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
         <span className={`gc-caret ${open ? "open" : ""}`} aria-hidden />
@@ -222,7 +248,9 @@ export function Objectives({ objectives, layout }: SlotPropsMap["Objectives"]) {
                   </>
                 ) : (
                   <>
-                    <Fake visited={i % 2 === 1}>{g.label}</Fake> ({g.progress}){g.id === next?.id && <New />}
+                    <Fake visited={i % 2 === 1}>{g.label}</Fake>
+                    {g.progress && <> ({g.progress})</>}
+                    {g.id === next?.id && <New />}
                   </>
                 )}
               </li>
@@ -262,6 +290,11 @@ export function Inspector({ inspector: who, layout, actions }: SlotPropsMap["Ins
               current mood: <MoodFace mood={who.mood} /> {who.moodLabel}
             </div>
             <div>current music: {MUSIC[who.kind]}</div>
+            {who.faction && (
+              <div>
+                current faction: <FactionChip faction={who.faction} className="gc-faction" />
+              </div>
+            )}
             {!short && <div>currently: {who.status}</div>}
           </div>
         </div>
@@ -374,12 +407,13 @@ export function Arena({ arena, actions }: SlotPropsMap["Arena"]) {
             </thead>
             <tbody>
               {rows.map((row) => (
-                <tr key={row.id} className={`${row.you ? "you" : ""} ${row.moved ? `moved-${row.moved}` : ""}`} title={row.title}>
+                <tr key={row.id} className={`${row.you ? "you" : ""} ${row.leak ? "leak" : ""} ${row.moved ? `moved-${row.moved}` : ""}`} title={row.title}>
                   <td>{row.rank}</td>
                   <td className="name">
                     <i style={{ background: row.color }} aria-hidden />
                     {row.short}
                     {row.open && <small> (open)</small>}
+                    {row.leak && <small className="h98-leak"> ({t("arena.leak")})</small>}
                   </td>
                   <td>{row.score}</td>
                   <td className={row.delta > 0 ? "good" : row.delta < 0 ? "bad" : ""}>{row.deltaText}</td>

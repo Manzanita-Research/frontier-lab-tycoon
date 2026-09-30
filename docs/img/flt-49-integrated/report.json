@@ -1,0 +1,61 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "46f564a97f613bd8548a0d304bc6383b9097f3d6"
+  },
+  "head": {
+    "branch": "flt-49-playable-logic",
+    "sha": "4ae31df",
+    "dirty": false
+  },
+  "seconds": 170.305,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "coach-path",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49-integrated/before/coach-path.png",
+      "after": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49-integrated/after/coach-path.png",
+      "title": "Coach suggests a connected path from the gate",
+      "compare": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49-integrated/compare/coach-path.png",
+      "changed": 0.9738695987654321
+    },
+    {
+      "scene": "coach-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49-integrated/before/coach-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49-integrated/after/coach-phone.png",
+      "title": "Coach path anchors on a phone",
+      "compare": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49-integrated/compare/coach-phone.png",
+      "changed": 0.9231164175476971
+    },
+    {
+      "scene": "coach-swag",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49-integrated/before/coach-swag.png",
+      "after": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49-integrated/after/coach-swag.png",
+      "title": "Playable opening coach: swag-drop",
+      "compare": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49-integrated/compare/coach-swag.png",
+      "changed": 0.8964768518518519
+    },
+    {
+      "scene": "coach-almanac",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49-integrated/before/coach-almanac.png",
+      "after": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49-integrated/after/coach-almanac.png",
+      "title": "Playable opening coach: field-almanac",
+      "compare": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49-integrated/compare/coach-almanac.png",
+      "changed": 0.967016975308642
+    },
+    {
+      "scene": "coach-karaoke",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49-integrated/before/coach-karaoke.png",
+      "after": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49-integrated/after/coach-karaoke.png",
+      "title": "Playable opening coach: karaoke-night",
+      "compare": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49-integrated/compare/coach-karaoke.png",
+      "changed": 0.8391836419753086
+    }
+  ],
+  "errors": []
+}

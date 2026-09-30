@@ -3,16 +3,23 @@
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult, Atom } from "effect/unstable/reactivity";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { atoms, registry } from "../../app/game";
+import { atoms, debugParams, registry } from "../../app/game";
 import type { Snapshot } from "../../app/hud";
 import { audioReadyAtom, mixerAtom, mixerOpenAtom } from "../../audio/state";
 import { roomAtom } from "../../newsroom/state";
 import { photoAtom } from "../../render/fx/photoState";
+import { beatAtom } from "../../render/fx/beatState";
 import { skinList } from "../../skins/registry";
 import type { LeapfrogView } from "../../sim/race/leapfrog/view";
 import { shotAtom } from "../juice/photo";
+import { useShareInput } from "../share/share";
+import { useSocialInput } from "../share/social";
 import { newMotion, NO_MOTION, stepMotion, type Motion, type MotionView } from "./leapfrogMotion";
-import { arenaOpenAtom, chatCountAtom, photoFlashAtom, photoTimeAtom, skinUiAtom, staffOpenAtom } from "./state";
+import { arenaOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, senateOpenAtom, skinUiAtom, staffOpenAtom } from "./state";
+import { modSession } from "../../app/mods";
+import { dramaPath, dramaViewModel } from "../../drama/feed";
+import { dramaAtom } from "../../drama/state";
+import { playableFixture } from "./previewLadder";
 import type { HudVM } from "./types";
 import { hudViewModel } from "./vm";
 
@@ -167,8 +174,19 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
   const photoTime = useAtomValue(photoTimeAtom);
   const flash = useAtomValue(photoFlashAtom);
   const shot = useAtomValue(shotAtom);
+  const beat = useAtomValue(beatAtom);
   const skinUi = useAtomValue(skinUiAtom);
   const staffOpen = useAtomValue(staffOpenAtom);
+  const senateOpen = useAtomValue(senateOpenAtom);
+  const factionsOpen = useAtomValue(factionsOpenAtom);
+  const helpOpen = useAtomValue(helpOpenAtom);
+  const modsOpen = useAtomValue(modsOpenAtom);
+  const papersOpen = useAtomValue(papersOpenAtom);
+  const dismissed = useAtomValue(dismissedAtom);
+  const disastersOpen = useAtomValue(disastersOpenAtom);
+  const dramaUi = useAtomValue(dramaAtom);
+  const share = useShareInput();
+  const social = useSocialInput();
   const viewport = useViewport();
   const tapHint = useTapHint(selected);
   // "Build an API Gateway..." twice is one hint too many: once a toast has said it, the standing hint is redundant.
@@ -178,11 +196,26 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
   const motion = useArenaMotion(snap.race.board, snap.race.rank);
   const leapfrog = useLeapfrogMotion(snap);
   const list = useMemo(() => skinList(), []);
+  // The session's mods are fixed at start (main.tsx loads `?mod=` before the game exists); only the window opens and shuts.
+  const lookLabels = useMemo(() => Object.fromEntries(Object.entries(modSession().presentation?.looks ?? {}).flatMap(([target, look]) => (look.label ? [[target, look.label]] : []))), []);
+  const mods = useMemo(() => {
+    const m = modSession();
+    return {
+      open: modsOpen,
+      list: m.mods.map((mod) => ({ ...mod, drama: dramaPath(mod.source, location.href) !== null })),
+      conflicts: m.conflicts.map((c) => `${c.path}: ${c.earlier} (${c.earlierOperation}), then ${c.later} (${c.laterOperation}); ${c.later} wins`),
+      errors: [...m.errors],
+      contentHash: m.run?.contentHash ?? null,
+    };
+  }, [modsOpen]);
+  const drama = useMemo(() => dramaViewModel(dramaUi, modSession().mods, location.href, new Date()), [dramaUi]);
 
+  // `?debug=1&ladder=N`: show a rung of the ladder without playing up to it (skins, screenshots). Never in a normal game.
+  const shown = useMemo(() => (debugParams.ladder ? ({ ...snap, ...playableFixture(debugParams.ladder.level, debugParams.ladder.coach, debugParams.ladder.unlock) } as unknown as Snapshot) : snap), [snap]);
   const vm = useMemo(
     () =>
       hudViewModel({
-        snap,
+        snap: shown,
         speed,
         tool,
         follow,
@@ -193,13 +226,21 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         tapHint,
         toldGateway: toldGateway.current,
         staffOpen,
+        senateOpen,
         zone,
+        factionsOpen,
         arena: { open: arenaOpen, alert: motion.alert, flinch: motion.flinch, moved: motion.moved },
         leapfrog,
         room,
         chatCount,
+        helpOpen,
+        papersOpen,
+        dismissed,
+        disastersOpen,
+        lookLabels,
         mixer: { open: mixerOpen, ready: audioReady, muted: mixer.muted, master: mixer.master, music: mixer.music, sfx: mixer.sfx },
         photo: { on: photoOn, time: photoTime, shot, flash },
+        beat,
         skins: {
           open: skinUi.picker.open,
           reducedMotion: skinUi.reducedMotion,
@@ -207,10 +248,15 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
           original: skinUi.picker.original,
           list,
           rejected: skinUi.refused,
+          offer: skinUi.offer,
         },
+        mods,
+        drama,
         viewport,
+        share,
+        social,
       }),
-    [snap, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, motion, leapfrog, room, chatCount, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, skinUi, list, viewport, staffOpen, zone],
+    [share, social, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, beat, skinUi, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, drama],
   );
   return vm;
 }

@@ -1,6 +1,7 @@
 // Chip the guide bot lives in the bottom-left corner and reads out toasts and hints in a speech balloon ("GREAT JOB!").
 // When it's quiet Chip offers a fact now and then; tap the bot for another. Also: the thought bubbles and the toast card.
 import { useEffect, useRef, useState } from "react";
+import { factionAttrs } from "../kit";
 import { useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import type { ToastVM } from "../../ui/hud/types";
@@ -10,7 +11,7 @@ import tipsFile from "./tips.json";
 /** A word balloon: who is thinking it (small, blue), then what they think. The root keeps the `bubble` class for photo mode. */
 export function Bubble({ bubble }: SlotPropsMap["Bubble"]) {
   return (
-    <div className={`bubble dd-bubble bubble-${bubble.kind}`}>
+    <div className={`bubble dd-bubble bubble-${bubble.kind}`} {...factionAttrs(bubble.faction)}>
       <small>{bubble.speaker || bubble.kind}</small>
       {bubble.text}
     </div>
@@ -20,8 +21,8 @@ export function Bubble({ bubble }: SlotPropsMap["Bubble"]) {
 /** How long the lab has to be quiet before Chip offers a fact. */
 const QUIET_MS = 45_000;
 
-const HEAD: Record<ToastVM["tone"], string> = { good: "GREAT JOB!", bad: "OOPS!", joke: "HA HA!", neutral: "NEWS FLASH!", hint: "PSST!" };
-const MOOD: Record<ToastVM["tone"], RobotMood> = { good: "cheer", bad: "oops", joke: "happy", neutral: "happy", hint: "think" };
+const HEAD: Record<ToastVM["tone"], string> = { good: "GREAT JOB!", bad: "OOPS!", joke: "HA HA!", neutral: "NEWS FLASH!", hint: "PSST!", warn: "UH-OH!" };
+const MOOD: Record<ToastVM["tone"], RobotMood> = { good: "cheer", bad: "oops", joke: "happy", neutral: "happy", hint: "think", warn: "oops" };
 
 export function Toast({ toast, actions }: SlotPropsMap["Toast"]) {
   const body = (
@@ -30,7 +31,7 @@ export function Toast({ toast, actions }: SlotPropsMap["Toast"]) {
       {toast.text}
     </>
   );
-  if (toast.tone === "hint") return <div className="dd-toast hint">{body}</div>;
+  if (toast.tone === "hint" || toast.tone === "warn") return <div className={`dd-toast ${toast.tone}`}>{body}</div>;
   return (
     <button type="button" className={`dd-toast ${toast.tone}`} onClick={() => actions.dismissToast(toast.id)}>
       {body}
@@ -43,8 +44,10 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
   const [tip, setTip] = useState<number | null>(null);
   const phone = vm.layout.compact;
   const toast = vm.toasts.at(-1);
-  const hint = toast ? undefined : vm.hints[0];
-  const busy = toast !== undefined || hint !== undefined;
+  // A standing warning ("your entrance isn't connected") speaks whenever nobody else is, until it is fixed.
+  const warning = toast ? undefined : vm.warnings[0];
+  const hint = toast || warning ? undefined : vm.hints[0];
+  const busy = toast !== undefined || warning !== undefined || hint !== undefined;
   const facts = tipsFile.tips;
 
   // When it's been quiet a while the bot offers a fact (never on a phone, where the campus needs the room). The wait is
@@ -80,6 +83,10 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
     head = HEAD[toast.tone];
     mood = MOOD[toast.tone];
     body = toast.text;
+  } else if (warning) {
+    head = HEAD.warn;
+    mood = MOOD.warn;
+    body = warning;
   } else if (hint) {
     head = HEAD.hint;
     mood = MOOD.hint;

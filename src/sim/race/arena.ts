@@ -1,7 +1,9 @@
 // The Frontier Arena: a score from capability and hype, re-ranked once a week.
-import { RIVAL_BY_ID, YOU, type RivalId } from "../../content/rivals";
+import { arenaScore, YOU, type RivalId } from "../../content/rivals";
 import type { GameState } from "../types";
 import { rankBoard, ranksOf, type BoardRow } from "./state";
+import { defs } from "../defs";
+import { neoLabById } from "../neolabs/driver";
 
 export const rankOf = (board: BoardRow[]): number => {
   const index = board.findIndex((r) => r.id === YOU);
@@ -18,6 +20,28 @@ export function refreshBoard(state: GameState) {
   race.rank = rank;
 }
 
+/** Where each rival stands against you when the Race opens, in Arena points, best first: five ahead, one behind (FLT-58). */
+export const FIELD_MARGINS = [70, 50, 32, 20, 8, -20];
+
+/**
+ * The Race opens (Level 4): the rivals have been busy while you were in the garage. Each is set, in the order they already
+ * stand, to a margin over your score today, so you start at #6 whatever you did to get here. No random draws.
+ */
+export function seedField(state: GameState) {
+  const race = state.race;
+  const mine = arenaScore(state.capability, state.hype);
+  const order = rankBoard(state, race.rivals).filter((r) => r.id !== YOU).map((r) => r.id);
+  race.rivals = race.rivals.map((r) => {
+    const margin = FIELD_MARGINS[order.indexOf(r.context.id)] ?? 0;
+    const capability = Math.max(5, Math.round((mine + margin - 1000 - 1.5 * r.context.hype) / 4));
+    return { ...r, context: { ...r.context, capability } };
+  });
+  race.board = rankBoard(state, race.rivals);
+  race.prevRanks = ranksOf(race.board);
+  race.rank = rankOf(race.board);
+  race.rankDelta = 0;
+}
+
 export interface BoardView {
   id: string;
   name: string;
@@ -31,6 +55,8 @@ export interface BoardView {
   /** Their latest model, if they have one. */
   model: string;
   open: boolean;
+  /** A lab your own people founded (FLT-26, FLT-20): who, why, and whether it has it in for you. */
+  neo?: { founder: string; manifesto: string; nemesis: boolean; friendly: boolean; origin: string; founded: number };
 }
 
 export function boardView(state: GameState): BoardView[] {
@@ -41,7 +67,12 @@ export function boardView(state: GameState): BoardView[] {
     if (row.id === YOU) {
       return { id: YOU, name: state.labName, short: state.labName, color: "#ff8a4c", score: row.score, rank, delta, you: true, model: state.models[state.models.length - 1] ?? "", open: false };
     }
-    const def = RIVAL_BY_ID[row.id as RivalId];
+    const neo = neoLabById(state, row.id);
+    if (neo) {
+      const c = neo.rival.context;
+      return { id: row.id, name: neo.name, short: neo.short, color: neo.color, score: row.score, rank, delta, you: false, model: c.model, open: c.open, neo: { founder: neo.founder, manifesto: neo.manifesto, nemesis: neo.nemesis, friendly: neo.mood === "friendly", origin: neo.origin, founded: neo.founded } };
+    }
+    const def = defs().rivalById[row.id as RivalId];
     const ctx = race.rivals.find((r) => r.context.id === row.id)!.context;
     return { id: row.id, name: def.name, short: def.short, color: def.color, score: row.score, rank, delta, you: false, model: ctx.model, open: ctx.open };
   });

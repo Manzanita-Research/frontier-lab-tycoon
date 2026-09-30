@@ -1,0 +1,52 @@
+name: Journey
+
+# The journey test (FLT-53): a new player plays Level 1 to 5 of a deployed build. It is long (about 10 minutes of
+# play on a fast runner, capped at 60), so it runs nightly against prod and by hand against any URL, never per PR.
+on:
+  schedule:
+    - cron: "17 7 * * *"
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "The build to play (no params), e.g. https://pr-60-flt-prod.manzanita.workers.dev"
+        required: true
+        default: "https://flt-prod.manzanita.workers.dev"
+      minutes:
+        description: "Wall-clock cap, in minutes"
+        required: false
+        default: "60"
+
+permissions:
+  contents: read
+
+env:
+  CI: "true"
+
+jobs:
+  journey:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Play Level 1 to 5
+        run: pnpm e2e:journey --url "$JOURNEY_URL" --minutes "$JOURNEY_MINUTES"
+        env:
+          JOURNEY_URL: ${{ inputs.url || 'https://flt-prod.manzanita.workers.dev' }}
+          JOURNEY_MINUTES: ${{ inputs.minutes || '60' }}
+      - name: Summary
+        if: always()
+        run: test -f e2e/results/journey/report.md && cat e2e/results/journey/report.md >> "$GITHUB_STEP_SUMMARY" || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: journey-${{ github.run_id }}
+          path: e2e/results/journey/

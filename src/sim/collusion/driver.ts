@@ -1,5 +1,4 @@
 // Own random stream; pure machine transitions inside tick. Renderer/skin follow-ups consume signals, not game rules.
-import { eventById } from "../../content/events";
 import { YOU } from "../../content/rivals";
 import { THOUGHT_TICKS, TICKS_PER_DAY } from "../constants";
 import { arcMachine } from "../machines/arc";
@@ -16,11 +15,15 @@ import { refreshRecords } from "../race/leapfrog/driver";
 import { COLLUSION, PICK_PREFIX, SIGN_CARD } from "./pack";
 import { freshSwarm, stepSwarm, type SwarmEvent } from "./machine";
 import { activeSwarm, type SwarmEnding } from "./state";
+import { defs } from "../defs";
+import { picked, picks } from "../picks";
 const R = COLLUSION.rules;
 const OWNER = "collusion";
+/** Set by outsiders who find the Swarm (FLT-19's auditors): partly contained early on, exposed once organized. */
+const FOUND_FLAG = "collusion:found";
 const SIGN_HEADLINES = COLLUSION.content.headlines.add.filter((h) => h.trigger !== "inquiryFailed");
 
-/** Enabling is explicit while the UI task follows. Baseline init and its RNG do not change. */
+/** The pack switch: the ladder flips it when Scrutiny is earned (sim/progression.ts). Baseline init and its RNG do not change. */
 export function enableCollusion(s: GameState) {
   if (!s.collusion) s.collusion = {
     enabled: true, rngState: (s.seed ^ 0x4352554d) >>> 0, machine: freshSwarm(),
@@ -39,7 +42,7 @@ export function disableCollusion(s: GameState) {
   delete s.investigations?.[OWNER];
   delete s.flags[`offer:${SIGN_CARD}`];
   for (const key of ["investigate", "ship", "ask"]) delete s.flags[PICK_PREFIX + key];
-  const def = eventById(SIGN_CARD);
+  const def = defs().eventById(SIGN_CARD);
   if (def) s.arcs[SIGN_CARD] = initialStored(arcMachine, { choices: def.choices.length, cooldownDays: def.cooldown ?? 14, openedDay: null });
   s.collusion.machine = { ...s.collusion.machine, context: { ...s.collusion.machine.context, investigationUntil: -1 } };
   refreshBoard(s);
@@ -81,13 +84,15 @@ function send(s: GameState, rng: Rng, event: SwarmEvent) {
     if (["contained", "partlyContained", "exposed"].includes(c.machine.value)) ending(s, rng, c.machine.value as SwarmEnding);
   }
 }
+const CHOICE_FLAGS = picks(PICK_PREFIX, ["investigate", "ship", "ask"] as const);
+
 /** Consume flag effects immediately after chooseEvent, including commands applied while paused. */
 export function applyCollusionChoices(s: GameState) {
-  if (!s.collusion?.enabled) return;
+  if (!s.collusion?.enabled || !picked(s.flags, CHOICE_FLAGS)) return;
   const rng = createRng(s.collusion.rngState);
-  for (const choice of ["investigate", "ship", "ask"]) {
-    if (s.flags[PICK_PREFIX + choice] === undefined) continue;
-    delete s.flags[PICK_PREFIX + choice];
+  for (const { key: choice, flag } of CHOICE_FLAGS) {
+    if (s.flags[flag] === undefined) continue;
+    delete s.flags[flag];
     send(s, rng, { type: "CHOSE", choice, day: s.day, tick: s.tick });
   }
   s.collusion.rngState = rng.state();
@@ -114,7 +119,9 @@ export function dailyCollusion(s: GameState) {
   send(s, rng, { type: "DAY", day: s.day, tick: s.tick, seedRoll: rng.next(), catchRoll: rng.next(),
     agents: Math.max(0, 6 + Math.floor(s.capability / 2) + s.agentBonus), capability: s.capability,
     pressure: Math.max(0, Math.min(1, (s.race.rank - 1) / 6)), reliability, security, arrived,
+    found: s.flags[FOUND_FLAG] !== undefined ? 1 : 0,
   });
+  delete s.flags[FOUND_FLAG];
   if (activeSwarm(s)) {
     if (s.leapfrog.enabled) refreshRecords(s, rng);
     if (!c.classified && c.machine.value !== "seeded") {

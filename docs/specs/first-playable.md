@@ -49,7 +49,7 @@ Tune the numbers so that with one Cluster, Hall and Gateway, cash dips for the f
   - Agent (unreachable): "There is no path. I have written a 40-page memo about it."
   - Visitor: "The demo was pre-recorded, right? Right?"
   - Model names: "Frontier-2", then "Frontier-2.5-Reasoner", then "Frontier-3-Mini-Pro-Preview-0925".
-  - Rivals: parody only (e.g. "Anthropomorphic", "Open-ish AI", "MetaMeta Superintelligence Labs", "Very Safe Superintelligence Inc.", "Sirocco", "Macrohard"). Never real people or nationalities.
+  - Rivals: parody only (e.g. "Anthropomorphic", "Open-ish AI", "MetaMeta Metaintelligence Labs", "Very Very Super Super Intelligence", "Sirocco", "Macrohard"). Never real people or nationalities.
 
 ## Render: `src/render/` (R3F + drei, no asset files)
 

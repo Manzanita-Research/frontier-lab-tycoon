@@ -1,11 +1,12 @@
 // Small verbs on the Leapfrog state that both the race's weekly cycle and the launch driver need, kept apart from the
 // driver so the race can call them without a circular import.
 import { LEAPFROG } from "../../../content/leapfrog";
-import { RIVAL_BY_ID, type RivalId, YOU } from "../../../content/rivals";
+import { type RivalId, YOU } from "../../../content/rivals";
 import { step } from "../../machines/run";
 import type { GameState } from "../../types";
 import type { PendingLaunch } from "./state";
 import { voiceMachine } from "./voice";
+import { defs } from "../../defs";
 
 const R = LEAPFROG.rules;
 
@@ -14,12 +15,12 @@ export const labIds = (state: GameState): string[] => [YOU, ...state.race.rivals
 
 export const rivalOf = (state: GameState, id: string) => state.race.rivals.find((r) => r.context.id === id);
 
-/** Does the lab have a product to score? Very Safe SI has none, so it never appears on a benchmark. */
-export const hasProduct = (id: string): boolean => id === YOU || RIVAL_BY_ID[id as RivalId]?.models != null;
+/** Does the lab have a product to score? Super Super AI has none, so it never appears on a benchmark. */
+export const hasProduct = (id: string): boolean => id === YOU || defs().rivalById[id as RivalId]?.models != null;
 
 export const capOf = (state: GameState, id: string): number => (id === YOU ? state.capability : (rivalOf(state, id)?.context.capability ?? 0));
 export const hypeOf = (state: GameState, id: string): number => (id === YOU ? state.hype : (rivalOf(state, id)?.context.hype ?? 0));
-export const nameOf = (state: GameState, id: string): string => (id === YOU ? state.labName : (RIVAL_BY_ID[id as RivalId]?.name ?? id));
+export const nameOf = (state: GameState, id: string): string => (id === YOU ? state.labName : (defs().rivalById[id as RivalId]?.name ?? id));
 
 /**
  * Push a lab's share of the news cycle up (or, negative, down). A launch from a lab everyone is already watching is

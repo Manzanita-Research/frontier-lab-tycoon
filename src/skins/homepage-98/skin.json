@@ -22,7 +22,7 @@
     "Arena",
     "EraCard",
     "Outcome",
-    "NewsControls",
+    "NewsControls", "DramaButton",
     "NewsArrival",
     "PhotoButton"
   ],
@@ -95,6 +95,7 @@
     "color.tipText": "#000000",
     "color.selection": "#0000EE",
     "color.selectionText": "#FFFFFF",
+    "color.highlight": "#D400D4",
     "color.meterFrom": "#000080",
     "color.meterTo": "#000080",
     "font.ui": "\"Tinos\", \"Times New Roman\", serif",

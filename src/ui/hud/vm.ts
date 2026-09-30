@@ -4,16 +4,15 @@
 // the game is reachable from them, so a change in the sim never breaks a mod and a mod can never touch the sim.
 // Pure: no atoms, no DOM, no clocks, no random numbers. It is unit-tested against fixture snapshots (vm.test.ts).
 import type { Snapshot, Tool } from "../../app/hud";
-import { RACE_TOOLS, SPEEDS, TOOLS } from "../../app/hud";
-import { BUILDINGS, PATH_PRICE } from "../../content/buildings";
+import { OFFICE_TOOLS, RACE_TOOLS, SPEEDS, TOOLS } from "../../app/hud";
+import { PATH_PRICE } from "../../content/buildings";
 import { ERAS } from "../../content/eras";
 import { STAFF } from "../../content/staff";
-import { eventById } from "../../content/events";
-import { GOALS, SCENARIO, type GoalDef } from "../../content/goals";
+import { dramaLetter } from "../../content/events";
+import { SCENARIO, type GoalDef } from "../../content/goals";
 import { FRIENDS } from "../../content/newsroom";
 import { LEAPFROG } from "../../content/leapfrog";
 import { STREAM_FALLBACK, STREAM_LINES } from "../../content/livestream";
-import { ARENA_SIZE } from "../../content/rivals";
 import { CUES } from "../../audio/score";
 import type { Edition } from "../../newsroom/edition";
 import { hourAt, clockLabel } from "../../render/fx/clock";
@@ -24,13 +23,30 @@ import type { NewsItem, Tone, WalkerKind } from "../../sim/types";
 import { trendOf, VIBES_MAX, WEIGHTS } from "../../sim/vibes";
 import { NO_MOTION, type MotionView } from "./leapfrogMotion";
 import { SKIN_API_VERSION } from "./types";
+import { DISASTER_LINES, HEAT_WORDS, PHASE_LABELS, RISK_COPY, TAG_LABELS, TRUST_WORDS, UNDERSTAFFED } from "../../content/disasterCopy";
+import { HELP_BUILDINGS, HELP_LOOP, HELP_NUMBERS, HELP_TITLE } from "../../content/help";
+import { playableOf, type PlayableInput } from "./playable";
+import { papersOf, paperMomentOf } from "./papers";
+import { collusionOf, crumbWikiOf, investigationOf } from "./collusion";
+import { factionChips, factionsOf } from "./factions";
+import type { FactionChipVM } from "./types";
+import { challengeLine, challengeQuery, compareRuns, VERDICT_TEXT, type Challenge } from "../share/link";
+import { streakText } from "../share/streak";
+import { ENDING_RULES, endingById } from "../../sim/endings/pack";
 import type {
-  ArenaVM, BenchCellVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, EditionRowVM, EventVM, HudVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
-  ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, ResponseVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, StreamVM, ThoughtRowVM, TrainingVM, TrendVM, VoiceVM, WalkerKindVM,
+  ArenaRowVM, DramaDocVM,
+  ArenaVM, AuditVM, BeatVM, BillVM, SenateVM, TrackerVM, GoalVM, ReportCardVM, ToneVM, BenchCellVM, DisasterRunVM, DisastersVM, DisasterStageVM, MeterVM, RiskVM, UnderstaffedVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HearingMoveVM, HearingVM, HudVM, LeakVM, SenatorVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
+  DramaVM, ModsVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, ResponseVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, StreamVM, ThoughtRowVM, TrainingVM, TrendVM, VoiceVM, WalkerKindVM,
+  EndingVM, ShareVM, TakeoverVM, MemoVM, ChallengeVM,
 } from "./types";
+import { defs } from "../../sim/defs";
 
 /** How many game days after a release the "SHIPPED!" sticker stays up. */
 export const SHIPPED_DAYS = 3;
+/** No `?mod=`: the base game, the Mod Manager shut. */
+export const NO_MODS_VM: ModsVM = { open: false, list: [], conflicts: [], errors: [], contentHash: null };
+/** Nothing fetched from the Drama feed yet, no pack loaded, the window shut. */
+export const NO_DRAMA_VM: DramaVM = { open: false, status: "idle", latest: null, archive: [], on: null, fresh: false, intro: false };
 /** The newest headlines a ticker carries. */
 export const TICKER_ITEMS = 24;
 
@@ -41,7 +57,7 @@ export interface HudInput {
   tool: Tool | null;
   follow: boolean;
   highlight: string | null;
-  toasts: readonly { id: number; text: string; tone: Tone }[];
+  toasts: readonly { id: number; text: string; tone: Tone; batch?: readonly { text: string; tone: Tone }[] }[];
   news: readonly NewsItem[];
   outcomeDismissed: boolean;
   /** "Tap anyone to read their mind" is still showing. */
@@ -51,19 +67,42 @@ export interface HudInput {
   /** The Staff panel is open, and whose patrol zone is being painted. */
   staffOpen: boolean;
   zone: number | null;
+  /** The Senate window (FLT-22/23) is open. Optional: closed. */
+  senateOpen?: boolean;
+  /** FLT-33: the Factions panel is open. Optional: folded. */
+  factionsOpen?: boolean;
   arena: { open: boolean; alert: boolean; flinch: boolean; moved: Record<string, "up" | "down"> };
   /** Release Leapfrog's real-time flourishes (row flashes, blinking badges, solved columns kept on the board, news-cycle history). Optional: none is fine. */
   leapfrog?: MotionView;
   room: { archive: readonly Edition[]; view: "archive" | Edition | null; unread: readonly string[]; storage: boolean };
   /** How many chat messages have arrived so far. */
   chatCount: number;
+  /** Help ▸ How to play is open. */
+  helpOpen: boolean;
+  /** The Papers window is open (absent: folded). */
+  papersOpen?: boolean;
+  /** Paper moments and CrumbWiki reveals already closed, by key. */
+  dismissed?: readonly string[];
+  /** The Disasters menu is open (FLT-32). */
+  disastersOpen?: boolean;
+  /** FLT-55: what mod looks call a walker ("Golden Retriever"), by look target ("protester", "visitor:Journalist"). Optional: none. */
+  lookLabels?: Readonly<Record<string, string>>;
   mixer: { open: boolean; ready: boolean; muted: boolean; master: number; music: number; sfx: number };
   photo: { on: boolean; time: string; shot: { id: number; url: string; name: string } | null; flash: number };
+  /** A camera beat's caption (FLT-56). Optional: none. */
+  beat?: { id: number; kind: string; caption: string; sub: string } | null;
   skins: SkinPickerVM;
+  /** The Mod Manager. Optional: none means no mods and the window shut. */
+  mods?: ModsVM;
+  /** Today's Drama (FLT-34). Optional: none means nothing fetched and the window shut. */
+  drama?: DramaVM;
   viewport: { width: number; height: number };
+  /** The ending's share card and the campus photo its front page prints (FLT-11). Optional: none is fine. */
+  share?: { photo: string | null } & ShareVM;
+  /** FLT-57: days played in a row, a friend's challenge from the URL (and whether its banner is up), the Memo extra already read, and this page's address for friend links. Optional: none is fine. */
+  social?: { streak: number; challenge: Challenge | null; challengeOpen: boolean; memoSeen: string | null; linkBase: string | null };
 }
 
-const goalDefs = new Map(GOALS.map((g) => [g.id, g]));
 
 /** "Revenue $140K / $250K per day", "Runs 2 / 3", "Hype 47 / 60". */
 export function goalProgressText(def: GoalDef, value: number): string {
@@ -79,9 +118,12 @@ export function goalProgressText(def: GoalDef, value: number): string {
       return `Era ${Math.floor(shown)} / ${def.target}`;
     case "rank":
       if (value <= 0) return "Counts from Era 3";
-      return value >= def.target ? `Arena #${ARENA_SIZE + 1 - Math.floor(value)} (top ${ARENA_SIZE + 1 - def.target} reached)` : `Arena #${ARENA_SIZE + 1 - Math.floor(value)}, need top ${ARENA_SIZE + 1 - def.target}`;
+      return value >= def.target ? `Arena #${defs().arenaSize + 1 - Math.floor(value)} (top ${defs().arenaSize + 1 - def.target} reached)` : `Arena #${defs().arenaSize + 1 - Math.floor(value)}, need top ${defs().arenaSize + 1 - def.target}`;
   }
 }
+
+/** The top bar of a camera beat (FLT-56), by kind. */
+const BEAT_KICKER: Record<string, string> = { exit: "Breaking · a departure", huddle: "The auditors are conferring", viral: "Live · trending now", statement: "A statement from Comms", leak: "Someone is asking about the file" };
 
 const TONE_LABEL = { bad: "Breaking", joke: "Developing", good: "Good news", neutral: "Update" } as const;
 const MOOD = { content: "Content", slumped: "Slumped", miserable: "Miserable", resigned: "Resigned" } as const;
@@ -92,7 +134,7 @@ const NOUN: Record<WalkerKind, [string, string]> = {
   visitor: ["visitor", "visitors"],
   protester: ["protester", "protesters"],
 };
-const SHORT: Record<Tool, string> = { path: "Path", cluster: "Cluster", hall: "Training Hall", gateway: "Gateway", kombucha: "Kombucha", nap: "Nap Pods", snack: "Snack Wall", demo: "Demo Stage", datacenter: "Datacenter", gas: "Gas Turbine", solar: "Solar Farm", bulldoze: "Bulldoze" };
+const SHORT: Record<Tool, string> = { path: "Path", cluster: "Cluster", hall: "Training Hall", gateway: "Gateway", kombucha: "Kombucha", nap: "Nap Pods", snack: "Snack Wall", demo: "Demo Stage", datacenter: "Datacenter", gas: "Gas Turbine", solar: "Solar Farm", security: "Security", bulldoze: "Bulldoze" };
 const CUE_LABEL: Record<string, string> = { place: "Place", coin: "Coin", bulldoze: "Bulldoze", card: "News card", choice: "Choice", release: "Release", era: "New era", breakdown: "Alarm" };
 export const PHOTO_TIMES = [
   { key: "live", label: "Live" },
@@ -101,8 +143,8 @@ export const PHOTO_TIMES = [
   { key: "night", label: "Night" },
 ];
 
-const toolName = (t: Tool) => (t === "path" ? "Path" : t === "bulldoze" ? "Bulldoze" : BUILDINGS[t].name);
-const toolPrice = (t: Tool) => (t === "path" ? PATH_PRICE : t === "bulldoze" ? 0 : BUILDINGS[t].price);
+const toolName = (t: Tool) => (t === "path" ? "Path" : t === "bulldoze" ? "Bulldoze" : defs().buildings[t].name);
+const toolPrice = (t: Tool) => (t === "path" ? PATH_PRICE : t === "bulldoze" ? 0 : defs().buildings[t].price);
 const arrow = (delta: number) => (delta > 0 ? `↑${delta}` : delta < 0 ? `↓${-delta}` : "–");
 const pts = (n: number) => Math.round(n * VIBES_MAX);
 
@@ -115,7 +157,8 @@ function statsOf(i: HudInput): StatsVM {
   const s = i.snap;
   const v = s.vibes;
   const race = s.race;
-  const runwayLow = s.runway !== null && s.runway < 6;
+  // "Low" means the same as the spending dialog: under three months (FLT-58: six fired in the first minutes of a healthy lab).
+  const runwayLow = s.runway !== null && s.runway < 3;
   const date = formatDate(s.day);
   return {
     labName: s.labName,
@@ -180,13 +223,15 @@ function objectivesOf(s: Snapshot): ObjectivesVM {
     urgent: left <= 60,
     deadline: formatDate(SCENARIO.deadlineDay),
     items: s.goals.map((g) => {
-      const def = goalDefs.get(g.id)!;
-      return { id: g.id, label: def.label, progress: goalProgressText(def, g.value), ratio: Math.max(0, Math.min(1, g.value / g.target)), met: g.met };
+      const def = defs().goals.find((d) => d.id === g.id)!;
+      // The release goal names the run actually training ("Ship 3 models (0/3), next: Frontier-2"), so its own progress line goes.
+      const release = g.id === "release";
+      return { id: g.id, label: release ? s.releaseGoal : def.label, progress: release ? "" : goalProgressText(def, g.value), ratio: Math.max(0, Math.min(1, g.value / g.target)), met: g.met };
     }),
   };
 }
 
-function inspectorOf(who: Inspect | null, following: boolean, lab: string): InspectorVM | null {
+function inspectorOf(who: Inspect | null, following: boolean, lab: string, chips: ReadonlyMap<string, FactionChipVM>, labels: Readonly<Record<string, string>> = {}): InspectorVM | null {
   if (!who) return null;
   const drift = who.kind === "agent" ? (who.needs.find((n) => n.key === "drift")?.value ?? 0) : 0;
   const look = lookOf(who);
@@ -196,7 +241,7 @@ function inspectorOf(who: Inspect | null, following: boolean, lab: string): Insp
     name: who.name,
     role: who.role,
     kind: who.kind,
-    kindLabel: KIND[who.kind],
+    kindLabel: labels[`${who.kind}:${who.role}`] ?? labels[who.kind] ?? KIND[who.kind],
     mood: who.mood,
     moodLabel: MOOD[who.mood],
     status: who.status,
@@ -206,13 +251,14 @@ function inspectorOf(who: Inspect | null, following: boolean, lab: string): Insp
     portrait: { kind: who.kind, body: look.body, head: look.head, happiness: who.happiness, drift },
     following,
     badge: String(who.id).padStart(4, "0"),
+    ...(who.faction && chips.has(who.faction) ? { faction: chips.get(who.faction)! } : {}),
   };
 }
 
 function buildOf(i: HudInput): { items: BuildItemVM[]; tip: BuildTipVM | null } {
   const s = i.snap;
   const race = s.race;
-  const palette: Tool[] = [...TOOLS.filter((t) => t !== "bulldoze"), ...RACE_TOOLS.filter((t) => t !== "bulldoze" && t !== "path" && race.unlocked.includes(t)), "bulldoze"];
+  const palette: Tool[] = [...TOOLS.filter((t) => t !== "bulldoze"), ...RACE_TOOLS.filter((t) => t !== "bulldoze" && t !== "path" && race.unlocked.includes(t)), ...OFFICE_TOOLS, "bulldoze"];
   const built = new Map<string, number>();
   for (const b of s.buildings) built.set(b.kind, (built.get(b.kind) ?? 0) + 1);
   const items = palette.map((t): BuildItemVM => {
@@ -223,7 +269,7 @@ function buildOf(i: HudInput): { items: BuildItemVM[]; tip: BuildTipVM | null } 
       kind: t,
       name: toolName(t),
       short: SHORT[t],
-      blurb: t === "path" || t === "bulldoze" ? null : BUILDINGS[t].blurb,
+      blurb: t === "path" || t === "bulldoze" ? null : defs().buildings[t].blurb,
       price,
       priceText: t === "bulldoze" ? "refund 50%" : isFree ? "FREE" : formatMoney(price),
       free: isFree,
@@ -252,16 +298,38 @@ function buildOf(i: HudInput): { items: BuildItemVM[]; tip: BuildTipVM | null } 
     built: 0,
     isBulldoze: false,
     isPath: false,
+    panel: true,
   });
+  // The Senate (FLT-23): the Promise Tracker and the bill, once the lab has been to its first hearing.
+  if (s.promises.enabled) {
+    const due = s.promises.stage === "campaign" || s.promises.stage === "rollCall" || s.bill.stage === "invited";
+    items.push({
+      kind: "senate",
+      name: "Senate",
+      short: "Senate",
+      blurb: "Three senators, their promises, and what it costs to change their minds.",
+      price: 0,
+      priceText: s.bill.stage === "invited" ? "draft due" : due ? "vote soon" : "in recess",
+      free: false,
+      affordable: true,
+      hotkey: null,
+      selected: i.senateOpen ?? false,
+      race: false,
+      built: 0,
+      isBulldoze: false,
+      isPath: false,
+      panel: true,
+    });
+  }
   const t = i.tool;
   let tip: BuildTipVM | null = null;
   if (t === "path") tip = { kind: t, name: "Path", text: "Drag to lay paths. Buildings need one beside them or nobody visits.", upkeepText: "Right-drag to pan." };
   else if (t === "bulldoze") tip = { kind: t, name: "Bulldoze", text: "Click or drag over things to remove them. Refunds half.", upkeepText: null };
-  else if (t) tip = { kind: t, name: BUILDINGS[t].name, text: BUILDINGS[t].blurb, upkeepText: `Upkeep ${formatMoney(BUILDINGS[t].upkeepPerDay)}/day. Needs a path beside it.` };
+  else if (t) tip = { kind: t, name: defs().buildings[t].name, text: defs().buildings[t].blurb, upkeepText: `Upkeep ${formatMoney(defs().buildings[t].upkeepPerDay)}/day. Needs a path beside it.` };
   return { items, tip };
 }
 
-function staffOf(i: HudInput): StaffVM {
+function staffOf(i: HudInput, earned: ReadonlySet<string>): StaffVM {
   const ops = i.snap.ops;
   const row = (o: (typeof ops.staff)[number]): StaffRowVM => ({ id: o.id, job: o.job, title: o.title, name: o.name, status: o.status, color: STAFF[o.job].color, zone: o.zone, leaving: o.leaving });
   const painting = i.zone === null ? null : ops.staff.find((o) => o.id === i.zone);
@@ -271,7 +339,8 @@ function staffOf(i: HudInput): StaffVM {
     payroll: ops.payroll,
     payrollText: ops.staff.length > 0 ? `${formatMoney(ops.payroll)}/day` : "nobody on the payroll",
     painting: painting ? row(painting) : null,
-    jobs: ops.jobs.map((j): StaffJobVM => ({ job: j.job, title: j.title, blurb: j.blurb, salary: j.salary, salaryText: `${formatMoney(j.salary)}/day`, count: j.count, max: j.max, canHire: j.canHire, reason: j.reason, color: STAFF[j.job].color })),
+    // Only the kinds of staff the lab has unlocked can be hired.
+    jobs: ops.jobs.filter((j) => earned.has(j.job)).map((j): StaffJobVM => ({ job: j.job, title: j.title, blurb: j.blurb, salary: j.salary, salaryText: `${formatMoney(j.salary)}/day`, count: j.count, max: j.max, canHire: j.canHire, reason: j.reason, color: STAFF[j.job].color })),
     roster: ops.staff.map(row),
     slopPct: ops.slopPct,
     broken: ops.broken.length,
@@ -286,15 +355,36 @@ function speedOf(value: number): SpeedVM {
   };
 }
 
-function bubblesOf(i: HudInput): BubbleVM[] {
-  return i.snap.thoughts.map((t) => ({ id: t.id, walkerId: t.walkerId, kind: t.kind, speaker: i.snap.speakers[t.walkerId] ?? "", text: t.text }));
+function bubblesOf(i: HudInput, chips: ReadonlyMap<string, FactionChipVM>): BubbleVM[] {
+  const chats = i.snap.chats ?? [];
+  // Two people talking say their lines out loud instead of thinking: the visitor first, then your researcher.
+  const talking = new Set(chats.flatMap((c) => (c.lines.length ? [c.hostId, c.guestId] : [])));
+  const thoughts = i.snap.thoughts.filter((t) => !talking.has(t.walkerId)).map((t): BubbleVM => {
+    const faction = t.faction ? chips.get(t.faction) : undefined;
+    return { id: t.id, walkerId: t.walkerId, kind: t.kind, speaker: i.snap.speakers[t.walkerId] ?? "", text: t.text, ...(faction ? { faction } : {}) };
+  });
+  const said = chats.flatMap((c) => c.lines.slice(0, 2).map((text, k): BubbleVM => {
+    const walkerId = k === 0 ? c.guestId : c.hostId;
+    return { id: -(c.id * 2 + k), walkerId, kind: k === 0 ? "visitor" : "researcher", speaker: c.names?.[k] || i.snap.speakers[walkerId] || "", text, speech: true };
+  }));
+  return [...thoughts, ...said];
+}
+
+/** A drama card's document, filled in from the pack's template. */
+function dramaOf(id: string, vars: Record<string, string>): DramaDocVM | null {
+  // A poaching offer is in the poacher's own voice (FLT-56).
+  const l = dramaLetter(id, vars.poacherId);
+  if (!l) return null;
+  const f = (s: string) => fillTemplate(s, vars);
+  return { style: l.style, file: f(l.file), from: f(l.from), to: f(l.to), subject: f(l.subject), lines: l.lines.map(f).filter((x) => x.trim().length > 0), sign: f(l.sign) };
 }
 
 function eventOf(i: HudInput): { event: EventVM | null; era: HudVM["eraCard"] } {
   const open = i.snap.event;
-  const def = open ? eventById(open.id) : undefined;
+  const def = open ? defs().eventById(open.id) : undefined;
   if (!open || !def) return { event: null, era: null };
-  const vars = { ...i.snap.race.vars, lab: i.snap.labName };
+  const hearing = def.kind === "hearing" ? hearingOf(i.snap) : null;
+  const vars = { ...i.snap.race.vars, lab: i.snap.labName, senator: hearing?.asking?.name ?? "The chair", act: i.snap.bill.act || "the bill", motion: i.snap.promises.motion?.title ?? "the motion" };
   if (def.kind === "era") {
     const n = Number(def.id.replace("era", ""));
     const era = ERAS[n - 1]!;
@@ -312,12 +402,213 @@ function eventOf(i: HudInput): { event: EventVM | null; era: HudVM["eraCard"] } 
       body: fillTemplate(def.body, vars),
       tone: def.tone,
       stripe: def.stripe ?? TONE_LABEL[def.tone],
-      kind: def.kind === "auction" || def.kind === "response" || def.kind === "stream" ? def.kind : "plain",
-      choices: def.choices.map((c, k) => ({ label: c.label, hint: fillTemplate(c.hint, vars), key: k + 1 })),
+      kind: def.kind === "auction" || def.kind === "response" || def.kind === "stream" || def.kind === "hearing" || def.kind === "leak" || def.kind === "drama" || def.kind === "bill" || def.kind === "vote" ? def.kind : def.kind === "report" && i.snap.audit.report ? "report" : "plain",
+      choices: def.choices.map((c, k) => {
+        const blocked = i.snap.eventBlocked?.[k];
+        return blocked ? { label: c.label, hint: blocked, key: k + 1, disabled: blocked } : { label: c.label, hint: fillTemplate(c.hint, vars), key: k + 1 };
+      }),
       paddles: def.kind === "auction" ? rivals.map((r, k) => ({ id: r.id, name: r.short, color: r.color, number: 200 + ((r.score * 7 + k * 31) % 800) })) : [],
       response: def.kind === "response" ? responseOf(i.snap, vars) : null,
       stream: def.kind === "stream" ? streamOf(i.snap, def.id, vars) : null,
+      investigation: investigationOf(i.snap, def.id),
+      hearing,
+      leak: def.kind === "leak" ? leakOf(i.snap) : null,
+      drama: def.kind === "drama" ? dramaOf(def.id, vars) : null,
+      report: def.kind === "report" ? reportOf(i.snap) : null,
+      bill: def.kind === "bill" ? billOf(i.snap) : null,
+      tracker: def.kind === "vote" ? trackerOf(i.snap) : null,
     },
+  };
+}
+
+const MOVE_LABEL: Record<HearingMoveVM["meter"], string> = { trust: "Trust", capture: "Capture", hype: "Hype", heat: "Heat" };
+const arrows = (n: number) => (n > 0 ? "▲" : "▼").repeat(Math.abs(n) >= 8 ? 3 : Math.abs(n) >= 4 ? 2 : 1);
+
+const SIDE_TEXT = { aye: "Aye", nay: "Nay", both: "Both" } as const;
+const BILL_STATUS: Record<string, string> = {
+  invited: "Draft", declined: "Shredded", floor: "On the floor", failed: "Voted down", law: "In force", exposed: "Exposed", fallout: "Fallout", sunset: "Sunset", quiet: "Nothing on the desk",
+};
+
+/** The button a beat offers while it plays (FLT-56): the leak's "Bury it", while the reporter is still asking. */
+function beatActionOf(kind: string, s: Snapshot): BeatVM["action"] {
+  const w = kind === "leak" ? billOf(s)?.warning : null;
+  return w ? { id: "bury", label: w.buryText, enabled: w.canBury } : null;
+}
+
+/** Regulatory Capture's bill (FLT-22): the draft, the law, and what it does to each rival. */
+export function billOf(s: Snapshot): BillVM | null {
+  const b = s.bill;
+  if (!b.enabled || !b.act) return null;
+  const clauses = b.clauses.map((c) => ({ ...c }));
+  const picked = clauses.filter((c) => c.on).length;
+  const rivals = b.rivals.map((r) => ({
+    id: r.id,
+    name: r.name,
+    tags: [
+      ...(r.growth < 1 ? [`grows ${Math.round((1 - r.growth) * 100)}% slower`] : []),
+      ...(r.pace < 1 ? [`trains ${Math.round((1 - r.pace) * 100)}% slower`] : []),
+      ...(r.closed ? ["ships closed"] : []),
+    ],
+  }));
+  return {
+    stage: b.stage,
+    act: b.act,
+    fileName: `${b.act.replace(/[^A-Za-z0-9]+/g, "_").replace(/^_|_$/g, "")}_FINAL_v3.doc`,
+    author: b.author,
+    reporter: b.reporter,
+    clauses,
+    editable: b.stage === "invited",
+    picked,
+    pick: b.pick,
+    pickText: `${picked} of ${b.pick} clauses`,
+    status: b.stage === "law" && b.lawDays !== null ? `In force · day ${b.lawDays}` : (BILL_STATUS[b.stage] ?? b.stage),
+    tally: b.ayes === null ? null : `${b.ayes}–${3 - b.ayes}`,
+    leakText: b.stage === "law" ? `${(b.leakOdds * 100).toFixed(b.leakOdds < 0.1 ? 1 : 0)}% a day` : null,
+    risk: b.risk,
+    riskText: `${Math.round(b.risk * 100)}% before the sunset`,
+    riskLabel: b.riskLabel,
+    warning: b.warning
+      ? {
+          text: `${b.reporter} is asking about the file`,
+          daysText: b.warning.daysLeft === 0 ? "The story runs tomorrow" : `The story runs in ${b.warning.daysLeft} day${b.warning.daysLeft === 1 ? "" : "s"}`,
+          buryText: `Bury it (${formatMoney(b.warning.cost)})`,
+          canBury: s.cash >= b.warning.cost,
+        }
+      : null,
+    rivals,
+  };
+}
+
+const TRACKER_STATUS: Record<string, string> = { recess: "In recess", dormant: "In recess", rollCall: "Roll call today" };
+
+/** The Promise Tracker (FLT-23): the motion, three senators, what they said and how they will vote. */
+export function trackerOf(s: Snapshot): TrackerVM | null {
+  const p = s.promises;
+  if (!p.enabled) return null;
+  const last = p.last ? { title: p.last.title, passed: p.last.passed, tally: `${p.last.ayes}–${p.last.nays}` } : null;
+  const status =
+    p.stage === "campaign" ? (p.daysUntilVote === 0 ? "Roll call tomorrow" : `Roll call in ${p.daysUntilVote} day${p.daysUntilVote === 1 ? "" : "s"}`)
+    : (p.stage === "passed" || p.stage === "failed") && last ? `${last.passed ? "Passed" : "Failed"} ${last.tally}`
+    : (TRACKER_STATUS[p.stage] ?? p.stage);
+  return {
+    stage: p.stage,
+    motion: p.motion ? { ...p.motion, stakes: p.motion.stakes ? { ...p.motion.stakes } : null, labSideText: `${s.labName} wants ${SIDE_TEXT[p.motion.labSide]}` } : null,
+    status,
+    lobbying: p.lobbying,
+    senators: p.senators.map((sen) => ({
+      id: sen.id,
+      name: sen.name,
+      role: sen.role,
+      seat: sen.seat,
+      look: { ...sen.look },
+      said: sen.said,
+      saidText: sen.said ? SIDE_TEXT[sen.said] : "-",
+      line: sen.line,
+      leaning: sen.leaning,
+      oddsText: p.motion ? pct(sen.odds) : "-",
+      lobbied: sen.lobbied,
+      feeText: formatMoney(sen.fee),
+      canLobby: p.lobbying && !sen.lobbied && s.cash >= sen.fee,
+      truth: sen.truth,
+      truthText: sen.truth === null ? "-" : `${sen.truth}%`,
+      truthLabel: sen.truthLabel,
+      record: `${sen.kept} kept · ${sen.broken} broken`,
+      recent: sen.log.slice(-4).map((r) => ({ title: r.title, said: SIDE_TEXT[r.said], voted: SIDE_TEXT[r.voted], kept: r.kept, lobbied: r.lobbied })),
+    })),
+    last,
+    held: p.held,
+  };
+}
+
+function senateOf(i: HudInput): SenateVM {
+  const tracker = trackerOf(i.snap);
+  return { open: (i.senateOpen ?? false) && tracker !== null, tracker, bill: billOf(i.snap) };
+}
+
+/** The Hearing's witness table: the senators, the meters, and what each answer would move. */
+function hearingOf(s: Snapshot): HearingVM | null {
+  const h = s.hearing;
+  if (!h.enabled) return null;
+  const senators: SenatorVM[] = h.senators.map((sen) => ({ id: sen.id, name: sen.name, role: sen.role, seat: sen.seat, look: { ...sen.look }, asking: sen.asking, answered: sen.answered }));
+  const labels = { ...MOVE_LABEL, trust: h.labels.trust, capture: h.labels.capture };
+  const answers = (h.current?.options ?? []).map((o) => ({
+    style: o.key,
+    moves: (["trust", "capture", "hype", "heat"] as const).filter((m) => o[m] !== 0).map((m) => ({
+      meter: m, label: labels[m], amount: o[m], arrows: arrows(o[m]), good: m === "capture" ? null : m === "heat" ? o[m] < 0 : o[m] > 0,
+    })),
+  }));
+  const asked = Math.min(h.asked + 1, h.total);
+  return {
+    stage: h.stage,
+    topic: h.topic,
+    senators,
+    asking: senators.find((x) => x.asking) ?? null,
+    asked,
+    total: h.total,
+    progressText: h.verdict ? "Adjourned" : `Question ${asked} of ${h.total}`,
+    trust: { label: h.labels.trust, value: h.trust, text: String(Math.round(h.trust)) },
+    capture: { label: h.labels.capture, value: h.capture, text: String(Math.round(h.capture)) },
+    answers,
+    verdict: h.verdict,
+  };
+}
+
+/** The yacht's leaked group chat, as the lab's rivals wrote it. */
+function leakOf(s: Snapshot): LeakVM | null {
+  const y = s.yacht;
+  if (!y.enabled || y.chat.length === 0) return null;
+  const members = [...new Set(y.chat.filter((m) => !m.system && m.from !== "yacht").map((m) => m.name))];
+  return { yachtName: y.yachtName, groupName: y.groupName, rsvp: y.rsvp ?? "sign", members: `${members.join(", ")} + the yacht`, messages: y.chat.map((m) => ({ ...m })) };
+}
+
+const PREP_TEXT: Record<string, string> = { prep: "Prepped the paperwork", tidy: "Tidied up", usual: "Business as usual" };
+const signed = (n: number) => `${n > 0 ? "+" : n < 0 ? "\u2212" : ""}${Math.abs(Math.round(n))}`;
+
+/** The auditors' report card, from the last one they published. */
+function reportOf(s: Snapshot): ReportCardVM | null {
+  const r = s.audit.report;
+  if (!r) return null;
+  const move = (n: number, what: string, good: boolean) => ({ text: `${signed(n)} ${what}`, tone: (n === 0 ? "neutral" : good === n > 0 ? "good" : "bad") as ToneVM });
+  return {
+    visitText: `Visit ${r.visit} \u00b7 ${formatDate(r.day)}`,
+    lab: s.labName,
+    grades: r.grades.map((g) => ({ id: g.id, label: g.label, grade: g.grade, score: Math.round(g.score), comment: g.comment })),
+    overall: r.overall,
+    prepText: r.prep ? (PREP_TEXT[r.prep] ?? null) : null,
+    stamp: r.caught ? "CAUGHT HIDING" : r.swarm ? "SWARM FOUND" : null,
+    caught: r.caught,
+    swarm: r.swarm,
+    inspected: r.inspected.map((k) => (defs().buildings as Record<string, { name: string } | undefined>)[k]?.name ?? k),
+    moves: [move(r.moves.trust, "trust", true), move(r.moves.heat, "heat", false), move(r.moves.hype, "hype", true)].filter((m) => m.text[0] !== "0"),
+    headline: r.headline,
+  };
+}
+
+/** The pin over the auditors: where they are and what they are doing. */
+function auditOf(s: Snapshot): AuditVM {
+  const a = s.audit;
+  const evals = a.phase === "evaluating";
+  const line = !a.enabled ? null
+    : a.stage === "countdown" && a.daysLeft !== null ? (a.daysLeft <= 0 ? "Auditors arrive today" : `Auditors arrive in ${a.daysLeft} day${a.daysLeft === 1 ? "" : "s"}`)
+    : a.stage !== "visit" || a.visitors === 0 ? null
+    : evals ? "Running their own evals"
+    : a.phase === "inspecting" && a.stop ? `Inspecting the ${a.stop.name}`
+    : a.phase === "huddling" ? "Comparing notes. Nobody breathe."
+    : a.phase === "leaving" ? "Leaving, with footnotes"
+    : a.stop ? `On their way to the ${a.stop.name}` : null;
+  const progress = a.progress === null ? null : Math.max(0, Math.min(1, a.progress));
+  return {
+    enabled: a.enabled,
+    stage: a.stage,
+    daysLeft: a.daysLeft,
+    visitors: a.visitors,
+    phase: a.phase,
+    line,
+    progress,
+    progressText: progress === null ? "" : `${Math.round(progress * 100)}%`,
+    stopsText: a.stops > 0 ? `${Math.min(a.done + (a.stop ? 1 : 0), a.stops)}/${a.stops}` : "",
+    evals,
+    boxed: a.boxed,
   };
 }
 
@@ -327,6 +618,7 @@ function thoughtsOf(i: HudInput): ThoughtRowVM[] {
 
 function arenaOf(i: HudInput): ArenaVM {
   const race = i.snap.race;
+  const leaked = new Set(i.snap.disasters.leaked);
   return {
     open: i.arena.open,
     alert: i.arena.alert,
@@ -352,12 +644,79 @@ function arenaOf(i: HudInput): ArenaVM {
       deltaText: r.delta > 0 ? `↑${r.delta}` : r.delta < 0 ? `↓${-r.delta}` : "",
       color: r.color,
       moved: i.arena.moved[r.id] ?? null,
-      title: r.model ? `Latest model: ${r.model}${r.open ? " (open weights)" : ""}` : r.you ? "You" : "No product. Big valuation.",
+      title: r.neo ? `${r.neo.founder}'s lab: "${r.neo.manifesto}"` : leaked.has(r.id) ? `Running on your leaked weights${r.model ? ` (${r.model})` : ""}` : r.model ? `Latest model: ${r.model}${r.open ? " (open weights)" : ""}` : r.you ? "You" : "No product. Big valuation.",
+      leak: leaked.has(r.id),
+      ...neoTag(r.neo, i.snap.day),
     })),
   };
 }
 
+/** How long a neo lab is NEW on the Arena. */
+const NEW_DAYS = 14;
+function neoTag(neo: Snapshot["race"]["board"][number]["neo"], day: number): Pick<ArenaRowVM, "tag" | "tagText"> {
+  if (!neo) return { tag: null, tagText: "" };
+  const tag = neo.nemesis ? "nemesis" : day - neo.founded < NEW_DAYS ? "new" : "alumni";
+  return { tag, tagText: tag.toUpperCase() };
+}
+
 const pct = (n: number) => `${Math.round(n * 100)}%`;
+
+// ---- Disasters (FLT-32) ----------------------------------------------------------------------------------------------
+
+const RISK_KEYS: readonly RiskVM[] = ["off", "rare", "normal", "chaos"];
+
+function stageOf(phase: string): DisasterStageVM {
+  if (phase === "warning" || phase === "aftermath" || phase === "done") return phase;
+  if (phase === "active" || phase === "spread") return "active";
+  return "response";
+}
+
+const meter = (value: number, words: readonly string[]): MeterVM => {
+  const v = Math.round(Math.max(0, Math.min(100, value)));
+  const word = words[Math.min(words.length - 1, Math.floor(v / (100 / words.length)))]!;
+  return { value: v, word, text: `${v} · ${word}` };
+};
+
+function disastersOf(i: HudInput, enabled: boolean): DisastersVM {
+  const d = i.snap.disasters;
+  const nameOf = (id: string) => d.menu.find((m) => m.id === id)?.name ?? d.runs.find((r) => r.id === id)?.name ?? "disaster";
+  const running = d.runs.map((r): DisasterRunVM => {
+    const working = r.job !== null;
+    const title = working ? (STAFF[r.job as keyof typeof STAFF]?.title ?? r.job) : "";
+    return {
+      id: r.id,
+      name: r.name,
+      phase: r.phase,
+      stage: stageOf(r.phase),
+      phaseLabel: PHASE_LABELS[r.phase] ?? r.phase,
+      line: DISASTER_LINES[r.id]?.[r.phase] ?? d.menu.find((m) => m.id === r.id)?.blurb ?? "",
+      progress: working ? r.progress : null,
+      progressText: working ? `${title} ${pct(r.progress)}` : null,
+      days: r.days,
+      daysText: `Day ${r.days + 1}`,
+    };
+  });
+  const understaffed = d.diverted.map((u): UnderstaffedVM => {
+    const all = u.diverted >= u.total;
+    const copy = UNDERSTAFFED[u.job];
+    const title = STAFF[u.job].title;
+    const vars = { n: String(u.diverted), total: String(u.total), name: nameOf(u.by) };
+    return { job: u.job, title, diverted: u.diverted, total: u.total, all, text: copy ? fillTemplate(all ? copy.all : copy.some, vars) : `${u.diverted} of ${u.total} ${title} on the ${vars.name}.` };
+  });
+  const calm = !d.calm ? null : i.snap.models === 0 ? "Calm start: nothing random until your first release." : `Calm start: nothing random before day ${d.calmDay}.`;
+  return {
+    enabled,
+    open: enabled && (i.disastersOpen ?? false),
+    risk: d.risk,
+    risks: RISK_KEYS.map((key) => ({ key, label: RISK_COPY[key].label, blurb: RISK_COPY[key].blurb, active: key === d.risk })),
+    calm: d.risk === "off" ? null : calm,
+    menu: d.menu.map((m) => ({ id: m.id, name: m.name, blurb: m.blurb, tags: m.tags.map((key) => ({ key, label: TAG_LABELS[key] ?? key })), active: m.active, available: m.available, reason: m.reason ?? null })),
+    running,
+    understaffed,
+    trust: meter(d.trust, TRUST_WORDS),
+    heat: meter(d.heat, HEAT_WORDS),
+  };
+}
 const grouped = (n: number) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
 /** The forced-response card's numbers, straight from the snapshot: how baked the run is, what shipping now adds, the bug odds. */
@@ -472,7 +831,8 @@ const OFF_LEAPFROG: LeapfrogVM = {
 
 function outcomeOf(i: HudInput): OutcomeVM | null {
   const s = i.snap;
-  if (s.outcome === "playing" || i.outcomeDismissed) return null;
+  // An ending is its own card: the front page (endingOf).
+  if (s.outcome === "playing" || s.outcome === "ended" || i.outcomeDismissed) return null;
   const won = s.outcome === "won";
   const met = s.goals.filter((g) => g.met).length;
   return {
@@ -490,6 +850,114 @@ function outcomeOf(i: HudInput): OutcomeVM | null {
     ],
     note: won ? "All three milestones met." : `${met} of ${s.goals.length} milestones met.`,
   };
+}
+
+const NO_SHARE: ShareVM = { status: "idle", card: null, native: false, note: null };
+
+/** How the lab ended, on a Frontier Times front page (FLT-11). */
+function endingOf(i: HudInput): EndingVM | null {
+  const view = i.snap.endings;
+  const e = view?.ending;
+  if (!view || !e || i.snap.outcome !== "ended" || i.outcomeDismissed) return null;
+  const st = view.stats;
+  const n = (x: number) => Math.round(x).toLocaleString("en-US");
+  const { photo = null, ...share } = i.share ?? { ...NO_SHARE, photo: null };
+  const social = i.social;
+  const result = { ending: e.id, day: st.days, vibes: st.peakVibes, models: st.models };
+  const link = `${social?.linkBase ?? ""}?${challengeQuery({ ...result, seed: view.seed, daily: view.dailyKey })}`;
+  const streak = social && social.streak >= 2 ? { days: social.streak, text: streakText(social.streak) } : null;
+  const friend = challengeOn(i);
+  const verdict = friend ? compareRuns(result, friend) : null;
+  const versus = friend && verdict ? { line: challengeLine(friend), verdict, text: VERDICT_TEXT[verdict] } : null;
+  return {
+    id: e.id,
+    title: e.title,
+    tone: e.tone,
+    keepPlaying: e.keepPlaying,
+    lab: i.snap.labName,
+    paper: { masthead: "The Frontier Times", ...e.paper, photo },
+    stats: [
+      { key: "days", emoji: "📅", label: "Days", text: n(st.days) },
+      { key: "vibes", emoji: "✨", label: "Peak Vibes", text: n(st.peakVibes) },
+      { key: "models", emoji: "🚀", label: "Models released", text: n(st.models) },
+      { key: "protesters", emoji: "📣", label: "Peak protesters", text: n(st.peakProtesters) },
+      { key: "escaped", emoji: "🏃", label: "Agents escaped", text: n(st.agentsEscaped) },
+    ],
+    strip: view.strip,
+    // The clipboard gets the streak, the head-to-head and the link too: the summary is what lands in the group chat.
+    summary: [view.summary, ...(streak ? [`🔥 ${streak.text}`] : []), ...(versus ? [`🆚 ${versus.text}`] : []), `Beat it: ${link}`].join("\n"),
+    daily: view.daily ? `Today's lab · ${view.daily}` : null,
+    share,
+    labNumber: view.labNumber,
+    next: e.next,
+    refound: view.refound ? { name: view.refound.name, labNumber: view.refound.labNumber, perks: view.refound.perks.map((p) => ({ ...p })) } : null,
+    streak,
+    versus,
+    link,
+  };
+}
+
+/** The friend's challenge applies while this is their lab: the same seed, and the first lab on it. */
+function challengeOn(i: HudInput): Challenge | null {
+  const c = i.social?.challenge;
+  const view = i.snap.endings;
+  return c && view && view.seed === c.seed && view.labNumber === 1 ? c : null;
+}
+
+/** The banner a friend's link opens on: "Your friend's lab was Captured on day 212. Beat it?" */
+function challengeOf(i: HudInput): ChallengeVM | null {
+  const c = challengeOn(i);
+  if (!c || !i.social?.challengeOpen || i.snap.endings?.ending) return null;
+  const def = endingById(c.ending);
+  const n = (x: number) => Math.round(x).toLocaleString("en-US");
+  return {
+    line: challengeLine(c),
+    ask: "Beat it?",
+    ending: def?.title ?? c.ending,
+    tone: def?.tone ?? "neutral",
+    stats: `${n(c.vibes)} peak Vibes · ${c.models === 1 ? "1 model" : `${n(c.models)} models`}`,
+    daily: i.snap.endings?.daily ? `Today's lab · ${i.snap.endings.daily}` : null,
+    cta: "Beat it",
+  };
+}
+
+/** The Memo: its countdown while it's coming (hidden under the card itself), then its extra edition until it's read. */
+function memoOf(i: HudInput): MemoVM | null {
+  const m = i.snap.endings?.memo;
+  if (!m || i.snap.endings?.ending) return null;
+  const key = `${i.snap.endings!.seed}:${m.day}`;
+  if (m.phase === "coming") {
+    if (i.snap.event) return null;
+    const when = m.daysLeft === 0 ? "today" : m.daysLeft === 1 ? "tomorrow" : `${m.daysLeft} days`;
+    const progress = 1 - Math.min(1, m.daysLeft / ENDING_RULES.memo.countdownDays);
+    return { phase: "coming", key, daysLeft: m.daysLeft, progress, title: `The Memo · ${when}`, line: m.line, extra: null };
+  }
+  // A late edition, not a standing one: a game loaded a week after the Memo doesn't reprint it.
+  if (!m.extra || !m.choice || i.social?.memoSeen === key || i.snap.day - m.day > 2) return null;
+  return {
+    phase: "extra",
+    key,
+    daysLeft: 0,
+    progress: 1,
+    title: "The Memo",
+    line: m.chip ?? "",
+    extra: {
+      masthead: "The Frontier Times",
+      kicker: m.extra.kicker,
+      headline: m.extra.headline,
+      deck: m.extra.deck,
+      choice: m.label ?? m.choice,
+      effects: [...m.effects],
+      reactions: m.reactions.map((r) => ({ name: r.name, role: r.role, text: r.text })),
+    },
+  };
+}
+
+/** The Takeover under way: the lab's own model is in charge. */
+function takeoverOf(i: HudInput): TakeoverVM | null {
+  const view = i.snap.endings;
+  if (!view?.managedBy) return null;
+  return { manager: view.managedBy, title: `Frontier Lab Tycoon (managed by ${view.managedBy})`, placed: view.placed, thanks: view.thanks };
 }
 
 const editionRow = (e: Edition, unread: readonly string[]): EditionRowVM => ({
@@ -562,34 +1030,114 @@ function photoOf(i: HudInput): PhotoVM {
   };
 }
 
+/** A toast that says what a standing warning already says is the warning: it is shown once. */
+const spokenToasts = (i: HudInput) => i.toasts.filter((t) => !i.snap.warnings.includes(t.text));
+
+/**
+ * One standing hint at a time, and none while a toast is talking or the coach is (it has the floor); the gateway hint is redundant
+ * once a toast has said it, and pointless while the Gateway is still locked.
+ */
+function standingHints(i: HudInput, play: PlayableInput): HudVM["hints"] {
+  if (spokenToasts(i).length > 0 || play.coach) return [];
+  return !i.snap.hasGateway && !i.toldGateway && play.buildings.has("gateway") ? ["gateway"] : i.tapHint ? ["tap"] : [];
+}
+
+function confirmOf(s: Snapshot): ConfirmVM | null {
+  const p = s.pendingConfirm;
+  if (!p) return null;
+  return {
+    kind: p.kind,
+    cost: p.cost,
+    costText: p.cost > 0 ? formatMoney(p.cost) : "free",
+    runwayAfter: p.runwayAfter,
+    runwayText: p.runwayAfter === null ? "∞" : `${p.runwayAfter.toFixed(1)} mo`,
+    message: p.message,
+  };
+}
+
+function helpOf(items: readonly BuildItemVM[]): HudVM["help"] {
+  const buildings = items
+    .filter((it) => !it.isBulldoze && !it.panel)
+    .map((it) => ({ kind: it.kind, name: it.name, line: HELP_BUILDINGS[it.kind] ?? `${it.name}: ${it.blurb ?? ""}`.trim() }));
+  return { title: HELP_TITLE, loop: [...HELP_LOOP], buildings, numbers: HELP_NUMBERS.map((n) => ({ ...n })) };
+}
+
+/** The note's one goal: the ladder rung's, or once the ladder is done the next open objective ("Top 3 on the Arena in Era 3 · Arena #6, need top 3"). */
+function goalOf({ text, current, target, status, lowerIsBetter, objective }: PlayableInput["goal"]): GoalVM {
+  const def = objective ? defs().goals.find((d) => d.id === objective) : undefined;
+  // The sim says the progress in words when a count alone would not ("$26K of $40K a day · 3 of 12 visitors").
+  const progress = status ?? (def?.unit === "rank" ? goalProgressText(def, current) : `${Math.min(current, target)}/${target}`);
+  // A rank goal: #6 of a Top 3 is half way.
+  const ratio = target > 0 ? Math.max(0, Math.min(1, lowerIsBetter ? (current > 0 ? target / current : 0) : current / target)) : 0;
+  return { text, current, target, line: text ? `${text} · ${progress}` : "", progressText: progress, ratio };
+}
+
+/** What the lab has earned: only these tools are in the build panel (the bulldozer always is), and the Staff tile follows the payroll. */
+function earnedItems(items: BuildItemVM[], play: PlayableInput): BuildItemVM[] {
+  return items.filter((it) => (it.isBulldoze ? true : it.kind === "staff" ? play.visible.staff : it.kind === "senate" ? true : it.isPath || play.buildings.has(it.kind)));
+}
+
 export function hudViewModel(i: HudInput): HudVM {
+  const play = playableOf(i.snap);
   const build = buildOf(i);
+  const items = earnedItems(build.items, play);
   const { event, era } = eventOf(i);
+  // Snapshots from before FLT-33 (fixtures, old links) have no `factions`: that is "off".
+  const chips = factionChips(i.snap.factions);
   return {
     apiVersion: SKIN_API_VERSION,
     stats: statsOf(i),
     training: trainingOf(i.snap),
     objectives: objectivesOf(i.snap),
-    inspector: inspectorOf(i.snap.inspect, i.follow, i.snap.labName),
-    buildItems: build.items,
+    inspector: inspectorOf(i.snap.inspect, i.follow, i.snap.labName, chips, i.lookLabels),
+    buildItems: items,
     buildTip: build.tip,
     speed: speedOf(i.speed),
-    staff: staffOf(i),
-    bubbles: bubblesOf(i),
+    staff: staffOf(i, play.staff),
+    senate: senateOf(i),
+    bubbles: bubblesOf(i, chips),
     ticker: i.news.slice(-TICKER_ITEMS).map((n) => ({ id: n.id, text: n.text, tone: n.tone })),
-    toasts: i.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })),
+    toasts: spokenToasts(i).map((t) => (t.batch ? { id: t.id, text: t.text, tone: t.tone, batch: t.batch.map((b) => ({ text: b.text, tone: b.tone })) } : { id: t.id, text: t.text, tone: t.tone })),
     // One hint at a time, and none while a toast is talking; the gateway hint is redundant once a toast has said it.
-    hints: i.toasts.length > 0 ? [] : !i.snap.hasGateway && !i.toldGateway ? ["gateway"] : i.tapHint ? ["tap"] : [],
+    hints: standingHints(i, play),
+    warnings: [...i.snap.warnings],
+    progress: {
+      level: play.level,
+      levelName: play.levelName,
+      goal: goalOf(play.goal),
+      teasers: play.teasers.map((t) => ({ ...t })),
+    },
+    visible: play.visible,
+    coach: play.coach,
+    unlock: play.unlock,
+    help: i.helpOpen ? helpOf(items) : null,
+    confirm: confirmOf(i.snap),
     event,
     thoughtsPanel: thoughtsOf(i),
     arena: arenaOf(i),
     leapfrog: leapfrogOf(i),
+    papers: papersOf(i.snap, play.visible.papers, i.papersOpen ?? false),
+    // A card, an era or the ending outranks a paper moment: it waits (the day window allowing) until they close.
+    paperMoment: event || era ? null : paperMomentOf(i.snap, play.visible.papers, i.dismissed ?? []),
+    collusion: collusionOf(i.snap),
+    crumbWiki: event || era ? null : crumbWikiOf(i.snap, i.dismissed ?? []),
+    factions: factionsOf(i.snap.factions, i.factionsOpen ?? false),
     eraCard: era,
     outcome: outcomeOf(i),
+    audit: auditOf(i.snap),
+    ending: endingOf(i),
+    takeover: takeoverOf(i),
+    memo: memoOf(i),
+    challenge: challengeOf(i),
     newsroom: newsroomOf(i),
     sound: soundOf(i),
     photoMode: photoOf(i),
+    // A card needs the player: the beat makes way. Photo mode hides it with the rest of the HUD.
+    beat: i.beat && !event && !era && !i.photo.on ? { ...i.beat, kicker: BEAT_KICKER[i.beat.kind] ?? "Meanwhile", skipLabel: "Skip »", action: beatActionOf(i.beat.kind, i.snap) } : null,
     skins: i.skins,
+    mods: i.mods ?? NO_MODS_VM,
+    disasters: disastersOf(i, play.visible.disasters),
+    drama: i.drama ?? NO_DRAMA_VM,
     layout: { width: i.viewport.width, height: i.viewport.height, phone: i.viewport.width <= 480, compact: i.viewport.width <= 640, tall: i.viewport.height >= 800 },
   };
 }

@@ -1,11 +1,12 @@
 // The race's slice of the World. Plain JSON, like everything in GameState.
-import { RIVAL_DEFS } from "../../content/rivals";
 import { arenaScore, YOU } from "../../content/rivals";
 import { initialStored } from "../machines/run";
 import type { GameState } from "../types";
 import { collusionScore } from "../collusion/scores";
+import { neoRows } from "../neolabs/driver";
 import { eraMachine, type EraStored } from "./era";
 import { rivalMachine, type RivalStored } from "./rival";
+import { defs } from "../defs";
 
 export interface BoardRow {
   id: string;
@@ -25,7 +26,7 @@ export interface RaceState {
   era: EraStored;
   /** The R&D multiplier as of the last daily check. */
   mult: number;
-  /** One machine per rival, in RIVAL_DEFS order. */
+  /** One machine per rival, in defs().rivals order. */
   rivals: RivalStored[];
   /** The Frontier Arena as of the last weekly update, best first. */
   board: BoardRow[];
@@ -53,17 +54,19 @@ export interface RaceState {
 export const AUCTION_FIRST_DAY = 40;
 
 /** Your row is last among equals: ties go to the lab with the better press. */
-export function rankBoard(state: Pick<GameState, "capability" | "hype"> & Partial<Pick<GameState, "collusion" | "day">>, rivals: RivalStored[]): BoardRow[] {
+export function rankBoard(state: Pick<GameState, "capability" | "hype"> & Partial<Pick<GameState, "collusion" | "day" | "neoLabs">>, rivals: RivalStored[]): BoardRow[] {
   const rows: BoardRow[] = rivals.map((r) => ({ id: r.context.id, score: arenaScore(r.context.capability, r.context.hype) }));
   const score = collusionScore({ collusion: state.collusion, day: state.day ?? 0 }, arenaScore(state.capability, state.hype));
   if (score !== null) rows.push({ id: YOU, score });
+  // Neo labs (FLT-26, FLT-20): labs your own people founded.
+  rows.push(...neoRows(state));
   return rows.sort((a, b) => b.score - a.score);
 }
 
 export const ranksOf = (board: BoardRow[]): Record<string, number> => Object.fromEntries(board.map((r, i) => [r.id, i + 1]));
 
 export function createRace(state: Pick<GameState, "capability" | "hype">): RaceState {
-  const rivals = RIVAL_DEFS.map((d) =>
+  const rivals = defs().rivals.map((d) =>
     initialStored(rivalMachine, {
       id: d.id,
       personality: d.personality,

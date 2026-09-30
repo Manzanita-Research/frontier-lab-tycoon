@@ -15,7 +15,9 @@ export interface FramesApi {
 
 export class Frames extends Context.Service<Frames, FramesApi>()("@flt/Frames") {}
 
-const MAX_DT = 0.25;
+// Keep ordinary low-FPS frames at real 1× speed. Still discard long tab sleeps;
+// the app also caps each catch-up at 40 fixed sim ticks.
+const MAX_DT = 1;
 
 /** requestAnimationFrame, for as long as the layer's scope lives. */
 export const framesBrowser = Layer.effect(

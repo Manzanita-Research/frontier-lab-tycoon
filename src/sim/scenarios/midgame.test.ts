@@ -1,10 +1,11 @@
-import { getReach, isReachable, tileIndex, buildingAt, isPathTile, rectContains } from "../pathfind";
+import { getReach, isReachable, tileIndex, isPathTile } from "../pathfind";
 import { openEventOf } from "../events";
 import { outcomeOf } from "../goals";
+import { progressOf } from "../progression";
 import { eraOfState } from "../race/race";
 import { tick } from "../tick";
 import { SimHandle } from "../../app/sim";
-import { createMidgameScenario, MIDGAME_SEED, midgameOpeningNews, midgameOpeningThoughts, walkerOnCampus } from "./midgame";
+import { createMidgameScenario, MIDGAME_SEED, midgameOpeningNews, midgameOpeningThoughts, walkerOnCampus, walkerPlaced } from "./midgame";
 
 // FNV-1a, the same deliberately simple hash used by sim/golden.test.ts, over the entire persisted World.
 function digest(s: unknown): string {
@@ -19,17 +20,33 @@ describe("midgame scenario", () => {
   it("replays ordinary commands and ticks to the same whole-world golden", () => {
     const again = createMidgameScenario();
     expect(again).toEqual(s);
-    // Includes the dormant arc entries registered by FLT-18; its optional feature stays off here.
-    expect(digest(s)).toBe("8906ff9f");
+    // FLT-49 preserves the full starter-campus preset, completes its ladder, and replays
+    // paid confirmations. Changed movement/attendance draws shift the real opening day.
+    // FLT-37: the campus it starts from wakes every earned pack, so Papers and Collusion now run in its 480 days too.
+    // FLT-52: and the Hearing, the yacht summit, Defection, the Poaching War, Evals Without Borders, Regulatory Capture
+    // and the Promise Tracker.
+    // FLT-33/25: the earned factions wake with the campus and argue all 480 days; the water crowd escalates through its arc.
+    // FLT-11 adds The Memo's dormant arc (arcs.memo); take it out and the World hashes to the old c4310492.
+    // FLT-51 tags every toast (source, importance, reply); the first digest strips the tags (on the train it matched FLT-52).
+    // FLT-56: the auditors huddle before they leave and the grade lingers, which moves the opening a few days, and the
+    // Hearing's twelve new questions change what the senators ask. Phase 2: the motions' passes and fails nudge the
+    // factions and last longer.
+    // Rename (#71): Very Safe SI is Super Super AI (id supersuper) and MetaMeta's full name changed; names and ids are in the World.
+    expect({
+      untagged: digest({ ...s, toasts: s.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) }),
+      full: digest(s),
+    }).toEqual({ untagged: "083910db", full: "4b179e05" }); // were 06ccd627 / 31b29e51 on the train before the rename
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);
-    expect(s.day).toBe(426);
+    expect(s.day).toBeGreaterThanOrEqual(420);
+    expect(s.day).toBeLessThanOrEqual(480);
     expect(s.buildings.length).toBeGreaterThanOrEqual(14);
     expect(s.buildings.length).toBeLessThanOrEqual(20);
     // Operations staff are rendered walkers too; count both populations, rather than inventing agent bonuses.
     expect(s.walkers.length + s.staff.length).toBeGreaterThanOrEqual(150);
-    expect(s.walkers.filter((w) => w.kind === "protester").length).toBe(40);
+    // The water crowd at its cap; FLT-25's counter-protest may have brought the Water Truthers Truthers too.
+    expect(s.walkers.filter((w) => w.kind === "protester" && w.crowd === undefined).length).toBe(40);
     expect(eraOfState(s)).toBe(2);
     const ready = s.training.context.progress / s.training.context.cost;
     expect(ready).toBeGreaterThanOrEqual(0.6);
@@ -40,6 +57,8 @@ describe("midgame scenario", () => {
     expect(s.leapfrog.last?.claims.length).toBeGreaterThan(0);
     expect(openEventOf(s)).toBeNull();
     expect(outcomeOf(s)).toBe("playing");
+    // The ladder is done (three models shipped), so the goal note names the next open objective, not a met rung (FLT-48).
+    expect(progressOf(s).goal).toMatchObject({ text: "Reach Era 3: Superhuman Coder", current: 2, target: 3 });
     const reach = getReach(s);
     expect(s.buildings.every((b) => isReachable(s, b) && !b.broken)).toBe(true);
     expect(s.grid.paths.every((on, i) => !on || !!reach.tiles[i])).toBe(true);
@@ -48,7 +67,7 @@ describe("midgame scenario", () => {
     expect(walkerOnCampus(s)).toBe(true);
     for (const w of [...s.walkers, ...s.staff]) {
       const x = Math.floor(w.x), z = Math.floor(w.z);
-      expect(isPathTile(s, x, z) || !!buildingAt(s, w.x, w.z) || rectContains(s.gate, w.x, w.z)).toBe(true);
+      expect(walkerPlaced(s, w)).toBe(true);
       if (isPathTile(s, x, z)) expect(getReach(s).tiles[tileIndex(s, x, z)]).toBe(1);
     }
     const resumed = JSON.parse(JSON.stringify(s));
@@ -67,11 +86,11 @@ describe("midgame scenario", () => {
         latestDrop: s.leapfrog.last, digest: digest(s) }));
     }
   });
-  it("opens with the curated existing bubbles and the SOTA joke without changing the World", () => {
+  it("opens with the curated existing bubbles and a whole, short headline ahead of the SOTA joke, without changing the World", () => {
     const before = digest(s);
     const thoughts = midgameOpeningThoughts(s);
     expect(thoughts.map((t) => t.text)).toEqual([
-      "The loss went down. I refuse to touch anything.",
+      "They chant in perfect 4/4. Our uptime isn't even that stable.",
       "I calculated my water usage. I'd rather not say.",
       "Someone hand me a water. Not from them.",
     ]);
@@ -80,8 +99,12 @@ describe("midgame scenario", () => {
       expect(s.walkers.some((w) => w.id === t.walkerId && w.machine.value !== "inside")).toBe(true);
     }
     const news = midgameOpeningNews(s);
-    expect(news[0]?.text).toBe("GPQA-Diamond-Encrusted has a new champion, Superintelligence-Preview-12. The previous champion learned of this from the ticker (*at a temperature we would rather not discuss)");
-    expect(news[0]?.day).toBe(s.day);
+    // FLT-48 hero: the tape opens on a line that fits the ticker whole; the fresh SOTA claim follows it that week.
+    // FLT-52: with the wave packs running, this World's SOTA week has no valuation line, so the tape opens on the SOTA claim.
+    const valuation = s.news.some((n) => n.day >= s.day - 7 && /valuation rises \d+% on news that it exists/.test(n.text));
+    expect(news[0]?.text).toMatch(valuation ? /valuation rises \d+% on news that it exists/ : /has a new champion|SOTA|state-of-the-art|posts a new best|tops .*says|leaderboard:/);
+    expect(news[0]?.day).toBeGreaterThanOrEqual(s.day - 7);
+    expect(news.some((n) => n.day === s.day && /has a new champion|SOTA|state-of-the-art|posts a new best|tops .*says|leaderboard:/.test(n.text))).toBe(true);
     expect(digest(s)).toBe(before);
     // Delayed HUD mounts and repeated paused publishes must still start with the chosen headline.
     const handle = new SimHandle(JSON.parse(JSON.stringify(s)), true);

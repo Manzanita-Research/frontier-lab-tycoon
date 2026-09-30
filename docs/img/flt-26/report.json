@@ -1,0 +1,97 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "00b8c60bdeb6679ae2cd69c310664855e2baebc4"
+  },
+  "head": {
+    "branch": "flt-26-20-defection-poaching",
+    "sha": "d27b0c8",
+    "dirty": true
+  },
+  "seconds": 175.226,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "defection-chat",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-26/before/defection-chat.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-26/after/defection-chat.png",
+      "title": "Defection: a VC pitches your star at the Kombucha Bar (speech bubbles)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-26/compare/defection-chat.png",
+      "changed": 0.33685725308641973
+    },
+    {
+      "scene": "defection-card",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-26/before/defection-card.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-26/after/defection-card.png",
+      "title": "Defection: the resignation letter, DRAFT v7",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-26/compare/defection-card.png",
+      "changed": 0.337054012345679
+    },
+    {
+      "scene": "defection-exit",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-26/before/defection-exit.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-26/after/defection-exit.png",
+      "title": "Defection: your star walks out with a box",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-26/compare/defection-exit.png",
+      "changed": 0.12566512345679012
+    },
+    {
+      "scene": "defection-manifesto",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-26/before/defection-manifesto.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-26/after/defection-manifesto.png",
+      "title": "Defection: the neo lab's MANIFESTO.txt",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-26/compare/defection-manifesto.png",
+      "changed": 0.26229552469135803
+    },
+    {
+      "scene": "defection-arena",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-26/before/defection-arena.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-26/after/defection-arena.png",
+      "title": "Defection: the neo lab on the Arena board, tagged",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-26/compare/defection-arena.png",
+      "changed": 0.14640354938271605
+    },
+    {
+      "scene": "poach-offer",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-26/before/poach-offer.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-26/after/poach-offer.png",
+      "title": "Poaching War: the recruiter email",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-26/compare/poach-offer.png",
+      "changed": 0.29550462962962964
+    },
+    {
+      "scene": "defection-card-karaoke",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-26/before/defection-card-karaoke.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-26/after/defection-card-karaoke.png",
+      "title": "Defection: the resignation letter in another skin (base Drama slot)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-26/compare/defection-card-karaoke.png",
+      "changed": 0.6826057098765432
+    },
+    {
+      "scene": "defection-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-26/before/defection-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-26/after/defection-phone.png",
+      "title": "Defection: the resignation letter on a phone",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-26/compare/defection-phone.png",
+      "changed": 0.7565826649653664
+    },
+    {
+      "scene": "poach-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-26/before/poach-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-26/after/poach-phone.png",
+      "title": "Poaching War: the recruiter email on a phone",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-26/compare/poach-phone.png",
+      "changed": 0.6688563312674687
+    }
+  ],
+  "errors": []
+}

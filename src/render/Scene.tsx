@@ -4,6 +4,7 @@ import { Suspense, lazy, useRef } from "react";
 import { debugParams } from "../app/game";
 import { SoundLayer } from "../audio/SoundLayer";
 import { PressCamera } from "./PressCamera";
+import { ProbeView } from "./ProbeView";
 import { Buildings } from "./buildings/Buildings";
 import { CAMERA_OFFSET, CameraRig } from "./fx/CameraRig";
 import { FxDirector } from "./fx/FxDirector";
@@ -13,9 +14,13 @@ import { ParticleLayer } from "./fx/ParticleLayer";
 import { photoAtom } from "./fx/photoState";
 import { Decor, Ground, Paths } from "./Ground";
 import { Fence } from "./Fence";
+import { NeoCampuses } from "./NeoCampuses";
+import { GradePlaque } from "./GradePlaque";
 import { Slop } from "./Slop";
 import { StaffCrew } from "./StaffCrew";
+import { VisitorGroups } from "./VisitorGroups";
 import { OverlayProjector } from "./overlay";
+import { CoachSuggestion } from "./CoachSuggestion";
 import { Placement } from "./Placement";
 import { Walkers } from "./Walkers";
 
@@ -56,16 +61,21 @@ export function Scene() {
       <Paths />
       <Slop />
       <Fence />
+      <NeoCampuses />
+      <GradePlaque />
       <Lamps />
       <Buildings />
       <Walkers />
       <StaffCrew />
+      <VisitorGroups />
       <ParticleLayer />
       <OverlayProjector />
       <Placement />
+      <CoachSuggestion />
       <CameraRig baseZoom={zoom} />
       <PhotoLayer />
       <PressCamera />
+      <ProbeView />
     </Canvas>
   );
 }

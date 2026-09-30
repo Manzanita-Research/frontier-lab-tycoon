@@ -109,10 +109,34 @@ export function clearSlop(state: GameState, i: number) {
 
 /** Once a day: when a fifth of the paths are slopped, the ticker says so (and again every couple of weeks while it stays that way). */
 export function dailySlop(state: GameState, rng: Rng) {
+  if (state.flags.firstSpillDay !== undefined && state.day >= state.flags.firstSpillDay) firstSpill(state);
   const { share } = slopStats(state);
   if (share <= SLOP_NEWS_SHARE || state.day < (state.flags.nextSlopNews ?? 0)) return;
   const pct = String(Math.round(share * 100));
   pushNews(state, rng, "slop", { pct });
-  if (state.flags.nextSlopNews === undefined) addToast(state, `${state.labName} campus now ${pct}% slop by volume. A Janitor Bot is $2K a day.`, "bad");
+  if (state.flags.nextSlopNews === undefined) addToast(state, `${state.labName} campus now ${pct}% slop by volume. A Janitor Bot is $2K a day.`, "bad", { source: "ops", importance: "you" });
   state.flags.nextSlopNews = state.day + NEWS_COOLDOWN_DAYS;
+}
+
+/** Puddles in the first spill, and how deep. */
+export const FIRST_SPILL = { tiles: 6, depth: 2 };
+
+/**
+ * FLT-58: the day after Level 3 opens, the Kombucha Bar's culture gets out, so the new Janitor Bot has something to mop
+ * before the agents have drifted far enough to make their own mess. The path tiles nearest the bar (or the gate), once.
+ */
+export function firstSpill(state: GameState) {
+  delete state.flags.firstSpillDay;
+  const bar = state.buildings.find((b) => b.kind === "kombucha");
+  const cx = bar ? bar.x + bar.w / 2 : state.gate.x + 0.5;
+  const cz = bar ? bar.z + bar.d / 2 : state.gate.z + 0.5;
+  const w = state.grid.w;
+  const near = state.grid.paths
+    .flatMap((p, i) => (p ? [{ i, d: (i % w + 0.5 - cx) ** 2 + (Math.floor(i / w) + 0.5 - cz) ** 2 }] : []))
+    .sort((a, b) => a.d - b.d || a.i - b.i)
+    .slice(0, FIRST_SPILL.tiles);
+  if (near.length === 0) return;
+  for (const { i } of near) state.slop[i] = Math.max(state.slop[i] ?? 0, FIRST_SPILL.depth);
+  state.flags.slopRev = (state.flags.slopRev ?? 0) + 1;
+  addToast(state, bar ? "The Kombucha Bar's culture has escaped onto the paths. It is alive and it is sticky." : "Something sticky is on the paths. Nobody will say what.", "bad", { source: "ops", importance: "you" });
 }

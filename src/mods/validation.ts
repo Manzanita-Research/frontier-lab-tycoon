@@ -5,6 +5,12 @@ import type { ContentApi } from "./services/content";
 import type { VocabularyApi } from "./services/vocabulary";
 import { ArcNode, ModError, suggest, type ArcData, type NamedCallData } from "./schema";
 import type { Schema } from "effect";
+import { checkCall, GUARD_NAMES, normalize, VERB_NAMES } from "../sim/verbs";
+import type { Call, DisasterDef } from "../sim/disasters/types";
+import { validateDisaster } from "../sim/disasters/validate";
+
+/** The events the sim sends a mod arc (sim/modArcs.ts). */
+export const ARC_EVENTS = ["DAY", "CHOSE"] as const;
 
 // Built-in directly loaded pack triggers remain known to the M1a checker.
 const triggers = new Set([...HEADLINES.map((line) => line.trigger), ...papersPack.content.headlines.add.map((line) => line.trigger)]);
@@ -13,8 +19,17 @@ function known(value: string, values: readonly string[], path: string) {
   if (!values.includes(value)) throw new ModError({ path, detail: `unknown value "${value}"${suggest(value, values)}` });
 }
 export function validateContent(content: ContentApi, vocabulary: VocabularyApi): void {
+  if (content.progression.length !== 5 || new Set(content.progression.map((r) => r.level)).size !== 5) throw new ModError({ path: "content.progression", detail: "expected exactly one row for each level 1–5" });
   const kinds = content.walkerKinds.map((kind) => kind.id);
   const buildings = Object.keys(content.buildings);
+  if (content.coach.length === 0) throw new ModError({ path: "content.coach", detail: "expected at least one coach line (remove the tutorial by overriding lines, not by emptying it)" });
+  content.progression.forEach((row, i) => row.buildings.forEach((kind, j) => known(kind, buildings, `content.progression[${i}].buildings[${j}]`)));
+  // FLT-37: a new building is locked until a ladder row unlocks it; say so instead of letting it vanish from the palette.
+  const laddered = new Set<string>(content.progression.flatMap((row) => row.buildings));
+  for (const [id, building] of Object.entries(content.buildings)) {
+    if (building.scenery || Reflect.get(building, "office") === true || building.locked || laddered.has(id)) continue;
+    throw new ModError({ path: `content.buildings.${id}`, detail: `no progression row unlocks "${id}"; add it to a level, e.g. content.progression.override [{ "id": "business", "buildings": ["gateway", "kombucha", "${id}"] }]` });
+  }
   for (const [id, building] of Object.entries(content.buildings)) {
     building.hosts.forEach((kind, i) => known(kind, kinds, `content.buildings.${id}.hosts[${i}]`));
     for (const [kind, serves] of Object.entries(building.serves)) {
@@ -32,8 +47,9 @@ export function validateContent(content: ContentApi, vocabulary: VocabularyApi):
     known(line.kind, kinds, `content.thoughts[${i}].kind`);
     known(line.when, [...conditions], `content.thoughts[${i}].when`);
   });
+  const cards = content.events.filter((event) => "choices" in event).map((event) => event.id);
   content.events.forEach((event, i) => {
-    if (!("choices" in event)) { validateArc(event, vocabulary, `content.events[${i}]`); return; }
+    if (!("choices" in event)) { validateArc(event, vocabulary, `content.events[${i}]`, cards); return; }
     event.choices.forEach((choice, j) => choice.effects.forEach((effect, k) => {
     const path = `content.events[${i}].choices[${j}].effects[${k}]`;
     if (effect.type === "place") known(effect.kind, buildings, `${path}.kind`);
@@ -45,12 +61,24 @@ export function validateContent(content: ContentApi, vocabulary: VocabularyApi):
   content.arcs.forEach((arc, i) => {
     if (eventIds.has(arc.id)) throw new ModError({ path: `content.arcs[${i}].id`, detail: `id "${arc.id}" is already in events` });
   });
-  content.arcs.forEach((arc, i) => validateArc(arc, vocabulary, `content.arcs[${i}]`));
+  content.arcs.forEach((arc, i) => validateArc(arc, vocabulary, `content.arcs[${i}]`, cards));
+  const benches = content.benchmarks.map((b) => b.id);
+  content.benchmarks.forEach((b, i) => { if (b.replaces !== undefined) known(b.replaces, benches, `content.benchmarks[${i}].replaces`); });
+  if (!content.benchmarks.some((b) => b.replaces === undefined)) throw new ModError({ path: "content.benchmarks", detail: "at least one benchmark must be in play from the start (no `replaces`)" });
+  if (content.mishaps.length === 0) throw new ModError({ path: "content.mishaps", detail: "the livestream needs at least one thing that can go wrong" });
+  // Disasters: the same checker the shipped pack gets (statechart, verbs and params, reachability, cards).
+  for (const disaster of content.disasters) {
+    const [first] = validateDisaster(disaster as unknown as DisasterDef, `content.disasters.${disaster.id}`);
+    if (first) {
+      const cut = first.indexOf(": ");
+      throw new ModError({ path: first.slice(0, cut), detail: first.slice(cut + 2) });
+    }
+  }
 }
 
 /** Structural reachability, ignoring guard outcomes. This is validation only, not a second sim engine.
  * Targets use sibling paths (including a compound state's descendants). Delays and inline code have no schema. */
-export function validateArc(arc: ArcData, vocabulary: VocabularyApi, path: string): void {
+export function validateArc(arc: ArcData, vocabulary: VocabularyApi, path: string, cards?: readonly string[]): void {
   const nodes = new Map<string, Schema.Schema.Type<typeof ArcNode>>();
   const collect = (states: ArcData["states"], parent: string) => {
     for (const [key, node] of Object.entries(states)) {
@@ -60,7 +88,19 @@ export function validateArc(arc: ArcData, vocabulary: VocabularyApi, path: strin
     }
   };
   collect(arc.states, "");
-  const call = (value: NamedCallData, names: readonly string[], at: string) => known(typeof value === "string" ? value : value.type, names, at);
+  // The name, then (for the sim's own Vocabulary) its parameters, with the same messages the disaster packs get.
+  const call = (value: NamedCallData, names: readonly string[], at: string) => {
+    const { type, params } = normalize(value as Call);
+    known(type, names, at);
+    const kind = names === vocabulary.guards ? "guard" : "verb";
+    if (!(kind === "guard" ? GUARD_NAMES : VERB_NAMES).includes(type)) return;
+    const [first] = checkCall(value as Call, kind, at);
+    if (first) {
+      const cut = first.indexOf(": ");
+      throw new ModError({ path: first.slice(0, cut), detail: first.slice(cut + 2) });
+    }
+    if (type === "card" && cards) known(params.id as string, cards, `${at}.params.id`);
+  };
   const edges = new Map<string, string[]>();
   known(arc.initial, Object.keys(arc.states), `${path}.initial`);
   for (const [key, node] of nodes) {
@@ -73,6 +113,7 @@ export function validateArc(arc: ArcData, vocabulary: VocabularyApi, path: strin
     for (const [i, action] of (node.entry ?? []).entries()) call(action, vocabulary.effects, `${path}.states.${key}.entry[${i}]`);
     for (const [i, action] of (node.exit ?? []).entries()) call(action, vocabulary.effects, `${path}.states.${key}.exit[${i}]`);
     for (const [event, value] of Object.entries(node.on ?? {})) {
+      known(event, ARC_EVENTS, `${path}.states.${key}.on.${event}`);
       const transitions = Array.isArray(value) ? value : [value];
       for (const [i, transition] of transitions.entries()) {
         const at = `${path}.states.${key}.on.${event}[${i}]`;
@@ -84,7 +125,9 @@ export function validateArc(arc: ArcData, vocabulary: VocabularyApi, path: strin
           targets.push(full);
         }
         if (typeof transition !== "string") {
-          if (transition.guard) call(transition.guard, vocabulary.guards, `${at}.guard`);
+          const guard = transition.guard;
+          if (Array.isArray(guard)) guard.forEach((g: NamedCallData, j) => call(g, vocabulary.guards, `${at}.guard[${j}]`));
+          else if (guard) call(guard as NamedCallData, vocabulary.guards, `${at}.guard`);
           for (const [j, action] of (transition.actions ?? []).entries()) call(action, vocabulary.effects, `${at}.actions[${j}]`);
         }
       }

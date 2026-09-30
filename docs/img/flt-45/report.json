@@ -1,0 +1,97 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "c8ad3b462476cb6b9e6eb121531f49c043cf4638"
+  },
+  "head": {
+    "branch": "flt-45-46-papers-collusion-ui",
+    "sha": "ec039e8",
+    "dirty": false
+  },
+  "seconds": 177.458,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "paper-drop",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45/before/paper-drop.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45/after/paper-drop.png",
+      "title": "Publishing Papers: drop through existing ticker and toast",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45/compare/paper-drop.png",
+      "changed": 0.49886496913580247
+    },
+    {
+      "scene": "paper-scoop",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45/before/paper-scoop.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45/after/paper-scoop.png",
+      "title": "Publishing Papers: scoop through existing ticker and toast",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45/compare/paper-scoop.png",
+      "changed": 0.39005478395061727
+    },
+    {
+      "scene": "paper-award",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45/before/paper-award.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45/after/paper-award.png",
+      "title": "Publishing Papers: award through existing ticker and toast",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45/compare/paper-award.png",
+      "changed": 0.40163194444444444
+    },
+    {
+      "scene": "papers-panel",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45/before/papers-panel.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45/after/papers-panel.png",
+      "title": "Publish or Perish: the papers window open (the scoop moment closed first)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45/compare/papers-panel.png",
+      "changed": 0.35653317901234566
+    },
+    {
+      "scene": "paper-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45/before/paper-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45/after/paper-phone.png",
+      "title": "Publishing Papers: drop through existing ticker and toast",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45/compare/paper-phone.png",
+      "changed": 0.7457611799732653
+    },
+    {
+      "scene": "collusion-sign",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45/before/collusion-sign.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45/after/collusion-sign.png",
+      "title": "Agent Collusion: the first Security memo (existing event-card slot)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45/compare/collusion-sign.png",
+      "changed": 0.2920702160493827
+    },
+    {
+      "scene": "collusion-traffic",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45/before/collusion-traffic.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45/after/collusion-traffic.png",
+      "title": "Agent Collusion: POSTs off the Compute Cluster and Kombucha After Dark",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45/compare/collusion-traffic.png",
+      "changed": 0.22682793209876542
+    },
+    {
+      "scene": "collusion-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45/before/collusion-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45/after/collusion-phone.png",
+      "title": "The same Security memo on a phone",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45/compare/collusion-phone.png",
+      "changed": 0.5200867359338923
+    },
+    {
+      "scene": "collusion-scandal",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45/before/collusion-scandal.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45/after/collusion-scandal.png",
+      "title": "Agent Collusion: exposed, the existing ticker carries the scandal headline",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45/compare/collusion-scandal.png",
+      "changed": 0.5212083333333334
+    }
+  ],
+  "errors": []
+}

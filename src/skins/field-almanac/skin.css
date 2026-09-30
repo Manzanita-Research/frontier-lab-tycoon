@@ -376,6 +376,10 @@
     border-radius: var(--flt-radius-panel);
     box-shadow: var(--flt-shadow-panel), 0 0 0 1px rgba(34, 49, 58, 0.06);
   }
+  /* The discourse, open, floats over the scene: frosted paper would show the bubbles through it. */
+  .factions.open {
+    background: var(--flt-color-panel);
+  }
   .fa-h3 {
     display: flex;
     align-items: baseline;
@@ -433,6 +437,12 @@
     padding-top: 12px;
     border-top: 1px solid var(--fa-hair);
     position: relative;
+  }
+  /* the notes card at the start has no field notes above the goal, so no rule and no gap either */
+  .fa-notes > .fa-objectives:first-child {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
   }
   .fa-obj-head {
     display: flex;
@@ -929,6 +939,29 @@
       opacity: 0.45;
       cursor: not-allowed;
     }
+  }
+  .fa-tool.locked {
+    opacity: 0.55;
+    cursor: default;
+    width: 92px;
+    border: 1px dashed var(--fa-hair);
+    background: transparent;
+    .fa-price {
+      font-size: 11px;
+      white-space: normal;
+      text-align: center;
+      line-height: 1.1;
+      padding: 0 4px;
+    }
+  }
+  .fa-shelf-closed {
+    width: fit-content;
+    align-self: center;
+    padding: 8px 14px;
+    overflow: visible;
+  }
+  .fa-open {
+    width: 92px;
   }
   .fa-hot {
     position: absolute;
@@ -2397,6 +2430,22 @@
       top: 6px;
       right: 6px;
     }
+    /* The lone goal is a card under the speed pill, and the hint toast steps down beneath it */
+    .fa-objectives.fa-goal-one {
+      position: fixed;
+      left: 8px;
+      right: 8px;
+      top: 140px;
+      z-index: 1;
+      padding: 10px 16px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 16px;
+      background: #fbf7ee;
+      box-shadow: var(--flt-shadow-panel), 0 0 0 1px rgba(34, 49, 58, 0.1);
+    }
+    .fa-hud:has(.fa-goal-one) .toasts {
+      top: 232px;
+    }
 
     /* The right-hand things: the speed pill, Overheard as a button, the reading room above the shelf */
     .fa-controls {
@@ -2439,7 +2488,7 @@
     .fa-tools {
       position: fixed;
       right: 8px;
-      bottom: calc(150px + env(safe-area-inset-bottom));
+      bottom: calc(60px + env(safe-area-inset-bottom));
       z-index: 5;
       padding: 2px;
       button {
@@ -2553,7 +2602,19 @@
     }
     /* the reading room's buttons step over the tip that is standing above the shelf */
     .fa-hud:has(.fa-tip) .fa-tools {
-      bottom: calc(216px + env(safe-area-inset-bottom));
+      bottom: calc(60px + env(safe-area-inset-bottom));
+    }
+    /* Build sits at the left and the reading-room buttons at the right, on one row; the open shelf and the tip go above both */
+    .fa-shelfwrap {
+      align-items: flex-start;
+    }
+    .fa-shelfwrap .fa-tip,
+    .fa-shelfwrap .fa-shelf:not(.fa-shelf-closed) {
+      align-self: stretch;
+    }
+    .fa-shelf.fa-shelf-closed {
+      width: fit-content;
+      align-self: flex-start;
     }
     .ticker.fa-ticker {
       height: calc(38px + env(safe-area-inset-bottom));

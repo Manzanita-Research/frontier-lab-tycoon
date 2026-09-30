@@ -59,7 +59,7 @@ function respond(state: GameState, rng: Rng, action: LeapfrogAction) {
         // The rival gets the room to itself for a while, and your name drops out of it.
         if (rival) pushVoice(state, rival, R.response.holdRivalPush);
         pushVoice(state, YOU, -(1 - R.response.holdDamp) * (lf.voice.context.attention[YOU] ?? 0));
-        addToast(state, `Holding for a counter-launch: ${fx.until - state.day} days to land it.`, "neutral");
+        addToast(state, `Holding for a counter-launch: ${fx.until - state.day} days to land it.`, "neutral", { source: "leapfrog", importance: "you" });
         return;
       case "LEAKED":
         leakScreenshot(state, rng);
@@ -93,6 +93,6 @@ function leakScreenshot(state: GameState, rng: Rng) {
     refreshRecords(state, rng);
   }
   pushVoice(state, YOU, R.response.leakPush);
-  addToast(state, "The screenshot is everywhere. So are the questions.", "neutral");
+  addToast(state, "The screenshot is everywhere. So are the questions.", "neutral", { source: "leapfrog", importance: "you" });
 }
 

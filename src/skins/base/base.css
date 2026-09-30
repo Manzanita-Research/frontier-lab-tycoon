@@ -220,7 +220,7 @@ button {
 }
 
 /* Build bar */
-.buildwrap {
+.bottom-dock {
   position: absolute;
   left: 0;
   right: 0;
@@ -230,6 +230,14 @@ button {
   align-items: center;
   gap: 8px;
   padding: 0 10px;
+  pointer-events: none;
+}
+.buildwrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
 }
 .tip {
   padding: 7px 12px;
@@ -366,7 +374,7 @@ button {
 
 /* Toasts */
 .toasts {
-  position: absolute;
+  position: fixed;
   top: 100px;
   left: 50%;
   transform: translateX(-50%);
@@ -785,6 +793,17 @@ button {
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: #a4581f;
+}
+/* A choice you can't take right now (a bid bigger than the bank, FLT-58), in every skin: greyed out, its hint says why. */
+.choice:disabled,
+.dd-answer:disabled,
+.gc-choice:disabled,
+.kn-choice:disabled,
+.sd-choice:disabled,
+.f95-choices .f95-btn:disabled {
+  opacity: 0.5;
+  filter: grayscale(1);
+  cursor: not-allowed;
 }
 .choice.plain {
   justify-content: center;

@@ -20,7 +20,7 @@
     "Toast",
     "EventCard",
     "PhotoButton",
-    "NewsControls",
+    "NewsControls", "DramaButton",
     "Arena",
     "EraCard",
     "Outcome"
@@ -110,6 +110,7 @@
     "color.tipText": "#1E2A2F",
     "color.selection": "#1E2A2F",
     "color.selectionText": "#FFF8EC",
+    "color.highlight": "#6D5FE0",
     "color.meterFrom": "#FF6B35",
     "color.meterTo": "#F2B53A",
     "font.ui": "\"Bricolage Grotesque\", system-ui, sans-serif",

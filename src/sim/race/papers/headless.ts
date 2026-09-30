@@ -1,10 +1,10 @@
 // Evidence bot: normal ticks, actual applicants at the gate, actual rival machine shocks. No free papers or forced dice.
-import { BUILDINGS, type PlaceableKind } from "../../../content/buildings";
+import type { PlaceableKind } from "../../../content/buildings";
 import { openEventOf } from "../../events";
 import { outcomeOf } from "../../goals";
 import { staffOf } from "../../staff";
 import { slopStats } from "../../slop";
-import { createInitialState } from "../../state";
+import { createTestCampus as createInitialState } from "../../testkit";
 import { answer, countOf, findSpot, layPaths } from "../../testkit";
 import { applyNow, tick, TICKS_PER_DAY } from "../../tick";
 import type { Command } from "../../commands";
@@ -12,6 +12,7 @@ import { enableLeapfrog } from "../leapfrog/driver";
 import { enablePapers } from "./driver";
 import type { PublicationPolicy } from "./policy";
 import { papersView } from "./view";
+import { defs } from "../../defs";
 
 export function runPapersHeadless(seed: number, policy: PublicationPolicy, off = false) {
   const s = createInitialState(seed);
@@ -38,7 +39,7 @@ export function runPapersHeadless(seed: number, policy: PublicationPolicy, off =
       else if (s.day > 50 && countOf(s, "snack") < 1 + Math.floor(halls / 3)) kind = "snack";
       else if (countOf(s, "cluster") + 6 * datacenters < 3 * halls) kind = "cluster";
       else if (halls < Math.min(7, 3 + Math.floor(s.day / 90))) kind = "hall";
-      if (kind && s.cash > BUILDINGS[kind].price + 400_000) {
+      if (kind && s.cash > defs().buildings[kind].price + 400_000) {
         const at = findSpot(s, kind);
         if (at) cmds.push({ type: "placeBuilding", kind, x: at[0], z: at[1] });
       }

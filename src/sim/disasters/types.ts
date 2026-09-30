@@ -159,12 +159,12 @@ export interface TimedEffect {
   id: number;
   /** The disaster that owns it (its id), or "" for none: an owned effect ends with the disaster. */
   owner: string;
-  kind: "drain" | "spike" | "revenue" | "auditor";
-  /** drain: fraction lost per day; spike, revenue, auditor: a multiplier. */
+  kind: "drain" | "spike" | "revenue" | "auditor" | "rivalGrowth" | "rivalPace" | "rivalClosed";
+  /** drain: fraction lost per day; spike, revenue, auditor, rivalGrowth, rivalPace: a multiplier; rivalClosed: 1. */
   value: number;
   /** The tick it wears off; -1 lasts as long as the owner does. */
   until: number;
-  /** spike: which building kinds pay more (empty: all of them). */
+  /** spike: which building kinds pay more (empty: all of them). rival*: which labs (see `rivalMatches`). */
   kinds: string[];
 }
 
@@ -173,6 +173,11 @@ export type Cue = { id: number; tick: number } & (
   | { type: "focus"; x: number; z: number; zoom: number; hold: number | null }
   | { type: "shake"; strength: number }
   | { type: "sound"; cue: string }
+  /**
+   * FLT-56: a camera beat. Letterbox bars, a caption, a slow shot of (x, z) in tiles, or of `follow` (walker ids) as
+   * they walk. `beat` names it for the renderer (`exit`, `huddle`, `viral`, ...). It never pauses time.
+   */
+  | { type: "beat"; beat: string; caption: string; sub: string; x: number; z: number; zoom: number; hold: number; follow: number[] }
 );
 
 export interface HistoryRow {

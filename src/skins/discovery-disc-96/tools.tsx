@@ -1,8 +1,8 @@
 // The small controls: the Oregon Trail Pace buttons, the "DID YOU KNOW?" tape, and the row of round sticker buttons
 // (News Room, sound, mixer, skins, camera).
 import { useState } from "react";
-import { Marquee } from "../kit";
-import { useT } from "../context";
+import { ALL_VISIBLE, DramaIcon, Marquee } from "../kit";
+import { useCoach, useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import { Icon } from "./art";
 
@@ -16,6 +16,7 @@ const CAPTION: Record<number, string> = {
 /** Rest / Steady / Strenuous / Grueling, like the wagon party's pace on the trail. */
 export function Speed({ speed, actions }: SlotPropsMap["Speed"]) {
   const t = useT();
+  const coach = useCoach();
   return (
     <div className="dd-pace" role="group" aria-label={t("speed.label")}>
       <div className="dd-pace-row">
@@ -23,7 +24,7 @@ export function Speed({ speed, actions }: SlotPropsMap["Speed"]) {
           <Icon name="wagon" size={28} /> {t("speed.label")}:
         </span>
         {speed.options.map((o) => (
-          <button key={o.value} type="button" className={`dd-pb ${o.active ? "on" : ""}`} onClick={() => actions.setSpeed(o.value)} aria-pressed={o.active} title={CAPTION[o.value]}>
+          <button key={o.value} type="button" className={`dd-pb ${o.active ? "on" : ""}`} {...(o.value === 3 ? coach.attrs("speed") : {})} onClick={() => actions.setSpeed(o.value)} aria-pressed={o.active} title={CAPTION[o.value]}>
             {o.value === 0 && <Icon name="pause" size={14} />}
             {t(o.key)}
           </button>
@@ -46,16 +47,18 @@ export function Ticker({ items }: SlotPropsMap["Ticker"]) {
   );
 }
 
-export function NewsControls({ newsroom, sound, skins, actions }: SlotPropsMap["NewsControls"]) {
+export function NewsControls({ newsroom, sound, skins, visible = ALL_VISIBLE, actions }: SlotPropsMap["NewsControls"]) {
   const t = useT();
   // On a phone the sound, mixer and skin buttons fold behind one "more" button (CSS decides; on a desktop it's hidden).
   const [open, setOpen] = useState(false);
   return (
     <div className={`dd-tools ${open ? "open" : ""}`} role="group" aria-label="Tools">
-      <button type="button" className="dd-tool news" onClick={() => actions.openNews()} aria-label={t("news.open")} title={t("news.button")}>
-        <Icon name="news" size={26} />
-        {newsroom.unread > 0 && <b className="dd-unread">{newsroom.unread}</b>}
-      </button>
+      {visible.news && (
+        <button type="button" className="dd-tool news" onClick={() => actions.openNews()} aria-label={t("news.open")} title={t("news.button")}>
+          <Icon name="news" size={26} />
+          {newsroom.unread > 0 && <b className="dd-unread">{newsroom.unread}</b>}
+        </button>
+      )}
       <button type="button" className="dd-tool dd-fold" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-label="More tools" title="More tools">
         <Icon name="more" size={26} />
       </button>
@@ -101,5 +104,16 @@ export function NewsArrival({ arrival, actions }: SlotPropsMap["NewsArrival"]) {
         </button>
       </span>
     </aside>
+  );
+}
+
+/** Today's Drama: one more big round button on the toolbar. */
+export function DramaButton({ drama, actions }: SlotPropsMap["DramaButton"]) {
+  const t = useT();
+  return (
+    <button type="button" className={`dd-tool dd-drama${drama.on ? " on" : ""}`} onClick={() => actions.openDrama()} aria-label={t("drama.open")} title={t("drama.button")}>
+      <DramaIcon size={26} stroke={2.2} />
+      {drama.on ? <b className="dd-unread">{t("drama.on")}</b> : drama.fresh && <b className="dd-unread">{t("drama.new")}</b>}
+    </button>
   );
 }

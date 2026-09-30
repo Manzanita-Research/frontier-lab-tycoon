@@ -40,6 +40,9 @@ jobs:
       - run: pnpm --dir infra typecheck
 
   deploy:
+    outputs:
+      # A PR's preview, or prod after a deploy from main: the stranger plays whichever this run deployed.
+      preview_url: ${{ steps.preview.outputs.url || steps.prod.outputs.url }}
     needs: check
     runs-on: ubuntu-latest
     permissions:
@@ -50,6 +53,8 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
+          # Today's Drama (FLT-34) publishes the packs in origin/main's tree, never the branch's: the build needs main.
+          fetch-depth: 0
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -86,6 +91,56 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PULL_REQUEST: ${{ github.event.number }}
           DEPLOY_REVISION: ${{ github.event.pull_request.head.sha || github.sha }}
+          FLT_CUSTOM_DOMAIN: ${{ vars.FLT_CUSTOM_DOMAIN }}
+
+      - name: Read the deployed preview URL
+        if: github.event_name == 'pull_request' && steps.current.outputs.deploy == 'true'
+        id: preview
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comments = await github.paginate(github.rest.issues.listComments, { ...context.repo, issue_number: context.issue.number });
+            const revision = context.payload.pull_request.head.sha.slice(0, 7);
+            const comment = comments.reverse().find(c => c.body.includes('## Preview deployed') && c.body.includes(revision));
+            const url = comment?.body.match(/\[Play this preview\]\((https:\/\/[^)]+)\)/)?.[1];
+            if (!url) throw new Error('No preview URL for the deployed revision');
+            core.setOutput('url', url);
+
+      - name: The prod URL
+        if: github.event_name == 'push' && steps.current.outputs.deploy == 'true'
+        id: prod
+        # Where players are: app.<zone> once the custom domain is on (#70), else the workers.dev name.
+        run: echo "url=${PROD_URL}" >> "$GITHUB_OUTPUT"
+        env:
+          PROD_URL: ${{ vars.FLT_CUSTOM_DOMAIN && format('https://app.{0}/', vars.FLT_CUSTOM_DOMAIN) || 'https://flt-prod.manzanita.workers.dev/' }}
+
+  # On a PR: its preview. On main: prod, after the deploy has gone out (FLT-62). It never blocks a deploy, but a failure
+  # fails the run, so a broken landing shows red on main.
+  stranger:
+    needs: deploy
+    if: needs.deploy.outputs.preview_url != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Play the deployed build as a stranger
+        run: pnpm e2e:stranger --url "$PREVIEW_URL"
+        env:
+          PREVIEW_URL: ${{ needs.deploy.outputs.preview_url }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stranger-${{ github.event.number || 'prod' }}
+          path: e2e/results/
 
   cleanup:
     if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository

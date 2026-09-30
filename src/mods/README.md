@@ -1,8 +1,10 @@
-# M1a mod foundations
+# Mod foundations (M1a) and live integration (M1b)
 
-These modules are independent of the live app. `BaseGame.layer` provides `Skin`, `Content`,
-`Rules`, `Vocabulary`, `Assets`, `Audio`, and a read-only `GameEvents` stream. The stream is
-empty until M1b supplies its producer. No RNG or clock service is overridable.
+`BaseGame.layer` provides `Skin`, `Content`, `Rules`, `Vocabulary`, `Assets`, `Audio`, and a
+read-only `GameEvents` stream. The stream is still empty (no producer yet). No RNG or clock
+service is overridable. Since FLT-37 (M1b) the app shell resolves `?mod=` into a
+`GameDefinition` at start (`src/app/mods.ts`) and the sim reads its content through
+`defs()` (`src/sim/defs.ts`); see "M1b: what landed" below.
 
 ```ts
 const manifests = await Effect.runPromise(loadModLinks(location.search, { baseUrl: location.href }));
@@ -30,7 +32,7 @@ uses today's `ui.css` tokens and does not mount a skin or import React.
   their zero-based position on this API baseline. Only patched sections materialize those ids;
   they remain stable across subsequent removals/overrides in a stack. The unmodified base's
   arrays match the original content exactly. Persist manifests against a game/content version;
-  M1b must add run identities/content hashes before shareable replays.
+  Runs record their mods' ids, versions and content hashes (`GameState.mods`).
 - Headlines default to `trigger: "filler"` and can carry the documented named `when` condition.
   Thoughts use today's named conditions. `events` accepts choice cards or JSON statecharts;
   `arcs` is also explicit. The v1 statechart subset supports compound states, named guards/actions,
@@ -55,37 +57,46 @@ pnpm mod:check mods/examples/headline-pack/mod.json
 pnpm exec vitest run src/mods
 ```
 
-The checker composes/validates the full Layer, runs seed 42 for **365 actual days**, answers
-cards, checks finite stats, and replays the World twice for an identical digest. It uses today's
-`createInitialState(seed)` and `tick(state, commands)` without modifying content globals.
+The checker composes/validates the full Layer, runs seed 42 for **365 actual days** in the real
+sim with the resolved definition (`createInitialState(seed, opening, def)` and
+`tick(state, commands, def)`), answers cards, checks finite stats, and replays the World twice for
+an identical digest. The harness places one gateway and hires one SRE through existing commands
+to keep a fixed campus sustainable. The report lists the sections that executed, the ones nothing
+reads yet (`walkerKinds`, `endings`, `tips`, `tables`), and each arc's final state.
 
-Compatible existing rival personality/starting-stat fields and existing goal targets are injected
-into the World before stepping. All other changed sections are explicitly reported as deferred.
-The harness places one gateway and hires one SRE through existing commands to keep a fixed
-campus sustainable. Passing this check proves schema/composition/structural validation and the
-reported injection coverage; it does not prove execution of deferred content.
+## M1b: what landed (FLT-37)
 
-## Exact M1b handoff
+1. The app shell loads `?mod=` links in order, composes and resolves them before the World is
+   created, records ids, versions and content hashes in `GameState.mods`, and lists loaded mods,
+   conflicts and errors in the Mod Manager (a skin slot; Frontier 95 opens it from Start, Mods…).
+   A mod that fails is skipped; a set that fails to compose starts the base game.
+2. `createInitialState`, `tick` and `applyNow` take an optional `def`; `SimHandle` threads the
+   session's. `withDefs(def, body)` installs it for the synchronous call and `setSessionDefinition`
+   is what the renderer and HUD read between ticks. With no mods, `defs()` is the content modules
+   themselves, so the goldens are byte-identical (and a definition equal to the base is too).
+3. Content imports in the sim read `defs()`: buildings, rivals, the Arena size, goals, events, the
+   ladder, the coach, headlines (with their `when`), thoughts, name pools, disasters, and Release
+   Leapfrog's benchmarks and mishaps. New buildings render as coloured blocks (`ModModel`).
+4. JSON arcs compile to XState machines (`src/sim/modArcs.ts`) against the Vocabulary and step
+   with the pure `transition()` at midnight (`DAY`) and on every answered card (`CHOSE`). They
+   persist `{value, context}` in `GameState.modArcs` and run emitted verbs in order. A die is
+   drawn only for arcs that use `chance`. The `card` verb opens any `content.events` card.
+5. `content.disasters`, `content.benchmarks` and `content.mishaps` are mod sections: the base
+   packs (`mods/base-disasters`, `mods/base-leapfrog`) are the base game's entries. Leapfrog's
+   rules, labs, footnotes and headlines, and the collusion and papers packs, are still read from
+   their pack files (rules patches are M3).
 
-1. Load links/imports, compose mods, and resolve a definition in the Effect app shell at game start.
-   Surface load errors/conflicts and persist ids, versions and content hashes with the run.
-2. Add an optional/default base definition to `createInitialState(seed, def)`,
-   `tick(state, commands, def)` and `applyNow(state, commands, def)`. Keep the existing command
-   argument position, tick/RNG order and unmodded baseline behavior. Thread the definition through
-   `SimHandle` step/reset/applyNow, debug staging, and the test/headless helpers.
-3. Replace content imports in commands, initial placement, economy, training, goals, news, thoughts,
-   needs/mind, crowd/walkers/protest, staff/slop/breakdowns, and race drivers with resolved lookups.
-   Initialize rivals/arcs/goals from the definition, not fixed module arrays; derive Arena size.
-   Preserve procedural name/audio algorithms while moving their data pools behind services.
-4. Compile JSON arcs against the registered vocabulary, step purely with `transition()` in the tick,
-   persist JSON snapshots and apply emitted effects in order. Pre-roll chance guards with the core
-   RNG. Resolve named headline conditions in the news driver. No wall-clock waits or actors in sim.
-5. Widen closed building/rival/entity unions additively where runtime additions require it, and provide
-   renderer fallbacks for new content. Read UI content, skins and asset/audio services through the
-   app shell; supply the FLT-14 registry to `makeBaseGameLayer`. Bind GameEvents to a scoped,
-   read-only stream fed by discrete sim changes. Preserve independent entity presentation.
-6. Remove the temporary World injection bridge, make mod:check execute the full resolved definition,
-   and extend golden/determinism/perf and browser evidence to prove the actual runtime changes.
+6. Presentation (FLT-55) never enters the `GameDefinition`. `resolvePresentation(layer)` reads
+   the `Skin`, `Assets`, `Audio` and `Looks` services once per session and swaps every bundled
+   data URL for a `blob:` URL (`presentation.ts`); `src/app/mods.ts` keeps it as
+   `modSession().presentation`. The skin registry takes the mod skins (`registerModSkins`: the
+   picker, `?skin=`, the Found New Skin offer), the Audio service's cues go to the sound kit
+   (overrides, new names, the `protest.chant`/`protest.grow`/`ui.click` hooks) and
+   `src/render/modLooks.ts` draws the `looks` (recipe, sprite, glb, tint; targets `kind`,
+   `kind:role`, `faction:<id>`), one InstancedMesh per part. `flt-mod check` runs
+   `checkPresentation` (`check.ts`) as well as the headless year.
+
+Not yet: `audio.music` validates but nothing plays it, and `GameEvents` has no producer.
 
 M1a changes no sim entry points or live UI and re-records no golden digests. Its only existing-file
 edit is the additive `package.json` script; `docs/specs/FLT-30.md` pins the task description.

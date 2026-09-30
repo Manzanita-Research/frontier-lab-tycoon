@@ -26,7 +26,7 @@ export const PACK_TRIGGERS = [
 ] as const;
 export type PackTrigger = (typeof PACK_TRIGGERS)[number];
 
-const BenchmarkSchema = Schema.Struct({
+export const BenchmarkSchema = Schema.Struct({
   id: Str,
   name: Str,
   short: Str,
@@ -50,7 +50,7 @@ export interface LabDef extends Schema.Schema.Type<typeof LabSchema> {}
 const HeadlineSchema = Schema.Struct({ id: Str, trigger: Schema.Literals(PACK_TRIGGERS), tone: Tone, text: Str });
 export interface PackHeadline extends Schema.Schema.Type<typeof HeadlineSchema> {}
 
-const MishapSchema = Schema.Struct({
+export const MishapSchema = Schema.Struct({
   id: Str,
   /** Relative odds. */
   weight: Num,

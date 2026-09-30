@@ -2,6 +2,7 @@
 // card (the stage lights come up on a big number) and the win / lose card (the scoreboard).
 import { Fragment } from "react";
 import { useT } from "../context";
+import { Evidence } from "../kit";
 import type { SlotPropsMap } from "../types";
 import type { EventVM, HudActions, ResponseVM } from "../../ui/hud/types";
 import { Note, Notes, Scene, Star, Tape } from "./art";
@@ -14,7 +15,7 @@ function Choices({ event, actions }: { event: EventVM; actions: HudActions }) {
   return (
     <div className="kn-choices">
       {event.choices.map((c, i) => (
-        <button key={c.label} type="button" className="kn-choice" style={{ ["--c" as string]: KEY_COLOURS[i % KEY_COLOURS.length] }} onClick={() => actions.choose(event.id, i)}>
+        <button key={c.label} type="button" className="kn-choice" disabled={!!c.disabled} title={c.disabled} style={{ ["--c" as string]: KEY_COLOURS[i % KEY_COLOURS.length] }} onClick={() => actions.choose(event.id, i)}>
           <span className="kn-choice-key">{c.key}</span>
           <span className="kn-choice-text">
             <b>{c.label}</b>
@@ -88,6 +89,7 @@ export function EventCard({ event, actions }: SlotPropsMap["EventCard"]) {
             </ul>
           )}
           {event.response && <Gauges response={event.response} />}
+          {event.investigation && <Evidence investigation={event.investigation} />}
           <Choices event={event} actions={actions} />
         </div>
       </div>

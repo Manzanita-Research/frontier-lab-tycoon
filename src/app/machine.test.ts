@@ -7,12 +7,13 @@ import { SCENARIO } from "../content/goals";
 import { openEventOf } from "../sim/events";
 import { createInitialState } from "../sim/state";
 import { tick } from "../sim/tick";
+import { createTestCampus, readyForPressure } from "../sim/testkit";
 import type { Speed } from "./hud";
 import { appMachine } from "./machine";
 import { framesManual, ManualFrames } from "./frames";
-import { createSimHandle, Sim, simLayer, type SimHandle } from "./sim";
+import { Sim, simLayer, SimHandle } from "./sim";
 
-const handleFor = (seed = 1, warp = 0) => createSimHandle({ seed, warp, agents: 0, discourse: 0, researchers: 0 });
+const handleFor = (seed = 1) => new SimHandle(createTestCampus(seed));
 
 /** Boot the app on `handle`, and hand back the actor and a frame pump. */
 const boot = (speed: Speed = 1) =>
@@ -22,7 +23,7 @@ const boot = (speed: Speed = 1) =>
     const first = sim.report(true, true)!;
     const actor = yield* createEffectActor(appMachine, { input: { speed, first } });
     /** Push `n` frames of `dt` seconds and let the actor drain its mailbox. */
-    const pump = (n: number, dt = 0.1) =>
+    const pump = (n: number, dt = 0.15) =>
       Effect.gen(function* () {
         for (let i = 0; i < n; i++) frames.emit(dt);
         for (let i = 0; i < 40 + n * 4; i++) yield* Effect.yieldNow;
@@ -33,16 +34,112 @@ const boot = (speed: Speed = 1) =>
 const provide = (handle: SimHandle) => Effect.provide(Layer.mergeAll(simLayer(handle), framesManual));
 
 describe("app machine", () => {
-  it.effect("starts in playing.running and advances the sim one tick per 0.1 s frame at 1x, like direct ticks", () => {
+  it.effect("opens paused at 1×, then the first build click starts time and coach marks never hold it", () => {
+    const handle = new SimHandle(createInitialState(1));
+    return Effect.gen(function* () {
+      const { actor, sim, pump } = yield* boot();
+      yield* pump(40);
+      expect(actor.getSnapshot().matches({ playing: "paused" })).toBe(true);
+      expect(actor.getSnapshot().context.speed).toBe(1);
+      expect(sim.world.tick).toBe(0);
+      yield* send(actor, { type: "COMMAND", command: { type: "buildPanelOpened" } });
+      yield* pump(20);
+      expect(sim.world.tick).toBeGreaterThan(0);
+      expect(actor.getSnapshot().context.snap.coach?.id).toBe("path");
+      const before = sim.world.tick;
+      yield* send(actor, { type: "SET_OVERLAY", id: "build", open: true });
+      yield* send(actor, { type: "SELECT", id: sim.world.walkers[0]!.id });
+      yield* pump(120);
+      expect(sim.world.tick - before).toBeGreaterThanOrEqual(60);
+      const replayAt = sim.world.tick;
+      yield* send(actor, { type: "COMMAND", command: { type: "coachReplay" } });
+      yield* pump(10);
+      expect(sim.world.tick).toBeGreaterThan(replayAt);
+      yield* send(actor, { type: "SET_SPEED", speed: 0 });
+      yield* pump(4);
+      const held = sim.world.tick;
+      yield* send(actor, { type: "COMMAND", command: { type: "coachReplay" } });
+      yield* pump(10);
+      expect(sim.world.tick).toBe(held);
+    }).pipe(provide(handle));
+  });
+
+  it.effect("menus and inspection keep time running, while the player's pause persists", () => {
+    const handle = handleFor();
+    return Effect.gen(function* () {
+      const { actor, sim, pump } = yield* boot(3);
+      yield* send(actor, { type: "SET_OVERLAY", id: "staff", open: true });
+      yield* send(actor, { type: "SET_OVERLAY", id: "thoughts", open: true });
+      yield* pump(20);
+      expect(sim.world.tick).toBeGreaterThan(0);
+      yield* send(actor, { type: "COMMAND", command: { type: "hire", job: "sre" } });
+      yield* pump(10);
+      expect(sim.world.staff).toHaveLength(1);
+      expect(actor.getSnapshot().context.speed).toBe(3);
+      yield* send(actor, { type: "SET_SPEED", speed: 0 });
+      yield* send(actor, { type: "SET_OVERLAY", id: "staff", open: false });
+      yield* pump(10);
+      expect(actor.getSnapshot().matches({ playing: "paused" })).toBe(true);
+    }).pipe(provide(handle));
+  });
+  it.effect("starts in playing.running and advances the sim one tick per two 0.15 s frame at 1x, like direct ticks", () => {
     const handle = handleFor(3);
     return Effect.gen(function* () {
       const { actor, sim, pump } = yield* boot();
       expect(actor.getSnapshot().matches({ playing: "running" })).toBe(true);
-      yield* pump(60);
+      yield* pump(120);
       expect(sim.world.tick).toBe(60);
-      const direct = createInitialState(3);
+      const direct = createTestCampus(3);
       for (let i = 0; i < 60; i++) tick(direct);
       expect(JSON.stringify(sim.world)).toBe(JSON.stringify(direct));
+    }).pipe(provide(handle));
+  });
+
+  it.effect("keeps six seconds at 1× equal to one game day at two rendered frames per second", () => {
+    const handle = handleFor(3);
+    return Effect.gen(function* () {
+      const { sim, pump } = yield* boot();
+      yield* pump(12, 0.5);
+      expect(sim.world.tick).toBe(20);
+      const direct = createTestCampus(3);
+      for (let i = 0; i < 20; i++) tick(direct);
+      expect(JSON.stringify(sim.world)).toBe(JSON.stringify(direct));
+    }).pipe(provide(handle));
+  });
+
+  it.effect("bounds a resumed tab's long frame instead of charging for all its hidden time", () => {
+    const handle = handleFor(3);
+    return Effect.gen(function* () {
+      const { sim, pump } = yield* boot();
+      yield* pump(1, 300);
+      expect(sim.world.tick).toBe(3);
+    }).pipe(provide(handle));
+  });
+
+  it.effect("a spending proposal pauses at the chosen speed, then cancellation resumes without a catch-up bill", () => {
+    const handle = new SimHandle(createInitialState(1));
+    handle.world.cash = 100_000;
+    handle.applyNow([{ type: "skipTutorial" }]);
+    delete handle.world.progression; delete handle.world.coach;
+    return Effect.gen(function* () {
+      const { actor, sim, pump } = yield* boot(3);
+      yield* pump(1); // let the manual frame stream subscribe before queuing the proposal
+      yield* send(actor, { type: "COMMAND", command: { type: "hire", job: "sre" } });
+      yield* pump(4);
+      expect(actor.getSnapshot().context.snap.pendingConfirm?.kind).toBe("hire");
+      const heldAt = sim.world.tick;
+      const cash = sim.world.cash;
+      yield* pump(80);
+      expect(sim.world.tick).toBe(heldAt);
+      expect(sim.world.cash).toBe(cash);
+      expect(sim.world.staff).toHaveLength(0);
+      expect(actor.getSnapshot().context.speed).toBe(3);
+      yield* send(actor, { type: "COMMAND", command: { type: "cancelConfirm" } });
+      yield* pump(4);
+      expect(actor.getSnapshot().context.snap.pendingConfirm).toBeNull();
+      expect(sim.world.tick - heldAt).toBeGreaterThan(0);
+      expect(sim.world.tick - heldAt).toBeLessThanOrEqual(6);
+      expect(actor.getSnapshot().context.speed).toBe(3);
     }).pipe(provide(handle));
   });
 
@@ -52,11 +149,11 @@ describe("app machine", () => {
       const { actor, sim, pump } = yield* boot();
       yield* send(actor, { type: "SET_SPEED", speed: 3 });
       yield* waitFor(actor, (s) => s.context.speed === 3, { timeout: "1 second" });
-      yield* pump(10);
+      yield* pump(20);
       expect(sim.world.tick).toBe(30);
       yield* send(actor, { type: "TOGGLE_PAUSE" });
       yield* waitFor(actor, (s) => s.matches({ playing: "paused" }), { timeout: "1 second" });
-      yield* pump(10);
+      yield* pump(20);
       expect(sim.world.tick).toBe(30);
       yield* send(actor, { type: "TOGGLE_PAUSE" });
       yield* waitFor(actor, (s) => s.matches({ playing: "running" }), { timeout: "1 second" });
@@ -82,9 +179,10 @@ describe("app machine", () => {
     const handle = handleFor(1);
     handle.world.day = 59;
     handle.world.waterDiscourse = 44;
+    readyForPressure(handle.world);
     return Effect.gen(function* () {
       const { actor, sim, pump } = yield* boot();
-      yield* pump(30);
+      yield* pump(50);
       yield* waitFor(actor, (s) => s.matches("eventOpen"), { timeout: "1 second" });
       expect(openEventOf(sim.world)?.id).toBe("waterDiscourse");
       const heldAt = sim.world.tick;
@@ -111,7 +209,8 @@ describe("app machine", () => {
       expect(actor.getSnapshot().context.outcome).toBe("lost");
       yield* send(actor, { type: "NEW_LAB" });
       yield* pump(3);
-      yield* waitFor(actor, (s) => s.matches({ playing: "running" }), { timeout: "1 second" });
+      yield* waitFor(actor, (s) => s.matches({ playing: "paused" }), { timeout: "1 second" });
+      expect(actor.getSnapshot().context.speed).toBe(1);
       expect(actor.getSnapshot().context.outcome).toBe("playing");
       expect(sim.world.day).toBeLessThan(2);
     }).pipe(provide(handle));
@@ -129,6 +228,30 @@ describe("app machine", () => {
       const first = actor.getSnapshot().context.toasts[0]!;
       yield* send(actor, { type: "DISMISS_TOAST", id: first.id });
       yield* waitFor(actor, (s) => s.context.toasts.length === 1, { timeout: "1 second" });
+      yield* TestClock.adjust("1 second");
+      yield* waitFor(actor, (s) => s.context.toasts.length === 0, { timeout: "1 second" });
+    }).pipe(provide(handle));
+  });
+
+  it.effect("holds the toasts off a camera beat (FLT-56): nothing shows or expires until it ends, then each gets its full time", () => {
+    const handle = handleFor();
+    return Effect.gen(function* () {
+      const { actor } = yield* boot();
+      yield* send(actor, { type: "TOAST", text: "Not enough cash", tone: "bad" });
+      yield* waitFor(actor, (s) => s.context.toasts.length === 1, { timeout: "1 second" });
+      yield* TestClock.adjust("4 seconds");
+      yield* send(actor, { type: "HOLD_TOASTS", on: true });
+      yield* send(actor, { type: "TOAST", text: "Needs a path next to it", tone: "bad" });
+      yield* waitFor(actor, (s) => s.context.held?.length === 2, { timeout: "1 second" });
+      expect(actor.getSnapshot().context.toasts).toHaveLength(0);
+      // A long beat: the one that was showing would have expired by now, and nobody saw the new one.
+      yield* TestClock.adjust("20 seconds");
+      expect(actor.getSnapshot().context.held).toHaveLength(2);
+      yield* send(actor, { type: "HOLD_TOASTS", on: false });
+      yield* waitFor(actor, (s) => s.context.held === null, { timeout: "1 second" });
+      expect(actor.getSnapshot().context.toasts.map((t) => t.text)).toEqual(["Not enough cash", "Needs a path next to it"]);
+      yield* TestClock.adjust("5 seconds");
+      expect(actor.getSnapshot().context.toasts).toHaveLength(2);
       yield* TestClock.adjust("1 second");
       yield* waitFor(actor, (s) => s.context.toasts.length === 0, { timeout: "1 second" });
     }).pipe(provide(handle));
@@ -243,12 +366,13 @@ describe("app machine", () => {
     const handle = handleFor();
     return Effect.gen(function* () {
       const { actor, sim, pump } = yield* boot(0);
-      sim.world.toasts.push({ id: 900, text: "Frontier-2 is out! Build an API Gateway to sell it.", tone: "good" });
+      sim.world.toasts.push({ id: 900, text: "Frontier-2 is out! Build an API Gateway to sell it.", tone: "good", source: "training", importance: "you", reply: true });
       yield* pump(6);
-      sim.world.toasts.push({ id: 901, text: "Frontier-2 is out! Build an API Gateway to sell it.", tone: "good" });
+      sim.world.toasts.push({ id: 901, text: "Frontier-2 is out! Build an API Gateway to sell it.", tone: "good", source: "training", importance: "you", reply: true });
       yield* pump(6);
       const texts = actor.getSnapshot().context.toasts.map((t) => t.text);
       expect(texts.filter((t) => t.startsWith("Frontier-2 is out"))).toHaveLength(1);
+      expect(texts).toHaveLength(1);
     }).pipe(provide(handle));
   });
 });

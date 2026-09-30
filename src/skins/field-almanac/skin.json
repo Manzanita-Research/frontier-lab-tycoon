@@ -20,7 +20,7 @@
     "Toast",
     "Benchmarks",
     "Voice",
-    "NewsControls",
+    "NewsControls", "DramaButton",
     "PhotoButton"
   ],
   "fonts": [
@@ -116,6 +116,7 @@
     "color.tipText": "#22313A",
     "color.selection": "#22313A",
     "color.selectionText": "#FBF7EE",
+    "color.highlight": "#B4531A",
     "color.meterFrom": "#6F9B78",
     "color.meterTo": "#C79A2B",
     "font.ui": "\"Figtree\", system-ui, sans-serif",

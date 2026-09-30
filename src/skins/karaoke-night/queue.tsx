@@ -1,7 +1,8 @@
 // The song on the screen and the queue behind it: the training run is "NOW TRAINING" (a segmented progress bar like a
 // karaoke score meter), the scenario's objectives are the "UP NEXT" queue.
 import { useState } from "react";
-import { useT } from "../context";
+import { useCoach, useT } from "../context";
+import { ALL_VISIBLE } from "../kit";
 import type { SlotPropsMap } from "../types";
 import { Check, Note, Notes, Star } from "./art";
 
@@ -9,9 +10,10 @@ const SEGMENTS = 20;
 
 export function Training({ training }: SlotPropsMap["Training"]) {
   const t = useT();
+  const coach = useCoach();
   if (!training.hasHall) {
     return (
-      <div className="kn-plastic kn-training" data-coach="training">
+      <div className="kn-plastic kn-training" {...coach.attrs("training")}>
         <div className="kn-screen">
           <div className="kn-np">
             <Note /> {t("training.title")} <b>· OFF AIR</b>
@@ -23,7 +25,7 @@ export function Training({ training }: SlotPropsMap["Training"]) {
   }
   const lit = Math.floor(training.pct * SEGMENTS);
   return (
-    <div className={`kn-plastic kn-training ${training.justShipped ? "shipped" : ""}`} data-coach="training">
+    <div className={`kn-plastic kn-training ${training.justShipped ? "shipped" : ""}`} {...coach.attrs("training")}>
       <div className="kn-screen">
         <div className="kn-np">
           <Note /> {t("training.title")}{" "}
@@ -56,12 +58,38 @@ export function Training({ training }: SlotPropsMap["Training"]) {
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
-export function Objectives({ objectives, layout }: SlotPropsMap["Objectives"]) {
+export function Objectives({ objectives, progress, visible = ALL_VISIBLE, layout }: SlotPropsMap["Objectives"]) {
   const t = useT();
+  const coach = useCoach();
   // Folded on a phone (a badge that opens the queue over the map), open on a desktop.
   const [open, setOpen] = useState(() => !layout.compact);
+  const goal = progress?.goal.line ? progress.goal : null;
+  if (goal && !visible.arena) {
+    // One line on the screen: the song in front of you. The full queue comes with the race.
+    return (
+      <div className="kn-plastic kn-queue open kn-goal-one" {...coach.attrs("goals")} role="status">
+        <div className="kn-screen">
+          <div className="kn-np">
+            <Notes /> <span className="kn-queue-title">{t("objectives.goal")}</span>
+          </div>
+          <ol className="kn-q">
+            <li>
+              <span className="kn-no">01</span>
+              <span className="kn-q-text">
+                <b>{goal.text}</b>
+                <small>
+                  {Math.min(goal.current, goal.target)} / {goal.target}
+                </small>
+              </span>
+              <span className="kn-q-pct">{Math.round(goal.ratio * 100)}%</span>
+            </li>
+          </ol>
+        </div>
+      </div>
+    );
+  }
   return (
-    <div className={`kn-plastic kn-queue ${open ? "open" : ""} ${layout.compact ? "compact" : ""}`} data-coach="goals">
+    <div className={`kn-plastic kn-queue ${open ? "open" : ""} ${layout.compact ? "compact" : ""}`} {...(goal ? coach.attrs("goals") : {})}>
       <div className="kn-screen">
         <button type="button" className="kn-np kn-queue-head" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-label={`${t("objectives.title")}, ${objectives.done} of ${objectives.total} done, ${objectives.daysLeft} ${t("objectives.daysLeft")}`}>
           <Notes /> <span className="kn-queue-title">{t("objectives.title")}</span>
@@ -82,7 +110,7 @@ export function Objectives({ objectives, layout }: SlotPropsMap["Objectives"]) {
                   <span className="kn-no">{pad(i + 1)}</span>
                   <span className="kn-q-text">
                     <b>{g.label}</b>
-                    <small>{g.progress}</small>
+                    {g.progress && <small>{g.progress}</small>}
                   </span>
                   <span className="kn-q-pct">{g.met ? <Check /> : `${Math.round(g.ratio * 100)}%`}</span>
                 </li>

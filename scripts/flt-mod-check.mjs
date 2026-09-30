@@ -20,8 +20,7 @@ else {
     const digest = (state) => createHash("sha256").update(JSON.stringify(state)).digest("hex");
     if (digest(report.state) !== digest(replay.state)) throw new Error("deterministic replay differs");
     const { state, ...numbers } = report;
-    console.log(JSON.stringify({ ok: true, path, mod, conflicts, ...numbers, deterministic: true, digest: digest(state), elapsedMs: Math.round(performance.now() - start),
-      coverage: "M1a: schema + composition + structural arc/reference validation + existing World injection. Deferred sections are not executed until M1b." }, null, 2));
+    console.log(JSON.stringify({ ok: true, path, mod, conflicts, ...numbers, deterministic: true, digest: digest(state), elapsedMs: Math.round(performance.now() - start) }, null, 2));
   } catch (error) {
     console.error(String(error));
     process.exitCode = 1;

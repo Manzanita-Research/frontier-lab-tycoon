@@ -1,6 +1,7 @@
 // The full-screen cards: the news card as a worksheet with a red ribbon title and "circle one answer", the new-era
 // card as a certificate with a gold medal, and the win / lose card as a diploma.
 import { useT } from "../context";
+import { Evidence } from "../kit";
 import type { SlotPropsMap } from "../types";
 import { burstPoints, Icon, Robot, StarIcon } from "./art";
 
@@ -36,10 +37,11 @@ export function EventCard({ event, actions }: SlotPropsMap["EventCard"]) {
               ))}
             </ul>
           )}
+          {event.investigation && <Evidence investigation={event.investigation} />}
           <div className="dd-circle-one">Circle one answer:</div>
           <div className="dd-answers">
             {event.choices.map((c, i) => (
-              <button key={c.label} type="button" className={`dd-answer a${i % 3}`} onClick={() => actions.choose(event.id, i)}>
+              <button key={c.label} type="button" className={`dd-answer a${i % 3}`} disabled={!!c.disabled} title={c.disabled} onClick={() => actions.choose(event.id, i)}>
                 <span className="dd-letter">{c.key}</span>
                 <span className="dd-answer-text">
                   <b>{c.label}</b>

@@ -1,0 +1,60 @@
+# Daily Drama: the automation
+
+**Status: not created.** The lead creates it **after Jem OKs the first Drama PR** (FLT-34). Builders never create it.
+
+## What runs each day
+
+One bb automation fires at **07:30 San Francisco time**. It spawns **one Claude Opus 5.5 thread on a fresh Modal machine**. That thread runs the pipeline once:
+
+```
+node scripts/drama-run.mjs
+  fetch   drama/sources.json → candidates.md (the last 36 h of public feeds)
+  room    a scratch dir outside the checkout: BRIEF.md (drama/pick.md), SKILL.md (flt-modding), candidates.md
+  write   headless `claude -p --restricted`, no shell, one `check` tool: picks one story (or skips) and writes the pack
+  check   flt-mod check + drama/lint.mjs + shape → mods/drama/<date>/CHECK.txt
+  pr      branch drama-<date> from origin/main, PR "Daily Drama: <summary>" (source link in the PR body only)
+```
+
+Then it posts the outcome on FLT-34 and stops. A quiet day posts "skipped" and opens nothing. Jem reviews and merges every Drama PR; nothing auto-publishes (the trust ratchet: after about 20 approvals in a row with no edits, desk asks Jem about auto-publishing).
+
+Cost per run: about $0.30 of Opus 5.5 for the author, about 70 s of author time, and one Modal machine for a few minutes. The author runs in the same thread, so it uses that machine's Claude login.
+
+## Create it (the lead, from the Mini)
+
+**Script mode** is recommended. The spawn is fully determined by code, and script automations run on the bb server, where `bb thread spawn --environment-provider modal-sandbox` works the same way it does for the lead. (Agent-mode automations can't pick an environment provider, so they would run on the Mini.)
+
+```sh
+bb automation create --project proj_dvb9hes55f \
+  --name "Daily Drama (FLT-34)" \
+  --cron "30 7 * * *" --timezone America/Los_Angeles \
+  --interpreter bash --timeout 5m \
+  --script-file drama/automation.sh
+```
+
+Or paste the script inline with `--script "$(cat drama/automation.sh)"`. Check it with `bb automation show <id> --project proj_dvb9hes55f`. To fire one run by hand: `bb automation run <id> --project proj_dvb9hes55f`.
+
+`drama/automation.sh` does four things:
+
+1. Resolves `bb` (`$BB_CLI` if set, otherwise `bb` on PATH).
+2. Picks today's date in San Francisco.
+3. Spawns the thread: `--environment-provider modal-sandbox --provider claude-code --model claude-opus-5-5 --reasoning-level high --permission-mode auto`, titled `explore · Daily Drama <date>`, with the prompt below. The model is passed explicitly, because Modal's catalog is stale.
+4. Attaches the new thread to FLT-34.
+
+## The thread's prompt
+
+This is kept in `drama/automation.sh`. Verbatim:
+
+> Kind: explore. House rules: the mission-control charter (on the Mini at /Users/jem/.bb-machines/jem.getbb.app/thread-storage/mission-control/CHARTER.md). Task: **FLT-34 Daily Drama run for {date}.** You are the runner, not the author: the pack is written by the headless author inside the pipeline, from the modding skill alone, and you never edit it by hand.
+>
+> 1. `git fetch origin && git checkout -B drama-run-{date} origin/main`, then `node scripts/drama-run.mjs --date {date}`.
+> 2. If it prints `quiet day, skipped`: `bb tasks comment FLT-34 --body "Daily Drama {date}: skipped (quiet day). <the SKIP reason, one line>"` and stop.
+> 3. If it prints `opened <url>`: `bb tasks comment FLT-34 --body "Daily Drama {date}: <url>, ready for Jem's review."` and stop. **Never merge a Drama PR**; Jem reviews every one.
+> 4. If it prints `NOT GREEN`, or the author crashed: run it once more exactly as before (the author starts fresh). If it fails again, comment the last 30 lines of output on FLT-34 as "Daily Drama {date}: failed", and stop. Don't fix the pack yourself, and don't edit drama/**: a hand-made pack would defeat the point.
+> 5. Don't start dev servers. End your turn with one line: what (the PR, a skip or a failure), and why.
+
+## Operating it
+
+- **Pause:** `bb automation pause <id> --project proj_dvb9hes55f`. **Resume:** `bb automation resume <id> ...`.
+- **Machines:** each run's Modal machine stays up until its thread is archived. The lead archives finished Drama threads daily (or run `bb machine list --json` and remove any idle machines).
+- **Three-day proof (the spec's "done when"):** three consecutive runs, each a PR that passes `flt-mod check` and the linter, or a documented skip.
+- **Tuning:** the story choice lives in `drama/pick.md` and the feeds in `drama/sources.json`. The linter's knowledge lives in `drama/denylist.json` (add names freely) and `drama/glossary.json`. A Drama PR never edits these files. Tuning PRs go through the lead like any other code.

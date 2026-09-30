@@ -13,14 +13,14 @@ test("private modder kit works against the actual game contract", async (t) => {
   const directory = await mkdtemp(resolve(tmpdir(), "flt-kit-test-"));
   try {
     await withGameRuntime(async (runner) => {
-      await t.test("both M1a examples replay 365 actual days", async () => {
+      await t.test("both examples run 365 actual days with their content executed", async () => {
         for (const example of ["every-lab-is-steve", "headline-pack"]) {
           const report = await check(resolve(gameRoot, `mods/examples/${example}/mod.json`), runner);
           assert.equal(report.days, 365);
           assert.equal(report.ticks, 7300);
           assert.ok(report.cardsAnswered > 0);
           assert.equal(report.deterministic, true);
-          assert.ok(report.injection.deferred.length > 0);
+          assert.deepEqual(report.coverage, { executed: [example === "every-lab-is-steve" ? "rivals" : "headlines"], inert: [] });
         }
       });
       await t.test("SDK, typed template and every section validate", async () => {
@@ -30,7 +30,8 @@ test("private modder kit works against the actual game contract", async (t) => {
         assert.deepEqual(loaded.manifest, json);
         assert.deepEqual((await loadManifest(resolve(input, "mod.example.ts"), runner)).manifest, json);
         const report = await check(input, runner);
-        assert.equal(report.arcs[0].states, 2);
+        // The base game has arcs of its own now (FLT-25/33), so find the template's.
+        assert.equal(report.arcs.find((arc) => arc.id === "fetch-arc").states, 2);
         const sdk = await runner.import(resolve(gameRoot, "packages/flt-mod-sdk/src/index.ts"));
         assert.throws(() => sdk.defineMod({ apiVersion: 2, id: "broken", name: "Broken", version: "1" }));
       });
@@ -41,12 +42,15 @@ test("private modder kit works against the actual game contract", async (t) => {
         const { decodeManifest } = await runner.import(resolve(gameRoot, "src/mods/schema.ts"));
         const { composeMods } = await runner.import(resolve(gameRoot, "src/mods/loader.ts"));
         const { resolveGameDefinition } = await runner.import(resolve(gameRoot, "src/mods/game-definition.ts"));
+        const { checkPresentation } = await runner.import(resolve(gameRoot, "src/mods/check.ts"));
         const { Effect } = await runner.import("effect");
         for (const [index, [, json]] of examples.entries()) {
           const part = JSON.parse(json);
-          const manifest = await Effect.runPromise(decodeManifest({ apiVersion: 1, id: `example-${index}`, name: "Example", version: "1.0.0", ...(part.skin ? part : { content: part }) }));
+          const topLevel = ["skin", "audio", "looks", "assets"].some((key) => key in part);
+          const manifest = await Effect.runPromise(decodeManifest({ apiVersion: 1, id: `example-${index}`, name: "Example", version: "1.0.0", ...(topLevel ? part : { content: part }) }));
           const definition = await Effect.runPromise(resolveGameDefinition(composeMods([manifest]).layer));
           definition.content.arcs.forEach(checkArcGraph);
+          if (topLevel) await checkPresentation(manifest);
         }
       });
       await t.test("scaffold test command and inlined bundle work outside the workspace", async () => {

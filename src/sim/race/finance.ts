@@ -1,11 +1,15 @@
 // Money in the race: what the revenue factor is, what a funding round is worth, what an auction costs.
-import { arenaScore, RIVAL_BY_ID, YOU, type RivalId } from "../../content/rivals";
+import { arenaScore, YOU, type RivalId } from "../../content/rivals";
 import { formatMoney, runwayMonths } from "../format";
 import type { GameState } from "../types";
 import { rankOf } from "./arena";
 import { valuationFactor } from "./leapfrog/factors";
 import { leapfrogVars } from "./leapfrog/vars";
+import { defectionVars } from "../defection/driver";
+import { poachingVars } from "../poaching/driver";
 import { evalBonus } from "../collusion/scores";
+import { defs } from "../defs";
+import { neoLabById } from "../neolabs/driver";
 
 /** Revenue while an open-weights rival is eating it. */
 export const OPEN_DROP_FACTOR = 0.7;
@@ -55,12 +59,19 @@ export type Bid = keyof typeof BID_MULTIPLES;
 
 export const bidAmount = (state: GameState, bid: Bid): number => Math.round(auctionUnit(state) * BID_MULTIPLES[bid]);
 
+/**
+ * Why each auction bid can't be made, in choice order, or null (FLT-58): a bid bigger than the cash in the bank is greyed out
+ * with the reason. "Bid low" never is, so the card can always be answered (the sim clamps an offer to the cash anyway).
+ */
+export const auctionBlocked = (state: GameState): (string | null)[] =>
+  (["low", "mid", "all"] as const).map((bid) => (bid !== "low" && bidAmount(state, bid) > state.cash ? `${formatMoney(bidAmount(state, bid))} is more than the ${formatMoney(Math.max(0, state.cash))} you have` : null));
+
 /** The template variables the race's cards and effects use. They never shadow {lab}, {model} or {rival}. */
 export function raceVars(state: GameState): Record<string, string> {
   const { race } = state;
   const top = race.board.find((r) => r.id !== YOU)!;
   const drop = race.openDrop;
-  const nameOf = (id: string) => RIVAL_BY_ID[id as RivalId]?.name ?? id;
+  const nameOf = (id: string) => defs().rivalById[id as RivalId]?.name ?? neoLabById(state, id)?.name ?? id;
   const rivalScore = drop ? (race.board.find((r) => r.id === drop.rival)?.score ?? 0) : 0;
   const mine = arenaScore(state.capability, state.hype);
   return {
@@ -78,5 +89,8 @@ export function raceVars(state: GameState): Record<string, string> {
     gap: drop ? `${Math.abs(rivalScore - mine)} points` : "",
     // Release Leapfrog's cards ({lfRival}, {lfReady}, ...): empty while the pack is off.
     ...leapfrogVars(state),
+    // Defection ({defName}, {neoName}, ...) and the Poaching War ({poacher}, {poachNames}, ...).
+    ...defectionVars(state),
+    ...poachingVars(state),
   };
 }

@@ -172,6 +172,22 @@
   box-shadow: 0 2px 0 color-mix(in srgb, var(--flt-color-line) 75%, transparent);
   pointer-events: none;
 }
+/* The coach's "read their mind" pointer (FLT-58): clickable, unlike the other tags. */
+.peektag {
+  transform: translate(-50%, -100%);
+}
+.peektag button {
+  padding: 2px 9px;
+  border: 2px solid var(--ink);
+  border-radius: 11px;
+  background: var(--cream);
+  color: var(--ink);
+  font: 900 12px var(--font);
+  white-space: nowrap;
+  cursor: pointer;
+  pointer-events: auto;
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--flt-color-line) 75%, transparent);
+}
 .stafftag.job-sre {
   background: #ffc978;
 }
@@ -209,5 +225,66 @@
   }
   .staff.painting {
     bottom: calc(150px + env(safe-area-inset-bottom));
+  }
+}
+
+/* Disasters on the map (FLT-32) */
+.stafftag.diverted {
+  background: #ff5a3d;
+  color: #fff;
+}
+.dzsite {
+  transform: translate(-50%, -100%);
+  display: grid;
+  gap: 3px;
+  justify-items: center;
+  padding: 4px 9px 5px;
+  border: 2.5px solid var(--ink);
+  border-radius: var(--flt-radius-button);
+  background: var(--cream);
+  color: var(--ink);
+  font: 900 11.5px var(--font);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.dzsite-bar {
+  position: relative;
+  display: block;
+  width: 96px;
+  height: 11px;
+  border: 2px solid var(--ink);
+  border-radius: 5px;
+  background: #fff;
+  overflow: hidden;
+}
+.dzsite-bar i {
+  display: block;
+  height: 100%;
+  background: #2fb98f;
+}
+.dzsite-bar small {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 8.5px;
+  color: #111;
+}
+.dzgate {
+  transform: translate(-50%, -50%);
+  padding: 4px 11px;
+  border: 3px solid #111;
+  background: repeating-linear-gradient(-45deg, #ffd24a 0 8px, #111 8px 16px);
+  color: #fff;
+  font: 900 13px var(--font);
+  letter-spacing: 0.06em;
+  text-shadow: 0 0 3px #111, 0 0 3px #111, 0 0 3px #111;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: bob 0.8s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dzgate {
+    animation: none;
   }
 }

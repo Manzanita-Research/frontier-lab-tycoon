@@ -1,0 +1,95 @@
+{
+  "base": {
+    "ref": "origin/flt-47-playable",
+    "sha": "158f23ea046981a2b78231b952e68569cc88887c"
+  },
+  "head": {
+    "branch": "flt-21-24-hearing-yacht",
+    "sha": "ee6a894",
+    "dirty": true
+  },
+  "seconds": 154.133,
+  "problems": [
+    "overview.png: blank composite: panel 3 is 24% one colour, 6 colours",
+    "phone.png: blank composite: panel 3 is 24% one colour, 7 colours"
+  ],
+  "rows": [
+    {
+      "scene": "overview",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-21-24/before/overview.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-21-24/after/overview.png",
+      "title": "The campus, mid-morning, paused",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-21-24/compare/overview.png",
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 24% one colour, 6 colours",
+      "error": "compare: blank composite: panel 3 is 24% one colour, 6 colours"
+    },
+    {
+      "scene": "phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-21-24/before/phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-21-24/after/phone.png",
+      "title": "The same campus on a phone (390x844)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-21-24/compare/phone.png",
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 24% one colour, 7 colours",
+      "error": "compare: blank composite: panel 3 is 24% one colour, 7 colours"
+    },
+    {
+      "scene": "hearing",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-21-24/before/hearing.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-21-24/after/hearing.png",
+      "title": "FLT-21 The Hearing: the second senator asks, one chaotic answer on the record",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-21-24/compare/hearing.png",
+      "changed": 0.24460493827160493
+    },
+    {
+      "scene": "hearing-gavel",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-21-24/before/hearing-gavel.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-21-24/after/hearing-gavel.png",
+      "title": "FLT-21 The Hearing: the gavel (chaotic, chaotic, earnest goes viral)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-21-24/compare/hearing-gavel.png",
+      "changed": 0.18839814814814815
+    },
+    {
+      "scene": "hearing-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-21-24/before/hearing-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-21-24/after/hearing-phone.png",
+      "title": "FLT-21 The Hearing on a phone",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-21-24/compare/hearing-phone.png",
+      "changed": 0.6693401385344513
+    },
+    {
+      "scene": "yacht-invite",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-21-24/before/yacht-invite.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-21-24/after/yacht-invite.png",
+      "title": "FLT-24 The yacht summit invitation (existing event-card slot)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-21-24/compare/yacht-invite.png",
+      "changed": 0.13457716049382715
+    },
+    {
+      "scene": "yacht-leak",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-21-24/before/yacht-leak.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-21-24/after/yacht-leak.png",
+      "title": "FLT-24 The leaked group chat",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-21-24/compare/yacht-leak.png",
+      "changed": 0.29644984567901234
+    },
+    {
+      "scene": "yacht-leak-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-21-24/before/yacht-leak-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-21-24/after/yacht-leak-phone.png",
+      "title": "FLT-24 The leaked group chat on a phone",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-21-24/compare/yacht-leak-phone.png",
+      "changed": 0.6570307753068416
+    }
+  ],
+  "errors": []
+}

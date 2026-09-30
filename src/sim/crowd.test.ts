@@ -8,7 +8,7 @@ import { demoOdds, FLOP_SCALE, SHOW_TICKS, showFor } from "./demo";
 import { causeOf, thoughtBoard, thoughtOf, walkersThinking } from "./mind";
 import { applyServes, happinessOf, moodFor, RIVAL_FOMO, tickNeeds } from "./needs";
 import { createRng } from "./rng";
-import { createInitialState } from "./state";
+import { createTestCampus as createInitialState } from "./testkit";
 import { answer, perfBudget } from "./testkit";
 import { tick } from "./tick";
 import type { GameState, Walker } from "./types";
@@ -16,6 +16,8 @@ import { TARGET_WANDER } from "./types";
 import { dailyVibes, initialVibes, readVibes, trendOf, visitorCapFor, visitorChanceFor, vibesTarget } from "./vibes";
 import { chooseTarget, dailyWalkers, fillAgents, researcherTarget, seedWalkers } from "./walkers";
 import { syncProtesters } from "./protest";
+import { enableFactions } from "./factions/state";
+import { settleFactions } from "./factions/driver";
 
 const count = (s: GameState, kind: Walker["kind"]) => s.walkers.filter((w) => w.kind === kind).length;
 const researchers = (s: GameState) => s.walkers.filter((w) => w.kind === "researcher");
@@ -478,7 +480,8 @@ describe("Vibes", () => {
     expect(visitorCapFor(900)).toBeGreaterThan(visitorCapFor(300));
     expect(visitorChanceFor(900)).toBeGreaterThan(visitorChanceFor(300));
     const arrivals = (vibes: number) => {
-      const s = createInitialState(4);
+      const s = campus("demo");
+      s.day = 60;
       s.walkers = [];
       s.vibes.value = vibes;
       let seen = 0;
@@ -494,19 +497,19 @@ describe("Vibes", () => {
   });
 
   it("brings applicants to the gate when Vibes are above 350 and a hall has room, and only then", () => {
-    const withRoom = () => campus("hall");
+    const withRoom = () => { const s = campus("hall"); s.walkers = s.walkers.filter((w) => w.kind !== "researcher"); seedWalkers(s, "researcher", 3, createRng(99)); return s; };
     const s = withRoom();
-    expect(researcherTarget(s)).toBe(10 + 8);
-    expect(count(s, "researcher")).toBe(11);
+    expect(researcherTarget(s)).toBe(3 + 8);
+    expect(count(s, "researcher")).toBe(3);
     s.vibes.value = 300;
     for (let i = 0; i < 20; i++) dailyWalkers(s, createRng(i));
-    expect(count(s, "researcher")).toBe(11);
+    expect(count(s, "researcher")).toBe(3);
 
     const g = withRoom();
     g.vibes.value = 700;
     const rng = createRng(2);
     for (let i = 0; i < 10; i++) dailyWalkers(g, rng);
-    expect(count(g, "researcher")).toBeGreaterThan(11);
+    expect(count(g, "researcher")).toBeGreaterThan(3);
     expect(count(g, "researcher")).toBeLessThanOrEqual(researcherTarget(g));
     const newcomer = researchers(g).find((w) => w.machine.value === "arriving")!;
     expect(newcomer).toBeDefined();
@@ -517,11 +520,11 @@ describe("Vibes", () => {
     expect(newcomer.z).toBeGreaterThan(g.gate.z - 4);
 
     // Applicants keep coming until the halls are full, and then they stop.
-    const full = createInitialState(1);
+    const full = withRoom();
     full.vibes.value = 900;
     for (let i = 0; i < 40; i++) dailyWalkers(full, createRng(i));
     expect(count(full, "researcher")).toBe(researcherTarget(full));
-    expect(researcherTarget(full)).toBe(14);
+    expect(researcherTarget(full)).toBe(11);
   });
 });
 
@@ -681,12 +684,18 @@ describe("determinism and scale", () => {
     expect(a.walkers.every((w) => w.name.length > 0)).toBe(true);
   });
 
-  it("keeps 800 walkers under 0.5 ms per tick", () => {
+  // FLT-33: and again with the factions on, a fast lab's worth of them marching, and the paths arguing.
+  for (const factions of [false, true]) it(`keeps 800 walkers under 0.5 ms per tick${factions ? " with the factions on" : ""}`, () => {
     const s = campus("nap", "snack", "demo");
     const rng = createRng(11);
     s.capability = 4000; // agentTarget caps at 400
     fillAgents(s, rng);
     s.waterDiscourse = 160;
+    if (factions) {
+      enableFactions(s);
+      s.factions!.pace = 3;
+      settleFactions(s);
+    }
     syncProtesters(s, rng, true);
     // Three small buildings for 300 researchers is a queue and a half: an unfair fight on purpose. Visitors leave and
     // unhappy researchers quit, so the crowd is topped back up before each timed batch.
@@ -710,7 +719,8 @@ describe("determinism and scale", () => {
       best = Math.min(best, (performance.now() - t0) / 200);
       expect(s.day).toBeGreaterThan(day); // it really ran
     }
-    console.log(`800-walker tick: ${best.toFixed(3)} ms (best of 3 x 200 ticks), never fewer than ${smallest} walkers at the start of a batch`);
+    if (factions) expect(s.walkers.some((w) => w.crowd !== undefined)).toBe(true);
+    console.log(`800-walker tick${factions ? " (factions on)" : ""}: ${best.toFixed(3)} ms (best of 3 x 200 ticks), never fewer than ${smallest} walkers at the start of a batch`);
     expect(smallest).toBeGreaterThanOrEqual(800);
     expect(best).toBeLessThan(perfBudget(0.5)); // a shared CI runner gets double, like the other wall-clock budgets
   });

@@ -4,8 +4,8 @@
     "",
     "  query    URL params merged over `defaults.query`; a null value removes a default. These are the game's own hooks",
     "           (src/debug.ts): seed, warp (sim days before the first frame), speed (0 = paused), hour, zoom, focus=x,z,",
-    "           photo, moment=<shuffle|era|era3|auction|funding|ops|queue|slop>, researchers, agents, discourse, skin.",
-    "  viewport 'WxH' (default 1440x900). mobile: true = a phone: dsf 2, touch (use with 390x844).",
+    "           photo, moment=<shuffle|era|era3|auction|funding|ops|queue|slop|defection-*|poach-offer|factions|counterprotest|argue>, researchers, agents, discourse, skin.",
+    "  viewport 'WxH' (default 1440x900). mobile: true = a phone: dsf 2, touch (use with 390x844). dsf: 2 = a 2x (retina) desktop capture.",
     "  steps    run in order once the page has drawn `frames` frames (default 24), then it settles again and shoots:",
     "             { \"wait\": ms }",
     "             { \"select\": \"researcher\" | \"researcher:Ada Gradient\" }   tap a walker (opens the inspector)",
@@ -55,14 +55,10 @@
       "photo"
     ],
     "leapfrog": [
-      "leap-board",
-      "leap-solved",
-      "leap-voice",
       "leap-shipnow",
       "leap-dog",
       "leap-chart",
-      "leap-phone",
-      "leap-phone-board"
+      "leap-phone"
     ],
     "disasters": [
       "disaster-swarm",
@@ -76,12 +72,22 @@
       "paper-drop",
       "paper-scoop",
       "paper-award",
+      "papers-panel",
       "paper-phone"
     ],
     "collusion": [
       "collusion-sign",
+      "collusion-traffic",
       "collusion-phone",
       "collusion-scandal"
+    ],
+    "coach": [
+      "coach-path",
+      "coach-hall",
+      "coach-phone",
+      "coach-swag",
+      "coach-almanac",
+      "coach-karaoke"
     ],
     "swag-drop": [
       "desk",
@@ -96,6 +102,176 @@
       "desk-phone-badge",
       "desk-phone-okr",
       "desk-phone-more"
+    ],
+    "mods": [
+      "mod-steve",
+      "mod-steve-phone",
+      "mod-retriever",
+      "mod-manager"
+    ],
+    "disasters-ui": [
+      "dz-alert",
+      "dz-menu",
+      "dz-ask",
+      "dz-leak",
+      "dz-finance",
+      "dz-swag-alert",
+      "dz-swag-menu",
+      "dz-h98-leak",
+      "dz-phone",
+      "dz-swag-phone"
+    ],
+    "circus": [
+      "hearing",
+      "hearing-gavel",
+      "hearing-phone",
+      "yacht-invite",
+      "yacht-leak",
+      "yacht-leak-phone"
+    ],
+    "drama": [
+      "defection-chat",
+      "defection-card",
+      "defection-exit",
+      "defection-manifesto",
+      "defection-arena",
+      "poach-offer",
+      "defection-card-karaoke",
+      "defection-phone",
+      "poach-phone"
+    ],
+    "daily-drama": [
+      "drama-intro",
+      "drama-nudge",
+      "drama-programs",
+      "drama-window",
+      "drama-playing",
+      "drama-base",
+      "drama-phone"
+    ],
+    "auditors": [
+      "audit-notice",
+      "audit-countdown",
+      "audit-visit",
+      "audit-tidy",
+      "audit-evals",
+      "audit-report",
+      "audit-caught",
+      "audit-phone"
+    ],
+    "flt-52": [
+      "wave-campus",
+      "wave-papers",
+      "collusion-sign",
+      "wave-disasters",
+      "hearing",
+      "yacht-invite",
+      "wave-defection",
+      "wave-poaching",
+      "wave-auditors",
+      "wave-promises",
+      "senate-draft",
+      "wave-factions",
+      "wave-drama",
+      "notice-burst",
+      "memo",
+      "front-95",
+      "wave-mods",
+      "wave-phone"
+    ],
+    "heroes": [
+      "hero",
+      "hero-photo"
+    ],
+    "senate": [
+      "senate-draft",
+      "senate-law",
+      "senate-exposed",
+      "senate-vote",
+      "senate-rollcall",
+      "senate-draft-phone",
+      "senate-vote-phone"
+    ],
+    "discourse": [
+      "factions",
+      "factions-base",
+      "factions-karaoke",
+      "counterprotest",
+      "argue",
+      "factions-chip",
+      "factions-phone"
+    ],
+    "endings": [
+      "memo",
+      "takeover",
+      "takeover-95",
+      "thanks",
+      "front-takeover",
+      "front-regulated",
+      "front-acquihired",
+      "front-captured",
+      "front-pivot",
+      "front-95",
+      "front-phone",
+      "front-phone-share"
+    ],
+    "notices": [
+      "notice-burst",
+      "notice-burst-base"
+    ],
+    "flt-58": [
+      "first-wait",
+      "first-peek",
+      "coach-card",
+      "auction",
+      "auction-broke"
+    ],
+    "flt-57": [
+      "end-acquihired",
+      "end-acquihired-almanac",
+      "end-acquihired-phone",
+      "end-card",
+      "end-card-lab2",
+      "end-versus",
+      "end-versus-phone",
+      "friend",
+      "friend-almanac",
+      "friend-phone",
+      "memo-countdown",
+      "memo-countdown-almanac",
+      "memo-race",
+      "memo-slow-phone"
+    ],
+    "flt-55": [
+      "gate",
+      "gate-mod",
+      "gate-phone",
+      "gate-mod-phone",
+      "gate-mod-offer",
+      "gate-mod-skin"
+    ],
+    "circus-juice": [
+      "c56-conga",
+      "c56-conga-phone",
+      "c56-campus",
+      "c56-poach-sirocco",
+      "c56-huddle",
+      "c56-huddle-phone",
+      "c56-plaque",
+      "c56-viral",
+      "c56-viral-phone",
+      "c56-marchers",
+      "c56-marchers-phone",
+      "c56-gate",
+      "c56-gate-karaoke",
+      "c56-statement",
+      "c56-statement-phone",
+      "c56-risk",
+      "c56-risk-phone",
+      "c56-leak",
+      "c56-leak-phone",
+      "c56-leak-senate",
+      "c56-stakes"
     ]
   },
   "scenes": {
@@ -143,6 +319,31 @@
     "menu": {
       "title": "The Start menu / build bar open",
       "steps": [
+        {
+          "eval": "(f, w) => { const b = document.querySelector('[data-testid=\"start-button\"]'); if (b) b.click(); else f.send({ type: 'SET_TOOL', tool: 'cluster' }); }"
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "menu-fresh": {
+      "title": "The Start menu open at a fresh start (day 0, level 1, tutorial skipped): what is locked, and what unlocks it",
+      "query": {
+        "warp": null
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "coachSkip"
+            }
+          }
+        },
+        {
+          "wait": 500
+        },
         {
           "eval": "(f, w) => { const b = document.querySelector('[data-testid=\"start-button\"]'); if (b) b.click(); else f.send({ type: 'SET_TOOL', tool: 'cluster' }); }"
         },
@@ -224,11 +425,19 @@
       }
     },
     "auction": {
-      "title": "The Race: the compute auction",
+      "title": "The Race: the compute auction (the card opens at midnight, 6 ticks in)",
       "query": {
         "moment": "auction",
         "warp": null
-      }
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { for (let i = 0; i < 20; i++) f.tick(w); }"
+        },
+        {
+          "wait": 600
+        }
+      ]
     },
     "funding": {
       "title": "The Race: a funding round",
@@ -453,6 +662,30 @@
       "viewport": "390x844",
       "mobile": true
     },
+    "papers-panel": {
+      "title": "Publish or Perish: the papers window open (the scoop moment closed first)",
+      "query": {
+        "warp": 0,
+        "moment": "paper-scoop",
+        "leapfrog": "off"
+      },
+      "steps": [
+        {
+          "click": ".f95-moment [data-g='close'], .paper-moment .moment-buttons .plain",
+          "optional": true
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": ".f95-papers:not(.open) .f95-tb, .papers-chip",
+          "optional": true
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
     "collusion-sign": {
       "title": "Agent Collusion: the first Security memo (existing event-card slot)",
       "query": {
@@ -479,6 +712,19 @@
         }
       ]
     },
+    "collusion-traffic": {
+      "title": "Agent Collusion: POSTs off the Compute Cluster and Kombucha After Dark",
+      "query": {
+        "moment": "collusion-traffic",
+        "warp": null,
+        "hour": 23
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
     "collusion-scandal": {
       "title": "Agent Collusion: exposed, the existing ticker carries the scandal headline",
       "query": {
@@ -488,6 +734,140 @@
       "steps": [
         {
           "wait": 800
+        }
+      ]
+    },
+    "coach-path": {
+      "title": "Coach suggests a connected path from the gate",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "11,19",
+        "zoom": 55
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        }
+      ]
+    },
+    "coach-hall": {
+      "title": "Coach suggests a Training Hall beside the paid path",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "11,19",
+        "zoom": 55
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 17
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 16
+            }
+          }
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "coach-phone": {
+      "title": "Coach path anchors on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "11,19",
+        "zoom": 29
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
         }
       ]
     },
@@ -766,6 +1146,2477 @@
           "wait": 500
         }
       ]
+    },
+    "coach-swag": {
+      "title": "Playable opening coach: swag-drop",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "11,19",
+        "zoom": 55,
+        "skin": "swag-drop"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        }
+      ]
+    },
+    "coach-almanac": {
+      "title": "Playable opening coach: field-almanac",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "11,19",
+        "zoom": 55,
+        "skin": "field-almanac"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        }
+      ]
+    },
+    "coach-karaoke": {
+      "title": "Playable opening coach: karaoke-night",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "11,19",
+        "zoom": 55,
+        "skin": "karaoke-night"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        }
+      ]
+    },
+    "mod-steve": {
+      "title": "FLT-37: ?mod=every-lab-is-steve, the Arena is three Steves (main ignores ?mod=)",
+      "query": {
+        "mod": "/mods/examples/every-lab-is-steve/mod.json"
+      },
+      "steps": []
+    },
+    "mod-steve-phone": {
+      "title": "FLT-37: the Steve mod on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "mod": "/mods/examples/every-lab-is-steve/mod.json"
+      },
+      "steps": []
+    },
+    "mod-manager": {
+      "title": "FLT-37: Start, Settings, Mods… with two mods loaded",
+      "query": {
+        "mod": [
+          "/mods/examples/every-lab-is-steve/mod.json",
+          "/mods/examples/headline-pack/mod.json"
+        ]
+      },
+      "steps": [
+        {
+          "click": "[data-testid=start-button]"
+        },
+        {
+          "click": ".f95-startwrap button[role=menuitem]:has-text(\"Settings\")",
+          "optional": true
+        },
+        {
+          "click": ".f95-startwrap li.sub button:has-text(\"Mods\")",
+          "optional": true
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "mod-retriever": {
+      "title": "FLT-37: the fresh agent's golden-retriever mod, first midnight of a new game (toast and camera to the gate)",
+      "query": {
+        "warp": null,
+        "mod": "/mods/examples/golden-retriever-protest/mod.json"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "skipTutorial"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "eval": "(f, w) => { while (w.day < 1) f.tick(w); }"
+        },
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "dz-alert": {
+      "title": "FLT-32: Rogue Agent Swarm mid-cleanup in Frontier 95: the error box, GATE UNGUARDED over the gate, the progress label on the Security Office",
+      "query": {
+        "warp": null,
+        "disaster": "rogueSwarm",
+        "dz": 45,
+        "dzPick": 0,
+        "zoom": 72,
+        "focus": "11.6,18.4"
+      },
+      "steps": [
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "dz-menu": {
+      "title": "FLT-32: Start ▸ Settings ▸ Disasters… (the Disasters Properties applet) while the swarm is on",
+      "query": {
+        "warp": null,
+        "disaster": "rogueSwarm",
+        "dz": 45,
+        "dzPick": 0,
+        "zoom": 72,
+        "focus": "11.6,18.4"
+      },
+      "steps": [
+        {
+          "eval": "async (f, w) => { const z = (ms) => new Promise((r) => setTimeout(r, ms)); const q = (s) => document.querySelector(s); q('[data-testid=start-button]')?.click(); await z(250); [...document.querySelectorAll('[role=menuitem][aria-expanded]')].find((b) => /Settings/.test(b.textContent))?.click(); await z(250); q('[data-testid=start-disasters]')?.click(); await z(300); }"
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "dz-ask": {
+      "title": "FLT-32: \"Start a GPU Fire?\" with No as the default",
+      "query": {
+        "warp": null,
+        "disaster": "rogueSwarm",
+        "dz": 45,
+        "dzPick": 0,
+        "zoom": 72,
+        "focus": "11.6,18.4"
+      },
+      "steps": [
+        {
+          "eval": "async (f, w) => { const z = (ms) => new Promise((r) => setTimeout(r, ms)); const q = (s) => document.querySelector(s); q('[data-testid=start-button]')?.click(); await z(250); [...document.querySelectorAll('[role=menuitem][aria-expanded]')].find((b) => /Settings/.test(b.textContent))?.click(); await z(250); q('[data-testid=start-disasters]')?.click(); await z(300); [...document.querySelectorAll('.f95-dz-listbox button:not([disabled])')].find((b) => /GPU/.test(b.textContent))?.click(); await z(150); [...document.querySelectorAll('.f95-dz-applet .f95-row button')].find((b) => /Start/.test(b.textContent))?.click(); }"
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "dz-leak": {
+      "title": "FLT-32: Weights Leak: the thief's row in the Arena reads \"your weights\"",
+      "query": {
+        "warp": null,
+        "disaster": "weightsLeak",
+        "dz": 40,
+        "dzPick": 0,
+        "zoom": 72,
+        "focus": "11.6,18.4"
+      },
+      "steps": [
+        {
+          "eval": "async (f, w) => { const z = (ms) => new Promise((r) => setTimeout(r, ms)); const q = (s) => document.querySelector(s); document.querySelectorAll('[role=tab]').forEach((t) => /^Arena$/.test(t.textContent.trim()) && t.click()); }"
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "dz-finance": {
+      "title": "FLT-32: Public trust and Regulator heat on the Finance tab",
+      "query": {
+        "warp": null,
+        "disaster": "rogueSwarm",
+        "dz": 45,
+        "dzPick": 0,
+        "zoom": 72,
+        "focus": "11.6,18.4"
+      },
+      "steps": [
+        {
+          "eval": "async (f, w) => { document.querySelectorAll('[role=tab]').forEach((t) => /^Finance$/.test(t.textContent.trim()) && t.click()); }"
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "dz-swag-alert": {
+      "title": "FLT-32: the base alert in Swag Drop (the corkboard shrinks so the Arena still shows)",
+      "query": {
+        "warp": null,
+        "disaster": "weightsLeak",
+        "dz": 40,
+        "dzPick": 0,
+        "zoom": 72,
+        "focus": "11.6,18.4",
+        "skin": "swag-drop"
+      },
+      "steps": [
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "dz-swag-menu": {
+      "title": "FLT-32: the base Disasters menu (Swag Drop)",
+      "query": {
+        "warp": null,
+        "disaster": "rogueSwarm",
+        "dz": 45,
+        "dzPick": 0,
+        "zoom": 72,
+        "focus": "11.6,18.4",
+        "skin": "swag-drop"
+      },
+      "steps": [
+        {
+          "click": ".dz-more",
+          "optional": true
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "dz-h98-leak": {
+      "title": "FLT-32: the leak in Homepage 98's Top Labs table",
+      "query": {
+        "warp": null,
+        "disaster": "weightsLeak",
+        "dz": 40,
+        "dzPick": 0,
+        "zoom": 72,
+        "focus": "11.6,18.4",
+        "skin": "homepage-98"
+      },
+      "steps": [
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "dz-phone": {
+      "title": "FLT-32: the swarm on a phone (Frontier 95): the error box under the lab bar",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "disaster": "rogueSwarm",
+        "dz": 45,
+        "dzPick": 0,
+        "zoom": 72,
+        "focus": "11.6,18.4"
+      },
+      "steps": [
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "dz-swag-phone": {
+      "title": "FLT-32: the Disasters menu on a phone (Swag Drop)",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "disaster": "rogueSwarm",
+        "dz": 45,
+        "dzPick": 0,
+        "zoom": 72,
+        "focus": "11.6,18.4",
+        "skin": "swag-drop"
+      },
+      "steps": [
+        {
+          "click": ".dz-more",
+          "optional": true
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "hearing": {
+      "title": "FLT-21 The Hearing: the second senator asks, one chaotic answer on the record",
+      "query": {
+        "moment": "hearing",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "hearing-gavel": {
+      "title": "FLT-21 The Hearing: the gavel (chaotic, chaotic, earnest goes viral)",
+      "query": {
+        "moment": "hearing-verdict",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "hearing-phone": {
+      "title": "FLT-21 The Hearing on a phone",
+      "query": {
+        "moment": "hearing",
+        "warp": null
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "yacht-invite": {
+      "title": "FLT-24 The yacht summit invitation (existing event-card slot)",
+      "query": {
+        "moment": "yacht-invite",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "yacht-leak": {
+      "title": "FLT-24 The leaked group chat",
+      "query": {
+        "moment": "yacht-leak",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "yacht-leak-phone": {
+      "title": "FLT-24 The leaked group chat on a phone",
+      "query": {
+        "moment": "yacht-leak",
+        "warp": null
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "defection-chat": {
+      "title": "Defection: a VC pitches your star at the Kombucha Bar (speech bubbles)",
+      "query": {
+        "moment": "defection-chat",
+        "warp": null,
+        "focus": "11,16",
+        "zoom": 70
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "defection-card": {
+      "title": "Defection: the resignation letter, DRAFT v7",
+      "query": {
+        "moment": "defection-card",
+        "warp": null
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "defection-exit": {
+      "title": "Defection: your star walks out with a box",
+      "query": {
+        "moment": "defection-exit",
+        "warp": null,
+        "focus": "9,15",
+        "zoom": 60
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "defection-manifesto": {
+      "title": "Defection: the neo lab's MANIFESTO.txt",
+      "query": {
+        "moment": "defection-manifesto",
+        "warp": null
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "defection-arena": {
+      "title": "Defection: the neo lab on the Arena board, tagged",
+      "query": {
+        "moment": "defection-arena",
+        "warp": null,
+        "leapfrog": "off"
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "poach-offer": {
+      "title": "Poaching War: the recruiter email",
+      "query": {
+        "moment": "poach-offer",
+        "warp": null,
+        "leapfrog": "off"
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "defection-card-karaoke": {
+      "title": "Defection: the resignation letter in another skin (base Drama slot)",
+      "query": {
+        "moment": "defection-card",
+        "warp": null,
+        "skin": "karaoke-night"
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "defection-phone": {
+      "title": "Defection: the resignation letter on a phone",
+      "query": {
+        "moment": "defection-card",
+        "warp": null
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "poach-phone": {
+      "title": "Poaching War: the recruiter email on a phone",
+      "query": {
+        "moment": "poach-offer",
+        "warp": null,
+        "leapfrog": "off"
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "audit-notice": {
+      "title": "FLT-19: the auditors' seven-day warning card (Prep / Tidy up / Business as usual)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "moment": "audit-notice"
+      },
+      "steps": []
+    },
+    "audit-countdown": {
+      "title": "FLT-19: Prep chosen; the countdown sign hangs over the gate",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "moment": "audit-notice",
+        "focus": "11,21",
+        "zoom": 70
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "CHOOSE",
+            "choiceIndex": 0
+          }
+        },
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "audit-visit": {
+      "title": "FLT-19: Evals Without Borders on campus, inspecting the Compute Cluster",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "moment": "audit-visit",
+        "focus": "8.5,10.5",
+        "zoom": 100
+      },
+      "steps": [
+        {
+          "wait": 4000
+        }
+      ]
+    },
+    "audit-tidy": {
+      "title": "FLT-19: Tidy up: the agents hide in cardboard boxes while the auditors look around",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "moment": "audit-tidy",
+        "focus": "10,8.5",
+        "zoom": 100
+      },
+      "steps": [
+        {
+          "wait": 4000
+        }
+      ]
+    },
+    "audit-evals": {
+      "title": "FLT-19: the auditors run their own evals at the Training Hall",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "moment": "audit-evals",
+        "focus": "18.5,16.5",
+        "zoom": 75
+      },
+      "steps": [
+        {
+          "wait": 4000
+        }
+      ]
+    },
+    "audit-report": {
+      "title": "FLT-19: the report card (prepped, no surprises)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "moment": "audit-report"
+      },
+      "steps": []
+    },
+    "audit-caught": {
+      "title": "FLT-19: the report card after Tidy up got caught (F in Eval honesty, the stamp)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "moment": "audit-caught"
+      },
+      "steps": []
+    },
+    "audit-phone": {
+      "title": "FLT-19: the caught report card on a phone (390x844)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "moment": "audit-caught"
+      },
+      "steps": [],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "wave-campus": {
+      "title": "FLT-52: the Level 5 mid-game campus every wave pack wakes on (?scenario=midgame)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95"
+      },
+      "steps": []
+    },
+    "wave-papers": {
+      "title": "FLT-52 at Level 5: Publish or Perish, the Papers window opened on the mid-game campus",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "click": ".f95-papers:not(.open) .f95-tb, .papers-chip",
+          "optional": true
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "wave-disasters": {
+      "title": "FLT-52 at Level 5: Start ▸ Settings ▸ Disasters… on the mid-game campus",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "eval": "async (f, w) => { const z = (ms) => new Promise((r) => setTimeout(r, ms)); const q = (s) => document.querySelector(s); q('[data-testid=start-button]')?.click(); await z(250); [...document.querySelectorAll('[role=menuitem][aria-expanded]')].find((b) => /Settings/.test(b.textContent))?.click(); await z(250); q('[data-testid=start-disasters]')?.click(); await z(300); }"
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "wave-poaching": {
+      "title": "FLT-52 at Level 5: played on from the mid-game, the Poaching War's recruiter email turns up (~day 483)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { for (let i = 0; i < 120 * 20; i++) { const open = Object.keys(w.arcs).find((a) => w.arcs[a].value === 'cardOpen'); if (open === 'poaching-offer') return; f.tick(w, open ? [{ type: 'chooseEvent', eventId: open, choiceIndex: 0 }] : []); } }"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "wave-defection": {
+      "title": "FLT-52 at Level 5: played on from the mid-game, the resignation letter (~day 490)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { for (let i = 0; i < 120 * 20; i++) { const open = Object.keys(w.arcs).find((a) => w.arcs[a].value === 'cardOpen'); if (open === 'defection-card') return; f.tick(w, open ? [{ type: 'chooseEvent', eventId: open, choiceIndex: 0 }] : []); } }"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "wave-auditors": {
+      "title": "FLT-52 at Level 5: played on from the mid-game, Evals Without Borders' warning (~day 507)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { for (let i = 0; i < 120 * 20; i++) { const open = Object.keys(w.arcs).find((a) => w.arcs[a].value === 'cardOpen'); if (open === 'audit-notice') return; f.tick(w, open ? [{ type: 'chooseEvent', eventId: open, choiceIndex: 0 }] : []); } }"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "wave-promises": {
+      "title": "FLT-52 at Level 5: played on from the mid-game, the Promise Tracker's whip card (~day 467)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { for (let i = 0; i < 120 * 20; i++) { const open = Object.keys(w.arcs).find((a) => w.arcs[a].value === 'cardOpen'); if (open === 'promises-whip') return; f.tick(w, open ? [{ type: 'chooseEvent', eventId: open, choiceIndex: 0 }] : []); } }"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "wave-mods": {
+      "title": "FLT-52 at Level 5: Start ▸ Settings ▸ Mods… on the mid-game campus with two mods loaded",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95",
+        "mod": [
+          "/mods/examples/every-lab-is-steve/mod.json",
+          "/mods/examples/headline-pack/mod.json"
+        ]
+      },
+      "steps": [
+        {
+          "click": "[data-testid=start-button]"
+        },
+        {
+          "click": ".f95-startwrap button[role=menuitem]:has-text(\"Settings\")",
+          "optional": true
+        },
+        {
+          "click": ".f95-startwrap li.sub button:has-text(\"Mods\")",
+          "optional": true
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "wave-phone": {
+      "title": "FLT-52 at Level 5: the resignation letter on a phone",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95"
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "eval": "(f, w) => { for (let i = 0; i < 120 * 20; i++) { const open = Object.keys(w.arcs).find((a) => w.arcs[a].value === 'cardOpen'); if (open === 'defection-card') return; f.tick(w, open ? [{ type: 'chooseEvent', eventId: open, choiceIndex: 0 }] : []); } }"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "hero": {
+      "title": "FLT-48 hero: the mid-game campus in Frontier 95, the gate protest and a dome up close, at 2x",
+      "dsf": 2,
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "12.5,17.5",
+        "zoom": 60,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { const css = document.createElement('style'); css.textContent = '.stafftag{display:none!important}[data-hero-live]{display:none!important}'; document.head.appendChild(css); const news = w.news.filter((n) => n.id >= f.sim.newsStartId).slice(-24).slice(0, 6); for (const tape of document.querySelectorAll('.ticker-track, .dd-ticker-track, .gc-mtrack')) { const still = tape.cloneNode(false); still.style.transform = 'none'; for (const n of news) { const s = document.createElement('span'); s.className = 'tick ' + n.tone; s.textContent = n.text; still.appendChild(s); } tape.setAttribute('data-hero-live', ''); tape.after(still); } }"
+        },
+        {
+          "eval": "(f, w) => { const $ = (s) => document.querySelector(s); $('.f95-net .f95-b[data-g=close]')?.click(); if ($('.f95-post.head')?.getAttribute('aria-expanded') === 'true') $('.f95-post.head').click(); [...document.querySelectorAll('.f95-tasks [role=tab]')].find((b) => /Arena/.test(b.textContent))?.click(); if ($('.f95-thoughts.open')) $('.f95-thoughts .f95-b[data-g=min]')?.click(); const who = w.walkers.find((x) => x.kind === 'visitor'); if (who) { f.send({ type: 'SELECT', id: who.id }); f.send({ type: 'SELECT', id: null }); } }"
+        },
+        {
+          "wait": 600
+        },
+        {
+          "eval": "(f, w) => { if (!document.querySelector('.tipballoon')) document.querySelector('.f95-clip')?.click(); }"
+        },
+        {
+          "wait": 600
+        },
+        {
+          "eval": "(f, w) => { const t = document.querySelector('.f95-tasks:not(.open) .f95-tb'); if (t) t.click(); }"
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "hero-photo": {
+      "title": "FLT-48 hero, photo mode at golden hour",
+      "dsf": 2,
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "12.5,17.5",
+        "zoom": 60,
+        "skin": "frontier-95",
+        "photo": 1
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { const css = document.createElement('style'); css.textContent = '.stafftag{display:none!important}[data-hero-live]{display:none!important}'; document.head.appendChild(css); const news = w.news.filter((n) => n.id >= f.sim.newsStartId).slice(-24).slice(0, 6); for (const tape of document.querySelectorAll('.ticker-track, .dd-ticker-track, .gc-mtrack')) { const still = tape.cloneNode(false); still.style.transform = 'none'; for (const n of news) { const s = document.createElement('span'); s.className = 'tick ' + n.tone; s.textContent = n.text; still.appendChild(s); } tape.setAttribute('data-hero-live', ''); tape.after(still); } }"
+        },
+        {
+          "eval": "(f, w) => { [...document.querySelectorAll('button')].find((b) => b.textContent.trim() === 'Golden')?.click(); }"
+        },
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "hero-grid": {
+      "title": "FLT-48 hero, the same moment in every skin (run with --skin all)",
+      "dsf": 2,
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "12.5,17.5",
+        "zoom": 60
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { const css = document.createElement('style'); css.textContent = '.stafftag{display:none!important}[data-hero-live]{display:none!important}'; document.head.appendChild(css); const news = w.news.filter((n) => n.id >= f.sim.newsStartId).slice(-24).slice(0, 6); for (const tape of document.querySelectorAll('.ticker-track, .dd-ticker-track, .gc-mtrack')) { const still = tape.cloneNode(false); still.style.transform = 'none'; for (const n of news) { const s = document.createElement('span'); s.className = 'tick ' + n.tone; s.textContent = n.text; still.appendChild(s); } tape.setAttribute('data-hero-live', ''); tape.after(still); } }"
+        },
+        {
+          "eval": "(f, w) => { const $ = (s) => document.querySelector(s); $('.f95-net .f95-b[data-g=close]')?.click(); if ($('.f95-post.head')?.getAttribute('aria-expanded') === 'true') $('.f95-post.head').click(); [...document.querySelectorAll('.f95-tasks [role=tab]')].find((b) => /Arena/.test(b.textContent))?.click(); if ($('.f95-thoughts.open')) $('.f95-thoughts .f95-b[data-g=min]')?.click(); const who = w.walkers.find((x) => x.kind === 'visitor'); if (who) { f.send({ type: 'SELECT', id: who.id }); f.send({ type: 'SELECT', id: null }); } }"
+        },
+        {
+          "wait": 600
+        },
+        {
+          "eval": "(f, w) => { if (!document.querySelector('.tipballoon')) document.querySelector('.f95-clip')?.click(); }"
+        },
+        {
+          "wait": 600
+        },
+        {
+          "eval": "(f, w) => { const t = document.querySelector('.f95-tasks:not(.open) .f95-tb'); if (t) t.click(); }"
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "senate-draft": {
+      "title": "FLT-22 Regulatory Capture: the staffer's draft, two clauses ticked (track changes on)",
+      "query": {
+        "moment": "bill",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "wave-factions": {
+      "title": "FLT-52 at Level 5: the Discourse Monitor (FLT-33 factions, awake since The Race) opened on the mid-game campus",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "click": ".f95-s.disc:not(.on), .factions:not(.open) .factions-head",
+          "optional": true
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "wave-drama": {
+      "title": "FLT-52 at Level 5: Today's Drama (FLT-34) opened from its button on the mid-game campus, with the rehearsal feed",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95",
+        "drama": "fixture"
+      },
+      "steps": [
+        {
+          "wait": 400
+        },
+        {
+          "click": "button[aria-label^=\"Open Today\"]",
+          "optional": true
+        },
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "senate-law": {
+      "title": "FLT-22/23 The law in force three weeks on, and the Promise Tracker (opened from the Senate tile) whipping the next vote",
+      "query": {
+        "moment": "bill-law",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 600
+        },
+        {
+          "click": "[data-testid=\"start-button\"]",
+          "optional": true
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": "[data-coach=\"build:senate\"]",
+          "optional": true
+        },
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "senate-exposed": {
+      "title": "FLT-22 The leak: someone opened the file properties",
+      "query": {
+        "moment": "bill-exposed",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "senate-vote": {
+      "title": "FLT-23 The Promise Tracker: roll call in 5 days, one senator lobbied",
+      "query": {
+        "moment": "vote",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "senate-rollcall": {
+      "title": "FLT-23 The roll call: promises kept and broken, Truth-o-meters moved",
+      "query": {
+        "moment": "rollcall",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "senate-draft-phone": {
+      "title": "FLT-22 The draft on a phone",
+      "query": {
+        "moment": "bill",
+        "warp": null
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "senate-vote-phone": {
+      "title": "FLT-23 The Promise Tracker on a phone",
+      "query": {
+        "moment": "vote",
+        "warp": null
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "factions": {
+      "title": "FLT-33: the Discourse Monitor after a fast, open season (an alliance, a schism, Doomers at the gate)",
+      "query": {
+        "moment": "factions"
+      },
+      "steps": []
+    },
+    "factions-base": {
+      "title": "FLT-33: the base Factions panel, open",
+      "query": {
+        "moment": "factions",
+        "skin": "base"
+      },
+      "steps": []
+    },
+    "factions-karaoke": {
+      "title": "FLT-33: the discourse in Karaoke Night",
+      "query": {
+        "moment": "factions",
+        "skin": "karaoke-night"
+      },
+      "steps": []
+    },
+    "counterprotest": {
+      "title": "FLT-25: the Water Discourse at its height, the Water Truthers Truthers across the path",
+      "query": {
+        "moment": "counterprotest",
+        "zoom": 80,
+        "focus": "12,21"
+      },
+      "steps": []
+    },
+    "argue": {
+      "title": "FLT-33: an Accelerationist and a Doomer pass on a path and say so",
+      "query": {
+        "moment": "argue"
+      },
+      "steps": []
+    },
+    "factions-chip": {
+      "title": "FLT-33: a researcher's inspector card with their faction chip",
+      "query": {
+        "moment": "argue"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { const r = w.walkers.find((x) => x.kind === \"researcher\" && x.faction && x.machine?.value !== \"inside\"); if (r) f.send({ type: \"SELECT\", id: r.id }); }"
+        }
+      ]
+    },
+    "factions-phone": {
+      "title": "FLT-33: the Discourse Monitor on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "moment": "factions"
+      },
+      "steps": []
+    },
+    "drama-intro": {
+      "title": "FLT-34: a Drama pack has just loaded (fixture feed): the ON AIR card says what's coming",
+      "query": {
+        "drama": "fixture",
+        "mod": "/mods/drama-fixture/2026-09-29/mod.json"
+      },
+      "steps": [
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "drama-nudge": {
+      "title": "FLT-34: a new pack is out (mid-game lab, once the tap hint has gone): the tray megaphone gets a \"!\" and the paperclip has opinions",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95",
+        "drama": "fixture"
+      },
+      "steps": [
+        {
+          "wait": 23500
+        }
+      ]
+    },
+    "drama-programs": {
+      "title": "FLT-34: Start ▸ Programs ▸ Today's Drama",
+      "query": {
+        "drama": "fixture"
+      },
+      "steps": [
+        {
+          "click": "[data-testid=start-button]"
+        },
+        {
+          "click": ".f95-startwrap button[role=menuitem]:has-text(\"Programs\")",
+          "optional": true
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "drama-window": {
+      "title": "FLT-34: Today's Drama: the latest pack's card and the archive",
+      "query": {
+        "drama": "fixture"
+      },
+      "steps": [
+        {
+          "wait": 400
+        },
+        {
+          "click": "button[aria-label^=\"Open Today\"]",
+          "optional": true
+        },
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "drama-playing": {
+      "title": "FLT-34: the window with a pack playing, and Mods… offering to switch it off",
+      "query": {
+        "drama": "fixture",
+        "mod": "/mods/drama-fixture/2026-09-29/mod.json"
+      },
+      "steps": [
+        {
+          "wait": 1500
+        },
+        {
+          "click": "button:has-text(\"Let's go\")",
+          "optional": true
+        },
+        {
+          "click": "[data-testid=start-button]"
+        },
+        {
+          "click": ".f95-startwrap button[role=menuitem]:has-text(\"Settings\")",
+          "optional": true
+        },
+        {
+          "click": ".f95-startwrap li.sub button:has-text(\"Mods\")",
+          "optional": true
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "drama-base": {
+      "title": "FLT-34: the base skin's Today's Drama button and card",
+      "query": {
+        "drama": "fixture",
+        "skin": "base"
+      },
+      "steps": [
+        {
+          "wait": 400
+        },
+        {
+          "click": "button[aria-label^=\"Open Today\"]",
+          "optional": true
+        },
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "drama-phone": {
+      "title": "FLT-34: Today's Drama on a phone (390x844)",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "drama": "fixture"
+      },
+      "steps": [
+        {
+          "wait": 400
+        },
+        {
+          "click": "button[aria-label^=\"Open Today\"]",
+          "optional": true
+        },
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "memo": {
+      "title": "FLT-11: The Memo, the Era 4 fork (Race or Slow Down)",
+      "query": {
+        "warp": null,
+        "moment": "memo"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "takeover": {
+      "title": "FLT-11: The Takeover: the title is not yours, the cursor moves by itself",
+      "query": {
+        "warp": null,
+        "moment": "takeover"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "takeover-95": {
+      "title": "FLT-11: The Takeover in Frontier 95",
+      "query": {
+        "warp": null,
+        "moment": "takeover",
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "thanks": {
+      "title": "FLT-11: 'Thanks for playing. We'll take it from here.'",
+      "query": {
+        "warp": null,
+        "moment": "thanks"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "front-takeover": {
+      "title": "FLT-11: The Takeover's front page and share card",
+      "query": {
+        "warp": null,
+        "moment": "front-takeover"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "front-regulated": {
+      "title": "FLT-11: Regulated Utility's front page (the campus goes beige)",
+      "query": {
+        "warp": null,
+        "moment": "front-regulated"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "front-acquihired": {
+      "title": "FLT-11: Acqui-hired's front page",
+      "query": {
+        "warp": null,
+        "moment": "front-acquihired"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "front-captured": {
+      "title": "FLT-11: Captured's front page",
+      "query": {
+        "warp": null,
+        "moment": "front-captured"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "front-pivot": {
+      "title": "FLT-11: The Pivot's front page",
+      "query": {
+        "warp": null,
+        "moment": "front-pivot"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "front-95": {
+      "title": "FLT-11: an ending in Frontier 95 (Internet Exploder + NoteBad)",
+      "query": {
+        "warp": null,
+        "moment": "front-captured",
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "front-phone": {
+      "title": "FLT-11: an ending on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "moment": "front-acquihired"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "front-phone-share": {
+      "title": "FLT-11: an ending on a phone, scrolled to Share and the card",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "moment": "front-acquihired"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        },
+        {
+          "eval": "() => { const el = document.querySelector('.f95-end-run, .ending-side'); if (el) el.scrollIntoView({ block: 'start' }); }"
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "notice-burst": {
+      "title": "FLT-51: a busy second on the mid-game campus (nine notices land at once, as at 10x), Frontier 95",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => {\n  const say = (text, tone, source, importance) => w.toasts.push({ id: w.nextId++, text, tone, source, importance });\n  say('API Gateway is out of order. An SRE is on it.', 'bad', 'ops', 'world');\n  say('Lucia Argmax loved it: $160K in the bank', 'good', 'economy', 'world');\n  say('Sirocco launched Gale-4-Turbo. The news cycle is theirs.', 'bad', 'leapfrog', 'world');\n  say('Dmitri Backprop handed in the box and left.', 'bad', 'staff', 'you');\n  say('Demo went flawlessly (it was pre-recorded)', 'good', 'crowd', 'world');\n  say('Sirocco took your record on SWE-VR.', 'bad', 'leapfrog', 'you');\n  say('Kombucha Bar is out of order. An SRE is on it.', 'bad', 'ops', 'world');\n  say('MetaMeta Metaintelligence Labs just dropped Superintelligence-Preview-15-Mini for free. Revenue -30% for 30 days.', 'bad', 'race', 'you');\n  say('Up 2 places: #3 on the Arena.', 'good', 'race', 'world');\n  w.version++;\n}"
+        },
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "notice-burst-base": {
+      "title": "FLT-51: the same nine notices, in the base skin",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "base"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => {\n  const say = (text, tone, source, importance) => w.toasts.push({ id: w.nextId++, text, tone, source, importance });\n  say('API Gateway is out of order. An SRE is on it.', 'bad', 'ops', 'world');\n  say('Lucia Argmax loved it: $160K in the bank', 'good', 'economy', 'world');\n  say('Sirocco launched Gale-4-Turbo. The news cycle is theirs.', 'bad', 'leapfrog', 'world');\n  say('Dmitri Backprop handed in the box and left.', 'bad', 'staff', 'you');\n  say('Demo went flawlessly (it was pre-recorded)', 'good', 'crowd', 'world');\n  say('Sirocco took your record on SWE-VR.', 'bad', 'leapfrog', 'you');\n  say('Kombucha Bar is out of order. An SRE is on it.', 'bad', 'ops', 'world');\n  say('MetaMeta Metaintelligence Labs just dropped Superintelligence-Preview-15-Mini for free. Revenue -30% for 30 days.', 'bad', 'race', 'you');\n  say('Up 2 places: #3 on the Arena.', 'good', 'race', 'world');\n  w.version++;\n}"
+        },
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "first-wait": {
+      "title": "FLT-58: the first minute, while the first model trains (seed 3, 2.5 days after the Hall)",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "11,17",
+        "zoom": 50
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 17
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 16
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placeBuilding",
+              "kind": "hall",
+              "x": 12,
+              "z": 16
+            }
+          }
+        },
+        {
+          "wait": 400
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "eval": "(f, w) => { for (let i = 0; i < 50; i++) f.tick(w); }"
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "first-peek": {
+      "title": "FLT-58: the first minute after ▶▶: the coach points at a researcher's mind",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "11,17",
+        "zoom": 50
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 17
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 16
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placeBuilding",
+              "kind": "hall",
+              "x": 12,
+              "z": 16
+            }
+          }
+        },
+        {
+          "wait": 400
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "eval": "(f, w) => { for (let i = 0; i < 50; i++) f.tick(w); }"
+        },
+        {
+          "wait": 600
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 3
+          }
+        },
+        {
+          "wait": 150
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "coach-card": {
+      "title": "FLT-58: the first model ships and Level 2's card opens while the coach has a step",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "11,17",
+        "zoom": 50
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 17
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 16
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placeBuilding",
+              "kind": "hall",
+              "x": 12,
+              "z": 16
+            }
+          }
+        },
+        {
+          "wait": 400
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "eval": "(f, w) => { for (let i = 0; i < 50; i++) f.tick(w); }"
+        },
+        {
+          "wait": 600
+        },
+        {
+          "eval": "(f, w) => { w.training.context.progress = w.training.context.cost - 0.01; for (let i = 0; i < 30; i++) f.tick(w); }"
+        },
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "auction-broke": {
+      "title": "FLT-58: the compute auction when the bank can't cover the big bids",
+      "query": {
+        "moment": "auction",
+        "warp": null
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { for (let i = 0; i < 20; i++) f.tick(w); }"
+        },
+        {
+          "eval": "(f, w) => { w.cash = 1_500_000; }"
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "end-acquihired": {
+      "title": "FLT-57: Acqui-hired ends on Found a new lab (three perks), with a 7-day streak",
+      "query": {
+        "warp": null,
+        "moment": "front-acquihired",
+        "streak": 7
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "end-acquihired-almanac": {
+      "title": "FLT-57: the same ending in Field Almanac (the base Ending slot)",
+      "query": {
+        "warp": null,
+        "moment": "front-acquihired",
+        "streak": 7,
+        "skin": "field-almanac"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "end-acquihired-phone": {
+      "title": "FLT-57: Acqui-hired on a phone, scrolled to What now",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "moment": "front-acquihired",
+        "streak": 7
+      },
+      "steps": [
+        {
+          "wait": 7000
+        },
+        {
+          "eval": "() => { const el = document.querySelector('.f95-end-next, .ending-next, .f95-end-run, .ending-side'); if (el) el.scrollIntoView({ block: 'start' }); }"
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "end-card": {
+      "title": "FLT-57: the share card with a streak flame (Frontier 95)",
+      "query": {
+        "warp": null,
+        "moment": "front-acquihired",
+        "streak": 7
+      },
+      "steps": [
+        {
+          "wait": 7000
+        },
+        {
+          "eval": "() => { const img = document.querySelector('.f95-end-card, .ending-card-preview'); if (!img) return; Object.assign(img.style, { position: 'fixed', inset: '0', margin: 'auto', width: 'min(1200px, 100vw)', height: 'auto', zIndex: '9999', boxShadow: '0 0 0 100vmax #222' }); }"
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "end-card-lab2": {
+      "title": "FLT-57: a second lab's share card: Lab #2 and the streak (Field Almanac)",
+      "query": {
+        "warp": null,
+        "moment": "lab2",
+        "streak": 12,
+        "skin": "field-almanac"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        },
+        {
+          "eval": "() => { const img = document.querySelector('.f95-end-card, .ending-card-preview'); if (!img) return; Object.assign(img.style, { position: 'fixed', inset: '0', margin: 'auto', width: 'min(1200px, 100vw)', height: 'auto', zIndex: '9999', boxShadow: '0 0 0 100vmax #222' }); }"
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "end-versus": {
+      "title": "FLT-57: a friend's run on the same seed: the verdict and Keep regulating",
+      "query": {
+        "warp": null,
+        "moment": "front-captured",
+        "seed": 48,
+        "vs": "acquihired.180.60.4",
+        "streak": 3
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "end-versus-phone": {
+      "title": "FLT-57: the verdict on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "moment": "front-captured",
+        "seed": 48,
+        "vs": "acquihired.180.60.4",
+        "streak": 3
+      },
+      "steps": [
+        {
+          "wait": 7000
+        },
+        {
+          "eval": "() => { const el = document.querySelector('.f95-end-next, .ending-next, .f95-end-run, .ending-side'); if (el) el.scrollIntoView({ block: 'start' }); }"
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "friend": {
+      "title": "FLT-57: a friend's link: 'Your friend's lab was Captured on day 212. Beat it?'",
+      "query": {
+        "vs": "captured.212.88.7"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "friend-almanac": {
+      "title": "FLT-57: the friend banner in Field Almanac",
+      "query": {
+        "vs": "captured.212.88.7",
+        "skin": "field-almanac"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "friend-phone": {
+      "title": "FLT-57: the friend banner on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "vs": "captured.212.88.7"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "memo-countdown": {
+      "title": "FLT-57: The Memo, three days out (Frontier 95: a very slow file copy)",
+      "query": {
+        "warp": null,
+        "moment": "memo-countdown"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "memo-countdown-almanac": {
+      "title": "FLT-57: The Memo's countdown in Field Almanac",
+      "query": {
+        "warp": null,
+        "moment": "memo-countdown",
+        "skin": "field-almanac"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "memo-race": {
+      "title": "FLT-57: after the Memo: the Race extra edition, three staff quoted",
+      "query": {
+        "warp": null,
+        "moment": "memo-race"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "memo-slow-phone": {
+      "title": "FLT-57: the Slow Down extra edition on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "moment": "memo-slow"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "gate": {
+      "title": "FLT-55: the gate with protesters, no mod (the base game: must be unchanged)",
+      "query": {
+        "discourse": 32,
+        "focus": "12.5,20",
+        "zoom": 80,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "skipTutorial"
+            }
+          }
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "gate-mod": {
+      "title": "FLT-55: the same gate with ?mod= golden retrievers (main applies the mod's content only; the branch draws its looks)",
+      "query": {
+        "discourse": 32,
+        "focus": "12.5,20",
+        "zoom": 80,
+        "skin": "frontier-95",
+        "mod": "/mods/examples/golden-retriever-protest/mod.json"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "skipTutorial"
+            }
+          }
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "gate-phone": {
+      "title": "FLT-55: the gate on a phone, no mod",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "discourse": 32,
+        "focus": "12.5,20",
+        "zoom": 70,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "skipTutorial"
+            }
+          }
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "gate-mod-phone": {
+      "title": "FLT-55: the gate on a phone with ?mod= golden retrievers",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "discourse": 32,
+        "focus": "12.5,20",
+        "zoom": 70,
+        "skin": "frontier-95",
+        "mod": "/mods/examples/golden-retriever-protest/mod.json"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "skipTutorial"
+            }
+          }
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "gate-mod-offer": {
+      "title": "FLT-55: a mod that asks for its skin: the Found New Skin box (no ?skin=)",
+      "query": {
+        "discourse": 32,
+        "focus": "12.5,20",
+        "zoom": 80,
+        "skin": null,
+        "mod": "/mods/examples/golden-retriever-protest/mod.json"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "skipTutorial"
+            }
+          }
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "gate-mod-skin": {
+      "title": "FLT-55: ?skin=good-boy-95, the mod's skin (Fetch, Sit/Walkies/Zoomies, Bark Bark News)",
+      "query": {
+        "discourse": 32,
+        "focus": "12.5,20",
+        "zoom": 80,
+        "skin": "good-boy-95",
+        "mod": "/mods/examples/golden-retriever-protest/mod.json"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "skipTutorial"
+            }
+          }
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "c56-conga": {
+      "title": "FLT-56: the star walks out, and the team follows in a conga line (camera beat)",
+      "query": {
+        "warp": null,
+        "moment": "defection-exit",
+        "beat": 1
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "c56-conga-phone": {
+      "title": "FLT-56: the conga beat on a phone",
+      "query": {
+        "warp": null,
+        "moment": "defection-exit",
+        "beat": 1
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 1200
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "c56-campus": {
+      "title": "FLT-56: the neo lab's campus beyond the fence, balloon and empty plinth",
+      "query": {
+        "warp": null,
+        "moment": "defection-arena",
+        "leapfrog": "off",
+        "focus": "16,25",
+        "zoom": 70
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "c56-poach-sirocco": {
+      "title": "FLT-56: a poaching offer in Sirocco's own voice",
+      "query": {
+        "warp": null,
+        "moment": "poach-offer:sirocco",
+        "leapfrog": "off"
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "c56-huddle": {
+      "title": "FLT-56: the auditors huddle before the report (camera beat)",
+      "query": {
+        "warp": null,
+        "scenario": "midgame",
+        "seed": 48,
+        "moment": "audit-huddle",
+        "beat": 1
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "c56-huddle-phone": {
+      "title": "FLT-56: the huddle beat on a phone",
+      "query": {
+        "warp": null,
+        "scenario": "midgame",
+        "seed": 48,
+        "moment": "audit-huddle",
+        "beat": 1
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "c56-plaque": {
+      "title": "FLT-56: the grade plaque by the gate, two days after the report",
+      "query": {
+        "warp": null,
+        "scenario": "midgame",
+        "seed": 48,
+        "moment": "audit-graded",
+        "focus": "14.3,24.3",
+        "zoom": 110
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "c56-viral": {
+      "title": "FLT-56: the hearing clip goes viral (camera beat, ticker burst, Network Traffic)",
+      "query": {
+        "warp": null,
+        "moment": "hearing-viral",
+        "beat": 1
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "c56-viral-phone": {
+      "title": "FLT-56: the viral beat on a phone",
+      "query": {
+        "warp": null,
+        "moment": "hearing-viral",
+        "beat": 1
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "c56-gate": {
+      "title": "FLT-56: marchers in their faction's colours and signs, and the gate legend with its Statement buttons",
+      "query": {
+        "moment": "counterprotest",
+        "zoom": 80,
+        "focus": "12,21"
+      },
+      "steps": [
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "c56-gate-karaoke": {
+      "title": "FLT-56: the gate legend in a base-slot skin (Karaoke Night)",
+      "query": {
+        "moment": "counterprotest",
+        "skin": "karaoke-night"
+      },
+      "steps": [
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "c56-statement": {
+      "title": "FLT-56: Comms issues a statement to the Doomers (camera beat at the gate)",
+      "query": {
+        "warp": null,
+        "moment": "statement",
+        "beat": 1
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "c56-statement-phone": {
+      "title": "FLT-56: the statement beat on a phone",
+      "query": {
+        "warp": null,
+        "moment": "statement",
+        "beat": 1
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "c56-risk": {
+      "title": "FLT-56: the draft's leak-risk meter (Metadata risk) under the clauses",
+      "query": {
+        "moment": "bill",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "c56-risk-phone": {
+      "title": "FLT-56: the draft's leak-risk meter on a phone",
+      "query": {
+        "moment": "bill",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "c56-leak": {
+      "title": "FLT-56: a reporter is asking about the file (camera beat with a Bury button)",
+      "query": {
+        "moment": "bill-leak",
+        "warp": null,
+        "beat": 1
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "c56-leak-phone": {
+      "title": "FLT-56: the leak-warning beat on a phone",
+      "query": {
+        "moment": "bill-leak",
+        "warp": null,
+        "beat": 1
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "c56-leak-senate": {
+      "title": "FLT-56: the law's row in the Senate window: the reporter's clock and Bury it",
+      "query": {
+        "moment": "bill-leak",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 600
+        },
+        {
+          "click": "[data-testid=\"start-button\"]",
+          "optional": true
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": "[data-coach=\"build:senate\"]",
+          "optional": true
+        },
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "c56-stakes": {
+      "title": "FLT-56: a small motion with stakes (what passing and failing do), on the whip card",
+      "query": {
+        "moment": "vote",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "c56-marchers": {
+      "title": "FLT-56 review: the counter-protest at the default zoom in photo mode (no legend), caps and boards in each faction's colour",
+      "query": {
+        "moment": "counterprotest",
+        "focus": "12,21",
+        "photo": 1
+      },
+      "steps": [
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "c56-marchers-phone": {
+      "title": "FLT-56 review: the counter-protest at the default zoom, in photo mode on a phone",
+      "query": {
+        "moment": "counterprotest",
+        "focus": "12,21",
+        "photo": 1
+      },
+      "steps": [
+        {
+          "wait": 600
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
     }
   }
 }

@@ -1,4 +1,5 @@
 import { Effect, Layer, Stream } from "effect";
+import { updateProgression, progressOf } from "../sim/progression";
 import { BUILDINGS } from "../content/buildings";
 import { EVENTS } from "../content/events";
 import { HEADLINES } from "../content/headlines";
@@ -17,7 +18,8 @@ import { Assets } from "./services/assets";
 import { Audio } from "./services/audio";
 import { GameEvents } from "./services/game-events";
 import { baseTables } from "./tables";
-import { runHeadless, injectDefinition } from "./headless";
+import { runHeadless } from "./headless";
+import { withDefs } from "../sim/defs";
 import { createInitialState } from "../sim/state";
 import steve from "../../mods/examples/every-lab-is-steve/mod.json";
 import headlines from "../../mods/examples/headline-pack/mod.json";
@@ -44,19 +46,34 @@ describe("mod foundations", () => {
   });
   it("adds, overrides, removes, and retains unmentioned fields", async () => {
     const def = await resolve([mod("one", {
-      rivals: { add: [{ ...RIVAL_DEFS[0]!, id: "steve", name: "Steve" }], override: [{ id: "anthro", name: "Steve Senior" }], remove: ["vssi"] },
+      rivals: { add: [{ ...RIVAL_DEFS[0]!, id: "steve", name: "Steve" }], override: [{ id: "anthro", name: "Steve Senior" }], remove: ["supersuper"] },
       headlines: { add: [{ id: "hello", tone: "joke", text: "Steve ships" }] },
       buildings: { override: [{ id: "cluster", name: "Steve's Compute" }] },
       walkerKinds: { override: [{ id: "agent", presentation: "flow" }] },
     })]);
     expect(def.content.rivals[0]).toEqual({ ...RIVAL_DEFS[0], name: "Steve Senior" });
-    expect(def.content.rivals.some((r) => r.id === "vssi")).toBe(false);
+    expect(def.content.rivals.some((r) => r.id === "supersuper")).toBe(false);
     expect(def.content.rivals.at(-1)?.id).toBe("steve");
     expect(def.content.headlines.at(-1)).toEqual({ id: "hello", tone: "joke", text: "Steve ships", trigger: "filler" });
     expect(def.content.buildings.cluster?.name).toBe("Steve's Compute");
     expect(def.content.walkerKinds.find((k) => k.id === "agent")?.presentation).toBe("flow");
     expect(RIVAL_DEFS[0]?.name).toBe("Anthropomorphic");
     expect(HEADLINES.some((h) => h.text === "Steve ships")).toBe(false);
+  });
+  it("loads progression overrides into the actual sim and rejects a missing level", async () => {
+    const manifest = await Effect.runPromise(decodeManifest(mod("two-models", {
+      progression: { override: [{ id: "garage", goal: { text: "Ship two models", metric: "models", target: 2 } }] },
+    })));
+    const def = await resolve([manifest]);
+    const state = createInitialState(42, "garage", def);
+    withDefs(def, () => {
+      state.models.push("Fixture-1"); updateProgression(state);
+      expect(progressOf(state)).toMatchObject({ level: 1, goal: { text: "Ship two models", target: 2 } });
+      state.models.push("Fixture-2"); updateProgression(state);
+      expect(progressOf(state).level).toBe(2);
+    });
+    expect(baseContent.progression[0]?.goal.target).toBe(1);
+    await expect(resolve([mod("missing-level", { progression: { remove: ["team"] } })])).rejects.toThrow();
   });
   it("wraps the supplied service, stacks in order, and preserves other services", async () => {
     const first = mod("first", { rivals: { override: [{ id: "anthro", name: "First" }] } });
@@ -115,14 +132,14 @@ describe("mod foundations", () => {
     await expect(Effect.runPromise(decodeManifest({ ...mod("bad"), content: { headlines: { add: [{ id: "test", text: "Test", tone: "jok" }] } } }))).rejects.toThrow('did you mean "joke"');
   });
   it("validates named arc vocabulary, missing references and unreachable states", async () => {
-    const arc = { id: "steve-arc", initial: "idle", states: { idle: { on: { DAY: { target: "done", guard: { type: "stat.gte", params: { stat: "hype", value: 40 } }, actions: ["effect.cash"] } } }, done: { type: "final" as const } } };
-    expect((await resolve([mod("arcs", { arcs: { add: [arc] } })])).content.arcs).toEqual([arc]);
+    const arc = { id: "steve-arc", initial: "idle", states: { idle: { on: { DAY: { target: "done", guard: { type: "stat.gte", params: { stat: "hype", value: 40 } }, actions: [{ type: "cash.delta", params: { amount: 100 } }] } } }, done: { type: "final" as const } } };
+    expect((await resolve([mod("arcs", { arcs: { add: [arc] } })])).content.arcs.at(-1)).toEqual(arc);
     expect((await resolve([mod("arcs", { events: { add: [arc] } })])).content.events.at(-1)).toEqual(arc);
     const conditioned = await resolve([mod("conditional", { headlines: { add: [{ id: "discourse-line", text: "The discourse has a streaming deal", tone: "joke", when: { "stat.gte": ["waterDiscourse", 40] } }] } })]);
     expect(conditioned.content.headlines.at(-1)?.when).toEqual({ "stat.gte": ["waterDiscourse", 40] });
     await expect(resolve([mod("arcs", { arcs: { add: [{ ...arc, states: { ...arc.states, lonely: {} } }] } })])).rejects.toThrow("unreachable states: lonely");
-    await expect(resolve([mod("arcs", { arcs: { add: [{ ...arc, states: { idle: { entry: ["effect.cashh"] } } }] } })])).rejects.toThrow('did you mean "effect.cash"');
-    await expect(resolve([mod("arcs", { arcs: { add: [{ ...arc, initial: "missing" }] } })])).rejects.toThrow("content.arcs[0].initial");
+    await expect(resolve([mod("arcs", { arcs: { add: [{ ...arc, states: { idle: { entry: ["cash.deltaa"] } } }] } })])).rejects.toThrow('did you mean "cash.delta"');
+    await expect(resolve([mod("arcs", { arcs: { add: [{ ...arc, initial: "missing" }] } })])).rejects.toThrow(/content\.arcs\[\d+\]\.initial/);
     await expect(Effect.runPromise(decodeManifest({ ...mod("arcs"), content: { arcs: { add: [{ ...arc, states: { idle: { after: { 1000: "done" } } } }] } } }))).rejects.toThrow("after");
   });
   it("accepts an injectable skin registry without pulling React into the pure definition", async () => {
@@ -138,13 +155,12 @@ describe("mod foundations", () => {
       expect(report.ticks).toBe(365 * 20);
       expect(report.cardsAnswered).toBeGreaterThan(0);
       expect(report.state).toEqual(runHeadless(def).state);
-      expect(report.injection.deferred.length).toBeGreaterThan(0);
+      expect(report.coverage).toEqual({ executed: [input === steve ? "rivals" : "headlines"], inert: [] });
     }
-  });
-  it("injects compatible rival and goal fields without altering global modules", async () => {
+  }, 20_000); // Four headless years (the factions run in them since FLT-33); tick budgets are checked separately.
+  it("starts rivals and goals from the definition without altering global modules", async () => {
     const def = await resolve([mod("tuning", { rivals: { override: [{ id: "anthro", startCapability: 77, personality: { ...RIVAL_DEFS[0]!.personality, growth: 23 } }] }, goals: { override: [{ id: "release", target: 4 }] } })]);
-    const state = createInitialState(42);
-    expect(injectDefinition(state, def).applied).toHaveLength(2);
+    const state = createInitialState(42, "garage", def);
     expect(state.race.rivals[0]?.context.capability).toBe(77);
     expect(state.race.rivals[0]?.context.personality.growth).toBe(23);
     expect(state.goals.context.goals[0]?.target).toBe(4);

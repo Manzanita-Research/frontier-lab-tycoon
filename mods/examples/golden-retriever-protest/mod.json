@@ -1,0 +1,160 @@
+{
+  "apiVersion": 1,
+  "id": "golden-retriever-protest",
+  "name": "Golden Retriever Protest",
+  "version": "1.0.0",
+  "author": "The Good Boy Collective",
+  "description": "The protesters at the gate are all golden retrievers, with placards, wagging tails and a bark every time the picket grows. Good dogs, firm demands.",
+  "looks": {
+    "protester": {
+      "label": "Golden Retriever",
+      "recipe": [
+        {"shape": "capsule", "size": [0.48, 0.98, 0.46], "at": [0, 0.46, -0.02], "color": "coat", "rotate": [90, 0, 0]},
+        {"shape": "sphere", "size": [0.44, 0.46, 0.38], "at": [0, 0.54, 0.3], "color": "coat", "shade": 0.18},
+        {"shape": "capsule", "size": [0.14, 0.36, 0.14], "at": [0.13, 0.18, 0.28], "color": "coat", "shade": -0.1, "pivot": [0, 0.14, 0], "motion": "step"},
+        {"shape": "capsule", "size": [0.14, 0.36, 0.14], "at": [-0.13, 0.18, 0.28], "color": "coat", "shade": -0.1, "pivot": [0, 0.14, 0], "motion": "step-alt"},
+        {"shape": "capsule", "size": [0.14, 0.36, 0.14], "at": [0.13, 0.18, -0.28], "color": "coat", "shade": -0.1, "pivot": [0, 0.14, 0], "motion": "step-alt"},
+        {"shape": "capsule", "size": [0.14, 0.36, 0.14], "at": [-0.13, 0.18, -0.28], "color": "coat", "shade": -0.1, "pivot": [0, 0.14, 0], "motion": "step"},
+        {"shape": "sphere", "size": [0.4, 0.38, 0.4], "at": [0, 0.86, 0.54], "color": "coat", "pivot": [0, -0.12, -0.14], "motion": "nod"},
+        {"shape": "box", "size": [0.2, 0.16, 0.24], "at": [0, 0.8, 0.76], "color": "coat", "pivot": [0, -0.06, -0.36], "motion": "nod", "shade": 0.22},
+        {"shape": "sphere", "size": [0.1, 0.08, 0.08], "at": [0, 0.85, 0.88], "color": "#2a1d14", "pivot": [0, -0.11, -0.48], "motion": "nod"},
+        {"shape": "box", "size": [0.09, 0.02, 0.14], "at": [0, 0.72, 0.82], "color": "#e8738a", "pivot": [0, 0.02, -0.42], "motion": "nod", "rotate": [-25, 0, 0]},
+        {"shape": "sphere", "size": [0.065, 0.075, 0.04], "at": [0.095, 0.92, 0.72], "color": "#1a120c", "pivot": [-0.095, -0.18, -0.32], "motion": "nod"},
+        {"shape": "sphere", "size": [0.065, 0.075, 0.04], "at": [-0.095, 0.92, 0.72], "color": "#1a120c", "pivot": [0.095, -0.18, -0.32], "motion": "nod"},
+        {"shape": "box", "size": [0.09, 0.28, 0.16], "at": [0.22, 0.8, 0.5], "color": "coat", "shade": -0.28, "pivot": [0, 0.13, 0], "motion": "flop"},
+        {"shape": "box", "size": [0.09, 0.28, 0.16], "at": [-0.22, 0.8, 0.5], "color": "coat", "shade": -0.28, "pivot": [0, 0.13, 0], "motion": "flop"},
+        {
+          "shape": "capsule",
+          "size": [0.13, 0.46, 0.13],
+          "at": [0, 0.66, -0.6],
+          "color": "coat",
+          "shade": 0.12,
+          "rotate": [-45, 0, 0],
+          "pivot": [0, -0.16, 0.16],
+          "motion": "wag"
+        },
+        {"shape": "cylinder", "size": [0.34, 0.08, 0.34], "at": [0, 0.7, 0.42], "color": "#d64545", "rotate": [-30, 0, 0]}
+      ],
+      "coats": ["#d9a441", "#e3b45c", "#c98b32", "#edc77a", "#b8752a", "#f2d59a"],
+      "scale": 1.1,
+      "gait": "trot",
+      "signs": ["WOOF LIES", "GOOD BOY TRUTH NOW", "WHO'S A GOOD MODEL", "OPEN THE TREAT WEIGHTS", "SIT. STAY. ALIGN.", "BALL IS LIFE"]
+    }
+  },
+  "audio": {
+    "cues": {
+      "gr.bark": [
+        {"at": 0, "hz": 300, "endHz": 560, "duration": 0.05, "gain": 0.12, "wave": "sawtooth"},
+        {"at": 0.045, "hz": 560, "endHz": 200, "duration": 0.13, "gain": 0.14, "wave": "square"},
+        {"at": 0, "hz": 900, "duration": 0.07, "gain": 0.05, "wave": "noise"},
+        {"at": 0.24, "hz": 330, "endHz": 616, "duration": 0.05, "gain": 0.12, "wave": "sawtooth"},
+        {"at": 0.285, "hz": 616, "endHz": 220, "duration": 0.13, "gain": 0.14, "wave": "square"},
+        {"at": 0.24, "hz": 900, "duration": 0.07, "gain": 0.05, "wave": "noise"}
+      ],
+      "protest.grow": [
+        {"at": 0, "hz": 300, "endHz": 560, "duration": 0.05, "gain": 0.132, "wave": "sawtooth"},
+        {"at": 0.045, "hz": 560, "endHz": 200, "duration": 0.13, "gain": 0.154, "wave": "square"},
+        {"at": 0, "hz": 900, "duration": 0.07, "gain": 0.055, "wave": "noise"},
+        {"at": 0.2, "hz": 345, "endHz": 644, "duration": 0.05, "gain": 0.12, "wave": "sawtooth"},
+        {"at": 0.245, "hz": 644, "endHz": 230, "duration": 0.13, "gain": 0.14, "wave": "square"},
+        {"at": 0.2, "hz": 900, "duration": 0.07, "gain": 0.05, "wave": "noise"},
+        {"at": 0.42, "hz": 285, "endHz": 532, "duration": 0.05, "gain": 0.108, "wave": "sawtooth"},
+        {"at": 0.465, "hz": 532, "endHz": 190, "duration": 0.13, "gain": 0.126, "wave": "square"},
+        {"at": 0.42, "hz": 900, "duration": 0.07, "gain": 0.045, "wave": "noise"}
+      ],
+      "protest.chant": [
+        {"at": 0, "hz": 300, "endHz": 560, "duration": 0.05, "gain": 0.036, "wave": "sawtooth"},
+        {"at": 0.045, "hz": 560, "endHz": 200, "duration": 0.13, "gain": 0.042, "wave": "square"},
+        {"at": 0, "hz": 900, "duration": 0.07, "gain": 0.015, "wave": "noise"},
+        {"at": 0.18, "hz": 330, "endHz": 616, "duration": 0.05, "gain": 0.036, "wave": "sawtooth"},
+        {"at": 0.225, "hz": 616, "endHz": 220, "duration": 0.13, "gain": 0.042, "wave": "square"},
+        {"at": 0.18, "hz": 900, "duration": 0.07, "gain": 0.015, "wave": "noise"},
+        {"at": 0.42, "hz": 270, "endHz": 504, "duration": 0.05, "gain": 0.048, "wave": "sawtooth"},
+        {"at": 0.465, "hz": 504, "endHz": 180, "duration": 0.13, "gain": 0.056, "wave": "square"},
+        {"at": 0.42, "hz": 900, "duration": 0.07, "gain": 0.02, "wave": "noise"}
+      ],
+      "ui.click": [
+        {"at": 0, "hz": 1300, "endHz": 1900, "duration": 0.05, "gain": 0.05, "wave": "sine"},
+        {"at": 0.06, "hz": 1900, "endHz": 1200, "duration": 0.05, "gain": 0.04, "wave": "sine"}
+      ]
+    }
+  },
+  "skin": {
+    "id": "good-boy-95",
+    "name": "Good Boy 95",
+    "extends": "frontier-95",
+    "activate": true,
+    "author": "The Good Boy Collective",
+    "description": "Frontier 95, but golden. The Start menu fetches.",
+    "tokens": {
+      "color.bg": "#6fae5a",
+      "color.titlebar": "#b8752a",
+      "color.accent": "#b8752a",
+      "color.selection": "#b8752a",
+      "color.info": "#b8752a",
+      "color.meterFrom": "#c98b32",
+      "color.meterTo": "#d9a441",
+      "color.panel": "#d8c9a8",
+      "color.panelAlt": "#ece0c4",
+      "bevel.face": "#d8c9a8"
+    },
+    "strings": {
+      "build.menuTitle": "Fetch",
+      "speed.pause": "Sit",
+      "speed.1": "Walkies",
+      "speed.3": "Zoomies",
+      "speed.10": "ZOOMIES!!",
+      "ticker.label": "Bark Bark News »",
+      "thoughts.title": "Sniffs"
+    }
+  },
+  "content": {
+    "thoughts": {
+      "add": [
+        {"id": "gr-always", "kind": "protester", "when": "always", "text": "I support open treats. I oppose closed doors."},
+        {"id": "gr-protest", "kind": "protester", "when": "protest", "text": "Water bowl transparency NOW. (wags tail)"},
+        {"id": "gr-discourse", "kind": "protester", "when": "discourse", "text": "Woof. That is my whole position paper."},
+        {"id": "gr-night", "kind": "protester", "when": "night", "text": "Protesting until someone throws the ball."},
+        {"id": "gr-crowded", "kind": "protester", "when": "crowded", "text": "So many friends at the gate! Best protest ever!"},
+        {"id": "gr-hype", "kind": "protester", "when": "highHype", "text": "Is that a new model? Does it fetch?"},
+        {"id": "gr-sniffed", "kind": "protester", "when": "always", "text": "I have sniffed your training data. Concerning."},
+        {"id": "gr-sign", "kind": "protester", "when": "always", "text": "My sign says WOOF LIES. I stand by my sign."},
+        {"id": "gr-squirrel", "kind": "protester", "when": "always", "text": "We demand a pause. Also that squirrel. Mostly the squirrel."}
+      ],
+      "remove": ["base-thoughts-74", "base-thoughts-75", "base-thoughts-76", "base-thoughts-77", "base-thoughts-78"]
+    },
+    "headlines": {
+      "add": [
+        {"id": "gr-protest-news", "trigger": "protest", "text": "Protesters outside {lab} confirmed to be golden retrievers; demands include belly rubs", "tone": "joke"},
+        {"id": "gr-filler-1", "text": "Golden retriever protest at {lab} remains peaceful, slightly damp", "tone": "joke"},
+        {"id": "gr-filler-2", "text": "Gate picket leader accepts tennis ball, forgets grievance, asks for another", "tone": "joke"}
+      ]
+    },
+    "arcs": {
+      "add": [
+        {
+          "id": "gr-arrival",
+          "initial": "waiting",
+          "states": {
+            "waiting": {"on": {"DAY": {"target": "barking", "guard": {"type": "day.after", "params": {"day": 0}}}}},
+            "barking": {
+              "entry": [
+                {"type": "toast", "params": {"text": "Protesters have gathered at the gate. They are all golden retrievers.", "tone": "joke"}},
+                {"type": "news", "params": {"text": "Golden retrievers picket {lab}: 'We just want to be involved'", "tone": "joke"}},
+                {"type": "discourse.delta", "params": {"amount": 20}},
+                {"type": "camera.focus", "params": {"on": "gate", "zoom": 1.5, "hold": 3}},
+                {"type": "sound.cue", "params": {"cue": "gr.bark"}}
+              ],
+              "on": {
+                "DAY": {
+                  "guard": {"type": "every", "params": {"days": 5}},
+                  "actions": [{"type": "discourse.delta", "params": {"amount": 4}}, {"type": "toast", "params": {"text": "Another good dog joins the picket line.", "tone": "joke"}}]
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

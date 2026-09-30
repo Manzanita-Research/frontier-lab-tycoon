@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { applyNow } from "../../sim/tick";
-import { createInitialState } from "../../sim/state";
+import { createTestCampus as createInitialState } from "../../sim/testkit";
 import { findSpot, layPaths } from "../../sim/testkit";
 import { currentLoad, fanSpeed, loadOf } from "./utilisation";
 

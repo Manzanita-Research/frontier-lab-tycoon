@@ -1,0 +1,18 @@
+{
+  "base": null,
+  "head": {
+    "branch": "flt-34-drama-part2",
+    "sha": "977e9a9",
+    "dirty": true
+  },
+  "seconds": 73.783,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "drama-window",
+      "gallery": true,
+      "count": 6
+    }
+  ],
+  "errors": []
+}

@@ -5,15 +5,15 @@ import { createSimHandle } from "../../../app/sim";
 import { makeSnapshot } from "../../../app/hud";
 import { initialStored, step } from "../../machines/run";
 import { createRng } from "../../rng";
-import { createInitialState } from "../../state";
+import { createTestCampus as createInitialState } from "../../testkit";
 import { applyNow, tick } from "../../tick";
 import { dailyWalkers } from "../../walkers";
-import { answer } from "../../testkit";
+import { answer, createTestCampus } from "../../testkit";
 import { stagePapers } from "./demo";
 import { P, PAPERS_PACK } from "./content";
 import { dailyPapers, disablePapers, enablePapers, publishPaper, setPublicationPolicy } from "./driver";
 import { policyMachine } from "./policy";
-import { publicationMachine } from "./publication";
+import { publicationMachine, quietPaperDay, type PublicationStored } from "./publication";
 import { papersView } from "./view";
 // Pinned v6 graph typing does not model emitted events; same adapter as machines/graph.test.ts.
 function graph(machine: AnyStateMachine, options: Record<string, unknown>) {
@@ -74,6 +74,27 @@ describe("publication statecharts", () => {
     expect(new Set(Object.values(map).map((n) => n.state.value))).toEqual(new Set(Object.keys(publicationMachine.states)));
     const pm = graph(policyMachine, { input: { publishPressure: 0 }, events: (["Open", "Selective", "Closed"] as const).map((policy) => ({ type: "SET", policy })), serializeState: (s: { value: unknown }) => String(s.value) });
     expect(new Set(Object.values(pm).map((n) => n.state.value))).toEqual(new Set(["Open", "Selective", "Closed"]));
+  });
+  it("the quiet day (no transition(), FLT-39) answers as the machine does, whenever it answers", () => {
+    let quiet = 0;
+    for (const value of ["draft", "review", "published", "criticized", "awarded"] as const)
+      for (const dueDay of [null, 10, 70])
+        for (const critiqueDay of [null, 9, 13])
+          for (const scoopedBy of ["", "sirocco"]) {
+            const stored: PublicationStored = { value, context: { ...fresh().context, value: 0.8, citations: 5, dueDay, critiqueDay, scoopedBy } };
+            for (const d of [8, 9, 10, 13, 69, 70, 71])
+              for (const scoopRival of ["", "sirocco"])
+                for (const award of ["", "Golden Footnote"]) {
+                  const event = { day: d, scoopRival, scoopValue: 0.5, award, citationGain: 3, critiqueValue: 0.4 };
+                  const got = quietPaperDay(stored, event);
+                  if (!got) continue;
+                  quiet++;
+                  const want = step(publicationMachine, stored, { type: "DAY", ...event });
+                  expect(want.effects).toEqual([]);
+                  expect(got).toStrictEqual(want.stored);
+                }
+          }
+    expect(quiet).toBeGreaterThan(300);
   });
 });
 
@@ -175,18 +196,18 @@ describe("papers integration", () => {
       }
     }
   });
-  it("app switch and reset preserve enablement, with ?papers=off supported", () => {
+  it("papers waits for Scrutiny in a new lab and reset, with ?papers=off supported", () => {
     const sim = createSimHandle(readDebugParams("?papers=on&leapfrog=off"));
-    expect(sim.world.papers?.enabled).toBe(true);
+    expect(sim.world.papers).toBeUndefined();
     sim.reset(2);
-    expect(sim.world.papers?.enabled).toBe(true);
+    expect(sim.world.papers).toBeUndefined();
     expect(createSimHandle(readDebugParams("?papers=off")).world.papers).toBeUndefined();
   });
   it("the tiny recruitingPull hook brings more and more-focused real applicants for identical gate trials", () => {
     const trials = (pull: number) => {
       let count = 0, focus = 0;
       for (let seed = 1; seed <= 200; seed++) {
-        const s = createInitialState(seed);
+        const s = createTestCampus(seed); // a working campus: applicants come for a hall, and the first-run opening has none (FLT-16)
         s.walkers = s.walkers.filter((w) => w.kind !== "researcher");
         s.vibes.value = 700;
         s.recruitingPull = pull;

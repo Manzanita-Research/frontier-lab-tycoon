@@ -1131,6 +1131,27 @@
     color: var(--kn-lemon);
     font: 400 16px/1 var(--kn-num);
   }
+  /* a button that is still dark: what lights it is on its LCD; it does nothing when pressed */
+  .kn-ab.locked {
+    cursor: default;
+    opacity: 0.6;
+    filter: saturate(0.3);
+    .kn-lcd span {
+      font-size: 11px;
+      line-height: 1.2;
+      color: var(--flt-color-textDim);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      display: block;
+      padding: 0 3px;
+    }
+  }
+  /* the BUILD button that opens the arcade sits alone in a small console */
+  .kn-tray-closed {
+    padding: 14px 14px 10px;
+    overflow: visible;
+  }
   .kn-lcd {
     width: 82px;
     padding: 3px 2px 4px;
@@ -2938,6 +2959,10 @@
     .kn-toasts-host {
       bottom: calc(var(--kn-ticker-h) + var(--kn-tray-h) + 12px);
       z-index: 9;
+    }
+    /* ...and over the arcade too while it is open (its row is as tall again as the BUILD button). */
+    .kn-hud:has([data-coach-panel]) .kn-toasts-host {
+      bottom: calc(var(--kn-ticker-h) + var(--kn-tray-h) + 12px + 114px);
     }
     /* The standing hint steps aside while the contestant sheet is up. */
     .kn-hud:has(.kn-card.sheet) .kn-toast.hint {

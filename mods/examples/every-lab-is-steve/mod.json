@@ -3,13 +3,25 @@
   "id": "every-lab-is-steve",
   "name": "Every Lab Is Named Steve",
   "version": "1.0.0",
-  "description": "The Effect-for-modders example, using the current game's canonical rival IDs.",
+  "description": "Every rival lab is now called Steve. The Arena becomes a very confusing leaderboard. Load it with ?mod=/mods/examples/every-lab-is-steve/mod.json.",
   "content": {
     "rivals": {
       "override": [
-        { "id": "anthro", "name": "Steve (Safety-Flavoured)" },
-        { "id": "openish", "name": "Steve (Formerly Non-Profit)" },
-        { "id": "metameta", "name": "Steve Superintelligence Labs" }
+        {
+          "id": "anthro",
+          "name": "Steve (Safety-Flavoured)",
+          "short": "Steve"
+        },
+        {
+          "id": "openish",
+          "name": "Steve (Formerly Non-Profit)",
+          "short": "Steve"
+        },
+        {
+          "id": "metameta",
+          "name": "Steve Superintelligence Labs",
+          "short": "Steve"
+        }
       ]
     }
   }

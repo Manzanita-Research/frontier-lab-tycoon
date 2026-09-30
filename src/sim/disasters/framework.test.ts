@@ -5,9 +5,11 @@ import docs from "../../../docs/DISASTERS.md?raw";
 import { BUILDINGS } from "../../content/buildings";
 import { eventById } from "../../content/events";
 import { canPlace, placeBuilding } from "../commands";
+import { refreshBoard } from "../race/arena";
+import { ranksOf } from "../race/state";
 import { createRng } from "../rng";
-import { createInitialState } from "../state";
-import { perfBudget } from "../testkit";
+import { createTestCampus as createInitialState } from "../testkit";
+import { perfBudget, createTestCampus, layPaths, readyForPressure } from "../testkit";
 import { applyNow, tick } from "../tick";
 import { GUARDS, GUARD_NAMES, STATS, STAT_NAMES, VERBS, VERB_NAMES, checkCall, runVerb, statsIn, vocabulary, type VerbEnv } from "../verbs";
 import type { GameState } from "../types";
@@ -143,7 +145,7 @@ describe("the vocabulary", () => {
     expect(vocabulary.effects).toEqual(VERB_NAMES);
     expect(vocabulary.guards).toEqual(GUARD_NAMES);
     for (const v of ["staff.divert", "compute.drain", "cost.spike", "building.offline", "building.fire", "trust.delta", "heat.delta", "camera.focus", "sound.cue", "shake", "news", "card"]) expect(VERB_NAMES).toContain(v);
-    // (`visitors.arrive` and `investigate.start` are named in the spec's list of examples; nothing in the first two waves calls them, so they wait for FLT-18/19.)
+    for (const v of ["visitors.arrive", "visitors.leave", "walkers.disguise", "walkers.reveal", "investigate.start"]) expect(VERB_NAMES).toContain(v); // FLT-18/19
     for (const g of Object.values(GUARDS)) expect(g.doc.length).toBeGreaterThan(10);
     for (const v of Object.values(VERBS)) expect(v.doc.length).toBeGreaterThan(10);
   });
@@ -153,7 +155,7 @@ describe("the vocabulary", () => {
   });
 
   it("reads the lab's stats by name", () => {
-    const s = createInitialState(1);
+    const s = createTestCampus(1);
     const read = Object.fromEntries(STAT_NAMES.map((n) => [n, STATS[n]!(s, null)]));
     expect(read.clusters).toBe(1);
     expect(read.halls).toBe(1);
@@ -251,7 +253,8 @@ describe("verbs", () => {
   });
 
   it("building.fire breaks a building and remembers it; wear caps reliability; ensure places a free Security Office once", () => {
-    const s = createInitialState(3);
+    const s = createTestCampus(3);
+    layPaths(s); // the free Security Office arrives beside a path
     s.cash = 1000;
     const cash = s.cash;
     const e = env(s, "x");
@@ -310,19 +313,25 @@ describe("verbs", () => {
   it("rival.leap lifts the most open lab to just under you, opens its weights, and never drags it down", () => {
     const s = createInitialState(1);
     s.capability = 60;
+    refreshBoard(s);
+    const before = ranksOf(s.race.board).sirocco!;
     const e = env(s, "x");
     runVerb(e, { type: "rival.leap", params: { relative: -0.1, open: true } });
     const sirocco = s.race.rivals.find((r) => r.context.id === "sirocco")!;
     expect(sirocco.context.capability).toBeCloseTo(54);
     expect(sirocco.context.open).toBe(true);
     expect(e.run!.vars.leapRival).toBe("Sirocco");
+    expect(e.run!.vars.leapRivalId).toBe("sirocco");
+    // The Arena shows the jump now, not at the weekly re-rank (FLT-32).
+    expect(ranksOf(s.race.board).sirocco).toBeLessThan(before);
     s.capability = 10;
     runVerb(e, { type: "rival.leap", params: { relative: -0.1 } });
     expect(s.race.rivals.find((r) => r.context.id === "sirocco")!.context.capability).toBeCloseTo(54);
   });
 
   it("card sets the offer flag and opens the card at once when the screen is free", () => {
-    const s = createInitialState(1);
+    const s = createTestCampus(1);
+    readyForPressure(s); // cards wait for a first launch and a gateway (FLT-16)
     const e = env(s, "weightsLeak");
     runVerb(e, { type: "card", params: { id: "leak" } });
     expect(e.run!.card).toBe("dz:weightsLeak:leak");

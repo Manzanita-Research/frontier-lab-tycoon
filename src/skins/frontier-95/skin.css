@@ -45,21 +45,34 @@
     align-items: flex-start;
     gap: 10px;
   }
-  .f95-right {
+  /* The right-hand side: the managed window stack, then (in the same column, so it can never cover a window) the news
+     arrival and the paperclip with its balloon. The stack gets whatever height they leave. */
+  .f95-side {
     position: absolute;
     right: 10px;
     top: 10px;
-    bottom: calc(var(--taskbar) + 10px);
-    /* Wide enough for Task Mangler's Benchmarks tab; every other window keeps its 400px, on the right. */
+    bottom: calc(var(--taskbar) + 6px);
     width: min(600px, calc(100vw - 20px));
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 10px;
+    gap: 8px;
+    pointer-events: none;
+  }
+  .f95-right {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-width: none;
     pointer-events: none;
+  }
+  .f95-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
     > * {
       flex: 0 0 auto;
     }
@@ -413,8 +426,9 @@
       }
     }
     &.burst {
+      /* Below the title bar, so the window's ✕ stays visible (FLT-58). */
       right: -10px;
-      top: -14px;
+      top: 34px;
       padding: 5px 10px;
       background: #e00000;
       color: #fff;
@@ -699,6 +713,11 @@
       background: var(--flt-color-selection);
       color: var(--flt-color-selectionText);
     }
+    /* the rival running your leaked weights (FLT-32) */
+    .f95-leak {
+      color: var(--flt-color-bad);
+      font-style: normal;
+    }
     &.moved-up span:last-child,
     .up {
       color: var(--flt-color-good);
@@ -900,10 +919,11 @@
       color: #444;
     }
     &.arrival {
-      position: absolute;
+      position: relative;
       left: auto;
-      right: 10px;
-      bottom: calc(var(--taskbar) + 8px);
+      bottom: auto;
+      max-width: 100%;
+      flex: none;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
@@ -1124,14 +1144,12 @@
     }
   }
   .f95-assistant {
-    position: absolute;
-    right: 10px;
-    bottom: calc(var(--taskbar) + 6px);
+    flex: none;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
     gap: 14px;
-    width: min(310px, calc(100vw - 20px));
+    width: min(330px, 100%);
     pointer-events: none;
   }
   .f95-balloon {
@@ -1226,11 +1244,33 @@
     &.good {
       color: var(--flt-color-good);
     }
-    &.hint {
+    &.hint,
+    &.warn {
       cursor: default;
+    }
+    &.warn {
+      color: var(--flt-color-bad);
     }
     + .f95-toast {
       border-top: 1px dotted #808080;
+    }
+    /* A pile of notices (FLT-51): the header in ink, each line in its own tone. */
+    &.f95-batch {
+      color: inherit;
+      ul {
+        margin: 4px 0 2px;
+        padding-left: 16px;
+        list-style: square;
+      }
+      li.bad {
+        color: var(--flt-color-bad);
+      }
+      li.good {
+        color: var(--flt-color-good);
+      }
+      i {
+        color: #444;
+      }
     }
   }
   .f95-clip {
@@ -1248,6 +1288,224 @@
     }
     &.wiggle svg {
       animation: frontier-95-wiggle 0.5s steps(4) 3;
+    }
+  }
+
+  /* A folded window is its title bar and nothing else (the Task Mangler's title carries the R&D number). */
+  .f95-tasks:not(.open) > :not(.f95-tb),
+  .f95-thoughts:not(.open) > :not(.f95-tb),
+  .f95-papers:not(.open) > :not(.f95-tb) {
+    display: none;
+  }
+
+  /* A folded window is its title bar and nothing else (the Task Mangler's title carries the R&D number). */
+  .f95-tasks:not(.open) > :not(.f95-tb),
+  .f95-thoughts:not(.open) > :not(.f95-tb),
+  .f95-papers:not(.open) > :not(.f95-tb) {
+    display: none;
+  }
+
+  /* ---- Playable v1: the coach, the goal, the locked teasers, the New! box, Help ---- */
+  .f95-coachwrap {
+    display: contents;
+  }
+  .f95-coach {
+    position: fixed;
+    z-index: 44;
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    pointer-events: auto;
+    .f95-balloon {
+      width: 310px;
+      margin: 0;
+      padding: 8px 10px 7px;
+      &::after {
+        right: -8px;
+        bottom: 16px;
+        border: 6px solid transparent;
+        border-left: 8px solid #000;
+        border-right: 0;
+        border-top-width: 6px;
+      }
+    }
+    .f95-clip {
+      display: block;
+      flex: none;
+      width: 44px;
+      height: 50px;
+      pointer-events: none;
+      svg {
+        width: 100%;
+        height: 100%;
+        image-rendering: pixelated;
+      }
+      &.wiggle svg {
+        animation: frontier-95-wiggle 0.5s steps(4) 3;
+      }
+    }
+  }
+  .f95-saying {
+    margin: 2px 0 7px;
+    font-size: 17px;
+    line-height: 1.15;
+  }
+  .f95-coachfoot {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    small {
+      font-size: 14px;
+      color: #444;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+  }
+  .f95-skip {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    font-size: 15px;
+    color: #000080;
+    text-decoration: underline;
+    cursor: pointer;
+    &:hover {
+      color: #0000c0;
+    }
+    &:focus-visible {
+      outline: 1px dotted #000;
+      outline-offset: 2px;
+    }
+  }
+  /* The one goal: a single sticky note with a blocky bar. */
+  .f95-post.goal {
+    display: grid;
+    gap: 2px;
+    width: 100%;
+    /* As wide as the other notes: a long goal wraps instead of stretching the column. */
+    max-width: 250px;
+    padding: 6px 10px 8px;
+    border: 1px solid #000;
+    background: #fff27a;
+    text-align: left;
+    small {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #555;
+    }
+    b {
+      font-size: 17px;
+    }
+    .f95-goalnum {
+      font-size: 15px;
+    }
+  }
+  .f95-goalbar {
+    display: block;
+    height: 10px;
+    margin-top: 4px;
+    border: 1px solid #000;
+    background: #fff;
+    i {
+      display: block;
+      height: 100%;
+      background: repeating-linear-gradient(90deg, #000080 0 8px, transparent 8px 10px);
+    }
+  }
+  .f95-menu li.locked button {
+    color: #7a7a7a;
+    cursor: default;
+    &:hover {
+      background: transparent;
+      color: #7a7a7a;
+    }
+  }
+  .f95-unlock {
+    position: fixed;
+    z-index: 30;
+    top: 38%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(440px, calc(100vw - 20px));
+    pointer-events: auto;
+  }
+  .f95-unlockitems {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px 14px;
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+    li::before {
+      content: "";
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      margin-right: 8px;
+      background: #000080;
+    }
+  }
+  .f95-help {
+    width: min(580px, 100%);
+    max-height: calc(100dvh - 30px);
+    overflow: auto;
+    pointer-events: auto;
+  }
+  .f95-helpbody {
+    margin: 4px;
+    padding: 8px 14px 10px;
+    background: #fff;
+    max-height: min(60vh, 460px);
+    overflow: auto;
+    user-select: text;
+    h3 {
+      margin: 10px 0 3px;
+      font-size: 17px;
+      font-weight: bold;
+      color: #000080;
+      &:first-child {
+        margin-top: 0;
+      }
+    }
+    ol,
+    ul {
+      margin: 0;
+      padding-left: 22px;
+      line-height: 1.2;
+    }
+    li {
+      margin: 2px 0;
+    }
+    dl {
+      margin: 0;
+    }
+    dt {
+      display: inline;
+      font-weight: bold;
+      &::after {
+        content: ":";
+      }
+    }
+    dd {
+      display: inline;
+      margin: 0 0 0 4px;
+    }
+    div {
+      margin: 2px 0;
+    }
+  }
+  @media (max-width: 640px) {
+    .f95-coach.docked {
+      left: 4px;
+      right: 4px;
+      .f95-balloon {
+        flex: 1;
+        width: auto;
+        min-width: 0;
+      }
     }
   }
 
@@ -1273,6 +1531,21 @@
     width: min(540px, 100%);
     max-height: calc(100dvh - 20px);
     overflow: auto;
+  }
+  .f95-skinoffer {
+    width: min(460px, 100%);
+    .f95-msgbody p + p {
+      margin-top: 8px;
+    }
+  }
+  .f95-skinoffer-preview {
+    flex: none;
+    width: 96px;
+    height: 72px;
+    object-fit: cover;
+    box-shadow: var(--sunk);
+    padding: 2px;
+    background: var(--flt-color-panelAlt);
   }
   .f95-msgbody {
     display: flex;
@@ -1322,6 +1595,10 @@
         color: var(--flt-color-textDim);
       }
     }
+  }
+  .f95-confirm-facts {
+    margin-top: 6px !important;
+    color: var(--flt-color-textDim);
   }
   .f95-paddles {
     display: flex;
@@ -1430,6 +1707,147 @@
       margin: 0;
       padding: 8px 10px;
     }
+  }
+
+  /* ---- disasters (FLT-32) ---- */
+  .f95-dz-stack {
+    display: grid;
+    gap: 4px;
+    pointer-events: auto;
+  }
+  .f95-left > .f95-dz-stack {
+    display: none;
+  }
+  .f95-dz-err {
+    width: 100%;
+    &.stage-active,
+    &.stage-warning {
+      animation: frontier-95-dzshake 0.5s steps(4) 2;
+    }
+    &.folded .f95-tb {
+      cursor: pointer;
+    }
+    .f95-errbody {
+      align-items: flex-start;
+      padding-top: 8px;
+    }
+    .f95-row {
+      justify-content: center;
+    }
+  }
+  .f95-dz-head {
+    font-weight: bold;
+  }
+  .f95-dz-line {
+    margin-top: 4px !important;
+    font-size: 15px;
+  }
+  .f95-dz-prog {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px 0;
+    .f95-prog {
+      height: 18px;
+      padding: 2px;
+    }
+    small {
+      font-size: 14px;
+    }
+  }
+  .f95-dz-short {
+    margin: 6px 12px 0;
+    font-size: 15px;
+    &.all {
+      color: var(--flt-color-bad);
+      font-weight: bold;
+      animation: frontier-95-blink 1s steps(2) infinite;
+    }
+  }
+  .f95-dz-details {
+    margin: 8px 12px 0;
+    padding: 4px 6px;
+    font: 13px/1.25 "Courier New", monospace;
+    white-space: pre-wrap;
+  }
+  .f95-dz-applet {
+    width: min(480px, calc(100vw - 20px));
+    max-height: calc(100dvh - 20px);
+    overflow: auto;
+    fieldset {
+      display: grid;
+      gap: 4px;
+      border: 1px solid var(--sh);
+      box-shadow: 1px 1px 0 var(--hl);
+      margin: 0 0 8px;
+      padding: 6px 10px 8px;
+    }
+    small {
+      font-size: 14px;
+      color: var(--flt-color-textDim);
+    }
+  }
+  .f95-dz-lede {
+    margin: 0 0 8px;
+  }
+  .f95-dz-risk {
+    grid-template-columns: repeat(4, auto);
+    justify-content: start;
+    column-gap: 16px !important;
+    small {
+      grid-column: 1 / -1;
+    }
+  }
+  .f95-dz-listbox ul {
+    margin: 0;
+    padding: 2px;
+    list-style: none;
+    button {
+      display: grid;
+      grid-template-columns: 26px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+      padding: 2px 4px;
+      border: 0;
+      background: none;
+      color: inherit;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+      &.on {
+        background: var(--flt-color-selection);
+        color: var(--flt-color-selectionText);
+        outline: 1px dotted #fff;
+        outline-offset: -1px;
+      }
+      &:disabled {
+        cursor: default;
+        color: var(--sh);
+      }
+      &.live .st {
+        color: var(--flt-color-bad);
+      }
+    }
+    .st {
+      font-size: 13px;
+    }
+  }
+  .f95-dz-meters {
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    column-gap: 8px !important;
+    .f95-prog {
+      height: 18px;
+      padding: 2px;
+    }
+    .v {
+      font-size: 14px;
+    }
+  }
+  .f95-dz-yes {
+    color: var(--flt-color-bad);
   }
 
   /* ---- applications ---- */
@@ -1727,6 +2145,47 @@
   }
   .f95-display {
     width: min(470px, 100%);
+  }
+  .f95-mods {
+    width: min(460px, 100%);
+    p {
+      margin: 0;
+    }
+    code {
+      font-size: 11px;
+      overflow-wrap: anywhere;
+    }
+    fieldset {
+      display: grid;
+    }
+    fieldset.bad legend {
+      color: var(--flt-color-bad);
+    }
+  }
+  .f95-modlist {
+    background: #fff;
+    min-height: 72px;
+    max-height: 180px;
+    overflow: auto;
+    padding: 4px;
+    [role="listitem"] {
+      display: grid;
+      grid-template-columns: 20px 1fr auto auto;
+      gap: 6px;
+      align-items: center;
+      padding: 2px 0;
+    }
+    small {
+      grid-column: 2 / -1;
+      color: var(--sh);
+    }
+    .hash {
+      font-family: monospace;
+    }
+    .empty {
+      color: var(--sh);
+      padding: 4px;
+    }
   }
   .f95-monitor {
     width: 220px;
@@ -2127,6 +2586,184 @@
       }
     }
   }
+  /* The discourse (FLT-33): the tray megaphone, "Discourse Monitor" and the inspector's "Member of" line. */
+  .f95-s.disc.loud svg {
+    animation: frontier-95-wiggle 0.5s steps(2) infinite;
+  }
+  .f95-discn {
+    position: absolute;
+    right: 0;
+    top: 0;
+    min-width: 12px;
+    padding: 0 2px;
+    background: #e00000;
+    color: #fff;
+    font-size: 11px;
+    font-style: normal;
+    line-height: 12px;
+    text-align: center;
+  }
+  .f95-disc {
+    position: fixed;
+    left: 336px;
+    bottom: calc(var(--taskbar) + 8px);
+    width: 340px;
+    z-index: 6;
+    .f95-discpage {
+      padding: 4px;
+      min-height: 210px;
+    }
+    .f95-listwrap {
+      margin: 0;
+      max-height: 260px;
+      overflow: auto;
+    }
+    .f95-lhead,
+    .f95-lrow {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) 92px;
+    }
+    .f95-lrow i,
+    .f95-discrel i {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      margin-right: 5px;
+      border: 1px solid #000;
+      vertical-align: -1px;
+    }
+    .f95-lrow[data-mood="fan"] span:last-child {
+      color: var(--flt-color-good);
+    }
+    .f95-lrow[data-mood="upset"] span:last-child {
+      color: var(--flt-color-bad);
+    }
+    .f95-lrow[data-mood="protesting"] {
+      background: var(--flt-color-selection);
+      color: var(--flt-color-selectionText);
+    }
+    .f95-approval {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .f95-apbar {
+      position: relative;
+      flex: 1;
+      height: 10px;
+      b {
+        position: absolute;
+        top: 2px;
+        bottom: 2px;
+        background: repeating-linear-gradient(90deg, var(--navy) 0 4px, transparent 4px 5px);
+        &.neg {
+          background: repeating-linear-gradient(90deg, #c00000 0 4px, transparent 4px 5px);
+        }
+      }
+    }
+    .faction-stance {
+      font-size: 14px;
+      grid-template-columns: 76px 1fr 76px;
+    }
+    .faction-stance .track {
+      height: 10px;
+      border: 0;
+      border-radius: 0;
+      box-shadow: var(--sunk);
+      background: var(--flt-color-inset);
+    }
+    .faction-stance .track i {
+      width: 10px;
+      height: 16px;
+      margin: -8px 0 0 -5px;
+      border: 0;
+      border-radius: 0;
+      background: var(--g);
+      box-shadow: var(--btn);
+    }
+  }
+  .f95-discstance {
+    display: grid;
+    gap: 8px;
+    padding: 6px 4px;
+  }
+  .f95-discaxis {
+    display: grid;
+    gap: 1px;
+    font-size: 15px;
+  }
+  .f95-discrel {
+    margin: 0;
+    padding: 4px 6px;
+    list-style: none;
+    font-size: 15px;
+    li {
+      display: flex;
+      align-items: center;
+      padding: 1px 0;
+    }
+    b {
+      font-weight: normal;
+      padding: 0 4px;
+    }
+    em {
+      margin-left: auto;
+      font-style: normal;
+    }
+    li.allied em {
+      color: var(--flt-color-good);
+    }
+    li.feuding em,
+    li.schism em {
+      color: var(--flt-color-bad);
+    }
+    li.schism em {
+      font-weight: bold;
+    }
+  }
+  .f95-discnone {
+    margin: 8px 4px;
+    font-size: 15px;
+  }
+  .f95-discsafety {
+    margin: 4px;
+    padding: 6px 10px 8px;
+    border: 0;
+    box-shadow: var(--etched);
+    font-size: 15px;
+    label {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 0;
+      cursor: pointer;
+    }
+    small {
+      font-size: 13px;
+      color: var(--flt-color-textDim);
+    }
+  }
+  .bubble.f95-tip[data-faction] {
+    box-shadow: inset 5px 0 0 var(--faction);
+    padding-left: 10px;
+  }
+  .f95-tipfaction {
+    font-style: normal;
+    font-weight: normal;
+    color: var(--flt-color-textDim);
+  }
+  .f95-member i {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 5px;
+    border: 1px solid #000;
+    vertical-align: -1px;
+  }
+  .f95-member[data-mood="protesting"],
+  .f95-member[data-mood="upset"] {
+    color: var(--flt-color-bad);
+  }
   .f95-gauges {
     display: grid;
     grid-template-columns: 1.35fr 1fr 1fr;
@@ -2163,6 +2800,116 @@
   }
   .f95-stream {
     width: min(640px, 100%);
+  }
+  .f95-tag {
+    font-style: normal;
+    font-size: 13px;
+    &.tag-new {
+      color: var(--flt-color-good);
+    }
+    &.tag-nemesis {
+      color: var(--flt-color-bad);
+      animation: frontier-95-blink 1s steps(2) infinite;
+    }
+  }
+  .f95-tip.speech {
+    background: #fff;
+    b::after {
+      content: " says:";
+      font-weight: normal;
+    }
+  }
+  /* FLT-26/FLT-20 drama cards: the document is the card's picture. */
+  .f95-drama {
+    width: min(600px, 100%);
+    .f95-page {
+      margin: 4px 6px;
+      max-height: 38vh;
+      overflow: auto;
+      background: #fff;
+      color: #000;
+      p {
+        margin: 0 0 8px;
+      }
+    }
+    .f95-sign {
+      white-space: pre-line;
+    }
+  }
+  .f95-wordbar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 8px 4px;
+    box-shadow: var(--etched);
+    .f95-font {
+      padding: 1px 6px;
+      background: #fff;
+      font-size: 14px;
+    }
+    b,
+    i,
+    u {
+      width: 20px;
+      text-align: center;
+      font-family: "Times New Roman", Times, serif;
+    }
+  }
+  .f95-wordpad {
+    padding: 10px 0;
+    background: #808080 !important;
+    .f95-paper {
+      margin: 0 auto;
+      width: calc(100% - 32px);
+      padding: 18px 22px;
+      background: #fff;
+      box-shadow: 2px 2px 0 #000;
+      font-family: "Times New Roman", Times, serif;
+      font-size: 17px;
+      line-height: 1.3;
+    }
+    .f95-subject {
+      font-weight: bold;
+      text-decoration: underline;
+    }
+  }
+  .f95-mailhead {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 3px 8px;
+    align-items: center;
+    margin: 4px 6px 0;
+    dt {
+      text-align: right;
+      font-size: 15px;
+    }
+    dd {
+      margin: 0;
+      padding: 1px 6px;
+      background: #fff;
+      color: #000;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+  .f95-mail {
+    padding: 10px 12px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 15px;
+  }
+  .f95-notepad {
+    padding: 8px 10px;
+    text-align: left;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 15px;
+    line-height: 1.3;
+    white-space: pre-wrap;
+    .f95-cursor {
+      width: 8px;
+      height: 16px;
+      background: #000;
+    }
   }
   .f95-player {
     display: grid;
@@ -2338,7 +3085,10 @@
     .f95-dog,
     .f95-dog .tail,
     .f95-dog .legs,
-    .f95-spin {
+    .f95-s.disc.loud svg,
+    .f95-spin,
+    .f95-dz-err,
+    .f95-dz-short.all {
       animation: none;
     }
   }
@@ -2363,11 +3113,11 @@
 
   /* ---- narrower desktops ---- */
   @media (max-width: 1040px) and (min-width: 641px) {
-    .f95-right {
+    .f95-side {
       width: min(560px, calc(100vw - 20px));
-      > .f95-win {
-        width: min(340px, 100%);
-      }
+    }
+    .f95-stack > .f95-win {
+      width: min(340px, 100%);
     }
     .f95-left {
       width: calc(100vw - 370px);
@@ -2425,37 +3175,55 @@
     .f95-notes {
       width: 100%;
     }
+    .f95-left > .f95-dz-stack {
+      display: grid;
+    }
+    .f95-side > .f95-dz-stack {
+      display: none;
+    }
     .f95-post {
       width: 100%;
+      &.goal {
+        max-width: none;
+      }
       &.head {
         min-height: 44px;
         display: flex;
         align-items: center;
       }
     }
+    /* On a phone the side column dissolves: the two folded windows sit in a row above the news strip, and the
+       assistant rides above them (below), so windows and balloon place themselves against the desktop as before. */
+    .f95-side,
+    .f95-stack {
+      display: contents;
+    }
     .f95-right {
+      position: absolute;
       left: 4px;
       right: 4px;
       top: auto;
       bottom: calc(var(--taskbar) + 30px + 8px);
       width: auto;
+      display: flex;
       flex-direction: row;
       align-items: flex-start;
       gap: 4px;
       overflow: visible;
-      > * {
-        flex: 1 1 0;
-        min-width: 0;
-      }
-      > .f95-win,
-      > .f95-tasks.wide {
-        width: auto;
-      }
+    }
+    .f95-stack > * {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+    .f95-stack > .f95-win,
+    .f95-stack > .f95-tasks.wide {
+      width: auto;
     }
     .f95-props,
     .f95-staff,
     .f95-tasks.open,
-    .f95-thoughts.open {
+    .f95-thoughts.open,
+    .f95-papers.open {
       position: fixed;
       left: 4px;
       right: 4px;
@@ -2465,15 +3233,12 @@
       z-index: 20;
       overflow: auto;
     }
-    .f95-tasks:not(.open) > :not(.f95-tb),
-    .f95-thoughts:not(.open) > :not(.f95-tb) {
-      display: none;
-    }
     .f95-long {
       display: none;
     }
     .f95-tasks:not(.open) .f95-tb,
-    .f95-thoughts:not(.open) .f95-tb {
+    .f95-thoughts:not(.open) .f95-tb,
+    .f95-papers:not(.open) .f95-tb {
       height: 32px;
       .f95-b::after {
         inset: -8px -2px;
@@ -2537,6 +3302,7 @@
       height: 44px;
     }
     .f95-assistant {
+      position: absolute;
       right: 4px;
       bottom: calc(var(--taskbar) + 30px + 52px);
       width: calc(100vw - 8px);
@@ -2547,12 +3313,25 @@
       max-height: 110px;
       overflow: hidden;
     }
+    .f95-tooltip.arrival {
+      position: absolute;
+      right: 4px;
+      bottom: calc(var(--taskbar) + 30px + 52px);
+    }
+
     .f95-clip {
       width: 40px;
       height: 44px;
     }
     .f95-msgbox {
       width: 100%;
+    }
+    .f95-drama .f95-page {
+      max-height: 30vh;
+    }
+    .f95-wordpad .f95-paper {
+      padding: 12px 14px;
+      font-size: 15px;
     }
     .f95-player {
       grid-template-columns: 1fr;
@@ -2573,6 +3352,14 @@
       left: 4px;
       right: 4px;
       width: auto;
+    }
+    .f95-disc {
+      left: 4px;
+      right: 4px;
+      width: auto;
+      .f95-listwrap {
+        max-height: 34vh;
+      }
     }
     .f95-paper {
       padding: 10px 12px;
@@ -2645,5 +3432,1426 @@
 @keyframes frontier-95-turn {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* ---- Publish or Perish, the arXive moments, the evidence and CrumbWiki (FLT-45, FLT-46) ---- */
+[data-skin="frontier-95"] {
+  .f95-papers.alert > .f95-tb {
+    background: var(--flt-color-bad);
+  }
+  .f95-papers-top {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px;
+    padding: 8px 8px 4px;
+    align-items: start;
+    fieldset {
+      display: grid;
+      gap: 4px;
+      border: 1px solid var(--sh);
+      box-shadow: 1px 1px 0 var(--hl);
+      margin: 0;
+      padding: 4px 10px 8px;
+    }
+    label {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      min-height: 26px;
+    }
+  }
+  .f95-papers-facts {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+    .f95-papers-rep {
+      padding: 2px 8px;
+      font-family: var(--flt-font-numbers);
+      font-size: 22px;
+    }
+  }
+  .f95-papers-blurb {
+    margin: 0 8px 4px;
+    font-size: 14px;
+    color: var(--flt-color-textDim);
+  }
+  .f95-papers-list {
+    margin: 4px;
+    max-height: 320px;
+    overflow: auto;
+    font-size: 15px;
+  }
+  .f95-papers-empty {
+    margin: 8px;
+    color: var(--flt-color-textDim);
+  }
+  .f95-paper-row {
+    display: grid;
+    gap: 2px;
+    padding: 6px 8px;
+    border-bottom: 1px dotted var(--sh);
+    b {
+      line-height: 1.2;
+    }
+    small {
+      font-size: 13px;
+      color: var(--flt-color-textDim);
+    }
+    &.status-draft {
+      background: var(--flt-color-selection);
+      color: var(--flt-color-selectionText);
+      small {
+        color: inherit;
+      }
+    }
+    .f95-row.left {
+      justify-content: flex-start;
+      padding: 4px 0 0;
+    }
+    .f95-prog {
+      height: 16px;
+      padding: 2px;
+    }
+  }
+  .f95-paper-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-family: var(--flt-font-mono);
+    font-size: 13px;
+    .st.tone-good {
+      color: var(--flt-color-good);
+    }
+    .st.tone-bad {
+      color: var(--flt-color-bad);
+    }
+  }
+  .status-draft .f95-paper-top .st {
+    color: inherit;
+  }
+
+  .f95-moment {
+    width: min(720px, calc(100vw - 20px));
+    max-height: calc(100dvh - 20px);
+    display: flex;
+    flex-direction: column;
+    &.moment-award {
+      width: min(560px, calc(100vw - 20px));
+    }
+  }
+  .f95-moment-page,
+  .f95-wikipage {
+    margin: 4px;
+    padding: 10px 14px;
+    overflow: auto;
+    min-height: 0;
+    flex: 1;
+    background: #fff;
+    color: #000;
+  }
+  .f95-moment .f95-row .f95-btn {
+    min-height: 32px;
+  }
+
+  .evidence {
+    margin: 4px 14px;
+    padding: 6px;
+    background: var(--g);
+    box-shadow: var(--sunk);
+    border-radius: 0;
+  }
+  .evidence-log {
+    font-size: 13px;
+    border-radius: 0;
+  }
+  .evidence-label,
+  .evidence-note {
+    font-size: 13px;
+  }
+
+  .f95-wiki {
+    width: min(960px, calc(100vw - 20px));
+    .wiki {
+      border-radius: 0;
+    }
+  }
+  @media (max-width: 640px) {
+    .f95-papers-top {
+      grid-template-columns: 1fr;
+    }
+    .f95-moment .f95-toolbar .f95-btn,
+    .f95-wiki .f95-toolbar .f95-btn,
+    .f95-wiki .f95-menubar {
+      display: none;
+    }
+  }
+}
+@keyframes frontier-95-dzshake {
+  25% {
+    translate: -3px 0;
+  }
+  75% {
+    translate: 3px 0;
+  }
+}
+
+/* The Circus (FLT-21, FLT-24): CapitolCam (the Hearing) and Chat-o-Matic 95 (the leaked yacht chat). */
+[data-skin="frontier-95"] {
+  .f95-hearing,
+  .f95-leak {
+    width: min(620px, 100%);
+  }
+  .f95-tiles {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+    margin: 4px;
+  }
+  .f95-tile {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    margin: 0;
+    padding: 8px 0 0;
+    background: repeating-linear-gradient(0deg, #08081a 0 2px, #101030 2px 4px);
+    figcaption {
+      width: 100%;
+      margin-top: 4px;
+      padding: 1px 4px;
+      background: #000;
+      color: #fff;
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: center;
+    }
+    small {
+      color: #c0c0c0;
+    }
+    .f95-onair {
+      left: 4px;
+      top: 4px;
+      font-size: 12px;
+    }
+    &.speaking {
+      outline: 3px solid #ffe000;
+      outline-offset: -3px;
+      figcaption {
+        background: var(--navy);
+      }
+    }
+    &:not(.speaking) .f95-senator {
+      filter: grayscale(0.55) brightness(0.8);
+    }
+  }
+  .f95-senator {
+    width: 64px;
+    height: 86px;
+  }
+  .f95-stamp {
+    position: absolute;
+    right: 4px;
+    top: 26px;
+    padding: 0 5px;
+    border: 2px solid #000;
+    background: #ffe000;
+    color: #000;
+    font-size: 12px;
+    text-transform: uppercase;
+    transform: rotate(8deg);
+    &.a-earnest {
+      background: #80ff80;
+    }
+    &.a-slick {
+      background: #c0a0ff;
+    }
+    &.a-chaotic {
+      background: #ff8040;
+    }
+  }
+  .f95-asker {
+    display: block;
+    color: #000080;
+  }
+  .f95-meters {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 4px 14px 0;
+    padding: 4px 10px 8px;
+    border: 1px solid var(--sh);
+    box-shadow: 1px 1px 0 var(--hl);
+    label {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 6px;
+    }
+    .f95-prog {
+      height: 16px;
+    }
+  }
+  .f95-move {
+    margin-left: 6px;
+    padding: 0 3px;
+    white-space: nowrap;
+    &.up {
+      background: #c0ffc0;
+      color: #006000;
+    }
+    &.down {
+      background: #ffc0c0;
+      color: #a00000;
+    }
+    &.sly {
+      background: #e0d0ff;
+      color: #400080;
+    }
+  }
+  .f95-leakpane {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 150px;
+    gap: 4px;
+    margin: 4px;
+    overflow: hidden;
+  }
+  .f95-log,
+  .f95-members {
+    margin: 0;
+    padding: 4px 6px;
+    list-style: none;
+    background: #fff;
+    font-size: 14px;
+    li {
+      line-height: 1.2;
+    }
+  }
+  .f95-log {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-height: 250px;
+    overflow-y: auto;
+    .ts {
+      color: #808080;
+    }
+    .sys {
+      color: #008000;
+    }
+    .you {
+      background: #ffffc0;
+    }
+  }
+  .f95-members li {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .f95-leaked {
+    position: absolute;
+    right: 14px;
+    bottom: 18px;
+    padding: 0 14px;
+    border: 5px solid #e00000;
+    color: #e00000;
+    font-family: var(--flt-font-display);
+    font-size: 40px;
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    opacity: 0.85;
+    pointer-events: none;
+    transform: rotate(-12deg);
+    animation: frontier-95-stamp 0.4s steps(3) 0.3s both;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .f95-leaked {
+      animation: none;
+    }
+  }
+  @media (max-width: 640px) {
+    .f95-senator {
+      width: 44px;
+      height: 60px;
+    }
+    .f95-tile small {
+      display: none;
+    }
+    .f95-meters {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+    .f95-leakpane {
+      grid-template-columns: 1fr;
+    }
+    .f95-members {
+      display: none;
+    }
+    .f95-log {
+      max-height: 180px;
+    }
+    .f95-leaked {
+      font-size: 30px;
+    }
+  }
+}
+@keyframes frontier-95-stamp {
+  from {
+    opacity: 0;
+    transform: rotate(-12deg) scale(2.5);
+  }
+}
+
+/* Evals Without Borders (FLT-19): REPORT.DOC in a word processor, and a sticky-note-sized file-copy dialog over the auditors. */
+[data-skin="frontier-95"] {
+  .f95-report {
+    width: min(600px, 100%);
+    max-height: calc(100dvh - 20px);
+    overflow: auto;
+    .f95-choices {
+      padding-top: 6px;
+    }
+  }
+  .f95-report-well {
+    margin: 0 6px;
+    padding: 10px;
+    background: #808080;
+  }
+  .f95-report-page {
+    position: relative;
+    padding: 16px 20px 14px;
+    background: #fff;
+    color: #000;
+    font-family: "Times New Roman", Times, serif;
+    box-shadow: 3px 3px 0 #000;
+    -webkit-font-smoothing: auto;
+    header {
+      position: relative;
+      padding-right: 70px;
+      border-bottom: 2px solid #000;
+      margin-bottom: 6px;
+    }
+    small {
+      font: 13px var(--flt-font-ui);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    h2 {
+      margin: 2px 0 2px;
+      font-size: 22px;
+      line-height: 1.1;
+    }
+    header p {
+      margin: 0 0 6px;
+      font-size: 14px;
+      font-style: italic;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 15px;
+    }
+    th,
+    td {
+      padding: 3px 4px;
+      border-bottom: 1px dotted #000;
+      text-align: left;
+      vertical-align: middle;
+    }
+    th {
+      white-space: nowrap;
+    }
+    td.g {
+      width: 28px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+    }
+    td.r {
+      font-size: 13.5px;
+      font-style: italic;
+      color: #202020;
+    }
+    .grade-D td.g,
+    .grade-F td.g {
+      color: #c00000;
+    }
+    .grade-A td.g,
+    .grade-B td.g {
+      color: #005a00;
+    }
+  }
+  .f95-report-overall {
+    position: absolute;
+    right: 0;
+    top: 2px;
+    display: grid;
+    place-items: center;
+    width: 58px;
+    height: 58px;
+    border: 3px solid #c00000;
+    border-radius: 50%;
+    color: #c00000;
+    font: bold 36px/1 "Times New Roman", Times, serif;
+    transform: rotate(-9deg);
+  }
+  .overall-A .f95-report-overall,
+  .overall-B .f95-report-overall {
+    border-color: #005a00;
+    color: #005a00;
+  }
+  .f95-report-headline {
+    margin: 8px 0 0;
+    font-size: 15px;
+    font-weight: bold;
+    &::before {
+      content: "FRONTIER TIMES \2014  ";
+      font: 12px var(--flt-font-ui);
+      letter-spacing: 0.06em;
+    }
+  }
+  .f95-report-stamp {
+    position: absolute;
+    left: 50%;
+    top: 46%;
+    padding: 2px 12px;
+    border: 5px double #c00000;
+    color: #c00000;
+    font: 34px/1.05 var(--flt-font-display);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    opacity: 0.82;
+    mix-blend-mode: multiply;
+    pointer-events: none;
+    transform: translate(-50%, -50%) rotate(-12deg);
+    animation: frontier-95-stamp 0.4s steps(4, end) both 0.25s;
+  }
+  .f95-report-moves {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 8px 14px 0;
+    span {
+      padding: 1px 8px;
+      font-size: 15px;
+      box-shadow: var(--sunk);
+      background: #fff;
+    }
+    .tone-good {
+      color: var(--flt-color-good);
+    }
+    .tone-bad {
+      color: var(--flt-color-bad);
+    }
+  }
+  .audit-anchor {
+    transform: translate(-50%, -100%);
+  }
+  /* Who's Outside (FLT-56): the crowds at the gate and Comms' Statement… button. */
+  .gate-anchor {
+    transform: translate(-50%, 8px);
+    pointer-events: auto;
+  }
+  .f95-gatelegend {
+    width: max-content;
+    min-width: 200px;
+    max-width: 280px;
+    .f95-tb {
+      padding: 1px 2px;
+      min-height: 0;
+    }
+    .f95-tt {
+      font-size: 13px;
+    }
+    .f95-status {
+      font-size: 12px;
+    }
+  }
+  .f95-gatelegend-in {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    padding: 4px 6px;
+    list-style: none;
+    font-size: 14px;
+    line-height: 1.1;
+    li {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    i {
+      flex: none;
+      width: 11px;
+      height: 11px;
+      border: 1px solid #000;
+    }
+    .nm {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .f95-btn {
+      min-width: 0;
+      padding: 1px 6px;
+      font-size: 12px;
+    }
+  }
+  .f95-auditpin {
+    width: max-content;
+    min-width: 188px;
+    max-width: 280px;
+    .f95-tb {
+      padding: 1px 2px;
+      min-height: 0;
+    }
+    .f95-tt {
+      font-size: 13px;
+    }
+    &.evals .f95-tb {
+      background: #808000;
+    }
+  }
+  .f95-auditpin-in {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 4px 6px 5px;
+    font-size: 14px;
+    line-height: 1.1;
+    .ln {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .f95-prog {
+      height: 14px;
+      padding: 2px;
+      i {
+        background: repeating-linear-gradient(90deg, var(--navy) 0 6px, transparent 6px 8px);
+      }
+    }
+    .st {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12.5px;
+      color: var(--flt-color-textDim);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .f95-report-stamp {
+      animation: none;
+    }
+  }
+  @media (max-width: 640px) {
+    .f95-report {
+      width: 100%;
+    }
+    .f95-report-page {
+      padding: 12px 12px 10px;
+      td.r {
+        display: none;
+      }
+    }
+    .f95-report-stamp {
+      font-size: 26px;
+    }
+  }
+}
+@keyframes frontier-95-stamp {
+  from {
+    transform: translate(-50%, -50%) rotate(-12deg) scale(2.2);
+    opacity: 0;
+  }
+}
+
+/* Regulatory Capture (FLT-22): WordPerfectly 6.0 with Track Changes on. The Promise Tracker (FLT-23): Excess 95. */
+[data-skin="frontier-95"] {
+  .f95-bill {
+    width: min(660px, 100%);
+  }
+  .f95-leakrisk {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    margin: 4px 6px 0;
+    font-size: 12px;
+    .f95-prog {
+      flex: 1 1 120px;
+    }
+    &.hot b {
+      color: #c00000;
+    }
+  }
+  .f95-leakwarn {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    margin-top: 3px;
+    b {
+      color: #c00000;
+    }
+  }
+  .f95-xls {
+    width: min(720px, 100%);
+  }
+  .f95-menubar {
+    display: flex;
+    gap: 14px;
+    padding: 2px 8px;
+    font-size: 14px;
+    .f95-trk {
+      margin-left: auto;
+      padding: 0 4px;
+      border: 1px solid var(--sh);
+      background: #fff;
+      color: #c00000;
+      font-weight: bold;
+    }
+  }
+  .f95-docwrap {
+    position: relative;
+    margin: 0 4px;
+    padding: 10px;
+    max-height: 44dvh;
+    overflow: auto;
+    background: #808080;
+  }
+  .f95-page-sheet {
+    padding: 14px 16px 16px 22px;
+    background: #fff;
+    color: #000;
+    font-family: "Times New Roman", Times, serif;
+    font-size: 15px;
+    box-shadow: 3px 3px 0 #000;
+    h3 {
+      margin: 0 0 6px;
+      text-align: center;
+      font-size: 17px;
+      text-transform: uppercase;
+      text-decoration: underline;
+    }
+  }
+  .f95-enact {
+    margin: 0 0 8px;
+    font-style: italic;
+  }
+  .f95-clauses {
+    margin: 0;
+    padding: 0 0 0 18px;
+    li {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 180px;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    li.ins {
+      border-left: 2px solid #c00000;
+      margin-left: -10px;
+      padding-left: 8px;
+    }
+    li.ins .f95-clause > span {
+      color: #c00000;
+      text-decoration: underline;
+    }
+    li.del .f95-clause > span {
+      color: #606060;
+    }
+    li.del {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  .f95-clause {
+    display: flex;
+    gap: 6px;
+    align-items: flex-start;
+    cursor: pointer;
+    input {
+      margin-top: 3px;
+    }
+  }
+  .f95-fx {
+    display: block;
+    color: #000080;
+    font-family: var(--flt-font-ui);
+    font-size: 12px;
+    text-decoration: none;
+  }
+  .f95-balloon {
+    align-self: start;
+    padding: 3px 5px;
+    border: 1px solid #c00000;
+    background: #ffe0e0;
+    color: #000;
+    font-family: var(--flt-font-ui);
+    font-size: 12px;
+    line-height: 1.25;
+    b {
+      color: #c00000;
+    }
+  }
+  .f95-props {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    width: min(300px, 80%);
+    transform: rotate(-2deg);
+    box-shadow: 4px 4px 0 #000;
+    dl {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 3px 8px;
+      margin: 0;
+      padding: 8px 10px;
+      font-size: 14px;
+    }
+    dd {
+      margin: 0;
+    }
+    .hot {
+      background: #ffe000;
+      font-weight: bold;
+    }
+  }
+  .f95-formula {
+    display: grid;
+    grid-template-columns: 44px auto minmax(0, 1fr);
+    gap: 4px;
+    align-items: center;
+    margin: 4px;
+    font-size: 13px;
+    .ref,
+    code {
+      padding: 1px 4px;
+      background: #fff;
+      color: #000;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .fx {
+      font-style: italic;
+      font-weight: bold;
+    }
+  }
+  .f95-sheetwrap {
+    margin: 0 4px;
+    background: #fff;
+    overflow: auto;
+  }
+  .f95-sheet {
+    width: 100%;
+    border-collapse: collapse;
+    color: #000;
+    font-size: 13px;
+    th {
+      min-width: 22px;
+      padding: 1px 4px;
+      border: 1px solid #808080;
+      background: var(--flt-color-panel);
+      font-weight: normal;
+      text-align: center;
+    }
+    td {
+      padding: 2px 5px;
+      border: 1px solid #c0c0c0;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+    tr.hdr td {
+      font-weight: bold;
+      background: #ffffe0;
+    }
+    tr.lobbied td.who {
+      background: #fff0c0;
+    }
+    tr.motion td,
+    tr.law td {
+      white-space: normal;
+      font-size: 12px;
+    }
+    tr.law td {
+      background: #ffe0e0;
+    }
+    .f95-stakes {
+      display: flex;
+      flex-direction: column;
+      margin-top: 2px;
+      b {
+        color: #000080;
+      }
+    }
+    td.who {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      span {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.1;
+      }
+    }
+    small {
+      color: #606060;
+      font-size: 11px;
+    }
+    .side-aye {
+      color: #008000;
+      font-weight: bold;
+    }
+    .side-nay {
+      color: #c00000;
+      font-weight: bold;
+    }
+    .side-both {
+      color: #806000;
+      font-weight: bold;
+    }
+    td.kept {
+      background: #c0ffc0;
+      font-weight: bold;
+    }
+    td.broken {
+      background: #ff8080;
+      color: #000;
+      font-weight: bold;
+    }
+    td.truth {
+      min-width: 150px;
+      .f95-prog {
+        display: block;
+        height: 12px;
+      }
+      span {
+        display: block;
+        font-size: 12px;
+      }
+    }
+  }
+  .f95-cellface {
+    width: 22px;
+    height: 30px;
+    flex: none;
+  }
+  .f95-cellbtn {
+    min-width: 0;
+    padding: 1px 6px;
+    font-size: 12px;
+  }
+  .f95-sheettabs {
+    display: flex;
+    gap: 2px;
+    margin: 0 4px;
+    font-size: 12px;
+    span {
+      padding: 1px 8px;
+      border: 1px solid var(--sh);
+      border-top: none;
+      background: var(--flt-color-panel);
+    }
+    .on {
+      background: #fff;
+      font-weight: bold;
+    }
+  }
+  @media (max-width: 640px) {
+    .f95-clauses li {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .f95-sheet {
+      font-size: 12px;
+      td {
+        padding: 2px 3px;
+      }
+      td.who {
+        white-space: normal;
+        min-width: 96px;
+        small {
+          display: none;
+        }
+      }
+      tr.hdr td {
+        white-space: normal;
+      }
+      td.truth {
+        min-width: 72px;
+        small {
+          display: none;
+        }
+      }
+    }
+    .f95-cellface {
+      display: none;
+    }
+  }
+}
+
+/* ---- Today's Drama (FLT-34): the tray megaphone and the channel viewer ---- */
+[data-skin="frontier-95"] {
+  .f95-s.drama.fresh svg {
+    animation: frontier-95-drama-shout 1.4s steps(4) 4;
+  }
+  .f95-drama {
+    width: min(500px, 100%);
+    .f95-mixbody {
+      max-height: min(62dvh, 560px);
+      overflow: auto;
+    }
+    p {
+      margin: 0;
+    }
+    small {
+      color: #404040;
+    }
+    .f95-row.left {
+      justify-content: flex-start;
+      align-items: center;
+      padding: 0;
+      small {
+        flex: 1;
+        font-size: 11px;
+      }
+    }
+  }
+  .f95-drama-banner {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 3px 3px 0;
+    padding: 6px 10px 5px;
+    background-color: #c00000;
+    background-image: repeating-conic-gradient(#e00000 0 25%, transparent 0 50%);
+    background-size: 2px 2px;
+    color: #fff;
+    box-shadow: var(--sunk);
+    b {
+      font: 900 22px/1 "Arial Black", Impact, sans-serif;
+      letter-spacing: 1px;
+      text-shadow: 2px 2px 0 #000;
+    }
+    span {
+      font-size: 12px;
+      font-weight: 700;
+    }
+  }
+  .f95-drama.intro .f95-drama-banner b {
+    color: #ffff00;
+    animation: frontier-95-drama-blink 1s steps(2) infinite;
+  }
+  .f95-drama-now {
+    font-weight: 700;
+  }
+  .f95-drama-story {
+    background: #fff;
+    padding: 8px 10px 10px;
+    h2 {
+      margin: 0 0 4px;
+      font: 700 24px/1.05 "Times New Roman", Times, serif;
+    }
+    .dek {
+      font: italic 14px/1.3 "Times New Roman", Times, serif;
+      margin-bottom: 6px;
+    }
+    ul {
+      margin: 0 0 6px;
+      padding: 6px 0 0 18px;
+      border-top: 1px solid var(--sh);
+      display: grid;
+      gap: 3px;
+    }
+    li {
+      font-size: 12px;
+    }
+    small {
+      display: block;
+      font-weight: 700;
+    }
+  }
+  .f95-drama-live {
+    color: #c00000;
+    font-weight: 700;
+  }
+  .f95-drama-archive .f95-modlist {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    [role="listitem"] {
+      grid-template-columns: 20px 1fr auto auto;
+      column-gap: 10px;
+      row-gap: 0;
+      padding: 3px 2px 5px;
+    }
+    [role="listitem"] > span {
+      color: var(--sh);
+    }
+  }
+  .f95-modoff {
+    min-width: 0;
+    min-height: 22px;
+    padding: 0 8px;
+    font-size: 11px;
+  }
+  .f95-mods .f95-modlist [role="listitem"] {
+    grid-template-columns: 20px 1fr auto auto auto;
+  }
+  .f95-link {
+    border: 0;
+    padding: 0;
+    background: none;
+    color: #0000c0;
+    text-decoration: underline;
+    font: inherit;
+    cursor: pointer;
+  }
+  @media (max-width: 640px) {
+    .f95-drama-banner b {
+      font-size: 18px;
+    }
+    .f95-drama-story h2 {
+      font-size: 20px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .f95-s.drama.fresh svg,
+    .f95-drama.intro .f95-drama-banner b {
+      animation: none;
+    }
+  }
+}
+@keyframes frontier-95-drama-shout {
+  25% {
+    transform: rotate(-12deg);
+  }
+  75% {
+    transform: rotate(12deg);
+  }
+}
+@keyframes frontier-95-drama-blink {
+  50% {
+    color: #fff;
+  }
+}
+
+/* ---- the end (FLT-11): the last paper in Internet Exploder, the run in NoteBad, and The Takeover's title bar ---- */
+[data-skin="frontier-95"] {
+  .f95-end {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 10px;
+    align-items: start;
+    width: min(1180px, calc(100vw - 20px));
+    max-height: calc(100dvh - 20px);
+    > .f95-win {
+      min-width: 0;
+    }
+    &.compact {
+      grid-template-columns: minmax(0, 1fr);
+      overflow: auto;
+      max-height: calc(100dvh - 20px);
+      .f95-end-paper {
+        max-height: none;
+      }
+      .f95-paper {
+        padding: 12px 14px;
+      }
+    }
+  }
+  .f95-end-paper {
+    width: auto;
+    max-height: calc(100dvh - 20px);
+    .f95-paper {
+      position: relative;
+    }
+    .bottom.single {
+      grid-template-columns: 1fr;
+    }
+  }
+  .f95-end-signoff {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 2px solid #000;
+    text-align: center;
+    font-size: 20px;
+  }
+  .f95-end-paper figure {
+    position: relative;
+  }
+  .f95-end-stamp {
+    position: absolute;
+    bottom: 48px;
+    right: 10px;
+    background: #ffffffcc;
+    padding: 4px 12px;
+    border: 4px solid #c00000;
+    color: #c00000;
+    font-family: var(--flt-font-numbers);
+    font-size: 28px;
+    text-transform: uppercase;
+    transform: rotate(-8deg);
+    opacity: 0.85;
+    pointer-events: none;
+    &.tone-good {
+      color: #008000;
+      border-color: #008000;
+    }
+    &.tone-neutral {
+      color: #000080;
+      border-color: #000080;
+    }
+  }
+  .f95-end-run {
+    max-height: calc(100dvh - 20px);
+    display: flex;
+    flex-direction: column;
+  }
+  .f95-end-body {
+    display: grid;
+    gap: 8px;
+    padding: 10px;
+    overflow: auto;
+  }
+  .f95-end-daily {
+    color: #000080;
+    text-transform: uppercase;
+    font-size: 13px;
+  }
+  .f95-end-lab {
+    font-size: 20px;
+    font-weight: normal;
+  }
+  .f95-end-strip {
+    font-size: 15px;
+    line-height: 1.2;
+    letter-spacing: -1px;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .f95-end-facts {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+    div {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    dd {
+      min-width: 48px;
+      text-align: right;
+    }
+  }
+  .f95-end-buttons {
+    display: grid;
+    gap: 6px;
+    .f95-btn {
+      width: 100%;
+    }
+  }
+  .f95-end-card {
+    width: 100%;
+    display: block;
+  }
+  .f95-takeover {
+    position: fixed;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 60;
+    width: min(560px, calc(100vw - 12px));
+    background: var(--g);
+    box-shadow: inset -1px -1px 0 var(--dk), inset 1px 1px 0 var(--hl), inset -2px -2px 0 var(--sh), inset 2px 2px 0 var(--lt);
+    padding: 3px;
+    pointer-events: none;
+    text-align: center;
+    animation: frontier-95-blink 1s steps(1) 3;
+    small {
+      display: block;
+      padding: 2px 4px;
+    }
+  }
+  .f95-takeover-thanks {
+    pointer-events: none;
+    z-index: 65;
+  }
+}
+
+/* ---- FLT-57: what now, the streak, a friend's result, The Memo as a file copy, the challenge as a message box ---- */
+[data-skin="frontier-95"] {
+  .f95-end-labno {
+    color: #000080;
+    font-size: 15px;
+  }
+  .f95-end-streak {
+    color: #800000;
+    font-size: 17px;
+  }
+  .f95-end-versus {
+    display: grid;
+    gap: 2px;
+    padding: 6px 8px;
+    background: #fff;
+    &.verdict-win b {
+      color: #008000;
+    }
+    &.verdict-lose b {
+      color: #c00000;
+    }
+  }
+  .f95-end-next {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding: 4px 8px 8px;
+    border: 0;
+    box-shadow: inset -1px -1px 0 var(--hl), inset 1px 1px 0 var(--sh), inset -2px -2px 0 var(--sh), inset 2px 2px 0 var(--hl);
+    legend {
+      padding: 0 4px;
+    }
+    p {
+      margin: 0;
+      line-height: 1.2;
+    }
+    > .f95-btn {
+      width: 100%;
+    }
+  }
+  .f95-end-nextname {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--flt-font-numbers);
+    word-break: break-word;
+  }
+  .f95-end-perks {
+    padding: 0;
+  }
+  .f95-end-jump {
+    position: fixed;
+    left: 50%;
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%);
+    z-index: 71;
+    padding: 8px 20px;
+    font-size: 18px;
+  }
+  .f95-memo-copy {
+    position: fixed;
+    bottom: 44px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 55;
+    width: min(360px, calc(100vw - 12px));
+    pointer-events: none;
+    &.soon .f95-tt {
+      animation: frontier-95-blink 1s steps(1) infinite;
+    }
+  }
+  .f95-memo-body {
+    display: grid;
+    gap: 4px;
+    padding: 8px 10px;
+    p {
+      margin: 0;
+    }
+    small {
+      color: var(--flt-color-textDim);
+    }
+    .f95-prog {
+      width: 100%;
+    }
+  }
+  .f95-memo-fly {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    height: 26px;
+  }
+  .f95-memo-paper {
+    position: absolute;
+    left: 20px;
+    top: 0;
+    animation: frontier-95-fly 1.6s steps(8) infinite;
+  }
+  .f95-memo-line {
+    font-style: italic;
+  }
+  .f95-memo-extra {
+    width: min(640px, 100%);
+    max-height: calc(100dvh - 20px);
+    display: flex;
+    flex-direction: column;
+    .f95-paper {
+      overflow: auto;
+      h2 {
+        margin: 4px 0;
+      }
+    }
+    .f95-row {
+      padding: 8px;
+      justify-content: flex-end;
+    }
+  }
+  .f95-memo-quotes {
+    display: grid;
+    gap: 6px;
+    blockquote {
+      margin: 0;
+      padding-left: 8px;
+      border-left: 3px solid #000;
+    }
+    p {
+      margin: 0;
+    }
+    cite {
+      font-style: normal;
+      font-size: 13px;
+    }
+  }
+  .f95-memo-effects {
+    margin: 4px 0;
+    padding-left: 20px;
+  }
+  .f95-challenge {
+    width: min(460px, 100%);
+    .f95-row {
+      padding: 8px 14px 12px;
+      justify-content: center;
+    }
+  }
+  .f95-challenge-result {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 12px 0 8px;
+    .f95-end-stamp.static {
+      position: static;
+      font-size: 20px;
+      padding: 2px 10px;
+    }
+    &.tone-good .f95-end-stamp {
+      color: #008000;
+      border-color: #008000;
+    }
+    &.tone-neutral .f95-end-stamp {
+      color: #000080;
+      border-color: #000080;
+    }
+  }
+  .f95-challenge-note {
+    color: var(--flt-color-textDim);
+  }
+}
+@keyframes frontier-95-fly {
+  to {
+    left: calc(100% - 40px);
   }
 }

@@ -5,6 +5,8 @@
 // now also covers the new walker fields and the Vibes. FLT-10 (Operations) did it again: slop, breakdowns (a random
 // draw per building per day), queues you can see, and staff; the script below now hires a few, and the projection
 // covers the slop, the payroll and every building's reliability.
+// FLT-32 put the Security Office on the Scrutiny rung, so its unlock card lists one more item: the digests from the
+// card on (it arrives between ticks 800 and 1600) moved for that alone: same RNG state and world at 4000, one more item.
 //
 // The digest reads the game through `view()`, not the raw state, so the persisted shape can change (machine
 // snapshots, moved fields) without touching the recorded values. Only `view()` follows the shape.
@@ -47,11 +49,17 @@ function view(s: GameState) {
     waterDiscourse: s.waterDiscourse,
     ledger: s.ledger,
     training: s.training.context,
+    coach: s.coach,
+    progression: s.progression,
+    unlockCards: s.unlockCards,
+    tutorial: s.tutorial,
+    guardrails: s.guardrails,
     models: s.models,
     goals: s.goals.context.goals,
     flags: sorted(flagsOf(s)),
     news: s.news,
-    toasts: s.toasts,
+    // FLT-51 tags toasts (source, importance, reply) for the app; the numbers pinned here are the text, tone and id.
+    toasts: s.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })),
     thoughts: s.thoughts,
     pops: s.pops,
     buildings: s.buildings,
@@ -108,7 +116,7 @@ function spot(s: GameState, kind: PlaceableKind): [number, number] | null {
   return null;
 }
 
-const BUILD_ORDER: PlaceableKind[] = ["gateway", "snack", "cluster", "nap", "gateway", "demo", "hall", "cluster", "gateway", "cluster"];
+const BUILD_ORDER: PlaceableKind[] = ["hall", "gateway", "kombucha", "snack", "cluster", "nap", "gateway", "hall", "cluster", "gateway"];
 
 /** A busy player: builds every 30 ticks, paves a bit, bulldozes a path, answers every event card differently. */
 function play(seed: number, ticks: number, checkpoints: number[]): Record<number, string> {
@@ -117,6 +125,11 @@ function play(seed: number, ticks: number, checkpoints: number[]): Record<number
   let built = 0;
   for (let i = 0; i < ticks; i++) {
     const cmds: Command[] = [];
+    if (i === 0) {
+      for (let z = 18; z >= 10; z--) cmds.push({ type: "placePath", x: 11, z });
+      for (let x = 6; x <= 17; x++) cmds.push({ type: "placePath", x, z: 16 });
+      cmds.push({ type: "continueTutorial" });
+    }
     const open = openEventOf(s);
     if (open) cmds.push({ type: "chooseEvent", eventId: open.id, choiceIndex: (s.tick + seed) % eventById(open.id)!.choices.length });
     else if (i % 30 === 5 && built < BUILD_ORDER.length) {
@@ -131,9 +144,10 @@ function play(seed: number, ticks: number, checkpoints: number[]): Record<number
     // Operations: a Janitor Bot, an SRE and a guard, one of them with a patrol zone.
     if (i === 300) cmds.push({ type: "hire", job: "janitor" }, { type: "hire", job: "sre" });
     if (i === 900) cmds.push({ type: "hire", job: "security" }, { type: "hire", job: "comms" });
-    if (i === 1000) for (const x of [8, 9, 10]) cmds.push({ type: "paintZone", id: s.staff[0]!.id, x, z: 16, on: true });
+    if (i === 1000 && s.staff[0]) for (const x of [8, 9, 10]) cmds.push({ type: "paintZone", id: s.staff[0]!.id, x, z: 16, on: true });
     if (i === 700) cmds.push({ type: "bulldoze", x: 13, z: 16 });
-    tick(s, cmds);
+    // This stress script deliberately approves its own spending; ordinary play uses the 3-month dialog.
+    tick(s, cmds.map((c) => c.type === "placeBuilding" || c.type === "placePath" || c.type === "hire" ? { ...c, confirmed: true } : c));
     if (checkpoints.includes(i + 1)) out[i + 1] = digest(s);
   }
   return out;
@@ -141,20 +155,53 @@ function play(seed: number, ticks: number, checkpoints: number[]): Record<number
 
 const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 
+// FLT-16 intentionally re-records these for the quiet start, daily attraction-driven arrivals, delayed pressure,
+// tutorial state and the paid opening paths. Movement uses sqrt for bounded tile distances (same geometry,
+// deterministic floating-point differences). Each seed is independently replayed and JSON round-tripped.
+// The playtest follow-up fixes unzoned staff patrol (new seeded route draws), records guardrails,
+// and explicitly confirms the busy-player stress purchases so dialogs cannot freeze this replay.
 // Recorded from the pre-port sim (origin/flt-3-slice-2 @ 8f9750a; sorted-flags projection), re-recorded by FLT-9 and
 // again by FLT-10. FLT-9 changes the game on purpose: rivals, the Arena, eras, the R&D multiplier (training runs faster), bigger
 // leaps per release, Training Halls that convert 30 compute a day, and a compute auction on day 40 that this
 // script answers like any other card. The port itself was verified against the original numbers in FLT-3.
+// FLT-49 intentionally records the new starting coach/progression state. Systems and purchases now
+// wait for earned levels; the busy-player script first builds a Hall so it can earn access to a Gateway.
+// Path exploration and the Comms break post change deterministic route draws from this new opening.
+// FLT-47 polish rewords three thoughts (parody rule: no real brands); seed 1 shows one at tick 200. Text only, same RNG stream.
+// FLT-37 wakes a system's pack when its rung is earned: Collusion (on Scrutiny, level 5) never started in normal play.
+// Every seed reaches level 5 by tick 980-1120; only checkpoints after that move (seed 3 from 2400, seeds 1 and 2 from 3200).
+// FLT-52 (merge train) adds five more packs to Scrutiny: the Hearing, the yacht summit, Defection, the Poaching War and
+// Evals Without Borders. Level 5 lands at tick 980 (seeds 1, 3) and 1120 (seed 2), so 200 and 800 hold. First tick each
+// pack moves the World (seed 1 / 2 / 3): Poaching 1120 / 1823 / 1683, the yacht 1220 / 1360 / 1220, the Hearing
+// 1380 / 1520 / 1380, Evals Without Borders 3246 / 2183 / 2203, Defection 2626 / 3386 / 2806. So 1600 on moves on every seed.
+// Then Regulatory Capture and the Promise Tracker (FLT-22/23), also on Scrutiny: they arm their card arcs the tick Level 5
+// lands (980 / 1120 / 980) and first move a number or a headline at 1463 / 1603 / 1823 (Capture 1463 / 1603 / 3429,
+// the Promise Tracker 1823 / 1623 / 1823). 200 and 800 still hold.
+// Then the factions and the Water Discourse arc (FLT-33/25). Level 4 lands at 940 / 980 / 880: its rung now names the
+// factions, which wake and first move the World 4 ticks later (944 / 984 / 884). The base-water arc's documentary crew
+// (a new card, Level 5) first moves it at 1963 / 2043 / 2343 (2323 / 2383 / 2403 with the factions off). 200 and 800 hold.
+// FLT-58 moves the ladder on purpose: the first run is a small model (100 compute, not 300), progression is checked every
+// tick, Level 2 counts visitors served, Level 3 scripts the first spill and breakdown, Level 4 seeds the Arena field, and
+// the coach has two more steps. So the opening ships sooner and every later checkpoint follows from that.
+// On the merge train (FLT-52) these are FLT-58's own numbers, digit for digit: under the new ladder this script reaches
+// Level 2 at tick 240 / 240 / 220 and Level 3 at 1380 / 1340 / 1360, and never earns Level 4 in 4000 ticks (its tick-300
+// hires land while staff is still locked, so the ops goal never has its SRE and Janitor). No Race or Scrutiny pack wakes,
+// so none of the wave moves a checkpoint. The wave's packs are pinned by the midgame digest (every pack awake for 480
+// days) and by each pack's own determinism test.
+// Merge train 2: FLT-56 (#68) re-recorded these on the old ladder, where its conga line, the auditors' huddle, the
+// Hearing's docket and the motions' stakes all ran in this script. Under FLT-58's ladder none of those packs wakes
+// here, so FLT-56 moves nothing and the train's values stand; its changes are pinned by the midgame digest.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "59465b3c", 800: "1a89bf0c", 1600: "4a013429", 2400: "35cb7214", 3200: "10103d71", 4000: "41405c46" },
-  2: { 200: "c1dcb803", 800: "9295e431", 1600: "3d5c8221", 2400: "36a58fde", 3200: "a0b5244c", 4000: "7ee4edf6" },
-  3: { 200: "72c61121", 800: "f81dee8f", 1600: "4a9b231c", 2400: "ad7cc54e", 3200: "767d1481", 4000: "3757a512" },
+  1: { 200: "c403ae9a", 800: "c9a777bd", 1600: "927ac8ca", 2400: "5f82d6d0", 3200: "156351fa", 4000: "510c4ee9" },
+  2: { 200: "766f3295", 800: "aec1b296", 1600: "7f4c5dc5", 2400: "4e24ec1b", 3200: "49356bf5", 4000: "a8747659" },
+  3: { 200: "b43cb9be", 800: "510d3b99", 1600: "52d334c3", 2400: "c82c786a", 3200: "94e585db", 4000: "7191754a" },
 };
 
 describe("golden runs", () => {
   for (const seed of [1, 2, 3]) {
     it(`seed ${seed} reproduces the recorded digests at every checkpoint`, () => {
-      expect(play(seed, 4000, CHECKPOINTS)).toEqual(GOLDEN[seed]);
+      const actual = play(seed, 4000, CHECKPOINTS);
+      expect(actual).toEqual(GOLDEN[seed]);
     });
   }
 });
