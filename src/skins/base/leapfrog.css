@@ -1,0 +1,447 @@
+/* Release Leapfrog (FLT-31): the benchmark leaderboard, the news-cycle meter, the forced-response gauges and the livestream card. */
+
+/* ---- Benchmarks ---- */
+.bench {
+  width: min(516px, calc(100vw - 20px));
+  padding: 0;
+  overflow: hidden;
+  pointer-events: auto;
+}
+.bench-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+.bench-sub {
+  flex: 1;
+  min-width: 0;
+  font-size: 11px;
+  opacity: 0.65;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bench-fold {
+  opacity: 0.6;
+}
+.bench.flashing .bench-head b::after {
+  content: " ●";
+  color: var(--bad);
+  animation: bench-blink 0.9s steps(2, jump-none) infinite;
+}
+.bench-scroll {
+  overflow-x: auto;
+  padding: 0 6px 6px;
+}
+.bench-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 6px;
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+.bench-table th,
+.bench-table td {
+  padding: 4px 5px;
+  text-align: center;
+  white-space: nowrap;
+  font-weight: 800;
+}
+.bench-lab {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 64px;
+  text-align: left !important;
+  background: var(--flt-color-panel);
+}
+.bench-lab span {
+  vertical-align: middle;
+}
+.bench-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 5px;
+  border-radius: 50%;
+  border: 1.5px solid var(--flt-color-line);
+  vertical-align: middle;
+}
+.bench-col {
+  position: relative;
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  opacity: 0.85;
+}
+.bench-col.saturated .bench-name,
+.bench-cell.saturated .bench-score {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+.bench-col.saturated,
+.bench-cell.saturated {
+  opacity: 0.55;
+}
+.bench-col.new .bench-name {
+  color: var(--good);
+}
+.bench-new {
+  position: absolute;
+  top: -5px;
+  right: -2px;
+  padding: 0 3px;
+  border-radius: 4px;
+  background: var(--good);
+  color: var(--flt-color-selectionText);
+  font-size: 7px;
+  line-height: 1.4;
+}
+.bench-stamp {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  padding: 0 3px;
+  border: 2px solid var(--bad);
+  border-radius: 3px;
+  color: var(--bad);
+  font-size: 9px;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  transform: translate(-50%, -50%) rotate(-14deg);
+  background: color-mix(in srgb, var(--flt-color-panel) 82%, transparent);
+  opacity: 1;
+  animation: bench-stamp 0.5s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+}
+.bench-row .bench-lab {
+  border-radius: 8px 0 0 8px;
+}
+.bench-row.you > * {
+  background: color-mix(in srgb, var(--flt-color-accent) 26%, var(--flt-color-panel));
+}
+.bench-row.you .bench-lab {
+  box-shadow: inset 2px 0 0 var(--orange), inset 0 2px 0 var(--orange), inset 0 -2px 0 var(--orange);
+}
+.bench-row.you td:last-child {
+  box-shadow: inset -2px 0 0 var(--orange), inset 0 2px 0 var(--orange), inset 0 -2px 0 var(--orange);
+  border-radius: 0 8px 8px 0;
+}
+.bench-row.you td:not(:last-child) {
+  box-shadow: inset 0 2px 0 var(--orange), inset 0 -2px 0 var(--orange);
+}
+.bench-row.flash > * {
+  animation: bench-row-flash 1.2s ease-out 3;
+}
+.bench-cell {
+  position: relative;
+}
+.bench-cell.sota .bench-score {
+  padding: 1px 4px;
+  border-radius: 6px;
+  background: #ffd84a;
+  color: #3a2a1c;
+  box-shadow: 0 0 0 1.5px var(--flt-color-line);
+}
+.bench-badge {
+  position: absolute;
+  left: 1px;
+  top: -6px;
+  z-index: 1;
+  padding: 0 3px;
+  border-radius: 4px;
+  background: var(--flt-color-selection);
+  color: var(--flt-color-selectionText);
+  font-size: 7px;
+  line-height: 1.5;
+  letter-spacing: 0.06em;
+}
+.bench-cell.flash .bench-badge {
+  animation: bench-blink 0.55s steps(2, jump-none) infinite;
+  background: var(--bad);
+}
+.bench-cell.flash .bench-score {
+  animation: bench-glow 0.55s ease-in-out infinite alternate;
+}
+.bench-score sup {
+  font-size: 9px;
+  color: var(--bad);
+}
+.bench-foot {
+  margin: 4px 4px 0;
+  font-size: 10.5px;
+  opacity: 0.7;
+}
+.bench-drop {
+  margin: 0;
+  padding: 0 10px 8px;
+  font-size: 11px;
+  opacity: 0.75;
+}
+.bench-empty {
+  margin: 0;
+  padding: 8px 10px 10px;
+  font-size: 12px;
+  opacity: 0.7;
+}
+@keyframes bench-blink {
+  50% {
+    opacity: 0.15;
+  }
+}
+@keyframes bench-glow {
+  to {
+    box-shadow: 0 0 0 1.5px var(--flt-color-line), 0 0 8px 2px #ffd84a;
+  }
+}
+@keyframes bench-row-flash {
+  0%,
+  100% {
+    filter: none;
+  }
+  35% {
+    filter: brightness(1.25) saturate(1.5);
+  }
+}
+@keyframes bench-stamp {
+  from {
+    transform: translate(-50%, -50%) rotate(-14deg) scale(2.4);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bench-cell.flash .bench-badge,
+  .bench-cell.flash .bench-score,
+  .bench-row.flash > *,
+  .bench-stamp,
+  .bench.flashing .bench-head b::after {
+    animation: none;
+  }
+}
+:root[data-motion="reduced"] {
+  .bench-cell.flash .bench-badge,
+  .bench-cell.flash .bench-score,
+  .bench-row.flash > *,
+  .bench-stamp,
+  .bench.flashing .bench-head b::after {
+    animation: none;
+  }
+}
+
+/* ---- News cycle (share of voice) ---- */
+.voice {
+  width: 272px;
+  padding: 7px 10px 8px;
+  pointer-events: auto;
+}
+.voice-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.voice-you {
+  font-size: 12px;
+}
+.voice-you.up {
+  color: var(--good);
+}
+.voice-you.down {
+  color: var(--bad);
+}
+.voice-bar {
+  display: flex;
+  height: 12px;
+  margin: 5px 0 3px;
+  overflow: hidden;
+  border: 2px solid var(--flt-color-line);
+  border-radius: 7px;
+  transition: box-shadow 0.4s;
+}
+.voice-bar i {
+  display: block;
+  min-width: 2px;
+  transition: width 0.6s ease-out;
+}
+.voice-bar i + i {
+  border-left: 1.5px solid var(--flt-color-line);
+}
+.voice.owned .voice-bar {
+  box-shadow: 0 0 0 2px var(--orange), 0 0 10px var(--orange);
+}
+.voice-line {
+  margin: 0;
+  font-size: 11px;
+  opacity: 0.75;
+}
+.voice-graph {
+  display: block;
+  width: 100%;
+  height: 70px;
+  margin-top: 6px;
+  border: 2px solid var(--flt-color-line);
+  border-radius: 8px;
+  background: var(--flt-color-inset);
+}
+.vg-grid {
+  stroke: color-mix(in srgb, var(--flt-color-line) 25%, transparent);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+/* ---- Forced response: the gauges above the choices ---- */
+.response-gauges {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr 1fr;
+  gap: 8px;
+  margin: 12px 0 4px;
+}
+.rg {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px 10px 8px;
+  border: 2.5px solid var(--flt-color-line);
+  border-radius: 12px;
+  background: var(--flt-color-inset);
+}
+.rg-label {
+  font-size: 10.5px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+.rg-big {
+  font-family: var(--flt-font-numbers);
+  font-size: 30px;
+  line-height: 1.05;
+  color: var(--flt-color-numeral);
+}
+.rg-sub {
+  font-size: 11.5px;
+  opacity: 0.7;
+}
+.rg-meter {
+  display: block;
+  height: 10px;
+  margin-top: 3px;
+  overflow: hidden;
+  border: 2px solid var(--flt-color-line);
+  border-radius: 6px;
+  background: var(--flt-color-panel);
+}
+.rg-meter i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--flt-color-meterFrom), var(--flt-color-meterTo));
+}
+.rg-bug.risky .rg-big {
+  color: var(--bad);
+}
+
+/* ---- The launch livestream ---- */
+.stream-frame {
+  overflow: hidden;
+  border: 2.5px solid var(--flt-color-line);
+  border-radius: 12px;
+  background: #15121a;
+  color: #f4efe6;
+}
+.stream-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 10px;
+  font-size: 12px;
+  background: #2a2532;
+}
+.stream-live {
+  padding: 0 6px;
+  border-radius: 4px;
+  background: #e0362c;
+  animation: bench-blink 1.4s steps(2, jump-none) infinite;
+}
+.stream-model {
+  margin-left: auto;
+  opacity: 0.7;
+}
+.stream-stage {
+  display: grid;
+  grid-template-columns: 1fr 42%;
+  min-height: 132px;
+}
+.stream-screen {
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  text-align: center;
+  font-size: 17px;
+  line-height: 1.25;
+  background: repeating-linear-gradient(0deg, #1d1a24 0 3px, #211e29 3px 6px);
+}
+.stream-screen b {
+  padding: 8px 12px;
+  border: 2px solid #f4efe6;
+  border-radius: 6px;
+  background: #b71c1c;
+  box-shadow: 0 4px 0 #000;
+}
+.stream-chat {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 3px;
+  margin: 0;
+  padding: 8px 10px;
+  list-style: none;
+  font-size: 12px;
+  background: #1a1720;
+  border-left: 2px solid #2a2532;
+  overflow: hidden;
+}
+.stream-chat b {
+  color: #ffb454;
+}
+@media (max-width: 640px) {
+  .bench {
+    width: calc(100vw - 16px);
+  }
+  .voice {
+    width: 100%;
+  }
+  .response-gauges {
+    grid-template-columns: 1fr 1fr;
+  }
+  .rg-ready {
+    grid-column: 1 / -1;
+  }
+  .stream-stage {
+    grid-template-columns: 1fr;
+  }
+  .stream-chat {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stream-live {
+    animation: none;
+  }
+}
+:root[data-motion="reduced"] .stream-live {
+  animation: none;
+}
