@@ -11,8 +11,8 @@ _Copied from the FLT-9 task description on Sep 29 (Sonnet 5.5 builder). Decision
 - **Rivals** (6 parody labs, each a machine `idle → training → releasing → cooldown`, with personality parameters for cadence, growth, openness, poaching and hype-hunger):
   - **Anthropomorphic:** safety-first, ships late, writes essays.
   - **Open-ish AI:** ships every week, product sprawl.
-  - **MetaMeta Superintelligence Labs:** poaches with $100M offers, flip-flops on open weights.
-  - **Very Safe Superintelligence Inc.:** no product, $30B valuation.
+  - **MetaMeta Metaintelligence Labs:** poaches with $100M offers, flip-flops on open weights.
+  - **Very Very Super Super Intelligence:** no product, $30B valuation.
   - **Sirocco:** open weights, releases via a torrent link at 3am.
   - **Macrohard:** BigCo, bundles everything into spreadsheet software.
   - Parody names only; no nationalities.

@@ -78,16 +78,22 @@ test("everyday words and the game's own names pass", () => {
     "the llama is fine",
     "a mistral wind",
     "Who called?",
-    "VSSI raises $4B at a $30B valuation for a 5GW campus, 100M offers by 3PM",
+    "Super Super AI raises $4B at a $30B valuation for a 5GW campus, 100M offers by 3PM",
     "Priya Gradient ships Frontier-4-Mini",
     "Macrohard buys Sirocco; Open-ish AI files a blog post",
     "MetaMeta ships",
-    "Very Safe Superintelligence Inc. raises again",
+    "Very Very Super Super Intelligence raises again",
+    "MetaMeta Metaintelligence Labs poaches again",
     "Anthropomorphic declines to join the price war, publishes a 40-page essay on why",
     "Tokens now cheaper than the kombucha used to generate them",
     "the Arena leaderboard is a vibe",
     "AGI by Friday, says CEO, again",
   ]) assert.deepEqual(fails(text), [], text);
+});
+
+test("the real labs our old rival names contained fail", () => {
+  assert.ok(fails("Very Safe Superintelligence Inc. raises again").length > 0);
+  assert.ok(fails("Meta Superintelligence Labs poaches again").length > 0);
 });
 
 test("ambiguous words warn instead of failing", () => {

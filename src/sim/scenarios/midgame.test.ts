@@ -28,9 +28,12 @@ describe("midgame scenario", () => {
     // FLT-33/25: the earned factions wake with the campus and argue all 480 days; the water crowd escalates through its arc.
     // FLT-11 adds The Memo's dormant arc (arcs.memo); take it out and the World hashes to the old c4310492.
     // FLT-51 tags every toast (source, importance, reply); without the tags it is the World FLT-52 pinned, number for number.
-    // FLT-54: the card budget spaces the cards (and the World keeps its pacer), so the whole run moves: was 36f6a4a9 / 6c24ddd0.
-    expect(digest({ ...s, toasts: s.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) })).toBe("a1348e0f");
-    expect(digest(s)).toBe("7360029b");
+    // FLT-54: the card budget spaces the cards (and the World keeps its pacer), so the whole run moves; the rename (#71) put
+    // Super Super AI (id supersuper) and MetaMeta's full name in the World too. Were 36f6a4a9 / 6c24ddd0 before both.
+    expect({
+      untagged: digest({ ...s, toasts: s.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) }),
+      full: digest(s),
+    }).toEqual({ untagged: "73fa8a3b", full: "96430d5d" });
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);

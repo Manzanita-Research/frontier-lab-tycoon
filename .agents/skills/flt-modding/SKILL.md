@@ -73,7 +73,7 @@ ids. Fields merge only at the top level: nested objects/arrays replace whole fie
 Later mods wrap earlier ones; conflicts report consecutive touches, without waiving
 missing-id/duplicate-add errors. Buildings require **id equal to kind**.
 
-- Rivals: `anthro`, `openish`, `metameta`, `vssi`, `sirocco`, `macrohard`. `name`
+- Rivals: `anthro`, `openish`, `metameta`, `supersuper`, `sirocco`, `macrohard`. `name`
   is the Arena's long name, `short` its short one.
 - Buildings: `cluster`, `hall`, `gateway`, `kombucha`, `nap`, `snack`, `demo`,
   `fountain`, `datacenter`, `gas`, `solar`, `security`. A new building also needs a

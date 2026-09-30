@@ -210,11 +210,12 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // to spare). Level 4 lands at 1670 / 1613 / 1612 and Level 5 at 2240 on every seed (2380 / 2520 / 2380 without the
 // climb), so Scrutiny's staggered wake-ups (6 to 86 days after the rung) all play inside the 4000 ticks. The card budget
 // itself moved nothing here: before the script changed, every checkpoint held. 200 and 800 hold; 1600 on moves on every
-// seed (the Level 3 hires land before it).
+// seed (the Level 3 hires land before it). The rival rename (#71) then moved 2400 on: the packs Level 5 wakes carry the
+// rivals' names and ids.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "c403ae9a", 800: "c9a777bd", 1600: "bb207932", 2400: "6f4d8320", 3200: "9c108571", 4000: "df3ed8b4" },
-  2: { 200: "766f3295", 800: "aec1b296", 1600: "1fad47b0", 2400: "b7a2ca78", 3200: "3eeee88f", 4000: "4b80a9a7" },
-  3: { 200: "b43cb9be", 800: "510d3b99", 1600: "52fba8d3", 2400: "668e23fb", 3200: "7e9afb24", 4000: "33e374a9" },
+  1: { 200: "c403ae9a", 800: "c9a777bd", 1600: "bb207932", 2400: "d6b85d82", 3200: "d306a21f", 4000: "c8ea326a" },
+  2: { 200: "766f3295", 800: "aec1b296", 1600: "1fad47b0", 2400: "4ceaeda2", 3200: "874ce4e7", 4000: "e345a0d5" },
+  3: { 200: "b43cb9be", 800: "510d3b99", 1600: "52fba8d3", 2400: "7d43e46f", 3200: "ad5438fc", 4000: "c5b00b3f" },
 };
 
 describe("golden runs", () => {
