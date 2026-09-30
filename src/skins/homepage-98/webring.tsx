@@ -67,7 +67,7 @@ export function BuildBar({ items, tip, teasers = [], actions }: SlotPropsMap["Bu
           <b>{tip.name}</b> · {tip.text} {tip.upkeepText && <small>{tip.upkeepText}</small>}
         </div>
       )}
-      <div className="gc-box gc-parch gc-ring">
+      <div className="gc-box gc-parch gc-ring" data-coach-panel={open ? "" : undefined}>
         <div className="gc-nav">
           <span className="br">[ </span>
           <button type="button" className="gc-link prev" onClick={() => step(-1)} aria-label="Previous tool">

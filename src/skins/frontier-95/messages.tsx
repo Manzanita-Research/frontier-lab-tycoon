@@ -217,7 +217,7 @@ function Clip() {
  * Skip tutorial that never goes away. It waits for you to do the thing (no Next), and it never pauses the game. On a phone it docks to
  * the top or the bottom, whichever is away from the target.
  */
-export function Coach({ coach, anchor, layout, actions }: SlotPropsMap["Coach"]) {
+export function Coach({ coach, anchor, panel, layout, actions }: SlotPropsMap["Coach"]) {
   const t = useT();
   const ref = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 360, h: 120 });
@@ -226,7 +226,7 @@ export function Coach({ coach, anchor, layout, actions }: SlotPropsMap["Coach"])
     if (b && (Math.abs(b.width - size.w) > 1 || Math.abs(b.height - size.h) > 1)) setSize({ w: b.width, h: b.height });
   }, [coach.id, layout.width, layout.height, size.w, size.h]);
   // The taskbar is 42px, and the news strip and the top windows are not to be covered either.
-  const place = layout.compact ? null : placeBalloon(anchor, size, { w: layout.width, h: layout.height }, { gap: 18, margin: { top: 12, bottom: 52, left: 10, right: 10 } });
+  const place = layout.compact ? null : placeBalloon(anchor, size, { w: layout.width, h: layout.height }, { gap: 18, panel, margin: { top: 12, bottom: 52, left: 10, right: 10 } });
   // On a phone the balloon docks away from its target: at the bottom only for something in the top of the screen.
   const dock = anchor && anchor.y < layout.height * 0.3 ? "bottom" : "top";
   return (

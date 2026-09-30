@@ -15,7 +15,7 @@ export function Bubble({ bubble }: SlotPropsMap["Bubble"]) {
   );
 }
 
-const TITLE = { good: "Congratulations!!!", bad: "WARNING!!!", joke: "Hey, you!", neutral: "You've got mail!", hint: "Tip of the Day!", warn: "WARNING!!!" } as const;
+const TITLE = { good: "Congratulations!!!", bad: "WARNING!!!", joke: "Hey, you!", neutral: "You've got mail!", hint: "Tip of the Day!", warn: "Heads up!!!" } as const;
 
 /** A toast is a pop-up window. Clicking the link (or the box) makes it go away, as promised. */
 export function Toast({ toast, actions }: SlotPropsMap["Toast"]) {

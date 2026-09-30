@@ -24,7 +24,7 @@ function Buddy() {
  * clear of the ticker and the top bar; on a phone it docks to the top or the bottom, whichever is away from the target.
  * No Continue button: the line waits for you to do the thing.
  */
-export function Coach({ coach, anchor, layout, actions }: SlotPropsMap["Coach"]) {
+export function Coach({ coach, anchor, panel, layout, actions }: SlotPropsMap["Coach"]) {
   const t = useT();
   const ref = useRef<HTMLElement>(null);
   const [size, setSize] = useState({ w: 340, h: 104 });
@@ -32,7 +32,7 @@ export function Coach({ coach, anchor, layout, actions }: SlotPropsMap["Coach"])
     const b = ref.current?.getBoundingClientRect();
     if (b && (Math.abs(b.width - size.w) > 1 || Math.abs(b.height - size.h) > 1)) setSize({ w: b.width, h: b.height });
   }, [coach.id, layout.width, layout.height, size.w, size.h]);
-  const place = layout.compact ? null : placeBalloon(anchor, size, { w: layout.width, h: layout.height }, { gap: 20, margin: { top: 76, bottom: 48, left: 12, right: 12 } });
+  const place = layout.compact ? null : placeBalloon(anchor, size, { w: layout.width, h: layout.height }, { gap: 20, panel, margin: { top: 76, bottom: 48, left: 12, right: 12 } });
   // On a phone the balloon docks away from its target: at the bottom only for something in the top of the screen.
   const dock = anchor && anchor.y < layout.height * 0.3 ? "bottom" : "top";
   return (

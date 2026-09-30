@@ -61,7 +61,7 @@ export function BuildBar({ items, tip, teasers = [], actions }: SlotPropsMap["Bu
         </div>
       )}
       {open && (
-        <div className="buildmenu panel" role="menu" aria-label={t("build.menuTitle")}>
+        <div className="buildmenu panel" data-coach-panel role="menu" aria-label={t("build.menuTitle")}>
           <div className="buildmenu-grid">
             {items.map((it) => (
               <button

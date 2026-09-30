@@ -22,6 +22,8 @@ export interface PlaceOptions {
   margin?: number | { top?: number; right?: number; bottom?: number; left?: number };
   /** Sides to try, in order. The default faces the middle of the screen: a target in the bottom row gets its balloon above it. */
   prefer?: readonly Side[];
+  /** The popup the target sits in (a build menu): the balloon keeps off all of it, still level with the target. */
+  panel?: Rect | null;
 }
 
 const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
@@ -42,14 +44,16 @@ export function placeBalloon(anchor: Rect | null, size: { w: number; h: number }
   if (!anchor) return { x: inX(x1 - size.w), y: inY(y1 - size.h), side: "none" };
   const cx = anchor.x + anchor.w / 2;
   const cy = anchor.y + anchor.h / 2;
+  // The balloon clears the whole popup when the target is in one, but stays level with the target itself.
+  const box = opts.panel ?? anchor;
   const at: Record<Side, { x: number; y: number; room: number }> = {
-    right: { x: anchor.x + anchor.w + gap, y: cy - size.h / 2, room: x1 - (anchor.x + anchor.w + gap) - size.w },
-    left: { x: anchor.x - gap - size.w, y: cy - size.h / 2, room: anchor.x - gap - size.w - x0 },
-    top: { x: cx - size.w / 2, y: anchor.y - gap - size.h, room: anchor.y - gap - size.h - y0 },
-    bottom: { x: cx - size.w / 2, y: anchor.y + anchor.h + gap, room: y1 - (anchor.y + anchor.h + gap) - size.h },
+    right: { x: box.x + box.w + gap, y: cy - size.h / 2, room: x1 - (box.x + box.w + gap) - size.w },
+    left: { x: box.x - gap - size.w, y: cy - size.h / 2, room: box.x - gap - size.w - x0 },
+    top: { x: cx - size.w / 2, y: box.y - gap - size.h, room: box.y - gap - size.h - y0 },
+    bottom: { x: cx - size.w / 2, y: box.y + box.h + gap, room: y1 - (box.y + box.h + gap) - size.h },
   };
-  // Beside a target on the side that faces the middle of the screen; above it when it is in the bottom row.
-  const low = cy > view.h * 0.78;
+  // Beside a target on the side that faces the middle of the screen; above it when it (or its popup) sits low on the screen.
+  const low = box.y + box.h / 2 > view.h * 0.7;
   const order: readonly Side[] = opts.prefer ?? (low ? ["top", cx < view.w / 2 ? "right" : "left", "left", "right", "bottom"] : cx < view.w * 0.5 ? ["right", "bottom", "top", "left"] : ["left", "bottom", "top", "right"]);
   const fit = order.find((s) => at[s].room >= 0);
   const side = fit ?? (Object.keys(at) as Side[]).sort((a, b) => at[b].room - at[a].room)[0]!;

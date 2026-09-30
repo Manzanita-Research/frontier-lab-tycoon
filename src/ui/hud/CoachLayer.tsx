@@ -10,6 +10,15 @@ const PAD = 7;
 
 const sameRect = (a: Rect | null, b: Rect | null) => (a === null || b === null ? a === b : Math.abs(a.x - b.x) < 1 && Math.abs(a.y - b.y) < 1 && Math.abs(a.w - b.w) < 1 && Math.abs(a.h - b.h) < 1);
 
+/** The popup (marked `data-coach-panel`) a target sits in, if any: a balloon must keep off all of it, not just off the target. */
+function measurePanel(target: string): Rect | null {
+  if (typeof document === "undefined" || target === "map:suggest") return null;
+  const panel = document.querySelector<HTMLElement>("[data-coach-active]")?.closest<HTMLElement>("[data-coach-panel]");
+  if (!panel) return null;
+  const b = panel.getBoundingClientRect();
+  return b.width > 0 && b.height > 0 ? { x: b.left, y: b.top, w: b.width, h: b.height } : null;
+}
+
 /** Where the coach's target is on screen right now: the element marked `data-coach-active`, or the ghost tiles for "map:suggest". */
 export function measureTarget(target: string): Rect | null {
   if (typeof document === "undefined") return null;
@@ -29,28 +38,29 @@ export function measureTarget(target: string): Rect | null {
   return x1 > x0 && y1 > y0 ? { x: x0, y: y0, w: x1 - x0, h: y1 - y0 } : null;
 }
 
-/** Follow the target (a menu opening, a window moving) without re-rendering per frame: state changes only when the box moves. */
-function useSpotlight(target: string | null): Rect | null {
-  const [rect, setRect] = useState<Rect | null>(null);
+/** Follow the target (a menu opening, a window moving) without re-rendering per frame: state changes only when a box moves. */
+function useSpotlight(target: string | null): { rect: Rect | null; panel: Rect | null } {
+  const [found, setFound] = useState<{ rect: Rect | null; panel: Rect | null }>({ rect: null, panel: null });
   useEffect(() => {
     if (!target) {
-      setRect(null);
+      setFound({ rect: null, panel: null });
       return;
     }
     let raf = 0;
-    let last: Rect | null = null;
+    let last: { rect: Rect | null; panel: Rect | null } = { rect: null, panel: null };
     const frame = () => {
-      const next = measureTarget(target);
-      if (!sameRect(next, last)) {
-        last = next;
-        setRect(next);
+      const rect = measureTarget(target);
+      const panel = rect ? measurePanel(target) : null;
+      if (!sameRect(rect, last.rect) || !sameRect(panel, last.panel)) {
+        last = { rect, panel };
+        setFound(last);
       }
       raf = requestAnimationFrame(frame);
     };
     raf = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(raf);
   }, [target]);
-  return rect;
+  return found;
 }
 
 /** The dimming with a hole in it, and the pulsing ring round the hole. */
@@ -74,12 +84,12 @@ function Spotlight({ rect }: { rect: Rect }) {
 export function CoachLayer({ vm, actions }: { vm: HudVM; actions: HudActions }) {
   const { Coach } = useSkin().slots;
   const coach = vm.coach;
-  const rect = useSpotlight(coach?.target ?? null);
+  const { rect, panel } = useSpotlight(coach?.target ?? null);
   if (!coach) return null;
   return (
     <>
       {rect && <Spotlight rect={rect} />}
-      <Coach coach={coach} anchor={rect && { x: rect.x - PAD, y: rect.y - PAD, w: rect.w + PAD * 2, h: rect.h + PAD * 2 }} layout={vm.layout} actions={actions} />
+      <Coach coach={coach} anchor={rect && { x: rect.x - PAD, y: rect.y - PAD, w: rect.w + PAD * 2, h: rect.h + PAD * 2 }} panel={panel} layout={vm.layout} actions={actions} />
     </>
   );
 }

@@ -41,6 +41,15 @@ describe("placeBalloon", () => {
     }
   });
 
+  it("keeps clear of the whole popup the target sits in, level with the target", () => {
+    const panel = { x: 431, y: 604, w: 582, h: 191 };
+    const target = { x: 660, y: 608, w: 120, h: 100 };
+    const p = placeBalloon(target, box, view, { panel, margin: { bottom: 48 } });
+    const clear = p.y + box.h <= panel.y || p.y >= panel.y + panel.h || p.x + box.w <= panel.x || p.x >= panel.x + panel.w;
+    expect(clear).toBe(true);
+    expect(p.side).toBe("top");
+  });
+
   it("honours the preferred order, and with no target sits bottom-right", () => {
     const anchor = { x: 600, y: 400, w: 200, h: 60 };
     expect(placeBalloon(anchor, box, view, { prefer: ["left"] }).side).toBe("left");

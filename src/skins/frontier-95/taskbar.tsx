@@ -115,7 +115,7 @@ export function BuildBar({ items, tip, teasers = [], actions }: SlotPropsMap["Bu
   return (
     <div className="f95-startwrap" ref={root}>
       {open && (
-        <div className="f95-win f95-menu" role="menu" aria-label={t("build.menuTitle")}>
+        <div className="f95-win f95-menu" data-coach-panel role="menu" aria-label={t("build.menuTitle")}>
           <div className="side f95-dither" aria-hidden>
             <b>Frontier</b>95
           </div>

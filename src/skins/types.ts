@@ -79,8 +79,12 @@ export interface SlotPropsMap {
   EventCard: { event: EventVM; actions: HudActions };
   /** A spend waiting for a yes or a no (it would leave under three months of runway). Modal; time is held while it is up. */
   Confirm: { confirm: ConfirmVM; actions: HudActions };
-  /** The coach mark's balloon (the paperclip in Frontier 95). The host draws the dimming and the ring; `anchor` is where the spotlit thing is on screen, or null. */
-  Coach: { coach: CoachVM; anchor: Rect | null; layout: LayoutVM; actions: HudActions };
+  /**
+   * The coach mark's balloon (the paperclip in Frontier 95). The host draws the dimming and the ring; `anchor` is where the spotlit
+   * thing is on screen (or null), and `panel` the popup it sits in if that popup is marked `data-coach-panel` (a build menu): keep
+   * the balloon off all of it.
+   */
+  Coach: { coach: CoachVM; anchor: Rect | null; panel?: Rect | null; layout: LayoutVM; actions: HudActions };
   /** The small "New!" card that comes with a level-up. */
   UnlockCard: { unlock: UnlockCardVM; actions: HudActions };
   /** Help ▸ How to play: one window. `actions.closeHelp()`, and `actions.coachReplay()` for "Replay tutorial". */

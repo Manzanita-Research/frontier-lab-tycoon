@@ -178,7 +178,7 @@ export function BuildBar({ items, tip, teasers = [], layout, actions }: SlotProp
           <b>{tip.name}</b> {tip.text} {tip.upkeepText && <em>{tip.upkeepText}</em>}
         </div>
       )}
-      <div className={`dd-tray ${open ? "" : "closed"}`}>
+      <div className={`dd-tray ${open ? "" : "closed"}`} data-coach-panel={open ? "" : undefined}>
         <button type="button" className="dd-tray-label" aria-expanded={open} onClick={() => toggle(!open)} {...coach.attrs("start", !open && inside)}>
           {t("build.menuTitle")}
           {held && !open ? ` · ${held.short}` : ""}
