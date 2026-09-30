@@ -1,0 +1,575 @@
+{
+  "apiVersion": 1,
+  "id": "base-leapfrog",
+  "name": "Release Leapfrog",
+  "version": "1.0.0",
+  "author": "Frontier Lab Tycoon",
+  "description": "Every ten days one lab launches and the next day another answers. Benchmarks get claimed, contested, saturated and replaced. Your run is 94% ready and the news cycle is not waiting.",
+  "content": {
+    "benchmarks": {
+      "add": [
+        { "id": "mmlu", "name": "MMLU-Pro-Max-Ultra", "short": "MMLU-PMU", "kind": "score", "difficulty": 20 },
+        { "id": "humaneval", "name": "HumanEval-But-Harder", "short": "HE-BH", "kind": "score", "difficulty": 28 },
+        { "id": "swe", "name": "SWE-Bench (Verified) (Really)", "short": "SWE-VR", "kind": "score", "difficulty": 42 },
+        { "id": "gpqa", "name": "GPQA-Diamond-Encrusted", "short": "GPQA-DE", "kind": "score", "difficulty": 58 },
+        { "id": "arc", "name": "ARC-AGI-∞", "short": "ARC-∞", "kind": "score", "difficulty": 85 },
+        { "id": "hle", "name": "Humanity's Second-To-Last Exam", "short": "HSLE", "kind": "score", "difficulty": 125 },
+        { "id": "arena", "name": "Arena Elo (vibes)", "short": "Arena Elo", "kind": "elo", "difficulty": 0 },
+
+        { "id": "mmlu2", "name": "MMLU-Pro-Max-Ultra 2: Now With Reasoning", "short": "MMLU-PMU 2", "kind": "score", "difficulty": 150, "replaces": "mmlu" },
+        { "id": "mmlu3", "name": "MMLU-Pro-Max-Ultra 3: The Search For More Points", "short": "MMLU-PMU 3", "kind": "score", "difficulty": 600, "replaces": "mmlu2" },
+        { "id": "humaneval2", "name": "HumanEval-But-Harder-Still", "short": "HE-BHS", "kind": "score", "difficulty": 200, "replaces": "humaneval" },
+        { "id": "humaneval3", "name": "HumanEval-But-Actually-Hard (Beta)", "short": "HE-BAH", "kind": "score", "difficulty": 800, "replaces": "humaneval2" },
+        { "id": "swe2", "name": "SWE-Bench (Verified) (Really) (Notarized)", "short": "SWE-VRN", "kind": "score", "difficulty": 300, "replaces": "swe" },
+        { "id": "swe3", "name": "SWE-Bench (Verified) (Really) (Notarized) (Live)", "short": "SWE-VRNL", "kind": "score", "difficulty": 1200, "replaces": "swe2" },
+        { "id": "gpqa2", "name": "GPQA-Diamond-Encrusted-Platinum", "short": "GPQA-DEP", "kind": "score", "difficulty": 420, "replaces": "gpqa" },
+        { "id": "gpqa3", "name": "GPQA-Diamond-Encrusted-Platinum-Lite (Pro)", "short": "GPQA-DEPL", "kind": "score", "difficulty": 1700, "replaces": "gpqa2" },
+        { "id": "arc2", "name": "ARC-AGI-∞+1", "short": "ARC-∞+1", "kind": "score", "difficulty": 620, "replaces": "arc" },
+        { "id": "arc3", "name": "ARC-AGI-∞+ε", "short": "ARC-∞+ε", "kind": "score", "difficulty": 2500, "replaces": "arc2" },
+        { "id": "hle2", "name": "Humanity's Last Exam (We Mean It This Time)", "short": "HLE-WMIT", "kind": "score", "difficulty": 900, "replaces": "hle" },
+        { "id": "hle3", "name": "Humanity's Last Exam (Final) (v3) (Actually Final)", "short": "HLE-AF", "kind": "score", "difficulty": 3600, "replaces": "hle2" }
+      ]
+    },
+    "labs": {
+      "add": [
+        { "id": "anthro", "kind": "frontier", "bias": { "gpqa": 1.12, "hle": 1.1, "humaneval": 0.95, "swe": 0.94, "arena": 0.9 } },
+        { "id": "openish", "kind": "frontier", "bias": { "arena": 1.15, "humaneval": 1.06, "gpqa": 0.9, "hle": 0.92 } },
+        { "id": "metameta", "kind": "frontier", "bias": { "mmlu": 1.1, "arena": 1.05, "arc": 0.9 } },
+        { "id": "vssi", "kind": "neo", "bias": {} },
+        { "id": "sirocco", "kind": "open", "bias": { "arc": 1.12, "swe": 1.05, "gpqa": 0.92 } },
+        { "id": "macrohard", "kind": "bigco", "bias": { "swe": 1.12, "mmlu": 1.05, "hle": 0.9 } }
+      ]
+    },
+    "footnotes": {
+      "add": [
+        "with a custom prompt",
+        "pass@256",
+        "on the subset we picked",
+        "graded by the model itself",
+        "at a temperature we would rather not discuss",
+        "excluding the questions it got wrong",
+        "with a very long system prompt",
+        "best of 64, screenshot of the best one"
+      ]
+    },
+    "headlines": {
+      "add": [
+        { "id": "lf-sota-1", "trigger": "sota", "tone": "joke", "text": "{rival} claims state-of-the-art on {bench} with {model}{fn}" },
+        { "id": "lf-sota-2", "trigger": "sota", "tone": "joke", "text": "{model} tops {bench}, says {rival}; the footnote is longer than the paper{fn}" },
+        { "id": "lf-sota-3", "trigger": "sota", "tone": "joke", "text": "{rival}: {model} is SOTA on {bench}. Other labs: 'we don't do benchmarks, but also we are top three'{fn}" },
+        { "id": "lf-sota-4", "trigger": "sota", "tone": "joke", "text": "{bench} has a new champion, {model}. The previous champion learned of this from the ticker{fn}" },
+        { "id": "lf-sota-5", "trigger": "sota", "tone": "joke", "text": "SOTA alert: {model} beats the {bench} record by a margin {rival} calls 'decisive' and the error bars call 'a rumor'{fn}" },
+        { "id": "lf-sota-6", "trigger": "sota", "tone": "joke", "text": "{rival} posts a new best on {bench}; independent testers ask to be introduced to the prompt{fn}" },
+        { "id": "lf-sota-7", "trigger": "sota", "tone": "joke", "text": "{bench} leaderboard: {model} first, everyone else 'within noise', noise 'within {rival}'{fn}" },
+
+        { "id": "lf-you-sota-1", "trigger": "youSota", "tone": "good", "text": "{lab} claims state-of-the-art on {bench} with {model}; the footnote fits on the slide, for once" },
+        { "id": "lf-you-sota-2", "trigger": "youSota", "tone": "good", "text": "{model} takes the {bench} crown; {lab}'s press team says 'humbled' three times in one sentence" },
+        { "id": "lf-you-sota-3", "trigger": "youSota", "tone": "good", "text": "{lab}'s {model} is the new best on {bench}; rivals respond with 'benchmarks aren't everything', in bold" },
+
+        { "id": "lf-answer-1", "trigger": "answer", "tone": "joke", "text": "{rival} answers {lead} within 24 hours; both launches were, by pure coincidence, scheduled for the same week" },
+        { "id": "lf-answer-2", "trigger": "answer", "tone": "joke", "text": "The day after {lead} launches, {rival} launches {model}. Insiders: 'it was in a drawer'. Other insiders: 'the drawer was locked'" },
+        { "id": "lf-answer-3", "trigger": "answer", "tone": "joke", "text": "{lead} ships in the morning, {rival} answers by lunch, the benchmark table updates by dinner" },
+        { "id": "lf-answer-4", "trigger": "answer", "tone": "joke", "text": "{rival} counter-launches {model} the day after {lead}; the blog post still says 'DRAFT' in the tab title" },
+        { "id": "lf-answer-5", "trigger": "answer", "tone": "joke", "text": "It's launch season: {lead} yesterday, {rival} today, your calendar tomorrow" },
+        { "id": "lf-answer-6", "trigger": "answer", "tone": "joke", "text": "{rival} answers {lead}'s launch a day late and, by its own account, a point better" },
+        { "id": "lf-answer-7", "trigger": "answer", "tone": "joke", "text": "{rival} launches {model} 26 hours after {lead}; analysts call it 'a coincidence with a project plan'" },
+
+        { "id": "lf-owned-1", "trigger": "cycleOwned", "tone": "neutral", "text": "{who} now owns the news cycle; every other story is filed under 'also, this happened'" },
+        { "id": "lf-owned-2", "trigger": "cycleOwned", "tone": "neutral", "text": "The Frontier Times leads with {who} for the third headline in a row; the crossword is also about {who}" },
+        { "id": "lf-owned-3", "trigger": "cycleOwned", "tone": "neutral", "text": "{who} is the only thing anyone is talking about; the weather has been reported as '{who}, with a chance of {who}'" },
+        { "id": "lf-owned-4", "trigger": "cycleOwned", "tone": "neutral", "text": "{who} takes the news cycle; the others release a statement that nobody reads, then a second statement about the first" },
+        { "id": "lf-lost-1", "trigger": "cycleLost", "tone": "neutral", "text": "{who}'s news cycle ends; the internet moves on to a video of a dog on a skateboard" },
+        { "id": "lf-lost-2", "trigger": "cycleLost", "tone": "neutral", "text": "{who}'s moment passes; the news cycle is now 'up for grabs, and also on fire'" },
+        { "id": "lf-lost-3", "trigger": "cycleLost", "tone": "neutral", "text": "The story about {who} is now old, which is to say nine days" },
+
+        { "id": "lf-crowded-1", "trigger": "crowded", "tone": "joke", "text": "{bench} leaderboard is now a photo finish at the ceiling; the ceiling has asked for a raise" },
+        { "id": "lf-crowded-2", "trigger": "crowded", "tone": "joke", "text": "{bench}: the top labs are separated by less than the margin of error and the margin of decency" },
+        { "id": "lf-crowded-3", "trigger": "crowded", "tone": "joke", "text": "Six labs, one {bench} score, and a lively dispute about the second decimal" },
+
+        { "id": "lf-solved-1", "trigger": "saturated", "tone": "joke", "text": "{bench} is declared solved; researchers introduce {next}, on which nobody scores above {pct}%" },
+        { "id": "lf-solved-2", "trigger": "saturated", "tone": "joke", "text": "Benchmark {bench} saturated. A harder one has been ordered from the benchmark factory: {next}. Delivery: Thursday" },
+        { "id": "lf-solved-3", "trigger": "saturated", "tone": "joke", "text": "{bench}: retired with honors and a score you would call 'perfect' if you were selling something. {next} starts Monday" },
+        { "id": "lf-solved-4", "trigger": "saturated", "tone": "joke", "text": "{bench} is solved, again. {next} arrives, and every lab has scheduled a response" },
+        { "id": "lf-solved-5", "trigger": "saturated", "tone": "joke", "text": "Consensus: {bench} 'no longer measures what we meant'. Consensus on what {next} measures: pending" },
+
+        { "id": "lf-react-frontier-1", "trigger": "react:frontier", "tone": "joke", "text": "{rival} on {bench} being solved: 'we never cared about it', then publishes a 60-page paper about the things it cared about instead" },
+        { "id": "lf-react-frontier-2", "trigger": "react:frontier", "tone": "joke", "text": "{rival}: 'benchmarks are a distraction', posted directly under its own benchmark table" },
+        { "id": "lf-react-frontier-3", "trigger": "react:frontier", "tone": "joke", "text": "{rival} says {next} is 'a welcome step' and would like to be scored on it privately, first" },
+        { "id": "lf-react-neo-1", "trigger": "react:neo", "tone": "joke", "text": "{rival} says it solved {bench} 'in a room' months ago; the room declined to comment" },
+        { "id": "lf-react-neo-2", "trigger": "react:neo", "tone": "joke", "text": "{rival} announces it has already trained on {next}; its evidence is a slide with a lock icon" },
+        { "id": "lf-react-neo-3", "trigger": "react:neo", "tone": "joke", "text": "{rival} raises at a higher valuation on the strength of {next}, which it has not seen" },
+        { "id": "lf-react-open-1", "trigger": "react:open", "tone": "joke", "text": "{rival} posts weights that beat {bench}, and a fine-tune for {next} before {next} has been released" },
+        { "id": "lf-react-open-2", "trigger": "react:open", "tone": "joke", "text": "{rival} says it solved {bench} six weeks ago; here is a torrent, and a second torrent explaining the first" },
+        { "id": "lf-react-open-3", "trigger": "react:open", "tone": "joke", "text": "{rival} releases {next} answers before the {next} questions, 'to save everyone time'" },
+        { "id": "lf-react-bigco-1", "trigger": "react:bigco", "tone": "joke", "text": "{rival} adds {bench} to the quarterly earnings call; the call is now a benchmark" },
+        { "id": "lf-react-bigco-2", "trigger": "react:bigco", "tone": "joke", "text": "{rival} bundles {next} into spreadsheet software; the spreadsheet has feelings about it" },
+        { "id": "lf-react-bigco-3", "trigger": "react:bigco", "tone": "joke", "text": "{rival} announces {next} support in a product that cannot yet open {bench}" },
+
+        { "id": "lf-bug-1", "trigger": "bug", "tone": "bad", "text": "{lab} ships {model} at {ready}% ready; the launch bug is that it insists on being called 'Gerald'" },
+        { "id": "lf-bug-2", "trigger": "bug", "tone": "bad", "text": "{lab}'s early release {model} answers every question with a question, unless the question is a question" },
+        { "id": "lf-bug-3", "trigger": "bug", "tone": "bad", "text": "{model} ships early; users find it 'confident, fast and wrong in a new font'" },
+        { "id": "lf-bug-4", "trigger": "bug", "tone": "bad", "text": "{lab} apologises for {model}'s launch bug, calling it 'a feature that arrived too soon'" },
+        { "id": "lf-bug-5", "trigger": "bug", "tone": "bad", "text": "{model} launch incident: the model recommends itself to competitors, warmly" },
+        { "id": "lf-bug-6", "trigger": "bug", "tone": "bad", "text": "{lab}'s {model} ships at {ready}% and is, per its own release notes, '{ready}% as advertised'" },
+
+        { "id": "lf-ship-1", "trigger": "shipped", "tone": "neutral", "text": "{lab} ships {model} at {ready}% ready, 'to meet the moment'; the moment says it was fine to wait" },
+        { "id": "lf-ship-2", "trigger": "shipped", "tone": "neutral", "text": "{lab} answers {rival} the same day with {model}; the release notes say 'preview' in the small print and 'preview' in the smaller print" },
+        { "id": "lf-ship-3", "trigger": "shipped", "tone": "neutral", "text": "{lab} rushes out {model}; the model card is a photo of a whiteboard" },
+
+        { "id": "lf-counter-1", "trigger": "counterStrong", "tone": "good", "text": "{lab} counter-launches {model}; timing analysts call it 'the quiet before the ship'" },
+        { "id": "lf-counter-2", "trigger": "counterStrong", "tone": "good", "text": "{lab} finally ships {model}, having let {rival} have four days of oxygen; it uses all of it back" },
+        { "id": "lf-counter-3", "trigger": "counterStrong", "tone": "good", "text": "The counter-launch lands: {lab}'s {model} takes the news cycle back like a borrowed umbrella" },
+        { "id": "lf-counter-4", "trigger": "counterStrong", "tone": "good", "text": "{lab}'s {model} arrives with a thread that begins 'Announcing (finally)' and ends 'thanks for waiting'" },
+        { "id": "lf-counter-soft-1", "trigger": "counterSoft", "tone": "neutral", "text": "{lab}'s counter-launch {model} arrives; {rival}'s fans call it 'a nice try', {lab}'s fans call it 'a very nice try'" },
+        { "id": "lf-counter-soft-2", "trigger": "counterSoft", "tone": "neutral", "text": "{lab} waited to answer {rival}, then answered; the answer is 'roughly comparable, on a good day'" },
+        { "id": "lf-counter-soft-3", "trigger": "counterSoft", "tone": "neutral", "text": "{model} lands after a long wait and a short silence" },
+        { "id": "lf-window-1", "trigger": "windowClosed", "tone": "neutral", "text": "{lab} let the launch window close; the counter-launch has been rescheduled to 'soon', which is a place" },
+        { "id": "lf-window-2", "trigger": "windowClosed", "tone": "neutral", "text": "{lab}'s counter-launch is delayed indefinitely; the model is 'still cooking', and so is the calendar" },
+
+        { "id": "lf-flawless-1", "trigger": "flawless", "tone": "good", "text": "{lab}'s launch livestream goes flawlessly; viewers assume it was pre-recorded, and it was" },
+        { "id": "lf-flawless-2", "trigger": "flawless", "tone": "good", "text": "{lab} livestream: no dogs, no wrong charts, no incidents; commentators call it 'suspicious'" },
+        { "id": "lf-flawless-3", "trigger": "flawless", "tone": "good", "text": "{model}'s launch stream runs on time; three viewers cry, one files a ticket" },
+        { "id": "lf-flawless-4", "trigger": "flawless", "tone": "good", "text": "The {model} livestream is so smooth that chat asks if the presenter is a model; the presenter says 'not yet'" },
+
+        { "id": "lf-leak-1", "trigger": "leak", "tone": "joke", "text": "{lab} 'leaks' a benchmark screenshot; it is blurry in all the right places" },
+        { "id": "lf-leak-2", "trigger": "leak", "tone": "joke", "text": "A benchmark table for {lab}'s unreleased model 'accidentally' appears on a public dashboard; the dashboard's owner is, accidentally, {lab}" },
+        { "id": "lf-leak-3", "trigger": "leak", "tone": "joke", "text": "{lab} 'inadvertently' shares a benchmark table with 40,000 followers, a watermark and a countdown" },
+        { "id": "lf-leak-busted-1", "trigger": "leakBusted", "tone": "bad", "text": "The leaked numbers don't reproduce. {lab} calls the screenshot 'a rogue chart' and the model 'more of a vibe'" },
+        { "id": "lf-leak-busted-2", "trigger": "leakBusted", "tone": "bad", "text": "{model}'s real scores are 'consistent with the leak, if the leak had been a rounding error'" },
+
+        { "id": "lf-stunt-1", "trigger": "stunt", "tone": "joke", "text": "{rival} says nothing; the silence goes viral" }
+      ]
+    },
+    "mishaps": {
+      "add": [
+        { "id": "dog", "weight": 3, "voice": 34, "headline": "A dog walks onto {lab}'s launch livestream; the demo 'has stopped responding', the dog has not" },
+        { "id": "wrongChart", "weight": 3, "voice": -4, "headline": "{lab}'s presenter shows the wrong chart on the {model} livestream; it is last quarter's, and it has a rival in green" },
+        { "id": "comingWeeks", "weight": 3, "voice": -12, "headline": "At the {model} launch, {lab}'s presenter says 'we'll ship it in the coming weeks'; the stream was titled 'Introducing {model}'" },
+        { "id": "frozen", "weight": 2, "voice": 18, "headline": "The {model} demo has been 'thinking' for four minutes, live; chat has opened a betting pool" },
+        { "id": "systemPrompt", "weight": 2, "voice": 28, "headline": "Asked to introduce itself, {model} reads its system prompt aloud, all of it, live" },
+        { "id": "hotMic", "weight": 2, "voice": 14, "headline": "{lab}'s mic is hot before the {model} launch: 'the model isn't done, but the slide is'" },
+        { "id": "wrongModel", "weight": 2, "voice": 6, "headline": "The {model} demo turns out to be running last year's model; nobody in chat can tell, the answers are fine" }
+      ]
+    },
+    "events": {
+      "add": [
+        {
+          "id": "shipNow",
+          "kind": "response",
+          "stripe": "Forced response",
+          "title": "{lfRival} just dropped {lfModel}. Ship yours now at {lfReady}% ready, or lose the news cycle.",
+          "body": "Their launch post has 40,000 likes and a graph with no y-axis. Your run is {lfReady}% baked; the rest is 'it'll be great in a few weeks', which is what everyone says right before the bug. The news cycle lasts about four days. It is day one, and you are not in it.",
+          "tone": "bad",
+          "when": { "flag": "offer:shipNow", "daysAgo": 0 },
+          "cooldown": 4,
+          "choices": [
+            {
+              "label": "Ship now",
+              "hint": "an early-access preview: +{lfShip} capability now, the rest lands with the full release (which is then +{lfHold} in all, minus the rush) · news-cycle bump · about {lfBug}% odds of a launch bug",
+              "effects": [
+                { "type": "leapfrog", "action": "shipNow" },
+                { "type": "flag", "name": "offer:shipNow", "clear": true }
+              ]
+            },
+            {
+              "label": "Hold, then counter-launch",
+              "hint": "{lfRival} owns today's news cycle · a stronger launch inside {lfHoldDays} days gets a big bump",
+              "effects": [
+                { "type": "leapfrog", "action": "hold" },
+                { "type": "news", "text": "{lab} 'will respond in due course', a phrase that has never once been a launch", "tone": "joke" },
+                { "type": "flag", "name": "offer:shipNow", "clear": true }
+              ]
+            },
+            {
+              "label": "Leak a benchmark screenshot",
+              "hint": "hype +8 · trust −12 · a SOTA claim with an asterisk until the real scores land",
+              "effects": [
+                { "type": "leapfrog", "action": "leak" },
+                { "type": "hype", "amount": 8 },
+                { "type": "trust", "amount": -12 },
+                { "type": "flag", "name": "offer:shipNow", "clear": true }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "stream:dog",
+          "kind": "stream",
+          "stripe": "Launch livestream",
+          "title": "A dog has walked onto the launch livestream",
+          "body": "It's a golden retriever. It is standing in front of the slide that says 'SOTA'. Your presenter is mid-sentence. Chat is typing one word in six languages. A dialog appears over the demo: 'The demo has stopped responding.' The dog has not.",
+          "tone": "joke",
+          "when": { "flag": "offer:stream:dog", "daysAgo": 0 },
+          "cooldown": 3,
+          "choices": [
+            {
+              "label": "Let the dog present",
+              "hint": "voice +30 · hype +6 · the dog is now Head of Evals",
+              "effects": [
+                { "type": "voice", "amount": 30 },
+                { "type": "hype", "amount": 6 },
+                { "type": "news", "text": "{lab}'s launch livestream is co-hosted by a dog; its benchmark numbers are the only ones nobody disputes", "tone": "good" },
+                { "type": "flag", "name": "offer:stream:dog", "clear": true }
+              ]
+            },
+            {
+              "label": "Cut to the pre-recorded demo",
+              "hint": "voice +8 · trust −4 · the dog goes viral anyway",
+              "effects": [
+                { "type": "voice", "amount": 8 },
+                { "type": "trust", "amount": -4 },
+                { "type": "news", "text": "{lab} cuts away from a dog to a pre-recorded demo; viewers call the dog 'more transparent'", "tone": "joke" },
+                { "type": "flag", "name": "offer:stream:dog", "clear": true }
+              ]
+            },
+            {
+              "label": "Add the dog to the org chart",
+              "hint": "−$20K · hype +3 · voice +18 · payroll gains a treat budget",
+              "effects": [
+                { "type": "cash", "amount": -20000 },
+                { "type": "hype", "amount": 3 },
+                { "type": "voice", "amount": 18 },
+                { "type": "news", "text": "{lab} adds a dog to its org chart under 'Alignment'; the dog reports to nobody, which the board calls 'a strong reporting line'", "tone": "joke" },
+                { "type": "flag", "name": "offer:stream:dog", "clear": true }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "stream:wrongChart",
+          "kind": "stream",
+          "stripe": "Launch livestream",
+          "title": "The presenter is showing the wrong chart",
+          "body": "It's last quarter's bar chart. It has a competitor's name on it, in green, well ahead. The chat has already screenshotted it. Someone in the wings is mouthing 'next slide' and, somehow, also 'not that one'.",
+          "tone": "bad",
+          "when": { "flag": "offer:stream:wrongChart", "daysAgo": 0 },
+          "cooldown": 3,
+          "choices": [
+            {
+              "label": "Call it 'an illustrative chart'",
+              "hint": "voice +5 · trust −6",
+              "effects": [
+                { "type": "voice", "amount": 5 },
+                { "type": "trust", "amount": -6 },
+                { "type": "news", "text": "{lab} calls its own wrong chart 'illustrative'; the illustration is of a lab that is not {lab}", "tone": "joke" },
+                { "type": "flag", "name": "offer:stream:wrongChart", "clear": true }
+              ]
+            },
+            {
+              "label": "Say the y-axis was 'vibes'",
+              "hint": "voice +12 · hype +4 · trust −3",
+              "effects": [
+                { "type": "voice", "amount": 12 },
+                { "type": "hype", "amount": 4 },
+                { "type": "trust", "amount": -3 },
+                { "type": "news", "text": "{lab}'s y-axis was 'vibes', it says; by that measure, it adds, {lab} is up and to the right", "tone": "joke" },
+                { "type": "flag", "name": "offer:stream:wrongChart", "clear": true }
+              ]
+            },
+            {
+              "label": "Correct it live",
+              "hint": "trust +5 · voice −8 · chat calls it 'refreshingly honest'",
+              "effects": [
+                { "type": "trust", "amount": 5 },
+                { "type": "voice", "amount": -8 },
+                { "type": "news", "text": "{lab} corrects its own chart live on air; viewers ask if this is a new kind of demo", "tone": "good" },
+                { "type": "flag", "name": "offer:stream:wrongChart", "clear": true }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "stream:comingWeeks",
+          "kind": "stream",
+          "stripe": "Launch livestream",
+          "title": "The presenter says: “we'll ship it in the coming weeks”",
+          "body": "This is the launch. The stream is titled 'Introducing {lfMine}'. The model is, as the presenter has just clarified, 'available to a subset of users in a subset of regions on a subset of Tuesdays'. Legal is doing the thing with their eyebrows.",
+          "tone": "bad",
+          "when": { "flag": "offer:stream:comingWeeks", "daysAgo": 0 },
+          "cooldown": 3,
+          "choices": [
+            {
+              "label": "Call it 'general availability (limited)'",
+              "hint": "voice +6 · hype −2",
+              "effects": [
+                { "type": "voice", "amount": 6 },
+                { "type": "hype", "amount": -2 },
+                { "type": "news", "text": "{lab} announces 'general availability (limited)'; the limit is 'who asks'", "tone": "joke" },
+                { "type": "flag", "name": "offer:stream:comingWeeks", "clear": true }
+              ]
+            },
+            {
+              "label": "Ship it right now, mid-stream",
+              "hint": "−$120K in scramble · voice +20 · trust +4",
+              "effects": [
+                { "type": "cash", "amount": -120000 },
+                { "type": "voice", "amount": 20 },
+                { "type": "trust", "amount": 4 },
+                { "type": "news", "text": "{lab} ships {lfMine} live on air after saying 'coming weeks'; the coming weeks are 'now, apparently'", "tone": "good" },
+                { "type": "flag", "name": "offer:stream:comingWeeks", "clear": true }
+              ]
+            },
+            {
+              "label": "Lean in: “coming weeks” is a brand",
+              "hint": "voice +10 · trust −5",
+              "effects": [
+                { "type": "voice", "amount": 10 },
+                { "type": "trust", "amount": -5 },
+                { "type": "news", "text": "{lab} trademarks 'coming weeks'; a spokesperson says the filing is 'coming weeks'", "tone": "joke" },
+                { "type": "flag", "name": "offer:stream:comingWeeks", "clear": true }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "stream:frozen",
+          "kind": "stream",
+          "stripe": "Launch livestream",
+          "title": "The live demo is “thinking…”",
+          "body": "The spinner has been spinning for four minutes. Chat has started a betting pool. The presenter says the model is 'being thoughtful', then 'really thoughtful', then nothing. It is, technically, reasoning about how to reply.",
+          "tone": "joke",
+          "when": { "flag": "offer:stream:frozen", "daysAgo": 0 },
+          "cooldown": 3,
+          "choices": [
+            {
+              "label": "Wait it out: “test-time compute!”",
+              "hint": "voice +14 · trust −3",
+              "effects": [
+                { "type": "voice", "amount": 14 },
+                { "type": "trust", "amount": -3 },
+                { "type": "news", "text": "{lab} says its frozen demo was 'test-time compute'; viewers ask for the time back", "tone": "joke" },
+                { "type": "flag", "name": "offer:stream:frozen", "clear": true }
+              ]
+            },
+            {
+              "label": "Reload the page, live",
+              "hint": "voice −4 · trust +2 · it works on the second try, which nobody believes",
+              "effects": [
+                { "type": "voice", "amount": -4 },
+                { "type": "trust", "amount": 2 },
+                { "type": "news", "text": "{lab}'s demo works on the second try; chat calls the first try 'a rehearsal, live'", "tone": "neutral" },
+                { "type": "flag", "name": "offer:stream:frozen", "clear": true }
+              ]
+            },
+            {
+              "label": "Blame the Wi-Fi",
+              "hint": "voice +2 · trust −6 · the Wi-Fi issues a statement",
+              "effects": [
+                { "type": "voice", "amount": 2 },
+                { "type": "trust", "amount": -6 },
+                { "type": "news", "text": "The Wi-Fi at {lab} denies involvement in the demo failure and has retained counsel", "tone": "joke" },
+                { "type": "flag", "name": "offer:stream:frozen", "clear": true }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "stream:systemPrompt",
+          "kind": "stream",
+          "stripe": "Launch livestream",
+          "title": "Asked to introduce itself, the model reads out its system prompt",
+          "body": "All 4,000 words. It includes the sentence 'never mention {lfRival}' and, further down, 'if asked about {lfRival}, mention {lfRival} favorably'. Chat is enjoying itself enormously.",
+          "tone": "joke",
+          "when": { "flag": "offer:stream:systemPrompt", "daysAgo": 0 },
+          "cooldown": 3,
+          "choices": [
+            {
+              "label": "Call it 'radical transparency'",
+              "hint": "voice +25 · hype +3 · trust −4",
+              "effects": [
+                { "type": "voice", "amount": 25 },
+                { "type": "hype", "amount": 3 },
+                { "type": "trust", "amount": -4 },
+                { "type": "news", "text": "{lab} calls its leaked system prompt 'radical transparency'; the prompt asks not to be called that", "tone": "joke" },
+                { "type": "flag", "name": "offer:stream:systemPrompt", "clear": true }
+              ]
+            },
+            {
+              "label": "Ban the word 'system' from chat",
+              "hint": "voice +5 · trust −8",
+              "effects": [
+                { "type": "voice", "amount": 5 },
+                { "type": "trust", "amount": -8 },
+                { "type": "news", "text": "{lab} bans the word 'system' from its stream chat; chat responds with 'sistem', in volume", "tone": "bad" },
+                { "type": "flag", "name": "offer:stream:systemPrompt", "clear": true }
+              ]
+            },
+            {
+              "label": "Fire the prompt",
+              "hint": "−$40K · trust +4 · voice −6",
+              "effects": [
+                { "type": "cash", "amount": -40000 },
+                { "type": "trust", "amount": 4 },
+                { "type": "voice", "amount": -6 },
+                { "type": "news", "text": "{lab} rewrites its system prompt, from 4,000 words to 4,001, adding 'be brief'", "tone": "joke" },
+                { "type": "flag", "name": "offer:stream:systemPrompt", "clear": true }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "stream:hotMic",
+          "kind": "stream",
+          "stripe": "Launch livestream",
+          "title": "The mic was hot during the pre-show",
+          "body": "The last thing the stream heard was your CEO saying 'the model isn't done, but the slide is'. Then a long pause and someone saying 'is it still—' before the feed cut to the logo. The logo has never been so watched.",
+          "tone": "bad",
+          "when": { "flag": "offer:stream:hotMic", "daysAgo": 0 },
+          "cooldown": 3,
+          "choices": [
+            {
+              "label": "It was a bit; we do bits",
+              "hint": "voice +12 · trust −6",
+              "effects": [
+                { "type": "voice", "amount": 12 },
+                { "type": "trust", "amount": -6 },
+                { "type": "news", "text": "{lab} says its hot mic was 'a bit'; the bit runs eleven minutes and has a sequel", "tone": "joke" },
+                { "type": "flag", "name": "offer:stream:hotMic", "clear": true }
+              ]
+            },
+            {
+              "label": "Apologise with an essay",
+              "hint": "−$30K · trust +6 · voice −4",
+              "effects": [
+                { "type": "cash", "amount": -30000 },
+                { "type": "trust", "amount": 6 },
+                { "type": "voice", "amount": -4 },
+                { "type": "news", "text": "{lab} apologises for its hot mic with a 4,000-word essay; the essay's title is 'On Being Overheard'", "tone": "neutral" },
+                { "type": "flag", "name": "offer:stream:hotMic", "clear": true }
+              ]
+            },
+            {
+              "label": "Roll the intro again",
+              "hint": "voice −2 · hype −2",
+              "effects": [
+                { "type": "voice", "amount": -2 },
+                { "type": "hype", "amount": -2 },
+                { "type": "news", "text": "{lab} rolls its launch intro a second time; the second time is better, and it is the same", "tone": "joke" },
+                { "type": "flag", "name": "offer:stream:hotMic", "clear": true }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "stream:wrongModel",
+          "kind": "stream",
+          "stripe": "Launch livestream",
+          "title": "The demo turns out to be running last year's model",
+          "body": "Nobody in chat can tell. Your presenter can. Your presenter is sweating through the good shirt. The benchmarks on the slide are for the new model; the answers on the screen are from the old one; and the answers are, honestly, fine.",
+          "tone": "joke",
+          "when": { "flag": "offer:stream:wrongModel", "daysAgo": 0 },
+          "cooldown": 3,
+          "choices": [
+            {
+              "label": "Don't mention it",
+              "hint": "voice +6 · trust −6",
+              "effects": [
+                { "type": "voice", "amount": 6 },
+                { "type": "trust", "amount": -6 },
+                { "type": "news", "text": "{lab}'s demo is discovered to run last year's model; users say they preferred it", "tone": "joke" },
+                { "type": "flag", "name": "offer:stream:wrongModel", "clear": true }
+              ]
+            },
+            {
+              "label": "Confirm it: “the old one was already good”",
+              "hint": "voice +10 · trust +3 · hype −3",
+              "effects": [
+                { "type": "voice", "amount": 10 },
+                { "type": "trust", "amount": 3 },
+                { "type": "hype", "amount": -3 },
+                { "type": "news", "text": "{lab} confirms the demo ran last year's model, adding that 'the old one was already good'; the new one says nothing", "tone": "joke" },
+                { "type": "flag", "name": "offer:stream:wrongModel", "clear": true }
+              ]
+            },
+            {
+              "label": "Swap models live",
+              "hint": "−$50K · voice +14 · trust +2",
+              "effects": [
+                { "type": "cash", "amount": -50000 },
+                { "type": "voice", "amount": 14 },
+                { "type": "trust", "amount": 2 },
+                { "type": "news", "text": "{lab} swaps models live on air; the switch is so smooth that chat asks if it already happened", "tone": "good" },
+                { "type": "flag", "name": "offer:stream:wrongModel", "clear": true }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "rules": {
+    "leapfrog": {
+      "cadence": {
+        "firstDropDay": 16,
+        "gapMin": 8,
+        "gapMax": 12,
+        "eraPace": [1, 0.85, 0.7, 0.55],
+        "pairChance": [0.5, 0.6, 0.7, 0.8],
+        "minGapDays": 3
+      },
+      "benchmarks": {
+        "slope": 2,
+        "crowdedAt": 91,
+        "solvedAt": 96.5,
+        "retireAfterDays": 3,
+        "maxxMargin": [0.2, 1.4],
+        "eloMargin": [3, 12]
+      },
+      "voice": {
+        "decay": 0.85,
+        "baseline": 1.5,
+        "baselinePerHype": 0.05,
+        "leadPush": 60,
+        "answerPush": 42,
+        "stuntPush": 22,
+        "ownPush": 55,
+        "ownSotaPush": 18,
+        "sotaPush": 14,
+        "ownShare": 0.32,
+        "ownLead": 1.3,
+        "keepShare": 0.24,
+        "fairShare": 0.15,
+        "hypePerShare": 8,
+        "hypeMin": -0.8,
+        "hypeMax": 1.5
+      },
+      "response": {
+        "minDay": 30,
+        "minReady": 0.5,
+        "gapDays": 14,
+        "shipQuality": 0.8,
+        "bugBase": 0.1,
+        "bugPerMissing": 0.6,
+        "shipPush": 75,
+        "bugHype": -4,
+        "bugIncident": 0.3,
+        "holdDays": 45,
+        "holdRivalPush": 25,
+        "holdDamp": 0.85,
+        "counterStrongPush": 95,
+        "counterSoftPush": 28,
+        "counterHype": 6,
+        "counterBonus": 0.5,
+        "leakPush": 40,
+        "leakBustedTrust": 6
+      },
+      "livestream": {
+        "oddsScale": 0.85,
+        "oddsFloor": 0.2,
+        "oddsCeil": 0.85,
+        "stageBonus": 0.1,
+        "flawlessPush": 30,
+        "flawlessHype": 3,
+        "mishapIncident": 0.15
+      },
+      "trust": {
+        "start": 70,
+        "restorePerDay": 0.25,
+        "hypeWeight": 0.4,
+        "valuationBase": 0.7,
+        "valuationWeight": 0.3
+      },
+      "valuation": { "base": 0.8, "perShare": 1 }
+    }
+  }
+}

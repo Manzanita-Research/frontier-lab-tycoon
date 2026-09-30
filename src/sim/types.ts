@@ -5,6 +5,7 @@ import type { ArcStored } from "./machines/arc";
 import type { EconomyStored } from "./machines/economy";
 import type { GoalsStored } from "./machines/goals";
 import type { MoodStored } from "./machines/mood";
+import type { LeapfrogState } from "./race/leapfrog/state";
 import type { RaceState } from "./race/state";
 import type { StaffStored } from "./machines/staff";
 import type { TrainingStored } from "./machines/training";
@@ -264,6 +265,8 @@ export interface GameState {
   arcs: Record<string, ArcStored>;
   /** The Race (FLT-9): rival machines, the Arena, the era ratchet, the open-weights drop and the auction clock. */
   race: RaceState;
+  /** Release Leapfrog (FLT-27): the release calendar, the benchmark leaderboard, the news cycle, the forced response and the launch livestream. Asleep unless `enabled`. */
+  leapfrog: LeapfrogState;
   /** Slop on each grid tile (FLT-10), 0 (clean) to 3 (ankle-deep). Drifted agents drop it on the path; Janitor Bots mop it up. */
   slop: number[];
   /** The payroll: Janitor Bots, SREs, Comms Reps and Security. */

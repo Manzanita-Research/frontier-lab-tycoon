@@ -3,6 +3,7 @@
 import type { BuildingKind } from "./buildings";
 import type { Tone, WalkerKind } from "../sim/types";
 import { ERAS } from "./eras";
+import { LEAPFROG } from "./leapfrog";
 
 /** What has to be true for an event to fire. `all` combines conditions. */
 export type Condition =
@@ -26,7 +27,14 @@ export type Effect =
   /** Free scenery next to the gate. */
   | { type: "place"; kind: BuildingKind; near: "gate" }
   /** One of the Race's moves (sim/race/actions.ts): a bid, a round, a price cut. */
-  | { type: "race"; action: RaceAction };
+  | { type: "race"; action: RaceAction }
+  /** Release Leapfrog (FLT-27): a push (negative: a slump) to your share of the news cycle, and a nudge to trust. */
+  | { type: "voice"; amount: number }
+  | { type: "trust"; amount: number }
+  /** The forced-response card's three answers (sim/race/leapfrog/actions.ts). */
+  | { type: "leapfrog"; action: LeapfrogAction };
+
+export type LeapfrogAction = "shipNow" | "hold" | "leak";
 
 export type RaceAction = "cutPrices" | "openRelease" | "safetyConcerns" | "bidLow" | "bidMid" | "bidAll" | "raise" | "raiseCircular";
 
@@ -47,8 +55,8 @@ export interface EventDef {
   cooldown?: number;
   /** One to three. */
   choices: EventChoice[];
-  /** Presentation: a full-screen era title card, or the auction room. Anything else is the plain card. */
-  kind?: "era" | "auction";
+  /** Presentation: a full-screen era title card, the auction room, or Leapfrog's forced response and launch livestream. Anything else is the plain card. */
+  kind?: "era" | "auction" | "response" | "stream";
   /** The stripe text at the top of the card, when it isn't the tone's ("Breaking", "Developing", ...). */
   stripe?: string;
 }
@@ -285,5 +293,7 @@ const RACE_EVENTS: EventDef[] = [
 ];
 
 EVENTS.push(...RACE_EVENTS);
+// Release Leapfrog's cards live in its pack (mods/base-leapfrog); they only ever open once its systems set their flags.
+EVENTS.push(...LEAPFROG.events);
 
 export const eventById = (id: string): EventDef | undefined => EVENTS.find((e) => e.id === id);
