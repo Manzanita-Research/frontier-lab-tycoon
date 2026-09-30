@@ -12,7 +12,10 @@ import "./playable.css";
 import "./disasters.css";
 import "./circus.css";
 import "./drama.css";
+import "./audit.css";
 import { Arena } from "./slots/Arena";
+import { AuditPin } from "./slots/AuditPin";
+import { ReportCard } from "./slots/ReportCard";
 import { Benchmarks } from "./slots/Benchmarks";
 import { Assistant } from "./slots/Assistant";
 import { BuildBar } from "./slots/BuildBar";
@@ -59,5 +62,5 @@ import { Layout } from "./Layout";
 export const baseSlots: SlotComponents = {
   Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, Bubble, ThoughtsPanel, Ticker, Toast, Assistant,
   EventCard, Confirm, Coach, UnlockCard, HowToPlay, Arena, Benchmarks, Voice, Livestream, Hearing, LeakedChat, Drama, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, NewsControls,
-  NewsArrival, NewsRoom, Mixer, ModManager, Papers, PaperMoment, CrumbWiki, DisasterMenu, DisasterAlert,
+  NewsArrival, NewsRoom, Mixer, ModManager, Papers, PaperMoment, CrumbWiki, DisasterMenu, DisasterAlert, ReportCard, AuditPin,
 };

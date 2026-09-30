@@ -181,5 +181,7 @@
   "disasters.trust": "Public trust",
   "disasters.heat": "Regulator heat",
   "disasters.alert": "Disaster",
-  "disasters.more": "Disasters…"
+  "disasters.more": "Disasters…",
+  "audit.who": "Evals Without Borders",
+  "report.overall": "Overall"
 }

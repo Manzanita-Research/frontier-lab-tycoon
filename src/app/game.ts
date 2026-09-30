@@ -12,6 +12,7 @@ import { canPlace } from "../sim/commands";
 import { TICKS_PER_DAY } from "../sim/constants";
 import { withDefs } from "../sim/defs";
 import { tick } from "../sim/tick";
+import { isAuditMoment, stageAudit } from "../sim/auditors/demo";
 import { createMidgameScenario, MIDGAME_CAMERA, midgameOpeningNews, midgameOpeningThoughts } from "../sim/scenarios/midgame";
 import type { Tone } from "../sim/types";
 import { framesBrowser } from "./frames";
@@ -32,6 +33,8 @@ if (midgame && mods.run) sim.world.mods = mods.run;
 if (midgame) {
   sim.newsStartId = midgameOpeningNews(sim.world)[0]!.id;
   sim.openingThoughts = { tick: sim.world.tick, thoughts: midgameOpeningThoughts(sim.world) };
+  // FLT-19: the auditors on the mid-game campus (the busiest one there is).
+  if (isAuditMoment(params.moment)) stageAudit(sim.world, params.moment);
 }
 // A new lab plays on "rare" (the sim itself starts with random disasters off, so tests are unaffected); `?risk=` overrides.
 if (!midgame && !debugParams.risk) setRisk(sim.world, DEFAULT_RISK);

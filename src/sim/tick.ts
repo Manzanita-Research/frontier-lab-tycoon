@@ -1,5 +1,6 @@
 // The fixed-step loop: apply queued commands, move everyone, run the daily systems at midnight.
 import { applyCommands, type Command } from "./commands";
+import { applyAuditorChoices, dailyAuditors, updateAuditors } from "./auditors/driver";
 import { applyCollusionChoices, dailyCollusion, updateCollusion } from "./collusion/driver";
 import { applyHearingChoices, dailyHearing } from "./hearing/driver";
 import { applyYachtChoices, dailyYacht } from "./yacht/driver";
@@ -14,6 +15,7 @@ import { dailyCrowd } from "./crowd";
 import { dailyEconomy } from "./economy";
 import { dailyEvents, openEventOf } from "./events";
 import { dailyGoals } from "./goals";
+import { updateGroups } from "./groups";
 import { dailyNews } from "./news";
 import { dailyPapers } from "./race/papers/driver";
 import { dailyLeapfrog } from "./race/leapfrog/driver";
@@ -52,6 +54,7 @@ function step(state: GameState, commands: readonly Command[]) {
   if (systemUnlocked(state, "collusion")) applyCollusionChoices(state);
   applyCircusChoices(state);
   applyPackChoices(state);
+  if (systemUnlocked(state, "auditors")) applyAuditorChoices(state);
   if (pendingConfirmOf(state) || openEventOf(state) || state.goals.value === "lost") {
     state.rngState = rng.state();
     return;
@@ -60,6 +63,8 @@ function step(state: GameState, commands: readonly Command[]) {
   updateWalkers(state, rng);
   if (systemUnlocked(state, "protests")) updateProtesters(state, rng);
   updateStaff(state, rng);
+  updateGroups(state);
+  if (systemUnlocked(state, "auditors")) updateAuditors(state);
   if (systemUnlocked(state, "collusion")) updateCollusion(state);
   if (systemUnlocked(state, "disasters")) updateDisasters(state);
   updateMeetings(state);
@@ -89,6 +94,7 @@ function step(state: GameState, commands: readonly Command[]) {
     dailyThoughts(state, rng);
     dailyGoals(state, rng);
     if (defs().arcs.length > 0) dailyModArcs(state, rng);
+    if (systemUnlocked(state, "auditors")) dailyAuditors(state);
     if (systemUnlocked(state, "events")) dailyEvents(state);
     updateProgression(state);
     updateTutorial(state);
@@ -111,6 +117,7 @@ function now(state: GameState, commands: readonly Command[]) {
   if (systemUnlocked(state, "collusion")) applyCollusionChoices(state);
   applyCircusChoices(state);
   applyPackChoices(state);
+  if (systemUnlocked(state, "auditors")) applyAuditorChoices(state);
   updateCoach(state);
   state.rngState = rng.state();
 }

@@ -19,6 +19,7 @@ import { breakBuilding } from "./breakdowns";
 import { placeBuilding } from "./commands";
 import { dailyEvents } from "./events";
 import { fillTemplate } from "./format";
+import { groupKind, sendGroupsHome, spawnGroup, visitorCount } from "./groups";
 import { step } from "./machines/run";
 import { addNews, addToast, templateVars } from "./news";
 import { clampDiscourse } from "./protest";
@@ -144,6 +145,8 @@ export const STATS: Record<string, (state: GameState, run: DisasterRun | null) =
   /** SREs on their way to, or working on, a broken building. */
   sreAttending: (s) => staffOf(s, "sre").filter((o) => (o.machine.value === "going" || o.machine.value === "working") && s.buildings.some((b) => b.id === o.task && b.broken)).length,
   trust: (s) => s.disasters.trust,
+  /** Members of visiting groups on campus (FLT-19). */
+  visitors: (s) => visitorCount(s),
   heat: (s) => s.disasters.heat,
   /** Disasters begun, all time. */
   disasters: (s) => s.disasters.started,
@@ -592,6 +595,30 @@ export const VERBS: Record<string, VerbDef> = {
         w.energy = Math.max(0, Math.min(1, w.energy + a));
         w.focus = Math.max(0, Math.min(1, w.focus + a));
       }
+    },
+  },
+  "visitors.arrive": {
+    doc: "A visiting group of a kind a pack registered (`content.groups`) comes in through the gate and tours the campus. Owned by the calling machine.",
+    spec: { kind: "string" },
+    run: (env, p) => {
+      const kind = groupKind(p.kind as string);
+      if (kind) spawnGroup(env.state, kind, ownerOf(env), env.rng);
+    },
+  },
+  "visitors.leave": { doc: "The calling machine's visiting groups cut the tour short and head for the gate.", spec: {}, run: (env) => sendGroupsHome(env.state, ownerOf(env)) },
+  "walkers.disguise": {
+    doc: "Draw every walker of `kind` as `as` (the renderer knows `box`: a cardboard box). Presentation only; the sim is unchanged.",
+    spec: { kind: "string", as: "string" },
+    run: (env, p) => void ((env.state.disguises ??= {})[p.kind as string] = p.as as string),
+  },
+  "walkers.reveal": {
+    doc: "Undo `walkers.disguise` for `kind`.",
+    spec: { kind: "string" },
+    run: (env, p) => {
+      const d = env.state.disguises;
+      if (!d) return;
+      delete d[p.kind as string];
+      if (Object.keys(d).length === 0) delete env.state.disguises;
     },
   },
   "flag.set": { doc: "Set a flag to today's day number.", spec: { name: "string" }, run: (env, p) => void (env.state.flags[p.name as string] = env.state.day) },

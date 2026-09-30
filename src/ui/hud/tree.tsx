@@ -50,19 +50,20 @@ export function Docked({ vm, actions }: { vm: HudVM; actions: HudActions }) {
 }
 
 /** A card opens in the slot its kind asks for: the livestream, the witness table, the leaked chat, or the plain card. */
-function EventModal({ event, actions, slots: { EventCard, Livestream, Hearing, LeakedChat, Drama } }: { event: EventVM; actions: HudActions; slots: Pick<SlotComponents, "EventCard" | "Livestream" | "Hearing" | "LeakedChat" | "Drama"> }) {
+function EventModal({ event, actions, slots: { EventCard, Livestream, Hearing, LeakedChat, Drama, ReportCard } }: { event: EventVM; actions: HudActions; slots: Pick<SlotComponents, "EventCard" | "Livestream" | "Hearing" | "LeakedChat" | "Drama" | "ReportCard"> }) {
   if (event.stream) return <Livestream event={event} stream={event.stream} actions={actions} />;
   if (event.hearing) return <Hearing event={event} hearing={event.hearing} actions={actions} />;
   if (event.leak) return <LeakedChat event={event} leak={event.leak} actions={actions} />;
   if (event.drama) return <Drama event={event} drama={event.drama} actions={actions} />;
+  if (event.report) return <ReportCard event={event} report={event.report} actions={actions} />;
   return <EventCard event={event} actions={actions} />;
 }
 
 export function Modals({ vm, actions }: { vm: HudVM; actions: HudActions }) {
-  const { EventCard, Livestream, Hearing, LeakedChat, Drama, Confirm, UnlockCard, HowToPlay, EraCard, Outcome, NewsRoom, Mixer, ModManager, SkinPicker, PaperMoment, CrumbWiki, DisasterMenu } = useSkin().slots;
+  const { EventCard, Livestream, Hearing, LeakedChat, Drama, ReportCard, Confirm, UnlockCard, HowToPlay, EraCard, Outcome, NewsRoom, Mixer, ModManager, SkinPicker, PaperMoment, CrumbWiki, DisasterMenu } = useSkin().slots;
   return (
     <>
-      {vm.event && <EventModal event={vm.event} actions={actions} slots={{ EventCard, Livestream, Hearing, LeakedChat, Drama }} />}
+      {vm.event && <EventModal event={vm.event} actions={actions} slots={{ EventCard, Livestream, Hearing, LeakedChat, Drama, ReportCard }} />}
       {vm.confirm && <Confirm confirm={vm.confirm} actions={actions} />}
       {vm.crumbWiki && <CrumbWiki key={vm.crumbWiki.key} wiki={vm.crumbWiki} actions={actions} />}
       {!vm.crumbWiki && vm.paperMoment && <PaperMoment key={vm.paperMoment.key} moment={vm.paperMoment} actions={actions} />}

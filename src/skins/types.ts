@@ -2,7 +2,7 @@
 // nothing else in the game: no `src/sim/**`, no store, no three.
 import type { ComponentType, ReactNode } from "react";
 import type {
-  ArenaVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, DramaVM, EraCardVM, EventVM, HearingVM, HudActions, HudVM, LeakVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
+  ArenaVM, AuditVM, ReportCardVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, DramaVM, EraCardVM, EventVM, HearingVM, HudActions, HudVM, LeakVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
   ModsVM, NewsroomVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StatsVM, ThoughtRowVM, TickerItemVM,
   StaffVM, TeaserVM, ProgressVM, ToastVM, TrainingVM, UnlockCardVM, VisibleVM, HelpVM, PapersVM, PaperMomentVM, CrumbWikiVM, DisastersVM,
 } from "../ui/hud/types";
@@ -52,6 +52,8 @@ export const SLOT_NAMES = [
   "CrumbWiki",
   "DisasterMenu",
   "DisasterAlert",
+  "ReportCard",
+  "AuditPin",
 ] as const;
 export type SlotName = (typeof SLOT_NAMES)[number];
 
@@ -142,6 +144,10 @@ export interface SlotPropsMap {
   DisasterMenu: { disasters: DisastersVM; actions: HudActions };
   /** What is going wrong now (FLT-32): disasters under way, their stage and cleanup, who is pulled off their post. Docked, once `disasters.enabled`; with nothing running it may be the way into the menu (the base's is), or nothing. */
   DisasterAlert: { disasters: DisastersVM; layout: LayoutVM; actions: HudActions };
+  /** Evals Without Borders' report card (FLT-19): opens instead of EventCard for `event.kind === "report"`; answer it with `actions.choose`. */
+  ReportCard: { event: EventVM; report: ReportCardVM; actions: HudActions };
+  /** The sign over the auditors (over the gate during the countdown). The game pins it to them every frame; drawn only while `audit.line` is set. */
+  AuditPin: { audit: AuditVM; actions: HudActions };
 }
 
 export type SlotComponents = { [K in SlotName]: ComponentType<SlotPropsMap[K]> };

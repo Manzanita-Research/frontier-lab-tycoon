@@ -10,6 +10,8 @@ import type { DefectionState } from "./defection/state";
 import type { NeoLabsState } from "./neolabs/state";
 import type { Meeting } from "./meetings";
 import type { PoachingState } from "./poaching/state";
+import type { AuditorsState } from "./auditors/state";
+import type { VisitorGroup } from "./groups";
 import type { NeedKey } from "../content/needs";
 import type { DisastersState } from "./disasters/types";
 import type { ArcStored } from "./machines/arc";
@@ -330,4 +332,10 @@ export interface GameState {
   neoLabs?: NeoLabsState;
   /** A visitor talking to one of your people somewhere visible (sim/meetings.ts, the `people.meet` verb). */
   meetings?: Meeting[];
+  /** FLT-19: visitor groups on campus (auditors today); absent until the first one arrives. */
+  groups?: VisitorGroup[];
+  /** FLT-19: presentation requests by walker kind (`agent: "box"` while the agents hide in cardboard boxes). Never read by sim logic. */
+  disguises?: Record<string, string>;
+  /** FLT-19: the Evals Without Borders pack; absent until enabled. */
+  auditors?: AuditorsState;
 }

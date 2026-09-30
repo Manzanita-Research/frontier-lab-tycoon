@@ -28,3 +28,6 @@ export function nightAmount(hour: number): number {
 
 /** Night is when the thought pool changes its tune (the campus is lit and someone is still shipping). */
 export const isNight = (hour: number) => nightAmount(hour) > 0.6;
+
+/** One hour on the campus clock (the one the player sees): 25 ticks. Visits and dwells that say "hours" mean these. */
+export const TICKS_PER_HOUR = CYCLE_TICKS / 24;

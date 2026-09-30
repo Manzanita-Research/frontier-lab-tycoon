@@ -18,6 +18,8 @@ import { activeSwarm, type SwarmEnding } from "./state";
 import { defs } from "../defs";
 const R = COLLUSION.rules;
 const OWNER = "collusion";
+/** Set by outsiders who find the Swarm (FLT-19's auditors): partly contained early on, exposed once organized. */
+const FOUND_FLAG = "collusion:found";
 const SIGN_HEADLINES = COLLUSION.content.headlines.add.filter((h) => h.trigger !== "inquiryFailed");
 
 /** The pack switch: the ladder flips it when Scrutiny is earned (sim/progression.ts). Baseline init and its RNG do not change. */
@@ -114,7 +116,9 @@ export function dailyCollusion(s: GameState) {
   send(s, rng, { type: "DAY", day: s.day, tick: s.tick, seedRoll: rng.next(), catchRoll: rng.next(),
     agents: Math.max(0, 6 + Math.floor(s.capability / 2) + s.agentBonus), capability: s.capability,
     pressure: Math.max(0, Math.min(1, (s.race.rank - 1) / 6)), reliability, security, arrived,
+    found: s.flags[FOUND_FLAG] !== undefined ? 1 : 0,
   });
+  delete s.flags[FOUND_FLAG];
   if (activeSwarm(s)) {
     if (s.leapfrog.enabled) refreshRecords(s, rng);
     if (!c.classified && c.machine.value !== "seeded") {

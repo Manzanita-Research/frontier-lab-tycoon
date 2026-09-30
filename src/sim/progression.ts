@@ -1,5 +1,6 @@
 import { enableLeapfrog } from "./race/leapfrog/driver";
 import { enablePapers } from "./race/papers/driver";
+import { enableAuditors } from "./auditors/driver";
 import { enableCollusion } from "./collusion/driver";
 import { enableDefection } from "./defection/driver";
 import { enableHearing } from "./hearing/driver";
@@ -37,8 +38,9 @@ const PACKS: readonly { id: SystemId; enable: (s: GameState) => void; off: strin
   { id: "yacht", enable: enableYacht, off: "yachtOff" },
   { id: "defection", enable: enableDefection, off: "defectionOff" },
   { id: "poaching", enable: enablePoaching, off: "poachingOff" },
+  { id: "auditors", enable: enableAuditors, off: "auditorsOff" },
 ];
-/** The flags behind `?leapfrog=off`, `?papers=off`, `?collusion=off`, `?hearing=off`, `?yacht=off`, `?defection=off` and `?poaching=off`. */
+/** The flags behind `?leapfrog=off`, `?papers=off`, `?collusion=off`, `?hearing=off`, `?yacht=off`, `?defection=off`, `?poaching=off` and `?auditors=off`. */
 export const PACK_OFF_FLAGS = PACKS.map((p) => p.off);
 function enablePacks(s: GameState, systems: readonly SystemId[]) {
   for (const pack of PACKS) if (systems.includes(pack.id) && !s.flags[pack.off]) pack.enable(s);

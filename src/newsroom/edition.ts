@@ -53,7 +53,8 @@ const patternsOf = (d = defs()) => (built?.from === d ? built.patterns : (built 
 ] }).patterns);
 export function storyFromNews(n: NewsItem): Story {
   const match = patternsOf().find((p) => p.re.test(n.text));
-  const kind = match?.kind ?? (/breakdown|broke|offline|alarm/i.test(n.text) ? "breakdown" : /era|takeoff|explosion/i.test(n.text) ? "era" : /protest|water discourse/i.test(n.text) ? "protest" : "filler");
+  // Evals Without Borders (FLT-19): their visit, and above all their report card, is the Frontier Times' kind of story.
+  const kind = match?.kind ?? (/Evals Without Borders|^Frontier Times: |^Auditors /.test(n.text) ? "audit" : /breakdown|broke|offline|alarm/i.test(n.text) ? "breakdown" : /era|takeoff|explosion/i.test(n.text) ? "era" : /protest|water discourse/i.test(n.text) ? "protest" : "filler");
   return { id: n.id, day: n.day, text: n.text, kind };
 }
 /** Biggest story first; newer wins ties, then id. Deduplicate before taking four. Never sorts the input. */

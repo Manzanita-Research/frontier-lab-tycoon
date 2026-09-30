@@ -18,6 +18,8 @@ import { collusionView, type CollusionView } from "../sim/collusion/view";
 import { hearingView, type HearingView } from "../sim/hearing/view";
 import { yachtView, type YachtView } from "../sim/yacht/view";
 import { raceView, type RaceView } from "../sim/race/view";
+import { auditView, type AuditView } from "../sim/auditors/view";
+import { memberById } from "../sim/groups";
 import { outcomeOf, releaseGoalText } from "../sim/goals";
 import { estimateLedger } from "../sim/economy";
 import { assistantOf, type AssistantMessage } from "../sim/tutorial";
@@ -120,6 +122,8 @@ export interface Snapshot {
   warnings: string[];
   releaseGoal: string;
   disasters: DisastersSnapshot;
+  /** Evals Without Borders (FLT-19): the countdown, the tour and the last report card. `enabled: false` before Scrutiny. */
+  audit: AuditView;
 }
 
 /** Disasters (FLT-32): the menu, what is under way, who it has pulled off their post, and the two meters it moves. */
@@ -187,7 +191,8 @@ function speakersOf(s: GameState): Record<number, string> {
   if (s.thoughts.length === 0) return out;
   const names = new Map<number, string>();
   for (const w of s.walkers) names.set(w.id, w.name);
-  for (const t of s.thoughts) out[t.walkerId] = names.get(t.walkerId) ?? "";
+  // Visitor groups (the auditors) are not walkers: their names come from the group.
+  for (const t of s.thoughts) out[t.walkerId] = names.get(t.walkerId) ?? memberById(s, t.walkerId)?.member.name ?? "";
   return out;
 }
 
@@ -246,5 +251,6 @@ export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO
     warnings: persistentWarnings(s),
     releaseGoal: releaseGoalText(s),
     disasters: disastersOf(s),
+    audit: auditView(s),
   };
 }

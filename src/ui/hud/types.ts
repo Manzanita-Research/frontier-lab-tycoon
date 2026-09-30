@@ -423,6 +423,64 @@ export interface LeakVM {
   messages: { from: string; name: string; color: string; you: boolean; system: boolean; time: string; text: string }[];
 }
 
+/** One subject on the auditors' report card. */
+export interface ReportGradeVM {
+  id: string;
+  /** "Eval honesty" */
+  label: string;
+  grade: "A" | "B" | "C" | "D" | "F";
+  /** 0 to 100. */
+  score: number;
+  /** The auditors' remark in the margin ("They brought their own evals. We brought ours. Ours were better."). */
+  comment: string;
+}
+
+/** Evals Without Borders' report card (FLT-19): opens instead of EventCard for `event.kind === "report"`. */
+export interface ReportCardVM {
+  /** "Visit 2 · Day 131" */
+  visitText: string;
+  lab: string;
+  grades: ReportGradeVM[];
+  overall: "A" | "B" | "C" | "D" | "F";
+  /** What the lab chose on the warning card ("Tidied up"), or null. */
+  prepText: string | null;
+  /** A stamp across the card: "CAUGHT HIDING", "SWARM FOUND", or null. */
+  stamp: string | null;
+  caught: boolean;
+  swarm: boolean;
+  /** Where they went, in order ("Compute Cluster", "Kombucha Bar", ...). */
+  inspected: string[];
+  /** What it did to you: ["+4 trust", "−3 heat", "+2 hype"]. */
+  moves: { text: string; tone: ToneVM }[];
+  /** The Frontier Times' headline about it. */
+  headline: string;
+}
+
+/** The auditors on campus, for the pin over their heads (and anything else that wants to know). */
+export interface AuditVM {
+  /** Scrutiny is reached and the auditors exist. */
+  enabled: boolean;
+  /** "quiet" | "notice" | "countdown" | "visit" | "report" */
+  stage: string;
+  /** During the countdown: days until they arrive. */
+  daysLeft: number | null;
+  /** Auditors on campus. */
+  visitors: number;
+  /** "walking" | "inspecting" | "evaluating" | "leaving", or null when nobody is here. */
+  phase: string | null;
+  /** The pin's one line: "Inspecting Kombucha Bar", "Running their own evals", "Arriving in 3 days". Null: no pin. */
+  line: string | null;
+  /** 0 to 1 while they stand at a stop, and "60%". */
+  progress: number | null;
+  progressText: string;
+  /** Stops finished of the plan: "2/4". */
+  stopsText: string;
+  /** They are running their own evals right now. */
+  evals: boolean;
+  /** The agents are in cardboard boxes. */
+  boxed: boolean;
+}
+
 export interface EventVM {
   id: string;
   title: string;
@@ -430,8 +488,8 @@ export interface EventVM {
   tone: ToneVM;
   /** The top-stripe text: "Breaking", "Developing", ... */
   stripe: string;
-  /** "response" and "stream" are Release Leapfrog's cards: `response` / `stream` carry their extra data. "hearing" (FLT-21) and "leak" (FLT-24) carry `hearing` / `leak`; "drama" (FLT-26, FLT-20) carries `drama`. */
-  kind: "plain" | "auction" | "response" | "stream" | "hearing" | "leak" | "drama";
+  /** "response" and "stream" are Release Leapfrog's cards: `response` / `stream` carry their extra data. "hearing" (FLT-21) and "leak" (FLT-24) carry `hearing` / `leak`; "drama" (FLT-26, FLT-20) carries `drama`; "report" is the auditors' report card (FLT-19, `report`). */
+  kind: "plain" | "auction" | "response" | "stream" | "hearing" | "leak" | "drama" | "report";
   choices: ChoiceVM[];
   paddles: AuctionPaddleVM[];
   response: ResponseVM | null;
@@ -444,6 +502,8 @@ export interface EventVM {
   leak?: LeakVM | null;
   /** The document a drama card is about: the resignation letter, the recruiter's email, the manifesto. */
   drama?: DramaVM | null;
+  /** The auditors' report card (FLT-19), on its `report` card. */
+  report?: ReportCardVM | null;
 }
 
 /** A drama card's document (Defection, the Poaching War). Every string is filled in; `lines` are paragraphs. */
@@ -1039,6 +1099,8 @@ export interface HudVM {
   crumbWiki: CrumbWikiVM | null;
   eraCard: EraCardVM | null;
   outcome: OutcomeVM | null;
+  /** Evals Without Borders: the countdown and the tour. */
+  audit: AuditVM;
   newsroom: NewsroomVM;
   sound: SoundVM;
   photoMode: PhotoVM;

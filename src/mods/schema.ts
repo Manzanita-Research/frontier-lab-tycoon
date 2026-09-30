@@ -75,7 +75,7 @@ export const EventCard = Schema.Struct({
   id, title: text, body: text, tone, when: Condition,
   cooldown: Schema.optionalKey(nonnegative),
   choices: Schema.Array(EventChoice).check(Schema.isBetweenLength(1, 3)),
-  kind: Schema.optionalKey(Schema.Literals(["era", "auction", "response", "stream", "hearing", "leak", "drama"])), stripe: Schema.optionalKey(text),
+  kind: Schema.optionalKey(Schema.Literals(["era", "auction", "response", "stream", "hearing", "leak", "drama", "report"])), stripe: Schema.optionalKey(text),
 });
 export type EventData = typeof EventCard.Type;
 
@@ -131,7 +131,7 @@ export const Progression = Schema.Struct({
   // Any building kind, including a mod's own (validation checks it exists).
   buildings: Schema.Array(text),
   staff: Schema.Array(Schema.Literals(["janitor", "sre", "comms", "security"])),
-  systems: Schema.Array(Schema.Literals(["breakdowns", "slop", "leapfrog", "arena", "rnd", "news", "events", "protests", "disasters", "papers", "collusion"])),
+  systems: Schema.Array(Schema.Literals(["breakdowns", "slop", "leapfrog", "arena", "rnd", "news", "events", "protests", "disasters", "papers", "collusion", "auditors"])),
   panels: Schema.Array(Schema.Literals(["revenue", "vibes", "arena", "rnd", "thoughts", "news", "staff", "events", "papers", "disasters"])),
   goal: Schema.Struct({ text, metric: Schema.Literals(["models", "revenue", "team", "arena"]), target: positive, vibes: Schema.optionalKey(nonnegative) }),
 });

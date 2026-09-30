@@ -314,6 +314,8 @@ If your slot needs copy that has no key, write it into the slot (as Frontier 95 
 | `sound.mute` | Mute sound |
 | `sound.unmute` | Unmute sound |
 | `sound.openMixer` | Open sound mixer |
+| `audit.who` | Evals Without Borders |
+| `report.overall` | Overall |
 | `photo.open` | Photo mode (P) |
 | `photo.title` | Photo mode |
 | `photo.time` | Time of day |
@@ -434,8 +436,9 @@ A slot is a React component. Each gets **its slice of the view-model plus `actio
 | `CrumbWiki` | `{ wiki, actions }` | The agent-collusion reveal (FLT-46): the fan wiki the agents were running, a talk page (`== Heading ==` lines and colon-indented replies), the revision history, the consequences and, for the exposed ending, the scandal front page (`wiki.frontPage`). `actions.closeCrumbWiki(wiki.key)`. Holds time while up. Before the ending nothing names the collusion: the sign card only carries `event.investigation` (draw it with `kit`'s `<Evidence investigation>`, as every shipped skin's `EventCard` does). |
 | `DisasterMenu` | `{ disasters, actions }` | The Disasters menu (FLT-32), SimCity-style: the random-disaster setting (`disasters.risks`, Off / Rare / Normal / Chaos; `actions.setRisk(key)`), the list you can start one from (`disasters.menu`: name, blurb, `tags`, `available` or the `reason` it is not, `active`), and the Trust and Heat meters. Starting one must **ask first** ("Start a GPU Fire?"), with the safe answer as the default; then `actions.triggerDisaster(id)`. `actions.closeDisasters()` shuts it; time is held while it is open. Frontier 95's is a Control Panel applet with radio buttons and a Yes/No box. |
 | `DisasterAlert` | `{ disasters, layout, actions }` | Docked. What is going wrong now: each run in `disasters.running` (`stage` warning / active / response / aftermath, `phaseLabel`, a funny `line`, cleanup `progress`), and `disasters.understaffed` (who has been pulled off their post; `all` means nobody is left, like an unguarded gate). With nothing going on it is a quiet way into the menu (`actions.openDisasters()`). Frontier 95's is a Win95 fatal-error box. Only rendered once `vm.visible.disasters`. |
-
-The **docked** slots (`Layout` receives them pre-rendered) are `Stats`, `Training`, `Objectives`, `Inspector`, `BuildBar`, `Speed`, `Staff`, `ThoughtsPanel`, `Ticker`, `Toasts` (one `Toast` at a time: the newest toast, or the standing hint when nobody is talking), `Assistant`, `Arena`, `Benchmarks`, `Voice`, `Papers`, `NewsControls`, `NewsArrival`, `PhotoButton` and `DisasterAlert`. The modal slots (`EventCard`, `Livestream`, `Hearing`, `LeakedChat`, `Drama`, `EraCard`, `Outcome`, `NewsRoom`, `Mixer`, `ModManager`, `SkinPicker`, `PaperMoment`, `CrumbWiki`, `DisasterMenu`) and `PhotoOverlay` are rendered by the game when there is something to show.
+| `ReportCard` | `{ event, report, actions }` | Evals Without Borders' report card (FLT-19). Opens instead of `EventCard` when `event.kind === "report"`: five subjects graded A to F with a remark each, the `overall` grade, a `stamp` ("CAUGHT HIDING", "SWARM FOUND") or null, what it did to trust, heat and hype (`moves`), and the Frontier Times' `headline`. Answer with `actions.choose`. |
+| `AuditPin` | `{ audit, actions }` | The sign over the auditors' heads (over the gate during the countdown): `audit.line` ("Inspecting the Kombucha Bar"), `stopsText` ("2/4") and a `progress` bar while they stand at a stop (`evals` while they run their own). The game pins it every frame and only draws it while `audit.line` is set. Keep it small: it sits over the 3D scene. |
+The **docked** slots (`Layout` receives them pre-rendered) are `Stats`, `Training`, `Objectives`, `Inspector`, `BuildBar`, `Speed`, `Staff`, `ThoughtsPanel`, `Ticker`, `Toasts` (one `Toast` at a time: the newest toast, or the standing hint when nobody is talking), `Assistant`, `Arena`, `Benchmarks`, `Voice`, `Papers`, `NewsControls`, `NewsArrival`, `PhotoButton` and `DisasterAlert`. `AuditPin` is pinned into the scene like `Bubble`. The modal slots (`EventCard`, `Livestream`, `Hearing`, `LeakedChat`, `Drama`, `ReportCard`, `EraCard`, `Outcome`, `NewsRoom`, `Mixer`, `ModManager`, `SkinPicker`, `PaperMoment`, `CrumbWiki`, `DisasterMenu`) and `PhotoOverlay` are rendered by the game when there is something to show.
 
 ## Writing slots.tsx
 
@@ -501,6 +504,7 @@ interface HudVM {
   eraCard: EraCardVM | null;
   thoughtsPanel; arena; outcome;
   leapfrog;                              // Release Leapfrog: the benchmark leaderboard (columns, rows, cells) and the share-of-voice meter; `enabled: false` when the pack is off
+  audit;                                 // Evals Without Borders: the stage, the countdown, what the group is doing (the AuditPin's line and progress)
   newsroom; sound; photoMode; skins;     // the news room (archive, paper, chat), mixer, photo mode, skin picker
   layout: { width, height, phone /* ≤480 */, compact /* ≤640 */, tall /* ≥800 */ };
 }

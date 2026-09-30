@@ -15,6 +15,7 @@ import { Decor, Ground, Paths } from "./Ground";
 import { Fence } from "./Fence";
 import { Slop } from "./Slop";
 import { StaffCrew } from "./StaffCrew";
+import { VisitorGroups } from "./VisitorGroups";
 import { OverlayProjector } from "./overlay";
 import { CoachSuggestion } from "./CoachSuggestion";
 import { Placement } from "./Placement";
@@ -61,6 +62,7 @@ export function Scene() {
       <Buildings />
       <Walkers />
       <StaffCrew />
+      <VisitorGroups />
       <ParticleLayer />
       <OverlayProjector />
       <Placement />

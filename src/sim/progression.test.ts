@@ -31,12 +31,14 @@ describe("the playable ladder", () => {
     s.vibes.value = 499; updateProgression(s); expect(progressOf(s).level).toBe(3);
     s.vibes.value = 500; updateProgression(s); expect(progressOf(s).level).toBe(4);
     expect(s.leapfrog.enabled).toBe(true);
+    expect(s.auditors).toBeUndefined();
     s.race.rank = 6; updateProgression(s); expect(progressOf(s).level).toBe(4);
     s.race.rank = 5; updateProgression(s); expect(progressOf(s).level).toBe(5);
     expect(canHire(s, "security").ok).toBe(true); expect(s.papers?.enabled).toBe(true);
     // Collusion is on the Scrutiny rung, so earning it wakes the pack (it used to stay asleep in normal play).
     expect(s.collusion?.enabled).toBe(true);
     expect(s.hearing?.enabled).toBe(true); expect(s.yacht?.enabled).toBe(true);
+    expect(s.auditors?.enabled).toBe(true);
     s.cash = 350_000; expect(canPlace(s, "security", 12, 19).ok).toBe(true);
     expect(s.unlockCards?.map((c) => c.id)).toEqual(["business", "team", "race", "scrutiny"]);
     applyNow(s, [{ type: "dismissUnlock" }]); expect(makeSnapshot(s).unlockCard?.id).toBe("team");

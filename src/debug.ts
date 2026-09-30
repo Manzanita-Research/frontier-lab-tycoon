@@ -38,6 +38,8 @@ export interface DebugParams {
   /** Defection (FLT-26) and the Poaching War (FLT-20) wake at Level 5 (or at once in a debug world, which has no ladder) unless `?defection=off` / `?poaching=off`. */
   defection: boolean;
   poaching: boolean;
+  /** Evals Without Borders (FLT-19) wakes at Level 5 and visits from Era 2, unless ?auditors=off. */
+  auditors: boolean;
   /**
    * Preview a rung of the Playable v1 ladder without playing to it (screenshots, skins): `?debug=1&ladder=1` is level 1,
    * `&coach=0` puts the first of the seven coach lines up, `&unlock` the "New!" card. Only with `debug`.
@@ -72,6 +74,7 @@ export function readDebugParams(search = typeof window === "undefined" ? "" : wi
     yacht: q.get("yacht") !== "off",
     defection: q.get("defection") !== "off",
     poaching: q.get("poaching") !== "off",
+    auditors: q.get("auditors") !== "off",
     ladder: q.has("debug") && num("ladder") !== null && num("ladder")! >= 1 && num("ladder")! <= 5 ? { level: Math.round(num("ladder")!) as 1 | 2 | 3 | 4 | 5, coach: num("coach"), unlock: q.has("unlock") } : null,
   };
 }
