@@ -241,6 +241,14 @@
       "memo-countdown-almanac",
       "memo-race",
       "memo-slow-phone"
+    ],
+    "flt-55": [
+      "gate",
+      "gate-mod",
+      "gate-phone",
+      "gate-mod-phone",
+      "gate-mod-offer",
+      "gate-mod-skin"
     ]
   },
   "scenes": {
@@ -3127,6 +3135,146 @@
       "steps": [
         {
           "wait": 800
+        }
+      ]
+    },
+    "gate": {
+      "title": "FLT-55: the gate with protesters, no mod (the base game: must be unchanged)",
+      "query": {
+        "discourse": 32,
+        "focus": "12.5,20",
+        "zoom": 80,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "skipTutorial"
+            }
+          }
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "gate-mod": {
+      "title": "FLT-55: the same gate with ?mod= golden retrievers (main applies the mod's content only; the branch draws its looks)",
+      "query": {
+        "discourse": 32,
+        "focus": "12.5,20",
+        "zoom": 80,
+        "skin": "frontier-95",
+        "mod": "/mods/examples/golden-retriever-protest/mod.json"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "skipTutorial"
+            }
+          }
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "gate-phone": {
+      "title": "FLT-55: the gate on a phone, no mod",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "discourse": 32,
+        "focus": "12.5,20",
+        "zoom": 70,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "skipTutorial"
+            }
+          }
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "gate-mod-phone": {
+      "title": "FLT-55: the gate on a phone with ?mod= golden retrievers",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "discourse": 32,
+        "focus": "12.5,20",
+        "zoom": 70,
+        "skin": "frontier-95",
+        "mod": "/mods/examples/golden-retriever-protest/mod.json"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "skipTutorial"
+            }
+          }
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "gate-mod-offer": {
+      "title": "FLT-55: a mod that asks for its skin: the Found New Skin box (no ?skin=)",
+      "query": {
+        "discourse": 32,
+        "focus": "12.5,20",
+        "zoom": 80,
+        "skin": null,
+        "mod": "/mods/examples/golden-retriever-protest/mod.json"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "skipTutorial"
+            }
+          }
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "gate-mod-skin": {
+      "title": "FLT-55: ?skin=good-boy-95, the mod's skin (Fetch, Sit/Walkies/Zoomies, Bark Bark News)",
+      "query": {
+        "discourse": 32,
+        "focus": "12.5,20",
+        "zoom": 80,
+        "skin": "good-boy-95",
+        "mod": "/mods/examples/golden-retriever-protest/mod.json"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "skipTutorial"
+            }
+          }
+        },
+        {
+          "wait": 600
         }
       ]
     }

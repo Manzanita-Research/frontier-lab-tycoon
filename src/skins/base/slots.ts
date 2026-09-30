@@ -34,6 +34,7 @@ import { GroupChat } from "./slots/GroupChat";
 import { Inspector } from "./slots/Inspector";
 import { Mixer } from "./slots/Mixer";
 import { ModManager } from "./slots/ModManager";
+import { ModSkinOffer } from "./slots/ModSkinOffer";
 import { Drama } from "./slots/Drama";
 import { DramaButton } from "./slots/DramaButton";
 import { NewsArrival } from "./slots/NewsArrival";
@@ -73,5 +74,5 @@ import { Layout } from "./Layout";
 export const baseSlots: SlotComponents = {
   Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, Bubble, ThoughtsPanel, Ticker, Toast, Assistant,
   EventCard, Confirm, Coach, UnlockCard, HowToPlay, Arena, Benchmarks, Voice, Factions, Livestream, Hearing, LeakedChat, DramaCard, Bill, PromiseTracker, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, Ending, Takeover, NewsControls,
-  NewsArrival, NewsRoom, Mixer, ModManager, Papers, PaperMoment, CrumbWiki, DisasterMenu, DisasterAlert, ReportCard, AuditPin, DramaButton, Drama, Memo, Challenge,
+  NewsArrival, NewsRoom, Mixer, ModManager, ModSkinOffer, Papers, PaperMoment, CrumbWiki, DisasterMenu, DisasterAlert, ReportCard, AuditPin, DramaButton, Drama, Memo, Challenge,
 };

@@ -16,6 +16,18 @@ export function cueNotes(cue: Cue, variation = 0): Note[] {
     case "breakdown": return [0, 0.22, 0.44].map((at) => note(740, 0.16, "square", 0.075, at, 440));
   }
 }
+/**
+ * Named moments a mod can give a sound through the Audio service (FLT-55). The base game plays the chant (three
+ * syllables and a foot-stomp, every 0.7 s while more than ten protesters stand at the gate); the others are silent
+ * until a mod sets them: `protest.grow` when the crowd at the gate grows, `ui.click` on a HUD button.
+ */
+export const HOOKS = ["protest.chant", "protest.grow", "ui.click"] as const;
+export type Hook = (typeof HOOKS)[number];
+export function hookNotes(hook: Hook): Note[] {
+  if (hook !== "protest.chant") return [];
+  return [...[0, 1, 2].map((i): Note => ({ at: i * 0.16, hz: i === 1 ? 185 : 150, endHz: 120, duration: 0.12, gain: 0.045, wave: "sawtooth" })),
+    { at: 0.5, hz: 80, endHz: 40, duration: 0.14, gain: 0.09, wave: "sine" }];
+}
 export function eraScore(era: string): { root: number; bpm: number } {
   // Works with both named eras and future content ids, no dependency on a shared sim type.
   let hash = 0;

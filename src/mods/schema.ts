@@ -158,18 +158,77 @@ export const ContentPatch = Schema.Struct({
   benchmarks: Schema.optionalKey(patch(BenchmarkSchema)), mishaps: Schema.optionalKey(patch(MishapSchema)),
   factions: Schema.optionalKey(patch(FactionSchema)),
 });
+/** A bundled font: an asset id (the family is the id), or FLT-14's `{ family, src }` with `src` an asset id. */
+export const SkinFont = Schema.Union([text, Schema.Struct({
+  family: text.check(Schema.isPattern(/^[\w -]+$/)), src: text,
+  weight: Schema.optionalKey(Schema.Union([number, text.check(Schema.isPattern(/^[\w -]+$/))])), style: Schema.optionalKey(Schema.Literals(["normal", "italic"])),
+})]);
 export const SkinData = Schema.Struct({
   id: ModId, name: text, tokens: Schema.optionalKey(record), strings: Schema.optionalKey(record),
-  css: Schema.optionalKey(Schema.String), fonts: Schema.optionalKey(strings),
+  css: Schema.optionalKey(Schema.String), fonts: Schema.optionalKey(Schema.Array(SkinFont)),
   assets: Schema.optionalKey(record), activate: Schema.optionalKey(Schema.Boolean),
+  /** FLT-55: a built-in skin to start from (its slots, CSS and tokens), e.g. "frontier-95". Default: the base. */
+  extends: Schema.optionalKey(ModId),
+  author: Schema.optionalKey(Schema.String), description: Schema.optionalKey(Schema.String),
+  /** An image asset id the Display picker shows. */
+  preview: Schema.optionalKey(text),
 });
 export type SkinData = typeof SkinData.Type;
 export const Note = Schema.Struct({ at: nonnegative, hz: positive, endHz: Schema.optionalKey(positive), duration: positive, gain: fraction, wave: Schema.Literals(["sine", "square", "sawtooth", "triangle", "noise"]) });
+/** A cue name: lower-case words joined by dots or dashes ("protest.grow", "ui.click", "gr-bark"). */
+export const CueName = text.check(Schema.isPattern(/^[a-z][a-z0-9]*(?:[.-][a-z0-9]+)*$/));
+/** A mod's note: audible pitches, and nothing that starts or rings for longer than five seconds (a cue is a moment, not a drone). */
+const hz = number.check(Schema.isBetween({ minimum: 20, maximum: 20000 }));
+const seconds = number.check(Schema.isBetween({ minimum: 0, maximum: 5 }));
+export const CueNote = Schema.Struct({ ...Note.fields, at: seconds, hz, endHz: Schema.optionalKey(hz), duration: seconds.check(Schema.isGreaterThan(0)) });
+export const AudioSection = Schema.Struct({ cues: Schema.optionalKey(Schema.Record(CueName, Schema.Array(CueNote).check(Schema.isBetweenLength(0, 32)))), music: Schema.optionalKey(strings) });
+
+const vec3 = Schema.Tuple([number, number, number]);
+const size3 = Schema.Tuple([positive, positive, positive]);
+/** One primitive of a walker recipe (FLT-55). Units are world tiles at scale 1: a person stands about 1.25 tall. */
+export const LookPart = Schema.Struct({
+  shape: Schema.Literals(["box", "sphere", "capsule", "cone", "cylinder"]),
+  size: size3, at: vec3,
+  /** Degrees about x, y, z, applied to the part before it is placed. */
+  rotate: Schema.optionalKey(vec3),
+  /** Where the part turns for its `motion` (default: its centre, `at`). */
+  pivot: Schema.optionalKey(vec3),
+  /** "#rrggbb", or "coat" for the walker's colour from `coats`. */
+  color: text,
+  /** Darken (below 0) or lighten (above 0) the colour, -1 to 1. */
+  shade: Schema.optionalKey(number.check(Schema.isBetween({ minimum: -1, maximum: 1 }))),
+  /** wag (a tail), nod (a head), flop (an ear), sway, or step / step-alt (legs, in turn, while walking). */
+  motion: Schema.optionalKey(Schema.Literals(["wag", "nod", "flop", "sway", "step", "step-alt"])),
+});
+export type LookPartData = typeof LookPart.Type;
+/** How a walker kind or role looks (FLT-55). Exactly one of `recipe`, `sprite`, `glb` or `tint`. Presentation only. */
+export const Look = Schema.Struct({
+  recipe: Schema.optionalKey(Schema.Array(LookPart).check(Schema.isBetweenLength(1, 16))),
+  sprite: Schema.optionalKey(text),
+  glb: Schema.optionalKey(text),
+  tint: Schema.optionalKey(Schema.Struct({ body: Schema.optionalKey(text), head: Schema.optionalKey(text) })),
+  /** Per-walker colours for `"coat"` parts, and a per-walker tint on a sprite. */
+  coats: Schema.optionalKey(Schema.Array(text).check(Schema.isBetweenLength(1, 16))),
+  /** A sprite's width and height in tiles (default 0.9 x 1.2, about a person); a model is fitted to the height. */
+  size: Schema.optionalKey(Schema.Tuple([positive, positive])),
+  scale: Schema.optionalKey(positive),
+  gait: Schema.optionalKey(Schema.Literals(["walk", "trot", "hop", "float"])),
+  /** Protest placards for this look (protesters only): short lines, 1 to 12 of them. */
+  signs: Schema.optionalKey(Schema.Array(text.check(Schema.isMaxLength(40))).check(Schema.isBetweenLength(1, 12))),
+  /** Placard height in tiles (default: held up just above the top of the look; a small look gets a smaller placard). */
+  signHeight: Schema.optionalKey(positive),
+  /** What the inspector calls one ("Golden Retriever"). */
+  label: Schema.optionalKey(text.check(Schema.isMaxLength(40))),
+});
+export type LookData = typeof Look.Type;
+/** `looks` keys: a walker kind ("protester"), a kind and a role ("visitor:Journalist"), or a faction crowd ("faction:doomers"). */
+export const LookTarget = text.check(Schema.isPattern(/^[a-z][\w-]*(?::[\w '.-]+)?$/));
 export const ModManifest = Schema.Struct({
   apiVersion: Schema.Literal(1), id: ModId, name: text, version: text,
   author: Schema.optionalKey(Schema.String), description: Schema.optionalKey(Schema.String),
   skin: Schema.optionalKey(Schema.NullOr(SkinData)), content: Schema.optionalKey(ContentPatch),
-  assets: Schema.optionalKey(record), audio: Schema.optionalKey(Schema.Struct({ cues: Schema.optionalKey(Schema.Record(text, Schema.Array(Note))), music: Schema.optionalKey(strings) })),
+  assets: Schema.optionalKey(record), audio: Schema.optionalKey(AudioSection),
+  looks: Schema.optionalKey(Schema.Record(LookTarget, Look)),
 });
 export interface ModManifest extends Schema.Schema.Type<typeof ModManifest> {}
 
@@ -189,7 +248,7 @@ export function suggest(word: string, candidates: readonly string[]): string {
   const best = candidates.map((value) => ({ value, distance: distance(word, value) })).sort((a, b) => a.distance - b.distance)[0];
   return best && best.distance <= 2 ? ` (did you mean "${best.value}"?)` : "";
 }
-const fieldNames = ["apiVersion", "id", "name", "version", "author", "description", "skin", "content", "assets", "audio", "add", "override", "remove", ...Object.keys(ContentPatch.fields), ...Object.keys(Rival.fields), ...Object.keys(Building.fields), ...Object.keys(SkinData.fields), "choices", "effects", "type", "amount", "cash", "hype", "discourse", "protesters", "flag", "news", "thought", "place", "race", "text", "tone", "trigger", "when", "presentation", "good", "bad", "neutral", "joke", "walker", "flow", "sprite", "offmap", "initial", "states", "entry", "exit", "on", "guard", "actions", "target", "params", "blurb", "odds", "requires", "cards", "difficulty", "replaces", "weight", "voice", "headline", ...Object.keys(FactionSchema.fields), "faction", "relation"];
+const fieldNames = ["apiVersion", "id", "name", "version", "author", "description", "skin", "content", "assets", "audio", "looks", "cues", "music", ...Object.keys(Look.fields), ...Object.keys(LookPart.fields), "family", "src", "add", "override", "remove", ...Object.keys(ContentPatch.fields), ...Object.keys(Rival.fields), ...Object.keys(Building.fields), ...Object.keys(SkinData.fields), "choices", "effects", "type", "amount", "cash", "hype", "discourse", "protesters", "flag", "news", "thought", "place", "race", "text", "tone", "trigger", "when", "presentation", "good", "bad", "neutral", "joke", "walker", "flow", "sprite", "offmap", "initial", "states", "entry", "exit", "on", "guard", "actions", "target", "params", "blurb", "odds", "requires", "cards", "difficulty", "replaces", "weight", "voice", "headline", ...Object.keys(FactionSchema.fields), "faction", "relation"];
 function pathString(path: ReadonlyArray<PropertyKey | { readonly key: PropertyKey }>): string {
   return path.reduce<string>((s, part) => {
     const key = typeof part === "object" ? part.key : part;

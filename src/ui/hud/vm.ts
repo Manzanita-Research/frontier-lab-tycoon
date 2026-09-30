@@ -85,6 +85,8 @@ export interface HudInput {
   dismissed?: readonly string[];
   /** The Disasters menu is open (FLT-32). */
   disastersOpen?: boolean;
+  /** FLT-55: what mod looks call a walker ("Golden Retriever"), by look target ("protester", "visitor:Journalist"). Optional: none. */
+  lookLabels?: Readonly<Record<string, string>>;
   mixer: { open: boolean; ready: boolean; muted: boolean; master: number; music: number; sfx: number };
   photo: { on: boolean; time: string; shot: { id: number; url: string; name: string } | null; flash: number };
   skins: SkinPickerVM;
@@ -224,7 +226,7 @@ function objectivesOf(s: Snapshot): ObjectivesVM {
   };
 }
 
-function inspectorOf(who: Inspect | null, following: boolean, lab: string, chips: ReadonlyMap<string, FactionChipVM>): InspectorVM | null {
+function inspectorOf(who: Inspect | null, following: boolean, lab: string, chips: ReadonlyMap<string, FactionChipVM>, labels: Readonly<Record<string, string>> = {}): InspectorVM | null {
   if (!who) return null;
   const drift = who.kind === "agent" ? (who.needs.find((n) => n.key === "drift")?.value ?? 0) : 0;
   const look = lookOf(who);
@@ -234,7 +236,7 @@ function inspectorOf(who: Inspect | null, following: boolean, lab: string, chips
     name: who.name,
     role: who.role,
     kind: who.kind,
-    kindLabel: KIND[who.kind],
+    kindLabel: labels[`${who.kind}:${who.role}`] ?? labels[who.kind] ?? KIND[who.kind],
     mood: who.mood,
     moodLabel: MOOD[who.mood],
     status: who.status,
@@ -1063,7 +1065,7 @@ export function hudViewModel(i: HudInput): HudVM {
     stats: statsOf(i),
     training: trainingOf(i.snap),
     objectives: objectivesOf(i.snap),
-    inspector: inspectorOf(i.snap.inspect, i.follow, i.snap.labName, chips),
+    inspector: inspectorOf(i.snap.inspect, i.follow, i.snap.labName, chips, i.lookLabels),
     buildItems: items,
     buildTip: build.tip,
     speed: speedOf(i.speed),

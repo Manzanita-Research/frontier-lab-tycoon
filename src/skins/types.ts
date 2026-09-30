@@ -3,7 +3,7 @@
 import type { ComponentType, ReactNode } from "react";
 import type {
   ArenaVM, AuditVM, BillVM, TrackerVM, ReportCardVM, BubbleVM, FactionsVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, DramaDocVM, DramaVM, EraCardVM, EventVM, HearingVM, HudActions, HudVM, LeakVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
-  ModsVM, NewsroomVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StatsVM, ThoughtRowVM, TickerItemVM,
+  ModsVM, SkinOfferVM, NewsroomVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StatsVM, ThoughtRowVM, TickerItemVM,
   StaffVM, TeaserVM, ProgressVM, ToastVM, TrainingVM, UnlockCardVM, VisibleVM, HelpVM, PapersVM, PaperMomentVM, CrumbWikiVM, DisastersVM,
   EndingVM, TakeoverVM, MemoVM, ChallengeVM,
 } from "../ui/hud/types";
@@ -53,6 +53,7 @@ export const SLOT_NAMES = [
   "NewsRoom",
   "Mixer",
   "ModManager",
+  "ModSkinOffer",
   "Papers",
   "PaperMoment",
   "CrumbWiki",
@@ -172,6 +173,8 @@ export interface SlotPropsMap {
   Mixer: { sound: SoundVM; actions: HudActions };
   /** Start ▸ Settings ▸ Mods… while `mods.open`: what `?mod=` loaded, clashes and failures. Close with `actions.closeMods()`. */
   ModManager: { mods: ModsVM; actions: HudActions };
+  /** FLT-55: a mod asks to switch to its skin. Yes is `actions.acceptSkinOffer()`, no (and Escape) `actions.declineSkinOffer()`. */
+  ModSkinOffer: { offer: SkinOfferVM; actions: HudActions };
   /**
    * Papers (FLT-45): a chip that opens a window with the publication policy and the list; drafts go to arXive or peer review from
    * here. Docked, and only rendered once earned (`visible.papers` and `papers.enabled`). `papers.open` says which to draw.

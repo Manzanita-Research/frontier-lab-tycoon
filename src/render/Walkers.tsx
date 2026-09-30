@@ -1,12 +1,15 @@
 import { useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { SIGNS, SIGN_COLORS } from "../content/protest";
 import { sim as game } from "../app/game";
 import { HALF } from "./coords";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import { CHEER_SECONDS, fx } from "./fx/state";
-import { FONT_STACK, glowTexture } from "./materials";
+import { glowTexture } from "./materials";
+import { signTexture } from "./signs";
+import { buildModLooks, lookKey, type Pose } from "./modLooks";
+import { modSession } from "../app/mods";
 import { Follow } from "./follow";
 import { HOODIES, PICKET, SKIN, SUITS } from "./look";
 import { Pick } from "./Pick";
@@ -46,51 +49,13 @@ const dummy = new THREE.Object3D();
 dummy.rotation.order = "YXZ";
 const signDummy = new THREE.Object3D();
 signDummy.rotation.order = "YXZ";
+/** One pose object, reused for every walker a mod look draws. */
+const pose: Pose = { x: 0, z: 0, yaw: 0, t: 0, phase: 0, walking: false, hop: 0, land: 0, env: 0, signYaw: 0 };
 const dir = new THREE.Vector3();
 const heading = new Float32Array(4096);
 
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 const wrap = (a: number) => Math.atan2(Math.sin(a), Math.cos(a));
-
-/** A placard: colour board, ink border, bold text wrapped to at most three lines. */
-function signTexture(text: string, bg: string): THREE.CanvasTexture {
-  const w = 320;
-  const h = 180;
-  const canvas = document.createElement("canvas");
-  canvas.width = w;
-  canvas.height = h;
-  const g = canvas.getContext("2d")!;
-  g.fillStyle = "#3a2a1c";
-  g.fillRect(0, 0, w, h);
-  g.fillStyle = bg;
-  g.fillRect(9, 9, w - 18, h - 18);
-  g.fillStyle = "#b3261e";
-  g.textAlign = "center";
-  g.textBaseline = "middle";
-  const words = text.split(" ");
-  for (let size = 76; size >= 26; size -= 4) {
-    g.font = `900 ${size}px ${FONT_STACK}`;
-    const lines: string[] = [];
-    let line = "";
-    for (const word of words) {
-      const next = line ? `${line} ${word}` : word;
-      if (g.measureText(next).width > w - 40 && line) {
-        lines.push(line);
-        line = word;
-      } else line = next;
-    }
-    lines.push(line);
-    const widest = Math.max(...lines.map((l) => g.measureText(l).width));
-    if (lines.length * size * 1.08 <= h - 30 && widest <= w - 40) {
-      lines.forEach((l, i) => g.fillText(l, w / 2, h / 2 + (i - (lines.length - 1) / 2) * size * 1.08));
-      break;
-    }
-  }
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  tex.anisotropy = 4;
-  return tex;
-}
 
 /**
  * Every walker in the game is an instance in one of a handful of InstancedMeshes,
@@ -133,6 +98,10 @@ export function Walkers() {
   // Tidy up (FLT-19): an agent hiding in a cardboard box, packing tape across the top, eyes through the hand hole.
   const hideGeo = useMemo(() => new RoundedBoxGeometry(0.46 * S, 0.44 * S, 0.42 * S, 2, 0.02 * S), []);
   const tapeGeo = useMemo(() => new THREE.BoxGeometry(0.47 * S, 0.012 * S, 0.1 * S), []);
+  // Mod looks (FLT-55): golden retrievers for protesters and the like. The base game has none, and skips all of it.
+  const looks = useMemo(() => buildModLooks(modSession().presentation?.looks ?? {}), []);
+  useEffect(() => () => looks.dispose(), [looks]);
+  const modded = looks.drawers.size > 0 || looks.tints.size > 0;
 
   useFrame(({ clock, camera }) => {
     const sim = game.world;
@@ -158,6 +127,7 @@ export function Walkers() {
     const agentLook = LOOKS[eraOfState(sim) - 1]!;
     const boxed = sim.disguises?.agent === "box";
     let nk = 0;
+    if (modded) looks.drawers.forEach((d) => d.begin());
 
     const set = (m: THREE.InstancedMesh | null, i: number, x: number, y: number, z: number, ry: number, sx: number, sy: number, sz: number, rx = 0) => {
       if (!m) return;
@@ -204,6 +174,14 @@ export function Walkers() {
       const look = !walking && env === 0 ? Math.sin(t * 0.9 + phase * 1.3) * 0.95 * (0.5 + 0.5 * Math.sin(t * 0.31 + phase)) : 0;
       const yaw = env > 0 ? ry + wrap(signYaw - ry) * Math.min(1, env * 1.6) : ry + look;
       const breath = !walking && env === 0 ? Math.sin(t * 2.2 + phase) * 0.014 : 0;
+      const tinted = modded ? lookKey(looks.tints, w) : undefined;
+      if (modded) {
+        const drawer = lookKey(looks.drawers, w);
+        if (drawer) {
+          Object.assign(pose, { x, z, yaw, t, phase, walking, hop, land, env, signYaw });
+          if (drawer.draw(w, pose)) continue;
+        }
+      }
 
       if (w.kind === "agent" && boxed) {
         // A box that walks. It stops dead (and trembles a little) whenever it is not walking.
@@ -232,7 +210,7 @@ export function Walkers() {
         set(aOrb.current, i, x, bob + 0.5 * S * k + Math.sin(t * 6 + phase) * 0.015, z, 0, k, k, k);
         const pulse = (1.9 + Math.sin(t * 3 + phase) * 0.2) * (1 + env * 0.4) * k;
         set(aGlow.current, i, x, 0.03, z, 0, pulse, 1, pulse);
-        aBody.current?.setColorAt(i, agentLook.body);
+        aBody.current?.setColorAt(i, tinted?.body ?? agentLook.body);
         // Drift shows: the era's own colour while aligned, through violet, to hot pink.
         const d = w.drift * 2;
         const stage = Math.min(1, Math.floor(d));
@@ -259,8 +237,8 @@ export function Walkers() {
         set(pBody.current, i, x, 0.26 * S + bob, z, ry, 1 + land * 0.6, 1 - land, 1 + land * 0.6);
         set(pHead.current, i, x, 0.66 * S + bob - land * 0.1, z, ry, 1, 1, 1);
         glasses(x, 0.66 * S + bob - land * 0.1, z, ry);
-        pBody.current?.setColorAt(i, picket[w.id % picket.length]!);
-        pHead.current?.setColorAt(i, skins[(w.id * 7) % skins.length]!);
+        pBody.current?.setColorAt(i, tinted?.body ?? picket[w.id % picket.length]!);
+        pHead.current?.setColorAt(i, tinted?.head ?? skins[(w.id * 7) % skins.length]!);
         const wave = Math.sin(t * 5 + phase) * 0.14;
         // The pole runs from the fist up to the board.
         set(pStick.current, i, x, 1.25 + bob, z, 0, 1, 1, 1);
@@ -306,16 +284,18 @@ export function Walkers() {
         i = nr++;
         body = rBody.current;
         head = rHead.current;
-        bodyCol = hoodies[w.id % hoodies.length]!;
+        bodyCol = tinted?.body ?? hoodies[w.id % hoodies.length]!;
+        const skin = tinted?.head ?? skins[(w.id * 3) % skins.length]!;
         set(head, i, headX, headY, headZ, yaw, 1, 1, 1);
-        head?.setColorAt(i, slump > 0 ? tint.copy(skins[(w.id * 3) % skins.length]!).lerp(SLUMP_TINT, 0.25 * slump) : skins[(w.id * 3) % skins.length]!);
+        head?.setColorAt(i, slump > 0 ? tint.copy(skin).lerp(SLUMP_TINT, 0.25 * slump) : skin);
       } else {
         i = nv++;
         body = vBody.current;
         head = vHead.current;
-        bodyCol = suits.get(w.role) ?? FALLBACK_SUIT;
+        bodyCol = tinted?.body ?? suits.get(w.role) ?? FALLBACK_SUIT;
+        const skin = tinted?.head ?? skins[(w.id * 5) % skins.length]!;
         set(head, i, headX, headY, headZ, yaw, 1, 1, 1);
-        head?.setColorAt(i, slump > 0 ? tint.copy(skins[(w.id * 5) % skins.length]!).lerp(SLUMP_TINT, 0.25 * slump) : skins[(w.id * 5) % skins.length]!);
+        head?.setColorAt(i, slump > 0 ? tint.copy(skin).lerp(SLUMP_TINT, 0.25 * slump) : skin);
       }
       glasses(headX, headY, headZ, yaw);
       set(body, i, bodyX, cy * cs + bob, bodyZ, yaw, wide, squash, wide, lean);
@@ -364,6 +344,7 @@ export function Walkers() {
     done(tape.current, nk);
     done(lit.current, nl);
     boards.current.forEach((m, i) => done(m, nb[i] ?? 0));
+    if (modded) looks.drawers.forEach((d) => d.end());
   });
 
   return (
@@ -456,6 +437,8 @@ export function Walkers() {
           <meshBasicMaterial color="#ffd24a" toneMapped={false} />
         </mesh>
       </group>
+
+      {modded && <primitive object={looks.group} />}
 
       <Pick />
       <Follow />
