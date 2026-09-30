@@ -31,6 +31,7 @@ flowchart LR
 |---|---|---|---|---|---|
 | **app** | `src/app/machine.ts` | `playing.{running,paused}`, `eventOpen`, `gameOver` | `FRAME`, `SYNCED`, `SET_SPEED`, `TOGGLE_PAUSE`, `SET_TOOL`, `SET_HOVER`, `COMMAND`, `CHOOSE`, `KEEP_PLAYING`, `NEW_LAB`, `TOAST*` | Effect actions `advance`, `hold`, `newLab`; delayed `TOAST_EXPIRED` | speed, command queue, frame accumulator, tool, hover, toasts, the 5 Hz HUD snapshot |
 | **training** | `src/sim/machines/training.ts` | `idle`, `training`, `releasing` | `DAY {halls, gain}`, `NAMED {name}` | `RELEASED`, `RUN_STARTED` | run, progress, cost, next model name |
+| **tutorial** | `src/sim/machines/tutorial.ts` | `path`, `hall`, `gateway`, `hire`, `release`, `done`, `skipped` | `FACTS`, `CONTINUE`, `SKIP` | `FINISHED` (one launch toast) | acknowledgement of the current step; stored in `World.tutorial` |
 | **economy** | `.../economy.ts` | `solvent`, `runwayWarning`, `bailout`, `bankrupt` | `DAY {cash, day}` | `BAILOUT` | day of the last bridge round |
 | **goals** | `.../goals.ts` | `tracking`, `won`, `lost` (final) | `DAY {day, cash, values}` | `WON`, `LOST` | the three milestones, the day it ended |
 | **arc** (one per event card) | `.../arc.ts` | `calm`, `brewing`, `cardOpen`, `cooldown` | `DAY {day, ready, slotFree, pace}`, `CHOOSE {choiceIndex}` | `RESOLVED` | choices, cooldown days, day last opened |
@@ -68,6 +69,16 @@ stateDiagram-v2
 ```
 
 The target after every event that could change it is one function, `phaseFor(context)`: card open wins, then an undismissed outcome, then speed. A machine booted with speed 0 starts `paused` (an `always` transition).
+
+### First-run pacing (FLT-16)
+
+At 1× the shell feeds 20 ticks per six seconds: one game day. Day/night still spans 30 days (three minutes), with six-hour dawn/dusk blends. A clean lab starts with one connected Compute Cluster, three researchers, one agent and no visitors or Training Hall. The shell opens at speed 1 but holds time until the first successful build and while a new tutorial message needs acknowledgement. Selecting that step's build tool or sending `continueTutorial` acknowledges it. The sim itself can still be stepped headlessly; `applyNow` advances tutorial facts for commands made while paused.
+
+`Snapshot.assistant` / `atoms.assistant` expose `{ step, message, highlight, paused, canSkip }`, or `null` on completion/skip/older saves. Content is `content/tutorial.ts`; targets are `build:path`, `build:hall`, `build:gateway`, `staff:hire`, `training`. Send `COMMAND { command: { type: "continueTutorial" } }` for Next and `{ type: "skipTutorial" }` for Skip. FLT-29 owns the assistant skin, pulsing targets, visible Skip and paused indicator; FLT-16 only routes plain messages through the existing hint host.
+
+`SET_OVERLAY { id, open }` holds time for independently owned menus. Existing Staff, phone stats/Objectives/Thoughts/Arena and photo mode are wired through it; new hosts can use `useAutoPause`. An inspector, event or outcome card also holds time. Closing one overlay preserves both other overlays and the player's selected speed; no catch-up time is banked while held. Desktop readout panels are persistent HUD, rather than modal menus.
+
+Visitor arrivals run once a day. `visitorDemand` combines connected Gateways/Demo Stages/campus size × hype × Vibes, with word of mouth over the first 60 days and a small trickle. Disconnected or broken attractions contribute nothing. Cards wait until day 40; pressure also requires a release and a reachable Gateway (prior revenue proves that introduction, so bulldozing a Gateway cannot disable later fires). `scripts/pacing-report.mjs` uses paid commands over three seeds × 365 days; the actual 1× browser sequence is `scripts/pacing-shots.mjs`, with no debug URL or clock override.
 
 ### Water Discourse arc
 
@@ -351,4 +362,3 @@ flowchart LR
 | A scripted player (`sim/playthrough.test.ts`, which now hires staff) | Era 2 around day 70, Era 3 and the win around day 470 to 520, Era 4 around day 1060 to 1110 (about 60 days later than before: repairs, slop and salaries are not free) |
 
 Determinism: the goldens (`sim/golden.test.ts`) were re-recorded on purpose: every building draws a breakdown die each day, and the script now hires a few staff and paints a zone, so the digests also cover slop, the payroll and every building's reliability.
-

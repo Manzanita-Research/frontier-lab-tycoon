@@ -77,6 +77,9 @@ describe("the first run", () => {
     expect(pressureReady(s)).toBe(true);
     dailyEvents(s);
     expect(openEventOf(s)?.id).toBe("computeAuction");
+    s.flags.firstRevenue = 39;
+    applyNow(s, [{ type: "bulldoze", x: 12, z: 20 }]);
+    expect(pressureReady(s)).toBe(true); // the opening grace period cannot be farmed by removing revenue
   });
 
   it("pulls visitors with connected attractions, hype and Vibes, with a late-game cap", () => {

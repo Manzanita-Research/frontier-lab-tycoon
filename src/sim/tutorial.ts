@@ -47,7 +47,7 @@ export function continueTutorial(state: GameState, skip = false) {
   if (assistantOf(state)) state.tutorial = step(tutorialMachine, state.tutorial!, { type: skip ? "SKIP" : "CONTINUE" }).stored;
 }
 
-/** Pressure stays asleep until the player has seen a launch and has a working route to revenue. */
+/** Pressure waits for a launch and a route to revenue; removing a gateway later cannot switch fires off. */
 export function pressureReady(state: GameState): boolean {
-  return state.day >= 40 && state.models.length > 0 && state.buildings.some((b) => b.kind === "gateway" && isReachable(state, b));
+  return state.day >= 40 && state.models.length > 0 && (state.flags.firstRevenue !== undefined || state.buildings.some((b) => b.kind === "gateway" && isReachable(state, b)));
 }
