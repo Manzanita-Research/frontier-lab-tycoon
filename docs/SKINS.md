@@ -226,6 +226,31 @@ If your slot needs copy that has no key, write it into the slot (as Frontier 95 
 | `build.display` | Display… |
 | `build.shutdown` | Shut Down Lab… |
 | `build.placing` | Placing {name} |
+| `build.facilities` | Facilities |
+| `build.group.compute` | Compute & Power |
+| `build.group.research` | Research & Revenue |
+| `build.group.amenities` | Amenities |
+| `build.group.offices` | Staff & Offices |
+| `build.run` | Run… |
+| `build.facilitiesCount` | {n} buildings |
+| `build.runCount` | {n} widgets |
+| `build.groupNo` | {n}. |
+| `run.title` | Run |
+| `run.prompt` | Type the name of a widget, and the lab will open it for you. |
+| `run.open` | Open: |
+| `run.ok` | OK |
+| `run.cancel` | Cancel |
+| `run.none` | No widget called that yet. Press OK anyway: it might be funny. |
+| `run.back` | Back |
+| `mode.building` | Placing {name} · Esc to stop building |
+| `mode.path` | Drawing path · Esc to stop building |
+| `mode.bulldoze` | Bulldozing · Esc to stop |
+| `mode.zone` | Painting {name} · Esc to stop |
+| `mode.subBuilding` | Shift-click to place another · right-click cancels |
+| `mode.subPath` | Drag to lay a run · right-click also stops |
+| `mode.subBulldoze` | Drag to clear a run · right-click also stops |
+| `mode.subZone` | Drag over tiles · right-click also stops |
+| `mode.done` | Done |
 | `speed.label` | Game speed |
 | `speed.pause` | Pause |
 | `speed.1` | 1× speed |

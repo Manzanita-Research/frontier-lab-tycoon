@@ -112,6 +112,10 @@
     "shadow.pop": "none"
   },
   "strings": {
+    "run.title": "Address",
+    "run.prompt": "Type a page's address. Best viewed at 800×600.",
+    "build.facilitiesCount": "{n} pages",
+    "build.runCount": "{n} links",
     "ticker.label": "WHAT'S NEW!!!",
     "training.title": "Under Construction",
     "objectives.title": "My Goals",

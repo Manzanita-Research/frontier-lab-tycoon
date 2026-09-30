@@ -147,6 +147,51 @@ export interface BuildItemVM {
   isPath: boolean;
   /** A tile that opens a window instead of picking a tool ("staff", "senate"): never the tool in your hand. */
   panel?: boolean;
+  /**
+   * FLT-63: where it goes in the Start menu. `tools` (Path, Bulldoze) stay at the top level; the rest are the groups of
+   * the "Facilities ▸" submenu, in this order: `compute`, `research`, `amenities`, `offices`. The kit's `facilityGroups`
+   * sorts a list of items into them. Absent: `amenities`.
+   */
+  group?: FacilityGroupVM;
+}
+
+/** FLT-63: the Start menu's groups. See `BuildItemVM.group`. */
+export type FacilityGroupVM = "tools" | "compute" | "research" | "amenities" | "offices";
+
+/**
+ * FLT-63: the tool in your hand, as a mode: what the hint says and how it ends. `sticky` modes (Path, Bulldoze, painting a
+ * patrol zone) stay on after each tile; a building drops out after one placement (Shift keeps it). Esc, a right-click, the
+ * tool again or another tool always ends it. The host draws the hint ("Esc to stop building") near the pointer, or a
+ * **Done ✕** button on touch screens; a skin only restyles `.mode-hint` / `.mode-done`, and may relabel them (strings
+ * `mode.*`).
+ */
+export interface PlaceModeVM {
+  kind: "path" | "bulldoze" | "building" | "zone";
+  /** The tool ("path", "hall", ...), or null while painting a zone. */
+  tool: BuildKindVM | null;
+  /** "Path", "Training Hall", "Kevin's patrol". */
+  name: string;
+  sticky: boolean;
+}
+
+/**
+ * FLT-63: a UI widget the Start menu's "Run…" can open (the Run dialog in Frontier 95): a window, a panel or a tab.
+ * `actions.openWidget(id)` opens it (never shuts it), and a slot that keeps its own open state hears about it through
+ * the kit's `useWidget(id, open)`. Only what the lab has earned is listed.
+ */
+export interface WidgetVM {
+  /** "properties", "finance", "arena", "benchmarks", "thoughts", "traffic", "discourse", "papers", "news", "staff", "senate", "disasters", "drama", "mods", "help", "display", "sound". */
+  id: string;
+  /** "Thoughts" */
+  name: string;
+  /** What to type in a Run box: "thoughts.txt", "arena.exe". */
+  file: string;
+  /** One line for the list. */
+  blurb: string;
+  /** An icon id (the build icons' ids plus the widgets' own: "arena", "thoughts", "news", ...). */
+  icon: string;
+  /** Other names a Run box accepts ("finance", "money"). Lower case. */
+  aliases: string[];
 }
 
 export interface BuildTipVM {
@@ -1592,6 +1637,10 @@ export interface HudVM {
   inspector: InspectorVM | null;
   buildItems: BuildItemVM[];
   buildTip: BuildTipVM | null;
+  /** FLT-63: the mode the pointer is in (a tool in hand, or painting a patrol zone), or null. */
+  mode?: PlaceModeVM | null;
+  /** FLT-63: what the Start menu's "Run…" can open, in list order. */
+  widgets?: WidgetVM[];
   speed: SpeedVM;
   staff: StaffVM;
   /** The Senate window: the Promise Tracker and the bill (FLT-22/23). `tracker` is null until the pack wakes. */
@@ -1660,6 +1709,8 @@ export interface HudVM {
 export interface HudActions {
   /** Pick a build tool ("path", "cluster", ..., "bulldoze"). Picking the selected one puts it away; `null` clears. `"staff"` opens or closes the payroll, `"senate"` the Senate window. */
   place(kind: BuildKindVM | null): void;
+  /** FLT-63: open a widget from `vm.widgets` (Run…). Opens, never toggles shut; an unknown or unearned id does nothing. */
+  openWidget(id: string): void;
   setSpeed(speed: number): void;
   togglePause(): void;
   /** Answer the open event card. */

@@ -120,6 +120,14 @@
     "x.keyLo": "#CDBDF5"
   },
   "strings": {
+    "build.facilitiesCount": "{n} songs",
+    "build.runCount": "{n} on tap",
+    "run.title": "Request a song",
+    "run.prompt": "Write a widget on the slip like a song title. The KJ cues it up.",
+    "build.group.compute": "Power Ballads",
+    "build.group.research": "Chart Toppers",
+    "build.group.amenities": "Crowd Pleasers",
+    "build.group.offices": "Backing Band",
     "ticker.label": "AI NEWS KARAOKE",
     "ticker.aria": "AI News Karaoke: the latest headlines, sung along",
     "objectives.title": "UP NEXT",

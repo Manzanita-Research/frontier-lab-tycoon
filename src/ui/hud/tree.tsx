@@ -20,7 +20,7 @@ export function Docked({ vm, actions }: { vm: HudVM; actions: HudActions }) {
     Training: vm.training.hasHall ? <Training training={vm.training} actions={actions} /> : null,
     Objectives: <Objectives objectives={vm.objectives} progress={vm.progress} visible={vm.visible} layout={vm.layout} actions={actions} />,
     Inspector: vm.inspector ? <Inspector inspector={vm.inspector} layout={vm.layout} actions={actions} /> : null,
-    BuildBar: <BuildBar items={vm.buildItems} tip={vm.buildTip} teasers={vm.progress.teasers} layout={vm.layout} actions={actions} disasters={vm.disasters} />,
+    BuildBar: <BuildBar items={vm.buildItems} tip={vm.buildTip} teasers={vm.progress.teasers} layout={vm.layout} actions={actions} disasters={vm.disasters} widgets={vm.widgets ?? []} mode={vm.mode ?? null} />,
     Speed: <Speed speed={vm.speed} stats={vm.stats} actions={actions} />,
     Staff: vm.staff.open && vm.visible.staff ? <Staff staff={vm.staff} actions={actions} /> : null,
     ThoughtsPanel: vm.visible.thoughts ? <ThoughtsPanel rows={vm.thoughtsPanel} layout={vm.layout} actions={actions} /> : null,

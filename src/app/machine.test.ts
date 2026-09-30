@@ -274,6 +274,57 @@ describe("app machine", () => {
     }).pipe(provide(handle));
   });
 
+  it.effect("placement modes (FLT-63): a building drops after one placement unless Shift keeps it; the path stays; a covering window ends it", () => {
+    const handle = handleFor();
+    return Effect.gen(function* () {
+      const { actor } = yield* boot();
+      const tool = () => actor.getSnapshot().context.tool;
+      yield* send(actor, { type: "SET_TOOL", tool: "kombucha" });
+      yield* waitFor(actor, () => tool() === "kombucha", { timeout: "1 second" });
+      yield* send(actor, { type: "PLACE", command: { type: "placeBuilding", kind: "kombucha", x: 40, z: 40 }, keep: true });
+      yield* Effect.yieldNow;
+      expect(tool()).toBe("kombucha");
+      yield* send(actor, { type: "PLACE", command: { type: "placeBuilding", kind: "kombucha", x: 44, z: 40 }, keep: false });
+      yield* waitFor(actor, () => tool() === null, { timeout: "1 second" });
+
+      // The coach tile places straight through COMMAND: that drops the tool too.
+      yield* send(actor, { type: "SET_TOOL", tool: "cluster" });
+      yield* waitFor(actor, () => tool() === "cluster", { timeout: "1 second" });
+      yield* send(actor, { type: "COMMAND", command: { type: "placeBuilding", kind: "cluster", x: 48, z: 40 } });
+      yield* waitFor(actor, () => tool() === null, { timeout: "1 second" });
+
+      // The path is sticky: laying tiles never drops it. The build menu opening keeps it (you are picking the next tool);
+      // a window that covers the map ends it, and one that was already open does not.
+      yield* send(actor, { type: "SET_TOOL", tool: "path" });
+      yield* send(actor, { type: "COMMAND", command: { type: "placePath", x: 40, z: 48 } });
+      yield* send(actor, { type: "SET_OVERLAY", id: "start", open: true });
+      yield* Effect.yieldNow;
+      expect(tool()).toBe("path");
+      yield* send(actor, { type: "SET_OVERLAY", id: "mixer", open: true });
+      yield* waitFor(actor, () => tool() === null, { timeout: "1 second" });
+      yield* send(actor, { type: "SET_TOOL", tool: "path" });
+      yield* send(actor, { type: "SET_OVERLAY", id: "mixer", open: true });
+      yield* Effect.yieldNow;
+      expect(tool()).toBe("path");
+    }).pipe(provide(handle));
+  });
+
+  it.effect("placement modes (FLT-63): an event card opening ends the mode, so nothing is left half-held under it", () => {
+    const handle = handleFor(1);
+    handle.world.day = 59;
+    handle.world.waterDiscourse = 44;
+    readyForPressure(handle.world);
+    return Effect.gen(function* () {
+      const { actor, pump } = yield* boot();
+      yield* send(actor, { type: "SET_TOOL", tool: "path" });
+      yield* waitFor(actor, (s) => s.context.tool === "path", { timeout: "1 second" });
+      yield* pump(50);
+      yield* waitFor(actor, (s) => s.matches("eventOpen"), { timeout: "1 second" });
+      expect(actor.getSnapshot().context.tool).toBeNull();
+      expect(actor.getSnapshot().context.hover).toBeNull();
+    }).pipe(provide(handle));
+  });
+
   it.effect("selects a walker: the snapshot carries their card, Follow and Thoughts highlight come through, and closing clears it", () => {
     const handle = handleFor(2);
     return Effect.gen(function* () {

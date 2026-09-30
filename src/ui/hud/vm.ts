@@ -29,6 +29,7 @@ import { playableOf, type PlayableInput } from "./playable";
 import { papersOf, paperMomentOf } from "./papers";
 import { collusionOf, crumbWikiOf, investigationOf } from "./collusion";
 import { factionChips, factionsOf } from "./factions";
+import { groupOf, modeOf, widgetsOf } from "./widgets";
 import type { FactionChipVM } from "./types";
 import { challengeLine, challengeQuery, compareRuns, VERDICT_TEXT, type Challenge } from "../share/link";
 import { streakText } from "../share/streak";
@@ -283,6 +284,7 @@ function buildOf(i: HudInput): { items: BuildItemVM[]; tip: BuildTipVM | null } 
       built: built.get(t) ?? 0,
       isBulldoze: t === "bulldoze",
       isPath: t === "path",
+      group: groupOf(t),
     };
   });
   const ops = s.ops;
@@ -302,6 +304,7 @@ function buildOf(i: HudInput): { items: BuildItemVM[]; tip: BuildTipVM | null } 
     isBulldoze: false,
     isPath: false,
     panel: true,
+    group: "offices",
   });
   // The Senate (FLT-23): the Promise Tracker and the bill, once the lab has been to its first hearing.
   if (s.promises.enabled) {
@@ -322,6 +325,7 @@ function buildOf(i: HudInput): { items: BuildItemVM[]; tip: BuildTipVM | null } 
       isBulldoze: false,
       isPath: false,
       panel: true,
+      group: "offices",
     });
   }
   const t = i.tool;
@@ -1087,7 +1091,7 @@ export function hudViewModel(i: HudInput): HudVM {
   const { event, era } = eventOf(i);
   // Snapshots from before FLT-33 (fixtures, old links) have no `factions`: that is "off".
   const chips = factionChips(i.snap.factions);
-  return {
+  const vm: HudVM = {
     apiVersion: SKIN_API_VERSION,
     stats: statsOf(i),
     training: trainingOf(i.snap),
@@ -1095,6 +1099,7 @@ export function hudViewModel(i: HudInput): HudVM {
     inspector: inspectorOf(i.snap.inspect, i.follow, i.snap.labName, chips, i.lookLabels),
     buildItems: items,
     buildTip: build.tip,
+    mode: modeOf(items, i.tool, zoneOf(i)),
     speed: speedOf(i.speed),
     staff: staffOf(i, play.staff),
     senate: senateOf(i),
@@ -1144,6 +1149,22 @@ export function hudViewModel(i: HudInput): HudVM {
     drama: i.drama ?? NO_DRAMA_VM,
     layout: { width: i.viewport.width, height: i.viewport.height, phone: i.viewport.width <= 480, compact: i.viewport.width <= 640, tall: i.viewport.height >= 800 },
   };
+  vm.widgets = widgetsOf({
+    visible: vm.visible,
+    leapfrog: vm.leapfrog.enabled,
+    factions: vm.factions.enabled && vm.visible.factions,
+    papers: vm.papers.enabled && vm.visible.papers,
+    senate: items.some((it) => it.kind === "senate"),
+    disasters: vm.disasters.enabled,
+  });
+  return vm;
+}
+
+/** The staffer whose patrol zone is being painted, if any. */
+function zoneOf(i: HudInput): { name: string } | null {
+  if (i.zone === null) return null;
+  const o = i.snap.ops.staff.find((s) => s.id === i.zone);
+  return o ? { name: o.name.split(" ")[0] ?? o.name } : null;
 }
 
 export type { WalkerKindVM };
