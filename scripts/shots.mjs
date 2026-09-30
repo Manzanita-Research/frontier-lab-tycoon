@@ -56,11 +56,13 @@ const HELP = `pnpm shots [flags]: before/after screenshots of the same scenes on
   --scenes-file <json>    extra scenes, merged over scripts/shots.scenes.json
   --fresh                 rebuild the base even if it is cached (shots/.cache/<sha>)
   --list                  list scenes and sets, then exit
+  --verify <png|dir>...   only check that images are not blank (or mostly one colour); exit 1 if any are
   -h, --help
 `;
-let args;
+let args, positionals;
 try {
-  args = parseArgs({
+  ({ values: args, positionals } = parseArgs({
+    allowPositionals: true,
     options: {
       scenes: { type: "string", default: "standard" },
       skin: { type: "string" },
@@ -77,15 +79,94 @@ try {
       "scenes-file": { type: "string" },
       fresh: { type: "boolean", default: false },
       list: { type: "boolean", default: false },
+      verify: { type: "boolean", default: false },
       help: { type: "boolean", short: "h", default: false },
     },
-  }).values;
+  }));
 } catch (e) {
   die(`${e.message}\n\n${HELP}`);
 }
 if (args.help) {
   console.log(HELP);
   process.exit(0);
+}
+
+const cleanups = [];
+const cleanup = () => {
+  while (cleanups.length) {
+    try {
+      cleanups.pop()();
+    } catch {}
+  }
+};
+for (const sig of ["SIGINT", "SIGTERM"]) process.on(sig, () => (cleanup(), process.exit(130)));
+process.on("exit", cleanup);
+
+// ── the blank guard ─────────────────────────────────────────────────────────────────────────────────────────────────
+// A screenshot (or a composite) that is a dark frame, or nearly one colour, means the page or the compositor never drew:
+// a failure, never evidence. Every capture and every composite is checked, and a blank one fails the run loudly.
+const BLANK_DOMINANT = 0.9;  // one 4-bit colour covering more of the image than this = blank
+const BLANK_COLORS = 16; //     fewer distinct colours (each on >= 0.1% of pixels) than this = blank
+let browser;
+async function getBrowser() {
+  if (!browser) {
+    browser = await chromium.launch({ args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
+    cleanups.push(() => browser.close());
+  }
+  return browser;
+}
+let probePage;
+/** Colour stats for a PNG, or for crops of it ([{ x, y, w, h }] in image pixels; null = the whole image). */
+async function analyze(file, crops = [null]) {
+  probePage ??= await (await (await getBrowser()).newContext()).newPage();
+  return probePage.evaluate(
+    async ({ src, crops }) => {
+      const img = new Image();
+      img.src = src;
+      await img.decode();
+      return crops.map((c) => {
+        const r = c ?? { x: 0, y: 0, w: img.naturalWidth, h: img.naturalHeight };
+        const scale = Math.min(1, 320 / r.w);
+        const cw = Math.max(1, Math.round(r.w * scale)), ch = Math.max(1, Math.round(r.h * scale));
+        const cv = document.createElement("canvas");
+        cv.width = cw;
+        cv.height = ch;
+        const g = cv.getContext("2d", { willReadFrequently: true });
+        g.drawImage(img, r.x, r.y, r.w, r.h, 0, 0, cw, ch);
+        const px = g.getImageData(0, 0, cw, ch).data;
+        const bins = new Map();
+        for (let i = 0; i < px.length; i += 4) {
+          const k = ((px[i] >> 4) << 8) | ((px[i + 1] >> 4) << 4) | (px[i + 2] >> 4);
+          bins.set(k, (bins.get(k) ?? 0) + 1);
+        }
+        const n = cw * ch;
+        return { dominant: Math.max(...bins.values()) / n, colors: [...bins.values()].filter((v) => v / n >= 0.001).length };
+      });
+    },
+    { src: `data:image/png;base64,${readFileSync(file).toString("base64")}`, crops },
+  );
+}
+const isBlank = (st) => st.dominant > BLANK_DOMINANT || st.colors < BLANK_COLORS;
+const describe = (st) => `${(st.dominant * 100).toFixed(0)}% one colour, ${st.colors} colours`;
+
+if (args.verify) {
+  const files = positionals.flatMap((p) => {
+    const abs = resolve(p);
+    if (!existsSync(abs)) die(`--verify: ${p} does not exist`);
+    const walk = (d) => readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(join(d, e.name)) : e.name.endsWith(".png") ? [join(d, e.name)] : []));
+    return statSync(abs).isDirectory() ? walk(abs) : [abs];
+  });
+  if (!files.length) die("--verify: no .png files given. Usage: pnpm shots --verify <png|dir>...");
+  let bad = 0;
+  for (const f of files) {
+    const [st] = await analyze(f);
+    const blank = isBlank(st);
+    bad += blank ? 1 : 0;
+    console.log(`${blank ? "BLANK" : "ok   "}  ${relative(process.cwd(), f)}  (${describe(st)})`);
+  }
+  cleanup();
+  console.log(bad ? `\n${bad} of ${files.length} images are blank.` : `\nall ${files.length} images have content.`);
+  process.exit(bad ? 1 : 0);
 }
 
 // ── scenes ──────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -128,16 +209,6 @@ const tryGit = (...a) => {
     return null;
   }
 };
-const cleanups = [];
-const cleanup = () => {
-  while (cleanups.length) {
-    try {
-      cleanups.pop()();
-    } catch {}
-  }
-};
-for (const sig of ["SIGINT", "SIGTERM"]) process.on(sig, () => (cleanup(), process.exit(130)));
-process.on("exit", cleanup);
 
 function resolveRef(ref) {
   // `main` means the freshest main: origin/main if we have it (builders branch from it), else the local branch.
@@ -243,9 +314,9 @@ const out = resolve(root, args.out);
 for (const d of ["before", "after", "compare"]) rmSync(join(out, d), { recursive: true, force: true });
 for (const d of ["before", "after", "compare"]) mkdirSync(join(out, d), { recursive: true });
 
-const browser = await chromium.launch({ args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
-cleanups.push(() => browser.close());
+await getBrowser();
 const errors = [];
+const problems = []; // blank or failed outputs: they fail the run
 const results = []; // { scene, skin, file, side, ok, error? }
 
 async function runStep(page, step) {
@@ -293,35 +364,54 @@ async function capture(side, sceneName, skin) {
   const scene = sceneData.scenes[sceneName];
   const sk = side.side === "before" && args["skin-before"] !== undefined ? (args["skin-before"] === "none" ? null : args["skin-before"]) : skin;
   const [width, height] = (scene.viewport ?? sceneData.defaults.viewport).split("x").map(Number);
-  const ctx = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: scene.mobile ? 2 : 1, isMobile: !!scene.mobile, hasTouch: !!scene.mobile });
-  const page = await ctx.newPage();
+  const dsf = scene.mobile ? 2 : 1;
   const tag = `${side.side}/${sceneName}${skin ? `@${skin}` : ""}`;
-  page.on("pageerror", (e) => errors.push(`${tag}: ${e}`));
-  page.on("console", (m) => m.type() === "error" && errors.push(`${tag}: ${m.text()}`));
   const file = join(out, side.side, `${sceneName}${skin ? `@${skin}` : ""}.png`);
   const t = Date.now();
-  try {
-    await page.addInitScript(() => {
-      window.__shotFrames = 0;
-      const tick = () => (window.__shotFrames++, requestAnimationFrame(tick));
-      requestAnimationFrame(tick);
-    });
-    await page.goto(sceneUrl(side.url, scene, sk), { waitUntil: "networkidle" });
-    await page.waitForFunction(() => window.__flt?.sim?.world, null, { timeout: 60_000 });
-    const frames = Number(args.frames ?? scene.frames ?? sceneData.defaults.frames);
-    await settleFrames(page, frames);
-    for (const step of scene.steps ?? []) await runStep(page, step);
-    if (scene.steps?.length) await settleFrames(page, Math.ceil(frames / 3));
-    await calmDom(page);
-    await page.screenshot({ path: file });
-    results.push({ scene: sceneName, skin, side: side.side, file, ok: true });
-    log(`${tag} ${secs(t)}`);
-  } catch (e) {
-    results.push({ scene: sceneName, skin, side: side.side, file, ok: false, error: String(e.message ?? e).split("\n")[0] });
-    log(`${tag} failed: ${String(e.message ?? e).split("\n")[0]}`);
-  } finally {
-    await ctx.close();
+  let error = "";
+  // A blank frame gets one retry (a slow first WebGL context is the usual cause); anything else that throws does not.
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const ctx = await (await getBrowser()).newContext({ viewport: { width, height }, deviceScaleFactor: dsf, isMobile: !!scene.mobile, hasTouch: !!scene.mobile });
+    const page = await ctx.newPage();
+    page.on("pageerror", (e) => errors.push(`${tag}: ${e}`));
+    page.on("console", (m) => m.type() === "error" && errors.push(`${tag}: ${m.text()}`));
+    try {
+      await page.addInitScript(() => {
+        window.__shotFrames = 0;
+        const tick = () => (window.__shotFrames++, requestAnimationFrame(tick));
+        requestAnimationFrame(tick);
+      });
+      await page.goto(sceneUrl(side.url, scene, sk), { waitUntil: "networkidle" });
+      await page.waitForFunction(() => window.__flt?.sim?.world, null, { timeout: 60_000 });
+      const frames = Number(args.frames ?? scene.frames ?? sceneData.defaults.frames);
+      await settleFrames(page, frames);
+      for (const step of scene.steps ?? []) await runStep(page, step);
+      if (scene.steps?.length) await settleFrames(page, Math.ceil(frames / 3));
+      await calmDom(page);
+      await page.evaluate(() => document.fonts.ready);
+      const canvas = await page.evaluate(() => {
+        const r = document.querySelector("canvas")?.getBoundingClientRect();
+        return r ? { x: r.x, y: r.y, w: r.width, h: r.height } : null;
+      });
+      await page.screenshot({ path: file });
+      // The guard: the whole frame and the 3D canvas must both have real content.
+      if (!canvas || canvas.w * canvas.h < width * height * 0.25) throw Object.assign(new Error("no full-size <canvas> on the page"), { blank: true });
+      const [whole, cv] = await analyze(file, [null, { x: canvas.x * dsf, y: canvas.y * dsf, w: canvas.w * dsf, h: canvas.h * dsf }]);
+      if (isBlank(whole)) throw Object.assign(new Error(`blank screenshot (${describe(whole)})`), { blank: true });
+      if (isBlank(cv)) throw Object.assign(new Error(`the 3D canvas is blank (${describe(cv)})`), { blank: true });
+      results.push({ scene: sceneName, skin, side: side.side, file, ok: true });
+      log(`${tag} ${secs(t)}`);
+      await ctx.close();
+      return;
+    } catch (e) {
+      error = String(e.message ?? e).split("\n")[0];
+      log(`${tag} ${e.blank && attempt === 1 ? "came out blank, retrying once: " : "failed: "}${error}`);
+      await ctx.close();
+      if (!e.blank) break;
+    }
   }
+  results.push({ scene: sceneName, skin, side: side.side, file, ok: false, error });
+  problems.push(`${tag}: ${error}`);
 }
 
 const tCap = Date.now();
@@ -331,10 +421,11 @@ log(`captured ${results.filter((r) => r.ok).length}/${results.length} shots in $
 // ── compare images: rendered by the same headless Chromium (no image library needed) ────────────────────────────────
 const b64 = (f) => `data:image/png;base64,${readFileSync(f).toString("base64")}`;
 const esc = (s) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
-async function compose(panels, { title, mobile, width, footer, diff, outFile }) {
-  const ctx = await browser.newContext({ viewport: { width: 1200, height: 800 }, deviceScaleFactor: mobile ? 2 : 1 });
+async function compose(panels, { title, mobile, width, footer, diff, outFile, gallery }) {
+  const dsf = mobile ? 2 : 1;
+  const ctx = await (await getBrowser()).newContext({ viewport: { width: 1200, height: 800 }, deviceScaleFactor: dsf });
   const page = await ctx.newPage();
-  const pw = mobile ? 390 : Math.min(width, 960);
+  const pw = mobile ? 390 : Math.min(width, gallery ? 620 : 960);
   const html = `<!doctype html><meta charset=utf-8><style>
     body{margin:0;background:#12141a;font:600 15px/1.3 ui-sans-serif,system-ui,sans-serif;color:#e8eaf0}
     #sheet{display:inline-block;padding:18px}
@@ -350,7 +441,13 @@ async function compose(panels, { title, mobile, width, footer, diff, outFile }) 
     .map((p, i) => `<figure class="${p.kind}"><figcaption><b>${esc(p.kind === "diff" ? "DIFF" : p.kind.toUpperCase())}</b>${esc(p.label)}</figcaption>${p.kind === "diff" ? `<canvas id=diff></canvas>` : `<img id=i${i} src="${b64(p.file)}">`}</figure>`)
     .join("")}</div><footer id=foot>${esc(footer)}</footer></div>`;
   await page.setContent(html);
-  await page.waitForFunction(() => [...document.images].every((i) => i.complete && i.naturalWidth > 0));
+  // Wait for the fonts and decode every image before touching pixels (a composite of images that hadn't loaded is a blank).
+  const undecoded = await page.evaluate(async () => {
+    await document.fonts.ready;
+    await Promise.allSettled([...document.images].map((i) => i.decode()));
+    return [...document.images].filter((i) => !i.complete || i.naturalWidth === 0).length;
+  });
+  if (undecoded) throw new Error(`${undecoded} panel image(s) did not load`);
   // Pixel diff (before vs after): a pixel "differs" if its channels move by more than a small threshold.
   const stats = await page.evaluate((wantPanel) => {
     const [a, b] = [document.getElementById("i0"), document.getElementById("i1")];
@@ -400,9 +497,31 @@ async function compose(panels, { title, mobile, width, footer, diff, outFile }) 
     return { changed: changed / (w * h), w, h };
   }, diff);
   if (stats) await page.evaluate((s) => (document.getElementById("foot").textContent += `  ·  ${(s.changed * 100).toFixed(2)}% of pixels differ`), stats);
+  const panelRects = await page.evaluate(() => {
+    const sheet = document.getElementById("sheet").getBoundingClientRect();
+    return [...document.querySelectorAll("figure img, figure canvas")].map((el) => {
+      const r = el.getBoundingClientRect();
+      return { x: r.x - sheet.x, y: r.y - sheet.y, w: r.width, h: r.height };
+    });
+  });
   await page.locator("#sheet").screenshot({ path: outFile });
   await ctx.close();
+  // The guard: the composite as a whole and each panel inside it must have real content.
+  const seen = await analyze(outFile, [null, ...panelRects.map((r) => ({ x: r.x * dsf, y: r.y * dsf, w: r.w * dsf, h: r.h * dsf }))]);
+  const bad = seen.findIndex(isBlank);
+  if (bad >= 0) throw new Error(`blank composite: ${bad === 0 ? "the image" : `panel ${bad}`} is ${describe(seen[bad])}`);
   return stats;
+}
+
+/** compose(), but a failure (a blank composite, an image that didn't load) is recorded as a problem instead of thrown. */
+async function safeCompose(panels, opts) {
+  try {
+    return { stats: await compose(panels, opts) };
+  } catch (e) {
+    const error = String(e.message ?? e).split("\n")[0];
+    problems.push(`${basename(opts.outFile)}: ${error}`);
+    return { error };
+  }
 }
 
 const NOISE = 0.005; // two builds of one commit differ by ~0.2% of pixels (idle 3D animation), so under 0.5% reads as "unchanged"
@@ -415,8 +534,8 @@ if (args.skin === "all") {
     const scene = sceneData.scenes[name];
     const panels = skins.flatMap((s) => (okFile(name, s, "after") ? [{ kind: "after", label: s, file: okFile(name, s, "after") }] : []));
     if (!panels.length) continue;
-    await compose(panels, { outFile: join(out, "compare", `gallery-${name}.png`), title: `${scene.title ?? name}: every skin (${label("after")})`, mobile: scene.mobile, width: Number(scene.viewport?.split("x")[0] ?? 1440), footer: "pnpm shots --skin all" });
-    rows.push({ scene: name, gallery: true, count: panels.length });
+    const made = await safeCompose(panels, { outFile: join(out, "compare", `gallery-${name}.png`), title: `${scene.title ?? name}: every skin (${label("after")})`, mobile: scene.mobile, width: Number(scene.viewport?.split("x")[0] ?? 1440), footer: "pnpm shots --skin all", gallery: true });
+    rows.push({ scene: name, gallery: true, count: panels.length, error: made.error });
   }
 } else {
   for (const skin of skins) {
@@ -428,12 +547,14 @@ if (args.skin === "all") {
         const panels = [...(bf ? [{ kind: "before", label: label("before"), file: bf }] : []), { kind: "after", label: label("after"), file: af }];
         if (bf && args.diff) panels.push({ kind: "diff", label: "what changed", file: af });
         const file = join(out, "compare", `${name}${skin ? `@${skin}` : ""}.png`);
-        const stats = await compose(panels, { outFile: file, title: `${name}${skin ? ` · skin ${skin}` : ""}: ${scene.title ?? ""}`, mobile: scene.mobile, width: Number(scene.viewport?.split("x")[0] ?? 1440), footer: `${sceneUrl("", scene, skin).replace(/^\//, "")}`, diff: args.diff });
+        const made = await safeCompose(panels, { outFile: file, title: `${name}${skin ? ` · skin ${skin}` : ""}: ${scene.title ?? ""}`, mobile: scene.mobile, width: Number(scene.viewport?.split("x")[0] ?? 1440), footer: `${sceneUrl("", scene, skin).replace(/^\//, "")}`, diff: args.diff });
         row.compare = file;
-        row.changed = stats?.changed ?? null;
+        row.changed = made.stats?.changed ?? null;
+        if (made.error) row.composeError = made.error;
       }
       const failed = results.filter((r) => r.scene === name && r.skin === skin && !r.ok);
-      if (failed.length) row.error = failed.map((f) => `${f.side}: ${f.error}`).join("; ");
+      const errs = [...failed.map((f) => `${f.side}: ${f.error}`), ...(row.composeError ? [`compare: ${row.composeError}`] : [])];
+      if (errs.length) row.error = errs.join("; ");
       rows.push(row);
     }
   }
@@ -443,11 +564,12 @@ if (args.skin === "all") {
 const repoUrl = (tryGit("remote", "get-url", "origin") ?? "").replace(/\/\/[^@/]*@/, "//").replace(/\.git$/, "").replace(/^git@github\.com:/, "https://github.com/");
 const relOut = relative(root, out).split("\\").join("/");
 const ignored = spawnSync("git", ["check-ignore", "-q", join(relOut, "x.png")], { cwd: root }).status === 0;
-const img = (f) => (f ? `![${basename(f, ".png")}](${repoUrl}/blob/${branch}/${relOut}/${relative(out, f).split("\\").join("/")}?raw=true)` : "_n/a_");
+const inRepo = !relOut.startsWith("..");
+const img = (f) => (f ? `![${basename(f, ".png")}](${inRepo ? `${repoUrl}/blob/${branch}/${relOut}/${relative(out, f).split("\\").join("/")}?raw=true` : f})` : "_n/a_");
 let md = "";
 if (args.skin === "all") {
   md += `| Scene | Gallery (${skins.length} skins) |\n|---|---|\n`;
-  for (const r of rows) md += `| ${r.scene} | ${img(join(out, "compare", `gallery-${r.scene}.png`))} |\n`;
+  for (const r of rows) md += `| ${r.scene}${r.error ? `<br>⚠ ${r.error}` : ""} | ${img(join(out, "compare", `gallery-${r.scene}.png`))} |\n`;
 } else if (wantBefore) {
   md += `| Scene | Before (${label("before")}) | After (${label("after")}) |\n|---|---|---|\n`;
   for (const r of rows) {
@@ -456,16 +578,21 @@ if (args.skin === "all") {
   }
 } else {
   md += `| Scene | After (${label("after")}) |\n|---|---|\n`;
-  for (const r of rows) md += `| **${r.scene}**${r.skin ? ` (${r.skin})` : ""} | ${img(r.after)} |\n`;
+  for (const r of rows) md += `| **${r.scene}**${r.skin ? ` (${r.skin})` : ""}${r.error ? `<br>⚠ ${r.error}` : ""} | ${img(r.after)} |\n`;
 }
 const total = secs();
-const summary = `_pnpm shots: ${sceneNames.length} scene(s)${skins[0] ? `, ${skins.length} skin(s)` : ""} in ${total} (${results.filter((r) => r.ok).length}/${results.length} captures ok)._`;
-writeFileSync(join(out, "report.md"), `${md}\n${summary}\n`);
-writeFileSync(join(out, "report.json"), JSON.stringify({ base: baseSpec, head: { branch, sha: headSha, dirty }, seconds: (Date.now() - t0) / 1000, rows, errors: [...new Set(errors)] }, null, 2));
+const okCount = results.filter((r) => r.ok).length;
+const summary = `_pnpm shots: ${sceneNames.length} scene(s)${skins[0] ? `, ${skins.length} skin(s)` : ""} in ${total} (${okCount}/${results.length} captures ok${problems.length ? `, ${problems.length} PROBLEM(S)` : ""})._`;
+const banner = problems.length ? `\n> **⚠ ${problems.length} blank or failed output(s), do not use these as evidence:**\n${problems.map((p) => `> - ${p}`).join("\n")}\n` : "";
+writeFileSync(join(out, "report.md"), `${banner}\n${md}\n${summary}\n`);
+writeFileSync(join(out, "report.json"), JSON.stringify({ base: baseSpec, head: { branch, sha: headSha, dirty }, seconds: (Date.now() - t0) / 1000, problems, rows, errors: [...new Set(errors)] }, null, 2));
 console.log(`\n${md}\n${summary}`);
 console.log(`\nfiles: ${relOut}/{before,after,compare}/  ·  report: ${relOut}/report.md`);
 if (ignored) console.log(`note: ${relOut}/ is gitignored, so those image links only work once the files are committed. For a PR, write somewhere committable: pnpm shots --out docs/img/<task>`);
 if (errors.length) console.log(`\npage errors (${new Set(errors).size} distinct):\n  ${[...new Set(errors)].slice(0, 10).join("\n  ")}`);
-const failedAll = results.filter((r) => !r.ok);
 cleanup();
-process.exit(failedAll.length && failedAll.length === results.length ? 1 : 0);
+if (problems.length) {
+  console.error(`\n✖✖✖ pnpm shots FAILED: ${problems.length} blank or failed output(s). These are not evidence:\n${problems.map((p) => `  - ${p}`).join("\n")}\n`);
+  process.exit(1);
+}
+process.exit(0);
