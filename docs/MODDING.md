@@ -47,7 +47,8 @@ One `mod.json`, validated on load with **Effect Schema**. Errors are friendly an
     "thoughts":  { "add": [{ "id": "wd-t1", "kind": "protester", "when": "always", "text": "My sign is biodegradable. My anger is not." }] },
     "rivals":    { "override": [{ "id": "sirocco", "name": "Sirocco (Hydrated Edition)" }] },
     "events":    { "add": [ /* arcs as JSON statecharts, see docs/mods/arcs.md */ ] },
-    "buildings": { "add": [ /* data: size, price, upkeep, effects; model = "primitive recipe" or a bundled .glb (FLT-13 pipeline) */ ] }
+    "buildings": { "add": [ /* data: size, price, upkeep, effects; model = "primitive recipe" or a bundled .glb (FLT-13 pipeline) */ ] },
+    "disasters": { "add": [ /* JSON statecharts (FLT-17): warning, active, cleanup, aftermath; see docs/DISASTERS.md and mods/base-disasters */ ] }
   },
   "assets": { "sign.png": "data:image/png;base64,…" }
 }

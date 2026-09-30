@@ -13,7 +13,7 @@ import { setupEffect } from "@xstate/effect";
 import type { AnyStateMachine } from "xstate";
 import { passes, normalize, type GuardEnv } from "../verbs";
 import { step, type Stepped } from "../machines/run";
-import type { Call, DisasterContext, DisasterDef, DisasterStored, StateNode, TransitionDef } from "./types";
+import type { Call, DisasterContext, DisasterDef, DisasterStored, Json, StateNode, TransitionDef } from "./types";
 
 const Stats = Schema.Record(Schema.String, Schema.Number);
 const beat = { tick: Schema.Number, day: Schema.Number, roll: Schema.Number, work: Schema.Number, stats: Stats };
@@ -59,7 +59,7 @@ export type DisasterEvent = Beat | Chose;
 export interface VerbCall {
   type: "CALL";
   verb: string;
-  params: Record<string, never>;
+  params: Record<string, Json>;
 }
 
 interface Enq {
@@ -122,7 +122,7 @@ export const startStored = (def: DisasterDef, day: number, tick: number): Disast
 });
 
 /** One beat: the next stored state and the verbs to run, in order. */
-export function stepDisaster(def: DisasterDef, stored: DisasterStored, event: DisasterEvent): { stored: DisasterStored; calls: { verb: string; params: Record<string, never> }[] } {
+export function stepDisaster(def: DisasterDef, stored: DisasterStored, event: DisasterEvent): { stored: DisasterStored; calls: { verb: string; params: Record<string, Json> }[] } {
   const r = step(machineOf(def), stored as never, event as never) as Stepped<DisasterMachine>;
   return {
     stored: r.stored as unknown as DisasterStored,

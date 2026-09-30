@@ -15,14 +15,18 @@ import type { GameState } from "../types";
 import { isFinal, startStored, stepDisaster, type DisasterEvent } from "./compile";
 import { offerFlag, pickFlag } from "./names";
 import { DISASTERS, disasterById, PACKS } from "./pack";
-import { RISKS, type DisasterDef, type DisasterRun, type DisastersState, type Risk, type TimedEffect } from "./types";
+import { RISKS, type DisasterDef, type DisasterRun, type DisastersState, type Json, type Risk, type TimedEffect } from "./types";
 import { validatePack } from "./validate";
 
 /** What a new game starts with. Tests start with disasters off (`createInitialState`), and the app sets this on a new lab. */
 export const DEFAULT_RISK: Risk = "rare";
 
-/** Odds per day per disaster, before the disaster's own weight (rare is about one in 80 days across the first wave). */
-export const RATE: Record<Risk, number> = { off: 0, rare: 0.004, normal: 0.01, chaos: 0.05 };
+/**
+ * Odds per day that *something* goes wrong, for a lab of average risk (the mean weight of the disasters that could
+ * happen today): about two a year on rare, five on normal, a couple a month on chaos. The odds do not depend on how many
+ * disasters are installed: a mod that adds ten makes the mix richer, not the setting angrier. The weights only decide which.
+ */
+export const RATE: Record<Risk, number> = { off: 0, rare: 0.006, normal: 0.015, chaos: 0.06 };
 /** Days between one random disaster and the next, and how many may be under way at once. */
 const SPACING: Record<Risk, number> = { off: 0, rare: 14, normal: 8, chaos: 2 };
 const MAX_RUNNING: Record<Risk, number> = { off: 0, rare: 1, normal: 2, chaos: 3 };
@@ -119,8 +123,8 @@ function pickTarget(state: GameState, rng: Rng, def: DisasterDef): number {
 }
 
 /** Run the verbs a transition (or a start) called, in order. */
-function apply(state: GameState, rng: Rng, run: DisasterRun, calls: readonly { verb: string; params: Record<string, unknown> }[]) {
-  for (const c of calls) runVerb({ state, rng, run }, { type: c.verb, params: c.params as Record<string, never> });
+function apply(state: GameState, rng: Rng, run: DisasterRun, calls: readonly { verb: string; params: Record<string, Json> }[]) {
+  for (const c of calls) runVerb({ state, rng, run }, { type: c.verb, params: c.params });
 }
 
 /**
@@ -176,11 +180,11 @@ function answered(state: GameState, def: DisasterDef, run: DisasterRun): string 
   return key;
 }
 
-/** Wrap up a disaster that reached its final state: everyone back to work, its effects over, a line in the history. */
+/** Wrap up a disaster that reached its final state: everyone back to work, its open-ended effects over (the ones with a `days` outlive it), a line in the history. */
 function end(state: GameState, def: DisasterDef, run: DisasterRun) {
   const d = state.disasters;
   releaseStaff(state, run.id);
-  d.effects = d.effects.filter((e) => e.owner !== run.id);
+  d.effects = d.effects.filter((e) => e.owner !== run.id || e.until >= 0);
   d.runs = d.runs.filter((r) => r !== run);
   d.history.push({ id: run.id, name: def.name, startedDay: run.startedDay, endedDay: state.day });
   if (d.history.length > 20) d.history.splice(0, d.history.length - 20);
@@ -263,21 +267,26 @@ export function dailyDisasters(state: GameState) {
     d.effects = d.effects.filter((e) => live(state, e));
   }
   if (d.risk === "off" || d.runs.length >= MAX_RUNNING[d.risk] || state.day - d.lastStart < SPACING[d.risk] || state.goals.value === "lost") return;
+  const quicken = d.risk === "chaos" ? CHAOS_QUICKENING : 1;
+  const eligible = definitions().filter(
+    (def) =>
+      !d.runs.some((r) => r.id === def.id) &&
+      state.day >= (def.odds.minDay ?? 0) * quicken &&
+      state.day - (d.lastByDef[def.id] ?? -999) >= (def.odds.gapDays ?? 0) * quicken &&
+      canTrigger(state, def.id).ok,
+  );
+  if (eligible.length === 0) return;
+  const weights = eligible.map((def) => weightOf(state, def));
+  const total = weights.reduce((a, b) => a + b, 0);
   const rng = createRng(d.rngState);
-  const chaos = d.risk === "chaos";
-  let chosen: string | null = null;
-  for (const def of definitions()) {
-    if (d.runs.some((r) => r.id === def.id)) continue;
-    const quicken = chaos ? CHAOS_QUICKENING : 1;
-    if (state.day < (def.odds.minDay ?? 0) * quicken) continue;
-    if (state.day - (d.lastByDef[def.id] ?? -999) < (def.odds.gapDays ?? 0) * quicken) continue;
-    if (!canTrigger(state, def.id).ok) continue;
-    // Every eligible disaster rolls, whether or not one has already won today: the stream does not depend on the order.
-    const hit = rng.next() < RATE[d.risk] * weightOf(state, def);
-    if (hit && chosen === null) chosen = def.id;
+  // One roll for "does anything happen today", and only if it does, a second to say what.
+  let chosen: DisasterDef | null = null;
+  if (rng.next() < (RATE[d.risk] * total) / eligible.length) {
+    let at = rng.next() * total;
+    chosen = eligible.find((_, i) => (at -= weights[i]!) < 0) ?? eligible[eligible.length - 1]!;
   }
   d.rngState = rng.state();
-  if (chosen) triggerDisaster(state, chosen, { forced: false });
+  if (chosen) triggerDisaster(state, chosen.id, { forced: false });
 }
 
 // ---- For the UI (FLT-32) -----------------------------------------------------------------------------------------

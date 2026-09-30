@@ -38,6 +38,7 @@ flowchart LR
 | **rival** (one per rival lab) | `src/sim/race/rival.ts` | `idle`, `training`, `releasing`, `cooldown` | `WEEK {aggro, pace, chase, four dice, name}`, `SHOCK {capability, hype, momentum}` | `RELEASED`, `POACH` | personality, capability, hype, weeks left, open weights?, momentum, latest model |
 | **era** | `src/sim/race/era.ts` | `era1`, `era2`, `era3`, `era4` | `DAY {mult}` | `ERA_REACHED` | the peak multiplier (the ratchet) |
 | **staff** (one per staffer) | `src/sim/machines/staff.ts` | `arriving`, `idle`, `going`, `working`, `leaving`, `gone` (final) | `ARRIVED`, `TASK`, `DONE`, `LOST`, `FIRED`, `EXITED` | none: the driver acts on the state entered | nothing (the task, route, patrol zone and counters stay plain fields on the staffer) |
+| **disaster** (one per running disaster; `src/sim/disasters/`) | compiled from JSON (`mods/base-disasters/mod.json`) | the content's own: `warning`, `active`, `cleanup`, `aftermath`, `done` (final) | `TICK {tick, day, roll, work, stats}`, `CHOSE {..., choice}` | `CALL {verb, params}`: the driver runs the Vocabulary verb (`sim/verbs.ts`) | id, start day, when the state began, cleanup progress and staff-hours |
 | **mood** (one per researcher and visitor) | `.../mood.ts` | `content`, `slumped`, `miserable`, `resigned` (final) | `LIFT`, `SLUMP`, `CRASH`, `DAY` | `RESIGNED` | the count of miserable days in a row |
 
 Arithmetic stays in plain functions: money per day, the training gain (`spend * (0.75 + 0.25 * morale)`), movement along a route, routing itself.
@@ -351,4 +352,30 @@ flowchart LR
 | A scripted player (`sim/playthrough.test.ts`, which now hires staff) | Era 2 around day 70, Era 3 and the win around day 470 to 520, Era 4 around day 1060 to 1110 (about 60 days later than before: repairs, slop and salaries are not free) |
 
 Determinism: the goldens (`sim/golden.test.ts`) were re-recorded on purpose: every building draws a breakdown die each day, and the script now hires a few staff and paints a zone, so the digests also cover slop, the payroll and every building's reliability.
+
+## Disasters (FLT-17): acts of God as JSON statecharts
+
+The full page is `docs/DISASTERS.md`. In one breath: a disaster is data (`mods/base-disasters/mod.json`, FLT-15 section shape); `compile.ts` turns each into an XState machine; `driver.ts` steps every running one once a tick with the pure `transition()` and runs what it emits (`CALL {verb, params}`) through the Vocabulary in `sim/verbs.ts`; cards become ordinary event cards; the presentation (camera, shake, sound) travels as read-only cues on `state.disasters.cues`.
+
+```mermaid
+flowchart LR
+  DICE["dailyDisasters<br/>(off / rare / normal / chaos,<br/>own random stream)"] -->|"triggerDisaster"| RUN
+  MENU["Disasters menu (FLT-32),<br/>?disaster=, __flt.disaster()"] -->|"disaster command"| RUN
+  RUN["state.disasters.runs[i]<br/>{ machine: { value, context }, target, fires, diverts, card }"]
+  T["tick: updateDisasters"] -->|"TICK { tick, day, roll,<br/>work, stats }"| RUN
+  CARD["answered card:<br/>pick flag"] -->|"CHOSE { choice }"| RUN
+  RUN -->|"CALL { verb, params }"| V["verbs.ts<br/>staff.divert, compute.drain, cost.spike,<br/>building.fire, camera.focus, card, news ..."]
+  V --> W[("World: staff, effects,<br/>buildings, news, toasts, cues")]
+  W -->|"computeFactor, upkeepFactor,<br/>revenueEffect"| ECON["economy.ts, training.ts"]
+  W -->|"state.disasters.cues"| FX["watch.ts -> FxDirector, SoundLayer"]
+```
+
+| Measurement | Result |
+|---|---|
+| `updateDisasters` with nothing running | one length check |
+| `updateDisasters`, one to three disasters running | about 15 to 45 microseconds a tick (asserted under 0.15 ms) |
+| A year in a working lab, random disasters (6 seeds) | off 0; rare 1.7 (0 to 5); normal 5.5 (2 to 10); chaos 24 (20 to 35) |
+| The existing perf tests | unchanged within noise (the 800-walker test reads 0.66 to 0.78 ms on this box for both `main` and the branch, against its 0.5 budget, doubled on CI) |
+
+Determinism: the disasters draw from `state.disasters.rngState`, not the main stream, and tests start with the setting `off`, so the golden digests and the playthrough tests are untouched. A separate test runs 90 days of chaos twice and compares the World byte for byte, and another saves and loads a World mid-swarm.
 

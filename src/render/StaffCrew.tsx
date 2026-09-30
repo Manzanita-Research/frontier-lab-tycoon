@@ -83,9 +83,9 @@ export function StaffCrew() {
       if (s.machine.value === "leaving" && !moving) continue;
       if (s.divert && phaseName !== "leaving") {
         // Panic pulse: the "!" hops while they jog to the incident.
-        const top = (s.job === "janitor" ? 1.1 : 1.85) + Math.abs(Math.sin(t * 7 + phase)) * 0.09;
-        set(bangStem.current, nbang, x, top + 0.2, z, 0, 0.075, 0.26, 0.075);
-        set(bangDot.current, nbang, x, top - 0.03, z, 0, 0.095, 0.095, 0.095);
+        const top = (s.job === "janitor" ? 1.5 : 2.3) + Math.abs(Math.sin(t * 7 + phase)) * 0.1;
+        set(bangStem.current, nbang, x, top + 0.52, z, 0, 0.14, 0.44, 0.14);
+        set(bangDot.current, nbang, x, top, z, 0, 0.17, 0.17, 0.17);
         nbang++;
       }
       if (s.job === "janitor") {

@@ -21,6 +21,7 @@ import { dailyEvents } from "./events";
 import { fillTemplate } from "./format";
 import { step } from "./machines/run";
 import { addNews, addToast, templateVars } from "./news";
+import { clampDiscourse } from "./protest";
 import { findSpot } from "./race/actions";
 import { rivalMachine } from "./race/rival";
 import type { Rng } from "./rng";
@@ -125,6 +126,10 @@ export const STATS: Record<string, (state: GameState, run: DisasterRun | null) =
   clusters: (s) => s.buildings.filter((b) => b.kind === "cluster" && alive(b)).length,
   halls: (s) => s.buildings.filter((b) => b.kind === "hall" && alive(b)).length,
   gateways: (s) => s.buildings.filter((b) => b.kind === "gateway" && alive(b)).length,
+  /** The power plants of the race (a compute auction unlocks them): what a brownout has to work with. */
+  gas: (s) => s.buildings.filter((b) => b.kind === "gas" && alive(b)).length,
+  solar: (s) => s.buildings.filter((b) => b.kind === "solar" && alive(b)).length,
+  datacenters: (s) => s.buildings.filter((b) => b.kind === "datacenter" && alive(b)).length,
   broken: (s) => s.buildings.filter((b) => b.broken).length,
   security: (s) => crew(s, "security"),
   sre: (s) => crew(s, "sre"),
@@ -364,11 +369,11 @@ export const VERBS: Record<string, VerbDef> = {
     run: (env, p) => addEffect(env, "auditor", p.mult as number, p.days as number | undefined),
   },
   "effects.end": {
-    doc: "End this disaster's timed effects (drain, spike, revenue, auditor), all of them or one `kind`.",
+    doc: "End this disaster's open-ended effects (the ones with no `days`: drain, spike, revenue, auditor), all of them or one `kind`. Effects with a `days` run their course.",
     spec: { kind: "string?" },
     run: (env, p) => {
       const owner = ownerOf(env);
-      env.state.disasters.effects = env.state.disasters.effects.filter((e) => e.owner !== owner || (p.kind !== undefined && e.kind !== p.kind));
+      env.state.disasters.effects = env.state.disasters.effects.filter((e) => e.owner !== owner || e.until >= 0 || (p.kind !== undefined && e.kind !== p.kind));
     },
   },
   "building.fire": {
@@ -424,6 +429,11 @@ export const VERBS: Record<string, VerbDef> = {
     doc: "Add to regulatory heat (0 to 100, starts at 0). FLT-19's auditors read it.",
     spec: { amount: "number" },
     run: (env, p) => void (env.state.disasters.heat = clamp100(env.state.disasters.heat + (p.amount as number))),
+  },
+  "discourse.delta": {
+    doc: "Add to the water discourse (the stat behind the protesters at the gate; 4 points is one protester).",
+    spec: { amount: "number" },
+    run: (env, p) => void (env.state.waterDiscourse = clampDiscourse(env.state.waterDiscourse + (p.amount as number))),
   },
   "cash.delta": { doc: "Add to (or, negative, take from) the bank.", spec: { amount: "number" }, run: (env, p) => void (env.state.cash += p.amount as number) },
   "rival.leap": {
