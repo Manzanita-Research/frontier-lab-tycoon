@@ -121,7 +121,7 @@ describe("the token and string contract", () => {
     expect(tokenSheet(BASE_ID, {})).not.toContain("data-skin=");
   });
   it("picks the starting skin from ?skin=, then storage, then the default", () => {
-    expect(initialSkinId("?skin=geocities", "swag-drop")).toBe("geocities");
+    expect(initialSkinId("?skin=homepage-98", "swag-drop")).toBe("homepage-98");
     expect(initialSkinId("", "swag-drop")).toBe("swag-drop");
     expect(initialSkinId("?debug=1", null)).toBe(DEFAULT_SKIN);
     expect(DEFAULT_SKIN).toBe("frontier-95");
