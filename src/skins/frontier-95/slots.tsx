@@ -5,10 +5,11 @@ import { Arena, Inspector, Objectives, Staff, Stats, ThoughtsPanel, Training } f
 import { BuildBar, NewsControls, PhotoButton, Speed, Ticker } from "./taskbar";
 import { Assistant, Bubble, EraCard, EventCard, NewsArrival, Outcome, Toast } from "./messages";
 import { FrontPage, GroupChat, Mixer, NewsRoom, PhotoOverlay, SkinPicker } from "./apps";
+import { Benchmarks, Livestream, Voice } from "./leapfrog";
 
 const slots: SkinSlots = {
   Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, Bubble, ThoughtsPanel, Ticker, Toast, Assistant,
-  EventCard, Arena, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, NewsControls,
+  EventCard, Arena, Benchmarks, Voice, Livestream, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, NewsControls,
   NewsArrival, NewsRoom, Mixer,
 };
 export default slots;

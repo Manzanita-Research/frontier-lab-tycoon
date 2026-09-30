@@ -1,6 +1,6 @@
 // Frontier 95's windows: Lab Properties, the copy dialog, sticky notes, Properties of a walker, Task Mangler, Thoughts.txt.
 import { useState } from "react";
-import { Odometer, money } from "../kit";
+import { Odometer, money, useSlots } from "../kit";
 import { useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import { Ico, PixelPortrait } from "./icons";
@@ -277,15 +277,21 @@ export function Inspector({ inspector: who, actions }: SlotPropsMap["Inspector"]
 }
 
 /** "Task Mangler": the Frontier Arena as a process list (Lab, Model, Score, Δ), with the R&D multiplier as the performance line. */
-export function Arena({ arena, actions }: SlotPropsMap["Arena"]) {
+export function Arena({ arena, leapfrog, layout, actions }: SlotPropsMap["Arena"]) {
   const t = useT();
+  const { Benchmarks } = useSlots();
   const rd = arena.rd;
+  const bench = leapfrog.enabled;
+  // With Release Leapfrog on, the leaderboard is the live part of the race: it opens first, and the tab lights up on a launch.
+  const [tab, setTab] = useState<"perf" | "bench">("bench");
+  const onBench = bench && tab === "bench" && arena.open;
+  const launched = leapfrog.rows.some((r) => r.flash);
   return (
     <Win
-      className={`f95-tasks ${arena.open ? "open" : ""} ${arena.alert ? "alert" : ""}`}
+      className={`f95-tasks ${arena.open ? "open" : ""} ${arena.alert ? "alert" : ""} ${onBench ? "wide" : ""} ${launched ? "launched" : ""}`}
       title={
         <>
-          Task Mangler<span className="f95-long"> — {t("arena.title")}</span>
+          Task Mangler<span className="f95-long"> — {onBench ? t("bench.title") : t("arena.title")}</span>
         </>
       }
       label="Task Mangler"
@@ -301,7 +307,19 @@ export function Arena({ arena, actions }: SlotPropsMap["Arena"]) {
         <Blocks value={rd.eraPct} label={rd.nextText} />
         <small>{rd.nextText}</small>
       </div>
-      {arena.open && (
+      {arena.open && bench && (
+        <Tabs
+          label="Task Mangler"
+          active={tab}
+          onChange={setTab}
+          tabs={[
+            { id: "perf", label: t("stats.tab.arena") },
+            { id: "bench", label: launched ? `${t("bench.tab")} •` : t("bench.tab") },
+          ]}
+        />
+      )}
+      {onBench && <Benchmarks leapfrog={leapfrog} layout={layout} actions={actions} />}
+      {arena.open && !onBench && (
         <div className="f95-listwrap inset" role="table" aria-label={t("arena.title")}>
           <div className="f95-lhead" role="row">
             <span role="columnheader">{t("arena.colLab")}</span>
