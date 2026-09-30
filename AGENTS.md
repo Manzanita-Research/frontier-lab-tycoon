@@ -44,6 +44,7 @@ It builds `main` in a temporary worktree (cached by commit in `shots/.cache/`) a
 - `src/render/fx/`: the juice layer (camera director, particles, day/night, photo mode). It only reads the World; see the last section of `docs/ARCHITECTURE.md`.
 - `src/sim/disasters/` and `src/sim/verbs.ts`: disasters as JSON statecharts (`mods/base-disasters/mod.json`) plus the Vocabulary of generic guards and verbs they call. Adding a disaster is a JSON entry; read `docs/DISASTERS.md`.
 - `mods/base-leapfrog/`: the Release Leapfrog content pack (FLT-27, the FLT-15 section shape; loaded by `src/content/leapfrog.ts`), its machines in `src/sim/race/leapfrog/`; asleep unless `enableLeapfrog(state)` (the app does it, `?leapfrog=off` skips it).
+- `mods/base-auditors/`: Evals Without Borders (FLT-19), the external auditors: a chart in `src/sim/auditors/`, visitor groups (not walkers) in `src/sim/groups.ts`, the ReportCard and AuditPin slots; on at the Scrutiny level (`enableAuditors`, `?auditors=off` skips it). See its README.
 - `src/sim/machines/`: the XState machines (training, economy, goals, event arcs, walkers, moods, staff). `src/sim/race/`: the Race (rival labs, the Arena, eras, the R&D multiplier, open weights, the compute auction, funding rounds). `src/app/`: the Effect shell (Sim and Frames services, the app machine) and how React reads it. See `docs/ARCHITECTURE.md`.
 
 If you need to change a shared type in `src/sim/types.ts`, keep the change additive and mention it in your PR.
