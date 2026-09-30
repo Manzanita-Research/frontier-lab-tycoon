@@ -2,7 +2,7 @@
 // scoreboard whose rows slide to their new places every week. The scoreboard has a second tab, the Release Leapfrog benchmark
 // table (so the Layout does not place the Benchmarks or Voice slots on their own).
 import { useState } from "react";
-import { BenchTable, Odometer, VoiceGraph, useT } from "../kit";
+import { BenchTable, Odometer, VoiceGraph, useT, useWidget } from "../kit";
 import type { SlotPropsMap } from "../types";
 
 const ROW = 27;
@@ -12,6 +12,8 @@ export function Arena({ arena, leapfrog, layout }: SlotPropsMap["Arena"]) {
   const rd = arena.rd;
   const [tab, setTab] = useState<"arena" | "bench">("arena");
   const [graph, setGraph] = useState(false);
+  useWidget(["arena", "benchmarks"], (id) => setTab(id === "benchmarks" ? "bench" : "arena"));
+  useWidget("traffic", () => setGraph(true));
   const bench = leapfrog.enabled;
   const voice = leapfrog.voice;
   const lead = leapfrog.rows.find((r) => r.you);

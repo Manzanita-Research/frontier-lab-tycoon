@@ -2140,3 +2140,79 @@
     width: 100%;
   }
 }
+
+/* ---- FLT-63: Facilities with a heading per section, and Go to URL… as an address bar ---- */
+[data-skin="homepage-98"] {
+  .gc-row.view-facilities {
+    align-items: flex-end;
+    gap: 12px;
+  }
+  .gc-row.view-run {
+    align-items: flex-start;
+    overflow: visible;
+  }
+  .gc-back {
+    flex: none;
+    align-self: center;
+    white-space: nowrap;
+  }
+  .gc-section {
+    flex: none;
+    h4 {
+      margin: 0 0 3px;
+      font: bold 13px "Times New Roman", Times, serif;
+      color: #800000;
+      text-decoration: underline;
+      white-space: nowrap;
+    }
+  }
+  .gc-section-row {
+    display: flex;
+    gap: 6px;
+  }
+  .gc-folder .nm::after {
+    content: " \bb";
+  }
+  .gc-run {
+    flex: 1;
+    max-width: 540px;
+    padding: 6px 8px;
+    border: 2px inset #c0c0c0;
+    background: #fff;
+    color: #000;
+    .runbox-field label,
+    .runbox-go {
+      border-radius: 0;
+    }
+    .runbox-list {
+      max-height: min(220px, 32dvh);
+    }
+    .runbox-name {
+      color: #0000ee;
+      text-decoration: underline;
+    }
+  }
+}
+[data-skin="homepage-98"] {
+  @media (max-width: 640px) {
+    /* On a phone Facilities and the address bar take a full line under the arrows. */
+    .gc-row.view-facilities,
+    .gc-row.view-run {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+    .gc-row.view-run {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .gc-row.view-run .gc-back {
+      align-self: flex-start;
+    }
+    .gc-run {
+      max-width: none;
+    }
+    .gc-section h4 {
+      font-size: 12px;
+    }
+  }
+}

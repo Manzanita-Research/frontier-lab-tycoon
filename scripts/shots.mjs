@@ -336,6 +336,36 @@ async function runStep(page, step) {
       return;
     }
   }
+  if ("type" in step) {
+    // FLT-63: type into a field (the Run box), then press Enter if asked.
+    try {
+      await page.fill(step.into, step.type, { timeout: step.optional ? 1500 : 5000 });
+      if (step.enter) await page.press(step.into, "Enter");
+    } catch (e) {
+      if (!step.optional) throw e;
+    }
+    return;
+  }
+  if ("drag" in step) {
+    // FLT-63: a real mouse drag across tiles [x, z] (the path tool laying a run). `hold` keeps the button down for the shot.
+    const pts = await page.evaluate((tiles) => {
+      const v = window.__fltProbe?.().view;
+      const half = window.__flt.sim.world.grid.w / 2;
+      if (!v?.rect || v.matrix.length !== 16) return null;
+      const m = v.matrix;
+      return tiles.map(([x, z]) => {
+        const X = x + 0.5 - half, Z = z + 0.5 - half;
+        const cx = m[0] * X + m[8] * Z + m[12], cy = m[1] * X + m[9] * Z + m[13], cw = m[3] * X + m[11] * Z + m[15];
+        return [v.rect.left + ((cx / cw + 1) / 2) * v.rect.width, v.rect.top + ((1 - cy / cw) / 2) * v.rect.height];
+      });
+    }, step.drag);
+    if (!pts?.length) throw new Error("drag: no camera to aim with (window.__fltProbe().view)");
+    await page.mouse.move(pts[0][0], pts[0][1]);
+    await page.mouse.down();
+    for (const [x, y] of pts.slice(1)) await page.mouse.move(x, y, { steps: 6 });
+    if (!step.hold) await page.mouse.up();
+    return;
+  }
   if ("select" in step) {
     const [kind, name] = step.select.split(":");
     const id = await page.evaluate(([kind, name]) => {
@@ -385,6 +415,7 @@ async function capture(side, sceneName, skin) {
         const tick = () => (window.__shotFrames++, requestAnimationFrame(tick));
         requestAnimationFrame(tick);
       });
+      if (scene.storage) await page.addInitScript((kv) => { for (const [k, v] of Object.entries(kv)) localStorage.setItem(k, v); }, scene.storage);
       await page.goto(sceneUrl(side.url, scene, sk), { waitUntil: "networkidle" });
       await page.waitForFunction(() => window.__flt?.sim?.world, null, { timeout: 60_000 });
       const frames = Number(args.frames ?? scene.frames ?? sceneData.defaults.frames);

@@ -12,10 +12,12 @@ import { NewsDesk } from "../../newsroom/desk";
 import { frontPage, recap } from "../../newsroom/edition";
 import { loadRoom, pressCamera, publish, resetRoom, roomAtom, viewRoom } from "../../newsroom/state";
 import { fx } from "../../render/fx/state";
+import { isBeat, skipBeat } from "../../render/fx/beat";
 import { debugParams } from "../../app/game";
 import { setPhoto, takePhoto, togglePhoto } from "../juice/photo";
 import { chatCountAtom } from "./state";
 import { useShareCard, useTakeoverTitle } from "../share/share";
+import { useStreak } from "../share/social";
 import type { HudVM } from "./types";
 import { defs } from "../../sim/defs";
 
@@ -60,7 +62,11 @@ function useHotkeys(vm: HudVM) {
         // A focused button would also treat Space as a click.
         (document.activeElement as HTMLElement | null)?.blur?.();
         send({ type: "TOGGLE_PAUSE" });
-      } else if (e.key === "Escape") send({ type: "SET_TOOL", tool: null });
+      } else if (e.key === "Escape") {
+        // Esc skips a camera beat first (FLT-56), then puts the tool away.
+        if (isBeat()) skipBeat();
+        else send({ type: "SET_TOOL", tool: null });
+      }
       else if (/^[1-9]$/.test(e.key)) {
         const tool = TOOLS[Number(e.key) - 1]!;
         if (earned.current.has(tool)) send({ type: "SET_TOOL", tool });
@@ -68,6 +74,61 @@ function useHotkeys(vm: HudVM) {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
+  }, []);
+}
+
+/** Put the tool down and stop painting a zone. */
+function endMode() {
+  const c = appNow();
+  if (c?.zone != null) send({ type: "SET_ZONE", id: null });
+  if (c?.tool) send({ type: "SET_TOOL", tool: null });
+}
+const inMode = () => {
+  const c = appNow();
+  return !!c && (c.tool !== null || c.zone !== null);
+};
+const RIGHT_CLICK_SLOP = 6;
+
+/**
+ * FLT-63: Esc and a right-click always end the mode (a tool in hand, a zone being painted), and do nothing else: no
+ * browser context menu, no closing a window or a card behind it. A right-drag still pans the map.
+ */
+function useModeExits() {
+  useEffect(() => {
+    let down: { x: number; y: number } | null = null;
+    let endedAt = -Infinity;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || !inMode()) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      endMode();
+    };
+    const onDown = (e: PointerEvent) => {
+      down = e.button === 2 && inMode() ? { x: e.clientX, y: e.clientY } : null;
+    };
+    const onUp = (e: PointerEvent) => {
+      if (e.button !== 2 || !down) return;
+      const still = Math.hypot(e.clientX - down.x, e.clientY - down.y) <= RIGHT_CLICK_SLOP;
+      down = null;
+      if (still && inMode()) {
+        endMode();
+        endedAt = performance.now();
+      }
+    };
+    // The menu comes on the press on some systems and on the release on others: refuse it either way while in a mode.
+    const onMenu = (e: MouseEvent) => {
+      if (down || inMode() || performance.now() - endedAt < 400) e.preventDefault();
+    };
+    window.addEventListener("keydown", onKey, true);
+    window.addEventListener("pointerdown", onDown, true);
+    window.addEventListener("pointerup", onUp, true);
+    window.addEventListener("contextmenu", onMenu, true);
+    return () => {
+      window.removeEventListener("keydown", onKey, true);
+      window.removeEventListener("pointerdown", onDown, true);
+      window.removeEventListener("pointerup", onUp, true);
+      window.removeEventListener("contextmenu", onMenu, true);
+    };
   }, []);
 }
 
@@ -129,7 +190,9 @@ function useNewsDesk(snap: Snapshot) {
     const result = desk.poll(sim.world);
     if (result.reset) {
       pressCamera.pending.length = 0;
-      resetRoom();
+      // A loaded save (FLT-65) is a lab coming back: its archive is still on the shelf. A new lab starts a fresh one.
+      if (sim.loaded === sim.world) loadRoom();
+      else resetRoom();
     }
     if (result.editions.length) pressCamera.pending.push(result.editions);
   }, [snap]);
@@ -182,10 +245,13 @@ function useOverlays(vm: HudVM) {
   useAutoPause("mixer", vm.sound.open);
   useAutoPause("arena", vm.arena.open && vm.layout.compact);
   useAutoPause("drama", vm.drama.open);
+  useAutoPause("saves", vm.saves.open || vm.saves.modPrompt !== null);
+  useAutoPause("welcome", vm.saves.welcome !== null);
 }
 
 export function useHudEffects(vm: HudVM, snap: Snapshot) {
   useOverlays(vm);
+  useModeExits();
   useHotkeys(vm);
   usePhotoKeys(vm);
   useChatPlayback();
@@ -193,4 +259,15 @@ export function useHudEffects(vm: HudVM, snap: Snapshot) {
   useEffect(startDrama, []);
   useShareCard(vm);
   useTakeoverTitle(vm);
+  useStreak(snap.day);
+  useBeatStage(vm.beat !== null);
+}
+
+/** A camera beat clears the stage (FLT-56): `body.beat` fades the HUD out (beat.css) and the app holds the toasts. */
+function useBeatStage(on: boolean) {
+  useEffect(() => {
+    document.body.classList.toggle("beat", on);
+    send({ type: "HOLD_TOASTS", on });
+    return () => document.body.classList.remove("beat");
+  }, [on]);
 }

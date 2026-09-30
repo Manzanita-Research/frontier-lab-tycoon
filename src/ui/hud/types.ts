@@ -147,6 +147,51 @@ export interface BuildItemVM {
   isPath: boolean;
   /** A tile that opens a window instead of picking a tool ("staff", "senate"): never the tool in your hand. */
   panel?: boolean;
+  /**
+   * FLT-63: where it goes in the Start menu. `tools` (Path, Bulldoze) stay at the top level; the rest are the groups of
+   * the "Facilities ▸" submenu, in this order: `compute`, `research`, `amenities`, `offices`. The kit's `facilityGroups`
+   * sorts a list of items into them. Absent: `amenities`.
+   */
+  group?: FacilityGroupVM;
+}
+
+/** FLT-63: the Start menu's groups. See `BuildItemVM.group`. */
+export type FacilityGroupVM = "tools" | "compute" | "research" | "amenities" | "offices";
+
+/**
+ * FLT-63: the tool in your hand, as a mode: what the hint says and how it ends. `sticky` modes (Path, Bulldoze, painting a
+ * patrol zone) stay on after each tile; a building drops out after one placement (Shift keeps it). Esc, a right-click, the
+ * tool again or another tool always ends it. The host draws the hint ("Esc to stop building") near the pointer, or a
+ * **Done ✕** button on touch screens; a skin only restyles `.mode-hint` / `.mode-done`, and may relabel them (strings
+ * `mode.*`).
+ */
+export interface PlaceModeVM {
+  kind: "path" | "bulldoze" | "building" | "zone";
+  /** The tool ("path", "hall", ...), or null while painting a zone. */
+  tool: BuildKindVM | null;
+  /** "Path", "Training Hall", "Kevin's patrol". */
+  name: string;
+  sticky: boolean;
+}
+
+/**
+ * FLT-63: a UI widget the Start menu's "Run…" can open (the Run dialog in Frontier 95): a window, a panel or a tab.
+ * `actions.openWidget(id)` opens it (never shuts it), and a slot that keeps its own open state hears about it through
+ * the kit's `useWidget(id, open)`. Only what the lab has earned is listed.
+ */
+export interface WidgetVM {
+  /** "properties", "finance", "arena", "benchmarks", "thoughts", "traffic", "discourse", "papers", "news", "staff", "senate", "disasters", "drama", "mods", "help", "display", "sound". */
+  id: string;
+  /** "Thoughts" */
+  name: string;
+  /** What to type in a Run box: "thoughts.txt", "arena.exe". */
+  file: string;
+  /** One line for the list. */
+  blurb: string;
+  /** An icon id (the build icons' ids plus the widgets' own: "arena", "thoughts", "news", ...). */
+  icon: string;
+  /** Other names a Run box accepts ("finance", "money"). Lower case. */
+  aliases: string[];
 }
 
 export interface BuildTipVM {
@@ -471,6 +516,15 @@ export interface BillVM {
   tally: string | null;
   /** The chance a day that someone opens the file properties ("0.4% a day"), while the law stands. */
   leakText: string | null;
+  /**
+   * FLT-56, the leak-risk meter: 0 to 1, the odds the file properties leak before the law sunsets (the draft as ticked,
+   * at today's heat and trust; the law's days left once it stands), its text ("34% before the sunset") and a label.
+   */
+  risk: number;
+  riskText: string;
+  riskLabel: string;
+  /** FLT-56: a reporter is asking about the file ("The story runs in 7 days") and the bury button (`actions.buryLeak`). Null: nobody is. */
+  warning: { text: string; daysText: string; buryText: string; canBury: boolean } | null;
   /** What the law does to each rival, while it stands. */
   rivals: BillRivalVM[];
 }
@@ -505,7 +559,8 @@ export interface TrackerSenatorVM {
 export interface TrackerVM {
   /** "recess", "campaign", "rollCall", "passed", "failed" (or "dormant"). */
   stage: string;
-  motion: { id: string; title: string; summary: string; labSide: "aye" | "nay"; labSideText: string } | null;
+  /** `stakes` (FLT-56): what passing and failing would do, a line each (null: the motion does not say). */
+  motion: { id: string; title: string; summary: string; labSide: "aye" | "nay"; labSideText: string; stakes: { pass: string; fail: string } | null } | null;
   /** "Roll call in 3 days", "In recess", "Passed 2–1" */
   status: string;
   /** Lobbying is open: `actions.lobby(id)`. */
@@ -864,11 +919,79 @@ export interface EndingVM {
   daily: string | null;
   /** The share card (1200×630 PNG): its preview once made, and what the last share did. */
   share: ShareVM;
+  /** Lab #1, #2, ... (FLT-57): a lab founded after the last one ended says so on the card. */
+  labNumber: number;
+  /**
+   * What to do now (FLT-57): every ending ends on one clear action. "refound": Found a new lab, one button per perk in
+   * `refound.perks` (`actions.foundLab(perk.id)`); "keepPlaying": time goes on (`actions.keepPlaying()`).
+   */
+  next: { action: "refound" | "keepPlaying"; label: string; prompt: string };
+  /** The next lab's name ("Reward Hacking Holdings 2: This Time It's Aligned") and the perks it may keep. Null unless `next.action` is "refound". */
+  refound: { name: string; labNumber: number; perks: RefoundPerkVM[] } | null;
+  /** Days played in a row on this device, from 2 up ("7-day streak"); null otherwise. */
+  streak: { days: number; text: string } | null;
+  /** This run was a friend's challenge: their result, and who won. */
+  versus: { line: string; verdict: "win" | "lose" | "tie"; text: string } | null;
+  /** The friend link: this seed and this result, nothing personal (`actions.copyLink()` copies it). */
+  link: string;
+}
+
+export interface RefoundPerkVM {
+  /** "founder" | "loyal" | "seed". */
+  id: string;
+  /** "Famous founder". */
+  label: string;
+  /** "The press knows your name now. Hype starts 25 higher." */
+  blurb: string;
+}
+
+/**
+ * The Memo (FLT-57). "coming": the countdown, one line a day until the card lands (not modal; hide it under a card).
+ * "extra": the extra edition, once a box is ticked: modal, holds time, closed with `actions.dismissMemo(key)`.
+ */
+export interface MemoVM {
+  phase: "coming" | "extra";
+  key: string;
+  daysLeft: number;
+  /** How far along the countdown is, 0 (the rumour) to 1 (on your desk). */
+  progress: number;
+  /** "The Memo · 3 days", "The Memo · tomorrow", "The Memo · today". */
+  title: string;
+  /** "Page two is the same chart, steeper." */
+  line: string;
+  extra: {
+    masthead: string;
+    kicker: string;
+    headline: string;
+    deck: string;
+    /** "Race" or "Slow Down": the box that was ticked. */
+    choice: string;
+    /** From now on: "Training +25%", "The protest grows every day". */
+    effects: string[];
+    /** Three named staff, out loud. */
+    reactions: { name: string; role: string; text: string }[];
+  } | null;
+}
+
+/** A friend's challenge (FLT-57), from the link they sent: shown when the game opens on their seed. Holds time until answered. */
+export interface ChallengeVM {
+  /** "Your friend's lab was Captured on day 212." */
+  line: string;
+  ask: string;
+  /** "Captured". */
+  ending: string;
+  tone: "good" | "bad" | "neutral";
+  /** "88 peak Vibes · 7 models". */
+  stats: string;
+  /** "Today's lab · Sep 30, 2026", or null. */
+  daily: string | null;
+  /** The button: "Beat it" (`actions.dismissChallenge()`). */
+  cta: string;
 }
 
 export interface ShareVM {
-  /** "idle" | "making" | "ready" (the card is made) | "shared" | "saved" (downloaded) | "copied" (the summary) | "error". */
-  status: "idle" | "making" | "ready" | "shared" | "saved" | "copied" | "error";
+  /** "idle" | "making" | "ready" (the card is made) | "shared" | "saved" (downloaded) | "copied" (the summary) | "linked" (the friend link, FLT-57) | "error". */
+  status: "idle" | "making" | "ready" | "shared" | "saved" | "copied" | "linked" | "error";
   /** The card, as an object URL, once made. */
   card: string | null;
   /** This device shares files (a phone): the button says Share, not Download. */
@@ -1086,6 +1209,24 @@ export interface SoundVM {
   cues: { id: string; label: string }[];
 }
 
+/**
+ * A camera beat (FLT-56) on screen: letterbox bars and a caption while the camera makes its move. Time is still
+ * running underneath; `actions.skipBeat()` (or Esc) ends it. `kind` is `exit` (a defection's conga line out of the
+ * gate), `huddle` (the auditors conferring before the report card) or `viral` (the hearing clip).
+ */
+export interface BeatVM {
+  id: number;
+  kind: string;
+  /** The small line in the top bar ("Breaking: a departure"). */
+  kicker: string;
+  caption: string;
+  /** A second line, or "". */
+  sub: string;
+  skipLabel: string;
+  /** FLT-56: a button the beat offers while it plays (the leak's "Bury it"): `actions.beatAction(id)`. Null: none. */
+  action: { id: string; label: string; enabled: boolean } | null;
+}
+
 export interface PhotoVM {
   on: boolean;
   /** "live" | "day" | "golden" | "night" | "" (pinned by a link) */
@@ -1183,7 +1324,7 @@ export interface FactionsVM {
   /** Newest first. */
   log: FactionLogVM[];
   /** Crowds at the gate right now; the water crowd has id "". */
-  gate: { id: string; name: string; color: string; count: number }[];
+  gate: GateCrowdVM[];
   /** "At the gate: 18 Water Discourse vs 12 Water Truthers Truthers", or "". */
   gateText: string;
   /** The folded panel's one line: "2 fans · 3 upset · Doomers marching". */
@@ -1192,6 +1333,29 @@ export interface FactionsVM {
   fans: number;
   angry: number;
   safety: { level: number; options: SafetyOptionVM[] };
+  /** FLT-56: the Comms statement, the lever the gate legend pulls (`actions.issueStatement(faction)`). */
+  statement: StatementVM;
+}
+
+/** One crowd at the gate (FLT-33), for the panel and the legend by the gate (FLT-56). */
+export interface GateCrowdVM {
+  id: string;
+  name: string;
+  color: string;
+  count: number;
+  /** A faction's crowd can be addressed with a statement; the water crowd is nobody's to address. */
+  addressable: boolean;
+}
+
+/** FLT-56: what a statement costs and whether Comms can put one out now. */
+export interface StatementVM {
+  ready: boolean;
+  /** "$15K". */
+  costText: string;
+  /** "Ready", or "Comms needs 3 days". */
+  waitText: string;
+  /** "Your Comms Rep writes it" or "The intern writes it (no Comms Rep)". */
+  writerText: string;
 }
 
 export interface SkinInfoVM {
@@ -1201,6 +1365,21 @@ export interface SkinInfoVM {
   description: string;
   version: string;
   /** URL of the preview image (may be empty). */
+  preview: string;
+  /** FLT-55: the name of the mod it came from (`?mod=`), absent for a built-in skin. */
+  mod?: string;
+}
+
+/** FLT-55: a mod asks to put on its own skin. Nothing changes until the player says yes. */
+export interface SkinOfferVM {
+  /** The skin's id and name ("good-boy-95", "Good Boy 95"). */
+  skin: string;
+  name: string;
+  /** The mod asking. */
+  mod: string;
+  modName: string;
+  description: string;
+  /** Preview image URL (may be empty). */
   preview: string;
 }
 
@@ -1230,6 +1409,68 @@ export interface ModsVM {
   errors: string[];
   /** Hash of the whole resolved content, or null when running the base game. */
   contentHash: string | null;
+}
+
+/** A save, as the Save/Load window and "Welcome back" show it (FLT-65). */
+export interface SaveSummaryVM {
+  /** "Gradient Descent Labs" */
+  lab: string;
+  /** "Y2 · Mar 5" */
+  date: string;
+  day: number;
+  /** "3 hours ago", "just now", "2 days ago" */
+  ago: string;
+  /** "45K" */
+  size: string;
+  /** The skin it was saved in ("Frontier 95"), or null. Loading puts it back on. */
+  skin: string | null;
+  /** Ids of the mods it was made with. */
+  mods: string[];
+}
+
+/** One row of the Save/Load window: the autosave or a manual slot. */
+export interface SaveSlotVM {
+  /** "auto", "1", "2", "3": what `saveTo`, `loadFrom`, `deleteSave` and `exportSave` take. */
+  slot: string;
+  /** "Autosave", "Slot 1" */
+  label: string;
+  /** Null for an empty slot. */
+  save: SaveSummaryVM | null;
+  /** Something is there that isn't a readable save ("Scrambled"), or null. */
+  broken: string | null;
+}
+
+/** A save made with mods this session doesn't have (or without ones it has). */
+export interface SaveModPromptVM {
+  lab: string;
+  /** Mods the save needs that aren't running ("my-mod 1.2.0"). */
+  missing: string[];
+  /** Mods running now that the save was made without. */
+  extra: string[];
+  /** Every missing mod came with its `?mod=` link, so "Reload with its mods" can fetch them. */
+  canFetch: boolean;
+}
+
+/** Saving and loading (FLT-65): the Save/Load window, "Welcome back", and the prompt about mods. */
+export interface SavesVM {
+  open: boolean;
+  /** False when the browser keeps nothing (private browsing): the slots are off, Export and Import still work. */
+  available: boolean;
+  /** The autosave, then slots 1 to 3. */
+  slots: SaveSlotVM[];
+  /** The lab playing now: what Save writes. */
+  current: { lab: string; date: string };
+  /** "Welcome back": the autosave to continue, or null. Time holds while it is up. */
+  welcome: SaveSummaryVM | null;
+  /** A load, save or import is under way. */
+  busy: boolean;
+  /** What just happened ("Saved to slot 2.", "That file isn't a lab save."), or null. */
+  status: { text: string; tone: ToneVM } | null;
+  modPrompt: SaveModPromptVM | null;
+  /** How much of the browser's room the saves take: "92K of about 5 MB", and 0 to 1. */
+  storage: { text: string; used: number };
+  /** A file is being dragged over the page: show where to drop it. */
+  dragging: boolean;
 }
 
 /** One published Daily Drama pack (FLT-34): a small parody mod about the day's industry news, merged after review. */
@@ -1288,6 +1529,8 @@ export interface SkinPickerVM {
   list: SkinInfoVM[];
   /** Skins that were refused, with the reason. */
   rejected: { id: string; errors: string[] }[];
+  /** FLT-55: a mod's request to switch to its skin, waiting on the player (the `ModSkinOffer` slot). */
+  offer?: SkinOfferVM | null;
 }
 
 export interface LayoutVM {
@@ -1394,6 +1637,10 @@ export interface HudVM {
   inspector: InspectorVM | null;
   buildItems: BuildItemVM[];
   buildTip: BuildTipVM | null;
+  /** FLT-63: the mode the pointer is in (a tool in hand, or painting a patrol zone), or null. */
+  mode?: PlaceModeVM | null;
+  /** FLT-63: what the Start menu's "Run…" can open, in list order. */
+  widgets?: WidgetVM[];
   speed: SpeedVM;
   staff: StaffVM;
   /** The Senate window: the Promise Tracker and the bill (FLT-22/23). `tracker` is null until the pack wakes. */
@@ -1438,11 +1685,19 @@ export interface HudVM {
   ending?: EndingVM | null;
   /** The Takeover under way (or kept watching): who is in charge now. Null otherwise. */
   takeover?: TakeoverVM | null;
+  /** The Memo's countdown, then its extra edition (FLT-57). Null otherwise. */
+  memo?: MemoVM | null;
+  /** A friend's challenge, until it is answered (FLT-57). */
+  challenge?: ChallengeVM | null;
   newsroom: NewsroomVM;
   sound: SoundVM;
   photoMode: PhotoVM;
+  /** A camera beat's letterbox and caption (FLT-56), or null. */
+  beat: BeatVM | null;
   skins: SkinPickerVM;
   mods: ModsVM;
+  /** Saving and loading (FLT-65). */
+  saves: SavesVM;
   /** Disasters (FLT-32): `enabled: false` until the lab earns them. */
   disasters: DisastersVM;
   /** Today's Drama (FLT-34). */
@@ -1454,6 +1709,8 @@ export interface HudVM {
 export interface HudActions {
   /** Pick a build tool ("path", "cluster", ..., "bulldoze"). Picking the selected one puts it away; `null` clears. `"staff"` opens or closes the payroll, `"senate"` the Senate window. */
   place(kind: BuildKindVM | null): void;
+  /** FLT-63: open a widget from `vm.widgets` (Run…). Opens, never toggles shut; an unknown or unearned id does nothing. */
+  openWidget(id: string): void;
   setSpeed(speed: number): void;
   togglePause(): void;
   /** Answer the open event card. */
@@ -1501,6 +1758,12 @@ export interface HudActions {
   toggleFactions(): void;
   /** FLT-33: the safety budget, 0 (none) to 3 (lavish). Costs money every day and slows training; the Safetyists notice. */
   setSafetySpend(level: number): void;
+  /** FLT-56: Comms puts out a statement to one faction (the gate legend). Costs money, then a cooldown; the sim may refuse with a toast. */
+  issueStatement(faction: string): void;
+  /** FLT-56: bury the story a reporter is chasing about the law (Regulatory Capture). */
+  buryLeak(): void;
+  /** FLT-56: press the button a camera beat offers (`BeatVM.action.id`). */
+  beatAction(id: string): void;
   keepPlaying(): void;
   newLab(): void;
   /** Today's lab: a new lab on today's seed, the same campus as everyone else's today. */
@@ -1509,6 +1772,14 @@ export interface HudActions {
   shareEnding?(): void;
   /** The run summary onto the clipboard. */
   copySummary?(): void;
+  /** Found a new lab (FLT-57), keeping one perk (`EndingVM.refound.perks[].id`). */
+  foundLab?(perk: string): void;
+  /** The friend link onto the clipboard. */
+  copyLink?(): void;
+  /** Close a friend's challenge banner (and get going). */
+  dismissChallenge?(): void;
+  /** Close the Memo's extra edition (`MemoVM.key`). */
+  dismissMemo?(key: string): void;
   // The payroll.
   closeStaff(): void;
   hire(job: string): void;
@@ -1535,6 +1806,8 @@ export interface HudActions {
   setMuted(muted: boolean): void;
   setVolume(channel: "master" | "music" | "sfx", value: number): void;
   playCue(cue: string): void;
+  /** End the camera beat on screen now (FLT-56): the bars go and the camera eases back. */
+  skipBeat(): void;
   // Photo mode.
   setPhoto(on: boolean): void;
   setPhotoTime(key: string): void;
@@ -1549,6 +1822,10 @@ export interface HudActions {
   /** Go back to the skin the picker opened on and close it. */
   cancelSkinPicker(): void;
   setReducedMotion(on: boolean): void;
+  /** FLT-55: say yes to a mod's skin offer (it shows, and is remembered for that mod). */
+  acceptSkinOffer(): void;
+  /** Say no: the skin stays in the picker, and this mod will not ask again. */
+  declineSkinOffer(): void;
   // Mods.
   openMods(): void;
   closeMods(): void;
@@ -1559,4 +1836,24 @@ export interface HudActions {
   closeDrama(): void;
   /** Load a published Drama pack by id (reloads with it in `?mod=`: a new lab). */
   playDrama(id: string): void;
+  // Saves (FLT-65). `slot` is a SaveSlotVM's `slot`.
+  openSaves(): void;
+  closeSaves(): void;
+  /** Save the lab playing now to a slot (over what is there). */
+  saveTo(slot: string): void;
+  loadFrom(slot: string): void;
+  deleteSave(slot: string): void;
+  /** Download a slot, or the lab playing now (`"current"`), as a `.fltsave` file. */
+  exportSave(slot: string): void;
+  /** Load a `.fltsave` file (a file picker's, or a drop's). */
+  importSave(file: File): void;
+  /** "Welcome back": load the autosave. */
+  continueSave(): void;
+  /** "Welcome back": play the new lab instead. */
+  dismissWelcome(): void;
+  /** The mods prompt: reload with the save's mods, then load it. */
+  fetchModsAndLoad(): void;
+  /** The mods prompt: load it with the mods running now. */
+  loadWithoutMods(): void;
+  cancelModPrompt(): void;
 }

@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { ALL_VISIBLE, DramaIcon, useCoach, useT } from "../kit";
+import { ALL_VISIBLE, DramaIcon, SpeedGlyph, useCoach, useT, useWidget } from "../kit";
 import type { SlotPropsMap } from "../types";
 import { BubbleIcon, Caret, LeafIcon, LensIcon, LetterIcon, MixerIcon, PauseIcon, SoundIcon } from "./icons";
 
-/** Pause, 1×, 3×, 10× as round-ended buttons; the one that is running is ink. (The Layout puts the lens beside them.) */
+/** Pause, ▶, ▶▶, ▶▶▶ (1×, 3×, 10×) as round-ended buttons; the one that is running is ink. (The Layout puts the lens beside them.) */
 export function Speed({ speed, actions }: SlotPropsMap["Speed"]) {
   const t = useT();
   const coach = useCoach();
@@ -11,7 +11,7 @@ export function Speed({ speed, actions }: SlotPropsMap["Speed"]) {
     <div className="fa-speed" role="group" aria-label={t("speed.label")}>
       {speed.options.map((o) => (
         <button key={o.value} className={o.active ? "on" : ""} {...(o.value === 3 ? coach.attrs("speed") : {})} onClick={() => actions.setSpeed(o.value)} aria-label={t(o.key)} aria-pressed={o.active}>
-          {o.value === 0 ? <PauseIcon /> : t(`speed.short.${o.value}`)}
+          {o.value === 0 ? <PauseIcon /> : <SpeedGlyph value={o.value} />}
         </button>
       ))}
     </div>
@@ -63,6 +63,7 @@ export function NewsControls({ newsroom, sound, skins, visible = ALL_VISIBLE, ac
 export function ThoughtsPanel({ rows, layout, actions }: SlotPropsMap["ThoughtsPanel"]) {
   const t = useT();
   const [open, setOpen] = useState(() => !layout.compact);
+  useWidget("thoughts", () => setOpen(true));
   const total = rows.reduce((n, r) => n + r.count, 0);
   return (
     <section className={`fa-overheard fa-paper ${open ? "open" : ""} ${layout.compact ? "compact" : ""}`} aria-label={t("thoughts.title")}>

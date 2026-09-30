@@ -18,6 +18,8 @@ export const NeoLines = Schema.Struct({ release: Schema.Array(S), poach: Schema.
 /** What a drama card looks like on screen: the resignation letter, the recruiter's email, the manifesto. Templates, like the card. */
 export const Letter = Schema.Struct({
   card: S, style: Schema.Literals(["letter", "email", "manifesto"]), file: S, from: S, to: S, subject: S, lines: Schema.Array(S), sign: S,
+  // FLT-56: a letter in one lab's voice: a rival id, or "neo" for any neo lab. The card falls back to the one without.
+  poacher: Schema.optional(S),
 });
 export type Letter = typeof Letter.Type;
 const Pack = Schema.Struct({
@@ -27,7 +29,8 @@ const Pack = Schema.Struct({
     events: Schema.Struct({ add: Schema.Array(DramaCard) }),
     headlines: Schema.Struct({ add: Schema.Array(Headline) }),
     thoughts: Schema.Struct({ add: Schema.Array(Thought) }),
-    reasons: Schema.Struct({ add: Schema.Array(Schema.Struct({ id: S, text: S, titleOdds: N })) }),
+    // `leaving` is what they say they are leaving to do, for the exit beat's caption (FLT-56).
+    reasons: Schema.Struct({ add: Schema.Array(Schema.Struct({ id: S, text: S, titleOdds: N, leaving: S })) }),
     labNames: Pool,
     manifestos: Pool,
     neoLines: NeoLines,

@@ -34,6 +34,9 @@ export interface DefectionExit {
   loss: number;
   /** The lab they founded, once they have. */
   lab: string | null;
+  /** FLT-56: why they went (a reason id) and the seed round waiting for them, in $B. Missing from older saves. */
+  reason?: string;
+  seed?: number;
 }
 
 export interface DefectionState {

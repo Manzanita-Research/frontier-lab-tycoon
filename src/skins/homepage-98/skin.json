@@ -5,6 +5,7 @@
   "author": "Frontier Lab Tycoon",
   "version": "1.0.0",
   "description": "The lab's 1998 home page: ridge borders, a hit counter for Vibes, an Under Construction sign, a WebRing for the build bar, pop-up windows for the news, and a great deal of enthusiasm.",
+  "unlisted": true,
   "preview": "assets/preview.jpg",
   "slots": [
     "Layout",
@@ -112,6 +113,10 @@
     "shadow.pop": "none"
   },
   "strings": {
+    "run.title": "Address",
+    "run.prompt": "Type a page's address. Best viewed at 800×600.",
+    "build.facilitiesCount": "{n} pages",
+    "build.runCount": "{n} links",
     "ticker.label": "WHAT'S NEW!!!",
     "training.title": "Under Construction",
     "objectives.title": "My Goals",

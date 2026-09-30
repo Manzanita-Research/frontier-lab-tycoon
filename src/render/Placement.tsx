@@ -1,4 +1,4 @@
-import type { ThreeEvent } from "@react-three/fiber";
+import { useThree, type ThreeEvent } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import { atoms, send, sim, use } from "../app/game";
 import type { Tool } from "../app/hud";
@@ -46,6 +46,11 @@ export function Placement() {
   useEffect(() => {
     painting.current = null;
   }, [tool, zone]);
+  // The cursor says the mode too (FLT-63): a crosshair while a tool is in hand or a zone is being painted, nothing after.
+  const canvas = useThree((s) => s.gl.domElement);
+  useEffect(() => {
+    canvas.style.cursor = tool === "bulldoze" ? "not-allowed" : tool || zone !== null ? "crosshair" : "";
+  }, [canvas, tool, zone]);
 
   const fromEvent = (e: ThreeEvent<PointerEvent | MouseEvent>) => {
     if (zone !== null) return { x: Math.floor(e.point.x + HALF), z: Math.floor(e.point.z + HALF) };
@@ -92,7 +97,7 @@ export function Placement() {
   const onClick = (e: ThreeEvent<MouseEvent>) => {
     if (!tool || tool === "path" || tool === "bulldoze") return;
     const at = fromEvent(e);
-    if (at) use(tool, at.x, at.z);
+    if (at) use(tool, at.x, at.z, false, e.nativeEvent.shiftKey);
   };
 
   const ghost = useMemo(

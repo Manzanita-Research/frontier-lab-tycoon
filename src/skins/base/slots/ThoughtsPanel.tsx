@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useT } from "../../context";
-import { useAutoPause } from "../../kit";
+import { useAutoPause, useWidget } from "../../kit";
 import type { SlotPropsMap } from "../../types";
 
 /** RCT's guest thoughts window: everybody's thought, counted, most common first. Tap a row to light up who thinks it. */
 export function ThoughtsPanel({ rows, layout, actions }: SlotPropsMap["ThoughtsPanel"]) {
   const t = useT();
   const [open, setOpen] = useState(() => !layout.compact);
+  useWidget("thoughts", () => setOpen(true));
   useAutoPause(actions, "thoughts", layout.compact && open);
   return (
     <section className={`thoughts panel ${open ? "open" : ""} ${layout.compact ? "compact" : ""}`} aria-label={t("thoughts.title")}>

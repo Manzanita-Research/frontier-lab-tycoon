@@ -20,7 +20,7 @@ export function Docked({ vm, actions }: { vm: HudVM; actions: HudActions }) {
     Training: vm.training.hasHall ? <Training training={vm.training} actions={actions} /> : null,
     Objectives: <Objectives objectives={vm.objectives} progress={vm.progress} visible={vm.visible} layout={vm.layout} actions={actions} />,
     Inspector: vm.inspector ? <Inspector inspector={vm.inspector} layout={vm.layout} actions={actions} /> : null,
-    BuildBar: <BuildBar items={vm.buildItems} tip={vm.buildTip} teasers={vm.progress.teasers} layout={vm.layout} actions={actions} disasters={vm.disasters} />,
+    BuildBar: <BuildBar items={vm.buildItems} tip={vm.buildTip} teasers={vm.progress.teasers} layout={vm.layout} actions={actions} disasters={vm.disasters} widgets={vm.widgets ?? []} mode={vm.mode ?? null} />,
     Speed: <Speed speed={vm.speed} stats={vm.stats} actions={actions} />,
     Staff: vm.staff.open && vm.visible.staff ? <Staff staff={vm.staff} actions={actions} /> : null,
     ThoughtsPanel: vm.visible.thoughts ? <ThoughtsPanel rows={vm.thoughtsPanel} layout={vm.layout} actions={actions} /> : null,
@@ -67,7 +67,7 @@ function EventModal({ vm, event, actions, slots: { EventCard, Livestream, Hearin
 }
 
 export function Modals({ vm, actions }: { vm: HudVM; actions: HudActions }) {
-  const { EventCard, Livestream, Hearing, LeakedChat, DramaCard, ReportCard, Bill, PromiseTracker, Confirm, UnlockCard, HowToPlay, EraCard, Outcome, Ending, Takeover, NewsRoom, Mixer, ModManager, SkinPicker, PaperMoment, CrumbWiki, DisasterMenu, Drama } = useSkin().slots;
+  const { EventCard, Livestream, Hearing, LeakedChat, DramaCard, ReportCard, Bill, PromiseTracker, Confirm, UnlockCard, HowToPlay, EraCard, Outcome, Ending, Takeover, Memo, Challenge, NewsRoom, Mixer, ModManager, ModSkinOffer, SkinPicker, PaperMoment, CrumbWiki, DisasterMenu, Drama, Welcome, SaveLoad } = useSkin().slots;
   return (
     <>
       {vm.senate.open && vm.senate.tracker && !vm.event?.tracker && (
@@ -84,13 +84,24 @@ export function Modals({ vm, actions }: { vm: HudVM; actions: HudActions }) {
       {vm.outcome && <Outcome outcome={vm.outcome} actions={actions} />}
       {vm.takeover && !vm.ending && <Takeover takeover={vm.takeover} layout={vm.layout} actions={actions} />}
       {vm.ending && <Ending ending={vm.ending} layout={vm.layout} actions={actions} />}
+      {vm.memo && <Memo memo={vm.memo} layout={vm.layout} actions={actions} />}
+      {vm.challenge && <Challenge challenge={vm.challenge} layout={vm.layout} actions={actions} />}
       {vm.newsroom.view && <NewsRoom newsroom={vm.newsroom} actions={actions} />}
       {vm.sound.open && <Mixer sound={vm.sound} actions={actions} />}
       {vm.drama.open && <Drama drama={vm.drama} actions={actions} />}
       {vm.mods.open && <ModManager mods={vm.mods} actions={actions} />}
       {vm.skins.open && <SkinPicker skins={vm.skins} actions={actions} />}
+      {vm.skins.offer && !vm.skins.open && <ModSkinOffer offer={vm.skins.offer} actions={actions} />}
+      {vm.saves.welcome && !vm.saves.open && <Welcome welcome={vm.saves.welcome} saves={vm.saves} actions={actions} />}
+      {(vm.saves.open || vm.saves.modPrompt || vm.saves.dragging) && <SaveLoad saves={vm.saves} actions={actions} />}
     </>
   );
+}
+
+/** A camera beat's letterbox and caption (FLT-56): over the docked HUD, under the cards. */
+export function BeatLayer({ vm, actions }: { vm: HudVM; actions: HudActions }) {
+  const { Beat } = useSkin().slots;
+  return vm.beat ? <Beat beat={vm.beat} actions={actions} /> : null;
 }
 
 /** Photo mode's controls and the polaroid: they live outside the HUD layer so hiding the HUD does not hide them. */

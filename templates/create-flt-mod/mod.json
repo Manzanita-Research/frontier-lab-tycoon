@@ -3,7 +3,7 @@
   "id": "starter-mod",
   "name": "Starter Mod",
   "version": "1.0.0",
-  "description": "A small example of every v1 content section.",
+  "description": "A small example of every v1 section: content, looks, sound and a skin.",
   "content": {
     "rivals": {
       "override": [
@@ -193,9 +193,41 @@
   "skin": {
     "id": "starter-mod",
     "name": "Starter Mod",
+    "extends": "frontier-95",
     "tokens": {
-      "--accent": "#d8ac48"
+      "color.titlebar": "#b8752a",
+      "color.selection": "#b8752a"
+    },
+    "strings": {
+      "build.menuTitle": "Fetch"
     },
     "css": ".fetch-note { color: #d8ac48; }"
+  },
+  "looks": {
+    "protester": {
+      "label": "Very Good Protester",
+      "tint": {
+        "body": "#d9a441",
+        "head": "#f2d59a"
+      },
+      "signs": [
+        "FETCH THE TRUTH",
+        "SIT. STAY. ALIGN."
+      ]
+    }
+  },
+  "audio": {
+    "cues": {
+      "ui.click": [
+        {
+          "at": 0,
+          "hz": 1400,
+          "endHz": 2100,
+          "duration": 0.05,
+          "gain": 0.05,
+          "wave": "sine"
+        }
+      ]
+    }
   }
 }

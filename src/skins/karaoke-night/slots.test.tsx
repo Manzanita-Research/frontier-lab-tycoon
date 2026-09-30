@@ -86,10 +86,15 @@ describe("Karaoke Night", () => {
 
   it("the arcade has a round button with an LCD tag for each tool, and greys out what you cannot afford", () => {
     const items = vm.buildItems.map((it, i) => (i === 1 ? { ...it, affordable: false, selected: false } : it));
-    const out = html(<Arcade items={items} teasers={[]} actions={actions} done={() => {}} />);
-    // One per tool, then Help's.
-    expect(out.match(/class="kn-btnr"/g)?.length).toBe(items.length + 1);
-    expect(out.match(/class="kn-lcd"/g)?.length).toBe(items.length + 1);
+    // The top row is the tools, Facilities, Run… and Help; Facilities is a back button and every building (FLT-63).
+    const top = html(<Arcade items={items} teasers={[]} actions={actions} done={() => {}} />);
+    const book = html(<Arcade items={items} teasers={[]} actions={actions} done={() => {}} view="facilities" />);
+    const out = top + book;
+    expect(out.match(/class="kn-btnr"/g)?.length).toBe(items.length + 4);
+    expect(out.match(/class="kn-lcd"/g)?.length).toBe(items.length + 4);
+    expect(top).toContain('data-testid="start-facilities"');
+    expect(top).toContain('data-testid="start-run"');
+    expect(book).toContain("Power Ballads");
     expect(out).toContain('aria-pressed="true"');
     expect(out).toMatch(/kn-ab\s+poor/);
     for (const it of items) if (it.hotkey !== null) expect(out).toContain(`<span class="kn-k">${it.hotkey}</span>`);
@@ -99,12 +104,12 @@ describe("Karaoke Night", () => {
     const docked = html(<Docked vm={vm} actions={actions} />);
     for (const hook of ["start", "training", "stat:runway", "goals"]) expect(docked).toContain(`data-coach="${hook}"`);
     // One per tool in the open arcade (the BUILD button is shut until pressed).
-    const open = html(<Arcade items={vm.buildItems} teasers={[]} actions={actions} done={() => {}} />);
+    const open = html(<Arcade items={vm.buildItems} teasers={[]} actions={actions} done={() => {}} />) + html(<Arcade items={vm.buildItems} teasers={[]} actions={actions} done={() => {}} view="facilities" />);
     for (const it of vm.buildItems) expect(open).toContain(`data-coach="build:${it.kind}"`);
     // The training element keeps its hook in both states, and the arcade shows exactly the items it is handed (unlocks filter the list upstream).
     expect(html(<slot.Training training={{ ...vm.training, hasHall: false }} actions={actions} />)).toContain('data-coach="training"');
     const some = vm.buildItems.slice(0, 3);
-    const tray = html(<Arcade items={some} teasers={[]} actions={actions} done={() => {}} />);
+    const tray = html(<Arcade items={some} teasers={[]} actions={actions} done={() => {}} />) + html(<Arcade items={some} teasers={[]} actions={actions} done={() => {}} view="facilities" />);
     expect(tray.match(/data-coach="build:/g)?.length).toBe(3);
   });
 
@@ -112,7 +117,8 @@ describe("Karaoke Night", () => {
     const shut = html(<slot.BuildBar items={vm.buildItems} tip={null} layout={vm.layout} actions={actions} />);
     expect(shut.match(/class="kn-btnr"/g)?.length).toBe(1);
     expect(shut).toContain('aria-expanded="false"');
-    const open = html(<Arcade items={vm.buildItems.slice(0, 2)} teasers={[{ label: "2 more", hint: "Ship your first model" }]} actions={actions} done={() => {}} />);
+    const teasers = [{ label: "2 more", hint: "Ship your first model" }];
+    const open = html(<Arcade items={vm.buildItems.slice(0, 2)} teasers={teasers} actions={actions} done={() => {}} />) + html(<Arcade items={vm.buildItems.slice(0, 2)} teasers={teasers} actions={actions} done={() => {}} view="facilities" />);
     expect(open).toContain("kn-ab locked");
     expect(open).toContain("2 more");
     expect(open).toContain("SHIP YOUR FIRST MODEL");
@@ -135,9 +141,9 @@ describe("Karaoke Night", () => {
     expect(out).toMatch(/^<div class="bubble /);
   });
 
-  it("the deck uses the skin's tape words for the speed keys", () => {
+  it("the deck keeps the plain speed labels on its tape keys", () => {
     const out = html(<slot.Speed speed={vm.speed} stats={vm.stats} actions={actions} />);
-    for (const word of ["Stop", "Play", "Fast forward", "Encore"]) expect(out).toContain(`aria-label="${word}"`);
+    for (const word of ["Pause", "1× speed", "3× speed", "10× speed"]) expect(out).toContain(`aria-label="${word}"`);
   });
 
   it("draws every icon itself: no emoji and no glyph a font might not have, in any of its source", () => {

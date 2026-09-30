@@ -1,7 +1,7 @@
 // The lab's home page: the header with the hit counter, Under Construction, My Goals, About Me, the guestbook and the
 // Top Sites table. Everything is a table, a rule or a link, because it is 1998 and CSS is a rumour.
 import { useEffect, useRef, useState } from "react";
-import { ALL_VISIBLE, FactionChip, Odometer, money } from "../kit";
+import { ALL_VISIBLE, FactionChip, Odometer, money, useWidget } from "../kit";
 import { useCoach, useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import type { StatsVM } from "../../ui/hud/types";
@@ -343,6 +343,7 @@ export function Inspector({ inspector: who, layout, actions }: SlotPropsMap["Ins
 export function ThoughtsPanel({ rows, layout, actions }: SlotPropsMap["ThoughtsPanel"]) {
   const t = useT();
   const [open, setOpen] = useState(() => !layout.compact);
+  useWidget("thoughts", () => setOpen(true));
   const total = rows.reduce((n, r) => n + r.count, 0);
   return (
     <section className={`gc-box gc-parch gc-book ${open ? "open" : ""}`} aria-label={t("thoughts.title")}>

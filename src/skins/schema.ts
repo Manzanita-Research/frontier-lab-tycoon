@@ -6,6 +6,21 @@ import { SLOT_NAMES } from "./types";
 import baseTokens from "./base/tokens.json";
 import baseStrings from "./base/strings.json";
 
+/** The skin that is just the base: no skin.json, no custom slots. Used only when the default itself is refused. */
+export const BASE_ID = "base";
+
+/**
+ * Why a mod's skin can't be registered (FLT-55): it takes a built-in skin's id, or `extends` a skin that isn't built in.
+ * `folders` is every skin folder; `usable` the ones that validated. The registry and `flt-mod check` share this.
+ */
+export function modSkinErrors(id: string, parent: string | undefined, folders: readonly string[], usable: readonly string[]): string[] {
+  const errors: string[] = [];
+  if (id === BASE_ID || folders.includes(id)) errors.push(`id: "${id}" is a built-in skin's id; give the mod's skin its own`);
+  const from = parent ?? BASE_ID;
+  if (from !== BASE_ID && !usable.includes(from)) errors.push(`extends: no built-in skin "${from}" (there are ${[BASE_ID, ...usable].join(", ")})`);
+  return errors;
+}
+
 /** Tokens every skin must set: the ones that give a skin its identity. The rest fall back to the base. */
 export const REQUIRED_TOKENS = [
   "color.bg",
@@ -59,6 +74,8 @@ export const SkinManifest = Schema.Struct({
   preview: Schema.String.check(Schema.isPattern(/^assets\/preview\.(png|jpe?g|webp|gif|svg)$/i)),
   /** The slots this skin replaces with its own components (its `slots.tsx` exports exactly these). */
   slots: Schema.Array(Schema.String),
+  /** Kept out of the player's Display picker (still reachable with `?skin=<id>`) until it passes a taste review. Unhiding is deleting this line. */
+  unlisted: Schema.optionalKey(Schema.Boolean),
 });
 export type SkinManifest = typeof SkinManifest.Type;
 

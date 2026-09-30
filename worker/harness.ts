@@ -48,9 +48,11 @@ export interface WorkerOptions {
   host?: string;
   /** The static assets. Tests get a stub that names the path it was asked for. */
   assets?: (req: MfRequest) => MfResponse | Promise<MfResponse>;
+  /** Extra plain-text bindings (the redirect's APP_HOST and REDIRECT_HOSTS, say). */
+  vars?: Record<string, string>;
 }
 
-export async function startWorker(profile: HfProfile, { host = HOST, assets }: WorkerOptions = {}) {
+export async function startWorker(profile: HfProfile, { host = HOST, assets, vars }: WorkerOptions = {}) {
   const origin = `http://${host}`;
   const hf: HfLog = { tokenRequests: [], userinfo: [] };
   const mf = new Miniflare({
@@ -68,6 +70,7 @@ export async function startWorker(profile: HfProfile, { host = HOST, assets }: W
       BETTER_AUTH_SECRET: "test-secret-that-is-at-least-32-characters-long",
       HF_CLIENT_ID: "test-client",
       HF_CLIENT_SECRET: "test-client-secret",
+      ...vars,
     },
     serviceBindings: {
       // The static assets: tell a test which path fell through to them.

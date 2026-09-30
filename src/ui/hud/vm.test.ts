@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { BUILDINGS } from "../../content/buildings";
 import { formatMoney } from "../../sim/format";
-import { fixtureInput, fixtureWorld, FIXTURE_CHAT, FIXTURE_PAPER } from "./fixtures";
+import { fixtureEnding, fixtureInput, fixtureWorld, FIXTURE_CHAT, FIXTURE_PAPER } from "./fixtures";
 import { CALM_START_DAY } from "../../sim/disasters/driver";
 import { SKIN_API_VERSION } from "./types";
 import { hudViewModel, SHIPPED_DAYS, TICKER_ITEMS } from "./vm";
+import { agoText, modMismatch } from "./saves.vm";
 
 /** Every value in a view-model must survive JSON: that is what makes it a contract a skin can rely on. */
 function assertPlain(v: unknown, path = "vm") {
@@ -428,4 +429,138 @@ describe("endings (FLT-11)", () => {
     expect(vm.ending!.share).toEqual({ status: "ready", card: "blob:card", native: true, note: null });
     expect(vm.ending!.keepPlaying).toBe(false);
   }, 30_000);
+});
+
+describe("placement modes and the Start menu (FLT-63)", () => {
+  it("names the tool in hand as a mode: a building is one-shot, the path and bulldozer are sticky", () => {
+    expect(hudViewModel(fixtureInput({ tool: "cluster" })).mode).toMatchObject({ kind: "building", tool: "cluster", sticky: false });
+    expect(hudViewModel(fixtureInput({ tool: "path" })).mode).toMatchObject({ kind: "path", sticky: true });
+    expect(hudViewModel(fixtureInput({ tool: null })).mode).toBeNull();
+  });
+
+  it("puts every build item in a Facilities group, with Path and the Staff tile where the menu expects them", () => {
+    const items = hudViewModel(fixtureInput({})).buildItems;
+    expect(items.every((it) => it.group)).toBe(true);
+    expect(items.find((it) => it.isPath)!.group).toBe("tools");
+    expect(items.find((it) => it.kind === "cluster")!.group).toBe("compute");
+    expect(items.find((it) => it.kind === "hall")!.group).toBe("research");
+    expect(items.find((it) => it.kind === "staff")?.group ?? "offices").toBe("offices");
+  });
+
+  it("lists only the widgets the lab has earned, each with a file to type into Run", () => {
+    const widgets = hudViewModel(fixtureInput({})).widgets!;
+    const ids = widgets.map((w) => w.id);
+    expect(ids).toContain("properties");
+    expect(ids).toContain("drama");
+    expect(new Set(widgets.map((w) => w.file)).size).toBe(widgets.length);
+    expect(widgets.every((w) => /^[a-z]+\.[a-z]{3}$/.test(w.file))).toBe(true);
+  });
+});
+
+describe("saves (FLT-65)", () => {
+  it("lists the autosave and three slots, with dates, ages and sizes", () => {
+    const vm = hudViewModel(fixtureInput({ saves: "window" }));
+    assertPlain(vm.saves);
+    expect(vm.saves.open).toBe(true);
+    expect(vm.saves.slots.map((s) => s.label)).toEqual(["Autosave", "Slot 1", "Slot 2", "Slot 3"]);
+    expect(vm.saves.slots[0]!.save).toMatchObject({ lab: "Gradient Descent Labs", date: "Y2 · Mar 5", ago: "3 hours ago", size: "45K", skin: "Frontier 95" });
+    expect(vm.saves.slots[1]!.save).toMatchObject({ ago: "2 days ago", size: "5K", mods: ["every-lab-is-steve"] });
+    expect(vm.saves.slots[2]).toMatchObject({ save: null, broken: "Scrambled" });
+    expect(vm.saves.slots[3]).toMatchObject({ save: null, broken: null });
+    expect(vm.saves.storage.text).toBe("50K of about 5 MB");
+    expect(vm.saves.current.lab).toBe(vm.stats.labName);
+  });
+
+  it("says Welcome back with the autosave, and nothing without one", () => {
+    expect(hudViewModel(fixtureInput({ saves: "welcome" })).saves.welcome).toMatchObject({ lab: "Gradient Descent Labs", date: "Y2 · Mar 5" });
+    const none = hudViewModel(fixtureInput());
+    expect(none.saves.welcome).toBeNull();
+    expect(none.saves.open).toBe(false);
+    assertPlain(none.saves);
+  });
+
+  it("passes the mods question and private browsing through", () => {
+    expect(hudViewModel(fixtureInput({ saves: "prompt" })).saves.modPrompt).toMatchObject({ canFetch: true, missing: ["every-lab-is-steve 1.0.0"] });
+    expect(hudViewModel(fixtureInput({ saves: "private" })).saves.available).toBe(false);
+  });
+});
+
+describe("saves helpers (FLT-65)", () => {
+  const now = Date.parse("2026-09-30T15:00:00Z");
+  const at = (ms: number) => new Date(now - ms).toISOString();
+  it("says how long ago, in words", () => {
+    expect(agoText(at(30_000), now)).toBe("just now");
+    expect(agoText(at(12 * 60_000), now)).toBe("12 minutes ago");
+    expect(agoText(at(3_600_000), now)).toBe("an hour ago");
+    expect(agoText(at(30 * 3_600_000), now)).toBe("yesterday");
+    expect(agoText(at(40 * 86_400_000), now)).toBe("2026-08-21");
+    expect(agoText("not a date", now)).toBe("some time ago");
+  });
+
+  it("asks about mods only when they differ", () => {
+    const save = { lab: "Lab", mods: [{ id: "steve", version: "1.0.0", hash: "aa", source: "/mods/steve.json" }] } as unknown as Parameters<typeof modMismatch>[0];
+    expect(modMismatch(save, [{ id: "steve", hash: "aa" }])).toBeNull();
+    expect(modMismatch(save, [])).toEqual({ lab: "Lab", missing: ["steve 1.0.0"], extra: [], canFetch: true });
+    expect(modMismatch(save, [{ id: "steve", hash: "bb", name: "Steve 2" }])).toMatchObject({ extra: ["Steve 2"], canFetch: true });
+    expect(modMismatch({ ...save, mods: [] }, [{ id: "steve", hash: "aa" }])).toMatchObject({ missing: [], extra: ["steve"], canFetch: false });
+  });
+});
+
+describe("no dead ends, streaks and friend links (FLT-57)", () => {
+  const friend = (moment: string, over: Partial<{ ending: string; day: number; vibes: number; models: number }> = {}) => ({
+    ending: "captured", day: 212, vibes: 88, models: 7, seed: fixtureEnding(moment).seed, daily: null, ...over,
+  });
+
+  it("the Acqui-hired front page offers a new lab with three perks, and a link that carries the result and nothing else", () => {
+    const vm = hudViewModel(fixtureInput({ ending: "front-acquihired", selected: null }));
+    assertPlain(vm);
+    const e = vm.ending!;
+    expect(e.next).toMatchObject({ action: "refound", label: "Found a new lab" });
+    expect(e.refound!.perks.map((p) => p.id)).toEqual(["founder", "loyal", "seed"]);
+    expect(e.labNumber).toBe(1);
+    expect(e.streak).toBeNull();
+    expect(e.versus).toBeNull();
+    const url = new URL(e.link);
+    expect([...url.searchParams.keys()]).toEqual(["seed", "vs"]);
+    expect(url.searchParams.get("vs")).toMatch(/^acquihired\.\d+\.\d+\.\d+$/);
+    expect(e.link).not.toContain(encodeURIComponent(e.lab.split(" ")[0]!));
+    expect(e.summary.split("\n").at(-1)).toBe(`Beat it: ${e.link}`);
+  });
+
+  it("a second lab says so, and the streak goes on the summary from two days up", () => {
+    const vm = hudViewModel(fixtureInput({ ending: "lab2", selected: null, social: { streak: 7 } }));
+    expect(vm.ending!.labNumber).toBe(2);
+    expect(vm.ending!.refound!.labNumber).toBe(3);
+    expect(vm.ending!.streak).toEqual({ days: 7, text: "7-day streak" });
+    expect(vm.ending!.summary).toContain("🔥 7-day streak");
+    expect(vm.ending!.summary.split("\n")[0]).toContain("Lab #2");
+    expect(hudViewModel(fixtureInput({ ending: "lab2", selected: null, social: { streak: 1 } })).ending!.streak).toBeNull();
+  });
+
+  it("a friend's challenge: a banner on their seed until it's answered, then a verdict on the front page", () => {
+    const c = friend("memo-countdown");
+    const vm = hudViewModel(fixtureInput({ ending: "memo-countdown", selected: null, social: { challenge: c, challengeOpen: true } }));
+    expect(vm.challenge).toEqual({ line: "Your friend's lab was Captured on day 212.", ask: "Beat it?", ending: "Captured", tone: "neutral", stats: "88 peak Vibes · 7 models", daily: null, cta: "Beat it" });
+    expect(hudViewModel(fixtureInput({ ending: "memo-countdown", selected: null, social: { challenge: c, challengeOpen: false } })).challenge).toBeNull();
+    // Another seed is another lab: no banner.
+    expect(hudViewModel(fixtureInput({ ending: "memo-countdown", selected: null, social: { challenge: { ...c, seed: c.seed + 1 }, challengeOpen: true } })).challenge).toBeNull();
+    // Acqui-hired (bad) beats nobody who was Regulated (neutral); against another bad ending, holding out longer wins.
+    const end = (ch: ReturnType<typeof friend>) => hudViewModel(fixtureInput({ ending: "front-acquihired", selected: null, social: { challenge: ch } })).ending!.versus!;
+    expect(end(friend("front-acquihired", { ending: "regulated" }))).toMatchObject({ verdict: "lose", text: "Your friend's lab wins. Rematch?" });
+    expect(end(friend("front-acquihired", { ending: "acquihired", day: 1 }))).toMatchObject({ verdict: "win", line: "Your friend's lab was Acqui-hired on day 1." });
+  });
+
+  it("The Memo: a countdown (hidden under the card itself), then an extra edition once, for a couple of days", () => {
+    const coming = hudViewModel(fixtureInput({ ending: "memo-countdown", selected: null })).memo!;
+    expect(coming).toMatchObject({ phase: "coming", daysLeft: 3, title: "The Memo · 3 days", line: "Legal has read it. Legal has gone home.", extra: null });
+    expect(coming.progress).toBeCloseTo(0.4);
+    expect(hudViewModel(fixtureInput({ ending: "memo", selected: null })).memo).toBeNull();
+    const extra = hudViewModel(fixtureInput({ ending: "memo-race", selected: null })).memo!;
+    expect(extra.phase).toBe("extra");
+    expect(extra.extra!.choice).toBe("Race");
+    expect(extra.extra!.reactions).toHaveLength(3);
+    expect(hudViewModel(fixtureInput({ ending: "memo-race", selected: null, social: { memoSeen: extra.key } })).memo).toBeNull();
+    const later = fixtureInput({ ending: "memo-race", selected: null });
+    expect(hudViewModel({ ...later, snap: { ...later.snap, day: later.snap.day + 3 } }).memo).toBeNull();
+  });
 });

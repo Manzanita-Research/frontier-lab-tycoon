@@ -2,17 +2,18 @@
 // a Task Mangler for opinions: every faction's approval as a process list, where the lab stands, who is allied or
 // feuding, and the safety budget as a Control Panel radio group.
 import { useState } from "react";
-import { StanceTrack } from "../kit";
+import { StanceTrack, useWidget } from "../kit";
 import { useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import { Ico } from "./icons";
-import { Tabs, Win } from "./parts";
+import { Btn, Tabs, Win } from "./parts";
 
 type Tab = "factions" | "stance" | "relations" | "safety";
 
 export function Factions({ factions, layout, actions }: SlotPropsMap["Factions"]) {
   const t = useT();
   const [tab, setTab] = useState<Tab>("factions");
+  useWidget("discourse", () => setTab("factions"));
   const { open } = factions;
   const marching = factions.rows.some((r) => r.mood === "protesting");
   return (
@@ -119,5 +120,34 @@ export function Factions({ factions, layout, actions }: SlotPropsMap["Factions"]
         </Win>
       )}
     </>
+  );
+}
+
+/**
+ * Who is at the gate (FLT-56), pinned over it: "Who's Outside", a Details view of the crowds with a colour swatch each,
+ * and a Statement… button per faction (Comms' one lever). The status bar says what it costs and who will write it.
+ */
+export function GateLegend({ factions, actions }: SlotPropsMap["GateLegend"]) {
+  const t = useT();
+  const st = factions.statement;
+  return (
+    <Win className="f95-gatelegend" title="Who's Outside" icon="megaphone" label={t("gate.title")}>
+      <ul className="f95-gatelegend-in">
+        {factions.gate.map((g) => (
+          <li key={g.id || "water"}>
+            <i style={{ background: g.color }} aria-hidden />
+            <span className="nm">
+              {g.count} {g.name}
+            </span>
+            {g.addressable && (
+              <Btn disabled={!st.ready} onClick={() => actions.issueStatement(g.id)} title={`${st.costText} · ${st.writerText}`}>
+                Statement…
+              </Btn>
+            )}
+          </li>
+        ))}
+      </ul>
+      <div className="f95-status">{st.ready ? `${st.costText} · ${st.writerText}` : st.waitText}</div>
+    </Win>
   );
 }

@@ -1,7 +1,10 @@
 /** The Worker's bindings (FLT-67). Alchemy binds them in `infra/alchemy.run.ts`, and only when `FLT_AUTH=on`. */
 export interface Env {
-  /** The game's built `dist/`. Everything that isn't `/api/*` goes here. */
+  /** The game's built `dist/`. Everything that isn't `/api/*` (or a redirect) goes here. */
   ASSETS: Fetcher;
+  /** The game's host, and the comma-separated hosts that 302 to it: the edge script's redirect, which this replaces. */
+  APP_HOST?: string;
+  REDIRECT_HOSTS?: string;
   /** Better Auth's tables plus `saves` (metadata). Schema: `worker/migrations/`. */
   DB: D1Database;
   /** Save blobs, at `saves/<userId>/<slot>.fltsave`. */

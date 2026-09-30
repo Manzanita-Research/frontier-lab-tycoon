@@ -1,5 +1,5 @@
 // Synth recipes are inspectable and shared by realtime playback and offline cue verification.
-export const CUES = ["place", "coin", "bulldoze", "card", "choice", "release", "era", "breakdown"] as const;
+export const CUES = ["place", "coin", "bulldoze", "card", "choice", "release", "era", "breakdown", "conga", "drumroll", "shutter"] as const;
 export type Cue = (typeof CUES)[number];
 export interface Note { at: number; hz: number; endHz?: number; duration: number; gain: number; wave: OscillatorType | "noise" }
 export const midi = (n: number) => 440 * 2 ** ((n - 69) / 12);
@@ -14,7 +14,25 @@ export function cueNotes(cue: Cue, variation = 0): Note[] {
     case "release": return [60, 64, 67, 72, 76].map((n, i) => note(midi(n), 0.38, "triangle", 0.16, i * 0.12));
     case "era": return [48, 55, 60, 64, 67, 72].map((n, i) => note(midi(n), 0.65, "triangle", 0.13, i * 0.09));
     case "breakdown": return [0, 0.22, 0.44].map((at) => note(740, 0.16, "square", 0.075, at, 440));
+    // FLT-56's beats. The walk-out: one-two-three-KICK on hand drums, twice.
+    case "conga": return [0, 0.18, 0.36, 0.6, 0.96, 1.14, 1.32, 1.56].map((at, i) => note(i % 4 === 3 ? 150 : 220, 0.14, "sine", i % 4 === 3 ? 0.4 : 0.26, at, i % 4 === 3 ? 90 : 170));
+    // The auditors confer: a snare roll that swells, and the cymbal.
+    case "drumroll": return [...Array.from({ length: 26 }, (_, i) => note(1400, 0.05, "noise", 0.05 + i * 0.008, i * 0.06)), note(5200, 0.4, "noise", 0.2, 1.58, 3000)];
+    // The hearing clip goes viral: a wall of camera shutters.
+    case "shutter": return [0, 0.09, 0.15, 0.31, 0.38, 0.52, 0.6, 0.66, 0.84].map((at, i) => note(2600 + (i % 3) * 500, 0.05, "noise", 0.16, at, 900));
   }
+}
+/**
+ * Named moments a mod can give a sound through the Audio service (FLT-55). The base game plays the chant (three
+ * syllables and a foot-stomp, every 0.7 s while more than ten protesters stand at the gate); the others are silent
+ * until a mod sets them: `protest.grow` when the crowd at the gate grows, `ui.click` on a HUD button.
+ */
+export const HOOKS = ["protest.chant", "protest.grow", "ui.click"] as const;
+export type Hook = (typeof HOOKS)[number];
+export function hookNotes(hook: Hook): Note[] {
+  if (hook !== "protest.chant") return [];
+  return [...[0, 1, 2].map((i): Note => ({ at: i * 0.16, hz: i === 1 ? 185 : 150, endHz: 120, duration: 0.12, gain: 0.045, wave: "sawtooth" })),
+    { at: 0.5, hz: 80, endHz: 40, duration: 0.14, gain: 0.09, wave: "sine" }];
 }
 export function eraScore(era: string): { root: number; bpm: number } {
   // Works with both named eras and future content ids, no dependency on a shared sim type.

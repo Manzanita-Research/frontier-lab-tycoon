@@ -26,6 +26,8 @@ export type FxEvent =
   | { type: "shake"; strength: number }
   /** A disaster asked for a sound cue (an SFX name from audio/score.ts). */
   | { type: "cue"; cue: string }
+  /** FLT-56: a camera beat (letterbox, caption, a slow shot), in scene coordinates; `follow` are walker ids to track. */
+  | { type: "beat"; beat: string; caption: string; sub: string; x: number; z: number; zoom: number; hold: number; follow: number[] }
   /** A different World (new lab): forget everything. */
   | { type: "reset" };
 
@@ -124,6 +126,7 @@ export function createWatch(): Watch {
         cueId = c.id;
         if (c.type === "focus") out.push({ type: "focus", x: worldX(c.x), z: worldZ(c.z), zoom: c.zoom, hold: c.hold });
         else if (c.type === "shake") out.push({ type: "shake", strength: c.strength });
+        else if (c.type === "beat") out.push({ type: "beat", beat: c.beat, caption: c.caption, sub: c.sub, x: worldX(c.x), z: worldZ(c.z), zoom: c.zoom, hold: c.hold, follow: c.follow });
         else out.push({ type: "cue", cue: c.cue });
       }
 

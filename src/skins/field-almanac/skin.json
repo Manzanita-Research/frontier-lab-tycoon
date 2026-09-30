@@ -5,6 +5,7 @@
   "author": "Frontier Lab Tycoon",
   "version": "1.0.0",
   "description": "A naturalist's field guide to your lab: quiet frosted-paper panels, a soft serif, hairline rules, and the news as dispatches.",
+  "unlisted": true,
   "preview": "assets/preview.jpg",
   "slots": [
     "Layout",
@@ -133,6 +134,15 @@
     "shadow.pop": "0 6px 14px -8px rgba(34, 49, 58, 0.5)"
   },
   "strings": {
+    "run.title": "Index",
+    "run.prompt": "Look up a widget by name, and the almanac turns to its page.",
+    "build.facilitiesCount": "{n} plates",
+    "build.runCount": "{n} entries",
+    "build.groupNo": "Plate {n}.",
+    "build.group.compute": "Engines & Power",
+    "build.group.research": "Studies & Trade",
+    "build.group.amenities": "Comforts",
+    "build.group.offices": "Staff & Quarters",
     "ticker.label": "Dispatches",
     "objectives.title": "This year's objectives",
     "training.title": "Field notes",

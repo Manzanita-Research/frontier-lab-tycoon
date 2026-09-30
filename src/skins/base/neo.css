@@ -1,0 +1,29 @@
+/* FLT-56: a neo lab's valuation, pinned over its balloon beyond the fence. */
+.neoballoon {
+  display: grid;
+  justify-items: center;
+  gap: 1px;
+  transform: translate(-50%, -100%);
+  white-space: nowrap;
+  pointer-events: none;
+  b {
+    padding: 1px 8px 2px;
+    border: 2px solid var(--ink, #3a2a1c);
+    border-radius: 999px;
+    background: #fffaf0;
+    color: var(--ink, #3a2a1c);
+    font: 900 15px var(--font, system-ui);
+    box-shadow: 0 2px 0 var(--ink, #3a2a1c);
+  }
+  small {
+    padding: 0 5px;
+    border-radius: 3px;
+    background: #fffaf0d0;
+    color: var(--ink, #3a2a1c);
+    font: 600 10px var(--font, system-ui);
+  }
+}
+.neoballoon.neo-nemesis small {
+  background: #b3263a;
+  color: #fffaf0;
+}

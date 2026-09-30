@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ALL_VISIBLE, Odometer, money, useCoach, useT } from "../kit";
+import { ALL_VISIBLE, Odometer, money, useCoach, useT, useWidget } from "../kit";
 import type { SlotPropsMap } from "../types";
 import type { StatsVM } from "../../ui/hud/types";
 import { Caret, InfinityIcon } from "./icons";
@@ -104,6 +104,7 @@ export function Stats({ stats, layout, visible = ALL_VISIBLE, actions }: SlotPro
   const coach = useCoach();
   const compact = layout.compact;
   const [expanded, setExpanded] = useState(false);
+  useWidget(["properties", "finance"], () => setExpanded(true));
   const hype = useTrend(stats.hype.value);
   const a = stats.arena;
   return (

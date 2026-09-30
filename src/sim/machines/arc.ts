@@ -4,7 +4,8 @@
 // choice's effects; this decides when a card opens, which picks count, and when it may come back.
 import { Schema } from "effect";
 import { setupEffect } from "@xstate/effect";
-import type { Stored } from "./run";
+import type { EventFromLogic } from "xstate";
+import { step, type Stored } from "./run";
 
 export const ArcContext = Schema.Struct({
   /** Choices on the card: a pick outside 0..choices-1 is ignored. */
@@ -65,6 +66,27 @@ export const arcMachine = setupEffect({
 });
 
 export type ArcStored = Stored<typeof arcMachine>;
+
+type ArcDay = Extract<EventFromLogic<typeof arcMachine>, { type: "DAY" }>;
+
+/**
+ * A DAY that leaves the card as it is, done without `transition()` (FLT-39): on the daily check nearly every card is calm
+ * with its condition unmet, or still cooling down, and sixty machine steps a midnight are not free. Returns null when
+ * the machine has something to decide. Mirrors the "stay" branches above exactly (a test checks it against the machine).
+ */
+export function quietArcDay(stored: ArcStored, event: ArcDay): ArcStored | null {
+  const { openedDay, cooldownDays } = stored.context;
+  switch (stored.value) {
+    case "calm":
+      return event.ready ? null : stored;
+    case "cooldown":
+      return openedDay !== null && event.day - openedDay < cooldownDays * event.pace ? stored : null;
+  }
+  return null;
+}
+
+/** The daily check for one card: the quiet day when it is one, the machine otherwise. */
+export const dayArc = (stored: ArcStored, event: ArcDay): ArcStored => quietArcDay(stored, event) ?? step(arcMachine, stored, event).stored;
 
 function evaluate(context: ArcContext, event: { day: number; ready: boolean; slotFree: boolean }) {
   if (!event.ready) return { target: "calm" };

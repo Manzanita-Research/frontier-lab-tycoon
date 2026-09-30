@@ -9,7 +9,6 @@ export const AUTH_SECRETS = ["BETTER_AUTH_SECRET", "HF_CLIENT_ID", "HF_CLIENT_SE
 /** Only prod, and only with the repo variable `FLT_AUTH=on`. PR previews never get auth: their hosts are random. */
 export const authEnabled = (stage: string, flag: string | undefined) => stage === "prod" && flag?.trim() === "on";
 
-/** The Worker in front of the assets, and the paths it runs for. Everything else is served straight from `dist/`. */
+/** The Worker that replaces the edge script when accounts are on (it runs for the same paths: all but /assets/*). */
 export const AUTH_WORKER_MAIN = new URL("../worker/index.ts", import.meta.url);
-export const AUTH_WORKER_PATHS = ["/api/*"];
 export const AUTH_MIGRATIONS = new URL("../worker/migrations/", import.meta.url);

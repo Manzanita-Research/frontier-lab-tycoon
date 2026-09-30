@@ -14,10 +14,10 @@ describe("the FLT_AUTH switch", () => {
     expect(authEnabled("prod", "on")).toBe(true);
   });
 
-  it("guards everything the stack adds: off, the site is the assets-only Worker it was", () => {
+  it("guards everything the stack adds: off, the site is the edge-script Worker it was", () => {
     const stack = readFileSync(new URL("./alchemy.run.ts", import.meta.url), "utf8");
     // Every account resource, the Worker script, its secrets and the build flag live inside the `auth ?` branch.
-    const branch = stack.slice(stack.indexOf("const accounts = auth"), stack.indexOf(": {};", stack.indexOf("const accounts = auth")));
+    const branch = stack.slice(stack.indexOf("const accounts = auth"), stack.indexOf(": undefined;", stack.indexOf("const accounts = auth")));
     for (const piece of ["main: fileURLToPath", "D1.Database", "R2.Bucket", ...AUTH_SECRETS.map((s) => `Config.Redacted("${s}")`), 'VITE_FLT_AUTH: "on"']) {
       expect(branch).toContain(piece);
       expect(stack.split(piece).length - 1).toBe(1);
@@ -26,7 +26,13 @@ describe("the FLT_AUTH switch", () => {
     expect(branch.match(/RemovalPolicy\.retain\(\)/g)).toHaveLength(2);
     expect(branch).toContain("name: `flt-${stack.stage}-accounts`");
     expect(branch).toContain("name: `flt-${stack.stage}-saves`");
-    expect(stack).toContain('assets: { notFoundHandling: "single-page-application", ...(auth ? { runWorkerFirst: AUTH_WORKER_PATHS } : {}) }');
+    // Off (and on every PR Preview), the Worker keeps main's edge script; on, worker/index.ts takes its place.
+    expect(stack).toContain("...(accounts ?? { script: EDGE_SCRIPT }),");
+    expect(stack.split("script: EDGE_SCRIPT").length - 1).toBe(1);
+    expect(branch).toContain("REDIRECT_HOSTS: REDIRECT_HOSTS.join(\",\")");
+    // The preview branch declares no bindings of its own.
+    const preview = stack.slice(stack.indexOf("preview: {"), stack.indexOf("}),", stack.indexOf("preview: {")));
+    expect(preview).not.toMatch(/env|DB|SAVES|Redacted|main/);
   });
 
   it("passes the secrets by name, only to a production deploy with the flag on", () => {

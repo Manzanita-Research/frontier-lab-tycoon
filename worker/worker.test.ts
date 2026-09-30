@@ -154,6 +154,22 @@ describe("routing", () => {
     expect(res.status).toBe(404);
     expect(await res.json()).toMatchObject({ error: "not-found" });
   });
+
+  it("does the edge script's job: the apex and www 302 to app., path and query kept, /api included", async () => {
+    const apex = await startWorker(profile, { host: "frontierlabtycoon.test", vars: { APP_HOST: "app.frontierlabtycoon.test", REDIRECT_HOSTS: "frontierlabtycoon.test,www.frontierlabtycoon.test" } });
+    try {
+      for (const path of ["/", "/?seed=12", "/api/auth/get-session"]) {
+        const res = await apex.fetch(path, { redirect: "manual" });
+        expect(res.status).toBe(302);
+        expect(res.headers.get("location")).toBe(`https://app.frontierlabtycoon.test${path}`);
+        expect(res.headers.get("cache-control")).toBe("no-store");
+      }
+    } finally {
+      await apex.mf.dispose();
+    }
+    // The game's own host is never redirected.
+    expect((await w.fetch("/", { redirect: "manual" })).status).toBe(200);
+  });
 });
 
 describe("/api/saves (local D1 + R2)", () => {

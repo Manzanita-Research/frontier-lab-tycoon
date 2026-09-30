@@ -1,0 +1,34 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "babb740d8cda4c2161ce857838435028a0504551"
+  },
+  "head": {
+    "branch": "flt-63-place-menu",
+    "sha": "caae1a6",
+    "dirty": true
+  },
+  "seconds": 52.27,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "flt63-facilities",
+      "skin": "swag-drop",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/swag-drop/before/flt63-facilities@swag-drop.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/swag-drop/after/flt63-facilities@swag-drop.png",
+      "title": "FLT-63: Start ▸ Facilities ▸ open (the buildings, grouped)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/swag-drop/compare/flt63-facilities@swag-drop.png",
+      "changed": 0.06259259259259259
+    },
+    {
+      "scene": "flt63-run",
+      "skin": "swag-drop",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/swag-drop/before/flt63-run@swag-drop.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/swag-drop/after/flt63-run@swag-drop.png",
+      "title": "FLT-63: Start ▸ Run… (the widget launcher)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/swag-drop/compare/flt63-run@swag-drop.png",
+      "changed": 0.20167978395061728
+    }
+  ],
+  "errors": []
+}
