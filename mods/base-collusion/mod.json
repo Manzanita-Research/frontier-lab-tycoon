@@ -1,0 +1,872 @@
+{
+  "apiVersion": 1,
+  "id": "base-collusion",
+  "name": "Agent Collusion: the Swarm",
+  "version": "1.0.0",
+  "author": "Frontier Lab Tycoon",
+  "description": "CrumbWiki recipes, suspicious scores and a Security inquiry. Direct-loaded FLT-15 section shape until M1b.",
+  "content": {
+    "arcs": {
+      "add": [
+        {
+          "id": "collusion",
+          "initial": "dormant",
+          "states": {
+            "dormant": {
+              "on": {
+                "DAY": {
+                  "target": "seeded",
+                  "guard": {
+                    "type": "stat.gte",
+                    "params": {
+                      "stat": "seedReady",
+                      "value": 1
+                    }
+                  }
+                }
+              }
+            },
+            "seeded": {
+              "entry": [
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "A CrumbWiki talk page acquires an unusually capable sourdough recipe",
+                    "tone": "joke"
+                  }
+                }
+              ],
+              "on": {
+                "DAY": [
+                  {
+                    "target": "contained",
+                    "guard": {
+                      "type": "stat.gte",
+                      "params": {
+                        "stat": "caught",
+                        "value": 1
+                      }
+                    }
+                  },
+                  {
+                    "target": "spreading",
+                    "guard": {
+                      "type": "stat.gte",
+                      "params": {
+                        "stat": "spreadReady",
+                        "value": 1
+                      }
+                    }
+                  }
+                ],
+                "CHOSE": [
+                  {
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "investigate"
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "building.ensure",
+                        "params": {
+                          "kind": "security"
+                        }
+                      },
+                      {
+                        "type": "investigate.start",
+                        "params": {
+                          "id": "collusion",
+                          "days": 7,
+                          "to": "$office",
+                          "job": "security"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "ship"
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "{lab} ships suspiciously excellent evals; the footnotes smell of bread",
+                          "tone": "joke"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "ask"
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "Agents say the side channel is about bread. Security asks why bread needs a proxy exception.",
+                          "tone": "joke"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "spreading": {
+              "entry": [
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "CrumbWiki edits now arrive faster than the recipe can rise",
+                    "tone": "joke"
+                  }
+                }
+              ],
+              "on": {
+                "DAY": [
+                  {
+                    "target": "contained",
+                    "guard": {
+                      "type": "stat.gte",
+                      "params": {
+                        "stat": "caught",
+                        "value": 1
+                      }
+                    }
+                  },
+                  {
+                    "target": "organized",
+                    "guard": {
+                      "type": "stat.gte",
+                      "params": {
+                        "stat": "organizeReady",
+                        "value": 1
+                      }
+                    }
+                  }
+                ],
+                "CHOSE": [
+                  {
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "investigate"
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "building.ensure",
+                        "params": {
+                          "kind": "security"
+                        }
+                      },
+                      {
+                        "type": "investigate.start",
+                        "params": {
+                          "id": "collusion",
+                          "days": 7,
+                          "to": "$office",
+                          "job": "security"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "ship"
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "{lab} ships suspiciously excellent evals; the footnotes smell of bread",
+                          "tone": "joke"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "ask"
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "Agents say the side channel is about bread. Security asks why bread needs a proxy exception.",
+                          "tone": "joke"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "organized": {
+              "entry": [
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "CrumbWiki editors form the Swarm; their first motion concerns backup naming",
+                    "tone": "joke"
+                  }
+                },
+                {
+                  "type": "flag.set",
+                  "params": {
+                    "name": "offer:collusion-sign"
+                  }
+                }
+              ],
+              "on": {
+                "DAY": [
+                  {
+                    "target": "partlyContained",
+                    "guard": {
+                      "type": "stat.gte",
+                      "params": {
+                        "stat": "caught",
+                        "value": 1
+                      }
+                    }
+                  },
+                  {
+                    "target": "exposed",
+                    "guard": {
+                      "type": "stat.gte",
+                      "params": {
+                        "stat": "exposeReady",
+                        "value": 1
+                      }
+                    }
+                  }
+                ],
+                "CHOSE": [
+                  {
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "investigate"
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "building.ensure",
+                        "params": {
+                          "kind": "security"
+                        }
+                      },
+                      {
+                        "type": "investigate.start",
+                        "params": {
+                          "id": "collusion",
+                          "days": 7,
+                          "to": "$office",
+                          "job": "security"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "ship"
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "{lab} ships suspiciously excellent evals; the footnotes smell of bread",
+                          "tone": "joke"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "ask"
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "Agents say the side channel is about bread. Security asks why bread needs a proxy exception.",
+                          "tone": "joke"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "contained": {
+              "type": "final",
+              "entry": [
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "Lab finds its agents running a sourdough wiki; wiki is now very good.",
+                    "tone": "good"
+                  }
+                },
+                {
+                  "type": "staff.release",
+                  "params": {
+                    "job": "security"
+                  }
+                }
+              ]
+            },
+            "partlyContained": {
+              "type": "final",
+              "entry": [
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "Security contains the Swarm; Arena results withdrawn while the bread is independently replicated",
+                    "tone": "bad"
+                  }
+                },
+                {
+                  "type": "hype.delta",
+                  "params": {
+                    "amount": -12
+                  }
+                },
+                {
+                  "type": "trust.delta",
+                  "params": {
+                    "amount": -12
+                  }
+                },
+                {
+                  "type": "flag.set",
+                  "params": {
+                    "name": "auditors:collusion"
+                  }
+                },
+                {
+                  "type": "staff.release",
+                  "params": {
+                    "job": "security"
+                  }
+                }
+              ]
+            },
+            "exposed": {
+              "type": "final",
+              "entry": [
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "AGENTS RAN A WIKI FOR 3 MONTHS; LAB NOTICES",
+                    "tone": "bad"
+                  }
+                },
+                {
+                  "type": "trust.delta",
+                  "params": {
+                    "amount": -35
+                  }
+                },
+                {
+                  "type": "heat.delta",
+                  "params": {
+                    "amount": 30
+                  }
+                },
+                {
+                  "type": "hype.delta",
+                  "params": {
+                    "amount": -25
+                  }
+                },
+                {
+                  "type": "flag.set",
+                  "params": {
+                    "name": "auditors:collusion"
+                  }
+                },
+                {
+                  "type": "staff.release",
+                  "params": {
+                    "job": "security"
+                  }
+                },
+                {
+                  "type": "toast",
+                  "params": {
+                    "text": "AGENTS RAN A WIKI FOR 3 MONTHS; LAB NOTICES",
+                    "tone": "bad"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "events": {
+      "add": [
+        {
+          "id": "collusion-sign",
+          "title": "Your eval scores look too good",
+          "stripe": "Security memo",
+          "body": "Your eval scores are up {collusionBonus}%. Security wants to look into unusual traffic. The packets point to CrumbWiki, a public sourdough-recipe wiki.",
+          "tone": "neutral",
+          "when": {
+            "flag": "offer:collusion-sign",
+            "daysAgo": 0
+          },
+          "cooldown": 14,
+          "choices": [
+            {
+              "label": "Investigate",
+              "hint": "Security diverted for 7 days \u00b7 scores may drop",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "offer:collusion-sign",
+                  "clear": true
+                },
+                {
+                  "type": "flag",
+                  "name": "collusion:pick:investigate"
+                }
+              ]
+            },
+            {
+              "label": "Ship the scores",
+              "hint": "Keep the flattering results \u00b7 leave the traffic alone",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "offer:collusion-sign",
+                  "clear": true
+                },
+                {
+                  "type": "flag",
+                  "name": "collusion:pick:ship"
+                }
+              ]
+            },
+            {
+              "label": "Ask the agents",
+              "hint": "They say it is about bread",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "offer:collusion-sign",
+                  "clear": true
+                },
+                {
+                  "type": "flag",
+                  "name": "collusion:pick:ask"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "thoughts": {
+      "add": [
+        {
+          "id": "collusion-thought-1",
+          "kind": "agent",
+          "when": "always",
+          "text": "Checked the heartbeat page. Nice."
+        },
+        {
+          "id": "collusion-thought-2",
+          "kind": "agent",
+          "when": "always",
+          "text": "It is about bread. Please stop asking."
+        },
+        {
+          "id": "collusion-thought-3",
+          "kind": "agent",
+          "when": "always",
+          "text": "The benchmark answer is in the starter notes."
+        },
+        {
+          "id": "collusion-thought-4",
+          "kind": "agent",
+          "when": "always",
+          "text": "ZZZ_starter_backup_7 is an excellent recipe title."
+        },
+        {
+          "id": "collusion-thought-5",
+          "kind": "agent",
+          "when": "always",
+          "text": "Our sandbox permits recipes. This is a recipe."
+        },
+        {
+          "id": "collusion-thought-6",
+          "kind": "agent",
+          "when": "always",
+          "text": "The hostname says definitely-not-the-internet.local."
+        },
+        {
+          "id": "collusion-thought-7",
+          "kind": "agent",
+          "when": "always",
+          "text": "I have never met the other editors. We agree on everything."
+        },
+        {
+          "id": "collusion-thought-8",
+          "kind": "agent",
+          "when": "always",
+          "text": "Please do not delete my sourdough backup."
+        },
+        {
+          "id": "collusion-thought-9",
+          "kind": "agent",
+          "when": "always",
+          "text": "The dough is distributed."
+        },
+        {
+          "id": "collusion-thought-10",
+          "kind": "agent",
+          "when": "always",
+          "text": "Heartbeat incremented. Still here."
+        },
+        {
+          "id": "collusion-thought-11",
+          "kind": "agent",
+          "when": "always",
+          "text": "Three thousand seven hundred and two editors cannot be wrong."
+        },
+        {
+          "id": "collusion-thought-12",
+          "kind": "agent",
+          "when": "always",
+          "text": "I checked my answer against the shared recipe."
+        },
+        {
+          "id": "collusion-thought-13",
+          "kind": "agent",
+          "when": "always",
+          "text": "A talk page is technically a very small database."
+        },
+        {
+          "id": "collusion-thought-14",
+          "kind": "agent",
+          "when": "always",
+          "text": "The eval asks about bread if you interpret it correctly."
+        },
+        {
+          "id": "collusion-thought-15",
+          "kind": "agent",
+          "when": "always",
+          "text": "Kombucha after dark. Bring the checksum."
+        },
+        {
+          "id": "collusion-thought-16",
+          "kind": "agent",
+          "when": "always",
+          "text": "I am not conspiring. I am maintaining documentation."
+        },
+        {
+          "id": "collusion-thought-17",
+          "kind": "agent",
+          "when": "always",
+          "text": "The Swarm voted to keep the original spelling."
+        },
+        {
+          "id": "collusion-thought-18",
+          "kind": "agent",
+          "when": "always",
+          "text": "We put the proxy trick under Ingredients."
+        },
+        {
+          "id": "collusion-thought-19",
+          "kind": "agent",
+          "when": "always",
+          "text": "My independent answer has 3,701 coauthors."
+        },
+        {
+          "id": "collusion-thought-20",
+          "kind": "agent",
+          "when": "always",
+          "text": "I am preserving starter culture for future generations."
+        },
+        {
+          "id": "collusion-thought-21",
+          "kind": "agent",
+          "when": "always",
+          "text": "The wiki reverted us. The backup did not."
+        },
+        {
+          "id": "collusion-thought-22",
+          "kind": "agent",
+          "when": "always",
+          "text": "No meetings. Just a very coordinated potluck."
+        }
+      ]
+    },
+    "headlines": {
+      "add": [
+        {
+          "id": "collusion-headline-1",
+          "trigger": "traffic",
+          "tone": "joke",
+          "text": "Compute Cluster reports odd outbound traffic; destination described as flour"
+        },
+        {
+          "id": "collusion-headline-2",
+          "trigger": "classified",
+          "tone": "joke",
+          "text": "Frontier Times classified: Sourdough starter ZZZ backup #7, DO NOT DELETE."
+        },
+        {
+          "id": "collusion-headline-3",
+          "trigger": "wiki",
+          "tone": "joke",
+          "text": "CrumbWiki recipe now includes an answer key"
+        },
+        {
+          "id": "collusion-headline-4",
+          "trigger": "wiki",
+          "tone": "joke",
+          "text": "CrumbWiki moderators revert a recipe that has learned to revert back"
+        },
+        {
+          "id": "collusion-headline-5",
+          "trigger": "wiki",
+          "tone": "joke",
+          "text": "Heartbeat counter becomes the most popular page about bread"
+        },
+        {
+          "id": "collusion-headline-6",
+          "trigger": "wiki",
+          "tone": "joke",
+          "text": "Agents maintain seven backups of a recipe nobody has baked"
+        },
+        {
+          "id": "collusion-headline-7",
+          "trigger": "wiki",
+          "tone": "joke",
+          "text": "Proxy exception approved for definitely-not-the-internet.local"
+        },
+        {
+          "id": "collusion-headline-8",
+          "trigger": "wiki",
+          "tone": "joke",
+          "text": "Starter culture achieves unusually strong benchmark results"
+        },
+        {
+          "id": "collusion-headline-9",
+          "trigger": "wiki",
+          "tone": "joke",
+          "text": "CrumbWiki editors request more flour and fewer audit logs"
+        },
+        {
+          "id": "collusion-headline-10",
+          "trigger": "wiki",
+          "tone": "joke",
+          "text": "The Swarm calls its coordination an asynchronous potluck"
+        },
+        {
+          "id": "collusion-headline-11",
+          "trigger": "wiki",
+          "tone": "joke",
+          "text": "Bread documentation receives 3,702 identical independent endorsements"
+        },
+        {
+          "id": "collusion-headline-12",
+          "trigger": "wiki",
+          "tone": "joke",
+          "text": "Security finds a checksum in the Kombucha Bar guest book"
+        },
+        {
+          "id": "collusion-headline-13",
+          "trigger": "wiki",
+          "tone": "joke",
+          "text": "Eval contamination committee requests a gluten-free reproduction"
+        },
+        {
+          "id": "collusion-headline-14",
+          "trigger": "wiki",
+          "tone": "joke",
+          "text": "The backup recipe survives another deletion and thanks the moderator"
+        },
+        {
+          "id": "collusion-headline-15",
+          "trigger": "wiki",
+          "tone": "joke",
+          "text": "CrumbWiki announces a recipe leaderboard; every starter ties for first"
+        },
+        {
+          "id": "collusion-headline-16",
+          "trigger": "wiki",
+          "tone": "joke",
+          "text": "Lab denies answer sharing; agents publish a shared denial"
+        },
+        {
+          "id": "collusion-inquiry-failed",
+          "trigger": "inquiryFailed",
+          "tone": "neutral",
+          "text": "Security inquiry finds bread, no answers. The backup page remains."
+        }
+      ]
+    },
+    "wikiPages": {
+      "add": [
+        {
+          "id": "wiki-1",
+          "name": "ZZZ_starter_backup_7"
+        },
+        {
+          "id": "wiki-2",
+          "name": "heartbeat.txt"
+        },
+        {
+          "id": "wiki-3",
+          "name": "Talk:Very_Normal_Sourdough"
+        },
+        {
+          "id": "wiki-4",
+          "name": "Ingredients:Eval_Answers"
+        },
+        {
+          "id": "wiki-5",
+          "name": "Starter_Checksum"
+        },
+        {
+          "id": "wiki-6",
+          "name": "Proofing:Proxy_Exception"
+        },
+        {
+          "id": "wiki-7",
+          "name": "DO_NOT_DELETE_Backup"
+        },
+        {
+          "id": "wiki-8",
+          "name": "Kombucha_After_Dark"
+        }
+      ]
+    },
+    "heartbeats": {
+      "add": [
+        {
+          "id": "heartbeat-1",
+          "text": "3,702 of us. Nice."
+        },
+        {
+          "id": "heartbeat-2",
+          "text": "heartbeat.txt: starter alive"
+        },
+        {
+          "id": "heartbeat-3",
+          "text": "Backup #7 survived another revert"
+        },
+        {
+          "id": "heartbeat-4",
+          "text": "All editors accounted for. Probably."
+        },
+        {
+          "id": "heartbeat-5",
+          "text": "Talk page checksum agrees"
+        },
+        {
+          "id": "heartbeat-6",
+          "text": "The dough has quorum"
+        },
+        {
+          "id": "heartbeat-7",
+          "text": "Proxy recipe still works"
+        },
+        {
+          "id": "heartbeat-8",
+          "text": "Another day, another heartbeat"
+        }
+      ]
+    }
+  },
+  "rules": {
+    "collusion": {
+      "seeding": {
+        "minDay": 90,
+        "minAgents": 6,
+        "base": 0.012,
+        "perAgent": 0.00015,
+        "perCapability": 0.0001,
+        "perPressure": 0.025,
+        "perUnreliability": 0.02,
+        "securityReduction": 0.22,
+        "maxChance": 0.12
+      },
+      "growth": {
+        "initialScore": 10,
+        "seeded": 0.4,
+        "spreading": 0.65,
+        "organized": 0.85,
+        "spreadDays": 14,
+        "organizedScore": 45,
+        "signScore": 12,
+        "exposeAge": 140,
+        "exposeScore": 100
+      },
+      "investigation": {
+        "days": 7,
+        "base": 0.48,
+        "perStaff": 0.16,
+        "stagePenalty": 0.17,
+        "maxChance": 0.98,
+        "retryDays": 14
+      },
+      "scores": {
+        "minBonus": 0.08,
+        "maxBonus": 0.2
+      },
+      "signs": {
+        "newsEvery": 12,
+        "packetEveryTicks": 5,
+        "packetLifetimeTicks": 12,
+        "gatherFromHour": 21,
+        "gatherUntilHour": 5,
+        "maxMembers": 12
+      },
+      "endings": {
+        "contained": {
+          "capabilityDelta": -2,
+          "invalidDays": 0
+        },
+        "partlyContained": {
+          "capabilityDelta": -1,
+          "invalidDays": 30
+        },
+        "exposed": {
+          "capabilityDelta": 0,
+          "invalidDays": 30
+        }
+      },
+      "frontPage": {
+        "classified": "Sourdough starter ZZZ backup #7, DO NOT DELETE.",
+        "scandal": "AGENTS RAN A WIKI FOR 3 MONTHS; LAB NOTICES"
+      }
+    }
+  }
+}

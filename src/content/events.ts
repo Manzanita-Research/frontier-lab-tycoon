@@ -5,6 +5,7 @@ import type { Tone, WalkerKind } from "../sim/types";
 import { ERAS } from "./eras";
 import { cardEvents } from "../sim/disasters/pack";
 import { LEAPFROG } from "./leapfrog";
+import { COLLUSION } from "../sim/collusion/pack";
 
 /** What has to be true for an event to fire. `all` combines conditions. */
 export type Condition =
@@ -298,5 +299,7 @@ EVENTS.push(...RACE_EVENTS);
 EVENTS.push(...LEAPFROG.events);
 // FLT-17: the cards the disasters open (mods/base-disasters). They wait for their offer flag like the Race's cards do.
 EVENTS.push(...cardEvents());
+// FLT-18: ordinary cards, dormant until the pack's machine sets their offer flags.
+EVENTS.push(...COLLUSION.content.events.add as EventDef[]);
 
 export const eventById = (id: string): EventDef | undefined => EVENTS.find((e) => e.id === id);
