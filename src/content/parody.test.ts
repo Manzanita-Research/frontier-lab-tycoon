@@ -1,5 +1,5 @@
 // Parody names only (AGENTS.md). Every content string, skin string and window title the game can show: the content
-// tables, the 2D UI and all six skins (code, JSON and CSS), and every base pack under mods/. The defection test keeps
+// tables, the 2D UI and all six skins (code, JSON and CSS), the software-shelf intro, and every base pack under mods/. The defection test keeps
 // its narrower check on its own two packs; this one covers the rest, so a real product name fails wherever it lands.
 const REAL = [
   "Copilot", "Internet Explorer", "Notepad", "WordPad", "LinkedIn", "Excel", "PowerPoint", "Outlook", "Slack", "Twitter",
@@ -7,20 +7,28 @@ const REAL = [
   // Real labs our old rival names contained (renamed before prod: Super Super AI, MetaMeta Metaintelligence Labs).
   "Safe Superintelligence", "Meta Superintelligence", "SSI",
 ];
+// The software shelf (FLT-70) parodies a 1997 software store, so it also must not name the real ones: the publishers,
+// the boxes on the shelf, the stores, the BIOS and the chips. Scanned in src/intro only (the game has no shelf).
+const RETAIL = [
+  "Maxis", "SimCity", "RollerCoaster Tycoon", "Encarta", "Mavis Beacon", "Carmen Sandiego", "Oregon Trail", "Myst",
+  "Egghead", "CompUSA", "Babbage's", "Scholastic", "Broderbund", "Sierra", "American Megatrends", "AMIBIOS", "Award BIOS",
+  "Phoenix BIOS", "Intel", "Pentium", "Sound Blaster", "IBM", "Compaq", "Packard Bell", "After Dark", "Windows", "Energy Star",
+  "Microsoft Office", "Norton", "Lotus",
+];
 // Our parodies that contain (or sit next to) a real name. They are removed before the scan.
 const ALLOWED = ["Outlook Excess", "WordSad", "WordPerfectly", "NoteBad"];
 
 const sources = import.meta.glob<string>(
-  ["./**/*.{ts,json}", "../ui/**/*.{ts,tsx,json,css}", "../skins/**/*.{ts,tsx,json,css}", "../../mods/base-*/**/*.json", "!**/*.test.{ts,tsx}"],
+  ["./**/*.{ts,json}", "../ui/**/*.{ts,tsx,json,css}", "../skins/**/*.{ts,tsx,json,css}", "../intro/**/*.{ts,tsx,json,css}", "../../mods/base-*/**/*.json", "!**/*.test.{ts,tsx}"],
   { query: "?raw", import: "default", eager: true },
 );
 const scanned = Object.keys(sources);
 const packs = [...new Set(scanned.flatMap((f) => /^\.\.\/\.\.\/mods\/(base-[^/]+)\//.exec(f)?.[1] ?? []))];
 
 /** Every real name in `text`, once the allowed parodies are taken out. */
-function realNames(text: string): string[] {
+function realNames(text: string, names = REAL): string[] {
   const clean = ALLOWED.reduce((t, ok) => t.split(ok).join(""), text);
-  return REAL.filter((name) => new RegExp(`\\b${name.replace(" ", "\\s+")}\\b`).test(clean));
+  return names.filter((name) => new RegExp(`\\b${name.replace(" ", "\\s+")}\\b`).test(clean));
 }
 
 describe("parody names only", () => {
@@ -30,6 +38,7 @@ describe("parody names only", () => {
     expect(realNames("Very Safe Superintelligence Inc., Meta Superintelligence Labs, SSI")).toEqual(["Safe Superintelligence", "Meta Superintelligence", "SSI"]);
     // Word boundaries mean "MetaMeta Superintelligence" would slip past this scan (and the Drama lint), which is why
     // MetaMeta's full name was changed by hand (#71): it contained a real lab's name as a substring.
+    expect(realNames("Frontier BIOS, a Frontier 486FX, the '96 sim-game look, Intel Inside, a Maxis box", [...REAL, ...RETAIL])).toEqual(["Maxis", "Intel"]);
     expect(realNames("Very Very Super Super Intelligence, Super Super AI, MetaMeta Metaintelligence Labs, SSID")).toEqual([]);
   });
   it("reads the content, the UI, all six skins and every base pack", () => {
@@ -39,9 +48,10 @@ describe("parody names only", () => {
     expect(sources["../skins/frontier-95/skin.css"]).toContain('[data-skin="frontier-95"]');
     expect(packs.length).toBeGreaterThanOrEqual(13);
     for (const p of packs) expect(scanned).toContain(`../../mods/${p}/mod.json`);
+    for (const f of ["content.ts", "manual.ts", "art.ts", "Intro.tsx", "stage/Kiosk.tsx"]) expect(scanned).toContain(`../intro/${f}`);
   });
   it("names no real product, app, site or lab anywhere the player can read", () => {
-    const found = scanned.flatMap((f) => realNames(sources[f]!).map((name) => `${f}: ${name}`));
+    const found = scanned.flatMap((f) => realNames(sources[f]!, f.startsWith("../intro/") ? [...REAL, ...RETAIL] : REAL).map((name) => `${f}: ${name}`));
     expect(found).toEqual([]);
   });
 });
