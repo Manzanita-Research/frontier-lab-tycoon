@@ -285,6 +285,8 @@
       "flt63-facilities",
       "flt63-run",
       "flt63-run-agi",
+      "flt63-start",
+      "flt63-run-save",
       "flt63-path",
       "flt63-hall",
       "flt63-phone-facilities",
@@ -3731,6 +3733,44 @@
         },
         {
           "wait": 500
+        }
+      ]
+    },
+    "flt63-start": {
+      "title": "FLT-63 + FLT-65: the Start menu open (Facilities ▸, Run…, Save / Load…)",
+      "steps": [
+        {
+          "click": "[data-coach=start]"
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "flt63-run-save": {
+      "title": "FLT-63 + FLT-65: Run… save.exe opens the floppy window",
+      "steps": [
+        {
+          "click": "[data-coach=start]"
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": "[data-testid=start-run]",
+          "optional": true
+        },
+        {
+          "wait": 600
+        },
+        {
+          "type": "save.exe",
+          "into": "[data-testid=run-input]",
+          "enter": true,
+          "optional": true
+        },
+        {
+          "wait": 800
         }
       ]
     },
