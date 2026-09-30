@@ -1,6 +1,6 @@
 # Modding Frontier Lab Tycoon (design, v1)
 
-_FLT-15. Written by the FLT lead (Opus 5.5). Jem: "this whole game should be agent native… designed for vibecoded mods to be shared with your friends."_
+_FLT-15. Written by the FLT lead (Opus 5.5). Companion: `docs/EFFECT-FOR-MODDERS.md` (Effect in plain words, with a worked example). Jem: "this whole game should be agent native… designed for vibecoded mods to be shared with your friends."_
 
 **The test:** someone asks their coding agent *"make me a Frontier Lab Tycoon mod where the protesters are all golden retrievers"*, gets a working mod in minutes, and sends a friend a link that opens the game with it loaded.
 
@@ -17,6 +17,18 @@ Most of the fun can be expressed as **data**, and data is safe to share, easy fo
 
 **Story arcs are data-only statecharts.** An arc is an XState machine config written in JSON. Its guards and actions may only reference **named built-ins** the game registers via `setup()`: guards like `stat.gte`, `flag.is`, `day.after` and `chance`, and actions like `effect.cash`, `effect.hype`, `news`, `card`, `spawn.protesters` and `flag.set`. There are no functions in mods. The game still runs arcs with pure `transition()` inside the tick, so modded games stay deterministic, and the same seed plus the same mods replay identically.
 
+## 1b. Architecture: every extension point is an Effect service, and every mod is a Layer
+
+_Jem's idea. It fits perfectly, because the app already runs on Effect (`Sim` and `Frames` are services today). New to Effect? Read `docs/EFFECT-FOR-MODDERS.md` first._
+
+- **Extension points are services** (`Context.Service` classes in `src/mods/services/`): `Skin`, `Content` (buildings, walker kinds and thoughts, headlines, arcs, rivals, endings, assistant tips, names), `Rules` (tunables and machine patches), `Vocabulary` (the named guards and effects JSON arcs may use), `Assets`, `Audio`, and `GameEvents` (a read-only stream). `Rng` and the clock are core and **not** moddable, which keeps games replayable.
+- **The base game is just the default Layers** (`BaseGame.layer` = `Layer.mergeAll(baseSkin, baseContent, baseRules, …)`). Nothing in the game reads `src/content/*` directly any more; it asks for the services.
+- **Every mod compiles to a Layer.** The loader validates a data mod's `mod.json` with Effect Schema and turns each section into a **wrapping Layer**: it reads the service as it was below it (`yield* Content`) and returns a changed copy. Modders never write Effect. Power users and built-in mods can write the Layer directly.
+- **Composition is layering in load order:** `Layer.provide(modN, … Layer.provide(mod1, BaseGame.layer))`. Precedence and conflicts are explicit. Each content section uses `add` (an error if the id exists, unless it's the mod's own), `override` (the id must exist, and fields merge), or `remove`. Before building, the loader computes a **conflict report** (e.g. "water-dlc and every-lab-is-steve both override rival `metameta`; the later one wins"), and the Mod Manager shows it.
+- **Resolved once per game:** at game start (and on dev hot-reload) the app resolves the services into one plain **`GameDefinition`** (content, rules, vocabulary). The pure sim takes it as input: `createInitialState(seed, def)` and `tick(state, def)`. Layers decide *what the game is made of*; the tick stays the same deterministic function.
+- **Tests and `flt-mod check`** provide `Layer.provide(modLayer, BaseGame.layer)` and run the headless sim. It's the same mechanism as the game, so there's nothing special to mock.
+- **Safety doesn't change:** a Layer is how things plug in, not an escape hatch. Shared mods are data turned into Layers by *our* loader. A sandboxed script mod never runs in the page; the host builds a Layer from its capability-limited messages (for example, `GameEvents` subscriptions and player `Command`s).
+
 ## 2. The manifest
 
 One `mod.json`, validated on load with **Effect Schema**. Errors are friendly and give the exact JSON path, e.g. `content.events[2].choices[0].effects[1]: unknown effect "effect.cashh" (did you mean "effect.cash"?)`.
@@ -31,16 +43,17 @@ One `mod.json`, validated on load with **Effect Schema**. Errors are friendly an
   "description": "The discourse is now a documentary. Then a musical.",
   "skin": null,                      // or an FLT-14 skin.json object (tokens, strings, css, fonts, assets)
   "content": {
-    "headlines": [{ "id": "wd-01", "when": { "stat.gte": ["discourse", 40] }, "text": "{lab} water discourse gets a Netflix deal", "tone": "joke" }],
-    "thoughts":  [{ "id": "wd-t1", "kind": "protester", "when": "always", "text": "My sign is biodegradable. My anger is not." }],
-    "events":    [ /* arcs as JSON statecharts, see docs/mods/arcs.md */ ],
-    "buildings": [ /* data: size, price, upkeep, effects; model = "primitive recipe" or a bundled .glb (FLT-13 pipeline) */ ]
+    "headlines": { "add": [{ "id": "wd-01", "when": { "stat.gte": ["discourse", 40] }, "text": "{lab} water discourse gets a streaming deal", "tone": "joke" }] },
+    "thoughts":  { "add": [{ "id": "wd-t1", "kind": "protester", "when": "always", "text": "My sign is biodegradable. My anger is not." }] },
+    "rivals":    { "override": [{ "id": "sirocco", "name": "Sirocco (Hydrated Edition)" }] },
+    "events":    { "add": [ /* arcs as JSON statecharts, see docs/mods/arcs.md */ ] },
+    "buildings": { "add": [ /* data: size, price, upkeep, effects; model = "primitive recipe" or a bundled .glb (FLT-13 pipeline) */ ] }
   },
   "assets": { "sign.png": "data:image/png;base64,…" }
 }
 ```
 
-- **Composable:** load several mods in order. Content merges by `id` (a later mod wins, and the Mod Manager lists every override). Exactly one skin is active at a time; a mod's skin becomes *available*, and can ask to be activated.
+- **Composable:** load several mods in order. Every content section says what it does: `add`, `override` (fields merge) or `remove`. Each mod compiles to a Layer wrapping the ones below it (§1b), so a later mod wins, and the Mod Manager lists every conflict. Exactly one skin is active at a time; a mod's skin becomes *available*, and can ask to be activated.
 - **Identity:** the active mod set (ids, versions, content hashes) is part of a run's identity, so share links and replays reproduce the same game.
 
 ## 3. Safety
@@ -70,8 +83,9 @@ One `mod.json`, validated on load with **Effect Schema**. Errors are friendly an
 ## 6. Plan
 
 - **M1** (after FLT-14 Phase 1 lands the skin format):
+  - the services in `src/mods/services/` and `BaseGame.layer`; the game reads content and rules through them, resolved into a `GameDefinition` passed to the pure sim
   - the manifest and schema
-  - the loader, with composition and overrides
+  - the loader: data mod → wrapping Layer, with composition, the conflict report and overrides
   - the Mod Manager
   - `?mod=` on the public site
   - the built-in skins migrated to `mods/skin-*`
