@@ -4,9 +4,6 @@ import { canPlace, type Command } from "../commands";
 import { openEventOf } from "../events";
 import { outcomeOf } from "../goals";
 import { buildingAt, isPathTile, rectContains } from "../pathfind";
-import { enableLeapfrog } from "../race/leapfrog/driver";
-import { enableFactions } from "../factions/state";
-import { settleFactions } from "../factions/driver";
 import { createInitialState } from "../state";
 import { applyNow, tick, TICKS_PER_DAY } from "../tick";
 import type { GameState, Thought, WalkerKind } from "../types";
@@ -86,11 +83,9 @@ export function walkerOnCampus(s: GameState): boolean {
 
 export function createMidgameScenario(): GameState {
   const s = createInitialState(MIDGAME_SEED, "campus");
-  // The curated mid-game scenario starts with every system earned. Its paid replay remains unchanged.
-  s.progression = { value: "complete", context: { level: 5 } };
+  // The curated mid-game scenario starts with every system earned (the campus opening already woke every pack).
   s.coach = { value: "skipped", context: { index: 0, elapsed: 0 } };
   s.flags.coachBuildOpened = 0;
-  enableLeapfrog(s);
   pave(s);
   for (let i = 0; s.day < 480 && i < 500 * TICKS_PER_DAY && outcomeOf(s) !== "lost"; i++) {
     let cmds = answer(s);
@@ -117,12 +112,7 @@ export function createMidgameScenario(): GameState {
     if (s.day >= 420 && s.day <= 480 && ready >= 0.6 && ready <= 0.8 &&
       s.leapfrog.last?.day === s.day && s.leapfrog.last.claims.length &&
       s.buildings.every((b) => !b.broken) && !openEventOf(s) &&
-      s.news.some((n) => n.day === s.day && sotaHeadline.test(n.text))) {
-      // FLT-33: the factions arrive with opinions already formed (the replay above never sees them, so it is unchanged).
-      enableFactions(s);
-      settleFactions(s);
-      return s;
-    }
+      s.news.some((n) => n.day === s.day && sotaHeadline.test(n.text))) return s;
   }
   throw new Error(`Mid-game scenario could not reach its opening moment: day ${s.day}, tick ${s.tick}, outcome ${outcomeOf(s)}, cash ${s.cash}, confirm ${JSON.stringify(s.guardrails?.context.pendingConfirm)}, buildings ${s.buildings.map(b => b.kind)}`);
 }

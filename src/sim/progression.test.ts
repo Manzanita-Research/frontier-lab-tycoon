@@ -34,10 +34,30 @@ describe("the playable ladder", () => {
     s.race.rank = 6; updateProgression(s); expect(progressOf(s).level).toBe(4);
     s.race.rank = 5; updateProgression(s); expect(progressOf(s).level).toBe(5);
     expect(canHire(s, "security").ok).toBe(true); expect(s.papers?.enabled).toBe(true);
+    // Collusion is on the Scrutiny rung, so earning it wakes the pack (it used to stay asleep in normal play).
+    expect(s.collusion?.enabled).toBe(true);
     s.cash = 350_000; expect(canPlace(s, "security", 12, 19).ok).toBe(true);
     expect(s.unlockCards?.map((c) => c.id)).toEqual(["business", "team", "race", "scrutiny"]);
     applyNow(s, [{ type: "dismissUnlock" }]); expect(makeSnapshot(s).unlockCard?.id).toBe("team");
   });
+  it("wakes every earned pack, honours ?<pack>=off, and starts a campus with all of them awake", () => {
+    const s = createInitialState(4);
+    s.flags.collusionOff = 1;
+    s.progression = { value: "growing", context: { level: 4 } };
+    expect(s.leapfrog.enabled).toBe(false);
+    updateProgression(s); // nothing met: no level-up, nothing wakes
+    expect(s.leapfrog.enabled).toBe(false);
+    s.race.rank = 5; updateProgression(s);
+    expect(progressOf(s).level).toBe(5);
+    expect(s.papers?.enabled).toBe(true);
+    expect(s.collusion?.enabled ?? false).toBe(false);
+    const campus = createInitialState(4, "campus");
+    expect([campus.leapfrog.enabled, campus.papers?.enabled, campus.collusion?.enabled]).toEqual([true, true, true]);
+    // A garage's first rung has no packs, so a new game starts with all of them asleep.
+    const garage = createInitialState(4);
+    expect([garage.leapfrog.enabled, garage.papers?.enabled ?? false, garage.collusion?.enabled ?? false]).toEqual([false, false, false]);
+  });
+
   it("keeps locked systems asleep, and visitors wait for a gateway", () => {
     const s = createInitialState(1); s.day = 100; s.waterDiscourse = 80; s.disasters.risk = "chaos";
     enableCollusion(s);

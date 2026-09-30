@@ -1,7 +1,7 @@
 // Release Leapfrog's slice of the World (FLT-27). Plain JSON, like everything in GameState. Five machines (the release
 // calendar, the benchmarks, the news cycle, the forced response and the launch livestream) plus the little bookkeeping
-// they share. Off by default in `createInitialState`; `enableLeapfrog` is the "pack loaded" switch (FLT-15's loader will
-// flip it from the mod list).
+// they share. Asleep in a new garage game; `enableLeapfrog` is the "pack loaded" switch, flipped when the ladder's
+// Race rung is earned (sim/progression.ts) or at once when a run starts with it earned.
 import { LEAPFROG, type BenchmarkDef } from "../../../content/leapfrog";
 import { YOU } from "../../../content/rivals";
 import { initialStored } from "../../machines/run";

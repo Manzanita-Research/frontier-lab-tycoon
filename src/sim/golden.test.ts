@@ -168,10 +168,13 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // FLT-33/25 re-records from 1600 on, on purpose: Level 4 (reached between 800 and 1000) turns the factions on, whose
 // path arguments take thought ids and bubbles (their dice are their own, so the main RNG stream is untouched until
 // the thoughts differ), and the Water Discourse now escalates through the base-water arc.
+// FLT-37 wakes a system's pack when its rung is earned: Collusion (on Scrutiny, level 5) never started in normal play.
+// Every seed reaches level 5 by tick 980-1120; only checkpoints after that move (seed 3 from 2400, seeds 1 and 2 from 3200).
+// Merged with FLT-33/25: the factions' checkpoints hold until Collusion wakes too (seed 3 moves from 2400, seed 2 from 3200, seed 1 at 4000).
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "d3826cd0", 800: "ed628bb9", 1600: "83b73f59", 2400: "7e4a0c23", 3200: "1bd2f316", 4000: "d8736350" },
-  2: { 200: "e548b1af", 800: "552cae60", 1600: "728f7138", 2400: "d1746fea", 3200: "68af6edc", 4000: "9cdf214e" },
-  3: { 200: "58bb415c", 800: "920699d6", 1600: "ee2f6f97", 2400: "91673d73", 3200: "9549e60e", 4000: "db5c6350" },
+  1: { 200: "d3826cd0", 800: "ed628bb9", 1600: "83b73f59", 2400: "7e4a0c23", 3200: "1bd2f316", 4000: "cbf6ed18" },
+  2: { 200: "e548b1af", 800: "552cae60", 1600: "728f7138", 2400: "d1746fea", 3200: "0f39d906", 4000: "de565e1a" },
+  3: { 200: "58bb415c", 800: "920699d6", 1600: "ee2f6f97", 2400: "cc850fbe", 3200: "ab304223", 4000: "b758b8c1" },
 };
 
 describe("golden runs", () => {

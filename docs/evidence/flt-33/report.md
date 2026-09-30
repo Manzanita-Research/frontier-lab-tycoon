@@ -47,5 +47,5 @@
 
 ## Cost
 
-- `dailyFactions` (stance, ten moods, 45 relations, op-eds): **32 µs** a game day, once every 20 ticks.
+- `dailyFactions` (stance, ten moods, 45 relations, op-eds): **28 µs** a game day, once every 20 ticks.
 

@@ -21,9 +21,10 @@ describe("midgame scenario", () => {
     expect(again).toEqual(s);
     // FLT-49 preserves the full starter-campus preset, completes its ladder, and replays
     // paid confirmations. Changed movement/attendance draws shift the real opening day.
-    // FLT-33/25: the water escalation now runs as a base arc during the replay, and the factions arrive, settled, at
-    // the opening moment.
-    expect(digest(s)).toBe("a88b590d");
+    // FLT-33/25: the water escalation runs as a base arc, and the earned factions wake with the campus and argue all
+    // 480 days.
+    // FLT-37: the campus it starts from wakes every earned pack, so Papers and Collusion now run in its 480 days too.
+    expect(digest(s)).toBe("ad3ac499");
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);

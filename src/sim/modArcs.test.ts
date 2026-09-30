@@ -65,8 +65,12 @@ describe("mod arcs (FLT-37)", () => {
     for (let i = 0; i < 200; i++) tick(s);
     const base = new Set(BASE_ARCS.map((a) => a.id));
     for (const id of Object.keys(s.modArcs ?? {})) expect(base.has(id)).toBe(true);
-    // The factions are off in a bare World, so their arcs sleep and store nothing.
-    expect(Object.keys(s.modArcs ?? {}).some((id) => id.startsWith("fx:"))).toBe(false);
+    // A campus has earned Level 4, so its factions wake with it; a garage's sleep (their arcs store nothing) until then.
+    expect(s.factions).toBeDefined();
+    const garage = createInitialState(1, "garage");
+    for (let i = 0; i < 200; i++) tick(garage);
+    expect(garage.factions).toBeUndefined();
+    expect(Object.keys(garage.modArcs ?? {}).some((id) => id.startsWith("fx:"))).toBe(false);
   });
 
   it("step at midnight, run their actions in order, open cards and hear the answer", async () => {

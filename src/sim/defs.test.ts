@@ -96,6 +96,12 @@ describe("the resolved definition (FLT-37)", () => {
     expect(s.walkers.filter((w) => w.kind === "protester").length).toBeGreaterThan(0);
   });
 
+  it("a pack a mod moves to the first rung is awake from the start", async () => {
+    const def = await resolve([mod("early-collusion", { progression: { override: [{ ...BASE_DEFS.progression[0]!, systems: ["collusion"] }] } })]);
+    expect(createInitialState(1, "garage", def).collusion?.enabled).toBe(true);
+    expect(createInitialState(1, "garage").collusion?.enabled ?? false).toBe(false);
+  });
+
   it("names and conditional headlines come from the definition", async () => {
     const def = await resolve([mod("names", {
       names: { override: [{ id: "LAB_NAMES", values: ["Steve's Garage"] }, { id: "FIRST_NAMES", values: ["Steve"] }] },

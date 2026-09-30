@@ -18,17 +18,14 @@ import { isMoment, stageMoment } from "../sim/race/demo";
 import { isOpsMoment, stageOps } from "../sim/opsDemo";
 import { isPaperMoment, stagePapers } from "../sim/race/papers/demo";
 import { isFactionMoment, stageFactions } from "../sim/factions/demo";
-import { enablePapers } from "../sim/race/papers/driver";
-import { enableLeapfrog } from "../sim/race/leapfrog/driver";
-import { enableFactions } from "../sim/factions/state";
 import { parseLeapMoment, stageLeapfrog } from "../sim/race/leapfrog/demo";
 import { isCollusionMoment, stageCollusion } from "../sim/collusion/demo";
-import { enableCollusion } from "../sim/collusion/driver";
 import { walkersThinking } from "../sim/mind";
 import { makeSnapshot, NO_SELECTION, type Snapshot, type UiSelection, type UiToast } from "./hud";
 import { continueTutorial } from "../sim/tutorial";
 import { stageFirstRun } from "../sim/firstRunDemo";
 import { withDefs } from "../sim/defs";
+import { enableEarnedPacks, PACK_OFF_FLAGS } from "../sim/progression";
 import type { GameDefinition } from "../mods/game-definition";
 
 /** What the loop tells the app after touching the World. `snap`, `news` and `toasts` come with a publish. */
@@ -82,20 +79,14 @@ export class SimHandle {
     this.newsStartId = 0;
     this.openingThoughts = undefined;
     const risk = this.world.disasters.risk;
-    const collusion = this.world.collusion?.enabled;
-    const leapfrogOff = this.world.flags.leapfrogOff;
-    const papersOff = this.world.flags.papersOff;
-    const factionsOff = this.world.flags.factionsOff;
-    const off = Object.entries(this.world.flags).filter(([k]) => k.startsWith("arcOff:"));
+    // The `?<pack>=off` switches carry over, and so do arcs switched off by name (`?water=off` is
+    // `arcOff:water-escalation`); the packs themselves wake again as the new lab earns them.
+    const off = Object.keys(this.world.flags).filter((f) => PACK_OFF_FLAGS.includes(f) || f.startsWith("arcOff:"));
     const mods = this.world.mods;
     this.world = createInitialState(seed, "garage", this.def);
     if (mods) this.world.mods = mods;
     setRisk(this.world, risk);
-    if (leapfrogOff) this.world.flags.leapfrogOff = leapfrogOff;
-    if (collusion) enableCollusion(this.world);
-    if (papersOff) this.world.flags.papersOff = papersOff;
-    if (factionsOff) this.world.flags.factionsOff = factionsOff;
-    for (const [k, v] of off) this.world.flags[k] = v;
+    for (const f of off) this.world.flags[f] = 1;
     this.alpha = 1;
   }
 
@@ -125,7 +116,7 @@ export class SimHandle {
   }
 }
 
-type SimDebug = Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean; factions?: boolean; water?: boolean };
+type SimDebug = Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean; collusion?: boolean; factions?: boolean; water?: boolean };
 
 /**
  * A living campus, warped forward and dressed up per the `?seed=&warp=&agents=&discourse=` debug knobs.
@@ -141,13 +132,13 @@ function stage(dbg: SimDebug): GameState {
   const sim = createInitialState(dbg.seed);
   if (dbg.leapfrog === false) sim.flags.leapfrogOff = 1;
   if (dbg.papers === false) sim.flags.papersOff = 1;
+  if (dbg.collusion === false) sim.flags.collusionOff = 1;
   if (dbg.factions === false) sim.flags.factionsOff = 1;
   if (dbg.water === false) sim.flags["arcOff:water-escalation"] = 1;
   const leap = parseLeapMoment(dbg.moment);
   if (dbg.warp > 0 || dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0 || dbg.moment || dbg.disaster) { continueTutorial(sim, true); delete sim.progression; }
-  if (!sim.progression && dbg.leapfrog) enableLeapfrog(sim);
-  if (!sim.progression && dbg.papers) enablePapers(sim);
-  if (!sim.progression && dbg.factions) enableFactions(sim);
+  // No ladder means every system is earned: wake every pack that isn't switched off.
+  if (!sim.progression) enableEarnedPacks(sim);
   for (let i = 0; i < dbg.warp * TICKS_PER_DAY; i++) tick(sim);
   if (dbg.moment === "jem-opening" || dbg.moment === "jem-confirm") stageFirstRun(sim, dbg.moment);
   else if (isMoment(dbg.moment)) stageMoment(sim, dbg.moment);

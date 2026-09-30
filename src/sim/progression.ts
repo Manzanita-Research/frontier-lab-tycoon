@@ -1,5 +1,6 @@
 import { enableLeapfrog } from "./race/leapfrog/driver";
 import { enablePapers } from "./race/papers/driver";
+import { enableCollusion } from "./collusion/driver";
 import { enableFactions } from "./factions/state";
 import type { BuildingKind } from "../content/buildings";
 import { STAFF } from "../content/staff";
@@ -21,6 +22,29 @@ export const buildingUnlocked = (s: GameState, kind: BuildingKind): boolean => !
   unlockedRows(s).some((r) => r.buildings.includes(kind)) ||
   (defs().buildings[kind]?.office === true && (systemUnlocked(s, "disasters") || systemUnlocked(s, "collusion"))) ||
   (levelOf(s) >= 4 && s.flags[`unlocked:${kind}`] !== undefined);
+/**
+ * The systems that are content packs with their own state, and the `?<id>=off` flag that keeps each one asleep.
+ * Earning a system on the ladder switches its pack on (FLT-37); in table order, so collusion finds Leapfrog awake.
+ */
+const PACKS: readonly { id: SystemId; enable: (s: GameState) => void; off: string }[] = [
+  { id: "leapfrog", enable: enableLeapfrog, off: "leapfrogOff" },
+  { id: "papers", enable: enablePapers, off: "papersOff" },
+  { id: "collusion", enable: enableCollusion, off: "collusionOff" },
+  { id: "factions", enable: enableFactions, off: "factionsOff" },
+];
+/** The flags behind `?leapfrog=off`, `?papers=off`, `?collusion=off` and `?factions=off`. */
+export const PACK_OFF_FLAGS = PACKS.map((p) => p.off);
+function enablePacks(s: GameState, systems: readonly SystemId[]) {
+  for (const pack of PACKS) if (systems.includes(pack.id) && !s.flags[pack.off]) pack.enable(s);
+}
+/**
+ * Switch on the pack of every system the run has already earned: a new game whose first rung lists one (a mod can
+ * move a system down the ladder), a campus or scenario that starts with the ladder complete, or a debug run with no
+ * ladder at all (everything earned).
+ */
+export function enableEarnedPacks(s: GameState) {
+  enablePacks(s, s.progression ? unlockedRows(s).flatMap((r) => [...r.systems]) : rows(s).flatMap((r) => [...r.systems]));
+}
 function goalValue(s: GameState) {
   const goal = rows(s).find((r) => r.level === levelOf(s))!.goal;
   const current = goal.metric === "models" ? s.models.length : goal.metric === "revenue" ? s.ledger.income : goal.metric === "team" ? s.walkers.filter((w) => w.kind === "researcher" && w.machine.value !== "quitting").length : s.race.rank;
@@ -57,9 +81,7 @@ export function updateProgression(s: GameState) {
   s.progression = result.stored;
   for (const event of result.effects) {
     const row = rows(s).find((r) => r.level === event.level)!;
-    if (row.systems.includes("leapfrog") && !s.flags.leapfrogOff) enableLeapfrog(s);
-    if (row.systems.includes("papers") && !s.flags.papersOff) enablePapers(s);
-    if (row.systems.includes("factions")) enableFactions(s);
+    enablePacks(s, row.systems);
     const items = [...row.buildings.map((k) => defs().buildings[k]?.name ?? k), ...row.staff.map((k) => STAFF[k].title), ...row.systems];
     s.unlockCards ??= [];
     s.unlockCards.push({ id: row.id, title: `New! ${row.name}`, body: row.goal.text, items });

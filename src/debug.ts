@@ -30,6 +30,8 @@ export interface DebugParams {
   leapfrog: boolean;
   /** Publishing Papers is on unless ?papers=off. */
   papers: boolean;
+  /** Collusion (FLT-45) wakes with its rung unless ?collusion=off. */
+  collusion: boolean;
   /** Factions (FLT-33) are on unless `?factions=off`. */
   factions: boolean;
   /** The Water Discourse escalation (FLT-25) runs unless `?water=off` (the plain water crowd stays). */
@@ -63,6 +65,7 @@ export function readDebugParams(search = typeof window === "undefined" ? "" : wi
     risk: q.get("risk"),
     leapfrog: q.get("leapfrog") !== "off",
     papers: q.get("papers") !== "off",
+    collusion: q.get("collusion") !== "off",
     factions: q.get("factions") !== "off",
     water: q.get("water") !== "off",
     ladder: q.has("debug") && num("ladder") !== null && num("ladder")! >= 1 && num("ladder")! <= 5 ? { level: Math.round(num("ladder")!) as 1 | 2 | 3 | 4 | 5, coach: num("coach"), unlock: q.has("unlock") } : null,
