@@ -91,7 +91,7 @@ export async function checkPack(dir, day = date) {
   try {
     const { mod, names } = readPack(dir);
     const report = lintPack(mod, { names });
-    parts.push(`$ drama lint\n${formatReport(relative(root, dir), report)}`);
+    parts.push(`$ drama lint\n${formatReport(relative(root, dir).startsWith("..") ? "pack" : relative(root, dir), report)}`);
     if (!report.ok) ok = false;
     const shape = shapeCheck(mod, day);
     parts.push(`$ drama shape\n${shape.length ? shape.map((p) => `  ✗ ${p}`).join("\n") : "  ✓ one card/arc, 5-10 headlines, 5-10 thoughts, ids prefixed"}`);
