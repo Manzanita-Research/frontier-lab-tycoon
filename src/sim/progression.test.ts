@@ -3,6 +3,7 @@ import { PROGRESSION } from "../content/progression";
 import { baseContent, baseRules, baseVocabulary } from "../mods/base-game";
 import { withDefs } from "./defs";
 import { makeSnapshot } from "../app/hud";
+import { playableOf } from "../ui/hud/playable";
 import { canPlace } from "./commands";
 import { progressOf, systemUnlocked, updateProgression } from "./progression";
 import { canHire, hire, updateStaff } from "./staff";
@@ -71,6 +72,42 @@ describe("the playable ladder", () => {
     expect(s.slop.some(Boolean)).toBe(false); expect(s.buildings[0]?.reliability).toBe(1);
     expect(Object.values(s.arcs).some((a) => a.value === "cardOpen")).toBe(false);
     expect(s.hearing).toBeUndefined(); expect(s.yacht).toBeUndefined();
+    expect(s.defection).toBeUndefined(); expect(s.poaching).toBeUndefined(); expect(s.auditors).toBeUndefined();
+  });
+
+  // FLT-52: every pack in the merge train is on the Scrutiny rung, wakes the day it is earned, and has its own off switch.
+  const WAVE = ["hearing", "yacht", "defection", "poaching", "auditors"] as const;
+  it.each(WAVE)("%s sleeps until Scrutiny, wakes when it is earned, and stays asleep with ?%s=off", (id) => {
+    expect(PROGRESSION.find((r) => r.id === "scrutiny")?.systems).toContain(id);
+    const awake = (s: ReturnType<typeof createInitialState>) => s[id]?.enabled ?? false;
+    const s = createInitialState(4);
+    s.progression = { value: "growing", context: { level: 4 } };
+    expect(systemUnlocked(s, id)).toBe(false);
+    updateProgression(s);
+    expect(awake(s)).toBe(false);
+    s.race.rank = 5; updateProgression(s);
+    expect(progressOf(s).level).toBe(5);
+    expect(systemUnlocked(s, id)).toBe(true);
+    expect(awake(s)).toBe(true);
+    const off = createInitialState(4);
+    off.flags[`${id}Off`] = 1;
+    off.progression = { value: "growing", context: { level: 4 } };
+    off.race.rank = 5; updateProgression(off);
+    expect(progressOf(off).level).toBe(5);
+    expect(awake(off)).toBe(false);
+    // A campus (every rung earned) starts with it awake; a garage without.
+    expect(awake(createInitialState(4, "campus"))).toBe(true);
+    expect(awake(createInitialState(4))).toBe(false);
+  });
+  it("names every wave pack on the New! card, in words", () => {
+    const s = createInitialState(4);
+    s.progression = { value: "growing", context: { level: 4 } };
+    s.race.rank = 5; updateProgression(s);
+    const card = makeSnapshot(s).unlockCard!;
+    for (const id of WAVE) expect(card.items).toContain(id);
+    const shown = playableOf({ unlockCard: card }).unlock!.items;
+    expect(shown).toEqual(expect.arrayContaining(["The Hearing", "The yacht summit", "Defection", "The Poaching War", "Evals Without Borders"]));
+    for (const id of WAVE) expect(shown).not.toContain(id);
   });
   it("teases what is locked as one row per milestone, not one ??? per item", () => {
     const s = createInitialState(1);
