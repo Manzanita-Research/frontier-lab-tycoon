@@ -1,0 +1,88 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "5bd2f67e897d5a24f6ea6746bfcf124bbab2cfd9"
+  },
+  "head": {
+    "branch": "flt-63-place-menu",
+    "sha": "c393ee1",
+    "dirty": true
+  },
+  "seconds": 169.435,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "flt63-facilities",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/before/flt63-facilities.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/after/flt63-facilities.png",
+      "title": "FLT-63: Start ▸ Facilities ▸ open (the buildings, grouped)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/compare/flt63-facilities.png",
+      "changed": 0.15891743827160493
+    },
+    {
+      "scene": "flt63-run",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/before/flt63-run.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/after/flt63-run.png",
+      "title": "FLT-63: Start ▸ Run… (the widget launcher)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/compare/flt63-run.png",
+      "changed": 0.22724382716049382
+    },
+    {
+      "scene": "flt63-run-agi",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/before/flt63-run-agi.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/after/flt63-run-agi.png",
+      "title": "FLT-63: Run… agi.exe",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/compare/flt63-run-agi.png",
+      "changed": 0.2375516975308642
+    },
+    {
+      "scene": "flt63-path",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/before/flt63-path.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/after/flt63-path.png",
+      "title": "FLT-63: the path tool mid-run, with the mode hint at the pointer",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/compare/flt63-path.png",
+      "changed": 0.011304012345679012
+    },
+    {
+      "scene": "flt63-hall",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/before/flt63-hall.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/after/flt63-hall.png",
+      "title": "FLT-63: a Training Hall in hand (one-shot; Shift keeps it)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/compare/flt63-hall.png",
+      "changed": 0.01832561728395062
+    },
+    {
+      "scene": "flt63-phone-facilities",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/before/flt63-phone-facilities.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/after/flt63-phone-facilities.png",
+      "title": "FLT-63: phone: Start ▸ Facilities ▸ opens in place",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/compare/flt63-phone-facilities.png",
+      "changed": 0.09971670312310123
+    },
+    {
+      "scene": "flt63-phone-run",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/before/flt63-phone-run.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/after/flt63-phone-run.png",
+      "title": "FLT-63: phone: Run…",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/compare/flt63-phone-run.png",
+      "changed": 0.6365787155182889
+    },
+    {
+      "scene": "flt63-phone-done",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/before/flt63-phone-done.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/after/flt63-phone-done.png",
+      "title": "FLT-63: phone: the path tool in hand, and the Done button",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/compare/flt63-phone-done.png",
+      "changed": 0.026593449993923927
+    }
+  ],
+  "errors": []
+}

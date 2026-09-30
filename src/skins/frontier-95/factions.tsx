@@ -2,7 +2,7 @@
 // a Task Mangler for opinions: every faction's approval as a process list, where the lab stands, who is allied or
 // feuding, and the safety budget as a Control Panel radio group.
 import { useState } from "react";
-import { StanceTrack } from "../kit";
+import { StanceTrack, useWidget } from "../kit";
 import { useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import { Ico } from "./icons";
@@ -13,6 +13,7 @@ type Tab = "factions" | "stance" | "relations" | "safety";
 export function Factions({ factions, layout, actions }: SlotPropsMap["Factions"]) {
   const t = useT();
   const [tab, setTab] = useState<Tab>("factions");
+  useWidget("discourse", () => setTab("factions"));
   const { open } = factions;
   const marching = factions.rows.some((r) => r.mood === "protesting");
   return (

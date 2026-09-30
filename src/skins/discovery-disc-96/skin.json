@@ -113,6 +113,12 @@
     "x.ink": "#111111"
   },
   "strings": {
+    "run.title": "Go to",
+    "run.prompt": "Type where you want to go! The disc takes you there.",
+    "build.group.compute": "Big Machines",
+    "build.group.research": "Science Stuff",
+    "build.group.amenities": "Fun Stuff",
+    "build.group.offices": "Grown-Up Offices",
     "stats.vibes": "Vibes",
     "ticker.label": "DID YOU KNOW?",
     "objectives.title": "MY STAR CHART",

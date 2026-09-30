@@ -1,8 +1,9 @@
 // The taskbar: Start (and its menu), quick-launch, the news tape, and the tray (speed, news, sound, camera, clock).
 import { useEffect, useRef, useState } from "react";
-import { ALL_VISIBLE, Dialog, Marquee } from "../kit";
+import { ALL_VISIBLE, coachInFacilities, Dialog, facilityGroups, Marquee, useRunBox } from "../kit";
 import { useCoach, useT } from "../context";
 import type { SlotPropsMap } from "../types";
+import type { BuildItemVM, WidgetVM } from "../../ui/hud/types";
 import { Flag, Ico } from "./icons";
 import { Btn, Win } from "./parts";
 
@@ -68,20 +69,108 @@ function ShutDown({ lab, onClose }: { lab: string; onClose: () => void }) {
   );
 }
 
-/** Start button, its menu (every building, Bulldoze…, Settings, Shut Down Lab…), quick-launch, and the tool in hand. */
-export function BuildBar({ items, tip, teasers = [], disasters, actions }: SlotPropsMap["BuildBar"]) {
+/** Where Frontier 95 draws each Run… widget from its own sprite. */
+const WIDGET_ICONS: Record<string, string> = {
+  properties: "info", finance: "chart", arena: "globe", benchmarks: "chart", thoughts: "chat", traffic: "net", discourse: "megaphone",
+  papers: "doc", news: "news", staff: "staff", senate: "senate", disasters: "siren", drama: "drama", saves: "floppy", mods: "programs", display: "display",
+  sound: "sound", help: "help",
+};
+const widgetIcon = (w: WidgetVM) => WIDGET_ICONS[w.id] ?? "doc";
+
+/** Start ▸ Run…: type a file name ("thoughts.txt", "arena.exe") or pick one from the list below it. */
+function RunDialog({ widgets, onRun, onClose }: { widgets: WidgetVM[]; onRun: (id: string) => void; onClose: () => void }) {
+  const t = useT();
+  const { typed, setTyped, shown, q, error, dismiss, go } = useRunBox(widgets, onRun);
+  const input = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    input.current?.focus();
+    input.current?.select();
+  }, []);
+  return (
+    <Dialog label={t("run.title")} close={() => (error ? dismiss() : onClose())} layerClass="f95-layer" dialogClass="f95-dialogbox f95-rundialog">
+      <Win title={t("run.title")} buttons={[{ g: "close", label: "Close", onClick: onClose }]} className="f95-run">
+        <form
+          className="f95-runbody"
+          onSubmit={(e) => {
+            e.preventDefault();
+            go(typed);
+          }}
+        >
+          <div className="f95-runhead">
+            <Ico name="run" size={32} />
+            <p>{t("run.prompt")}</p>
+          </div>
+          <label className="f95-runopen">
+            <span>
+              <u>O</u>pen:
+            </span>
+            <input ref={input} className="inset" value={typed} onChange={(e) => setTyped(e.target.value)} spellCheck={false} autoComplete="off" autoCapitalize="off" aria-label={t("run.open")} list="f95-run-files" data-testid="run-input" />
+          </label>
+          <datalist id="f95-run-files">
+            {widgets.map((w) => (
+              <option key={w.id} value={w.file} />
+            ))}
+          </datalist>
+          <ul className="f95-runlist inset" role="listbox" aria-label="Widgets">
+            {shown.map((w) => (
+              <li key={w.id} role="option" aria-selected={w.file === q}>
+                <button type="button" onClick={() => go(w.file)} onPointerEnter={(e) => e.pointerType === "mouse" && setTyped(w.file)} title={w.blurb}>
+                  <Ico name={widgetIcon(w)} size={20} />
+                  <span className="f">{w.file}</span>
+                  <span className="n">{w.name}</span>
+                  <small>{w.blurb}</small>
+                </button>
+              </li>
+            ))}
+            {shown.length === 0 && <li className="none">{t("run.none")}</li>}
+          </ul>
+          <div className="f95-row">
+            <Btn def type="submit" data-testid="run-ok">
+              {t("run.ok")}
+            </Btn>
+            <Btn onClick={onClose}>{t("run.cancel")}</Btn>
+          </div>
+        </form>
+      </Win>
+      {/* The error box sits inside the Run dialog, so its Esc (the dialog's) shuts the box first and the dialog second. */}
+      {error && (
+        <div className="f95-layer f95-runerr" role="alertdialog" aria-label={error.title}>
+          <Win title={error.title} buttons={[{ g: "close", label: "Close", onClick: dismiss }]} className="f95-errbox">
+            <div className="f95-shutbody">
+              <Ico name="error" size={32} />
+              <p>{error.text}</p>
+            </div>
+            <div className="f95-row">
+              <Btn def autoFocus onClick={() => { dismiss(); input.current?.select(); }}>{t("run.ok")}</Btn>
+            </div>
+          </Win>
+        </div>
+      )}
+    </Dialog>
+  );
+}
+
+type Fly = null | "facilities" | "programs" | "settings";
+
+/**
+ * Start button and its menu (FLT-63): Path and Bulldoze… on top, every building in Facilities ▸ (grouped, like Programs
+ * in the real thing), the widgets in Programs ▸ and behind Run…, then Help, Settings ▸ and Shut Down Lab…. A flyout opens
+ * on hover or click; on a phone it opens in place instead.
+ */
+export function BuildBar({ items, tip, teasers = [], disasters, widgets = [], actions }: SlotPropsMap["BuildBar"]) {
   const t = useT();
   const coach = useCoach();
   const [openRaw, setOpenRaw] = useState(false);
   const open = openRaw;
+  const [fly, setFly] = useState<Fly>(null);
   // The first coach step waits for the menu to open, so say so each time it does.
   const setOpen = (next: boolean) => {
     setOpenRaw(next);
+    setFly(null);
     if (next) actions.buildPanel(true);
   };
-  const [settings, setSettings] = useState(false);
-  const [programs, setPrograms] = useState(false);
   const [confirm, setConfirm] = useState<Confirm>(null);
+  const [run, setRun] = useState(false);
   const root = useRef<HTMLDivElement>(null);
 
   // A tap outside, or Escape, closes the menu.
@@ -99,10 +188,18 @@ export function BuildBar({ items, tip, teasers = [], disasters, actions }: SlotP
     };
   }, [open]);
 
-  const buildings = items.filter((i) => !i.isBulldoze);
-  const bulldoze = items.find((i) => i.isBulldoze);
-  const quick = buildings
-    .filter((i) => !i.isPath && !i.panel)
+  // On a phone a flyout opens in place and the menu grows upward: bring its entry to the top of the (scrolling) menu.
+  useEffect(() => {
+    const li = fly ? root.current?.querySelector<HTMLElement>(`[data-fly="${fly}"]`) : null;
+    const sub = li?.querySelector<HTMLElement>(".f95-fly");
+    if (li && sub && getComputedStyle(sub).position === "static") li.scrollIntoView({ block: "start" });
+  }, [fly]);
+
+  const { tools, groups } = facilityGroups(items);
+  const path = tools.find((i) => i.isPath);
+  const bulldoze = tools.find((i) => i.isBulldoze);
+  const quick = items
+    .filter((i) => !i.isPath && !i.isBulldoze && !i.panel)
     .map((it, order) => ({ it, order }))
     .sort((a, b) => b.it.built - a.it.built || a.order - b.order)
     .slice(0, 3)
@@ -112,6 +209,27 @@ export function BuildBar({ items, tip, teasers = [], disasters, actions }: SlotP
     actions.place(kind);
     setOpen(false);
   };
+  const launch = (id: string) => {
+    setOpen(false);
+    setRun(false);
+    actions.openWidget(id);
+  };
+  // The coach points at a building while Facilities ▸ is shut: its entry stands in, so the spotlight has something to light.
+  const facCoach = fly !== "facilities" && coach.intoPanel(items) && coachInFacilities(coach.target, items);
+  // Hover opens a flyout (a mouse only: a tap is a click); a click only ever opens, so hover-then-click never shuts it.
+  const flyProps = (id: Exclude<Fly, null>) => ({
+    onPointerEnter: (e: React.PointerEvent) => e.pointerType === "mouse" && setFly(id),
+  });
+  const hoverShut = { onPointerEnter: (e: React.PointerEvent) => e.pointerType === "mouse" && setFly(null) };
+  const opener = (id: Exclude<Fly, null>) => ({ role: "menuitem", "aria-haspopup": "menu" as const, "aria-expanded": fly === id, className: fly === id ? "on" : "", onClick: () => setFly(id) });
+  const row = (it: BuildItemVM, size = 24) => (
+    <button type="button" role="menuitem" {...coach.attrs(`build:${it.kind}`)} className={it.selected ? "on" : ""} disabled={!it.affordable && !it.selected} onClick={() => pick(it.kind)}>
+      <Ico name={it.kind} size={size} />
+      <span>{it.name}</span>
+      <span className="hk">{it.hotkey ?? ""}</span>
+      <span className="p">{it.free ? t("build.free") : it.priceText}</span>
+    </button>
+  );
 
   return (
     <div className="f95-startwrap" ref={root}>
@@ -121,66 +239,96 @@ export function BuildBar({ items, tip, teasers = [], disasters, actions }: SlotP
             <b>Frontier</b>95
           </div>
           <ul>
-            {buildings.map((it) => (
-              <li key={it.kind}>
-                <button type="button" role="menuitem" {...coach.attrs(`build:${it.kind}`)} className={it.selected ? "on" : ""} disabled={!it.affordable && !it.selected} onClick={() => pick(it.kind)}>
-                  <Ico name={it.kind} size={24} />
-                  <span>{it.name}</span>
-                  <span className="hk">{it.hotkey ?? ""}</span>
-                  <span className="p">{it.free ? t("build.free") : it.priceText}</span>
-                </button>
-              </li>
-            ))}
-            {/* What you have not unlocked yet, and what unlocks it. */}
-            {teasers.map((teaser, i) => (
-              <li key={`${teaser.label}-${i}`} className="locked">
-                <button type="button" role="menuitem" disabled aria-disabled title={`${t("build.locked")}: ${teaser.hint}`}>
-                  <Ico name="lock" size={24} />
-                  <span>
-                    {teaser.label}
-                    {teaser.hint && <> · {teaser.hint}</>}
-                  </span>
-                  <span className="hk" />
-                  <span className="p" />
-                </button>
-              </li>
-            ))}
-            <li className="sep" role="separator" />
+            {path && <li {...hoverShut}>{row(path)}</li>}
             {bulldoze && (
-              <li>
-                <button type="button" role="menuitem" className={bulldoze.selected ? "on" : ""} onClick={() => pick(bulldoze.kind)}>
+              <li {...hoverShut}>
+                <button type="button" role="menuitem" {...coach.attrs(`build:${bulldoze.kind}`)} className={bulldoze.selected ? "on" : ""} onClick={() => pick(bulldoze.kind)}>
                   <Ico name="bulldoze" size={24} />
                   <span>{t("build.bulldoze")}…</span>
-                  <span className="hk" />
+                  <span className="hk">{bulldoze.hotkey ?? ""}</span>
                   <span className="p">½ back</span>
                 </button>
               </li>
             )}
-            <li>
-              <button type="button" role="menuitem" aria-expanded={programs} onClick={() => setPrograms(!programs)}>
+            <li className="sep" role="separator" />
+            <li className="fly" data-fly="facilities" {...flyProps("facilities")}>
+              <button type="button" {...opener("facilities")} {...coach.attrs("start:facilities", facCoach)} data-testid="start-facilities">
+                <Ico name="folder" size={24} />
+                <span>{t("build.facilities")}</span>
+                <span className="hk" />
+                <span className="p arrow" aria-hidden />
+              </button>
+              {fly === "facilities" && (
+                <div className="f95-win f95-fly f95-facilities" role="menu" aria-label={t("build.facilities")} data-coach-panel>
+                  {groups.map((g) => (
+                    <ul key={g.id} role="group" aria-label={t(`build.group.${g.id}`)}>
+                      <li className="hd" role="presentation">
+                        {t(`build.group.${g.id}`)}
+                      </li>
+                      {g.items.map((it) => (
+                        <li key={it.kind}>{row(it, 20)}</li>
+                      ))}
+                    </ul>
+                  ))}
+                  {teasers.length > 0 && (
+                    <ul role="group" aria-label={t("build.locked")} className="locked-group">
+                      <li className="hd" role="presentation">
+                        {t("build.locked")}
+                      </li>
+                      {teasers.map((teaser, i) => (
+                        <li key={`${teaser.label}-${i}`} className="locked">
+                          <button type="button" role="menuitem" disabled aria-disabled title={`${t("build.locked")}: ${teaser.hint}`}>
+                            <Ico name="lock" size={20} />
+                            <span>
+                              {teaser.label}
+                              {teaser.hint && <> · {teaser.hint}</>}
+                            </span>
+                            <span className="hk" />
+                            <span className="p" />
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+            </li>
+            <li className="fly" data-fly="programs" {...flyProps("programs")}>
+              <button type="button" {...opener("programs")}>
                 <Ico name="programs" size={24} />
                 <span>Programs</span>
                 <span className="hk" />
-                <span className={`p arrow ${programs ? "down" : ""}`} aria-hidden />
+                <span className="p arrow" aria-hidden />
+              </button>
+              {fly === "programs" && (
+                <div className="f95-win f95-fly" role="menu" aria-label="Programs">
+                  <ul>
+                    {widgets.map((w) => (
+                      <li key={w.id}>
+                        <button type="button" role="menuitem" title={w.blurb} onClick={() => launch(w.id)}>
+                          <Ico name={widgetIcon(w)} size={20} />
+                          <span>{w.id === "drama" ? t("drama.button") : w.name}</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </li>
+            <li {...hoverShut}>
+              <button type="button" role="menuitem" data-testid="start-run" onClick={() => { setOpen(false); if (held) actions.place(null); setRun(true); }}>
+                <Ico name="run" size={24} />
+                <span>{t("build.run")}</span>
               </button>
             </li>
-            {programs && (
-              <li className="sub">
-                <button type="button" role="menuitem" onClick={() => { setOpen(false); actions.openDrama(); }}>
-                  <Ico name="drama" size={16} />
-                  <span>{t("drama.button")}</span>
-                </button>
-              </li>
-            )}
-            <li>
-              <button type="button" role="menuitem" onClick={() => { setOpen(false); actions.openSaves(); }}>
+            <li {...hoverShut}>
+              <button type="button" role="menuitem" data-testid="start-saves" onClick={() => launch("saves")}>
                 <Ico name="floppy" size={24} />
                 <span>{t("saves.open")}…</span>
                 <span className="hk">Ctrl+S</span>
-                <span className="p" />
               </button>
             </li>
-            <li>
+            <li {...hoverShut}>
               <button type="button" role="menuitem" onClick={() => { setOpen(false); actions.openHelp(); }}>
                 <Ico name="help" size={24} />
                 <span>{t("build.help")}…</span>
@@ -188,45 +336,48 @@ export function BuildBar({ items, tip, teasers = [], disasters, actions }: SlotP
                 <span className="p" />
               </button>
             </li>
-            <li>
-              <button type="button" role="menuitem" aria-expanded={settings} onClick={() => setSettings(!settings)}>
+            <li className="fly" data-fly="settings" {...flyProps("settings")}>
+              <button type="button" {...opener("settings")}>
                 <Ico name="display" size={24} />
                 <span>{t("build.settings")}</span>
                 <span className="hk" />
-                <span className={`p arrow ${settings ? "down" : ""}`} aria-hidden />
+                <span className="p arrow" aria-hidden />
               </button>
+              {fly === "settings" && (
+                <div className="f95-win f95-fly" role="menu" aria-label={t("build.settings")}>
+                  <ul>
+                    <li>
+                      <button type="button" role="menuitem" onClick={() => { setOpen(false); actions.openSkinPicker(); }}>
+                        <Ico name="display" size={20} />
+                        <span>{t("build.display")}</span>
+                      </button>
+                    </li>
+                    <li>
+                      <button type="button" role="menuitem" onClick={() => { setOpen(false); actions.openMixer(); }}>
+                        <Ico name="sound" size={20} />
+                        <span>Sound…</span>
+                      </button>
+                    </li>
+                    <li>
+                      <button type="button" role="menuitem" onClick={() => { setOpen(false); actions.openMods(); }}>
+                        <Ico name="programs" size={20} />
+                        <span>Mods…</span>
+                      </button>
+                    </li>
+                    {disasters?.enabled && (
+                      <li>
+                        <button type="button" role="menuitem" data-testid="start-disasters" onClick={() => { setOpen(false); actions.openDisasters(); }}>
+                          <Ico name="siren" size={20} />
+                          <span>{t("disasters.more")}</span>
+                        </button>
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              )}
             </li>
-            {settings && (
-              <>
-                <li className="sub">
-                  <button type="button" role="menuitem" onClick={() => { setOpen(false); actions.openSkinPicker(); }}>
-                    <span />
-                    <span>{t("build.display")}</span>
-                  </button>
-                </li>
-                <li className="sub">
-                  <button type="button" role="menuitem" onClick={() => { setOpen(false); actions.openMixer(); }}>
-                    <span />
-                    <span>Sound…</span>
-                  </button>
-                </li>
-                <li className="sub">
-                  <button type="button" role="menuitem" onClick={() => { setOpen(false); actions.openMods(); }}>
-                    <span />
-                    <span>Mods…</span>
-                  </button>
-                </li>
-                {disasters?.enabled && (
-                  <li className="sub">
-                    <button type="button" role="menuitem" data-testid="start-disasters" onClick={() => { setOpen(false); actions.openDisasters(); }}>
-                      <span />
-                      <span>{t("disasters.more")}</span>
-                    </button>
-                  </li>
-                )}
-              </>
-            )}
-            <li>
+            <li className="sep" role="separator" />
+            <li {...hoverShut}>
               <button type="button" role="menuitem" onClick={() => { setOpen(false); setConfirm("ask"); }}>
                 <Ico name="off" size={24} />
                 <span>{t("build.shutdown")}</span>
@@ -257,6 +408,7 @@ export function BuildBar({ items, tip, teasers = [], disasters, actions }: SlotP
           <span>{t("build.placing", { name: held.short })}</span>
         </button>
       )}
+      {run && <RunDialog widgets={widgets} onRun={launch} onClose={() => setRun(false)} />}
       {confirm && <ShutDown lab="the lab" onClose={() => setConfirm(null)} />}
     </div>
   );

@@ -10,6 +10,7 @@ import "./factions.css";
 import "./compact.css";
 import "./notices.css";
 import "./playable.css";
+import "./modes.css";
 import "./disasters.css";
 import "./circus.css";
 import "./drama.css";

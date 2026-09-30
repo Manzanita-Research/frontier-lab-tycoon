@@ -142,9 +142,10 @@ export const toast = (text: string, tone: Tone = "neutral") => send({ type: "TOA
 
 /**
  * A player action at tile (x, z): validate against the World, then queue the command or toast why not.
- * `quiet` (painting a path by dragging) suppresses everything except "Not enough cash".
+ * `quiet` (painting a path by dragging) suppresses everything except "Not enough cash". A building drops the tool once it
+ * is down, unless `keep` (Shift held: place another, RCT-style).
  */
-export function use(tool: Tool, x: number, z: number, quiet = false) {
+export function use(tool: Tool, x: number, z: number, quiet = false, keep = false) {
   const world = sim.world;
   if (tool === "bulldoze") {
     if (buildingAt(world, x, z) || world.grid.paths[z * world.grid.w + x]) send({ type: "COMMAND", command: { type: "bulldoze", x, z } });
@@ -155,7 +156,7 @@ export function use(tool: Tool, x: number, z: number, quiet = false) {
     if (!quiet || res.reason === "Not enough cash") if (res.reason !== "Already a path") toast(res.reason, "bad");
     return;
   }
-  send({ type: "COMMAND", command: tool === "path" ? { type: "placePath", x, z } : { type: "placeBuilding", kind: tool, x, z } });
+  send(tool === "path" ? { type: "COMMAND", command: { type: "placePath", x, z } } : { type: "PLACE", command: { type: "placeBuilding", kind: tool, x, z }, keep });
 }
 
 /**

@@ -6,7 +6,7 @@ import type { BuildItemVM, HudActions, HudVM } from "../ui/hud/types";
 import { hudViewModel } from "../ui/hud/vm";
 import { SkinProvider } from "./context";
 import { prepareSkin } from "./registry";
-import { ringStep } from "./homepage-98/webring";
+import { Ring, ringStep } from "./homepage-98/webring";
 import type { LoadedSkin, SlotPropsMap } from "./types";
 
 const actions = new Proxy({}, { get: () => () => undefined }) as HudActions;
@@ -14,6 +14,20 @@ const vm = (): HudVM => hudViewModel(fixtureInput({ width: 1440, height: 900 }))
 const html = (skin: LoadedSkin, node: React.ReactNode) => renderToString(<SkinProvider skin={skin}>{node}</SkinProvider>).replace(/<!-- -->/g, "");
 
 describe("homepage-98", () => {
+  it("the open ring is the tools, Facilities and Run… on top, and every building behind Facilities (FLT-63)", async () => {
+    const { skin } = await prepareSkin("homepage-98");
+    const v = vm();
+    const top = html(skin, <Ring items={v.buildItems} teasers={[]} widgets={v.widgets} actions={actions} done={() => undefined} />);
+    const map = html(skin, <Ring items={v.buildItems} teasers={[]} widgets={v.widgets} actions={actions} done={() => undefined} view="facilities" />);
+    expect(top).toContain('data-testid="start-facilities"');
+    expect(top).toContain("Facilities");
+    expect(top).toContain("Run…");
+    for (const it of v.buildItems) expect(top + map).toContain(`data-coach="build:${it.kind}"`);
+    const run = html(skin, <Ring items={v.buildItems} teasers={[]} widgets={v.widgets} actions={actions} done={() => undefined} view="run" />);
+    expect(run).toContain("Best viewed at 800×600");
+    expect(run).toContain('data-testid="run-input"');
+  });
+
   it("welcomes you to the lab's home page and shows Vibes as a six-digit hit counter", async () => {
     const { skin } = await prepareSkin("homepage-98");
     const v = vm();

@@ -75,8 +75,8 @@ export function Toast({ toast, actions }: SlotPropsMap["Toast"]) {
 const BATCH_LINES = 4;
 
 const REPLIES: Record<string, string> = {
-  align: "Alignment: loading. Estimated time remaining: unknown. Would you like to speed this up? (See: Grueling.)",
-  ship: "Shipping faster! Have you tried turning it up to Grueling? It's the last of the four speeds.",
+  align: "Alignment: loading. Estimated time remaining: unknown. Would you like to speed this up? (See: the button with three arrows.)",
+  ship: "Shipping faster! Have you tried the button with three arrows? It's the last of the four speeds.",
 };
 
 /**
