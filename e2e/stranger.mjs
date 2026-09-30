@@ -70,7 +70,9 @@ try {
       await page.screenshot({ path: `${out}/gateway.png` });
       break;
     }
-    if (now - lastClick >= 600) {
+    // Training waits for release; runway/goals wait for their timers. Only
+    // Start and construction marks ask for a click.
+    if (now - lastClick >= 600 && ["start", "path", "hall", "gateway"].includes(probe.coachId)) {
       // These are the only allowed controls. A confirm is the sole exception in the contract.
       const confirm = page.getByRole("button", { name: /^(OK|Build anyway|Hire anyway|Go ahead)$/i }).first();
       const tile = page.locator("[data-coach-tile]:visible").first();
@@ -84,6 +86,7 @@ try {
         // click finishes. Re-probe/retry; the date, movement and six-minute deadlines still fail stalls.
         if (error.name !== "TimeoutError") throw error;
         result.clickRetries = (result.clickRetries ?? 0) + 1;
+        await page.waitForTimeout(200);
       }
       lastClick = now;
     }
