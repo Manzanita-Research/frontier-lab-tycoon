@@ -1,0 +1,362 @@
+{
+  "_": [
+    "Scenes for `pnpm shots` (scripts/shots.mjs). Add your own: a scene is data, no code.",
+    "",
+    "  query    URL params merged over `defaults.query`; a null value removes a default. These are the game's own hooks",
+    "           (src/debug.ts): seed, warp (sim days before the first frame), speed (0 = paused), hour, zoom, focus=x,z,",
+    "           photo, moment=<shuffle|era|era3|auction|funding|ops|queue|slop>, researchers, agents, discourse, skin.",
+    "  viewport 'WxH' (default 1440x900). mobile: true = a phone: dsf 2, touch (use with 390x844).",
+    "  steps    run in order once the page has drawn `frames` frames (default 24), then it settles again and shoots:",
+    "             { \"wait\": ms }",
+    "             { \"select\": \"researcher\" | \"researcher:Ada Gradient\" }   tap a walker (opens the inspector)",
+    "             { \"send\": { ...event } }                                    window.__flt.send(event)",
+    "             { \"tick\": n }                                               n sim ticks",
+    "             { \"click\": \"css selector\", \"optional\": true }",
+    "             { \"eval\": \"(f, w) => { ... }\" }                            f = window.__flt, w = f.sim.world",
+    "  sets     named lists for --scenes (`standard` is the default; `all` is every scene)."
+  ],
+  "defaults": {
+    "viewport": "1440x900",
+    "query": {
+      "debug": 1,
+      "seed": 3,
+      "speed": 0,
+      "hour": 13,
+      "warp": 30
+    },
+    "frames": 24
+  },
+  "sets": {
+    "standard": [
+      "overview",
+      "inspector",
+      "event",
+      "phone"
+    ],
+    "moments": [
+      "ops",
+      "queue",
+      "slop",
+      "shuffle",
+      "auction",
+      "funding"
+    ],
+    "juice": [
+      "photo",
+      "night",
+      "release"
+    ],
+    "skins": [
+      "overview",
+      "inspector",
+      "event",
+      "menu",
+      "phone",
+      "photo"
+    ],
+    "leapfrog": [
+      "leap-shipnow",
+      "leap-dog",
+      "leap-chart",
+      "leap-phone"
+    ],
+    "disasters": [
+      "disaster-swarm",
+      "disaster-swarm-card",
+      "disaster-fire",
+      "disaster-leak",
+      "disaster-swarm-phone",
+      "disaster-leak-phone"
+    ]
+  },
+  "scenes": {
+    "overview": {
+      "title": "The campus, mid-morning, paused",
+      "steps": []
+    },
+    "inspector": {
+      "title": "Tap a researcher: the inspector opens",
+      "steps": [
+        {
+          "select": "researcher:Ada Gradient"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "event": {
+      "title": "An event card lands (the Water Discourse)",
+      "query": {
+        "discourse": 44
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { w.waterDiscourse = 44; w.day = 60; w.tick = 61 * 20 - 1; f.tick(w); }"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "menu": {
+      "title": "The Start menu / build bar open",
+      "steps": [
+        {
+          "eval": "(f, w) => { const b = document.querySelector('[data-testid=\"start-button\"]'); if (b) b.click(); else f.send({ type: 'SET_TOOL', tool: 'cluster' }); }"
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "phone": {
+      "title": "The same campus on a phone (390x844)",
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": []
+    },
+    "photo": {
+      "title": "Photo mode",
+      "query": {
+        "photo": 1
+      },
+      "steps": []
+    },
+    "night": {
+      "title": "It's 2am. Still shipping.",
+      "query": {
+        "hour": 22.5,
+        "zoom": 62,
+        "focus": "11,15"
+      },
+      "steps": []
+    },
+    "release": {
+      "title": "A model release: confetti, the camera swoops to the Hall",
+      "query": {
+        "zoom": 78,
+        "focus": "11.5,14",
+        "speed": 1
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { w.compute = 400; w.training.context.progress = w.training.context.cost - 1; for (let i = 0; i < 20; i++) f.tick(w); }"
+        },
+        {
+          "wait": 700
+        }
+      ]
+    },
+    "ops": {
+      "title": "Operations: slop, a Janitor Bot, a cluster on fire, an SRE jogging",
+      "query": {
+        "moment": "ops",
+        "zoom": 88,
+        "focus": "10.6,14.2",
+        "warp": null
+      }
+    },
+    "queue": {
+      "title": "A full Kombucha Bar and the line down the spine",
+      "query": {
+        "moment": "queue",
+        "zoom": 95,
+        "focus": "11.5,20",
+        "warp": null
+      }
+    },
+    "slop": {
+      "title": "A campus ankle-deep in slop",
+      "query": {
+        "moment": "slop",
+        "zoom": 70,
+        "focus": "11,15",
+        "warp": null
+      }
+    },
+    "shuffle": {
+      "title": "The Race: the leaderboard shuffles",
+      "query": {
+        "moment": "shuffle",
+        "warp": null
+      }
+    },
+    "auction": {
+      "title": "The Race: the compute auction",
+      "query": {
+        "moment": "auction",
+        "warp": null
+      }
+    },
+    "funding": {
+      "title": "The Race: a funding round",
+      "query": {
+        "moment": "funding",
+        "warp": null
+      }
+    },
+    "leap-shipnow": {
+      "title": "Release Leapfrog: \"Ship now at 94% ready\" (a rival just dropped)",
+      "query": {
+        "moment": "shipnow",
+        "warp": null
+      },
+      "steps": [
+        {
+          "tick": 14
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "leap-dog": {
+      "title": "Release Leapfrog: a dog walks onto the launch livestream",
+      "query": {
+        "moment": "stream:dog",
+        "warp": null
+      },
+      "steps": [
+        {
+          "tick": 14
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "leap-chart": {
+      "title": "Release Leapfrog: the presenter shows the wrong chart",
+      "query": {
+        "moment": "stream:wrongChart",
+        "warp": null
+      },
+      "steps": [
+        {
+          "tick": 14
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "leap-phone": {
+      "title": "Release Leapfrog: the forced-response card on a phone",
+      "query": {
+        "moment": "shipnow",
+        "warp": null
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "tick": 14
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "disaster-swarm": {
+      "title": "Rogue Agent Swarm: Security jogging to the Security Office, posts empty, red \"!\" (FLT-17)",
+      "query": {
+        "warp": null,
+        "zoom": 72,
+        "focus": "11.6,18.4"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { w.cash = Math.max(w.cash, 12e6); const hires = ['security', 'security', 'security', 'sre', 'sre'].map((job) => ({ type: 'hire', job })); for (let i = 0; i < 60; i++) f.tick(w, i === 0 ? hires : []); f.tick(w, [{ type: 'disaster', id: 'rogueSwarm' }]); for (let i = 0; i < 12 && w.tick < 64; i++) f.tick(w, []); f.tick(w, [{ type: 'chooseEvent', eventId: 'dz:rogueSwarm:alert', choiceIndex: 0 }]); for (let i = 0; i < 40 && w.tick < 80; i++) f.tick(w, []); }"
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "disaster-swarm-card": {
+      "title": "The swarm's alert card (FLT-17)",
+      "query": {
+        "warp": null,
+        "zoom": 70,
+        "focus": "11.5,15.5"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { w.cash = Math.max(w.cash, 12e6); const hires = ['security', 'security', 'security', 'sre', 'sre'].map((job) => ({ type: 'hire', job })); for (let i = 0; i < 60; i++) f.tick(w, i === 0 ? hires : []); f.tick(w, [{ type: 'disaster', id: 'rogueSwarm' }]); for (let i = 0; i < 12 && w.tick < 64; i++) f.tick(w, []); for (let i = 0; i < 40 && w.tick < 63; i++) f.tick(w, []); }"
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "disaster-fire": {
+      "title": "GPU Fire: a cluster burns, an SRE runs to it (FLT-17)",
+      "query": {
+        "warp": null,
+        "zoom": 88,
+        "focus": "10.2,14.6"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { w.cash = Math.max(w.cash, 12e6); const hires = ['security', 'security', 'security', 'sre', 'sre'].map((job) => ({ type: 'hire', job })); for (let i = 0; i < 60; i++) f.tick(w, i === 0 ? hires : []); f.tick(w, [{ type: 'disaster', id: 'gpuFire' }]); for (let i = 0; i < 40 && w.tick < 76; i++) f.tick(w, []); }"
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "disaster-leak": {
+      "title": "Weights Leak: Sue, Shrug, or \"It was always going to be open\" (FLT-17)",
+      "query": {
+        "warp": null,
+        "zoom": 70,
+        "focus": "11.5,15.5"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { w.cash = Math.max(w.cash, 12e6); const hires = ['security', 'security', 'security', 'sre', 'sre'].map((job) => ({ type: 'hire', job })); for (let i = 0; i < 60; i++) f.tick(w, i === 0 ? hires : []); f.tick(w, [{ type: 'disaster', id: 'weightsLeak' }]); for (let i = 0; i < 12 && w.tick < 64; i++) f.tick(w, []); for (let i = 0; i < 40 && w.tick < 62; i++) f.tick(w, []); }"
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "disaster-swarm-phone": {
+      "title": "The swarm on a phone (390x844)",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "zoom": 52,
+        "focus": "11.2,17.4"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { w.cash = Math.max(w.cash, 12e6); const hires = ['security', 'security', 'security', 'sre', 'sre'].map((job) => ({ type: 'hire', job })); for (let i = 0; i < 60; i++) f.tick(w, i === 0 ? hires : []); f.tick(w, [{ type: 'disaster', id: 'rogueSwarm' }]); for (let i = 0; i < 12 && w.tick < 64; i++) f.tick(w, []); f.tick(w, [{ type: 'chooseEvent', eventId: 'dz:rogueSwarm:alert', choiceIndex: 0 }]); for (let i = 0; i < 40 && w.tick < 80; i++) f.tick(w, []); }"
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "disaster-leak-phone": {
+      "title": "The leak card on a phone (390x844)",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "zoom": 70,
+        "focus": "11.5,15.5"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { w.cash = Math.max(w.cash, 12e6); const hires = ['security', 'security', 'security', 'sre', 'sre'].map((job) => ({ type: 'hire', job })); for (let i = 0; i < 60; i++) f.tick(w, i === 0 ? hires : []); f.tick(w, [{ type: 'disaster', id: 'weightsLeak' }]); for (let i = 0; i < 12 && w.tick < 64; i++) f.tick(w, []); for (let i = 0; i < 40 && w.tick < 62; i++) f.tick(w, []); }"
+        },
+        {
+          "wait": 400
+        }
+      ]
+    }
+  }
+}

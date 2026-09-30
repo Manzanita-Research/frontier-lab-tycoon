@@ -63,12 +63,16 @@ const EventEffect = Schema.Union([
   Schema.Struct({ type: Schema.Literal("thought"), text, count: nonnegative, kind: Schema.optionalKey(text) }),
   Schema.Struct({ type: Schema.Literal("place"), kind: text, near: Schema.Literal("gate") }),
   Schema.Struct({ type: Schema.Literal("race"), action: Schema.Literals(["cutPrices", "openRelease", "safetyConcerns", "bidLow", "bidMid", "bidAll", "raise", "raiseCircular"]) }),
+  // Release Leapfrog (FLT-27): the news cycle, trust, and the forced-response card's three answers.
+  Schema.Struct({ type: Schema.Literal("voice"), amount: number }),
+  Schema.Struct({ type: Schema.Literal("trust"), amount: number }),
+  Schema.Struct({ type: Schema.Literal("leapfrog"), action: Schema.Literals(["shipNow", "hold", "leak"]) }),
 ]);
 export const EventCard = Schema.Struct({
   id, title: text, body: text, tone, when: Condition,
   cooldown: Schema.optionalKey(nonnegative),
   choices: Schema.Array(Schema.Struct({ label: text, hint: Schema.String, effects: Schema.Array(EventEffect) })).check(Schema.isBetweenLength(1, 3)),
-  kind: Schema.optionalKey(Schema.Literals(["era", "auction"])), stripe: Schema.optionalKey(text),
+  kind: Schema.optionalKey(Schema.Literals(["era", "auction", "response", "stream"])), stripe: Schema.optionalKey(text),
 });
 export type EventData = typeof EventCard.Type;
 

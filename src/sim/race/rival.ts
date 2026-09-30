@@ -54,6 +54,11 @@ const Week = Schema.Struct({
   poachRoll: Schema.Number,
   /** The name the next release would have. */
   name: Schema.String,
+  /**
+   * Release Leapfrog (FLT-27): a finished model is held back for a launch date the calendar picks, instead of shipping
+   * the moment training is over. The machine then emits FINISHED and changes nothing; a LAUNCH event ships it.
+   */
+  hold: Schema.Boolean,
 });
 type WeekEvent = typeof Week.Type;
 
@@ -65,10 +70,14 @@ export const rivalMachine = setupEffect({
       WEEK: Week,
       /** Something happened to them: negative numbers hurt. Used by the player's cards and the auction. */
       SHOCK: Schema.Struct({ capability: Schema.Number, hype: Schema.Number, momentum: Schema.Number }),
+      /** The launch date arrived for a model that was held back (see `hold` on WEEK): it ships now, in any state. */
+      LAUNCH: Schema.Struct({ week: Schema.Number, model: Schema.String, gain: Schema.Number, hype: Schema.Number, open: Schema.Boolean }),
     },
     emitted: {
       RELEASED: Schema.Struct({ id: Schema.String, model: Schema.String, gain: Schema.Number, open: Schema.Boolean, capability: Schema.Number }),
       POACH: Schema.Struct({ id: Schema.String }),
+      /** Training is over and the model is held for a launch date: what it will add, and the hype the launch will earn. */
+      FINISHED: Schema.Struct({ id: Schema.String, model: Schema.String, gain: Schema.Number, open: Schema.Boolean, hype: Schema.Number }),
     },
   },
 }).createMachine({
@@ -76,6 +85,19 @@ export const rivalMachine = setupEffect({
   initial: "idle",
   on: {
     SHOCK: ({ context, event }) => ({ context: shocked(context, event) }),
+    LAUNCH: ({ context, event }, enq) => {
+      const next: RivalContext = {
+        ...context,
+        capability: context.capability + event.gain,
+        hype: clamp(context.hype + event.hype, 0, 100),
+        releases: context.releases + 1,
+        open: event.open,
+        model: event.model || context.model,
+        lastRelease: event.week,
+      };
+      enq.emit({ type: "RELEASED", id: context.id, model: event.model, gain: event.gain, open: event.open, capability: next.capability });
+      return { context: next };
+    },
   },
   states: {
     /** Between runs. The next week starts one. */
@@ -121,7 +143,12 @@ export const rivalMachine = setupEffect({
 export type RivalStored = Stored<typeof rivalMachine>;
 
 type Enq = {
-  emit: (e: { type: "RELEASED"; id: string; model: string; gain: number; open: boolean; capability: number } | { type: "POACH"; id: string }) => void;
+  emit: (
+    e:
+      | { type: "RELEASED"; id: string; model: string; gain: number; open: boolean; capability: number }
+      | { type: "POACH"; id: string }
+      | { type: "FINISHED"; id: string; model: string; gain: number; open: boolean; hype: number },
+  ) => void;
 };
 
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
@@ -169,6 +196,11 @@ export function opensThisTime(context: RivalContext, roll: number): boolean {
 function release(context: RivalContext, event: WeekEvent, enq: Enq) {
   const gain = context.personality.growth * (0.6 + 0.8 * event.gainRoll) * event.aggro * event.chase * context.momentum;
   const open = opensThisTime(context, event.openRoll);
+  if (event.hold) {
+    // Done training, not yet launched: the calendar picks the day (and the lab that answers whom).
+    enq.emit({ type: "FINISHED", id: context.id, model: event.name, gain, open, hype: 9 * context.personality.hypeHunger });
+    return { target: "releasing", context: { ...context, weeks: 0 } };
+  }
   const next: RivalContext = {
     ...context,
     capability: context.capability + gain,

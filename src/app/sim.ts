@@ -9,10 +9,15 @@ import { createRng } from "../sim/rng";
 import { createInitialState } from "../sim/state";
 import { applyNow, tick, TICKS_PER_DAY } from "../sim/tick";
 import { syncProtesters } from "../sim/protest";
+import { setRisk } from "../sim/disasters/driver";
+import { stageDisaster } from "../sim/disasters/demo";
+import { RISKS, type Risk } from "../sim/disasters/types";
 import type { GameState, NewsItem, OpenEvent, Outcome } from "../sim/types";
 import { fillAgents, seedWalkers } from "../sim/walkers";
 import { isMoment, stageMoment } from "../sim/race/demo";
 import { isOpsMoment, stageOps } from "../sim/opsDemo";
+import { enableLeapfrog } from "../sim/race/leapfrog/driver";
+import { parseLeapMoment, stageLeapfrog } from "../sim/race/leapfrog/demo";
 import { walkersThinking } from "../sim/mind";
 import { makeSnapshot, NO_SELECTION, type Snapshot, type UiSelection, type UiToast } from "./hud";
 import { continueTutorial } from "../sim/tutorial";
@@ -42,9 +47,12 @@ export class SimHandle {
   ui: UiSelection = NO_SELECTION;
   /** Walkers behind the lit-up Thoughts row, refreshed with each publish (about 5 Hz). */
   highlightIds: ReadonlySet<number> = new Set();
+  /** Release Leapfrog's pack is loaded (a new lab gets it too). */
+  leapfrog: boolean;
 
-  constructor(world: GameState) {
+  constructor(world: GameState, leapfrog = false) {
     this.world = world;
+    this.leapfrog = leapfrog;
   }
 
   /** Advance `n` ticks; queued commands apply on the first one. */
@@ -57,9 +65,12 @@ export class SimHandle {
     if (commands.length > 0) applyNow(this.world, commands);
   }
 
-  /** Start over with a fresh seed. */
+  /** Start over with a fresh seed (the random-disaster setting carries over to the new lab). */
   reset(seed: number) {
+    const risk = this.world.disasters.risk;
     this.world = createInitialState(seed);
+    setRisk(this.world, risk);
+    if (this.leapfrog) enableLeapfrog(this.world);
     this.alpha = 1;
   }
 
@@ -85,13 +96,18 @@ export class SimHandle {
 }
 
 /** A living campus, warped forward and dressed up per the `?seed=&warp=&agents=&discourse=` debug knobs. */
-export function createSimHandle(dbg: Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & { moment?: string | null }): SimHandle {
+export function createSimHandle(
+  dbg: Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk">> & { moment?: string | null; leapfrog?: boolean },
+): SimHandle {
   const sim = createInitialState(dbg.seed);
-  if (dbg.warp > 0 || dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0 || dbg.moment) continueTutorial(sim, true);
+  if (dbg.leapfrog) enableLeapfrog(sim);
+  if (dbg.warp > 0 || dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0 || dbg.moment || dbg.disaster || dbg.leapfrog) continueTutorial(sim, true);
   for (let i = 0; i < dbg.warp * TICKS_PER_DAY; i++) tick(sim);
+  const leap = parseLeapMoment(dbg.moment);
   if (dbg.moment === "jem-opening" || dbg.moment === "jem-confirm") stageFirstRun(sim, dbg.moment);
   else if (isMoment(dbg.moment)) stageMoment(sim, dbg.moment);
   else if (isOpsMoment(dbg.moment)) stageOps(sim, dbg.moment);
+  else if (leap) stageLeapfrog(sim, leap.moment, leap.arg);
   if (dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0) {
     const rng = createRng(sim.rngState);
     if (dbg.researchers > 0) seedWalkers(sim, "researcher", dbg.researchers, rng);
@@ -105,7 +121,11 @@ export function createSimHandle(dbg: Pick<DebugParams, "seed" | "warp" | "agents
     }
     sim.rngState = rng.state();
   }
-  return new SimHandle(sim);
+  // Disasters (FLT-17): `?risk=` sets the random-disaster setting once the warp is done (the warp itself runs with them off, so a
+  // `?warp=` link is the same lab it always was), and `?disaster=<id>` starts one a moment before the shot.
+  if ((RISKS as readonly string[]).includes(dbg.risk ?? "")) setRisk(sim, dbg.risk as Risk);
+  if (dbg.disaster) stageDisaster(sim, dbg.disaster, dbg.dz ?? 0, dbg.dzPick ?? null);
+  return new SimHandle(sim, sim.leapfrog.enabled);
 }
 
 export class Sim extends Context.Service<Sim, SimHandle>()("@flt/Sim") {}

@@ -2,9 +2,12 @@
 import type { NeedKey } from "./needs";
 import type { WalkerKind } from "../sim/types";
 
-export type BuildingKind = "cluster" | "hall" | "gateway" | "kombucha" | "nap" | "snack" | "demo" | "fountain" | "datacenter" | "gas" | "solar";
-/** What the build palette can offer; scenery is placed by events, not by the player. */
-export type PlaceableKind = Exclude<BuildingKind, "fountain">;
+export type BuildingKind = "cluster" | "hall" | "gateway" | "kombucha" | "nap" | "snack" | "demo" | "fountain" | "datacenter" | "gas" | "solar" | "security";
+/**
+ * What the build palette can offer; scenery is placed by events, not by the player, and the Security Office (FLT-17) is
+ * placed by a disaster or the `placeBuilding` command until the palette gets its tile (FLT-32).
+ */
+export type PlaceableKind = Exclude<BuildingKind, "fountain" | "security">;
 
 export interface BuildingDef {
   kind: BuildingKind;
@@ -32,6 +35,8 @@ export interface BuildingDef {
   tally?: "sips" | "naps" | "snacks" | "demos";
   /** Hidden from the palette (and refused by the sim) until a compute auction unlocks it. */
   locked?: boolean;
+  /** A staff building: walkers never visit it, and it is not on the palette yet (disasters send staff there). */
+  office?: boolean;
 }
 
 export const BUILDINGS: Record<BuildingKind, BuildingDef> = {
@@ -189,10 +194,24 @@ export const BUILDINGS: Record<BuildingKind, BuildingDef> = {
     stay: [0, 0],
     serves: {},
   },
+  security: {
+    kind: "security",
+    name: "Security Office",
+    size: [2, 2],
+    price: 350_000,
+    upkeepPerDay: 2_000,
+    blurb: "Where incident response happens. Also where the good coffee is hidden.",
+    color: "#3b5bdb",
+    office: true,
+    hosts: [],
+    capacity: 0,
+    stay: [0, 0],
+    serves: {},
+  },
 };
 
 export const BUILDING_KINDS = Object.keys(BUILDINGS) as BuildingKind[];
-export const PLACEABLE_KINDS = BUILDING_KINDS.filter((k): k is PlaceableKind => !BUILDINGS[k].scenery);
+export const PLACEABLE_KINDS = BUILDING_KINDS.filter((k): k is PlaceableKind => !BUILDINGS[k].scenery && !BUILDINGS[k].office);
 /** The race's buildings: they show up in the palette once a compute auction has been won. */
 export const RACE_KINDS = BUILDING_KINDS.filter((k): k is PlaceableKind => !!BUILDINGS[k].locked);
 

@@ -1,4 +1,5 @@
 // URL knobs for screenshots and stress tests, e.g. /?seed=3&warp=25&zoom=70&focus=12,14&agents=200&discourse=44&researchers=20&hour=22&photo&moment=shuffle
+// and, for disasters (FLT-17): /?disaster=rogueSwarm&dz=14&dzPick=0&risk=chaos
 export interface DebugParams {
   seed: number;
   /** Simulate this many game days before the first frame. */
@@ -14,10 +15,19 @@ export interface DebugParams {
   hour: number | null;
   /** Open in photo mode. */
   photo: boolean;
-  /** Stage a moment for a link or a screenshot: a race one (shuffle, era, era3, auction, funding: sim/race/demo.ts) or an operations one (ops, queue, slop: sim/opsDemo.ts). */
+  /** Stage a moment for a link or a screenshot: a race one (shuffle, era, era3, auction, funding: sim/race/demo.ts) an operations one (ops, queue, slop: sim/opsDemo.ts), or a Release Leapfrog one (shipnow, pair, stream[:mishap], solved: sim/race/leapfrog/demo.ts). */
   moment: string | null;
   /** Extra researchers on top of the hall-driven count (for Thoughts-panel and queue screenshots). */
   researchers: number;
+  /** Trigger this disaster (`rogueSwarm`, `gpuFire`, `weightsLeak`; see mods/base-disasters) once the lab has loaded. */
+  disaster: string | null;
+  /** With `disaster`: run this many ticks after it starts. Cards stay open unless `dzPick` answers them. */
+  dz: number;
+  dzPick: number | null;
+  /** The random-disaster setting: off, rare (the game's default), normal or chaos. */
+  risk: string | null;
+  /** Release Leapfrog (FLT-27) is on unless `?leapfrog=off`. */
+  leapfrog: boolean;
 }
 
 export function readDebugParams(search = typeof window === "undefined" ? "" : window.location.search): DebugParams {
@@ -36,5 +46,10 @@ export function readDebugParams(search = typeof window === "undefined" ? "" : wi
     photo: q.has("photo"),
     moment: q.get("moment"),
     researchers: num("researchers") ?? 0,
+    disaster: q.get("disaster"),
+    dz: num("dz") ?? 0,
+    dzPick: num("dzPick"),
+    risk: q.get("risk"),
+    leapfrog: q.get("leapfrog") !== "off",
   };
 }

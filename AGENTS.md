@@ -20,7 +20,20 @@ pnpm test             # vitest (sim + content tests)
 pnpm typecheck
 pnpm build            # tsc + vite build into dist/
 pnpm check            # all three: run before every PR
+pnpm shots            # before/after screenshots of main vs your branch (see below)
+pnpm shot <url> <png> # one headless screenshot (Playwright + SwiftShader)
 ```
+
+### Before/after screenshots: `pnpm shots`
+
+```sh
+pnpm shots                                   # 4 standard scenes: overview, inspector, event, phone (~2.5 min cold on a Modal builder)
+pnpm shots --scenes overview,ops,night --diff --out docs/img/flt-99
+pnpm shots --skin frontier-95                # a skin on both builds; `--skin all` = a gallery of every skin
+pnpm shots --list                            # every scene and set
+```
+
+It builds `main` in a temporary worktree (cached by commit in `shots/.cache/`) and your checkout, serves both, and writes `<out>/{before,after,compare}/<scene>.png` plus `report.md`, whose table you paste into the PR body. `shots/` is gitignored scratch; pass `--out docs/img/<task>` and commit that directory so the PR's image links resolve. A scene is data (`?seed`, `?moment=`, `?zoom`, a few steps), so a task adds its own in `scripts/shots.scenes.json`. The game is paused and the news ticker is parked, so a build compared with itself differs by about 0.2% of pixels; a scene under 0.5% is reported as unchanged. Every capture and every compare image is checked for blank or single-colour output (a dark frame, a canvas that never drew, images that didn't load), and the run exits 1 with a loud banner if any is: never paste those as evidence. `pnpm shots --verify <png|dir>` runs the same check on existing images. Run one at a time (it is CPU-heavy on 1 vCPU).
 
 ## Architecture in one breath
 
@@ -29,6 +42,8 @@ pnpm check            # all three: run before every PR
 - `src/render/`: react-three-fiber scene. Reads sim state, never mutates it except through store actions.
 - `src/ui/hud/`: the 2D UI's host. `hudViewModel(snapshot)` (`vm.ts`) turns the snapshot into a plain-JSON `HudVM`; `types.ts` is the whole modding contract (`HudVM` + `HudActions`). `src/skins/`: the skin system (tokens, slots, registry, schema) and the six skins (Frontier 95 is the default). **The 2D UI is skinned: read `docs/SKINS.md` before touching it**, put UI in a slot (base or a skin's), and never import `src/sim/**`, the store or three from `src/skins/**` (a test fails if you do). `src/ui/juice/`: sky and photo-mode plumbing; `src/ui/WorldOverlay.tsx`: labels pinned to the scene.
 - `src/render/fx/`: the juice layer (camera director, particles, day/night, photo mode). It only reads the World; see the last section of `docs/ARCHITECTURE.md`.
+- `src/sim/disasters/` and `src/sim/verbs.ts`: disasters as JSON statecharts (`mods/base-disasters/mod.json`) plus the Vocabulary of generic guards and verbs they call. Adding a disaster is a JSON entry; read `docs/DISASTERS.md`.
+- `mods/base-leapfrog/`: the Release Leapfrog content pack (FLT-27, the FLT-15 section shape; loaded by `src/content/leapfrog.ts`), its machines in `src/sim/race/leapfrog/`; asleep unless `enableLeapfrog(state)` (the app does it, `?leapfrog=off` skips it).
 - `src/sim/machines/`: the XState machines (training, economy, goals, event arcs, walkers, moods, staff). `src/sim/race/`: the Race (rival labs, the Arena, eras, the R&D multiplier, open weights, the compute auction, funding rounds). `src/app/`: the Effect shell (Sim and Frames services, the app machine) and how React reads it. See `docs/ARCHITECTURE.md`.
 
 If you need to change a shared type in `src/sim/types.ts`, keep the change additive and mention it in your PR.
@@ -52,7 +67,7 @@ Only people (visitors, staff, researchers) are sure to be walkers. Agents, compu
 
 ## PRs
 
-- **Before/after screenshots (Jem's rule).** Any PR that changes something **visible** (the 2D UI, the 3D scene, skins, events, on-screen text) includes **before/after screenshots of the same scene**: same seed, same camera and scene, same viewport, taken from `main` and from your branch. Use `pnpm shots` once it exists (FLT-35); until then use `pnpm shot` with the same URL on both builds. Put them in the PR body as pairs (before | after), plus a phone shot if the layout changed. **Logic-only PRs** show tests or a sim/headless report instead.
+- **Before/after screenshots (Jem's rule).** Any PR that changes something **visible** (the 2D UI, the 3D scene, skins, events, on-screen text) includes **before/after screenshots of the same scene**: same seed, same camera and scene, same viewport, taken from `main` and from your branch. Run **`pnpm shots`** (FLT-35): it builds `main` and your branch, captures the same scenes on both, and prints the markdown table for the PR body. Scenes live in `scripts/shots.scenes.json`, so add your own there. See "Before/after screenshots" below. Put them in the PR body as pairs (before | after), plus a phone shot if the layout changed. **Logic-only PRs** show tests or a sim/headless report instead.
 
 - Open a real PR from your branch into `main`. CI runs typecheck, tests and build.
 - Put evidence in the PR: test output, and for anything visual, a screenshot (see `docs/modal.md` for headless screenshots) or a `bb connect expose` link.

@@ -39,7 +39,13 @@ flowchart LR
 | **walker** (one per walker) | `.../walker.ts` | `arriving`, `seeking`, `queuing`, `inside`, `loitering`, `wandering`, `choosing`, `leaving`, `quitting`, `picketing`, `gone` (final) | `ARRIVED`, `QUEUED`, `ADMITTED`, `GAVE_UP`, `LINGER`, `NEXT`, `TOUR_DONE`, `QUIT`, `CHOSE_BUILDING`, `CHOSE_WANDER`, `PROTEST_STARTED`, `SENT_HOME`, `EXITED` | none: the driver acts on the state entered | nothing (the need a walker is seeking, `visits` and `step` stay plain walker fields) |
 | **rival** (one per rival lab) | `src/sim/race/rival.ts` | `idle`, `training`, `releasing`, `cooldown` | `WEEK {aggro, pace, chase, four dice, name}`, `SHOCK {capability, hype, momentum}` | `RELEASED`, `POACH` | personality, capability, hype, weeks left, open weights?, momentum, latest model |
 | **era** | `src/sim/race/era.ts` | `era1`, `era2`, `era3`, `era4` | `DAY {mult}` | `ERA_REACHED` | the peak multiplier (the ratchet) |
+| **calendar** (Leapfrog) | `src/sim/race/leapfrog/calendar.ts` | `quiet`, `answering` | `DAY {gapRoll, pairRoll, pace, pairChance}` | `DROP {slot: lead \| answer}` | days to the next lead drop, gap range, launches so far |
+| **benchmark** (one per column) | `.../leapfrog/benchmark.ts` | `live`, `crowded`, `saturated`, `retired` (final) | `SCORES {best, holder, day}`, `DAY {day}` | `SOTA`, `CROWDED`, `SATURATED`, `RETIRED` | best score, holder, thresholds, the day it was solved |
+| **voice** (the news cycle) | `.../leapfrog/voice.ts` | `contested`, `owned` | `PUSH {lab, amount}`, `DAY {decay, baselines, ...}` | `OWNED`, `LOST` | attention per lab, owner, streak |
+| **response** (the forced card) | `.../leapfrog/response.ts` | `idle`, `offered`, `holding` | `DROP {eligible}`, `PICK {ship \| hold \| leak}`, `RELEASED {strong}`, `DAY` | `OFFER`, `SHIPPED`, `HELD`, `LEAKED`, `COUNTER`, `EXPIRED`, `WITHDRAWN` | day of the last offer, hold deadline, counts |
+| **livestream** | `.../leapfrog/livestream.ts` | `idle`, `live` | `GO {ok, kind}`, `DAY` | `AIRED {ok, kind}` | streams, mishaps, the mishap on air |
 | **staff** (one per staffer) | `src/sim/machines/staff.ts` | `arriving`, `idle`, `going`, `working`, `leaving`, `gone` (final) | `ARRIVED`, `TASK`, `DONE`, `LOST`, `FIRED`, `EXITED` | none: the driver acts on the state entered | nothing (the task, route, patrol zone and counters stay plain fields on the staffer) |
+| **disaster** (one per running disaster; `src/sim/disasters/`) | compiled from JSON (`mods/base-disasters/mod.json`) | the content's own: `warning`, `active`, `cleanup`, `aftermath`, `done` (final) | `TICK {tick, day, roll, work, stats}`, `CHOSE {..., choice}` | `CALL {verb, params}`: the driver runs the Vocabulary verb (`sim/verbs.ts`) | id, start day, when the state began, cleanup progress and staff-hours |
 | **mood** (one per researcher and visitor) | `.../mood.ts` | `content`, `slumped`, `miserable`, `resigned` (final) | `LIFT`, `SLUMP`, `CRASH`, `DAY` | `RESIGNED` | the count of miserable days in a row |
 
 Arithmetic stays in plain functions: money per day, the training gain (`spend * (0.75 + 0.25 * morale)`), movement along a route, routing itself.
@@ -372,6 +378,61 @@ flowchart LR
 
 Determinism: the goldens (`sim/golden.test.ts`) were re-recorded on purpose: every building draws a breakdown die each day, and the script now hires a few staff and paints a zone, so the digests also cover slop, the payroll and every building's reliability.
 
+## Release Leapfrog (FLT-27, the sim side)
+
+_"Every ~10 days one frontier lab releases a model and the next day the other one does."_ The heartbeat of the Race: a relentless launch calendar, benchmarks that get claimed, contested, solved and replaced, a news cycle you can lose, and a forced response when a rival launches while your run is cooking. Spec: `docs/specs/FLT-27.md`. This page is the sim; the panels are FLT-31 (the World already publishes `Snapshot.leapfrog` for them).
+
+```mermaid
+flowchart LR
+  W["weekly(): rivals finish training<br/>(WEEK {hold: true})"] -->|"FINISHED"| Q["queue: a finished model per lab,<br/>waiting for its launch date"]
+  CAL["calendar machine<br/>quiet -> answering -> quiet"] -->|"DROP lead / answer"| PICK["pick a lab: the queue's longest wait,<br/>not one that just launched;<br/>an answer favors the strong"]
+  Q --> PICK
+  PICK -->|"LAUNCH"| RIV["rival machine:<br/>capability, hype, model, open?"]
+  RIV --> BX["real scores top nothing?<br/>benchmaxx the closest column"]
+  BX --> REC["refreshRecords: SCORES to each<br/>benchmark machine"]
+  REC -->|"SOTA"| NEWS["headline + toast"]
+  REC -->|"SATURATED"| SOLVED["'solved' headline, harder column,<br/>two labs react in character,<br/>old column retires 3 days later"]
+  PICK -->|"PUSH"| VOICE["voice machine: share of the news cycle<br/>(decays 15% a day)"]
+  PICK -->|"lead drop, your run 45-99% done"| RESP["response machine: OFFER"]
+  RESP --> CARD["'Ship now at 94% ready' card"]
+  CARD -->|"ship"| PREV["preview now (80% of the readiness),<br/>the run carries on"]
+  CARD -->|"hold"| HOLD["25 days: your next launch is the counter"]
+  CARD -->|"leak"| LEAK["asterisked SOTA claim, hype +8, trust -12"]
+  OWN["your run finishes<br/>(or the preview)"] --> LS["livestream machine:<br/>flawless, or a mishap card"]
+  VOICE -->|"share vs fair"| HYPE["hype nudge, valuation factor"]
+```
+
+- **The pack** (`mods/base-leapfrog/mod.json`, in the FLT-15 section shape; `src/content/leapfrog.ts` loads it and checks it with Effect Schema, so a typo says `content.mishaps.add[2].weight: Expected number`). It holds the benchmark names and the chain of harder replacements, each lab's strengths, the footnotes, 72 headlines, the seven livestream mishaps (each a card `stream:<id>`), the forced-response card, and every tuning knob under `rules.leapfrog` (cadence, saturation thresholds, news-cycle numbers, response and livestream odds, trust). A mod adds a benchmark, a mishap (an entry plus its `stream:<id>` card) or headline lines without touching the engine. Until FLT-15 M1b lands the loader, this file is imported directly; the switch should be mechanical.
+- **Off by default in `createInitialState`, on in the app.** `enableLeapfrog(state)` is the "pack loaded" switch (`?leapfrog=off` turns it off in the browser). Off means asleep: no dice are drawn and nothing moves, so the goldens and every pre-existing test are untouched. `RaceState` and the rest of the World are unchanged; the pack's state is `GameState.leapfrog`.
+- **Rivals hold their models.** With the pack on, `weekly()` sends `WEEK` with `hold: true` to labs that have a product. The rival machine finishes the run, emits `FINISHED` and changes nothing else; the model waits in `leapfrog.queue` and a `LAUNCH` event (any state) ships it on the calendar's day. So a lab's capability, its model name and the Arena move on launch day, and "one lab drops, the next day another answers" is made of real rival state. A lab with nothing finished ships a **point release** (a small update, e.g. "Chatty-4-plus"); what it paid out is credited against its next finished model, so launching more often does not make a lab grow faster (pack on and off reach the same eras within noise).
+- **Cadence.** A lead drop every 8 to 12 days (times the era's pace: 1, 0.85, 0.7, 0.55), never under 3. Each lead is answered the next day with a chance of 50%, 60%, 70%, 80% by era, by a different lab, weighted toward the strong. Two dice a day are always drawn, so the stream doesn't depend on whether anything dropped.
+- **Benchmarks.** A score is `100 / (1 + (difficulty / (capability x bias)) ^ 2)`: 50% at the difficulty, toward 100 as it grows; Arena Elo is `1000 + 4 cap + 1.5 hype` and never saturates. Each drop claims SOTA on at least one column: if a lab's honest scores top nothing, it **benchmaxxes** the column it is closest on (a custom prompt, best of 64; the score lands just past the standing record, the headline gets a footnote such as "(*pass@256)", and the leaderboard row marks it). Benchmaxxed claims last until the lab's next launch. A column is `crowded` at 91%, **`saturated` at 96.5%**: the headline declares it solved, the pack's harder replacement joins the board (scores back to about a third), a frontier lab, a neo lab, an open-weights lab or a BigCo each react in their own voice, and the old column stops counting for claims and retires three days later.
+- **The news cycle.** Every lab has an attention pile that decays 15% a day toward a baseline set by its hype; launches, stunts, livestream mishaps and the card choices push it. Your share of the total is the share-of-voice meter. A lab with 32% and 1.3x the runner-up **owns the cycle** (a headline; the Frontier Times front page leads with it) until it drops under 24%. Your share above 15% nudges your hype up to +1.5 a day (below it, down to -0.8), and scales the valuation a funding round uses (x0.8 to x1.4, times a trust factor).
+- **Forced response.** When a lead drop lands while your run is 45% to 99% done (not before day 30, not within 8 days of the last card, not while holding or after a preview), the `shipNow` card opens: "**{rival} just dropped {model}. Ship yours now at {ready}% ready, or lose the news cycle.**" Three answers: **Ship now** ships an *early-access preview* (`SHIP_NOW` on the training machine): it adds `ready x 0.8` of the release now, the run carries on, and the full release later adds the rest less that; the gap (`0.2 x ready` of the release) is the quality penalty, kept for good. It costs a news-cycle bump (a big one), and a chance of an embarrassing launch bug (`10% + 60% x (1 - ready)`: hype -4, an incident, a smaller bump). **Hold** costs you the room (the rival gets +25, your pile drops 15%) and opens a 25-day window: your next launch is a counter-launch, strong (a big bump, +6 hype, three days of revenue) if it beats every rival's capability, soft if not, and a shrug (and a trust dent) if the window closes. **Leak** gives a SOTA claim with an asterisk on the column you are closest on, hype +8, trust -12, and a scandal if the real scores can't reproduce it.
+- **Livestream.** Every launch of yours (a finished run, or the preview) airs a livestream: it works by `demoOdds(capability) x readiness x 0.85`, plus 0.1 with a Demo Stage standing (between 20% and 85%). If it does not, one of seven mishaps (weighted; the pack's `mishaps`) fires: a headline, a small hit to the Vibes, a share-of-voice push, and its card with three ways to spin it: the dog on stage (Frontier 95's "The demo has stopped responding"), the wrong chart, "we'll ship it in the coming weeks", the frozen "thinking..." spinner, the model reading out its system prompt, the hot mic, the demo running last year's model.
+- **The cards are the existing event cards.** New effects (`voice`, `trust`, `leapfrog`) join `content/events.ts`; the arcs machines open a card when its flag is set (`offer:shipNow`, `offer:stream:<id>`). New `kind`s (`response`, `stream`) are for FLT-31's skin slots. The card text uses `{lfRival} {lfModel} {lfReady} {lfShip} {lfHold} {lfBug} {lfHoldDays} {lfMine}`, filled from the World with the race's variables (`sim/race/finance.ts` `raceVars`).
+- **HUD.** `Snapshot.leapfrog` (`sim/race/leapfrog/view.ts`): the benchmark columns (status, best, holder, "new"), a row per lab (scores aligned to the columns, who holds each record, which are benchmaxxed, whether the row is flashing from a launch, model), the share-of-voice shares and owner, trust, the latest launch and its claims, the calendar's countdown, and the response's numbers (readiness, what shipping would add, the bug odds). No new panels here.
+- **Debug scenes:** `?moment=shipnow` (day 39, run 94% done, a lab is a second from launching), `pair` (a lab launched today, the answer lands in a second), `stream[:dog|wrongChart|comingWeeks|frozen|systemPrompt|hotMic|wrongModel]`, `solved` (a benchmark has just been solved).
+
+### Where the spec was silent
+
+- A rival's **capability jumps on launch day, not when training ends**, so the Arena and the leaderboard show public models only.
+- **Benchmaxxing** (and the footnote joke) is how "each drop claims SOTA" stays true when a lab is behind; the player's own scores are always honest, and the leak is the player's benchmaxx.
+- **"Ship now" is an early-access preview**, not a wiped run: a wipe would have made it a bad deal at any readiness.
+- **Trust** is a new 0 to 100 number (start 70, +0.25 a day back toward it). It feeds the valuation and the hype the news cycle gives, and moves with the card choices.
+- The Frontier Times gets a `cycle` story kind (priority 88) so the front page leads with the cycle's owner; solved benchmarks are `era`-sized news.
+
+### Numbers (1-vCPU Modal box)
+
+| Measurement | Result |
+|---|---|
+| `dailyLeapfrog` (calendar, a drop, records, voice), per game day | about 0.1 ms, once every 20 ticks |
+| `leapfrogView` (the HUD's 5 Hz part) | about 0.03 ms |
+| 365 headless days, three seeds (the playthrough bot's build order) | 37 to 40 lead drops, 21 to 23 answered the next day, gaps of 7 to 13 days, 5 to 7 forced-response cards, 1 to 2 benchmarks solved, about 160 SOTA claims of which about 35 are benchmaxxed |
+| 700 days, pack on vs off, same seeds | same outcome (won), Era 2 at day 48 to 101 vs 68 to 73, Era 3 at day 487 to 510 vs 466 to 489 |
+
+The full table, the first launches, a leaderboard and a ticker sample are in `docs/evidence/flt-27/report.md` (`LEAPFROG_REPORT=1 pnpm vitest run src/sim/race/leapfrog/report.test.ts`). The 500- and 800-walker perf tests are unchanged (the pack is off in them).
+
 
 ## The 2D UI is skinned (FLT-14)
 
@@ -414,3 +475,28 @@ FLT-16 decides *when* the tutorial speaks and when time is held; FLT-29 is every
 - **Calm by default**: while the tutorial is up, the Arena starts folded (`arenaOpenByDefault(tutorialUp)`; it opens by itself when the tutorial ends, or when you drop a place) and the "no Training Hall" reminder waits for the hall step.
 
 Evidence scripts: `scripts/tutorial-shots.mjs` drives a real ten-minute first run through the UI only (`docs/evidence/FLT-29-sequence/`).
+## Disasters (FLT-17): acts of God as JSON statecharts
+
+The full page is `docs/DISASTERS.md`. In one breath: a disaster is data (`mods/base-disasters/mod.json`, FLT-15 section shape); `compile.ts` turns each into an XState machine; `driver.ts` steps every running one once a tick with the pure `transition()` and runs what it emits (`CALL {verb, params}`) through the Vocabulary in `sim/verbs.ts`; cards become ordinary event cards; the presentation (camera, shake, sound) travels as read-only cues on `state.disasters.cues`.
+
+```mermaid
+flowchart LR
+  DICE["dailyDisasters<br/>(off / rare / normal / chaos,<br/>own random stream)"] -->|"triggerDisaster"| RUN
+  MENU["Disasters menu (FLT-32),<br/>?disaster=, __flt.disaster()"] -->|"disaster command"| RUN
+  RUN["state.disasters.runs[i]<br/>{ machine: { value, context }, target, fires, diverts, card }"]
+  T["tick: updateDisasters"] -->|"TICK { tick, day, roll,<br/>work, stats }"| RUN
+  CARD["answered card:<br/>pick flag"] -->|"CHOSE { choice }"| RUN
+  RUN -->|"CALL { verb, params }"| V["verbs.ts<br/>staff.divert, compute.drain, cost.spike,<br/>building.fire, camera.focus, card, news ..."]
+  V --> W[("World: staff, effects,<br/>buildings, news, toasts, cues")]
+  W -->|"computeFactor, upkeepFactor,<br/>revenueEffect"| ECON["economy.ts, training.ts"]
+  W -->|"state.disasters.cues"| FX["watch.ts -> FxDirector, SoundLayer"]
+```
+
+| Measurement | Result |
+|---|---|
+| `updateDisasters` with nothing running | one length check |
+| `updateDisasters`, one to three disasters running | about 15 to 45 microseconds a tick (asserted under 0.15 ms) |
+| A year in a working lab, random disasters (6 seeds) | off 0; rare 1.7 (0 to 5); normal 5.5 (2 to 10); chaos 24 (20 to 35) |
+| The existing perf tests | unchanged within noise (the 800-walker test reads 0.66 to 0.78 ms on this box for both `main` and the branch, against its 0.5 budget, doubled on CI) |
+
+Determinism: the disasters draw from `state.disasters.rngState`, not the main stream, and tests start with the setting `off`, so the golden digests and the playthrough tests are untouched. A separate test runs 90 days of chaos twice and compares the World byte for byte, and another saves and loads a World mid-swarm.
