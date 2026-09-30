@@ -114,6 +114,22 @@
       "front-95",
       "front-phone",
       "front-phone-share"
+    ],
+    "flt-57": [
+      "end-acquihired",
+      "end-acquihired-almanac",
+      "end-acquihired-phone",
+      "end-card",
+      "end-card-lab2",
+      "end-versus",
+      "end-versus-phone",
+      "friend",
+      "friend-almanac",
+      "friend-phone",
+      "memo-countdown",
+      "memo-countdown-almanac",
+      "memo-race",
+      "memo-slow-phone"
     ]
   },
   "scenes": {
@@ -1199,6 +1215,218 @@
         },
         {
           "wait": 500
+        }
+      ]
+    },
+    "end-acquihired": {
+      "title": "FLT-57: Acqui-hired ends on Found a new lab (three perks), with a 7-day streak",
+      "query": {
+        "warp": null,
+        "moment": "front-acquihired",
+        "streak": 7
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "end-acquihired-almanac": {
+      "title": "FLT-57: the same ending in Field Almanac (the base Ending slot)",
+      "query": {
+        "warp": null,
+        "moment": "front-acquihired",
+        "streak": 7,
+        "skin": "field-almanac"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "end-acquihired-phone": {
+      "title": "FLT-57: Acqui-hired on a phone, scrolled to What now",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "moment": "front-acquihired",
+        "streak": 7
+      },
+      "steps": [
+        {
+          "wait": 7000
+        },
+        {
+          "eval": "() => { const el = document.querySelector('.f95-end-next, .ending-next, .f95-end-run, .ending-side'); if (el) el.scrollIntoView({ block: 'start' }); }"
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "end-card": {
+      "title": "FLT-57: the share card with a streak flame (Frontier 95)",
+      "query": {
+        "warp": null,
+        "moment": "front-acquihired",
+        "streak": 7
+      },
+      "steps": [
+        {
+          "wait": 7000
+        },
+        {
+          "eval": "() => { const img = document.querySelector('.f95-end-card, .ending-card-preview'); if (!img) return; Object.assign(img.style, { position: 'fixed', inset: '0', margin: 'auto', width: 'min(1200px, 100vw)', height: 'auto', zIndex: '9999', boxShadow: '0 0 0 100vmax #222' }); }"
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "end-card-lab2": {
+      "title": "FLT-57: a second lab's share card: Lab #2 and the streak (Field Almanac)",
+      "query": {
+        "warp": null,
+        "moment": "lab2",
+        "streak": 12,
+        "skin": "field-almanac"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        },
+        {
+          "eval": "() => { const img = document.querySelector('.f95-end-card, .ending-card-preview'); if (!img) return; Object.assign(img.style, { position: 'fixed', inset: '0', margin: 'auto', width: 'min(1200px, 100vw)', height: 'auto', zIndex: '9999', boxShadow: '0 0 0 100vmax #222' }); }"
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "end-versus": {
+      "title": "FLT-57: a friend's run on the same seed: the verdict and Keep regulating",
+      "query": {
+        "warp": null,
+        "moment": "front-captured",
+        "seed": 48,
+        "vs": "acquihired.180.60.4",
+        "streak": 3
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "end-versus-phone": {
+      "title": "FLT-57: the verdict on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "moment": "front-captured",
+        "seed": 48,
+        "vs": "acquihired.180.60.4",
+        "streak": 3
+      },
+      "steps": [
+        {
+          "wait": 7000
+        },
+        {
+          "eval": "() => { const el = document.querySelector('.f95-end-next, .ending-next, .f95-end-run, .ending-side'); if (el) el.scrollIntoView({ block: 'start' }); }"
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "friend": {
+      "title": "FLT-57: a friend's link: 'Your friend's lab was Captured on day 212. Beat it?'",
+      "query": {
+        "vs": "captured.212.88.7"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "friend-almanac": {
+      "title": "FLT-57: the friend banner in Field Almanac",
+      "query": {
+        "vs": "captured.212.88.7",
+        "skin": "field-almanac"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "friend-phone": {
+      "title": "FLT-57: the friend banner on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "vs": "captured.212.88.7"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "memo-countdown": {
+      "title": "FLT-57: The Memo, three days out (Frontier 95: a very slow file copy)",
+      "query": {
+        "warp": null,
+        "moment": "memo-countdown"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "memo-countdown-almanac": {
+      "title": "FLT-57: The Memo's countdown in Field Almanac",
+      "query": {
+        "warp": null,
+        "moment": "memo-countdown",
+        "skin": "field-almanac"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "memo-race": {
+      "title": "FLT-57: after the Memo: the Race extra edition, three staff quoted",
+      "query": {
+        "warp": null,
+        "moment": "memo-race"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "memo-slow-phone": {
+      "title": "FLT-57: the Slow Down extra edition on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "moment": "memo-slow"
+      },
+      "steps": [
+        {
+          "wait": 800
         }
       ]
     }

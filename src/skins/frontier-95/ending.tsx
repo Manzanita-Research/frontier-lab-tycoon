@@ -3,13 +3,14 @@
 import type { SlotPropsMap } from "../types";
 import { Ico } from "./icons";
 import { Blocks, Btn, Win } from "./parts";
-import { useAutoPause } from "../kit";
+import { useAutoPause, useJumpTo } from "../kit";
 
 const SHARE_NOTE: Record<string, string> = { making: "Printing the card… (do not turn off your computer)", error: "General protection fault in PRINTER.DRV. Try again?" };
 
 export function Ending({ ending, layout, actions }: SlotPropsMap["Ending"]) {
   const p = ending.paper;
   const share = ending.share;
+  const next = useJumpTo<HTMLFieldSetElement>(layout.compact);
   return (
     <div className="f95-layer f95-dim">
       <div className={`f95-end ${layout.compact ? "compact" : ""}`} role="dialog" aria-modal="true" aria-label={`The end: ${ending.title}`}>
@@ -93,7 +94,7 @@ export function Ending({ ending, layout, actions }: SlotPropsMap["Ending"]) {
                 <b>{ending.versus.text}</b>
               </div>
             )}
-            <fieldset className="f95-end-next">
+            <fieldset className="f95-end-next" ref={next.ref}>
               <legend>What now?</legend>
               <p>{ending.next.prompt}</p>
               {ending.refound ? (
@@ -135,6 +136,11 @@ export function Ending({ ending, layout, actions }: SlotPropsMap["Ending"]) {
           <div className="f95-status">{share.note ?? SHARE_NOTE[share.status] ?? "Ready"}</div>
         </Win>
       </div>
+      {next.show && (
+        <Btn def className="f95-end-jump" onClick={next.jump}>
+          What now? ↓
+        </Btn>
+      )}
     </div>
   );
 }

@@ -198,7 +198,7 @@ body.ending-beige canvas { filter: sepia(0.55) saturate(0.55) brightness(1.04); 
 
 .memo-countdown {
   position: fixed;
-  top: 8px;
+  bottom: calc(228px + env(safe-area-inset-bottom, 0px));
   left: 50%;
   transform: translateX(-50%);
   z-index: 55;
@@ -219,7 +219,7 @@ body.ending-beige canvas { filter: sepia(0.55) saturate(0.55) brightness(1.04); 
 .memo-countdown b { font: 900 15px Georgia, serif; }
 .memo-countdown small { font: italic 12px Georgia, serif; opacity: 0.8; }
 .memo-countdown.soon { border-color: #b0302a; animation: memo-drop 0.5s cubic-bezier(0.3, 1.6, 0.5, 1), memo-shake 2.4s 0.5s infinite; }
-@keyframes memo-drop { from { transform: translate(-50%, -60px); } }
+@keyframes memo-drop { from { transform: translate(-50%, 60px); opacity: 0; } }
 @keyframes memo-shake { 0%, 90%, 100% { rotate: 0deg; } 93% { rotate: -2deg; } 96% { rotate: 2deg; } }
 .memo-backdrop { z-index: 68; background: #1d1a14b8; overflow: auto; }
 .memo-extra { position: relative; width: min(640px, 100%); max-height: calc(100dvh - 24px); overflow: auto; color: #29251d; box-shadow: 0 24px 80px #0008; animation: ending-press 0.7s cubic-bezier(0.2, 1.3, 0.4, 1); }
@@ -254,3 +254,4 @@ body.ending-beige canvas { filter: sepia(0.55) saturate(0.55) brightness(1.04); 
 .challenge.tone-neutral .challenge-stamp { color: #2f5d8c; border-color: #2f5d8c; }
 .challenge-note { margin: 0; font-size: 12px; color: var(--flt-color-textDim); }
 .challenge .choice { width: 100%; }
+.ending-jump { position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 71; width: auto; padding: 10px 22px; box-shadow: 0 8px 24px #0007; }

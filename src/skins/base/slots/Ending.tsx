@@ -1,3 +1,4 @@
+import { useJumpTo } from "../../kit";
 import type { SlotPropsMap } from "../../types";
 
 const SHARE_LABEL: Record<string, string> = { making: "Printing the card…", error: "The printer jammed. Try again?" };
@@ -6,6 +7,7 @@ const SHARE_LABEL: Record<string, string> = { making: "Printing the card…", er
 export function Ending({ ending, layout, actions }: SlotPropsMap["Ending"]) {
   const p = ending.paper;
   const share = ending.share;
+  const next = useJumpTo<HTMLElement>(layout.compact);
   return (
     <div className="modal-backdrop ending-backdrop">
       <div className={`ending ending-${ending.id} tone-${ending.tone} ${layout.compact ? "compact" : ""}`} role="dialog" aria-modal="true" aria-label={`The end: ${ending.title}`}>
@@ -77,7 +79,7 @@ export function Ending({ ending, layout, actions }: SlotPropsMap["Ending"]) {
               )}
             </div>
           )}
-          <section className="ending-next" aria-label="What now">
+          <section className="ending-next" aria-label="What now" ref={next.ref}>
             <span className="paper-section">What now</span>
             <p>{ending.next.prompt}</p>
             {ending.refound ? (
@@ -122,6 +124,11 @@ export function Ending({ ending, layout, actions }: SlotPropsMap["Ending"]) {
           {share.card && <img className="ending-card-preview" src={share.card} alt="The share card" />}
         </aside>
       </div>
+      {next.show && (
+        <button className="choice plain primary ending-jump" onClick={next.jump}>
+          <b>What now? ↓</b>
+        </button>
+      )}
     </div>
   );
 }
