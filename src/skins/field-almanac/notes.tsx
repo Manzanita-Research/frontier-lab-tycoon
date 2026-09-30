@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useT } from "../kit";
+import { ALL_VISIBLE, useCoach, useT } from "../kit";
 import type { SlotPropsMap } from "../types";
 import { CheckIcon, ClipboardIcon } from "./icons";
 import { almanacDate, roman } from "./lore";
@@ -7,9 +7,10 @@ import { almanacDate, roman } from "./lore";
 /** The run under observation: its name in italics, a hairline that fills, and how much compute it eats a day. */
 export function Training({ training }: SlotPropsMap["Training"]) {
   const t = useT();
+  const coach = useCoach();
   if (!training.hasHall) {
     return (
-      <section className="fa-training idle" aria-label={t("training.title")} data-coach="training">
+      <section className="fa-training idle" aria-label={t("training.title")} {...coach.attrs("training")}>
         <div className="fa-sc">{t("training.title")}</div>
         <p className="fa-quiet">{t("training.noHall")}</p>
       </section>
@@ -17,7 +18,7 @@ export function Training({ training }: SlotPropsMap["Training"]) {
   }
   const pct = Math.floor(training.pct * 100);
   return (
-    <section className="fa-training" aria-label={t("training.title")} data-coach="training">
+    <section className="fa-training" aria-label={t("training.title")} {...coach.attrs("training")}>
       <div className="fa-sc">
         {t("training.title")} · training run {roman(training.run)}
       </div>
@@ -40,12 +41,35 @@ export function Training({ training }: SlotPropsMap["Training"]) {
  * This year's objectives as a checklist with a hand-ticked box each. On a phone it starts as a small clipboard button
  * (with the tally) and opens over the map.
  */
-export function Objectives({ objectives, layout }: SlotPropsMap["Objectives"]) {
+export function Objectives({ objectives, progress, visible = ALL_VISIBLE, layout }: SlotPropsMap["Objectives"]) {
   const t = useT();
+  const coach = useCoach();
   const [open, setOpen] = useState(() => !layout.compact);
   const compact = layout.compact;
+  const goal = progress?.goal.line ? progress.goal : null;
+  if (goal && !visible.arena) {
+    // The one goal in front of you, ticked off by hand when it is done; the year's objectives come with the race.
+    return (
+      <section className="fa-objectives fa-goal-one" aria-label={t("objectives.goal")} {...coach.attrs("goals")} role="status">
+        <div className="fa-obj-head">
+          <span className="fa-sc">{t("objectives.goal")}</span>
+        </div>
+        <ul className="fa-checks">
+          <li className="fa-check">
+            <span className="fa-box" aria-hidden />
+            <span className="fa-check-text">
+              <span className="fa-check-label">{goal.text}</span>
+              <small>
+                {Math.min(goal.current, goal.target)} of {goal.target}
+              </small>
+            </span>
+          </li>
+        </ul>
+      </section>
+    );
+  }
   return (
-    <section className={`fa-objectives ${open ? "open" : ""} ${compact ? "compact" : ""}`} aria-label={t("objectives.title")} data-coach="goals">
+    <section className={`fa-objectives ${open ? "open" : ""} ${compact ? "compact" : ""}`} aria-label={t("objectives.title")} {...(goal ? coach.attrs("goals") : {})}>
       {compact && !open && (
         <button className="fa-obj-pill" onClick={() => setOpen(true)} aria-expanded={false} aria-label={`${t("objectives.title")}, ${objectives.done} of ${objectives.total} done, ${objectives.daysLeft} ${t("objectives.daysLeft")}`}>
           <ClipboardIcon />
@@ -74,7 +98,7 @@ export function Objectives({ objectives, layout }: SlotPropsMap["Objectives"]) {
                 </span>
                 <span className="fa-check-text">
                   <span className="fa-check-label">{g.label}</span>
-                  {!g.met && <small>{g.progress}</small>}
+                  {!g.met && g.progress && <small>{g.progress}</small>}
                 </span>
               </li>
             ))}

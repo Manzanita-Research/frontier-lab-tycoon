@@ -31,9 +31,10 @@ export function Toast({ toast, actions }: SlotPropsMap["Toast"]) {
       <span className="tx">{toast.text}</span>
     </span>
   );
-  if (toast.tone === "hint") {
+  // A hint is a standing tip and a warning a standing problem: neither peels off, they go when it comes true / is fixed.
+  if (toast.tone === "hint" || toast.tone === "warn") {
     return (
-      <div className="sd-sticker hint" role="status">
+      <div className={`sd-sticker ${toast.tone === "warn" ? "bad" : "hint"}`} role="status">
         {inner}
       </div>
     );

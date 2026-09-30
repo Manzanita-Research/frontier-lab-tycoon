@@ -11,6 +11,7 @@ import { SkinProvider } from "../context";
 import { prepareSkin } from "../registry";
 import type { LoadedSkin } from "../types";
 import { almanacDate, binomial, ordinal, roman, sealInitial, shortName, specimenNo } from "./lore";
+import { Shelf } from "./shelf";
 
 const actions = new Proxy({}, { get: () => () => undefined }) as HudActions;
 const vm: HudVM = hudViewModel(fixtureInput({ tool: "hall" }));
@@ -141,19 +142,33 @@ describe("Field Almanac", () => {
   });
 
   it("the shelf has an engraving, a price and the hotkey for every tool, and Bulldoze is Clear land", () => {
-    const out = html(<slot.BuildBar items={vm.buildItems} tip={vm.buildTip} layout={vm.layout} actions={actions} />);
-    expect(out.match(/fa-well/g)?.length).toBe(vm.buildItems.length);
+    const out = html(<Shelf items={vm.buildItems} teasers={[]} actions={actions} done={() => {}} />);
+    // One engraving per tool, then Help's.
+    expect(out.match(/fa-well/g)?.length).toBe(vm.buildItems.length + 1);
     expect(out).toContain("Clear land");
     expect(out).toContain('aria-pressed="true"'); // the tool in hand
-    expect(out).toContain("fa-tip"); // and what it does
     for (const it of vm.buildItems) if (it.hotkey !== null) expect(out).toContain(`>${it.hotkey}<`);
+    // What the tool in hand does sits over the shelf, shut or open.
+    expect(html(<slot.BuildBar items={vm.buildItems} tip={vm.buildTip} layout={vm.layout} actions={actions} />)).toContain("fa-tip");
+  });
+
+  it("the shelf is shut until you press Build: one engraving, and locked tools and Help inside", () => {
+    const shut = html(<slot.BuildBar items={vm.buildItems} tip={null} layout={vm.layout} actions={actions} />);
+    expect(shut.match(/fa-well/g)?.length).toBe(1);
+    expect(shut).toContain('aria-expanded="false"');
+    const teasers = [{ label: "Compute Cage", hint: "Ship a model" }];
+    const open = html(<Shelf items={vm.buildItems.slice(0, 2)} teasers={teasers} actions={actions} done={() => {}} />);
+    expect(open).toContain("fa-tool locked");
+    expect(open).toContain("Ship a model");
+    expect(open).toContain("How to play");
   });
 
   it("carries the coach-mark hooks the tutorial spotlights, on the elements they name", () => {
     const out = html(<Docked vm={vm} actions={actions} />);
     for (const hook of ["start", "training", "stat:runway", "goals"]) expect(out).toContain(`data-coach="${hook}"`);
-    // One per tool: rendered from the view-model as given, so an unlock filter or a mod's tool needs nothing here.
-    for (const it of vm.buildItems) expect(out).toContain(`data-coach="build:${it.kind}"`);
+    // One per tool in the open shelf: rendered from the view-model as given, so an unlock filter or a mod's tool needs nothing here.
+    const shelf = html(<Shelf items={vm.buildItems} teasers={[]} actions={actions} done={() => {}} />);
+    for (const it of vm.buildItems) expect(shelf).toContain(`data-coach="build:${it.kind}"`);
     // ...and the run under observation carries it whether or not there is a Training Hall yet.
     expect(html(<slot.Training training={{ ...vm.training, hasHall: false }} actions={actions} />)).toContain('data-coach="training"');
   });

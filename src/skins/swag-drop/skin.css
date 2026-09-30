@@ -869,6 +869,44 @@
     text-decoration-thickness: 2px;
   }
 
+  /* a key that is still blank: what it needs is on the front band, and it does nothing when pressed */
+  .sd-key.build.locked {
+    opacity: 0.6;
+    cursor: default;
+    pointer-events: auto;
+  }
+  .sd-key.build.locked .face {
+    background: var(--sd-slate);
+    color: var(--sd-soft);
+    filter: saturate(0.25);
+  }
+  .sd-key.build.locked .nm {
+    max-width: 76px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .sd-key.build.locked .pr {
+    max-width: 78px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 9px;
+  }
+  /* the Build key that opens the deck: it sits alone in a small tray, and sinks while the deck is open */
+  .sd-deck.sd-deck-closed {
+    padding: 10px 12px 15px;
+    overflow: visible;
+  }
+  .sd-goal-one .sd-sticky {
+    padding-left: 38px;
+  }
+  .sd-goal-one small {
+    display: block;
+    font: 800 10px var(--sd-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+
   /* the speed keys and the camera, each in a dark tray */
   .sd-tray {
     pointer-events: auto;
@@ -2748,6 +2786,12 @@
     .sd-deckwrap {
       bottom: calc(52px + env(safe-area-inset-bottom));
       padding: 0 8px;
+      align-items: flex-end;
+    }
+    /* the tip and the open deck use the width; the Build key sits at the right with the sound keys at its left */
+    .sd-deckwrap .sd-tip,
+    .sd-deckwrap .sd-deck:not(.sd-deck-closed) {
+      align-self: center;
     }
     .sd-deck {
       gap: 8px;
@@ -2768,7 +2812,7 @@
     }
     .sd-dock {
       left: 8px;
-      bottom: calc(176px + env(safe-area-inset-bottom));
+      bottom: calc(52px + env(safe-area-inset-bottom));
     }
     .sd-lanyard {
       position: fixed;
