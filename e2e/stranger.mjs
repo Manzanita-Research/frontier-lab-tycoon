@@ -19,6 +19,7 @@ let startDay = null;
 let pathAt = null;
 let pathPositions = null;
 let moved = false;
+let lastCoach = null;
 try {
   await page.goto(url.href, { waitUntil: "networkidle", timeout: 60_000 });
   await page.waitForFunction(() => typeof window.__fltProbe === "function", { timeout: 15_000 });
@@ -34,6 +35,10 @@ try {
     const now = Date.now();
     const probe = await page.evaluate(() => window.__fltProbe());
     result.samples.push({ ms: now - firstClick, ...probe });
+    if (probe.coachId !== lastCoach) {
+      console.log(`Coach ${probe.coachId} at ${((now - firstClick) / 1000).toFixed(1)} s, day ${probe.day}`);
+      lastCoach = probe.coachId;
+    }
     if (errors.length) throw new Error(`Console errors: ${errors.join("; ")}`);
     if (probe.day >= startDay + 3) result.checks.threeDaysMs ??= now - firstClick;
     if (now - firstClick >= 60_000 && !result.checks.threeDaysMs) throw new Error("Date did not advance 3 days within 60 seconds");
@@ -70,9 +75,16 @@ try {
       const confirm = page.getByRole("button", { name: /^(OK|Build anyway|Hire anyway|Go ahead)$/i }).first();
       const tile = page.locator("[data-coach-tile]:visible").first();
       const active = page.locator("[data-coach-active]:visible").first();
-      if (await confirm.count()) await confirm.click({ timeout: 1500 });
-      else if (await tile.count()) await tile.click({ timeout: 1500 });
-      else if (await active.count()) await active.click({ timeout: 1500 });
+      try {
+        if (await confirm.count()) await confirm.click({ timeout: 1500 });
+        else if (await tile.count()) await tile.click({ timeout: 1500 });
+        else if (await active.count()) await active.click({ timeout: 1500 });
+      } catch (error) {
+        // A successful construction can remove its projected button before Playwright's
+        // click finishes. Re-probe/retry; the date, movement and six-minute deadlines still fail stalls.
+        if (error.name !== "TimeoutError") throw error;
+        result.clickRetries = (result.clickRetries ?? 0) + 1;
+      }
       lastClick = now;
     }
     await page.waitForTimeout(250);
