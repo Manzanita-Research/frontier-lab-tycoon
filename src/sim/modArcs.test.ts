@@ -14,7 +14,7 @@ import { applyNow, tick } from "./tick";
 import type { GameState } from "./types";
 import { GUARD_NAMES, VERB_NAMES } from "./verbs";
 import { ACTION_NAMES as SDK_ACTIONS, GUARD_NAMES as SDK_GUARDS } from "../../packages/flt-mod-sdk/src/index";
-import { BASE_ARCS } from "../content/factions";
+import { BASE_ARCS, FACTIONS } from "../content/factions";
 
 const mod = (id: string, content: ModManifest["content"] = {}): ModManifest => ({ apiVersion: 1, id, name: id, version: "1.0.0", content });
 const resolve = async (mods: readonly unknown[]): Promise<GameDefinition> => {
@@ -71,6 +71,24 @@ describe("mod arcs (FLT-37)", () => {
     for (let i = 0; i < 200; i++) tick(garage);
     expect(garage.factions).toBeUndefined();
     expect(Object.keys(garage.modArcs ?? {}).some((id) => id.startsWith("fx:"))).toBe(false);
+  });
+
+  it("a mod adds, overrides and removes a faction (FLT-33), and the World's machines follow", async () => {
+    const accel = FACTIONS.find((f) => f.id === "accelerationists")!;
+    const def = await resolve([mod("poets", { factions: {
+      add: [{ ...accel, id: "prompt-poets", name: "Prompt Poets", short: "Poets", color: "#aa66ff" }],
+      override: [{ id: "doomers", name: "Very Worried Guys" }],
+      remove: ["normies"],
+    } })]);
+    const ids = withDefs(def, () => defs().factions.map((f) => f.id));
+    expect(ids).toContain("prompt-poets");
+    expect(ids).not.toContain("normies");
+    expect(withDefs(def, () => defs().factionById("doomers")?.name)).toBe("Very Worried Guys");
+    const s = createInitialState(1, "campus", def);
+    playTo(s, 3, def);
+    expect(s.factions?.moods["prompt-poets"]).toBeDefined();
+    expect(s.factions?.moods.normies).toBeUndefined();
+    expect(Object.keys(s.factions?.relations ?? {}).some((k) => k.includes("prompt-poets"))).toBe(true);
   });
 
   it("step at midnight, run their actions in order, open cards and hear the answer", async () => {
