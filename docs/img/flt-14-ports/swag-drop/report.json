@@ -1,0 +1,74 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "e92465c43fd3c8588d4ad93ef2d13f773fce5113"
+  },
+  "head": {
+    "branch": "flt-14-port-swag-drop",
+    "sha": "e0fce8d",
+    "dirty": false
+  },
+  "seconds": 164.324,
+  "problems": [
+    "photo@swag-drop.png: blank composite: panel 3 is 53% one colour, 12 colours"
+  ],
+  "rows": [
+    {
+      "scene": "overview",
+      "skin": "swag-drop",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/before/overview@swag-drop.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/after/overview@swag-drop.png",
+      "title": "The campus, mid-morning, paused",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/compare/overview@swag-drop.png",
+      "changed": 0.3414375
+    },
+    {
+      "scene": "inspector",
+      "skin": "swag-drop",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/before/inspector@swag-drop.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/after/inspector@swag-drop.png",
+      "title": "Tap a researcher: the inspector opens",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/compare/inspector@swag-drop.png",
+      "changed": 0.3796929012345679
+    },
+    {
+      "scene": "event",
+      "skin": "swag-drop",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/before/event@swag-drop.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/after/event@swag-drop.png",
+      "title": "An event card lands (the Water Discourse)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/compare/event@swag-drop.png",
+      "changed": 0.749349537037037
+    },
+    {
+      "scene": "menu",
+      "skin": "swag-drop",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/before/menu@swag-drop.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/after/menu@swag-drop.png",
+      "title": "The Start menu / build bar open",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/compare/menu@swag-drop.png",
+      "changed": 0.36720138888888887
+    },
+    {
+      "scene": "phone",
+      "skin": "swag-drop",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/before/phone@swag-drop.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/after/phone@swag-drop.png",
+      "title": "The same campus on a phone (390x844)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/compare/phone@swag-drop.png",
+      "changed": 0.4383559667031231
+    },
+    {
+      "scene": "photo",
+      "skin": "swag-drop",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/before/photo@swag-drop.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/after/photo@swag-drop.png",
+      "title": "Photo mode",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/compare/photo@swag-drop.png",
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 53% one colour, 12 colours",
+      "error": "compare: blank composite: panel 3 is 53% one colour, 12 colours"
+    }
+  ],
+  "errors": []
+}
