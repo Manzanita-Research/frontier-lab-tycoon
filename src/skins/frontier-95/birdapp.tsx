@@ -11,8 +11,8 @@ import { Blocks, Field, Sticker, Tabs, Win } from "./parts";
 
 type Tab = "timeline" | "buddies" | "comms";
 
-/** The glyph in the message list's first column: unread (live), or how it landed. */
-const MARK = { live: "●", flop: "·", banger: "★", controversy: "!", ratioed: "↩", cancelled: "✕" } as const;
+/** The flag in the message list's first column: unread (live), or how it landed. Plain ASCII: W95FA has no stars or hearts. */
+const MARK = { live: "●", flop: "·", banger: "*", controversy: "!", ratioed: "R", cancelled: "X" } as const;
 /** The contact list's groups, loudest first. */
 const GROUPS: { tier: BirdPosterVM["tier"]; label: string }[] = [
   { tier: "big", label: "Big accounts" },
@@ -106,8 +106,8 @@ export function BirdApp({ birdapp, layout, actions }: SlotPropsMap["BirdApp"]) {
                     <span />
                     <span>Subject</span>
                     <span>From</span>
-                    <span>♡</span>
-                    <span>↩</span>
+                    <span className="num">Likes</span>
+                    <span className="num">Re</span>
                   </div>
                   {posts.length === 0 && <p className="f95-bird-empty">{t("birdapp.empty")}</p>}
                   {posts.map((p) => (
@@ -141,7 +141,7 @@ export function BirdApp({ birdapp, layout, actions }: SlotPropsMap["BirdApp"]) {
                     return (
                       <div key={g.tier} role="group" aria-label={g.label}>
                         <b className="f95-bird-group">
-                          ▾ {g.label} ({members.length})
+                          {g.label} ({members.length})
                         </b>
                         {members.map((p) => (
                           <div
@@ -245,9 +245,9 @@ function Preview({ post }: { post: BirdPostVM }) {
       </div>
       <p className="f95-bird-text">{post.text}</p>
       <div className="f95-bird-counts">
-        <span>♡ {post.likesText}</span>
-        <span>⟲ {post.repostsText}</span>
-        <span className={post.ratioing ? "bad" : ""}>↩ {post.repliesText}</span>
+        <span>{post.likesText} likes</span>
+        <span>{post.repostsText} reposts</span>
+        <span className={post.ratioing ? "bad" : ""}>{post.repliesText} replies</span>
         {post.outcome !== "live" && <b className={`f95-bird-outcome tone-${post.tone}`}>{t(`birdapp.outcome.${post.outcome}`)}</b>}
         {post.outcome === "live" && post.ratioing && <b className="f95-bird-outcome tone-joke">{t("birdapp.ratio")}</b>}
         {post.reviewed && <small>{t("birdapp.reviewed")}</small>}

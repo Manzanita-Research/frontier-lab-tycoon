@@ -4873,10 +4873,10 @@
     line-height: 12px;
     text-align: center;
   }
-  /* One column further in than the Discourse Monitor, so the two can be open together on a wide screen. */
+  /* Where the Discourse Monitor opens, in the clear space under Lab Properties; with the Monitor open too, one column further in. */
   .f95-bird {
     position: fixed;
-    left: 688px;
+    left: 336px;
     bottom: calc(var(--taskbar) + 8px);
     width: 430px;
     max-height: calc(100vh - var(--taskbar) - 60px);
@@ -5057,12 +5057,23 @@
     font-style: italic;
     color: var(--flt-color-textDim);
   }
+  .f95-disc ~ .f95-bird {
+    left: 688px;
+  }
   .f95-bird-group {
     display: block;
     padding: 1px 4px;
     font-weight: normal;
     font-size: 14px;
     color: var(--flt-color-textDim);
+    &::before {
+      content: "";
+      display: inline-block;
+      margin: 0 5px 2px 2px;
+      border: 4px solid transparent;
+      border-top: 5px solid #000;
+      border-bottom: 0;
+    }
   }
   .f95-bird-buddy {
     display: flex;
@@ -5213,11 +5224,6 @@
     }
     &.cancelled b {
       color: var(--flt-color-bad);
-    }
-  }
-  @media (max-width: 1180px) {
-    .f95-bird {
-      left: 336px;
     }
   }
   @media (max-width: 640px) {

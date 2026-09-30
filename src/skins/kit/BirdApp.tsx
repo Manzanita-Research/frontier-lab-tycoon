@@ -27,14 +27,28 @@ export function AuraSpark({ values, className = "" }: { values: readonly number[
   );
 }
 
-/** ♡ likes, ⟲ reposts, ↩ replies: the numbers climb while the post is live. */
+/** Likes, reposts, replies: the numbers climb while the post is live. The glyphs are drawn, since few UI fonts have ♡ or ⟲. */
 export function BirdCounts({ post, className = "" }: { post: BirdPostVM; className?: string }) {
   return (
     <span className={`bird-counts ${className} ${post.ratioing ? "ratioing" : ""}`}>
-      <span title={`${post.likes} likes`}>♡ {post.likesText}</span>
-      <span title={`${post.reposts} reposts`}>⟲ {post.repostsText}</span>
-      <span title={`${post.replies} replies`} className="replies">↩ {post.repliesText}</span>
+      <span title={`${post.likes} likes`}>
+        <CountIcon d="M5 8.5 1.6 5.2a2 2 0 0 1 3.4-2.4 2 2 0 0 1 3.4 2.4z" /> {post.likesText}
+      </span>
+      <span title={`${post.reposts} reposts`}>
+        <CountIcon d="M2 4.5V3h5L5.5 1.5M8 5.5V7H3l1.5 1.5" /> {post.repostsText}
+      </span>
+      <span title={`${post.replies} replies`} className="replies">
+        <CountIcon d="M1.5 2h7v4.5h-4L2.5 8.5v-2h-1z" /> {post.repliesText}
+      </span>
     </span>
+  );
+}
+
+function CountIcon({ d }: { d: string }) {
+  return (
+    <svg className="bird-ic" width="10" height="10" viewBox="0 0 10 10" aria-hidden>
+      <path d={d} fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" strokeLinecap="round" />
+    </svg>
   );
 }
 
