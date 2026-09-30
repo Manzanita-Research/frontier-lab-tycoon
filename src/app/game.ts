@@ -88,6 +88,8 @@ export const atoms = {
   highlight: pick((c) => c.highlight),
   race: pick((c) => c.snap.race),
   ops: pick((c) => c.snap.ops),
+  /** Agent collusion's signs for the world overlay (packets, the night gathering, the inquiry). */
+  collusion: pick((c) => c.snap.collusion),
   staffCount: pick((c) => c.snap.ops.staff.length),
   payroll: pick((c) => c.snap.ops.payroll),
   /** The staffer whose patrol zone is being painted, or null. */

@@ -13,6 +13,7 @@ import { openEventOf } from "../sim/events";
 import { opsView, type OpsView } from "../sim/opsView";
 import { leapfrogView, type LeapfrogView } from "../sim/race/leapfrog/view";
 import { papersView, type PapersView } from "../sim/race/papers/view";
+import { collusionView, type CollusionView } from "../sim/collusion/view";
 import { raceView, type RaceView } from "../sim/race/view";
 import { outcomeOf, releaseGoalText } from "../sim/goals";
 import { estimateLedger } from "../sim/economy";
@@ -95,6 +96,8 @@ export interface Snapshot {
   leapfrog: LeapfrogView;
   /** Publishing Papers (FLT-28): list, review timers and publication policy. */
   papers: PapersView;
+  /** Agent collusion (FLT-18): packets, the night gathering, the inquiry and the ending's front page. No stage before an ending reaches the UI as text. */
+  collusion: CollusionView;
   /** Operations: staff, slop, broken buildings, queues. */
   ops: OpsView;
   assistant: AssistantMessage | null;
@@ -160,6 +163,7 @@ export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO
     race: raceView(s),
     leapfrog: leapfrogView(s),
     papers: papersView(s),
+    collusion: collusionView(s),
     ops: opsView(s),
     assistant: assistantOf(s),
     firstBuildPending: !!s.coach && s.flags.started === undefined && s.flags.firstBuild === undefined,

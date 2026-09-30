@@ -12,6 +12,8 @@ import { newMotion, stepMotion, type MotionView } from "./leapfrogMotion";
 import type { SkinPickerVM } from "./types";
 import type { HudInput } from "./vm";
 import { playableFixture } from "./previewLadder";
+import { stagePapers } from "../../sim/race/papers/demo";
+import { stageCollusion } from "../../sim/collusion/demo";
 
 /** A busy campus a few game days in, with thoughts, a crowd and a run in flight (the real opening is quieter: see `openingWorld`). */
 export function fixtureWorld(days = 12, seed = 3): GameState {
@@ -93,13 +95,25 @@ export interface FixtureOptions {
   help?: boolean;
   /** Standing warnings. */
   warnings?: string[];
+  /** Papers staged as the review moments are (`?moment=paper-*`); "panel" is the scoop's World with the Papers window open. */
+  papers?: "drop" | "scoop" | "award" | "panel";
+  /** Agent collusion staged as its review moments are (`?moment=collusion-*`); "sign" opens the card. */
+  collusion?: "sign" | "traffic" | "scandal";
   width?: number;
   height?: number;
   skins?: Partial<SkinPickerVM>;
 }
 
+/** A World with a papers or collusion moment staged on it, through the same code the `?moment=` links use. */
+export function fixtureStaged(o: Pick<FixtureOptions, "papers" | "collusion">): GameState {
+  const w = createTestCampus(3);
+  if (o.papers) stagePapers(w, o.papers === "panel" ? "paper-scoop" : `paper-${o.papers}`);
+  if (o.collusion) stageCollusion(w, `collusion-${o.collusion}`);
+  return w;
+}
+
 export function fixtureSnapshot(o: FixtureOptions = {}): Snapshot {
-  const w = o.world ?? (o.leapfrog ? fixtureLeapfrog().world : fixtureWorld());
+  const w = o.world ?? (o.leapfrog ? fixtureLeapfrog().world : o.papers || o.collusion ? fixtureStaged(o) : fixtureWorld());
   const selected = o.selected === undefined ? (w.walkers.find((x) => x.kind === "researcher")?.id ?? null) : o.selected;
   const snap = makeSnapshot(w, undefined, { selected, follow: false, highlight: null });
   const pendingConfirm = o.confirm
@@ -140,6 +154,8 @@ export function fixtureInput(o: FixtureOptions = {}): HudInput {
     },
     chatCount: o.chatCount ?? 2,
     helpOpen: o.help ?? false,
+    papersOpen: o.papers === "panel",
+    dismissed: [],
     mixer: { open: false, ready: true, muted: false, master: 0.7, music: 0.3, sfx: 0.65 },
     photo: { on: o.photo ?? false, time: "live", shot: { id: 1, url: "data:image/png;base64,", name: "frontier-lab-tycoon-campus.png" }, flash: 1 },
     skins: { ...NO_SKINS, ...o.skins },

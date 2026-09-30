@@ -8,7 +8,7 @@ import type { HudActions, HudVM, ToastVM } from "./types";
 export function Docked({ vm, actions }: { vm: HudVM; actions: HudActions }) {
   const { slots } = useSkin();
   const t = useT();
-  const { Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, ThoughtsPanel, Ticker, Toast, Assistant, Arena, Benchmarks, Voice, NewsControls, NewsArrival, PhotoButton } = slots;
+  const { Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, ThoughtsPanel, Ticker, Toast, Assistant, Arena, Benchmarks, Voice, NewsControls, NewsArrival, PhotoButton, Papers } = slots;
   // One toast at a time, the newest winning; a standing hint only shows while nobody is talking.
   const newest = vm.toasts.at(-1);
   const talking: ToastVM[] = newest ? [newest] : vm.hints.map((h, i): ToastVM => ({ id: -1 - i, text: t(`hint.${h}`), tone: "hint" }));
@@ -39,6 +39,7 @@ export function Docked({ vm, actions }: { vm: HudVM; actions: HudActions }) {
     NewsControls: <NewsControls newsroom={vm.newsroom} sound={vm.sound} skins={vm.skins} visible={vm.visible} actions={actions} />,
     NewsArrival: vm.newsroom.arrival && vm.visible.news ? <NewsArrival arrival={vm.newsroom.arrival} actions={actions} /> : null,
     PhotoButton: <PhotoButton photo={vm.photoMode} actions={actions} />,
+    Papers: vm.papers.enabled && vm.visible.papers ? <Papers papers={vm.papers} layout={vm.layout} actions={actions} /> : null,
   };
   return (
     <CoachProvider value={vm.coach?.target ?? null}>
@@ -48,11 +49,13 @@ export function Docked({ vm, actions }: { vm: HudVM; actions: HudActions }) {
 }
 
 export function Modals({ vm, actions }: { vm: HudVM; actions: HudActions }) {
-  const { EventCard, Livestream, Confirm, UnlockCard, HowToPlay, EraCard, Outcome, NewsRoom, Mixer, ModManager, SkinPicker } = useSkin().slots;
+  const { EventCard, Livestream, Confirm, UnlockCard, HowToPlay, EraCard, Outcome, NewsRoom, Mixer, ModManager, SkinPicker, PaperMoment, CrumbWiki } = useSkin().slots;
   return (
     <>
       {vm.event && (vm.event.stream ? <Livestream event={vm.event} stream={vm.event.stream} actions={actions} /> : <EventCard event={vm.event} actions={actions} />)}
       {vm.confirm && <Confirm confirm={vm.confirm} actions={actions} />}
+      {vm.crumbWiki && <CrumbWiki key={vm.crumbWiki.key} wiki={vm.crumbWiki} actions={actions} />}
+      {!vm.crumbWiki && vm.paperMoment && <PaperMoment key={vm.paperMoment.key} moment={vm.paperMoment} actions={actions} />}
       {vm.unlock && <UnlockCard unlock={vm.unlock} actions={actions} />}
       {vm.help && <HowToPlay help={vm.help} actions={actions} />}
       {vm.eraCard && <EraCard era={vm.eraCard} actions={actions} />}

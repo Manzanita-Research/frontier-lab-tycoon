@@ -1,0 +1,52 @@
+{
+  "base": {
+    "ref": "origin/flt-47-playable",
+    "sha": "253fd51882499ae16509bb53b4a82b9b49a8f920"
+  },
+  "head": {
+    "branch": "flt-45-46-papers-collusion-ui",
+    "sha": "ec039e8",
+    "dirty": true
+  },
+  "seconds": 80.43,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "overview",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45-standard/before/overview.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45-standard/after/overview.png",
+      "title": "The campus, mid-morning, paused",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45-standard/compare/overview.png",
+      "changed": 0.028305555555555556
+    },
+    {
+      "scene": "inspector",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45-standard/before/inspector.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45-standard/after/inspector.png",
+      "title": "Tap a researcher: the inspector opens",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45-standard/compare/inspector.png",
+      "changed": 0.02811496913580247
+    },
+    {
+      "scene": "event",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45-standard/before/event.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45-standard/after/event.png",
+      "title": "An event card lands (the Water Discourse)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45-standard/compare/event.png",
+      "changed": 0.02840432098765432
+    },
+    {
+      "scene": "phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45-standard/before/phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45-standard/after/phone.png",
+      "title": "The same campus on a phone (390x844)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-45-standard/compare/phone.png",
+      "changed": 0.013951421800947867
+    }
+  ],
+  "errors": []
+}

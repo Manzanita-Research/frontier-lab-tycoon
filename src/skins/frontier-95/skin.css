@@ -1269,13 +1269,15 @@
 
   /* A folded window is its title bar and nothing else (the Task Mangler's title carries the R&D number). */
   .f95-tasks:not(.open) > :not(.f95-tb),
-  .f95-thoughts:not(.open) > :not(.f95-tb) {
+  .f95-thoughts:not(.open) > :not(.f95-tb),
+  .f95-papers:not(.open) > :not(.f95-tb) {
     display: none;
   }
 
   /* A folded window is its title bar and nothing else (the Task Mangler's title carries the R&D number). */
   .f95-tasks:not(.open) > :not(.f95-tb),
-  .f95-thoughts:not(.open) > :not(.f95-tb) {
+  .f95-thoughts:not(.open) > :not(.f95-tb),
+  .f95-papers:not(.open) > :not(.f95-tb) {
     display: none;
   }
 
@@ -2735,7 +2737,8 @@
     .f95-props,
     .f95-staff,
     .f95-tasks.open,
-    .f95-thoughts.open {
+    .f95-thoughts.open,
+    .f95-papers.open {
       position: fixed;
       left: 4px;
       right: 4px;
@@ -2749,7 +2752,8 @@
       display: none;
     }
     .f95-tasks:not(.open) .f95-tb,
-    .f95-thoughts:not(.open) .f95-tb {
+    .f95-thoughts:not(.open) .f95-tb,
+    .f95-papers:not(.open) .f95-tb {
       height: 32px;
       .f95-b::after {
         inset: -8px -2px;
@@ -2928,5 +2932,158 @@
 @keyframes frontier-95-turn {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* ---- Publish or Perish, the arXive moments, the evidence and CrumbWiki (FLT-45, FLT-46) ---- */
+[data-skin="frontier-95"] {
+  .f95-papers.alert > .f95-tb {
+    background: var(--flt-color-bad);
+  }
+  .f95-papers-top {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px;
+    padding: 8px 8px 4px;
+    align-items: start;
+    fieldset {
+      display: grid;
+      gap: 4px;
+      border: 1px solid var(--sh);
+      box-shadow: 1px 1px 0 var(--hl);
+      margin: 0;
+      padding: 4px 10px 8px;
+    }
+    label {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      min-height: 26px;
+    }
+  }
+  .f95-papers-facts {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+    .f95-papers-rep {
+      padding: 2px 8px;
+      font-family: var(--flt-font-numbers);
+      font-size: 22px;
+    }
+  }
+  .f95-papers-blurb {
+    margin: 0 8px 4px;
+    font-size: 14px;
+    color: var(--flt-color-textDim);
+  }
+  .f95-papers-list {
+    margin: 4px;
+    max-height: 320px;
+    overflow: auto;
+    font-size: 15px;
+  }
+  .f95-papers-empty {
+    margin: 8px;
+    color: var(--flt-color-textDim);
+  }
+  .f95-paper-row {
+    display: grid;
+    gap: 2px;
+    padding: 6px 8px;
+    border-bottom: 1px dotted var(--sh);
+    b {
+      line-height: 1.2;
+    }
+    small {
+      font-size: 13px;
+      color: var(--flt-color-textDim);
+    }
+    &.status-draft {
+      background: var(--flt-color-selection);
+      color: var(--flt-color-selectionText);
+      small {
+        color: inherit;
+      }
+    }
+    .f95-row.left {
+      justify-content: flex-start;
+      padding: 4px 0 0;
+    }
+    .f95-prog {
+      height: 16px;
+      padding: 2px;
+    }
+  }
+  .f95-paper-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-family: var(--flt-font-mono);
+    font-size: 13px;
+    .st.tone-good {
+      color: var(--flt-color-good);
+    }
+    .st.tone-bad {
+      color: var(--flt-color-bad);
+    }
+  }
+  .status-draft .f95-paper-top .st {
+    color: inherit;
+  }
+
+  .f95-moment {
+    width: min(720px, calc(100vw - 20px));
+    max-height: calc(100dvh - 20px);
+    display: flex;
+    flex-direction: column;
+    &.moment-award {
+      width: min(560px, calc(100vw - 20px));
+    }
+  }
+  .f95-moment-page,
+  .f95-wikipage {
+    margin: 4px;
+    padding: 10px 14px;
+    overflow: auto;
+    min-height: 0;
+    flex: 1;
+    background: #fff;
+    color: #000;
+  }
+  .f95-moment .f95-row .f95-btn {
+    min-height: 32px;
+  }
+
+  .evidence {
+    margin: 4px 14px;
+    padding: 6px;
+    background: var(--g);
+    box-shadow: var(--sunk);
+    border-radius: 0;
+  }
+  .evidence-log {
+    font-size: 13px;
+    border-radius: 0;
+  }
+  .evidence-label,
+  .evidence-note {
+    font-size: 13px;
+  }
+
+  .f95-wiki {
+    width: min(960px, calc(100vw - 20px));
+    .wiki {
+      border-radius: 0;
+    }
+  }
+  @media (max-width: 640px) {
+    .f95-papers-top {
+      grid-template-columns: 1fr;
+    }
+    .f95-moment .f95-toolbar .f95-btn,
+    .f95-wiki .f95-toolbar .f95-btn,
+    .f95-wiki .f95-menubar {
+      display: none;
+    }
   }
 }

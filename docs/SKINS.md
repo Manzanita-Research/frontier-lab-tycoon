@@ -318,6 +318,33 @@ If your slot needs copy that has no key, write it into the slot (as Frontier 95 
 | `stats.fewerStats` | Fewer stats |
 | `inspector.fold` | Fold the card |
 | `inspector.more` | Show more |
+| `papers.title` | Papers |
+| `papers.chip` | Papers |
+| `papers.drafts` | {n} to publish |
+| `papers.policy` | Publication policy |
+| `papers.reputation` | Reputation |
+| `papers.pressure` | Publish pressure |
+| `papers.preprint` | arXive it |
+| `papers.review` | Peer review |
+| `papers.empty` | No papers yet. Ship a model and someone will write it up. |
+| `papers.close` | Close |
+| `moment.drop` | arXive · New submissions |
+| `moment.scoop` | Scooped |
+| `moment.award` | Certificate of Achievement |
+| `moment.theirs` | Theirs |
+| `moment.yours` | Yours |
+| `moment.you` | you |
+| `inv.title` | Security's evidence |
+| `inv.bonus` | Eval scores |
+| `inv.log` | Outbound traffic from the Compute Cluster |
+| `wiki.talk` | Talk |
+| `wiki.history` | Revision history |
+| `wiki.heartbeat` | heartbeat.txt |
+| `wiki.pages` | Pages the agents maintain |
+| `wiki.cost` | What it cost |
+| `moment.certifies` | This certifies that |
+| `moment.awarded` | has been awarded |
+| `moment.gap` | They posted it |
 
 ## skin.css
 
@@ -384,8 +411,11 @@ A slot is a React component. Each gets **its slice of the view-model plus `actio
 | `NewsRoom` | `{ newsroom, actions }` | The News Room modal: the archive, and the open paper or chat (compose `useSlots().FrontPage` / `.GroupChat`, or draw your own). |
 | `Mixer` | `{ sound, actions }` | The sound mixer modal. |
 | `ModManager` | `{ mods, actions }` | Settings ▸ Mods… (FLT-37): what `?mod=` loaded, clashes and failures, while `mods.open`. Close with `actions.closeMods()`. |
+| `Papers` | `{ papers, layout, actions }` | Publish or Perish (FLT-45): the publication policy (`papers.policies`, `actions.setPublicationPolicy(id)`), reputation, the recruiting perk, the publish-pressure meter and the paper list with **arXive it** / **Peer review** on each draft (`actions.publishPaper(paperId, "preprint" \| "peerReview")`). Folds to a chip (`papers.open`, `actions.togglePapers()`). Docked. Draw only when `papers.enabled && visible.papers` (the host already skips it otherwise); it unlocks at Level 5. |
+| `PaperMoment` | `{ moment, actions }` | The paper screenshot moments: `moment.kind` is `drop` (a fake arXive listing with yours in the middle, `moment.listing`), `scoop` (their title and timestamp beside yours, `gapText`) or `award` (a certificate). The buttons are jokes; any of them calls `actions.dismissPaperMoment(moment.key)`. Holds time while up (`useAutoPause`). |
+| `CrumbWiki` | `{ wiki, actions }` | The agent-collusion reveal (FLT-46): the fan wiki the agents were running, a talk page (`== Heading ==` lines and colon-indented replies), the revision history, the consequences and, for the exposed ending, the scandal front page (`wiki.frontPage`). `actions.closeCrumbWiki(wiki.key)`. Holds time while up. Before the ending nothing names the collusion: the sign card only carries `event.investigation` (draw it with `kit`'s `<Evidence investigation>`, as every shipped skin's `EventCard` does). |
 
-The **docked** slots (`Layout` receives them pre-rendered) are `Stats`, `Training`, `Objectives`, `Inspector`, `BuildBar`, `Speed`, `Staff`, `ThoughtsPanel`, `Ticker`, `Toasts` (one `Toast` at a time: the newest toast, or the standing hint when nobody is talking), `Assistant`, `Arena`, `Benchmarks`, `Voice`, `NewsControls`, `NewsArrival` and `PhotoButton`. The modal slots (`EventCard`, `Livestream`, `EraCard`, `Outcome`, `NewsRoom`, `Mixer`, `ModManager`, `SkinPicker`) and `PhotoOverlay` are rendered by the game when there is something to show.
+The **docked** slots (`Layout` receives them pre-rendered) are `Stats`, `Training`, `Objectives`, `Inspector`, `BuildBar`, `Speed`, `Staff`, `ThoughtsPanel`, `Ticker`, `Toasts` (one `Toast` at a time: the newest toast, or the standing hint when nobody is talking), `Assistant`, `Arena`, `Benchmarks`, `Voice`, `Papers`, `NewsControls`, `NewsArrival` and `PhotoButton`. The modal slots (`EventCard`, `Livestream`, `EraCard`, `Outcome`, `NewsRoom`, `Mixer`, `ModManager`, `SkinPicker`, `PaperMoment`, `CrumbWiki`) and `PhotoOverlay` are rendered by the game when there is something to show.
 
 ## Writing slots.tsx
 

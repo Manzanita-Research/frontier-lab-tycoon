@@ -1,6 +1,6 @@
 // Message boxes and the paperclip: bubbles, toasts, event cards, the era blue screen, the outcome card, the assistant.
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Dialog, placeBalloon } from "../kit";
+import { Dialog, Evidence, placeBalloon } from "../kit";
 import { useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import { Btn, Win } from "./parts";
@@ -344,6 +344,7 @@ export function EventCard({ event, actions }: SlotPropsMap["EventCard"]) {
           </div>
         )}
         {event.response && <Gauges response={event.response} />}
+        {event.investigation && <Evidence investigation={event.investigation} />}
         <div className="f95-choices">
           {event.choices.map((c, i) => (
             <Btn key={c.label} def={i === 0} onClick={() => actions.choose(event.id, i)} autoFocus={i === 0}>

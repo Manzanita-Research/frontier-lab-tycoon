@@ -35,7 +35,7 @@ export class NewsDesk {
     const editions: Edition[] = [];
     // No historical editions fabricated on load/warp. Subsequent boundaries use their precise period.
     for (let d = this.day + 1; d <= world.day; d++) {
-      if (d % 7 === 0) editions.push(frontPage(this.stories, d, world.labName));
+      if (d % 7 === 0) editions.push(frontPage(this.stories, d, world.labName, { classified: world.collusion?.classified, scandal: world.collusion?.frontPage }));
       if (d % 30 === 0) editions.push(recap(this.stories, d, world.labName));
     }
     this.day = world.day;

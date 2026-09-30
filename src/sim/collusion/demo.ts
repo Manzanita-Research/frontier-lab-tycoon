@@ -19,6 +19,9 @@ export function stageCollusion(s: GameState, moment: typeof COLLUSION_MOMENTS[nu
   s.day = 150; s.tick = 3000;
   s.collusion!.machine = { value: "spreading", context: { ...freshSwarm().context, seededDay: 120, score: 40, noticed: true } };
   if (moment === "collusion-sign") {
+    // Cards wait for a lab with a product and revenue (pressureReady); a staged lab has both, as the papers moments do.
+    if (s.models.length === 0) s.models.push("Frontier-1");
+    s.flags.firstRevenue ??= s.day;
     for (let i = 0; i < 3; i++) hire(s, "security");
     s.flags[`offer:${SIGN_CARD}`] = s.day;
     // A previously queued baseline card is answered, retaining normal slot arbitration.

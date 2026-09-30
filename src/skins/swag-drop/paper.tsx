@@ -1,5 +1,5 @@
 // Paper and stickers: thought bubbles, toasts, the terminal ticker, and the event card as a memo with a rubber stamp.
-import { Marquee, useT } from "../kit";
+import { Evidence, Marquee, useT } from "../kit";
 import type { ToneVM } from "../../ui/hud/types";
 import type { SlotPropsMap } from "../types";
 import { Glyph, GLYPHS } from "./icons";
@@ -116,6 +116,7 @@ export function EventCard({ event, actions }: SlotPropsMap["EventCard"]) {
               ))}
             </div>
           )}
+          {event.investigation && <Evidence investigation={event.investigation} />}
           <div className="sd-choices">
             {event.choices.map((c, i) => (
               <button key={c.label} type="button" className="sd-choice" onClick={() => actions.choose(event.id, i)}>
