@@ -15,6 +15,7 @@ import type { GameState } from "../../types";
 import { addIncident } from "../../vibes";
 import { announceRelease, eraOfState, modelName } from "../race";
 import { opensThisTime, rivalMachine } from "../rival";
+import { rivalRules } from "../rules";
 import { benchMachine, isOpen, scoreFor } from "./benchmark";
 import { calendarMachine } from "./calendar";
 import { livestreamMachine } from "./livestream";
@@ -240,10 +241,13 @@ function pointRelease(state: GameState, rng: Rng, id: string): PendingLaunch {
   const def = defs().rivalById[id as RivalId];
   const ctx = rivalOf(state, id)!.context;
   const era = eraDef(eraOfState(state));
-  const gain = def.personality.growth * 0.45 * era.rivalGrowth;
+  const law = rivalRules(state, ctx);
+  const gain = def.personality.growth * 0.45 * era.rivalGrowth * law.growth;
   // What it pays out now comes off the lab's next finished model, so launching more often doesn't make a lab grow faster.
   state.leapfrog.labs[id]!.advance += gain;
-  return { id, model: modelName(def, ctx.releases + 1, rng), gain, hype: 5 * def.personality.hypeHunger, open: opensThisTime(ctx, rng.next()), since: state.day };
+  const model = modelName(def, ctx.releases + 1, rng);
+  const openRoll = rng.next();
+  return { id, model, gain, hype: 5 * def.personality.hypeHunger, open: !law.closed && opensThisTime(ctx, openRoll), since: state.day };
 }
 
 /**
@@ -291,7 +295,8 @@ export function handleDrop(state: GameState, rng: Rng, slot: "lead" | "answer") 
     model: pending.model,
     gain: pending.gain,
     hype: pending.hype,
-    open: pending.open,
+    // FLT-22: a model finished before a permit clause passed still launches closed once it is law.
+    open: pending.open && !rivalRules(state, race.rivals[at]!.context).closed,
   });
   race.rivals[at] = stored;
   lf.queue = lf.queue.filter((p) => p.id !== pending.id);

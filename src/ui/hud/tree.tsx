@@ -49,21 +49,28 @@ export function Docked({ vm, actions }: { vm: HudVM; actions: HudActions }) {
   );
 }
 
-/** A card opens in the slot its kind asks for: the livestream, the witness table, the leaked chat, or the plain card. */
-function EventModal({ event, actions, slots: { EventCard, Livestream, Hearing, LeakedChat, Drama, ReportCard } }: { event: EventVM; actions: HudActions; slots: Pick<SlotComponents, "EventCard" | "Livestream" | "Hearing" | "LeakedChat" | "Drama" | "ReportCard"> }) {
+type ModalSlots = Pick<SlotComponents, "EventCard" | "Livestream" | "Hearing" | "LeakedChat" | "Drama" | "ReportCard" | "Bill" | "PromiseTracker">;
+
+/** A card opens in the slot its kind asks for: the livestream, the witness table, the leaked chat, a drama document, the auditors' report, the bill, the Promise Tracker, or the plain card. */
+function EventModal({ vm, event, actions, slots: { EventCard, Livestream, Hearing, LeakedChat, Drama, ReportCard, Bill, PromiseTracker } }: { vm: HudVM; event: EventVM; actions: HudActions; slots: ModalSlots }) {
   if (event.stream) return <Livestream event={event} stream={event.stream} actions={actions} />;
   if (event.hearing) return <Hearing event={event} hearing={event.hearing} actions={actions} />;
   if (event.leak) return <LeakedChat event={event} leak={event.leak} actions={actions} />;
   if (event.drama) return <Drama event={event} drama={event.drama} actions={actions} />;
   if (event.report) return <ReportCard event={event} report={event.report} actions={actions} />;
+  if (event.bill) return <Bill event={event} bill={event.bill} actions={actions} />;
+  if (event.tracker) return <PromiseTracker event={event} tracker={event.tracker} bill={vm.senate.bill} layout={vm.layout} actions={actions} />;
   return <EventCard event={event} actions={actions} />;
 }
 
 export function Modals({ vm, actions }: { vm: HudVM; actions: HudActions }) {
-  const { EventCard, Livestream, Hearing, LeakedChat, Drama, ReportCard, Confirm, UnlockCard, HowToPlay, EraCard, Outcome, NewsRoom, Mixer, ModManager, SkinPicker, PaperMoment, CrumbWiki, DisasterMenu } = useSkin().slots;
+  const { EventCard, Livestream, Hearing, LeakedChat, Drama, ReportCard, Bill, PromiseTracker, Confirm, UnlockCard, HowToPlay, EraCard, Outcome, NewsRoom, Mixer, ModManager, SkinPicker, PaperMoment, CrumbWiki, DisasterMenu } = useSkin().slots;
   return (
     <>
-      {vm.event && <EventModal event={vm.event} actions={actions} slots={{ EventCard, Livestream, Hearing, LeakedChat, Drama, ReportCard }} />}
+      {vm.senate.open && vm.senate.tracker && !vm.event?.tracker && (
+        <PromiseTracker event={null} tracker={vm.senate.tracker} bill={vm.senate.bill} layout={vm.layout} actions={actions} />
+      )}
+      {vm.event && <EventModal vm={vm} event={vm.event} actions={actions} slots={{ EventCard, Livestream, Hearing, LeakedChat, Drama, ReportCard, Bill, PromiseTracker }} />}
       {vm.confirm && <Confirm confirm={vm.confirm} actions={actions} />}
       {vm.crumbWiki && <CrumbWiki key={vm.crumbWiki.key} wiki={vm.crumbWiki} actions={actions} />}
       {!vm.crumbWiki && vm.paperMoment && <PaperMoment key={vm.paperMoment.key} moment={vm.paperMoment} actions={actions} />}

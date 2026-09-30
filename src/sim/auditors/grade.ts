@@ -2,7 +2,7 @@
 import { AUDITORS, GRADES, type Grade } from "./pack";
 import type { AuditGradeRow } from "./state";
 import type { AuditContext } from "./machine";
-import type { GameState } from "../types";
+import type { AuditorNote, GameState } from "../types";
 
 const R = AUDITORS.rules;
 const count = (s: GameState, kind: string) => s.buildings.filter((b) => b.kind === kind && !b.broken).length;
@@ -48,14 +48,33 @@ export function scoreCategory(facts: Record<string, number>, cat: (typeof R.rubr
   return Math.round(Math.max(0, Math.min(100, score)));
 }
 
-/** Grades, the overall grade and what the card does to trust, heat and hype. */
-export function gradeReport(facts: Record<string, number>) {
+/** The notes on the lab's file since the last visit (the Vocabulary's `auditor.note`; FLT-22's exposed bill files one). */
+export function notesSince(s: GameState): AuditorNote[] {
+  const last = s.auditors?.history.at(-1)?.day ?? -1;
+  return (s.auditorNotes ?? []).filter((n) => n.day > last);
+}
+
+/**
+ * A score moved `amount` grades (+ up, - down), just into the new band: B's 78 down one is C's 69, up one is A's 85.
+ * FLT-52 joins FLT-22's notes to FLT-19's rubric here.
+ */
+function shiftScore(score: number, amount: number): number {
+  const i = Math.max(0, Math.min(R.bands.length - 1, R.bands.findIndex((b) => score >= b.min) - amount));
+  if (amount < 0) return Math.min(score, i === 0 ? 100 : R.bands[i - 1]!.min - 1);
+  return Math.max(score, R.bands[i]!.min);
+}
+
+/** Grades, the overall grade and what the card does to trust, heat and hype. `notes` move a grade and give its remark. */
+export function gradeReport(facts: Record<string, number>, notes: readonly AuditorNote[] = []) {
   const caught = facts.caught! > 0;
   const swarm = facts.swarm! > 0;
   const grades: AuditGradeRow[] = R.rubric.map((cat) => {
-    const score = scoreCategory(facts, cat);
+    const mine = notes.filter((n) => n.grade === cat.id);
+    const amount = mine.reduce((n, x) => n + x.amount, 0);
+    const score = amount ? shiftScore(scoreCategory(facts, cat), amount) : scoreCategory(facts, cat);
     const grade = gradeOf(score);
-    const comment = cat.id === "honesty" && caught ? R.caught.comment : cat.id === "honesty" && swarm ? R.swarm.comment : cat.comments[grade];
+    const noted = mine.at(-1)?.text;
+    const comment = cat.id === "honesty" && caught ? R.caught.comment : cat.id === "honesty" && swarm ? R.swarm.comment : noted ?? cat.comments[grade];
     return { id: cat.id, label: cat.label, score, grade, comment };
   });
   const average = Math.round(grades.reduce((n, g) => n + g.score, 0) / Math.max(1, grades.length));

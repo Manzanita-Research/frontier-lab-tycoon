@@ -50,7 +50,7 @@ export function BuildBar({ items, tip, teasers = [], actions }: SlotPropsMap["Bu
     };
   }, [open]);
 
-  const held = items.find((it) => it.selected && it.kind !== "staff");
+  const held = items.find((it) => it.selected && !it.panel);
   // While the coach points at something inside the panel and the panel is shut, the Build button stands in for it.
   const inside = coach.intoPanel(items);
   return (
@@ -68,7 +68,7 @@ export function BuildBar({ items, tip, teasers = [], actions }: SlotPropsMap["Bu
                 key={it.kind}
                 role="menuitem"
                 {...coach.attrs(`build:${it.kind}`)}
-                className={`tool ${it.kind === "staff" ? "staff-tool" : ""} ${it.race ? "race" : ""} ${it.selected ? "on" : ""} ${it.affordable ? "" : "broke"}`}
+                className={`tool ${it.panel ? "staff-tool" : ""} ${it.race ? "race" : ""} ${it.selected ? "on" : ""} ${it.affordable ? "" : "broke"}`}
                 onClick={() => {
                   actions.place(it.kind);
                   toggle(false);

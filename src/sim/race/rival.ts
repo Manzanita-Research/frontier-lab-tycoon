@@ -54,6 +54,8 @@ const Week = Schema.Struct({
   poachRoll: Schema.Number,
   /** The name the next release would have. */
   name: Schema.String,
+  /** FLT-22: the law forbids this lab open weights for now (a permit clause). */
+  closed: Schema.Boolean,
   /**
    * Release Leapfrog (FLT-27): a finished model is held back for a launch date the calendar picks, instead of shipping
    * the moment training is over. The machine then emits FINISHED and changes nothing; a LAUNCH event ships it.
@@ -195,7 +197,7 @@ export function opensThisTime(context: RivalContext, roll: number): boolean {
 
 function release(context: RivalContext, event: WeekEvent, enq: Enq) {
   const gain = context.personality.growth * (0.6 + 0.8 * event.gainRoll) * event.aggro * event.chase * context.momentum;
-  const open = opensThisTime(context, event.openRoll);
+  const open = !event.closed && opensThisTime(context, event.openRoll);
   if (event.hold) {
     // Done training, not yet launched: the calendar picks the day (and the lab that answers whom).
     enq.emit({ type: "FINISHED", id: context.id, model: event.name, gain, open, hype: 9 * context.personality.hypeHunger });

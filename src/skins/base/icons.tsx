@@ -136,4 +136,13 @@ export const ICONS: Record<string, ReactElement> = {
       <path d="M8 29 Q16 23 24 29" fill="#ff8a2b" stroke={ink} strokeWidth="2" />
     </svg>
   ),
+  senate: (
+    <svg {...S}>
+      <path d="M16 4 V9 M16 4 H21 V7 H16" stroke={ink} strokeWidth="2" fill="#e8574a" />
+      <path d="M9 15 A7 6.5 0 0 1 23 15 Z" fill="#f7eed6" stroke={ink} strokeWidth="2" />
+      <rect x="6" y="15" width="20" height="3" fill="#efe2bd" stroke={ink} strokeWidth="2" />
+      <path d="M9 18 V25 M13.5 18 V25 M18.5 18 V25 M23 18 V25" stroke={ink} strokeWidth="2" />
+      <rect x="4" y="25" width="24" height="3" rx="1" fill="#c9c3b6" stroke={ink} strokeWidth="2" />
+    </svg>
+  ),
 };

@@ -111,7 +111,7 @@ export function BuildBar({ items, tip, teasers = [], actions }: SlotPropsMap["Bu
     setOpen(next);
     actions.buildPanel(next);
   };
-  const held = items.find((it) => it.selected && it.kind !== "staff");
+  const held = items.find((it) => it.selected && !it.panel);
   const inside = coach.intoPanel(items);
   return (
     <div className="sd-deckwrap">

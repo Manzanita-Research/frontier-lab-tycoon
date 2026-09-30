@@ -14,6 +14,8 @@ import type { Rng } from "./rng";
 import type { GameState, Rect, StaffJob } from "./types";
 import { buildingUnlocked, systemUnlocked } from "./progression";
 import { coachCommand } from "./coach";
+import { lobbySenator } from "./promises/driver";
+import { draftClause } from "./capture/driver";
 import { continueTutorial } from "./tutorial";
 import { defs } from "./defs";
 
@@ -38,7 +40,11 @@ export type Command =
   /** Trigger a disaster on purpose (the Disasters menu, after its confirmation; the `?disaster=` hook). A refusal is a toast. */
   | { type: "disaster"; id: string }
   /** The random-disaster setting: off, rare, normal or chaos. */
-  | { type: "setRisk"; risk: Risk };
+  | { type: "setRisk"; risk: Risk }
+  /** Send the lab's lobbyists to a senator about the motion on the docket (FLT-23). A refusal is a toast. */
+  | { type: "lobby"; senator: string }
+  /** Tick (`on`) or untick a clause on the bill the lab was asked to draft (FLT-22). */
+  | { type: "draftClause"; clause: string; on: boolean };
 
 export type PlaceResult = { ok: true } | { ok: false; reason: string };
 
@@ -178,6 +184,12 @@ export function applyCommands(state: GameState, commands: readonly Command[], rn
       }
       case "setRisk":
         if (systemUnlocked(state, "disasters")) setRisk(state, c.risk);
+        break;
+      case "lobby":
+        if (systemUnlocked(state, "promises")) lobbySenator(state, c.senator);
+        break;
+      case "draftClause":
+        if (systemUnlocked(state, "capture")) draftClause(state, c.clause, c.on);
         break;
       case "startTraining":
         if (!state.buildings.some((b) => b.kind === "hall")) addToast(state, "Build a Training Hall first.", "bad");

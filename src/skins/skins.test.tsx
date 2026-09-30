@@ -75,6 +75,10 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
       return { event: vms.leak!.event!, leak: vms.leak!.event!.leak!, actions };
     case "Drama":
       return { event: vms.resign!.event!, drama: vms.resign!.event!.drama!, actions };
+    case "Bill":
+      return { event: vms.bill!.event!, bill: vms.bill!.event!.bill!, actions };
+    case "PromiseTracker":
+      return { event: null, tracker: vms.law!.senate.tracker!, bill: vms.law!.senate.bill, layout: vms.law!.layout, actions };
     case "EraCard":
       return { era: vms.era!.eraCard!, actions };
     case "FrontPage":
@@ -144,6 +148,11 @@ const vms: Record<string, HudVM> = {
   gavel: vmOf({ circus: "hearing-verdict" }),
   invite: vmOf({ circus: "yacht-invite" }),
   leak: vmOf({ circus: "yacht-leak" }),
+  bill: vmOf({ senate: "bill" }),
+  law: vmOf({ senate: "bill-law", senateOpen: true }),
+  exposed: vmOf({ senate: "bill-exposed" }),
+  vote: vmOf({ senate: "vote" }),
+  rollcall: vmOf({ senate: "rollcall" }),
   era: vmOf({ event: "era2" }),
   outcome: vmOf({ outcome: "won" }),
   paper: vmOf({ view: FIXTURE_PAPER }),

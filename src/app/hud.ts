@@ -17,6 +17,8 @@ import { papersView, type PapersView } from "../sim/race/papers/view";
 import { collusionView, type CollusionView } from "../sim/collusion/view";
 import { hearingView, type HearingView } from "../sim/hearing/view";
 import { yachtView, type YachtView } from "../sim/yacht/view";
+import { captureView, type CaptureView } from "../sim/capture/view";
+import { promisesView, type PromisesView } from "../sim/promises/view";
 import { raceView, type RaceView } from "../sim/race/view";
 import { auditView, type AuditView } from "../sim/auditors/view";
 import { memberById } from "../sim/groups";
@@ -111,6 +113,10 @@ export interface Snapshot {
   hearing: HearingView;
   /** The yacht summit (FLT-24): the RSVP, the leaked group chat, the ending. */
   yacht: YachtView;
+  /** Regulatory Capture (FLT-22): the bill the lab was asked to draft, the law in force, the leak odds. */
+  bill: CaptureView;
+  /** The Promise Tracker (FLT-23): the docket, the senators' promises and votes, the Truth-o-meters. */
+  promises: PromisesView;
   /** Operations: staff, slop, broken buildings, queues. */
   ops: OpsView;
   /** Meetings in progress (a VC and your researcher by the Kombucha Bar, FLT-26): who, and what they say, visitor first. */
@@ -239,6 +245,8 @@ export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO
     collusion: collusionView(s),
     hearing: hearingView(s),
     yacht: yachtView(s),
+    bill: captureView(s),
+    promises: promisesView(s),
     ops: opsView(s),
     chats: talking(s).map((m) => {
       const guest = s.walkers.find((w) => w.id === m.guestId);
