@@ -27,6 +27,7 @@ import { SKIN_API_VERSION } from "./types";
 import { HELP_BUILDINGS, HELP_LOOP, HELP_NUMBERS, HELP_TITLE } from "../../content/help";
 import { playableOf, type PlayableInput } from "./playable";
 import type {
+  EndingVM, ShareVM, TakeoverVM,
   ArenaVM, BenchCellVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HudVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
   ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, ResponseVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, StreamVM, ThoughtRowVM, TrainingVM, TrendVM, VoiceVM, WalkerKindVM,
 } from "./types";
@@ -65,6 +66,8 @@ export interface HudInput {
   photo: { on: boolean; time: string; shot: { id: number; url: string; name: string } | null; flash: number };
   skins: SkinPickerVM;
   viewport: { width: number; height: number };
+  /** The ending's share card and the campus photo its front page prints (FLT-11). Optional: none is fine. */
+  share?: { photo: string | null } & ShareVM;
 }
 
 const goalDefs = new Map(GOALS.map((g) => [g.id, g]));
@@ -479,7 +482,8 @@ const OFF_LEAPFROG: LeapfrogVM = {
 
 function outcomeOf(i: HudInput): OutcomeVM | null {
   const s = i.snap;
-  if (s.outcome === "playing" || i.outcomeDismissed) return null;
+  // An ending is its own card: the front page (endingOf).
+  if (s.outcome === "playing" || s.outcome === "ended" || i.outcomeDismissed) return null;
   const won = s.outcome === "won";
   const met = s.goals.filter((g) => g.met).length;
   return {
@@ -497,6 +501,44 @@ function outcomeOf(i: HudInput): OutcomeVM | null {
     ],
     note: won ? "All three milestones met." : `${met} of ${s.goals.length} milestones met.`,
   };
+}
+
+const NO_SHARE: ShareVM = { status: "idle", card: null, native: false, note: null };
+
+/** How the lab ended, on a Frontier Times front page (FLT-11). */
+function endingOf(i: HudInput): EndingVM | null {
+  const view = i.snap.endings;
+  const e = view?.ending;
+  if (!view || !e || i.snap.outcome !== "ended" || i.outcomeDismissed) return null;
+  const st = view.stats;
+  const n = (x: number) => Math.round(x).toLocaleString("en-US");
+  const { photo = null, ...share } = i.share ?? { ...NO_SHARE, photo: null };
+  return {
+    id: e.id,
+    title: e.title,
+    tone: e.tone,
+    keepPlaying: e.keepPlaying,
+    lab: i.snap.labName,
+    paper: { masthead: "The Frontier Times", ...e.paper, photo },
+    stats: [
+      { key: "days", emoji: "📅", label: "Days", text: n(st.days) },
+      { key: "vibes", emoji: "✨", label: "Peak Vibes", text: n(st.peakVibes) },
+      { key: "models", emoji: "🚀", label: "Models released", text: n(st.models) },
+      { key: "protesters", emoji: "📣", label: "Peak protesters", text: n(st.peakProtesters) },
+      { key: "escaped", emoji: "🏃", label: "Agents escaped", text: n(st.agentsEscaped) },
+    ],
+    strip: view.strip,
+    summary: view.summary,
+    daily: view.daily ? `Today's lab · ${view.daily}` : null,
+    share,
+  };
+}
+
+/** The Takeover under way: the lab's own model is in charge. */
+function takeoverOf(i: HudInput): TakeoverVM | null {
+  const view = i.snap.endings;
+  if (!view?.managedBy) return null;
+  return { manager: view.managedBy, title: `Frontier Lab Tycoon (managed by ${view.managedBy})`, placed: view.placed, thanks: view.thanks };
 }
 
 const editionRow = (e: Edition, unread: readonly string[]): EditionRowVM => ({
@@ -648,6 +690,8 @@ export function hudViewModel(i: HudInput): HudVM {
     leapfrog: leapfrogOf(i),
     eraCard: era,
     outcome: outcomeOf(i),
+    ending: endingOf(i),
+    takeover: takeoverOf(i),
     newsroom: newsroomOf(i),
     sound: soundOf(i),
     photoMode: photoOf(i),

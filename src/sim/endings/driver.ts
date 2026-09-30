@@ -165,6 +165,11 @@ export function dailyEndings(state: GameState, rng: Rng) {
   if (!e) return;
   e.peakVibes = Math.max(e.peakVibes, Math.round(state.vibes.value));
   e.peakProtesters = Math.max(e.peakProtesters, protesterCount(state));
+  const swarm = state.disasters.lastByDef.rogueSwarm;
+  if (swarm !== undefined && swarm !== e.swarmDay) {
+    e.swarmDay = swarm;
+    e.agentsEscaped += state.walkers.reduce((n, w) => n + (w.kind === "agent" ? 1 : 0), 0);
+  }
   const era = eraOfState(state);
   while (e.eraDays.length < era) e.eraDays.push(state.day);
   if (e.run) return;

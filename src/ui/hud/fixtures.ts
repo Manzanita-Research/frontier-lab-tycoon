@@ -12,6 +12,14 @@ import { newMotion, stepMotion, type MotionView } from "./leapfrogMotion";
 import type { SkinPickerVM } from "./types";
 import type { HudInput } from "./vm";
 import { playableFixture } from "./previewLadder";
+import { stageEndingMoment } from "../../sim/endings/demo";
+
+const staged = new Map<string, GameState>();
+/** An ending's scene (`memo`, `takeover`, `thanks`, `front-<id>`), staged once per test run: they start from the mid-game campus. */
+export function fixtureEnding(moment: string): GameState {
+  if (!staged.has(moment)) staged.set(moment, stageEndingMoment(moment));
+  return staged.get(moment)!;
+}
 
 /** A busy campus a few game days in, with thoughts, a crowd and a run in flight (the real opening is quieter: see `openingWorld`). */
 export function fixtureWorld(days = 12, seed = 3): GameState {
@@ -87,6 +95,8 @@ export interface FixtureOptions {
   photo?: boolean;
   staff?: boolean;
   outcome?: "won" | "lost" | null;
+  /** An ending's scene (FLT-11): `takeover` (the autopilot at work), `thanks`, or `front-<id>` (the last front page). */
+  ending?: string;
   /** A spend waiting for a yes or a no. */
   confirm?: boolean;
   /** Help ▸ How to play is open. */
@@ -99,7 +109,7 @@ export interface FixtureOptions {
 }
 
 export function fixtureSnapshot(o: FixtureOptions = {}): Snapshot {
-  const w = o.world ?? (o.leapfrog ? fixtureLeapfrog().world : fixtureWorld());
+  const w = o.world ?? (o.ending ? fixtureEnding(o.ending) : o.leapfrog ? fixtureLeapfrog().world : fixtureWorld());
   const selected = o.selected === undefined ? (w.walkers.find((x) => x.kind === "researcher")?.id ?? null) : o.selected;
   const snap = makeSnapshot(w, undefined, { selected, follow: false, highlight: null });
   const pendingConfirm = o.confirm

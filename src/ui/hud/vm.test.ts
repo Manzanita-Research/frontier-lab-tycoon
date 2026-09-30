@@ -281,3 +281,38 @@ describe("Playable v1: what the lab has earned, the coach, and Help", () => {
     for (const line of [...help.loop, ...help.buildings.map((b) => b.line)]) expect(line).not.toMatch(/venture capital into heat|loss goes down/i);
   });
 });
+
+describe("endings (FLT-11)", () => {
+  it("shows the last front page only once it's out, as plain JSON, with the five stats and the run summary", () => {
+    const vm = hudViewModel(fixtureInput({ ending: "front-regulated", selected: null }));
+    assertPlain(vm);
+    expect(vm.outcome).toBeNull();
+    expect(vm.ending).toMatchObject({ id: "regulated", title: "Regulated Utility", keepPlaying: true });
+    expect(vm.ending!.paper.masthead).toBe("The Frontier Times");
+    expect(vm.ending!.paper.headline).not.toMatch(/\{\w+\}/);
+    expect(vm.ending!.stats.map((s) => s.key)).toEqual(["days", "vibes", "models", "protesters", "escaped"]);
+    expect(vm.ending!.summary).toContain(vm.ending!.lab);
+    expect(vm.ending!.summary).toContain(vm.ending!.strip);
+    expect(vm.ending!.share).toEqual({ status: "idle", card: null, native: false, note: null });
+    // Dismissed (Keep watching): gone.
+    expect(hudViewModel({ ...fixtureInput({ ending: "front-regulated", selected: null }), outcomeDismissed: true }).ending).toBeNull();
+    // An ordinary game: none.
+    expect(hudViewModel(fixtureInput()).ending).toBeNull();
+  });
+
+  it("names the manager in the title while The Takeover's autopilot builds, then says thanks", () => {
+    const vm = hudViewModel(fixtureInput({ ending: "takeover", selected: null }));
+    expect(vm.ending).toBeNull();
+    expect(vm.takeover).toMatchObject({ title: `Frontier Lab Tycoon (managed by ${vm.takeover!.manager})`, thanks: null });
+    expect(vm.takeover!.placed).toBeGreaterThanOrEqual(2);
+    expect(hudViewModel(fixtureInput({ ending: "thanks", selected: null })).takeover!.thanks).toBe("Thanks for playing. We'll take it from here.");
+  });
+
+  it("passes the share card and the campus photo through", () => {
+    const input = { ...fixtureInput({ ending: "front-acquihired", selected: null }), share: { photo: "data:image/webp;base64,x", status: "ready" as const, card: "blob:card", native: true, note: null } };
+    const vm = hudViewModel(input);
+    expect(vm.ending!.paper.photo).toBe("data:image/webp;base64,x");
+    expect(vm.ending!.share).toEqual({ status: "ready", card: "blob:card", native: true, note: null });
+    expect(vm.ending!.keepPlaying).toBe(false);
+  });
+});

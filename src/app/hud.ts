@@ -19,6 +19,7 @@ import { estimateLedger } from "../sim/economy";
 import { assistantOf, type AssistantMessage } from "../sim/tutorial";
 import { pendingConfirmOf, persistentWarnings, type PendingConfirm } from "../sim/guardrails";
 import type { Building, GameState, GoalProgress, OpenEvent, Outcome, Pop, Thought, Tone, Vibes } from "../sim/types";
+import { endingsView, type EndingsView } from "../sim/endings/view";
 
 export type Tool = "path" | PlaceableKind | "bulldoze";
 /** Hotkeys 1-9 pick these in order. */
@@ -95,6 +96,8 @@ export interface Snapshot {
   leapfrog: LeapfrogView;
   /** Publishing Papers (FLT-28): list, review timers and publication policy. */
   papers: PapersView;
+  /** The endings (FLT-11): the front page, the run summary, The Takeover's manager. Null when they're off. */
+  endings: EndingsView | null;
   /** Operations: staff, slop, broken buildings, queues. */
   ops: OpsView;
   assistant: AssistantMessage | null;
@@ -160,6 +163,7 @@ export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO
     race: raceView(s),
     leapfrog: leapfrogView(s),
     papers: papersView(s),
+    endings: endingsView(s),
     ops: opsView(s),
     assistant: assistantOf(s),
     firstBuildPending: !!s.coach && s.flags.started === undefined && s.flags.firstBuild === undefined,

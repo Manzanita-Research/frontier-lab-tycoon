@@ -3,6 +3,7 @@
 import type { ComponentType, ReactNode } from "react";
 import type {
   ArenaVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, EraCardVM, EventVM, HudActions, HudVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
+  EndingVM, TakeoverVM,
   NewsroomVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StatsVM, ThoughtRowVM, TickerItemVM,
   StaffVM, TeaserVM, ProgressVM, ToastVM, TrainingVM, UnlockCardVM, VisibleVM, HelpVM,
 } from "../ui/hud/types";
@@ -39,6 +40,8 @@ export const SLOT_NAMES = [
   "PhotoOverlay",
   "SkinPicker",
   "Outcome",
+  "Ending",
+  "Takeover",
   "NewsControls",
   "NewsArrival",
   "NewsRoom",
@@ -107,6 +110,14 @@ export interface SlotPropsMap {
   PhotoOverlay: { photo: PhotoVM; actions: HudActions };
   SkinPicker: { skins: SkinPickerVM; actions: HudActions };
   Outcome: { outcome: OutcomeVM; actions: HudActions };
+  /**
+   * How the lab ended (FLT-11): the Frontier Times front page, the run summary and the share card. Modal; time is held.
+   * `actions.shareEnding()` (share sheet on phones, a PNG download elsewhere), `copySummary()`, `keepPlaying()` (only if
+   * `ending.keepPlaying`), `newLab()`, `playDaily()`.
+   */
+  Ending: { ending: EndingVM; layout: LayoutVM; actions: HudActions };
+  /** The Takeover while it plays: "Frontier Lab Tycoon (managed by Frontier-9)", and its last card (`takeover.thanks`). Not modal. */
+  Takeover: { takeover: TakeoverVM; layout: LayoutVM; actions: HudActions };
   /** The News Room button is earned (`visible.news`); mute, the mixer and the skin picker are not. */
   NewsControls: { newsroom: NewsroomVM; sound: SoundVM; skins: SkinPickerVM; visible?: VisibleVM; actions: HudActions };
   NewsArrival: { arrival: NonNullable<NewsroomVM["arrival"]>; actions: HudActions };

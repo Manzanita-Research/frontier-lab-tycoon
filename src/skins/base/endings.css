@@ -1,0 +1,139 @@
+/* Endings (FLT-11): the last front page, the run summary beside it, and The Takeover's banner and farewell card. */
+.ending-backdrop { z-index: 70; background: #1d1a14b8; backdrop-filter: blur(3px); overflow: auto; }
+.ending {
+  width: min(1180px, 100%);
+  max-height: calc(100dvh - 24px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 14px;
+  align-items: start;
+  animation: ending-press 0.9s cubic-bezier(0.2, 1.3, 0.4, 1);
+}
+.ending.compact { grid-template-columns: 1fr; max-height: none; }
+@keyframes ending-press {
+  0% { transform: scale(0.2) rotate(-540deg); opacity: 0; }
+  70% { transform: scale(1.03) rotate(4deg); opacity: 1; }
+}
+.ending-page {
+  position: relative;
+  max-height: calc(100dvh - 24px);
+  overflow: auto;
+  border-radius: 4px;
+  box-shadow: 0 24px 80px #0008;
+  color: #29251d;
+}
+.ending.compact .ending-page { max-height: none; padding: 16px 16px 14px; }
+.ending-page .paper-lead h2 { font-size: clamp(26px, 3vw, 42px); }
+.ending-page .paper-deck { font-size: 15px; }
+.ending.compact .paper-lead, .ending.compact .paper-substories { grid-template-columns: 1fr; }
+.ending.compact .paper-substories section + section { border-left: 0; padding-left: 0; }
+.ending-page .paper-bottom { grid-template-columns: 1fr; }
+.ending-signoff { margin: 12px 0 0; padding-top: 12px; border-top: 3px double #8b7d66; text-align: center; font: italic 700 clamp(18px, 2vw, 24px) Georgia, serif; }
+.ending-stamp {
+  position: absolute;
+  top: 88px;
+  right: 22px;
+  padding: 6px 14px;
+  border: 4px solid #b0302a;
+  border-radius: 6px;
+  color: #b0302a;
+  font: 900 20px Nunito, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transform: rotate(-9deg);
+  opacity: 0.85;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  animation: ending-stamp 0.5s 0.8s both cubic-bezier(0.3, 1.8, 0.5, 1);
+}
+.ending.tone-good .ending-stamp { color: #1f7a45; border-color: #1f7a45; }
+.ending.tone-neutral .ending-stamp { color: #2f5d8c; border-color: #2f5d8c; }
+@keyframes ending-stamp {
+  from { transform: rotate(-9deg) scale(3); opacity: 0; }
+}
+.ending-side {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--flt-color-panel);
+  color: var(--flt-color-text);
+  border: var(--flt-border-width) var(--flt-border-style) var(--flt-color-line);
+  box-shadow: 0 16px 40px #0006;
+  max-height: calc(100dvh - 24px);
+  overflow: auto;
+}
+.ending.compact .ending-side { position: sticky; bottom: 0; max-height: none; }
+.ending-lab { font: 900 20px/1.1 var(--flt-font-display); }
+.ending-strip { font-size: 22px; letter-spacing: 1px; line-height: 1.2; overflow-wrap: anywhere; }
+.ending-stats { display: grid; gap: 4px; margin: 0; }
+.ending-stats div { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; }
+.ending-stats dt { color: var(--flt-color-textDim); }
+.ending-stats dd { margin: 0; font-weight: 900; font-family: var(--flt-font-numbers); }
+.ending-buttons { display: grid; gap: 6px; }
+.ending-buttons .choice { width: 100%; }
+.ending-note { margin: 0; font-size: 12px; color: var(--flt-color-textDim); }
+.ending-card-preview { width: 100%; border-radius: 4px; border: 1px solid var(--flt-color-line); }
+
+/* The Takeover */
+.takeover-banner {
+  position: fixed;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: 4px 10px;
+  max-width: calc(100vw - 16px);
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: #101820e6;
+  color: #9ff7ff;
+  font: 800 15px ui-monospace, Menlo, monospace;
+  box-shadow: 0 0 0 2px #3ff0ff88, 0 0 24px #3ff0ff55;
+  pointer-events: none;
+  animation: takeover-in 0.6s ease-out;
+}
+.takeover-banner small { color: #d6fbff; opacity: 0.7; font-size: 11px; }
+@keyframes takeover-in {
+  from { transform: translate(-50%, -40px); opacity: 0; }
+}
+.takeover-thanks {
+  position: fixed;
+  inset: 0;
+  z-index: 65;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  background: radial-gradient(ellipse at center, #0b1016cc, #0b101600 70%);
+  color: #f2fdff;
+  pointer-events: none;
+  animation: fade-in 1.2s ease-out;
+}
+.takeover-thanks p { margin: 0; max-width: 16ch; font: 900 clamp(30px, 6vw, 64px)/1.05 Georgia, serif; text-shadow: 0 2px 24px #000; }
+.takeover-thanks small { margin-top: 14px; font: 800 16px ui-monospace, Menlo, monospace; color: #9ff7ff; }
+
+/* The autopilot's cursor, pinned to the campus by the game (not a slot: it is the same in every skin). */
+.ghost-cursor { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 5; filter: drop-shadow(0 3px 4px #0007); }
+.ghost-cursor svg { display: block; transform-origin: 3px 2px; }
+.ghost-cursor.click svg { animation: ghost-click 0.35s ease-out; }
+.ghost-cursor span {
+  position: absolute;
+  left: 20px;
+  top: 22px;
+  white-space: nowrap;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: #101820e6;
+  color: #9ff7ff;
+  font: 800 11px ui-monospace, Menlo, monospace;
+}
+@keyframes ghost-click {
+  40% { transform: scale(0.75); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ending, .ending-stamp, .takeover-banner, .takeover-thanks, .ghost-cursor.click svg { animation: none; }
+}

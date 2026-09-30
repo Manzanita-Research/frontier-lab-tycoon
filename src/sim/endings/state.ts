@@ -33,8 +33,12 @@ export interface EndingsState {
   peakVibes: number;
   peakProtesters: number;
   agentsEscaped: number;
+  /** The day the last Rogue Agent Swarm we counted began (every agent on campus that day went with it). */
+  swarmDay: number | null;
   /** The day each era was first reached (index 0 is Era 1). */
   eraDays: number[];
+  /** Today's lab: the date key (`2026-09-30`) when this is the daily seed, so the summary can say so. */
+  daily: string | null;
 }
 
 export function createEndings(): EndingsState {
@@ -47,13 +51,16 @@ export function createEndings(): EndingsState {
     peakVibes: 0,
     peakProtesters: 0,
     agentsEscaped: 0,
+    swarmDay: null,
     eraDays: [0],
+    daily: null,
   };
 }
 
-/** Switch the endings on (the app does, unless `?endings=off`). Idempotent. */
-export function enableEndings(state: GameState) {
+/** Switch the endings on (the app does, unless `?endings=off`). Idempotent. `daily` marks Today's lab. */
+export function enableEndings(state: GameState, daily: string | null = null) {
   state.endings ??= createEndings();
+  if (daily) state.endings.daily = daily;
   // Saves from before the Memo existed have no arc for it.
   for (const def of ENDINGS_PACK.content.events.add) state.arcs[def.id] ??= initialStored(arcMachine, { choices: def.choices.length, cooldownDays: def.cooldown ?? 60, openedDay: null });
 }

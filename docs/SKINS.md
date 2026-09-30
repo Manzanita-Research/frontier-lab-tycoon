@@ -379,12 +379,14 @@ A slot is a React component. Each gets **its slice of the view-model plus `actio
 | `PhotoOverlay` | `{ photo, actions }` | Photo mode's controls (time of day, shutter, exit) and the "photo saved" thumbnail. Rendered outside the HUD layer so hiding the HUD does not hide it. Draw only at the edges: the campus is the picture. |
 | `SkinPicker` | `{ skins, actions }` | The skin picker. `previewSkin(id)` switches live, `applySkin()` keeps it, `cancelSkinPicker()` goes back. |
 | `Outcome` | `{ outcome, actions }` | The win / lose card (`keepPlaying`, `newLab`). |
+| `Ending` | `{ ending, layout, actions }` | How the lab ended (FLT-11): the last *Frontier Times* front page (`ending.paper`, its `photo` is your campus), the run summary beside it (`stats`, the era `strip`, `daily`), and the buttons: `shareEnding` (the 1200×630 card; `ending.share` says whether it's the Web Share sheet or a download, and holds the finished card), `copySummary`, `keepPlaying` when `keepPlaying`, `newLab`, `playDaily`. The game draws the share card itself in the skin's colours and chrome. |
+| `Takeover` | `{ takeover, layout, actions }` | The Takeover under way: `takeover.title` ("Frontier Lab Tycoon (managed by Frontier-9)") while the lab's own model builds for you, then `takeover.thanks`, the last card. Not modal: keep it out of the way of the ghost cursor. |
 | `NewsControls` | `{ newsroom, sound, skins, visible, actions }` | The News Room button (with unread count), mute, and (base) the skin picker button. |
 | `NewsArrival` | `{ arrival, actions }` | "The Frontier Times is here" (`viewNews(id)`, `skipNews()`). |
 | `NewsRoom` | `{ newsroom, actions }` | The News Room modal: the archive, and the open paper or chat (compose `useSlots().FrontPage` / `.GroupChat`, or draw your own). |
 | `Mixer` | `{ sound, actions }` | The sound mixer modal. |
 
-The **docked** slots (`Layout` receives them pre-rendered) are `Stats`, `Training`, `Objectives`, `Inspector`, `BuildBar`, `Speed`, `Staff`, `ThoughtsPanel`, `Ticker`, `Toasts` (one `Toast` at a time: the newest toast, or the standing hint when nobody is talking), `Assistant`, `Arena`, `Benchmarks`, `Voice`, `NewsControls`, `NewsArrival` and `PhotoButton`. The modal slots (`EventCard`, `Livestream`, `EraCard`, `Outcome`, `NewsRoom`, `Mixer`, `SkinPicker`) and `PhotoOverlay` are rendered by the game when there is something to show.
+The **docked** slots (`Layout` receives them pre-rendered) are `Stats`, `Training`, `Objectives`, `Inspector`, `BuildBar`, `Speed`, `Staff`, `ThoughtsPanel`, `Ticker`, `Toasts` (one `Toast` at a time: the newest toast, or the standing hint when nobody is talking), `Assistant`, `Arena`, `Benchmarks`, `Voice`, `NewsControls`, `NewsArrival` and `PhotoButton`. The modal slots (`EventCard`, `Livestream`, `EraCard`, `Outcome`, `Ending`, `Takeover`, `NewsRoom`, `Mixer`, `SkinPicker`) and `PhotoOverlay` are rendered by the game when there is something to show.
 
 ## Writing slots.tsx
 

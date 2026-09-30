@@ -11,6 +11,7 @@
 import { Clock, Effect, Schema, Stream } from "effect";
 import { fromEffectEventStream, setupEffect } from "@xstate/effect";
 import type { Command } from "../sim/commands";
+import { dailySeed } from "../sim/daily";
 import type { NewsItem, OpenEvent, Outcome, Tone } from "../sim/types";
 import { Frames } from "./frames";
 import type { Snapshot, Speed, Tool, UiSelection, UiToast } from "./hud";
@@ -111,6 +112,8 @@ export const appMachine = setupEffect({
       CHOOSE: Schema.Struct({ choiceIndex: Schema.Number }),
       KEEP_PLAYING: Schema.Struct({}),
       NEW_LAB: Schema.Struct({}),
+      /** Today's lab: a new lab on the date's seed ("2026-09-30"), the same campus for everyone that day. */
+      DAILY_LAB: Schema.Struct({ daily: Schema.String }),
       TOAST: Schema.Struct({ text: Schema.String, tone: opaque<Tone>() }),
       /** Tap a walker (or tap away: null) to open or close the inspector. */
       SELECT: Schema.Struct({ id: Schema.NullOr(Schema.Number) }),
@@ -154,7 +157,8 @@ export const appMachine = setupEffect({
       Effect.gen(function* () {
         const sim = yield* Sim;
         const ms = yield* Clock.currentTimeMillis;
-        sim.reset(((ms ^ Math.imul(sim.world.seed, 2654435761)) >>> 0) || 1);
+        const daily = args.event.type === "DAILY_LAB" ? args.event.daily : null;
+        sim.reset(daily ? dailySeed(daily) : ((ms ^ Math.imul(sim.world.seed, 2654435761)) >>> 0) || 1, daily);
         const report = sim.report(true, true);
         if (report) args.self.send({ type: "SYNCED", report, now: 0 });
       }),
@@ -238,6 +242,8 @@ export const appMachine = setupEffect({
         toastSeq: gated.seq,
         event: report.event,
         outcome: report.outcome,
+        // A new outcome is shown even if the last one was waved away (won, kept playing, and now an ending's front page).
+        outcomeDismissed: report.outcome === context.outcome ? context.outcomeDismissed : false,
         snap: report.snap ?? context.snap,
         news: report.news ?? context.news,
         lastPublishAt: report.snap ? now : context.lastPublishAt,
@@ -293,11 +299,14 @@ export const appMachine = setupEffect({
     },
     SET_FOLLOW: ({ context, event }) => (context.selected === null ? undefined : { context: { ...context, follow: event.follow, lastPublishAt: 0 } }),
     HIGHLIGHT: ({ context, event }) => ({ context: { ...context, highlight: event.key === context.highlight ? null : event.key, lastPublishAt: 0 } }),
+    DAILY_LAB: (args, enq) => {
+      enq(args.actions.newLab, args);
+      return { context: freshLab(args.context), target: ".playing.running" };
+    },
     NEW_LAB: (args, enq) => {
       const { context, actions } = args;
       enq(actions.newLab, args);
-      const next = { ...context, queue: [], acc: 0, toasts: [], gate: newGate(), outcomeDismissed: false, speed: 1 as Speed, tool: null, hover: null, selected: null, follow: false, highlight: null, zone: null, overlays: [] };
-      return { context: next, target: ".playing.running" };
+      return { context: freshLab(context), target: ".playing.running" };
     },
     TOAST: ({ context, event }, enq) => {
       const id = 1_000_000 + context.toastSeq;
@@ -315,6 +324,9 @@ export const appMachine = setupEffect({
     },
   },
 });
+
+/** The app's side of a new lab: nothing queued, nothing selected, running at 1x. */
+const freshLab = (context: AppContext): AppContext => ({ ...context, queue: [], acc: 0, toasts: [], gate: newGate(), outcomeDismissed: false, speed: 1, tool: null, hover: null, selected: null, follow: false, highlight: null, zone: null, overlays: [] });
 
 /** The selection as the sim handle wants it. */
 const uiOf = (c: AppContext): UiSelection => ({ selected: c.selected, follow: c.follow, highlight: c.highlight });
