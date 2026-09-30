@@ -89,6 +89,17 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
       return { chat: vms.chat!.newsroom.chat!, actions };
     case "PhotoButton":
       return { photo: main.photoMode, actions };
+    case "GateLegend":
+      return {
+        factions: {
+          ...main.factions, enabled: true, protests: true,
+          gate: [{ id: "", name: "Water Discourse", color: "#3fa7d6", count: 14, addressable: false }, { id: "doomers", name: "Doomers", color: "#6b5b95", count: 9, addressable: true }],
+          statement: { ready: true, costText: "$15K", waitText: "Ready", writerText: "The intern writes it (no Comms Rep)" },
+        },
+        actions,
+      };
+    case "Beat":
+      return { beat: { id: 1, kind: "exit", kicker: "Breaking · a departure", caption: "Dr. Ada Gradient is leaving to “focus on safety” (and a $4B seed round)", sub: "Kevin Backprop follows in a conga line, carrying boxes.", skipLabel: "Skip »", action: null }, actions };
     case "PhotoOverlay":
       return { photo: vms.photo!.photoMode, actions };
     case "SkinPicker":

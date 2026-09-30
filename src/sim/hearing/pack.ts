@@ -3,7 +3,7 @@
 // here would import the Vocabulary while content/events.ts is still loading).
 import { Schema } from "effect";
 import json from "../../../mods/base-hearing/mod.json";
-import { ArcNode, EventCard, Headline } from "../../mods/schema";
+import { ArcNode, EventCard, Headline, NamedCall } from "../../mods/schema";
 
 const N = Schema.Finite;
 const S = Schema.NonEmptyString;
@@ -35,6 +35,14 @@ const Pack = Schema.Struct({
     triggers: Schema.Array(Trigger),
     verdicts: Schema.Record(S, Schema.Struct({ title: S, line: S })),
     meters: Schema.Struct({ trustLabel: S, captureLabel: S }),
+    /**
+     * What a verdict sets off once the lab has left the building (FLT-56): verbs (`{lab}` and `{quote}`, the CEO's
+     * latest chaotic answer, are filled in) and `count` of the pack's headlines for `trigger`, all at once.
+     */
+    aftermath: Schema.optionalKey(Schema.Record(S, Schema.Struct({
+      calls: Schema.optionalKey(Schema.Array(NamedCall)),
+      headlines: Schema.optionalKey(Schema.Struct({ trigger: S, count: N })),
+    }))),
   }) }),
 });
 export type HearingTrigger = typeof Trigger.Type;
@@ -52,6 +60,9 @@ export function loadHearingPack(input: unknown) {
   }
   for (const t of rules.triggers) {
     if ([t.flagPrefix, t.stat, t.afterDays].filter((x) => x !== undefined).length !== 1) throw new Error(`rules.hearing.triggers.${t.id}: give one of flagPrefix, stat or afterDays`);
+  }
+  for (const id of Object.keys(rules.aftermath ?? {})) {
+    if (!(id in rules.verdicts)) throw new Error(`rules.hearing.aftermath.${id}: no verdict "${id}"`);
   }
   if (!cards.has(GAVEL_CARD)) throw new Error(`content.events: the pack needs a "${GAVEL_CARD}" card`);
   return { ...p, chart, rules };

@@ -8,6 +8,7 @@ import type { Snapshot } from "../../app/hud";
 import { audioReadyAtom, mixerAtom, mixerOpenAtom } from "../../audio/state";
 import { roomAtom } from "../../newsroom/state";
 import { photoAtom } from "../../render/fx/photoState";
+import { beatAtom } from "../../render/fx/beatState";
 import { skinList } from "../../skins/registry";
 import type { LeapfrogView } from "../../sim/race/leapfrog/view";
 import { shotAtom } from "../juice/photo";
@@ -173,6 +174,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
   const photoTime = useAtomValue(photoTimeAtom);
   const flash = useAtomValue(photoFlashAtom);
   const shot = useAtomValue(shotAtom);
+  const beat = useAtomValue(beatAtom);
   const skinUi = useAtomValue(skinUiAtom);
   const staffOpen = useAtomValue(staffOpenAtom);
   const senateOpen = useAtomValue(senateOpenAtom);
@@ -238,6 +240,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         lookLabels,
         mixer: { open: mixerOpen, ready: audioReady, muted: mixer.muted, master: mixer.master, music: mixer.music, sfx: mixer.sfx },
         photo: { on: photoOn, time: photoTime, shot, flash },
+        beat,
         skins: {
           open: skinUi.picker.open,
           reducedMotion: skinUi.reducedMotion,
@@ -253,7 +256,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         share,
         social,
       }),
-    [share, social, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, skinUi, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, drama],
+    [share, social, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, beat, skinUi, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, drama],
   );
   return vm;
 }

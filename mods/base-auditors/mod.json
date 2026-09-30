@@ -552,7 +552,8 @@
             "evalAt": [
               "hall"
             ],
-            "evalHours": 3
+            "evalHours": 3,
+            "huddleHours": 1
           },
           "look": {
             "vest": "#39b54a",
@@ -583,6 +584,66 @@
           "id": "auditors-headline-3",
           "trigger": "noShow",
           "text": "Evals Without Borders could not find a way into {lab}. The report will note that the gate is decorative.",
+          "tone": "joke"
+        },
+        {
+          "id": "auditors-rivals-A-1",
+          "trigger": "rivals:A",
+          "text": "{rival} congratulates {lab} on its A and quietly books the same auditors for next week",
+          "tone": "neutral"
+        },
+        {
+          "id": "auditors-rivals-B-1",
+          "trigger": "rivals:B",
+          "text": "{rival} notes that {lab}'s B is 'a strong result for a lab of that size'",
+          "tone": "joke"
+        },
+        {
+          "id": "auditors-rivals-C-1",
+          "trigger": "rivals:C",
+          "text": "{rival} calls {lab}'s C 'brave' in a post with forty-one emoji",
+          "tone": "joke"
+        },
+        {
+          "id": "auditors-rivals-D-1",
+          "trigger": "rivals:D",
+          "text": "{rival} sends {lab} a fruit basket and a highlighter, 'for the D'",
+          "tone": "joke"
+        },
+        {
+          "id": "auditors-rivals-D-2",
+          "trigger": "rivals:D",
+          "text": "{rival} livestreams a reading of {lab}'s audit, doing the voices",
+          "tone": "joke"
+        },
+        {
+          "id": "auditors-rivals-F-1",
+          "trigger": "rivals:F",
+          "text": "{rival} frames {lab}'s F in its own lobby, next to its own C",
+          "tone": "joke"
+        },
+        {
+          "id": "auditors-rivals-F-2",
+          "trigger": "rivals:F",
+          "text": "{rival} launches a merch line: 'I got an F at {lab}'. It sells out.",
+          "tone": "joke"
+        },
+        {
+          "id": "auditors-rivals-F-3",
+          "trigger": "rivals:F",
+          "text": "{rival} offers {lab} 'free tutoring'. The first lesson is on safety plans.",
+          "tone": "joke"
+        },
+        {
+          "id": "auditors-rivals-caught-1",
+          "trigger": "rivals:caught",
+          "text": "{rival} releases a statement: 'Our agents have never been in boxes.' It is signed by four boxes.",
+          "tone": "joke"
+        },
+        {
+          "id": "auditors-rivals-caught-2",
+          "trigger": "rivals:caught",
+          "text": "{rival} ships a product called Boxless. It is a box.",
           "tone": "joke"
         }
       ]
@@ -774,6 +835,106 @@
           "kind": "agent",
           "when": "box",
           "text": "Normal box. Cardboard noises."
+        },
+        {
+          "kind": "auditor",
+          "when": "huddle",
+          "text": "Is a B-minus a B? Asking for a spreadsheet."
+        },
+        {
+          "kind": "auditor",
+          "when": "huddle",
+          "text": "Do we mention the kombucha tap in the findings?"
+        },
+        {
+          "kind": "auditor",
+          "when": "huddle",
+          "text": "I wrote 'vibes' in the margin. Is that a finding?"
+        },
+        {
+          "kind": "auditor",
+          "when": "huddle",
+          "text": "Round up or round down? ...Round down."
+        },
+        {
+          "kind": "auditor",
+          "when": "huddle",
+          "text": "Nobody say the grade out loud. They can lip-read."
+        },
+        {
+          "kind": "auditor",
+          "when": "huddle",
+          "text": "My clipboard has a clipboard. It also has notes."
+        },
+        {
+          "kind": "visitor",
+          "when": "grade:A",
+          "text": "An A from the auditors! I'm touching everything."
+        },
+        {
+          "kind": "visitor",
+          "when": "grade:A",
+          "text": "{lab} got an A. I read it on a mug in the gift shop."
+        },
+        {
+          "kind": "visitor",
+          "when": "grade:A",
+          "text": "Straight A lab. Even the fountain looks accredited."
+        },
+        {
+          "kind": "visitor",
+          "when": "grade:B",
+          "text": "A B. Solid. Like a lab you'd bring home to your parents."
+        },
+        {
+          "kind": "visitor",
+          "when": "grade:B",
+          "text": "{lab} got a B. The B stands for 'basically fine'."
+        },
+        {
+          "kind": "visitor",
+          "when": "grade:C",
+          "text": "A C. So the model is... average? That's the scary kind."
+        },
+        {
+          "kind": "visitor",
+          "when": "grade:C",
+          "text": "I heard {lab} got a C. The C stands for 'curious choices'."
+        },
+        {
+          "kind": "visitor",
+          "when": "grade:D",
+          "text": "A D from the auditors. I'm keeping my hands in my pockets."
+        },
+        {
+          "kind": "visitor",
+          "when": "grade:D",
+          "text": "{lab} got a D. Is this tour still covered by my insurance?"
+        },
+        {
+          "kind": "visitor",
+          "when": "grade:F",
+          "text": "An F?! I'm only here for the free lanyard."
+        },
+        {
+          "kind": "visitor",
+          "when": "grade:F",
+          "text": "They got an F and they're still doing tours. Iconic."
+        },
+        {
+          "kind": "visitor",
+          "when": "grade:F",
+          "text": "F for... Frontier? Please say Frontier."
+        },
+        {
+          "kind": "visitor",
+          "when": "grade:caught",
+          "text": "Is it true they hid the agents in boxes? Which box is mine?"
+        },
+        {
+          "kind": "visitor",
+          "when": "grade:caught",
+          "text": "I just saw a box wave at me. Is that on the tour?"
         }
       ]
     }
@@ -1070,6 +1231,23 @@
         "F": "Evals Without Borders fails {lab}: \"We have never needed a second clipboard before\"",
         "caught": "CARDBOARD-GATE: auditors catch {lab} hiding its agents in boxes",
         "swarm": "Auditors find {lab}'s agents running a sourdough wiki full of test answers"
+      },
+      "huddle": [
+        {
+          "type": "camera.beat",
+          "params": {
+            "kind": "huddle",
+            "caption": "Evals Without Borders are comparing notes",
+            "sub": "Somebody just said \"round down\". Nobody breathe.",
+            "on": "here",
+            "zoom": 1.8,
+            "hold": 4.5
+          }
+        }
+      ],
+      "gradeTalk": {
+        "days": 30,
+        "chance": 0.5
       }
     }
   }

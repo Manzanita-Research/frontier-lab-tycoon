@@ -14,6 +14,7 @@ import { shiftTrust } from "../race/leapfrog/ops";
 import { createRng, type Rng } from "../rng";
 import type { GameState, Tone, Walker } from "../types";
 import { runVerb } from "../verbs";
+import type { Call } from "../disasters/types";
 import { activeSwarm } from "../collusion/state";
 import { auditFacts, gradeReport, notesSince } from "./grade";
 import { freshAudit, stepAudit, type AuditEvent } from "./machine";
@@ -27,7 +28,7 @@ const COUNTDOWN_DAYS = 7;
 const GRADE_TONE: Record<Grade, Tone> = { A: "good", B: "good", C: "neutral", D: "bad", F: "bad" };
 
 const lines = (kind: string, when: string) => THOUGHTS.filter((t) => t.kind === kind && t.when === when);
-const fill = (s: GameState, text: string) => fillTemplate(text, { lab: s.labName });
+const fill = (s: GameState, text: string, vars: Record<string, string> = {}) => fillTemplate(text, { lab: s.labName, ...vars });
 function headline(s: GameState, trigger: string) {
   const h = HEADLINES.find((o) => o.trigger === trigger);
   if (h) addNews(s, fill(s, h.text), h.tone);
@@ -85,6 +86,24 @@ function publish(s: GameState, rng: Rng) {
   a.frontPage = { day: s.day, title, grade: overall };
   a.history.push({ day: s.day, overall, caught });
   addNews(s, `Frontier Times: ${title}`, caught || swarm ? "bad" : GRADE_TONE[overall]);
+  // The rest of the industry reads it too (FLT-56): a rival has something to say about it.
+  const said = HEADLINES.filter((h) => h.trigger === `rivals:${caught ? "caught" : overall}`);
+  if (said.length) {
+    const h = rng.pick(said);
+    runVerb(env, { type: "news", params: { text: h.text, tone: h.tone } });
+  }
+}
+
+/** For a while after a report, the visitors have heard about it (FLT-56). Draws nothing before the first report. */
+function gradeTalk(s: GameState, rng: Rng) {
+  const talk = R.gradeTalk;
+  const last = s.auditors!.report;
+  if (!talk || !last || s.day - last.day > talk.days || !rng.chance(talk.chance)) return;
+  const pool = lines("visitor", `grade:${last.caught ? "caught" : last.overall}`);
+  const visitors = s.walkers.filter((w) => w.kind === "visitor");
+  if (!pool.length || !visitors.length || s.thoughts.length >= 6) return;
+  const who = rng.pick(visitors);
+  s.thoughts.push({ id: s.nextId++, walkerId: who.id, kind: "visitor", text: fill(s, rng.pick(pool).text, { grade: last.overall }), expiresTick: s.tick + TICKS_PER_DAY / 2 });
 }
 
 function send(s: GameState, rng: Rng, event: AuditEvent) {
@@ -152,6 +171,7 @@ export function dailyAuditors(s: GameState) {
     if (s.disguises?.agent && agents.length && rng.chance(0.5)) say(s, rng, rng.pick(agents), lines("agent", "box"), TICKS_PER_DAY * 2);
     else if (researchers.length) say(s, rng, rng.pick(researchers), lines("researcher", prep === "tidy" && rng.chance(0.5) ? "tidy" : "audit"), TICKS_PER_DAY * 2);
   }
+  gradeTalk(s, rng);
   a.rngState = rng.state();
 }
 
@@ -174,13 +194,20 @@ export function updateAuditors(s: GameState) {
         headline(s, "evals");
         runVerb({ state: s, rng: dice(), run: null, owner: OWNER }, { type: "camera.focus", params: { on: "hall", zoom: 1.4, hold: 2.6 } });
       }
+      if (phase === "huddling") {
+        // FLT-56: the hold-your-breath beat before the report. They talk first, too.
+        a.chatTick = s.tick;
+        const at = g.route[0];
+        const env = { state: s, rng: dice(), run: null, owner: OWNER, at: at ? ([at[0], at[1]] as [number, number]) : undefined };
+        for (const c of R.huddle ?? []) runVerb(env, c as Call);
+      }
       if (phase === "leaving") headline(s, "leave");
     }
     if (phase === "leaving" || s.tick < a.chatTick) continue;
     a.chatTick = s.tick + R.chat.everyTicks;
     const r = dice();
     const who = r.pick(g.members);
-    const when = phase === "evaluating" ? "evals" : s.disguises?.agent && r.chance(0.4) ? "box" : "inspect";
+    const when = phase === "evaluating" ? "evals" : phase === "huddling" ? "huddle" : s.disguises?.agent && r.chance(0.4) ? "box" : "inspect";
     say(s, r, { id: who.id, kind: "visitor" }, lines("auditor", when), R.chat.everyTicks + 15);
     if (!r.chance(R.chat.replyChance)) continue;
     // Whoever is nearest answers: a researcher, or (in a box) an agent.

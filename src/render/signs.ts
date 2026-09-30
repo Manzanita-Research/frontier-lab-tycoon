@@ -1,8 +1,8 @@
 import * as THREE from "three";
 import { FONT_STACK } from "./materials";
 
-/** A placard: colour board, ink border, bold text wrapped to at most three lines. */
-export function signTexture(text: string, bg: string): THREE.CanvasTexture {
+/** A placard: colour board, ink border, bold text wrapped to at most three lines (FLT-56: the ink is the crowd's). */
+export function signTexture(text: string, bg: string, ink = "#b3261e"): THREE.CanvasTexture {
   const w = 320;
   const h = 180;
   const canvas = document.createElement("canvas");
@@ -13,7 +13,7 @@ export function signTexture(text: string, bg: string): THREE.CanvasTexture {
   g.fillRect(0, 0, w, h);
   g.fillStyle = bg;
   g.fillRect(9, 9, w - 18, h - 18);
-  g.fillStyle = "#b3261e";
+  g.fillStyle = ink;
   g.textAlign = "center";
   g.textBaseline = "middle";
   const words = text.split(" ");

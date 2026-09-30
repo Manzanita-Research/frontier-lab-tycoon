@@ -1,17 +1,19 @@
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
-import { SIGNS, SIGN_COLORS } from "../content/protest";
 import { sim as game } from "../app/game";
 import { HALF } from "./coords";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
+import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { CHEER_SECONDS, fx } from "./fx/state";
 import { glowTexture } from "./materials";
 import { signTexture } from "./signs";
 import { buildModLooks, lookKey, type Pose } from "./modLooks";
 import { modSession } from "../app/mods";
+import { beatRun } from "./fx/beatState";
+import { reducedMotion } from "../skins/kit/motion";
 import { Follow } from "./follow";
-import { HOODIES, PICKET, SKIN, SUITS } from "./look";
+import { crowdColor, HOODIES, PICKET, placards, SKIN, SUITS } from "./look";
 import { Pick } from "./Pick";
 import { eraDef } from "../content/eras";
 import { eraOfState } from "../sim/race/race";
@@ -75,6 +77,7 @@ export function Walkers() {
   const pBody = useRef<THREE.InstancedMesh>(null);
   const pHead = useRef<THREE.InstancedMesh>(null);
   const pStick = useRef<THREE.InstancedMesh>(null);
+  const pCap = useRef<THREE.InstancedMesh>(null);
   const eyes = useRef<THREE.InstancedMesh>(null);
   const boxes = useRef<THREE.InstancedMesh>(null);
   const lit = useRef<THREE.InstancedMesh>(null);
@@ -83,7 +86,18 @@ export function Walkers() {
   const hide = useRef<THREE.InstancedMesh>(null);
   const tape = useRef<THREE.InstancedMesh>(null);
   const glowMap = useMemo(() => glowTexture("#ffffff"), []);
-  const signMaps = useMemo(() => SIGNS.map((text, i) => signTexture(text, SIGN_COLORS[i % SIGN_COLORS.length]!)), []);
+  // FLT-56: the water crowd's placards and each faction's own, in its colours. A faction's marchers carry theirs.
+  const signs = useMemo(() => {
+    const all = placards();
+    const byCrowd = new Map<string, number[]>();
+    all.forEach((p, i) => byCrowd.set(p.crowd, [...(byCrowd.get(p.crowd) ?? []), i]));
+    const bodies = new Map<string, THREE.Color>();
+    for (const crowd of byCrowd.keys()) {
+      const c = crowdColor(crowd);
+      if (c) bodies.set(crowd, color(c));
+    }
+    return { all, byCrowd, bodies, maps: all.map((p) => signTexture(p.text, p.bg, p.ink)) };
+  }, []);
   const glowGeo = useMemo(() => new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2), []);
   const haloGeo = useMemo(() => new THREE.RingGeometry(0.5, 0.72, 28).rotateX(-Math.PI / 2), []);
   const boardGeo = useMemo(() => new THREE.PlaneGeometry(1.3, 0.73), []);
@@ -92,6 +106,12 @@ export function Walkers() {
   const orbGeo = useMemo(() => new THREE.SphereGeometry(0.065 * S, 10, 8), []);
   const hatGeo = useMemo(() => new THREE.SphereGeometry(0.2 * S, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2), []);
   const agentHaloGeo = useMemo(() => new THREE.TorusGeometry(0.2 * S, 0.02 * S, 6, 20).rotateX(Math.PI / 2), []);
+  // A marcher's cap: a dome over the crown with a peak out front, in one mesh.
+  const capGeo = useMemo(() => {
+    const dome = new THREE.SphereGeometry(0.14 * S, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2);
+    const peak = new THREE.CylinderGeometry(0.11 * S, 0.11 * S, 0.02 * S, 12, 1, false, -Math.PI / 2, Math.PI).translate(0, 0, 0.06 * S);
+    return mergeGeometries([dome.toNonIndexed(), peak.toNonIndexed()])!;
+  }, []);
   const stickGeo = useMemo(() => new THREE.BoxGeometry(0.045, 1, 0.045), []);
   const eyeGeo = useMemo(() => new THREE.BoxGeometry(0.17 * S, 0.042 * S, 0.05 * S), []);
   const boxGeo = useMemo(() => new RoundedBoxGeometry(0.34, 0.26, 0.3, 2, 0.03), []);
@@ -118,14 +138,19 @@ export function Walkers() {
     let no = 0;
     let nv = 0;
     let np = 0;
+    let nc = 0;
     let ne = 0;
     let nx = 0;
     let nl = 0;
     let picked: { x: number; z: number } | null = null;
-    const nb = new Array<number>(SIGNS.length).fill(0);
+    const nb = new Array<number>(signs.all.length).fill(0);
     // The agents look like the era: hard hats in Coding Automation, halos after that, bigger and brighter each time.
     const agentLook = LOOKS[eraOfState(sim) - 1]!;
     const boxed = sim.disguises?.agent === "box";
+    // FLT-56: during a walk-out's beat, the ones leaving dance it: one-two-three-kick, all on the same count.
+    const conga = beatRun.kind === "exit" && beatRun.follow.length > 0 && !reducedMotion() ? beatRun.follow : null;
+    const sway = Math.sin(t * 7.2) * 0.07 * S;
+    const kick = Math.max(0, Math.sin(t * 3.6)) ** 10 * 0.14 * S;
     let nk = 0;
     if (modded) looks.drawers.forEach((d) => d.begin());
 
@@ -237,12 +262,20 @@ export function Walkers() {
         set(pBody.current, i, x, 0.26 * S + bob, z, ry, 1 + land * 0.6, 1 - land, 1 + land * 0.6);
         set(pHead.current, i, x, 0.66 * S + bob - land * 0.1, z, ry, 1, 1, 1);
         glasses(x, 0.66 * S + bob - land * 0.1, z, ry);
-        pBody.current?.setColorAt(i, tinted?.body ?? picket[w.id % picket.length]!);
+        // A mod's tint wins; then a faction's marchers wear its colour (FLT-56); the water crowd, whatever it had on.
+        pBody.current?.setColorAt(i, tinted?.body ?? ((w.crowd && signs.bodies.get(w.crowd)) || picket[w.id % picket.length]!));
         pHead.current?.setColorAt(i, tinted?.head ?? skins[(w.id * 7) % skins.length]!);
+        // And a solid cap in it, so the groups read from the default camera without the legend (FLT-56 review).
+        const cap = w.crowd ? signs.bodies.get(w.crowd) : undefined;
+        if (cap) {
+          set(pCap.current, nc, x, 0.7 * S + bob - land * 0.1, z, ry, 1, 1, 1);
+          pCap.current?.setColorAt(nc++, cap);
+        }
         const wave = Math.sin(t * 5 + phase) * 0.14;
         // The pole runs from the fist up to the board.
         set(pStick.current, i, x, 1.25 + bob, z, 0, 1, 1, 1);
-        const which = w.id % SIGNS.length;
+        const own = signs.byCrowd.get(w.crowd ?? "") ?? signs.byCrowd.get("")!;
+        const which = own[w.id % own.length]!;
         const board = boards.current[which];
         if (board) {
           const k = nb[which]!++;
@@ -259,7 +292,8 @@ export function Walkers() {
       const mood = w.mood.value;
       const slump = mood === "miserable" ? 1 : mood === "slumped" ? 0.7 : 0;
       const pace = slump > 0 ? 6.5 : 10;
-      const bob = (walking ? Math.abs(Math.sin(t * pace + phase)) * (slump > 0 ? 0.025 : 0.045) : slump > 0 ? 0 : Math.sin(t * 1.3 + phase) * 0.008) * S + hop;
+      const dancing = conga !== null && conga.includes(w.id);
+      const bob = (walking ? Math.abs(Math.sin(t * pace + phase)) * (slump > 0 ? 0.025 : 0.045) : slump > 0 ? 0 : Math.sin(t * 1.3 + phase) * 0.008) * S + hop + (dancing ? kick : 0);
       const squash = (walking && slump === 0 ? 1 + Math.sin(t * 20 + phase) * 0.04 : 1 + breath) - land;
       const wide = 1 + land * 0.6;
       const lean = slump * 0.42;
@@ -271,10 +305,13 @@ export function Walkers() {
       const fwx = Math.sin(yaw);
       const fwz = Math.cos(yaw);
       const droop = slump * 0.07 * S;
-      const bodyX = x + fwx * cy * sn;
-      const bodyZ = z + fwz * cy * sn;
-      const headX = x + fwx * (hy * sn + droop);
-      const headZ = z + fwz * (hy * sn + droop);
+      // The conga's hip sway: sideways, across the way they are walking.
+      const sx = dancing ? fwz * sway : 0;
+      const sz = dancing ? -fwx * sway : 0;
+      const bodyX = x + fwx * cy * sn + sx * 0.6;
+      const bodyZ = z + fwz * cy * sn + sz * 0.6;
+      const headX = x + fwx * (hy * sn + droop) + sx;
+      const headZ = z + fwz * (hy * sn + droop) + sz;
       const headY = hy * cs - droop * 0.8 + bob - land * 0.1;
       let body: THREE.InstancedMesh | null;
       let head: THREE.InstancedMesh | null;
@@ -322,6 +359,8 @@ export function Walkers() {
     const done = (m: THREE.InstancedMesh | null, n: number) => {
       if (!m) return;
       m.count = n;
+      // Forty-odd placard meshes, most of them empty most of the time: an empty one skips its draw.
+      m.visible = n > 0;
       m.instanceMatrix.needsUpdate = true;
       if (m.instanceColor) m.instanceColor.needsUpdate = true;
     };
@@ -338,6 +377,7 @@ export function Walkers() {
     done(pBody.current, np);
     done(pHead.current, np);
     done(pStick.current, np);
+    done(pCap.current, nc);
     done(eyes.current, ne);
     done(boxes.current, nx);
     done(hide.current, nk);
@@ -399,12 +439,15 @@ export function Walkers() {
         <meshStandardMaterial color="#2a1d14" roughness={0.5} />
       </instancedMesh>
 
+      <instancedMesh ref={pCap} args={[capGeo, undefined, CAP]} castShadow frustumCulled={false}>
+        <meshStandardMaterial roughness={0.55} />
+      </instancedMesh>
       <instancedMesh ref={pStick} args={[stickGeo, undefined, CAP]} castShadow frustumCulled={false}>
         <meshStandardMaterial color="#8a5a3a" roughness={0.9} />
       </instancedMesh>
-      {SIGNS.map((text, i) => (
-        <instancedMesh key={text} ref={(m) => void (boards.current[i] = m)} args={[boardGeo, undefined, SIGN_CAP]} frustumCulled={false}>
-          <meshBasicMaterial map={signMaps[i]} toneMapped={false} side={THREE.DoubleSide} />
+      {signs.all.map((p, i) => (
+        <instancedMesh key={`${p.crowd}:${p.text}`} ref={(m) => void (boards.current[i] = m)} args={[boardGeo, undefined, SIGN_CAP]} frustumCulled={false}>
+          <meshBasicMaterial map={signs.maps[i]} toneMapped={false} side={THREE.DoubleSide} />
         </instancedMesh>
       ))}
 

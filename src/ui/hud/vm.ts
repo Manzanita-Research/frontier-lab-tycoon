@@ -8,7 +8,7 @@ import { OFFICE_TOOLS, RACE_TOOLS, SPEEDS, TOOLS } from "../../app/hud";
 import { PATH_PRICE } from "../../content/buildings";
 import { ERAS } from "../../content/eras";
 import { STAFF } from "../../content/staff";
-import { DRAMA_LETTERS } from "../../content/events";
+import { dramaLetter } from "../../content/events";
 import { SCENARIO, type GoalDef } from "../../content/goals";
 import { FRIENDS } from "../../content/newsroom";
 import { LEAPFROG } from "../../content/leapfrog";
@@ -35,7 +35,7 @@ import { streakText } from "../share/streak";
 import { ENDING_RULES, endingById } from "../../sim/endings/pack";
 import type {
   ArenaRowVM, DramaDocVM,
-  ArenaVM, AuditVM, BillVM, SenateVM, TrackerVM, GoalVM, ReportCardVM, ToneVM, BenchCellVM, DisasterRunVM, DisastersVM, DisasterStageVM, MeterVM, RiskVM, UnderstaffedVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HearingMoveVM, HearingVM, HudVM, LeakVM, SenatorVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
+  ArenaVM, AuditVM, BeatVM, BillVM, SenateVM, TrackerVM, GoalVM, ReportCardVM, ToneVM, BenchCellVM, DisasterRunVM, DisastersVM, DisasterStageVM, MeterVM, RiskVM, UnderstaffedVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HearingMoveVM, HearingVM, HudVM, LeakVM, SenatorVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
   DramaVM, ModsVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, ResponseVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, StreamVM, ThoughtRowVM, TrainingVM, TrendVM, VoiceVM, WalkerKindVM,
   EndingVM, ShareVM, TakeoverVM, MemoVM, ChallengeVM,
 } from "./types";
@@ -89,6 +89,8 @@ export interface HudInput {
   lookLabels?: Readonly<Record<string, string>>;
   mixer: { open: boolean; ready: boolean; muted: boolean; master: number; music: number; sfx: number };
   photo: { on: boolean; time: string; shot: { id: number; url: string; name: string } | null; flash: number };
+  /** A camera beat's caption (FLT-56). Optional: none. */
+  beat?: { id: number; kind: string; caption: string; sub: string } | null;
   skins: SkinPickerVM;
   /** The Mod Manager. Optional: none means no mods and the window shut. */
   mods?: ModsVM;
@@ -119,6 +121,9 @@ export function goalProgressText(def: GoalDef, value: number): string {
       return value >= def.target ? `Arena #${defs().arenaSize + 1 - Math.floor(value)} (top ${defs().arenaSize + 1 - def.target} reached)` : `Arena #${defs().arenaSize + 1 - Math.floor(value)}, need top ${defs().arenaSize + 1 - def.target}`;
   }
 }
+
+/** The top bar of a camera beat (FLT-56), by kind. */
+const BEAT_KICKER: Record<string, string> = { exit: "Breaking · a departure", huddle: "The auditors are conferring", viral: "Live · trending now", statement: "A statement from Comms", leak: "Someone is asking about the file" };
 
 const TONE_LABEL = { bad: "Breaking", joke: "Developing", good: "Good news", neutral: "Update" } as const;
 const MOOD = { content: "Content", slumped: "Slumped", miserable: "Miserable", resigned: "Resigned" } as const;
@@ -367,7 +372,8 @@ function bubblesOf(i: HudInput, chips: ReadonlyMap<string, FactionChipVM>): Bubb
 
 /** A drama card's document, filled in from the pack's template. */
 function dramaOf(id: string, vars: Record<string, string>): DramaDocVM | null {
-  const l = DRAMA_LETTERS.get(id);
+  // A poaching offer is in the poacher's own voice (FLT-56).
+  const l = dramaLetter(id, vars.poacherId);
   if (!l) return null;
   const f = (s: string) => fillTemplate(s, vars);
   return { style: l.style, file: f(l.file), from: f(l.from), to: f(l.to), subject: f(l.subject), lines: l.lines.map(f).filter((x) => x.trim().length > 0), sign: f(l.sign) };
@@ -423,6 +429,12 @@ const BILL_STATUS: Record<string, string> = {
   invited: "Draft", declined: "Shredded", floor: "On the floor", failed: "Voted down", law: "In force", exposed: "Exposed", fallout: "Fallout", sunset: "Sunset", quiet: "Nothing on the desk",
 };
 
+/** The button a beat offers while it plays (FLT-56): the leak's "Bury it", while the reporter is still asking. */
+function beatActionOf(kind: string, s: Snapshot): BeatVM["action"] {
+  const w = kind === "leak" ? billOf(s)?.warning : null;
+  return w ? { id: "bury", label: w.buryText, enabled: w.canBury } : null;
+}
+
 /** Regulatory Capture's bill (FLT-22): the draft, the law, and what it does to each rival. */
 export function billOf(s: Snapshot): BillVM | null {
   const b = s.bill;
@@ -452,6 +464,17 @@ export function billOf(s: Snapshot): BillVM | null {
     status: b.stage === "law" && b.lawDays !== null ? `In force · day ${b.lawDays}` : (BILL_STATUS[b.stage] ?? b.stage),
     tally: b.ayes === null ? null : `${b.ayes}–${3 - b.ayes}`,
     leakText: b.stage === "law" ? `${(b.leakOdds * 100).toFixed(b.leakOdds < 0.1 ? 1 : 0)}% a day` : null,
+    risk: b.risk,
+    riskText: `${Math.round(b.risk * 100)}% before the sunset`,
+    riskLabel: b.riskLabel,
+    warning: b.warning
+      ? {
+          text: `${b.reporter} is asking about the file`,
+          daysText: b.warning.daysLeft === 0 ? "The story runs tomorrow" : `The story runs in ${b.warning.daysLeft} day${b.warning.daysLeft === 1 ? "" : "s"}`,
+          buryText: `Bury it (${formatMoney(b.warning.cost)})`,
+          canBury: s.cash >= b.warning.cost,
+        }
+      : null,
     rivals,
   };
 }
@@ -469,7 +492,7 @@ export function trackerOf(s: Snapshot): TrackerVM | null {
     : (TRACKER_STATUS[p.stage] ?? p.stage);
   return {
     stage: p.stage,
-    motion: p.motion ? { ...p.motion, labSideText: `${s.labName} wants ${SIDE_TEXT[p.motion.labSide]}` } : null,
+    motion: p.motion ? { ...p.motion, stakes: p.motion.stakes ? { ...p.motion.stakes } : null, labSideText: `${s.labName} wants ${SIDE_TEXT[p.motion.labSide]}` } : null,
     status,
     lobbying: p.lobbying,
     senators: p.senators.map((sen) => ({
@@ -570,6 +593,7 @@ function auditOf(s: Snapshot): AuditVM {
     : a.stage !== "visit" || a.visitors === 0 ? null
     : evals ? "Running their own evals"
     : a.phase === "inspecting" && a.stop ? `Inspecting the ${a.stop.name}`
+    : a.phase === "huddling" ? "Comparing notes. Nobody breathe."
     : a.phase === "leaving" ? "Leaving, with footnotes"
     : a.stop ? `On their way to the ${a.stop.name}` : null;
   const progress = a.progress === null ? null : Math.max(0, Math.min(1, a.progress));
@@ -1108,6 +1132,8 @@ export function hudViewModel(i: HudInput): HudVM {
     newsroom: newsroomOf(i),
     sound: soundOf(i),
     photoMode: photoOf(i),
+    // A card needs the player: the beat makes way. Photo mode hides it with the rest of the HUD.
+    beat: i.beat && !event && !era && !i.photo.on ? { ...i.beat, kicker: BEAT_KICKER[i.beat.kind] ?? "Meanwhile", skipLabel: "Skip »", action: beatActionOf(i.beat.kind, i.snap) } : null,
     skins: i.skins,
     mods: i.mods ?? NO_MODS_VM,
     disasters: disastersOf(i, play.visible.disasters),

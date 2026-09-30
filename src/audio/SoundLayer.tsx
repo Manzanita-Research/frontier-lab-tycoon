@@ -69,6 +69,7 @@ export function SoundLayer() {
         case "release": sound.cue("release"); break;
         case "incident": sound.cue("card"); break;
         case "incidentClosed": sound.cue("choice"); break;
+        case "beat": sound.cue(e.beat === "huddle" ? "drumroll" : e.beat === "viral" ? "shutter" : "conga"); break;
         case "cue": sound.cue(e.cue); break;
         case "reset": Object.assign(last.current, soundSnapshot(world)); break;
       }

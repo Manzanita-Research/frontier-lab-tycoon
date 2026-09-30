@@ -215,6 +215,15 @@ export function Bill({ event, bill, actions }: SlotPropsMap["Bill"]) {
             </Win>
           )}
         </div>
+        {bill.editable && (
+          <div className={`f95-leakrisk ${bill.risk >= 0.3 ? "hot" : ""}`}>
+            <span>Metadata risk:</span>
+            <Blocks value={bill.risk} label="Leak risk" tone={bill.risk >= 0.3 ? "red" : "navy"} />
+            <span>
+              <b>{bill.riskText}</b> · {bill.riskLabel}
+            </span>
+          </div>
+        )}
         <div className="f95-msgbody">
           <Ico name={exposed ? "warn" : "doc"} size={36} />
           <div>
@@ -331,6 +340,16 @@ export function PromiseTracker({ event, tracker, bill, actions }: SlotPropsMap["
                   {m ? (
                     <>
                       <b>{m.title}</b> {m.summary} <em className={`side-${m.labSide}`}>({m.labSideText})</em>
+                      {m.stakes && (
+                        <span className="f95-stakes">
+                          <span>
+                            <b>=IF(PASS)</b> {m.stakes.pass}
+                          </span>
+                          <span>
+                            <b>=IF(FAIL)</b> {m.stakes.fail}
+                          </span>
+                        </span>
+                      )}
                     </>
                   ) : (
                     <>
@@ -344,6 +363,14 @@ export function PromiseTracker({ event, tracker, bill, actions }: SlotPropsMap["
                   <th>6</th>
                   <td colSpan={6}>
                     <b>{law.act}</b> ({law.status}){hit.map((r) => ` · ${r.name}: ${r.tags.join(", ")}`).join("")}
+                    {law.warning && (
+                      <span className="f95-leakwarn">
+                        <b>#REF! {law.warning.text}.</b> {law.warning.daysText}.
+                        <Btn className="f95-cellbtn" disabled={!law.warning.canBury} onClick={() => actions.buryLeak()}>
+                          {law.warning.buryText}
+                        </Btn>
+                      </span>
+                    )}
                   </td>
                 </tr>
               )}

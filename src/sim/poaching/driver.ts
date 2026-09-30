@@ -77,7 +77,7 @@ export function poachingVars(s: GameState): Record<string, string> {
   const o = p.offer;
   const n = present(s).length || o.targets.length;
   Object.assign(out, {
-    poacher: o.name, poacherShort: o.short, poachCount: String(n), poachFirst: o.names[0] ?? "",
+    poacher: o.name, poacherShort: o.short, poacherId: o.from, poachCount: String(n), poachFirst: o.names[0] ?? "",
     poachNames: o.names.length <= 1 ? (o.names[0] ?? "") : `${o.names.slice(0, -1).join(", ")} and ${o.names[o.names.length - 1]}`,
     poachCost: formatMoney(MATCH_EACH * n),
   });

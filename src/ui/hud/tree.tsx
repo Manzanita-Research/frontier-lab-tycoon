@@ -96,6 +96,12 @@ export function Modals({ vm, actions }: { vm: HudVM; actions: HudActions }) {
   );
 }
 
+/** A camera beat's letterbox and caption (FLT-56): over the docked HUD, under the cards. */
+export function BeatLayer({ vm, actions }: { vm: HudVM; actions: HudActions }) {
+  const { Beat } = useSkin().slots;
+  return vm.beat ? <Beat beat={vm.beat} actions={actions} /> : null;
+}
+
 /** Photo mode's controls and the polaroid: they live outside the HUD layer so hiding the HUD does not hide them. */
 export function PhotoLayer({ vm, actions }: { vm: HudVM; actions: HudActions }) {
   const { PhotoOverlay } = useSkin().slots;

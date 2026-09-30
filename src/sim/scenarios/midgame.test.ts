@@ -1,11 +1,11 @@
-import { getReach, isReachable, tileIndex, buildingAt, isPathTile, rectContains } from "../pathfind";
+import { getReach, isReachable, tileIndex, isPathTile } from "../pathfind";
 import { openEventOf } from "../events";
 import { outcomeOf } from "../goals";
 import { progressOf } from "../progression";
 import { eraOfState } from "../race/race";
 import { tick } from "../tick";
 import { SimHandle } from "../../app/sim";
-import { createMidgameScenario, MIDGAME_SEED, midgameOpeningNews, midgameOpeningThoughts, walkerOnCampus } from "./midgame";
+import { createMidgameScenario, MIDGAME_SEED, midgameOpeningNews, midgameOpeningThoughts, walkerOnCampus, walkerPlaced } from "./midgame";
 
 // FNV-1a, the same deliberately simple hash used by sim/golden.test.ts, over the entire persisted World.
 function digest(s: unknown): string {
@@ -27,9 +27,12 @@ describe("midgame scenario", () => {
     // and the Promise Tracker.
     // FLT-33/25: the earned factions wake with the campus and argue all 480 days; the water crowd escalates through its arc.
     // FLT-11 adds The Memo's dormant arc (arcs.memo); take it out and the World hashes to the old c4310492.
-    // FLT-51 tags every toast (source, importance, reply); without the tags it is the World FLT-52 pinned, number for number.
-    expect(digest({ ...s, toasts: s.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) })).toBe("36f6a4a9");
-    expect(digest(s)).toBe("6c24ddd0");
+    // FLT-51 tags every toast (source, importance, reply); the first digest strips the tags (on the train it matched FLT-52).
+    // FLT-56: the auditors huddle before they leave and the grade lingers, which moves the opening a few days, and the
+    // Hearing's twelve new questions change what the senators ask. Phase 2: the motions' passes and fails nudge the
+    // factions and last longer.
+    expect(digest({ ...s, toasts: s.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) })).toBe("06ccd627");
+    expect(digest(s)).toBe("31b29e51");
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);
@@ -61,7 +64,7 @@ describe("midgame scenario", () => {
     expect(walkerOnCampus(s)).toBe(true);
     for (const w of [...s.walkers, ...s.staff]) {
       const x = Math.floor(w.x), z = Math.floor(w.z);
-      expect(isPathTile(s, x, z) || !!buildingAt(s, w.x, w.z) || rectContains(s.gate, w.x, w.z)).toBe(true);
+      expect(walkerPlaced(s, w)).toBe(true);
       if (isPathTile(s, x, z)) expect(getReach(s).tiles[tileIndex(s, x, z)]).toBe(1);
     }
     const resumed = JSON.parse(JSON.stringify(s));

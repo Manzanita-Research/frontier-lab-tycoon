@@ -382,6 +382,118 @@
             "Can you start Monday? Can your friends? I've cc'd your friends."
           ],
           "sign": "Warmly, aggressively,\nTalent @ {poacher}"
+        },
+        {
+          "card": "poaching-offer",
+          "poacher": "metameta",
+          "style": "email",
+          "file": "Outlook Excess",
+          "from": "Talent Team <talent@{poacherShort}.example>",
+          "to": "{poachNames}",
+          "subject": "Quick chat? 🚀 (confidential) (not confidential)",
+          "lines": [
+            "Hi {poachFirst},",
+            "The founder read your paper personally. Well, the abstract. Well, a summary of the abstract, on a boat.",
+            "The package is $100M over four years, a private chef, and a desk six feet from the founder (bring headphones). The desk moves with him.",
+            "We also have open weights. Or we did. We'll have them again if you join. Can your friends start Monday? I've cc'd your friends."
+          ],
+          "sign": "Warmly, aggressively,\nTalent @ {poacher}"
+        },
+        {
+          "card": "poaching-offer",
+          "poacher": "anthro",
+          "style": "letter",
+          "file": "Careful Mail",
+          "from": "People & Wellbeing <careers@anthropomorphic.example>",
+          "to": "{poachNames}",
+          "subject": "An invitation (after careful consideration)",
+          "lines": [
+            "Dear {poachFirst},",
+            "We hope this message finds you well, and we have written a 30-page essay on whether it could.",
+            "We would like to offer you a role on our team. The offer is not the largest you will receive. It is, we believe, the most responsible.",
+            "Please take as long as you need to decide. We will take longer to ship."
+          ],
+          "sign": "With care, and a model card,\nThe Constitution Committee @ {poacher}"
+        },
+        {
+          "card": "poaching-offer",
+          "poacher": "openish",
+          "style": "email",
+          "file": "Outlook Excess",
+          "from": "recruiting <hiring@openish.example>",
+          "to": "{poachNames}",
+          "subject": "hey 👋 quick one",
+          "lines": [
+            "hey {poachFirst}!!",
+            "we're shipping a thing on thursday and it would be cool if you were on it. also friday's thing. and the thing after that.",
+            "comp is great, equity is a capped-profit-uncapped-profit-shaped instrument, legal will explain (they can't).",
+            "reply with a single lowercase 'yes' like everyone else here"
+          ],
+          "sign": "— sent from our new device (it's a pendant)\n{poacher}"
+        },
+        {
+          "card": "poaching-offer",
+          "poacher": "vssi",
+          "style": "letter",
+          "file": "Very Secure Mail",
+          "from": "Office of the Founder <no-reply@verysafe.example>",
+          "to": "{poachNames}",
+          "subject": "[REDACTED]",
+          "lines": [
+            "{poachFirst}.",
+            "We have no product. We have never had a product. We are worth $30B.",
+            "We cannot tell you what you would work on. We cannot tell you where the office is. There is a very nice chair.",
+            "Burn this email. Then come to the address that is not written here."
+          ],
+          "sign": "— {poacher}\n(this signature will self-delete)"
+        },
+        {
+          "card": "poaching-offer",
+          "poacher": "sirocco",
+          "style": "email",
+          "file": "Webmail (self-hosted, down)",
+          "from": "careers@sirocco.example",
+          "to": "{poachNames}",
+          "subject": "Magnet link inside 🧲 (the job)",
+          "lines": [
+            "Hello {poachFirst},",
+            "We saw your work. We also saw your weights, which is how we found your email. Sorry.",
+            "We offer open weights, a lunch that is also the offsite, and a release schedule of 'whenever the torrent finishes'.",
+            "Your offer letter is attached as a 40GB torrent. Seed it, please."
+          ],
+          "sign": "Seed well,\nThe {poacher} maintainers"
+        },
+        {
+          "card": "poaching-offer",
+          "poacher": "macrohard",
+          "style": "email",
+          "file": "Outlook Excess (Enterprise Edition)",
+          "from": "Talent Acquisition Center of Excellence <ta-coe@macrohard.example>",
+          "to": "{poachNames}",
+          "subject": "ACTION REQUIRED: Your Opportunity (Ref #88213-B)",
+          "lines": [
+            "Dear Valued Candidate {poachFirst},",
+            "Your profile has been identified as synergistic with our Assistant-for-Assistants initiative. Please see the attached PowerPitch (47 slides).",
+            "Benefits include a bundled licence to everything we have ever made, whether you want it or not, and a badge that opens 3 of the 11 doors.",
+            "To accept, fill in the form, print it, scan it, and upload it to the portal that requires the form."
+          ],
+          "sign": "Regards,\nTA CoE | {poacher} | This email was sent from a spreadsheet"
+        },
+        {
+          "card": "poaching-offer",
+          "poacher": "neo",
+          "style": "email",
+          "file": "Gee-Mail (personal)",
+          "from": "{poacherShort} founders <us@our-new-lab.example>",
+          "to": "{poachNames}",
+          "subject": "remember us?? 😅",
+          "lines": [
+            "{poachFirst}!!!",
+            "It's us. From the lab. We left to build it properly this time and it's going great (we have a logo).",
+            "We can offer you a lot of equity in something with no product and a very big balloon.",
+            "The old gang's all here. Bring a box. You know the drill."
+          ],
+          "sign": "xoxo,\nthe {poacherShort} team (formerly yours)"
         }
       ]
     }

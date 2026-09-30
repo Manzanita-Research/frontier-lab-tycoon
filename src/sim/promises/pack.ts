@@ -14,6 +14,8 @@ const Pledge = Schema.Struct({ says: Schema.Literals(["aye", "nay", "both"]), li
 /** A motion: `labSide` is how the lab wants it to go; `lean` is each senator's odds of voting the lab's way before any lobbying. */
 const Motion = Schema.Struct({
   id: S, title: S, summary: S, labSide: Side,
+  /** FLT-56: what passing and failing does, in a line each, for the tracker (optional). */
+  stakes: Schema.optionalKey(Schema.Struct({ pass: S, fail: S })),
   promises: Schema.Record(S, Pledge),
   lean: Schema.Record(S, N),
   pass: Schema.Array(NamedCall), fail: Schema.Array(NamedCall),
@@ -41,7 +43,7 @@ export type MotionData = typeof Motion.Type;
 export type Side = typeof Side.Type;
 export type PromiseData = typeof Pledge.Type;
 /** What a roll call needs: a motion from the docket, or the bill FLT-22 tables. */
-export interface MotionLike { id: string; title: string; summary: string; labSide: Side; promises: Readonly<Record<string, PromiseData>>; lean: Readonly<Record<string, number>> }
+export interface MotionLike { id: string; title: string; summary: string; labSide: Side; stakes?: { readonly pass: string; readonly fail: string }; promises: Readonly<Record<string, PromiseData>>; lean: Readonly<Record<string, number>> }
 
 export const WHIP_CARD = "promises-whip";
 export const ROLLCALL_CARD = "promises-rollcall";

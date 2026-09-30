@@ -9,10 +9,10 @@ import { enableHearing } from "../hearing/driver";
 import { enablePromises } from "../promises/driver";
 import { promisesView } from "../promises/view";
 import { ROLLCALL_CARD, WHIP_CARD } from "../promises/pack";
-import { enableCapture } from "./driver";
+import { enableCapture, warnLeak } from "./driver";
 import { DRAFT_CARD, EXPOSED_CARD } from "./pack";
 
-export const SENATE_MOMENTS = ["bill", "bill-law", "bill-exposed", "vote", "rollcall"] as const;
+export const SENATE_MOMENTS = ["bill", "bill-law", "bill-leak", "bill-exposed", "vote", "rollcall"] as const;
 export type SenateMoment = (typeof SENATE_MOMENTS)[number];
 export function isSenateMoment(value: string | null | undefined): value is SenateMoment {
   return (SENATE_MOMENTS as readonly unknown[]).includes(value);
@@ -47,7 +47,8 @@ export function lobbyAll(s: GameState) {
 
 /**
  * "bill": the staffer's draft on screen, two clauses ticked. "bill-law": the bill (lobbied through) is law. "bill-exposed":
- * then someone reads the file properties. "vote": a motion on the docket, one senator lobbied, the whip card up.
+ * then someone reads the file properties. "bill-leak" (FLT-56): the law, and a reporter asking about the file (the beat
+ * with its Bury button, and the Senate window open on the law). "vote": a motion on the docket, one senator lobbied, the whip card up.
  * "rollcall": the roll call after that, with the flipped vote.
  */
 export function stageSenate(s: GameState, moment: SenateMoment) {
@@ -73,10 +74,11 @@ export function stageSenate(s: GameState, moment: SenateMoment) {
     lobbyAll(s);
     tick(s, openEventOf(s) ? answer(s) : []);
   }
-  if (moment === "bill-law") {
+  if (moment === "bill-law" || moment === "bill-leak") {
     // Three weeks of law, the Senate's own cards answered, and a quiet screen for the shot.
     const aged = (s: GameState) => s.bill!.lawDay !== null && s.day >= s.bill!.lawDay + 21;
     for (let i = 0; i < 40 * TICKS_PER_DAY && !(aged(s) && !openEventOf(s)); i++) tick(s, openEventOf(s) ? answer(s) : []);
+    if (moment === "bill-leak") warnLeak(s);
     return;
   }
   if (openEventOf(s)) tick(s, answer(s));

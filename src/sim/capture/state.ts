@@ -31,6 +31,10 @@ export interface BillState {
   ayes: number | null;
   /** Each rival's release count when the driver last looked, so a release under the law makes the news once. */
   seen: Record<string, number>;
+  /** FLT-56: the day a reporter started asking about the law's file properties (absent: nobody is). */
+  warned?: number;
+  /** FLT-56: how many times the lab has buried the story under this law. */
+  buried?: number;
   /** Bills gone by, newest last (the last 8). */
   history: BillRecord[];
 }

@@ -21,8 +21,8 @@ export type AudioData = NonNullable<Mod["audio"]>;
 export const GUARD_NAMES = ["after", "every", "progress.gte", "stat.gte", "stat.lte", "chance", "choice", "day.after", "flag.is", "faction.gte", "faction.lte", "relation.gte", "relation.lte", "answered", "not", "any", "all"] as const;
 export const ACTION_NAMES = [
   "investigate.start", "staff.divert", "staff.release", "compute.drain", "cost.spike", "revenue.mult", "auditor.odds", "auditor.note", "effects.end",
-  "building.fire", "building.offline", "building.wear", "building.ensure", "hype.delta", "trust.delta", "heat.delta", "capture.delta", "discourse.delta",
-  "cash.delta", "rival.leap", "rival.growth", "rival.pace", "rival.closed", "camera.focus", "shake", "sound.cue", "news", "toast", "card", "faction.delta", "relation.delta",
+  "building.fire", "building.offline", "building.wear", "building.ensure", "hype.delta", "trust.delta", "voice.push", "heat.delta", "capture.delta", "discourse.delta",
+  "cash.delta", "rival.leap", "rival.growth", "rival.pace", "rival.closed", "camera.focus", "camera.beat", "shake", "sound.cue", "news", "toast", "card", "faction.delta", "relation.delta",
   "faction.signal", "faction.rally", "faction.disperse", "flag.set", "flag.clear",
   "people.meet", "people.quit", "people.pay", "people.cheer",
   "visitors.arrive", "visitors.leave", "walkers.disguise", "walkers.reveal",

@@ -1,7 +1,7 @@
 import { expect, it } from "vitest";
 import { CUES, cueNotes, eraScore } from "./score";
 import { DEFAULT_MIXER, readMixer } from "./SoundKit";
-it("all eight cues have finite, bounded synth envelopes; coin pitches vary", () => {
+it("every cue has finite, bounded synth envelopes; coin pitches vary", () => {
   for (const cue of CUES) {
     expect(cueNotes(cue).length).toBeGreaterThan(0);
     for (const n of cueNotes(cue)) {

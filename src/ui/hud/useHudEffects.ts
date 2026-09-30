@@ -12,6 +12,7 @@ import { NewsDesk } from "../../newsroom/desk";
 import { frontPage, recap } from "../../newsroom/edition";
 import { loadRoom, pressCamera, publish, resetRoom, roomAtom, viewRoom } from "../../newsroom/state";
 import { fx } from "../../render/fx/state";
+import { isBeat, skipBeat } from "../../render/fx/beat";
 import { debugParams } from "../../app/game";
 import { setPhoto, takePhoto, togglePhoto } from "../juice/photo";
 import { chatCountAtom } from "./state";
@@ -61,7 +62,11 @@ function useHotkeys(vm: HudVM) {
         // A focused button would also treat Space as a click.
         (document.activeElement as HTMLElement | null)?.blur?.();
         send({ type: "TOGGLE_PAUSE" });
-      } else if (e.key === "Escape") send({ type: "SET_TOOL", tool: null });
+      } else if (e.key === "Escape") {
+        // Esc skips a camera beat first (FLT-56), then puts the tool away.
+        if (isBeat()) skipBeat();
+        else send({ type: "SET_TOOL", tool: null });
+      }
       else if (/^[1-9]$/.test(e.key)) {
         const tool = TOOLS[Number(e.key) - 1]!;
         if (earned.current.has(tool)) send({ type: "SET_TOOL", tool });
@@ -195,4 +200,14 @@ export function useHudEffects(vm: HudVM, snap: Snapshot) {
   useShareCard(vm);
   useTakeoverTitle(vm);
   useStreak(snap.day);
+  useBeatStage(vm.beat !== null);
+}
+
+/** A camera beat clears the stage (FLT-56): `body.beat` fades the HUD out (beat.css) and the app holds the toasts. */
+function useBeatStage(on: boolean) {
+  useEffect(() => {
+    document.body.classList.toggle("beat", on);
+    send({ type: "HOLD_TOASTS", on });
+    return () => document.body.classList.remove("beat");
+  }, [on]);
 }

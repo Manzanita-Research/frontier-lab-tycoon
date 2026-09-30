@@ -2,7 +2,7 @@
 // nothing else in the game: no `src/sim/**`, no store, no three.
 import type { ComponentType, ReactNode } from "react";
 import type {
-  ArenaVM, AuditVM, BillVM, TrackerVM, ReportCardVM, BubbleVM, FactionsVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, DramaDocVM, DramaVM, EraCardVM, EventVM, HearingVM, HudActions, HudVM, LeakVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
+  ArenaVM, AuditVM, BeatVM, BillVM, TrackerVM, ReportCardVM, BubbleVM, FactionsVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, DramaDocVM, DramaVM, EraCardVM, EventVM, HearingVM, HudActions, HudVM, LeakVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
   ModsVM, SkinOfferVM, NewsroomVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StatsVM, ThoughtRowVM, TickerItemVM,
   StaffVM, TeaserVM, ProgressVM, ToastVM, TrainingVM, UnlockCardVM, VisibleVM, HelpVM, PapersVM, PaperMomentVM, CrumbWikiVM, DisastersVM,
   EndingVM, TakeoverVM, MemoVM, ChallengeVM,
@@ -61,6 +61,8 @@ export const SLOT_NAMES = [
   "DisasterAlert",
   "ReportCard",
   "AuditPin",
+  "Beat",
+  "GateLegend",
   "DramaButton",
   "Drama",
   "Memo",
@@ -152,6 +154,18 @@ export interface SlotPropsMap {
   GroupChat: { chat: ChatVM; actions: HudActions };
   PhotoButton: { photo: PhotoVM; actions: HudActions };
   PhotoOverlay: { photo: PhotoVM; actions: HudActions };
+  /**
+   * A camera beat (FLT-56): letterbox bars top and bottom and the caption, while the camera makes its move over the
+   * running game. Drawn over the docked HUD and under the cards. Offer a skip (`actions.skipBeat()`; Esc does it too)
+   * and keep the bars still under reduced motion.
+   */
+  Beat: { beat: BeatVM; actions: HudActions };
+  /**
+   * Who is at the gate (FLT-56): the game pins it over the gate while a faction marches there. One row per crowd in
+   * `factions.gate` (its colour, count and name); an `addressable` one offers `actions.issueStatement(id)`, which costs
+   * `factions.statement.costText` and is off while `!factions.statement.ready`.
+   */
+  GateLegend: { factions: FactionsVM; actions: HudActions };
   SkinPicker: { skins: SkinPickerVM; actions: HudActions };
   Outcome: { outcome: OutcomeVM; actions: HudActions };
   /**
