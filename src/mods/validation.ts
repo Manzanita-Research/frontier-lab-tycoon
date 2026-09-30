@@ -5,6 +5,11 @@ import type { ContentApi } from "./services/content";
 import type { VocabularyApi } from "./services/vocabulary";
 import { ArcNode, ModError, suggest, type ArcData, type NamedCallData } from "./schema";
 import type { Schema } from "effect";
+import { checkCall, GUARD_NAMES, normalize, VERB_NAMES } from "../sim/verbs";
+import type { Call } from "../sim/disasters/types";
+
+/** The events the sim sends a mod arc (sim/modArcs.ts). */
+export const ARC_EVENTS = ["DAY", "CHOSE"] as const;
 
 // Built-in directly loaded pack triggers remain known to the M1a checker.
 const triggers = new Set([...HEADLINES.map((line) => line.trigger), ...papersPack.content.headlines.add.map((line) => line.trigger)]);
@@ -41,8 +46,9 @@ export function validateContent(content: ContentApi, vocabulary: VocabularyApi):
     known(line.kind, kinds, `content.thoughts[${i}].kind`);
     known(line.when, [...conditions], `content.thoughts[${i}].when`);
   });
+  const cards = content.events.filter((event) => "choices" in event).map((event) => event.id);
   content.events.forEach((event, i) => {
-    if (!("choices" in event)) { validateArc(event, vocabulary, `content.events[${i}]`); return; }
+    if (!("choices" in event)) { validateArc(event, vocabulary, `content.events[${i}]`, cards); return; }
     event.choices.forEach((choice, j) => choice.effects.forEach((effect, k) => {
     const path = `content.events[${i}].choices[${j}].effects[${k}]`;
     if (effect.type === "place") known(effect.kind, buildings, `${path}.kind`);
@@ -54,12 +60,12 @@ export function validateContent(content: ContentApi, vocabulary: VocabularyApi):
   content.arcs.forEach((arc, i) => {
     if (eventIds.has(arc.id)) throw new ModError({ path: `content.arcs[${i}].id`, detail: `id "${arc.id}" is already in events` });
   });
-  content.arcs.forEach((arc, i) => validateArc(arc, vocabulary, `content.arcs[${i}]`));
+  content.arcs.forEach((arc, i) => validateArc(arc, vocabulary, `content.arcs[${i}]`, cards));
 }
 
 /** Structural reachability, ignoring guard outcomes. This is validation only, not a second sim engine.
  * Targets use sibling paths (including a compound state's descendants). Delays and inline code have no schema. */
-export function validateArc(arc: ArcData, vocabulary: VocabularyApi, path: string): void {
+export function validateArc(arc: ArcData, vocabulary: VocabularyApi, path: string, cards?: readonly string[]): void {
   const nodes = new Map<string, Schema.Schema.Type<typeof ArcNode>>();
   const collect = (states: ArcData["states"], parent: string) => {
     for (const [key, node] of Object.entries(states)) {
@@ -69,7 +75,19 @@ export function validateArc(arc: ArcData, vocabulary: VocabularyApi, path: strin
     }
   };
   collect(arc.states, "");
-  const call = (value: NamedCallData, names: readonly string[], at: string) => known(typeof value === "string" ? value : value.type, names, at);
+  // The name, then (for the sim's own Vocabulary) its parameters, with the same messages the disaster packs get.
+  const call = (value: NamedCallData, names: readonly string[], at: string) => {
+    const { type, params } = normalize(value as Call);
+    known(type, names, at);
+    const kind = names === vocabulary.guards ? "guard" : "verb";
+    if (!(kind === "guard" ? GUARD_NAMES : VERB_NAMES).includes(type)) return;
+    const [first] = checkCall(value as Call, kind, at);
+    if (first) {
+      const cut = first.indexOf(": ");
+      throw new ModError({ path: first.slice(0, cut), detail: first.slice(cut + 2) });
+    }
+    if (type === "card" && cards) known(params.id as string, cards, `${at}.params.id`);
+  };
   const edges = new Map<string, string[]>();
   known(arc.initial, Object.keys(arc.states), `${path}.initial`);
   for (const [key, node] of nodes) {
@@ -82,6 +100,7 @@ export function validateArc(arc: ArcData, vocabulary: VocabularyApi, path: strin
     for (const [i, action] of (node.entry ?? []).entries()) call(action, vocabulary.effects, `${path}.states.${key}.entry[${i}]`);
     for (const [i, action] of (node.exit ?? []).entries()) call(action, vocabulary.effects, `${path}.states.${key}.exit[${i}]`);
     for (const [event, value] of Object.entries(node.on ?? {})) {
+      known(event, ARC_EVENTS, `${path}.states.${key}.on.${event}`);
       const transitions = Array.isArray(value) ? value : [value];
       for (const [i, transition] of transitions.entries()) {
         const at = `${path}.states.${key}.on.${event}[${i}]`;

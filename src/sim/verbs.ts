@@ -12,7 +12,7 @@
 // `vocabulary` at the bottom has exactly that shape, so wrapping it in the Layer is mechanical.
 import type { BuildingKind } from "../content/buildings";
 import type { RivalId } from "../content/rivals";
-import { cardId, offerFlag } from "./disasters/names";
+import { askFlag, cardId, offerFlag } from "./disasters/names";
 import type { Call, Cue, DisasterRun, Json, TimedEffect } from "./disasters/types";
 import { TICKS_PER_DAY } from "./constants";
 import { breakBuilding } from "./breakdowns";
@@ -162,6 +162,10 @@ export interface GuardEnv {
   ctx: { enteredTick: number; progress: number; hours: number };
   /** The player's pick, on a CHOSE beat. */
   choice?: string;
+  /** The card that was answered, on a mod arc's CHOSE beat (a disaster only hears its own cards). */
+  card?: string;
+  /** The flags the chart's guards name (mod arcs; set = the day it was set). */
+  flags?: Record<string, number>;
 }
 
 interface GuardDef {
@@ -208,7 +212,17 @@ export const GUARDS: Record<string, GuardDef> = {
   "stat.gte": { doc: "A stat (see STAT_NAMES) is at least `value`.", spec: { stat: "string", value: "number" }, test: (env, p) => (env.stats[p.stat as string] ?? 0) >= (p.value as number) },
   "stat.lte": { doc: "A stat is at most `value`.", spec: { stat: "string", value: "number" }, test: (env, p) => (env.stats[p.stat as string] ?? 0) <= (p.value as number) },
   chance: { doc: "The die the driver rolled for this beat is under `p`. Ordered transitions with the same guard share one roll.", spec: { p: "number" }, test: (env, p) => env.roll < (p.p as number) },
-  choice: { doc: "The player picked this choice key on the card the disaster opened.", spec: { is: "string" }, test: (env, p) => env.choice === p.is },
+  choice: {
+    doc: "The player picked this choice: its `key` on a disaster's card, its position (\"0\", \"1\", ...) on a mod's. A mod arc hears every card, so name it with `card`.",
+    spec: { is: "string", card: "string?" },
+    test: (env, p) => env.choice === p.is && (p.card === undefined || env.card === p.card),
+  },
+  "day.after": { doc: "Today is later than day `day` (day 0 is the first).", spec: { day: "number" }, test: (env, p) => env.day > (p.day as number) },
+  "flag.is": {
+    doc: "The flag `flag` is set (or, with `set: false`, is not). Cards and `flag.set` set flags.",
+    spec: { flag: "string", set: "boolean?" },
+    test: (env, p) => (env.flags?.[p.flag as string] !== undefined) === (p.set ?? true),
+  },
   not: { doc: "The other guard does not hold.", spec: { guard: "call" }, test: (env, p) => !passes(p.guard as Call, env) },
   any: { doc: "At least one of these guards holds (a plain list of guards means all of them).", spec: { guards: "calls" }, test: (env, p) => (p.guards as Call[]).some((g) => passes(g, env)) },
 };
@@ -501,14 +515,14 @@ export const VERBS: Record<string, VerbDef> = {
   },
   toast: { doc: "A toast over the map (same template variables as `news`).", spec: { text: "string", tone: "string?" }, run: (env, p) => addToast(env.state, say(env, p.text as string), toneOf(p.tone)) },
   card: {
-    doc: "Open one of the disaster's event cards (`cards[].id`). The machine hears the player's pick as a CHOSE beat with the choice's `key`.",
+    doc: "Open an event card: one of the disaster's (`cards[].id`), or from a mod arc any card in `content.events` by id, whatever its `when` says. It waits its turn if another card is open. The machine hears the player's pick as a CHOSE beat.",
     spec: { id: "string" },
     run: (env, p) => {
       const { state, run } = env;
-      if (!run) return;
-      const id = cardId(run.id, p.id as string);
-      state.flags[offerFlag(id)] = state.day;
-      run.card = id;
+      const id = run ? cardId(run.id, p.id as string) : (p.id as string);
+      if (!run && !defs().eventById(id)) return;
+      state.flags[run ? offerFlag(id) : askFlag(id)] = state.day;
+      if (run) run.card = id;
       // Cards are checked once a day; a disaster does not want to wait for midnight.
       dailyEvents(state);
     },
@@ -564,6 +578,28 @@ export function statsIn(guard: Call | Call[] | undefined, into = new Set<string>
   if (isCall(params.guard)) statsIn(params.guard as Call, into);
   if (Array.isArray(params.guards)) statsIn(params.guards as Call[], into);
   return into;
+}
+
+/** Flags a guard names, so a mod arc's beat carries only those. */
+export function flagsIn(guard: Call | Call[] | undefined, into = new Set<string>()): Set<string> {
+  if (guard === undefined) return into;
+  if (Array.isArray(guard)) {
+    for (const g of guard) flagsIn(g, into);
+    return into;
+  }
+  const { type, params } = normalize(guard);
+  if (type === "flag.is" && typeof params.flag === "string") into.add(params.flag);
+  if (isCall(params.guard)) flagsIn(params.guard as Call, into);
+  if (Array.isArray(params.guards)) flagsIn(params.guards as Call[], into);
+  return into;
+}
+
+/** Whether a guard rolls the die (so the driver only draws one for charts that use it). */
+export function usesChance(guard: Call | Call[] | undefined): boolean {
+  if (guard === undefined) return false;
+  if (Array.isArray(guard)) return guard.some(usesChance);
+  const { type, params } = normalize(guard);
+  return type === "chance" || (isCall(params.guard) && usesChance(params.guard as Call)) || (Array.isArray(params.guards) && usesChance(params.guards as Call[]));
 }
 
 /** FLT-30's `VocabularyApi` shape: the names a mod's statecharts may use. */

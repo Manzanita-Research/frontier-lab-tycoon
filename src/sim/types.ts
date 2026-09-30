@@ -7,6 +7,7 @@ import type { CollusionState, Investigation } from "./collusion/state";
 import type { NeedKey } from "../content/needs";
 import type { DisastersState } from "./disasters/types";
 import type { ArcStored } from "./machines/arc";
+import type { ModArcStored } from "./modArcs";
 import type { EconomyStored } from "./machines/economy";
 import type { GoalsStored } from "./machines/goals";
 import type { MoodStored } from "./machines/mood";
@@ -285,6 +286,8 @@ export interface GameState {
   goals: GoalsStored;
   /** One machine per event card, by event id. At most one is in `cardOpen`; `tick` does nothing while it is. */
   arcs: Record<string, ArcStored>;
+  /** FLT-37: a mod's story arcs (sim/modArcs.ts), by arc id. Absent until a modded run's first beat. */
+  modArcs?: Record<string, ModArcStored>;
   /** The Race (FLT-9): rival machines, the Arena, the era ratchet, the open-weights drop and the auction clock. */
   race: RaceState;
   /** Release Leapfrog (FLT-27): the release calendar, the benchmark leaderboard, the news cycle, the forced response and the launch livestream. Asleep unless `enabled`. */

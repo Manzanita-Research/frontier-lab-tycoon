@@ -15,6 +15,7 @@ import { Content, type ContentApi } from "./services/content";
 import { Skin, type SkinApi } from "./services/skin";
 import { Rules, type RulesApi } from "./services/rules";
 import { Vocabulary, type VocabularyApi } from "./services/vocabulary";
+import { vocabulary } from "../sim/verbs";
 import { Assets } from "./services/assets";
 import { Audio } from "./services/audio";
 import { GameEvents } from "./services/game-events";
@@ -46,10 +47,8 @@ export const baseRules: RulesApi = {
     key === "TICKS_PER_DAY" ? [value, value] as const : key === "BULLDOZE_REFUND" ? [0, 1] as const : [0, Math.max(1, value * 10)] as const])),
   runCostGrowth: Array.from({ length: 6 }, (_, i) => Constants.runCostGrowth(i + 1)), machinePatches: {},
 };
-export const baseVocabulary: VocabularyApi = {
-  guards: ["stat.gte", "flag.is", "day.after", "chance"],
-  effects: ["effect.cash", "effect.hype", "effect.discourse", "news", "card", "spawn.protesters", "flag.set"],
-};
+/** The sim's real Vocabulary (sim/verbs.ts): the guards and actions a mod arc runs with. */
+export const baseVocabulary: VocabularyApi = { guards: [...vocabulary.guards], effects: [...vocabulary.effects] };
 export function makeBaseGameLayer(skins?: SkinApi) {
   const urls: Readonly<Record<string, string>> = {};
   return Layer.mergeAll(

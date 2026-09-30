@@ -18,6 +18,8 @@ import type { Rng } from "./rng";
 import type { GameState, OpenEvent } from "./types";
 import { pressureReady } from "./tutorial";
 import { defs } from "./defs";
+import { askFlag } from "./disasters/names";
+import { modArcsHeard } from "./modArcs";
 
 export function conditionHolds(state: GameState, c: Condition): boolean {
   if ("all" in c) return c.all.every((sub) => conditionHolds(state, sub));
@@ -48,7 +50,7 @@ export function dailyEvents(state: GameState) {
   // Later eras crowd the calendar: cooldowns shrink.
   const pace = eraDef(eraOfState(state)).pace;
   for (const def of defs().events) {
-    const { stored } = step(arcMachine, state.arcs[def.id]!, { type: "DAY", day: state.day, ready: pressureReady(state) && conditionHolds(state, def.when), slotFree, pace });
+    const { stored } = step(arcMachine, state.arcs[def.id]!, { type: "DAY", day: state.day, ready: pressureReady(state) && (conditionHolds(state, def.when) || state.flags[askFlag(def.id)] !== undefined), slotFree, pace });
     state.arcs[def.id] = stored;
     if (stored.value === "cardOpen") slotFree = false;
   }
@@ -138,5 +140,10 @@ export function chooseEvent(state: GameState, rng: Rng, eventId: string, choiceI
   // The race's numbers are read once, before any effect moves them: a card's own text is about how things stood.
   const vars = raceVars(state);
   for (const e of effects) for (const effect of def.choices[e.choiceIndex]!.effects) applyEffect(state, rng, effect, vars);
-  if (effects.length > 0) syncProtesters(state, rng);
+  if (effects.length > 0) {
+    // A card a mod arc asked for (the `card` verb) is answered.
+    delete state.flags[askFlag(eventId)];
+    syncProtesters(state, rng);
+    if (defs().arcs.length > 0) modArcsHeard(state, rng, eventId, effects[0]!.choiceIndex);
+  }
 }

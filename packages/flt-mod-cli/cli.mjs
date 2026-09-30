@@ -31,6 +31,7 @@ export function printReport(report) {
   console.log(`Replay identical: ${report.digest}; cash $${Math.round(report.cash)}; ${report.elapsedMs} ms`);
   console.log(`Arc reachability: ${report.arcs.length} arcs checked with xstate/graph (structural, guards/actions omitted)`);
   for (const arc of report.arcs) console.log(`  ${arc.id}: ${arc.states} states, ${arc.configurations} configurations`);
+  if (Object.keys(report.arcStates ?? {}).length > 0) console.log(`Arcs ran in the sim: ${Object.entries(report.arcStates).map(([id, at]) => `${id} ended in "${at}"`).join(", ")}`);
   console.log(`Executed: ${report.coverage.executed.join(", ") || "nothing changed from the base game"} (the real sim ran with your definition)`);
   if (report.coverage.inert.length > 0) console.log(`Validated but not read by any system yet: ${report.coverage.inert.join(", ")}`);
 }

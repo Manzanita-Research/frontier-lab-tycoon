@@ -39,6 +39,8 @@ export interface HeadlessReport {
   readonly models: number;
   readonly outcome: string;
   readonly coverage: Coverage;
+  /** Where each mod arc stands at the end of the run (its state path), so an arc that never moved is easy to spot. */
+  readonly arcStates: Record<string, string>;
   readonly state: GameState;
 }
 /** A fixed sustainable campus harness, not a balance bot. It exercises the existing economy/training/race.
@@ -67,5 +69,5 @@ export function runHeadless(def: GameDefinition, options: { days?: number; seed?
     for (const key of ["cash", "capability", "hype", "compute"] as const) if (!Number.isFinite(state[key])) throw new ModError({ path: `headless.${key}`, detail: `non-finite number at day ${state.day}` });
   }
   if (state.day !== days) throw new ModError({ path: "headless", detail: `clock stalled at day ${state.day}; expected ${days}` });
-  return { seed, days: state.day, ticks: state.tick, attempts, cardsAnswered, cash: state.cash, models: state.models.length, outcome: withDefs(def, () => outcomeOf(state)), coverage: coverageOf(def), state };
+  return { seed, days: state.day, ticks: state.tick, attempts, cardsAnswered, cash: state.cash, models: state.models.length, outcome: withDefs(def, () => outcomeOf(state)), coverage: coverageOf(def), arcStates: Object.fromEntries(Object.entries(state.modArcs ?? {}).map(([id, arc]) => [id, arc.value])), state };
 }

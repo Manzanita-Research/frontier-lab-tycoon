@@ -24,7 +24,8 @@ import { updateCoach } from "./coach";
 import { systemUnlocked, updateProgression } from "./progression";
 import { updateTutorial } from "./tutorial";
 import { observeGuardrails, pendingConfirmOf } from "./guardrails";
-import { withDefs } from "./defs";
+import { defs, withDefs } from "./defs";
+import { dailyModArcs } from "./modArcs";
 import type { GameDefinition } from "../mods/game-definition";
 
 export { TICKS_PER_DAY };
@@ -70,6 +71,7 @@ function step(state: GameState, commands: readonly Command[]) {
     if (systemUnlocked(state, "papers")) dailyPapers(state, rng);
     dailyThoughts(state, rng);
     dailyGoals(state, rng);
+    if (defs().arcs.length > 0) dailyModArcs(state, rng);
     if (systemUnlocked(state, "events")) dailyEvents(state);
     updateProgression(state);
     updateTutorial(state);

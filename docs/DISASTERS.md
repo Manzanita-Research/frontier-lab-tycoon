@@ -67,7 +67,9 @@ Guards (pure; `stat.*` read the lab's stats by name):
 | `stat.gte` | stat: string, value: number | A stat (see STAT_NAMES) is at least `value`. |
 | `stat.lte` | stat: string, value: number | A stat is at most `value`. |
 | `chance` | p: number | The die the driver rolled for this beat is under `p`. Ordered transitions with the same guard share one roll. |
-| `choice` | is: string | The player picked this choice key on the card the disaster opened. |
+| `choice` | is: string, card?: string | The player picked this choice: its `key` on a disaster's card, its position (`"0"`, `"1"`, ...) on a mod's. A mod arc hears every card, so name it with `card`. |
+| `day.after` | day: number | Today is later than day `day`. Mostly for mod arcs (sim/modArcs.ts), which step once a day. |
+| `flag.is` | flag: string, set?: boolean | The flag is set (or, with `set: false`, is not). Only mod arcs see flags: a disaster's beat carries none. |
 | `not` | guard: call | The other guard does not hold. |
 | `any` | guards: calls | At least one of these guards holds (a plain list of guards means all of them). |
 
@@ -97,7 +99,7 @@ Verbs (run by the driver, in order, after each transition):
 | `sound.cue` | cue: string | Play a sound cue: `alarm` (FLT-7's breakdown alarm), `card`, `era` or `release`. |
 | `news` | text: string, tone?: string | A ticker headline. `{lab}`, `{model}`, `{rival}`, `{cash}` and `{target}` are filled in, plus whatever the disaster's verbs set (`{leapRival}`). |
 | `toast` | text: string, tone?: string | A toast over the map (same template variables as `news`). |
-| `card` | id: string | Open one of the disaster's event cards (`cards[].id`). The machine hears the player's pick as a CHOSE beat with the choice's `key`. |
+| `card` | id: string | Open one of the disaster's event cards (`cards[].id`); from a mod arc, any card in `content.events` by id, whatever its own `when` says (it waits if another card is open). The machine hears the player's pick as a CHOSE beat. |
 | `flag.set` | name: string | Set a flag to today's day number. |
 | `flag.clear` | name: string | Clear a flag. |
 
