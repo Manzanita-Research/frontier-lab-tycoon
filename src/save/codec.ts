@@ -3,7 +3,7 @@
 // then the Effect Schema, then the World's own shape, so every failure is a SaveError with a sentence in it.
 import { Effect, Schema } from "effect";
 import type { GameState } from "../sim/types";
-import { migrate } from "./migrations";
+import { WORLD_MIGRATIONS, hasWorldSteps, migrate, migrateWorld, type WorldMigration } from "./migrations";
 import { SAVE_KIND, SAVE_VERSION, SaveFile, saveError, type SaveEncoding, type SaveError, type SaveMeta, type SaveMod } from "./format";
 
 const canGzip = () => typeof CompressionStream === "function" && typeof DecompressionStream === "function";
@@ -85,10 +85,24 @@ export const parseSave = (input: unknown): Effect.Effect<SaveFile, SaveError> =>
     if (typeof obj.v !== "number" || !Number.isInteger(obj.v) || obj.v < 1) return yield* saveError("corrupt", "This save has no version number, so there is no telling what is in it.");
     if (obj.v > SAVE_VERSION) return yield* saveError("tooNew", `This lab was saved by a newer version of the game (save format v${obj.v}; this one reads up to v${SAVE_VERSION}). Reload the page to update.`);
     const upgraded = yield* Effect.try({ try: () => migrate(obj as { v: number }), catch: (e) => saveError("corrupt", `This save couldn't be upgraded: ${e instanceof Error ? e.message : String(e)}`) });
-    return yield* decodeEnvelope(upgraded).pipe(
+    const save = yield* decodeEnvelope(upgraded).pipe(
       Effect.mapError((e) => saveError("corrupt", `This save is damaged: ${String(e.message).split("\n")[0]}`)),
     );
+    return yield* upgradeWorld(save, obj.v);
   });
+
+/** Run the World steps (`WORLD_MIGRATIONS`) on a save first written as v`from`: unpack, fix the JSON, pack again. */
+export const upgradeWorld = (save: SaveFile, from: number, target = SAVE_VERSION, table: Readonly<Record<number, WorldMigration>> = WORLD_MIGRATIONS): Effect.Effect<SaveFile, SaveError> =>
+  !hasWorldSteps(from, target, table)
+    ? Effect.succeed(save)
+    : Effect.gen(function* () {
+        const json = yield* unpack(save.enc, save.state);
+        const world = yield* Effect.try({
+          try: () => JSON.stringify(migrateWorld(JSON.parse(json), from, target, table)),
+          catch: (e) => saveError("corrupt", `This save couldn't be upgraded: ${e instanceof Error ? e.message : String(e)}`),
+        });
+        return { ...save, ...(yield* pack(world)) };
+      });
 
 /** The least a World must have for the sim to run on it. The rest is optional in the sim itself (older Worlds load). */
 const WorldShape = Schema.Struct({

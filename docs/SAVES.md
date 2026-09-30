@@ -75,11 +75,21 @@ It never autosaves on a staged link (`?moment=`, `?scenario=`, `?shot`, …; `is
 
 ## Migrations
 
-`MIGRATIONS[n]` upgrades a v`n` envelope to v`n+1` (and the World inside, if it has to: unpack, fix, repack). `migrate` runs every step up to `SAVE_VERSION`, and `parseSave` calls it before validation.
+`MIGRATIONS[n]` upgrades a v`n` envelope to v`n+1`; `migrate` runs every step up to `SAVE_VERSION`, and `parseSave` calls it before validation. The World inside is gzipped, so a step that changes the World goes in `WORLD_MIGRATIONS[n]` (same keys): `parseSave` unpacks an old save's World, runs those steps on the plain JSON and packs it again (`upgradeWorld`).
 
-Adding a version: bump `SAVE_VERSION` in `format.ts`, add `MIGRATIONS[old]`, freeze a save of the old version in `src/save/fixtures/` and extend `migrations.test.ts`. The frozen v1 save is `fixtures/v1-garage-day45.fltsave` (a day-45 garage); its test must keep passing forever.
+Adding a version: bump `SAVE_VERSION` in `format.ts`, add `MIGRATIONS[old]` (and `WORLD_MIGRATIONS[old]` if the World changed), freeze a save of the old version in `src/save/fixtures/` and extend `migrations.test.ts`. The frozen v1 save is `fixtures/v1-garage-day45.fltsave` (a day-45 garage); its test must keep passing forever.
 
-When a content id is renamed (the rival `vssi` becoming `supersuper` in the FLT-62 wave, say), old saves still carry the old id inside the World: that is a migration, v1 → v2, which renames it wherever the World keeps rival ids.
+**A renamed content id is a migration.** Old saves carry the old id inside the World, as values (`race.rivals[].context.id`, `race.board[].id`) and as keys (`race.prevRanks`, `leapfrog.labs`, `bill.seen`, ...). `renameIds(world, { old: "new" })` renames every string that *is* the id and every key that is, and leaves prose alone. For the FLT-62 rival rename (`vssi` to `supersuper`, not on `main` yet), the PR that renames it adds:
+
+```ts
+// format.ts
+export const SAVE_VERSION = 2;
+// migrations.ts
+export const MIGRATIONS = { 1: (s) => ({ ...s, v: 2 }) };
+export const WORLD_MIGRATIONS = { 1: (w) => renameIds(w, { vssi: "supersuper" }) };
+```
+
+`migrations.test.ts` already rehearses exactly that on the frozen v1 save.
 
 ## Demo shelves
 
