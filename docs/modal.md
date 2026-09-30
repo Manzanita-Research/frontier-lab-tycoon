@@ -18,7 +18,13 @@ bb thread spawn \
 bb tasks attach FLT-n --thread <new thread id>
 ```
 
-- Use `claude-opus-5-5` at `high` for architecture, the sim core, integration and taste-heavy work; use `claude-sonnet-5-5` at `xhigh` for well-scoped tasks. **Never** use `claude-sonnet-5`, `claude-opus-5` or older. The builder's first task comment states its exact model.
+- **Model routing (Jem, Sep 30). Always pass `--model` explicitly; the catalog on Modal can be stale:**
+  - **Codex `gpt-6.1-sol`** (`--provider codex --model gpt-6.1-sol --reasoning-level high`; **never** Sol 5.6/6.0 or Astra): backend, logic, the sim, XState/Effect, mods and loader, infra, tests, balance tooling, **and 3D** (scene, models, camera, particles, shaders).
+  - **Claude Sonnet 5.5** (`--provider claude-code --model claude-sonnet-5-5 --reasoning-level xhigh`): **2D UI only** (HUD, skins, panels, dialogs, bubbles, ticker).
+  - **Claude Opus 5.5** (xhigh): the lead only, for direction, specs and review.
+  - **Mixed tasks:** split them, or give the UI part to Sonnet. **Never** Sonnet 5, Opus 5 or older.
+  - **Proving the model:** the builder's first task comment states its exact model. Codex doesn't show the model ID in its prompt, so Sol builders prove it from `~/.codex/sessions/**/*.jsonl` (`grep -rhoE '"model":"[^"]+"' ~/.codex/sessions | sort | uniq -c`).
+  - **Codex on Modal:** the image pins Codex CLI 0.159.2, which has Sol 6.1 in its catalog; older versions don't. Fresh machines have **no Codex login** until a durable auth route exists (asked of Jem via desk). Until then, run Sol builders on the already-logged-in machine with `--machine <host> --new-environment worktree`.
 - Start every prompt with the kind (`Kind: explore.`) and `House rules: <charter path>`, then the task key, and tell the builder to read `AGENTS.md` and `docs/DESIGN.md`.
 - Each spawn creates a fresh Modal machine. bb clones the repo, runs `.bb-env-setup.sh` (pnpm install + headless Chromium), and starts the agent.
 - Run at most 3–4 builders at once.
