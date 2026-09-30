@@ -35,9 +35,13 @@ export const baseContent: ContentApi = {
   tables: baseTables,
 };
 const tunables = Object.fromEntries(Object.entries(Constants).filter((entry): entry is [string, number] => typeof entry[1] === "number"));
+const allTunables = { ...tunables, PATH_PRICE, BULLDOZE_REFUND, EVENT_COOLDOWN_DAYS, MAX_STAFF, MAX_PER_JOB };
 export const baseRules: RulesApi = {
-  tunables: { ...tunables, PATH_PRICE, BULLDOZE_REFUND, EVENT_COOLDOWN_DAYS, MAX_STAFF, MAX_PER_JOB },
-  safeRanges: {}, runCostGrowth: Array.from({ length: 6 }, (_, i) => Constants.runCostGrowth(i + 1)), machinePatches: {},
+  tunables: allTunables,
+  // M1 exposes data only. These are conservative authoring bounds; rules patches remain disabled until M3.
+  safeRanges: Object.fromEntries(Object.entries(allTunables).map(([key, value]) => [key,
+    key === "TICKS_PER_DAY" ? [value, value] as const : key === "BULLDOZE_REFUND" ? [0, 1] as const : [0, Math.max(1, value * 10)] as const])),
+  runCostGrowth: Array.from({ length: 6 }, (_, i) => Constants.runCostGrowth(i + 1)), machinePatches: {},
 };
 export const baseVocabulary: VocabularyApi = {
   guards: ["stat.gte", "flag.is", "day.after", "chance"],

@@ -8,7 +8,7 @@ export interface ContentApi {
   readonly rivals: ReadonlyArray<RivalData>;
   readonly headlines: ReadonlyArray<HeadlineData>;
   readonly thoughts: ReadonlyArray<ThoughtData>;
-  readonly events: ReadonlyArray<EventData>;
+  readonly events: ReadonlyArray<EventData | ArcData>;
   readonly arcs: ReadonlyArray<ArcData>;
   /** Presentation is independent of mechanics. Agents need not walk. */
   readonly walkerKinds: ReadonlyArray<Schema.Schema.Type<typeof EntityKind>>;

@@ -5,7 +5,7 @@ import { Skin } from "./services/skin";
 import { Assets } from "./services/assets";
 import { Audio } from "./services/audio";
 import { Vocabulary } from "./services/vocabulary";
-import { Arc, Building, Ending, EntityKind, EventCard, Goal, Headline, ModError, NamePool, Rival, Thought, Tip, decodeManifest, type ModManifest } from "./schema";
+import { Arc, Building, Ending, EntityKind, EventOrArc, Goal, Headline, ModError, NamePool, Rival, Thought, Tip, decodeManifest, type ModManifest } from "./schema";
 import { contentKey, patchById } from "./patch";
 import { sanitizeCss } from "./css";
 import { validateAssets } from "./assets";
@@ -24,7 +24,7 @@ function applyContent(below: ContentApi, mod: ModManifest): ContentApi {
     rivals: patchById("rivals", below.rivals, p.rivals, (row) => row.id, Schema.decodeUnknownSync(Rival)),
     headlines: p.headlines ? patchById("headlines", below.headlines.map((row, i) => ({ ...row, id: contentKey("headlines", row, i) })), p.headlines, (row) => row.id, (input) => Schema.decodeUnknownSync(Schema.Struct({ ...Headline.fields, id: Schema.String }))({ trigger: "filler", ...toObject(input) })) : below.headlines,
     thoughts: p.thoughts ? patchById("thoughts", below.thoughts.map((row, i) => ({ ...row, id: contentKey("thoughts", row, i) })), p.thoughts, (row) => row.id, Schema.decodeUnknownSync(Schema.Struct({ ...Thought.fields, id: Schema.String }))) : below.thoughts,
-    events: patchById("events", below.events, p.events, (row) => row.id, Schema.decodeUnknownSync(EventCard)),
+    events: patchById("events", below.events, p.events, (row) => row.id, Schema.decodeUnknownSync(EventOrArc, { onExcessProperty: "error" })),
     arcs: patchById("arcs", below.arcs, p.arcs, (row) => row.id, Schema.decodeUnknownSync(Arc)),
     walkerKinds: patchById("walkerKinds", below.walkerKinds, p.walkerKinds, (row) => row.id, Schema.decodeUnknownSync(EntityKind)),
     endings: patchById("endings", below.endings, p.endings, (row) => row.id, Schema.decodeUnknownSync(Ending)),
