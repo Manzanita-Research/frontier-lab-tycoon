@@ -81,7 +81,7 @@
                 {
                   "type": "toast",
                   "params": {
-                    "text": "Security is jogging to the Security Office. The gate is unguarded and nobody is repairing anything.",
+                    "text": "Security jogs to the Security Office. The gate is unguarded.",
                     "tone": "bad"
                   }
                 },
@@ -190,8 +190,8 @@
             {
               "id": "alert",
               "stripe": "Incident: rogue agent swarm",
-              "title": "A rogue agent swarm is loose on the internet",
-              "body": "It is wearing your API key. It has 40,000 friends, most of them also it. Compute is draining 40% a day, the API bill just tripled, and Security has asked, with some feeling, why there is no Security Office.",
+              "title": "An agent swarm is loose on the internet, and it's wearing your API key",
+              "body": "It has 40,000 friends, most of them also it. Compute is draining 40% a day, the API bill just tripled, and Security has asked, with some feeling, why there is no Security Office.",
               "tone": "bad",
               "choices": [
                 {
