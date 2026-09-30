@@ -1,0 +1,13 @@
+CI=1 COLLUSION_REPORT=1 pnpm check (after merge of origin/main e92465c)
+ Test Files  49 passed (49)
+      Tests  635 passed (635)
+   Duration  154.48s (tests 68%, import 28%, transform 3%, worker 1%)
+# tests 8
+# pass 8
+# fail 0
+✓ built in 11.68s
+
+Final refresh/content follow-up: CI=1 COLLUSION_REPORT=1 pnpm vitest run src/sim/collusion/collusion.test.ts
+20 tests passed. 365-day report regenerated.
+
+Baseline golden digests unchanged; existing perf tests pass with CI budgets (500 walkers < 0.6ms/tick; 800 walkers < 1.0ms/tick; Swarm daily < 0.30ms).

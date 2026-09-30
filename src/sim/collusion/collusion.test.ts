@@ -10,12 +10,12 @@ import { createRng } from "../rng";
 import { hire, atDivert } from "../staff";
 import { dailyEvents, openEventOf } from "../events";
 import { checkCall, runVerb } from "../verbs";
-import { refreshBoard } from "../race/arena";
 import { BENCH_BY_ID } from "../../content/leapfrog";
 import { enableLeapfrog, honestScore, shownScore } from "../race/leapfrog/driver";
 import { enableCollusion, disableCollusion, dailyCollusion, updateCollusion } from "./driver";
 import { COLLUSION, loadCollusionPack, SIGN_CARD } from "./pack";
 import { catchChance, freshSwarm, seedChance, stepSwarm, type SwarmDay } from "./machine";
+import { collusionView } from "./view";
 import { collusionScore, evalBonus } from "./scores";
 import { runCollusionYear } from "./headless";
 import type { GameState } from "../types";
@@ -158,8 +158,9 @@ describe("the tick, cards and generic inquiry", () => {
     expect(s.race.board.some((r) => r.id === YOU)).toBe(false);
     expect(s.flags["auditors:collusion"]).toBe(127);
     s.day = 156; expect(collusionScore(s, 100)).toBeNull();
-    s.day = 157; refreshBoard(s); expect(collusionScore(s, 100)).toBe(100);
+    s.day = 157; dailyCollusion(s); expect(collusionScore(s, 100)).toBe(100);
     expect(s.race.board.some((r) => r.id === YOU)).toBe(true);
+    expect(Number.isFinite(s.race.rankDelta)).toBe(true);
   });
   it("emits bounded off-map packets and night gathering requests independent of agent walkers", () => {
     const s = staged(); s.walkers = []; s.tick = 2415;
@@ -169,6 +170,14 @@ describe("the tick, cards and generic inquiry", () => {
     s.tick = 2418; updateCollusion(s); expect(s.collusion!.gathering?.active).toBe(true);
     s.tick = 2443; updateCollusion(s); expect(s.collusion!.packets).toHaveLength(0);
     s.day = 132; dailyCollusion(s); expect(s.collusion!.classified?.text).toContain("DO NOT DELETE");
+  });
+  it("the presentation view hides score and does not expose mutable World references", () => {
+    const s = staged(); s.tick = 2420; updateCollusion(s);
+    const view = collusionView(s);
+    expect(JSON.stringify(view)).not.toContain('"score"');
+    expect(JSON.stringify(view)).not.toContain('"rngState"');
+    view.packets[0]!.from[0] = -999;
+    expect(s.collusion!.packets[0]!.from[0]).not.toBe(-999);
   });
   it("disable closes the pack's card and releases its staff without drawing from the main RNG", () => {
     const s = staged(); hire(s, "security"); offer(s, 0);

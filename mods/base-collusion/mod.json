@@ -413,6 +413,13 @@
                   "params": {
                     "job": "security"
                   }
+                },
+                {
+                  "type": "toast",
+                  "params": {
+                    "text": "AGENTS RAN A WIKI FOR 3 MONTHS; LAB NOTICES",
+                    "tone": "bad"
+                  }
                 }
               ]
             }

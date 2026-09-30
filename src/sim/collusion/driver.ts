@@ -12,11 +12,13 @@ import { runVerb } from "../verbs";
 import type { GameState } from "../types";
 import { refreshBoard } from "../race/arena";
 import { shiftTrust } from "../race/leapfrog/ops";
+import { refreshRecords } from "../race/leapfrog/driver";
 import { COLLUSION, PICK_PREFIX, SIGN_CARD } from "./pack";
 import { freshSwarm, stepSwarm, type SwarmEvent } from "./machine";
 import { activeSwarm, type SwarmEnding } from "./state";
 const R = COLLUSION.rules;
 const OWNER = "collusion";
+const SIGN_HEADLINES = COLLUSION.content.headlines.add.filter((h) => h.trigger !== "inquiryFailed");
 
 /** Enabling is explicit while the UI task follows. Baseline init and its RNG do not change. */
 export function enableCollusion(s: GameState) {
@@ -41,8 +43,11 @@ export function disableCollusion(s: GameState) {
   if (def) s.arcs[SIGN_CARD] = initialStored(arcMachine, { choices: def.choices.length, cooldownDays: def.cooldown ?? 14, openedDay: null });
   s.collusion.machine = { ...s.collusion.machine, context: { ...s.collusion.machine.context, investigationUntil: -1 } };
   refreshBoard(s);
+  const rng = createRng(s.collusion.rngState);
+  if (s.leapfrog.enabled) refreshRecords(s, rng);
+  s.collusion.rngState = rng.state();
 }
-function ending(s: GameState, kind: SwarmEnding) {
+function ending(s: GameState, rng: Rng, kind: SwarmEnding) {
   const c = s.collusion!;
   const rule = R.endings[kind];
   c.ending = kind;
@@ -60,6 +65,7 @@ function ending(s: GameState, kind: SwarmEnding) {
   // Invalidate leaked claims as well as capability-derived scores.
   if (rule.invalidDays > 0 && s.leapfrog.labs[YOU]) s.leapfrog.labs[YOU]!.maxx = {};
   refreshBoard(s);
+  if (s.leapfrog.enabled) refreshRecords(s, rng);
 }
 function send(s: GameState, rng: Rng, event: SwarmEvent) {
   const c = s.collusion!;
@@ -72,7 +78,7 @@ function send(s: GameState, rng: Rng, event: SwarmEvent) {
   }
   if (previous !== c.machine.value) {
     c.history.push({ day: s.day, stage: c.machine.value });
-    if (["contained", "partlyContained", "exposed"].includes(c.machine.value)) ending(s, c.machine.value as SwarmEnding);
+    if (["contained", "partlyContained", "exposed"].includes(c.machine.value)) ending(s, rng, c.machine.value as SwarmEnding);
   }
 }
 /** Consume flag effects immediately after chooseEvent, including commands applied while paused. */
@@ -89,7 +95,17 @@ export function applyCollusionChoices(s: GameState) {
 /** Daily engine facts: agent count is an entity statistic; its present depiction never controls the chart. */
 export function dailyCollusion(s: GameState) {
   const c = s.collusion;
-  if (!c?.enabled || c.ending) return;
+  if (!c?.enabled) return;
+  // Withdrawal ends on its due day, even between the legacy Arena's weekly refreshes.
+  if (c.ending) {
+    if (c.invalidUntil > 0 && s.day === c.invalidUntil) {
+      refreshBoard(s);
+      const rng = createRng(c.rngState);
+      if (s.leapfrog.enabled) refreshRecords(s, rng);
+      c.rngState = rng.state();
+    }
+    return;
+  }
   const rng = createRng(c.rngState);
   const clusters = s.buildings.filter((b) => b.kind === "cluster");
   const reliability = clusters.length ? clusters.reduce((n, b) => n + (b.broken ? 0 : b.reliability), 0) / clusters.length : 1;
@@ -100,12 +116,13 @@ export function dailyCollusion(s: GameState) {
     pressure: Math.max(0, Math.min(1, (s.race.rank - 1) / 6)), reliability, security, arrived,
   });
   if (activeSwarm(s)) {
+    if (s.leapfrog.enabled) refreshRecords(s, rng);
     if (!c.classified && c.machine.value !== "seeded") {
       c.classified = { day: s.day, text: R.frontPage.classified };
       addNews(s, `Frontier Times classified: ${c.classified.text}`, "joke");
     }
     if (s.day % R.signs.newsEvery === 0) {
-      const h = rng.pick(COLLUSION.content.headlines.add);
+      const h = rng.pick(SIGN_HEADLINES);
       addNews(s, fillTemplate(h.text, { lab: s.labName }), h.tone);
       c.heartbeat = { day: s.day, page: "heartbeat.txt", text: rng.pick(COLLUSION.content.heartbeats.add).text };
       // An optional adapter to today's agent walkers; the score never depends on this pool.
