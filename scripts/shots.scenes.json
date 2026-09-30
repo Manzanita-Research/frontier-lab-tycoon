@@ -149,6 +149,19 @@
       "audit-report",
       "audit-caught",
       "audit-phone"
+    ],
+    "flt-52": [
+      "wave-campus",
+      "wave-papers",
+      "collusion-sign",
+      "wave-disasters",
+      "hearing",
+      "yacht-invite",
+      "wave-defection",
+      "wave-poaching",
+      "wave-auditors",
+      "wave-mods",
+      "wave-phone"
     ]
   },
   "scenes": {
@@ -1707,6 +1720,150 @@
       "steps": [],
       "viewport": "390x844",
       "mobile": true
+    },
+    "wave-campus": {
+      "title": "FLT-52: the Level 5 mid-game campus every wave pack wakes on (?scenario=midgame)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95"
+      },
+      "steps": []
+    },
+    "wave-papers": {
+      "title": "FLT-52 at Level 5: Publish or Perish, the Papers window opened on the mid-game campus",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "click": ".f95-papers:not(.open) .f95-tb, .papers-chip",
+          "optional": true
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "wave-disasters": {
+      "title": "FLT-52 at Level 5: Start ▸ Settings ▸ Disasters… on the mid-game campus",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "eval": "async (f, w) => { const z = (ms) => new Promise((r) => setTimeout(r, ms)); const q = (s) => document.querySelector(s); q('[data-testid=start-button]')?.click(); await z(250); [...document.querySelectorAll('[role=menuitem][aria-expanded]')].find((b) => /Settings/.test(b.textContent))?.click(); await z(250); q('[data-testid=start-disasters]')?.click(); await z(300); }"
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "wave-poaching": {
+      "title": "FLT-52 at Level 5: played on from the mid-game, the Poaching War's recruiter email turns up (~day 483)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { for (let i = 0; i < 120 * 20; i++) { const open = Object.keys(w.arcs).find((a) => w.arcs[a].value === 'cardOpen'); if (open === 'poaching-offer') return; f.tick(w, open ? [{ type: 'chooseEvent', eventId: open, choiceIndex: 0 }] : []); } }"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "wave-defection": {
+      "title": "FLT-52 at Level 5: played on from the mid-game, the resignation letter (~day 490)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { for (let i = 0; i < 120 * 20; i++) { const open = Object.keys(w.arcs).find((a) => w.arcs[a].value === 'cardOpen'); if (open === 'defection-card') return; f.tick(w, open ? [{ type: 'chooseEvent', eventId: open, choiceIndex: 0 }] : []); } }"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "wave-auditors": {
+      "title": "FLT-52 at Level 5: played on from the mid-game, Evals Without Borders' warning (~day 507)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { for (let i = 0; i < 120 * 20; i++) { const open = Object.keys(w.arcs).find((a) => w.arcs[a].value === 'cardOpen'); if (open === 'audit-notice') return; f.tick(w, open ? [{ type: 'chooseEvent', eventId: open, choiceIndex: 0 }] : []); } }"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "wave-mods": {
+      "title": "FLT-52 at Level 5: Start ▸ Settings ▸ Mods… on the mid-game campus with two mods loaded",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95",
+        "mod": [
+          "/mods/examples/every-lab-is-steve/mod.json",
+          "/mods/examples/headline-pack/mod.json"
+        ]
+      },
+      "steps": [
+        {
+          "click": "[data-testid=start-button]"
+        },
+        {
+          "click": ".f95-startwrap button[role=menuitem][aria-expanded]",
+          "optional": true
+        },
+        {
+          "click": ".f95-startwrap li.sub ~ li.sub ~ li.sub button",
+          "optional": true
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "wave-phone": {
+      "title": "FLT-52 at Level 5: the resignation letter on a phone",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95"
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "eval": "(f, w) => { for (let i = 0; i < 120 * 20; i++) { const open = Object.keys(w.arcs).find((a) => w.arcs[a].value === 'cardOpen'); if (open === 'defection-card') return; f.tick(w, open ? [{ type: 'chooseEvent', eventId: open, choiceIndex: 0 }] : []); } }"
+        },
+        {
+          "wait": 800
+        }
+      ]
     }
   }
 }
