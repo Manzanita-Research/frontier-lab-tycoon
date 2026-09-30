@@ -129,6 +129,7 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 14px 16px;
+    max-width: calc(100vw - 14px - 14px - 380px);
     pointer-events: none;
   }
   .dd-stk {
@@ -238,10 +239,10 @@
     .delta {
       font: 700 14px var(--flt-font-ui);
       &.good {
-        color: #9ff0b3;
+        color: #e2ffe9;
       }
       &.bad {
-        color: #ffc2b8;
+        color: #ffe5e1;
       }
     }
     .l {
@@ -296,6 +297,12 @@
   }
   .dd-more {
     display: none;
+  }
+  .dd-tool.dd-fold {
+    display: none;
+  }
+  .dd-pop {
+    display: contents;
   }
 
   /* The Vibes star */
@@ -598,20 +605,32 @@
     flex-direction: column;
     align-items: flex-end;
     gap: 12px;
-    width: min(430px, calc(100vw - 28px));
+    width: min(470px, calc(100vw - 28px));
     pointer-events: none;
   }
   .dd-pace {
     pointer-events: auto;
     display: flex;
     flex: none;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 8px 6px 12px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    padding: 6px 8px 5px 12px;
     border: 3px solid var(--dd-ink);
     border-radius: 6px;
     background: var(--dd-paper);
     box-shadow: 5px 5px 0 var(--dd-ink);
+  }
+  .dd-pace-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .dd-pace-cap {
+    margin: 0 0 0 2px;
+    font-size: 13px;
+    line-height: 1.2;
+    color: var(--flt-color-textDim);
   }
   .dd-pace-l {
     display: flex;
@@ -894,7 +913,7 @@
     margin-top: 4px;
     font-size: 15px;
     &.mood-content {
-      color: var(--dd-green);
+      color: #0b6b2c;
     }
     &.mood-slumped {
       color: #a04a00;
@@ -1243,7 +1262,7 @@
   }
   .dd-price {
     font: 400 19px/1 var(--dd-display);
-    color: var(--dd-green);
+    color: #0b6b2c;
     letter-spacing: 0.02em;
     &.free {
       color: var(--dd-purple);
@@ -1907,7 +1926,1258 @@
   /* ---------- the rest of the game's UI, dressed (the base's markup) ---------- */
   .panel {
     background-color: var(--dd-paper);
+    background-image: var(--dd-grid);
+    background-size: 14px 14px;
+  }
+  .odo {
+    letter-spacing: 0.02em;
+  }
+
+  /* Say What? (the thoughts panel) */
+  .thoughts.panel {
+    width: 350px;
+    max-width: 100%;
+  }
+  .thoughts-head {
+    padding: 6px 12px;
+    color: var(--dd-ink);
+    cursor: pointer;
+  }
+  .thoughts-title {
+    font: 400 26px/1 var(--dd-display);
+    letter-spacing: 0.02em;
+  }
+  .thoughts-icon {
+    border: 3px solid var(--dd-ink);
+    border-radius: 9px;
+    background: #fff;
+    i {
+      border: 2px solid var(--dd-ink);
+      background: #fff;
+    }
+  }
+  .thoughts-caret {
+    opacity: 1;
+    border-top-color: var(--dd-ink);
+  }
+  .thoughts-list {
+    border-top: 2px dashed #999;
+    padding: 0 8px 8px;
+  }
+  .thought-row {
+    padding: 5px 8px 6px 6px;
+    border: 2px solid var(--dd-ink);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--dd-ink);
+    font-size: 14px;
+    line-height: 1.2;
+    &:hover {
+      background: #fff7c2;
+    }
+    &.on {
+      background: var(--dd-yellow);
+      box-shadow: 2px 2px 0 var(--dd-ink);
+    }
+  }
+  .thought-count {
+    min-width: 30px;
+    height: 30px;
+    border: 2px solid var(--dd-ink);
+    border-radius: 50%;
+    background: var(--dd-ink);
+    color: #fff;
+    font: 400 20px/1 var(--dd-display);
+  }
+  .kind-researcher .thought-count {
+    background: var(--dd-purple);
+  }
+  .kind-agent .thought-count {
+    background: var(--dd-blue);
+  }
+  .kind-visitor .thought-count {
+    background: var(--dd-orange);
+    color: var(--dd-ink);
+  }
+  .kind-protester .thought-count {
+    background: var(--dd-red);
+  }
+  .thought-who {
+    color: var(--dd-blue);
+  }
+
+  /* The Big Race (R&D multiplier and the Arena) */
+  .race-panel {
+    width: 350px;
+    max-width: 100%;
+    gap: 14px;
+  }
+  .rd {
+    --era: var(--dd-blue);
+    padding: 8px 12px 10px;
+    &::before {
+      display: none;
+    }
+    &.era-2 {
+      --era: var(--dd-orange);
+      --era-ink: var(--dd-ink);
+    }
+    &.era-3 {
+      --era: var(--dd-purple);
+    }
+    &.era-4 {
+      --era: var(--dd-red);
+    }
+  }
+  .rd-label {
+    font: 400 24px/1 var(--dd-display);
+    letter-spacing: 0.03em;
+    opacity: 1;
+    text-transform: uppercase;
+  }
+  .era-pill {
+    padding: 1px 9px;
+    border: 2px solid var(--dd-ink);
+    border-radius: 999px;
+    background: var(--era);
+    color: #fff;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    text-shadow: none;
+  }
+  .rd.era-2 .era-pill {
+    color: var(--dd-ink);
+  }
+  .rd-big .odo {
+    font: 400 46px/1 var(--flt-font-numbers);
+    letter-spacing: 0.02em;
+    -webkit-text-stroke: 2px var(--dd-ink);
+    text-shadow: 3px 3px 0 var(--dd-ink);
+  }
+  .rd-sub {
+    font-size: 14px;
+    opacity: 1;
+  }
+  .era-meter {
+    height: 16px;
+    margin-top: 6px;
+    border: 3px solid var(--dd-ink);
+    border-radius: 0;
+    background: #fff;
+    span {
+      background: repeating-linear-gradient(90deg, var(--era) 0 12px, color-mix(in srgb, var(--era) 65%, #fff) 12px 24px);
+    }
+  }
+  .era-next {
+    font-size: 13px;
+    opacity: 1;
+    color: var(--flt-color-textDim);
+  }
+  .drop-banner {
+    border: 2px solid var(--dd-ink);
     border-radius: 6px;
+    background: var(--dd-red);
+    color: #fff;
+    font-size: 14px;
+  }
+  .arena.panel {
+    padding: 8px 10px 10px;
+  }
+  .arena-head {
+    align-items: center;
+    font: 400 26px/1 var(--dd-display);
+    letter-spacing: 0.02em;
+    span {
+      font: 700 13px var(--flt-font-ui);
+      opacity: 1;
+      color: var(--flt-color-textDim);
+    }
+  }
+  .arena-row {
+    border-radius: 6px;
+    font-size: 14px;
+    &.you {
+      background: #fff7c2;
+      box-shadow: inset 0 0 0 3px var(--dd-ink);
+    }
+    &.moved-up {
+      background-color: color-mix(in srgb, var(--dd-lime) 35%, #fff);
+    }
+    &.moved-down {
+      background-color: color-mix(in srgb, var(--dd-red) 25%, #fff);
+    }
+    &.you.moved-up {
+      background-color: color-mix(in srgb, var(--dd-lime) 45%, #fff);
+    }
+    &.you.moved-down {
+      background-color: color-mix(in srgb, var(--dd-red) 35%, #fff);
+    }
+  }
+  .ar-rank {
+    opacity: 1;
+    width: 18px;
+  }
+  .ar-dot {
+    border-width: 2px;
+  }
+  .ar-score {
+    opacity: 1;
+  }
+  .ar-delta {
+    font-size: 13px;
+    width: 26px;
+  }
+  .ar-open {
+    background: var(--dd-green);
+    font-size: 11px;
+  }
+
+  /* The payroll */
+  .staff.panel {
+    position: relative;
+    left: auto;
+    bottom: auto;
+    z-index: auto;
+    width: 350px;
+    max-width: 100%;
+    max-height: none;
+    padding: 10px 12px 12px;
+    overflow: visible;
+    pointer-events: auto;
+    &.painting {
+      bottom: auto;
+    }
+  }
+  .staff-title {
+    font: 400 26px/1 var(--dd-display);
+    letter-spacing: 0.02em;
+  }
+  .staff-pay {
+    font-size: 14px;
+    opacity: 1;
+    color: var(--flt-color-textDim);
+  }
+  .staff-x {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--dd-ink);
+    background: #fff;
+    box-shadow: 2px 2px 0 var(--dd-ink);
+    &:hover {
+      background: var(--dd-yellow);
+    }
+  }
+  .staff li {
+    border: 2px solid var(--dd-ink);
+    border-radius: 8px;
+    background: #fff;
+  }
+  .staff-roster li {
+    background: #fff7c2;
+  }
+  .swatch {
+    width: 16px;
+    height: 16px;
+  }
+  .hire-text,
+  .roster-text {
+    font-size: 15px;
+  }
+  .staff .blurb {
+    font-size: 13px;
+    opacity: 1;
+    color: var(--flt-color-textDim);
+    white-space: normal;
+  }
+  .mini {
+    min-height: 38px;
+    padding: 4px 12px;
+    border: 3px solid var(--dd-ink);
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 2px 2px 0 var(--dd-ink);
+    color: var(--dd-ink);
+    font-size: 14px;
+    &.primary {
+      background: var(--dd-blue);
+      color: #fff;
+    }
+    &.danger {
+      background: #ffd6d2;
+    }
+    &:active:not(:disabled) {
+      transform: translate(2px, 2px);
+      box-shadow: none;
+    }
+  }
+  .staff-foot,
+  .staff-paint {
+    font-size: 13px;
+  }
+
+  /* News Room, sound mixer and the skin picker: paper cards with a yellow title bar */
+  .news-backdrop {
+    background-color: rgba(17, 17, 17, 0.55);
+    background-image: radial-gradient(rgba(255, 255, 255, 0.16) 1.5px, transparent 2px);
+    background-size: 30px 30px;
+    backdrop-filter: none;
+  }
+  .news-dialog {
+    border: 3px solid var(--dd-ink);
+    border-radius: 6px;
+    background-color: var(--dd-paper);
+    box-shadow: 8px 8px 0 var(--dd-ink);
+    color: var(--dd-ink);
+  }
+  .news-toolbar {
+    padding: 8px 14px;
+    border-bottom: 3px solid var(--dd-ink);
+    background: var(--dd-yellow);
+    color: var(--dd-ink);
+    font: 700 16px var(--flt-font-ui);
+    span {
+      color: var(--dd-ink);
+      font-size: 14px;
+    }
+    button {
+      min-height: 40px;
+      padding: 4px 12px;
+      border: 3px solid var(--dd-ink);
+      border-radius: 6px;
+      background: #fff;
+      box-shadow: 3px 3px 0 var(--dd-ink);
+      color: var(--dd-ink);
+      font: 700 15px var(--flt-font-ui);
+      &:hover {
+        background: #fff7c2;
+      }
+      &:active {
+        transform: translate(2px, 2px);
+        box-shadow: 1px 1px 0 var(--dd-ink);
+      }
+    }
+  }
+  .skin-picker .news-toolbar,
+  .mixer-box .news-toolbar {
+    margin: 0 -20px 12px;
+    padding: 8px 20px;
+  }
+  .archive-list button {
+    border: 3px solid var(--dd-ink);
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 3px 3px 0 var(--dd-ink);
+    &:hover {
+      background: #fff7c2;
+      border-color: var(--dd-ink);
+    }
+  }
+  .edition-icon {
+    border: 2px solid var(--dd-ink);
+    border-radius: 6px;
+    background: var(--dd-yellow);
+    &.chat {
+      background: var(--dd-lime);
+    }
+  }
+  .chat-message p {
+    border: 2px solid var(--dd-ink);
+    border-radius: 4px 16px 16px;
+    box-shadow: 2px 2px 0 var(--dd-ink);
+  }
+  .chat-bottom button,
+  .mute-button {
+    min-height: 44px;
+    border: 3px solid var(--dd-ink);
+    border-radius: 6px;
+    background: var(--dd-blue);
+    box-shadow: 3px 3px 0 var(--dd-ink);
+    color: #fff;
+    font: 700 16px var(--flt-font-ui);
+  }
+  .mixer-intro,
+  .mixer-box small {
+    color: var(--flt-color-textDim);
+    font-size: 14px;
+  }
+  .mixer-slider {
+    font: 700 16px var(--flt-font-ui);
+    input {
+      accent-color: var(--dd-purple);
+    }
+  }
+  .sound-audition button {
+    min-height: 36px;
+    border: 2px solid var(--dd-ink);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--dd-ink);
+    font-size: 14px;
+  }
+  .skin-card {
+    border: 3px solid var(--dd-ink);
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 3px 3px 0 var(--dd-ink);
+    &.on {
+      background: #fff7c2;
+      border-color: var(--dd-ink);
+      box-shadow: 0 0 0 3px var(--dd-blue), 3px 3px 0 3px var(--dd-ink);
+    }
+    small {
+      font-size: 13px;
+      opacity: 1;
+      color: var(--flt-color-textDim);
+    }
+  }
+  .skin-rejected {
+    font-size: 14px;
+    color: #a50f16;
+  }
+  .skin-buttons .choice {
+    min-height: 44px;
+    border-radius: 6px;
+    box-shadow: 3px 3px 0 var(--dd-ink);
+    font: 400 24px/1 var(--dd-display);
+    &.primary {
+      background: var(--dd-green);
+      color: #fff;
+    }
+    b {
+      font-weight: 400;
+    }
+  }
+
+  /* Photo mode */
+  .photo-bar.panel {
+    border-radius: 6px;
+  }
+  .photo-times button,
+  .photo-done {
+    min-height: 40px;
+    border: 3px solid var(--dd-ink);
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 2px 2px 0 var(--dd-ink);
+    color: var(--dd-ink);
+    font: 700 15px var(--flt-font-ui);
+    &.on,
+    &:hover {
+      background: var(--dd-yellow);
+    }
+  }
+  .photo-done {
+    background: var(--dd-yellow);
+  }
+  .shutter {
+    border-color: var(--dd-ink);
+  }
+  .polaroid {
+    border: 3px solid var(--dd-ink);
+    box-shadow: 5px 5px 0 var(--dd-ink);
+  }
+  .polaroid-cap {
+    font-family: var(--dd-display);
+    font-weight: 400;
+  }
+
+
+  /* ---------- a laptop: the same sheet, a size down ---------- */
+  @media (max-width: 1400px), (max-height: 820px) {
+    .dd-left {
+      gap: 10px;
+    }
+    .dd-stats {
+      gap: 10px;
+    }
+    .dd-globe {
+      width: 50px;
+      height: 50px;
+    }
+    .dd-ribbon b {
+      font-size: 34px;
+    }
+    .dd-date {
+      font-size: 15px;
+    }
+    .dd-stickers {
+      gap: 10px 12px;
+    }
+    .dd-star {
+      width: 126px;
+      height: 121px;
+    }
+    .dd-star-text {
+      padding-top: 13px;
+      .n {
+        font-size: 36px;
+      }
+      .l {
+        font-size: 12px;
+      }
+    }
+    .dd-circ {
+      width: 92px;
+      height: 92px;
+    }
+    .dd-stk .n {
+      font-size: 30px;
+    }
+    .dd-runway .n {
+      font-size: 32px;
+    }
+    .dd-stk .l {
+      font-size: 12px;
+    }
+    .dd-pill {
+      min-width: 82px;
+      padding: 6px 10px 7px;
+    }
+    .dd-burst {
+      width: 100px;
+      height: 100px;
+      .n {
+        font-size: 28px;
+      }
+      .l {
+        font-size: 11px;
+      }
+    }
+    .dd-chart {
+      width: 312px;
+      padding: 8px 10px 10px;
+      .dd-training h4,
+      .dd-goals h4 {
+        font-size: 24px;
+      }
+    }
+    .dd-model {
+      font-size: 17px;
+    }
+    .dd-goals {
+      margin-top: 8px;
+    }
+    .dd-goal-list li {
+      padding: 4px 0;
+    }
+  }
+
+  /* ---------- short screens: the badge loses its personnel file so the FOLLOW button stays on screen ---------- */
+  @media (max-height: 820px) and (min-width: 641px) {
+    .dd-eta,
+    .dd-goal-list .dd-bar {
+      display: none;
+    }
+    .dd-goal-list li {
+      padding: 3px 0;
+    }
+    .dd-goals {
+      margin-top: 6px;
+    }
+    .dd-right {
+      gap: 10px;
+    }
+    .dd-tool {
+      width: 44px;
+      height: 44px;
+    }
+    .dd-badge-top {
+      padding: 10px 52px 6px 14px;
+      h4 {
+        margin: 0;
+      }
+      small {
+        display: none;
+      }
+    }
+    .dd-badge-in {
+      padding: 8px 12px 10px;
+    }
+    .dd-who {
+      grid-template-columns: 72px 1fr;
+    }
+    .dd-photo {
+      width: 72px;
+      height: 84px;
+      padding-bottom: 12px;
+    }
+    .dd-portrait {
+      width: 60px;
+      height: 60px;
+    }
+    .dd-name {
+      font-size: 26px;
+    }
+    .dd-status,
+    .dd-log {
+      display: none;
+    }
+    .dd-therms {
+      gap: 4px;
+      margin-top: 8px;
+    }
+    .dd-fact {
+      margin-top: 8px;
+      padding: 6px 8px;
+      font-size: 15px;
+      b {
+        font-size: 19px;
+      }
+    }
+    .dd-go {
+      min-height: 44px;
+      margin-top: 8px;
+    }
+  }
+
+  /* ---------- a wide screen: the right column may run down beside the tray ---------- */
+  @media (min-width: 1560px) {
+    .dd-right {
+      bottom: calc(var(--dd-ticker-h) + 14px);
+    }
+  }
+
+  /* ---------- narrower than a desktop: the bot's balloon floats over the tray ---------- */
+  @media (max-width: 1100px) {
+    .dd-assistant {
+      width: 92px;
+    }
+    .dd-banner {
+      max-width: calc(100vw - 28px - 450px);
+      flex-wrap: wrap;
+    }
+    .dd-globe {
+      display: none;
+    }
+    .dd-say {
+      position: absolute;
+      left: 62px;
+      bottom: calc(100% - 6px);
+      width: max-content;
+      max-width: min(252px, calc(100vw - 100px));
+      margin: 0;
+      &::before,
+      &::after {
+        display: none;
+      }
+    }
+  }
+
+  /* ---------- a phone: one strip of stickers, a Star Chart strip, Pace over the tray ---------- */
+  @media (max-width: 640px) {
+    & {
+      --dd-ticker-h: 44px;
+      --dd-tray-h: 92px;
+    }
+    .dd-left {
+      left: 8px;
+      top: 8px;
+      gap: 8px;
+      width: calc(100vw - 16px);
+    }
+    .dd-stats {
+      gap: 8px;
+      width: 100%;
+    }
+    .dd-globe {
+      display: none;
+    }
+    .dd-ribbon {
+      max-width: calc(100vw - 16px - 96px);
+      filter: drop-shadow(3px 3px 0 var(--dd-ink));
+      b {
+        padding: 3px 24px 1px 10px;
+        font-size: 26px;
+      }
+    }
+    .dd-date {
+      padding: 1px 8px;
+      font-size: 13px;
+      box-shadow: 2px 2px 0 var(--dd-ink);
+    }
+    .dd-stickers {
+      gap: 8px;
+      max-width: none;
+      width: 100%;
+    }
+    .dd-star {
+      width: 100px;
+      height: 96px;
+    }
+    .dd-star-text {
+      padding-top: 8px;
+      .n {
+        font-size: 30px;
+      }
+      .l {
+        margin-top: 0;
+        font-size: 12px;
+      }
+      .dd-trend {
+        display: none;
+      }
+    }
+    .dd-circ {
+      width: 74px;
+      height: 74px;
+      padding: 3px;
+      box-shadow: 3px 3px 0 var(--dd-ink);
+    }
+    .dd-stk .n {
+      font-size: 25px;
+    }
+    .dd-stk .l {
+      margin-top: 1px;
+      font-size: 12px;
+    }
+    .dd-cash .net,
+    .dd-runway .long {
+      display: none;
+    }
+    .dd-runway .hurry {
+      margin-top: 0;
+      font-size: 12px;
+      gap: 0;
+    }
+    .dd-more {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      border: 3px solid var(--dd-ink);
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 3px 3px 0 var(--dd-ink);
+      color: var(--dd-ink);
+      cursor: pointer;
+      pointer-events: auto;
+    }
+    .dd-cap,
+    .dd-hype,
+    .dd-arena,
+    .dd-burst {
+      display: none;
+    }
+    .dd-stats.expanded {
+      .dd-cap,
+      .dd-hype,
+      .dd-arena {
+        display: grid;
+      }
+      .dd-burst {
+        display: grid;
+        width: 92px;
+        height: 92px;
+        .n {
+          font-size: 25px;
+        }
+        .l {
+          font-size: 11px;
+        }
+      }
+    }
+    .dd-pill {
+      min-width: 76px;
+      padding: 5px 8px 6px;
+    }
+    .dd-burst .era {
+      display: none;
+    }
+
+    .dd-chart {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: calc(100vw - 16px - 56px);
+      padding: 6px 8px 8px;
+      box-shadow: 3px 3px 0 var(--dd-ink);
+      .dd-training h4 {
+        font-size: 20px;
+        gap: 4px;
+      }
+    }
+    .dd-training {
+      flex: 1;
+      min-width: 0;
+    }
+    .dd-model {
+      margin: 0;
+      overflow: hidden;
+      font-size: 14px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .dd-bar {
+      height: 12px;
+      margin: 3px 0 0;
+      border-width: 2px;
+    }
+    .dd-trainfoot,
+    .dd-eta {
+      display: none;
+    }
+    .dd-empty {
+      margin: 2px 0 0;
+      font-size: 13px;
+    }
+    .dd-shipped {
+      top: -18px;
+      right: -12px;
+      font-size: 20px;
+    }
+    .dd-goals {
+      flex: none;
+      margin: 0;
+    }
+    .dd-goals-head {
+      flex-direction: column;
+      justify-content: center;
+      gap: 0;
+      width: 48px;
+      min-height: 46px;
+    }
+    .dd-chart .dd-goals-head h4 {
+      display: none;
+    }
+    .dd-days {
+      display: none;
+    }
+    .dd-count {
+      font-size: 17px;
+    }
+    .dd-goal-body {
+      position: absolute;
+      z-index: 8;
+      left: 0;
+      right: 0;
+      top: calc(100% + 8px);
+      padding: 6px 12px 8px;
+      border: 3px solid var(--dd-ink);
+      border-radius: 6px;
+      background-color: var(--dd-paper);
+      background-image: var(--dd-grid);
+      background-size: 14px 14px;
+      box-shadow: 5px 5px 0 var(--dd-ink);
+    }
+
+    /* The right column dissolves: Pace, the round buttons and the panels each find their own place. */
+    .dd-right {
+      display: contents;
+    }
+    .dd-pace {
+      position: absolute;
+      left: 8px;
+      right: 8px;
+      bottom: calc(var(--dd-ticker-h) + var(--dd-tray-h) + 32px);
+      padding: 4px 6px 4px 62px;
+      box-shadow: 3px 3px 0 var(--dd-ink);
+    }
+    .dd-pace-row {
+      width: 100%;
+      gap: 6px;
+    }
+    .dd-pace-l,
+    .dd-pace-cap {
+      display: none;
+    }
+    .dd-pb {
+      flex: 1;
+      min-width: 0;
+      min-height: 44px;
+      padding: 2px 3px;
+      font-size: 14px;
+      box-shadow: 2px 2px 0 var(--dd-ink);
+      &.on {
+        transform: translate(1px, 1px);
+        box-shadow: 1px 1px 0 var(--dd-ink);
+      }
+    }
+    .dd-toolbar {
+      position: absolute;
+      right: 8px;
+      top: 50px;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+      margin: 0;
+    }
+    .dd-tools {
+      position: relative;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+    .dd-tool {
+      width: 44px;
+      height: 44px;
+    }
+    .dd-tool.dd-fold {
+      display: grid;
+      background: #fff;
+    }
+    .dd-pop {
+      display: none;
+      position: absolute;
+      top: 52px;
+      right: 0;
+      flex-direction: row;
+      gap: 8px;
+      padding: 6px;
+      border: 3px solid var(--dd-ink);
+      border-radius: 30px;
+      background: var(--dd-paper);
+      box-shadow: 3px 3px 0 var(--dd-ink);
+    }
+    .dd-tools.open .dd-pop {
+      display: flex;
+      right: 52px;
+      top: 0;
+    }
+    .dd-extra {
+      position: absolute;
+      left: 8px;
+      right: 8px;
+      width: auto;
+      bottom: calc(var(--dd-ticker-h) + var(--dd-tray-h) + 100px);
+    }
+    .dd-stack {
+      position: absolute;
+      right: 8px;
+      top: 268px;
+      width: auto;
+      max-width: calc(100vw - 16px);
+      margin: 0;
+      padding: 0;
+      gap: 8px;
+      overflow: visible;
+    }
+    .thoughts.panel {
+      width: auto;
+      &.open {
+        width: min(340px, calc(100vw - 16px));
+      }
+    }
+    .race-panel {
+      width: auto;
+    }
+    .staff.panel {
+      position: fixed;
+      left: 8px;
+      right: 8px;
+      top: 210px;
+      bottom: auto;
+      z-index: 20;
+      width: auto;
+      max-height: calc(100dvh - 210px - var(--dd-ticker-h) - var(--dd-tray-h) - 84px);
+      overflow-y: auto;
+    }
+
+    /* The Field Trip Badge becomes a short bottom sheet */
+    .dd-badge.sheet {
+      position: fixed;
+      left: 8px;
+      right: 8px;
+      bottom: calc(var(--dd-ticker-h) + var(--dd-tray-h) + 92px);
+      z-index: 30;
+      width: auto;
+      max-width: none;
+      &.more {
+        max-height: 60dvh;
+        overflow-y: auto;
+      }
+      .dd-hole {
+        display: none;
+      }
+      .dd-badge-top {
+        padding: 4px 52px 6px 12px;
+        h4 {
+          font-size: 20px;
+        }
+        small {
+          display: none;
+        }
+      }
+      &.more .dd-badge-top small {
+        display: block;
+        font-size: 13px;
+      }
+      .dd-x {
+        top: 8px;
+        right: 8px;
+        width: 40px;
+        height: 40px;
+      }
+      .dd-badge-in {
+        padding: 8px 12px 10px;
+      }
+      .dd-who {
+        grid-template-columns: 54px 1fr;
+        gap: 10px;
+      }
+      .dd-photo {
+        width: 54px;
+        height: 66px;
+        padding-bottom: 11px;
+      }
+      .dd-portrait {
+        width: 44px;
+        height: 44px;
+      }
+      .dd-id {
+        font-size: 11px;
+      }
+      .dd-name {
+        font-size: 24px;
+      }
+      .dd-role {
+        margin-top: 2px;
+        font-size: 13px;
+      }
+      .dd-mood {
+        margin-top: 2px;
+        font-size: 14px;
+      }
+      .dd-status {
+        display: none;
+      }
+      &.more .dd-status {
+        display: block;
+      }
+      .dd-therms {
+        margin-top: 6px;
+      }
+      .dd-fact {
+        margin-top: 8px;
+        padding: 6px 8px;
+        font-size: 15px;
+        b {
+          font-size: 19px;
+        }
+      }
+      .dd-go {
+        min-height: 44px;
+        margin-top: 8px;
+        font-size: 22px;
+      }
+    }
+    .dd-handle {
+      display: grid;
+      place-items: center;
+      height: 18px;
+      margin: 0 -12px 2px 0;
+      touch-action: none;
+      cursor: grab;
+      i {
+        width: 40px;
+        height: 5px;
+        border-radius: 3px;
+        background: rgba(255, 255, 255, 0.75);
+      }
+    }
+
+    /* the guide bot stands on the tray, next to Pace */
+    .dd-bottom {
+      left: 0;
+      right: 0;
+      bottom: calc(var(--dd-ticker-h) + 8px);
+      display: block;
+      padding: 0 8px;
+    }
+    .dd-assistant {
+      position: absolute;
+      left: 8px;
+      bottom: calc(100% - 8px);
+      z-index: 4;
+      width: calc(100vw - 16px);
+      min-height: 0;
+      pointer-events: none;
+    }
+    .dd-guide {
+      width: 50px;
+      height: 62px;
+      filter: none;
+    }
+    .dd-say {
+      left: 0;
+      right: 0;
+      bottom: 84px;
+      z-index: 6;
+      &::before {
+        display: none;
+      }
+      &::after {
+        display: block;
+        left: 22px;
+        bottom: -10px;
+        width: 16px;
+        height: 16px;
+        background: #fff;
+        border-right: 3px solid var(--dd-ink);
+        border-bottom: 3px solid var(--dd-ink);
+        clip-path: none;
+        transform: rotate(45deg);
+      }
+    }
+    .dd-say-body {
+      max-width: none;
+      font-size: 15px;
+      b {
+        font-size: 21px;
+      }
+    }
+    .dd-stamps {
+      width: 100%;
+    }
+    .dd-tray {
+      padding: 12px 6px 6px;
+      box-shadow: 3px 3px 0 var(--dd-ink);
+    }
+    .dd-tray-label {
+      top: -14px;
+      left: 62px;
+      font-size: 16px;
+      line-height: 1.1;
+    }
+    .dd-tray-row {
+      gap: 6px;
+      padding: 2px 2px 6px;
+    }
+    .dd-stamp {
+      flex: 0 0 64px;
+      min-width: 64px;
+      max-width: 64px;
+      height: 74px;
+      font-size: 12px;
+      box-shadow: 2px 2px 0 var(--dd-ink);
+    }
+    .dd-stamp-art {
+      width: 28px;
+      height: 28px;
+    }
+    .dd-price {
+      font-size: 17px;
+    }
+    .dd-key {
+      display: none;
+    }
+    .dd-stamp-tip {
+      left: 8px;
+      right: 8px;
+      bottom: calc(100% + 66px);
+      width: auto;
+      max-width: none;
+      font-size: 14px;
+      &::after {
+        display: none;
+      }
+    }
+    .dd-ticker {
+      gap: 10px;
+      padding-inline: 8px;
+      font-size: 16px;
+    }
+    .dd-ticker-tag {
+      padding: 0 7px;
+      font-size: 19px;
+    }
+    .dd-ticker .tick {
+      font-size: 16px;
+    }
+    .dd-vibes-tip {
+      left: 8px;
+      right: 8px;
+      width: auto;
+    }
+
+    /* cards */
+    .dd-worksheet {
+      width: calc(100vw - 32px);
+    }
+    .dd-rtitle {
+      margin: 14px -12px 0;
+      padding: 7px 20px 3px;
+      h2 {
+        font-size: 25px;
+      }
+    }
+    .dd-ws-body {
+      padding: 14px 12px 14px;
+      background-image: repeating-linear-gradient(transparent 0 23px, rgba(26, 91, 214, 0.2) 23px 24px), linear-gradient(90deg, transparent 30px, rgba(217, 23, 31, 0.45) 30px 32px, transparent 32px);
+      p {
+        margin-left: 22px;
+        font-size: 16px;
+        line-height: 24px;
+      }
+    }
+    .dd-circle-one,
+    .dd-answers,
+    .dd-paddles {
+      margin-left: 22px;
+    }
+    .dd-circle-one {
+      font-size: 20px;
+      line-height: 24px;
+    }
+    .dd-answer {
+      padding: 6px 10px 6px 6px;
+      gap: 8px;
+    }
+    .dd-letter {
+      width: 36px;
+      height: 36px;
+      font-size: 24px;
+    }
+    .dd-cert {
+      width: calc(100vw - 32px);
+      padding: 16px 14px 18px;
+      .dd-rtitle {
+        margin-inline: -20px;
+      }
+    }
+    .dd-medal {
+      width: 92px;
+      height: 92px;
+      span {
+        font-size: 54px;
+      }
+    }
+    .dd-continue {
+      min-height: 48px;
+      font-size: 26px;
+    }
+    .dd-outcome .dd-ws-head {
+      margin-inline: -14px;
+    }
+  }
+
+  /* ---------- fingers: every button at least 44px ---------- */
+  @media (pointer: coarse) {
+    .dd-pb,
+    .dd-x,
+    .dd-extra-btns button,
+    .mini,
+    .staff-x,
+    .news-toolbar button,
+    .photo-times button,
+    .photo-done,
+    .sound-audition button,
+    .dd-more {
+      min-height: 44px;
+      min-width: 44px;
+    }
+    .dd-tool {
+      width: 48px;
+      height: 48px;
+    }
+    .dd-goals-head,
+    .thoughts-head {
+      min-height: 44px;
+    }
+    .dd-x {
+      width: 44px;
+      height: 44px;
+    }
   }
 
   /* ---------- reduced motion (the OS setting, or the switch in the skin picker) ---------- */

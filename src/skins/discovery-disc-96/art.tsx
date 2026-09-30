@@ -207,6 +207,7 @@ export function Icon({ name, size = 24 }: { name: string; size?: number }) {
         <path d="M7.5 10h3M13.5 10h3M8.5 16h7" {...line} strokeWidth={2} />
       </>
     ),
+    chevron: <path d="M6 9l6 6 6-6" {...line} strokeWidth={3.4} stroke="currentColor" />,
     more: (
       <>
         <circle cx="6" cy="12" r="2" fill="currentColor" />

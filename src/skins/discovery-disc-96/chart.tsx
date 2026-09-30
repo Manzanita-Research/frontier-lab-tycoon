@@ -60,7 +60,7 @@ export function Objectives({ objectives, layout }: SlotPropsMap["Objectives"]) {
         </span>
       </button>
       {open && (
-        <>
+        <div className="dd-goal-body">
           <ul className="dd-goal-list">
             {objectives.items.map((g) => (
               <li key={g.id} className={g.met ? "met" : ""}>
@@ -74,7 +74,7 @@ export function Objectives({ objectives, layout }: SlotPropsMap["Objectives"]) {
             ))}
           </ul>
           <div className="dd-due">{t("objectives.by", { date: objectives.deadline })}</div>
-        </>
+        </div>
       )}
     </section>
   );

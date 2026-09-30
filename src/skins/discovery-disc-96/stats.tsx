@@ -91,12 +91,15 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
         <div className={`dd-stk dd-circ dd-cash ${stats.cash.negative ? "neg" : ""}`} title={`${t("stats.cash")} ${stats.cash.text}`}>
           <Odometer className="n" value={stats.cash.value} format={money} flash={false} />
           <span className="l">
-            {t("stats.cash")} · <span className="net">{stats.net.text}</span>
+            {t("stats.cash")}
+            <span className="net"> · {stats.net.text}</span>
           </span>
         </div>
         <div className={`dd-stk dd-circ dd-runway ${rw.warning ? "warn" : ""}`}>
           <span className="n">{months}</span>
-          <span className="l">months of {t("stats.runway").toLowerCase()}</span>
+          <span className="l">
+            months<span className="long"> of {t("stats.runway").toLowerCase()}</span>
+          </span>
           {rw.warning && (
             <span className="hurry">
               <Icon name="clock" size={16} /> hurry!
@@ -105,7 +108,7 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
         </div>
         {compact && (
           <button type="button" className="dd-more" onClick={() => setExpanded((e) => !e)} aria-expanded={expanded} aria-label={expanded ? t("stats.fewerStats") : t("stats.moreStats")}>
-            <Icon name="more" size={26} />
+            <Icon name="chevron" size={26} />
           </button>
         )}
         <div className="dd-stk dd-pill dd-cap" title={stats.capability.latestModel ?? undefined}>
@@ -140,7 +143,8 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
           <span className="txt">
             <Odometer className="n" value={stats.rd.mult} format={(n) => `${n.toFixed(1)}×`} flash={false} />
             <span className="l">
-              {t("stats.rd")} · {t("stats.era", { n: stats.rd.era })}
+              {t("stats.rd")}
+              <span className="era"> · {t("stats.era", { n: stats.rd.era })}</span>
             </span>
           </span>
         </div>

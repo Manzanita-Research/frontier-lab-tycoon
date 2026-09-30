@@ -7,9 +7,10 @@ import type { SlotPropsMap } from "../types";
 import { Icon } from "./art";
 
 const SWIPE = 28;
+const MOOD_ICON = { content: "happy", slumped: "slumped", miserable: "miserable", resigned: "resigned" } as const;
 
 /** "Dr. Ada Gradient" and "Ada Gradient" are both "Ada"; "Agent-0042" stays whole. */
-function firstName(name: string): string {
+export function firstName(name: string): string {
   const words = name.replace(/^(dr|prof|mr|ms|mx)\.?\s+/i, "").split(/\s+/);
   return words[0] || name;
 }
@@ -65,7 +66,7 @@ export function Inspector({ inspector: who, layout, actions }: SlotPropsMap["Ins
             <div className="dd-name">{who.name}</div>
             <div className="dd-role">{who.role}</div>
             <div className={`dd-mood mood-${who.mood}`}>
-              <Icon name={who.mood} size={20} /> {who.moodLabel.toLowerCase()}
+              <Icon name={MOOD_ICON[who.mood]} size={20} /> {who.moodLabel.toLowerCase()}
               <span className="dd-kind">{who.kindLabel}</span>
             </div>
           </div>
