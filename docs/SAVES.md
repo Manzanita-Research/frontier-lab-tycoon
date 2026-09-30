@@ -13,7 +13,7 @@ src/ui/hud/saves.ts, saves.vm.ts   the Save/Load window, "Welcome back", the mod
 ```jsonc
 {
   "kind": "fltsave",              // what it is: a random JSON file gets "that isn't a lab save"
-  "v": 1,                         // SAVE_VERSION; see Migrations
+  "v": 2,                         // SAVE_VERSION; see Migrations
   "savedAt": "2026-09-30T12:00:00.000Z",
   "seed": 20240601,
   "lab": "Gradient Descent Labs", // for the menu
@@ -79,17 +79,11 @@ It never autosaves on a staged link (`?moment=`, `?scenario=`, `?shot`, …; `is
 
 Adding a version: bump `SAVE_VERSION` in `format.ts`, add `MIGRATIONS[old]` (and `WORLD_MIGRATIONS[old]` if the World changed), freeze a save of the old version in `src/save/fixtures/` and extend `migrations.test.ts`. The frozen v1 save is `fixtures/v1-garage-day45.fltsave` (a day-45 garage); its test must keep passing forever.
 
-**A renamed content id is a migration.** Old saves carry the old id inside the World, as values (`race.rivals[].context.id`, `race.board[].id`) and as keys (`race.prevRanks`, `leapfrog.labs`, `bill.seen`, ...). `renameIds(world, { old: "new" })` renames every string that *is* the id and every key that is, and leaves prose alone. For the FLT-62 rival rename (`vssi` to `supersuper`, not on `main` yet), the PR that renames it adds:
+**A renamed content id is a migration.** Old saves carry the old id inside the World, as values (`race.rivals[].context.id`, `race.board[].id`) and as keys (`race.prevRanks`, `leapfrog.labs`, `bill.seen`, ...). `renameIds(world, { old: "new" })` renames every string that *is* the id and every key that is, and leaves prose alone; `replaceText(world, [[old, new], ...])` swaps a phrase (an old display name) wherever it appears.
 
-```ts
-// format.ts
-export const SAVE_VERSION = 2;
-// migrations.ts
-export const MIGRATIONS = { 1: (s) => ({ ...s, v: 2 }) };
-export const WORLD_MIGRATIONS = { 1: (w) => renameIds(w, { vssi: "supersuper" }) };
-```
-
-`migrations.test.ts` already rehearses exactly that on the frozen v1 save.
+| From | Step |
+|---|---|
+| v1 → v2 | #71 renamed the rival `vssi` to `supersuper` ("Very Safe SI" to "Super Super AI", and "MetaMeta Superintelligence Labs" to "MetaMeta Metaintelligence Labs"): `WORLD_MIGRATIONS[1]` renames the id and scrubs the old names from text. Tested on the frozen v1 garage, which then plays on for 60 days. |
 
 ## Demo shelves
 

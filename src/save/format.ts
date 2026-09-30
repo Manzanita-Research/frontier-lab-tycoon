@@ -4,7 +4,7 @@
 import { Schema } from "effect";
 
 /** The envelope's version. Bump it (and add a step to `migrations.ts`) whenever an old save would load wrong. */
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 2;
 /** Every save says what it is, so a random JSON file gets a friendly "that isn't a lab" instead of a crash. */
 export const SAVE_KIND = "fltsave";
 /** The file extension and the MIME type a download uses. */

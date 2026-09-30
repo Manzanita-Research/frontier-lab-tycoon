@@ -3,7 +3,8 @@ import { Effect } from "effect";
 import { runDays } from "../sim/testkit";
 import { decodeSave, loadWorld, parseSave, upgradeWorld } from "./codec";
 import { SAVE_VERSION } from "./format";
-import { MIGRATIONS, WORLD_MIGRATIONS, migrate, renameIds, type Migration } from "./migrations";
+import { RIVAL_DEFS } from "../content/rivals";
+import { MIGRATIONS, WORLD_MIGRATIONS, migrate, renameIds, replaceText, type Migration } from "./migrations";
 
 // Written once on Sep 30 2026 (FLT-65, v1): `createInitialState(7)`, `runDays(s, 45)`, then
 // `encodeSave(s, { skin: "frontier-95", savedAt: new Date("2026-09-30T12:00:00Z") })`. Frozen: never regenerate it.
@@ -45,20 +46,35 @@ describe("migrations", () => {
   it("renameIds renames exact ids and keys, and leaves prose alone", () => {
     const w = { rivals: [{ id: "vssi" }, { id: "anthro" }], prevRanks: { vssi: 3 }, news: "vssi shipped", n: 4, f: null };
     expect(renameIds(w, { vssi: "supersuper" })).toEqual({ rivals: [{ id: "supersuper" }, { id: "anthro" }], prevRanks: { supersuper: 3 }, news: "vssi shipped", n: 4, f: null });
+    expect(renameIds({ constructor: "toString" }, { vssi: "x" })).toEqual({ constructor: "toString" });
   });
 
-  // A dress rehearsal for the FLT-62 rename (rival `vssi` to `supersuper`): the World step runs inside the packed
-  // state of the frozen v1 garage, and every trace of the old id is gone.
-  it("a World step reaches inside the packed World of an old save", async () => {
-    const v1 = await run(parseSave(V1_GARAGE));
-    const before = JSON.stringify(await run(loadWorld(v1)));
-    expect(before).toContain('"vssi"');
-    const upgraded = await run(upgradeWorld(v1, 1, 2, { 1: (w) => renameIds(w, { vssi: "supersuper" }) }));
+  it("replaceText swaps phrases inside any string, longest first when asked in that order", () => {
+    const pairs = [["Very Safe Superintelligence Inc.", "Very Very Super Super Intelligence"], ["Very Safe SI", "Super Super AI"]] as const;
+    expect(replaceText({ h: ["Very Safe SI raises again", "Very Safe Superintelligence Inc. files"], n: 1 }, pairs)).toEqual({ h: ["Super Super AI raises again", "Very Very Super Super Intelligence files"], n: 1 });
+  });
+
+  // v1 → v2 (#71): the rival `vssi` is `supersuper` now. The frozen v1 garage has the old id as values and as keys.
+  it("v1 → v2: the frozen garage's `vssi` is `supersuper`, and it plays on", async () => {
+    const { save, world } = await run(decodeSave(V1_GARAGE));
+    expect(save.v).toBe(2);
+    const json = JSON.stringify(world);
+    expect(json).not.toMatch(/"vssi"|Very Safe S|MetaMeta Superintelligence/);
+    const known = new Set<string>(RIVAL_DEFS.map((r) => r.id));
+    for (const r of world.race!.rivals) expect(known.has(r.context.id)).toBe(true);
+    expect(Object.keys(world.race!.prevRanks ?? {})).toContain("supersuper");
+    runDays(world, 60);
+    expect(world.day).toBe(105);
+  });
+
+  it("a World step reaches inside the packed World of a save, and no step leaves it alone", async () => {
+    const save = await run(parseSave(V1_GARAGE));
+    const upgraded = await run(upgradeWorld(save, 2, 3, { 2: (w) => renameIds(w, { anthro: "anthro-2" }) }));
+    const before = JSON.stringify(await run(loadWorld(save)));
     const after = JSON.stringify(await run(loadWorld(upgraded)));
-    expect(after).not.toContain('"vssi"');
-    expect(after).toContain('"supersuper"');
-    expect(after.split('"supersuper"').length).toBe(before.split('"vssi"').length);
-    // No step for this version: the save comes back untouched.
-    expect(await run(upgradeWorld(v1, 1, 2, {}))).toBe(v1);
+    expect(before).toContain('"anthro"');
+    expect(after).not.toContain('"anthro"');
+    expect(after.split('"anthro-2"').length).toBe(before.split('"anthro"').length);
+    expect(await run(upgradeWorld(save, 2, 3, {}))).toBe(save);
   });
 });

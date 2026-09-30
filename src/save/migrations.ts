@@ -12,8 +12,13 @@ import { SAVE_VERSION } from "./format";
 export type Envelope = { v: number } & Record<string, unknown>;
 export type Migration = (save: Envelope) => Envelope;
 
-/** Keyed by the version a step upgrades *from*. Empty while v1 is the only format there has been. */
-export const MIGRATIONS: Readonly<Record<number, Migration>> = {};
+/**
+ * Keyed by the version a step upgrades *from*.
+ * - v1 → v2 (#71): the rival `vssi` became `supersuper` ("Super Super AI"); the World step below does the work.
+ */
+export const MIGRATIONS: Readonly<Record<number, Migration>> = {
+  1: (s) => ({ ...s, v: 2 }),
+};
 
 /** Upgrade `save` step by step to `target` (default: the current version). Throws on a gap in the table. */
 export function migrate(save: { v: number }, target = SAVE_VERSION, table: Readonly<Record<number, Migration>> = MIGRATIONS): Envelope {
@@ -32,7 +37,16 @@ export type WorldJson = Record<string, unknown>;
 export type WorldMigration = (world: WorldJson) => WorldJson;
 
 /** Steps on the unpacked World, keyed like MIGRATIONS (by the version they upgrade from). Most versions need none. */
-export const WORLD_MIGRATIONS: Readonly<Record<number, WorldMigration>> = {};
+export const WORLD_MIGRATIONS: Readonly<Record<number, WorldMigration>> = {
+  // #71 renamed two rivals whose names were too close to real labs'. Old Worlds keep the old id (as values and as
+  // keys) and may keep the old names in text (headlines, the board), so both go.
+  1: (w) =>
+    replaceText(renameIds(w, { vssi: "supersuper" }), [
+      ["Very Safe Superintelligence Inc.", "Very Very Super Super Intelligence"],
+      ["MetaMeta Superintelligence Labs", "MetaMeta Metaintelligence Labs"],
+      ["Very Safe SI", "Super Super AI"],
+    ]),
+};
 
 /** Run the World steps for a save first written as v`from`. */
 export function migrateWorld(world: WorldJson, from: number, target = SAVE_VERSION, table: Readonly<Record<number, WorldMigration>> = WORLD_MIGRATIONS): WorldJson {
@@ -51,7 +65,7 @@ export const hasWorldSteps = (from: number, target = SAVE_VERSION, table: Readon
 /**
  * A content id renamed (a rival, a building, a pack): every string that *is* the old id, and every key that is, becomes
  * the new one, anywhere in the World. Prose that merely mentions it ("vssi shipped") is left alone.
- * `MIGRATIONS[1] = (s) => ({ ...s, v: 2 })` plus `WORLD_MIGRATIONS[1] = (w) => renameIds(w, { vssi: "supersuper" })`.
+ * See `WORLD_MIGRATIONS[1]`.
  */
 export function renameIds<T>(value: T, renames: Readonly<Record<string, string>>): T {
   const to = new Map(Object.entries(renames));
@@ -61,6 +75,22 @@ export function renameIds<T>(value: T, renames: Readonly<Record<string, string>>
     if (v && typeof v === "object") {
       const out: Record<string, unknown> = {};
       for (const [k, x] of Object.entries(v)) out[to.get(k) ?? k] = walk(x);
+      return out;
+    }
+    return v;
+  };
+  return walk(value) as T;
+}
+
+/** Every occurrence of each old phrase, in every string in the World (keys too), becomes the new one, in order. */
+export function replaceText<T>(value: T, pairs: readonly (readonly [string, string])[]): T {
+  const fix = (t: string) => pairs.reduce((acc, [from, to]) => acc.split(from).join(to), t);
+  const walk = (v: unknown): unknown => {
+    if (typeof v === "string") return fix(v);
+    if (Array.isArray(v)) return v.map(walk);
+    if (v && typeof v === "object") {
+      const out: Record<string, unknown> = {};
+      for (const [k, x] of Object.entries(v)) out[fix(k)] = walk(x);
       return out;
     }
     return v;

@@ -196,7 +196,7 @@ export const FIXTURE_DRAMA_FEED: FeedPackData[] = [
 export const FIXTURE_NOW = Date.parse("2026-09-30T15:00:00Z");
 
 const fixtureMeta = (lab: string, day: number, hoursAgo: number, size: number, skin: string | null, mods: string[] = []): SaveMeta => ({
-  kind: "fltsave", v: 1, savedAt: new Date(FIXTURE_NOW - hoursAgo * 3_600_000).toISOString(), seed: 7, lab, day, tick: day * 20, enc: "gzip64", skin, size,
+  kind: "fltsave", v: 2, savedAt: new Date(FIXTURE_NOW - hoursAgo * 3_600_000).toISOString(), seed: 7, lab, day, tick: day * 20, enc: "gzip64", skin, size,
   mods: mods.map((id) => ({ id, version: "1.0.0", hash: "f3b023e9" })),
 });
 
