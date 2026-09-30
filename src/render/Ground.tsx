@@ -4,7 +4,7 @@ import { createRng } from "../sim/rng";
 import { GRID_SIZE } from "../sim/state";
 import { atoms, sim } from "../app/game";
 import { useApp } from "../app/hooks";
-import { HALF, worldX, worldZ } from "./coords";
+import { HALF, NEO_LOT_HALF, NEO_LOTS, worldX, worldZ } from "./coords";
 import { boxGeo, CREAM, std } from "./materials";
 
 const BOARD = 28;
@@ -85,7 +85,12 @@ export function Paths() {
 }
 
 /** Trees, bushes and rocks on the rim of the board. Static, seeded locally so it never touches the sim. */
+/** Which neo lab lot (FLT-56) a tree or bush stands on, or -1. */
+const lotAt = (x: number, z: number) => NEO_LOTS.findIndex(([lx, lz]) => Math.abs(x - lx) < NEO_LOT_HALF[0] && Math.abs(z - lz) < NEO_LOT_HALF[1]);
+
 export function Decor() {
+  // Trees on a lot a neo lab has built on are felled (scaled to nothing: the instance counts never change).
+  const built = useApp(atoms.neo).length;
   const items = useMemo(() => {
     const rng = createRng(20250929);
     const trees: { x: number; z: number; s: number; c: number }[] = [];
@@ -118,8 +123,10 @@ export function Decor() {
     const greens = ["#3f8f3e", "#4ea347", "#5cb54f"].map((c) => new THREE.Color(c));
     const put = (mesh: THREE.InstancedMesh | null, i: number, x: number, y: number, z: number, sx: number, sy: number, color?: THREE.Color) => {
       if (!mesh) return;
+      const lot = lotAt(x, z);
+      const felled = lot >= 0 && lot < built;
       d.position.set(x, y, z);
-      d.scale.set(sx, sy, sx);
+      d.scale.set(felled ? 0 : sx, felled ? 0 : sy, felled ? 0 : sx);
       d.rotation.y = i * 1.7;
       d.updateMatrix();
       mesh.setMatrixAt(i, d.matrix);
@@ -137,7 +144,7 @@ export function Decor() {
       m.current.instanceMatrix.needsUpdate = true;
       if (m.current.instanceColor) m.current.instanceColor.needsUpdate = true;
     }
-  }, [items]);
+  }, [items, built]);
 
   return (
     <group>

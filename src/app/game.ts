@@ -93,6 +93,8 @@ export const atoms = {
   ops: pick((c) => c.snap.ops),
   /** Agent collusion's signs for the world overlay (packets, the night gathering, the inquiry). */
   collusion: pick((c) => c.snap.collusion),
+  /** FLT-56: the neo labs' campuses beyond the fence. Same array until one changes. */
+  neo: pick((c) => c.snap.neo),
   staffCount: pick((c) => c.snap.ops.staff.length),
   payroll: pick((c) => c.snap.ops.payroll),
   disasters: pick((c) => c.snap.disasters),

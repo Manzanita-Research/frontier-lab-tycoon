@@ -76,6 +76,23 @@ export function stageDrama(s: GameState, moment: DramaMoment) {
   s.defection!.scores[star.id] = 95;
   until(s, cardIs(CARD), 30);
   if (moment === "defection-card") return;
+  // Most of their team is fed up too (FLT-56): the walk-out is a proper conga line.
+  for (const id of s.defection!.subject?.team.slice(0, 4) ?? []) {
+    const w = s.walkers.find((x) => x.id === id);
+    if (w) Object.assign(w, { energy: 0.15, focus: 0.2, fomo: 0.9 });
+  }
+  // And the die agrees: the first nudge of Defection's own stream where three or more walk out with them.
+  const base = s.defection!.rngState;
+  for (let k = 0; k < 16; k++) {
+    const trial = structuredClone(s);
+    trial.defection!.rngState = (base + k * 0x9e3779b9) >>> 0;
+    applyNow(trial, answer(trial, CHOICES.indexOf("goodbye")));
+    tick(trial);
+    if ((trial.defection!.exit?.followerIds.length ?? 0) >= 3) {
+      s.defection!.rngState = (base + k * 0x9e3779b9) >>> 0;
+      break;
+    }
+  }
   applyNow(s, answer(s, CHOICES.indexOf("goodbye")));
   // A few steps: the boxes are out and heading for the gate.
   for (let i = 0; i < 6; i++) tick(s);

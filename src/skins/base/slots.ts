@@ -14,6 +14,7 @@ import "./circus.css";
 import "./drama.css";
 import "./audit.css";
 import "./beat.css";
+import "./neo.css";
 import { Arena } from "./slots/Arena";
 import { AuditPin } from "./slots/AuditPin";
 import { Beat } from "./slots/Beat";

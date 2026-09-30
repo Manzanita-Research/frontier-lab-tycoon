@@ -8,6 +8,8 @@ import { atoms, sim } from "../app/game";
 import { useApp } from "../app/hooks";
 import { GATHERING_SIGN, GATHERING_SUB, INQUIRY_SIGN, WIKI_HOST } from "../content/crumbwiki";
 import { COLLUSION } from "../sim/collusion/pack";
+import { NEO_BALLOON_SUB } from "../content/neocampus";
+import { balloonAt, balloonRadius } from "../render/NeoCampuses";
 
 interface Live {
   id: number;
@@ -309,6 +311,30 @@ function CollusionSigns() {
   );
 }
 
+/** FLT-56: each neo lab's valuation, on its balloon beyond the fence. */
+function NeoBalloons() {
+  const labs = useApp(atoms.neo);
+  return (
+    <>
+      {labs.map((lab, i) => (
+        <Anchored
+          key={lab.id}
+          className={`neoballoon neo-${lab.nemesis ? "nemesis" : lab.mood}`}
+          pos={(out) => {
+            const r = balloonRadius(lab.valuation);
+            const [x, y, z] = balloonAt(i, performance.now() / 1000, r);
+            out.set(x, y + r * 1.2, z);
+            return true;
+          }}
+        >
+          <b style={{ borderColor: lab.color }}>${lab.valuation}B</b>
+          <small>{NEO_BALLOON_SUB[lab.nemesis ? "nemesis" : lab.mood]}</small>
+        </Anchored>
+      ))}
+    </>
+  );
+}
+
 /** The world's own labels: names, coin pops, warnings. Thought bubbles are the skin's (see hud/BubbleLayer). */
 export function WorldOverlay() {
   return (
@@ -320,6 +346,7 @@ export function WorldOverlay() {
       <StaffTags />
       <QueueLabels />
       <CollusionSigns />
+      <NeoBalloons />
       <DisasterLabels />
       <Reason />
     </div>

@@ -14,7 +14,8 @@ import { createWatch, type FxEvent } from "./watch";
 import { beatAtom, beatRun } from "./beatState";
 import { endBeat, isBeat, skipBeat } from "./beat";
 import { reducedMotion } from "../../skins/kit/motion";
-import { registry, sim as game } from "../../app/game";
+import { debugParams, registry, sim as game } from "../../app/game";
+import { worldX, worldZ } from "../coords";
 
 // `?debug=1` exposes the juice state to probes and screenshot scripts (`get` is R3F's store getter: camera, controls).
 if (typeof window !== "undefined" && new URLSearchParams(window.location.search).has("debug")) {
@@ -41,6 +42,7 @@ export function FxDirector() {
   const brokenSeen = useRef(new Set<number>());
   const doneSeen = useRef(new Map<number, number>());
   const first = useRef(true);
+  const replay = useRef(debugParams.beat);
 
   /** The camera's current view, for a shot to start from. */
   const view = () => {
@@ -123,8 +125,10 @@ export function FxDirector() {
       case "beat": {
         // FLT-56: a camera beat. The bars and the caption always (the HUD draws them from `beatAtom`); the camera move
         // only when the player is not in photo mode and has not asked for less motion. Time keeps running throughout.
-        const camera = !fx.photo && !reducedMotion() && cinema.focus(view(), { ...aim(ev.x, ev.z, ev.zoom, 0.06), zoom: ev.zoom, hold: ev.hold, rate: ev.beat === "huddle" ? 0.8 : 2.4 });
-        Object.assign(beatRun, { id: beatRun.id + 1, kind: ev.beat, x: ev.x, z: ev.z, follow: ev.follow, zoom: ev.zoom, until: fx.time + ev.hold + 2.2, camera, acc: 0 });
+        // `?beat` (screenshots) holds it until skipped.
+        const hold = debugParams.beat ? null : ev.hold;
+        const camera = !fx.photo && !reducedMotion() && cinema.focus(view(), { ...aim(ev.x, ev.z, ev.zoom, 0.06), zoom: ev.zoom, hold, rate: ev.beat === "huddle" ? 0.8 : 2.4 });
+        Object.assign(beatRun, { id: beatRun.id + 1, kind: ev.beat, x: ev.x, z: ev.z, follow: ev.follow, zoom: ev.zoom, until: hold === null ? Infinity : fx.time + hold + 2.2, camera, acc: 0 });
         registry.set(beatAtom, { id: beatRun.id, kind: ev.beat, caption: ev.caption, sub: ev.sub });
         if (ev.beat === "viral") shake(0.35);
         return;
@@ -216,6 +220,12 @@ export function FxDirector() {
     fx.night = nightAmount(fx.hour);
 
     for (const ev of watch.poll(world)) handle(ev);
+    if (replay.current) {
+      // `?moment=...&beat`: the staged moment's beat happened before the first frame; play the latest one now.
+      replay.current = false;
+      const c = [...world.disasters.cues].reverse().find((c) => c.type === "beat");
+      if (c?.type === "beat") handle({ type: "beat", beat: c.beat, caption: c.caption, sub: c.sub, x: worldX(c.x), z: worldZ(c.z), zoom: c.zoom, hold: c.hold, follow: c.follow });
+    }
     if (isBeat()) runBeat(world.walkers, dt);
 
     // Ambient emitters. Each is a rate per second, spent as whole particles.

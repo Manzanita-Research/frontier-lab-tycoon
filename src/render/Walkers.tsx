@@ -6,6 +6,8 @@ import { sim as game } from "../app/game";
 import { HALF } from "./coords";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import { CHEER_SECONDS, fx } from "./fx/state";
+import { beatRun } from "./fx/beatState";
+import { reducedMotion } from "../skins/kit/motion";
 import { FONT_STACK, glowTexture } from "./materials";
 import { Follow } from "./follow";
 import { HOODIES, PICKET, SKIN, SUITS } from "./look";
@@ -157,6 +159,10 @@ export function Walkers() {
     // The agents look like the era: hard hats in Coding Automation, halos after that, bigger and brighter each time.
     const agentLook = LOOKS[eraOfState(sim) - 1]!;
     const boxed = sim.disguises?.agent === "box";
+    // FLT-56: during a walk-out's beat, the ones leaving dance it: one-two-three-kick, all on the same count.
+    const conga = beatRun.kind === "exit" && beatRun.follow.length > 0 && !reducedMotion() ? beatRun.follow : null;
+    const sway = Math.sin(t * 7.2) * 0.07 * S;
+    const kick = Math.max(0, Math.sin(t * 3.6)) ** 10 * 0.14 * S;
     let nk = 0;
 
     const set = (m: THREE.InstancedMesh | null, i: number, x: number, y: number, z: number, ry: number, sx: number, sy: number, sz: number, rx = 0) => {
@@ -281,7 +287,8 @@ export function Walkers() {
       const mood = w.mood.value;
       const slump = mood === "miserable" ? 1 : mood === "slumped" ? 0.7 : 0;
       const pace = slump > 0 ? 6.5 : 10;
-      const bob = (walking ? Math.abs(Math.sin(t * pace + phase)) * (slump > 0 ? 0.025 : 0.045) : slump > 0 ? 0 : Math.sin(t * 1.3 + phase) * 0.008) * S + hop;
+      const dancing = conga !== null && conga.includes(w.id);
+      const bob = (walking ? Math.abs(Math.sin(t * pace + phase)) * (slump > 0 ? 0.025 : 0.045) : slump > 0 ? 0 : Math.sin(t * 1.3 + phase) * 0.008) * S + hop + (dancing ? kick : 0);
       const squash = (walking && slump === 0 ? 1 + Math.sin(t * 20 + phase) * 0.04 : 1 + breath) - land;
       const wide = 1 + land * 0.6;
       const lean = slump * 0.42;
@@ -293,10 +300,13 @@ export function Walkers() {
       const fwx = Math.sin(yaw);
       const fwz = Math.cos(yaw);
       const droop = slump * 0.07 * S;
-      const bodyX = x + fwx * cy * sn;
-      const bodyZ = z + fwz * cy * sn;
-      const headX = x + fwx * (hy * sn + droop);
-      const headZ = z + fwz * (hy * sn + droop);
+      // The conga's hip sway: sideways, across the way they are walking.
+      const sx = dancing ? fwz * sway : 0;
+      const sz = dancing ? -fwx * sway : 0;
+      const bodyX = x + fwx * cy * sn + sx * 0.6;
+      const bodyZ = z + fwz * cy * sn + sz * 0.6;
+      const headX = x + fwx * (hy * sn + droop) + sx;
+      const headZ = z + fwz * (hy * sn + droop) + sz;
       const headY = hy * cs - droop * 0.8 + bob - land * 0.1;
       let body: THREE.InstancedMesh | null;
       let head: THREE.InstancedMesh | null;

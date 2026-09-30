@@ -99,3 +99,11 @@
 :root[data-motion="reduced"] .beat-bar {
   animation: none;
 }
+/* While a beat plays, the docked HUD steps back so the shot reads as a shot. Cards and menus are not docked, and a
+   card ends the beat anyway. */
+.hud-host > * {
+  transition: opacity var(--flt-motion-slow, 0.3s) ease;
+}
+.hud-host:has(> .beat) > :not(.beat) {
+  opacity: 0.12;
+}
