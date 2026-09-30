@@ -16,6 +16,7 @@ export function Layout({ vm, slots }: SlotPropsMap["Layout"]) {
         <div className="sd-keys">
           {slots.Speed}
           {slots.PhotoButton}
+          {slots.DramaButton}
         </div>
         {slots.ThoughtsPanel}
         {slots.Inspector}

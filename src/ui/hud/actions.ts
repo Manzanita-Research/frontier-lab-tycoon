@@ -6,6 +6,7 @@ import { mixerOpenAtom, playCue, setMixer } from "../../audio/state";
 import type { Cue } from "../../audio/score";
 import { fx } from "../../render/fx/state";
 import { roomAtom, skipNews, viewRoom } from "../../newsroom/state";
+import { dramaActions } from "../../drama/state";
 import { setPhoto, takePhoto } from "../juice/photo";
 import { arenaOpenAtom, chatCountAtom, helpOpenAtom, modsOpenAtom, photoFlashAtom, photoTimeAtom, staffOpenAtom } from "./state";
 import { skinActions } from "./skinControl";
@@ -91,6 +92,8 @@ export const hudActions: HudActions = {
   closeMixer: () => registry.set(mixerOpenAtom, false),
   openMods: () => registry.set(modsOpenAtom, true),
   closeMods: () => registry.set(modsOpenAtom, false),
+  // Today's Drama (FLT-34): the window, and the two reloads that switch a pack on or a mod off.
+  ...dramaActions,
   setMuted: (muted) => setMixer({ muted }),
   setVolume: (channel, value) => setMixer({ [channel]: Math.max(0, Math.min(1, value)) }),
   playCue: (cue) => playCue(cue as Cue),

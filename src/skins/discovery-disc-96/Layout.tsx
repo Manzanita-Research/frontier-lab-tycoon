@@ -19,6 +19,7 @@ export function Layout({ slots }: SlotPropsMap["Layout"]) {
         {slots.Speed}
         <div className="dd-toolbar">
           {slots.NewsControls}
+          {slots.DramaButton}
           {slots.PhotoButton}
         </div>
         <div className="dd-stack">

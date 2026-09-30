@@ -293,6 +293,10 @@ If your slot needs copy that has no key, write it into the slot (as Frontier 95 
 | `news.backCampus` | ← Campus |
 | `news.backArchive` | ← Archive |
 | `news.paused` | News Room · campus paused |
+| `drama.button` | Today's Drama |
+| `drama.open` | Open Today's Drama |
+| `drama.new` | NEW |
+| `drama.on` | ON AIR |
 | `news.close` | Back to campus × |
 | `news.skipBack` | Skip and return to campus |
 | `sound.title` | Campus sound |
@@ -383,9 +387,11 @@ A slot is a React component. Each gets **its slice of the view-model plus `actio
 | `NewsArrival` | `{ arrival, actions }` | "The Frontier Times is here" (`viewNews(id)`, `skipNews()`). |
 | `NewsRoom` | `{ newsroom, actions }` | The News Room modal: the archive, and the open paper or chat (compose `useSlots().FrontPage` / `.GroupChat`, or draw your own). |
 | `Mixer` | `{ sound, actions }` | The sound mixer modal. |
-| `ModManager` | `{ mods, actions }` | Settings ▸ Mods… (FLT-37): what `?mod=` loaded, clashes and failures, while `mods.open`. Close with `actions.closeMods()`. |
+| `ModManager` | `{ mods, actions }` | Settings ▸ Mods… (FLT-37): what `?mod=` loaded, clashes and failures, while `mods.open`. Close with `actions.closeMods()`; `actions.removeMod(id)` starts a new lab without that mod (`mods.list[i].drama` marks a Today's Drama pack: say "Switch off"). |
+| `DramaButton` | `{ drama, actions }` | Today's Drama (FLT-34), shown from day one in every skin: `actions.openDrama()`. Badge it when `drama.fresh` (a pack the player hasn't looked at) or `drama.on` (one is playing). Frontier 95 also files it under Start ▸ Programs. |
+| `Drama` | `{ drama, actions }` | The Today's Drama window, while `drama.open`: `drama.latest` as a short card (title, `dateText`, `ago`, `teasers`, `summary`, `event`), `drama.archive` (older packs), `drama.on` (the pack playing in this lab), `drama.status` (`loading` / `error` / `ready`; an empty ready feed is normal). `drama.intro` means a pack has just loaded: say what's coming. `playDrama(id)` starts a new lab with it, `closeDrama()` closes and clears the NEW badge. |
 
-The **docked** slots (`Layout` receives them pre-rendered) are `Stats`, `Training`, `Objectives`, `Inspector`, `BuildBar`, `Speed`, `Staff`, `ThoughtsPanel`, `Ticker`, `Toasts` (one `Toast` at a time: the newest toast, or the standing hint when nobody is talking), `Assistant`, `Arena`, `Benchmarks`, `Voice`, `NewsControls`, `NewsArrival` and `PhotoButton`. The modal slots (`EventCard`, `Livestream`, `EraCard`, `Outcome`, `NewsRoom`, `Mixer`, `ModManager`, `SkinPicker`) and `PhotoOverlay` are rendered by the game when there is something to show.
+The **docked** slots (`Layout` receives them pre-rendered) are `Stats`, `Training`, `Objectives`, `Inspector`, `BuildBar`, `Speed`, `Staff`, `ThoughtsPanel`, `Ticker`, `Toasts` (one `Toast` at a time: the newest toast, or the standing hint when nobody is talking), `Assistant`, `Arena`, `Benchmarks`, `Voice`, `NewsControls`, `NewsArrival`, `PhotoButton` and `DramaButton`. The modal slots (`EventCard`, `Livestream`, `EraCard`, `Outcome`, `NewsRoom`, `Mixer`, `ModManager`, `Drama`, `SkinPicker`) and `PhotoOverlay` are rendered by the game when there is something to show.
 
 ## Writing slots.tsx
 
@@ -458,7 +464,7 @@ interface HudVM {
 
 Numbers come as numbers (`cash.value`) **and** formatted text (`cash.text`), so you can roll an odometer and still have a caption. Colours the game owns (the walker's `portrait.body`, an Arena lab's `color`) come as CSS colour strings.
 
-`HudActions` is everything a skin can ask for: `place(kind)`, `setSpeed(n)`, `togglePause()`, `choose(eventId, i)`, `continueEra()`, `select(id)`, `follow(id, on?)`, `closeInspector()`, `highlight(key)`, the payroll (`closeStaff`, `hire(job)`, `fire(id)`, `paintZone(id | null)`, `clearZone(id)`), `dismissToast(id)`, the coach and the cards (`coachSkip()`, `coachReplay()`, `dismissUnlock()`, `buildPanel(open)`, `openHelp()`, `closeHelp()`), the spend check (`confirmSpend()`, `cancelSpend()`), `holdTime(id, open)` (use the kit's `useAutoPause`), `toggleArena()`, `keepPlaying()`, `newLab()`, the news-room ones (`openNews`, `viewNews`, `closeNews`, `skipNews`, `revealChat`), sound (`openMixer`, `closeMixer`, `setMuted`, `setVolume`, `playCue`), photo mode (`setPhoto`, `setPhotoTime`, `takePhoto`) skins (`openSkinPicker`, `previewSkin`, `applySkin`, `cancelSkinPicker`, `setReducedMotion`) and mods (`openMods`, `closeMods`). Each is safe to call at any time; the game ignores what does not apply.
+`HudActions` is everything a skin can ask for: `place(kind)`, `setSpeed(n)`, `togglePause()`, `choose(eventId, i)`, `continueEra()`, `select(id)`, `follow(id, on?)`, `closeInspector()`, `highlight(key)`, the payroll (`closeStaff`, `hire(job)`, `fire(id)`, `paintZone(id | null)`, `clearZone(id)`), `dismissToast(id)`, the coach and the cards (`coachSkip()`, `coachReplay()`, `dismissUnlock()`, `buildPanel(open)`, `openHelp()`, `closeHelp()`), the spend check (`confirmSpend()`, `cancelSpend()`), `holdTime(id, open)` (use the kit's `useAutoPause`), `toggleArena()`, `keepPlaying()`, `newLab()`, the news-room ones (`openNews`, `viewNews`, `closeNews`, `skipNews`, `revealChat`), sound (`openMixer`, `closeMixer`, `setMuted`, `setVolume`, `playCue`), photo mode (`setPhoto`, `setPhotoTime`, `takePhoto`) skins (`openSkinPicker`, `previewSkin`, `applySkin`, `cancelSkinPicker`, `setReducedMotion`) mods (`openMods`, `closeMods`, `removeMod`) and Today's Drama (`openDrama`, `closeDrama`, `playDrama`). Each is safe to call at any time; the game ignores what does not apply.
 
 Changing the contract: keep changes **additive** (new fields, new actions) and add a fixture to `src/ui/hud/fixtures.ts` + a test in `vm.test.ts`. A breaking change means bumping `SKIN_API_VERSION` and every `skin.json`.
 

@@ -12,6 +12,7 @@ import { newMotion, stepMotion, type MotionView } from "./leapfrogMotion";
 import type { SkinPickerVM } from "./types";
 import type { HudInput } from "./vm";
 import { playableFixture } from "./previewLadder";
+import { dramaViewModel, NO_DRAMA_UI, type FeedPackData } from "../../drama/feed";
 
 /** A busy campus a few game days in, with thoughts, a crowd and a run in flight (the real opening is quieter: see `openingWorld`). */
 export function fixtureWorld(days = 12, seed = 3): GameState {
@@ -69,6 +70,55 @@ const STORIES = [
 export const FIXTURE_PAPER = frontPage(STORIES, 28, "Mostly Harmless Compute");
 export const FIXTURE_CHAT = recap(STORIES, 30, "Mostly Harmless Compute");
 
+/** The rehearsal Drama feed (drama/fixtures/feed), as index.json lists it: newest first. */
+export const FIXTURE_DRAMA_FEED: FeedPackData[] = [
+  {
+    id: "drama-2026-09-29",
+    date: "2026-09-29",
+    title: "The Perk Arms Race",
+    description: "The labs stop competing on models and start competing on snacks. By Friday, one of them is offering a moon.",
+    url: "/mods/drama-fixture/2026-09-29/mod.json",
+    teasers: [
+      "MetaMeta offers researchers a private chef, a private gym and a private moon (moon pending)",
+      "Open-ish AI answers with unlimited nap pods; output flat, dreams 40% more agentic",
+      "Anthropomorphic's only perk is a sincere handwritten letter about your potential; three researchers cry",
+    ],
+    event: { title: "Your Researchers Have Seen the Other Lab's Snack Wall", day: 20 },
+    counts: { events: 1, headlines: 8, thoughts: 7, rivals: 1 },
+  },
+  {
+    id: "drama-2026-09-28",
+    date: "2026-09-28",
+    title: "The Benchmark Bake-Off",
+    description: "Every lab tops a leaderboard today, each on a benchmark it wrote that morning.",
+    url: "/mods/drama-fixture/2026-09-28/mod.json",
+    teasers: ["Open-ish AI sets record on Open-ish Bench, which it released 20 minutes earlier"],
+    event: { title: "A Rival Tops a Benchmark It Invented at Breakfast", day: 20 },
+    counts: { events: 1, headlines: 6, thoughts: 5, rivals: 0 },
+  },
+  {
+    id: "drama-2026-09-27",
+    date: "2026-09-27",
+    title: "The Price War",
+    description: "Every lab halves its prices, then halves them again. By lunch, tokens cost less than the kombucha that made them.",
+    url: "/mods/drama-fixture/2026-09-27/mod.json",
+    teasers: ["Tokens now cheaper than the kombucha used to generate them"],
+    event: { title: "The Price War Reaches Your Pricing Page", day: 20 },
+    counts: { events: 1, headlines: 5, thoughts: 5, rivals: 1 },
+  },
+];
+
+/** Today's Drama in a few moments: the window open on the feed, the "now playing" card, a feed with nothing in it. */
+export function fixtureDrama(kind: "feed" | "intro" | "empty" | "fresh"): NonNullable<HudInput["drama"]> {
+  const href = "https://flt.test/?drama=fixture";
+  const playing = [{ id: "drama-2026-09-29", name: "Daily Drama: The Perk Arms Race", source: FIXTURE_DRAMA_FEED[0]!.url }];
+  const now = new Date(2026, 8, 29, 12);
+  if (kind === "fresh") return dramaViewModel({ ...NO_DRAMA_UI, latest: FIXTURE_DRAMA_FEED[0]! }, [], href, now);
+  if (kind === "empty") return dramaViewModel({ ...NO_DRAMA_UI, open: true, status: "ready", packs: [] }, [], href, now);
+  const ui = { ...NO_DRAMA_UI, open: true, status: "ready" as const, packs: FIXTURE_DRAMA_FEED, latest: FIXTURE_DRAMA_FEED[0]!, seen: "drama-2026-09-28" };
+  return kind === "intro" ? dramaViewModel({ ...ui, intro: true }, playing, href, now) : dramaViewModel(ui, [], href, now);
+}
+
 export interface FixtureOptions {
   /** Playable v1: put the snapshot on this rung of the ladder (absent: everything is earned). */
   level?: 1 | 2 | 3 | 4 | 5;
@@ -96,6 +146,8 @@ export interface FixtureOptions {
   width?: number;
   height?: number;
   skins?: Partial<SkinPickerVM>;
+  /** Today's Drama (absent: nothing fetched yet, the window shut). */
+  drama?: "feed" | "intro" | "empty" | "fresh";
 }
 
 export function fixtureSnapshot(o: FixtureOptions = {}): Snapshot {
@@ -144,6 +196,7 @@ export function fixtureInput(o: FixtureOptions = {}): HudInput {
     photo: { on: o.photo ?? false, time: "live", shot: { id: 1, url: "data:image/png;base64,", name: "frontier-lab-tycoon-campus.png" }, flash: 1 },
     skins: { ...NO_SKINS, ...o.skins },
     leapfrog: lf?.motion,
+    drama: o.drama ? fixtureDrama(o.drama) : undefined,
     viewport: { width: o.width ?? 1440, height: o.height ?? 900 },
   };
 }

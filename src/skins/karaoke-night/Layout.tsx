@@ -22,6 +22,7 @@ export function Layout({ slots }: SlotPropsMap["Layout"]) {
             {slots.PhotoButton}
           </div>
           {slots.NewsControls}
+          {slots.DramaButton}
         </div>
         {slots.NewsArrival}
         <div className="kn-stack">

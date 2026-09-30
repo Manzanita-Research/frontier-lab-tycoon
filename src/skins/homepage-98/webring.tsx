@@ -1,7 +1,7 @@
 // The navigation: the build palette as the AI Labs WebRing (88×31 buttons, Prev/Next), the speed buttons as a grey web
 // form, the news as a navy marquee with a badge you are not supposed to click, and the little utilities as form buttons.
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { ALL_VISIBLE, Marquee, reducedMotion } from "../kit";
+import { ALL_VISIBLE, DramaIcon, Marquee, reducedMotion } from "../kit";
 import { useCoach, useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import type { BuildItemVM } from "../../ui/hud/types";
@@ -227,5 +227,19 @@ export function PhotoButton({ photo, actions }: SlotPropsMap["PhotoButton"]) {
     <button type="button" className="gc-fb gc-photobtn" onClick={() => actions.setPhoto(true)} aria-label={t("photo.open")} title={t("photo.open")}>
       <Gci name="camera" size={18} />
     </button>
+  );
+}
+
+/** Today's Drama: a form button that shouts (the page has a NEW! gif for it, naturally). */
+export function DramaButton({ drama, actions }: SlotPropsMap["DramaButton"]) {
+  const t = useT();
+  return (
+    <div className="gc-form gc-menu gc-drama">
+      <button type="button" className="gc-fb" onClick={() => actions.openDrama()} aria-label={t("drama.open")}>
+        <DramaIcon size={18} />
+        <span className="lbl">{t("drama.button")}</span>
+        {drama.on ? <b className="gc-unread">{t("drama.on")}</b> : drama.fresh && <b className="gc-unread">{t("drama.new")}</b>}
+      </button>
+    </div>
   );
 }

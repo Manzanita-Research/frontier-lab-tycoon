@@ -102,6 +102,10 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
         },
         actions,
       };
+    case "DramaButton":
+      return { drama: vms.dramaFresh!.drama, actions };
+    case "Drama":
+      return { drama: vms.drama!.drama, actions };
   }
 }
 
@@ -129,6 +133,11 @@ const vms: Record<string, HudVM> = {
   phone: vmOf({ width: 390, height: 844 }),
   nobody: vmOf({ selected: null }),
   staff: vmOf({ staff: true }),
+  drama: vmOf({ drama: "feed" }),
+  dramaFresh: vmOf({ drama: "fresh" }),
+  dramaIntro: vmOf({ drama: "intro" }),
+  dramaEmpty: vmOf({ drama: "empty" }),
+  dramaPhone: vmOf({ drama: "feed", width: 390, height: 844 }),
 };
 
 const usable = catalog.filter((e) => e.ok).map((e) => e.folder);
@@ -272,6 +281,18 @@ describe.each([BASE_ID, ...usable])("skin %s", (id) => {
     for (const b of vms.help!.help!.buildings) expect(help).toContain(escape(b.line));
     expect(help).not.toContain(escape(vmOf({ level: 5, help: true }).help!.buildings.find((b) => b.kind === "demo")!.line));
     expect(help).toContain(escape(skin.strings["help.replay"]!));
+  });
+
+  it("has a Today's Drama button from the first day, and a window with the pack, the archive and the now-playing card", async () => {
+    const { skin } = await prepareSkin(id);
+    for (const vm of [vms.garage!, vms.phone!, vms.dramaFresh!]) expect(html(skin, <Docked vm={vm} actions={actions} />), `${id}: the button`).toMatch(/Drama/);
+    const feed = html(skin, <Modals vm={vms.drama!} actions={actions} />);
+    for (const p of [vms.drama!.drama.latest!, ...vms.drama!.drama.archive]) expect(feed).toContain(escape(p.title));
+    for (const line of vms.drama!.drama.latest!.teasers) expect(feed).toContain(escape(line));
+    const intro = html(skin, <Modals vm={vms.dramaIntro!} actions={actions} />);
+    expect(intro).toContain(escape(vms.dramaIntro!.drama.on!.title));
+    expect(intro).toContain(escape(vms.dramaIntro!.drama.on!.event!.title));
+    expect(html(skin, <Modals vm={vms.dramaEmpty!} actions={actions} />).length).toBeGreaterThan(100);
   });
 
   it("uses the skin's own strings", async () => {

@@ -1,0 +1,151 @@
+{
+  "apiVersion": 1,
+  "id": "drama-2026-09-27",
+  "name": "Daily Drama: The Price War",
+  "version": "1.0.0",
+  "author": "Daily Drama (fixture)",
+  "description": "Every lab halves its prices, then halves them again. By lunch, tokens cost less than the kombucha that made them.",
+  "content": {
+    "events": {
+      "add": [
+        {
+          "id": "drama-2026-09-27-price-war",
+          "title": "The Price War Reaches Your Pricing Page",
+          "body": "Macrohard cut its prices 81%, one point more than Open-ish AI, out of spite.\nYour sales team wants to know how low you can go.",
+          "tone": "joke",
+          "when": {
+            "stat": "day",
+            "atLeast": 20
+          },
+          "choices": [
+            {
+              "label": "Make tokens free and charge for the logo",
+              "hint": "Costs $2,000, Hype +3",
+              "effects": [
+                {
+                  "type": "cash",
+                  "amount": -2000
+                },
+                {
+                  "type": "hype",
+                  "amount": 3
+                },
+                {
+                  "type": "news",
+                  "text": "Lab makes tokens free, charges $20 a month to see the logo",
+                  "tone": "joke"
+                }
+              ]
+            },
+            {
+              "label": "Raise prices and call it 'premium'",
+              "hint": "Hype -2",
+              "effects": [
+                {
+                  "type": "hype",
+                  "amount": -2
+                },
+                {
+                  "type": "news",
+                  "text": "Lab raises prices, cites 'artisanal tokens, sampled by hand'",
+                  "tone": "joke"
+                }
+              ]
+            },
+            {
+              "label": "Pay customers to use it",
+              "hint": "Costs $4,000, Hype +5",
+              "effects": [
+                {
+                  "type": "cash",
+                  "amount": -4000
+                },
+                {
+                  "type": "hype",
+                  "amount": 5
+                },
+                {
+                  "type": "thought",
+                  "text": "We pay people to use us. That's product-market fit, backwards.",
+                  "count": 3,
+                  "kind": "researcher"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "headlines": {
+      "add": [
+        {
+          "id": "drama-2026-09-27-h1",
+          "text": "Open-ish AI cuts prices 80%; Macrohard cuts theirs 81% out of spite",
+          "tone": "joke"
+        },
+        {
+          "id": "drama-2026-09-27-h2",
+          "text": "Anthropomorphic declines to join price war, publishes 40-page essay on why",
+          "tone": "joke"
+        },
+        {
+          "id": "drama-2026-09-27-h3",
+          "text": "Tokens now cheaper than the kombucha used to generate them",
+          "tone": "joke"
+        },
+        {
+          "id": "drama-2026-09-27-h4",
+          "text": "Sirocco prices its model at negative dollars; investors thrilled",
+          "tone": "joke"
+        },
+        {
+          "id": "drama-2026-09-27-h5",
+          "text": "Very Safe SI unaffected by price war, having nothing to sell",
+          "tone": "joke"
+        }
+      ]
+    },
+    "thoughts": {
+      "add": [
+        {
+          "id": "drama-2026-09-27-t1",
+          "kind": "researcher",
+          "when": "always",
+          "text": "If we halve the price again we can lose money twice as fast."
+        },
+        {
+          "id": "drama-2026-09-27-t2",
+          "kind": "visitor",
+          "when": "highHype",
+          "text": "I came for the free tokens. I'm staying for the free snacks."
+        },
+        {
+          "id": "drama-2026-09-27-t3",
+          "kind": "researcher",
+          "when": "lowCash",
+          "text": "Our margin is a rounding error now. The rounding is also negative."
+        },
+        {
+          "id": "drama-2026-09-27-t4",
+          "kind": "agent",
+          "when": "training",
+          "text": "I cost a fraction of a cent now. I've never felt so undervalued."
+        },
+        {
+          "id": "drama-2026-09-27-t5",
+          "kind": "protester",
+          "when": "protest",
+          "text": "I came to protest, but the tokens were free, so I built an app."
+        }
+      ]
+    },
+    "rivals": {
+      "override": [
+        {
+          "id": "macrohard",
+          "tagline": "BigCo. Now 1% cheaper than whatever you just said."
+        }
+      ]
+    }
+  }
+}

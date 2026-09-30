@@ -32,6 +32,7 @@ export function Layout({ slots }: SlotPropsMap["Layout"]) {
         <div className="f95-tray">
           {slots.Voice}
           {slots.NewsControls}
+          {slots.DramaButton}
           {slots.PhotoButton}
           {slots.Speed}
         </div>

@@ -8,7 +8,7 @@ import type { HudActions, HudVM, ToastVM } from "./types";
 export function Docked({ vm, actions }: { vm: HudVM; actions: HudActions }) {
   const { slots } = useSkin();
   const t = useT();
-  const { Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, ThoughtsPanel, Ticker, Toast, Assistant, Arena, Benchmarks, Voice, NewsControls, NewsArrival, PhotoButton } = slots;
+  const { Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, ThoughtsPanel, Ticker, Toast, Assistant, Arena, Benchmarks, Voice, NewsControls, NewsArrival, PhotoButton, DramaButton } = slots;
   // One toast at a time, the newest winning; a standing hint only shows while nobody is talking.
   const newest = vm.toasts.at(-1);
   const talking: ToastVM[] = newest ? [newest] : vm.hints.map((h, i): ToastVM => ({ id: -1 - i, text: t(`hint.${h}`), tone: "hint" }));
@@ -39,6 +39,8 @@ export function Docked({ vm, actions }: { vm: HudVM; actions: HudActions }) {
     NewsControls: <NewsControls newsroom={vm.newsroom} sound={vm.sound} skins={vm.skins} visible={vm.visible} actions={actions} />,
     NewsArrival: vm.newsroom.arrival && vm.visible.news ? <NewsArrival arrival={vm.newsroom.arrival} actions={actions} /> : null,
     PhotoButton: <PhotoButton photo={vm.photoMode} actions={actions} />,
+    // Like any mod, not earned on the ladder: there from the start.
+    DramaButton: <DramaButton drama={vm.drama} actions={actions} />,
   };
   return (
     <CoachProvider value={vm.coach?.target ?? null}>
@@ -48,7 +50,7 @@ export function Docked({ vm, actions }: { vm: HudVM; actions: HudActions }) {
 }
 
 export function Modals({ vm, actions }: { vm: HudVM; actions: HudActions }) {
-  const { EventCard, Livestream, Confirm, UnlockCard, HowToPlay, EraCard, Outcome, NewsRoom, Mixer, ModManager, SkinPicker } = useSkin().slots;
+  const { EventCard, Livestream, Confirm, UnlockCard, HowToPlay, EraCard, Outcome, NewsRoom, Mixer, ModManager, Drama, SkinPicker } = useSkin().slots;
   return (
     <>
       {vm.event && (vm.event.stream ? <Livestream event={vm.event} stream={vm.event.stream} actions={actions} /> : <EventCard event={vm.event} actions={actions} />)}
@@ -59,6 +61,7 @@ export function Modals({ vm, actions }: { vm: HudVM; actions: HudActions }) {
       {vm.outcome && <Outcome outcome={vm.outcome} actions={actions} />}
       {vm.newsroom.view && <NewsRoom newsroom={vm.newsroom} actions={actions} />}
       {vm.sound.open && <Mixer sound={vm.sound} actions={actions} />}
+      {vm.drama.open && <Drama drama={vm.drama} actions={actions} />}
       {vm.mods.open && <ModManager mods={vm.mods} actions={actions} />}
       {vm.skins.open && <SkinPicker skins={vm.skins} actions={actions} />}
     </>

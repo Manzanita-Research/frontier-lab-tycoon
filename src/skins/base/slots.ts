@@ -9,6 +9,7 @@ import "./leapfrog.css";
 import "./compact.css";
 import "./notices.css";
 import "./playable.css";
+import "./drama.css";
 import { Arena } from "./slots/Arena";
 import { Benchmarks } from "./slots/Benchmarks";
 import { Assistant } from "./slots/Assistant";
@@ -25,6 +26,8 @@ import { GroupChat } from "./slots/GroupChat";
 import { Inspector } from "./slots/Inspector";
 import { Mixer } from "./slots/Mixer";
 import { ModManager } from "./slots/ModManager";
+import { Drama } from "./slots/Drama";
+import { DramaButton } from "./slots/DramaButton";
 import { NewsArrival } from "./slots/NewsArrival";
 import { NewsControls } from "./slots/NewsControls";
 import { NewsRoom } from "./slots/NewsRoom";
@@ -47,5 +50,5 @@ import { Layout } from "./Layout";
 export const baseSlots: SlotComponents = {
   Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, Bubble, ThoughtsPanel, Ticker, Toast, Assistant,
   EventCard, Confirm, Coach, UnlockCard, HowToPlay, Arena, Benchmarks, Voice, Livestream, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, NewsControls,
-  NewsArrival, NewsRoom, Mixer, ModManager,
+  NewsArrival, NewsRoom, Mixer, ModManager, DramaButton, Drama,
 };

@@ -20,6 +20,7 @@ export function Layout({ slots }: SlotPropsMap["Layout"]) {
         <div className="right-col">
           {slots.Speed}
           {slots.NewsControls}
+          {slots.DramaButton}
           {slots.NewsArrival}
           {slots.PhotoButton}
           {slots.ThoughtsPanel}
