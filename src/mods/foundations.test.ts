@@ -1,4 +1,5 @@
 import { Effect, Layer, Stream } from "effect";
+import { updateProgression, progressOf } from "../sim/progression";
 import { BUILDINGS } from "../content/buildings";
 import { EVENTS } from "../content/events";
 import { HEADLINES } from "../content/headlines";
@@ -57,6 +58,19 @@ describe("mod foundations", () => {
     expect(def.content.walkerKinds.find((k) => k.id === "agent")?.presentation).toBe("flow");
     expect(RIVAL_DEFS[0]?.name).toBe("Anthropomorphic");
     expect(HEADLINES.some((h) => h.text === "Steve ships")).toBe(false);
+  });
+  it("loads progression overrides into the actual sim and rejects a missing level", async () => {
+    const manifest = await Effect.runPromise(decodeManifest(mod("two-models", {
+      progression: { override: [{ id: "garage", goal: { text: "Ship two models", metric: "models", target: 2 } }] },
+    })));
+    const def = await resolve([manifest]);
+    const state = createInitialState(42);
+    expect(injectDefinition(state, def).applied).toContain("progression: unlock ladder");
+    state.models.push("Fixture-1"); updateProgression(state);
+    expect(progressOf(state)).toMatchObject({ level: 1, goal: { text: "Ship two models", target: 2 } });
+    state.models.push("Fixture-2"); updateProgression(state);
+    expect(progressOf(state).level).toBe(2);
+    await expect(resolve([mod("missing-level", { progression: { remove: ["team"] } })])).rejects.toThrow();
   });
   it("wraps the supplied service, stacks in order, and preserves other services", async () => {
     const first = mod("first", { rivals: { override: [{ id: "anthro", name: "First" }] } });

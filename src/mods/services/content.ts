@@ -4,6 +4,7 @@ import type { ArcData, BuildingData, Ending, EntityKind, EventData, Goal, Headli
 import type { baseTables } from "../tables";
 
 export interface ContentApi {
+  readonly progression: readonly import("../../content/progression").ProgressionLevel[];
   readonly buildings: Readonly<Record<string, BuildingData>>;
   readonly rivals: ReadonlyArray<RivalData>;
   readonly headlines: ReadonlyArray<HeadlineData>;

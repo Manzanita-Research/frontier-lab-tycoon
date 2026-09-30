@@ -21,6 +21,8 @@ export interface InjectionReport { readonly applied: string[]; readonly deferred
 export function injectDefinition(state: GameState, def: GameDefinition): InjectionReport {
   const applied: string[] = [];
   const deferred: string[] = [];
+  state.progressionContent = structuredClone(def.content.progression);
+  if (JSON.stringify(def.content.progression) !== JSON.stringify(baseContent.progression)) applied.push("progression: unlock ladder");
   const byId = new Map(def.content.rivals.map((rival) => [rival.id, rival]));
   for (const stored of state.race.rivals) {
     const rival = byId.get(stored.context.id);
@@ -46,7 +48,7 @@ export function injectDefinition(state: GameState, def: GameDefinition): Injecti
     return goal;
   }) };
   for (const [section, value] of Object.entries(def.content)) {
-    if (section === "rivals") continue;
+    if (section === "rivals" || section === "progression") continue;
     const base = Reflect.get(baseContent, section);
     if (JSON.stringify(value) !== JSON.stringify(base)) deferred.push(`${section}: full runtime lookup awaits M1b`);
   }
@@ -73,6 +75,8 @@ export function runHeadless(def: GameDefinition, options: { days?: number; seed?
   if (!Number.isInteger(days) || days < 1 || days > 3650) throw new ModError({ path: "days", detail: "expected 1–3650 whole days" });
   const state = createInitialState(seed);
   const injection = injectDefinition(state, def);
+  delete state.progression;
+  delete state.coach;
   // The quiet opening has no Hall or long paths: pay for the connected campus this harness exercises.
   const setup: Command[] = [...pacingCommands(state),
     { type: "placeBuilding", kind: "hall", x: 12, z: 11 },

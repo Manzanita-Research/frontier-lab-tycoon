@@ -334,6 +334,39 @@ export interface AuctionPaddleVM {
   number: number;
 }
 
+/** The forced-response card ("Ship now at 94% ready or lose the news cycle"), with the live numbers behind its choices. */
+export interface ResponseVM {
+  /** The lab that just launched, and what. */
+  rival: string;
+  rivalModel: string;
+  /** Your run's model, and how baked it is: 0 to 1, and "94%". */
+  model: string;
+  ready: number;
+  readyText: string;
+  /** Capability an early-access preview adds now ("+4.2"), and what the whole release would add ("+6.0"). */
+  shipText: string;
+  holdText: string;
+  /** Odds of an embarrassing launch bug: 0 to 1, and "16%". */
+  bug: number;
+  bugText: string;
+  /** Days a counter-launch has to land. */
+  holdDays: number;
+}
+
+/** The launch livestream mishap card: the dog, the wrong chart, the frozen spinner. */
+export interface StreamVM {
+  /** The mishap's id in the Leapfrog pack ("dog", "wrongChart", ...). Mods add their own. */
+  mishap: string;
+  /** Your model, as the stream is titled. */
+  model: string;
+  viewers: number;
+  viewersText: string;
+  /** The one line a dialog says ("The demo has stopped responding. The dog has not."). */
+  caption: string;
+  /** What chat is saying, oldest first. */
+  chat: { who: string; text: string }[];
+}
+
 export interface EventVM {
   id: string;
   title: string;
@@ -341,9 +374,12 @@ export interface EventVM {
   tone: ToneVM;
   /** The top-stripe text: "Breaking", "Developing", ... */
   stripe: string;
-  kind: "plain" | "auction";
+  /** "response" and "stream" are Release Leapfrog's cards: `response` / `stream` carry their extra data. */
+  kind: "plain" | "auction" | "response" | "stream";
   choices: ChoiceVM[];
   paddles: AuctionPaddleVM[];
+  response: ResponseVM | null;
+  stream: StreamVM | null;
 }
 
 export interface ThoughtRowVM {
@@ -387,6 +423,116 @@ export interface ArenaVM {
     drop: { model: string; daysLeft: number } | null;
   };
   rows: ArenaRowVM[];
+}
+
+// ---- Release Leapfrog (FLT-31): the benchmark leaderboard and the share-of-voice meter.
+
+export interface BenchColumnVM {
+  id: string;
+  /** "MMLU-Pro-Max-Ultra" */
+  name: string;
+  /** "MMLU-PMU": what fits in a column head. */
+  short: string;
+  kind: "score" | "elo";
+  /** live: open. crowded: a photo finish near the ceiling. saturated: declared solved (strike it through, stamp SOLVED). */
+  status: "live" | "crowded" | "saturated";
+  /** The best score on the board, formatted ("87.3", "1,412"). */
+  bestText: string;
+  /** Who holds it: their short name ("" when nobody), and whether that is you. */
+  holder: string;
+  holderYou: boolean;
+  /** A harder replacement that joined in the last few days. */
+  isNew: boolean;
+  /** The sim has already retired it; it stays on the board a few seconds longer so the SOLVED stamp gets seen. */
+  ghost: boolean;
+}
+
+export interface BenchCellVM {
+  /** "87.3", "1,412", or "-" when the lab has no product to score. */
+  text: string;
+  /** Holds the record in this column. */
+  sota: boolean;
+  /** ...and the record was tuned for (a custom prompt, best of 64): show the asterisk. */
+  maxx: boolean;
+  /** The record just changed hands: blink the badge. */
+  flash: boolean;
+}
+
+export interface LeaderRowVM {
+  id: string;
+  /** 1 = leads the most columns. */
+  rank: number;
+  name: string;
+  short: string;
+  /** What a narrow table prints: "You" for your row, else `short`. */
+  label: string;
+  color: string;
+  you: boolean;
+  kind: "you" | "frontier" | "neo" | "open" | "bigco";
+  /** Their latest model, or null when they have no product. */
+  model: string | null;
+  /** One per entry of `columns`, in order. */
+  cells: BenchCellVM[];
+  /** How many columns they lead. */
+  wins: number;
+  /** They launched a moment ago: flash the row. */
+  flash: boolean;
+}
+
+export interface VoiceShareVM {
+  id: string;
+  short: string;
+  color: string;
+  /** 0 to 1; everyone's add up to 1. */
+  share: number;
+  pctText: string;
+  you: boolean;
+}
+
+export interface VoiceSeriesVM {
+  id: string;
+  short: string;
+  color: string;
+  you: boolean;
+  /** Shares (0 to 1) at the end of each of the last game days, oldest first. Empty until the game has run a day. */
+  points: number[];
+}
+
+/** The news cycle: whose launches, stunts and scandals people are talking about. It decays 15% a day. */
+export interface VoiceVM {
+  /** Biggest share first. */
+  shares: VoiceShareVM[];
+  yours: number;
+  yoursText: string;
+  trend: TrendVM;
+  /** Who owns the cycle right now, or "" when it is up for grabs. */
+  owner: string;
+  youOwn: boolean;
+  streak: number;
+  /** "You own the news cycle", "Vast Sea Labs owns the news cycle", "The news cycle is up for grabs". */
+  headline: string;
+  /** You first, then the biggest rivals: what a "Network Traffic" graph plots. */
+  series: VoiceSeriesVM[];
+}
+
+export interface LeapfrogVM {
+  /** false when the pack is off (`?leapfrog=off`): draw nothing. */
+  enabled: boolean;
+  columns: BenchColumnVM[];
+  rows: LeaderRowVM[];
+  /** "*pass@256": the excuse for the latest benchmaxxed record, shown under the table while any cell carries an asterisk. */
+  footnote: string;
+  hasMaxx: boolean;
+  solved: number;
+  /** The latest launch, or null before the first. */
+  drop: { lab: string; model: string; slot: "lead" | "answer"; daysAgo: number; text: string } | null;
+  /** "Next launch in about 6 days" / "An answer lands tomorrow". */
+  nextText: string;
+  /** 0 to 100. */
+  trust: number;
+  voice: VoiceVM;
+  /** Goes up by one with every launch: key an animation on it. */
+  pulse: number;
 }
 
 export interface EraCardVM {
@@ -556,6 +702,8 @@ export interface HudVM {
   event: EventVM | null;
   thoughtsPanel: ThoughtRowVM[];
   arena: ArenaVM;
+  /** Release Leapfrog: the benchmark leaderboard and the share-of-voice meter. `enabled: false` when the pack is off. */
+  leapfrog: LeapfrogVM;
   eraCard: EraCardVM | null;
   outcome: OutcomeVM | null;
   newsroom: NewsroomVM;

@@ -47,6 +47,9 @@ function view(s: GameState) {
     waterDiscourse: s.waterDiscourse,
     ledger: s.ledger,
     training: s.training.context,
+    coach: s.coach,
+    progression: s.progression,
+    unlockCards: s.unlockCards,
     tutorial: s.tutorial,
     guardrails: s.guardrails,
     models: s.models,
@@ -110,7 +113,7 @@ function spot(s: GameState, kind: PlaceableKind): [number, number] | null {
   return null;
 }
 
-const BUILD_ORDER: PlaceableKind[] = ["gateway", "snack", "cluster", "nap", "gateway", "demo", "hall", "cluster", "gateway", "cluster"];
+const BUILD_ORDER: PlaceableKind[] = ["hall", "gateway", "kombucha", "snack", "cluster", "nap", "gateway", "hall", "cluster", "gateway"];
 
 /** A busy player: builds every 30 ticks, paves a bit, bulldozes a path, answers every event card differently. */
 function play(seed: number, ticks: number, checkpoints: number[]): Record<number, string> {
@@ -138,7 +141,7 @@ function play(seed: number, ticks: number, checkpoints: number[]): Record<number
     // Operations: a Janitor Bot, an SRE and a guard, one of them with a patrol zone.
     if (i === 300) cmds.push({ type: "hire", job: "janitor" }, { type: "hire", job: "sre" });
     if (i === 900) cmds.push({ type: "hire", job: "security" }, { type: "hire", job: "comms" });
-    if (i === 1000) for (const x of [8, 9, 10]) cmds.push({ type: "paintZone", id: s.staff[0]!.id, x, z: 16, on: true });
+    if (i === 1000 && s.staff[0]) for (const x of [8, 9, 10]) cmds.push({ type: "paintZone", id: s.staff[0]!.id, x, z: 16, on: true });
     if (i === 700) cmds.push({ type: "bulldoze", x: 13, z: 16 });
     // This stress script deliberately approves its own spending; ordinary play uses the 3-month dialog.
     tick(s, cmds.map((c) => c.type === "placeBuilding" || c.type === "placePath" || c.type === "hire" ? { ...c, confirmed: true } : c));
@@ -158,16 +161,20 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // again by FLT-10. FLT-9 changes the game on purpose: rivals, the Arena, eras, the R&D multiplier (training runs faster), bigger
 // leaps per release, Training Halls that convert 30 compute a day, and a compute auction on day 40 that this
 // script answers like any other card. The port itself was verified against the original numbers in FLT-3.
+// FLT-49 intentionally records the new starting coach/progression state. Systems and purchases now
+// wait for earned levels; the busy-player script first builds a Hall so it can earn access to a Gateway.
+// Path exploration and the Comms break post change deterministic route draws from this new opening.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "b501ed67", 800: "cd638c69", 1600: "211c7ff0", 2400: "3bcab8cc", 3200: "4c393abf", 4000: "58eb49df" },
-  2: { 200: "cb6fd307", 800: "a33df4f0", 1600: "c71a8775", 2400: "1a2fac0e", 3200: "2aa16b41", 4000: "4092bb36" },
-  3: { 200: "1ba636c4", 800: "7bd152ce", 1600: "a9cfc9cb", 2400: "c43fda8e", 3200: "9dc8b895", 4000: "ce9b2b9d" },
+  1: { 200: "a559ea28", 800: "ed628bb9", 1600: "bef75afa", 2400: "a01d1390", 3200: "7a3d787d", 4000: "6a0686fc" },
+  2: { 200: "e548b1af", 800: "552cae60", 1600: "3f400add", 2400: "2868f2da", 3200: "5080b683", 4000: "c0ae2826" },
+  3: { 200: "58bb415c", 800: "920699d6", 1600: "d35c1c03", 2400: "02ba6f9a", 3200: "bcfd9788", 4000: "9ec9a141" },
 };
 
 describe("golden runs", () => {
   for (const seed of [1, 2, 3]) {
     it(`seed ${seed} reproduces the recorded digests at every checkpoint`, () => {
-      expect(play(seed, 4000, CHECKPOINTS)).toEqual(GOLDEN[seed]);
+      const actual = play(seed, 4000, CHECKPOINTS);
+      expect(actual).toEqual(GOLDEN[seed]);
     });
   }
 });

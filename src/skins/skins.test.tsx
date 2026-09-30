@@ -62,7 +62,13 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
     case "HowToPlay":
       return { help: vms.help!.help!, actions };
     case "Arena":
-      return { arena: main.arena, actions };
+      return { arena: main.arena, leapfrog: vms.lf!.leapfrog, layout: main.layout, actions };
+    case "Benchmarks":
+      return { leapfrog: vms.lf!.leapfrog, layout: vms.lf!.layout, actions };
+    case "Voice":
+      return { leapfrog: vms.lf!.leapfrog, layout: vms.lf!.layout, actions };
+    case "Livestream":
+      return { event: vms.stream!.event!, stream: vms.stream!.event!.stream!, actions };
     case "EraCard":
       return { era: vms.era!.eraCard!, actions };
     case "FrontPage":
@@ -98,6 +104,10 @@ const vms: Record<string, HudVM> = {
   help: vmOf({ level: 2, help: true }),
   // Nobody else is talking: a skin with one speech balloon (Chip, in Discovery Disc) shows a standing warning when it is quiet.
   warned: hudViewModel({ ...fixtureInput({ warnings: ["Your entrance isn't connected to any paths. Visitors are forming a very orderly queue to nowhere."] }), toasts: [] }),
+  lf: vmOf({ leapfrog: true }),
+  lfPhone: vmOf({ leapfrog: true, width: 390, height: 844 }),
+  shipNow: vmOf({ leapfrog: true, event: "shipNow" }),
+  stream: vmOf({ leapfrog: true, event: "stream:dog" }),
   auction: vmOf({ event: "computeAuction" }),
   era: vmOf({ event: "era2" }),
   outcome: vmOf({ outcome: "won" }),

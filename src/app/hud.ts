@@ -1,4 +1,8 @@
 // What the HUD reads: a small plain snapshot of the World, refreshed at about 5 Hz instead of every tick.
+import { coachOf } from "../sim/coach";
+import { progressOf, visibleHud } from "../sim/progression";
+import type { CoachMark } from "../content/coach";
+import type { ProgressView, UnlockCard, HudPanel } from "../content/progression";
 import type { PlaceableKind } from "../content/buildings";
 import { runwayMonths } from "../sim/format";
 import { protesterCount } from "../sim/protest";
@@ -40,6 +44,10 @@ export const NO_SELECTION: UiSelection = { selected: null, follow: false, highli
 export const BOARD_ROWS = 14;
 
 export interface Snapshot {
+  progress: ProgressView;
+  coach: CoachMark | null;
+  unlockCard: UnlockCard | null;
+  hud: { visible: Record<HudPanel, boolean> };
   tick: number;
   day: number;
   cash: number;
@@ -115,6 +123,7 @@ function speakersOf(s: GameState): Record<number, string> {
 export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO_SELECTION): Snapshot {
   const books = estimateLedger(s);
   return {
+    progress: progressOf(s), coach: coachOf(s), unlockCard: s.unlockCards?.[0] ?? null, hud: visibleHud(s),
     tick: s.tick,
     day: s.day,
     cash: s.cash,
@@ -153,7 +162,7 @@ export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO
     papers: papersView(s),
     ops: opsView(s),
     assistant: assistantOf(s),
-    firstBuildPending: assistantOf(s) !== null && s.flags.firstBuild === undefined,
+    firstBuildPending: !!s.coach && s.flags.started === undefined && s.flags.firstBuild === undefined,
     pendingConfirm: pendingConfirmOf(s),
     warnings: persistentWarnings(s),
     releaseGoal: releaseGoalText(s),

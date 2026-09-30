@@ -52,7 +52,7 @@
     right: 10px;
     top: 10px;
     bottom: calc(var(--taskbar) + 6px);
-    width: min(400px, calc(100vw - 20px));
+    width: min(600px, calc(100vw - 20px));
     display: flex;
     flex-direction: column;
     align-items: flex-end;
@@ -71,9 +71,16 @@
   .f95-stack {
     display: flex;
     flex-direction: column;
+    align-items: flex-end;
     gap: 10px;
     > * {
       flex: 0 0 auto;
+    }
+    > .f95-win {
+      width: min(400px, 100%);
+    }
+    > .f95-tasks.wide {
+      width: 100%;
     }
   }
 
@@ -2109,6 +2116,411 @@
     white-space: nowrap;
   }
 
+
+  /* ---- Release Leapfrog (FLT-31): Benchmarks tab, Network Traffic, the forced-response gauges, the livestream ---- */
+  .f95-tasks.launched > .f95-tb {
+    animation: frontier-95-blink 0.7s steps(2) 4;
+  }
+  .f95-bench {
+    .f95-benchwrap {
+      margin: 4px;
+      padding: 2px;
+      font-size: 14px;
+    }
+    .bench-scroll {
+      padding: 0;
+      overflow-x: auto;
+    }
+    .bench-table {
+      width: 100%;
+      border-collapse: collapse;
+      border-spacing: 0;
+      font-size: 14px;
+      font-variant-numeric: normal;
+    }
+    .bench-table th,
+    .bench-table td {
+      padding: 8px 3px 3px;
+      text-align: center;
+      font-weight: normal;
+      white-space: nowrap;
+    }
+    .bench-table thead th {
+      padding: 4px 3px 3px;
+      position: relative;
+      background: var(--g);
+      box-shadow: var(--btn);
+      font-size: 12px;
+      letter-spacing: 0;
+      opacity: 1;
+    }
+    .bench-lab {
+      position: sticky;
+      left: 0;
+      min-width: 78px;
+      text-align: left;
+      border-radius: 0;
+      background: var(--flt-color-inset);
+    }
+    thead .bench-lab {
+      background: var(--g);
+    }
+    .bench-dot {
+      width: 8px;
+      height: 8px;
+      margin-right: 5px;
+      border: 1px solid #000;
+      border-radius: 0;
+    }
+    .bench-row > * {
+      border-radius: 0;
+    }
+    .bench-row.you > *,
+    .bench-row.you .bench-lab {
+      background: var(--flt-color-selection);
+      color: var(--flt-color-selectionText);
+      box-shadow: none;
+    }
+    .bench-row.flash > * {
+      animation: frontier-95-rowflash 0.7s steps(2) 6;
+    }
+    .bench-cell {
+      position: relative;
+    }
+    .bench-cell.sota .bench-score {
+      padding: 0 3px;
+      border-radius: 0;
+      background: #ffff00;
+      color: #000;
+      box-shadow: 0 0 0 1px #000;
+    }
+    .bench-badge {
+      top: 0;
+      left: 0;
+      padding: 0 2px;
+      border-radius: 0;
+      background: #e00000;
+      color: #fff;
+      font-size: 10px;
+      font-weight: normal;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+    .bench-cell.flash .bench-badge {
+      animation: frontier-95-blink 0.4s steps(2) infinite;
+    }
+    .bench-cell.flash .bench-score {
+      animation: none;
+    }
+    .bench-col.saturated,
+    .bench-cell.saturated {
+      opacity: 1;
+    }
+    .bench-cell.saturated {
+      color: var(--flt-color-textDim);
+    }
+    .bench-row.you .bench-cell.saturated {
+      color: var(--flt-color-selectionText);
+    }
+    .bench-col.saturated .bench-name {
+      text-decoration: line-through;
+      text-decoration-thickness: 1px;
+    }
+    .bench-stamp {
+      padding: 0 3px;
+      border: 2px solid #e00000;
+      border-radius: 0;
+      color: #e00000;
+      background: #ffffffe6;
+      font-size: 11px;
+      animation: none;
+    }
+    .bench-new {
+      top: -1px;
+      right: 0;
+      border-radius: 0;
+      background: #008000;
+      font-size: 10px;
+    }
+    .bench-col.new .bench-name {
+      color: inherit;
+    }
+    .bench-score sup {
+      font-size: 11px;
+      color: #e00000;
+    }
+    .bench-row.you .bench-score sup {
+      color: #ffff00;
+    }
+    .bench-foot {
+      margin: 2px 4px 0;
+      font-size: 13px;
+      opacity: 1;
+      color: var(--flt-color-textDim);
+    }
+    .bench-empty {
+      padding: 6px 8px;
+      font-size: 15px;
+    }
+  }
+  .f95-s.net {
+    position: relative;
+  }
+  .f95-tx {
+    position: absolute;
+    right: 3px;
+    bottom: 3px;
+    width: 4px;
+    height: 4px;
+    background: #00e000;
+    animation: frontier-95-blink 0.35s steps(2) 8;
+  }
+  .f95-net {
+    position: fixed;
+    left: 10px;
+    bottom: calc(var(--taskbar) + 8px);
+    width: 316px;
+    z-index: 6;
+    &.owned > .f95-tb {
+      background: #800000;
+    }
+  }
+  .f95-netmenu {
+    display: flex;
+    gap: 14px;
+    padding: 1px 6px 3px;
+    font-size: 15px;
+    span::first-letter {
+      text-decoration: underline;
+    }
+  }
+  .f95-netgraph {
+    position: relative;
+    margin: 0 4px 4px;
+    height: 112px;
+    padding: 4px;
+    background: #000;
+    .f95-vg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    .vg-grid {
+      stroke: #005a00;
+    }
+  }
+  .f95-netlabel {
+    position: absolute;
+    left: 8px;
+    top: 4px;
+    font-size: 13px;
+    color: #00e000;
+  }
+  .f95-netkey {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px 12px;
+    margin: 0 4px;
+    padding: 4px 6px;
+    list-style: none;
+    font-size: 15px;
+    li {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+    li span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    li.you {
+      font-weight: bold;
+    }
+    i {
+      flex: none;
+      width: 10px;
+      height: 10px;
+      border: 1px solid #000;
+    }
+    b {
+      margin-left: auto;
+      font-weight: normal;
+    }
+    em {
+      font-style: normal;
+      &.up {
+        color: var(--flt-color-good);
+      }
+      &.down {
+        color: var(--flt-color-bad);
+      }
+    }
+  }
+  .f95-gauges {
+    display: grid;
+    grid-template-columns: 1.35fr 1fr 1fr;
+    gap: 6px;
+    padding: 6px 14px 0;
+  }
+  .f95-gauge {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    min-width: 0;
+    padding: 4px 6px 6px;
+    box-shadow: var(--etched);
+    > span,
+    small {
+      font-size: 14px;
+      color: var(--flt-color-textDim);
+    }
+    .f95-led {
+      font-size: 30px;
+      padding: 2px 6px 0;
+    }
+    .f95-led.lg {
+      font-size: 44px;
+    }
+    .f95-prog {
+      height: 18px;
+      padding: 2px;
+    }
+    &.risky .f95-led {
+      animation: frontier-95-blink 0.8s steps(2) infinite;
+    }
+  }
+  .f95-stream {
+    width: min(640px, 100%);
+  }
+  .f95-player {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 190px;
+    gap: 4px;
+    margin: 4px;
+  }
+  .f95-screen {
+    position: relative;
+    display: grid;
+    place-items: center;
+    height: 216px;
+    overflow: hidden;
+    background: repeating-linear-gradient(0deg, #08081a 0 2px, #101030 2px 4px);
+    box-shadow: var(--sunk);
+  }
+  .f95-onair {
+    position: absolute;
+    left: 8px;
+    top: 6px;
+    padding: 0 6px;
+    background: #e00000;
+    color: #fff;
+    animation: frontier-95-blink 1.2s steps(2) infinite;
+  }
+  .f95-viewers {
+    position: absolute;
+    right: 8px;
+    top: 6px;
+    font-size: 14px;
+    color: #fff;
+  }
+  .f95-errbox {
+    position: relative;
+    z-index: 2;
+    width: min(320px, calc(100% - 24px));
+    margin-top: 18px;
+  }
+  .f95-errbody {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px 2px;
+    p {
+      margin: 0;
+      line-height: 1.2;
+    }
+    .f95-ico {
+      flex: none;
+    }
+  }
+  .f95-chat {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 3px;
+    margin: 0;
+    padding: 4px 6px;
+    list-style: none;
+    font-size: 14px;
+    overflow: hidden;
+    li {
+      line-height: 1.15;
+    }
+    li b {
+      color: #000080;
+      font-weight: normal;
+    }
+  }
+  .f95-dog {
+    position: absolute;
+    left: 14px;
+    bottom: 2px;
+    z-index: 3;
+    width: 120px;
+    height: 70px;
+    animation: frontier-95-dog 3.6s steps(18) both;
+    .tail {
+      transform-origin: 4px 4px;
+      animation: frontier-95-wag 0.3s steps(2) infinite;
+    }
+    .legs {
+      animation: frontier-95-trot 0.24s steps(2) 15;
+    }
+  }
+  .f95-chartpic {
+    position: absolute;
+    left: 14px;
+    bottom: 12px;
+    width: 120px;
+    height: 72px;
+    border: 2px solid #fff;
+  }
+  .f95-spin {
+    position: absolute;
+    left: 24px;
+    bottom: 16px;
+    width: 44px;
+    height: 44px;
+    animation: frontier-95-turn 1.6s steps(8) infinite;
+    i {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: #fff;
+    }
+    i:nth-child(1) {
+      left: 16px;
+      top: 0;
+    }
+    i:nth-child(2) {
+      right: 0;
+      top: 16px;
+      opacity: 0.7;
+    }
+    i:nth-child(3) {
+      left: 16px;
+      bottom: 0;
+      opacity: 0.45;
+    }
+    i:nth-child(4) {
+      left: 0;
+      top: 16px;
+      opacity: 0.25;
+    }
+  }
+
   /* ---- focus, motion, touch ---- */
   button:focus-visible,
   select:focus-visible,
@@ -2130,14 +2542,34 @@
   &[data-motion="reduced"] {
     .f95-dots,
     .f95-cursor,
-    .f95-clip.wiggle svg {
+    .f95-clip.wiggle svg,
+    .f95-tasks.launched > .f95-tb,
+    .f95-bench .bench-row.flash > *,
+    .f95-bench .bench-cell.flash .bench-badge,
+    .f95-tx,
+    .f95-gauge.risky .f95-led,
+    .f95-onair,
+    .f95-dog,
+    .f95-dog .tail,
+    .f95-dog .legs,
+    .f95-spin {
       animation: none;
     }
   }
   @media (prefers-reduced-motion: reduce) {
     .f95-dots,
     .f95-cursor,
-    .f95-clip.wiggle svg {
+    .f95-clip.wiggle svg,
+    .f95-tasks.launched > .f95-tb,
+    .f95-bench .bench-row.flash > *,
+    .f95-bench .bench-cell.flash .bench-badge,
+    .f95-tx,
+    .f95-gauge.risky .f95-led,
+    .f95-onair,
+    .f95-dog,
+    .f95-dog .tail,
+    .f95-dog .legs,
+    .f95-spin {
       animation: none;
     }
   }
@@ -2163,7 +2595,10 @@
   /* ---- narrower desktops ---- */
   @media (max-width: 1040px) and (min-width: 641px) {
     .f95-side {
-      width: min(340px, calc(100vw - 20px));
+      width: min(560px, calc(100vw - 20px));
+    }
+    .f95-stack > .f95-win {
+      width: min(340px, 100%);
     }
     .f95-left {
       width: calc(100vw - 370px);
@@ -2251,6 +2686,10 @@
     .f95-stack > * {
       flex: 1 1 0;
       min-width: 0;
+    }
+    .f95-stack > .f95-win,
+    .f95-stack > .f95-tasks.wide {
+      width: auto;
     }
     .f95-props,
     .f95-staff,
@@ -2357,6 +2796,26 @@
     .f95-msgbox {
       width: 100%;
     }
+    .f95-player {
+      grid-template-columns: 1fr;
+    }
+    .f95-screen {
+      height: 178px;
+    }
+    .f95-errbox {
+      margin-top: 22px;
+    }
+    .f95-chat {
+      max-height: 66px;
+      li:nth-last-child(n + 4) {
+        display: none;
+      }
+    }
+    .f95-net {
+      left: 4px;
+      right: 4px;
+      width: auto;
+    }
     .f95-paper {
       padding: 10px 12px;
       .lead,
@@ -2399,5 +2858,34 @@
   }
   to {
     background-position: 8px 0;
+  }
+}
+@keyframes frontier-95-rowflash {
+  50% {
+    background: #ffff80;
+    color: #000;
+  }
+}
+@keyframes frontier-95-dog {
+  from {
+    transform: translateX(-160px);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@keyframes frontier-95-wag {
+  50% {
+    transform: rotate(-24deg);
+  }
+}
+@keyframes frontier-95-trot {
+  50% {
+    transform: translateY(-3px);
+  }
+}
+@keyframes frontier-95-turn {
+  to {
+    transform: rotate(360deg);
   }
 }

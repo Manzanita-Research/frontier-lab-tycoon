@@ -2128,3 +2128,11 @@
     transform: scale(1.04);
   }
 }
+
+/* Release Leapfrog (FLT-31): the base leaderboard and news-cycle panels take this skin's right column. */
+[data-skin="homepage-98"] {
+  .gc-right .bench,
+  .gc-right .voice {
+    width: 100%;
+  }
+}

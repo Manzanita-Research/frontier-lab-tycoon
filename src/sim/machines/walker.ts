@@ -97,7 +97,7 @@ export const LEAVE_PATIENCE = 0.06;
 /** A visitor tours a fixed number of buildings; when none are left, or patience is gone, the next decision is to leave. */
 export const tourDone = (kind: WalkerKind, visits: number, patience = 1) => kind === "visitor" && (visits <= 0 || patience < LEAVE_PATIENCE);
 
-const memo = new Map<string, WalkerPhase>();
+const memo = new Map<WalkerPhase, Map<string, WalkerPhase>>();
 
 /**
  * `step(walkerMachine, ...)` for a machine with no context and no functions: what a transition does then depends on
@@ -106,11 +106,12 @@ const memo = new Map<string, WalkerPhase>();
  * dozens of times a tick, and this is what keeps the 800-walker budget. `machine.test.ts` checks every pair.
  */
 export function stepWalker(stored: WalkerStored, event: EventFromLogic<typeof walkerMachine>): WalkerStored {
-  const key = `${stored.value}>${event.type}`;
-  let next = memo.get(key);
+  let events = memo.get(stored.value);
+  if (!events) { events = new Map(); memo.set(stored.value, events); }
+  let next = events.get(event.type);
   if (next === undefined) {
     next = step(walkerMachine, { value: stored.value, context: {} }, event).stored.value;
-    memo.set(key, next);
+    events.set(event.type, next);
   }
   return { value: next, context: {} };
 }

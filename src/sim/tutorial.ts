@@ -1,3 +1,5 @@
+import { levelOf } from "./progression";
+import { coachCommand } from "./coach";
 import { TUTORIAL, TUTORIAL_DONE, type TutorialStep, type TutorialTarget } from "../content/tutorial";
 import { tutorialMachine } from "./machines/tutorial";
 import { step } from "./machines/run";
@@ -19,7 +21,7 @@ export function assistantOf(state: GameState): AssistantMessage | null {
   const t = state.tutorial;
   if (!t || t.value === "done" || t.value === "skipped") return null;
   const key = t.value as TutorialStep;
-  return { step: key, ...TUTORIAL[key], paused: !t.context.acknowledged, canSkip: true };
+  return { step: key, ...TUTORIAL[key], paused: false, canSkip: true };
 }
 
 /** Successful commands set facts; this driver steps synchronously even when the app is paused. */
@@ -44,10 +46,12 @@ export function updateTutorial(state: GameState) {
 }
 
 export function continueTutorial(state: GameState, skip = false) {
+  if (skip) coachCommand(state, "coachSkip");
   if (assistantOf(state)) state.tutorial = step(tutorialMachine, state.tutorial!, { type: skip ? "SKIP" : "CONTINUE" }).stored;
 }
 
 /** Pressure waits for a launch and a route to revenue; removing a gateway later cannot switch fires off. */
 export function pressureReady(state: GameState): boolean {
+  if (state.progression) return levelOf(state) >= 3;
   return state.day >= 40 && state.models.length > 0 && (state.flags.firstRevenue !== undefined || state.buildings.some((b) => b.kind === "gateway" && isReachable(state, b)));
 }

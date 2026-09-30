@@ -78,9 +78,26 @@
       "collusion-sign",
       "collusion-phone",
       "collusion-scandal"
+    ],
+    "coach": [
+      "coach-path",
+      "coach-hall",
+      "coach-phone"
     ]
   },
   "scenes": {
+    "midgame": {
+      "title": "FLT-48 Part A: the scripted mid-game campus, paused near Y2 Mar",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "steps": []
+    },
     "overview": {
       "title": "The campus, mid-morning, paused",
       "steps": []
@@ -458,6 +475,224 @@
       "steps": [
         {
           "wait": 800
+        }
+      ]
+    },
+    "coach-path": {
+      "title": "Coach suggests a connected path from the gate",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "11,19",
+        "zoom": 55
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        }
+      ]
+    },
+    "coach-hall": {
+      "title": "Coach suggests a Training Hall beside the paid path",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "11,19",
+        "zoom": 55
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 17
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 16
+            }
+          }
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "coach-phone": {
+      "title": "Coach path anchors on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "11,19",
+        "zoom": 29
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        }
+      ]
+    },
+    "leap-board": {
+      "title": "Release Leapfrog: the benchmark leaderboard mid-drop (a lab launched, another answers tomorrow)",
+      "query": {
+        "moment": "pair",
+        "warp": null
+      },
+      "steps": [
+        {
+          "tick": 14
+        },
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "leap-solved": {
+      "title": "Release Leapfrog: a benchmark has just been solved (struck through, stamped SOLVED, a harder one on the board)",
+      "query": {
+        "moment": "solved",
+        "warp": null
+      },
+      "steps": [
+        {
+          "tick": 14
+        },
+        {
+          "send": {
+            "type": "KEEP_PLAYING"
+          }
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "leap-voice": {
+      "title": "Release Leapfrog: the news cycle, 40 days of it (Network Traffic in Frontier 95)",
+      "query": {
+        "moment": "pair",
+        "warp": null
+      },
+      "steps": [
+        {
+          "eval": "async (f, w) => { for (let d = 0; d < 42; d++) { f.send({ type: 'CHOOSE', choiceIndex: 0 }); await new Promise((r) => setTimeout(r, 70)); for (let i = 0; i < 20; i++) f.tick(w); await new Promise((r) => setTimeout(r, 240)); } }"
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "leap-phone-board": {
+      "title": "Release Leapfrog: the leaderboard on a phone (Task Mangler opened)",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "moment": "pair",
+        "warp": null
+      },
+      "steps": [
+        {
+          "tick": 14
+        },
+        {
+          "wait": 800
+        },
+        {
+          "click": ".f95-tasks .f95-tb",
+          "optional": true
+        },
+        {
+          "click": ".bench-head",
+          "optional": true
+        },
+        {
+          "wait": 600
         }
       ]
     }

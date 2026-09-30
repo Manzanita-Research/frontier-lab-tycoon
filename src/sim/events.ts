@@ -42,7 +42,7 @@ export function openEventOf(state: GameState): OpenEvent | null {
  * cooldown is over takes the screen, and the rest wait their turn as `brewing`. The game pauses until it is answered.
  */
 export function dailyEvents(state: GameState) {
-  if (state.goals.value === "lost" || state.day < 40) return;
+  if (state.goals.value === "lost" || (!state.progression && state.day < 40)) return;
   let slotFree = openEventOf(state) === null;
   // Later eras crowd the calendar: cooldowns shrink.
   const pace = eraDef(eraOfState(state)).pace;
