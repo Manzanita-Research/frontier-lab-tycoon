@@ -277,3 +277,20 @@ export function bootChoice(search: string, stored: string | null, entries: reado
 
 /** What the picker's OK saves: the skin showing, if the player could have picked it there. A `?skin=` visit to a hidden skin never sticks. */
 export const pickToSave = (active: string, entries: readonly CatalogEntry[] = catalog): string | null => (isListed(active, entries) ? active : null);
+
+/** What loading a save does to the skin: `id` to put on (null: keep the current one), and whether to say Frontier 95 is back. */
+export interface SaveSkinChoice {
+  id: string | null;
+  notice: boolean;
+}
+/**
+ * Loading a save (FLT-65) puts its skin back: a listed skin, Classic, or a mod's skin whose mod is loaded. A save from a skin
+ * that has since been hidden gets Frontier 95 and the notice instead (FLT-71). Anything else (a mod that isn't loaded) keeps the
+ * current look.
+ */
+export function saveSkinChoice(saved: string | null | undefined, active: string, entries: readonly CatalogEntry[] = catalog): SaveSkinChoice {
+  if (!saved) return { id: null, notice: false };
+  const hidden = entries.some((e) => e.folder === saved && e.manifest?.unlisted);
+  const id = hidden ? DEFAULT_SKIN : skinList(entries).some((s) => s.id === saved) ? saved : null;
+  return { id: id === active ? null : id, notice: hidden };
+}

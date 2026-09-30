@@ -1,7 +1,7 @@
 // FLT-71: Frontier 95 for everyone, the other five hidden from the picker (still reachable with ?skin=), and an old pick
 // of a hidden skin moved to Frontier 95 once, with a notice.
 import { describe, expect, it } from "vitest";
-import { BASE_ID, CLASSIC, DEFAULT_SKIN, MIGRATED_NOTICE, bootChoice, catalog, isListed, pickToSave, prepareSkin, skinList } from "./registry";
+import { BASE_ID, CLASSIC, DEFAULT_SKIN, MIGRATED_NOTICE, bootChoice, catalog, isListed, pickToSave, prepareSkin, registerModSkins, saveSkinChoice, skinList } from "./registry";
 
 const HIDDEN = ["discovery-disc-96", "field-almanac", "homepage-98", "karaoke-night", "swag-drop"];
 
@@ -50,5 +50,28 @@ describe("which skin a player starts on", () => {
   it("a saved pick that is still listed is left alone", () => {
     expect(bootChoice("", BASE_ID)).toEqual({ id: BASE_ID, notice: false });
     expect(bootChoice("", DEFAULT_SKIN)).toEqual({ id: DEFAULT_SKIN, notice: false });
+  });
+});
+
+describe("loading a save puts its skin back (FLT-65)", () => {
+  it("a save from a skin that is hidden now gets Frontier 95 and the notice", () => {
+    for (const id of HIDDEN) expect(saveSkinChoice(id, BASE_ID), id).toEqual({ id: DEFAULT_SKIN, notice: true });
+    // Already on Frontier 95: nothing to switch, but the notice still explains why the save's look didn't come back.
+    expect(saveSkinChoice("discovery-disc-96", DEFAULT_SKIN)).toEqual({ id: null, notice: true });
+  });
+  it("a listed skin or Classic comes back, and a save with no skin or the current one changes nothing", () => {
+    expect(saveSkinChoice(BASE_ID, DEFAULT_SKIN)).toEqual({ id: BASE_ID, notice: false });
+    expect(saveSkinChoice(DEFAULT_SKIN, BASE_ID)).toEqual({ id: DEFAULT_SKIN, notice: false });
+    expect(saveSkinChoice(DEFAULT_SKIN, DEFAULT_SKIN)).toEqual({ id: null, notice: false });
+    expect(saveSkinChoice(undefined, BASE_ID)).toEqual({ id: null, notice: false });
+  });
+  it("a mod's skin comes back while its mod is loaded, and keeps the current look when it isn't", () => {
+    expect(saveSkinChoice("good-boy-95", DEFAULT_SKIN)).toEqual({ id: null, notice: false });
+    registerModSkins({ "good-boy-95": { id: "good-boy-95", name: "Good Boy 95", extends: "frontier-95" } }, { "good-boy-95": { id: "golden-retriever-protest", name: "Golden Retriever Protest", version: "1.0.0" } });
+    try {
+      expect(saveSkinChoice("good-boy-95", DEFAULT_SKIN)).toEqual({ id: "good-boy-95", notice: false });
+    } finally {
+      registerModSkins({}, {});
+    }
   });
 });

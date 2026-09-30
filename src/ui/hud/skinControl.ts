@@ -1,8 +1,8 @@
 // Switching skins: load, apply, remember. The picker's preview/apply/cancel semantics live here so they survive a
 // change of skin (the SkinPicker slot itself is replaced when the skin changes).
-import { bootNotice, registry } from "../../app/game";
+import { bootNotice, registry, send } from "../../app/game";
 import { modSession } from "../../app/mods";
-import { BASE_ID, DEFAULT_SKIN, MIGRATED_NOTICE, MOTION_KEY, STORAGE_KEY, SkinRefused, applyPrepared, bootChoice, modSkin, pickToSave, prepareSkin, registerModSkins, skinList } from "../../skins/registry";
+import { BASE_ID, DEFAULT_SKIN, MIGRATED_NOTICE, MOTION_KEY, STORAGE_KEY, SkinRefused, applyPrepared, bootChoice, modSkin, pickToSave, saveSkinChoice, prepareSkin, registerModSkins, skinList } from "../../skins/registry";
 import { loadedSkinAtom, skinUiAtom, type SkinUi } from "./state";
 
 const ui = () => registry.get(skinUiAtom);
@@ -35,13 +35,16 @@ function refuse(e: unknown, id: string) {
  * Show a skin. A skin that is refused is reported (console and the picker) and the game falls back to the default,
  * then to the base, so the player is never left without a HUD. Returns the id that ended up showing.
  */
-export async function showSkin(id: string): Promise<string> {
+export async function showSkin(id: string, opts: { persist?: boolean } = {}): Promise<string> {
   for (const candidate of [...new Set([id, DEFAULT_SKIN, BASE_ID])]) {
     try {
       const prepared = await prepareSkin(candidate);
       await applyPrepared(prepared);
       registry.set(loadedSkinAtom, prepared.skin);
       setUi({ active: candidate, refused: ui().refused.filter((r) => r.id !== candidate) });
+      // `persist` (a loaded save's skin, FLT-65) sticks only for a listed built-in skin, like the picker's OK (FLT-71).
+      const pick = opts.persist && candidate === id ? pickToSave(id) : null;
+      if (pick) remember(STORAGE_KEY, pick);
       return candidate;
     } catch (e) {
       refuse(e, candidate);
@@ -78,12 +81,27 @@ export async function bootSkin(): Promise<void> {
   if (choice.save) remember(STORAGE_KEY, choice.save);
   const wearsMod = !!asked && !explicit && answer === "yes";
   await showSkin(wearsMod ? asked : choice.id);
-  if (choice.notice && !wearsMod) bootNotice(MIGRATED_NOTICE);
+  if (choice.notice && !wearsMod) onceMigrated(bootNotice);
   if (asked && !explicit && answer === null) {
     const skin = modSkin(asked)!;
     const info = skinList().find((s) => s.id === asked);
     setUi({ offer: { skin: asked, name: skin.data.name, mod: skin.mod.id, modName: skin.mod.name, description: info?.description ?? "", preview: info?.preview ?? "" } });
   }
+}
+
+/** "Frontier 95 is back as your desktop.", at most once per profile, whether the hidden skin came from the saved pick or a save. */
+const MIGRATED_KEY = "flt.skin.migrated";
+function onceMigrated(show: (text: string) => void) {
+  if (recall(MIGRATED_KEY)) return;
+  remember(MIGRATED_KEY, "1");
+  show(MIGRATED_NOTICE);
+}
+
+/** Loading a save (FLT-65) puts its skin back, or Frontier 95 when that skin is hidden now (see `saveSkinChoice`). */
+export async function restoreSaveSkin(saved: string | null | undefined): Promise<void> {
+  const choice = saveSkinChoice(saved, ui().active);
+  if (choice.id) await showSkin(choice.id, { persist: true });
+  if (choice.notice) onceMigrated((text) => send({ type: "TOAST", text, tone: "neutral" }));
 }
 
 function applyMotion(on: boolean) {

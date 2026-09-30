@@ -581,7 +581,7 @@ node scripts/skin-shots.mjs /tmp/m --skin midnight --only e --measure    # phone
 
 Which skin loads: `?skin=<id>`, then `localStorage["flt.skin"]` (set by the picker's OK), then `frontier-95`. A `?skin=` link is for that visit only: it is never saved unless the player picks that skin in the picker, and an unlisted skin is never saved at all. `?skin=base` loads the bare base skin, which is handy for debugging a skin against its foundation. Switching in the picker is live and does not reset the game.
 
-The picker lists the skins without `unlisted` (today Frontier 95) and then **Classic**, the base skin. A saved pick of an unlisted skin (from before FLT-71 hid five of them) is rewritten to `frontier-95` once, with the notice "Frontier 95 is back as your desktop." (`bootChoice` in `registry.ts`; `src/skins/picker.test.ts`).
+The picker lists the skins without `unlisted` (today Frontier 95) and then **Classic**, the base skin. A saved pick of an unlisted skin (from before FLT-71 hid five of them) is rewritten to `frontier-95` once, with the notice "Frontier 95 is back as your desktop." (`bootChoice` in `registry.ts`; `src/skins/picker.test.ts`). Loading a save puts its skin back (a listed skin, Classic, or a mod's skin while its mod is loaded); a save made in a hidden skin gets Frontier 95 instead (`saveSkinChoice`). The notice is shown at most once per profile.
 
 The six standard scenes (a: overview 1440×900, b: inspector open, c: the Water Discourse card, d: build bar / Start menu open, e: phone 390×844, f: photo mode) are the evidence every skin PR carries.
 
