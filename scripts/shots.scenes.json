@@ -226,6 +226,8 @@
       "c56-plaque",
       "c56-viral",
       "c56-viral-phone",
+      "c56-marchers",
+      "c56-marchers-phone",
       "c56-gate",
       "c56-gate-karaoke",
       "c56-statement",
@@ -2866,6 +2868,34 @@
           "wait": 900
         }
       ]
+    },
+    "c56-marchers": {
+      "title": "FLT-56 review: the counter-protest at the default zoom in photo mode (no legend), caps and boards in each faction's colour",
+      "query": {
+        "moment": "counterprotest",
+        "focus": "12,21",
+        "photo": 1
+      },
+      "steps": [
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "c56-marchers-phone": {
+      "title": "FLT-56 review: the counter-protest at the default zoom, in photo mode on a phone",
+      "query": {
+        "moment": "counterprotest",
+        "focus": "12,21",
+        "photo": 1
+      },
+      "steps": [
+        {
+          "wait": 600
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
     }
   }
 }

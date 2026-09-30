@@ -116,11 +116,27 @@
 :root[data-motion="reduced"] .beat-bar {
   animation: none;
 }
-/* While a beat plays, the docked HUD steps back so the shot reads as a shot. Cards and menus are not docked, and a
-   card ends the beat anyway. */
-.hud-host > * {
-  transition: opacity var(--flt-motion-slow, 0.3s) ease;
+/* While a beat plays the HUD leaves the shot entirely (FLT-56 review): the docked windows, the coach and the game's
+   pinned chrome fade out, and come back when the bars go. Thought bubbles and the world's own signs stay, as in photo
+   mode: they are the jokes. The toasts wait in the app (HOLD_TOASTS) rather than play out unseen. Cards and menus are
+   not docked, and a card ends the beat anyway. `body.beat` is set by the host (useHudEffects), so every skin gets it. */
+.hud-host > *,
+.gate-anchor,
+.audit-anchor {
+  transition: opacity var(--flt-motion-slow, 0.3s) ease, visibility 0s;
 }
-.hud-host:has(> .beat) > :not(.beat) {
-  opacity: 0.12;
+body.beat .hud-host > :not(.beat),
+body.beat .gate-anchor,
+body.beat .audit-anchor,
+body.beat .world .coinpop,
+body.beat .world .nopath,
+body.beat .world .reason,
+body.beat .world .brokenlabel,
+body.beat .world .stafftag,
+body.beat .world .queuelabel,
+body.beat .world .nametag {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity var(--flt-motion-slow, 0.3s) ease, visibility 0s var(--flt-motion-slow, 0.3s);
 }

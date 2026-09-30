@@ -198,4 +198,14 @@ export function useHudEffects(vm: HudVM, snap: Snapshot) {
   useEffect(startDrama, []);
   useShareCard(vm);
   useTakeoverTitle(vm);
+  useBeatStage(vm.beat !== null);
+}
+
+/** A camera beat clears the stage (FLT-56): `body.beat` fades the HUD out (beat.css) and the app holds the toasts. */
+function useBeatStage(on: boolean) {
+  useEffect(() => {
+    document.body.classList.toggle("beat", on);
+    send({ type: "HOLD_TOASTS", on });
+    return () => document.body.classList.remove("beat");
+  }, [on]);
 }

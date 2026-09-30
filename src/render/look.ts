@@ -30,21 +30,22 @@ export interface Placard {
   crowd: string;
 }
 
-/** Mix a colour toward white (`k` 0 is the colour, 1 is white). */
-function pale(hex: string, k: number): string {
+/** Ink that reads on a board of `hex`: near-black on a light colour, white on a dark one. */
+export function inkOn(hex: string): string {
   const n = parseInt(hex.slice(1), 16);
-  const ch = (shift: number) => Math.round(((n >> shift) & 255) + (255 - ((n >> shift) & 255)) * k);
-  return `#${((ch(16) << 16) | (ch(8) << 8) | ch(0)).toString(16).padStart(6, "0")}`;
+  const lin = (v: number) => ((v /= 255) <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+  const l = 0.2126 * lin((n >> 16) & 255) + 0.7152 * lin((n >> 8) & 255) + 0.0722 * lin(n & 255);
+  // Whichever contrasts more: white's ratio is 1.05 / (l + 0.05), #1b1b1b's is (l + 0.05) / 0.061. They cross near 0.2.
+  return l > 0.2 ? "#1b1b1b" : "#ffffff";
 }
 
 /**
  * Every placard on the map: the water crowd's (cream boards, red ink), then each faction's own signs, up to four, on a
- * board in a pale wash of the faction's colour with the colour itself for ink, so a mixed crowd at the gate sorts itself
- * out at a glance (FLT-56).
+ * board in the faction's colour itself, so a mixed crowd at the gate sorts itself out at the default zoom (FLT-56).
  */
 export function placards(): Placard[] {
   const water = SIGNS.map((text, i) => ({ text, bg: SIGN_COLORS[i % SIGN_COLORS.length]!, ink: "#b3261e", crowd: "" }));
-  const factions = defs().factions.flatMap((f) => f.signs.slice(0, 4).map((text) => ({ text, bg: pale(f.color, 0.82), ink: f.color, crowd: f.id })));
+  const factions = defs().factions.flatMap((f) => f.signs.slice(0, 4).map((text) => ({ text, bg: f.color, ink: inkOn(f.color), crowd: f.id })));
   return [...water, ...factions];
 }
 

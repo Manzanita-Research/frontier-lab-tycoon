@@ -90,8 +90,10 @@ export const hudActions: HudActions = {
   setSafetySpend: (level) => send({ type: "COMMAND", command: { type: "setSafetySpend", level } }),
   issueStatement: (faction) => send({ type: "COMMAND", command: { type: "issueStatement", faction } }),
   buryLeak: () => send({ type: "COMMAND", command: { type: "buryLeak" } }),
+  // The beat's own button answers it, so the beat is over: the reply toast shows at once instead of waiting it out.
   beatAction: (id) => {
     if (id === "bury") send({ type: "COMMAND", command: { type: "buryLeak" } });
+    skipBeat();
   },
   keepPlaying: () => send({ type: "KEEP_PLAYING" }),
   newLab: () => send({ type: "NEW_LAB" }),

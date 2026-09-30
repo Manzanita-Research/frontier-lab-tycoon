@@ -4,6 +4,7 @@ import * as THREE from "three";
 import { sim as game } from "../app/game";
 import { HALF } from "./coords";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
+import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { CHEER_SECONDS, fx } from "./fx/state";
 import { beatRun } from "./fx/beatState";
 import { reducedMotion } from "../skins/kit/motion";
@@ -111,6 +112,7 @@ export function Walkers() {
   const pBody = useRef<THREE.InstancedMesh>(null);
   const pHead = useRef<THREE.InstancedMesh>(null);
   const pStick = useRef<THREE.InstancedMesh>(null);
+  const pCap = useRef<THREE.InstancedMesh>(null);
   const eyes = useRef<THREE.InstancedMesh>(null);
   const boxes = useRef<THREE.InstancedMesh>(null);
   const lit = useRef<THREE.InstancedMesh>(null);
@@ -139,6 +141,12 @@ export function Walkers() {
   const orbGeo = useMemo(() => new THREE.SphereGeometry(0.065 * S, 10, 8), []);
   const hatGeo = useMemo(() => new THREE.SphereGeometry(0.2 * S, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2), []);
   const agentHaloGeo = useMemo(() => new THREE.TorusGeometry(0.2 * S, 0.02 * S, 6, 20).rotateX(Math.PI / 2), []);
+  // A marcher's cap: a dome over the crown with a peak out front, in one mesh.
+  const capGeo = useMemo(() => {
+    const dome = new THREE.SphereGeometry(0.14 * S, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2);
+    const peak = new THREE.CylinderGeometry(0.11 * S, 0.11 * S, 0.02 * S, 12, 1, false, -Math.PI / 2, Math.PI).translate(0, 0, 0.06 * S);
+    return mergeGeometries([dome.toNonIndexed(), peak.toNonIndexed()])!;
+  }, []);
   const stickGeo = useMemo(() => new THREE.BoxGeometry(0.045, 1, 0.045), []);
   const eyeGeo = useMemo(() => new THREE.BoxGeometry(0.17 * S, 0.042 * S, 0.05 * S), []);
   const boxGeo = useMemo(() => new RoundedBoxGeometry(0.34, 0.26, 0.3, 2, 0.03), []);
@@ -161,6 +169,7 @@ export function Walkers() {
     let no = 0;
     let nv = 0;
     let np = 0;
+    let nc = 0;
     let ne = 0;
     let nx = 0;
     let nl = 0;
@@ -278,6 +287,12 @@ export function Walkers() {
         // A faction's marchers wear its colour (FLT-56); the water crowd, whatever it had on.
         pBody.current?.setColorAt(i, (w.crowd && signs.bodies.get(w.crowd)) || picket[w.id % picket.length]!);
         pHead.current?.setColorAt(i, skins[(w.id * 7) % skins.length]!);
+        // And a solid cap in it, so the groups read from the default camera without the legend (FLT-56 review).
+        const cap = w.crowd ? signs.bodies.get(w.crowd) : undefined;
+        if (cap) {
+          set(pCap.current, nc, x, 0.7 * S + bob - land * 0.1, z, ry, 1, 1, 1);
+          pCap.current?.setColorAt(nc++, cap);
+        }
         const wave = Math.sin(t * 5 + phase) * 0.14;
         // The pole runs from the fist up to the board.
         set(pStick.current, i, x, 1.25 + bob, z, 0, 1, 1, 1);
@@ -382,6 +397,7 @@ export function Walkers() {
     done(pBody.current, np);
     done(pHead.current, np);
     done(pStick.current, np);
+    done(pCap.current, nc);
     done(eyes.current, ne);
     done(boxes.current, nx);
     done(hide.current, nk);
@@ -442,6 +458,9 @@ export function Walkers() {
         <meshStandardMaterial color="#2a1d14" roughness={0.5} />
       </instancedMesh>
 
+      <instancedMesh ref={pCap} args={[capGeo, undefined, CAP]} castShadow frustumCulled={false}>
+        <meshStandardMaterial roughness={0.55} />
+      </instancedMesh>
       <instancedMesh ref={pStick} args={[stickGeo, undefined, CAP]} castShadow frustumCulled={false}>
         <meshStandardMaterial color="#8a5a3a" roughness={0.9} />
       </instancedMesh>
