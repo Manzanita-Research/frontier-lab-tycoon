@@ -93,6 +93,8 @@ const vms: Record<string, HudVM> = {
   event: vmOf({ event: "waterDiscourse" }),
   confirm: vmOf({ confirm: true }),
   coached: vmOf({ level: 1, coach: 0, unlock: true }),
+  garage: vmOf({ level: 1, selected: null }),
+  lab: vmOf({ level: 5, selected: null }),
   help: vmOf({ level: 2, help: true }),
   // Nobody else is talking: a skin with one speech balloon (Chip, in Discovery Disc) shows a standing warning when it is quiet.
   warned: hudViewModel({ ...fixtureInput({ warnings: ["Your entrance isn't connected to any paths. Visitors are forming a very orderly queue to nowhere."] }), toasts: [] }),
@@ -188,6 +190,67 @@ describe.each([BASE_ID, ...usable])("skin %s", (id) => {
     const echoed = hudViewModel({ ...fixtureInput({ warnings: vm.warnings }), toasts: [{ id: 5, text: vm.warnings[0]!, tone: "bad" }] });
     expect(echoed.toasts).toEqual([]);
     expect(html(skin, <Docked vm={echoed} actions={actions} />).split(escape(vm.warnings[0]!)).length - 1).toBe(1);
+  });
+
+  it("hides what the lab has not earned yet (level 1: cash, runway, date, the goal, the training bar) and shows it all later", async () => {
+    const { skin } = await prepareSkin(id);
+    const garage = html(skin, <Docked vm={vms.garage!} actions={actions} />);
+    const lab = html(skin, <Docked vm={vms.lab!} actions={actions} />);
+    const rival = vms.lab!.arena.rows[0]!.short;
+    const thought = vms.lab!.thoughtsPanel[0]!.text;
+    expect(lab).toContain(escape(rival));
+    expect(garage).not.toContain(escape(rival));
+    expect(lab).toContain(escape(thought));
+    expect(garage).not.toContain(escape(thought));
+    // The goal is one line (its words, and no scenario checklist behind it).
+    expect(garage).toContain(escape(vms.garage!.progress.goal.text));
+    expect(garage).not.toContain(escape(vms.garage!.objectives.items[0]!.label));
+    // The Vibes breakdown and the payroll are earned later too.
+    expect(garage).not.toContain(escape(vms.garage!.stats.vibes.rows[0]!.label));
+    expect(garage).toContain(escape(vms.garage!.stats.cash.text));
+  });
+
+  it("marks what the coach can point at, in this skin: start, runway, goals, the training bar; and lights only the current one", async () => {
+    const { skin } = await prepareSkin(id);
+    for (const [target, step] of [["start", 0], ["training", 3], ["stat:runway", 5], ["goals", 6]] as const) {
+      const vm = vmOf({ level: 1, coach: step, selected: null });
+      expect(vm.coach!.target).toBe(target);
+      const out = html(skin, <Docked vm={vm} actions={actions} />);
+      expect(out, `${id}: data-coach="${target}"`).toContain(`data-coach="${target}"`);
+      // Exactly the one the coach is on is active.
+      expect(out.match(/data-coach-active/g)?.length, `${id}: active ${target}`).toBe(1);
+      expect(out).toMatch(new RegExp(`data-coach="${target.replace(":", ":")}"[^>]*data-coach-active|data-coach-active[^>]*data-coach="${target}"`));
+    }
+    // With nobody coaching nothing is active, but the hooks are still there.
+    const quiet = html(skin, <Docked vm={vms.garage!} actions={actions} />);
+    expect(quiet).not.toContain("data-coach-active");
+    expect(quiet).toContain('data-coach="start"');
+  });
+
+  it("draws the coach's balloon: one line, 'N of 7', a Skip that is always there, and no Continue", async () => {
+    const { skin } = await prepareSkin(id);
+    const vm = vms.coached!;
+    const out = html(skin, <skin.slots.Coach coach={vm.coach!} anchor={{ x: 4, y: 862, w: 72, h: 32 }} layout={vm.layout} actions={actions} />);
+    expect(out).toContain(escape(vm.coach!.text));
+    expect(out).toContain(escape(skin.strings["coach.skip"]!));
+    expect(out).toContain(escape(skin.strings["coach.step"]!.replace("{n}", "1").replace("{total}", "7")));
+    expect(out).not.toMatch(/>\s*(Next|Continue)\s*</);
+    // On a phone it docks instead of floating beside the target.
+    const phone = vmOf({ level: 1, coach: 0, width: 390, height: 844 });
+    const docked = html(skin, <skin.slots.Coach coach={phone.coach!} anchor={{ x: 4, y: 800, w: 72, h: 44 }} layout={phone.layout} actions={actions} />);
+    expect(docked).toContain("docked");
+  });
+
+  it("draws the New! card (what unlocked) and Help (the loop, the unlocked buildings, the numbers)", async () => {
+    const { skin } = await prepareSkin(id);
+    const card = html(skin, <skin.slots.UnlockCard unlock={vms.coached!.unlock!} actions={actions} />);
+    expect(card).toContain(escape(vms.coached!.unlock!.title));
+    for (const item of vms.coached!.unlock!.items) expect(card).toContain(escape(item));
+    const help = html(skin, <skin.slots.HowToPlay help={vms.help!.help!} actions={actions} />);
+    for (const line of vms.help!.help!.loop) expect(help).toContain(escape(line));
+    for (const b of vms.help!.help!.buildings) expect(help).toContain(escape(b.line));
+    expect(help).not.toContain(escape(vmOf({ level: 5, help: true }).help!.buildings.find((b) => b.kind === "demo")!.line));
+    expect(help).toContain(escape(skin.strings["help.replay"]!));
   });
 
   it("uses the skin's own strings", async () => {
