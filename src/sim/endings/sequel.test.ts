@@ -8,7 +8,7 @@ import { openEventOf } from "../events";
 import { activeConditions } from "../thoughts";
 import { createInitialState } from "../state";
 import { createRng } from "../rng";
-import { createTestCampus } from "../testkit";
+import { answer, createTestCampus } from "../testkit";
 import { createMidgameScenario } from "../scenarios/midgame";
 import { TICKS_PER_DAY, tick } from "../tick";
 import type { GameState } from "../types";
@@ -138,13 +138,18 @@ describe("The Memo: a countdown, then an aftermath", () => {
     offerMemo(s);
     expect(s.news.at(-1)!.text).toBe(`A memo is going round ${s.labName}. Nobody has read page two yet`);
     const seen: [number, string][] = [];
-    for (let d = 0; d < 6 && !openEventOf(s); d++) {
+    // The train's packs open their own cards in these days: answer them, and stop only at the Memo.
+    const memoOpen = () => openEventOf(s)?.id === "memo";
+    for (let d = 0; d < 12 && !memoOpen(); d++) {
       const m = memoView(s)!;
       seen.push([m.daysLeft, m.line]);
-      for (let i = 0; i < TICKS_PER_DAY && !openEventOf(s); i++) tick(s, []);
+      for (let i = 0; i < TICKS_PER_DAY && !memoOpen(); i++) tick(s, answer(s));
     }
-    expect(seen.map(([d]) => d)).toEqual([5, 4, 3, 2, 1]);
-    expect(seen.at(-1)![1]).toBe("It's on your desk tomorrow.");
+    // If another card holds the desk on the due day, the Memo waits on day 0 ("It's on your desk.") until it is free.
+    const onTime = seen.filter(([d]) => d > 0);
+    expect(onTime.map(([d]) => d)).toEqual([5, 4, 3, 2, 1]);
+    expect(seen.slice(onTime.length).every(([d]) => d === 0)).toBe(true);
+    expect(onTime.at(-1)![1]).toBe("It's on your desk tomorrow.");
     expect(seen[0]![1]).toBe("Page one is a chart.");
     expect(openEventOf(s)?.id).toBe("memo");
   });
