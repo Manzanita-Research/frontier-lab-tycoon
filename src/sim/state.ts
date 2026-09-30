@@ -8,7 +8,8 @@ import { arcMachine } from "./machines/arc";
 import { economyMachine } from "./machines/economy";
 import { goalsMachine } from "./machines/goals";
 import { trainingMachine } from "./machines/training";
-import { tutorialMachine } from "./machines/tutorial";
+import { coachMachine } from "./machines/coach";
+import { progressionMachine } from "./machines/progression";
 import { pushNews } from "./news";
 import { newSlop } from "./slop";
 import { blankVibes, initialVibes } from "./vibes";
@@ -61,7 +62,7 @@ export function createInitialState(seed = 1): GameState {
     version: 1,
     nextId: 1,
     // The old generic "rival" headlines are retired: the six rival labs of the Race (sim/race) make the real news.
-    flags: { nextFiller: 3, nextRival: 1e9 },
+    flags: { nextFiller: 3, nextRival: 1e9, walkerPathCount: paths.filter(Boolean).length },
     recentThoughts: [],
     agentBonus: 0,
     waterDiscourse: 0,
@@ -70,7 +71,9 @@ export function createInitialState(seed = 1): GameState {
     leapfrog: createLeapfrog(),
     slop: newSlop(w, h),
     staff: [],
-    tutorial: initialStored(tutorialMachine, undefined),
+    coach: initialStored(coachMachine, undefined),
+    progression: initialStored(progressionMachine, undefined),
+    unlockCards: [],
     disasters: createDisasters(seed),
     arcs: Object.fromEntries(
       EVENTS.map((def) => [def.id, initialStored(arcMachine, { choices: def.choices.length, cooldownDays: def.cooldown ?? EVENT_COOLDOWN_DAYS, openedDay: null })]),

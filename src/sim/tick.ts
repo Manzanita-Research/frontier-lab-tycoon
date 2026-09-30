@@ -19,6 +19,8 @@ import { dailyThoughts } from "./thoughts";
 import { dailyTraining } from "./training";
 import { dailyWalkers, updateWalkers } from "./walkers";
 import type { GameState } from "./types";
+import { updateCoach } from "./coach";
+import { systemUnlocked, updateProgression } from "./progression";
 import { updateTutorial } from "./tutorial";
 import { observeGuardrails, pendingConfirmOf } from "./guardrails";
 
@@ -38,29 +40,31 @@ export function tick(state: GameState, commands: readonly Command[] = []) {
   }
   state.tick++;
   updateWalkers(state, rng);
-  updateProtesters(state, rng);
+  if (systemUnlocked(state, "protests")) updateProtesters(state, rng);
   updateStaff(state, rng);
-  updateDisasters(state);
+  if (systemUnlocked(state, "disasters")) updateDisasters(state);
   if (state.tick % TICKS_PER_DAY === 0) {
     state.day++;
-    dailyDisasters(state);
+    if (systemUnlocked(state, "disasters")) dailyDisasters(state);
     dailyEconomy(state, rng);
     dailyTraining(state, rng);
     dailyWalkers(state, rng);
-    dailyBreakdowns(state, rng);
-    dailyDiscourse(state, rng);
+    if (systemUnlocked(state, "breakdowns")) dailyBreakdowns(state, rng);
+    if (systemUnlocked(state, "protests")) dailyDiscourse(state, rng);
     dailyNews(state, rng);
-    dailySlop(state, rng);
+    if (systemUnlocked(state, "slop")) dailySlop(state, rng);
     dailyCrowd(state, rng);
-    dailyRace(state, rng);
-    dailyLeapfrog(state, rng);
-    dailyPapers(state, rng);
+    if (systemUnlocked(state, "arena")) dailyRace(state, rng);
+    if (systemUnlocked(state, "leapfrog")) dailyLeapfrog(state, rng);
+    if (systemUnlocked(state, "papers")) dailyPapers(state, rng);
     dailyThoughts(state, rng);
     dailyGoals(state, rng);
-    dailyEvents(state);
+    if (systemUnlocked(state, "events")) dailyEvents(state);
+    updateProgression(state);
     updateTutorial(state);
     observeGuardrails(state);
   }
+  updateCoach(state, true);
   state.rngState = rng.state();
 }
 
@@ -70,5 +74,6 @@ export function applyNow(state: GameState, commands: readonly Command[]) {
   applyCommands(state, commands, rng);
   updateTutorial(state);
   observeGuardrails(state);
+  updateCoach(state);
   state.rngState = rng.state();
 }

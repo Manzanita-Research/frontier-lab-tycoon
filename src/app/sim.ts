@@ -103,10 +103,14 @@ export function createSimHandle(
   dbg: Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean },
 ): SimHandle {
   const sim = createInitialState(dbg.seed);
-  if (dbg.leapfrog) enableLeapfrog(sim);
-  if (dbg.papers) enablePapers(sim);
+  if (dbg.leapfrog === false) sim.flags.leapfrogOff = 1;
+  if (dbg.papers === false) sim.flags.papersOff = 1;
+  if (!sim.progression && dbg.leapfrog) enableLeapfrog(sim);
+  if (!sim.progression && dbg.papers) enablePapers(sim);
   const leap = parseLeapMoment(dbg.moment);
-  if (dbg.warp > 0 || dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0 || dbg.moment) continueTutorial(sim, true);
+  if (dbg.warp > 0 || dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0 || dbg.moment) { continueTutorial(sim, true); delete sim.progression; }
+  if (!sim.progression && dbg.leapfrog) enableLeapfrog(sim);
+  if (!sim.progression && dbg.papers) enablePapers(sim);
   for (let i = 0; i < dbg.warp * TICKS_PER_DAY; i++) tick(sim);
   if (dbg.moment === "jem-opening" || dbg.moment === "jem-confirm") stageFirstRun(sim, dbg.moment);
   else if (isMoment(dbg.moment)) stageMoment(sim, dbg.moment);

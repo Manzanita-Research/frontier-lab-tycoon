@@ -15,6 +15,10 @@ import type { HudActions } from "./types";
 const TIME_HOURS: Record<string, number | null> = { live: null, day: 13, golden: 18.3, night: 22.5 };
 
 export const hudActions: HudActions = {
+  coachSkip: () => send({ type: "COMMAND", command: { type: "coachSkip" } }),
+  coachReplay: () => send({ type: "COMMAND", command: { type: "coachReplay" } }),
+  dismissUnlock: () => send({ type: "COMMAND", command: { type: "dismissUnlock" } }),
+  openBuild: () => send({ type: "COMMAND", command: { type: "buildPanelOpened" } }),
   place: (kind) => {
     // "staff" is a tile in the palette that opens the payroll instead of picking a tool.
     if (kind === "staff") return void registry.set(staffOpenAtom, !registry.get(staffOpenAtom));

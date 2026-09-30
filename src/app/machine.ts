@@ -76,17 +76,14 @@ export function phaseFor(c: AppContext): Phase {
   return c.speed === 0 || autoPaused(c) ? ".playing.paused" : ".playing.running";
 }
 
-export const autoPaused = (c: AppContext): boolean => c.snap.firstBuildPending || !!c.snap.assistant?.paused || !!c.snap.pendingConfirm || c.selected !== null || c.overlays.length > 0;
+export const autoPaused = (c: AppContext): boolean => c.snap.firstBuildPending || !!c.snap.pendingConfirm;
 
 /** Why time is standing still, for the "Paused" indicator: null while the clock runs. A card beats the pause button, which beats the auto-pauses. */
 export type PauseReason = "card" | "player" | "tutorial" | "build" | "menu" | "inspector";
 export function pauseReasonOf(c: AppContext): PauseReason | null {
   if (c.event || outcomeHeld(c) || c.snap.pendingConfirm) return "card";
   if (c.speed === 0) return "player";
-  if (c.snap.assistant?.paused) return "tutorial";
   if (c.snap.firstBuildPending) return "build";
-  if (c.overlays.length > 0) return "menu";
-  if (c.selected !== null) return "inspector";
   return null;
 }
 
@@ -248,13 +245,15 @@ export const appMachine = setupEffect({
     },
     SET_TOOL: ({ context, event }) => {
       const tool = context.tool === event.tool ? null : event.tool;
-      const matches = context.snap.assistant?.highlight === `build:${tool}`;
-      return { context: { ...context, tool, hover: null, zone: null, queue: matches ? [...context.queue, { type: "continueTutorial" as const }] : context.queue, lastPublishAt: 0 } };
+      const queue: readonly Command[] = tool ? [...context.queue, { type: "buildPanelOpened" }] : context.queue;
+      return { context: { ...context, tool, hover: null, zone: null, queue, speed: context.snap.firstBuildPending && tool ? 1 : context.speed, lastPublishAt: 0 } };
     },
     SET_OVERLAY: ({ context, event }) => {
       const overlays = context.overlays.filter((id) => id !== event.id);
       if (event.open) overlays.push(event.id);
-      const next = { ...context, overlays, acc: 0 };
+      const build = event.open && /start|build|menu/.test(event.id);
+      const queue: readonly Command[] = build ? [...context.queue, { type: "buildPanelOpened" }] : context.queue;
+      const next = { ...context, overlays, queue, speed: build && context.snap.firstBuildPending ? 1 as Speed : context.speed };
       return { context: next, target: phaseFor(next) };
     },
     SET_ZONE: ({ context, event }) => ({ context: { ...context, zone: event.id === context.zone ? null : event.id, tool: null, hover: null } }),
@@ -263,7 +262,7 @@ export const appMachine = setupEffect({
       return { context: { ...context, hover: event.hover } };
     },
     // A player command publishes the snapshot on the very next frame, so a hire or a painted tile shows straight away.
-    COMMAND: ({ context, event }) => ({ context: { ...context, queue: [...context.queue, event.command], lastPublishAt: 0 } }),
+    COMMAND: ({ context, event }) => ({ context: { ...context, speed: event.command.type === "buildPanelOpened" && context.snap.firstBuildPending ? 1 : context.speed, queue: [...context.queue, event.command], lastPublishAt: 0 } }),
     CHOOSE: ({ context, event }) => {
       if (!context.event) return;
       const command: Command = { type: "chooseEvent", eventId: context.event.id, choiceIndex: event.choiceIndex };

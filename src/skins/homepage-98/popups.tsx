@@ -28,7 +28,7 @@ export function Toast({ toast, actions }: SlotPropsMap["Toast"]) {
   }
   const close = () => actions.dismissToast(toast.id);
   return (
-    <Pop title={TITLE[toast.tone]} className={`gc-toast ${toast.tone}`} role="status" onClose={close}>
+    <Pop title={TITLE[toast.tone === "warn" ? "bad" : toast.tone]} className={`gc-toast ${toast.tone}`} role="status" onClose={close}>
       <div>{toast.text}</div>
       <button type="button" className="gc-link" onClick={close}>
         Click here!!!

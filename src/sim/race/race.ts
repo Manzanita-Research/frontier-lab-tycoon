@@ -8,7 +8,6 @@ import { RIVAL_BY_ID, type RivalDef, type RivalId } from "../../content/rivals";
 import type { EmittedFrom } from "xstate";
 import { fillTemplate } from "../format";
 import { step } from "../machines/run";
-import { pressureReady } from "../tutorial";
 import { addNews, addToast, templateVars } from "../news";
 import type { Rng } from "../rng";
 import type { GameState } from "../types";

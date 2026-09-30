@@ -1,3 +1,5 @@
+import type { CoachMark } from "../../content/coach";
+import type { ProgressView, UnlockCard, HudPanel } from "../../content/progression";
 // The modding contract: everything a skin may know about the game, as plain JSON, and everything it may ask for.
 //
 // A skin gets `vm` (a slice of `HudVM`) and `actions` (`HudActions`) and nothing else. It never imports `src/sim/**`,
@@ -491,6 +493,10 @@ export interface LayoutVM {
 }
 
 export interface HudVM {
+  progress: ProgressView;
+  coach: CoachMark | null;
+  unlockCard: UnlockCard | null;
+  hud: { visible: Record<HudPanel, boolean> };
   apiVersion: typeof SKIN_API_VERSION;
   stats: StatsVM;
   training: TrainingVM;
@@ -525,6 +531,10 @@ export interface HudVM {
 
 /** Everything a skin may ask the game to do. Each one is safe to call at any time; the game ignores what does not apply. */
 export interface HudActions {
+  coachSkip(): void;
+  coachReplay(): void;
+  dismissUnlock(): void;
+  openBuild(): void;
   /** Pick a build tool ("path", "cluster", ..., "bulldoze"). Picking the selected one puts it away; `null` clears. `"staff"` opens or closes the payroll. */
   place(kind: BuildKindVM | null): void;
   setSpeed(speed: number): void;

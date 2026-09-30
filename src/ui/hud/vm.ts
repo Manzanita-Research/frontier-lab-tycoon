@@ -495,6 +495,7 @@ export function hudViewModel(i: HudInput): HudVM {
   const build = buildOf(i);
   const { event, era } = eventOf(i);
   return {
+    progress: i.snap.progress, coach: i.snap.coach, unlockCard: i.snap.unlockCard, hud: i.snap.hud,
     apiVersion: SKIN_API_VERSION,
     stats: statsOf(i),
     training: trainingOf(i.snap),

@@ -13,6 +13,7 @@ function known(value: string, values: readonly string[], path: string) {
   if (!values.includes(value)) throw new ModError({ path, detail: `unknown value "${value}"${suggest(value, values)}` });
 }
 export function validateContent(content: ContentApi, vocabulary: VocabularyApi): void {
+  if (content.progression.length !== 5 || new Set(content.progression.map((r) => r.level)).size !== 5) throw new ModError({ path: "content.progression", detail: "expected exactly one row for each level 1–5" });
   const kinds = content.walkerKinds.map((kind) => kind.id);
   const buildings = Object.keys(content.buildings);
   for (const [id, building] of Object.entries(content.buildings)) {

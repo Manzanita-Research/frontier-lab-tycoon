@@ -15,6 +15,10 @@ import { pendingConfirmOf } from "./guardrails";
 export function createTestCampus(seed = 1): GameState {
   const s = createInitialState(seed);
   delete s.tutorial;
+  delete s.coach;
+  delete s.progression;
+  delete s.flags.walkerPathCount;
+  s.flags.firstGateway = 0; // fixture has already opened for visitors
   s.grid.paths.fill(false);
   const path = (x: number, z: number) => { s.grid.paths[z * s.grid.w + x] = true; };
   for (let z = 10; z <= 22; z++) path(11, z);

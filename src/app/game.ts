@@ -38,6 +38,8 @@ const pick = <T>(select: (c: AppContext) => T) => app.select((s) => select(s.con
 /** Selector atoms for the HUD and the scene. Values keep their identity until they change. */
 export const atoms = {
   snap: pick((c) => c.snap),
+  coach: pick((c) => c.snap.coach),
+  progress: pick((c) => c.snap.progress),
   news: pick((c) => c.news),
   speed: pick((c) => c.speed),
   paused: pick((c) => c.speed === 0 || autoPaused(c) || !!c.event || (c.outcome !== "playing" && !c.outcomeDismissed)),
@@ -104,6 +106,18 @@ export function use(tool: Tool, x: number, z: number, quiet = false) {
     return;
   }
   send({ type: "COMMAND", command: tool === "path" ? { type: "placePath", x, z } : { type: "placeBuilding", kind: tool, x, z } });
+}
+
+// Always-on read-only contract: copied values, no URL switches or mutation handles.
+if (typeof window !== "undefined") {
+  (window as unknown as { __fltProbe: () => unknown }).__fltProbe = () => {
+    const w = sim.world;
+    const c = appNow();
+    return { date: w.day, day: w.day, paused: c ? c.speed === 0 || autoPaused(c) || !!c.event : true, speed: c?.speed ?? initialSpeed,
+      walkers: [...w.walkers.map((p) => ({ id: p.id, kind: p.kind, x: p.x, z: p.z, mode: p.machine.value })), ...w.staff.map((p) => ({ id: p.id, kind: p.job, x: p.x, z: p.z, mode: p.machine.value }))],
+      gate: { x: w.gate.x, z: w.gate.z }, coachId: c?.snap.coach?.id ?? null };
+  };
+  window.addEventListener("click", () => send({ type: "COMMAND", command: { type: "coachClick" } }));
 }
 
 // `?debug=1` exposes the game for probes and screenshot scripts.
