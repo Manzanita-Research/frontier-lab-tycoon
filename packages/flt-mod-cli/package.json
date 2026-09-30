@@ -1,0 +1,15 @@
+{
+  "name": "@flt/mod-cli",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "flt-mod": "./cli.mjs",
+    "create-flt-mod": "./create.mjs"
+  },
+  "dependencies": {
+    "@flt/mod-sdk": "workspace:*",
+    "vite": "7.3.6",
+    "xstate": "6.0.0-alpha.62"
+  }
+}

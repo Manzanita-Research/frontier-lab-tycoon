@@ -24,6 +24,8 @@ export const trainingMachine = setupEffect({
       DAY: Schema.Struct({ halls: Schema.Number, gain: Schema.Number }),
       /** The driver has picked the name for the run after a release. */
       NAMED: Schema.Struct({ name: Schema.String }),
+      /** Release Leapfrog's "ship now" (FLT-27): a preview ships early, adding `scale` (0 to 1) of the release; the run carries on. */
+      SHIP_NOW: Schema.Struct({ scale: Schema.Number }),
     },
     emitted: {
       /** A run finished: `run` shipped `model` and capability grows by `gain`. */
@@ -49,6 +51,12 @@ export const trainingMachine = setupEffect({
         DAY: ({ context, event }, enq) => {
           if (event.halls === 0) return { target: "idle" };
           return advance(context, event.gain, enq);
+        },
+        // A preview: the release lands now (scaled), and the run carries on to the full one. The driver books what the
+        // preview already paid out and takes it off the final release (see settlePreview in race/leapfrog/ops.ts).
+        SHIP_NOW: ({ context, event }, enq) => {
+          enq.emit({ type: "RELEASED", model: `${context.name}-preview`, run: context.run, gain: releaseGain(context.run) * event.scale });
+          return { target: "training", context };
         },
       },
     },

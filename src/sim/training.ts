@@ -2,12 +2,14 @@
 import type { EmittedFrom, EventFromLogic } from "xstate";
 import { modelName } from "../content/names";
 import { COMPUTE_PER_CLUSTER, COMPUTE_PER_HALL } from "./constants";
+import { computeFactor } from "./disasters/driver";
 import { formatMoney } from "./format";
 import { addToast, pushNews } from "./news";
 import { step, type Stepped } from "./machines/run";
 import { trainingMachine } from "./machines/training";
 import { happinessOf } from "./needs";
 import { isReachable } from "./pathfind";
+import { settlePreview } from "./race/leapfrog/ops";
 import { datacenterCompute } from "./race/power";
 import { rdMultiplier, releaseBoost } from "./race/rd";
 import type { Rng } from "./rng";
@@ -24,7 +26,8 @@ export function morale(state: GameState): number {
 }
 
 export function computePerDay(state: GameState): number {
-  return state.buildings.filter((b) => b.kind === "cluster" && !b.broken).length * COMPUTE_PER_CLUSTER + datacenterCompute(state);
+  // A rogue swarm (FLT-17) steals a share of it: computeFactor is 1 when nothing is draining the lab.
+  return (state.buildings.filter((b) => b.kind === "cluster" && !b.broken).length * COMPUTE_PER_CLUSTER + datacenterCompute(state)) * computeFactor(state);
 }
 
 /**
@@ -56,6 +59,11 @@ export function dailyTraining(state: GameState, rng: Rng) {
   feed(state, rng, { type: "DAY", halls, gain });
 }
 
+/** Ship the run in progress now as a preview that lands `scale` of the release; the run carries on (Release Leapfrog's "ship now"). Only from `training`. */
+export function shipEarly(state: GameState, rng: Rng, scale: number) {
+  feed(state, rng, { type: "SHIP_NOW", scale });
+}
+
 /**
  * Send the machine an event and apply what it emits, in order. After a release the machine waits in `releasing`
  * for a name: the driver rolls it here, after the release effects and before the next run's, which is the order
@@ -75,7 +83,8 @@ function apply(state: GameState, rng: Rng, e: EmittedFrom<typeof trainingMachine
   switch (e.type) {
     case "RELEASED": {
       // The R&D multiplier makes the leap bigger (sqrt of it), so the takeoff is felt in what a release adds.
-      const gain = e.gain * releaseBoost(rdMultiplier(state));
+      // A preview already paid out part of this release (Release Leapfrog's "ship now"): only the rest lands.
+      const gain = settlePreview(state, e.gain * releaseBoost(rdMultiplier(state)));
       state.capability += gain;
       state.hype = Math.min(100, state.hype + 15);
       state.models.push(e.model);
