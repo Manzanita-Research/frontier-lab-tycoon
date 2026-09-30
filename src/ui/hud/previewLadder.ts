@@ -10,11 +10,12 @@ const LADDER = [
   { name: "Scrutiny", buildings: ["path", "cluster", "hall", "gateway", "kombucha", "nap", "snack", "demo"], staff: ["sre", "janitor", "security", "comms"], goal: ["Ship model #3", 1, 3], show: ["revenue", "vibes", "thoughts", "staff", "arena", "rnd", "news", "events", "papers", "disasters"] },
 ] as const;
 
+// One row per milestone, as the sim groups them: how many things it unlocks, and the goal that earns them.
 const TEASERS = [
-  [{ label: "???", hint: "ship your first model" }, { label: "???", hint: "earn your first $" }, { label: "7 more…", hint: "" }],
-  [{ label: "???", hint: "earn $20K a day" }, { label: "4 more…", hint: "" }],
-  [{ label: "???", hint: "reach 8 researchers" }, { label: "3 more…", hint: "" }],
-  [{ label: "???", hint: "make the Arena's top 5" }],
+  [{ label: "2 more", hint: "Ship your first model" }, { label: "4 more", hint: "Earn $20K a day" }, { label: "3 more", hint: "Reach the Top 5 on the Arena" }],
+  [{ label: "4 more", hint: "Earn $20K a day" }, { label: "3 more", hint: "Reach the Top 5 on the Arena" }],
+  [{ label: "3 more", hint: "Reach the Top 5 on the Arena" }],
+  [{ label: "3 more", hint: "Reach the Top 5 on the Arena" }],
   [],
 ] as const;
 

@@ -164,11 +164,13 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // FLT-49 intentionally records the new starting coach/progression state. Systems and purchases now
 // wait for earned levels; the busy-player script first builds a Hall so it can earn access to a Gateway.
 // Path exploration and the Comms break post change deterministic route draws from this new opening.
+// FLT-47 polish rewords three thoughts (parody rule: no real brands); seed 1 shows one at tick 200. Text only, same RNG stream.
 // FLT-19 re-records from 1600: the Scrutiny level now also turns on the auditors (its unlock card lists them), and
 // Evals Without Borders visits these labs once they reach Era 2 (grades move trust, heat and hype; `prep` costs cash).
 // The auditors line up along the wall they walked up to (not the door, which can be round the back): 3200 on.
+// Merged with the FLT-47 polish: seed 1 takes its tick-200 digest; from 1600 on these runs follow the auditors.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "a559ea28", 800: "ed628bb9", 1600: "154506ff", 2400: "dce53217", 3200: "2eae320f", 4000: "a7d8c947" },
+  1: { 200: "d3826cd0", 800: "ed628bb9", 1600: "154506ff", 2400: "dce53217", 3200: "2eae320f", 4000: "a7d8c947" },
   2: { 200: "e548b1af", 800: "552cae60", 1600: "c6fc67c6", 2400: "a12190c8", 3200: "e51f1262", 4000: "bc03d2b2" },
   3: { 200: "58bb415c", 800: "920699d6", 1600: "7a21a5ca", 2400: "9c237f42", 3200: "2cc09ded", 4000: "34f8c696" },
 };
