@@ -22,6 +22,10 @@ describe("the FLT_AUTH switch", () => {
       expect(branch).toContain(piece);
       expect(stack.split(piece).length - 1).toBe(1);
     }
+    // Players' data survives the flag going off again, and comes back under the same names when it goes on.
+    expect(branch.match(/RemovalPolicy\.retain\(\)/g)).toHaveLength(2);
+    expect(branch).toContain("name: `flt-${stack.stage}-accounts`");
+    expect(branch).toContain("name: `flt-${stack.stage}-saves`");
     expect(stack).toContain('assets: { notFoundHandling: "single-page-application", ...(auth ? { runWorkerFirst: AUTH_WORKER_PATHS } : {}) }');
   });
 

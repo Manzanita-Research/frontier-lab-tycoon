@@ -36,8 +36,12 @@ export default Alchemy.Stack(
       ? {
           main: fileURLToPath(AUTH_WORKER_MAIN),
           env: {
-            DB: yield* Cloudflare.D1.Database("Accounts", { migrations: fileURLToPath(AUTH_MIGRATIONS) }),
-            SAVES: yield* Cloudflare.R2.Bucket("Saves"),
+            // Players' data. Named, and kept if the flag is ever switched off again (Alchemy would otherwise delete
+            // what it no longer declares); switching back on adopts the same database and bucket by name.
+            DB: yield* Cloudflare.D1.Database("Accounts", { name: `flt-${stack.stage}-accounts`, migrations: fileURLToPath(AUTH_MIGRATIONS) }).pipe(
+              Alchemy.RemovalPolicy.retain(),
+            ),
+            SAVES: yield* Cloudflare.R2.Bucket("Saves", { name: `flt-${stack.stage}-saves` }).pipe(Alchemy.RemovalPolicy.retain()),
             AUTH_HOSTS: AUTH_HOSTS.join(","),
             BETTER_AUTH_SECRET: Config.Redacted("BETTER_AUTH_SECRET"),
             HF_CLIENT_ID: Config.Redacted("HF_CLIENT_ID"),
