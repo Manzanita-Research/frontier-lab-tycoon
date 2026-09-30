@@ -11,7 +11,7 @@ import { SkinProvider } from "../context";
 import { read } from "../files";
 import { prepareSkin } from "../registry";
 import type { LoadedSkin } from "../types";
-import { pick, schedule } from "./ticker";
+import { pick, rating, schedule } from "./ticker";
 
 const actions = new Proxy({}, { get: () => () => undefined }) as HudActions;
 const vm: HudVM = hudViewModel(fixtureInput({ tool: "hall" }));
@@ -204,6 +204,20 @@ describe("AI News Karaoke", () => {
     expect(out).toContain("Older news that is teased");
     // The lit copy is for the eyes only: a screen reader reads each word once.
     expect(out.match(/class="kn-lit" aria-hidden/g)?.length).toBe(9);
+  });
+
+  it("gives each line a score at the end, the same one every time, higher for good news than for bad", () => {
+    for (const tone of ["good", "joke", "neutral", "bad"] as const) {
+      for (let id = 1; id < 60; id++) {
+        const r = rating({ id, tone });
+        expect(r).toBeGreaterThanOrEqual(55);
+        expect(r).toBeLessThanOrEqual(100);
+        expect(rating({ id, tone })).toBe(r);
+      }
+    }
+    expect(rating({ id: 7, tone: "good" })).toBeGreaterThan(rating({ id: 7, tone: "bad" }));
+    const out = html(<slot.Ticker items={[{ id: 7, text: "Good news", tone: "good" }]} actions={actions} />);
+    expect(out).toContain('class="kn-rate"');
   });
 
   it("stays on its feet with nothing to sing", () => {

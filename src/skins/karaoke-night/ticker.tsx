@@ -8,7 +8,7 @@ import { reducedMotion } from "../kit";
 import { useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import type { TickerItemVM } from "../../ui/hud/types";
-import { Notes } from "./art";
+import { Notes, Star } from "./art";
 
 /** How long a character takes to sing: about 14 a second, brisk but readable. */
 const MS_PER_CHAR = 70;
@@ -21,7 +21,7 @@ const HOLD_MS = 1500;
 /** How high the ball hops (px), and how far above the letters it lands (a phone's bar has less headroom). */
 const ARC = 14;
 const LAND = 5;
-const ARC_PHONE = 9;
+const ARC_PHONE = 6;
 const LAND_PHONE = 3;
 /** The biggest and smallest type of a line; a long headline shrinks to fit before it wraps. */
 const FS_MAX = 21;
@@ -46,6 +46,13 @@ export function schedule(text: string): { words: Timing[]; sing: number; total: 
     return { word, from, to: LEAD_MS + ((at - 1) / weight) * sing };
   });
   return { words: list, sing, total: LEAD_MS + sing };
+}
+
+/** The score the machine gives a line when it is done, like the end of a song: good news sings well, bad news is off-key. Pure decoration. */
+const SCORES: Record<TickerItemVM["tone"], [low: number, span: number]> = { good: [90, 11], joke: [80, 20], neutral: [70, 26], bad: [55, 21] };
+export function rating(item: Pick<TickerItemVM, "id" | "tone">): number {
+  const [low, span] = SCORES[item.tone];
+  return low + ((item.id * 2654435761) >>> 0) % span;
 }
 
 /** The headline after `curId`: the oldest one nobody has sung yet, else the next in the tape (wrapping round). */
@@ -207,6 +214,7 @@ export function Ticker({ items }: SlotPropsMap["Ticker"]) {
 
   const next = pick(items, item?.id ?? null, seenMax.current);
   const words = item ? item.text.trim().split(/\s+/).filter(Boolean) : [];
+  const done = item ? Math.round(schedule(item.text).total) : 0;
   return (
     <div className="kn-ticker" role="marquee" aria-label={t("ticker.aria")}>
       <span className="kn-label">
@@ -225,6 +233,9 @@ export function Ticker({ items }: SlotPropsMap["Ticker"]) {
                 </span>{" "}
               </Fragment>
             ))}
+            <span className="kn-rate" style={{ animationDelay: `${done}ms` }} aria-hidden>
+              <Star /> {rating(item)}
+            </span>
             <span className="kn-ball" ref={ball} aria-hidden>
               <i ref={hop} />
             </span>
