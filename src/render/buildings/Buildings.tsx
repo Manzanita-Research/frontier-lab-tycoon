@@ -18,6 +18,7 @@ import { HallModel } from "./HallModel";
 import { KombuchaModel } from "./KombuchaModel";
 import { NapModel } from "./NapModel";
 import { SnackModel } from "./SnackModel";
+import { SecurityOfficeModel } from "./SecurityOfficeModel";
 import { DemoModel } from "./DemoModel";
 import { BrokenFx } from "./BrokenFx";
 
@@ -47,6 +48,8 @@ export function BuildingModel({ kind, id }: { kind: BuildingKind; id?: number })
       return <GasTurbineModel color={color} />;
     case "solar":
       return <SolarFarmModel color={color} />;
+    case "security":
+      return <SecurityOfficeModel color={color} />;
   }
 }
 

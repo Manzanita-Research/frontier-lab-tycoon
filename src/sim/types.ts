@@ -1,6 +1,7 @@
 // Everything in GameState is plain and JSON-serializable.
 import type { BuildingKind } from "../content/buildings";
 import type { NeedKey } from "../content/needs";
+import type { DisastersState } from "./disasters/types";
 import type { ArcStored } from "./machines/arc";
 import type { EconomyStored } from "./machines/economy";
 import type { GoalsStored } from "./machines/goals";
@@ -143,6 +144,8 @@ export interface Staffer {
   zone: number[];
   /** The staff machine: arriving, idle, going, working, leaving or gone. */
   machine: StaffStored;
+  /** Pulled off their post by a disaster (FLT-17): they jog to `to` (a building id, 0 for the gate) with a red "!" and stay until released. */
+  divert?: { owner: string; to: number; jog: number };
 }
 
 export interface NewsItem {
@@ -271,4 +274,6 @@ export interface GameState {
   slop: number[];
   /** The payroll: Janitor Bots, SREs, Comms Reps and Security. */
   staff: Staffer[];
+  /** Disasters (FLT-17): the random-disaster setting, the ones in play, timed effects, and the cues the renderer reads. */
+  disasters: DisastersState;
 }

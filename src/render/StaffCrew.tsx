@@ -37,6 +37,9 @@ export function StaffCrew() {
   const mopHead = useRef<THREE.InstancedMesh>(null);
   const tote = useRef<THREE.InstancedMesh>(null);
   const ring = useRef<THREE.InstancedMesh>(null);
+  // The red "!" over a staffer a disaster has pulled off their post (FLT-17): a stem and a dot.
+  const bangStem = useRef<THREE.InstancedMesh>(null);
+  const bangDot = useRef<THREE.InstancedMesh>(null);
   const botGeo = useMemo(() => new RoundedBoxGeometry(0.34 * S, 0.4 * S, 0.3 * S, 3, 0.07 * S), []);
   const visorGeo = useMemo(() => new THREE.BoxGeometry(0.24 * S, 0.08 * S, 0.06 * S), []);
   const hatGeo = useMemo(() => new THREE.SphereGeometry(0.16 * S, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2), []);
@@ -54,6 +57,7 @@ export function StaffCrew() {
     let nm = 0;
     let nt = 0;
     let nr = 0;
+    let nbang = 0;
     const set = (m: THREE.InstancedMesh | null, i: number, x: number, y: number, z: number, ry: number, sx = 1, sy = 1, sz = 1, rx = 0, rz = 0) => {
       if (!m) return;
       dummy.position.set(x, y, z);
@@ -77,6 +81,13 @@ export function StaffCrew() {
       const fx = Math.sin(yaw);
       const fz = Math.cos(yaw);
       if (s.machine.value === "leaving" && !moving) continue;
+      if (s.divert && phaseName !== "leaving") {
+        // Panic pulse: the "!" hops while they jog to the incident.
+        const top = (s.job === "janitor" ? 1.5 : 2.3) + Math.abs(Math.sin(t * 7 + phase)) * 0.1;
+        set(bangStem.current, nbang, x, top + 0.52, z, 0, 0.14, 0.44, 0.14);
+        set(bangDot.current, nbang, x, top, z, 0, 0.17, 0.17, 0.17);
+        nbang++;
+      }
       if (s.job === "janitor") {
         const i = nb++;
         const wob = working ? Math.sin(t * 14 + phase) * 0.12 : 0;
@@ -145,6 +156,8 @@ export function StaffCrew() {
     done(mopHead.current, nm);
     done(tote.current, nt);
     done(ring.current, nr);
+    done(bangStem.current, nbang);
+    done(bangDot.current, nbang);
   });
 
   return (
@@ -174,6 +187,14 @@ export function StaffCrew() {
       </instancedMesh>
       <instancedMesh ref={tote} args={[toteGeo, undefined, CAP]} castShadow frustumCulled={false}>
         <meshStandardMaterial roughness={0.9} />
+      </instancedMesh>
+      <instancedMesh ref={bangStem} args={[undefined, undefined, CAP]} frustumCulled={false} renderOrder={3}>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshBasicMaterial color="#ff2a2a" toneMapped={false} />
+      </instancedMesh>
+      <instancedMesh ref={bangDot} args={[undefined, undefined, CAP]} frustumCulled={false} renderOrder={3}>
+        <sphereGeometry args={[0.5, 10, 8]} />
+        <meshBasicMaterial color="#ff2a2a" toneMapped={false} />
       </instancedMesh>
       <instancedMesh ref={ring} args={[undefined, undefined, 24 * 24]} frustumCulled={false} renderOrder={2}>
         <boxGeometry args={[1, 0.02, 1]} />

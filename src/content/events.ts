@@ -3,6 +3,7 @@
 import type { BuildingKind } from "./buildings";
 import type { Tone, WalkerKind } from "../sim/types";
 import { ERAS } from "./eras";
+import { cardEvents } from "../sim/disasters/pack";
 import { LEAPFROG } from "./leapfrog";
 
 /** What has to be true for an event to fire. `all` combines conditions. */
@@ -295,5 +296,7 @@ const RACE_EVENTS: EventDef[] = [
 EVENTS.push(...RACE_EVENTS);
 // Release Leapfrog's cards live in its pack (mods/base-leapfrog); they only ever open once its systems set their flags.
 EVENTS.push(...LEAPFROG.events);
+// FLT-17: the cards the disasters open (mods/base-disasters). They wait for their offer flag like the Race's cards do.
+EVENTS.push(...cardEvents());
 
 export const eventById = (id: string): EventDef | undefined => EVENTS.find((e) => e.id === id);

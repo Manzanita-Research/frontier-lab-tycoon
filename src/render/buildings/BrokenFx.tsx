@@ -5,7 +5,7 @@ import type { BuildingKind } from "../../content/buildings";
 import { sim as game } from "../../app/game";
 
 /** Roughly how tall each model is, so the flames sit on the roof. */
-export const ROOF: Record<BuildingKind, number> = { cluster: 1.9, hall: 2.3, gateway: 1.5, kombucha: 0.9, nap: 0.7, snack: 0.9, demo: 1.5, fountain: 0.6, datacenter: 2.4, gas: 1.6, solar: 0.5 };
+export const ROOF: Record<BuildingKind, number> = { cluster: 1.9, hall: 2.3, gateway: 1.5, kombucha: 0.9, nap: 0.7, snack: 0.9, demo: 1.5, fountain: 0.6, datacenter: 2.4, gas: 1.6, solar: 0.5, security: 1.3 };
 
 /**
  * A building that is out of order (FLT-10) pulses a red ring on the ground and burns a little on the roof (the smoke and
