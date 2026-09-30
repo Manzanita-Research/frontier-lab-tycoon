@@ -413,7 +413,8 @@ export const VERBS: Record<string, VerbDef> = {
       // Free: the voucher makes `canPlace` and `placeBuilding` charge nothing, and is spent (or dropped) right here.
       state.flags[`free:${kind}`] = 1;
       const at = findSpot(state, kind);
-      if (at) placeBuilding(state, rng, kind, at[0], at[1]);
+      // Granted by the incident, not asked for: no "the board will have questions" (FLT-16's spending check) on a free building.
+      if (at) placeBuilding(state, rng, kind, at[0], at[1], true);
       delete state.flags[`free:${kind}`];
       if (!at) return void addToast(state, `No room for a ${BUILDINGS[kind].name}. The incident room is the gate.`, "neutral");
       if (typeof p.text === "string") addToast(state, say(env, p.text), "neutral");

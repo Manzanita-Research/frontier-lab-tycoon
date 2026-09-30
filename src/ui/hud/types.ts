@@ -201,8 +201,6 @@ export interface StaffJobVM {
   /** Why not, when `canHire` is false. */
   reason: string;
   color: string;
-  /** One of the hires the guided opening asks for (the Janitor Bot, the SRE): a skin lights its Hire button while the tutorial points at "staff:hire". */
-  starter: boolean;
 }
 
 /** The payroll: hire and fire, and paint patrol zones. It opens from the build palette's "staff" tile. */
@@ -253,36 +251,6 @@ export interface ConfirmVM {
   runwayText: string;
   /** "This leaves 1.8 months of runway. The board will have questions." */
   message: string;
-}
-
-/**
- * The guided opening, one step at a time. `highlight` is what the step points at: "build:path", "build:hall",
- * "build:gateway", "staff:hire" or "training". A slot lights the thing with `useHighlight(target)` (from the kit).
- */
-export interface AssistantVM {
-  /** The step's id ("path", "hall", "gateway", "hire" or "release"). */
-  step: string;
-  /** 1-based position among `total` steps, for "Step 2 of 5". */
-  number: number;
-  total: number;
-  /** One sentence. */
-  message: string;
-  highlight: string;
-  /** The game is holding time until the player taps Next or does the thing. */
-  paused: boolean;
-  /** The message is read, but the very first build is still to come: the clock starts on it. */
-  waitingForBuild: boolean;
-  canSkip: boolean;
-}
-
-/** Why time is standing still (null while it runs). Card: an event, era or outcome card is up. */
-export type PauseReasonVM = "card" | "player" | "tutorial" | "build" | "menu" | "inspector";
-
-export interface PauseVM {
-  paused: boolean;
-  reason: PauseReasonVM | null;
-  /** The game paused it (a message, a menu, an inspector, a card), as opposed to the player pressing Pause. */
-  auto: boolean;
 }
 
 export interface ChoiceVM {
@@ -504,9 +472,6 @@ export interface HudVM {
   ticker: TickerItemVM[];
   toasts: ToastVM[];
   hints: HintId[];
-  /** The tutorial's current step, or null once it is done or skipped. */
-  assistant: AssistantVM | null;
-  pause: PauseVM;
   /** Standing warnings ("Your entrance isn't connected...", low runway with ways out): they stay until fixed. */
   warnings: string[];
   /** A spend waiting for a yes or a no (also holds time). */
@@ -540,9 +505,6 @@ export interface HudActions {
   /** Light up who thinks a Thoughts row (`ThoughtRowVM.key`); again to switch off. */
   highlight(key: string): void;
   dismissToast(id: number): void;
-  /** The tutorial: Next (also done by picking the highlighted build tool) and Skip. */
-  continueTutorial(): void;
-  skipTutorial(): void;
   /** Answer `vm.confirm`: go ahead with the spend, or keep the runway. */
   confirmSpend(): void;
   cancelSpend(): void;

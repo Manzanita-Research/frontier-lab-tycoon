@@ -34,25 +34,24 @@ const boot = (speed: Speed = 1) =>
 const provide = (handle: SimHandle) => Effect.provide(Layer.mergeAll(simLayer(handle), framesManual));
 
 describe("app machine", () => {
-  it.effect("a clean game opens paused at 1× until a valid build, and messages pause until acknowledged", () => {
+  it.effect("a clean game opens at 1× and runs: the opening's messages do not hold time (only menus, cards and the spending check do)", () => {
     const handle = new SimHandle(createInitialState(1));
     return Effect.gen(function* () {
       const { actor, sim, pump } = yield* boot();
       yield* pump(40);
-      expect(actor.getSnapshot().matches({ playing: "paused" })).toBe(true);
+      expect(actor.getSnapshot().matches({ playing: "running" })).toBe(true);
       expect(actor.getSnapshot().context.speed).toBe(1);
-      expect(sim.world.tick).toBe(0);
+      expect(actor.getSnapshot().context.snap.assistant?.step).toBe("path");
+      expect(sim.world.tick).toBeGreaterThan(0);
+      // Choosing the tool the message points at is still a valid acknowledgement, and it changes nothing about the clock.
       yield* send(actor, { type: "SET_TOOL", tool: "path" });
       yield* pump(8);
-      expect(sim.world.tick).toBe(0);
+      expect(actor.getSnapshot().context.speed).toBe(1);
+      expect(actor.getSnapshot().matches({ playing: "running" })).toBe(true);
       yield* send(actor, { type: "COMMAND", command: { type: "placePath", x: 11, z: 18 } });
       yield* pump(8);
       expect(actor.getSnapshot().context.snap.assistant?.step).toBe("hall");
-      expect(sim.world.tick).toBe(0);
-      yield* send(actor, { type: "SET_TOOL", tool: "hall" });
-      yield* pump(20);
-      expect(sim.world.tick).toBeGreaterThan(0);
-      expect(actor.getSnapshot().context.speed).toBe(1);
+      expect(actor.getSnapshot().matches({ playing: "running" })).toBe(true);
     }).pipe(provide(handle));
   });
 
@@ -186,7 +185,7 @@ describe("app machine", () => {
       expect(actor.getSnapshot().context.outcome).toBe("lost");
       yield* send(actor, { type: "NEW_LAB" });
       yield* pump(3);
-      yield* waitFor(actor, (s) => s.matches({ playing: "paused" }), { timeout: "1 second" });
+      yield* waitFor(actor, (s) => s.matches({ playing: "running" }), { timeout: "1 second" });
       expect(actor.getSnapshot().context.speed).toBe(1);
       expect(actor.getSnapshot().context.outcome).toBe("playing");
       expect(sim.world.day).toBeLessThan(2);

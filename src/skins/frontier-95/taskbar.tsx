@@ -1,7 +1,7 @@
 // The taskbar: Start (and its menu), quick-launch, the news tape, and the tray (speed, news, sound, camera, clock).
 import { useEffect, useRef, useState } from "react";
 import { Dialog, Marquee } from "../kit";
-import { useHighlight, useT } from "../context";
+import { useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import { Flag, Ico } from "./icons";
 import { Btn, Win } from "./parts";
@@ -71,7 +71,6 @@ function ShutDown({ lab, onClose }: { lab: string; onClose: () => void }) {
 /** Start button, its menu (every building, Bulldoze…, Settings, Shut Down Lab…), quick-launch, and the tool in hand. */
 export function BuildBar({ items, tip, actions }: SlotPropsMap["BuildBar"]) {
   const t = useT();
-  const hl = useHighlight();
   const [open, setOpen] = useState(false);
   const [settings, setSettings] = useState(false);
   const [confirm, setConfirm] = useState<Confirm>(null);
@@ -105,10 +104,6 @@ export function BuildBar({ items, tip, actions }: SlotPropsMap["BuildBar"]) {
     actions.place(kind);
     setOpen(false);
   };
-  // The tutorial points at a tool ("build:hall") or the Staff entry ("staff:hire") until it is in hand. Everything is
-  // in the Start menu, so the Start button pulses while the menu is shut, and the entry itself once it is open.
-  const pointed = (kind: string, selected: boolean) => !selected && (hl(`build:${kind}`) || (kind === "staff" && hl("staff:hire")));
-  const pointedKind = items.find((it) => pointed(it.kind, it.selected))?.kind ?? null;
 
   return (
     <div className="f95-startwrap" ref={root}>
@@ -120,7 +115,7 @@ export function BuildBar({ items, tip, actions }: SlotPropsMap["BuildBar"]) {
           <ul>
             {buildings.map((it) => (
               <li key={it.kind}>
-                <button type="button" role="menuitem" className={`${it.selected ? "on" : ""} ${pointed(it.kind, it.selected) ? "flt-hl" : ""}`} disabled={!it.affordable && !it.selected} onClick={() => pick(it.kind)}>
+                <button type="button" role="menuitem" className={it.selected ? "on" : ""} disabled={!it.affordable && !it.selected} onClick={() => pick(it.kind)}>
                   <Ico name={it.kind} size={24} />
                   <span>{it.name}</span>
                   <span className="hk">{it.hotkey ?? ""}</span>
@@ -177,13 +172,13 @@ export function BuildBar({ items, tip, actions }: SlotPropsMap["BuildBar"]) {
           <b>{tip.name}</b> {tip.text} {tip.upkeepText && <small>{tip.upkeepText}</small>}
         </div>
       )}
-      <button type="button" className={`f95-start ${open ? "on" : ""} ${!open && pointedKind ? "flt-hl" : ""}`} data-testid="start-button" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}>
+      <button type="button" className={`f95-start ${open ? "on" : ""}`} data-testid="start-button" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}>
         <Flag />
         <span>{t("build.menuTitle")}</span>
       </button>
       <span className="f95-qs" role="group" aria-label="Quick launch">
         {quick.map((it) => (
-          <button key={it.kind} type="button" className={`f95-qb ${it.selected ? "on" : ""} ${!open && pointed(it.kind, it.selected) ? "flt-hl" : ""}`} title={`${it.name} (${it.priceText})`} aria-label={it.name} aria-pressed={it.selected} disabled={!it.affordable && !it.selected} onClick={() => actions.place(it.kind)}>
+          <button key={it.kind} type="button" className={`f95-qb ${it.selected ? "on" : ""}`} title={`${it.name} (${it.priceText})`} aria-label={it.name} aria-pressed={it.selected} disabled={!it.affordable && !it.selected} onClick={() => actions.place(it.kind)}>
             <Ico name={it.kind} size={20} />
           </button>
         ))}
@@ -202,18 +197,10 @@ export function BuildBar({ items, tip, actions }: SlotPropsMap["BuildBar"]) {
 const SPEED_GLYPHS: Record<number, number> = { 1: 1, 3: 2, 10: 3 };
 
 /** Speed in the tray, labelled with pace words as tooltips (Rest, Steady, Strenuous, Grueling), and the clock. */
-export function Speed({ speed, stats, pause, actions }: SlotPropsMap["Speed"]) {
+export function Speed({ speed, stats, actions }: SlotPropsMap["Speed"]) {
   const t = useT();
-  // The game holding time (a message to read, an open menu, a walker's card) shows as a little tray icon that breathes.
-  // The pause button already says when the player did it, and a card says so itself.
-  const held = pause.auto && pause.reason !== "card" ? pause.reason : null;
   return (
     <>
-      {held && (
-        <span className="f95-s f95-paused" role="status" title={t(`pause.${held}`)} aria-label={t(`pause.${held}`)}>
-          <Ico name="pause" size={16} />
-        </span>
-      )}
       <div className="f95-speed" role="group" aria-label={t("speed.label")}>
         {speed.options.map((o) => (
           <button key={o.value} type="button" className={`f95-s ${o.active ? "on" : ""}`} title={t(o.key)} aria-label={t(o.key)} aria-pressed={o.active} onClick={() => actions.setSpeed(o.value)}>

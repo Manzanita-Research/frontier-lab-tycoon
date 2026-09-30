@@ -10,8 +10,7 @@ import { step } from "../../machines/run";
 import { releaseGain } from "../../machines/training";
 import { addNews } from "../../news";
 import { createRng, type Rng } from "../../rng";
-import { createInitialState } from "../../state";
-import { answer, perfBudget } from "../../testkit";
+import { answer, perfBudget, createTestCampus, readyForPressure } from "../../testkit";
 import { tick } from "../../tick";
 import { dailyTraining } from "../../training";
 import type { GameState } from "../../types";
@@ -32,7 +31,7 @@ import { leapfrogView } from "./view";
 /** A dice roll that never varies: `next()` is always `v`. */
 const fixed = (v: number): Rng => ({ next: () => v, int: (lo) => lo, chance: (p) => v < p, pick: (items) => items[0]!, state: () => 1 });
 const on = (seed = 1): GameState => {
-  const s = createInitialState(seed);
+  const s = createTestCampus(seed);
   enableLeapfrog(s);
   return s;
 };
@@ -141,7 +140,7 @@ describe("the pack (mods/base-leapfrog)", () => {
 
 describe("switching the pack on and off", () => {
   it("is off by default, and off means nothing: no dice are drawn and nothing moves", () => {
-    const s = createInitialState(1);
+    const s = createTestCampus(1);
     expect(s.leapfrog.enabled).toBe(false);
     const rng = createRng(5);
     const before = rng.state();
@@ -158,7 +157,7 @@ describe("switching the pack on and off", () => {
   });
 
   it("switching it on makes the current scores the starting records, without a word in the news", () => {
-    const s = createInitialState(1);
+    const s = createTestCampus(1);
     const news = s.news.length;
     enableLeapfrog(s);
     expect(s.news.length).toBe(news);
@@ -331,6 +330,7 @@ describe("records and saturation", () => {
 describe("the forced response", () => {
   it("a rival launch while your run is 94% done opens the card, spaced out and never before day 30", () => {
     const s = on();
+    readyForPressure(s); // cards wait for a first launch and a gateway (FLT-16): stage it
     runAt(s, 0.94);
     s.day = 20;
     handleDrop(s, fixed(0.6), "lead");
@@ -464,6 +464,7 @@ describe("the forced response", () => {
 
   it("Leak: the card's hype and trust hit, and a SOTA claim with an asterisk until the real scores land (and it is a scandal if they don't)", () => {
     const s = on();
+    readyForPressure(s); // cards wait for a first launch and a gateway (FLT-16): stage it
     s.day = 40;
     runAt(s, 0.8);
     offer(s);
@@ -519,6 +520,7 @@ describe("the launch livestream", () => {
 
   it("a mishap: a headline, a hit to the Vibes, and a card that opens the same day", () => {
     const s = on();
+    readyForPressure(s); // cards wait for a first launch and a gateway (FLT-16): stage it
     s.models.push("Frontier-6");
     const incidents = s.vibes.incidents;
     ownRelease(s, fixed(0.99), { early: false, ready: 1 });
@@ -550,6 +552,7 @@ describe("the launch livestream", () => {
       const card = eventById(`stream:${m.id}`)!;
       card.choices.forEach((choice, i) => {
         const s = on();
+        readyForPressure(s); // cards wait for a first launch and a gateway (FLT-16): stage it
         s.models.push("Frontier-6");
         s.flags[`offer:stream:${m.id}`] = s.day;
         dailyEvents(s);
@@ -742,6 +745,7 @@ describe("a headless year (the scripted player, the pack on)", () => {
 describe("the cycle ties into the existing news and race code", () => {
   it("the open-weights drop still works when the drop is a calendar launch", () => {
     const s = on();
+    readyForPressure(s); // cards wait for a first launch and a gateway (FLT-16): stage it
     s.day = 40;
     s.ledger = { income: 50_000, expenses: 20_000, net: 30_000 };
     s.capability = 20;
@@ -796,7 +800,7 @@ describe("debug moments (?moment=)", () => {
   };
 
   it("shipnow: a lab launches as the day turns and the forced-response card opens, with the run at 94%", () => {
-    const s = createInitialState(1);
+    const s = createTestCampus(1);
     stageLeapfrog(s, "shipnow");
     expect(s.leapfrog.enabled).toBe(true);
     expect(ticksUntilCard(s)).toBe("shipNow");
@@ -805,7 +809,7 @@ describe("debug moments (?moment=)", () => {
   });
 
   it("pair: a lab launched today and the answer lands within a second, by another lab, with its own headline", () => {
-    const s = createInitialState(1);
+    const s = createTestCampus(1);
     stageLeapfrog(s, "pair");
     const lead = s.leapfrog.last!;
     expect(lead.slot).toBe("lead");
@@ -816,7 +820,7 @@ describe("debug moments (?moment=)", () => {
 
   it("stream opens the dog by default, or the mishap you name, after a mishap headline", () => {
     for (const [arg, card] of [["", "stream:dog"], ["wrongChart", "stream:wrongChart"], ["comingWeeks", "stream:comingWeeks"], ["nonsense", "stream:dog"]] as const) {
-      const s = createInitialState(1);
+      const s = createTestCampus(1);
       stageLeapfrog(s, "stream", arg);
       expect(ticksUntilCard(s), arg).toBe(card);
     }
@@ -826,7 +830,7 @@ describe("debug moments (?moment=)", () => {
   });
 
   it("solved: the harder benchmark is on the board and the ticker says so", () => {
-    const s = createInitialState(1);
+    const s = createTestCampus(1);
     stageLeapfrog(s, "solved");
     const v = leapfrogView(s);
     expect(v.benchmarks.some((b) => b.status === "saturated")).toBe(true);
@@ -836,8 +840,8 @@ describe("debug moments (?moment=)", () => {
 
   it("a staged World keeps playing without trouble and stays deterministic", () => {
     for (const m of LEAP_MOMENTS) {
-      const a = createInitialState(2);
-      const b = createInitialState(2);
+      const a = createTestCampus(2);
+      const b = createTestCampus(2);
       stageLeapfrog(a, m);
       stageLeapfrog(b, m);
       for (let i = 0; i < 100; i++) {

@@ -1,7 +1,7 @@
 // Every skin renders every slot from a fixture view-model without throwing, and its files are what the format says.
 import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { fixtureInput, openingWorld, FIXTURE_CHAT, FIXTURE_PAPER } from "../ui/hud/fixtures";
+import { fixtureInput, FIXTURE_CHAT, FIXTURE_PAPER } from "../ui/hud/fixtures";
 import { Docked, Modals, PhotoLayer } from "../ui/hud/tree";
 import type { HudActions, HudVM } from "../ui/hud/types";
 import { hudViewModel } from "../ui/hud/vm";
@@ -38,7 +38,7 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
     case "BuildBar":
       return { items: main.buildItems, tip: main.buildTip, layout: main.layout, actions };
     case "Speed":
-      return { speed: main.speed, stats: main.stats, pause: main.pause, actions };
+      return { speed: main.speed, stats: main.stats, actions };
     case "Staff":
       return { staff: { ...main.staff, open: true }, actions };
     case "Bubble":
@@ -53,8 +53,6 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
       return { vm: main, actions };
     case "EventCard":
       return { event: vms.event!.event!, actions };
-    case "Confirm":
-      return { confirm: vms.confirm!.confirm!, actions };
     case "Arena":
       return { arena: main.arena, actions };
     case "EraCard":
@@ -82,13 +80,7 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
   }
 }
 
-/** A clean start: the guided opening on its first step, the game waiting for Next. */
-const openingOf = (o: FixtureOptions = {}): HudVM => hudViewModel({ ...fixtureInput({ world: openingWorld(), selected: null, ...o }), pauseReason: "tutorial", toasts: [] });
-const withToast = (vm: HudVM): HudVM => ({ ...vm, toasts: [{ id: 9, text: "The kombucha keg has achieved sentience", tone: "joke" }] });
-
 const vms: Record<string, HudVM> = {
-  opening: openingOf(),
-  openingPhone: openingOf({ width: 390, height: 844 }),
   main: vmOf({ tool: "cluster" }),
   event: vmOf({ event: "waterDiscourse" }),
   confirm: vmOf({ confirm: true }),
@@ -128,8 +120,8 @@ describe.each([BASE_ID, ...usable])("skin %s", (id) => {
       const props = propsFor(name, vms);
       const Slot = skin.slots[name] as React.ComponentType<SlotPropsMap[SlotName]>;
       const out = html(skin, <Slot {...props!} />);
-      // With no tutorial up, the base's Assistant draws nothing (hints and toasts are the Toasts slot's job).
-      if (!(name === "Assistant" && skin.slots.Assistant === baseSlots.Assistant && !(props as { vm: HudVM }).vm.assistant)) expect(out.length, `${id}/${name} drew nothing`).toBeGreaterThan(0);
+      // With no spend to confirm, the base's Assistant draws nothing (hints and toasts are the Toasts slot's job).
+      if (!(name === "Assistant" && skin.slots.Assistant === baseSlots.Assistant && !(props as { vm: HudVM }).vm.confirm)) expect(out.length, `${id}/${name} drew nothing`).toBeGreaterThan(0);
       expect(out, `${id}/${name}`).not.toMatch(/undefined|\[object Object\]|NaN/);
       expect(out, `${id}/${name} left a placeholder`).not.toMatch(/\{\w+\}/);
     }
@@ -163,74 +155,17 @@ describe.each([BASE_ID, ...usable])("skin %s", (id) => {
     expect(era).toContain(escape(vms.era!.eraCard!.line));
   });
 
-  it("delivers the tutorial through the Assistant slot: the sentence, Next while the game waits, Skip always", async () => {
-    const { skin } = await prepareSkin(id);
-    const lesson = vms.opening!;
-    const out = html(skin, <skin.slots.Assistant vm={lesson} actions={actions} />);
-    expect(out).toContain(escape(lesson.assistant!.message));
-    expect(out).toContain(escape(skin.strings["assistant.skip"]!));
-    expect(out).toContain(escape(skin.strings["assistant.next"]!));
-    expect(out).toContain(escape(skin.strings["assistant.step"]!.replace("{n}", "1").replace("{total}", "5")));
-    // Acknowledged: no Next to press, but the way out stays.
-    const read = { ...lesson, assistant: { ...lesson.assistant!, paused: false } };
-    const acknowledged = html(skin, <skin.slots.Assistant vm={read} actions={actions} />);
-    expect(acknowledged).not.toContain(`>${escape(skin.strings["assistant.next"]!)}<`);
-    expect(acknowledged).toContain(escape(skin.strings["assistant.skip"]!));
-    // Done or skipped: nothing of the lesson is left.
-    const over = html(skin, <skin.slots.Assistant vm={{ ...lesson, assistant: null }} actions={actions} />);
-    expect(over).not.toContain(escape(skin.strings["assistant.skip"]!));
-  });
-
-  it("keeps a phone's lesson short: one sentence, both buttons", async () => {
-    const { skin } = await prepareSkin(id);
-    const out = html(skin, <Docked vm={vms.openingPhone!} actions={actions} />);
-    expect(out).toContain(escape(vms.openingPhone!.assistant!.message));
-    expect(out).toContain(escape(skin.strings["assistant.skip"]!));
-  });
-
-  it("lights whatever the step points at, and only while the tutorial is up", async () => {
-    const { skin } = await prepareSkin(id);
-    const lit = html(skin, <Docked vm={vms.opening!} actions={actions} />);
-    expect(lit).toContain("flt-hl");
-    const quiet = html(skin, <Docked vm={vmOf({ tool: "cluster" })} actions={actions} />);
-    expect(quiet).not.toContain("flt-hl");
-    // Pointing at the tool in hand is done with: the ring goes out once it is picked.
-    const picked = hudViewModel({ ...fixtureInput({ world: openingWorld(), selected: null }), tool: "path", pauseReason: "tutorial", toasts: [] });
-    expect(html(skin, <Docked vm={picked} actions={actions} />)).not.toContain("flt-hl");
-  });
-
-  it("points at the Training window when the last step says to watch the run", async () => {
-    const { skin } = await prepareSkin(id);
-    const run = { ...vmOf({ selected: null }), assistant: { ...vms.opening!.assistant!, step: "release", number: 5, highlight: "training", paused: false, waitingForBuild: false } };
-    const out = html(skin, <Docked vm={run} actions={actions} />);
-    expect(out).toMatch(/class="[^"]*flt-hl[^"]*"/);
-    expect(html(skin, <Docked vm={{ ...run, assistant: { ...run.assistant, highlight: "nothing:here" } }} actions={actions} />)).not.toContain("flt-hl");
-  });
-
-  it("shows a gentle Paused note when the game itself is holding time, and not for a card or the pause button", async () => {
-    const { skin } = await prepareSkin(id);
-    const speed = (pause: HudVM["pause"]) => html(skin, <skin.slots.Speed speed={vms.main!.speed} stats={vms.main!.stats} pause={pause} actions={actions} />);
-    const none = speed({ paused: false, reason: null, auto: false });
-    for (const reason of ["tutorial", "build", "menu", "inspector"] as const) {
-      const out = speed({ paused: true, reason, auto: true });
-      expect(out, reason).not.toBe(none);
-      expect(out, reason).toContain(escape(skin.strings[`pause.${reason}`]!));
-    }
-    expect(speed({ paused: true, reason: "card", auto: true })).toBe(none);
-    expect(speed({ paused: true, reason: "player", auto: false })).toBe(none);
-  });
-
-  it("asks before a spend that leaves under three months of runway, and offers the safe answer first", async () => {
+  it("asks before a spend that leaves under three months of runway, from the Assistant slot", async () => {
     const { skin } = await prepareSkin(id);
     const vm = vms.confirm!;
     expect(vm.confirm).toMatchObject({ kind: "hire", costText: "$4K", runwayText: "1.8 mo" });
-    const out = html(skin, <Modals vm={vm} actions={actions} />);
+    const out = html(skin, <Docked vm={vm} actions={actions} />);
     expect(out).toContain(escape(vm.confirm!.message));
     expect(out).toContain(escape(vm.confirm!.costText));
     expect(out).toContain(escape(vm.confirm!.runwayText));
-    expect(out).toContain('role="dialog"'.replace("dialog", out.includes('role="alertdialog"') ? "alertdialog" : "dialog"));
-    // No card when nothing is waiting.
-    expect(html(skin, <Modals vm={vms.main!} actions={actions} />)).not.toContain(escape(vm.confirm!.message));
+    expect(out).toMatch(/role="(alert)?dialog"/);
+    // Nothing waiting: no card.
+    expect(html(skin, <Docked vm={vms.main!} actions={actions} />)).not.toContain(escape(vm.confirm!.message));
   });
 
   it("keeps standing warnings on screen (once, even if a toast says the same thing)", async () => {
@@ -242,14 +177,6 @@ describe.each([BASE_ID, ...usable])("skin %s", (id) => {
     const echoed = hudViewModel({ ...fixtureInput({ warnings: vm.warnings }), toasts: [{ id: 5, text: vm.warnings[0]!, tone: "bad" }] });
     expect(echoed.toasts).toEqual([]);
     expect(html(skin, <Docked vm={echoed} actions={actions} />).split(escape(vm.warnings[0]!)).length - 1).toBe(1);
-  });
-
-  it("queues a toast under the lesson instead of talking over it", async () => {
-    const { skin } = await prepareSkin(id);
-    const vm = withToast(vms.opening!);
-    const out = html(skin, <Docked vm={vm} actions={actions} />);
-    expect(out).toContain(escape(vm.assistant!.message));
-    expect(out).toContain(escape(vm.toasts[0]!.text));
   });
 
   it("uses the skin's own strings", async () => {

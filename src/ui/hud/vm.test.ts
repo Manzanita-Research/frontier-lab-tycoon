@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { BUILDINGS } from "../../content/buildings";
 import { formatMoney } from "../../sim/format";
-import { fixtureInput, fixtureWorld, openingWorld, FIXTURE_CHAT, FIXTURE_PAPER } from "./fixtures";
-import { applyNow } from "../../sim/tick";
+import { fixtureInput, fixtureWorld, FIXTURE_CHAT, FIXTURE_PAPER } from "./fixtures";
 import { SKIN_API_VERSION } from "./types";
 import { hudViewModel, SHIPPED_DAYS, TICKER_ITEMS } from "./vm";
 
@@ -187,43 +186,23 @@ describe("hudViewModel", () => {
   });
 });
 
-describe("the tutorial and the pause, as a skin sees them", () => {
-  const opening = fixtureInput({ world: openingWorld(), selected: null });
-
-  it("carries the current step: one sentence, where it points, and whether the game is waiting for Next", () => {
-    const vm = hudViewModel({ ...opening, pauseReason: "tutorial" });
-    expect(vm.assistant).toMatchObject({ step: "path", number: 1, total: 5, highlight: "build:path", paused: true, waitingForBuild: true, canSkip: true });
-    expect(vm.assistant!.message.length).toBeGreaterThan(20);
-    expect(vm.assistant!.message).not.toMatch(/\n/);
-    expect(vm.assistant!.message.split(/[.;:!?]\s/).length).toBeLessThan(3);
-    assertPlain(vm.assistant);
+describe("the spend check, the standing warnings and the release goal, as a skin sees them", () => {
+  it("shows a spend waiting for a yes or a no as plain data, and nothing when nothing waits", () => {
+    expect(hudViewModel(fixtureInput()).confirm).toBeNull();
+    const vm = hudViewModel(fixtureInput({ confirm: true }));
+    expect(vm.confirm).toEqual({ kind: "hire", cost: 4000, costText: "$4K", runwayAfter: 1.8, runwayText: "1.8 mo", message: "This leaves 1.8 months of runway. The board will have questions." });
+    assertPlain(vm.confirm);
   });
 
-  it("follows the steps through, and is null once it is done or skipped", () => {
-    const world = openingWorld();
-    applyNow(world, [{ type: "placePath", x: 11, z: 18 }]);
-    const hall = hudViewModel({ ...fixtureInput({ world, selected: null }), pauseReason: "tutorial" });
-    expect(hall.assistant).toMatchObject({ step: "hall", number: 2, highlight: "build:hall", paused: true });
-    applyNow(world, [{ type: "skipTutorial" }]);
-    expect(hudViewModel(fixtureInput({ world, selected: null })).assistant).toBeNull();
-    expect(hudViewModel(fixtureInput()).assistant).toBeNull(); // the explicit test campus has no tutorial
-  });
-
-  it("stops the standing hints from talking over the lesson, and lets them back when it is over", () => {
-    expect(hudViewModel({ ...opening, toasts: [] }).hints).toEqual([]);
-    expect(hudViewModel({ ...fixtureInput(), toasts: [] }).hints).toEqual(["gateway"]);
-  });
-
-  it("says whether time is held and why; only the game's own holds are 'auto'", () => {
-    expect(hudViewModel(fixtureInput()).pause).toEqual({ paused: false, reason: null, auto: false });
-    expect(hudViewModel({ ...fixtureInput(), pauseReason: "player" }).pause).toEqual({ paused: true, reason: "player", auto: false });
-    for (const reason of ["tutorial", "build", "menu", "inspector", "card"] as const) {
-      expect(hudViewModel({ ...fixtureInput(), pauseReason: reason }).pause).toEqual({ paused: true, reason, auto: true });
-    }
-  });
-
-  it("marks the two hires the tutorial accepts, so a skin can light their buttons", () => {
-    const jobs = hudViewModel(fixtureInput({ staff: true })).staff.jobs;
-    expect(jobs.filter((j) => j.starter).map((j) => j.job).sort()).toEqual(["janitor", "sre"]);
+  it("carries standing warnings, and shows a toast that repeats one only once", () => {
+    const warning = "Your entrance isn't connected to any paths. Visitors are forming a very orderly queue to nowhere.";
+    const quiet = hudViewModel(fixtureInput());
+    expect(quiet.warnings).toEqual([]);
+    const input = fixtureInput({ warnings: [warning] });
+    expect(hudViewModel(input).warnings).toEqual([warning]);
+    const echoed = hudViewModel({ ...input, toasts: [{ id: 5, text: warning, tone: "bad" }] });
+    expect(echoed.toasts).toEqual([]);
+    // Other toasts are untouched.
+    expect(hudViewModel({ ...input, toasts: [{ id: 6, text: "Something else", tone: "joke" }] }).toasts.map((t) => t.text)).toEqual(["Something else"]);
   });
 });

@@ -1,7 +1,7 @@
 // Frontier 95's windows: Lab Properties, the copy dialog, sticky notes, Properties of a walker, Task Mangler, Thoughts.txt.
 import { useState } from "react";
 import { Odometer, money, useAutoPause } from "../kit";
-import { useHighlight, useT } from "../context";
+import { useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import { Ico, PixelPortrait } from "./icons";
 import { Blocks, Btn, Field, Sticker, Tabs, Win } from "./parts";
@@ -138,10 +138,9 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
 /** The file-copy dialog: "Copying the internet into Frontier-3…", with a Cancel that never quite works. */
 export function Training({ training }: SlotPropsMap["Training"]) {
   const t = useT();
-  const hl = useHighlight();
   const eta = training.etaDays === null ? "estimating time remaining…" : t("training.eta", { n: training.etaDays });
   return (
-    <Win className={`f95-copy ${hl("training") ? "flt-hl" : ""}`} title={training.hasHall ? t("training.window", { name: training.name }) : "Nothing to copy"} icon="doc" buttons={[{ g: "close", label: "Close", disabled: true }]}>
+    <Win className="f95-copy" title={training.hasHall ? t("training.window", { name: training.name }) : "Nothing to copy"} icon="doc" buttons={[{ g: "close", label: "Close", disabled: true }]}>
       <div className="f95-copybody">
         {training.hasHall ? (
           <>
@@ -379,7 +378,6 @@ export function ThoughtsPanel({ rows, layout, actions }: SlotPropsMap["ThoughtsP
 /** "Staff Manager": hire and fire, and paint patrol zones. Opens from Start ▸ Staff. */
 export function Staff({ staff, actions }: SlotPropsMap["Staff"]) {
   const t = useT();
-  const hl = useHighlight();
   const [tab, setTab] = useState<"hire" | "roster">("hire");
   const [folded, setFolded] = useState(false);
   useStackWindow("staff", folded, setFolded);
@@ -433,7 +431,7 @@ export function Staff({ staff, actions }: SlotPropsMap["Staff"]) {
                       <b>{j.title}</b> <small>{j.salaryText}</small>
                       <small className="blurb">{j.blurb}</small>
                     </span>
-                    <Btn className={j.starter && j.canHire && hl("staff:hire") ? "flt-hl" : ""} disabled={!j.canHire} title={j.reason} onClick={() => actions.hire(j.job)}>
+                    <Btn disabled={!j.canHire} title={j.reason} onClick={() => actions.hire(j.job)}>
                       {t("staff.hire")}
                       {j.count > 0 ? ` (${j.count})` : ""}
                     </Btn>

@@ -4,6 +4,7 @@
 import { BUILDINGS, type PlaceableKind } from "../../../content/buildings";
 import { BENCH_BY_ID } from "../../../content/leapfrog";
 import { openEventOf } from "../../events";
+import { pendingConfirmOf } from "../../guardrails";
 import { outcomeOf } from "../../goals";
 import type { Command } from "../../commands";
 import { slopStats } from "../../slop";
@@ -80,7 +81,10 @@ export function runHeadless(seed: number, opts: HeadlessOptions = {}): HeadlessR
   for (let i = 0; i < days * TICKS_PER_DAY && outcomeOf(s) !== "lost"; i++) {
     const cmds: Command[] = [];
     const open = openEventOf(s);
-    if (open) {
+    // The spending check (FLT-16): like the playthrough bot, approve a planned spend while the reserve holds, else decline.
+    const pending = pendingConfirmOf(s);
+    if (pending) cmds.push(s.cash >= pending.cost + RESERVE ? { ...pending.command, confirmed: true } : { type: "cancelConfirm" });
+    else if (open) {
       cards[open.id] = (cards[open.id] ?? 0) + 1;
       cmds.push({ type: "chooseEvent", eventId: open.id, choiceIndex: choose(s, open.id) });
     } else if (opts.build !== false && i % (TICKS_PER_DAY * 4) === 2) {

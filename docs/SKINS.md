@@ -106,7 +106,7 @@ Token values are written into a stylesheet, so they may not contain `{ } ; < >`,
 
 Tokens are CSS custom properties named `--flt-<category>-<name>` (`color.panel` → `--flt-color-panel`). The base defines all of them; a skin overrides some. In your own CSS, read them with `var(--flt-color-panel)`. Categories: `color.*`, `font.*`, `space.*`, `radius.*`, `border.*`, `bevel.*` (so a Win95 bevel is four colours, not a hack), `shadow.*` and `motion.*`.
 
-**Motion and reduced motion.** Use `var(--flt-motion-base)` for durations. Under `prefers-reduced-motion: reduce`, or when the player ticks "Reduce motion" in the skin picker (`<html data-motion="reduced">`), the loader swaps `--flt-motion-fast|base|slow|pulse` for their `motion.reduced.*` variants. Keyframe animations you write yourself must switch off under the same two conditions (see Frontier 95's CSS for the pattern).
+**Motion and reduced motion.** Use `var(--flt-motion-base)` for durations. Under `prefers-reduced-motion: reduce`, or when the player ticks "Reduce motion" in the skin picker (`<html data-motion="reduced">`), the loader swaps `--flt-motion-fast|base|slow` for their `motion.reduced.*` variants. Keyframe animations you write yourself must switch off under the same two conditions (see Frontier 95's CSS for the pattern).
 
 **Contrast is tested** for every skin: `color.text` ≥ 4.5:1 on `color.panel`, `color.panelAlt` and `color.inset`; `color.textDim` ≥ 4.5:1 on the panel; `color.numeral` ≥ 3:1 on `color.numeralBg`; and the tooltip, selection, title-bar and accent pairs ≥ 4.5:1.
 
@@ -133,7 +133,6 @@ Tokens are CSS custom properties named `--flt-<category>-<name>` (`color.panel` 
 | `color.tipText` | `--flt-color-tipText` | `#3a2a1c` |  | Text on tooltips. ≥ 4.5:1. |
 | `color.selection` | `--flt-color-selection` | `#3a2a1c` |  | Selected rows, dark chips, the ticker. Paired with `color.selectionText`. |
 | `color.selectionText` | `--flt-color-selectionText` | `#fff3d6` |  | Text on `color.selection`. ≥ 4.5:1. |
-| `color.highlight` | `--flt-color-highlight` | `#7a3cff` |  | The pulsing ring the tutorial puts on whatever its current step points at (the build tool, the Start button, the Training window). ≥ 3:1 on the panel. |
 | `color.meterFrom` | `--flt-color-meterFrom` | `#ffb347` |  | Progress meters: the start of the gradient (a flat skin sets both ends the same). |
 | `color.meterTo` | `--flt-color-meterTo` | `#ff6a4c` |  | Progress meters: the end of the gradient. |
 | `font.ui` | `--flt-font-ui` | `ui-rounded, "SF Pro Rounded", "Nunito", "Varela Round", system-ui, sans-serif` | **yes** | Body font stack. |
@@ -162,11 +161,9 @@ Tokens are CSS custom properties named `--flt-<category>-<name>` (`color.panel` 
 | `motion.base` | `--flt-motion-base` | `240ms` |  | Normal transition. |
 | `motion.slow` | `--flt-motion-slow` | `700ms` |  | Long transition. |
 | `motion.ease` | `--flt-motion-ease` | `cubic-bezier(0.2, 0.8, 0.2, 1)` |  | Easing curve. |
-| `motion.pulse` | `--flt-motion-pulse` | `1600ms` |  | One pulse of the tutorial's highlight ring. |
 | `motion.reduced.fast` | `--flt-motion-reduced-fast` | `0ms` |  | What `motion.fast` becomes under reduced motion (the OS setting or the Display dialog's switch). |
 | `motion.reduced.base` | `--flt-motion-reduced-base` | `0ms` |  | Reduced variant of `motion.base`. |
 | `motion.reduced.slow` | `--flt-motion-reduced-slow` | `0ms` |  | Reduced variant of `motion.slow`. |
-| `motion.reduced.pulse` | `--flt-motion-reduced-pulse` | `0ms` |  | Reduced variant of `motion.pulse` (the ring stays, it just stops pulsing). |
 
 ## Strings
 
@@ -239,15 +236,6 @@ If your slot needs copy that has no key, write it into the slot (as Frontier 95 
 | `confirm.ok` | Do it anyway |
 | `confirm.cancel` | Keep the runway |
 | `assistant.title` | Assistant |
-| `assistant.step` | Step {n} of {total} |
-| `assistant.next` | Next |
-| `assistant.skip` | Skip tutorial |
-| `assistant.placeIt` | Pick it, then click the map. |
-| `pause.player` | Paused |
-| `pause.tutorial` | Paused. Tap Next when you're ready. |
-| `pause.build` | Paused until your first build. |
-| `pause.menu` | Paused while this is open. |
-| `pause.inspector` | Paused while you read a mind. |
 | `event.paused` | Paused |
 | `arena.title` | Frontier Arena |
 | `arena.week` | Week {n} |
@@ -332,15 +320,14 @@ A slot is a React component. Each gets **its slice of the view-model plus `actio
 | `Objectives` | `{ objectives, layout, actions }` | The three scenario milestones and the deadline. |
 | `Inspector` | `{ inspector, actions }` | The card for the tapped walker: portrait, needs, thought, history, Follow. Only rendered when there is a selection. |
 | `BuildBar` | `{ items, tip, layout, actions }` | The build palette. `items[].kind` is the tool id and the icon id; `actions.place(kind)`. Hotkeys 1–9 are handled by the game. |
-| `Speed` | `{ speed, stats, pause, actions }` | Pause / 1× / 3× / 10×. Label them with `t(option.key)`. Also the gentle **"Paused"** indicator: `pause.auto` is true when the game itself is holding time (a tutorial message, an open menu, a selected walker), `pause.reason` says why (`t("pause." + reason)`; a `card` says it is paused itself). The base draws a pill under the buttons; Frontier 95 a tray icon. |
+| `Speed` | `{ speed, stats, actions }` | Pause / 1× / 3× / 10×. Label them with `t(option.key)`. |
 | `Staff` | `{ staff, actions }` | The payroll panel: hire, fire, and paint patrol zones (`staff.painting` is the staffer whose zone is being painted on the map). Rendered only while `staff.open`; it opens from the `staff` tile in the build palette (`buildItems` ends with `{ kind: "staff" }`; `actions.place("staff")` toggles the panel), so every `BuildBar` should draw that tile like any other. |
 | `Bubble` | `{ bubble, actions }` | **One** thought bubble. The game pins whatever you render to the walker on every frame, so do not position it. **The root element must have the class `bubble`**: photo mode copies it onto the picture. |
 | `ThoughtsPanel` | `{ rows, layout, actions }` | Everybody's thoughts, counted; `actions.highlight(row.key)` lights up who thinks it. On a phone (`layout.compact`) the base folds it to an icon. |
 | `Ticker` | `{ items, actions }` | The news tape. Use `kit`'s `<Marquee items>`. |
 | `Toast` | `{ toast, actions }` | One toast. `toast.tone === "hint"` is a standing hint and `"warn"` a standing warning (both not dismissable: a warning like "your entrance isn't connected" stays until it is fixed). Frontier 95 has no `Toasts` dock: its paperclip draws `vm.warnings` itself. |
-| `Assistant` | `{ vm, actions }` | The helper that delivers the guided opening: `vm.assistant` is the current step (`message`, `number` of `total`, `paused` while it waits for **Next**, `canSkip`), and `actions.continueTutorial()` / `actions.skipTutorial()` answer it. Draw the sentence, a Next button while `paused`, and a **Skip tutorial** that never hides. Frontier 95's paperclip hosts toasts in the same balloon (they queue under the message); the base draws a card above the build bar. It is `null` once the tutorial is done or skipped. |
+| `Assistant` | `{ vm, actions }` | A helper character that hosts hints, toasts and standing warnings, and asks the spend check (`vm.confirm`: "this leaves 1.8 months of runway", answered with `actions.confirmSpend()` or `actions.cancelSpend()`; make the safe answer the default, and Escape and a click outside give it). Time is held while it is up. The base draws nothing but the spend check (its warnings are `Toast`s); Frontier 95's paperclip lives here. |
 | `EventCard` | `{ event, actions }` | The modal news card. `actions.choose(event.id, i)`; the 1–3 keys are handled by the game. |
-| `Confirm` | `{ confirm, actions }` | A modal: a spend (a hire, a build, a path) that would leave the lab under three months of runway, held for a yes or a no. `confirm.message`, `costText` and `runwayText` say what it is; `actions.confirmSpend()` goes ahead, `actions.cancelSpend()` keeps the runway (make that the default: focus it, and Escape or a click outside give it). Time is held while it is up. Frontier 95's is a Win95 warning box. |
 | `Arena` | `{ arena, actions }` | The R&D multiplier and era, and the Frontier Arena leaderboard (`arena.open` folded or open; `actions.toggleArena()`). |
 | `EraCard` | `{ era, actions }` | The full-screen era title card. `actions.continueEra()`; Enter, Space and (after 0.7 s) any key work. |
 | `FrontPage` | `{ paper, actions }` | The weekly paper. |
@@ -381,7 +368,7 @@ const slots: SkinSlots = { Stats };
 export default slots;
 ```
 
-What a slot may import: `react`; `../types` and `../../ui/hud/types` (types only); `../kit` (Odometer, Marquee, Portrait, Dialog, money, reducedMotion, useT, useSlots, useSkin, useHighlight, useAutoPause); files in its own folder. **Nothing else in the game.** Rules for slots:
+What a slot may import: `react`; `../types` and `../../ui/hud/types` (types only); `../kit` (Odometer, Marquee, Portrait, Dialog, money, reducedMotion, useT, useSlots, useSkin, useAutoPause); files in its own folder. **Nothing else in the game.** Rules for slots:
 
 - **Render from props.** No reading the store, no timers that touch the game. UI-only state (an open tab, whether the Start menu is open) is `useState` inside the slot.
 - **Do not call `window` during render** (the tests render on the server). Read `layout.compact` / `layout.phone` from the props for responsive defaults; use `useEffect` for anything with the DOM.
@@ -391,14 +378,9 @@ What a slot may import: `react`; `../types` and `../../ui/hud/types` (types only
 - Be accessible: real `<button>`s, `aria-label`s on icon-only controls, `role="dialog"` on modals, `aria-pressed` on toggles.
 - Parody names only: no real companies, products or people in anything a player can read.
 
-## The tutorial, highlights and the Paused indicator
+## Panels that hold time
 
-Three things in the contract belong to the guided opening. A skin that replaces slots should draw all three; a tokens-and-CSS skin gets them from the base.
-
-- **The lesson** is `vm.assistant` (see the `Assistant` slot). One sentence, `Step {n} of {total}`, a **Next** button only while `assistant.paused` (the game is waiting for it; picking the highlighted tool also answers it), and a **Skip tutorial** that is always there. `actions.continueTutorial()` and `actions.skipTutorial()` answer it. Keep it to the sentence and two buttons: there is no room for more on a phone, and it must sit above the build bar or taskbar without covering the tool it points at.
-- **The highlight** is a class: `const hl = useHighlight();` then give whatever `hl("build:hall")` says is pointed at the class `flt-hl`. The targets are `build:<tool>` (any `BuildItemVM.kind`), `staff:hire` and `training`. The ring and its pulse come from the tokens `color.highlight` and `motion.pulse` (both skinnable, and `motion.reduced.pulse` stops the pulse for reduced-motion players). Override `.flt-hl` in `skin.css` for another look (Frontier 95's is a blinking hard-edged red rectangle). Put the ring *inside* anything that clips (a scrolling bar), and stop it once the tool is in hand. If the thing is inside something that is shut (Frontier 95's Start menu), light the shut thing, then the entry when it opens.
-- **Paused** is `pause` in the `Speed` slot's props (and `vm.pause`). Show a note only when `pause.auto && pause.reason !== "card"`: the game itself is holding time (a message to read, an open menu, a walker's card). Say why with the strings `pause.tutorial`, `pause.build`, `pause.menu` and `pause.inspector`. Do not show it for the pause button (it is already pressed) or a card (it says so itself). Keep it gentle: it is a reassurance, not an alarm.
-- If a panel of your own covers the map while it is open, hold time with the kit's `useAutoPause(actions, "my-panel", open)`.
+If a panel of your own covers the map while it is open (a phone sheet, a menu), hold time with the kit's `useAutoPause(actions, "my-panel", open)`: the game keeps the ids apart, so closing one panel never resumes time beneath another. The panels the host owns (the payroll, the sound mixer, the News Room, the phone Arena) hold it for you.
 
 ## The view-model and actions
 
@@ -410,7 +392,7 @@ interface HudVM {
   stats; training; objectives;           // numbers and text, already formatted ("$4.04M", "5.0 mo")
   inspector: InspectorVM | null;         // null when nobody is selected
   buildItems; buildTip;                  // the palette, and the tooltip for the tool in hand
-  speed; bubbles; ticker; toasts; hints; assistant; pause; warnings; confirm; // assistant: the tutorial step (null when done); pause: whether time is held and why; warnings: standing problems (`toast` tone "warn" in the base's stack); confirm: a spend waiting for a yes or no; hints: at most one of "gateway" | "tap", and none while a toast is up (their copy is strings hint.gateway / hint.tap)
+  speed; bubbles; ticker; toasts; hints; warnings; confirm; // warnings: standing problems (`toast` tone "warn" in the base's stack); confirm: a spend waiting for a yes or no; hints: at most one of "gateway" | "tap", and none while a toast is up (their copy is strings hint.gateway / hint.tap)
   event: EventVM | null;                 // a modal card; the era card is separate:
   eraCard: EraCardVM | null;
   thoughtsPanel; arena; outcome;
@@ -421,7 +403,7 @@ interface HudVM {
 
 Numbers come as numbers (`cash.value`) **and** formatted text (`cash.text`), so you can roll an odometer and still have a caption. Colours the game owns (the walker's `portrait.body`, an Arena lab's `color`) come as CSS colour strings.
 
-`HudActions` is everything a skin can ask for: `place(kind)`, `setSpeed(n)`, `togglePause()`, `choose(eventId, i)`, `continueEra()`, `select(id)`, `follow(id, on?)`, `closeInspector()`, `highlight(key)`, the payroll (`closeStaff`, `hire(job)`, `fire(id)`, `paintZone(id | null)`, `clearZone(id)`), `dismissToast(id)`, the tutorial (`continueTutorial()`, `skipTutorial()`), the spend check (`confirmSpend()`, `cancelSpend()`), `holdTime(id, open)` (use the kit's `useAutoPause`), `toggleArena()`, `keepPlaying()`, `newLab()`, the news-room ones (`openNews`, `viewNews`, `closeNews`, `skipNews`, `revealChat`), sound (`openMixer`, `closeMixer`, `setMuted`, `setVolume`, `playCue`), photo mode (`setPhoto`, `setPhotoTime`, `takePhoto`) and skins (`openSkinPicker`, `previewSkin`, `applySkin`, `cancelSkinPicker`, `setReducedMotion`). Each is safe to call at any time; the game ignores what does not apply.
+`HudActions` is everything a skin can ask for: `place(kind)`, `setSpeed(n)`, `togglePause()`, `choose(eventId, i)`, `continueEra()`, `select(id)`, `follow(id, on?)`, `closeInspector()`, `highlight(key)`, the payroll (`closeStaff`, `hire(job)`, `fire(id)`, `paintZone(id | null)`, `clearZone(id)`), `dismissToast(id)`, the spend check (`confirmSpend()`, `cancelSpend()`), `holdTime(id, open)` (use the kit's `useAutoPause`), `toggleArena()`, `keepPlaying()`, `newLab()`, the news-room ones (`openNews`, `viewNews`, `closeNews`, `skipNews`, `revealChat`), sound (`openMixer`, `closeMixer`, `setMuted`, `setVolume`, `playCue`), photo mode (`setPhoto`, `setPhotoTime`, `takePhoto`) and skins (`openSkinPicker`, `previewSkin`, `applySkin`, `cancelSkinPicker`, `setReducedMotion`). Each is safe to call at any time; the game ignores what does not apply.
 
 Changing the contract: keep changes **additive** (new fields, new actions) and add a fixture to `src/ui/hud/fixtures.ts` + a test in `vm.test.ts`. A breaking change means bumping `SKIN_API_VERSION` and every `skin.json`.
 

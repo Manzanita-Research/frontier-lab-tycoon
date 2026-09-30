@@ -2,8 +2,8 @@
 // nothing else in the game: no `src/sim/**`, no store, no three.
 import type { ComponentType, ReactNode } from "react";
 import type {
-  ArenaVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EraCardVM, EventVM, HudActions, HudVM, InspectorVM, LayoutVM,
-  NewsroomVM, ObjectivesVM, OutcomeVM, PaperVM, PauseVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StatsVM, ThoughtRowVM, TickerItemVM,
+  ArenaVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, EraCardVM, EventVM, HudActions, HudVM, InspectorVM, LayoutVM,
+  NewsroomVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StatsVM, ThoughtRowVM, TickerItemVM,
   StaffVM, ToastVM, TrainingVM,
 } from "../ui/hud/types";
 
@@ -23,7 +23,6 @@ export const SLOT_NAMES = [
   "Toast",
   "Assistant",
   "EventCard",
-  "Confirm",
   "Arena",
   "EraCard",
   "FrontPage",
@@ -58,8 +57,7 @@ export interface SlotPropsMap {
   Objectives: { objectives: ObjectivesVM; layout: LayoutVM; actions: HudActions };
   Inspector: { inspector: InspectorVM; layout: LayoutVM; actions: HudActions };
   BuildBar: { items: BuildItemVM[]; tip: BuildTipVM | null; layout: LayoutVM; actions: HudActions };
-  /** The speed buttons, and (`pause`) the gentle "Paused" indicator for when the game is holding time. */
-  Speed: { speed: SpeedVM; stats: StatsVM; pause: PauseVM; actions: HudActions };
+  Speed: { speed: SpeedVM; stats: StatsVM; actions: HudActions };
   /** The payroll panel (hire, fire, paint patrol zones). Only rendered while `staff.open`. */
   Staff: { staff: StaffVM; actions: HudActions };
   /** One bubble. The game pins whatever this renders to the walker, every frame. */
@@ -71,8 +69,6 @@ export interface SlotPropsMap {
   /** Hints and the tips host. Needs the whole view-model to be helpful. */
   Assistant: { vm: HudVM; actions: HudActions };
   EventCard: { event: EventVM; actions: HudActions };
-  /** A spend waiting for a yes or a no (it would leave under three months of runway). Modal; time is held while it is up. */
-  Confirm: { confirm: ConfirmVM; actions: HudActions };
   Arena: { arena: ArenaVM; actions: HudActions };
   EraCard: { era: EraCardVM; actions: HudActions };
   FrontPage: { paper: PaperVM; actions: HudActions };

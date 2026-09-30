@@ -76,19 +76,11 @@ export function phaseFor(c: AppContext): Phase {
   return c.speed === 0 || autoPaused(c) ? ".playing.paused" : ".playing.running";
 }
 
-export const autoPaused = (c: AppContext): boolean => c.snap.firstBuildPending || !!c.snap.assistant?.paused || !!c.snap.pendingConfirm || c.selected !== null || c.overlays.length > 0;
-
-/** Why time is standing still, for the "Paused" indicator: null while the clock runs. A card beats the pause button, which beats the auto-pauses. */
-export type PauseReason = "card" | "player" | "tutorial" | "build" | "menu" | "inspector";
-export function pauseReasonOf(c: AppContext): PauseReason | null {
-  if (c.event || outcomeHeld(c) || c.snap.pendingConfirm) return "card";
-  if (c.speed === 0) return "player";
-  if (c.snap.assistant?.paused) return "tutorial";
-  if (c.snap.firstBuildPending) return "build";
-  if (c.overlays.length > 0) return "menu";
-  if (c.selected !== null) return "inspector";
-  return null;
-}
+/**
+ * What holds time without the player asking: a spend waiting for its yes or no, a selected walker, an open menu. (FLT-16's
+ * guided opening also held time until you tapped Next and until the first build; the coach marks that replace it do not.)
+ */
+export const autoPaused = (c: AppContext): boolean => !!c.snap.pendingConfirm || c.selected !== null || c.overlays.length > 0;
 
 /** The same words twice are one toast (the newer replaces the older); the HUD shows only the newest, so keep just a few. */
 const addToasts = (c: AppContext, fresh: readonly UiToast[]) => ({ ...c, toasts: [...c.toasts.filter((t) => !fresh.some((f) => f.text === t.text)), ...fresh].slice(-3) });
