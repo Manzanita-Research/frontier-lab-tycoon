@@ -270,7 +270,7 @@ export interface ConfirmVM {
 // ---- Playable v1: what the player has unlocked, the coach marks, and the "New!" card ----
 
 /** The HUD panels the player earns as the lab grows (a hidden panel is simply not drawn). */
-export type HudPanelId = "revenue" | "vibes" | "arena" | "rnd" | "thoughts" | "news" | "staff" | "events" | "papers" | "disasters" | "factions";
+export type HudPanelId = "revenue" | "vibes" | "arena" | "rnd" | "thoughts" | "news" | "staff" | "events" | "papers" | "disasters" | "factions" | "birdapp";
 export type VisibleVM = Record<HudPanelId, boolean>;
 
 /** What the build panel teases as locked: one row per milestone, how many it unlocks and the goal that earns them ("2 more · Ship your first model"). */
@@ -1266,6 +1266,122 @@ export interface SafetyOptionVM {
   active: boolean;
 }
 
+/** FLT-69: how a post landed. `live`: still going up, not landed yet. */
+export type BirdOutcomeVM = "live" | "flop" | "banger" | "controversy" | "ratioed" | "cancelled";
+
+/** One post on the Bird App timeline. The numbers tick up while it is live and stop where it lands. */
+export interface BirdPostVM {
+  id: string;
+  name: string;
+  /** With the @. */
+  handle: string;
+  /** One character for the avatar. */
+  glyph: string;
+  archetype: string;
+  text: string;
+  /** "3:12 AM". */
+  time: string;
+  likes: number;
+  reposts: number;
+  replies: number;
+  /** "1.2K" and so on, ready to print. */
+  likesText: string;
+  repostsText: string;
+  repliesText: string;
+  outcome: BirdOutcomeVM;
+  /** "Banger", "Ratioed", "Cancelled"... or "" while live. */
+  outcomeText: string;
+  tone: "good" | "bad" | "neutral" | "joke";
+  /** The "viral" sticker: a banger that has landed, or one taking off right now. */
+  viral: boolean;
+  /** Replies are outpacing the likes: a ratio (or worse) forming. */
+  ratioing: boolean;
+  /** The top reply, once there are replies ("" before). */
+  reply: string;
+  /** Comms read it first. */
+  reviewed: boolean;
+  /** "Comms got to it" / "It stuck" / "". */
+  handledText: string;
+  /** "@so_back_twice", when it answers someone (the Duo). */
+  replyTo: string | null;
+  /** "3am", "launch day"... or "". */
+  momentText: string;
+}
+
+/** One of the three levers on a poster, with its trade-off printed on the button. */
+export interface BirdLeverVM {
+  id: "cook" | "comms" | "logoff";
+  /** "Let them cook", "Run it by Comms", "Please log off". */
+  label: string;
+  /** "22% banger · 9% cancel", "no posts · −focus". */
+  tradeoff: string;
+  active: boolean;
+}
+
+/** One researcher's posting profile. */
+export interface BirdPosterVM {
+  id: number;
+  name: string;
+  handle: string;
+  glyph: string;
+  archetypeName: string;
+  tier: "recluse" | "occasional" | "big" | "break";
+  /** "Big account", "On a posting break (12 days)". */
+  tierText: string;
+  followersText: string;
+  /** The banger↔cancel meter: their odds on an average post as the lever stands (0 on "Please log off"). */
+  banger: number;
+  cancel: number;
+  /** "19% banger · 7% cancel". */
+  meterText: string;
+  /** Cancelled, still here, and every rival's recruiter knows the name. */
+  hot: boolean;
+  levers: BirdLeverVM[];
+  /** "4 posts · 1 banger · 0 cancels". */
+  record: string;
+}
+
+/** FLT-69: the Bird App panel. `enabled: false` until Level 3 (and with `?birdapp=off`); draw nothing then. */
+export interface BirdAppVM {
+  enabled: boolean;
+  /** The panel is open (`actions.toggleBirdApp()`). */
+  open: boolean;
+  /** The folded chip's line: "3 live · Aura 42". */
+  headline: string;
+  /** 0 to 100. */
+  aura: number;
+  auraText: string;
+  /** What it does right now: "+6 Hype · visitors ×1.10 · applicants ×1.14". */
+  auraEffects: string;
+  /** The last 30 midnights, for a sparkline (0 to 100). */
+  auraHistory: number[];
+  /** Today's moments: "Launch day", "3am", "Water discourse"... */
+  moments: string[];
+  /** Posts that are up and have not landed, newest first. */
+  live: BirdPostVM[];
+  /** "@shipping_tmrw is typing…", or null. */
+  typing: string | null;
+  /** Posts that have landed, newest first. */
+  log: BirdPostVM[];
+  posters: BirdPosterVM[];
+  /** "16 of 23 researchers": the list is the loudest first. */
+  postersText: string;
+  comms: {
+    desk: "calm" | "busy" | "drowning";
+    /** "Calm", "Busy: 3 in the queue", "Drowning: the PR team is underwater". */
+    deskText: string;
+    queue: { id: string; handle: string; kind: "controversy" | "cancelled"; text: string }[];
+    /** "2 of 5 today". */
+    capacityText: string;
+    /** 0 to 1: how full the queue is against where it drowns. */
+    load: number;
+  };
+  /** "142 posts · 12 bangers · 3 cancels". */
+  tally: string;
+  /** The newest post that landed a banger or a cancel (for a moment's sticker), or null. */
+  spotlight: BirdPostVM | null;
+}
+
 /** FLT-33: the discourse. `enabled: false` until Level 4 (and with `?factions=off`); draw nothing then. */
 export interface FactionsVM {
   enabled: boolean;
@@ -1566,6 +1682,8 @@ export interface HudVM {
   crumbWiki: CrumbWikiVM | null;
   /** FLT-33: the factions and the lab's stance. `enabled: false` until Level 4. */
   factions: FactionsVM;
+  /** FLT-69: the Bird App. `enabled: false` until Level 3. */
+  birdapp: BirdAppVM;
   eraCard: EraCardVM | null;
   outcome: OutcomeVM | null;
   /** Evals Without Borders: the countdown and the tour. */
@@ -1641,6 +1759,10 @@ export interface HudActions {
   setRisk(risk: RiskVM): void;
   /** FLT-33: open or fold the Factions panel. */
   toggleFactions(): void;
+  /** FLT-69: open or fold the Bird App. */
+  toggleBirdApp(): void;
+  /** FLT-69: a poster's lever (`BirdPosterVM.id`): "cook", "comms" or "logoff". */
+  setBirdLever(id: number, lever: BirdLeverVM["id"]): void;
   /** FLT-33: the safety budget, 0 (none) to 3 (lavish). Costs money every day and slows training; the Safetyists notice. */
   setSafetySpend(level: number): void;
   /** FLT-56: Comms puts out a statement to one faction (the gate legend). Costs money, then a cooldown; the sim may refuse with a toast. */

@@ -15,7 +15,7 @@ import { shotAtom } from "../juice/photo";
 import { useShareInput } from "../share/share";
 import { useSocialInput } from "../share/social";
 import { newMotion, NO_MOTION, stepMotion, type Motion, type MotionView } from "./leapfrogMotion";
-import { arenaOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, senateOpenAtom, skinUiAtom, staffOpenAtom } from "./state";
+import { arenaOpenAtom, birdAppOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, senateOpenAtom, skinUiAtom, staffOpenAtom } from "./state";
 import { modSession } from "../../app/mods";
 import { dramaPath, dramaViewModel } from "../../drama/feed";
 import { dramaAtom } from "../../drama/state";
@@ -179,6 +179,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
   const staffOpen = useAtomValue(staffOpenAtom);
   const senateOpen = useAtomValue(senateOpenAtom);
   const factionsOpen = useAtomValue(factionsOpenAtom);
+  const birdAppOpen = useAtomValue(birdAppOpenAtom);
   const helpOpen = useAtomValue(helpOpenAtom);
   const modsOpen = useAtomValue(modsOpenAtom);
   const papersOpen = useAtomValue(papersOpenAtom);
@@ -229,6 +230,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         senateOpen,
         zone,
         factionsOpen,
+        birdAppOpen,
         arena: { open: arenaOpen, alert: motion.alert, flinch: motion.flinch, moved: motion.moved },
         leapfrog,
         room,
@@ -256,7 +258,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         share,
         social,
       }),
-    [share, social, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, beat, skinUi, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, drama],
+    [share, social, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, beat, skinUi, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, birdAppOpen, drama],
   );
   return vm;
 }

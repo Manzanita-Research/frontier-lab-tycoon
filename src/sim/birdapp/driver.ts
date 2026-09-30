@@ -127,6 +127,8 @@ export function outcomeOdds(spice: number, reviewed: boolean): Record<BirdOutcom
   const cancelled = R.odds.cancelled[0] + R.odds.cancelled[1] * x * x;
   return { flop: Math.max(0, 1 - banger - controversy - ratioed - cancelled), banger, controversy, ratioed, cancelled };
 }
+/** A poster's odds on an average line (spice 0.5): what the timeline's meter and the lever buttons show. */
+export const posterOdds = (spice: number, reviewed: boolean) => outcomeOdds(clamp01(0.5 * spice + 0.25), reviewed);
 /** One die against the odds, in BIRD_OUTCOMES order with flop last. */
 export function rollOutcome(u: number, odds: Record<BirdOutcome, number>): BirdOutcome {
   let acc = 0;

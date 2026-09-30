@@ -29,6 +29,7 @@ import { playableOf, type PlayableInput } from "./playable";
 import { papersOf, paperMomentOf } from "./papers";
 import { collusionOf, crumbWikiOf, investigationOf } from "./collusion";
 import { factionChips, factionsOf } from "./factions";
+import { birdAppOf } from "./birdapp";
 import type { FactionChipVM } from "./types";
 import { challengeLine, challengeQuery, compareRuns, VERDICT_TEXT, type Challenge } from "../share/link";
 import { streakText } from "../share/streak";
@@ -71,6 +72,8 @@ export interface HudInput {
   senateOpen?: boolean;
   /** FLT-33: the Factions panel is open. Optional: folded. */
   factionsOpen?: boolean;
+  /** FLT-69: the Bird App is open. Optional: folded. */
+  birdAppOpen?: boolean;
   arena: { open: boolean; alert: boolean; flinch: boolean; moved: Record<string, "up" | "down"> };
   /** Release Leapfrog's real-time flourishes (row flashes, blinking badges, solved columns kept on the board, news-cycle history). Optional: none is fine. */
   leapfrog?: MotionView;
@@ -178,6 +181,8 @@ function statsOf(i: HudInput): StatsVM {
         { label: "Calm baseline", note: "10%", fill: 1, points: pts(WEIGHTS.penalties) },
         { label: "Incidents", note: "quits, flops, bailouts", fill: v.incident, points: -pts((WEIGHTS.penalties * v.incident) / 2) + 0 },
         { label: "Protesters at the gate", note: null, fill: v.protest, points: -pts((WEIGHTS.penalties * v.protest) / 2) + 0 },
+        // FLT-69: the Bird App's Aura, the part of Hype the posters hold up (already counted in the Hype row).
+        ...(s.birdapp?.enabled ? [{ label: "Aura", note: `the Bird App: +${Math.round(s.birdapp.effects.hype)} of the Hype`, fill: s.birdapp.aura / 100, points: pts((WEIGHTS.hype * s.birdapp.effects.hype) / 100) }] : []),
       ],
     },
     cash: { value: s.cash, text: formatMoney(s.cash), negative: s.cash < 0 },
@@ -1122,6 +1127,7 @@ export function hudViewModel(i: HudInput): HudVM {
     collusion: collusionOf(i.snap),
     crumbWiki: event || era ? null : crumbWikiOf(i.snap, i.dismissed ?? []),
     factions: factionsOf(i.snap.factions, i.factionsOpen ?? false),
+    birdapp: birdAppOf(i.snap, play.visible.birdapp, i.birdAppOpen ?? false),
     eraCard: era,
     outcome: outcomeOf(i),
     audit: auditOf(i.snap),

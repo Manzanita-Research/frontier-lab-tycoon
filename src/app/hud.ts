@@ -21,6 +21,7 @@ import { yachtView, type YachtView } from "../sim/yacht/view";
 import { captureView, type CaptureView } from "../sim/capture/view";
 import { promisesView, type PromisesView } from "../sim/promises/view";
 import { factionsView, type FactionsView } from "../sim/factions/view";
+import { birdView, type BirdView } from "../sim/birdapp/view";
 import { raceView, type RaceView } from "../sim/race/view";
 import { auditView, type AuditView } from "../sim/auditors/view";
 import { neoCampusView, sameCampuses, type NeoCampusView } from "../sim/neolabs/view";
@@ -134,6 +135,8 @@ export interface Snapshot {
   chats: { id: number; hostId: number; guestId: number; names: [string, string]; lines: string[] }[];
   /** FLT-33: the factions' meters, moods and relations, the lab's stance, the gate. `enabled: false` until Level 4. */
   factions: FactionsView;
+  /** FLT-69: the Bird App's timeline (posts that are up), its posters and levers, the Comms desk and the Aura. `enabled: false` until Level 3. */
+  birdapp: BirdView;
   assistant: AssistantMessage | null;
   firstBuildPending: boolean;
   pendingConfirm: PendingConfirm | null;
@@ -280,6 +283,7 @@ export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO
       return { id: m.id, hostId: m.hostId, guestId: m.guestId, names: [guest?.role || guest?.name || "", host?.name ?? ""], lines: m.lines.slice() };
     }),
     factions: factionsView(s),
+    birdapp: birdView(s),
     assistant: assistantOf(s),
     firstBuildPending: !!s.coach && s.flags.started === undefined && s.flags.firstBuild === undefined,
     pendingConfirm: pendingConfirmOf(s),
