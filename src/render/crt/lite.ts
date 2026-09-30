@@ -3,10 +3,13 @@
 // cost: scanlines whose dark gaps close up on bright pixels (the beam widening), a faint RGB triad, the same barrel
 // bow, and the world's vignette. One texture read per pixel.
 import { BlendFunction, Effect, EffectAttribute } from "postprocessing";
-import { Uniform } from "three";
+import { Uniform, type Texture } from "three";
+import { aces } from "./shaders";
 
 const fragmentShader = /* glsl */ `
-uniform float pitch, scan, mask, curve, vignette, vignetteInner;
+uniform float pitch, scan, mask, curve, vignette, vignetteInner, toneExposure;
+uniform sampler2D backdrop;
+${aces}
 
 void mainUv(inout vec2 uv) {
   vec2 c = uv * 2. - 1.;
@@ -16,7 +19,11 @@ void mainUv(inout vec2 uv) {
 
 void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor) {
   if (any(lessThan(uv, vec2(0.))) || any(greaterThan(uv, vec2(1.)))) { outputColor = vec4(0., 0., 0., 1.); return; }
-  vec3 c = inputColor.rgb;
+  // The scene is premultiplied over a transparent clear: tone-map it and lay it over the (untouched) sky.
+  float a = clamp(inputColor.a, 0., 1.);
+  vec3 c = a > 0. ? acesFilmic(inputColor.rgb / a) : vec3(0.);
+  // An sRGB texture: the GPU hands it over linear, like the scene.
+  c = mix(texture2D(backdrop, uv).rgb, c, a);
   float l = dot(c, vec3(.2126, .7152, .0722));
   // Distance from the middle of this scanline, 0..0.5; bright pixels get a wider beam.
   float d = abs(fract(gl_FragCoord.y / pitch) - .5);
@@ -29,7 +36,7 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
   c *= triad / (1. - 2. * mask / 3.);
   vec2 k = vUv * 2. - 1.;
   c *= 1. - vignette * clamp((length(k) / 1.4142136 - vignetteInner) / max(1. - vignetteInner, .0001), 0., 1.);
-  outputColor = vec4(c, inputColor.a);
+  outputColor = vec4(c, 1.);
 }
 `;
 
@@ -44,11 +51,15 @@ export interface LiteCrtOptions {
 }
 
 export class LiteCrtEffect extends Effect {
-  constructor(options: LiteCrtOptions) {
+  constructor(options: LiteCrtOptions, backdrop: Texture) {
     super("LiteCrtEffect", fragmentShader, {
       blendFunction: BlendFunction.SET,
       attributes: EffectAttribute.NONE,
-      uniforms: new Map(Object.entries(options).map(([k, v]) => [k, new Uniform(v)])),
+      uniforms: new Map<string, Uniform>([
+        ...Object.entries(options).map(([k, v]) => [k, new Uniform(v)] as [string, Uniform]),
+        ["toneExposure", new Uniform(1)],
+        ["backdrop", new Uniform(backdrop)],
+      ]),
     });
   }
   set(options: Partial<LiteCrtOptions>) {

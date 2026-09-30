@@ -6,6 +6,8 @@ import { SoundLayer } from "../audio/SoundLayer";
 import { PressCamera } from "./PressCamera";
 import { ProbeView } from "./ProbeView";
 import { Buildings } from "./buildings/Buildings";
+import { CrtLayer } from "./crt/CrtLayer";
+import { crtEvents } from "./crt/events";
 import { CAMERA_OFFSET, CameraRig } from "./fx/CameraRig";
 import { FxDirector } from "./fx/FxDirector";
 import { Lighting } from "./fx/Lighting";
@@ -51,6 +53,7 @@ export function Scene() {
       shadows
       dpr={[1, 1.75]}
       gl={{ antialias: true, alpha: true }}
+      events={crtEvents}
       camera={{ position: CAMERA_OFFSET.toArray(), zoom, near: -100, far: 200 }}
     >
       <FxDirector />
@@ -74,6 +77,7 @@ export function Scene() {
       <CoachSuggestion />
       <CameraRig baseZoom={zoom} />
       <PhotoLayer />
+      <CrtLayer />
       <PressCamera />
       <ProbeView />
     </Canvas>

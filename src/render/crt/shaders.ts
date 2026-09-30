@@ -123,10 +123,8 @@ vec3 decodeSRGB(vec3 c) {
 }`;
 
 // FLT: three's ACESFilmicToneMapping (three 0.180, tonemapping_pars_fragment), so the CRT'd campus has the colours
-// the plain canvas has.
-const aces = `
-uniform bool toneMap;
-uniform float toneExposure;
+// the plain canvas has. Needs a \`toneExposure\` uniform (the lite effect declares its own).
+export const aces = `
 vec3 RRTAndODTFit(vec3 v) {
   vec3 a = v * (v + 0.0245786) - 0.000090537;
   vec3 b = v * (0.983729 * v + 0.4329510) + 0.238081;
@@ -144,16 +142,29 @@ vec3 acesFilmic(vec3 color) {
 
 // texelFetch makes input sampling independent of the caller's texture filters.
 // Encode before averaging: the frozen pipeline consumes display-encoded pixels.
+// FLT: on the first level, tone-map the (premultiplied) scene and lay it over the backdrop, which is display-encoded
+// already and, like a plain sRGB scene.background, never tone-mapped.
 export const prepare = `precision highp float;
 in vec2 uv; out vec4 frag;
 uniform sampler2D tex;
 uniform bool encodeInput;
+uniform bool toneMap;
+uniform float toneExposure;
+uniform bool useBackdrop;
+uniform sampler2D backdrop;
 ${transfer}
 ${aces}
 vec3 readPixel(ivec2 p) {
-  vec3 c = texelFetch(tex, clamp(p, ivec2(0), textureSize(tex, 0) - 1), 0).rgb;
+  ivec2 size = textureSize(tex, 0);
+  vec4 s = texelFetch(tex, clamp(p, ivec2(0), size - 1), 0);
+  vec3 c = s.rgb;
+  if (encodeInput && useBackdrop) c = s.a > 0. ? c / s.a : vec3(0.);
   if (encodeInput && toneMap) c = acesFilmic(c);
-  return encodeInput ? encodeSRGB(c) : c;
+  if (!encodeInput) return c;
+  c = encodeSRGB(c);
+  // The backdrop is an sRGB texture, which the GPU decodes as it samples; encode it back.
+  if (useBackdrop) c = mix(encodeSRGB(texture(backdrop, (vec2(p) + .5) / vec2(size)).rgb), c, clamp(s.a, 0., 1.));
+  return c;
 }
 void main() {
   vec2 p = uv * vec2(textureSize(tex, 0)) - .5;

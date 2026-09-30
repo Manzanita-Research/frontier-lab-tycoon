@@ -19,6 +19,8 @@ export const GOVERNOR_DEFAULTS: GovernorOptions = { budgetMs: 20, warmup: 45, wi
 
 export class CrtGovernor {
   tier: CrtTier;
+  /** The tier it started at: below it, the canvas has been turned down. */
+  readonly start: CrtTier;
   /** Settled: stopped watching (the canvas is flat, or a step down showed the tube was not the cost). */
   settled = false;
   /** The tier stepped down from, and the mean frame time there, while the step is on trial. */
@@ -31,6 +33,7 @@ export class CrtGovernor {
   constructor(start: CrtTier, options: Partial<GovernorOptions> = {}) {
     this.o = { ...GOVERNOR_DEFAULTS, ...options };
     this.tier = start;
+    this.start = start;
     this.skip = this.o.warmup;
     if (start === "flat") this.settled = true;
   }

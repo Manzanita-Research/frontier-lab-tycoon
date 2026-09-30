@@ -25,7 +25,7 @@ describe("CRT looks", () => {
 
   it("gives the shader one row per pitch of CSS pixels", () => {
     expect(inputResolution(CRT_LOOKS.subtle, 1440, 900)).toBe(720);
-    expect(inputResolution(CRT_LOOKS.full, 1440, 900)).toBe(480);
+    expect(inputResolution(CRT_LOOKS.full, 1440, 900)).toBe(720);
     expect(inputResolution(CRT_LOOKS.full, 40, 20)).toBe(32);
     expect(screenOptions(CRT_LOOKS.subtle, 1440, 900).tube?.corner).toBe(0);
   });

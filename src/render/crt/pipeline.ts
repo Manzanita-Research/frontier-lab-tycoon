@@ -79,6 +79,11 @@ export class CRTPipeline {
   inputResolution: "auto" | number = "auto";
   toneMap = false;
   toneExposure = 1;
+  /**
+   * FLT: a display-encoded picture to show where the scene is transparent (the sky, when the canvas is see-through).
+   * Laid under the scene after tone mapping, so it keeps its colours. Null: the scene's own alpha is ignored.
+   */
+  backdrop: Texture | null = null;
   readonly size = new Vector2(1, 1);
   private readonly cssSize = new Vector2();
   private readonly screenSize = new Vector2();
@@ -98,7 +103,6 @@ export class CRTPipeline {
   }
 
   setOptions(options: CRTOptions = {}): this {
-    if (this.disposed) throw new Error("CRT pass has been disposed.");
     const next: Record<string, unknown> = { ...this.options, ...options };
     for (const key of Object.keys(next)) {
       if (!(SETTING_KEYS as string[]).includes(key) && !OPTION_KEYS.includes(key)) throw new TypeError(`Unknown CRT option: ${key}`);
@@ -125,7 +129,8 @@ export class CRTPipeline {
   }
 
   initialize(renderer: WebGLRenderer) {
-    if (this.disposed) throw new Error("CRT pass has been disposed.");
+    // FLT: a disposed pipeline comes back on its next render (React's strict mode disposes and reuses effects' objects).
+    this.disposed = false;
     if (this.resources) return;
     this.floatTargets = renderer.extensions.has("EXT_color_buffer_float");
     const uniforms: Record<string, IUniform> = {
@@ -136,7 +141,7 @@ export class CRTPipeline {
       curve: { value: 0 }, vignette: { value: 0 }, vignetteInner: { value: 0.6 }, corner: { value: 0 },
     };
     const stages = [horizontal, vertical, optics].map((shader) => material(shader, uniforms));
-    const preparation = material(prepareShader, { tex: { value: null }, encodeInput: { value: false }, toneMap: { value: false }, toneExposure: { value: 1 } });
+    const preparation = material(prepareShader, { tex: { value: null }, encodeInput: { value: false }, toneMap: { value: false }, toneExposure: { value: 1 }, useBackdrop: { value: false }, backdrop: { value: null } });
     const copier = material(copyShader, { tex: { value: null }, encodeInput: { value: false }, decodeOutput: { value: false }, nearestInput: { value: false } });
     const geometry = new BufferGeometry();
     // The frozen vertex shader names its attribute a_position, not position.
@@ -202,6 +207,8 @@ export class CRTPipeline {
     const prep = this.resources!.preparation;
     prep.uniforms.toneMap!.value = this.toneMap;
     prep.uniforms.toneExposure!.value = renderer.toneMappingExposure;
+    prep.uniforms.useBackdrop!.value = this.backdrop !== null;
+    prep.uniforms.backdrop!.value = this.backdrop;
     // Even at native resolution, isolate nearest sampling and RGBA8 input from the caller's target.
     do {
       const nw = Math.max(w, Math.ceil(sw / 2));

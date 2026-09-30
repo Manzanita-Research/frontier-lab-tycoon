@@ -63,11 +63,12 @@ export const CRT_LOOKS: Record<Exclude<CrtMode, "off">, CrtLook> = {
     css: { scan: 0.05, vignette: 0.05, vignetteInner: 0.6, corner: 12, glowRadius: 2, glowAlpha: 0.28, roll: 0, flicker: 0 },
     lite: { scan: 0.22, mask: 0.05 },
   },
-  // The family TV in 1995, the one with a VCR on top.
+  // The family TV in 1995, the one with a VCR on top. Same line count as subtle: at 300 lines (a 3px pitch) the
+  // campus turned to soup, so the TV-ness is thinner beams, a coarser mask, more bow, the roll and the flicker.
   full: {
-    pitch: 3,
-    preset: "soft",
-    shader: { spread: 0.6, bleed: 0.5, beam: 0.26, bloom: 0.18, glow: 0.12, focus: 0.06, mask: 0.16, exposure: 1.16 },
+    pitch: 2,
+    preset: "clean",
+    shader: { spread: 0.4, bleed: 0.22, beam: 0.24, bloom: 0.16, glow: 0.08, focus: 0.015, mask: 0.18, exposure: 1.1 },
     curve: 0.03,
     vignette: 0.42,
     vignetteInner: 0.35,

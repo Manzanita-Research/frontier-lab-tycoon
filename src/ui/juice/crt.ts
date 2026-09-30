@@ -2,7 +2,8 @@
 // visit, and what the canvas can afford. Everything lands in `crtAtom`, which the scene (CrtFX) and the CSS tube read.
 import { registry } from "../../app/game";
 import { isCrtMode, type CrtMode, type CrtTier, CRT_TIERS } from "../../render/crt/looks";
-import { crtAtom } from "../../render/crt/state";
+import { CrtGovernor } from "../../render/crt/governor";
+import { crtAtom, crtGovernor } from "../../render/crt/state";
 import { photoAtom } from "../../render/fx/photoState";
 import { loadedSkinAtom } from "../hud/state";
 
@@ -31,12 +32,15 @@ function startTier(): CrtTier {
 }
 
 let chosen: CrtMode | null = recall();
+const pinned = pinnedMode !== null || pinnedTier !== null;
 
 function recompute(patch: { tier?: CrtTier; reduced?: boolean } = {}) {
   const skinDefault = registry.get(loadedSkinAtom).crt ?? "off";
   const mode: CrtMode = registry.get(photoAtom) ? "off" : (pinnedMode ?? chosen ?? skinDefault);
   const prev = registry.get(crtAtom);
-  const next = { ...prev, mode, pinned: pinnedMode !== null || pinnedTier !== null, ...patch };
+  const next = { ...prev, mode, pinned, ...patch };
+  // The first time the tube comes on, a governor starts watching the frame rate (the canvas feeds it; see CrtLayer).
+  if (mode !== "off" && !pinned && !crtGovernor.current) crtGovernor.current = new CrtGovernor(next.tier);
   if (next.mode !== prev.mode || next.tier !== prev.tier || next.reduced !== prev.reduced || next.pinned !== prev.pinned) registry.set(crtAtom, next);
 }
 
@@ -48,13 +52,8 @@ export function setCrtMode(mode: CrtMode) {
   } catch {
     /* Private mode: the pick lasts for this visit. */
   }
+  crtGovernor.current = null;
   recompute({ tier: startTier(), reduced: false });
-}
-
-/** The governor stepped the canvas to `tier` (render side). */
-export function setCrtTier(tier: CrtTier) {
-  const start = startTier();
-  recompute({ tier, reduced: CRT_TIERS.indexOf(tier) > CRT_TIERS.indexOf(start) });
 }
 
 /** The player's own pick, or null while the skin's default applies. */
