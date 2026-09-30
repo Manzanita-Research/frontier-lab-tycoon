@@ -2105,6 +2105,16 @@
       display: none;
     }
   }
+  @media (max-height: 879px) {
+    .fa-voice-line {
+      display: none;
+    }
+  }
+  @media (max-height: 779px) {
+    .fa-voice {
+      display: none;
+    }
+  }
   @media (max-height: 820px) {
     .fa-plate {
       height: 60px;
