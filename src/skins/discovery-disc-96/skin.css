@@ -1324,6 +1324,7 @@
 
   /* The DID YOU KNOW? tape */
   .dd-ticker {
+    box-sizing: border-box;
     position: absolute;
     left: 0;
     right: 0;
@@ -1482,6 +1483,7 @@
   }
   .dd-worksheet {
     --tone: var(--dd-blue);
+    box-sizing: border-box;
     position: relative;
     isolation: isolate;
     display: flex;
@@ -1736,6 +1738,8 @@
     pointer-events: none;
   }
   .dd-cert {
+    --tone: var(--dd-blue);
+    box-sizing: border-box;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -1866,7 +1870,14 @@
     }
   }
   .dd-outcome {
+    --tone: var(--dd-red);
     padding-top: 0;
+    &.won {
+      --tone: var(--dd-green);
+    }
+    &.lost {
+      --tone: var(--dd-purple);
+    }
     .dd-ws-head {
       align-self: stretch;
       margin: 0 -30px;
@@ -1935,6 +1946,7 @@
 
   /* Say What? (the thoughts panel) */
   .thoughts.panel {
+    box-sizing: border-box;
     width: 350px;
     max-width: 100%;
   }
@@ -2134,6 +2146,7 @@
 
   /* The payroll */
   .staff.panel {
+    box-sizing: border-box;
     position: relative;
     left: auto;
     bottom: auto;
@@ -2348,6 +2361,44 @@
     }
   }
 
+  /* Labels pinned to the map: the tapped walker's name, "no path", reasons */
+  .nametag {
+    padding: 1px 9px 2px;
+    border: 3px solid var(--dd-ink);
+    border-radius: 4px;
+    background: var(--dd-yellow);
+    box-shadow: 2px 2px 0 var(--dd-ink);
+    color: var(--dd-ink);
+    font: 400 17px/1.15 var(--dd-display);
+    letter-spacing: 0.03em;
+  }
+  .nopath,
+  .reason {
+    border: 3px solid var(--dd-ink);
+    border-radius: 4px;
+    box-shadow: 2px 2px 0 var(--dd-ink);
+    font: 400 17px/1.15 var(--dd-display);
+    letter-spacing: 0.03em;
+  }
+  .nopath {
+    background: var(--dd-red);
+    color: #fff;
+  }
+  .reason {
+    background: #fff;
+    color: var(--dd-ink);
+  }
+  .coinpop {
+    font-family: var(--dd-display);
+    font-weight: 400;
+    letter-spacing: 0.03em;
+  }
+  .news-toolbar > b + button {
+    min-width: 44px;
+    font-size: 26px;
+    line-height: 1;
+  }
+
   /* Photo mode */
   .photo-bar.panel {
     border-radius: 6px;
@@ -2543,7 +2594,7 @@
       width: 92px;
     }
     .dd-banner {
-      max-width: calc(100vw - 28px - 450px);
+      max-width: max(280px, calc(100vw - 28px - 450px));
       flex-wrap: wrap;
     }
     .dd-globe {
@@ -2578,6 +2629,10 @@
     .dd-stats {
       gap: 8px;
       width: 100%;
+    }
+    .dd-banner {
+      max-width: 100%;
+      flex-wrap: nowrap;
     }
     .dd-globe {
       display: none;
@@ -2618,8 +2673,9 @@
       }
     }
     .dd-circ {
-      width: 74px;
-      height: 74px;
+      box-sizing: border-box;
+      width: 80px;
+      height: 80px;
       padding: 3px;
       box-shadow: 3px 3px 0 var(--dd-ink);
     }
@@ -2686,6 +2742,7 @@
     }
 
     .dd-chart {
+      box-sizing: border-box;
       display: flex;
       align-items: center;
       gap: 8px;
