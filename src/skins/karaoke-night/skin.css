@@ -1,84 +1,3134 @@
-/* Karaoke Night (stub): plum stage lighting, pixel display face, a glowing ticker. */
+/*
+ * Karaoke Night: a karaoke machine runs the lab. Flat lilac plastic bodies with dark screens set into them, Jersey 10
+ * (a chunky scoreboard pixel face) for headings, labels and every number, Nunito for reading, and glow kept to a whisper:
+ * small text-shadows on the numbers and the sung words, never a big blur.
+ *
+ * Why not Pixelify Sans, as the stub had? Its capital C is closed up like an O ("OASH", "Oompute") and its 5 and S look
+ * alike; Jersey 10 keeps C, O, 5 and S apart, so one face does the display type and the digits.
+ *
+ * The slots live in this folder (Layout.tsx, stats.tsx, ticker.tsx, ...); the rest of the game's UI is the base's markup
+ * dressed here (`.panel` is a screen in a plastic bezel).
+ *
+ * To drop in a paid face (Chalmers) later: bundle the woff2 and its licence in assets/fonts, list it in skin.json "fonts",
+ * and put its family first in the `font.display` and `font.numbers` tokens. Nothing below names a font: every heading
+ * reads `var(--flt-font-display)` and every digit `var(--flt-font-numbers)`.
+ */
 [data-skin="karaoke-night"] {
-  .panel {
-    background-image: linear-gradient(180deg, color-mix(in srgb, var(--flt-color-accent) 14%, transparent), transparent 40%);
+  --kn-plastic: var(--flt-x-plastic);
+  --kn-hi: var(--flt-x-plasticHi);
+  --kn-lo: var(--flt-x-plasticLo);
+  --kn-edge: var(--flt-x-plasticEdge);
+  --kn-plum: var(--flt-x-plum);
+  --kn-screen: var(--flt-x-screen);
+  --kn-pink: var(--flt-x-pink);
+  --kn-pink-lo: var(--flt-x-pinkLo);
+  --kn-pink-hi: var(--flt-x-pinkHi);
+  --kn-lemon: var(--flt-x-lemon);
+  --kn-lemon-lo: var(--flt-x-lemonLo);
+  --kn-mint: var(--flt-x-mint);
+  --kn-cyan: var(--flt-x-cyan);
+  --kn-key: var(--flt-x-key);
+  --kn-key-lo: var(--flt-x-keyLo);
+  --kn-display: var(--flt-font-display);
+  --kn-num: var(--flt-font-numbers);
+  --kn-ticker-h: 58px;
+  --kn-tray-h: 132px;
+  --kn-rail: 318px;
+  /* The high scores board is a table with seven columns: it is the one panel that hangs out to the left of the rail. */
+  --kn-wide: 516px;
+  font-synthesis: none;
+
+  /* ---------- shared bits ---------- */
+  .kn-hud,
+  .kn-backdrop {
+    font-family: var(--flt-font-ui);
+    font-weight: 700;
+    color: var(--flt-color-text);
   }
-  .lab-name,
-  .chip-title b,
-  .obj-title,
-  .thoughts-title,
-  .arena-head b,
-  .insp-name {
-    font-family: var(--flt-font-display);
-    letter-spacing: 0.02em;
+  .kn-hud,
+  .kn-hud *,
+  .kn-hud *::before,
+  .kn-hud *::after,
+  .kn-backdrop,
+  .kn-backdrop *,
+  .kn-backdrop *::before,
+  .kn-backdrop *::after {
+    box-sizing: border-box;
   }
-  .stat .label,
-  .vibes-label {
+  button {
+    font-family: inherit;
+  }
+  button:focus-visible,
+  summary:focus-visible {
+    outline: 3px solid var(--kn-cyan);
+    outline-offset: 2px;
+  }
+  .kn-hud {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .kn-glyph {
+    flex: none;
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.14em;
+  }
+  .kn-trend {
+    width: 0.62em;
+    height: 0.62em;
+    vertical-align: 0.02em;
+  }
+
+  /* The plastic body, and the screen set into it. */
+  .kn-plastic {
+    pointer-events: auto;
+    padding: 9px;
+    border-radius: 22px;
+    background: var(--kn-plastic);
+    box-shadow:
+      inset 0 3px 0 var(--kn-hi),
+      inset 0 -5px 0 var(--kn-lo),
+      0 6px 0 rgba(23, 12, 39, 0.5);
+  }
+  .kn-screen {
+    position: relative;
+    border-radius: 14px;
+    background: var(--flt-color-panel);
+    box-shadow:
+      inset 0 0 0 2px rgba(0, 0, 0, 0.35),
+      inset 0 0 14px rgba(255, 95, 162, 0.12);
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 3px);
+      pointer-events: none;
+    }
+  }
+  /* Glowing text: colour plus a whisper of light. */
+  .gold {
+    color: var(--flt-color-numeral);
+    text-shadow: 0 0 8px rgba(255, 228, 92, 0.4);
+  }
+  .hot {
+    color: var(--flt-color-bad);
+    text-shadow: 0 0 8px rgba(255, 128, 150, 0.45);
+  }
+  .mint {
+    color: var(--kn-mint);
+    text-shadow: 0 0 8px rgba(92, 242, 201, 0.4);
+  }
+  .cyan {
+    color: var(--kn-cyan);
+    text-shadow: 0 0 8px rgba(79, 227, 255, 0.4);
+  }
+  .pink {
+    color: var(--kn-pink);
+    text-shadow: 0 0 8px rgba(255, 95, 162, 0.45);
+  }
+  .dim {
     color: var(--flt-color-textDim);
   }
-  .stat .value {
-    font-size: 26px;
+
+  /* ---------- the console (Stats): top left ---------- */
+  .kn-left {
+    position: absolute;
+    left: 16px;
+    top: 14px;
+    width: min(700px, calc(100vw - 32px - var(--kn-rail) - 16px));
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    max-height: calc(100dvh - 14px - var(--kn-ticker-h) - var(--kn-tray-h) - 34px);
+    pointer-events: none;
   }
-  .vibes-value {
-    font-size: 44px;
-  }
-  .vibes-value,
-  .stat .value {
-    text-shadow: 0 0 10px color-mix(in srgb, var(--flt-color-numeral) 55%, transparent);
-  }
-  .bar,
-  .obj-bar,
-  .need-bar,
-  .meter {
-    background: var(--flt-color-inset);
-  }
-  .tool {
-    background: var(--flt-color-panelAlt);
-    color: var(--flt-color-text);
-    border-radius: var(--flt-radius-pill);
-    &.on {
-      background: var(--flt-color-accent);
-      color: var(--flt-color-accentText);
-      box-shadow: 0 0 14px var(--flt-color-accent);
+  .kn-console {
+    width: 100%;
+    .kn-screen {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 4px 16px;
+      padding: 10px 18px 12px;
     }
   }
-  .ticker {
-    background: var(--flt-color-inset);
-    color: var(--flt-color-text);
-    border-top-color: var(--flt-color-accent);
-    font-family: var(--flt-font-display);
+  .kn-lab {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    min-width: 0;
   }
-  .ticker-tag {
-    background: var(--flt-color-accent);
-    color: var(--flt-color-accentText);
+  .kn-lab-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font: 400 29px/1.15 var(--kn-display);
+    letter-spacing: 0.02em;
+    color: var(--kn-lemon);
+    text-shadow: 0 0 8px rgba(255, 228, 92, 0.4);
   }
-  .tick,
-  .tick.neutral {
-    color: var(--flt-color-text);
-    font-size: 17px;
+  .kn-lab-date {
+    flex: none;
+    font: 400 17px var(--kn-display);
+    color: var(--flt-color-textDim);
+    white-space: nowrap;
   }
-  .tick.good {
-    color: var(--flt-color-good);
+  .kn-vibes {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding-right: 14px;
+    border-right: 2px dashed rgba(201, 184, 255, 0.25);
   }
-  .tick.bad {
+  .kn-vibes-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 96px;
+    min-height: 44px;
+    padding: 0 6px;
+    border: 0;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+  }
+  .kn-score {
+    font: 400 66px/0.9 var(--kn-num);
+    color: var(--kn-pink);
+    text-shadow: 0 0 10px rgba(255, 95, 162, 0.45);
+    font-variant-numeric: tabular-nums;
+  }
+  .kn-vibes-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 5px;
+    font: 400 16px var(--kn-display);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--flt-color-textDim);
+    .kn-glyph {
+      color: var(--kn-pink);
+    }
+  }
+  .trend-up .kn-trend {
+    color: var(--kn-mint);
+  }
+  .trend-down .kn-trend {
     color: var(--flt-color-bad);
   }
-  .speed button {
-    background: var(--flt-color-panelAlt);
-    &.on {
-      background: var(--flt-color-accent);
-      color: var(--flt-color-accentText);
+  .kn-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px 14px;
+    align-content: center;
+  }
+  .kn-st {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    text-align: left;
+  }
+  .kn-l {
+    font: 400 15px var(--kn-display);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--flt-color-textDim);
+    white-space: nowrap;
+  }
+  .kn-v {
+    font: 400 30px/1.05 var(--kn-num);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    text-transform: uppercase;
+  }
+  .kn-s {
+    font: 400 15px var(--kn-display);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: 1.2em;
+  }
+  .kn-hype-n {
+    font: 400 15px var(--kn-num);
+    color: var(--kn-lemon);
+    margin-left: 4px;
+  }
+  .kn-vu {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 34px;
+    max-width: 110px;
+    margin-top: 3px;
+    i {
+      flex: 1 1 0;
+      min-width: 0;
+      max-width: 8px;
+      background: rgba(201, 184, 255, 0.2);
+      &.on {
+        background: var(--kn-mint);
+        box-shadow: 0 0 5px rgba(92, 242, 201, 0.5);
+      }
+      &.on.y {
+        background: var(--kn-lemon);
+        box-shadow: 0 0 5px rgba(255, 228, 92, 0.5);
+      }
+      &.on.r {
+        background: var(--kn-pink);
+        box-shadow: 0 0 5px rgba(255, 95, 162, 0.5);
+      }
     }
   }
-  .bubble {
-    background: var(--flt-color-tip);
-    color: var(--flt-color-tipText);
-    box-shadow: 0 0 0 2px var(--flt-color-accent);
+  .kn-arena {
+    cursor: pointer;
+    min-height: 44px;
+    &:hover .kn-v {
+      filter: brightness(1.15);
+    }
+    &.flinch {
+      animation: karaoke-night-shake 0.4s;
+    }
   }
-  .choice,
-  .thought-row,
-  .arena-row {
+  .kn-delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: 6px;
+    font-size: 0.6em;
+    &.good {
+      color: var(--kn-mint);
+    }
+    &.bad {
+      color: var(--flt-color-bad);
+    }
+  }
+  .kn-more {
+    display: none;
+  }
+  /* The scorecard: where the vibes come from. */
+  .kn-scorecard {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: -8px;
+    z-index: 6;
+    width: 340px;
+    max-width: calc(100vw - 32px);
+    padding: 10px 12px 11px;
+    border: 4px solid var(--kn-plastic);
+    border-radius: 16px;
+    background: var(--flt-color-panel);
+    box-shadow: 0 5px 0 rgba(23, 12, 39, 0.5);
+    font-size: 13px;
+  }
+  .kn-scorecard-title {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+    font: 400 17px var(--kn-display);
+    color: var(--kn-lemon);
+    span {
+      color: var(--flt-color-textDim);
+    }
+  }
+  .kn-vrow {
+    display: grid;
+    grid-template-columns: 1fr 64px 40px;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 0;
+  }
+  .kn-vlabel {
+    font-size: 12.5px;
+    line-height: 1.15;
+    small {
+      font-size: 11px;
+      color: var(--flt-color-textDim);
+    }
+  }
+  .kn-vbar {
+    height: 8px;
+    background: #2d1a48;
+    i {
+      display: block;
+      height: 100%;
+      background: var(--kn-mint);
+      &.neg {
+        background: var(--flt-color-bad);
+      }
+    }
+  }
+  .kn-vpts {
+    text-align: right;
+    font: 400 17px var(--kn-num);
+    color: var(--kn-mint);
+    &.bad {
+      color: var(--flt-color-bad);
+    }
+  }
+  .kn-scorecard-foot {
+    margin-top: 7px;
+    padding-top: 6px;
+    border-top: 2px dashed rgba(201, 184, 255, 0.25);
+    font-size: 11.5px;
+    line-height: 1.3;
+    color: var(--flt-color-textDim);
+  }
+
+  /* ---------- NOW TRAINING and UP NEXT ---------- */
+  /* Song and queue: if the window is short they scroll (and fade at the edge) rather than run under the arcade. */
+  .kn-under {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    min-height: 0;
+    padding: 4px 8px 26px;
+    margin: -4px -8px -26px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    pointer-events: none;
+    mask-image: linear-gradient(#000 calc(100% - 24px), transparent);
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    > * {
+      flex: none;
+    }
+  }
+  .kn-training,
+  .kn-queue {
+    width: 300px;
+    max-width: 100%;
+  }
+  .kn-training .kn-screen,
+  .kn-queue .kn-screen {
+    padding: 11px 14px 12px;
+  }
+  .kn-np {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font: 400 16px var(--kn-display);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--flt-color-textDim);
+    b {
+      font-weight: 700;
+      color: var(--kn-pink);
+    }
+  }
+  .kn-eta {
+    margin-left: auto;
+    color: var(--kn-lemon);
+    white-space: nowrap;
+  }
+  .kn-song {
+    margin: 4px 0 8px;
+    font: 400 27px/1.1 var(--kn-display);
+    color: var(--kn-mint);
+    text-shadow: 0 0 8px rgba(92, 242, 201, 0.4);
+    overflow-wrap: anywhere;
+  }
+  .kn-quiet {
+    margin-top: 6px;
+    font-size: 14px;
+    line-height: 1.3;
+    color: var(--flt-color-text);
+  }
+  .kn-pbar {
+    display: flex;
+    gap: 2px;
+    height: 16px;
+    padding: 2px;
+    border-radius: 3px;
+    background: #2d1a48;
+    i {
+      flex: 1;
+      background: #3a2560;
+      &.on {
+        background: var(--kn-pink);
+        box-shadow: 0 0 5px rgba(255, 95, 162, 0.6);
+      }
+    }
+  }
+  .kn-time {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 5px;
+    font: 400 15px var(--kn-display);
+    letter-spacing: 0.04em;
+    color: var(--flt-color-textDim);
+  }
+  .kn-stamp {
+    position: absolute;
+    right: 12px;
+    top: -14px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px 4px;
+    border-radius: 6px;
+    background: var(--kn-lemon);
+    color: var(--kn-plum);
+    font: 400 18px var(--kn-display);
+    box-shadow:
+      inset 0 -3px 0 var(--kn-lemon-lo),
+      0 0 0 3px #fff;
+    transform: rotate(4deg);
+    animation: karaoke-night-pop 0.5s cubic-bezier(0.3, 1.6, 0.5, 1);
+  }
+  /* The sticker takes the corner the time remaining sits in. */
+  .kn-training.shipped .kn-eta {
+    visibility: hidden;
+  }
+  .kn-queue-head {
+    width: 100%;
+    min-height: 26px;
+    padding: 0;
+    border: 0;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    color: var(--flt-color-textDim);
+  }
+  .kn-queue-title {
+    flex: 1;
+  }
+  .kn-queue-count {
+    padding: 0 7px;
+    border-radius: 6px;
+    background: var(--kn-pink);
+    color: var(--flt-color-accentText);
+    font: 400 15px/1.35 var(--kn-num);
+  }
+  .kn-queue-days {
+    white-space: nowrap;
+    color: var(--flt-color-textDim);
+    &.hot {
+      color: var(--flt-color-bad);
+    }
+    .short {
+      display: none;
+    }
+  }
+  .kn-q {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    margin: 9px 0 0;
+    padding: 0;
+    list-style: none;
+    li {
+      display: grid;
+      grid-template-columns: 26px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 8px;
+    }
+  }
+  .kn-no {
+    font: 400 21px var(--kn-num);
+    color: var(--kn-lemon);
+  }
+  .kn-q-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    b {
+      font-weight: 900;
+      font-size: 14px;
+      line-height: 1.15;
+    }
+    small {
+      font-size: 12px;
+      line-height: 1.2;
+      color: var(--flt-color-textDim);
+    }
+  }
+  .kn-q li.met .kn-q-text b {
+    text-decoration: line-through;
+    text-decoration-thickness: 2px;
+    color: rgba(255, 246, 251, 0.6);
+  }
+  .kn-q-pct {
+    font: 400 19px var(--kn-num);
+    color: var(--kn-mint);
+  }
+  .kn-queue-by {
+    margin-top: 8px;
+    font: 400 15px var(--kn-display);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--flt-color-textDim);
+  }
+
+  /* ---------- the tape deck (Speed, the record key, the tools): top right ---------- */
+  .kn-right {
+    position: absolute;
+    right: 16px;
+    top: 14px;
+    width: var(--kn-wide);
+    max-width: calc(100vw - 32px);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 12px;
+    max-height: calc(100dvh - 14px - var(--kn-ticker-h) - var(--kn-tray-h) - 34px);
+    pointer-events: none;
+  }
+  .kn-deck {
+    flex: none;
+    width: var(--kn-rail);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 9px 10px 11px;
+  }
+  .kn-deck-row {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+  .kn-speed,
+  .kn-tools,
+  .kn-tools-more {
+    display: flex;
+    gap: 8px;
+  }
+  .kn-tools {
+    justify-content: flex-end;
+    align-items: center;
+    gap: 6px;
+  }
+  .kn-tools-more {
+    gap: 6px;
+  }
+  .kn-key {
+    position: relative;
+    width: 54px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    grid-auto-flow: column;
+    gap: 6px;
+    padding: 0;
+    border: 0;
+    border-radius: 12px;
+    background: var(--kn-key);
+    color: var(--kn-plum);
+    box-shadow:
+      inset 0 -4px 0 var(--kn-key-lo),
+      0 3px 0 rgba(42, 23, 64, 0.35);
+    cursor: pointer;
+    transition: transform var(--flt-motion-fast);
+    &:hover {
+      background: #fff;
+    }
+    &:active,
+    &.on {
+      transform: translateY(2px);
+      box-shadow:
+        inset 0 -2px 0 var(--kn-key-lo),
+        0 1px 0 rgba(42, 23, 64, 0.35);
+    }
+    &.on {
+      background: var(--kn-pink);
+      box-shadow:
+        inset 0 -3px 0 var(--kn-pink-lo),
+        0 0 10px rgba(255, 95, 162, 0.5);
+    }
+  }
+  .kn-tape {
+    width: 20px;
+    height: 16px;
+  }
+  .kn-tool-ic {
+    width: 24px;
+    height: 24px;
+  }
+  .kn-tools .kn-key {
+    width: 44px;
+    height: 44px;
+  }
+  .kn-key.news {
+    width: auto;
+    padding: 0 12px;
+    font: 400 16px var(--kn-display);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .kn-key.fold {
+    display: none;
+  }
+  .kn-unread {
+    position: absolute;
+    top: -8px;
+    right: -6px;
+    min-width: 21px;
+    height: 21px;
+    padding: 0 5px;
+    border-radius: 11px;
+    background: var(--kn-pink);
+    color: var(--kn-plum);
+    box-shadow: 0 0 0 2px var(--kn-screen);
+    font: 400 16px/21px var(--kn-num);
+    text-align: center;
+  }
+  .kn-extra {
+    pointer-events: auto;
+    align-self: flex-end;
+    width: var(--kn-rail);
+    max-width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px 8px;
+    padding: 9px 12px 11px;
+    border-radius: 14px;
+    background: var(--kn-lemon);
+    color: var(--kn-plum);
+    box-shadow:
+      inset 0 -4px 0 var(--kn-lemon-lo),
+      0 0 0 3px #fff;
+    transform: rotate(-1.5deg);
+    animation: karaoke-night-pop 0.45s cubic-bezier(0.3, 1.6, 0.5, 1);
+  }
+  .kn-extra-tag {
+    flex-basis: 100%;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font: 400 21px var(--kn-display);
+  }
+  .kn-extra-text {
+    flex-basis: 100%;
+    font-weight: 900;
+    font-size: 13.5px;
+    line-height: 1.25;
+  }
+  .kn-extra-btns {
+    display: flex;
+    gap: 8px;
+    button {
+      min-height: 36px;
+      padding: 0 16px;
+      border: 0;
+      border-radius: 8px;
+      background: rgba(42, 23, 64, 0.14);
+      color: var(--kn-plum);
+      font: 400 18px var(--kn-display);
+      cursor: pointer;
+      &.read {
+        background: var(--kn-plum);
+        color: var(--kn-lemon);
+      }
+    }
+  }
+
+  /* ---------- the contestant card (Inspector) ---------- */
+  .kn-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    width: 100%;
+    gap: 12px;
+    min-height: 0;
+    padding: 4px 8px 26px;
+    margin: -4px -8px -26px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    pointer-events: none;
+    /* A panel that runs out of room fades away at the edge instead of being cut. */
+    mask-image: linear-gradient(#000 calc(100% - 24px), transparent);
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    > * {
+      flex: none;
+      width: var(--kn-rail);
+    }
+  }
+  .kn-card {
+    width: 100%;
+    .kn-screen {
+      padding: 12px 16px 16px;
+    }
+  }
+  .kn-p2 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    font: 400 16px var(--kn-display);
+    letter-spacing: 0.04em;
+    color: var(--flt-color-textDim);
+    .kn-glyph {
+      color: var(--kn-pink);
+    }
+  }
+  .kn-x {
+    flex: none;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
     background: var(--flt-color-panelAlt);
     color: var(--flt-color-text);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .kn-who {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 6px;
+  }
+  .kn-ava {
+    flex: none;
+    width: 64px;
+    height: 64px;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow:
+      0 0 0 3px var(--kn-pink),
+      0 0 12px rgba(255, 95, 162, 0.45);
+    image-rendering: pixelated;
+  }
+  .kn-face {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .kn-who-text {
+    min-width: 0;
+  }
+  .kn-name {
+    margin: 0;
+    font: 400 27px/1.05 var(--kn-display);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--kn-pink);
+    text-shadow: 0 0 8px rgba(255, 95, 162, 0.45);
+    overflow-wrap: anywhere;
+  }
+  .kn-role {
+    margin-top: 4px;
+    font-weight: 800;
+    font-size: 13px;
+    line-height: 1.2;
+    color: var(--flt-color-textDim);
+  }
+  .kn-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 6px;
+  }
+  .kn-tag {
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--kn-lemon);
+    color: var(--kn-plum);
+    font: 400 15px var(--kn-display);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    &.kn-mood.content {
+      background: var(--kn-mint);
+    }
+    &.kn-mood.miserable,
+    &.kn-mood.resigned {
+      background: var(--flt-color-bad);
+    }
+  }
+  .kn-status {
+    margin-top: 10px;
+    font-size: 13px;
+    line-height: 1.3;
+    color: var(--flt-color-textDim);
+  }
+  .kn-meters {
+    margin-top: 4px;
+  }
+  .kn-meter {
+    --hc: var(--kn-mint);
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr) 40px;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    font: 400 16px var(--kn-display);
+    &.warn {
+      --hc: var(--kn-lemon);
+    }
+    &.bad {
+      --hc: var(--flt-color-bad);
+    }
+  }
+  .kn-ml {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--flt-color-textDim);
+  }
+  .kn-hearts {
+    display: flex;
+    gap: 3px;
+    i {
+      flex: none;
+      width: 14px;
+      height: 12px;
+      background: #3a2560;
+      clip-path: polygon(0 25%, 25% 0, 50% 25%, 75% 0, 100% 25%, 100% 50%, 50% 100%, 0 50%);
+      &.on {
+        background: var(--hc);
+      }
+    }
+  }
+  .kn-mp {
+    text-align: right;
+    font: 400 19px var(--kn-num);
+    color: var(--hc);
+    text-shadow: 0 0 8px color-mix(in srgb, var(--hc) 40%, transparent);
+  }
+  .kn-lyric {
+    margin-top: 12px;
+    padding: 9px 12px 10px;
+    border-radius: 10px;
+    background: #2b1747;
+    font-weight: 800;
+    font-size: 15px;
+    line-height: 1.3;
+    color: #fff;
+    q {
+      display: block;
+      quotes: "\201C" "\201D";
+    }
+  }
+  .kn-lyric-h {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 3px;
+    font: 400 15px var(--kn-display);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--kn-pink);
+  }
+  .kn-liner {
+    margin-top: 8px;
+    summary {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 28px;
+      list-style: none;
+      cursor: pointer;
+      font: 400 15px var(--kn-display);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--flt-color-textDim);
+      &::-webkit-details-marker {
+        display: none;
+      }
+      &::before {
+        content: "";
+        width: 0;
+        height: 0;
+        border-left: 6px solid currentColor;
+        border-top: 4px solid transparent;
+        border-bottom: 4px solid transparent;
+      }
+    }
+    &[open] summary::before {
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-top: 6px solid currentColor;
+    }
+    ul {
+      margin: 4px 0 0;
+      padding-left: 18px;
+      font-size: 12.5px;
+      line-height: 1.35;
+      color: var(--flt-color-text);
+    }
+  }
+  .kn-follow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    height: 46px;
+    margin-top: 10px;
+    padding: 0;
+    border: 0;
+    border-radius: 14px;
+    background: var(--kn-pink-hi);
+    color: var(--kn-plum);
+    font: 400 24px var(--kn-display);
+    letter-spacing: 0.04em;
+    box-shadow:
+      inset 0 -5px 0 var(--kn-pink-lo),
+      0 0 12px rgba(255, 95, 162, 0.4);
+    cursor: pointer;
+    &:active {
+      transform: translateY(2px);
+    }
+    &.on {
+      background: var(--kn-mint);
+      box-shadow:
+        inset 0 -5px 0 #1fb58c,
+        0 0 12px rgba(92, 242, 201, 0.4);
+    }
+  }
+  .kn-handle {
+    display: none;
+  }
+
+  /* ---------- the arcade (BuildBar): bottom centre ---------- */
+  .kn-bottom {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: var(--kn-ticker-h);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 0 10px 16px;
+    pointer-events: none;
+  }
+  .kn-buildwrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    max-width: 100%;
+  }
+  .kn-tip {
+    pointer-events: auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2px 8px;
+    max-width: min(760px, 100%);
+    padding: 7px 16px 8px;
+    border-radius: 12px;
+    background: var(--kn-screen);
+    box-shadow: 0 0 0 3px var(--kn-plastic);
+    font-size: 13.5px;
+    line-height: 1.3;
+    text-align: center;
+    b {
+      font: 400 18px var(--kn-display);
+      color: var(--kn-lemon);
+    }
+    small {
+      font-size: 12px;
+      color: var(--flt-color-textDim);
+    }
+  }
+  .kn-tray {
+    display: flex;
+    gap: 10px;
+    max-width: 100%;
+    padding: 16px 16px 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+  .kn-ab {
+    --c: var(--kn-plastic);
+    --cd: var(--kn-lo);
+    flex: none;
+    width: 82px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+    &:disabled {
+      cursor: not-allowed;
+    }
+    &:focus-visible {
+      outline: none;
+      .kn-btnr {
+        outline: 3px solid var(--kn-cyan);
+        outline-offset: 4px;
+      }
+    }
+    &.poor {
+      opacity: 0.55;
+      filter: saturate(0.3);
+    }
+    &:hover:not(:disabled) .kn-btnr {
+      transform: translateY(-2px);
+    }
+    &.on .kn-btnr {
+      transform: translateY(3px);
+      box-shadow:
+        0 2px 0 var(--cd),
+        0 0 0 4px #fff,
+        0 0 14px var(--c);
+    }
+  }
+  .kn-btnr {
+    position: relative;
+    width: 58px;
+    height: 58px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 31% 26%, rgba(255, 255, 255, 0.8) 0 9%, transparent 10%),
+      var(--c);
+    box-shadow:
+      0 5px 0 var(--cd),
+      0 8px 0 rgba(42, 23, 64, 0.35);
+    transition: transform var(--flt-motion-fast);
+  }
+  .kn-bicon {
+    width: 30px;
+    height: 30px;
+    filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.25));
+  }
+  .kn-k {
+    position: absolute;
+    top: -7px;
+    right: -7px;
+    width: 21px;
+    height: 21px;
+    display: grid;
+    place-items: center;
+    border-radius: 6px;
+    background: var(--kn-plum);
+    color: var(--kn-lemon);
+    font: 400 16px/1 var(--kn-num);
+  }
+  .kn-lcd {
+    width: 82px;
+    padding: 3px 2px 4px;
+    border-radius: 6px;
+    background: var(--kn-screen);
+    text-align: center;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    b {
+      display: block;
+      padding: 0 3px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 900;
+      font-size: 11.5px;
+      line-height: 1.3;
+      color: #fff;
+    }
+    span {
+      font: 400 17px/1.05 var(--kn-num);
+      color: var(--kn-mint);
+      &.free {
+        color: var(--kn-lemon);
+      }
+    }
+  }
+
+  /* ---------- toasts: the star that pops up ---------- */
+  .kn-toasts-host {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(var(--kn-ticker-h) + var(--kn-tray-h) + 70px);
+    display: flex;
+    justify-content: center;
+    padding: 0 12px;
+    pointer-events: none;
+    .toasts {
+      position: static;
+      top: auto;
+      left: auto;
+      width: auto;
+      max-width: 100%;
+      transform: none;
+      pointer-events: none;
+    }
+  }
+  .kn-toast {
+    display: block;
+    max-width: min(430px, calc(100vw - 32px));
+    padding: 10px 22px 12px 18px;
+    border: 0;
+    border-radius: 14px;
+    background: var(--kn-lemon);
+    color: var(--kn-plum);
+    text-align: left;
+    font-family: inherit;
+    transform: rotate(-2deg);
+    box-shadow:
+      inset 0 -4px 0 var(--kn-lemon-lo),
+      0 0 0 4px #fff,
+      0 0 18px rgba(255, 228, 92, 0.55);
+    animation: karaoke-night-pop 0.45s cubic-bezier(0.3, 1.6, 0.5, 1);
+    pointer-events: auto;
+    cursor: pointer;
+    &.bad {
+      background: var(--flt-color-bad);
+      box-shadow:
+        inset 0 -4px 0 #c2455a,
+        0 0 0 4px #fff,
+        0 0 18px rgba(255, 128, 150, 0.5);
+    }
+    &.joke {
+      background: var(--kn-plastic);
+      box-shadow:
+        inset 0 -4px 0 var(--kn-lo),
+        0 0 0 4px #fff,
+        0 0 18px rgba(185, 164, 255, 0.5);
+    }
+    &.neutral {
+      background: var(--kn-cyan);
+      box-shadow:
+        inset 0 -4px 0 #1f9fc2,
+        0 0 0 4px #fff,
+        0 0 18px rgba(79, 227, 255, 0.5);
+    }
+    &.hint {
+      background: #fff;
+      cursor: default;
+      transform: rotate(0);
+      box-shadow:
+        inset 0 -4px 0 var(--kn-key-lo),
+        0 0 0 4px var(--kn-plastic);
+      animation:
+        karaoke-night-pop 0.45s cubic-bezier(0.3, 1.6, 0.5, 1),
+        karaoke-night-bob 2.4s ease-in-out 0.5s infinite;
+    }
+  }
+  .kn-toast-h {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font: 400 24px/1.15 var(--kn-display);
+    letter-spacing: 0.03em;
+  }
+  .kn-toast-t {
+    display: block;
+    margin-top: 2px;
+    font-weight: 900;
+    font-size: 13.5px;
+    line-height: 1.3;
+  }
+
+  /* ---------- AI News Karaoke: the sung tape along the bottom ---------- */
+  .kn-ticker {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: var(--kn-ticker-h);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 18px env(safe-area-inset-bottom);
+    background: var(--kn-screen);
+    box-shadow: 0 -3px 0 rgba(201, 184, 255, 0.35);
+    pointer-events: auto;
+  }
+  .kn-label {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 11px 5px;
+    border-radius: 6px;
+    background: var(--kn-lemon);
+    color: var(--kn-plum);
+    font: 400 18px var(--kn-display);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    box-shadow: 0 3px 0 var(--kn-lemon-lo);
+  }
+  .kn-stage {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+  }
+  .kn-line {
+    --sung: var(--kn-pink);
+    position: relative;
+    width: max-content;
+    margin: 0;
+    padding-top: 6px;
+    font-weight: 900;
+    font-size: var(--kn-fs, 21px);
+    line-height: 1.15;
+    white-space: nowrap;
+    color: rgba(255, 246, 251, 0.62);
+    animation: karaoke-night-line-in 0.3s ease-out;
+    &.tone-good {
+      --sung: var(--kn-mint);
+    }
+    &.tone-bad {
+      --sung: var(--flt-color-bad);
+    }
+    &.tone-joke {
+      --sung: var(--kn-lemon);
+    }
+    &.idle {
+      color: var(--flt-color-textDim);
+      animation: none;
+    }
+    &[data-wrap="1"] {
+      width: 100%;
+      white-space: normal;
+      line-height: 1.14;
+      padding-top: 10px;
+    }
+  }
+  .kn-w {
+    position: relative;
+    display: inline-block;
+  }
+  .kn-lit {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    transform: translateX(-100%);
+    pointer-events: none;
+    > span {
+      display: block;
+      white-space: nowrap;
+      transform: translateX(100%);
+      color: var(--sung);
+      text-shadow: 0 0 6px color-mix(in srgb, var(--sung) 45%, transparent);
+    }
+  }
+  /* The score at the end of the song. */
+  .kn-rate {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 10px;
+    padding: 0 8px 1px;
+    border-radius: 6px;
+    background: var(--sung);
+    color: var(--kn-plum);
+    font: 400 22px/1.15 var(--kn-num);
+    vertical-align: middle;
+    opacity: 0;
+    animation: karaoke-night-rate 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+  }
+  .kn-line[data-still] {
+    .kn-rate {
+      opacity: 1;
+      animation: none;
+    }
+    .kn-lit,
+    .kn-lit > span {
+      transform: none;
+    }
+    .kn-ball {
+      display: none;
+    }
+  }
+  .kn-ball {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+    will-change: transform;
+    i {
+      position: absolute;
+      left: -6px;
+      top: -12px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--kn-lemon);
+      box-shadow: 0 0 8px var(--kn-lemon);
+      transform-origin: 50% 100%;
+      will-change: transform;
+    }
+  }
+  .kn-next {
+    flex: 0 1 28%;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    overflow: hidden;
+    white-space: nowrap;
+    font-weight: 800;
+    font-size: 15px;
+    color: rgba(201, 184, 255, 0.75);
+  }
+  .kn-next-t {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ---------- thought bubbles ---------- */
+  .bubble.kn-bubble {
+    max-width: 240px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    color: var(--kn-plum);
+    font: 800 14.5px/1.25 var(--flt-font-ui);
+    text-align: left;
+    filter: drop-shadow(0 4px 0 rgba(42, 23, 64, 0.35));
+    &::after {
+      display: none;
+    }
+  }
+  .kn-bub-body {
+    padding: 9px 14px 10px;
+    background: #fff;
+    clip-path: polygon(
+      0 6px,
+      3px 6px,
+      3px 3px,
+      6px 3px,
+      6px 0,
+      calc(100% - 6px) 0,
+      calc(100% - 6px) 3px,
+      calc(100% - 3px) 3px,
+      calc(100% - 3px) 6px,
+      100% 6px,
+      100% calc(100% - 6px),
+      calc(100% - 3px) calc(100% - 6px),
+      calc(100% - 3px) calc(100% - 3px),
+      calc(100% - 6px) calc(100% - 3px),
+      calc(100% - 6px) 100%,
+      6px 100%,
+      6px calc(100% - 3px),
+      3px calc(100% - 3px),
+      3px calc(100% - 6px),
+      0 calc(100% - 6px)
+    );
+  }
+  .kn-bub-who {
+    display: block;
+    margin-bottom: 2px;
+    font: 400 15px var(--kn-display);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #6b4fd6;
+  }
+  .bubble-agent .kn-bub-who {
+    color: #0d6f80;
+  }
+  .kn-tail {
+    display: block;
+    width: 12px;
+    height: 12px;
+    margin: 0 auto;
+    background:
+      linear-gradient(#fff 0 0) 0 0 / 12px 4px no-repeat,
+      linear-gradient(#fff 0 0) 2px 4px / 8px 4px no-repeat,
+      linear-gradient(#fff 0 0) 4px 8px / 4px 4px no-repeat;
+  }
+
+  /* ---------- the cards: news, era, win / lose ---------- */
+  .kn-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    display: grid;
+    place-items: center;
+    padding: 12px;
+    background: rgba(23, 12, 39, 0.66);
+    pointer-events: auto;
+    animation: karaoke-night-fade 0.25s ease-out;
+  }
+  .kn-event {
+    --stripe: var(--kn-plastic);
+    width: min(560px, 100%);
+    max-height: 100%;
+    overflow-y: auto;
+    animation: karaoke-night-card-in 0.5s cubic-bezier(0.3, 1.5, 0.45, 1);
+    &.tone-bad {
+      --stripe: var(--flt-color-bad);
+    }
+    &.tone-joke {
+      --stripe: var(--kn-lemon);
+    }
+    &.tone-good,
+    &.kn-outcome.won {
+      --stripe: var(--kn-mint);
+    }
+    &.kn-outcome.lost {
+      --stripe: var(--flt-color-bad);
+    }
+    .kn-screen {
+      padding-bottom: 16px;
+    }
+  }
+  .kn-event-head {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 14px 14px 0 0;
+    background: var(--stripe);
+    color: var(--kn-plum);
+    font: 400 17px var(--kn-display);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .kn-stripe {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .kn-paused {
+    padding: 1px 9px 2px;
+    border-radius: 6px;
+    background: var(--kn-plum);
+    color: var(--kn-lemon);
+    font: 400 15px var(--kn-display);
+    white-space: nowrap;
+  }
+  .kn-event-title {
+    margin: 14px 18px 8px;
+    font: 400 32px/1.12 var(--kn-display);
+    letter-spacing: 0.02em;
+    color: var(--kn-lemon);
+    text-shadow: 0 0 8px rgba(255, 228, 92, 0.35);
+  }
+  .kn-event-body {
+    margin: 0 18px 14px;
+    font-size: 15.5px;
+    line-height: 1.4;
+    color: var(--flt-color-text);
+  }
+  .kn-paddles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 18px 14px;
+    padding: 0;
+    list-style: none;
+    li {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 3px 12px 3px 4px;
+      border-radius: 999px;
+      background: #2b1747;
+      font-size: 13px;
+      font-weight: 800;
+    }
+  }
+  .kn-paddle-n {
+    min-width: 26px;
+    height: 26px;
+    padding: 0 7px;
+    display: grid;
+    place-items: center;
+    border-radius: 13px;
+    background: var(--paddle, var(--kn-pink));
+    color: var(--kn-plum);
+    font: 400 18px/1 var(--kn-num);
+  }
+  .kn-choices {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    margin: 0 16px;
+  }
+  .kn-choice {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 8px 14px 8px 8px;
+    border: 0;
+    border-radius: 14px;
+    background: #2b1747;
+    color: var(--flt-color-text);
+    text-align: left;
+    box-shadow:
+      inset 0 0 0 2px rgba(185, 164, 255, 0.3),
+      0 4px 0 rgba(0, 0, 0, 0.35);
+    cursor: pointer;
+    transition: transform var(--flt-motion-fast);
+    &:hover {
+      background: var(--flt-color-panelAlt);
+      box-shadow:
+        inset 0 0 0 2px var(--c),
+        0 4px 0 rgba(0, 0, 0, 0.35);
+    }
+    &:active {
+      transform: translateY(3px);
+      box-shadow: inset 0 0 0 2px var(--c);
+    }
+  }
+  .kn-choice-key {
+    flex: none;
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--c);
+    color: var(--kn-plum);
+    box-shadow: 0 3px 0 rgba(0, 0, 0, 0.35);
+    font: 400 24px/1 var(--kn-num);
+  }
+  .kn-choice-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    b {
+      font-weight: 900;
+      font-size: 16.5px;
+      line-height: 1.15;
+    }
+    small {
+      font: 400 16px var(--kn-display);
+      letter-spacing: 0.02em;
+      color: var(--kn-mint);
+    }
+  }
+  .kn-encore {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 52px;
+    padding: 0 26px;
+    border: 0;
+    border-radius: 14px;
+    background: var(--kn-pink-hi);
+    color: var(--kn-plum);
+    font: 400 27px var(--kn-display);
+    letter-spacing: 0.04em;
+    box-shadow:
+      inset 0 -5px 0 var(--kn-pink-lo),
+      0 0 12px rgba(255, 95, 162, 0.4);
+    cursor: pointer;
+    &:active {
+      transform: translateY(2px);
+    }
+    &.plain {
+      background: var(--kn-key);
+      box-shadow: inset 0 -5px 0 var(--kn-key-lo);
+    }
+  }
+  .kn-chip {
+    min-width: 24px;
+    height: 24px;
+    padding: 0 4px;
+    border-radius: 6px;
+    background: var(--kn-plum);
+    color: var(--kn-lemon);
+    font: 400 17px/24px var(--kn-num);
+    text-align: center;
+  }
+  .kn-outcome-buttons {
+    display: flex;
+    gap: 10px;
+    margin: 0 16px;
+    .kn-encore {
+      flex: 1;
+    }
+  }
+  .kn-score-board {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin: 0 16px 12px;
+    div {
+      padding: 6px 10px 7px;
+      border-radius: 8px;
+      background: #2b1747;
+    }
+    dt {
+      font: 400 15px var(--kn-display);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--flt-color-textDim);
+    }
+    dd {
+      margin: 0;
+      font: 400 26px/1.1 var(--kn-num);
+      color: var(--kn-mint);
+    }
+    .bad dd {
+      color: var(--flt-color-bad);
+    }
+  }
+  /* The new-era card: stage lights up on a big number. */
+  .kn-era {
+    background: rgba(23, 12, 39, 0.84);
+    overflow: hidden;
+  }
+  .kn-beams {
+    position: absolute;
+    inset: -40%;
+    background: repeating-conic-gradient(from 0deg at 50% 50%, rgba(255, 95, 162, 0.1) 0 7deg, transparent 7deg 22deg);
+    animation: karaoke-night-spin 90s linear infinite;
+    pointer-events: none;
+  }
+  .kn-era-card {
+    position: relative;
+    width: min(520px, 100%);
+    max-height: 100%;
+    overflow-y: auto;
+    text-align: center;
+    animation: karaoke-night-card-in 0.6s cubic-bezier(0.3, 1.5, 0.45, 1);
+    .kn-screen {
+      padding: 16px 20px 20px;
+    }
+  }
+  .kn-era-kicker {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    font: 400 18px var(--kn-display);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--kn-lemon);
+  }
+  .kn-era-num {
+    font: 400 132px/0.95 var(--kn-num);
+    color: var(--kn-pink);
+    text-shadow: 0 0 14px rgba(255, 95, 162, 0.5);
+    animation: karaoke-night-slam 0.6s cubic-bezier(0.3, 1.5, 0.45, 1);
+  }
+  .kn-era-title {
+    margin: 4px 0 10px;
+    font: 400 41px/1.1 var(--kn-display);
+    letter-spacing: 0.02em;
+    color: var(--kn-lemon);
+    text-shadow: 0 0 8px rgba(255, 228, 92, 0.35);
+    span {
+      display: inline-block;
+      animation: karaoke-night-rise 0.45s cubic-bezier(0.3, 1.5, 0.45, 1) both;
+    }
+  }
+  .kn-era-line {
+    margin: 0 6px 12px;
+    font-weight: 800;
+    font-size: 16px;
+    line-height: 1.35;
+  }
+  .kn-era-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0 0 12px;
+    padding: 0;
+    list-style: none;
+    text-align: left;
+    li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: #2b1747;
+      font-weight: 800;
+      font-size: 14.5px;
+      line-height: 1.3;
+      .kn-glyph {
+        margin-top: 2px;
+        color: var(--kn-mint);
+      }
+    }
+  }
+  .kn-era-stars {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 14px;
+    span {
+      width: 26px;
+      height: 26px;
+      color: #3a2560;
+      &.on {
+        color: var(--kn-lemon);
+      }
+      .kn-glyph {
+        width: 100%;
+        height: 100%;
+      }
+    }
+  }
+
+  /* ---------- the base's own panels, dressed: a screen in a plastic bezel ---------- */
+  .panel {
+    border: 6px solid var(--kn-plastic);
+    border-top-color: var(--kn-hi);
+    border-bottom-color: var(--kn-lo);
+    border-radius: 22px;
+    background: var(--flt-color-panel);
+    color: var(--flt-color-text);
+    box-shadow:
+      inset 0 0 0 2px rgba(0, 0, 0, 0.35),
+      0 6px 0 rgba(23, 12, 39, 0.5);
+  }
+  .staff {
+    left: 16px;
+    bottom: calc(var(--kn-ticker-h) + var(--kn-tray-h) + 24px);
+  }
+  .kn-stack > .race-panel,
+  .kn-stack > .thoughts {
+    width: var(--kn-rail);
+  }
+  .thoughts-head,
+  .arena-head b,
+  .rd-label,
+  .staff-title {
+    font-family: var(--kn-display);
+    font-weight: 400;
+    letter-spacing: 0.04em;
+  }
+  .thoughts-head {
+    font-size: 18px;
+    color: var(--kn-lemon);
+  }
+  .staff-title {
+    font-size: 21px;
+    color: var(--kn-lemon);
+  }
+  .thought-row {
+    background: #2b1747;
+    color: var(--flt-color-text);
+  }
+  .thought-row.on {
+    border-color: var(--kn-pink);
+    background: #3b2159;
+  }
+  .thought-count {
+    font: 400 18px var(--kn-num);
+    color: var(--kn-plum);
+  }
+  .thoughts-icon,
+  .thoughts-icon i {
+    border-color: var(--kn-lemon);
+    background: none;
+  }
+  .thoughts-caret {
+    border-top-color: var(--kn-lemon);
+    opacity: 1;
+  }
+  .kind-researcher .thought-count {
+    background: var(--kn-plastic);
+  }
+  .kind-agent .thought-count {
+    background: var(--kn-cyan);
+  }
+  .kind-visitor .thought-count {
+    background: #ff9a5c;
+  }
+  .kind-protester .thought-count {
+    background: var(--flt-color-bad);
+  }
+  /* The R&D multiplier and the Frontier Arena read as the machine's high-score board. */
+  .rd {
+    --era: var(--kn-cyan);
+    &.era-2 {
+      --era: var(--kn-lemon);
+    }
+    &.era-3 {
+      --era: var(--kn-pink);
+    }
+    &.era-4 {
+      --era: #ff9a5c;
+    }
+    &::before {
+      display: none;
+    }
+  }
+  .rd-label {
+    opacity: 1;
+    font-size: 15px;
+    color: var(--flt-color-textDim);
+  }
+  .era-pill {
+    border: 0;
+    border-radius: 4px;
+    background: var(--era);
+    color: var(--kn-plum);
+    font: 400 15px var(--kn-display);
+    letter-spacing: 0.02em;
+    text-shadow: none;
+  }
+  .rd-big .odo {
+    font: 400 46px/1 var(--kn-num);
+    letter-spacing: 0;
+    color: var(--era);
+    -webkit-text-stroke: 0;
+    text-shadow: 0 0 10px color-mix(in srgb, var(--era) 45%, transparent);
+  }
+  .rd-sub,
+  .era-next {
+    opacity: 1;
+    font-size: 12.5px;
+    color: var(--flt-color-textDim);
+  }
+  .era-meter {
+    border-radius: 2px;
+    background: #2d1a48;
+  }
+  .drop-banner {
+    background: var(--flt-color-bad);
+    color: var(--kn-plum);
+  }
+  .arena-head b {
+    font-size: 19px;
+    color: var(--kn-lemon);
+  }
+  .arena-head span {
+    opacity: 1;
+    font-size: 12px;
+    color: var(--flt-color-textDim);
+  }
+  .arena-row {
+    background: #2b1747;
+    &.you {
+      background: #4a2262;
+      box-shadow: inset 0 0 0 2px var(--kn-pink);
+    }
+  }
+  .ar-rank {
+    font: 400 18px var(--kn-num);
+    color: var(--kn-lemon);
+    opacity: 1;
+  }
+  .ar-dot {
+    border: 0;
+  }
+  .ar-score {
+    font: 400 18px var(--kn-num);
+    color: var(--kn-mint);
+    opacity: 1;
+  }
+  .ar-delta {
+    font: 400 15px var(--kn-num);
+    &.good {
+      color: var(--kn-mint);
+    }
+    &.bad {
+      color: var(--flt-color-bad);
+    }
+  }
+  .ar-open {
+    background: var(--kn-mint);
+    color: var(--kn-plum);
+  }
+  .nametag {
+    background: var(--kn-pink);
+    color: var(--kn-plum);
+    font: 400 16px var(--kn-display);
+    letter-spacing: 0.03em;
+  }
+  .toast.panel {
+    background: var(--kn-lemon);
+    color: var(--kn-plum);
+  }
+
+  /* The dialogs the base builds for the news room, the mixer and the skin picker: same plastic frame; the mixer and the
+     picker are screens, the news room stays a printed paper (it is the Frontier Times, in every skin). */
+  .news-backdrop,
+  .modal-backdrop {
+    background: rgba(23, 12, 39, 0.66);
+    backdrop-filter: none;
+  }
+  .news-dialog {
+    border: 6px solid var(--kn-plastic);
+    border-top-color: var(--kn-hi);
+    border-bottom-color: var(--kn-lo);
+    border-radius: 22px;
+    box-shadow: 0 6px 0 rgba(23, 12, 39, 0.5);
+    &:has(.mixer-box),
+    &:has(.skin-picker) {
+      background: var(--flt-color-panel);
+      color: var(--flt-color-text);
+      box-shadow:
+        inset 0 0 0 2px rgba(0, 0, 0, 0.35),
+        0 6px 0 rgba(23, 12, 39, 0.5);
+    }
+  }
+  .mixer-box,
+  .skin-picker {
+    .news-toolbar {
+      background: none;
+      border-bottom: 2px dashed rgba(201, 184, 255, 0.25);
+      color: var(--kn-lemon);
+      font: 400 21px var(--kn-display);
+      button {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        background: var(--flt-color-panelAlt);
+        color: var(--flt-color-text);
+        font-size: 20px;
+        line-height: 1;
+        &:hover {
+          background: #4b2a70;
+        }
+      }
+    }
+  }
+  .mixer-intro,
+  .mixer-box small {
+    color: var(--flt-color-textDim);
+  }
+  .mute-button {
+    min-height: 44px;
+    background: var(--kn-pink-hi);
+    color: var(--kn-plum);
+    font: 400 21px var(--kn-display);
+    letter-spacing: 0.04em;
+    box-shadow: inset 0 -4px 0 var(--kn-pink-lo);
+  }
+  .mixer-slider {
+    color: var(--flt-color-text);
+    input {
+      accent-color: var(--kn-pink);
+    }
+    output {
+      font: 400 18px var(--kn-num);
+      color: var(--kn-mint);
+    }
+  }
+  .sound-audition summary {
+    color: var(--flt-color-textDim);
+  }
+  .sound-audition button {
+    background: #2b1747;
+    color: var(--flt-color-text);
+    min-height: 36px;
+  }
+  .skin-card {
+    background: #2b1747;
+    color: var(--flt-color-text);
+    border-color: rgba(185, 164, 255, 0.35);
+    b {
+      font-family: var(--kn-display);
+      font-size: 19px;
+      font-weight: 400;
+      color: var(--kn-lemon);
+    }
+    small {
+      opacity: 1;
+      color: var(--flt-color-textDim);
+    }
+    &.on {
+      border-color: var(--kn-pink);
+      box-shadow: 0 0 0 2px var(--kn-pink);
+    }
+  }
+  .skin-motion {
+    color: var(--flt-color-text);
+  }
+  .skin-buttons .choice {
+    justify-content: center;
+    min-height: 48px;
+    border: 0;
+    background: var(--kn-key);
+    color: var(--kn-plum);
+    box-shadow: inset 0 -4px 0 var(--kn-key-lo);
+    b {
+      font: 400 22px var(--kn-display);
+    }
+    &.primary {
+      background: var(--kn-pink-hi);
+      box-shadow: inset 0 -4px 0 var(--kn-pink-lo);
+    }
+  }
+
+  /* ---------- motion ---------- */
+  &[data-motion="reduced"] {
+    .kn-line,
+    .kn-toast,
+    .kn-extra,
+    .kn-stamp,
+    .kn-event,
+    .kn-era-card,
+    .kn-era-num,
+    .kn-era-title span,
+    .kn-backdrop,
+    .kn-beams,
+    .kn-onair,
+    .kn-spinner,
+    .kn-bench.flashing .kn-bench-title::after,
+    .kn-arena.flinch {
+      animation: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .kn-line,
+    .kn-toast,
+    .kn-extra,
+    .kn-stamp,
+    .kn-event,
+    .kn-era-card,
+    .kn-era-num,
+    .kn-era-title span,
+    .kn-backdrop,
+    .kn-beams,
+    .kn-onair,
+    .kn-spinner,
+    .kn-bench.flashing .kn-bench-title::after,
+    .kn-arena.flinch {
+      animation: none;
+    }
+  }
+
+  /* ---------- touch: every target at least 44px ---------- */
+  @media (pointer: coarse) {
+    .kn-x {
+      width: 44px;
+      height: 44px;
+    }
+    .kn-queue-head,
+    .kn-bench-head,
+    .kn-voice-head,
+    .kn-liner summary {
+      min-height: 44px;
+    }
+    .kn-extra-btns button {
+      min-height: 44px;
+    }
+  }
+
+  /* ---------- narrow desktops ---------- */
+  @media (max-width: 1100px) {
+    .kn-next {
+      display: none;
+    }
+  }
+  @media (min-width: 1360px) {
+    /* Wide enough for the star to sit between the console and the deck, like a sticker on the machine. */
+    .kn-toasts-host {
+      top: 26px;
+      bottom: auto;
+      left: calc(16px + 700px + 12px);
+      right: calc(16px + var(--kn-rail) + 12px);
+      justify-content: center;
+      padding: 0;
+    }
+  }
+
+  /* ---------- Release Leapfrog: HIGH SCORES and the applause meter ---------- */
+  .kn-bench,
+  .kn-voice {
+    .kn-screen {
+      padding: 9px 10px 10px;
+    }
+  }
+  .kn-stack > .kn-bench {
+    width: var(--kn-wide);
+    max-width: 100%;
+  }
+  .kn-bench-head,
+  .kn-voice-head {
+    width: 100%;
+    min-height: 26px;
+    padding: 0;
+    border: 0;
+    background: none;
+    text-align: left;
+    color: var(--kn-lemon);
+    cursor: pointer;
+  }
+  .kn-bench-title,
+  .kn-voice-title {
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .kn-bench-sub {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: right;
+    color: var(--flt-color-textDim);
+  }
+  .kn-bench-wins {
+    display: none;
+  }
+  .kn-bench.flashing .kn-bench-title::after {
+    content: "";
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-left: 6px;
+    background: var(--kn-pink);
+    animation: karaoke-night-blink 0.9s steps(2, jump-none) infinite;
+  }
+  .kn-bench .bench-scroll {
+    padding: 4px 0 0;
+  }
+  .kn-bench .bench-table {
+    border-spacing: 0 4px;
+    font: 400 15px var(--kn-display);
+  }
+  .kn-bench .bench-table th,
+  .kn-bench .bench-table td {
+    padding: 4px 5px;
+    font-weight: 400;
+  }
+  .kn-bench .bench-row > * {
+    background: #2b1747;
+  }
+  .kn-bench .bench-lab {
+    min-width: 76px;
+    background: #2b1747;
+    letter-spacing: 0.03em;
+  }
+  .kn-bench .bench-dot {
+    border: 0;
+  }
+  .kn-bench .bench-col {
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    color: var(--flt-color-textDim);
+    opacity: 1;
+  }
+  .kn-bench .bench-col.new .bench-name {
+    color: var(--kn-mint);
+  }
+  .kn-bench .bench-col.saturated,
+  .kn-bench .bench-cell.saturated {
+    opacity: 0.6;
+  }
+  .kn-bench .bench-row.you > * {
+    background: #4a2262;
+  }
+  .kn-bench .bench-cell {
+    font-size: 17px;
+    font-family: var(--kn-num);
+  }
+  .kn-bench .bench-cell.sota .bench-score {
+    padding: 0 5px;
+    border-radius: 4px;
+    background: var(--kn-lemon);
+    color: var(--kn-plum);
+    box-shadow: none;
+  }
+  .kn-bench .bench-badge,
+  .kn-bench .bench-new {
+    background: var(--kn-pink);
+    color: var(--kn-plum);
+    font: 400 11px/1.3 var(--kn-display);
+  }
+  .kn-bench .bench-new {
+    background: var(--kn-mint);
+  }
+  .kn-bench .bench-stamp {
+    border-color: var(--kn-pink);
+    color: var(--kn-pink);
+    background: rgba(36, 19, 56, 0.85);
+    font: 400 13px/1.2 var(--kn-display);
+  }
+  .kn-bench .bench-score sup {
+    color: var(--kn-pink);
+  }
+  .kn-bench .bench-foot,
+  .kn-bench .bench-empty,
+  .kn-bench-drop {
+    margin: 4px 0 0;
+    padding: 0;
+    font-size: 12px;
+    line-height: 1.3;
+    opacity: 1;
+    color: var(--flt-color-textDim);
+  }
+  .kn-voice-you {
+    margin-left: auto;
+    color: var(--flt-color-textDim);
+    white-space: nowrap;
+    &.up {
+      color: var(--kn-mint);
+    }
+    &.down {
+      color: var(--flt-color-bad);
+    }
+    .kn-trend {
+      width: 0.6em;
+      height: 0.6em;
+    }
+  }
+  .kn-voice-bar {
+    display: flex;
+    gap: 2px;
+    height: 14px;
+    margin: 7px 0 5px;
+    padding: 2px;
+    border-radius: 3px;
+    background: #2d1a48;
+    i {
+      display: block;
+      min-width: 2px;
+      transition: width 0.6s ease-out;
+    }
+  }
+  .kn-voice.owned .kn-voice-bar {
+    box-shadow:
+      0 0 0 2px var(--kn-pink),
+      0 0 8px rgba(255, 95, 162, 0.5);
+  }
+  .kn-voice-line {
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.3;
+    color: var(--flt-color-textDim);
+  }
+  .kn-vg {
+    display: block;
+    width: 100%;
+    height: 70px;
+    margin-top: 8px;
+    border-radius: 6px;
+    background: var(--kn-screen);
+  }
+
+  /* The forced-response gauges and the launch livestream. */
+  .kn-gauges {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr 1fr;
+    gap: 8px;
+    margin: 0 16px 12px;
+  }
+  .kn-rg {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 7px 10px 8px;
+    border-radius: 8px;
+    background: #2b1747;
+    small {
+      font-size: 12px;
+      color: var(--flt-color-textDim);
+    }
+    .kn-pbar {
+      height: 12px;
+      margin-top: 4px;
+    }
+  }
+  .kn-rg-big {
+    font: 400 34px/1.05 var(--kn-num);
+  }
+  .kn-video {
+    margin: 12px 16px 0;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #0d0518;
+    box-shadow: 0 0 0 3px rgba(185, 164, 255, 0.35);
+  }
+  .kn-video-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 10px;
+    background: #2b1747;
+    font: 400 16px var(--kn-display);
+    letter-spacing: 0.04em;
+    color: var(--flt-color-textDim);
+  }
+  .kn-video-model {
+    margin-left: auto;
+  }
+  .kn-onair {
+    padding: 0 8px;
+    border-radius: 4px;
+    background: var(--kn-pink);
+    color: var(--kn-plum);
+    font-weight: 400;
+    animation: karaoke-night-blink 1.4s steps(2, jump-none) infinite;
+  }
+  .kn-video-stage {
+    display: grid;
+    grid-template-columns: 1fr 42%;
+    min-height: 150px;
+  }
+  .kn-video-screen {
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: 10px;
+    padding: 12px;
+    background: repeating-linear-gradient(0deg, #1d0f33 0 3px, #22123b 3px 6px);
+  }
+  .kn-scene {
+    width: 96px;
+    height: auto;
+    image-rendering: pixelated;
+  }
+  .kn-spinner {
+    width: 56px;
+    animation: karaoke-night-tick 1s steps(8) infinite;
+  }
+  .kn-caption {
+    padding: 5px 12px 6px;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.45);
+    box-shadow: 0 4px 0 #000;
+    font: 400 22px/1.15 var(--kn-display);
+    letter-spacing: 0.02em;
+    text-align: center;
+    color: var(--kn-lemon);
+  }
+  .kn-requests {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 3px;
+    margin: 0;
+    padding: 8px 10px;
+    overflow: hidden;
+    list-style: none;
+    background: var(--kn-screen);
+    font-size: 12.5px;
+    line-height: 1.3;
+    b {
+      color: var(--kn-cyan);
+    }
+  }
+  .kn-stream .kn-event-title {
+    margin-top: 12px;
+  }
+
+  /* ---------- short windows (a 13-inch laptop): the panels give up their second lines ---------- */
+  @media (min-width: 641px) and (max-height: 820px) {
+    .kn-console .kn-screen {
+      padding: 8px 16px 9px;
+    }
+    .kn-score {
+      font-size: 58px;
+    }
+    .kn-vu {
+      height: 28px;
+    }
+    .kn-song {
+      margin: 2px 0 6px;
+      font-size: 20px;
+    }
+    .kn-q-text small,
+    .kn-status,
+    .kn-liner {
+      display: none;
+    }
+    .kn-q {
+      gap: 7px;
+    }
+    .kn-lyric {
+      margin-top: 8px;
+    }
+    .kn-follow {
+      margin-top: 8px;
+    }
+  }
+
+  /* ---------- tablets and small laptops ---------- */
+  @media (max-width: 1180px) {
+    .kn-stack > .kn-bench {
+      width: var(--kn-rail);
+    }
+  }
+  @media (max-width: 960px) {
+    .kn-v {
+      font-size: 26px;
+    }
+    .kn-score {
+      font-size: 56px;
+    }
+    .kn-lab-name {
+      font-size: 20px;
+    }
+  }
+
+  /* ---------- phones: one row of console, one strip of deck, the song, and the campus ---------- */
+  @media (max-width: 640px) {
+    --kn-ticker-h: 64px;
+    /* The arcade (about 110px) plus the gap the AI News Karaoke tab sits in. */
+    --kn-tray-h: 132px;
+    .kn-hud {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto auto;
+      grid-auto-rows: min-content;
+      align-content: start;
+      gap: 6px;
+      padding: max(8px, env(safe-area-inset-top)) 8px 0;
+    }
+    .kn-left,
+    .kn-under,
+    .kn-right,
+    .kn-stack {
+      display: contents;
+    }
+    .kn-console {
+      order: 1;
+      grid-column: 1 / -1;
+    }
+    .kn-deck {
+      order: 2;
+      grid-column: 1 / -1;
+    }
+    .kn-training {
+      order: 3;
+      grid-column: 1;
+    }
+    .kn-queue {
+      order: 4;
+      grid-column: 2;
+    }
+    .kn-bench {
+      order: 5;
+      grid-column: 3;
+    }
+    .kn-stack > .thoughts {
+      order: 6;
+      grid-column: 4;
+    }
+    .kn-extra {
+      order: 7;
+      grid-column: 1 / -1;
+      align-self: auto;
+    }
+    .kn-plastic {
+      padding: 4px;
+      border-radius: 16px;
+      box-shadow:
+        inset 0 2px 0 var(--kn-hi),
+        inset 0 -4px 0 var(--kn-lo),
+        0 4px 0 rgba(23, 12, 39, 0.5);
+    }
+    .kn-screen {
+      border-radius: 11px;
+    }
+
+    /* The console: Vibes, cash and runway in one row; the caret opens the rest. */
+    .kn-console .kn-screen {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 6px 4px 10px;
+    }
+    .kn-console.compact:not(.expanded) {
+      .kn-lab,
+      .kn-cap,
+      .kn-hype,
+      .kn-arena,
+      .kn-rd,
+      .kn-l {
+        display: none;
+      }
+    }
+    .kn-console.compact .kn-vibes {
+      padding-right: 0;
+      border-right: 0;
+    }
+    .kn-console.compact .kn-vibes-btn {
+      min-width: 0;
+      padding: 0 4px;
+    }
+    .kn-console.compact .kn-score {
+      font-size: 42px;
+    }
+    .kn-console.compact .kn-vibes-label {
+      margin-top: 1px;
+      font-size: 11px;
+    }
+    .kn-console.compact .kn-stats {
+      flex: 1;
+      display: flex;
+      gap: 12px;
+      min-width: 0;
+    }
+    .kn-console.compact .kn-st {
+      flex: 1;
+      min-width: 0;
+    }
+    .kn-console.compact .kn-v {
+      font-size: 24px;
+    }
+    .kn-console.compact .kn-s {
+      font-size: 11px;
+    }
+    .kn-more {
+      flex: none;
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border: 0;
+      border-radius: 10px;
+      background: var(--flt-color-panelAlt);
+      color: var(--kn-lemon);
+      cursor: pointer;
+      .kn-trend {
+        width: 14px;
+        height: 14px;
+      }
+    }
+    .kn-console.compact.expanded .kn-screen {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 4px 10px;
+      padding: 6px 10px 6px;
+    }
+    .kn-console.compact.expanded .kn-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px 8px;
+    }
+    .kn-console.compact.expanded .kn-l {
+      font-size: 11px;
+    }
+    .kn-console.compact.expanded .kn-more {
+      grid-column: 1 / -1;
+      width: 100%;
+      height: 32px;
+    }
+    .kn-lab-name {
+      font-size: 18px;
+    }
+    .kn-scorecard {
+      left: -4px;
+      width: min(340px, calc(100vw - 24px));
+    }
+
+    /* The deck: tape keys, record, News Room and a "more" key in one strip. */
+    .kn-deck {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 4px 6px 6px;
+    }
+    .kn-deck-row {
+      gap: 4px;
+    }
+    .kn-speed {
+      gap: 4px;
+    }
+    .kn-key {
+      width: 44px;
+      height: 44px;
+    }
+    .kn-key.news {
+      width: 44px;
+      padding: 0;
+    }
+    .kn-key-label {
+      display: none;
+    }
+    .kn-key.fold {
+      display: grid;
+    }
+    .kn-tools {
+      position: relative;
+      gap: 4px;
+    }
+    .kn-tools-more {
+      display: none;
+      position: absolute;
+      top: calc(100% + 12px);
+      right: 0;
+      z-index: 8;
+      padding: 6px;
+      border-radius: 14px;
+      background: var(--kn-plastic);
+      box-shadow:
+        inset 0 3px 0 var(--kn-hi),
+        inset 0 -4px 0 var(--kn-lo),
+        0 5px 0 rgba(23, 12, 39, 0.5);
+    }
+    .kn-tools.open .kn-tools-more {
+      display: flex;
+    }
+
+    /* NOW TRAINING: just the song and its bar. */
+    .kn-training {
+      width: auto;
+      .kn-screen {
+        padding: 5px 10px 6px;
+      }
+      .kn-np,
+      .kn-time {
+        display: none;
+      }
+      .kn-song {
+        margin: 0 0 4px;
+        font-size: 16px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .kn-pbar {
+        height: 10px;
+        padding: 1px 2px;
+      }
+    }
+    .kn-stamp {
+      left: auto;
+      right: 8px;
+      top: -12px;
+      font-size: 13px;
+      transform: rotate(4deg);
+    }
+
+    /* UP NEXT, HIGH SCORES and Requests fold to a badge each; open, they cover the middle of the map. */
+    .kn-queue,
+    .kn-bench {
+      width: auto;
+      .kn-screen {
+        padding: 2px 6px;
+      }
+      &.open {
+        position: fixed;
+        z-index: 6;
+        left: 8px;
+        right: 8px;
+        top: 214px;
+        width: auto;
+        max-height: 56vh;
+        overflow-y: auto;
+      }
+    }
+    .kn-queue:not(.open),
+    .kn-bench:not(.open) {
+      .kn-screen {
+        padding: 0;
+      }
+      .kn-np {
+        position: relative;
+        width: 44px;
+        height: 44px;
+        min-height: 44px;
+        justify-content: center;
+        gap: 0;
+      }
+      .kn-queue-title,
+      .kn-queue-days,
+      .kn-bench-title,
+      .kn-bench-sub,
+      .kn-np .kn-trend {
+        display: none;
+      }
+      .kn-glyph {
+        width: 20px;
+        height: 20px;
+      }
+    }
+    .kn-queue:not(.open) .kn-queue-count,
+    .kn-bench:not(.open) .kn-bench-wins,
+    .thoughts.compact:not(.open) .icon-badge {
+      display: block;
+      position: absolute;
+      top: -9px;
+      right: -4px;
+      min-width: 21px;
+      padding: 0 5px;
+      border-radius: 11px;
+      background: var(--kn-pink);
+      color: var(--kn-plum);
+      box-shadow: 0 0 0 2px var(--kn-screen);
+      font: 400 16px/21px var(--kn-num);
+      text-align: center;
+    }
+    .kn-queue.open .kn-queue-days .long,
+    .kn-bench.open .kn-bench-sub {
+      display: none;
+    }
+    .kn-queue.open .kn-queue-days .short {
+      display: inline;
+    }
+    .kn-bench.open .kn-bench-title {
+      flex: 1;
+    }
+    .kn-stack > .thoughts {
+      width: auto;
+      min-width: 0;
+      align-self: stretch;
+      border-width: 4px;
+      border-radius: 16px;
+      &:not(.open) {
+        overflow: visible;
+        .thoughts-title,
+        .thoughts-caret {
+          display: none;
+        }
+        .thoughts-head {
+          position: relative;
+          width: 44px;
+          height: 100%;
+          min-height: 44px;
+          padding: 0;
+          justify-content: center;
+        }
+      }
+      &.open {
+        position: fixed;
+        z-index: 6;
+        left: 8px;
+        right: 8px;
+        top: 214px;
+        width: auto;
+        max-height: 56vh;
+      }
+    }
+    .thoughts-list {
+      max-height: calc(56vh - 56px);
+    }
+    .kn-extra {
+      width: auto;
+      transform: none;
+      max-width: none;
+    }
+    .kn-stack > .kn-bench,
+    .kn-stack > .race-panel {
+      width: auto;
+      max-width: none;
+    }
+
+    /* The contestant card is a short bottom sheet: swipe up for the rest, down to fold it. */
+    .kn-card.sheet {
+      position: fixed;
+      z-index: 8;
+      left: 8px;
+      right: 8px;
+      bottom: calc(var(--kn-ticker-h) + var(--kn-tray-h) + 8px);
+      width: auto;
+      &.more {
+        max-height: 62vh;
+        overflow-y: auto;
+      }
+      .kn-screen {
+        padding: 6px 12px 10px;
+      }
+      .kn-ava {
+        width: 44px;
+        height: 44px;
+        box-shadow: 0 0 0 2px var(--kn-pink);
+      }
+      .kn-name {
+        font-size: 17px;
+      }
+      .kn-role {
+        margin-top: 2px;
+        font-size: 12px;
+      }
+      .kn-who {
+        margin-top: 2px;
+      }
+      .kn-lyric {
+        margin-top: 8px;
+        font-size: 14px;
+      }
+      .kn-meter {
+        margin-top: 6px;
+      }
+    }
+    .kn-card.sheet:not(.more) .kn-tags {
+      display: none;
+    }
+    .kn-handle {
+      display: grid;
+      place-items: center;
+      height: 16px;
+      margin-bottom: 2px;
+      touch-action: none;
+      cursor: grab;
+      i {
+        width: 38px;
+        height: 5px;
+        border-radius: 3px;
+        background: rgba(42, 23, 64, 0.45);
+      }
+    }
+
+    /* The arcade: smaller buttons, the LCDs keep the name and the price. */
+    .kn-bottom {
+      padding: 0 6px 22px;
+      gap: 6px;
+    }
+    .kn-tip {
+      padding: 5px 12px 6px;
+      font-size: 12px;
+    }
+    .kn-tray {
+      gap: 6px;
+      padding: 11px 10px 6px;
+    }
+    .kn-ab {
+      width: 68px;
+      gap: 5px;
+    }
+    .kn-btnr {
+      width: 42px;
+      height: 42px;
+    }
+    .kn-bicon {
+      width: 24px;
+      height: 24px;
+    }
+    .kn-k {
+      top: -6px;
+      right: -6px;
+      width: 19px;
+      height: 19px;
+      font-size: 14px;
+    }
+    .kn-lcd {
+      width: 68px;
+      padding: 2px 2px 3px;
+      b {
+        font-size: 10.5px;
+        line-height: 1.2;
+      }
+      span {
+        font-size: 15px;
+      }
+    }
+    .staff {
+      left: 8px;
+      bottom: calc(var(--kn-ticker-h) + var(--kn-tray-h) + 12px);
+    }
+    .race-panel {
+      bottom: calc(var(--kn-ticker-h) + var(--kn-tray-h) + 12px);
+    }
+
+    /* Toasts float just over the arcade. */
+    .kn-toasts-host {
+      bottom: calc(var(--kn-ticker-h) + var(--kn-tray-h) + 12px);
+      z-index: 9;
+    }
+    /* The standing hint steps aside while the contestant sheet is up. */
+    .kn-hud:has(.kn-card.sheet) .kn-toast.hint {
+      display: none;
+    }
+    .kn-toast {
+      max-width: calc(100vw - 24px);
+      padding: 8px 16px 10px 14px;
+    }
+    .kn-toast-h {
+      font-size: 17px;
+    }
+    .kn-toast.hint {
+      padding: 6px 14px 8px;
+      .kn-toast-h {
+        display: none;
+      }
+    }
+    .kn-toast-t {
+      font-size: 12.5px;
+    }
+
+    /* AI News Karaoke: two lines of lyrics, the label stuck on the top edge. */
+    .kn-ticker {
+      padding: 4px 10px env(safe-area-inset-bottom);
+    }
+    .kn-label {
+      position: absolute;
+      right: 12px;
+      bottom: 100%;
+      padding: 3px 10px 2px;
+      border-radius: 8px 8px 0 0;
+      font-size: 12px;
+      box-shadow: none;
+    }
+    .kn-line {
+      padding-top: 12px;
+    }
+    .kn-ball i {
+      left: -5px;
+      top: -10px;
+      width: 10px;
+      height: 10px;
+    }
+
+    /* The cards. */
+    .kn-backdrop {
+      padding: 8px;
+    }
+    .kn-event-title {
+      margin: 10px 12px 6px;
+      font-size: 21px;
+    }
+    .kn-event-body {
+      margin: 0 12px 10px;
+      font-size: 14px;
+    }
+    .kn-choices,
+    .kn-outcome-buttons,
+    .kn-score-board,
+    .kn-paddles {
+      margin-left: 10px;
+      margin-right: 10px;
+    }
+    .kn-paddles {
+      margin-bottom: 10px;
+    }
+    .kn-choice-text b {
+      font-size: 15px;
+    }
+    .kn-score-board {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .kn-outcome-buttons {
+      flex-direction: column-reverse;
+    }
+    .kn-gauges {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin: 0 10px 10px;
+    }
+    .kn-rg.wide {
+      grid-column: 1 / -1;
+    }
+    .kn-video {
+      margin: 10px 10px 0;
+    }
+    .kn-video-stage {
+      grid-template-columns: 1fr;
+      min-height: 0;
+    }
+    .kn-requests {
+      display: none;
+    }
+    .kn-caption {
+      font-size: 19px;
+    }
+    .kn-era-card .kn-screen {
+      padding: 12px 12px 14px;
+    }
+    .kn-era-num {
+      font-size: 92px;
+    }
+    .kn-era-title {
+      font-size: 26px;
+    }
+    .kn-era-line {
+      font-size: 14.5px;
+    }
+    .kn-era-list li {
+      font-size: 13.5px;
+    }
+  }
+}
+
+@keyframes karaoke-night-pop {
+  from {
+    scale: 0.5;
+    opacity: 0;
+  }
+}
+@keyframes karaoke-night-bob {
+  50% {
+    translate: 0 -3px;
+  }
+}
+@keyframes karaoke-night-shake {
+  25% {
+    translate: -3px 0;
+  }
+  75% {
+    translate: 3px 0;
+  }
+}
+@keyframes karaoke-night-rate {
+  from {
+    opacity: 0;
+    scale: 0.4;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+@keyframes karaoke-night-blink {
+  50% {
+    opacity: 0.2;
+  }
+}
+@keyframes karaoke-night-tick {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes karaoke-night-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes karaoke-night-line-in {
+  from {
+    opacity: 0;
+    translate: 0 6px;
+  }
+}
+@keyframes karaoke-night-card-in {
+  0% {
+    transform: translateY(40px) scale(0.7);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(-6px) scale(1.03);
+    opacity: 1;
+  }
+  100% {
+    transform: none;
+  }
+}
+@keyframes karaoke-night-slam {
+  from {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+@keyframes karaoke-night-rise {
+  from {
+    transform: translateY(14px);
+    opacity: 0;
+  }
+}
+@keyframes karaoke-night-spin {
+  to {
+    transform: rotate(360deg);
   }
 }
