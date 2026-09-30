@@ -3,7 +3,7 @@ import { it } from "@effect/vitest";
 import { Effect, Layer } from "effect";
 import { createEffectActor, waitFor } from "@xstate/effect";
 import { describe, expect } from "vitest";
-import { createInitialState } from "../sim/state";
+import { createTestCampus as createInitialState } from "../sim/testkit";
 import { enableLeapfrog } from "../sim/race/leapfrog/driver";
 import { runHeadless } from "../sim/race/leapfrog/headless";
 import { leapfrogView } from "../sim/race/leapfrog/view";
@@ -69,7 +69,7 @@ describe("classifyToast", () => {
       }
     }
     expect(seen).toBeGreaterThan(60);
-  });
+  }, 15_000); // Three complete years of sim; individual tick budgets are checked separately.
 });
 
 describe("gateToasts", () => {

@@ -41,6 +41,16 @@ describe("the coach", () => {
     expect(coachOf(s)?.id).toBe("runway");
     delete loaded.coach; expect(coachOf(loaded)).toBeNull();
   });
+  it("replay starts at Start after a built campus, without holding time", () => {
+    const s = createInitialState(1);
+    applyNow(s, [{ type: "buildPanelOpened" }, ...paths, { type: "placeBuilding", kind: "hall", x: 12, z: 16 }]);
+    applyNow(s, [{ type: "coachReplay" }]);
+    expect(coachOf(s)?.id).toBe("start");
+    const before = s.tick; tick(s);
+    expect(s.tick).toBe(before + 1); expect(coachOf(s)?.id).toBe("start");
+    applyNow(s, [{ type: "buildPanelOpened" }]);
+    expect(coachOf(s)?.id).toBe("training");
+  });
   it("replays all machines and RNG exactly after a save/load", () => {
     const s = createInitialState(3);
     applyNow(s, [...paths, { type: "placeBuilding", kind: "hall", x: 12, z: 16 }]);

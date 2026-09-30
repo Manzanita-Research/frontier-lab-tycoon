@@ -1,8 +1,9 @@
+import { BUILDINGS } from "../content/buildings";
 import { COACH, type CoachLine, type CoachMark } from "../content/coach";
 import { canPlace } from "./commands";
 import { coachMachine } from "./machines/coach";
 import { initialStored, step } from "./machines/run";
-import { getReach, isReachable } from "./pathfind";
+import { entrances, getReach, isReachable } from "./pathfind";
 import type { GameState } from "./types";
 
 export function coachOf(s: GameState): CoachMark | null {
@@ -18,8 +19,11 @@ export function coachOf(s: GameState): CoachMark | null {
   } else if (line.id === "hall" || line.id === "gateway") {
     const building = line.id === "hall" ? "hall" : "gateway";
     const preferred: [number, number] = building === "hall" ? [12, 16] : [12, 20];
-    let at = canPlace(s, building, ...preferred).ok ? preferred : null;
-    for (let z = 3; !at && z <= 21; z++) for (let x = 2; !at && x <= 20; x++) if (canPlace(s, building, x, z).ok) at = [x, z];
+    const [w, d] = BUILDINGS[building].size;
+    const connected = (x: number, z: number) => canPlace(s, building, x, z).ok &&
+      entrances(s, { x, z, w, d }).some((e) => getReach(s).tiles[e.z * s.grid.w + e.x]);
+    let at = connected(...preferred) ? preferred : null;
+    for (let z = 3; !at && z <= 21; z++) for (let x = 2; !at && x <= 20; x++) if (connected(x, z)) at = [x, z];
     if (at) mark.suggest = { kind: "building", building, x: at[0], z: at[1] };
   }
   return mark;
@@ -30,7 +34,7 @@ export function updateCoach(s: GameState, ticked = false) {
     const line: CoachLine | undefined = COACH[s.coach.context.index];
     if (!line) break;
     const reach: ReturnType<typeof getReach>["tiles"] | null = line.trigger === "pathConnected" ? getReach(s).tiles : null;
-    const matches: boolean = line.trigger === "buildPanelOpened" ? s.flags.coachBuildOpened !== undefined || s.flags.firstPath !== undefined
+    const matches: boolean = line.trigger === "buildPanelOpened" ? s.flags.coachBuildOpened !== undefined || (s.flags.coachReplayAt === undefined && s.flags.firstPath !== undefined)
       : line.trigger === "pathConnected" ? s.flags.firstPath !== undefined && reach!.filter(Boolean).length >= 8
       : line.trigger === "hallBuilt" ? s.buildings.some((b) => b.kind === "hall" && isReachable(s, b))
       : line.trigger === "released" ? s.models.length > 0
@@ -43,7 +47,7 @@ export function updateCoach(s: GameState, ticked = false) {
   }
 }
 export function coachCommand(s: GameState, type: "coachSkip" | "coachReplay" | "coachClick") {
-  if (type === "coachReplay") { s.coach = initialStored(coachMachine, undefined); delete s.flags.coachBuildOpened; return; }
+  if (type === "coachReplay") { s.coach = initialStored(coachMachine, undefined); delete s.flags.coachBuildOpened; s.flags.coachReplayAt = s.tick; return; }
   if (!s.coach) return;
   s.coach = type === "coachSkip" ? step(coachMachine, s.coach, { type: "SKIP" }).stored
     : step(coachMachine, s.coach, { type: "CLICK", timer: COACH[s.coach.context.index]?.waitFor === "timer", last: s.coach.context.index === COACH.length - 1 }).stored;
