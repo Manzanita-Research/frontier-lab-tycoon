@@ -1,0 +1,23 @@
+{
+  "apiVersion": 1,
+  "id": "drama-fixture-price-war",
+  "name": "Daily Drama: The Price War",
+  "version": "1.0.0",
+  "description": "A known-good Drama pack for the linter's tests.",
+  "content": {
+    "headlines": {
+      "add": [
+        { "id": "fixture-price-1", "text": "Open-ish AI cuts API prices 80%; Macrohard cuts theirs 81% out of spite", "tone": "joke" },
+        { "id": "fixture-price-2", "text": "Anthropomorphic declines to join price war, publishes 40-page essay on why", "tone": "joke" },
+        { "id": "fixture-price-3", "text": "Tokens now cheaper than the kombucha used to generate them", "tone": "joke" },
+        { "id": "fixture-price-4", "text": "Gronkwell Dynamics prices its model at negative dollars; investors thrilled", "tone": "joke" }
+      ]
+    },
+    "thoughts": {
+      "add": [
+        { "id": "fixture-price-t1", "kind": "researcher", "when": "always", "text": "If we halve the price again we can lose money twice as fast." },
+        { "id": "fixture-price-t2", "kind": "visitor", "when": "highHype", "text": "I came for the free tokens. I'm staying for the free snacks." }
+      ]
+    }
+  }
+}
