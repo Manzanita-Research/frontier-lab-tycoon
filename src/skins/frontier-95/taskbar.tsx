@@ -201,7 +201,7 @@ export function BuildBar({ items, tip, teasers = [], actions }: SlotPropsMap["Bu
           <b>{tip.name}</b> {tip.text} {tip.upkeepText && <small>{tip.upkeepText}</small>}
         </div>
       )}
-      <button type="button" {...coach.attrs("start", !open && (coach.target?.startsWith("build:") ?? false))} className={`f95-start ${open ? "on" : ""}`} data-testid="start-button" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}>
+      <button type="button" {...coach.attrs("start", !open && coach.intoPanel(items))} className={`f95-start ${open ? "on" : ""}`} data-testid="start-button" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}>
         <Flag />
         <span>{t("build.menuTitle")}</span>
       </button>

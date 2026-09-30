@@ -81,10 +81,20 @@ function Spotlight({ rect }: { rect: Rect }) {
   );
 }
 
+/**
+ * What to light. A tool in the build panel is lit until it is in hand; then the next thing to do is on the map, so the ghost tiles are
+ * (and if the game shows none, nothing is: the map is not dimmed while somebody is drawing on it).
+ */
+function spotlightTarget(vm: HudVM): string | null {
+  const target = vm.coach?.target ?? null;
+  if (target?.startsWith("build:") && vm.buildItems.some((it) => it.selected && `build:${it.kind}` === target)) return "map:suggest";
+  return target;
+}
+
 export function CoachLayer({ vm, actions }: { vm: HudVM; actions: HudActions }) {
   const { Coach } = useSkin().slots;
   const coach = vm.coach;
-  const { rect, panel } = useSpotlight(coach?.target ?? null);
+  const { rect, panel } = useSpotlight(spotlightTarget(vm));
   if (!coach) return null;
   return (
     <>

@@ -170,7 +170,7 @@ export function BuildBar({ items, tip, teasers = [], layout, actions }: SlotProp
   };
   const held = items.find((it) => it.selected && it.kind !== "staff");
   // While the coach points at a stamp and the tray is shut, the tab stands in for it.
-  const inside = coach.target?.startsWith("build:") ?? false;
+  const inside = coach.intoPanel(items);
   return (
     <div className={`dd-stamps ${layout.compact ? "compact" : ""}`}>
       {tip && (

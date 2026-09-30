@@ -52,7 +52,7 @@ export function BuildBar({ items, tip, teasers = [], actions }: SlotPropsMap["Bu
 
   const held = items.find((it) => it.selected && it.kind !== "staff");
   // While the coach points at something inside the panel and the panel is shut, the Build button stands in for it.
-  const inside = coach.target?.startsWith("build:") ?? false;
+  const inside = coach.intoPanel(items);
   return (
     <div className="buildwrap" ref={root}>
       {tip && (

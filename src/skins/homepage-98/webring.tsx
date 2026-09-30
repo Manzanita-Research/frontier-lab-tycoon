@@ -44,7 +44,7 @@ export function BuildBar({ items, tip, teasers = [], actions }: SlotPropsMap["Bu
     actions.buildPanel(next);
   };
   // While the coach points at a button and the ring is shut, the "Build something" link stands in for it.
-  const inside = coach.target?.startsWith("build:") ?? false;
+  const inside = coach.intoPanel(items);
   const strip = useRef<HTMLDivElement>(null);
   const selected = items.find((i) => i.selected)?.kind;
 
