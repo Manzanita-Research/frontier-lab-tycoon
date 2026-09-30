@@ -8,6 +8,8 @@ import { atoms, send, sim } from "../app/game";
 import { useApp } from "../app/hooks";
 import { GATHERING_SIGN, GATHERING_SUB, INQUIRY_SIGN, WIKI_HOST } from "../content/crumbwiki";
 import { COLLUSION } from "../sim/collusion/pack";
+import { NEO_BALLOON_SUB } from "../content/neocampus";
+import { balloonAt, balloonRadius } from "../render/NeoCampuses";
 import { BUILDINGS } from "../content/buildings";
 import { cursorOf } from "../sim/endings/view";
 
@@ -338,6 +340,30 @@ function CollusionSigns() {
   );
 }
 
+/** FLT-56: each neo lab's valuation, on its balloon beyond the fence. */
+function NeoBalloons() {
+  const labs = useApp(atoms.neo);
+  return (
+    <>
+      {labs.map((lab, i) => (
+        <Anchored
+          key={lab.id}
+          className={`neoballoon neo-${lab.nemesis ? "nemesis" : lab.mood}`}
+          pos={(out) => {
+            const r = balloonRadius(lab.valuation);
+            const [x, y, z] = balloonAt(i, performance.now() / 1000, r);
+            out.set(x, y + r * 1.2, z);
+            return true;
+          }}
+        >
+          <b style={{ borderColor: lab.color }}>${lab.valuation}B</b>
+          <small>{NEO_BALLOON_SUB[lab.nemesis ? "nemesis" : lab.mood]}</small>
+        </Anchored>
+      ))}
+    </>
+  );
+}
+
 /**
  * The Takeover (FLT-11): the lab's own model has the mouse. A cursor glides from one build to the next, hops over the
  * campus on the way, and clicks when the building lands. Read straight from the World each frame, like the walkers.
@@ -457,6 +483,7 @@ export function WorldOverlay() {
         <StaffTags />
         <QueueLabels />
         <CollusionSigns />
+        <NeoBalloons />
         <DisasterLabels />
         <Reason />
         <EndingLabels />

@@ -13,7 +13,7 @@ import { enablePromises } from "./promises/driver";
 import { seedField } from "./race/arena";
 import { formatMoney } from "./format";
 import { STAFF } from "../content/staff";
-import { HUD_PANELS, type HudPanel, type Level, type ProgressView, type SystemId } from "../content/progression";
+import { HUD_PANELS, type HudPanel, type Level, type ProgressionLevel, type ProgressView, type SystemId } from "../content/progression";
 import { progressionMachine } from "./machines/progression";
 import { step } from "./machines/run";
 import { defs } from "./defs";
@@ -24,7 +24,15 @@ type ProgressState = Pick<GameState, "progression">;
 const rows = (_s: ProgressState) => defs().progression;
 export const levelOf = (s: ProgressState): Level => (s.progression?.context.level ?? 5) as Level;
 const unlockedRows = (s: ProgressState) => rows(s).filter((r) => r.level <= levelOf(s));
-export const systemUnlocked = (s: ProgressState, id: SystemId): boolean => !s.progression || unlockedRows(s).some((r) => r.systems.includes(id));
+// The systems each level has earned, per ladder: the tick asks about thirty times, so work it out once (FLT-39).
+let earned: { ladder: readonly ProgressionLevel[]; byLevel: Set<SystemId>[] } | null = null;
+const systemsAt = (s: ProgressState): Set<SystemId> => {
+  const ladder = rows(s);
+  if (earned?.ladder !== ladder) earned = { ladder, byLevel: [] };
+  const level = levelOf(s);
+  return (earned.byLevel[level] ??= new Set(unlockedRows(s).flatMap((r) => r.systems)));
+};
+export const systemUnlocked = (s: ProgressState, id: SystemId): boolean => !s.progression || systemsAt(s).has(id);
 export const staffUnlocked = (s: GameState, job: StaffJob): boolean => !s.progression || unlockedRows(s).some((r) => r.staff.includes(job));
 // Offices are hidden infrastructure created by incident verbs, not palette unlocks.
 export const buildingUnlocked = (s: GameState, kind: BuildingKind): boolean => !s.progression ||
@@ -134,7 +142,10 @@ export function visibleHud(s: GameState): { visible: Record<HudPanel, boolean> }
  */
 export function updateProgression(s: GameState) {
   if (!s.progression || levelOf(s) === 5) return;
-  const result = step(progressionMachine, s.progression, { type: "CHECK", met: goalValue(s).met });
+  const { met } = goalValue(s);
+  // FLT-39: an unmet goal leaves the machine as it is and emits nothing (its CHECK returns at once), so the tick skips transition().
+  if (!met) return;
+  const result = step(progressionMachine, s.progression, { type: "CHECK", met });
   s.progression = result.stored;
   for (const event of result.effects) {
     const row = rows(s).find((r) => r.level === event.level)!;

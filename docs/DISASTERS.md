@@ -100,12 +100,14 @@ Verbs (run by the driver, in order, after each transition):
 | `building.ensure` | kind: string, text?: string, source?: string, importance?: string | Make sure a building of `kind` exists: if the lab has none, one arrives free beside the gate (upkeep still applies). |
 | `hype.delta` | amount: number | Add to hype (0 to 100). |
 | `trust.delta` | amount: number | Add to public trust (0 to 100, starts at 50). |
+| `voice.push` | amount: number | Put the lab in the news cycle (FLT-56): `amount` more of the share of voice the Release Leapfrog tracks and Network Traffic plots (a rival's launch pushes 42 to 60). Nothing while the Leapfrog is off. The Hearing's viral clip pushes 50. |
 | `heat.delta` | amount: number | Add to regulatory heat (0 to 100, starts at 0). FLT-19's auditors read it. |
 | `capture.delta` | amount: number | Add to regulatory capture (0 to 100, starts at 0): how much of the rulebook the lab wrote. The Hearing (FLT-21) moves it; FLT-22 reads it. |
 | `discourse.delta` | amount: number | Add to the water discourse (the stat behind the protesters at the gate; 4 points is one protester). |
 | `cash.delta` | amount: number | Add to (or, negative, take from) the bank. |
 | `rival.leap` | relative: number, open?: boolean | The most open-weights lab jumps to `relative` times yours (-0.1 is 10% below your capability; it never goes down) and, with `open`, ships open weights. Sets `{leapRival}` and `{leapModel}` for the disaster's headlines. |
 | `camera.focus` | on: string, zoom?: number, hold?: number | Fly the camera to `on` (`gate`, `$target`, `$adjacent`, `$office` or a building kind), `zoom` times closer, for `hold` seconds. Unless the player is in photo mode. |
+| `camera.beat` | kind: string, caption: string, sub?: string, on: string, zoom?: number, hold?: number | A camera beat (FLT-56): letterbox bars and a `caption` (plus an optional `sub` line; templates, like `news`) while the camera eases to `on` for `hold` seconds. `on` is a place, as for `camera.focus`, `here` (wherever the pack's driver says the beat is, such as the auditors' huddle), or `people`: the beat's people, followed as they walk. `kind` names the beat for the renderer (`exit`, `huddle`, `viral`). Time keeps running, the player can skip it, and photo mode or reduced motion get the caption without the camera move. |
 | `shake` | strength: number | Shake the screen, `strength` 0 to 1. |
 | `sound.cue` | cue: string | Play a sound cue: `alarm` (FLT-7's breakdown alarm), `card`, `era` or `release`. |
 | `news` | text: string, tone?: string | A ticker headline. `{lab}`, `{model}`, `{rival}`, `{cash}` and `{target}` are filled in, plus whatever the disaster's verbs set (`{leapRival}`). |
@@ -123,7 +125,7 @@ Verbs (run by the driver, in order, after each transition):
 | `flag.set` | name: string | Set a flag to today's day number. |
 | `flag.clear` | name: string | Clear a flag. |
 | `people.meet` | role: string, at: string, hours: number, lines?: string[] | A visitor with `role` walks in from the gate to meet the beat's first person by the first `at` building and they talk for `hours`, in view (sim/meetings.ts). `lines` is what they say, visitor first, alternating. FLT-26's VC chat. |
-| `people.quit` | quiet?: boolean | Everyone the beat is about hands in the box and walks out through the gate. With `quiet`, the calling pack writes the exit headline. |
+| `people.quit` | quiet?: boolean, conga?: boolean | Everyone the beat is about hands in the box and walks out through the gate. With `quiet`, the calling pack writes the exit headline. With `conga`, they leave as a conga line behind the first of them (FLT-56). |
 | `people.pay` | each: number | Take `each` from the bank for everyone the beat is about (a matched offer). |
 | `people.cheer` | amount: number | Lift the energy and focus of everyone the beat is about. |
 

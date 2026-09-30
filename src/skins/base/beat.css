@@ -1,0 +1,142 @@
+/* FLT-56: camera beats. Letterbox bars over the docked HUD (under the cards), the kicker up top, the caption below.
+   The bars slide with the skin's slow motion token, so reduced motion gets them still. */
+.beat {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  pointer-events: none;
+  font-family: var(--flt-font-display);
+}
+.beat-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--flt-space-3);
+  padding: 0 max(var(--flt-space-4), 4vw);
+  background: #0b0b10;
+  color: #f6f1e6;
+  animation-duration: var(--flt-motion-slow);
+  animation-timing-function: var(--flt-motion-ease);
+  animation-fill-mode: both;
+}
+.beat-top {
+  top: 0;
+  height: clamp(44px, 11vh, 96px);
+  justify-content: center;
+  animation-name: beat-drop;
+}
+.beat-bottom {
+  bottom: 0;
+  min-height: clamp(64px, 14vh, 128px);
+  padding-top: var(--flt-space-2);
+  padding-bottom: max(var(--flt-space-2), env(safe-area-inset-bottom));
+  animation-name: beat-rise;
+}
+.beat-kicker {
+  font-size: 0.72em;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+.beat-words {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+}
+.beat-caption {
+  margin: 0;
+  font-size: clamp(15px, 2.1vw, 24px);
+  line-height: 1.25;
+  text-wrap: balance;
+}
+.beat-sub {
+  margin: 0.3em 0 0;
+  font-family: var(--flt-font-ui);
+  font-size: clamp(12px, 1.3vw, 15px);
+  font-style: italic;
+  opacity: 0.75;
+}
+.beat-skip {
+  pointer-events: auto;
+  flex: none;
+  font: inherit;
+  font-size: 0.8em;
+  color: inherit;
+  background: transparent;
+  border: 1px solid color-mix(in srgb, #f6f1e6 45%, transparent);
+  border-radius: var(--flt-radius-button);
+  padding: 0.35em 0.8em;
+  cursor: pointer;
+}
+.beat-skip:hover,
+.beat-skip:focus-visible {
+  background: color-mix(in srgb, #f6f1e6 16%, transparent);
+}
+.beat-action {
+  background: #b3261e;
+  border-color: #f6f1e6;
+  font-weight: 700;
+}
+.beat-action:hover,
+.beat-action:focus-visible {
+  background: #d23a2f;
+}
+.beat-action:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.beat-leak .beat-kicker::before {
+  content: "! ";
+  color: #ffb4a8;
+}
+.beat-viral .beat-kicker::before {
+  content: "● ";
+  color: #ff3b30;
+}
+@keyframes beat-drop {
+  from { transform: translateY(-100%); }
+}
+@keyframes beat-rise {
+  from { transform: translateY(100%); }
+}
+@media (max-width: 480px) {
+  .beat-bottom {
+    flex-direction: column;
+    gap: var(--flt-space-1);
+  }
+  .beat-skip {
+    align-self: flex-end;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .beat-bar { animation: none; }
+}
+:root[data-motion="reduced"] .beat-bar {
+  animation: none;
+}
+/* While a beat plays the HUD leaves the shot entirely (FLT-56 review): the docked windows, the coach and the game's
+   pinned chrome fade out, and come back when the bars go. Thought bubbles and the world's own signs stay, as in photo
+   mode: they are the jokes. The toasts wait in the app (HOLD_TOASTS) rather than play out unseen. Cards and menus are
+   not docked, and a card ends the beat anyway. `body.beat` is set by the host (useHudEffects), so every skin gets it. */
+.hud-host > *,
+.gate-anchor,
+.audit-anchor {
+  transition: opacity var(--flt-motion-slow, 0.3s) ease, visibility 0s;
+}
+body.beat .hud-host > :not(.beat),
+body.beat .gate-anchor,
+body.beat .audit-anchor,
+body.beat .world .coinpop,
+body.beat .world .nopath,
+body.beat .world .reason,
+body.beat .world .brokenlabel,
+body.beat .world .stafftag,
+body.beat .world .queuelabel,
+body.beat .world .nametag {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity var(--flt-motion-slow, 0.3s) ease, visibility 0s var(--flt-motion-slow, 0.3s);
+}

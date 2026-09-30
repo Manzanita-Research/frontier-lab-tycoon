@@ -167,6 +167,17 @@ export async function copySummary(e: EndingVM | null = showing) {
   }
 }
 
+/** The friend link alone (FLT-57): this seed and this result, nothing personal. */
+export async function copyLink(e: EndingVM | null = showing) {
+  if (!e) return;
+  try {
+    await navigator.clipboard.writeText(e.link);
+    patch({ status: "linked", note: "Challenge link copied. Same lab, same seed: let them try." });
+  } catch {
+    patch({ note: "The clipboard said no. Here's the link to copy by hand:\n" + e.link });
+  }
+}
+
 export const playDaily = () => send({ type: "DAILY_LAB", daily: todayKey() });
 
 /** What the view-model gets. */

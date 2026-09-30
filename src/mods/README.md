@@ -86,8 +86,17 @@ reads yet (`walkerKinds`, `endings`, `tips`, `tables`), and each arc's final sta
    rules, labs, footnotes and headlines, and the collusion and papers packs, are still read from
    their pack files (rules patches are M3).
 
-Not yet: mod skins, assets and audio are validated but not applied (the FLT-14 registry is not
-supplied to `makeBaseGameLayer`), and `GameEvents` has no producer.
+6. Presentation (FLT-55) never enters the `GameDefinition`. `resolvePresentation(layer)` reads
+   the `Skin`, `Assets`, `Audio` and `Looks` services once per session and swaps every bundled
+   data URL for a `blob:` URL (`presentation.ts`); `src/app/mods.ts` keeps it as
+   `modSession().presentation`. The skin registry takes the mod skins (`registerModSkins`: the
+   picker, `?skin=`, the Found New Skin offer), the Audio service's cues go to the sound kit
+   (overrides, new names, the `protest.chant`/`protest.grow`/`ui.click` hooks) and
+   `src/render/modLooks.ts` draws the `looks` (recipe, sprite, glb, tint; targets `kind`,
+   `kind:role`, `faction:<id>`), one InstancedMesh per part. `flt-mod check` runs
+   `checkPresentation` (`check.ts`) as well as the headless year.
+
+Not yet: `audio.music` validates but nothing plays it, and `GameEvents` has no producer.
 
 M1a changes no sim entry points or live UI and re-records no golden digests. Its only existing-file
 edit is the additive `package.json` script; `docs/specs/FLT-30.md` pins the task description.

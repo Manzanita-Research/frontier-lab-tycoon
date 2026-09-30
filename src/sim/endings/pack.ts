@@ -20,6 +20,15 @@ const Paper = Schema.Struct({
   signoff: S,
 });
 
+/** What the end screen offers first (FLT-57): every ending leads somewhere. Templates as the paper's. */
+const Next = Schema.Struct({
+  /** "refound": Found a new lab, with a perk (the endings that stop time); "keepPlaying": time goes on. */
+  action: Schema.Literals(["refound", "keepPlaying"]),
+  label: S,
+  /** One line under the headline: what just happened to you, and what you can do about it. */
+  prompt: S,
+});
+
 const EndingDef = Schema.Struct({
   id: S,
   title: S,
@@ -32,9 +41,39 @@ const EndingDef = Schema.Struct({
   trigger: Schema.Array(NamedCall),
   initial: S,
   states: Schema.Record(S, ArcNode),
+  next: Next,
+  /** How a friend's challenge link puts it (FLT-57): "Your friend's lab {brag} on day 212. Beat it?" */
+  brag: S,
   paper: Paper,
 });
 export type EndingDef = typeof EndingDef.Type;
+export type MemoForkDef = typeof MemoFork.Type;
+export type PerkDef = typeof Perk.Type;
+export type PerkId = PerkDef["id"];
+
+/** A walker's line: who says it, and what. */
+const Line = Schema.Struct({ kind: Schema.Literals(["researcher", "agent", "visitor", "protester"]), text: S });
+
+/** One box on The Memo, and what ticking it does to the lab from then on (FLT-57). */
+const MemoFork = Schema.Struct({
+  label: S,
+  /** Training runs this much faster (1.25) or slower (0.5) for the rest of the game. */
+  training: N,
+  /** The water discourse is multiplied by this once a day: the protest at the gate grows (Race) or goes home (Slow Down). */
+  discourse: N,
+  /** The lingering effect, in words, for the chip and the extra edition. */
+  effects: Schema.Array(S),
+  chip: S,
+  /** The extra edition that goes to press the moment the box is ticked. */
+  extra: Schema.Struct({ kicker: S, headline: S, deck: S }),
+  /** Said out loud on campus, the moment it lands, by the first of each kind the driver finds; quoted in the extra. */
+  reactions: Schema.Array(Line),
+  /** Lines added to the thought pool for as long as the choice stands. */
+  thoughts: Schema.Array(Line),
+});
+
+/** A perk the next lab starts with. `amount` is the perk's size: hype points, training percent, or dollars. */
+const Perk = Schema.Struct({ id: Schema.Literals(["founder", "loyal", "seed"]), label: S, blurb: S, amount: N });
 
 const Pack = Schema.Struct({
   apiVersion: Schema.Literal(1),
@@ -46,7 +85,24 @@ const Pack = Schema.Struct({
   }),
   rules: Schema.Struct({
     endings: Schema.Struct({
-      memo: Schema.Struct({ era: N }),
+      memo: Schema.Struct({
+        era: N,
+        /** Days from the rumour to the card (the Memo event's `daysAgo` says the same; a test holds them together). */
+        countdownDays: N,
+        rumour: S,
+        /** One line per day left, from the day it lands (0) up. */
+        countdown: Schema.Array(S),
+        race: MemoFork,
+        slow: MemoFork,
+      }),
+      newLab: Schema.Struct({
+        perks: Schema.Array(Perk),
+        /** The next lab's subtitle, from Lab #2 on; past the list, `sequel` with {n}. */
+        sequels: Schema.Array(S),
+        sequel: S,
+        loyal: Schema.Struct({ role: S, thought: S, fallback: S }),
+        opening: S,
+      }),
       takeover: Schema.Struct({ aheadRank: N, managerOffset: N }),
       autopilot: Schema.Struct({ everyTicks: N, aimTicks: N, kinds: Schema.Array(S), refusal: S, paid: S }),
     }),

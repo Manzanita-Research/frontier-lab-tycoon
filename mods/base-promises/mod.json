@@ -302,6 +302,10 @@
           "title": "The Unplug It Act",
           "summary": "Every AI must have an off switch big enough to see from space.",
           "labSide": "nay",
+          "stakes": {
+            "pass": "Upkeep on clusters and datacenters +15% for 90 days; the Doomers cheer, the Accelerationists sulk",
+            "fail": "Heat −4; the Doomers take it personally"
+          },
           "promises": {
             "blusterworth": {
               "says": "both",
@@ -338,12 +342,28 @@
             {
               "type": "cost.spike",
               "params": {
-                "mult": 1.1,
-                "days": 45,
+                "mult": 1.15,
+                "days": 90,
                 "kinds": [
                   "cluster",
                   "datacenter"
                 ]
+              }
+            },
+            {
+              "type": "faction.delta",
+              "params": {
+                "faction": "doomers",
+                "amount": 12,
+                "text": "The Unplug It Act passed; they have seen the switch"
+              }
+            },
+            {
+              "type": "faction.delta",
+              "params": {
+                "faction": "accelerationists",
+                "amount": -10,
+                "text": "A big red switch, on every model"
               }
             }
           ],
@@ -360,6 +380,14 @@
               "params": {
                 "amount": -4
               }
+            },
+            {
+              "type": "faction.delta",
+              "params": {
+                "faction": "doomers",
+                "amount": -12,
+                "text": "The Unplug It Act failed; the plug remains at large"
+              }
             }
           ]
         },
@@ -368,6 +396,10 @@
           "title": "The Chatbot Disclosure Act",
           "summary": "Every chatbot must say \"I am a chatbot\" before every sentence, including this one.",
           "labSide": "nay",
+          "stakes": {
+            "pass": "Revenue −12% for 60 days (four extra words a reply); the Ethicists approve",
+            "fail": "Trust −3; the Ethicists write a strongly worded blog post"
+          },
           "promises": {
             "blusterworth": {
               "says": "aye",
@@ -404,8 +436,16 @@
             {
               "type": "revenue.mult",
               "params": {
-                "mult": 0.9,
-                "days": 30
+                "mult": 0.88,
+                "days": 60
+              }
+            },
+            {
+              "type": "faction.delta",
+              "params": {
+                "faction": "ethicists",
+                "amount": 10,
+                "text": "Every chatbot now says it is a chatbot"
               }
             }
           ],
@@ -422,6 +462,20 @@
               "params": {
                 "amount": -3
               }
+            },
+            {
+              "type": "trust.delta",
+              "params": {
+                "amount": -3
+              }
+            },
+            {
+              "type": "faction.delta",
+              "params": {
+                "faction": "ethicists",
+                "amount": -10,
+                "text": "The Chatbot Disclosure Act failed"
+              }
             }
           ]
         },
@@ -430,6 +484,10 @@
           "title": "The Frontier Tax Credit (Mostly Frontier) Act",
           "summary": "A tax credit for anyone building \"the future\", defined in a footnote as {lab}.",
           "labSide": "aye",
+          "stakes": {
+            "pass": "$400K cheque, Heat +6; the VCs are thrilled, the Luddites are not",
+            "fail": "Nothing, except the VCs asking why"
+          },
           "promises": {
             "blusterworth": {
               "says": "aye",
@@ -460,13 +518,29 @@
             {
               "type": "cash.delta",
               "params": {
-                "amount": 150000
+                "amount": 400000
               }
             },
             {
               "type": "heat.delta",
               "params": {
-                "amount": 4
+                "amount": 6
+              }
+            },
+            {
+              "type": "faction.delta",
+              "params": {
+                "faction": "vcs",
+                "amount": 10,
+                "text": "A tax credit for the future, defined as the portfolio"
+              }
+            },
+            {
+              "type": "faction.delta",
+              "params": {
+                "faction": "luddites",
+                "amount": -8,
+                "text": "Public money for the robots"
               }
             }
           ],
@@ -477,6 +551,14 @@
                 "text": "Frontier Tax Credit fails; {lab} files the cheque under \"next year\"",
                 "tone": "joke"
               }
+            },
+            {
+              "type": "faction.delta",
+              "params": {
+                "faction": "vcs",
+                "amount": -8,
+                "text": "The tax credit failed; the deck had a slide about it"
+              }
             }
           ]
         },
@@ -485,6 +567,10 @@
           "title": "The Datacenter Water Accountability Act",
           "summary": "Datacenters must pay for their water, and apologise to it.",
           "labSide": "nay",
+          "stakes": {
+            "pass": "Datacenter upkeep +25% for 60 days; the water crowd goes quiet",
+            "fail": "The water discourse gets louder"
+          },
           "promises": {
             "blusterworth": {
               "says": "both",
@@ -546,7 +632,7 @@
             {
               "type": "discourse.delta",
               "params": {
-                "amount": 6
+                "amount": 10
               }
             },
             {
@@ -562,6 +648,10 @@
           "title": "The Senate Modernisation (Robots Write The Bills) Act",
           "summary": "Senate staff may use AI to draft bills. The AI is {lab}'s.",
           "labSide": "aye",
+          "stakes": {
+            "pass": "Capture +8, Hype +4; the Wonks are horrified",
+            "fail": "Capture −4: the Senate starts reading its own bills"
+          },
           "promises": {
             "blusterworth": {
               "says": "aye",
@@ -592,13 +682,21 @@
             {
               "type": "capture.delta",
               "params": {
-                "amount": 4
+                "amount": 8
               }
             },
             {
               "type": "hype.delta",
               "params": {
                 "amount": 4
+              }
+            },
+            {
+              "type": "faction.delta",
+              "params": {
+                "faction": "wonks",
+                "amount": -10,
+                "text": "The bills are written by a chatbot now"
               }
             }
           ],
@@ -609,6 +707,20 @@
                 "text": "Senate votes to keep writing its own bills; the bills remain exactly as good",
                 "tone": "joke"
               }
+            },
+            {
+              "type": "capture.delta",
+              "params": {
+                "amount": -4
+              }
+            },
+            {
+              "type": "faction.delta",
+              "params": {
+                "faction": "wonks",
+                "amount": 8,
+                "text": "The Senate will keep writing its own bills"
+              }
             }
           ]
         },
@@ -617,6 +729,10 @@
           "title": "The Deepfake Senator Protection Act",
           "summary": "Deepfakes are banned. Of senators. Everyone else is \"a matter for the states\".",
           "labSide": "nay",
+          "stakes": {
+            "pass": "Hype −6 for your demo reel (it had a senator in it); Heat +3",
+            "fail": "Trust −4; a deepfake of the chair goes viral"
+          },
           "promises": {
             "blusterworth": {
               "says": "aye",
@@ -649,6 +765,19 @@
               "params": {
                 "amount": 3
               }
+            },
+            {
+              "type": "hype.delta",
+              "params": {
+                "amount": -6
+              }
+            },
+            {
+              "type": "news",
+              "params": {
+                "text": "{lab} pulls its launch video: the crowd shot included a senator, technically",
+                "tone": "joke"
+              }
             }
           ],
           "fail": [
@@ -658,6 +787,18 @@
                 "text": "Deepfake Senator Protection Act fails; a deepfake of the chair calls it \"a great day\"",
                 "tone": "joke"
               }
+            },
+            {
+              "type": "trust.delta",
+              "params": {
+                "amount": -4
+              }
+            },
+            {
+              "type": "voice.push",
+              "params": {
+                "amount": 6
+              }
             }
           ]
         },
@@ -666,6 +807,10 @@
           "title": "The Six-Month Pause (Starting Next Year) Act",
           "summary": "A pause on frontier AI, beginning shortly after the next funding round.",
           "labSide": "nay",
+          "stakes": {
+            "pass": "Every lab ashore trains 20% slower for 60 days (Sirocco is on a boat); Heat +10; the Doomers dance",
+            "fail": "Hype +5; the Accelerationists throw a party"
+          },
           "promises": {
             "blusterworth": {
               "says": "both",
@@ -703,7 +848,32 @@
               "type": "cost.spike",
               "params": {
                 "mult": 1.1,
-                "days": 30
+                "days": 60
+              }
+            },
+            {
+              "type": "rival.pace",
+              "params": {
+                "mult": 0.8,
+                "who": [
+                  "!sirocco"
+                ],
+                "days": 60
+              }
+            },
+            {
+              "type": "news",
+              "params": {
+                "text": "Sirocco confirms its boat is \"not technically ashore\"; keeps training",
+                "tone": "joke"
+              }
+            },
+            {
+              "type": "faction.delta",
+              "params": {
+                "faction": "doomers",
+                "amount": 15,
+                "text": "The Pause passed (it starts next year)"
               }
             }
           ],
@@ -720,6 +890,20 @@
               "params": {
                 "amount": -5
               }
+            },
+            {
+              "type": "hype.delta",
+              "params": {
+                "amount": 5
+              }
+            },
+            {
+              "type": "faction.delta",
+              "params": {
+                "faction": "accelerationists",
+                "amount": 10,
+                "text": "The Pause failed; the line goes up"
+              }
             }
           ]
         },
@@ -728,6 +912,10 @@
           "title": "The Public Compute For Everyone Act",
           "summary": "Free compute for universities, served by {lab}'s datacenters at list price.",
           "labSide": "aye",
+          "stakes": {
+            "pass": "$250K at list price, Trust +4; the Open Weights crowd cheers",
+            "fail": "The Open Weights crowd blames you, personally"
+          },
           "promises": {
             "blusterworth": {
               "says": "aye",
@@ -758,13 +946,21 @@
             {
               "type": "cash.delta",
               "params": {
-                "amount": 80000
+                "amount": 250000
               }
             },
             {
               "type": "trust.delta",
               "params": {
-                "amount": 2
+                "amount": 4
+              }
+            },
+            {
+              "type": "faction.delta",
+              "params": {
+                "faction": "open-weights",
+                "amount": 8,
+                "text": "Free compute for universities"
               }
             }
           ],
@@ -774,6 +970,14 @@
               "params": {
                 "text": "Public Compute fails; universities go back to the one GPU in the basement",
                 "tone": "joke"
+              }
+            },
+            {
+              "type": "faction.delta",
+              "params": {
+                "faction": "open-weights",
+                "amount": -10,
+                "text": "Public Compute failed; the one GPU in the basement it is"
               }
             }
           ]

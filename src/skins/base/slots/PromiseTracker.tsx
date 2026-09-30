@@ -1,7 +1,7 @@
 import { Senator, useT } from "../../kit";
 import type { HudActions, TrackerSenatorVM, TrackerVM } from "../../../ui/hud/types";
 import type { SlotPropsMap } from "../../types";
-import { BillRivals } from "./Bill";
+import { BillRivals, BillWarning } from "./Bill";
 import { Choices } from "./EventCard";
 
 /** 0 to 100, green when they keep their word; an empty meter before the first vote. */
@@ -81,6 +81,14 @@ export function PromiseTracker({ event, tracker, bill, actions }: SlotPropsMap["
               <b>{m.title}</b>
               <span>{m.summary}</span>
               <small className={`side side-${m.labSide}`}>{m.labSideText}</small>
+              {m.stakes && (
+                <dl className="tracker-stakes">
+                  <dt>If it passes</dt>
+                  <dd>{m.stakes.pass}</dd>
+                  <dt>If it fails</dt>
+                  <dd>{m.stakes.fail}</dd>
+                </dl>
+              )}
             </div>
           ) : (
             <p className="tracker-recess">The Senate is in recess. {tracker.last ? `Last: ${tracker.last.title}, ${tracker.last.passed ? "passed" : "failed"} ${tracker.last.tally}.` : "Nothing on the docket."}</p>
@@ -94,6 +102,7 @@ export function PromiseTracker({ event, tracker, bill, actions }: SlotPropsMap["
             <div className="tracker-law">
               <b>{bill.act}</b> <small>{bill.status}</small>
               <BillRivals bill={bill} />
+              <BillWarning bill={bill} actions={actions} />
             </div>
           )}
           {event && <Choices event={event} actions={actions} />}

@@ -60,6 +60,9 @@ export interface FactionsState {
   /** Day of the last dueling op-eds, and of the last argument on the paths. */
   lastOpEd: number;
   lastArgue: number;
+  /** FLT-56: the day Comms last put out a statement, and how many it has (absent before the first). */
+  lastStatement?: number;
+  statements?: number;
   /** Tallies for the headless report and the tests. */
   counts: { alliances: number; schisms: number; feuds: number; arguments: number; opEds: number; shouts: number; marches: number; hype: number; boycotts: number };
 }
