@@ -2,7 +2,7 @@
 // off it (colours, lamps, the sky) stays in render/fx/clock.ts, which re-exports these.
 //
 // One day/night cycle lasts CYCLE_DAYS game days (FLT-10 slowed it from 10 to 30: at one day every two seconds the lamps
-// were flipping too often). The game opens at 8am. Everything is a smooth function of the hour.
+// were flipping too often). FLT-16 makes each game day six seconds. The game opens at 8am.
 import { TICKS_PER_DAY } from "./constants";
 
 export const CYCLE_DAYS = 30;
@@ -21,9 +21,9 @@ export function hourAt(tick: number): number {
   return h < 0 ? h + 24 : h;
 }
 
-/** 0 in daylight, 1 at night: dusk 18:30 to 21:00, dawn 4:30 to 7:00. */
+/** Six-hour dawn and dusk: each gently blends over a quarter of the cycle. */
 export function nightAmount(hour: number): number {
-  return hour >= 12 ? smooth(18.5, 21, hour) : 1 - smooth(4.5, 7, hour);
+  return hour >= 12 ? smooth(16, 22, hour) : 1 - smooth(2, 8, hour);
 }
 
 /** Night is when the thought pool changes its tune (the campus is lit and someone is still shipping). */

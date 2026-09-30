@@ -3,6 +3,7 @@
 import { useAtomValue } from "@effect/atom-react";
 import { useEffect, useRef } from "react";
 import { appNow, registry, send, sim } from "../../app/game";
+import { useAutoPause } from "../../app/hooks";
 import type { Snapshot } from "../../app/hud";
 import { TOOLS } from "../../app/hud";
 import { playCue } from "../../audio/state";
@@ -112,6 +113,7 @@ function useNewsDesk(snap: Snapshot) {
   const room = useAtomValue(roomAtom);
   const demoOpened = useRef(false);
   const pausedForReading = room.view !== null;
+  useAutoPause("newsroom", pausedForReading);
   useEffect(() => {
     loadRoom();
   }, []);
@@ -124,13 +126,7 @@ function useNewsDesk(snap: Snapshot) {
     if (result.editions.length) pressCamera.pending.push(result.editions);
   }, [snap]);
   useEffect(() => {
-    if (!pausedForReading) return;
-    const speed = appNow()?.speed ?? 1;
-    send({ type: "SET_SPEED", speed: 0 });
-    playCue("card");
-    return () => {
-      if (appNow()?.speed === 0) send({ type: "SET_SPEED", speed });
-    };
+    if (pausedForReading) playCue("card");
   }, [pausedForReading]);
   useEffect(() => {
     if (!new URLSearchParams(location.search).has("debug")) return;
@@ -165,7 +161,20 @@ function useNewsDesk(snap: Snapshot) {
   }, [room.archive]);
 }
 
+/**
+ * Panels the host owns hold time while they are open: the payroll, the sound mixer and (on a phone, where it covers the
+ * map) the Arena. A slot's own phone sheets (Stats, Objectives, Thoughts) hold it themselves through the kit's
+ * `useAutoPause`; the News Room does it in `useNewsDesk`. The game keeps the ids apart, so closing one never resumes
+ * time beneath another.
+ */
+function useOverlays(vm: HudVM) {
+  useAutoPause("staff", vm.staff.open);
+  useAutoPause("mixer", vm.sound.open);
+  useAutoPause("arena", vm.arena.open && vm.layout.compact);
+}
+
 export function useHudEffects(vm: HudVM, snap: Snapshot) {
+  useOverlays(vm);
   useHotkeys(vm);
   usePhotoKeys(vm);
   useChatPlayback();

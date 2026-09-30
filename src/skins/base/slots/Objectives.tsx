@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useT } from "../../context";
+import { useAutoPause } from "../../kit";
 import type { SlotPropsMap } from "../../types";
 
 /** The scenario checklist, collapsible so it can get out of the way of the campus (and start folded on a phone). */
-export function Objectives({ objectives, layout }: SlotPropsMap["Objectives"]) {
+export function Objectives({ objectives, layout, actions }: SlotPropsMap["Objectives"]) {
   const t = useT();
   const [open, setOpen] = useState(() => !layout.compact);
+  useAutoPause(actions, "objectives", layout.compact && open);
   return (
     <div className={`objectives panel ${open ? "open" : ""} ${layout.compact ? "compact" : ""}`}>
       {layout.compact && (

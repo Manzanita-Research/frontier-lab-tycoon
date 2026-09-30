@@ -40,6 +40,7 @@ export const trainingMachine = setupEffect({
       on: {
         DAY: ({ context, event }, enq) => {
           if (event.halls === 0) return;
+          if (context.progress === 0) enq.emit({ type: "RUN_STARTED", model: context.name });
           return advance(context, event.gain, enq);
         },
       },

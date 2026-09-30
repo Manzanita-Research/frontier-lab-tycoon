@@ -9,6 +9,7 @@ import type { RaceState } from "./race/state";
 import type { StaffStored } from "./machines/staff";
 import type { TrainingStored } from "./machines/training";
 import type { WalkerStored } from "./machines/walker";
+import type { TutorialStored } from "./machines/tutorial";
 
 export type { BuildingKind, NeedKey };
 export type WalkerKind = "researcher" | "agent" | "visitor" | "protester";
@@ -268,4 +269,6 @@ export interface GameState {
   slop: number[];
   /** The payroll: Janitor Bots, SREs, Comms Reps and Security. */
   staff: Staffer[];
+  /** FLT-16: absent on older saves; those keep playing without onboarding. */
+  tutorial?: TutorialStored;
 }

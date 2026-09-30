@@ -10,6 +10,7 @@ import { addToast, pushNews } from "./news";
 import type { NewsTrigger } from "../content/headlines";
 import type { Rng } from "./rng";
 import type { Building, GameState } from "./types";
+import { pressureReady } from "./tutorial";
 
 export const RELIABILITY_LOSS = 0.005;
 export const BREAKDOWN_FACTOR = 0.2;
@@ -80,6 +81,7 @@ const attended = (state: GameState, b: Building) => state.staff.some((s) => s.jo
 
 /** Once a day: everything wears a little, and some of it gives out. */
 export function dailyBreakdowns(state: GameState, rng: Rng) {
+  if (!pressureReady(state)) return;
   const inside = new Map<number, number>();
   for (const w of state.walkers) if (w.kind !== "agent" && w.machine.value === "inside") inside.set(w.targetId, (inside.get(w.targetId) ?? 0) + 1);
   let halls = 0;

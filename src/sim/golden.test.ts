@@ -47,6 +47,7 @@ function view(s: GameState) {
     waterDiscourse: s.waterDiscourse,
     ledger: s.ledger,
     training: s.training.context,
+    tutorial: s.tutorial,
     models: s.models,
     goals: s.goals.context.goals,
     flags: sorted(flagsOf(s)),
@@ -117,6 +118,11 @@ function play(seed: number, ticks: number, checkpoints: number[]): Record<number
   let built = 0;
   for (let i = 0; i < ticks; i++) {
     const cmds: Command[] = [];
+    if (i === 0) {
+      for (let z = 18; z >= 10; z--) cmds.push({ type: "placePath", x: 11, z });
+      for (let x = 6; x <= 17; x++) cmds.push({ type: "placePath", x, z: 16 });
+      cmds.push({ type: "continueTutorial" });
+    }
     const open = openEventOf(s);
     if (open) cmds.push({ type: "chooseEvent", eventId: open.id, choiceIndex: (s.tick + seed) % eventById(open.id)!.choices.length });
     else if (i % 30 === 5 && built < BUILD_ORDER.length) {
@@ -141,14 +147,17 @@ function play(seed: number, ticks: number, checkpoints: number[]): Record<number
 
 const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 
+// FLT-16 intentionally re-records these for the quiet start, daily attraction-driven arrivals, delayed pressure,
+// tutorial state and the paid opening paths. Movement uses sqrt for bounded tile distances (same geometry,
+// deterministic floating-point differences). Each seed is independently replayed and JSON round-tripped.
 // Recorded from the pre-port sim (origin/flt-3-slice-2 @ 8f9750a; sorted-flags projection), re-recorded by FLT-9 and
 // again by FLT-10. FLT-9 changes the game on purpose: rivals, the Arena, eras, the R&D multiplier (training runs faster), bigger
 // leaps per release, Training Halls that convert 30 compute a day, and a compute auction on day 40 that this
 // script answers like any other card. The port itself was verified against the original numbers in FLT-3.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "59465b3c", 800: "1a89bf0c", 1600: "4a013429", 2400: "35cb7214", 3200: "10103d71", 4000: "41405c46" },
-  2: { 200: "c1dcb803", 800: "9295e431", 1600: "3d5c8221", 2400: "36a58fde", 3200: "a0b5244c", 4000: "7ee4edf6" },
-  3: { 200: "72c61121", 800: "f81dee8f", 1600: "4a9b231c", 2400: "ad7cc54e", 3200: "767d1481", 4000: "3757a512" },
+  1: { 200: "9f9a88dc", 800: "7aff03f5", 1600: "1eb17b88", 2400: "697cf047", 3200: "6ce3410d", 4000: "89026325" },
+  2: { 200: "d03070d0", 800: "c23fd0e0", 1600: "ec05daa5", 2400: "1a679737", 3200: "18cbae5f", 4000: "bbb2cbdf" },
+  3: { 200: "f6864d9b", 800: "e741d981", 1600: "071bc6fe", 2400: "e8fb88a7", 3200: "051d55b6", 4000: "291a7978" },
 };
 
 describe("golden runs", () => {

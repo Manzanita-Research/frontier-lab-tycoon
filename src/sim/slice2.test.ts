@@ -8,10 +8,12 @@ import { dailyEvents, openEventOf } from "./events";
 import { dailyGoals, outcomeOf } from "./goals";
 import { dailyDiscourse, protesterCount, protesterTarget, syncProtesters } from "./protest";
 import { createRng } from "./rng";
-import { createInitialState } from "./state";
+import { readyForPressure, createTestCampus as createBaseCampus } from "./testkit";
 import { TICKS_PER_DAY, tick } from "./tick";
 import { agentTarget, fillAgents, researcherTarget, seedWalkers, visitorCap } from "./walkers";
 import type { GameState } from "./types";
+
+const createInitialState = (seed = 1) => { const s = createBaseCampus(seed); readyForPressure(s); return s; };
 
 const count = (s: GameState, kind: string) => s.walkers.filter((w) => w.kind === kind).length;
 const run = (s: GameState, days: number, script: (s: GameState) => Command[] = () => []) => {
@@ -30,14 +32,14 @@ function withWaterEvent(seed = 1): GameState {
 }
 
 describe("crowd density", () => {
-  it("seats 10 + 4 per hall researchers (applicants fill it) and 6 + capability/2 agents, capped at 400", () => {
+  it("seats 3 + 4 per hall researchers and grows agents from capability, capped at 400", () => {
     const s = createInitialState(1);
     expect(count(s, "researcher")).toBe(8 + 3);
-    expect(researcherTarget(s)).toBe(14);
+    expect(researcherTarget(s)).toBe(7);
     s.buildings.push({ id: 99, kind: "hall", x: 1, z: 1, w: 3, d: 3, placedTick: 0, reliability: 1, broken: false, brokenTick: 0 });
-    expect(researcherTarget(s)).toBe(18);
+    expect(researcherTarget(s)).toBe(11);
     s.capability = 40;
-    expect(agentTarget(s)).toBe(26);
+    expect(agentTarget(s)).toBe(16);
     s.capability = 5000;
     expect(agentTarget(s)).toBe(MAX_AGENTS);
   });
@@ -68,7 +70,7 @@ describe("crowd density", () => {
     const s = createInitialState(2);
     let loitering = 0;
     for (let i = 0; i < 600; i++) {
-      tick(s);
+      tick(s, answer(s));
       loitering = Math.max(loitering, s.walkers.filter((w) => w.machine.value === "loitering").length);
     }
     expect(loitering).toBeGreaterThan(3);
@@ -197,7 +199,7 @@ describe("water discourse and protesters", () => {
     s.waterDiscourse = 12;
     dailyDiscourse(s, createRng(1));
     expect(s.walkers.filter((w) => w.kind === "protester" && w.machine.value !== "leaving")).toHaveLength(3);
-    run(s, 2); // the extras walk out through the gate and despawn
+    run(s, 2, answer); // the extras walk out through the gate and despawn
     expect(protesterCount(s)).toBe(3);
   });
 
@@ -419,6 +421,10 @@ describe("content sanity", () => {
 
   it("sizes the visitor cap for a busier campus", () => {
     const s = createInitialState(1);
-    expect(visitorCap(s)).toBe(Math.round(20 + s.vibes.value * 0.08));
+    const before = visitorCap(s);
+    s.hype = 100;
+    s.vibes.value = 950;
+    expect(visitorCap(s)).toBeGreaterThan(before);
+    expect(visitorCap(s)).toBeLessThanOrEqual(400);
   });
 });

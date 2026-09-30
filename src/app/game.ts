@@ -12,7 +12,7 @@ import { tick } from "../sim/tick";
 import type { Tone } from "../sim/types";
 import { framesBrowser } from "./frames";
 import { SPEEDS, type Speed, type Tool } from "./hud";
-import { appMachine, type AppContext } from "./machine";
+import { appMachine, autoPaused, pauseReasonOf, type AppContext } from "./machine";
 import { createSimHandle, simLayer } from "./sim";
 
 export const debugParams = readDebugParams();
@@ -37,6 +37,10 @@ export const atoms = {
   snap: pick((c) => c.snap),
   news: pick((c) => c.news),
   speed: pick((c) => c.speed),
+  paused: pick((c) => c.speed === 0 || autoPaused(c) || !!c.event || (c.outcome !== "playing" && !c.outcomeDismissed)),
+  /** Why time is held (null while it runs): the pause button, a tutorial message, an open menu, a card... */
+  pauseReason: pick(pauseReasonOf),
+  assistant: pick((c) => c.snap.assistant),
   tool: pick((c) => c.tool),
   hover: pick((c) => c.hover),
   toasts: pick((c) => c.toasts),

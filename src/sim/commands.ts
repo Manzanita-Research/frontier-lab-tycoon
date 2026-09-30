@@ -7,12 +7,15 @@ import { canHire, clearZone, fire, hire, paintZone } from "./staff";
 import { buildingAt, edgeTiles, inBounds, isPathTile, rectContains, rectsOverlap, tileIndex } from "./pathfind";
 import type { Rng } from "./rng";
 import type { GameState, Rect, StaffJob } from "./types";
+import { continueTutorial } from "./tutorial";
 
 export type Command =
   | { type: "placePath"; x: number; z: number }
   | { type: "placeBuilding"; kind: BuildingKind; x: number; z: number }
   | { type: "bulldoze"; x: number; z: number }
   | { type: "startTraining" }
+  | { type: "continueTutorial" }
+  | { type: "skipTutorial" }
   /** Put someone on the payroll (FLT-10): they walk in through the gate. */
   | { type: "hire"; job: StaffJob }
   | { type: "fire"; id: number }
@@ -64,6 +67,7 @@ export function placeBuilding(state: GameState, rng: Rng, kind: BuildingKind, x:
   delete state.flags[`free:${kind}`];
   state.buildings.push({ id: state.nextId++, kind, x, z, w: def.size[0], d: def.size[1], placedTick: state.tick, reliability: 1, broken: false, brokenTick: 0 });
   state.version++;
+  state.flags.firstBuild ??= state.day;
   const first = state.flags[`built:${kind}`] === undefined;
   state.flags[`built:${kind}`] = state.day;
   if (first) {
@@ -96,6 +100,8 @@ export function applyCommands(state: GameState, commands: readonly Command[], rn
           state.cash -= PATH_PRICE;
           state.grid.paths[tileIndex(state, c.x, c.z)] = true;
           state.version++;
+          state.flags.firstBuild ??= state.day;
+          state.flags.firstPath ??= state.day;
         }
         break;
       case "placeBuilding":
@@ -108,7 +114,16 @@ export function applyCommands(state: GameState, commands: readonly Command[], rn
         chooseEvent(state, rng, c.eventId, c.choiceIndex);
         break;
       case "hire":
-        if (canHire(state, c.job).ok) hire(state, c.job);
+        if (canHire(state, c.job).ok) {
+          hire(state, c.job);
+          if (c.job === "janitor" || c.job === "sre") state.flags.firstSupportHire ??= state.day;
+        }
+        break;
+      case "continueTutorial":
+        continueTutorial(state);
+        break;
+      case "skipTutorial":
+        continueTutorial(state, true);
         break;
       case "fire":
         fire(state, c.id);

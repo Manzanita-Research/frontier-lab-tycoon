@@ -1,6 +1,6 @@
 // Frontier 95's windows: Lab Properties, the copy dialog, sticky notes, Properties of a walker, Task Mangler, Thoughts.txt.
 import { useState } from "react";
-import { Odometer, money } from "../kit";
+import { Odometer, money, useAutoPause } from "../kit";
 import { useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import { Ico, PixelPortrait } from "./icons";
@@ -13,6 +13,7 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
   const t = useT();
   const [tab, setTab] = useState<StatsTab>("general");
   const [collapsed, setCollapsed] = useState(layout.compact);
+  useAutoPause(actions, "stats", layout.compact && !collapsed);
   const title = t("stats.window", { lab: stats.labName });
   const trend = { up: "▲", down: "▼", flat: "" }[stats.vibes.trend];
   const led = (
@@ -175,9 +176,10 @@ export function Training({ training }: SlotPropsMap["Training"]) {
 }
 
 /** Desktop sticky notes: flat yellow, 1px border. */
-export function Objectives({ objectives, layout }: SlotPropsMap["Objectives"]) {
+export function Objectives({ objectives, layout, actions }: SlotPropsMap["Objectives"]) {
   const t = useT();
   const [open, setOpen] = useState(() => !layout.compact);
+  useAutoPause(actions, "objectives", layout.compact && open);
   return (
     <div className="f95-notes">
       <button type="button" className="f95-post head" onClick={() => setOpen(!open)} aria-expanded={open}>
@@ -333,6 +335,7 @@ export function Arena({ arena, actions }: SlotPropsMap["Arena"]) {
 export function ThoughtsPanel({ rows, layout, actions }: SlotPropsMap["ThoughtsPanel"]) {
   const t = useT();
   const [open, setOpen] = useState(() => !layout.compact);
+  useAutoPause(actions, "thoughts", layout.compact && open);
   return (
     <Win className={`f95-thoughts ${open ? "open" : ""}`} title={`${t("thoughts.title")}.txt`} icon="doc" onTitleClick={() => setOpen(!open)} buttons={[{ g: "min", label: open ? "Minimize" : "Restore", onClick: () => setOpen(!open) }]}>
       {open && (

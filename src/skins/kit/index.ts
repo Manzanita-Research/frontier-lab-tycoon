@@ -6,3 +6,4 @@ export { Dialog } from "./Dialog";
 export { money } from "./format";
 export { reducedMotion } from "./motion";
 export { useT, useSlots, useSkin } from "../context";
+export { useAutoPause } from "./autopause";

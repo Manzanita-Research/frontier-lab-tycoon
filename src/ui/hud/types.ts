@@ -233,6 +233,36 @@ export interface ToastVM {
 
 export type HintId = "gateway" | "tap";
 
+/**
+ * The guided opening, one step at a time. `highlight` is what the step points at: "build:path", "build:hall",
+ * "build:gateway", "staff:hire" or "training". A slot lights the thing with `useHighlight(target)` (from the kit).
+ */
+export interface AssistantVM {
+  /** The step's id ("path", "hall", "gateway", "hire" or "release"). */
+  step: string;
+  /** 1-based position among `total` steps, for "Step 2 of 5". */
+  number: number;
+  total: number;
+  /** One sentence. */
+  message: string;
+  highlight: string;
+  /** The game is holding time until the player taps Next or does the thing. */
+  paused: boolean;
+  /** The message is read, but the very first build is still to come: the clock starts on it. */
+  waitingForBuild: boolean;
+  canSkip: boolean;
+}
+
+/** Why time is standing still (null while it runs). Card: an event, era or outcome card is up. */
+export type PauseReasonVM = "card" | "player" | "tutorial" | "build" | "menu" | "inspector";
+
+export interface PauseVM {
+  paused: boolean;
+  reason: PauseReasonVM | null;
+  /** The game paused it (a message, a menu, an inspector, a card), as opposed to the player pressing Pause. */
+  auto: boolean;
+}
+
 export interface ChoiceVM {
   label: string;
   hint: string;
@@ -452,6 +482,9 @@ export interface HudVM {
   ticker: TickerItemVM[];
   toasts: ToastVM[];
   hints: HintId[];
+  /** The tutorial's current step, or null once it is done or skipped. */
+  assistant: AssistantVM | null;
+  pause: PauseVM;
   event: EventVM | null;
   thoughtsPanel: ThoughtRowVM[];
   arena: ArenaVM;
@@ -481,6 +514,11 @@ export interface HudActions {
   /** Light up who thinks a Thoughts row (`ThoughtRowVM.key`); again to switch off. */
   highlight(key: string): void;
   dismissToast(id: number): void;
+  /** The tutorial: Next (also done by picking the highlighted build tool) and Skip. */
+  continueTutorial(): void;
+  skipTutorial(): void;
+  /** Hold time while a panel of yours is open (`id` names it; `false` lets go). Use `useAutoPause` from the kit. */
+  holdTime(id: string, open: boolean): void;
   toggleArena(): void;
   keepPlaying(): void;
   newLab(): void;

@@ -15,13 +15,15 @@ import { chainFor, faceDoor, SLOT_SPACING, slotPoint } from "./queues";
 import { createRng, type Rng } from "./rng";
 import { cleanlinessOf, dailySlop, mopTile, slopInterval, slopStats, SLOP_DRIFT, MESS_DECAY, MESS_THOUGHT, MESS_UNHAPPINESS } from "./slop";
 import { commsRelief, guardsOn, payroll, staffOf } from "./staff";
-import { createInitialState } from "./state";
+import { readyForPressure, createTestCampus as createBaseCampus } from "./testkit";
 import { answer } from "./testkit";
 import { activeConditions, dailyThoughts } from "./thoughts";
 import { tick, TICKS_PER_DAY } from "./tick";
 import { TARGET_WANDER, type GameState, type Walker } from "./types";
 import { readVibes } from "./vibes";
 import { computePerDay } from "./training";
+
+const createInitialState = (seed = 1) => { const s = createBaseCampus(seed); readyForPressure(s); return s; };
 
 const rng = () => createRng(9);
 /** An rng that never rolls a hit: wear without breakdowns. */
@@ -340,10 +342,9 @@ describe("breakdowns", () => {
     const s = createInitialState(1);
     s.walkers = [];
     applyCommands(s, [{ type: "placeBuilding", kind: "gateway", x: 13, z: 17 }], rng());
-    const gw = buildingOf(s, "gateway");
     dailyEconomy(s, rng());
     expect(s.ledger.income).toBeGreaterThan(0);
-    gw.broken = true;
+    for (const b of s.buildings) if (b.kind === "gateway") b.broken = true;
     dailyEconomy(s, rng());
     expect(s.ledger.income).toBe(0);
   });

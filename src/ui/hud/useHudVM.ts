@@ -97,6 +97,7 @@ export type AppSource = {
   selected: number | null;
   zone: number | null;
   outcomeDismissed: boolean;
+  pauseReason: Parameters<typeof hudViewModel>[0]["pauseReason"];
 };
 
 /** Everything the view-model reads from the app actor, as one atom. */
@@ -115,6 +116,7 @@ const appSourceAtom = Atom.make((get): AsyncResult.AsyncResult<AppSource, never>
     selected: v(atoms.selected),
     zone: v(atoms.zone),
     outcomeDismissed: v(atoms.outcomeDismissed),
+    pauseReason: v(atoms.pauseReason),
   });
 });
 
@@ -141,7 +143,7 @@ export function useAppSource(): AppSource | null {
   return src;
 }
 
-export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, selected, zone, outcomeDismissed }: AppSource): HudVM {
+export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, selected, zone, outcomeDismissed, pauseReason }: AppSource): HudVM {
   const arenaOpen = useAtomValue(arenaOpenAtom);
   const room = useAtomValue(roomAtom);
   const chatCount = useAtomValue(chatCountAtom);
@@ -174,6 +176,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         toasts,
         news,
         outcomeDismissed,
+        pauseReason,
         tapHint,
         toldGateway: toldGateway.current,
         staffOpen,
@@ -193,7 +196,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         },
         viewport,
       }),
-    [snap, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, motion, room, chatCount, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, skinUi, list, viewport, staffOpen, zone],
+    [snap, speed, tool, follow, highlight, toasts, news, outcomeDismissed, pauseReason, tapHint, arenaOpen, motion, room, chatCount, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, skinUi, list, viewport, staffOpen, zone],
   );
   return vm;
 }

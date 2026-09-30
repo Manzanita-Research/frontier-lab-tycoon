@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { applyNow, tick } from "../../sim/tick";
-import { createInitialState } from "../../sim/state";
+import { createTestCampus as createInitialState } from "../../sim/testkit";
 import { TICKS_PER_DAY } from "../../sim/constants";
 import { createWatch } from "./watch";
 

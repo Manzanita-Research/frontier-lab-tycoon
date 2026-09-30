@@ -7,12 +7,13 @@ import { SCENARIO } from "../content/goals";
 import { openEventOf } from "../sim/events";
 import { createInitialState } from "../sim/state";
 import { tick } from "../sim/tick";
+import { createTestCampus, readyForPressure } from "../sim/testkit";
 import type { Speed } from "./hud";
 import { appMachine } from "./machine";
 import { framesManual, ManualFrames } from "./frames";
-import { createSimHandle, Sim, simLayer, type SimHandle } from "./sim";
+import { Sim, simLayer, SimHandle } from "./sim";
 
-const handleFor = (seed = 1, warp = 0) => createSimHandle({ seed, warp, agents: 0, discourse: 0, researchers: 0 });
+const handleFor = (seed = 1) => new SimHandle(createTestCampus(seed));
 
 /** Boot the app on `handle`, and hand back the actor and a frame pump. */
 const boot = (speed: Speed = 1) =>
@@ -22,7 +23,7 @@ const boot = (speed: Speed = 1) =>
     const first = sim.report(true, true)!;
     const actor = yield* createEffectActor(appMachine, { input: { speed, first } });
     /** Push `n` frames of `dt` seconds and let the actor drain its mailbox. */
-    const pump = (n: number, dt = 0.1) =>
+    const pump = (n: number, dt = 0.15) =>
       Effect.gen(function* () {
         for (let i = 0; i < n; i++) frames.emit(dt);
         for (let i = 0; i < 40 + n * 4; i++) yield* Effect.yieldNow;
@@ -33,14 +34,61 @@ const boot = (speed: Speed = 1) =>
 const provide = (handle: SimHandle) => Effect.provide(Layer.mergeAll(simLayer(handle), framesManual));
 
 describe("app machine", () => {
-  it.effect("starts in playing.running and advances the sim one tick per 0.1 s frame at 1x, like direct ticks", () => {
+  it.effect("a clean game opens paused at 1× until a valid build, and messages pause until acknowledged", () => {
+    const handle = new SimHandle(createInitialState(1));
+    return Effect.gen(function* () {
+      const { actor, sim, pump } = yield* boot();
+      yield* pump(40);
+      expect(actor.getSnapshot().matches({ playing: "paused" })).toBe(true);
+      expect(actor.getSnapshot().context.speed).toBe(1);
+      expect(sim.world.tick).toBe(0);
+      yield* send(actor, { type: "SET_TOOL", tool: "path" });
+      yield* pump(8);
+      expect(sim.world.tick).toBe(0);
+      yield* send(actor, { type: "COMMAND", command: { type: "placePath", x: 11, z: 18 } });
+      yield* pump(8);
+      expect(actor.getSnapshot().context.snap.assistant?.step).toBe("hall");
+      expect(sim.world.tick).toBe(0);
+      yield* send(actor, { type: "SET_TOOL", tool: "hall" });
+      yield* pump(20);
+      expect(sim.world.tick).toBeGreaterThan(0);
+      expect(actor.getSnapshot().context.speed).toBe(1);
+    }).pipe(provide(handle));
+  });
+
+  it.effect("overlapping menus and cards hold time without losing a chosen speed or queued inputs", () => {
+    const handle = handleFor();
+    return Effect.gen(function* () {
+      const { actor, sim, pump } = yield* boot(3);
+      yield* send(actor, { type: "SET_OVERLAY", id: "staff", open: true });
+      yield* send(actor, { type: "SET_OVERLAY", id: "thoughts", open: true });
+      yield* waitFor(actor, (st) => st.context.overlays.length === 2, { timeout: "1 second" });
+      yield* pump(20);
+      expect(sim.world.tick).toBe(0);
+      yield* send(actor, { type: "COMMAND", command: { type: "hire", job: "sre" } });
+      yield* send(actor, { type: "SET_OVERLAY", id: "staff", open: false });
+      yield* pump(10);
+      expect(sim.world.staff).toHaveLength(1);
+      expect(sim.world.tick).toBe(0);
+      yield* send(actor, { type: "SET_OVERLAY", id: "thoughts", open: false });
+      yield* pump(10);
+      expect(sim.world.tick).toBeGreaterThan(0);
+      expect(actor.getSnapshot().context.speed).toBe(3);
+      yield* send(actor, { type: "SET_SPEED", speed: 0 });
+      yield* send(actor, { type: "SET_OVERLAY", id: "staff", open: true });
+      yield* send(actor, { type: "SET_OVERLAY", id: "staff", open: false });
+      yield* pump(10);
+      expect(actor.getSnapshot().matches({ playing: "paused" })).toBe(true);
+    }).pipe(provide(handle));
+  });
+  it.effect("starts in playing.running and advances the sim one tick per two 0.15 s frame at 1x, like direct ticks", () => {
     const handle = handleFor(3);
     return Effect.gen(function* () {
       const { actor, sim, pump } = yield* boot();
       expect(actor.getSnapshot().matches({ playing: "running" })).toBe(true);
-      yield* pump(60);
+      yield* pump(120);
       expect(sim.world.tick).toBe(60);
-      const direct = createInitialState(3);
+      const direct = createTestCampus(3);
       for (let i = 0; i < 60; i++) tick(direct);
       expect(JSON.stringify(sim.world)).toBe(JSON.stringify(direct));
     }).pipe(provide(handle));
@@ -52,11 +100,11 @@ describe("app machine", () => {
       const { actor, sim, pump } = yield* boot();
       yield* send(actor, { type: "SET_SPEED", speed: 3 });
       yield* waitFor(actor, (s) => s.context.speed === 3, { timeout: "1 second" });
-      yield* pump(10);
+      yield* pump(20);
       expect(sim.world.tick).toBe(30);
       yield* send(actor, { type: "TOGGLE_PAUSE" });
       yield* waitFor(actor, (s) => s.matches({ playing: "paused" }), { timeout: "1 second" });
-      yield* pump(10);
+      yield* pump(20);
       expect(sim.world.tick).toBe(30);
       yield* send(actor, { type: "TOGGLE_PAUSE" });
       yield* waitFor(actor, (s) => s.matches({ playing: "running" }), { timeout: "1 second" });
@@ -82,9 +130,10 @@ describe("app machine", () => {
     const handle = handleFor(1);
     handle.world.day = 59;
     handle.world.waterDiscourse = 44;
+    readyForPressure(handle.world);
     return Effect.gen(function* () {
       const { actor, sim, pump } = yield* boot();
-      yield* pump(30);
+      yield* pump(50);
       yield* waitFor(actor, (s) => s.matches("eventOpen"), { timeout: "1 second" });
       expect(openEventOf(sim.world)?.id).toBe("waterDiscourse");
       const heldAt = sim.world.tick;
@@ -111,7 +160,8 @@ describe("app machine", () => {
       expect(actor.getSnapshot().context.outcome).toBe("lost");
       yield* send(actor, { type: "NEW_LAB" });
       yield* pump(3);
-      yield* waitFor(actor, (s) => s.matches({ playing: "running" }), { timeout: "1 second" });
+      yield* waitFor(actor, (s) => s.matches({ playing: "paused" }), { timeout: "1 second" });
+      expect(actor.getSnapshot().context.speed).toBe(1);
       expect(actor.getSnapshot().context.outcome).toBe("playing");
       expect(sim.world.day).toBeLessThan(2);
     }).pipe(provide(handle));

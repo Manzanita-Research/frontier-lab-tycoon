@@ -3,16 +3,22 @@
 import { makeSnapshot, type Snapshot } from "../../app/hud";
 import { frontPage, recap, type Edition } from "../../newsroom/edition";
 import { createInitialState } from "../../sim/state";
+import { createTestCampus } from "../../sim/testkit";
 import { tick } from "../../sim/tick";
 import type { GameState } from "../../sim/types";
 import type { SkinPickerVM } from "./types";
 import type { HudInput } from "./vm";
 
-/** A campus a few game days in, with thoughts, a crowd and a first release on the books. */
+/** A busy campus a few game days in, with thoughts, a crowd and a run in flight (the real opening is quieter: see `openingWorld`). */
 export function fixtureWorld(days = 12, seed = 3): GameState {
-  const s = createInitialState(seed);
+  const s = createTestCampus(seed);
   for (let i = 0; i < days * 20; i++) tick(s);
   return s;
+}
+
+/** A clean start: the gate, one cluster, three researchers, and the guided opening waiting on its first step. */
+export function openingWorld(seed = 3): GameState {
+  return createInitialState(seed);
 }
 
 export const NO_SKINS: SkinPickerVM = {
@@ -75,6 +81,7 @@ export function fixtureInput(o: FixtureOptions = {}): HudInput {
       { id: 2, day: 4, text: "Interns told not to touch the big red button, or the green one", tone: "joke" },
     ],
     outcomeDismissed: false,
+    pauseReason: null,
     tapHint: true,
     toldGateway: false,
     staffOpen: o.staff ?? false,

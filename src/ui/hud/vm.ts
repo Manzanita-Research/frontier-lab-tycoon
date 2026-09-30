@@ -8,6 +8,7 @@ import { RACE_TOOLS, SPEEDS, TOOLS } from "../../app/hud";
 import { BUILDINGS, PATH_PRICE } from "../../content/buildings";
 import { ERAS } from "../../content/eras";
 import { STAFF } from "../../content/staff";
+import { TUTORIAL_STEPS } from "../../content/tutorial";
 import { eventById } from "../../content/events";
 import { GOALS, SCENARIO, type GoalDef } from "../../content/goals";
 import { FRIENDS } from "../../content/newsroom";
@@ -22,8 +23,8 @@ import type { NewsItem, Tone, WalkerKind } from "../../sim/types";
 import { trendOf, VIBES_MAX, WEIGHTS } from "../../sim/vibes";
 import { SKIN_API_VERSION } from "./types";
 import type {
-  ArenaVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, EditionRowVM, EventVM, HudVM, InspectorVM, NeedVM, NewsroomVM,
-  ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, ThoughtRowVM, TrainingVM, WalkerKindVM,
+  ArenaVM, AssistantVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, EditionRowVM, EventVM, HudVM, InspectorVM, NeedVM, NewsroomVM,
+  ObjectivesVM, OutcomeVM, PaperVM, PauseReasonVM, PauseVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, ThoughtRowVM, TrainingVM, WalkerKindVM,
 } from "./types";
 
 /** How many game days after a release the "SHIPPED!" sticker stays up. */
@@ -41,6 +42,8 @@ export interface HudInput {
   toasts: readonly { id: number; text: string; tone: Tone }[];
   news: readonly NewsItem[];
   outcomeDismissed: boolean;
+  /** Why the app is holding time (null while it runs): the pause button, a tutorial message, a menu, a card. */
+  pauseReason: PauseReasonVM | null;
   /** "Tap anyone to read their mind" is still showing. */
   tapHint: boolean;
   /** A toast has already told the player about the API Gateway, so the standing hint would be a repeat. */
@@ -442,6 +445,31 @@ function photoOf(i: HudInput): PhotoVM {
   };
 }
 
+/** One standing hint at a time, and none while a toast or the tutorial is talking; the gateway hint is redundant once a toast has said it. */
+function standingHints(i: HudInput): HudVM["hints"] {
+  if (i.toasts.length > 0 || i.snap.assistant) return [];
+  return !i.snap.hasGateway && !i.toldGateway ? ["gateway"] : i.tapHint ? ["tap"] : [];
+}
+
+function assistantOf(snap: Snapshot): AssistantVM | null {
+  const a = snap.assistant;
+  if (!a) return null;
+  return {
+    step: a.step,
+    number: TUTORIAL_STEPS.indexOf(a.step) + 1,
+    total: TUTORIAL_STEPS.length,
+    message: a.message,
+    highlight: a.highlight,
+    paused: a.paused,
+    waitingForBuild: snap.firstBuildPending,
+    canSkip: a.canSkip,
+  };
+}
+
+function pauseOf(reason: PauseReasonVM | null): PauseVM {
+  return { paused: reason !== null, reason, auto: reason !== null && reason !== "player" };
+}
+
 export function hudViewModel(i: HudInput): HudVM {
   const build = buildOf(i);
   const { event, era } = eventOf(i);
@@ -459,7 +487,9 @@ export function hudViewModel(i: HudInput): HudVM {
     ticker: i.news.slice(-TICKER_ITEMS).map((n) => ({ id: n.id, text: n.text, tone: n.tone })),
     toasts: i.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })),
     // One hint at a time, and none while a toast is talking; the gateway hint is redundant once a toast has said it.
-    hints: i.toasts.length > 0 ? [] : !i.snap.hasGateway && !i.toldGateway ? ["gateway"] : i.tapHint ? ["tap"] : [],
+    hints: standingHints(i),
+    assistant: assistantOf(i.snap),
+    pause: pauseOf(i.pauseReason),
     event,
     thoughtsPanel: thoughtsOf(i),
     arena: arenaOf(i),

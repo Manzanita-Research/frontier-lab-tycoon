@@ -8,6 +8,7 @@ import { RIVAL_BY_ID, type RivalDef, type RivalId } from "../../content/rivals";
 import type { EmittedFrom } from "xstate";
 import { fillTemplate } from "../format";
 import { step } from "../machines/run";
+import { pressureReady } from "../tutorial";
 import { addNews, addToast, templateVars } from "../news";
 import type { Rng } from "../rng";
 import type { GameState } from "../types";
@@ -142,7 +143,7 @@ function applyRival(state: GameState, rng: Rng, def: RivalDef, e: RivalEffect) {
       if (lines.length > 0) addNews(state, fillTemplate(rng.pick(lines), vars), !def.models ? "joke" : ahead ? "bad" : "neutral");
 
       const close = e.capability >= state.capability * DROP_FLOOR && e.capability <= state.capability * DROP_CEILING;
-      if (e.open && def.models && close && state.ledger.income > 0 && !openDropActive(state) && state.day - race.lastDrop >= DROP_GAP_DAYS) {
+      if (pressureReady(state) && e.open && def.models && close && state.ledger.income > 0 && !openDropActive(state) && state.day - race.lastDrop >= DROP_GAP_DAYS) {
         race.openDrop = { until: state.day + OPEN_DROP_DAYS, rival: def.id, model: e.model };
         race.lastDrop = state.day;
         state.flags["offer:openWeights"] = state.day;

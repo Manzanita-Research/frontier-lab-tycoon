@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Odometer, money } from "../../kit";
+import { Odometer, money, useAutoPause } from "../../kit";
 import { useT } from "../../context";
 import type { SlotPropsMap } from "../../types";
 import { RaceStats } from "./RaceStats";
@@ -11,6 +11,7 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
   const compact = layout.compact;
   // On a phone the bar is one row (Vibes, cash, runway); a tap on the caret opens the rest.
   const [expanded, setExpanded] = useState(false);
+  useAutoPause(actions, "stats", compact && expanded);
   return (
     <div className={`topbar panel ${compact ? "compact" : ""} ${compact && expanded ? "expanded" : ""}`}>
       <div className="lab">
