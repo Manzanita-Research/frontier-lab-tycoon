@@ -1,0 +1,59 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "babb740d8cda4c2161ce857838435028a0504551"
+  },
+  "head": {
+    "branch": "flt-71-skins-default",
+    "sha": "d7dc917",
+    "dirty": true
+  },
+  "seconds": 94.25,
+  "problems": [
+    "coach-disc.png: blank composite: panel 3 is 67% one colour, 9 colours",
+    "fresh.png: blank composite: panel 3 is 65% one colour, 7 colours"
+  ],
+  "rows": [
+    {
+      "scene": "coach-disc",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-71-skins/before/coach-disc.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-71-skins/after/coach-disc.png",
+      "title": "Discovery Disc '96 at the first coach line: \"Click Start.\" and the button it points at",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-71-skins/compare/coach-disc.png",
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 67% one colour, 9 colours",
+      "error": "compare: blank composite: panel 3 is 67% one colour, 9 colours"
+    },
+    {
+      "scene": "fresh",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-71-skins/before/fresh.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-71-skins/after/fresh.png",
+      "title": "A fresh profile: nothing saved, no ?skin=, the first coach line",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-71-skins/compare/fresh.png",
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 65% one colour, 7 colours",
+      "error": "compare: blank composite: panel 3 is 65% one colour, 7 colours"
+    },
+    {
+      "scene": "migrated",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-71-skins/before/migrated.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-71-skins/after/migrated.png",
+      "title": "A returning player whose saved pick was Discovery Disc '96 (now hidden), no ?skin=, tutorial skipped (Frontier 95's paperclip holds toasts while the coach talks)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-71-skins/compare/migrated.png",
+      "changed": 0.23158873456790124
+    },
+    {
+      "scene": "picker",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-71-skins/before/picker.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-71-skins/after/picker.png",
+      "title": "Start ▸ Settings ▸ Display…: the skin picker",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-71-skins/compare/picker.png",
+      "changed": 0.100008487654321
+    }
+  ],
+  "errors": []
+}

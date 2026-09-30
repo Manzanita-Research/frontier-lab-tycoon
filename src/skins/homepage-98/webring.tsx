@@ -1,7 +1,7 @@
 // The navigation: the build palette as the AI Labs WebRing (88×31 buttons, Prev/Next), the speed buttons as a grey web
 // form, the news as a navy marquee with a badge you are not supposed to click, and the little utilities as form buttons.
 import { useEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
-import { ALL_VISIBLE, DramaIcon, Marquee, reducedMotion, RunBox, useStartMenu, type StartView } from "../kit";
+import { ALL_VISIBLE, DramaIcon, Marquee, reducedMotion, RunBox, SpeedGlyph, useStartMenu, type StartView } from "../kit";
 import { useCoach, useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import type { BuildItemVM } from "../../ui/hud/types";
@@ -80,7 +80,7 @@ export function BuildBar({ items, tip, teasers = [], widgets = [], actions }: Sl
             | <b className="gc-ringname"><Spark /> The AI Labs WebRing <Spark /></b>
             <button type="button" className="gc-link gc-build" aria-expanded={open} onClick={() => toggle(!open)} {...coach.attrs("start", !open && inside)}>
               {" "}
-              — {t("build.menuTitle").toLowerCase()} something!
+              — {t("build.open")} something!
             </button>{" "}
             |{" "}
           </span>
@@ -218,9 +218,7 @@ export function Ring({ items, teasers = [], widgets = [], actions, done, strip, 
   );
 }
 
-const SPEED_WORDS: Record<number, string> = { 0: "Pause", 1: "Play", 3: "Fast", 10: "Faster!!" };
-
-/** "Speed: [Pause] [Play] [Fast] [Faster!!]": grey form buttons, Play pressed in. */
+/** "Speed: [Pause] [▶] [▶▶] [▶▶▶]": grey form buttons, the one running pressed in. */
 export function Speed({ speed, actions }: SlotPropsMap["Speed"]) {
   const t = useT();
   const coach = useCoach();
@@ -229,7 +227,7 @@ export function Speed({ speed, actions }: SlotPropsMap["Speed"]) {
       <span className="gc-flabel">Speed:</span>
       {speed.options.map((o) => (
         <button key={o.value} type="button" className={`gc-fb ${o.active ? "on" : ""}`} {...(o.value === 3 ? coach.attrs("speed") : {})} onClick={() => actions.setSpeed(o.value)} aria-label={t(o.key)} aria-pressed={o.active}>
-          {SPEED_WORDS[o.value] ?? t(`speed.short.${o.value}`)}
+          {o.value === 0 ? t("speed.pause") : <SpeedGlyph value={o.value} />}
         </button>
       ))}
     </div>

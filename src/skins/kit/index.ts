@@ -6,6 +6,7 @@ export { Senator } from "./Senator";
 export { Dialog } from "./Dialog";
 export { ImportButton } from "./ImportButton";
 export { DramaIcon } from "./DramaIcon";
+export { SpeedGlyph } from "./SpeedGlyph";
 export { money } from "./format";
 export { reducedMotion } from "./motion";
 export { useT, useSlots, useSkin, useCoach, type CoachApi } from "../context";

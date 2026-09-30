@@ -1,7 +1,7 @@
 // The small controls: the Oregon Trail Pace buttons, the "DID YOU KNOW?" tape, and the row of round sticker buttons
 // (News Room, sound, mixer, skins, camera).
 import { useState } from "react";
-import { ALL_VISIBLE, DramaIcon, Marquee } from "../kit";
+import { ALL_VISIBLE, DramaIcon, Marquee, SpeedGlyph } from "../kit";
 import { useCoach, useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import { Icon } from "./art";
@@ -13,7 +13,7 @@ const CAPTION: Record<number, string> = {
   10: "The interns are questioning everything.",
 };
 
-/** Rest / Steady / Strenuous / Grueling, like the wagon party's pace on the trail. */
+/** The wagon party's Pace bar: plain Pause / ▶ / ▶▶ / ▶▶▶ buttons (the coach names them), the trail talk in the caption. */
 export function Speed({ speed, actions }: SlotPropsMap["Speed"]) {
   const t = useT();
   const coach = useCoach();
@@ -24,9 +24,14 @@ export function Speed({ speed, actions }: SlotPropsMap["Speed"]) {
           <Icon name="wagon" size={28} /> {t("speed.label")}:
         </span>
         {speed.options.map((o) => (
-          <button key={o.value} type="button" className={`dd-pb ${o.active ? "on" : ""}`} {...(o.value === 3 ? coach.attrs("speed") : {})} onClick={() => actions.setSpeed(o.value)} aria-pressed={o.active} title={CAPTION[o.value]}>
-            {o.value === 0 && <Icon name="pause" size={14} />}
-            {t(o.key)}
+          <button key={o.value} type="button" className={`dd-pb ${o.active ? "on" : ""}`} {...(o.value === 3 ? coach.attrs("speed") : {})} onClick={() => actions.setSpeed(o.value)} aria-pressed={o.active} aria-label={t(o.key)} title={CAPTION[o.value]}>
+            {o.value === 0 ? (
+              <>
+                <Icon name="pause" size={14} /> {t("speed.pause")}
+              </>
+            ) : (
+              <SpeedGlyph value={o.value} />
+            )}
           </button>
         ))}
       </div>

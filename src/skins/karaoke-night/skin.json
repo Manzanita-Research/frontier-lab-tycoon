@@ -5,6 +5,7 @@
   "author": "Frontier Lab Tycoon",
   "version": "1.0.0",
   "description": "A karaoke machine runs the lab: lilac plastic, glowing screens, pixel scoreboard type, a song queue for objectives and AI News Karaoke along the bottom, with a bouncing ball.",
+  "unlisted": true,
   "preview": "assets/preview.jpg",
   "slots": [
     "Layout",
@@ -135,10 +136,6 @@
     "training.title": "NOW TRAINING",
     "training.shipped": "SHIPPED!",
     "thoughts.title": "Requests",
-    "speed.pause": "Stop",
-    "speed.1": "Play",
-    "speed.3": "Fast forward",
-    "speed.10": "Encore",
     "inspector.follow": "Follow",
     "inspector.thinking": "Now thinking",
     "build.menuTitle": "Arcade",
