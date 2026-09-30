@@ -72,7 +72,7 @@ export function Ending({ ending, layout, actions }: SlotPropsMap["Ending"]) {
             <div className="f95-end-strip" aria-label="The run by era, in squares">
               {ending.strip}
             </div>
-            <dl className="f95-facts small">
+            <dl className="f95-facts f95-end-facts">
               {ending.stats.map((s) => (
                 <div key={s.key}>
                   <dt>
@@ -83,7 +83,7 @@ export function Ending({ ending, layout, actions }: SlotPropsMap["Ending"]) {
               ))}
             </dl>
             <div className="f95-end-buttons">
-              <Btn def onClick={() => actions.shareEnding?.()} disabled={share.status === "making"} autoFocus>
+              <Btn def onClick={() => actions.shareEnding?.()} disabled={share.status === "making"} autoFocus={!layout.compact}>
                 {share.native ? "Share the front page..." : "Save share card..."}
               </Btn>
               <Btn onClick={() => actions.copySummary?.()}>{share.status === "copied" ? "Copied!" : "Copy run summary"}</Btn>

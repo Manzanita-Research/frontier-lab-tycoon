@@ -2899,12 +2899,18 @@
     align-items: start;
     width: min(1180px, calc(100vw - 20px));
     max-height: calc(100dvh - 20px);
+    > .f95-win {
+      min-width: 0;
+    }
     &.compact {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
       overflow: auto;
       max-height: calc(100dvh - 20px);
       .f95-end-paper {
         max-height: none;
+      }
+      .f95-paper {
+        padding: 12px 14px;
       }
     }
   }
@@ -2972,9 +2978,25 @@
     font-weight: normal;
   }
   .f95-end-strip {
-    font-size: 16px;
+    font-size: 15px;
     line-height: 1.2;
-    overflow-wrap: anywhere;
+    letter-spacing: -1px;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .f95-end-facts {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+    div {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    dd {
+      min-width: 48px;
+      text-align: right;
+    }
   }
   .f95-end-buttons {
     display: grid;

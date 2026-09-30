@@ -112,7 +112,8 @@
       "front-captured",
       "front-pivot",
       "front-95",
-      "front-phone"
+      "front-phone",
+      "front-phone-share"
     ]
   },
   "scenes": {
@@ -1178,6 +1179,26 @@
       "steps": [
         {
           "wait": 7000
+        }
+      ]
+    },
+    "front-phone-share": {
+      "title": "FLT-11: an ending on a phone, scrolled to Share and the card",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "moment": "front-acquihired"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        },
+        {
+          "eval": "() => { const el = document.querySelector('.f95-end-run, .ending-side'); if (el) el.scrollIntoView({ block: 'start' }); }"
+        },
+        {
+          "wait": 500
         }
       ]
     }
