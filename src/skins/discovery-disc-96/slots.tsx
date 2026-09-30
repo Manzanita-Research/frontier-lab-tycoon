@@ -5,9 +5,9 @@ import { Objectives, Training } from "./chart";
 import { Stats } from "./stats";
 import { Inspector } from "./badge";
 import { BuildBar } from "./stamps";
-import { NewsArrival, NewsControls, PhotoButton, Speed, Ticker } from "./tools";
+import { DramaButton, NewsArrival, NewsControls, PhotoButton, Speed, Ticker } from "./tools";
 import { Assistant, Bubble, Toast } from "./guide";
 import { EraCard, EventCard, Outcome } from "./cards";
 
-const slots: SkinSlots = { Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Bubble, Ticker, Toast, Assistant, EventCard, EraCard, Outcome, NewsControls, NewsArrival, PhotoButton };
+const slots: SkinSlots = { Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Bubble, Ticker, Toast, Assistant, EventCard, EraCard, Outcome, NewsControls, NewsArrival, PhotoButton, DramaButton };
 export default slots;

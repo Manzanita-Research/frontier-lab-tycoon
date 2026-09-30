@@ -15,6 +15,8 @@ import { shotAtom } from "../juice/photo";
 import { newMotion, NO_MOTION, stepMotion, type Motion, type MotionView } from "./leapfrogMotion";
 import { arenaOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, senateOpenAtom, skinUiAtom, staffOpenAtom } from "./state";
 import { modSession } from "../../app/mods";
+import { dramaPath, dramaViewModel } from "../../drama/feed";
+import { dramaAtom } from "../../drama/state";
 import { playableFixture } from "./previewLadder";
 import type { HudVM } from "./types";
 import { hudViewModel } from "./vm";
@@ -180,6 +182,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
   const papersOpen = useAtomValue(papersOpenAtom);
   const dismissed = useAtomValue(dismissedAtom);
   const disastersOpen = useAtomValue(disastersOpenAtom);
+  const dramaUi = useAtomValue(dramaAtom);
   const viewport = useViewport();
   const tapHint = useTapHint(selected);
   // "Build an API Gateway..." twice is one hint too many: once a toast has said it, the standing hint is redundant.
@@ -194,12 +197,13 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
     const m = modSession();
     return {
       open: modsOpen,
-      list: m.mods.map((mod) => ({ ...mod })),
+      list: m.mods.map((mod) => ({ ...mod, drama: dramaPath(mod.source, location.href) !== null })),
       conflicts: m.conflicts.map((c) => `${c.path}: ${c.earlier} (${c.earlierOperation}), then ${c.later} (${c.laterOperation}); ${c.later} wins`),
       errors: [...m.errors],
       contentHash: m.run?.contentHash ?? null,
     };
   }, [modsOpen]);
+  const drama = useMemo(() => dramaViewModel(dramaUi, modSession().mods, location.href, new Date()), [dramaUi]);
 
   // `?debug=1&ladder=N`: show a rung of the ladder without playing up to it (skins, screenshots). Never in a normal game.
   const shown = useMemo(() => (debugParams.ladder ? ({ ...snap, ...playableFixture(debugParams.ladder.level, debugParams.ladder.coach, debugParams.ladder.unlock) } as unknown as Snapshot) : snap), [snap]);
@@ -240,9 +244,10 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
           rejected: skinUi.refused,
         },
         mods,
+        drama,
         viewport,
       }),
-    [shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, beat, skinUi, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen],
+    [shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, beat, skinUi, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, drama],
   );
   return vm;
 }

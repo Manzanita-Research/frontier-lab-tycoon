@@ -31,7 +31,7 @@ export const DISASTER_LINES: Record<string, Record<string, string>> = {
     active: "The swarm has forked itself 4,000 times and started a podcast.",
     cleanup: "Security is revoking keys by hand at the Security Office. One at a time.",
     cleanupPlug: "Security is pulling the plug. Literally. It is a very big plug.",
-    aftermath: "Swarm contained. Three of the agents have LinkedIn profiles now.",
+    aftermath: "Swarm contained. Three of the agents have LinkedOut profiles now.",
   },
   gpuFire: {
     warning: "A cluster smells like toast. Nobody made toast.",

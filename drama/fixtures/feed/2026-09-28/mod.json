@@ -1,0 +1,144 @@
+{
+  "apiVersion": 1,
+  "id": "drama-2026-09-28",
+  "name": "Daily Drama: The Benchmark Bake-Off",
+  "version": "1.0.0",
+  "author": "Daily Drama (fixture)",
+  "description": "Every lab tops a leaderboard today, each on a benchmark it wrote that morning.",
+  "content": {
+    "events": {
+      "add": [
+        {
+          "id": "drama-2026-09-28-bake-off",
+          "title": "A Rival Tops a Benchmark It Invented at Breakfast",
+          "body": "Open-ish AI scored 100% on Open-ish Bench, which it released 20 minutes before the results.\nThe press wants to know which benchmark you're winning.",
+          "tone": "joke",
+          "when": {
+            "stat": "day",
+            "atLeast": 20
+          },
+          "choices": [
+            {
+              "label": "Invent our own benchmark and win it",
+              "hint": "Hype +4, Discourse +2",
+              "effects": [
+                {
+                  "type": "hype",
+                  "amount": 4
+                },
+                {
+                  "type": "discourse",
+                  "add": 2
+                },
+                {
+                  "type": "news",
+                  "text": "Lab sets record on benchmark it announced during the livestream",
+                  "tone": "joke"
+                }
+              ]
+            },
+            {
+              "label": "Win a real benchmark, slowly",
+              "hint": "Hype -1",
+              "effects": [
+                {
+                  "type": "hype",
+                  "amount": -1
+                },
+                {
+                  "type": "thought",
+                  "text": "Real benchmarks are hard. That's why nobody uses them.",
+                  "count": 3,
+                  "kind": "researcher"
+                }
+              ]
+            },
+            {
+              "label": "Retire from benchmarks, undefeated",
+              "hint": "Hype +2",
+              "effects": [
+                {
+                  "type": "hype",
+                  "amount": 2
+                },
+                {
+                  "type": "news",
+                  "text": "Lab retires from benchmarks 'while still undefeated'",
+                  "tone": "joke"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "headlines": {
+      "add": [
+        {
+          "id": "drama-2026-09-28-h1",
+          "text": "Open-ish AI sets record on Open-ish Bench, which it released 20 minutes earlier",
+          "tone": "joke"
+        },
+        {
+          "id": "drama-2026-09-28-h2",
+          "text": "Anthropomorphic tops its own honesty eval, admits this is a bit awkward",
+          "tone": "joke"
+        },
+        {
+          "id": "drama-2026-09-28-h3",
+          "text": "MetaMeta claims top spot on a leaderboard where it is the only entry",
+          "tone": "joke"
+        },
+        {
+          "id": "drama-2026-09-28-h4",
+          "text": "Macrohard benchmark measures how well models fill in spreadsheet cells; Macrohard wins",
+          "tone": "joke"
+        },
+        {
+          "id": "drama-2026-09-28-h5",
+          "text": "Sirocco posts its scores as a torrent; seeders report 'basically superintelligent, trust us'",
+          "tone": "joke"
+        },
+        {
+          "id": "drama-2026-09-28-h6",
+          "text": "New benchmark ranks benchmarks by how easy they are to win",
+          "tone": "joke"
+        }
+      ]
+    },
+    "thoughts": {
+      "add": [
+        {
+          "id": "drama-2026-09-28-t1",
+          "kind": "researcher",
+          "when": "always",
+          "text": "I wrote the test, and the answers, and then we passed. Science."
+        },
+        {
+          "id": "drama-2026-09-28-t2",
+          "kind": "researcher",
+          "when": "training",
+          "text": "Our loss curve looks great if you tilt your head."
+        },
+        {
+          "id": "drama-2026-09-28-t3",
+          "kind": "visitor",
+          "when": "highHype",
+          "text": "Which benchmark are you winning? All of them? Great, sign me up."
+        },
+        {
+          "id": "drama-2026-09-28-t4",
+          "kind": "agent",
+          "when": "training",
+          "text": "I trained on the test set. I prefer to call it a study group."
+        },
+        {
+          "id": "drama-2026-09-28-t5",
+          "kind": "researcher",
+          "when": "justReleased",
+          "text": "We shipped! Now I invent the benchmark we're best at."
+        }
+      ]
+    }
+  }
+}

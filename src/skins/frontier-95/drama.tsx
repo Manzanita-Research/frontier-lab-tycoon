@@ -1,7 +1,7 @@
 // Frontier 95's drama cards (FLT-26 Defection, FLT-20 Poaching War): the resignation draft open in WordSad, the recruiter's
 // message in Outlook Excess and the neo lab's MANIFESTO.txt in NoteBad, with the choices underneath as a message box's buttons.
 import { useT } from "../context";
-import type { DramaVM } from "../../ui/hud/types";
+import type { DramaDocVM } from "../../ui/hud/types";
 import type { SlotPropsMap } from "../types";
 import { Btn, Win } from "./parts";
 
@@ -11,7 +11,7 @@ const APP = {
   manifesto: { app: "NoteBad", icon: "doc", menu: ["File", "Edit", "Search", "Help"] },
 } as const;
 
-function Page({ drama }: { drama: DramaVM }) {
+function Page({ drama }: { drama: DramaDocVM }) {
   if (drama.style === "email") {
     return (
       <>
@@ -62,7 +62,7 @@ function Page({ drama }: { drama: DramaVM }) {
   );
 }
 
-export function Drama({ event, drama, actions }: SlotPropsMap["Drama"]) {
+export function DramaCard({ event, drama, actions }: SlotPropsMap["DramaCard"]) {
   const t = useT();
   const app = APP[drama.style];
   const title = drama.style === "email" ? `${drama.subject} - ${app.app}` : `${drama.file} - ${app.app}`;
