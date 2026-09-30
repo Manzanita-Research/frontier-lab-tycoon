@@ -226,11 +226,11 @@ export function Coach({ coach, anchor, panel, layout, actions }: SlotPropsMap["C
     if (b && (Math.abs(b.width - size.w) > 1 || Math.abs(b.height - size.h) > 1)) setSize({ w: b.width, h: b.height });
   }, [coach.id, layout.width, layout.height, size.w, size.h]);
   // The taskbar is 42px, and the news strip and the top windows are not to be covered either.
-  const place = layout.compact ? null : placeBalloon(anchor, size, { w: layout.width, h: layout.height }, { gap: 18, panel, margin: { top: 12, bottom: 52, left: 10, right: 10 } });
-  // On a phone the balloon docks away from its target: at the bottom only for something in the top of the screen.
-  const dock = anchor && anchor.y < layout.height * 0.3 ? "bottom" : "top";
+  const view = { w: layout.width, h: layout.height };
+  // On a phone it spans the screen, straight above the target (or below it, for something at the top).
+  const place = layout.compact ? placeBalloon(anchor, size, view, { gap: 12, panel, prefer: ["top", "bottom"], margin: { top: 52, bottom: 8, left: 4, right: 4 } }) : placeBalloon(anchor, size, view, { gap: 18, panel, margin: { top: 12, bottom: 52, left: 10, right: 10 } });
   return (
-    <div key={coach.id} ref={ref} className={`f95-coach ${layout.compact ? `docked dock-${dock}` : ""}`} style={place ? { left: place.x, top: place.y } : undefined} role="status" aria-live="polite" aria-label={t("assistant.title")}>
+    <div key={coach.id} ref={ref} className={`f95-coach ${layout.compact ? "docked" : ""}`} style={layout.compact ? { top: place.y } : { left: place.x, top: place.y }} role="status" aria-live="polite" aria-label={t("assistant.title")}>
       <div className="f95-balloon">
         <p className="f95-saying">{coach.text}</p>
         <div className="f95-coachfoot">

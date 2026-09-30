@@ -56,12 +56,11 @@ export function Objectives({ objectives, progress, visible = ALL_VISIBLE, layout
     // The one goal in front of you: a single star, until the race brings the chart.
     return (
       <section className="dd-goals dd-goal-one open" {...coach.attrs("goals")} role="status">
-        <div className="dd-goals-head">
-          <StarIcon on={false} size={26} />
-          <h4>{t("objectives.goal")}</h4>
-        </div>
         <div className="dd-goal-body">
           <div className="dd-goal-text">
+            <small>
+              <StarIcon on={false} size={20} /> {t("objectives.goal")}
+            </small>
             <b>{goal.line}</b>
             <StripeBar value={goal.ratio} label={goal.text} />
           </div>

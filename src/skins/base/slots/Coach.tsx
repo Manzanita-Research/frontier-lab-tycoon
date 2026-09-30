@@ -32,15 +32,14 @@ export function Coach({ coach, anchor, panel, layout, actions }: SlotPropsMap["C
     const b = ref.current?.getBoundingClientRect();
     if (b && (Math.abs(b.width - size.w) > 1 || Math.abs(b.height - size.h) > 1)) setSize({ w: b.width, h: b.height });
   }, [coach.id, layout.width, layout.height, size.w, size.h]);
-  const place = layout.compact ? null : placeBalloon(anchor, size, { w: layout.width, h: layout.height }, { gap: 20, panel, margin: { top: 76, bottom: 48, left: 12, right: 12 } });
-  // On a phone the balloon docks away from its target: at the bottom only for something in the top of the screen.
-  const dock = anchor && anchor.y < layout.height * 0.3 ? "bottom" : "top";
+  const view = { w: layout.width, h: layout.height };
+  const place = layout.compact ? placeBalloon(anchor, size, view, { gap: 12, panel, prefer: ["top", "bottom"], margin: { top: 56, bottom: 8, left: 8, right: 8 } }) : placeBalloon(anchor, size, view, { gap: 20, panel, margin: { top: 76, bottom: 48, left: 12, right: 12 } });
   return (
     <aside
       key={coach.id}
       ref={ref}
-      className={`coach panel ${layout.compact ? `docked dock-${dock}` : ""} ${place ? `side-${place.side}` : ""}`}
-      style={place ? { left: place.x, top: place.y } : undefined}
+      className={`coach panel ${layout.compact ? "docked" : ""} ${place ? `side-${place.side}` : ""}`}
+      style={layout.compact ? { top: place.y } : { left: place.x, top: place.y }}
       role="status"
       aria-live="polite"
       aria-label={t("assistant.title")}

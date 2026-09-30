@@ -1,10 +1,10 @@
 
-| Scene | Before (`main` @ deb7d60) | After (`flt-50-playable-ui` @ 8bba4a0+) |
-|---|---|---|
-| **coach-start** (discovery-disc-96)<br>93.3% px differ | ![coach-start@discovery-disc-96](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-50-playable-ui/docs/evidence/FLT-50/discovery-disc-96/before/coach-start@discovery-disc-96.png?raw=true) | ![coach-start@discovery-disc-96](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-50-playable-ui/docs/evidence/FLT-50/discovery-disc-96/after/coach-start@discovery-disc-96.png?raw=true) |
-| **coach-path** (discovery-disc-96)<br>93.1% px differ | ![coach-path@discovery-disc-96](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-50-playable-ui/docs/evidence/FLT-50/discovery-disc-96/before/coach-path@discovery-disc-96.png?raw=true) | ![coach-path@discovery-disc-96](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-50-playable-ui/docs/evidence/FLT-50/discovery-disc-96/after/coach-path@discovery-disc-96.png?raw=true) |
-| **coach-hall** (discovery-disc-96)<br>93.6% px differ | ![coach-hall@discovery-disc-96](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-50-playable-ui/docs/evidence/FLT-50/discovery-disc-96/before/coach-hall@discovery-disc-96.png?raw=true) | ![coach-hall@discovery-disc-96](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-50-playable-ui/docs/evidence/FLT-50/discovery-disc-96/after/coach-hall@discovery-disc-96.png?raw=true) |
-| **level-3** (discovery-disc-96)<br>34.2% px differ | ![level-3@discovery-disc-96](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-50-playable-ui/docs/evidence/FLT-50/discovery-disc-96/before/level-3@discovery-disc-96.png?raw=true) | ![level-3@discovery-disc-96](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-50-playable-ui/docs/evidence/FLT-50/discovery-disc-96/after/level-3@discovery-disc-96.png?raw=true) |
-| **phone-start** (discovery-disc-96)<br>86.4% px differ | ![phone-start@discovery-disc-96](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-50-playable-ui/docs/evidence/FLT-50/discovery-disc-96/before/phone-start@discovery-disc-96.png?raw=true) | ![phone-start@discovery-disc-96](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-50-playable-ui/docs/evidence/FLT-50/discovery-disc-96/after/phone-start@discovery-disc-96.png?raw=true) |
+| Scene | After (`flt-50-playable-ui` @ 54fd5fa+) |
+|---|---|
+| **coach-start** (discovery-disc-96) | ![coach-start@discovery-disc-96](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-50-playable-ui/docs/evidence/FLT-50/discovery-disc-96/after/coach-start@discovery-disc-96.png?raw=true) |
+| **coach-path** (discovery-disc-96) | ![coach-path@discovery-disc-96](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-50-playable-ui/docs/evidence/FLT-50/discovery-disc-96/after/coach-path@discovery-disc-96.png?raw=true) |
+| **level-3** (discovery-disc-96) | ![level-3@discovery-disc-96](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-50-playable-ui/docs/evidence/FLT-50/discovery-disc-96/after/level-3@discovery-disc-96.png?raw=true) |
+| **phone-start** (discovery-disc-96) | ![phone-start@discovery-disc-96](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-50-playable-ui/docs/evidence/FLT-50/discovery-disc-96/after/phone-start@discovery-disc-96.png?raw=true) |
+| **phone-path** (discovery-disc-96) | ![phone-path@discovery-disc-96](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-50-playable-ui/docs/evidence/FLT-50/discovery-disc-96/after/phone-path@discovery-disc-96.png?raw=true) |
 
-_pnpm shots: 5 scene(s), 1 skin(s) in 103.8s (10/10 captures ok)._
+_pnpm shots: 5 scene(s), 1 skin(s) in 48.0s (5/5 captures ok)._

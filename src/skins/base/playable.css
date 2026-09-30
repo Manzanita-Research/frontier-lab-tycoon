@@ -431,12 +431,6 @@
     right: 8px;
     width: auto;
   }
-  .coach.docked.dock-bottom {
-    bottom: 132px;
-  }
-  .coach.docked.dock-top {
-    top: 96px;
-  }
   .coach.docked::after {
     display: none;
   }

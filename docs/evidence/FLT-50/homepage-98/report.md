@@ -1,10 +1,10 @@
 
-| Scene | Before (`main` @ deb7d60) | After (`flt-50-playable-ui` @ 8bba4a0+) |
-|---|---|---|
-| **coach-start** (homepage-98)<br>96.7% px differ | ![coach-start@homepage-98](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-50-playable-ui/docs/evidence/FLT-50/homepage-98/before/coach-start@homepage-98.png?raw=true) | ![coach-start@homepage-98](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-50-playable-ui/docs/evidence/FLT-50/homepage-98/after/coach-start@homepage-98.png?raw=true) |
-| **coach-path** (homepage-98)<br>96.4% px differ | ![coach-path@homepage-98](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-50-playable-ui/docs/evidence/FLT-50/homepage-98/before/coach-path@homepage-98.png?raw=true) | ![coach-path@homepage-98](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-50-playable-ui/docs/evidence/FLT-50/homepage-98/after/coach-path@homepage-98.png?raw=true) |
-| **coach-hall** (homepage-98)<br>97.6% px differ | ![coach-hall@homepage-98](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-50-playable-ui/docs/evidence/FLT-50/homepage-98/before/coach-hall@homepage-98.png?raw=true) | ![coach-hall@homepage-98](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-50-playable-ui/docs/evidence/FLT-50/homepage-98/after/coach-hall@homepage-98.png?raw=true) |
-| **level-3** (homepage-98)<br>43.2% px differ | ![level-3@homepage-98](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-50-playable-ui/docs/evidence/FLT-50/homepage-98/before/level-3@homepage-98.png?raw=true) | ![level-3@homepage-98](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-50-playable-ui/docs/evidence/FLT-50/homepage-98/after/level-3@homepage-98.png?raw=true) |
-| **phone-start** (homepage-98)<br>45.7% px differ | ![phone-start@homepage-98](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-50-playable-ui/docs/evidence/FLT-50/homepage-98/before/phone-start@homepage-98.png?raw=true) | ![phone-start@homepage-98](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-50-playable-ui/docs/evidence/FLT-50/homepage-98/after/phone-start@homepage-98.png?raw=true) |
+| Scene | After (`flt-50-playable-ui` @ 54fd5fa+) |
+|---|---|
+| **coach-start** (homepage-98) | ![coach-start@homepage-98](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-50-playable-ui/docs/evidence/FLT-50/homepage-98/after/coach-start@homepage-98.png?raw=true) |
+| **coach-path** (homepage-98) | ![coach-path@homepage-98](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-50-playable-ui/docs/evidence/FLT-50/homepage-98/after/coach-path@homepage-98.png?raw=true) |
+| **level-3** (homepage-98) | ![level-3@homepage-98](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-50-playable-ui/docs/evidence/FLT-50/homepage-98/after/level-3@homepage-98.png?raw=true) |
+| **phone-start** (homepage-98) | ![phone-start@homepage-98](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-50-playable-ui/docs/evidence/FLT-50/homepage-98/after/phone-start@homepage-98.png?raw=true) |
+| **phone-path** (homepage-98) | ![phone-path@homepage-98](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-50-playable-ui/docs/evidence/FLT-50/homepage-98/after/phone-path@homepage-98.png?raw=true) |
 
-_pnpm shots: 5 scene(s), 1 skin(s) in 90.1s (10/10 captures ok)._
+_pnpm shots: 5 scene(s), 1 skin(s) in 46.0s (5/5 captures ok)._

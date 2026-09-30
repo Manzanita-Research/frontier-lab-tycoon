@@ -1184,6 +1184,22 @@
     background-position: 0 0, 13px 19px;
     box-shadow: 5px 5px 0 var(--dd-ink);
   }
+  .dd-goal-one .dd-goal-text {
+    display: grid;
+    gap: 4px;
+    small {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--dd-display);
+      font-size: 15px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    b {
+      font-size: 17px;
+    }
+  }
   .dd-tray.closed {
     padding: 8px 14px;
     .dd-tray-label {

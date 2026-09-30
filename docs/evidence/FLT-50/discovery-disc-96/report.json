@@ -1,55 +1,47 @@
 {
-  "base": {
-    "ref": "origin/main",
-    "sha": "deb7d601138ef4e226ba7cb77768f05d8f3aaa87"
-  },
+  "base": null,
   "head": {
     "branch": "flt-50-playable-ui",
-    "sha": "8bba4a0",
+    "sha": "54fd5fa",
     "dirty": true
   },
-  "seconds": 103.76,
+  "seconds": 48.027,
   "problems": [],
   "rows": [
     {
       "scene": "coach-start",
       "skin": "discovery-disc-96",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/discovery-disc-96/before/coach-start@discovery-disc-96.png",
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/discovery-disc-96/after/coach-start@discovery-disc-96.png",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/discovery-disc-96/compare/coach-start@discovery-disc-96.png",
-      "changed": 0.9325200617283951
+      "changed": null
     },
     {
       "scene": "coach-path",
       "skin": "discovery-disc-96",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/discovery-disc-96/before/coach-path@discovery-disc-96.png",
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/discovery-disc-96/after/coach-path@discovery-disc-96.png",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/discovery-disc-96/compare/coach-path@discovery-disc-96.png",
-      "changed": 0.9306188271604938
-    },
-    {
-      "scene": "coach-hall",
-      "skin": "discovery-disc-96",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/discovery-disc-96/before/coach-hall@discovery-disc-96.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/discovery-disc-96/after/coach-hall@discovery-disc-96.png",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/discovery-disc-96/compare/coach-hall@discovery-disc-96.png",
-      "changed": 0.9360887345679012
+      "changed": null
     },
     {
       "scene": "level-3",
       "skin": "discovery-disc-96",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/discovery-disc-96/before/level-3@discovery-disc-96.png",
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/discovery-disc-96/after/level-3@discovery-disc-96.png",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/discovery-disc-96/compare/level-3@discovery-disc-96.png",
-      "changed": 0.3424182098765432
+      "changed": null
     },
     {
       "scene": "phone-start",
       "skin": "discovery-disc-96",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/discovery-disc-96/before/phone-start@discovery-disc-96.png",
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/discovery-disc-96/after/phone-start@discovery-disc-96.png",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/discovery-disc-96/compare/phone-start@discovery-disc-96.png",
-      "changed": 0.8641314254465913
+      "changed": null
+    },
+    {
+      "scene": "phone-path",
+      "skin": "discovery-disc-96",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/discovery-disc-96/after/phone-path@discovery-disc-96.png",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/discovery-disc-96/compare/phone-path@discovery-disc-96.png",
+      "changed": null
     }
   ],
   "errors": []

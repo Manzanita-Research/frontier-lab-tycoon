@@ -1468,12 +1468,6 @@
         width: auto;
         min-width: 0;
       }
-      &.dock-bottom {
-        bottom: calc(var(--taskbar) + 30px + 52px);
-      }
-      &.dock-top {
-        top: 52px;
-      }
     }
   }
 

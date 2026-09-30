@@ -1,0 +1,32 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "deb7d601138ef4e226ba7cb77768f05d8f3aaa87"
+  },
+  "head": {
+    "branch": "flt-50-playable-ui",
+    "sha": "54fd5fa",
+    "dirty": true
+  },
+  "seconds": 48.347,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "phone-start",
+      "skin": "swag-drop",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop-phone/before/phone-start@swag-drop.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop-phone/after/phone-start@swag-drop.png",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop-phone/compare/phone-start@swag-drop.png",
+      "changed": 0.8780722141207923
+    },
+    {
+      "scene": "phone-path",
+      "skin": "swag-drop",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop-phone/before/phone-path@swag-drop.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop-phone/after/phone-path@swag-drop.png",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop-phone/compare/phone-path@swag-drop.png",
+      "changed": 0.9295365475756471
+    }
+  ],
+  "errors": []
+}

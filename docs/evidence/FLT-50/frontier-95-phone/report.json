@@ -5,10 +5,10 @@
   },
   "head": {
     "branch": "flt-50-playable-ui",
-    "sha": "8bba4a0",
+    "sha": "54fd5fa",
     "dirty": true
   },
-  "seconds": 45.264,
+  "seconds": 41.707,
   "problems": [],
   "rows": [
     {
@@ -17,7 +17,7 @@
       "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95-phone/before/phone-start@frontier-95.png",
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95-phone/after/phone-start@frontier-95.png",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95-phone/compare/phone-start@frontier-95.png",
-      "changed": 0.9518866204885162
+      "changed": 0.9241235265524365
     },
     {
       "scene": "phone-path",
@@ -25,7 +25,7 @@
       "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95-phone/before/phone-path@frontier-95.png",
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95-phone/after/phone-path@frontier-95.png",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95-phone/compare/phone-path@frontier-95.png",
-      "changed": 0.919701664843845
+      "changed": 0.9365680823915421
     }
   ],
   "errors": []
