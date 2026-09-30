@@ -79,6 +79,9 @@ function NoPath() {
 function BrokenLabels() {
   const ops = useApp(atoms.ops);
   const buildings = useApp(atoms.buildings);
+  const disasters = useApp(atoms.disasters);
+  const sre = disasters.diverted.find((d) => d.job === "sre");
+  const away = sre && sre.diverted === sre.total ? (disasters.runs.find((r) => r.id === sre.by)?.name ?? null) : null;
   return (
     <>
       {ops.broken.map((o) => {
@@ -94,7 +97,7 @@ function BrokenLabels() {
               return true;
             }}
           >
-            {o.sre ? "SRE on the way" : "OUT OF ORDER"}
+            {o.sre ? "SRE on the way" : away ? `OUT OF ORDER · SREs on the ${away}` : "OUT OF ORDER"}
           </Anchored>
         );
       })}
@@ -105,12 +108,13 @@ function BrokenLabels() {
 /** Who is who: a small tag over each staffer (their job), so a Janitor Bot in a crowd is still a Janitor Bot. */
 function StaffTags() {
   const ops = useApp(atoms.ops);
+  const diverted = new Set(useApp(atoms.disasters).divertedIds);
   return (
     <>
       {ops.staff.map((o) => (
         <Anchored
           key={o.id}
-          className={`stafftag job-${o.job}`}
+          className={`stafftag job-${o.job} ${diverted.has(o.id) ? "diverted" : ""}`}
           pos={(out) => {
             const s = sim.world.staff.find((q) => q.id === o.id);
             if (!s) return false;
@@ -122,6 +126,47 @@ function StaffTags() {
           {o.title}
         </Anchored>
       ))}
+    </>
+  );
+}
+
+/**
+ * Disasters on the map (FLT-32): the cleanup's progress over wherever a disaster has sent people, and a shout at the
+ * gate when every guard has been pulled off it.
+ */
+function DisasterLabels() {
+  const disasters = useApp(atoms.disasters);
+  const buildings = useApp(atoms.buildings);
+  const security = disasters.diverted.find((d) => d.job === "security");
+  const over = (to: number, y: number) => (out: { set: (x: number, y: number, z: number) => unknown }) => {
+    const rect = (to !== 0 && buildings.find((b) => b.id === to)) || sim.world.gate;
+    const [cx, cz] = rectCenter(rect);
+    out.set(cx, y, cz);
+    return true;
+  };
+  return (
+    <>
+      {disasters.sites.map((site) => {
+        const run = disasters.runs.find((r) => r.id === site.owner);
+        if (!run) return null;
+        const pct = run.progress === null ? null : Math.round(run.progress * 100);
+        return (
+          <Anchored key={`${site.owner}-${site.to}`} className="dzsite" pos={over(site.to, 3.6)}>
+            <b>{run.name}</b>
+            {pct !== null && (
+              <span className="dzsite-bar">
+                <i style={{ width: `${pct}%` }} />
+                <small>{pct}%</small>
+              </span>
+            )}
+          </Anchored>
+        );
+      })}
+      {security && security.diverted === security.total && (
+        <Anchored className="dzgate" pos={over(0, 2.4)}>
+          GATE UNGUARDED
+        </Anchored>
+      )}
     </>
   );
 }
@@ -275,6 +320,7 @@ export function WorldOverlay() {
       <StaffTags />
       <QueueLabels />
       <CollusionSigns />
+      <DisasterLabels />
       <Reason />
     </div>
   );

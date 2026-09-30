@@ -72,6 +72,12 @@ const ART: Record<string, ReactNode> = {
       <circle cx="7" cy="6" r="3.5" fill="#FFD400" stroke={INK} strokeWidth="2" />
     </>
   ),
+  security: (
+    <>
+      <path d="M16 3 26 7v8c0 7-5 11-10 13C11 26 6 22 6 15V7Z" fill="#1A5BD6" strokeWidth="2.5" {...S} />
+      <path d="M11 15l4 4 7-8" fill="none" stroke="#FFD400" strokeWidth="3" />
+    </>
+  ),
   bulldoze: (
     <>
       <rect x="8" y="9" width="15" height="11" fill="#FFD400" strokeWidth="2.5" {...S} />

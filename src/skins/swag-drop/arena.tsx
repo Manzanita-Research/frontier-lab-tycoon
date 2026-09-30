@@ -74,12 +74,13 @@ export function Arena({ arena, leapfrog, layout }: SlotPropsMap["Arena"]) {
           {(tab === "arena" || !bench) && (
             <div className="rows" style={{ height: arena.rows.length * ROW }}>
               {arena.rows.map((row) => (
-                <div key={row.id} className={`row ${row.you ? "you" : ""} ${row.moved ? `moved-${row.moved}` : ""}`} style={{ transform: `translateY(${(row.rank - 1) * ROW}px)` }} title={row.title}>
+                <div key={row.id} className={`row ${row.you ? "you" : ""} ${row.leak ? "leak" : ""} ${row.moved ? `moved-${row.moved}` : ""}`} style={{ transform: `translateY(${(row.rank - 1) * ROW}px)` }} title={row.title}>
                   <span className="rk">{row.rank}</span>
                   <i className="dot" style={{ background: row.color }} />
                   <span className="nm">
                     {row.short}
                     {row.open && <em>open</em>}
+                    {row.leak && <em className="leak">{t("arena.leak")}</em>}
                   </span>
                   <span className="sc">{row.score}</span>
                   <span className={`dl ${row.delta > 0 ? "up" : row.delta < 0 ? "down" : ""}`}>{row.deltaText}</span>

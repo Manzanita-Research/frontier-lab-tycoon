@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { BUILDINGS } from "../../content/buildings";
 import { formatMoney } from "../../sim/format";
 import { fixtureInput, fixtureWorld, FIXTURE_CHAT, FIXTURE_PAPER } from "./fixtures";
+import { CALM_START_DAY } from "../../sim/disasters/driver";
 import { SKIN_API_VERSION } from "./types";
 import { hudViewModel, SHIPPED_DAYS, TICKER_ITEMS } from "./vm";
 
@@ -47,7 +48,7 @@ describe("hudViewModel", () => {
 
   it("lists the build palette with prices, hotkeys, affordability and the selected tool", () => {
     const kinds = vm.buildItems.map((b) => b.kind);
-    expect(kinds).toEqual(["path", "cluster", "hall", "gateway", "kombucha", "nap", "snack", "demo", "bulldoze", "staff"]);
+    expect(kinds).toEqual(["path", "cluster", "hall", "gateway", "kombucha", "nap", "snack", "demo", "security", "bulldoze", "staff"]);
     const cluster = vm.buildItems.find((b) => b.kind === "cluster")!;
     expect(cluster).toMatchObject({ name: BUILDINGS.cluster.name, hotkey: 2, selected: true, price: BUILDINGS.cluster.price, priceText: formatMoney(BUILDINGS.cluster.price) });
     expect(vm.buildItems.filter((b) => b.selected)).toHaveLength(1);
@@ -279,5 +280,73 @@ describe("Playable v1: what the lab has earned, the coach, and Help", () => {
     expect(help.numbers.map((n) => n.name)).toEqual(["Cash", "Runway", "Vibes", "Hype"]);
     // Instructions, not jokes: the world keeps those.
     for (const line of [...help.loop, ...help.buildings.map((b) => b.line)]) expect(line).not.toMatch(/venture capital into heat|loss goes down/i);
+  });
+});
+
+describe("the Disasters view (FLT-32)", () => {
+  const mid = hudViewModel(fixtureInput({ disaster: true, disastersOpen: true }));
+
+  it("is earned at Scrutiny: hidden before it, and the menu cannot open while it is", () => {
+    const four = hudViewModel(fixtureInput({ level: 4, disastersOpen: true }));
+    expect(four.disasters.enabled).toBe(false);
+    expect(four.disasters.open).toBe(false);
+    expect(four.buildItems.map((b) => b.kind)).not.toContain("security");
+    const five = hudViewModel(fixtureInput({ level: 5, disastersOpen: true }));
+    expect(five.disasters.enabled).toBe(true);
+    expect(five.disasters.open).toBe(true);
+    expect(five.buildItems.map((b) => b.kind)).toContain("security");
+  });
+
+  it("offers the four settings with one checked, and every disaster, greyed with a reason while it is under way", () => {
+    expect(mid.disasters.risks.map((r) => r.label)).toEqual(["Off", "Rare", "Normal", "Chaos"]);
+    expect(mid.disasters.risks.filter((r) => r.active).map((r) => r.key)).toEqual([mid.disasters.risk]);
+    const swarm = mid.disasters.menu.find((m) => m.id === "rogueSwarm")!;
+    expect(swarm).toMatchObject({ active: true, available: false });
+    expect(swarm.reason).toMatch(/under way/);
+    expect(mid.disasters.menu.find((m) => m.id === "gpuFire")).toMatchObject({ active: false, available: true });
+    for (const m of mid.disasters.menu) for (const t of m.tags) expect(t.label).not.toBe("");
+  });
+
+  it("says what is going wrong, in the game's voice, with the cleanup's progress", () => {
+    const swarm = mid.disasters.running.find((r) => r.id === "rogueSwarm")!;
+    expect(swarm.stage).toBe("response");
+    expect(swarm.phaseLabel).toBe("Cleaning up");
+    expect(swarm.line).toMatch(/revoking keys/);
+    expect(swarm.progress).toBeGreaterThan(0);
+    expect(swarm.progressText).toMatch(/^Security \d+%$/);
+    expect(mid.disasters.running.find((r) => r.id === "weightsLeak")?.phaseLabel).toBe("Lawyering");
+  });
+
+  it("names who was pulled off their post, and shouts when nobody is left", () => {
+    const sec = mid.disasters.understaffed.find((u) => u.job === "security")!;
+    expect(sec).toMatchObject({ all: true, diverted: sec.total });
+    expect(sec.text).toBe("All Security on the Rogue Agent Swarm. GATE UNGUARDED.");
+    // The map's half: who goes red, and where the swarm's cleanup is (the Security Office).
+    const snap = fixtureInput({ disaster: true }).snap;
+    expect(snap.disasters.divertedIds).toHaveLength(snap.disasters.diverted.reduce((n, d) => n + d.diverted, 0));
+    const site = snap.disasters.sites.find((x) => x.owner === "rogueSwarm" && x.job === "security")!;
+    expect(snap.buildings.find((b) => b.id === site.to)?.kind).toBe("security");
+  });
+
+  it("marks the rival running on your leaked weights in the Arena", () => {
+    const leaked = mid.arena.rows.filter((r) => r.leak);
+    expect(leaked.map((r) => r.id)).toEqual(["sirocco"]);
+    expect(leaked[0]!.title).toMatch(/leaked weights/);
+    expect(hudViewModel(fixtureInput()).arena.rows.some((r) => r.leak)).toBe(false);
+  });
+
+  it("puts a word on trust and heat", () => {
+    expect(mid.disasters.trust.text).toBe(`${mid.disasters.trust.value} · ${mid.disasters.trust.word}`);
+    expect(mid.disasters.heat.word).not.toBe("");
+  });
+
+  it("promises a calm start while the lab has shipped nothing, and says nothing about it when risk is off", () => {
+    const w = fixtureWorld();
+    w.disasters.risk = "rare";
+    w.models = [];
+    expect(hudViewModel(fixtureInput({ world: w })).disasters.calm).not.toBeNull();
+    w.disasters.risk = "off";
+    expect(hudViewModel(fixtureInput({ world: w })).disasters.calm).toBeNull();
+    expect(CALM_START_DAY).toBeGreaterThan(0);
   });
 });

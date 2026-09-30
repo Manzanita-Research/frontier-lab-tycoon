@@ -7,10 +7,11 @@ import { Assistant, Bubble, Coach, Confirm, EraCard, EventCard, HowToPlay, NewsA
 import { FrontPage, GroupChat, Mixer, ModManager, NewsRoom, PhotoOverlay, SkinPicker } from "./apps";
 import { Benchmarks, Livestream, Voice } from "./leapfrog";
 import { CrumbWiki, PaperMoment, Papers } from "./papers";
+import { DisasterAlert, DisasterMenu } from "./disasters";
 
 const slots: SkinSlots = {
   Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, Bubble, ThoughtsPanel, Ticker, Toast, Assistant,
   EventCard, Confirm, Coach, UnlockCard, HowToPlay, Arena, Benchmarks, Voice, Livestream, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, NewsControls,
-  NewsArrival, NewsRoom, Mixer, ModManager, Papers, PaperMoment, CrumbWiki,
+  NewsArrival, NewsRoom, Mixer, ModManager, Papers, PaperMoment, CrumbWiki, DisasterMenu, DisasterAlert,
 };
 export default slots;

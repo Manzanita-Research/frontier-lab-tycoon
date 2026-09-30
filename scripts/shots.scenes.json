@@ -108,6 +108,18 @@
       "mod-steve-phone",
       "mod-retriever",
       "mod-manager"
+    ],
+    "disasters-ui": [
+      "dz-alert",
+      "dz-menu",
+      "dz-ask",
+      "dz-leak",
+      "dz-finance",
+      "dz-swag-alert",
+      "dz-swag-menu",
+      "dz-h98-leak",
+      "dz-phone",
+      "dz-swag-phone"
     ]
   },
   "scenes": {
@@ -1141,6 +1153,194 @@
         },
         {
           "wait": 1200
+        }
+      ]
+    },
+    "dz-alert": {
+      "title": "FLT-32: Rogue Agent Swarm mid-cleanup in Frontier 95: the error box, GATE UNGUARDED over the gate, the progress label on the Security Office",
+      "query": {
+        "warp": null,
+        "disaster": "rogueSwarm",
+        "dz": 45,
+        "dzPick": 0,
+        "zoom": 72,
+        "focus": "11.6,18.4"
+      },
+      "steps": [
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "dz-menu": {
+      "title": "FLT-32: Start ▸ Settings ▸ Disasters… (the Disasters Properties applet) while the swarm is on",
+      "query": {
+        "warp": null,
+        "disaster": "rogueSwarm",
+        "dz": 45,
+        "dzPick": 0,
+        "zoom": 72,
+        "focus": "11.6,18.4"
+      },
+      "steps": [
+        {
+          "eval": "async (f, w) => { const z = (ms) => new Promise((r) => setTimeout(r, ms)); const q = (s) => document.querySelector(s); q('[data-testid=start-button]')?.click(); await z(250); [...document.querySelectorAll('[role=menuitem][aria-expanded]')].find((b) => /Settings/.test(b.textContent))?.click(); await z(250); q('[data-testid=start-disasters]')?.click(); await z(300); }"
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "dz-ask": {
+      "title": "FLT-32: \"Start a GPU Fire?\" with No as the default",
+      "query": {
+        "warp": null,
+        "disaster": "rogueSwarm",
+        "dz": 45,
+        "dzPick": 0,
+        "zoom": 72,
+        "focus": "11.6,18.4"
+      },
+      "steps": [
+        {
+          "eval": "async (f, w) => { const z = (ms) => new Promise((r) => setTimeout(r, ms)); const q = (s) => document.querySelector(s); q('[data-testid=start-button]')?.click(); await z(250); [...document.querySelectorAll('[role=menuitem][aria-expanded]')].find((b) => /Settings/.test(b.textContent))?.click(); await z(250); q('[data-testid=start-disasters]')?.click(); await z(300); [...document.querySelectorAll('.f95-dz-listbox button:not([disabled])')].find((b) => /GPU/.test(b.textContent))?.click(); await z(150); [...document.querySelectorAll('.f95-dz-applet .f95-row button')].find((b) => /Start/.test(b.textContent))?.click(); }"
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "dz-leak": {
+      "title": "FLT-32: Weights Leak: the thief's row in the Arena reads \"your weights\"",
+      "query": {
+        "warp": null,
+        "disaster": "weightsLeak",
+        "dz": 40,
+        "dzPick": 0,
+        "zoom": 72,
+        "focus": "11.6,18.4"
+      },
+      "steps": [
+        {
+          "eval": "async (f, w) => { const z = (ms) => new Promise((r) => setTimeout(r, ms)); const q = (s) => document.querySelector(s); document.querySelectorAll('[role=tab]').forEach((t) => /^Arena$/.test(t.textContent.trim()) && t.click()); }"
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "dz-finance": {
+      "title": "FLT-32: Public trust and Regulator heat on the Finance tab",
+      "query": {
+        "warp": null,
+        "disaster": "rogueSwarm",
+        "dz": 45,
+        "dzPick": 0,
+        "zoom": 72,
+        "focus": "11.6,18.4"
+      },
+      "steps": [
+        {
+          "eval": "async (f, w) => { document.querySelectorAll('[role=tab]').forEach((t) => /^Finance$/.test(t.textContent.trim()) && t.click()); }"
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "dz-swag-alert": {
+      "title": "FLT-32: the base alert in Swag Drop (the corkboard shrinks so the Arena still shows)",
+      "query": {
+        "warp": null,
+        "disaster": "weightsLeak",
+        "dz": 40,
+        "dzPick": 0,
+        "zoom": 72,
+        "focus": "11.6,18.4",
+        "skin": "swag-drop"
+      },
+      "steps": [
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "dz-swag-menu": {
+      "title": "FLT-32: the base Disasters menu (Swag Drop)",
+      "query": {
+        "warp": null,
+        "disaster": "rogueSwarm",
+        "dz": 45,
+        "dzPick": 0,
+        "zoom": 72,
+        "focus": "11.6,18.4",
+        "skin": "swag-drop"
+      },
+      "steps": [
+        {
+          "click": ".dz-more",
+          "optional": true
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "dz-h98-leak": {
+      "title": "FLT-32: the leak in Homepage 98's Top Labs table",
+      "query": {
+        "warp": null,
+        "disaster": "weightsLeak",
+        "dz": 40,
+        "dzPick": 0,
+        "zoom": 72,
+        "focus": "11.6,18.4",
+        "skin": "homepage-98"
+      },
+      "steps": [
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "dz-phone": {
+      "title": "FLT-32: the swarm on a phone (Frontier 95): the error box under the lab bar",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "disaster": "rogueSwarm",
+        "dz": 45,
+        "dzPick": 0,
+        "zoom": 72,
+        "focus": "11.6,18.4"
+      },
+      "steps": [
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "dz-swag-phone": {
+      "title": "FLT-32: the Disasters menu on a phone (Swag Drop)",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "disaster": "rogueSwarm",
+        "dz": 45,
+        "dzPick": 0,
+        "zoom": 72,
+        "focus": "11.6,18.4",
+        "skin": "swag-drop"
+      },
+      "steps": [
+        {
+          "click": ".dz-more",
+          "optional": true
+        },
+        {
+          "wait": 500
         }
       ]
     }

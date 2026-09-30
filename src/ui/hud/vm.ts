@@ -4,7 +4,7 @@
 // the game is reachable from them, so a change in the sim never breaks a mod and a mod can never touch the sim.
 // Pure: no atoms, no DOM, no clocks, no random numbers. It is unit-tested against fixture snapshots (vm.test.ts).
 import type { Snapshot, Tool } from "../../app/hud";
-import { RACE_TOOLS, SPEEDS, TOOLS } from "../../app/hud";
+import { OFFICE_TOOLS, RACE_TOOLS, SPEEDS, TOOLS } from "../../app/hud";
 import { PATH_PRICE } from "../../content/buildings";
 import { ERAS } from "../../content/eras";
 import { STAFF } from "../../content/staff";
@@ -22,12 +22,13 @@ import type { NewsItem, Tone, WalkerKind } from "../../sim/types";
 import { trendOf, VIBES_MAX, WEIGHTS } from "../../sim/vibes";
 import { NO_MOTION, type MotionView } from "./leapfrogMotion";
 import { SKIN_API_VERSION } from "./types";
+import { DISASTER_LINES, HEAT_WORDS, PHASE_LABELS, RISK_COPY, TAG_LABELS, TRUST_WORDS, UNDERSTAFFED } from "../../content/disasterCopy";
 import { HELP_BUILDINGS, HELP_LOOP, HELP_NUMBERS, HELP_TITLE } from "../../content/help";
 import { playableOf, type PlayableInput } from "./playable";
 import { papersOf, paperMomentOf } from "./papers";
 import { collusionOf, crumbWikiOf, investigationOf } from "./collusion";
 import type {
-  ArenaVM, BenchCellVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HudVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
+  ArenaVM, BenchCellVM, DisasterRunVM, DisastersVM, DisasterStageVM, MeterVM, RiskVM, UnderstaffedVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HudVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
   ModsVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, ResponseVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, StreamVM, ThoughtRowVM, TrainingVM, TrendVM, VoiceVM, WalkerKindVM,
 } from "./types";
 import { defs } from "../../sim/defs";
@@ -68,6 +69,8 @@ export interface HudInput {
   papersOpen?: boolean;
   /** Paper moments and CrumbWiki reveals already closed, by key. */
   dismissed?: readonly string[];
+  /** The Disasters menu is open (FLT-32). */
+  disastersOpen?: boolean;
   mixer: { open: boolean; ready: boolean; muted: boolean; master: number; music: number; sfx: number };
   photo: { on: boolean; time: string; shot: { id: number; url: string; name: string } | null; flash: number };
   skins: SkinPickerVM;
@@ -104,7 +107,7 @@ const NOUN: Record<WalkerKind, [string, string]> = {
   visitor: ["visitor", "visitors"],
   protester: ["protester", "protesters"],
 };
-const SHORT: Record<Tool, string> = { path: "Path", cluster: "Cluster", hall: "Training Hall", gateway: "Gateway", kombucha: "Kombucha", nap: "Nap Pods", snack: "Snack Wall", demo: "Demo Stage", datacenter: "Datacenter", gas: "Gas Turbine", solar: "Solar Farm", bulldoze: "Bulldoze" };
+const SHORT: Record<Tool, string> = { path: "Path", cluster: "Cluster", hall: "Training Hall", gateway: "Gateway", kombucha: "Kombucha", nap: "Nap Pods", snack: "Snack Wall", demo: "Demo Stage", datacenter: "Datacenter", gas: "Gas Turbine", solar: "Solar Farm", security: "Security", bulldoze: "Bulldoze" };
 const CUE_LABEL: Record<string, string> = { place: "Place", coin: "Coin", bulldoze: "Bulldoze", card: "News card", choice: "Choice", release: "Release", era: "New era", breakdown: "Alarm" };
 export const PHOTO_TIMES = [
   { key: "live", label: "Live" },
@@ -226,7 +229,7 @@ function inspectorOf(who: Inspect | null, following: boolean, lab: string): Insp
 function buildOf(i: HudInput): { items: BuildItemVM[]; tip: BuildTipVM | null } {
   const s = i.snap;
   const race = s.race;
-  const palette: Tool[] = [...TOOLS.filter((t) => t !== "bulldoze"), ...RACE_TOOLS.filter((t) => t !== "bulldoze" && t !== "path" && race.unlocked.includes(t)), "bulldoze"];
+  const palette: Tool[] = [...TOOLS.filter((t) => t !== "bulldoze"), ...RACE_TOOLS.filter((t) => t !== "bulldoze" && t !== "path" && race.unlocked.includes(t)), ...OFFICE_TOOLS, "bulldoze"];
   const built = new Map<string, number>();
   for (const b of s.buildings) built.set(b.kind, (built.get(b.kind) ?? 0) + 1);
   const items = palette.map((t): BuildItemVM => {
@@ -343,6 +346,7 @@ function thoughtsOf(i: HudInput): ThoughtRowVM[] {
 
 function arenaOf(i: HudInput): ArenaVM {
   const race = i.snap.race;
+  const leaked = new Set(i.snap.disasters.leaked);
   return {
     open: i.arena.open,
     alert: i.arena.alert,
@@ -368,12 +372,70 @@ function arenaOf(i: HudInput): ArenaVM {
       deltaText: r.delta > 0 ? `↑${r.delta}` : r.delta < 0 ? `↓${-r.delta}` : "",
       color: r.color,
       moved: i.arena.moved[r.id] ?? null,
-      title: r.model ? `Latest model: ${r.model}${r.open ? " (open weights)" : ""}` : r.you ? "You" : "No product. Big valuation.",
+      title: leaked.has(r.id) ? `Running on your leaked weights${r.model ? ` (${r.model})` : ""}` : r.model ? `Latest model: ${r.model}${r.open ? " (open weights)" : ""}` : r.you ? "You" : "No product. Big valuation.",
+      leak: leaked.has(r.id),
     })),
   };
 }
 
 const pct = (n: number) => `${Math.round(n * 100)}%`;
+
+// ---- Disasters (FLT-32) ----------------------------------------------------------------------------------------------
+
+const RISK_KEYS: readonly RiskVM[] = ["off", "rare", "normal", "chaos"];
+
+function stageOf(phase: string): DisasterStageVM {
+  if (phase === "warning" || phase === "aftermath" || phase === "done") return phase;
+  if (phase === "active" || phase === "spread") return "active";
+  return "response";
+}
+
+const meter = (value: number, words: readonly string[]): MeterVM => {
+  const v = Math.round(Math.max(0, Math.min(100, value)));
+  const word = words[Math.min(words.length - 1, Math.floor(v / (100 / words.length)))]!;
+  return { value: v, word, text: `${v} · ${word}` };
+};
+
+function disastersOf(i: HudInput, enabled: boolean): DisastersVM {
+  const d = i.snap.disasters;
+  const nameOf = (id: string) => d.menu.find((m) => m.id === id)?.name ?? d.runs.find((r) => r.id === id)?.name ?? "disaster";
+  const running = d.runs.map((r): DisasterRunVM => {
+    const working = r.job !== null;
+    const title = working ? (STAFF[r.job as keyof typeof STAFF]?.title ?? r.job) : "";
+    return {
+      id: r.id,
+      name: r.name,
+      phase: r.phase,
+      stage: stageOf(r.phase),
+      phaseLabel: PHASE_LABELS[r.phase] ?? r.phase,
+      line: DISASTER_LINES[r.id]?.[r.phase] ?? d.menu.find((m) => m.id === r.id)?.blurb ?? "",
+      progress: working ? r.progress : null,
+      progressText: working ? `${title} ${pct(r.progress)}` : null,
+      days: r.days,
+      daysText: `Day ${r.days + 1}`,
+    };
+  });
+  const understaffed = d.diverted.map((u): UnderstaffedVM => {
+    const all = u.diverted >= u.total;
+    const copy = UNDERSTAFFED[u.job];
+    const title = STAFF[u.job].title;
+    const vars = { n: String(u.diverted), total: String(u.total), name: nameOf(u.by) };
+    return { job: u.job, title, diverted: u.diverted, total: u.total, all, text: copy ? fillTemplate(all ? copy.all : copy.some, vars) : `${u.diverted} of ${u.total} ${title} on the ${vars.name}.` };
+  });
+  const calm = !d.calm ? null : i.snap.models === 0 ? "Calm start: nothing random until your first release." : `Calm start: nothing random before day ${d.calmDay}.`;
+  return {
+    enabled,
+    open: enabled && (i.disastersOpen ?? false),
+    risk: d.risk,
+    risks: RISK_KEYS.map((key) => ({ key, label: RISK_COPY[key].label, blurb: RISK_COPY[key].blurb, active: key === d.risk })),
+    calm: d.risk === "off" ? null : calm,
+    menu: d.menu.map((m) => ({ id: m.id, name: m.name, blurb: m.blurb, tags: m.tags.map((key) => ({ key, label: TAG_LABELS[key] ?? key })), active: m.active, available: m.available, reason: m.reason ?? null })),
+    running,
+    understaffed,
+    trust: meter(d.trust, TRUST_WORDS),
+    heat: meter(d.heat, HEAT_WORDS),
+  };
+}
 const grouped = (n: number) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
 /** The forced-response card's numbers, straight from the snapshot: how baked the run is, what shipping now adds, the bug odds. */
@@ -667,6 +729,7 @@ export function hudViewModel(i: HudInput): HudVM {
     photoMode: photoOf(i),
     skins: i.skins,
     mods: i.mods ?? NO_MODS_VM,
+    disasters: disastersOf(i, play.visible.disasters),
     layout: { width: i.viewport.width, height: i.viewport.height, phone: i.viewport.width <= 480, compact: i.viewport.width <= 640, tall: i.viewport.height >= 800 },
   };
 }

@@ -92,6 +92,12 @@ export const KEY_ICONS: Record<string, ReactElement> = {
       <path d="M13 22v5M20 22v5M9 27h15" stroke="currentColor" strokeWidth={W} />
     </svg>
   ),
+  security: (
+    <svg {...K}>
+      <path d="M16 3 26 7v8c0 7-5 11-10 13C11 26 6 22 6 15V7Z" fill="#7FB2F0" stroke="currentColor" strokeWidth={W} />
+      <path d="M11 15l4 4 7-8" fill="none" stroke="#fff" strokeWidth="2.6" />
+    </svg>
+  ),
   bulldoze: (
     <svg {...K}>
       <rect x="9" y="10" width="14" height="10" rx="2" fill="#FFD166" stroke="currentColor" strokeWidth={W} />

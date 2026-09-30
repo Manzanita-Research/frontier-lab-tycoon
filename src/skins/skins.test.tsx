@@ -108,6 +108,10 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
       return { moment: vms.scoop!.paperMoment!, actions };
     case "CrumbWiki":
       return { wiki: vms.scandal!.crumbWiki!, actions };
+    case "DisasterMenu":
+      return { disasters: vms.dzMenu!.disasters, actions };
+    case "DisasterAlert":
+      return { disasters: vms.dz!.disasters, layout: vms.dz!.layout, actions };
   }
 }
 
@@ -141,6 +145,9 @@ const vms: Record<string, HudVM> = {
   award: vmOf({ papers: "award" }),
   sign: vmOf({ collusion: "sign" }),
   scandal: vmOf({ collusion: "scandal" }),
+  dz: vmOf({ disaster: true }),
+  dzMenu: vmOf({ disaster: true, disastersOpen: true }),
+  dzPhone: vmOf({ disaster: true, width: 390, height: 844 }),
 };
 
 const usable = catalog.filter((e) => e.ok).map((e) => e.folder);

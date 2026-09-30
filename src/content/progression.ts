@@ -21,7 +21,7 @@ export const PROGRESSION: readonly ProgressionLevel[] = [
   { id: "business", level: 2, name: "Open for business", buildings: ["gateway", "kombucha"], staff: [], systems: [], panels: ["revenue", "vibes"], goal: { text: "Earn $20K a day", metric: "revenue", target: 20_000 } },
   { id: "team", level: 3, name: "Growing team", buildings: ["nap", "snack"], staff: ["sre", "janitor"], systems: ["breakdowns", "slop"], panels: ["thoughts", "staff"], goal: { text: "8 researchers and Vibes ≥ 500", metric: "team", target: 8, vibes: 500 } },
   { id: "race", level: 4, name: "The Race", buildings: [], staff: [], systems: ["leapfrog", "arena", "rnd", "news"], panels: ["arena", "rnd", "news"], goal: { text: "Top 5 on the Arena", metric: "arena", target: 5 } },
-  { id: "scrutiny", level: 5, name: "Scrutiny", buildings: ["demo"], staff: ["security", "comms"], systems: ["protests", "events", "disasters", "papers", "collusion"], panels: ["events", "papers", "disasters"], goal: { text: "Ship model #3", metric: "models", target: 3 } },
+  { id: "scrutiny", level: 5, name: "Scrutiny", buildings: ["demo", "security"], staff: ["security", "comms"], systems: ["protests", "events", "disasters", "papers", "collusion"], panels: ["events", "papers", "disasters"], goal: { text: "Ship model #3", metric: "models", target: 3 } },
 ];
 export interface UnlockCard { id: string; title: string; body: string; items: string[] }
 export interface ProgressView {

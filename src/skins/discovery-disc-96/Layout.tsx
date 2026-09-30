@@ -24,6 +24,7 @@ export function Layout({ slots }: SlotPropsMap["Layout"]) {
         <div className="dd-stack">
           {slots.Staff}
           {slots.Inspector}
+          {slots.DisasterAlert}
           {slots.Arena}
           {slots.Papers}
           {slots.Benchmarks}

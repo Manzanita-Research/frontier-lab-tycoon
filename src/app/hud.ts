@@ -19,13 +19,17 @@ import { outcomeOf, releaseGoalText } from "../sim/goals";
 import { estimateLedger } from "../sim/economy";
 import { assistantOf, type AssistantMessage } from "../sim/tutorial";
 import { pendingConfirmOf, persistentWarnings, type PendingConfirm } from "../sim/guardrails";
-import type { Building, GameState, GoalProgress, OpenEvent, Outcome, Pop, Thought, Tone, Vibes } from "../sim/types";
+import { calmStart, CALM_START_DAY, disasterMenu, disastersView, type MenuRow, type RunView } from "../sim/disasters/driver";
+import type { Risk } from "../sim/disasters/types";
+import type { Building, GameState, GoalProgress, OpenEvent, Outcome, Pop, StaffJob, Thought, Tone, Vibes } from "../sim/types";
 
-export type Tool = "path" | PlaceableKind | "bulldoze";
+export type Tool = "path" | PlaceableKind | "security" | "bulldoze";
 /** Hotkeys 1-9 pick these in order. */
 export const TOOLS: Tool[] = ["path", "cluster", "hall", "gateway", "kombucha", "nap", "snack", "demo", "bulldoze"];
 /** The race's buildings: in the palette (between the core buildings and Bulldoze, no hotkey) once an auction unlocks them. */
 export const RACE_TOOLS: Tool[] = ["datacenter", "gas", "solar"];
+/** Offices (FLT-32): in the palette once the ladder earns them (Scrutiny), no hotkey. */
+export const OFFICE_TOOLS: Tool[] = ["security"];
 export const SPEEDS = [0, 1, 3, 10] as const;
 export type Speed = (typeof SPEEDS)[number];
 
@@ -105,12 +109,66 @@ export interface Snapshot {
   pendingConfirm: PendingConfirm | null;
   warnings: string[];
   releaseGoal: string;
+  disasters: DisastersSnapshot;
+}
+
+/** Disasters (FLT-32): the menu, what is under way, who it has pulled off their post, and the two meters it moves. */
+export interface DisastersSnapshot {
+  risk: Risk;
+  /** The calm start holds the dice (no release yet, or before `calmDay`). */
+  calm: boolean;
+  calmDay: number;
+  menu: MenuRow[];
+  runs: RunView[];
+  /** Public trust and regulatory heat, 0 to 100. */
+  trust: number;
+  heat: number;
+  /** Per job with anyone pulled off their post: how many, of how many, and by which disaster. */
+  diverted: { job: StaffJob; diverted: number; total: number; by: string }[];
+  /** Rivals a weights leak lifted, while it is still under way (the Arena marks them). */
+  leaked: string[];
+  /** Staffers pulled off their post (their map tags go red). */
+  divertedIds: number[];
+  /** Where each disaster has sent people: a building id, or 0 for the gate. The map puts the cleanup's progress there. */
+  sites: { owner: string; to: number; job: StaffJob }[];
 }
 
 export interface UiToast {
   id: number;
   text: string;
   tone: Tone;
+}
+
+function disastersOf(s: GameState): DisastersSnapshot {
+  const d = s.disasters;
+  const diverted: DisastersSnapshot["diverted"] = [];
+  const divertedIds: number[] = [];
+  const sites: DisastersSnapshot["sites"] = [];
+  for (const o of s.staff) {
+    if (o.machine.value === "leaving") continue;
+    let row = diverted.find((r) => r.job === o.job);
+    if (!row) diverted.push((row = { job: o.job, diverted: 0, total: 0, by: "" }));
+    row.total++;
+    if (o.divert) {
+      row.diverted++;
+      row.by ||= o.divert.owner;
+      divertedIds.push(o.id);
+      if (!sites.some((x) => x.owner === o.divert!.owner && x.to === o.divert!.to)) sites.push({ owner: o.divert.owner, to: o.divert.to, job: o.job });
+    }
+  }
+  return {
+    risk: d.risk,
+    calm: calmStart(s),
+    calmDay: CALM_START_DAY,
+    menu: disasterMenu(s),
+    runs: disastersView(s),
+    trust: d.trust,
+    heat: d.heat,
+    diverted: diverted.filter((r) => r.diverted > 0),
+    leaked: d.runs.flatMap((r) => (r.id === "weightsLeak" && r.vars.leapRivalId && r.machine.value !== "done" ? [r.vars.leapRivalId] : [])),
+    divertedIds,
+    sites,
+  };
 }
 
 /** Names of the walkers who are thinking out loud, so a bubble can say who said it. */
@@ -170,5 +228,6 @@ export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO
     pendingConfirm: pendingConfirmOf(s),
     warnings: persistentWarnings(s),
     releaseGoal: releaseGoalText(s),
+    disasters: disastersOf(s),
   };
 }

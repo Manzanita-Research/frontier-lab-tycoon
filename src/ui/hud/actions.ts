@@ -7,7 +7,7 @@ import type { Cue } from "../../audio/score";
 import { fx } from "../../render/fx/state";
 import { roomAtom, skipNews, viewRoom } from "../../newsroom/state";
 import { setPhoto, takePhoto } from "../juice/photo";
-import { arenaOpenAtom, chatCountAtom, dismissedAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, staffOpenAtom } from "./state";
+import { arenaOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, staffOpenAtom } from "./state";
 import { skinActions } from "./skinControl";
 import type { StaffJob } from "../../sim/types";
 import type { HudActions } from "./types";
@@ -60,6 +60,14 @@ export const hudActions: HudActions = {
   buildPanel: (open) => {
     if (open) send({ type: "COMMAND", command: { type: "buildPanelOpened" } });
   },
+  openDisasters: () => registry.set(disastersOpenAtom, true),
+  closeDisasters: () => registry.set(disastersOpenAtom, false),
+  // The sim refuses what cannot happen (with a toast), so the menu can send it as it is.
+  triggerDisaster: (id) => {
+    registry.set(disastersOpenAtom, false);
+    send({ type: "COMMAND", command: { type: "disaster", id } });
+  },
+  setRisk: (risk) => send({ type: "COMMAND", command: { type: "setRisk", risk } }),
   openHelp: () => registry.set(helpOpenAtom, true),
   closeHelp: () => registry.set(helpOpenAtom, false),
   holdTime: (id, open) => send({ type: "SET_OVERLAY", id, open }),

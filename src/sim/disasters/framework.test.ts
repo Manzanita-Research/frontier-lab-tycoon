@@ -5,6 +5,8 @@ import docs from "../../../docs/DISASTERS.md?raw";
 import { BUILDINGS } from "../../content/buildings";
 import { eventById } from "../../content/events";
 import { canPlace, placeBuilding } from "../commands";
+import { refreshBoard } from "../race/arena";
+import { ranksOf } from "../race/state";
 import { createRng } from "../rng";
 import { createTestCampus as createInitialState } from "../testkit";
 import { perfBudget, createTestCampus, layPaths, readyForPressure } from "../testkit";
@@ -311,12 +313,17 @@ describe("verbs", () => {
   it("rival.leap lifts the most open lab to just under you, opens its weights, and never drags it down", () => {
     const s = createInitialState(1);
     s.capability = 60;
+    refreshBoard(s);
+    const before = ranksOf(s.race.board).sirocco!;
     const e = env(s, "x");
     runVerb(e, { type: "rival.leap", params: { relative: -0.1, open: true } });
     const sirocco = s.race.rivals.find((r) => r.context.id === "sirocco")!;
     expect(sirocco.context.capability).toBeCloseTo(54);
     expect(sirocco.context.open).toBe(true);
     expect(e.run!.vars.leapRival).toBe("Sirocco");
+    expect(e.run!.vars.leapRivalId).toBe("sirocco");
+    // The Arena shows the jump now, not at the weekly re-rank (FLT-32).
+    expect(ranksOf(s.race.board).sirocco).toBeLessThan(before);
     s.capability = 10;
     runVerb(e, { type: "rival.leap", params: { relative: -0.1 } });
     expect(s.race.rivals.find((r) => r.context.id === "sirocco")!.context.capability).toBeCloseTo(54);

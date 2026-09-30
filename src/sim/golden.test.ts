@@ -5,6 +5,8 @@
 // now also covers the new walker fields and the Vibes. FLT-10 (Operations) did it again: slop, breakdowns (a random
 // draw per building per day), queues you can see, and staff; the script below now hires a few, and the projection
 // covers the slop, the payroll and every building's reliability.
+// FLT-32 put the Security Office on the Scrutiny rung, so its unlock card lists one more item: the digests from the
+// card on (it arrives between ticks 800 and 1600) moved for that alone: same RNG state and world at 4000, one more item.
 //
 // The digest reads the game through `view()`, not the raw state, so the persisted shape can change (machine
 // snapshots, moved fields) without touching the recorded values. Only `view()` follows the shape.

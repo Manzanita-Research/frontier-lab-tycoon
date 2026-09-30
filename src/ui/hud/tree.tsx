@@ -8,19 +8,19 @@ import type { HudActions, HudVM, ToastVM } from "./types";
 export function Docked({ vm, actions }: { vm: HudVM; actions: HudActions }) {
   const { slots } = useSkin();
   const t = useT();
-  const { Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, ThoughtsPanel, Ticker, Toast, Assistant, Arena, Benchmarks, Voice, NewsControls, NewsArrival, PhotoButton, Papers } = slots;
+  const { Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, ThoughtsPanel, Ticker, Toast, Assistant, Arena, Benchmarks, Voice, NewsControls, NewsArrival, PhotoButton, Papers, DisasterAlert } = slots;
   // One toast at a time, the newest winning; a standing hint only shows while nobody is talking.
   const newest = vm.toasts.at(-1);
   const talking: ToastVM[] = newest ? [newest] : vm.hints.map((h, i): ToastVM => ({ id: -1 - i, text: t(`hint.${h}`), tone: "hint" }));
   // Standing warnings come first and stay until whatever causes them is fixed.
   const stack: ToastVM[] = [...vm.warnings.map((text, i): ToastVM => ({ id: -100 - i, text, tone: "warn" })), ...talking];
   const nodes: Record<DockedSlot, ReactNode> = {
-    Stats: <Stats stats={vm.stats} layout={vm.layout} visible={vm.visible} actions={actions} />,
+    Stats: <Stats stats={vm.stats} layout={vm.layout} visible={vm.visible} actions={actions} disasters={vm.disasters} />,
     // Hidden until there is something to show: the training bar appears once a Training Hall is up.
     Training: vm.training.hasHall ? <Training training={vm.training} actions={actions} /> : null,
     Objectives: <Objectives objectives={vm.objectives} progress={vm.progress} visible={vm.visible} layout={vm.layout} actions={actions} />,
     Inspector: vm.inspector ? <Inspector inspector={vm.inspector} layout={vm.layout} actions={actions} /> : null,
-    BuildBar: <BuildBar items={vm.buildItems} tip={vm.buildTip} teasers={vm.progress.teasers} layout={vm.layout} actions={actions} />,
+    BuildBar: <BuildBar items={vm.buildItems} tip={vm.buildTip} teasers={vm.progress.teasers} layout={vm.layout} actions={actions} disasters={vm.disasters} />,
     Speed: <Speed speed={vm.speed} stats={vm.stats} actions={actions} />,
     Staff: vm.staff.open && vm.visible.staff ? <Staff staff={vm.staff} actions={actions} /> : null,
     ThoughtsPanel: vm.visible.thoughts ? <ThoughtsPanel rows={vm.thoughtsPanel} layout={vm.layout} actions={actions} /> : null,
@@ -40,6 +40,7 @@ export function Docked({ vm, actions }: { vm: HudVM; actions: HudActions }) {
     NewsArrival: vm.newsroom.arrival && vm.visible.news ? <NewsArrival arrival={vm.newsroom.arrival} actions={actions} /> : null,
     PhotoButton: <PhotoButton photo={vm.photoMode} actions={actions} />,
     Papers: vm.papers.enabled && vm.visible.papers ? <Papers papers={vm.papers} layout={vm.layout} actions={actions} /> : null,
+    DisasterAlert: vm.disasters.enabled ? <DisasterAlert disasters={vm.disasters} layout={vm.layout} actions={actions} /> : null,
   };
   return (
     <CoachProvider value={vm.coach?.target ?? null}>
@@ -49,7 +50,7 @@ export function Docked({ vm, actions }: { vm: HudVM; actions: HudActions }) {
 }
 
 export function Modals({ vm, actions }: { vm: HudVM; actions: HudActions }) {
-  const { EventCard, Livestream, Confirm, UnlockCard, HowToPlay, EraCard, Outcome, NewsRoom, Mixer, ModManager, SkinPicker, PaperMoment, CrumbWiki } = useSkin().slots;
+  const { EventCard, Livestream, Confirm, UnlockCard, HowToPlay, EraCard, Outcome, NewsRoom, Mixer, ModManager, SkinPicker, PaperMoment, CrumbWiki, DisasterMenu } = useSkin().slots;
   return (
     <>
       {vm.event && (vm.event.stream ? <Livestream event={vm.event} stream={vm.event.stream} actions={actions} /> : <EventCard event={vm.event} actions={actions} />)}
@@ -58,6 +59,7 @@ export function Modals({ vm, actions }: { vm: HudVM; actions: HudActions }) {
       {!vm.crumbWiki && vm.paperMoment && <PaperMoment key={vm.paperMoment.key} moment={vm.paperMoment} actions={actions} />}
       {vm.unlock && <UnlockCard unlock={vm.unlock} actions={actions} />}
       {vm.help && <HowToPlay help={vm.help} actions={actions} />}
+      {vm.disasters.open && <DisasterMenu disasters={vm.disasters} actions={actions} />}
       {vm.eraCard && <EraCard era={vm.eraCard} actions={actions} />}
       {vm.outcome && <Outcome outcome={vm.outcome} actions={actions} />}
       {vm.newsroom.view && <NewsRoom newsroom={vm.newsroom} actions={actions} />}

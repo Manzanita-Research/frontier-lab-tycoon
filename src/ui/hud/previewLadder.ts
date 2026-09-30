@@ -7,7 +7,7 @@ const LADDER = [
   { name: "Open for business", buildings: ["path", "cluster", "hall", "gateway", "kombucha"], staff: [], goal: ["Earn $20K a day", 4_000, 20_000], show: ["revenue", "vibes"] },
   { name: "Growing team", buildings: ["path", "cluster", "hall", "gateway", "kombucha", "nap", "snack"], staff: ["sre", "janitor"], goal: ["Reach 8 researchers and 500 Vibes", 4, 8], show: ["revenue", "vibes", "thoughts", "staff"] },
   { name: "The Race", buildings: ["path", "cluster", "hall", "gateway", "kombucha", "nap", "snack"], staff: ["sre", "janitor"], goal: ["Reach the Top 5 on the Arena", 7, 5], show: ["revenue", "vibes", "thoughts", "staff", "arena", "rnd", "news"] },
-  { name: "Scrutiny", buildings: ["path", "cluster", "hall", "gateway", "kombucha", "nap", "snack", "demo"], staff: ["sre", "janitor", "security", "comms"], goal: ["Ship model #3", 1, 3], show: ["revenue", "vibes", "thoughts", "staff", "arena", "rnd", "news", "events", "papers", "disasters"] },
+  { name: "Scrutiny", buildings: ["path", "cluster", "hall", "gateway", "kombucha", "nap", "snack", "demo", "security"], staff: ["sre", "janitor", "security", "comms"], goal: ["Ship model #3", 1, 3], show: ["revenue", "vibes", "thoughts", "staff", "arena", "rnd", "news", "events", "papers", "disasters"] },
 ] as const;
 
 // One row per milestone, as the sim groups them: how many things it unlocks, and the goal that earns them.

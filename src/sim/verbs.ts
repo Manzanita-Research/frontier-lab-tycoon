@@ -23,6 +23,7 @@ import { step } from "./machines/run";
 import { addNews, addToast, templateVars } from "./news";
 import { clampDiscourse } from "./protest";
 import { findSpot } from "./race/actions";
+import { refreshBoard } from "./race/arena";
 import { rivalMachine } from "./race/rival";
 import type { Rng } from "./rng";
 import { atDivert, divertStaff, releaseStaff, staffOf } from "./staff";
@@ -491,9 +492,12 @@ export const VERBS: Record<string, VerbDef> = {
       const gain = Math.max(0, state.capability * (1 + (p.relative as number)) - rival.context.capability);
       const shocked = step(rivalMachine, rival, { type: "SHOCK", capability: gain, hype: 0, momentum: 0 }).stored;
       race.rivals[pick] = p.open ? { ...shocked, context: { ...shocked.context, open: true } } : shocked;
+      // Out of cycle, like a collusion scandal: the jump shows on the Arena now, not at the weekly re-rank (FLT-32).
+      refreshBoard(state);
       if (run) {
         run.vars.leapRival = defs().rivalById[rival.context.id as RivalId]?.name ?? rival.context.id;
         run.vars.leapModel = rival.context.model || "a model that is suspiciously familiar";
+        run.vars.leapRivalId = rival.context.id;
       }
     },
   },

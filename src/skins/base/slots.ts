@@ -9,6 +9,7 @@ import "./leapfrog.css";
 import "./compact.css";
 import "./notices.css";
 import "./playable.css";
+import "./disasters.css";
 import { Arena } from "./slots/Arena";
 import { Benchmarks } from "./slots/Benchmarks";
 import { Assistant } from "./slots/Assistant";
@@ -46,10 +47,12 @@ import { Papers } from "./slots/Papers";
 import { PaperMoment } from "./slots/PaperMoment";
 import { CrumbWiki } from "./slots/CrumbWiki";
 import "./papers.css";
+import { DisasterAlert } from "./slots/DisasterAlert";
+import { DisasterMenu } from "./slots/DisasterMenu";
 import { Layout } from "./Layout";
 
 export const baseSlots: SlotComponents = {
   Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, Bubble, ThoughtsPanel, Ticker, Toast, Assistant,
   EventCard, Confirm, Coach, UnlockCard, HowToPlay, Arena, Benchmarks, Voice, Livestream, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, NewsControls,
-  NewsArrival, NewsRoom, Mixer, ModManager, Papers, PaperMoment, CrumbWiki,
+  NewsArrival, NewsRoom, Mixer, ModManager, Papers, PaperMoment, CrumbWiki, DisasterMenu, DisasterAlert,
 };
