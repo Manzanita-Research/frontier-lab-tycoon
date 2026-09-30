@@ -4,6 +4,7 @@ import { BUILDINGS } from "../content/buildings";
 import { canPlace, type Command } from "./commands";
 import { openEventOf } from "./events";
 import type { GameState } from "./types";
+import { pendingConfirmOf } from "./guardrails";
 
 export const PACING_BUILDS: readonly [number, PlaceableKind][] = [
   [10, "hall"], [13, "gateway"], [23, "kombucha"], [30, "snack"], [35, "nap"],
@@ -23,6 +24,7 @@ export function pacingSpot(s: GameState, kind: PlaceableKind): [number, number] 
 }
 
 export function pacingCommands(s: GameState): Command[] {
+  if (pendingConfirmOf(s)) return [{ type: "cancelConfirm" }];
   const open = openEventOf(s);
   if (open) return [{ type: "chooseEvent", eventId: open.id, choiceIndex: open.id === "waterDiscourse" && s.cash > 1_000_000 ? 1 : open.id === "openWeights" ? 1 : 0 }];
   const cmds: Command[] = [{ type: "continueTutorial" }];

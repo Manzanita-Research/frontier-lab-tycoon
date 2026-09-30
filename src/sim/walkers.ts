@@ -22,6 +22,8 @@ import {
   isPathTile,
   bfsRoute,
   tileIndex,
+  entranceConnected,
+  gateAmble,
 } from "./pathfind";
 import type { EventFromLogic } from "xstate";
 import { stepWalker, tourDone, walkerMachine, type WalkerPhase } from "./machines/walker";
@@ -581,6 +583,7 @@ export function updateWalkers(state: GameState, rng: Rng) {
     repairWalkers(state, rng);
   }
   fillOccupancy(state);
+  const disconnected = !entranceConnected(state);
   const fountains = state.buildings.filter((b) => b.kind === "fountain");
   let gone: Set<number> | null = null;
   for (const w of state.walkers) {
@@ -589,6 +592,14 @@ export function updateWalkers(state: GameState, rng: Rng) {
     }
     w.px = w.x;
     w.pz = w.z;
+    if (disconnected && w.machine.value !== "inside" && !exiting(w.machine.value)) {
+      // The existing wandering phase owns this wait; reconsider destinations on reconnection/version change.
+      if (w.machine.value !== "wandering") send(state, w, rng, { type: "NEXT" });
+      w.targetId = TARGET_WANDER;
+      if (w.route.length === 0 || state.tick % 12 === 0) w.route = gateAmble(state, w.id);
+      advance(w);
+      continue;
+    }
     tickNeeds(w, state.capability);
     // Slop (sim/slop.ts): drifted agents drop it, everyone else gets a little grumpier for standing in it.
     if (w.kind === "agent") {

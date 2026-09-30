@@ -13,7 +13,7 @@ import { repairBuilding } from "./breakdowns";
 import { fillTemplate } from "./format";
 import { stepStaff, staffStart } from "./machines/staff";
 import { addToast, pushNews } from "./news";
-import { bfsRoute, entrances, getReach, inBounds, isPathTile, nearestPathTile, routeToRect, tileIndex } from "./pathfind";
+import { bfsRoute, entrances, getReach, inBounds, isPathTile, nearestPathTile, routeToRect, tileIndex, entranceConnected, gateAmble } from "./pathfind";
 import { mopTile } from "./slop";
 import type { Rng } from "./rng";
 import type { EventFromLogic } from "xstate";
@@ -261,8 +261,11 @@ function patrol(state: GameState, s: Staffer, rng: Rng) {
   }
   const reach = getReach(state).tiles;
   const tiles: number[] = [];
-  if (s.zone.length > 0) for (const i of s.zone) if (reach[i]) tiles.push(i);
-  else for (let i = 0; i < reach.length; i++) if (reach[i]) tiles.push(i);
+  if (s.zone.length > 0) {
+    for (const i of s.zone) if (reach[i]) tiles.push(i);
+  } else {
+    for (let i = 0; i < reach.length; i++) if (reach[i]) tiles.push(i);
+  }
   if (tiles.length === 0) return;
   const goal = rng.pick(tiles);
   const route = pathRoute(state, s, new Set([goal]));
@@ -357,9 +360,17 @@ export function updateStaff(state: GameState, rng: Rng) {
     repairStaff(state);
   }
   let gone: Set<number> | null = null;
+  const disconnected = !entranceConnected(state);
   for (const s of state.staff) {
     s.px = s.x;
     s.pz = s.z;
+    if (disconnected && s.machine.value !== "leaving" && !(s.job === "security" && s.zone.length === 0)) {
+      if (s.machine.value === "going" || s.machine.value === "working") send(s, { type: "LOST" });
+      if (s.machine.value === "arriving") send(s, { type: "ARRIVED" });
+      if (s.route.length === 0 || state.tick % 12 === 0) s.route = gateAmble(state, s.id);
+      move(s);
+      continue;
+    }
     switch (s.machine.value) {
       case "arriving":
         move(s);

@@ -9,6 +9,7 @@ import { createInitialState } from "./state";
 import { createRng } from "./rng";
 import { seedWalkers } from "./walkers";
 import { initialVibes } from "./vibes";
+import { pendingConfirmOf } from "./guardrails";
 
 /** Explicit busy campus for existing crowd/render tests; the real opening stays quiet. */
 export function createTestCampus(seed = 1): GameState {
@@ -53,6 +54,7 @@ export const perfBudget = (ms: number): number => ((globalThis as { process?: { 
 
 /** The command that answers whatever card is open with `pick` (default: the first choice), or none if nothing is open. */
 export function answer(s: GameState, pick: number | ((id: string, choices: number) => number) = 0): Command[] {
+  if (pendingConfirmOf(s)) return [{ type: "cancelConfirm" }];
   const open = openEventOf(s);
   if (!open) return [];
   const choices = eventById(open.id)!.choices.length;

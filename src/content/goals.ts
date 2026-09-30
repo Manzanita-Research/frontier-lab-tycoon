@@ -14,7 +14,7 @@ export interface GoalDef {
 }
 
 export const GOALS: GoalDef[] = [
-  { id: "release", metric: "runs", label: "Release Frontier-4", target: 3, unit: "runs" },
+  { id: "release", metric: "runs", label: "Ship 3 models", target: 3, unit: "runs" },
   { id: "era", metric: "era", label: "Reach Era 3: Superhuman Coder", target: 3, unit: "era" },
   // The metric counts places from the bottom, so "higher is better" holds for every goal: #3 of 7 is 5.
   { id: "arena", metric: "arena", label: "Top 3 on the Arena in Era 3", target: ARENA_SIZE + 1 - 3, unit: "rank" },

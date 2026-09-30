@@ -76,7 +76,7 @@ export function phaseFor(c: AppContext): Phase {
   return c.speed === 0 || autoPaused(c) ? ".playing.paused" : ".playing.running";
 }
 
-export const autoPaused = (c: AppContext): boolean => c.snap.firstBuildPending || !!c.snap.assistant?.paused || c.selected !== null || c.overlays.length > 0;
+export const autoPaused = (c: AppContext): boolean => c.snap.firstBuildPending || !!c.snap.assistant?.paused || !!c.snap.pendingConfirm || c.selected !== null || c.overlays.length > 0;
 
 /** The same words twice are one toast (the newer replaces the older); the HUD shows only the newest, so keep just a few. */
 const addToasts = (c: AppContext, fresh: readonly UiToast[]) => ({ ...c, toasts: [...c.toasts.filter((t) => !fresh.some((f) => f.text === t.text)), ...fresh].slice(-3) });

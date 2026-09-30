@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { StaffPanel, StaffTool } from "./ops/Staff";
 import { useCompact } from "./useCompact";
 import { BUILDINGS, PATH_PRICE } from "../content/buildings";
+import { REDUNDANT_HALL } from "../content/guardrails";
 import { formatDate, formatMoney } from "../sim/format";
 import { appNow, atoms, send } from "../app/game";
 import { RACE_TOOLS, SPEEDS, TOOLS, type Tool } from "../app/hud";
@@ -207,6 +208,7 @@ function Ticker() {
 function Toasts() {
   const toasts = useApp(atoms.toasts);
   const assistant = useApp(atoms.assistant);
+  const warnings = useApp(atoms.snap).warnings;
   // The app machine expires each toast after 5.2 s; a click dismisses it early.
   const dismiss = (id: number) => send({ type: "DISMISS_TOAST", id });
   const hasGateway = useApp(atoms.hasGateway);
@@ -218,14 +220,15 @@ function Toasts() {
     const t = setTimeout(() => setTapHint(false), 22_000);
     return () => clearTimeout(t);
   }, [selected]);
-  const newest = toasts.at(-1);
+  const newest = toasts.filter((t) => !warnings.includes(t.text)).at(-1);
   // "Build an API Gateway..." twice is one hint too many: once any toast has said it, the standing hint is redundant.
   const toldAboutGateway = useRef(false);
   if (newest && /API Gateway/i.test(newest.text)) toldAboutGateway.current = true;
   const hint = assistant?.message ?? (newest ? null : !hasGateway && !toldAboutGateway.current ? "Build an API Gateway next to a path to start earning." : tapHint ? "Tap anyone to read their mind." : null);
   return (
     <div className="toasts">
-      {newest && !assistant ? (
+      {warnings.map((text) => <div key={text} className="toast panel bad" role="status">{text}</div>)}
+      {newest && (!assistant || newest.text === REDUNDANT_HALL) ? (
         <button key={newest.id} className={`toast panel ${newest.tone}`} onClick={() => dismiss(newest.id)}>
           {newest.text}
         </button>
@@ -233,11 +236,23 @@ function Toasts() {
         hint && (
           <button key={hint} className="toast panel hint" data-highlight={assistant?.highlight} onClick={() => send({ type: "COMMAND", command: { type: "continueTutorial" } })}>
             {hint}
+            {assistant?.paused && <span> · Continue →</span>}
           </button>
         )
       )}
     </div>
   );
+}
+
+/** Minimal legacy host; FLT-29 can render the same saved proposal in its skin dialog. */
+function SpendingConfirmation() {
+  const pending = useApp(atoms.snap).pendingConfirm;
+  if (!pending) return null;
+  return <div className="modal-backdrop"><div className="modal-card tone-bad" role="dialog" aria-modal="true" aria-label="Low runway confirmation">
+    <h2>The board will have questions.</h2><p>{pending.message}</p>
+    <button className="choice" onClick={() => send({ type: "COMMAND", command: { ...pending.command, confirmed: true } })}>Confirm {pending.kind}</button>
+    <button className="choice" onClick={() => send({ type: "COMMAND", command: { type: "cancelConfirm" } })}>Keep the runway</button>
+  </div></div>;
 }
 
 export function HUD() {
@@ -246,7 +261,7 @@ export function HUD() {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
       const st = appNow();
       // A card is up: it owns the keyboard (1 to 3 choose), and nothing else should move.
-      if (!st || st.event || (st.outcome !== "playing" && !st.outcomeDismissed)) return;
+      if (!st || st.event || st.snap.pendingConfirm || (st.outcome !== "playing" && !st.outcomeDismissed)) return;
       if (e.key === " ") {
         e.preventDefault();
         // A focused button would also treat Space as a click.
@@ -280,6 +295,7 @@ export function HUD() {
       <StaffPanel />
       <EventCard />
       <OutcomeCard />
+      <SpendingConfirmation />
     </div>
   );
 }

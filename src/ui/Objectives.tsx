@@ -30,6 +30,7 @@ function progressText(def: GoalDef, value: number): string {
 export function Objectives() {
   const goals = useApp(atoms.goals);
   const day = useApp(atoms.day);
+  const releaseGoal = useApp(atoms.snap).releaseGoal;
   const compact = useCompact();
   const [open, setOpen] = useState(() => window.innerWidth > 640);
   useAutoPause("objectives", compact && open);
@@ -72,8 +73,8 @@ export function Objectives() {
                     {g.met ? "✓" : ""}
                   </span>
                   <span className="obj-text">
-                    <b>{def.label}</b>
-                    <span className="obj-progress">{progressText(def, g.value)}</span>
+                    <b>{g.id === "release" ? releaseGoal : def.label}</b>
+                    {g.id !== "release" && <span className="obj-progress">{progressText(def, g.value)}</span>}
                     <span className="obj-bar">
                       <span style={{ width: `${Math.min(100, (g.value / g.target) * 100)}%` }} />
                     </span>

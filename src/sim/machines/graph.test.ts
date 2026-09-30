@@ -15,6 +15,7 @@ import { staffMachine } from "./staff";
 import { trainingMachine } from "./training";
 import { walkerMachine } from "./walker";
 import { tutorialMachine } from "./tutorial";
+import { guardrailsMachine } from "./guardrails";
 
 const byValue = { serializeState: (s: { value: unknown }) => JSON.stringify(s.value) };
 
@@ -31,6 +32,14 @@ function explore(machine: AnyStateMachine, options: Record<string, unknown>) {
 }
 
 describe("machine graphs", () => {
+  it("a spending confirmation can open and clear", () => {
+    const r = explore(guardrailsMachine, {
+      input: { pendingConfirm: null, lowRunway: false, gateDisconnected: false },
+      events: [{ type: "REQUEST", pendingConfirm: { kind: "hire", cost: 0, runwayAfter: 1, message: "Runway", command: { type: "hire", job: "sre" } } }, { type: "CLEAR" }],
+    });
+    expect(r.unreachable).toEqual([]);
+    expect(r.deadEnds).toEqual([]);
+  });
   it("the tutorial can reach every step, completion and skip", () => {
     const events = [
       { type: "FACTS", path: true, hall: true, revenue: true, hired: true, released: true },

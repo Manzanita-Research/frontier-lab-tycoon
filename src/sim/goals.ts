@@ -28,6 +28,14 @@ export function outcomeOf(state: GameState): Outcome {
   return state.goals.value === "tracking" ? "playing" : state.goals.value;
 }
 
+/** Count the releases already shipped and name the actual run currently training, including its suffixes. */
+export function releaseGoalText(state: GameState): string {
+  const goal = state.goals.context.goals.find((g) => g.id === "release");
+  const target = goal?.target ?? 3;
+  const shipped = Math.min(state.models.length, target);
+  return `Ship ${target} models (${shipped}/${target})${goal?.met ? " — shipped" : `, next: ${state.training.context.name}`}`;
+}
+
 export function dailyGoals(state: GameState, rng: Rng) {
   if (state.goals.value !== "tracking") return;
   const values: Record<string, number> = {};
