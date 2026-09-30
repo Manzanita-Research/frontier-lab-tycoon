@@ -7,6 +7,8 @@ import { type Command } from "./commands";
 import { openEventOf } from "./events";
 import { outcomeOf } from "./goals";
 import { eraOfState } from "./race/race";
+import { slopStats } from "./slop";
+import { staffOf } from "./staff";
 import { createInitialState } from "./state";
 import { countOf, findSpot, layPaths } from "./testkit";
 import { TICKS_PER_DAY, tick } from "./tick";
@@ -55,6 +57,14 @@ export function playBot(seed: number, opts: { halls?: number; days?: number; kee
     if (open) {
       cards[open.id] = (cards[open.id] ?? 0) + 1;
       cmds.push({ type: "chooseEvent", eventId: open.id, choiceIndex: choice(s, open.id) });
+    } else if (i % (TICKS_PER_DAY * 4) === 2) {
+      // Operations: an SRE per handful of buildings, a Janitor Bot per handful of agents once the paths get grubby,
+      // a Comms Rep when the gate fills up. Salaries are a few percent of a day's income, and a lab without them slides.
+      const agents = s.walkers.filter((w) => w.kind === "agent").length;
+      const protesters = s.walkers.filter((w) => w.kind === "protester").length;
+      if (s.day > 15 && staffOf(s, "sre").length < 1 + Math.floor(s.buildings.length / 9)) cmds.push({ type: "hire", job: "sre" });
+      else if (slopStats(s).share > 0.06 && staffOf(s, "janitor").length < Math.min(10, 1 + Math.floor(agents / 4))) cmds.push({ type: "hire", job: "janitor" });
+      else if (protesters >= 6 && staffOf(s, "comms").length < 1 + Math.floor(protesters / 14)) cmds.push({ type: "hire", job: "comms" });
     } else if (i % (TICKS_PER_DAY * 4) === 0) {
       const halls = countOf(s, "hall");
       const clusters = countOf(s, "cluster");

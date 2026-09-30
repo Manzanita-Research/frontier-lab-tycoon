@@ -401,15 +401,15 @@ describe("the compute auction", () => {
   it("a Datacenter needs power: +60 compute a day with a Gas Turbine or Solar Farm, nothing without", () => {
     const s = createInitialState(1);
     const base = computePerDay(s);
-    s.buildings.push({ id: 900, kind: "datacenter", x: 1, z: 1, w: 4, d: 4, placedTick: 0 });
+    s.buildings.push({ id: 900, kind: "datacenter", x: 1, z: 1, w: 4, d: 4, placedTick: 0, reliability: 1, broken: false, brokenTick: 0 });
     expect(powerOf(s)).toMatchObject({ datacenters: 1, powered: 0 });
     expect(computePerDay(s)).toBe(base);
-    s.buildings.push({ id: 901, kind: "gas", x: 8, z: 1, w: 2, d: 2, placedTick: 0 });
+    s.buildings.push({ id: 901, kind: "gas", x: 8, z: 1, w: 2, d: 2, placedTick: 0, reliability: 1, broken: false, brokenTick: 0 });
     expect(datacenterCompute(s)).toBe(60);
     expect(computePerDay(s)).toBe(base + 60);
-    s.buildings.push({ id: 902, kind: "datacenter", x: 1, z: 8, w: 4, d: 4, placedTick: 0 });
+    s.buildings.push({ id: 902, kind: "datacenter", x: 1, z: 8, w: 4, d: 4, placedTick: 0, reliability: 1, broken: false, brokenTick: 0 });
     expect(computePerDay(s)).toBe(base + 60); // the second one has no plant yet
-    s.buildings.push({ id: 903, kind: "solar", x: 12, z: 1, w: 3, d: 3, placedTick: 0 });
+    s.buildings.push({ id: 903, kind: "solar", x: 12, z: 1, w: 3, d: 3, placedTick: 0, reliability: 1, broken: false, brokenTick: 0 });
     expect(computePerDay(s)).toBe(base + 120);
   });
 
@@ -420,13 +420,13 @@ describe("the compute auction", () => {
     dailyDiscourse(s, createRng(1));
     const plain = s.waterDiscourse - d0;
     const g = createInitialState(1);
-    g.buildings.push({ id: 901, kind: "gas", x: 8, z: 1, w: 2, d: 2, placedTick: 0 });
+    g.buildings.push({ id: 901, kind: "gas", x: 8, z: 1, w: 2, d: 2, placedTick: 0, reliability: 1, broken: false, brokenTick: 0 });
     dailyDiscourse(g, createRng(1));
     expect(g.waterDiscourse - d0).toBeCloseTo(plain + gasDiscourse(g));
     expect(gasDiscourse(g)).toBeGreaterThan(0);
     const v = createInitialState(1);
     const rest = hypeResting(v);
-    v.buildings.push({ id: 902, kind: "solar", x: 12, z: 1, w: 3, d: 3, placedTick: 0 });
+    v.buildings.push({ id: 902, kind: "solar", x: 12, z: 1, w: 3, d: 3, placedTick: 0, reliability: 1, broken: false, brokenTick: 0 });
     expect(hypeResting(v)).toBe(rest + solarHype(v));
     expect(solarHype(v)).toBeGreaterThan(0);
   });

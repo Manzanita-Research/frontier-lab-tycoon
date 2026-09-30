@@ -1,6 +1,7 @@
 // Thought bubbles. `when` is a condition evaluated each day; 'always' lines are the fallback pool.
 // Templates: {lab} {model}. Parody only.
 import type { WalkerKind } from "../sim/types";
+import { NIGHT_THOUGHTS } from "./night";
 import { RACE_THOUGHTS, type RaceThoughtCondition } from "./raceThoughts";
 
 export type ThoughtCondition =
@@ -16,6 +17,8 @@ export type ThoughtCondition =
   | "discourse"
   /** Ten or more protesters at the gate. */
   | "protest"
+  /** After dark: the lamps are on and someone is still at it (content/night.ts). */
+  | "night"
   /** The race: the current era, an open-weights drop, an unpowered datacenter, the top of the Arena. */
   | RaceThoughtCondition;
 
@@ -115,5 +118,6 @@ export const THOUGHTS: ThoughtLine[] = [
   t("protester", "always", "This is the most organized thing I've done since my group project."),
   t("protester", "protest", "Someone hand me a water. Not from them."),
 
+  ...NIGHT_THOUGHTS.map((n) => t(n.kind, "night", n.text)),
   ...RACE_THOUGHTS,
 ];

@@ -34,7 +34,7 @@ describe("crowd density", () => {
     const s = createInitialState(1);
     expect(count(s, "researcher")).toBe(8 + 3);
     expect(researcherTarget(s)).toBe(14);
-    s.buildings.push({ id: 99, kind: "hall", x: 1, z: 1, w: 3, d: 3, placedTick: 0 });
+    s.buildings.push({ id: 99, kind: "hall", x: 1, z: 1, w: 3, d: 3, placedTick: 0, reliability: 1, broken: false, brokenTick: 0 });
     expect(researcherTarget(s)).toBe(18);
     s.capability = 40;
     expect(agentTarget(s)).toBe(26);
@@ -44,7 +44,7 @@ describe("crowd density", () => {
 
   it("grows the researcher and agent populations toward their targets", () => {
     const s = createInitialState(3);
-    s.buildings.push({ id: 99, kind: "hall", x: 1, z: 1, w: 3, d: 3, placedTick: 0 });
+    s.buildings.push({ id: 99, kind: "hall", x: 1, z: 1, w: 3, d: 3, placedTick: 0, reliability: 1, broken: false, brokenTick: 0 });
     s.capability = 60;
     // nobody walks out during this test
     s.race.rivals = s.race.rivals.map((r) => ({ ...r, context: { ...r.context, personality: { ...r.context.personality, poaching: 0 } } }));
@@ -175,8 +175,8 @@ describe("water discourse and protesters", () => {
     const s = createInitialState(1);
     dailyDiscourse(s, createRng(1));
     expect(s.waterDiscourse).toBeCloseTo(0.2);
-    s.buildings.push({ id: 90, kind: "cluster", x: 0, z: 0, w: 2, d: 2, placedTick: 0 });
-    s.buildings.push({ id: 91, kind: "cluster", x: 0, z: 3, w: 2, d: 2, placedTick: 0 });
+    s.buildings.push({ id: 90, kind: "cluster", x: 0, z: 0, w: 2, d: 2, placedTick: 0, reliability: 1, broken: false, brokenTick: 0 });
+    s.buildings.push({ id: 91, kind: "cluster", x: 0, z: 3, w: 2, d: 2, placedTick: 0, reliability: 1, broken: false, brokenTick: 0 });
     dailyDiscourse(s, createRng(1));
     expect(s.waterDiscourse).toBeCloseTo(0.2 + 1.5 - 0.3);
     s.buildings = [];

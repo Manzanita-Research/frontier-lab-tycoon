@@ -6,6 +6,7 @@ import type { EconomyStored } from "./machines/economy";
 import type { GoalsStored } from "./machines/goals";
 import type { MoodStored } from "./machines/mood";
 import type { RaceState } from "./race/state";
+import type { StaffStored } from "./machines/staff";
 import type { TrainingStored } from "./machines/training";
 import type { WalkerStored } from "./machines/walker";
 
@@ -29,6 +30,12 @@ export interface Building extends Rect {
   kind: BuildingKind;
   /** Tick it was placed on; the renderer uses it for the pop-in squash. */
   placedTick: number;
+  /** 0 to 1 (FLT-10): a new building is at 1, loses 0.5% a day, and a repair puts it back to 0.9. */
+  reliability: number;
+  /** Out of order (a fire, an outage): it does no work, and nobody goes in, until someone fixes it. */
+  broken: boolean;
+  /** The tick it broke; the emergency contractor's clock starts here. */
+  brokenTick: number;
 }
 
 /** Walker.targetId values that aren't building ids. */
@@ -97,6 +104,42 @@ export interface Walker {
   /** Protesters: the spot they picket from. */
   homeX: number;
   homeZ: number;
+  /** Ticks left of "I just stepped in slop": the thought, and the grumpiness, last a moment after they leave the puddle. */
+  mess: number;
+  /** In a line (FLT-10): the tick they joined, the entrance tile the line forms on, and the place they stand in it (-1: not yet). */
+  queued: number;
+  qtile: number;
+  qslot: number;
+}
+
+export type StaffJob = "janitor" | "sre" | "comms" | "security";
+
+/** Someone on the payroll (FLT-10): a little walker with a machine of their own and, optionally, a painted patrol zone. */
+export interface Staffer {
+  id: number;
+  job: StaffJob;
+  name: string;
+  x: number;
+  z: number;
+  /** Position at the start of this tick, for render interpolation. */
+  px: number;
+  pz: number;
+  dir: number;
+  route: Point[];
+  /** Ticks left of what they are doing (working, or waiting to look around again). */
+  timer: number;
+  /** What they are on their way to or working on: a tile index (janitor), a building id (SRE), a walker id (comms), a fence waypoint (security). */
+  task: number;
+  /** The last thing they finished, so a Comms Rep does not hand the same protester a second tote bag straight away. */
+  last: number;
+  /** Game day they joined. */
+  hired: number;
+  /** Jobs done (puddles mopped, buildings fixed, tote bags handed out). */
+  done: number;
+  /** Painted patrol zone: grid tile indices, sorted. Empty means the whole campus. */
+  zone: number[];
+  /** The staff machine: arriving, idle, going, working, leaving or gone. */
+  machine: StaffStored;
 }
 
 export interface NewsItem {
@@ -219,4 +262,8 @@ export interface GameState {
   arcs: Record<string, ArcStored>;
   /** The Race (FLT-9): rival machines, the Arena, the era ratchet, the open-weights drop and the auction clock. */
   race: RaceState;
+  /** Slop on each grid tile (FLT-10), 0 (clean) to 3 (ankle-deep). Drifted agents drop it on the path; Janitor Bots mop it up. */
+  slop: number[];
+  /** The payroll: Janitor Bots, SREs, Comms Reps and Security. */
+  staff: Staffer[];
 }

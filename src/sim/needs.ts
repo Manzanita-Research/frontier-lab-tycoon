@@ -3,6 +3,7 @@
 import type { BuildingDef } from "../content/buildings";
 import { NEEDS, NEEDS_BY_KIND, type NeedKey } from "../content/needs";
 import type { MoodLevel } from "./machines/mood";
+import { MESS_UNHAPPINESS } from "./slop";
 import type { Walker } from "./types";
 
 /** Per tick, at 20 ticks a game day. */
@@ -39,13 +40,14 @@ export function tickNeeds(w: Walker, capability: number) {
   }
 }
 
-/** Happiness, 0 to 1, from the needs: researchers 40% energy, 35% focus, 25% calm; visitors half patience, half wonder. */
+/** Happiness, 0 to 1, from the needs: researchers 40% energy, 35% focus, 25% calm; visitors half patience, half wonder. Fresh from a puddle of slop, a little less. */
 export function happinessOf(w: Walker): number {
+  const slop = w.mess > 0 ? MESS_UNHAPPINESS : 0;
   switch (w.kind) {
     case "researcher":
-      return 0.4 * w.energy + 0.35 * w.focus + 0.25 * (1 - w.fomo);
+      return Math.max(0, 0.4 * w.energy + 0.35 * w.focus + 0.25 * (1 - w.fomo) - slop);
     case "visitor":
-      return 0.5 * w.patience + 0.5 * w.impressed;
+      return Math.max(0, 0.5 * w.patience + 0.5 * w.impressed - slop);
     case "agent":
       return 1 - w.drift;
     default:

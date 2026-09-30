@@ -64,7 +64,7 @@ function placeNearGate(state: GameState, kind: BuildingKind) {
     const z = g.z + dz;
     if (!inBounds(state, x, z) || isPathTile(state, x, z) || buildingAt(state, x, z) || rectContains(g, x, z)) continue;
     const def = BUILDINGS[kind];
-    state.buildings.push({ id: state.nextId++, kind, x, z, w: def.size[0], d: def.size[1], placedTick: state.tick });
+    state.buildings.push({ id: state.nextId++, kind, x, z, w: def.size[0], d: def.size[1], placedTick: state.tick, reliability: 1, broken: false, brokenTick: 0 });
     state.version++;
     return;
   }

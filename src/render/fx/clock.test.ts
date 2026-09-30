@@ -1,11 +1,24 @@
 import { describe, expect, it } from "vitest";
-import { ambience, brightness, chaseHour, clockLabel, CYCLE_TICKS, goldenAmount, hourAt, hourDelta, isNight, lightPosition, nightAmount, START_HOUR } from "./clock";
+import { ambience, brightness, chaseHour, clockLabel, CYCLE_DAYS, CYCLE_TICKS, goldenAmount, hourAt, hourDelta, isNight, lightPosition, nightAmount, START_HOUR } from "./clock";
 
 describe("campus clock", () => {
-  it("opens at 8am and completes one cycle every ten game days", () => {
+  it("opens at 8am and completes one cycle every thirty game days", () => {
+    expect(CYCLE_DAYS).toBe(30);
     expect(hourAt(0)).toBeCloseTo(START_HOUR);
     expect(hourAt(CYCLE_TICKS)).toBeCloseTo(START_HOUR);
     expect(hourAt(CYCLE_TICKS / 2)).toBeCloseTo((START_HOUR + 12) % 24);
+  });
+
+  it("does not flip the lamps more than twice per cycle (FLT-10 slowed the cycle down from 10 days to 30)", () => {
+    let flips = 0;
+    let on = ambience(hourAt(0)).lampGlow > 0.5;
+    for (let tick = 0; tick <= 100 * 20; tick++) {
+      const now = ambience(hourAt(tick)).lampGlow > 0.5;
+      if (now !== on) flips++;
+      on = now;
+    }
+    // A hundred game days is three and a bit cycles: at most one on and one off each.
+    expect(flips).toBeLessThanOrEqual(8);
   });
 
   it("is bright at noon and dark at 2am, with dusk and dawn in between", () => {
