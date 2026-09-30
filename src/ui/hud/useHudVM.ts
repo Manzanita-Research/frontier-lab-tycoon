@@ -10,7 +10,7 @@ import { roomAtom } from "../../newsroom/state";
 import { photoAtom } from "../../render/fx/photoState";
 import { skinList } from "../../skins/registry";
 import { shotAtom } from "../juice/photo";
-import { arenaOpenAtom, chatCountAtom, photoFlashAtom, photoTimeAtom, skinUiAtom, staffOpenAtom } from "./state";
+import { arenaOpenAtom, arenaOpenByDefault, chatCountAtom, photoFlashAtom, photoTimeAtom, skinUiAtom, staffOpenAtom } from "./state";
 import type { HudVM } from "./types";
 import { hudViewModel } from "./vm";
 
@@ -144,7 +144,8 @@ export function useAppSource(): AppSource | null {
 }
 
 export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, selected, zone, outcomeDismissed, pauseReason }: AppSource): HudVM {
-  const arenaOpen = useAtomValue(arenaOpenAtom);
+  const arenaChoice = useAtomValue(arenaOpenAtom);
+  const arenaOpen = arenaChoice ?? arenaOpenByDefault(snap.assistant !== null);
   const room = useAtomValue(roomAtom);
   const chatCount = useAtomValue(chatCountAtom);
   const mixer = useAtomValue(mixerAtom);

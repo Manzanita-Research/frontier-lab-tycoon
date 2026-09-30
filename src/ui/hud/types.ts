@@ -201,6 +201,8 @@ export interface StaffJobVM {
   /** Why not, when `canHire` is false. */
   reason: string;
   color: string;
+  /** One of the hires the guided opening asks for (the Janitor Bot, the SRE): a skin lights its Hire button while the tutorial points at "staff:hire". */
+  starter: boolean;
 }
 
 /** The payroll: hire and fire, and paint patrol zones. It opens from the build palette's "staff" tile. */

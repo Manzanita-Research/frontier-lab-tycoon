@@ -42,6 +42,9 @@ describe("contrast", () => {
       expect(contrast(t("color.titlebarText"), t("color.titlebar"))).toBeGreaterThanOrEqual(4.5);
       expect(contrast(t("color.accentText"), t("color.accent"))).toBeGreaterThanOrEqual(4.5);
     });
+    it("the tutorial's highlight ring stands out from the panel (3:1, like any UI outline)", () => {
+      expect(contrast(t("color.highlight"), t("color.panel"))).toBeGreaterThanOrEqual(3);
+    });
     it("good and bad are distinguishable from the panel at large-text strength (3:1)", () => {
       expect(contrast(t("color.good"), t("color.panel"))).toBeGreaterThanOrEqual(3);
       expect(contrast(t("color.bad"), t("color.panel"))).toBeGreaterThanOrEqual(3);

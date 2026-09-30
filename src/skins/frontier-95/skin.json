@@ -33,6 +33,7 @@
     "color.tipText": "#000000",
     "color.selection": "#000080",
     "color.selectionText": "#FFFFFF",
+    "color.highlight": "#D00000",
     "color.meterFrom": "#000080",
     "color.meterTo": "#000080",
     "font.ui": "\"W95FA\", \"Tahoma\", sans-serif",

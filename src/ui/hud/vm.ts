@@ -259,6 +259,9 @@ function buildOf(i: HudInput): { items: BuildItemVM[]; tip: BuildTipVM | null } 
   return { items, tip };
 }
 
+/** The two hires the tutorial's "hire" step accepts (the same two `sim/commands.ts` counts). */
+const STARTER_HIRES: ReadonlySet<string> = new Set(["janitor", "sre"]);
+
 function staffOf(i: HudInput): StaffVM {
   const ops = i.snap.ops;
   const row = (o: (typeof ops.staff)[number]): StaffRowVM => ({ id: o.id, job: o.job, title: o.title, name: o.name, status: o.status, color: STAFF[o.job].color, zone: o.zone, leaving: o.leaving });
@@ -269,7 +272,7 @@ function staffOf(i: HudInput): StaffVM {
     payroll: ops.payroll,
     payrollText: ops.staff.length > 0 ? `${formatMoney(ops.payroll)}/day` : "nobody on the payroll",
     painting: painting ? row(painting) : null,
-    jobs: ops.jobs.map((j): StaffJobVM => ({ job: j.job, title: j.title, blurb: j.blurb, salary: j.salary, salaryText: `${formatMoney(j.salary)}/day`, count: j.count, max: j.max, canHire: j.canHire, reason: j.reason, color: STAFF[j.job].color })),
+    jobs: ops.jobs.map((j): StaffJobVM => ({ job: j.job, title: j.title, blurb: j.blurb, salary: j.salary, salaryText: `${formatMoney(j.salary)}/day`, count: j.count, max: j.max, canHire: j.canHire, reason: j.reason, color: STAFF[j.job].color, starter: STARTER_HIRES.has(j.job) })),
     roster: ops.staff.map(row),
     slopPct: ops.slopPct,
     broken: ops.broken.length,

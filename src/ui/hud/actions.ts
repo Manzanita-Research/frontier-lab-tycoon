@@ -7,7 +7,7 @@ import type { Cue } from "../../audio/score";
 import { fx } from "../../render/fx/state";
 import { roomAtom, skipNews, viewRoom } from "../../newsroom/state";
 import { setPhoto, takePhoto } from "../juice/photo";
-import { arenaOpenAtom, chatCountAtom, photoFlashAtom, photoTimeAtom, staffOpenAtom } from "./state";
+import { arenaOpenAtom, arenaOpenByDefault, chatCountAtom, photoFlashAtom, photoTimeAtom, staffOpenAtom } from "./state";
 import { skinActions } from "./skinControl";
 import type { StaffJob } from "../../sim/types";
 import type { HudActions } from "./types";
@@ -40,7 +40,7 @@ export const hudActions: HudActions = {
   continueTutorial: () => send({ type: "COMMAND", command: { type: "continueTutorial" } }),
   skipTutorial: () => send({ type: "COMMAND", command: { type: "skipTutorial" } }),
   holdTime: (id, open) => send({ type: "SET_OVERLAY", id, open }),
-  toggleArena: () => registry.set(arenaOpenAtom, !registry.get(arenaOpenAtom)),
+  toggleArena: () => registry.set(arenaOpenAtom, !(registry.get(arenaOpenAtom) ?? arenaOpenByDefault(appNow()?.snap.assistant != null))),
   keepPlaying: () => send({ type: "KEEP_PLAYING" }),
   newLab: () => send({ type: "NEW_LAB" }),
 

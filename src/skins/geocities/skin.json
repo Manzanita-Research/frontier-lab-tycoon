@@ -76,6 +76,7 @@
     "color.tipText": "#000000",
     "color.selection": "#0000EE",
     "color.selectionText": "#FFFFFF",
+    "color.highlight": "#D400D4",
     "color.meterFrom": "#FF00FF",
     "color.meterTo": "#00CCFF",
     "font.ui": "\"Tinos\", \"Times New Roman\", serif",

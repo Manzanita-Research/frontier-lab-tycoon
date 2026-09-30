@@ -1,9 +1,10 @@
 /* Warm paper and an overactive group chat, layered over the toy campus. */
-.news-controls { position:fixed; right:16px; top:160px; z-index:24; display:flex; padding:4px; gap:3px; pointer-events:auto; }
-.news-controls button { border:0; background:transparent; font:800 14px Nunito, sans-serif; color:var(--flt-color-text); padding:8px 10px; cursor:pointer; border-radius:9px; }
+.news-controls { display:flex; align-self:flex-end; padding:4px; gap:3px; pointer-events:auto; }
+.news-controls svg { display:block; }
+.news-controls button { display:inline-flex; align-items:center; gap:6px; border:0; background:transparent; font:800 14px Nunito, sans-serif; color:var(--flt-color-text); padding:8px 10px; cursor:pointer; border-radius:9px; }
 .news-controls button:hover { background:var(--flt-color-panelAlt); }
 .unread-count { background:#bb563e; color:white; padding:2px 6px; border-radius:9px; margin-left:7px; }
-.news-arrival { position:fixed; right:16px; top:215px; z-index:24; max-width:330px; padding:13px; display:flex; flex-wrap:wrap; align-items:center; gap:8px; font-size:13px; pointer-events:auto; }
+.news-arrival { align-self:flex-end; max-width:330px; padding:13px; display:flex; flex-wrap:wrap; align-items:center; gap:8px; font-size:13px; pointer-events:auto; }
 .news-arrival span { flex-basis:100%; font-weight:800; }
 .news-arrival button { border:0; border-radius:7px; padding:7px 14px; color:var(--flt-color-selectionText); background:var(--flt-color-selection); font:800 12px Nunito, sans-serif; cursor:pointer; }
 .news-arrival button:last-child { background:var(--flt-color-panelAlt); color:var(--flt-color-text); }
@@ -63,7 +64,7 @@
 body.photo .news-controls,body.photo .news-arrival { display:none; }
 @keyframes typing { 50% { transform:translateY(-3px); opacity:.4; } } @keyframes chat-pop { from { opacity:0; transform:translateY(7px); } to { opacity:1; transform:translateY(0); } }
 @media(max-width:700px) {
-  .news-controls { top:auto; bottom:163px; right:10px; }.news-controls button { font-size:12px; padding:6px 8px; }.news-arrival { top:auto; bottom:206px; right:10px; max-width:260px; }
+  .news-controls button { font-size:12px; padding:6px 8px; }.news-arrival { max-width:260px; }
   .news-backdrop { padding:10px; }.news-dialog { max-height:calc(100dvh - 20px); }.news-toolbar { padding:7px; gap:4px; }.news-toolbar span { display:none; }.news-toolbar button { font-size:11px; }
   .front-page { padding:18px 17px 14px; }.paper-eyebrow { font-size:8px; letter-spacing:.4px; }.masthead { letter-spacing:-1.7px; font-size:34px; }.paper-date { font-size:8px; }.paper-date span:last-child { display:none; }
   .paper-lead { grid-template-columns:1fr; gap:14px; margin-top:17px; }.paper-lead h2 { font-size:29px; }.paper-substories { grid-template-columns:1fr; gap:14px; }.paper-substories section+section { border-left:0; border-top:1px solid #c1b398; padding:14px 0 0; }.paper-bottom { grid-template-columns:1fr; gap:15px; }.paper-lead img { max-height:210px; }.news-archive { padding:22px 16px; }.archive-list button { gap:10px; padding:12px; }.archive-list b { font-size:15px; }.archive-list em { display:none; }

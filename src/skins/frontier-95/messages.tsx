@@ -49,17 +49,23 @@ const REPLIES: Record<string, string> = {
   ship: "Shipping faster! Have you tried turning it up to Grueling? It's the last of the four speeds.",
 };
 
-/** The paperclip: hosts hints and toasts in a yellow balloon, and offers a tip when the lab is quiet. */
+/**
+ * The paperclip. It delivers the guided opening (one sentence a step, a Next while the game is waiting for one, a Skip that
+ * is always there), and hosts toasts and hints in the same balloon: a toast queues under the message, so nothing ever
+ * speaks over the lesson. When it is quiet it offers a tip every so often.
+ */
 export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
   const t = useT();
   const [tipsOff, setTipsOff] = useState(readTipsOff);
   const [tip, setTip] = useState<number | null>(null);
   const [reply, setReply] = useState<string | null>(null);
   const phone = vm.layout.compact;
+  const lesson = vm.assistant;
   // One at a time, the newest toast winning; the game only sends a hint while nobody is talking.
   const hints = vm.hints;
   const toasts = vm.toasts.slice(-1);
-  const busy = toasts.length > 0 || hints.length > 0;
+  const busy = lesson !== null || toasts.length > 0 || hints.length > 0;
+  const held = vm.pause.auto && vm.pause.reason !== "card" ? vm.pause.reason : null;
 
   // When it is quiet, the clip offers a tip every so often (never on a phone, where the campus needs the room).
   useEffect(() => {
@@ -91,7 +97,40 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
   return (
     <div className="f95-assistant" aria-live="polite">
       {busy && (
-        <div className="f95-balloon" role="status">
+        <div className={`f95-balloon ${lesson ? "lesson" : ""}`} role="status">
+          {lesson && (
+            <div className="f95-lesson" data-step={lesson.step}>
+              <div className="f95-stepline">
+                <small>{t("assistant.step", { n: lesson.number, total: lesson.total })}</small>
+                <span className="f95-pips" aria-hidden>
+                  {Array.from({ length: lesson.total }, (_, i) => (
+                    <i key={i} className={i + 1 < lesson.number ? "done" : i + 1 === lesson.number ? "now" : ""} />
+                  ))}
+                </span>
+              </div>
+              <p className="f95-saying">{lesson.message}</p>
+              <div className="f95-sayrow">
+                {lesson.paused ? (
+                  <Btn def className="f95-next" onClick={() => actions.continueTutorial()}>
+                    {t("assistant.next")}
+                  </Btn>
+                ) : (
+                  lesson.waitingForBuild && lesson.highlight.startsWith("build:") && <small className="f95-placeit">{t("assistant.placeIt")}</small>
+                )}
+                {lesson.canSkip && (
+                  <button type="button" className="f95-skip" onClick={() => actions.skipTutorial()}>
+                    {t("assistant.skip")}
+                  </button>
+                )}
+              </div>
+              {held && (
+                <div className="f95-holdnote">
+                  <Ico name="pause" size={14} />
+                  <span>{t(`pause.${held}`)}</span>
+                </div>
+              )}
+            </div>
+          )}
           {hints.map((h) => (
             <div key={h} className="f95-toast hint">
               <Ico name="info" size={18} />
@@ -129,9 +168,11 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
           )}
         </div>
       )}
+      {/* A new step re-mounts the clip, so it wiggles for every message. */}
       <button
+        key={lesson?.step ?? "clip"}
         type="button"
-        className={`f95-clip ${vm.toasts.length > 0 ? "wiggle" : ""}`}
+        className={`f95-clip ${lesson || vm.toasts.length > 0 ? "wiggle" : ""}`}
         aria-label={t("assistant.title")}
         title={t("assistant.title")}
         onClick={() => (tip === null ? setTip(tip ?? 0) : closeTip())}

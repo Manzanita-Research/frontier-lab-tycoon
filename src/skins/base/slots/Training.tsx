@@ -1,18 +1,19 @@
-import { useT } from "../../context";
+import { useHighlight, useT } from "../../context";
 import type { SlotPropsMap } from "../../types";
 
 /** The training chip: which model is cooking and how far along it is. */
 export function Training({ training }: SlotPropsMap["Training"]) {
   const t = useT();
+  const hl = useHighlight();
   if (!training.hasHall) {
     return (
-      <div className="chip panel">
+      <div className={`chip panel ${hl("training") ? "flt-hl" : ""}`}>
         <div className="chip-title">{t("training.noHall")}</div>
       </div>
     );
   }
   return (
-    <div className="chip panel">
+    <div className={`chip panel ${hl("training") ? "flt-hl" : ""}`}>
       <div className="chip-title">
         {t("training.title")} <b>{training.name}</b> · {training.pctText}
       </div>

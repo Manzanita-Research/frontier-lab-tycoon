@@ -1,10 +1,11 @@
 // Frontier 95's windows: Lab Properties, the copy dialog, sticky notes, Properties of a walker, Task Mangler, Thoughts.txt.
 import { useState } from "react";
 import { Odometer, money, useAutoPause } from "../kit";
-import { useT } from "../context";
+import { useHighlight, useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import { Ico, PixelPortrait } from "./icons";
 import { Blocks, Btn, Field, Sticker, Tabs, Win } from "./parts";
+import { useStackWindow } from "./stack";
 
 type StatsTab = "general" | "finance" | "arena" | "vibes";
 
@@ -137,9 +138,10 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
 /** The file-copy dialog: "Copying the internet into Frontier-3…", with a Cancel that never quite works. */
 export function Training({ training }: SlotPropsMap["Training"]) {
   const t = useT();
+  const hl = useHighlight();
   const eta = training.etaDays === null ? "estimating time remaining…" : t("training.eta", { n: training.etaDays });
   return (
-    <Win className="f95-copy" title={training.hasHall ? t("training.window", { name: training.name }) : "Nothing to copy"} icon="doc" buttons={[{ g: "close", label: "Close", disabled: true }]}>
+    <Win className={`f95-copy ${hl("training") ? "flt-hl" : ""}`} title={training.hasHall ? t("training.window", { name: training.name }) : "Nothing to copy"} icon="doc" buttons={[{ g: "close", label: "Close", disabled: true }]}>
       <div className="f95-copybody">
         {training.hasHall ? (
           <>
@@ -210,70 +212,80 @@ export function Objectives({ objectives, layout, actions }: SlotPropsMap["Object
 }
 
 /** "Properties of Dr. Ada Gradient": the laminated ID badge, blocky need bars, the thought in a read-only box. */
-export function Inspector({ inspector: who, actions }: SlotPropsMap["Inspector"]) {
+export function Inspector({ inspector: who, layout, actions }: SlotPropsMap["Inspector"]) {
   const t = useT();
   const [tab, setTab] = useState<"general" | "history">("general");
+  // On the desktop it can fold to its title bar (and does, when it is the oldest window and the column is full).
+  const [folded, setFolded] = useState(false);
+  useStackWindow("inspector", folded, setFolded);
+  const fold = !layout.compact;
   return (
     <Win
       className="f95-props"
       title={t("inspector.title", { name: who.name })}
       icon="info"
       buttons={[
+        ...(fold ? [{ g: "min" as const, label: folded ? "Restore" : "Minimize", onClick: () => setFolded(!folded) }] : []),
         { g: "help", label: "Help" },
         { g: "close", label: t("inspector.close"), onClick: () => actions.closeInspector() },
       ]}
+      onTitleClick={fold && folded ? () => setFolded(false) : undefined}
       role="dialog"
       label={`${who.name}, ${who.role}`}
     >
-      <Tabs label="Properties" active={tab} onChange={setTab} tabs={[{ id: "general", label: "General" }, { id: "history", label: "History" }]} />
-      <div className="f95-page" role="tabpanel">
-        {tab === "general" ? (
-          <>
-            <div className="f95-badge">
-              <div className="hd">
-                <span>{who.lab.toUpperCase()}</span>
-                <span>{who.kind === "researcher" ? "ALL-HANDS ACCESS" : who.kind === "visitor" ? "VISITOR" : who.kind === "agent" ? "AGENT ACCESS" : "OUTSIDE THE GATE"}</span>
-              </div>
-              <div className="bd">
-                <PixelPortrait kind={who.portrait.kind} body={who.portrait.body} head={who.portrait.head} happiness={who.portrait.happiness} drift={who.portrait.drift} />
-                <div>
-                  <h3>{who.name}</h3>
-                  <div className="r">{who.role}</div>
-                  <div className="r">
-                    Badge #{who.badge} · {who.kindLabel} · {who.moodLabel}
+      {!(fold && folded) && (
+        <>
+          <Tabs label="Properties" active={tab} onChange={setTab} tabs={[{ id: "general", label: "General" }, { id: "history", label: "History" }]} />
+          <div className="f95-page" role="tabpanel">
+            {tab === "general" ? (
+              <>
+                <div className="f95-badge">
+                  <div className="hd">
+                    <span>{who.lab.toUpperCase()}</span>
+                    <span>{who.kind === "researcher" ? "ALL-HANDS ACCESS" : who.kind === "visitor" ? "VISITOR" : who.kind === "agent" ? "AGENT ACCESS" : "OUTSIDE THE GATE"}</span>
                   </div>
-                  <div className="bar" aria-hidden />
+                  <div className="bd">
+                    <PixelPortrait kind={who.portrait.kind} body={who.portrait.body} head={who.portrait.head} happiness={who.portrait.happiness} drift={who.portrait.drift} />
+                    <div>
+                      <h3>{who.name}</h3>
+                      <div className="r">{who.role}</div>
+                      <div className="r">
+                        Badge #{who.badge} · {who.kindLabel} · {who.moodLabel}
+                      </div>
+                      <div className="bar" aria-hidden />
+                    </div>
+                  </div>
+                  <span className="holo" aria-hidden />
                 </div>
-              </div>
-              <span className="holo" aria-hidden />
+                <div className="f95-status">{who.status}</div>
+                {who.needs.map((n) => (
+                  <div key={n.key} className="f95-need">
+                    <span>{n.label}</span>
+                    <Blocks value={n.value} label={n.label} tone={n.tone === "bad" ? "red" : "navy"} />
+                    <span>{n.pct}%</span>
+                  </div>
+                ))}
+                <div className="f95-think inset" aria-label={t("inspector.thinking")}>
+                  “{who.thought}”
+                </div>
+              </>
+            ) : (
+              <ul className="f95-history inset">
+                {who.history.map((h) => (
+                  <li key={h}>{h}</li>
+                ))}
+              </ul>
+            )}
+            <div className="f95-row">
+              <Btn def onClick={() => actions.follow(who.id, !who.following)} aria-pressed={who.following}>
+                {who.following ? `${t("inspector.follow")} ✓` : t("inspector.follow")}
+              </Btn>
+              <Btn onClick={() => actions.closeInspector()}>{t("inspector.ok")}</Btn>
+              <Btn onClick={() => actions.closeInspector()}>Cancel</Btn>
             </div>
-            <div className="f95-status">{who.status}</div>
-            {who.needs.map((n) => (
-              <div key={n.key} className="f95-need">
-                <span>{n.label}</span>
-                <Blocks value={n.value} label={n.label} tone={n.tone === "bad" ? "red" : "navy"} />
-                <span>{n.pct}%</span>
-              </div>
-            ))}
-            <div className="f95-think inset" aria-label={t("inspector.thinking")}>
-              “{who.thought}”
-            </div>
-          </>
-        ) : (
-          <ul className="f95-history inset">
-            {who.history.map((h) => (
-              <li key={h}>{h}</li>
-            ))}
-          </ul>
-        )}
-        <div className="f95-row">
-          <Btn def onClick={() => actions.follow(who.id, !who.following)} aria-pressed={who.following}>
-            {who.following ? `${t("inspector.follow")} ✓` : t("inspector.follow")}
-          </Btn>
-          <Btn onClick={() => actions.closeInspector()}>{t("inspector.ok")}</Btn>
-          <Btn onClick={() => actions.closeInspector()}>Cancel</Btn>
-        </div>
-      </div>
+          </div>
+        </>
+      )}
     </Win>
   );
 }
@@ -282,13 +294,23 @@ export function Inspector({ inspector: who, actions }: SlotPropsMap["Inspector"]
 export function Arena({ arena, actions }: SlotPropsMap["Arena"]) {
   const t = useT();
   const rd = arena.rd;
+  useStackWindow("arena", !arena.open, (minimised) => {
+    if (minimised === arena.open) actions.toggleArena();
+  });
   return (
     <Win
       className={`f95-tasks ${arena.open ? "open" : ""} ${arena.alert ? "alert" : ""}`}
       title={
-        <>
-          Task Mangler<span className="f95-long"> — {t("arena.title")}</span>
-        </>
+        arena.open ? (
+          <>
+            Task Mangler<span className="f95-long"> — {t("arena.title")}</span>
+          </>
+        ) : (
+          // Folded to its title bar, it still says the one number that matters.
+          <>
+            Task Mangler — {t("stats.rd")} {rd.multText}
+          </>
+        )
       }
       label="Task Mangler"
       icon="chart"
@@ -336,6 +358,7 @@ export function ThoughtsPanel({ rows, layout, actions }: SlotPropsMap["ThoughtsP
   const t = useT();
   const [open, setOpen] = useState(() => !layout.compact);
   useAutoPause(actions, "thoughts", layout.compact && open);
+  useStackWindow("thoughts", !open, (minimised) => setOpen(!minimised));
   return (
     <Win className={`f95-thoughts ${open ? "open" : ""}`} title={`${t("thoughts.title")}.txt`} icon="doc" onTitleClick={() => setOpen(!open)} buttons={[{ g: "min", label: open ? "Minimize" : "Restore", onClick: () => setOpen(!open) }]}>
       {open && (
@@ -356,7 +379,10 @@ export function ThoughtsPanel({ rows, layout, actions }: SlotPropsMap["ThoughtsP
 /** "Staff Manager": hire and fire, and paint patrol zones. Opens from Start ▸ Staff. */
 export function Staff({ staff, actions }: SlotPropsMap["Staff"]) {
   const t = useT();
+  const hl = useHighlight();
   const [tab, setTab] = useState<"hire" | "roster">("hire");
+  const [folded, setFolded] = useState(false);
+  useStackWindow("staff", folded, setFolded);
   if (staff.painting) {
     const p = staff.painting;
     return (
@@ -376,62 +402,75 @@ export function Staff({ staff, actions }: SlotPropsMap["Staff"]) {
     );
   }
   return (
-    <Win className="f95-staff" title="Staff Manager" icon="staff" buttons={[{ g: "close", label: t("inspector.close"), onClick: () => actions.closeStaff() }]}>
-      <Tabs
-        label="Staff"
-        active={tab}
-        onChange={setTab}
-        tabs={[
-          { id: "hire", label: "Hire" },
-          { id: "roster", label: `Roster (${staff.count})` },
-        ]}
-      />
-      <div className="f95-page" role="tabpanel">
-        {tab === "hire" ? (
-          <ul className="f95-hire inset">
-            {staff.jobs.map((j) => (
-              <li key={j.job}>
-                <i className="swatch" style={{ background: j.color }} aria-hidden />
-                <span>
-                  <b>{j.title}</b> <small>{j.salaryText}</small>
-                  <small className="blurb">{j.blurb}</small>
-                </span>
-                <Btn disabled={!j.canHire} title={j.reason} onClick={() => actions.hire(j.job)}>
-                  {t("staff.hire")}
-                  {j.count > 0 ? ` (${j.count})` : ""}
-                </Btn>
-              </li>
-            ))}
-          </ul>
-        ) : staff.roster.length === 0 ? (
-          <p className="f95-hint">Nobody on the payroll yet. Hire someone on the other tab.</p>
-        ) : (
-          <ul className="f95-hire inset">
-            {staff.roster.map((s) => (
-              <li key={s.id} className={s.leaving ? "leaving" : ""}>
-                <i className="swatch" style={{ background: s.color }} aria-hidden />
-                <span>
-                  <b>{s.name}</b> <small>{s.title}</small>
-                  <small className="blurb">
-                    {s.status} · {s.zone > 0 ? `zone: ${s.zone} tiles` : "whole campus"}
-                  </small>
-                </span>
-                <span className="f95-pair">
-                  <Btn disabled={s.leaving} onClick={() => actions.paintZone(s.id)} title="Paint a patrol zone on the map">
-                    {t("staff.zone")}
-                  </Btn>
-                  <Btn disabled={s.leaving} onClick={() => actions.fire(s.id)}>
-                    {t("staff.fire")}
-                  </Btn>
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-      <div className="f95-status">
-        {staff.payrollText} · {staff.slopPct}% slop{staff.broken > 0 ? ` · ${staff.broken} out of order` : ""}
-      </div>
+    <Win
+      className="f95-staff"
+      title="Staff Manager"
+      icon="staff"
+      buttons={[
+        { g: "min", label: folded ? "Restore" : "Minimize", onClick: () => setFolded(!folded) },
+        { g: "close", label: t("inspector.close"), onClick: () => actions.closeStaff() },
+      ]}
+      onTitleClick={folded ? () => setFolded(false) : undefined}
+    >
+      {!folded && (
+        <>
+          <Tabs
+            label="Staff"
+            active={tab}
+            onChange={setTab}
+            tabs={[
+              { id: "hire", label: "Hire" },
+              { id: "roster", label: `Roster (${staff.count})` },
+            ]}
+          />
+          <div className="f95-page" role="tabpanel">
+            {tab === "hire" ? (
+              <ul className="f95-hire inset">
+                {staff.jobs.map((j) => (
+                  <li key={j.job}>
+                    <i className="swatch" style={{ background: j.color }} aria-hidden />
+                    <span>
+                      <b>{j.title}</b> <small>{j.salaryText}</small>
+                      <small className="blurb">{j.blurb}</small>
+                    </span>
+                    <Btn className={j.starter && j.canHire && hl("staff:hire") ? "flt-hl" : ""} disabled={!j.canHire} title={j.reason} onClick={() => actions.hire(j.job)}>
+                      {t("staff.hire")}
+                      {j.count > 0 ? ` (${j.count})` : ""}
+                    </Btn>
+                  </li>
+                ))}
+              </ul>
+            ) : staff.roster.length === 0 ? (
+              <p className="f95-hint">Nobody on the payroll yet. Hire someone on the other tab.</p>
+            ) : (
+              <ul className="f95-hire inset">
+                {staff.roster.map((s) => (
+                  <li key={s.id} className={s.leaving ? "leaving" : ""}>
+                    <i className="swatch" style={{ background: s.color }} aria-hidden />
+                    <span>
+                      <b>{s.name}</b> <small>{s.title}</small>
+                      <small className="blurb">
+                        {s.status} · {s.zone > 0 ? `zone: ${s.zone} tiles` : "whole campus"}
+                      </small>
+                    </span>
+                    <span className="f95-pair">
+                      <Btn disabled={s.leaving} onClick={() => actions.paintZone(s.id)} title="Paint a patrol zone on the map">
+                        {t("staff.zone")}
+                      </Btn>
+                      <Btn disabled={s.leaving} onClick={() => actions.fire(s.id)}>
+                        {t("staff.fire")}
+                      </Btn>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <div className="f95-status">
+            {staff.payrollText} · {staff.slopPct}% slop{staff.broken > 0 ? ` · ${staff.broken} out of order` : ""}
+          </div>
+        </>
+      )}
     </Win>
   );
 }

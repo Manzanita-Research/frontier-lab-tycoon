@@ -6,6 +6,7 @@ import "./race.css";
 import "./news.css";
 import "./ops.css";
 import "./compact.css";
+import "./tutorial.css";
 import { Arena } from "./slots/Arena";
 import { Assistant } from "./slots/Assistant";
 import { BuildBar } from "./slots/BuildBar";

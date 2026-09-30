@@ -45,19 +45,33 @@
     align-items: flex-start;
     gap: 10px;
   }
-  .f95-right {
+  /* The right-hand side: the managed window stack, then (in the same column, so it can never cover a window) the news
+     arrival and the paperclip with its balloon. The stack gets whatever height they leave. */
+  .f95-side {
     position: absolute;
     right: 10px;
     top: 10px;
-    bottom: calc(var(--taskbar) + 10px);
+    bottom: calc(var(--taskbar) + 6px);
     width: min(400px, calc(100vw - 20px));
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    align-items: flex-end;
+    gap: 8px;
+    pointer-events: none;
+  }
+  .f95-right {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-width: none;
     pointer-events: none;
+  }
+  .f95-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
     > * {
       flex: 0 0 auto;
     }
@@ -892,10 +906,11 @@
       color: #444;
     }
     &.arrival {
-      position: absolute;
+      position: relative;
       left: auto;
-      right: 10px;
-      bottom: calc(var(--taskbar) + 8px);
+      bottom: auto;
+      max-width: 100%;
+      flex: none;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
@@ -1116,14 +1131,12 @@
     }
   }
   .f95-assistant {
-    position: absolute;
-    right: 10px;
-    bottom: calc(var(--taskbar) + 6px);
+    flex: none;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
     gap: 14px;
-    width: min(310px, calc(100vw - 20px));
+    width: min(330px, 100%);
     pointer-events: none;
   }
   .f95-balloon {
@@ -1240,6 +1253,127 @@
     }
     &.wiggle svg {
       animation: frontier-95-wiggle 0.5s steps(4) 3;
+    }
+  }
+
+  /* A folded window is its title bar and nothing else (the Task Mangler's title carries the R&D number). */
+  .f95-tasks:not(.open) > :not(.f95-tb),
+  .f95-thoughts:not(.open) > :not(.f95-tb) {
+    display: none;
+  }
+
+  /* ---- the guided opening: the paperclip's lesson, the highlight ring, the paused tray icon ---- */
+  .f95-balloon.lesson {
+    padding: 8px 10px 8px;
+  }
+  .f95-stepline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    color: #444;
+    small {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+  }
+  .f95-pips {
+    display: inline-flex;
+    gap: 3px;
+    i {
+      width: 8px;
+      height: 8px;
+      border: 1px solid #000080;
+      background: transparent;
+      &.done {
+        background: #000080;
+      }
+      &.now {
+        background: #ffe000;
+      }
+    }
+  }
+  .f95-saying {
+    margin: 3px 0 8px;
+    font-size: 17px;
+    line-height: 1.15;
+  }
+  .f95-sayrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .f95-placeit {
+    font-size: 15px;
+    color: #444;
+  }
+  .f95-next {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 84px;
+    white-space: nowrap;
+    &::after {
+      content: "";
+      flex: none;
+      border: 5px solid transparent;
+      border-left: 6px solid currentColor;
+      border-right: 0;
+    }
+  }
+  .f95-skip {
+    margin-left: auto;
+    border: 0;
+    background: transparent;
+    padding: 2px 0;
+    font: inherit;
+    font-size: 15px;
+    color: #000080;
+    text-decoration: underline;
+    cursor: pointer;
+    &:hover {
+      color: #0000c0;
+    }
+  }
+  .f95-holdnote {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 7px;
+    padding-top: 5px;
+    border-top: 1px dotted #808080;
+    font-size: 15px;
+    color: #444;
+  }
+  .f95-lesson + .f95-toast {
+    margin-top: 6px;
+    border-top: 1px dotted #808080;
+  }
+  /* The ring: flat and blinky, like a focus rectangle that wants attention. */
+  .flt-hl {
+    outline: 3px solid var(--flt-color-highlight);
+    outline-offset: 1px;
+    filter: none;
+    animation: frontier-95-ring var(--flt-motion-pulse) steps(1, end) infinite;
+  }
+  /* On the taskbar (flush with the screen's edge) and in the menu the ring sits inside the button. */
+  .f95-menu li button.flt-hl,
+  .f95-startwrap .flt-hl {
+    outline-offset: -4px;
+    animation-name: frontier-95-ring-in;
+  }
+  .f95-skip:focus-visible,
+  .f95-next:focus-visible {
+    outline: 1px dotted #000;
+    outline-offset: -4px;
+  }
+  .f95-paused {
+    cursor: default;
+    animation: frontier-95-breathe 2.4s steps(1, end) infinite;
+    &:hover {
+      box-shadow: none;
     }
   }
 
@@ -1898,14 +2032,18 @@
   &[data-motion="reduced"] {
     .f95-dots,
     .f95-cursor,
-    .f95-clip.wiggle svg {
+    .f95-clip.wiggle svg,
+    .flt-hl,
+    .f95-paused {
       animation: none;
     }
   }
   @media (prefers-reduced-motion: reduce) {
     .f95-dots,
     .f95-cursor,
-    .f95-clip.wiggle svg {
+    .f95-clip.wiggle svg,
+    .flt-hl,
+    .f95-paused {
       animation: none;
     }
   }
@@ -1930,7 +2068,7 @@
 
   /* ---- narrower desktops ---- */
   @media (max-width: 1040px) and (min-width: 641px) {
-    .f95-right {
+    .f95-side {
       width: min(340px, calc(100vw - 20px));
     }
     .f95-left {
@@ -1997,20 +2135,28 @@
         align-items: center;
       }
     }
+    /* On a phone the side column dissolves: the two folded windows sit in a row above the news strip, and the
+       assistant rides above them (below), so windows and balloon place themselves against the desktop as before. */
+    .f95-side,
+    .f95-stack {
+      display: contents;
+    }
     .f95-right {
+      position: absolute;
       left: 4px;
       right: 4px;
       top: auto;
       bottom: calc(var(--taskbar) + 30px + 8px);
       width: auto;
+      display: flex;
       flex-direction: row;
       align-items: flex-start;
       gap: 4px;
       overflow: visible;
-      > * {
-        flex: 1 1 0;
-        min-width: 0;
-      }
+    }
+    .f95-stack > * {
+      flex: 1 1 0;
+      min-width: 0;
     }
     .f95-props,
     .f95-staff,
@@ -2024,10 +2170,6 @@
       max-height: calc(100dvh - var(--taskbar) - 30px - 12px);
       z-index: 20;
       overflow: auto;
-    }
-    .f95-tasks:not(.open) > :not(.f95-tb),
-    .f95-thoughts:not(.open) > :not(.f95-tb) {
-      display: none;
     }
     .f95-long {
       display: none;
@@ -2097,6 +2239,7 @@
       height: 44px;
     }
     .f95-assistant {
+      position: absolute;
       right: 4px;
       bottom: calc(var(--taskbar) + 30px + 52px);
       width: calc(100vw - 8px);
@@ -2106,6 +2249,18 @@
       font-size: 15px;
       max-height: 110px;
       overflow: hidden;
+      &.lesson {
+        max-height: none;
+      }
+    }
+    .f95-tooltip.arrival {
+      position: absolute;
+      right: 4px;
+      bottom: calc(var(--taskbar) + 30px + 52px);
+    }
+    /* The tray icon says it; the phone has no room for the note as well. */
+    .f95-holdnote {
+      display: none;
     }
     .f95-clip {
       width: 40px;
@@ -2143,6 +2298,36 @@
   }
   100% {
     transform: rotate(0);
+  }
+}
+@keyframes frontier-95-ring {
+  0%,
+  49% {
+    outline-offset: 1px;
+  }
+  50%,
+  100% {
+    outline-offset: 4px;
+  }
+}
+@keyframes frontier-95-ring-in {
+  0%,
+  49% {
+    outline-offset: -4px;
+  }
+  50%,
+  100% {
+    outline-offset: -2px;
+  }
+}
+@keyframes frontier-95-breathe {
+  0%,
+  59% {
+    opacity: 1;
+  }
+  60%,
+  100% {
+    opacity: 0.4;
   }
 }
 @keyframes frontier-95-blink {
