@@ -1,0 +1,16 @@
+{
+  "apiVersion": 1,
+  "id": "every-lab-is-steve",
+  "name": "Every Lab Is Named Steve",
+  "version": "1.0.0",
+  "description": "The Effect-for-modders example, using the current game's canonical rival IDs.",
+  "content": {
+    "rivals": {
+      "override": [
+        { "id": "anthro", "name": "Steve (Safety-Flavoured)" },
+        { "id": "openish", "name": "Steve (Formerly Non-Profit)" },
+        { "id": "metameta", "name": "Steve Superintelligence Labs" }
+      ]
+    }
+  }
+}
