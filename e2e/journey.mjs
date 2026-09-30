@@ -21,11 +21,12 @@ const out = process.env.FLT_E2E_OUT ?? "e2e/results/journey";
 await mkdir(`${out}/levels`, { recursive: true });
 await mkdir(`${out}/moments`, { recursive: true });
 
-const LEVEL_DAYS = 120; // a level taking longer than this is a balance wall
+// Game days each level may take (FLT-58), as in src/sim/ladder.test.ts: long enough to be a level, short enough not to be a wall.
+const LEVEL_WINDOW = { 2: [5, 25], 3: [5, 40], 4: [5, 40], 5: [5, 45] };
 const CASH_FLOOR = -2_000_000;
 const TOAST_STORM = 6; // toasts per real minute at 1×
 const LOOK_MS = 60_000; // after each level-up (and the coach), a minute at 1× to read and count toasts
-const FLAT_MS = 60_000; // a real minute at 1× with nothing new (no building, card, level, model or toast) is a flat moment
+const FLAT_MS = 60_000; // a real minute at 1× (or at the 3× the coach asks for) with nothing new (no building, card, level, model, toast or coach step) is a flat moment
 const WALL_CAP = Number(arg("minutes", "90")) * 60_000;
 const BEYOND_DAYS = Number(arg("beyond", "0")); // keep playing this many game days at Level 5, for the triage
 const STALL_CAP = 3 * 60_000;
@@ -34,11 +35,12 @@ const CLICK_MS = 5000;
 const viewport = process.env.CI ? { width: 1280, height: 800 } : { width: 1440, height: 900 };
 
 // What the sensible player builds at each level, as totals (a kind already built counts). Hires are "staff:<job>".
-// Level 1 is the coach's. Level 2 wants revenue (Gateways sell the model), 3 wants seats and Vibes, 4 wants capability.
+// Level 1 is the coach's. Level 2 wants revenue and visitors (Gateways, a Kombucha Bar), 3 wants an SRE and a Janitor for
+// the first spill and breakdown, 4 wants capability. Mirrors WANTS in src/sim/ladder.test.ts.
 const WANTS = {
-  2: [["gateway", 2], ["kombucha", 1], ["gateway", 3], ["cluster", 2], ["gateway", 4]],
-  3: [["hall", 2], ["kombucha", 1], ["snack", 1], ["staff:janitor", 1], ["nap", 1], ["staff:sre", 1], ["snack", 2], ["kombucha", 2], ["hall", 3]],
-  4: [["cluster", 3], ["hall", 3], ["cluster", 4], ["gateway", 5], ["cluster", 5]],
+  2: [["gateway", 1], ["kombucha", 1], ["gateway", 2], ["kombucha", 2], ["cluster", 2]],
+  3: [["staff:sre", 1], ["staff:janitor", 1], ["snack", 1], ["staff:janitor", 2], ["hall", 2], ["nap", 1], ["cluster", 3]],
+  4: [["cluster", 4], ["gateway", 3], ["cluster", 5], ["hall", 3], ["cluster", 6]],
   5: [["staff:security", 1], ["staff:comms", 1], ["demo", 1]],
 };
 const RESERVE = 1_000_000; // cash the player keeps after a purchase
@@ -299,6 +301,7 @@ try {
   let level = 1, levelTick = first.tick, levelAt = Date.now();
   let lookUntil = 0; // real time: stay at 1× until then
   let coachDone = false;
+  let peeked = false;
   let lastAct = 0;
   let lastCoachClick = 0;
   let heldSince = 0;
@@ -311,6 +314,7 @@ try {
   let reachedAt = null;
   let lastSample = 0;
   let flatKey = "", flatSince = Date.now();
+  const slowSeen = new Set();
 
   for (;;) {
     const now = Date.now();
@@ -327,7 +331,11 @@ try {
     if (probe.tick !== lastTick) { lastTick = probe.tick; lastTickAt = now; }
     else if (now - lastTickAt > STALL_CAP) throw new Error(`Game time stood still for ${STALL_CAP / 60_000} minutes at game day ${gameDays(probe)} (level ${probe.progress.level}, overlays ${probe.overlays.join(",") || "none"}, event ${probe.event ?? "none"})`);
     const levelDays = (probe.tick - levelTick) / tpd;
-    if (levelDays > LEVEL_DAYS && probe.progress.level < 5) await fail("slow level", `Level ${probe.progress.level} (${probe.progress.name}) took more than ${LEVEL_DAYS} game days; goal "${probe.progress.goal.text}" at ${probe.progress.goal.current}/${probe.progress.goal.target}`, probe);
+    const maxDays = LEVEL_WINDOW[probe.progress.level + 1]?.[1];
+    if (maxDays !== undefined && levelDays > maxDays && !slowSeen.has(probe.progress.level)) {
+      slowSeen.add(probe.progress.level);
+      await fail("slow level", `Level ${probe.progress.level} (${probe.progress.name}) took more than ${maxDays} game days; goal "${probe.progress.goal.text}" at ${probe.progress.goal.status ?? `${probe.progress.goal.current}/${probe.progress.goal.target}`}`, probe);
+    }
 
     // Toasts: count each new one; the storm check is for 1× only.
     for (const t of probe.toasts) {
@@ -355,8 +363,9 @@ try {
     }
 
     // Flat moments: reported with a still, not failed (the player may simply be waiting on a model).
-    const change = `${probe.progress.level}|${probe.map.buildings.length}|${probe.models}|${cardSeen.size}|${toastSeen.size}|${probe.event}`;
-    if (change !== flatKey || probe.speed !== 1 || probe.paused) { flatKey = change; flatSince = now; }
+    const change = `${probe.progress.level}|${probe.map.buildings.length}|${probe.models}|${cardSeen.size}|${toastSeen.size}|${probe.event}|${probe.coachId}`;
+    const counted = probe.speed === 1 || (probe.speed === 3 && !coachDone); // the coach's ▶▶ step asks for 3×
+    if (change !== flatKey || !counted || probe.paused) { flatKey = change; flatSince = now; }
     else if (now - flatSince > FLAT_MS) {
       const shot = await still(`${out}/moments/flat-${String(result.flat.length + 1).padStart(2, "0")}.png`);
       result.flat.push({ gameDay: gameDays(probe), level: probe.progress.level, coach: probe.coachId, training: probe.training, shot });
@@ -370,7 +379,9 @@ try {
       level = probe.progress.level;
       await page.waitForTimeout(600); // let the "New!" card draw
       const shot = await still(`${out}/levels/level-${level}.png`);
-      const row = { level, name: probe.progress.name, gameDay: gameDays(probe), levelDays: +levelDays.toFixed(1), wallS: wallS(), cash: probe.cash, runway: probe.runway, income: probe.income, toastsPerMinute, windows: (await windows()).map((w) => w.label), goal: probe.progress.goal.text, shot };
+      const [lo, hi] = LEVEL_WINDOW[level] ?? [0, Infinity];
+      if (levelDays < lo || levelDays > hi) await fail(levelDays < lo ? "short level" : "slow level", `Level ${level - 1} → ${level} took ${levelDays.toFixed(1)} game days (window ${lo}–${hi})`, probe);
+      const row = { level, name: probe.progress.name, gameDay: gameDays(probe), levelDays: +levelDays.toFixed(1), window: [lo, hi], wallS: wallS(), cash: probe.cash, runway: probe.runway, income: probe.income, toastsPerMinute, windows: (await windows()).map((w) => w.label), goal: probe.progress.goal.text, shot };
       result.levels.push(row);
       log(`LEVEL ${level} ${row.name} at game day ${row.gameDay} (${row.levelDays} days for the last level), cash ${(probe.cash / 1e6).toFixed(2)}M, runway ${probe.runway === null ? "∞" : `${probe.runway.toFixed(1)} mo`}`);
       levelTick = probe.tick; levelAt = now; levelToasts = 0;
@@ -453,13 +464,17 @@ try {
       log(`Coach done at game day ${gameDays(probe)}`);
     }
     if (!coachDone) {
-      if (now - lastCoachClick >= 600 && ["start", "path", "hall", "gateway"].includes(probe.coachId)) {
+      // Follow the coach: its tile or button, ▶▶ at "speed", and the researcher it points at at "peek".
+      if (now - lastCoachClick >= 600 && ["start", "path", "hall", "speed", "peek", "gateway"].includes(probe.coachId)) {
+        if (probe.coachId === "peek") peeked = true;
         const tile = page.locator("[data-coach-tile]:visible").first();
         const active = page.locator("[data-coach-active]:visible").first();
         if (await tile.count()) await press(tile);
         else if (await active.count()) await press(active);
         lastCoachClick = Date.now();
       }
+      // Close the mind-read the peek opened, once it has been read.
+      if (peeked && probe.coachId !== "peek") { peeked = false; await page.waitForTimeout(1500); await page.keyboard.press("Escape"); }
       await page.waitForTimeout(250);
       continue;
     }
@@ -617,12 +632,12 @@ try {
 
 function report(r) {
   const money = (n) => (n === null || n === undefined ? "–" : `${n < 0 ? "−" : ""}$${(Math.abs(n) / 1e6).toFixed(2)}M`);
-  const rows = r.levels.map((l) => `| ${l.level} ${l.name} | ${l.gameDay} | ${l.levelDays ?? "–"} | ${(l.wallS / 60).toFixed(1)} min | ${money(l.cash)} | ${l.runway === null || l.runway === undefined ? "∞" : `${l.runway.toFixed(1)} mo`} | ${l.toastsPerMinute} | ${l.windows.join("; ").slice(0, 120)} |`);
+  const rows = r.levels.map((l) => `| ${l.level} ${l.name} | ${l.gameDay} | ${l.levelDays ?? "–"}${l.window ? ` (${l.window[0]}–${l.window[1]})` : ""} | ${(l.wallS / 60).toFixed(1)} min | ${money(l.cash)} | ${l.runway === null || l.runway === undefined ? "∞" : `${l.runway.toFixed(1)} mo`} | ${l.toastsPerMinute} | ${l.windows.join("; ").slice(0, 120)} |`);
   return `# Journey test: Level 1 → 5
 
 ${r.passed ? "**Passed**" : "**Failed**"}. Level 5 ${r.reachedLevel5 ? "reached" : "**not** reached"}. ${r.url}, ${r.viewport.width}×${r.viewport.height}, ${r.timing?.wallS ?? "?"} s wall, ${r.timing?.fps ?? "?"} fps.
 ${r.error ? `\nStopped: ${r.error}\n` : ""}
-| Level | Game day | Days on the last level | Wall | Cash | Runway | Toasts/min (last level) | Open windows |
+| Level | Game day | Days on the last level (window) | Wall | Cash | Runway | Toasts/min (last level) | Open windows |
 |---|---:|---:|---:|---:|---:|---:|---|
 ${rows.join("\n")}
 

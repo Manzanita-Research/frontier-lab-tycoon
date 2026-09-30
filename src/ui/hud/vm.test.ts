@@ -248,7 +248,7 @@ describe("Playable v1: what the lab has earned, the coach, and Help", () => {
 
   it("puts the one goal on one line, with a ratio", () => {
     const g = level(1).progress.goal;
-    expect(g).toMatchObject({ text: "Ship your first model", current: 0, target: 1, line: "Ship your first model · 0/1", ratio: 0 });
+    expect(g).toMatchObject({ text: "Ship your first model", current: 0, target: 1, line: "Ship your first model · 0/1", progressText: "0/1", ratio: 0 });
     expect(level(2).progress.goal.line).toBe("Earn $20K a day · 4000/20000");
     expect(level(2).progress.goal.ratio).toBeCloseTo(0.2);
   });

@@ -272,6 +272,8 @@ export interface GoalVM {
   target: number;
   /** "Ship your first model · 0/1" */
   line: string;
+  /** Just the progress, for a skin that shows it on its own line: "0/1", "$26K of $40K a day · 3 of 12 visitors". */
+  progressText: string;
   /** 0 to 1 */
   ratio: number;
 }

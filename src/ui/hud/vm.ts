@@ -637,6 +637,7 @@ export function hudViewModel(i: HudInput): HudVM {
       goal: {
         ...play.goal,
         // The sim says the progress in words when a count alone would not ("$26K of $40K a day · 3 of 12 visitors").
+        progressText: play.goal.status ?? `${Math.min(play.goal.current, play.goal.target)}/${play.goal.target}`,
         line: play.goal.text ? `${play.goal.text} · ${play.goal.status ?? `${Math.min(play.goal.current, play.goal.target)}/${play.goal.target}`}` : "",
         ratio: play.goal.target > 0 ? Math.max(0, Math.min(1, play.goal.lowerIsBetter ? (play.goal.current > 0 ? play.goal.target / play.goal.current : 0) : play.goal.current / play.goal.target)) : 0,
       },
