@@ -76,6 +76,30 @@ importers:
         specifier: 5.0.2
         version: 5.0.2(vite@7.3.6)
 
+  packages/flt-mod-cli:
+    dependencies:
+      '@flt/mod-sdk':
+        specifier: workspace:*
+        version: link:../flt-mod-sdk
+      vite:
+        specifier: 7.3.6
+        version: 7.3.6
+      xstate:
+        specifier: 6.0.0-alpha.62
+        version: 6.0.0-alpha.62
+
+  packages/flt-mod-sdk:
+    dependencies:
+      effect:
+        specifier: 4.0.0-rc.118
+        version: 4.0.0-rc.118
+
+  templates/create-flt-mod:
+    devDependencies:
+      '@flt/mod-sdk':
+        specifier: workspace:*
+        version: link:../../packages/flt-mod-sdk
+
 packages:
 
   '@babel/code-frame@7.29.7':

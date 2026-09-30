@@ -4,6 +4,19 @@ _FLT-15. Written by the FLT lead (Opus 5.5). Companion: `docs/EFFECT-FOR-MODDERS
 
 **The test:** someone asks their coding agent *"make me a Frontier Lab Tycoon mod where the protesters are all golden retrievers"*, gets a working mod in minutes, and sends a friend a link that opens the game with it loaded.
 
+## Current implementation (M1a + M2)
+
+This page describes the intended design. M1a foundations and the private M2 kit
+are available; live loading and full content execution await M1b. See
+`src/mods/README.md` for the precise coverage. Start with `pnpm create-mod my-mod`,
+then `pnpm --dir my-mod test`. From the game checkout, `pnpm flt-mod check <path>`,
+`pnpm flt-mod bundle <dir>` and `pnpm flt-mod dev <dir>` use the private source-linked
+kit. The scaffold includes the mod-authoring skill and every v1 content section.
+Optional `mod.ts` uses `@flt/mod-sdk`; directory commands prefer it, while the
+scaffold test checks `mod.json`. Bundle with an explicit `mod.json` output to
+regenerate that file. Local assets are inlined; remote assets are rejected.
+`dev` serves CORS on 5174 and prints the future game link; game hot-reload is M1b.
+
 ## 1. Principle: data first, code last
 
 Most of the fun can be expressed as **data**, and data is safe to share, easy for agents to write, deterministic, and replayable. So mods come in four tiers, and only the last one runs code.

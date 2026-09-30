@@ -14,9 +14,12 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "check": "pnpm typecheck && pnpm test && pnpm build",
+    "check": "pnpm typecheck && pnpm test && pnpm build && pnpm modkit:check",
     "shot": "node scripts/shot.mjs",
-    "mod:check": "node scripts/flt-mod-check.mjs"
+    "mod:check": "node scripts/flt-mod-check.mjs",
+    "flt-mod": "node packages/flt-mod-cli/cli.mjs",
+    "create-mod": "node packages/flt-mod-cli/create.mjs",
+    "modkit:check": "pnpm --filter @flt/mod-sdk typecheck && node --test packages/flt-mod-cli/*.test.mjs"
   },
   "dependencies": {
     "@effect/atom-react": "4.0.0-rc.118",

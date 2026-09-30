@@ -1,0 +1,95 @@
+#!/usr/bin/env node
+import { createHash } from "node:crypto";
+import { readFile, writeFile } from "node:fs/promises";
+import { createServer } from "node:http";
+import { basename, extname, resolve } from "node:path";
+import { performance } from "node:perf_hooks";
+import { fileURLToPath } from "node:url";
+import { checkArcGraph } from "./graph.mjs";
+import { gameRoot, inside, loadManifest, withGameRuntime } from "./io.mjs";
+
+export async function check(input, runner) {
+  const { manifest, path } = await loadManifest(input, runner);
+  const { checkMod } = await runner.import(`${gameRoot}/src/mods/check.ts`);
+  const { composeMods } = await runner.import(`${gameRoot}/src/mods/loader.ts`);
+  const { resolveGameDefinition } = await runner.import(`${gameRoot}/src/mods/game-definition.ts`);
+  const { decodeManifest } = await runner.import(`${gameRoot}/src/mods/schema.ts`);
+  const { Effect } = await runner.import("effect");
+  const start = performance.now();
+  const decoded = await Effect.runPromise(decodeManifest(manifest));
+  const definition = await Effect.runPromise(resolveGameDefinition(composeMods([decoded]).layer));
+  const arcs = [...definition.content.arcs, ...definition.content.events.filter((event) => !("choices" in event))].map(checkArcGraph);
+  const { report, replay, conflicts, mod } = await checkMod(manifest);
+  const digest = (state) => createHash("sha256").update(JSON.stringify(state)).digest("hex");
+  if (digest(report.state) !== digest(replay.state)) throw new Error("deterministic replay differs");
+  const { state, ...numbers } = report;
+  return { ok: true, path, mod, ...numbers, conflicts, arcs, deterministic: true, digest: digest(state), elapsedMs: Math.round(performance.now() - start) };
+}
+export function printReport(report) {
+  console.log(`PASS ${report.mod.id}@${report.mod.version}: ${report.days} days, ${report.ticks} ticks, ${report.cardsAnswered} cards answered, ${report.models} releases`);
+  console.log(`Replay identical: ${report.digest}; cash $${Math.round(report.cash)}; ${report.elapsedMs} ms`);
+  console.log(`Arc reachability: ${report.arcs.length} arcs checked with xstate/graph (structural, guards/actions omitted)`);
+  for (const arc of report.arcs) console.log(`  ${arc.id}: ${arc.states} states, ${arc.configurations} configurations`);
+  console.log(`M1a applied: ${report.injection.applied.join("; ") || "base simulation only"}`);
+  console.log(`M1b deferred: ${report.injection.deferred.join("; ") || "none"}`);
+  console.log("Coverage: schema, composition, assets, structural arcs, existing World injection. Deferred content is not executed until M1b.");
+}
+export async function bundle(directory, output, runner) {
+  const { manifest } = await loadManifest(directory, runner);
+  const { decodeManifest } = await runner.import(`${gameRoot}/src/mods/schema.ts`);
+  const { validateAssets } = await runner.import(`${gameRoot}/src/mods/assets.ts`);
+  const { composeMods } = await runner.import(`${gameRoot}/src/mods/loader.ts`);
+  const { resolveGameDefinition } = await runner.import(`${gameRoot}/src/mods/game-definition.ts`);
+  const { Effect } = await runner.import("effect");
+  const decoded = await Effect.runPromise(decodeManifest(manifest));
+  validateAssets(decoded.assets ?? {});
+  const definition = await Effect.runPromise(resolveGameDefinition(composeMods([decoded]).layer));
+  [...definition.content.arcs, ...definition.content.events.filter((event) => !("choices" in event))].forEach(checkArcGraph);
+  const path = output ? resolve(output) : resolve(directory, `${decoded.id}.fltmod.json`);
+  await writeFile(path, JSON.stringify(decoded, null, 2) + "\n");
+  return path;
+}
+export async function serve(directory, port = 5174) {
+  // No browser HMR yet. Each request rereads JSON (or recompiles trusted local TS).
+  const server = createServer(async (request, response) => {
+    response.setHeader("Access-Control-Allow-Origin", "*");
+    response.setHeader("Cache-Control", "no-store");
+    if (request.method === "OPTIONS") { response.writeHead(204); response.end(); return; }
+    if (request.method !== "GET" && request.method !== "HEAD") { response.writeHead(405); response.end(); return; }
+    try {
+      const pathname = decodeURIComponent(new URL(request.url, "http://localhost").pathname);
+      let body;
+      if (pathname === "/mod.json") {
+        body = await withGameRuntime(async (runner) => JSON.stringify((await loadManifest(directory, runner)).manifest));
+        response.setHeader("Content-Type", "application/json");
+      } else {
+        const file = await inside(directory, `.${pathname}`);
+        body = await readFile(file);
+        const types = { ".json": "application/json", ".png": "image/png", ".css": "text/css", ".glb": "model/gltf-binary" };
+        response.setHeader("Content-Type", types[extname(file)] ?? "application/octet-stream");
+      }
+      response.end(request.method === "HEAD" ? undefined : body);
+    } catch (error) { response.writeHead(400, { "Content-Type": "text/plain" }); response.end(String(error)); }
+  });
+  await new Promise((ok, fail) => { server.once("error", fail); server.listen(port, "0.0.0.0", ok); });
+  return server;
+}
+export async function main(args = process.argv.slice(2)) {
+  const [command, input, output] = args;
+  if (!input || !["check", "bundle", "dev"].includes(command) || (command !== "bundle" && output)) throw new Error("Usage: flt-mod check <path> | bundle <dir> [output.fltmod.json] | dev <dir>");
+  if (command === "dev") {
+    const server = await serve(resolve(input));
+    console.log("Serving mod with CORS on http://localhost:5174/mod.json");
+    console.log("Open your game with ?mod=http://localhost:5174/mod.json&dev=1 (serving only; game loading/hot-reload awaits M1b)");
+    const stop = () => server.close(() => process.exit());
+    process.once("SIGINT", stop); process.once("SIGTERM", stop);
+    return;
+  }
+  return withGameRuntime(async (runner) => {
+    if (command === "check") printReport(await check(input, runner));
+    else console.log(`Bundled ${basename(input)} → ${await bundle(input, output, runner)}`);
+  });
+}
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch((error) => { console.error(`FAIL ${String(error)}`); process.exitCode = 1; });
+}
