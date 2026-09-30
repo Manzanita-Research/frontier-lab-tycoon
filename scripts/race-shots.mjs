@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Evidence shots for FLT-9 (The Race): the moments a URL can't reach. The game is paused (?speed=0) and the script
-// drives the sim through window.__flt (?debug=1), so each moment is the real thing, just set up quickly.
+// drives the sim through window.__flt (?debug=1&skin=base), so each moment is the real thing, just set up quickly.
 //
 //   pnpm build && (pnpm preview &) && sleep 2
 //   node scripts/race-shots.mjs shuffle docs/img/flt-9/shuffle.png     (the Arena reshuffles, you fall from #1 to #4)
@@ -34,7 +34,7 @@ const page = await ctx.newPage();
 const errors = [];
 page.on("pageerror", (e) => errors.push(String(e)));
 page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
-const go = (q = "") => page.goto(`${base}?debug=1&seed=3&speed=0&hour=13${q}`, { waitUntil: "networkidle" });
+const go = (q = "") => page.goto(`${base}?debug=1&skin=base&seed=3&speed=0&hour=13${q}`, { waitUntil: "networkidle" });
 const save = async (path) => {
   mkdirSync(dirname(path), { recursive: true });
   await page.screenshot({ path });

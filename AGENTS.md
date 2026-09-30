@@ -27,7 +27,7 @@ pnpm check            # all three: run before every PR
 - `src/sim/`: pure TypeScript, deterministic, **no React, no three, no DOM, no Math.random** (use `src/sim/rng.ts`). A fixed-step `tick(state)` drives everything. Unit-test it.
 - `src/content/`: data only (buildings, research, rival labs, events, headlines, thoughts). Adding a joke should never need an engine change.
 - `src/render/`: react-three-fiber scene. Reads sim state, never mutates it except through store actions.
-- `src/ui/`: DOM HUD over the canvas (stats, build palette, ticker, event cards, speed control). `src/ui/juice/`: odometers, sky, photo mode.
+- `src/ui/hud/`: the 2D UI's host. `hudViewModel(snapshot)` (`vm.ts`) turns the snapshot into a plain-JSON `HudVM`; `types.ts` is the whole modding contract (`HudVM` + `HudActions`). `src/skins/`: the skin system (tokens, slots, registry, schema) and the six skins (Frontier 95 is the default). **The 2D UI is skinned: read `docs/SKINS.md` before touching it**, put UI in a slot (base or a skin's), and never import `src/sim/**`, the store or three from `src/skins/**` (a test fails if you do). `src/ui/juice/`: sky and photo-mode plumbing; `src/ui/WorldOverlay.tsx`: labels pinned to the scene.
 - `src/render/fx/`: the juice layer (camera director, particles, day/night, photo mode). It only reads the World; see the last section of `docs/ARCHITECTURE.md`.
 - `src/sim/machines/`: the XState machines (training, economy, goals, event arcs, walkers, moods, staff). `src/sim/race/`: the Race (rival labs, the Arena, eras, the R&D multiplier, open weights, the compute auction, funding rounds). `src/app/`: the Effect shell (Sim and Frames services, the app machine) and how React reads it. See `docs/ARCHITECTURE.md`.
 

@@ -99,7 +99,7 @@ export function BuildBar({ items, tip, actions }: SlotPropsMap["BuildBar"]) {
     .sort((a, b) => b.it.built - a.it.built || a.order - b.order)
     .slice(0, 3)
     .map((x) => x.it);
-  const held = items.find((i) => i.selected);
+  const held = items.find((i) => i.selected && i.kind !== "staff");
   const pick = (kind: string) => {
     actions.place(kind);
     setOpen(false);
