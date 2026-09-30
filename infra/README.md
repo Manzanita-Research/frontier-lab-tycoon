@@ -40,8 +40,8 @@ pnpm install --frozen-lockfile
 pnpm --dir infra install --frozen-lockfile
 pnpm check
 pnpm --dir infra typecheck
-printf %s "$CLOUDFLARE_API_TOKEN" | gh secret set CLOUDFLARE_API_TOKEN --repo jem-computer/frontier-lab-tycoon
-printf %s "$CLOUDFLARE_ACCOUNT_ID" | gh secret set CLOUDFLARE_ACCOUNT_ID --repo jem-computer/frontier-lab-tycoon
+printf %s "$CLOUDFLARE_API_TOKEN" | gh secret set CLOUDFLARE_API_TOKEN --repo Manzanita-Research/frontier-lab-tycoon
+printf %s "$CLOUDFLARE_ACCOUNT_ID" | gh secret set CLOUDFLARE_ACCOUNT_ID --repo Manzanita-Research/frontier-lab-tycoon
 CI=true pnpm --dir infra exec alchemy deploy --stage prod --yes
 ```
 
