@@ -48,10 +48,13 @@ export function Docked({ vm, actions }: { vm: HudVM; actions: HudActions }) {
 }
 
 export function Modals({ vm, actions }: { vm: HudVM; actions: HudActions }) {
-  const { EventCard, Livestream, Confirm, UnlockCard, HowToPlay, EraCard, Outcome, NewsRoom, Mixer, SkinPicker } = useSkin().slots;
+  const { EventCard, Livestream, ReportCard, Confirm, UnlockCard, HowToPlay, EraCard, Outcome, NewsRoom, Mixer, SkinPicker } = useSkin().slots;
   return (
     <>
-      {vm.event && (vm.event.stream ? <Livestream event={vm.event} stream={vm.event.stream} actions={actions} /> : <EventCard event={vm.event} actions={actions} />)}
+      {vm.event &&
+        (vm.event.stream ? <Livestream event={vm.event} stream={vm.event.stream} actions={actions} />
+        : vm.event.report ? <ReportCard event={vm.event} report={vm.event.report} actions={actions} />
+        : <EventCard event={vm.event} actions={actions} />)}
       {vm.confirm && <Confirm confirm={vm.confirm} actions={actions} />}
       {vm.unlock && <UnlockCard unlock={vm.unlock} actions={actions} />}
       {vm.help && <HowToPlay help={vm.help} actions={actions} />}

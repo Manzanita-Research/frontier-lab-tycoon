@@ -299,6 +299,8 @@ If your slot needs copy that has no key, write it into the slot (as Frontier 95 
 | `sound.mute` | Mute sound |
 | `sound.unmute` | Unmute sound |
 | `sound.openMixer` | Open sound mixer |
+| `audit.who` | Evals Without Borders |
+| `report.overall` | Overall |
 | `photo.open` | Photo mode (P) |
 | `photo.title` | Photo mode |
 | `photo.time` | Time of day |
@@ -383,8 +385,10 @@ A slot is a React component. Each gets **its slice of the view-model plus `actio
 | `NewsArrival` | `{ arrival, actions }` | "The Frontier Times is here" (`viewNews(id)`, `skipNews()`). |
 | `NewsRoom` | `{ newsroom, actions }` | The News Room modal: the archive, and the open paper or chat (compose `useSlots().FrontPage` / `.GroupChat`, or draw your own). |
 | `Mixer` | `{ sound, actions }` | The sound mixer modal. |
+| `ReportCard` | `{ event, report, actions }` | Evals Without Borders' report card (FLT-19). Opens instead of `EventCard` when `event.kind === "report"`: five subjects graded A to F with a remark each, the `overall` grade, a `stamp` ("CAUGHT HIDING", "SWARM FOUND") or null, what it did to trust, heat and hype (`moves`), and the Frontier Times' `headline`. Answer with `actions.choose`. |
+| `AuditPin` | `{ audit, actions }` | The sign over the auditors' heads (over the gate during the countdown): `audit.line` ("Inspecting the Kombucha Bar"), `stopsText` ("2/4") and a `progress` bar while they stand at a stop (`evals` while they run their own). The game pins it every frame and only draws it while `audit.line` is set. Keep it small: it sits over the 3D scene. |
 
-The **docked** slots (`Layout` receives them pre-rendered) are `Stats`, `Training`, `Objectives`, `Inspector`, `BuildBar`, `Speed`, `Staff`, `ThoughtsPanel`, `Ticker`, `Toasts` (one `Toast` at a time: the newest toast, or the standing hint when nobody is talking), `Assistant`, `Arena`, `Benchmarks`, `Voice`, `NewsControls`, `NewsArrival` and `PhotoButton`. The modal slots (`EventCard`, `Livestream`, `EraCard`, `Outcome`, `NewsRoom`, `Mixer`, `SkinPicker`) and `PhotoOverlay` are rendered by the game when there is something to show.
+The **docked** slots (`Layout` receives them pre-rendered) are `Stats`, `Training`, `Objectives`, `Inspector`, `BuildBar`, `Speed`, `Staff`, `ThoughtsPanel`, `Ticker`, `Toasts` (one `Toast` at a time: the newest toast, or the standing hint when nobody is talking), `Assistant`, `Arena`, `Benchmarks`, `Voice`, `NewsControls`, `NewsArrival` and `PhotoButton`. `AuditPin` is pinned into the scene like `Bubble`. The modal slots (`EventCard`, `Livestream`, `ReportCard`, `EraCard`, `Outcome`, `NewsRoom`, `Mixer`, `SkinPicker`) and `PhotoOverlay` are rendered by the game when there is something to show.
 
 ## Writing slots.tsx
 
@@ -450,6 +454,7 @@ interface HudVM {
   eraCard: EraCardVM | null;
   thoughtsPanel; arena; outcome;
   leapfrog;                              // Release Leapfrog: the benchmark leaderboard (columns, rows, cells) and the share-of-voice meter; `enabled: false` when the pack is off
+  audit;                                 // Evals Without Borders: the stage, the countdown, what the group is doing (the AuditPin's line and progress)
   newsroom; sound; photoMode; skins;     // the news room (archive, paper, chat), mixer, photo mode, skin picker
   layout: { width, height, phone /* ≤480 */, compact /* ≤640 */, tall /* ≥800 */ };
 }

@@ -100,6 +100,16 @@
       "desk-phone-badge",
       "desk-phone-okr",
       "desk-phone-more"
+    ],
+    "auditors": [
+      "audit-notice",
+      "audit-countdown",
+      "audit-visit",
+      "audit-tidy",
+      "audit-evals",
+      "audit-report",
+      "audit-caught",
+      "audit-phone"
     ]
   },
   "scenes": {
@@ -1006,6 +1016,118 @@
           "wait": 250
         }
       ]
+    },
+    "audit-notice": {
+      "title": "FLT-19: the auditors' seven-day warning card (Prep / Tidy up / Business as usual)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "moment": "audit-notice"
+      },
+      "steps": []
+    },
+    "audit-countdown": {
+      "title": "FLT-19: Prep chosen; the countdown sign hangs over the gate",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "moment": "audit-notice",
+        "focus": "11,21",
+        "zoom": 70
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "CHOOSE",
+            "choiceIndex": 0
+          }
+        },
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "audit-visit": {
+      "title": "FLT-19: Evals Without Borders on campus, inspecting the Compute Cluster",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "moment": "audit-visit",
+        "focus": "8.5,10.5",
+        "zoom": 100
+      },
+      "steps": [
+        {
+          "wait": 4000
+        }
+      ]
+    },
+    "audit-tidy": {
+      "title": "FLT-19: Tidy up: the agents hide in cardboard boxes while the auditors look around",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "moment": "audit-tidy",
+        "focus": "10,8.5",
+        "zoom": 100
+      },
+      "steps": [
+        {
+          "wait": 4000
+        }
+      ]
+    },
+    "audit-evals": {
+      "title": "FLT-19: the auditors run their own evals at the Training Hall",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "moment": "audit-evals",
+        "focus": "18.5,16.5",
+        "zoom": 75
+      },
+      "steps": [
+        {
+          "wait": 4000
+        }
+      ]
+    },
+    "audit-report": {
+      "title": "FLT-19: the report card (prepped, no surprises)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "moment": "audit-report"
+      },
+      "steps": []
+    },
+    "audit-caught": {
+      "title": "FLT-19: the report card after Tidy up got caught (F in Eval honesty, the stamp)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "moment": "audit-caught"
+      },
+      "steps": []
+    },
+    "audit-phone": {
+      "title": "FLT-19: the caught report card on a phone (390x844)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "moment": "audit-caught"
+      },
+      "steps": [],
+      "viewport": "390x844",
+      "mobile": true
     }
   }
 }

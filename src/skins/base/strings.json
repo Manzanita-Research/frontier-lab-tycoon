@@ -139,5 +139,7 @@
   "response.ready": "Ready",
   "response.ship": "Ship now",
   "response.full": "Full release",
-  "response.bug": "Launch bug odds"
+  "response.bug": "Launch bug odds",
+  "audit.who": "Evals Without Borders",
+  "report.overall": "Overall"
 }

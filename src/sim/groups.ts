@@ -245,22 +245,30 @@ function follow(g: VisitorGroup, speed: number) {
   }
 }
 
-/** At a stop: a line along the building's front, facing it, shuffling about and peering at things. */
+/**
+ * At a stop: a line along the wall the leader walked up to (the end of the trail), facing the building, shuffling about
+ * and peering at things. Not the door: that can be round the back, and the line would walk through the building.
+ */
 function fanOut(s: GameState, g: VisitorGroup, b: Building, speed: number) {
-  const door = doorPoint(s, b) ?? centre(b);
   const [cx, cz] = centre(b);
-  const ax = door[0] - cx;
-  const az = door[1] - cz;
+  const [ex, ez] = g.trail[g.trail.length - 1] ?? doorPoint(s, b) ?? [cx, cz];
+  const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
+  const wx = clamp(ex, b.x, b.x + b.w);
+  const wz = clamp(ez, b.z, b.z + b.d);
+  let ax = ex - wx;
+  let az = ez - wz;
+  if (Math.hypot(ax, az) < 1e-3) { ax = ex - cx; az = ez - cz; }
   const len = Math.hypot(ax, az) || 1;
   // Outward from the wall, and along it.
   const ox = ax / len;
   const oz = az / len;
+  const door: Point = [wx, wz];
   const n = g.members.length;
   g.members.forEach((m, i) => {
     const side = (i - (n - 1) / 2) * 0.55;
     const peer = Math.sin(s.tick * 0.07 + i * 2.1) * 0.18;
-    const tx = door[0] + ox * (0.35 + peer) - oz * side;
-    const tz = door[1] + oz * (0.35 + peer) + ox * side;
+    const tx = door[0] + ox * (0.45 + peer) - oz * side;
+    const tz = door[1] + oz * (0.45 + peer) + ox * side;
     stepToward(m, tx, tz, speed);
     if (Math.hypot(tx - m.x, tz - m.z) < 0.05) m.dir = Math.atan2(cx - m.x, cz - m.z) + Math.sin(s.tick * 0.05 + i) * 0.5;
   });

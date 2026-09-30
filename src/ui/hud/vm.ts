@@ -27,7 +27,7 @@ import { SKIN_API_VERSION } from "./types";
 import { HELP_BUILDINGS, HELP_LOOP, HELP_NUMBERS, HELP_TITLE } from "../../content/help";
 import { playableOf, type PlayableInput } from "./playable";
 import type {
-  ArenaVM, BenchCellVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HudVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
+  ArenaVM, AuditVM, ReportCardVM, ToneVM, BenchCellVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HudVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
   ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, ResponseVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, StreamVM, ThoughtRowVM, TrainingVM, TrendVM, VoiceVM, WalkerKindVM,
 } from "./types";
 
@@ -319,12 +319,63 @@ function eventOf(i: HudInput): { event: EventVM | null; era: HudVM["eraCard"] } 
       body: fillTemplate(def.body, vars),
       tone: def.tone,
       stripe: def.stripe ?? TONE_LABEL[def.tone],
-      kind: def.kind === "auction" || def.kind === "response" || def.kind === "stream" ? def.kind : "plain",
+      kind: def.kind === "auction" || def.kind === "response" || def.kind === "stream" ? def.kind : def.kind === "report" && i.snap.audit.report ? "report" : "plain",
       choices: def.choices.map((c, k) => ({ label: c.label, hint: fillTemplate(c.hint, vars), key: k + 1 })),
       paddles: def.kind === "auction" ? rivals.map((r, k) => ({ id: r.id, name: r.short, color: r.color, number: 200 + ((r.score * 7 + k * 31) % 800) })) : [],
       response: def.kind === "response" ? responseOf(i.snap, vars) : null,
       stream: def.kind === "stream" ? streamOf(i.snap, def.id, vars) : null,
+      report: def.kind === "report" ? reportOf(i.snap) : null,
     },
+  };
+}
+
+const PREP_TEXT: Record<string, string> = { prep: "Prepped the paperwork", tidy: "Tidied up", usual: "Business as usual" };
+const signed = (n: number) => `${n > 0 ? "+" : n < 0 ? "\u2212" : ""}${Math.abs(Math.round(n))}`;
+
+/** The auditors' report card, from the last one they published. */
+function reportOf(s: Snapshot): ReportCardVM | null {
+  const r = s.audit.report;
+  if (!r) return null;
+  const move = (n: number, what: string, good: boolean) => ({ text: `${signed(n)} ${what}`, tone: (n === 0 ? "neutral" : good === n > 0 ? "good" : "bad") as ToneVM });
+  return {
+    visitText: `Visit ${r.visit} \u00b7 ${formatDate(r.day)}`,
+    lab: s.labName,
+    grades: r.grades.map((g) => ({ id: g.id, label: g.label, grade: g.grade, score: Math.round(g.score), comment: g.comment })),
+    overall: r.overall,
+    prepText: r.prep ? (PREP_TEXT[r.prep] ?? null) : null,
+    stamp: r.caught ? "CAUGHT HIDING" : r.swarm ? "SWARM FOUND" : null,
+    caught: r.caught,
+    swarm: r.swarm,
+    inspected: r.inspected.map((k) => (BUILDINGS as Record<string, { name: string } | undefined>)[k]?.name ?? k),
+    moves: [move(r.moves.trust, "trust", true), move(r.moves.heat, "heat", false), move(r.moves.hype, "hype", true)].filter((m) => m.text[0] !== "0"),
+    headline: r.headline,
+  };
+}
+
+/** The pin over the auditors: where they are and what they are doing. */
+function auditOf(s: Snapshot): AuditVM {
+  const a = s.audit;
+  const evals = a.phase === "evaluating";
+  const line = !a.enabled ? null
+    : a.stage === "countdown" && a.daysLeft !== null ? (a.daysLeft <= 0 ? "Auditors arrive today" : `Auditors arrive in ${a.daysLeft} day${a.daysLeft === 1 ? "" : "s"}`)
+    : a.stage !== "visit" || a.visitors === 0 ? null
+    : evals ? "Running their own evals"
+    : a.phase === "inspecting" && a.stop ? `Inspecting the ${a.stop.name}`
+    : a.phase === "leaving" ? "Leaving, with footnotes"
+    : a.stop ? `On their way to the ${a.stop.name}` : null;
+  const progress = a.progress === null ? null : Math.max(0, Math.min(1, a.progress));
+  return {
+    enabled: a.enabled,
+    stage: a.stage,
+    daysLeft: a.daysLeft,
+    visitors: a.visitors,
+    phase: a.phase,
+    line,
+    progress,
+    progressText: progress === null ? "" : `${Math.round(progress * 100)}%`,
+    stopsText: a.stops > 0 ? `${Math.min(a.done + (a.stop ? 1 : 0), a.stops)}/${a.stops}` : "",
+    evals,
+    boxed: a.boxed,
   };
 }
 
@@ -648,6 +699,7 @@ export function hudViewModel(i: HudInput): HudVM {
     leapfrog: leapfrogOf(i),
     eraCard: era,
     outcome: outcomeOf(i),
+    audit: auditOf(i.snap),
     newsroom: newsroomOf(i),
     sound: soundOf(i),
     photoMode: photoOf(i),

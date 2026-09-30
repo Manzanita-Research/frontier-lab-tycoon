@@ -2889,3 +2889,217 @@
     transform: rotate(360deg);
   }
 }
+
+/* Evals Without Borders (FLT-19): REPORT.DOC in a word processor, and a sticky-note-sized file-copy dialog over the auditors. */
+[data-skin="frontier-95"] {
+  .f95-report {
+    width: min(600px, 100%);
+    max-height: calc(100dvh - 20px);
+    overflow: auto;
+    .f95-choices {
+      padding-top: 6px;
+    }
+  }
+  .f95-report-well {
+    margin: 0 6px;
+    padding: 10px;
+    background: #808080;
+  }
+  .f95-report-page {
+    position: relative;
+    padding: 16px 20px 14px;
+    background: #fff;
+    color: #000;
+    font-family: "Times New Roman", Times, serif;
+    box-shadow: 3px 3px 0 #000;
+    -webkit-font-smoothing: auto;
+    header {
+      position: relative;
+      padding-right: 70px;
+      border-bottom: 2px solid #000;
+      margin-bottom: 6px;
+    }
+    small {
+      font: 13px var(--flt-font-ui);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    h2 {
+      margin: 2px 0 2px;
+      font-size: 22px;
+      line-height: 1.1;
+    }
+    header p {
+      margin: 0 0 6px;
+      font-size: 14px;
+      font-style: italic;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 15px;
+    }
+    th,
+    td {
+      padding: 3px 4px;
+      border-bottom: 1px dotted #000;
+      text-align: left;
+      vertical-align: middle;
+    }
+    th {
+      white-space: nowrap;
+    }
+    td.g {
+      width: 28px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+    }
+    td.r {
+      font-size: 13.5px;
+      font-style: italic;
+      color: #202020;
+    }
+    .grade-D td.g,
+    .grade-F td.g {
+      color: #c00000;
+    }
+    .grade-A td.g,
+    .grade-B td.g {
+      color: #005a00;
+    }
+  }
+  .f95-report-overall {
+    position: absolute;
+    right: 0;
+    top: 2px;
+    display: grid;
+    place-items: center;
+    width: 58px;
+    height: 58px;
+    border: 3px solid #c00000;
+    border-radius: 50%;
+    color: #c00000;
+    font: bold 36px/1 "Times New Roman", Times, serif;
+    transform: rotate(-9deg);
+  }
+  .overall-A .f95-report-overall,
+  .overall-B .f95-report-overall {
+    border-color: #005a00;
+    color: #005a00;
+  }
+  .f95-report-headline {
+    margin: 8px 0 0;
+    font-size: 15px;
+    font-weight: bold;
+    &::before {
+      content: "FRONTIER TIMES \2014  ";
+      font: 12px var(--flt-font-ui);
+      letter-spacing: 0.06em;
+    }
+  }
+  .f95-report-stamp {
+    position: absolute;
+    left: 50%;
+    top: 46%;
+    padding: 2px 12px;
+    border: 5px double #c00000;
+    color: #c00000;
+    font: 34px/1.05 var(--flt-font-display);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    opacity: 0.82;
+    mix-blend-mode: multiply;
+    pointer-events: none;
+    transform: translate(-50%, -50%) rotate(-12deg);
+    animation: frontier-95-stamp 0.4s steps(4, end) both 0.25s;
+  }
+  .f95-report-moves {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 8px 14px 0;
+    span {
+      padding: 1px 8px;
+      font-size: 15px;
+      box-shadow: var(--sunk);
+      background: #fff;
+    }
+    .tone-good {
+      color: var(--flt-color-good);
+    }
+    .tone-bad {
+      color: var(--flt-color-bad);
+    }
+  }
+  .audit-anchor {
+    transform: translate(-50%, -100%);
+  }
+  .f95-auditpin {
+    width: max-content;
+    min-width: 188px;
+    max-width: 280px;
+    .f95-tb {
+      padding: 1px 2px;
+      min-height: 0;
+    }
+    .f95-tt {
+      font-size: 13px;
+    }
+    &.evals .f95-tb {
+      background: #808000;
+    }
+  }
+  .f95-auditpin-in {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 4px 6px 5px;
+    font-size: 14px;
+    line-height: 1.1;
+    .ln {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .f95-prog {
+      height: 14px;
+      padding: 2px;
+      i {
+        background: repeating-linear-gradient(90deg, var(--navy) 0 6px, transparent 6px 8px);
+      }
+    }
+    .st {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12.5px;
+      color: var(--flt-color-textDim);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .f95-report-stamp {
+      animation: none;
+    }
+  }
+  @media (max-width: 640px) {
+    .f95-report {
+      width: 100%;
+    }
+    .f95-report-page {
+      padding: 12px 12px 10px;
+      td.r {
+        display: none;
+      }
+    }
+    .f95-report-stamp {
+      font-size: 26px;
+    }
+  }
+}
+@keyframes frontier-95-stamp {
+  from {
+    transform: translate(-50%, -50%) rotate(-12deg) scale(2.2);
+    opacity: 0;
+  }
+}

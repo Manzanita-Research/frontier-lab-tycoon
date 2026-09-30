@@ -3,7 +3,8 @@
 import { TICKS_PER_DAY } from "../constants";
 import { dailyEvents, openEventOf } from "../events";
 import { dwellProgress, groupsOf } from "../groups";
-import { answer } from "../testkit";
+import { doorPoint } from "../pathfind";
+import { answer, readyForPressure } from "../testkit";
 import { applyNow, tick } from "../tick";
 import type { GameState } from "../types";
 import { dailyAuditors, enableAuditors } from "./driver";
@@ -25,6 +26,8 @@ function openCard(s: GameState, card: string) {
 }
 
 export function stageAudit(s: GameState, moment: AuditMoment) {
+  // Cards need a campus past the opening (day 40, a model, a gateway); a thin `?warp=` campus gets the minimum.
+  if (!s.progression) readyForPressure(s);
   enableAuditors(s);
   const a = s.auditors!;
   const fresh = freshAudit().context;
@@ -50,11 +53,30 @@ export function stageAudit(s: GameState, moment: AuditMoment) {
   if (prep === "tidy") s.disguises = { agent: "box" };
   a.machine = { value: "countdown", context: { ...fresh, prep, enteredTick: s.tick - 7 * TICKS_PER_DAY } };
   dailyAuditors(s);
-  const ready = () => {
-    const g = groupsOf(s, OWNER)[0];
+  const ready = (w: GameState) => {
+    const g = groupsOf(w, OWNER)[0];
     if (!g) return true;
     const dwell = dwellProgress(g) ?? 0;
     return moment === "audit-evals" ? g.machine.value === "evaluating" && dwell >= 0.45 : g.machine.value === "inspecting" && dwell >= 0.35;
   };
-  for (let i = 0; i < 4000 && !ready(); i++) tick(s, answer(s));
+  // Rehearse on a copy for a stop whose door faces the default camera (it looks in from +x/+z), so the auditors are not
+  // standing behind the building they are inspecting; then play the real World that many ticks. Same dice, same ticks.
+  const facing = (w: GameState) => {
+    const g = groupsOf(w, OWNER)[0];
+    const b = g && w.buildings.find((x) => x.id === g.stops[g.at]?.building);
+    const door = b && doorPoint(w, b);
+    return !b || !door || door[0] + door[1] > b.x + b.w / 2 + b.z + b.d / 2;
+  };
+  const copy = structuredClone(s);
+  let first = -1;
+  let best = -1;
+  for (let i = 0; i < 4000 && best < 0 && groupsOf(copy, OWNER)[0]; i++) {
+    if (ready(copy)) {
+      if (first < 0) first = i;
+      if (facing(copy)) best = i;
+    }
+    tick(copy, answer(copy));
+  }
+  const n = best >= 0 ? best : first >= 0 ? first : 4000;
+  for (let i = 0; i < n; i++) tick(s, answer(s));
 }

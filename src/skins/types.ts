@@ -2,7 +2,7 @@
 // nothing else in the game: no `src/sim/**`, no store, no three.
 import type { ComponentType, ReactNode } from "react";
 import type {
-  ArenaVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, EraCardVM, EventVM, HudActions, HudVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
+  ArenaVM, AuditVM, ReportCardVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, EraCardVM, EventVM, HudActions, HudVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
   NewsroomVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StatsVM, ThoughtRowVM, TickerItemVM,
   StaffVM, TeaserVM, ProgressVM, ToastVM, TrainingVM, UnlockCardVM, VisibleVM, HelpVM,
 } from "../ui/hud/types";
@@ -43,6 +43,8 @@ export const SLOT_NAMES = [
   "NewsArrival",
   "NewsRoom",
   "Mixer",
+  "ReportCard",
+  "AuditPin",
 ] as const;
 export type SlotName = (typeof SLOT_NAMES)[number];
 
@@ -112,6 +114,10 @@ export interface SlotPropsMap {
   NewsArrival: { arrival: NonNullable<NewsroomVM["arrival"]>; actions: HudActions };
   NewsRoom: { newsroom: NewsroomVM; actions: HudActions };
   Mixer: { sound: SoundVM; actions: HudActions };
+  /** Evals Without Borders' report card (FLT-19): opens instead of EventCard for `event.kind === "report"`; answer it with `actions.choose`. */
+  ReportCard: { event: EventVM; report: ReportCardVM; actions: HudActions };
+  /** The sign over the auditors (over the gate during the countdown). The game pins it to them every frame; drawn only while `audit.line` is set. */
+  AuditPin: { audit: AuditVM; actions: HudActions };
 }
 
 export type SlotComponents = { [K in SlotName]: ComponentType<SlotPropsMap[K]> };

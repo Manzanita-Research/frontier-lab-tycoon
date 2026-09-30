@@ -91,6 +91,10 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
       return { newsroom: vms.archive!.newsroom, actions };
     case "Mixer":
       return { sound: { ...main.sound, open: true }, actions };
+    case "ReportCard":
+      return { event: vms.caught!.event!, report: vms.caught!.event!.report!, actions };
+    case "AuditPin":
+      return { audit: vms.evals!.audit, actions };
   }
 }
 
@@ -118,6 +122,14 @@ const vms: Record<string, HudVM> = {
   phone: vmOf({ width: 390, height: 844 }),
   nobody: vmOf({ selected: null }),
   staff: vmOf({ staff: true }),
+  // Evals Without Borders (FLT-19): the warning card, the sign over the gate, the tour, their evals, the report card.
+  notice: vmOf({ audit: "audit-notice" }),
+  countdown: vmOf({ audit: "audit-countdown" }),
+  visit: vmOf({ audit: "audit-visit" }),
+  evals: vmOf({ audit: "audit-evals" }),
+  report: vmOf({ audit: "audit-report" }),
+  caught: vmOf({ audit: "audit-caught" }),
+  reportPhone: vmOf({ audit: "audit-caught", width: 390, height: 844 }),
 };
 
 const usable = catalog.filter((e) => e.ok).map((e) => e.folder);
@@ -176,6 +188,25 @@ describe.each([BASE_ID, ...usable])("skin %s", (id) => {
     for (const c of vms.event!.event!.choices) expect(card).toContain(escape(c.label));
     const era = html(skin, <Modals vm={vms.era!} actions={actions} />);
     expect(era).toContain(escape(vms.era!.eraCard!.line));
+  });
+
+  it("shows the auditors' report card (every grade, the stamp, the choices) and the sign over their heads", async () => {
+    const { skin } = await prepareSkin(id);
+    for (const key of ["report", "caught", "reportPhone"]) {
+      const vm = vms[key]!;
+      const report = vm.event!.report!;
+      const out = html(skin, <Modals vm={vm} actions={actions} />);
+      for (const g of report.grades) expect(out, `${id}/${key}/${g.id}`).toContain(escape(g.label));
+      for (const c of vm.event!.choices) expect(out).toContain(escape(c.label));
+      if (report.stamp) expect(out).toContain(report.stamp);
+      expect(out).toMatch(/role="(alert)?dialog"/);
+    }
+    const Pin = skin.slots.AuditPin;
+    for (const key of ["countdown", "visit", "evals"]) {
+      const audit = vms[key]!.audit;
+      expect(audit.line, key).toBeTruthy();
+      expect(html(skin, <Pin audit={audit} actions={actions} />)).toContain(escape(audit.line!));
+    }
   });
 
   it("asks before a spend that leaves under three months of runway, in a modal of its own", async () => {

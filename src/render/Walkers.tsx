@@ -115,6 +115,8 @@ export function Walkers() {
   const lit = useRef<THREE.InstancedMesh>(null);
   const ring = useRef<THREE.Group>(null);
   const boards = useRef<(THREE.InstancedMesh | null)[]>([]);
+  const hide = useRef<THREE.InstancedMesh>(null);
+  const tape = useRef<THREE.InstancedMesh>(null);
   const glowMap = useMemo(() => glowTexture("#ffffff"), []);
   const signMaps = useMemo(() => SIGNS.map((text, i) => signTexture(text, SIGN_COLORS[i % SIGN_COLORS.length]!)), []);
   const glowGeo = useMemo(() => new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2), []);
@@ -128,6 +130,9 @@ export function Walkers() {
   const stickGeo = useMemo(() => new THREE.BoxGeometry(0.045, 1, 0.045), []);
   const eyeGeo = useMemo(() => new THREE.BoxGeometry(0.17 * S, 0.042 * S, 0.05 * S), []);
   const boxGeo = useMemo(() => new RoundedBoxGeometry(0.34, 0.26, 0.3, 2, 0.03), []);
+  // Tidy up (FLT-19): an agent hiding in a cardboard box, packing tape across the top, eyes through the hand hole.
+  const hideGeo = useMemo(() => new RoundedBoxGeometry(0.46 * S, 0.44 * S, 0.42 * S, 2, 0.02 * S), []);
+  const tapeGeo = useMemo(() => new THREE.BoxGeometry(0.47 * S, 0.012 * S, 0.1 * S), []);
 
   useFrame(({ clock, camera }) => {
     const sim = game.world;
@@ -151,6 +156,8 @@ export function Walkers() {
     const nb = new Array<number>(SIGNS.length).fill(0);
     // The agents look like the era: hard hats in Coding Automation, halos after that, bigger and brighter each time.
     const agentLook = LOOKS[eraOfState(sim) - 1]!;
+    const boxed = sim.disguises?.agent === "box";
+    let nk = 0;
 
     const set = (m: THREE.InstancedMesh | null, i: number, x: number, y: number, z: number, ry: number, sx: number, sy: number, sz: number, rx = 0) => {
       if (!m) return;
@@ -198,6 +205,24 @@ export function Walkers() {
       const yaw = env > 0 ? ry + wrap(signYaw - ry) * Math.min(1, env * 1.6) : ry + look;
       const breath = !walking && env === 0 ? Math.sin(t * 2.2 + phase) * 0.014 : 0;
 
+      if (w.kind === "agent" && boxed) {
+        // A box that walks. It stops dead (and trembles a little) whenever it is not walking.
+        const shuffle = walking ? Math.abs(Math.sin(t * 12 + phase)) * 0.03 * S : Math.sin(t * 30 + phase) * 0.004 * S;
+        const lean = walking ? Math.sin(t * 12 + phase) * 0.06 : 0;
+        const i = nk++;
+        set(hide.current, i, x, 0.22 * S + shuffle + hop, z, ry, 1, 1, 1, lean);
+        set(tape.current, i, x, 0.44 * S + shuffle + hop, z, ry, 1, 1, 1, lean);
+        const eyes = aVisor.current;
+        if (eyes) {
+          set(eyes, na, x + Math.sin(ry) * 0.23 * S, 0.3 * S + shuffle + hop, z + Math.cos(ry) * 0.23 * S, ry, 0.55, 0.45, 0.4);
+          eyes.setColorAt(na, agentLook.visor);
+          set(aBody.current, na, 0, -50, 0, 0, 0, 0, 0);
+          set(aOrb.current, na, 0, -50, 0, 0, 0, 0, 0);
+          set(aGlow.current, na, 0, -50, 0, 0, 0, 0, 0);
+          na++;
+        }
+        continue;
+      }
       if (w.kind === "agent") {
         const k = agentLook.scale;
         const bob = (0.26 + Math.sin(t * 3 + phase) * 0.04) * S * k + hop;
@@ -335,6 +360,8 @@ export function Walkers() {
     done(pStick.current, np);
     done(eyes.current, ne);
     done(boxes.current, nx);
+    done(hide.current, nk);
+    done(tape.current, nk);
     done(lit.current, nl);
     boards.current.forEach((m, i) => done(m, nb[i] ?? 0));
   });
@@ -399,6 +426,14 @@ export function Walkers() {
           <meshBasicMaterial map={signMaps[i]} toneMapped={false} side={THREE.DoubleSide} />
         </instancedMesh>
       ))}
+
+      {/* Tidy up: agents hiding in boxes. Nobody is fooled. */}
+      <instancedMesh ref={hide} args={[hideGeo, undefined, CAP]} castShadow frustumCulled={false}>
+        <meshStandardMaterial color="#c99a55" roughness={0.95} />
+      </instancedMesh>
+      <instancedMesh ref={tape} args={[tapeGeo, undefined, CAP]} frustumCulled={false}>
+        <meshStandardMaterial color="#e8d3a0" roughness={0.4} />
+      </instancedMesh>
 
       {/* A researcher walking out for good carries a cardboard box. */}
       <instancedMesh ref={boxes} args={[boxGeo, undefined, SIGN_CAP]} castShadow frustumCulled={false}>

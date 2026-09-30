@@ -9,7 +9,10 @@ import "./leapfrog.css";
 import "./compact.css";
 import "./notices.css";
 import "./playable.css";
+import "./audit.css";
 import { Arena } from "./slots/Arena";
+import { AuditPin } from "./slots/AuditPin";
+import { ReportCard } from "./slots/ReportCard";
 import { Benchmarks } from "./slots/Benchmarks";
 import { Assistant } from "./slots/Assistant";
 import { BuildBar } from "./slots/BuildBar";
@@ -46,5 +49,5 @@ import { Layout } from "./Layout";
 export const baseSlots: SlotComponents = {
   Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, Bubble, ThoughtsPanel, Ticker, Toast, Assistant,
   EventCard, Confirm, Coach, UnlockCard, HowToPlay, Arena, Benchmarks, Voice, Livestream, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, NewsControls,
-  NewsArrival, NewsRoom, Mixer,
+  NewsArrival, NewsRoom, Mixer, ReportCard, AuditPin,
 };

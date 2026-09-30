@@ -5,8 +5,9 @@ import { frontPage, recap, type Edition } from "../../newsroom/edition";
 import { createTestCampus } from "../../sim/testkit";
 import { enableLeapfrog } from "../../sim/race/leapfrog/driver";
 import { leapfrogView } from "../../sim/race/leapfrog/view";
-import { answer } from "../../sim/testkit";
-import { tick } from "../../sim/tick";
+import { answer, layPaths, readyForPressure } from "../../sim/testkit";
+import { stageAudit, type AuditMoment } from "../../sim/auditors/demo";
+import { applyNow, tick } from "../../sim/tick";
 import type { GameState } from "../../sim/types";
 import { newMotion, stepMotion, type MotionView } from "./leapfrogMotion";
 import type { SkinPickerVM } from "./types";
@@ -48,6 +49,20 @@ export function fixtureLeapfrog(days = 48, seed = 3): { world: GameState; motion
   return { world: s, motion: view };
 }
 
+/**
+ * Evals Without Borders (FLT-19) on a small campus: a staged moment, through the same chart, cards and ticks as play.
+ * "audit-countdown" answers the warning card with Prep, so the sign stands over the gate.
+ */
+export function fixtureAudit(moment: AuditMoment | "audit-countdown", seed = 3): GameState {
+  const s = createTestCampus(seed);
+  layPaths(s);
+  readyForPressure(s);
+  s.tick = s.day * 20;
+  stageAudit(s, moment === "audit-countdown" ? "audit-notice" : moment);
+  if (moment === "audit-countdown") applyNow(s, answer(s));
+  return s;
+}
+
 export const NO_SKINS: SkinPickerVM = {
   open: false,
   reducedMotion: false,
@@ -77,6 +92,8 @@ export interface FixtureOptions {
   /** The "New!" card is up. */
   unlock?: boolean;
   world?: GameState;
+  /** An Evals Without Borders moment (the world comes from `fixtureAudit`). */
+  audit?: AuditMoment | "audit-countdown";
   /** Release Leapfrog on, 48 days in, with its leaderboard, news cycle and history. */
   leapfrog?: boolean;
   selected?: number | null;
@@ -99,7 +116,7 @@ export interface FixtureOptions {
 }
 
 export function fixtureSnapshot(o: FixtureOptions = {}): Snapshot {
-  const w = o.world ?? (o.leapfrog ? fixtureLeapfrog().world : fixtureWorld());
+  const w = o.world ?? (o.audit ? fixtureAudit(o.audit) : o.leapfrog ? fixtureLeapfrog().world : fixtureWorld());
   const selected = o.selected === undefined ? (w.walkers.find((x) => x.kind === "researcher")?.id ?? null) : o.selected;
   const snap = makeSnapshot(w, undefined, { selected, follow: false, highlight: null });
   const pendingConfirm = o.confirm
