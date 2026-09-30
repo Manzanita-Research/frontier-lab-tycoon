@@ -96,6 +96,7 @@ Only the **active** skin's CSS, slots and fonts are loaded (Vite splits them int
 | `version` | `"1.2.3"` | Semver. |
 | `preview` | `"assets/preview.<ext>"` | Picker thumbnail. |
 | `unlisted` | `true` (optional) | Keeps the skin out of the player's picker until it passes a taste review. It still loads with `?skin=<id>`. Unhiding is deleting the line. |
+| `crt` | `"off"`, `"subtle"` or `"full"` (optional) | FLT-73: the CRT tube the skin is seen through until the player picks one in Display Properties → Settings. Frontier 95 says `"subtle"`; absent means off. A mod skin inherits its parent's. |
 | `tokens` | `{ "color.panel": "#fff", ... }` | See [Tokens](#tokens). All **required** tokens must be present; the rest fall back to the base. Names must be known tokens, or your own under the `x.` prefix (`"x.sparkle": "#f0f"` → `--flt-x-sparkle`). |
 | `strings` | `{ "help.title": "Field Guide" }` | Relabels UI copy. Keys must exist in the [strings table](#strings). Titles and body copy only: see [Rules](#rules) for control labels. |
 | `fonts` | `[{ family, src, weight?, style?, license, licenseFile }]` | Bundled files only. `src` and `licenseFile` are paths inside the skin folder. Licence must be OFL, Apache, MIT or CC0. |
