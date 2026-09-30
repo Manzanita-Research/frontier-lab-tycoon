@@ -106,6 +106,15 @@
       "mod-steve-phone",
       "mod-retriever",
       "mod-manager"
+    ],
+    "factions": [
+      "factions",
+      "factions-base",
+      "factions-karaoke",
+      "counterprotest",
+      "argue",
+      "factions-chip",
+      "factions-phone"
     ]
   },
   "scenes": {
@@ -1104,6 +1113,65 @@
           "wait": 1200
         }
       ]
+    },
+    "factions": {
+      "title": "FLT-33: the Discourse Monitor after a fast, open season (an alliance, a schism, Doomers at the gate)",
+      "query": {
+        "moment": "factions"
+      },
+      "steps": []
+    },
+    "factions-base": {
+      "title": "FLT-33: the base Factions panel, open",
+      "query": {
+        "moment": "factions",
+        "skin": "base"
+      },
+      "steps": []
+    },
+    "factions-karaoke": {
+      "title": "FLT-33: the discourse in Karaoke Night",
+      "query": {
+        "moment": "factions",
+        "skin": "karaoke-night"
+      },
+      "steps": []
+    },
+    "counterprotest": {
+      "title": "FLT-25: the Water Discourse at its height, the Water Truthers Truthers across the path",
+      "query": {
+        "moment": "counterprotest",
+        "zoom": 80,
+        "focus": "12,21"
+      },
+      "steps": []
+    },
+    "argue": {
+      "title": "FLT-33: an Accelerationist and a Doomer pass on a path and say so",
+      "query": {
+        "moment": "argue"
+      },
+      "steps": []
+    },
+    "factions-chip": {
+      "title": "FLT-33: a researcher's inspector card with their faction chip",
+      "query": {
+        "moment": "argue"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { const r = w.walkers.find((x) => x.kind === \"researcher\" && x.faction && x.machine?.value !== \"inside\"); if (r) f.send({ type: \"SELECT\", id: r.id }); }"
+        }
+      ]
+    },
+    "factions-phone": {
+      "title": "FLT-33: the Discourse Monitor on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "moment": "factions"
+      },
+      "steps": []
     }
   }
 }
