@@ -2,7 +2,7 @@
 // nothing else in the game: no `src/sim/**`, no store, no three.
 import type { ComponentType, ReactNode } from "react";
 import type {
-  ArenaVM, AuditVM, BillVM, TrackerVM, ReportCardVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, DramaVM, EraCardVM, EventVM, HearingVM, HudActions, HudVM, LeakVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
+  ArenaVM, AuditVM, BeatVM, BillVM, TrackerVM, ReportCardVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, DramaVM, EraCardVM, EventVM, HearingVM, HudActions, HudVM, LeakVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
   ModsVM, NewsroomVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StatsVM, ThoughtRowVM, TickerItemVM,
   StaffVM, TeaserVM, ProgressVM, ToastVM, TrainingVM, UnlockCardVM, VisibleVM, HelpVM, PapersVM, PaperMomentVM, CrumbWikiVM, DisastersVM,
 } from "../ui/hud/types";
@@ -56,6 +56,7 @@ export const SLOT_NAMES = [
   "DisasterAlert",
   "ReportCard",
   "AuditPin",
+  "Beat",
 ] as const;
 export type SlotName = (typeof SLOT_NAMES)[number];
 
@@ -137,6 +138,12 @@ export interface SlotPropsMap {
   GroupChat: { chat: ChatVM; actions: HudActions };
   PhotoButton: { photo: PhotoVM; actions: HudActions };
   PhotoOverlay: { photo: PhotoVM; actions: HudActions };
+  /**
+   * A camera beat (FLT-56): letterbox bars top and bottom and the caption, while the camera makes its move over the
+   * running game. Drawn over the docked HUD and under the cards. Offer a skip (`actions.skipBeat()`; Esc does it too)
+   * and keep the bars still under reduced motion.
+   */
+  Beat: { beat: BeatVM; actions: HudActions };
   SkinPicker: { skins: SkinPickerVM; actions: HudActions };
   Outcome: { outcome: OutcomeVM; actions: HudActions };
   /** The News Room button is earned (`visible.news`); mute, the mixer and the skin picker are not. */

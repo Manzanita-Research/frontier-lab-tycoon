@@ -176,10 +176,12 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // Then Regulatory Capture and the Promise Tracker (FLT-22/23), also on Scrutiny: they arm their card arcs the tick Level 5
 // lands (980 / 1120 / 980) and first move a number or a headline at 1463 / 1603 / 1823 (Capture 1463 / 1603 / 3429,
 // the Promise Tracker 1823 / 1623 / 1823). 200 and 800 still hold.
+// FLT-56 lines a walk-out up as a conga line on the founder's route (positions only: same RNG stream, same ids). Only
+// seed 3's Defection (2806) walks more than one person out, so only its 3200 and 4000 moved.
 const GOLDEN: Record<number, Record<number, string>> = {
   1: { 200: "d3826cd0", 800: "ed628bb9", 1600: "ad77df1a", 2400: "560a4eaf", 3200: "50260ab2", 4000: "86598cd5" },
   2: { 200: "e548b1af", 800: "552cae60", 1600: "dd876296", 2400: "2d94abf2", 3200: "115d1e56", 4000: "06c4b6de" },
-  3: { 200: "58bb415c", 800: "920699d6", 1600: "b0010f7b", 2400: "03c1eadb", 3200: "62fbf2cb", 4000: "763a13ea" },
+  3: { 200: "58bb415c", 800: "920699d6", 1600: "b0010f7b", 2400: "03c1eadb", 3200: "a4e1ba73", 4000: "c4212020" },
 };
 
 describe("golden runs", () => {

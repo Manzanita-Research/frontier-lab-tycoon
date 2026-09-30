@@ -997,6 +997,22 @@ export interface SoundVM {
   cues: { id: string; label: string }[];
 }
 
+/**
+ * A camera beat (FLT-56) on screen: letterbox bars and a caption while the camera makes its move. Time is still
+ * running underneath; `actions.skipBeat()` (or Esc) ends it. `kind` is `exit` (a defection's conga line out of the
+ * gate), `huddle` (the auditors conferring before the report card) or `viral` (the hearing clip).
+ */
+export interface BeatVM {
+  id: number;
+  kind: string;
+  /** The small line in the top bar ("Breaking: a departure"). */
+  kicker: string;
+  caption: string;
+  /** A second line, or "". */
+  sub: string;
+  skipLabel: string;
+}
+
 export interface PhotoVM {
   on: boolean;
   /** "live" | "day" | "golden" | "night" | "" (pinned by a link) */
@@ -1202,6 +1218,8 @@ export interface HudVM {
   newsroom: NewsroomVM;
   sound: SoundVM;
   photoMode: PhotoVM;
+  /** A camera beat's letterbox and caption (FLT-56), or null. */
+  beat: BeatVM | null;
   skins: SkinPickerVM;
   mods: ModsVM;
   /** Disasters (FLT-32): `enabled: false` until the lab earns them. */
@@ -1284,6 +1302,8 @@ export interface HudActions {
   setMuted(muted: boolean): void;
   setVolume(channel: "master" | "music" | "sfx", value: number): void;
   playCue(cue: string): void;
+  /** End the camera beat on screen now (FLT-56): the bars go and the camera eases back. */
+  skipBeat(): void;
   // Photo mode.
   setPhoto(on: boolean): void;
   setPhotoTime(key: string): void;

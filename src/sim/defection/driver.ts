@@ -125,6 +125,9 @@ function followersOf(s: GameState, subject: DefectionSubject, roll: number, loud
   return (pool.length ? pool : team.slice(0, 1)).slice(0, Math.min(n, R.exit.maxFollowers)).map((w) => w.id);
 }
 
+/** The seed round the VCs have lined up, in $B (FLT-56): the caption's punchline and the neo lab's balloon. No dice. */
+export const seedRound = (sub: Pick<DefectionSubject, "seniority" | "team">) => Math.max(1, Math.round(1 + sub.seniority * 6 + sub.team.length * 0.5));
+
 const listNames = (names: string[]) => names.length <= 1 ? (names[0] ?? "nobody") : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
 const oddsText = (p: number) => (p <= 0.55 ? "a coin flip" : p >= 0.85 ? "it usually works" : "it probably works");
 
@@ -139,6 +142,7 @@ export function defectionVars(s: GameState): Record<string, string> {
     const team = sub.team.filter((id) => { const w = byId(s, id); return !!w && onStaff(w) && happinessOf(w) < R.exit.followerHappiness; }).length;
     Object.assign(out, {
       defName: sub.name, defTheir: THEIR[sub.pro] ?? "their", defRole: sub.role, defReason: reason?.text ?? "",
+      defLeaving: reason?.leaving ?? "focus on safety", defSeed: `$${seedRound(sub)}B`,
       defTitleOdds: oddsText(reason?.titleOdds ?? 0.5),
       defFollowers: team >= 2 ? `${team} of ${THEIR[sub.pro] ?? "their"} team are rumoured to be going too.` : team === 1 ? "One of the team is rumoured to be going too." : "The team seems settled. For now.",
     });
@@ -158,7 +162,8 @@ function send(s: GameState, rng: Rng, event: ChartEvent, people: { meet?: number
   const { stored, calls } = stepChart<DefectionStage>(defectionMachine, d.machine, event);
   d.machine = stored;
   for (const call of calls) {
-    const who = call.verb === "people.meet" ? people.meet : call.verb === "people.cheer" ? people.cheer : call.verb === "people.quit" ? people.quit : undefined;
+    // A beat that follows people (the conga out of the gate) follows the ones walking out.
+    const who = call.verb === "people.meet" ? people.meet : call.verb === "people.cheer" ? people.cheer : call.verb === "people.quit" || call.verb === "camera.beat" ? people.quit : undefined;
     const env: VerbEnv = { state: s, rng, run: null, owner: OWNER, people: who, vars };
     if (call.verb === "people.meet") {
       // Each call is a fresh visit, so fresh lines.
@@ -251,8 +256,10 @@ export function applyDefectionChoices(s: GameState) {
     const loud = choice === "title" && !titleWorks;
     const followers = followersOf(s, sub, followerRoll, loud);
     const team = sub.team.filter((id) => { const w = byId(s, id); return !!w && onStaff(w); });
+    const names = followers.map((id) => byId(s, id)?.name ?? "").filter(Boolean);
+    const defConga = names.length === 0 ? "Nobody follows. They take two boxes." : `${listNames(names)} ${names.length === 1 ? "follows" : "follow"} in a conga line, carrying boxes.`;
     const { next } = send(s, rng, { type: "CHOSE", choice, day: s.day, tick: s.tick, stats: statsFor(s, d, { titleWorks }) },
-      { meet: [sub.id], cheer: [sub.id, ...team], quit: [sub.id, ...followers] }, defectionVars(s));
+      { meet: [sub.id], cheer: [sub.id, ...team], quit: [sub.id, ...followers] }, { ...defectionVars(s), defConga });
     d.resolved = s.day;
     if (next === "watching") {
       d.scores[sub.id] = 0;
@@ -265,6 +272,7 @@ export function applyDefectionChoices(s: GameState) {
       d.exit = {
         day: s.day, founderId: sub.id, founder: sub.name, pro: sub.pro, followerIds: followers,
         followers: followers.map((id) => byId(s, id)?.name ?? ""), mood: next === "farewell" ? "friendly" : "hostile", loss, lab: null,
+        reason: sub.reason, seed: seedRound(sub),
       };
       delete d.scores[sub.id];
       for (const id of followers) delete d.scores[id];
@@ -303,7 +311,7 @@ export function updateDefection(s: GameState) {
     founder: { id: x.founderId, name: x.founder }, followers: x.followers, origin: "defection", mood: x.mood,
     names: DEFECTION.names[x.mood], manifestos: DEFECTION.manifestos[x.mood],
     capability: s.capability * R.spinout.startShare * (friendly ? 1 : R.spinout.hostileBoost), hype: R.spinout.startHype,
-    personality: R.personality[x.mood], lines: DEFECTION.content.neoLines,
+    personality: R.personality[x.mood], lines: DEFECTION.content.neoLines, seed: x.seed,
   });
   x.lab = lab.id;
   const rng = createRng(s.defection.rngState);

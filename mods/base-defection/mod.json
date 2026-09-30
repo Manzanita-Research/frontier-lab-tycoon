@@ -281,17 +281,21 @@
                   }
                 },
                 {
-                  "type": "camera.focus",
+                  "type": "people.quit",
                   "params": {
-                    "on": "gate",
-                    "zoom": 1.6,
-                    "hold": 3
+                    "quiet": true,
+                    "conga": true
                   }
                 },
                 {
-                  "type": "people.quit",
+                  "type": "camera.beat",
                   "params": {
-                    "quiet": true
+                    "kind": "exit",
+                    "on": "people",
+                    "zoom": 1.7,
+                    "hold": 5,
+                    "caption": "{defName} is leaving to “{defLeaving}” (and a {defSeed} seed round)",
+                    "sub": "{defConga}"
                   }
                 }
               ],
@@ -332,14 +336,6 @@
                   }
                 },
                 {
-                  "type": "camera.focus",
-                  "params": {
-                    "on": "gate",
-                    "zoom": 1.6,
-                    "hold": 3
-                  }
-                },
-                {
                   "type": "shake",
                   "params": {
                     "strength": 0.25
@@ -348,7 +344,19 @@
                 {
                   "type": "people.quit",
                   "params": {
-                    "quiet": true
+                    "quiet": true,
+                    "conga": true
+                  }
+                },
+                {
+                  "type": "camera.beat",
+                  "params": {
+                    "kind": "exit",
+                    "on": "people",
+                    "zoom": 1.7,
+                    "hold": 5,
+                    "caption": "{defName} is storming out to “{defLeaving}” (and a {defSeed} seed round)",
+                    "sub": "{defConga}"
                   }
                 }
               ],
@@ -631,22 +639,26 @@
         {
           "id": "concerns",
           "text": "I have concerns",
-          "titleOdds": 0.5
+          "titleOdds": 0.5,
+          "leaving": "focus on safety"
         },
         {
           "id": "money",
           "text": "The equity math doesn't math",
-          "titleOdds": 0.8
+          "titleOdds": 0.8,
+          "leaving": "take equity seriously"
         },
         {
           "id": "credit",
           "text": "Nobody put my name on the model card",
-          "titleOdds": 0.9
+          "titleOdds": 0.9,
+          "leaving": "get some credit for once"
         },
         {
           "id": "vision",
           "text": "I want to build it my way",
-          "titleOdds": 0.7
+          "titleOdds": 0.7,
+          "leaving": "build it properly this time"
         }
       ]
     },

@@ -77,6 +77,8 @@ export interface HudInput {
   disastersOpen?: boolean;
   mixer: { open: boolean; ready: boolean; muted: boolean; master: number; music: number; sfx: number };
   photo: { on: boolean; time: string; shot: { id: number; url: string; name: string } | null; flash: number };
+  /** A camera beat's caption (FLT-56). Optional: none. */
+  beat?: { id: number; kind: string; caption: string; sub: string } | null;
   skins: SkinPickerVM;
   /** The Mod Manager. Optional: none means no mods and the window shut. */
   mods?: ModsVM;
@@ -101,6 +103,9 @@ export function goalProgressText(def: GoalDef, value: number): string {
       return value >= def.target ? `Arena #${defs().arenaSize + 1 - Math.floor(value)} (top ${defs().arenaSize + 1 - def.target} reached)` : `Arena #${defs().arenaSize + 1 - Math.floor(value)}, need top ${defs().arenaSize + 1 - def.target}`;
   }
 }
+
+/** The top bar of a camera beat (FLT-56), by kind. */
+const BEAT_KICKER: Record<string, string> = { exit: "Breaking · a departure", huddle: "The auditors are conferring", viral: "Live · trending now" };
 
 const TONE_LABEL = { bad: "Breaking", joke: "Developing", good: "Good news", neutral: "Update" } as const;
 const MOOD = { content: "Content", slumped: "Slumped", miserable: "Miserable", resigned: "Resigned" } as const;
@@ -963,6 +968,8 @@ export function hudViewModel(i: HudInput): HudVM {
     newsroom: newsroomOf(i),
     sound: soundOf(i),
     photoMode: photoOf(i),
+    // A card needs the player: the beat makes way. Photo mode hides it with the rest of the HUD.
+    beat: i.beat && !event && !era && !i.photo.on ? { ...i.beat, kicker: BEAT_KICKER[i.beat.kind] ?? "Meanwhile", skipLabel: "Skip ▸" } : null,
     skins: i.skins,
     mods: i.mods ?? NO_MODS_VM,
     disasters: disastersOf(i, play.visible.disasters),

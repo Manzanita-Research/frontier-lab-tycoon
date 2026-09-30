@@ -29,6 +29,7 @@ import { rivalMachine } from "./race/rival";
 import type { Rng } from "./rng";
 import { atDivert, divertStaff, releaseStaff, staffOf } from "./staff";
 import { callMeeting } from "./meetings";
+import { congaLine } from "./conga";
 import { resign } from "./walkers";
 import type { Building, GameState, StaffJob, Tone } from "./types";
 import { defs } from "./defs";
@@ -557,6 +558,20 @@ export const VERBS: Record<string, VerbDef> = {
       if (at) pushCue(env.state, { type: "focus", x: at[0], z: at[1], zoom: num(p.zoom, 1.3), hold: num(p.hold, 2.4) });
     },
   },
+  "camera.beat": {
+    doc: "A camera beat (FLT-56): letterbox bars and a `caption` (with an optional `sub` line; templates, like `news`) while the camera eases to `on` for `hold` seconds. `on` is a place, as for `camera.focus`, or `people`: the beat's people, followed as they walk. `kind` tells the renderer which beat it is (`exit`, `huddle`, `viral`). Time keeps running, the player can skip it, and photo mode or reduced motion get the caption without the camera move.",
+    spec: { kind: "string", caption: "string", sub: "string?", on: "string", zoom: "number?", hold: "number?" },
+    run: (env, p) => {
+      const people = p.on === "people" ? (env.people ?? []).filter((id) => env.state.walkers.some((w) => w.id === id)) : [];
+      const lead = people.length ? env.state.walkers.find((w) => w.id === people[0]) : undefined;
+      const at: [number, number] | null = lead ? [lead.x, lead.z] : placeOf(env, p.on as string);
+      if (!at) return;
+      pushCue(env.state, {
+        type: "beat", beat: p.kind as string, caption: say(env, p.caption as string), sub: p.sub ? say(env, p.sub as string) : "",
+        x: at[0], z: at[1], zoom: num(p.zoom, 1.5), hold: num(p.hold, 4), follow: people,
+      });
+    },
+  },
   shake: { doc: "Shake the screen, `strength` 0 to 1.", spec: { strength: "number" }, run: (env, p) => pushCue(env.state, { type: "shake", strength: Math.max(0, Math.min(1, p.strength as number)) }) },
   "sound.cue": {
     doc: "Play a sound cue: `alarm` (FLT-7's breakdown alarm), `card`, `era` or `release`.",
@@ -594,8 +609,8 @@ export const VERBS: Record<string, VerbDef> = {
     },
   },
   "people.quit": {
-    doc: "Everyone the beat is about hands in the box and walks out through the gate. With `quiet`, the calling pack writes the exit headline instead of the usual one.",
-    spec: { quiet: "boolean?" },
+    doc: "Everyone the beat is about hands in the box and walks out through the gate. With `quiet`, the calling pack writes the exit headline instead of the usual one. With `conga`, they leave as a conga line behind the first of them (FLT-56).",
+    spec: { quiet: "boolean?", conga: "boolean?" },
     run: (env, p) => {
       const { state, rng } = env;
       for (const id of env.people ?? []) {
@@ -604,6 +619,7 @@ export const VERBS: Record<string, VerbDef> = {
         if (p.quiet) state.flags[`quietExit:${w.id}`] = state.day;
         resign(state, w, rng);
       }
+      if (p.conga) congaLine(state, env.people ?? []);
     },
   },
   "people.pay": {

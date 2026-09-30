@@ -27,7 +27,8 @@ const Pack = Schema.Struct({
     events: Schema.Struct({ add: Schema.Array(DramaCard) }),
     headlines: Schema.Struct({ add: Schema.Array(Headline) }),
     thoughts: Schema.Struct({ add: Schema.Array(Thought) }),
-    reasons: Schema.Struct({ add: Schema.Array(Schema.Struct({ id: S, text: S, titleOdds: N })) }),
+    // `leaving` is what they say they are leaving to do, for the exit beat's caption (FLT-56).
+    reasons: Schema.Struct({ add: Schema.Array(Schema.Struct({ id: S, text: S, titleOdds: N, leaving: S })) }),
     labNames: Pool,
     manifestos: Pool,
     neoLines: NeoLines,

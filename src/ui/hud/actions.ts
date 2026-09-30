@@ -5,6 +5,7 @@ import { SPEEDS, type Speed, type Tool } from "../../app/hud";
 import { mixerOpenAtom, playCue, setMixer } from "../../audio/state";
 import type { Cue } from "../../audio/score";
 import { fx } from "../../render/fx/state";
+import { skipBeat } from "../../render/fx/beat";
 import { roomAtom, skipNews, viewRoom } from "../../newsroom/state";
 import { setPhoto, takePhoto } from "../juice/photo";
 import { arenaOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, senateOpenAtom, staffOpenAtom } from "./state";
@@ -99,6 +100,7 @@ export const hudActions: HudActions = {
   clearZone: (id) => send({ type: "COMMAND", command: { type: "clearZone", id } }),
 
   closeSenate: () => registry.set(senateOpenAtom, false),
+  skipBeat: () => skipBeat(),
   lobby: (senator) => send({ type: "COMMAND", command: { type: "lobby", senator } }),
   draftClause: (clause, on) => send({ type: "COMMAND", command: { type: "draftClause", clause, on } }),
 

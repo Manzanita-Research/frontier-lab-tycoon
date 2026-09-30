@@ -2,7 +2,6 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import type { OrthographicCamera } from "three";
-import { sim as game } from "../../app/game";
 import { HALF, rectCenter } from "../coords";
 import { chaseHour, hourAt, nightAmount } from "./clock";
 import { ashPuff, blowout, coinFountain, confettiBurst, droplet, dustBurst, ember, firefly, flame, particles as pool, slopGlint, smokePuff, sparkle, star, suds, toteBurst } from "./particles";
@@ -12,6 +11,10 @@ import { currentLoad } from "./utilisation";
 import { ROOF } from "../buildings/BrokenFx";
 import { SLOP_MAX } from "../../sim/slop";
 import { createWatch, type FxEvent } from "./watch";
+import { beatAtom, beatRun } from "./beatState";
+import { endBeat, isBeat, skipBeat } from "./beat";
+import { reducedMotion } from "../../skins/kit/motion";
+import { registry, sim as game } from "../../app/game";
 
 // `?debug=1` exposes the juice state to probes and screenshot scripts (`get` is R3F's store getter: camera, controls).
 if (typeof window !== "undefined" && new URLSearchParams(window.location.search).has("debug")) {
@@ -86,6 +89,8 @@ export function FxDirector() {
           if (!fx.photo) cinema.focus(view(), { x: 0, z: 1, zoom: 0.8, hold: null });
           return;
         }
+        // A card needs the player: a beat's bars and caption make way for it.
+        endBeat();
         shake(0.8);
         if (!fx.photo) cinema.focus(view(), { ...aim(ev.x, ev.z, 1.25, 0.3), zoom: 1.25, hold: null });
         return;
@@ -115,6 +120,15 @@ export function FxDirector() {
         return;
       case "cue":
         return; // the sound layer plays these
+      case "beat": {
+        // FLT-56: a camera beat. The bars and the caption always (the HUD draws them from `beatAtom`); the camera move
+        // only when the player is not in photo mode and has not asked for less motion. Time keeps running throughout.
+        const camera = !fx.photo && !reducedMotion() && cinema.focus(view(), { ...aim(ev.x, ev.z, ev.zoom, 0.06), zoom: ev.zoom, hold: ev.hold, rate: ev.beat === "huddle" ? 0.8 : 2.4 });
+        Object.assign(beatRun, { id: beatRun.id + 1, kind: ev.beat, x: ev.x, z: ev.z, follow: ev.follow, zoom: ev.zoom, until: fx.time + ev.hold + 2.2, camera, acc: 0 });
+        registry.set(beatAtom, { id: beatRun.id, kind: ev.beat, caption: ev.caption, sub: ev.sub });
+        if (ev.beat === "viral") shake(0.35);
+        return;
+      }
       case "placed":
         dustBurst(pool, ev.x, ev.z, Math.max(ev.w, ev.d) * 0.62, 8 + ev.w * ev.d * 3);
         shake(0.1);
@@ -141,12 +155,49 @@ export function FxDirector() {
       }
       case "reset":
         pool.clear();
+        endBeat();
         cinema.cancel();
         fx.cheerAt = -1e9;
         fx.earnAt = -1e9;
         brokenSeen.current.clear();
         doneSeen.current.clear();
         return;
+    }
+  };
+
+  /** A beat in progress: follow its people, throw its particles, and end it on time or when the player takes the camera. */
+  const runBeat = (walkers: typeof game.world.walkers, dt: number) => {
+    const b = beatRun;
+    if (fx.time > b.until || (b.camera && !cinema.active)) return void skipBeat();
+    if (b.follow.length && b.camera) {
+      let x = 0;
+      let z = 0;
+      let n = 0;
+      for (const w of walkers) {
+        if (!b.follow.includes(w.id)) continue;
+        x += w.x;
+        z += w.z;
+        n++;
+      }
+      if (n) {
+        b.x = x / n - HALF;
+        b.z = z / n - HALF;
+        const at = aim(b.x, b.z, 1, 0.06);
+        cinema.retarget(at.x, at.z);
+      } else b.follow = [];
+    }
+    if (dt <= 0 || fx.photo) return;
+    b.acc += dt * (b.kind === "viral" ? 9 : b.kind === "huddle" ? 14 : 0);
+    for (let k = 0; b.acc >= 1 && k < 4; k++, b.acc--) {
+      if (b.kind === "viral") {
+        // Paparazzi: camera flashes all round the gate.
+        const fx0 = b.x + pool.rand(-2.4, 2.4);
+        const fz0 = b.z + pool.rand(-1.6, 1.6);
+        for (let i = 0; i < 5; i++) sparkle(pool, fx0 + pool.rand(-0.08, 0.08), pool.rand(0.5, 1.1), fz0 + pool.rand(-0.08, 0.08), [1, 1, 0.96]);
+      } else {
+        // Clipboards scratching: little grey flecks over the huddle.
+        sparkle(pool, b.x + pool.rand(-0.9, 0.9), pool.rand(1.1, 1.5), b.z + pool.rand(-0.9, 0.9), [0.85, 0.87, 0.92]);
+      }
     }
   };
 
@@ -165,6 +216,7 @@ export function FxDirector() {
     fx.night = nightAmount(fx.hour);
 
     for (const ev of watch.poll(world)) handle(ev);
+    if (isBeat()) runBeat(world.walkers, dt);
 
     // Ambient emitters. Each is a rate per second, spent as whole particles.
     const a = acc.current;

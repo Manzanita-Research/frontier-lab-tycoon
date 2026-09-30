@@ -15,7 +15,9 @@ import { updateProgression } from "../progression";
 import { PROGRESSION } from "../../content/progression";
 import type { Call } from "../disasters/types";
 import type { GameState, Walker } from "../types";
-import { applyDefectionChoices, candidates, dailyDefection, enableDefection, disableDefection, scoreDelta } from "./driver";
+import { applyDefectionChoices, candidates, dailyDefection, enableDefection, disableDefection, scoreDelta, seedRound } from "./driver";
+import { CONGA_GAP } from "../conga";
+import { neoValuation } from "../neolabs/state";
 import { CARD, CHOICES, DEFECTION, loadDefectionPack, MANIFESTO_CARD } from "./pack";
 import { runDefectionYear } from "./headless";
 import { stageDrama, type DramaMoment } from "./demo";
@@ -146,6 +148,38 @@ describe("the card", () => {
     expect(row.neo?.manifesto).toBe(lab.manifesto);
     expect(row.score).toBeLessThan(boardView(s).find((r) => r.you)!.score);
     expect(eventById(MANIFESTO_CARD)!.title).toContain("{neoName}");
+  });
+  it("FLT-56: they leave as a conga line on the founder's route, and the camera gets a captioned beat", () => {
+    const { s, star } = staged(3);
+    until(s, cardOpen(CARD));
+    const sub = s.defection!.subject!;
+    pick(s, "goodbye");
+    const x = s.defection!.exit!;
+    const line = [star.id, ...x.followerIds].map((id) => byId(s, id)!);
+    expect(line.length).toBeGreaterThanOrEqual(2);
+    // Nose to tail: each one's route is the tail of the one in front's, and they stand about a gap apart on it.
+    for (let k = 1; k < line.length; k++) {
+      const [ahead, behind] = [line[k - 1]!, line[k]!];
+      expect(ahead.route.length).toBeLessThanOrEqual(behind.route.length);
+      expect(JSON.stringify(behind.route.slice(-ahead.route.length))).toBe(JSON.stringify(ahead.route));
+      expect(Math.hypot(ahead.x - behind.x, ahead.z - behind.z)).toBeLessThanOrEqual(CONGA_GAP + 1e-6);
+      expect(behind.px).toBe(behind.x);
+    }
+    // Same speed, so the line holds on the way out.
+    for (let i = 0; i < 5; i++) tick(s);
+    for (let k = 1; k < line.length; k++) if (line[k]!.route.length) expect(Math.hypot(line[k - 1]!.x - line[k]!.x, line[k - 1]!.z - line[k]!.z)).toBeLessThanOrEqual(CONGA_GAP + 1e-6);
+    const beat = s.disasters.cues.find((c) => c.type === "beat");
+    expect(beat && beat.type === "beat" && beat.beat).toBe("exit");
+    if (beat?.type !== "beat") return;
+    expect(beat.caption).toContain(star.name);
+    expect(beat.caption).toContain(`$${seedRound(sub)}B seed round`);
+    expect(beat.caption).not.toMatch(/\{\w+\}/);
+    expect(beat.follow).toEqual([star.id, ...x.followerIds]);
+    expect(beat.sub).toMatch(/conga line, carrying boxes/);
+    expect(x.seed).toBe(seedRound(sub));
+    until(s, cardOpen(MANIFESTO_CARD), 4);
+    expect(s.neoLabs!.labs[0]!.seed).toBe(x.seed);
+    expect(neoValuation(s.neoLabs!.labs[0]!)).toBeGreaterThan(x.seed!);
   });
   it("counter-offer: costs cash, resets the score, and the clock runs faster next time", () => {
     const { s, star } = staged();

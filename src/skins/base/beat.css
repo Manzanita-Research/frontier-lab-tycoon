@@ -1,0 +1,101 @@
+/* FLT-56: camera beats. Letterbox bars over the docked HUD (under the cards), the kicker up top, the caption below.
+   The bars slide with the skin's slow motion token, so reduced motion gets them still. */
+.beat {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  pointer-events: none;
+  font-family: var(--flt-font-display);
+}
+.beat-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--flt-space-3);
+  padding: 0 max(var(--flt-space-4), 4vw);
+  background: #0b0b10;
+  color: #f6f1e6;
+  animation-duration: var(--flt-motion-slow);
+  animation-timing-function: var(--flt-motion-ease);
+  animation-fill-mode: both;
+}
+.beat-top {
+  top: 0;
+  height: clamp(44px, 11vh, 96px);
+  justify-content: center;
+  animation-name: beat-drop;
+}
+.beat-bottom {
+  bottom: 0;
+  min-height: clamp(64px, 14vh, 128px);
+  padding-top: var(--flt-space-2);
+  padding-bottom: max(var(--flt-space-2), env(safe-area-inset-bottom));
+  animation-name: beat-rise;
+}
+.beat-kicker {
+  font-size: 0.72em;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+.beat-words {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+}
+.beat-caption {
+  margin: 0;
+  font-size: clamp(15px, 2.1vw, 24px);
+  line-height: 1.25;
+  text-wrap: balance;
+}
+.beat-sub {
+  margin: 0.3em 0 0;
+  font-family: var(--flt-font-ui);
+  font-size: clamp(12px, 1.3vw, 15px);
+  font-style: italic;
+  opacity: 0.75;
+}
+.beat-skip {
+  pointer-events: auto;
+  flex: none;
+  font: inherit;
+  font-size: 0.8em;
+  color: inherit;
+  background: transparent;
+  border: 1px solid color-mix(in srgb, #f6f1e6 45%, transparent);
+  border-radius: var(--flt-radius-button);
+  padding: 0.35em 0.8em;
+  cursor: pointer;
+}
+.beat-skip:hover,
+.beat-skip:focus-visible {
+  background: color-mix(in srgb, #f6f1e6 16%, transparent);
+}
+.beat-viral .beat-kicker::before {
+  content: "● ";
+  color: #ff3b30;
+}
+@keyframes beat-drop {
+  from { transform: translateY(-100%); }
+}
+@keyframes beat-rise {
+  from { transform: translateY(100%); }
+}
+@media (max-width: 480px) {
+  .beat-bottom {
+    flex-direction: column;
+    gap: var(--flt-space-1);
+  }
+  .beat-skip {
+    align-self: flex-end;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .beat-bar { animation: none; }
+}
+:root[data-motion="reduced"] .beat-bar {
+  animation: none;
+}
