@@ -1,6 +1,6 @@
 // Chip the guide bot lives in the bottom-left corner and reads out toasts and hints in a speech balloon ("GREAT JOB!").
 // When it's quiet Chip offers a fact now and then; tap the bot for another. Also: the thought bubbles and the toast card.
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import type { ToastVM } from "../../ui/hud/types";
@@ -16,6 +16,9 @@ export function Bubble({ bubble }: SlotPropsMap["Bubble"]) {
     </div>
   );
 }
+
+/** How long the lab has to be quiet before Chip offers a fact. */
+const QUIET_MS = 45_000;
 
 const HEAD: Record<ToastVM["tone"], string> = { good: "GREAT JOB!", bad: "OOPS!", joke: "HA HA!", neutral: "NEWS FLASH!", hint: "PSST!" };
 const MOOD: Record<ToastVM["tone"], RobotMood> = { good: "cheer", bad: "oops", joke: "happy", neutral: "happy", hint: "think" };
@@ -44,12 +47,26 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
   const busy = toast !== undefined || hint !== undefined;
   const facts = tipsFile.tips;
 
-  // When it's quiet the bot offers a fact every so often (never on a phone, where the campus needs the room).
+  // When it's been quiet a while the bot offers a fact (never on a phone, where the campus needs the room). The wait is
+  // counted from the last time anyone spoke, so a toast or a new day doesn't keep resetting the clock.
+  const quietSince = useRef(0);
+  const busyRef = useRef(busy);
+  const run = useRef(vm.training.run);
+  busyRef.current = busy;
+  run.current = vm.training.run;
   useEffect(() => {
-    if (phone || busy) return;
-    const id = window.setInterval(() => setTip((i) => (i === null ? Math.floor(vm.stats.date.length + vm.training.run) % facts.length : i)), 45_000);
+    quietSince.current = Date.now(); // somebody just started, or stopped, talking
+  }, [busy, tip]);
+  useEffect(() => {
+    quietSince.current = Date.now();
+    if (phone) return;
+    const id = window.setInterval(() => {
+      if (busyRef.current || Date.now() - quietSince.current < QUIET_MS) return;
+      quietSince.current = Date.now();
+      setTip((i) => (i === null ? run.current % facts.length : i));
+    }, 5_000);
     return () => window.clearInterval(id);
-  }, [phone, busy, facts.length, vm.stats.date.length, vm.training.run]);
+  }, [phone, facts.length]);
   useEffect(() => {
     if (tip === null) return;
     const id = window.setTimeout(() => setTip(null), 14_000);
