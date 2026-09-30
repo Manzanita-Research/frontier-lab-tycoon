@@ -7,6 +7,7 @@ import { arcMachine } from "./machines/arc";
 import { economyMachine } from "./machines/economy";
 import { goalsMachine } from "./machines/goals";
 import { trainingMachine } from "./machines/training";
+import { tutorialMachine } from "./machines/tutorial";
 import { pushNews } from "./news";
 import { newSlop } from "./slop";
 import { blankVibes, initialVibes } from "./vibes";
@@ -19,9 +20,8 @@ import type { GameState } from "./types";
 export const GRID_SIZE = 24;
 export const START_CASH = 5_000_000;
 const START_CAPABILITY = 10;
-const START_VISITORS = 18;
 
-/** A living campus at tick 0: gate, paths, one of each core building, a run 40% done, and a crowd mid-stride. */
+/** A quiet campus: the gate, a short connected stub, compute, three researchers and one agent. */
 export function createInitialState(seed = 1): GameState {
   const rng = createRng(seed);
   const w = GRID_SIZE;
@@ -30,10 +30,8 @@ export function createInitialState(seed = 1): GameState {
   const path = (x: number, z: number) => {
     paths[z * w + x] = true;
   };
-  for (let z = 10; z <= 22; z++) path(11, z);
+  for (let z = 19; z <= 22; z++) path(11, z);
   path(12, 22);
-  for (let x = 6; x <= 17; x++) path(x, 16);
-  for (let x = 8; x <= 15; x++) path(x, 10);
 
   const state: GameState = {
     seed,
@@ -51,7 +49,7 @@ export function createInitialState(seed = 1): GameState {
     buildings: [],
     walkers: [],
     economy: initialStored(economyMachine, { lastBailout: null }),
-    training: initialStored(trainingMachine, { run: 1, progress: 120, cost: 300, name: modelName(1, rng, 0) }),
+    training: { ...initialStored(trainingMachine, { run: 1, progress: 0, cost: 300, name: modelName(1, rng, 0) }), value: "idle" },
     models: [],
     news: [],
     thoughts: [],
@@ -69,6 +67,7 @@ export function createInitialState(seed = 1): GameState {
     race: createRace({ capability: START_CAPABILITY, hype: 30 }),
     slop: newSlop(w, h),
     staff: [],
+    tutorial: initialStored(tutorialMachine, undefined),
     arcs: Object.fromEntries(
       EVENTS.map((def) => [def.id, initialStored(arcMachine, { choices: def.choices.length, cooldownDays: def.cooldown ?? EVENT_COOLDOWN_DAYS, openedDay: null })]),
     ),
@@ -79,19 +78,14 @@ export function createInitialState(seed = 1): GameState {
     state.buildings.push({ id: state.nextId++, kind, x, z, w: bw, d: bd, placedTick: 0, reliability: 1, broken: false, brokenTick: 0 });
     state.flags[`built:${kind}`] = 0;
   };
-  put("cluster", 8, 11);
-  put("hall", 12, 11);
-  // Down front, so a gateway dropped beside the spine never hides it from the default camera.
-  put("kombucha", 12, 19);
+  put("cluster", 9, 19);
 
   seedWalkers(state, "researcher", researchersAtStart(state), rng);
   seedWalkers(state, "agent", agentTarget(state), rng);
-  seedWalkers(state, "visitor", START_VISITORS, rng);
 
   state.vibes = initialVibes(state);
 
   pushNews(state, rng, "start");
-  pushNews(state, rng, "runStarted", { model: state.training.context.name });
   for (let i = 0; i < 3; i++) dailyThoughts(state, rng, true);
 
   state.rngState = rng.state();

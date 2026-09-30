@@ -33,6 +33,7 @@ export function dailyEconomy(state: GameState, rng: Rng) {
   }
   state.cash += income - expenses;
   state.ledger = { income, expenses, net: income - expenses };
+  if (income > 0) state.flags.firstRevenue ??= state.day;
   state.pops = state.pops.filter((p) => state.tick - p.tick < 3 * TICKS_PER_DAY);
 
   const target = hypeResting(state);

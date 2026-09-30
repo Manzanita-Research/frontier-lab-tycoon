@@ -3,8 +3,50 @@ import { BUILDINGS, type PlaceableKind } from "../content/buildings";
 import { eventById } from "../content/events";
 import { canPlace, type Command } from "./commands";
 import { openEventOf } from "./events";
-import { TICKS_PER_DAY, tick } from "./tick";
+import { applyNow, TICKS_PER_DAY, tick } from "./tick";
 import type { GameState } from "./types";
+import { createInitialState } from "./state";
+import { createRng } from "./rng";
+import { seedWalkers } from "./walkers";
+import { initialVibes } from "./vibes";
+
+/** Explicit busy campus for existing crowd/render tests; the real opening stays quiet. */
+export function createTestCampus(seed = 1): GameState {
+  const s = createInitialState(seed);
+  delete s.tutorial;
+  s.grid.paths.fill(false);
+  const path = (x: number, z: number) => { s.grid.paths[z * s.grid.w + x] = true; };
+  for (let z = 10; z <= 22; z++) path(11, z);
+  path(12, 22);
+  for (let x = 6; x <= 17; x++) path(x, 16);
+  for (let x = 8; x <= 15; x++) path(x, 10);
+  s.buildings = [];
+  for (const [kind, x, z] of [["cluster", 8, 11], ["hall", 12, 11], ["kombucha", 12, 19]] as const) {
+    const [w, d] = BUILDINGS[kind].size;
+    s.buildings.push({ id: s.nextId++, kind, x, z, w, d, placedTick: 0, reliability: 1, broken: false, brokenTick: 0 });
+    s.flags[`built:${kind}`] = 0;
+  }
+  s.version++;
+  s.training = { value: "training", context: { ...s.training.context, progress: 120 } };
+  s.walkers = [];
+  const rng = createRng(s.rngState);
+  seedWalkers(s, "researcher", 11, rng);
+  seedWalkers(s, "agent", 11, rng);
+  seedWalkers(s, "visitor", 18, rng);
+  s.rngState = rng.state();
+  s.vibes = initialVibes(s);
+  return s;
+}
+
+/** Stage the prerequisites explicitly when a test is about pressure rather than onboarding. */
+export function readyForPressure(s: GameState) {
+  if (!s.models.length) s.models.push("Fixture-1-Preview");
+  if (!s.buildings.some((b) => b.kind === "gateway")) {
+    const [x, z] = findSpot(s, "gateway")!;
+    applyNow(s, [{ type: "placeBuilding", kind: "gateway", x, z }]);
+  }
+  s.day = Math.max(40, s.day);
+}
 
 /** Wall-clock budgets are for Modal and laptops; a shared CI runner gets double. */
 export const perfBudget = (ms: number): number => ((globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env?.CI ? ms * 2 : ms);
@@ -39,6 +81,7 @@ export function layPaths(s: GameState) {
   };
   for (const z of [4, 7, 13, 19]) for (let x = 3; x <= 20; x++) put(x, z);
   for (const x of [5, 17]) for (let z = 4; z <= 22; z++) put(x, z);
+  for (let z = 4; z <= 22; z++) if (!s.buildings.some((b) => 11 >= b.x && 11 < b.x + b.w && z >= b.z && z < b.z + b.d)) put(11, z);
   s.version++;
 }
 

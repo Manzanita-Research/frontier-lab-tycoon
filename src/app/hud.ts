@@ -9,6 +9,7 @@ import { openEventOf } from "../sim/events";
 import { opsView, type OpsView } from "../sim/opsView";
 import { raceView, type RaceView } from "../sim/race/view";
 import { outcomeOf } from "../sim/goals";
+import { assistantOf, type AssistantMessage } from "../sim/tutorial";
 import type { Building, GameState, GoalProgress, OpenEvent, Outcome, Pop, Thought, Tone, Vibes } from "../sim/types";
 
 export type Tool = "path" | PlaceableKind | "bulldoze";
@@ -72,6 +73,8 @@ export interface Snapshot {
   race: RaceView;
   /** Operations: staff, slop, broken buildings, queues. */
   ops: OpsView;
+  assistant: AssistantMessage | null;
+  firstBuildPending: boolean;
 }
 
 export interface UiToast {
@@ -113,5 +116,7 @@ export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO
     selectedId: ui.selected,
     race: raceView(s),
     ops: opsView(s),
+    assistant: assistantOf(s),
+    firstBuildPending: assistantOf(s) !== null && s.flags.firstBuild === undefined,
   };
 }

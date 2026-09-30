@@ -14,6 +14,7 @@ import { moodMachine } from "./mood";
 import { staffMachine } from "./staff";
 import { trainingMachine } from "./training";
 import { walkerMachine } from "./walker";
+import { tutorialMachine } from "./tutorial";
 
 const byValue = { serializeState: (s: { value: unknown }) => JSON.stringify(s.value) };
 
@@ -30,6 +31,15 @@ function explore(machine: AnyStateMachine, options: Record<string, unknown>) {
 }
 
 describe("machine graphs", () => {
+  it("the tutorial can reach every step, completion and skip", () => {
+    const events = [
+      { type: "FACTS", path: true, hall: true, revenue: true, hired: true, released: true },
+      { type: "CONTINUE" }, { type: "SKIP" },
+    ];
+    const r = explore(tutorialMachine, { events });
+    expect(r.unreachable).toEqual([]);
+    expect(r.deadEnds).toEqual([]);
+  });
   it("every event arc reaches all four states, and none but the loop is a dead end", () => {
     for (const def of EVENTS) {
       const input = { choices: def.choices.length, cooldownDays: def.cooldown ?? EVENT_COOLDOWN_DAYS, openedDay: null };

@@ -16,7 +16,8 @@ import { Frames } from "./frames";
 import type { Snapshot, Speed, Tool, UiSelection, UiToast } from "./hud";
 import { Sim, type SyncReport } from "./sim";
 
-export const TICKS_PER_SECOND = 10;
+/** Twenty sim ticks per day, six real seconds at 1×. */
+export const TICKS_PER_SECOND = 20 / 6;
 export const MAX_CATCHUP_TICKS = 40;
 export const SNAPSHOT_MS = 200;
 export const TOAST_MS = 5200;
@@ -50,6 +51,8 @@ export const AppContext = Schema.Struct({
   highlight: Schema.NullOr(Schema.String),
   /** The staffer whose patrol zone is being painted (their id), if any: dragging on the map paints it. */
   zone: Schema.NullOr(Schema.Number),
+  /** Independently owned menus: closing one cannot resume time beneath another. */
+  overlays: opaque<readonly string[]>(),
 });
 export type AppContext = typeof AppContext.Type;
 
@@ -70,8 +73,10 @@ const outcomeHeld = (c: AppContext) => c.outcome !== "playing" && !c.outcomeDism
 export function phaseFor(c: AppContext): Phase {
   if (c.event) return ".eventOpen";
   if (outcomeHeld(c)) return ".gameOver";
-  return c.speed === 0 ? ".playing.paused" : ".playing.running";
+  return c.speed === 0 || autoPaused(c) ? ".playing.paused" : ".playing.running";
 }
+
+export const autoPaused = (c: AppContext): boolean => c.snap.firstBuildPending || !!c.snap.assistant?.paused || c.selected !== null || c.overlays.length > 0;
 
 /** The same words twice are one toast (the newer replaces the older); the HUD shows only the newest, so keep just a few. */
 const addToasts = (c: AppContext, fresh: readonly UiToast[]) => ({ ...c, toasts: [...c.toasts.filter((t) => !fresh.some((f) => f.text === t.text)), ...fresh].slice(-3) });
@@ -103,6 +108,7 @@ export const appMachine = setupEffect({
       HIGHLIGHT: Schema.Struct({ key: Schema.NullOr(Schema.String) }),
       /** Start (or stop, with null) painting a staffer's patrol zone. */
       SET_ZONE: Schema.Struct({ id: Schema.NullOr(Schema.Number) }),
+      SET_OVERLAY: Schema.Struct({ id: Schema.String, open: Schema.Boolean }),
       DISMISS_TOAST: Schema.Struct({ id: Schema.Number }),
       TOAST_EXPIRED: Schema.Struct({ id: Schema.Number }),
     },
@@ -160,6 +166,7 @@ export const appMachine = setupEffect({
     follow: false,
     highlight: null,
     zone: null,
+    overlays: [],
   }),
   invoke: { src: "frameLoop" },
   initial: "playing",
@@ -169,7 +176,7 @@ export const appMachine = setupEffect({
       states: {
         running: {
           // Booted with the speed at 0 (a `?speed=0` link): start paused.
-          always: ({ context }) => (context.speed === 0 ? { target: "paused" } : undefined),
+          always: ({ context }) => (context.speed === 0 || autoPaused(context) ? { target: "paused" } : undefined),
           on: {
             FRAME: (args, enq) => {
               const { context, event, actions } = args;
@@ -227,7 +234,17 @@ export const appMachine = setupEffect({
       const next = { ...context, speed: (context.speed === 0 ? 1 : 0) as Speed };
       return { context: next, target: phaseFor(next) };
     },
-    SET_TOOL: ({ context, event }) => ({ context: { ...context, tool: context.tool === event.tool ? null : event.tool, hover: null, zone: null } }),
+    SET_TOOL: ({ context, event }) => {
+      const tool = context.tool === event.tool ? null : event.tool;
+      const matches = context.snap.assistant?.highlight === `build:${tool}`;
+      return { context: { ...context, tool, hover: null, zone: null, queue: matches ? [...context.queue, { type: "continueTutorial" as const }] : context.queue, lastPublishAt: 0 } };
+    },
+    SET_OVERLAY: ({ context, event }) => {
+      const overlays = context.overlays.filter((id) => id !== event.id);
+      if (event.open) overlays.push(event.id);
+      const next = { ...context, overlays, acc: 0 };
+      return { context: next, target: phaseFor(next) };
+    },
     SET_ZONE: ({ context, event }) => ({ context: { ...context, zone: event.id === context.zone ? null : event.id, tool: null, hover: null } }),
     SET_HOVER: ({ context, event }) => {
       if (context.hover?.x === event.hover?.x && context.hover?.z === event.hover?.z) return;
@@ -245,13 +262,16 @@ export const appMachine = setupEffect({
       return { context: next, target: phaseFor(next) };
     },
     // Selection changes reset the publish timer, so the next frame publishes and the card opens straight away.
-    SELECT: ({ context, event }) => ({ context: { ...context, selected: event.id, follow: event.id === context.selected ? context.follow : false, lastPublishAt: 0 } }),
+    SELECT: ({ context, event }) => {
+      const next = { ...context, selected: event.id, follow: event.id === context.selected ? context.follow : false, lastPublishAt: 0, acc: 0 };
+      return { context: next, target: phaseFor(next) };
+    },
     SET_FOLLOW: ({ context, event }) => (context.selected === null ? undefined : { context: { ...context, follow: event.follow, lastPublishAt: 0 } }),
     HIGHLIGHT: ({ context, event }) => ({ context: { ...context, highlight: event.key === context.highlight ? null : event.key, lastPublishAt: 0 } }),
     NEW_LAB: (args, enq) => {
       const { context, actions } = args;
       enq(actions.newLab, args);
-      const next = { ...context, queue: [], acc: 0, toasts: [], outcomeDismissed: false, speed: 1 as Speed, tool: null, hover: null, selected: null, follow: false, highlight: null, zone: null };
+      const next = { ...context, queue: [], acc: 0, toasts: [], outcomeDismissed: false, speed: 1 as Speed, tool: null, hover: null, selected: null, follow: false, highlight: null, zone: null, overlays: [] };
       return { context: next, target: ".playing.running" };
     },
     TOAST: ({ context, event }, enq) => {

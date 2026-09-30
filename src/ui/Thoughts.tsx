@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { atoms, send } from "../app/game";
-import { useApp } from "../app/hooks";
+import { useApp, useAutoPause } from "../app/hooks";
 import { useCompact } from "./useCompact";
 import type { ThoughtRow } from "../sim/mind";
 import type { WalkerKind } from "../sim/types";
@@ -21,6 +21,7 @@ export function Thoughts() {
   const compact = useCompact();
   // On a phone it starts shut, as an icon button; the list opens over the map.
   const [open, setOpen] = useState(() => typeof window === "undefined" || window.innerWidth > 640);
+  useAutoPause("thoughts", compact && open);
   return (
     <section className={`thoughts panel ${open ? "open" : ""} ${compact ? "compact" : ""}`} aria-label="Thoughts">
       <button className="thoughts-head" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-label={compact ? `Thoughts, ${board.length} kinds` : undefined}>

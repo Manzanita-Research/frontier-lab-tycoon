@@ -2,7 +2,7 @@ import { useAtomValue } from "@effect/atom-react";
 import { STAFF } from "../../content/staff";
 import { formatMoney } from "../../sim/format";
 import { atoms, registry, send } from "../../app/game";
-import { useApp } from "../../app/hooks";
+import { useApp, useAutoPause } from "../../app/hooks";
 import { staffOpenAtom } from "./staffState";
 import "./ops.css";
 
@@ -41,6 +41,7 @@ export function StaffTool() {
 /** The payroll: hire and fire, and paint patrol zones. It opens from the palette and never lives in the right-hand column. */
 export function StaffPanel() {
   const open = useAtomValue(staffOpenAtom);
+  useAutoPause("staff", open);
   const ops = useApp(atoms.ops);
   const zoneId = useApp(atoms.zone);
   if (!open) return null;

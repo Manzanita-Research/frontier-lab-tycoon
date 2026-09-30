@@ -3,7 +3,7 @@ import { GOALS, SCENARIO, type GoalDef } from "../content/goals";
 import { ARENA_SIZE } from "../content/rivals";
 import { formatDate, formatMoney } from "../sim/format";
 import { atoms } from "../app/game";
-import { useApp } from "../app/hooks";
+import { useApp, useAutoPause } from "../app/hooks";
 import { useCompact } from "./useCompact";
 
 const defs = new Map(GOALS.map((g) => [g.id, g]));
@@ -32,6 +32,7 @@ export function Objectives() {
   const day = useApp(atoms.day);
   const compact = useCompact();
   const [open, setOpen] = useState(() => window.innerWidth > 640);
+  useAutoPause("objectives", compact && open);
   const done = goals.filter((g) => g.met).length;
   const left = Math.max(0, SCENARIO.deadlineDay - day);
   // On a phone the checklist is an icon button (with how many are done) and opens over the map when tapped.

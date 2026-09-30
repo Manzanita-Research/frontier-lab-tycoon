@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FIRST_NIGHT_LINE, NIGHT_THOUGHTS } from "../../content/night";
-import { createInitialState } from "../../sim/state";
+import { createTestCampus as createInitialState } from "../../sim/testkit";
 import { lampSpots } from "./Night";
 
 describe("night", () => {

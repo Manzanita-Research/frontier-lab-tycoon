@@ -1,7 +1,7 @@
 import { useAtomValue } from "@effect/atom-react";
 import { useEffect, useRef, useState } from "react";
 import { atoms, registry } from "../../app/game";
-import { useApp } from "../../app/hooks";
+import { useApp, useAutoPause } from "../../app/hooks";
 import { Odometer } from "../juice/Odometer";
 import { arenaOpenAtom } from "./arenaState";
 import "./race.css";
@@ -18,6 +18,7 @@ const delta = (d: number) => (d > 0 ? `↑${d}` : d < 0 ? `↓${-d}` : "");
 export function RacePanel() {
   const race = useApp(atoms.race);
   const open = useAtomValue(arenaOpenAtom);
+  useAutoPause("arena", open && window.innerWidth <= 640);
   const ranks = useRef<Record<string, number>>({});
   const [moved, setMoved] = useState<Record<string, "up" | "down">>({});
   const [alert, setAlert] = useState(false);

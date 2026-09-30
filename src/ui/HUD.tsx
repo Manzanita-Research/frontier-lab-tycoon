@@ -5,7 +5,7 @@ import { BUILDINGS, PATH_PRICE } from "../content/buildings";
 import { formatDate, formatMoney } from "../sim/format";
 import { appNow, atoms, send } from "../app/game";
 import { RACE_TOOLS, SPEEDS, TOOLS, type Tool } from "../app/hud";
-import { useApp } from "../app/hooks";
+import { useApp, useAutoPause } from "../app/hooks";
 import { EventCard } from "./EventCard";
 import { ICONS } from "./icons";
 import { Inspector } from "./Inspector";
@@ -26,6 +26,7 @@ function TopBar() {
   const compact = useCompact();
   // On a phone the bar is one row (Vibes, cash, runway); a tap on the caret opens the rest.
   const [expanded, setExpanded] = useState(false);
+  useAutoPause("stats", compact && expanded);
   const runwayLow = s.runway !== null && s.runway < 6;
   return (
     <div className={`topbar panel ${compact ? "compact" : ""} ${compact && expanded ? "expanded" : ""}`}>
@@ -205,6 +206,7 @@ function Ticker() {
 /** One toast at a time, the newest winning: a real toast beats a hint, and two hints never share the screen. */
 function Toasts() {
   const toasts = useApp(atoms.toasts);
+  const assistant = useApp(atoms.assistant);
   // The app machine expires each toast after 5.2 s; a click dismisses it early.
   const dismiss = (id: number) => send({ type: "DISMISS_TOAST", id });
   const hasGateway = useApp(atoms.hasGateway);
@@ -220,18 +222,18 @@ function Toasts() {
   // "Build an API Gateway..." twice is one hint too many: once any toast has said it, the standing hint is redundant.
   const toldAboutGateway = useRef(false);
   if (newest && /API Gateway/i.test(newest.text)) toldAboutGateway.current = true;
-  const hint = newest ? null : !hasGateway && !toldAboutGateway.current ? "Build an API Gateway next to a path to start earning." : tapHint ? "Tap anyone to read their mind." : null;
+  const hint = assistant?.message ?? (newest ? null : !hasGateway && !toldAboutGateway.current ? "Build an API Gateway next to a path to start earning." : tapHint ? "Tap anyone to read their mind." : null);
   return (
     <div className="toasts">
-      {newest ? (
+      {newest && !assistant ? (
         <button key={newest.id} className={`toast panel ${newest.tone}`} onClick={() => dismiss(newest.id)}>
           {newest.text}
         </button>
       ) : (
         hint && (
-          <div key={hint} className="toast panel hint">
+          <button key={hint} className="toast panel hint" data-highlight={assistant?.highlight} onClick={() => send({ type: "COMMAND", command: { type: "continueTutorial" } })}>
             {hint}
-          </div>
+          </button>
         )
       )}
     </div>

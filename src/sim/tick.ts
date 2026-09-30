@@ -16,6 +16,7 @@ import { dailyThoughts } from "./thoughts";
 import { dailyTraining } from "./training";
 import { dailyWalkers, updateWalkers } from "./walkers";
 import type { GameState } from "./types";
+import { updateTutorial } from "./tutorial";
 
 export { TICKS_PER_DAY };
 
@@ -26,6 +27,7 @@ export { TICKS_PER_DAY };
 export function tick(state: GameState, commands: readonly Command[] = []) {
   const rng = createRng(state.rngState);
   applyCommands(state, commands, rng);
+  if (commands.length > 0) updateTutorial(state);
   if (openEventOf(state) || state.goals.value === "lost") {
     state.rngState = rng.state();
     return;
@@ -48,6 +50,7 @@ export function tick(state: GameState, commands: readonly Command[] = []) {
     dailyThoughts(state, rng);
     dailyGoals(state, rng);
     dailyEvents(state);
+    updateTutorial(state);
   }
   state.rngState = rng.state();
 }
@@ -56,5 +59,6 @@ export function tick(state: GameState, commands: readonly Command[] = []) {
 export function applyNow(state: GameState, commands: readonly Command[]) {
   const rng = createRng(state.rngState);
   applyCommands(state, commands, rng);
+  updateTutorial(state);
   state.rngState = rng.state();
 }

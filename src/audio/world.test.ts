@@ -1,4 +1,4 @@
-import { createInitialState } from "../sim/state";
+import { createTestCampus as createInitialState } from "../sim/testkit";
 import { soundCues, soundSnapshot, worldEra } from "./world";
 import { CUES, eraScore } from "./score";
 
