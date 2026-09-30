@@ -9,7 +9,7 @@ export function Objectives({ objectives, layout }: SlotPropsMap["Objectives"]) {
   const t = useT();
   const [open, setOpen] = useState(() => !layout.compact);
   return (
-    <div className={`sd-okrs ${open ? "open" : ""} ${layout.compact ? "compact" : ""}`}>
+    <div className={`sd-okrs ${open ? "open" : ""} ${layout.compact ? "compact" : ""}`} data-coach="goals">
       <button
         type="button"
         className="sd-okr-head"

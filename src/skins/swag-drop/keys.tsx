@@ -25,7 +25,7 @@ export function BuildBar({ items, tip, actions }: SlotPropsMap["BuildBar"]) {
           <b>{tip.name}</b> {tip.text} {tip.upkeepText && <span className="dim">{tip.upkeepText}</span>}
         </div>
       )}
-      <div className="sd-deck" role="toolbar" aria-label={t("build.menuTitle")}>
+      <div className="sd-deck" role="toolbar" aria-label={t("build.menuTitle")} data-coach="start">
         {items.map((it) => (
           <button
             key={it.kind}
@@ -35,6 +35,7 @@ export function BuildBar({ items, tip, actions }: SlotPropsMap["BuildBar"]) {
             disabled={!it.affordable && !it.selected}
             aria-pressed={it.selected}
             title={it.name}
+            data-coach={`build:${it.kind}`}
           >
             <Cap
               face={

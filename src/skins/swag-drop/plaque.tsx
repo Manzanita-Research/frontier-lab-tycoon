@@ -9,9 +9,9 @@ const signed = (n: number) => `${n >= 0 ? "+" : "−"}${money(Math.abs(n))}/d`;
 const TREND = { up: "rising", down: "falling", flat: "steady" } as const;
 
 /** One enamel pin: a flat disc or pill with a coloured rim, and a mono label underneath. */
-function Pin({ label, rim, className = "", tag, children }: { label: string; rim: string; className?: string; tag?: ReactNode; children: ReactNode }) {
+function Pin({ label, rim, className = "", tag, coach, children }: { label: string; rim: string; className?: string; tag?: ReactNode; coach?: string; children: ReactNode }) {
   return (
-    <div className={`sd-pin ${className}`}>
+    <div className={`sd-pin ${className}`} data-coach={coach}>
       <div className={`sd-badge rim-${rim}`}>
         {children}
         {tag}
@@ -124,7 +124,7 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
         >
           <Odometer className={`sd-num ${stats.cash.negative ? "bad" : ""}`} value={stats.cash.value} format={money} />
         </Pin>
-        <Pin label={t("stats.runway")} rim={stats.runway.warning ? "bad" : "good"} className="pin-runway">
+        <Pin label={t("stats.runway")} rim={stats.runway.warning ? "bad" : "good"} className="pin-runway" coach="stat:runway">
           <span className={`sd-num ${stats.runway.warning ? "bad" : ""}`}>{stats.runway.text}</span>
         </Pin>
         <Pin label={t("stats.capability")} rim="research" className="pin-cap">
@@ -180,7 +180,7 @@ export function Training({ training }: SlotPropsMap["Training"]) {
   const t = useT();
   if (!training.hasHall) {
     return (
-      <div className="sd-gauge off" role="status">
+      <div className="sd-gauge off" role="status" data-coach="training">
         <span className="sd-tape">{t("training.noHall")}</span>
       </div>
     );
@@ -189,6 +189,7 @@ export function Training({ training }: SlotPropsMap["Training"]) {
   return (
     <div
       className={`sd-gauge ${training.justShipped ? "shipped" : ""}`}
+      data-coach="training"
       role="progressbar"
       aria-label={`${t("training.title")} ${training.name}`}
       aria-valuemin={0}

@@ -129,7 +129,7 @@
     "ticker.label": "$ tail -f news",
     "objectives.title": "OKRs",
     "training.title": "Training run",
-    "thoughts.title": "Slack (all channels)",
+    "thoughts.title": "#all-hands (all channels)",
     "inspector.follow": "Pin to lanyard",
     "inspector.following": "Pinned. Tap to unpin",
     "training.shipped": "SHIPPED!",

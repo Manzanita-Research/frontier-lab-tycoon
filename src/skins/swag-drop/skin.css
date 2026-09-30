@@ -1016,7 +1016,7 @@
     transition: max-height var(--flt-motion-base) var(--flt-motion-ease);
   }
   .sd-right.arena-open .sd-cork-list {
-    max-height: 200px;
+    max-height: 150px;
   }
   .sd-right.badge-open .sd-cork-list {
     max-height: 100px;
@@ -1775,6 +1775,7 @@
   .sd-board .head span {
     color: var(--sd-soft);
     font-size: 10.5px;
+    white-space: nowrap;
   }
   .sd-board .rows {
     position: relative;
@@ -1843,6 +1844,101 @@
   }
   .sd-board .row.moved-down {
     animation: swag-drop-down 1.2s;
+  }
+
+  /* the news cycle: one line and a stacked bar; the scoreboard's second tab is the benchmark table */
+  .sd-rd {
+    flex-wrap: wrap;
+  }
+  .sd-voice {
+    flex: 1 1 100%;
+    padding: 6px 0 0;
+    border-top: 2px dashed var(--sd-ink);
+  }
+  .sd-voice .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    width: 100%;
+    min-height: 22px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--sd-ink);
+    font: 800 11px var(--sd-mono);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .sd-voice .you.up {
+    color: var(--flt-color-good);
+  }
+  .sd-voice .you.down {
+    color: var(--flt-color-bad);
+  }
+  .sd-voice .bar {
+    display: flex;
+    height: 13px;
+    margin-top: 3px;
+    border: 2px solid var(--sd-ink);
+    background: #fff;
+    overflow: hidden;
+  }
+  .sd-voice .bar i {
+    display: block;
+    height: 100%;
+    border-right: 1.5px solid var(--sd-ink);
+  }
+  .sd-voice .bar i:last-child {
+    border-right: 0;
+  }
+  .sd-vgraph {
+    display: block;
+    margin-top: 6px;
+    width: 100%;
+    height: auto;
+  }
+  .sd-board .tabs {
+    display: flex;
+    gap: 6px;
+  }
+  .sd-board .tabs button {
+    min-height: 26px;
+    padding: 0 8px;
+    border: 2px solid var(--sd-ink);
+    border-radius: 6px;
+    background: var(--sd-cap);
+    box-shadow: 0 3px 0 var(--sd-ink);
+    color: var(--sd-ink);
+    font: 800 11px var(--sd-mono);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .sd-board .tabs button.on {
+    background: var(--sd-signal);
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 var(--sd-ink);
+  }
+  .sd-board.flashing .tabs button:not(.on)::after {
+    content: " ●";
+    color: var(--flt-color-bad);
+  }
+  .sd-board .head {
+    height: auto;
+    min-height: 30px;
+  }
+  .sd-board .sd-bench {
+    max-height: 200px;
+    margin-top: 6px;
+    overflow: auto;
+    color: var(--sd-ink);
+  }
+  .sd-board .sd-bench-sub {
+    margin: 6px 0 0;
+    font: 600 11px/1.3 var(--sd-mono);
+    color: var(--sd-soft);
   }
 
   /* ---- the memo ---- */
@@ -2431,8 +2527,12 @@
       grid-row: 4;
     }
     .sd-arena:not(.open),
-    .sd-rd {
+    .sd-rd,
+    .sd-voice {
       display: none;
+    }
+    .sd-board .tabs button {
+      min-height: 44px;
     }
     .toasts {
       top: 310px;
