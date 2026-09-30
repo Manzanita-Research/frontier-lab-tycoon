@@ -337,3 +337,57 @@ export function Face({ who }: { who: PortraitVM }) {
     </svg>
   );
 }
+
+// ---------- what is on the karaoke video when the launch livestream goes wrong ----------
+
+/** The monitor's picture: a golden retriever walking on, last quarter's chart, a frozen spinner, or no signal. */
+export function Scene({ mishap }: { mishap: string }) {
+  if (mishap === "dog") {
+    return (
+      <svg className="kn-scene" viewBox="0 0 24 14" shapeRendering="crispEdges" {...G}>
+        <rect x="1" y="3" width="4" height="2" fill="#E0A030" />
+        <rect x="0" y="2" width="2" height="2" fill="#F0C060" />
+        <rect x="4" y="5" width="13" height="5" fill="#E0A030" />
+        <rect x="5" y="9" width="11" height="1" fill="#C88820" />
+        <rect x="16" y="2" width="6" height="5" fill="#E8B040" />
+        <rect x="16" y="2" width="2" height="4" fill="#B87820" />
+        <rect x="21" y="4" width="3" height="3" fill="#F0C060" />
+        <rect x="23" y="4" width="1" height="1" fill="#170C27" />
+        <rect x="19" y="3" width="1" height="1" fill="#170C27" />
+        <rect x="21" y="7" width="2" height="2" fill="#FF6080" />
+        <rect x="5" y="10" width="2" height="4" fill="#C88820" />
+        <rect x="9" y="10" width="2" height="4" fill="#E0A030" />
+        <rect x="13" y="10" width="2" height="4" fill="#C88820" />
+        <rect x="16" y="10" width="2" height="4" fill="#E0A030" />
+      </svg>
+    );
+  }
+  if (mishap === "wrongChart") {
+    return (
+      <svg className="kn-scene" viewBox="0 0 60 36" shapeRendering="crispEdges" {...G}>
+        <rect width="60" height="36" fill="#FFF6FB" />
+        <rect x="6" y="14" width="9" height="20" fill="#8F78E8" />
+        <rect x="20" y="20" width="9" height="14" fill="#8F78E8" />
+        <rect x="34" y="6" width="9" height="28" fill="#2FD9A8" />
+        <rect x="48" y="24" width="9" height="10" fill="#8F78E8" />
+        <path d="M3 34h56M3 2v32" stroke="#2A1740" />
+      </svg>
+    );
+  }
+  if (mishap === "frozen") {
+    return (
+      <svg className="kn-scene kn-spinner" viewBox="0 0 16 16" shapeRendering="crispEdges" {...G}>
+        {[[6, 0], [11, 2], [12, 6], [11, 11], [6, 12], [1, 11], [0, 6], [1, 2]].map(([x, y], i) => (
+          <rect key={i} x={x} y={y} width="4" height="4" fill="#FFF6FB" opacity={0.25 + (i % 4) * 0.25} />
+        ))}
+      </svg>
+    );
+  }
+  return (
+    <svg className="kn-scene" viewBox="0 0 24 14" shapeRendering="crispEdges" {...G}>
+      {[0, 4, 8, 12, 16, 20].map((x, i) => (
+        <rect key={x} x={x} y={0} width="4" height="14" fill={["#FFF6FB", "#FFE45C", "#4FE3FF", "#5CF2C9", "#FF5FA2", "#8F78E8"][i]} />
+      ))}
+    </svg>
+  );
+}

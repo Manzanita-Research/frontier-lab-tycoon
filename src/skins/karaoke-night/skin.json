@@ -18,6 +18,9 @@
     "Ticker",
     "Toast",
     "EventCard",
+    "Livestream",
+    "Benchmarks",
+    "Voice",
     "EraCard",
     "Outcome",
     "NewsControls",
@@ -135,6 +138,10 @@
     "outcome.keepPlaying": "One more song",
     "outcome.newLab": "New lab",
     "news.button": "News Room",
-    "skin.title": "Change the machine"
+    "skin.title": "Change the machine",
+    "bench.title": "High Scores",
+    "voice.title": "Applause",
+    "stream.live": "ON AIR",
+    "stream.chat": "Requests"
   }
 }

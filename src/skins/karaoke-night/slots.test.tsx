@@ -19,6 +19,9 @@ const { skin } = await prepareSkin("karaoke-night");
 // React puts <!-- --> between text runs on the server; take them out so the text reads the way it does on screen.
 const html = (node: React.ReactNode, s: LoadedSkin = skin) => renderToString(<SkinProvider skin={s}>{node}</SkinProvider>).replace(/<!-- -->/g, "");
 const slot = skin.slots;
+const lf = hudViewModel(fixtureInput({ leapfrog: true }));
+const shipNow = hudViewModel(fixtureInput({ leapfrog: true, event: "shipNow" }));
+const stream = hudViewModel(fixtureInput({ leapfrog: true, event: "stream:dog" }));
 const item = (id: number, text = `headline ${id}`): TickerItemVM => ({ id, text, tone: "neutral" });
 
 describe("Karaoke Night", () => {
@@ -120,6 +123,46 @@ describe("Karaoke Night", () => {
       const source = read(`karaoke-night/${file}.tsx`)!.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
       expect(source, file).not.toMatch(/[←-⏿■-➿⬀-⯿]/u);
     }
+  });
+});
+
+describe("Karaoke Night's Release Leapfrog panels", () => {
+  it("HIGH SCORES is the benchmark table on a desktop and a badge with your SOTA count on a phone", () => {
+    const desk = html(<slot.Benchmarks leapfrog={lf.leapfrog} layout={{ ...lf.layout, compact: false }} actions={actions} />);
+    expect(desk).toContain("High Scores");
+    expect(desk).toContain("bench-table");
+    expect(desk.match(/class="bench-row/g)?.length).toBe(lf.leapfrog.rows.length);
+    const phone = html(<slot.Benchmarks leapfrog={lf.leapfrog} layout={{ ...lf.layout, compact: true }} actions={actions} />);
+    expect(phone).not.toContain("bench-table");
+    expect(phone).toContain("kn-bench-wins");
+    expect(phone).toContain("aria-expanded=\"false\"");
+  });
+
+  it("the applause meter has a block per lab, says who owns the news cycle, and steps aside on a phone", () => {
+    const out = html(<slot.Voice leapfrog={lf.leapfrog} layout={{ ...lf.layout, compact: false }} actions={actions} />);
+    expect(out.match(/<i class="[^"]*" style="width:/g)?.length).toBe(lf.leapfrog.voice.shares.length);
+    expect(out).toContain(lf.leapfrog.voice.headline);
+    expect(html(<slot.Voice leapfrog={lf.leapfrog} layout={{ ...lf.layout, compact: true }} actions={actions} />)).toBe("");
+  });
+
+  it("the forced-response card shows its three gauges, the meter lit to how ready the run is", () => {
+    const event = shipNow.event!;
+    expect(event.response).not.toBeNull();
+    const out = html(<slot.EventCard event={event} actions={actions} />);
+    for (const label of ["Ready", "Ship now", "Launch bug odds"]) expect(out).toContain(label);
+    expect(out).toContain(event.response!.readyText);
+    expect(out.match(/<i class="on"><\/i>/g)?.length).toBe(Math.round(event.response!.ready * 16));
+  });
+
+  it("the livestream card is a karaoke video with ON AIR, the viewers, the mishap and the chat as requests", () => {
+    const event = stream.event!;
+    const out = html(<slot.Livestream event={event} stream={event.stream!} actions={actions} />);
+    expect(out).toContain("ON AIR");
+    expect(out).toContain(event.stream!.viewersText);
+    expect(out).toContain("kn-scene");
+    expect(out).toContain(event.stream!.caption.replace(/'/g, "&#x27;"));
+    expect(out.match(/<li><b>/g)?.length).toBeLessThanOrEqual(5);
+    for (const c of event.choices) expect(out).toContain(c.label);
   });
 });
 

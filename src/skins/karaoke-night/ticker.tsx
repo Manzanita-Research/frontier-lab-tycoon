@@ -18,9 +18,11 @@ const MAX_SING_MS = 13000;
 const LEAD_MS = 560;
 /** How long the finished line stays lit before the next one. */
 const HOLD_MS = 1500;
-/** How high the ball hops (px), and how far above the letters it lands. */
+/** How high the ball hops (px), and how far above the letters it lands (a phone's bar has less headroom). */
 const ARC = 14;
 const LAND = 5;
+const ARC_PHONE = 9;
+const LAND_PHONE = 3;
 /** The biggest and smallest type of a line; a long headline shrinks to fit before it wraps. */
 const FS_MAX = 21;
 const FS_MIN = 15;
@@ -72,11 +74,13 @@ function fit(line: HTMLElement, stage: HTMLElement, wrapAlways: boolean) {
 }
 
 /** Start the line: light each word as the ball reaches it, and send the ball hopping over the letters. Returns a cancel. */
-function sing(line: HTMLElement, ball: HTMLElement, hop: HTMLElement, timing: ReturnType<typeof schedule>): () => void {
+function sing(line: HTMLElement, ball: HTMLElement, hop: HTMLElement, timing: ReturnType<typeof schedule>, compact: boolean): () => void {
   const anims: Animation[] = [];
   const nodes = [...line.querySelectorAll<HTMLElement>(".kn-w")];
   if (nodes.length !== timing.words.length || typeof line.animate !== "function") return () => undefined;
   const { total } = timing;
+  const arc = compact ? ARC_PHONE : ARC;
+  const land = compact ? LAND_PHONE : LAND;
 
   // The highlight: each word's lit copy is wiped in from the left over the time the word takes. The wipe is two
   // transforms (the window slides in while the text slides back), so it runs off the main thread like the ball.
@@ -92,7 +96,7 @@ function sing(line: HTMLElement, ball: HTMLElement, hop: HTMLElement, timing: Re
   // The ball: it slides along the words at the pace of the highlight (x, y follow the word), while the inner disc hops.
   const at = (i: number, side: "left" | "right") => {
     const n = nodes[i]!;
-    return { x: n.offsetLeft + (side === "right" ? n.offsetWidth : 0), y: n.offsetTop - LAND };
+    return { x: n.offsetLeft + (side === "right" ? n.offsetWidth : 0), y: n.offsetTop - land };
   };
   const track: Keyframe[] = [];
   const push = (ms: number, p: { x: number; y: number }) => track.push({ transform: `translate(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px)`, offset: Math.min(1, ms / total) });
@@ -110,7 +114,7 @@ function sing(line: HTMLElement, ball: HTMLElement, hop: HTMLElement, timing: Re
   const down = "cubic-bezier(0.6, 0, 0.8, 0.4)";
   const squash = "translateY(0) scale(1.35, 0.7)";
   const rest = "translateY(0) scale(1, 1)";
-  const air = `translateY(${-ARC}px) scale(0.88, 1.12)`;
+  const air = `translateY(${-arc}px) scale(0.88, 1.12)`;
   beats.forEach((b, i) => {
     hops.push({ transform: i === beats.length - 1 ? rest : squash, offset: Math.min(1, b / total), easing: up });
     const next = beats[i + 1];
@@ -170,7 +174,7 @@ export function Ticker({ items }: SlotPropsMap["Ticker"]) {
         return;
       }
       delete el.dataset.still;
-      cancelSong = sing(el, ball.current!, hop.current!, timing);
+      cancelSong = sing(el, ball.current!, hop.current!, timing, compact);
       timer = window.setTimeout(advance, timing.total + HOLD_MS);
     };
     // Fit and measure once the type is in (the skin's fonts load after the first render).

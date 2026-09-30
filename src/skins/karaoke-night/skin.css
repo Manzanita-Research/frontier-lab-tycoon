@@ -34,6 +34,8 @@
   --kn-ticker-h: 58px;
   --kn-tray-h: 132px;
   --kn-rail: 318px;
+  /* The high scores board is a table with seven columns: it is the one panel that hangs out to the left of the rail. */
+  --kn-wide: 516px;
   font-synthesis: none;
 
   /* ---------- shared bits ---------- */
@@ -474,8 +476,8 @@
   }
   .kn-stamp {
     position: absolute;
-    right: 10px;
-    top: -12px;
+    left: 12px;
+    top: -14px;
     z-index: 2;
     display: inline-flex;
     align-items: center;
@@ -488,7 +490,7 @@
     box-shadow:
       inset 0 -3px 0 var(--kn-lemon-lo),
       0 0 0 3px #fff;
-    transform: rotate(5deg);
+    transform: rotate(-4deg);
     animation: karaoke-night-pop 0.5s cubic-bezier(0.3, 1.6, 0.5, 1);
   }
   .kn-queue-head {
@@ -576,16 +578,18 @@
     position: absolute;
     right: 16px;
     top: 14px;
-    width: var(--kn-rail);
+    width: var(--kn-wide);
+    max-width: calc(100vw - 32px);
     display: flex;
     flex-direction: column;
-    align-items: stretch;
+    align-items: flex-end;
     gap: 12px;
     max-height: calc(100dvh - 14px - var(--kn-ticker-h) - var(--kn-tray-h) - 34px);
     pointer-events: none;
   }
   .kn-deck {
     flex: none;
+    width: var(--kn-rail);
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -684,6 +688,7 @@
   .kn-extra {
     pointer-events: auto;
     align-self: flex-end;
+    width: var(--kn-rail);
     max-width: 100%;
     display: flex;
     flex-wrap: wrap;
@@ -735,7 +740,8 @@
   .kn-stack {
     display: flex;
     flex-direction: column;
-    align-items: stretch;
+    align-items: flex-end;
+    width: 100%;
     gap: 12px;
     min-height: 0;
     padding: 4px 8px 26px;
@@ -750,6 +756,7 @@
     }
     > * {
       flex: none;
+      width: var(--kn-rail);
     }
   }
   .kn-card {
@@ -1783,7 +1790,7 @@
   }
   .kn-stack > .race-panel,
   .kn-stack > .thoughts {
-    width: 100%;
+    width: var(--kn-rail);
   }
   .thoughts-head,
   .arena-head b,
@@ -2061,6 +2068,9 @@
     .kn-era-title span,
     .kn-backdrop,
     .kn-beams,
+    .kn-onair,
+    .kn-spinner,
+    .kn-bench.flashing .kn-bench-title::after,
     .kn-arena.flinch {
       animation: none;
     }
@@ -2076,6 +2086,9 @@
     .kn-era-title span,
     .kn-backdrop,
     .kn-beams,
+    .kn-onair,
+    .kn-spinner,
+    .kn-bench.flashing .kn-bench-title::after,
     .kn-arena.flinch {
       animation: none;
     }
@@ -2088,6 +2101,8 @@
       height: 44px;
     }
     .kn-queue-head,
+    .kn-bench-head,
+    .kn-voice-head,
     .kn-liner summary {
       min-height: 44px;
     }
@@ -2112,6 +2127,287 @@
       justify-content: center;
       padding: 0;
     }
+  }
+
+  /* ---------- Release Leapfrog: HIGH SCORES and the applause meter ---------- */
+  .kn-bench,
+  .kn-voice {
+    .kn-screen {
+      padding: 9px 10px 10px;
+    }
+  }
+  .kn-stack > .kn-bench {
+    width: var(--kn-wide);
+    max-width: 100%;
+  }
+  .kn-bench-head,
+  .kn-voice-head {
+    width: 100%;
+    min-height: 26px;
+    padding: 0;
+    border: 0;
+    background: none;
+    text-align: left;
+    color: var(--kn-lemon);
+    cursor: pointer;
+  }
+  .kn-bench-title,
+  .kn-voice-title {
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .kn-bench-sub {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: right;
+    color: var(--flt-color-textDim);
+  }
+  .kn-bench-wins {
+    display: none;
+  }
+  .kn-bench.flashing .kn-bench-title::after {
+    content: "";
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-left: 6px;
+    background: var(--kn-pink);
+    animation: karaoke-night-blink 0.9s steps(2, jump-none) infinite;
+  }
+  .kn-bench .bench-scroll {
+    padding: 4px 0 0;
+  }
+  .kn-bench .bench-table {
+    border-spacing: 0 4px;
+    font: 400 15px var(--kn-display);
+  }
+  .kn-bench .bench-table th,
+  .kn-bench .bench-table td {
+    padding: 4px 5px;
+    font-weight: 400;
+  }
+  .kn-bench .bench-row > * {
+    background: #2b1747;
+  }
+  .kn-bench .bench-lab {
+    min-width: 76px;
+    background: #2b1747;
+    letter-spacing: 0.03em;
+  }
+  .kn-bench .bench-dot {
+    border: 0;
+  }
+  .kn-bench .bench-col {
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    color: var(--flt-color-textDim);
+    opacity: 1;
+  }
+  .kn-bench .bench-col.new .bench-name {
+    color: var(--kn-mint);
+  }
+  .kn-bench .bench-col.saturated,
+  .kn-bench .bench-cell.saturated {
+    opacity: 0.6;
+  }
+  .kn-bench .bench-row.you > * {
+    background: #4a2262;
+  }
+  .kn-bench .bench-cell {
+    font-size: 17px;
+    font-family: var(--kn-num);
+  }
+  .kn-bench .bench-cell.sota .bench-score {
+    padding: 0 5px;
+    border-radius: 4px;
+    background: var(--kn-lemon);
+    color: var(--kn-plum);
+    box-shadow: none;
+  }
+  .kn-bench .bench-badge,
+  .kn-bench .bench-new {
+    background: var(--kn-pink);
+    color: var(--kn-plum);
+    font: 400 11px/1.3 var(--kn-display);
+  }
+  .kn-bench .bench-new {
+    background: var(--kn-mint);
+  }
+  .kn-bench .bench-stamp {
+    border-color: var(--kn-pink);
+    color: var(--kn-pink);
+    background: rgba(36, 19, 56, 0.85);
+    font: 400 13px/1.2 var(--kn-display);
+  }
+  .kn-bench .bench-score sup {
+    color: var(--kn-pink);
+  }
+  .kn-bench .bench-foot,
+  .kn-bench .bench-empty,
+  .kn-bench-drop {
+    margin: 4px 0 0;
+    padding: 0;
+    font-size: 12px;
+    line-height: 1.3;
+    opacity: 1;
+    color: var(--flt-color-textDim);
+  }
+  .kn-voice-you {
+    margin-left: auto;
+    color: var(--flt-color-textDim);
+    white-space: nowrap;
+    &.up {
+      color: var(--kn-mint);
+    }
+    &.down {
+      color: var(--flt-color-bad);
+    }
+    .kn-trend {
+      width: 0.6em;
+      height: 0.6em;
+    }
+  }
+  .kn-voice-bar {
+    display: flex;
+    gap: 2px;
+    height: 14px;
+    margin: 7px 0 5px;
+    padding: 2px;
+    border-radius: 3px;
+    background: #2d1a48;
+    i {
+      display: block;
+      min-width: 2px;
+      transition: width 0.6s ease-out;
+    }
+  }
+  .kn-voice.owned .kn-voice-bar {
+    box-shadow:
+      0 0 0 2px var(--kn-pink),
+      0 0 8px rgba(255, 95, 162, 0.5);
+  }
+  .kn-voice-line {
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.3;
+    color: var(--flt-color-textDim);
+  }
+  .kn-vg {
+    display: block;
+    width: 100%;
+    height: 70px;
+    margin-top: 8px;
+    border-radius: 6px;
+    background: var(--kn-screen);
+  }
+
+  /* The forced-response gauges and the launch livestream. */
+  .kn-gauges {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr 1fr;
+    gap: 8px;
+    margin: 0 16px 12px;
+  }
+  .kn-rg {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 7px 10px 8px;
+    border-radius: 8px;
+    background: #2b1747;
+    small {
+      font-size: 12px;
+      color: var(--flt-color-textDim);
+    }
+    .kn-pbar {
+      height: 12px;
+      margin-top: 4px;
+    }
+  }
+  .kn-rg-big {
+    font: 400 34px/1.05 var(--kn-num);
+  }
+  .kn-video {
+    margin: 12px 16px 0;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #0d0518;
+    box-shadow: 0 0 0 3px rgba(185, 164, 255, 0.35);
+  }
+  .kn-video-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 10px;
+    background: #2b1747;
+    font: 400 16px var(--kn-display);
+    letter-spacing: 0.04em;
+    color: var(--flt-color-textDim);
+  }
+  .kn-video-model {
+    margin-left: auto;
+  }
+  .kn-onair {
+    padding: 0 8px;
+    border-radius: 4px;
+    background: var(--kn-pink);
+    color: var(--kn-plum);
+    font-weight: 400;
+    animation: karaoke-night-blink 1.4s steps(2, jump-none) infinite;
+  }
+  .kn-video-stage {
+    display: grid;
+    grid-template-columns: 1fr 42%;
+    min-height: 150px;
+  }
+  .kn-video-screen {
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: 10px;
+    padding: 12px;
+    background: repeating-linear-gradient(0deg, #1d0f33 0 3px, #22123b 3px 6px);
+  }
+  .kn-scene {
+    width: 96px;
+    height: auto;
+    image-rendering: pixelated;
+  }
+  .kn-spinner {
+    width: 56px;
+    animation: karaoke-night-tick 1s steps(8) infinite;
+  }
+  .kn-caption {
+    padding: 5px 12px 6px;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.45);
+    box-shadow: 0 4px 0 #000;
+    font: 400 22px/1.15 var(--kn-display);
+    letter-spacing: 0.02em;
+    text-align: center;
+    color: var(--kn-lemon);
+  }
+  .kn-requests {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 3px;
+    margin: 0;
+    padding: 8px 10px;
+    overflow: hidden;
+    list-style: none;
+    background: var(--kn-screen);
+    font-size: 12.5px;
+    line-height: 1.3;
+    b {
+      color: var(--kn-cyan);
+    }
+  }
+  .kn-stream .kn-event-title {
+    margin-top: 12px;
   }
 
   /* ---------- short windows (a 13-inch laptop): the panels give up their second lines ---------- */
@@ -2146,6 +2442,11 @@
   }
 
   /* ---------- tablets and small laptops ---------- */
+  @media (max-width: 1180px) {
+    .kn-stack > .kn-bench {
+      width: var(--kn-rail);
+    }
+  }
   @media (max-width: 960px) {
     .kn-v {
       font-size: 26px;
@@ -2165,7 +2466,7 @@
     --kn-tray-h: 132px;
     .kn-hud {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto auto;
+      grid-template-columns: minmax(0, 1fr) auto auto auto;
       grid-auto-rows: min-content;
       align-content: start;
       gap: 6px;
@@ -2193,12 +2494,16 @@
       order: 4;
       grid-column: 2;
     }
-    .kn-stack > .thoughts {
+    .kn-bench {
       order: 5;
       grid-column: 3;
     }
-    .kn-extra {
+    .kn-stack > .thoughts {
       order: 6;
+      grid-column: 4;
+    }
+    .kn-extra {
+      order: 7;
       grid-column: 1 / -1;
       align-self: auto;
     }
@@ -2378,21 +2683,19 @@
       }
     }
     .kn-stamp {
-      top: -10px;
+      left: auto;
+      right: 8px;
+      top: -12px;
       font-size: 13px;
+      transform: rotate(4deg);
     }
 
-    /* UP NEXT and Requests fold to a badge; open, they cover the middle of the map. */
-    .kn-queue {
+    /* UP NEXT, HIGH SCORES and Requests fold to a badge each; open, they cover the middle of the map. */
+    .kn-queue,
+    .kn-bench {
       width: auto;
       .kn-screen {
         padding: 2px 6px;
-      }
-      &:not(.open) {
-        .kn-queue-title,
-        .kn-queue-days {
-          display: none;
-        }
       }
       &.open {
         position: fixed;
@@ -2403,30 +2706,77 @@
         width: auto;
         max-height: 56vh;
         overflow-y: auto;
-        .kn-queue-days .long {
-          display: none;
-        }
-        .kn-queue-days .short {
-          display: inline;
-        }
       }
     }
-    .kn-queue-head {
-      min-height: 44px;
+    .kn-queue:not(.open),
+    .kn-bench:not(.open) {
+      .kn-screen {
+        padding: 0;
+      }
+      .kn-np {
+        position: relative;
+        width: 44px;
+        height: 44px;
+        min-height: 44px;
+        justify-content: center;
+        gap: 0;
+      }
+      .kn-queue-title,
+      .kn-queue-days,
+      .kn-bench-title,
+      .kn-bench-sub,
+      .kn-np .kn-trend {
+        display: none;
+      }
+      .kn-glyph {
+        width: 20px;
+        height: 20px;
+      }
+    }
+    .kn-queue:not(.open) .kn-queue-count,
+    .kn-bench:not(.open) .kn-bench-wins,
+    .thoughts.compact:not(.open) .icon-badge {
+      display: block;
+      position: absolute;
+      top: -9px;
+      right: -4px;
+      min-width: 21px;
+      padding: 0 5px;
+      border-radius: 11px;
+      background: var(--kn-pink);
+      color: var(--kn-plum);
+      box-shadow: 0 0 0 2px var(--kn-screen);
+      font: 400 16px/21px var(--kn-num);
+      text-align: center;
+    }
+    .kn-queue.open .kn-queue-days .long,
+    .kn-bench.open .kn-bench-sub {
+      display: none;
+    }
+    .kn-queue.open .kn-queue-days .short {
+      display: inline;
+    }
+    .kn-bench.open .kn-bench-title {
+      flex: 1;
     }
     .kn-stack > .thoughts {
       width: auto;
       min-width: 0;
       align-self: stretch;
+      border-width: 4px;
+      border-radius: 16px;
       &:not(.open) {
         .thoughts-title,
         .thoughts-caret {
           display: none;
         }
         .thoughts-head {
+          position: relative;
+          width: 44px;
           height: 100%;
           min-height: 44px;
-          padding: 4px 8px;
+          padding: 0;
+          justify-content: center;
         }
       }
       &.open {
@@ -2443,14 +2793,20 @@
       max-height: calc(56vh - 56px);
     }
     .kn-extra {
+      width: auto;
       transform: none;
+      max-width: none;
+    }
+    .kn-stack > .kn-bench,
+    .kn-stack > .race-panel {
+      width: auto;
       max-width: none;
     }
 
     /* The contestant card is a short bottom sheet: swipe up for the rest, down to fold it. */
     .kn-card.sheet {
       position: fixed;
-      z-index: 30;
+      z-index: 8;
       left: 8px;
       right: 8px;
       bottom: calc(var(--kn-ticker-h) + var(--kn-tray-h) + 8px);
@@ -2557,7 +2913,7 @@
     /* Toasts float just over the arcade. */
     .kn-toasts-host {
       bottom: calc(var(--kn-ticker-h) + var(--kn-tray-h) + 12px);
-      z-index: 40;
+      z-index: 9;
     }
     /* The standing hint steps aside while the contestant sheet is up. */
     .kn-hud:has(.kn-card.sheet) .kn-toast.hint {
@@ -2594,7 +2950,7 @@
       box-shadow: none;
     }
     .kn-line {
-      padding-top: 10px;
+      padding-top: 12px;
     }
 
     /* The cards. */
@@ -2627,6 +2983,26 @@
     }
     .kn-outcome-buttons {
       flex-direction: column-reverse;
+    }
+    .kn-gauges {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin: 0 10px 10px;
+    }
+    .kn-rg.wide {
+      grid-column: 1 / -1;
+    }
+    .kn-video {
+      margin: 10px 10px 0;
+    }
+    .kn-video-stage {
+      grid-template-columns: 1fr;
+      min-height: 0;
+    }
+    .kn-requests {
+      display: none;
+    }
+    .kn-caption {
+      font-size: 19px;
     }
     .kn-era-card .kn-screen {
       padding: 12px 12px 14px;
@@ -2663,6 +3039,16 @@
   }
   75% {
     translate: 3px 0;
+  }
+}
+@keyframes karaoke-night-blink {
+  50% {
+    opacity: 0.2;
+  }
+}
+@keyframes karaoke-night-tick {
+  to {
+    transform: rotate(360deg);
   }
 }
 @keyframes karaoke-night-fade {
