@@ -13,6 +13,7 @@ import { openEventOf } from "../sim/events";
 import { opsView, type OpsView } from "../sim/opsView";
 import { leapfrogView, type LeapfrogView } from "../sim/race/leapfrog/view";
 import { papersView, type PapersView } from "../sim/race/papers/view";
+import { factionsView, type FactionsView } from "../sim/factions/view";
 import { raceView, type RaceView } from "../sim/race/view";
 import { outcomeOf, releaseGoalText } from "../sim/goals";
 import { estimateLedger } from "../sim/economy";
@@ -97,6 +98,8 @@ export interface Snapshot {
   papers: PapersView;
   /** Operations: staff, slop, broken buildings, queues. */
   ops: OpsView;
+  /** FLT-33: the factions' meters, moods and relations, the lab's stance, the gate. `enabled: false` until Level 4. */
+  factions: FactionsView;
   assistant: AssistantMessage | null;
   firstBuildPending: boolean;
   pendingConfirm: PendingConfirm | null;
@@ -161,6 +164,7 @@ export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO
     leapfrog: leapfrogView(s),
     papers: papersView(s),
     ops: opsView(s),
+    factions: factionsView(s),
     assistant: assistantOf(s),
     firstBuildPending: !!s.coach && s.flags.started === undefined && s.flags.firstBuild === undefined,
     pendingConfirm: pendingConfirmOf(s),

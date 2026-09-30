@@ -2,7 +2,7 @@
 // nothing else in the game: no `src/sim/**`, no store, no three.
 import type { ComponentType, ReactNode } from "react";
 import type {
-  ArenaVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, EraCardVM, EventVM, HudActions, HudVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
+  ArenaVM, BubbleVM, BuildItemVM, FactionsVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, EraCardVM, EventVM, HudActions, HudVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
   ModsVM, NewsroomVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StatsVM, ThoughtRowVM, TickerItemVM,
   StaffVM, TeaserVM, ProgressVM, ToastVM, TrainingVM, UnlockCardVM, VisibleVM, HelpVM,
 } from "../ui/hud/types";
@@ -31,6 +31,7 @@ export const SLOT_NAMES = [
   "Arena",
   "Benchmarks",
   "Voice",
+  "Factions",
   "Livestream",
   "EraCard",
   "FrontPage",
@@ -48,7 +49,7 @@ export const SLOT_NAMES = [
 export type SlotName = (typeof SLOT_NAMES)[number];
 
 /** The slots that sit in the HUD all the time, already rendered, for the Layout to place. */
-export const DOCKED_SLOTS = ["Stats", "Training", "Objectives", "Inspector", "BuildBar", "Speed", "Staff", "ThoughtsPanel", "Ticker", "Toasts", "Assistant", "Arena", "Benchmarks", "Voice", "NewsControls", "NewsArrival", "PhotoButton"] as const;
+export const DOCKED_SLOTS = ["Stats", "Training", "Objectives", "Inspector", "BuildBar", "Speed", "Staff", "ThoughtsPanel", "Ticker", "Toasts", "Assistant", "Arena", "Benchmarks", "Voice", "Factions", "NewsControls", "NewsArrival", "PhotoButton"] as const;
 export type DockedSlot = (typeof DOCKED_SLOTS)[number];
 
 /** What the Layout receives: the docked slots as elements (or null when there is nothing to show) plus the whole VM. */
@@ -99,6 +100,12 @@ export interface SlotPropsMap {
   Benchmarks: { leapfrog: LeapfrogVM; layout: LayoutVM; actions: HudActions };
   /** The share-of-voice meter: who has the news cycle, and the last sixty days of it. Docked. */
   Voice: { leapfrog: LeapfrogVM; layout: LayoutVM; actions: HudActions };
+  /**
+   * FLT-33: the discourse. Each faction's meter and mood (and why), the lab's stance on five axes, who is allied or
+   * feuding, who is at the gate, and the safety budget (`actions.setSafetySpend(level)`). Folded to `factions.headline`
+   * until `factions.open` (`actions.toggleFactions()`). Docked; only rendered once `factions.enabled` and `visible.factions`.
+   */
+  Factions: { factions: FactionsVM; layout: LayoutVM; actions: HudActions };
   /** The launch livestream mishap card (the dog, the wrong chart). Opens instead of EventCard for `event.kind === "stream"`; answer it with `actions.choose`. */
   Livestream: { event: EventVM; stream: StreamVM; actions: HudActions };
   EraCard: { era: EraCardVM; actions: HudActions };

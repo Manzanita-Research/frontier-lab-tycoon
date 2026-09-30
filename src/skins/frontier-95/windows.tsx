@@ -285,6 +285,13 @@ export function Inspector({ inspector: who, layout, actions }: SlotPropsMap["Ins
                       <div className="r">
                         Badge #{who.badge} · {who.kindLabel} · {who.moodLabel}
                       </div>
+                      {who.faction && (
+                        <div className="r f95-member" data-mood={who.faction.mood}>
+                          <i style={{ background: who.faction.color }} aria-hidden />
+                          Member of: {who.faction.name}
+                          {who.faction.mood !== "calm" ? ` (${who.faction.moodLabel})` : ""}
+                        </div>
+                      )}
                       <div className="bar" aria-hidden />
                     </div>
                   </div>

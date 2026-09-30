@@ -1,3 +1,4 @@
+import { factionAttrs } from "../../kit";
 import type { SlotPropsMap } from "../../types";
 
 /**
@@ -5,5 +6,10 @@ import type { SlotPropsMap } from "../../types";
  * `bubble` so photo mode can copy it onto the picture.
  */
 export function Bubble({ bubble }: SlotPropsMap["Bubble"]) {
-  return <div className={`bubble bubble-${bubble.kind}`}>{bubble.text}</div>;
+  // Said as a faction (FLT-33): `data-faction` and `--faction` let the CSS give it their colour.
+  return (
+    <div className={`bubble bubble-${bubble.kind}`} {...factionAttrs(bubble.faction)}>
+      {bubble.text}
+    </div>
+  );
 }

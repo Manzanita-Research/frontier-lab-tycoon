@@ -281,3 +281,47 @@ describe("Playable v1: what the lab has earned, the coach, and Help", () => {
     for (const line of [...help.loop, ...help.buildings.map((b) => b.line)]) expect(line).not.toMatch(/venture capital into heat|loss goes down/i);
   });
 });
+
+describe("the discourse (FLT-33)", () => {
+  const fx = hudViewModel(fixtureInput({ factions: true, factionsOpen: true }));
+
+  it("is plain JSON, like the rest of the view-model", () => {
+    assertPlain(fx);
+    assertPlain(hudViewModel(fixtureInput({ factions: true })));
+  });
+
+  it("is off (and draws nothing) until the factions are on", () => {
+    const vm = hudViewModel(fixtureInput());
+    expect(vm.factions.enabled).toBe(false);
+    expect(vm.inspector?.faction ?? null).toBeNull();
+  });
+
+  it("gives every faction a meter, a mood in words and a reason, and says who is at the gate", () => {
+    const f = fx.factions;
+    expect(f.enabled && f.open).toBe(true);
+    expect(f.rows.length).toBeGreaterThanOrEqual(10);
+    for (const r of f.rows) {
+      expect(r.meter).toBeGreaterThanOrEqual(-100);
+      expect(r.meter).toBeLessThanOrEqual(100);
+      expect(r.meterText).toMatch(/^([+−]\d+|0)$/);
+      expect(["Fans", "Upset", "Marching", "Furious online", "Calm"]).toContain(r.moodLabel);
+    }
+    expect(f.fans + f.angry).toBeGreaterThan(0);
+    expect(f.headline).not.toBe("");
+    expect(f.stance.map((s) => s.axis)).toEqual(["speed", "safety", "openness", "fairness", "profit"]);
+    expect(f.safety.options.filter((o) => o.active)).toHaveLength(1);
+    if (f.gate.length) expect(f.gateText).toMatch(/^At the gate: \d+ /);
+  });
+
+  it("puts a schism first among the relations", () => {
+    const rel = fx.factions.relations;
+    const i = rel.findIndex((r) => r.schism);
+    if (i >= 0) expect(rel.slice(0, i).every((r) => r.schism)).toBe(true);
+    expect(rel.every((r) => r.state === "allied" || r.state === "feuding")).toBe(true);
+  });
+
+  it("chips the selected walker and every bubble said as a faction", () => {
+    expect(fx.inspector?.faction).toMatchObject({ id: expect.any(String), color: expect.stringMatching(/^#/) });
+    for (const b of fx.bubbles) if (b.faction) expect(fx.factions.rows.map((r) => r.id)).toContain(b.faction.id);
+  });
+});

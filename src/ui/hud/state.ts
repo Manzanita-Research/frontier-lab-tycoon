@@ -38,5 +38,8 @@ export const modsOpenAtom = Atom.make(false);
 /** Is Help ▸ How to play open? UI-only state. */
 export const helpOpenAtom = Atom.make(false);
 
+/** FLT-33: is the Factions panel open? Folded to one line until you ask (a `?moment=factions` link opens it). */
+export const factionsOpenAtom = Atom.make(debugParams.moment === "factions" || debugParams.moment === "counterprotest");
+
 /** Is the Staff panel open? UI-only state, kept as an Effect atom like the rest of what React reads. */
 export const staffOpenAtom = Atom.make(false);

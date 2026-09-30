@@ -18,6 +18,8 @@ import { factionMoodMachine, quietMoodDay, quietRelationDay, relationMachine, ty
 import { enableFactions, meterOf, nudgeRelation, relationStateOf } from "./state";
 import { dailyFactions, setSafetySpend, settleFactions } from "./driver";
 import { safetyDrag } from "./stance";
+import { stageFactions, type FactionMoment } from "./demo";
+import { factionsView } from "./view";
 import { CLOSED_CAREFUL, COMPROMISE, OPEN_FAST, runFactions, factionsTable, type FactionsReport } from "./headless";
 
 // Pinned v6 graph typing does not model emitted events; same adapter as machines/graph.test.ts.
@@ -308,5 +310,40 @@ describe("quiet days", () => {
         } else expect(full.effects.length).toBeGreaterThan(0);
       }
     }
+  });
+});
+
+describe("debug moments (?moment=factions|counterprotest|argue)", () => {
+  const staged = (moment: FactionMoment, seed = 3) => {
+    const s = createTestCampus(seed);
+    for (let i = 0; i < 12 * TICKS_PER_DAY; i++) tick(s, answer(s));
+    stageFactions(s, moment);
+    return s;
+  };
+
+  it("stages an alliance, a schism, fans and a march, the same way every time", () => {
+    const s = staged("factions");
+    expect(relationStateOf(s, "accelerationists", "open-weights")).toBe("allied");
+    expect(relationStateOf(s, "doomers", "safetyists")).toBe("feuding");
+    expect(s.factions!.log.some((l) => l.text.startsWith("Schism"))).toBe(true);
+    const v = factionsView(s);
+    expect(v.rows.some((r) => r.mood === "fan")).toBe(true);
+    expect(v.relations.find((r) => r.schism)).toBeDefined();
+    expect(JSON.stringify(staged("factions"))).toBe(JSON.stringify(s));
+  });
+
+  it("puts two crowds at the gate for the counter-protest, and the arc where it would be", () => {
+    const s = staged("counterprotest");
+    expect(s.modArcs?.["water-escalation"]?.value).toBe("counter");
+    const gate = factionsView(s).gate;
+    expect(gate.find((g) => g.id === "")?.count).toBeGreaterThan(0);
+    expect(gate.find((g) => g.id === "truthers-truthers")?.count).toBeGreaterThan(0);
+  });
+
+  it("starts an argument on a path: two bubbles, one the reply", () => {
+    const s = staged("argue");
+    const pair = s.thoughts.filter((t) => t.faction && t.expiresTick > s.tick);
+    expect(pair.map((t) => t.faction)).toEqual(["accelerationists", "doomers"]);
+    expect(pair[1]!.replyTo).toBe(pair[0]!.walkerId);
   });
 });

@@ -4,7 +4,7 @@
     "",
     "  query    URL params merged over `defaults.query`; a null value removes a default. These are the game's own hooks",
     "           (src/debug.ts): seed, warp (sim days before the first frame), speed (0 = paused), hour, zoom, focus=x,z,",
-    "           photo, moment=<shuffle|era|era3|auction|funding|ops|queue|slop>, researchers, agents, discourse, skin.",
+    "           photo, moment=<shuffle|era|era3|auction|funding|ops|queue|slop|factions|counterprotest|argue>, researchers, agents, discourse, skin.",
     "  viewport 'WxH' (default 1440x900). mobile: true = a phone: dsf 2, touch (use with 390x844).",
     "  steps    run in order once the page has drawn `frames` frames (default 24), then it settles again and shoots:",
     "             { \"wait\": ms }",

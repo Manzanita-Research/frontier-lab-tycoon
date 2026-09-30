@@ -2,6 +2,7 @@
 // little hearts, what they are thinking as the lyric on screen, and a big pink FOLLOW button.
 // On a phone it is a short bottom sheet (swipe up for the rest, down to fold it, once more to close it), like the base.
 import { useRef, useState } from "react";
+import { FactionChip } from "../kit";
 import { useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import { Face, Heart, Note, Tape } from "./art";
@@ -61,6 +62,7 @@ export function Inspector({ inspector: who, layout, actions }: SlotPropsMap["Ins
             <div className="kn-tags">
               <span className={`kn-tag kn-mood ${who.mood}`}>{who.moodLabel}</span>
               <span className="kn-tag">{who.kindLabel}</span>
+              {who.faction && <FactionChip faction={who.faction} className="kn-tag kn-faction" />}
             </div>
           </div>
         </div>

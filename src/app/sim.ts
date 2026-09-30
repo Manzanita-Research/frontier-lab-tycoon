@@ -17,6 +17,7 @@ import { fillAgents, seedWalkers } from "../sim/walkers";
 import { isMoment, stageMoment } from "../sim/race/demo";
 import { isOpsMoment, stageOps } from "../sim/opsDemo";
 import { isPaperMoment, stagePapers } from "../sim/race/papers/demo";
+import { isFactionMoment, stageFactions } from "../sim/factions/demo";
 import { enablePapers } from "../sim/race/papers/driver";
 import { enableLeapfrog } from "../sim/race/leapfrog/driver";
 import { enableFactions } from "../sim/factions/state";
@@ -154,6 +155,7 @@ function stage(dbg: SimDebug): GameState {
   else if (leap) stageLeapfrog(sim, leap.moment, leap.arg);
   else if (isCollusionMoment(dbg.moment)) stageCollusion(sim, dbg.moment);
   else if (isPaperMoment(dbg.moment)) stagePapers(sim, dbg.moment);
+  else if (isFactionMoment(dbg.moment)) stageFactions(sim, dbg.moment);
   if (dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0) {
     const rng = createRng(sim.rngState);
     if (dbg.researchers > 0) seedWalkers(sim, "researcher", dbg.researchers, rng);

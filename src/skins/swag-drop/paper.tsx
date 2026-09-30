@@ -1,5 +1,5 @@
 // Paper and stickers: thought bubbles, toasts, the terminal ticker, and the event card as a memo with a rubber stamp.
-import { Marquee, useT } from "../kit";
+import { Marquee, factionAttrs, useT } from "../kit";
 import type { ToneVM } from "../../ui/hud/types";
 import type { SlotPropsMap } from "../types";
 import { Glyph, GLYPHS } from "./icons";
@@ -7,7 +7,7 @@ import { Glyph, GLYPHS } from "./icons";
 /** A paper bubble with a coloured spine and the speaker's name on the first line. The root keeps the `bubble` class so photo mode can copy it. */
 export function Bubble({ bubble }: SlotPropsMap["Bubble"]) {
   return (
-    <div className={`bubble sd-bubble bubble-${bubble.kind}`}>
+    <div className={`bubble sd-bubble bubble-${bubble.kind}`} {...factionAttrs(bubble.faction)}>
       <b>{bubble.speaker || bubble.kind}</b>
       {bubble.text}
     </div>

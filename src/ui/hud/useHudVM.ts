@@ -12,7 +12,7 @@ import { skinList } from "../../skins/registry";
 import type { LeapfrogView } from "../../sim/race/leapfrog/view";
 import { shotAtom } from "../juice/photo";
 import { newMotion, NO_MOTION, stepMotion, type Motion, type MotionView } from "./leapfrogMotion";
-import { arenaOpenAtom, chatCountAtom, helpOpenAtom, modsOpenAtom, photoFlashAtom, photoTimeAtom, skinUiAtom, staffOpenAtom } from "./state";
+import { arenaOpenAtom, chatCountAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, photoFlashAtom, photoTimeAtom, skinUiAtom, staffOpenAtom } from "./state";
 import { modSession } from "../../app/mods";
 import { playableFixture } from "./previewLadder";
 import type { HudVM } from "./types";
@@ -171,6 +171,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
   const shot = useAtomValue(shotAtom);
   const skinUi = useAtomValue(skinUiAtom);
   const staffOpen = useAtomValue(staffOpenAtom);
+  const factionsOpen = useAtomValue(factionsOpenAtom);
   const helpOpen = useAtomValue(helpOpenAtom);
   const modsOpen = useAtomValue(modsOpenAtom);
   const viewport = useViewport();
@@ -211,6 +212,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         toldGateway: toldGateway.current,
         staffOpen,
         zone,
+        factionsOpen,
         arena: { open: arenaOpen, alert: motion.alert, flinch: motion.flinch, moved: motion.moved },
         leapfrog,
         room,
@@ -229,7 +231,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         mods,
         viewport,
       }),
-    [shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, motion, leapfrog, room, chatCount, helpOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, skinUi, list, mods, viewport, staffOpen, zone],
+    [shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, motion, leapfrog, room, chatCount, helpOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, skinUi, list, mods, viewport, staffOpen, zone, factionsOpen],
   );
   return vm;
 }

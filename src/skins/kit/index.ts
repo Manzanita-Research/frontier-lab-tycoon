@@ -11,3 +11,4 @@ export { placeBalloon, type Placement, type Rect, type Side } from "./place";
 export { ALL_VISIBLE } from "./visible";
 export { BenchTable } from "./BenchTable";
 export { VoiceGraph } from "./VoiceGraph";
+export { FactionChip, FactionMeter, StanceTrack, factionAttrs } from "./Factions";

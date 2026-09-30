@@ -24,6 +24,8 @@ import { NO_MOTION, type MotionView } from "./leapfrogMotion";
 import { SKIN_API_VERSION } from "./types";
 import { HELP_BUILDINGS, HELP_LOOP, HELP_NUMBERS, HELP_TITLE } from "../../content/help";
 import { playableOf, type PlayableInput } from "./playable";
+import { factionChips, factionsOf } from "./factions";
+import type { FactionChipVM } from "./types";
 import type {
   ArenaVM, BenchCellVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HudVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
   ModsVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, ResponseVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, StreamVM, ThoughtRowVM, TrainingVM, TrendVM, VoiceVM, WalkerKindVM,
@@ -54,6 +56,8 @@ export interface HudInput {
   /** The Staff panel is open, and whose patrol zone is being painted. */
   staffOpen: boolean;
   zone: number | null;
+  /** FLT-33: the Factions panel is open. Optional: folded. */
+  factionsOpen?: boolean;
   arena: { open: boolean; alert: boolean; flinch: boolean; moved: Record<string, "up" | "down"> };
   /** Release Leapfrog's real-time flourishes (row flashes, blinking badges, solved columns kept on the board, news-cycle history). Optional: none is fine. */
   leapfrog?: MotionView;
@@ -194,7 +198,7 @@ function objectivesOf(s: Snapshot): ObjectivesVM {
   };
 }
 
-function inspectorOf(who: Inspect | null, following: boolean, lab: string): InspectorVM | null {
+function inspectorOf(who: Inspect | null, following: boolean, lab: string, chips: ReadonlyMap<string, FactionChipVM>): InspectorVM | null {
   if (!who) return null;
   const drift = who.kind === "agent" ? (who.needs.find((n) => n.key === "drift")?.value ?? 0) : 0;
   const look = lookOf(who);
@@ -214,6 +218,7 @@ function inspectorOf(who: Inspect | null, following: boolean, lab: string): Insp
     portrait: { kind: who.kind, body: look.body, head: look.head, happiness: who.happiness, drift },
     following,
     badge: String(who.id).padStart(4, "0"),
+    ...(who.faction && chips.has(who.faction) ? { faction: chips.get(who.faction)! } : {}),
   };
 }
 
@@ -295,8 +300,11 @@ function speedOf(value: number): SpeedVM {
   };
 }
 
-function bubblesOf(i: HudInput): BubbleVM[] {
-  return i.snap.thoughts.map((t) => ({ id: t.id, walkerId: t.walkerId, kind: t.kind, speaker: i.snap.speakers[t.walkerId] ?? "", text: t.text }));
+function bubblesOf(i: HudInput, chips: ReadonlyMap<string, FactionChipVM>): BubbleVM[] {
+  return i.snap.thoughts.map((t) => {
+    const faction = t.faction ? chips.get(t.faction) : undefined;
+    return { id: t.id, walkerId: t.walkerId, kind: t.kind, speaker: i.snap.speakers[t.walkerId] ?? "", text: t.text, ...(faction ? { faction } : {}) };
+  });
 }
 
 function eventOf(i: HudInput): { event: EventVM | null; era: HudVM["eraCard"] } {
@@ -613,17 +621,19 @@ export function hudViewModel(i: HudInput): HudVM {
   const build = buildOf(i);
   const items = earnedItems(build.items, play);
   const { event, era } = eventOf(i);
+  // Snapshots from before FLT-33 (fixtures, old links) have no `factions`: that is "off".
+  const chips = factionChips(i.snap.factions);
   return {
     apiVersion: SKIN_API_VERSION,
     stats: statsOf(i),
     training: trainingOf(i.snap),
     objectives: objectivesOf(i.snap),
-    inspector: inspectorOf(i.snap.inspect, i.follow, i.snap.labName),
+    inspector: inspectorOf(i.snap.inspect, i.follow, i.snap.labName, chips),
     buildItems: items,
     buildTip: build.tip,
     speed: speedOf(i.speed),
     staff: staffOf(i, play.staff),
-    bubbles: bubblesOf(i),
+    bubbles: bubblesOf(i, chips),
     ticker: i.news.slice(-TICKER_ITEMS).map((n) => ({ id: n.id, text: n.text, tone: n.tone })),
     toasts: spokenToasts(i).map((t) => ({ id: t.id, text: t.text, tone: t.tone })),
     // One hint at a time, and none while a toast is talking; the gateway hint is redundant once a toast has said it.
@@ -648,6 +658,7 @@ export function hudViewModel(i: HudInput): HudVM {
     thoughtsPanel: thoughtsOf(i),
     arena: arenaOf(i),
     leapfrog: leapfrogOf(i),
+    factions: factionsOf(i.snap.factions, i.factionsOpen ?? false),
     eraCard: era,
     outcome: outcomeOf(i),
     newsroom: newsroomOf(i),

@@ -5,7 +5,7 @@ import { STAFF } from "../../content/staff";
 import type { CoachVM, HudPanelId, UnlockCardVM, VisibleVM } from "./types";
 import { defs } from "../../sim/defs";
 
-export const HUD_PANELS: readonly HudPanelId[] = ["revenue", "vibes", "arena", "rnd", "thoughts", "news", "staff", "events", "papers", "disasters"];
+export const HUD_PANELS: readonly HudPanelId[] = ["revenue", "vibes", "arena", "rnd", "thoughts", "news", "staff", "events", "papers", "disasters", "factions"];
 
 /** The contract, as the logic sends it. */
 export interface PlayableSnapshot {

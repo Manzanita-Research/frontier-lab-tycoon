@@ -28,6 +28,7 @@ export function Layout({ slots }: SlotPropsMap["Layout"]) {
           {slots.Inspector}
           {slots.Benchmarks}
           {slots.Voice}
+          {slots.Factions}
           {slots.Arena}
           {slots.ThoughtsPanel}
         </div>

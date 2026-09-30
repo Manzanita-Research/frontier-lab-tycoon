@@ -1,7 +1,7 @@
 // The lab's home page: the header with the hit counter, Under Construction, My Goals, About Me, the guestbook and the
 // Top Sites table. Everything is a table, a rule or a link, because it is 1998 and CSS is a rumour.
 import { useEffect, useRef, useState } from "react";
-import { ALL_VISIBLE, Odometer, money } from "../kit";
+import { ALL_VISIBLE, FactionChip, Odometer, money } from "../kit";
 import { useCoach, useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import type { StatsVM } from "../../ui/hud/types";
@@ -290,6 +290,11 @@ export function Inspector({ inspector: who, layout, actions }: SlotPropsMap["Ins
               current mood: <MoodFace mood={who.mood} /> {who.moodLabel}
             </div>
             <div>current music: {MUSIC[who.kind]}</div>
+            {who.faction && (
+              <div>
+                current faction: <FactionChip faction={who.faction} className="gc-faction" />
+              </div>
+            )}
             {!short && <div>currently: {who.status}</div>}
           </div>
         </div>

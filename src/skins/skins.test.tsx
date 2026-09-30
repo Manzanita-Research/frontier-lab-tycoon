@@ -67,6 +67,8 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
       return { leapfrog: vms.lf!.leapfrog, layout: vms.lf!.layout, actions };
     case "Voice":
       return { leapfrog: vms.lf!.leapfrog, layout: vms.lf!.layout, actions };
+    case "Factions":
+      return { factions: vms.fx!.factions, layout: vms.fx!.layout, actions };
     case "Livestream":
       return { event: vms.stream!.event!, stream: vms.stream!.event!.stream!, actions };
     case "EraCard":
@@ -117,6 +119,9 @@ const vms: Record<string, HudVM> = {
   warned: hudViewModel({ ...fixtureInput({ warnings: ["Your entrance isn't connected to any paths. Visitors are forming a very orderly queue to nowhere."] }), toasts: [] }),
   lf: vmOf({ leapfrog: true }),
   lfPhone: vmOf({ leapfrog: true, width: 390, height: 844 }),
+  fx: vmOf({ factions: true, factionsOpen: true }),
+  fxFolded: vmOf({ factions: true }),
+  fxPhone: vmOf({ factions: true, factionsOpen: true, width: 390, height: 844 }),
   shipNow: vmOf({ leapfrog: true, event: "shipNow" }),
   stream: vmOf({ leapfrog: true, event: "stream:dog" }),
   auction: vmOf({ event: "computeAuction" }),
