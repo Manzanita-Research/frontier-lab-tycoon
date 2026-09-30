@@ -42,7 +42,7 @@ export function Welcome({ welcome, saves, actions }: SlotPropsMap["Welcome"]) {
             </Btn>
           </div>
         </div>
-        <p className="f95-welcome-small">A new lab writes over AUTOSAVE.FLT after its first month. To keep both, Save it to a slot first (Start ▸ Save/Load…).</p>
+        <p className="f95-welcome-small">A new lab writes over AUTOSAVE.FLT after its first month. To keep both, Save it to a slot first (Start, then Save / Load…).</p>
       </Win>
     </Dialog>
   );

@@ -4787,7 +4787,7 @@
       padding-top: 0;
     }
     .f95-saverow {
-      grid-template-columns: 112px minmax(0, 1fr) 60px;
+      grid-template-columns: 128px minmax(0, 1fr) 44px;
       span:nth-child(3),
       span:nth-child(4) {
         display: none;

@@ -53,7 +53,7 @@ function Slots({ saves, actions }: { saves: SavesVM; actions: HudActions }) {
             )}
             {s.save && (
               <button onClick={() => actions.exportSave(s.slot)} disabled={saves.busy} aria-label={`Export ${s.label}`}>
-                ⤓
+                Export
               </button>
             )}
             {(s.save || s.broken) && s.slot !== "auto" && (

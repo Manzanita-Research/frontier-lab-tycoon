@@ -1,0 +1,52 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "5bd2f67e897d5a24f6ea6746bfcf124bbab2cfd9"
+  },
+  "head": {
+    "branch": "flt-65-saves",
+    "sha": "ffc93a1",
+    "dirty": true
+  },
+  "seconds": 86.915,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "saves-welcome",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-65/before/saves-welcome.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-65/after/saves-welcome.png",
+      "title": "FLT-65: a returning player's start screen (Welcome back, from a pretend save shelf)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-65/compare/saves-welcome.png",
+      "changed": 0.07524074074074075
+    },
+    {
+      "scene": "saves-window",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-65/before/saves-window.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-65/after/saves-window.png",
+      "title": "FLT-65: the Save/Load window on a pretend shelf (autosave, a v1 save, two empty slots)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-65/compare/saves-window.png",
+      "changed": 0.14796913580246915
+    },
+    {
+      "scene": "menu",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-65/before/menu.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-65/after/menu.png",
+      "title": "The Start menu / build bar open",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-65/compare/menu.png",
+      "changed": 0.013070216049382716
+    },
+    {
+      "scene": "saves-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-65/before/saves-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-65/after/saves-phone.png",
+      "title": "FLT-65: the Save/Load window on a phone (390x844)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-65/compare/saves-phone.png",
+      "changed": 0.4968404423380727
+    }
+  ],
+  "errors": []
+}
