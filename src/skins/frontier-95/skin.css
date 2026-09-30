@@ -3362,8 +3362,30 @@
     .f95-clauses li {
       grid-template-columns: minmax(0, 1fr);
     }
-    .f95-sheet td.truth {
-      min-width: 110px;
+    .f95-sheet {
+      font-size: 12px;
+      td {
+        padding: 2px 3px;
+      }
+      td.who {
+        white-space: normal;
+        min-width: 96px;
+        small {
+          display: none;
+        }
+      }
+      tr.hdr td {
+        white-space: normal;
+      }
+      td.truth {
+        min-width: 72px;
+        small {
+          display: none;
+        }
+      }
+    }
+    .f95-cellface {
+      display: none;
     }
   }
 }

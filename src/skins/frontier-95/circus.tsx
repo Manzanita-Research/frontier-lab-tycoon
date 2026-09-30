@@ -317,7 +317,7 @@ export function PromiseTracker({ event, tracker, bill, actions }: SlotPropsMap["
                 <th>1</th>
                 <td>Senator</td>
                 <td>Promised</td>
-                <td>{after ? "Voted" : "Leaning"}</td>
+                <td>{after ? "Voted" : "Leaning (your odds)"}</td>
                 <td>{after ? "Kept?" : "Lobbyists"}</td>
                 <td>Truth-o-meter</td>
                 <td />
