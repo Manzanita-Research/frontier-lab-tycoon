@@ -2918,7 +2918,7 @@
       "title": "FLT-63: Start ▸ Facilities ▸ open (the buildings, grouped)",
       "steps": [
         {
-          "click": "[data-testid=start-button], .build-open, .dd-tray-label, .gc-build"
+          "click": "[data-coach=start]"
         },
         {
           "wait": 300
@@ -2936,7 +2936,7 @@
       "title": "FLT-63: Start ▸ Run… (the widget launcher)",
       "steps": [
         {
-          "click": "[data-testid=start-button], .build-open, .dd-tray-label, .gc-build"
+          "click": "[data-coach=start]"
         },
         {
           "wait": 300
@@ -2953,7 +2953,7 @@
       "title": "FLT-63: Run… agi.exe",
       "steps": [
         {
-          "click": "[data-testid=start-button], .build-open, .dd-tray-label, .gc-build"
+          "click": "[data-coach=start]"
         },
         {
           "wait": 300
@@ -2987,28 +2987,7 @@
           "wait": 300
         },
         {
-          "drag": [
-            [
-              14,
-              20
-            ],
-            [
-              15,
-              20
-            ],
-            [
-              16,
-              20
-            ],
-            [
-              17,
-              20
-            ],
-            [
-              18,
-              20
-            ]
-          ],
+          "drag": [[12, 21], [12, 20], [12, 19], [12, 18], [12, 17], [12, 16]],
           "hold": true
         },
         {
@@ -3047,7 +3026,7 @@
       "mobile": true,
       "steps": [
         {
-          "click": "[data-testid=start-button], .build-open, .dd-tray-label, .gc-build"
+          "click": "[data-coach=start]"
         },
         {
           "wait": 300
@@ -3067,7 +3046,7 @@
       "mobile": true,
       "steps": [
         {
-          "click": "[data-testid=start-button], .build-open, .dd-tray-label, .gc-build"
+          "click": "[data-coach=start]"
         },
         {
           "wait": 300

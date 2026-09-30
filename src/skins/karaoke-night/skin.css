@@ -3162,6 +3162,7 @@
 [data-skin="karaoke-night"] {
   .kn-tray.view-facilities {
     align-items: flex-end;
+    padding-top: 10px;
   }
   .kn-row {
     display: flex;
@@ -3174,12 +3175,16 @@
     border-left: 2px dotted color-mix(in srgb, var(--kn-cyan) 55%, transparent);
   }
   .kn-rowname {
+    align-self: flex-start;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--kn-screen);
     font: 900 11px var(--kn-display);
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--kn-cyan);
-    text-shadow: 0 0 6px color-mix(in srgb, var(--kn-cyan) 60%, transparent);
     white-space: nowrap;
+    margin-bottom: 4px;
   }
   .kn-rowkeys {
     display: flex;

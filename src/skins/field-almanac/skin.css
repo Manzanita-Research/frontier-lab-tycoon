@@ -2776,7 +2776,7 @@
     align-items: flex-start;
     gap: 12px;
   }
-  .fa-plate {
+  .fa-guide {
     flex: none;
     display: flex;
     flex-direction: column;
@@ -2796,7 +2796,7 @@
       }
     }
   }
-  .fa-plate-tools {
+  .fa-guide-tools {
     display: flex;
     gap: 6px;
   }

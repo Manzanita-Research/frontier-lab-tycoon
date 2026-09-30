@@ -117,16 +117,16 @@ export function Shelf({ items, teasers = [], widgets = [], actions, done, view }
         <>
           {back}
           {menu.groups.map((g, i) => (
-            <figure key={g.id} className="fa-plate" role="group" aria-label={t(`build.group.${g.id}`)}>
-              <div className="fa-plate-tools">{g.items.map(tool)}</div>
+            <figure key={g.id} className="fa-guide" role="group" aria-label={t(`build.group.${g.id}`)}>
+              <div className="fa-guide-tools">{g.items.map(tool)}</div>
               <figcaption>
                 <b>{t("build.groupNo", { n: ["I", "II", "III", "IV", "V"][i] ?? String(i + 1) })}</b> {t(`build.group.${g.id}`)}
               </figcaption>
             </figure>
           ))}
           {teasers.length > 0 && (
-            <figure className="fa-plate" role="group" aria-label={t("build.locked")}>
-              <div className="fa-plate-tools">
+            <figure className="fa-guide" role="group" aria-label={t("build.locked")}>
+              <div className="fa-guide-tools">
                 {teasers.map((teaser, i) => (
                   <div key={`${teaser.label}-${i}`} className="fa-tool locked" aria-disabled title={`${t("build.locked")}: ${teaser.hint}`}>
                     <span className="fa-well">
