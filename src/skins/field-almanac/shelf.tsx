@@ -16,7 +16,7 @@ export function BuildBar({ items, tip, actions }: SlotPropsMap["BuildBar"]) {
           <i>{tip.name}</i> — {tip.text} {tip.upkeepText && <span className="dim">{tip.upkeepText}</span>}
         </div>
       )}
-      <div className="fa-shelf fa-paper" role="toolbar" aria-label={t("build.menuTitle")}>
+      <div className="fa-shelf fa-paper" role="toolbar" aria-label={t("build.menuTitle")} data-coach="start">
         {items.map((it) => (
           <button
             key={it.kind}
@@ -25,6 +25,7 @@ export function BuildBar({ items, tip, actions }: SlotPropsMap["BuildBar"]) {
             disabled={!it.affordable && !it.selected}
             aria-pressed={it.selected}
             title={it.name}
+            data-coach={`build:${it.kind}`}
           >
             {it.hotkey !== null && <span className="fa-hot">{it.hotkey}</span>}
             <span className="fa-well">

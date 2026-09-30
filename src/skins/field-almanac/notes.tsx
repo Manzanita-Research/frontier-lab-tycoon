@@ -9,7 +9,7 @@ export function Training({ training }: SlotPropsMap["Training"]) {
   const t = useT();
   if (!training.hasHall) {
     return (
-      <section className="fa-training idle" aria-label={t("training.title")}>
+      <section className="fa-training idle" aria-label={t("training.title")} data-coach="training">
         <div className="fa-sc">{t("training.title")}</div>
         <p className="fa-quiet">{t("training.noHall")}</p>
       </section>
@@ -17,7 +17,7 @@ export function Training({ training }: SlotPropsMap["Training"]) {
   }
   const pct = Math.floor(training.pct * 100);
   return (
-    <section className="fa-training" aria-label={t("training.title")}>
+    <section className="fa-training" aria-label={t("training.title")} data-coach="training">
       <div className="fa-sc">
         {t("training.title")} · training run {roman(training.run)}
       </div>
@@ -45,7 +45,7 @@ export function Objectives({ objectives, layout }: SlotPropsMap["Objectives"]) {
   const [open, setOpen] = useState(() => !layout.compact);
   const compact = layout.compact;
   return (
-    <section className={`fa-objectives ${open ? "open" : ""} ${compact ? "compact" : ""}`} aria-label={t("objectives.title")}>
+    <section className={`fa-objectives ${open ? "open" : ""} ${compact ? "compact" : ""}`} aria-label={t("objectives.title")} data-coach="goals">
       {compact && !open && (
         <button className="fa-obj-pill" onClick={() => setOpen(true)} aria-expanded={false} aria-label={`${t("objectives.title")}, ${objectives.done} of ${objectives.total} done, ${objectives.daysLeft} ${t("objectives.daysLeft")}`}>
           <ClipboardIcon />

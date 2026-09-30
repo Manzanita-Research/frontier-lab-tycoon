@@ -7,6 +7,7 @@ import type { SlotPropsMap } from "../types";
  * header. Everything sits on the campus instead of framing it: the middle of the screen is left empty.
  */
 export function Layout({ vm, slots }: SlotPropsMap["Layout"]) {
+  // A window the game hides arrives as null: its wrapper goes with it.
   // On a phone the leaderboard is a pill beside Overheard under the speed buttons; on a desktop it hangs under the field notes.
   const compact = vm.layout.compact;
   return (
@@ -16,18 +17,22 @@ export function Layout({ vm, slots }: SlotPropsMap["Layout"]) {
         {slots.Toasts}
       </div>
       <div className="fa-left">
-        <div className="fa-notes">
-          {slots.Training}
-          {slots.Objectives}
-        </div>
+        {(slots.Training || slots.Objectives) && (
+          <div className="fa-notes">
+            {slots.Training}
+            {slots.Objectives}
+          </div>
+        )}
         {!compact && slots.Benchmarks}
         {slots.Voice}
       </div>
       <div className="fa-right">
-        <div className="fa-controls fa-paper">
-          {slots.Speed}
-          {slots.PhotoButton}
-        </div>
+        {(slots.Speed || slots.PhotoButton) && (
+          <div className="fa-controls fa-paper">
+            {slots.Speed}
+            {slots.PhotoButton}
+          </div>
+        )}
         {slots.NewsControls}
         {slots.NewsArrival}
         {slots.Inspector}

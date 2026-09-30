@@ -149,6 +149,15 @@ describe("Field Almanac", () => {
     for (const it of vm.buildItems) if (it.hotkey !== null) expect(out).toContain(`>${it.hotkey}<`);
   });
 
+  it("carries the coach-mark hooks the tutorial spotlights, on the elements they name", () => {
+    const out = html(<Docked vm={vm} actions={actions} />);
+    for (const hook of ["start", "training", "stat:runway", "goals"]) expect(out).toContain(`data-coach="${hook}"`);
+    // One per tool: rendered from the view-model as given, so an unlock filter or a mod's tool needs nothing here.
+    for (const it of vm.buildItems) expect(out).toContain(`data-coach="build:${it.kind}"`);
+    // ...and the run under observation carries it whether or not there is a Training Hall yet.
+    expect(html(<slot.Training training={{ ...vm.training, hasHall: false }} actions={actions} />)).toContain('data-coach="training"');
+  });
+
   it("Dispatches keeps the game's `ticker` class and the seven-word label", () => {
     const out = html(<slot.Ticker items={vm.ticker} actions={actions} />);
     expect(out).toContain('class="ticker fa-ticker"');

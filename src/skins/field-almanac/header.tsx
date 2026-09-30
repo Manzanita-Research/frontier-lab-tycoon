@@ -118,7 +118,7 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
         <Odometer className={`fa-v ${stats.cash.negative ? "bad" : ""}`} value={stats.cash.value} format={money} />
         <Odometer className={`fa-d ${stats.net.good ? "good" : "bad"}`} value={stats.net.value} format={perDay} flash={false} />
       </div>
-      <div className="fa-stat fa-runway">
+      <div className="fa-stat fa-runway" data-coach="stat:runway">
         <span className="fa-sc">{t("stats.runway")}</span>
         <span className={`fa-v ${stats.runway.warning ? "bad" : ""}`}>{stats.runway.months === null ? <InfinityIcon /> : stats.runway.text}</span>
         <span className={`fa-d ${stats.runway.warning ? "bad" : "dim"}`}>{runwayCaption(stats.runway)}</span>
