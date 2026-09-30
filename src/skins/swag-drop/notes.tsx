@@ -1,6 +1,6 @@
 // Things stuck to the wall: the OKRs as sticky notes and the Thoughts as a corkboard with push-pins.
 import { useState } from "react";
-import { ALL_VISIBLE, useCoach, useT } from "../kit";
+import { ALL_VISIBLE, useCoach, useT, useWidget } from "../kit";
 import type { SlotPropsMap } from "../types";
 import { Glyph } from "./icons";
 
@@ -74,6 +74,7 @@ export function Objectives({ objectives, progress, visible = ALL_VISIBLE, layout
 export function ThoughtsPanel({ rows, layout, actions }: SlotPropsMap["ThoughtsPanel"]) {
   const t = useT();
   const [open, setOpen] = useState(() => !layout.compact);
+  useWidget("thoughts", () => setOpen(true));
   const total = rows.reduce((n, r) => n + r.count, 0);
   return (
     <section className={`sd-cork ${open ? "open" : ""} ${layout.compact ? "compact" : ""}`} aria-label={t("thoughts.title")}>

@@ -4,6 +4,7 @@ import { debugParams } from "../../app/game";
 import type { LoadedSkin } from "../../skins/types";
 import { baseSlots } from "../../skins/base/slots";
 import { BASE_STRINGS } from "../../skins/schema";
+import type { SkinOfferVM } from "./types";
 
 /** Open on a desktop-sized screen, folded on a phone or a short window (the Arena chip toggles it either way). */
 export const arenaOpenAtom = Atom.make(typeof window === "undefined" ? true : window.innerWidth > 640 && window.innerHeight >= 800);
@@ -23,11 +24,13 @@ export interface SkinUi {
   /** Skins that were refused at load time (a bad slots.tsx, a missing font), with why. */
   refused: { id: string; errors: string[] }[];
   reducedMotion: boolean;
+  /** FLT-55: a mod's skin waiting for the player's yes or no. */
+  offer: SkinOfferVM | null;
 }
 
 // keepAlive: the boot sequence sets these before React has mounted anything, and an atom nobody subscribes to would
 // forget its value.
-export const skinUiAtom = Atom.keepAlive(Atom.make<SkinUi>({ active: "base", picker: { open: false, original: null }, refused: [], reducedMotion: false }));
+export const skinUiAtom = Atom.keepAlive(Atom.make<SkinUi>({ active: "base", picker: { open: false, original: null }, refused: [], reducedMotion: false, offer: null }));
 
 /** The skin's components and copy: what the host renders. Starts as the base until the first skin has loaded. */
 export const loadedSkinAtom = Atom.keepAlive(Atom.make<LoadedSkin>({ id: "base", name: "Base", slots: baseSlots, strings: { ...BASE_STRINGS } }));

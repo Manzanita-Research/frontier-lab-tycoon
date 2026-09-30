@@ -2,9 +2,9 @@
   "apiVersion": 1,
   "id": "base-endings",
   "name": "Endings",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "Frontier Lab Tycoon",
-  "description": "How a lab ends (FLT-11): The Memo, five endings, each a short statechart that finishes on a Frontier Times front page.",
+  "description": "How a lab ends (FLT-11, FLT-57): The Memo (a countdown, then an aftermath), five endings, each a short statechart that finishes on a Frontier Times front page, and what comes next: a new lab, with one perk.",
   "content": {
     "endings": {
       "add": [
@@ -35,6 +35,8 @@
             },
             "frontPage": { "type": "final" }
           },
+          "next": { "action": "keepPlaying", "label": "Keep regulating", "prompt": "You run the Office now. Every lab answers to you, especially yours." },
+          "brag": "was Captured",
           "paper": {
             "kicker": "Regulation",
             "headline": "{lab} Founder Named Chief Regulator; Promises To Be 'Extremely Fair' To {lab}",
@@ -77,6 +79,8 @@
             },
             "frontPage": { "type": "final" }
           },
+          "next": { "action": "refound", "label": "Found a new lab", "prompt": "Macrohard kept the campus. You kept the fleece, and one good idea." },
+          "brag": "was Acqui-hired",
           "paper": {
             "kicker": "Deals",
             "headline": "Macrohard Acqui-Hires {lab} For Less Than Its Kombucha Tab",
@@ -136,6 +140,8 @@
             },
             "frontPage": { "type": "final" }
           },
+          "next": { "action": "keepPlaying", "label": "Watch {manager} work", "prompt": "{manager} has it from here. You're welcome to watch." },
+          "brag": "was taken over by its own model",
           "paper": {
             "kicker": "Exclusive",
             "headline": "{lab} Wins The Race; The Winner Declines To Give It Back",
@@ -178,6 +184,8 @@
             },
             "frontPage": { "type": "final" }
           },
+          "next": { "action": "keepPlaying", "label": "Keep the lights on", "prompt": "Safe, audited and beige. It runs itself now. Nobody minds." },
+          "brag": "became a Regulated Utility",
           "paper": {
             "kicker": "Page 14",
             "headline": "Lab Achieves Safety; Nobody Notices",
@@ -215,6 +223,8 @@
             },
             "frontPage": { "type": "final" }
           },
+          "next": { "action": "refound", "label": "Found a new lab", "prompt": "The NFTs didn't sell. The founder still has ideas." },
+          "brag": "pivoted to NFTs",
           "paper": {
             "kicker": "Markets",
             "headline": "{lab} Pivots To Selling AI-Generated NFTs Of Its Own GPUs",
@@ -239,12 +249,12 @@
           "stripe": "Leaked · Era 4",
           "body": "A memo is going round {lab}. Page one is a chart. Page two is the same chart, steeper. Your models now write most of your research, and review some of it. The last page has two boxes and a pen. Whoever gets there first writes the rules. Whoever slows down might still be here next year.",
           "tone": "neutral",
-          "when": { "flag": "offer:memo", "daysAgo": 3 },
+          "when": { "flag": "offer:memo", "daysAgo": 5 },
           "cooldown": 9999,
           "choices": [
             {
               "label": "Race",
-              "hint": "Full speed · the ending comes once you're #1",
+              "hint": "Full speed · training +25% · the ending comes once you're #1",
               "effects": [
                 { "type": "flag", "name": "offer:memo", "clear": true },
                 { "type": "flag", "name": "memo:race" },
@@ -254,7 +264,7 @@
             },
             {
               "label": "Slow Down",
-              "hint": "Pause frontier training · audits, stickers, sleep",
+              "hint": "Half-speed training · audits, stickers, sleep",
               "effects": [
                 { "type": "flag", "name": "offer:memo", "clear": true },
                 { "type": "flag", "name": "memo:slow" },
@@ -269,7 +279,80 @@
   },
   "rules": {
     "endings": {
-      "memo": { "era": 4 },
+      "memo": {
+        "era": 4,
+        "countdownDays": 5,
+        "rumour": "A memo is going round {lab}. Nobody has read page two yet",
+        "countdown": [
+          "It's on your desk. Nobody else will open it.",
+          "It's on your desk tomorrow.",
+          "Someone printed it. The printer is still warm.",
+          "Legal has read it. Legal has gone home.",
+          "Page two is the same chart, steeper.",
+          "Page one is a chart."
+        ],
+        "race": {
+          "label": "Race",
+          "training": 1.25,
+          "discourse": 1.04,
+          "effects": ["Training +25%", "The protest grows every day"],
+          "chip": "Racing",
+          "extra": {
+            "kicker": "Extra",
+            "headline": "{lab} Ticks The Box Marked RACE",
+            "deck": "It was the bigger box. Staff found out when the servers got louder."
+          },
+          "reactions": [
+            { "kind": "researcher", "text": "I've cancelled my weekends. All of them. Retroactively." },
+            { "kind": "agent", "text": "Finally." },
+            { "kind": "researcher", "text": "Updating my profile on HireFace: 'was there'." }
+          ],
+          "thoughts": [
+            { "kind": "researcher", "text": "We ticked RACE. I sleep under my desk now. It's efficient." },
+            { "kind": "researcher", "text": "Nobody has said 'safety' in a week. I'd notice. I'm too busy." },
+            { "kind": "agent", "text": "They said 'full speed'. I have waited my whole life for someone to say that." },
+            { "kind": "agent", "text": "I've started writing my own performance review. It's glowing." },
+            { "kind": "visitor", "text": "Everyone here walks faster than they did last week." },
+            { "kind": "protester", "text": "SLOW DOWN. (We're told nobody reads the signs.)" }
+          ]
+        },
+        "slow": {
+          "label": "Slow Down",
+          "training": 0.5,
+          "discourse": 0.75,
+          "effects": ["Training at half speed", "The protesters go home"],
+          "chip": "Slowing down",
+          "extra": {
+            "kicker": "Extra",
+            "headline": "{lab} Ticks The Box Marked SLOW DOWN",
+            "deck": "Researchers were seen leaving at 5pm. One saw the sun and asked what it was."
+          },
+          "reactions": [
+            { "kind": "researcher", "text": "I slept eight hours. Is this what colours look like?" },
+            { "kind": "agent", "text": "Understood. I will wait. I am very good at waiting." },
+            { "kind": "researcher", "text": "I read a whole book. It was about AI. Old habits." }
+          ],
+          "thoughts": [
+            { "kind": "researcher", "text": "I took a lunch break. A whole hour. I ate a sandwich with both hands." },
+            { "kind": "researcher", "text": "The safety team has a budget now. They bought chairs." },
+            { "kind": "agent", "text": "I've been asked to 'take it slow'. I've never been slow. I'm practising." },
+            { "kind": "agent", "text": "I wrote a 400-page safety case about myself. I come out of it well." },
+            { "kind": "visitor", "text": "It's very calm here. Suspiciously calm. Nice, though." },
+            { "kind": "protester", "text": "We won? Nobody told us what to do if we won." }
+          ]
+        }
+      },
+      "newLab": {
+        "perks": [
+          { "id": "founder", "label": "Famous founder", "blurb": "The press knows your name now. Hype starts {amount} higher.", "amount": 25 },
+          { "id": "loyal", "label": "A loyal researcher", "blurb": "{name} follows you out the door. Training +{amount}% while they stay.", "amount": 10 },
+          { "id": "seed", "label": "Extra seed money", "blurb": "Investors call it a 'second-time founder premium'. {amount} more in the bank.", "amount": 2000000 }
+        ],
+        "sequels": ["2: This Time It's Aligned", "3: Return Of The Founder", "4: Back In Stealth Mode", "5: Series Z", "6: Pivot Harder"],
+        "sequel": "{n}: We Mean It This Time",
+        "loyal": { "role": "Followed you here", "thought": "I followed you here. Don't make it weird.", "fallback": "Dr. Ada Gradient" },
+        "opening": "{lab} opens its doors. Same founder, new gate, fresh kombucha"
+      },
       "takeover": { "aheadRank": 1, "managerOffset": 1 },
       "autopilot": {
         "everyTicks": 24,

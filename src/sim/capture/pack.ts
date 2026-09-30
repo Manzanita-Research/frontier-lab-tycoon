@@ -25,6 +25,16 @@ const Pack = Schema.Struct({
     floorDays: N,
     /** A day's odds that journalists read the file properties: base × shame × (1 + heat/heatScale) × (1 + (50 − trust)/trustScale). */
     backfire: Schema.Struct({ base: N, heatScale: N, trustScale: N }),
+    /**
+     * FLT-56: the leak comes with a warning. When the day's roll hits, a reporter starts asking and the story runs `days`
+     * later unless the lab buries it: `cost` (× `costGrowth` for each burial before), Capture −`capture`, Heat +`heat`,
+     * and each burial adds `shame` to the odds (buried stories grow back). `meter` labels the draft's projected risk.
+     */
+    warning: Schema.Struct({
+      days: N, cost: N, costGrowth: N, capture: N, heat: N, shame: N,
+      caption: S, sub: S, toast: S, buried: Schema.Array(S), buriedToast: S, broke: S,
+      meter: Schema.Array(Schema.Struct({ atLeast: N, label: S })),
+    }),
     author: S, reporter: S, empty: S,
   }) }),
 });
@@ -44,6 +54,7 @@ export function loadCapturePack(input: unknown) {
     ids.add(c.id);
   }
   if (rules.pick < 1 || rules.pick > rules.clauses.length) throw new Error(`rules.capture.pick: between 1 and ${rules.clauses.length}`);
+  if (!rules.warning.buried.length) throw new Error("rules.capture.warning.buried: at least one headline");
   if (!rules.actNames.length) throw new Error("rules.capture.actNames: the bill needs a name");
   const cards = new Set(p.content.events.add.map((e) => e.id));
   for (const id of [DRAFT_CARD, EXPOSED_CARD]) if (!cards.has(id)) throw new Error(`content.events: the pack needs a "${id}" card`);

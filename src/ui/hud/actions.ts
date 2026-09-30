@@ -5,14 +5,19 @@ import { SPEEDS, type Speed, type Tool } from "../../app/hud";
 import { mixerOpenAtom, playCue, setMixer } from "../../audio/state";
 import type { Cue } from "../../audio/score";
 import { fx } from "../../render/fx/state";
+import { skipBeat } from "../../render/fx/beat";
 import { roomAtom, skipNews, viewRoom } from "../../newsroom/state";
 import { dramaActions } from "../../drama/state";
 import { setPhoto, takePhoto } from "../juice/photo";
-import { copySummary, playDaily, shareEnding } from "../share/share";
+import { copyLink, copySummary, playDaily, shareEnding } from "../share/share";
+import { dismissChallenge, dismissMemo } from "../share/social";
 import { arenaOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, senateOpenAtom, staffOpenAtom } from "./state";
 import { skinActions } from "./skinControl";
+import { savesActions } from "./saves";
 import type { StaffJob } from "../../sim/types";
 import type { HudActions } from "./types";
+import { announceWidget } from "../../skins/kit/launcher";
+import { WIDGET_IDS } from "./widgets";
 
 const dismiss = (key: string) => {
   const seen = registry.get(dismissedAtom);
@@ -87,11 +92,22 @@ export const hudActions: HudActions = {
   closeCrumbWiki: dismiss,
   toggleFactions: () => registry.set(factionsOpenAtom, !registry.get(factionsOpenAtom)),
   setSafetySpend: (level) => send({ type: "COMMAND", command: { type: "setSafetySpend", level } }),
+  issueStatement: (faction) => send({ type: "COMMAND", command: { type: "issueStatement", faction } }),
+  buryLeak: () => send({ type: "COMMAND", command: { type: "buryLeak" } }),
+  // The beat's own button answers it, so the beat is over: the reply toast shows at once instead of waiting it out.
+  beatAction: (id) => {
+    if (id === "bury") send({ type: "COMMAND", command: { type: "buryLeak" } });
+    skipBeat();
+  },
   keepPlaying: () => send({ type: "KEEP_PLAYING" }),
   newLab: () => send({ type: "NEW_LAB" }),
   playDaily,
   shareEnding: () => void shareEnding(),
   copySummary: () => void copySummary(),
+  foundLab: (perk) => send({ type: "FOUND_LAB", perk }),
+  copyLink: () => void copyLink(),
+  dismissChallenge,
+  dismissMemo,
 
   closeStaff: () => {
     send({ type: "SET_ZONE", id: null });
@@ -106,6 +122,7 @@ export const hudActions: HudActions = {
   clearZone: (id) => send({ type: "COMMAND", command: { type: "clearZone", id } }),
 
   closeSenate: () => registry.set(senateOpenAtom, false),
+  skipBeat: () => skipBeat(),
   lobby: (senator) => send({ type: "COMMAND", command: { type: "lobby", senator } }),
   draftClause: (clause, on) => send({ type: "COMMAND", command: { type: "draftClause", clause, on } }),
 
@@ -128,6 +145,8 @@ export const hudActions: HudActions = {
   closeMods: () => registry.set(modsOpenAtom, false),
   // Today's Drama (FLT-34): the window, and the two reloads that switch a pack on or a mod off.
   ...dramaActions,
+  // Saves (FLT-65): the Save/Load window, Welcome back, export and import.
+  ...savesActions,
   setMuted: (muted) => setMixer({ muted }),
   setVolume: (channel, value) => setMixer({ [channel]: Math.max(0, Math.min(1, value)) }),
   playCue: (cue) => playCue(cue as Cue),
@@ -148,4 +167,30 @@ export const hudActions: HudActions = {
   dismissShot: () => undefined,
 
   ...skinActions,
+
+  // FLT-63: Run…. Opens (never shuts) what the host owns, then tells the skin, whose slots keep the rest (a folded window, a tab).
+  openWidget: (id) => {
+    if (!WIDGET_IDS.includes(id)) return;
+    // A window is opening over the map: put the tool down first, so nothing is left half-held under it (FLT-63).
+    const now = appNow();
+    if (now?.tool || now?.zone) send({ type: "SET_TOOL", tool: null });
+    const open = {
+      arena: () => registry.set(arenaOpenAtom, true),
+      benchmarks: () => registry.set(arenaOpenAtom, true),
+      discourse: () => registry.set(factionsOpenAtom, true),
+      papers: () => registry.set(papersOpenAtom, true),
+      news: () => viewRoom("archive"),
+      staff: () => registry.set(staffOpenAtom, true),
+      senate: () => registry.set(senateOpenAtom, true),
+      disasters: () => registry.set(disastersOpenAtom, true),
+      drama: () => hudActions.openDrama(),
+      saves: () => savesActions.openSaves(),
+      mods: () => registry.set(modsOpenAtom, true),
+      display: () => hudActions.openSkinPicker(),
+      sound: () => registry.set(mixerOpenAtom, true),
+      help: () => registry.set(helpOpenAtom, true),
+    }[id];
+    open?.();
+    announceWidget(id);
+  },
 };

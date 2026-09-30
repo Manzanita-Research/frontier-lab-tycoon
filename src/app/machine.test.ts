@@ -233,6 +233,30 @@ describe("app machine", () => {
     }).pipe(provide(handle));
   });
 
+  it.effect("holds the toasts off a camera beat (FLT-56): nothing shows or expires until it ends, then each gets its full time", () => {
+    const handle = handleFor();
+    return Effect.gen(function* () {
+      const { actor } = yield* boot();
+      yield* send(actor, { type: "TOAST", text: "Not enough cash", tone: "bad" });
+      yield* waitFor(actor, (s) => s.context.toasts.length === 1, { timeout: "1 second" });
+      yield* TestClock.adjust("4 seconds");
+      yield* send(actor, { type: "HOLD_TOASTS", on: true });
+      yield* send(actor, { type: "TOAST", text: "Needs a path next to it", tone: "bad" });
+      yield* waitFor(actor, (s) => s.context.held?.length === 2, { timeout: "1 second" });
+      expect(actor.getSnapshot().context.toasts).toHaveLength(0);
+      // A long beat: the one that was showing would have expired by now, and nobody saw the new one.
+      yield* TestClock.adjust("20 seconds");
+      expect(actor.getSnapshot().context.held).toHaveLength(2);
+      yield* send(actor, { type: "HOLD_TOASTS", on: false });
+      yield* waitFor(actor, (s) => s.context.held === null, { timeout: "1 second" });
+      expect(actor.getSnapshot().context.toasts.map((t) => t.text)).toEqual(["Not enough cash", "Needs a path next to it"]);
+      yield* TestClock.adjust("5 seconds");
+      expect(actor.getSnapshot().context.toasts).toHaveLength(2);
+      yield* TestClock.adjust("1 second");
+      yield* waitFor(actor, (s) => s.context.toasts.length === 0, { timeout: "1 second" });
+    }).pipe(provide(handle));
+  });
+
   it.effect("picks a tool, toggles it off on a second pick, and ignores a hover that has not moved", () => {
     const handle = handleFor();
     return Effect.gen(function* () {
@@ -246,6 +270,57 @@ describe("app machine", () => {
       yield* send(actor, { type: "SET_TOOL", tool: "gateway" });
       yield* waitFor(actor, (s) => s.context.tool === null, { timeout: "1 second" });
       expect(snap.context.hover).toEqual({ x: 3, z: 4 });
+      expect(actor.getSnapshot().context.hover).toBeNull();
+    }).pipe(provide(handle));
+  });
+
+  it.effect("placement modes (FLT-63): a building drops after one placement unless Shift keeps it; the path stays; a covering window ends it", () => {
+    const handle = handleFor();
+    return Effect.gen(function* () {
+      const { actor } = yield* boot();
+      const tool = () => actor.getSnapshot().context.tool;
+      yield* send(actor, { type: "SET_TOOL", tool: "kombucha" });
+      yield* waitFor(actor, () => tool() === "kombucha", { timeout: "1 second" });
+      yield* send(actor, { type: "PLACE", command: { type: "placeBuilding", kind: "kombucha", x: 40, z: 40 }, keep: true });
+      yield* Effect.yieldNow;
+      expect(tool()).toBe("kombucha");
+      yield* send(actor, { type: "PLACE", command: { type: "placeBuilding", kind: "kombucha", x: 44, z: 40 }, keep: false });
+      yield* waitFor(actor, () => tool() === null, { timeout: "1 second" });
+
+      // The coach tile places straight through COMMAND: that drops the tool too.
+      yield* send(actor, { type: "SET_TOOL", tool: "cluster" });
+      yield* waitFor(actor, () => tool() === "cluster", { timeout: "1 second" });
+      yield* send(actor, { type: "COMMAND", command: { type: "placeBuilding", kind: "cluster", x: 48, z: 40 } });
+      yield* waitFor(actor, () => tool() === null, { timeout: "1 second" });
+
+      // The path is sticky: laying tiles never drops it. The build menu opening keeps it (you are picking the next tool);
+      // a window that covers the map ends it, and one that was already open does not.
+      yield* send(actor, { type: "SET_TOOL", tool: "path" });
+      yield* send(actor, { type: "COMMAND", command: { type: "placePath", x: 40, z: 48 } });
+      yield* send(actor, { type: "SET_OVERLAY", id: "start", open: true });
+      yield* Effect.yieldNow;
+      expect(tool()).toBe("path");
+      yield* send(actor, { type: "SET_OVERLAY", id: "mixer", open: true });
+      yield* waitFor(actor, () => tool() === null, { timeout: "1 second" });
+      yield* send(actor, { type: "SET_TOOL", tool: "path" });
+      yield* send(actor, { type: "SET_OVERLAY", id: "mixer", open: true });
+      yield* Effect.yieldNow;
+      expect(tool()).toBe("path");
+    }).pipe(provide(handle));
+  });
+
+  it.effect("placement modes (FLT-63): an event card opening ends the mode, so nothing is left half-held under it", () => {
+    const handle = handleFor(1);
+    handle.world.day = 59;
+    handle.world.waterDiscourse = 44;
+    readyForPressure(handle.world);
+    return Effect.gen(function* () {
+      const { actor, pump } = yield* boot();
+      yield* send(actor, { type: "SET_TOOL", tool: "path" });
+      yield* waitFor(actor, (s) => s.context.tool === "path", { timeout: "1 second" });
+      yield* pump(50);
+      yield* waitFor(actor, (s) => s.matches("eventOpen"), { timeout: "1 second" });
+      expect(actor.getSnapshot().context.tool).toBeNull();
       expect(actor.getSnapshot().context.hover).toBeNull();
     }).pipe(provide(handle));
   });

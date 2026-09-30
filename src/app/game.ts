@@ -20,6 +20,9 @@ import { SPEEDS, type Speed, type Tool } from "./hud";
 import { appMachine, autoPaused, type AppContext } from "./machine";
 import { createSimHandle, SimHandle, simLayer } from "./sim";
 import { modSession } from "./mods";
+import { SaveDesk, Saves, isStagedLink } from "./saves";
+import { demoSaveStore } from "./savesDemo";
+import { browserStorage, makeSaveStore } from "../save";
 
 const midgame = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("scenario") === "midgame";
 const params = readDebugParams();
@@ -41,7 +44,18 @@ if (!midgame && !debugParams.risk) setRisk(sim.world, DEFAULT_RISK);
 
 const initialSpeed: Speed = midgame ? 0 : (SPEEDS as readonly number[]).includes(debugParams.speed ?? 1) ? ((debugParams.speed ?? 1) as Speed) : 1;
 
-const runtime = Atom.runtime(Layer.mergeAll(simLayer(sim), framesBrowser));
+/**
+ * Saving (FLT-65): the slots in localStorage, or with `?saves=demo|window` a pretend shelf in memory (screenshots).
+ * Staged links never autosave over the player's lab. `savesReady` settles once the shelf can be read.
+ */
+const search = typeof window === "undefined" ? "" : window.location.search;
+const shelf = new URLSearchParams(search).has("saves") ? demoSaveStore(mods.def) : { store: makeSaveStore(browserStorage()), ready: Promise.resolve() };
+export const savesReady = shelf.ready;
+export const saveDesk = new SaveDesk(shelf.store, !isStagedLink(search) && !new URLSearchParams(search).has("saves"), () =>
+  mods.mods.map(({ id, version, hash, source }) => ({ id, version, hash, source })),
+);
+
+const runtime = Atom.runtime(Layer.mergeAll(simLayer(sim), framesBrowser, Layer.succeed(Saves, saveDesk)));
 
 /** The app actor's atoms: `snapshot`, `send`, and `select` for derived values. */
 const first = sim.report(true, true)!;
@@ -93,6 +107,10 @@ export const atoms = {
   ops: pick((c) => c.snap.ops),
   /** Agent collusion's signs for the world overlay (packets, the night gathering, the inquiry). */
   collusion: pick((c) => c.snap.collusion),
+  /** FLT-56: the neo labs' campuses beyond the fence. Same array until one changes. */
+  neo: pick((c) => c.snap.neo),
+  /** FLT-56: the last audit grade, for the plaque by the gate. */
+  plaque: pick((c) => c.snap.audit.report),
   staffCount: pick((c) => c.snap.ops.staff.length),
   payroll: pick((c) => c.snap.ops.payroll),
   disasters: pick((c) => c.snap.disasters),
@@ -122,9 +140,10 @@ export const toast = (text: string, tone: Tone = "neutral") => send({ type: "TOA
 
 /**
  * A player action at tile (x, z): validate against the World, then queue the command or toast why not.
- * `quiet` (painting a path by dragging) suppresses everything except "Not enough cash".
+ * `quiet` (painting a path by dragging) suppresses everything except "Not enough cash". A building drops the tool once it
+ * is down, unless `keep` (Shift held: place another, RCT-style).
  */
-export function use(tool: Tool, x: number, z: number, quiet = false) {
+export function use(tool: Tool, x: number, z: number, quiet = false, keep = false) {
   const world = sim.world;
   if (tool === "bulldoze") {
     if (buildingAt(world, x, z) || world.grid.paths[z * world.grid.w + x]) send({ type: "COMMAND", command: { type: "bulldoze", x, z } });
@@ -135,7 +154,7 @@ export function use(tool: Tool, x: number, z: number, quiet = false) {
     if (!quiet || res.reason === "Not enough cash") if (res.reason !== "Already a path") toast(res.reason, "bad");
     return;
   }
-  send({ type: "COMMAND", command: tool === "path" ? { type: "placePath", x, z } : { type: "placeBuilding", kind: tool, x, z } });
+  send(tool === "path" ? { type: "COMMAND", command: { type: "placePath", x, z } } : { type: "PLACE", command: { type: "placeBuilding", kind: tool, x, z }, keep });
 }
 
 /**
@@ -167,6 +186,10 @@ if (typeof window !== "undefined") {
       view: probeView.view?.() ?? null };
   };
   window.addEventListener("click", () => send({ type: "COMMAND", command: { type: "coachClick" } }));
+  // Closing the tab (or switching away from it) autosaves, so a lab is never more than a month behind.
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") send({ type: "SAVE", slot: "auto", why: "hide" });
+  });
 }
 
 // `?debug=1` exposes the game for probes and screenshot scripts.

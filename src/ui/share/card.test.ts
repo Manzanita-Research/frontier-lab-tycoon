@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import type { EndingVM } from "../hud/types";
 import { hudViewModel } from "../hud/vm";
-import { fixtureInput } from "../hud/fixtures";
+import { fixtureEnding, fixtureInput } from "../hud/fixtures";
 import { CARD_H, CARD_W, CHROMED_SKINS, cardTheme, contrastOn, drawCard, fit, wrap } from "./card";
 
 /** Every character is half its font size wide: close enough to a serif to test layout without a browser. */
@@ -85,4 +85,29 @@ describe("share card (FLT-11)", () => {
       }
     });
   }
+
+  it("prints Lab #2, the streak (a painted flame) and the head-to-head under the stats, in every skin (FLT-57)", () => {
+    // A friend's challenge only applies to a first lab; the card is laid out for all three at once regardless.
+    const seed = fixtureEnding("front-acquihired").seed;
+    const versus = hudViewModel(fixtureInput({ ending: "front-acquihired", social: { challenge: { ending: "captured", day: 212, vibes: 88, models: 7, seed, daily: null } } })).ending!.versus;
+    expect(versus).not.toBeNull();
+    const e = { ...hudViewModel(fixtureInput({ ending: "lab2", social: { streak: 7 } })).ending!, versus };
+    for (const skin of ["base", ...CHROMED_SKINS]) {
+      const { ctx, texts } = recorder();
+      drawCard(ctx, cardTheme(skin, {}), e, null);
+      const at = (s: string) => texts.find((t) => t.text === s);
+      expect(at("Lab #2"), skin).toBeDefined();
+      const streak = at("7-day streak")!;
+      const verdict = at(e.versus!.text)!;
+      const lastStat = at(e.stats.at(-1)!.text)!;
+      expect(streak.y, skin).toBeGreaterThan(lastStat.y);
+      expect(verdict.y, skin).toBeGreaterThan(streak.y);
+      for (const t of [streak, verdict, at("Lab #2")!]) {
+        const left = t.align === "right" ? t.x - t.w : t.x;
+        expect(left, `${skin} "${t.text}"`).toBeGreaterThanOrEqual(816);
+        expect(left + t.w, `${skin} "${t.text}"`).toBeLessThanOrEqual(CARD_W - 28);
+        expect(t.y, `${skin} "${t.text}"`).toBeLessThanOrEqual(CARD_H - 30);
+      }
+    }
+  }, 60_000);
 });

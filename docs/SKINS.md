@@ -226,6 +226,31 @@ If your slot needs copy that has no key, write it into the slot (as Frontier 95 
 | `build.display` | Display… |
 | `build.shutdown` | Shut Down Lab… |
 | `build.placing` | Placing {name} |
+| `build.facilities` | Facilities |
+| `build.group.compute` | Compute & Power |
+| `build.group.research` | Research & Revenue |
+| `build.group.amenities` | Amenities |
+| `build.group.offices` | Staff & Offices |
+| `build.run` | Run… |
+| `build.facilitiesCount` | {n} buildings |
+| `build.runCount` | {n} widgets |
+| `build.groupNo` | {n}. |
+| `run.title` | Run |
+| `run.prompt` | Type the name of a widget, and the lab will open it for you. |
+| `run.open` | Open: |
+| `run.ok` | OK |
+| `run.cancel` | Cancel |
+| `run.none` | No widget called that yet. Press OK anyway: it might be funny. |
+| `run.back` | Back |
+| `mode.building` | Placing {name} · Esc to stop building |
+| `mode.path` | Drawing path · Esc to stop building |
+| `mode.bulldoze` | Bulldozing · Esc to stop |
+| `mode.zone` | Painting {name} · Esc to stop |
+| `mode.subBuilding` | Shift-click to place another · right-click cancels |
+| `mode.subPath` | Drag to lay a run · right-click also stops |
+| `mode.subBulldoze` | Drag to clear a run · right-click also stops |
+| `mode.subZone` | Drag over tiles · right-click also stops |
+| `mode.done` | Done |
 | `speed.label` | Game speed |
 | `speed.pause` | Pause |
 | `speed.1` | 1× speed |
@@ -283,6 +308,9 @@ If your slot needs copy that has no key, write it into the slot (as Frontier 95 
 | `factions.log` | Lately |
 | `factions.safety` | Safety budget |
 | `factions.none` | Nobody is feuding. Give it a week. |
+| `gate.title` | At the gate (FLT-56: the GateLegend) |
+| `gate.address` | Statement |
+| `gate.statement` | A statement: |
 | `stream.live` | LIVE |
 | `stream.watching` | {n} watching |
 | `stream.chat` | Chat |
@@ -316,6 +344,7 @@ If your slot needs copy that has no key, write it into the slot (as Frontier 95 
 | `news.paused` | News Room · campus paused |
 | `drama.button` | Today's Drama |
 | `drama.open` | Open Today's Drama |
+| `saves.open` | Save / Load |
 | `drama.new` | NEW |
 | `drama.on` | ON AIR |
 | `news.close` | Back to campus × |
@@ -439,13 +468,14 @@ A slot is a React component. Each gets **its slice of the view-model plus `actio
 | `PhotoOverlay` | `{ photo, actions }` | Photo mode's controls (time of day, shutter, exit) and the "photo saved" thumbnail. Rendered outside the HUD layer so hiding the HUD does not hide it. Draw only at the edges: the campus is the picture. |
 | `SkinPicker` | `{ skins, actions }` | The skin picker. `previewSkin(id)` switches live, `applySkin()` keeps it, `cancelSkinPicker()` goes back. |
 | `Outcome` | `{ outcome, actions }` | The win / lose card (`keepPlaying`, `newLab`). |
-| `Ending` | `{ ending, layout, actions }` | How the lab ended (FLT-11): the last *Frontier Times* front page (`ending.paper`, its `photo` is your campus), the run summary beside it (`stats`, the era `strip`, `daily`), and the buttons: `shareEnding` (the 1200×630 card; `ending.share` says whether it's the Web Share sheet or a download, and holds the finished card), `copySummary`, `keepPlaying` when `keepPlaying`, `newLab`, `playDaily`. The game draws the share card itself in the skin's colours and chrome. |
+| `Ending` | `{ ending, layout, actions }` | How the lab ended (FLT-11): the last *Frontier Times* front page (`ending.paper`, its `photo` is your campus), the run summary beside it (`stats`, the era `strip`, `daily`), and the buttons: `shareEnding` (the 1200×630 card; `ending.share` says whether it's the Web Share sheet or a download, and holds the finished card), `copySummary`, `keepPlaying` when `keepPlaying`, `newLab`, `playDaily`. The game draws the share card itself in the skin's colours and chrome. FLT-57: every ending ends on `ending.next` (its `prompt` and `label`): when `ending.refound` is set, one button per `refound.perks` (`foundLab(perk.id)`, label and blurb both shown) under the next lab's `refound.name`; otherwise a `keepPlaying` button labelled `next.label`. Show `labNumber` when it is over 1, `streak.text` when there is one, `versus.text` (and `versus.line`) when a friend's link started this run, and a `copyLink` button (status `"linked"` once copied). |
 | `Takeover` | `{ takeover, layout, actions }` | The Takeover under way: `takeover.title` ("Frontier Lab Tycoon (managed by Frontier-9)") while the lab's own model builds for you, then `takeover.thanks`, the last card. Not modal: keep it out of the way of the ghost cursor. |
 | `NewsControls` | `{ newsroom, sound, skins, visible, actions }` | The News Room button (with unread count), mute, and (base) the skin picker button. |
 | `NewsArrival` | `{ arrival, actions }` | "The Frontier Times is here" (`viewNews(id)`, `skipNews()`). |
 | `NewsRoom` | `{ newsroom, actions }` | The News Room modal: the archive, and the open paper or chat (compose `useSlots().FrontPage` / `.GroupChat`, or draw your own). |
 | `Mixer` | `{ sound, actions }` | The sound mixer modal. |
 | `ModManager` | `{ mods, actions }` | Settings ▸ Mods… (FLT-37): what `?mod=` loaded, clashes and failures, while `mods.open`. Close with `actions.closeMods()`; `actions.removeMod(id)` starts a new lab without that mod (`mods.list[i].drama` marks a Today's Drama pack: say "Switch off"). |
+| `ModSkinOffer` | `{ offer, actions }` | FLT-55: a mod (`?mod=`) brought a skin and asks to put it on (`skins.offer`). Nothing changes until the player answers: `actions.acceptSkinOffer()` shows it, `actions.declineSkinOffer()` (and Escape) keeps the current skin. The answer is remembered for that skin, and `?skin=` never asks. Frontier 95's is a "Found New Skin" box. |
 | `Papers` | `{ papers, layout, actions }` | Publish or Perish (FLT-45): the publication policy (`papers.policies`, `actions.setPublicationPolicy(id)`), reputation, the recruiting perk, the publish-pressure meter and the paper list with **arXive it** / **Peer review** on each draft (`actions.publishPaper(paperId, "preprint" \| "peerReview")`). Folds to a chip (`papers.open`, `actions.togglePapers()`). Docked. Draw only when `papers.enabled && visible.papers` (the host already skips it otherwise); it unlocks at Level 5. |
 | `PaperMoment` | `{ moment, actions }` | The paper screenshot moments: `moment.kind` is `drop` (a fake arXive listing with yours in the middle, `moment.listing`), `scoop` (their title and timestamp beside yours, `gapText`) or `award` (a certificate). The buttons are jokes; any of them calls `actions.dismissPaperMoment(moment.key)`. Holds time while up (`useAutoPause`). |
 | `CrumbWiki` | `{ wiki, actions }` | The agent-collusion reveal (FLT-46): the fan wiki the agents were running, a talk page (`== Heading ==` lines and colon-indented replies), the revision history, the consequences and, for the exposed ending, the scandal front page (`wiki.frontPage`). `actions.closeCrumbWiki(wiki.key)`. Holds time while up. Before the ending nothing names the collusion: the sign card only carries `event.investigation` (draw it with `kit`'s `<Evidence investigation>`, as every shipped skin's `EventCard` does). |
@@ -453,10 +483,16 @@ A slot is a React component. Each gets **its slice of the view-model plus `actio
 | `DisasterAlert` | `{ disasters, layout, actions }` | Docked. What is going wrong now: each run in `disasters.running` (`stage` warning / active / response / aftermath, `phaseLabel`, a funny `line`, cleanup `progress`), and `disasters.understaffed` (who has been pulled off their post; `all` means nobody is left, like an unguarded gate). With nothing going on it is a quiet way into the menu (`actions.openDisasters()`). Frontier 95's is a Win95 fatal-error box. Only rendered once `vm.visible.disasters`. |
 | `ReportCard` | `{ event, report, actions }` | Evals Without Borders' report card (FLT-19). Opens instead of `EventCard` when `event.kind === "report"`: five subjects graded A to F with a remark each, the `overall` grade, a `stamp` ("CAUGHT HIDING", "SWARM FOUND") or null, what it did to trust, heat and hype (`moves`), and the Frontier Times' `headline`. Answer with `actions.choose`. |
 | `AuditPin` | `{ audit, actions }` | The sign over the auditors' heads (over the gate during the countdown): `audit.line` ("Inspecting the Kombucha Bar"), `stopsText` ("2/4") and a `progress` bar while they stand at a stop (`evals` while they run their own). The game pins it every frame and only draws it while `audit.line` is set. Keep it small: it sits over the 3D scene. |
+| `Beat` | `{ beat, actions }` | A camera beat (FLT-56): letterbox bars and a caption while the camera makes its move over the running game (a defection's conga line out of the gate, the auditors conferring, the hearing clip going viral). `beat.kicker` for the top bar, `caption` and `sub` for the bottom one, and a `skipLabel` button that calls `actions.skipBeat()` (Esc does it too). Drawn over the docked HUD and under the cards; keep the bars still under reduced motion (the motion tokens do it if you use them). |
+| `GateLegend` | `{ factions, actions }` | Who is at the gate (FLT-56): one row per crowd in `factions.gate` (its `color`, `count` and `name`; the water crowd has id `""`), so a mixed protest sorts itself out. An `addressable` row offers the Comms lever, `actions.issueStatement(id)`: it costs `factions.statement.costText`, is off while `!factions.statement.ready` (`waitText` says how long), and `writerText` says who writes it. The game pins it over the lawn inside the gate while a faction marches there. Keep it small: it sits over the 3D scene. |
 | `DramaButton` | `{ drama, actions }` | Today's Drama (FLT-34), shown from day one in every skin: `actions.openDrama()`. Badge it when `drama.fresh` (a pack the player hasn't looked at) or `drama.on` (one is playing). Frontier 95 also files it under Start ▸ Programs. |
 | `Drama` | `{ drama, actions }` | The Today's Drama window, while `drama.open`: `drama.latest` as a short card (title, `dateText`, `ago`, `teasers`, `summary`, `event`), `drama.archive` (older packs), `drama.on` (the pack playing in this lab), `drama.status` (`loading` / `error` / `ready`; an empty ready feed is normal). `drama.intro` means a pack has just loaded: say what's coming. `playDrama(id)` starts a new lab with it, `closeDrama()` closes and clears the NEW badge. |
+| `Memo` | `{ memo, layout, actions }` | The Memo (FLT-57). `memo.phase` `"coming"`: a countdown (`title`, today's `line`, `daysLeft`, `progress` 0 to 1), not modal, out of the way at the top. `"extra"`: the extra edition once a box is ticked (`extra.headline`, `deck`, `choice`, the three `reactions` with names, the lingering `effects`): modal, holds time (`useAutoPause`), closed with `dismissMemo(memo.key)`. |
+| `Challenge` | `{ challenge, layout, actions }` | A friend's link opened the game on their seed (FLT-57): `challenge.line` ("Your friend's lab was Captured on day 212."), `ask`, their `ending` (and `tone`) and `stats`. Modal, holds time, one button labelled `cta` that calls `dismissChallenge()`. |
+| `Welcome` | `{ welcome, saves, actions }` | "Welcome back" (FLT-65), while `saves.welcome` is set: a returning player's autosave (`welcome.lab`, `date`, `ago`). `continueSave()` loads it, `dismissWelcome()` plays the new lab instead. Say plainly that a new lab takes over the autosave after a month. Time is held. |
+| `SaveLoad` | `{ saves, actions }` | The Save/Load window (FLT-65), rendered while `saves.open`, `saves.modPrompt` or `saves.dragging`. `saves.slots` is the autosave then slots 1 to 3 (`save` is null when empty, `broken` when unreadable): `saveTo(slot)` (not the autosave), `loadFrom(slot)`, `exportSave(slot)`, `deleteSave(slot)`. `exportSave("current")` and `importSave(file)` (the kit's `ImportButton`) move a lab as a `.fltsave` file. With `saves.modPrompt`, ask first: `fetchModsAndLoad()` (only if `canFetch`), `loadWithoutMods()`, `cancelModPrompt()`. With only `saves.dragging`, show where to drop a file. `saves.available` is false in private browsing: the slots are off, files still work. Time is held. Open it with `openSaves()` from somewhere in your chrome (Ctrl+S / ⌘S opens it in every skin). |
 
-The **docked** slots (`Layout` receives them pre-rendered) are `Stats`, `Training`, `Objectives`, `Inspector`, `BuildBar`, `Speed`, `Staff`, `ThoughtsPanel`, `Ticker`, `Toasts` (one `Toast` at a time: the newest toast, or the standing hint when nobody is talking), `Assistant`, `Arena`, `Benchmarks`, `Voice`, `Factions`, `Papers`, `NewsControls`, `NewsArrival`, `PhotoButton`, `DisasterAlert` and `DramaButton`. `AuditPin` is pinned into the scene like `Bubble`. The modal slots (`EventCard`, `Livestream`, `Hearing`, `LeakedChat`, `DramaCard`, `ReportCard`, `Bill`, `PromiseTracker`, `EraCard`, `Outcome`, `Ending`, `Takeover`, `NewsRoom`, `Mixer`, `ModManager`, `Drama`, `SkinPicker`, `PaperMoment`, `CrumbWiki`, `DisasterMenu`) and `PhotoOverlay` are rendered by the game when there is something to show.
+The **docked** slots (`Layout` receives them pre-rendered) are `Stats`, `Training`, `Objectives`, `Inspector`, `BuildBar`, `Speed`, `Staff`, `ThoughtsPanel`, `Ticker`, `Toasts` (one `Toast` at a time: the newest toast, or the standing hint when nobody is talking), `Assistant`, `Arena`, `Benchmarks`, `Voice`, `Factions`, `Papers`, `NewsControls`, `NewsArrival`, `PhotoButton`, `DisasterAlert` and `DramaButton`. `AuditPin` and `GateLegend` are pinned into the scene like `Bubble`. The modal slots (`EventCard`, `Livestream`, `Hearing`, `LeakedChat`, `DramaCard`, `ReportCard`, `Bill`, `PromiseTracker`, `EraCard`, `Outcome`, `Ending`, `Takeover`, `Memo`, `Challenge`, `NewsRoom`, `Mixer`, `ModManager`, `ModSkinOffer`, `Drama`, `SkinPicker`, `PaperMoment`, `CrumbWiki`, `DisasterMenu`, `Welcome`, `SaveLoad`) and `PhotoOverlay` and `Beat` are rendered by the game when there is something to show.
 
 ## Writing slots.tsx
 
@@ -522,6 +558,7 @@ interface HudVM {
   eraCard: EraCardVM | null;
   thoughtsPanel; arena; outcome;
   leapfrog;                              // Release Leapfrog: the benchmark leaderboard (columns, rows, cells) and the share-of-voice meter; `enabled: false` when the pack is off
+  beat;                                  // a camera beat's kicker and caption (FLT-56), or null
   audit;                                 // Evals Without Borders: the stage, the countdown, what the group is doing (the AuditPin's line and progress)
   newsroom; sound; photoMode; skins;     // the news room (archive, paper, chat), mixer, photo mode, skin picker
   layout: { width, height, phone /* ≤480 */, compact /* ≤640 */, tall /* ≥800 */ };
@@ -530,7 +567,7 @@ interface HudVM {
 
 Numbers come as numbers (`cash.value`) **and** formatted text (`cash.text`), so you can roll an odometer and still have a caption. Colours the game owns (the walker's `portrait.body`, an Arena lab's `color`) come as CSS colour strings.
 
-`HudActions` is everything a skin can ask for: `place(kind)`, `setSpeed(n)`, `togglePause()`, `choose(eventId, i)`, `continueEra()`, `select(id)`, `follow(id, on?)`, `closeInspector()`, `highlight(key)`, the payroll (`closeStaff`, `hire(job)`, `fire(id)`, `paintZone(id | null)`, `clearZone(id)`), `dismissToast(id)`, the coach and the cards (`coachSkip()`, `coachReplay()`, `dismissUnlock()`, `buildPanel(open)`, `openHelp()`, `closeHelp()`), the spend check (`confirmSpend()`, `cancelSpend()`), `holdTime(id, open)` (use the kit's `useAutoPause`), `toggleArena()`, `keepPlaying()`, `newLab()`, the news-room ones (`openNews`, `viewNews`, `closeNews`, `skipNews`, `revealChat`), sound (`openMixer`, `closeMixer`, `setMuted`, `setVolume`, `playCue`), photo mode (`setPhoto`, `setPhotoTime`, `takePhoto`) skins (`openSkinPicker`, `previewSkin`, `applySkin`, `cancelSkinPicker`, `setReducedMotion`) mods (`openMods`, `closeMods`, `removeMod`) and Today's Drama (`openDrama`, `closeDrama`, `playDrama`). Each is safe to call at any time; the game ignores what does not apply.
+`HudActions` is everything a skin can ask for: `place(kind)`, `setSpeed(n)`, `togglePause()`, `choose(eventId, i)`, `continueEra()`, `select(id)`, `follow(id, on?)`, `closeInspector()`, `highlight(key)`, the payroll (`closeStaff`, `hire(job)`, `fire(id)`, `paintZone(id | null)`, `clearZone(id)`), `dismissToast(id)`, the coach and the cards (`coachSkip()`, `coachReplay()`, `dismissUnlock()`, `buildPanel(open)`, `openHelp()`, `closeHelp()`), the spend check (`confirmSpend()`, `cancelSpend()`), `holdTime(id, open)` (use the kit's `useAutoPause`), `toggleArena()`, `keepPlaying()`, `newLab()`, the news-room ones (`openNews`, `viewNews`, `closeNews`, `skipNews`, `revealChat`), sound (`openMixer`, `closeMixer`, `setMuted`, `setVolume`, `playCue`), photo mode (`setPhoto`, `setPhotoTime`, `takePhoto`) skins (`openSkinPicker`, `previewSkin`, `applySkin`, `cancelSkinPicker`, `setReducedMotion`) mods (`openMods`, `closeMods`, `removeMod`) Today's Drama (`openDrama`, `closeDrama`, `playDrama`) and saves (`openSaves`, `closeSaves`, `saveTo`, `loadFrom`, `deleteSave`, `exportSave`, `importSave`, `continueSave`, `dismissWelcome`, `fetchModsAndLoad`, `loadWithoutMods`, `cancelModPrompt`). Each is safe to call at any time; the game ignores what does not apply.
 
 Changing the contract: keep changes **additive** (new fields, new actions) and add a fixture to `src/ui/hud/fixtures.ts` + a test in `vm.test.ts`. A breaking change means bumping `SKIN_API_VERSION` and every `skin.json`.
 

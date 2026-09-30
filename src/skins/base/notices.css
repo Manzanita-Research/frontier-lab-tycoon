@@ -42,3 +42,13 @@
     padding: 2px;
   }
 }
+
+/* FLT-55: a mod's skin offer. */
+.skin-offer-preview {
+  display: block;
+  width: 100%;
+  max-height: 160px;
+  object-fit: cover;
+  border-radius: calc(var(--flt-radius-panel) / 2);
+  margin: 4px 0 10px;
+}

@@ -33,6 +33,8 @@ import { enableEarnedPacks, PACK_OFF_FLAGS } from "../sim/progression";
 import type { GameDefinition } from "../mods/game-definition";
 import { enableEndings } from "../sim/endings/state";
 import { isEndingMoment, stageEndingMoment } from "../sim/endings/demo";
+import { applyLineage, perkById } from "../sim/endings/lineage";
+import type { PerkId } from "../sim/endings/pack";
 
 /** What the loop tells the app after touching the World. `snap`, `news` and `toasts` come with a publish. */
 export interface SyncReport {
@@ -67,6 +69,8 @@ export class SimHandle {
 
   /** The endings (FLT-11) are on: a new lab gets them too. */
   endings: boolean;
+  /** The World a save put here (FLT-65), so the News Room reopens its archive instead of wiping it. */
+  loaded: GameState | null = null;
 
   constructor(world: GameState, leapfrog = false, public papers = world.papers?.enabled ?? false, public readonly def: GameDefinition | null = null) {
     this.world = world;
@@ -98,6 +102,30 @@ export class SimHandle {
     setRisk(this.world, risk);
     for (const f of off) this.world.flags[f] = 1;
     if (this.endings) enableEndings(this.world, daily);
+    this.alpha = 1;
+  }
+
+  /** Found a new lab (FLT-57): a fresh seed, the sequel's name, and the one perk the player kept. */
+  refound(seed: number, perk: string) {
+    const prev = this.world;
+    this.reset(seed, null);
+    applyLineage(this.world, prev, (perkById(perk)?.id ?? "founder") as PerkId);
+  }
+
+  /**
+   * Carry on from a save (FLT-65): the World replaces the live one as it is, so the next tick is the tick it would
+   * have been. The handle's own switches follow the World (a save knows whether its packs are on).
+   */
+  load(world: GameState) {
+    this.newsStartId = 0;
+    this.openingThoughts = undefined;
+    this.world = world;
+    this.loaded = world;
+    this.leapfrog = world.leapfrog.enabled;
+    this.papers = world.papers?.enabled ?? false;
+    this.endings = !!world.endings;
+    this.lastSnap = undefined;
+    this.lastVersion = -1;
     this.alpha = 1;
   }
 

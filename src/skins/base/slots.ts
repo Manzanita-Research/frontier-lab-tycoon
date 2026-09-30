@@ -10,13 +10,18 @@ import "./factions.css";
 import "./compact.css";
 import "./notices.css";
 import "./playable.css";
+import "./modes.css";
 import "./disasters.css";
 import "./circus.css";
 import "./drama.css";
 import "./audit.css";
+import "./beat.css";
+import "./neo.css";
 import "./endings.css";
 import { Arena } from "./slots/Arena";
 import { AuditPin } from "./slots/AuditPin";
+import { Beat } from "./slots/Beat";
+import { GateLegend } from "./slots/GateLegend";
 import { ReportCard } from "./slots/ReportCard";
 import { Benchmarks } from "./slots/Benchmarks";
 import { Assistant } from "./slots/Assistant";
@@ -34,6 +39,7 @@ import { GroupChat } from "./slots/GroupChat";
 import { Inspector } from "./slots/Inspector";
 import { Mixer } from "./slots/Mixer";
 import { ModManager } from "./slots/ModManager";
+import { ModSkinOffer } from "./slots/ModSkinOffer";
 import { Drama } from "./slots/Drama";
 import { DramaButton } from "./slots/DramaButton";
 import { NewsArrival } from "./slots/NewsArrival";
@@ -43,6 +49,8 @@ import { Objectives } from "./slots/Objectives";
 import { Outcome } from "./slots/Outcome";
 import { Ending } from "./slots/Ending";
 import { Takeover } from "./slots/Takeover";
+import { Memo } from "./slots/Memo";
+import { Challenge } from "./slots/Challenge";
 import { PhotoButton } from "./slots/PhotoButton";
 import { PhotoOverlay } from "./slots/PhotoOverlay";
 import { SkinPicker } from "./slots/SkinPicker";
@@ -66,10 +74,13 @@ import { CrumbWiki } from "./slots/CrumbWiki";
 import "./papers.css";
 import { DisasterAlert } from "./slots/DisasterAlert";
 import { DisasterMenu } from "./slots/DisasterMenu";
+import { Welcome } from "./slots/Welcome";
+import { SaveLoad } from "./slots/SaveLoad";
+import "./saves.css";
 import { Layout } from "./Layout";
 
 export const baseSlots: SlotComponents = {
   Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, Bubble, ThoughtsPanel, Ticker, Toast, Assistant,
   EventCard, Confirm, Coach, UnlockCard, HowToPlay, Arena, Benchmarks, Voice, Factions, Livestream, Hearing, LeakedChat, DramaCard, Bill, PromiseTracker, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, Ending, Takeover, NewsControls,
-  NewsArrival, NewsRoom, Mixer, ModManager, Papers, PaperMoment, CrumbWiki, DisasterMenu, DisasterAlert, ReportCard, AuditPin, DramaButton, Drama,
+  NewsArrival, NewsRoom, Mixer, ModManager, ModSkinOffer, Papers, PaperMoment, CrumbWiki, DisasterMenu, DisasterAlert, ReportCard, AuditPin, Beat, GateLegend, DramaButton, Drama, Memo, Challenge, Welcome, SaveLoad,
 };

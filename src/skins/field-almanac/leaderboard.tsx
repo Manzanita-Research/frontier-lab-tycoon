@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BenchTable, VoiceGraph, useT } from "../kit";
+import { BenchTable, VoiceGraph, useT, useWidget } from "../kit";
 import type { SlotPropsMap } from "../types";
 import { Caret, TableIcon } from "./icons";
 
@@ -11,6 +11,7 @@ import { Caret, TableIcon } from "./icons";
 export function Benchmarks({ leapfrog, layout }: SlotPropsMap["Benchmarks"]) {
   const t = useT();
   const [open, setOpen] = useState(false);
+  useWidget("benchmarks", () => setOpen(true));
   const lead = leapfrog.rows.find((r) => r.you);
   const flashing = leapfrog.rows.some((r) => r.flash || r.cells.some((c) => c.flash));
   const records = `${lead?.wins ?? 0} ${t("bench.sota")}`;
@@ -45,6 +46,7 @@ export function Benchmarks({ leapfrog, layout }: SlotPropsMap["Benchmarks"]) {
 export function Voice({ leapfrog, layout }: SlotPropsMap["Voice"]) {
   const t = useT();
   const [open, setOpen] = useState(false);
+  useWidget("traffic", () => setOpen(true));
   const { voice } = leapfrog;
   if (layout.compact) return null;
   const arrow = { up: "↑", down: "↓", flat: "" }[voice.trend];

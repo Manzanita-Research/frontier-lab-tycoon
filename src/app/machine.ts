@@ -8,15 +8,17 @@
 // Effect actions do the impure part through the Sim service and report back with SYNCED, which is where card and
 // outcome changes move the machine. Player input is just an event: choosing a card is `CHOOSE`, and the machine
 // forwards it into the sim as a `chooseEvent` command on the next tick.
-import { Clock, Effect, Schema, Stream } from "effect";
+import { Clock, Effect, Option, Schema, Stream } from "effect";
 import { fromEffectEventStream, setupEffect } from "@xstate/effect";
 import type { Command } from "../sim/commands";
 import { dailySeed } from "../sim/daily";
-import type { NewsItem, OpenEvent, Outcome, Tone } from "../sim/types";
+import type { GameState, NewsItem, OpenEvent, Outcome, Tone } from "../sim/types";
 import { Frames } from "./frames";
 import type { Snapshot, Speed, Tool, UiSelection, UiToast } from "./hud";
 import { gateToasts, mergeWire, newGate, WIRE_MAX, type NoticeGate, type WireItem } from "./notices";
 import { Sim, type SyncReport } from "./sim";
+import { Saves, type SaveWhy } from "./saves";
+import type { SlotId } from "../save";
 
 /** Twenty sim ticks per day, six real seconds at 1×. */
 export const TICKS_PER_SECOND = 20 / 6;
@@ -25,6 +27,8 @@ export const SNAPSHOT_MS = 200;
 export const TOAST_MS = 5200;
 /** A batch summary is a list: it gets longer to be read. */
 export const BATCH_TOAST_MS = 9000;
+/** The autosave runs when the calendar turns a month (30 game days: three minutes at 1×). */
+export const AUTOSAVE_DAYS = 30;
 
 /** A type-only schema: the context carries these shapes as they are, with nothing to validate at runtime. */
 const opaque = <T>() => Schema.declare<T>((_value): _value is T => true);
@@ -51,6 +55,8 @@ export const AppContext = Schema.Struct({
   /** The world notices the notice policy sent to the ticker, newest last. */
   wire: opaque<readonly WireItem[]>(),
   toasts: opaque<readonly UiToast[]>(),
+  /** A camera beat is on (FLT-56): the toasts wait here, their timers not started, and come out when it ends. */
+  held: Schema.NullOr(opaque<readonly UiToast[]>()),
   toastSeq: Schema.Number,
   /** The `you` toasts the notice policy is holding for its window (see `notices.ts`). */
   gate: opaque<NoticeGate>(),
@@ -98,8 +104,27 @@ export function pauseReasonOf(c: AppContext): PauseReason | null {
   return null;
 }
 
+/** Put the tool down and stop painting a zone: the ghost and the hint go with them. */
+const endMode = (c: AppContext): AppContext => (c.tool === null && c.zone === null ? c : { ...c, tool: null, zone: null, hover: null, lastPublishAt: 0 });
+
+/**
+ * Something now needs the player more than the map does (FLT-63): a card, the outcome, a "New!" card, or the coach moving
+ * on to a step that is not about the tool in hand. The mode ends rather than linger half-on behind it.
+ */
+function interrupted(before: AppContext, after: AppContext): boolean {
+  if (after.tool === null && after.zone === null) return false;
+  if (after.event && after.event.id !== before.event?.id) return true;
+  if (after.outcome !== before.outcome && after.outcome !== "playing") return true;
+  if (after.snap.unlockCard && !before.snap.unlockCard) return true;
+  const coach = after.snap.coach;
+  if (coach && coach.id !== before.snap.coach?.id) return coach.target !== `build:${after.tool}` && coach.target !== "map:suggest";
+  return false;
+}
+
 /** The same words twice are one toast (the newer replaces the older); the HUD shows only the newest, so keep just a few. */
-const addToasts = (c: AppContext, fresh: readonly UiToast[]) => ({ ...c, toasts: [...c.toasts.filter((t) => !fresh.some((f) => f.text === t.text)), ...fresh].slice(-3) });
+const merged = (old: readonly UiToast[], fresh: readonly UiToast[]) => [...old.filter((t) => !fresh.some((f) => f.text === t.text)), ...fresh].slice(-3);
+/** New toasts join the queue while a beat holds them, and the screen otherwise. */
+const addToasts = (c: AppContext, fresh: readonly UiToast[]): AppContext => (c.held ? { ...c, held: merged(c.held, fresh) } : { ...c, toasts: merged(c.toasts, fresh) });
 
 export const appMachine = setupEffect({
   schemas: {
@@ -115,13 +140,23 @@ export const appMachine = setupEffect({
       SET_HOVER: Schema.Struct({ hover: opaque<{ x: number; z: number } | null>() }),
       /** A validated player action: place a path or building, or bulldoze. Applied on the next tick. */
       COMMAND: Schema.Struct({ command: opaque<Command>() }),
+      /** A building from the tool in hand (FLT-63): the tool drops once it is down, unless `keep` (Shift held). */
+      PLACE: Schema.Struct({ command: opaque<Command>(), keep: Schema.Boolean }),
       /** Pick a choice on the open event card. */
       CHOOSE: Schema.Struct({ choiceIndex: Schema.Number }),
       KEEP_PLAYING: Schema.Struct({}),
       NEW_LAB: Schema.Struct({}),
+      /** Carry on from a save (FLT-65): the decoded World replaces the live one. */
+      LOAD_LAB: Schema.Struct({ world: opaque<GameState>() }),
+      /** Write the World to a save slot now: the autosave (`why`: month, hide, ending) or a slot the player picked. */
+      SAVE: Schema.Struct({ slot: opaque<SlotId>(), why: opaque<SaveWhy>() }),
       /** Today's lab: a new lab on the date's seed ("2026-09-30"), the same campus for everyone that day. */
       DAILY_LAB: Schema.Struct({ daily: Schema.String }),
+      /** Found a new lab (FLT-57): the sequel to the one that just ended, on a fresh seed, keeping one perk. */
+      FOUND_LAB: Schema.Struct({ perk: Schema.String }),
       TOAST: Schema.Struct({ text: Schema.String, tone: opaque<Tone>() }),
+      /** A camera beat started (on) or ended: hold the toasts off the shot, then let them out. */
+      HOLD_TOASTS: Schema.Struct({ on: Schema.Boolean }),
       /** Tap a walker (or tap away: null) to open or close the inspector. */
       SELECT: Schema.Struct({ id: Schema.NullOr(Schema.Number) }),
       /** The inspector's Follow button. */
@@ -165,9 +200,32 @@ export const appMachine = setupEffect({
         const sim = yield* Sim;
         const ms = yield* Clock.currentTimeMillis;
         const daily = args.event.type === "DAILY_LAB" ? args.event.daily : null;
-        sim.reset(daily ? dailySeed(daily) : ((ms ^ Math.imul(sim.world.seed, 2654435761)) >>> 0) || 1, daily);
+        const seed = daily ? dailySeed(daily) : ((ms ^ Math.imul(sim.world.seed, 2654435761)) >>> 0) || 1;
+        if (args.event.type === "FOUND_LAB") sim.refound(seed, args.event.perk);
+        else sim.reset(seed, daily);
         const report = sim.report(true, true);
         if (report) args.self.send({ type: "SYNCED", report, now: 0 });
+      }),
+    /** A save's World becomes the live one. */
+    loadLab: (args) =>
+      Effect.gen(function* () {
+        const sim = yield* Sim;
+        if (args.event.type !== "LOAD_LAB") return;
+        sim.load(args.event.world);
+        const report = sim.report(true, true);
+        if (report) args.self.send({ type: "SYNCED", report, now: 0 });
+      }),
+    /**
+     * Save the World as it stands (copied in one synchronous stringify, so ticks can carry on while it compresses).
+     * Without a Saves service (tests, a headless shell) this does nothing.
+     */
+    save: (args) =>
+      Effect.gen(function* () {
+        const saves = yield* Effect.serviceOption(Saves);
+        if (Option.isNone(saves)) return;
+        const sim = yield* Sim;
+        const p = args.params as { slot: SlotId; why: SaveWhy };
+        yield* saves.value.save(sim.world, p.slot, p.why, (text, tone) => args.self.send({ type: "TOAST", text, tone }));
       }),
   },
 }).createMachine({
@@ -186,6 +244,7 @@ export const appMachine = setupEffect({
     headlines: input.first.news ?? [],
     wire: [],
     toasts: input.first.toasts.slice(-3),
+    held: null,
     toastSeq: 1,
     gate: newGate(),
     selected: null,
@@ -234,7 +293,8 @@ export const appMachine = setupEffect({
 } } },
   },
   on: {
-    SYNCED: ({ context, event }, enq) => {
+    SYNCED: (args, enq) => {
+      const { context, event } = args;
       const { report, now } = event;
       // One policy for every notice: what is about you is a toast (one per window), the world's news is for the ticker.
       const gated = gateToasts(context.gate, report.toasts, {
@@ -264,8 +324,13 @@ export const appMachine = setupEffect({
         // The staffer whose zone was being painted has been let go.
         ...(report.snap && context.zone !== null && !report.snap.ops.staff.some((o) => o.id === context.zone) ? { zone: null } : {}),
       };
-      for (const t of fresh) enq.raise({ type: "TOAST_EXPIRED", id: t.id }, { id: `toast:${t.id}`, delay: t.batch ? BATCH_TOAST_MS : TOAST_MS });
-      return { context: next, target: phaseFor(next) };
+      if (!context.held) for (const t of fresh) enq.raise({ type: "TOAST_EXPIRED", id: t.id }, { id: `toast:${t.id}`, delay: t.batch ? BATCH_TOAST_MS : TOAST_MS });
+      // The autosave: each new month, and the moment the lab ends (won, lost, or one of the endings' front pages).
+      // A month is the calendar turning by one; a jump (a save loading, a new lab) is not the player's month ending.
+      const why: SaveWhy | null = report.outcome !== "playing" && report.outcome !== context.outcome && context.outcome === "playing" ? "ending"
+        : report.snap && Math.floor(report.snap.day / AUTOSAVE_DAYS) === Math.floor(context.snap.day / AUTOSAVE_DAYS) + 1 ? "month" : null;
+      if (why) enq(args.actions.save, { ...args, params: { slot: "auto", why } });
+      return { context: interrupted(context, next) ? endMode(next) : next, target: phaseFor(next) };
     },
     SET_SPEED: ({ context, event }) => {
       // The coach asked for ▶▶ while the first model trains (FLT-58).
@@ -287,7 +352,9 @@ export const appMachine = setupEffect({
       if (event.open) overlays.push(event.id);
       const build = event.open && /start|build|menu/.test(event.id);
       const queue: readonly Command[] = build ? [...context.queue, { type: "buildPanelOpened" }] : context.queue;
-      const next = { ...context, overlays, queue, speed: build && context.snap.firstBuildPending ? 1 as Speed : context.speed };
+      // A window that covers the map ends the mode (FLT-63); the build menu itself does not: you are picking the next tool.
+      const held = event.open && !build && !context.overlays.includes(event.id) ? endMode(context) : context;
+      const next = { ...held, overlays, queue, speed: build && context.snap.firstBuildPending ? 1 as Speed : context.speed };
       return { context: next, target: phaseFor(next) };
     },
     SET_ZONE: ({ context, event }) => ({ context: { ...context, zone: event.id === context.zone ? null : event.id, tool: null, hover: null } }),
@@ -296,7 +363,13 @@ export const appMachine = setupEffect({
       return { context: { ...context, hover: event.hover } };
     },
     // A player command publishes the snapshot on the very next frame, so a hire or a painted tile shows straight away.
-    COMMAND: ({ context, event }) => ({ context: { ...context, speed: event.command.type === "buildPanelOpened" && context.snap.firstBuildPending ? 1 : context.speed, queue: [...context.queue, event.command], lastPublishAt: 0 } }),
+    // A building drops out of your hand once it is down (FLT-63), from the tool or the coach's tile; paths stay.
+    COMMAND: ({ context, event }) => {
+      const held = event.command.type === "placeBuilding" ? endMode(context) : context;
+      return { context: { ...held, speed: event.command.type === "buildPanelOpened" && context.snap.firstBuildPending ? 1 : context.speed, queue: [...context.queue, event.command], lastPublishAt: 0 } };
+    },
+    // ...unless Shift is held: place another, RCT-style.
+    PLACE: ({ context, event }) => ({ context: { ...(event.keep ? context : endMode(context)), queue: [...context.queue, event.command], lastPublishAt: 0 } }),
     CHOOSE: ({ context, event }) => {
       // A greyed-out choice (a bid you can't afford) can't be taken by key either.
       if (!context.event || context.snap.eventBlocked?.[event.choiceIndex]) return;
@@ -320,16 +393,37 @@ export const appMachine = setupEffect({
       enq(args.actions.newLab, args);
       return { context: freshLab(args.context), target: ".playing.running" };
     },
+    FOUND_LAB: (args, enq) => {
+      enq(args.actions.newLab, args);
+      return { context: freshLab(args.context), target: ".playing.running" };
+    },
     NEW_LAB: (args, enq) => {
       const { context, actions } = args;
       enq(actions.newLab, args);
       return { context: freshLab(context), target: ".playing.running" };
     },
+    LOAD_LAB: (args, enq) => {
+      enq(args.actions.loadLab, args);
+      return { context: freshLab(args.context), target: ".playing.running" };
+    },
+    SAVE: (args, enq) => {
+      enq(args.actions.save, { ...args, params: { slot: args.event.slot, why: args.event.why } });
+    },
     TOAST: ({ context, event }, enq) => {
       const id = 1_000_000 + context.toastSeq;
-      enq.raise({ type: "TOAST_EXPIRED", id }, { id: `toast:${id}`, delay: TOAST_MS });
-      const kept = context.toasts.filter((t) => t.text !== event.text).slice(-2);
-      return { context: { ...context, toasts: [...kept, { id, text: event.text, tone: event.tone }], toastSeq: context.toastSeq + 1 } };
+      if (!context.held) enq.raise({ type: "TOAST_EXPIRED", id }, { id: `toast:${id}`, delay: TOAST_MS });
+      return { context: { ...addToasts(context, [{ id, text: event.text, tone: event.tone }]), toastSeq: context.toastSeq + 1 } };
+    },
+    HOLD_TOASTS: ({ context, event }, enq) => {
+      if (event.on === !!context.held) return;
+      // On: what is showing steps off the shot with the rest of the HUD, and waits with a fresh clock.
+      if (event.on) {
+        for (const t of context.toasts) enq.cancel(`toast:${t.id}`);
+        return { context: { ...context, toasts: [], held: context.toasts } };
+      }
+      const held = context.held ?? [];
+      for (const t of held) enq.raise({ type: "TOAST_EXPIRED", id: t.id }, { id: `toast:${t.id}`, delay: t.batch ? BATCH_TOAST_MS : TOAST_MS });
+      return { context: { ...context, toasts: merged(context.toasts, held), held: null } };
     },
     DISMISS_TOAST: ({ context, event }, enq) => {
       enq.cancel(`toast:${event.id}`);
@@ -343,7 +437,7 @@ export const appMachine = setupEffect({
 });
 
 /** The app's side of a new lab: nothing queued, nothing selected, running at 1x. */
-const freshLab = (context: AppContext): AppContext => ({ ...context, queue: [], acc: 0, toasts: [], gate: newGate(), wire: [], headlines: [], outcomeDismissed: false, speed: 1, tool: null, hover: null, selected: null, follow: false, highlight: null, zone: null, overlays: [] });
+const freshLab = (context: AppContext): AppContext => ({ ...context, queue: [], acc: 0, toasts: [], held: null, gate: newGate(), wire: [], headlines: [], outcomeDismissed: false, speed: 1, tool: null, hover: null, selected: null, follow: false, highlight: null, zone: null, overlays: [] });
 
 /** The selection as the sim handle wants it. */
 const uiOf = (c: AppContext): UiSelection => ({ selected: c.selected, follow: c.follow, highlight: c.highlight });

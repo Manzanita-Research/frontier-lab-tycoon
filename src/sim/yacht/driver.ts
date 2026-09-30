@@ -10,6 +10,7 @@ import { chartStats, compileChart, type Beat } from "../circus/chart";
 import type { GameState } from "../types";
 import { ENDINGS, PICK_PREFIX, PICKS, YACHT } from "./pack";
 import type { YachtStored } from "./state";
+import { picks } from "../picks";
 
 const R = YACHT.rules;
 const OWNER = "yacht";
@@ -50,12 +51,14 @@ function send(s: GameState, rng: Rng, beat: Beat) {
   if ((ENDINGS as readonly string[]).includes(now)) y.ending = now;
 }
 
+const PICK_FLAGS = picks(PICK_PREFIX, PICKS);
+
 export function applyYachtChoices(s: GameState) {
   const y = s.yacht;
   if (!y?.enabled) return;
-  for (const key of PICKS) {
-    if (s.flags[PICK_PREFIX + key] === undefined) continue;
-    delete s.flags[PICK_PREFIX + key];
+  for (const { key, flag } of PICK_FLAGS) {
+    if (s.flags[flag] === undefined) continue;
+    delete s.flags[flag];
     const rng = createRng(y.rngState);
     send(s, rng, { type: "CHOSE", tick: s.tick, day: s.day, roll: 0, stats: {}, choice: key });
     y.rngState = rng.state();

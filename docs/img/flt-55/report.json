@@ -1,0 +1,70 @@
+{
+  "base": {
+    "ref": "origin/flt-wave-2",
+    "sha": "47eabbc110cf1cfb54ae4917584ac0ad3a1a9b94"
+  },
+  "head": {
+    "branch": "flt-55-mods-m1c",
+    "sha": "20f04ec",
+    "dirty": false
+  },
+  "seconds": 138.915,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "gate",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-55/before/gate.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-55/after/gate.png",
+      "title": "FLT-55: the gate with protesters, no mod (the base game: must be unchanged)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-55/compare/gate.png",
+      "changed": 0.007338734567901234
+    },
+    {
+      "scene": "gate-mod",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-55/before/gate-mod.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-55/after/gate-mod.png",
+      "title": "FLT-55: the same gate with ?mod= golden retrievers (main applies the mod's content only; the branch draws its looks)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-55/compare/gate-mod.png",
+      "changed": 0.07461342592592593
+    },
+    {
+      "scene": "gate-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-55/before/gate-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-55/after/gate-phone.png",
+      "title": "FLT-55: the gate on a phone, no mod",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-55/compare/gate-phone.png",
+      "changed": 0.019062917729979343
+    },
+    {
+      "scene": "gate-mod-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-55/before/gate-mod-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-55/after/gate-mod-phone.png",
+      "title": "FLT-55: the gate on a phone with ?mod= golden retrievers",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-55/compare/gate-mod-phone.png",
+      "changed": 0.21615020051039008
+    },
+    {
+      "scene": "gate-mod-offer",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-55/before/gate-mod-offer.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-55/after/gate-mod-offer.png",
+      "title": "FLT-55: a mod that asks for its skin: the Found New Skin box (no ?skin=)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-55/compare/gate-mod-offer.png",
+      "changed": 0.11865586419753087
+    },
+    {
+      "scene": "gate-mod-skin",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-55/before/gate-mod-skin.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-55/after/gate-mod-skin.png",
+      "title": "FLT-55: ?skin=good-boy-95, the mod's skin (Fetch, Sit/Walkies/Zoomies, Bark Bark News)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-55/compare/gate-mod-skin.png",
+      "changed": 0.3054274691358025
+    }
+  ],
+  "errors": []
+}

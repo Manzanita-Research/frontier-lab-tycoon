@@ -20,7 +20,7 @@ env:
 jobs:
   check:
     if: github.event.action != 'closed' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
         with:
@@ -41,9 +41,10 @@ jobs:
 
   deploy:
     outputs:
-      preview_url: ${{ steps.preview.outputs.url }}
+      # A PR's preview, or prod after a deploy from main: the stranger plays whichever this run deployed.
+      preview_url: ${{ steps.preview.outputs.url || steps.prod.outputs.url }}
     needs: check
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     permissions:
       contents: read
       pull-requests: write
@@ -90,7 +91,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PULL_REQUEST: ${{ github.event.number }}
           DEPLOY_REVISION: ${{ github.event.pull_request.head.sha || github.sha }}
-          FLT_CUSTOM_DOMAIN: ${{ vars.FLT_CUSTOM_DOMAIN }}
 
       - name: Read the deployed preview URL
         if: github.event_name == 'pull_request' && steps.current.outputs.deploy == 'true'
@@ -105,14 +105,24 @@ jobs:
             if (!url) throw new Error('No preview URL for the deployed revision');
             core.setOutput('url', url);
 
+      - name: The prod URL
+        if: github.event_name == 'push' && steps.current.outputs.deploy == 'true'
+        id: prod
+        # Where players are: app.<zone> once the custom domain is on (#70), else the workers.dev name.
+        run: echo "url=${PROD_URL}" >> "$GITHUB_OUTPUT"
+        env:
+          PROD_URL: https://app.frontierlabtycoon.com/
+
+  # On a PR: its preview. On main: prod, after the deploy has gone out (FLT-62). It never blocks a deploy, but a failure
+  # fails the run, so a broken landing shows red on main.
   stranger:
     needs: deploy
-    if: github.event_name == 'pull_request' && needs.deploy.outputs.preview_url != ''
-    runs-on: ubuntu-latest
+    if: needs.deploy.outputs.preview_url != ''
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
@@ -121,19 +131,19 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
-      - name: Play the deployed preview as a stranger
+      - name: Play the deployed build as a stranger
         run: pnpm e2e:stranger --url "$PREVIEW_URL"
         env:
           PREVIEW_URL: ${{ needs.deploy.outputs.preview_url }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: stranger-${{ github.event.number }}
+          name: stranger-${{ github.event.number || 'prod' }}
           path: e2e/results/
 
   cleanup:
     if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     permissions:
       contents: read
       pull-requests: write
