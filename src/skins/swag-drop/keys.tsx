@@ -1,3 +1,4 @@
+import { useCoach } from "../kit";
 // The keyboard on the desk: the build palette, the speed keys, the camera and the news/sound/skin dock, all keycaps.
 // A keycap is a cream face over a darker front band; pressing it sinks it (CSS: `.on` and `:active`).
 import type { ReactNode } from "react";
@@ -17,6 +18,7 @@ function Cap({ face, band }: { face: ReactNode; band?: ReactNode }) {
 
 /** The build palette: one key per tool, its price on the front band, its hotkey as the legend. */
 export function BuildBar({ items, tip, actions }: SlotPropsMap["BuildBar"]) {
+  const coachApi = useCoach();
   const t = useT();
   return (
     <div className="sd-deckwrap">
@@ -25,7 +27,7 @@ export function BuildBar({ items, tip, actions }: SlotPropsMap["BuildBar"]) {
           <b>{tip.name}</b> {tip.text} {tip.upkeepText && <span className="dim">{tip.upkeepText}</span>}
         </div>
       )}
-      <div className="sd-deck" role="toolbar" aria-label={t("build.menuTitle")} data-coach="start">
+      <div className="sd-deck" role="toolbar" aria-label={t("build.menuTitle")} {...coachApi.attrs("start")} onClick={() => actions.buildPanel(true)}>
         {items.map((it) => (
           <button
             key={it.kind}
@@ -35,7 +37,7 @@ export function BuildBar({ items, tip, actions }: SlotPropsMap["BuildBar"]) {
             disabled={!it.affordable && !it.selected}
             aria-pressed={it.selected}
             title={it.name}
-            data-coach={`build:${it.kind}`}
+            {...coachApi.attrs(`build:${it.kind}`)}
           >
             <Cap
               face={

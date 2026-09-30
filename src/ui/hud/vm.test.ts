@@ -211,7 +211,9 @@ describe("Playable v1: what the lab has earned, the coach, and Help", () => {
   const level = (n: 1 | 2 | 3 | 4 | 5, more: Parameters<typeof fixtureInput>[0] = {}) => hudViewModel(fixtureInput({ level: n, ...more }));
 
   it("carries no ladder as 'everything is earned': the game plays as it always did", () => {
-    const vm = hudViewModel(fixtureInput());
+    const input = fixtureInput();
+    for (const key of ["progress", "coach", "unlockCard", "hud"]) Reflect.deleteProperty(input.snap, key);
+    const vm = hudViewModel(input);
     expect(Object.values(vm.visible).every(Boolean)).toBe(true);
     expect(vm.buildItems.map((b) => b.kind)).toContain("demo");
     expect(vm.coach).toBeNull();

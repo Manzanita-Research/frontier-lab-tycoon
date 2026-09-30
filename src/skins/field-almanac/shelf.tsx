@@ -1,3 +1,4 @@
+import { useCoach } from "../kit";
 import { useT } from "../kit";
 import type { SlotPropsMap } from "../types";
 import { ToolIcon } from "./icons";
@@ -8,6 +9,7 @@ import { ToolIcon } from "./icons";
  * tools than screen.
  */
 export function BuildBar({ items, tip, actions }: SlotPropsMap["BuildBar"]) {
+  const coachApi = useCoach();
   const t = useT();
   return (
     <div className="fa-shelfwrap">
@@ -16,7 +18,7 @@ export function BuildBar({ items, tip, actions }: SlotPropsMap["BuildBar"]) {
           <i>{tip.name}</i> — {tip.text} {tip.upkeepText && <span className="dim">{tip.upkeepText}</span>}
         </div>
       )}
-      <div className="fa-shelf fa-paper" role="toolbar" aria-label={t("build.menuTitle")} data-coach="start">
+      <div className="fa-shelf fa-paper" role="toolbar" aria-label={t("build.menuTitle")} {...coachApi.attrs("start")} onClick={() => actions.buildPanel(true)}>
         {items.map((it) => (
           <button
             key={it.kind}
@@ -25,7 +27,7 @@ export function BuildBar({ items, tip, actions }: SlotPropsMap["BuildBar"]) {
             disabled={!it.affordable && !it.selected}
             aria-pressed={it.selected}
             title={it.name}
-            data-coach={`build:${it.kind}`}
+            {...coachApi.attrs(`build:${it.kind}`)}
           >
             {it.hotkey !== null && <span className="fa-hot">{it.hotkey}</span>}
             <span className="fa-well">

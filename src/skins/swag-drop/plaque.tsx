@@ -1,3 +1,4 @@
+import { useCoach, ALL_VISIBLE } from "../kit";
 // The paper plaque and the instrument beside it: the lab's numbers as enamel pins, and the training run as a dial.
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Odometer, money, useT } from "../kit";
@@ -10,8 +11,9 @@ const TREND = { up: "rising", down: "falling", flat: "steady" } as const;
 
 /** One enamel pin: a flat disc or pill with a coloured rim, and a mono label underneath. */
 function Pin({ label, rim, className = "", tag, coach, children }: { label: string; rim: string; className?: string; tag?: ReactNode; coach?: string; children: ReactNode }) {
+  const coachApi = useCoach();
   return (
-    <div className={`sd-pin ${className}`} data-coach={coach}>
+    <div className={`sd-pin ${className}`} {...(coach ? coachApi.attrs(coach) : {})}>
       <div className={`sd-badge rim-${rim}`}>
         {children}
         {tag}
@@ -103,7 +105,7 @@ function HypeDial({ value }: { value: number }) {
 }
 
 /** The top-left plaque: lab name, date, and the pins. On a phone it is one row (Vibes, cash, runway) and a tab opens the rest. */
-export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
+export function Stats({ stats, layout, actions, visible = ALL_VISIBLE }: SlotPropsMap["Stats"]) {
   const t = useT();
   const compact = layout.compact;
   const [expanded, setExpanded] = useState(false);
@@ -115,26 +117,26 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
         <span className="sd-date">{stats.date}</span>
       </div>
       <div className="sd-pins">
-        <VibesPin vibes={stats.vibes} />
+        {visible.vibes && <VibesPin vibes={stats.vibes} />}
         <Pin
           label={t("stats.cash")}
           rim={stats.cash.negative ? "bad" : "gold"}
           className="pin-cash"
-          tag={<Odometer className={`sd-delta ${stats.net.good ? "good" : "bad"}`} value={stats.net.value} format={signed} flash={false} />}
+          tag={visible.revenue && <Odometer className={`sd-delta ${stats.net.good ? "good" : "bad"}`} value={stats.net.value} format={signed} flash={false} />}
         >
           <Odometer className={`sd-num ${stats.cash.negative ? "bad" : ""}`} value={stats.cash.value} format={money} />
         </Pin>
         <Pin label={t("stats.runway")} rim={stats.runway.warning ? "bad" : "good"} className="pin-runway" coach="stat:runway">
           <span className={`sd-num ${stats.runway.warning ? "bad" : ""}`}>{stats.runway.text}</span>
         </Pin>
-        <Pin label={t("stats.capability")} rim="research" className="pin-cap">
+        {visible.rnd && (<Pin label={t("stats.capability")} rim="research" className="pin-cap">
           <Odometer className="sd-num" value={stats.capability.value} />
-        </Pin>
-        <Pin label={t("stats.hype")} rim="signal" className="pin-hype">
+        </Pin>)}
+        {visible.revenue && (<Pin label={t("stats.hype")} rim="signal" className="pin-hype">
           <HypeDial value={stats.hype.value} />
-        </Pin>
+        </Pin>)}
       </div>
-      <div className="sd-tags">
+      {visible.arena || visible.rnd && (<div className="sd-tags">
         <button
           type="button"
           className={`sd-tag arena ${a.top ? "top" : ""} ${a.flinch ? "flinch" : ""}`}
@@ -152,7 +154,7 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
           <Odometer className="sd-mult" value={stats.rd.mult} format={(n) => `${n.toFixed(1)}×`} />
           <span className="s">{t("stats.era", { n: stats.rd.era })}</span>
         </div>
-      </div>
+      </div>)}
       {compact && (
         <button type="button" className="sd-more" onClick={() => setExpanded((e) => !e)} aria-expanded={expanded} aria-label={expanded ? t("stats.fewerStats") : t("stats.moreStats")}>
           <span className={`sd-caret ${expanded ? "open" : ""}`} aria-hidden />
@@ -177,10 +179,11 @@ const DIAL_TICKS = Array.from({ length: 11 }, (_, i) => {
 
 /** The training run as an instrument: a dial with a needle, the model's name, and how long is left. */
 export function Training({ training }: SlotPropsMap["Training"]) {
+  const coachApi = useCoach();
   const t = useT();
   if (!training.hasHall) {
     return (
-      <div className="sd-gauge off" role="status" data-coach="training">
+      <div className="sd-gauge off" role="status" {...coachApi.attrs("training")}>
         <span className="sd-tape">{t("training.noHall")}</span>
       </div>
     );
@@ -189,7 +192,7 @@ export function Training({ training }: SlotPropsMap["Training"]) {
   return (
     <div
       className={`sd-gauge ${training.justShipped ? "shipped" : ""}`}
-      data-coach="training"
+      {...coachApi.attrs("training")}
       role="progressbar"
       aria-label={`${t("training.title")} ${training.name}`}
       aria-valuemin={0}

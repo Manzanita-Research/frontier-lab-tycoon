@@ -1,3 +1,4 @@
+import { useCoach, ALL_VISIBLE } from "../kit";
 // Things stuck to the wall: the OKRs as sticky notes and the Thoughts as a corkboard with push-pins.
 import { useState } from "react";
 import { useT } from "../kit";
@@ -5,11 +6,13 @@ import type { SlotPropsMap } from "../types";
 import { Glyph } from "./icons";
 
 /** The scenario checklist as three sticky notes. Folds to a tab (and starts folded on a phone) so the campus stays visible. */
-export function Objectives({ objectives, layout }: SlotPropsMap["Objectives"]) {
+export function Objectives({ objectives, layout, progress, visible = ALL_VISIBLE }: SlotPropsMap["Objectives"]) {
+  const coachApi = useCoach();
   const t = useT();
   const [open, setOpen] = useState(() => !layout.compact);
+  if (progress?.goal.text && !visible.arena) return <div className="sd-okrs" {...coachApi.attrs("goals")}><div>{progress.goal.line}</div></div>;
   return (
-    <div className={`sd-okrs ${open ? "open" : ""} ${layout.compact ? "compact" : ""}`} data-coach="goals">
+    <div className={`sd-okrs ${open ? "open" : ""} ${layout.compact ? "compact" : ""}`} {...coachApi.attrs("goals")}>
       <button
         type="button"
         className="sd-okr-head"

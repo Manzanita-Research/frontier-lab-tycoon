@@ -1,3 +1,4 @@
+import { useCoach, ALL_VISIBLE } from "../kit";
 import { useState } from "react";
 import { useT } from "../kit";
 import type { SlotPropsMap } from "../types";
@@ -6,10 +7,11 @@ import { almanacDate, roman } from "./lore";
 
 /** The run under observation: its name in italics, a hairline that fills, and how much compute it eats a day. */
 export function Training({ training }: SlotPropsMap["Training"]) {
+  const coachApi = useCoach();
   const t = useT();
   if (!training.hasHall) {
     return (
-      <section className="fa-training idle" aria-label={t("training.title")} data-coach="training">
+      <section className="fa-training idle" aria-label={t("training.title")} {...coachApi.attrs("training")}>
         <div className="fa-sc">{t("training.title")}</div>
         <p className="fa-quiet">{t("training.noHall")}</p>
       </section>
@@ -17,7 +19,7 @@ export function Training({ training }: SlotPropsMap["Training"]) {
   }
   const pct = Math.floor(training.pct * 100);
   return (
-    <section className="fa-training" aria-label={t("training.title")} data-coach="training">
+    <section className="fa-training" aria-label={t("training.title")} {...coachApi.attrs("training")}>
       <div className="fa-sc">
         {t("training.title")} · training run {roman(training.run)}
       </div>
@@ -40,12 +42,14 @@ export function Training({ training }: SlotPropsMap["Training"]) {
  * This year's objectives as a checklist with a hand-ticked box each. On a phone it starts as a small clipboard button
  * (with the tally) and opens over the map.
  */
-export function Objectives({ objectives, layout }: SlotPropsMap["Objectives"]) {
+export function Objectives({ objectives, layout, progress, visible = ALL_VISIBLE }: SlotPropsMap["Objectives"]) {
+  const coachApi = useCoach();
   const t = useT();
   const [open, setOpen] = useState(() => !layout.compact);
   const compact = layout.compact;
+  if (progress?.goal.text && !visible.arena) return <section className="fa-objectives" {...coachApi.attrs("goals")}><div>{progress.goal.line}</div></section>;
   return (
-    <section className={`fa-objectives ${open ? "open" : ""} ${compact ? "compact" : ""}`} aria-label={t("objectives.title")} data-coach="goals">
+    <section className={`fa-objectives ${open ? "open" : ""} ${compact ? "compact" : ""}`} aria-label={t("objectives.title")} {...coachApi.attrs("goals")}>
       {compact && !open && (
         <button className="fa-obj-pill" onClick={() => setOpen(true)} aria-expanded={false} aria-label={`${t("objectives.title")}, ${objectives.done} of ${objectives.total} done, ${objectives.daysLeft} ${t("objectives.daysLeft")}`}>
           <ClipboardIcon />

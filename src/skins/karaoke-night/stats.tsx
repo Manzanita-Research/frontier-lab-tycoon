@@ -1,3 +1,4 @@
+import { useCoach, ALL_VISIBLE } from "../kit";
 // The console: a lilac plastic body with a glowing screen in it. The lab name and date on top, Vibes as the big pink score,
 // cash, runway and capability as glowing numbers, hype as a VU meter, and the race's two chips (the Arena, AI R&D).
 import { useEffect, useRef, useState } from "react";
@@ -63,7 +64,8 @@ function Vibes({ vibes }: { vibes: StatsVM["vibes"] }) {
   );
 }
 
-export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
+export function Stats({ stats, layout, actions, visible = ALL_VISIBLE }: SlotPropsMap["Stats"]) {
+  const coachApi = useCoach();
   const t = useT();
   const compact = layout.compact;
   // On a phone the console is one row (Vibes, cash, runway); the caret opens the rest.
@@ -81,26 +83,26 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
             {stats.date}
           </span>
         </div>
-        <Vibes vibes={stats.vibes} />
+        {visible.vibes && <Vibes vibes={stats.vibes} />}
         <div className="kn-stats">
           <div className="kn-st kn-cash">
             <span className="kn-l">{t("stats.cash")}</span>
             <Odometer className={`kn-v ${stats.cash.negative ? "hot" : "gold"}`} value={stats.cash.value} format={money} flash={false} />
-            <Odometer className={`kn-s ${stats.net.good ? "mint" : "hot"}`} value={stats.net.value} format={perDay} flash={false} />
+            {visible.revenue && <Odometer className={`kn-s ${stats.net.good ? "mint" : "hot"}`} value={stats.net.value} format={perDay} flash={false} />}
           </div>
-          <div className="kn-st kn-runway" data-coach="stat:runway">
+          <div className="kn-st kn-runway" {...coachApi.attrs("stat:runway")}>
             <span className="kn-l">{t("stats.runway")}</span>
             <span className={`kn-v ${stats.runway.warning ? "hot" : "gold"}`}>{stats.runway.text}</span>
             <span className={`kn-s ${stats.runway.warning ? "hot" : "dim"}`}>{stats.runway.warning ? "LOW!" : "COMFY"}</span>
           </div>
-          <div className="kn-st kn-cap">
+          {visible.rnd && (<div className="kn-st kn-cap">
             <span className="kn-l">{t("stats.capability")}</span>
             <Odometer className="kn-v cyan" value={stats.capability.value} flash={false} />
             <span className="kn-s dim" title={stats.capability.latestModel ?? undefined}>
               {stats.capability.latestModel}
             </span>
-          </div>
-          <div className="kn-st kn-hype">
+          </div>)}
+          {visible.revenue && (<div className="kn-st kn-hype">
             <span className="kn-l">
               {t("stats.hype")} <Odometer className="kn-hype-n" value={stats.hype.value} flash={false} />
             </span>
@@ -109,8 +111,8 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
                 <i key={i} className={`${i < lit ? "on" : ""} ${i >= 8 ? "r" : i >= 6 ? "y" : ""}`} style={{ height: `${28 + i * 8}%` }} />
               ))}
             </span>
-          </div>
-          <button
+          </div>)}
+          {visible.arena && (<button
             type="button"
             className={`kn-st kn-arena ${a.flinch ? "flinch" : ""} ${a.top ? "top" : ""}`}
             onClick={() => actions.toggleArena()}
@@ -128,12 +130,12 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
               )}
             </span>
             <span className="kn-s dim">{a.top ? t("stats.arenaTop") : t("stats.arenaOn")}</span>
-          </button>
-          <div className="kn-st kn-rd">
+          </button>)}
+          {visible.rnd && (<div className="kn-st kn-rd">
             <span className="kn-l">{t("stats.rd")}</span>
             <Odometer className="kn-v mint" value={stats.rd.mult} format={(n) => `${n.toFixed(1)}×`} flash={false} />
             <span className="kn-s dim">{t("stats.era", { n: stats.rd.era })}</span>
-          </div>
+          </div>)}
         </div>
         {compact && (
           <button type="button" className="kn-more" onClick={() => setExpanded((e) => !e)} aria-expanded={expanded} aria-label={expanded ? t("stats.fewerStats") : t("stats.moreStats")}>
