@@ -5,7 +5,7 @@ import type {
   ArenaVM, AuditVM, BillVM, TrackerVM, ReportCardVM, BubbleVM, FactionsVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, DramaDocVM, DramaVM, EraCardVM, EventVM, HearingVM, HudActions, HudVM, LeakVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
   ModsVM, NewsroomVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StatsVM, ThoughtRowVM, TickerItemVM,
   StaffVM, TeaserVM, ProgressVM, ToastVM, TrainingVM, UnlockCardVM, VisibleVM, HelpVM, PapersVM, PaperMomentVM, CrumbWikiVM, DisastersVM,
-  EndingVM, TakeoverVM,
+  EndingVM, TakeoverVM, MemoVM, ChallengeVM,
 } from "../ui/hud/types";
 import type { Rect } from "./kit/place";
 
@@ -62,6 +62,8 @@ export const SLOT_NAMES = [
   "AuditPin",
   "DramaButton",
   "Drama",
+  "Memo",
+  "Challenge",
 ] as const;
 export type SlotName = (typeof SLOT_NAMES)[number];
 
@@ -159,6 +161,10 @@ export interface SlotPropsMap {
   Ending: { ending: EndingVM; layout: LayoutVM; actions: HudActions };
   /** The Takeover while it plays: "Frontier Lab Tycoon (managed by Frontier-9)", and its last card (`takeover.thanks`). Not modal. */
   Takeover: { takeover: TakeoverVM; layout: LayoutVM; actions: HudActions };
+  /** The Memo (FLT-57): `memo.phase` "coming" is a small countdown (not modal); "extra" is the extra edition (modal, holds time). */
+  Memo: { memo: MemoVM; layout: LayoutVM; actions: HudActions };
+  /** A friend's challenge (FLT-57): "Your friend's lab was Captured on day 212. Beat it?" Modal, holds time; `actions.dismissChallenge()`. */
+  Challenge: { challenge: ChallengeVM; layout: LayoutVM; actions: HudActions };
   /** The News Room button is earned (`visible.news`); mute, the mixer and the skin picker are not. */
   NewsControls: { newsroom: NewsroomVM; sound: SoundVM; skins: SkinPickerVM; visible?: VisibleVM; actions: HudActions };
   NewsArrival: { arrival: NonNullable<NewsroomVM["arrival"]>; actions: HudActions };

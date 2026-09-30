@@ -1,5 +1,7 @@
 // Debug scenes for the endings (FLT-11): `?moment=memo` (The Memo on screen), `takeover` (the autopilot mid-glide),
-// `thanks` (the last card), and `front-<id>` (an ending's front page, fresh off the press). They start from the curated
+// `thanks` (the last card), and `front-<id>` (an ending's front page, fresh off the press). FLT-57 adds
+// `memo-countdown` (three days to go), `memo-race` and `memo-slow` (the extra edition), and `lab2` (a second lab's
+// Acqui-hired front page, offering Lab #3). They start from the curated
 // mid-game campus (it looks lived-in), put it in Era 4, and move it along the ordinary way: the ending's own chart, the
 // ordinary tick. Pure sim; the game itself never calls it.
 import { openEventOf } from "../events";
@@ -9,11 +11,13 @@ import { tick, TICKS_PER_DAY } from "../tick";
 import type { Command } from "../commands";
 import type { GameState } from "../types";
 import { cursorOf } from "./view";
+import { applyLineage } from "./lineage";
+import { offerMemo } from "./memo";
 import { startEnding } from "./driver";
 import { ENDINGS, MEMO_RACE, MEMO_SLOW } from "./pack";
 import { enableEndings } from "./state";
 
-export const ENDING_MOMENTS = ["memo", "takeover", "thanks", ...ENDINGS.map((e) => `front-${e.id}`)] as const;
+export const ENDING_MOMENTS = ["memo", "memo-countdown", "memo-race", "memo-slow", "lab2", "takeover", "thanks", ...ENDINGS.map((e) => `front-${e.id}`)] as const;
 export const isEndingMoment = (m: string | null | undefined): m is string => !!m && (ENDING_MOMENTS as readonly string[]).includes(m);
 
 /** Tick until `done`, answering every card that opens (The Memo stays open only if `keepMemo`). */
@@ -46,10 +50,28 @@ function lateGame(): GameState {
 
 export function stageEndingMoment(moment: string): GameState {
   const s = lateGame();
+  if (moment === "lab2") {
+    // The first lab went under; the second, founded with a loyal researcher, is going the same way.
+    applyLineage(s, stageEndingMoment("front-acquihired"), "loyal");
+    moment = "front-acquihired";
+  }
   if (moment === "memo") {
-    until(s, (w) => openEventOf(w)?.id === "memo", 4, true);
+    until(s, (w) => openEventOf(w)?.id === "memo", 8, true);
     return s;
   }
+  if (moment === "memo-countdown") {
+    offerMemo(s);
+    until(s, (w) => w.day >= w.flags["memo:offered"]! + 2, 3);
+    return s;
+  }
+  if (moment === "memo-race" || moment === "memo-slow") {
+    offerMemo(s);
+    until(s, (w) => openEventOf(w)?.id === "memo", 8, true);
+    tick(s, [{ type: "chooseEvent", eventId: "memo", choiceIndex: moment === "memo-race" ? 0 : 1 }]);
+    until(s, (w) => w.endings!.memo !== undefined, 1);
+    return s;
+  }
+
   // Every other scene is The Memo answered one way or the other (the goals machine steps aside), then the ending.
   const id = moment.startsWith("front-") ? moment.slice(6) : "takeover";
   s.flags["memo:offered"] = s.day;

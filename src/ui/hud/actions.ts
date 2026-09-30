@@ -8,7 +8,8 @@ import { fx } from "../../render/fx/state";
 import { roomAtom, skipNews, viewRoom } from "../../newsroom/state";
 import { dramaActions } from "../../drama/state";
 import { setPhoto, takePhoto } from "../juice/photo";
-import { copySummary, playDaily, shareEnding } from "../share/share";
+import { copyLink, copySummary, playDaily, shareEnding } from "../share/share";
+import { dismissChallenge, dismissMemo } from "../share/social";
 import { arenaOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, senateOpenAtom, staffOpenAtom } from "./state";
 import { skinActions } from "./skinControl";
 import type { StaffJob } from "../../sim/types";
@@ -92,6 +93,10 @@ export const hudActions: HudActions = {
   playDaily,
   shareEnding: () => void shareEnding(),
   copySummary: () => void copySummary(),
+  foundLab: (perk) => send({ type: "FOUND_LAB", perk }),
+  copyLink: () => void copyLink(),
+  dismissChallenge,
+  dismissMemo,
 
   closeStaff: () => {
     send({ type: "SET_ZONE", id: null });

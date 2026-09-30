@@ -16,6 +16,7 @@ import { debugParams } from "../../app/game";
 import { setPhoto, takePhoto, togglePhoto } from "../juice/photo";
 import { chatCountAtom } from "./state";
 import { useShareCard, useTakeoverTitle } from "../share/share";
+import { useStreak } from "../share/social";
 import type { HudVM } from "./types";
 import { defs } from "../../sim/defs";
 
@@ -193,4 +194,5 @@ export function useHudEffects(vm: HudVM, snap: Snapshot) {
   useEffect(startDrama, []);
   useShareCard(vm);
   useTakeoverTitle(vm);
+  useStreak(snap.day);
 }

@@ -121,6 +121,8 @@ export const appMachine = setupEffect({
       NEW_LAB: Schema.Struct({}),
       /** Today's lab: a new lab on the date's seed ("2026-09-30"), the same campus for everyone that day. */
       DAILY_LAB: Schema.Struct({ daily: Schema.String }),
+      /** Found a new lab (FLT-57): the sequel to the one that just ended, on a fresh seed, keeping one perk. */
+      FOUND_LAB: Schema.Struct({ perk: Schema.String }),
       TOAST: Schema.Struct({ text: Schema.String, tone: opaque<Tone>() }),
       /** Tap a walker (or tap away: null) to open or close the inspector. */
       SELECT: Schema.Struct({ id: Schema.NullOr(Schema.Number) }),
@@ -165,7 +167,9 @@ export const appMachine = setupEffect({
         const sim = yield* Sim;
         const ms = yield* Clock.currentTimeMillis;
         const daily = args.event.type === "DAILY_LAB" ? args.event.daily : null;
-        sim.reset(daily ? dailySeed(daily) : ((ms ^ Math.imul(sim.world.seed, 2654435761)) >>> 0) || 1, daily);
+        const seed = daily ? dailySeed(daily) : ((ms ^ Math.imul(sim.world.seed, 2654435761)) >>> 0) || 1;
+        if (args.event.type === "FOUND_LAB") sim.refound(seed, args.event.perk);
+        else sim.reset(seed, daily);
         const report = sim.report(true, true);
         if (report) args.self.send({ type: "SYNCED", report, now: 0 });
       }),
@@ -317,6 +321,10 @@ export const appMachine = setupEffect({
     SET_FOLLOW: ({ context, event }) => (context.selected === null ? undefined : { context: { ...context, follow: event.follow, lastPublishAt: 0 } }),
     HIGHLIGHT: ({ context, event }) => ({ context: { ...context, highlight: event.key === context.highlight ? null : event.key, lastPublishAt: 0 } }),
     DAILY_LAB: (args, enq) => {
+      enq(args.actions.newLab, args);
+      return { context: freshLab(args.context), target: ".playing.running" };
+    },
+    FOUND_LAB: (args, enq) => {
       enq(args.actions.newLab, args);
       return { context: freshLab(args.context), target: ".playing.running" };
     },

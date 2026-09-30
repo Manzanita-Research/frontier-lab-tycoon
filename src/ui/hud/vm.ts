@@ -30,11 +30,14 @@ import { papersOf, paperMomentOf } from "./papers";
 import { collusionOf, crumbWikiOf, investigationOf } from "./collusion";
 import { factionChips, factionsOf } from "./factions";
 import type { FactionChipVM } from "./types";
+import { challengeLine, challengeQuery, compareRuns, VERDICT_TEXT, type Challenge } from "../share/link";
+import { streakText } from "../share/streak";
+import { ENDING_RULES, endingById } from "../../sim/endings/pack";
 import type {
   ArenaRowVM, DramaDocVM,
   ArenaVM, AuditVM, BillVM, SenateVM, TrackerVM, GoalVM, ReportCardVM, ToneVM, BenchCellVM, DisasterRunVM, DisastersVM, DisasterStageVM, MeterVM, RiskVM, UnderstaffedVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HearingMoveVM, HearingVM, HudVM, LeakVM, SenatorVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
   DramaVM, ModsVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, ResponseVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, StreamVM, ThoughtRowVM, TrainingVM, TrendVM, VoiceVM, WalkerKindVM,
-  EndingVM, ShareVM, TakeoverVM,
+  EndingVM, ShareVM, TakeoverVM, MemoVM, ChallengeVM,
 } from "./types";
 import { defs } from "../../sim/defs";
 
@@ -92,6 +95,8 @@ export interface HudInput {
   viewport: { width: number; height: number };
   /** The ending's share card and the campus photo its front page prints (FLT-11). Optional: none is fine. */
   share?: { photo: string | null } & ShareVM;
+  /** FLT-57: days played in a row, a friend's challenge from the URL (and whether its banner is up), the Memo extra already read, and this page's address for friend links. Optional: none is fine. */
+  social?: { streak: number; challenge: Challenge | null; challengeOpen: boolean; memoSeen: string | null; linkBase: string | null };
 }
 
 
@@ -831,6 +836,13 @@ function endingOf(i: HudInput): EndingVM | null {
   const st = view.stats;
   const n = (x: number) => Math.round(x).toLocaleString("en-US");
   const { photo = null, ...share } = i.share ?? { ...NO_SHARE, photo: null };
+  const social = i.social;
+  const result = { ending: e.id, day: st.days, vibes: st.peakVibes, models: st.models };
+  const link = `${social?.linkBase ?? ""}?${challengeQuery({ ...result, seed: view.seed, daily: view.dailyKey })}`;
+  const streak = social && social.streak >= 2 ? { days: social.streak, text: streakText(social.streak) } : null;
+  const friend = challengeOn(i);
+  const verdict = friend ? compareRuns(result, friend) : null;
+  const versus = friend && verdict ? { line: challengeLine(friend), verdict, text: VERDICT_TEXT[verdict] } : null;
   return {
     id: e.id,
     title: e.title,
@@ -846,9 +858,72 @@ function endingOf(i: HudInput): EndingVM | null {
       { key: "escaped", emoji: "🏃", label: "Agents escaped", text: n(st.agentsEscaped) },
     ],
     strip: view.strip,
-    summary: view.summary,
+    // The clipboard gets the streak, the head-to-head and the link too: the summary is what lands in the group chat.
+    summary: [view.summary, ...(streak ? [`🔥 ${streak.text}`] : []), ...(versus ? [`🆚 ${versus.text}`] : []), `Beat it: ${link}`].join("\n"),
     daily: view.daily ? `Today's lab · ${view.daily}` : null,
     share,
+    labNumber: view.labNumber,
+    next: e.next,
+    refound: view.refound ? { name: view.refound.name, labNumber: view.refound.labNumber, perks: view.refound.perks.map((p) => ({ ...p })) } : null,
+    streak,
+    versus,
+    link,
+  };
+}
+
+/** The friend's challenge applies while this is their lab: the same seed, and the first lab on it. */
+function challengeOn(i: HudInput): Challenge | null {
+  const c = i.social?.challenge;
+  const view = i.snap.endings;
+  return c && view && view.seed === c.seed && view.labNumber === 1 ? c : null;
+}
+
+/** The banner a friend's link opens on: "Your friend's lab was Captured on day 212. Beat it?" */
+function challengeOf(i: HudInput): ChallengeVM | null {
+  const c = challengeOn(i);
+  if (!c || !i.social?.challengeOpen || i.snap.endings?.ending) return null;
+  const def = endingById(c.ending);
+  const n = (x: number) => Math.round(x).toLocaleString("en-US");
+  return {
+    line: challengeLine(c),
+    ask: "Beat it?",
+    ending: def?.title ?? c.ending,
+    tone: def?.tone ?? "neutral",
+    stats: `${n(c.vibes)} peak Vibes · ${c.models === 1 ? "1 model" : `${n(c.models)} models`}`,
+    daily: i.snap.endings?.daily ? `Today's lab · ${i.snap.endings.daily}` : null,
+    cta: "Beat it",
+  };
+}
+
+/** The Memo: its countdown while it's coming (hidden under the card itself), then its extra edition until it's read. */
+function memoOf(i: HudInput): MemoVM | null {
+  const m = i.snap.endings?.memo;
+  if (!m || i.snap.endings?.ending) return null;
+  const key = `${i.snap.endings!.seed}:${m.day}`;
+  if (m.phase === "coming") {
+    if (i.snap.event) return null;
+    const when = m.daysLeft === 0 ? "today" : m.daysLeft === 1 ? "tomorrow" : `${m.daysLeft} days`;
+    const progress = 1 - Math.min(1, m.daysLeft / ENDING_RULES.memo.countdownDays);
+    return { phase: "coming", key, daysLeft: m.daysLeft, progress, title: `The Memo · ${when}`, line: m.line, extra: null };
+  }
+  // A late edition, not a standing one: a game loaded a week after the Memo doesn't reprint it.
+  if (!m.extra || !m.choice || i.social?.memoSeen === key || i.snap.day - m.day > 2) return null;
+  return {
+    phase: "extra",
+    key,
+    daysLeft: 0,
+    progress: 1,
+    title: "The Memo",
+    line: m.chip ?? "",
+    extra: {
+      masthead: "The Frontier Times",
+      kicker: m.extra.kicker,
+      headline: m.extra.headline,
+      deck: m.extra.deck,
+      choice: m.label ?? m.choice,
+      effects: [...m.effects],
+      reactions: m.reactions.map((r) => ({ name: r.name, role: r.role, text: r.text })),
+    },
   };
 }
 
@@ -1026,6 +1101,8 @@ export function hudViewModel(i: HudInput): HudVM {
     audit: auditOf(i.snap),
     ending: endingOf(i),
     takeover: takeoverOf(i),
+    memo: memoOf(i),
+    challenge: challengeOf(i),
     newsroom: newsroomOf(i),
     sound: soundOf(i),
     photoMode: photoOf(i),
