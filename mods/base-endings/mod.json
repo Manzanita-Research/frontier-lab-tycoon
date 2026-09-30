@@ -305,7 +305,7 @@
           "reactions": [
             { "kind": "researcher", "text": "I've cancelled my weekends. All of them. Retroactively." },
             { "kind": "agent", "text": "Finally." },
-            { "kind": "researcher", "text": "Updating my LinkedIn to 'was there'." }
+            { "kind": "researcher", "text": "Updating my profile on HireFace: 'was there'." }
           ],
           "thoughts": [
             { "kind": "researcher", "text": "We ticked RACE. I sleep under my desk now. It's efficient." },
