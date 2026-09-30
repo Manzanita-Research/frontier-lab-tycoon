@@ -215,8 +215,8 @@ button {
   background: currentColor;
 }
 .speed button.on {
-  background: var(--ink);
-  color: var(--cream);
+  background: var(--flt-color-selection);
+  color: var(--flt-color-selectionText);
 }
 
 /* Build bar */
@@ -312,10 +312,10 @@ button {
   padding-bottom: env(safe-area-inset-bottom);
   display: flex;
   align-items: center;
-  background: var(--ink);
+  background: var(--flt-color-selection);
   color: var(--flt-color-selectionText);
   pointer-events: auto;
-  border-top: 3px solid #1f160e;
+  border-top: var(--flt-border-width) var(--flt-border-style) var(--flt-color-line);
 }
 .ticker-tag {
   flex: 0 0 auto;
@@ -484,7 +484,7 @@ button {
   transform: translate(-50%, -50%);
   padding: 4px 10px;
   border-radius: var(--flt-radius-button);
-  background: var(--ink);
+  background: var(--flt-color-selection);
   color: var(--flt-color-selectionText);
   font: 800 12.5px var(--font);
   white-space: nowrap;
@@ -535,8 +535,8 @@ button {
 .obj-count {
   padding: 0 8px;
   border-radius: 9px;
-  background: var(--ink);
-  color: var(--cream);
+  background: var(--flt-color-selection);
+  color: var(--flt-color-selectionText);
   font-size: 12px;
 }
 .obj-left {
@@ -765,8 +765,8 @@ button {
   display: grid;
   place-items: center;
   border-radius: 9px;
-  background: var(--ink);
-  color: var(--cream);
+  background: var(--flt-color-selection);
+  color: var(--flt-color-selectionText);
   font-size: 16px;
   font-weight: 900;
 }
@@ -1210,7 +1210,7 @@ button {
   display: grid;
   place-items: center;
   border-radius: 9px;
-  background: var(--ink);
+  background: var(--flt-color-selection);
   color: var(--flt-color-selectionText);
   font-weight: 900;
   font-size: 14px;
@@ -1406,7 +1406,7 @@ button {
   transform: translate(-50%, 6px);
   padding: 2px 9px 3px;
   border-radius: 9px;
-  background: var(--ink);
+  background: var(--flt-color-selection);
   color: var(--flt-color-selectionText);
   font: 900 12px var(--font);
   white-space: nowrap;

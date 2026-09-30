@@ -1,0 +1,84 @@
+/* Swag Drop (stub): desk merch. Base slots, restyled with tokens plus a few merch details. */
+[data-skin="swag-drop"] {
+  .panel {
+    background-image: linear-gradient(transparent 27px, color-mix(in srgb, var(--flt-color-line) 6%, transparent) 28px);
+    background-size: 100% 28px;
+  }
+  .vibes-btn {
+    background: var(--flt-color-accent);
+    border: var(--flt-border-width) solid var(--flt-color-line);
+    border-radius: var(--flt-radius-pill);
+    padding: 2px 16px;
+    box-shadow: var(--flt-shadow-pop);
+  }
+  .vibes-label,
+  .vibes-value,
+  .vibes-arrow {
+    color: var(--flt-color-accentText);
+  }
+  .obj-list li {
+    background: #ffe27a;
+    border: 2px solid var(--flt-color-line);
+    border-radius: 4px;
+    padding: 6px 8px;
+    transform: rotate(-0.6deg);
+    box-shadow: 2px 2px 0 var(--flt-color-line);
+    &:nth-child(even) {
+      transform: rotate(0.7deg);
+    }
+  }
+  .buildbar .tool {
+    background: #f4eee4;
+    border: 2px solid var(--flt-color-line);
+    border-bottom-width: 6px;
+    border-radius: 10px;
+    box-shadow: none;
+    &.on {
+      background: var(--flt-color-accent);
+      transform: translateY(3px);
+      border-bottom-width: 3px;
+    }
+    &.broke {
+      opacity: 0.55;
+    }
+  }
+  .ticker {
+    background: #1e2a2f;
+    color: #7ff0d0;
+    font-family: var(--flt-font-mono);
+    border-top-width: 2px;
+  }
+  .ticker-tag {
+    background: #22d3ee;
+    color: #1e2a2f;
+    border-radius: 3px;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .tick,
+  .tick.neutral {
+    color: #7ff0d0;
+    font-weight: 400;
+  }
+  .tick.good {
+    color: #b4f5c2;
+  }
+  .tick.bad {
+    color: #ffb0a6;
+  }
+  .inspector {
+    border-top: 22px solid var(--flt-color-accent);
+    border-top-left-radius: 22px;
+    border-top-right-radius: 22px;
+  }
+  .toast {
+    transform: rotate(-1deg);
+    &:nth-child(even) {
+      transform: rotate(1deg);
+    }
+  }
+  .bubble {
+    font-family: var(--flt-font-ui);
+    background: #ffe27a;
+  }
+}

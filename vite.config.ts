@@ -27,6 +27,8 @@ export default defineConfig({
     // The wall-clock perf tests share a 1-vCPU box with every other test file: run the files one at a time so
     // they measure the sim, not the neighbours.
     fileParallelism: false,
-    include: ["src/**/*.test.ts"],
+    include: ["src/**/*.test.{ts,tsx}"],
+    // The skin tests read each skin's CSS as text (scoping, tokens); everything else stays an empty module.
+    css: { include: [/src\/skins\/[^/]+\/skin\.css/] },
   },
 });

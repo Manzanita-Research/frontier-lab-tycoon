@@ -259,8 +259,8 @@ body.photo .world .reason {
   background: var(--cream-2);
 }
 .photo-times button.on {
-  background: var(--ink);
-  color: var(--cream);
+  background: var(--flt-color-selection);
+  color: var(--flt-color-selectionText);
 }
 .photo-done {
   background: var(--cream-2);
