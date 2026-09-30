@@ -75,7 +75,7 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
       return { event: vms.hearing!.event!, hearing: vms.hearing!.event!.hearing!, actions };
     case "LeakedChat":
       return { event: vms.leak!.event!, leak: vms.leak!.event!.leak!, actions };
-    case "Drama":
+    case "DramaCard":
       return { event: vms.resign!.event!, drama: vms.resign!.event!.drama!, actions };
     case "Bill":
       return { event: vms.bill!.event!, bill: vms.bill!.event!.bill!, actions };

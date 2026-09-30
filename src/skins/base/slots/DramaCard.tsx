@@ -1,10 +1,10 @@
 import { useT } from "../../context";
-import type { DramaVM } from "../../../ui/hud/types";
+import type { DramaDocVM } from "../../../ui/hud/types";
 import type { SlotPropsMap } from "../../types";
 import { Choices } from "./EventCard";
 
 /** The document on a drama card: a letter on paper, an email with its headers, or a manifesto in big type. */
-export function DramaDoc({ drama }: { drama: DramaVM }) {
+export function DramaDoc({ drama }: { drama: DramaDocVM }) {
   return (
     <div className={`drama-doc drama-${drama.style}`} aria-label={drama.file}>
       <div className="drama-file">{drama.file}</div>
@@ -28,7 +28,7 @@ export function DramaDoc({ drama }: { drama: DramaVM }) {
 }
 
 /** Defection's resignation letter and manifesto, the Poaching War's recruiter email: the document first, then the card. */
-export function Drama({ event, drama, actions }: SlotPropsMap["Drama"]) {
+export function DramaCard({ event, drama, actions }: SlotPropsMap["DramaCard"]) {
   const t = useT();
   return (
     <div className="modal-backdrop">

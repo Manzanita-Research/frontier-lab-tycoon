@@ -2,7 +2,7 @@
 // nothing else in the game: no `src/sim/**`, no store, no three.
 import type { ComponentType, ReactNode } from "react";
 import type {
-  ArenaVM, AuditVM, BillVM, TrackerVM, ReportCardVM, BubbleVM, FactionsVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, DramaVM, EraCardVM, EventVM, HearingVM, HudActions, HudVM, LeakVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
+  ArenaVM, AuditVM, BillVM, TrackerVM, ReportCardVM, BubbleVM, FactionsVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, DramaDocVM, EraCardVM, EventVM, HearingVM, HudActions, HudVM, LeakVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
   ModsVM, NewsroomVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StatsVM, ThoughtRowVM, TickerItemVM,
   StaffVM, TeaserVM, ProgressVM, ToastVM, TrainingVM, UnlockCardVM, VisibleVM, HelpVM, PapersVM, PaperMomentVM, CrumbWikiVM, DisastersVM,
 } from "../ui/hud/types";
@@ -35,7 +35,7 @@ export const SLOT_NAMES = [
   "Livestream",
   "Hearing",
   "LeakedChat",
-  "Drama",
+  "DramaCard",
   "Bill",
   "PromiseTracker",
   "EraCard",
@@ -125,7 +125,7 @@ export interface SlotPropsMap {
   /** The yacht summit's leaked group chat (FLT-24): the rivals' messages with a LEAKED stamp, and the three replies. Opens instead of EventCard for `event.kind === "leak"`; answer with `actions.choose`. */
   LeakedChat: { event: EventVM; leak: LeakVM; actions: HudActions };
   /** A drama card (Defection's resignation letter and manifesto, the Poaching War's recruiter email). Opens instead of `EventCard` for `event.kind === "drama"`; answer it with `actions.choose` (up to four choices). */
-  Drama: { event: EventVM; drama: DramaVM; actions: HudActions };
+  DramaCard: { event: EventVM; drama: DramaDocVM; actions: HudActions };
   /**
    * Regulatory Capture's bill (FLT-22): the draft the lab was asked to write (tick clauses with `actions.draftClause`,
    * up to `bill.pick`), and the leak ("Author: {lab} Legal"). Opens instead of EventCard for `event.kind === "bill"`;

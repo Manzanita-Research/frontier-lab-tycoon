@@ -51,7 +51,7 @@ import { Voice } from "./slots/Voice";
 import { Livestream } from "./slots/Livestream";
 import { Hearing } from "./slots/Hearing";
 import { LeakedChat } from "./slots/LeakedChat";
-import { Drama } from "./slots/Drama";
+import { DramaCard } from "./slots/DramaCard";
 import { Bill } from "./slots/Bill";
 import { PromiseTracker } from "./slots/PromiseTracker";
 import { Training } from "./slots/Training";
@@ -65,6 +65,6 @@ import { Layout } from "./Layout";
 
 export const baseSlots: SlotComponents = {
   Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, Bubble, ThoughtsPanel, Ticker, Toast, Assistant,
-  EventCard, Confirm, Coach, UnlockCard, HowToPlay, Arena, Benchmarks, Voice, Factions, Livestream, Hearing, LeakedChat, Drama, Bill, PromiseTracker, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, NewsControls,
+  EventCard, Confirm, Coach, UnlockCard, HowToPlay, Arena, Benchmarks, Voice, Factions, Livestream, Hearing, LeakedChat, DramaCard, Bill, PromiseTracker, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, NewsControls,
   NewsArrival, NewsRoom, Mixer, ModManager, Papers, PaperMoment, CrumbWiki, DisasterMenu, DisasterAlert, ReportCard, AuditPin,
 };

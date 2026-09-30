@@ -597,7 +597,7 @@ export interface EventVM {
   /** The leaked group chat, on the yacht's leak card. */
   leak?: LeakVM | null;
   /** The document a drama card is about: the resignation letter, the recruiter's email, the manifesto. */
-  drama?: DramaVM | null;
+  drama?: DramaDocVM | null;
   /** The auditors' report card (FLT-19), on its `report` card. */
   report?: ReportCardVM | null;
   /** The bill, on Regulatory Capture's draft and leak cards. */
@@ -607,7 +607,7 @@ export interface EventVM {
 }
 
 /** A drama card's document (Defection, the Poaching War). Every string is filled in; `lines` are paragraphs. */
-export interface DramaVM {
+export interface DramaDocVM {
   /** letter: a resignation letter someone is still drafting. email: a recruiter's offer. manifesto: a new lab's one-pager. */
   style: "letter" | "email" | "manifesto";
   /** What the file would be called ("resignation_DRAFT_v7.doc", "MANIFESTO.txt"). */

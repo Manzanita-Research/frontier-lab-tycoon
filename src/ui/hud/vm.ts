@@ -31,7 +31,7 @@ import { collusionOf, crumbWikiOf, investigationOf } from "./collusion";
 import { factionChips, factionsOf } from "./factions";
 import type { FactionChipVM } from "./types";
 import type {
-  ArenaRowVM, DramaVM,
+  ArenaRowVM, DramaDocVM,
   ArenaVM, AuditVM, BillVM, SenateVM, TrackerVM, GoalVM, ReportCardVM, ToneVM, BenchCellVM, DisasterRunVM, DisastersVM, DisasterStageVM, MeterVM, RiskVM, UnderstaffedVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HearingMoveVM, HearingVM, HudVM, LeakVM, SenatorVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
   ModsVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, ResponseVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, StreamVM, ThoughtRowVM, TrainingVM, TrendVM, VoiceVM, WalkerKindVM,
 } from "./types";
@@ -351,7 +351,7 @@ function bubblesOf(i: HudInput, chips: ReadonlyMap<string, FactionChipVM>): Bubb
 }
 
 /** A drama card's document, filled in from the pack's template. */
-function dramaOf(id: string, vars: Record<string, string>): DramaVM | null {
+function dramaOf(id: string, vars: Record<string, string>): DramaDocVM | null {
   const l = DRAMA_LETTERS.get(id);
   if (!l) return null;
   const f = (s: string) => fillTemplate(s, vars);
