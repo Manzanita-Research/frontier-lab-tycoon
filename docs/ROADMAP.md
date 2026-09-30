@@ -16,21 +16,41 @@ The test for every feature: **does it make a moment worth a screenshot within 30
 4. **The Juice.** Camera that swoops to the action, particles (confetti, GPU smoke, protest water droplets, agent sparkle trails), day/night with campus lights, odometer numbers, a synth sound kit, and a **tilt-shift photo mode** that makes the campus look like a real toy.
 5. **The Front Page.** A weekly *Frontier Times* front page, a monthly "what just happened in AI" group chat (a skeptic, a doomer, an accelerationist and your mom), and five endings, each a shareable front page. The best one is **The Takeover**: you win the race and the AI politely starts playing the game for you.
 
-## Slices, in order
+## Where we are (updated Sep 30)
 
-| # | Task | Slice | Builders | Why now |
-|---|---|---|---|---|
-| 0 | FLT-4 | **Foundation**: port to XState v6 + Effect v4 | 1 (running) | Everything else is machines on this |
-| 1 | FLT-8 | **The Crowd**: named walkers, needs, Vibes 0–999, inspector, thoughts list | 1 | The RCT heart; everything reads Vibes |
-| 1 | FLT-6 | **Juice I**: camera director, particles, day/night, photo mode, odometers | 1 | Render-only, parallel-safe with FLT-8 |
-| 2 | FLT-10 | **Operations**: staff, slop, breakdowns, queues | 1 | Gives the crowd problems to solve |
-| 2 | FLT-9 | **The Race**: rivals, leaderboard, eras, R&D multiplier, open weights, compute auction | 1 | Pressure and pacing for a 45-minute run |
-| 3 | FLT-5 | **The Circus**: Sandbox Escape chase, Hearing, Capture, Promise Tracker, Collusion, Poaching; Jev Worker API follows static hosting | 1 | The jokes people send |
-| 3 | FLT-7 | **Sound + News Room**: synth kit, Frontier Times, group-chat recap | 1 | The news cycle as content |
-| 4 | FLT-11 | **Endings + Share**: five endings, front-page share card, daily seed | 1 | The screenshot people send |
-| any | FLT-12 | **Public link** (ship): [public Worker](https://flt-prod.manzanita.workers.dev), Alchemy deployment from GitHub, PR previews and cleanup | 1, done | Friends can play without bb |
+**Shipped and live** at https://flt-prod.manzanita.workers.dev (deploys on every merge):
+- the first playable and slice 2 (FLT-3)
+- the XState + Effect port (FLT-4)
+- Juice I (FLT-6)
+- The Crowd (FLT-8)
+- The Race (FLT-9)
+- Sound + News Room (FLT-7)
+- the public link (FLT-12)
 
-FLT-3 (the first playable) closes when slice 2's PR (#4) merges.
+The FLT-13 Fal 3D experiment is done; its recommendation is hybrid, and rolling it out is Jem's call.
+
+## Next, in order
+
+| # | Task | What | Notes |
+|---|---|---|---|
+| now | FLT-10 | **Operations**: staff, slop, breakdowns, queues | building |
+| now | FLT-14 | **Skin system** + **Frontier 95** default skin; then 5 more skins (Swag Drop, Karaoke Night, Field Almanac, Discovery Disc '96, GeoCities) | Jem approves before merge; the ports run on Codex Sol |
+| next | FLT-16 | **First-run + pacing**: calm start, RCT-style visitor growth, guided opening | urgent; Jem plays it before merge |
+| then | FLT-15 | **Agent-native modding**: every extension point is an Effect service, every mod a Layer; `?mod=` links; `flt-mod check`; a mod-authoring skill | M1 after the FLT-14 skin format |
+| then | FLT-5 | **The Circus**, 10 standalone mechanics, each a built-in content pack (mod example) | see below |
+| later | FLT-11 | **Endings + share card + daily seed** | |
+
+**The Circus (FLT-5 sub-tasks):**
+- FLT-17 Disasters (SimCity-style menu; Rogue Agent Swarm, GPU Fire, Weights Leak)
+- FLT-18 Agent Collusion ("the Swarm")
+- FLT-19 External Auditors ("Evals Without Borders")
+- FLT-20 Poaching War
+- FLT-21 The Hearing (Jev later)
+- FLT-22 Regulatory Capture
+- FLT-23 Promise Tracker
+- FLT-24 Corporate Collusion (the yacht)
+- FLT-25 Protests grow
+- FLT-26 **Defection**: top researchers spin out a rival lab
 
 ## Rules for every slice
 
