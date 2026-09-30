@@ -11,6 +11,8 @@ import { YACHT } from "../sim/yacht/pack";
 import { DEFECTION, type Letter } from "../sim/defection/pack";
 import { POACHING } from "../sim/poaching/pack";
 import { AUDITORS } from "../sim/auditors/pack";
+import { PROMISES } from "../sim/promises/pack";
+import { CAPTURE } from "../sim/capture/pack";
 
 /** What has to be true for an event to fire. `all` combines conditions. */
 export type Condition =
@@ -62,8 +64,8 @@ export interface EventDef {
   cooldown?: number;
   /** One to three (a pack's drama card may have four). */
   choices: EventChoice[];
-  /** Presentation: a full-screen era title card, the auction room, Leapfrog's forced response and launch livestream, The Hearing's witness table (FLT-21), the yacht's leaked group chat (FLT-24), a drama card's document (FLT-26, FLT-20) or the auditors' report card (FLT-19). Anything else is the plain card. */
-  kind?: "era" | "auction" | "response" | "stream" | "hearing" | "leak" | "drama" | "report";
+  /** Presentation: a full-screen era title card, the auction room, Leapfrog's forced response and launch livestream, The Hearing's witness table (FLT-21), the yacht's leaked group chat (FLT-24), a drama card's document (FLT-26, FLT-20) the auditors' report card (FLT-19), the bill FLT-22 drafts or FLT-23's roll call. Anything else is the plain card. */
+  kind?: "era" | "auction" | "response" | "stream" | "hearing" | "leak" | "drama" | "report" | "bill" | "vote";
   /** The stripe text at the top of the card, when it isn't the tone's ("Breaking", "Developing", ...). */
   stripe?: string;
 }
@@ -313,6 +315,9 @@ EVENTS.push(...YACHT.content.events.add as EventDef[]);
 EVENTS.push(...DEFECTION.content.events.add as EventDef[], ...POACHING.content.events.add as EventDef[]);
 // FLT-19: Evals Without Borders' notice and report card (mods/base-auditors), behind their offer flags like the rest.
 EVENTS.push(...AUDITORS.content.events.add as EventDef[]);
+// FLT-23 and FLT-22: the Senate's whip and roll-call cards and the bill's cards (mods/base-promises, mods/base-capture).
+EVENTS.push(...PROMISES.content.events.add as EventDef[]);
+EVENTS.push(...CAPTURE.content.events.add as EventDef[]);
 
 export const eventById = (id: string): EventDef | undefined => EVENTS.find((e) => e.id === id);
 /** How each drama card looks on screen (the letter, the email, the manifesto): templates from the packs, by card id. */

@@ -15,9 +15,9 @@ export type ContentPatch = NonNullable<Mod["content"]>;
 /** The Vocabulary a mod arc may call (the game's src/sim/verbs.ts; a test keeps these lists equal). */
 export const GUARD_NAMES = ["after", "every", "progress.gte", "stat.gte", "stat.lte", "chance", "choice", "day.after", "flag.is", "not", "any", "all"] as const;
 export const ACTION_NAMES = [
-  "investigate.start", "staff.divert", "staff.release", "compute.drain", "cost.spike", "revenue.mult", "auditor.odds", "effects.end",
+  "investigate.start", "staff.divert", "staff.release", "compute.drain", "cost.spike", "revenue.mult", "auditor.odds", "auditor.note", "effects.end",
   "building.fire", "building.offline", "building.wear", "building.ensure", "hype.delta", "trust.delta", "heat.delta", "capture.delta", "discourse.delta",
-  "cash.delta", "rival.leap", "camera.focus", "shake", "sound.cue", "news", "toast", "card", "flag.set", "flag.clear",
+  "cash.delta", "rival.leap", "rival.growth", "rival.pace", "rival.closed", "camera.focus", "shake", "sound.cue", "news", "toast", "card", "flag.set", "flag.clear",
   "people.meet", "people.quit", "people.pay", "people.cheer",
   "visitors.arrive", "visitors.leave", "walkers.disguise", "walkers.reveal",
 ] as const;

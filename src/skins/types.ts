@@ -2,7 +2,7 @@
 // nothing else in the game: no `src/sim/**`, no store, no three.
 import type { ComponentType, ReactNode } from "react";
 import type {
-  ArenaVM, AuditVM, ReportCardVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, DramaVM, EraCardVM, EventVM, HearingVM, HudActions, HudVM, LeakVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
+  ArenaVM, AuditVM, BillVM, TrackerVM, ReportCardVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, DramaVM, EraCardVM, EventVM, HearingVM, HudActions, HudVM, LeakVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
   ModsVM, NewsroomVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StatsVM, ThoughtRowVM, TickerItemVM,
   StaffVM, TeaserVM, ProgressVM, ToastVM, TrainingVM, UnlockCardVM, VisibleVM, HelpVM, PapersVM, PaperMomentVM, CrumbWikiVM, DisastersVM,
 } from "../ui/hud/types";
@@ -35,6 +35,8 @@ export const SLOT_NAMES = [
   "Hearing",
   "LeakedChat",
   "Drama",
+  "Bill",
+  "PromiseTracker",
   "EraCard",
   "FrontPage",
   "GroupChat",
@@ -117,6 +119,19 @@ export interface SlotPropsMap {
   LeakedChat: { event: EventVM; leak: LeakVM; actions: HudActions };
   /** A drama card (Defection's resignation letter and manifesto, the Poaching War's recruiter email). Opens instead of `EventCard` for `event.kind === "drama"`; answer it with `actions.choose` (up to four choices). */
   Drama: { event: EventVM; drama: DramaVM; actions: HudActions };
+  /**
+   * Regulatory Capture's bill (FLT-22): the draft the lab was asked to write (tick clauses with `actions.draftClause`,
+   * up to `bill.pick`), and the leak ("Author: {lab} Legal"). Opens instead of EventCard for `event.kind === "bill"`;
+   * answer with `actions.choose`.
+   */
+  Bill: { event: EventVM; bill: BillVM; actions: HudActions };
+  /**
+   * The Promise Tracker (FLT-23): the motion on the docket and three senators (what they promised, how they lean, the
+   * lobbyists' fee through `actions.lobby`, their Truth-o-meter). Opens instead of EventCard for `event.kind === "vote"`
+   * (answer with `actions.choose`), and as a window from the build palette's "senate" tile with `event` null (close with
+   * `actions.closeSenate`). `bill` is the law in force, if any, for a skin that shows it alongside.
+   */
+  PromiseTracker: { event: EventVM | null; tracker: TrackerVM; bill: BillVM | null; layout: LayoutVM; actions: HudActions };
   EraCard: { era: EraCardVM; actions: HudActions };
   FrontPage: { paper: PaperVM; actions: HudActions };
   GroupChat: { chat: ChatVM; actions: HudActions };

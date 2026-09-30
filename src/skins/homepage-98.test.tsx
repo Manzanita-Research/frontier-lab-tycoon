@@ -68,11 +68,11 @@ describe("homepage-98", () => {
 
   describe("the WebRing", () => {
     const item = (kind: string, o: Partial<BuildItemVM> = {}): BuildItemVM => ({ kind, name: kind, short: kind, blurb: null, price: 1, priceText: "$1", free: false, affordable: true, hotkey: null, selected: false, race: false, built: 0, isBulldoze: false, isPath: false, ...o });
-    const ring = [item("path"), item("cluster"), item("hall"), item("bulldoze"), item("staff")];
+    const ring = [item("path"), item("cluster"), item("hall"), item("bulldoze"), item("staff", { panel: true }), item("senate", { panel: true })];
 
     it("starts at the first tool going Next and at the last going Prev", () => {
       expect(ringStep(ring, 1)).toBe("path");
-      expect(ringStep(ring, -1)).toBe("bulldoze"); // the payroll tile is not part of the ring
+      expect(ringStep(ring, -1)).toBe("bulldoze"); // the payroll and Senate tiles are not part of the ring
     });
 
     it("goes round from the tool in hand, in both directions, and never runs out", () => {

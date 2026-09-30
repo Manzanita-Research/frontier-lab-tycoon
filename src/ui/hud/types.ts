@@ -143,6 +143,8 @@ export interface BuildItemVM {
   built: number;
   isBulldoze: boolean;
   isPath: boolean;
+  /** A tile that opens a window instead of picking a tool ("staff", "senate"): never the tool in your hand. */
+  panel?: boolean;
 }
 
 export interface BuildTipVM {
@@ -413,6 +415,96 @@ export interface HearingVM {
   verdict: { id: string; title: string; line: string } | null;
 }
 
+/** One clause of the bill (FLT-22): the legalese, what it really means, what it does to the race, and how shameless it is (1 to 3). */
+export interface BillClauseVM {
+  id: string;
+  title: string;
+  legal: string;
+  plain: string;
+  effect: string;
+  shame: number;
+  /** Ticked on the draft, or in the bill once it has gone to the floor. */
+  on: boolean;
+}
+/** What the law in force does to one rival: short tags ("grows 45% slower", "ships closed"), empty when untouched. */
+export interface BillRivalVM {
+  id: string;
+  name: string;
+  tags: string[];
+}
+/** Regulatory Capture (FLT-22): the bill the lab was asked to "take a first pass" at. */
+export interface BillVM {
+  /** "invited" (the draft), "floor", "law", "exposed", or a resting stage ("quiet", "declined", "failed", "fallout", "sunset"). */
+  stage: string;
+  act: string;
+  /** "The_Frontier_Freedom_Act_FINAL_v3.doc" */
+  fileName: string;
+  /** Who the file properties say wrote it, and the paper that will read them. */
+  author: string;
+  reporter: string;
+  clauses: BillClauseVM[];
+  /** The draft can be edited (clauses ticked with `actions.draftClause`). */
+  editable: boolean;
+  picked: number;
+  pick: number;
+  /** "1 of 2 clauses" */
+  pickText: string;
+  /** "Draft", "On the floor", "In force · day 21", "Exposed", ... */
+  status: string;
+  /** Ayes out of three at the last roll call ("2–1"), or null. */
+  tally: string | null;
+  /** The chance a day that someone opens the file properties ("0.4% a day"), while the law stands. */
+  leakText: string | null;
+  /** What the law does to each rival, while it stands. */
+  rivals: BillRivalVM[];
+}
+
+/** One senator on the Promise Tracker (FLT-23). */
+export interface TrackerSenatorVM {
+  id: string;
+  name: string;
+  role: string;
+  seat: string;
+  look: { skin: string; suit: string; hair: string; tie: string; glasses: boolean };
+  /** What they promised about the motion on the docket, and the quote from the headline. */
+  said: "aye" | "nay" | "both" | null;
+  saidText: string;
+  line: string;
+  /** How they would vote today ("aye"/"nay"), and the odds they vote the lab's way ("62%"). */
+  leaning: "aye" | "nay" | null;
+  oddsText: string;
+  lobbied: boolean;
+  /** The lobbyists' fee, and whether it can be paid now (in session, not yet lobbied, the lab has the cash). */
+  feeText: string;
+  canLobby: boolean;
+  /** Truth-o-meter: 0 to 100 (null before any vote), its label ("Pants Ablaze") and the score ("3 kept · 5 broken"). */
+  truth: number | null;
+  truthText: string;
+  truthLabel: string;
+  record: string;
+  /** Their last votes, newest last: the motion, what they said, how they voted. */
+  recent: { title: string; said: string; voted: string; kept: boolean; lobbied: boolean }[];
+}
+/** The Promise Tracker (FLT-23): the motion on the docket and three senators' promises, votes and Truth-o-meters. */
+export interface TrackerVM {
+  /** "recess", "campaign", "rollCall", "passed", "failed" (or "dormant"). */
+  stage: string;
+  motion: { id: string; title: string; summary: string; labSide: "aye" | "nay"; labSideText: string } | null;
+  /** "Roll call in 3 days", "In recess", "Passed 2–1" */
+  status: string;
+  /** Lobbying is open: `actions.lobby(id)`. */
+  lobbying: boolean;
+  senators: TrackerSenatorVM[];
+  last: { title: string; passed: boolean; tally: string } | null;
+  held: number;
+}
+/** The Senate window (a build-bar tile opens it once the Promise Tracker is awake). */
+export interface SenateVM {
+  open: boolean;
+  tracker: TrackerVM | null;
+  bill: BillVM | null;
+}
+
 /** The leaked group chat (FLT-24): the yacht's name, the group's, and who said what. */
 export interface LeakVM {
   yachtName: string;
@@ -488,8 +580,8 @@ export interface EventVM {
   tone: ToneVM;
   /** The top-stripe text: "Breaking", "Developing", ... */
   stripe: string;
-  /** "response" and "stream" are Release Leapfrog's cards: `response` / `stream` carry their extra data. "hearing" (FLT-21) and "leak" (FLT-24) carry `hearing` / `leak`; "drama" (FLT-26, FLT-20) carries `drama`; "report" is the auditors' report card (FLT-19, `report`). */
-  kind: "plain" | "auction" | "response" | "stream" | "hearing" | "leak" | "drama" | "report";
+  /** "response" and "stream" are Release Leapfrog's cards: `response` / `stream` carry their extra data. "hearing" (FLT-21) and "leak" (FLT-24) carry `hearing` / `leak`; "drama" (FLT-26, FLT-20) carries `drama`; "report" is the auditors' report card (FLT-19, `report`); "bill" (FLT-22) and "vote" (FLT-23) carry `bill` / `tracker`. */
+  kind: "plain" | "auction" | "response" | "stream" | "hearing" | "leak" | "drama" | "report" | "bill" | "vote";
   choices: ChoiceVM[];
   paddles: AuctionPaddleVM[];
   response: ResponseVM | null;
@@ -504,6 +596,10 @@ export interface EventVM {
   drama?: DramaVM | null;
   /** The auditors' report card (FLT-19), on its `report` card. */
   report?: ReportCardVM | null;
+  /** The bill, on Regulatory Capture's draft and leak cards. */
+  bill?: BillVM | null;
+  /** The Promise Tracker, on its whip and roll-call cards. */
+  tracker?: TrackerVM | null;
 }
 
 /** A drama card's document (Defection, the Poaching War). Every string is filled in; `lines` are paragraphs. */
@@ -1067,6 +1163,8 @@ export interface HudVM {
   buildTip: BuildTipVM | null;
   speed: SpeedVM;
   staff: StaffVM;
+  /** The Senate window: the Promise Tracker and the bill (FLT-22/23). `tracker` is null until the pack wakes. */
+  senate: SenateVM;
   bubbles: BubbleVM[];
   ticker: TickerItemVM[];
   toasts: ToastVM[];
@@ -1113,7 +1211,7 @@ export interface HudVM {
 
 /** Everything a skin may ask the game to do. Each one is safe to call at any time; the game ignores what does not apply. */
 export interface HudActions {
-  /** Pick a build tool ("path", "cluster", ..., "bulldoze"). Picking the selected one puts it away; `null` clears. `"staff"` opens or closes the payroll. */
+  /** Pick a build tool ("path", "cluster", ..., "bulldoze"). Picking the selected one puts it away; `null` clears. `"staff"` opens or closes the payroll, `"senate"` the Senate window. */
   place(kind: BuildKindVM | null): void;
   setSpeed(speed: number): void;
   togglePause(): void;
@@ -1167,6 +1265,12 @@ export interface HudActions {
   /** Start painting a staffer's patrol zone on the map (`null` stops). */
   paintZone(staffId: number | null): void;
   clearZone(staffId: number): void;
+  // The Senate (FLT-22/23).
+  closeSenate(): void;
+  /** Send the lobbyists to a senator about the motion on the docket. */
+  lobby(senatorId: string): void;
+  /** Tick (or untick) a clause on the bill's draft. */
+  draftClause(clauseId: string, on: boolean): void;
   // The news room.
   openNews(): void;
   /** Open an edition by id, or the archive with "archive". */

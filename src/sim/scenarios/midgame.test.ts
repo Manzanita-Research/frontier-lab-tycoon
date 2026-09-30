@@ -23,8 +23,9 @@ describe("midgame scenario", () => {
     // FLT-49 preserves the full starter-campus preset, completes its ladder, and replays
     // paid confirmations. Changed movement/attendance draws shift the real opening day.
     // FLT-37: the campus it starts from wakes every earned pack, so Papers and Collusion now run in its 480 days too.
-    // FLT-52: and the Hearing, the yacht summit, Defection, the Poaching War and Evals Without Borders.
-    expect(digest(s)).toBe("40238dbd");
+    // FLT-52: and the Hearing, the yacht summit, Defection, the Poaching War, Evals Without Borders, Regulatory Capture
+    // and the Promise Tracker.
+    expect(digest(s)).toBe("c4d958df");
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);

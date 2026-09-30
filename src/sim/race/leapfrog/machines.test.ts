@@ -267,7 +267,7 @@ describe("the launch livestream", () => {
 
 describe("a rival's model held for its launch date", () => {
   const ctx = { id: "sirocco", personality: { cadence: 5, growth: 7, openness: 1, poaching: 0, hypeHunger: 1.1 }, capability: 20, hype: 40, baseHype: 40, weeks: 1, releases: 2, open: false, momentum: 1, model: "Zephyr-2", lastRelease: 3 };
-  const week = (hold: boolean) => ({ type: "WEEK" as const, week: 9, aggro: 1, pace: 1, chase: 1, lengthRoll: 0.5, gainRoll: 0.5, openRoll: 0.5, poachRoll: 0.99, name: "Zephyr-3", hold });
+  const week = (hold: boolean) => ({ type: "WEEK" as const, week: 9, aggro: 1, pace: 1, chase: 1, lengthRoll: 0.5, gainRoll: 0.5, openRoll: 0.5, poachRoll: 0.99, name: "Zephyr-3", hold, closed: false });
 
   it("finishes training without shipping: FINISHED carries the gain, and nothing about the lab changes", () => {
     const s = { value: "training", context: ctx } as never;

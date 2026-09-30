@@ -101,12 +101,12 @@ export function BuildBar({ items, tip, teasers = [], disasters, actions }: SlotP
   const buildings = items.filter((i) => !i.isBulldoze);
   const bulldoze = items.find((i) => i.isBulldoze);
   const quick = buildings
-    .filter((i) => !i.isPath && i.kind !== "staff")
+    .filter((i) => !i.isPath && !i.panel)
     .map((it, order) => ({ it, order }))
     .sort((a, b) => b.it.built - a.it.built || a.order - b.order)
     .slice(0, 3)
     .map((x) => x.it);
-  const held = items.find((i) => i.selected && i.kind !== "staff");
+  const held = items.find((i) => i.selected && !i.panel);
   const pick = (kind: string) => {
     actions.place(kind);
     setOpen(false);

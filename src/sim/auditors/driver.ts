@@ -15,7 +15,7 @@ import { createRng, type Rng } from "../rng";
 import type { GameState, Tone, Walker } from "../types";
 import { runVerb } from "../verbs";
 import { activeSwarm } from "../collusion/state";
-import { auditFacts, gradeReport } from "./grade";
+import { auditFacts, gradeReport, notesSince } from "./grade";
 import { freshAudit, stepAudit, type AuditEvent } from "./machine";
 import { AUDITORS, NOTICE_CARD, OWNER, PICK_PREFIX, PREP_CHOICES, REPORT_CARD, REPORT_CHOICES, type Grade, type Prep } from "./pack";
 
@@ -68,7 +68,7 @@ export function daysUntilVisit(s: GameState): number | null {
 function publish(s: GameState, rng: Rng) {
   const a = s.auditors!;
   const ctx = a.machine.context;
-  const { grades, average, overall, moves } = gradeReport(auditFacts(s, ctx));
+  const { grades, average, overall, moves } = gradeReport(auditFacts(s, ctx), notesSince(s));
   const env = { state: s, rng, run: null, owner: OWNER };
   runVerb(env, { type: "trust.delta", params: { amount: moves.trust } });
   runVerb(env, { type: "heat.delta", params: { amount: moves.heat } });

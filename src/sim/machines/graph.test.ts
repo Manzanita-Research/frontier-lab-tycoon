@@ -112,7 +112,7 @@ describe("machine graphs", () => {
   it("a rival can reach idle, training, releasing and cooldown", () => {
     const d = RIVAL_BY_ID.anthro;
     const input = { id: d.id, personality: d.personality, capability: 20, hype: 40, baseHype: 40, weeks: 0, releases: 0, open: false, momentum: 1, model: "", lastRelease: -1 };
-    const week = { type: "WEEK" as const, week: 1, aggro: 1, pace: 1, chase: 1, lengthRoll: 0.5, gainRoll: 0.5, openRoll: 0.5, poachRoll: 0.9, name: "M" };
+    const week = { type: "WEEK" as const, week: 1, aggro: 1, pace: 1, chase: 1, lengthRoll: 0.5, gainRoll: 0.5, openRoll: 0.5, poachRoll: 0.9, name: "M", closed: false };
     const events = [week, { ...week, pace: 50 }, { type: "SHOCK" as const, capability: -1, hype: -1, momentum: -0.1 }];
     const r = explore(rivalMachine, { input, events, limit: 200 });
     expect(r.unreachable).toEqual([]);

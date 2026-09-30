@@ -8,6 +8,7 @@ import { addNews, addToast } from "../news";
 import { refreshBoard } from "../race/arena";
 import { chase, eraOfState, POACH_FEE } from "../race/race";
 import { rivalMachine } from "../race/rival";
+import { rivalRules } from "../race/rules";
 import { createRng, type Rng } from "../rng";
 import type { GameState } from "../types";
 import { resign } from "../walkers";
@@ -120,11 +121,13 @@ export function dailyNeoLabs(s: GameState) {
   const era = eraDef(eraOfState(s));
   for (const lab of n.labs) {
     const before = lab.rival;
+    // FLT-22's law binds the new labs too (FLT-52).
+    const law = rivalRules(s, before.context);
     const event = {
       type: "WEEK" as const,
       week: s.race.week + 1,
-      aggro: era.rivalGrowth,
-      pace: era.rivalPace,
+      aggro: era.rivalGrowth * law.growth,
+      pace: era.rivalPace * law.pace,
       chase: chase(s.capability, before.context.capability),
       lengthRoll: rng.next(),
       gainRoll: rng.next(),
@@ -132,6 +135,7 @@ export function dailyNeoLabs(s: GameState) {
       poachRoll: rng.next(),
       name: fillTemplate(rng.pick(MODEL_NAMES), { short: lab.short.replace(/ (Labs|Inc\.)$/, ""), n: String(before.context.releases + 1) }),
       hold: false,
+      closed: law.closed,
     };
     const { stored, effects } = step(rivalMachine, before, event);
     lab.rival = stored;

@@ -49,3 +49,6 @@ export const papersOpenAtom = Atom.make(false);
 
 /** Paper moments and CrumbWiki reveals the player has closed this visit (their keys). */
 export const dismissedAtom = Atom.make<readonly string[]>([]);
+
+/** Is the Senate window (the Promise Tracker and the bill, FLT-22/23) open? UI-only state. */
+export const senateOpenAtom = Atom.make(false);

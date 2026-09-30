@@ -166,6 +166,15 @@
     "heroes": [
       "hero",
       "hero-photo"
+    ],
+    "senate": [
+      "senate-draft",
+      "senate-law",
+      "senate-exposed",
+      "senate-vote",
+      "senate-rollcall",
+      "senate-draft-phone",
+      "senate-vote-phone"
     ]
   },
   "scenes": {
@@ -1959,6 +1968,108 @@
         },
         {
           "wait": 600
+        }
+      ]
+    },
+    "senate-draft": {
+      "title": "FLT-22 Regulatory Capture: the staffer's draft, two clauses ticked (track changes on)",
+      "query": {
+        "moment": "bill",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "senate-law": {
+      "title": "FLT-22/23 The law in force three weeks on, and the Promise Tracker (opened from the Senate tile) whipping the next vote",
+      "query": {
+        "moment": "bill-law",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 600
+        },
+        {
+          "click": "[data-testid=\"start-button\"]",
+          "optional": true
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": "[data-coach=\"build:senate\"]",
+          "optional": true
+        },
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "senate-exposed": {
+      "title": "FLT-22 The leak: someone opened the file properties",
+      "query": {
+        "moment": "bill-exposed",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "senate-vote": {
+      "title": "FLT-23 The Promise Tracker: roll call in 5 days, one senator lobbied",
+      "query": {
+        "moment": "vote",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "senate-rollcall": {
+      "title": "FLT-23 The roll call: promises kept and broken, Truth-o-meters moved",
+      "query": {
+        "moment": "rollcall",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "senate-draft-phone": {
+      "title": "FLT-22 The draft on a phone",
+      "query": {
+        "moment": "bill",
+        "warp": null
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "senate-vote-phone": {
+      "title": "FLT-23 The Promise Tracker on a phone",
+      "query": {
+        "moment": "vote",
+        "warp": null
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "wait": 900
         }
       ]
     }

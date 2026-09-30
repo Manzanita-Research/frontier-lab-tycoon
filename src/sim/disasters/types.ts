@@ -159,12 +159,12 @@ export interface TimedEffect {
   id: number;
   /** The disaster that owns it (its id), or "" for none: an owned effect ends with the disaster. */
   owner: string;
-  kind: "drain" | "spike" | "revenue" | "auditor";
-  /** drain: fraction lost per day; spike, revenue, auditor: a multiplier. */
+  kind: "drain" | "spike" | "revenue" | "auditor" | "rivalGrowth" | "rivalPace" | "rivalClosed";
+  /** drain: fraction lost per day; spike, revenue, auditor, rivalGrowth, rivalPace: a multiplier; rivalClosed: 1. */
   value: number;
   /** The tick it wears off; -1 lasts as long as the owner does. */
   until: number;
-  /** spike: which building kinds pay more (empty: all of them). */
+  /** spike: which building kinds pay more (empty: all of them). rival*: which labs (see `rivalMatches`). */
   kinds: string[];
 }
 

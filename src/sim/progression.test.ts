@@ -42,6 +42,7 @@ describe("the playable ladder", () => {
     expect(s.collusion?.enabled).toBe(true);
     expect(s.hearing?.enabled).toBe(true); expect(s.yacht?.enabled).toBe(true);
     expect(s.auditors?.enabled).toBe(true);
+    expect(s.promises?.enabled).toBe(true); expect(s.bill?.enabled).toBe(true);
     s.cash = 350_000; expect(canPlace(s, "security", 12, 19).ok).toBe(true);
     expect(s.unlockCards?.map((c) => c.id)).toEqual(["business", "team", "race", "scrutiny"]);
     applyNow(s, [{ type: "dismissUnlock" }]); expect(makeSnapshot(s).unlockCard?.id).toBe("team");
@@ -92,13 +93,15 @@ describe("the playable ladder", () => {
     expect(Object.values(s.arcs).some((a) => a.value === "cardOpen")).toBe(false);
     expect(s.hearing).toBeUndefined(); expect(s.yacht).toBeUndefined();
     expect(s.defection).toBeUndefined(); expect(s.poaching).toBeUndefined(); expect(s.auditors).toBeUndefined();
+    expect(s.promises).toBeUndefined(); expect(s.bill).toBeUndefined();
   });
 
   // FLT-52: every pack in the merge train is on the Scrutiny rung, wakes the day it is earned, and has its own off switch.
-  const WAVE = ["hearing", "yacht", "defection", "poaching", "auditors"] as const;
+  const WAVE = ["hearing", "yacht", "defection", "poaching", "auditors", "promises", "capture"] as const;
   it.each(WAVE)("%s sleeps until Scrutiny, wakes when it is earned, and stays asleep with ?%s=off", (id) => {
     expect(PROGRESSION.find((r) => r.id === "scrutiny")?.systems).toContain(id);
-    const awake = (s: ReturnType<typeof createInitialState>) => s[id]?.enabled ?? false;
+    // Regulatory Capture keeps its state in `bill`.
+    const awake = (s: ReturnType<typeof createInitialState>) => s[id === "capture" ? "bill" : id]?.enabled ?? false;
     const s = createInitialState(4);
     s.progression = { value: "growing", context: { level: 4 } };
     expect(systemUnlocked(s, id)).toBe(false);
@@ -125,7 +128,7 @@ describe("the playable ladder", () => {
     const card = makeSnapshot(s).unlockCard!;
     for (const id of WAVE) expect(card.items).toContain(id);
     const shown = playableOf({ unlockCard: card }).unlock!.items;
-    expect(shown).toEqual(expect.arrayContaining(["The Hearing", "The yacht summit", "Defection", "The Poaching War", "Evals Without Borders"]));
+    expect(shown).toEqual(expect.arrayContaining(["The Hearing", "The yacht summit", "Defection", "The Poaching War", "Evals Without Borders", "The Promise Tracker", "Regulatory Capture"]));
     for (const id of WAVE) expect(shown).not.toContain(id);
   });
   it("teases what is locked as one row per milestone, not one ??? per item", () => {

@@ -5,6 +5,7 @@ import { frontPage, recap, type Edition } from "../../newsroom/edition";
 import { createTestCampus } from "../../sim/testkit";
 import { enableLeapfrog } from "../../sim/race/leapfrog/driver";
 import { stageCircus, type CircusMoment } from "../../sim/circus/demo";
+import { stageSenate, type SenateMoment } from "../../sim/capture/demo";
 import { leapfrogView } from "../../sim/race/leapfrog/view";
 import { answer, layPaths, readyForPressure } from "../../sim/testkit";
 import { stageAudit, type AuditMoment } from "../../sim/auditors/demo";
@@ -102,6 +103,13 @@ export function fixtureAudit(moment: AuditMoment | "audit-countdown", seed = 3):
   return s;
 }
 
+/** A lab staged at one of the Senate's moments (Regulatory Capture's bill, the Promise Tracker's vote). */
+export function fixtureSenate(moment: SenateMoment, seed = 3): GameState {
+  const s = fixtureWorld(12, seed);
+  stageSenate(s, moment);
+  return s;
+}
+
 export const NO_SKINS: SkinPickerVM = {
   open: false,
   reducedMotion: false,
@@ -137,6 +145,10 @@ export interface FixtureOptions {
   leapfrog?: boolean;
   /** The Hearing (a question, or the gavel) or the yacht summit (the invitation, or the leaked chat) on screen. */
   circus?: CircusMoment;
+  /** The Senate (FLT-22/23): the bill's draft, the law in force, the leak, the whip count or the roll call. */
+  senate?: SenateMoment;
+  /** The Senate window is open. */
+  senateOpen?: boolean;
   selected?: number | null;
   event?: string | null;
   tool?: string | null;
@@ -173,7 +185,7 @@ export function fixtureStaged(o: Pick<FixtureOptions, "papers" | "collusion">): 
 }
 
 export function fixtureSnapshot(o: FixtureOptions = {}): Snapshot {
-  const w = o.world ?? (o.audit ? fixtureAudit(o.audit) : o.leapfrog ? fixtureLeapfrog().world : o.papers || o.collusion ? fixtureStaged(o) : o.disaster ? fixtureDisaster() : o.circus ? fixtureCircus(o.circus) : fixtureWorld());
+  const w = o.world ?? (o.audit ? fixtureAudit(o.audit) : o.leapfrog ? fixtureLeapfrog().world : o.papers || o.collusion ? fixtureStaged(o) : o.disaster ? fixtureDisaster() : o.circus ? fixtureCircus(o.circus) : o.senate ? fixtureSenate(o.senate) : fixtureWorld());
   const selected = o.selected === undefined ? (w.walkers.find((x) => x.kind === "researcher")?.id ?? null) : o.selected;
   const snap = makeSnapshot(w, undefined, { selected, follow: false, highlight: null });
   const pendingConfirm = o.confirm
@@ -204,6 +216,7 @@ export function fixtureInput(o: FixtureOptions = {}): HudInput {
     tapHint: true,
     toldGateway: false,
     staffOpen: o.staff ?? false,
+    senateOpen: o.senateOpen ?? false,
     zone: null,
     arena: { open: true, alert: false, flinch: false, moved: {} },
     room: {

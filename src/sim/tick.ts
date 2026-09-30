@@ -8,6 +8,8 @@ import { applyDefectionChoices, dailyDefection, updateDefection } from "./defect
 import { updateMeetings } from "./meetings";
 import { dailyNeoLabs } from "./neolabs/driver";
 import { applyPoachingChoices, dailyPoaching } from "./poaching/driver";
+import { applyPromisesChoices, dailyPromises } from "./promises/driver";
+import { applyCaptureChoices, dailyCapture } from "./capture/driver";
 import { TICKS_PER_DAY } from "./constants";
 import { dailyBreakdowns } from "./breakdowns";
 import { dailyDisasters, updateDisasters } from "./disasters/driver";
@@ -91,6 +93,9 @@ function step(state: GameState, commands: readonly Command[]) {
     // The Circus (FLT-24, then FLT-21): the yacht first, so a subpoena it files today reaches the Senate today.
     if (systemUnlocked(state, "yacht")) dailyYacht(state);
     if (systemUnlocked(state, "hearing")) dailyHearing(state);
+    // The Senate (FLT-23) before the bill (FLT-22): a roll call counted today is heard by the bill today.
+    if (systemUnlocked(state, "promises")) dailyPromises(state);
+    if (systemUnlocked(state, "capture")) dailyCapture(state);
     dailyThoughts(state, rng);
     dailyGoals(state, rng);
     if (defs().arcs.length > 0) dailyModArcs(state, rng);
@@ -126,6 +131,8 @@ function now(state: GameState, commands: readonly Command[]) {
 function applyCircusChoices(state: GameState) {
   if (systemUnlocked(state, "yacht")) applyYachtChoices(state);
   if (systemUnlocked(state, "hearing")) applyHearingChoices(state);
+  if (systemUnlocked(state, "promises")) applyPromisesChoices(state);
+  if (systemUnlocked(state, "capture")) applyCaptureChoices(state);
 }
 
 /** Defection and the Poaching War hear the player's pick at once, paused or not (their cards pause the game). */

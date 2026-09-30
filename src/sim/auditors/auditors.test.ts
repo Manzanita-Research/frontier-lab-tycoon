@@ -9,11 +9,12 @@ import { groupKind, groupsOf } from "../groups";
 import { answer, createTestCampus, layPaths, readyForPressure } from "../testkit";
 import { applyNow, tick } from "../tick";
 import type { GameState } from "../types";
-import { checkCall } from "../verbs";
+import { checkCall, runVerb } from "../verbs";
+import { createRng } from "../rng";
 import { enableCollusion, dailyCollusion } from "../collusion/driver";
 import { freshSwarm } from "../collusion/machine";
 import { daysUntilVisit, disableAuditors, enableAuditors } from "./driver";
-import { auditFacts, gradeOf, gradeReport } from "./grade";
+import { auditFacts, gradeOf, gradeReport, notesSince } from "./grade";
 import { runAuditYear } from "./headless";
 import { freshAudit, stepAudit, type AuditDay, type AuditInspected } from "./machine";
 import { AUDITORS, loadAuditorsPack, NOTICE_CARD, OWNER, PREP_CHOICES, REPORT_CARD, type Prep } from "./pack";
@@ -138,6 +139,20 @@ describe("the report card", () => {
     expect(["D", "F"]).toContain(caught.overall);
     expect(caught.moves.trust).toBeLessThan(clean.moves.trust);
     expect(caught.moves.heat).toBeGreaterThan(clean.moves.heat);
+  });
+  it("reads the notes on the lab's file since the last visit (FLT-22's exposed bill files one; FLT-52 joins them)", () => {
+    const s = createTestCampus(1);
+    const facts = auditFacts(s, { prep: "prep", caught: 0, swarm: 0, evals: 1 });
+    const clean = gradeReport(facts).grades.find((g) => g.id === "honesty")!;
+    s.day = 40;
+    runVerb({ state: s, rng: createRng(1), run: null, owner: "capture" }, { type: "auditor.note", params: { grade: "honesty", amount: -1, text: "Wrote the law it is regulated by." } });
+    const noted = gradeReport(facts, notesSince(s)).grades.find((g) => g.id === "honesty")!;
+    expect("ABCDF".indexOf(noted.grade)).toBe(Math.min(4, "ABCDF".indexOf(clean.grade) + 1));
+    expect(noted.comment).toBe("Wrote the law it is regulated by.");
+    // A note the last visit already read does not count twice.
+    enableAuditors(s);
+    s.auditors!.history.push({ day: 40, overall: "B", caught: false });
+    expect(notesSince(s)).toEqual([]);
   });
 });
 

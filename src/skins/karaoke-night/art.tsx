@@ -152,6 +152,7 @@ export const BUTTON_COLOURS: Record<string, [face: string, rim: string]> = {
   solar: ["#FFE87A", "#C9B03A"],
   security: ["#6C8CFF", "#3B55C9"],
   staff: ["#6FE3FF", "#2A9FC2"],
+  senate: ["#FFD36F", "#C2902A"],
   bulldoze: ["#B9B0C9", "#7D728F"],
 };
 const FALLBACK: [string, string] = ["#B9A4FF", "#7F62DB"];
@@ -261,6 +262,14 @@ export function BuildIcon({ kind }: { kind: string }) {
         <>
           <path d="M16 3l10 4v8c0 7-5 11-10 13C11 26 6 22 6 15V7z" fill={W} />
           <path d="M11 15l4 4 7-8" fill="none" stroke={INK} strokeWidth="2.6" />
+        </>
+      );
+      break;
+    case "senate":
+      art = (
+        <>
+          <path d="M9 15a7 6.5 0 0 1 14 0Z" fill={W} />
+          <path d="M6 15h20v3H6ZM4 25h24v3H4ZM8 18h2v7H8ZM12.5 18h2v7h-2ZM17.5 18h2v7h-2ZM22 18h2v7h-2Z" fill={W} />
         </>
       );
       break;
