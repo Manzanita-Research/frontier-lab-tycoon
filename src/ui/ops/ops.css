@@ -1,0 +1,213 @@
+/* Operations UI (FLT-10): the Staff panel, the palette tile, and the labels pinned to broken buildings and queues. */
+.staff {
+  position: absolute;
+  left: 10px;
+  bottom: calc(152px + env(safe-area-inset-bottom));
+  width: min(370px, calc(100vw - 20px));
+  max-height: calc(100vh - 340px);
+  overflow-y: auto;
+  padding: 10px 12px 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 4;
+  animation: staff-in 0.25s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+@keyframes staff-in {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+}
+.staff-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.staff-title {
+  font-size: 17px;
+  font-weight: 900;
+}
+.staff-pay {
+  flex: 1;
+  font-size: 12.5px;
+  opacity: 0.7;
+}
+.staff-x {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--cream-2);
+  font-size: 18px;
+  line-height: 1;
+}
+.staff ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.staff li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 11px;
+  background: var(--cream-2);
+}
+.staff-roster li {
+  background: #fff;
+}
+.staff li.leaving {
+  opacity: 0.5;
+}
+.swatch {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2.5px solid var(--ink);
+}
+.hire-text,
+.roster-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  font-size: 13.5px;
+  line-height: 1.2;
+}
+.hire-text .dim {
+  opacity: 0.6;
+  font-weight: 700;
+}
+.staff .blurb {
+  font-size: 11.5px;
+  font-weight: 600;
+  opacity: 0.72;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mini {
+  flex: none;
+  padding: 4px 10px;
+  border: 2.5px solid var(--ink);
+  border-radius: 10px;
+  background: #fff;
+  font-size: 12.5px;
+  font-weight: 900;
+  box-shadow: 0 2px 0 rgba(58, 42, 28, 0.8);
+}
+.mini:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.mini.primary {
+  background: var(--orange);
+}
+.mini.danger {
+  background: #ffd6cc;
+}
+.mini:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+.staff-foot {
+  font-size: 12px;
+  opacity: 0.85;
+}
+.staff.painting {
+  flex-direction: row;
+  align-items: center;
+  bottom: calc(160px + env(safe-area-inset-bottom));
+}
+.staff-paint {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  line-height: 1.25;
+}
+.staff-paint b {
+  font-size: 14px;
+}
+.staff-paint-buttons {
+  display: flex;
+  gap: 6px;
+}
+.staff-tool .icon svg {
+  margin-top: -1px;
+}
+
+/* Warnings pinned to the scene */
+.brokenlabel {
+  transform: translate(-50%, -50%);
+  padding: 3px 9px;
+  border: 2.5px solid var(--ink);
+  border-radius: 10px;
+  background: #ff5a3d;
+  color: #fff;
+  font: 900 12px var(--font);
+  white-space: nowrap;
+  animation: bob 0.8s ease-in-out infinite;
+}
+.brokenlabel.fixing {
+  background: #ffb020;
+  color: var(--ink);
+}
+.stafftag {
+  transform: translate(-50%, -100%);
+  padding: 1px 7px;
+  border: 2px solid var(--ink);
+  border-radius: 9px;
+  background: var(--cream);
+  color: var(--ink);
+  font: 900 10.5px var(--font);
+  white-space: nowrap;
+  box-shadow: 0 2px 0 rgba(58, 42, 28, 0.75);
+  pointer-events: none;
+}
+.stafftag.job-sre {
+  background: #ffc978;
+}
+.stafftag.job-janitor {
+  background: #a8efe2;
+}
+.stafftag.job-comms {
+  background: #e5c6ff;
+}
+.stafftag.job-security {
+  background: #b9c6ff;
+}
+.queuelabel {
+  transform: translate(-50%, -50%);
+  padding: 2px 8px;
+  border: 2.5px solid var(--ink);
+  border-radius: 10px;
+  background: #fffdf5;
+  color: var(--ink);
+  font: 900 11.5px var(--font);
+  white-space: nowrap;
+  box-shadow: 0 2px 0 rgba(58, 42, 28, 0.8);
+}
+.queuelabel.long {
+  background: #ffd9a0;
+}
+
+@media (max-width: 640px) {
+  .staff {
+    left: 8px;
+    right: 8px;
+    width: auto;
+    bottom: calc(150px + env(safe-area-inset-bottom));
+    max-height: 46vh;
+  }
+  .staff.painting {
+    bottom: calc(150px + env(safe-area-inset-bottom));
+  }
+}

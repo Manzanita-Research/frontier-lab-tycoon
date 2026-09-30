@@ -1,4 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { StaffPanel, StaffTool } from "./ops/Staff";
+import { useCompact } from "./useCompact";
 import { BUILDINGS, PATH_PRICE } from "../content/buildings";
 import { formatDate, formatMoney } from "../sim/format";
 import { appNow, atoms, send } from "../app/game";
@@ -21,9 +23,12 @@ const toolPrice = (t: Tool) => (t === "path" ? PATH_PRICE : t === "bulldoze" ? 0
 
 function TopBar() {
   const s = useApp(atoms.snap);
+  const compact = useCompact();
+  // On a phone the bar is one row (Vibes, cash, runway); a tap on the caret opens the rest.
+  const [expanded, setExpanded] = useState(false);
   const runwayLow = s.runway !== null && s.runway < 6;
   return (
-    <div className="topbar panel">
+    <div className={`topbar panel ${compact ? "compact" : ""} ${compact && expanded ? "expanded" : ""}`}>
       <div className="lab">
         <div className="lab-name">{s.labName}</div>
         <div className="lab-date">{formatDate(s.day)}</div>
@@ -34,7 +39,7 @@ function TopBar() {
         <Odometer className={`value ${s.cash < 0 ? "bad" : ""}`} value={s.cash} format={formatMoney} />
         <Odometer className={`sub ${s.net >= 0 ? "good" : "bad"}`} value={s.net} format={(n) => `${n >= 0 ? "+" : "-"}${formatMoney(Math.abs(n))}/day`} flash={false} />
       </div>
-      <div className="stat">
+      <div className="stat runway">
         <span className="label">Runway</span>
         <span className={`value ${runwayLow ? "bad" : ""}`}>{s.runway === null ? "∞" : `${s.runway.toFixed(1)} mo`}</span>
       </div>
@@ -50,6 +55,11 @@ function TopBar() {
         </span>
       </div>
       <RaceStats />
+      {compact && (
+        <button className="topbar-toggle" onClick={() => setExpanded((e) => !e)} aria-expanded={expanded} aria-label={expanded ? "Fewer stats" : "More stats"}>
+          <span className={`caret ${expanded ? "open" : ""}`} aria-hidden />
+        </button>
+      )}
     </div>
   );
 }
@@ -131,6 +141,7 @@ function BuildBar() {
             </button>
           );
         })}
+        <StaffTool />
       </div>
     </div>
   );
@@ -191,6 +202,7 @@ function Ticker() {
   );
 }
 
+/** One toast at a time, the newest winning: a real toast beats a hint, and two hints never share the screen. */
 function Toasts() {
   const toasts = useApp(atoms.toasts);
   // The app machine expires each toast after 5.2 s; a click dismisses it early.
@@ -204,15 +216,24 @@ function Toasts() {
     const t = setTimeout(() => setTapHint(false), 22_000);
     return () => clearTimeout(t);
   }, [selected]);
+  const newest = toasts.at(-1);
+  // "Build an API Gateway..." twice is one hint too many: once any toast has said it, the standing hint is redundant.
+  const toldAboutGateway = useRef(false);
+  if (newest && /API Gateway/i.test(newest.text)) toldAboutGateway.current = true;
+  const hint = newest ? null : !hasGateway && !toldAboutGateway.current ? "Build an API Gateway next to a path to start earning." : tapHint ? "Tap anyone to read their mind." : null;
   return (
     <div className="toasts">
-      {!hasGateway && <div className="toast panel hint">Build an API Gateway next to a path to start earning.</div>}
-      {tapHint && <div className="toast panel hint">Tap anyone to read their mind.</div>}
-      {toasts.map((t) => (
-        <button key={t.id} className={`toast panel ${t.tone}`} onClick={() => dismiss(t.id)}>
-          {t.text}
+      {newest ? (
+        <button key={newest.id} className={`toast panel ${newest.tone}`} onClick={() => dismiss(newest.id)}>
+          {newest.text}
         </button>
-      ))}
+      ) : (
+        hint && (
+          <div key={hint} className="toast panel hint">
+            {hint}
+          </div>
+        )
+      )}
     </div>
   );
 }
@@ -254,6 +275,7 @@ export function HUD() {
       <Toasts />
       <BuildBar />
       <Ticker />
+      <StaffPanel />
       <EventCard />
       <OutcomeCard />
     </div>

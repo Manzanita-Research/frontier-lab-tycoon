@@ -5,10 +5,12 @@ import type { OrthographicCamera } from "three";
 import { sim as game } from "../../app/game";
 import { HALF, rectCenter } from "../coords";
 import { chaseHour, hourAt, nightAmount } from "./clock";
-import { coinFountain, confettiBurst, droplet, dustBurst, firefly, particles as pool, smokePuff, sparkle, star } from "./particles";
+import { ashPuff, blowout, coinFountain, confettiBurst, droplet, dustBurst, ember, firefly, flame, particles as pool, slopGlint, smokePuff, sparkle, star, suds, toteBurst } from "./particles";
 import { cinema, fx, shake } from "./state";
 import { GAS_STACK, GAS_STACK_TOP } from "../buildings/GasTurbineModel";
 import { currentLoad } from "./utilisation";
+import { ROOF } from "../buildings/BrokenFx";
+import { SLOP_MAX } from "../../sim/slop";
 import { createWatch, type FxEvent } from "./watch";
 
 // `?debug=1` exposes the juice state to probes and screenshot scripts (`get` is R3F's store getter: camera, controls).
@@ -31,7 +33,10 @@ export function FxDirector() {
     if (dbg) dbg.get = get;
   }, [get]);
   const watch = useMemo(createWatch, []);
-  const acc = useRef({ smoke: 0, spark: 0, drop: 0, fly: 0, star: 0, gas: 0 });
+  const acc = useRef({ smoke: 0, spark: 0, drop: 0, fly: 0, star: 0, gas: 0, fire: 0, embers: 0, glint: 0, suds: 0 });
+  /** Broken buildings we have already put on a show for, and how many jobs each staffer had done last frame. */
+  const brokenSeen = useRef(new Set<number>());
+  const doneSeen = useRef(new Map<number, number>());
   const first = useRef(true);
 
   /** The camera's current view, for a shot to start from. */
@@ -130,6 +135,8 @@ export function FxDirector() {
         cinema.cancel();
         fx.cheerAt = -1e9;
         fx.earnAt = -1e9;
+        brokenSeen.current.clear();
+        doneSeen.current.clear();
         return;
     }
   };
@@ -211,6 +218,84 @@ export function FxDirector() {
       smokePuff(pool, cx + GAS_STACK[0] + pool.rand(-0.04, 0.04), GAS_STACK_TOP, cz + GAS_STACK[1] + pool.rand(-0.04, 0.04));
     }
     a.gas = Math.min(a.gas, 3);
+
+    // Operations (FLT-10). Buildings that give out: a blowout the moment it happens, then flames, black smoke and embers
+    // for as long as it burns. Fixed ones get a sparkle burst.
+    const broken = world.buildings.filter((b) => b.broken);
+    const seen = brokenSeen.current;
+    for (const b of broken) {
+      if (seen.has(b.id)) continue;
+      seen.add(b.id);
+      const [cx, cz] = rectCenter(b);
+      blowout(pool, cx, ROOF[b.kind], cz);
+      shake(0.5);
+      if (!fx.photo) cinema.focus(view(), { x: cx, z: cz, zoom: 1.25, hold: 1.8 });
+    }
+    for (const id of [...seen]) {
+      const b = world.buildings.find((o) => o.id === id);
+      if (b && b.broken) continue;
+      seen.delete(id);
+      if (b) {
+        const [cx, cz] = rectCenter(b);
+        confettiBurst(pool, cx, ROOF[b.kind] + 0.2, cz, 36, 0.9);
+        for (let i = 0; i < 10; i++) sparkle(pool, cx + pool.rand(-0.6, 0.6), pool.rand(0.4, ROOF[b.kind]), cz + pool.rand(-0.6, 0.6), [1, 0.95, 0.5]);
+      }
+    }
+    if (broken.length > 0) {
+      a.fire += dt * 24 * Math.min(3, broken.length);
+      for (let n = 0; a.fire >= 1 && n < 10; n++, a.fire--) {
+        const b = broken[Math.floor(pool.rand() * broken.length)]!;
+        const [cx, cz] = rectCenter(b);
+        const ox = pool.rand(-0.4, 0.4) * b.w;
+        const oz = pool.rand(-0.4, 0.4) * b.d;
+        if (pool.rand() < 0.6) flame(pool, cx + ox, ROOF[b.kind] + 0.1, cz + oz);
+        else ashPuff(pool, cx + ox, ROOF[b.kind] + 0.3, cz + oz);
+      }
+      a.fire = Math.min(a.fire, 4);
+      a.embers += dt * 6;
+      for (let n = 0; a.embers >= 1 && n < 3; n++, a.embers--) {
+        const b = broken[Math.floor(pool.rand() * broken.length)]!;
+        const [cx, cz] = rectCenter(b);
+        ember(pool, cx, ROOF[b.kind] + 0.2, cz);
+      }
+      a.embers = Math.min(a.embers, 2);
+    } else a.fire = a.embers = 0;
+
+    // Slop glitters: an off-white twinkle over a random slopped tile, more of them where it is deeper.
+    a.glint += dt * 16;
+    for (let n = 0; a.glint >= 1 && n < 6; n++, a.glint--) {
+      for (let tries = 0; tries < 6; tries++) {
+        const i = Math.floor(pool.rand() * world.slop.length);
+        const level = world.slop[i]!;
+        if (level > 0 && pool.rand() < level / SLOP_MAX) {
+          slopGlint(pool, (i % world.grid.w) + pool.rand(0.25, 0.75) - HALF, 0.16 + level * 0.03, Math.floor(i / world.grid.w) + pool.rand(0.25, 0.75) - HALF);
+          break;
+        }
+      }
+    }
+    a.glint = Math.min(a.glint, 2);
+
+    // Staff at work: suds off the mop, sparks off a repair, and a shower of tote bags when a Comms Rep lands one.
+    const done = doneSeen.current;
+    for (const s of world.staff) {
+      const x = s.x - HALF;
+      const z = s.z - HALF;
+      if (s.machine.value === "working") {
+        if (s.job === "janitor") {
+          a.suds += dt * 12;
+          for (let n = 0; a.suds >= 1 && n < 3; n++, a.suds--) suds(pool, x + Math.sin(s.dir) * 0.35, z + Math.cos(s.dir) * 0.35);
+          a.suds = Math.min(a.suds, 2);
+        } else if (s.job === "sre" && pool.rand() < dt * 14) ember(pool, x + Math.sin(s.dir) * 0.4, 0.6, z + Math.cos(s.dir) * 0.4);
+      } else if (s.job === "sre" && s.machine.value === "going" && pool.rand() < dt * 9) {
+        // The SRE is running: a little dust off their heels.
+        dustBurst(pool, x - Math.sin(s.dir) * 0.25, z - Math.cos(s.dir) * 0.25, 0.12, 2);
+      }
+      const was = done.get(s.id);
+      done.set(s.id, s.done);
+      if (was === undefined || s.done <= was) continue;
+      if (s.job === "comms") toteBurst(pool, x + Math.sin(s.dir) * 0.5, 1, z + Math.cos(s.dir) * 0.5, 18);
+      else if (s.job === "janitor") for (let i = 0; i < 8; i++) sparkle(pool, x + pool.rand(-0.5, 0.5), 0.2, z + pool.rand(-0.5, 0.5), [0.9, 0.95, 1]);
+    }
 
     // Night: fireflies drift over the lawn and stars twinkle high up.
     if (fx.night > 0.3) {

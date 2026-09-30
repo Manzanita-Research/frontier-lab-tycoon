@@ -11,6 +11,7 @@ import type { Thought } from "../sim/types";
 function Bubble({ thought }: { thought: Thought }) {
   return (
     <Anchored
+      bubble
       className={`bubble bubble-${thought.kind}`}
       pos={(out) => {
         const w = sim.world.walkers.find((o) => o.id === thought.walkerId);
@@ -91,6 +92,86 @@ function NoPath() {
   );
 }
 
+/** Buildings that are out of order say so, and whether an SRE is on the way. */
+function BrokenLabels() {
+  const ops = useApp(atoms.ops);
+  const buildings = useApp(atoms.buildings);
+  return (
+    <>
+      {ops.broken.map((o) => {
+        const b = buildings.find((x) => x.id === o.id);
+        if (!b) return null;
+        return (
+          <Anchored
+            key={o.id}
+            className={`brokenlabel ${o.sre ? "fixing" : ""}`}
+            pos={(out) => {
+              const [cx, cz] = rectCenter(b);
+              out.set(cx, 3.1, cz);
+              return true;
+            }}
+          >
+            {o.sre ? "SRE on the way" : "OUT OF ORDER"}
+          </Anchored>
+        );
+      })}
+    </>
+  );
+}
+
+/** Who is who: a small tag over each staffer (their job), so a Janitor Bot in a crowd is still a Janitor Bot. */
+function StaffTags() {
+  const ops = useApp(atoms.ops);
+  return (
+    <>
+      {ops.staff.map((o) => (
+        <Anchored
+          key={o.id}
+          className={`stafftag job-${o.job}`}
+          pos={(out) => {
+            const s = sim.world.staff.find((q) => q.id === o.id);
+            if (!s) return false;
+            const a = sim.alpha;
+            out.set(s.px + (s.x - s.px) * a - HALF, 1.75, s.pz + (s.z - s.pz) * a - HALF);
+            return true;
+          }}
+        >
+          {o.title}
+        </Anchored>
+      ))}
+    </>
+  );
+}
+
+/** A line of three or more outside a building gets a count over the door. */
+function QueueLabels() {
+  const ops = useApp(atoms.ops);
+  const buildings = useApp(atoms.buildings);
+  return (
+    <>
+      {ops.queues
+        .filter((q) => q.n >= 3)
+        .map((q) => {
+          const b = buildings.find((x) => x.id === q.id);
+          if (!b) return null;
+          return (
+            <Anchored
+              key={q.id}
+              className={`queuelabel ${q.n >= 8 ? "long" : ""}`}
+              pos={(out) => {
+                const [cx, cz] = rectCenter(b);
+                out.set(cx, 1.9, cz);
+                return true;
+              }}
+            >
+              {q.n} waiting
+            </Anchored>
+          );
+        })}
+    </>
+  );
+}
+
 /** Why the ghost is red. */
 function Reason() {
   const tool = useApp(atoms.tool);
@@ -149,6 +230,9 @@ export function WorldOverlay() {
       ))}
       <CoinPops />
       <NoPath />
+      <BrokenLabels />
+      <StaffTags />
+      <QueueLabels />
       <Reason />
     </div>
   );

@@ -42,7 +42,9 @@ export function CameraRig({ baseZoom }: { baseZoom: number }) {
   const gl = useThree((s) => s.gl);
   const turn = useRef({ target: 0, current: 0 });
   const tool = useApp(atoms.tool);
-  const painting = tool === "path" || tool === "bulldoze";
+  // Painting a staffer's patrol zone is painting too: a left drag belongs to the brush.
+  const zone = useApp(atoms.zone);
+  const painting = tool === "path" || tool === "bulldoze" || zone !== null;
   const keys = useRef(new Set<string>());
   const vel = useRef({ x: 0, y: 0 });
   const pointer = useRef({ x: 0, y: 0, inside: false, down: false, overEdgeOk: false, edgeSince: -1, type: "mouse" });
@@ -85,7 +87,7 @@ export function CameraRig({ baseZoom }: { baseZoom: number }) {
       if ((e.target as Element | null)?.tagName !== "CANVAS" || e.button > 0) return;
       const now = performance.now();
       const moved = Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y);
-      if (moved > 8 || now - downAt.t > 320 || appNow()?.tool) return void (last.t = -1e9);
+      if (moved > 8 || now - downAt.t > 320 || appNow()?.tool || appNow()?.zone != null) return void (last.t = -1e9);
       if (now - last.t < 380 && Math.hypot(e.clientX - last.x, e.clientY - last.y) < 32) {
         focusAt(e.clientX, e.clientY);
         last.t = -1e9;

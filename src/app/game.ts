@@ -59,6 +59,11 @@ export const atoms = {
   follow: pick((c) => c.follow),
   highlight: pick((c) => c.highlight),
   race: pick((c) => c.snap.race),
+  ops: pick((c) => c.snap.ops),
+  staffCount: pick((c) => c.snap.ops.staff.length),
+  payroll: pick((c) => c.snap.ops.payroll),
+  /** The staffer whose patrol zone is being painted, or null. */
+  zone: pick((c) => c.zone),
   /** Template variables for the open card ({valuation}, {bidLow}, {dropRival}, ...). */
   cardVars: pick((c) => c.snap.race.vars),
 };

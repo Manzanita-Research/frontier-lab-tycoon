@@ -7,6 +7,7 @@ import { HUD } from "./ui/HUD";
 import { WorldOverlay } from "./ui/WorldOverlay";
 import { Juice, Sky } from "./ui/juice";
 import "./ui/ui.css";
+import "./ui/compact.css";
 
 export function App() {
   // Mounting the actor atom starts the app machine and its frame loop; releasing it stops both.
