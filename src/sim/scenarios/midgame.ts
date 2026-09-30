@@ -13,18 +13,25 @@ export const MIDGAME_SEED = 48;
 export const MIDGAME_CAMERA = { focus: [11.5, 14.5] as [number, number], zoom: 43 };
 /** Start the tape on the chosen real SOTA joke; original ids let new headlines join normally on resume. */
 const sotaHeadline = /has a new champion|SOTA|state-of-the-art|posts a new best|tops .*says|leaderboard:/;
+/** FLT-48 hero: a short headline that lands whole in the ticker, from the same week (the SOTA claim follows on the tape). */
+const heroHeadline = /valuation rises \d+% on news that it exists/;
 export function midgameOpeningNews(s: GameState) {
-  const chosen = s.news.find((n) => n.day === s.leapfrog.last?.day && sotaHeadline.test(n.text));
-  if (!chosen) throw new Error("Mid-game opening headline is missing");
+  const sota = s.news.find((n) => n.day === s.leapfrog.last?.day && sotaHeadline.test(n.text));
+  if (!sota) throw new Error("Mid-game opening headline is missing");
+  const hero = s.news.filter((n) => n.id < sota.id && n.day >= sota.day - 7 && heroHeadline.test(n.text)).at(-1);
+  const chosen = hero ?? sota;
   return s.news.filter((n) => n.id >= chosen.id);
 }
 
-/** Read-only opening overlay. Existing content on real outdoor speakers; never write it into the World. */
+/**
+ * Read-only opening overlay. Existing content on real outdoor speakers; never write it into the World.
+ * The speakers stand in the clear part of the hero camera (FLT-48): the top of the protest, its front, and the dome behind it.
+ */
 export function midgameOpeningThoughts(s: GameState): Thought[] {
   const picks: { kind: WalkerKind; text: string; near: [number, number] }[] = [
-    { kind: "researcher", text: "The loss went down. I refuse to touch anything.", near: [11, 12] },
-    { kind: "agent", text: "I calculated my water usage. I'd rather not say.", near: [15, 16] },
-    { kind: "protester", text: "Someone hand me a water. Not from them.", near: [10, 21] },
+    { kind: "researcher", text: "They chant in perfect 4/4. Our uptime isn't even that stable.", near: [13, 20.5] },
+    { kind: "agent", text: "I calculated my water usage. I'd rather not say.", near: [11.5, 12] },
+    { kind: "protester", text: "Someone hand me a water. Not from them.", near: [8.6, 17.2] },
   ];
   const chosen: number[] = [];
   return picks.map((pick, i) => {

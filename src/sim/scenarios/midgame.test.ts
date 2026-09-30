@@ -1,6 +1,7 @@
 import { getReach, isReachable, tileIndex, buildingAt, isPathTile, rectContains } from "../pathfind";
 import { openEventOf } from "../events";
 import { outcomeOf } from "../goals";
+import { progressOf } from "../progression";
 import { eraOfState } from "../race/race";
 import { tick } from "../tick";
 import { SimHandle } from "../../app/sim";
@@ -44,6 +45,8 @@ describe("midgame scenario", () => {
     expect(s.leapfrog.last?.claims.length).toBeGreaterThan(0);
     expect(openEventOf(s)).toBeNull();
     expect(outcomeOf(s)).toBe("playing");
+    // The ladder is done (three models shipped), so the goal note names the next open objective, not a met rung (FLT-48).
+    expect(progressOf(s).goal).toMatchObject({ text: "Reach Era 3: Superhuman Coder", current: 2, target: 3 });
     const reach = getReach(s);
     expect(s.buildings.every((b) => isReachable(s, b) && !b.broken)).toBe(true);
     expect(s.grid.paths.every((on, i) => !on || !!reach.tiles[i])).toBe(true);
@@ -71,11 +74,11 @@ describe("midgame scenario", () => {
         latestDrop: s.leapfrog.last, digest: digest(s) }));
     }
   });
-  it("opens with the curated existing bubbles and the SOTA joke without changing the World", () => {
+  it("opens with the curated existing bubbles and a whole, short headline ahead of the SOTA joke, without changing the World", () => {
     const before = digest(s);
     const thoughts = midgameOpeningThoughts(s);
     expect(thoughts.map((t) => t.text)).toEqual([
-      "The loss went down. I refuse to touch anything.",
+      "They chant in perfect 4/4. Our uptime isn't even that stable.",
       "I calculated my water usage. I'd rather not say.",
       "Someone hand me a water. Not from them.",
     ]);
@@ -84,8 +87,12 @@ describe("midgame scenario", () => {
       expect(s.walkers.some((w) => w.id === t.walkerId && w.machine.value !== "inside")).toBe(true);
     }
     const news = midgameOpeningNews(s);
-    expect(news[0]?.text).toMatch(/has a new champion|SOTA|state-of-the-art|posts a new best|tops .*says|leaderboard:/);
-    expect(news[0]?.day).toBe(s.day);
+    // FLT-48 hero: the tape opens on a line that fits the ticker whole; the fresh SOTA claim follows it that week.
+    // FLT-52: with the wave packs running, this World's SOTA week has no valuation line, so the tape opens on the SOTA claim.
+    const valuation = s.news.some((n) => n.day >= s.day - 7 && /valuation rises \d+% on news that it exists/.test(n.text));
+    expect(news[0]?.text).toMatch(valuation ? /valuation rises \d+% on news that it exists/ : /has a new champion|SOTA|state-of-the-art|posts a new best|tops .*says|leaderboard:/);
+    expect(news[0]?.day).toBeGreaterThanOrEqual(s.day - 7);
+    expect(news.some((n) => n.day === s.day && /has a new champion|SOTA|state-of-the-art|posts a new best|tops .*says|leaderboard:/.test(n.text))).toBe(true);
     expect(digest(s)).toBe(before);
     // Delayed HUD mounts and repeated paused publishes must still start with the chosen headline.
     const handle = new SimHandle(JSON.parse(JSON.stringify(s)), true);
