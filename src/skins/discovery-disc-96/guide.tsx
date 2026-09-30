@@ -20,8 +20,8 @@ export function Bubble({ bubble }: SlotPropsMap["Bubble"]) {
 /** How long the lab has to be quiet before Chip offers a fact. */
 const QUIET_MS = 45_000;
 
-const HEAD: Record<ToastVM["tone"], string> = { good: "GREAT JOB!", bad: "OOPS!", joke: "HA HA!", neutral: "NEWS FLASH!", hint: "PSST!" };
-const MOOD: Record<ToastVM["tone"], RobotMood> = { good: "cheer", bad: "oops", joke: "happy", neutral: "happy", hint: "think" };
+const HEAD: Record<ToastVM["tone"], string> = { good: "GREAT JOB!", bad: "OOPS!", joke: "HA HA!", neutral: "NEWS FLASH!", hint: "PSST!", warn: "UH-OH!" };
+const MOOD: Record<ToastVM["tone"], RobotMood> = { good: "cheer", bad: "oops", joke: "happy", neutral: "happy", hint: "think", warn: "oops" };
 
 export function Toast({ toast, actions }: SlotPropsMap["Toast"]) {
   const body = (
