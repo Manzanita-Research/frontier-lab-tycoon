@@ -12,7 +12,7 @@ Production: **https://flt-prod.manzanita.workers.dev**. The Worker serves the ro
 - Deploy and cleanup share a normalized PR concurrency key, including merged PR close events whose GitHub ref changes to `main`. In-progress runs finish before cleanup. Live head/open checks skip superseded commits and closed PRs; production checks the current `main` SHA before deploying.
 - Fork PRs get the ordinary game CI checks, but no deployment credentials or previews.
 
-The stack uses [Alchemy's StaticSite build contract](https://alchemy.run/cloudflare/frontend/static-site/) with `cwd` at the repository root, `pnpm build` and `outdir: "dist"`. A small post-build script adds `/deployment.json` containing only the checked-out commit SHA, so release verification can confirm the public revision and measure merge-to-live latency. StaticSite preserves the game's typecheck/build command without adding a different Vite version or Cloudflare plugin to the game.
+The stack uses [Alchemy's StaticSite build contract](https://alchemy.run/cloudflare/frontend/static-site/) with `cwd` at the repository root and `outdir: "dist"`. `node scripts/build-deployment.mjs` runs the root `pnpm build` and adds `/deployment.json` containing only the checked-out commit SHA, so release verification can confirm the public revision and measure merge-to-live latency. A single script avoids shell operators, which this pinned Alchemy version passes as literal arguments. StaticSite preserves the game's typecheck/build command without adding a different Vite version or Cloudflare plugin to the game.
 
 ## Dependency isolation
 

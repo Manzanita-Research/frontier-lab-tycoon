@@ -21,7 +21,7 @@ export default Alchemy.Stack(
     const site = yield* Cloudflare.Website.StaticSite("Website", {
       name: `flt-${stack.stage}`,
       cwd: fileURLToPath(new URL("../", import.meta.url)),
-      command: "pnpm build && node scripts/deployment-info.mjs",
+      command: "node scripts/build-deployment.mjs",
       outdir: "dist",
       workersDev: true,
       assets: { notFoundHandling: "single-page-application" },
