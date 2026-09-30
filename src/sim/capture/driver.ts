@@ -31,6 +31,8 @@ import { CAPTURE_STATS, freshBill, stepBill } from "./machine";
 const R = CAPTURE.rules;
 const W = R.warning;
 const OWNER = "capture";
+/** The reporter and the bury are about you, and need you (FLT-51). */
+const TAG = { source: "politics", importance: "you" } as const;
 const CARD_IDS = CAPTURE.content.events.add.map((e) => e.id);
 // Lazy, like the yacht's (FLT-52): verbs -> commands -> this driver is a cycle, so nothing from verbs runs at load.
 let measure: string[] | undefined;
@@ -81,7 +83,7 @@ export function draftClause(s: GameState, clause: string, on: boolean): boolean 
   if (!b?.enabled || b.machine.value !== "invited" || !clauseById(clause)) return false;
   if (!on) return (b.draft = b.draft.filter((c) => c !== clause)), true;
   if (b.draft.includes(clause)) return true;
-  if (b.draft.length >= R.pick) return void addToast(s, `The staffer says ${R.pick} clauses is "already a lot of clauses".`, "neutral"), false;
+  if (b.draft.length >= R.pick) return void addToast(s, `The staffer says ${R.pick} clauses is "already a lot of clauses".`, "neutral", { source: "politics", importance: "you" }), false;
   b.draft = [...b.draft, clause];
   return true;
 }
@@ -195,7 +197,7 @@ function warn(s: GameState, rng: Rng) {
   const b = s.bill!;
   b.warned = s.day;
   const v = { ...vars(s), reporter: R.reporter, days: String(W.days) };
-  addToast(s, fillTemplate(W.toast, v), "bad");
+  addToast(s, fillTemplate(W.toast, v), "bad", TAG);
   runVerb({ state: s, rng, run: null, owner: OWNER, vars: v }, { type: "camera.beat", params: { kind: "leak", caption: W.caption, sub: W.sub, on: "gate", zoom: 1.3, hold: 5 } });
 }
 
@@ -213,7 +215,7 @@ export function buryLeak(s: GameState): boolean {
   const b = s.bill;
   if (!b?.enabled || b.machine.value !== "law" || b.warned === undefined) return false;
   const cost = buryCost(s);
-  if (s.cash < cost) return addToast(s, fillTemplate(W.broke, { cost: formatMoney(cost) }), "bad"), false;
+  if (s.cash < cost) return addToast(s, fillTemplate(W.broke, { cost: formatMoney(cost) }), "bad", TAG), false;
   const rng = createRng(b.rngState);
   s.cash -= cost;
   s.ledger = { ...s.ledger, expenses: s.ledger.expenses + cost, net: s.ledger.net - cost };
@@ -223,7 +225,7 @@ export function buryLeak(s: GameState): boolean {
   delete b.warned;
   b.buried = (b.buried ?? 0) + 1;
   addNews(s, fillTemplate(rng.pick(W.buried), env.vars), "joke");
-  addToast(s, fillTemplate(W.buriedToast, { cost: formatMoney(buryCost(s)) }), "neutral");
+  addToast(s, fillTemplate(W.buriedToast, { cost: formatMoney(buryCost(s)) }), "neutral", TAG);
   b.rngState = rng.state();
   return true;
 }

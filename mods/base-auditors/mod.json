@@ -203,7 +203,8 @@
                         "type": "toast",
                         "params": {
                           "text": "An auditor lifted a box. The box said hello.",
-                          "tone": "bad"
+                          "tone": "bad",
+                          "importance": "you"
                         }
                       },
                       {
@@ -234,7 +235,8 @@
                         "type": "toast",
                         "params": {
                           "text": "The auditors are asking why your agents have a sourdough wiki.",
-                          "tone": "bad"
+                          "tone": "bad",
+                          "importance": "you"
                         }
                       },
                       {

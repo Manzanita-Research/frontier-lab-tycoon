@@ -198,6 +198,24 @@
       "factions-chip",
       "factions-phone"
     ],
+    "endings": [
+      "memo",
+      "takeover",
+      "takeover-95",
+      "thanks",
+      "front-takeover",
+      "front-regulated",
+      "front-acquihired",
+      "front-captured",
+      "front-pivot",
+      "front-95",
+      "front-phone",
+      "front-phone-share"
+    ],
+    "notices": [
+      "notice-burst",
+      "notice-burst-base"
+    ],
     "circus-juice": [
       "c56-conga",
       "c56-conga-phone",
@@ -2363,6 +2381,200 @@
         },
         {
           "wait": 1500
+        }
+      ]
+    },
+    "memo": {
+      "title": "FLT-11: The Memo, the Era 4 fork (Race or Slow Down)",
+      "query": {
+        "warp": null,
+        "moment": "memo"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "takeover": {
+      "title": "FLT-11: The Takeover: the title is not yours, the cursor moves by itself",
+      "query": {
+        "warp": null,
+        "moment": "takeover"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "takeover-95": {
+      "title": "FLT-11: The Takeover in Frontier 95",
+      "query": {
+        "warp": null,
+        "moment": "takeover",
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "thanks": {
+      "title": "FLT-11: 'Thanks for playing. We'll take it from here.'",
+      "query": {
+        "warp": null,
+        "moment": "thanks"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "front-takeover": {
+      "title": "FLT-11: The Takeover's front page and share card",
+      "query": {
+        "warp": null,
+        "moment": "front-takeover"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "front-regulated": {
+      "title": "FLT-11: Regulated Utility's front page (the campus goes beige)",
+      "query": {
+        "warp": null,
+        "moment": "front-regulated"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "front-acquihired": {
+      "title": "FLT-11: Acqui-hired's front page",
+      "query": {
+        "warp": null,
+        "moment": "front-acquihired"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "front-captured": {
+      "title": "FLT-11: Captured's front page",
+      "query": {
+        "warp": null,
+        "moment": "front-captured"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "front-pivot": {
+      "title": "FLT-11: The Pivot's front page",
+      "query": {
+        "warp": null,
+        "moment": "front-pivot"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "front-95": {
+      "title": "FLT-11: an ending in Frontier 95 (Internet Exploder + NoteBad)",
+      "query": {
+        "warp": null,
+        "moment": "front-captured",
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "front-phone": {
+      "title": "FLT-11: an ending on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "moment": "front-acquihired"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "front-phone-share": {
+      "title": "FLT-11: an ending on a phone, scrolled to Share and the card",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "moment": "front-acquihired"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        },
+        {
+          "eval": "() => { const el = document.querySelector('.f95-end-run, .ending-side'); if (el) el.scrollIntoView({ block: 'start' }); }"
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "notice-burst": {
+      "title": "FLT-51: a busy second on the mid-game campus (nine notices land at once, as at 10x), Frontier 95",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => {\n  const say = (text, tone, source, importance) => w.toasts.push({ id: w.nextId++, text, tone, source, importance });\n  say('API Gateway is out of order. An SRE is on it.', 'bad', 'ops', 'world');\n  say('Lucia Argmax loved it: $160K in the bank', 'good', 'economy', 'world');\n  say('Sirocco launched Gale-4-Turbo. The news cycle is theirs.', 'bad', 'leapfrog', 'world');\n  say('Dmitri Backprop handed in the box and left.', 'bad', 'staff', 'you');\n  say('Demo went flawlessly (it was pre-recorded)', 'good', 'crowd', 'world');\n  say('Sirocco took your record on SWE-VR.', 'bad', 'leapfrog', 'you');\n  say('Kombucha Bar is out of order. An SRE is on it.', 'bad', 'ops', 'world');\n  say('MetaMeta Superintelligence Labs just dropped Superintelligence-Preview-15-Mini for free. Revenue -30% for 30 days.', 'bad', 'race', 'you');\n  say('Up 2 places: #3 on the Arena.', 'good', 'race', 'world');\n  w.version++;\n}"
+        },
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "notice-burst-base": {
+      "title": "FLT-51: the same nine notices, in the base skin",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "base"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => {\n  const say = (text, tone, source, importance) => w.toasts.push({ id: w.nextId++, text, tone, source, importance });\n  say('API Gateway is out of order. An SRE is on it.', 'bad', 'ops', 'world');\n  say('Lucia Argmax loved it: $160K in the bank', 'good', 'economy', 'world');\n  say('Sirocco launched Gale-4-Turbo. The news cycle is theirs.', 'bad', 'leapfrog', 'world');\n  say('Dmitri Backprop handed in the box and left.', 'bad', 'staff', 'you');\n  say('Demo went flawlessly (it was pre-recorded)', 'good', 'crowd', 'world');\n  say('Sirocco took your record on SWE-VR.', 'bad', 'leapfrog', 'you');\n  say('Kombucha Bar is out of order. An SRE is on it.', 'bad', 'ops', 'world');\n  say('MetaMeta Superintelligence Labs just dropped Superintelligence-Preview-15-Mini for free. Revenue -30% for 30 days.', 'bad', 'race', 'you');\n  say('Up 2 places: #3 on the Arena.', 'good', 'race', 'world');\n  w.version++;\n}"
+        },
+        {
+          "wait": 1200
         }
       ]
     },

@@ -16,6 +16,7 @@ import { isBeat, skipBeat } from "../../render/fx/beat";
 import { debugParams } from "../../app/game";
 import { setPhoto, takePhoto, togglePhoto } from "../juice/photo";
 import { chatCountAtom } from "./state";
+import { useShareCard, useTakeoverTitle } from "../share/share";
 import type { HudVM } from "./types";
 import { defs } from "../../sim/defs";
 
@@ -195,4 +196,6 @@ export function useHudEffects(vm: HudVM, snap: Snapshot) {
   useChatPlayback();
   useNewsDesk(snap);
   useEffect(startDrama, []);
+  useShareCard(vm);
+  useTakeoverTitle(vm);
 }

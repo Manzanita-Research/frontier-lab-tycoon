@@ -113,7 +113,7 @@ function poach(s: GameState, lab: NeoLab, rng: Rng) {
   s.race.poached++;
   lab.poached++;
   addNews(s, say(s, lab, rng, lab.lines.poach, { name: gone.name }), "bad");
-  addToast(s, `${lab.name} poached ${gone.name}. ${lab.founder} sends a heart emoji.`, "bad");
+  addToast(s, `${lab.name} poached ${gone.name}. ${lab.founder} sends a heart emoji.`, "bad", { source: "defection", importance: "you" });
 }
 
 /** Once a day; the labs move on the Arena's weekly beat, before the Race re-ranks it. */
@@ -156,7 +156,7 @@ export function dailyNeoLabs(s: GameState) {
       const ctx = lab.rival.context;
       lab.rival = { ...lab.rival, context: { ...ctx, personality: { ...ctx.personality, poaching: Math.min(0.5, ctx.personality.poaching * 1.5) } } };
       addNews(s, say(s, lab, rng, lab.lines.nemesis), "bad");
-      addToast(s, `${lab.name} has named you its nemesis.`, "bad");
+      addToast(s, `${lab.name} has named you its nemesis.`, "bad", { source: "defection", importance: "you" });
     }
   }
   n.rngState = rng.state();

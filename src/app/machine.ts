@@ -11,10 +11,11 @@
 import { Clock, Effect, Schema, Stream } from "effect";
 import { fromEffectEventStream, setupEffect } from "@xstate/effect";
 import type { Command } from "../sim/commands";
+import { dailySeed } from "../sim/daily";
 import type { NewsItem, OpenEvent, Outcome, Tone } from "../sim/types";
 import { Frames } from "./frames";
 import type { Snapshot, Speed, Tool, UiSelection, UiToast } from "./hud";
-import { gateToasts, newGate, type NoticeGate } from "./notices";
+import { gateToasts, mergeWire, newGate, WIRE_MAX, type NoticeGate, type WireItem } from "./notices";
 import { Sim, type SyncReport } from "./sim";
 
 /** Twenty sim ticks per day, six real seconds at 1×. */
@@ -22,6 +23,8 @@ export const TICKS_PER_SECOND = 20 / 6;
 export const MAX_CATCHUP_TICKS = 40;
 export const SNAPSHOT_MS = 200;
 export const TOAST_MS = 5200;
+/** A batch summary is a list: it gets longer to be read. */
+export const BATCH_TOAST_MS = 9000;
 
 /** A type-only schema: the context carries these shapes as they are, with nothing to validate at runtime. */
 const opaque = <T>() => Schema.declare<T>((_value): _value is T => true);
@@ -41,10 +44,15 @@ export const AppContext = Schema.Struct({
   outcome: opaque<Outcome>(),
   /** The HUD's view of the World, refreshed at about 5 Hz. */
   snap: opaque<Snapshot>(),
+  /** The ticker: the sim's headlines with the world notices merged in (see `notices.ts`). */
   news: opaque<readonly NewsItem[]>(),
+  /** The sim's own headlines, as last published. */
+  headlines: opaque<readonly NewsItem[]>(),
+  /** The world notices the notice policy sent to the ticker, newest last. */
+  wire: opaque<readonly WireItem[]>(),
   toasts: opaque<readonly UiToast[]>(),
   toastSeq: Schema.Number,
-  /** What Release Leapfrog's launches have held back from the toast stack (see `notices.ts`). */
+  /** The `you` toasts the notice policy is holding for its window (see `notices.ts`). */
   gate: opaque<NoticeGate>(),
   /** The walker whose inspector card is open (their id), if any. */
   selected: Schema.NullOr(Schema.Number),
@@ -111,6 +119,8 @@ export const appMachine = setupEffect({
       CHOOSE: Schema.Struct({ choiceIndex: Schema.Number }),
       KEEP_PLAYING: Schema.Struct({}),
       NEW_LAB: Schema.Struct({}),
+      /** Today's lab: a new lab on the date's seed ("2026-09-30"), the same campus for everyone that day. */
+      DAILY_LAB: Schema.Struct({ daily: Schema.String }),
       TOAST: Schema.Struct({ text: Schema.String, tone: opaque<Tone>() }),
       /** Tap a walker (or tap away: null) to open or close the inspector. */
       SELECT: Schema.Struct({ id: Schema.NullOr(Schema.Number) }),
@@ -154,7 +164,8 @@ export const appMachine = setupEffect({
       Effect.gen(function* () {
         const sim = yield* Sim;
         const ms = yield* Clock.currentTimeMillis;
-        sim.reset(((ms ^ Math.imul(sim.world.seed, 2654435761)) >>> 0) || 1);
+        const daily = args.event.type === "DAILY_LAB" ? args.event.daily : null;
+        sim.reset(daily ? dailySeed(daily) : ((ms ^ Math.imul(sim.world.seed, 2654435761)) >>> 0) || 1, daily);
         const report = sim.report(true, true);
         if (report) args.self.send({ type: "SYNCED", report, now: 0 });
       }),
@@ -172,6 +183,8 @@ export const appMachine = setupEffect({
     outcome: input.first.outcome,
     snap: input.first.snap!,
     news: input.first.news ?? [],
+    headlines: input.first.news ?? [],
+    wire: [],
     toasts: input.first.toasts.slice(-3),
     toastSeq: 1,
     gate: newGate(),
@@ -223,30 +236,35 @@ export const appMachine = setupEffect({
   on: {
     SYNCED: ({ context, event }, enq) => {
       const { report, now } = event;
-      // Rival launches are for the leaderboard and the ticker: only what matters to the player becomes a toast.
+      // One policy for every notice: what is about you is a toast (one per window), the world's news is for the ticker.
       const gated = gateToasts(context.gate, report.toasts, {
         now,
-        speed: context.speed,
+        day: report.snap?.day ?? context.snap.day,
         leapfrog: report.snap?.leapfrog,
         rank: report.snap ? { prev: context.snap.race.rank, next: report.snap.race.rank, top: report.snap.race.board.find((r) => r.rank === 1)?.short ?? "" } : null,
         seq: context.toastSeq,
       });
       const fresh = gated.toasts;
+      const wire = gated.wire.length > 0 ? [...context.wire, ...gated.wire].slice(-WIRE_MAX) : context.wire;
       const next: AppContext = {
         ...addToasts(context, fresh),
         gate: gated.gate,
         toastSeq: gated.seq,
         event: report.event,
         outcome: report.outcome,
+        // A new outcome is shown even if the last one was waved away (won, kept playing, and now an ending's front page).
+        outcomeDismissed: report.outcome === context.outcome ? context.outcomeDismissed : false,
         snap: report.snap ?? context.snap,
-        news: report.news ?? context.news,
+        headlines: report.news ?? context.headlines,
+        wire,
+        news: report.news || wire !== context.wire ? mergeWire(report.news ?? context.headlines, wire) : context.news,
         lastPublishAt: report.snap ? now : context.lastPublishAt,
         // The walker left the map (out the gate, or the game was reset): close the card.
         ...(report.snap && context.selected !== null && report.snap.selectedId === context.selected && report.snap.inspect === null ? { selected: null, follow: false } : {}),
         // The staffer whose zone was being painted has been let go.
         ...(report.snap && context.zone !== null && !report.snap.ops.staff.some((o) => o.id === context.zone) ? { zone: null } : {}),
       };
-      for (const t of fresh) enq.raise({ type: "TOAST_EXPIRED", id: t.id }, { id: `toast:${t.id}`, delay: TOAST_MS });
+      for (const t of fresh) enq.raise({ type: "TOAST_EXPIRED", id: t.id }, { id: `toast:${t.id}`, delay: t.batch ? BATCH_TOAST_MS : TOAST_MS });
       return { context: next, target: phaseFor(next) };
     },
     SET_SPEED: ({ context, event }) => {
@@ -293,11 +311,14 @@ export const appMachine = setupEffect({
     },
     SET_FOLLOW: ({ context, event }) => (context.selected === null ? undefined : { context: { ...context, follow: event.follow, lastPublishAt: 0 } }),
     HIGHLIGHT: ({ context, event }) => ({ context: { ...context, highlight: event.key === context.highlight ? null : event.key, lastPublishAt: 0 } }),
+    DAILY_LAB: (args, enq) => {
+      enq(args.actions.newLab, args);
+      return { context: freshLab(args.context), target: ".playing.running" };
+    },
     NEW_LAB: (args, enq) => {
       const { context, actions } = args;
       enq(actions.newLab, args);
-      const next = { ...context, queue: [], acc: 0, toasts: [], gate: newGate(), outcomeDismissed: false, speed: 1 as Speed, tool: null, hover: null, selected: null, follow: false, highlight: null, zone: null, overlays: [] };
-      return { context: next, target: ".playing.running" };
+      return { context: freshLab(context), target: ".playing.running" };
     },
     TOAST: ({ context, event }, enq) => {
       const id = 1_000_000 + context.toastSeq;
@@ -315,6 +336,9 @@ export const appMachine = setupEffect({
     },
   },
 });
+
+/** The app's side of a new lab: nothing queued, nothing selected, running at 1x. */
+const freshLab = (context: AppContext): AppContext => ({ ...context, queue: [], acc: 0, toasts: [], gate: newGate(), wire: [], headlines: [], outcomeDismissed: false, speed: 1, tool: null, hover: null, selected: null, follow: false, highlight: null, zone: null, overlays: [] });
 
 /** The selection as the sim handle wants it. */
 const uiOf = (c: AppContext): UiSelection => ({ selected: c.selected, follow: c.follow, highlight: c.highlight });

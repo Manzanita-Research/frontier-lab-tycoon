@@ -26,10 +26,13 @@ describe("midgame scenario", () => {
     // FLT-52: and the Hearing, the yacht summit, Defection, the Poaching War, Evals Without Borders, Regulatory Capture
     // and the Promise Tracker.
     // FLT-33/25: the earned factions wake with the campus and argue all 480 days; the water crowd escalates through its arc.
+    // FLT-11 adds The Memo's dormant arc (arcs.memo); take it out and the World hashes to the old c4310492.
+    // FLT-51 tags every toast (source, importance, reply); the first digest strips the tags (on the train it matched FLT-52).
     // FLT-56: the auditors huddle before they leave and the grade lingers, which moves the opening a few days, and the
     // Hearing's twelve new questions change what the senators ask. Phase 2: the motions' passes and fails nudge the
     // factions and last longer.
-    expect(digest(s)).toBe("e26bf26e");
+    expect(digest({ ...s, toasts: s.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) })).toBe("06ccd627");
+    expect(digest(s)).toBe("31b29e51");
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);

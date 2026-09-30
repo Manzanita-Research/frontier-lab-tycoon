@@ -69,7 +69,8 @@
                         "type": "toast",
                         "params": {
                           "text": "{defName} seems happier. The VC has stopped calling.",
-                          "tone": "good"
+                          "tone": "good",
+                          "importance": "you"
                         }
                       }
                     ]
@@ -153,7 +154,8 @@
                         "type": "toast",
                         "params": {
                           "text": "{defName} stays. The clock resets, and it runs faster now.",
-                          "tone": "neutral"
+                          "tone": "neutral",
+                          "importance": "you"
                         }
                       }
                     ]
@@ -191,7 +193,8 @@
                         "type": "toast",
                         "params": {
                           "text": "Equity for {defName}. The team is buzzing; revenue is a little lighter for six months.",
-                          "tone": "good"
+                          "tone": "good",
+                          "importance": "you"
                         }
                       }
                     ]
@@ -230,7 +233,8 @@
                         "type": "toast",
                         "params": {
                           "text": "{defName} is Head of Safety now. It worked.",
-                          "tone": "good"
+                          "tone": "good",
+                          "importance": "you"
                         }
                       }
                     ]

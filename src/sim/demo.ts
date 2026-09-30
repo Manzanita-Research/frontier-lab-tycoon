@@ -27,7 +27,7 @@ export function showFor(state: GameState, rng: Rng, b: Building): number {
   // Toasts are for the moments that matter, so not every show gets one.
   if (state.tick - (state.flags.lastShowToast ?? -999) > 5 * 20) {
     state.flags.lastShowToast = state.tick;
-    addToast(state, worked ? "Demo went flawlessly (it was pre-recorded)" : "Live demo crashed. Presenter blames the Wi-Fi.", worked ? "good" : "bad");
+    addToast(state, worked ? "Demo went flawlessly (it was pre-recorded)" : "Live demo crashed. Presenter blames the Wi-Fi.", worked ? "good" : "bad", { source: "crowd" });
   }
   return worked ? 1 : FLOP_SCALE;
 }

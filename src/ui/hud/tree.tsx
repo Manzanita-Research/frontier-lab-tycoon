@@ -67,7 +67,7 @@ function EventModal({ vm, event, actions, slots: { EventCard, Livestream, Hearin
 }
 
 export function Modals({ vm, actions }: { vm: HudVM; actions: HudActions }) {
-  const { EventCard, Livestream, Hearing, LeakedChat, DramaCard, ReportCard, Bill, PromiseTracker, Confirm, UnlockCard, HowToPlay, EraCard, Outcome, NewsRoom, Mixer, ModManager, SkinPicker, PaperMoment, CrumbWiki, DisasterMenu, Drama } = useSkin().slots;
+  const { EventCard, Livestream, Hearing, LeakedChat, DramaCard, ReportCard, Bill, PromiseTracker, Confirm, UnlockCard, HowToPlay, EraCard, Outcome, Ending, Takeover, NewsRoom, Mixer, ModManager, SkinPicker, PaperMoment, CrumbWiki, DisasterMenu, Drama } = useSkin().slots;
   return (
     <>
       {vm.senate.open && vm.senate.tracker && !vm.event?.tracker && (
@@ -82,6 +82,8 @@ export function Modals({ vm, actions }: { vm: HudVM; actions: HudActions }) {
       {vm.disasters.open && <DisasterMenu disasters={vm.disasters} actions={actions} />}
       {vm.eraCard && <EraCard era={vm.eraCard} actions={actions} />}
       {vm.outcome && <Outcome outcome={vm.outcome} actions={actions} />}
+      {vm.takeover && !vm.ending && <Takeover takeover={vm.takeover} layout={vm.layout} actions={actions} />}
+      {vm.ending && <Ending ending={vm.ending} layout={vm.layout} actions={actions} />}
       {vm.newsroom.view && <NewsRoom newsroom={vm.newsroom} actions={actions} />}
       {vm.sound.open && <Mixer sound={vm.sound} actions={actions} />}
       {vm.drama.open && <Drama drama={vm.drama} actions={actions} />}

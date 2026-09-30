@@ -16,6 +16,7 @@ import type { BillState } from "./capture/state";
 import type { PromisesState } from "./promises/state";
 import type { NeedKey } from "../content/needs";
 import type { DisastersState } from "./disasters/types";
+import type { EndingsState } from "./endings/state";
 import type { ArcStored } from "./machines/arc";
 import type { ModArcStored } from "./modArcs";
 import type { EconomyStored } from "./machines/economy";
@@ -209,11 +210,26 @@ export interface Pop {
   tick: number;
 }
 
-/** Drained by the store into UI toasts. */
+/**
+ * Who a toast is from (FLT-51): the system that sent it, or a mod (`mod:<id>`). The app's notice policy reads it to decide which
+ * panel owns the news, and the flood test counts by it.
+ */
+export type NoticeSource =
+  | "leapfrog" | "ops" | "staff" | "economy" | "coach" | "event" | "disaster" | "papers" | "collusion" | "hearing" | "politics"
+  | "defection" | "auditors" | "factions" | "race" | "training" | "crowd" | "build" | "endings" | "mods" | `mod:${string}`;
+
+/** `you`: it is about you, or needs you (a toast). `world`: it happened out there (the ticker, and the panel that owns it). */
+export type Importance = "you" | "world";
+
+/** Drained by the store into UI toasts. `source` and `importance` are optional only so older saves still load (FLT-51). */
 export interface Toast {
   id: number;
   text: string;
   tone: Tone;
+  source?: NoticeSource;
+  importance?: Importance;
+  /** Sent while a player command was applied: the answer to something you just did, so the app shows it at once. */
+  reply?: true;
 }
 
 export interface GoalProgress {
@@ -225,7 +241,8 @@ export interface GoalProgress {
   met: boolean;
 }
 
-export type Outcome = "playing" | "won" | "lost";
+/** "ended": an ending (FLT-11) has reached its front page. */
+export type Outcome = "playing" | "won" | "lost" | "ended";
 
 /** A note on the lab's file for the auditors (FLT-19's report card reads them): which grade, how many grades, why. */
 export interface AuditorNote {
@@ -380,4 +397,6 @@ export interface GameState {
   disguises?: Record<string, string>;
   /** FLT-19: the Evals Without Borders pack; absent until enabled. */
   auditors?: AuditorsState;
+  /** FLT-11: The Memo and the endings; absent until `enableEndings` (older saves and baseline runs keep the win/lose-only game). */
+  endings?: EndingsState;
 }

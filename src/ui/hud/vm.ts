@@ -34,6 +34,7 @@ import type {
   ArenaRowVM, DramaDocVM,
   ArenaVM, AuditVM, BeatVM, BillVM, SenateVM, TrackerVM, GoalVM, ReportCardVM, ToneVM, BenchCellVM, DisasterRunVM, DisastersVM, DisasterStageVM, MeterVM, RiskVM, UnderstaffedVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HearingMoveVM, HearingVM, HudVM, LeakVM, SenatorVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
   DramaVM, ModsVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, ResponseVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, StreamVM, ThoughtRowVM, TrainingVM, TrendVM, VoiceVM, WalkerKindVM,
+  EndingVM, ShareVM, TakeoverVM,
 } from "./types";
 import { defs } from "../../sim/defs";
 
@@ -53,7 +54,7 @@ export interface HudInput {
   tool: Tool | null;
   follow: boolean;
   highlight: string | null;
-  toasts: readonly { id: number; text: string; tone: Tone }[];
+  toasts: readonly { id: number; text: string; tone: Tone; batch?: readonly { text: string; tone: Tone }[] }[];
   news: readonly NewsItem[];
   outcomeDismissed: boolean;
   /** "Tap anyone to read their mind" is still showing. */
@@ -91,6 +92,8 @@ export interface HudInput {
   /** Today's Drama (FLT-34). Optional: none means nothing fetched and the window shut. */
   drama?: DramaVM;
   viewport: { width: number; height: number };
+  /** The ending's share card and the campus photo its front page prints (FLT-11). Optional: none is fine. */
+  share?: { photo: string | null } & ShareVM;
 }
 
 
@@ -817,7 +820,8 @@ const OFF_LEAPFROG: LeapfrogVM = {
 
 function outcomeOf(i: HudInput): OutcomeVM | null {
   const s = i.snap;
-  if (s.outcome === "playing" || i.outcomeDismissed) return null;
+  // An ending is its own card: the front page (endingOf).
+  if (s.outcome === "playing" || s.outcome === "ended" || i.outcomeDismissed) return null;
   const won = s.outcome === "won";
   const met = s.goals.filter((g) => g.met).length;
   return {
@@ -835,6 +839,44 @@ function outcomeOf(i: HudInput): OutcomeVM | null {
     ],
     note: won ? "All three milestones met." : `${met} of ${s.goals.length} milestones met.`,
   };
+}
+
+const NO_SHARE: ShareVM = { status: "idle", card: null, native: false, note: null };
+
+/** How the lab ended, on a Frontier Times front page (FLT-11). */
+function endingOf(i: HudInput): EndingVM | null {
+  const view = i.snap.endings;
+  const e = view?.ending;
+  if (!view || !e || i.snap.outcome !== "ended" || i.outcomeDismissed) return null;
+  const st = view.stats;
+  const n = (x: number) => Math.round(x).toLocaleString("en-US");
+  const { photo = null, ...share } = i.share ?? { ...NO_SHARE, photo: null };
+  return {
+    id: e.id,
+    title: e.title,
+    tone: e.tone,
+    keepPlaying: e.keepPlaying,
+    lab: i.snap.labName,
+    paper: { masthead: "The Frontier Times", ...e.paper, photo },
+    stats: [
+      { key: "days", emoji: "📅", label: "Days", text: n(st.days) },
+      { key: "vibes", emoji: "✨", label: "Peak Vibes", text: n(st.peakVibes) },
+      { key: "models", emoji: "🚀", label: "Models released", text: n(st.models) },
+      { key: "protesters", emoji: "📣", label: "Peak protesters", text: n(st.peakProtesters) },
+      { key: "escaped", emoji: "🏃", label: "Agents escaped", text: n(st.agentsEscaped) },
+    ],
+    strip: view.strip,
+    summary: view.summary,
+    daily: view.daily ? `Today's lab · ${view.daily}` : null,
+    share,
+  };
+}
+
+/** The Takeover under way: the lab's own model is in charge. */
+function takeoverOf(i: HudInput): TakeoverVM | null {
+  const view = i.snap.endings;
+  if (!view?.managedBy) return null;
+  return { manager: view.managedBy, title: `Frontier Lab Tycoon (managed by ${view.managedBy})`, placed: view.placed, thanks: view.thanks };
 }
 
 const editionRow = (e: Edition, unread: readonly string[]): EditionRowVM => ({
@@ -971,7 +1013,7 @@ export function hudViewModel(i: HudInput): HudVM {
     senate: senateOf(i),
     bubbles: bubblesOf(i, chips),
     ticker: i.news.slice(-TICKER_ITEMS).map((n) => ({ id: n.id, text: n.text, tone: n.tone })),
-    toasts: spokenToasts(i).map((t) => ({ id: t.id, text: t.text, tone: t.tone })),
+    toasts: spokenToasts(i).map((t) => (t.batch ? { id: t.id, text: t.text, tone: t.tone, batch: t.batch.map((b) => ({ text: b.text, tone: b.tone })) } : { id: t.id, text: t.text, tone: t.tone })),
     // One hint at a time, and none while a toast is talking; the gateway hint is redundant once a toast has said it.
     hints: standingHints(i, play),
     warnings: [...i.snap.warnings],
@@ -999,6 +1041,8 @@ export function hudViewModel(i: HudInput): HudVM {
     eraCard: era,
     outcome: outcomeOf(i),
     audit: auditOf(i.snap),
+    ending: endingOf(i),
+    takeover: takeoverOf(i),
     newsroom: newsroomOf(i),
     sound: soundOf(i),
     photoMode: photoOf(i),

@@ -10,6 +10,8 @@ import { GATHERING_SIGN, GATHERING_SUB, INQUIRY_SIGN, WIKI_HOST } from "../conte
 import { COLLUSION } from "../sim/collusion/pack";
 import { NEO_BALLOON_SUB } from "../content/neocampus";
 import { balloonAt, balloonRadius } from "../render/NeoCampuses";
+import { BUILDINGS } from "../content/buildings";
+import { cursorOf } from "../sim/endings/view";
 
 interface Live {
   id: number;
@@ -335,20 +337,133 @@ function NeoBalloons() {
   );
 }
 
+/**
+ * The Takeover (FLT-11): the lab's own model has the mouse. A cursor glides from one build to the next, hops over the
+ * campus on the way, and clicks when the building lands. Read straight from the World each frame, like the walkers.
+ */
+function GhostCursor() {
+  const manager = useApp(atoms.managedBy);
+  const placed = useApp(atoms.autopilotPlaced);
+  const glide = useRef({ aimed: -1, fx: 0, fz: 0, x: 0, z: 0 });
+  if (!manager) return null;
+  return (
+    <Anchored
+      className="ghost-cursor click"
+      pos={(out) => {
+        const w = sim.world;
+        const c = cursorOf(w, w.tick + sim.alpha);
+        const g = glide.current;
+        const t = c ? w.endings?.autopilot.target : null;
+        // Between buildings it waits where it clicked last.
+        if (!c || !t) {
+          if (g.aimed === -1) return false;
+          out.set(g.x, 1.2, g.z);
+          return true;
+        }
+        const [sx, sz] = BUILDINGS[t.kind as keyof typeof BUILDINGS]?.size ?? [
+          1, 1,
+        ];
+        const tx = worldX(t.x + sx / 2);
+        const tz = worldZ(t.z + sz / 2);
+        // A new target: set off from wherever the cursor is now (the first one comes in from the gate side).
+        if (g.aimed !== t.aimedTick) {
+          if (g.aimed === -1) [g.x, g.z] = [tx - 6, tz + 6];
+          g.aimed = t.aimedTick;
+          g.fx = g.x;
+          g.fz = g.z;
+        }
+        const k = c.t * c.t * (3 - 2 * c.t);
+        g.x = g.fx + (tx - g.fx) * k;
+        g.z = g.fz + (tz - g.fz) * k;
+        out.set(g.x, 1.2 + Math.sin(Math.PI * c.t) * 2.2, g.z);
+        return true;
+      }}
+    >
+      <svg key={placed} width="42" height="51" viewBox="0 0 28 34" aria-hidden>
+        <path
+          d="M3 2 L3 27 L9.5 21 L14 31.5 L18.5 29.5 L14 19.5 L23 19.5 Z"
+          fill="#fff"
+          stroke="#0b1016"
+          strokeWidth="2.2"
+          strokeLinejoin="round"
+        />
+      </svg>
+      <span>{manager}</span>
+    </Anchored>
+  );
+}
+
+/** A sign on the gate and stickers on every building: how the campus looks once an ending has it (FLT-11). */
+function EndingLabels() {
+  const look = useApp(atoms.endingLook);
+  const buildings = useApp(atoms.buildings);
+  const beige = !!look?.beige;
+  useEffect(() => {
+    document.body.classList.toggle("ending-beige", beige);
+    return () => document.body.classList.remove("ending-beige");
+  }, [beige]);
+  if (!look) return null;
+  const gate =
+    typeof look.acquired === "string"
+      ? `A ${look.acquired} company`
+      : look.pivot
+        ? "🔁 NOW PIVOTING"
+        : look.officeMoved
+          ? "🏛️ Office of Frontier Oversight · Field Office"
+          : null;
+  return (
+    <>
+      {gate && (
+        <Anchored
+          className={`gatesign ${look.acquired ? "acquired" : look.officeMoved ? "captured" : "pivot"}`}
+          pos={(out) => {
+            const g = sim.world.gate;
+            out.set(worldX(g.x + g.w / 2), 2.4, worldZ(g.z + g.d / 2));
+            return true;
+          }}
+        >
+          {gate}
+        </Anchored>
+      )}
+      {look.stickers &&
+        buildings.map((b) => (
+          <Anchored
+            key={b.id}
+            className="compliant"
+            pos={(out) => {
+              const [cx, cz] = rectCenter(b);
+              out.set(cx, 1.9, cz);
+              return true;
+            }}
+          >
+            COMPLIANT ✓
+          </Anchored>
+        ))}
+    </>
+  );
+}
+
 /** The world's own labels: names, coin pops, warnings. Thought bubbles are the skin's (see hud/BubbleLayer). */
 export function WorldOverlay() {
   return (
-    <div className="world">
-      <NameTag />
-      <CoinPops />
-      <NoPath />
-      <BrokenLabels />
-      <StaffTags />
-      <QueueLabels />
-      <CollusionSigns />
-      <NeoBalloons />
-      <DisasterLabels />
-      <Reason />
-    </div>
+    <>
+      <div className="world">
+        <NameTag />
+        <CoinPops />
+        <NoPath />
+        <BrokenLabels />
+        <StaffTags />
+        <QueueLabels />
+        <CollusionSigns />
+        <NeoBalloons />
+        <DisasterLabels />
+        <Reason />
+        <EndingLabels />
+      </div>
+      {/* Above the HUD: it is using your mouse now. */}
+      <div className="world ghost-layer">
+        <GhostCursor />
+      </div>
+    </>
   );
 }

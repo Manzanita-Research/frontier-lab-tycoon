@@ -52,7 +52,8 @@
                   "type": "toast",
                   "params": {
                     "text": "A Senate staffer emails {lab}: \"Any chance your team could take a first pass at the bill?\"",
-                    "tone": "good"
+                    "tone": "good",
+                    "importance": "you"
                   }
                 },
                 {
@@ -125,7 +126,8 @@
                   "type": "toast",
                   "params": {
                     "text": "{act} goes to a floor vote. Your lobbyists are standing by.",
-                    "tone": "neutral"
+                    "tone": "neutral",
+                    "importance": "you"
                   }
                 },
                 {

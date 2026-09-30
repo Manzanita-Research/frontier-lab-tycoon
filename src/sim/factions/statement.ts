@@ -31,6 +31,9 @@ const Rules = Schema.Struct({
 });
 export const STATEMENT = Schema.decodeUnknownSync(Rules)(pack).rules.statement;
 
+/** Your statement, its refusals and its reception: about you (FLT-51). */
+const TAG = { source: "factions", importance: "you" } as const;
+
 const hasComms = (s: GameState) => s.staff.some((st) => st.job === "comms" && st.machine.value !== "leaving");
 
 /** Days until the next statement can go out (0: now). */
@@ -51,8 +54,8 @@ export function issueStatement(s: GameState, faction: string): boolean {
   if (!f || !def) return false;
   const R = STATEMENT;
   const wait = statementWait(s);
-  if (wait > 0) return addToast(s, fillTemplate(R.cooling, { days: String(wait) }), "neutral"), false;
-  if (s.cash < R.cost) return addToast(s, fillTemplate(R.broke, { cost: formatMoney(R.cost) }), "bad"), false;
+  if (wait > 0) return addToast(s, fillTemplate(R.cooling, { days: String(wait) }), "neutral", TAG), false;
+  if (s.cash < R.cost) return addToast(s, fillTemplate(R.broke, { cost: formatMoney(R.cost) }), "bad", TAG), false;
   const rng = createRng(f.rngState);
   const format = rng.pick(R.formats);
   const vars = { lab: s.labName, faction: def.name, format, line: fillTemplate(rng.pick(R.lines), { lab: s.labName, faction: def.name }) };
@@ -68,7 +71,7 @@ export function issueStatement(s: GameState, faction: string): boolean {
   addNews(s, fillTemplate(R.headline, vars), "joke");
   if (snubbed[0]) addNews(s, fillTemplate(R.backlashHeadline, { ...vars, other: snubbed[0].name }), "bad");
   log(s, f, `${s.labName} issued a statement to the ${def.name} (${format}).`, "joke", [faction, ...snubbed.map((o) => o.id)]);
-  addToast(s, fillTemplate(staffed ? R.toast : R.toastUnstaffed, vars), staffed ? "good" : "neutral");
+  addToast(s, fillTemplate(staffed ? R.toast : R.toastUnstaffed, vars), staffed ? "good" : "neutral", TAG);
   runVerb({ state: s, rng, run: null, owner: "factions", vars }, { type: "camera.beat", params: { kind: "statement", caption: R.caption, sub: R.sub, on: "gate", zoom: 1.4, hold: 4 } });
   f.rngState = rng.state();
   return true;

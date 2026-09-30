@@ -16,6 +16,7 @@ import "./drama.css";
 import "./audit.css";
 import "./beat.css";
 import "./neo.css";
+import "./endings.css";
 import { Arena } from "./slots/Arena";
 import { AuditPin } from "./slots/AuditPin";
 import { Beat } from "./slots/Beat";
@@ -44,6 +45,8 @@ import { NewsControls } from "./slots/NewsControls";
 import { NewsRoom } from "./slots/NewsRoom";
 import { Objectives } from "./slots/Objectives";
 import { Outcome } from "./slots/Outcome";
+import { Ending } from "./slots/Ending";
+import { Takeover } from "./slots/Takeover";
 import { PhotoButton } from "./slots/PhotoButton";
 import { PhotoOverlay } from "./slots/PhotoOverlay";
 import { SkinPicker } from "./slots/SkinPicker";
@@ -71,6 +74,6 @@ import { Layout } from "./Layout";
 
 export const baseSlots: SlotComponents = {
   Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, Bubble, ThoughtsPanel, Ticker, Toast, Assistant,
-  EventCard, Confirm, Coach, UnlockCard, HowToPlay, Arena, Benchmarks, Voice, Factions, Livestream, Hearing, LeakedChat, DramaCard, Bill, PromiseTracker, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, NewsControls,
+  EventCard, Confirm, Coach, UnlockCard, HowToPlay, Arena, Benchmarks, Voice, Factions, Livestream, Hearing, LeakedChat, DramaCard, Bill, PromiseTracker, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, Ending, Takeover, NewsControls,
   NewsArrival, NewsRoom, Mixer, ModManager, Papers, PaperMoment, CrumbWiki, DisasterMenu, DisasterAlert, ReportCard, AuditPin, Beat, GateLegend, DramaButton, Drama,
 };

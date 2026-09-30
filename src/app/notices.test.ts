@@ -1,234 +1,269 @@
-// The toast gate (FLT-31): a rival launch is for the leaderboard and the ticker, a toast is for what matters to you.
+// The notice policy (FLT-51): `you` is a toast (one per window, then a batch), `world` is the ticker, replies and the coach
+// are never held back. It routes on the sim's tags, never on the words, so a year of the sim is checked for untagged toasts.
 import { it } from "@effect/vitest";
 import { Effect, Layer } from "effect";
 import { createEffectActor, waitFor } from "@xstate/effect";
 import { describe, expect } from "vitest";
-import { createTestCampus as createInitialState } from "../sim/testkit";
+import { createMidgameScenario } from "../sim/scenarios/midgame";
 import { enableLeapfrog } from "../sim/race/leapfrog/driver";
 import { runHeadless } from "../sim/race/leapfrog/headless";
+import { runSenateYear } from "../sim/capture/headless";
 import { leapfrogView } from "../sim/race/leapfrog/view";
-import { answer, layPaths } from "../sim/testkit";
+import { answer, createTestCampus, layPaths } from "../sim/testkit";
 import { tick } from "../sim/tick";
-import type { GameState } from "../sim/types";
+import type { GameState, Toast } from "../sim/types";
 import { framesManual, ManualFrames } from "./frames";
 import type { UiToast } from "./hud";
 import { appMachine } from "./machine";
-import { classifyToast, gateToasts, HURRY_SPEED, isLeapfrogToast, LAUNCH_SUMMARY_MIN, LEAPFROG_TOAST_MS, newGate, summaryText, type GateEnv, type NoticeGate } from "./notices";
+import { gateToasts, laneOf, mergeWire, newGate, summaryText, TOAST_WINDOW_MS, type GateEnv, type NoticeGate } from "./notices";
 import { createSimHandle, Sim, simLayer } from "./sim";
 
 let nextId = 1;
-const toast = (text: string, tone: UiToast["tone"] = "bad"): UiToast => ({ id: nextId++, text, tone });
-const launch = (lab = "Vast Sea Labs") => toast(`${lab} launched Chatty-5-mini. The news cycle is theirs.`);
-const answers = () => toast("Open-ish AI answers Vast Sea Labs a day later: Open-ish-4-lite.");
-const record = () => toast("Vast Sea Labs took your record on HE-BH.");
+const make = (text: string, over: Partial<UiToast> = {}): UiToast => ({ id: nextId++, text, tone: "bad", source: "ops", importance: "world", ...over });
+const you = (text: string, over: Partial<UiToast> = {}) => make(text, { importance: "you", ...over });
+const launch = (lab = "Vast Sea Labs") => make(`${lab} launched Chatty-5-mini. The news cycle is theirs.`, { source: "leapfrog" });
+const record = () => you("Vast Sea Labs took your record on HE-BH.", { source: "leapfrog" });
 
-const env = (over: Partial<GateEnv> = {}): GateEnv => ({ now: 0, speed: 1, leapfrog: undefined, rank: null, seq: 1, ...over });
+const env = (over: Partial<GateEnv> = {}): GateEnv => ({ now: 0, day: 100, leapfrog: undefined, rank: null, seq: 1, ...over });
 
-/** Feed toasts to the gate at fake times; returns what each call put on screen. */
-function play(steps: { at: number; toasts?: UiToast[]; speed?: number; over?: Partial<GateEnv> }[]) {
+/** Feed toasts to the gate at fake times; returns what each call put on screen (texts) and on the ticker. */
+function play(steps: { at: number; toasts?: UiToast[]; over?: Partial<GateEnv> }[]) {
   let gate: NoticeGate = newGate();
   let seq = 1;
-  return steps.map((s) => {
-    const r = gateToasts(gate, s.toasts ?? [], env({ now: s.at, speed: s.speed ?? 1, seq, ...s.over }));
+  const ticker: string[] = [];
+  const shown = steps.map((s) => {
+    const r = gateToasts(gate, s.toasts ?? [], env({ now: s.at, seq, ...s.over }));
     gate = r.gate;
     seq = r.seq;
+    ticker.push(...r.wire.map((w) => w.text));
     return r.toasts.map((t) => t.text);
   });
+  return { shown, ticker, gate };
 }
 
-describe("classifyToast", () => {
-  it("recognises every toast Release Leapfrog's driver can send", () => {
-    expect(classifyToast("Vast Sea Labs launched Chatty-5-mini. The news cycle is theirs.")).toBe("launch");
-    expect(classifyToast("Open-ish AI answers Vast Sea Labs a day later: Open-ish-4-lite.")).toBe("launch");
-    expect(classifyToast("Vast Sea Labs took your record on HE-BH.")).toBe("record");
-    expect(classifyToast("HE-BH is solved. Everyone is back to 31% on HE-BHS.")).toBe("solved");
-    expect(classifyToast("Counter-launch lands: Frontier-5 takes the news cycle back.")).toBe("yours");
-    expect(classifyToast("The counter-launch is out, and a bit... comparable.")).toBe("yours");
-    expect(classifyToast("Frontier-5 has a launch bug. It insists it doesn't.")).toBe("yours");
-    expect(classifyToast("Frontier-5 is out at 94%: the news cycle is yours (for now).")).toBe("yours");
-    expect(classifyToast("The launch livestream goes flawlessly. (It was pre-recorded.)")).toBe("minor");
-    expect(classifyToast("You own the news cycle. Enjoy it: it lasts about four days.")).toBe("minor");
-    expect(classifyToast("Vast Sea Labs owns the news cycle.")).toBe("rivalCycle");
-    expect(classifyToast("Holding for a counter-launch: 25 days to land it.")).toBe("direct");
-    expect(classifyToast("The screenshot is everywhere. So are the questions.")).toBe("direct");
+describe("laneOf", () => {
+  it("sends `you` to the toast stack, `world` (and anything untagged) to the ticker, and never holds the coach or a reply about you", () => {
+    expect(laneOf({ importance: "you", source: "staff" })).toBe("toast");
+    expect(laneOf({ importance: "world", source: "ops" })).toBe("ticker");
+    expect(laneOf({})).toBe("ticker");
+    expect(laneOf({ importance: "you", source: "staff", reply: true })).toBe("now");
+    expect(laneOf({ source: "coach", importance: "you" })).toBe("now");
+    // The livestream that comes with your own "ship now" pick: news, not the answer.
+    expect(laneOf({ importance: "world", source: "leapfrog", reply: true })).toBe("ticker");
   });
-  it("leaves everyone else's toasts alone", () => {
-    for (const text of ["Not enough cash", "Hugo Stochastic handed in the box and left.", "#1 on the Frontier Arena! Everyone else is updating the rules.", "Frontier-2 is out! Launch week: +$70K", "Open-ish AI just dropped Open-ish-4 for free. Revenue -30% for 14 days."]) {
-      expect(classifyToast(text), text).toBe("other");
-    }
-  });
-  it("recognises every Leapfrog-sounding toast a year of the sim produces (so rewording one in the sim cannot bring the flood back)", () => {
-    const sounds = /news cycle|your record|launched|answers .* a day later|is solved|counter-launch|livestream|launch bug/i;
-    let seen = 0;
-    for (const seed of [1, 2, 3]) {
-      for (const t of runHeadless(seed, { days: 365 }).world.toasts) {
-        if (sounds.test(t.text)) {
-          seen++;
-          expect(isLeapfrogToast(t.text), `unrecognised: ${t.text}`).toBe(true);
-        }
-      }
-    }
-    expect(seen).toBeGreaterThan(60);
-  }, 15_000); // Three complete years of sim; individual tick budgets are checked separately.
 });
 
 describe("gateToasts", () => {
-  it("passes other toasts through untouched, in order, and never counts them against the window", () => {
-    const a = toast("Not enough cash");
-    const b = toast("Hugo handed in the box and left.");
-    const r = gateToasts(newGate(), [a, b], env());
-    expect(r.toasts).toEqual([a, b]);
+  it("never toasts the world: rival launches, breakdowns an SRE is already on, go to the ticker in order", () => {
+    const a = launch();
+    const b = make("API Gateway is out of order. An SRE is on it.");
+    const r = gateToasts(newGate(), [a, b], env({ day: 42 }));
+    expect(r.toasts).toEqual([]);
+    expect(r.wire).toEqual([
+      { id: a.id, day: 42, text: a.text, tone: "bad", source: "leapfrog" },
+      { id: b.id, day: 42, text: b.text, tone: "bad", source: "ops" },
+    ]);
     expect(r.gate.lastAt).toBeNull();
   });
 
-  it("does not toast a rival launch: one, two or three go to the ticker and the leaderboard", () => {
-    const shown = play([{ at: 0, toasts: [launch()] }, { at: 4_000, toasts: [answers()] }, { at: 30_000, toasts: [launch("Meta Meta")] }]);
-    expect(shown.flat()).toEqual([]);
-  });
-
-  it(`batches launches into one "N labs launched while you were busy" once ${LAUNCH_SUMMARY_MIN} have piled up`, () => {
-    const many = Array.from({ length: LAUNCH_SUMMARY_MIN }, () => launch());
-    const [shown] = play([{ at: 1_000, toasts: many }]);
-    expect(shown).toHaveLength(1);
-    expect(shown![0]).toMatch(new RegExp(`^${LAUNCH_SUMMARY_MIN} labs launched while you were busy\\.`));
-  });
-
-  it("toasts an overtaken record at once, as itself", () => {
+  it("shows a `you` toast at once, as itself, and shuts the window", () => {
     const rec = record();
-    const [shown] = play([{ at: 0, toasts: [rec] }]);
-    expect(shown).toEqual([rec.text]);
+    const { shown, gate } = play([{ at: 1_000, toasts: [rec] }]);
+    expect(shown).toEqual([[rec.text]]);
+    expect(gate.lastAt).toBe(1_000);
   });
 
-  it("allows at most one Leapfrog toast per 20 real seconds, and folds the rest into one summary when the window opens", () => {
-    const shown = play([
+  it(`allows at most one \`you\` toast per ${TOAST_WINDOW_MS / 1000} real seconds, and folds a pile into one batch when the window opens`, () => {
+    const quit = you("Priya Residual handed in the box and left.", { source: "staff" });
+    const { shown, ticker } = play([
       { at: 0, toasts: [record()] }, // shown
-      { at: 2_000, toasts: [launch(), launch(), record()] }, // held
-      { at: LEAPFROG_TOAST_MS - 200, toasts: [launch()] }, // still held
-      { at: LEAPFROG_TOAST_MS, toasts: [] }, // window opens: the one thing that matters, as itself
-      { at: LEAPFROG_TOAST_MS + 200, toasts: [launch(), record()] }, // four launches and a record are held, and the window is shut again
-      { at: 2 * LEAPFROG_TOAST_MS, toasts: [] }, // window opens: one summary
+      { at: 2_000, toasts: [quit] }, // held
+      { at: TOAST_WINDOW_MS - 200, toasts: [] }, // still shut
+      { at: TOAST_WINDOW_MS, toasts: [] }, // opens: the one thing, as itself
+      { at: TOAST_WINDOW_MS + 200, toasts: [record(), you("Kombucha Bar is out of order. Hire an SRE."), launch()] }, // two held
+      { at: 2 * TOAST_WINDOW_MS, toasts: [] }, // opens: one batch
     ]);
     expect(shown[0]).toHaveLength(1);
     expect(shown[1]).toEqual([]);
     expect(shown[2]).toEqual([]);
-    expect(shown[3]).toEqual(["Vast Sea Labs took your record on HE-BH."]);
+    expect(shown[3]).toEqual([quit.text]);
     expect(shown[4]).toEqual([]);
-    expect(shown[5]).toEqual(["4 labs launched and 1 of your records fell while you were busy. Receipts: the Benchmarks tab."]);
+    expect(shown[5]).toEqual(["2 things happened while you were busy. Top of the pile: Vast Sea Labs took your record on HE-BH."]);
+    // What the batch stood for can be read on the ticker; the launch went there on its own.
+    expect(ticker).toEqual(["Vast Sea Labs launched Chatty-5-mini. The news cycle is theirs.", "Vast Sea Labs took your record on HE-BH.", "Kombucha Bar is out of order. Hire an SRE."]);
   });
 
-  it("holds a lone record until the window opens rather than dropping it", () => {
-    const rec = record();
-    const shown = play([{ at: 0, toasts: [record()] }, { at: 5_000, toasts: [rec] }, { at: LEAPFROG_TOAST_MS, toasts: [] }]);
-    expect(shown[1]).toEqual([]);
-    expect(shown[2]).toEqual([rec.text]);
+  it("gives the batch its items, so a skin can list them", () => {
+    let gate = gateToasts(newGate(), [record()], env()).gate;
+    gate = gateToasts(gate, [you("One.", { tone: "good" }), you("Two.", { source: "economy" })], env({ now: 1_000 })).gate;
+    const r = gateToasts(gate, [], env({ now: TOAST_WINDOW_MS }));
+    expect(r.toasts[0]!.batch).toEqual([{ text: "One.", tone: "good", source: "ops" }, { text: "Two.", tone: "bad", source: "economy" }]);
+    expect(r.toasts[0]!.tone).toBe("bad");
+    expect(r.toasts[0]!.id).toBeGreaterThanOrEqual(1_000_000);
   });
 
-  it("toasts a solved benchmark only if you held its record", () => {
-    const solved = toast("HE-BH is solved. Everyone is back to 31% on HE-BHS.", "neutral");
-    const view = (holder: string) => ({ enabled: true, benchmarks: [{ short: "HE-BH", holder }] }) as never;
-    expect(play([{ at: 0, toasts: [solved], over: { leapfrog: view("openish") } }])[0]).toEqual([]);
-    expect(play([{ at: 0, toasts: [solved], over: { leapfrog: view("you") } }])[0]).toEqual([solved.text]);
+  it("counts the same words twice as one line", () => {
+    const { shown } = play([{ at: 0, toasts: [record()] }, { at: 1_000, toasts: [you("API Gateway is out of order. Hire an SRE."), you("API Gateway is out of order. Hire an SRE.")] }, { at: TOAST_WINDOW_MS, toasts: [] }]);
+    expect(shown[2]).toEqual(["API Gateway is out of order. Hire an SRE."]);
+  });
+
+  it("lets the coach and the answer to what you just did through at once, without using up the window", () => {
+    const hired = you("Mop-3000 joined as a Janitor Bot.", { source: "staff", reply: true });
+    const coach = you("Kevin's first model is out.", { source: "coach" });
+    const { shown, gate } = play([{ at: 0, toasts: [hired, coach, record()] }, { at: 1_000, toasts: [you("Cash is low.", { reply: true })] }]);
+    expect(shown[0]).toEqual([hired.text, coach.text, "Vast Sea Labs took your record on HE-BH."]);
+    expect(shown[1]).toEqual(["Cash is low."]);
+    expect(gate.lastAt).toBe(0);
   });
 
   it("says so when you lose #1, once, and only while the pack is on", () => {
     const lf = { enabled: true, benchmarks: [] } as never;
-    expect(play([{ at: 0, over: { leapfrog: lf, rank: { prev: 1, next: 2, top: "Vast Sea" } } }])[0]).toEqual(["You lost #1 on the Arena to Vast Sea."]);
-    expect(play([{ at: 0, over: { leapfrog: lf, rank: { prev: 2, next: 2, top: "Vast Sea" } } }])[0]).toEqual([]);
-    expect(play([{ at: 0, over: { rank: { prev: 1, next: 2, top: "Vast Sea" } } }])[0]).toEqual([]);
+    expect(play([{ at: 0, over: { leapfrog: lf, rank: { prev: 1, next: 2, top: "Vast Sea" } } }]).shown[0]).toEqual(["You lost #1 on the Arena to Vast Sea."]);
+    expect(play([{ at: 0, over: { leapfrog: lf, rank: { prev: 2, next: 2, top: "Vast Sea" } } }]).shown[0]).toEqual([]);
+    expect(play([{ at: 0, over: { rank: { prev: 1, next: 2, top: "Vast Sea" } } }]).shown[0]).toEqual([]);
   });
 
-  it(`at ${HURRY_SPEED}x and up, the small stuff stays in the ticker`, () => {
-    const flawless = toast("The launch livestream goes flawlessly. (It was pre-recorded.)", "good");
-    expect(play([{ at: 0, toasts: [flawless], speed: 1 }])[0]).toEqual([flawless.text]);
-    expect(play([{ at: 0, toasts: [flawless], speed: HURRY_SPEED }])[0]).toEqual([]);
-    expect(play([{ at: 0, toasts: [flawless], speed: 10 }])[0]).toEqual([]);
-  });
-
-  it("lets the answer to a card you just chose through, and it does not use up the window", () => {
-    const hold = toast("Holding for a counter-launch: 25 days to land it.", "neutral");
-    const shown = play([{ at: 0, toasts: [hold, record()] }]);
-    expect(shown[0]).toHaveLength(2);
-  });
-
-  it("forgets a few launches from long ago instead of counting them into a later summary", () => {
-    const shown = play([{ at: 0, toasts: [launch(), launch()] }, { at: 100_000, toasts: [launch(), launch()] }]);
-    expect(shown.flat()).toEqual([]);
-  });
-
-  it("writes plain summaries", () => {
-    const h = { launches: 5, records: 0, matters: [], since: 0 };
-    expect(summaryText(h)).toBe("5 labs launched while you were busy. Receipts: the Benchmarks tab.");
-    expect(summaryText({ ...h, launches: 1, records: 2 })).toBe("1 lab launched and 2 of your records fell while you were busy. Receipts: the Benchmarks tab.");
+  it("writes plain summaries that lead with the worst news", () => {
+    const good = you("SOLD! $2M for a Datacenter.", { tone: "good" });
+    expect(summaryText([good, you("Kevin Backprop handed in the box and left.")])).toBe("2 things happened while you were busy. Top of the pile: Kevin Backprop handed in the box and left.");
+    expect(summaryText([good, you("Up 2 places.", { tone: "good" })])).toBe("2 things happened while you were busy. Top of the pile: Up 2 places.");
   });
 });
 
+describe("mergeWire", () => {
+  it("interleaves world notices with the headlines by id, and skips one the ticker already says", () => {
+    const news = [{ id: 1, day: 1, text: "A", tone: "neutral" as const }, { id: 5, day: 2, text: "B", tone: "neutral" as const }];
+    expect(mergeWire(news, [{ id: 3, day: 1, text: "W", tone: "bad" }, { id: 6, day: 2, text: "B", tone: "bad" }]).map((n) => n.text)).toEqual(["A", "W", "B"]);
+    expect(mergeWire(news, [])).toBe(news);
+  });
+});
+
+/** Every toast a stretch of the sim sends. */
+function drain(s: GameState, days: number): Toast[] {
+  const all: Toast[] = [];
+  for (let i = 0; i < days * 20; i++) {
+    tick(s, answer(s));
+    all.push(...s.toasts.splice(0));
+  }
+  return all;
+}
+
+describe("every toast says who it is from (the flood test, keyed on source)", () => {
+  it("a year of Release Leapfrog: every toast is tagged, every launch and record is Leapfrog's, and a rival's launch is never about you", () => {
+    const sounds = /news cycle|your record|launched|answers .* a day later|is solved|counter-launch|livestream|launch bug/i;
+    let leapfrog = 0;
+    for (const seed of [1, 2, 3]) {
+      for (const t of runHeadless(seed, { days: 365 }).world.toasts) {
+        expect(t.source, `untagged: ${t.text}`).toBeDefined();
+        expect(t.importance, `no importance: ${t.text}`).toBeDefined();
+        if (!sounds.test(t.text) || t.text.startsWith("#1 on the Frontier Arena")) continue;
+        leapfrog++;
+        expect(t.source, t.text).toBe("leapfrog");
+        if (/ launched .+\. The news cycle is theirs\.$| answers .+ a day later: | owns the news cycle\.$/.test(t.text)) expect(t.importance, t.text).toBe("world");
+        if (/ took your record on /.test(t.text)) expect(t.importance, t.text).toBe("you");
+      }
+    }
+    expect(leapfrog).toBeGreaterThan(60);
+  }, 20_000);
+
+  it("the mid-game campus, every system awake: 200 more days and not one untagged toast", () => {
+    const s = createMidgameScenario();
+    s.toasts = [];
+    const all = drain(s, 200);
+    const sources = new Set(all.map((t) => t.source));
+    for (const t of all) {
+      expect(t.source, `untagged: ${t.text}`).toBeDefined();
+      expect(["you", "world"]).toContain(t.importance);
+    }
+    // It really is busy: breakdowns, staff, the economy and the Race all talk.
+    for (const src of ["ops", "staff", "economy", "leapfrog"]) expect(sources, src).toContain(src);
+    // And most of what it says is the world's: the ticker's, not a toast.
+    expect(all.filter((t) => t.importance === "world").length).toBeGreaterThan(all.length / 2);
+  }, 20_000);
+
+  it("the FLT-52 wave's Senate, factions and endings say who they are: politics, factions, endings, never a stray mod:", () => {
+    // A lobbying lab that overfills the draft (the third clause is the staffer's toast) plays on until Captured.
+    const r = runSenateYear(2, { clauses: ["kombucha", "review", "threshold"], lobby: true, endings: true }, 600);
+    expect(r.world.endings!.id).toBe("captured");
+    const all = r.world.toasts;
+    for (const t of all) {
+      expect(t.source, `untagged: ${t.text}`).toBeDefined();
+      expect(["you", "world"]).toContain(t.importance);
+      expect(t.source!.startsWith("mod:"), `${t.source}: ${t.text}`).toBe(false);
+    }
+    const from = (src: string) => all.filter((t) => t.source === src);
+    expect(from("politics").some((t) => /already a lot of clauses/.test(t.text) && t.importance === "you" && t.reply)).toBe(true);
+    expect(from("politics").some((t) => /first pass at the bill/.test(t.text) && t.importance === "you")).toBe(true);
+    expect(from("endings").some((t) => /office has moved off campus/.test(t.text) && t.importance === "you")).toBe(true);
+
+    const m = createMidgameScenario();
+    m.toasts = [];
+    tick(m, [{ type: "setSafetySpend", level: 2 }]);
+    expect(m.toasts.find((t) => /^Safety budget: /.test(t.text))).toMatchObject({ source: "factions", importance: "you", reply: true });
+  }, 120_000);
+});
+
 /**
- * What the app does with a year of toasts, without the machine: publishes at 5 Hz of real time, `10 x speed` ticks a
- * second, cards answered, the gate in between. "Before" is every Leapfrog toast the sim sends; "after" is what survives.
+ * What the app does with the sim's toasts, without the machine: publishes at 5 Hz of real time, `10 x speed` ticks a
+ * second, cards answered, the gate in between. Counts what reaches the screen.
  */
-function flood(speed: number, seconds: number, seed = 3) {
-  const s: GameState = createInitialState(seed);
-  enableLeapfrog(s);
-  layPaths(s);
+function flood(s: GameState, speed: number, seconds: number) {
   const ticksPerPublish = 2 * speed;
   let gate = newGate();
   let seq = 1;
   let raw = 0;
+  const held: number[] = [];
   let shown = 0;
-  let days = 0;
-  let rank = 1;
-  const at: number[] = [];
+  let rank = s.race.rank;
   for (let publish = 0; publish < seconds * 5; publish++) {
     const now = publish * 200;
     for (let i = 0; i < ticksPerPublish; i++) tick(s, answer(s));
-    const fresh = s.toasts.splice(0).map((t) => ({ ...t }));
-    raw += fresh.filter((t) => isLeapfrogToast(t.text)).length;
-    const view = leapfrogView(s);
+    const fresh: UiToast[] = s.toasts.splice(0).map((t) => ({ ...t }));
+    raw += fresh.length;
     const next = s.race.rank;
-    const r = gateToasts(gate, fresh, { now, speed, leapfrog: view, rank: { prev: rank, next, top: "" }, seq });
+    const r = gateToasts(gate, fresh, { now, day: s.day, leapfrog: leapfrogView(s), rank: { prev: rank, next, top: "" }, seq });
     rank = next;
     gate = r.gate;
     seq = r.seq;
-    for (const t of r.toasts) if (isLeapfrogToast(t.text) || t.text.startsWith("You lost #1") || /while you were busy/.test(t.text)) {
-      shown++;
-      at.push(now);
-    }
-    days = s.day;
+    shown += r.toasts.length;
+    for (const t of r.toasts) if (laneOf(t) === "toast" || t.batch) held.push(now);
   }
-  return { raw, shown, days, at };
+  return { raw, shown, held };
 }
 
 describe("a real minute", () => {
-  it.each([1, 3, 10])("at %dx, Leapfrog sends far fewer toasts than it did, never closer than 20 s apart", (speed) => {
-    const r = flood(speed, 60);
-    console.log(`60 s at ${speed}x (${r.days} game days): ${r.raw} Leapfrog toasts from the sim, ${r.shown} shown`);
+  it.each([1, 3, 10])("at %dx, Leapfrog alone: nothing about the world, and never two held toasts closer than the window", (speed) => {
+    const s = createTestCampus(3);
+    enableLeapfrog(s);
+    layPaths(s);
+    const r = flood(s, speed, 60);
     expect(r.raw).toBeGreaterThanOrEqual(r.shown);
-    expect(r.shown).toBeLessThanOrEqual(3);
-    for (let i = 1; i < r.at.length; i++) expect(r.at[i]! - r.at[i - 1]!).toBeGreaterThanOrEqual(LEAPFROG_TOAST_MS);
+    expect(r.held.length).toBeLessThanOrEqual(60 / (TOAST_WINDOW_MS / 1000));
+    for (let i = 1; i < r.held.length; i++) expect(r.held[i]! - r.held[i - 1]!).toBeGreaterThanOrEqual(TOAST_WINDOW_MS);
   });
-  it("still tells you about a lost record during a 10x rush", () => {
-    // Over ten minutes at 10x, the records that fell are reported (batched), not dropped.
-    const r = flood(10, 600);
-    expect(r.shown).toBeGreaterThan(0);
-    expect(r.shown).toBeLessThanOrEqual(600 / (LEAPFROG_TOAST_MS / 1000));
-  });
+  it("at 10x in the mid-game, the flood is a trickle: at most four held-back toasts a minute", () => {
+    const r = flood(createMidgameScenario(), 10, 60);
+    expect(r.raw).toBeGreaterThan(40);
+    expect(r.held.length).toBeLessThanOrEqual(4);
+  }, 20_000);
 });
 
 describe("the app machine", () => {
-  it.effect("keeps a rival's launch off the toast stack but shows a lost record, and everyone else's toasts as before", () => {
+  it.effect("keeps a rival's launch off the toast stack and on the ticker, shows a lost record, and answers a command at once", () => {
     const handle = createSimHandle({ seed: 1, warp: 0, agents: 0, discourse: 0, researchers: 0, leapfrog: true });
     return Effect.gen(function* () {
       const sim = yield* Sim;
       const frames = yield* ManualFrames;
       const actor = yield* createEffectActor(appMachine, { input: { speed: 1, first: sim.report(true, true)! } });
-      handle.world.toasts.push({ id: 9101, text: "Vast Sea Labs launched Chatty-5-mini. The news cycle is theirs.", tone: "bad" });
-      handle.world.toasts.push({ id: 9102, text: "Vast Sea Labs took your record on HE-BH.", tone: "bad" });
-      handle.world.toasts.push({ id: 9103, text: "Not enough cash", tone: "bad" });
+      handle.world.toasts.push({ id: 9101, text: "Vast Sea Labs launched Chatty-5-mini. The news cycle is theirs.", tone: "bad", source: "leapfrog", importance: "world" });
+      handle.world.toasts.push({ id: 9102, text: "Vast Sea Labs took your record on HE-BH.", tone: "bad", source: "leapfrog", importance: "you" });
+      handle.world.toasts.push({ id: 9103, text: "Build a Training Hall first.", tone: "bad", source: "build", importance: "you", reply: true });
       frames.emit(0.25);
       yield* waitFor(actor, (st) => st.context.toasts.some((t) => t.id === 9103), { timeout: "1 second" });
-      const ids = actor.getSnapshot().context.toasts.map((t) => t.id);
-      expect(ids).toContain(9102);
-      expect(ids).not.toContain(9101);
+      const c = actor.getSnapshot().context;
+      expect(c.toasts.map((t) => t.id)).toContain(9102);
+      expect(c.toasts.map((t) => t.id)).not.toContain(9101);
+      expect(c.news.map((n) => n.id)).toContain(9101);
     }).pipe(Effect.provide(Layer.mergeAll(simLayer(handle), framesManual)));
   });
 });

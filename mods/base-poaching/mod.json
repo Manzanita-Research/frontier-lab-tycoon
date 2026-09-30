@@ -78,7 +78,8 @@
                         "type": "toast",
                         "params": {
                           "text": "Matched. They asked for $100M. They settled for $250K each and a nicer chair.",
-                          "tone": "neutral"
+                          "tone": "neutral",
+                          "importance": "you"
                         }
                       }
                     ]
@@ -129,7 +130,8 @@
                         "type": "toast",
                         "params": {
                           "text": "The mission speech landed. Nobody is leaving for {poacher}. Today.",
-                          "tone": "good"
+                          "tone": "good",
+                          "importance": "you"
                         }
                       }
                     ]

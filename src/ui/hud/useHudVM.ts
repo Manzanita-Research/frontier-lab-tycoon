@@ -12,6 +12,7 @@ import { beatAtom } from "../../render/fx/beatState";
 import { skinList } from "../../skins/registry";
 import type { LeapfrogView } from "../../sim/race/leapfrog/view";
 import { shotAtom } from "../juice/photo";
+import { useShareInput } from "../share/share";
 import { newMotion, NO_MOTION, stepMotion, type Motion, type MotionView } from "./leapfrogMotion";
 import { arenaOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, senateOpenAtom, skinUiAtom, staffOpenAtom } from "./state";
 import { modSession } from "../../app/mods";
@@ -183,6 +184,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
   const dismissed = useAtomValue(dismissedAtom);
   const disastersOpen = useAtomValue(disastersOpenAtom);
   const dramaUi = useAtomValue(dramaAtom);
+  const share = useShareInput();
   const viewport = useViewport();
   const tapHint = useTapHint(selected);
   // "Build an API Gateway..." twice is one hint too many: once a toast has said it, the standing hint is redundant.
@@ -246,8 +248,9 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         mods,
         drama,
         viewport,
+        share,
       }),
-    [shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, beat, skinUi, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, drama],
+    [share, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, beat, skinUi, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, drama],
   );
   return vm;
 }

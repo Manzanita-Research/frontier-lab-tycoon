@@ -14,6 +14,7 @@ import { AUDITORS } from "../sim/auditors/pack";
 import { PROMISES } from "../sim/promises/pack";
 import { CAPTURE } from "../sim/capture/pack";
 import { FACTIONS_PACK, WATER_PACK } from "./factions";
+import { ENDINGS_PACK } from "../sim/endings/pack";
 
 /** What has to be true for an event to fire. `all` combines conditions. */
 export type Condition =
@@ -246,6 +247,8 @@ EVENTS.push(...PROMISES.content.events.add as EventDef[]);
 EVENTS.push(...CAPTURE.content.events.add as EventDef[]);
 // FLT-33 and FLT-25: the factions' and the Water Discourse's cards.
 EVENTS.push(...FACTIONS_PACK.events);
+// FLT-11: The Memo (mods/base-endings), dormant until the endings driver sets `offer:memo` in Era 4.
+EVENTS.push(...ENDINGS_PACK.content.events.add as EventDef[]);
 
 export const eventById = (id: string): EventDef | undefined => EVENTS.find((e) => e.id === id);
 /** How each drama card looks on screen (the letter, the email, the manifesto): templates from the packs, by card id. */

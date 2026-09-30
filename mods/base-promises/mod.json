@@ -28,7 +28,8 @@
                       "type": "toast",
                       "params": {
                         "text": "New: the Promise Tracker. Three senators, what they promised, how they voted, and a Truth-o-meter.",
-                        "tone": "good"
+                        "tone": "good",
+                    "importance": "you"
                       }
                     },
                     {

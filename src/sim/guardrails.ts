@@ -27,7 +27,7 @@ function feed(s: GameState, event: EventFromLogic<typeof guardrailsMachine>) {
   const stored = s.guardrails ?? initialStored(guardrailsMachine, { pendingConfirm: null, lowRunway: false, gateDisconnected: false });
   const result = step(guardrailsMachine, stored, event);
   s.guardrails = result.stored;
-  for (const e of result.effects) addToast(s, e.type === "NUDGE" ? RUNWAY_NUDGE : REDUNDANT_HALL, e.type === "NUDGE" ? "bad" : "neutral");
+  for (const e of result.effects) addToast(s, e.type === "NUDGE" ? RUNWAY_NUDGE : REDUNDANT_HALL, e.type === "NUDGE" ? "bad" : "neutral", { source: e.type === "NUDGE" ? "economy" : "build", importance: "you" });
 }
 export const pendingConfirmOf = (s: GameState): PendingConfirm | null => s.guardrails?.context.pendingConfirm ?? null;
 export function clearConfirm(s: GameState) { if (pendingConfirmOf(s)) feed(s, { type: "CLEAR" }); }
