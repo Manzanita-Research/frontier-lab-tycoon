@@ -9,7 +9,7 @@ import { causeOf, thoughtBoard, thoughtOf, walkersThinking } from "./mind";
 import { applyServes, happinessOf, moodFor, RIVAL_FOMO, tickNeeds } from "./needs";
 import { createRng } from "./rng";
 import { createInitialState } from "./state";
-import { answer } from "./testkit";
+import { answer, perfBudget } from "./testkit";
 import { tick } from "./tick";
 import type { GameState, Walker } from "./types";
 import { TARGET_WANDER } from "./types";
@@ -712,6 +712,6 @@ describe("determinism and scale", () => {
     }
     console.log(`800-walker tick: ${best.toFixed(3)} ms (best of 3 x 200 ticks), never fewer than ${smallest} walkers at the start of a batch`);
     expect(smallest).toBeGreaterThanOrEqual(800);
-    expect(best).toBeLessThan(0.5);
+    expect(best).toBeLessThan(perfBudget(0.5)); // a shared CI runner gets double, like the other wall-clock budgets
   });
 });
