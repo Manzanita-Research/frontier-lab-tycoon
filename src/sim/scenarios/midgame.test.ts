@@ -1,6 +1,7 @@
 import { getReach, isReachable, tileIndex, buildingAt, isPathTile, rectContains } from "../pathfind";
 import { openEventOf } from "../events";
 import { outcomeOf } from "../goals";
+import { progressOf } from "../progression";
 import { eraOfState } from "../race/race";
 import { tick } from "../tick";
 import { SimHandle } from "../../app/sim";
@@ -43,6 +44,8 @@ describe("midgame scenario", () => {
     expect(s.leapfrog.last?.claims.length).toBeGreaterThan(0);
     expect(openEventOf(s)).toBeNull();
     expect(outcomeOf(s)).toBe("playing");
+    // The ladder is done (three models shipped), so the goal note names the next open objective, not a met rung (FLT-48).
+    expect(progressOf(s).goal).toMatchObject({ text: "Reach Era 3: Superhuman Coder", current: 2, target: 3 });
     const reach = getReach(s);
     expect(s.buildings.every((b) => isReachable(s, b) && !b.broken)).toBe(true);
     expect(s.grid.paths.every((on, i) => !on || !!reach.tiles[i])).toBe(true);

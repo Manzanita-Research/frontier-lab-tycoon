@@ -52,12 +52,18 @@ function goalValue(s: GameState) {
 export function progressOf(s: GameState): ProgressView {
   const level = levelOf(s);
   const active = rows(s).find((r) => r.level === level)!;
-  const { current } = goalValue(s);
+  const { current, met } = goalValue(s);
   return { level, levelName: active.name,
     unlocked: { buildings: [...new Set([...unlockedRows(s).flatMap((r) => [...r.buildings]), ...defs().buildingKinds.filter((k) => level >= 4 && s.flags[`unlocked:${k}`] !== undefined) as BuildingKind[]])], staff: unlockedRows(s).flatMap((r) => [...r.staff]), systems: unlockedRows(s).flatMap((r) => [...r.systems]) },
-    goal: { text: active.goal.text, current, target: active.goal.target },
+    goal: met && !rows(s).some((r) => r.level > level) ? afterLadder(s) : { text: active.goal.text, current, target: active.goal.target },
     teasers: teasers(s, level),
   };
+}
+/** Past the last rung, with its goal met, the note names the first scenario objective still open; nothing if none is (FLT-48). */
+function afterLadder(s: GameState): ProgressView["goal"] {
+  const open = s.goals.context.goals.find((g) => !g.met);
+  const def = open && defs().goals.find((d) => d.id === open.id);
+  return open && def ? { text: def.label, current: open.value, target: open.target, objective: def.id } : { text: "", current: 0, target: 1 };
 }
 /** What is still locked, one row per milestone that unlocks it ("2 more · Ship your first model"), not one "???" per item. */
 function teasers(s: GameState, level: Level): ProgressView["teasers"] {

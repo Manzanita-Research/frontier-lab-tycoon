@@ -25,7 +25,7 @@ import { SKIN_API_VERSION } from "./types";
 import { HELP_BUILDINGS, HELP_LOOP, HELP_NUMBERS, HELP_TITLE } from "../../content/help";
 import { playableOf, type PlayableInput } from "./playable";
 import type {
-  ArenaVM, BenchCellVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HudVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
+  ArenaVM, BenchCellVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, GoalVM, HudVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
   ModsVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, ResponseVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, StreamVM, ThoughtRowVM, TrainingVM, TrendVM, VoiceVM, WalkerKindVM,
 } from "./types";
 import { defs } from "../../sim/defs";
@@ -603,6 +603,13 @@ function helpOf(items: readonly BuildItemVM[]): HudVM["help"] {
   return { title: HELP_TITLE, loop: [...HELP_LOOP], buildings, numbers: HELP_NUMBERS.map((n) => ({ ...n })) };
 }
 
+/** The note's one goal: the ladder rung's, or once the ladder is done the next open objective ("Top 3 on the Arena in Era 3 · Arena #6, need top 3"). */
+function goalOf({ text, current, target, objective }: PlayableInput["goal"]): GoalVM {
+  const def = objective ? defs().goals.find((d) => d.id === objective) : undefined;
+  const progress = def?.unit === "rank" ? goalProgressText(def, current) : `${Math.min(current, target)}/${target}`;
+  return { text, current, target, line: text ? `${text} · ${progress}` : "", ratio: target > 0 ? Math.max(0, Math.min(1, current / target)) : 0 };
+}
+
 /** What the lab has earned: only these tools are in the build panel (the bulldozer always is), and the Staff tile follows the payroll. */
 function earnedItems(items: BuildItemVM[], play: PlayableInput): BuildItemVM[] {
   return items.filter((it) => (it.isBulldoze ? true : it.kind === "staff" ? play.visible.staff : it.isPath || play.buildings.has(it.kind)));
@@ -632,11 +639,7 @@ export function hudViewModel(i: HudInput): HudVM {
     progress: {
       level: play.level,
       levelName: play.levelName,
-      goal: {
-        ...play.goal,
-        line: play.goal.text ? `${play.goal.text} · ${Math.min(play.goal.current, play.goal.target)}/${play.goal.target}` : "",
-        ratio: play.goal.target > 0 ? Math.max(0, Math.min(1, play.goal.current / play.goal.target)) : 0,
-      },
+      goal: goalOf(play.goal),
       teasers: play.teasers.map((t) => ({ ...t })),
     },
     visible: play.visible,

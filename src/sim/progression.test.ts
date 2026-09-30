@@ -3,6 +3,8 @@ import { PROGRESSION } from "../content/progression";
 import { baseContent, baseRules, baseVocabulary } from "../mods/base-game";
 import { withDefs } from "./defs";
 import { makeSnapshot } from "../app/hud";
+import { fixtureInput } from "../ui/hud/fixtures";
+import { hudViewModel } from "../ui/hud/vm";
 import { canPlace } from "./commands";
 import { progressOf, systemUnlocked, updateProgression } from "./progression";
 import { canHire, hire, updateStaff } from "./staff";
@@ -39,6 +41,23 @@ describe("the playable ladder", () => {
     s.cash = 350_000; expect(canPlace(s, "security", 12, 19).ok).toBe(true);
     expect(s.unlockCards?.map((c) => c.id)).toEqual(["business", "team", "race", "scrutiny"]);
     applyNow(s, [{ type: "dismissUnlock" }]); expect(makeSnapshot(s).unlockCard?.id).toBe("team");
+  });
+  it("never shows a met last rung: the note moves on to the next open objective, then hides (FLT-48)", () => {
+    const s = createInitialState(1);
+    s.progression = { value: "complete", context: { level: 5 } };
+    const line = () => hudViewModel({ ...fixtureInput(), snap: makeSnapshot(s) }).progress.goal.line;
+    expect(line()).toBe("Ship model #3 · 0/3");
+    s.models.push("A", "B", "C");
+    const set = (patch: Record<string, { value?: number; met?: boolean }>) => {
+      s.goals = { ...s.goals, context: { ...s.goals.context, goals: s.goals.context.goals.map((g) => ({ ...g, ...patch[g.id] })) } };
+    };
+    set({ release: { met: true }, era: { value: 2 } });
+    expect(progressOf(s).goal).toMatchObject({ text: "Reach Era 3: Superhuman Coder", objective: "era" });
+    expect(line()).toBe("Reach Era 3: Superhuman Coder · 2/3");
+    set({ era: { met: true }, arena: { value: 2 } }); // #6 of 7
+    expect(line()).toBe("Top 3 on the Arena in Era 3 · Arena #6, need top 3");
+    set({ arena: { met: true } });
+    expect(line()).toBe("");
   });
   it("wakes every earned pack, honours ?<pack>=off, and starts a campus with all of them awake", () => {
     const s = createInitialState(4);

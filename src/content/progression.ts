@@ -28,6 +28,7 @@ export interface ProgressView {
   level: Level;
   levelName: string;
   unlocked: { buildings: BuildingKind[]; staff: StaffJob[]; systems: SystemId[] };
-  goal: { text: string; current: number; target: number };
+  /** `objective` is set once the ladder is done: the goal is then that scenario objective (a GoalDef id). */
+  goal: { text: string; current: number; target: number; objective?: string };
   teasers: { label: string; hint: string }[];
 }

@@ -13,7 +13,7 @@ export interface PlayableSnapshot {
     level: number;
     levelName: string;
     unlocked: { buildings: readonly string[]; staff: readonly string[]; systems: readonly string[] };
-    goal: { text: string; current: number; target: number };
+    goal: { text: string; current: number; target: number; objective?: string };
     teasers: readonly { label: string; hint: string }[];
   };
   coach?: (CoachVM & { suggest?: unknown }) | null;
@@ -27,7 +27,7 @@ export interface PlayableInput {
   buildings: ReadonlySet<string>;
   staff: ReadonlySet<string>;
   systems: readonly string[];
-  goal: { text: string; current: number; target: number };
+  goal: { text: string; current: number; target: number; objective?: string };
   teasers: readonly { label: string; hint: string }[];
   visible: VisibleVM;
   coach: CoachVM | null;
