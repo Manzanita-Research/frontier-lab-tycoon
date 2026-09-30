@@ -21,7 +21,8 @@ describe("midgame scenario", () => {
     expect(again).toEqual(s);
     // FLT-49 preserves the full starter-campus preset, completes its ladder, and replays
     // paid confirmations. Changed movement/attendance draws shift the real opening day.
-    expect(digest(s)).toBe("8aab011b");
+    // FLT-19 registers two more cards (the audit notice and report), so the World's `arcs` gain two idle entries.
+    expect(digest(s)).toBe("bb954c1b");
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);

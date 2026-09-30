@@ -6,6 +6,7 @@ import { ERAS } from "./eras";
 import { cardEvents } from "../sim/disasters/pack";
 import { LEAPFROG } from "./leapfrog";
 import { COLLUSION } from "../sim/collusion/pack";
+import { AUDITORS } from "../sim/auditors/pack";
 
 /** What has to be true for an event to fire. `all` combines conditions. */
 export type Condition =
@@ -58,7 +59,7 @@ export interface EventDef {
   /** One to three. */
   choices: EventChoice[];
   /** Presentation: a full-screen era title card, the auction room, or Leapfrog's forced response and launch livestream. Anything else is the plain card. */
-  kind?: "era" | "auction" | "response" | "stream";
+  kind?: "era" | "auction" | "response" | "stream" | "report";
   /** The stripe text at the top of the card, when it isn't the tone's ("Breaking", "Developing", ...). */
   stripe?: string;
 }
@@ -301,5 +302,7 @@ EVENTS.push(...LEAPFROG.events);
 EVENTS.push(...cardEvents());
 // FLT-18: ordinary cards, dormant until the pack's machine sets their offer flags.
 EVENTS.push(...COLLUSION.content.events.add as EventDef[]);
+// FLT-19: Evals Without Borders' notice and report card (mods/base-auditors), behind their offer flags like the rest.
+EVENTS.push(...AUDITORS.content.events.add as EventDef[]);
 
 export const eventById = (id: string): EventDef | undefined => EVENTS.find((e) => e.id === id);

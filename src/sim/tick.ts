@@ -1,5 +1,6 @@
 // The fixed-step loop: apply queued commands, move everyone, run the daily systems at midnight.
 import { applyCommands, type Command } from "./commands";
+import { applyAuditorChoices, dailyAuditors, updateAuditors } from "./auditors/driver";
 import { applyCollusionChoices, dailyCollusion, updateCollusion } from "./collusion/driver";
 import { TICKS_PER_DAY } from "./constants";
 import { dailyBreakdowns } from "./breakdowns";
@@ -8,6 +9,7 @@ import { dailyCrowd } from "./crowd";
 import { dailyEconomy } from "./economy";
 import { dailyEvents, openEventOf } from "./events";
 import { dailyGoals } from "./goals";
+import { updateGroups } from "./groups";
 import { dailyNews } from "./news";
 import { dailyPapers } from "./race/papers/driver";
 import { dailyLeapfrog } from "./race/leapfrog/driver";
@@ -36,6 +38,7 @@ export function tick(state: GameState, commands: readonly Command[] = []) {
   applyCommands(state, commands, rng);
   if (commands.length > 0) { updateTutorial(state); observeGuardrails(state); }
   if (systemUnlocked(state, "collusion")) applyCollusionChoices(state);
+  if (systemUnlocked(state, "auditors")) applyAuditorChoices(state);
   if (pendingConfirmOf(state) || openEventOf(state) || state.goals.value === "lost") {
     state.rngState = rng.state();
     return;
@@ -44,6 +47,8 @@ export function tick(state: GameState, commands: readonly Command[] = []) {
   updateWalkers(state, rng);
   if (systemUnlocked(state, "protests")) updateProtesters(state, rng);
   updateStaff(state, rng);
+  updateGroups(state);
+  if (systemUnlocked(state, "auditors")) updateAuditors(state);
   if (systemUnlocked(state, "collusion")) updateCollusion(state);
   if (systemUnlocked(state, "disasters")) updateDisasters(state);
   if (state.tick % TICKS_PER_DAY === 0) {
@@ -63,6 +68,7 @@ export function tick(state: GameState, commands: readonly Command[] = []) {
     if (systemUnlocked(state, "papers")) dailyPapers(state, rng);
     dailyThoughts(state, rng);
     dailyGoals(state, rng);
+    if (systemUnlocked(state, "auditors")) dailyAuditors(state);
     if (systemUnlocked(state, "events")) dailyEvents(state);
     updateProgression(state);
     updateTutorial(state);
@@ -79,6 +85,7 @@ export function applyNow(state: GameState, commands: readonly Command[]) {
   updateTutorial(state);
   observeGuardrails(state);
   if (systemUnlocked(state, "collusion")) applyCollusionChoices(state);
+  if (systemUnlocked(state, "auditors")) applyAuditorChoices(state);
   updateCoach(state);
   state.rngState = rng.state();
 }

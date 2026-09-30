@@ -143,7 +143,7 @@ describe("the vocabulary", () => {
     expect(vocabulary.effects).toEqual(VERB_NAMES);
     expect(vocabulary.guards).toEqual(GUARD_NAMES);
     for (const v of ["staff.divert", "compute.drain", "cost.spike", "building.offline", "building.fire", "trust.delta", "heat.delta", "camera.focus", "sound.cue", "shake", "news", "card"]) expect(VERB_NAMES).toContain(v);
-    // (`visitors.arrive` and `investigate.start` are named in the spec's list of examples; nothing in the first two waves calls them, so they wait for FLT-18/19.)
+    for (const v of ["visitors.arrive", "visitors.leave", "walkers.disguise", "walkers.reveal", "investigate.start"]) expect(VERB_NAMES).toContain(v); // FLT-18/19
     for (const g of Object.values(GUARDS)) expect(g.doc.length).toBeGreaterThan(10);
     for (const v of Object.values(VERBS)) expect(v.doc.length).toBeGreaterThan(10);
   });

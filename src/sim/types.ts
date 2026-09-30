@@ -4,6 +4,8 @@ import type { ProgressionStored } from "./machines/progression";
 import type { ProgressionLevel, UnlockCard } from "../content/progression";
 import type { BuildingKind } from "../content/buildings";
 import type { CollusionState, Investigation } from "./collusion/state";
+import type { AuditorsState } from "./auditors/state";
+import type { VisitorGroup } from "./groups";
 import type { NeedKey } from "../content/needs";
 import type { DisastersState } from "./disasters/types";
 import type { ArcStored } from "./machines/arc";
@@ -299,4 +301,10 @@ export interface GameState {
   collusion?: CollusionState;
   /** Generic inquiries started by the Vocabulary; the owning machine completes them. */
   investigations?: Record<string, Investigation>;
+  /** FLT-19: visitor groups on campus (auditors today); absent until the first one arrives. */
+  groups?: VisitorGroup[];
+  /** FLT-19: presentation requests by walker kind (`agent: "box"` while the agents hide in cardboard boxes). Never read by sim logic. */
+  disguises?: Record<string, string>;
+  /** FLT-19: the Evals Without Borders pack; absent until enabled. */
+  auditors?: AuditorsState;
 }

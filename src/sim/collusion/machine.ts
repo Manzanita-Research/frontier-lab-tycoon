@@ -22,6 +22,8 @@ const Day = Schema.Struct({
   day: Schema.Number, tick: Schema.Number, seedRoll: Schema.Number, catchRoll: Schema.Number,
   agents: Schema.Number, capability: Schema.Number, pressure: Schema.Number,
   reliability: Schema.Number, security: Schema.Number, arrived: Schema.Number,
+  /** Outsiders found it (FLT-19's auditors set `collusion:found`). */
+  found: Schema.optionalKey(Schema.Number),
 });
 export interface SwarmDay extends Schema.Schema.Type<typeof Day> { type: "DAY" }
 export type SwarmEvent = SwarmDay | { type: "CHOSE"; choice: string; day: number; tick: number };
@@ -77,6 +79,7 @@ function handler(stage: SwarmStage, node: ArcNodeData) {
       caught: caught ? 1 : 0,
       spreadReady: event.day - ctx.seededDay >= R.growth.spreadDays ? 1 : 0,
       organizeReady: ctx.score >= R.growth.organizedScore ? 1 : 0,
+      outsideFound: event.type === "DAY" && event.found ? 1 : 0,
       exposeReady: ctx.score >= R.growth.exposeScore && event.day - ctx.seededDay >= R.growth.exposeAge ? 1 : 0,
     };
     const raw = node.on?.[event.type];

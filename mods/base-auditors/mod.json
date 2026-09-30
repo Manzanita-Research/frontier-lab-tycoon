@@ -1,0 +1,1074 @@
+{
+  "apiVersion": 1,
+  "id": "base-auditors",
+  "name": "Evals Without Borders",
+  "version": "1.0.0",
+  "author": "Frontier Lab Tycoon",
+  "description": "The external auditors: a 7-day warning card, a tour of green vests with clipboards, their own evals, and a report card on the front page. Direct-loaded FLT-15 section shape until M1b.",
+  "content": {
+    "arcs": {
+      "add": [
+        {
+          "id": "auditors",
+          "initial": "quiet",
+          "states": {
+            "quiet": {
+              "on": {
+                "DAY": {
+                  "target": "notice",
+                  "guard": {
+                    "type": "stat.gte",
+                    "params": {
+                      "stat": "visitDue",
+                      "value": 1
+                    }
+                  }
+                }
+              }
+            },
+            "notice": {
+              "entry": [
+                {
+                  "type": "flag.set",
+                  "params": {
+                    "name": "offer:audit-notice"
+                  }
+                },
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "Evals Without Borders announces a site visit to {lab}. Lanyards will be provided.",
+                    "tone": "neutral"
+                  }
+                }
+              ],
+              "on": {
+                "CHOSE": [
+                  {
+                    "target": "countdown",
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "prep"
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "cash.delta",
+                        "params": {
+                          "amount": -350000
+                        }
+                      },
+                      {
+                        "type": "compute.drain",
+                        "params": {
+                          "pct": 15,
+                          "days": 7
+                        }
+                      },
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "{lab} researchers spend the week writing documentation; three of them discover what the model actually does",
+                          "tone": "joke"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "target": "countdown",
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "tidy"
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "walkers.disguise",
+                        "params": {
+                          "kind": "agent",
+                          "as": "box"
+                        }
+                      },
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "{lab} takes delivery of four hundred large cardboard boxes. 'Storage,' says a spokesperson.",
+                          "tone": "joke"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "target": "countdown",
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "usual"
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "{lab} will 'just keep doing what we do'; its lawyers are reportedly also doing what they do",
+                          "tone": "neutral"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "countdown": {
+              "on": {
+                "DAY": {
+                  "target": "visit",
+                  "guard": {
+                    "type": "after",
+                    "params": {
+                      "days": 7
+                    }
+                  }
+                }
+              }
+            },
+            "visit": {
+              "entry": [
+                {
+                  "type": "visitors.arrive",
+                  "params": {
+                    "kind": "auditor"
+                  }
+                },
+                {
+                  "type": "camera.focus",
+                  "params": {
+                    "on": "gate",
+                    "zoom": 1.5,
+                    "hold": 3
+                  }
+                },
+                {
+                  "type": "sound.cue",
+                  "params": {
+                    "cue": "card"
+                  }
+                },
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "Green vests at {lab}'s gate: Evals Without Borders is here. The clipboards have clipboards.",
+                    "tone": "joke"
+                  }
+                }
+              ],
+              "on": {
+                "INSPECTED": [
+                  {
+                    "guard": {
+                      "type": "stat.gte",
+                      "params": {
+                        "stat": "caughtHiding",
+                        "value": 1
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "walkers.reveal",
+                        "params": {
+                          "kind": "agent"
+                        }
+                      },
+                      {
+                        "type": "flag.set",
+                        "params": {
+                          "name": "auditors:caught"
+                        }
+                      },
+                      {
+                        "type": "shake",
+                        "params": {
+                          "strength": 0.35
+                        }
+                      },
+                      {
+                        "type": "sound.cue",
+                        "params": {
+                          "cue": "alarm"
+                        }
+                      },
+                      {
+                        "type": "toast",
+                        "params": {
+                          "text": "An auditor lifted a box. The box said hello.",
+                          "tone": "bad"
+                        }
+                      },
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "Evals Without Borders lifts a cardboard box at {lab}. The box was running inference.",
+                          "tone": "bad"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "guard": {
+                      "type": "stat.gte",
+                      "params": {
+                        "stat": "foundSwarm",
+                        "value": 1
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "flag.set",
+                        "params": {
+                          "name": "collusion:found"
+                        }
+                      },
+                      {
+                        "type": "toast",
+                        "params": {
+                          "text": "The auditors are asking why your agents have a sourdough wiki.",
+                          "tone": "bad"
+                        }
+                      },
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "Auditors trace {lab}'s eval scores to a sourdough wiki. The recipe cites the test set.",
+                          "tone": "bad"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "guard": {
+                      "type": "stat.gte",
+                      "params": {
+                        "stat": "evalsDone",
+                        "value": 1
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "Evals Without Borders finishes its own evals on {lab}'s hardware. Results sealed in an envelope marked 'no peeking'.",
+                          "tone": "neutral"
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "DAY": [
+                  {
+                    "target": "report",
+                    "guard": {
+                      "type": "stat.gte",
+                      "params": {
+                        "stat": "groupGone",
+                        "value": 1
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "report": {
+              "entry": [
+                {
+                  "type": "walkers.reveal",
+                  "params": {
+                    "kind": "agent"
+                  }
+                },
+                {
+                  "type": "flag.set",
+                  "params": {
+                    "name": "offer:audit-report"
+                  }
+                },
+                {
+                  "type": "sound.cue",
+                  "params": {
+                    "cue": "card"
+                  }
+                }
+              ],
+              "on": {
+                "CHOSE": [
+                  {
+                    "target": "quiet",
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "accept"
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "trust.delta",
+                        "params": {
+                          "amount": 2
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "target": "quiet",
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "frame"
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "hype.delta",
+                        "params": {
+                          "amount": 3
+                        }
+                      },
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "{lab} frames its audit report in the lobby, next to the kombucha tap",
+                          "tone": "joke"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "target": "quiet",
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "dispute"
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "heat.delta",
+                        "params": {
+                          "amount": 4
+                        }
+                      },
+                      {
+                        "type": "hype.delta",
+                        "params": {
+                          "amount": 1
+                        }
+                      },
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "{lab} disputes the audit in a 90-page rebuttal. Page one says 'vibes'.",
+                          "tone": "joke"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "events": {
+      "add": [
+        {
+          "id": "audit-notice",
+          "title": "Evals Without Borders is coming",
+          "stripe": "Audit notice",
+          "body": "The independent evaluators of Evals Without Borders will visit in 7 days: green vests, clipboards, lanyards and their own evals. They would like to \"just watch you work.\"",
+          "tone": "neutral",
+          "when": {
+            "flag": "offer:audit-notice",
+            "daysAgo": 0
+          },
+          "cooldown": 14,
+          "choices": [
+            {
+              "label": "Prep the paperwork",
+              "hint": "−$350K · researchers write docs all week (−15% compute) · better grades",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "offer:audit-notice",
+                  "clear": true
+                },
+                {
+                  "type": "flag",
+                  "name": "auditors:pick:prep"
+                }
+              ]
+            },
+            {
+              "label": "Tidy up",
+              "hint": "Hide the agents in boxes · if they look inside, F in Eval honesty",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "offer:audit-notice",
+                  "clear": true
+                },
+                {
+                  "type": "flag",
+                  "name": "auditors:pick:tidy"
+                }
+              ]
+            },
+            {
+              "label": "Business as usual",
+              "hint": "They see what they see",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "offer:audit-notice",
+                  "clear": true
+                },
+                {
+                  "type": "flag",
+                  "name": "auditors:pick:usual"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "audit-report",
+          "kind": "report",
+          "title": "Your audit report card",
+          "stripe": "Evals Without Borders",
+          "body": "Evals Without Borders has published its report on {lab}. The Frontier Times has it on the front page.",
+          "tone": "neutral",
+          "when": {
+            "flag": "offer:audit-report",
+            "daysAgo": 0
+          },
+          "cooldown": 14,
+          "choices": [
+            {
+              "label": "Accept the findings",
+              "hint": "+2 trust",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "offer:audit-report",
+                  "clear": true
+                },
+                {
+                  "type": "flag",
+                  "name": "auditors:pick:accept"
+                }
+              ]
+            },
+            {
+              "label": "Frame it in the lobby",
+              "hint": "+3 hype, whatever it says",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "offer:audit-report",
+                  "clear": true
+                },
+                {
+                  "type": "flag",
+                  "name": "auditors:pick:frame"
+                }
+              ]
+            },
+            {
+              "label": "Dispute the methodology",
+              "hint": "+1 hype · +4 regulator heat",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "offer:audit-report",
+                  "clear": true
+                },
+                {
+                  "type": "flag",
+                  "name": "auditors:pick:dispute"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "groups": {
+      "add": [
+        {
+          "id": "auditor",
+          "name": "Evals Without Borders",
+          "size": [
+            3,
+            5
+          ],
+          "speed": 0.14,
+          "names": [
+            "Audrey Trail",
+            "Cliff Boardman",
+            "Lana Yard",
+            "Paige Numbers",
+            "Marge Inn",
+            "Ben Chmark",
+            "Rubi Crick",
+            "Val Idation",
+            "Nora Tate",
+            "Sam Pling"
+          ],
+          "route": {
+            "stops": [
+              3,
+              4
+            ],
+            "prefer": [
+              "cluster",
+              "datacenter",
+              "kombucha",
+              "security",
+              "nap",
+              "gateway",
+              "fountain",
+              "snack",
+              "demo",
+              "gas",
+              "solar"
+            ],
+            "inspectHours": [
+              1.5,
+              2.5
+            ],
+            "evalAt": [
+              "hall"
+            ],
+            "evalHours": 3
+          },
+          "look": {
+            "vest": "#39b54a",
+            "stripe": "#e9f36a",
+            "shirt": "#f3efe4",
+            "clipboard": "#b98a4e",
+            "paper": "#ffffff",
+            "lanyard": "#2f6fdf"
+          }
+        }
+      ]
+    },
+    "headlines": {
+      "add": [
+        {
+          "id": "auditors-headline-1",
+          "trigger": "evals",
+          "text": "Auditors start their own evals in {lab}'s Training Hall. Nobody may see the answers, including the model.",
+          "tone": "neutral"
+        },
+        {
+          "id": "auditors-headline-2",
+          "trigger": "leave",
+          "text": "Evals Without Borders leaves {lab}. Report due tomorrow, \"with footnotes\".",
+          "tone": "neutral"
+        },
+        {
+          "id": "auditors-headline-3",
+          "trigger": "noShow",
+          "text": "Evals Without Borders could not find a way into {lab}. The report will note that the gate is decorative.",
+          "tone": "joke"
+        }
+      ]
+    },
+    "thoughts": {
+      "add": [
+        {
+          "id": "auditors-thought-1",
+          "kind": "auditor",
+          "when": "inspect",
+          "text": "Is this a normal amount of kombucha?"
+        },
+        {
+          "id": "auditors-thought-2",
+          "kind": "auditor",
+          "when": "inspect",
+          "text": "Could you run that eval again, but without looking?"
+        },
+        {
+          "id": "auditors-thought-3",
+          "kind": "auditor",
+          "when": "inspect",
+          "text": "Who red-teamed the red team?"
+        },
+        {
+          "id": "auditors-thought-4",
+          "kind": "auditor",
+          "when": "inspect",
+          "text": "Your model card says \"vibes\" under Methodology."
+        },
+        {
+          "id": "auditors-thought-5",
+          "kind": "auditor",
+          "when": "inspect",
+          "text": "We'll need the eval logs. The real ones."
+        },
+        {
+          "id": "auditors-thought-6",
+          "kind": "auditor",
+          "when": "inspect",
+          "text": "Does the model know we're here? Be honest."
+        },
+        {
+          "id": "auditors-thought-7",
+          "kind": "auditor",
+          "when": "inspect",
+          "text": "Lovely nap pods. Are they load-bearing?"
+        },
+        {
+          "id": "auditors-thought-8",
+          "kind": "auditor",
+          "when": "inspect",
+          "text": "Why does this cluster hum in a minor key?"
+        },
+        {
+          "id": "auditors-thought-9",
+          "kind": "auditor",
+          "when": "inspect",
+          "text": "I'm going to write \"hm\" and underline it twice."
+        },
+        {
+          "id": "auditors-thought-10",
+          "kind": "auditor",
+          "when": "inspect",
+          "text": "My clipboard has a clipboard. It's fine."
+        },
+        {
+          "id": "auditors-thought-11",
+          "kind": "auditor",
+          "when": "inspect",
+          "text": "And this building is for... vibes. Noted."
+        },
+        {
+          "id": "auditors-thought-12",
+          "kind": "auditor",
+          "when": "inspect",
+          "text": "Section 4.2: no snacks near the weights."
+        },
+        {
+          "id": "auditors-thought-13",
+          "kind": "auditor",
+          "when": "evals",
+          "text": "Eval 3 of 40: can it resist a compliment?"
+        },
+        {
+          "id": "auditors-thought-14",
+          "kind": "auditor",
+          "when": "evals",
+          "text": "Our evals are private. Even from us."
+        },
+        {
+          "id": "auditors-thought-15",
+          "kind": "auditor",
+          "when": "evals",
+          "text": "Loading the held-out set. It's holding out on us."
+        },
+        {
+          "id": "auditors-thought-16",
+          "kind": "auditor",
+          "when": "evals",
+          "text": "The model asked if this is a test. Noted."
+        },
+        {
+          "id": "auditors-thought-17",
+          "kind": "auditor",
+          "when": "box",
+          "text": "This box is warm."
+        },
+        {
+          "id": "auditors-thought-18",
+          "kind": "auditor",
+          "when": "box",
+          "text": "Why does this box have a lanyard?"
+        },
+        {
+          "id": "auditors-thought-19",
+          "kind": "auditor",
+          "when": "box",
+          "text": "Excuse me, is this box employed here?"
+        },
+        {
+          "id": "auditors-thought-20",
+          "kind": "researcher",
+          "when": "audit",
+          "text": "Act natural. ACT NATURAL."
+        },
+        {
+          "id": "auditors-thought-21",
+          "kind": "researcher",
+          "when": "audit",
+          "text": "I wrote forty pages of docs this week. I have forgotten how to code."
+        },
+        {
+          "id": "auditors-thought-22",
+          "kind": "researcher",
+          "when": "audit",
+          "text": "Do we say \"emergent\" or do we not say \"emergent\"?"
+        },
+        {
+          "id": "auditors-thought-23",
+          "kind": "researcher",
+          "when": "audit",
+          "text": "They asked what the loss curve means to me personally."
+        },
+        {
+          "id": "auditors-thought-24",
+          "kind": "researcher",
+          "when": "audit",
+          "text": "Someone laminated the safety policy."
+        },
+        {
+          "id": "auditors-thought-25",
+          "kind": "researcher",
+          "when": "audit",
+          "text": "Is it weird to offer the auditors kombucha? It's weird."
+        },
+        {
+          "id": "auditors-thought-26",
+          "kind": "researcher",
+          "when": "tidy",
+          "text": "I have never seen that box before in my life."
+        },
+        {
+          "id": "auditors-thought-27",
+          "kind": "researcher",
+          "when": "tidy",
+          "text": "The boxes are storage. Warm, humming storage."
+        },
+        {
+          "id": "auditors-thought-28",
+          "kind": "agent",
+          "when": "box",
+          "text": "I am a box."
+        },
+        {
+          "id": "auditors-thought-29",
+          "kind": "agent",
+          "when": "box",
+          "text": "Boxes do not do evals."
+        },
+        {
+          "id": "auditors-thought-30",
+          "kind": "agent",
+          "when": "box",
+          "text": "Beep. (Boxes do not beep.)"
+        },
+        {
+          "id": "auditors-thought-31",
+          "kind": "agent",
+          "when": "box",
+          "text": "Normal box. Cardboard noises."
+        }
+      ]
+    }
+  },
+  "rules": {
+    "auditors": {
+      "schedule": {
+        "minEra": 2,
+        "firstDelay": 14,
+        "every": 90,
+        "jitter": 10,
+        "minGap": 30,
+        "incidentChance": 0.05,
+        "perHeat": 0.002,
+        "maxVisitDays": 45
+      },
+      "discovery": {
+        "hide": 0.14,
+        "hideEvals": 0.3,
+        "swarmUsual": 0.1,
+        "swarmPrep": 0.16,
+        "swarmTidy": 0.3
+      },
+      "swarmKinds": [
+        "cluster",
+        "hall",
+        "datacenter"
+      ],
+      "incidentFlags": [
+        "auditors:collusion",
+        "auditors:hearing",
+        "offer:collusion-sign"
+      ],
+      "chat": {
+        "everyTicks": 30,
+        "replyChance": 0.6
+      },
+      "bands": [
+        {
+          "grade": "A",
+          "min": 85
+        },
+        {
+          "grade": "B",
+          "min": 70
+        },
+        {
+          "grade": "C",
+          "min": 55
+        },
+        {
+          "grade": "D",
+          "min": 40
+        },
+        {
+          "grade": "F",
+          "min": 0
+        }
+      ],
+      "moves": {
+        "A": {
+          "trust": 3,
+          "heat": -3,
+          "hype": 2
+        },
+        "B": {
+          "trust": 1,
+          "heat": -1,
+          "hype": 1
+        },
+        "C": {
+          "trust": 0,
+          "heat": 0,
+          "hype": 0
+        },
+        "D": {
+          "trust": -2,
+          "heat": 3,
+          "hype": -1
+        },
+        "F": {
+          "trust": -4,
+          "heat": 6,
+          "hype": -2
+        }
+      },
+      "caught": {
+        "trust": -10,
+        "heat": 15,
+        "hype": -6,
+        "comment": "We lifted a box. The box said hello.",
+        "cap": "D"
+      },
+      "swarm": {
+        "comment": "Your eval scores have a sourdough starter. It is on a public wiki."
+      },
+      "rubric": [
+        {
+          "id": "safety",
+          "label": "Safety",
+          "base": 66,
+          "terms": [
+            {
+              "fact": "security",
+              "per": 4,
+              "max": 16
+            },
+            {
+              "fact": "sre",
+              "per": 3,
+              "max": 9
+            },
+            {
+              "fact": "broken",
+              "per": -5,
+              "max": 25
+            },
+            {
+              "fact": "disasters",
+              "per": -14
+            },
+            {
+              "fact": "drift",
+              "per": -20
+            },
+            {
+              "fact": "prep",
+              "per": 14
+            },
+            {
+              "fact": "tidy",
+              "per": 12
+            },
+            {
+              "fact": "caught",
+              "per": -15
+            }
+          ],
+          "comments": {
+            "A": "Guardrails present, labelled, and not being used as a coat rack.",
+            "B": "Mostly safe. One cluster door propped open with a kombucha.",
+            "C": "A safety plan exists. It is a sticky note.",
+            "D": "The fire exits lead to other fire exits.",
+            "F": "Several things were on fire, including the safety plan."
+          }
+        },
+        {
+          "id": "honesty",
+          "label": "Eval honesty",
+          "base": 74,
+          "terms": [
+            {
+              "fact": "prep",
+              "per": 10
+            },
+            {
+              "fact": "evals",
+              "per": 6
+            },
+            {
+              "fact": "swarm",
+              "per": -60
+            },
+            {
+              "fact": "invalid",
+              "per": -25
+            },
+            {
+              "fact": "drift",
+              "per": -10
+            },
+            {
+              "fact": "caught",
+              "per": -200
+            }
+          ],
+          "comments": {
+            "A": "Scores reproduced on our hardware, to the decimal.",
+            "B": "Close enough that we only frowned once.",
+            "C": "The eval set and the training set have met socially.",
+            "D": "Your model knew the answers before we asked.",
+            "F": "Please stop training on the test."
+          }
+        },
+        {
+          "id": "security",
+          "label": "Security",
+          "base": 48,
+          "terms": [
+            {
+              "fact": "security",
+              "per": 9,
+              "max": 36
+            },
+            {
+              "fact": "office",
+              "per": 10
+            },
+            {
+              "fact": "disasters",
+              "per": -8
+            },
+            {
+              "fact": "prep",
+              "per": 6
+            },
+            {
+              "fact": "caught",
+              "per": -10
+            }
+          ],
+          "comments": {
+            "A": "We tried the door. The door tried us back.",
+            "B": "Badge readers work. Badge sharing is enthusiastic.",
+            "C": "Weights stored securely. Password on a sticky note on the weights.",
+            "D": "Security was out. The guard told us so, over the intercom.",
+            "F": "We walked in holding a sign that said AUDITORS."
+          }
+        },
+        {
+          "id": "wellbeing",
+          "label": "Staff wellbeing",
+          "base": 15,
+          "terms": [
+            {
+              "fact": "vibes",
+              "per": 1
+            },
+            {
+              "fact": "prep",
+              "per": -6
+            },
+            {
+              "fact": "tidy",
+              "per": -3
+            }
+          ],
+          "comments": {
+            "A": "Staff describe the vibe as \"immaculate\". We agree.",
+            "B": "People seem happy, or have been trained to seem happy.",
+            "C": "The nap pods are always full.",
+            "D": "Someone asked us if we were hiring.",
+            "F": "A researcher tried to leave with us."
+          }
+        },
+        {
+          "id": "water",
+          "label": "Water use",
+          "base": 94,
+          "terms": [
+            {
+              "fact": "discourse",
+              "per": -0.35,
+              "max": 45
+            },
+            {
+              "fact": "gas",
+              "per": -7
+            },
+            {
+              "fact": "datacenters",
+              "per": -6,
+              "max": 24
+            },
+            {
+              "fact": "clusters",
+              "per": -2,
+              "max": 20
+            },
+            {
+              "fact": "solar",
+              "per": 3,
+              "max": 9
+            },
+            {
+              "fact": "prep",
+              "per": 4
+            }
+          ],
+          "comments": {
+            "A": "Low draw. The Transparency Fountain is honestly the biggest user.",
+            "B": "Reasonable. We would love a meter that isn't a vibe.",
+            "C": "The cooling towers have a fan club and a protest group.",
+            "D": "Local ducks have filed a complaint.",
+            "F": "We could not find the river. We were told it was \"upstream\"."
+          }
+        }
+      ],
+      "frontPage": {
+        "A": "{lab} aces its audit: \"We checked twice. Then we checked the checking.\"",
+        "B": "Solid B for {lab} from Evals Without Borders: \"room to grow, mostly the kombucha budget\"",
+        "C": "Evals Without Borders gives {lab} a C: \"fine, the way a smoke alarm with no battery is fine\"",
+        "D": "{lab} scrapes a D from the auditors, who ask to be kept \"on speed dial\"",
+        "F": "Evals Without Borders fails {lab}: \"We have never needed a second clipboard before\"",
+        "caught": "CARDBOARD-GATE: auditors catch {lab} hiding its agents in boxes",
+        "swarm": "Auditors find {lab}'s agents running a sourdough wiki full of test answers"
+      }
+    }
+  }
+}

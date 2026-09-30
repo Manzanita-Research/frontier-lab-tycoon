@@ -98,10 +98,14 @@ Verbs (run by the driver, in order, after each transition):
 | `news` | text: string, tone?: string | A ticker headline. `{lab}`, `{model}`, `{rival}`, `{cash}` and `{target}` are filled in, plus whatever the disaster's verbs set (`{leapRival}`). |
 | `toast` | text: string, tone?: string | A toast over the map (same template variables as `news`). |
 | `card` | id: string | Open one of the disaster's event cards (`cards[].id`). The machine hears the player's pick as a CHOSE beat with the choice's `key`. |
+| `visitors.arrive` | kind: string | A visiting group of a kind a pack registered (`content.groups`) comes in through the gate and tours the campus. Owned by the calling machine. |
+| `visitors.leave` |  | The calling machine's visiting groups cut the tour short and head for the gate. |
+| `walkers.disguise` | kind: string, as: string | Draw every walker of `kind` as `as` (the renderer knows `box`: a cardboard box). Presentation only; the sim is unchanged. |
+| `walkers.reveal` | kind: string | Undo `walkers.disguise` for `kind`. |
 | `flag.set` | name: string | Set a flag to today's day number. |
 | `flag.clear` | name: string | Clear a flag. |
 
-Stats a guard, `requires` or `odds.scale` can read: day, capability, hype, cash, compute, discourse, models, agents, clusters, halls, gateways, gas, solar, datacenters, broken, security, sre, comms, janitor, sreAttending, trust, heat, burning, adjacent.
+Stats a guard, `requires` or `odds.scale` can read: day, capability, hype, cash, compute, discourse, models, agents, clusters, halls, gateways, gas, solar, datacenters, broken, security, sre, comms, janitor, sreAttending, trust, vibes, visitors, heat, burning, adjacent.
 
 Building references in verbs: `$target` (the building the disaster is about), `$adjacent` (the nearest other working building of its kind that this disaster has not touched), `$office` (the Security Office), `gate`, or a building kind. `to`/`on` take the same.
 

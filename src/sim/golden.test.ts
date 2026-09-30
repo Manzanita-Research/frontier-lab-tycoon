@@ -164,10 +164,12 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // FLT-49 intentionally records the new starting coach/progression state. Systems and purchases now
 // wait for earned levels; the busy-player script first builds a Hall so it can earn access to a Gateway.
 // Path exploration and the Comms break post change deterministic route draws from this new opening.
+// FLT-19 re-records from 1600: the Scrutiny level now also turns on the auditors (its unlock card lists them), and
+// Evals Without Borders visits these labs once they reach Era 2 (grades move trust, heat and hype; `prep` costs cash).
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "a559ea28", 800: "ed628bb9", 1600: "bef75afa", 2400: "a01d1390", 3200: "7a3d787d", 4000: "6a0686fc" },
-  2: { 200: "e548b1af", 800: "552cae60", 1600: "3f400add", 2400: "2868f2da", 3200: "5080b683", 4000: "c0ae2826" },
-  3: { 200: "58bb415c", 800: "920699d6", 1600: "d35c1c03", 2400: "02ba6f9a", 3200: "bcfd9788", 4000: "9ec9a141" },
+  1: { 200: "a559ea28", 800: "ed628bb9", 1600: "154506ff", 2400: "dce53217", 3200: "332dbec9", 4000: "3885a898" },
+  2: { 200: "e548b1af", 800: "552cae60", 1600: "c6fc67c6", 2400: "a12190c8", 3200: "89f1ea9c", 4000: "7b9b8c80" },
+  3: { 200: "58bb415c", 800: "920699d6", 1600: "7a21a5ca", 2400: "9c237f42", 3200: "2cc09ded", 4000: "34f8c696" },
 };
 
 describe("golden runs", () => {
