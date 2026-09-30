@@ -4,7 +4,7 @@ import { createRng } from "../sim/rng";
 import { GRID_SIZE } from "../sim/state";
 import { atoms, sim } from "../app/game";
 import { useApp } from "../app/hooks";
-import { HALF, NEO_LOT_HALF, NEO_LOTS, worldX, worldZ } from "./coords";
+import { HALF, NEO_LOT_HALF, NEO_LOTS, PLAQUE_AT, worldX, worldZ } from "./coords";
 import { boxGeo, CREAM, std } from "./materials";
 
 const BOARD = 28;
@@ -91,6 +91,8 @@ const lotAt = (x: number, z: number) => NEO_LOTS.findIndex(([lx, lz]) => Math.ab
 export function Decor() {
   // Trees on a lot a neo lab has built on are felled (scaled to nothing: the instance counts never change).
   const built = useApp(atoms.neo).length;
+  // And the few in front of the auditors' plaque, once there is one (FLT-56).
+  const plaque = useApp(atoms.plaque) !== null;
   const items = useMemo(() => {
     const rng = createRng(20250929);
     const trees: { x: number; z: number; s: number; c: number }[] = [];
@@ -124,7 +126,7 @@ export function Decor() {
     const put = (mesh: THREE.InstancedMesh | null, i: number, x: number, y: number, z: number, sx: number, sy: number, color?: THREE.Color) => {
       if (!mesh) return;
       const lot = lotAt(x, z);
-      const felled = lot >= 0 && lot < built;
+      const felled = (lot >= 0 && lot < built) || (plaque && Math.hypot(x - PLAQUE_AT[0], z - PLAQUE_AT[1]) < 1.5);
       d.position.set(x, y, z);
       d.scale.set(felled ? 0 : sx, felled ? 0 : sy, felled ? 0 : sx);
       d.rotation.y = i * 1.7;
@@ -144,7 +146,7 @@ export function Decor() {
       m.current.instanceMatrix.needsUpdate = true;
       if (m.current.instanceColor) m.current.instanceColor.needsUpdate = true;
     }
-  }, [items, built]);
+  }, [items, built, plaque]);
 
   return (
     <group>

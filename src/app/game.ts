@@ -95,6 +95,8 @@ export const atoms = {
   collusion: pick((c) => c.snap.collusion),
   /** FLT-56: the neo labs' campuses beyond the fence. Same array until one changes. */
   neo: pick((c) => c.snap.neo),
+  /** FLT-56: the last audit grade, for the plaque by the gate. */
+  plaque: pick((c) => c.snap.audit.report),
   staffCount: pick((c) => c.snap.ops.staff.length),
   payroll: pick((c) => c.snap.ops.payroll),
   disasters: pick((c) => c.snap.disasters),

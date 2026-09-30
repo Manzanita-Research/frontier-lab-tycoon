@@ -286,6 +286,8 @@ export interface VerbEnv {
   people?: number[];
   /** Extra template variables for this beat's words (`{defName}`, `{act}` for FLT-22's bill). */
   vars?: Record<string, string>;
+  /** Where this beat happens, when it is not a building (the auditors' huddle, FLT-56): the `here` place. */
+  at?: [number, number];
 }
 
 interface VerbDef {
@@ -336,6 +338,7 @@ export function buildingRef(env: VerbEnv, ref: string): Building | null {
 
 /** Where a place name points, in tile coordinates: the gate, or the middle of a building. */
 function placeOf(env: VerbEnv, on: string): [number, number] | null {
+  if (on === "here") return env.at ?? null;
   if (on === "gate") return [env.state.gate.x + env.state.gate.w / 2, env.state.gate.z + env.state.gate.d / 2];
   const b = buildingRef(env, on);
   return b ? [b.x + b.w / 2, b.z + b.d / 2] : null;
@@ -588,7 +591,7 @@ export const VERBS: Record<string, VerbDef> = {
     },
   },
   "camera.beat": {
-    doc: "A camera beat (FLT-56): letterbox bars and a `caption` (with an optional `sub` line; templates, like `news`) while the camera eases to `on` for `hold` seconds. `on` is a place, as for `camera.focus`, or `people`: the beat's people, followed as they walk. `kind` tells the renderer which beat it is (`exit`, `huddle`, `viral`). Time keeps running, the player can skip it, and photo mode or reduced motion get the caption without the camera move.",
+    doc: "A camera beat (FLT-56): letterbox bars and a `caption` (with an optional `sub` line; templates, like `news`) while the camera eases to `on` for `hold` seconds. `on` is a place, as for `camera.focus`, `here` (wherever the pack's driver says the beat is, such as the auditors' huddle), or `people`: the beat's people, followed as they walk. `kind` tells the renderer which beat it is (`exit`, `huddle`, `viral`). Time keeps running, the player can skip it, and photo mode or reduced motion get the caption without the camera move.",
     spec: { kind: "string", caption: "string", sub: "string?", on: "string", zoom: "number?", hold: "number?" },
     run: (env, p) => {
       const people = p.on === "people" ? (env.people ?? []).filter((id) => env.state.walkers.some((w) => w.id === id)) : [];

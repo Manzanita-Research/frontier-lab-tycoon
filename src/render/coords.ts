@@ -18,3 +18,6 @@ export const NEO_LOTS: readonly (readonly [number, number])[] = [
 ];
 /** Half the lot's width and depth: the trees there make way once someone builds. */
 export const NEO_LOT_HALF: readonly [number, number] = [1.15, 0.95];
+
+/** FLT-56: the auditors' grade plaque, on the verge just east of the gate (scene units). */
+export const PLAQUE_AT: readonly [number, number] = [2.3, 12.5];

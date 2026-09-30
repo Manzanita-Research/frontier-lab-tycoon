@@ -1,11 +1,11 @@
-import { getReach, isReachable, tileIndex, buildingAt, isPathTile, rectContains } from "../pathfind";
+import { getReach, isReachable, tileIndex, isPathTile } from "../pathfind";
 import { openEventOf } from "../events";
 import { outcomeOf } from "../goals";
 import { progressOf } from "../progression";
 import { eraOfState } from "../race/race";
 import { tick } from "../tick";
 import { SimHandle } from "../../app/sim";
-import { createMidgameScenario, MIDGAME_SEED, midgameOpeningNews, midgameOpeningThoughts, walkerOnCampus } from "./midgame";
+import { createMidgameScenario, MIDGAME_SEED, midgameOpeningNews, midgameOpeningThoughts, walkerOnCampus, walkerPlaced } from "./midgame";
 
 // FNV-1a, the same deliberately simple hash used by sim/golden.test.ts, over the entire persisted World.
 function digest(s: unknown): string {
@@ -26,7 +26,8 @@ describe("midgame scenario", () => {
     // FLT-52: and the Hearing, the yacht summit, Defection, the Poaching War, Evals Without Borders, Regulatory Capture
     // and the Promise Tracker.
     // FLT-33/25: the earned factions wake with the campus and argue all 480 days; the water crowd escalates through its arc.
-    expect(digest(s)).toBe("c4310492");
+    // FLT-56: the auditors huddle before they leave and the grade lingers, which moves the opening a few days.
+    expect(digest(s)).toBe("376f323e");
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);
@@ -58,7 +59,7 @@ describe("midgame scenario", () => {
     expect(walkerOnCampus(s)).toBe(true);
     for (const w of [...s.walkers, ...s.staff]) {
       const x = Math.floor(w.x), z = Math.floor(w.z);
-      expect(isPathTile(s, x, z) || !!buildingAt(s, w.x, w.z) || rectContains(s.gate, w.x, w.z)).toBe(true);
+      expect(walkerPlaced(s, w)).toBe(true);
       if (isPathTile(s, x, z)) expect(getReach(s).tiles[tileIndex(s, x, z)]).toBe(1);
     }
     const resumed = JSON.parse(JSON.stringify(s));

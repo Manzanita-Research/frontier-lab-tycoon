@@ -2,7 +2,7 @@
 // band and chart edge; the engine side is the visitor-group system (sim/groups.ts) and a few generic verbs.
 import { Schema } from "effect";
 import json from "../../../mods/base-auditors/mod.json";
-import { ArcNode, EventCard, Headline, Thought } from "../../mods/schema";
+import { ArcNode, EventCard, Headline, NamedCall, Thought } from "../../mods/schema";
 import { registerGroupKind, type GroupKind } from "../groups";
 
 const N = Schema.Finite;
@@ -15,7 +15,7 @@ const GradeLit = Schema.Literals(GRADES);
 const Move = numbers("trust", "heat", "hype");
 const Group = Schema.Struct({
   id: S, name: S, size: Range, speed: N, names: Schema.Array(S),
-  route: Schema.Struct({ stops: Range, prefer: Schema.Array(S), inspectHours: Range, evalAt: Schema.Array(S), evalHours: N }),
+  route: Schema.Struct({ stops: Range, prefer: Schema.Array(S), inspectHours: Range, evalAt: Schema.Array(S), evalHours: N, huddleHours: Schema.optionalKey(N) }),
   look: Schema.Record(S, Schema.Json),
 });
 /** A report-card line: a base score plus weighted facts (see `auditFacts`), clamped to 0..100, then banded. */
@@ -45,6 +45,10 @@ const Pack = Schema.Struct({
     swarm: Schema.Struct({ comment: S }),
     rubric: Schema.Array(Category),
     frontPage: Schema.Struct({ A: S, B: S, C: S, D: S, F: S, caught: S, swarm: S }),
+    /** FLT-56: what the huddle before the report does (a camera beat, at `here`). */
+    huddle: Schema.optionalKey(Schema.Array(NamedCall)),
+    /** FLT-56: for `days` after a report, visitors quote the grade (thoughts `visitor` / `grade:<A-F>`), on `chance` a day. */
+    gradeTalk: Schema.optionalKey(numbers("days", "chance")),
   }) }),
 });
 export function loadAuditorsPack(input: unknown) {

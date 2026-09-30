@@ -558,6 +558,7 @@ function auditOf(s: Snapshot): AuditVM {
     : a.stage !== "visit" || a.visitors === 0 ? null
     : evals ? "Running their own evals"
     : a.phase === "inspecting" && a.stop ? `Inspecting the ${a.stop.name}`
+    : a.phase === "huddling" ? "Comparing notes. Nobody breathe."
     : a.phase === "leaving" ? "Leaving, with footnotes"
     : a.stop ? `On their way to the ${a.stop.name}` : null;
   const progress = a.progress === null ? null : Math.max(0, Math.min(1, a.progress));

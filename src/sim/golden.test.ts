@@ -180,11 +180,13 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // factions, which wake and first move the World 4 ticks later (944 / 984 / 884). The base-water arc's documentary crew
 // (a new card, Level 5) first moves it at 1963 / 2043 / 2343 (2323 / 2383 / 2403 with the factions off). 200 and 800 hold.
 // FLT-56 lines a walk-out up as a conga line on the founder's route (positions only: same RNG stream, same ids). Only
-// seed 3's Defection walks more than one person out before 4000, so only its 4000 moved.
+// seed 3's Defection walks more than one person out before 4000, so only its 4000 moved. Then the auditors huddle for an
+// hour before they leave, and the report draws a rival's reaction and (for a month) the visitors' talk from the
+// auditors' own stream: every seed's first visit ends before 3200, so 3200 and 4000 moved and nothing earlier did.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "d3826cd0", 800: "ed628bb9", 1600: "e572590c", 2400: "722cfa55", 3200: "22c99bb6", 4000: "68967430" },
-  2: { 200: "e548b1af", 800: "552cae60", 1600: "cc016f76", 2400: "c0301cb7", 3200: "d96c9353", 4000: "3bbe5608" },
-  3: { 200: "58bb415c", 800: "920699d6", 1600: "4034a696", 2400: "a367296d", 3200: "c48be0ba", 4000: "88393b2d" },
+  1: { 200: "d3826cd0", 800: "ed628bb9", 1600: "e572590c", 2400: "722cfa55", 3200: "1020b2c9", 4000: "f40d1823" },
+  2: { 200: "e548b1af", 800: "552cae60", 1600: "cc016f76", 2400: "c0301cb7", 3200: "1339f3f9", 4000: "43eadd11" },
+  3: { 200: "58bb415c", 800: "920699d6", 1600: "4034a696", 2400: "a367296d", 3200: "07f3eecb", 4000: "b97ececc" },
 };
 
 describe("golden runs", () => {
