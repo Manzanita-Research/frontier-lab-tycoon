@@ -3,6 +3,7 @@ import type { CoachStored } from "./machines/coach";
 import type { ProgressionStored } from "./machines/progression";
 import type { ProgressionLevel, UnlockCard } from "../content/progression";
 import type { BuildingKind } from "../content/buildings";
+import type { CollusionState, Investigation } from "./collusion/state";
 import type { NeedKey } from "../content/needs";
 import type { DisastersState } from "./disasters/types";
 import type { ArcStored } from "./machines/arc";
@@ -294,4 +295,8 @@ export interface GameState {
   guardrails?: GuardrailsStored;
   /** Disasters (FLT-17): the random-disaster setting, the ones in play, timed effects, and the cues the renderer reads. */
   disasters: DisastersState;
+  /** FLT-18: opt-in Swarm pack; absent preserves legacy saves and baseline runs. */
+  collusion?: CollusionState;
+  /** Generic inquiries started by the Vocabulary; the owning machine completes them. */
+  investigations?: Record<string, Investigation>;
 }

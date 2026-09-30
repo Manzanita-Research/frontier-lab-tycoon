@@ -1,3 +1,4 @@
+import { pressureReady } from "../tutorial";
 // The Race's driver: once a game day it checks the R&D multiplier and the era ratchet, calls the weekly cycle
 // every seventh day (rivals act, the Arena is re-ranked, the news turns) and decides which cards are due
 // (open-weights drop, compute auction, funding round). The rivals and the era are machines; this applies what
@@ -148,7 +149,7 @@ export function announceRelease(state: GameState, rng: Rng, def: RivalDef, e: Ex
   if (!quiet && lines.length > 0) addNews(state, fillTemplate(rng.pick(lines), vars), !def.models ? "joke" : ahead ? "bad" : "neutral");
 
   const close = e.capability >= state.capability * DROP_FLOOR && e.capability <= state.capability * DROP_CEILING;
-  if (e.open && def.models && close && state.ledger.income > 0 && !openDropActive(state) && state.day - race.lastDrop >= DROP_GAP_DAYS) {
+  if (pressureReady(state) && e.open && def.models && close && state.ledger.income > 0 && !openDropActive(state) && state.day - race.lastDrop >= DROP_GAP_DAYS) {
     race.openDrop = { until: state.day + OPEN_DROP_DAYS, rival: def.id, model: e.model };
     race.lastDrop = state.day;
     state.flags["offer:openWeights"] = state.day;

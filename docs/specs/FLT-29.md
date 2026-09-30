@@ -17,3 +17,10 @@
    - (c) The News Room button no longer overlaps the Thoughts header (in every skin).
 4. **Evidence:** before/after on `main` vs this branch; a 0–10 minute sequence at 1× with no params, in Frontier 95 and in one stub skin; and phone.
 5. **Merge order (after Jem OKs):** merge #26, then this PR (it contains #27's commits), then close #27 as landed via this PR. **Don't merge it yourself.**
+
+---
+**Scope change (lead, Sep 30).** Jem: "this isn't in a place anyone can play" (FLT-47). The tutorial UI in this spec (the assistant's Next/Skip, the pulsing highlights, the Paused indicator) was **dropped** and is replaced by FLT-47's coach marks and unlock system (built in FLT-50). What this task landed:
+1. **Integration:** `origin/main` (FLT-14 landed there as a squash, plus FLT-27, FLT-17, FLT-36) and `origin/flt-16-first-run`, with FLT-16's UI wiring ported into the slots (auto-pause overlays, the News Room and Mixer changes).
+2. **Minimal wiring** of `pendingConfirm` (a confirm box), `warnings` and `releaseGoal` through the existing `Assistant`/`Toast` slots. Plain; FLT-47 restyles it.
+3. **Layout fixes:** Frontier 95's right column is a managed window stack, the paperclip's balloon sits in the same column above the tray (it never covers a window; toasts, hints and warnings queue in it), and the base skin's News Room controls no longer float over the Thoughts header.
+4. The old tutorial's pausing hint is gone: the opening no longer holds time.

@@ -1,10 +1,9 @@
-import { useHighlight, useT } from "../../context";
+import { useT } from "../../context";
 import type { SlotPropsMap } from "../../types";
 
 /** The payroll: hire and fire, and paint patrol zones. It opens from the palette and never lives in the right-hand column. */
 export function Staff({ staff, actions }: SlotPropsMap["Staff"]) {
   const t = useT();
-  const hl = useHighlight();
   const painting = staff.painting;
   if (painting) {
     return (
@@ -47,7 +46,7 @@ export function Staff({ staff, actions }: SlotPropsMap["Staff"]) {
                 {j.blurb}
               </span>
             </span>
-            <button className={`mini primary ${j.starter && j.canHire && hl("staff:hire") ? "flt-hl" : ""}`} disabled={!j.canHire} title={j.reason} onClick={() => actions.hire(j.job)}>
+            <button className="mini primary" disabled={!j.canHire} title={j.reason} onClick={() => actions.hire(j.job)}>
               {t("staff.hire")}
               {j.count > 0 ? ` (${j.count})` : ""}
             </button>

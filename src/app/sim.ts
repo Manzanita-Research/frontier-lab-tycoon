@@ -20,6 +20,8 @@ import { isPaperMoment, stagePapers } from "../sim/race/papers/demo";
 import { enablePapers } from "../sim/race/papers/driver";
 import { enableLeapfrog } from "../sim/race/leapfrog/driver";
 import { parseLeapMoment, stageLeapfrog } from "../sim/race/leapfrog/demo";
+import { isCollusionMoment, stageCollusion } from "../sim/collusion/demo";
+import { enableCollusion } from "../sim/collusion/driver";
 import { walkersThinking } from "../sim/mind";
 import { makeSnapshot, NO_SELECTION, type Snapshot, type UiSelection, type UiToast } from "./hud";
 import { continueTutorial } from "../sim/tutorial";
@@ -70,9 +72,11 @@ export class SimHandle {
   /** Start over with a fresh seed (the random-disaster setting carries over to the new lab). */
   reset(seed: number) {
     const risk = this.world.disasters.risk;
+    const collusion = this.world.collusion?.enabled;
     this.world = createInitialState(seed);
     setRisk(this.world, risk);
     if (this.leapfrog) enableLeapfrog(this.world);
+    if (collusion) enableCollusion(this.world);
     if (this.papers) enablePapers(this.world);
     this.alpha = 1;
   }
@@ -105,10 +109,8 @@ export function createSimHandle(
   const sim = createInitialState(dbg.seed);
   if (dbg.leapfrog === false) sim.flags.leapfrogOff = 1;
   if (dbg.papers === false) sim.flags.papersOff = 1;
-  if (!sim.progression && dbg.leapfrog) enableLeapfrog(sim);
-  if (!sim.progression && dbg.papers) enablePapers(sim);
   const leap = parseLeapMoment(dbg.moment);
-  if (dbg.warp > 0 || dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0 || dbg.moment) { continueTutorial(sim, true); delete sim.progression; }
+  if (dbg.warp > 0 || dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0 || dbg.moment || dbg.disaster) { continueTutorial(sim, true); delete sim.progression; }
   if (!sim.progression && dbg.leapfrog) enableLeapfrog(sim);
   if (!sim.progression && dbg.papers) enablePapers(sim);
   for (let i = 0; i < dbg.warp * TICKS_PER_DAY; i++) tick(sim);
@@ -116,6 +118,7 @@ export function createSimHandle(
   else if (isMoment(dbg.moment)) stageMoment(sim, dbg.moment);
   else if (isOpsMoment(dbg.moment)) stageOps(sim, dbg.moment);
   else if (leap) stageLeapfrog(sim, leap.moment, leap.arg);
+  else if (isCollusionMoment(dbg.moment)) stageCollusion(sim, dbg.moment);
   else if (isPaperMoment(dbg.moment)) stagePapers(sim, dbg.moment);
   if (dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0) {
     const rng = createRng(sim.rngState);

@@ -1,0 +1,44 @@
+/*
+ * Notices: what the game says that is not a toast you can wave away. A standing warning ("your entrance isn't connected")
+ * and the spend check ("this leaves 1.8 months of runway"). Plain on purpose, and all of it reads tokens (--flt-*).
+ */
+
+/* ---- a standing warning: it stays until whatever causes it is fixed ---- */
+.toast.warn {
+  background: color-mix(in srgb, var(--flt-color-bad) 16%, var(--flt-color-panel));
+  border-color: var(--flt-color-bad);
+  text-align: left;
+  animation: none;
+}
+
+/* ---- the spend check ---- */
+.confirm-facts {
+  margin: 4px 0 12px;
+  font-size: 14px;
+  color: var(--flt-color-textDim);
+}
+.confirm-card .choices {
+  display: grid;
+  gap: 8px;
+}
+
+/* ---- phones: toasts stack just above the build bar, out of the right-hand column's way ---- */
+@media (max-width: 640px) {
+  .toasts,
+  .hud:has(.topbar.compact.expanded) .toasts {
+    position: static;
+    transform: none;
+    width: 100%;
+    align-items: stretch;
+    gap: 6px;
+  }
+  .toasts:empty {
+    display: none;
+  }
+  .news-controls button span:not(.unread-count) {
+    display: none;
+  }
+  .news-controls {
+    padding: 2px;
+  }
+}

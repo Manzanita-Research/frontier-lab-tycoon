@@ -39,7 +39,7 @@ describe("app machine", () => {
     return Effect.gen(function* () {
       const { actor, sim, pump } = yield* boot();
       yield* pump(40);
-      expect(actor.getSnapshot().matches({ playing: "paused" })).toBe(true);
+      expect(actor.getSnapshot().matches({ playing: "running" })).toBe(true);
       expect(actor.getSnapshot().context.speed).toBe(1);
       expect(sim.world.tick).toBe(0);
       yield* send(actor, { type: "COMMAND", command: { type: "buildPanelOpened" } });
@@ -184,7 +184,7 @@ describe("app machine", () => {
       expect(actor.getSnapshot().context.outcome).toBe("lost");
       yield* send(actor, { type: "NEW_LAB" });
       yield* pump(3);
-      yield* waitFor(actor, (s) => s.matches({ playing: "paused" }), { timeout: "1 second" });
+      yield* waitFor(actor, (s) => s.matches({ playing: "running" }), { timeout: "1 second" });
       expect(actor.getSnapshot().context.speed).toBe(1);
       expect(actor.getSnapshot().context.outcome).toBe("playing");
       expect(sim.world.day).toBeLessThan(2);

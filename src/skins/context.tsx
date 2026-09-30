@@ -15,19 +15,6 @@ export function useSkin(): LoadedSkin {
   return skin;
 }
 
-/** What the tutorial is pointing at ("build:path", "staff:hire", "training", ...), or null. Set by the host from the view-model. */
-const HighlightContext = createContext<string | null>(null);
-export const HighlightProvider = HighlightContext.Provider;
-
-/**
- * `const hl = useHighlight(); ... className={hl("build:hall") ? "flt-hl" : ""}`: is the tutorial pointing at this? Give the
- * thing the `flt-hl` class and the pulsing ring (skinnable: `color.highlight`, `motion.pulse`) comes with it.
- */
-export function useHighlight(): (target: string) => boolean {
-  const target = useContext(HighlightContext);
-  return (t) => target === t;
-}
-
 /** The other slots of the active skin, for slots that compose them. */
 export const useSlots = () => useSkin().slots;
 

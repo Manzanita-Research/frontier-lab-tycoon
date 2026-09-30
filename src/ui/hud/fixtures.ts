@@ -2,7 +2,6 @@
 // UI state a moment needs. Deterministic: the same call gives the same JSON.
 import { makeSnapshot, type Snapshot } from "../../app/hud";
 import { frontPage, recap, type Edition } from "../../newsroom/edition";
-import { createInitialState } from "../../sim/state";
 import { createTestCampus } from "../../sim/testkit";
 import { tick } from "../../sim/tick";
 import type { GameState } from "../../sim/types";
@@ -16,11 +15,6 @@ export function fixtureWorld(days = 12, seed = 3): GameState {
   return s;
 }
 
-/** A clean start: the gate, one cluster, three researchers, and the guided opening waiting on its first step. */
-export function openingWorld(seed = 3): GameState {
-  return createInitialState(seed);
-}
-
 export const NO_SKINS: SkinPickerVM = {
   open: false,
   reducedMotion: false,
@@ -28,7 +22,7 @@ export const NO_SKINS: SkinPickerVM = {
   original: null,
   list: [
     { id: "frontier-95", name: "Frontier 95", author: "Frontier Lab Tycoon", description: "The lab as a 1995 desktop.", version: "1.0.0", preview: "" },
-    { id: "geocities", name: "GeoCities", author: "Frontier Lab Tycoon", description: "The lab's home page.", version: "1.0.0", preview: "" },
+    { id: "homepage-98", name: "Homepage '98", author: "Frontier Lab Tycoon", description: "The lab's home page.", version: "1.0.0", preview: "" },
   ],
   rejected: [],
 };
@@ -88,7 +82,6 @@ export function fixtureInput(o: FixtureOptions = {}): HudInput {
       { id: 2, day: 4, text: "Interns told not to touch the big red button, or the green one", tone: "joke" },
     ],
     outcomeDismissed: false,
-    pauseReason: null,
     tapHint: true,
     toldGateway: false,
     staffOpen: o.staff ?? false,

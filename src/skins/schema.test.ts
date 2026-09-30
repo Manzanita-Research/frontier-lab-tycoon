@@ -101,7 +101,7 @@ describe("the token and string contract", () => {
 
   it("has every required token in the base set, and a reduced variant for every duration", () => {
     for (const k of REQUIRED_TOKENS) expect(BASE_TOKENS, k).toHaveProperty([k]);
-    for (const m of ["fast", "base", "slow", "pulse"]) expect(BASE_TOKENS).toHaveProperty([`motion.reduced.${m}`]);
+    for (const m of ["fast", "base", "slow"]) expect(BASE_TOKENS).toHaveProperty([`motion.reduced.${m}`]);
   });
   it("names CSS variables predictably", () => {
     expect(tokenVar("color.panel")).toBe("--flt-color-panel");
@@ -121,7 +121,7 @@ describe("the token and string contract", () => {
     expect(tokenSheet(BASE_ID, {})).not.toContain("data-skin=");
   });
   it("picks the starting skin from ?skin=, then storage, then the default", () => {
-    expect(initialSkinId("?skin=geocities", "swag-drop")).toBe("geocities");
+    expect(initialSkinId("?skin=homepage-98", "swag-drop")).toBe("homepage-98");
     expect(initialSkinId("", "swag-drop")).toBe("swag-drop");
     expect(initialSkinId("?debug=1", null)).toBe(DEFAULT_SKIN);
     expect(DEFAULT_SKIN).toBe("frontier-95");

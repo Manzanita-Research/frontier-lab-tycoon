@@ -51,9 +51,42 @@ const REPLIES: Record<string, string> = {
 };
 
 /**
- * The paperclip. It delivers the guided opening (one sentence a step, a Next while the game is waiting for one, a Skip that
- * is always there), and hosts toasts and hints in the same balloon: a toast queues under the message, so nothing ever
- * speaks over the lesson. When it is quiet it offers a tip every so often.
+ * "This leaves 1.8 months of runway": a Win95 warning box. Yes does it; No (the default, and Escape, and the close box, and a
+ * click outside) keeps the runway. Time is held while it is up.
+ */
+function SpendCheck({ confirm, actions }: { confirm: NonNullable<SlotPropsMap["Assistant"]["vm"]["confirm"]>; actions: SlotPropsMap["Assistant"]["actions"] }) {
+  const t = useT();
+  const no = () => actions.cancelSpend();
+  return (
+    <Dialog label="Lab Manager" close={no} layerClass="f95-layer f95-dim" dialogClass="f95-dialogbox">
+      <Win className="f95-msgbox tone-bad" title="Lab Manager" icon="warn" buttons={[{ g: "close", label: "No", onClick: no }]} role="alertdialog" label="Lab Manager: are you sure?">
+        <div className="f95-msgbody">
+          <Ico name="warn" size={36} />
+          <div>
+            <p>{confirm.message}</p>
+            <p className="f95-confirm-facts">
+              {t("confirm.cost")}: {confirm.costText} · {t("confirm.runway")}: {confirm.runwayText}
+              <br />
+              Are you sure you want to do this?
+            </p>
+          </div>
+        </div>
+        <div className="f95-row">
+          <Btn onClick={() => actions.confirmSpend()}>Yes</Btn>
+          <Btn def autoFocus onClick={no}>
+            No
+          </Btn>
+        </div>
+        <div className="f95-status">{t("event.paused")}</div>
+      </Win>
+    </Dialog>
+  );
+}
+
+/**
+ * The paperclip. It hosts toasts, hints and standing warnings in one yellow balloon (they queue there, so nothing speaks over
+ * anything else), offers a tip when the lab is quiet, and asks the spend check ("this leaves 1.8 months of runway") as a
+ * Win95 warning box.
  */
 export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
   const t = useT();
@@ -61,14 +94,12 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
   const [tip, setTip] = useState<number | null>(null);
   const [reply, setReply] = useState<string | null>(null);
   const phone = vm.layout.compact;
-  const lesson = vm.assistant;
   // One at a time, the newest toast winning; the game only sends a hint while nobody is talking.
   const hints = vm.hints;
   const toasts = vm.toasts.slice(-1);
   // Standing warnings ("your entrance isn't connected") stay in the balloon until they are fixed.
   const warnings = vm.warnings;
-  const busy = lesson !== null || warnings.length > 0 || toasts.length > 0 || hints.length > 0;
-  const held = vm.pause.auto && vm.pause.reason !== "card" ? vm.pause.reason : null;
+  const busy = warnings.length > 0 || toasts.length > 0 || hints.length > 0;
 
   // When it is quiet, the clip offers a tip every so often (never on a phone, where the campus needs the room).
   useEffect(() => {
@@ -99,41 +130,9 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
 
   return (
     <div className="f95-assistant" aria-live="polite">
+      {vm.confirm && <SpendCheck confirm={vm.confirm} actions={actions} />}
       {busy && (
-        <div className={`f95-balloon ${lesson ? "lesson" : ""}`} role="status">
-          {lesson && (
-            <div className="f95-lesson" data-step={lesson.step}>
-              <div className="f95-stepline">
-                <small>{t("assistant.step", { n: lesson.number, total: lesson.total })}</small>
-                <span className="f95-pips" aria-hidden>
-                  {Array.from({ length: lesson.total }, (_, i) => (
-                    <i key={i} className={i + 1 < lesson.number ? "done" : i + 1 === lesson.number ? "now" : ""} />
-                  ))}
-                </span>
-              </div>
-              <p className="f95-saying">{lesson.message}</p>
-              <div className="f95-sayrow">
-                {lesson.paused ? (
-                  <Btn def className="f95-next" onClick={() => actions.continueTutorial()}>
-                    {t("assistant.next")}
-                  </Btn>
-                ) : (
-                  lesson.waitingForBuild && lesson.highlight.startsWith("build:") && <small className="f95-placeit">{t("assistant.placeIt")}</small>
-                )}
-                {lesson.canSkip && (
-                  <button type="button" className="f95-skip" onClick={() => actions.skipTutorial()}>
-                    {t("assistant.skip")}
-                  </button>
-                )}
-              </div>
-              {held && (
-                <div className="f95-holdnote">
-                  <Ico name="pause" size={14} />
-                  <span>{t(`pause.${held}`)}</span>
-                </div>
-              )}
-            </div>
-          )}
+        <div className="f95-balloon" role="status">
           {warnings.map((w) => (
             <div key={w} className="f95-toast warn" role="status">
               <Ico name="warn" size={18} />
@@ -177,11 +176,9 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
           )}
         </div>
       )}
-      {/* A new step re-mounts the clip, so it wiggles for every message. */}
       <button
-        key={lesson?.step ?? "clip"}
         type="button"
-        className={`f95-clip ${lesson || vm.toasts.length > 0 ? "wiggle" : ""}`}
+        className={`f95-clip ${vm.toasts.length > 0 ? "wiggle" : ""}`}
         aria-label={t("assistant.title")}
         title={t("assistant.title")}
         onClick={() => (tip === null ? setTip(tip ?? 0) : closeTip())}
@@ -200,39 +197,6 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
 }
 
 const ICON_BY_TONE = { bad: "error", joke: "warn", good: "info", neutral: "info" } as const;
-
-/**
- * "This leaves 1.8 months of runway": a Win95 warning box. Yes does it; No (the default, and Escape, and the close box, and a
- * click outside) keeps the runway. Time is held while it is up.
- */
-export function Confirm({ confirm, actions }: SlotPropsMap["Confirm"]) {
-  const t = useT();
-  const no = () => actions.cancelSpend();
-  return (
-    <Dialog label="Lab Manager" close={no} layerClass="f95-layer f95-dim" dialogClass="f95-dialogbox">
-      <Win className="f95-msgbox tone-bad" title="Lab Manager" icon="warn" buttons={[{ g: "close", label: "No", onClick: no }]} role="alertdialog" label="Lab Manager: are you sure?">
-        <div className="f95-msgbody">
-          <Ico name="warn" size={36} />
-          <div>
-            <p>{confirm.message}</p>
-            <p className="f95-confirm-facts">
-              {t("confirm.cost")}: {confirm.costText} · {t("confirm.runway")}: {confirm.runwayText}
-              <br />
-              Are you sure you want to do this?
-            </p>
-          </div>
-        </div>
-        <div className="f95-row">
-          <Btn onClick={() => actions.confirmSpend()}>Yes</Btn>
-          <Btn def autoFocus onClick={no}>
-            No
-          </Btn>
-        </div>
-        <div className="f95-status">{t("event.paused")}</div>
-      </Win>
-    </Dialog>
-  );
-}
 
 /** A Win95 message box: an icon, the news, and the choices as buttons, the first one being the default. */
 export function EventCard({ event, actions }: SlotPropsMap["EventCard"]) {

@@ -1,5 +1,6 @@
 // The fixed-step loop: apply queued commands, move everyone, run the daily systems at midnight.
 import { applyCommands, type Command } from "./commands";
+import { applyCollusionChoices, dailyCollusion, updateCollusion } from "./collusion/driver";
 import { TICKS_PER_DAY } from "./constants";
 import { dailyBreakdowns } from "./breakdowns";
 import { dailyDisasters, updateDisasters } from "./disasters/driver";
@@ -34,6 +35,7 @@ export function tick(state: GameState, commands: readonly Command[] = []) {
   const rng = createRng(state.rngState);
   applyCommands(state, commands, rng);
   if (commands.length > 0) { updateTutorial(state); observeGuardrails(state); }
+  if (systemUnlocked(state, "collusion")) applyCollusionChoices(state);
   if (pendingConfirmOf(state) || openEventOf(state) || state.goals.value === "lost") {
     state.rngState = rng.state();
     return;
@@ -42,6 +44,7 @@ export function tick(state: GameState, commands: readonly Command[] = []) {
   updateWalkers(state, rng);
   if (systemUnlocked(state, "protests")) updateProtesters(state, rng);
   updateStaff(state, rng);
+  if (systemUnlocked(state, "collusion")) updateCollusion(state);
   if (systemUnlocked(state, "disasters")) updateDisasters(state);
   if (state.tick % TICKS_PER_DAY === 0) {
     state.day++;
@@ -54,6 +57,7 @@ export function tick(state: GameState, commands: readonly Command[] = []) {
     dailyNews(state, rng);
     if (systemUnlocked(state, "slop")) dailySlop(state, rng);
     dailyCrowd(state, rng);
+    if (systemUnlocked(state, "collusion")) dailyCollusion(state);
     if (systemUnlocked(state, "arena")) dailyRace(state, rng);
     if (systemUnlocked(state, "leapfrog")) dailyLeapfrog(state, rng);
     if (systemUnlocked(state, "papers")) dailyPapers(state, rng);
@@ -74,6 +78,7 @@ export function applyNow(state: GameState, commands: readonly Command[]) {
   applyCommands(state, commands, rng);
   updateTutorial(state);
   observeGuardrails(state);
+  if (systemUnlocked(state, "collusion")) applyCollusionChoices(state);
   updateCoach(state);
   state.rngState = rng.state();
 }

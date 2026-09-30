@@ -5,17 +5,8 @@ import type { LoadedSkin } from "../../skins/types";
 import { baseSlots } from "../../skins/base/slots";
 import { BASE_STRINGS } from "../../skins/schema";
 
-/**
- * `null` until somebody chooses (the Arena chip, the Task Mangler's title bar, or the Arena opening itself when you drop a
- * place). Then it is `arenaOpenByDefault`.
- */
-export const arenaOpenAtom = Atom.make<boolean | null>(null);
-
-/**
- * Open on a desktop-sized screen, folded on a phone or a short window, and folded while the guided opening is up: minute
- * zero is a path and a gate, and a leaderboard of rivals can wait. It pops open when the tutorial ends.
- */
-export const arenaOpenByDefault = (tutorialUp: boolean) => (typeof window === "undefined" ? true : window.innerWidth > 640 && window.innerHeight >= 800) && !tutorialUp;
+/** Open on a desktop-sized screen, folded on a phone or a short window (the Arena chip toggles it either way). */
+export const arenaOpenAtom = Atom.make(typeof window === "undefined" ? true : window.innerWidth > 640 && window.innerHeight >= 800);
 
 /** How many messages of the open group chat have arrived. */
 export const chatCountAtom = Atom.make(0);

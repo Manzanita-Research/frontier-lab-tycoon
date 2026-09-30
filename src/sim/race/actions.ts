@@ -96,7 +96,8 @@ function grantDatacenter(state: GameState, rng: Rng) {
   for (const kind of RACE_KINDS) if (state.flags[`unlocked:${kind}`] === undefined) state.flags[`unlocked:${kind}`] = state.day;
   state.flags["free:datacenter"] = 1;
   const spot = findSpot(state, "datacenter");
-  if (spot) placeBuilding(state, rng, "datacenter", spot[0], spot[1]);
+  // Won at auction, not asked for: no spending check (FLT-16) on a free building.
+  if (spot) placeBuilding(state, rng, "datacenter", spot[0], spot[1], true);
   else addToast(state, "No room for the Datacenter. It's yours, free, wherever you make room.", "neutral");
 }
 

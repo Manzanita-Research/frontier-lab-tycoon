@@ -51,7 +51,7 @@ describe("Discovery Disc '96", () => {
   });
 
   it("Pace uses the trail's words and says how the party feels", () => {
-    const out = html(<slot.Speed pause={vm.pause} speed={vm.speed} stats={vm.stats} actions={actions} />);
+    const out = html(<slot.Speed speed={vm.speed} stats={vm.stats} actions={actions} />);
     for (const word of ["Rest", "Steady", "Strenuous", "Grueling"]) expect(out).toContain(word);
     expect(out).toContain("Pace");
     expect(out).toMatch(/dd-pace-cap/);

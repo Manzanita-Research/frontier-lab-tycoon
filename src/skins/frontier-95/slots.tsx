@@ -3,12 +3,12 @@ import type { SkinSlots } from "../types";
 import { Layout } from "./Layout";
 import { Arena, Inspector, Objectives, Staff, Stats, ThoughtsPanel, Training } from "./windows";
 import { BuildBar, NewsControls, PhotoButton, Speed, Ticker } from "./taskbar";
-import { Assistant, Bubble, Confirm, EraCard, EventCard, NewsArrival, Outcome, Toast } from "./messages";
+import { Assistant, Bubble, EraCard, EventCard, NewsArrival, Outcome, Toast } from "./messages";
 import { FrontPage, GroupChat, Mixer, NewsRoom, PhotoOverlay, SkinPicker } from "./apps";
 
 const slots: SkinSlots = {
   Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, Bubble, ThoughtsPanel, Ticker, Toast, Assistant,
-  EventCard, Confirm, Arena, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, NewsControls,
+  EventCard, Arena, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, NewsControls,
   NewsArrival, NewsRoom, Mixer,
 };
 export default slots;

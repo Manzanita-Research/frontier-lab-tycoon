@@ -8,7 +8,6 @@ import { RACE_TOOLS, SPEEDS, TOOLS } from "../../app/hud";
 import { BUILDINGS, PATH_PRICE } from "../../content/buildings";
 import { ERAS } from "../../content/eras";
 import { STAFF } from "../../content/staff";
-import { TUTORIAL_STEPS } from "../../content/tutorial";
 import { eventById } from "../../content/events";
 import { GOALS, SCENARIO, type GoalDef } from "../../content/goals";
 import { FRIENDS } from "../../content/newsroom";
@@ -23,8 +22,8 @@ import type { NewsItem, Tone, WalkerKind } from "../../sim/types";
 import { trendOf, VIBES_MAX, WEIGHTS } from "../../sim/vibes";
 import { SKIN_API_VERSION } from "./types";
 import type {
-  ArenaVM, AssistantVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HudVM, InspectorVM, NeedVM, NewsroomVM,
-  ObjectivesVM, OutcomeVM, PaperVM, PauseReasonVM, PauseVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, ThoughtRowVM, TrainingVM, WalkerKindVM,
+  ArenaVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HudVM, InspectorVM, NeedVM, NewsroomVM,
+  ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, ThoughtRowVM, TrainingVM, WalkerKindVM,
 } from "./types";
 
 /** How many game days after a release the "SHIPPED!" sticker stays up. */
@@ -42,8 +41,6 @@ export interface HudInput {
   toasts: readonly { id: number; text: string; tone: Tone }[];
   news: readonly NewsItem[];
   outcomeDismissed: boolean;
-  /** Why the app is holding time (null while it runs): the pause button, a tutorial message, a menu, a card. */
-  pauseReason: PauseReasonVM | null;
   /** "Tap anyone to read their mind" is still showing. */
   tapHint: boolean;
   /** A toast has already told the player about the API Gateway, so the standing hint would be a repeat. */
@@ -261,9 +258,6 @@ function buildOf(i: HudInput): { items: BuildItemVM[]; tip: BuildTipVM | null } 
   return { items, tip };
 }
 
-/** The two hires the tutorial's "hire" step accepts (the same two `sim/commands.ts` counts). */
-const STARTER_HIRES: ReadonlySet<string> = new Set(["janitor", "sre"]);
-
 function staffOf(i: HudInput): StaffVM {
   const ops = i.snap.ops;
   const row = (o: (typeof ops.staff)[number]): StaffRowVM => ({ id: o.id, job: o.job, title: o.title, name: o.name, status: o.status, color: STAFF[o.job].color, zone: o.zone, leaving: o.leaving });
@@ -274,7 +268,7 @@ function staffOf(i: HudInput): StaffVM {
     payroll: ops.payroll,
     payrollText: ops.staff.length > 0 ? `${formatMoney(ops.payroll)}/day` : "nobody on the payroll",
     painting: painting ? row(painting) : null,
-    jobs: ops.jobs.map((j): StaffJobVM => ({ job: j.job, title: j.title, blurb: j.blurb, salary: j.salary, salaryText: `${formatMoney(j.salary)}/day`, count: j.count, max: j.max, canHire: j.canHire, reason: j.reason, color: STAFF[j.job].color, starter: STARTER_HIRES.has(j.job) })),
+    jobs: ops.jobs.map((j): StaffJobVM => ({ job: j.job, title: j.title, blurb: j.blurb, salary: j.salary, salaryText: `${formatMoney(j.salary)}/day`, count: j.count, max: j.max, canHire: j.canHire, reason: j.reason, color: STAFF[j.job].color })),
     roster: ops.staff.map(row),
     slopPct: ops.slopPct,
     broken: ops.broken.length,
@@ -453,25 +447,10 @@ function photoOf(i: HudInput): PhotoVM {
 /** A toast that says what a standing warning already says is the warning: it is shown once. */
 const spokenToasts = (i: HudInput) => i.toasts.filter((t) => !i.snap.warnings.includes(t.text));
 
-/** One standing hint at a time, and none while a toast or the tutorial is talking; the gateway hint is redundant once a toast has said it. */
+/** One standing hint at a time, and none while a toast is talking; the gateway hint is redundant once a toast has said it. */
 function standingHints(i: HudInput): HudVM["hints"] {
-  if (spokenToasts(i).length > 0 || i.snap.assistant) return [];
+  if (spokenToasts(i).length > 0) return [];
   return !i.snap.hasGateway && !i.toldGateway ? ["gateway"] : i.tapHint ? ["tap"] : [];
-}
-
-function assistantOf(snap: Snapshot): AssistantVM | null {
-  const a = snap.assistant;
-  if (!a) return null;
-  return {
-    step: a.step,
-    number: TUTORIAL_STEPS.indexOf(a.step) + 1,
-    total: TUTORIAL_STEPS.length,
-    message: a.message,
-    highlight: a.highlight,
-    paused: a.paused,
-    waitingForBuild: snap.firstBuildPending,
-    canSkip: a.canSkip,
-  };
 }
 
 function confirmOf(s: Snapshot): ConfirmVM | null {
@@ -485,10 +464,6 @@ function confirmOf(s: Snapshot): ConfirmVM | null {
     runwayText: p.runwayAfter === null ? "∞" : `${p.runwayAfter.toFixed(1)} mo`,
     message: p.message,
   };
-}
-
-function pauseOf(reason: PauseReasonVM | null): PauseVM {
-  return { paused: reason !== null, reason, auto: reason !== null && reason !== "player" };
 }
 
 export function hudViewModel(i: HudInput): HudVM {
@@ -510,8 +485,6 @@ export function hudViewModel(i: HudInput): HudVM {
     toasts: spokenToasts(i).map((t) => ({ id: t.id, text: t.text, tone: t.tone })),
     // One hint at a time, and none while a toast is talking; the gateway hint is redundant once a toast has said it.
     hints: standingHints(i),
-    assistant: assistantOf(i.snap),
-    pause: pauseOf(i.pauseReason),
     warnings: [...i.snap.warnings],
     confirm: confirmOf(i.snap),
     event,
