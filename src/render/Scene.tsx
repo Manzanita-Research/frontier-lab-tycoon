@@ -19,6 +19,7 @@ import { VisitorGroups } from "./VisitorGroups";
 import { OverlayProjector } from "./overlay";
 import { CoachSuggestion } from "./CoachSuggestion";
 import { Placement } from "./Placement";
+import { ProbeView } from "./ProbeView";
 import { Walkers } from "./Walkers";
 
 // Postprocessing is a chunk of its own, fetched the first time photo mode opens and mounted only while it is on.
@@ -70,6 +71,7 @@ export function Scene() {
       <CameraRig baseZoom={zoom} />
       <PhotoLayer />
       <PressCamera />
+      <ProbeView />
     </Canvas>
   );
 }
