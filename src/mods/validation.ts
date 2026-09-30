@@ -6,7 +6,8 @@ import type { VocabularyApi } from "./services/vocabulary";
 import { ArcNode, ModError, suggest, type ArcData, type NamedCallData } from "./schema";
 import type { Schema } from "effect";
 import { checkCall, GUARD_NAMES, normalize, VERB_NAMES } from "../sim/verbs";
-import type { Call } from "../sim/disasters/types";
+import type { Call, DisasterDef } from "../sim/disasters/types";
+import { validateDisaster } from "../sim/disasters/validate";
 
 /** The events the sim sends a mod arc (sim/modArcs.ts). */
 export const ARC_EVENTS = ["DAY", "CHOSE"] as const;
@@ -61,6 +62,18 @@ export function validateContent(content: ContentApi, vocabulary: VocabularyApi):
     if (eventIds.has(arc.id)) throw new ModError({ path: `content.arcs[${i}].id`, detail: `id "${arc.id}" is already in events` });
   });
   content.arcs.forEach((arc, i) => validateArc(arc, vocabulary, `content.arcs[${i}]`, cards));
+  const benches = content.benchmarks.map((b) => b.id);
+  content.benchmarks.forEach((b, i) => { if (b.replaces !== undefined) known(b.replaces, benches, `content.benchmarks[${i}].replaces`); });
+  if (!content.benchmarks.some((b) => b.replaces === undefined)) throw new ModError({ path: "content.benchmarks", detail: "at least one benchmark must be in play from the start (no `replaces`)" });
+  if (content.mishaps.length === 0) throw new ModError({ path: "content.mishaps", detail: "the livestream needs at least one thing that can go wrong" });
+  // Disasters: the same checker the shipped pack gets (statechart, verbs and params, reachability, cards).
+  for (const disaster of content.disasters) {
+    const [first] = validateDisaster(disaster as unknown as DisasterDef, `content.disasters.${disaster.id}`);
+    if (first) {
+      const cut = first.indexOf(": ");
+      throw new ModError({ path: first.slice(0, cut), detail: first.slice(cut + 2) });
+    }
+  }
 }
 
 /** Structural reachability, ignoring guard outcomes. This is validation only, not a second sim engine.

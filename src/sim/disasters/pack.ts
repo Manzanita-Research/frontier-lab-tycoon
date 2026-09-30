@@ -1,6 +1,6 @@
-// The disaster content packs the game ships with. Until FLT-15 M1b's loader lands, the pack is read straight from its
-// JSON file (mods/base-disasters/mod.json, the FLT-15 section shape); switching to the loader is a mechanical change:
-// `content.disasters` will come from the `Content` service instead of this list.
+// The disaster content pack the game ships with: the base game's `content.disasters` (FLT-37 put it on the mod loader, so
+// a mod can add, override or remove disasters; the sim reads them through `defs().disasters`). This file holds the
+// shipped pack (mods/base-disasters/mod.json) and turns a disaster's cards into ordinary event cards.
 //
 // Deliberately light on imports: content/events.ts reads the cards from here while the rest of the sim is still loading.
 import pack from "../../../mods/base-disasters/mod.json";

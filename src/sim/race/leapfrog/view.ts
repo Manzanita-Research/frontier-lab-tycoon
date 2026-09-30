@@ -2,7 +2,7 @@
 // just happened, as a small plain snapshot rebuilt with each publish (about 5 Hz). No panels are drawn from it yet
 // (FLT-31 does that); the World's `race.board` (the Frontier Arena) stays as it was.
 import type { LabKind } from "../../../content/leapfrog";
-import { LEAPFROG, BENCH_BY_ID } from "../../../content/leapfrog";
+import { LEAPFROG } from "../../../content/leapfrog";
 import { YOU, type RivalId } from "../../../content/rivals";
 import type { GameState } from "../../types";
 import { honestScore, shownScore } from "./driver";
@@ -153,7 +153,7 @@ export function leapfrogView(state: GameState): LeapfrogView {
       name: nameOf(state, last.lab),
       model: last.model,
       lead: last.lead,
-      claims: last.claims.map((c) => ({ bench: c.bench, name: BENCH_BY_ID[c.bench]?.name ?? c.bench, short: BENCH_BY_ID[c.bench]?.short ?? c.bench, score: c.score, prev: c.prev, maxx: c.maxx })),
+      claims: last.claims.map((c) => ({ bench: c.bench, name: defs().benchById[c.bench]?.name ?? c.bench, short: defs().benchById[c.bench]?.short ?? c.bench, score: c.score, prev: c.prev, maxx: c.maxx })),
     },
     next: { days: lf.calendar.context.daysLeft, answering: lf.calendar.value === "answering" },
     response: {

@@ -2,7 +2,6 @@
 // what happened (the launch rhythm, the cards, the records, the saturations, the news cycle). Used by the tests and,
 // with LEAPFROG_REPORT=1, to write the sim report that goes in the PR. Not game code.
 import type { PlaceableKind } from "../../../content/buildings";
-import { BENCH_BY_ID } from "../../../content/leapfrog";
 import { openEventOf } from "../../events";
 import { pendingConfirmOf } from "../../guardrails";
 import { outcomeOf } from "../../goals";
@@ -120,7 +119,7 @@ export function runHeadless(seed: number, opts: HeadlessOptions = {}): HeadlessR
     const lf = s.leapfrog;
     if (lf.last !== last && lf.last) {
       last = lf.last;
-      drops.push({ day: lf.last.day, slot: lf.last.slot, lab: lf.last.lab, model: lf.last.model, claims: lf.last.claims.map((c) => `${BENCH_BY_ID[c.bench]?.short ?? c.bench}${c.maxx ? "*" : ""}`) });
+      drops.push({ day: lf.last.day, slot: lf.last.slot, lab: lf.last.lab, model: lf.last.model, claims: lf.last.claims.map((c) => `${defs().benchById[c.bench]?.short ?? c.bench}${c.maxx ? "*" : ""}`) });
     }
   }
   const leads = drops.filter((d) => d.slot === "lead");

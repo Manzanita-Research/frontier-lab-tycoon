@@ -2,7 +2,7 @@
 // World (a lab launches, a benchmark record falls, a benchmark is solved, somebody owns the news cycle). It also
 // handles your own launches (the SOTA claims, the counter-launch, the livestream). The machines are pure; the dice are
 // drawn here, in a fixed order, and none are drawn at all while the pack is off.
-import { BENCH_BY_ID, LEAPFROG, mishapById, successorOf, type BenchmarkDef, type PackTrigger } from "../../../content/leapfrog";
+import { LEAPFROG, type BenchmarkDef, type PackTrigger } from "../../../content/leapfrog";
 import { eraDef } from "../../../content/eras";
 import { YOU, type RivalId } from "../../../content/rivals";
 import { fillTemplate } from "../../format";
@@ -207,7 +207,7 @@ function declareSolved(state: GameState, rng: Rng, e: BenchEntry, holder: string
 
 /** The pack's replacement for a solved benchmark, or (if a mod never named one) a tougher "(Extended)" version of it. */
 function introduceSuccessor(state: GameState, solved: BenchmarkDef): BenchmarkDef {
-  const named = successorOf(solved.id);
+  const named = defs().successorOf(solved.id);
   const def: BenchmarkDef = named ?? {
     id: `${solved.id}+`,
     name: `${solved.name} (Extended)`,
@@ -305,11 +305,11 @@ export function handleDrop(state: GameState, rng: Rng, slot: "lead" | "answer") 
   if (slot === "answer") packNews(state, rng, "answer", { rival: def.name, lead: leadName, model: pending.model });
   const claim = claims[0];
   if (claim) {
-    const bench = BENCH_BY_ID[claim.bench]?.name ?? claim.bench;
+    const bench = defs().benchById[claim.bench]?.name ?? claim.bench;
     const fn = claim.maxx ? ` (*${rng.pick(LEAPFROG.footnotes)})` : "";
     packNews(state, rng, "sota", { rival: def.name, model: pending.model, bench, fn });
   }
-  for (const c of claims) if (c.prevHolder === YOU) addToast(state, `${def.name} took your record on ${BENCH_BY_ID[c.bench]?.short ?? c.bench}.`, "bad");
+  for (const c of claims) if (c.prevHolder === YOU) addToast(state, `${def.name} took your record on ${defs().benchById[c.bench]?.short ?? c.bench}.`, "bad");
   addToast(state, slot === "lead" ? `${def.name} launched ${pending.model}. The news cycle is theirs.` : `${def.name} answers ${leadName} a day later: ${pending.model}.`, "bad");
 
   pushVoice(state, pending.id, slot === "lead" ? R.voice.leadPush : R.voice.answerPush);
@@ -333,7 +333,7 @@ function offerResponse(state: GameState) {
 
 const pickMishap = (rng: Rng) => {
   const roll = rng.next();
-  const mishap = weighted(LEAPFROG.mishaps, LEAPFROG.mishaps.map((m) => m.weight), roll);
+  const mishap = weighted(defs().mishaps, defs().mishaps.map((m) => m.weight), roll);
   return mishap;
 };
 
@@ -363,7 +363,7 @@ export function ownRelease(state: GameState, rng: Rng, opts: { early: boolean; r
   }
   const claims = refreshRecords(state, rng).filter((c) => c.lab === YOU);
   const topClaim = claims[0];
-  if (topClaim) packNews(state, rng, "youSota", { model, bench: BENCH_BY_ID[topClaim.bench]?.name ?? topClaim.bench });
+  if (topClaim) packNews(state, rng, "youSota", { model, bench: defs().benchById[topClaim.bench]?.name ?? topClaim.bench });
 
   const rivalTop = state.race.rivals.reduce((best, r) => (hasProduct(r.context.id) && r.context.capability > best ? r.context.capability : best), 0);
   const strong = state.capability >= rivalTop;
@@ -419,7 +419,7 @@ function livestream(state: GameState, rng: Rng, model: string, ready: number, fo
   const roll = rng.next();
   const picked = pickMishap(rng);
   // `forced` (a debug scene) names the mishap; the dice are drawn either way.
-  const mishap = (forced && mishapById(forced)) || picked;
+  const mishap = (forced && defs().mishapById(forced)) || picked;
   const ok = forced ? false : roll < odds;
   const { stored, effects } = step(livestreamMachine, lf.livestream, { type: "GO", day: state.day, ok, kind: mishap.id });
   lf.livestream = stored;
@@ -431,9 +431,10 @@ function livestream(state: GameState, rng: Rng, model: string, ready: number, fo
       addToast(state, "The launch livestream goes flawlessly. (It was pre-recorded.)", "good");
       continue;
     }
-    const def = mishapById(e.kind);
+    const def = defs().mishapById(e.kind);
     if (!def) continue;
-    state.flags[`offer:stream:${def.id}`] = state.day;
+    // A mod's mishap may have no card of its own (`stream:<id>`): then it is only the headline.
+    if (defs().eventById(`stream:${def.id}`)) state.flags[`offer:stream:${def.id}`] = state.day;
     addNews(state, fillTemplate(def.headline, { lab: state.labName, model }), "joke");
     addIncident(state, L.mishapIncident);
     pushVoice(state, YOU, def.voice);

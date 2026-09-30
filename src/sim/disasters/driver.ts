@@ -14,7 +14,8 @@ import { enforceDiverts, passes, runVerb, statsIn, STATS, workThisTick, type Gua
 import type { GameState } from "../types";
 import { isFinal, startStored, stepDisaster, type DisasterEvent } from "./compile";
 import { offerFlag, pickFlag } from "./names";
-import { DISASTERS, disasterById, PACKS } from "./pack";
+import { PACKS } from "./pack";
+import { defs } from "../defs";
 import { RISKS, type DisasterDef, type DisasterRun, type DisastersState, type Json, type Risk, type TimedEffect } from "./types";
 import { validatePack } from "./validate";
 
@@ -61,7 +62,7 @@ export function definitions(): readonly DisasterDef[] {
       if (errors.length > 0) throw new Error(`Disaster pack "${p.id}" is invalid:\n${errors.join("\n")}`);
     }
   }
-  return DISASTERS;
+  return defs().disasters;
 }
 
 // ---- Stats ----------------------------------------------------------------------------------------------------
@@ -136,7 +137,7 @@ function apply(state: GameState, rng: Rng, run: DisasterRun, calls: readonly { v
 export function triggerDisaster(state: GameState, id: string, opts: { forced?: boolean } = {}): { ok: true; run: DisasterRun } | Refusal {
   const can = canTrigger(state, id);
   if (!can.ok) return can;
-  const def = disasterById(id)!;
+  const def = defs().disasterById(id)!;
   const d = state.disasters;
   const rng = createRng(d.rngState);
   const run: DisasterRun = {
@@ -198,7 +199,7 @@ export function updateDisasters(state: GameState) {
   if (d.runs.length === 0) return;
   const rng = createRng(d.rngState);
   for (const run of d.runs.slice()) {
-    const def = disasterById(run.id);
+    const def = defs().disasterById(run.id);
     if (!def) continue;
     const names = statNames(def);
     const beat = (): Omit<DisasterEvent, "type"> => ({ tick: state.tick, day: state.day, roll: rng.next(), work: 0, stats: statsFor(state, run, names) });
@@ -328,7 +329,7 @@ export interface RunView {
 export const disastersView = (state: GameState): RunView[] =>
   state.disasters.runs.map((r) => ({
     id: r.id,
-    name: disasterById(r.id)?.name ?? r.id,
+    name: defs().disasterById(r.id)?.name ?? r.id,
     phase: r.machine.value,
     progress: r.machine.context.progress,
     days: Math.floor((state.tick - r.startedTick) / TICKS_PER_DAY),

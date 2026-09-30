@@ -4,7 +4,9 @@ import { composeMods } from "../mods/loader";
 import { resolveGameDefinition, type GameDefinition } from "../mods/game-definition";
 import { decodeManifest, type ArcData, type ModManifest } from "../mods/schema";
 import starter from "../../templates/create-flt-mod/mod.json";
-import { withDefs } from "./defs";
+import { defs, withDefs } from "./defs";
+import { disasterMenu, triggerDisaster } from "./disasters/driver";
+import { enableLeapfrog } from "./race/leapfrog/driver";
 import { openEventOf } from "./events";
 import { createInitialState } from "./state";
 import { answer } from "./testkit";
@@ -123,5 +125,49 @@ describe("mod arcs (FLT-37)", () => {
     await expect(one({ on: { DAY: { target: "b", actions: [{ type: "card", params: { id: "stev-card" } }] } } })).rejects.toThrow('did you mean "steve-card"');
     await expect(one({ on: { DAYS: "b" } })).rejects.toThrow('did you mean "DAY"');
     await expect(one({ on: { DAY: { target: "b", guard: { type: "stat.gte", params: { stat: "hipe", value: 1 } } } } })).rejects.toThrow('did you mean "hype"');
+  });
+
+  it("disasters are a mod section: a new one runs, a shipped one can be renamed", async () => {
+    const outage = {
+      id: "steveOutage", name: "Steve Is Out Sick", blurb: "Every lab's Steve calls in sick at once.", tags: ["staff"],
+      odds: { weight: 0.5, minDay: 30, gapDays: 30 }, initial: "warning",
+      states: {
+        warning: { entry: [{ type: "news", params: { text: "All the Steves are out today", tone: "joke" } }], on: { TICK: [{ guard: { type: "after", params: { hours: 2 } }, target: "active" }] } },
+        active: { entry: [{ type: "card", params: { id: "soup" } }], on: { CHOSE: [{ guard: { type: "choice", params: { is: "soup" } }, target: "done", actions: [{ type: "hype.delta", params: { amount: 5 } }] }] } },
+        done: { type: "final" },
+      },
+      cards: [{ id: "soup", title: "Steve Is Sick", body: "Send soup?", tone: "joke", choices: [{ key: "soup", label: "Send soup", hint: "Steve appreciates it.", effects: [] }] }],
+    };
+    const def = await resolve([mod("steve-outage", { disasters: { add: [outage], override: [{ id: "gpuFire", name: "Steve's GPU Fire" }] } })]);
+    const s = createInitialState(3, "campus", def);
+    withDefs(def, () => {
+      expect(disasterMenu(s).map((r) => r.name)).toEqual(expect.arrayContaining(["Steve Is Out Sick", "Steve's GPU Fire"]));
+      expect(defs().eventById("dz:steveOutage:soup")?.title).toBe("Steve Is Sick");
+      expect(triggerDisaster(s, "steveOutage", { forced: true }).ok).toBe(true);
+    });
+    for (let i = 0; i < 200 && !openEventOf(s); i++) tick(s, [], def);
+    expect(s.news.some((n) => n.text === "All the Steves are out today")).toBe(true);
+    expect(openEventOf(s)?.id).toBe("dz:steveOutage:soup");
+    for (let i = 0; i < 100 && s.disasters.runs.length > 0; i++) tick(s, withDefs(def, () => answer(s, () => 0)), def);
+    expect(s.disasters.runs).toHaveLength(0);
+    expect(s.disasters.history.at(-1)).toMatchObject({ id: "steveOutage" });
+    // Unmodded, nobody has heard of it.
+    expect(disasterMenu(createInitialState(3, "campus")).map((r) => r.name)).not.toContain("Steve Is Out Sick");
+    await expect(resolve([mod("bad", { disasters: { add: [{ ...outage, states: { ...outage.states, warning: { on: { TICK: [{ guard: { type: "aftr" }, target: "active" }] } } } }] } })])).rejects.toThrow('did you mean "after"');
+  });
+
+  it("Release Leapfrog's benchmarks and mishaps are mod sections", async () => {
+    const def = await resolve([mod("steve-bench", {
+      benchmarks: { override: [{ id: "mmlu", name: "Steve's Last Exam", short: "SLE" }], add: [{ id: "steve2", name: "Steve's Last Exam 2", short: "SLE 2", kind: "score", difficulty: 150, replaces: "mmlu" }] },
+      mishaps: { add: [{ id: "steveMic", weight: 1, voice: -2, headline: "{lab}'s livestream mic picks up Steve eating crisps" }] },
+    })]);
+    const s = createInitialState(2, "campus", def);
+    withDefs(def, () => enableLeapfrog(s));
+    expect(s.leapfrog.benchmarks.map((b) => b.def.name)).toContain("Steve's Last Exam");
+    withDefs(def, () => {
+      expect(defs().successorOf("mmlu")?.name).toBe("MMLU-Pro-Max-Ultra 2: Now With Reasoning");
+      expect(defs().mishapById("steveMic")?.voice).toBe(-2);
+    });
+    await expect(resolve([mod("bad", { benchmarks: { add: [{ id: "x", name: "X", short: "X", kind: "score", difficulty: 1, replaces: "mmlo" }] } })])).rejects.toThrow('did you mean "mmlu"');
   });
 });

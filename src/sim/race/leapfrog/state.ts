@@ -131,7 +131,7 @@ export function createLeapfrog(): LeapfrogState {
     response: initialStored(responseMachine, { lastOffer: -999, holdUntil: 0, offers: 0, ships: 0, holds: 0, leaks: 0, counters: 0 }),
     livestream: initialStored(livestreamMachine, { since: -1, streams: 0, mishaps: 0, kind: "" }),
     voice: initialStored(voiceMachine, { attention, owner: "", streak: 0 }),
-    benchmarks: LEAPFROG.starters.map((def) => ({ def, machine: benchStored(def, 0) })),
+    benchmarks: defs().starters.map((def) => ({ def, machine: benchStored(def, 0) })),
     queue: [],
     labs,
     modelsSeen: 0,

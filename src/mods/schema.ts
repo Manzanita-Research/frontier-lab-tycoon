@@ -1,4 +1,5 @@
 import { Effect, Schema, SchemaIssue, Struct } from "effect";
+import { BenchmarkSchema, MishapSchema } from "../content/leapfrog";
 
 const text = Schema.NonEmptyString;
 const number = Schema.Finite;
@@ -95,6 +96,12 @@ export const ArcNode: Schema.Codec<ArcNodeData> = Schema.suspend(() => Schema.St
 export const Arc = Schema.Struct({ id, initial: text, states: Schema.Record(id, ArcNode) });
 export type ArcData = typeof Arc.Type;
 export const EntityKind = Schema.Struct({ id, name: text, presentation: Schema.Literals(["walker", "flow", "sprite", "offmap"]), needs: strings });
+/** A disaster (FLT-17): a JSON statechart plus its cards. The shape is checked in full by sim/disasters/validate.ts. */
+export const Disaster = Schema.Struct({
+  id, name: text, blurb: text, tags: Schema.optionalKey(strings), odds: Schema.Json, requires: Schema.optionalKey(Schema.Json),
+  target: Schema.optionalKey(Schema.Json), initial: text, states: Schema.Record(Schema.String, Schema.Json), cards: Schema.optionalKey(Schema.Array(Schema.Json)),
+});
+export type DisasterData = typeof Disaster.Type;
 export const Ending = Schema.Struct({ id, title: text, text, when: Condition });
 export const Tip = Schema.Struct({ id, text, when: Schema.optionalKey(text) });
 export const NamePool = Schema.Struct({ id, values: strings });
@@ -138,6 +145,8 @@ export const ContentPatch = Schema.Struct({
   events: Schema.optionalKey(EventPatch), arcs: Schema.optionalKey(patch(Arc)),
   walkerKinds: Schema.optionalKey(patch(EntityKind)), endings: Schema.optionalKey(patch(Ending)),
   tips: Schema.optionalKey(patch(Tip)), names: Schema.optionalKey(patch(NamePool)), goals: Schema.optionalKey(patch(Goal)),
+  disasters: Schema.optionalKey(patch(Disaster)),
+  benchmarks: Schema.optionalKey(patch(BenchmarkSchema)), mishaps: Schema.optionalKey(patch(MishapSchema)),
 });
 export const SkinData = Schema.Struct({
   id: ModId, name: text, tokens: Schema.optionalKey(record), strings: Schema.optionalKey(record),
@@ -170,7 +179,7 @@ export function suggest(word: string, candidates: readonly string[]): string {
   const best = candidates.map((value) => ({ value, distance: distance(word, value) })).sort((a, b) => a.distance - b.distance)[0];
   return best && best.distance <= 2 ? ` (did you mean "${best.value}"?)` : "";
 }
-const fieldNames = ["apiVersion", "id", "name", "version", "author", "description", "skin", "content", "assets", "audio", "add", "override", "remove", ...Object.keys(ContentPatch.fields), ...Object.keys(Rival.fields), ...Object.keys(Building.fields), ...Object.keys(SkinData.fields), "choices", "effects", "type", "amount", "cash", "hype", "discourse", "protesters", "flag", "news", "thought", "place", "race", "text", "tone", "trigger", "when", "presentation", "good", "bad", "neutral", "joke", "walker", "flow", "sprite", "offmap", "initial", "states", "entry", "exit", "on", "guard", "actions", "target", "params"];
+const fieldNames = ["apiVersion", "id", "name", "version", "author", "description", "skin", "content", "assets", "audio", "add", "override", "remove", ...Object.keys(ContentPatch.fields), ...Object.keys(Rival.fields), ...Object.keys(Building.fields), ...Object.keys(SkinData.fields), "choices", "effects", "type", "amount", "cash", "hype", "discourse", "protesters", "flag", "news", "thought", "place", "race", "text", "tone", "trigger", "when", "presentation", "good", "bad", "neutral", "joke", "walker", "flow", "sprite", "offmap", "initial", "states", "entry", "exit", "on", "guard", "actions", "target", "params", "blurb", "odds", "requires", "cards", "difficulty", "replaces", "weight", "voice", "headline"];
 function pathString(path: ReadonlyArray<PropertyKey | { readonly key: PropertyKey }>): string {
   return path.reduce<string>((s, part) => {
     const key = typeof part === "object" ? part.key : part;

@@ -15,6 +15,9 @@ import { PROGRESSION, type ProgressionLevel } from "../content/progression";
 import { RIVAL_DEFS, type RivalDef, type RivalId } from "../content/rivals";
 import { THOUGHTS, type ThoughtLine } from "../content/thoughts";
 import type { ArcData, HeadlineData } from "../mods/schema";
+import { cardEvents, DISASTERS } from "./disasters/pack";
+import type { DisasterDef } from "./disasters/types";
+import { LEAPFROG, type BenchmarkDef, type MishapDef } from "../content/leapfrog";
 
 /** The pools behind the procedural names. The algorithms stay in content/names.ts; mods swap the words. */
 export interface NamePools {
@@ -56,11 +59,21 @@ export interface Defs {
   readonly names: NamePools;
   readonly progression: readonly ProgressionLevel[];
   readonly coach: readonly CoachLine[];
+  /** FLT-17's disasters; their cards are already in `events`. */
+  readonly disasters: readonly DisasterDef[];
+  readonly disasterById: (id: string) => DisasterDef | undefined;
+  /** Release Leapfrog's benchmarks: `starters` are in play from day one, the rest replace a solved one. */
+  readonly benchmarks: readonly BenchmarkDef[];
+  readonly starters: readonly BenchmarkDef[];
+  readonly benchById: Readonly<Record<string, BenchmarkDef>>;
+  readonly successorOf: (id: string) => BenchmarkDef | undefined;
+  readonly mishaps: readonly MishapDef[];
+  readonly mishapById: (id: string) => MishapDef | undefined;
 }
 
 const BASE_ARENA_SIZE = RIVAL_DEFS.length + 1;
 
-function build(source: GameDefinition | null, parts: Omit<Defs, "source" | "buildingKinds" | "placeableKinds" | "raceKinds" | "rivalById" | "arenaSize" | "headlinesFor" | "eventById">): Defs {
+function build(source: GameDefinition | null, parts: Omit<Defs, "source" | "buildingKinds" | "placeableKinds" | "raceKinds" | "rivalById" | "arenaSize" | "headlinesFor" | "eventById" | "disasterById" | "starters" | "benchById" | "successorOf" | "mishapById">): Defs {
   const buildingKinds = Object.keys(parts.buildings) as BuildingKind[];
   const byTrigger = new Map<string, HeadlineLine[]>();
   for (const h of parts.headlines) {
@@ -69,6 +82,7 @@ function build(source: GameDefinition | null, parts: Omit<Defs, "source" | "buil
     else byTrigger.set(h.trigger, [h]);
   }
   const events = new Map(parts.events.map((e) => [e.id, e]));
+  const disasters = new Map(parts.disasters.map((d) => [d.id, d]));
   return {
     ...parts,
     source,
@@ -79,6 +93,11 @@ function build(source: GameDefinition | null, parts: Omit<Defs, "source" | "buil
     arenaSize: parts.rivals.length + 1,
     headlinesFor: (trigger) => byTrigger.get(trigger) ?? [],
     eventById: (id) => events.get(id),
+    disasterById: (id) => disasters.get(id),
+    starters: parts.benchmarks.filter((b) => b.replaces === undefined),
+    benchById: Object.fromEntries(parts.benchmarks.map((b) => [b.id, b])),
+    successorOf: (id) => parts.benchmarks.find((b) => b.replaces === id),
+    mishapById: (id) => parts.mishaps.find((m) => m.id === id),
   };
 }
 
@@ -97,6 +116,9 @@ export const BASE_DEFS: Defs = build(null, {
   },
   progression: PROGRESSION,
   coach: COACH,
+  disasters: DISASTERS,
+  benchmarks: LEAPFROG.benchmarks,
+  mishaps: LEAPFROG.mishaps,
 });
 
 const isArc = (entry: object): entry is ArcData => "states" in entry;
@@ -109,13 +131,27 @@ function fromDefinition(def: GameDefinition): Defs {
   };
   // "Top 3 on the Arena" is stored counted from the bottom (#3 of 7 is 5); keep it "top 3" when mods add or remove rivals.
   const shift = c.rivals.length + 1 - BASE_ARENA_SIZE;
+  // A disaster's cards are part of the disaster: rebuild them from the definition's disasters, where the base keeps them.
+  const disasters = c.disasters as unknown as readonly DisasterDef[];
+  const fresh = cardEvents(disasters);
+  const events: EventDef[] = [];
+  let placed = false;
+  for (const e of c.events) {
+    if (isArc(e)) continue;
+    if (!e.id.startsWith("dz:")) events.push(e as unknown as EventDef);
+    else if (!placed) {
+      events.push(...fresh);
+      placed = true;
+    }
+  }
+  if (!placed) events.push(...fresh);
   const goals = (c.goals as readonly GoalDef[]).map((g) => (g.metric === "arena" && shift !== 0 ? { ...g, target: Math.max(1, g.target + shift) } : g));
   return build(def, {
     buildings: c.buildings as Record<BuildingKind, BuildingDef>,
     rivals: c.rivals as readonly RivalDef[],
     headlines: c.headlines as readonly HeadlineLine[],
     thoughts: c.thoughts as readonly ThoughtLine[],
-    events: c.events.filter((e) => !isArc(e)) as unknown as readonly EventDef[],
+    events,
     arcs: [...c.arcs, ...c.events.filter(isArc)],
     goals,
     names: {
@@ -124,6 +160,9 @@ function fromDefinition(def: GameDefinition): Defs {
     },
     progression: c.progression,
     coach: (c.coach ?? COACH) as readonly CoachLine[],
+    disasters,
+    benchmarks: c.benchmarks,
+    mishaps: c.mishaps,
   });
 }
 
