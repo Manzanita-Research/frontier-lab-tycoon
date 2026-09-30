@@ -171,10 +171,10 @@ button:not(:disabled):active {
 }
 
 /* ---- Photo mode ---- */
-.hud {
+.hud-host {
   transition: opacity 0.25s ease;
 }
-body.photo .hud {
+body.photo .hud-host {
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.25s ease, visibility 0s 0.25s;
@@ -272,7 +272,7 @@ body.photo .world .reason {
   border-radius: 50%;
   border: 4px solid var(--ink);
   background: #fff;
-  box-shadow: 0 4px 0 rgba(58, 42, 28, 0.85);
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--flt-color-line) 85%, transparent);
   display: grid;
   place-items: center;
 }
@@ -281,7 +281,7 @@ body.photo .world .reason {
   height: 42px;
   border-radius: 50%;
   background: #ff6a4c;
-  border: 3px solid var(--ink);
+  border: var(--flt-border-width) var(--flt-border-style) var(--flt-color-line);
 }
 .shutter:hover span {
   background: #ff8467;
@@ -312,7 +312,7 @@ body.photo .world .reason {
   border: 0;
   background: #fffdf4;
   border-radius: 4px;
-  box-shadow: 0 3px 0 rgba(58, 42, 28, 0.5), 0 14px 30px rgba(58, 42, 28, 0.4);
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--flt-color-line) 50%, transparent), 0 14px 30px color-mix(in srgb, var(--flt-color-line) 40%, transparent);
   transform: rotate(3.5deg);
   pointer-events: auto;
   animation: polaroid-drop 0.7s cubic-bezier(0.2, 1.3, 0.4, 1);

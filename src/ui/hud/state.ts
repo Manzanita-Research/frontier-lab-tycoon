@@ -1,0 +1,34 @@
+// UI-only state the HUD host owns, kept as Effect atoms like the rest of what React reads. None of it is game state.
+import { Atom } from "effect/unstable/reactivity";
+import { debugParams } from "../../app/game";
+import type { LoadedSkin } from "../../skins/types";
+import { baseSlots } from "../../skins/base/slots";
+import { BASE_STRINGS } from "../../skins/schema";
+
+/** Open on a desktop-sized screen, folded on a phone or a short window (the Arena chip toggles it either way). */
+export const arenaOpenAtom = Atom.make(typeof window === "undefined" ? true : window.innerWidth > 640 && window.innerHeight >= 800);
+
+/** How many messages of the open group chat have arrived. */
+export const chatCountAtom = Atom.make(0);
+
+/** The photo bar's time-of-day pick ("" when a link pinned the hour). */
+export const photoTimeAtom = Atom.make<string>(debugParams.hour !== null ? "" : "live");
+/** Bumped every time the shutter fires, for the flash. */
+export const photoFlashAtom = Atom.make(0);
+
+export interface SkinUi {
+  /** The skin showing right now. */
+  active: string;
+  picker: { open: boolean; original: string | null };
+  /** Skins that were refused at load time (a bad slots.tsx, a missing font), with why. */
+  refused: { id: string; errors: string[] }[];
+  reducedMotion: boolean;
+}
+
+export const skinUiAtom = Atom.make<SkinUi>({ active: "base", picker: { open: false, original: null }, refused: [], reducedMotion: false });
+
+/** The skin's components and copy: what the host renders. Starts as the base until the first skin has loaded. */
+export const loadedSkinAtom = Atom.make<LoadedSkin>({ id: "base", name: "Base", slots: baseSlots, strings: { ...BASE_STRINGS } });
+
+/** A client-side night thought (NightThoughts publishes it, the view-model carries it to the Bubble slot). */
+export const nightBubbleAtom = Atom.make<import("./types").BubbleVM | null>(null);

@@ -6,24 +6,6 @@ import { getReach } from "../sim/pathfind";
 import { formatMoney } from "../sim/format";
 import { atoms, sim } from "../app/game";
 import { useApp } from "../app/hooks";
-import type { Thought } from "../sim/types";
-
-function Bubble({ thought }: { thought: Thought }) {
-  return (
-    <Anchored
-      className={`bubble bubble-${thought.kind}`}
-      pos={(out) => {
-        const w = sim.world.walkers.find((o) => o.id === thought.walkerId);
-        if (!w || w.machine.value === "inside") return false;
-        const a = sim.alpha;
-        out.set(w.px + (w.x - w.px) * a - HALF, w.kind === "agent" ? 0.95 : 1.1, w.pz + (w.z - w.pz) * a - HALF);
-        return true;
-      }}
-    >
-      {thought.text}
-    </Anchored>
-  );
-}
 
 interface Live {
   id: number;
@@ -139,14 +121,11 @@ function NameTag() {
   );
 }
 
+/** The world's own labels: names, coin pops, warnings. Thought bubbles are the skin's (see hud/BubbleLayer). */
 export function WorldOverlay() {
-  const thoughts = useApp(atoms.thoughts);
   return (
     <div className="world">
       <NameTag />
-      {thoughts.map((t) => (
-        <Bubble key={t.id} thought={t} />
-      ))}
       <CoinPops />
       <NoPath />
       <Reason />

@@ -1,0 +1,626 @@
+/* The Race (FLT-9): the top-bar chips, the R&D banner, the Frontier Arena, the era title card and the auction room. */
+
+/* ---- Top bar ---- */
+.arena-chip {
+  align-items: flex-start;
+  padding: 0 2px;
+  border: 0;
+  background: none;
+  text-align: left;
+  min-width: 78px;
+  cursor: pointer;
+}
+.arena-chip .delta {
+  margin-left: 5px;
+  font-size: 13px;
+  font-weight: 900;
+}
+.arena-chip .sub {
+  font-size: 11px;
+  opacity: 0.65;
+}
+.arena-chip.top .value {
+  color: #d99a00;
+  text-shadow: 0 0 10px rgba(255, 206, 60, 0.6);
+}
+.arena-chip.flinch {
+  animation: chip-flinch 0.9s ease-out;
+}
+@keyframes chip-flinch {
+  0%,
+  100% {
+    transform: none;
+  }
+  12% {
+    transform: translateX(-6px) rotate(-3deg);
+    color: var(--bad);
+  }
+  30% {
+    transform: translateX(5px) rotate(2deg);
+  }
+  50% {
+    transform: translateX(-3px);
+  }
+  70% {
+    transform: translateX(2px);
+  }
+}
+.rd-stat .value {
+  color: #6a4cd6;
+}
+
+/* ---- Right column ---- */
+.right-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  min-width: 0;
+}
+.race-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 272px;
+  pointer-events: none;
+}
+.race-panel > * {
+  pointer-events: auto;
+}
+.race-panel.alert {
+  animation: panel-shake 0.7s ease-out;
+}
+@keyframes panel-shake {
+  10%,
+  90% {
+    transform: translateX(-2px);
+  }
+  20%,
+  80% {
+    transform: translateX(4px);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translateX(-7px);
+  }
+  40%,
+  60% {
+    transform: translateX(7px);
+  }
+}
+
+/* The R&D multiplier, big */
+.rd {
+  --era: #4f8ff0;
+  padding: 8px 12px 9px;
+  position: relative;
+  overflow: hidden;
+}
+.rd::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--era) 22%, transparent), transparent 62%);
+  pointer-events: none;
+}
+.rd.era-2 {
+  --era: #f2a020;
+}
+.rd.era-3 {
+  --era: #9a63f0;
+}
+.rd.era-4 {
+  --era: #ee4a2c;
+}
+.rd-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.rd-label {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+.era-pill {
+  padding: 1px 8px;
+  border-radius: 9px;
+  border: 2px solid var(--ink);
+  background: var(--era);
+  color: var(--flt-color-selectionText);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  text-shadow: 0 1px 0 color-mix(in srgb, var(--flt-color-line) 60%, transparent);
+}
+.rd-big {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 1px;
+}
+.rd-big .odo {
+  font-size: 40px;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--era);
+  letter-spacing: -0.02em;
+  -webkit-text-stroke: 1.5px var(--ink);
+  paint-order: stroke fill;
+  text-shadow: 0 3px 0 color-mix(in srgb, var(--flt-color-line) 85%, transparent);
+}
+.rd-sub {
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.15;
+  opacity: 0.75;
+}
+.era-meter {
+  height: 7px;
+  margin-top: 6px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--flt-color-line) 18%, transparent);
+  overflow: hidden;
+}
+.era-meter span {
+  display: block;
+  height: 100%;
+  background: var(--era);
+  transition: width 0.6s;
+}
+.era-next {
+  margin-top: 3px;
+  font-size: 11px;
+  opacity: 0.6;
+}
+.drop-banner {
+  margin-top: 6px;
+  padding: 3px 8px;
+  border-radius: 8px;
+  background: var(--bad);
+  color: var(--flt-color-selectionText);
+  font-size: 12px;
+  font-weight: 900;
+  animation: drop-pulse 1.6s ease-in-out infinite;
+}
+@keyframes drop-pulse {
+  50% {
+    filter: brightness(1.25);
+  }
+}
+
+/* The Frontier Arena: rows are positioned by rank, so a re-rank is a slide */
+.arena {
+  padding: 8px 10px 8px;
+}
+.arena-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 5px;
+  font-size: 13px;
+}
+.arena-head span {
+  font-size: 11px;
+  opacity: 0.6;
+}
+.arena-rows {
+  position: relative;
+}
+.arena-row {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 27px;
+  padding: 0 6px;
+  border-radius: 9px;
+  font-size: 12.5px;
+  font-weight: 800;
+  transition: transform 0.95s cubic-bezier(0.3, 1.35, 0.5, 1), background-color 0.4s;
+}
+.arena-row.you {
+  background: #ffe0b5;
+  box-shadow: inset 0 0 0 2px var(--orange);
+  z-index: 1;
+}
+.arena-row.moved-up {
+  background-color: #cdf3d6;
+  animation: row-up 0.8s ease-out;
+}
+.arena-row.moved-down {
+  background-color: #ffd0c6;
+  animation: row-down 0.8s ease-out;
+}
+.arena-row.you.moved-up {
+  background-color: #b9f0c8;
+}
+.arena-row.you.moved-down {
+  background-color: #ffb9a8;
+}
+@keyframes row-up {
+  40% {
+    filter: brightness(1.15);
+    scale: 1.04;
+  }
+}
+@keyframes row-down {
+  30% {
+    scale: 0.97;
+  }
+}
+.ar-rank {
+  width: 15px;
+  text-align: right;
+  font-weight: 900;
+  opacity: 0.7;
+  font-variant-numeric: tabular-nums;
+}
+.ar-dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+}
+.ar-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.ar-open {
+  margin-left: 4px;
+  padding: 0 4px;
+  border-radius: 5px;
+  background: #2fb98f;
+  color: #fff;
+  font-size: 9px;
+  font-style: normal;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  vertical-align: 1px;
+}
+.ar-score {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+.ar-delta {
+  width: 22px;
+  font-size: 11px;
+  font-weight: 900;
+  text-align: left;
+}
+
+/* ---- Era title card ---- */
+.era-backdrop {
+  --era: #4f8ff0;
+  z-index: 12;
+  padding: 0;
+  background: radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--era) 55%, #2a1a10) 0%, #1e1410 78%);
+  backdrop-filter: none;
+  overflow: hidden;
+  animation: era-fade 0.35s ease-out;
+}
+.era-backdrop.era-2 {
+  --era: #f2a020;
+}
+.era-backdrop.era-3 {
+  --era: #9a63f0;
+}
+.era-backdrop.era-4 {
+  --era: #ee4a2c;
+}
+@keyframes era-fade {
+  from {
+    opacity: 0;
+  }
+}
+.era-rays {
+  position: absolute;
+  inset: -30%;
+  background: repeating-conic-gradient(from 0deg at 50% 50%, color-mix(in srgb, var(--era) 40%, transparent) 0deg 7deg, transparent 7deg 22deg);
+  mask-image: radial-gradient(circle at 50% 50%, #000 0%, transparent 62%);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 0%, transparent 62%);
+  animation: era-spin 46s linear infinite;
+  opacity: 0.75;
+}
+@keyframes era-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.era-card {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: min(900px, 100%);
+  padding: 20px 20px 24px;
+  color: var(--flt-color-selectionText);
+  text-align: center;
+}
+.era-kicker {
+  padding: 4px 16px;
+  border-radius: 999px;
+  border: var(--flt-border-width) var(--flt-border-style) var(--flt-color-line);
+  background: var(--era);
+  color: var(--flt-color-selectionText);
+  font-size: clamp(12px, 1.6vw, 17px);
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 0 color-mix(in srgb, var(--flt-color-line) 70%, transparent);
+  box-shadow: 0 4px 0 var(--ink);
+  animation: era-drop 0.5s cubic-bezier(0.3, 1.6, 0.5, 1) 0.1s both;
+}
+.era-num {
+  font-size: clamp(120px, 30vh, 300px);
+  font-weight: 900;
+  line-height: 0.9;
+  color: var(--era);
+  -webkit-text-stroke: clamp(4px, 0.9vh, 9px) var(--ink);
+  paint-order: stroke fill;
+  text-shadow: 0 clamp(6px, 1.4vh, 14px) 0 var(--ink), 0 0 60px color-mix(in srgb, var(--era) 70%, transparent);
+  animation: era-slam 0.7s cubic-bezier(0.2, 1.7, 0.4, 1) 0.18s both;
+}
+.era-title {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0 0.3em;
+  font-size: clamp(30px, 7.2vw, 84px);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  text-shadow: 0 5px 0 var(--ink), 0 0 26px color-mix(in srgb, var(--era) 60%, transparent);
+}
+.era-title span {
+  display: inline-block;
+  animation: era-word 0.55s cubic-bezier(0.25, 1.6, 0.4, 1) both;
+}
+.era-line {
+  margin: 4px 0 0;
+  max-width: 34ch;
+  font-size: clamp(17px, 2.5vw, 30px);
+  font-weight: 800;
+  line-height: 1.25;
+  color: var(--flt-color-selectionText);
+  animation: era-drop 0.6s ease-out 1s both;
+}
+.era-changes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  animation: era-drop 0.6s ease-out 1.3s both;
+}
+.era-changes li {
+  padding: 5px 13px;
+  border-radius: 12px;
+  border: 2px solid color-mix(in srgb, var(--era) 70%, var(--flt-color-selectionText));
+  background: rgba(30, 20, 16, 0.55);
+  font-size: clamp(12px, 1.5vw, 16px);
+  font-weight: 800;
+}
+.era-dots {
+  display: flex;
+  gap: 9px;
+  margin-top: 6px;
+  animation: era-drop 0.6s ease-out 1.4s both;
+}
+.era-dots i {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 2px solid var(--flt-color-selectionText);
+  opacity: 0.55;
+}
+.era-dots i.on {
+  background: var(--era);
+  border-color: var(--flt-color-selectionText);
+  opacity: 1;
+  box-shadow: 0 0 12px var(--era);
+}
+.era-go {
+  margin-top: 10px;
+  padding: 11px 26px;
+  border: var(--flt-border-width) var(--flt-border-style) var(--flt-color-line);
+  border-radius: var(--flt-radius-panel);
+  background: var(--flt-color-selectionText);
+  color: var(--ink);
+  font-size: clamp(16px, 2vw, 22px);
+  font-weight: 900;
+  box-shadow: 0 5px 0 var(--ink);
+  animation: era-drop 0.6s ease-out 1.6s both, era-beat 1.6s ease-in-out 2.4s infinite;
+}
+.era-go:hover {
+  background: #fff;
+}
+.era-go:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 var(--ink);
+}
+.era-key {
+  display: inline-block;
+  margin-left: 8px;
+  width: 22px;
+  height: 22px;
+  line-height: 20px;
+  border-radius: 7px;
+  border: 2px solid var(--ink);
+  background: var(--era);
+  color: var(--flt-color-selectionText);
+  font-size: 13px;
+}
+@keyframes era-slam {
+  0% {
+    transform: scale(4) rotate(-14deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(0.93) rotate(2deg);
+    opacity: 1;
+  }
+  100% {
+    transform: none;
+  }
+}
+@keyframes era-word {
+  from {
+    transform: translateY(40px) scale(0.5) rotate(-6deg);
+    opacity: 0;
+  }
+}
+@keyframes era-drop {
+  from {
+    transform: translateY(-14px);
+    opacity: 0;
+  }
+}
+@keyframes era-beat {
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* ---- Auction room ---- */
+.auction-strip {
+  position: relative;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  gap: 8px;
+  margin: 0 0 14px;
+  padding: 12px 8px 8px;
+  border: 3px dashed color-mix(in srgb, var(--flt-color-line) 35%, transparent);
+  border-radius: 14px;
+  background: repeating-linear-gradient(90deg, color-mix(in srgb, var(--flt-color-line) 5%, transparent) 0 10px, transparent 10px 20px);
+}
+.paddle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  animation: paddle-wave 1.5s ease-in-out infinite;
+  transform-origin: 50% 100%;
+}
+.paddle-board {
+  min-width: 44px;
+  padding: 4px 8px;
+  border: var(--flt-border-width) var(--flt-border-style) var(--flt-color-line);
+  border-radius: 8px;
+  color: var(--flt-color-selectionText);
+  font-size: 17px;
+  font-weight: 900;
+  text-align: center;
+  text-shadow: 0 1px 0 color-mix(in srgb, var(--flt-color-line) 70%, transparent);
+  font-variant-numeric: tabular-nums;
+}
+.paddle-stick {
+  width: 5px;
+  height: 20px;
+  background: #8a5a3a;
+  border: 2px solid var(--ink);
+  border-top: 0;
+}
+.paddle-name {
+  margin-top: 3px;
+  font-size: 11px;
+  font-weight: 800;
+  opacity: 0.75;
+}
+.gavel {
+  position: absolute;
+  right: 6px;
+  top: -14px;
+  font-size: 26px;
+  transform-origin: 90% 90%;
+  animation: gavel-bang 1.9s ease-in-out infinite;
+}
+@keyframes paddle-wave {
+  0%,
+  100% {
+    transform: rotate(-5deg);
+  }
+  50% {
+    transform: rotate(6deg) translateY(-5px);
+  }
+}
+@keyframes gavel-bang {
+  0%,
+  60%,
+  100% {
+    transform: rotate(-30deg);
+  }
+  72% {
+    transform: rotate(20deg);
+  }
+}
+
+/* ---- Palette: the race's buildings ---- */
+.tool.race {
+  border-style: dashed;
+}
+.tool .free {
+  color: var(--good);
+  font-weight: 900;
+}
+
+/* ---- Phones ---- */
+@media (max-width: 640px) {
+  .arena-chip {
+    min-width: 0;
+  }
+  /* An overlay over the middle of the map, above the build bar and the ticker: the top bar is three rows tall here. */
+  .race-panel {
+    position: fixed;
+    z-index: 4;
+    left: 8px;
+    right: 8px;
+    bottom: calc(env(safe-area-inset-bottom) + 178px);
+    width: auto;
+  }
+  .race-panel:not(.open) .rd {
+    display: none;
+  }
+  .rd {
+    padding: 6px 10px 7px;
+  }
+  .rd-big .odo {
+    font-size: 30px;
+  }
+  .arena-row {
+    font-size: 12px;
+  }
+  .era-card {
+    gap: 6px;
+    padding: 14px 12px 18px;
+  }
+  .era-num {
+    font-size: clamp(90px, 21vh, 190px);
+  }
+  .auction-strip {
+    padding: 10px 4px 6px;
+  }
+  .paddle-board {
+    min-width: 38px;
+    font-size: 15px;
+  }
+}

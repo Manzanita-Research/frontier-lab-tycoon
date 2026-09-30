@@ -1,28 +1,21 @@
-import { useEffect, useState } from "react";
-import { sim } from "../../app/game";
+import { useEffect } from "react";
+import { registry, sim } from "../../app/game";
 import { FIRST_NIGHT_LINE, NIGHT_THOUGHTS } from "../../content/night";
-import { HALF } from "../../render/coords";
-import { Anchored } from "../../render/overlay";
 import { fx } from "../../render/fx/state";
-import type { WalkerKind } from "../../sim/types";
+import { nightBubbleAtom } from "../hud/state";
 
 const NIGHT_MIN = 0.7;
 const SHOW_MS = 5200;
 const GAP_MS = 4500;
 
-interface Bubble {
-  id: number;
-  walkerId: number;
-  kind: WalkerKind;
-  text: string;
-}
-
 /**
  * While the campus is lit up, someone is always still at it: every few seconds a walker gets a night-only thought
- * bubble ("It's 2am. Still shipping."). Cosmetic and client-side, so it never touches the sim's own thoughts.
+ * bubble ("It's 2am. Still shipping."). Cosmetic and client-side, so it never touches the sim's own thoughts. It only
+ * decides *when* and *who*: the bubble goes into the view-model and the active skin's Bubble slot draws it.
  */
 export function NightThoughts() {
-  const [bubble, setBubble] = useState<Bubble | null>(null);
+  const setBubble = (next: ((cur: import("../hud/types").BubbleVM | null) => import("../hud/types").BubbleVM | null) | import("../hud/types").BubbleVM | null) =>
+    registry.set(nightBubbleAtom, typeof next === "function" ? next(registry.get(nightBubbleAtom)) : next);
 
   useEffect(() => {
     let seq = 0;
@@ -39,7 +32,7 @@ export function NightThoughts() {
       const fits = candidates.filter((w) => w.kind === line.kind);
       const walker = (fits.length > 0 ? fits : candidates)[Math.floor(Math.random() * (fits.length > 0 ? fits.length : candidates.length))]!;
       first = false;
-      const b = { id: ++seq, walkerId: walker.id, kind: walker.kind, text: line.text };
+      const b = { id: ++seq, walkerId: walker.id, kind: walker.kind, speaker: walker.name, text: line.text, night: true };
       setBubble(b);
       busyUntil = now + SHOW_MS + GAP_MS;
       timers.push(window.setTimeout(() => setBubble((cur) => (cur?.id === b.id ? null : cur)), SHOW_MS));
@@ -50,22 +43,5 @@ export function NightThoughts() {
     };
   }, []);
 
-  if (!bubble) return null;
-  return (
-    <div className="world">
-      <Anchored
-        key={bubble.id}
-        className={`bubble bubble-${bubble.kind} bubble-night`}
-        pos={(out) => {
-          const w = sim.world.walkers.find((o) => o.id === bubble.walkerId);
-          if (!w || w.machine.value === "inside") return false;
-          const a = sim.alpha;
-          out.set(w.px + (w.x - w.px) * a - HALF, w.kind === "agent" ? 0.95 : 1.1, w.pz + (w.z - w.pz) * a - HALF);
-          return true;
-        }}
-      >
-        {bubble.text}
-      </Anchored>
-    </div>
-  );
+  return null;
 }
