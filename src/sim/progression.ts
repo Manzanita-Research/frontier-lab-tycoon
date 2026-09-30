@@ -142,7 +142,10 @@ export function visibleHud(s: GameState): { visible: Record<HudPanel, boolean> }
  */
 export function updateProgression(s: GameState) {
   if (!s.progression || levelOf(s) === 5) return;
-  const result = step(progressionMachine, s.progression, { type: "CHECK", met: goalValue(s).met });
+  const { met } = goalValue(s);
+  // FLT-39: an unmet goal leaves the machine as it is and emits nothing (its CHECK returns at once), so the tick skips transition().
+  if (!met) return;
+  const result = step(progressionMachine, s.progression, { type: "CHECK", met });
   s.progression = result.stored;
   for (const event of result.effects) {
     const row = rows(s).find((r) => r.level === event.level)!;

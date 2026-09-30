@@ -4,6 +4,7 @@ import { remembered, step } from "./run";
 import { arcMachine, dayArc, quietArcDay, type ArcStored } from "./arc";
 import { moodMachine, QUIT_DAYS, stepMood, type MoodStored } from "./mood";
 import { staffMachine, stepStaff, type StaffStored } from "./staff";
+import { progressionMachine, type ProgressionStored } from "./progression";
 
 /** Ask twice (a miss, then a hit) and compare both with a plain step, including which keys are present. */
 function same<M extends Parameters<typeof step>[0]>(machine: M, stepped: ReturnType<typeof remembered<M>>, stored: never, event: never) {
@@ -74,6 +75,16 @@ describe("remembered steps", () => {
                   }
           }
     expect(quiet).toBeGreaterThan(500); // the shortcut is taken, not just never wrong
+  });
+
+  it("lets updateProgression skip an unmet goal: the machine stays put and says nothing", () => {
+    for (const value of ["growing", "complete"] as const)
+      for (let level = 0; level <= 6; level++) {
+        const stored: ProgressionStored = { value, context: { level } };
+        const { stored: next, effects } = step(progressionMachine, stored, { type: "CHECK", met: false });
+        expect(effects).toEqual([]);
+        expect(next).toStrictEqual(stored);
+      }
   });
 
   it("keeps undefined, NaN, Infinity and -0 apart in its key", () => {
