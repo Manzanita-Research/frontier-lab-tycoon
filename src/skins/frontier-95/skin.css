@@ -2494,6 +2494,7 @@
   }
   .f95-notepad {
     padding: 8px 10px;
+    text-align: left;
     font-family: "Courier New", Courier, monospace;
     font-size: 15px;
     line-height: 1.3;

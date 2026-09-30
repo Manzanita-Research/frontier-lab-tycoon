@@ -4,7 +4,7 @@
     "",
     "  query    URL params merged over `defaults.query`; a null value removes a default. These are the game's own hooks",
     "           (src/debug.ts): seed, warp (sim days before the first frame), speed (0 = paused), hour, zoom, focus=x,z,",
-    "           photo, moment=<shuffle|era|era3|auction|funding|ops|queue|slop>, researchers, agents, discourse, skin.",
+    "           photo, moment=<shuffle|era|era3|auction|funding|ops|queue|slop|defection-*|poach-offer>, researchers, agents, discourse, skin.",
     "  viewport 'WxH' (default 1440x900). mobile: true = a phone: dsf 2, touch (use with 390x844).",
     "  steps    run in order once the page has drawn `frames` frames (default 24), then it settles again and shoots:",
     "             { \"wait\": ms }",
@@ -100,6 +100,17 @@
       "desk-phone-badge",
       "desk-phone-okr",
       "desk-phone-more"
+    ],
+    "drama": [
+      "defection-chat",
+      "defection-card",
+      "defection-exit",
+      "defection-manifesto",
+      "defection-arena",
+      "poach-offer",
+      "defection-card-karaoke",
+      "defection-phone",
+      "poach-phone"
     ]
   },
   "scenes": {
@@ -1006,6 +1017,153 @@
           "wait": 250
         }
       ]
+    },
+    "defection-chat": {
+      "title": "Defection: a VC pitches your star at the Kombucha Bar (speech bubbles)",
+      "query": {
+        "moment": "defection-chat",
+        "warp": null,
+        "focus": "11,16",
+        "zoom": 70
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "defection-card": {
+      "title": "Defection: the resignation letter, DRAFT v7",
+      "query": {
+        "moment": "defection-card",
+        "warp": null
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "defection-exit": {
+      "title": "Defection: your star walks out with a box",
+      "query": {
+        "moment": "defection-exit",
+        "warp": null,
+        "focus": "9,15",
+        "zoom": 60
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "defection-manifesto": {
+      "title": "Defection: the neo lab's MANIFESTO.txt",
+      "query": {
+        "moment": "defection-manifesto",
+        "warp": null
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "defection-arena": {
+      "title": "Defection: the neo lab on the Arena board, tagged",
+      "query": {
+        "moment": "defection-arena",
+        "warp": null,
+        "leapfrog": "off"
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "poach-offer": {
+      "title": "Poaching War: the recruiter email",
+      "query": {
+        "moment": "poach-offer",
+        "warp": null,
+        "leapfrog": "off"
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "defection-card-karaoke": {
+      "title": "Defection: the resignation letter in another skin (base Drama slot)",
+      "query": {
+        "moment": "defection-card",
+        "warp": null,
+        "skin": "karaoke-night"
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "defection-phone": {
+      "title": "Defection: the resignation letter on a phone",
+      "query": {
+        "moment": "defection-card",
+        "warp": null
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "poach-phone": {
+      "title": "Poaching War: the recruiter email on a phone",
+      "query": {
+        "moment": "poach-offer",
+        "warp": null,
+        "leapfrog": "off"
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
     }
   }
 }

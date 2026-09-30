@@ -12,6 +12,11 @@ describe("thought bubbles", () => {
     expect(shown.map((s) => s.item)).toEqual(["a", "c", "b"]);
   });
 
+  it("shows two people talking ahead of any thought, however far away they stand", () => {
+    const list = [bubble("a", 400, 300, 0.1), bubble("b", 700, 300, 0.2), bubble("c", 1000, 300, 0.3), { ...bubble("vc", 100, 300, 0.8), first: true }, { ...bubble("star", 1300, 300, 0.9), first: true }];
+    expect(layoutBubbles(list).map((s) => s.item)).toEqual(["vc", "star", "a"]);
+  });
+
   it("leaves bubbles that are already apart exactly where they were", () => {
     const shown = layoutBubbles([bubble("a", 200, 300, 0.1), bubble("b", 600, 300, 0.2)]);
     expect(shown.map((s) => [s.x, s.y])).toEqual([[200, 300], [600, 300]]);

@@ -301,7 +301,7 @@ function bubblesOf(i: HudInput): BubbleVM[] {
   const thoughts = i.snap.thoughts.filter((t) => !talking.has(t.walkerId)).map((t): BubbleVM => ({ id: t.id, walkerId: t.walkerId, kind: t.kind, speaker: i.snap.speakers[t.walkerId] ?? "", text: t.text }));
   const said = chats.flatMap((c) => c.lines.slice(0, 2).map((text, k): BubbleVM => {
     const walkerId = k === 0 ? c.guestId : c.hostId;
-    return { id: -(c.id * 2 + k), walkerId, kind: k === 0 ? "visitor" : "researcher", speaker: i.snap.speakers[walkerId] ?? "", text, speech: true };
+    return { id: -(c.id * 2 + k), walkerId, kind: k === 0 ? "visitor" : "researcher", speaker: c.names?.[k] || i.snap.speakers[walkerId] || "", text, speech: true };
   }));
   return [...thoughts, ...said];
 }

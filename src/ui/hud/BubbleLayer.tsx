@@ -15,6 +15,7 @@ export function BubbleLayer({ bubbles, actions }: { bubbles: HudVM["bubbles"]; a
       {bubbles.map((b) => (
         <Anchored
           bubble
+          first={b.speech}
           key={b.id}
           pos={(out) => {
             const w = sim.world.walkers.find((o) => o.id === b.walkerId);

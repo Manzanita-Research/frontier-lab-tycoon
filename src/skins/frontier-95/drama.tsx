@@ -69,7 +69,7 @@ export function Drama({ event, drama, actions }: SlotPropsMap["Drama"]) {
   return (
     <div className="f95-layer f95-dim">
       <Win
-        className={`f95-msgbox f95-drama drama-${drama.style} tone-${event.tone}`}
+        className={`f95-msgbox f95-drama f95-drama-${drama.style} tone-${event.tone}`}
         title={title}
         icon={app.icon}
         role="alertdialog"

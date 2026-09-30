@@ -99,7 +99,8 @@ export interface Snapshot {
   /** Operations: staff, slop, broken buildings, queues. */
   ops: OpsView;
   /** Meetings in progress (a VC and your researcher by the Kombucha Bar, FLT-26): who, and what they say, visitor first. */
-  chats: { id: number; hostId: number; guestId: number; lines: string[] }[];
+  /** Meetings in their talking phase; `names` is who says it, guest (their role, e.g. "Venture Capitalist") then host. */
+  chats: { id: number; hostId: number; guestId: number; names: [string, string]; lines: string[] }[];
   assistant: AssistantMessage | null;
   firstBuildPending: boolean;
   pendingConfirm: PendingConfirm | null;
@@ -164,7 +165,11 @@ export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO
     leapfrog: leapfrogView(s),
     papers: papersView(s),
     ops: opsView(s),
-    chats: talking(s).map((m) => ({ id: m.id, hostId: m.hostId, guestId: m.guestId, lines: m.lines.slice() })),
+    chats: talking(s).map((m) => {
+      const guest = s.walkers.find((w) => w.id === m.guestId);
+      const host = s.walkers.find((w) => w.id === m.hostId);
+      return { id: m.id, hostId: m.hostId, guestId: m.guestId, names: [guest?.role || guest?.name || "", host?.name ?? ""], lines: m.lines.slice() };
+    }),
     assistant: assistantOf(s),
     firstBuildPending: !!s.coach && s.flags.started === undefined && s.flags.firstBuild === undefined,
     pendingConfirm: pendingConfirmOf(s),
