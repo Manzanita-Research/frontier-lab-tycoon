@@ -69,7 +69,7 @@ function ShutDown({ lab, onClose }: { lab: string; onClose: () => void }) {
 }
 
 /** Start button, its menu (every building, Bulldoze…, Settings, Shut Down Lab…), quick-launch, and the tool in hand. */
-export function BuildBar({ items, tip, teasers = [], actions }: SlotPropsMap["BuildBar"]) {
+export function BuildBar({ items, tip, teasers = [], disasters, actions }: SlotPropsMap["BuildBar"]) {
   const t = useT();
   const coach = useCoach();
   const [openRaw, setOpenRaw] = useState(false);
@@ -191,6 +191,14 @@ export function BuildBar({ items, tip, teasers = [], actions }: SlotPropsMap["Bu
                     <span>Mods…</span>
                   </button>
                 </li>
+                {disasters?.enabled && (
+                  <li className="sub">
+                    <button type="button" role="menuitem" data-testid="start-disasters" onClick={() => { setOpen(false); actions.openDisasters(); }}>
+                      <span />
+                      <span>{t("disasters.more")}</span>
+                    </button>
+                  </li>
+                )}
               </>
             )}
             <li>

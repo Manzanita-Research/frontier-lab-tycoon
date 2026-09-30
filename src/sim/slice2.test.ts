@@ -349,10 +349,10 @@ describe("events", () => {
     expect(openEventOf(s)?.id).toBe("waterDiscourse");
   });
 
-  it("keeps every event within 1 to 3 choices, each with a hint", () => {
+  it("keeps every event within 1 to 3 choices (4 on a drama card), each with a hint", () => {
     for (const e of EVENTS) {
       expect(e.choices.length).toBeGreaterThanOrEqual(1);
-      expect(e.choices.length).toBeLessThanOrEqual(3);
+      expect(e.choices.length).toBeLessThanOrEqual(e.kind === "drama" ? 4 : 3);
       for (const c of e.choices) expect(c.hint.length).toBeGreaterThan(3);
       expect(eventById(e.id)).toBe(e);
     }

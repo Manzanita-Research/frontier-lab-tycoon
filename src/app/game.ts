@@ -12,6 +12,7 @@ import { canPlace } from "../sim/commands";
 import { TICKS_PER_DAY } from "../sim/constants";
 import { withDefs } from "../sim/defs";
 import { tick } from "../sim/tick";
+import { isAuditMoment, stageAudit } from "../sim/auditors/demo";
 import { createMidgameScenario, MIDGAME_CAMERA, midgameOpeningNews, midgameOpeningThoughts } from "../sim/scenarios/midgame";
 import type { Tone } from "../sim/types";
 import { framesBrowser } from "./frames";
@@ -32,6 +33,8 @@ if (midgame && mods.run) sim.world.mods = mods.run;
 if (midgame) {
   sim.newsStartId = midgameOpeningNews(sim.world)[0]!.id;
   sim.openingThoughts = { tick: sim.world.tick, thoughts: midgameOpeningThoughts(sim.world) };
+  // FLT-19: the auditors on the mid-game campus (the busiest one there is).
+  if (isAuditMoment(params.moment)) stageAudit(sim.world, params.moment);
 }
 // A new lab plays on "rare" (the sim itself starts with random disasters off, so tests are unaffected); `?risk=` overrides.
 if (!midgame && !debugParams.risk) setRisk(sim.world, DEFAULT_RISK);
@@ -88,8 +91,11 @@ export const atoms = {
   highlight: pick((c) => c.highlight),
   race: pick((c) => c.snap.race),
   ops: pick((c) => c.snap.ops),
+  /** Agent collusion's signs for the world overlay (packets, the night gathering, the inquiry). */
+  collusion: pick((c) => c.snap.collusion),
   staffCount: pick((c) => c.snap.ops.staff.length),
   payroll: pick((c) => c.snap.ops.payroll),
+  disasters: pick((c) => c.snap.disasters),
   /** The staffer whose patrol zone is being painted, or null. */
   zone: pick((c) => c.zone),
   /** Template variables for the open card ({valuation}, {bidLow}, {dropRival}, ...). */

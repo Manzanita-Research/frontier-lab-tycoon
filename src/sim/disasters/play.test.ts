@@ -11,7 +11,7 @@ import { answer, findSpot, layPaths, createTestCampus, readyForPressure } from "
 import { applyNow, TICKS_PER_DAY, tick } from "../tick";
 import type { GameState } from "../types";
 import { stepDisaster, startStored } from "./compile";
-import { auditorOdds, canTrigger, computeFactor, disastersView, revenueEffect, setRisk, triggerDisaster, upkeepFactor } from "./driver";
+import { auditorOdds, CALM_START_DAY, canTrigger, computeFactor, dailyDisasters, disastersView, revenueEffect, setRisk, triggerDisaster, upkeepFactor } from "./driver";
 import { disasterById } from "./pack";
 import type { Risk } from "./types";
 
@@ -451,6 +451,25 @@ describe("random disasters", () => {
     // The main random stream is untouched by the setting.
     expect(on.rngState).toBe(off.rngState);
     expect(JSON.stringify({ ...on, disasters: null })).toBe(JSON.stringify({ ...off, disasters: null }));
+  });
+
+  it("keeps a calm start (FLT-32): nothing random before the first release, nor before day 60; the menu still works", () => {
+    const days = (s: GameState, from: number, to: number) => {
+      for (s.day = from; s.day < to; s.day++) dailyDisasters(s);
+    };
+    const s = lab(4);
+    setRisk(s, "chaos");
+    s.models = []; // no release yet: a whole year of chaos, and nothing
+    days(s, 0, 400);
+    expect(s.disasters.started).toBe(0);
+    s.models = ["Fixture-1-Preview"]; // a release, but still the first weeks
+    days(s, 0, CALM_START_DAY);
+    expect(s.disasters.started).toBe(0);
+    days(s, CALM_START_DAY, 400);
+    expect(s.disasters.started).toBeGreaterThan(0);
+    const menu = lab(4);
+    menu.models = [];
+    expect(triggerDisaster(menu, "rogueSwarm").ok).toBe(true); // the menu is not the dice
   });
 
   it("is deterministic: same seed, setting and answers give the same game, and it survives a save and load mid-disaster", { timeout: 60_000 }, () => {

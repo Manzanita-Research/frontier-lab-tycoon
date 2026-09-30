@@ -13,6 +13,7 @@ import { addNews, addToast, headlinePool, templateVars } from "../news";
 import type { Rng } from "../rng";
 import type { GameState } from "../types";
 import { resign } from "../walkers";
+import { offerPoach } from "../poaching/driver";
 import { refreshBoard } from "./arena";
 import { queueFinished, pushVoice } from "./leapfrog/ops";
 import { LEAPFROG } from "../../content/leapfrog";
@@ -175,6 +176,8 @@ function applyRival(state: GameState, rng: Rng, def: RivalDef, e: RivalEffect) {
       // The poached researcher hands in the box like any quitter (FLT-8): box, gate, headline, a dent in the Vibes.
       const staff = state.walkers.filter((w) => w.kind === "researcher" && w.machine.value !== "leaving" && w.machine.value !== "quitting");
       if (staff.length <= POACH_FLOOR) return;
+      // The Poaching War (FLT-20), when it is on, turns this into one offer to several people and a card.
+      if (offerPoach(state, { from: def.id, name: def.name, short: def.short })) return;
       const gone = rng.pick(staff);
       resign(state, gone, rng);
       state.cash -= POACH_FEE;

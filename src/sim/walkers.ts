@@ -285,6 +285,12 @@ function departVisitor(state: GameState, w: Walker, rng: Rng) {
 
 /** They reached the gate with the box: the headline, the toast, the dent in the Vibes. */
 function walkOut(state: GameState, w: Walker, rng: Rng) {
+  // A pack that walked them out (the `people.quit` verb, quietly) writes its own exit.
+  if (state.flags[`quietExit:${w.id}`] !== undefined) {
+    delete state.flags[`quietExit:${w.id}`];
+    addIncident(state, 0.15);
+    return;
+  }
   pushNews(state, rng, "researcherLeft", { name: w.name, their: defs().names.THEIR[w.pro] ?? "their" });
   addToast(state, `${w.name} handed in the box and left.`, "bad", { source: "staff", importance: "you" });
   addIncident(state, 0.15);

@@ -1,6 +1,6 @@
 // Message boxes and the paperclip: bubbles, toasts, event cards, the era blue screen, the outcome card, the assistant.
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Dialog, placeBalloon } from "../kit";
+import { Dialog, Evidence, placeBalloon } from "../kit";
 import { useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import { Btn, Win } from "./parts";
@@ -20,7 +20,7 @@ const readTipsOff = () => {
 /** A yellow tooltip with a 1px black border and a bold speaker line. The root keeps the `bubble` class so photo mode can copy it. */
 export function Bubble({ bubble }: SlotPropsMap["Bubble"]) {
   return (
-    <div className={`bubble f95-tip bubble-${bubble.kind}`}>
+    <div className={`bubble f95-tip bubble-${bubble.kind}${bubble.speech ? " speech" : ""}`}>
       <b>{bubble.speaker || bubble.kind}</b>
       {bubble.text}
     </div>
@@ -369,6 +369,7 @@ export function EventCard({ event, actions }: SlotPropsMap["EventCard"]) {
           </div>
         )}
         {event.response && <Gauges response={event.response} />}
+        {event.investigation && <Evidence investigation={event.investigation} />}
         <div className="f95-choices">
           {event.choices.map((c, i) => (
             <Btn key={c.label} def={i === 0} onClick={() => actions.choose(event.id, i)} autoFocus={i === 0}>

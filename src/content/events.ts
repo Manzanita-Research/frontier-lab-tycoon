@@ -6,6 +6,11 @@ import { ERAS } from "./eras";
 import { cardEvents } from "../sim/disasters/pack";
 import { LEAPFROG } from "./leapfrog";
 import { COLLUSION } from "../sim/collusion/pack";
+import { HEARING } from "../sim/hearing/pack";
+import { YACHT } from "../sim/yacht/pack";
+import { DEFECTION, type Letter } from "../sim/defection/pack";
+import { POACHING } from "../sim/poaching/pack";
+import { AUDITORS } from "../sim/auditors/pack";
 
 /** What has to be true for an event to fire. `all` combines conditions. */
 export type Condition =
@@ -55,10 +60,10 @@ export interface EventDef {
   when: Condition;
   /** Days before the same event may fire again. Defaults to EVENT_COOLDOWN_DAYS. */
   cooldown?: number;
-  /** One to three. */
+  /** One to three (a pack's drama card may have four). */
   choices: EventChoice[];
-  /** Presentation: a full-screen era title card, the auction room, or Leapfrog's forced response and launch livestream. Anything else is the plain card. */
-  kind?: "era" | "auction" | "response" | "stream";
+  /** Presentation: a full-screen era title card, the auction room, Leapfrog's forced response and launch livestream, The Hearing's witness table (FLT-21), the yacht's leaked group chat (FLT-24), a drama card's document (FLT-26, FLT-20) or the auditors' report card (FLT-19). Anything else is the plain card. */
+  kind?: "era" | "auction" | "response" | "stream" | "hearing" | "leak" | "drama" | "report";
   /** The stripe text at the top of the card, when it isn't the tone's ("Breaking", "Developing", ...). */
   stripe?: string;
 }
@@ -301,5 +306,14 @@ EVENTS.push(...LEAPFROG.events);
 EVENTS.push(...cardEvents());
 // FLT-18: ordinary cards, dormant until the pack's machine sets their offer flags.
 EVENTS.push(...COLLUSION.content.events.add as EventDef[]);
+// The Circus packs (FLT-21, FLT-24): their cards only open when their own machine asks.
+EVENTS.push(...HEARING.content.events.add as EventDef[]);
+EVENTS.push(...YACHT.content.events.add as EventDef[]);
+// FLT-26 and FLT-20: the drama cards (a resignation letter, a manifesto, a recruiter's offer), dormant until their packs set the flags.
+EVENTS.push(...DEFECTION.content.events.add as EventDef[], ...POACHING.content.events.add as EventDef[]);
+// FLT-19: Evals Without Borders' notice and report card (mods/base-auditors), behind their offer flags like the rest.
+EVENTS.push(...AUDITORS.content.events.add as EventDef[]);
 
 export const eventById = (id: string): EventDef | undefined => EVENTS.find((e) => e.id === id);
+/** How each drama card looks on screen (the letter, the email, the manifesto): templates from the packs, by card id. */
+export const DRAMA_LETTERS: ReadonlyMap<string, Letter> = new Map([...DEFECTION.content.letters.add, ...POACHING.content.letters.add].map((l) => [l.card, l]));

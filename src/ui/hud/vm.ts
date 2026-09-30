@@ -4,10 +4,11 @@
 // the game is reachable from them, so a change in the sim never breaks a mod and a mod can never touch the sim.
 // Pure: no atoms, no DOM, no clocks, no random numbers. It is unit-tested against fixture snapshots (vm.test.ts).
 import type { Snapshot, Tool } from "../../app/hud";
-import { RACE_TOOLS, SPEEDS, TOOLS } from "../../app/hud";
+import { OFFICE_TOOLS, RACE_TOOLS, SPEEDS, TOOLS } from "../../app/hud";
 import { PATH_PRICE } from "../../content/buildings";
 import { ERAS } from "../../content/eras";
 import { STAFF } from "../../content/staff";
+import { DRAMA_LETTERS } from "../../content/events";
 import { SCENARIO, type GoalDef } from "../../content/goals";
 import { FRIENDS } from "../../content/newsroom";
 import { LEAPFROG } from "../../content/leapfrog";
@@ -22,10 +23,14 @@ import type { NewsItem, Tone, WalkerKind } from "../../sim/types";
 import { trendOf, VIBES_MAX, WEIGHTS } from "../../sim/vibes";
 import { NO_MOTION, type MotionView } from "./leapfrogMotion";
 import { SKIN_API_VERSION } from "./types";
+import { DISASTER_LINES, HEAT_WORDS, PHASE_LABELS, RISK_COPY, TAG_LABELS, TRUST_WORDS, UNDERSTAFFED } from "../../content/disasterCopy";
 import { HELP_BUILDINGS, HELP_LOOP, HELP_NUMBERS, HELP_TITLE } from "../../content/help";
 import { playableOf, type PlayableInput } from "./playable";
+import { papersOf, paperMomentOf } from "./papers";
+import { collusionOf, crumbWikiOf, investigationOf } from "./collusion";
 import type {
-  ArenaVM, BenchCellVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HudVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
+  ArenaRowVM, DramaVM,
+  ArenaVM, AuditVM, GoalVM, ReportCardVM, ToneVM, BenchCellVM, DisasterRunVM, DisastersVM, DisasterStageVM, MeterVM, RiskVM, UnderstaffedVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HearingMoveVM, HearingVM, HudVM, LeakVM, SenatorVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
   ModsVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, ResponseVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, StreamVM, ThoughtRowVM, TrainingVM, TrendVM, VoiceVM, WalkerKindVM,
 } from "./types";
 import { defs } from "../../sim/defs";
@@ -62,6 +67,12 @@ export interface HudInput {
   chatCount: number;
   /** Help ▸ How to play is open. */
   helpOpen: boolean;
+  /** The Papers window is open (absent: folded). */
+  papersOpen?: boolean;
+  /** Paper moments and CrumbWiki reveals already closed, by key. */
+  dismissed?: readonly string[];
+  /** The Disasters menu is open (FLT-32). */
+  disastersOpen?: boolean;
   mixer: { open: boolean; ready: boolean; muted: boolean; master: number; music: number; sfx: number };
   photo: { on: boolean; time: string; shot: { id: number; url: string; name: string } | null; flash: number };
   skins: SkinPickerVM;
@@ -98,7 +109,7 @@ const NOUN: Record<WalkerKind, [string, string]> = {
   visitor: ["visitor", "visitors"],
   protester: ["protester", "protesters"],
 };
-const SHORT: Record<Tool, string> = { path: "Path", cluster: "Cluster", hall: "Training Hall", gateway: "Gateway", kombucha: "Kombucha", nap: "Nap Pods", snack: "Snack Wall", demo: "Demo Stage", datacenter: "Datacenter", gas: "Gas Turbine", solar: "Solar Farm", bulldoze: "Bulldoze" };
+const SHORT: Record<Tool, string> = { path: "Path", cluster: "Cluster", hall: "Training Hall", gateway: "Gateway", kombucha: "Kombucha", nap: "Nap Pods", snack: "Snack Wall", demo: "Demo Stage", datacenter: "Datacenter", gas: "Gas Turbine", solar: "Solar Farm", security: "Security", bulldoze: "Bulldoze" };
 const CUE_LABEL: Record<string, string> = { place: "Place", coin: "Coin", bulldoze: "Bulldoze", card: "News card", choice: "Choice", release: "Release", era: "New era", breakdown: "Alarm" };
 export const PHOTO_TIMES = [
   { key: "live", label: "Live" },
@@ -220,7 +231,7 @@ function inspectorOf(who: Inspect | null, following: boolean, lab: string): Insp
 function buildOf(i: HudInput): { items: BuildItemVM[]; tip: BuildTipVM | null } {
   const s = i.snap;
   const race = s.race;
-  const palette: Tool[] = [...TOOLS.filter((t) => t !== "bulldoze"), ...RACE_TOOLS.filter((t) => t !== "bulldoze" && t !== "path" && race.unlocked.includes(t)), "bulldoze"];
+  const palette: Tool[] = [...TOOLS.filter((t) => t !== "bulldoze"), ...RACE_TOOLS.filter((t) => t !== "bulldoze" && t !== "path" && race.unlocked.includes(t)), ...OFFICE_TOOLS, "bulldoze"];
   const built = new Map<string, number>();
   for (const b of s.buildings) built.set(b.kind, (built.get(b.kind) ?? 0) + 1);
   const items = palette.map((t): BuildItemVM => {
@@ -296,14 +307,31 @@ function speedOf(value: number): SpeedVM {
 }
 
 function bubblesOf(i: HudInput): BubbleVM[] {
-  return i.snap.thoughts.map((t) => ({ id: t.id, walkerId: t.walkerId, kind: t.kind, speaker: i.snap.speakers[t.walkerId] ?? "", text: t.text }));
+  const chats = i.snap.chats ?? [];
+  // Two people talking say their lines out loud instead of thinking: the visitor first, then your researcher.
+  const talking = new Set(chats.flatMap((c) => (c.lines.length ? [c.hostId, c.guestId] : [])));
+  const thoughts = i.snap.thoughts.filter((t) => !talking.has(t.walkerId)).map((t): BubbleVM => ({ id: t.id, walkerId: t.walkerId, kind: t.kind, speaker: i.snap.speakers[t.walkerId] ?? "", text: t.text }));
+  const said = chats.flatMap((c) => c.lines.slice(0, 2).map((text, k): BubbleVM => {
+    const walkerId = k === 0 ? c.guestId : c.hostId;
+    return { id: -(c.id * 2 + k), walkerId, kind: k === 0 ? "visitor" : "researcher", speaker: c.names?.[k] || i.snap.speakers[walkerId] || "", text, speech: true };
+  }));
+  return [...thoughts, ...said];
+}
+
+/** A drama card's document, filled in from the pack's template. */
+function dramaOf(id: string, vars: Record<string, string>): DramaVM | null {
+  const l = DRAMA_LETTERS.get(id);
+  if (!l) return null;
+  const f = (s: string) => fillTemplate(s, vars);
+  return { style: l.style, file: f(l.file), from: f(l.from), to: f(l.to), subject: f(l.subject), lines: l.lines.map(f).filter((x) => x.trim().length > 0), sign: f(l.sign) };
 }
 
 function eventOf(i: HudInput): { event: EventVM | null; era: HudVM["eraCard"] } {
   const open = i.snap.event;
   const def = open ? defs().eventById(open.id) : undefined;
   if (!open || !def) return { event: null, era: null };
-  const vars = { ...i.snap.race.vars, lab: i.snap.labName };
+  const hearing = def.kind === "hearing" ? hearingOf(i.snap) : null;
+  const vars = { ...i.snap.race.vars, lab: i.snap.labName, senator: hearing?.asking?.name ?? "The chair" };
   if (def.kind === "era") {
     const n = Number(def.id.replace("era", ""));
     const era = ERAS[n - 1]!;
@@ -321,12 +349,106 @@ function eventOf(i: HudInput): { event: EventVM | null; era: HudVM["eraCard"] } 
       body: fillTemplate(def.body, vars),
       tone: def.tone,
       stripe: def.stripe ?? TONE_LABEL[def.tone],
-      kind: def.kind === "auction" || def.kind === "response" || def.kind === "stream" ? def.kind : "plain",
+      kind: def.kind === "auction" || def.kind === "response" || def.kind === "stream" || def.kind === "hearing" || def.kind === "leak" || def.kind === "drama" ? def.kind : def.kind === "report" && i.snap.audit.report ? "report" : "plain",
       choices: def.choices.map((c, k) => ({ label: c.label, hint: fillTemplate(c.hint, vars), key: k + 1 })),
       paddles: def.kind === "auction" ? rivals.map((r, k) => ({ id: r.id, name: r.short, color: r.color, number: 200 + ((r.score * 7 + k * 31) % 800) })) : [],
       response: def.kind === "response" ? responseOf(i.snap, vars) : null,
       stream: def.kind === "stream" ? streamOf(i.snap, def.id, vars) : null,
+      investigation: investigationOf(i.snap, def.id),
+      hearing,
+      leak: def.kind === "leak" ? leakOf(i.snap) : null,
+      drama: def.kind === "drama" ? dramaOf(def.id, vars) : null,
+      report: def.kind === "report" ? reportOf(i.snap) : null,
     },
+  };
+}
+
+const MOVE_LABEL: Record<HearingMoveVM["meter"], string> = { trust: "Trust", capture: "Capture", hype: "Hype", heat: "Heat" };
+const arrows = (n: number) => (n > 0 ? "▲" : "▼").repeat(Math.abs(n) >= 8 ? 3 : Math.abs(n) >= 4 ? 2 : 1);
+
+/** The Hearing's witness table: the senators, the meters, and what each answer would move. */
+function hearingOf(s: Snapshot): HearingVM | null {
+  const h = s.hearing;
+  if (!h.enabled) return null;
+  const senators: SenatorVM[] = h.senators.map((sen) => ({ id: sen.id, name: sen.name, role: sen.role, seat: sen.seat, look: { ...sen.look }, asking: sen.asking, answered: sen.answered }));
+  const labels = { ...MOVE_LABEL, trust: h.labels.trust, capture: h.labels.capture };
+  const answers = (h.current?.options ?? []).map((o) => ({
+    style: o.key,
+    moves: (["trust", "capture", "hype", "heat"] as const).filter((m) => o[m] !== 0).map((m) => ({
+      meter: m, label: labels[m], amount: o[m], arrows: arrows(o[m]), good: m === "capture" ? null : m === "heat" ? o[m] < 0 : o[m] > 0,
+    })),
+  }));
+  const asked = Math.min(h.asked + 1, h.total);
+  return {
+    stage: h.stage,
+    topic: h.topic,
+    senators,
+    asking: senators.find((x) => x.asking) ?? null,
+    asked,
+    total: h.total,
+    progressText: h.verdict ? "Adjourned" : `Question ${asked} of ${h.total}`,
+    trust: { label: h.labels.trust, value: h.trust, text: String(Math.round(h.trust)) },
+    capture: { label: h.labels.capture, value: h.capture, text: String(Math.round(h.capture)) },
+    answers,
+    verdict: h.verdict,
+  };
+}
+
+/** The yacht's leaked group chat, as the lab's rivals wrote it. */
+function leakOf(s: Snapshot): LeakVM | null {
+  const y = s.yacht;
+  if (!y.enabled || y.chat.length === 0) return null;
+  const members = [...new Set(y.chat.filter((m) => !m.system && m.from !== "yacht").map((m) => m.name))];
+  return { yachtName: y.yachtName, groupName: y.groupName, rsvp: y.rsvp ?? "sign", members: `${members.join(", ")} + the yacht`, messages: y.chat.map((m) => ({ ...m })) };
+}
+
+const PREP_TEXT: Record<string, string> = { prep: "Prepped the paperwork", tidy: "Tidied up", usual: "Business as usual" };
+const signed = (n: number) => `${n > 0 ? "+" : n < 0 ? "\u2212" : ""}${Math.abs(Math.round(n))}`;
+
+/** The auditors' report card, from the last one they published. */
+function reportOf(s: Snapshot): ReportCardVM | null {
+  const r = s.audit.report;
+  if (!r) return null;
+  const move = (n: number, what: string, good: boolean) => ({ text: `${signed(n)} ${what}`, tone: (n === 0 ? "neutral" : good === n > 0 ? "good" : "bad") as ToneVM });
+  return {
+    visitText: `Visit ${r.visit} \u00b7 ${formatDate(r.day)}`,
+    lab: s.labName,
+    grades: r.grades.map((g) => ({ id: g.id, label: g.label, grade: g.grade, score: Math.round(g.score), comment: g.comment })),
+    overall: r.overall,
+    prepText: r.prep ? (PREP_TEXT[r.prep] ?? null) : null,
+    stamp: r.caught ? "CAUGHT HIDING" : r.swarm ? "SWARM FOUND" : null,
+    caught: r.caught,
+    swarm: r.swarm,
+    inspected: r.inspected.map((k) => (defs().buildings as Record<string, { name: string } | undefined>)[k]?.name ?? k),
+    moves: [move(r.moves.trust, "trust", true), move(r.moves.heat, "heat", false), move(r.moves.hype, "hype", true)].filter((m) => m.text[0] !== "0"),
+    headline: r.headline,
+  };
+}
+
+/** The pin over the auditors: where they are and what they are doing. */
+function auditOf(s: Snapshot): AuditVM {
+  const a = s.audit;
+  const evals = a.phase === "evaluating";
+  const line = !a.enabled ? null
+    : a.stage === "countdown" && a.daysLeft !== null ? (a.daysLeft <= 0 ? "Auditors arrive today" : `Auditors arrive in ${a.daysLeft} day${a.daysLeft === 1 ? "" : "s"}`)
+    : a.stage !== "visit" || a.visitors === 0 ? null
+    : evals ? "Running their own evals"
+    : a.phase === "inspecting" && a.stop ? `Inspecting the ${a.stop.name}`
+    : a.phase === "leaving" ? "Leaving, with footnotes"
+    : a.stop ? `On their way to the ${a.stop.name}` : null;
+  const progress = a.progress === null ? null : Math.max(0, Math.min(1, a.progress));
+  return {
+    enabled: a.enabled,
+    stage: a.stage,
+    daysLeft: a.daysLeft,
+    visitors: a.visitors,
+    phase: a.phase,
+    line,
+    progress,
+    progressText: progress === null ? "" : `${Math.round(progress * 100)}%`,
+    stopsText: a.stops > 0 ? `${Math.min(a.done + (a.stop ? 1 : 0), a.stops)}/${a.stops}` : "",
+    evals,
+    boxed: a.boxed,
   };
 }
 
@@ -336,6 +458,7 @@ function thoughtsOf(i: HudInput): ThoughtRowVM[] {
 
 function arenaOf(i: HudInput): ArenaVM {
   const race = i.snap.race;
+  const leaked = new Set(i.snap.disasters.leaked);
   return {
     open: i.arena.open,
     alert: i.arena.alert,
@@ -361,12 +484,79 @@ function arenaOf(i: HudInput): ArenaVM {
       deltaText: r.delta > 0 ? `↑${r.delta}` : r.delta < 0 ? `↓${-r.delta}` : "",
       color: r.color,
       moved: i.arena.moved[r.id] ?? null,
-      title: r.model ? `Latest model: ${r.model}${r.open ? " (open weights)" : ""}` : r.you ? "You" : "No product. Big valuation.",
+      title: r.neo ? `${r.neo.founder}'s lab: "${r.neo.manifesto}"` : leaked.has(r.id) ? `Running on your leaked weights${r.model ? ` (${r.model})` : ""}` : r.model ? `Latest model: ${r.model}${r.open ? " (open weights)" : ""}` : r.you ? "You" : "No product. Big valuation.",
+      leak: leaked.has(r.id),
+      ...neoTag(r.neo, i.snap.day),
     })),
   };
 }
 
+/** How long a neo lab is NEW on the Arena. */
+const NEW_DAYS = 14;
+function neoTag(neo: Snapshot["race"]["board"][number]["neo"], day: number): Pick<ArenaRowVM, "tag" | "tagText"> {
+  if (!neo) return { tag: null, tagText: "" };
+  const tag = neo.nemesis ? "nemesis" : day - neo.founded < NEW_DAYS ? "new" : "alumni";
+  return { tag, tagText: tag.toUpperCase() };
+}
+
 const pct = (n: number) => `${Math.round(n * 100)}%`;
+
+// ---- Disasters (FLT-32) ----------------------------------------------------------------------------------------------
+
+const RISK_KEYS: readonly RiskVM[] = ["off", "rare", "normal", "chaos"];
+
+function stageOf(phase: string): DisasterStageVM {
+  if (phase === "warning" || phase === "aftermath" || phase === "done") return phase;
+  if (phase === "active" || phase === "spread") return "active";
+  return "response";
+}
+
+const meter = (value: number, words: readonly string[]): MeterVM => {
+  const v = Math.round(Math.max(0, Math.min(100, value)));
+  const word = words[Math.min(words.length - 1, Math.floor(v / (100 / words.length)))]!;
+  return { value: v, word, text: `${v} · ${word}` };
+};
+
+function disastersOf(i: HudInput, enabled: boolean): DisastersVM {
+  const d = i.snap.disasters;
+  const nameOf = (id: string) => d.menu.find((m) => m.id === id)?.name ?? d.runs.find((r) => r.id === id)?.name ?? "disaster";
+  const running = d.runs.map((r): DisasterRunVM => {
+    const working = r.job !== null;
+    const title = working ? (STAFF[r.job as keyof typeof STAFF]?.title ?? r.job) : "";
+    return {
+      id: r.id,
+      name: r.name,
+      phase: r.phase,
+      stage: stageOf(r.phase),
+      phaseLabel: PHASE_LABELS[r.phase] ?? r.phase,
+      line: DISASTER_LINES[r.id]?.[r.phase] ?? d.menu.find((m) => m.id === r.id)?.blurb ?? "",
+      progress: working ? r.progress : null,
+      progressText: working ? `${title} ${pct(r.progress)}` : null,
+      days: r.days,
+      daysText: `Day ${r.days + 1}`,
+    };
+  });
+  const understaffed = d.diverted.map((u): UnderstaffedVM => {
+    const all = u.diverted >= u.total;
+    const copy = UNDERSTAFFED[u.job];
+    const title = STAFF[u.job].title;
+    const vars = { n: String(u.diverted), total: String(u.total), name: nameOf(u.by) };
+    return { job: u.job, title, diverted: u.diverted, total: u.total, all, text: copy ? fillTemplate(all ? copy.all : copy.some, vars) : `${u.diverted} of ${u.total} ${title} on the ${vars.name}.` };
+  });
+  const calm = !d.calm ? null : i.snap.models === 0 ? "Calm start: nothing random until your first release." : `Calm start: nothing random before day ${d.calmDay}.`;
+  return {
+    enabled,
+    open: enabled && (i.disastersOpen ?? false),
+    risk: d.risk,
+    risks: RISK_KEYS.map((key) => ({ key, label: RISK_COPY[key].label, blurb: RISK_COPY[key].blurb, active: key === d.risk })),
+    calm: d.risk === "off" ? null : calm,
+    menu: d.menu.map((m) => ({ id: m.id, name: m.name, blurb: m.blurb, tags: m.tags.map((key) => ({ key, label: TAG_LABELS[key] ?? key })), active: m.active, available: m.available, reason: m.reason ?? null })),
+    running,
+    understaffed,
+    trust: meter(d.trust, TRUST_WORDS),
+    heat: meter(d.heat, HEAT_WORDS),
+  };
+}
 const grouped = (n: number) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
 /** The forced-response card's numbers, straight from the snapshot: how baked the run is, what shipping now adds, the bug odds. */
@@ -603,6 +793,13 @@ function helpOf(items: readonly BuildItemVM[]): HudVM["help"] {
   return { title: HELP_TITLE, loop: [...HELP_LOOP], buildings, numbers: HELP_NUMBERS.map((n) => ({ ...n })) };
 }
 
+/** The note's one goal: the ladder rung's, or once the ladder is done the next open objective ("Top 3 on the Arena in Era 3 · Arena #6, need top 3"). */
+function goalOf({ text, current, target, objective }: PlayableInput["goal"]): GoalVM {
+  const def = objective ? defs().goals.find((d) => d.id === objective) : undefined;
+  const progress = def?.unit === "rank" ? goalProgressText(def, current) : `${Math.min(current, target)}/${target}`;
+  return { text, current, target, line: text ? `${text} · ${progress}` : "", ratio: target > 0 ? Math.max(0, Math.min(1, current / target)) : 0 };
+}
+
 /** What the lab has earned: only these tools are in the build panel (the bulldozer always is), and the Staff tile follows the payroll. */
 function earnedItems(items: BuildItemVM[], play: PlayableInput): BuildItemVM[] {
   return items.filter((it) => (it.isBulldoze ? true : it.kind === "staff" ? play.visible.staff : it.isPath || play.buildings.has(it.kind)));
@@ -632,11 +829,7 @@ export function hudViewModel(i: HudInput): HudVM {
     progress: {
       level: play.level,
       levelName: play.levelName,
-      goal: {
-        ...play.goal,
-        line: play.goal.text ? `${play.goal.text} · ${Math.min(play.goal.current, play.goal.target)}/${play.goal.target}` : "",
-        ratio: play.goal.target > 0 ? Math.max(0, Math.min(1, play.goal.current / play.goal.target)) : 0,
-      },
+      goal: goalOf(play.goal),
       teasers: play.teasers.map((t) => ({ ...t })),
     },
     visible: play.visible,
@@ -648,13 +841,20 @@ export function hudViewModel(i: HudInput): HudVM {
     thoughtsPanel: thoughtsOf(i),
     arena: arenaOf(i),
     leapfrog: leapfrogOf(i),
+    papers: papersOf(i.snap, play.visible.papers, i.papersOpen ?? false),
+    // A card, an era or the ending outranks a paper moment: it waits (the day window allowing) until they close.
+    paperMoment: event || era ? null : paperMomentOf(i.snap, play.visible.papers, i.dismissed ?? []),
+    collusion: collusionOf(i.snap),
+    crumbWiki: event || era ? null : crumbWikiOf(i.snap, i.dismissed ?? []),
     eraCard: era,
     outcome: outcomeOf(i),
+    audit: auditOf(i.snap),
     newsroom: newsroomOf(i),
     sound: soundOf(i),
     photoMode: photoOf(i),
     skins: i.skins,
     mods: i.mods ?? NO_MODS_VM,
+    disasters: disastersOf(i, play.visible.disasters),
     layout: { width: i.viewport.width, height: i.viewport.height, phone: i.viewport.width <= 480, compact: i.viewport.width <= 640, tall: i.viewport.height >= 800 },
   };
 }

@@ -402,12 +402,13 @@ export function Arena({ arena, actions }: SlotPropsMap["Arena"]) {
             </thead>
             <tbody>
               {rows.map((row) => (
-                <tr key={row.id} className={`${row.you ? "you" : ""} ${row.moved ? `moved-${row.moved}` : ""}`} title={row.title}>
+                <tr key={row.id} className={`${row.you ? "you" : ""} ${row.leak ? "leak" : ""} ${row.moved ? `moved-${row.moved}` : ""}`} title={row.title}>
                   <td>{row.rank}</td>
                   <td className="name">
                     <i style={{ background: row.color }} aria-hidden />
                     {row.short}
                     {row.open && <small> (open)</small>}
+                    {row.leak && <small className="h98-leak"> ({t("arena.leak")})</small>}
                   </td>
                   <td>{row.score}</td>
                   <td className={row.delta > 0 ? "good" : row.delta < 0 ? "bad" : ""}>{row.deltaText}</td>

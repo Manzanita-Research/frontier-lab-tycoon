@@ -1,0 +1,559 @@
+/* Papers (FLT-45) and agent collusion (FLT-46): the Papers chip and window, the paper moments, the investigation evidence and
+   the CrumbWiki reveal. Tokens only, so every skin that keeps the base slots gets them in its own colours. */
+
+/* ---- The Papers chip and window ---- */
+.papers-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  padding: 6px 10px;
+  font: inherit;
+  color: var(--flt-color-text);
+  cursor: pointer;
+  text-align: left;
+}
+.papers-chip span {
+  font-size: 13px;
+  opacity: 0.75;
+}
+.papers-chip.has-drafts b::after {
+  content: " •";
+  color: var(--flt-color-accent);
+}
+.papers {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 300px;
+  max-height: 46vh;
+  padding: 8px 10px;
+  color: var(--flt-color-text);
+  font-size: 14px;
+}
+.papers-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.papers-summary {
+  flex: 1;
+  font-size: 13px;
+  opacity: 0.7;
+}
+.papers-x {
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 16px;
+  line-height: 1;
+  color: inherit;
+  cursor: pointer;
+}
+.papers-policy {
+  display: flex;
+  border: var(--flt-border-width) var(--flt-border-style) var(--flt-color-line);
+  border-radius: var(--flt-radius-button);
+  overflow: hidden;
+}
+.papers-policy button {
+  flex: 1;
+  padding: 3px 0;
+  border: 0;
+  background: var(--flt-color-inset);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.papers-policy button.on {
+  background: var(--flt-color-selection);
+  color: var(--flt-color-selectionText);
+  font-weight: 800;
+}
+.papers-blurb {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.8;
+}
+.papers-facts {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+.papers-pressure {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 2px 6px;
+  font-size: 13px;
+}
+.papers-pressure small {
+  grid-column: 1 / -1;
+  opacity: 0.7;
+}
+.paper-meter {
+  display: block;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--flt-color-inset);
+  overflow: hidden;
+}
+.paper-meter i {
+  display: block;
+  height: 100%;
+  background: var(--flt-color-meterTo);
+}
+.paper-meter.hot i {
+  background: var(--flt-color-bad);
+}
+.papers-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow: auto;
+  min-height: 0;
+}
+.paper-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 0;
+  border-top: 1px solid color-mix(in srgb, var(--flt-color-line) 25%, transparent);
+}
+.paper-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 12px;
+}
+.paper-id {
+  font-family: var(--flt-font-mono);
+  opacity: 0.7;
+}
+.paper-status.tone-good {
+  color: var(--flt-color-good);
+}
+.paper-status.tone-bad {
+  color: var(--flt-color-bad);
+}
+.paper-status.tone-joke {
+  color: var(--flt-color-accent);
+  font-weight: 800;
+}
+.paper-title {
+  font-size: 14px;
+  line-height: 1.2;
+}
+.paper-byline,
+.paper-cites {
+  font-size: 12px;
+  opacity: 0.7;
+}
+.paper-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 2px;
+}
+.paper-go {
+  padding: 2px 8px;
+  border: var(--flt-border-width) var(--flt-border-style) var(--flt-color-line);
+  border-radius: var(--flt-radius-button);
+  background: var(--flt-color-accent);
+  color: var(--flt-color-accentText);
+  font: inherit;
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+}
+.paper-go.plain {
+  background: var(--flt-color-inset);
+  color: inherit;
+}
+.papers-empty {
+  margin: 4px 0;
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+/* ---- Paper moments ---- */
+.paper-moment .card-body h2 {
+  font-size: 19px;
+}
+.arxive {
+  border: 1px solid color-mix(in srgb, var(--flt-color-line) 40%, transparent);
+  background: var(--flt-color-panel);
+  font-size: 14px;
+}
+.arxive-load {
+  padding: 4px 8px;
+  background: #b31b1b;
+  color: #fff;
+  font-weight: 700;
+}
+.arxive-kicker {
+  padding: 4px 8px;
+  font-weight: 800;
+  border-bottom: 1px solid color-mix(in srgb, var(--flt-color-line) 25%, transparent);
+}
+.arxive-list {
+  margin: 0;
+  padding: 0 8px;
+  list-style: none;
+}
+.arxive-list li {
+  display: flex;
+  flex-direction: column;
+  padding: 5px 0;
+  border-bottom: 1px dotted color-mix(in srgb, var(--flt-color-line) 25%, transparent);
+  opacity: 0.6;
+}
+.arxive-list li.you {
+  opacity: 1;
+  background: color-mix(in srgb, var(--flt-color-accent) 18%, transparent);
+  margin: 0 -8px;
+  padding: 6px 8px;
+}
+.arxive-id {
+  font-family: var(--flt-font-mono);
+  font-size: 12px;
+}
+.arxive-by {
+  font-size: 12px;
+}
+.arxive-you {
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 0 5px;
+  background: var(--flt-color-accent);
+  color: var(--flt-color-accentText);
+  font-style: normal;
+  font-weight: 800;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+.scoop {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 8px;
+  align-items: stretch;
+}
+.scoop-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  border: var(--flt-border-width) var(--flt-border-style) var(--flt-color-line);
+  background: var(--flt-color-panel);
+}
+.scoop-col.theirs {
+  transform: rotate(-1.5deg);
+}
+.scoop-col.yours {
+  opacity: 0.75;
+}
+.scoop-label {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.scoop-stamp {
+  font-family: var(--flt-font-mono);
+  font-size: 13px;
+}
+.scoop-gap {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  max-width: 96px;
+  font-size: 13px;
+}
+.scoop-gap b {
+  color: var(--flt-color-bad);
+  font-size: 15px;
+}
+.certificate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 6px double #b8860b;
+  background: #fffaf0;
+  color: #3a2a00;
+  text-align: center;
+  font-family: Georgia, "Times New Roman", serif;
+}
+.cert-kicker {
+  font-size: 18px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.cert-small {
+  font-style: italic;
+  font-size: 14px;
+}
+.cert-title {
+  font-size: 16px;
+}
+.cert-by {
+  font-size: 13px;
+}
+.cert-award {
+  color: #8a5a00;
+  font-size: 20px;
+}
+.cert-foot {
+  margin-top: 4px;
+  font-size: 12px;
+  opacity: 0.8;
+}
+.moment-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+.moment-buttons .choice {
+  flex: 1 1 auto;
+}
+
+/* ---- The investigation evidence (inside the collusion-sign card) ---- */
+.evidence {
+  margin: 8px 0 10px;
+  font-size: 14px;
+}
+.evidence-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.evidence-bonus {
+  color: var(--flt-color-good);
+  font-size: 16px;
+}
+.evidence-none {
+  color: var(--flt-color-bad);
+}
+.evidence-label {
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.evidence-log {
+  margin: 2px 0;
+  padding: 6px 8px;
+  max-width: 100%;
+  overflow: hidden;
+  background: #101410;
+  color: #7dff9a;
+  font: 12px/1.45 var(--flt-font-mono);
+  white-space: pre;
+  text-overflow: ellipsis;
+}
+.evidence-note {
+  font-style: italic;
+  opacity: 0.8;
+}
+
+/* ---- The CrumbWiki reveal ---- */
+.crumbwiki {
+  width: min(720px, 100%);
+}
+.wiki-url {
+  padding: 5px 12px;
+  background: var(--flt-color-inset);
+  font: 13px var(--flt-font-mono);
+  border-bottom: 1px solid color-mix(in srgb, var(--flt-color-line) 30%, transparent);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.wiki {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 15px;
+  color: var(--flt-color-text);
+}
+.wiki-front {
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  border: 2px solid var(--flt-color-line);
+  background: #fbf8ef;
+  color: #111;
+  text-align: center;
+}
+.wiki-masthead {
+  font: 900 20px/1 Georgia, serif;
+  letter-spacing: 0.04em;
+  border-bottom: 3px double #111;
+  padding-bottom: 4px;
+}
+.wiki-headline {
+  display: block;
+  margin: 6px 0 2px;
+  font: 900 20px/1.1 Georgia, serif;
+  text-transform: uppercase;
+}
+.wiki-front p {
+  margin: 0;
+  font-size: 14px;
+}
+.wiki-classified {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 3px 8px;
+  border: 1px dashed #111;
+  font-size: 13px;
+}
+.wiki-banner {
+  padding: 6px 10px;
+  border-left: 4px solid var(--flt-color-accent);
+  background: color-mix(in srgb, var(--flt-color-accent) 12%, transparent);
+  font-weight: 700;
+}
+.wiki-banner.tone-bad {
+  border-color: var(--flt-color-bad);
+}
+.wiki-banner.tone-good {
+  border-color: var(--flt-color-good);
+}
+.wiki-site {
+  margin: 8px 0 4px;
+  font-size: 13px;
+  font-style: italic;
+  opacity: 0.7;
+}
+.wiki-cols {
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  gap: 12px;
+}
+.wiki-main h3 {
+  margin: 0 0 4px;
+  font-size: 17px;
+  font-weight: 400;
+  border-bottom: 1px solid color-mix(in srgb, var(--flt-color-line) 30%, transparent);
+}
+.wiki-talk h4,
+.wiki-side h4 {
+  margin: 8px 0 2px;
+  font-size: 14px;
+}
+.wiki-talk p {
+  margin: 2px 0;
+  font-size: 14px;
+}
+.wiki-heartbeat {
+  margin: 0;
+  padding: 4px 6px;
+  background: var(--flt-color-inset);
+  font: 13px var(--flt-font-mono);
+  white-space: pre-wrap;
+}
+.wiki-history,
+.wiki-pages {
+  margin: 0;
+  padding-left: 14px;
+  font-size: 12px;
+}
+.wiki-pages {
+  font-family: var(--flt-font-mono);
+}
+.wiki-cost {
+  margin-top: 10px;
+  font-size: 14px;
+}
+.wiki-cost ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 2px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.wiki-cost li::before {
+  content: "• ";
+}
+@media (max-width: 560px) {
+  .wiki-cols {
+    grid-template-columns: 1fr;
+  }
+  .scoop {
+    grid-template-columns: 1fr;
+  }
+  .scoop-gap {
+    max-width: none;
+  }
+  .papers {
+    width: auto;
+  }
+}
+
+/* ---- Agent collusion's signs over the campus (FLT-46): the packets, the night out, the inquiry ---- */
+.packet {
+  transform: translate(-50%, -50%);
+  font: 700 10px var(--flt-font-mono);
+  letter-spacing: 0.04em;
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: #101410;
+  color: #7dff9a;
+  box-shadow: 0 0 0 1px #7dff9a55;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.aftersign,
+.inquirysign {
+  transform: translate(-50%, -100%);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.aftersign {
+  display: grid;
+  justify-items: center;
+  padding: 3px 10px 4px;
+  border-radius: 6px;
+  background: #1b0f2e;
+  color: #ff7de0;
+  border: 2px solid #ff7de0;
+  box-shadow: 0 0 10px #ff7de088;
+  font: 700 13px var(--flt-font-display);
+  b {
+    font-style: italic;
+  }
+  small {
+    font: 11px var(--flt-font-mono);
+    color: #ffd0f4;
+  }
+}
+.inquirysign {
+  padding: 3px 8px;
+  background: #fff6c8;
+  color: #3a2a00;
+  border: 2px solid #3a2a00;
+  font: 700 12px var(--flt-font-mono);
+}
+.aftersign {
+  animation: aftersign-buzz 2.4s steps(1) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .aftersign {
+    animation: none;
+  }
+}
+:root[data-motion="reduced"] .aftersign {
+  animation: none;
+}
+@keyframes aftersign-buzz {
+  0%,
+  92%,
+  96% {
+    opacity: 1;
+  }
+  94%,
+  98% {
+    opacity: 0.55;
+  }
+}

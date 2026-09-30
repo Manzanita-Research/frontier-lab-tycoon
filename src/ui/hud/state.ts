@@ -38,5 +38,14 @@ export const modsOpenAtom = Atom.make(false);
 /** Is Help ▸ How to play open? UI-only state. */
 export const helpOpenAtom = Atom.make(false);
 
+/** Is the Disasters menu open (FLT-32)? UI-only state. */
+export const disastersOpenAtom = Atom.make(false);
+
 /** Is the Staff panel open? UI-only state, kept as an Effect atom like the rest of what React reads. */
 export const staffOpenAtom = Atom.make(false);
+
+/** Is the Papers window open? Folded to a chip until the player opens it. */
+export const papersOpenAtom = Atom.make(false);
+
+/** Paper moments and CrumbWiki reveals the player has closed this visit (their keys). */
+export const dismissedAtom = Atom.make<readonly string[]>([]);

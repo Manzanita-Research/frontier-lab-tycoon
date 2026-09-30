@@ -4,14 +4,21 @@ import { makeSnapshot, type Snapshot } from "../../app/hud";
 import { frontPage, recap, type Edition } from "../../newsroom/edition";
 import { createTestCampus } from "../../sim/testkit";
 import { enableLeapfrog } from "../../sim/race/leapfrog/driver";
+import { stageCircus, type CircusMoment } from "../../sim/circus/demo";
 import { leapfrogView } from "../../sim/race/leapfrog/view";
-import { answer } from "../../sim/testkit";
-import { tick } from "../../sim/tick";
+import { answer, layPaths, readyForPressure } from "../../sim/testkit";
+import { stageAudit, type AuditMoment } from "../../sim/auditors/demo";
+import { applyNow, tick } from "../../sim/tick";
+import { triggerDisaster } from "../../sim/disasters/driver";
 import type { GameState } from "../../sim/types";
 import { newMotion, stepMotion, type MotionView } from "./leapfrogMotion";
 import type { SkinPickerVM } from "./types";
 import type { HudInput } from "./vm";
 import { playableFixture } from "./previewLadder";
+import { stagePapers } from "../../sim/race/papers/demo";
+import { stageCollusion } from "../../sim/collusion/demo";
+import { createInitialState } from "../../sim/state";
+import { stageDrama, type DramaMoment } from "../../sim/defection/demo";
 
 /** A busy campus a few game days in, with thoughts, a crowd and a run in flight (the real opening is quieter: see `openingWorld`). */
 export function fixtureWorld(days = 12, seed = 3): GameState {
@@ -48,6 +55,53 @@ export function fixtureLeapfrog(days = 48, seed = 3): { world: GameState; motion
   return { world: s, motion: view };
 }
 
+/**
+ * A lab mid-disaster (FLT-32): a Rogue Agent Swarm, its card answered, Security at the Security Office pulling the plug
+ * (so the gate is unguarded), a weights leak lifting a rival on the Arena, and trust and heat moved off their start.
+ */
+export function fixtureDisaster(seed = 3): GameState {
+  const s = fixtureWorld(12, seed);
+  readyForPressure(s);
+  s.cash = 50_000_000;
+  applyNow(s, [{ type: "hire", job: "security" }, { type: "hire", job: "security" }, { type: "hire", job: "sre" }]);
+  for (let i = 0; i < 40; i++) tick(s);
+  triggerDisaster(s, "rogueSwarm");
+  triggerDisaster(s, "weightsLeak");
+  for (let i = 0; i < 1200 && !s.disasters.runs.some((r) => r.id === "rogueSwarm" && r.machine.value.startsWith("cleanup") && r.machine.context.progress > 0.2); i++) tick(s, answer(s));
+  return s;
+}
+
+/** The busy campus with The Hearing or the yacht summit staged on it: the card that moment wants is on screen. */
+export function fixtureCircus(moment: CircusMoment, seed = 3): GameState {
+  const s = fixtureWorld(12, seed);
+  stageCircus(s, moment);
+  return s;
+}
+
+/** A lab staged at one of Defection's or the Poaching War's moments (the VC chat, a card, the exit, the new rival). */
+export function fixtureDrama(moment: DramaMoment, seed = 7): GameState {
+  const s = createInitialState(seed);
+  delete s.progression;
+  delete s.coach;
+  delete s.tutorial;
+  stageDrama(s, moment);
+  return s;
+}
+
+/**
+ * Evals Without Borders (FLT-19) on a small campus: a staged moment, through the same chart, cards and ticks as play.
+ * "audit-countdown" answers the warning card with Prep, so the sign stands over the gate.
+ */
+export function fixtureAudit(moment: AuditMoment | "audit-countdown", seed = 3): GameState {
+  const s = createTestCampus(seed);
+  layPaths(s);
+  readyForPressure(s);
+  s.tick = s.day * 20;
+  stageAudit(s, moment === "audit-countdown" ? "audit-notice" : moment);
+  if (moment === "audit-countdown") applyNow(s, answer(s));
+  return s;
+}
+
 export const NO_SKINS: SkinPickerVM = {
   open: false,
   reducedMotion: false,
@@ -77,8 +131,12 @@ export interface FixtureOptions {
   /** The "New!" card is up. */
   unlock?: boolean;
   world?: GameState;
+  /** An Evals Without Borders moment (the world comes from `fixtureAudit`). */
+  audit?: AuditMoment | "audit-countdown";
   /** Release Leapfrog on, 48 days in, with its leaderboard, news cycle and history. */
   leapfrog?: boolean;
+  /** The Hearing (a question, or the gavel) or the yacht summit (the invitation, or the leaked chat) on screen. */
+  circus?: CircusMoment;
   selected?: number | null;
   event?: string | null;
   tool?: string | null;
@@ -93,13 +151,29 @@ export interface FixtureOptions {
   help?: boolean;
   /** Standing warnings. */
   warnings?: string[];
+  /** Papers staged as the review moments are (`?moment=paper-*`); "panel" is the scoop's World with the Papers window open. */
+  papers?: "drop" | "scoop" | "award" | "panel";
+  /** Agent collusion staged as its review moments are (`?moment=collusion-*`); "sign" opens the card. */
+  collusion?: "sign" | "traffic" | "scandal";
+  /** Mid-disaster (see `fixtureDisaster`). */
+  disaster?: boolean;
+  /** The Disasters menu is open. */
+  disastersOpen?: boolean;
   width?: number;
   height?: number;
   skins?: Partial<SkinPickerVM>;
 }
 
+/** A World with a papers or collusion moment staged on it, through the same code the `?moment=` links use. */
+export function fixtureStaged(o: Pick<FixtureOptions, "papers" | "collusion">): GameState {
+  const w = createTestCampus(3);
+  if (o.papers) stagePapers(w, o.papers === "panel" ? "paper-scoop" : `paper-${o.papers}`);
+  if (o.collusion) stageCollusion(w, `collusion-${o.collusion}`);
+  return w;
+}
+
 export function fixtureSnapshot(o: FixtureOptions = {}): Snapshot {
-  const w = o.world ?? (o.leapfrog ? fixtureLeapfrog().world : fixtureWorld());
+  const w = o.world ?? (o.audit ? fixtureAudit(o.audit) : o.leapfrog ? fixtureLeapfrog().world : o.papers || o.collusion ? fixtureStaged(o) : o.disaster ? fixtureDisaster() : o.circus ? fixtureCircus(o.circus) : fixtureWorld());
   const selected = o.selected === undefined ? (w.walkers.find((x) => x.kind === "researcher")?.id ?? null) : o.selected;
   const snap = makeSnapshot(w, undefined, { selected, follow: false, highlight: null });
   const pendingConfirm = o.confirm
@@ -140,6 +214,9 @@ export function fixtureInput(o: FixtureOptions = {}): HudInput {
     },
     chatCount: o.chatCount ?? 2,
     helpOpen: o.help ?? false,
+    papersOpen: o.papers === "panel",
+    dismissed: [],
+    disastersOpen: o.disastersOpen ?? false,
     mixer: { open: false, ready: true, muted: false, master: 0.7, music: 0.3, sfx: 0.65 },
     photo: { on: o.photo ?? false, time: "live", shot: { id: 1, url: "data:image/png;base64,", name: "frontier-lab-tycoon-campus.png" }, flash: 1 },
     skins: { ...NO_SKINS, ...o.skins },

@@ -368,7 +368,7 @@ async function capture(side, sceneName, skin) {
   const scene = sceneData.scenes[sceneName];
   const sk = side.side === "before" && args["skin-before"] !== undefined ? (args["skin-before"] === "none" ? null : args["skin-before"]) : skin;
   const [width, height] = (scene.viewport ?? sceneData.defaults.viewport).split("x").map(Number);
-  const dsf = scene.mobile ? 2 : 1;
+  const dsf = scene.dsf ?? (scene.mobile ? 2 : 1);
   const tag = `${side.side}/${sceneName}${skin ? `@${skin}` : ""}`;
   const file = join(out, side.side, `${sceneName}${skin ? `@${skin}` : ""}.png`);
   const t = Date.now();
@@ -397,7 +397,8 @@ async function capture(side, sceneName, skin) {
         const r = document.querySelector("canvas")?.getBoundingClientRect();
         return r ? { x: r.x, y: r.y, w: r.width, h: r.height } : null;
       });
-      await page.screenshot({ path: file });
+      // A 2x photo-mode frame is slow to read back on SwiftShader.
+      await page.screenshot({ path: file, timeout: dsf > 1 ? 120_000 : 30_000 });
       // The guard: the whole frame and the 3D canvas must both have real content.
       if (!canvas || canvas.w * canvas.h < width * height * 0.25) throw Object.assign(new Error("no full-size <canvas> on the page"), { blank: true });
       const [whole, cv] = await analyze(file, [null, { x: canvas.x * dsf, y: canvas.y * dsf, w: canvas.w * dsf, h: canvas.h * dsf }]);
@@ -425,8 +426,8 @@ log(`captured ${results.filter((r) => r.ok).length}/${results.length} shots in $
 // ── compare images: rendered by the same headless Chromium (no image library needed) ────────────────────────────────
 const b64 = (f) => `data:image/png;base64,${readFileSync(f).toString("base64")}`;
 const esc = (s) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
-async function compose(panels, { title, mobile, width, footer, diff, outFile, gallery }) {
-  const dsf = mobile ? 2 : 1;
+async function compose(panels, { title, mobile, width, footer, diff, outFile, gallery, dsf: sceneDsf }) {
+  const dsf = sceneDsf ?? (mobile ? 2 : 1);
   const ctx = await (await getBrowser()).newContext({ viewport: { width: 1200, height: 800 }, deviceScaleFactor: dsf });
   const page = await ctx.newPage();
   const pw = mobile ? 390 : Math.min(width, gallery ? 620 : 960);
@@ -538,7 +539,7 @@ if (args.skin === "all") {
     const scene = sceneData.scenes[name];
     const panels = skins.flatMap((s) => (okFile(name, s, "after") ? [{ kind: "after", label: s, file: okFile(name, s, "after") }] : []));
     if (!panels.length) continue;
-    const made = await safeCompose(panels, { outFile: join(out, "compare", `gallery-${name}.png`), title: `${scene.title ?? name}: every skin (${label("after")})`, mobile: scene.mobile, width: Number(scene.viewport?.split("x")[0] ?? 1440), footer: "pnpm shots --skin all", gallery: true });
+    const made = await safeCompose(panels, { outFile: join(out, "compare", `gallery-${name}.png`), title: `${scene.title ?? name}: every skin (${label("after")})`, mobile: scene.mobile, width: Number(scene.viewport?.split("x")[0] ?? 1440), footer: "pnpm shots --skin all", gallery: true, dsf: scene.dsf });
     rows.push({ scene: name, gallery: true, count: panels.length, error: made.error });
   }
 } else {
@@ -551,7 +552,7 @@ if (args.skin === "all") {
         const panels = [...(bf ? [{ kind: "before", label: label("before"), file: bf }] : []), { kind: "after", label: label("after"), file: af }];
         if (bf && args.diff) panels.push({ kind: "diff", label: "what changed", file: af });
         const file = join(out, "compare", `${name}${skin ? `@${skin}` : ""}.png`);
-        const made = await safeCompose(panels, { outFile: file, title: `${name}${skin ? ` · skin ${skin}` : ""}: ${scene.title ?? ""}`, mobile: scene.mobile, width: Number(scene.viewport?.split("x")[0] ?? 1440), footer: `${sceneUrl("", scene, skin).replace(/^\//, "")}`, diff: args.diff });
+        const made = await safeCompose(panels, { outFile: file, title: `${name}${skin ? ` · skin ${skin}` : ""}: ${scene.title ?? ""}`, mobile: scene.mobile, width: Number(scene.viewport?.split("x")[0] ?? 1440), footer: `${sceneUrl("", scene, skin).replace(/^\//, "")}`, diff: args.diff, dsf: scene.dsf });
         row.compare = file;
         row.changed = made.stats?.changed ?? null;
         if (made.error) row.composeError = made.error;

@@ -4,6 +4,14 @@ import type { ProgressionStored } from "./machines/progression";
 import type { UnlockCard } from "../content/progression";
 import type { BuildingKind } from "../content/buildings";
 import type { CollusionState, Investigation } from "./collusion/state";
+import type { HearingState } from "./hearing/state";
+import type { YachtState } from "./yacht/state";
+import type { DefectionState } from "./defection/state";
+import type { NeoLabsState } from "./neolabs/state";
+import type { Meeting } from "./meetings";
+import type { PoachingState } from "./poaching/state";
+import type { AuditorsState } from "./auditors/state";
+import type { VisitorGroup } from "./groups";
 import type { NeedKey } from "../content/needs";
 import type { DisastersState } from "./disasters/types";
 import type { ArcStored } from "./machines/arc";
@@ -323,6 +331,26 @@ export interface GameState {
   disasters: DisastersState;
   /** FLT-18: opt-in Swarm pack; absent preserves legacy saves and baseline runs. */
   collusion?: CollusionState;
+  /** Regulatory capture, 0 to 100 (the `capture` stat; `capture.delta` moves it). Absent means 0. FLT-21 moves it, FLT-22 reads it. */
+  capture?: number;
+  /** FLT-21 The Hearing: absent until the pack is enabled (Level 5, Scrutiny). */
+  hearing?: HearingState;
+  /** FLT-24 the yacht summit: absent until the pack is enabled (Level 5, Scrutiny). */
+  yacht?: YachtState;
   /** Generic inquiries started by the Vocabulary; the owning machine completes them. */
   investigations?: Record<string, Investigation>;
+  /** FLT-26 Defection: opt-in pack (the ladder turns it on at Scrutiny); absent in legacy saves and baseline runs. */
+  defection?: DefectionState;
+  /** FLT-20 Poaching War: opt-in pack, same rules. */
+  poaching?: PoachingState;
+  /** Labs your own people founded (FLT-26, FLT-20): on the Arena beside the built-in rivals. */
+  neoLabs?: NeoLabsState;
+  /** A visitor talking to one of your people somewhere visible (sim/meetings.ts, the `people.meet` verb). */
+  meetings?: Meeting[];
+  /** FLT-19: visitor groups on campus (auditors today); absent until the first one arrives. */
+  groups?: VisitorGroup[];
+  /** FLT-19: presentation requests by walker kind (`agent: "box"` while the agents hide in cardboard boxes). Never read by sim logic. */
+  disguises?: Record<string, string>;
+  /** FLT-19: the Evals Without Borders pack; absent until enabled. */
+  auditors?: AuditorsState;
 }

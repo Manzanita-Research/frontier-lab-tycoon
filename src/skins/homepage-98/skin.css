@@ -893,6 +893,10 @@
       background: #ffff99;
       font-weight: 700;
     }
+    .h98-leak {
+      color: #cc0000;
+      font-weight: 700;
+    }
     .good {
       color: #006600;
     }

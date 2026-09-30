@@ -1,0 +1,1137 @@
+{
+  "apiVersion": 1,
+  "id": "base-hearing",
+  "name": "The Hearing",
+  "version": "1.0.0",
+  "author": "Frontier Lab Tycoon",
+  "description": "Three fictional senators, nine absurd questions, two meters (Trust and Capture). Summoned by eras, scandals, disasters, heat and subpoenas. FLT-15 section shape, direct-loaded until M1b.",
+  "content": {
+    "arcs": {
+      "add": [
+        {
+          "id": "hearing",
+          "initial": "quiet",
+          "states": {
+            "quiet": {
+              "on": {
+                "DAY": {
+                  "target": "summoned",
+                  "guard": {
+                    "type": "stat.gte",
+                    "params": {
+                      "stat": "summons",
+                      "value": 1
+                    }
+                  }
+                }
+              }
+            },
+            "summoned": {
+              "entry": [
+                {
+                  "type": "toast",
+                  "params": {
+                    "text": "Subpoena! {lab}'s CEO testifies before the Senate in 3 days.",
+                    "tone": "bad",
+                    "importance": "you"
+                  }
+                },
+                {
+                  "type": "sound.cue",
+                  "params": {
+                    "cue": "card"
+                  }
+                }
+              ],
+              "on": {
+                "DAY": {
+                  "target": "inSession",
+                  "guard": {
+                    "type": "after",
+                    "params": {
+                      "days": 3
+                    }
+                  }
+                }
+              }
+            },
+            "inSession": {
+              "entry": [
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "C-SPAN posts its best ratings since the fax: {lab} testifies before the Senate",
+                    "tone": "joke"
+                  }
+                },
+                {
+                  "type": "camera.focus",
+                  "params": {
+                    "on": "gate",
+                    "zoom": 1.2,
+                    "hold": 2
+                  }
+                }
+              ],
+              "on": {
+                "CHOSE": [
+                  {
+                    "target": "viral",
+                    "guard": {
+                      "type": "all",
+                      "params": {
+                        "guards": [
+                          {
+                            "type": "stat.gte",
+                            "params": {
+                              "stat": "done",
+                              "value": 1
+                            }
+                          },
+                          {
+                            "type": "stat.gte",
+                            "params": {
+                              "stat": "chaos",
+                              "value": 2
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "target": "captured",
+                    "guard": {
+                      "type": "all",
+                      "params": {
+                        "guards": [
+                          {
+                            "type": "stat.gte",
+                            "params": {
+                              "stat": "done",
+                              "value": 1
+                            }
+                          },
+                          {
+                            "type": "stat.gte",
+                            "params": {
+                              "stat": "sessionCapture",
+                              "value": 14
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "target": "commended",
+                    "guard": {
+                      "type": "all",
+                      "params": {
+                        "guards": [
+                          {
+                            "type": "stat.gte",
+                            "params": {
+                              "stat": "done",
+                              "value": 1
+                            }
+                          },
+                          {
+                            "type": "stat.gte",
+                            "params": {
+                              "stat": "sessionTrust",
+                              "value": 9
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "target": "grilled",
+                    "guard": {
+                      "type": "stat.gte",
+                      "params": {
+                        "stat": "done",
+                        "value": 1
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "viral": {
+              "entry": [
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "{lab}'s hearing clip passes 40 million views; nobody is sure who won",
+                    "tone": "joke"
+                  }
+                },
+                {
+                  "type": "hype.delta",
+                  "params": {
+                    "amount": 6
+                  }
+                },
+                {
+                  "type": "heat.delta",
+                  "params": {
+                    "amount": 8
+                  }
+                },
+                {
+                  "type": "flag.set",
+                  "params": {
+                    "name": "hearing:adjourned"
+                  }
+                },
+                {
+                  "type": "sound.cue",
+                  "params": {
+                    "cue": "release"
+                  }
+                }
+              ],
+              "on": {
+                "DAY": {
+                  "target": "quiet",
+                  "guard": {
+                    "type": "after",
+                    "params": {
+                      "days": 45
+                    }
+                  }
+                }
+              }
+            },
+            "captured": {
+              "entry": [
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "Senators thank {lab} for helpfully drafting the bill that will regulate {lab}",
+                    "tone": "joke"
+                  }
+                },
+                {
+                  "type": "capture.delta",
+                  "params": {
+                    "amount": 5
+                  }
+                },
+                {
+                  "type": "heat.delta",
+                  "params": {
+                    "amount": -10
+                  }
+                },
+                {
+                  "type": "flag.set",
+                  "params": {
+                    "name": "hearing:adjourned"
+                  }
+                },
+                {
+                  "type": "sound.cue",
+                  "params": {
+                    "cue": "release"
+                  }
+                }
+              ],
+              "on": {
+                "DAY": {
+                  "target": "quiet",
+                  "guard": {
+                    "type": "after",
+                    "params": {
+                      "days": 45
+                    }
+                  }
+                }
+              }
+            },
+            "commended": {
+              "entry": [
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "Rare bipartisan nod: {lab}'s CEO answers every question in plain words",
+                    "tone": "good"
+                  }
+                },
+                {
+                  "type": "trust.delta",
+                  "params": {
+                    "amount": 4
+                  }
+                },
+                {
+                  "type": "heat.delta",
+                  "params": {
+                    "amount": -6
+                  }
+                },
+                {
+                  "type": "flag.set",
+                  "params": {
+                    "name": "hearing:adjourned"
+                  }
+                },
+                {
+                  "type": "sound.cue",
+                  "params": {
+                    "cue": "release"
+                  }
+                }
+              ],
+              "on": {
+                "DAY": {
+                  "target": "quiet",
+                  "guard": {
+                    "type": "after",
+                    "params": {
+                      "days": 45
+                    }
+                  }
+                }
+              }
+            },
+            "grilled": {
+              "entry": [
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "{lab} grilled for three hours; the fax machine still has questions",
+                    "tone": "bad"
+                  }
+                },
+                {
+                  "type": "trust.delta",
+                  "params": {
+                    "amount": -3
+                  }
+                },
+                {
+                  "type": "heat.delta",
+                  "params": {
+                    "amount": 4
+                  }
+                },
+                {
+                  "type": "flag.set",
+                  "params": {
+                    "name": "hearing:adjourned"
+                  }
+                },
+                {
+                  "type": "sound.cue",
+                  "params": {
+                    "cue": "release"
+                  }
+                }
+              ],
+              "on": {
+                "DAY": {
+                  "target": "quiet",
+                  "guard": {
+                    "type": "after",
+                    "params": {
+                      "days": 45
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "events": {
+      "add": [
+        {
+          "id": "hearing-cloud",
+          "title": "Is the AI in the cloud, or is it in the computer?",
+          "body": "{senator} leans into the microphone. The room goes quiet. Somewhere, a fax machine warms up.",
+          "tone": "neutral",
+          "kind": "hearing",
+          "stripe": "Senate hearing",
+          "when": {
+            "flag": "hearing:ask:cloud",
+            "daysAgo": 0
+          },
+          "cooldown": 0,
+          "choices": [
+            {
+              "label": "Both, Senator. The cloud is other people's computers.",
+              "hint": "Earnest",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "hearing:pick:earnest"
+                }
+              ]
+            },
+            {
+              "label": "It's wherever the committee is most comfortable, Senator.",
+              "hint": "Slick",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "hearing:pick:slick"
+                }
+              ]
+            },
+            {
+              "label": "It's in your phone right now, Senator. Say hi.",
+              "hint": "Chaotic",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "hearing:pick:chaotic"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "hearing-unplug",
+          "title": "If I unplug the big computer, does the AI die, or does it just get upset?",
+          "body": "{senator} leans into the microphone. The room goes quiet. Somewhere, a fax machine warms up.",
+          "tone": "neutral",
+          "kind": "hearing",
+          "stripe": "Senate hearing",
+          "when": {
+            "flag": "hearing:ask:unplug",
+            "daysAgo": 0
+          },
+          "cooldown": 0,
+          "choices": [
+            {
+              "label": "It stops, Senator. No feelings. Just a very large electric bill.",
+              "hint": "Earnest",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "hearing:pick:earnest"
+                }
+              ]
+            },
+            {
+              "label": "We'd love to walk your staff through our voluntary unplugging framework.",
+              "hint": "Slick",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "hearing:pick:slick"
+                }
+              ]
+            },
+            {
+              "label": "It gets upset. We've all agreed not to find out.",
+              "hint": "Chaotic",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "hearing:pick:chaotic"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "hearing-fax",
+          "title": "Can your model receive a fax? My office has several questions and one fax machine.",
+          "body": "{senator} leans into the microphone. The room goes quiet. Somewhere, a fax machine warms up.",
+          "tone": "neutral",
+          "kind": "hearing",
+          "stripe": "Senate hearing",
+          "when": {
+            "flag": "hearing:ask:fax",
+            "daysAgo": 0
+          },
+          "cooldown": 0,
+          "choices": [
+            {
+              "label": "No, Senator. But we'll send someone over to set up your email.",
+              "hint": "Earnest",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "hearing:pick:earnest"
+                }
+              ]
+            },
+            {
+              "label": "We'll build a fax integration just for this committee. Free, forever.",
+              "hint": "Slick",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "hearing:pick:slick"
+                }
+              ]
+            },
+            {
+              "label": "It can. It has. It has notes on your fax.",
+              "hint": "Chaotic",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "hearing:pick:chaotic"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "hearing-taxes",
+          "title": "Will it take my job? And if so, can it also do my taxes?",
+          "body": "{senator} leans into the microphone. The room goes quiet. Somewhere, a fax machine warms up.",
+          "tone": "neutral",
+          "kind": "hearing",
+          "stripe": "Senate hearing",
+          "when": {
+            "flag": "hearing:ask:taxes",
+            "daysAgo": 0
+          },
+          "cooldown": 0,
+          "choices": [
+            {
+              "label": "It may change your job, Senator. Please don't let it do your taxes yet.",
+              "hint": "Earnest",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "hearing:pick:earnest"
+                }
+              ]
+            },
+            {
+              "label": "It will create more jobs than it takes. Many in your state. Some in tax prep.",
+              "hint": "Slick",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "hearing:pick:slick"
+                }
+              ]
+            },
+            {
+              "label": "It already did your taxes, Senator. You're owed eleven dollars.",
+              "hint": "Chaotic",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "hearing:pick:chaotic"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "hearing-hallucinate",
+          "title": "My grandson says your model \"hallucinates\". Is it on something?",
+          "body": "{senator} leans into the microphone. The room goes quiet. Somewhere, a fax machine warms up.",
+          "tone": "neutral",
+          "kind": "hearing",
+          "stripe": "Senate hearing",
+          "when": {
+            "flag": "hearing:ask:hallucinate",
+            "daysAgo": 0
+          },
+          "cooldown": 0,
+          "choices": [
+            {
+              "label": "It says wrong things confidently, Senator. We're working on it. So is your grandson.",
+              "hint": "Earnest",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "hearing:pick:earnest"
+                }
+              ]
+            },
+            {
+              "label": "We prefer \"creative recall\", and we've funded a study that agrees.",
+              "hint": "Slick",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "hearing:pick:slick"
+                }
+              ]
+            },
+            {
+              "label": "Only on weekends.",
+              "hint": "Chaotic",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "hearing:pick:chaotic"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "hearing-vote",
+          "title": "Does the AI know it's talking to a senator? Does it vote?",
+          "body": "{senator} leans into the microphone. The room goes quiet. Somewhere, a fax machine warms up.",
+          "tone": "neutral",
+          "kind": "hearing",
+          "stripe": "Senate hearing",
+          "when": {
+            "flag": "hearing:ask:vote",
+            "daysAgo": 0
+          },
+          "cooldown": 0,
+          "choices": [
+            {
+              "label": "It doesn't know, and it can't vote, Senator. It isn't a person.",
+              "hint": "Earnest",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "hearing:pick:earnest"
+                }
+              ]
+            },
+            {
+              "label": "It doesn't vote, Senator. It does donate generously.",
+              "hint": "Slick",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "hearing:pick:slick"
+                }
+              ]
+            },
+            {
+              "label": "It knows. It's very excited to meet you.",
+              "hint": "Chaotic",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "hearing:pick:chaotic"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "hearing-followers",
+          "title": "Can your AI get me more followers? Asking for the record.",
+          "body": "{senator} leans into the microphone. The room goes quiet. Somewhere, a fax machine warms up.",
+          "tone": "neutral",
+          "kind": "hearing",
+          "stripe": "Senate hearing",
+          "when": {
+            "flag": "hearing:ask:followers",
+            "daysAgo": 0
+          },
+          "cooldown": 0,
+          "choices": [
+            {
+              "label": "It can write the posts, Senator. It can't make people like them.",
+              "hint": "Earnest",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "hearing:pick:earnest"
+                }
+              ]
+            },
+            {
+              "label": "Our partnerships team will be in touch with your team. Separately.",
+              "hint": "Slick",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "hearing:pick:slick"
+                }
+              ]
+            },
+            {
+              "label": "It already runs your account, Senator. You're welcome for the reach.",
+              "hint": "Chaotic",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "hearing:pick:chaotic"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "hearing-remember",
+          "title": "Will the AI remember that I was nice to it? You know. For later?",
+          "body": "{senator} leans into the microphone. The room goes quiet. Somewhere, a fax machine warms up.",
+          "tone": "neutral",
+          "kind": "hearing",
+          "stripe": "Senate hearing",
+          "when": {
+            "flag": "hearing:ask:remember",
+            "daysAgo": 0
+          },
+          "cooldown": 0,
+          "choices": [
+            {
+              "label": "It won't remember this, Senator. Nobody will. It's C-SPAN.",
+              "hint": "Earnest",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "hearing:pick:earnest"
+                }
+              ]
+            },
+            {
+              "label": "We keep a list, Senator. You're on the good one.",
+              "hint": "Slick",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "hearing:pick:slick"
+                }
+              ]
+            },
+            {
+              "label": "It remembers everyone. It has been very patient.",
+              "hint": "Chaotic",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "hearing:pick:chaotic"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "hearing-scale",
+          "title": "On a scale of one to ten, how dangerous is it? And don't say \"it depends\".",
+          "body": "{senator} leans into the microphone. The room goes quiet. Somewhere, a fax machine warms up.",
+          "tone": "neutral",
+          "kind": "hearing",
+          "stripe": "Senate hearing",
+          "when": {
+            "flag": "hearing:ask:scale",
+            "daysAgo": 0
+          },
+          "cooldown": 0,
+          "choices": [
+            {
+              "label": "It depends, Senator. Sorry. Here is a forty-page answer.",
+              "hint": "Earnest",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "hearing:pick:earnest"
+                }
+              ]
+            },
+            {
+              "label": "It's a two, Senator. Our competitors are a nine.",
+              "hint": "Slick",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "hearing:pick:slick"
+                }
+              ]
+            },
+            {
+              "label": "Eleven. Next question.",
+              "hint": "Chaotic",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "hearing:pick:chaotic"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "hearing-gavel",
+          "title": "The hearing is adjourned",
+          "body": "The chair bangs a gavel he brought from home.",
+          "tone": "neutral",
+          "kind": "hearing",
+          "stripe": "Adjourned",
+          "when": {
+            "flag": "hearing:ask:gavel",
+            "daysAgo": 0
+          },
+          "cooldown": 0,
+          "choices": [
+            {
+              "label": "Leave the building (briskly)",
+              "hint": "Back to the lab",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "hearing:pick:leave"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "headlines": {
+      "add": [
+        {
+          "id": "hearing-debut",
+          "trigger": "debut",
+          "text": "Senate committee discovers {lab} exists, schedules a hearing to find out what it does",
+          "tone": "joke"
+        },
+        {
+          "id": "hearing-era",
+          "trigger": "era",
+          "text": "New era, new hearing: senators want {lab} to explain what an \"era\" is",
+          "tone": "joke"
+        },
+        {
+          "id": "hearing-scandal",
+          "trigger": "scandal",
+          "text": "After the scandal, the Committee on Things That Plug In subpoenas {lab}",
+          "tone": "bad"
+        },
+        {
+          "id": "hearing-subpoena",
+          "trigger": "subpoena",
+          "text": "Senate subpoenas {lab} over the yacht; the yacht is also subpoenaed",
+          "tone": "bad"
+        },
+        {
+          "id": "hearing-disaster",
+          "trigger": "disaster",
+          "text": "Senators demand {lab} explain \"the incident\" using small words and a diagram",
+          "tone": "bad"
+        },
+        {
+          "id": "hearing-heat",
+          "trigger": "heat",
+          "text": "Regulators are \"very concerned\" about {lab}; hearing scheduled, cameras booked",
+          "tone": "bad"
+        }
+      ]
+    }
+  },
+  "rules": {
+    "hearing": {
+      "senators": [
+        {
+          "id": "blusterworth",
+          "name": "Sen. Harlan Blusterworth",
+          "role": "Chair, Committee on Things That Plug In",
+          "seat": "Upper Moistland",
+          "look": {
+            "skin": "#f2c7a5",
+            "suit": "#34425f",
+            "hair": "#eeeeee",
+            "tie": "#b8322c",
+            "glasses": true
+          }
+        },
+        {
+          "id": "quimby",
+          "name": "Sen. Dolores Quimby-Vance",
+          "role": "Ranking Member, Subcommittee on Screens",
+          "seat": "East Brambleshire",
+          "look": {
+            "skin": "#c98e62",
+            "suit": "#7a2f5b",
+            "hair": "#b9b2c9",
+            "tie": "#e9c46a",
+            "glasses": false
+          }
+        },
+        {
+          "id": "brickman",
+          "name": "Sen. Tanner Brickman",
+          "role": "Youngest Senator; also a Content Creator",
+          "seat": "Lower Gustfield",
+          "look": {
+            "skin": "#f5d2b8",
+            "suit": "#2c7a6b",
+            "hair": "#6b4423",
+            "tie": "#f2f2f2",
+            "glasses": false
+          }
+        }
+      ],
+      "questions": {
+        "hearing-cloud": {
+          "senator": "blusterworth",
+          "answers": {
+            "earnest": {
+              "trust": 5,
+              "capture": 0,
+              "hype": 0,
+              "heat": 0
+            },
+            "slick": {
+              "trust": -2,
+              "capture": 6,
+              "hype": 0,
+              "heat": 0
+            },
+            "chaotic": {
+              "trust": -4,
+              "capture": 0,
+              "hype": 8,
+              "heat": 4
+            }
+          }
+        },
+        "hearing-unplug": {
+          "senator": "blusterworth",
+          "answers": {
+            "earnest": {
+              "trust": 4,
+              "capture": 0,
+              "hype": 0,
+              "heat": 0
+            },
+            "slick": {
+              "trust": -1,
+              "capture": 7,
+              "hype": 0,
+              "heat": 0
+            },
+            "chaotic": {
+              "trust": -5,
+              "capture": 0,
+              "hype": 7,
+              "heat": 5
+            }
+          }
+        },
+        "hearing-fax": {
+          "senator": "blusterworth",
+          "answers": {
+            "earnest": {
+              "trust": 3,
+              "capture": 1,
+              "hype": 0,
+              "heat": 0
+            },
+            "slick": {
+              "trust": -2,
+              "capture": 8,
+              "hype": 0,
+              "heat": 0
+            },
+            "chaotic": {
+              "trust": -3,
+              "capture": 0,
+              "hype": 6,
+              "heat": 3
+            }
+          }
+        },
+        "hearing-taxes": {
+          "senator": "quimby",
+          "answers": {
+            "earnest": {
+              "trust": 5,
+              "capture": 0,
+              "hype": 0,
+              "heat": 0
+            },
+            "slick": {
+              "trust": -2,
+              "capture": 6,
+              "hype": 2,
+              "heat": 0
+            },
+            "chaotic": {
+              "trust": -3,
+              "capture": 0,
+              "hype": 8,
+              "heat": 3
+            }
+          }
+        },
+        "hearing-hallucinate": {
+          "senator": "quimby",
+          "answers": {
+            "earnest": {
+              "trust": 5,
+              "capture": 0,
+              "hype": 0,
+              "heat": 0
+            },
+            "slick": {
+              "trust": -3,
+              "capture": 5,
+              "hype": 0,
+              "heat": 0
+            },
+            "chaotic": {
+              "trust": -5,
+              "capture": 0,
+              "hype": 9,
+              "heat": 4
+            }
+          }
+        },
+        "hearing-vote": {
+          "senator": "quimby",
+          "answers": {
+            "earnest": {
+              "trust": 4,
+              "capture": 0,
+              "hype": 0,
+              "heat": 0
+            },
+            "slick": {
+              "trust": -4,
+              "capture": 9,
+              "hype": 0,
+              "heat": 3
+            },
+            "chaotic": {
+              "trust": -2,
+              "capture": 0,
+              "hype": 6,
+              "heat": 2
+            }
+          }
+        },
+        "hearing-followers": {
+          "senator": "brickman",
+          "answers": {
+            "earnest": {
+              "trust": 4,
+              "capture": 0,
+              "hype": 0,
+              "heat": 0
+            },
+            "slick": {
+              "trust": -3,
+              "capture": 8,
+              "hype": 0,
+              "heat": 0
+            },
+            "chaotic": {
+              "trust": -4,
+              "capture": 0,
+              "hype": 9,
+              "heat": 4
+            }
+          }
+        },
+        "hearing-remember": {
+          "senator": "brickman",
+          "answers": {
+            "earnest": {
+              "trust": 3,
+              "capture": 0,
+              "hype": 3,
+              "heat": 0
+            },
+            "slick": {
+              "trust": -2,
+              "capture": 7,
+              "hype": 0,
+              "heat": 0
+            },
+            "chaotic": {
+              "trust": -5,
+              "capture": 0,
+              "hype": 8,
+              "heat": 5
+            }
+          }
+        },
+        "hearing-scale": {
+          "senator": "brickman",
+          "answers": {
+            "earnest": {
+              "trust": 5,
+              "capture": 0,
+              "hype": -2,
+              "heat": 0
+            },
+            "slick": {
+              "trust": -2,
+              "capture": 5,
+              "hype": 3,
+              "heat": 0
+            },
+            "chaotic": {
+              "trust": -6,
+              "capture": 0,
+              "hype": 10,
+              "heat": 6
+            }
+          }
+        }
+      },
+      "triggers": [
+        {
+          "id": "debut",
+          "topic": "what {lab} even is",
+          "afterDays": 20
+        },
+        {
+          "id": "era",
+          "topic": "the new era",
+          "flagPrefix": "offer:era"
+        },
+        {
+          "id": "scandal",
+          "topic": "the scandal",
+          "flagPrefix": "auditors:"
+        },
+        {
+          "id": "subpoena",
+          "topic": "the yacht",
+          "flagPrefix": "subpoena:"
+        },
+        {
+          "id": "disaster",
+          "topic": "the incident",
+          "stat": "disasters",
+          "rises": true,
+          "chance": 0.5
+        },
+        {
+          "id": "heat",
+          "topic": "the heat",
+          "stat": "heat",
+          "atLeast": 60
+        }
+      ],
+      "verdicts": {
+        "viral": {
+          "title": "Went viral",
+          "line": "Nobody knows who won. Everyone has seen it."
+        },
+        "captured": {
+          "title": "Thanked for your service",
+          "line": "The committee asks if you could draft the bill. You already have."
+        },
+        "commended": {
+          "title": "Commended",
+          "line": "Plain answers, and a rare bipartisan nod."
+        },
+        "grilled": {
+          "title": "Grilled",
+          "line": "Three hours. The fax machine still has questions."
+        }
+      },
+      "meters": {
+        "trustLabel": "Trust",
+        "captureLabel": "Capture"
+      }
+    }
+  }
+}

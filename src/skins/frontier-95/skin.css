@@ -712,6 +712,11 @@
       background: var(--flt-color-selection);
       color: var(--flt-color-selectionText);
     }
+    /* the rival running your leaked weights (FLT-32) */
+    .f95-leak {
+      color: var(--flt-color-bad);
+      font-style: normal;
+    }
     &.moved-up span:last-child,
     .up {
       color: var(--flt-color-good);
@@ -1287,13 +1292,15 @@
 
   /* A folded window is its title bar and nothing else (the Task Mangler's title carries the R&D number). */
   .f95-tasks:not(.open) > :not(.f95-tb),
-  .f95-thoughts:not(.open) > :not(.f95-tb) {
+  .f95-thoughts:not(.open) > :not(.f95-tb),
+  .f95-papers:not(.open) > :not(.f95-tb) {
     display: none;
   }
 
   /* A folded window is its title bar and nothing else (the Task Mangler's title carries the R&D number). */
   .f95-tasks:not(.open) > :not(.f95-tb),
-  .f95-thoughts:not(.open) > :not(.f95-tb) {
+  .f95-thoughts:not(.open) > :not(.f95-tb),
+  .f95-papers:not(.open) > :not(.f95-tb) {
     display: none;
   }
 
@@ -1679,6 +1686,147 @@
       margin: 0;
       padding: 8px 10px;
     }
+  }
+
+  /* ---- disasters (FLT-32) ---- */
+  .f95-dz-stack {
+    display: grid;
+    gap: 4px;
+    pointer-events: auto;
+  }
+  .f95-left > .f95-dz-stack {
+    display: none;
+  }
+  .f95-dz-err {
+    width: 100%;
+    &.stage-active,
+    &.stage-warning {
+      animation: frontier-95-dzshake 0.5s steps(4) 2;
+    }
+    &.folded .f95-tb {
+      cursor: pointer;
+    }
+    .f95-errbody {
+      align-items: flex-start;
+      padding-top: 8px;
+    }
+    .f95-row {
+      justify-content: center;
+    }
+  }
+  .f95-dz-head {
+    font-weight: bold;
+  }
+  .f95-dz-line {
+    margin-top: 4px !important;
+    font-size: 15px;
+  }
+  .f95-dz-prog {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px 0;
+    .f95-prog {
+      height: 18px;
+      padding: 2px;
+    }
+    small {
+      font-size: 14px;
+    }
+  }
+  .f95-dz-short {
+    margin: 6px 12px 0;
+    font-size: 15px;
+    &.all {
+      color: var(--flt-color-bad);
+      font-weight: bold;
+      animation: frontier-95-blink 1s steps(2) infinite;
+    }
+  }
+  .f95-dz-details {
+    margin: 8px 12px 0;
+    padding: 4px 6px;
+    font: 13px/1.25 "Courier New", monospace;
+    white-space: pre-wrap;
+  }
+  .f95-dz-applet {
+    width: min(480px, calc(100vw - 20px));
+    max-height: calc(100dvh - 20px);
+    overflow: auto;
+    fieldset {
+      display: grid;
+      gap: 4px;
+      border: 1px solid var(--sh);
+      box-shadow: 1px 1px 0 var(--hl);
+      margin: 0 0 8px;
+      padding: 6px 10px 8px;
+    }
+    small {
+      font-size: 14px;
+      color: var(--flt-color-textDim);
+    }
+  }
+  .f95-dz-lede {
+    margin: 0 0 8px;
+  }
+  .f95-dz-risk {
+    grid-template-columns: repeat(4, auto);
+    justify-content: start;
+    column-gap: 16px !important;
+    small {
+      grid-column: 1 / -1;
+    }
+  }
+  .f95-dz-listbox ul {
+    margin: 0;
+    padding: 2px;
+    list-style: none;
+    button {
+      display: grid;
+      grid-template-columns: 26px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+      padding: 2px 4px;
+      border: 0;
+      background: none;
+      color: inherit;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+      &.on {
+        background: var(--flt-color-selection);
+        color: var(--flt-color-selectionText);
+        outline: 1px dotted #fff;
+        outline-offset: -1px;
+      }
+      &:disabled {
+        cursor: default;
+        color: var(--sh);
+      }
+      &.live .st {
+        color: var(--flt-color-bad);
+      }
+    }
+    .st {
+      font-size: 13px;
+    }
+  }
+  .f95-dz-meters {
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    column-gap: 8px !important;
+    .f95-prog {
+      height: 18px;
+      padding: 2px;
+    }
+    .v {
+      font-size: 14px;
+    }
+  }
+  .f95-dz-yes {
+    color: var(--flt-color-bad);
   }
 
   /* ---- applications ---- */
@@ -2454,6 +2602,116 @@
   .f95-stream {
     width: min(640px, 100%);
   }
+  .f95-tag {
+    font-style: normal;
+    font-size: 13px;
+    &.tag-new {
+      color: var(--flt-color-good);
+    }
+    &.tag-nemesis {
+      color: var(--flt-color-bad);
+      animation: frontier-95-blink 1s steps(2) infinite;
+    }
+  }
+  .f95-tip.speech {
+    background: #fff;
+    b::after {
+      content: " says:";
+      font-weight: normal;
+    }
+  }
+  /* FLT-26/FLT-20 drama cards: the document is the card's picture. */
+  .f95-drama {
+    width: min(600px, 100%);
+    .f95-page {
+      margin: 4px 6px;
+      max-height: 38vh;
+      overflow: auto;
+      background: #fff;
+      color: #000;
+      p {
+        margin: 0 0 8px;
+      }
+    }
+    .f95-sign {
+      white-space: pre-line;
+    }
+  }
+  .f95-wordbar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 8px 4px;
+    box-shadow: var(--etched);
+    .f95-font {
+      padding: 1px 6px;
+      background: #fff;
+      font-size: 14px;
+    }
+    b,
+    i,
+    u {
+      width: 20px;
+      text-align: center;
+      font-family: "Times New Roman", Times, serif;
+    }
+  }
+  .f95-wordpad {
+    padding: 10px 0;
+    background: #808080 !important;
+    .f95-paper {
+      margin: 0 auto;
+      width: calc(100% - 32px);
+      padding: 18px 22px;
+      background: #fff;
+      box-shadow: 2px 2px 0 #000;
+      font-family: "Times New Roman", Times, serif;
+      font-size: 17px;
+      line-height: 1.3;
+    }
+    .f95-subject {
+      font-weight: bold;
+      text-decoration: underline;
+    }
+  }
+  .f95-mailhead {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 3px 8px;
+    align-items: center;
+    margin: 4px 6px 0;
+    dt {
+      text-align: right;
+      font-size: 15px;
+    }
+    dd {
+      margin: 0;
+      padding: 1px 6px;
+      background: #fff;
+      color: #000;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+  .f95-mail {
+    padding: 10px 12px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 15px;
+  }
+  .f95-notepad {
+    padding: 8px 10px;
+    text-align: left;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 15px;
+    line-height: 1.3;
+    white-space: pre-wrap;
+    .f95-cursor {
+      width: 8px;
+      height: 16px;
+      background: #000;
+    }
+  }
   .f95-player {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 190px;
@@ -2628,7 +2886,9 @@
     .f95-dog,
     .f95-dog .tail,
     .f95-dog .legs,
-    .f95-spin {
+    .f95-spin,
+    .f95-dz-err,
+    .f95-dz-short.all {
       animation: none;
     }
   }
@@ -2715,6 +2975,12 @@
     .f95-notes {
       width: 100%;
     }
+    .f95-left > .f95-dz-stack {
+      display: grid;
+    }
+    .f95-side > .f95-dz-stack {
+      display: none;
+    }
     .f95-post {
       width: 100%;
       &.head {
@@ -2753,7 +3019,8 @@
     .f95-props,
     .f95-staff,
     .f95-tasks.open,
-    .f95-thoughts.open {
+    .f95-thoughts.open,
+    .f95-papers.open {
       position: fixed;
       left: 4px;
       right: 4px;
@@ -2767,7 +3034,8 @@
       display: none;
     }
     .f95-tasks:not(.open) .f95-tb,
-    .f95-thoughts:not(.open) .f95-tb {
+    .f95-thoughts:not(.open) .f95-tb,
+    .f95-papers:not(.open) .f95-tb {
       height: 32px;
       .f95-b::after {
         inset: -8px -2px;
@@ -2854,6 +3122,13 @@
     }
     .f95-msgbox {
       width: 100%;
+    }
+    .f95-drama .f95-page {
+      max-height: 30vh;
+    }
+    .f95-wordpad .f95-paper {
+      padding: 12px 14px;
+      font-size: 15px;
     }
     .f95-player {
       grid-template-columns: 1fr;
@@ -2946,5 +3221,588 @@
 @keyframes frontier-95-turn {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* ---- Publish or Perish, the arXive moments, the evidence and CrumbWiki (FLT-45, FLT-46) ---- */
+[data-skin="frontier-95"] {
+  .f95-papers.alert > .f95-tb {
+    background: var(--flt-color-bad);
+  }
+  .f95-papers-top {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px;
+    padding: 8px 8px 4px;
+    align-items: start;
+    fieldset {
+      display: grid;
+      gap: 4px;
+      border: 1px solid var(--sh);
+      box-shadow: 1px 1px 0 var(--hl);
+      margin: 0;
+      padding: 4px 10px 8px;
+    }
+    label {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      min-height: 26px;
+    }
+  }
+  .f95-papers-facts {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+    .f95-papers-rep {
+      padding: 2px 8px;
+      font-family: var(--flt-font-numbers);
+      font-size: 22px;
+    }
+  }
+  .f95-papers-blurb {
+    margin: 0 8px 4px;
+    font-size: 14px;
+    color: var(--flt-color-textDim);
+  }
+  .f95-papers-list {
+    margin: 4px;
+    max-height: 320px;
+    overflow: auto;
+    font-size: 15px;
+  }
+  .f95-papers-empty {
+    margin: 8px;
+    color: var(--flt-color-textDim);
+  }
+  .f95-paper-row {
+    display: grid;
+    gap: 2px;
+    padding: 6px 8px;
+    border-bottom: 1px dotted var(--sh);
+    b {
+      line-height: 1.2;
+    }
+    small {
+      font-size: 13px;
+      color: var(--flt-color-textDim);
+    }
+    &.status-draft {
+      background: var(--flt-color-selection);
+      color: var(--flt-color-selectionText);
+      small {
+        color: inherit;
+      }
+    }
+    .f95-row.left {
+      justify-content: flex-start;
+      padding: 4px 0 0;
+    }
+    .f95-prog {
+      height: 16px;
+      padding: 2px;
+    }
+  }
+  .f95-paper-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-family: var(--flt-font-mono);
+    font-size: 13px;
+    .st.tone-good {
+      color: var(--flt-color-good);
+    }
+    .st.tone-bad {
+      color: var(--flt-color-bad);
+    }
+  }
+  .status-draft .f95-paper-top .st {
+    color: inherit;
+  }
+
+  .f95-moment {
+    width: min(720px, calc(100vw - 20px));
+    max-height: calc(100dvh - 20px);
+    display: flex;
+    flex-direction: column;
+    &.moment-award {
+      width: min(560px, calc(100vw - 20px));
+    }
+  }
+  .f95-moment-page,
+  .f95-wikipage {
+    margin: 4px;
+    padding: 10px 14px;
+    overflow: auto;
+    min-height: 0;
+    flex: 1;
+    background: #fff;
+    color: #000;
+  }
+  .f95-moment .f95-row .f95-btn {
+    min-height: 32px;
+  }
+
+  .evidence {
+    margin: 4px 14px;
+    padding: 6px;
+    background: var(--g);
+    box-shadow: var(--sunk);
+    border-radius: 0;
+  }
+  .evidence-log {
+    font-size: 13px;
+    border-radius: 0;
+  }
+  .evidence-label,
+  .evidence-note {
+    font-size: 13px;
+  }
+
+  .f95-wiki {
+    width: min(960px, calc(100vw - 20px));
+    .wiki {
+      border-radius: 0;
+    }
+  }
+  @media (max-width: 640px) {
+    .f95-papers-top {
+      grid-template-columns: 1fr;
+    }
+    .f95-moment .f95-toolbar .f95-btn,
+    .f95-wiki .f95-toolbar .f95-btn,
+    .f95-wiki .f95-menubar {
+      display: none;
+    }
+  }
+}
+@keyframes frontier-95-dzshake {
+  25% {
+    translate: -3px 0;
+  }
+  75% {
+    translate: 3px 0;
+  }
+}
+
+/* The Circus (FLT-21, FLT-24): CapitolCam (the Hearing) and Chat-o-Matic 95 (the leaked yacht chat). */
+[data-skin="frontier-95"] {
+  .f95-hearing,
+  .f95-leak {
+    width: min(620px, 100%);
+  }
+  .f95-tiles {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+    margin: 4px;
+  }
+  .f95-tile {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    margin: 0;
+    padding: 8px 0 0;
+    background: repeating-linear-gradient(0deg, #08081a 0 2px, #101030 2px 4px);
+    figcaption {
+      width: 100%;
+      margin-top: 4px;
+      padding: 1px 4px;
+      background: #000;
+      color: #fff;
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: center;
+    }
+    small {
+      color: #c0c0c0;
+    }
+    .f95-onair {
+      left: 4px;
+      top: 4px;
+      font-size: 12px;
+    }
+    &.speaking {
+      outline: 3px solid #ffe000;
+      outline-offset: -3px;
+      figcaption {
+        background: var(--navy);
+      }
+    }
+    &:not(.speaking) .f95-senator {
+      filter: grayscale(0.55) brightness(0.8);
+    }
+  }
+  .f95-senator {
+    width: 64px;
+    height: 86px;
+  }
+  .f95-stamp {
+    position: absolute;
+    right: 4px;
+    top: 26px;
+    padding: 0 5px;
+    border: 2px solid #000;
+    background: #ffe000;
+    color: #000;
+    font-size: 12px;
+    text-transform: uppercase;
+    transform: rotate(8deg);
+    &.a-earnest {
+      background: #80ff80;
+    }
+    &.a-slick {
+      background: #c0a0ff;
+    }
+    &.a-chaotic {
+      background: #ff8040;
+    }
+  }
+  .f95-asker {
+    display: block;
+    color: #000080;
+  }
+  .f95-meters {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 4px 14px 0;
+    padding: 4px 10px 8px;
+    border: 1px solid var(--sh);
+    box-shadow: 1px 1px 0 var(--hl);
+    label {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 6px;
+    }
+    .f95-prog {
+      height: 16px;
+    }
+  }
+  .f95-move {
+    margin-left: 6px;
+    padding: 0 3px;
+    white-space: nowrap;
+    &.up {
+      background: #c0ffc0;
+      color: #006000;
+    }
+    &.down {
+      background: #ffc0c0;
+      color: #a00000;
+    }
+    &.sly {
+      background: #e0d0ff;
+      color: #400080;
+    }
+  }
+  .f95-leakpane {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 150px;
+    gap: 4px;
+    margin: 4px;
+    overflow: hidden;
+  }
+  .f95-log,
+  .f95-members {
+    margin: 0;
+    padding: 4px 6px;
+    list-style: none;
+    background: #fff;
+    font-size: 14px;
+    li {
+      line-height: 1.2;
+    }
+  }
+  .f95-log {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-height: 250px;
+    overflow-y: auto;
+    .ts {
+      color: #808080;
+    }
+    .sys {
+      color: #008000;
+    }
+    .you {
+      background: #ffffc0;
+    }
+  }
+  .f95-members li {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .f95-leaked {
+    position: absolute;
+    right: 14px;
+    bottom: 18px;
+    padding: 0 14px;
+    border: 5px solid #e00000;
+    color: #e00000;
+    font-family: var(--flt-font-display);
+    font-size: 40px;
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    opacity: 0.85;
+    pointer-events: none;
+    transform: rotate(-12deg);
+    animation: frontier-95-stamp 0.4s steps(3) 0.3s both;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .f95-leaked {
+      animation: none;
+    }
+  }
+  @media (max-width: 640px) {
+    .f95-senator {
+      width: 44px;
+      height: 60px;
+    }
+    .f95-tile small {
+      display: none;
+    }
+    .f95-meters {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+    .f95-leakpane {
+      grid-template-columns: 1fr;
+    }
+    .f95-members {
+      display: none;
+    }
+    .f95-log {
+      max-height: 180px;
+    }
+    .f95-leaked {
+      font-size: 30px;
+    }
+  }
+}
+@keyframes frontier-95-stamp {
+  from {
+    opacity: 0;
+    transform: rotate(-12deg) scale(2.5);
+  }
+}
+
+/* Evals Without Borders (FLT-19): REPORT.DOC in a word processor, and a sticky-note-sized file-copy dialog over the auditors. */
+[data-skin="frontier-95"] {
+  .f95-report {
+    width: min(600px, 100%);
+    max-height: calc(100dvh - 20px);
+    overflow: auto;
+    .f95-choices {
+      padding-top: 6px;
+    }
+  }
+  .f95-report-well {
+    margin: 0 6px;
+    padding: 10px;
+    background: #808080;
+  }
+  .f95-report-page {
+    position: relative;
+    padding: 16px 20px 14px;
+    background: #fff;
+    color: #000;
+    font-family: "Times New Roman", Times, serif;
+    box-shadow: 3px 3px 0 #000;
+    -webkit-font-smoothing: auto;
+    header {
+      position: relative;
+      padding-right: 70px;
+      border-bottom: 2px solid #000;
+      margin-bottom: 6px;
+    }
+    small {
+      font: 13px var(--flt-font-ui);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    h2 {
+      margin: 2px 0 2px;
+      font-size: 22px;
+      line-height: 1.1;
+    }
+    header p {
+      margin: 0 0 6px;
+      font-size: 14px;
+      font-style: italic;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 15px;
+    }
+    th,
+    td {
+      padding: 3px 4px;
+      border-bottom: 1px dotted #000;
+      text-align: left;
+      vertical-align: middle;
+    }
+    th {
+      white-space: nowrap;
+    }
+    td.g {
+      width: 28px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+    }
+    td.r {
+      font-size: 13.5px;
+      font-style: italic;
+      color: #202020;
+    }
+    .grade-D td.g,
+    .grade-F td.g {
+      color: #c00000;
+    }
+    .grade-A td.g,
+    .grade-B td.g {
+      color: #005a00;
+    }
+  }
+  .f95-report-overall {
+    position: absolute;
+    right: 0;
+    top: 2px;
+    display: grid;
+    place-items: center;
+    width: 58px;
+    height: 58px;
+    border: 3px solid #c00000;
+    border-radius: 50%;
+    color: #c00000;
+    font: bold 36px/1 "Times New Roman", Times, serif;
+    transform: rotate(-9deg);
+  }
+  .overall-A .f95-report-overall,
+  .overall-B .f95-report-overall {
+    border-color: #005a00;
+    color: #005a00;
+  }
+  .f95-report-headline {
+    margin: 8px 0 0;
+    font-size: 15px;
+    font-weight: bold;
+    &::before {
+      content: "FRONTIER TIMES \2014  ";
+      font: 12px var(--flt-font-ui);
+      letter-spacing: 0.06em;
+    }
+  }
+  .f95-report-stamp {
+    position: absolute;
+    left: 50%;
+    top: 46%;
+    padding: 2px 12px;
+    border: 5px double #c00000;
+    color: #c00000;
+    font: 34px/1.05 var(--flt-font-display);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    opacity: 0.82;
+    mix-blend-mode: multiply;
+    pointer-events: none;
+    transform: translate(-50%, -50%) rotate(-12deg);
+    animation: frontier-95-stamp 0.4s steps(4, end) both 0.25s;
+  }
+  .f95-report-moves {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 8px 14px 0;
+    span {
+      padding: 1px 8px;
+      font-size: 15px;
+      box-shadow: var(--sunk);
+      background: #fff;
+    }
+    .tone-good {
+      color: var(--flt-color-good);
+    }
+    .tone-bad {
+      color: var(--flt-color-bad);
+    }
+  }
+  .audit-anchor {
+    transform: translate(-50%, -100%);
+  }
+  .f95-auditpin {
+    width: max-content;
+    min-width: 188px;
+    max-width: 280px;
+    .f95-tb {
+      padding: 1px 2px;
+      min-height: 0;
+    }
+    .f95-tt {
+      font-size: 13px;
+    }
+    &.evals .f95-tb {
+      background: #808000;
+    }
+  }
+  .f95-auditpin-in {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 4px 6px 5px;
+    font-size: 14px;
+    line-height: 1.1;
+    .ln {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .f95-prog {
+      height: 14px;
+      padding: 2px;
+      i {
+        background: repeating-linear-gradient(90deg, var(--navy) 0 6px, transparent 6px 8px);
+      }
+    }
+    .st {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12.5px;
+      color: var(--flt-color-textDim);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .f95-report-stamp {
+      animation: none;
+    }
+  }
+  @media (max-width: 640px) {
+    .f95-report {
+      width: 100%;
+    }
+    .f95-report-page {
+      padding: 12px 12px 10px;
+      td.r {
+        display: none;
+      }
+    }
+    .f95-report-stamp {
+      font-size: 26px;
+    }
+  }
+}
+@keyframes frontier-95-stamp {
+  from {
+    transform: translate(-50%, -50%) rotate(-12deg) scale(2.2);
+    opacity: 0;
   }
 }

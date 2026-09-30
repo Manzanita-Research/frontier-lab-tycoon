@@ -1,6 +1,6 @@
 # Disasters (FLT-17): acts of God, as data
 
-_Sim side. The Disasters menu and the `DisasterAlert` skin slot are FLT-32 (a Sonnet sub-task, after FLT-14). Spec: `docs/specs/FLT-17.md`. Written by the FLT-17 builder (Sonnet 5.5)._
+_Sim side. The Disasters menu and the `DisasterAlert` skin slot are FLT-32 (see "The UI" below). Spec: `docs/specs/FLT-17.md`. Written by the FLT-17 builder (Sonnet 5.5)._
 
 A disaster is **content**: a JSON statechart in a pack (`mods/base-disasters/mod.json`, the FLT-15 section shape, `content.disasters.add`). The engine compiles it to an XState machine, steps it with the pure `transition()` inside the tick, and applies what it emits through a small **Vocabulary** of generic verbs (`src/sim/verbs.ts`). There is no disaster-specific code in the engine: the five disasters that ship are all data, and the second wave (Viral Jailbreak, Grid Brownout) needed one new generic verb (`discourse.delta`) and three new stats.
 
@@ -72,6 +72,7 @@ Guards (pure; `stat.*` read the lab's stats by name):
 | `flag.is` | flag: string, set?: boolean | The flag is set (or, with `set: false`, is not). Only mod arcs see flags: a disaster's beat carries none. |
 | `not` | guard: call | The other guard does not hold. |
 | `any` | guards: calls | At least one of these guards holds (a plain list of guards means all of them). |
+| `all` | guards: calls | Every one of these guards holds (a transition's `guard` is one call, so this is how it asks for two). |
 
 Verbs (run by the driver, in order, after each transition):
 
@@ -91,6 +92,7 @@ Verbs (run by the driver, in order, after each transition):
 | `hype.delta` | amount: number | Add to hype (0 to 100). |
 | `trust.delta` | amount: number | Add to public trust (0 to 100, starts at 50). |
 | `heat.delta` | amount: number | Add to regulatory heat (0 to 100, starts at 0). FLT-19's auditors read it. |
+| `capture.delta` | amount: number | Add to regulatory capture (0 to 100, starts at 0): how much of the rulebook the lab wrote. The Hearing (FLT-21) moves it; FLT-22 reads it. |
 | `discourse.delta` | amount: number | Add to the water discourse (the stat behind the protesters at the gate; 4 points is one protester). |
 | `cash.delta` | amount: number | Add to (or, negative, take from) the bank. |
 | `rival.leap` | relative: number, open?: boolean | The most open-weights lab jumps to `relative` times yours (-0.1 is 10% below your capability; it never goes down) and, with `open`, ships open weights. Sets `{leapRival}` and `{leapModel}` for the disaster's headlines. |
@@ -99,11 +101,21 @@ Verbs (run by the driver, in order, after each transition):
 | `sound.cue` | cue: string | Play a sound cue: `alarm` (FLT-7's breakdown alarm), `card`, `era` or `release`. |
 | `news` | text: string, tone?: string | A ticker headline. `{lab}`, `{model}`, `{rival}`, `{cash}` and `{target}` are filled in, plus whatever the disaster's verbs set (`{leapRival}`). |
 | `toast` | text: string, tone?: string, source?: string, importance?: string | A notice (same template variables as `news`). `importance` is `world` (the default: it goes to the ticker) or `you` (a toast over the map, at most one per 15 real seconds, see `src/app/notices.ts`). `source` defaults to `disaster` here (`event` in a card's arc, `mod:<id>` in a mod's). |
-| `card` | id: string | Open one of the disaster's event cards (`cards[].id`); from a mod arc, any card in `content.events` by id, whatever its own `when` says (it waits if another card is open). The machine hears the player's pick as a CHOSE beat. |
+| `card` | id: string | Open one of the disaster's event cards (`cards[].id`); from a mod arc, any card in `content.events` by id, whatever its own `when` says (it waits if another card is open). The machine hears the player's pick as a CHOSE beat with the choice's `key`. |
+| `visitors.arrive` | kind: string | A visiting group of a kind a pack registered (`content.groups`) comes in through the gate and tours the campus. Owned by the calling machine. |
+| `visitors.leave` |  | The calling machine's visiting groups cut the tour short and head for the gate. |
+| `walkers.disguise` | kind: string, as: string | Draw every walker of `kind` as `as` (the renderer knows `box`: a cardboard box). Presentation only; the sim is unchanged. |
+| `walkers.reveal` | kind: string | Undo `walkers.disguise` for `kind`. |
 | `flag.set` | name: string | Set a flag to today's day number. |
 | `flag.clear` | name: string | Clear a flag. |
+| `people.meet` | role: string, at: string, hours: number, lines?: string[] | A visitor with `role` walks in from the gate to meet the beat's first person by the first `at` building and they talk for `hours`, in view (sim/meetings.ts). `lines` is what they say, visitor first, alternating. FLT-26's VC chat. |
+| `people.quit` | quiet?: boolean | Everyone the beat is about hands in the box and walks out through the gate. With `quiet`, the calling pack writes the exit headline. |
+| `people.pay` | each: number | Take `each` from the bank for everyone the beat is about (a matched offer). |
+| `people.cheer` | amount: number | Lift the energy and focus of everyone the beat is about. |
 
-Stats a guard, `requires` or `odds.scale` can read: day, capability, hype, cash, compute, discourse, models, agents, clusters, halls, gateways, gas, solar, datacenters, broken, security, sre, comms, janitor, sreAttending, trust, heat, burning, adjacent.
+The `people.*` verbs act on the people a pack's driver names for the beat (`VerbEnv.people`, main person first); a disaster names nobody, so they do nothing there. A driver can also hand the beat template variables (`VerbEnv.vars`, e.g. FLT-26's `{defName}`).
+
+Stats a guard, `requires` or `odds.scale` can read: day, capability, hype, cash, compute, discourse, models, agents, clusters, halls, gateways, gas, solar, datacenters, broken, security, sre, comms, janitor, vibes, visitors, sreAttending, trust, heat, disasters (begun, all time), capture, burning, adjacent. A mechanic that measures its own stats (The Hearing's session tallies) passes them to `checkCall`/`checkChart` as local names.
 
 Building references in verbs: `$target` (the building the disaster is about), `$adjacent` (the nearest other working building of its kind that this disaster has not touched), `$office` (the Security Office), `gate`, or a building kind. `to`/`on` take the same.
 
@@ -148,9 +160,18 @@ The setting is `state.disasters.risk`: `off`, `rare`, `normal`, `chaos` (the `se
 ## Hand-offs
 
 - **FLT-32 (UI):** the Disasters menu is `disasterMenu(state)` (id, name, blurb, tags, active, available, reason) plus the two commands; "asks for confirmation" is the UI's. `disastersView(state)` gives the running ones (phase, progress 0..1, days) for a `DisasterAlert` slot. The palette tile for the Security Office. Icons for `tags`.
-- **FLT-19 (auditors):** read `auditorOdds(state)` (x2 for 60 days after a swarm) and `state.disasters.heat` / `.trust` (0..100). Nothing else in the sim reads them yet.
+- **FLT-19 (auditors):** read `auditorOdds(state)` (x2 for 60 days after a swarm) and `state.disasters.heat` / `.trust` (0..100). The Hearing (FLT-21) moves trust too, and adds `state.capture`; FLT-19 can summon the lab by setting any `subpoena:*` flag.
 - **FLT-15 M1b:** `pack.ts` reads the JSON directly; switching to `Content.disasters` is mechanical (`DisasterDef` is already the section shape, guards and verbs are already named calls, and `vocabulary` matches the `Vocabulary` service). The pack's cards are pushed into `EVENTS` at load (`content/events.ts`), as the Race's are.
 - **Not built:** Datacenter Flood (a copy of the fire with `building.offline` and `discourse.delta`; needs a Datacenter, which needs an auction) and Benchmark Contamination (the Arena is FLT-27's); `visitors.arrive` and `investigate.start` from the spec's example list wait for the mechanics that call them (FLT-18/19).
+
+## The UI (FLT-32)
+
+- **Unlocked at Scrutiny** (level 5): `vm.visible.disasters` gates the `DisasterAlert` dock and the menu; the Security Office joins the palette on the same rung.
+- **`DisasterMenu`** (modal): the Off / Rare / Normal / Chaos setting (`setRisk`), the list from `disasterMenu(state)` with a tag chip per tag, and a confirm before `triggerDisaster`, whose safe answer is the default. Time is held while it is open. Frontier 95 puts it under Start ▸ Settings ▸ Disasters… as a Control Panel applet.
+- **`DisasterAlert`** (docked): each run with its stage, a line from `content/disasterCopy.ts` (per disaster and state, falling back to the blurb) and the cleanup's progress, plus who has been pulled off their post ("All Security on the Rogue Agent Swarm. GATE UNGUARDED."). In Frontier 95 it is an application error box, `ROGUE_AGENT_SWARM.EXE is being shut down. Please wait.`
+- **On the map:** diverted staff tags go red, the cleanup's progress floats over the building people were sent to, the gate says GATE UNGUARDED when every guard is away, and a broken building says the SREs are busy.
+- **Trust and Heat** sit in the menu and on Frontier 95's Lab Properties ▸ Finance tab.
+- **Sim changes FLT-32 made:** a calm start (`calmStart`: no random disasters until the first release and day `CALM_START_DAY`, before any dice, so the RNG stream is untouched while calm), `DEFAULT_RISK` back to `rare`, `rival.leap` re-ranks the Arena at once and records `leapRivalId` (the Arena marks that row), and `RunView.job`.
 
 ## Choices where the spec was silent
 

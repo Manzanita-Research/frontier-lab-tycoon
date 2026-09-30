@@ -16,12 +16,14 @@ export function Layout({ slots }: SlotPropsMap["Layout"]) {
           {slots.Objectives}
           {slots.Benchmarks}
           {slots.Voice}
+          {slots.Papers}
         </div>
         <div className="right-col">
           {slots.Speed}
           {slots.NewsControls}
           {slots.NewsArrival}
           {slots.PhotoButton}
+          {slots.DisasterAlert}
           {slots.ThoughtsPanel}
           {slots.Inspector}
           {slots.Arena}

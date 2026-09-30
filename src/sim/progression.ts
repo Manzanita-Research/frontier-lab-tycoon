@@ -1,6 +1,11 @@
 import { enableLeapfrog } from "./race/leapfrog/driver";
 import { enablePapers } from "./race/papers/driver";
+import { enableAuditors } from "./auditors/driver";
 import { enableCollusion } from "./collusion/driver";
+import { enableDefection } from "./defection/driver";
+import { enableHearing } from "./hearing/driver";
+import { enablePoaching } from "./poaching/driver";
+import { enableYacht } from "./yacht/driver";
 import type { BuildingKind } from "../content/buildings";
 import { STAFF } from "../content/staff";
 import { HUD_PANELS, type HudPanel, type Level, type ProgressView, type SystemId } from "../content/progression";
@@ -29,8 +34,13 @@ const PACKS: readonly { id: SystemId; enable: (s: GameState) => void; off: strin
   { id: "leapfrog", enable: enableLeapfrog, off: "leapfrogOff" },
   { id: "papers", enable: enablePapers, off: "papersOff" },
   { id: "collusion", enable: enableCollusion, off: "collusionOff" },
+  { id: "hearing", enable: enableHearing, off: "hearingOff" },
+  { id: "yacht", enable: enableYacht, off: "yachtOff" },
+  { id: "defection", enable: enableDefection, off: "defectionOff" },
+  { id: "poaching", enable: enablePoaching, off: "poachingOff" },
+  { id: "auditors", enable: enableAuditors, off: "auditorsOff" },
 ];
-/** The flags behind `?leapfrog=off`, `?papers=off` and `?collusion=off`. */
+/** The flags behind `?leapfrog=off`, `?papers=off`, `?collusion=off`, `?hearing=off`, `?yacht=off`, `?defection=off`, `?poaching=off` and `?auditors=off`. */
 export const PACK_OFF_FLAGS = PACKS.map((p) => p.off);
 function enablePacks(s: GameState, systems: readonly SystemId[]) {
   for (const pack of PACKS) if (systems.includes(pack.id) && !s.flags[pack.off]) pack.enable(s);
@@ -52,12 +62,18 @@ function goalValue(s: GameState) {
 export function progressOf(s: GameState): ProgressView {
   const level = levelOf(s);
   const active = rows(s).find((r) => r.level === level)!;
-  const { current } = goalValue(s);
+  const { current, met } = goalValue(s);
   return { level, levelName: active.name,
     unlocked: { buildings: [...new Set([...unlockedRows(s).flatMap((r) => [...r.buildings]), ...defs().buildingKinds.filter((k) => level >= 4 && s.flags[`unlocked:${k}`] !== undefined) as BuildingKind[]])], staff: unlockedRows(s).flatMap((r) => [...r.staff]), systems: unlockedRows(s).flatMap((r) => [...r.systems]) },
-    goal: { text: active.goal.text, current, target: active.goal.target },
+    goal: met && !rows(s).some((r) => r.level > level) ? afterLadder(s) : { text: active.goal.text, current, target: active.goal.target },
     teasers: teasers(s, level),
   };
+}
+/** Past the last rung, with its goal met, the note names the first scenario objective still open; nothing if none is (FLT-48). */
+function afterLadder(s: GameState): ProgressView["goal"] {
+  const open = s.goals.context.goals.find((g) => !g.met);
+  const def = open && defs().goals.find((d) => d.id === open.id);
+  return open && def ? { text: def.label, current: open.value, target: open.target, objective: def.id } : { text: "", current: 0, target: 1 };
 }
 /** What is still locked, one row per milestone that unlocks it ("2 more · Ship your first model"), not one "???" per item. */
 function teasers(s: GameState, level: Level): ProgressView["teasers"] {

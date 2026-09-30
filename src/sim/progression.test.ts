@@ -3,6 +3,9 @@ import { PROGRESSION } from "../content/progression";
 import { baseContent, baseRules, baseVocabulary } from "../mods/base-game";
 import { withDefs } from "./defs";
 import { makeSnapshot } from "../app/hud";
+import { playableOf } from "../ui/hud/playable";
+import { fixtureInput } from "../ui/hud/fixtures";
+import { hudViewModel } from "../ui/hud/vm";
 import { canPlace } from "./commands";
 import { progressOf, systemUnlocked, updateProgression } from "./progression";
 import { canHire, hire, updateStaff } from "./staff";
@@ -31,14 +34,34 @@ describe("the playable ladder", () => {
     s.vibes.value = 499; updateProgression(s); expect(progressOf(s).level).toBe(3);
     s.vibes.value = 500; updateProgression(s); expect(progressOf(s).level).toBe(4);
     expect(s.leapfrog.enabled).toBe(true);
+    expect(s.auditors).toBeUndefined();
     s.race.rank = 6; updateProgression(s); expect(progressOf(s).level).toBe(4);
     s.race.rank = 5; updateProgression(s); expect(progressOf(s).level).toBe(5);
     expect(canHire(s, "security").ok).toBe(true); expect(s.papers?.enabled).toBe(true);
     // Collusion is on the Scrutiny rung, so earning it wakes the pack (it used to stay asleep in normal play).
     expect(s.collusion?.enabled).toBe(true);
+    expect(s.hearing?.enabled).toBe(true); expect(s.yacht?.enabled).toBe(true);
+    expect(s.auditors?.enabled).toBe(true);
     s.cash = 350_000; expect(canPlace(s, "security", 12, 19).ok).toBe(true);
     expect(s.unlockCards?.map((c) => c.id)).toEqual(["business", "team", "race", "scrutiny"]);
     applyNow(s, [{ type: "dismissUnlock" }]); expect(makeSnapshot(s).unlockCard?.id).toBe("team");
+  });
+  it("never shows a met last rung: the note moves on to the next open objective, then hides (FLT-48)", () => {
+    const s = createInitialState(1);
+    s.progression = { value: "complete", context: { level: 5 } };
+    const line = () => hudViewModel({ ...fixtureInput(), snap: makeSnapshot(s) }).progress.goal.line;
+    expect(line()).toBe("Ship model #3 · 0/3");
+    s.models.push("A", "B", "C");
+    const set = (patch: Record<string, { value?: number; met?: boolean }>) => {
+      s.goals = { ...s.goals, context: { ...s.goals.context, goals: s.goals.context.goals.map((g) => ({ ...g, ...patch[g.id] })) } };
+    };
+    set({ release: { met: true }, era: { value: 2 } });
+    expect(progressOf(s).goal).toMatchObject({ text: "Reach Era 3: Superhuman Coder", objective: "era" });
+    expect(line()).toBe("Reach Era 3: Superhuman Coder · 2/3");
+    set({ era: { met: true }, arena: { value: 2 } }); // #6 of 7
+    expect(line()).toBe("Top 3 on the Arena in Era 3 · Arena #6, need top 3");
+    set({ arena: { met: true } });
+    expect(line()).toBe("");
   });
   it("wakes every earned pack, honours ?<pack>=off, and starts a campus with all of them awake", () => {
     const s = createInitialState(4);
@@ -67,13 +90,50 @@ describe("the playable ladder", () => {
     expect(s.walkers.some((w) => w.kind === "visitor" || w.kind === "protester")).toBe(false);
     expect(s.slop.some(Boolean)).toBe(false); expect(s.buildings[0]?.reliability).toBe(1);
     expect(Object.values(s.arcs).some((a) => a.value === "cardOpen")).toBe(false);
+    expect(s.hearing).toBeUndefined(); expect(s.yacht).toBeUndefined();
+    expect(s.defection).toBeUndefined(); expect(s.poaching).toBeUndefined(); expect(s.auditors).toBeUndefined();
+  });
+
+  // FLT-52: every pack in the merge train is on the Scrutiny rung, wakes the day it is earned, and has its own off switch.
+  const WAVE = ["hearing", "yacht", "defection", "poaching", "auditors"] as const;
+  it.each(WAVE)("%s sleeps until Scrutiny, wakes when it is earned, and stays asleep with ?%s=off", (id) => {
+    expect(PROGRESSION.find((r) => r.id === "scrutiny")?.systems).toContain(id);
+    const awake = (s: ReturnType<typeof createInitialState>) => s[id]?.enabled ?? false;
+    const s = createInitialState(4);
+    s.progression = { value: "growing", context: { level: 4 } };
+    expect(systemUnlocked(s, id)).toBe(false);
+    updateProgression(s);
+    expect(awake(s)).toBe(false);
+    s.race.rank = 5; updateProgression(s);
+    expect(progressOf(s).level).toBe(5);
+    expect(systemUnlocked(s, id)).toBe(true);
+    expect(awake(s)).toBe(true);
+    const off = createInitialState(4);
+    off.flags[`${id}Off`] = 1;
+    off.progression = { value: "growing", context: { level: 4 } };
+    off.race.rank = 5; updateProgression(off);
+    expect(progressOf(off).level).toBe(5);
+    expect(awake(off)).toBe(false);
+    // A campus (every rung earned) starts with it awake; a garage without.
+    expect(awake(createInitialState(4, "campus"))).toBe(true);
+    expect(awake(createInitialState(4))).toBe(false);
+  });
+  it("names every wave pack on the New! card, in words", () => {
+    const s = createInitialState(4);
+    s.progression = { value: "growing", context: { level: 4 } };
+    s.race.rank = 5; updateProgression(s);
+    const card = makeSnapshot(s).unlockCard!;
+    for (const id of WAVE) expect(card.items).toContain(id);
+    const shown = playableOf({ unlockCard: card }).unlock!.items;
+    expect(shown).toEqual(expect.arrayContaining(["The Hearing", "The yacht summit", "Defection", "The Poaching War", "Evals Without Borders"]));
+    for (const id of WAVE) expect(shown).not.toContain(id);
   });
   it("teases what is locked as one row per milestone, not one ??? per item", () => {
     const s = createInitialState(1);
     expect(progressOf(s).teasers).toEqual([
       { label: "2 more", hint: "Ship your first model" },
       { label: "4 more", hint: "Earn $20K a day" },
-      { label: "3 more", hint: "Top 5 on the Arena" },
+      { label: "4 more", hint: "Top 5 on the Arena" },
     ]);
     s.models.push("Fixture-1"); updateProgression(s);
     expect(progressOf(s).teasers.map((t) => t.hint)).toEqual(["Earn $20K a day", "Top 5 on the Arena"]);

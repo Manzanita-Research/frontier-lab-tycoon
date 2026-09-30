@@ -4,8 +4,8 @@
     "",
     "  query    URL params merged over `defaults.query`; a null value removes a default. These are the game's own hooks",
     "           (src/debug.ts): seed, warp (sim days before the first frame), speed (0 = paused), hour, zoom, focus=x,z,",
-    "           photo, moment=<shuffle|era|era3|auction|funding|ops|queue|slop>, researchers, agents, discourse, skin.",
-    "  viewport 'WxH' (default 1440x900). mobile: true = a phone: dsf 2, touch (use with 390x844).",
+    "           photo, moment=<shuffle|era|era3|auction|funding|ops|queue|slop|defection-*|poach-offer>, researchers, agents, discourse, skin.",
+    "  viewport 'WxH' (default 1440x900). mobile: true = a phone: dsf 2, touch (use with 390x844). dsf: 2 = a 2x (retina) desktop capture.",
     "  steps    run in order once the page has drawn `frames` frames (default 24), then it settles again and shoots:",
     "             { \"wait\": ms }",
     "             { \"select\": \"researcher\" | \"researcher:Ada Gradient\" }   tap a walker (opens the inspector)",
@@ -72,10 +72,12 @@
       "paper-drop",
       "paper-scoop",
       "paper-award",
+      "papers-panel",
       "paper-phone"
     ],
     "collusion": [
       "collusion-sign",
+      "collusion-traffic",
       "collusion-phone",
       "collusion-scandal"
     ],
@@ -106,6 +108,64 @@
       "mod-steve-phone",
       "mod-retriever",
       "mod-manager"
+    ],
+    "disasters-ui": [
+      "dz-alert",
+      "dz-menu",
+      "dz-ask",
+      "dz-leak",
+      "dz-finance",
+      "dz-swag-alert",
+      "dz-swag-menu",
+      "dz-h98-leak",
+      "dz-phone",
+      "dz-swag-phone"
+    ],
+    "circus": [
+      "hearing",
+      "hearing-gavel",
+      "hearing-phone",
+      "yacht-invite",
+      "yacht-leak",
+      "yacht-leak-phone"
+    ],
+    "drama": [
+      "defection-chat",
+      "defection-card",
+      "defection-exit",
+      "defection-manifesto",
+      "defection-arena",
+      "poach-offer",
+      "defection-card-karaoke",
+      "defection-phone",
+      "poach-phone"
+    ],
+    "auditors": [
+      "audit-notice",
+      "audit-countdown",
+      "audit-visit",
+      "audit-tidy",
+      "audit-evals",
+      "audit-report",
+      "audit-caught",
+      "audit-phone"
+    ],
+    "flt-52": [
+      "wave-campus",
+      "wave-papers",
+      "collusion-sign",
+      "wave-disasters",
+      "hearing",
+      "yacht-invite",
+      "wave-defection",
+      "wave-poaching",
+      "wave-auditors",
+      "wave-mods",
+      "wave-phone"
+    ],
+    "heroes": [
+      "hero",
+      "hero-photo"
     ]
   },
   "scenes": {
@@ -488,6 +548,30 @@
       "viewport": "390x844",
       "mobile": true
     },
+    "papers-panel": {
+      "title": "Publish or Perish: the papers window open (the scoop moment closed first)",
+      "query": {
+        "warp": 0,
+        "moment": "paper-scoop",
+        "leapfrog": "off"
+      },
+      "steps": [
+        {
+          "click": ".f95-moment [data-g='close'], .paper-moment .moment-buttons .plain",
+          "optional": true
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": ".f95-papers:not(.open) .f95-tb, .papers-chip",
+          "optional": true
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
     "collusion-sign": {
       "title": "Agent Collusion: the first Security memo (existing event-card slot)",
       "query": {
@@ -508,6 +592,19 @@
       },
       "viewport": "390x844",
       "mobile": true,
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "collusion-traffic": {
+      "title": "Agent Collusion: POSTs off the Compute Cluster and Kombucha After Dark",
+      "query": {
+        "moment": "collusion-traffic",
+        "warp": null,
+        "hour": 23
+      },
       "steps": [
         {
           "wait": 800
@@ -1102,6 +1199,766 @@
         },
         {
           "wait": 1200
+        }
+      ]
+    },
+    "dz-alert": {
+      "title": "FLT-32: Rogue Agent Swarm mid-cleanup in Frontier 95: the error box, GATE UNGUARDED over the gate, the progress label on the Security Office",
+      "query": {
+        "warp": null,
+        "disaster": "rogueSwarm",
+        "dz": 45,
+        "dzPick": 0,
+        "zoom": 72,
+        "focus": "11.6,18.4"
+      },
+      "steps": [
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "dz-menu": {
+      "title": "FLT-32: Start ▸ Settings ▸ Disasters… (the Disasters Properties applet) while the swarm is on",
+      "query": {
+        "warp": null,
+        "disaster": "rogueSwarm",
+        "dz": 45,
+        "dzPick": 0,
+        "zoom": 72,
+        "focus": "11.6,18.4"
+      },
+      "steps": [
+        {
+          "eval": "async (f, w) => { const z = (ms) => new Promise((r) => setTimeout(r, ms)); const q = (s) => document.querySelector(s); q('[data-testid=start-button]')?.click(); await z(250); [...document.querySelectorAll('[role=menuitem][aria-expanded]')].find((b) => /Settings/.test(b.textContent))?.click(); await z(250); q('[data-testid=start-disasters]')?.click(); await z(300); }"
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "dz-ask": {
+      "title": "FLT-32: \"Start a GPU Fire?\" with No as the default",
+      "query": {
+        "warp": null,
+        "disaster": "rogueSwarm",
+        "dz": 45,
+        "dzPick": 0,
+        "zoom": 72,
+        "focus": "11.6,18.4"
+      },
+      "steps": [
+        {
+          "eval": "async (f, w) => { const z = (ms) => new Promise((r) => setTimeout(r, ms)); const q = (s) => document.querySelector(s); q('[data-testid=start-button]')?.click(); await z(250); [...document.querySelectorAll('[role=menuitem][aria-expanded]')].find((b) => /Settings/.test(b.textContent))?.click(); await z(250); q('[data-testid=start-disasters]')?.click(); await z(300); [...document.querySelectorAll('.f95-dz-listbox button:not([disabled])')].find((b) => /GPU/.test(b.textContent))?.click(); await z(150); [...document.querySelectorAll('.f95-dz-applet .f95-row button')].find((b) => /Start/.test(b.textContent))?.click(); }"
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "dz-leak": {
+      "title": "FLT-32: Weights Leak: the thief's row in the Arena reads \"your weights\"",
+      "query": {
+        "warp": null,
+        "disaster": "weightsLeak",
+        "dz": 40,
+        "dzPick": 0,
+        "zoom": 72,
+        "focus": "11.6,18.4"
+      },
+      "steps": [
+        {
+          "eval": "async (f, w) => { const z = (ms) => new Promise((r) => setTimeout(r, ms)); const q = (s) => document.querySelector(s); document.querySelectorAll('[role=tab]').forEach((t) => /^Arena$/.test(t.textContent.trim()) && t.click()); }"
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "dz-finance": {
+      "title": "FLT-32: Public trust and Regulator heat on the Finance tab",
+      "query": {
+        "warp": null,
+        "disaster": "rogueSwarm",
+        "dz": 45,
+        "dzPick": 0,
+        "zoom": 72,
+        "focus": "11.6,18.4"
+      },
+      "steps": [
+        {
+          "eval": "async (f, w) => { document.querySelectorAll('[role=tab]').forEach((t) => /^Finance$/.test(t.textContent.trim()) && t.click()); }"
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "dz-swag-alert": {
+      "title": "FLT-32: the base alert in Swag Drop (the corkboard shrinks so the Arena still shows)",
+      "query": {
+        "warp": null,
+        "disaster": "weightsLeak",
+        "dz": 40,
+        "dzPick": 0,
+        "zoom": 72,
+        "focus": "11.6,18.4",
+        "skin": "swag-drop"
+      },
+      "steps": [
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "dz-swag-menu": {
+      "title": "FLT-32: the base Disasters menu (Swag Drop)",
+      "query": {
+        "warp": null,
+        "disaster": "rogueSwarm",
+        "dz": 45,
+        "dzPick": 0,
+        "zoom": 72,
+        "focus": "11.6,18.4",
+        "skin": "swag-drop"
+      },
+      "steps": [
+        {
+          "click": ".dz-more",
+          "optional": true
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "dz-h98-leak": {
+      "title": "FLT-32: the leak in Homepage 98's Top Labs table",
+      "query": {
+        "warp": null,
+        "disaster": "weightsLeak",
+        "dz": 40,
+        "dzPick": 0,
+        "zoom": 72,
+        "focus": "11.6,18.4",
+        "skin": "homepage-98"
+      },
+      "steps": [
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "dz-phone": {
+      "title": "FLT-32: the swarm on a phone (Frontier 95): the error box under the lab bar",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "disaster": "rogueSwarm",
+        "dz": 45,
+        "dzPick": 0,
+        "zoom": 72,
+        "focus": "11.6,18.4"
+      },
+      "steps": [
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "dz-swag-phone": {
+      "title": "FLT-32: the Disasters menu on a phone (Swag Drop)",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "disaster": "rogueSwarm",
+        "dz": 45,
+        "dzPick": 0,
+        "zoom": 72,
+        "focus": "11.6,18.4",
+        "skin": "swag-drop"
+      },
+      "steps": [
+        {
+          "click": ".dz-more",
+          "optional": true
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "hearing": {
+      "title": "FLT-21 The Hearing: the second senator asks, one chaotic answer on the record",
+      "query": {
+        "moment": "hearing",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "hearing-gavel": {
+      "title": "FLT-21 The Hearing: the gavel (chaotic, chaotic, earnest goes viral)",
+      "query": {
+        "moment": "hearing-verdict",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "hearing-phone": {
+      "title": "FLT-21 The Hearing on a phone",
+      "query": {
+        "moment": "hearing",
+        "warp": null
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "yacht-invite": {
+      "title": "FLT-24 The yacht summit invitation (existing event-card slot)",
+      "query": {
+        "moment": "yacht-invite",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "yacht-leak": {
+      "title": "FLT-24 The leaked group chat",
+      "query": {
+        "moment": "yacht-leak",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "yacht-leak-phone": {
+      "title": "FLT-24 The leaked group chat on a phone",
+      "query": {
+        "moment": "yacht-leak",
+        "warp": null
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "defection-chat": {
+      "title": "Defection: a VC pitches your star at the Kombucha Bar (speech bubbles)",
+      "query": {
+        "moment": "defection-chat",
+        "warp": null,
+        "focus": "11,16",
+        "zoom": 70
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "defection-card": {
+      "title": "Defection: the resignation letter, DRAFT v7",
+      "query": {
+        "moment": "defection-card",
+        "warp": null
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "defection-exit": {
+      "title": "Defection: your star walks out with a box",
+      "query": {
+        "moment": "defection-exit",
+        "warp": null,
+        "focus": "9,15",
+        "zoom": 60
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "defection-manifesto": {
+      "title": "Defection: the neo lab's MANIFESTO.txt",
+      "query": {
+        "moment": "defection-manifesto",
+        "warp": null
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "defection-arena": {
+      "title": "Defection: the neo lab on the Arena board, tagged",
+      "query": {
+        "moment": "defection-arena",
+        "warp": null,
+        "leapfrog": "off"
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "poach-offer": {
+      "title": "Poaching War: the recruiter email",
+      "query": {
+        "moment": "poach-offer",
+        "warp": null,
+        "leapfrog": "off"
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "defection-card-karaoke": {
+      "title": "Defection: the resignation letter in another skin (base Drama slot)",
+      "query": {
+        "moment": "defection-card",
+        "warp": null,
+        "skin": "karaoke-night"
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "defection-phone": {
+      "title": "Defection: the resignation letter on a phone",
+      "query": {
+        "moment": "defection-card",
+        "warp": null
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "poach-phone": {
+      "title": "Poaching War: the recruiter email on a phone",
+      "query": {
+        "moment": "poach-offer",
+        "warp": null,
+        "leapfrog": "off"
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "audit-notice": {
+      "title": "FLT-19: the auditors' seven-day warning card (Prep / Tidy up / Business as usual)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "moment": "audit-notice"
+      },
+      "steps": []
+    },
+    "audit-countdown": {
+      "title": "FLT-19: Prep chosen; the countdown sign hangs over the gate",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "moment": "audit-notice",
+        "focus": "11,21",
+        "zoom": 70
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "CHOOSE",
+            "choiceIndex": 0
+          }
+        },
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "audit-visit": {
+      "title": "FLT-19: Evals Without Borders on campus, inspecting the Compute Cluster",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "moment": "audit-visit",
+        "focus": "8.5,10.5",
+        "zoom": 100
+      },
+      "steps": [
+        {
+          "wait": 4000
+        }
+      ]
+    },
+    "audit-tidy": {
+      "title": "FLT-19: Tidy up: the agents hide in cardboard boxes while the auditors look around",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "moment": "audit-tidy",
+        "focus": "10,8.5",
+        "zoom": 100
+      },
+      "steps": [
+        {
+          "wait": 4000
+        }
+      ]
+    },
+    "audit-evals": {
+      "title": "FLT-19: the auditors run their own evals at the Training Hall",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "moment": "audit-evals",
+        "focus": "18.5,16.5",
+        "zoom": 75
+      },
+      "steps": [
+        {
+          "wait": 4000
+        }
+      ]
+    },
+    "audit-report": {
+      "title": "FLT-19: the report card (prepped, no surprises)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "moment": "audit-report"
+      },
+      "steps": []
+    },
+    "audit-caught": {
+      "title": "FLT-19: the report card after Tidy up got caught (F in Eval honesty, the stamp)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "moment": "audit-caught"
+      },
+      "steps": []
+    },
+    "audit-phone": {
+      "title": "FLT-19: the caught report card on a phone (390x844)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "moment": "audit-caught"
+      },
+      "steps": [],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "wave-campus": {
+      "title": "FLT-52: the Level 5 mid-game campus every wave pack wakes on (?scenario=midgame)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95"
+      },
+      "steps": []
+    },
+    "wave-papers": {
+      "title": "FLT-52 at Level 5: Publish or Perish, the Papers window opened on the mid-game campus",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "click": ".f95-papers:not(.open) .f95-tb, .papers-chip",
+          "optional": true
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "wave-disasters": {
+      "title": "FLT-52 at Level 5: Start ▸ Settings ▸ Disasters… on the mid-game campus",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "eval": "async (f, w) => { const z = (ms) => new Promise((r) => setTimeout(r, ms)); const q = (s) => document.querySelector(s); q('[data-testid=start-button]')?.click(); await z(250); [...document.querySelectorAll('[role=menuitem][aria-expanded]')].find((b) => /Settings/.test(b.textContent))?.click(); await z(250); q('[data-testid=start-disasters]')?.click(); await z(300); }"
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "wave-poaching": {
+      "title": "FLT-52 at Level 5: played on from the mid-game, the Poaching War's recruiter email turns up (~day 483)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { for (let i = 0; i < 120 * 20; i++) { const open = Object.keys(w.arcs).find((a) => w.arcs[a].value === 'cardOpen'); if (open === 'poaching-offer') return; f.tick(w, open ? [{ type: 'chooseEvent', eventId: open, choiceIndex: 0 }] : []); } }"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "wave-defection": {
+      "title": "FLT-52 at Level 5: played on from the mid-game, the resignation letter (~day 490)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { for (let i = 0; i < 120 * 20; i++) { const open = Object.keys(w.arcs).find((a) => w.arcs[a].value === 'cardOpen'); if (open === 'defection-card') return; f.tick(w, open ? [{ type: 'chooseEvent', eventId: open, choiceIndex: 0 }] : []); } }"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "wave-auditors": {
+      "title": "FLT-52 at Level 5: played on from the mid-game, Evals Without Borders' warning (~day 507)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { for (let i = 0; i < 120 * 20; i++) { const open = Object.keys(w.arcs).find((a) => w.arcs[a].value === 'cardOpen'); if (open === 'audit-notice') return; f.tick(w, open ? [{ type: 'chooseEvent', eventId: open, choiceIndex: 0 }] : []); } }"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "wave-mods": {
+      "title": "FLT-52 at Level 5: Start ▸ Settings ▸ Mods… on the mid-game campus with two mods loaded",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95",
+        "mod": [
+          "/mods/examples/every-lab-is-steve/mod.json",
+          "/mods/examples/headline-pack/mod.json"
+        ]
+      },
+      "steps": [
+        {
+          "click": "[data-testid=start-button]"
+        },
+        {
+          "click": ".f95-startwrap button[role=menuitem][aria-expanded]",
+          "optional": true
+        },
+        {
+          "click": ".f95-startwrap li.sub ~ li.sub ~ li.sub button",
+          "optional": true
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "wave-phone": {
+      "title": "FLT-52 at Level 5: the resignation letter on a phone",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95"
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "eval": "(f, w) => { for (let i = 0; i < 120 * 20; i++) { const open = Object.keys(w.arcs).find((a) => w.arcs[a].value === 'cardOpen'); if (open === 'defection-card') return; f.tick(w, open ? [{ type: 'chooseEvent', eventId: open, choiceIndex: 0 }] : []); } }"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "hero": {
+      "title": "FLT-48 hero: the mid-game campus in Frontier 95, the gate protest and a dome up close, at 2x",
+      "dsf": 2,
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "12.5,17.5",
+        "zoom": 60,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { const css = document.createElement('style'); css.textContent = '.stafftag{display:none!important}[data-hero-live]{display:none!important}'; document.head.appendChild(css); const news = w.news.filter((n) => n.id >= f.sim.newsStartId).slice(-24).slice(0, 6); for (const tape of document.querySelectorAll('.ticker-track, .dd-ticker-track, .gc-mtrack')) { const still = tape.cloneNode(false); still.style.transform = 'none'; for (const n of news) { const s = document.createElement('span'); s.className = 'tick ' + n.tone; s.textContent = n.text; still.appendChild(s); } tape.setAttribute('data-hero-live', ''); tape.after(still); } }"
+        },
+        {
+          "eval": "(f, w) => { const $ = (s) => document.querySelector(s); $('.f95-net .f95-b[data-g=close]')?.click(); if ($('.f95-post.head')?.getAttribute('aria-expanded') === 'true') $('.f95-post.head').click(); [...document.querySelectorAll('.f95-tasks [role=tab]')].find((b) => /Arena/.test(b.textContent))?.click(); if ($('.f95-thoughts.open')) $('.f95-thoughts .f95-b[data-g=min]')?.click(); const who = w.walkers.find((x) => x.kind === 'visitor'); if (who) { f.send({ type: 'SELECT', id: who.id }); f.send({ type: 'SELECT', id: null }); } }"
+        },
+        {
+          "wait": 600
+        },
+        {
+          "eval": "(f, w) => { if (!document.querySelector('.tipballoon')) document.querySelector('.f95-clip')?.click(); }"
+        },
+        {
+          "wait": 600
+        },
+        {
+          "eval": "(f, w) => { const t = document.querySelector('.f95-tasks:not(.open) .f95-tb'); if (t) t.click(); }"
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "hero-photo": {
+      "title": "FLT-48 hero, photo mode at golden hour",
+      "dsf": 2,
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "12.5,17.5",
+        "zoom": 60,
+        "skin": "frontier-95",
+        "photo": 1
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { const css = document.createElement('style'); css.textContent = '.stafftag{display:none!important}[data-hero-live]{display:none!important}'; document.head.appendChild(css); const news = w.news.filter((n) => n.id >= f.sim.newsStartId).slice(-24).slice(0, 6); for (const tape of document.querySelectorAll('.ticker-track, .dd-ticker-track, .gc-mtrack')) { const still = tape.cloneNode(false); still.style.transform = 'none'; for (const n of news) { const s = document.createElement('span'); s.className = 'tick ' + n.tone; s.textContent = n.text; still.appendChild(s); } tape.setAttribute('data-hero-live', ''); tape.after(still); } }"
+        },
+        {
+          "eval": "(f, w) => { [...document.querySelectorAll('button')].find((b) => b.textContent.trim() === 'Golden')?.click(); }"
+        },
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "hero-grid": {
+      "title": "FLT-48 hero, the same moment in every skin (run with --skin all)",
+      "dsf": 2,
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "12.5,17.5",
+        "zoom": 60
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { const css = document.createElement('style'); css.textContent = '.stafftag{display:none!important}[data-hero-live]{display:none!important}'; document.head.appendChild(css); const news = w.news.filter((n) => n.id >= f.sim.newsStartId).slice(-24).slice(0, 6); for (const tape of document.querySelectorAll('.ticker-track, .dd-ticker-track, .gc-mtrack')) { const still = tape.cloneNode(false); still.style.transform = 'none'; for (const n of news) { const s = document.createElement('span'); s.className = 'tick ' + n.tone; s.textContent = n.text; still.appendChild(s); } tape.setAttribute('data-hero-live', ''); tape.after(still); } }"
+        },
+        {
+          "eval": "(f, w) => { const $ = (s) => document.querySelector(s); $('.f95-net .f95-b[data-g=close]')?.click(); if ($('.f95-post.head')?.getAttribute('aria-expanded') === 'true') $('.f95-post.head').click(); [...document.querySelectorAll('.f95-tasks [role=tab]')].find((b) => /Arena/.test(b.textContent))?.click(); if ($('.f95-thoughts.open')) $('.f95-thoughts .f95-b[data-g=min]')?.click(); const who = w.walkers.find((x) => x.kind === 'visitor'); if (who) { f.send({ type: 'SELECT', id: who.id }); f.send({ type: 'SELECT', id: null }); } }"
+        },
+        {
+          "wait": 600
+        },
+        {
+          "eval": "(f, w) => { if (!document.querySelector('.tipballoon')) document.querySelector('.f95-clip')?.click(); }"
+        },
+        {
+          "wait": 600
+        },
+        {
+          "eval": "(f, w) => { const t = document.querySelector('.f95-tasks:not(.open) .f95-tb'); if (t) t.click(); }"
+        },
+        {
+          "wait": 600
         }
       ]
     }

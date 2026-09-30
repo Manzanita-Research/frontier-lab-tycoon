@@ -5,6 +5,8 @@
 // now also covers the new walker fields and the Vibes. FLT-10 (Operations) did it again: slop, breakdowns (a random
 // draw per building per day), queues you can see, and staff; the script below now hires a few, and the projection
 // covers the slop, the payroll and every building's reliability.
+// FLT-32 put the Security Office on the Scrutiny rung, so its unlock card lists one more item: the digests from the
+// card on (it arrives between ticks 800 and 1600) moved for that alone: same RNG state and world at 4000, one more item.
 //
 // The digest reads the game through `view()`, not the raw state, so the persisted shape can change (machine
 // snapshots, moved fields) without touching the recorded values. Only `view()` follows the shape.
@@ -168,10 +170,14 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // FLT-47 polish rewords three thoughts (parody rule: no real brands); seed 1 shows one at tick 200. Text only, same RNG stream.
 // FLT-37 wakes a system's pack when its rung is earned: Collusion (on Scrutiny, level 5) never started in normal play.
 // Every seed reaches level 5 by tick 980-1120; only checkpoints after that move (seed 3 from 2400, seeds 1 and 2 from 3200).
+// FLT-52 (merge train) adds five more packs to Scrutiny: the Hearing, the yacht summit, Defection, the Poaching War and
+// Evals Without Borders. Level 5 lands at tick 980 (seeds 1, 3) and 1120 (seed 2), so 200 and 800 hold. First tick each
+// pack moves the World (seed 1 / 2 / 3): Poaching 1120 / 1823 / 1683, the yacht 1220 / 1360 / 1220, the Hearing
+// 1380 / 1520 / 1380, Evals Without Borders 3246 / 2183 / 2203, Defection 2626 / 3386 / 2806. So 1600 on moves on every seed.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "d3826cd0", 800: "ed628bb9", 1600: "bef75afa", 2400: "a01d1390", 3200: "5f3ef2af", 4000: "a3566eca" },
-  2: { 200: "e548b1af", 800: "552cae60", 1600: "3f400add", 2400: "2868f2da", 3200: "1b62d8f3", 4000: "c068c6c9" },
-  3: { 200: "58bb415c", 800: "920699d6", 1600: "d35c1c03", 2400: "072188ed", 3200: "949b9d44", 4000: "641a425a" },
+  1: { 200: "d3826cd0", 800: "ed628bb9", 1600: "50d70b08", 2400: "23358218", 3200: "86b059e7", 4000: "6b622087" },
+  2: { 200: "e548b1af", 800: "552cae60", 1600: "90e6dc5c", 2400: "f3b5f6e5", 3200: "1d5b4ab1", 4000: "c39da6f3" },
+  3: { 200: "58bb415c", 800: "920699d6", 1600: "86ca360f", 2400: "095b6c66", 3200: "674f1746", 4000: "cd109ec0" },
 };
 
 describe("golden runs", () => {

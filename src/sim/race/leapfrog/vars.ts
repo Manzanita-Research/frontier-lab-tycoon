@@ -24,7 +24,7 @@ export function shipGains(state: GameState): { ship: number; hold: number } {
 /** The chance an early release has a launch bug: worse the less baked it is. */
 export const bugChance = (ready: number): number => Math.min(0.9, R.response.bugBase + R.response.bugPerMissing * (1 - ready));
 
-const nameOf = (state: GameState, id: string): string => (id === YOU ? state.labName : (defs().rivalById[id as RivalId]?.name ?? id));
+const nameOf = (state: GameState, id: string): string => (id === YOU ? state.labName : (defs().rivalById[id as RivalId]?.name ?? state.neoLabs?.labs.find((l) => l.id === id)?.name ?? id));
 
 export function leapfrogVars(state: GameState): Record<string, string> {
   const lf = state.leapfrog;

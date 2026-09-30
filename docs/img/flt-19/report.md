@@ -1,0 +1,13 @@
+
+| Scene | Before (`main` @ 00b8c60) | After (`flt-19-auditors` @ cca4a69) |
+|---|---|---|
+| **audit-notice**<br>18.8% px differ | ![audit-notice](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-19-auditors/docs/img/flt-19/before/audit-notice.png?raw=true) | ![audit-notice](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-19-auditors/docs/img/flt-19/after/audit-notice.png?raw=true) |
+| **audit-countdown**<br>12.0% px differ | ![audit-countdown](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-19-auditors/docs/img/flt-19/before/audit-countdown.png?raw=true) | ![audit-countdown](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-19-auditors/docs/img/flt-19/after/audit-countdown.png?raw=true) |
+| **audit-visit**<br>20.5% px differ | ![audit-visit](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-19-auditors/docs/img/flt-19/before/audit-visit.png?raw=true) | ![audit-visit](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-19-auditors/docs/img/flt-19/after/audit-visit.png?raw=true) |
+| **audit-tidy**<br>18.6% px differ | ![audit-tidy](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-19-auditors/docs/img/flt-19/before/audit-tidy.png?raw=true) | ![audit-tidy](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-19-auditors/docs/img/flt-19/after/audit-tidy.png?raw=true) |
+| **audit-evals**<br>12.1% px differ | ![audit-evals](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-19-auditors/docs/img/flt-19/before/audit-evals.png?raw=true) | ![audit-evals](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-19-auditors/docs/img/flt-19/after/audit-evals.png?raw=true) |
+| **audit-report**<br>27.7% px differ | ![audit-report](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-19-auditors/docs/img/flt-19/before/audit-report.png?raw=true) | ![audit-report](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-19-auditors/docs/img/flt-19/after/audit-report.png?raw=true) |
+| **audit-caught**<br>27.7% px differ | ![audit-caught](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-19-auditors/docs/img/flt-19/before/audit-caught.png?raw=true) | ![audit-caught](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-19-auditors/docs/img/flt-19/after/audit-caught.png?raw=true) |
+| **audit-phone**<br>67.8% px differ | ![audit-phone](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-19-auditors/docs/img/flt-19/before/audit-phone.png?raw=true) | ![audit-phone](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-19-auditors/docs/img/flt-19/after/audit-phone.png?raw=true) |
+
+_pnpm shots: 8 scene(s) in 239.3s (16/16 captures ok)._

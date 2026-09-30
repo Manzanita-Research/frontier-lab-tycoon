@@ -13,7 +13,7 @@ export interface PlayableSnapshot {
     level: number;
     levelName: string;
     unlocked: { buildings: readonly string[]; staff: readonly string[]; systems: readonly string[] };
-    goal: { text: string; current: number; target: number };
+    goal: { text: string; current: number; target: number; objective?: string };
     teasers: readonly { label: string; hint: string }[];
   };
   coach?: (CoachVM & { suggest?: unknown }) | null;
@@ -27,7 +27,7 @@ export interface PlayableInput {
   buildings: ReadonlySet<string>;
   staff: ReadonlySet<string>;
   systems: readonly string[];
-  goal: { text: string; current: number; target: number };
+  goal: { text: string; current: number; target: number; objective?: string };
   teasers: readonly { label: string; hint: string }[];
   visible: VisibleVM;
   coach: CoachVM | null;
@@ -35,6 +35,20 @@ export interface PlayableInput {
   /** False when the snapshot carried no ladder at all (everything is earned). */
   laddered: boolean;
 }
+
+/**
+ * The "New!" card lists what a level brings, and the logic sends systems as ids. Name them for people; `null` is a secret the
+ * card must not spoil (collusion is only ever seen through its signs).
+ */
+const SYSTEM_NAMES: Record<string, string | null> = {
+  breakdowns: "Breakdowns", slop: "Slop", leapfrog: "Benchmark leaderboard", arena: "The Arena", rnd: "R&D multiplier", news: "The Frontier Times",
+  events: "Event cards", protests: "Protests", disasters: "Disasters", papers: "Papers: publish or perish", collusion: null,
+  hearing: "The Hearing", yacht: "The yacht summit", defection: "Defection", poaching: "The Poaching War", auditors: "Evals Without Borders",
+};
+const unlockOf = (card: UnlockCardVM): UnlockCardVM => ({
+  ...card,
+  items: card.items.flatMap((item) => (item in SYSTEM_NAMES ? (SYSTEM_NAMES[item] === null ? [] : [SYSTEM_NAMES[item]!]) : [item])),
+});
 
 const everything = (on: boolean): VisibleVM => Object.fromEntries(HUD_PANELS.map((p) => [p, on])) as VisibleVM;
 
@@ -54,7 +68,7 @@ export function playableOf(snap: object): PlayableInput {
     teasers: progress?.teasers ?? [],
     visible,
     coach: coach && { id: coach.id, step: coach.step, of: coach.of, text: coach.text, target: coach.target, waitFor: coach.waitFor, canSkip: coach.canSkip },
-    unlock: p.unlockCard ?? null,
+    unlock: p.unlockCard ? unlockOf(p.unlockCard) : null,
     laddered: progress !== undefined,
   };
 }

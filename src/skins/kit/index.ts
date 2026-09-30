@@ -2,6 +2,7 @@
 export { Odometer } from "./Odometer";
 export { Marquee } from "./Marquee";
 export { Portrait } from "./Portrait";
+export { Senator } from "./Senator";
 export { Dialog } from "./Dialog";
 export { money } from "./format";
 export { reducedMotion } from "./motion";
@@ -11,3 +12,6 @@ export { placeBalloon, type Placement, type Rect, type Side } from "./place";
 export { ALL_VISIBLE } from "./visible";
 export { BenchTable } from "./BenchTable";
 export { VoiceGraph } from "./VoiceGraph";
+export { Evidence } from "./Evidence";
+export { PaperMomentBody } from "./PaperMomentBody";
+export { CrumbWikiBody, TalkPage } from "./CrumbWikiBody";
