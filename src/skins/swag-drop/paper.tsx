@@ -84,7 +84,6 @@ export function EventCard({ event, actions }: SlotPropsMap["EventCard"]) {
               <b>Frontier Lab</b>
               <small>Office of Vibes and Compliance</small>
             </span>
-            <span className="memo-tag">MEMO</span>
           </header>
           <dl className="sd-fields">
             <div>
@@ -129,6 +128,92 @@ export function EventCard({ event, actions }: SlotPropsMap["EventCard"]) {
         </div>
         <span className={`sd-stamp ${event.tone}`} aria-hidden>
           {STAMP[event.tone]}
+        </span>
+      </article>
+    </div>
+  );
+}
+
+/** The era title card as an all-hands slide: a big enamel medal, the name, one line, and what changes as sticky notes. */
+export function EraCard({ era, actions }: SlotPropsMap["EraCard"]) {
+  return (
+    <div className="sd-backdrop sd-era-backdrop">
+      <article className={`sd-era era-${era.n}`} role="dialog" aria-modal="true" aria-label={era.name}>
+        <div className="sd-era-head">
+          <span className="sd-era-medal" aria-hidden>
+            <b>{era.n}</b>
+          </span>
+          <span className="kicker">{era.kicker}</span>
+        </div>
+        <h2>{era.name}</h2>
+        <p className="line">{era.line}</p>
+        <ul className="sd-era-changes">
+          {era.changes.map((c, i) => (
+            <li key={c} className={`c${i % 3}`}>
+              {c}
+            </li>
+          ))}
+        </ul>
+        <div className="sd-era-dots" role="img" aria-label={`Era ${era.n} of ${era.total}`}>
+          {Array.from({ length: era.total }, (_, i) => (
+            <i key={i} className={i + 1 <= era.n ? "on" : ""} />
+          ))}
+        </div>
+        <button type="button" className="sd-key wide sd-follow sd-go" onClick={() => actions.continueEra()}>
+          <span className="face">
+            {era.continueLabel} <span className="sd-keycap">1</span>
+          </span>
+          <span className="band" />
+        </button>
+      </article>
+    </div>
+  );
+}
+
+/** The win or lose card as a memo: the stats as a till receipt, and a stamp for the verdict. */
+export function Outcome({ outcome, actions }: SlotPropsMap["Outcome"]) {
+  const t = useT();
+  return (
+    <div className="sd-backdrop">
+      <article className={`sd-memo ${outcome.won ? "tone-good" : "tone-bad"}`} role="dialog" aria-modal="true" aria-label={outcome.won ? "You won" : "Game over"}>
+        <div className="sd-sheet">
+          <header className="sd-letterhead">
+            <svg className="logo" viewBox="0 0 32 32" aria-hidden>
+              <rect x="2" y="2" width="28" height="28" rx="7" />
+              <path d="M9 22 16 8l7 14M12 17.5h8" />
+            </svg>
+            <span className="org">
+              <b>{outcome.stripe}</b>
+              <small>{outcome.date}</small>
+            </span>
+          </header>
+          <h2>{outcome.headline}</h2>
+          <dl className="sd-tally">
+            {outcome.stats.map((s) => (
+              <div key={s.label}>
+                <dt>{s.label}</dt>
+                <dd className={s.bad ? "bad" : ""}>{s.text}</dd>
+              </div>
+            ))}
+          </dl>
+          <p>{outcome.note}</p>
+          <div className="sd-choices row">
+            {outcome.won && (
+              <button type="button" className="sd-choice" onClick={() => actions.keepPlaying()}>
+                <span className="txt">
+                  <b>{t("outcome.keepPlaying")}</b>
+                </span>
+              </button>
+            )}
+            <button type="button" className="sd-choice primary" onClick={() => actions.newLab()}>
+              <span className="txt">
+                <b>{t("outcome.newLab")}</b>
+              </span>
+            </button>
+          </div>
+        </div>
+        <span className={`sd-stamp ${outcome.won ? "good" : "bad"}`} aria-hidden>
+          {outcome.won ? "PROMOTED" : "REDUNDANT"}
         </span>
       </article>
     </div>

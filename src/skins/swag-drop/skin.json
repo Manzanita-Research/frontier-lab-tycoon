@@ -21,7 +21,9 @@
     "EventCard",
     "PhotoButton",
     "NewsControls",
-    "Arena"
+    "Arena",
+    "EraCard",
+    "Outcome"
   ],
   "fonts": [
     {

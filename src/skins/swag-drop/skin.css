@@ -454,6 +454,7 @@
   /* ---- the instrument: training as a dial ---- */
   .sd-gauge {
     position: relative;
+    z-index: 2;
     pointer-events: auto;
     display: flex;
     align-items: center;
@@ -571,11 +572,11 @@
     pointer-events: none;
   }
   .sd-stamp.shipped {
-    left: 14px;
-    bottom: 12px;
+    right: 10px;
+    bottom: -13px;
     font-size: 17px;
-    transform: rotate(-9deg);
-    background: color-mix(in srgb, var(--sd-paper) 70%, transparent);
+    transform: rotate(-6deg);
+    background: color-mix(in srgb, var(--sd-paper) 82%, transparent);
   }
 
   /* ---- sticky-note OKRs ---- */
@@ -1300,11 +1301,11 @@
   }
   .sd-bat {
     display: grid;
-    grid-template-columns: 58px 1fr 38px;
+    grid-template-columns: 72px 1fr 38px;
     align-items: center;
     gap: 8px;
     padding: 0 16px;
-    font: 800 10.5px var(--sd-mono);
+    font: 800 10px/1.05 var(--sd-mono);
     letter-spacing: 0.03em;
     text-transform: uppercase;
   }
@@ -1693,11 +1694,13 @@
   }
   .sd-rd .top {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 6px;
+    gap: 3px 6px;
   }
   .sd-rd .k {
+    white-space: nowrap;
     font: 800 10px var(--sd-mono);
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -1904,14 +1907,6 @@
     text-transform: uppercase;
     color: var(--sd-soft);
   }
-  .sd-letterhead .memo-tag {
-    margin-left: auto;
-    padding: 1px 9px;
-    border: 2px solid var(--sd-ink);
-    font: 800 13px var(--sd-mono);
-    letter-spacing: 0.14em;
-    transform: rotate(3deg);
-  }
   .sd-fields {
     display: flex;
     flex-wrap: wrap;
@@ -1936,7 +1931,6 @@
   }
   .sd-memo h2 {
     margin: 0 0 8px;
-    padding-right: 96px;
     font: 800 25px/1.12 var(--flt-font-display);
     letter-spacing: -0.01em;
   }
@@ -2035,9 +2029,11 @@
   }
   .sd-memo > .sd-stamp {
     right: 14px;
-    top: 58px;
-    font-size: 24px;
-    transform: rotate(-9deg);
+    top: 16px;
+    padding: 4px 14px 5px;
+    font-size: 25px;
+    transform: rotate(-8deg);
+    background: color-mix(in srgb, var(--sd-paper) 55%, transparent);
   }
   .sd-memo.tone-good > .sd-stamp {
     color: #14683c;
@@ -2047,6 +2043,193 @@
   }
   .sd-memo.tone-neutral > .sd-stamp {
     color: #2c4d8f;
+  }
+
+  /* ---- the era card: an all-hands slide ---- */
+  .sd-era-backdrop {
+    background: color-mix(in srgb, var(--sd-ink) 68%, transparent);
+  }
+  .sd-era {
+    --era: #4f8ff0;
+    position: relative;
+    width: min(620px, 100%);
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 22px 26px 26px;
+    border: 3px solid var(--sd-ink);
+    border-radius: 6px;
+    background-color: var(--sd-paper);
+    background-image: repeating-linear-gradient(-45deg, transparent 0 22px, color-mix(in srgb, var(--era) 12%, transparent) 22px 44px);
+    box-shadow: 8px 8px 0 var(--sd-ink);
+    color: var(--sd-ink);
+    text-align: center;
+    transform: rotate(-0.6deg);
+    animation: swag-drop-slide 0.5s cubic-bezier(0.3, 1.3, 0.5, 1);
+  }
+  .sd-era.era-2 {
+    --era: #f2a020;
+  }
+  .sd-era.era-3 {
+    --era: #9a63f0;
+  }
+  .sd-era.era-4 {
+    --era: #ee4a2c;
+  }
+  .sd-era-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .sd-era-medal {
+    display: grid;
+    place-items: center;
+    width: 104px;
+    height: 104px;
+    border: 4px solid var(--sd-ink);
+    border-radius: 50%;
+    background: var(--sd-paper);
+    box-shadow: inset 0 0 0 7px var(--era), 5px 5px 0 var(--sd-ink);
+    animation: swag-drop-thunk 0.45s 0.2s both cubic-bezier(0.3, 1.4, 0.5, 1);
+  }
+  .sd-era-medal b {
+    font: 800 62px/1 var(--sd-num);
+  }
+  .sd-era .kicker {
+    padding: 3px 12px;
+    border: 2px solid var(--sd-ink);
+    background: color-mix(in srgb, var(--era) 40%, var(--sd-paper));
+    font: 800 14px var(--sd-mono);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transform: rotate(-2deg);
+  }
+  .sd-era h2 {
+    margin: 4px 0 0;
+    font: 800 44px/1 var(--flt-font-display);
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    text-shadow: 3px 3px 0 color-mix(in srgb, var(--era) 55%, transparent);
+  }
+  .sd-era .line {
+    margin: 0;
+    max-width: 30em;
+    font: 700 19px/1.35 var(--sd-ui);
+  }
+  .sd-era-changes {
+    list-style: none;
+    margin: 4px 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+  }
+  .sd-era-changes li {
+    padding: 8px 14px 9px;
+    border: 2px solid var(--sd-ink);
+    border-radius: 2px 2px 12px 2px;
+    background: var(--sd-sticky);
+    box-shadow: 3px 3px 0 var(--sd-ink);
+    font: 800 14.5px var(--sd-ui);
+    transform: rotate(-1.4deg);
+  }
+  .sd-era-changes li.c1 {
+    background: #ffd9a8;
+    transform: rotate(1deg);
+  }
+  .sd-era-changes li.c2 {
+    background: #cff3c9;
+    transform: rotate(-0.6deg);
+  }
+  .sd-era-dots {
+    display: flex;
+    gap: 10px;
+  }
+  .sd-era-dots i {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--sd-ink);
+    border-radius: 50%;
+    background: #fff;
+  }
+  .sd-era-dots i.on {
+    background: var(--era);
+    box-shadow: 2px 2px 0 var(--sd-ink);
+  }
+  .sd-era .sd-go {
+    flex: none;
+    align-self: center;
+    width: min(340px, 100%);
+    height: 58px;
+    pointer-events: auto;
+  }
+  .sd-era .sd-go .face {
+    gap: 12px;
+    font: 800 19px var(--sd-ui);
+    flex-direction: row;
+  }
+  .sd-era .sd-keycap {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+    box-shadow: 0 2px 0 var(--sd-ink);
+  }
+
+  /* the win / lose memo: the stats as a till receipt */
+  .sd-tally {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin: 0 0 14px;
+    padding: 10px 12px;
+    border: 2px dashed var(--sd-ink);
+    background: #fff;
+    font: 700 13.5px var(--sd-mono);
+  }
+  .sd-tally div {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+  }
+  .sd-tally dt {
+    text-transform: uppercase;
+  }
+  .sd-tally dt::after {
+    content: "";
+    flex: 1;
+  }
+  .sd-tally div {
+    justify-content: space-between;
+    border-bottom: 2px dotted rgba(30, 42, 47, 0.35);
+  }
+  .sd-tally dd {
+    margin: 0;
+    font-weight: 800;
+  }
+  .sd-tally dd.bad {
+    color: var(--flt-color-bad);
+  }
+  .sd-choices.row {
+    flex-direction: row;
+    gap: 12px;
+  }
+  .sd-choices.row .sd-choice {
+    flex: 1;
+    justify-content: center;
+    min-height: 52px;
+  }
+  .sd-choice.primary {
+    background: var(--sd-signal);
+  }
+  .sd-choice.primary:hover {
+    background: #ff8558;
+  }
+  .sd-memo.tone-bad > .sd-stamp {
+    color: var(--flt-color-bad);
   }
 
   /* ---- what the base still draws: dialogs, era card, Arena, payroll, News Room, photo mode ---- */
@@ -2071,6 +2254,10 @@
   .news-arrival {
     border-radius: 8px;
   }
+  .staff {
+    bottom: calc(196px + env(safe-area-inset-bottom));
+    max-height: calc(100vh - 400px);
+  }
   .news-arrival {
     top: auto;
     left: 12px;
@@ -2086,10 +2273,55 @@
     box-shadow: 6px 6px 0 var(--sd-ink);
   }
   .photo-bar {
+    gap: 12px;
+    padding: 10px 14px 15px;
+    border: 2px solid var(--sd-ink);
+    border-radius: 12px;
+    background: var(--sd-slate);
+    background-image: none;
+    box-shadow: var(--sd-hard);
+  }
+  .photo-times button,
+  .photo-done {
+    min-width: 56px;
+    height: 44px;
+    padding: 0 12px;
+    border: 2px solid var(--sd-ink);
     border-radius: 10px;
+    background: var(--sd-cap);
+    box-shadow: 0 4px 0 var(--sd-ink);
+    color: var(--sd-ink);
+    font: 800 14px var(--sd-ui);
+  }
+  .photo-times button:hover,
+  .photo-done:hover {
+    background: var(--sd-cap);
+    transform: translateY(-1px);
+  }
+  .photo-times button.on {
+    background: var(--sd-signal);
+    color: var(--sd-ink);
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 var(--sd-ink);
   }
   .shutter {
-    box-shadow: 0 4px 0 var(--sd-ink);
+    width: 64px;
+    height: 64px;
+    border: 3px solid var(--sd-ink);
+    box-shadow: 0 5px 0 var(--sd-ink);
+  }
+  .shutter span {
+    background: var(--sd-bad);
+    border: 2px solid var(--sd-ink);
+  }
+  .shutter:active {
+    transform: translateY(4px);
+    box-shadow: 0 1px 0 var(--sd-ink);
+  }
+  .polaroid {
+    border: 2px solid var(--sd-ink);
+    border-radius: 2px;
+    box-shadow: 4px 4px 0 var(--sd-ink);
   }
 
   /* ---- phones ---- */
@@ -2266,8 +2498,8 @@
       font-size: 18px;
     }
     .sd-stamp.shipped {
-      left: 4px;
-      bottom: 6px;
+      right: 6px;
+      bottom: -10px;
       font-size: 12px;
     }
     .sd-okrs.compact:not(.open) {
@@ -2403,21 +2635,53 @@
       max-height: 58vh;
       overflow-y: auto;
     }
+    .sd-barcode {
+      display: none;
+    }
+    .sd-pin.pin-hype .sd-badge {
+      min-width: 78px;
+      height: 42px;
+    }
+    .sd-hype {
+      width: 60px;
+      height: 37px;
+    }
+    .sd-hype .sd-num {
+      font-size: 14px;
+    }
     .sd-quote {
       font-size: 14px;
     }
     .sd-memo h2 {
-      padding-right: 0;
       font-size: 21px;
     }
     .sd-sheet {
       padding: 14px 14px 18px;
     }
     .sd-memo > .sd-stamp {
-      top: auto;
-      bottom: -12px;
-      right: 8px;
-      font-size: 18px;
+      right: -4px;
+      top: -14px;
+      font-size: 17px;
+    }
+    .sd-era {
+      padding: 16px 14px 18px;
+      gap: 10px;
+    }
+    .sd-era-medal {
+      width: 76px;
+      height: 76px;
+    }
+    .sd-era-medal b {
+      font-size: 44px;
+    }
+    .sd-era h2 {
+      font-size: 30px;
+    }
+    .sd-era .line {
+      font-size: 16px;
+    }
+    .sd-choices.row {
+      flex-direction: column-reverse;
     }
     .news-arrival {
       bottom: calc(214px + env(safe-area-inset-bottom));
@@ -2453,6 +2717,8 @@
     .sd-stamp,
     .sd-sticker,
     .sd-memo,
+    .sd-era,
+    .sd-era-medal,
     .sd-backdrop,
     .sd-paddles .sd-paddle,
     .sd-prompt .cursor,
@@ -2467,6 +2733,8 @@
     .sd-stamp,
     .sd-sticker,
     .sd-memo,
+    .sd-era,
+    .sd-era-medal,
     .sd-backdrop,
     .sd-paddles .sd-paddle,
     .sd-prompt .cursor,

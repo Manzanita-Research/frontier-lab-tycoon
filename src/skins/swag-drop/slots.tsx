@@ -6,7 +6,7 @@ import { Inspector } from "./badge";
 import { BuildBar, NewsControls, PhotoButton, Speed } from "./keys";
 import { Layout } from "./Layout";
 import { Objectives, ThoughtsPanel } from "./notes";
-import { Bubble, EventCard, Ticker, Toast } from "./paper";
+import { Bubble, EraCard, EventCard, Outcome, Ticker, Toast } from "./paper";
 import { Stats, Training } from "./plaque";
 
 const slots: SkinSlots = {
@@ -23,6 +23,8 @@ const slots: SkinSlots = {
   Ticker,
   Toast,
   EventCard,
+  EraCard,
+  Outcome,
   PhotoButton,
   NewsControls,
 };
