@@ -46,6 +46,10 @@ The game logic runs on **XState v6 (alpha) and Effect v4 (rc)**, joined by `@xst
 
 House style for sim machines: transitions are pure and never draw random numbers. The driver pre-rolls dice, in the original draw order, and passes them in the event (`{ type: "TIMER_DONE", loiter: rng.chance(...) }`). Side effects on the World are `enq`'d actions that the driver runs in order after each `transition()`. `src/sim/golden.test.ts` pins the RNG stream and the World for three seeds, so a port step that changes a number fails loudly.
 
+## Entities: don't assume everything walks
+
+Only people (visitors, staff, researchers) are sure to be walkers. Agents, compute, data, tokens and models may later be shown as flows, sprites or not at all (see the Open questions in `docs/ROADMAP.md`). Keep an entity's **presentation** separate from its sim logic, and write mechanics against entities and stats rather than against walkers.
+
 ## PRs
 
 - Open a real PR from your branch into `main`. CI runs typecheck, tests and build.

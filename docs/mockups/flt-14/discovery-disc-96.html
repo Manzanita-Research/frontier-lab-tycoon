@@ -1,0 +1,155 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jersey+10&family=Comic+Neue:wght@400;700&display=block" rel="stylesheet">
+<style>
+:root{--red:#E4222B;--yel:#FFD400;--blu:#1A5BD6;--grn:#1FA24A;--pur:#7B3FC4;--ora:#FF8A00;--ink:#111;--paper:#FFFDF2;
+  --disp:"Jersey 10",monospace;--body:"Comic Neue","Comic Sans MS",cursive}
+*{box-sizing:border-box}html,body{margin:0;width:1440px;height:900px;overflow:hidden}
+body{background:url(bg.png) 0 0/1440px 900px no-repeat;font-family:var(--body);font-weight:700;color:var(--ink);position:relative}
+.card{position:absolute;background:var(--paper);border:3px solid var(--ink);box-shadow:5px 5px 0 var(--ink);border-radius:6px}
+.graph{background-color:var(--paper);background-image:linear-gradient(rgba(26,91,214,.13) 1px,transparent 1px),linear-gradient(90deg,rgba(26,91,214,.13) 1px,transparent 1px);background-size:14px 14px}
+.stars{background-color:var(--blu);background-image:radial-gradient(#fff 1.2px,transparent 1.6px),radial-gradient(var(--yel) 1.2px,transparent 1.6px);background-size:26px 26px,38px 38px;background-position:0 0,13px 19px}
+.disp{font-family:var(--disp);letter-spacing:.02em}
+/* banner */
+.banner{position:absolute;left:14px;top:12px;display:flex;align-items:center;gap:10px}
+.ribbon{background:var(--red);color:#fff;border:3px solid var(--ink);box-shadow:5px 5px 0 var(--ink);padding:4px 22px 2px 14px;font-family:var(--disp);font-size:40px;line-height:1;clip-path:polygon(0 0,100% 0,96% 50%,100% 100%,0 100%)}
+.globe{width:60px;height:60px}
+.date{background:var(--yel);border:3px solid var(--ink);padding:3px 10px;font-size:17px;box-shadow:3px 3px 0 var(--ink);transform:rotate(-3deg)}
+/* sticker stats */
+.stats{position:absolute;left:14px;top:86px;display:flex;gap:14px;align-items:center}
+.stk{display:grid;place-items:center;text-align:center;border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink);line-height:1}
+.stk .n{font-family:var(--disp);font-size:34px}
+.stk .l{font-size:13px;margin-top:2px}
+.star{width:124px;height:118px;background:var(--yel);clip-path:polygon(50% 0,61% 34%,98% 35%,68% 56%,79% 92%,50% 70%,21% 92%,32% 56%,2% 35%,39% 34%);border:0;box-shadow:none;position:relative}
+.starwrap{position:relative;width:150px;height:142px;filter:drop-shadow(4px 4px 0 #111)}
+.starwrap::before{content:"";position:absolute;inset:-3px;background:#111;clip-path:polygon(50% 0,61% 34%,98% 35%,68% 56%,79% 92%,50% 70%,21% 92%,32% 56%,2% 35%,39% 34%)}
+.starwrap .star{position:absolute;inset:3px;width:auto;height:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:14px}
+.star .n{font-size:34px;line-height:.9}.star .l{font-size:12px}
+.circ{width:96px;height:96px;border-radius:50%}
+.pill{padding:8px 14px;border-radius:12px}
+/* star chart */
+.chart{left:14px;top:246px;width:318px;padding:10px 12px 12px}
+.chart h4,.trip h4{margin:0 0 6px;font-family:var(--disp);font-size:26px;font-weight:400;line-height:1}
+.tr{display:grid;grid-template-columns:1fr 34px;align-items:center;border-top:2px dashed #999;padding:6px 0;font-size:16px}
+.tr .s{font-size:24px;text-align:center}
+.bar{height:18px;border:3px solid var(--ink);background:#fff;margin:4px 0 2px;position:relative}
+.bar i{position:absolute;left:0;top:0;bottom:0;background:repeating-linear-gradient(90deg,var(--pur) 0 12px,#9d6be0 12px 24px)}
+/* pace */
+.pace{position:absolute;right:14px;top:12px;display:flex;gap:8px;align-items:center;background:var(--paper);border:3px solid var(--ink);box-shadow:5px 5px 0 var(--ink);padding:6px 8px 6px 12px;border-radius:6px}
+.pace .l{font-size:15px}
+.pb{border:3px solid var(--ink);padding:4px 10px;font-size:16px;background:#fff;box-shadow:3px 3px 0 var(--ink)}
+.pb.on{background:var(--grn);color:#fff;transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+/* field trip badge */
+.trip{right:14px;top:84px;width:350px;padding:0;overflow:visible}
+.trip .hole{position:absolute;left:50%;top:-18px;width:40px;height:26px;margin-left:-20px;border:3px solid var(--ink);border-radius:8px;background:#ccc}
+.trip .top{background:var(--grn);color:#fff;padding:12px 14px 6px;border-bottom:3px solid var(--ink)}
+.trip .top h4{color:#fff}
+.trip .top small{font-size:14px}
+.trip .in{padding:10px 14px 14px}
+.who{display:grid;grid-template-columns:84px 1fr;gap:12px;align-items:center}
+.ph{width:84px;height:96px;border:3px solid var(--ink);background:var(--yel)}
+.who .nm{font-family:var(--disp);font-size:30px;line-height:.95}
+.who .r{font-size:15px;margin-top:4px}
+.therm{display:grid;grid-template-columns:78px 1fr 44px;gap:8px;align-items:center;font-size:15px;margin-top:8px}
+.th{height:18px;border:3px solid var(--ink);border-radius:10px;background:#fff;overflow:hidden}.th i{display:block;height:100%}
+.fact{margin-top:10px;border:3px dashed var(--ink);padding:8px 10px;background:#fff7c2;font-size:16px}
+.fact b{font-family:var(--disp);font-size:20px;font-weight:400;color:var(--red)}
+.go{margin-top:10px;background:var(--blu);color:#fff;border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink);text-align:center;font-family:var(--disp);font-size:26px;padding:4px}
+/* speech bubbles */
+.sp{position:absolute;background:#fff;border:3px solid var(--ink);border-radius:18px;padding:8px 12px;font-size:16px;line-height:1.2}
+.sp::after{content:"";position:absolute;left:var(--tx,40%);bottom:-17px;width:22px;height:18px;background:#fff;border-right:3px solid var(--ink);border-bottom:3px solid var(--ink);transform:skewX(-35deg);clip-path:polygon(0 0,100% 0,100% 100%)}
+.sp small{display:block;font-size:13px;color:var(--blu)}
+/* guide */
+.guide{position:absolute;left:14px;bottom:62px;display:flex;align-items:flex-end;gap:6px}
+.robot{width:92px;height:112px}
+.gsay{background:#fff;border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink);border-radius:16px;padding:10px 14px;font-size:17px;max-width:250px;margin-bottom:0;position:relative}
+.gsay b{font-family:var(--disp);font-size:24px;font-weight:400;color:var(--red);display:block;line-height:1}
+/* stamps */
+.stamps{position:absolute;left:390px;bottom:62px;display:flex;gap:8px;padding:8px 10px 10px}
+.stp{width:78px;height:86px;background:#fff;border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:13px;line-height:1.05;text-align:center}
+.stp svg{width:34px;height:34px}
+.stp .p{font-family:var(--disp);font-size:19px;color:var(--grn)}
+.stp.on{background:var(--yel);transform:translate(2px,2px) rotate(-2deg);box-shadow:1px 1px 0 var(--ink)}
+.stp.poor{opacity:.45}
+.stamps .lbl{position:absolute;top:-16px;left:14px;background:var(--red);color:#fff;border:3px solid var(--ink);padding:0 8px;font-family:var(--disp);font-size:20px}
+/* did you know */
+.dyk{position:absolute;left:0;right:0;bottom:0;height:48px;background:var(--yel);border-top:3px solid var(--ink);display:flex;align-items:center;gap:14px;padding:0 14px;white-space:nowrap;overflow:hidden;font-size:18px}
+.dyk .t{background:var(--red);color:#fff;border:3px solid var(--ink);padding:0 10px;font-family:var(--disp);font-size:24px;transform:rotate(-2deg)}
+</style></head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs>
+ <symbol id="i-path" viewBox="0 0 32 32"><path d="M3 20 16 27 29 20 16 13Z" fill="#E8C37A" stroke="#111" stroke-width="2.5" stroke-linejoin="round"/></symbol>
+ <symbol id="i-cluster" viewBox="0 0 32 32"><rect x="5" y="6" width="10" height="21" fill="#1A5BD6" stroke="#111" stroke-width="2.5"/><rect x="17" y="11" width="10" height="16" fill="#1A5BD6" stroke="#111" stroke-width="2.5"/><path d="M8 11h4M8 16h4M20 16h4" stroke="#FFD400" stroke-width="2.5"/></symbol>
+ <symbol id="i-hall" viewBox="0 0 32 32"><path d="M4 25a12 12 0 0 1 24 0Z" fill="#fff" stroke="#111" stroke-width="2.5"/><rect x="2" y="24" width="28" height="4" fill="#7B3FC4" stroke="#111" stroke-width="2"/></symbol>
+ <symbol id="i-gate" viewBox="0 0 32 32"><path d="M6 28V14a10 10 0 0 1 20 0v14h-6V15a4 4 0 0 0-8 0v13Z" fill="#FF8A00" stroke="#111" stroke-width="2.5" stroke-linejoin="round"/></symbol>
+ <symbol id="i-kom" viewBox="0 0 32 32"><path d="M12 3h8v5l4 4v17H8V12l4-4Z" fill="#FFD400" stroke="#111" stroke-width="2.5" stroke-linejoin="round"/></symbol>
+ <symbol id="i-nap" viewBox="0 0 32 32"><rect x="3" y="13" width="26" height="12" rx="6" fill="#7fd0ff" stroke="#111" stroke-width="2.5"/><path d="M21 4h6l-6 6h6" stroke="#111" stroke-width="2.5" fill="none"/></symbol>
+ <symbol id="i-demo" viewBox="0 0 32 32"><rect x="4" y="4" width="24" height="16" fill="#E4222B" stroke="#111" stroke-width="2.5"/><path d="M13 8v8l6-4Z" fill="#fff"/><path d="M16 20v7M10 28h12" stroke="#111" stroke-width="2.5"/></symbol>
+ <symbol id="i-doze" viewBox="0 0 32 32"><rect x="8" y="9" width="15" height="11" fill="#FFD400" stroke="#111" stroke-width="2.5"/><circle cx="11" cy="25" r="3.5" fill="#fff" stroke="#111" stroke-width="2.5"/><circle cx="21" cy="25" r="3.5" fill="#fff" stroke="#111" stroke-width="2.5"/></symbol>
+</defs></svg>
+
+<div class="banner">
+  <svg class="globe" viewBox="0 0 60 60"><circle cx="30" cy="30" r="26" fill="#1A5BD6" stroke="#111" stroke-width="3"/><path d="M14 18c6 2 8 8 14 6s4 10 10 10 6 8 2 12M36 8c-2 6 6 8 12 6M8 34c6-2 10 4 8 10" fill="#1FA24A" stroke="#111" stroke-width="2.5"/><path d="M4 30h52M30 4c-9 8-9 44 0 52M30 4c9 8 9 44 0 52" fill="none" stroke="#111" stroke-width="1.5" opacity=".35"/></svg>
+  <span class="ribbon">Mostly Harmless Compute</span>
+  <span class="date">Y1 · Jan 30 · Day 30</span>
+</div>
+
+<div class="stats">
+  <div class="starwrap"><div class="star"><span class="n disp">636</span><span class="l">VIBES!</span></div></div>
+  <div class="stk circ" style="background:var(--grn);color:#fff"><div><div class="n">$4.33M</div><div class="l">cash · −$25K/day</div></div></div>
+  <div class="stk circ" style="background:#fff;border-color:var(--red)"><div><div class="n" style="color:var(--red)">5.8</div><div class="l">months of runway<br>⏰ hurry!</div></div></div>
+  <div class="stk pill" style="background:var(--pur);color:#fff;transform:rotate(3deg)"><div class="n">26</div><div class="l">capability</div></div>
+  <div class="stk pill" style="background:var(--ora);transform:rotate(-4deg)"><div class="n">44</div><div class="l">hype 📣</div></div>
+</div>
+
+<div class="card graph chart">
+  <h4>🔬 NOW TRAINING</h4>
+  <div style="font-size:18px">Frontier-3-Reasoner</div>
+  <div class="bar"><i style="width:42%"></i></div>
+  <div style="font-size:14px;display:flex;justify-content:space-between"><span>42% done!</span><span>+10 compute a day</span></div>
+  <h4 style="margin-top:12px">⭐ MY STAR CHART · Q1</h4>
+  <div class="tr"><span>Release Frontier-2</span><span class="s">⭐</span></div>
+  <div class="tr"><span>Earn $250K a day</span><span class="s" style="opacity:.25">⭐</span></div>
+  <div class="tr"><span>Hype 60 or more</span><span class="s" style="opacity:.25">⭐</span></div>
+</div>
+
+<div class="pace"><span class="l">Pace:</span><span class="pb">⏸ Rest</span><span class="pb on">Steady</span><span class="pb">Strenuous</span><span class="pb">Grueling</span></div>
+
+<div class="card trip">
+  <span class="hole"></span>
+  <div class="top"><h4>FIELD TRIP BADGE</h4><small>Frontier Labs Science Center · please return to front desk</small></div>
+  <div class="in graph">
+    <div class="who"><svg class="ph" viewBox="0 0 28 32"><rect width="28" height="32" fill="#FFD400"/><circle cx="14" cy="12" r="7" fill="#c68a5a" stroke="#111" stroke-width="1.5"/><path d="M7 10c1-6 13-6 14 0" fill="#3b2415"/><circle cx="11.5" cy="12" r="1" fill="#111"/><circle cx="16.5" cy="12" r="1" fill="#111"/><path d="M11 15.5q3 1.5 6 0" stroke="#111" fill="none"/><path d="M3 32c1-8 21-8 22 0" fill="#1FA24A" stroke="#111" stroke-width="1.5"/></svg>
+      <div><div class="nm disp">Dr. Ada Gradient</div><div class="r">Member of Technical Staff</div><div class="r" style="color:var(--red)">😴 feeling slumped</div></div></div>
+    <div class="therm"><span>Energy</span><span class="th"><i style="width:12%;background:var(--red)"></i></span><span>12%</span></div>
+    <div class="therm"><span>Focus</span><span class="th"><i style="width:90%;background:var(--grn)"></i></span><span>90%</span></div>
+    <div class="therm"><span>FOMO</span><span class="th"><i style="width:5%;background:var(--ora)"></i></span><span>5%</span></div>
+    <div class="fact"><b>Ada is thinking…</b>“The kombucha is warm and so is my equity.”</div>
+    <div class="go">▶ FOLLOW ADA</div>
+  </div>
+</div>
+
+<div class="sp" style="left:222px;top:512px;width:250px;--tx:96px"><small>Visitor · journalist</small>I'm a journalist. My piece is called 'AI: Hot or Not?'</div>
+<div class="sp" style="left:88px;top:594px;width:250px;--tx:100px"><small>Visitor · venture capital</small>I'm here to 'get exposure to AI'. Where do I sign for the AI?</div>
+<div class="sp" style="left:852px;top:220px;width:190px;font-size:14.5px;--tx:66px"><small>Agent-0042 "Sparky"</small>I asked for a dinner recipe. It gave me a research agenda.</div>
+
+<div class="guide">
+  <svg class="robot" viewBox="0 0 46 56"><rect x="8" y="10" width="30" height="22" rx="4" fill="#bfc6d6" stroke="#111" stroke-width="2.5"/><circle cx="17" cy="21" r="4" fill="#fff" stroke="#111" stroke-width="2"/><circle cx="29" cy="21" r="4" fill="#fff" stroke="#111" stroke-width="2"/><circle cx="17" cy="21" r="1.6" fill="#111"/><circle cx="29" cy="21" r="1.6" fill="#111"/><path d="M18 27q5 3 10 0" stroke="#111" stroke-width="2" fill="none"/><path d="M23 10V4" stroke="#111" stroke-width="2.5"/><circle cx="23" cy="3" r="3" fill="#E4222B" stroke="#111" stroke-width="2"/><rect x="12" y="34" width="22" height="16" rx="3" fill="#1A5BD6" stroke="#111" stroke-width="2.5"/><path d="M12 38l-8 6M34 38l8-6" stroke="#111" stroke-width="3"/><rect x="18" y="38" width="10" height="6" fill="#FFD400" stroke="#111" stroke-width="1.5"/></svg>
+  <div class="gsay"><b>GREAT JOB!</b>You shipped Frontier-2! ⭐ Now let's find out what "alignment" means…</div>
+</div>
+
+<div class="card stars stamps">
+  <span class="lbl">BUILD STAMPS</span>
+  <div class="stp"><svg><use href="#i-path"/></svg>Path<span class="p">$10K</span></div>
+  <div class="stp"><svg><use href="#i-cluster"/></svg>Cluster<span class="p">$600K</span></div>
+  <div class="stp on"><svg><use href="#i-hall"/></svg>Training Hall<span class="p">$900K</span></div>
+  <div class="stp"><svg><use href="#i-gate"/></svg>Gateway<span class="p">$400K</span></div>
+  <div class="stp"><svg><use href="#i-kom"/></svg>Kombucha<span class="p">$120K</span></div>
+  <div class="stp"><svg><use href="#i-nap"/></svg>Nap Pods<span class="p">$200K</span></div>
+  <div class="stp poor"><svg><use href="#i-demo"/></svg>Demo Stage<span class="p">$5.5M</span></div>
+  <div class="stp"><svg><use href="#i-doze"/></svg>Bulldoze<span class="p">½</span></div>
+</div>
+
+<div class="dyk"><span class="t">DID YOU KNOW?</span>Training run for Frontier-3 kicks off; interns told not to touch the big red button, or the green one! ★ Sirocco releases an open-weights model via torrent link at 3am! ★</div>
+</body></html>
