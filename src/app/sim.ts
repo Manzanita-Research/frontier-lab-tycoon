@@ -22,6 +22,7 @@ import { parseLeapMoment, stageLeapfrog } from "../sim/race/leapfrog/demo";
 import { isCollusionMoment, stageCollusion } from "../sim/collusion/demo";
 import { isCircusMoment, stageCircus } from "../sim/circus/demo";
 import { isDramaMoment, stageDrama } from "../sim/defection/demo";
+import { isEscapeMoment, stageEscape } from "../sim/escape/demo";
 import { isAuditMoment, stageAudit } from "../sim/auditors/demo";
 import { isSenateMoment, stageSenate } from "../sim/capture/demo";
 import { walkersThinking } from "../sim/mind";
@@ -120,7 +121,7 @@ export class SimHandle {
   }
 }
 
-type SimDebug = Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean; collusion?: boolean; hearing?: boolean; yacht?: boolean; defection?: boolean; poaching?: boolean; auditors?: boolean; capture?: boolean; promises?: boolean; factions?: boolean; water?: boolean };
+type SimDebug = Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean; collusion?: boolean; hearing?: boolean; yacht?: boolean; defection?: boolean; poaching?: boolean; auditors?: boolean; capture?: boolean; promises?: boolean; factions?: boolean; water?: boolean; escape?: boolean };
 
 /**
  * A living campus, warped forward and dressed up per the `?seed=&warp=&agents=&discourse=` debug knobs.
@@ -145,6 +146,7 @@ function stage(dbg: SimDebug): GameState {
   if (dbg.capture === false) sim.flags.captureOff = 1;
   if (dbg.promises === false) sim.flags.promisesOff = 1;
   if (dbg.factions === false) sim.flags.factionsOff = 1;
+  if (dbg.escape === false) sim.flags.escapeOff = 1;
   if (dbg.water === false) sim.flags["arcOff:water-escalation"] = 1;
   const leap = parseLeapMoment(dbg.moment);
   if (dbg.warp > 0 || dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0 || dbg.moment || dbg.disaster) { continueTutorial(sim, true); delete sim.progression; }
@@ -162,6 +164,7 @@ function stage(dbg: SimDebug): GameState {
   else if (isAuditMoment(dbg.moment)) stageAudit(sim, dbg.moment);
   else if (isSenateMoment(dbg.moment)) stageSenate(sim, dbg.moment);
   else if (isFactionMoment(dbg.moment)) stageFactions(sim, dbg.moment);
+  else if (isEscapeMoment(dbg.moment)) stageEscape(sim, dbg.moment);
   if (dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0) {
     const rng = createRng(sim.rngState);
     if (dbg.researchers > 0) seedWalkers(sim, "researcher", dbg.researchers, rng);

@@ -179,10 +179,13 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // Then the factions and the Water Discourse arc (FLT-33/25). Level 4 lands at 940 / 980 / 880: its rung now names the
 // factions, which wake and first move the World 4 ticks later (944 / 984 / 884). The base-water arc's documentary crew
 // (a new card, Level 5) first moves it at 1963 / 2043 / 2343 (2323 / 2383 / 2403 with the factions off). 200 and 800 hold.
+// Then the Sandbox Escape (FLT-59), on Scrutiny too: the Level 5 card names the Sandbox, the Honeypot and the escape, and
+// the pack draws its own dice (its own stream) from the next day, so only its state and the card move at first; its
+// thoughts, runs and escapes follow. 1600 on moves on every seed; 200 and 800 hold.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "d3826cd0", 800: "ed628bb9", 1600: "e572590c", 2400: "722cfa55", 3200: "22c99bb6", 4000: "68967430" },
-  2: { 200: "e548b1af", 800: "552cae60", 1600: "cc016f76", 2400: "c0301cb7", 3200: "d96c9353", 4000: "3bbe5608" },
-  3: { 200: "58bb415c", 800: "920699d6", 1600: "4034a696", 2400: "a367296d", 3200: "c48be0ba", 4000: "dbc626f9" },
+  1: { 200: "d3826cd0", 800: "ed628bb9", 1600: "b6044e68", 2400: "2731365d", 3200: "f1b7867e", 4000: "812100b5" },
+  2: { 200: "e548b1af", 800: "552cae60", 1600: "665b9892", 2400: "a2510113", 3200: "35f1335d", 4000: "4909af45" },
+  3: { 200: "58bb415c", 800: "920699d6", 1600: "b3f89e91", 2400: "93c30b84", 3200: "9b97d0c2", 4000: "5c99d78f" },
 };
 
 describe("golden runs", () => {

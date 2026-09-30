@@ -160,7 +160,7 @@ describe("the playable ladder", () => {
     expect(progressOf(s).teasers).toEqual([
       { label: "2 more", hint: "Ship your first model" },
       { label: "4 more", hint: "Earn $20K a day" },
-      { label: "4 more", hint: "Top 5 on the Arena" },
+      { label: "6 more", hint: "Top 5 on the Arena" },
     ]);
     s.models.push("Fixture-1"); updateProgression(s);
     expect(progressOf(s).teasers.map((t) => t.hint)).toEqual(["Earn $20K a day", "Top 5 on the Arena"]);

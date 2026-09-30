@@ -19,6 +19,8 @@ import { KombuchaModel } from "./KombuchaModel";
 import { NapModel } from "./NapModel";
 import { SnackModel } from "./SnackModel";
 import { SecurityOfficeModel } from "./SecurityOfficeModel";
+import { SandboxModel } from "./SandboxModel";
+import { HoneypotModel } from "./HoneypotModel";
 import { DemoModel } from "./DemoModel";
 import { ModModel } from "./ModModel";
 import { BrokenFx } from "./BrokenFx";
@@ -53,6 +55,10 @@ export function BuildingModel({ kind, id }: { kind: BuildingKind; id?: number })
       return <SolarFarmModel color={color} />;
     case "security":
       return <SecurityOfficeModel color={color} />;
+    case "sandbox":
+      return <SandboxModel color={color} />;
+    case "honeypot":
+      return <HoneypotModel color={color} />;
     default:
       // A kind a mod added: no model of its own yet.
       return <ModModel color={color} size={def.size} />;

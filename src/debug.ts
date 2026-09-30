@@ -47,6 +47,8 @@ export interface DebugParams {
   factions: boolean;
   /** The Water Discourse escalation (FLT-25) runs unless `?water=off` (the plain water crowd stays). */
   water: boolean;
+  /** The Sandbox Escape (FLT-59) wakes at Level 5 unless `?escape=off`. */
+  escape: boolean;
   /**
    * Preview a rung of the Playable v1 ladder without playing to it (screenshots, skins): `?debug=1&ladder=1` is level 1,
    * `&coach=0` puts the first of the seven coach lines up, `&unlock` the "New!" card. Only with `debug`.
@@ -86,6 +88,7 @@ export function readDebugParams(search = typeof window === "undefined" ? "" : wi
     promises: q.get("promises") !== "off",
     factions: q.get("factions") !== "off",
     water: q.get("water") !== "off",
+    escape: q.get("escape") !== "off",
     ladder: q.has("debug") && num("ladder") !== null && num("ladder")! >= 1 && num("ladder")! <= 5 ? { level: Math.round(num("ladder")!) as 1 | 2 | 3 | 4 | 5, coach: num("coach"), unlock: q.has("unlock") } : null,
   };
 }

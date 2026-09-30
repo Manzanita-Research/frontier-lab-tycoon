@@ -203,6 +203,6 @@ describe("Field Almanac", () => {
     const text = out.replace(/<[^>]*>/g, "").replace(/&#x27;|&quot;|&amp;/g, "");
     for (const ch of text) expect(/[\u0020-\u007e\u00a0-\u00ff\u2000-\u206f\u2190-\u2193\u2212]/.test(ch), `U+${ch.codePointAt(0)!.toString(16)} ${ch}`).toBe(true);
     // ...and no tool falls back to the plain crate.
-    for (const it of vm.buildItems) expect(["path", "cluster", "hall", "gateway", "kombucha", "nap", "snack", "demo", "datacenter", "gas", "solar", "security", "bulldoze", "staff"]).toContain(it.kind);
+    for (const it of vm.buildItems) expect(["path", "cluster", "hall", "gateway", "kombucha", "nap", "snack", "demo", "datacenter", "gas", "solar", "security", "sandbox", "honeypot", "bulldoze", "staff"]).toContain(it.kind);
   });
 });

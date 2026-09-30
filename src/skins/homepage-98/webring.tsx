@@ -22,6 +22,8 @@ const RING: Record<string, string> = {
   gas: "#5a4020",
   solar: "#0050a0",
   security: "#202080",
+  sandbox: "#c09020",
+  honeypot: "#008040",
   bulldoze: "#404040",
   staff: "#007060",
   senate: "#303078",

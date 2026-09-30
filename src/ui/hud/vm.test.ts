@@ -48,7 +48,7 @@ describe("hudViewModel", () => {
 
   it("lists the build palette with prices, hotkeys, affordability and the selected tool", () => {
     const kinds = vm.buildItems.map((b) => b.kind);
-    expect(kinds).toEqual(["path", "cluster", "hall", "gateway", "kombucha", "nap", "snack", "demo", "security", "bulldoze", "staff"]);
+    expect(kinds).toEqual(["path", "cluster", "hall", "gateway", "kombucha", "nap", "snack", "demo", "security", "sandbox", "honeypot", "bulldoze", "staff"]);
     const cluster = vm.buildItems.find((b) => b.kind === "cluster")!;
     expect(cluster).toMatchObject({ name: BUILDINGS.cluster.name, hotkey: 2, selected: true, price: BUILDINGS.cluster.price, priceText: formatMoney(BUILDINGS.cluster.price) });
     expect(vm.buildItems.filter((b) => b.selected)).toHaveLength(1);

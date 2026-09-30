@@ -21,7 +21,7 @@ export const ACTION_NAMES = [
   "cash.delta", "rival.leap", "rival.growth", "rival.pace", "rival.closed", "camera.focus", "shake", "sound.cue", "news", "toast", "card", "faction.delta", "relation.delta",
   "faction.signal", "faction.rally", "faction.disperse", "flag.set", "flag.clear",
   "people.meet", "people.quit", "people.pay", "people.cheer",
-  "visitors.arrive", "visitors.leave", "walkers.disguise", "walkers.reveal",
+  "visitors.arrive", "visitors.leave", "walkers.disguise", "walkers.reveal", "spawn.escape",
 ] as const;
 export type GuardName = (typeof GUARD_NAMES)[number];
 export type ActionName = (typeof ACTION_NAMES)[number];

@@ -7,6 +7,7 @@ import type { CollusionState, Investigation } from "./collusion/state";
 import type { HearingState } from "./hearing/state";
 import type { YachtState } from "./yacht/state";
 import type { DefectionState } from "./defection/state";
+import type { EscapeState } from "./escape/state";
 import type { NeoLabsState } from "./neolabs/state";
 import type { Meeting } from "./meetings";
 import type { PoachingState } from "./poaching/state";
@@ -169,6 +170,8 @@ export interface Staffer {
   machine: StaffStored;
   /** Pulled off their post by a disaster (FLT-17): they jog to `to` (a building id, 0 for the gate) with a red "!" and stay until released. */
   divert?: { owner: string; to: number; jog: number };
+  /** Chasing a runner (FLT-59 Sandbox Escape): a security guard jogs at `jog` times their speed toward (x, z), which sim/escape moves every tick. */
+  chase?: { runner: number; x: number; z: number; jog: number };
 }
 
 export interface NewsItem {
@@ -368,6 +371,8 @@ export interface GameState {
   investigations?: Record<string, Investigation>;
   /** FLT-26 Defection: opt-in pack (the ladder turns it on at Scrutiny); absent in legacy saves and baseline runs. */
   defection?: DefectionState;
+  /** FLT-59 The Sandbox Escape: opt-in pack (mods/base-escape), wakes at Level 5. */
+  escape?: EscapeState;
   /** FLT-20 Poaching War: opt-in pack, same rules. */
   poaching?: PoachingState;
   /** Labs your own people founded (FLT-26, FLT-20): on the Arena beside the built-in rivals. */

@@ -26,7 +26,8 @@ describe("midgame scenario", () => {
     // FLT-52: and the Hearing, the yacht summit, Defection, the Poaching War, Evals Without Borders, Regulatory Capture
     // and the Promise Tracker.
     // FLT-33/25: the earned factions wake with the campus and argue all 480 days; the water crowd escalates through its arc.
-    expect(digest(s)).toBe("c4310492");
+    // FLT-59: and the Sandbox Escape. Nobody guards this fence, so a few agents get out (9 by the opening, now day 460).
+    expect(digest(s)).toBe("2d50d1f0");
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);

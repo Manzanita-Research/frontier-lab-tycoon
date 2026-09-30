@@ -3,7 +3,7 @@ import { coachOf } from "../sim/coach";
 import { progressOf, visibleHud } from "../sim/progression";
 import type { CoachMark } from "../content/coach";
 import type { ProgressView, UnlockCard, HudPanel } from "../content/progression";
-import type { PlaceableKind } from "../content/buildings";
+import type { OfficeKind, PlaceableKind } from "../content/buildings";
 import { runwayMonths } from "../sim/format";
 import { protesterCount } from "../sim/protest";
 import { inspectWalker, type Inspect } from "../sim/inspect";
@@ -22,6 +22,7 @@ import { promisesView, type PromisesView } from "../sim/promises/view";
 import { factionsView, type FactionsView } from "../sim/factions/view";
 import { raceView, type RaceView } from "../sim/race/view";
 import { auditView, type AuditView } from "../sim/auditors/view";
+import { escapeView, type EscapeView } from "../sim/escape/driver";
 import { memberById } from "../sim/groups";
 import { outcomeOf, releaseGoalText } from "../sim/goals";
 import { estimateLedger } from "../sim/economy";
@@ -31,13 +32,13 @@ import { calmStart, CALM_START_DAY, disasterMenu, disastersView, type MenuRow, t
 import type { Risk } from "../sim/disasters/types";
 import type { Building, GameState, GoalProgress, OpenEvent, Outcome, Pop, StaffJob, Thought, Tone, Vibes } from "../sim/types";
 
-export type Tool = "path" | PlaceableKind | "security" | "bulldoze";
+export type Tool = "path" | PlaceableKind | OfficeKind | "bulldoze";
 /** Hotkeys 1-9 pick these in order. */
 export const TOOLS: Tool[] = ["path", "cluster", "hall", "gateway", "kombucha", "nap", "snack", "demo", "bulldoze"];
 /** The race's buildings: in the palette (between the core buildings and Bulldoze, no hotkey) once an auction unlocks them. */
 export const RACE_TOOLS: Tool[] = ["datacenter", "gas", "solar"];
 /** Offices (FLT-32): in the palette once the ladder earns them (Scrutiny), no hotkey. */
-export const OFFICE_TOOLS: Tool[] = ["security"];
+export const OFFICE_TOOLS: Tool[] = ["security", "sandbox", "honeypot"];
 export const SPEEDS = [0, 1, 3, 10] as const;
 export type Speed = (typeof SPEEDS)[number];
 
@@ -133,6 +134,8 @@ export interface Snapshot {
   disasters: DisastersSnapshot;
   /** Evals Without Borders (FLT-19): the countdown, the tour and the last report card. `enabled: false` before Scrutiny. */
   audit: AuditView;
+  /** The Sandbox Escape (FLT-59): who is pacing or running, where to, and the tallies. `null` until Level 5 (or `?escape=off`). */
+  escape: EscapeView | null;
 }
 
 /** Disasters (FLT-32): the menu, what is under way, who it has pulled off their post, and the two meters it moves. */
@@ -264,5 +267,6 @@ export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO
     releaseGoal: releaseGoalText(s),
     disasters: disastersOf(s),
     audit: auditView(s),
+    escape: escapeView(s),
   };
 }

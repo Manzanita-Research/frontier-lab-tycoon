@@ -56,6 +56,8 @@ export const AppContext = Schema.Struct({
   zone: Schema.NullOr(Schema.Number),
   /** Independently owned menus: closing one cannot resume time beneath another. */
   overlays: opaque<readonly string[]>(),
+  /** The speed an agent's run for the fence (FLT-59) dropped the game from to 1x, restored when the chase is over. */
+  chaseSpeed: opaque<Speed | null>(),
 });
 export type AppContext = typeof AppContext.Type;
 
@@ -88,6 +90,16 @@ export function pauseReasonOf(c: AppContext): PauseReason | null {
   if (c.speed === 0) return "player";
   if (c.snap.firstBuildPending) return "build";
   return null;
+}
+
+/**
+ * An agent running for the fence (FLT-59) drops the game to 1x so the player can catch it, and the speed comes back when
+ * the chase is over. Touching the speed or the pause button in between is the player's call: the old speed is forgotten.
+ */
+export function chaseSpeedOf(c: Pick<AppContext, "speed" | "chaseSpeed">, chase: boolean): Pick<AppContext, "speed" | "chaseSpeed"> {
+  if (chase && c.chaseSpeed === null && c.speed > 1) return { speed: 1 as Speed, chaseSpeed: c.speed };
+  if (!chase && c.chaseSpeed !== null) return { speed: c.chaseSpeed, chaseSpeed: null };
+  return { speed: c.speed, chaseSpeed: c.chaseSpeed };
 }
 
 /** The same words twice are one toast (the newer replaces the older); the HUD shows only the newest, so keep just a few. */
@@ -180,6 +192,7 @@ export const appMachine = setupEffect({
     highlight: null,
     zone: null,
     overlays: [],
+    chaseSpeed: null,
   }),
   invoke: { src: "frameLoop" },
   initial: "playing",
@@ -234,6 +247,7 @@ export const appMachine = setupEffect({
       const fresh = gated.toasts;
       const next: AppContext = {
         ...addToasts(context, fresh),
+        ...(report.snap ? chaseSpeedOf(context, !!report.snap.escape?.chase) : {}),
         gate: gated.gate,
         toastSeq: gated.seq,
         event: report.event,
@@ -250,11 +264,11 @@ export const appMachine = setupEffect({
       return { context: next, target: phaseFor(next) };
     },
     SET_SPEED: ({ context, event }) => {
-      const next = { ...context, speed: event.speed };
+      const next = { ...context, speed: event.speed, chaseSpeed: null };
       return { context: next, target: phaseFor(next) };
     },
     TOGGLE_PAUSE: ({ context }) => {
-      const next = { ...context, speed: (context.speed === 0 ? 1 : 0) as Speed };
+      const next = { ...context, speed: (context.speed === 0 ? 1 : 0) as Speed, chaseSpeed: null };
       return { context: next, target: phaseFor(next) };
     },
     SET_TOOL: ({ context, event }) => {
@@ -296,7 +310,7 @@ export const appMachine = setupEffect({
     NEW_LAB: (args, enq) => {
       const { context, actions } = args;
       enq(actions.newLab, args);
-      const next = { ...context, queue: [], acc: 0, toasts: [], gate: newGate(), outcomeDismissed: false, speed: 1 as Speed, tool: null, hover: null, selected: null, follow: false, highlight: null, zone: null, overlays: [] };
+      const next = { ...context, queue: [], acc: 0, toasts: [], gate: newGate(), outcomeDismissed: false, speed: 1 as Speed, tool: null, hover: null, selected: null, follow: false, highlight: null, zone: null, overlays: [], chaseSpeed: null };
       return { context: next, target: ".playing.running" };
     },
     TOAST: ({ context, event }, enq) => {

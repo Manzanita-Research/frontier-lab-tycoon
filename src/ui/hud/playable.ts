@@ -44,7 +44,7 @@ const SYSTEM_NAMES: Record<string, string | null> = {
   breakdowns: "Breakdowns", slop: "Slop", leapfrog: "Benchmark leaderboard", arena: "The Arena", rnd: "R&D multiplier", news: "The Frontier Times",
   events: "Event cards", protests: "Protests", disasters: "Disasters", papers: "Papers: publish or perish", collusion: null,
   hearing: "The Hearing", yacht: "The yacht summit", defection: "Defection", poaching: "The Poaching War", auditors: "Evals Without Borders",
-  promises: "The Promise Tracker", capture: "Regulatory Capture", factions: "Factions",
+  promises: "The Promise Tracker", capture: "Regulatory Capture", factions: "Factions", escape: "The Sandbox Escape",
 };
 const unlockOf = (card: UnlockCardVM): UnlockCardVM => ({
   ...card,

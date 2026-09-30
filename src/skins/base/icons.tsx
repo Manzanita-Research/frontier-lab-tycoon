@@ -117,6 +117,24 @@ export const ICONS: Record<string, ReactElement> = {
       <rect x="21" y="22" width="5" height="6" fill="#f2b134" stroke={ink} strokeWidth="1.6" />
     </svg>
   ),
+  sandbox: (
+    <svg {...S}>
+      <path d="M3 18 L16 12 L29 18 L16 25 Z" fill="#e9c46a" stroke={ink} strokeWidth="2" />
+      <path d="M3 18 V21 L16 28 L29 21 V18" fill="#c99a3a" stroke={ink} strokeWidth="2" />
+      <path d="M8 14 L10 20 H15 L17 14 Z" fill="#e0704a" stroke={ink} strokeWidth="1.8" />
+      <path d="M9 14 Q12.5 9 16 14" stroke={ink} strokeWidth="1.6" fill="none" />
+      <path d="M22 5 V16" stroke={ink} strokeWidth="2" />
+      <path d="M20 16 H24 L23 20 H21 Z" fill="#3b78d8" stroke={ink} strokeWidth="1.6" />
+    </svg>
+  ),
+  honeypot: (
+    <svg {...S}>
+      <path d="M16 14 V29" stroke={ink} strokeWidth="2.4" />
+      <rect x="3" y="4" width="26" height="11" rx="1.5" fill="#2f9e44" stroke={ink} strokeWidth="2" />
+      <path d="M7 9.5 H20 M16.5 6.5 L20 9.5 L16.5 12.5" stroke="#fff" strokeWidth="2.2" fill="none" />
+      <circle cx="25" cy="9.5" r="1.6" fill="#fff" />
+    </svg>
+  ),
   bulldoze: (
     <svg {...S}>
       <rect x="4" y="15" width="16" height="8" rx="2" fill="#ffd24a" stroke={ink} strokeWidth="2" />

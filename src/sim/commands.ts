@@ -19,6 +19,7 @@ import { draftClause } from "./capture/driver";
 import { continueTutorial } from "./tutorial";
 import { defs } from "./defs";
 import { setSafetySpend } from "./factions/driver";
+import { catchAgent } from "./escape/driver";
 
 export type Command =
   | { type: "coachSkip" | "coachReplay" | "coachClick" | "dismissUnlock" | "buildPanelOpened" }
@@ -47,7 +48,9 @@ export type Command =
   /** Tick (`on`) or untick a clause on the bill the lab was asked to draft (FLT-22). */
   | { type: "draftClause"; clause: string; on: boolean }
   /** FLT-33: the safety budget, 0 (none) to 3 (lavish). Costs money daily and slows training; the factions notice. */
-  | { type: "setSafetySpend"; level: number };
+  | { type: "setSafetySpend"; level: number }
+  /** FLT-59: pick up an agent that is pacing the fence or running for it (walker id) and carry it back to the sandbox. */
+  | { type: "catchAgent"; id: number };
 
 export type PlaceResult = { ok: true } | { ok: false; reason: string };
 
@@ -196,6 +199,9 @@ export function applyCommands(state: GameState, commands: readonly Command[], rn
         break;
       case "setSafetySpend":
         if (state.factions && systemUnlocked(state, "factions")) setSafetySpend(state, c.level);
+        break;
+      case "catchAgent":
+        if (systemUnlocked(state, "escape")) catchAgent(state, c.id);
         break;
       case "startTraining":
         if (!state.buildings.some((b) => b.kind === "hall")) addToast(state, "Build a Training Hall first.", "bad");

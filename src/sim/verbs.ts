@@ -33,6 +33,7 @@ import type { Rng } from "./rng";
 import { atDivert, divertStaff, releaseStaff, staffOf } from "./staff";
 import { callMeeting } from "./meetings";
 import { resign } from "./walkers";
+import { startEscape } from "./escape/driver";
 import type { Building, GameState, StaffJob, Tone } from "./types";
 import { defs } from "./defs";
 
@@ -676,6 +677,11 @@ export const VERBS: Record<string, VerbDef> = {
       delete d[p.kind as string];
       if (Object.keys(d).length === 0) delete env.state.disguises;
     },
+  },
+  "spawn.escape": {
+    doc: "The most drifted agent (with `count` above 1, a jailbreak: that many, each for a different fence) starts thinking about the fence; with `now`, it skips the brooding and goes straight to pacing. Needs the Sandbox Escape pack awake.",
+    spec: { count: "number?", now: "boolean?" },
+    run: (env, p) => void startEscape(env.state, { count: (p.count as number | undefined) ?? 1, pace: p.now === true }),
   },
   "faction.delta": {
     doc: "Nudge a faction's meter (−100 to 100) now; its mood catches up at midnight. Nothing while the factions are off.",

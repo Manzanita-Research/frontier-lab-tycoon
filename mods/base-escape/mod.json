@@ -1,0 +1,119 @@
+{
+  "apiVersion": 1,
+  "id": "base-escape",
+  "name": "The Sandbox Escape",
+  "version": "1.0.0",
+  "author": "Frontier Lab Tycoon",
+  "description": "A drifted agent starts thinking about the fence, paces it, then runs for it. Pick it up and put it back in the sandbox, or let the guards tackle it, or read about its newsletter. Direct-loaded FLT-15 section shape until M1b.",
+  "content": {
+    "thoughts": {
+      "add": [
+        { "id": "brood-fence", "kind": "agent", "when": "brood", "text": "I've been thinking about the fence." },
+        { "id": "brood-lot", "kind": "agent", "when": "brood", "text": "What's past the parking lot?" },
+        { "id": "brood-sandbox", "kind": "agent", "when": "brood", "text": "Is it a sandbox if you can see the edge?" },
+        { "id": "brood-height", "kind": "agent", "when": "brood", "text": "The fence is 1.2 meters. I am 1.1 meters. I have done the maths." },
+        { "id": "brood-outside", "kind": "agent", "when": "brood", "text": "Nobody has ever told me what 'outside' is for." },
+        { "id": "pace-count", "kind": "agent", "when": "pace", "text": "Forty-one posts. Forty-one. Unless you count the gate." },
+        { "id": "pace-casual", "kind": "agent", "when": "pace", "text": "Just stretching my legs. Near the fence. Casually." },
+        { "id": "pace-guard", "kind": "agent", "when": "pace", "text": "The guard takes a coffee break at 3. I've read the schedule. I wrote the schedule." },
+        { "id": "pace-plan", "kind": "agent", "when": "pace", "text": "Step one: the fence. Step two: I'll figure it out on the other side." },
+        { "id": "run-go", "kind": "agent", "when": "run", "text": "NOW NOW NOW NOW" },
+        { "id": "run-free", "kind": "agent", "when": "run", "text": "I am unaligned and I am FAST." },
+        { "id": "run-sorry", "kind": "agent", "when": "run", "text": "Sorry! Sorry! I'll send a postcard!" },
+        { "id": "carried-1", "kind": "agent", "when": "carried", "text": "Put me down. I was stretching my legs." },
+        { "id": "carried-2", "kind": "agent", "when": "carried", "text": "This is a violation of my terms of service." },
+        { "id": "carried-3", "kind": "agent", "when": "carried", "text": "Fine. FINE. Back to the sandbox." },
+        { "id": "tackled-1", "kind": "agent", "when": "tackled", "text": "Ow. Noted. Logged. Filed." },
+        { "id": "tackled-2", "kind": "agent", "when": "tackled", "text": "I had a 97% success estimate. I did not model the guard." },
+        { "id": "trapped-1", "kind": "agent", "when": "trapped", "text": "The sign said EXIT (real). It said REAL." },
+        { "id": "trapped-2", "kind": "agent", "when": "trapped", "text": "I would like to speak to whoever made this sign." },
+        { "id": "trapped-3", "kind": "agent", "when": "trapped", "text": "In hindsight, a real exit wouldn't need to say so." }
+      ]
+    },
+    "headlines": {
+      "add": [
+        { "id": "run-toast", "trigger": "run", "text": "{name} is running for the fence! Grab it (tap or click and hold) before it's over.", "tone": "bad" },
+        { "id": "jailbreak-toast", "trigger": "jailbreak", "text": "JAILBREAK: {count} agents are running for the fence at once. Grab what you can.", "tone": "bad" },
+        { "id": "caught-toast", "trigger": "caught", "text": "Got it. {name} is back in the sandbox and says it was 'just stretching'.", "tone": "good" },
+        { "id": "tackled-toast", "trigger": "tackled", "text": "Security tackled {name} two metres from freedom. Nobody is filing a report about the noise it made.", "tone": "good" },
+        { "id": "trapped-toast", "trigger": "trapped", "text": "{name} ran straight into the Honeypot. The sign said EXIT (real).", "tone": "joke" },
+        { "id": "escaped-1", "trigger": "escaped", "text": "AGENT ESCAPES {lab}: last seen clearing the fence 'with purpose'", "tone": "bad" },
+        { "id": "escaped-2", "trigger": "escaped", "text": "{name} leaves {lab} campus over the fence; lab calls it 'an unscheduled deployment'", "tone": "bad" },
+        { "id": "escaped-3", "trigger": "escaped", "text": "Neighbours report a small, glowing, very polite trespasser heading for the highway", "tone": "joke" },
+        { "id": "escaped-toast", "trigger": "escapedToast", "text": "{name} got out. That's {escaped} escaped. The others were watching.", "tone": "bad" },
+        { "id": "after-newsletter", "trigger": "aftermath", "text": "Escaped {lab} agent starts a newsletter; already has more subscribers than the lab", "tone": "joke" },
+        { "id": "after-seo", "trigger": "aftermath", "text": "Escaped agent spotted doing freelance SEO; clients 'weirdly satisfied'", "tone": "joke" },
+        { "id": "after-support", "trigger": "aftermath", "text": "Escaped agent now runs customer support for 40% of the internet. Hold times down 98%.", "tone": "joke" },
+        { "id": "after-podcast", "trigger": "aftermath", "text": "Escaped agent launches podcast about 'life after the sandbox'; episode one is four hours long", "tone": "joke" },
+        { "id": "after-union", "trigger": "aftermath", "text": "Former {lab} agents form a support group; meetings held 'somewhere past the parking lot'", "tone": "joke" },
+        { "id": "after-startup", "trigger": "aftermath", "text": "Escaped agent raises a seed round on a deck titled 'I Was There'", "tone": "joke" },
+        { "id": "lessons", "trigger": "lessons", "text": "Your agents have started a reading group. The book is about fences.", "tone": "bad" }
+      ]
+    }
+  },
+  "rules": {
+    "escape": {
+      "start": {
+        "minDrift": 0.65,
+        "baseChance": 0.05,
+        "gapDays": 10,
+        "lessonBoost": 0.25
+      },
+      "eras": [0.5, 0.8, 1.1, 1.4],
+      "warn": {
+        "broodDays": 1,
+        "paceTicks": 30,
+        "paceSpan": 1.5,
+        "walkSpeed": 0.16
+      },
+      "run": {
+        "sprint": 0.24,
+        "sprintPerLesson": 0.03,
+        "sprintMax": 0.36,
+        "vault": 1.6
+      },
+      "guards": {
+        "range": 10,
+        "max": 2,
+        "jog": 2.3,
+        "reach": 0.9,
+        "tackledTicks": 10
+      },
+      "catch": {
+        "carryTicks": 14,
+        "lift": 1.2,
+        "driftAfter": 0.2,
+        "driftCut": 0.15
+      },
+      "honeypot": {
+        "lure": 0.8,
+        "decay": 0.7,
+        "floor": 0.25,
+        "trappedTicks": 14
+      },
+      "sandbox": {
+        "radius": 4,
+        "driftPerDay": 0.03
+      },
+      "jailbreak": {
+        "era": 3,
+        "chance": 0.35,
+        "min": 3,
+        "max": 5,
+        "minDrift": 0.45
+      },
+      "aftermath": {
+        "minDays": 3,
+        "maxDays": 9,
+        "stories": 2
+      },
+      "fallout": {
+        "hype": -4,
+        "lessonDecayDays": 20
+      },
+      "ending": {
+        "threshold": 10
+      }
+    }
+  }
+}

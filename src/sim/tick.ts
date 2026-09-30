@@ -24,6 +24,7 @@ import { dailyLeapfrog } from "./race/leapfrog/driver";
 import { dailyRace } from "./race/race";
 import { dailySlop } from "./slop";
 import { updateStaff } from "./staff";
+import { dailyEscape, updateEscape } from "./escape/driver";
 import { dailyDiscourse, updateProtesters } from "./protest";
 import { createRng } from "./rng";
 import { dailyThoughts } from "./thoughts";
@@ -67,6 +68,7 @@ function step(state: GameState, commands: readonly Command[]) {
   if (systemUnlocked(state, "protests")) updateProtesters(state, rng);
   if (state.factions && systemUnlocked(state, "factions")) updateFactions(state);
   updateStaff(state, rng);
+  if (systemUnlocked(state, "escape")) updateEscape(state);
   updateGroups(state);
   if (systemUnlocked(state, "auditors")) updateAuditors(state);
   if (systemUnlocked(state, "collusion")) updateCollusion(state);
@@ -100,6 +102,8 @@ function step(state: GameState, commands: readonly Command[]) {
     // The Senate (FLT-23) before the bill (FLT-22): a roll call counted today is heard by the bill today.
     if (systemUnlocked(state, "promises")) dailyPromises(state);
     if (systemUnlocked(state, "capture")) dailyCapture(state);
+    // FLT-59: before the day's bubbles, so an agent brooding about the fence has the floor.
+    if (systemUnlocked(state, "escape")) dailyEscape(state);
     dailyThoughts(state, rng);
     dailyGoals(state, rng);
     if (defs().arcs.length > 0) dailyModArcs(state, rng);
