@@ -157,7 +157,7 @@ describe("mod foundations", () => {
       expect(report.state).toEqual(runHeadless(def).state);
       expect(report.coverage).toEqual({ executed: [input === steve ? "rivals" : "headlines"], inert: [] });
     }
-  });
+  }, 20_000); // Four headless years (the factions run in them since FLT-33); tick budgets are checked separately.
   it("starts rivals and goals from the definition without altering global modules", async () => {
     const def = await resolve([mod("tuning", { rivals: { override: [{ id: "anthro", startCapability: 77, personality: { ...RIVAL_DEFS[0]!.personality, growth: 23 } }] }, goals: { override: [{ id: "release", target: 4 }] } })]);
     const state = createInitialState(42, "garage", def);
