@@ -19,7 +19,7 @@ import type { GameState, Walker } from "../types";
 import { runVerb, type VerbEnv } from "../verbs";
 import { CARD, CHOICES, DEFECTION, MANIFESTO_CARD, MANIFESTO_CHOICES, PICK_PREFIX } from "./pack";
 import type { DefectionStage, DefectionState, DefectionSubject } from "./state";
-import { picks } from "../picks";
+import { picked, picks } from "../picks";
 
 const R = DEFECTION.rules;
 const OWNER = "defection";
@@ -261,7 +261,7 @@ const MANIFESTO_FLAGS = picks(PICK_PREFIX, MANIFESTO_CHOICES);
 
 export function applyDefectionChoices(s: GameState) {
   const d = s.defection;
-  if (!d?.enabled) return;
+  if (!d?.enabled || (!picked(s.flags, CHOICE_FLAGS) && !picked(s.flags, MANIFESTO_FLAGS))) return;
   const rng = createRng(d.rngState);
   for (const { key: choice, flag } of CHOICE_FLAGS) {
     if (s.flags[flag] === undefined) continue;

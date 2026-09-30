@@ -16,7 +16,7 @@ import { COLLUSION, PICK_PREFIX, SIGN_CARD } from "./pack";
 import { freshSwarm, stepSwarm, type SwarmEvent } from "./machine";
 import { activeSwarm, type SwarmEnding } from "./state";
 import { defs } from "../defs";
-import { picks } from "../picks";
+import { picked, picks } from "../picks";
 const R = COLLUSION.rules;
 const OWNER = "collusion";
 /** Set by outsiders who find the Swarm (FLT-19's auditors): partly contained early on, exposed once organized. */
@@ -88,7 +88,7 @@ const CHOICE_FLAGS = picks(PICK_PREFIX, ["investigate", "ship", "ask"] as const)
 
 /** Consume flag effects immediately after chooseEvent, including commands applied while paused. */
 export function applyCollusionChoices(s: GameState) {
-  if (!s.collusion?.enabled) return;
+  if (!s.collusion?.enabled || !picked(s.flags, CHOICE_FLAGS)) return;
   const rng = createRng(s.collusion.rngState);
   for (const { key: choice, flag } of CHOICE_FLAGS) {
     if (s.flags[flag] === undefined) continue;

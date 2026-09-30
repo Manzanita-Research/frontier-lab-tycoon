@@ -14,7 +14,7 @@ import type { GameState, Walker } from "../types";
 import { runVerb } from "../verbs";
 import { CARD, CHOICES, PICK_PREFIX, POACHING } from "./pack";
 import type { PoachingStage } from "./state";
-import { picks } from "../picks";
+import { picked, picks } from "../picks";
 
 const R = POACHING.rules;
 const OWNER = "poaching";
@@ -130,7 +130,7 @@ const CHOICE_FLAGS = picks(PICK_PREFIX, CHOICES);
 
 export function applyPoachingChoices(s: GameState) {
   const p = s.poaching;
-  if (!p?.enabled) return;
+  if (!p?.enabled || !picked(s.flags, CHOICE_FLAGS)) return;
   const rng = createRng(p.rngState);
   for (const { key: choice, flag } of CHOICE_FLAGS) {
     if (s.flags[flag] === undefined) continue;
