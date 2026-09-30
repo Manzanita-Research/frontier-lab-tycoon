@@ -8,7 +8,7 @@ import type { GameState } from "../types";
 import { enableHearing } from "../hearing/driver";
 import { enableYacht } from "../yacht/driver";
 
-export const CIRCUS_MOMENTS = ["hearing", "hearing-verdict", "yacht-invite", "yacht-leak"] as const;
+export const CIRCUS_MOMENTS = ["hearing", "hearing-verdict", "hearing-viral", "yacht-invite", "yacht-leak"] as const;
 export type CircusMoment = (typeof CIRCUS_MOMENTS)[number];
 export function isCircusMoment(value: string | null | undefined): value is CircusMoment {
   return (CIRCUS_MOMENTS as readonly unknown[]).includes(value);
@@ -26,8 +26,9 @@ function until(s: GameState, want: (id: string) => boolean, days = 90) {
 }
 
 /** The lab is called in for its debut (the pack woke three weeks ago) and testifies. "hearing": one chaotic answer given,
- * the second senator asking. "hearing-verdict": chaotic, chaotic, earnest, which goes viral, and the gavel is up. */
-export function stageHearing(s: GameState, moment: "hearing" | "hearing-verdict") {
+ * the second senator asking. "hearing-verdict": chaotic, chaotic, earnest, which goes viral, and the gavel is up.
+ * "hearing-viral" (FLT-56): out of the building, a few steps into the clip (the beat, the headlines, the voice). */
+export function stageHearing(s: GameState, moment: "hearing" | "hearing-verdict" | "hearing-viral") {
   if (!s.models.length) s.models.push("Frontier-1");
   enableHearing(s);
   s.hearing!.enabledDay = s.day - 21;
@@ -37,6 +38,9 @@ export function stageHearing(s: GameState, moment: "hearing" | "hearing-verdict"
     applyNow(s, answer(s, pick));
     until(s, isHearingCard, 2);
   }
+  if (moment !== "hearing-viral") return;
+  applyNow(s, answer(s));
+  for (let i = 0; i < 4; i++) tick(s);
 }
 
 /** The invitation on the table, or (having signed) the group chat leaked. */
@@ -50,6 +54,6 @@ export function stageYacht(s: GameState, moment: "yacht-invite" | "yacht-leak") 
 }
 
 export function stageCircus(s: GameState, moment: CircusMoment) {
-  if (moment === "hearing" || moment === "hearing-verdict") stageHearing(s, moment);
+  if (moment === "hearing" || moment === "hearing-verdict" || moment === "hearing-viral") stageHearing(s, moment);
   else stageYacht(s, moment);
 }

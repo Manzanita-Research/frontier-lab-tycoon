@@ -97,13 +97,26 @@ describe("the bill in play", () => {
     free.disasters.effects = free.disasters.effects.filter((e) => e.owner !== "capture");
     const before = Object.fromEntries(s.race.rivals.map((r) => [r.context.id, { cap: r.context.capability, releases: r.context.releases }]));
     const gained = (w: GameState, ids: string[]) => w.race.rivals.filter((r) => ids.includes(r.context.id)).reduce((n, r) => n + r.context.capability - before[r.context.id]!.cap, 0);
-    run(law, 180);
-    run(free, 180);
+    // Every open lab's release over the year, open or closed: the last one alone is a coin toss (FLT-56 moved it).
+    const watch = (w: GameState) => {
+      const seen = Object.fromEntries(w.race.rivals.map((r) => [r.context.id, r.context.releases]));
+      const shipped: boolean[] = [];
+      for (let d = 0; d < 180; d++) {
+        run(w, 1);
+        for (const r of w.race.rivals) {
+          if (!open.includes(r.context.id) || r.context.releases === seen[r.context.id]) continue;
+          seen[r.context.id] = r.context.releases;
+          shipped.push(r.context.open);
+        }
+      }
+      return shipped;
+    };
+    const shippedLaw = watch(law);
+    const shippedFree = watch(free);
     expect(gained(law, behind)).toBeLessThan(gained(free, behind) * 0.8);
-    const shipped = (w: GameState) => w.race.rivals.filter((r) => open.includes(r.context.id) && r.context.releases > before[r.context.id]!.releases);
-    expect(shipped(law).length).toBeGreaterThan(0);
-    for (const r of shipped(law)) expect(r.context.open).toBe(false);
-    expect(shipped(free).some((r) => r.context.open)).toBe(true);
+    expect(shippedLaw.length).toBeGreaterThan(0);
+    expect(shippedLaw.every((o) => !o)).toBe(true);
+    expect(shippedFree.some((o) => o)).toBe(true);
   }, 30_000);
 
   it("backfires: the file properties leak, the law is struck, trust and the auditors' Honesty grade take the hit", () => {

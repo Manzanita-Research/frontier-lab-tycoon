@@ -183,10 +183,12 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // seed 3's Defection walks more than one person out before 4000, so only its 4000 moved. Then the auditors huddle for an
 // hour before they leave, and the report draws a rival's reaction and (for a month) the visitors' talk from the
 // auditors' own stream: every seed's first visit ends before 3200, so 3200 and 4000 moved and nothing earlier did.
+// Then the Hearing got twelve more questions: the same draw picks a different docket from a longer list, so the first
+// summons (between 800 and 1600 on every seed) asks other things, and 1600 onward moved. The old pack reproduces the old values.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "d3826cd0", 800: "ed628bb9", 1600: "e572590c", 2400: "722cfa55", 3200: "1020b2c9", 4000: "f40d1823" },
-  2: { 200: "e548b1af", 800: "552cae60", 1600: "cc016f76", 2400: "c0301cb7", 3200: "1339f3f9", 4000: "43eadd11" },
-  3: { 200: "58bb415c", 800: "920699d6", 1600: "4034a696", 2400: "a367296d", 3200: "07f3eecb", 4000: "b97ececc" },
+  1: { 200: "d3826cd0", 800: "ed628bb9", 1600: "5090f149", 2400: "a10524e9", 3200: "7842a0c2", 4000: "334a527f" },
+  2: { 200: "e548b1af", 800: "552cae60", 1600: "031fbba6", 2400: "2ac048c7", 3200: "b5159b68", 4000: "207579df" },
+  3: { 200: "58bb415c", 800: "920699d6", 1600: "1e68dec4", 2400: "104a383c", 3200: "ac609443", 4000: "61e1599f" },
 };
 
 describe("golden runs", () => {

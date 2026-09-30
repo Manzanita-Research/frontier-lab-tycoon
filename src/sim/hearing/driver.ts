@@ -11,6 +11,7 @@ import { openEventOf } from "../events";
 import { createRng, type Rng } from "../rng";
 import { runVerb, STATS } from "../verbs";
 import type { Beat } from "../circus/chart";
+import type { Call } from "../disasters/types";
 import type { GameState } from "../types";
 import { ANSWER_KEYS, GAVEL_CARD, HEARING, isVerdict, PICK_PREFIX, type HearingTrigger } from "./pack";
 import { freshHearing, stepHearing } from "./machine";
@@ -108,6 +109,34 @@ function send(s: GameState, rng: Rng, beat: Beat) {
     const c = h.machine.context;
     h.history.push({ day: s.day, topic: c.topic, trigger: c.trigger, verdict: now, trust: c.sessionTrust, capture: c.sessionCapture });
     if (h.history.length > 12) h.history.shift();
+    if (R.aftermath?.[now]) h.aftermath = now;
+  }
+}
+
+/** The label of the CEO's latest chaotic answer this session: the line the clip is made of. */
+function quoteOf(s: GameState): string {
+  const c = s.hearing!.machine.context;
+  for (let i = c.answers.length - 1; i >= 0; i--) {
+    if (c.answers[i] !== "chaotic") continue;
+    const pick = eventById(c.docket[i] ?? "")?.choices.find((ch) => ch.effects.some((e) => e.type === "flag" && e.name === PICK_PREFIX + "chaotic"));
+    if (pick) return pick.label;
+  }
+  return "No further questions.";
+}
+
+/** The verdict's aftermath, once: the pack's verbs, then a burst of its headlines (distinct, in the pack's own stream). */
+function runAftermath(s: GameState, rng: Rng) {
+  const h = s.hearing!;
+  const a = h.aftermath ? R.aftermath?.[h.aftermath] : undefined;
+  delete h.aftermath;
+  if (!a) return;
+  const vars = { lab: s.labName, quote: quoteOf(s) };
+  for (const call of a.calls ?? []) runVerb({ state: s, rng, run: null, owner: OWNER, vars }, call as Call);
+  if (!a.headlines) return;
+  const pool = HEARING.content.headlines.add.filter((l) => l.trigger === a.headlines!.trigger);
+  for (let i = 0; i < a.headlines.count && pool.length; i++) {
+    const line = pool.splice(Math.floor(rng.next() * pool.length), 1)[0]!;
+    addNews(s, fillTemplate(line.text, vars), line.tone);
   }
 }
 
@@ -133,8 +162,12 @@ export function applyHearingChoices(s: GameState) {
     if (s.flags[PICK_PREFIX + key] === undefined) continue;
     delete s.flags[PICK_PREFIX + key];
     picked = true;
-    if (key === "leave") continue;
     const rng = createRng(h.rngState);
+    if (key === "leave") {
+      if (h.aftermath) runAftermath(s, rng);
+      h.rngState = rng.state();
+      continue;
+    }
     const before = h.machine.value;
     send(s, rng, { type: "CHOSE", tick: s.tick, day: s.day, roll: 0, stats: {}, choice: key });
     h.rngState = rng.state();
@@ -160,5 +193,7 @@ export function dailyHearing(s: GameState) {
     if (line) addNews(s, fillTemplate(line.text, { lab: s.labName }), line.tone);
   }
   if (h.machine.value === "inSession") nextQuestion(s);
+  // The gavel never got the screen (another card had it): the aftermath goes out on the first quiet day instead.
+  if (h.aftermath && !openEventOf(s)) runAftermath(s, rng);
   h.rngState = rng.state();
 }

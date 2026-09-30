@@ -27,6 +27,8 @@ import { SIGNALS } from "../content/factions";
 import { signalFactions } from "./factions/driver";
 import { factionStat, nudgeFaction, nudgeRelation, pairKey } from "./factions/state";
 import { findSpot } from "./race/actions";
+import { pushVoice } from "./race/leapfrog/ops";
+import { YOU } from "../content/rivals";
 import { refreshBoard } from "./race/arena";
 import { rivalMachine } from "./race/rival";
 import type { Rng } from "./rng";
@@ -533,6 +535,11 @@ export const VERBS: Record<string, VerbDef> = {
     },
   },
   "hype.delta": { doc: "Add to hype (0 to 100).", spec: { amount: "number" }, run: (env, p) => void (env.state.hype = clamp100(env.state.hype + (p.amount as number))) },
+  "voice.push": {
+    doc: "Put the lab in the news cycle (FLT-56): `amount` more of the share of voice the Leapfrog tracks (a rival's launch pushes 42 to 60). Nothing while the Leapfrog is off.",
+    spec: { amount: "number" },
+    run: (env, p) => pushVoice(env.state, YOU, p.amount as number),
+  },
   "trust.delta": {
     doc: "Add to public trust (0 to 100, starts at 50).",
     spec: { amount: "number" },

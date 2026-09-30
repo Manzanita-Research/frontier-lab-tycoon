@@ -196,6 +196,17 @@
       "argue",
       "factions-chip",
       "factions-phone"
+    ],
+    "circus-juice": [
+      "c56-conga",
+      "c56-conga-phone",
+      "c56-campus",
+      "c56-poach-sirocco",
+      "c56-huddle",
+      "c56-huddle-phone",
+      "c56-plaque",
+      "c56-viral",
+      "c56-viral-phone"
     ]
   },
   "scenes": {
@@ -2321,6 +2332,150 @@
           "wait": 1500
         }
       ]
+    },
+    "c56-conga": {
+      "title": "FLT-56: the star walks out, and the team follows in a conga line (camera beat)",
+      "query": {
+        "warp": null,
+        "moment": "defection-exit",
+        "beat": 1
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "c56-conga-phone": {
+      "title": "FLT-56: the conga beat on a phone",
+      "query": {
+        "warp": null,
+        "moment": "defection-exit",
+        "beat": 1
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 1200
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "c56-campus": {
+      "title": "FLT-56: the neo lab's campus beyond the fence, balloon and empty plinth",
+      "query": {
+        "warp": null,
+        "moment": "defection-arena",
+        "leapfrog": "off",
+        "focus": "16,25",
+        "zoom": 70
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "c56-poach-sirocco": {
+      "title": "FLT-56: a poaching offer in Sirocco's own voice",
+      "query": {
+        "warp": null,
+        "moment": "poach-offer:sirocco",
+        "leapfrog": "off"
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "c56-huddle": {
+      "title": "FLT-56: the auditors huddle before the report (camera beat)",
+      "query": {
+        "warp": null,
+        "scenario": "midgame",
+        "seed": 48,
+        "moment": "audit-huddle",
+        "beat": 1
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "c56-huddle-phone": {
+      "title": "FLT-56: the huddle beat on a phone",
+      "query": {
+        "warp": null,
+        "scenario": "midgame",
+        "seed": 48,
+        "moment": "audit-huddle",
+        "beat": 1
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "c56-plaque": {
+      "title": "FLT-56: the grade plaque by the gate, two days after the report",
+      "query": {
+        "warp": null,
+        "scenario": "midgame",
+        "seed": 48,
+        "moment": "audit-graded",
+        "focus": "14.3,24.3",
+        "zoom": 110
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "c56-viral": {
+      "title": "FLT-56: the hearing clip goes viral (camera beat, ticker burst, Network Traffic)",
+      "query": {
+        "warp": null,
+        "moment": "hearing-viral",
+        "beat": 1
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "c56-viral-phone": {
+      "title": "FLT-56: the viral beat on a phone",
+      "query": {
+        "warp": null,
+        "moment": "hearing-viral",
+        "beat": 1
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
     }
   }
 }

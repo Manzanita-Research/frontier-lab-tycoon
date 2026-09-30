@@ -986,7 +986,7 @@ export function hudViewModel(i: HudInput): HudVM {
     sound: soundOf(i),
     photoMode: photoOf(i),
     // A card needs the player: the beat makes way. Photo mode hides it with the rest of the HUD.
-    beat: i.beat && !event && !era && !i.photo.on ? { ...i.beat, kicker: BEAT_KICKER[i.beat.kind] ?? "Meanwhile", skipLabel: "Skip ▸" } : null,
+    beat: i.beat && !event && !era && !i.photo.on ? { ...i.beat, kicker: BEAT_KICKER[i.beat.kind] ?? "Meanwhile", skipLabel: "Skip »" } : null,
     skins: i.skins,
     mods: i.mods ?? NO_MODS_VM,
     disasters: disastersOf(i, play.visible.disasters),

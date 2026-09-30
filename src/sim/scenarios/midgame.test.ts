@@ -26,8 +26,9 @@ describe("midgame scenario", () => {
     // FLT-52: and the Hearing, the yacht summit, Defection, the Poaching War, Evals Without Borders, Regulatory Capture
     // and the Promise Tracker.
     // FLT-33/25: the earned factions wake with the campus and argue all 480 days; the water crowd escalates through its arc.
-    // FLT-56: the auditors huddle before they leave and the grade lingers, which moves the opening a few days.
-    expect(digest(s)).toBe("376f323e");
+    // FLT-56: the auditors huddle before they leave and the grade lingers, which moves the opening a few days, and the
+    // Hearing's twelve new questions change what the senators ask.
+    expect(digest(s)).toBe("ed176ab5");
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);
