@@ -11,8 +11,7 @@ export default defineConfig({
       "effect/unstable/reactivity": "effect/reactivity",
     },
   },
-  // Relative base so the build works from any static host or sub-path.
-  base: "./",
+  base: "/",
   server: {
     // Dev servers run on Modal and are reached through `bb connect expose`.
     allowedHosts: true,

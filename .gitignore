@@ -8,3 +8,4 @@ coverage/
 !.env.example
 /screenshots/tmp/
 .claude/.cc-writes
+.alchemy/
