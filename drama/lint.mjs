@@ -260,6 +260,7 @@ export function lintText(text, { world = loadWorld(), pack = new Set(), path = "
       const lower = part.toLowerCase();
       if (pack.has(lower)) { if (!world.names.has(lower)) declared.add(part); continue; }
       if (world.names.has(lower)) continue;
+      if (/^\p{N}[\p{N}.,]*\p{L}{1,2}$/u.test(part)) continue; // amounts and units: $4B, 100M, 5GW, 3PM
       if (part.length === 1) { if (part === "X") hit(warnings, part, "might be a real app (X); prefer a parody name"); continue; }
       const camel = /\p{Ll}\p{Lu}/u.test(part) || /^\p{Ll}+\p{Lu}/u.test(part);
       if (!camel && world.words.has(lower)) continue;
@@ -325,7 +326,7 @@ export function main(args = process.argv.slice(2)) {
   const { dir, mod, names } = readPack(input);
   const report = lintPack(mod, { names });
   if (args.includes("--json")) console.log(JSON.stringify(report, null, 2));
-  else console.log(formatReport(relative(process.cwd(), dir) || basename(dir), report));
+  else console.log(formatReport(relative(process.cwd(), dir).startsWith("..") ? dir : relative(process.cwd(), dir) || basename(dir), report));
   return report.ok ? 0 : 1;
 }
 

@@ -78,6 +78,7 @@ test("everyday words and the game's own names pass", () => {
     "the llama is fine",
     "a mistral wind",
     "Who called?",
+    "VSSI raises $4B at a $30B valuation for a 5GW campus, 100M offers by 3PM",
     "Priya Gradient ships Frontier-4-Mini",
     "Macrohard buys Sirocco; Open-ish AI files a blog post",
     "MetaMeta ships",
