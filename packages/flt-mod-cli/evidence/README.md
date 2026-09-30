@@ -95,3 +95,9 @@ kit tests, and the production build. A previous unadjusted `pnpm check` was gree
 a later unadjusted repeat measured the 800-walker tick at 0.538 ms against its
 0.5 ms local cap. The shared host was validated using the repository's existing
 CI perfBudget setting (1.0 ms); no sim or performance limit was changed.
+
+The initial Deploy check exposed pnpm parent-workspace discovery: infra's
+independent install resolved the root workspace and did not install its own
+dependencies. An additive `infra/pnpm-workspace.yaml` restores the existing
+separate lockfile boundary; infra code/dependencies/workflow were not changed.
+Root and infra frozen installs, plus `pnpm --dir infra typecheck`, passed.
