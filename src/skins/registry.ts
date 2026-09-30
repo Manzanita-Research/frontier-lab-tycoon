@@ -175,10 +175,16 @@ async function load(id: string, m: SkinManifest): Promise<Prepared> {
  * to the mod skin's id, so the parent's rules still apply), then the mod's tokens, strings, fonts and CSS. The mod's
  * CSS was already scoped and limited to its own assets by the loader; its strings are only ever rendered as text.
  */
+/** A built-in skin's rules, moved to a mod skin that extends it. The build's minifier drops the quotes (`[data-skin=frontier-95]`). */
+export function rescopeCss(css: string, from: string, to: string): string {
+  const escaped = from.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return css.replace(new RegExp(`\\[data-skin=(["']?)${escaped}\\1\\]`, "g"), `[data-skin="${to}"]`);
+}
+
 async function loadModSkin({ id, data }: ModSkin): Promise<Prepared> {
   const parentId = data.extends ?? BASE_ID;
   const parent = await prepareSkin(parentId);
-  const rescope = (css: string) => (parentId === BASE_ID ? css : css.split(`[data-skin="${parentId}"]`).join(`[data-skin="${id}"]`));
+  const rescope = (css: string) => (parentId === BASE_ID ? css : rescopeCss(css, parentId, id));
   const parentTokens = catalog.find((e) => e.folder === parentId)?.manifest?.tokens ?? {};
   const tokens = Object.entries(data.tokens ?? {});
   const named = Object.fromEntries(tokens.filter(([k]) => !k.startsWith("--")));

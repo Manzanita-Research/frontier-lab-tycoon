@@ -115,6 +115,8 @@ missing-id/duplicate-add errors. Buildings require **id equal to kind**.
   `{"chance":0.5}`. Text fills `{lab}`, `{model}`, `{rival}`, `{cash}`.
 - Legacy anonymous line keys: `base-headlines-N`, `base-thoughts-N` (zero-based
   indices for the pinned content version). Prefer unique add ids for portable packs.
+  The base protesters' own thoughts are `base-thoughts-74` to `base-thoughts-78`:
+  remove them when your crowd should only think your lines.
 
 ### Cards
 

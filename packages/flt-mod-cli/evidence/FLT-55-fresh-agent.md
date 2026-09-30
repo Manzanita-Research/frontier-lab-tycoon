@@ -43,9 +43,9 @@ Look: protester is a recipe (11 parts, 4 placards, "Golden Retriever")
 - **Fixed:** the first check listed all ten of the base game's arcs (FLT-25/33's water escalation and faction arcs) as
   if they were the mod's, and "Arcs ran in the sim" was a wall of them. `flt-mod check` now counts the base game's
   unchanged arcs and lists only yours. (That is the second check run in the log above; the mod didn't change.)
-- **Open:** the base protester thoughts ("I'm here for the water. And the free kombucha.") still show beside the dogs' own. They are the
-  anonymous `base-thoughts-N` lines, so a mod can remove them only by index, and the skill doesn't say which indices are
-  the protester ones. A named-id pass on base thoughts would fix it; out of scope here.
+- **Fixed in the skill:** the base protester thoughts ("I'm here for the water. And the free kombucha.") still showed
+  beside the dogs' own. They are anonymous lines a mod can remove only by index, and the skill didn't say which. It now
+  names them (`base-thoughts-74` to `-78`), and the example mod removes them.
 - **Open:** `check` can't hear the bark. The skill says how to write a cue and when the hooks fire, but the only way to
   hear it is to load the game.
 - **Open:** the recipe coordinates took one careful read ("faces +z", "a leg's pivot is half its height"); a

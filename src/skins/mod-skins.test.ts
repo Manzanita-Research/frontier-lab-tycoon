@@ -1,6 +1,6 @@
 // FLT-55: a mod's skin in the registry. It starts from a built-in skin, is re-scoped to its own id, and cannot take a
 // built-in id or extend a skin that does not exist.
-import { prepareSkin, registerModSkins, skinList } from "./registry";
+import { prepareSkin, registerModSkins, rescopeCss, skinList } from "./registry";
 import type { SkinData } from "../mods/schema";
 
 const owner = { id: "golden-retriever-protest", name: "Golden Retriever Protest", version: "1.0.0" };
@@ -34,6 +34,11 @@ describe("mod skins (FLT-55)", () => {
     expect(p.tokenCss).toContain("--wag:12deg;");
     expect(p.fontCss).toContain('@font-face{font-family:"Bark Sans";src:url("blob:test/1");font-weight:700;');
     expect(p.families).toEqual(expect.arrayContaining([...parent.families, "Bark Sans"]));
+  });
+
+  it("re-scopes the parent's rules however the build wrote the selector (the minifier drops the quotes)", () => {
+    const css = `[data-skin="frontier-95"] .a{} [data-skin=frontier-95] .b{} [data-skin='frontier-95'] .c{} [data-skin=frontier-955] .d{}`;
+    expect(rescopeCss(css, "frontier-95", "good-boy-95")).toBe(`[data-skin="good-boy-95"] .a{} [data-skin="good-boy-95"] .b{} [data-skin="good-boy-95"] .c{} [data-skin=frontier-955] .d{}`);
   });
 
   it("starts from the base when it extends nothing", async () => {

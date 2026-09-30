@@ -116,8 +116,12 @@
         {"id": "gr-discourse", "kind": "protester", "when": "discourse", "text": "Woof. That is my whole position paper."},
         {"id": "gr-night", "kind": "protester", "when": "night", "text": "Protesting until someone throws the ball."},
         {"id": "gr-crowded", "kind": "protester", "when": "crowded", "text": "So many friends at the gate! Best protest ever!"},
-        {"id": "gr-hype", "kind": "protester", "when": "highHype", "text": "Is that a new model? Does it fetch?"}
-      ]
+        {"id": "gr-hype", "kind": "protester", "when": "highHype", "text": "Is that a new model? Does it fetch?"},
+        {"id": "gr-sniffed", "kind": "protester", "when": "always", "text": "I have sniffed your training data. Concerning."},
+        {"id": "gr-sign", "kind": "protester", "when": "always", "text": "My sign says WOOF LIES. I stand by my sign."},
+        {"id": "gr-squirrel", "kind": "protester", "when": "always", "text": "We demand a pause. Also that squirrel. Mostly the squirrel."}
+      ],
+      "remove": ["base-thoughts-74", "base-thoughts-75", "base-thoughts-76", "base-thoughts-77", "base-thoughts-78"]
     },
     "headlines": {
       "add": [
