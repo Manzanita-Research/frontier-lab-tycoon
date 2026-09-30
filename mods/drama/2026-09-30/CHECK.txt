@@ -1,12 +1,10 @@
 Daily Drama 2026-09-30: checker transcript (scripts/drama-run.mjs)
 
 $ flt-mod check mod.json
-PASS drama-2026-09-30@1.0.0: 365 days, 7300 ticks, 17 cards answered, 2 releases
-Replay identical: 74fe262d205f6156707d19d78e6959cb9994b77c33f5c7f0bebc8314c926e405; cash $16948233; 671 ms
-Arc reachability: 0 arcs checked with xstate/graph (structural, guards/actions omitted)
-M1a applied: base simulation only
-M1b deferred: rivals.anthro: copy and model pools; headlines: full runtime lookup awaits M1b; thoughts: full runtime lookup awaits M1b; events: full runtime lookup awaits M1b
-Coverage: schema, composition, assets, structural arcs, existing World injection. Deferred content is not executed until M1b.
+PASS drama-2026-09-30@1.0.0: 365 days, 7300 ticks, 55 cards answered, 4 releases
+Replay identical: eb83a65b71d204b133038584b291d33fc292477525d0a56f6eb3122e2ad017e2; cash $53179766; 1437 ms
+Arc reachability: 10 arcs checked with xstate/graph (structural, guards/actions omitted), 10 of them the base game's, unchanged
+Executed: rivals, headlines, thoughts, events (the real sim ran with your definition)
 
 $ drama lint
 drama-lint mods/drama/2026-09-30: PASS (0 errors, 0 warnings)
