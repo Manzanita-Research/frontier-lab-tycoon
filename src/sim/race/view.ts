@@ -49,7 +49,7 @@ export function raceView(s: GameState): RaceView {
     eraPct,
     rank: s.race.rank,
     rankDelta: s.race.rankDelta,
-    total: ARENA_SIZE,
+    total: Math.max(ARENA_SIZE, s.race.board.length),
     week: s.race.week,
     board: boardView(s),
     drop: drop && openDropActive(s) ? { rival: drop.rival, model: drop.model, daysLeft: Math.max(0, drop.until - s.day) } : null,

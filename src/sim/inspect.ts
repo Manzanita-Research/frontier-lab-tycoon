@@ -77,7 +77,9 @@ function historyOf(state: GameState, w: Walker): [string, string, string] {
       habits.sort((a, b) => b[0] - a[0]);
       const top = habits[0]![0] > 0 ? habits[0]![1] : "Has not had a proper break yet";
       const offer = stats.offers > 0 ? `Turned down ${RIVAL_SHORT[stats.rival] ?? "a rival"} ${times(stats.offers)}` : habits[1]![0] > 0 ? habits[1]![1] : "Has never been poached. Asks about it weekly";
-      return [`Joined ${when}`, top, offer];
+      // Defection (FLT-26): a warning sign, readable but not certain.
+      const vc = state.defection?.seen[w.id];
+      return [`Joined ${when}`, top, vc ? `Seen with VCs by the Kombucha Bar${vc > 1 ? `, ${times(vc)}` : ""}` : offer];
     }
     case "visitor": {
       const flavor: Record<string, string> = {

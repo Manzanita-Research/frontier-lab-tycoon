@@ -1,5 +1,7 @@
 import { enableLeapfrog } from "./race/leapfrog/driver";
 import { enablePapers } from "./race/papers/driver";
+import { enableDefection } from "./defection/driver";
+import { enablePoaching } from "./poaching/driver";
 import { BUILDINGS, type BuildingKind } from "../content/buildings";
 import { STAFF } from "../content/staff";
 import { HUD_PANELS, PROGRESSION, type HudPanel, type Level, type ProgressView, type SystemId } from "../content/progression";
@@ -47,6 +49,8 @@ export function updateProgression(s: GameState) {
     const row = rows(s).find((r) => r.level === event.level)!;
     if (row.systems.includes("leapfrog") && !s.flags.leapfrogOff) enableLeapfrog(s);
     if (row.systems.includes("papers") && !s.flags.papersOff) enablePapers(s);
+    if (row.systems.includes("defection") && !s.flags.defectionOff) enableDefection(s);
+    if (row.systems.includes("poaching") && !s.flags.poachingOff) enablePoaching(s);
     const items = [...row.buildings.map((k) => BUILDINGS[k].name), ...row.staff.map((k) => STAFF[k].title), ...row.systems];
     s.unlockCards ??= [];
     s.unlockCards.push({ id: row.id, title: `New! ${row.name}`, body: row.goal.text, items });

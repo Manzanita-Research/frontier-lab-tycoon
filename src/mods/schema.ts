@@ -68,11 +68,13 @@ const EventEffect = Schema.Union([
   Schema.Struct({ type: Schema.Literal("trust"), amount: number }),
   Schema.Struct({ type: Schema.Literal("leapfrog"), action: Schema.Literals(["shipNow", "hold", "leak"]) }),
 ]);
+/** One answer on a card. Exported so a pack with a bigger card (FLT-26's four-way choice) can reuse it. */
+export const EventChoice = Schema.Struct({ label: text, hint: Schema.String, effects: Schema.Array(EventEffect) });
 export const EventCard = Schema.Struct({
   id, title: text, body: text, tone, when: Condition,
   cooldown: Schema.optionalKey(nonnegative),
-  choices: Schema.Array(Schema.Struct({ label: text, hint: Schema.String, effects: Schema.Array(EventEffect) })).check(Schema.isBetweenLength(1, 3)),
-  kind: Schema.optionalKey(Schema.Literals(["era", "auction", "response", "stream"])), stripe: Schema.optionalKey(text),
+  choices: Schema.Array(EventChoice).check(Schema.isBetweenLength(1, 3)),
+  kind: Schema.optionalKey(Schema.Literals(["era", "auction", "response", "stream", "drama"])), stripe: Schema.optionalKey(text),
 });
 export type EventData = typeof EventCard.Type;
 

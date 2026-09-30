@@ -1,0 +1,394 @@
+{
+  "apiVersion": 1,
+  "id": "base-poaching",
+  "name": "Poaching War",
+  "version": "1.0.0",
+  "author": "Frontier Lab Tycoon",
+  "description": "A rival sends offers to several of your researchers at once. Match, give the mission speech, or let them go (and watch some of them found a neo lab). Rides the Race's poach beat (FLT-9). Direct-loaded FLT-15 section shape until M1b.",
+  "content": {
+    "arcs": {
+      "add": [
+        {
+          "id": "poaching",
+          "initial": "quiet",
+          "states": {
+            "quiet": {
+              "on": {
+                "DAY": [
+                  {
+                    "target": "offered",
+                    "guard": {
+                      "type": "stat.gte",
+                      "params": {
+                        "stat": "offerReady",
+                        "value": 1
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "offered": {
+              "entry": [
+                {
+                  "type": "flag.set",
+                  "params": {
+                    "name": "offer:poaching-offer"
+                  }
+                },
+                {
+                  "type": "sound.cue",
+                  "params": {
+                    "cue": "card"
+                  }
+                },
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "{poacher} sends {poachCount} {lab} researchers the same offer letter, with the names changed",
+                    "tone": "bad"
+                  }
+                }
+              ],
+              "on": {
+                "CHOSE": [
+                  {
+                    "target": "quiet",
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "match"
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "people.pay",
+                        "params": {
+                          "each": 250000
+                        }
+                      },
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "{lab} matches {poacher}'s offers; {poachNames} celebrate with the good kombucha",
+                          "tone": "neutral"
+                        }
+                      },
+                      {
+                        "type": "toast",
+                        "params": {
+                          "text": "Matched. They asked for $100M. They settled for $250K each and a nicer chair.",
+                          "tone": "neutral"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "target": "quiet",
+                    "guard": {
+                      "type": "all",
+                      "params": {
+                        "guards": [
+                          {
+                            "type": "choice",
+                            "params": {
+                              "is": "remind"
+                            }
+                          },
+                          {
+                            "type": "stat.gte",
+                            "params": {
+                              "stat": "vibes",
+                              "value": 550
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "people.cheer",
+                        "params": {
+                          "amount": 0.2
+                        }
+                      },
+                      {
+                        "type": "hype.delta",
+                        "params": {
+                          "amount": 1
+                        }
+                      },
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "{lab} holds an all-hands on 'the mission'; {poachNames} stay and one of them cries a bit",
+                          "tone": "good"
+                        }
+                      },
+                      {
+                        "type": "toast",
+                        "params": {
+                          "text": "The mission speech landed. Nobody is leaving for {poacher}. Today.",
+                          "tone": "good"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "target": "walkout",
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "remind"
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "{lab}'s mission speech runs 40 minutes; {poachNames} leave for {poacher} during the Q&A",
+                          "tone": "bad"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "target": "walkout",
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "letgo"
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "{poachNames} leave {lab} for {poacher}; the farewell Slack message has 300 heart emoji",
+                          "tone": "neutral"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "walkout": {
+              "entry": [
+                {
+                  "type": "hype.delta",
+                  "params": {
+                    "amount": -2
+                  }
+                },
+                {
+                  "type": "camera.focus",
+                  "params": {
+                    "on": "gate",
+                    "zoom": 1.5,
+                    "hold": 3
+                  }
+                },
+                {
+                  "type": "people.quit",
+                  "params": {
+                    "quiet": true
+                  }
+                }
+              ],
+              "on": {
+                "DAY": [
+                  {
+                    "target": "quiet",
+                    "guard": {
+                      "type": "stat.gte",
+                      "params": {
+                        "stat": "rested",
+                        "value": 1
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "events": {
+      "add": [
+        {
+          "id": "poaching-offer",
+          "kind": "drama",
+          "stripe": "Recruiter · Urgent",
+          "tone": "bad",
+          "cooldown": 0,
+          "when": {
+            "flag": "offer:poaching-offer",
+            "daysAgo": 0
+          },
+          "title": "{poacher} wants {poachCount} of your researchers.",
+          "body": "{poachNames} each got an offer from {poacher}. The number has a lot of zeroes. {poachFirst} forwarded it to you with \"Asking for a friend.\"",
+          "choices": [
+            {
+              "label": "Match the offers",
+              "hint": "{poachCost} now · they stay",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "offer:poaching-offer",
+                  "clear": true
+                },
+                {
+                  "type": "flag",
+                  "name": "poaching:pick:match"
+                }
+              ]
+            },
+            {
+              "label": "Remind them of the mission",
+              "hint": "Free · works if the Vibes are {vibesNeeded}+ (now {vibes})",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "offer:poaching-offer",
+                  "clear": true
+                },
+                {
+                  "type": "flag",
+                  "name": "poaching:pick:remind"
+                }
+              ]
+            },
+            {
+              "label": "Let them go",
+              "hint": "Boxes at the gate · some may found a neo lab",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "offer:poaching-offer",
+                  "clear": true
+                },
+                {
+                  "type": "flag",
+                  "name": "poaching:pick:letgo"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "headlines": {
+      "add": [
+        {
+          "id": "poaching-founded",
+          "trigger": "founded",
+          "tone": "bad",
+          "text": "Six weeks after leaving {lab} for {poacher}, {neoFounder} quits that too and launches {neoName}"
+        },
+        {
+          "id": "poaching-founded-2",
+          "trigger": "founded",
+          "tone": "joke",
+          "text": "{neoName} emerges from stealth: {neoFounder}, ex-{lab}, ex-{poacher}, ex-caring what anyone thinks"
+        }
+      ]
+    },
+    "thoughts": {
+      "add": [
+        {
+          "id": "poaching-ask-1",
+          "kind": "researcher",
+          "when": "offer",
+          "text": "⚡ I'd leave for $100M. Asking for a friend."
+        },
+        {
+          "id": "poaching-ask-2",
+          "kind": "researcher",
+          "when": "offer",
+          "text": "⚡ They offered me a boat. A real one."
+        },
+        {
+          "id": "poaching-ask-3",
+          "kind": "researcher",
+          "when": "offer",
+          "text": "⚡ The offer letter came with a signing bonus and a signing yacht."
+        },
+        {
+          "id": "poaching-ask-4",
+          "kind": "researcher",
+          "when": "offer",
+          "text": "⚡ My recruiter calls me 'superintelligence'. Nobody here does."
+        }
+      ]
+    },
+    "labNames": {
+      "add": [
+        {
+          "id": "neo",
+          "values": [
+            "{last} Superintelligence",
+            "{first}{last}",
+            "Post-{poacherShort}",
+            "{last} & Friends",
+            "Superintelligence Adjacent"
+          ]
+        }
+      ]
+    },
+    "manifestos": {
+      "add": [
+        {
+          "id": "neo",
+          "values": [
+            "We took the money. Now we take the lead.",
+            "Superintelligence, but with a smaller org chart.",
+            "We left two labs to build the third one right.",
+            "Our mission is the mission, minus the meetings."
+          ]
+        }
+      ]
+    },
+    "neoLines": {
+      "release": [
+        "{rival} ships {model}; the announcement is mostly about compensation philosophy",
+        "{rival} releases {model}, built by people {lab} used to pay"
+      ],
+      "poach": [
+        "{rival} hires {name} from {lab}, then {name}'s whole group chat",
+        "{name} leaves {lab} for {rival}; {founder} DMs 'told you'"
+      ],
+      "nemesis": [
+        "{rival}'s founder {founder} posts a leaderboard with {lab} circled in red"
+      ],
+      "goodwill": []
+    }
+  },
+  "rules": {
+    "poaching": {
+      "targets": {
+        "big": [2, 4],
+        "other": [1, 2],
+        "floor": 5
+      },
+      "bigPoachers": [
+        "metameta"
+      ],
+      "restDays": 30,
+      "found": {
+        "chance": 0.4,
+        "startShare": 0.3,
+        "startHype": 30,
+        "delayDays": 6
+      },
+      "personality": {
+        "cadence": 5,
+        "growth": 14,
+        "openness": 0.3,
+        "poaching": 0.12,
+        "hypeHunger": 1.4
+      }
+    }
+  }
+}

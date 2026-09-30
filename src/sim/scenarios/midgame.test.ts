@@ -21,7 +21,8 @@ describe("midgame scenario", () => {
     expect(again).toEqual(s);
     // FLT-49 preserves the full starter-campus preset, completes its ladder, and replays
     // paid confirmations. Changed movement/attendance draws shift the real opening day.
-    expect(digest(s)).toBe("8aab011b");
+    // FLT-26/FLT-20: the completed ladder now also wakes Defection and the Poaching War.
+    expect(digest(s)).toBe("4f1e1b90");
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);

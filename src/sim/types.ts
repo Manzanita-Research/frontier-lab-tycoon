@@ -4,6 +4,10 @@ import type { ProgressionStored } from "./machines/progression";
 import type { ProgressionLevel, UnlockCard } from "../content/progression";
 import type { BuildingKind } from "../content/buildings";
 import type { CollusionState, Investigation } from "./collusion/state";
+import type { DefectionState } from "./defection/state";
+import type { NeoLabsState } from "./neolabs/state";
+import type { Meeting } from "./meetings";
+import type { PoachingState } from "./poaching/state";
 import type { NeedKey } from "../content/needs";
 import type { DisastersState } from "./disasters/types";
 import type { ArcStored } from "./machines/arc";
@@ -299,4 +303,12 @@ export interface GameState {
   collusion?: CollusionState;
   /** Generic inquiries started by the Vocabulary; the owning machine completes them. */
   investigations?: Record<string, Investigation>;
+  /** FLT-26 Defection: opt-in pack (the ladder turns it on at Scrutiny); absent in legacy saves and baseline runs. */
+  defection?: DefectionState;
+  /** FLT-20 Poaching War: opt-in pack, same rules. */
+  poaching?: PoachingState;
+  /** Labs your own people founded (FLT-26, FLT-20): on the Arena beside the built-in rivals. */
+  neoLabs?: NeoLabsState;
+  /** A visitor talking to one of your people somewhere visible (sim/meetings.ts, the `people.meet` verb). */
+  meetings?: Meeting[];
 }
