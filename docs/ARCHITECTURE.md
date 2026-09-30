@@ -268,28 +268,28 @@ A pack that starts eating the budget fails the test by name.
 
 **Warm up before you time.** On one vCPU the JIT compiles on the same core as the tick. With every pack's code to compile, the first thousand ticks of a fresh process run up to 1.5 times slower than the rest, and a second lab built in the same warmed-up process runs its first days about a quarter faster. The test plays 1400 ticks before it starts the clock.
 
-The table: mean and p95 µs per tick, seed 1, 4000 ticks, 1-vCPU Modal box. "Before" is the train as FLT-39 found it (`flt-wave-2` with FLT-11 merged), with only the stopwatch added. Systems under 3 µs both times are left out (about 25 µs between them). Each lap carries about 1 µs of stopwatch, so the whole-tick row reads higher than the strict number.
+The table: mean and p95 µs per tick, seed 1, 4000 ticks, 1-vCPU Modal box. "Before" is the train with FLT-11 merged (`212ef6c`), with only the stopwatch and the busy lab added. Systems under 3 µs both times are left out (about 25 µs between them). Each lap carries about 1 µs of stopwatch, so the whole-tick row reads higher than the strict number.
 
 | System | Before mean | Before p95 | After mean | After p95 |
 |---|---:|---:|---:|---:|
-| walkers | 272.8 | 361.4 | 232.6 | 326.6 |
-| daily:events | 76.3 | 1116.8 | 4.9 | 46.7 |
-| daily:crowd | 57.3 | 463.0 | 9.4 | 112.1 |
-| staff | 41.3 | 75.5 | 20.1 | 44.3 |
-| daily:defection | 32.1 | 367.7 | 13.3 | 164.5 |
-| daily:modArcs | 24.2 | 234.0 | 4.9 | 46.0 |
-| choices | 23.5 | 28.5 | 10.3 | 11.8 |
-| protesters | 13.1 | 27.8 | 8.9 | 28.8 |
-| daily:leapfrog | 13.0 | 89.5 | 12.1 | 79.6 |
-| commands | 11.7 | 2.1 | 6.3 | 1.9 |
-| daily:papers | 11.3 | 189.6 | 2.6 | 35.7 |
-| daily:factions | 7.7 | 100.4 | 7.0 | 76.3 |
-| daily:race | 6.6 | 32.9 | 6.5 | 29.4 |
-| daily:economy | 5.9 | 78.5 | 5.4 | 84.2 |
-| factions | 5.6 | 6.8 | 4.6 | 5.2 |
-| **whole tick (stopwatch on)** | **652.9** | **4127.8** | **393.0** | **1668.3** |
-| **strict tick (stopwatch off, best of 3 x 200)** | **0.632 ms** | | **0.379 ms** | |
-| endings in the Takeover (mean, worst tick) | 533 µs, 13.4 ms | | 19 µs, 0.45 ms | |
+| walkers | 272.8 | 361.4 | 228.4 | 323.4 |
+| daily:events | 76.3 | 1116.8 | 5.7 | 49.7 |
+| daily:crowd | 57.3 | 463.0 | 9.9 | 129.9 |
+| staff | 41.3 | 75.5 | 20.6 | 46.4 |
+| daily:defection | 32.1 | 367.7 | 13.6 | 178.8 |
+| daily:modArcs | 24.2 | 234.0 | 5.9 | 51.8 |
+| choices | 23.5 | 28.5 | 9.1 | 10.2 |
+| protesters | 13.1 | 27.8 | 9.2 | 27.0 |
+| daily:leapfrog | 13.0 | 89.5 | 12.5 | 86.9 |
+| commands | 11.7 | 2.1 | 7.0 | 2.4 |
+| daily:papers | 11.3 | 189.6 | 2.7 | 40.5 |
+| daily:factions | 7.7 | 100.4 | 7.5 | 84.1 |
+| daily:race | 6.6 | 32.9 | 6.7 | 30.7 |
+| daily:economy | 5.9 | 78.5 | 6.8 | 84.6 |
+| factions | 5.6 | 6.8 | 4.9 | 6.1 |
+| **whole tick (stopwatch on)** | **652.9** | **4127.8** | **398.4** | **1774.2** |
+| **strict tick (stopwatch off, best of 3 x 200), 3 runs** | **0.602–0.624 ms** | | **0.384–0.397 ms** | |
+| endings in the Takeover (mean, worst tick), 3 runs | 544–551 µs, 13.5–14.1 ms | | 18–20 µs, 0.43–0.46 ms | |
 
 Where the time went, and what took it back. None of it changes behaviour: the goldens are byte-identical.
 
