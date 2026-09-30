@@ -19,7 +19,8 @@ describe("midgame scenario", () => {
   it("replays ordinary commands and ticks to the same whole-world golden", () => {
     const again = createMidgameScenario();
     expect(again).toEqual(s);
-    expect(digest(s)).toBe("9497cacc");
+    // Includes the dormant arc entries registered by FLT-18; its optional feature stays off here.
+    expect(digest(s)).toBe("8906ff9f");
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);
