@@ -34,7 +34,8 @@ export function applyLeapfrogEffect(state: GameState, rng: Rng, e: Extract<Effec
 /** The forced-response card: three answers to a rival's launch. */
 function respond(state: GameState, rng: Rng, action: LeapfrogAction) {
   const lf = state.leapfrog;
-  const pick = action === "shipNow" ? "ship" : action === "hold" ? "hold" : "leak";
+  const pick = action === "shipNow" ? "ship" : action === "hold" ? "hold" : action === "leak" ? "leak" : null;
+  if (!pick) return; // a mod's typo does nothing (the offer stays open)
   const ready = readiness(state);
   const { stored, effects } = step(responseMachine, lf.response, { type: "PICK", pick, day: state.day, holdDays: R.response.holdDays });
   lf.response = stored;
@@ -72,7 +73,7 @@ function leakScreenshot(state: GameState, rng: Rng) {
   const lf = state.leapfrog;
   const roll = rng.next();
   // The benchmark you're closest on, or the one you already lead (a leak of a real number is still a leak).
-  let closest: string | null = null;
+  let closest: (typeof lf.benchmarks)[number] | null = null;
   let gap = Infinity;
   for (const e of lf.benchmarks) {
     if (!isOpen(e.machine) || e.def.kind !== "score") continue;
@@ -81,13 +82,12 @@ function leakScreenshot(state: GameState, rng: Rng) {
     const g = e.machine.context.best - own;
     if (g < gap) {
       gap = g;
-      closest = e.def.id;
+      closest = e;
     }
   }
   if (closest) {
-    const def = lf.benchmarks.find((b) => b.def.id === closest)!.def;
-    setMaxx(state, def, YOU, roll);
-    lf.labs[YOU]!.leaked = closest;
+    setMaxx(state, closest, YOU, roll);
+    lf.labs[YOU]!.leaked = closest.def.id;
     lf.labs[YOU]!.flash = state.day + 2;
     packNews(state, rng, "leak", {});
     refreshRecords(state, rng);

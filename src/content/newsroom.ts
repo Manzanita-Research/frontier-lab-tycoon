@@ -1,5 +1,5 @@
 // News Room copy is data. Keep the four voices recognizable and the names fictional.
-export type StoryKind = "release" | "protest" | "money" | "rival" | "build" | "training" | "era" | "breakdown" | "ending" | "filler";
+export type StoryKind = "release" | "protest" | "money" | "rival" | "build" | "training" | "era" | "breakdown" | "ending" | "filler" | "cycle";
 export type Friend = "skeptic" | "doomer" | "accel" | "mom";
 export const FRIENDS: Record<Friend, { name: string; subtitle: string; avatar: string }> = {
   skeptic: { name: "Nell", subtitle: "the skeptic", avatar: "N" },
@@ -17,6 +17,7 @@ export const REACTIONS: Record<StoryKind, Record<Friend, string>> = {
   era: { skeptic: "new era, same slide deck", doomer: "i would like to unsubscribe from the next era", accel: "we are so back. we have never been more back.", mom: "is this you on the news? call me" },
   breakdown: { skeptic: "did you try turning the valuation off and on again", doomer: "the alarms are harmonizing now. that's probably bad.", accel: "temporary setback. permanent opportunity to buy more compute.", mom: "i heard something broke. are you eating properly?" },
   ending: { skeptic: "the board will call this a learning opportunity either way", doomer: "can we have a normal month next month", accel: "that was the tutorial. now scale it.", mom: "i'm proud of you. please call me before you start another company" },
+  cycle: { skeptic: "whoever owns the news cycle this week also owns a very confident font", doomer: "the cycle is four days long. the models are not on a cycle.", accel: "own the cycle. rent the cycle. become the cycle.", mom: "you were on the front page! or was that the other lab? call me" },
   filler: { skeptic: "the biggest news this month is that there is still news", doomer: "suspiciously quiet. updating my emergency spreadsheet.", accel: "quiet month = more time to build!!", mom: "no news is good news. did you get the photo of the garden?" },
 };
 export const CLASSIFIEDS = [
@@ -33,8 +34,8 @@ export const DESK_STORIES = [
   "Letters: our readers would like a shorter model name",
 ];
 export const STORY_PRIORITY: Record<StoryKind, number> = {
-  ending: 100, era: 95, breakdown: 90, release: 85, protest: 75, money: 70,
+  ending: 100, era: 95, breakdown: 90, cycle: 88, release: 85, protest: 75, money: 70,
   rival: 60, build: 40, training: 30, filler: 10,
 };
 
-export const EVENT_STORY_KIND: Record<string, StoryKind> = { waterDiscourse: "protest", drumCircle: "protest" };
+export const EVENT_STORY_KIND: Record<string, StoryKind> = { waterDiscourse: "protest", drumCircle: "protest", shipNow: "rival" };

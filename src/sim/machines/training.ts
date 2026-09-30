@@ -56,6 +56,7 @@ export const trainingMachine = setupEffect({
         // preview already paid out and takes it off the final release (see settlePreview in race/leapfrog/ops.ts).
         SHIP_NOW: ({ context, event }, enq) => {
           enq.emit({ type: "RELEASED", model: `${context.name}-preview`, run: context.run, gain: releaseGain(context.run) * event.scale });
+          return { target: "training", context };
         },
       },
     },

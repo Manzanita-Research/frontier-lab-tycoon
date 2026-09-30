@@ -14,10 +14,12 @@ export interface DebugParams {
   hour: number | null;
   /** Open in photo mode. */
   photo: boolean;
-  /** Stage a moment for a link or a screenshot: a race one (shuffle, era, era3, auction, funding: sim/race/demo.ts) or an operations one (ops, queue, slop: sim/opsDemo.ts). */
+  /** Stage a moment for a link or a screenshot: a race one (shuffle, era, era3, auction, funding: sim/race/demo.ts) an operations one (ops, queue, slop: sim/opsDemo.ts), or a Release Leapfrog one (shipnow, pair, stream[:mishap], solved: sim/race/leapfrog/demo.ts). */
   moment: string | null;
   /** Extra researchers on top of the hall-driven count (for Thoughts-panel and queue screenshots). */
   researchers: number;
+  /** Release Leapfrog (FLT-27) is on unless `?leapfrog=off`. */
+  leapfrog: boolean;
 }
 
 export function readDebugParams(search = typeof window === "undefined" ? "" : window.location.search): DebugParams {
@@ -36,5 +38,6 @@ export function readDebugParams(search = typeof window === "undefined" ? "" : wi
     photo: q.has("photo"),
     moment: q.get("moment"),
     researchers: num("researchers") ?? 0,
+    leapfrog: q.get("leapfrog") !== "off",
   };
 }

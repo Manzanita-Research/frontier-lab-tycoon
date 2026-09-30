@@ -51,6 +51,14 @@ RollerCoaster Tycoon, but the park is a frontier AI lab. You lay paths, drop bui
 - **Queues:** a full building grows a visible line on the path, and people leave it when their patience runs out ("This queue is longer than our context window.").
 - Ops is the pressure that keeps a rich lab honest: the better it does, the more agents, the more slop, the more staff. A lab that ignores it is fine for a while (about a hundred days) and then slides.
 
+## Release Leapfrog (FLT-27; spec: `docs/specs/FLT-27.md`)
+
+- **The rhythm:** every 8 to 12 game days one lab launches, and often the next day another answers ("the day-after counter-launch"). Each launch claims a benchmark record, with a footnote when it had to tune for it. Later eras run tighter.
+- **Benchmarks:** MMLU-Pro-Max-Ultra, HumanEval-But-Harder, SWE-Bench (Verified) (Really), GPQA-Diamond-Encrusted, ARC-AGI-∞, Humanity's Second-To-Last Exam and a vibes-based Arena Elo. Near 100% a benchmark is declared solved, a harder one takes its place and the labs react in character.
+- **The news cycle:** a share-of-voice meter that decays; launches, stunts and scandals push it; the lab that owns it makes the front page and feeds its hype and valuation.
+- **Forced response:** a rival launches while your run is 94% done: ship now (a preview, a quality penalty, a bug risk), hold and counter-launch later, or leak a benchmark screenshot.
+- **Your launches** get a livestream: usually fine, sometimes the dog walks on stage.
+
 ## Satire (parody names only)
 
 This is AI-2027-shaped escalation played as affectionate farce. It punches at incentives and institutions, never at real people, companies or nationalities.

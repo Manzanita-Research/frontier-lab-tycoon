@@ -154,22 +154,25 @@ function benchmaxx(state: GameState, rng: Rng, id: string) {
     if (!isOpen(e.machine) || e.def.kind !== "score") continue;
     const own = honestScore(state, id, e.def);
     if (own === null) continue;
-    const record = bestOthers(state, e.def, id);
+    const record = standing(state, e, id);
     if (own > record + 0.05) return; // an honest record: nothing to tune
     if (record - own < gap) {
       gap = record - own;
       closest = e;
     }
   }
-  if (closest) setMaxx(state, closest.def, id, roll);
+  if (closest) setMaxx(state, closest, id, roll);
 }
 
-export function setMaxx(state: GameState, def: BenchmarkDef, id: string, roll: number) {
-  const record = bestOthers(state, def, id);
-  const [lo, hi] = def.kind === "elo" ? R.benchmarks.eloMargin : R.benchmarks.maxxMargin;
-  // Near the ceiling the margin shrinks, so the last points take forever.
-  const margin = def.kind === "elo" ? lo + (hi - lo) * roll : Math.min(lo + (hi - lo) * roll, Math.max(0.05, (100 - record) * 0.3));
-  state.leapfrog.labs[id]!.maxx[def.id] = def.kind === "elo" ? record + margin : Math.min(99.95, record + margin);
+/** The record to beat for `id`: the best anyone else has, or the standing record if that is higher (its own old claim counts). */
+const standing = (state: GameState, e: BenchEntry, id: string): number => Math.max(bestOthers(state, e.def, id), e.machine.context.best);
+
+/** A claim just past the record on `e`: a custom prompt, best of 64. Near the ceiling the margin shrinks, so the last points take forever. */
+export function setMaxx(state: GameState, e: BenchEntry, id: string, roll: number) {
+  const record = standing(state, e, id);
+  const [lo, hi] = e.def.kind === "elo" ? R.benchmarks.eloMargin : R.benchmarks.maxxMargin;
+  const margin = e.def.kind === "elo" ? lo + (hi - lo) * roll : Math.min(lo + (hi - lo) * roll, Math.max(0.05, (100 - record) * 0.3));
+  state.leapfrog.labs[id]!.maxx[e.def.id] = e.def.kind === "elo" ? record + margin : Math.min(99.95, record + margin);
 }
 
 // ---------------------------------------------------------------------------------------------------- saturation
@@ -333,7 +336,7 @@ const pickMishap = (rng: Rng) => {
  * You launched a model (a finished run, or ship-now): the SOTA claims your scores earn, the counter-launch if you were
  * holding, the news cycle, and the livestream. `ready` is 1 for a finished run.
  */
-export function ownRelease(state: GameState, rng: Rng, opts: { early: boolean; ready: number }) {
+export function ownRelease(state: GameState, rng: Rng, opts: { early: boolean; ready: number; mishap?: string }) {
   const lf = state.leapfrog;
   lf.modelsSeen = state.models.length;
   const model = state.models[state.models.length - 1] ?? "";
@@ -400,16 +403,19 @@ export function ownRelease(state: GameState, rng: Rng, opts: { early: boolean; r
     }
   }
   pushVoice(state, YOU, push + R.voice.ownSotaPush * claims.length);
-  livestream(state, rng, model, opts.ready);
+  livestream(state, rng, model, opts.ready, opts.mishap);
 }
 
 /** The launch livestream: it works by quality and readiness, or a mishap card opens. */
-function livestream(state: GameState, rng: Rng, model: string, ready: number) {
+function livestream(state: GameState, rng: Rng, model: string, ready: number, forced?: string) {
   const lf = state.leapfrog;
   const L = R.livestream;
   const odds = Math.max(L.oddsFloor, Math.min(L.oddsCeil, demoOdds(state.capability) * ready * L.oddsScale + (state.buildings.some((b) => b.kind === "demo" && !b.broken) ? L.stageBonus : 0)));
-  const ok = rng.next() < odds;
-  const mishap = pickMishap(rng);
+  const roll = rng.next();
+  const picked = pickMishap(rng);
+  // `forced` (a debug scene) names the mishap; the dice are drawn either way.
+  const mishap = (forced && mishapById(forced)) || picked;
+  const ok = forced ? false : roll < odds;
   const { stored, effects } = step(livestreamMachine, lf.livestream, { type: "GO", day: state.day, ok, kind: mishap.id });
   lf.livestream = stored;
   for (const e of effects) {
