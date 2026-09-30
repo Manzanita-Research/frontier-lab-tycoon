@@ -15,7 +15,7 @@ export const labIds = (state: GameState): string[] => [YOU, ...state.race.rivals
 
 export const rivalOf = (state: GameState, id: string) => state.race.rivals.find((r) => r.context.id === id);
 
-/** Does the lab have a product to score? Very Safe SI has none, so it never appears on a benchmark. */
+/** Does the lab have a product to score? Super Super AI has none, so it never appears on a benchmark. */
 export const hasProduct = (id: string): boolean => id === YOU || defs().rivalById[id as RivalId]?.models != null;
 
 export const capOf = (state: GameState, id: string): number => (id === YOU ? state.capability : (rivalOf(state, id)?.context.capability ?? 0));

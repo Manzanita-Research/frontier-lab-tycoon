@@ -39,9 +39,9 @@ _Headless: the scripted player of `sim/race/leapfrog/headless.ts` (the playthrou
 | **Stochastic Parrots Anonymous** | 85.8 | 76.0 | 59.6 | 40.6 | 1523 | 32.2 | 21.1 | 0 |
 | Sirocco | 87.8 | 74.4 | *71.4 | 42.5 | 1493 | 33.9 | 22.4 | 0 |
 | Macrohard | *95.1 | 74.8 | 58.0 | 34.1 | 1467 | 30.7 | 20.0 | 0 |
-| Very Safe SI | – | – | – | – | – | – | – | 0 |
+| Super Super AI | – | – | – | – | – | – | – | 0 |
 
-Share of voice on day 365, seed 1: Open-ish AI 49%, Anthropomorphic 12%, Very Safe SI 10%, Stochastic Parrots Anonymous 8%, MetaMeta 8%, Macrohard 7%, Sirocco 7%. Trust 70.
+Share of voice on day 365, seed 1: Open-ish AI 49%, Anthropomorphic 12%, Super Super AI 10%, Stochastic Parrots Anonymous 8%, MetaMeta 8%, Macrohard 7%, Sirocco 7%. Trust 70.
 
 ## Pack on vs off: does it change whether the scenario can be won? (700 days)
 
@@ -54,7 +54,7 @@ Share of voice on day 365, seed 1: Open-ish AI 49%, Anthropomorphic 12%, Very Sa
 ## What the ticker said (seed 1, days 1–120)
 
 - d49: GPU shortage: labs reportedly bartering compute for sourdough starter
-- d49: MetaMeta Superintelligence Labs poaches a Stochastic Parrots Anonymous researcher with a nine-figure offer and a very large chair
+- d49: MetaMeta Metaintelligence Labs poaches a Stochastic Parrots Anonymous researcher with a nine-figure offer and a very large chair
 - d49: Macrohard raises another round, mostly to pay for the last round
 - d49: AI agent orders 400 burritos to the office; nobody remembers asking
 - d49: Stochastic Parrots Anonymous's moment passes; the news cycle is now 'up for grabs, and also on fire'

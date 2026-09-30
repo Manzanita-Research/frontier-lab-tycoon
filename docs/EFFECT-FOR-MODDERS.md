@@ -38,7 +38,7 @@ RNG and the clock remain owned by the game.
 ```
 
 The ids identify existing rivals. Display names do not. The other canonical ids
-are `vssi`, `sirocco`, and `macrohard`.
+are `supersuper`, `sirocco`, and `macrohard`.
 
 ## What the loader actually does
 
