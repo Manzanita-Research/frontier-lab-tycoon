@@ -47,6 +47,7 @@ export function Arena({ arena }: SlotPropsMap["Arena"]) {
                   {row.short}
                   {row.open && <em className="ar-open">open</em>}
                   {row.leak && <em className="ar-leak">{t("arena.leak")}</em>}
+                  {row.tag && <em className={`arena-tag tag-${row.tag}`}>{row.tagText}</em>}
                 </span>
                 <span className="ar-score">{row.score}</span>
                 <span className={`ar-delta ${row.delta > 0 ? "good" : "bad"}`}>{row.deltaText}</span>

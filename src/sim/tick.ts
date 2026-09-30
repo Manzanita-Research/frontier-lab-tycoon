@@ -3,6 +3,10 @@ import { applyCommands, type Command } from "./commands";
 import { applyCollusionChoices, dailyCollusion, updateCollusion } from "./collusion/driver";
 import { applyHearingChoices, dailyHearing } from "./hearing/driver";
 import { applyYachtChoices, dailyYacht } from "./yacht/driver";
+import { applyDefectionChoices, dailyDefection, updateDefection } from "./defection/driver";
+import { updateMeetings } from "./meetings";
+import { dailyNeoLabs } from "./neolabs/driver";
+import { applyPoachingChoices, dailyPoaching } from "./poaching/driver";
 import { TICKS_PER_DAY } from "./constants";
 import { dailyBreakdowns } from "./breakdowns";
 import { dailyDisasters, updateDisasters } from "./disasters/driver";
@@ -47,6 +51,7 @@ function step(state: GameState, commands: readonly Command[]) {
   if (commands.length > 0) { updateTutorial(state); observeGuardrails(state); }
   if (systemUnlocked(state, "collusion")) applyCollusionChoices(state);
   applyCircusChoices(state);
+  applyPackChoices(state);
   if (pendingConfirmOf(state) || openEventOf(state) || state.goals.value === "lost") {
     state.rngState = rng.state();
     return;
@@ -57,6 +62,8 @@ function step(state: GameState, commands: readonly Command[]) {
   updateStaff(state, rng);
   if (systemUnlocked(state, "collusion")) updateCollusion(state);
   if (systemUnlocked(state, "disasters")) updateDisasters(state);
+  updateMeetings(state);
+  if (systemUnlocked(state, "defection")) updateDefection(state);
   if (state.tick % TICKS_PER_DAY === 0) {
     state.day++;
     if (systemUnlocked(state, "disasters")) dailyDisasters(state);
@@ -69,7 +76,11 @@ function step(state: GameState, commands: readonly Command[]) {
     if (systemUnlocked(state, "slop")) dailySlop(state, rng);
     dailyCrowd(state, rng);
     if (systemUnlocked(state, "collusion")) dailyCollusion(state);
+    if (systemUnlocked(state, "defection")) dailyDefection(state);
+    // The spin-outs move on the Arena's weekly beat, before the Race re-ranks it.
+    if (systemUnlocked(state, "arena")) dailyNeoLabs(state);
     if (systemUnlocked(state, "arena")) dailyRace(state, rng);
+    if (systemUnlocked(state, "poaching")) dailyPoaching(state);
     if (systemUnlocked(state, "leapfrog")) dailyLeapfrog(state, rng);
     if (systemUnlocked(state, "papers")) dailyPapers(state, rng);
     // The Circus (FLT-24, then FLT-21): the yacht first, so a subpoena it files today reaches the Senate today.
@@ -99,6 +110,7 @@ function now(state: GameState, commands: readonly Command[]) {
   observeGuardrails(state);
   if (systemUnlocked(state, "collusion")) applyCollusionChoices(state);
   applyCircusChoices(state);
+  applyPackChoices(state);
   updateCoach(state);
   state.rngState = rng.state();
 }
@@ -107,4 +119,10 @@ function now(state: GameState, commands: readonly Command[]) {
 function applyCircusChoices(state: GameState) {
   if (systemUnlocked(state, "yacht")) applyYachtChoices(state);
   if (systemUnlocked(state, "hearing")) applyHearingChoices(state);
+}
+
+/** Defection and the Poaching War hear the player's pick at once, paused or not (their cards pause the game). */
+function applyPackChoices(state: GameState) {
+  if (systemUnlocked(state, "defection")) applyDefectionChoices(state);
+  if (systemUnlocked(state, "poaching")) applyPoachingChoices(state);
 }

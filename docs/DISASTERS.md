@@ -72,7 +72,7 @@ Guards (pure; `stat.*` read the lab's stats by name):
 | `flag.is` | flag: string, set?: boolean | The flag is set (or, with `set: false`, is not). Only mod arcs see flags: a disaster's beat carries none. |
 | `not` | guard: call | The other guard does not hold. |
 | `any` | guards: calls | At least one of these guards holds (a plain list of guards means all of them). |
-| `all` | guards: calls | Every one of these guards holds (for a transition, whose `guard` is a single call). |
+| `all` | guards: calls | Every one of these guards holds (a transition's `guard` is one call, so this is how it asks for two). |
 
 Verbs (run by the driver, in order, after each transition):
 
@@ -104,8 +104,14 @@ Verbs (run by the driver, in order, after each transition):
 | `card` | id: string | Open one of the disaster's event cards (`cards[].id`); from a mod arc, any card in `content.events` by id, whatever its own `when` says (it waits if another card is open). The machine hears the player's pick as a CHOSE beat. |
 | `flag.set` | name: string | Set a flag to today's day number. |
 | `flag.clear` | name: string | Clear a flag. |
+| `people.meet` | role: string, at: string, hours: number, lines?: string[] | A visitor with `role` walks in from the gate to meet the beat's first person by the first `at` building and they talk for `hours`, in view (sim/meetings.ts). `lines` is what they say, visitor first, alternating. FLT-26's VC chat. |
+| `people.quit` | quiet?: boolean | Everyone the beat is about hands in the box and walks out through the gate. With `quiet`, the calling pack writes the exit headline. |
+| `people.pay` | each: number | Take `each` from the bank for everyone the beat is about (a matched offer). |
+| `people.cheer` | amount: number | Lift the energy and focus of everyone the beat is about. |
 
-Stats a guard, `requires` or `odds.scale` can read: day, capability, hype, cash, compute, discourse, models, agents, clusters, halls, gateways, gas, solar, datacenters, broken, security, sre, comms, janitor, sreAttending, trust, heat, disasters (begun, all time), capture, burning, adjacent. A mechanic that measures its own stats (The Hearing's session tallies) passes them to `checkCall`/`checkChart` as local names.
+The `people.*` verbs act on the people a pack's driver names for the beat (`VerbEnv.people`, main person first); a disaster names nobody, so they do nothing there. A driver can also hand the beat template variables (`VerbEnv.vars`, e.g. FLT-26's `{defName}`).
+
+Stats a guard, `requires` or `odds.scale` can read: day, capability, hype, cash, compute, discourse, models, agents, clusters, halls, gateways, gas, solar, datacenters, broken, security, sre, comms, janitor, vibes, sreAttending, trust, heat, disasters (begun, all time), capture, burning, adjacent. A mechanic that measures its own stats (The Hearing's session tallies) passes them to `checkCall`/`checkChart` as local names.
 
 Building references in verbs: `$target` (the building the disaster is about), `$adjacent` (the nearest other working building of its kind that this disaster has not touched), `$office` (the Security Office), `gate`, or a building kind. `to`/`on` take the same.
 

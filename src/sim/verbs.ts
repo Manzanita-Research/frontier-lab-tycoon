@@ -27,6 +27,8 @@ import { refreshBoard } from "./race/arena";
 import { rivalMachine } from "./race/rival";
 import type { Rng } from "./rng";
 import { atDivert, divertStaff, releaseStaff, staffOf } from "./staff";
+import { callMeeting } from "./meetings";
+import { resign } from "./walkers";
 import type { Building, GameState, StaffJob, Tone } from "./types";
 import { defs } from "./defs";
 
@@ -137,6 +139,8 @@ export const STATS: Record<string, (state: GameState, run: DisasterRun | null) =
   sre: (s) => crew(s, "sre"),
   comms: (s) => crew(s, "comms"),
   janitor: (s) => crew(s, "janitor"),
+  /** The park rating, 0 to 999 (FLT-8): what a "Vibes check" reads. */
+  vibes: (s) => s.vibes.value,
   /** SREs on their way to, or working on, a broken building. */
   sreAttending: (s) => staffOf(s, "sre").filter((o) => (o.machine.value === "going" || o.machine.value === "working") && s.buildings.some((b) => b.id === o.task && b.broken)).length,
   trust: (s) => s.disasters.trust,
@@ -243,6 +247,10 @@ export interface VerbEnv {
   run: DisasterRun | null;
   /** A non-disaster machine can own effects and staff diversions too. */
   owner?: string;
+  /** The people this beat is about, the main one first (a pack's driver names them): what `people.*` verbs act on. */
+  people?: number[];
+  /** Extra template variables for this beat's words (`{defName}`). */
+  vars?: Record<string, string>;
 }
 
 interface VerbDef {
@@ -301,7 +309,7 @@ function placeOf(env: VerbEnv, on: string): [number, number] | null {
 function say(env: VerbEnv, text: string): string {
   const { state, run } = env;
   const target = run ? state.buildings.find((b) => b.id === run.target) : undefined;
-  const vars: Record<string, string> = { ...templateVars(state, {}, env.rng), ...(run?.vars ?? {}) };
+  const vars: Record<string, string> = { ...templateVars(state, {}, env.rng), ...(run?.vars ?? {}), ...(env.vars ?? {}) };
   if (target) vars.target = defs().buildings[target.kind].name;
   return fillTemplate(text, vars);
 }
@@ -543,6 +551,47 @@ export const VERBS: Record<string, VerbDef> = {
       if (run) run.card = id;
       // Cards are checked once a day; a disaster does not want to wait for midnight.
       dailyEvents(state);
+    },
+  },
+  "people.meet": {
+    doc: "A visitor with `role` walks in from the gate to meet the beat's first person by the first `at` building (a kind) and they talk for `hours`, in view. `lines` is what they say, visitor first, alternating.",
+    spec: { role: "string", at: "string", hours: "number", lines: "strings?" },
+    verify: (p) => ((p.at as string) in defs().buildings ? null : `unknown building "${p.at as string}"`),
+    run: (env, p) => {
+      const host = env.people?.[0];
+      if (host === undefined) return;
+      callMeeting(env.state, env.rng, { owner: ownerOf(env), hostId: host, role: p.role as string, at: p.at as string, hours: p.hours as number, lines: ((p.lines as string[] | undefined) ?? []).map((l) => say(env, l)) });
+    },
+  },
+  "people.quit": {
+    doc: "Everyone the beat is about hands in the box and walks out through the gate. With `quiet`, the calling pack writes the exit headline instead of the usual one.",
+    spec: { quiet: "boolean?" },
+    run: (env, p) => {
+      const { state, rng } = env;
+      for (const id of env.people ?? []) {
+        const w = state.walkers.find((o) => o.id === id);
+        if (!w || w.machine.value === "quitting" || w.machine.value === "leaving") continue;
+        if (p.quiet) state.flags[`quietExit:${w.id}`] = state.day;
+        resign(state, w, rng);
+      }
+    },
+  },
+  "people.pay": {
+    doc: "Take `each` from the bank for everyone the beat is about (a retention bonus, a matched offer).",
+    spec: { each: "number" },
+    run: (env, p) => void (env.state.cash -= (p.each as number) * (env.people?.filter((id) => env.state.walkers.some((w) => w.id === id)).length ?? 0)),
+  },
+  "people.cheer": {
+    doc: "Lift the spirits of everyone the beat is about: `amount` (0 to 1) onto their energy and focus.",
+    spec: { amount: "number" },
+    run: (env, p) => {
+      const a = p.amount as number;
+      for (const id of env.people ?? []) {
+        const w = env.state.walkers.find((o) => o.id === id);
+        if (!w) continue;
+        w.energy = Math.max(0, Math.min(1, w.energy + a));
+        w.focus = Math.max(0, Math.min(1, w.focus + a));
+      }
     },
   },
   "flag.set": { doc: "Set a flag to today's day number.", spec: { name: "string" }, run: (env, p) => void (env.state.flags[p.name as string] = env.state.day) },

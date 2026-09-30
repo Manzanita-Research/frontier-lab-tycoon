@@ -20,7 +20,7 @@ const readTipsOff = () => {
 /** A yellow tooltip with a 1px black border and a bold speaker line. The root keeps the `bubble` class so photo mode can copy it. */
 export function Bubble({ bubble }: SlotPropsMap["Bubble"]) {
   return (
-    <div className={`bubble f95-tip bubble-${bubble.kind}`}>
+    <div className={`bubble f95-tip bubble-${bubble.kind}${bubble.speech ? " speech" : ""}`}>
       <b>{bubble.speaker || bubble.kind}</b>
       {bubble.text}
     </div>

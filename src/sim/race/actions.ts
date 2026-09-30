@@ -109,7 +109,7 @@ export function resolveAuction(state: GameState, rng: Rng, bid: Bid) {
   const offer = Math.min(Math.max(0, state.cash), bidAmount(state, bid));
   const rival = unit * (RIVAL_BID_LOW + RIVAL_BID_SPAN * rng.next());
   race.nextAuction = state.day + Math.round(AUCTION_GAP_DAYS * eraDef(eraOfState(state)).pace);
-  const top = race.board.filter((r) => r.id !== "you");
+  const top = race.board.filter((r) => r.id in defs().rivalById);
   const rival_ = defs().rivalById[top[rng.int(0, Math.min(2, top.length - 1))]!.id as RivalId];
   if (offer >= rival) {
     state.cash -= offer;

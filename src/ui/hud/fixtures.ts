@@ -16,6 +16,8 @@ import type { HudInput } from "./vm";
 import { playableFixture } from "./previewLadder";
 import { stagePapers } from "../../sim/race/papers/demo";
 import { stageCollusion } from "../../sim/collusion/demo";
+import { createInitialState } from "../../sim/state";
+import { stageDrama, type DramaMoment } from "../../sim/defection/demo";
 
 /** A busy campus a few game days in, with thoughts, a crowd and a run in flight (the real opening is quieter: see `openingWorld`). */
 export function fixtureWorld(days = 12, seed = 3): GameState {
@@ -72,6 +74,16 @@ export function fixtureDisaster(seed = 3): GameState {
 export function fixtureCircus(moment: CircusMoment, seed = 3): GameState {
   const s = fixtureWorld(12, seed);
   stageCircus(s, moment);
+  return s;
+}
+
+/** A lab staged at one of Defection's or the Poaching War's moments (the VC chat, a card, the exit, the new rival). */
+export function fixtureDrama(moment: DramaMoment, seed = 7): GameState {
+  const s = createInitialState(seed);
+  delete s.progression;
+  delete s.coach;
+  delete s.tutorial;
+  stageDrama(s, moment);
   return s;
 }
 

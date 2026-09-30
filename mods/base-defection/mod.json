@@ -1,0 +1,820 @@
+{
+  "apiVersion": 1,
+  "id": "base-defection",
+  "name": "Defection",
+  "version": "1.0.0",
+  "author": "Frontier Lab Tycoon",
+  "description": "Your best researchers start their own labs. VCs by the Kombucha Bar, a four-way card, a box, a manifesto and a new rival on the Arena. Direct-loaded FLT-15 section shape until M1b.",
+  "content": {
+    "arcs": {
+      "add": [
+        {
+          "id": "defection",
+          "initial": "watching",
+          "states": {
+            "watching": {
+              "on": {
+                "DAY": [
+                  {
+                    "target": "courted",
+                    "guard": {
+                      "type": "stat.gte",
+                      "params": {
+                        "stat": "courtReady",
+                        "value": 1
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "courted": {
+              "entry": [
+                {
+                  "type": "people.meet",
+                  "params": {
+                    "role": "Venture Capitalist",
+                    "at": "kombucha",
+                    "hours": 10,
+                    "lines": [
+                      "{vcLine}",
+                      "{defLine}"
+                    ]
+                  }
+                }
+              ],
+              "on": {
+                "DAY": [
+                  {
+                    "target": "watching",
+                    "guard": {
+                      "type": "stat.gte",
+                      "params": {
+                        "stat": "subjectGone",
+                        "value": 1
+                      }
+                    }
+                  },
+                  {
+                    "target": "watching",
+                    "guard": {
+                      "type": "stat.gte",
+                      "params": {
+                        "stat": "cooled",
+                        "value": 1
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "toast",
+                        "params": {
+                          "text": "{defName} seems happier. The VC has stopped calling.",
+                          "tone": "good"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "target": "deciding",
+                    "guard": {
+                      "type": "stat.gte",
+                      "params": {
+                        "stat": "cardReady",
+                        "value": 1
+                      }
+                    }
+                  },
+                  {
+                    "guard": {
+                      "type": "stat.gte",
+                      "params": {
+                        "stat": "meetDue",
+                        "value": 1
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "people.meet",
+                        "params": {
+                          "role": "Venture Capitalist",
+                          "at": "kombucha",
+                          "hours": 10,
+                          "lines": [
+                            "{vcLine}",
+                            "{defLine}"
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "deciding": {
+              "entry": [
+                {
+                  "type": "flag.set",
+                  "params": {
+                    "name": "offer:defection-card"
+                  }
+                },
+                {
+                  "type": "sound.cue",
+                  "params": {
+                    "cue": "card"
+                  }
+                }
+              ],
+              "on": {
+                "CHOSE": [
+                  {
+                    "target": "watching",
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "counter"
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "cash.delta",
+                        "params": {
+                          "amount": -1500000
+                        }
+                      },
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "{lab} matches an offer nobody at {lab} has seen; {defName} stays, for now",
+                          "tone": "neutral"
+                        }
+                      },
+                      {
+                        "type": "toast",
+                        "params": {
+                          "text": "{defName} stays. The clock resets, and it runs faster now.",
+                          "tone": "neutral"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "target": "watching",
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "equity"
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "revenue.mult",
+                        "params": {
+                          "mult": 0.96,
+                          "days": 180
+                        }
+                      },
+                      {
+                        "type": "people.cheer",
+                        "params": {
+                          "amount": 0.3
+                        }
+                      },
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "{lab} hands out equity; {defName}'s team updates their LinkedOut headlines to 'owner'",
+                          "tone": "good"
+                        }
+                      },
+                      {
+                        "type": "toast",
+                        "params": {
+                          "text": "Equity for {defName}. The team is buzzing; revenue is a little lighter for six months.",
+                          "tone": "good"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "target": "watching",
+                    "guard": {
+                      "type": "all",
+                      "params": {
+                        "guards": [
+                          {
+                            "type": "choice",
+                            "params": {
+                              "is": "title"
+                            }
+                          },
+                          {
+                            "type": "stat.gte",
+                            "params": {
+                              "stat": "titleWorks",
+                              "value": 1
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "{lab} names {defName} Head of Safety; {defName} orders a second monitor and a lanyard",
+                          "tone": "joke"
+                        }
+                      },
+                      {
+                        "type": "toast",
+                        "params": {
+                          "text": "{defName} is Head of Safety now. It worked.",
+                          "tone": "good"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "target": "storming",
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "title"
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "{defName} declines the Head of Safety title in a 4,000-word post titled 'On Titles'",
+                          "tone": "bad"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "target": "farewell",
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "goodbye"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "farewell": {
+              "entry": [
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "{defName} leaves {lab} on good terms; the farewell cake says 'Good luck (not too much)'",
+                    "tone": "good"
+                  }
+                },
+                {
+                  "type": "hype.delta",
+                  "params": {
+                    "amount": 4
+                  }
+                },
+                {
+                  "type": "camera.focus",
+                  "params": {
+                    "on": "gate",
+                    "zoom": 1.6,
+                    "hold": 3
+                  }
+                },
+                {
+                  "type": "people.quit",
+                  "params": {
+                    "quiet": true
+                  }
+                }
+              ],
+              "on": {
+                "DAY": [
+                  {
+                    "target": "watching",
+                    "guard": {
+                      "type": "stat.gte",
+                      "params": {
+                        "stat": "rested",
+                        "value": 1
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "storming": {
+              "entry": [
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "{defName} quits {lab} in a thread that starts 'I have concerns' and ends with a waitlist link",
+                    "tone": "bad"
+                  }
+                },
+                {
+                  "type": "trust.delta",
+                  "params": {
+                    "amount": -6
+                  }
+                },
+                {
+                  "type": "hype.delta",
+                  "params": {
+                    "amount": -3
+                  }
+                },
+                {
+                  "type": "camera.focus",
+                  "params": {
+                    "on": "gate",
+                    "zoom": 1.6,
+                    "hold": 3
+                  }
+                },
+                {
+                  "type": "shake",
+                  "params": {
+                    "strength": 0.25
+                  }
+                },
+                {
+                  "type": "people.quit",
+                  "params": {
+                    "quiet": true
+                  }
+                }
+              ],
+              "on": {
+                "DAY": [
+                  {
+                    "target": "watching",
+                    "guard": {
+                      "type": "stat.gte",
+                      "params": {
+                        "stat": "rested",
+                        "value": 1
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "events": {
+      "add": [
+        {
+          "id": "defection-card",
+          "kind": "drama",
+          "stripe": "Confidential · HR",
+          "tone": "bad",
+          "title": "{defName} is thinking about starting {defTheir} own lab.",
+          "body": "{defName} ({defRole}) has been seen with VCs by the Kombucha Bar. Stated reason: \"{defReason}\". {defFollowers}",
+          "when": {
+            "flag": "offer:defection-card",
+            "daysAgo": 0
+          },
+          "cooldown": 0,
+          "choices": [
+            {
+              "label": "Counter-offer",
+              "hint": "$1.5M now · resets the clock, but it runs faster next time",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "offer:defection-card",
+                  "clear": true
+                },
+                {
+                  "type": "flag",
+                  "name": "defection:pick:counter"
+                }
+              ]
+            },
+            {
+              "label": "Equity",
+              "hint": "Revenue -4% for six months · {defTheir} team cheers up",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "offer:defection-card",
+                  "clear": true
+                },
+                {
+                  "type": "flag",
+                  "name": "defection:pick:equity"
+                }
+              ]
+            },
+            {
+              "label": "Make them Head of Safety",
+              "hint": "Cheap · {defTitleOdds} · if it fails, the exit is loud",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "offer:defection-card",
+                  "clear": true
+                },
+                {
+                  "type": "flag",
+                  "name": "defection:pick:title"
+                }
+              ]
+            },
+            {
+              "label": "Let them go gracefully",
+              "hint": "Hype up · a friendly new lab · alumni goodwill",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "offer:defection-card",
+                  "clear": true
+                },
+                {
+                  "type": "flag",
+                  "name": "defection:pick:goodbye"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "defection-manifesto",
+          "kind": "drama",
+          "stripe": "Frontier Times · Launch",
+          "tone": "joke",
+          "title": "{neoName} is live.",
+          "body": "{neoFounder} and {neoFollowers} left {lab} to start {neoName}. The manifesto is one line long: \"{neoManifesto}\"",
+          "when": {
+            "flag": "offer:defection-manifesto",
+            "daysAgo": 0
+          },
+          "cooldown": 0,
+          "choices": [
+            {
+              "label": "Congratulate them publicly",
+              "hint": "Hype +2 · they poach a little less",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "offer:defection-manifesto",
+                  "clear": true
+                },
+                {
+                  "type": "flag",
+                  "name": "defection:pick:congratulate"
+                }
+              ]
+            },
+            {
+              "label": "Vaguepost about the manifesto",
+              "hint": "Hype +4 · trust -3 · they will remember",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "offer:defection-manifesto",
+                  "clear": true
+                },
+                {
+                  "type": "flag",
+                  "name": "defection:pick:vaguepost"
+                }
+              ]
+            },
+            {
+              "label": "Say nothing",
+              "hint": "Dignified. Nobody notices.",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "offer:defection-manifesto",
+                  "clear": true
+                },
+                {
+                  "type": "flag",
+                  "name": "defection:pick:silence"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "headlines": {
+      "add": [
+        {
+          "id": "defection-domain",
+          "trigger": "domain",
+          "tone": "joke",
+          "text": "Sources say a senior {lab} researcher has registered a domain."
+        },
+        {
+          "id": "defection-domain-2",
+          "trigger": "domain",
+          "tone": "joke",
+          "text": "A {lab} researcher's GitHub bio now reads 'building something new'. Something new has a Delaware address."
+        },
+        {
+          "id": "defection-vc",
+          "trigger": "courted",
+          "tone": "neutral",
+          "text": "A venture capitalist in a quarter-zip was seen at {lab}'s Kombucha Bar, not drinking the kombucha."
+        },
+        {
+          "id": "defection-vc-2",
+          "trigger": "courted",
+          "tone": "joke",
+          "text": "VC firm announces a 'founder-in-residence' program; residence is {lab}'s Kombucha Bar."
+        },
+        {
+          "id": "defection-founded",
+          "trigger": "founded",
+          "tone": "bad",
+          "text": "{neoName} launches with {neoFollowerCount} ex-{lab} researchers and a seed round the size of a small nation's GDP."
+        },
+        {
+          "id": "defection-founded-friendly",
+          "trigger": "foundedFriendly",
+          "tone": "neutral",
+          "text": "{neoName} launches; founder thanks {lab} 'for everything, especially the compute'."
+        },
+        {
+          "id": "defection-congratulate",
+          "trigger": "congratulate",
+          "tone": "good",
+          "text": "{lab} congratulates {neoName}. The replies are 40% hearts and 60% 'is this a vaguepost?'"
+        },
+        {
+          "id": "defection-vaguepost",
+          "trigger": "vaguepost",
+          "tone": "joke",
+          "text": "{lab} posts 'responsibly means slower, actually'. {neoName} quote-posts it with a chart."
+        },
+        {
+          "id": "defection-silence",
+          "trigger": "silence",
+          "tone": "neutral",
+          "text": "{lab} declines to comment on {neoName}. The declining is described as 'loud'."
+        }
+      ]
+    },
+    "thoughts": {
+      "add": [
+        {
+          "id": "defection-concerns-1",
+          "kind": "researcher",
+          "when": "concerns",
+          "text": "I have concerns."
+        },
+        {
+          "id": "defection-concerns-2",
+          "kind": "researcher",
+          "when": "concerns",
+          "text": "I have concerns. Detailed ones. In a doc."
+        },
+        {
+          "id": "defection-money-1",
+          "kind": "researcher",
+          "when": "money",
+          "text": "My equity vests in 2031. My landlord doesn't."
+        },
+        {
+          "id": "defection-credit-1",
+          "kind": "researcher",
+          "when": "credit",
+          "text": "My name was on the model card. Font size 4."
+        },
+        {
+          "id": "defection-vision-1",
+          "kind": "researcher",
+          "when": "vision",
+          "text": "What if AGI, but my way?"
+        },
+        {
+          "id": "defection-vc-1",
+          "kind": "visitor",
+          "when": "vc",
+          "text": "Have you ever thought about... your own thing?"
+        },
+        {
+          "id": "defection-vc-2",
+          "kind": "visitor",
+          "when": "vc",
+          "text": "Pre-product, pre-revenue, pre-seed. Two billion."
+        },
+        {
+          "id": "defection-vc-3",
+          "kind": "visitor",
+          "when": "vc",
+          "text": "We back people, not plans. Mostly people."
+        },
+        {
+          "id": "defection-follower-1",
+          "kind": "researcher",
+          "when": "follower",
+          "text": "If {defName} goes, I go."
+        }
+      ]
+    },
+    "reasons": {
+      "add": [
+        {
+          "id": "concerns",
+          "text": "I have concerns",
+          "titleOdds": 0.5
+        },
+        {
+          "id": "money",
+          "text": "The equity math doesn't math",
+          "titleOdds": 0.8
+        },
+        {
+          "id": "credit",
+          "text": "Nobody put my name on the model card",
+          "titleOdds": 0.9
+        },
+        {
+          "id": "vision",
+          "text": "I want to build it my way",
+          "titleOdds": 0.7
+        }
+      ]
+    },
+    "labNames": {
+      "add": [
+        {
+          "id": "friendly",
+          "values": [
+            "{last} Labs",
+            "{first}.ai",
+            "{last} Intelligence",
+            "{last} & Friends"
+          ]
+        },
+        {
+          "id": "hostile",
+          "values": [
+            "Safe {last} Inc.",
+            "{last} Alignment Collective",
+            "Actually Open {last}",
+            "{last} Superintelligence"
+          ]
+        }
+      ]
+    },
+    "manifestos": {
+      "add": [
+        {
+          "id": "friendly",
+          "values": [
+            "We left to build AI responsibly, which means faster.",
+            "We love {lab}. We just love ourselves slightly more.",
+            "Same mission, fewer meetings.",
+            "We are building AGI for everyone, starting with our cap table."
+          ]
+        },
+        {
+          "id": "hostile",
+          "values": [
+            "We left to build AI responsibly, which means faster.",
+            "We left {lab} because someone had to be the adults. We are hiring adults.",
+            "Safety is too important to leave to people who aren't us.",
+            "{lab} lost its way. We found it, and filed a trademark."
+          ]
+        }
+      ]
+    },
+    "neoLines": {
+      "release": [
+        "{rival} ships {model}; the launch post thanks 'our friends at {lab}' in a tone",
+        "{rival} releases {model}, trained on vibes and a very large seed round",
+        "{rival} unveils {model}; {founder} calls it 'what we wanted to build at {lab}'"
+      ],
+      "poach": [
+        "{rival} hires {name} from {lab}; the offer letter is a meme",
+        "{name} leaves {lab} to join former colleague {founder} at {rival}"
+      ],
+      "nemesis": [
+        "{rival} founder {founder}: '{lab} is the reason we exist.' It is not a compliment.",
+        "{rival} puts a {lab} logo on its office dartboard, officially"
+      ],
+      "goodwill": [
+        "{founder} of {rival} recommends {lab} to a room of investors 'as a place I learned a lot'",
+        "{rival} sends {lab} a fruit basket; the card says 'no hard feelings, some soft ones'"
+      ]
+    },
+    "letters": {
+      "add": [
+        {
+          "card": "defection-card",
+          "style": "letter",
+          "file": "resignation_DRAFT_v7.doc",
+          "from": "{defName}",
+          "to": "{lab} leadership",
+          "subject": "Resignation (DRAFT v7, do not send)",
+          "lines": [
+            "Dear {lab},",
+            "It has been the privilege of my career to scale your models, your GPU budget and, briefly, the kombucha tap.",
+            "After a lot of reflection, and one coffee by the Kombucha Bar with some very nice people in quarter-zips, I have decided it is time to explore what's next.",
+            "The reason, if anyone asks: {defReason}.",
+            "{defFollowers}"
+          ],
+          "sign": "With gratitude and a non-compete I have not read,\n{defName}"
+        },
+        {
+          "card": "defection-manifesto",
+          "style": "manifesto",
+          "file": "MANIFESTO.txt",
+          "from": "{neoFounder}",
+          "to": "The world",
+          "subject": "{neoName}",
+          "lines": [
+            "{neoName}",
+            "\"{neoManifesto}\"",
+            "Founded by {neoFounder}, with {neoFollowers}.",
+            "We have a seed round, a logo and a whiteboard. We are hiring. (We are hiring your team.)"
+          ],
+          "sign": "— the founders, from a borrowed garage"
+        }
+      ]
+    }
+  },
+  "rules": {
+    "defection": {
+      "eligibility": {
+        "minResearchers": 5,
+        "minTenureDays": 14,
+        "candidates": 3
+      },
+      "score": {
+        "base": -0.8,
+        "morale": 1.4,
+        "seniority": 0.5,
+        "passedOver": 0.4,
+        "rivalHype": 0.25,
+        "contentDecay": 1.5,
+        "contentHappiness": 0.72,
+        "bump": 0.6,
+        "courtBoost": 0.8
+      },
+      "eras": [
+        0,
+        0,
+        0.1,
+        0.5,
+        0.3
+      ],
+      "thresholds": {
+        "courtScore": 45,
+        "cardScore": 80,
+        "coolScore": 30
+      },
+      "signs": {
+        "meetEveryDays": 4,
+        "headlineDay": 2,
+        "thoughtEveryDays": 2,
+        "minWarnDays": 7,
+        "gapDays": 60
+      },
+      "exit": {
+        "minLoss": 5,
+        "maxLoss": 12,
+        "minFollowers": 1,
+        "maxFollowers": 4,
+        "restDays": 30,
+        "followerHappiness": 0.55
+      },
+      "spinout": {
+        "startShare": 0.35,
+        "startHype": 28,
+        "hostileBoost": 1.4
+      },
+      "personality": {
+        "friendly": {
+          "cadence": 6,
+          "growth": 12,
+          "openness": 0.4,
+          "poaching": 0.03,
+          "hypeHunger": 1.2
+        },
+        "hostile": {
+          "cadence": 5,
+          "growth": 15,
+          "openness": 0.25,
+          "poaching": 0.14,
+          "hypeHunger": 1.5
+        }
+      }
+    }
+  }
+}

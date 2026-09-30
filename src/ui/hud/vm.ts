@@ -8,6 +8,7 @@ import { OFFICE_TOOLS, RACE_TOOLS, SPEEDS, TOOLS } from "../../app/hud";
 import { PATH_PRICE } from "../../content/buildings";
 import { ERAS } from "../../content/eras";
 import { STAFF } from "../../content/staff";
+import { DRAMA_LETTERS } from "../../content/events";
 import { SCENARIO, type GoalDef } from "../../content/goals";
 import { FRIENDS } from "../../content/newsroom";
 import { LEAPFROG } from "../../content/leapfrog";
@@ -28,6 +29,7 @@ import { playableOf, type PlayableInput } from "./playable";
 import { papersOf, paperMomentOf } from "./papers";
 import { collusionOf, crumbWikiOf, investigationOf } from "./collusion";
 import type {
+  ArenaRowVM, DramaVM,
   ArenaVM, BenchCellVM, DisasterRunVM, DisastersVM, DisasterStageVM, MeterVM, RiskVM, UnderstaffedVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HearingMoveVM, HearingVM, HudVM, LeakVM, SenatorVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
   ModsVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, ResponseVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, StreamVM, ThoughtRowVM, TrainingVM, TrendVM, VoiceVM, WalkerKindVM,
 } from "./types";
@@ -305,7 +307,23 @@ function speedOf(value: number): SpeedVM {
 }
 
 function bubblesOf(i: HudInput): BubbleVM[] {
-  return i.snap.thoughts.map((t) => ({ id: t.id, walkerId: t.walkerId, kind: t.kind, speaker: i.snap.speakers[t.walkerId] ?? "", text: t.text }));
+  const chats = i.snap.chats ?? [];
+  // Two people talking say their lines out loud instead of thinking: the visitor first, then your researcher.
+  const talking = new Set(chats.flatMap((c) => (c.lines.length ? [c.hostId, c.guestId] : [])));
+  const thoughts = i.snap.thoughts.filter((t) => !talking.has(t.walkerId)).map((t): BubbleVM => ({ id: t.id, walkerId: t.walkerId, kind: t.kind, speaker: i.snap.speakers[t.walkerId] ?? "", text: t.text }));
+  const said = chats.flatMap((c) => c.lines.slice(0, 2).map((text, k): BubbleVM => {
+    const walkerId = k === 0 ? c.guestId : c.hostId;
+    return { id: -(c.id * 2 + k), walkerId, kind: k === 0 ? "visitor" : "researcher", speaker: c.names?.[k] || i.snap.speakers[walkerId] || "", text, speech: true };
+  }));
+  return [...thoughts, ...said];
+}
+
+/** A drama card's document, filled in from the pack's template. */
+function dramaOf(id: string, vars: Record<string, string>): DramaVM | null {
+  const l = DRAMA_LETTERS.get(id);
+  if (!l) return null;
+  const f = (s: string) => fillTemplate(s, vars);
+  return { style: l.style, file: f(l.file), from: f(l.from), to: f(l.to), subject: f(l.subject), lines: l.lines.map(f).filter((x) => x.trim().length > 0), sign: f(l.sign) };
 }
 
 function eventOf(i: HudInput): { event: EventVM | null; era: HudVM["eraCard"] } {
@@ -331,7 +349,7 @@ function eventOf(i: HudInput): { event: EventVM | null; era: HudVM["eraCard"] } 
       body: fillTemplate(def.body, vars),
       tone: def.tone,
       stripe: def.stripe ?? TONE_LABEL[def.tone],
-      kind: def.kind === "auction" || def.kind === "response" || def.kind === "stream" || def.kind === "hearing" || def.kind === "leak" ? def.kind : "plain",
+      kind: def.kind === "auction" || def.kind === "response" || def.kind === "stream" || def.kind === "hearing" || def.kind === "leak" || def.kind === "drama" ? def.kind : "plain",
       choices: def.choices.map((c, k) => ({ label: c.label, hint: fillTemplate(c.hint, vars), key: k + 1 })),
       paddles: def.kind === "auction" ? rivals.map((r, k) => ({ id: r.id, name: r.short, color: r.color, number: 200 + ((r.score * 7 + k * 31) % 800) })) : [],
       response: def.kind === "response" ? responseOf(i.snap, vars) : null,
@@ -339,6 +357,7 @@ function eventOf(i: HudInput): { event: EventVM | null; era: HudVM["eraCard"] } 
       investigation: investigationOf(i.snap, def.id),
       hearing,
       leak: def.kind === "leak" ? leakOf(i.snap) : null,
+      drama: def.kind === "drama" ? dramaOf(def.id, vars) : null,
     },
   };
 }
@@ -414,10 +433,19 @@ function arenaOf(i: HudInput): ArenaVM {
       deltaText: r.delta > 0 ? `↑${r.delta}` : r.delta < 0 ? `↓${-r.delta}` : "",
       color: r.color,
       moved: i.arena.moved[r.id] ?? null,
-      title: leaked.has(r.id) ? `Running on your leaked weights${r.model ? ` (${r.model})` : ""}` : r.model ? `Latest model: ${r.model}${r.open ? " (open weights)" : ""}` : r.you ? "You" : "No product. Big valuation.",
+      title: r.neo ? `${r.neo.founder}'s lab: "${r.neo.manifesto}"` : leaked.has(r.id) ? `Running on your leaked weights${r.model ? ` (${r.model})` : ""}` : r.model ? `Latest model: ${r.model}${r.open ? " (open weights)" : ""}` : r.you ? "You" : "No product. Big valuation.",
       leak: leaked.has(r.id),
+      ...neoTag(r.neo, i.snap.day),
     })),
   };
+}
+
+/** How long a neo lab is NEW on the Arena. */
+const NEW_DAYS = 14;
+function neoTag(neo: Snapshot["race"]["board"][number]["neo"], day: number): Pick<ArenaRowVM, "tag" | "tagText"> {
+  if (!neo) return { tag: null, tagText: "" };
+  const tag = neo.nemesis ? "nemesis" : day - neo.founded < NEW_DAYS ? "new" : "alumni";
+  return { tag, tagText: tag.toUpperCase() };
 }
 
 const pct = (n: number) => `${Math.round(n * 100)}%`;
