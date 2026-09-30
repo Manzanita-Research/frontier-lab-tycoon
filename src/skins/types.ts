@@ -67,7 +67,7 @@ export interface SlotPropsMap {
   /** `progress.goal` is the one goal in front of you ("Ship your first model · 0/1"); the scenario list is `objectives`, shown once `visible.arena`. */
   Objectives: { objectives: ObjectivesVM; progress?: ProgressVM; visible?: VisibleVM; layout: LayoutVM; actions: HudActions };
   Inspector: { inspector: InspectorVM; layout: LayoutVM; actions: HudActions };
-  /** The build panel: `items` are only what is unlocked, `teasers` the locked ones ("??? · ship your first model"). Report each opening with `actions.buildPanel(true)`. */
+  /** The build panel: `items` are only what is unlocked, `teasers` the locked ones, one row per milestone ("2 more · Ship your first model"). Report each opening with `actions.buildPanel(true)`. */
   BuildBar: { items: BuildItemVM[]; tip: BuildTipVM | null; teasers?: TeaserVM[]; layout: LayoutVM; actions: HudActions };
   Speed: { speed: SpeedVM; stats: StatsVM; actions: HudActions };
   /** The payroll panel (hire, fire, paint patrol zones). Only rendered while `staff.open`. */

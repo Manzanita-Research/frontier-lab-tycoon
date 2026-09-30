@@ -112,9 +112,10 @@ describe("Karaoke Night", () => {
     const shut = html(<slot.BuildBar items={vm.buildItems} tip={null} layout={vm.layout} actions={actions} />);
     expect(shut.match(/class="kn-btnr"/g)?.length).toBe(1);
     expect(shut).toContain('aria-expanded="false"');
-    const open = html(<Arcade items={vm.buildItems.slice(0, 2)} teasers={[{ label: "Compute Cage", hint: "Ship a model" }]} actions={actions} done={() => {}} />);
+    const open = html(<Arcade items={vm.buildItems.slice(0, 2)} teasers={[{ label: "2 more", hint: "Ship your first model" }]} actions={actions} done={() => {}} />);
     expect(open).toContain("kn-ab locked");
-    expect(open).toContain("SHIP A MODEL");
+    expect(open).toContain("2 more");
+    expect(open).toContain("SHIP YOUR FIRST MODEL");
     expect(open).toContain("kn-ab help");
   });
 

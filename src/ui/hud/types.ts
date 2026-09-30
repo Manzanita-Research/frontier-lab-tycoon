@@ -261,7 +261,7 @@ export interface ConfirmVM {
 export type HudPanelId = "revenue" | "vibes" | "arena" | "rnd" | "thoughts" | "news" | "staff" | "events" | "papers" | "disasters";
 export type VisibleVM = Record<HudPanelId, boolean>;
 
-/** A locked item the build panel teases: "??? · ship your first model". */
+/** What the build panel teases as locked: one row per milestone, how many it unlocks and the goal that earns them ("2 more · Ship your first model"). */
 export interface TeaserVM {
   label: string;
   hint: string;

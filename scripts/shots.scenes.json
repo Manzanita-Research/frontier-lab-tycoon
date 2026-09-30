@@ -166,6 +166,31 @@
         }
       ]
     },
+    "menu-fresh": {
+      "title": "The Start menu open at a fresh start (day 0, level 1, tutorial skipped): what is locked, and what unlocks it",
+      "query": {
+        "warp": null
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "coachSkip"
+            }
+          }
+        },
+        {
+          "wait": 500
+        },
+        {
+          "eval": "(f, w) => { const b = document.querySelector('[data-testid=\"start-button\"]'); if (b) b.click(); else f.send({ type: 'SET_TOOL', tool: 'cluster' }); }"
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
     "phone": {
       "title": "The same campus on a phone (390x844)",
       "viewport": "390x844",
