@@ -14,6 +14,7 @@ import type { Command } from "../sim/commands";
 import type { NewsItem, OpenEvent, Outcome, Tone } from "../sim/types";
 import { Frames } from "./frames";
 import type { Snapshot, Speed, Tool, UiSelection, UiToast } from "./hud";
+import { gateToasts, newGate, type NoticeGate } from "./notices";
 import { Sim, type SyncReport } from "./sim";
 
 export const TICKS_PER_SECOND = 10;
@@ -42,6 +43,8 @@ export const AppContext = Schema.Struct({
   news: opaque<readonly NewsItem[]>(),
   toasts: opaque<readonly UiToast[]>(),
   toastSeq: Schema.Number,
+  /** What Release Leapfrog's launches have held back from the toast stack (see `notices.ts`). */
+  gate: opaque<NoticeGate>(),
   /** The walker whose inspector card is open (their id), if any. */
   selected: Schema.NullOr(Schema.Number),
   /** The camera is following `selected`. */
@@ -156,6 +159,7 @@ export const appMachine = setupEffect({
     news: input.first.news ?? [],
     toasts: input.first.toasts.slice(-3),
     toastSeq: 1,
+    gate: newGate(),
     selected: null,
     follow: false,
     highlight: null,
@@ -203,9 +207,19 @@ export const appMachine = setupEffect({
   on: {
     SYNCED: ({ context, event }, enq) => {
       const { report, now } = event;
-      const fresh = report.toasts;
+      // Rival launches are for the leaderboard and the ticker: only what matters to the player becomes a toast.
+      const gated = gateToasts(context.gate, report.toasts, {
+        now,
+        speed: context.speed,
+        leapfrog: report.snap?.leapfrog,
+        rank: report.snap ? { prev: context.snap.race.rank, next: report.snap.race.rank, top: report.snap.race.board.find((r) => r.rank === 1)?.short ?? "" } : null,
+        seq: context.toastSeq,
+      });
+      const fresh = gated.toasts;
       const next: AppContext = {
         ...addToasts(context, fresh),
+        gate: gated.gate,
+        toastSeq: gated.seq,
         event: report.event,
         outcome: report.outcome,
         snap: report.snap ?? context.snap,
@@ -251,7 +265,7 @@ export const appMachine = setupEffect({
     NEW_LAB: (args, enq) => {
       const { context, actions } = args;
       enq(actions.newLab, args);
-      const next = { ...context, queue: [], acc: 0, toasts: [], outcomeDismissed: false, speed: 1 as Speed, tool: null, hover: null, selected: null, follow: false, highlight: null, zone: null };
+      const next = { ...context, queue: [], acc: 0, toasts: [], gate: newGate(), outcomeDismissed: false, speed: 1 as Speed, tool: null, hover: null, selected: null, follow: false, highlight: null, zone: null };
       return { context: next, target: ".playing.running" };
     },
     TOAST: ({ context, event }, enq) => {
