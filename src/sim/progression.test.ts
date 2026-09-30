@@ -32,6 +32,7 @@ describe("the playable ladder", () => {
     s.race.rank = 6; updateProgression(s); expect(progressOf(s).level).toBe(4);
     s.race.rank = 5; updateProgression(s); expect(progressOf(s).level).toBe(5);
     expect(canHire(s, "security").ok).toBe(true); expect(s.papers?.enabled).toBe(true);
+    expect(s.hearing?.enabled).toBe(true); expect(s.yacht?.enabled).toBe(true);
     s.cash = 350_000; expect(canPlace(s, "security", 12, 19).ok).toBe(true);
     expect(s.unlockCards?.map((c) => c.id)).toEqual(["business", "team", "race", "scrutiny"]);
     applyNow(s, [{ type: "dismissUnlock" }]); expect(makeSnapshot(s).unlockCard?.id).toBe("team");
@@ -45,6 +46,7 @@ describe("the playable ladder", () => {
     expect(s.walkers.some((w) => w.kind === "visitor" || w.kind === "protester")).toBe(false);
     expect(s.slop.some(Boolean)).toBe(false); expect(s.buildings[0]?.reliability).toBe(1);
     expect(Object.values(s.arcs).some((a) => a.value === "cardOpen")).toBe(false);
+    expect(s.hearing).toBeUndefined(); expect(s.yacht).toBeUndefined();
   });
   it("reads modded goal thresholds from identified data rows", () => {
     const s = createInitialState(1);

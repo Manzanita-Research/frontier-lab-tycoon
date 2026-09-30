@@ -1,6 +1,8 @@
 // The fixed-step loop: apply queued commands, move everyone, run the daily systems at midnight.
 import { applyCommands, type Command } from "./commands";
 import { applyCollusionChoices, dailyCollusion, updateCollusion } from "./collusion/driver";
+import { applyHearingChoices, dailyHearing } from "./hearing/driver";
+import { applyYachtChoices, dailyYacht } from "./yacht/driver";
 import { TICKS_PER_DAY } from "./constants";
 import { dailyBreakdowns } from "./breakdowns";
 import { dailyDisasters, updateDisasters } from "./disasters/driver";
@@ -36,6 +38,7 @@ export function tick(state: GameState, commands: readonly Command[] = []) {
   applyCommands(state, commands, rng);
   if (commands.length > 0) { updateTutorial(state); observeGuardrails(state); }
   if (systemUnlocked(state, "collusion")) applyCollusionChoices(state);
+  applyCircusChoices(state);
   if (pendingConfirmOf(state) || openEventOf(state) || state.goals.value === "lost") {
     state.rngState = rng.state();
     return;
@@ -61,6 +64,9 @@ export function tick(state: GameState, commands: readonly Command[] = []) {
     if (systemUnlocked(state, "arena")) dailyRace(state, rng);
     if (systemUnlocked(state, "leapfrog")) dailyLeapfrog(state, rng);
     if (systemUnlocked(state, "papers")) dailyPapers(state, rng);
+    // The Circus (FLT-24, then FLT-21): the yacht first, so a subpoena it files today reaches the Senate today.
+    if (systemUnlocked(state, "yacht")) dailyYacht(state);
+    if (systemUnlocked(state, "hearing")) dailyHearing(state);
     dailyThoughts(state, rng);
     dailyGoals(state, rng);
     if (systemUnlocked(state, "events")) dailyEvents(state);
@@ -79,6 +85,13 @@ export function applyNow(state: GameState, commands: readonly Command[]) {
   updateTutorial(state);
   observeGuardrails(state);
   if (systemUnlocked(state, "collusion")) applyCollusionChoices(state);
+  applyCircusChoices(state);
   updateCoach(state);
   state.rngState = rng.state();
+}
+
+/** The Circus packs hear their card picks at once, paused or not: the next question follows the last answer. */
+function applyCircusChoices(state: GameState) {
+  if (systemUnlocked(state, "yacht")) applyYachtChoices(state);
+  if (systemUnlocked(state, "hearing")) applyHearingChoices(state);
 }
