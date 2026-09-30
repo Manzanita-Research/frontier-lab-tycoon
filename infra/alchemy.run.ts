@@ -6,6 +6,7 @@ import * as Config from "effect/Config";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import { fileURLToPath } from "node:url";
+import { AUTH_HOSTS, AUTH_MIGRATIONS, AUTH_WORKER_MAIN, AUTH_WORKER_PATHS, authEnabled } from "./auth.ts";
 
 export default Alchemy.Stack(
   "FrontierLabTycoon",
@@ -19,13 +20,34 @@ export default Alchemy.Stack(
       return yield* Effect.die(new Error(`Unsupported deployment stage: ${stack.stage}`));
     }
 
+    // Accounts and cloud saves (FLT-67), prod only, and off until the repo variable FLT_AUTH=on (docs/ACCOUNTS.md).
+    // Off, nothing below is declared and the site is the same assets-only Worker as before: no D1, no R2, no script,
+    // no secrets read. On, a Worker in front of the assets answers /api/* and the build turns the sign-in button on.
+    const auth = authEnabled(stack.stage, yield* Config.String("FLT_AUTH").pipe(Config.withDefault("")));
+    const accounts = auth
+      ? {
+          main: fileURLToPath(AUTH_WORKER_MAIN),
+          env: {
+            DB: yield* Cloudflare.D1.Database("Accounts", { migrations: fileURLToPath(AUTH_MIGRATIONS) }),
+            SAVES: yield* Cloudflare.R2.Bucket("Saves"),
+            AUTH_HOSTS: AUTH_HOSTS.join(","),
+            BETTER_AUTH_SECRET: Config.Redacted("BETTER_AUTH_SECRET"),
+            HF_CLIENT_ID: Config.Redacted("HF_CLIENT_ID"),
+            HF_CLIENT_SECRET: Config.Redacted("HF_CLIENT_SECRET"),
+            // StaticSite hands `env` to the build too: this is what compiles the client's account code in.
+            VITE_FLT_AUTH: "on",
+          },
+        }
+      : {};
+
     const site = yield* Cloudflare.Website.StaticSite("Website", {
       name: `flt-${stack.stage}`,
       cwd: fileURLToPath(new URL("../", import.meta.url)),
       command: "node scripts/build-deployment.mjs",
       outdir: "dist",
       workersDev: true,
-      assets: { notFoundHandling: "single-page-application" },
+      assets: { notFoundHandling: "single-page-application", ...(auth ? { runWorkerFirst: AUTH_WORKER_PATHS } : {}) },
+      ...accounts,
     });
 
     const github = yield* GitHub.GitHubEnv;
