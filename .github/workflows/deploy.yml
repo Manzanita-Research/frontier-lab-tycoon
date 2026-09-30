@@ -41,7 +41,8 @@ jobs:
 
   deploy:
     outputs:
-      preview_url: ${{ steps.preview.outputs.url }}
+      # A PR's preview, or prod after a deploy from main: the stranger plays whichever this run deployed.
+      preview_url: ${{ steps.preview.outputs.url || steps.prod.outputs.url }}
     needs: check
     runs-on: ubuntu-latest
     permissions:
@@ -104,14 +105,21 @@ jobs:
             if (!url) throw new Error('No preview URL for the deployed revision');
             core.setOutput('url', url);
 
+      - name: The prod URL
+        if: github.event_name == 'push' && steps.current.outputs.deploy == 'true'
+        id: prod
+        run: echo "url=https://flt-prod.manzanita.workers.dev/" >> "$GITHUB_OUTPUT"
+
+  # On a PR: its preview. On main: prod, after the deploy has gone out (FLT-62). It never blocks a deploy, but a failure
+  # fails the run, so a broken landing shows red on main.
   stranger:
     needs: deploy
-    if: github.event_name == 'pull_request' && needs.deploy.outputs.preview_url != ''
+    if: needs.deploy.outputs.preview_url != ''
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
@@ -120,14 +128,14 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
-      - name: Play the deployed preview as a stranger
+      - name: Play the deployed build as a stranger
         run: pnpm e2e:stranger --url "$PREVIEW_URL"
         env:
           PREVIEW_URL: ${{ needs.deploy.outputs.preview_url }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: stranger-${{ github.event.number }}
+          name: stranger-${{ github.event.number || 'prod' }}
           path: e2e/results/
 
   cleanup:
