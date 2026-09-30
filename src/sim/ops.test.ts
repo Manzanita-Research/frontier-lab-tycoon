@@ -11,9 +11,9 @@ import { dailyDiscourse, protesterCount, syncProtesters } from "./protest";
 import { dailyEconomy } from "./economy";
 import { causeOf, thoughtBoard, thoughtOf } from "./mind";
 import { happinessOf } from "./needs";
-import { faceDoor, slotPoint } from "./queues";
+import { chainFor, faceDoor, SLOT_SPACING, slotPoint } from "./queues";
 import { createRng, type Rng } from "./rng";
-import { cleanlinessOf, dailySlop, mopTile, slopInterval, slopStats, SLOP_DRIFT, MESS_TICKS } from "./slop";
+import { cleanlinessOf, dailySlop, mopTile, slopInterval, slopStats, SLOP_DRIFT, MESS_DECAY, MESS_THOUGHT, MESS_UNHAPPINESS } from "./slop";
 import { commsRelief, guardsOn, payroll, staffOf } from "./staff";
 import { createInitialState } from "./state";
 import { answer } from "./testkit";
@@ -40,8 +40,9 @@ function empty(): GameState {
   const s = createInitialState(1);
   s.walkers = [];
   s.cash = 100_000_000;
-  // Nobody new turns up mid-test.
+  // Nobody new turns up mid-test: no visitors, and no agents to drift and make their own slop.
   s.vibes.value = 0;
+  s.agentBonus = -100;
   return s;
 }
 const buildingOf = (s: GameState, kind: BuildingKind) => s.buildings.find((b) => b.kind === kind)!;
@@ -94,16 +95,24 @@ describe("slop", () => {
     s.slop[idx(s, 11, 14)] = 2;
     step(s);
     expect(r.mess).toBeGreaterThan(0);
-    expect(causeOf(r)).toBe("researcher.slop");
     expect(happinessOf(r)).toBeLessThan(before);
+    // It builds while they stand in it, up to a ceiling, and takes at most MESS_UNHAPPINESS off their happiness.
+    run(s, 30);
+    expect(r.mess).toBe(1);
+    // (Their needs have drained a little in the meantime: compare with the same walker, clean.)
+    expect(happinessOf({ ...r, mess: 0 }) - happinessOf(r)).toBeCloseTo(MESS_UNHAPPINESS, 5);
+    expect(causeOf(r)).toBe("researcher.slop");
     expect(thoughtOf(s, r)).toBe("This path is covered in slop.");
     expect(thoughtBoard(s).some((row) => row.text === "This path is covered in slop.")).toBe(true);
-    // It wears off once they are clear of the puddle.
+    // It wears off once they are clear of the puddle, slowly enough that the daily mood check never sees a flicker.
     r.route = [];
     s.slop[idx(s, 11, 14)] = 0;
-    run(s, MESS_TICKS + 2);
+    run(s, 20);
+    expect(r.mess).toBeCloseTo(1 - 20 * MESS_DECAY, 5);
+    expect(r.mess).toBeGreaterThan(MESS_THOUGHT);
+    run(s, Math.ceil(1 / MESS_DECAY));
     expect(r.mess).toBe(0);
-    expect(happinessOf(r)).toBeCloseTo(before, 1);
+    expect(happinessOf(r)).toBe(happinessOf({ ...r, mess: 0 }));
   });
 
   it("feeds the Vibes as cleanliness: spotless is 1, half the paths slopped is 0", () => {
@@ -467,10 +476,10 @@ describe("queues", () => {
       spots.add(`${w.x.toFixed(2)},${w.z.toFixed(2)}`);
     }
     expect(spots.size).toBe(5);
-    // The line runs away from the door and down the spine toward the gate: half a tile between people, the front by the Bar.
+    // The line runs away from the door and down the spine toward the gate: a stride between people, the front by the Bar.
     const byRank = [...waiting].sort((a, b) => a.qslot - b.qslot);
-    for (let i = 1; i < byRank.length; i++) expect(byRank[i]!.z - byRank[i - 1]!.z).toBeCloseTo(0.5, 1);
-    expect(byRank[0]!.z).toBeLessThan(19.6);
+    for (let i = 2; i < byRank.length; i++) expect(byRank[i]!.z - byRank[i - 1]!.z).toBeCloseTo(SLOT_SPACING, 1);
+    expect(byRank[0]!.z).toBeLessThan(19.8);
     expect(byRank[0]!.z).toBeGreaterThan(19);
   });
 
@@ -504,24 +513,19 @@ describe("queues", () => {
     expect(quitter.qslot).toBe(-1);
   });
 
-  it("places the nth person along the path, two to a tile, all facing the door", () => {
+  it("places the nth person along the path a stride apart, the front one at the door, all facing it", () => {
     const { s, bar } = crowdAtTheBar();
-    run(s, 40);
-    const chain = (s as unknown as { _: never })._;
-    void chain;
-    void bar;
-    // Pure geometry, on a straight bit of the spine: 0 and 1 share the first tile, 2 and 3 the next.
-    const west = { tiles: [idx(s, 11, 19), idx(s, 11, 20), idx(s, 11, 21)], dirs: [[0, 1], [0, 1], [0, 1]] as [number, number][] };
-    const p = [0, 1, 2, 3].map((n) => slotPoint(s, west, n));
-    expect(Math.floor(p[0]![1])).toBe(19);
-    expect(Math.floor(p[1]![1])).toBe(19);
-    expect(Math.floor(p[2]![1])).toBe(20);
-    expect(p[1]![1]).toBeGreaterThan(p[0]![1]);
-    expect(p[2]![1]).toBeGreaterThan(p[1]![1]);
-    // The front of the line faces the door (here: back up the spine, (0, -1)); the rest face the person ahead of them.
-    expect(Math.sin(faceDoor(s, west, 0))).toBeCloseTo(0);
-    expect(Math.cos(faceDoor(s, west, 0))).toBeCloseTo(-1);
-    expect(Math.cos(faceDoor(s, west, 3))).toBeCloseTo(-1);
+    // The line forms on the spine tile in front of the Bar (11, 19) and runs south, toward the gate.
+    const chain = chainFor(s, bar.id, idx(s, 11, 19))!;
+    expect(chain.tiles.slice(0, 3)).toEqual([idx(s, 11, 19), idx(s, 11, 20), idx(s, 11, 21)]);
+    const p = [0, 1, 2, 3, 4, 5].map((n) => slotPoint(s, chain, n));
+    for (let n = 2; n < 5; n++) expect(Math.hypot(p[n]![0] - p[n - 1]![0], p[n]![1] - p[n - 1]![1])).toBeCloseTo(SLOT_SPACING, 1); // (the first stride turns the corner)
+    // The front is by the Bar (its door is on the east edge of the tile), and the line runs away from it.
+    expect(p[0]![0]).toBeGreaterThan(11);
+    expect(p[3]![1]).toBeGreaterThan(p[1]![1]);
+    // The front of the line faces the door (east, +x); the rest face the person ahead of them (back up the spine, -z).
+    expect(Math.sin(faceDoor(s, chain, 0))).toBeGreaterThan(0.9);
+    expect(Math.cos(faceDoor(s, chain, 4))).toBeLessThan(-0.9);
   });
 });
 

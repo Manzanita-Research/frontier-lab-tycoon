@@ -146,9 +146,9 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // leaps per release, Training Halls that convert 30 compute a day, and a compute auction on day 40 that this
 // script answers like any other card. The port itself was verified against the original numbers in FLT-3.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "59465b3c", 800: "6eba620c", 1600: "b59b66cf", 2400: "f6356fff", 3200: "a57f9a18", 4000: "398aff3a" },
-  2: { 200: "c1dcb803", 800: "ee114821", 1600: "31c73382", 2400: "e791ebcf", 3200: "14f239c2", 4000: "8f28ca0e" },
-  3: { 200: "72c61121", 800: "b7f5666c", 1600: "33fb915d", 2400: "2464584e", 3200: "7c8e2c8e", 4000: "e41a0802" },
+  1: { 200: "59465b3c", 800: "1a89bf0c", 1600: "4a013429", 2400: "35cb7214", 3200: "10103d71", 4000: "41405c46" },
+  2: { 200: "c1dcb803", 800: "9295e431", 1600: "3d5c8221", 2400: "36a58fde", 3200: "a0b5244c", 4000: "7ee4edf6" },
+  3: { 200: "72c61121", 800: "f81dee8f", 1600: "4a9b231c", 2400: "ad7cc54e", 3200: "767d1481", 4000: "3757a512" },
 };
 
 describe("golden runs", () => {

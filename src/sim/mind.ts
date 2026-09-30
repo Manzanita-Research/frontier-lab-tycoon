@@ -7,6 +7,7 @@ import { RIVAL_SHORT } from "../content/names";
 import { hourAt, isNight } from "./daylight";
 import { fillTemplate } from "./format";
 import { happinessOf, urgencyOf } from "./needs";
+import { MESS_THOUGHT } from "./slop";
 import type { GameState, Walker, WalkerKind } from "./types";
 
 const ROTATE_DAYS = 2;
@@ -22,7 +23,7 @@ export function causeOf(w: Walker, night = false): Cause {
     case "researcher": {
       if (phase === "quitting") return "researcher.boxing";
       if (phase === "queuing") return "researcher.queue";
-      if (w.mess > 0) return "researcher.slop";
+      if (w.mess >= MESS_THOUGHT) return "researcher.slop";
       if (w.lost === "energy" || w.lost === "focus" || w.lost === "fomo") return `researcher.lost.${w.lost}`;
       const tired = urgencyOf(w, "energy");
       const scattered = urgencyOf(w, "focus");
@@ -34,7 +35,7 @@ export function causeOf(w: Walker, night = false): Cause {
     }
     case "visitor":
       if (phase === "queuing") return "visitor.queue";
-      if (w.mess > 0) return "visitor.slop";
+      if (w.mess >= MESS_THOUGHT) return "visitor.slop";
       if (w.lost === "impressed") return "visitor.lost.impressed";
       if (w.patience < 0.3) return "visitor.bored";
       if (w.impressed > 0.7) return "visitor.impressed";

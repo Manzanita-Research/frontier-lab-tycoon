@@ -104,12 +104,14 @@ export interface Walker {
   /** Protesters: the spot they picket from. */
   homeX: number;
   homeZ: number;
-  /** Ticks left of "I just stepped in slop": the thought, and the grumpiness, last a moment after they leave the puddle. */
+  /** How much slop they have been through lately, 0 to 1 (sim/slop.ts): it builds underfoot, wears off slowly, and takes a little off their happiness. */
   mess: number;
   /** In a line (FLT-10): the tick they joined, the entrance tile the line forms on, and the place they stand in it (-1: not yet). */
   queued: number;
   qtile: number;
   qslot: number;
+  /** Where the line says they should be standing (recomputed each tick from the join order; `qslot` follows it). Transient. */
+  qrank: number;
 }
 
 export type StaffJob = "janitor" | "sre" | "comms" | "security";

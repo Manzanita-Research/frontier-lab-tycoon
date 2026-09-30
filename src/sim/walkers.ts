@@ -8,7 +8,8 @@ import { formatMoney } from "./format";
 import { addToast, pushNews } from "./news";
 import { applyServes, gainOf, MIN_GAIN, mostUrgent, tickNeeds, urgencyOf } from "./needs";
 import { addIncident, APPLICANT_VIBES, visitorCapFor, visitorChanceFor } from "./vibes";
-import { chainFor, faceDoor, slotPoint, slotRoute } from "./queues";
+import { chainFor, faceDoor, slotPoint, slotRoute, type Chain } from "./queues";
+import { dropSlop, messTick } from "./slop";
 import { CONTENT } from "./machines/mood";
 import {
   doorPoint,
@@ -92,6 +93,7 @@ export function newWalker(state: GameState, kind: WalkerKind, x: number, z: numb
     queued: 0,
     qtile: -1,
     qslot: -1,
+    qrank: 0,
   };
 }
 
@@ -317,37 +319,54 @@ function passFountains(w: Walker, fountains: Building[]) {
 /** How many researchers and visitors are inside each building right now (agents walk through walls and don't count). */
 type Occupancy = Map<number, number>;
 const occupancy: Occupancy = new Map();
-/** The walkers waiting outside each full building, in the order they joined the line. */
-const lines = new Map<number, Walker[]>();
-/** Per building: each line that has formed (keyed by entrance tile) and how long it is, for anyone walking up to the tail. */
-const tails = new Map<number, { tile: number; n: number }[]>();
-/** Where each queuing walker stands in their own line (0 is the front). */
-const ranks = new Map<number, number>();
+
+/** The people waiting outside one full building, in the order they joined (kept between ticks so a busy line does not allocate). */
+interface Waiting {
+  building: Building | undefined;
+  list: Walker[];
+  /** Each line that has formed (keyed by entrance tile) and how long it is; where its tail stands is worked out when someone walks up. */
+  ends: { tile: number; n: number; max: number; chain: Chain | null; x: number; z: number; known: boolean }[];
+}
+const queues = new Map<number, Waiting>();
+/** How many of `queues` have anybody in them this tick. */
+let waiting = 0;
 
 function fillOccupancy(state: GameState) {
   occupancy.clear();
-  lines.clear();
-  tails.clear();
-  ranks.clear();
+  waiting = 0;
+  for (const q of queues.values()) {
+    q.list.length = 0;
+    q.ends.length = 0;
+  }
   for (const w of state.walkers) {
     if (w.kind === "agent") continue;
     const phase = w.machine.value;
     if (phase === "inside") occupancy.set(w.targetId, (occupancy.get(w.targetId) ?? 0) + 1);
     else if (phase === "queuing") {
-      const list = lines.get(w.targetId);
-      if (list) list.push(w);
-      else lines.set(w.targetId, [w]);
+      let q = queues.get(w.targetId);
+      if (!q) queues.set(w.targetId, (q = { building: undefined, list: [], ends: [] }));
+      if (q.list.length === 0) {
+        waiting++;
+        q.building = byId(state, w.targetId);
+      }
+      q.list.push(w);
     }
   }
-  for (const [id, list] of lines) {
-    if (list.length > 1) list.sort((a, b) => a.queued - b.queued || a.id - b.id);
-    const ends: { tile: number; n: number }[] = [];
+  if (waiting === 0) return;
+  for (const q of queues.values()) {
+    const list = q.list;
+    if (list.length === 0) continue;
+    if (list.length > 1) list.sort((x, y) => x.queued - y.queued || x.id - y.id);
+    const ends = q.ends;
     for (const w of list) {
       let end = ends.find((e) => e.tile === w.qtile);
-      if (!end) ends.push((end = { tile: w.qtile, n: 0 }));
-      ranks.set(w.id, end.n++);
+      if (!end) {
+        const chain = chainFor(state, q.building?.id ?? -1, w.qtile);
+        ends.push((end = { tile: w.qtile, n: 0, max: (chain?.slots.length ?? 1) - 1, chain, x: 0, z: 0, known: false }));
+      }
+      // Past the end of the path everybody shares the last place, so only the front of a long line ever shuffles.
+      w.qrank = Math.min(end.n++, end.max);
     }
-    tails.set(id, ends);
   }
 }
 
@@ -397,19 +416,26 @@ function arrive(state: GameState, w: Walker, rng: Rng) {
 
 /** Someone walking up to a building with a line stops at the tail of it instead of pushing in at the door. */
 function meetTail(state: GameState, w: Walker, rng: Rng): boolean {
-  const ends = tails.get(w.targetId);
-  if (!ends) return false;
-  for (const end of ends) {
-    const chain = chainFor(state, w.targetId, end.tile);
+  const q = queues.get(w.targetId);
+  if (!q || q.list.length === 0) return false;
+  for (const end of q.ends) {
+    const chain = end.chain;
     if (!chain) continue;
-    const [tx, tz] = slotPoint(state, chain, end.n);
-    if (Math.hypot(w.x - tx, w.z - tz) > TAIL_REACH) continue;
+    if (!end.known) {
+      [end.x, end.z] = slotPoint(state, chain, Math.min(end.n, end.max));
+      end.known = true;
+    }
+    const dx = w.x - end.x;
+    const dz = w.z - end.z;
+    if (dx * dx + dz * dz > TAIL_REACH * TAIL_REACH) continue;
     joinLine(state, w, rng, end.tile);
-    // They are already there: the place they stand in is the one they stopped at.
-    w.qslot = end.n;
-    end.n++;
-    ranks.set(w.id, w.qslot);
+    // They are already there: the place they stand in is the one they stopped at, facing the door like the rest.
+    w.qslot = w.qrank = Math.min(end.n, end.max);
     w.route = [];
+    end.n++;
+    w.dir = faceDoor(state, chain, w.qslot);
+    [end.x, end.z] = slotPoint(state, chain, Math.min(end.n, end.max));
+    q.list.push(w);
     return true;
   }
   return false;
@@ -417,23 +443,31 @@ function meetTail(state: GameState, w: Walker, rng: Rng): boolean {
 
 /** In line: the front of it gets in when there is room, everyone else shuffles up; patience runs out and they wander off. */
 function tickQueue(state: GameState, w: Walker, rng: Rng) {
-  const b = byId(state, w.targetId);
-  if (!b || b.broken) return pickNext(state, w, rng);
-  const line = lines.get(b.id);
-  if (line && line[0] === w && hasRoom(b)) {
-    line.shift();
+  const q = queues.get(w.targetId);
+  const b = q?.building;
+  if (!q || !b || b.broken) return pickNext(state, w, rng);
+  if (q.list[0] === w && hasRoom(b)) {
+    q.list.shift();
     return enter(state, w, rng, b, "ADMITTED");
   }
   // Take a place in the line, and move up when it does.
-  const chain = chainFor(state, b.id, w.qtile);
-  const rank = ranks.get(w.id) ?? 0;
-  if (chain && w.qslot !== rank) {
-    const [sx, sz] = slotPoint(state, chain, rank);
-    w.route = w.qslot >= 0 ? slotRoute(state, chain, w.qslot, rank) : Math.hypot(w.x - sx, w.z - sz) < 0.7 ? [[sx, sz]] : slotRoute(state, chain, -1, rank);
+  const rank = w.qrank;
+  if (w.qslot !== rank) {
+    const chain = chainFor(state, b.id, w.qtile);
+    if (chain) {
+      const [sx, sz] = slotPoint(state, chain, rank);
+      w.route = w.qslot >= 0 ? slotRoute(state, chain, w.qslot, rank) : Math.hypot(w.x - sx, w.z - sz) < 0.7 ? [[sx, sz]] : slotRoute(state, chain, -1, rank);
+    }
     w.qslot = rank;
   }
-  if (w.route.length > 0) advance(w);
-  else if (chain) w.dir = faceDoor(state, chain, rank);
+  if (w.route.length > 0) {
+    advance(w);
+    // Arrived at their place: turn to face the door (or whoever is in front).
+    if (w.route.length === 0) {
+      const chain = chainFor(state, b.id, w.qtile);
+      if (chain) w.dir = faceDoor(state, chain, rank);
+    }
+  }
   if (--w.timer > 0) return;
   if (w.kind === "visitor") w.patience = Math.max(0, w.patience - GAVE_UP_PATIENCE);
   w.qslot = -1;
@@ -547,6 +581,10 @@ export function updateWalkers(state: GameState, rng: Rng) {
     w.px = w.x;
     w.pz = w.z;
     tickNeeds(w, state.capability);
+    // Slop (sim/slop.ts): drifted agents drop it, everyone else gets a little grumpier for standing in it.
+    if (w.kind === "agent") {
+      if ((state.tick + w.id) % 7 === 0) dropSlop(state, w);
+    } else messTick(state, w);
     if (w.kind === "researcher" && fountains.length > 0 && w.machine.value !== "inside") passFountains(w, fountains);
     const phase = w.machine.value;
     if (phase === "inside") {
@@ -558,7 +596,7 @@ export function updateWalkers(state: GameState, rng: Rng) {
       continue;
     }
     // A line has formed at the place they are heading for: they stop at the back of it.
-    if (tails.size > 0 && w.targetId > 0 && w.kind !== "agent" && (phase === "seeking" || phase === "arriving") && meetTail(state, w, rng)) continue;
+    if (waiting > 0 && w.targetId > 0 && w.kind !== "agent" && (phase === "seeking" || phase === "arriving") && meetTail(state, w, rng)) continue;
     if (w.route.length === 0) {
       if (exiting(phase)) (gone ??= new Set()).add(w.id);
       else if (w.targetId === TARGET_WANDER) {

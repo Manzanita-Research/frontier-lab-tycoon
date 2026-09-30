@@ -43,8 +43,10 @@ const evalw = (fn) => page.evaluate(fn);
 
 switch (mode) {
   case "moment":
-    await go("&moment=ops&zoom=66&focus=11.5,14");
-    await wait(3500);
+    await go("&moment=ops&zoom=88&focus=10.6,14.2");
+    await wait(2500);
+    await page.click(".obj-head");
+    await wait(1000);
     await save(out);
     break;
   case "moment-wide":

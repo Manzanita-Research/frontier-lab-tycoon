@@ -8,7 +8,7 @@ import { dailyEvents, openEventOf } from "./events";
 import { dailyGoals } from "./goals";
 import { dailyNews } from "./news";
 import { dailyRace } from "./race/race";
-import { dailySlop, updateSlop } from "./slop";
+import { dailySlop } from "./slop";
 import { updateStaff } from "./staff";
 import { dailyDiscourse, updateProtesters } from "./protest";
 import { createRng } from "./rng";
@@ -33,7 +33,6 @@ export function tick(state: GameState, commands: readonly Command[] = []) {
   state.tick++;
   updateWalkers(state, rng);
   updateProtesters(state, rng);
-  updateSlop(state);
   updateStaff(state, rng);
   if (state.tick % TICKS_PER_DAY === 0) {
     state.day++;
