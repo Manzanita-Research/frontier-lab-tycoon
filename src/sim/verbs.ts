@@ -220,6 +220,8 @@ export interface VerbEnv {
   state: GameState;
   rng: Rng;
   run: DisasterRun | null;
+  /** A non-disaster machine can own effects and staff diversions too. */
+  owner?: string;
 }
 
 interface VerbDef {
@@ -233,7 +235,7 @@ const TONES = ["good", "bad", "neutral", "joke"] as const;
 const toneOf = (v: Json | undefined): Tone => ((TONES as readonly Json[]).includes(v as Json) ? (v as Tone) : "neutral");
 const num = (v: Json | undefined, fallback: number): number => (typeof v === "number" ? v : fallback);
 const clamp100 = (n: number) => Math.max(0, Math.min(100, n));
-const ownerOf = (env: VerbEnv) => env.run?.id ?? "";
+const ownerOf = (env: VerbEnv) => env.run?.id ?? env.owner ?? "";
 
 /** A building named in a statechart: `$target`, `$adjacent`, `$office`, or a kind. Broken ones are last choice. */
 export function buildingRef(env: VerbEnv, ref: string): Building | null {
@@ -326,6 +328,20 @@ function wreck(env: VerbEnv, b: Building) {
 const BUILDING = (spec: Spec): Spec => ({ building: "string", ...spec });
 
 export const VERBS: Record<string, VerbDef> = {
+  "investigate.start": {
+    doc: "Start an inquiry for `days`; divert free staff of `job` to `to`. The owning machine reads arrived staff and decides the result, then calls staff.release.",
+    spec: { id: "string", days: "number", job: "string", to: "string" },
+    verify: (p) => !(p.days as number > 0) ? "`days` must be positive" : ["security", "sre", "comms", "janitor"].includes(p.job as string) ? null : "unknown staff job",
+    run: (env, p) => {
+      const owner = ownerOf(env) || (p.id as string);
+      const job = p.job as StaffJob;
+      const to = buildingRef(env, p.to as string)?.id ?? 0;
+      const inquiries = env.state.investigations ??= {};
+      if (inquiries[owner]) return;
+      inquiries[owner] = { startedDay: env.state.day, days: p.days as number, to, job };
+      for (const s of staffOf(env.state, job)) if (!s.divert && s.machine.value !== "leaving") divertStaff(s, owner, to, 1.8);
+    },
+  },
   "staff.divert": {
     doc: "Pull `fraction` of a job off their posts and jog them to `to` (a building kind, `$target`, `$office` or `gate`) with a red \"!\". Their posts go unstaffed until `staff.release`, and new hires of the job are drawn in too.",
     spec: { job: "string", to: "string", fraction: "number?", jog: "number?" },
