@@ -612,7 +612,6 @@ export function hudViewModel(i: HudInput): HudVM {
   const items = earnedItems(build.items, play);
   const { event, era } = eventOf(i);
   return {
-    unlockCard: i.snap.unlockCard, hud: i.snap.hud,
     apiVersion: SKIN_API_VERSION,
     stats: statsOf(i),
     training: trainingOf(i.snap),
@@ -629,7 +628,6 @@ export function hudViewModel(i: HudInput): HudVM {
     hints: standingHints(i, play),
     warnings: [...i.snap.warnings],
     progress: {
-      unlocked: { buildings: [...play.buildings], staff: [...play.staff], systems: [...play.systems] },
       level: play.level,
       levelName: play.levelName,
       goal: {

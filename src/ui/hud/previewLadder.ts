@@ -1,8 +1,6 @@
 // A stand-in for the ladder the logic (FLT-49) sends: the five rungs of the plan (FLT-47) as snapshot additions. For fixtures, the
 // skin tests, and screenshot links (`?debug=1&ladder=1&coach=0`) that show a rung without playing up to it. Not game logic: the real
 // unlocks, goals and coach lines live in the sim's content.
-import type { Snapshot } from "../../app/hud";
-
 /** The ladder as the plan draws it (FLT-47), for fixtures and screenshots: what is unlocked, the goal, the teasers, what is shown. */
 const LADDER = [
   { name: "Garage", buildings: ["path", "cluster", "hall"], staff: [], goal: ["Ship your first model", 0, 1], show: [] },
@@ -31,7 +29,7 @@ export const COACH_LINES = [
 ] as const;
 
 /** The Playable v1 additions to a snapshot, as the logic (FLT-49) sends them. */
-export function playableFixture(level: 1 | 2 | 3 | 4 | 5, coach: number | null = null, unlock = false): Pick<Snapshot, "progress" | "coach" | "unlockCard" | "hud"> {
+export function playableFixture(level: 1 | 2 | 3 | 4 | 5, coach: number | null = null, unlock = false) {
   const l = LADDER[level - 1]!;
   const panels = ["revenue", "vibes", "arena", "rnd", "thoughts", "news", "staff", "events", "papers", "disasters"] as const;
   const c = coach === null ? null : COACH_LINES[coach]!;
@@ -39,7 +37,7 @@ export function playableFixture(level: 1 | 2 | 3 | 4 | 5, coach: number | null =
     progress: {
       level,
       levelName: l.name,
-      unlocked: { buildings: [...l.buildings].filter((k) => k !== "path"), staff: [...l.staff], systems: [] },
+      unlocked: { buildings: [...l.buildings], staff: [...l.staff], systems: [] as string[] },
       goal: { text: l.goal[0], current: l.goal[1], target: l.goal[2] },
       teasers: TEASERS[level - 1]!.map((t) => ({ ...t })),
     },

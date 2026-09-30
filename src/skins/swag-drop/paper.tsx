@@ -17,10 +17,10 @@ export function Bubble({ bubble }: SlotPropsMap["Bubble"]) {
 const TONE_GLYPH: Record<ToneVM | "hint" | "warn", keyof typeof GLYPHS> = {
   good: "star",
   bad: "warn",
-  warn: "warn",
   joke: "laugh",
   neutral: "info",
   hint: "tip",
+  warn: "warn",
 };
 
 /** A toast as a sticker: a die-cut white edge round a coloured pill. A tap peels it off (a hint stays until it comes true). */
@@ -31,9 +31,10 @@ export function Toast({ toast, actions }: SlotPropsMap["Toast"]) {
       <span className="tx">{toast.text}</span>
     </span>
   );
-  if (toast.tone === "hint") {
+  // A hint is a standing tip and a warning a standing problem: neither peels off, they go when it comes true / is fixed.
+  if (toast.tone === "hint" || toast.tone === "warn") {
     return (
-      <div className="sd-sticker hint" role="status">
+      <div className={`sd-sticker ${toast.tone === "warn" ? "bad" : "hint"}`} role="status">
         {inner}
       </div>
     );

@@ -1,6 +1,5 @@
-import { useCoach, ALL_VISIBLE } from "../kit";
 import { useEffect, useRef, useState } from "react";
-import { Odometer, money, useT } from "../kit";
+import { ALL_VISIBLE, Odometer, money, useCoach, useT } from "../kit";
 import type { SlotPropsMap } from "../types";
 import type { StatsVM } from "../../ui/hud/types";
 import { Caret, InfinityIcon } from "./icons";
@@ -100,9 +99,9 @@ function VibesRing({ vibes }: { vibes: StatsVM["vibes"] }) {
  * The header strip: the Vibes ring, the lab's name in italic with the date in words, then the numbers in a soft serif
  * with a line of commentary under each. On a phone it is one row (ring, cash, runway) and a fold arrow opens the rest.
  */
-export function Stats({ stats, layout, actions, visible = ALL_VISIBLE }: SlotPropsMap["Stats"]) {
-  const coachApi = useCoach();
+export function Stats({ stats, layout, visible = ALL_VISIBLE, actions }: SlotPropsMap["Stats"]) {
   const t = useT();
+  const coach = useCoach();
   const compact = layout.compact;
   const [expanded, setExpanded] = useState(false);
   const hype = useTrend(stats.hype.value);
@@ -120,35 +119,43 @@ export function Stats({ stats, layout, actions, visible = ALL_VISIBLE }: SlotPro
         <Odometer className={`fa-v ${stats.cash.negative ? "bad" : ""}`} value={stats.cash.value} format={money} />
         {visible.revenue && <Odometer className={`fa-d ${stats.net.good ? "good" : "bad"}`} value={stats.net.value} format={perDay} flash={false} />}
       </div>
-      <div className="fa-stat fa-runway" {...coachApi.attrs("stat:runway")}>
+      <div className="fa-stat fa-runway" {...coach.attrs("stat:runway")}>
         <span className="fa-sc">{t("stats.runway")}</span>
         <span className={`fa-v ${stats.runway.warning ? "bad" : ""}`}>{stats.runway.months === null ? <InfinityIcon /> : stats.runway.text}</span>
         <span className={`fa-d ${stats.runway.warning ? "bad" : "dim"}`}>{runwayCaption(stats.runway)}</span>
       </div>
-      {visible.rnd && (<div className="fa-stat fa-capability">
-        <span className="fa-sc">{t("stats.capability")}</span>
-        <Odometer className="fa-v" value={stats.capability.value} flash={false} />
-        <span className="fa-d plum" title={stats.capability.latestModel ?? undefined}>
-          {stats.capability.latestModel ?? "no release yet"}
-        </span>
-      </div>)}
-      {visible.revenue && (<div className="fa-stat fa-hype">
-        <span className="fa-sc">{t("stats.hype")}</span>
-        <Odometer className="fa-v" value={stats.hype.value} flash={false} />
-        <span className={`fa-d ${hype === "up" ? "good" : hype === "down" ? "bad" : "dim"}`}>{TREND_WORD[hype]}</span>
-      </div>)}
-      <i className="fa-div fa-div2" aria-hidden />
-      {visible.arena && (<button className={`fa-stat fa-arena ${a.flinch ? "flinch" : ""} ${a.top ? "top" : ""}`} onClick={() => actions.toggleArena()} aria-expanded={a.open} aria-label={`You are number ${a.rank} on the Frontier Arena. Click to ${a.open ? "hide" : "show"} the leaderboard.`}>
+      {visible.vibes && (
+        <>
+          <div className="fa-stat fa-capability">
+            <span className="fa-sc">{t("stats.capability")}</span>
+            <Odometer className="fa-v" value={stats.capability.value} flash={false} />
+            <span className="fa-d plum" title={stats.capability.latestModel ?? undefined}>
+              {stats.capability.latestModel ?? "no release yet"}
+            </span>
+          </div>
+          <div className="fa-stat fa-hype">
+            <span className="fa-sc">{t("stats.hype")}</span>
+            <Odometer className="fa-v" value={stats.hype.value} flash={false} />
+            <span className={`fa-d ${hype === "up" ? "good" : hype === "down" ? "bad" : "dim"}`}>{TREND_WORD[hype]}</span>
+          </div>
+        </>
+      )}
+      {(visible.arena || visible.rnd) && <i className="fa-div fa-div2" aria-hidden />}
+      {visible.arena && (
+      <button className={`fa-stat fa-arena ${a.flinch ? "flinch" : ""} ${a.top ? "top" : ""}`} onClick={() => actions.toggleArena()} aria-expanded={a.open} aria-label={`You are number ${a.rank} on the Frontier Arena. Click to ${a.open ? "hide" : "show"} the leaderboard.`}>
         <span className="fa-sc">{t("stats.arena")}</span>
         <span className="fa-v">#{a.rank}</span>
         <span className={`fa-d ${a.tone || "dim"}`}>{a.top ? t("stats.arenaTop") : a.rankDelta === 0 ? t("stats.arenaOn") : `${a.deltaText} ${t("stats.arenaOn")}`}</span>
-      </button>)}
-      {visible.rnd && (<div className="fa-stat fa-rd">
-        <span className="fa-sc">{t("stats.rd")}</span>
-        <Odometer className="fa-v" value={stats.rd.mult} format={(n) => `${n.toFixed(1)}×`} flash={false} />
-        <span className="fa-d dim">{t("stats.era", { n: stats.rd.era })}</span>
-      </div>)}
-      {compact && (
+      </button>
+      )}
+      {visible.rnd && (
+        <div className="fa-stat fa-rd">
+          <span className="fa-sc">{t("stats.rd")}</span>
+          <Odometer className="fa-v" value={stats.rd.mult} format={(n) => `${n.toFixed(1)}×`} flash={false} />
+          <span className="fa-d dim">{t("stats.era", { n: stats.rd.era })}</span>
+        </div>
+      )}
+      {compact && (visible.vibes || visible.arena) && (
         <button className="fa-more" onClick={() => setExpanded((e) => !e)} aria-expanded={expanded} aria-label={expanded ? t("stats.fewerStats") : t("stats.moreStats")}>
           <Caret open={expanded} />
         </button>

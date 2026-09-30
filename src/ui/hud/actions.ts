@@ -15,7 +15,6 @@ import type { HudActions } from "./types";
 const TIME_HOURS: Record<string, number | null> = { live: null, day: 13, golden: 18.3, night: 22.5 };
 
 export const hudActions: HudActions = {
-  openBuild: () => send({ type: "COMMAND", command: { type: "buildPanelOpened" } }),
   place: (kind) => {
     // "staff" is a tile in the palette that opens the payroll instead of picking a tool.
     if (kind === "staff") return void registry.set(staffOpenAtom, !registry.get(staffOpenAtom));
@@ -45,7 +44,7 @@ export const hudActions: HudActions = {
   },
   cancelSpend: () => send({ type: "COMMAND", command: { type: "cancelConfirm" } }),
 
-  // Coach and unlock-card commands, with Help closing when the coach replays.
+  // The coach and the "New!" card (FLT-49's commands; `as Command` until they are in the union).
   coachSkip: () => send({ type: "COMMAND", command: { type: "coachSkip" } }),
   coachReplay: () => {
     registry.set(helpOpenAtom, false);

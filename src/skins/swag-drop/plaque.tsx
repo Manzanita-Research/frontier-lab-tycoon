@@ -1,7 +1,6 @@
-import { useCoach, ALL_VISIBLE } from "../kit";
 // The paper plaque and the instrument beside it: the lab's numbers as enamel pins, and the training run as a dial.
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Odometer, money, useT } from "../kit";
+import { ALL_VISIBLE, Odometer, money, useCoach, useT } from "../kit";
 import type { StatsVM } from "../../ui/hud/types";
 import type { SlotPropsMap } from "../types";
 import { Glyph } from "./icons";
@@ -10,10 +9,9 @@ const signed = (n: number) => `${n >= 0 ? "+" : "−"}${money(Math.abs(n))}/d`;
 const TREND = { up: "rising", down: "falling", flat: "steady" } as const;
 
 /** One enamel pin: a flat disc or pill with a coloured rim, and a mono label underneath. */
-function Pin({ label, rim, className = "", tag, coach, children }: { label: string; rim: string; className?: string; tag?: ReactNode; coach?: string; children: ReactNode }) {
-  const coachApi = useCoach();
+function Pin({ label, rim, className = "", tag, attrs, children }: { label: string; rim: string; className?: string; tag?: ReactNode; attrs?: Record<string, string | undefined>; children: ReactNode }) {
   return (
-    <div className={`sd-pin ${className}`} {...(coach ? coachApi.attrs(coach) : {})}>
+    <div className={`sd-pin ${className}`} {...attrs}>
       <div className={`sd-badge rim-${rim}`}>
         {children}
         {tag}
@@ -105,8 +103,9 @@ function HypeDial({ value }: { value: number }) {
 }
 
 /** The top-left plaque: lab name, date, and the pins. On a phone it is one row (Vibes, cash, runway) and a tab opens the rest. */
-export function Stats({ stats, layout, actions, visible = ALL_VISIBLE }: SlotPropsMap["Stats"]) {
+export function Stats({ stats, layout, visible = ALL_VISIBLE, actions }: SlotPropsMap["Stats"]) {
   const t = useT();
+  const coach = useCoach();
   const compact = layout.compact;
   const [expanded, setExpanded] = useState(false);
   const a = stats.arena;
@@ -122,21 +121,26 @@ export function Stats({ stats, layout, actions, visible = ALL_VISIBLE }: SlotPro
           label={t("stats.cash")}
           rim={stats.cash.negative ? "bad" : "gold"}
           className="pin-cash"
-          tag={visible.revenue && <Odometer className={`sd-delta ${stats.net.good ? "good" : "bad"}`} value={stats.net.value} format={signed} flash={false} />}
+          tag={visible.revenue ? <Odometer className={`sd-delta ${stats.net.good ? "good" : "bad"}`} value={stats.net.value} format={signed} flash={false} /> : undefined}
         >
           <Odometer className={`sd-num ${stats.cash.negative ? "bad" : ""}`} value={stats.cash.value} format={money} />
         </Pin>
-        <Pin label={t("stats.runway")} rim={stats.runway.warning ? "bad" : "good"} className="pin-runway" coach="stat:runway">
+        <Pin label={t("stats.runway")} rim={stats.runway.warning ? "bad" : "good"} className="pin-runway" attrs={coach.attrs("stat:runway")}>
           <span className={`sd-num ${stats.runway.warning ? "bad" : ""}`}>{stats.runway.text}</span>
         </Pin>
-        {visible.rnd && (<Pin label={t("stats.capability")} rim="research" className="pin-cap">
-          <Odometer className="sd-num" value={stats.capability.value} />
-        </Pin>)}
-        {visible.revenue && (<Pin label={t("stats.hype")} rim="signal" className="pin-hype">
-          <HypeDial value={stats.hype.value} />
-        </Pin>)}
+        {visible.vibes && (
+          <>
+            <Pin label={t("stats.capability")} rim="research" className="pin-cap">
+              <Odometer className="sd-num" value={stats.capability.value} />
+            </Pin>
+            <Pin label={t("stats.hype")} rim="signal" className="pin-hype">
+              <HypeDial value={stats.hype.value} />
+            </Pin>
+          </>
+        )}
       </div>
-      {visible.arena || visible.rnd && (<div className="sd-tags">
+      <div className="sd-tags">
+        {visible.arena && (
         <button
           type="button"
           className={`sd-tag arena ${a.top ? "top" : ""} ${a.flinch ? "flinch" : ""}`}
@@ -149,13 +153,16 @@ export function Stats({ stats, layout, actions, visible = ALL_VISIBLE }: SlotPro
           <span className={`d ${a.tone}`}>{a.rankDelta === 0 ? "–" : a.deltaText}</span>
           <span className="s">{a.top ? t("stats.arenaTop") : t("stats.arenaOn")}</span>
         </button>
-        <div className="sd-tag rd">
-          <span className="k">{t("stats.rd")}</span>
-          <Odometer className="sd-mult" value={stats.rd.mult} format={(n) => `${n.toFixed(1)}×`} />
-          <span className="s">{t("stats.era", { n: stats.rd.era })}</span>
-        </div>
-      </div>)}
-      {compact && (
+        )}
+        {visible.rnd && (
+          <div className="sd-tag rd">
+            <span className="k">{t("stats.rd")}</span>
+            <Odometer className="sd-mult" value={stats.rd.mult} format={(n) => `${n.toFixed(1)}×`} />
+            <span className="s">{t("stats.era", { n: stats.rd.era })}</span>
+          </div>
+        )}
+      </div>
+      {compact && (visible.vibes || visible.arena) && (
         <button type="button" className="sd-more" onClick={() => setExpanded((e) => !e)} aria-expanded={expanded} aria-label={expanded ? t("stats.fewerStats") : t("stats.moreStats")}>
           <span className={`sd-caret ${expanded ? "open" : ""}`} aria-hidden />
         </button>
@@ -179,11 +186,11 @@ const DIAL_TICKS = Array.from({ length: 11 }, (_, i) => {
 
 /** The training run as an instrument: a dial with a needle, the model's name, and how long is left. */
 export function Training({ training }: SlotPropsMap["Training"]) {
-  const coachApi = useCoach();
   const t = useT();
+  const coach = useCoach();
   if (!training.hasHall) {
     return (
-      <div className="sd-gauge off" role="status" {...coachApi.attrs("training")}>
+      <div className="sd-gauge off" role="status" {...coach.attrs("training")}>
         <span className="sd-tape">{t("training.noHall")}</span>
       </div>
     );
@@ -192,7 +199,7 @@ export function Training({ training }: SlotPropsMap["Training"]) {
   return (
     <div
       className={`sd-gauge ${training.justShipped ? "shipped" : ""}`}
-      {...coachApi.attrs("training")}
+      {...coach.attrs("training")}
       role="progressbar"
       aria-label={`${t("training.title")} ${training.name}`}
       aria-valuemin={0}
