@@ -8,6 +8,7 @@ import { computePerDay, trainingEtaDays } from "../sim/training";
 import { openEventOf } from "../sim/events";
 import { opsView, type OpsView } from "../sim/opsView";
 import { leapfrogView, type LeapfrogView } from "../sim/race/leapfrog/view";
+import { papersView, type PapersView } from "../sim/race/papers/view";
 import { raceView, type RaceView } from "../sim/race/view";
 import { outcomeOf, releaseGoalText } from "../sim/goals";
 import { estimateLedger } from "../sim/economy";
@@ -84,6 +85,8 @@ export interface Snapshot {
   race: RaceView;
   /** Release Leapfrog (FLT-27): the benchmark leaderboard, the share-of-voice meter and the last launch. `enabled: false` when the pack is off. */
   leapfrog: LeapfrogView;
+  /** Publishing Papers (FLT-28): list, review timers and publication policy. */
+  papers: PapersView;
   /** Operations: staff, slop, broken buildings, queues. */
   ops: OpsView;
   assistant: AssistantMessage | null;
@@ -147,6 +150,7 @@ export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO
     selectedId: ui.selected,
     race: raceView(s),
     leapfrog: leapfrogView(s),
+    papers: papersView(s),
     ops: opsView(s),
     assistant: assistantOf(s),
     firstBuildPending: assistantOf(s) !== null && s.flags.firstBuild === undefined,

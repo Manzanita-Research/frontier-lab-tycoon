@@ -53,6 +53,8 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
       return { vm: main, actions };
     case "EventCard":
       return { event: vms.event!.event!, actions };
+    case "Confirm":
+      return { confirm: vms.confirm!.confirm!, actions };
     case "Arena":
       return { arena: main.arena, actions };
     case "EraCard":
@@ -84,7 +86,8 @@ const vms: Record<string, HudVM> = {
   main: vmOf({ tool: "cluster" }),
   event: vmOf({ event: "waterDiscourse" }),
   confirm: vmOf({ confirm: true }),
-  warned: vmOf({ warnings: ["Your entrance isn't connected to any paths. Visitors are forming a very orderly queue to nowhere."] }),
+  // Nobody else is talking: a skin with one speech balloon (Chip, in Discovery Disc) shows a standing warning when it is quiet.
+  warned: hudViewModel({ ...fixtureInput({ warnings: ["Your entrance isn't connected to any paths. Visitors are forming a very orderly queue to nowhere."] }), toasts: [] }),
   auction: vmOf({ event: "computeAuction" }),
   era: vmOf({ event: "era2" }),
   outcome: vmOf({ outcome: "won" }),
@@ -101,7 +104,7 @@ const usable = catalog.filter((e) => e.ok).map((e) => e.folder);
 
 describe("the catalog", () => {
   it("finds the six shipped skins, all valid", () => {
-    expect(usable.sort()).toEqual(["discovery-disc-96", "field-almanac", "frontier-95", "geocities", "karaoke-night", "swag-drop"]);
+    expect(usable.sort()).toEqual(["discovery-disc-96", "field-almanac", "frontier-95", "homepage-98", "karaoke-night", "swag-drop"]);
     expect(refusedSkins()).toEqual([]);
     expect(skinList().map((s) => s.id)[0]).toBe("frontier-95");
   });
@@ -120,8 +123,8 @@ describe.each([BASE_ID, ...usable])("skin %s", (id) => {
       const props = propsFor(name, vms);
       const Slot = skin.slots[name] as React.ComponentType<SlotPropsMap[SlotName]>;
       const out = html(skin, <Slot {...props!} />);
-      // With no spend to confirm, the base's Assistant draws nothing (hints and toasts are the Toasts slot's job).
-      if (!(name === "Assistant" && skin.slots.Assistant === baseSlots.Assistant && !(props as { vm: HudVM }).vm.confirm)) expect(out.length, `${id}/${name} drew nothing`).toBeGreaterThan(0);
+      // The base has no assistant character: its Assistant draws nothing (hints and toasts show as ordinary toasts).
+      if (!(name === "Assistant" && skin.slots.Assistant === baseSlots.Assistant)) expect(out.length, `${id}/${name} drew nothing`).toBeGreaterThan(0);
       expect(out, `${id}/${name}`).not.toMatch(/undefined|\[object Object\]|NaN/);
       expect(out, `${id}/${name} left a placeholder`).not.toMatch(/\{\w+\}/);
     }
@@ -155,17 +158,17 @@ describe.each([BASE_ID, ...usable])("skin %s", (id) => {
     expect(era).toContain(escape(vms.era!.eraCard!.line));
   });
 
-  it("asks before a spend that leaves under three months of runway, from the Assistant slot", async () => {
+  it("asks before a spend that leaves under three months of runway, in a modal of its own", async () => {
     const { skin } = await prepareSkin(id);
     const vm = vms.confirm!;
     expect(vm.confirm).toMatchObject({ kind: "hire", costText: "$4K", runwayText: "1.8 mo" });
-    const out = html(skin, <Docked vm={vm} actions={actions} />);
+    const out = html(skin, <Modals vm={vm} actions={actions} />);
     expect(out).toContain(escape(vm.confirm!.message));
     expect(out).toContain(escape(vm.confirm!.costText));
     expect(out).toContain(escape(vm.confirm!.runwayText));
     expect(out).toMatch(/role="(alert)?dialog"/);
     // Nothing waiting: no card.
-    expect(html(skin, <Docked vm={vms.main!} actions={actions} />)).not.toContain(escape(vm.confirm!.message));
+    expect(html(skin, <Modals vm={vms.main!} actions={actions} />)).not.toContain(escape(vm.confirm!.message));
   });
 
   it("keeps standing warnings on screen (once, even if a toast says the same thing)", async () => {

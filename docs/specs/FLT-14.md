@@ -50,7 +50,7 @@ src/skins/<id>/
 - **A11y and perf:** tap targets ≥ 44px, a visible focus rectangle (Win95's dotted focus ring counts), a reduced-motion setting, and no per-frame re-renders beyond the existing ~5 Hz snapshot.
 
 ### 4. The other five skins in Phase 1: **thin stubs only**
-Create `skin.json` with tokens and fonts plus `skin.css` for **Swag Drop, Karaoke Night, Field Almanac, Discovery Disc '96 and GeoCities**, with the right palette and type, and the base slots restyled through tokens alone. No custom `slots.tsx`. That proves the system switches between six real skins. Full ports come in Phase 2.
+Create `skin.json` with tokens and fonts plus `skin.css` for **Swag Drop, Karaoke Night, Field Almanac, Discovery Disc '96 and Homepage '98**, with the right palette and type, and the base slots restyled through tokens alone. No custom `slots.tsx`. That proves the system switches between six real skins. Full ports come in Phase 2.
 
 ### Evidence and gate (Phase 1)
 - **Before** screenshots first, from `main` before any change: (a) overview 1440×900, (b) inspector open, (c) the Water Discourse event card, (d) Start menu / build bar open, (e) phone 390×844, (f) photo mode.
@@ -58,5 +58,5 @@ Create `skin.json` with tokens and fonts plus `skin.css` for **Swag Drop, Karaok
 - Post the pairs and a preview link on FLT-14, set FLT-14 to `in_review`, and **don't merge**. The lead reviews, then Jem approves, and then merge.
 
 ## Phase 2 (after Jem approves Frontier 95): full ports, two builders at a time
-Five sub-tasks, one per skin, each porting its mockup into a full skin with custom slots where the mockup calls for them: Swag Drop's lanyard badge and keycaps, Karaoke Night's karaoke ticker with a bouncing ball, Field Almanac's specimen card, Discovery Disc's Field Trip Badge, stamps and pace, and GeoCities' hit counter, About Me, 88×31 webring and marquee. **Builders: Codex Sol 6.1 (`gpt-6.1-sol`)**, to spare Claude usage; the lead (Opus) reviews each one. Evidence per skin: 4 screenshots (overview, inspector, event card, phone). They merge on green plus the lead's review. Afterwards the lead posts a **gallery of all six** on FLT-14.
+Five sub-tasks, one per skin, each porting its mockup into a full skin with custom slots where the mockup calls for them: Swag Drop's lanyard badge and keycaps, Karaoke Night's karaoke ticker with a bouncing ball, Field Almanac's specimen card, Discovery Disc's Field Trip Badge, stamps and pace, and Homepage '98' hit counter, About Me, 88×31 webring and marquee. **Builders: Codex Sol 6.1 (`gpt-6.1-sol`)**, to spare Claude usage; the lead (Opus) reviews each one. Evidence per skin: 4 screenshots (overview, inspector, event card, phone). They merge on green plus the lead's review. Afterwards the lead posts a **gallery of all six** on FLT-14.
 

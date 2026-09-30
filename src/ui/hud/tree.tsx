@@ -41,10 +41,11 @@ export function Docked({ vm, actions }: { vm: HudVM; actions: HudActions }) {
 }
 
 export function Modals({ vm, actions }: { vm: HudVM; actions: HudActions }) {
-  const { EventCard, EraCard, Outcome, NewsRoom, Mixer, SkinPicker } = useSkin().slots;
+  const { EventCard, Confirm, EraCard, Outcome, NewsRoom, Mixer, SkinPicker } = useSkin().slots;
   return (
     <>
       {vm.event && <EventCard event={vm.event} actions={actions} />}
+      {vm.confirm && <Confirm confirm={vm.confirm} actions={actions} />}
           {vm.eraCard && <EraCard era={vm.eraCard} actions={actions} />}
       {vm.outcome && <Outcome outcome={vm.outcome} actions={actions} />}
       {vm.newsroom.view && <NewsRoom newsroom={vm.newsroom} actions={actions} />}

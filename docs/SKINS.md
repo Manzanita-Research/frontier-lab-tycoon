@@ -1,6 +1,6 @@
 # Making a skin
 
-A **skin** re-dresses the game's whole 2D UI: the stats, the build bar, the thought bubbles, the event cards, the news ticker, all of it. Six ship with the game (Frontier 95, Swag Drop, Karaoke Night, Field Almanac, Discovery Disc '96, GeoCities) and you can add yours by adding a folder. Skins switch **live** (no reload, the game keeps running) and this format is also the first kind of mod (FLT-15).
+A **skin** re-dresses the game's whole 2D UI: the stats, the build bar, the thought bubbles, the event cards, the news ticker, all of it. Six ship with the game (Frontier 95, Swag Drop, Karaoke Night, Field Almanac, Discovery Disc '96, Homepage '98) and you can add yours by adding a folder. Skins switch **live** (no reload, the game keeps running) and this format is also the first kind of mod (FLT-15).
 
 This page is the whole manual. It is written to be read by a person or by an agent that has never seen the repo. If you only read one section, read [the five-minute skin](#the-five-minute-skin).
 
@@ -326,7 +326,8 @@ A slot is a React component. Each gets **its slice of the view-model plus `actio
 | `ThoughtsPanel` | `{ rows, layout, actions }` | Everybody's thoughts, counted; `actions.highlight(row.key)` lights up who thinks it. On a phone (`layout.compact`) the base folds it to an icon. |
 | `Ticker` | `{ items, actions }` | The news tape. Use `kit`'s `<Marquee items>`. |
 | `Toast` | `{ toast, actions }` | One toast. `toast.tone === "hint"` is a standing hint and `"warn"` a standing warning (both not dismissable: a warning like "your entrance isn't connected" stays until it is fixed). Frontier 95 has no `Toasts` dock: its paperclip draws `vm.warnings` itself. |
-| `Assistant` | `{ vm, actions }` | A helper character that hosts hints, toasts and standing warnings, and asks the spend check (`vm.confirm`: "this leaves 1.8 months of runway", answered with `actions.confirmSpend()` or `actions.cancelSpend()`; make the safe answer the default, and Escape and a click outside give it). Time is held while it is up. The base draws nothing but the spend check (its warnings are `Toast`s); Frontier 95's paperclip lives here. |
+| `Assistant` | `{ vm, actions }` | A helper character that hosts hints, toasts and standing warnings (`vm.warnings`). The base draws nothing here; Frontier 95's paperclip lives here. |
+| `Confirm` | `{ confirm, actions }` | A modal: a spend (a hire, a build, a path) that would leave the lab under three months of runway, held for a yes or a no. `confirm.message`, `costText` and `runwayText` say what it is; `actions.confirmSpend()` goes ahead, `actions.cancelSpend()` keeps the runway (make that the default: focus it, and Escape or a click outside give it). Time is held while it is up. A skin that does not draw its own gets the base's, so the game can never wait on a box nobody can answer. Frontier 95's is a Win95 warning box. |
 | `EventCard` | `{ event, actions }` | The modal news card. `actions.choose(event.id, i)`; the 1–3 keys are handled by the game. |
 | `Arena` | `{ arena, actions }` | The R&D multiplier and era, and the Frontier Arena leaderboard (`arena.open` folded or open; `actions.toggleArena()`). |
 | `EraCard` | `{ era, actions }` | The full-screen era title card. `actions.continueEra()`; Enter, Space and (after 0.7 s) any key work. |

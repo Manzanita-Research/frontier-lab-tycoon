@@ -1,3 +1,4 @@
+import papersPack from "../../mods/base-papers/mod.json";
 import { HEADLINES } from "../content/headlines";
 import { THOUGHTS } from "../content/thoughts";
 import type { ContentApi } from "./services/content";
@@ -5,7 +6,8 @@ import type { VocabularyApi } from "./services/vocabulary";
 import { ArcNode, ModError, suggest, type ArcData, type NamedCallData } from "./schema";
 import type { Schema } from "effect";
 
-const triggers = new Set(HEADLINES.map((line) => line.trigger));
+// Built-in directly loaded pack triggers remain known to the M1a checker.
+const triggers = new Set([...HEADLINES.map((line) => line.trigger), ...papersPack.content.headlines.add.map((line) => line.trigger)]);
 const conditions = new Set(THOUGHTS.map((line) => line.when));
 function known(value: string, values: readonly string[], path: string) {
   if (!values.includes(value)) throw new ModError({ path, detail: `unknown value "${value}"${suggest(value, values)}` });

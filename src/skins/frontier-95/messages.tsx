@@ -51,42 +51,8 @@ const REPLIES: Record<string, string> = {
 };
 
 /**
- * "This leaves 1.8 months of runway": a Win95 warning box. Yes does it; No (the default, and Escape, and the close box, and a
- * click outside) keeps the runway. Time is held while it is up.
- */
-function SpendCheck({ confirm, actions }: { confirm: NonNullable<SlotPropsMap["Assistant"]["vm"]["confirm"]>; actions: SlotPropsMap["Assistant"]["actions"] }) {
-  const t = useT();
-  const no = () => actions.cancelSpend();
-  return (
-    <Dialog label="Lab Manager" close={no} layerClass="f95-layer f95-dim" dialogClass="f95-dialogbox">
-      <Win className="f95-msgbox tone-bad" title="Lab Manager" icon="warn" buttons={[{ g: "close", label: "No", onClick: no }]} role="alertdialog" label="Lab Manager: are you sure?">
-        <div className="f95-msgbody">
-          <Ico name="warn" size={36} />
-          <div>
-            <p>{confirm.message}</p>
-            <p className="f95-confirm-facts">
-              {t("confirm.cost")}: {confirm.costText} · {t("confirm.runway")}: {confirm.runwayText}
-              <br />
-              Are you sure you want to do this?
-            </p>
-          </div>
-        </div>
-        <div className="f95-row">
-          <Btn onClick={() => actions.confirmSpend()}>Yes</Btn>
-          <Btn def autoFocus onClick={no}>
-            No
-          </Btn>
-        </div>
-        <div className="f95-status">{t("event.paused")}</div>
-      </Win>
-    </Dialog>
-  );
-}
-
-/**
  * The paperclip. It hosts toasts, hints and standing warnings in one yellow balloon (they queue there, so nothing speaks over
- * anything else), offers a tip when the lab is quiet, and asks the spend check ("this leaves 1.8 months of runway") as a
- * Win95 warning box.
+ * anything else), and offers a tip when the lab is quiet.
  */
 export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
   const t = useT();
@@ -130,7 +96,6 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
 
   return (
     <div className="f95-assistant" aria-live="polite">
-      {vm.confirm && <SpendCheck confirm={vm.confirm} actions={actions} />}
       {busy && (
         <div className="f95-balloon" role="status">
           {warnings.map((w) => (
@@ -197,6 +162,39 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
 }
 
 const ICON_BY_TONE = { bad: "error", joke: "warn", good: "info", neutral: "info" } as const;
+
+/**
+ * "This leaves 1.8 months of runway": a Win95 warning box. Yes does it; No (the default, and Escape, and the close box, and a
+ * click outside) keeps the runway. Time is held while it is up.
+ */
+export function Confirm({ confirm, actions }: SlotPropsMap["Confirm"]) {
+  const t = useT();
+  const no = () => actions.cancelSpend();
+  return (
+    <Dialog label="Lab Manager" close={no} layerClass="f95-layer f95-dim" dialogClass="f95-dialogbox">
+      <Win className="f95-msgbox tone-bad" title="Lab Manager" icon="warn" buttons={[{ g: "close", label: "No", onClick: no }]} role="alertdialog" label="Lab Manager: are you sure?">
+        <div className="f95-msgbody">
+          <Ico name="warn" size={36} />
+          <div>
+            <p>{confirm.message}</p>
+            <p className="f95-confirm-facts">
+              {t("confirm.cost")}: {confirm.costText} · {t("confirm.runway")}: {confirm.runwayText}
+              <br />
+              Are you sure you want to do this?
+            </p>
+          </div>
+        </div>
+        <div className="f95-row">
+          <Btn onClick={() => actions.confirmSpend()}>Yes</Btn>
+          <Btn def autoFocus onClick={no}>
+            No
+          </Btn>
+        </div>
+        <div className="f95-status">{t("event.paused")}</div>
+      </Win>
+    </Dialog>
+  );
+}
 
 /** A Win95 message box: an icon, the news, and the choices as buttons, the first one being the default. */
 export function EventCard({ event, actions }: SlotPropsMap["EventCard"]) {
