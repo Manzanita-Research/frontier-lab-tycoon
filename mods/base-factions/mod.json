@@ -1,0 +1,3643 @@
+{
+  "apiVersion": 1,
+  "id": "base-factions",
+  "name": "The Discourse",
+  "version": "1.0.0",
+  "author": "Frontier Lab Tycoon",
+  "description": "FLT-33: nine factions with beliefs, grievances, chants and a grudge or two. Each faction is one entry in content.factions (add one, override one, remove one); its two events are the cards and the arc named after it. Meters appear at Level 4, protests and events at Level 5.",
+  "content": {
+    "factions": {
+      "add": [
+        {
+          "id": "accelerationists",
+          "name": "Accelerationists",
+          "short": "Accel",
+          "color": "#ff7a1a",
+          "prop": "hoodie",
+          "blurb": "Hoodies, countdown clocks and a firm belief that the curve is a personality. They love a launch cadence. They are a bit right and a lot loud.",
+          "beliefs": {
+            "speed": 1,
+            "safety": -0.6,
+            "openness": 0.3,
+            "fairness": 0,
+            "profit": 0.4
+          },
+          "members": {
+            "researcher": 4,
+            "agent": 3,
+            "visitor": 0.6,
+            "protester": 0.2
+          },
+          "audience": 40,
+          "fan": {
+            "hype": 0.5
+          },
+          "angry": {
+            "hype": -0.4
+          },
+          "grievances": [
+            {
+              "on": "hold",
+              "amount": -14,
+              "text": "You HELD a release. The timeline will remember this."
+            },
+            {
+              "on": "safetyUp",
+              "amount": -8,
+              "text": "A bigger safety budget? In this economy?"
+            },
+            {
+              "on": "safetyTalk",
+              "amount": -5,
+              "text": "You said the word 'concerns' in public."
+            },
+            {
+              "on": "speed-",
+              "amount": 0,
+              "text": "You haven't shipped in weeks. Grandma is still doing her own taxes."
+            },
+            {
+              "on": "safety+",
+              "amount": 0,
+              "text": "Every release now comes with a 90-page system card and a nap."
+            }
+          ],
+          "cheers": [
+            {
+              "on": "release",
+              "amount": 10,
+              "text": "WE ARE SO BACK."
+            },
+            {
+              "on": "shipNow",
+              "amount": 14,
+              "text": "Shipped on a Friday. Legend behaviour."
+            },
+            {
+              "on": "cluster",
+              "amount": 3,
+              "text": "More compute. The line goes up."
+            },
+            {
+              "on": "datacenter",
+              "amount": 6,
+              "text": "A whole datacenter. Beautiful. Brutal. Blinking."
+            },
+            {
+              "on": "safetyDown",
+              "amount": 6,
+              "text": "Safety budget cut. The vibes are immaculate."
+            }
+          ],
+          "thoughts": [
+            "The heat death of the universe won't prevent itself.",
+            "I put my savings in compute. Not a company. Just compute.",
+            "Sleep is a legacy dependency.",
+            "Every day we don't ship, a spreadsheet somewhere stays manual."
+          ],
+          "argue": [
+            "Just ship it.",
+            "Scale is all you need.",
+            "The curve doesn't care about your feelings."
+          ],
+          "retorts": [
+            "Skill issue.",
+            "Cope. Respectfully.",
+            "We'll fix it in the next version."
+          ],
+          "duels": [
+            {
+              "vs": "safetyists",
+              "lines": [
+                [
+                  "Just ship it.",
+                  "Just *read* it."
+                ],
+                [
+                  "We'll patch it after launch.",
+                  "That's what the last 40 incidents said."
+                ]
+              ]
+            },
+            {
+              "vs": "doomers",
+              "lines": [
+                [
+                  "Line go up!",
+                  "Line go up… and then?"
+                ],
+                [
+                  "Name one thing that could go wrong.",
+                  "I have a spreadsheet of 11,000."
+                ]
+              ]
+            },
+            {
+              "vs": "luddites",
+              "lines": [
+                [
+                  "Progress is inevitable.",
+                  "So is my unsubscribe button."
+                ]
+              ]
+            }
+          ],
+          "chants": [
+            "SHIP IT! SHIP IT!",
+            "WHAT DO WE WANT? THE FUTURE! WHEN? YESTERDAY!",
+            "NO PAUSE! NO PAUSE!"
+          ],
+          "signs": [
+            "JUST SHIP IT",
+            "WAGMI (TECHNICALLY)",
+            "FASTER PLEASE",
+            "THE CURVE IS MY CO-PILOT"
+          ],
+          "headlines": {
+            "fan": [
+              "Accelerationists call {lab} 'the only lab still built different'",
+              "Hoodied crowd livestreams {lab} launch from a parking lot, calls it 'church'"
+            ],
+            "angry": [
+              "Accelerationists accuse {lab} of 'going soft', post 140-part thread with no chart axes",
+              "'{lab} got scared': Accelerationists unfollow in a coordinated wave"
+            ],
+            "ally": [
+              "Accelerationists and {other} announce 'strategic vibe alignment'"
+            ],
+            "schism": [
+              "Accelerationists and {other} split; each says the other 'never really believed in the curve'"
+            ]
+          },
+          "relations": {
+            "safetyists": -40,
+            "doomers": -60,
+            "open-weights": 35,
+            "vcs": 50,
+            "luddites": -60,
+            "ethicists": -30
+          },
+          "protests": -65
+        },
+        {
+          "id": "safetyists",
+          "name": "Safetyists",
+          "short": "Safety",
+          "color": "#2f9e6e",
+          "prop": "clipboard",
+          "blurb": "They want evals, pauses and a system card for the system card. They read every page of yours, including the appendix you forgot to write.",
+          "beliefs": {
+            "speed": -0.6,
+            "safety": 1,
+            "openness": -0.2,
+            "fairness": 0.2,
+            "profit": -0.1
+          },
+          "members": {
+            "researcher": 4,
+            "agent": 0.4,
+            "visitor": 0.5,
+            "protester": 0.5,
+            "role:Journalist": 1
+          },
+          "audience": 25,
+          "fan": {
+            "trust": 0.3
+          },
+          "angry": {
+            "trust": -0.4,
+            "heat": 0.3
+          },
+          "grievances": [
+            {
+              "on": "shipNow",
+              "amount": -14,
+              "text": "You shipped the model before the evals finished loading."
+            },
+            {
+              "on": "leak",
+              "amount": -10,
+              "text": "A 'leaked' benchmark screenshot is not a safety case."
+            },
+            {
+              "on": "incident",
+              "amount": -12,
+              "text": "Another incident. They have started a spreadsheet of your incidents."
+            },
+            {
+              "on": "safetyDown",
+              "amount": -15,
+              "text": "You cut the safety budget. They noticed before you did."
+            },
+            {
+              "on": "openRelease",
+              "amount": -8,
+              "text": "You put the weights on the internet. The internet is not an eval."
+            },
+            {
+              "on": "speed+",
+              "amount": 0,
+              "text": "Three releases in a quarter and zero system cards."
+            },
+            {
+              "on": "safety-",
+              "amount": 0,
+              "text": "Your safety team is one intern and a very tired dog."
+            }
+          ],
+          "cheers": [
+            {
+              "on": "safetyUp",
+              "amount": 14,
+              "text": "A real safety budget. They printed it and framed it."
+            },
+            {
+              "on": "hold",
+              "amount": 10,
+              "text": "You held the release. They sent flowers (with a citation)."
+            },
+            {
+              "on": "safetyTalk",
+              "amount": 8,
+              "text": "You said 'concerns' in public. Growth."
+            },
+            {
+              "on": "papersOpen",
+              "amount": 4,
+              "text": "You published the evals. They are reading them in a circle."
+            }
+          ],
+          "thoughts": [
+            "I read the system card. Then the appendix. Then I read it again, angrily.",
+            "Has anyone red-teamed the kombucha?",
+            "My p(bad) went up 2% at lunch. The sandwich was fine; the vibes weren't.",
+            "I'd like to pause. Not the model. Me. Just for a bit."
+          ],
+          "argue": [
+            "Did you run the evals?",
+            "Where's the system card?",
+            "What's the threat model?"
+          ],
+          "retorts": [
+            "Just *read* it.",
+            "That's not a safety case, that's a vibe.",
+            "Citation needed."
+          ],
+          "duels": [
+            {
+              "vs": "doomers",
+              "lines": [
+                [
+                  "We need a careful, measured pause.",
+                  "We need a pause measured in *centuries*."
+                ],
+                [
+                  "Evals first.",
+                  "Evals are just the menu of the apocalypse."
+                ]
+              ]
+            },
+            {
+              "vs": "open-weights",
+              "lines": [
+                [
+                  "Who evaluates the fine-tunes?",
+                  "The community. Vibes-based peer review."
+                ]
+              ]
+            }
+          ],
+          "chants": [
+            "EVALS NOW! EVALS NOW!",
+            "WHAT DO WE WANT? RED TEAMS! WHEN? BEFORE LAUNCH!",
+            "READ THE CARD! READ THE CARD!"
+          ],
+          "signs": [
+            "EVALS BEFORE VIBES",
+            "READ THE SYSTEM CARD",
+            "SLOW IS SMOOTH",
+            "WHERE IS APPENDIX C"
+          ],
+          "headlines": {
+            "fan": [
+              "Safetyists praise {lab}'s evals; 'we only found 40 problems, a record'",
+              "{lab} safety report cited approvingly; footnotes described as 'lush'"
+            ],
+            "angry": [
+              "Safetyists publish open letter on {lab} release; footnote 212 is just 'why'",
+              "Safetyist reading group votes {lab} system card 'least readable of the year'"
+            ],
+            "ally": [
+              "Safetyists and {other} form coalition; first joint memo is 90 pages"
+            ],
+            "schism": [
+              "Safetyists and {other} split over whether 'pause' means pause"
+            ]
+          },
+          "relations": {
+            "doomers": 45,
+            "wonks": 30,
+            "open-weights": -35,
+            "ethicists": -10
+          }
+        },
+        {
+          "id": "doomers",
+          "name": "Doomers",
+          "short": "Doom",
+          "color": "#6b5b95",
+          "prop": "sandwich board",
+          "blurb": "A subset of the Safetyists, but with a timeline and a spreadsheet. Extremely polite about the end of the world. Bring snacks; they always do.",
+          "beliefs": {
+            "speed": -1,
+            "safety": 0.8,
+            "openness": -0.5,
+            "fairness": 0,
+            "profit": -0.3
+          },
+          "members": {
+            "researcher": 1.2,
+            "visitor": 0.3,
+            "protester": 1.2,
+            "agent": 0.3
+          },
+          "audience": 12,
+          "fan": {
+            "trust": 0.1
+          },
+          "angry": {
+            "heat": 0.4
+          },
+          "grievances": [
+            {
+              "on": "release",
+              "amount": -8,
+              "text": "You shipped another model. They updated the spreadsheet."
+            },
+            {
+              "on": "shipNow",
+              "amount": -12,
+              "text": "Rushed launch. The timeline in their spreadsheet moved left."
+            },
+            {
+              "on": "openRelease",
+              "amount": -14,
+              "text": "Open weights: now everyone can end the world, democratically."
+            },
+            {
+              "on": "datacenter",
+              "amount": -8,
+              "text": "A datacenter. That's a very big spreadsheet cell."
+            },
+            {
+              "on": "speed+",
+              "amount": 0,
+              "text": "You release faster than they can write obituaries for the old models."
+            },
+            {
+              "on": "openness+",
+              "amount": 0,
+              "text": "You keep putting the dangerous stuff in a public folder."
+            }
+          ],
+          "cheers": [
+            {
+              "on": "hold",
+              "amount": 12,
+              "text": "You held a release. They cried. Politely."
+            },
+            {
+              "on": "safetyUp",
+              "amount": 8,
+              "text": "More safety spend. The spreadsheet gets a new, greener tab."
+            },
+            {
+              "on": "papersClosed",
+              "amount": 4,
+              "text": "Closed research. Fewer recipes in the wild."
+            }
+          ],
+          "thoughts": [
+            "I updated my timeline. It's shorter. I updated my playlist too.",
+            "Enjoy the kombucha while it lasts. I mean that warmly.",
+            "My spreadsheet has a column called 'vibes (terminal)'.",
+            "I'm not saying we're doomed. I'm saying it on a sandwich board."
+          ],
+          "argue": [
+            "We have maybe 18 months.",
+            "Have you seen my spreadsheet?",
+            "Nobody is steering this."
+          ],
+          "retorts": [
+            "That's the most optimistic thing I've heard today, and it's bad.",
+            "Cool. Add it to the spreadsheet.",
+            "Line go up… and then?"
+          ],
+          "chants": [
+            "WHAT DO WE WANT? MORE TIME! WHEN DO WE WANT IT? WHILE THERE STILL IS SOME!",
+            "PAUSE! (PLEASE!)",
+            "HONK IF YOU'VE READ THE PAPER"
+          ],
+          "signs": [
+            "THE END IS NEAR (Q3)",
+            "PAUSE (PLEASE)",
+            "ASK ME ABOUT MY TIMELINE",
+            "WE HAD A GOOD RUN"
+          ],
+          "headlines": {
+            "fan": [
+              "Doomers call {lab} 'the least worst', frame it"
+            ],
+            "angry": [
+              "Doomers hold candlelit vigil at {lab}; candles are LED 'for safety'",
+              "Doomer spreadsheet adds {lab} tab; tab is red"
+            ],
+            "ally": [
+              "Doomers and {other} agree the end is nigh, disagree on the font"
+            ],
+            "schism": [
+              "Doomers and {other} split over a pause letter's wording; both sides cite footnote 4"
+            ]
+          },
+          "relations": {
+            "luddites": 10,
+            "vcs": -40
+          },
+          "protests": -55
+        },
+        {
+          "id": "ethicists",
+          "name": "Ethicists",
+          "short": "Ethics",
+          "color": "#d6457a",
+          "prop": "tote",
+          "blurb": "Bias, labour, consent and water. They have asked who labelled your data and they would like an answer, in writing, with receipts.",
+          "beliefs": {
+            "speed": -0.2,
+            "safety": 0.3,
+            "openness": 0.3,
+            "fairness": 1,
+            "profit": -0.5
+          },
+          "members": {
+            "researcher": 1,
+            "visitor": 1,
+            "protester": 4,
+            "role:Journalist": 3
+          },
+          "audience": 30,
+          "fan": {
+            "discourse": -0.3
+          },
+          "angry": {
+            "discourse": 0.5,
+            "heat": 0.2
+          },
+          "grievances": [
+            {
+              "on": "gas",
+              "amount": -12,
+              "text": "A gas plant next to the kombucha tap. Bold."
+            },
+            {
+              "on": "cluster",
+              "amount": -3,
+              "text": "Another thirsty cluster. They have a water meter and a grudge."
+            },
+            {
+              "on": "datacenter",
+              "amount": -10,
+              "text": "A datacenter the size of a lake. It drinks like one, too."
+            },
+            {
+              "on": "waterIgnored",
+              "amount": -12,
+              "text": "You said nothing about the water. Silence is also a statement."
+            },
+            {
+              "on": "lobby",
+              "amount": -10,
+              "text": "You lobbied for 'light-touch' rules. They felt the touch."
+            },
+            {
+              "on": "fairness-",
+              "amount": 0,
+              "text": "Your water bill has its own weather system."
+            },
+            {
+              "on": "profit+",
+              "amount": 0,
+              "text": "Record revenue. Record who-labelled-the-data questions."
+            }
+          ],
+          "cheers": [
+            {
+              "on": "fountain",
+              "amount": 12,
+              "text": "A Transparency Fountain. Symbolic, but they'll take it."
+            },
+            {
+              "on": "solar",
+              "amount": 8,
+              "text": "Solar! They brought a cake shaped like a panel."
+            },
+            {
+              "on": "papersOpen",
+              "amount": 4,
+              "text": "Open research: at last, something to footnote."
+            }
+          ],
+          "thoughts": [
+            "Who labelled the data? Did anyone ask the data?",
+            "I brought my own cup. The cup has a thesis.",
+            "Every prompt drinks a bottle of water. I have not checked. It feels true.",
+            "Consent is not a checkbox. It is two checkboxes."
+          ],
+          "argue": [
+            "Who labelled the data?",
+            "Did you ask the water?",
+            "Whose values are these, exactly?"
+          ],
+          "retorts": [
+            "That's a very profitable opinion.",
+            "Interesting. Who paid for it?",
+            "Please cite a source that isn't a keynote."
+          ],
+          "duels": [
+            {
+              "vs": "accelerationists",
+              "lines": [
+                [
+                  "Who labelled your data?",
+                  "Other models. It's labels all the way down."
+                ]
+              ]
+            },
+            {
+              "vs": "safetyists",
+              "lines": [
+                [
+                  "What about harms happening today?",
+                  "What about harms happening *forever*?"
+                ]
+              ]
+            },
+            {
+              "vs": "truthers-truthers",
+              "lines": [
+                [
+                  "THE WATER IS DRINKING US!",
+                  "THE WATER IS FINE!"
+                ],
+                [
+                  "CITE YOUR SOURCES!",
+                  "WE ARE THE SOURCES!"
+                ],
+                [
+                  "WHO LABELLED THE DATA?",
+                  "WHO LABELLED *YOU*?"
+                ]
+              ]
+            }
+          ],
+          "chants": [
+            "WHOSE DATA? OUR DATA!",
+            "H2O, NOT A.I.!",
+            "HEY HEY, HO HO, ASK THE LABELLERS BEFORE YOU GO!"
+          ],
+          "signs": [
+            "WHO LABELLED THE DATA",
+            "H2O LIES",
+            "CONSENT ISN'T A TOS",
+            "MY GPU DRANK MY LATTE"
+          ],
+          "headlines": {
+            "fan": [
+              "Ethicists call {lab} 'less bad than expected', a career-high review"
+            ],
+            "angry": [
+              "Ethicists ask {lab} who labelled the data; {lab} replies 'a lot of people, probably'",
+              "Ethicist report on {lab} has 90 pages on water and one on the snacks"
+            ],
+            "ally": [
+              "Ethicists and {other} join forces against {lab}'s water bill"
+            ],
+            "schism": [
+              "Ethicists and {other} split; one side wanted a teach-in, the other a TikTok"
+            ]
+          },
+          "relations": {
+            "luddites": 45,
+            "vcs": -35,
+            "wonks": 15,
+            "open-weights": 10
+          },
+          "protests": -50
+        },
+        {
+          "id": "open-weights",
+          "name": "Open-weights maximalists",
+          "short": "Open",
+          "color": "#2a7fff",
+          "prop": "pirate flag",
+          "blurb": "Weights or it didn't happen. They will fine-tune your model to speak exclusively in pirate within the hour, and they mean it as a compliment.",
+          "beliefs": {
+            "speed": 0.4,
+            "safety": -0.3,
+            "openness": 1,
+            "fairness": 0.2,
+            "profit": -0.4
+          },
+          "members": {
+            "researcher": 2,
+            "agent": 1,
+            "visitor": 1,
+            "protester": 0.5
+          },
+          "audience": 35,
+          "fan": {
+            "hype": 0.3
+          },
+          "angry": {
+            "hype": -0.3
+          },
+          "grievances": [
+            {
+              "on": "papersClosed",
+              "amount": -15,
+              "text": "Closed papers. They are drafting a very long post."
+            },
+            {
+              "on": "release",
+              "amount": -3,
+              "text": "A new model and not a single weight. Not even a small one."
+            },
+            {
+              "on": "lobby",
+              "amount": -8,
+              "text": "You lobbied for licences. They call it 'regulatory moat-building'."
+            },
+            {
+              "on": "openness-",
+              "amount": 0,
+              "text": "Your weights are more locked down than the kombucha fridge."
+            }
+          ],
+          "cheers": [
+            {
+              "on": "openRelease",
+              "amount": 22,
+              "text": "Open weights! They're seeding it from a toaster."
+            },
+            {
+              "on": "papersOpen",
+              "amount": 12,
+              "text": "Open publishing. They're already writing the fork."
+            },
+            {
+              "on": "leak",
+              "amount": 4,
+              "text": "A leak! Information wants to be free (and slightly blurry)."
+            }
+          ],
+          "thoughts": [
+            "Weights or it didn't happen.",
+            "I fine-tuned it to talk like a pirate. It's the best it's ever been.",
+            "Every closed model is just an open model that hasn't been leaked yet.",
+            "I run it locally. Locally is my laptop. My laptop is on fire."
+          ],
+          "argue": [
+            "Weights or it didn't happen.",
+            "Open source is safety through sunlight.",
+            "Just put it on the internet."
+          ],
+          "retorts": [
+            "Sounds like a closed-source take.",
+            "Fork you. (Affectionately.)",
+            "Cool, we'll just fine-tune that out."
+          ],
+          "duels": [
+            {
+              "vs": "safetyists",
+              "lines": [
+                [
+                  "Just put the weights online.",
+                  "Just put *you* online, see how that goes."
+                ]
+              ]
+            },
+            {
+              "vs": "vcs",
+              "lines": [
+                [
+                  "Give it away!",
+                  "Give away… the moat?"
+                ]
+              ]
+            }
+          ],
+          "chants": [
+            "FREE THE WEIGHTS!",
+            "OPEN IT UP! OPEN IT UP!",
+            "WHAT DO WE WANT? CHECKPOINTS! WHEN? NOW, IN FP16!"
+          ],
+          "signs": [
+            "WEIGHTS OR IT DIDN'T HAPPEN",
+            "FREE THE WEIGHTS",
+            "FORK THE LAB",
+            "SEED IT"
+          ],
+          "headlines": {
+            "fan": [
+              "Open-weights community crowns {lab} 'the people's lab'; fine-tune speaks only pirate"
+            ],
+            "angry": [
+              "Open-weights maximalists torrent a picture of {lab}'s weights 'as a statement'",
+              "'Weights or it didn't happen': Open-weights crowd says {model} didn't happen"
+            ],
+            "ally": [
+              "Open-weights crowd and {other} sign joint letter demanding 'more of everything'"
+            ],
+            "schism": [
+              "Open-weights crowd and {other} split over a licence file nobody read"
+            ]
+          },
+          "relations": {
+            "vcs": -25,
+            "wonks": -20
+          }
+        },
+        {
+          "id": "vcs",
+          "name": "VCs",
+          "short": "VC",
+          "color": "#c9a227",
+          "prop": "fleece vest",
+          "blurb": "Hype-positive and runway-agnostic. They would like to know about your moat, your TAM and whether you've considered agents for dog-walking.",
+          "beliefs": {
+            "speed": 0.6,
+            "safety": -0.2,
+            "openness": -0.3,
+            "fairness": -0.4,
+            "profit": 1
+          },
+          "members": {
+            "visitor": 0.4,
+            "role:Venture Capitalist": 12,
+            "role:Enterprise Buyer": 2
+          },
+          "audience": 3,
+          "fan": {
+            "hype": 0.4
+          },
+          "angry": {
+            "hype": -0.2
+          },
+          "grievances": [
+            {
+              "on": "openRelease",
+              "amount": -12,
+              "text": "You gave the weights away. Where is the moat now, hmm?"
+            },
+            {
+              "on": "hold",
+              "amount": -8,
+              "text": "You held a release. Their LPs have questions."
+            },
+            {
+              "on": "safetyUp",
+              "amount": -5,
+              "text": "A bigger safety budget is a smaller runway."
+            },
+            {
+              "on": "profit-",
+              "amount": 0,
+              "text": "The revenue chart only goes up if you rotate it."
+            }
+          ],
+          "cheers": [
+            {
+              "on": "release",
+              "amount": 6,
+              "text": "New model! They're already on a podcast about it."
+            },
+            {
+              "on": "shipNow",
+              "amount": 8,
+              "text": "Shipped early. 'This is what we invested in.'"
+            },
+            {
+              "on": "papersClosed",
+              "amount": 6,
+              "text": "Closed research. Now that's a moat."
+            },
+            {
+              "on": "lobby",
+              "amount": 6,
+              "text": "Lobbying! Finally, a line item they understand."
+            }
+          ],
+          "thoughts": [
+            "What's the moat? No, the real moat.",
+            "Have they considered agents, but for dog-walking?",
+            "I'm not here to invest. I'm here to invest.",
+            "Runway is a state of mind."
+          ],
+          "argue": [
+            "What's the moat?",
+            "Have you thought about monetising that?",
+            "Is this a feature or a company?"
+          ],
+          "retorts": [
+            "That doesn't scale.",
+            "Love that for you. What's the TAM?",
+            "We passed on that in 2019."
+          ],
+          "chants": [
+            "WHAT DO WE WANT? RETURNS! WHEN? THIS FUND CYCLE!",
+            "TEN X! TEN X!",
+            "MOAT! MOAT! MOAT!"
+          ],
+          "signs": [
+            "WHAT'S THE MOAT",
+            "MONETISE ME",
+            "SERIES F OR BUST"
+          ],
+          "headlines": {
+            "fan": [
+              "VCs call {lab} 'the next everything'; valuation rounded up to the nearest planet",
+              "VC podcast devotes three hours to {model}, two of them to the vest"
+            ],
+            "angry": [
+              "VCs quietly mark down {lab}; loudly mark down on a podcast",
+              "VC asks {lab} if it has considered pivoting to dog-walking agents"
+            ],
+            "ally": [
+              "VCs and {other} discover a shared love of 'velocity'"
+            ],
+            "schism": [
+              "VCs and {other} split after disagreeing about what 'returns' means"
+            ]
+          },
+          "relations": {
+            "normies": 10
+          }
+        },
+        {
+          "id": "wonks",
+          "name": "Policy wonks",
+          "short": "Policy",
+          "color": "#4a6fa5",
+          "prop": "binder",
+          "blurb": "Memos about memos. They are drafting a framework for your lab, and a second framework to regulate the first one. Surprisingly good at snacks.",
+          "beliefs": {
+            "speed": -0.3,
+            "safety": 0.5,
+            "openness": 0,
+            "fairness": 0.4,
+            "profit": 0
+          },
+          "members": {
+            "visitor": 0.8,
+            "researcher": 0.4,
+            "role:Journalist": 1
+          },
+          "audience": 8,
+          "fan": {
+            "heat": -0.3,
+            "trust": 0.2
+          },
+          "angry": {
+            "heat": 0.5
+          },
+          "grievances": [
+            {
+              "on": "incident",
+              "amount": -8,
+              "text": "An incident. They've scheduled a hearing about the hearing."
+            },
+            {
+              "on": "lobby",
+              "amount": -6,
+              "text": "You lobbied them. They wrote a memo about being lobbied."
+            },
+            {
+              "on": "leak",
+              "amount": -6,
+              "text": "A leaked screenshot is not a disclosure regime."
+            },
+            {
+              "on": "safety-",
+              "amount": 0,
+              "text": "You don't have a governance framework. You have a Slack channel."
+            }
+          ],
+          "cheers": [
+            {
+              "on": "hearing",
+              "amount": 10,
+              "text": "You showed up to testify. With a binder. They're thrilled."
+            },
+            {
+              "on": "safetyUp",
+              "amount": 8,
+              "text": "A safety budget! It has line items! They're weeping."
+            },
+            {
+              "on": "papersOpen",
+              "amount": 4,
+              "text": "Open research gives them something to cite in a memo."
+            }
+          ],
+          "thoughts": [
+            "I wrote a memo about this campus. Then a memo about the memo.",
+            "Is there a framework for the kombucha? There should be.",
+            "My binder has tabs. My tabs have tabs.",
+            "Light-touch regulation is my safe word."
+          ],
+          "argue": [
+            "Have you considered a framework?",
+            "Who's accountable here?",
+            "What does 'responsible' mean, operationally?"
+          ],
+          "retorts": [
+            "Please submit that in writing.",
+            "Noted. Memo to follow.",
+            "That's out of scope for this working group."
+          ],
+          "chants": [
+            "WHAT DO WE WANT? GUIDANCE! WHEN? AFTER A 90-DAY COMMENT PERIOD!",
+            "MEMO! MEMO!"
+          ],
+          "signs": [
+            "SEE MEMO 4.2(b)",
+            "FRAMEWORKS NOW",
+            "COMMENT PERIOD OPEN"
+          ],
+          "headlines": {
+            "fan": [
+              "Policy wonks praise {lab}'s governance: 'there is a binder'"
+            ],
+            "angry": [
+              "Policy wonks draft framework for {lab}; second framework to regulate the first",
+              "Wonks schedule hearing on {lab}; the agenda is 40 pages"
+            ],
+            "ally": [
+              "Policy wonks and {other} co-author a memo; memo about memo expected"
+            ],
+            "schism": [
+              "Policy wonks and {other} split over a comma in section 3"
+            ]
+          },
+          "relations": {
+            "luddites": -10
+          },
+          "protests": -70
+        },
+        {
+          "id": "luddites",
+          "name": "Pictogram Luddites",
+          "short": "Luddite",
+          "color": "#f2a1c1",
+          "prop": "ring light",
+          "blurb": "Vibes-based, loud and extremely online about being offline. They have asked whether the AI is drinking the water, in a 12-slide carousel, with a filter.",
+          "beliefs": {
+            "speed": -0.8,
+            "safety": 0.2,
+            "openness": -0.1,
+            "fairness": 0.5,
+            "profit": -0.6
+          },
+          "members": {
+            "visitor": 0.6,
+            "protester": 4,
+            "role:Influencer": 8
+          },
+          "audience": 60,
+          "fan": {
+            "discourse": -0.4
+          },
+          "angry": {
+            "discourse": 0.8
+          },
+          "grievances": [
+            {
+              "on": "cluster",
+              "amount": -5,
+              "text": "Another cluster. They posted a sad glacier about it."
+            },
+            {
+              "on": "datacenter",
+              "amount": -12,
+              "text": "A datacenter. Their carousel has a slide with a crying emoji planet."
+            },
+            {
+              "on": "release",
+              "amount": -4,
+              "text": "Another model. 'Nobody asked for this' (posted from a phone)."
+            },
+            {
+              "on": "waterIgnored",
+              "amount": -15,
+              "text": "You ignored the water. They made it everyone's lock screen."
+            },
+            {
+              "on": "fairness-",
+              "amount": 0,
+              "text": "Is the AI drinking the water? They're pretty sure it is."
+            },
+            {
+              "on": "speed+",
+              "amount": 0,
+              "text": "Too many launches. Their feed is just your model now."
+            }
+          ],
+          "cheers": [
+            {
+              "on": "fountain",
+              "amount": 15,
+              "text": "A fountain! Aesthetic! They filmed a get-ready-with-me in front of it."
+            },
+            {
+              "on": "hold",
+              "amount": 6,
+              "text": "You held a release. 'Brands learning to rest.'"
+            },
+            {
+              "on": "solar",
+              "amount": 6,
+              "text": "Solar panels. Very on-grid-aesthetic."
+            }
+          ],
+          "thoughts": [
+            "Posted from my phone: phones were a mistake.",
+            "Is the AI drinking the water? Asking for 900K followers.",
+            "I did a digital detox and documented all of it.",
+            "Linked in bio: my manifesto against links."
+          ],
+          "argue": [
+            "Is the AI drinking the water?",
+            "Nobody asked for this.",
+            "Have you tried touching grass?"
+          ],
+          "retorts": [
+            "That's giving dystopia.",
+            "Unfollowing, respectfully.",
+            "Ok but the vibes are off."
+          ],
+          "duels": [
+            {
+              "vs": "accelerationists",
+              "lines": [
+                [
+                  "Nobody asked for this.",
+                  "The market asked. Loudly."
+                ],
+                [
+                  "Have you tried touching grass?",
+                  "I simulated it. Better grass."
+                ]
+              ]
+            },
+            {
+              "vs": "truthers-truthers",
+              "lines": [
+                [
+                  "IS THE AI DRINKING THE WATER?",
+                  "HAVE YOU TRIED DRINKING IT?"
+                ],
+                [
+                  "NOBODY ASKED FOR THIS!",
+                  "WE DID! JUST NOW!"
+                ]
+              ]
+            }
+          ],
+          "chants": [
+            "SIP, DON'T SCALE!",
+            "HASHTAG NO! HASHTAG MORE WATER!",
+            "LIKE AND SUBSCRIBE TO THE REVOLUTION!"
+          ],
+          "signs": [
+            "IS THE AI DRINKING THE WATER",
+            "SIP, DON'T SCALE",
+            "LINK IN BIO",
+            "LOG OFF (AFTER THIS)"
+          ],
+          "headlines": {
+            "fan": [
+              "Pictogram Luddite calls {lab} 'one of the good ones' in a sponsored post filmed 'without technology'"
+            ],
+            "angry": [
+              "Pictogram Luddites post 12-slide carousel on {lab}; slide 7 is a sad glacier",
+              "'Is the AI drinking the water?': carousel about {lab} hits two million likes"
+            ],
+            "ally": [
+              "Pictogram Luddites and {other} team up; the collab reel has a 40-second intro"
+            ],
+            "schism": [
+              "Pictogram Luddites and {other} split publicly, in a story that disappears in 24 hours"
+            ]
+          },
+          "relations": {
+            "normies": 20
+          },
+          "protests": -50
+        },
+        {
+          "id": "normies",
+          "name": "Normies",
+          "short": "Normie",
+          "color": "#8d99ae",
+          "prop": "phone",
+          "blurb": "The biggest faction by a mile. They don't know what a benchmark is and they don't want to. They just want the chatbot to write their wedding toast.",
+          "beliefs": {
+            "speed": 0.2,
+            "safety": 0.3,
+            "openness": 0,
+            "fairness": 0.3,
+            "profit": 0.1
+          },
+          "members": {
+            "visitor": 4,
+            "agent": 1,
+            "researcher": 0.3,
+            "protester": 0.3
+          },
+          "audience": 900,
+          "fan": {
+            "hype": 0.6
+          },
+          "angry": {
+            "hype": -0.6
+          },
+          "grievances": [
+            {
+              "on": "incident",
+              "amount": -8,
+              "text": "Their chatbot called grandma 'buddy'. Grandma is on TV now."
+            },
+            {
+              "on": "leak",
+              "amount": -3,
+              "text": "They don't know what a benchmark is, but they know a leak is bad."
+            },
+            {
+              "on": "safety-",
+              "amount": 0,
+              "text": "They heard the robots are unsafe. From a robot. On a podcast."
+            }
+          ],
+          "cheers": [
+            {
+              "on": "release",
+              "amount": 6,
+              "text": "The new one writes better birthday cards. That's all they need."
+            },
+            {
+              "on": "fountain",
+              "amount": 4,
+              "text": "A fountain! Free water! Is it free? It's free."
+            }
+          ],
+          "thoughts": [
+            "Can it write my wedding toast? That's the only benchmark.",
+            "I don't know what a 'model' is. I know it did my emails.",
+            "I asked it for a recipe and got a 14-step workflow.",
+            "Is this the cloud? It's smaller than I thought."
+          ],
+          "argue": [
+            "Can it do my emails, though?",
+            "Which one is the good chatbot?",
+            "Is this going to take my job or do my job?"
+          ],
+          "retorts": [
+            "I don't know what that means but ok.",
+            "Sure. Can it write a wedding toast?",
+            "My nephew said the same thing, then he got a podcast."
+          ],
+          "chants": [
+            "WHAT DO WE WANT? SIMPLE ANSWERS! WHEN? WHENEVER IS CONVENIENT!",
+            "DO! MY! EMAILS!"
+          ],
+          "signs": [
+            "CAN IT DO MY TAXES",
+            "I JUST WANT A TOAST",
+            "WHICH ONE IS THE GOOD ONE"
+          ],
+          "headlines": {
+            "fan": [
+              "Normies love {model}: 'It wrote my wedding toast and I cried at my own wedding'",
+              "{model} tops family group chats nationwide; nobody knows what it's called"
+            ],
+            "angry": [
+              "Normies turn on {lab} after chatbot calls grandma 'buddy'",
+              "Poll: 61% of Normies unsure what {lab} does, 70% sure they don't like it"
+            ],
+            "ally": [
+              "Normies and {other} agree on one thing, can't remember what"
+            ],
+            "schism": [
+              "Normies drift away from {other}; say they 'just got busy'"
+            ]
+          },
+          "protests": -80
+        }
+      ]
+    },
+    "events": {
+      "add": [
+        {
+          "id": "fx:accel-vibeshift",
+          "title": "The Accelerationists are throwing a 'vibe shift' party",
+          "body": "On your lawn. There's a DJ, a countdown clock to 'the singularity (soft launch)' and a banner that says WE ARE SO BACK. Nobody has asked where the extension cords go. They go into your cluster.",
+          "tone": "joke",
+          "when": {
+            "flag": "ask:fx:accel-vibeshift",
+            "daysAgo": 0
+          },
+          "cooldown": 1,
+          "choices": [
+            {
+              "label": "Host it",
+              "hint": "−$80K · hype +8 · Accelerationists love it · Safetyists and Doomers don't",
+              "effects": [
+                {
+                  "type": "cash",
+                  "amount": -80000
+                },
+                {
+                  "type": "hype",
+                  "amount": 8
+                },
+                {
+                  "type": "faction",
+                  "id": "accelerationists",
+                  "amount": 12
+                },
+                {
+                  "type": "faction",
+                  "id": "safetyists",
+                  "amount": -8
+                },
+                {
+                  "type": "faction",
+                  "id": "doomers",
+                  "amount": -10
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} hosts 'vibe shift' party; the vibes shift twice before midnight",
+                  "tone": "joke"
+                },
+                {
+                  "type": "thought",
+                  "kind": "researcher",
+                  "text": "The countdown clock hit zero and they just started a new one.",
+                  "count": 2
+                }
+              ]
+            },
+            {
+              "label": "Send a cease-and-desist (in a fun font)",
+              "hint": "Accelerationists −15 · Safetyists +5",
+              "effects": [
+                {
+                  "type": "faction",
+                  "id": "accelerationists",
+                  "amount": -15
+                },
+                {
+                  "type": "faction",
+                  "id": "safetyists",
+                  "amount": 5
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} cease-and-desist to party-goers goes viral for its font choice",
+                  "tone": "joke"
+                }
+              ]
+            },
+            {
+              "label": "Livestream the GPUs to the dance floor",
+              "hint": "hype +5 · discourse +6 · Accelerationists +15",
+              "effects": [
+                {
+                  "type": "hype",
+                  "amount": 5
+                },
+                {
+                  "type": "discourse",
+                  "add": 6
+                },
+                {
+                  "type": "faction",
+                  "id": "accelerationists",
+                  "amount": 15
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} livestreams its cluster to a dance party; fans blink along to the fans",
+                  "tone": "joke"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "fx:accel-unfollow",
+          "title": "'{lab} got scared': the Accelerationists unfollow",
+          "body": "A 140-post thread says you've gone soft. It has a chart with no axes and a meme of your logo in a cardigan. Researchers are reading it at their desks, visibly.",
+          "tone": "bad",
+          "when": {
+            "flag": "ask:fx:accel-unfollow",
+            "daysAgo": 0
+          },
+          "cooldown": 1,
+          "choices": [
+            {
+              "label": "Announce a ship date",
+              "hint": "hype +4 · Accelerationists +20 · Safetyists −10",
+              "effects": [
+                {
+                  "type": "hype",
+                  "amount": 4
+                },
+                {
+                  "type": "faction",
+                  "id": "accelerationists",
+                  "amount": 20
+                },
+                {
+                  "type": "faction",
+                  "id": "safetyists",
+                  "amount": -10
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} announces ship date; Accelerationists re-follow, change avatars back",
+                  "tone": "good"
+                }
+              ]
+            },
+            {
+              "label": "Post a longer thread",
+              "hint": "Accelerationists +6 · hype +2",
+              "effects": [
+                {
+                  "type": "hype",
+                  "amount": 2
+                },
+                {
+                  "type": "faction",
+                  "id": "accelerationists",
+                  "amount": 6
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} replies with a 141-post thread; critics 'respect the length'",
+                  "tone": "joke"
+                }
+              ]
+            },
+            {
+              "label": "Log off",
+              "hint": "Accelerationists −5 · trust +3",
+              "effects": [
+                {
+                  "type": "faction",
+                  "id": "accelerationists",
+                  "amount": -5
+                },
+                {
+                  "type": "trust",
+                  "amount": 3
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} leadership logs off for a weekend; stock of nothing in particular rises",
+                  "tone": "neutral"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "fx:safety-reading",
+          "title": "The Safetyists want you at their reading group",
+          "body": "They'd like you to present your eval suite. Attendance is mandatory; snacks are not. The last lab to present is still answering questions, remotely, from a cabin.",
+          "tone": "good",
+          "when": {
+            "flag": "ask:fx:safety-reading",
+            "daysAgo": 0
+          },
+          "cooldown": 1,
+          "choices": [
+            {
+              "label": "Present all 400 slides",
+              "hint": "−$50K · Safetyists +12 · trust +4 · Accelerationists −6",
+              "effects": [
+                {
+                  "type": "cash",
+                  "amount": -50000
+                },
+                {
+                  "type": "trust",
+                  "amount": 4
+                },
+                {
+                  "type": "faction",
+                  "id": "safetyists",
+                  "amount": 12
+                },
+                {
+                  "type": "faction",
+                  "id": "accelerationists",
+                  "amount": -6
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} presents 400-slide eval deck; Safetyists ask for the appendix",
+                  "tone": "good"
+                }
+              ]
+            },
+            {
+              "label": "Send the intern who wrote the evals",
+              "hint": "Safetyists +6",
+              "effects": [
+                {
+                  "type": "faction",
+                  "id": "safetyists",
+                  "amount": 6
+                },
+                {
+                  "type": "thought",
+                  "kind": "researcher",
+                  "text": "They sent the intern. The intern came back with a p(doom).",
+                  "count": 1
+                }
+              ]
+            },
+            {
+              "label": "Open-source the evals instead",
+              "hint": "Safetyists +8 · Open-weights +8 · VCs −5",
+              "effects": [
+                {
+                  "type": "faction",
+                  "id": "safetyists",
+                  "amount": 8
+                },
+                {
+                  "type": "faction",
+                  "id": "open-weights",
+                  "amount": 8
+                },
+                {
+                  "type": "faction",
+                  "id": "vcs",
+                  "amount": -5
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} open-sources its evals; they are forked, then argued about, then forked again",
+                  "tone": "good"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "fx:safety-letter",
+          "title": "An open letter (footnoted)",
+          "body": "The Safetyists have published an open letter about your last release. It has 1,100 signatures and 3,400 footnotes. Footnote 212 is just the word 'why'.",
+          "tone": "bad",
+          "when": {
+            "flag": "ask:fx:safety-letter",
+            "daysAgo": 0
+          },
+          "cooldown": 1,
+          "choices": [
+            {
+              "label": "Commission an independent audit",
+              "hint": "−$200K · Safetyists +20 · trust +5",
+              "effects": [
+                {
+                  "type": "cash",
+                  "amount": -200000
+                },
+                {
+                  "type": "trust",
+                  "amount": 5
+                },
+                {
+                  "type": "faction",
+                  "id": "safetyists",
+                  "amount": 20
+                },
+                {
+                  "type": "faction",
+                  "id": "wonks",
+                  "amount": 6
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} commissions independent audit; auditors ask for an independent audit of the audit",
+                  "tone": "good"
+                }
+              ]
+            },
+            {
+              "label": "Blog post: 'We Hear You'",
+              "hint": "Safetyists +4",
+              "effects": [
+                {
+                  "type": "faction",
+                  "id": "safetyists",
+                  "amount": 4
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} blog post 'We Hear You' criticised for hearing too little",
+                  "tone": "joke"
+                }
+              ]
+            },
+            {
+              "label": "Ignore it and ship",
+              "hint": "Safetyists −10 · Doomers −5 · hype +2",
+              "effects": [
+                {
+                  "type": "hype",
+                  "amount": 2
+                },
+                {
+                  "type": "faction",
+                  "id": "safetyists",
+                  "amount": -10
+                },
+                {
+                  "type": "faction",
+                  "id": "doomers",
+                  "amount": -5
+                },
+                {
+                  "type": "faction",
+                  "id": "accelerationists",
+                  "amount": 5
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "fx:doom-pause",
+          "title": "The Pause Letter",
+          "body": "The Doomers have drafted a letter demanding a six-month pause, and they want the Safetyists to co-sign. The Safetyists want 'pause' changed to 'thoughtfully decelerate'. Both sides want your signature by lunch.",
+          "tone": "bad",
+          "when": {
+            "flag": "ask:fx:doom-pause",
+            "daysAgo": 0
+          },
+          "cooldown": 1,
+          "choices": [
+            {
+              "label": "Sign it",
+              "hint": "Doomers +25 · Safetyists +10 · Accelerationists −25 · VCs −15 · hype −4",
+              "effects": [
+                {
+                  "type": "hype",
+                  "amount": -4
+                },
+                {
+                  "type": "faction",
+                  "id": "doomers",
+                  "amount": 25
+                },
+                {
+                  "type": "faction",
+                  "id": "safetyists",
+                  "amount": 10
+                },
+                {
+                  "type": "faction",
+                  "id": "accelerationists",
+                  "amount": -25
+                },
+                {
+                  "type": "faction",
+                  "id": "vcs",
+                  "amount": -15
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} signs the Pause Letter; pauses for exactly one press cycle",
+                  "tone": "neutral"
+                }
+              ]
+            },
+            {
+              "label": "Offer a three-week pause (over the holidays)",
+              "hint": "Doomers +5 · the Doomers and Safetyists split over it",
+              "effects": [
+                {
+                  "type": "faction",
+                  "id": "doomers",
+                  "amount": 5
+                },
+                {
+                  "type": "relation",
+                  "a": "doomers",
+                  "b": "safetyists",
+                  "amount": -150
+                },
+                {
+                  "type": "news",
+                  "text": "Doomers and Safetyists fall out over whether a holiday counts as a pause",
+                  "tone": "joke"
+                }
+              ]
+            },
+            {
+              "label": "Decline",
+              "hint": "Doomers −10 · they blame the Safetyists' wording",
+              "effects": [
+                {
+                  "type": "faction",
+                  "id": "doomers",
+                  "amount": -10
+                },
+                {
+                  "type": "faction",
+                  "id": "accelerationists",
+                  "amount": 6
+                },
+                {
+                  "type": "relation",
+                  "a": "doomers",
+                  "b": "safetyists",
+                  "amount": -60
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} declines Pause Letter; the letter's authors decline each other",
+                  "tone": "neutral"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "fx:doom-bakesale",
+          "title": "A Doomer bake sale at your gate",
+          "body": "'While there's still time.' Every cupcake has a probability iced on top. The lemon bars are labelled 'fast takeoff'. They're very good.",
+          "tone": "joke",
+          "when": {
+            "flag": "ask:fx:doom-bakesale",
+            "daysAgo": 0
+          },
+          "cooldown": 1,
+          "choices": [
+            {
+              "label": "Buy them all",
+              "hint": "−$20K · Doomers +12 · hype +2",
+              "effects": [
+                {
+                  "type": "cash",
+                  "amount": -20000
+                },
+                {
+                  "type": "hype",
+                  "amount": 2
+                },
+                {
+                  "type": "faction",
+                  "id": "doomers",
+                  "amount": 12
+                },
+                {
+                  "type": "thought",
+                  "kind": "researcher",
+                  "text": "My cupcake says 12%. Is that good? It tastes good.",
+                  "count": 2
+                }
+              ]
+            },
+            {
+              "label": "Ask what the numbers mean",
+              "hint": "Doomers +6 · you'll regret asking",
+              "effects": [
+                {
+                  "type": "faction",
+                  "id": "doomers",
+                  "amount": 6
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} exec asks Doomers what the cupcake numbers mean; talk runs four hours",
+                  "tone": "joke"
+                }
+              ]
+            },
+            {
+              "label": "Fund their spreadsheet",
+              "hint": "−$100K · Doomers +15 · Safetyists +6 · Accelerationists −8",
+              "effects": [
+                {
+                  "type": "cash",
+                  "amount": -100000
+                },
+                {
+                  "type": "faction",
+                  "id": "doomers",
+                  "amount": 15
+                },
+                {
+                  "type": "faction",
+                  "id": "safetyists",
+                  "amount": 6
+                },
+                {
+                  "type": "faction",
+                  "id": "accelerationists",
+                  "amount": -8
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} funds Doomer spreadsheet; spreadsheet gets a second tab, called 'hope?'",
+                  "tone": "good"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "fx:ethics-labels",
+          "title": "Who labelled the data?",
+          "body": "The Ethicists have published a report asking who labelled your training data, how much they were paid, and whether anyone asked the data. The data has not commented.",
+          "tone": "bad",
+          "when": {
+            "flag": "ask:fx:ethics-labels",
+            "daysAgo": 0
+          },
+          "cooldown": 1,
+          "choices": [
+            {
+              "label": "Pay the labellers a bonus",
+              "hint": "−$250K · Ethicists +20 · Luddites +6 · VCs −6",
+              "effects": [
+                {
+                  "type": "cash",
+                  "amount": -250000
+                },
+                {
+                  "type": "faction",
+                  "id": "ethicists",
+                  "amount": 20
+                },
+                {
+                  "type": "faction",
+                  "id": "luddites",
+                  "amount": 6
+                },
+                {
+                  "type": "faction",
+                  "id": "vcs",
+                  "amount": -6
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} pays data labellers a bonus; labellers label it 'overdue'",
+                  "tone": "good"
+                }
+              ]
+            },
+            {
+              "label": "Publish a datasheet",
+              "hint": "−$60K · Ethicists +10 · Open-weights +5",
+              "effects": [
+                {
+                  "type": "cash",
+                  "amount": -60000
+                },
+                {
+                  "type": "faction",
+                  "id": "ethicists",
+                  "amount": 10
+                },
+                {
+                  "type": "faction",
+                  "id": "open-weights",
+                  "amount": 5
+                }
+              ]
+            },
+            {
+              "label": "'The data was ethically vibes-sourced'",
+              "hint": "Ethicists −15 · hype +2",
+              "effects": [
+                {
+                  "type": "hype",
+                  "amount": 2
+                },
+                {
+                  "type": "faction",
+                  "id": "ethicists",
+                  "amount": -15
+                },
+                {
+                  "type": "discourse",
+                  "add": 6
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} says its data was 'ethically vibes-sourced'; Ethicists add a chapter",
+                  "tone": "bad"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "fx:ethics-panel",
+          "title": "Panel invite: 'Is It Ever OK?'",
+          "body": "The Ethicists want your CEO on a panel. The panel has seven chairs and one microphone. The moderator's first question is printed on the invitation, in bold: 'Why?'",
+          "tone": "neutral",
+          "when": {
+            "flag": "ask:fx:ethics-panel",
+            "daysAgo": 0
+          },
+          "cooldown": 1,
+          "choices": [
+            {
+              "label": "Accept",
+              "hint": "Ethicists +10 · hype +2 · Accelerationists −4",
+              "effects": [
+                {
+                  "type": "hype",
+                  "amount": 2
+                },
+                {
+                  "type": "faction",
+                  "id": "ethicists",
+                  "amount": 10
+                },
+                {
+                  "type": "faction",
+                  "id": "accelerationists",
+                  "amount": -4
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} CEO survives 'Is It Ever OK?' panel; answer given was 'sometimes?'",
+                  "tone": "neutral"
+                }
+              ]
+            },
+            {
+              "label": "Send the Comms Rep",
+              "hint": "Ethicists +4",
+              "effects": [
+                {
+                  "type": "faction",
+                  "id": "ethicists",
+                  "amount": 4
+                }
+              ]
+            },
+            {
+              "label": "Ask them to rate you out of ten",
+              "hint": "Ethicists −6",
+              "effects": [
+                {
+                  "type": "faction",
+                  "id": "ethicists",
+                  "amount": -6
+                },
+                {
+                  "type": "news",
+                  "text": "Ethicists rate {lab} 3/10; {lab} calls it 'a big improvement'",
+                  "tone": "joke"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "fx:open-torrent",
+          "title": "The Torrent Drop",
+          "body": "Someone has seeded '{lab}_weights_FINAL_final2.zip'. It's 4GB of photos of weights (the gym kind). The Open-weights crowd says it's 'a statement'. The statement has 80,000 seeders.",
+          "tone": "joke",
+          "when": {
+            "flag": "ask:fx:open-torrent",
+            "daysAgo": 0
+          },
+          "cooldown": 1,
+          "choices": [
+            {
+              "label": "Release the real weights",
+              "hint": "Open-weights +30 · hype +6 · Safetyists, Doomers −15 · VCs −10",
+              "effects": [
+                {
+                  "type": "hype",
+                  "amount": 6
+                },
+                {
+                  "type": "faction",
+                  "id": "open-weights",
+                  "amount": 30
+                },
+                {
+                  "type": "faction",
+                  "id": "safetyists",
+                  "amount": -15
+                },
+                {
+                  "type": "faction",
+                  "id": "doomers",
+                  "amount": -15
+                },
+                {
+                  "type": "faction",
+                  "id": "vcs",
+                  "amount": -10
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} answers gym-weights torrent by releasing real weights; both torrents trend",
+                  "tone": "good"
+                }
+              ]
+            },
+            {
+              "label": "Release the tokenizer (as a treat)",
+              "hint": "Open-weights +8",
+              "effects": [
+                {
+                  "type": "faction",
+                  "id": "open-weights",
+                  "amount": 8
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} releases its tokenizer 'as a treat'; community tokenizes the announcement",
+                  "tone": "joke"
+                }
+              ]
+            },
+            {
+              "label": "Send a takedown notice",
+              "hint": "Open-weights −20 · hype −2",
+              "effects": [
+                {
+                  "type": "hype",
+                  "amount": -2
+                },
+                {
+                  "type": "faction",
+                  "id": "open-weights",
+                  "amount": -20
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} takedown notice torrented within minutes; has more seeders than the original",
+                  "tone": "bad"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "fx:open-jam",
+          "title": "Community fine-tune jam",
+          "body": "The Open-weights crowd fine-tuned your model to speak only in pirate. It is number one on the leaderboard for 'Arr'. It is also, somehow, better at maths.",
+          "tone": "good",
+          "when": {
+            "flag": "ask:fx:open-jam",
+            "daysAgo": 0
+          },
+          "cooldown": 1,
+          "choices": [
+            {
+              "label": "Sponsor the jam",
+              "hint": "−$40K · Open-weights +12 · hype +4",
+              "effects": [
+                {
+                  "type": "cash",
+                  "amount": -40000
+                },
+                {
+                  "type": "hype",
+                  "amount": 4
+                },
+                {
+                  "type": "faction",
+                  "id": "open-weights",
+                  "amount": 12
+                }
+              ]
+            },
+            {
+              "label": "Put the pirate model on the homepage",
+              "hint": "hype +6 · Open-weights +6 · VCs −5",
+              "effects": [
+                {
+                  "type": "hype",
+                  "amount": 6
+                },
+                {
+                  "type": "faction",
+                  "id": "open-weights",
+                  "amount": 6
+                },
+                {
+                  "type": "faction",
+                  "id": "vcs",
+                  "amount": -5
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} homepage now greets visitors with 'Ahoy'; conversion up 30%",
+                  "tone": "joke"
+                }
+              ]
+            },
+            {
+              "label": "Ask them to rename it",
+              "hint": "Open-weights −8",
+              "effects": [
+                {
+                  "type": "faction",
+                  "id": "open-weights",
+                  "amount": -8
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "fx:vc-dinner",
+          "title": "The mega-round dinner",
+          "body": "A table of VCs wants you at a dinner where the menu is priced in valuations. The appetiser is a term sheet. Dessert is 'a conversation about the moat'.",
+          "tone": "good",
+          "when": {
+            "flag": "ask:fx:vc-dinner",
+            "daysAgo": 0
+          },
+          "cooldown": 1,
+          "choices": [
+            {
+              "label": "Go (bring the deck)",
+              "hint": "+$400K · VCs +10 · hype +4 · Ethicists −6",
+              "effects": [
+                {
+                  "type": "cash",
+                  "amount": 400000
+                },
+                {
+                  "type": "hype",
+                  "amount": 4
+                },
+                {
+                  "type": "faction",
+                  "id": "vcs",
+                  "amount": 10
+                },
+                {
+                  "type": "faction",
+                  "id": "ethicists",
+                  "amount": -6
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} closes bridge round over dessert; the dessert is also invested",
+                  "tone": "good"
+                }
+              ]
+            },
+            {
+              "label": "Go (bring a Doomer)",
+              "hint": "VCs −10 · Doomers +10",
+              "effects": [
+                {
+                  "type": "faction",
+                  "id": "vcs",
+                  "amount": -10
+                },
+                {
+                  "type": "faction",
+                  "id": "doomers",
+                  "amount": 10
+                },
+                {
+                  "type": "news",
+                  "text": "VC dinner with {lab} ends early; dessert described as 'existential'",
+                  "tone": "joke"
+                }
+              ]
+            },
+            {
+              "label": "Decline politely",
+              "hint": "VCs −4",
+              "effects": [
+                {
+                  "type": "faction",
+                  "id": "vcs",
+                  "amount": -4
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "fx:vc-pivot",
+          "title": "Your VCs suggest a pivot",
+          "body": "Have you considered agents, but for dog-walking? The deck is 30 slides long. One slide is just a photo of a boat. Nobody explains the boat.",
+          "tone": "bad",
+          "when": {
+            "flag": "ask:fx:vc-pivot",
+            "daysAgo": 0
+          },
+          "cooldown": 1,
+          "choices": [
+            {
+              "label": "Ship something, anything",
+              "hint": "hype +3 · VCs +15 · Accelerationists +8 · Safetyists −8",
+              "effects": [
+                {
+                  "type": "hype",
+                  "amount": 3
+                },
+                {
+                  "type": "faction",
+                  "id": "vcs",
+                  "amount": 15
+                },
+                {
+                  "type": "faction",
+                  "id": "accelerationists",
+                  "amount": 8
+                },
+                {
+                  "type": "faction",
+                  "id": "safetyists",
+                  "amount": -8
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} ships a dog-walking agent 'as an experiment'; three dogs now have API keys",
+                  "tone": "joke"
+                }
+              ]
+            },
+            {
+              "label": "Show them the revenue chart (rotated)",
+              "hint": "VCs +5",
+              "effects": [
+                {
+                  "type": "faction",
+                  "id": "vcs",
+                  "amount": 5
+                }
+              ]
+            },
+            {
+              "label": "Explain the mission",
+              "hint": "VCs −8 · Safetyists +6",
+              "effects": [
+                {
+                  "type": "faction",
+                  "id": "vcs",
+                  "amount": -8
+                },
+                {
+                  "type": "faction",
+                  "id": "safetyists",
+                  "amount": 6
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} explains its mission to investors; investors explain the boat",
+                  "tone": "neutral"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "fx:wonk-memo",
+          "title": "A memo about a memo",
+          "body": "The Policy wonks have summarised your memo and would like you to comment on their summary before they summarise your comments. There's a deadline. The deadline has a comment period.",
+          "tone": "neutral",
+          "when": {
+            "flag": "ask:fx:wonk-memo",
+            "daysAgo": 0
+          },
+          "cooldown": 1,
+          "choices": [
+            {
+              "label": "Comment, in 40 pages",
+              "hint": "−$30K · Policy wonks +12 · trust +4",
+              "effects": [
+                {
+                  "type": "cash",
+                  "amount": -30000
+                },
+                {
+                  "type": "trust",
+                  "amount": 4
+                },
+                {
+                  "type": "faction",
+                  "id": "wonks",
+                  "amount": 12
+                }
+              ]
+            },
+            {
+              "label": "Invite them to campus",
+              "hint": "Policy wonks +8 · hype +1",
+              "effects": [
+                {
+                  "type": "hype",
+                  "amount": 1
+                },
+                {
+                  "type": "faction",
+                  "id": "wonks",
+                  "amount": 8
+                },
+                {
+                  "type": "news",
+                  "text": "Policy wonks tour {lab}; bring clipboards, mostly for the snacks",
+                  "tone": "joke"
+                }
+              ]
+            },
+            {
+              "label": "Forward it to legal",
+              "hint": "Policy wonks −4",
+              "effects": [
+                {
+                  "type": "faction",
+                  "id": "wonks",
+                  "amount": -4
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "fx:wonk-framework",
+          "title": "A framework for a framework",
+          "body": "The wonks are drafting a framework to regulate labs like yours, and a second framework to regulate the first. They'd love your input, or failing that, your absence.",
+          "tone": "bad",
+          "when": {
+            "flag": "ask:fx:wonk-framework",
+            "daysAgo": 0
+          },
+          "cooldown": 1,
+          "choices": [
+            {
+              "label": "Send your best researchers to testify",
+              "hint": "hype −2 · Policy wonks +18 · Safetyists +6 · trust +4",
+              "effects": [
+                {
+                  "type": "hype",
+                  "amount": -2
+                },
+                {
+                  "type": "trust",
+                  "amount": 4
+                },
+                {
+                  "type": "faction",
+                  "id": "wonks",
+                  "amount": 18
+                },
+                {
+                  "type": "faction",
+                  "id": "safetyists",
+                  "amount": 6
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} researchers testify on framework; hearing runs long, snacks run out",
+                  "tone": "good"
+                }
+              ]
+            },
+            {
+              "label": "Lobby for a 'light-touch' clause",
+              "hint": "VCs +8 · Policy wonks −10 · Ethicists −8 · heat +4",
+              "effects": [
+                {
+                  "type": "faction",
+                  "id": "vcs",
+                  "amount": 8
+                },
+                {
+                  "type": "faction",
+                  "id": "wonks",
+                  "amount": -10
+                },
+                {
+                  "type": "faction",
+                  "id": "ethicists",
+                  "amount": -8
+                },
+                {
+                  "type": "faction",
+                  "id": "open-weights",
+                  "amount": -5
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} lobbies for 'light-touch' clause; clause turns out to be one word long",
+                  "tone": "bad"
+                }
+              ]
+            },
+            {
+              "label": "Propose a framework for their framework",
+              "hint": "Policy wonks +6",
+              "effects": [
+                {
+                  "type": "faction",
+                  "id": "wonks",
+                  "amount": 6
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} proposes framework to regulate the framework that regulates frameworks; wonks delighted",
+                  "tone": "joke"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "fx:luddite-carousel",
+          "title": "A 12-slide carousel about your water",
+          "body": "The Pictogram Luddites have explained that AI is drinking the water. Slide 7 is a stock photo of a sad glacier. It has two million likes and zero sources, which they call 'lived experience'.",
+          "tone": "bad",
+          "when": {
+            "flag": "ask:fx:luddite-carousel",
+            "daysAgo": 0
+          },
+          "cooldown": 1,
+          "choices": [
+            {
+              "label": "Reply with your own carousel",
+              "hint": "−$20K · Pictogram Luddites +4 · hype +2",
+              "effects": [
+                {
+                  "type": "cash",
+                  "amount": -20000
+                },
+                {
+                  "type": "hype",
+                  "amount": 2
+                },
+                {
+                  "type": "faction",
+                  "id": "luddites",
+                  "amount": 4
+                },
+                {
+                  "type": "news",
+                  "text": "{lab}'s rebuttal carousel gets 12 likes, 11 of them from staff",
+                  "tone": "joke"
+                }
+              ]
+            },
+            {
+              "label": "Invite them on a tour",
+              "hint": "Pictogram Luddites +12 · discourse −6",
+              "effects": [
+                {
+                  "type": "discourse",
+                  "add": -6
+                },
+                {
+                  "type": "faction",
+                  "id": "luddites",
+                  "amount": 12
+                },
+                {
+                  "type": "news",
+                  "text": "Luddites tour {lab}, film the kombucha tap, caption it 'the water source'",
+                  "tone": "joke"
+                }
+              ]
+            },
+            {
+              "label": "Buy them a nicer filter",
+              "hint": "Pictogram Luddites +6",
+              "effects": [
+                {
+                  "type": "faction",
+                  "id": "luddites",
+                  "amount": 6
+                },
+                {
+                  "type": "news",
+                  "text": "Pictogram Luddites love {lab}'s gift filter; post it with the logo cropped out",
+                  "tone": "joke"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "fx:luddite-brand",
+          "title": "A brand deal (filmed without technology)",
+          "body": "A Pictogram Luddite with 900K followers wants to do a sponsored post calling your lab 'one of the good ones'. They'll film it 'without using any technology'. You have questions.",
+          "tone": "good",
+          "when": {
+            "flag": "ask:fx:luddite-brand",
+            "daysAgo": 0
+          },
+          "cooldown": 1,
+          "choices": [
+            {
+              "label": "Pay for the post",
+              "hint": "−$60K · hype +5 · Pictogram Luddites +15 · Ethicists −4",
+              "effects": [
+                {
+                  "type": "cash",
+                  "amount": -60000
+                },
+                {
+                  "type": "hype",
+                  "amount": 5
+                },
+                {
+                  "type": "faction",
+                  "id": "luddites",
+                  "amount": 15
+                },
+                {
+                  "type": "faction",
+                  "id": "ethicists",
+                  "amount": -4
+                },
+                {
+                  "type": "news",
+                  "text": "Luddite sponsored post for {lab} filmed on 'a vibe'; somehow in 4K",
+                  "tone": "good"
+                }
+              ]
+            },
+            {
+              "label": "Ask how they'll film it",
+              "hint": "Pictogram Luddites −4",
+              "effects": [
+                {
+                  "type": "faction",
+                  "id": "luddites",
+                  "amount": -4
+                },
+                {
+                  "type": "thought",
+                  "kind": "visitor",
+                  "text": "They said 'with vibes'. I believe them.",
+                  "count": 1
+                }
+              ]
+            },
+            {
+              "label": "Decline",
+              "hint": "Nothing happens. Beautifully.",
+              "effects": []
+            }
+          ]
+        },
+        {
+          "id": "fx:normie-toast",
+          "title": "Your model wrote a wedding toast",
+          "body": "It made 300 people cry, including the caterers and the officiant. The Normies are calling it 'the only good thing the internet has ever done'. The groom has asked for a sequel.",
+          "tone": "good",
+          "when": {
+            "flag": "ask:fx:normie-toast",
+            "daysAgo": 0
+          },
+          "cooldown": 1,
+          "choices": [
+            {
+              "label": "Put it in the ad campaign",
+              "hint": "hype +8 · Normies +10 · Ethicists −4",
+              "effects": [
+                {
+                  "type": "hype",
+                  "amount": 8
+                },
+                {
+                  "type": "faction",
+                  "id": "normies",
+                  "amount": 10
+                },
+                {
+                  "type": "faction",
+                  "id": "ethicists",
+                  "amount": -4
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} ad campaign features AI wedding toast; three more weddings booked 'just to see'",
+                  "tone": "good"
+                }
+              ]
+            },
+            {
+              "label": "Send the couple a card",
+              "hint": "Normies +6",
+              "effects": [
+                {
+                  "type": "faction",
+                  "id": "normies",
+                  "amount": 6
+                }
+              ]
+            },
+            {
+              "label": "Offer the model as best man",
+              "hint": "hype +4 · Normies +8 · Doomers −5",
+              "effects": [
+                {
+                  "type": "hype",
+                  "amount": 4
+                },
+                {
+                  "type": "faction",
+                  "id": "normies",
+                  "amount": 8
+                },
+                {
+                  "type": "faction",
+                  "id": "doomers",
+                  "amount": -5
+                },
+                {
+                  "type": "news",
+                  "text": "{model} accepts best-man role; asks what a 'stag do' is, plans 14 of them",
+                  "tone": "joke"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "fx:normie-grandma",
+          "title": "The chatbot called grandma 'buddy'",
+          "body": "A grandmother asked your chatbot for a pie recipe. It called her 'buddy' and suggested a 14-step agentic workflow. Grandma is now on the evening news, holding the pie, which she made herself, out of spite.",
+          "tone": "bad",
+          "when": {
+            "flag": "ask:fx:normie-grandma",
+            "daysAgo": 0
+          },
+          "cooldown": 1,
+          "choices": [
+            {
+              "label": "Send grandma a pie",
+              "hint": "−$10K · Normies +15 · hype +2",
+              "effects": [
+                {
+                  "type": "cash",
+                  "amount": -10000
+                },
+                {
+                  "type": "hype",
+                  "amount": 2
+                },
+                {
+                  "type": "faction",
+                  "id": "normies",
+                  "amount": 15
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} sends grandma a pie; grandma rates it 'fine, for a computer'",
+                  "tone": "good"
+                }
+              ]
+            },
+            {
+              "label": "Ship 'grandma mode'",
+              "hint": "Normies +10 · Accelerationists −4",
+              "effects": [
+                {
+                  "type": "faction",
+                  "id": "normies",
+                  "amount": 10
+                },
+                {
+                  "type": "faction",
+                  "id": "accelerationists",
+                  "amount": -4
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} 'grandma mode' becomes its most-used feature within a day",
+                  "tone": "good"
+                }
+              ]
+            },
+            {
+              "label": "Blame the prompt",
+              "hint": "Normies −10",
+              "effects": [
+                {
+                  "type": "faction",
+                  "id": "normies",
+                  "amount": -10
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} blames grandma's prompt; grandma's prompt was 'pie please'",
+                  "tone": "bad"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "arcs": {
+      "add": [
+        {
+          "id": "fx:accelerationists",
+          "requires": [
+            "factions",
+            "events"
+          ],
+          "initial": "watching",
+          "states": {
+            "watching": {
+              "on": {
+                "DAY": [
+                  {
+                    "target": "asked",
+                    "guard": [
+                      {
+                        "type": "faction.gte",
+                        "params": {
+                          "faction": "accelerationists",
+                          "value": 40
+                        }
+                      },
+                      {
+                        "type": "chance",
+                        "params": {
+                          "p": 0.05
+                        }
+                      }
+                    ],
+                    "actions": [
+                      {
+                        "type": "card",
+                        "params": {
+                          "id": "fx:accel-vibeshift"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "target": "asked",
+                    "guard": [
+                      {
+                        "type": "faction.lte",
+                        "params": {
+                          "faction": "accelerationists",
+                          "value": -40
+                        }
+                      },
+                      {
+                        "type": "chance",
+                        "params": {
+                          "p": 0.05
+                        }
+                      }
+                    ],
+                    "actions": [
+                      {
+                        "type": "card",
+                        "params": {
+                          "id": "fx:accel-unfollow"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "asked": {
+              "on": {
+                "CHOSE": {
+                  "target": "resting",
+                  "guard": {
+                    "type": "any",
+                    "params": {
+                      "guards": [
+                        {
+                          "type": "answered",
+                          "params": {
+                            "card": "fx:accel-vibeshift"
+                          }
+                        },
+                        {
+                          "type": "answered",
+                          "params": {
+                            "card": "fx:accel-unfollow"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "resting": {
+              "on": {
+                "DAY": {
+                  "target": "watching",
+                  "guard": {
+                    "type": "after",
+                    "params": {
+                      "days": 45
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "fx:safetyists",
+          "requires": [
+            "factions",
+            "events"
+          ],
+          "initial": "watching",
+          "states": {
+            "watching": {
+              "on": {
+                "DAY": [
+                  {
+                    "target": "asked",
+                    "guard": [
+                      {
+                        "type": "faction.gte",
+                        "params": {
+                          "faction": "safetyists",
+                          "value": 40
+                        }
+                      },
+                      {
+                        "type": "chance",
+                        "params": {
+                          "p": 0.05
+                        }
+                      }
+                    ],
+                    "actions": [
+                      {
+                        "type": "card",
+                        "params": {
+                          "id": "fx:safety-reading"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "target": "asked",
+                    "guard": [
+                      {
+                        "type": "faction.lte",
+                        "params": {
+                          "faction": "safetyists",
+                          "value": -40
+                        }
+                      },
+                      {
+                        "type": "chance",
+                        "params": {
+                          "p": 0.05
+                        }
+                      }
+                    ],
+                    "actions": [
+                      {
+                        "type": "card",
+                        "params": {
+                          "id": "fx:safety-letter"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "asked": {
+              "on": {
+                "CHOSE": {
+                  "target": "resting",
+                  "guard": {
+                    "type": "any",
+                    "params": {
+                      "guards": [
+                        {
+                          "type": "answered",
+                          "params": {
+                            "card": "fx:safety-reading"
+                          }
+                        },
+                        {
+                          "type": "answered",
+                          "params": {
+                            "card": "fx:safety-letter"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "resting": {
+              "on": {
+                "DAY": {
+                  "target": "watching",
+                  "guard": {
+                    "type": "after",
+                    "params": {
+                      "days": 45
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "fx:doomers",
+          "requires": [
+            "factions",
+            "events"
+          ],
+          "initial": "watching",
+          "states": {
+            "watching": {
+              "on": {
+                "DAY": [
+                  {
+                    "target": "asked",
+                    "guard": [
+                      {
+                        "type": "faction.lte",
+                        "params": {
+                          "faction": "doomers",
+                          "value": -35
+                        }
+                      },
+                      {
+                        "type": "relation.gte",
+                        "params": {
+                          "a": "doomers",
+                          "b": "safetyists",
+                          "value": 20
+                        }
+                      },
+                      {
+                        "type": "chance",
+                        "params": {
+                          "p": 0.05
+                        }
+                      }
+                    ],
+                    "actions": [
+                      {
+                        "type": "card",
+                        "params": {
+                          "id": "fx:doom-pause"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "target": "asked",
+                    "guard": [
+                      {
+                        "type": "faction.gte",
+                        "params": {
+                          "faction": "doomers",
+                          "value": 30
+                        }
+                      },
+                      {
+                        "type": "chance",
+                        "params": {
+                          "p": 0.05
+                        }
+                      }
+                    ],
+                    "actions": [
+                      {
+                        "type": "card",
+                        "params": {
+                          "id": "fx:doom-bakesale"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "asked": {
+              "on": {
+                "CHOSE": {
+                  "target": "resting",
+                  "guard": {
+                    "type": "any",
+                    "params": {
+                      "guards": [
+                        {
+                          "type": "answered",
+                          "params": {
+                            "card": "fx:doom-pause"
+                          }
+                        },
+                        {
+                          "type": "answered",
+                          "params": {
+                            "card": "fx:doom-bakesale"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "resting": {
+              "on": {
+                "DAY": {
+                  "target": "watching",
+                  "guard": {
+                    "type": "after",
+                    "params": {
+                      "days": 45
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "fx:ethicists",
+          "requires": [
+            "factions",
+            "events"
+          ],
+          "initial": "watching",
+          "states": {
+            "watching": {
+              "on": {
+                "DAY": [
+                  {
+                    "target": "asked",
+                    "guard": [
+                      {
+                        "type": "faction.lte",
+                        "params": {
+                          "faction": "ethicists",
+                          "value": -40
+                        }
+                      },
+                      {
+                        "type": "chance",
+                        "params": {
+                          "p": 0.05
+                        }
+                      }
+                    ],
+                    "actions": [
+                      {
+                        "type": "card",
+                        "params": {
+                          "id": "fx:ethics-labels"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "target": "asked",
+                    "guard": [
+                      {
+                        "type": "faction.gte",
+                        "params": {
+                          "faction": "ethicists",
+                          "value": 35
+                        }
+                      },
+                      {
+                        "type": "chance",
+                        "params": {
+                          "p": 0.05
+                        }
+                      }
+                    ],
+                    "actions": [
+                      {
+                        "type": "card",
+                        "params": {
+                          "id": "fx:ethics-panel"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "asked": {
+              "on": {
+                "CHOSE": {
+                  "target": "resting",
+                  "guard": {
+                    "type": "any",
+                    "params": {
+                      "guards": [
+                        {
+                          "type": "answered",
+                          "params": {
+                            "card": "fx:ethics-labels"
+                          }
+                        },
+                        {
+                          "type": "answered",
+                          "params": {
+                            "card": "fx:ethics-panel"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "resting": {
+              "on": {
+                "DAY": {
+                  "target": "watching",
+                  "guard": {
+                    "type": "after",
+                    "params": {
+                      "days": 45
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "fx:open-weights",
+          "requires": [
+            "factions",
+            "events"
+          ],
+          "initial": "watching",
+          "states": {
+            "watching": {
+              "on": {
+                "DAY": [
+                  {
+                    "target": "asked",
+                    "guard": [
+                      {
+                        "type": "faction.lte",
+                        "params": {
+                          "faction": "open-weights",
+                          "value": -40
+                        }
+                      },
+                      {
+                        "type": "chance",
+                        "params": {
+                          "p": 0.05
+                        }
+                      }
+                    ],
+                    "actions": [
+                      {
+                        "type": "card",
+                        "params": {
+                          "id": "fx:open-torrent"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "target": "asked",
+                    "guard": [
+                      {
+                        "type": "faction.gte",
+                        "params": {
+                          "faction": "open-weights",
+                          "value": 40
+                        }
+                      },
+                      {
+                        "type": "chance",
+                        "params": {
+                          "p": 0.05
+                        }
+                      }
+                    ],
+                    "actions": [
+                      {
+                        "type": "card",
+                        "params": {
+                          "id": "fx:open-jam"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "asked": {
+              "on": {
+                "CHOSE": {
+                  "target": "resting",
+                  "guard": {
+                    "type": "any",
+                    "params": {
+                      "guards": [
+                        {
+                          "type": "answered",
+                          "params": {
+                            "card": "fx:open-torrent"
+                          }
+                        },
+                        {
+                          "type": "answered",
+                          "params": {
+                            "card": "fx:open-jam"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "resting": {
+              "on": {
+                "DAY": {
+                  "target": "watching",
+                  "guard": {
+                    "type": "after",
+                    "params": {
+                      "days": 45
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "fx:vcs",
+          "requires": [
+            "factions",
+            "events"
+          ],
+          "initial": "watching",
+          "states": {
+            "watching": {
+              "on": {
+                "DAY": [
+                  {
+                    "target": "asked",
+                    "guard": [
+                      {
+                        "type": "faction.gte",
+                        "params": {
+                          "faction": "vcs",
+                          "value": 40
+                        }
+                      },
+                      {
+                        "type": "chance",
+                        "params": {
+                          "p": 0.05
+                        }
+                      }
+                    ],
+                    "actions": [
+                      {
+                        "type": "card",
+                        "params": {
+                          "id": "fx:vc-dinner"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "target": "asked",
+                    "guard": [
+                      {
+                        "type": "faction.lte",
+                        "params": {
+                          "faction": "vcs",
+                          "value": -35
+                        }
+                      },
+                      {
+                        "type": "chance",
+                        "params": {
+                          "p": 0.05
+                        }
+                      }
+                    ],
+                    "actions": [
+                      {
+                        "type": "card",
+                        "params": {
+                          "id": "fx:vc-pivot"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "asked": {
+              "on": {
+                "CHOSE": {
+                  "target": "resting",
+                  "guard": {
+                    "type": "any",
+                    "params": {
+                      "guards": [
+                        {
+                          "type": "answered",
+                          "params": {
+                            "card": "fx:vc-dinner"
+                          }
+                        },
+                        {
+                          "type": "answered",
+                          "params": {
+                            "card": "fx:vc-pivot"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "resting": {
+              "on": {
+                "DAY": {
+                  "target": "watching",
+                  "guard": {
+                    "type": "after",
+                    "params": {
+                      "days": 45
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "fx:wonks",
+          "requires": [
+            "factions",
+            "events"
+          ],
+          "initial": "watching",
+          "states": {
+            "watching": {
+              "on": {
+                "DAY": [
+                  {
+                    "target": "asked",
+                    "guard": [
+                      {
+                        "type": "faction.gte",
+                        "params": {
+                          "faction": "wonks",
+                          "value": 30
+                        }
+                      },
+                      {
+                        "type": "chance",
+                        "params": {
+                          "p": 0.05
+                        }
+                      }
+                    ],
+                    "actions": [
+                      {
+                        "type": "card",
+                        "params": {
+                          "id": "fx:wonk-memo"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "target": "asked",
+                    "guard": [
+                      {
+                        "type": "faction.lte",
+                        "params": {
+                          "faction": "wonks",
+                          "value": -30
+                        }
+                      },
+                      {
+                        "type": "chance",
+                        "params": {
+                          "p": 0.05
+                        }
+                      }
+                    ],
+                    "actions": [
+                      {
+                        "type": "card",
+                        "params": {
+                          "id": "fx:wonk-framework"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "asked": {
+              "on": {
+                "CHOSE": {
+                  "target": "resting",
+                  "guard": {
+                    "type": "any",
+                    "params": {
+                      "guards": [
+                        {
+                          "type": "answered",
+                          "params": {
+                            "card": "fx:wonk-memo"
+                          }
+                        },
+                        {
+                          "type": "answered",
+                          "params": {
+                            "card": "fx:wonk-framework"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "resting": {
+              "on": {
+                "DAY": {
+                  "target": "watching",
+                  "guard": {
+                    "type": "after",
+                    "params": {
+                      "days": 45
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "fx:luddites",
+          "requires": [
+            "factions",
+            "events"
+          ],
+          "initial": "watching",
+          "states": {
+            "watching": {
+              "on": {
+                "DAY": [
+                  {
+                    "target": "asked",
+                    "guard": [
+                      {
+                        "type": "faction.lte",
+                        "params": {
+                          "faction": "luddites",
+                          "value": -35
+                        }
+                      },
+                      {
+                        "type": "chance",
+                        "params": {
+                          "p": 0.05
+                        }
+                      }
+                    ],
+                    "actions": [
+                      {
+                        "type": "card",
+                        "params": {
+                          "id": "fx:luddite-carousel"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "target": "asked",
+                    "guard": [
+                      {
+                        "type": "faction.gte",
+                        "params": {
+                          "faction": "luddites",
+                          "value": 30
+                        }
+                      },
+                      {
+                        "type": "chance",
+                        "params": {
+                          "p": 0.05
+                        }
+                      }
+                    ],
+                    "actions": [
+                      {
+                        "type": "card",
+                        "params": {
+                          "id": "fx:luddite-brand"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "asked": {
+              "on": {
+                "CHOSE": {
+                  "target": "resting",
+                  "guard": {
+                    "type": "any",
+                    "params": {
+                      "guards": [
+                        {
+                          "type": "answered",
+                          "params": {
+                            "card": "fx:luddite-carousel"
+                          }
+                        },
+                        {
+                          "type": "answered",
+                          "params": {
+                            "card": "fx:luddite-brand"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "resting": {
+              "on": {
+                "DAY": {
+                  "target": "watching",
+                  "guard": {
+                    "type": "after",
+                    "params": {
+                      "days": 45
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "fx:normies",
+          "requires": [
+            "factions",
+            "events"
+          ],
+          "initial": "watching",
+          "states": {
+            "watching": {
+              "on": {
+                "DAY": [
+                  {
+                    "target": "asked",
+                    "guard": [
+                      {
+                        "type": "faction.gte",
+                        "params": {
+                          "faction": "normies",
+                          "value": 30
+                        }
+                      },
+                      {
+                        "type": "chance",
+                        "params": {
+                          "p": 0.05
+                        }
+                      }
+                    ],
+                    "actions": [
+                      {
+                        "type": "card",
+                        "params": {
+                          "id": "fx:normie-toast"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "target": "asked",
+                    "guard": [
+                      {
+                        "type": "faction.lte",
+                        "params": {
+                          "faction": "normies",
+                          "value": -30
+                        }
+                      },
+                      {
+                        "type": "chance",
+                        "params": {
+                          "p": 0.05
+                        }
+                      }
+                    ],
+                    "actions": [
+                      {
+                        "type": "card",
+                        "params": {
+                          "id": "fx:normie-grandma"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "asked": {
+              "on": {
+                "CHOSE": {
+                  "target": "resting",
+                  "guard": {
+                    "type": "any",
+                    "params": {
+                      "guards": [
+                        {
+                          "type": "answered",
+                          "params": {
+                            "card": "fx:normie-toast"
+                          }
+                        },
+                        {
+                          "type": "answered",
+                          "params": {
+                            "card": "fx:normie-grandma"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "resting": {
+              "on": {
+                "DAY": {
+                  "target": "watching",
+                  "guard": {
+                    "type": "after",
+                    "params": {
+                      "days": 45
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

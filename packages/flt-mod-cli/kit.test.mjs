@@ -30,7 +30,8 @@ test("private modder kit works against the actual game contract", async (t) => {
         assert.deepEqual(loaded.manifest, json);
         assert.deepEqual((await loadManifest(resolve(input, "mod.example.ts"), runner)).manifest, json);
         const report = await check(input, runner);
-        assert.equal(report.arcs[0].states, 2);
+        // The base game has arcs of its own now (FLT-25/33), so find the template's.
+        assert.equal(report.arcs.find((arc) => arc.id === "fetch-arc").states, 2);
         const sdk = await runner.import(resolve(gameRoot, "packages/flt-mod-sdk/src/index.ts"));
         assert.throws(() => sdk.defineMod({ apiVersion: 2, id: "broken", name: "Broken", version: "1" }));
       });

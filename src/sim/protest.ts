@@ -7,6 +7,9 @@ import { advance, despawn, newWalker } from "./walkers";
 import { gasDiscourse } from "./race/power";
 import { stepWalker } from "./machines/walker";
 import { commsRelief } from "./staff";
+import { defs } from "./defs";
+import { exchange, pairedThoughts } from "./factions/driver";
+import { THOUGHT_TICKS } from "./constants";
 
 const DISCOURSE_PER_CLUSTER = 0.5;
 const DISCOURSE_DECAY = 0.3;
@@ -72,23 +75,39 @@ function planRoute(state: GameState, ax: number, az: number, bx: number, bz: num
   return best ? [best, [bx, bz]] : [[bx, bz]];
 }
 
-/** A spot to picket from: on and beside the path just inside the gate, thickest right at the gate. */
-function pickHome(state: GameState, rng: Rng): Point {
+/** Which side of the path a crowd stands on: 0 spread across it; during a counter-protest −1 (left) and +1 (right). */
+type Side = -1 | 0 | 1;
+
+/**
+ * A spot to picket from: on and beside the path just inside the gate, thickest right at the gate. A counter-protest
+ * splits the lawn: the rally on the right, the crowds it came to shout at on the left, the path between them.
+ */
+function pickHome(state: GameState, rng: Rng, side: Side = 0): Point {
   const g = state.gate;
   const cx = g.x + g.w / 2;
   for (let i = 0; i < 16; i++) {
-    const x = cx - 0.5 + (rng.next() + rng.next() - 1) * 3.6;
+    const x = side === 0 ? cx - 0.5 + (rng.next() + rng.next() - 1) * 3.6 : side < 0 ? cx - 1 - rng.next() * 3.5 : cx + 0.6 + rng.next() * 3.4;
     const z = g.z - 0.45 - Math.pow(rng.next(), 1.4) * 5.2;
     if (standable(state, x, z)) return [x, z];
   }
-  return [cx - 0.5, g.z - 0.8];
+  return [side === 0 ? cx - 0.5 : side < 0 ? cx - 2 : cx + 1.5, g.z - 0.8];
 }
 
-function spawnProtester(state: GameState, rng: Rng, placed: boolean) {
+/** The side a crowd takes (`undefined`: the water crowd). Always 0 with no counter-protest on. */
+function sideOf(state: GameState, crowd: string | undefined): Side {
+  const rallies = state.rallies;
+  if (!rallies || rallies.length === 0) return 0;
+  if (crowd === undefined) return -1;
+  if (rallies.some((r) => r.faction === crowd)) return 1;
+  return rallies.some((r) => r.against.includes(crowd)) ? -1 : 0;
+}
+
+function spawnProtester(state: GameState, rng: Rng, placed: boolean, crowd?: string) {
   const g = state.gate;
   const w = newWalker(state, "protester", g.x + 0.3 + rng.next() * (g.w - 0.6), g.z + 0.35 + rng.next() * 0.6, rng);
   w.machine = stepWalker(w.machine, { type: "PROTEST_STARTED" });
-  const [hx, hz] = pickHome(state, rng);
+  if (crowd !== undefined) w.crowd = w.faction = crowd;
+  const [hx, hz] = pickHome(state, rng, sideOf(state, crowd));
   w.homeX = hx;
   w.homeZ = hz;
   w.timer = rng.int(10, 70);
@@ -112,11 +131,98 @@ function sendHome(state: GameState, w: Walker, rng: Rng) {
 /** Bring the number of protesters at the gate in line with the discourse: newcomers march in, extras wander off. */
 export function syncProtesters(state: GameState, rng: Rng, placed = false) {
   const target = protesterTarget(state);
-  const staying = state.walkers.filter((w) => w.kind === "protester" && w.machine.value !== "leaving");
+  const staying = state.walkers.filter((w) => w.kind === "protester" && w.crowd === undefined && w.machine.value !== "leaving");
   for (let i = staying.length; i < target; i++) spawnProtester(state, rng, placed);
   for (let extra = staying.length - target; extra > 0; extra--) {
     const [w] = staying.splice(rng.int(0, staying.length - 1), 1);
     sendHome(state, w!, rng);
+  }
+  if (state.factions || state.rallies) syncCrowds(state, rng, placed);
+}
+
+/** A protesting faction's own crowd: bigger the angrier it is. */
+export const crowdSize = (meter: number) => Math.max(2, Math.min(8, Math.round((-meter - 50) / 5)));
+/** Faction crowds together never add more than this on top of the water crowd. */
+const MAX_CROWDS = 24;
+
+/** How many of each faction's crowd should be at the gate: the marching factions, plus any rally. */
+export function crowdTargets(state: GameState): Map<string, number> {
+  const out = new Map<string, number>();
+  const f = state.factions;
+  if (f) {
+    for (const def of defs().factions) {
+      const mood = f.moods[def.id];
+      if (mood?.value === "protesting") out.set(def.id, crowdSize(mood.context.meter));
+    }
+  }
+  const water = protesterTarget(state);
+  for (const r of state.rallies ?? []) out.set(r.faction, (out.get(r.faction) ?? 0) + Math.max(r.min, Math.round(r.share * water)));
+  let room = MAX_CROWDS;
+  for (const [id, n] of out) {
+    out.set(id, Math.min(n, room));
+    room -= out.get(id)!;
+  }
+  return out;
+}
+
+/** Faction crowds march in and go home like the water crowd; a counter-protest also moves its targets across the path. */
+function syncCrowds(state: GameState, rng: Rng, placed: boolean) {
+  const want = crowdTargets(state);
+  const have = new Map<string, Walker[]>();
+  for (const w of state.walkers) {
+    if (w.kind !== "protester" || w.machine.value === "leaving") continue;
+    // A counter-protest on: its targets cross to the far side of the path (a crowd already there stays put).
+    const side = sideOf(state, w.crowd);
+    const cx = state.gate.x + state.gate.w / 2;
+    if (side < 0 && w.homeX > cx - 1) {
+      [w.homeX, w.homeZ] = pickHome(state, rng, side);
+      w.route = planRoute(state, w.x, w.z, w.homeX, w.homeZ);
+    }
+    if (w.crowd === undefined) continue;
+    const list = have.get(w.crowd);
+    if (list) list.push(w);
+    else have.set(w.crowd, [w]);
+  }
+  for (const [id, n] of want) for (let i = have.get(id)?.length ?? 0; i < n; i++) spawnProtester(state, rng, placed, id);
+  for (const [id, list] of have) {
+    for (let extra = list.length - (want.get(id) ?? 0); extra > 0; extra--) {
+      const [w] = list.splice(rng.int(0, list.length - 1), 1);
+      sendHome(state, w!, rng);
+    }
+  }
+}
+
+/** Ticks between shouts across the path in a counter-protest, and between chants from a marching faction. */
+const SHOUT_EVERY = 30;
+const CHANT_EVERY = 50;
+
+/** A counter-protest is two crowds shouting at each other; a faction on the march chants. Only faction crowds speak here. */
+function shout(state: GameState, rng: Rng) {
+  const rallies = state.rallies ?? [];
+  if (rallies.length > 0 && state.tick % SHOUT_EVERY === 0) {
+    const r = rallies[(state.tick / SHOUT_EVERY) % rallies.length]!;
+    const us = state.walkers.filter((w) => w.crowd === r.faction && w.route.length === 0 && w.machine.value !== "leaving");
+    const them = state.walkers.filter((w) => w.kind === "protester" && w.crowd !== r.faction && w.route.length === 0 && w.machine.value !== "leaving" && sideOf(state, w.crowd) < 0);
+    const def = defs().factionById(r.faction);
+    if (def && us.length > 0 && them.length > 0) {
+      const a = rng.pick(us);
+      const b = rng.pick(them);
+      // The water crowd speaks for whichever target faction the rally named first.
+      const other = defs().factionById(b.crowd ?? b.faction ?? r.against[0] ?? "") ?? defs().factionById(r.against[0] ?? "");
+      if (other) {
+        const [said, reply] = exchange(rng, def, other);
+        pairedThoughts(state, a, said, def.id, b, reply, other.id);
+        if (state.factions) state.factions.counts.shouts++;
+      }
+    }
+    return;
+  }
+  if (state.factions && state.tick % CHANT_EVERY === 0) {
+    const marching = state.walkers.filter((w) => w.crowd !== undefined && w.route.length === 0 && w.machine.value !== "leaving");
+    if (marching.length === 0 || state.thoughts.filter((t) => t.expiresTick > state.tick).length >= 3) return;
+    const w = rng.pick(marching);
+    const def = defs().factionById(w.crowd!);
+    if (def && def.chants.length > 0) state.thoughts.push({ id: state.nextId++, walkerId: w.id, kind: w.kind, text: rng.pick(def.chants), expiresTick: state.tick + THOUGHT_TICKS / 2, faction: def.id });
   }
 }
 
@@ -139,11 +245,12 @@ export function updateProtesters(state: GameState, rng: Rng) {
     if (--w.timer > 0) continue;
     w.timer = rng.int(30, 90);
     // Someone built on their spot? Find a new one.
-    if (!standable(state, w.homeX, w.homeZ)) [w.homeX, w.homeZ] = pickHome(state, rng);
+    if (!standable(state, w.homeX, w.homeZ)) [w.homeX, w.homeZ] = pickHome(state, rng, sideOf(state, w.crowd));
     const tx = w.homeX + (rng.next() - 0.5) * 1.6;
     const tz = w.homeZ + (rng.next() - 0.5) * 1.2;
     const [gx, gz] = standable(state, tx, tz) ? [tx, tz] : [w.homeX, w.homeZ];
     w.route = planRoute(state, w.x, w.z, gx, gz);
   }
   if (gone) despawn(state, gone);
+  if (state.rallies || state.factions) shout(state, rng);
 }

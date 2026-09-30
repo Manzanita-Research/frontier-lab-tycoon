@@ -61,7 +61,8 @@ export function breakBuilding(state: GameState, b: Building) {
   state.version++;
   state.flags.breakdowns = (state.flags.breakdowns ?? 0) + 1;
   state.flags.lastBreakdown = b.id;
-  addIncident(state, 0.12);
+  // Ops trouble, not a safety story: the factions do not count it (FLT-33).
+  addIncident(state, 0.12, false);
 }
 
 /** Fire in the cluster, an outage at the gateway: the headline, the status page joke, the toast, and the ripple through the crowd. */

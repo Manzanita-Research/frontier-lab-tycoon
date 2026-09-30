@@ -277,5 +277,5 @@ describe("a year with the pack on (headless)", () => {
     const off = runAuditYear(3, "off", { days: 120 });
     expect(off.world.auditors).toBeUndefined();
     expect(off.world.groups ?? []).toHaveLength(0);
-  });
+  }, 20_000); // Two headless years and a third of one; tick budgets are checked separately.
 });

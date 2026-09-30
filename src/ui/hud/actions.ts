@@ -8,7 +8,7 @@ import { fx } from "../../render/fx/state";
 import { skipBeat } from "../../render/fx/beat";
 import { roomAtom, skipNews, viewRoom } from "../../newsroom/state";
 import { setPhoto, takePhoto } from "../juice/photo";
-import { arenaOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, senateOpenAtom, staffOpenAtom } from "./state";
+import { arenaOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, senateOpenAtom, staffOpenAtom } from "./state";
 import { skinActions } from "./skinControl";
 import type { StaffJob } from "../../sim/types";
 import type { HudActions } from "./types";
@@ -84,6 +84,8 @@ export const hudActions: HudActions = {
   },
   dismissPaperMoment: dismiss,
   closeCrumbWiki: dismiss,
+  toggleFactions: () => registry.set(factionsOpenAtom, !registry.get(factionsOpenAtom)),
+  setSafetySpend: (level) => send({ type: "COMMAND", command: { type: "setSafetySpend", level } }),
   keepPlaying: () => send({ type: "KEEP_PLAYING" }),
   newLab: () => send({ type: "NEW_LAB" }),
 

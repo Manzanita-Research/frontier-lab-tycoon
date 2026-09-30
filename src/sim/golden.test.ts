@@ -176,12 +176,15 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // Then Regulatory Capture and the Promise Tracker (FLT-22/23), also on Scrutiny: they arm their card arcs the tick Level 5
 // lands (980 / 1120 / 980) and first move a number or a headline at 1463 / 1603 / 1823 (Capture 1463 / 1603 / 3429,
 // the Promise Tracker 1823 / 1623 / 1823). 200 and 800 still hold.
+// Then the factions and the Water Discourse arc (FLT-33/25). Level 4 lands at 940 / 980 / 880: its rung now names the
+// factions, which wake and first move the World 4 ticks later (944 / 984 / 884). The base-water arc's documentary crew
+// (a new card, Level 5) first moves it at 1963 / 2043 / 2343 (2323 / 2383 / 2403 with the factions off). 200 and 800 hold.
 // FLT-56 lines a walk-out up as a conga line on the founder's route (positions only: same RNG stream, same ids). Only
-// seed 3's Defection (2806) walks more than one person out, so only its 3200 and 4000 moved.
+// seed 3's Defection walks more than one person out before 4000, so only its 4000 moved.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "d3826cd0", 800: "ed628bb9", 1600: "ad77df1a", 2400: "560a4eaf", 3200: "50260ab2", 4000: "86598cd5" },
-  2: { 200: "e548b1af", 800: "552cae60", 1600: "dd876296", 2400: "2d94abf2", 3200: "115d1e56", 4000: "06c4b6de" },
-  3: { 200: "58bb415c", 800: "920699d6", 1600: "b0010f7b", 2400: "03c1eadb", 3200: "a4e1ba73", 4000: "c4212020" },
+  1: { 200: "d3826cd0", 800: "ed628bb9", 1600: "e572590c", 2400: "722cfa55", 3200: "22c99bb6", 4000: "68967430" },
+  2: { 200: "e548b1af", 800: "552cae60", 1600: "cc016f76", 2400: "c0301cb7", 3200: "d96c9353", 4000: "3bbe5608" },
+  3: { 200: "58bb415c", 800: "920699d6", 1600: "4034a696", 2400: "a367296d", 3200: "c48be0ba", 4000: "88393b2d" },
 };
 
 describe("golden runs", () => {

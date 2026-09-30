@@ -20,6 +20,7 @@ import { stagePapers } from "../../sim/race/papers/demo";
 import { stageCollusion } from "../../sim/collusion/demo";
 import { createInitialState } from "../../sim/state";
 import { stageDrama, type DramaMoment } from "../../sim/defection/demo";
+import { OPEN_FAST, runFactions } from "../../sim/factions/headless";
 
 /** A busy campus a few game days in, with thoughts, a crowd and a run in flight (the real opening is quieter: see `openingWorld`). */
 export function fixtureWorld(days = 12, seed = 3): GameState {
@@ -110,6 +111,16 @@ export function fixtureSenate(moment: SenateMoment, seed = 3): GameState {
   return s;
 }
 
+/**
+ * FLT-33: the headless open + fast lab (sim/factions/headless.ts) with the factions on, 60 days in: fans, upset
+ * factions, relations that have moved, a discourse log and walkers who have picked a side. Cached: it is a real run.
+ */
+let factionsWorld: GameState | null = null;
+export function fixtureFactions(): GameState {
+  factionsWorld ??= runFactions(1, OPEN_FAST, 60).world;
+  return factionsWorld;
+}
+
 export const NO_SKINS: SkinPickerVM = {
   open: false,
   reducedMotion: false,
@@ -149,6 +160,9 @@ export interface FixtureOptions {
   senate?: SenateMoment;
   /** The Senate window is open. */
   senateOpen?: boolean;
+  /** FLT-33: the factions on, 16 days in (a member of one is selected); `factionsOpen` opens the panel. */
+  factions?: boolean;
+  factionsOpen?: boolean;
   selected?: number | null;
   event?: string | null;
   tool?: string | null;
@@ -185,8 +199,8 @@ export function fixtureStaged(o: Pick<FixtureOptions, "papers" | "collusion">): 
 }
 
 export function fixtureSnapshot(o: FixtureOptions = {}): Snapshot {
-  const w = o.world ?? (o.audit ? fixtureAudit(o.audit) : o.leapfrog ? fixtureLeapfrog().world : o.papers || o.collusion ? fixtureStaged(o) : o.disaster ? fixtureDisaster() : o.circus ? fixtureCircus(o.circus) : o.senate ? fixtureSenate(o.senate) : fixtureWorld());
-  const selected = o.selected === undefined ? (w.walkers.find((x) => x.kind === "researcher")?.id ?? null) : o.selected;
+  const w = o.world ?? (o.audit ? fixtureAudit(o.audit) : o.leapfrog ? fixtureLeapfrog().world : o.factions ? fixtureFactions() : o.papers || o.collusion ? fixtureStaged(o) : o.disaster ? fixtureDisaster() : o.circus ? fixtureCircus(o.circus) : o.senate ? fixtureSenate(o.senate) : fixtureWorld());
+  const selected = o.selected === undefined ? (w.walkers.find((x) => x.kind === "researcher" && (!o.factions || x.faction))?.id ?? null) : o.selected;
   const snap = makeSnapshot(w, undefined, { selected, follow: false, highlight: null });
   const pendingConfirm = o.confirm
     ? { kind: "hire" as const, cost: 4_000, runwayAfter: 1.8, message: "This leaves 1.8 months of runway. The board will have questions.", command: { type: "hire" as const, job: "sre" as const } }
@@ -218,6 +232,7 @@ export function fixtureInput(o: FixtureOptions = {}): HudInput {
     staffOpen: o.staff ?? false,
     senateOpen: o.senateOpen ?? false,
     zone: null,
+    factionsOpen: o.factionsOpen ?? false,
     arena: { open: true, alert: false, flinch: false, moved: {} },
     room: {
       archive: [FIXTURE_PAPER, FIXTURE_CHAT],

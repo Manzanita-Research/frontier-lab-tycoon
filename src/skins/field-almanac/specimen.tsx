@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { useT } from "../kit";
+import { FactionChip, factionAttrs, useT } from "../kit";
 import type { SlotPropsMap } from "../types";
 import type { InspectorVM, PortraitVM } from "../../ui/hud/types";
 import { binomial, shortName, specimenNo } from "./lore";
@@ -106,6 +106,11 @@ export function Inspector({ inspector: who, layout, actions }: SlotPropsMap["Ins
       <div className="fa-latin">{binomial(who)}</div>
       <div className="fa-role">
         {who.role} · <span className={`fa-mood mood-${who.mood}`}>{who.moodLabel.toLowerCase()}</span>
+        {who.faction && (
+          <>
+            {" "}· flocks with <FactionChip faction={who.faction} className="fa-faction" />
+          </>
+        )}
       </div>
       {!sheet && <Plate who={who} caption={caption} />}
       {shown.length > 0 && (
@@ -150,7 +155,7 @@ const KIND_NOUN = { researcher: "Researcher", agent: "Agent", visitor: "Visitor"
 export function Bubble({ bubble }: SlotPropsMap["Bubble"]) {
   const who = bubble.kind === "agent" ? bubble.speaker : `${KIND_NOUN[bubble.kind]} · ${bubble.speaker}`;
   return (
-    <div className={`bubble bubble-${bubble.kind} fa-bubble`} data-who={who}>
+    <div className={`bubble bubble-${bubble.kind} fa-bubble`} data-who={who} {...factionAttrs(bubble.faction)}>
       {bubble.text}
     </div>
   );

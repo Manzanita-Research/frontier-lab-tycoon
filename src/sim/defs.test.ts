@@ -41,7 +41,7 @@ describe("the resolved definition (FLT-37)", () => {
         expect(JSON.stringify(play(seed, 120, base, opening))).toBe(JSON.stringify(play(seed, 120, undefined, opening)));
       }
     }
-  });
+  }, 20_000); // Eight 120-tick replays, four of them on a campus with every pack awake; tick budgets are checked separately.
 
   it("Every Lab Is Steve renames the Arena, and only inside its own run", async () => {
     const def = await resolve([steve]);

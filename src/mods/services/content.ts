@@ -24,6 +24,8 @@ export interface ContentApi {
   /** Release Leapfrog's benchmarks and livestream mishaps (mods/base-leapfrog). */
   readonly benchmarks: ReadonlyArray<import("../../content/leapfrog").BenchmarkDef>;
   readonly mishaps: ReadonlyArray<import("../../content/leapfrog").MishapDef>;
+  /** FLT-33's factions (mods/base-factions, plus mods/base-water's counter-protesters). */
+  readonly factions: ReadonlyArray<import("../../content/factions").FactionDef>;
   readonly tables: typeof baseTables;
 }
 export class Content extends Context.Service<Content, ContentApi>()("@flt/Content") {}

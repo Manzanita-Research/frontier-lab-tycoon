@@ -1,7 +1,7 @@
 // The Field Trip Badge: tap someone and their badge hangs off the corner of the screen. Thermometer meters for needs,
 // a fact box for what they're thinking, and a big FOLLOW button. On a phone it is a short sheet you can swipe up.
 import { useRef, useState } from "react";
-import { Portrait } from "../kit";
+import { FactionChip, Portrait } from "../kit";
 import { useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import { Icon } from "./art";
@@ -68,6 +68,7 @@ export function Inspector({ inspector: who, layout, actions }: SlotPropsMap["Ins
             <div className={`dd-mood mood-${who.mood}`}>
               <Icon name={MOOD_ICON[who.mood]} size={20} /> {who.moodLabel.toLowerCase()}
               <span className="dd-kind">{who.kindLabel}</span>
+              {who.faction && <FactionChip faction={who.faction} className="dd-faction" />}
             </div>
           </div>
         </div>

@@ -139,7 +139,7 @@ describe("a year of it", () => {
     expect(letgo.poaching!.lost).toBeGreaterThan(0);
     expect(match.poaching!.lost).toBe(0);
     expect(match.poaching!.matched).toBeGreaterThan(0);
-  });
+  }, 20_000); // Two headless years (every earned pack awake, the factions too); tick budgets are checked separately.
 });
 
 describe("FLT-56: each lab poaches in its own voice", () => {

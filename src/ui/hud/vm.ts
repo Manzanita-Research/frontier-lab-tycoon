@@ -28,6 +28,8 @@ import { HELP_BUILDINGS, HELP_LOOP, HELP_NUMBERS, HELP_TITLE } from "../../conte
 import { playableOf, type PlayableInput } from "./playable";
 import { papersOf, paperMomentOf } from "./papers";
 import { collusionOf, crumbWikiOf, investigationOf } from "./collusion";
+import { factionChips, factionsOf } from "./factions";
+import type { FactionChipVM } from "./types";
 import type {
   ArenaRowVM, DramaVM,
   ArenaVM, AuditVM, BillVM, SenateVM, TrackerVM, GoalVM, ReportCardVM, ToneVM, BenchCellVM, DisasterRunVM, DisastersVM, DisasterStageVM, MeterVM, RiskVM, UnderstaffedVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HearingMoveVM, HearingVM, HudVM, LeakVM, SenatorVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
@@ -61,6 +63,8 @@ export interface HudInput {
   zone: number | null;
   /** The Senate window (FLT-22/23) is open. Optional: closed. */
   senateOpen?: boolean;
+  /** FLT-33: the Factions panel is open. Optional: folded. */
+  factionsOpen?: boolean;
   arena: { open: boolean; alert: boolean; flinch: boolean; moved: Record<string, "up" | "down"> };
   /** Release Leapfrog's real-time flourishes (row flashes, blinking badges, solved columns kept on the board, news-cycle history). Optional: none is fine. */
   leapfrog?: MotionView;
@@ -212,7 +216,7 @@ function objectivesOf(s: Snapshot): ObjectivesVM {
   };
 }
 
-function inspectorOf(who: Inspect | null, following: boolean, lab: string): InspectorVM | null {
+function inspectorOf(who: Inspect | null, following: boolean, lab: string, chips: ReadonlyMap<string, FactionChipVM>): InspectorVM | null {
   if (!who) return null;
   const drift = who.kind === "agent" ? (who.needs.find((n) => n.key === "drift")?.value ?? 0) : 0;
   const look = lookOf(who);
@@ -232,6 +236,7 @@ function inspectorOf(who: Inspect | null, following: boolean, lab: string): Insp
     portrait: { kind: who.kind, body: look.body, head: look.head, happiness: who.happiness, drift },
     following,
     badge: String(who.id).padStart(4, "0"),
+    ...(who.faction && chips.has(who.faction) ? { faction: chips.get(who.faction)! } : {}),
   };
 }
 
@@ -335,11 +340,14 @@ function speedOf(value: number): SpeedVM {
   };
 }
 
-function bubblesOf(i: HudInput): BubbleVM[] {
+function bubblesOf(i: HudInput, chips: ReadonlyMap<string, FactionChipVM>): BubbleVM[] {
   const chats = i.snap.chats ?? [];
   // Two people talking say their lines out loud instead of thinking: the visitor first, then your researcher.
   const talking = new Set(chats.flatMap((c) => (c.lines.length ? [c.hostId, c.guestId] : [])));
-  const thoughts = i.snap.thoughts.filter((t) => !talking.has(t.walkerId)).map((t): BubbleVM => ({ id: t.id, walkerId: t.walkerId, kind: t.kind, speaker: i.snap.speakers[t.walkerId] ?? "", text: t.text }));
+  const thoughts = i.snap.thoughts.filter((t) => !talking.has(t.walkerId)).map((t): BubbleVM => {
+    const faction = t.faction ? chips.get(t.faction) : undefined;
+    return { id: t.id, walkerId: t.walkerId, kind: t.kind, speaker: i.snap.speakers[t.walkerId] ?? "", text: t.text, ...(faction ? { faction } : {}) };
+  });
   const said = chats.flatMap((c) => c.lines.slice(0, 2).map((text, k): BubbleVM => {
     const walkerId = k === 0 ? c.guestId : c.hostId;
     return { id: -(c.id * 2 + k), walkerId, kind: k === 0 ? "visitor" : "researcher", speaker: c.names?.[k] || i.snap.speakers[walkerId] || "", text, speech: true };
@@ -926,18 +934,20 @@ export function hudViewModel(i: HudInput): HudVM {
   const build = buildOf(i);
   const items = earnedItems(build.items, play);
   const { event, era } = eventOf(i);
+  // Snapshots from before FLT-33 (fixtures, old links) have no `factions`: that is "off".
+  const chips = factionChips(i.snap.factions);
   return {
     apiVersion: SKIN_API_VERSION,
     stats: statsOf(i),
     training: trainingOf(i.snap),
     objectives: objectivesOf(i.snap),
-    inspector: inspectorOf(i.snap.inspect, i.follow, i.snap.labName),
+    inspector: inspectorOf(i.snap.inspect, i.follow, i.snap.labName, chips),
     buildItems: items,
     buildTip: build.tip,
     speed: speedOf(i.speed),
     staff: staffOf(i, play.staff),
     senate: senateOf(i),
-    bubbles: bubblesOf(i),
+    bubbles: bubblesOf(i, chips),
     ticker: i.news.slice(-TICKER_ITEMS).map((n) => ({ id: n.id, text: n.text, tone: n.tone })),
     toasts: spokenToasts(i).map((t) => ({ id: t.id, text: t.text, tone: t.tone })),
     // One hint at a time, and none while a toast is talking; the gateway hint is redundant once a toast has said it.
@@ -963,6 +973,7 @@ export function hudViewModel(i: HudInput): HudVM {
     paperMoment: event || era ? null : paperMomentOf(i.snap, play.visible.papers, i.dismissed ?? []),
     collusion: collusionOf(i.snap),
     crumbWiki: event || era ? null : crumbWikiOf(i.snap, i.dismissed ?? []),
+    factions: factionsOf(i.snap.factions, i.factionsOpen ?? false),
     eraCard: era,
     outcome: outcomeOf(i),
     audit: auditOf(i.snap),
