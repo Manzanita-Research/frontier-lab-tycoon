@@ -8,6 +8,8 @@ import type { GameState } from "../types";
 import { managerName } from "./driver";
 import { endingById } from "./pack";
 import type { Look } from "./state";
+import { labNumberOf, refoundView, type RefoundView } from "./lineage";
+import { memoView, type MemoView } from "./memo";
 
 export interface FrontPage {
   kicker: string;
@@ -37,6 +39,8 @@ export interface EndingView {
   tone: "good" | "bad" | "neutral";
   /** Can the player keep watching (The Takeover, Regulated, Captured), or has time stopped (Acqui-hired, The Pivot)? */
   keepPlaying: boolean;
+  /** What the end screen offers first (FLT-57): "Found a new lab", or keep going. */
+  next: { action: "refound" | "keepPlaying"; label: string; prompt: string };
   paper: FrontPage;
 }
 
@@ -60,6 +64,12 @@ export interface EndingsView {
   strip: string;
   /** The whole run summary, ready for the clipboard. */
   summary: string;
+  /** Lab #1, #2, ...: how many labs this founder has run (FLT-57). */
+  labNumber: number;
+  /** The perks "Found a new lab" offers, once an ending that leads there has its front page out. */
+  refound: RefoundView | null;
+  /** The Memo's countdown, then its aftermath (FLT-57). */
+  memo: MemoView | null;
 }
 
 /** The squares for eras 1 to 4, and the stamp the strip ends on for each ending. */
@@ -112,6 +122,7 @@ export function endingsView(s: GameState): EndingsView | null {
           title: def.title,
           tone: def.tone,
           keepPlaying: def.keepPlaying,
+          next: { action: def.next.action, label: fill(def.next.label), prompt: fill(def.next.prompt) },
           paper: {
             kicker: fill(def.paper.kicker),
             headline: fill(def.paper.headline),
@@ -127,8 +138,9 @@ export function endingsView(s: GameState): EndingsView | null {
       : null;
   const daily = e.daily ? dailyLabel(e.daily) : null;
   const strip = eraStrip(eraDays, days) + (def ? (ENDING_EMOJI[def.id] ?? "📰") : "");
+  const labNumber = labNumberOf(s);
   const summary = [
-    `Frontier Lab Tycoon · ${daily ? `Today's lab, ${daily}` : `seed ${s.seed}`}`,
+    `Frontier Lab Tycoon · ${daily ? `Today's lab, ${daily}` : `seed ${s.seed}`}${labNumber > 1 ? ` · Lab #${labNumber}` : ""}`,
     `${s.labName}${def ? ` → ${def.title}` : ""}`,
     strip,
     `📅 ${n(stats.days)} days · ✨ ${n(stats.peakVibes)} peak Vibes · 🚀 ${n(stats.models)} models`,
@@ -148,6 +160,9 @@ export function endingsView(s: GameState): EndingsView | null {
     seed: s.seed,
     strip,
     summary,
+    labNumber,
+    refound: ending?.next.action === "refound" ? refoundView(s) : null,
+    memo: memoView(s),
   };
 }
 

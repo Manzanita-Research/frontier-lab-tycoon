@@ -6,6 +6,7 @@ import type { GameState } from "../types";
 import { initialStored } from "../machines/run";
 import { arcMachine } from "../machines/arc";
 import { ENDINGS_PACK } from "./pack";
+import type { MemoState } from "./memo";
 
 /** Presentation cues an ending's chart sets with `look.set` (the renderer and the HUD read them; the sim never does). */
 export type Look = Record<string, string | number | boolean>;
@@ -39,6 +40,8 @@ export interface EndingsState {
   eraDays: number[];
   /** Today's lab: the date key (`2026-09-30`) when this is the daily seed, so the summary can say so. */
   daily: string | null;
+  /** FLT-57: the Memo, once a box is ticked (absent before, and in saves from before FLT-57). */
+  memo?: MemoState;
 }
 
 export function createEndings(): EndingsState {

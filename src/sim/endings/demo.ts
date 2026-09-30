@@ -47,7 +47,7 @@ function lateGame(): GameState {
 export function stageEndingMoment(moment: string): GameState {
   const s = lateGame();
   if (moment === "memo") {
-    until(s, (w) => openEventOf(w)?.id === "memo", 4, true);
+    until(s, (w) => openEventOf(w)?.id === "memo", 8, true);
     return s;
   }
   // Every other scene is The Memo answered one way or the other (the goals machine steps aside), then the ending.

@@ -7,6 +7,7 @@ import type { CollusionState, Investigation } from "./collusion/state";
 import type { NeedKey } from "../content/needs";
 import type { DisastersState } from "./disasters/types";
 import type { EndingsState } from "./endings/state";
+import type { Lineage } from "./endings/lineage";
 import type { ArcStored } from "./machines/arc";
 import type { EconomyStored } from "./machines/economy";
 import type { GoalsStored } from "./machines/goals";
@@ -303,4 +304,6 @@ export interface GameState {
   investigations?: Record<string, Investigation>;
   /** FLT-11: The Memo and the endings; absent until `enableEndings` (older saves and baseline runs keep the win/lose-only game). */
   endings?: EndingsState;
+  /** FLT-57: a lab founded after the last one ended (Lab #2 on): its number, the founder's name and the perk it kept. Absent on Lab #1. */
+  lineage?: Lineage;
 }

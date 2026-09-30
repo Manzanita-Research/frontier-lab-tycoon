@@ -16,6 +16,7 @@ import type { Rng } from "../rng";
 import type { GameState } from "../types";
 import { checkCall, passes, runVerb, STATS, type VerbEnv } from "../verbs";
 import { updateAutopilot } from "./autopilot";
+import { dailyMemo, offerMemo, updateMemo } from "./memo";
 import { ENDING_RULES, ENDINGS, MEMO_OFFER, MEMO_RACE, MEMO_SLOW, endingById, type EndingDef } from "./pack";
 import type { EndingsState } from "./state";
 
@@ -39,6 +40,14 @@ export const ENDING_STATS: Record<string, (state: GameState) => number> = {
   broke: (s) => (s.cash < SCENARIO.brokeBelow ? 1 : 0),
   deadline: (s) => (s.day >= SCENARIO.deadlineDay && s.goals.value !== "won" ? 1 : 0),
   won: (s) => (s.goals.value === "won" ? 1 : 0),
+  /**
+   * The hook for Escaped (FLT-57): 1 once an escaped agent's own lab tops the Arena. The Sandbox Escape (FLT-5) owns
+   * `escape.rank`, the rank of Escaped Agent Inc.; until it exists this reads 0 and no ending names it. See the pack's README.
+   */
+  escapedAhead: (s) => {
+    const rank = (s as { escape?: { rank?: number } }).escape?.rank;
+    return rank !== undefined && rank <= ENDING_RULES.takeover.aheadRank ? 1 : 0;
+  },
 };
 export const ENDING_STAT_NAMES = Object.keys(ENDING_STATS);
 
@@ -172,11 +181,9 @@ export function dailyEndings(state: GameState, rng: Rng) {
   }
   const era = eraOfState(state);
   while (e.eraDays.length < era) e.eraDays.push(state.day);
+  dailyMemo(state);
   if (e.run) return;
-  if (era >= ENDING_RULES.memo.era && state.flags["memo:offered"] === undefined) {
-    state.flags["memo:offered"] = state.day;
-    state.flags[MEMO_OFFER] = state.day;
-  }
+  if (era >= ENDING_RULES.memo.era && state.flags["memo:offered"] === undefined) offerMemo(state);
   const env = { tick: state.tick, day: state.day, roll: dieOf(state.tick), stats: statsOf(state), ctx: { enteredTick: 0, progress: 0, hours: 0 } };
   for (const def of ENDINGS) {
     if (def.trigger.every((g) => passes(g as never, env))) {
@@ -189,7 +196,9 @@ export function dailyEndings(state: GameState, rng: Rng) {
 /** Once a tick: the running ending's chart, and the autopilot. */
 export function updateEndings(state: GameState, rng: Rng) {
   const e = state.endings;
-  if (!e?.run) return;
+  if (!e) return;
+  updateMemo(state);
+  if (!e.run) return;
   updateAutopilot(state, e, rng);
   if (e.endedDay !== null) return;
   const def = endingById(e.id!)!;

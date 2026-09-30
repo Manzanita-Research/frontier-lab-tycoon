@@ -28,6 +28,8 @@ export function activeConditions(state: GameState): Set<ThoughtCondition> {
   if (state.waterDiscourse >= 12) c.add("discourse");
   if (state.walkers.filter((w) => w.kind === "protester").length >= CROWDING_PROTESTERS) c.add("protest");
   for (const race of raceConditions(state)) c.add(race);
+  const memo = state.endings?.memo?.choice;
+  if (memo) c.add(memo === "race" ? "memoRace" : "memoSlow");
   return c;
 }
 
