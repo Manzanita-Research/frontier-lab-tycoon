@@ -14,12 +14,13 @@ export function Bubble({ bubble }: SlotPropsMap["Bubble"]) {
   );
 }
 
-const TONE_GLYPH: Record<ToneVM | "hint", keyof typeof GLYPHS> = {
+const TONE_GLYPH: Record<ToneVM | "hint" | "warn", keyof typeof GLYPHS> = {
   good: "star",
   bad: "warn",
   joke: "laugh",
   neutral: "info",
   hint: "tip",
+  warn: "warn",
 };
 
 /** A toast as a sticker: a die-cut white edge round a coloured pill. A tap peels it off (a hint stays until it comes true). */
