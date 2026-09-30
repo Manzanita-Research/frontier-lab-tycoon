@@ -4,7 +4,7 @@ import { HALF, rectCenter, worldX, worldZ } from "../render/coords";
 import { Anchored } from "../render/overlay";
 import { getReach } from "../sim/pathfind";
 import { formatMoney } from "../sim/format";
-import { atoms, sim } from "../app/game";
+import { atoms, send, sim } from "../app/game";
 import { useApp } from "../app/hooks";
 
 interface Live {
@@ -180,6 +180,33 @@ function Reason() {
   );
 }
 
+/**
+ * The coach's "read their mind" step (FLT-58): a "psst" over one researcher who is out on the paths, the first one by id, so it does
+ * not hop between people. The coach's ring finds it by `data-coach-active`; clicking it opens their card like clicking them does.
+ */
+function PeekTag() {
+  const coach = useApp(atoms.coach);
+  const who = useRef<number | null>(null);
+  if (coach?.target !== "map:researcher") return null;
+  return (
+    <Anchored
+      className="peektag"
+      pos={(out) => {
+        const w = sim.world.walkers.find((o) => o.kind === "researcher" && o.machine.value !== "inside" && o.machine.value !== "quitting");
+        who.current = w?.id ?? null;
+        if (!w) return false;
+        const a = sim.alpha;
+        out.set(w.px + (w.x - w.px) * a - HALF, 1.9, w.pz + (w.z - w.pz) * a - HALF);
+        return true;
+      }}
+    >
+      <button type="button" data-coach="map:researcher" data-coach-active="" onClick={() => who.current !== null && send({ type: "SELECT", id: who.current })}>
+        psst… 💭
+      </button>
+    </Anchored>
+  );
+}
+
 /** The name of the walker whose card is open, on the ground beside them. */
 function NameTag() {
   const inspect = useApp(atoms.inspect);
@@ -206,6 +233,7 @@ export function WorldOverlay() {
   return (
     <div className="world">
       <NameTag />
+      <PeekTag />
       <CoinPops />
       <NoPath />
       <BrokenLabels />

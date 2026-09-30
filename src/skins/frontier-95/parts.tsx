@@ -34,7 +34,8 @@ export function Win({
   attrs?: Record<string, string | undefined>;
 }) {
   return (
-    <section className={`f95-win ${className}`} aria-label={label ?? (typeof title === "string" ? title : undefined)} role={role} {...attrs}>
+    // An open window: the coach's balloon keeps off it (FLT-58), unless it is the window the coach is pointing at.
+    <section className={`f95-win ${className}`} aria-label={label ?? (typeof title === "string" ? title : undefined)} role={role} data-coach-avoid="" {...attrs}>
       <div className={`f95-tb ${onTitleClick ? "clickable" : ""}`} onClick={onTitleClick}>
         {icon && <Ico name={icon} size={18} />}
         <span className="f95-tt">{title}</span>

@@ -23,6 +23,8 @@ import type { GameState } from "./types";
 export const GRID_SIZE = 24;
 export const START_CASH = 5_000_000;
 const START_CAPABILITY = 10;
+/** The garage's first model is a small one (FLT-58): about a minute and a half at 1× on the starting Cluster. */
+export const FIRST_RUN_COST = 100;
 
 /** A quiet campus: the gate, a short connected stub, compute, three researchers and one agent. */
 export function createInitialState(seed = 1, opening: "garage" | "campus" = "garage"): GameState {
@@ -57,7 +59,7 @@ export function createInitialState(seed = 1, opening: "garage" | "campus" = "gar
     buildings: [],
     walkers: [],
     economy: initialStored(economyMachine, { lastBailout: null }),
-    training: { ...initialStored(trainingMachine, { run: 1, progress: 0, cost: 300, name: modelName(1, rng, 0) }), value: "idle" },
+    training: { ...initialStored(trainingMachine, { run: 1, progress: 0, cost: opening === "garage" ? FIRST_RUN_COST : 300, name: modelName(1, rng, 0) }), value: "idle" },
     models: [],
     news: [],
     thoughts: [],

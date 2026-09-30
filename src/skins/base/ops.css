@@ -172,6 +172,22 @@
   box-shadow: 0 2px 0 color-mix(in srgb, var(--flt-color-line) 75%, transparent);
   pointer-events: none;
 }
+/* The coach's "read their mind" pointer (FLT-58): clickable, unlike the other tags. */
+.peektag {
+  transform: translate(-50%, -100%);
+}
+.peektag button {
+  padding: 2px 9px;
+  border: 2px solid var(--ink);
+  border-radius: 11px;
+  background: var(--cream);
+  color: var(--ink);
+  font: 900 12px var(--font);
+  white-space: nowrap;
+  cursor: pointer;
+  pointer-events: auto;
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--flt-color-line) 75%, transparent);
+}
 .stafftag.job-sre {
   background: #ffc978;
 }

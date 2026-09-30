@@ -59,4 +59,15 @@ describe("placeBalloon", () => {
     expect(none.x).toBeGreaterThan(view.w / 2);
     expect(none.y).toBeGreaterThan(view.h / 2);
   });
+
+  it("steps around the windows it is told to avoid (FLT-58: the coach never covers a card)", () => {
+    const anchor = { x: 600, y: 400, w: 200, h: 60 };
+    const card = { x: 820, y: 300, w: 400, h: 300 };
+    const p = placeBalloon(anchor, box, view, { prefer: ["right", "left"], avoid: [card] });
+    expect(p.side).toBe("left");
+    expect(overlaps(p, card)).toBe(false);
+    const corner = { x: view.w - 500, y: view.h - 300, w: 500, h: 300 };
+    const none = placeBalloon(null, box, view, { avoid: [corner] });
+    expect(overlaps(none, corner)).toBe(false);
+  });
 });

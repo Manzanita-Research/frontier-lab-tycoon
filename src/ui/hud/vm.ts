@@ -119,7 +119,8 @@ function statsOf(i: HudInput): StatsVM {
   const s = i.snap;
   const v = s.vibes;
   const race = s.race;
-  const runwayLow = s.runway !== null && s.runway < 6;
+  // "Low" means the same as the spending dialog: under three months (FLT-58: six fired in the first minutes of a healthy lab).
+  const runwayLow = s.runway !== null && s.runway < 3;
   const date = formatDate(s.day);
   return {
     labName: s.labName,
@@ -320,7 +321,10 @@ function eventOf(i: HudInput): { event: EventVM | null; era: HudVM["eraCard"] } 
       tone: def.tone,
       stripe: def.stripe ?? TONE_LABEL[def.tone],
       kind: def.kind === "auction" || def.kind === "response" || def.kind === "stream" ? def.kind : "plain",
-      choices: def.choices.map((c, k) => ({ label: c.label, hint: fillTemplate(c.hint, vars), key: k + 1 })),
+      choices: def.choices.map((c, k) => {
+        const blocked = i.snap.eventBlocked?.[k];
+        return blocked ? { label: c.label, hint: blocked, key: k + 1, disabled: blocked } : { label: c.label, hint: fillTemplate(c.hint, vars), key: k + 1 };
+      }),
       paddles: def.kind === "auction" ? rivals.map((r, k) => ({ id: r.id, name: r.short, color: r.color, number: 200 + ((r.score * 7 + k * 31) % 800) })) : [],
       response: def.kind === "response" ? responseOf(i.snap, vars) : null,
       stream: def.kind === "stream" ? streamOf(i.snap, def.id, vars) : null,
@@ -632,8 +636,10 @@ export function hudViewModel(i: HudInput): HudVM {
       levelName: play.levelName,
       goal: {
         ...play.goal,
-        line: play.goal.text ? `${play.goal.text} · ${Math.min(play.goal.current, play.goal.target)}/${play.goal.target}` : "",
-        ratio: play.goal.target > 0 ? Math.max(0, Math.min(1, play.goal.current / play.goal.target)) : 0,
+        // The sim says the progress in words when a count alone would not ("$26K of $40K a day · 3 of 12 visitors").
+        progressText: play.goal.status ?? `${Math.min(play.goal.current, play.goal.target)}/${play.goal.target}`,
+        line: play.goal.text ? `${play.goal.text} · ${play.goal.status ?? `${Math.min(play.goal.current, play.goal.target)}/${play.goal.target}`}` : "",
+        ratio: play.goal.target > 0 ? Math.max(0, Math.min(1, play.goal.lowerIsBetter ? (play.goal.current > 0 ? play.goal.target / play.goal.current : 0) : play.goal.current / play.goal.target)) : 0,
       },
       teasers: play.teasers.map((t) => ({ ...t })),
     },

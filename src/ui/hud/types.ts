@@ -272,6 +272,8 @@ export interface GoalVM {
   target: number;
   /** "Ship your first model · 0/1" */
   line: string;
+  /** Just the progress, for a skin that shows it on its own line: "0/1", "$26K of $40K a day · 3 of 12 visitors". */
+  progressText: string;
   /** 0 to 1 */
   ratio: number;
 }
@@ -294,8 +296,10 @@ export interface CoachVM {
   step: number;
   of: number;
   text: string;
-  /** "start", "build:path", "build:hall", "training", "build:gateway", "stat:runway", "goals" or "map:suggest". */
+  /** "start", "build:path", "build:hall", "speed", "map:researcher", "training", "build:gateway", "stat:runway", "goals" or "map:suggest". */
   target: string;
+  /** Dim everything but the target (a build step). Otherwise only the ring shows: nothing is dimmed while you wait. */
+  dim?: boolean;
   /** An "info" line (waitFor "timer") fades on its own; the others wait for the action. */
   waitFor: "action" | "timer";
   canSkip: boolean;
@@ -325,6 +329,8 @@ export interface ChoiceVM {
   hint: string;
   /** 1 to 3: pressing the key picks it. */
   key: number;
+  /** Why it can't be taken right now (a bid bigger than the bank): draw it greyed out, with this as its hint. */
+  disabled?: string;
 }
 
 export interface AuctionPaddleVM {

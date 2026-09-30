@@ -794,6 +794,17 @@ button {
   font-variant-numeric: tabular-nums;
   color: #a4581f;
 }
+/* A choice you can't take right now (a bid bigger than the bank, FLT-58), in every skin: greyed out, its hint says why. */
+.choice:disabled,
+.dd-answer:disabled,
+.gc-choice:disabled,
+.kn-choice:disabled,
+.sd-choice:disabled,
+.f95-choices .f95-btn:disabled {
+  opacity: 0.5;
+  filter: grayscale(1);
+  cursor: not-allowed;
+}
 .choice.plain {
   justify-content: center;
   padding: 11px 16px;

@@ -24,6 +24,9 @@ export const CONTRACTOR_FEE = 60_000;
 /** The contractor's fix is a patch job. */
 export const CONTRACTOR_REPAIRED_TO = 0.8;
 
+/** What gives out first on the ladder, in order of preference: the funniest thing that is there. */
+const FIRST_TO_BREAK = ["kombucha", "gateway", "cluster"] as const;
+
 /** Buildings that wear out (not scenery). */
 export const wearsOut = (b: Building): boolean => !BUILDINGS[b.kind].scenery;
 
@@ -87,6 +90,14 @@ const attended = (state: GameState, b: Building) => state.staff.some((s) => s.jo
 /** Once a day: everything wears a little, and some of it gives out. */
 export function dailyBreakdowns(state: GameState, rng: Rng) {
   if (!pressureReady(state)) return;
+  // On the ladder the first breakdown is a lesson, not a dice roll: a few days after SREs can be hired, the Kombucha Bar
+  // (or failing that the Gateway, or the Cluster) gives out, and nothing else breaks before it (FLT-58).
+  if (state.flags.firstBreakdownDay !== undefined && state.flags.breakdowns === undefined) {
+    if (state.day < state.flags.firstBreakdownDay) return;
+    const first = FIRST_TO_BREAK.map((kind) => state.buildings.find((b) => b.kind === kind && !b.broken)).find(Boolean);
+    if (first) breakDown(state, rng, first);
+    return;
+  }
   const inside = new Map<number, number>();
   for (const w of state.walkers) if (w.kind !== "agent" && w.machine.value === "inside") inside.set(w.targetId, (inside.get(w.targetId) ?? 0) + 1);
   let halls = 0;

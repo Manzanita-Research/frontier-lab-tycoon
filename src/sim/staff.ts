@@ -330,6 +330,8 @@ function finish(state: GameState, rng: Rng, s: Staffer) {
       if (b?.broken) {
         repairBuilding(state, b);
         state.flags.lastRepaired = b.id;
+        // Level 3's goal wants a fix (FLT-58); counted only while it is the goal.
+        if (state.progression?.context.level === 3) state.flags.repaired = (state.flags.repaired ?? 0) + 1;
         pushNews(state, rng, "repaired");
       }
       break;

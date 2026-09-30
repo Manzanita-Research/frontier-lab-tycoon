@@ -5,6 +5,7 @@ import type { CoachMark } from "../content/coach";
 import type { ProgressView, UnlockCard, HudPanel } from "../content/progression";
 import type { PlaceableKind } from "../content/buildings";
 import { runwayMonths } from "../sim/format";
+import { auctionBlocked } from "../sim/race/finance";
 import { protesterCount } from "../sim/protest";
 import { inspectWalker, type Inspect } from "../sim/inspect";
 import { thoughtBoard, type ThoughtRow } from "../sim/mind";
@@ -81,6 +82,8 @@ export interface Snapshot {
   goals: GoalProgress[];
   outcome: Outcome;
   event: OpenEvent | null;
+  /** For the open card, why each choice can't be taken (null if it can): an auction bid you can't afford (FLT-58). */
+  eventBlocked?: (string | null)[];
   protesters: number;
   discourse: number;
   /** The Thoughts panel: everyone's thought, counted, most common first. */
@@ -152,6 +155,7 @@ export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO
     goals: s.goals.context.goals.map((g) => ({ ...g })),
     outcome: outcomeOf(s),
     event: openEventOf(s),
+    eventBlocked: openEventOf(s)?.id === "computeAuction" ? auctionBlocked(s) : [],
     protesters: protesterCount(s),
     discourse: s.waterDiscourse,
     board: thoughtBoard(s).slice(0, BOARD_ROWS),
