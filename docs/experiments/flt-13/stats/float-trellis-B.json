@@ -1,0 +1,32 @@
+{
+  "name": "float-trellis-B",
+  "raw_bytes": 16504160,
+  "blender_bytes": 488120,
+  "final_bytes": 103148,
+  "blender_seconds": 16,
+  "raw_tris": 486539,
+  "raw_verts": 314368,
+  "decimated_tris": 4973,
+  "final_tris": 4814,
+  "final_size_game_xyz": [
+    2.86,
+    1.753,
+    1.384
+  ],
+  "scale_applied": 2.85834,
+  "had_texture": true,
+  "exposure_gain": 1.374,
+  "rot_y": 0,
+  "palette_faces": {
+    "cream": 808,
+    "cream-dark": 3104,
+    "ink": 49,
+    "white": 176,
+    "steel-light": 465,
+    "steel": 39,
+    "steel-dark": 13,
+    "banner-orange": 177,
+    "banner-yellow": 57,
+    "water-blue": 85
+  }
+}

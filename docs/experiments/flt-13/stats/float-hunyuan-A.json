@@ -1,0 +1,32 @@
+{
+  "name": "float-hunyuan-A",
+  "raw_bytes": 14770413,
+  "blender_bytes": 470448,
+  "final_bytes": 110796,
+  "blender_seconds": 4,
+  "raw_tris": 50000,
+  "raw_verts": 25002,
+  "decimated_tris": 4600,
+  "final_tris": 4600,
+  "final_size_game_xyz": [
+    2.86,
+    2.115,
+    1.502
+  ],
+  "scale_applied": 2.8838,
+  "had_texture": true,
+  "exposure_gain": 1.359,
+  "rot_y": 90,
+  "palette_faces": {
+    "cream": 1208,
+    "cream-dark": 583,
+    "ink": 946,
+    "white": 348,
+    "steel-light": 227,
+    "steel": 26,
+    "steel-dark": 21,
+    "banner-orange": 329,
+    "banner-yellow": 55,
+    "water-blue": 857
+  }
+}

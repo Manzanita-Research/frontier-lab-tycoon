@@ -3,6 +3,7 @@
 //
 //   node scripts/fal3d/generate.mjs image <subject>                    styled concept image B from the procedural render A
 //   node scripts/fal3d/generate.mjs model <subject> <A|B> <gen>        one image-to-3D generation (gen: tripo | hunyuan | trellis)
+//   node scripts/fal3d/generate.mjs refetch <subject> <A|B> <gen> <requestId>   re-download a finished request (free)
 //   node scripts/fal3d/generate.mjs ledger                             print the running total
 //
 // Every call is appended to docs/experiments/flt-13/ledger.csv before the next one starts, and the script refuses to
@@ -55,11 +56,40 @@ function guard(endpoint) {
 async function upload(path) {
   return fal.storage.upload(new File([readFileSync(path)], path.split("/").pop(), { type: "image/png" }));
 }
-/** The first File-like value in a result whose url is a .glb (Fal names it model_glb or model_mesh depending on the model). */
-function pickGlb(data) {
-  for (const v of Object.values(data ?? {})) if (v && typeof v === "object" && typeof v.url === "string" && /\.glb(\?|$)/i.test(v.url)) return v.url;
-  for (const v of Object.values(data ?? {})) if (v && typeof v === "object" && typeof v.url === "string") return v.url;
-  throw new Error("no model file in the result: " + Object.keys(data ?? {}).join(","));
+/** Every downloadable file in a result, whatever the key (Fal names them differently per model, and Hunyuan's "model_glb" is an OBJ). */
+function filesIn(data) {
+  const seen = new Map();
+  const walk = (v) => {
+    if (!v || typeof v !== "object") return;
+    if (typeof v.url === "string") seen.set(v.url, v);
+    for (const child of Object.values(v)) walk(child);
+  };
+  walk(data);
+  return [...seen.values()];
+}
+const isGlb = (f) => /\.glb(\?|$)/i.test(f.url) || f.content_type === "model/gltf-binary";
+const isObj = (f) => /\.obj(\?|$)/i.test(f.url) || f.content_type === "model/obj";
+
+/** Saves a result as raw/<name>.glb, or as a raw/<name>/ folder (model.obj, material.mtl, texture) when the model comes back as OBJ. */
+async function saveModel(data, name) {
+  const files = filesIn(data);
+  const glb = files.find(isGlb);
+  if (glb) {
+    await download(glb.url, join(RAW, `${name}.glb`));
+    return { path: join(RAW, `${name}.glb`), kind: "glb", bytes: glb.file_size ?? 0 };
+  }
+  const obj = files.find(isObj);
+  if (!obj) throw new Error("no model file in the result: " + files.map((f) => f.content_type).join(","));
+  const dir = join(RAW, name);
+  mkdirSync(dir, { recursive: true });
+  await download(obj.url, join(dir, "model.obj"));
+  let bytes = obj.file_size ?? 0;
+  for (const f of files) {
+    if (f === obj || (f.content_type ?? "").startsWith("model/") || !f.file_name || /preview/i.test(f.file_name)) continue;
+    await download(f.url, join(dir, f.file_name));
+    bytes += f.file_size ?? 0;
+  }
+  return { path: join(dir, "model.obj"), kind: "obj", bytes };
 }
 async function run(endpoint, input, label, retry = true) {
   guard(endpoint);
@@ -96,10 +126,16 @@ if (cmd === "ledger") {
   if (!g || !["A", "B"].includes(ref)) throw new Error("usage: model <subject> <A|B> <tripo|hunyuan|trellis>");
   const image = await upload(join(OUT, "ref", `${subject}-${ref}.png`));
   const { res, seconds } = await run(g.endpoint, g.input(image), [subject, `${ref}/${gen}`]);
-  const file = join(RAW, `${subject}-${gen}-${ref}.glb`);
-  await download(pickGlb(res.data), file);
-  record(g.endpoint, subject, `${ref}/${gen}`, PRICE[g.endpoint], { seconds, requestId: res.requestId, note: "ok" });
-  console.log(`${subject} ${gen}-${ref}: saved ${file} (${seconds.toFixed(0)} s), total $${total().toFixed(2)}`);
+  const saved = await saveModel(res.data, `${subject}-${gen}-${ref}`);
+  record(g.endpoint, subject, `${ref}/${gen}`, PRICE[g.endpoint], { seconds, requestId: res.requestId, note: `ok ${saved.kind} ${saved.bytes}` });
+  console.log(`${subject} ${gen}-${ref}: saved ${saved.path} (${saved.kind}, ${(saved.bytes / 1e6).toFixed(1)} MB, ${seconds.toFixed(0)} s), total $${total().toFixed(2)}`);
+} else if (cmd === "refetch") {
+  // Re-download a finished request by id. Free: it reads the stored result and generates nothing.
+  const [, , , , requestId] = process.argv.slice(2);
+  const g = GEN[gen];
+  const data = (await fal.queue.result(g.endpoint, { requestId })).data;
+  const saved = await saveModel(data, `${subject}-${gen}-${ref}`);
+  console.log(`${subject} ${gen}-${ref}: refetched ${saved.path} (${saved.kind}, ${(saved.bytes / 1e6).toFixed(1)} MB)`);
 } else {
   console.error("usage: generate.mjs image <subject> | model <subject> <A|B> <tripo|hunyuan|trellis> | ledger");
   process.exit(2);

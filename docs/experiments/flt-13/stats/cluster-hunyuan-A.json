@@ -1,0 +1,31 @@
+{
+  "name": "cluster-hunyuan-A",
+  "raw_bytes": 15315028,
+  "blender_bytes": 283648,
+  "final_bytes": 67536,
+  "blender_seconds": 3,
+  "raw_tris": 49832,
+  "raw_verts": 24892,
+  "decimated_tris": 2760,
+  "final_tris": 2760,
+  "final_size_game_xyz": [
+    1.74,
+    1.9,
+    1.814
+  ],
+  "scale_applied": 2.60885,
+  "had_texture": true,
+  "exposure_gain": 1.251,
+  "rot_y": 0,
+  "palette_faces": {
+    "cream": 616,
+    "cream-dark": 426,
+    "ink": 191,
+    "white": 207,
+    "steel-light": 168,
+    "steel": 174,
+    "steel-dark": 160,
+    "glass": 814,
+    "cluster-blue": 4
+  }
+}

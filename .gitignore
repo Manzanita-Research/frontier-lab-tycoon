@@ -8,3 +8,4 @@ coverage/
 !.env.example
 /screenshots/tmp/
 .claude/.cc-writes
+docs/experiments/flt-13/raw/

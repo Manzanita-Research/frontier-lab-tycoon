@@ -1,0 +1,29 @@
+{
+  "name": "hall-hunyuan-B",
+  "raw_bytes": 15138763,
+  "blender_bytes": 471324,
+  "final_bytes": 114468,
+  "blender_seconds": 4,
+  "raw_tris": 49914,
+  "raw_verts": 24747,
+  "decimated_tris": 4600,
+  "final_tris": 4600,
+  "final_size_game_xyz": [
+    2.105,
+    2.1,
+    2.112
+  ],
+  "scale_applied": 2.40239,
+  "had_texture": true,
+  "exposure_gain": 2.196,
+  "rot_y": 0,
+  "palette_faces": {
+    "cream": 204,
+    "cream-dark": 1911,
+    "white": 427,
+    "dome-lilac": 7,
+    "steel-light": 526,
+    "glass": 126,
+    "hall-purple": 1399
+  }
+}

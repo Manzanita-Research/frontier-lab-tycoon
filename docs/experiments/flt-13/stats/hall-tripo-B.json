@@ -1,0 +1,28 @@
+{
+  "name": "hall-tripo-B",
+  "raw_bytes": 39750192,
+  "blender_bytes": 470832,
+  "final_bytes": 115972,
+  "blender_seconds": 51,
+  "raw_tris": 1393118,
+  "raw_verts": 709176,
+  "decimated_tris": 4600,
+  "final_tris": 4600,
+  "final_size_game_xyz": [
+    1.954,
+    2.1,
+    1.929
+  ],
+  "scale_applied": 2.09819,
+  "had_texture": true,
+  "exposure_gain": 1.451,
+  "rot_y": 0,
+  "palette_faces": {
+    "cream": 47,
+    "cream-dark": 746,
+    "white": 2496,
+    "steel-light": 2,
+    "glass": 339,
+    "hall-purple": 970
+  }
+}

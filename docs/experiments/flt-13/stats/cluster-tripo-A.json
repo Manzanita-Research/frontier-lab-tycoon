@@ -1,0 +1,32 @@
+{
+  "name": "cluster-tripo-A",
+  "raw_bytes": 42450452,
+  "blender_bytes": 283008,
+  "final_bytes": 71960,
+  "blender_seconds": 51,
+  "raw_tris": 1466968,
+  "raw_verts": 757087,
+  "decimated_tris": 2760,
+  "final_tris": 2760,
+  "final_size_game_xyz": [
+    1.61,
+    1.9,
+    1.606
+  ],
+  "scale_applied": 1.90045,
+  "had_texture": true,
+  "exposure_gain": 2.5,
+  "rot_y": 0,
+  "palette_faces": {
+    "cream": 593,
+    "cream-dark": 716,
+    "ink": 104,
+    "white": 20,
+    "steel-light": 40,
+    "steel": 3,
+    "steel-dark": 455,
+    "glass": 144,
+    "cluster-blue": 504,
+    "led-yellow": 181
+  }
+}

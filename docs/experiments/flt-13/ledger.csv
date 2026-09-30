@@ -5,3 +5,17 @@ time,endpoint,subject,reference,price_usd,seconds,request_id,note
 2026-09-29T23:41:24.638Z,fal-ai/nano-banana/edit,float,A->B,0.0398,7.9,01a0ef8b-4358-7150-bc1c-b211e58a5820,concept image
 2026-09-29T23:41:24.983Z,fal-ai/nano-banana/edit,cluster,A->B,0.0398,8.4,01a0ef8b-42e9-79a0-8a07-cb08e5dd3af5,concept image
 2026-09-29T23:41:25.957Z,fal-ai/nano-banana/edit,hall,A->B,0.0398,8.9,01a0ef8b-42da-7a10-a096-6d83b9859c1f,concept image
+2026-09-29T23:42:55.733Z,fal-ai/hunyuan-3d/v3.1/rapid/image-to-3d,hall,B/hunyuan,0.3000,74.9,01a0ef8b-9ff3-76f1-9b2d-ac5113219a01,ok
+2026-09-29T23:45:06.664Z,tripo3d/h3.1/image-to-3d,hall,B/tripo,0.4000,205.3,01a0ef8b-a090-7341-9942-fe4fc3966997,ok
+2026-09-29T23:51:05.940Z,fal-ai/hunyuan-3d/v3.1/rapid/image-to-3d,cluster,B/hunyuan,0.3000,58.1,,FAILED Gateway Timeout
+2026-09-29T23:51:27.874Z,fal-ai/hunyuan-3d/v3.1/rapid/image-to-3d,hall,A/hunyuan,0.3000,79.5,01a0ef93-5dce-7e12-9175-32db35d0c9d3,ok obj 14243649
+2026-09-29T23:52:28.571Z,fal-ai/hunyuan-3d/v3.1/rapid/image-to-3d,cluster,B/hunyuan,0.3000,81.1,01a0ef94-41f9-75c0-bf99-760cee05fc9b,ok obj 16344109
+2026-09-29T23:53:43.309Z,fal-ai/hunyuan-3d/v3.1/rapid/image-to-3d,cluster,A/hunyuan,0.3000,73.3,01a0ef95-86e5-7ff2-afde-138d0a3a0652,ok obj 15315028
+2026-09-29T23:54:00.837Z,tripo3d/h3.1/image-to-3d,hall,A/tripo,0.4000,232.3,01a0ef93-5dd6-7892-a0de-f6df4ac42962,ok glb 41157260
+2026-09-29T23:54:02.405Z,tripo3d/h3.1/image-to-3d,cluster,B/tripo,0.4000,233.7,01a0ef93-5e45-71a0-96b3-2b2c37dbc0e1,ok glb 41675056
+2026-09-29T23:55:15.404Z,tripo3d/h3.1/image-to-3d,cluster,A/tripo,0.4000,225.8,01a0ef94-9a3c-7172-9858-c1867fda0e6f,ok glb 42450452
+2026-09-29T23:55:29.556Z,fal-ai/hunyuan-3d/v3.1/rapid/image-to-3d,float,B/hunyuan,0.3000,86.6,01a0ef96-f147-7823-b0ce-d816e736da22,ok obj 14471710
+2026-09-29T23:56:18.289Z,fal-ai/hunyuan-3d/v3.1/rapid/image-to-3d,float,A/hunyuan,0.3000,61.5,01a0ef98-1253-79f2-9585-2837cdf223d0,ok obj 14770413
+2026-09-29T23:56:33.922Z,tripo3d/h3.1/image-to-3d,float,B/tripo,0.4000,169.0,01a0ef96-ab96-79f3-9044-f6c75801406e,ok glb 42769864
+2026-09-29T23:56:55.121Z,tripo3d/h3.1/image-to-3d,float,A/tripo,0.4000,170.6,01a0ef96-f552-7cf1-9a35-08784710ad0d,ok glb 40923448
+2026-09-29T23:57:28.302Z,fal-ai/trellis-2,float,B/trellis,0.2500,116.5,01a0ef98-4b6b-75b2-97fe-cdf072c33896,ok glb 16504160

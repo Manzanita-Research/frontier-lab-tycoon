@@ -1,0 +1,32 @@
+{
+  "name": "float-tripo-A",
+  "raw_bytes": 40923448,
+  "blender_bytes": 470196,
+  "final_bytes": 113672,
+  "blender_seconds": 49,
+  "raw_tris": 1422883,
+  "raw_verts": 730839,
+  "decimated_tris": 4599,
+  "final_tris": 4599,
+  "final_size_game_xyz": [
+    2.86,
+    2.164,
+    1.404
+  ],
+  "scale_applied": 2.86044,
+  "had_texture": true,
+  "exposure_gain": 2.2,
+  "rot_y": 0,
+  "palette_faces": {
+    "cream": 961,
+    "cream-dark": 768,
+    "ink": 765,
+    "white": 2,
+    "steel-light": 20,
+    "steel": 85,
+    "steel-dark": 267,
+    "banner-orange": 332,
+    "banner-yellow": 141,
+    "water-blue": 1258
+  }
+}

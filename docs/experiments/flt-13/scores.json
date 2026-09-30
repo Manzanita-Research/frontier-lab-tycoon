@@ -1,0 +1,18 @@
+{
+  "hall-proc": ["4", "Baseline: flat cream drum, lilac dome, purple band, reads instantly."],
+  "hall-tripo-A": ["4", "Ribbed dome and windows close to the procedural look, a little duller."],
+  "hall-tripo-B": ["4", "Same as A, cleanest window row; the dome loses the procedural lilac glow."],
+  "hall-hunyuan-A": ["3", "Right silhouette, but ragged base and lumpy dome facets."],
+  "hall-hunyuan-B": ["3", "As A; wobbly plinth edge and noisy dome."],
+  "cluster-proc": ["4", "Baseline: chunky cream towers, blue caps, glowing LEDs, spinning fan."],
+  "cluster-tripo-A": ["4", "Recognisable towers and LEDs, less crisp than procedural."],
+  "cluster-tripo-B": ["5", "Most toy-like of all: stacked rack detail, blue base and caps, yellow LED strips."],
+  "cluster-hunyuan-A": ["3", "Pale blue roofs bleed into the walls, no LEDs."],
+  "cluster-hunyuan-B": ["2", "Rack stack collapsed into mush; the detail did not survive."],
+  "float-proc": ["3", "Blockout: readable, but a bottle made of cylinders and black boxes."],
+  "float-tripo-A": ["4", "Bottle, cap, sunglasses, banners and wheels all present and in palette."],
+  "float-tripo-B": ["4", "Best of the float set: label band and sunglasses read, banners in accent colours."],
+  "float-hunyuan-A": ["4", "Close to Tripo, softer shapes."],
+  "float-hunyuan-B": ["3", "Bottle detail smeared."],
+  "float-trellis-B": ["1", "Decimation shredded the mesh into spikes; a 486k-tri raw mesh with thin parts does not survive a 5k budget."]
+}

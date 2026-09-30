@@ -1,0 +1,95 @@
+{
+  "_comment": "Colours the procedural models already use (src/render/materials.ts and src/render/buildings/*, accents from src/content/buildings.ts). Every face of a cleaned model snaps to shared + the subject's own accents. 'glass' faces become the campus window material, which lights up at night. 'drop' removes shared colours for a subject: the Hall is cream, lilac and one purple accent, so shading in a texture should not snap to grey or ink.",
+  "shared": [
+    {
+      "name": "cream",
+      "hex": "#f7eed6"
+    },
+    {
+      "name": "cream-dark",
+      "hex": "#e5d6b0"
+    },
+    {
+      "name": "ink",
+      "hex": "#3a2a1c"
+    },
+    {
+      "name": "white",
+      "hex": "#ffffff"
+    },
+    {
+      "name": "dome-lilac",
+      "hex": "#f6f0ff"
+    },
+    {
+      "name": "steel-light",
+      "hex": "#dfe7f2"
+    },
+    {
+      "name": "steel",
+      "hex": "#8a8fa0"
+    },
+    {
+      "name": "steel-dark",
+      "hex": "#5b6675"
+    },
+    {
+      "name": "glass",
+      "hex": "#8fb4d4",
+      "glass": true
+    }
+  ],
+  "kinds": {
+    "hall": {
+      "add": [
+        {
+          "name": "hall-purple",
+          "hex": "#8b6cf0"
+        }
+      ],
+      "drop": [
+        "steel",
+        "steel-dark",
+        "ink"
+      ]
+    },
+    "cluster": {
+      "add": [
+        {
+          "name": "cluster-blue",
+          "hex": "#4f8ff0"
+        },
+        {
+          "name": "led-yellow",
+          "hex": "#ffd24a"
+        }
+      ],
+      "drop": []
+    },
+    "float": {
+      "add": [
+        {
+          "name": "banner-orange",
+          "hex": "#ff8a4c"
+        },
+        {
+          "name": "banner-yellow",
+          "hex": "#ffd24a"
+        },
+        {
+          "name": "water-blue",
+          "hex": "#7fd3f0"
+        },
+        {
+          "name": "water-teal",
+          "hex": "#4fc3e8"
+        },
+        {
+          "name": "cheer-red",
+          "hex": "#ff5d4d"
+        }
+      ],
+      "drop": []
+    }
+  }
+}
