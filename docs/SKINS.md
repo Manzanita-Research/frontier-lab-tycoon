@@ -237,6 +237,8 @@ If your slot needs copy that has no key, write it into the slot (as Frontier 95 
 | `run.open` | Open: |
 | `run.ok` | OK |
 | `run.cancel` | Cancel |
+| `run.none` | No widget called that yet. Press OK anyway: it might be funny. |
+| `run.back` | Back |
 | `mode.building` | Placing {name} · Esc to stop building |
 | `mode.path` | Drawing path · Esc to stop building |
 | `mode.bulldoze` | Bulldozing · Esc to stop |

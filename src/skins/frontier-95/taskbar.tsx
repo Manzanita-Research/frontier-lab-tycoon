@@ -1,6 +1,6 @@
 // The taskbar: Start (and its menu), quick-launch, the news tape, and the tray (speed, news, sound, camera, clock).
 import { useEffect, useRef, useState } from "react";
-import { ALL_VISIBLE, coachInFacilities, Dialog, facilityGroups, Marquee, runFile } from "../kit";
+import { ALL_VISIBLE, coachInFacilities, Dialog, facilityGroups, Marquee, useRunBox } from "../kit";
 import { useCoach, useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import type { BuildItemVM, WidgetVM } from "../../ui/hud/types";
@@ -77,29 +77,17 @@ const WIDGET_ICONS: Record<string, string> = {
 };
 const widgetIcon = (w: WidgetVM) => WIDGET_ICONS[w.id] ?? "doc";
 
-/** What the Run box said last time: Windows remembered, so the lab does too (until the tab closes). */
-let lastRun = "";
-
 /** Start ▸ Run…: type a file name ("thoughts.txt", "arena.exe") or pick one from the list below it. */
 function RunDialog({ widgets, onRun, onClose }: { widgets: WidgetVM[]; onRun: (id: string) => void; onClose: () => void }) {
   const t = useT();
-  const [typed, setTyped] = useState(lastRun);
-  const [error, setError] = useState<{ title: string; text: string } | null>(null);
+  const { typed, setTyped, shown, q, error, dismiss, go } = useRunBox(widgets, onRun);
   const input = useRef<HTMLInputElement>(null);
   useEffect(() => {
     input.current?.focus();
     input.current?.select();
   }, []);
-  const q = typed.trim().toLowerCase();
-  const shown = q && !widgets.some((w) => w.file === q) ? widgets.filter((w) => w.file.startsWith(q) || w.name.toLowerCase().includes(q) || w.aliases.some((a) => a.startsWith(q))) : widgets;
-  const go = (text: string) => {
-    lastRun = text.trim();
-    const r = runFile(text, widgets);
-    if (r.ok) onRun(r.widget.id);
-    else setError({ title: r.title, text: r.text });
-  };
   return (
-    <Dialog label={t("run.title")} close={() => (error ? setError(null) : onClose())} layerClass="f95-layer" dialogClass="f95-dialogbox f95-rundialog">
+    <Dialog label={t("run.title")} close={() => (error ? dismiss() : onClose())} layerClass="f95-layer" dialogClass="f95-dialogbox f95-rundialog">
       <Win title={t("run.title")} buttons={[{ g: "close", label: "Close", onClick: onClose }]} className="f95-run">
         <form
           className="f95-runbody"
@@ -134,7 +122,7 @@ function RunDialog({ widgets, onRun, onClose }: { widgets: WidgetVM[]; onRun: (i
                 </button>
               </li>
             ))}
-            {shown.length === 0 && <li className="none">No widget called that yet. Press OK anyway; it might be funny.</li>}
+            {shown.length === 0 && <li className="none">{t("run.none")}</li>}
           </ul>
           <div className="f95-row">
             <Btn def type="submit" data-testid="run-ok">
@@ -147,13 +135,13 @@ function RunDialog({ widgets, onRun, onClose }: { widgets: WidgetVM[]; onRun: (i
       {/* The error box sits inside the Run dialog, so its Esc (the dialog's) shuts the box first and the dialog second. */}
       {error && (
         <div className="f95-layer f95-runerr" role="alertdialog" aria-label={error.title}>
-          <Win title={error.title} buttons={[{ g: "close", label: "Close", onClick: () => setError(null) }]} className="f95-errbox">
+          <Win title={error.title} buttons={[{ g: "close", label: "Close", onClick: dismiss }]} className="f95-errbox">
             <div className="f95-shutbody">
               <Ico name="error" size={32} />
               <p>{error.text}</p>
             </div>
             <div className="f95-row">
-              <Btn def autoFocus onClick={() => { setError(null); input.current?.select(); }}>{t("run.ok")}</Btn>
+              <Btn def autoFocus onClick={() => { dismiss(); input.current?.select(); }}>{t("run.ok")}</Btn>
             </div>
           </Win>
         </div>
