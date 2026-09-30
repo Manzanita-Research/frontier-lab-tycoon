@@ -372,7 +372,7 @@ try {
       const shot = await still(`${out}/levels/level-${level}.png`);
       const row = { level, name: probe.progress.name, gameDay: gameDays(probe), levelDays: +levelDays.toFixed(1), wallS: wallS(), cash: probe.cash, runway: probe.runway, income: probe.income, toastsPerMinute, windows: (await windows()).map((w) => w.label), goal: probe.progress.goal.text, shot };
       result.levels.push(row);
-      log(`LEVEL ${level} ${row.name} at game day ${row.gameDay} (${row.levelDays} days for the last level), cash ${(probe.cash / 1e6).toFixed(2)}M, runway ${probe.runway?.toFixed(1)} mo`);
+      log(`LEVEL ${level} ${row.name} at game day ${row.gameDay} (${row.levelDays} days for the last level), cash ${(probe.cash / 1e6).toFixed(2)}M, runway ${probe.runway === null ? "∞" : `${probe.runway.toFixed(1)} mo`}`);
       levelTick = probe.tick; levelAt = now; levelToasts = 0;
       lookUntil = now + LOOK_MS;
       if (level === 5 && reachedAt === null) { outcome.reached = true; reachedAt = probe.tick; }
