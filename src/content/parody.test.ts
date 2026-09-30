@@ -28,7 +28,8 @@ describe("parody names only", () => {
     expect(realNames('title: "RUN.TXT - Notepad", "Internet Explorer 3.0", "Macrohard Copilot for Copilot"')).toEqual(["Copilot", "Internet Explorer", "Notepad"]);
     expect(realNames("Outlook Excess, WordSad, WordPerfectly, NoteBad, Internet Exploder 3.0, LinkedOut, Excellent, the outlook")).toEqual([]);
     expect(realNames("Very Safe Superintelligence Inc., Meta Superintelligence Labs, SSI")).toEqual(["Safe Superintelligence", "Meta Superintelligence", "SSI"]);
-    // Word boundaries: "MetaMeta Superintelligence" slips past this scan; the Drama lint's substring check catches it.
+    // Word boundaries mean "MetaMeta Superintelligence" would slip past this scan (and the Drama lint), which is why
+    // MetaMeta's full name was changed by hand (#71): it contained a real lab's name as a substring.
     expect(realNames("Very Very Super Super Intelligence, Super Super AI, MetaMeta Metaintelligence Labs, SSID")).toEqual([]);
   });
   it("reads the content, the UI, all six skins and every base pack", () => {

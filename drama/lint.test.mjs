@@ -91,9 +91,9 @@ test("everyday words and the game's own names pass", () => {
   ]) assert.deepEqual(fails(text), [], text);
 });
 
-test("the old rival names fail: they contained real labs' names", () => {
+test("the real labs our old rival names contained fail", () => {
   assert.ok(fails("Very Safe Superintelligence Inc. raises again").length > 0);
-  assert.ok(fails("MetaMeta Superintelligence Labs poaches again").length > 0);
+  assert.ok(fails("Meta Superintelligence Labs poaches again").length > 0);
 });
 
 test("ambiguous words warn instead of failing", () => {
