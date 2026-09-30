@@ -15,6 +15,7 @@ import { createInitialState } from "./state";
 import { answer, findSpot } from "./testkit";
 import type { PlaceableKind } from "../content/buildings";
 import starter from "../../templates/create-flt-mod/mod.json";
+import { systemUnlocked } from "./progression";
 import { applyNow, tick } from "./tick";
 import type { GameState } from "./types";
 
@@ -78,6 +79,21 @@ describe("the resolved definition (FLT-37)", () => {
     const s = createInitialState(1, "garage", def);
     expect(withDefs(def, () => coachOf(s))?.text).toBe("Hello from a mod. Click Start.");
     expect(coachOf(s)?.text).not.toBe("Hello from a mod. Click Start.");
+  });
+
+  it("a mod can bring a system down the ladder: protesters in a new garage on day 1", async () => {
+    const def = await resolve([mod("early-protest", {
+      progression: { override: [{ ...BASE_DEFS.progression[0]!, systems: ["protests"] }] },
+      arcs: { add: [{ id: "picket", initial: "waiting", states: {
+        waiting: { on: { DAY: { target: "picketing" } } },
+        picketing: { entry: [{ type: "discourse.delta", params: { amount: 12 } }] },
+      } }] },
+    })]);
+    const s = createInitialState(1, "garage", def);
+    expect(withDefs(def, () => systemUnlocked(s, "protests"))).toBe(true);
+    expect(systemUnlocked(s, "protests")).toBe(false);
+    while (s.day < 3) tick(s, withDefs(def, () => answer(s, () => 0)), def);
+    expect(s.walkers.filter((w) => w.kind === "protester").length).toBeGreaterThan(0);
   });
 
   it("names and conditional headlines come from the definition", async () => {

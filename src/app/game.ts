@@ -9,6 +9,7 @@ import { readDebugParams } from "../debug";
 import { DEFAULT_RISK, setRisk } from "../sim/disasters/driver";
 import { buildingAt } from "../sim/pathfind";
 import { canPlace } from "../sim/commands";
+import { withDefs } from "../sim/defs";
 import { tick } from "../sim/tick";
 import { createMidgameScenario, MIDGAME_CAMERA, midgameOpeningNews, midgameOpeningThoughts } from "../sim/scenarios/midgame";
 import type { Tone } from "../sim/types";
@@ -25,7 +26,8 @@ export const debugParams = midgame ? { ...params, focus: params.focus ?? MIDGAME
 /** The one live World. The renderer reads `sim.world` and `sim.alpha` straight from useFrame. */
 /** `?mod=` was resolved before this module loaded (main.tsx); the World is created from that definition. */
 const mods = modSession();
-export const sim = midgame ? new SimHandle(createMidgameScenario(), true, undefined, mods.def) : createSimHandle(debugParams, mods.def, mods.run);
+export const sim = midgame ? new SimHandle(withDefs(mods.def, createMidgameScenario), true, undefined, mods.def) : createSimHandle(debugParams, mods.def, mods.run);
+if (midgame && mods.run) sim.world.mods = mods.run;
 if (midgame) {
   sim.newsStartId = midgameOpeningNews(sim.world)[0]!.id;
   sim.openingThoughts = { tick: sim.world.tick, thoughts: midgameOpeningThoughts(sim.world) };
