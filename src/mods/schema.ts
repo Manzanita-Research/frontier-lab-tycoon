@@ -221,7 +221,7 @@ export const Look = Schema.Struct({
   label: Schema.optionalKey(text.check(Schema.isMaxLength(40))),
 });
 export type LookData = typeof Look.Type;
-/** `looks` keys: a walker kind ("protester") or a kind and a role ("visitor:Journalist"). */
+/** `looks` keys: a walker kind ("protester"), a kind and a role ("visitor:Journalist"), or a faction crowd ("faction:doomers"). */
 export const LookTarget = text.check(Schema.isPattern(/^[a-z][\w-]*(?::[\w '.-]+)?$/));
 export const ModManifest = Schema.Struct({
   apiVersion: Schema.Literal(1), id: ModId, name: text, version: text,
