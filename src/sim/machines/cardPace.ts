@@ -62,16 +62,17 @@ function asked(queue: Waiting, ids: readonly string[], day: number): Waiting {
   return next;
 }
 type PacerContext = PacerStored["context"];
+export type Pacing = "urgent" | "priority" | "chain" | "normal";
 
 /**
  * May card `id` of `story` open on `day`? Only the front of the line may (or anyone, when nobody waits). `urgent` (a
  * disaster) jumps the line and keeps only the 1× gap, however fast the game runs; `chain` (the next question of a sitting
- * already under way) keeps the gap but not its own story's.
+ * already under way) keeps the gap but not its own story's; `priority` (an offer on a clock) keeps both but not the line.
  */
-export function pacerAllows(c: PacerContext, id: string, story: string, day: number, how: "urgent" | "chain" | "normal" = "normal"): boolean {
+export function pacerAllows(c: PacerContext, id: string, story: string, day: number, how: Pacing = "normal"): boolean {
   if (c.last !== null && day - c.last < (how === "urgent" ? Math.min(c.gap, CARD_GAP_DAYS) : c.gap)) return false;
   if (how === "urgent") return true;
-  if (c.queue.length > 0 && c.queue[0]!.id !== id) return false;
+  if (how !== "priority" && c.queue.length > 0 && c.queue[0]!.id !== id) return false;
   if (how === "chain") return true;
   const own = c.stories[story];
   return own === undefined || day - own >= c.storyGap;

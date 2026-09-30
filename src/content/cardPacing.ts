@@ -17,8 +17,10 @@ export interface CardPace {
   story?: string;
   /** Answers itself with `default` (and says so on the ticker) instead of waiting for a gap, and always at 10×. */
   minor?: true;
-  /** Opens as soon as the screen is free, gap or no gap. */
+  /** Opens as soon as the 1× gap is over, ahead of the line, however fast the game runs. */
   urgent?: true;
+  /** An offer on a clock (money, a launch, an era): keeps the gap, but goes ahead of the line instead of waiting behind colour. */
+  priority?: true;
   /** The choice a minor card takes by itself (0 if not set): the shrug, not the grand gesture. */
   default?: number;
 }
@@ -27,6 +29,8 @@ export interface CardPace {
 export const CARD_PACING: readonly { match: RegExp; pace: CardPace }[] = [
   // A disaster's own cards: the fire is now.
   { match: /^dz:/, pace: { story: "disaster", urgent: true } },
+  // The race's offers: a term sheet that waits behind a documentary crew is a term sheet at the wrong valuation.
+  { match: /^(fundingRound|computeAuction|openWeights|shipNow|era\d+)$/, pace: { priority: true } },
   // The factions' asks: colour, not decisions. The lab's intern can sign an open letter.
   { match: /^fx:/, pace: { story: "factions", minor: true } },
   // The Water Discourse is one story, from the viral post to the counter-protest.

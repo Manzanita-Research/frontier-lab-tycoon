@@ -223,7 +223,7 @@ describe("the pack as a system", () => {
     s.race.rank = 3; // Level 4's goal: Top 3 on the Arena
     updateProgression(s);
     // FLT-54: the rung's packs wake one at a time.
-    for (let i = 0; i < 120 && s.progression?.value === "waking"; i++) { s.day++; updateProgression(s); }
+    for (let i = 0; i < 120 && (s.progression as { value: string }).value === "waking"; i++) { s.day++; updateProgression(s); }
     expect(s.defection?.enabled).toBe(true);
     expect(s.poaching?.enabled).toBe(true);
     const off = createInitialState(4);

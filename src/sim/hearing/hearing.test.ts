@@ -12,7 +12,6 @@ import { GAVEL_CARD, HEARING, loadHearingPack } from "./pack";
 import { hearingView } from "./view";
 import type { Beat } from "../circus/chart";
 import type { GameState } from "../types";
-
 import { CARD_GAP_DAYS } from "../../content/cardPacing";
 
 const R = HEARING.rules;

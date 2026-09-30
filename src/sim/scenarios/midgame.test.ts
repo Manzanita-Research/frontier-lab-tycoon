@@ -28,8 +28,9 @@ describe("midgame scenario", () => {
     // FLT-33/25: the earned factions wake with the campus and argue all 480 days; the water crowd escalates through its arc.
     // FLT-11 adds The Memo's dormant arc (arcs.memo); take it out and the World hashes to the old c4310492.
     // FLT-51 tags every toast (source, importance, reply); without the tags it is the World FLT-52 pinned, number for number.
-    expect(digest({ ...s, toasts: s.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) })).toBe("36f6a4a9");
-    expect(digest(s)).toBe("6c24ddd0");
+    // FLT-54: the card budget spaces the cards (and the World keeps its pacer), so the whole run moves: was 36f6a4a9 / 6c24ddd0.
+    expect(digest({ ...s, toasts: s.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) })).toBe("a1348e0f");
+    expect(digest(s)).toBe("7360029b");
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);
@@ -44,7 +45,7 @@ describe("midgame scenario", () => {
     expect(eraOfState(s)).toBe(2);
     const ready = s.training.context.progress / s.training.context.cost;
     expect(ready).toBeGreaterThanOrEqual(0.6);
-    expect(ready).toBeLessThanOrEqual(0.8);
+    expect(ready).toBeLessThanOrEqual(0.9);
     expect(s.leapfrog.enabled).toBe(true);
     expect(s.leapfrog.last?.day).toBe(s.day);
     expect(s.leapfrog.last?.lab).not.toBe("you");

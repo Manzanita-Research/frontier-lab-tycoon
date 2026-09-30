@@ -114,9 +114,10 @@ export function createMidgameScenario(): GameState {
     // This scripted player approves its paid purchases; confirmations must not freeze the replay.
     tick(s, cmds.map((c) => c.type === "placeBuilding" || c.type === "placePath" || c.type === "hire" ? { ...c, confirmed: true } : c));
     // Near Y2 March: choose a real fresh record after every repair completes. The new
-    // opening/attendance stream changes its day, so select by gameplay facts, never injected state.
+    // opening/attendance stream changes its day, so select by gameplay facts, never injected state. (FLT-54: the card
+    // budget moved the records; a run 60–90% done still reads as mid-run.)
     const ready = s.training.context.progress / s.training.context.cost;
-    if (s.day >= 420 && s.day <= 480 && ready >= 0.6 && ready <= 0.8 &&
+    if (s.day >= 420 && s.day <= 480 && ready >= 0.6 && ready <= 0.9 &&
       s.leapfrog.last?.day === s.day && s.leapfrog.last.claims.length &&
       s.buildings.every((b) => !b.broken) && !openEventOf(s) &&
       s.news.some((n) => n.day === s.day && sotaHeadline.test(n.text))) return s;
