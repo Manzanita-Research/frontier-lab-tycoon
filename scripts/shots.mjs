@@ -338,8 +338,12 @@ async function runStep(page, step) {
   }
   if ("type" in step) {
     // FLT-63: type into a field (the Run box), then press Enter if asked.
-    await page.fill(step.into, step.type, { timeout: 5000 });
-    if (step.enter) await page.press(step.into, "Enter");
+    try {
+      await page.fill(step.into, step.type, { timeout: step.optional ? 1500 : 5000 });
+      if (step.enter) await page.press(step.into, "Enter");
+    } catch (e) {
+      if (!step.optional) throw e;
+    }
     return;
   }
   if ("drag" in step) {
