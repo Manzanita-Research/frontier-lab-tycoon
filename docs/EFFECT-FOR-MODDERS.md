@@ -1,93 +1,23 @@
 # Effect for modders (no prior Effect needed)
 
-_How Frontier Lab Tycoon plugs mods in, explained in plain words. You don't need any of this to make a data-only mod (see `docs/MODDING.md`), but it helps to know what happens to your mod after you hand it over. The mod-authoring skill uses this page too._
+Data modders write JSON, or optionally `defineMod({...})` in local TypeScript.
+Effect is how the game turns that data into services. No Effect knowledge is
+required to use the private SDK or `flt-mod` CLI.
 
-## Five words, one line each
-
-| Word | Plain meaning |
+| Word | Meaning |
 |---|---|
-| **Effect** | A TypeScript library. Its programs are *descriptions* of work (like a recipe) that run later. |
-| **Service** | A named slot the game asks for, like *"I need the Content"*. It has a name and a shape (a TypeScript type). |
-| **Layer** | A recipe that fills one or more slots. *"Here is how to make the Content."* |
-| **provide** | Hand a Layer to a program, so its slots get filled. |
-| **Schema** | A checked description of some data. It validates JSON and explains mistakes in plain words. |
+| Effect | A description of work, run later. |
+| Service | A named slot: Content, Skin, Rules, Vocabulary, Assets, Audio or GameEvents. |
+| Layer | A recipe that fills service slots. |
+| provide | Supply a Layer to an Effect or another Layer. |
+| Schema | The checked data description that validates a manifest. |
 
-Two more you'll see in code: **`Effect.gen(function* () { … })`** is how you write a step-by-step recipe, and **`yield*`** inside it means *"get me this (a service or a result), then carry on"*.
+Mods wrap services in load order. Each content section uses `add`, `override`,
+`remove`. An override merges top-level fields; nested objects and arrays replace
+whole fields. The later valid patch wins and composition reports conflicts.
+RNG and the clock remain owned by the game.
 
-## The picture: the game is a stage play
-
-- The game is a **play**. It needs certain **roles** filled: the Skin, the Content, the Rules, the Sounds, and so on. Those roles are **services**.
-- The **base game** is the default cast: one **Layer** per role.
-- A **mod** is a casting change: *"the Rival Labs will now be played by…"*. It's a Layer that takes over a role, usually by starting from whoever had it before and changing a few lines.
-- **Loading several mods** stacks those casting changes in order. The last one to touch a line wins, and the Mod Manager tells you when two mods touched the same line.
-- The play itself (the simulation tick) never changes how it runs. It asks for its cast **once, when a game starts**, then plays deterministically: same seed, same mods, same game.
-
-## The service map
-
-```mermaid
-flowchart TB
-  subgraph Mods["Mods (stacked in load order)"]
-    M2["mod: every-lab-is-steve → Layer"]
-    M1["mod: water-dlc → Layer"]
-  end
-  subgraph Base["Base game = default Layers"]
-    BS["Skin: Frontier 95"]
-    BC["Content: buildings, thoughts, headlines, arcs, rivals, endings, tips"]
-    BR["Rules: tunables + machine configs"]
-    BV["Vocabulary: named guards & effects arcs may use"]
-    BA["Assets"]
-    BAu["Audio"]
-  end
-  M2 -->|wraps| M1 -->|wraps| Base
-  Base --> Def["GameDefinition (plain data, resolved once per game)"]
-  Def --> Sim["Pure sim: tick(state, def)"]
-  BS --> HUD["HUD slots"]
-  BA --> HUD
-  BAu --> Snd["Sound kit"]
-  Sim --> Ev["GameEvents (read-only stream)"]
-  Ev --> Snd
-  Ev -. capability API .-> Scripts["Sandboxed script mods (later)"]
-```
-
-| Service | What it holds | Who reads it |
-|---|---|---|
-| `Skin` | tokens, strings, CSS, fonts, slot components (built-in skins only) | the HUD |
-| `Content` | buildings, walker kinds and thoughts, headlines, arcs (JSON statecharts), rivals, endings, assistant tips, names | building the `GameDefinition` |
-| `Rules` | tunable numbers (with safe ranges) and patches to built-in machines | building the `GameDefinition` |
-| `Vocabulary` | the named guards and effects JSON arcs may use (`stat.gte`, `effect.cash`, …) | validating and running arcs |
-| `Assets` | resolves an asset id to a URL (mod assets become `blob:` URLs) | the HUD, 3D models, sound |
-| `Audio` | sound recipes and music | the sound kit |
-| `GameEvents` | a read-only stream of what happened (release, era change, card opened) | sound, the HUD, script mods later |
-
-`Rng` and the clock are **not** moddable, which keeps games replayable.
-
-## Worked example: a mod that renames every rival lab
-
-### 1. The slot (in the game, already written)
-
-```ts
-// src/mods/services/content.ts
-import { Context } from "effect"
-
-export interface ContentApi {
-  readonly rivals: ReadonlyArray<RivalDef>
-  readonly headlines: ReadonlyArray<HeadlineDef>
-  // …buildings, thoughts, arcs, endings, tips
-}
-
-export class Content extends Context.Service<Content, ContentApi>()("@flt/Content") {}
-```
-
-### 2. The base game fills it
-
-```ts
-import { Layer } from "effect"
-import { RIVALS, HEADLINES /* … */ } from "../../content"
-
-export const baseContent = Layer.succeed(Content, Content.of({ rivals: RIVALS, headlines: HEADLINES /* … */ }))
-```
-
-### 3. Your mod, as data (this is all a modder writes)
+## A rival rename, using the real manifest API
 
 ```json
 {
@@ -98,72 +28,86 @@ export const baseContent = Layer.succeed(Content, Content.of({ rivals: RIVALS, h
   "content": {
     "rivals": {
       "override": [
-        { "id": "anthropomorphic", "name": "Steve (Safety-Flavoured)" },
-        { "id": "open-ish-ai",     "name": "Steve (Formerly Non-Profit)" },
-        { "id": "metameta",        "name": "Steve Superintelligence Labs" }
+        { "id": "anthro", "name": "Steve (Safety-Flavoured)" },
+        { "id": "openish", "name": "Steve (Formerly Non-Profit)" },
+        { "id": "metameta", "name": "Steve Superintelligence Labs" }
       ]
     }
   }
 }
 ```
 
-### 4. What the loader does with it
+The ids identify existing rivals. Display names do not. The other canonical ids
+are `vssi`, `sirocco`, and `macrohard`.
 
-It checks the JSON against the Schema. A typo like `"overide"` gets a friendly error pointing at the exact line. Then it turns the data into a Layer that **starts from the Content below it and changes only what you asked for**:
+## What the loader actually does
 
-```ts
-import { Effect, Layer } from "effect"
-
-const everyLabIsSteve = Layer.effect(
-  Content,
-  Effect.gen(function* () {
-    const below = yield* Content          // "get me the Content as it was before this mod"
-    return Content.of({
-      ...below,                             // keep everything else
-      rivals: overrideById(below.rivals, mod.content.rivals.override),
-    })
-  }),
-)
-```
-
-### 5. Stacking it on the base game
+These imports and calls match the M1a API. `composeMods` supplies `BaseGame.layer`
+by default, validates references, and builds wrapping Layers for changed services.
 
 ```ts
-// "feed the base Content into the mod, and use the mod's result"
-const content = Layer.provide(everyLabIsSteve, baseContent)
+import { Effect } from "effect";
+import { decodeManifest } from "../src/mods/schema";
+import { composeMods } from "../src/mods/loader";
+import { resolveGameDefinition } from "../src/mods/game-definition";
 
-// Two mods: each one wraps the one below it.
-const withTwo = Layer.provide(waterDlc, Layer.provide(everyLabIsSteve, baseContent))
+const input = JSON.parse('{"apiVersion":1,"id":"steve","name":"Steve","version":"1.0.0","content":{"rivals":{"override":[{"id":"anthro","name":"Steve"}]}}}');
+const manifest = await Effect.runPromise(decodeManifest(input));
+const { layer, conflicts } = composeMods([manifest]);
+const definition = await Effect.runPromise(resolveGameDefinition(layer));
+console.log(definition.content.rivals[0]?.name, conflicts);
 ```
 
-The game then asks for `Content` once, builds the `GameDefinition` and starts. The leaderboard now reads *Steve (Formerly Non-Profit)*.
+`definition` is plain content, rules and vocabulary. Resolve it once at game
+start, outside the deterministic tick. Skin, assets and audio remain services
+outside the sim. `Content` is the real `Context.Service` in
+`src/mods/services/content.ts`; `Skin`, `Rules`, `Vocabulary`, `Assets`, `Audio`
+and the read-only `GameEvents` stream live beside it. Rules and vocabulary have
+base services, but manifest patches to them are reserved for M3.
 
-### 6. The same mod written as code (power users only)
-
-With code you can rename **all** rivals without listing them. Built-in and trusted mods can do this today; shared code mods must run in the sandbox (see `docs/MODDING.md` §3).
+## The private SDK and check command
 
 ```ts
-const everyLabIsSteve = Layer.effect(Content, Effect.gen(function* () {
-  const below = yield* Content
-  return Content.of({ ...below, rivals: below.rivals.map((r, i) => ({ ...r, name: `Steve #${i + 1}` })) })
-}))
+import { defineMod, type RivalId } from "@flt/mod-sdk";
+const rival: RivalId = "anthro";
+export default defineMod({
+  apiVersion: 1, id: "steve", name: "Steve", version: "1.0.0",
+  content: { rivals: { override: [{ id: rival, name: "Steve" }] } },
+});
 ```
 
-## Testing and `flt-mod check`
+`Mod` is derived from the game's Effect Schema; `defineMod` also validates with
+that Schema. `mod.ts` executes trusted local author code. Bundle it to JSON
+before sharing: `pnpm flt-mod bundle ./my-mod ./my-mod/mod.json`.
 
-Tests swap Layers the same way the game does. `flt-mod check` builds *base game + your mod*, runs 365 in-game days headless (no browser; the sim is pure) and reports errors, arc states that can never be reached, and missing assets:
+```sh
+pnpm flt-mod check mods/examples/every-lab-is-steve/mod.json
+pnpm flt-mod check mods/examples/headline-pack/mod.json
+pnpm create-mod my-mod
+pnpm --dir my-mod test
+```
+
+The check uses the real M1a entry point, which can also be called directly:
 
 ```ts
-const program = runHeadless({ days: 365, seed: 42 })
-Effect.runPromise(program.pipe(Effect.provide(Layer.provide(yourModLayer, BaseGame.layer))))
+import { checkMod } from "../src/mods/check";
+const { report, replay } = await checkMod({
+  apiVersion: 1, id: "empty", name: "Empty", version: "1.0.0",
+});
+console.log(report.days, replay.days); // 365, 365
 ```
 
-## Safety, in one sentence
+It composes services, validates assets/references, then runs 365 actual days
+and a deterministic replay. The CLI adds `xstate/graph` structural arc traversal.
+It explores every transition alternative with guards/actions omitted; it cannot
+prove that a guarded transition will occur. Named action parameters are currently
+JSON data whose runtime semantics await M1b.
 
-**A Layer is how things plug in, not an escape hatch.** Shared mods are data that the game itself turns into Layers. Code from strangers never runs inside the page; it runs in a sandbox that can only ask for the same things a player can do.
+**M1a coverage:** existing rival personality/starting stats and goal targets can
+be injected into today's World. All other modified sections appear in the
+checker's **M1b deferred** list. New names, headlines, cards, arcs and skins are
+validated but not executed by that bridge. Live `?mod=` loading, runtime content
+lookups and game hot-reload are M1b. `flt-mod dev` currently only serves the data.
 
-## Try it
-
-1. Change `"Steve (Safety-Flavoured)"` and reload with `?mod=<your file URL>`.
-2. Add a headline: `"content": { "headlines": { "add": [{ "id": "steve-01", "text": "All labs merge into one Steve", "tone": "joke" }] } }`.
-3. Run `flt-mod check` and read what it says.
+Shared mods are data; shared script execution is a later sandbox milestone.
+The SDK/CLI stay private in this repo and are not published.
