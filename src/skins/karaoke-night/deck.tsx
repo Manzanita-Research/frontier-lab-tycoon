@@ -1,3 +1,4 @@
+import { ALL_VISIBLE } from "../kit";
 // The tape deck: Stop / Play / Fast forward / Encore as chunky white keys, the record key (photo mode) beside them, and a
 // row of small keys for the News Room, sound, the mixer and the skin picker. Plus the "EXTRA!" sticker when the paper lands.
 import { useState } from "react";
@@ -28,17 +29,17 @@ export function PhotoButton({ photo, actions }: SlotPropsMap["PhotoButton"]) {
   );
 }
 
-export function NewsControls({ newsroom, sound, skins, actions }: SlotPropsMap["NewsControls"]) {
+export function NewsControls({ newsroom, sound, skins, actions, visible = ALL_VISIBLE }: SlotPropsMap["NewsControls"]) {
   const t = useT();
   // On a phone the sound, mixer and skin keys fold behind one "more" key (the CSS decides; on a desktop it is hidden).
   const [open, setOpen] = useState(false);
   return (
     <div className={`kn-tools ${open ? "open" : ""}`} role="group" aria-label="Tools">
-      <button type="button" className="kn-key news" onClick={() => actions.openNews()} aria-label={newsroom.unread > 0 ? `${t("news.open")}, ${newsroom.unread} unread` : t("news.open")} title={t("news.button")}>
+      {visible.news && (<button type="button" className="kn-key news" onClick={() => actions.openNews()} aria-label={newsroom.unread > 0 ? `${t("news.open")}, ${newsroom.unread} unread` : t("news.open")} title={t("news.button")}>
         <ToolIcon name="news" />
         <span className="kn-key-label">{t("news.button")}</span>
         {newsroom.unread > 0 && <b className="kn-unread">{newsroom.unread}</b>}
-      </button>
+      </button>)}
       <button type="button" className="kn-key fold" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-label="More tools" title="More tools">
         <ToolIcon name="more" />
       </button>

@@ -210,6 +210,7 @@ describe.each([BASE_ID, ...usable])("skin %s", (id) => {
     const thought = vms.lab!.thoughtsPanel[0]!.text;
     expect(lab).toContain(escape(rival));
     expect(garage).not.toContain(escape(rival));
+    expect(garage).not.toContain(`aria-label="${escape(skin.strings["news.open"]!)}"`);
     expect(lab).toContain(escape(thought));
     expect(garage).not.toContain(escape(thought));
     // The goal is one line (its words, and no scenario checklist behind it).

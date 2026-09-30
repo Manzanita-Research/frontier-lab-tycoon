@@ -1,3 +1,4 @@
+import { ALL_VISIBLE } from "../kit";
 import { useCoach } from "../kit";
 // The keyboard on the desk: the build palette, the speed keys, the camera and the news/sound/skin dock, all keycaps.
 // A keycap is a cream face over a darker front band; pressing it sinks it (CSS: `.on` and `:active`).
@@ -96,14 +97,14 @@ export function PhotoButton({ photo, actions }: SlotPropsMap["PhotoButton"]) {
 }
 
 /** The News Room, mute, mixer and skin keys, in a row at the bottom-left. */
-export function NewsControls({ newsroom, sound, skins, actions }: SlotPropsMap["NewsControls"]) {
+export function NewsControls({ newsroom, sound, skins, actions, visible = ALL_VISIBLE }: SlotPropsMap["NewsControls"]) {
   const t = useT();
   return (
     <div className="sd-dock" role="group" aria-label={t("news.button")}>
-      <button type="button" className="sd-key dock news" onClick={() => actions.openNews()} aria-label={t("news.open")} title={t("news.open")}>
+      {visible.news && (<button type="button" className="sd-key dock news" onClick={() => actions.openNews()} aria-label={t("news.open")} title={t("news.open")}>
         <Cap face={<Glyph name="news" />} />
         {newsroom.unread > 0 && <b className="sd-unread">{newsroom.unread}</b>}
-      </button>
+      </button>)}
       <button
         type="button"
         className="sd-key dock"
