@@ -13,6 +13,8 @@ import { hearingView } from "./view";
 import type { Beat } from "../circus/chart";
 import type { GameState } from "../types";
 
+import { CARD_GAP_DAYS } from "../../content/cardPacing";
+
 const R = HEARING.rules;
 const PICK = { earnest: 0, slick: 1, chaotic: 2 } as const;
 const beat = (type: Beat["type"], day: number, more: Partial<Beat> = {}): Beat => ({ type, day, tick: day * TICKS_PER_DAY, roll: 0, stats: {}, ...more });
@@ -37,12 +39,17 @@ function summon(s: GameState) {
   runUntil(s, (s) => s.hearing!.machine.value === "inSession" && openEventOf(s)?.id.startsWith("hearing-") === true);
   expect(s.hearing!.machine.value).toBe("inSession");
 }
+/** Answers each question; between them the committee recesses (FLT-54's card budget) until the next one is on the table. */
 function testify(s: GameState, picks: (keyof typeof PICK)[]) {
+  const days: number[] = [];
   for (const p of picks) {
-    const open = openEventOf(s);
-    expect(open?.id).toBe(s.hearing!.machine.context.docket[s.hearing!.machine.context.answers.length]);
+    const c = s.hearing!.machine.context;
+    if (s.hearing!.machine.value === "inSession" && openEventOf(s)?.id !== c.docket[c.answers.length]) runUntil(s, (s) => openEventOf(s)?.id === c.docket[c.answers.length]);
+    expect(openEventOf(s)?.id).toBe(c.docket[c.answers.length]);
+    days.push(s.day);
     applyNow(s, answer(s, PICK[p]));
   }
+  return days;
 }
 
 describe("the Hearing pack", () => {
@@ -114,7 +121,7 @@ describe("a hearing in the game", () => {
     runUntil(s, () => false, 10);
     expect(s.hearing!.machine.value).toBe("quiet");
   });
-  it("summons, asks three questions back to back, moves both meters and bangs the gavel", () => {
+  it("summons, asks three questions a recess apart, moves both meters and bangs the gavel", () => {
     const s = staged();
     const trust = s.disasters.trust, capture = s.capture ?? 0;
     summon(s);
@@ -122,7 +129,9 @@ describe("a hearing in the game", () => {
     expect(view.stage).toBe("inSession");
     expect(view.current?.senator).toBe(R.questions[view.current!.card]!.senator);
     expect(eventById(openEventOf(s)!.id)?.kind).toBe("hearing");
-    testify(s, ["earnest", "slick", "earnest"]);
+    const days = testify(s, ["earnest", "slick", "earnest"]);
+    // One card per CARD_GAP_DAYS at 1×: the Senate takes its time, and so does everything else.
+    for (let i = 1; i < days.length; i++) expect(days[i]! - days[i - 1]!).toBeGreaterThanOrEqual(CARD_GAP_DAYS);
     expect(s.hearing!.machine.value).not.toBe("inSession");
     expect(openEventOf(s)?.id).toBe(GAVEL_CARD);
     expect(s.hearing!.history).toHaveLength(1);

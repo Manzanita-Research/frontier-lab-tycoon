@@ -17,7 +17,7 @@ import { declineBuilding } from "./endings/autopilot";
 import { dailyEndings, endingHalts, endingsOwnTheGame, updateEndings } from "./endings/driver";
 import { dailyCrowd } from "./crowd";
 import { dailyEconomy } from "./economy";
-import { dailyEvents, openEventOf } from "./events";
+import { dailyEvents, notePacer, openEventOf } from "./events";
 import { dailyGoals } from "./goals";
 import { updateGroups } from "./groups";
 import { dailyNews, replying } from "./news";
@@ -67,6 +67,8 @@ function step(state: GameState, commands: readonly Command[]) {
     applyPackChoices(state);
     if (systemUnlocked(state, "auditors")) applyAuditorChoices(state);
   });
+  // A card a pack's driver put up while answering another (the next question of a hearing) counts against the budget too.
+  notePacer(state);
   if (pendingConfirmOf(state) || openEventOf(state) || state.goals.value === "lost" || endingHalts(state)) {
     state.rngState = rng.state();
     return;
@@ -119,6 +121,7 @@ function step(state: GameState, commands: readonly Command[]) {
     updateProgression(state);
     updateTutorial(state);
     observeGuardrails(state);
+    notePacer(state);
   } else updateProgression(state);
   updateCoach(state, true);
   state.rngState = rng.state();

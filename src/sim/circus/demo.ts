@@ -1,7 +1,7 @@
 // Review moments for The Hearing (FLT-21) and the yacht summit (FLT-24): the same card and tick paths as play, run
 // until the card the shot wants is on screen. No renderer or UI dependencies.
 import { eventById } from "../../content/events";
-import { openEventOf } from "../events";
+import { openEventOf, unpaced } from "../events";
 import { answer, readyForPressure } from "../testkit";
 import { applyNow, tick, TICKS_PER_DAY } from "../tick";
 import type { GameState } from "../types";
@@ -28,6 +28,7 @@ function until(s: GameState, want: (id: string) => boolean, days = 90) {
 /** The lab is called in for its debut (the pack woke three weeks ago) and testifies. "hearing": one chaotic answer given,
  * the second senator asking. "hearing-verdict": chaotic, chaotic, earnest, which goes viral, and the gavel is up. */
 export function stageHearing(s: GameState, moment: "hearing" | "hearing-verdict") {
+  unpaced(s);
   if (!s.models.length) s.models.push("Frontier-1");
   enableHearing(s);
   s.hearing!.enabledDay = s.day - 21;
@@ -41,6 +42,7 @@ export function stageHearing(s: GameState, moment: "hearing" | "hearing-verdict"
 
 /** The invitation on the table, or (having signed) the group chat leaked. */
 export function stageYacht(s: GameState, moment: "yacht-invite" | "yacht-leak") {
+  unpaced(s);
   readyForPressure(s); // cards wait for day 40 and a gateway
   enableYacht(s);
   until(s, (id) => id === "yacht-invite");
@@ -50,6 +52,7 @@ export function stageYacht(s: GameState, moment: "yacht-invite" | "yacht-leak") 
 }
 
 export function stageCircus(s: GameState, moment: CircusMoment) {
+  unpaced(s);
   if (moment === "hearing" || moment === "hearing-verdict") stageHearing(s, moment);
   else stageYacht(s, moment);
 }

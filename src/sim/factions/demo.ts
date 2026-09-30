@@ -1,5 +1,6 @@
 // Debug scenes for the discourse (`?moment=factions|counterprotest|argue`, FLT-33/25): the game is staged a moment
 // before something is worth a screenshot, like sim/opsDemo.ts. Pure sim and deterministic; the game itself never uses it.
+import { unpaced } from "../events";
 import { defs } from "../defs";
 import { runVerb } from "../verbs";
 import { syncProtesters } from "../protest";
@@ -92,6 +93,7 @@ function stageCounterprotest(s: GameState) {
 }
 
 export function stageFactions(s: GameState, moment: FactionMoment) {
+  unpaced(s);
   enableFactions(s);
   if (!s.factions) return;
   stageDiscourse(s);

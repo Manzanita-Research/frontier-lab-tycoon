@@ -137,7 +137,7 @@ describe("the card", () => {
     for (const id of [star.id, ...x.followerIds]) expect(byId(s, id)?.machine.value).toBe("quitting");
     expect(s.capability).toBeLessThan(capability * (1 - R.exit.minLoss / 100) + 1e-9);
     expect(s.capability).toBeGreaterThanOrEqual(capability * (1 - R.exit.maxLoss / 100) - 1e-9);
-    until(s, cardOpen(MANIFESTO_CARD), 4);
+    until(s, cardOpen(MANIFESTO_CARD), 12);
     const lab = s.neoLabs!.labs[0]!;
     expect(lab.founder).toBe(star.name);
     expect(lab.mood).toBe("friendly");
@@ -198,7 +198,7 @@ describe("the card", () => {
       const { s } = staged();
       until(s, cardOpen(CARD));
       pick(s, "goodbye");
-      until(s, cardOpen(MANIFESTO_CARD), 4);
+      until(s, cardOpen(MANIFESTO_CARD), 12);
       const poaching = s.neoLabs!.labs[0]!.rival.context.personality.poaching;
       applyNow(s, answer(s, choice));
       check(s, poaching);
@@ -222,6 +222,8 @@ describe("the pack as a system", () => {
     s.progression = { value: "growing", context: { level: 4 } } as never;
     s.race.rank = 3; // Level 4's goal: Top 3 on the Arena
     updateProgression(s);
+    // FLT-54: the rung's packs wake one at a time.
+    for (let i = 0; i < 120 && s.progression?.value === "waking"; i++) { s.day++; updateProgression(s); }
     expect(s.defection?.enabled).toBe(true);
     expect(s.poaching?.enabled).toBe(true);
     const off = createInitialState(4);

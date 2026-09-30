@@ -2,7 +2,7 @@
 // defection-exit|defection-manifesto|defection-arena|poach-offer`. They use the same card and tick paths as play.
 // No renderer or UI dependencies.
 import { canPlace } from "../commands";
-import { dailyEvents, openEventOf } from "../events";
+import { dailyEvents, openEventOf, unpaced } from "../events";
 import { createRng } from "../rng";
 import { answer } from "../testkit";
 import { applyNow, tick, TICKS_PER_DAY } from "../tick";
@@ -55,6 +55,7 @@ function until(s: GameState, done: (s: GameState) => boolean, days: number) {
 const cardIs = (id: string) => (s: GameState) => openEventOf(s)?.id === id;
 
 export function stageDrama(s: GameState, moment: DramaMoment) {
+  unpaced(s);
   busyLab(s);
   if (moment === "poach-offer") {
     enablePoaching(s);

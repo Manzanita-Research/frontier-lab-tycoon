@@ -1,6 +1,7 @@
 // Everything in GameState is plain and JSON-serializable.
 import type { CoachStored } from "./machines/coach";
 import type { ProgressionStored } from "./machines/progression";
+import type { PacerStored } from "./machines/cardPace";
 import type { UnlockCard } from "../content/progression";
 import type { BuildingKind } from "../content/buildings";
 import type { CollusionState, Investigation } from "./collusion/state";
@@ -296,6 +297,8 @@ export interface GameState {
   mods?: RunMods;
   coach?: CoachStored;
   progression?: ProgressionStored;
+  /** FLT-54: the card budget (sim/machines/cardPace.ts). Absent until the first daily check that looks at it. */
+  pacer?: PacerStored;
   unlockCards?: UnlockCard[];
   seed: number;
   rngState: number;

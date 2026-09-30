@@ -1,7 +1,7 @@
 // Staged moments for links and screenshots (`?moment=audit-*`), through the same chart, cards and ticks as play.
 // No renderer or UI dependencies. Works on any campus; `?scenario=midgame` gives the auditors the most to look at.
 import { TICKS_PER_DAY } from "../constants";
-import { dailyEvents, openEventOf } from "../events";
+import { dailyEvents, openEventOf, unpaced } from "../events";
 import { dwellProgress, groupsOf } from "../groups";
 import { doorPoint } from "../pathfind";
 import { answer, readyForPressure } from "../testkit";
@@ -26,6 +26,7 @@ function openCard(s: GameState, card: string) {
 }
 
 export function stageAudit(s: GameState, moment: AuditMoment) {
+  unpaced(s);
   // Cards need a campus past the opening (day 40, a model, a gateway); a thin `?warp=` campus gets the minimum.
   if (!s.progression) readyForPressure(s);
   enableAuditors(s);

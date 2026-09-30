@@ -39,6 +39,8 @@ function offer(s: GameState, pick: number) {
   applyNow(s, answer(s, pick));
 }
 
+import { CARD_GAP_DAYS } from "../../content/cardPacing";
+
 describe("the JSON Swarm chart", () => {
   it("has every stage and all three endings structurally reachable via xstate/graph", () => {
     // Structural chart, guards omitted, same technique as FLT-15's checker. Behavioral guards are tested below.
@@ -134,12 +136,16 @@ describe("the tick, cards and generic inquiry", () => {
     expect(s.staff.map((o) => o.divert?.owner)).toEqual(["another", undefined, "other-inquiry"]);
     expect(checkCall({ type: "investigate.start", params: { id: "x", days: 0, job: "security", to: "gate" } }, "verb", "test")).not.toEqual([]);
   });
-  it("keeps another open card, and queues the sign until the slot is free", () => {
+  it("keeps another open card, and queues the sign until the slot is free and the card budget allows", () => {
     const s = staged(); s.day = 60; s.waterDiscourse = 44; dailyEvents(s);
     expect(openEventOf(s)?.id).toBe("waterDiscourse");
     s.flags[`offer:${SIGN_CARD}`] = s.day; dailyEvents(s);
     expect(openEventOf(s)?.id).toBe("waterDiscourse");
     applyNow(s, answer(s)); dailyEvents(s);
+    // FLT-54: not straight after another card; first in line once the gap is over.
+    expect(openEventOf(s)).toBeNull();
+    expect(s.pacer?.context.queue[0]?.id).toBe(SIGN_CARD);
+    s.day += CARD_GAP_DAYS; dailyEvents(s);
     expect(openEventOf(s)?.id).toBe(SIGN_CARD);
   });
   it("inflates shown evals, preserves honest scores, and invalidates both boards for exactly 30 days", () => {

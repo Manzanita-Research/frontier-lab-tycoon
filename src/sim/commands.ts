@@ -4,7 +4,10 @@ import { publishPaper, setPublicationPolicy } from "./race/papers/driver";
 import type { PublicationPolicy } from "./race/papers/policy";
 import { setRisk, triggerDisaster } from "./disasters/driver";
 import type { Risk } from "./disasters/types";
-import { chooseEvent } from "./events";
+import { chooseEvent, pacerOf } from "./events";
+import { paceFor, pacerMachine } from "./machines/cardPace";
+import { step } from "./machines/run";
+import { TICKS_PER_DAY, TICKS_PER_SECOND } from "./constants";
 import { addToast, pushNews } from "./news";
 import { clearSlop } from "./slop";
 import { canHire, clearZone, fire, hire, paintZone } from "./staff";
@@ -49,7 +52,9 @@ export type Command =
   /** Tick (`on`) or untick a clause on the bill the lab was asked to draft (FLT-22). */
   | { type: "draftClause"; clause: string; on: boolean }
   /** FLT-33: the safety budget, 0 (none) to 3 (lavish). Costs money daily and slows training; the factions notice. */
-  | { type: "setSafetySpend"; level: number };
+  | { type: "setSafetySpend"; level: number }
+  /** FLT-54: the game speed changed (0 never comes: pausing keeps the pace). The card budget stretches with it. */
+  | { type: "setPace"; speed: number };
 
 export type PlaceResult = { ok: true } | { ok: false; reason: string };
 
@@ -199,6 +204,9 @@ export function applyCommands(state: GameState, commands: readonly Command[], rn
         break;
       case "draftClause":
         if (systemUnlocked(state, "capture")) draftClause(state, c.clause, c.on);
+        break;
+      case "setPace":
+        state.pacer = step(pacerMachine, pacerOf(state), { type: "PACE", ...paceFor(c.speed, TICKS_PER_SECOND, TICKS_PER_DAY) }).stored;
         break;
       case "setSafetySpend":
         if (state.factions && systemUnlocked(state, "factions")) setSafetySpend(state, c.level);

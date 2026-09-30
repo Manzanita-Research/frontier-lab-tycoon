@@ -1,4 +1,6 @@
 export const TICKS_PER_DAY = 20;
+/** Twenty sim ticks per day, six real seconds at 1× (the app's clock; the card budget turns real seconds into game days with it). */
+export const TICKS_PER_SECOND = 20 / 6;
 /** Tiles per tick. */
 export const WALK_SPEED = 0.12;
 export const RESEARCHER_SALARY = 1_000;
