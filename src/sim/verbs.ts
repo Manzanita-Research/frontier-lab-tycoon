@@ -38,6 +38,7 @@ import { congaLine } from "./conga";
 import { resign } from "./walkers";
 import type { Building, GameState, Importance, NoticeSource, StaffJob, Tone } from "./types";
 import { defs } from "./defs";
+import { people as everyone } from "./ecs/protesters";
 
 /** A tick is 1.2 game hours (20 to a day). */
 export const HOURS_PER_TICK = 24 / TICKS_PER_DAY;
@@ -618,8 +619,8 @@ export const VERBS: Record<string, VerbDef> = {
     doc: "A camera beat (FLT-56): letterbox bars and a `caption` (with an optional `sub` line; templates, like `news`) while the camera eases to `on` for `hold` seconds. `on` is a place, as for `camera.focus`, `here` (wherever the pack's driver says the beat is, such as the auditors' huddle), or `people`: the beat's people, followed as they walk. `kind` tells the renderer which beat it is (`exit`, `huddle`, `viral`). Time keeps running, the player can skip it, and photo mode or reduced motion get the caption without the camera move.",
     spec: { kind: "string", caption: "string", sub: "string?", on: "string", zoom: "number?", hold: "number?" },
     run: (env, p) => {
-      const people = p.on === "people" ? (env.people ?? []).filter((id) => env.state.walkers.some((w) => w.id === id)) : [];
-      const lead = people.length ? env.state.walkers.find((w) => w.id === people[0]) : undefined;
+      const people = p.on === "people" ? (env.people ?? []).filter((id) => everyone(env.state).some((w) => w.id === id)) : [];
+      const lead = people.length ? everyone(env.state).find((w) => w.id === people[0]) : undefined;
       const at: [number, number] | null = lead ? [lead.x, lead.z] : placeOf(env, p.on as string);
       if (!at) return;
       pushCue(env.state, {
@@ -676,7 +677,7 @@ export const VERBS: Record<string, VerbDef> = {
     run: (env, p) => {
       const { state, rng } = env;
       for (const id of env.people ?? []) {
-        const w = state.walkers.find((o) => o.id === id);
+        const w = everyone(state).find((o) => o.id === id);
         if (!w || w.machine.value === "quitting" || w.machine.value === "leaving") continue;
         if (p.quiet) state.flags[`quietExit:${w.id}`] = state.day;
         resign(state, w, rng);
@@ -687,7 +688,7 @@ export const VERBS: Record<string, VerbDef> = {
   "people.pay": {
     doc: "Take `each` from the bank for everyone the beat is about (a retention bonus, a matched offer).",
     spec: { each: "number" },
-    run: (env, p) => void (env.state.cash -= (p.each as number) * (env.people?.filter((id) => env.state.walkers.some((w) => w.id === id)).length ?? 0)),
+    run: (env, p) => void (env.state.cash -= (p.each as number) * (env.people?.filter((id) => everyone(env.state).some((w) => w.id === id)).length ?? 0)),
   },
   "people.cheer": {
     doc: "Lift the spirits of everyone the beat is about: `amount` (0 to 1) onto their energy and focus.",
@@ -695,7 +696,7 @@ export const VERBS: Record<string, VerbDef> = {
     run: (env, p) => {
       const a = p.amount as number;
       for (const id of env.people ?? []) {
-        const w = env.state.walkers.find((o) => o.id === id);
+        const w = everyone(env.state).find((o) => o.id === id);
         if (!w) continue;
         w.energy = Math.max(0, Math.min(1, w.energy + a));
         w.focus = Math.max(0, Math.min(1, w.focus + a));

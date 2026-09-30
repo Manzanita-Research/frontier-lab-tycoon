@@ -8,6 +8,7 @@ import type { FactionMood, Relation } from "./machines";
 import { SAFETY_COST, SAFETY_DRAG, SAFETY_LABELS } from "./stance";
 import type { FactionLogItem } from "./state";
 import { statementOffer } from "./statement";
+import { people } from "../ecs/protesters";
 
 export interface FactionRowView {
   id: string;
@@ -57,7 +58,7 @@ export function factionsView(state: GameState): FactionsView {
   const members = new Map<string, number>();
   const marching = new Map<string, number>();
   let water = 0;
-  for (const w of state.walkers) {
+  for (const w of people(state)) {
     if (w.kind === "protester") {
       if (w.crowd === undefined) water++;
       else marching.set(w.crowd, (marching.get(w.crowd) ?? 0) + 1);

@@ -13,8 +13,9 @@ import { settleFactions } from "../factions/driver";
 import { groupKind, spawnGroup } from "../groups";
 import { OWNER as AUDITORS } from "../auditors/pack";
 import type { GameState, Walker } from "../types";
+import { people } from "../ecs/protesters";
 
-const count = (s: GameState, kind: Walker["kind"]) => s.walkers.filter((w) => w.kind === kind).length;
+const count = (s: GameState, kind: Walker["kind"]) => people(s).filter((w) => w.kind === kind).length;
 
 /** Where the extra buildings go: beside the cross path along z = 16, as in the Crowd's own 800-walker test. */
 const SPOTS: [BuildingKind, number, number][] = [["nap", 6, 17], ["snack", 9, 17], ["demo", 14, 17]];

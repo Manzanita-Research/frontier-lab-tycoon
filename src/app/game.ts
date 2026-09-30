@@ -23,6 +23,7 @@ import { modSession } from "./mods";
 import { SaveDesk, Saves, isStagedLink } from "./saves";
 import { demoSaveStore } from "./savesDemo";
 import { browserStorage, makeSaveStore } from "../save";
+import { people } from "../sim/ecs/protesters";
 
 const midgame = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("scenario") === "midgame";
 const params = readDebugParams();
@@ -172,7 +173,7 @@ if (typeof window !== "undefined") {
     const c = appNow();
     const snap = c?.snap;
     return { date: w.day, day: w.day, tick: w.tick, ticksPerDay: TICKS_PER_DAY, paused: c ? c.speed === 0 || autoPaused(c) || !!c.event : true, speed: c?.speed ?? initialSpeed,
-      walkers: [...w.walkers.map((p) => ({ id: p.id, kind: p.kind, x: p.x, z: p.z, mode: p.machine.value })), ...w.staff.map((p) => ({ id: p.id, kind: p.job, x: p.x, z: p.z, mode: p.machine.value }))],
+      walkers: [...people(w).map((p) => ({ id: p.id, kind: p.kind, x: p.x, z: p.z, mode: p.machine.value })), ...w.staff.map((p) => ({ id: p.id, kind: p.job, x: p.x, z: p.z, mode: p.machine.value }))],
       gate: { x: w.gate.x, z: w.gate.z }, coachId: c?.snap.coach?.id ?? null,
       // FLT-53, the journey test: what the HUD shows, and the map a player sees, as plain copies.
       progress: snap ? { level: snap.progress.level, name: snap.progress.levelName, goal: { ...snap.progress.goal }, unlocked: { buildings: [...snap.progress.unlocked.buildings], staff: [...snap.progress.unlocked.staff] } } : null,

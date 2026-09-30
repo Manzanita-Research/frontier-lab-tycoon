@@ -13,6 +13,7 @@ import { enablePapers } from "./driver";
 import type { PublicationPolicy } from "./policy";
 import { papersView } from "./view";
 import { defs } from "../../defs";
+import { people } from "../../ecs/protesters";
 
 export function runPapersHeadless(seed: number, policy: PublicationPolicy, off = false) {
   const s = createInitialState(seed);
@@ -46,7 +47,7 @@ export function runPapersHeadless(seed: number, policy: PublicationPolicy, off =
     } else if (!openEventOf(s) && i % (4 * TICKS_PER_DAY) === 2) {
       if (s.day > 15 && staffOf(s, "sre").length < 1 + Math.floor(s.buildings.length / 6)) cmds.push({ type: "hire", job: "sre" });
       else if (slopStats(s).share > 0.1 && staffOf(s, "janitor").length < 3) cmds.push({ type: "hire", job: "janitor" });
-      else if (s.walkers.filter((w) => w.kind === "protester").length >= 10 && staffOf(s, "comms").length < 2) cmds.push({ type: "hire", job: "comms" });
+      else if (people(s).filter((w) => w.kind === "protester").length >= 10 && staffOf(s, "comms").length < 2) cmds.push({ type: "hire", job: "comms" });
     }
     tick(s, cmds);
     for (const w of s.walkers) if (w.kind === "researcher" && !prior.has(w.id)) { applicants++; focus += w.focus; }

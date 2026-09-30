@@ -4,6 +4,7 @@ import * as THREE from "three";
 import { atoms, send, sim } from "../app/game";
 import { useApp } from "../app/hooks";
 import { HALF } from "./coords";
+import { people } from "../sim/ecs/protesters";
 
 const v = new THREE.Vector3();
 /** How far, in pixels per unit of zoom, a tap can land from a walker's middle and still count (a fingertip needs 24 at least). */
@@ -18,7 +19,7 @@ export function walkerAt(camera: THREE.Camera & { zoom?: number }, size: { width
   const a = sim.alpha;
   let best: number | null = null;
   let bestD = reach;
-  for (const w of sim.world.walkers) {
+  for (const w of people(sim.world)) {
     if (w.machine.value === "inside") continue;
     // The middle of the body, not the feet.
     v.set(w.px + (w.x - w.px) * a - HALF, 0.55, w.pz + (w.z - w.pz) * a - HALF).project(camera);
@@ -33,7 +34,7 @@ export function walkerAt(camera: THREE.Camera & { zoom?: number }, size: { width
 
 /** Where a walker is on screen (client pixels), for the `?debug=1` hook and the screenshot scripts. */
 function screenOf(camera: THREE.Camera, el: HTMLElement, id: number): [number, number] | null {
-  const w = sim.world.walkers.find((o) => o.id === id);
+  const w = people(sim.world).find((o) => o.id === id);
   if (!w || w.machine.value === "inside") return null;
   const a = sim.alpha;
   const rect = el.getBoundingClientRect();

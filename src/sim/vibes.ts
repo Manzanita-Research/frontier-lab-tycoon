@@ -4,6 +4,7 @@
 import type { GameState, Vibes } from "./types";
 import { happinessOf } from "./needs";
 import { cleanlinessOf } from "./slop";
+import { people as everyone } from "./ecs/protesters";
 
 export const VIBES_MAX = 999;
 export const WEIGHTS = { happiness: 0.4, impressed: 0.2, cleanliness: 0.15, hype: 0.15, penalties: 0.1 } as const;
@@ -26,7 +27,7 @@ export function readVibes(state: GameState) {
   let impressed = 0;
   let visitors = 0;
   let protesters = 0;
-  for (const w of state.walkers) {
+  for (const w of everyone(state)) {
     if (w.kind === "researcher") {
       happy += happinessOf(w);
       people++;

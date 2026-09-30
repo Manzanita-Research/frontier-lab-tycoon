@@ -281,7 +281,7 @@ describe("staff", () => {
     dailyDiscourse(bare, createRng(3));
     expect(bare.waterDiscourse - a.waterDiscourse).toBeCloseTo(4, 5);
     // Nobody to talk to, no relief.
-    a.walkers = a.walkers.filter((w) => w.kind !== "protester");
+    a.protesters = [];
     expect(commsRelief(a)).toBe(0);
     // And they do walk over to the crowd.
     for (let i = 0; i < 500 && (s.flags.totes ?? 0) < 1; i++) step(s);

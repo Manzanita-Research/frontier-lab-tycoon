@@ -22,6 +22,7 @@ import { pressureReady } from "./tutorial";
 import { defs } from "./defs";
 import { askFlag } from "./disasters/names";
 import { modArcsHeard } from "./modArcs";
+import { people } from "./ecs/protesters";
 
 export function conditionHolds(state: GameState, c: Condition): boolean {
   if ("all" in c) return c.all.every((sub) => conditionHolds(state, sub));
@@ -81,7 +82,7 @@ function placeNearGate(state: GameState, kind: BuildingKind) {
 
 function burstThoughts(state: GameState, rng: Rng, e: Extract<Effect, { type: "thought" }>, vars: Record<string, string>) {
   const speaking = new Set(state.thoughts.map((t) => t.walkerId));
-  const pool = state.walkers.filter((w) => modeOf(w) !== "inside" && !speaking.has(w.id) && (!e.kind || w.kind === e.kind));
+  const pool = people(state).filter((w) => modeOf(w) !== "inside" && !speaking.has(w.id) && (!e.kind || w.kind === e.kind));
   for (let i = 0; i < e.count && pool.length > 0; i++) {
     const [w] = pool.splice(rng.int(0, pool.length - 1), 1);
     state.thoughts.push({

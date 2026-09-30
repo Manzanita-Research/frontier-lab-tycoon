@@ -13,6 +13,7 @@ import { countOf, findSpot, layPaths } from "./testkit";
 import { TICKS_PER_DAY, tick } from "./tick";
 import type { GameState } from "./types";
 import { pendingConfirmOf } from "./guardrails";
+import { people } from "./ecs/protesters";
 
 const RESERVE = 400_000;
 
@@ -83,7 +84,7 @@ export function playBot(seed: number, opts: BotOptions = {}): Report {
       // Operations: an SRE per handful of buildings, a Janitor Bot per handful of agents once the paths get grubby,
       // a Comms Rep when the gate fills up. Salaries are a few percent of a day's income, and a lab without them slides.
       const agents = s.walkers.filter((w) => w.kind === "agent").length;
-      const protesters = s.walkers.filter((w) => w.kind === "protester").length;
+      const protesters = people(s).filter((w) => w.kind === "protester").length;
       if (s.day > 15 && staffOf(s, "sre").length < 1 + Math.floor(s.buildings.length / 6)) cmds.push({ type: "hire", job: "sre" });
       else if (slopStats(s).share > 0.1 && staffOf(s, "janitor").length < Math.min(10, 1 + Math.floor(agents / 4))) cmds.push({ type: "hire", job: "janitor" });
       else if (protesters >= 10 && staffOf(s, "comms").length < 1 + Math.floor(protesters / 20)) cmds.push({ type: "hire", job: "comms" });

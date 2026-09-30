@@ -18,6 +18,7 @@ import { modeOf } from "../walkers";
 import { factionMoodMachine, quietMoodDay, quietRelationDay, relationMachine } from "./machines";
 import { readStance, SAFETY_COST, SAFETY_DRAG, SAFETY_LABELS, updateStance } from "./stance";
 import { baseRelationOf, nudgeFaction, pairKey, seenNow, type FactionsState } from "./state";
+import { people } from "../ecs/protesters";
 
 /** A faction with no `protests` line marches on the gate at this meter. */
 export const DEFAULT_MARCH = -60;
@@ -301,7 +302,7 @@ function factionThought(state: GameState, f: FactionsState, rng: Rng, all: reado
   const live = state.thoughts.filter((t) => t.expiresTick > state.tick);
   if (live.length >= 3) return;
   const speaking = new Set(live.map((t) => t.walkerId));
-  const pool = state.walkers.filter((w) => w.faction && modeOf(w) === "walk" && !speaking.has(w.id) && Math.abs(f.moods[w.faction]?.context.meter ?? 0) >= 20);
+  const pool = people(state).filter((w) => w.faction && modeOf(w) === "walk" && !speaking.has(w.id) && Math.abs(f.moods[w.faction]?.context.meter ?? 0) >= 20);
   if (pool.length === 0) return;
   const w = rng.pick(pool);
   const def = all.find((d) => d.id === w.faction);
@@ -344,7 +345,7 @@ export function factionFor(state: GameState, w: Walker): string {
 export function updateFactions(state: GameState) {
   const f = state.factions;
   if (!f || state.tick % 4 !== 0) return;
-  for (const w of state.walkers) if (w.faction === undefined) w.faction = factionFor(state, w);
+  for (const w of people(state)) if (w.faction === undefined) w.faction = factionFor(state, w);
   if (state.tick - f.lastArgue < ARGUE_EVERY) return;
   const rng = createRng(f.rngState);
   if (argue(state, f, rng)) f.lastArgue = state.tick;
@@ -355,7 +356,7 @@ export function updateFactions(state: GameState) {
 function argue(state: GameState, f: FactionsState, rng: Rng): boolean {
   const speaking = new Set<number>();
   for (const t of state.thoughts) if (t.expiresTick > state.tick) speaking.add(t.walkerId);
-  const out = state.walkers.filter((w) => w.faction && w.kind !== "protester" && modeOf(w) === "walk" && !speaking.has(w.id));
+  const out = people(state).filter((w) => w.faction && w.kind !== "protester" && modeOf(w) === "walk" && !speaking.has(w.id));
   if (out.length < 2) return false;
   for (let tries = 0; tries < 6; tries++) {
     const a = rng.pick(out);

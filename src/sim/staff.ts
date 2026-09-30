@@ -21,6 +21,7 @@ import type { staffMachine } from "./machines/staff";
 import type { Building, GameState, Point, Rect, StaffJob, Staffer } from "./types";
 import { defs } from "./defs";
 import { toteBagFor } from "./factions/driver";
+import { people } from "./ecs/protesters";
 
 /** Look for something to do this often when idle (in ticks). */
 const SCAN_TICKS = 3;
@@ -44,7 +45,7 @@ export const payroll = (state: GameState): number => state.staff.reduce((sum, s)
 export const COMMS_RELIEF = 2;
 
 /** Discourse a day the Comms Reps talk down: nothing when there is nobody to talk to. */
-export const commsRelief = (state: GameState): number => (state.walkers.some((w) => w.kind === "protester") ? COMMS_RELIEF * staffOf(state, "comms").filter((s) => s.machine.value !== "leaving" && !s.divert).length : 0);
+export const commsRelief = (state: GameState): number => (people(state).some((w) => w.kind === "protester") ? COMMS_RELIEF * staffOf(state, "comms").filter((s) => s.machine.value !== "leaving" && !s.divert).length : 0);
 
 /** How many Security guards are on the fence (the hook FLT-5's escaped agents look for). One pulled off by a disaster is not. */
 export const guardsOn = (state: GameState): number => staffOf(state, "security").filter((s) => !s.divert).length;
@@ -211,7 +212,7 @@ function sreJob(state: GameState, s: Staffer): Job | null {
 function commsJob(state: GameState, s: Staffer): Job | null {
   let best: { id: number; x: number; z: number } | null = null;
   let bestD = Infinity;
-  for (const w of state.walkers) {
+  for (const w of people(state)) {
     if (w.kind !== "protester" || w.id === s.last || claimed(state, s, w.id)) continue;
     const d = (w.x - s.x) ** 2 + (w.z - s.z) ** 2;
     if (d < bestD) {
@@ -263,7 +264,7 @@ function patrol(state: GameState, s: Staffer, rng: Rng) {
     s.task = (s.task + 1) % FENCE.length;
     return;
   }
-  if (s.job === "comms" && !state.walkers.some((w) => w.kind === "protester")) {
+  if (s.job === "comms" && !people(state).some((w) => w.kind === "protester")) {
     const spot = state.buildings.find((b) => b.kind === "kombucha") ?? state.buildings.find((b) => b.kind === "gateway");
     const zoned = s.zone.find((i) => getReach(state).tiles[i]);
     const route = zoned !== undefined ? pathRoute(state, s, new Set([zoned])) : spot ? routeToRect(state, ...fromTile(state, s), spot) : pathRoute(state, s, new Set([tileIndex(state, 11, 19)]));
@@ -290,7 +291,7 @@ const isTarget = (state: GameState, s: Staffer): boolean => {
     case "sre":
       return state.buildings.some((b) => b.id === s.task && b.broken);
     case "comms":
-      return state.walkers.some((w) => w.id === s.task && w.kind === "protester");
+      return people(state).some((w) => w.id === s.task && w.kind === "protester");
     default:
       return false;
   }
@@ -338,7 +339,7 @@ function finish(state: GameState, rng: Rng, s: Staffer) {
       break;
     }
     case "comms": {
-      const w = state.walkers.find((o) => o.id === s.task);
+      const w = people(state).find((o) => o.id === s.task);
       state.flags.totes = (state.flags.totes ?? 0) + 1;
       if (w && state.flags.totes % 3 === 1) pushNews(state, rng, "tote");
       if (w?.crowd !== undefined) toteBagFor(state, w.crowd);
@@ -416,7 +417,7 @@ export function updateStaff(state: GameState, rng: Rng) {
         }
         move(s);
         if (s.route.length === 0) {
-          const w = s.job === "comms" ? state.walkers.find((o) => o.id === s.task) : undefined;
+          const w = s.job === "comms" ? people(state).find((o) => o.id === s.task) : undefined;
           if (w && Math.hypot(w.x - s.x, w.z - s.z) > TOTE_TOLERANCE) {
             s.last = s.task; // they moved: try somebody else, or come back for them
             s.task = 0;

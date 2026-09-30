@@ -17,6 +17,7 @@ import { crowdColor, HOODIES, PICKET, placards, SKIN, SUITS } from "./look";
 import { Pick } from "./Pick";
 import { eraDef } from "../content/eras";
 import { eraOfState } from "../sim/race/race";
+import { people } from "../sim/ecs/protesters";
 
 const CAP = 512;
 /** Every human gets a pair of glasses (one dark strip) so you can see which way they face and when they look around. */
@@ -169,7 +170,7 @@ export function Walkers() {
       set(eyes.current, ne++, x + Math.sin(yaw) * 0.112 * S, y + 0.02 * S, z + Math.cos(yaw) * 0.112 * S, yaw, 1, 1, 1);
     };
 
-    for (const w of sim.walkers) {
+    for (const w of people(sim)) {
       if (w.machine.value === "inside") continue;
       const slot = w.id % heading.length;
       heading[slot] = heading[slot]! + wrap(w.dir - heading[slot]!) * 0.25;

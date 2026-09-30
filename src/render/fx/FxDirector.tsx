@@ -16,6 +16,7 @@ import { endBeat, isBeat, skipBeat } from "./beat";
 import { reducedMotion } from "../../skins/kit/motion";
 import { debugParams, registry, sim as game } from "../../app/game";
 import { worldX, worldZ } from "../coords";
+import { people } from "../../sim/ecs/protesters";
 
 // `?debug=1` exposes the juice state to probes and screenshot scripts (`get` is R3F's store getter: camera, controls).
 if (typeof window !== "undefined" && new URLSearchParams(window.location.search).has("debug")) {
@@ -226,11 +227,11 @@ export function FxDirector() {
       const c = [...world.disasters.cues].reverse().find((c) => c.type === "beat");
       if (c?.type === "beat") handle({ type: "beat", beat: c.beat, caption: c.caption, sub: c.sub, x: worldX(c.x), z: worldZ(c.z), zoom: c.zoom, hold: c.hold, follow: c.follow });
     }
-    if (isBeat()) runBeat(world.walkers, dt);
+    if (isBeat()) runBeat(people(world), dt);
 
     // Ambient emitters. Each is a rate per second, spent as whole particles.
     const a = acc.current;
-    const walkers = world.walkers;
+    const walkers = people(world);
     if (dt <= 0) return;
 
     // A faint cyan trail behind agents on the move.

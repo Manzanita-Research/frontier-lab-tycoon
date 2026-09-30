@@ -9,6 +9,7 @@ import { answer, createTestCampus } from "./testkit";
 import { TICKS_PER_DAY, tick } from "./tick";
 import { dailyTraining } from "./training";
 import type { GameState } from "./types";
+import { people } from "./ecs/protesters";
 
 const gatewayAt = (s: GameState) => s.buildings.find((b) => b.kind === "gateway")!;
 
@@ -26,7 +27,7 @@ describe("initial state", () => {
     expect(s.walkers.filter((w) => w.kind === "researcher")).toHaveLength(3);
     expect(s.walkers.filter((w) => w.kind === "agent")).toHaveLength(1);
     expect(s.walkers.filter((w) => w.kind === "visitor")).toHaveLength(0);
-    expect(s.walkers.filter((w) => w.kind === "protester")).toHaveLength(0);
+    expect(people(s).filter((w) => w.kind === "protester")).toHaveLength(0);
     expect(s.training.context.progress / s.training.context.cost).toBe(0);
     expect(s.buildings.map((b) => b.kind).sort()).toEqual(["cluster"]);
     for (const b of s.buildings) expect(isReachable(s, b)).toBe(true);
@@ -163,7 +164,7 @@ describe("walkers", () => {
     const s = withGateway();
     for (let i = 0; i < 3000; i++) {
       tick(s);
-      for (const w of s.walkers) {
+      for (const w of people(s)) {
         if (w.machine.value === "inside" || w.kind === "protester") continue;
         const tx = Math.floor(w.x);
         const tz = Math.floor(w.z);

@@ -8,6 +8,7 @@ import { createInitialState } from "../state";
 import { applyNow, tick, TICKS_PER_DAY } from "../tick";
 import type { GameState, Thought, WalkerKind } from "../types";
 import { defs } from "../defs";
+import { people } from "../ecs/protesters";
 
 export const MIDGAME_SEED = 48;
 export const MIDGAME_CAMERA = { focus: [11.5, 14.5] as [number, number], zoom: 43 };
@@ -36,7 +37,7 @@ export function midgameOpeningThoughts(s: GameState): Thought[] {
   const chosen: number[] = [];
   return picks.map((pick, i) => {
     const line = defs().thoughts.find((t) => t.kind === pick.kind && t.text === pick.text);
-    const speaker = s.walkers.filter((w) => w.kind === pick.kind && w.machine.value !== "inside" && !chosen.includes(w.id))
+    const speaker = people(s).filter((w) => w.kind === pick.kind && w.machine.value !== "inside" && !chosen.includes(w.id))
       .sort((a, b) => Math.hypot(a.x - pick.near[0], a.z - pick.near[1]) - Math.hypot(b.x - pick.near[0], b.z - pick.near[1]) || a.id - b.id)[0];
     if (!line || !speaker) throw new Error(`Mid-game opening thought is missing: ${pick.kind}`);
     chosen.push(speaker.id);
@@ -94,7 +95,7 @@ export function walkerPlaced(s: GameState, w: { kind?: string; x: number; z: num
 }
 
 export function walkerOnCampus(s: GameState): boolean {
-  return s.walkers.every((w) => walkerPlaced(s, w));
+  return people(s).every((w) => walkerPlaced(s, w));
 }
 
 export function createMidgameScenario(): GameState {

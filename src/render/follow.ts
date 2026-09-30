@@ -4,6 +4,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { send, sim } from "../app/game";
 import { HALF } from "./coords";
+import { people } from "../sim/ecs/protesters";
 
 /**
  * Writes the world-space position (on the ground) of the walker being followed into `out` and returns true, or returns
@@ -12,7 +13,7 @@ import { HALF } from "./coords";
 export function followPoint(out: THREE.Vector3): boolean {
   const { selected, follow } = sim.ui;
   if (!follow || selected === null) return false;
-  const w = sim.world.walkers.find((o) => o.id === selected);
+  const w = people(sim.world).find((o) => o.id === selected);
   if (!w) return false;
   const a = sim.alpha;
   out.set(w.px + (w.x - w.px) * a - HALF, 0, w.pz + (w.z - w.pz) * a - HALF);

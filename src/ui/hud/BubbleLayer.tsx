@@ -4,6 +4,7 @@ import { HALF } from "../../render/coords";
 import { Anchored } from "../../render/overlay";
 import { useSlots } from "../../skins/context";
 import type { HudActions, HudVM } from "./types";
+import { people } from "../../sim/ecs/protesters";
 
 /**
  * Thought bubbles. The active skin's Bubble slot draws each one; the game pins it to the walker every frame (a plain
@@ -20,7 +21,7 @@ export function BubbleLayer({ bubbles, actions }: { bubbles: HudVM["bubbles"]; a
           key={b.id}
           pos={(out) => {
             const a = sim.alpha;
-            const w = sim.world.walkers.find((o) => o.id === b.walkerId);
+            const w = people(sim.world).find((o) => o.id === b.walkerId);
             if (!w) {
               // A visitor group's member (an auditor): not a walker, but the same interpolation.
               const m = memberById(sim.world, b.walkerId)?.member;

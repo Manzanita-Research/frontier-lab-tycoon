@@ -18,6 +18,7 @@ import starter from "../../templates/create-flt-mod/mod.json";
 import { systemUnlocked } from "./progression";
 import { applyNow, tick } from "./tick";
 import type { GameState } from "./types";
+import { people } from "./ecs/protesters";
 
 const mod = (id: string, content: ModManifest["content"] = {}): ModManifest => ({ apiVersion: 1, id, name: id, version: "1.0.0", content });
 const resolve = async (mods: readonly unknown[]): Promise<GameDefinition> => {
@@ -93,7 +94,7 @@ describe("the resolved definition (FLT-37)", () => {
     expect(withDefs(def, () => systemUnlocked(s, "protests"))).toBe(true);
     expect(systemUnlocked(s, "protests")).toBe(false);
     while (s.day < 3) tick(s, withDefs(def, () => answer(s, () => 0)), def);
-    expect(s.walkers.filter((w) => w.kind === "protester").length).toBeGreaterThan(0);
+    expect(people(s).filter((w) => w.kind === "protester").length).toBeGreaterThan(0);
   });
 
   it("a pack a mod moves to the first rung is awake from the start", async () => {

@@ -10,6 +10,7 @@ import type { GameState } from "../types";
 import { defs } from "../defs";
 import { enablePapers } from "../race/papers/driver";
 import { enableFactions, meterOf, moodOf, relationStateOf, type FactionsState } from "./state";
+import { people } from "../ecs/protesters";
 
 export interface Strategy {
   name: string;
@@ -109,9 +110,9 @@ export function runFactions(seed: number, strategy: Strategy = { name: "default"
       if (i === 1 && strategy.policy) cmds.push({ type: "setPublicationPolicy", policy: strategy.policy });
       if (i === 1 && strategy.safety) cmds.push({ type: "setSafetySpend", level: strategy.safety });
       // Look at the World once a tick for the gate, once a day for the rest.
-      const water0 = s.walkers.filter((w) => w.kind === "protester" && w.crowd === undefined).length;
+      const water0 = people(s).filter((w) => w.kind === "protester" && w.crowd === undefined).length;
       const crowds = new Map<string, number>();
-      for (const w of s.walkers) if (w.crowd !== undefined) crowds.set(w.crowd, (crowds.get(w.crowd) ?? 0) + 1);
+      for (const w of people(s)) if (w.crowd !== undefined) crowds.set(w.crowd, (crowds.get(w.crowd) ?? 0) + 1);
       maxWater = Math.max(maxWater, water0);
       for (const n of crowds.values()) maxCrowd = Math.max(maxCrowd, n);
       const arc = s.modArcs?.["water-escalation"]?.value;

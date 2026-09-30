@@ -16,6 +16,7 @@ import { openEventOf } from "./events";
 import { outcomeOf } from "./goals";
 import { createInitialState } from "./state";
 import { modeOf } from "./walkers";
+import { people } from "./ecs/protesters";
 import { tick } from "./tick";
 import type { GameState } from "./types";
 import type { PlaceableKind } from "../content/buildings";
@@ -66,7 +67,7 @@ function view(s: GameState) {
     slop: s.slop.reduce((acc, level, i) => (level ? acc + `${i}:${level},` : acc), ""),
     staff: s.staff.map((o) => ({ id: o.id, job: o.job, name: o.name, x: o.x, z: o.z, phase: o.machine.value, task: o.task, done: o.done, zone: o.zone })),
     paths: s.grid.paths.reduce((acc, on, i) => (on ? acc + `${i},` : acc), ""),
-    walkers: s.walkers.map((w) => ({
+    walkers: people(s).map((w) => ({
       id: w.id,
       kind: w.kind,
       x: w.x,

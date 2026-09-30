@@ -14,6 +14,7 @@ import { applyNow, tick } from "./tick";
 import { createRng } from "./rng";
 import { seedWalkers } from "./walkers";
 import { rectContains, routeToRect } from "./pathfind";
+import { people } from "./ecs/protesters";
 
 describe("the playable ladder", () => {
   it("gates placement and hiring, then unlocks five levels and queues every card", () => {
@@ -96,7 +97,7 @@ describe("the playable ladder", () => {
     const before = structuredClone({ race: s.race, leapfrog: s.leapfrog, disasters: s.disasters, collusion: s.collusion });
     for (let i = 0; i < 100; i++) tick(s);
     expect({ race: s.race, leapfrog: s.leapfrog, disasters: s.disasters, collusion: s.collusion }).toEqual(before);
-    expect(s.walkers.some((w) => w.kind === "visitor" || w.kind === "protester")).toBe(false);
+    expect(people(s).some((w) => w.kind === "visitor" || w.kind === "protester")).toBe(false);
     expect(s.slop.some(Boolean)).toBe(false); expect(s.buildings[0]?.reliability).toBe(1);
     expect(Object.values(s.arcs).some((a) => a.value === "cardOpen")).toBe(false);
     expect(s.hearing).toBeUndefined(); expect(s.yacht).toBeUndefined();

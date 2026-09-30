@@ -8,6 +8,7 @@ import { addNews } from "../news";
 import { clampDiscourse } from "../protest";
 import type { GameState, WalkerKind } from "../types";
 import { ENDING_RULES, MEMO_OFFER, MEMO_RACE, MEMO_SLOW, type MemoForkDef } from "./pack";
+import { people } from "../ecs/protesters";
 
 export type MemoChoice = "race" | "slow";
 
@@ -53,7 +54,7 @@ export function updateMemo(state: GameState) {
   const used = new Set<number>();
   const reactions: MemoState["reactions"] = [];
   for (const line of fork.reactions) {
-    const who = state.walkers.find((w) => w.kind === line.kind && !used.has(w.id));
+    const who = people(state).find((w) => w.kind === line.kind && !used.has(w.id));
     if (!who) continue;
     used.add(who.id);
     reactions.push({ name: who.name, role: who.role, kind: who.kind, text: line.text });

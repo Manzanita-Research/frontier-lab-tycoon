@@ -314,7 +314,13 @@ export interface GameState {
   grid: { w: number; h: number; paths: boolean[] };
   gate: Rect;
   buildings: Building[];
+  /** Everyone on campus except the protesters (FLT-75): `people(state)` in `sim/ecs/protesters.ts` gives everyone. */
   walkers: Walker[];
+  /**
+   * FLT-75: the protesters, one legacy Walker row each, in id order. Live, they are Koota entities (`sim/ecs/protesters.ts`)
+   * and this reads as their rows; a save holds the rows. Absent until the crowd is first touched.
+   */
+  protesters?: Walker[];
   /** The economy machine: solvent, runwayWarning, bailout or bankrupt, plus the day of the last bridge round. */
   economy: EconomyStored;
   /** The training machine: run, progress, cost and the next model name live in its context. */

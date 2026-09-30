@@ -22,6 +22,7 @@ import { stageFactions, type FactionMoment } from "./demo";
 import { factionsView } from "./view";
 import { issueStatement, STATEMENT } from "./statement";
 import { CLOSED_CAREFUL, COMPROMISE, OPEN_FAST, runFactions, factionsTable, type FactionsReport } from "./headless";
+import { people } from "../ecs/protesters";
 
 // Pinned v6 graph typing does not model emitted events; same adapter as machines/graph.test.ts.
 function graph(machine: AnyStateMachine, options: Record<string, unknown>) {
@@ -243,7 +244,7 @@ describe("FLT-25: the Water Discourse escalation", () => {
     const s = toCounter(3);
     expect(s.modArcs!["water-escalation"]!.value).toBe("counter");
     expect(s.rallies?.[0]?.faction).toBe("truthers-truthers");
-    const counter = (w: GameState) => w.walkers.filter((x) => x.crowd === "truthers-truthers" && x.machine.value !== "leaving").length;
+    const counter = (w: GameState) => people(w).filter((x) => x.crowd === "truthers-truthers" && x.machine.value !== "leaving").length;
     for (let i = 0; i < 2 * TICKS_PER_DAY; i++) tick(s, answer(s));
     const loud = counter(s);
     expect(loud).toBeGreaterThan(2);
@@ -256,7 +257,7 @@ describe("FLT-25: the Water Discourse escalation", () => {
       tick(calm, answer(calm));
     }
     expect(calm.waterDiscourse).toBeLessThan(s.waterDiscourse);
-    const gate = (w: GameState) => w.walkers.filter((x) => x.kind === "protester").length;
+    const gate = (w: GameState) => people(w).filter((x) => x.kind === "protester").length;
     expect(gate(calm)).toBeLessThan(gate(s));
   }, 120_000);
 
@@ -268,13 +269,13 @@ describe("FLT-25: the Water Discourse escalation", () => {
     expect(alone.factions).toBeUndefined();
     expect(alone.modArcs!["water-escalation"]!.value).toBe("counter");
     for (let i = 0; i < TICKS_PER_DAY; i++) tick(alone, answer(alone));
-    expect(alone.walkers.some((w) => w.crowd === "truthers-truthers")).toBe(true);
+    expect(people(alone).some((w) => w.crowd === "truthers-truthers")).toBe(true);
     const off = createTestCampus(3);
     off.flags["arcOff:water-escalation"] = 1;
     off.waterDiscourse = 150;
     for (let i = 0; i < 60 * TICKS_PER_DAY; i++) tick(off, answer(off));
     expect(off.modArcs?.["water-escalation"]).toBeUndefined();
-    expect(off.walkers.some((w) => w.kind === "protester")).toBe(true);
+    expect(people(off).some((w) => w.kind === "protester")).toBe(true);
   }, 120_000);
 });
 

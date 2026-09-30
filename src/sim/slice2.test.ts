@@ -12,6 +12,7 @@ import { readyForPressure, createTestCampus as createBaseCampus } from "./testki
 import { TICKS_PER_DAY, tick } from "./tick";
 import { agentTarget, fillAgents, researcherTarget, seedWalkers, visitorCap } from "./walkers";
 import type { GameState } from "./types";
+import { people } from "./ecs/protesters";
 
 const createInitialState = (seed = 1) => { const s = createBaseCampus(seed); readyForPressure(s); return s; };
 
@@ -85,7 +86,7 @@ describe("crowd density", () => {
     s.waterDiscourse = 160;
     syncProtesters(s, rng, true);
     expect(count(s, "agent")).toBe(400);
-    expect(s.walkers.length).toBeGreaterThanOrEqual(500);
+    expect(people(s).length).toBeGreaterThanOrEqual(500);
     // A card that opens would freeze time and flatter the number, so every card gets answered.
     for (let i = 0; i < 100; i++) tick(s, answer(s)); // warm up the JIT and spread the crowd out
     let best = Infinity;
@@ -198,7 +199,7 @@ describe("water discourse and protesters", () => {
     expect(protesterCount(s)).toBe(40);
     s.waterDiscourse = 12;
     dailyDiscourse(s, createRng(1));
-    expect(s.walkers.filter((w) => w.kind === "protester" && w.machine.value !== "leaving")).toHaveLength(3);
+    expect(people(s).filter((w) => w.kind === "protester" && w.machine.value !== "leaving")).toHaveLength(3);
     run(s, 2, answer); // the extras walk out through the gate and despawn
     expect(protesterCount(s)).toBe(3);
   });
@@ -209,7 +210,7 @@ describe("water discourse and protesters", () => {
     dailyDiscourse(s, createRng(1));
     for (let i = 0; i < 800; i++) {
       tick(s);
-      for (const w of s.walkers) {
+      for (const w of people(s)) {
         if (w.kind !== "protester") continue;
         expect(w.machine.value).not.toBe("inside");
         expect(s.buildings.some((b) => w.x >= b.x && w.x < b.x + b.w && w.z >= b.z && w.z < b.z + b.d)).toBe(false);

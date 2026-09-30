@@ -18,6 +18,7 @@ import { chooseTarget, dailyWalkers, fillAgents, researcherTarget, seedWalkers }
 import { syncProtesters } from "./protest";
 import { enableFactions } from "./factions/state";
 import { settleFactions } from "./factions/driver";
+import { people } from "./ecs/protesters";
 
 const count = (s: GameState, kind: Walker["kind"]) => s.walkers.filter((w) => w.kind === kind).length;
 const researchers = (s: GameState) => s.walkers.filter((w) => w.kind === "researcher");
@@ -712,14 +713,14 @@ describe("determinism and scale", () => {
     let smallest = Infinity;
     for (let attempt = 0; attempt < 3; attempt++) {
       topUp();
-      smallest = Math.min(smallest, s.walkers.length);
+      smallest = Math.min(smallest, people(s).length);
       const t0 = performance.now();
       const day = s.day;
       for (let i = 0; i < 200; i++) tick(s, answer(s));
       best = Math.min(best, (performance.now() - t0) / 200);
       expect(s.day).toBeGreaterThan(day); // it really ran
     }
-    if (factions) expect(s.walkers.some((w) => w.crowd !== undefined)).toBe(true);
+    if (factions) expect(people(s).some((w) => w.crowd !== undefined)).toBe(true);
     console.log(`800-walker tick${factions ? " (factions on)" : ""}: ${best.toFixed(3)} ms (best of 3 x 200 ticks), never fewer than ${smallest} walkers at the start of a batch`);
     expect(smallest).toBeGreaterThanOrEqual(800);
     expect(best).toBeLessThan(perfBudget(0.5)); // a shared CI runner gets double, like the other wall-clock budgets

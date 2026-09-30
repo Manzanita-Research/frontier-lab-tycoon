@@ -9,6 +9,7 @@ import { happinessOf, urgencyOf } from "./needs";
 import { MESS_THOUGHT } from "./slop";
 import type { GameState, Walker, WalkerKind } from "./types";
 import { defs } from "./defs";
+import { people } from "./ecs/protesters";
 
 const ROTATE_DAYS = 2;
 
@@ -76,7 +77,7 @@ export const thoughtKey = (kind: WalkerKind, text: string) => `${kind}|${text}`;
 /** Everyone's thoughts, counted and sorted by how many people share them. Walkers inside a building count too. */
 export function thoughtBoard(state: GameState): ThoughtRow[] {
   const rows = new Map<string, ThoughtRow>();
-  for (const w of state.walkers) {
+  for (const w of people(state)) {
     const text = thoughtOf(state, w);
     const key = thoughtKey(w.kind, text);
     const row = rows.get(key);
@@ -89,6 +90,6 @@ export function thoughtBoard(state: GameState): ThoughtRow[] {
 /** Ids of the walkers thinking the thought behind `key`. */
 export function walkersThinking(state: GameState, key: string): Set<number> {
   const ids = new Set<number>();
-  for (const w of state.walkers) if (thoughtKey(w.kind, thoughtOf(state, w)) === key) ids.add(w.id);
+  for (const w of people(state)) if (thoughtKey(w.kind, thoughtOf(state, w)) === key) ids.add(w.id);
   return ids;
 }

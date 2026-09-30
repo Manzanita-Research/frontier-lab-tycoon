@@ -12,6 +12,7 @@ import { NEO_BALLOON_SUB } from "../content/neocampus";
 import { balloonAt, balloonRadius } from "../render/NeoCampuses";
 import { BUILDINGS } from "../content/buildings";
 import { cursorOf } from "../sim/endings/view";
+import { people } from "../sim/ecs/protesters";
 
 interface Live {
   id: number;
@@ -267,7 +268,7 @@ function NameTag() {
       key={inspect.id}
       className="nametag"
       pos={(out) => {
-        const w = sim.world.walkers.find((o) => o.id === inspect.id);
+        const w = people(sim.world).find((o) => o.id === inspect.id);
         if (!w || w.machine.value === "inside") return false;
         const a = sim.alpha;
         out.set(w.px + (w.x - w.px) * a - HALF, -0.05, w.pz + (w.z - w.pz) * a - HALF);

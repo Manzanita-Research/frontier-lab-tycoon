@@ -14,6 +14,7 @@ import { visitorDemand } from "./attendance";
 import { chainFor, faceDoor, slotPoint, slotRoute, type Chain } from "./queues";
 import { dropSlop, messTick } from "./slop";
 import { CONTENT } from "./machines/mood";
+import { ground } from "./ecs/protesters";
 import {
   doorPoint,
   entrances,
@@ -521,7 +522,6 @@ function offPath(state: GameState, route: Point[]): boolean {
 /** Walkers caught out by a change to paths or buildings find a new way. */
 function repairWalkers(state: GameState, rng: Rng, grew: boolean) {
   for (const w of state.walkers) {
-    if (w.kind === "protester") continue; // they stand on grass; protest.ts looks after them
     if (found(state, w)) w.lost = "";
     if (grew && (w.machine.value === "wandering" || w.machine.value === "loitering")) {
       wander(state, w, rng);
@@ -552,9 +552,14 @@ function repairWalkers(state: GameState, rng: Rng, grew: boolean) {
 }
 
 export function advance(w: Walker) {
+  walk(w, w.route);
+}
+
+/** One tick of walking along `route` (eating waypoints as they're reached): Walkers, and FLT-75's Koota `Body`. */
+export function walk(w: { x: number; z: number; dir: number }, route: Point[]) {
   let budget = WALK_SPEED;
-  while (budget > 1e-9 && w.route.length > 0) {
-    const next = w.route[0]!; // not `const [tx, tz] =`: destructuring walks the array iterator, a fifth of this loop
+  while (budget > 1e-9 && route.length > 0) {
+    const next = route[0]!; // not `const [tx, tz] =`: destructuring walks the array iterator, a fifth of this loop
     const tx = next[0];
     const tz = next[1];
     const dx = tx - w.x;
@@ -566,7 +571,7 @@ export function advance(w: Walker) {
       w.x = tx;
       w.z = tz;
       budget -= dist;
-      w.route.shift();
+      route.shift();
     } else {
       w.x += (dx / dist) * budget;
       w.z += (dz / dist) * budget;
@@ -619,9 +624,6 @@ export function updateWalkers(state: GameState, rng: Rng) {
   const fountains = state.buildings.filter((b) => b.kind === "fountain");
   let gone: Set<number> | null = null;
   for (const w of state.walkers) {
-    if (w.kind === "protester") {
-      continue;
-    }
     w.px = w.x;
     w.pz = w.z;
     if (disconnected && w.machine.value !== "inside" && !exiting(w.machine.value)) {
@@ -726,7 +728,7 @@ export function dailyWalkers(state: GameState, rng: Rng) {
   admitApplicants(state, rng, count("researcher"));
   if (state.flags.firstGateway === undefined && !state.buildings.some((b) => b.kind === "gateway")) return;
   const demand = visitorDemand(state);
-  const crowdFactor = count("protester") >= CROWDING_PROTESTERS ? 0.5 : 1;
+  const crowdFactor = ground(state).size >= CROWDING_PROTESTERS ? 0.5 : 1;
   const rate = demand.perDay * crowdFactor;
   const arrivals = Math.floor(rate) + (rng.chance(rate % 1) ? 1 : 0);
   const room = Math.max(0, demand.cap - count("visitor"));

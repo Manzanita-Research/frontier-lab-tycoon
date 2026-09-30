@@ -16,6 +16,7 @@ import { eraOfState } from "../race";
 import { enableLeapfrog } from "./driver";
 import { leapfrogView, type LeapfrogView } from "./view";
 import { defs } from "../../defs";
+import { people } from "../../ecs/protesters";
 
 const RESERVE = 400_000;
 
@@ -95,7 +96,7 @@ export function runHeadless(seed: number, opts: HeadlessOptions = {}): HeadlessR
     } else if (opts.build !== false && i % (TICKS_PER_DAY * 4) === 2) {
       // Operations, as the playthrough bot does it: an SRE per handful of buildings, a Janitor Bot when the paths get grubby, a Comms Rep at a full gate.
       const agents = s.walkers.filter((w) => w.kind === "agent").length;
-      const protesters = s.walkers.filter((w) => w.kind === "protester").length;
+      const protesters = people(s).filter((w) => w.kind === "protester").length;
       if (s.day > 15 && staffOf(s, "sre").length < 1 + Math.floor(s.buildings.length / 6)) cmds.push({ type: "hire", job: "sre" });
       else if (slopStats(s).share > 0.1 && staffOf(s, "janitor").length < Math.min(10, 1 + Math.floor(agents / 4))) cmds.push({ type: "hire", job: "janitor" });
       else if (protesters >= 10 && staffOf(s, "comms").length < 1 + Math.floor(protesters / 20)) cmds.push({ type: "hire", job: "comms" });

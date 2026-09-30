@@ -33,6 +33,7 @@ import { calmStart, CALM_START_DAY, disasterMenu, disastersView, type MenuRow, t
 import type { Risk } from "../sim/disasters/types";
 import type { Building, GameState, GoalProgress, OpenEvent, Outcome, Pop, StaffJob, Thought, Tone, Vibes, Importance, NoticeSource } from "../sim/types";
 import { endingsView, type EndingsView } from "../sim/endings/view";
+import { people } from "../sim/ecs/protesters";
 
 export type Tool = "path" | PlaceableKind | "security" | "bulldoze";
 /** Hotkeys 1-9 pick these in order. */
@@ -214,7 +215,7 @@ function speakersOf(s: GameState): Record<number, string> {
   const out: Record<number, string> = {};
   if (s.thoughts.length === 0) return out;
   const names = new Map<number, string>();
-  for (const w of s.walkers) names.set(w.id, w.name);
+  for (const w of people(s)) names.set(w.id, w.name);
   // Visitor groups (the auditors) are not walkers: their names come from the group.
   for (const t of s.thoughts) out[t.walkerId] = names.get(t.walkerId) ?? memberById(s, t.walkerId)?.member.name ?? "";
   return out;
@@ -252,7 +253,7 @@ export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO
     version: s.version,
     buildings: prev && prev.version === s.version ? prev.buildings : s.buildings.slice(),
     models: s.models.length,
-    walkers: s.walkers.length,
+    walkers: people(s).length,
     hasGateway: s.buildings.some((b) => b.kind === "gateway"),
     goals: s.goals.context.goals.map((g) => ({ ...g })),
     outcome: outcomeOf(s),

@@ -6,6 +6,7 @@ import { eraOfState } from "../race/race";
 import { tick } from "../tick";
 import { SimHandle } from "../../app/sim";
 import { createMidgameScenario, MIDGAME_SEED, midgameOpeningNews, midgameOpeningThoughts, walkerOnCampus, walkerPlaced } from "./midgame";
+import { legacyWorld, people } from "../ecs/protesters";
 
 // FNV-1a, the same deliberately simple hash used by sim/golden.test.ts, over the entire persisted World.
 function digest(s: unknown): string {
@@ -32,9 +33,11 @@ describe("midgame scenario", () => {
     // Hearing's twelve new questions change what the senators ask. Phase 2: the motions' passes and fails nudge the
     // factions and last longer.
     // Rename (#71): Very Safe SI is Super Super AI (id supersuper) and MetaMeta's full name changed; names and ids are in the World.
+    // FLT-75: protesters are Koota entities saved in `protesters`; folded back into `walkers`, the World is byte-identical.
+    const legacy = legacyWorld(s) as typeof s;
     expect({
-      untagged: digest({ ...s, toasts: s.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) }),
-      full: digest(s),
+      untagged: digest({ ...legacy, toasts: legacy.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) }),
+      full: digest(legacy),
     }).toEqual({ untagged: "083910db", full: "4b179e05" }); // were 06ccd627 / 31b29e51 on the train before the rename
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
@@ -44,9 +47,9 @@ describe("midgame scenario", () => {
     expect(s.buildings.length).toBeGreaterThanOrEqual(14);
     expect(s.buildings.length).toBeLessThanOrEqual(20);
     // Operations staff are rendered walkers too; count both populations, rather than inventing agent bonuses.
-    expect(s.walkers.length + s.staff.length).toBeGreaterThanOrEqual(150);
+    expect(people(s).length + s.staff.length).toBeGreaterThanOrEqual(150);
     // The water crowd at its cap; FLT-25's counter-protest may have brought the Water Truthers Truthers too.
-    expect(s.walkers.filter((w) => w.kind === "protester" && w.crowd === undefined).length).toBe(40);
+    expect(people(s).filter((w) => w.kind === "protester" && w.crowd === undefined).length).toBe(40);
     expect(eraOfState(s)).toBe(2);
     const ready = s.training.context.progress / s.training.context.cost;
     expect(ready).toBeGreaterThanOrEqual(0.6);
@@ -65,7 +68,7 @@ describe("midgame scenario", () => {
   });
   it("puts every walker on a path or in a building, including the gate; resumes with real movement", () => {
     expect(walkerOnCampus(s)).toBe(true);
-    for (const w of [...s.walkers, ...s.staff]) {
+    for (const w of [...people(s), ...s.staff]) {
       const x = Math.floor(w.x), z = Math.floor(w.z);
       expect(walkerPlaced(s, w)).toBe(true);
       if (isPathTile(s, x, z)) expect(getReach(s).tiles[tileIndex(s, x, z)]).toBe(1);
@@ -81,7 +84,7 @@ describe("midgame scenario", () => {
     if ((globalThis as { process?: { env?: Record<string, string> } }).process?.env?.MIDGAME_REPORT) {
       console.log(JSON.stringify({ seed: s.seed, day: s.day, tick: s.tick, buildings: s.buildings.length,
         paths: s.grid.paths.filter(Boolean).length, campusWalkers: s.walkers.length, staff: s.staff.length,
-        protesters: s.walkers.filter((w) => w.kind === "protester").length, movingOnNextTick: moving,
+        protesters: people(s).filter((w) => w.kind === "protester").length, movingOnNextTick: moving,
         ready: s.training.context.progress / s.training.context.cost, era: eraOfState(s), cash: s.cash,
         latestDrop: s.leapfrog.last, digest: digest(s) }));
     }
@@ -96,7 +99,7 @@ describe("midgame scenario", () => {
     ]);
     for (const t of thoughts) {
       expect(t.expiresTick).toBeGreaterThan(s.tick);
-      expect(s.walkers.some((w) => w.id === t.walkerId && w.machine.value !== "inside")).toBe(true);
+      expect(people(s).some((w) => w.id === t.walkerId && w.machine.value !== "inside")).toBe(true);
     }
     const news = midgameOpeningNews(s);
     // FLT-48 hero: the tape opens on a line that fits the ticker whole; the fresh SOTA claim follows it that week.

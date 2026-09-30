@@ -2,8 +2,10 @@
 import { DISCOURSE_PER_PROTESTER, MAX_PROTESTERS } from "./constants";
 import { buildingAt, inBounds, rectContains } from "./pathfind";
 import type { Rng } from "./rng";
-import { TARGET_GATE, type GameState, type Point, type Walker } from "./types";
-import { advance, despawn, newWalker } from "./walkers";
+import { TARGET_GATE, type GameState, type Point } from "./types";
+import { newWalker, walk } from "./walkers";
+import { arrived, byWalkerId, ground, IsMarching, JustArrived, marching, setRoute, standing, type Ground, type ProtesterView } from "./ecs/protesters";
+import type { Entity } from "koota";
 import { gasDiscourse } from "./race/power";
 import { stepWalker } from "./machines/walker";
 import { commsRelief } from "./staff";
@@ -19,9 +21,7 @@ export function protesterTarget(state: GameState): number {
 }
 
 export function protesterCount(state: GameState): number {
-  let n = 0;
-  for (const w of state.walkers) if (w.kind === "protester") n++;
-  return n;
+  return ground(state).size;
 }
 
 /** Discourse has a floor but no ceiling: ignore it long enough and the 40-protester cap is what stops the crowd. */
@@ -117,10 +117,10 @@ function spawnProtester(state: GameState, rng: Rng, placed: boolean, crowd?: str
   } else {
     w.route = planRoute(state, w.x, w.z, hx, hz);
   }
-  state.walkers.push(w);
+  ground(state).adopt(w);
 }
 
-function sendHome(state: GameState, w: Walker, rng: Rng) {
+function sendHome(state: GameState, w: ProtesterView, rng: Rng) {
   const g = state.gate;
   const gx = g.x + 0.4 + rng.next() * (g.w - 0.8);
   w.machine = stepWalker(w.machine, { type: "SENT_HOME" });
@@ -131,7 +131,7 @@ function sendHome(state: GameState, w: Walker, rng: Rng) {
 /** Bring the number of protesters at the gate in line with the discourse: newcomers march in, extras wander off. */
 export function syncProtesters(state: GameState, rng: Rng, placed = false) {
   const target = protesterTarget(state);
-  const staying = state.walkers.filter((w) => w.kind === "protester" && w.crowd === undefined && w.machine.value !== "leaving");
+  const staying = ground(state).views().filter((w) => w.crowd === undefined && w.machine.value !== "leaving");
   for (let i = staying.length; i < target; i++) spawnProtester(state, rng, placed);
   for (let extra = staying.length - target; extra > 0; extra--) {
     const [w] = staying.splice(rng.int(0, staying.length - 1), 1);
@@ -168,9 +168,9 @@ export function crowdTargets(state: GameState): Map<string, number> {
 /** Faction crowds march in and go home like the water crowd; a counter-protest also moves its targets across the path. */
 function syncCrowds(state: GameState, rng: Rng, placed: boolean) {
   const want = crowdTargets(state);
-  const have = new Map<string, Walker[]>();
-  for (const w of state.walkers) {
-    if (w.kind !== "protester" || w.machine.value === "leaving") continue;
+  const have = new Map<string, ProtesterView[]>();
+  for (const w of ground(state).views()) {
+    if (w.machine.value === "leaving") continue;
     // A counter-protest on: its targets cross to the far side of the path (a crowd already there stays put).
     const side = sideOf(state, w.crowd);
     const cx = state.gate.x + state.gate.w / 2;
@@ -201,8 +201,9 @@ function shout(state: GameState, rng: Rng) {
   const rallies = state.rallies ?? [];
   if (rallies.length > 0 && state.tick % SHOUT_EVERY === 0) {
     const r = rallies[(state.tick / SHOUT_EVERY) % rallies.length]!;
-    const us = state.walkers.filter((w) => w.crowd === r.faction && w.route.length === 0 && w.machine.value !== "leaving");
-    const them = state.walkers.filter((w) => w.kind === "protester" && w.crowd !== r.faction && w.route.length === 0 && w.machine.value !== "leaving" && sideOf(state, w.crowd) < 0);
+    const crowd = ground(state).views();
+    const us = crowd.filter((w) => w.crowd === r.faction && w.route.length === 0 && w.machine.value !== "leaving");
+    const them = crowd.filter((w) => w.crowd !== r.faction && w.route.length === 0 && w.machine.value !== "leaving" && sideOf(state, w.crowd) < 0);
     const def = defs().factionById(r.faction);
     if (def && us.length > 0 && them.length > 0) {
       const a = rng.pick(us);
@@ -218,39 +219,67 @@ function shout(state: GameState, rng: Rng) {
     return;
   }
   if (state.factions && state.tick % CHANT_EVERY === 0) {
-    const marching = state.walkers.filter((w) => w.crowd !== undefined && w.route.length === 0 && w.machine.value !== "leaving");
-    if (marching.length === 0 || state.thoughts.filter((t) => t.expiresTick > state.tick).length >= 3) return;
-    const w = rng.pick(marching);
+    const chanting = ground(state).views().filter((w) => w.crowd !== undefined && w.route.length === 0 && w.machine.value !== "leaving");
+    if (chanting.length === 0 || state.thoughts.filter((t) => t.expiresTick > state.tick).length >= 3) return;
+    const w = rng.pick(chanting);
     const def = defs().factionById(w.crowd!);
     if (def && def.chants.length > 0) state.thoughts.push({ id: state.nextId++, walkerId: w.id, kind: w.kind, text: rng.pick(def.chants), expiresTick: state.tick + THOUGHT_TICKS / 2, faction: def.id });
   }
 }
 
+/** March: everyone with a route walks it. Whoever runs out of route is home (or, leaving, through the gate). */
+function marchSystem(g: Ground, gone: Set<Entity>) {
+  const done: Entity[] = [];
+  marching(g).updateEach(([body, route, flow], e) => {
+    body.px = body.x;
+    body.pz = body.z;
+    walk(body, route);
+    if (route.length > 0) return;
+    if (flow.value === "leaving") gone.add(e);
+    else done.push(e);
+  });
+  for (const e of done) {
+    e.remove(IsMarching);
+    e.add(JustArrived);
+  }
+  for (const e of gone) e.remove(IsMarching);
+}
+
+/**
+ * Picket: the rest stand at their spot and shuffle round it now and then; anyone left standing in "leaving" goes.
+ * Rolls dice, so it goes in Walker-id order, the order the old loop over `state.walkers` rolled them in.
+ */
+function picketSystem(state: GameState, g: Ground, rng: Rng, gone: Set<Entity>) {
+  standing(g)
+    .sort(byWalkerId)
+    .updateEach(([body, picket, flow], e) => {
+      body.px = body.x;
+      body.pz = body.z;
+      if (flow.value === "leaving") {
+        gone.add(e);
+        return;
+      }
+      if (--picket.timer > 0) return;
+      picket.timer = rng.int(30, 90);
+      // Someone built on their spot? Find a new one.
+      if (!standable(state, picket.homeX, picket.homeZ)) [picket.homeX, picket.homeZ] = pickHome(state, rng, sideOf(state, g.view(e).crowd));
+      const tx = picket.homeX + (rng.next() - 0.5) * 1.6;
+      const tz = picket.homeZ + (rng.next() - 0.5) * 1.2;
+      const [gx, gz] = standable(state, tx, tz) ? [tx, tz] : [picket.homeX, picket.homeZ];
+      setRoute(e, planRoute(state, body.x, body.z, gx, gz));
+    });
+}
+
 /** Protesters shuffle around their spot, march in from the gate, and leave the same way. They never enter a building. */
 export function updateProtesters(state: GameState, rng: Rng) {
-  let gone: Set<number> | null = null;
-  for (const w of state.walkers) {
-    if (w.kind !== "protester") continue;
-    w.px = w.x;
-    w.pz = w.z;
-    if (w.route.length > 0) {
-      advance(w);
-      if (w.route.length === 0 && w.machine.value === "leaving") (gone ??= new Set()).add(w.id);
-      continue;
-    }
-    if (w.machine.value === "leaving") {
-      (gone ??= new Set()).add(w.id);
-      continue;
-    }
-    if (--w.timer > 0) continue;
-    w.timer = rng.int(30, 90);
-    // Someone built on their spot? Find a new one.
-    if (!standable(state, w.homeX, w.homeZ)) [w.homeX, w.homeZ] = pickHome(state, rng, sideOf(state, w.crowd));
-    const tx = w.homeX + (rng.next() - 0.5) * 1.6;
-    const tz = w.homeZ + (rng.next() - 0.5) * 1.2;
-    const [gx, gz] = standable(state, tx, tz) ? [tx, tz] : [w.homeX, w.homeZ];
-    w.route = planRoute(state, w.x, w.z, gx, gz);
+  const g = ground(state);
+  const gone = new Set<Entity>();
+  marchSystem(g, gone);
+  picketSystem(state, g, rng, gone);
+  for (const e of arrived(g)) e.remove(JustArrived);
+  if (gone.size > 0) {
+    for (const e of gone) g.view(e).machine = stepWalker(g.view(e).machine, { type: "EXITED" });
+    g.remove(gone);
   }
-  if (gone) despawn(state, gone);
   if (state.rallies || state.factions) shout(state, rng);
 }

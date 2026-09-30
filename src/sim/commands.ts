@@ -20,6 +20,7 @@ import { continueTutorial } from "./tutorial";
 import { defs } from "./defs";
 import { setSafetySpend } from "./factions/driver";
 import { issueStatement } from "./factions/statement";
+import { people } from "./ecs/protesters";
 
 export type Command =
   | { type: "coachSkip" | "coachReplay" | "coachClick" | "dismissUnlock" | "buildPanelOpened" }
@@ -139,7 +140,7 @@ export function applyCommands(state: GameState, commands: readonly Command[], rn
       case "buildPanelOpened": state.flags.started ??= state.tick; state.flags.coachBuildOpened = state.tick; break;
       case "coachSaw":
         if (c.what === "speed") state.flags.coachSpedUp ??= state.tick;
-        else if (state.walkers.some((w) => w.id === c.id) || state.staff.some((w) => w.id === c.id)) state.flags.coachMindRead ??= state.tick;
+        else if (people(state).some((w) => w.id === c.id) || state.staff.some((w) => w.id === c.id)) state.flags.coachMindRead ??= state.tick;
         break;
       case "placePath":
         if (canPlace(state, "path", c.x, c.z).ok && guardSpending(state, c)) {

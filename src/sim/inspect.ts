@@ -6,6 +6,7 @@ import { thoughtOf } from "./mind";
 import { happinessOf } from "./needs";
 import type { GameState, Walker, WalkerKind } from "./types";
 import { defs } from "./defs";
+import { people } from "./ecs/protesters";
 
 export interface NeedBar {
   key: NeedKey;
@@ -105,7 +106,7 @@ function historyOf(state: GameState, w: Walker): [string, string, string] {
 
 /** The card for one walker, or null if they are no longer here. */
 export function inspectWalker(state: GameState, id: number): Inspect | null {
-  const w = state.walkers.find((o) => o.id === id);
+  const w = people(state).find((o) => o.id === id);
   if (!w) return null;
   return {
     id: w.id,

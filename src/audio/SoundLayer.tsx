@@ -10,6 +10,7 @@ import { SoundKit, synthNotes } from "./SoundKit";
 import { audioReadyAtom, bindSound, mixerAtom } from "./state";
 import { soundCues, soundSnapshot } from "./world";
 import { CUES, HOOKS } from "./score";
+import { people } from "../sim/ecs/protesters";
 
 /** Seconds between `protest.grow` cues: a crowd that swells by twenty is a few barks, not twenty. */
 const GROW_GAP = 2.5;
@@ -82,7 +83,7 @@ export function SoundLayer() {
     last.current.broken = now.broken;
     const era = now.era;
     let density = 0; let protesters = 0;
-    for (const w of world.walkers) {
+    for (const w of people(world)) {
       if (w.kind === "protester") protesters++;
       if (w.machine.value === "inside") continue;
       position.current.set(worldX(w.x), 0.8, worldZ(w.z)).project(camera);
