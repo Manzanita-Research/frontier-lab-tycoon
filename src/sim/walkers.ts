@@ -507,6 +507,15 @@ function found(state: GameState, w: Walker): boolean {
   return reachableBuildings(state).some((b) => defs().buildings[b.kind].hosts.includes(w.kind) && gainOf(defs().buildings[b.kind], w, need) >= MIN_GAIN);
 }
 
+/** Whether any waypoint is off the paths. An index loop: destructuring each point walked the array iterator (FLT-39). */
+function offPath(state: GameState, route: Point[]): boolean {
+  for (let i = 0; i < route.length; i++) {
+    const p = route[i]!;
+    if (!isPathTile(state, Math.floor(p[0]), Math.floor(p[1]))) return true;
+  }
+  return false;
+}
+
 /** Walkers caught out by a change to paths or buildings find a new way. */
 function repairWalkers(state: GameState, rng: Rng, grew: boolean) {
   for (const w of state.walkers) {
@@ -529,7 +538,7 @@ function repairWalkers(state: GameState, rng: Rng, grew: boolean) {
       const p = nearestPathTile(state, w.x, w.z);
       if (p) [w.x, w.z] = [p[0] + 0.5, p[1] + 0.5];
     }
-    const routeBroken = w.route.some(([x, z]) => !isPathTile(state, Math.floor(x), Math.floor(z)));
+    const routeBroken = offPath(state, w.route);
     const target = w.targetId > 0 ? byId(state, w.targetId) : undefined;
     const targetGone = w.targetId > 0 && (!target || target.broken);
     if (!routeBroken && !targetGone) continue;

@@ -18,6 +18,7 @@ import { activeSwarm } from "../collusion/state";
 import { auditFacts, gradeReport, notesSince } from "./grade";
 import { freshAudit, stepAudit, type AuditEvent } from "./machine";
 import { AUDITORS, NOTICE_CARD, OWNER, PICK_PREFIX, PREP_CHOICES, REPORT_CARD, REPORT_CHOICES, type Grade, type Prep } from "./pack";
+import { picks } from "../picks";
 
 const R = AUDITORS.rules;
 const HEADLINES = AUDITORS.content.headlines.add;
@@ -103,13 +104,15 @@ function send(s: GameState, rng: Rng, event: AuditEvent) {
 }
 
 /** Consume the cards' pick flags right after chooseEvent, including picks made while paused. */
+const CHOICE_FLAGS = picks(PICK_PREFIX, [...PREP_CHOICES, ...REPORT_CHOICES]);
+
 export function applyAuditorChoices(s: GameState) {
   const a = s.auditors;
   if (!a?.enabled) return;
   let rng: Rng | null = null;
-  for (const choice of [...PREP_CHOICES, ...REPORT_CHOICES]) {
-    if (s.flags[PICK_PREFIX + choice] === undefined) continue;
-    delete s.flags[PICK_PREFIX + choice];
+  for (const { key: choice, flag } of CHOICE_FLAGS) {
+    if (s.flags[flag] === undefined) continue;
+    delete s.flags[flag];
     send(s, (rng ??= createRng(a.rngState)), { type: "CHOSE", choice, day: s.day, tick: s.tick });
   }
   if (rng) a.rngState = rng.state();

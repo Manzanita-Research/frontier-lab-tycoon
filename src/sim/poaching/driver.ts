@@ -14,6 +14,7 @@ import type { GameState, Walker } from "../types";
 import { runVerb } from "../verbs";
 import { CARD, CHOICES, PICK_PREFIX, POACHING } from "./pack";
 import type { PoachingStage } from "./state";
+import { picks } from "../picks";
 
 const R = POACHING.rules;
 const OWNER = "poaching";
@@ -125,13 +126,15 @@ function send(s: GameState, rng: Rng, event: ChartEvent) {
   return p.machine.value;
 }
 
+const CHOICE_FLAGS = picks(PICK_PREFIX, CHOICES);
+
 export function applyPoachingChoices(s: GameState) {
   const p = s.poaching;
   if (!p?.enabled) return;
   const rng = createRng(p.rngState);
-  for (const choice of CHOICES) {
-    if (s.flags[PICK_PREFIX + choice] === undefined) continue;
-    delete s.flags[PICK_PREFIX + choice];
+  for (const { key: choice, flag } of CHOICE_FLAGS) {
+    if (s.flags[flag] === undefined) continue;
+    delete s.flags[flag];
     if (p.machine.value !== "offered" || !p.offer) continue;
     const foundRoll = rng.next();
     const people = present(s);

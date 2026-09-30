@@ -15,6 +15,7 @@ import type { GameState } from "../types";
 import { ANSWER_KEYS, GAVEL_CARD, HEARING, isVerdict, PICK_PREFIX, type HearingTrigger } from "./pack";
 import { freshHearing, stepHearing } from "./machine";
 import type { HearingState } from "./state";
+import { picks } from "../picks";
 
 const R = HEARING.rules;
 const OWNER = "hearing";
@@ -124,14 +125,16 @@ function nextQuestion(s: GameState) {
   if (id && eventById(id)) openCard(s, id);
 }
 
+const PICK_FLAGS = picks(PICK_PREFIX, [...ANSWER_KEYS, "leave"] as const);
+
 /** Picks arrive as flags from the card's choice; consumed at once, including while paused. */
 export function applyHearingChoices(s: GameState) {
   const h = s.hearing;
   if (!h?.enabled) return;
   let picked = false;
-  for (const key of [...ANSWER_KEYS, "leave"]) {
-    if (s.flags[PICK_PREFIX + key] === undefined) continue;
-    delete s.flags[PICK_PREFIX + key];
+  for (const { key, flag } of PICK_FLAGS) {
+    if (s.flags[flag] === undefined) continue;
+    delete s.flags[flag];
     picked = true;
     if (key === "leave") continue;
     const rng = createRng(h.rngState);

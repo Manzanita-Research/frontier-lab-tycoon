@@ -24,6 +24,7 @@ import type { Call } from "../disasters/types";
 import type { GameState } from "../types";
 import { CAPTURE, clauseById, DRAFT_CARD, EXPOSED_CARD, PICK_PREFIX, PICKS } from "./pack";
 import { CAPTURE_STATS, freshBill, stepBill } from "./machine";
+import { picks } from "../picks";
 
 const R = CAPTURE.rules;
 const OWNER = "capture";
@@ -121,12 +122,14 @@ function arrived(s: GameState, rng: Rng, to: string) {
 }
 
 /** Picks arrive as flags from the cards' choices; consumed at once, including while paused. */
+const PICK_FLAGS = picks(PICK_PREFIX, PICKS);
+
 export function applyCaptureChoices(s: GameState) {
   const b = s.bill;
   if (!b?.enabled) return;
-  for (const key of PICKS) {
-    if (s.flags[PICK_PREFIX + key] === undefined) continue;
-    delete s.flags[PICK_PREFIX + key];
+  for (const { key, flag } of PICK_FLAGS) {
+    if (s.flags[flag] === undefined) continue;
+    delete s.flags[flag];
     const rng = createRng(b.rngState);
     send(s, rng, { type: "CHOSE", tick: s.tick, day: s.day, roll: 0, stats: {}, choice: key, data: key === "send" ? { clauses: [...b.draft] } : undefined });
     b.rngState = rng.state();

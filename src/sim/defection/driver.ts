@@ -19,6 +19,7 @@ import type { GameState, Walker } from "../types";
 import { runVerb, type VerbEnv } from "../verbs";
 import { CARD, CHOICES, DEFECTION, MANIFESTO_CARD, MANIFESTO_CHOICES, PICK_PREFIX } from "./pack";
 import type { DefectionStage, DefectionState, DefectionSubject } from "./state";
+import { picks } from "../picks";
 
 const R = DEFECTION.rules;
 const OWNER = "defection";
@@ -237,13 +238,16 @@ function think(s: GameState, walkerId: number, kind: Walker["kind"], text: strin
 }
 
 /** Consume the card's picks right after chooseEvent (paused or not). */
+const CHOICE_FLAGS = picks(PICK_PREFIX, CHOICES);
+const MANIFESTO_FLAGS = picks(PICK_PREFIX, MANIFESTO_CHOICES);
+
 export function applyDefectionChoices(s: GameState) {
   const d = s.defection;
   if (!d?.enabled) return;
   const rng = createRng(d.rngState);
-  for (const choice of CHOICES) {
-    if (s.flags[PICK_PREFIX + choice] === undefined) continue;
-    delete s.flags[PICK_PREFIX + choice];
+  for (const { key: choice, flag } of CHOICE_FLAGS) {
+    if (s.flags[flag] === undefined) continue;
+    delete s.flags[flag];
     const sub = d.subject;
     if (!sub || d.machine.value !== "deciding") continue;
     // Dice first, in a fixed order, whatever the pick.
@@ -277,9 +281,9 @@ export function applyDefectionChoices(s: GameState) {
   }
   const x = d.exit;
   const lab = x?.lab ? neoLabById(s, x.lab) : undefined;
-  for (const choice of MANIFESTO_CHOICES) {
-    if (s.flags[PICK_PREFIX + choice] === undefined) continue;
-    delete s.flags[PICK_PREFIX + choice];
+  for (const { key: choice, flag } of MANIFESTO_FLAGS) {
+    if (s.flags[flag] === undefined) continue;
+    delete s.flags[flag];
     if (!lab) continue;
     if (choice === "congratulate") {
       s.hype = Math.min(100, s.hype + 2);
