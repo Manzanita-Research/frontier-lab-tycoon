@@ -1,0 +1,25 @@
+{
+  "base": {
+    "ref": "origin/flt-37-mods-live",
+    "sha": "a0d581da8ff085bfa3d79c644612580e60d0a42f"
+  },
+  "head": {
+    "branch": "flt-48-hero-shots",
+    "sha": "77ad34a",
+    "dirty": true
+  },
+  "seconds": 47.842,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "midgame",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-48/hero/midgame/before/midgame.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-48/hero/midgame/after/midgame.png",
+      "title": "FLT-48 Part A: the scripted mid-game campus, paused near Y2 Mar",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-48/hero/midgame/compare/midgame.png",
+      "changed": 0.040853395061728394
+    }
+  ],
+  "errors": []
+}
