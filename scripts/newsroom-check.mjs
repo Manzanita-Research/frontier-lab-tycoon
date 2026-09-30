@@ -77,15 +77,26 @@ for (const [name, query] of [['quiet',''], ['crowded','agents=200'], ['protest-n
 assert(report.beds[1].crowd > report.beds[0].crowd);
 assert(report.beds[2].protesters > 10 && report.beds[2].night > 0.6);
 assert.equal(report.beds[0].training, 0.4);
-await page.evaluate(() => { window.__flt.sim.world.training.context.progress = window.__flt.sim.world.training.context.cost * 0.9; window.__flt.sim.world.era = 'takeoff'; window.__flt.sim.world.buildings[0].broken = true; });
-await page.waitForFunction(() => window.__sound.diagnostics().humHz > 260 && window.__sound.diagnostics().beds.training === 0.9);
+// Audio reads the stored era machine and reports its number as a string (FLT-9).
+await page.evaluate(() => {
+  const world = window.__flt.sim.world;
+  world.training.context.progress = world.training.context.cost * 0.9;
+  world.race.era = { value: 'era3', context: { ...world.race.era.context, peak: 5 } };
+  world.buildings[0].broken = true;
+});
+await page.waitForFunction(() => {
+  const sound = window.__sound.diagnostics();
+  return sound.humHz > 260 && sound.beds.training === 0.9 && sound.beds.era === '3'
+    && sound.cues.era !== undefined && sound.cues.breakdown !== undefined;
+});
 const changed = await page.evaluate(() => window.__sound.diagnostics());
-assert.equal(changed.beds.training, 0.9); assert(changed.humHz > 260); assert.equal(changed.beds.era, 'takeoff');
+assert.equal(changed.beds.training, 0.9); assert(changed.humHz > 260); assert.equal(changed.beds.era, '3');
 assert(changed.cues.era !== undefined && changed.cues.breakdown !== undefined);
+report.era = { era: changed.beds.era, training: changed.beds.training, humHz: changed.humHz, cues: changed.cues };
 await page.evaluate(() => { const { camera, controls } = window.__fx.get(); const dx = 10 - controls.target.x; const dz = -10 - controls.target.z; camera.position.x += dx; camera.position.z += dz; controls.target.set(10, 0, -10); camera.zoom = controls.maxZoom; camera.updateProjectionMatrix(); controls.update(); });
 await page.waitForFunction(() => window.__sound.diagnostics().beds.crowd === 0);
 assert.equal(await page.evaluate(() => window.__sound.diagnostics().beds.crowd), 0);
-mark('Crowd follows camera position and scales with density; >10 protest chant; night crickets; rising training hum; era and breakdown compatibility adapters');
+mark('Crowd follows camera position and scales with density; >10 protest chant; night crickets; rising training hum; era3 machine reports "3" and fires era and breakdown cues');
 
 // Natural calendar publication, with no press demo involved.
 await go('seed=3');
