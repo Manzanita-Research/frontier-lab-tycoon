@@ -1,0 +1,10 @@
+# Validation
+
+- `pnpm typecheck` and `pnpm build`: pass, including the mod SDK.
+- `node --test packages/flt-mod-cli/*.test.mjs`: 8 passed.
+- Full `CI=1 pnpm check` run: 734/739 passed. The three newly merged Leapfrog fixture/timeout failures were corrected and verified by focused reruns (44 tests, plus the 20 notice tests). The remaining two Discovery Disc confirm/warning failures are the FLT-50 UI assignment; this branch does not implement DOM panels.
+- Coach, progression, wandering, staff posts, route-cache invalidation, locked collusion and all three goldens: verified. Mod override loading is exercised through manifest decoding and the Effect content layer.
+- `pnpm shots --scenes coach-path,coach-hall,coach-phone,midgame --base origin/main --out docs/img/flt-49`: all 8 captures and 4 comparison images verified as nonblank. Same seed, camera and viewport on both sides. These show the logic/ghost layer before FLT-50's UI lands.
+- Final strict timing command: `pnpm exec vitest run src/sim/slice2.test.ts src/sim/crowd.test.ts -t 'keeps (500|800) walkers' --reporter=verbose`. **500: 0.292 ms/tick**, pass under 0.3. **800: 0.616 ms/tick**, above the strict 0.5 threshold on this shared builder. Both timing tests passed in the complete CI-mode run, whose limits are 0.6/1.0 ms. This is a remaining strict-budget limitation, not a claim that 800 passed locally.
+
+Goldens were intentionally re-recorded for the new starting coach/progression state, quiet campus, earned systems and corresponding deterministic movement/attendance stream. The midgame replay preserves the full starter-campus preset and completes its ladder; its paid confirmations/replacements and changed stream select a real opening on day 420. No unrelated fixture digest was relaxed. Route caching subsequently preserved every golden unchanged.
