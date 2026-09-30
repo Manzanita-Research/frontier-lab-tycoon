@@ -173,6 +173,14 @@ export function BuildBar({ items, tip, teasers = [], disasters, actions }: SlotP
               </li>
             )}
             <li>
+              <button type="button" role="menuitem" onClick={() => { setOpen(false); actions.openSaves(); }}>
+                <Ico name="floppy" size={24} />
+                <span>{t("saves.open")}…</span>
+                <span className="hk">Ctrl+S</span>
+                <span className="p" />
+              </button>
+            </li>
+            <li>
               <button type="button" role="menuitem" onClick={() => { setOpen(false); actions.openHelp(); }}>
                 <Ico name="help" size={24} />
                 <span>{t("build.help")}…</span>

@@ -20,6 +20,9 @@ import { SPEEDS, type Speed, type Tool } from "./hud";
 import { appMachine, autoPaused, type AppContext } from "./machine";
 import { createSimHandle, SimHandle, simLayer } from "./sim";
 import { modSession } from "./mods";
+import { SaveDesk, Saves, isStagedLink } from "./saves";
+import { demoSaveStore } from "./savesDemo";
+import { browserStorage, makeSaveStore } from "../save";
 
 const midgame = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("scenario") === "midgame";
 const params = readDebugParams();
@@ -41,7 +44,18 @@ if (!midgame && !debugParams.risk) setRisk(sim.world, DEFAULT_RISK);
 
 const initialSpeed: Speed = midgame ? 0 : (SPEEDS as readonly number[]).includes(debugParams.speed ?? 1) ? ((debugParams.speed ?? 1) as Speed) : 1;
 
-const runtime = Atom.runtime(Layer.mergeAll(simLayer(sim), framesBrowser));
+/**
+ * Saving (FLT-65): the slots in localStorage, or with `?saves=demo|window` a pretend shelf in memory (screenshots).
+ * Staged links never autosave over the player's lab. `savesReady` settles once the shelf can be read.
+ */
+const search = typeof window === "undefined" ? "" : window.location.search;
+const shelf = new URLSearchParams(search).has("saves") ? demoSaveStore(mods.def) : { store: makeSaveStore(browserStorage()), ready: Promise.resolve() };
+export const savesReady = shelf.ready;
+export const saveDesk = new SaveDesk(shelf.store, !isStagedLink(search) && !new URLSearchParams(search).has("saves"), () =>
+  mods.mods.map(({ id, version, hash, source }) => ({ id, version, hash, source })),
+);
+
+const runtime = Atom.runtime(Layer.mergeAll(simLayer(sim), framesBrowser, Layer.succeed(Saves, saveDesk)));
 
 /** The app actor's atoms: `snapshot`, `send`, and `select` for derived values. */
 const first = sim.report(true, true)!;
@@ -173,6 +187,10 @@ if (typeof window !== "undefined") {
       view: probeView.view?.() ?? null };
   };
   window.addEventListener("click", () => send({ type: "COMMAND", command: { type: "coachClick" } }));
+  // Closing the tab (or switching away from it) autosaves, so a lab is never more than a month behind.
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") send({ type: "SAVE", slot: "auto", why: "hide" });
+  });
 }
 
 // `?debug=1` exposes the game for probes and screenshot scripts.

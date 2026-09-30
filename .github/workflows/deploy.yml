@@ -20,7 +20,7 @@ env:
 jobs:
   check:
     if: github.event.action != 'closed' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository)
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
         with:
@@ -44,7 +44,7 @@ jobs:
       # A PR's preview, or prod after a deploy from main: the stranger plays whichever this run deployed.
       preview_url: ${{ steps.preview.outputs.url || steps.prod.outputs.url }}
     needs: check
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     permissions:
       contents: read
       pull-requests: write
@@ -119,7 +119,7 @@ jobs:
   stranger:
     needs: deploy
     if: needs.deploy.outputs.preview_url != ''
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - uses: actions/checkout@v4
         with:
@@ -144,7 +144,7 @@ jobs:
 
   cleanup:
     if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     permissions:
       contents: read
       pull-requests: write

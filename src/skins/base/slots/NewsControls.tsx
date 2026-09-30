@@ -25,6 +25,12 @@ const Sliders = () => (
     <circle cx="18" cy="15" r="2.2" fill="var(--flt-color-panel)" />
   </svg>
 );
+const Floppy = () => (
+  <svg {...svg}>
+    <path d="M5 4h11l3 3v13H5z" />
+    <path d="M8 4v5h7V4M8 20v-6h8v6" />
+  </svg>
+);
 const Sparkle = () => (
   <svg {...svg}>
     <path d="M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.4z" />
@@ -48,6 +54,9 @@ export function NewsControls({ newsroom, sound, skins, visible = ALL_VISIBLE, ac
       </button>
       <button onClick={() => actions.openMixer()} aria-label={t("sound.openMixer")}>
         <Sliders />
+      </button>
+      <button onClick={() => actions.openSaves()} aria-label={t("saves.open")} title={t("saves.open")}>
+        <Floppy />
       </button>
       {skins.list.length > 1 && (
         <button onClick={() => actions.openSkinPicker()} aria-label={t("skin.open")} title={t("skin.open")}>
