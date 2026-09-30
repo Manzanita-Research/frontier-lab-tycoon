@@ -1,14 +1,14 @@
 {
   "base": {
     "ref": "origin/main",
-    "sha": "5bd2f67e897d5a24f6ea6746bfcf124bbab2cfd9"
+    "sha": "babb740d8cda4c2161ce857838435028a0504551"
   },
   "head": {
     "branch": "flt-65-saves",
-    "sha": "ffc93a1",
-    "dirty": true
+    "sha": "8cbc7da",
+    "dirty": false
   },
-  "seconds": 86.915,
+  "seconds": 97.644,
   "problems": [],
   "rows": [
     {
@@ -18,7 +18,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-65/after/saves-welcome.png",
       "title": "FLT-65: a returning player's start screen (Welcome back, from a pretend save shelf)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-65/compare/saves-welcome.png",
-      "changed": 0.07524074074074075
+      "changed": 0.07497530864197531
     },
     {
       "scene": "saves-window",
@@ -27,7 +27,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-65/after/saves-window.png",
       "title": "FLT-65: the Save/Load window on a pretend shelf (autosave, a v1 save, two empty slots)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-65/compare/saves-window.png",
-      "changed": 0.14796913580246915
+      "changed": 0.14794675925925926
     },
     {
       "scene": "menu",
@@ -36,7 +36,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-65/after/menu.png",
       "title": "The Start menu / build bar open",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-65/compare/menu.png",
-      "changed": 0.013070216049382716
+      "changed": 0.019297067901234567
     },
     {
       "scene": "saves-phone",
@@ -45,7 +45,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-65/after/saves-phone.png",
       "title": "FLT-65: the Save/Load window on a phone (390x844)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-65/compare/saves-phone.png",
-      "changed": 0.4968404423380727
+      "changed": 0.49630878600072914
     }
   ],
   "errors": []
