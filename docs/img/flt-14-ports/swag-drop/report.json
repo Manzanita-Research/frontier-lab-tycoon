@@ -1,14 +1,14 @@
 {
   "base": {
     "ref": "origin/main",
-    "sha": "e92465c43fd3c8588d4ad93ef2d13f773fce5113"
+    "sha": "17724078eeab199a0767c52d20ab666c149e06bd"
   },
   "head": {
     "branch": "flt-14-port-swag-drop",
-    "sha": "e0fce8d",
-    "dirty": false
+    "sha": "c2ec3cb",
+    "dirty": true
   },
-  "seconds": 164.324,
+  "seconds": 165.114,
   "problems": [
     "photo@swag-drop.png: blank composite: panel 3 is 53% one colour, 12 colours"
   ],
@@ -20,7 +20,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/after/overview@swag-drop.png",
       "title": "The campus, mid-morning, paused",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/compare/overview@swag-drop.png",
-      "changed": 0.3414375
+      "changed": 0.341116512345679
     },
     {
       "scene": "inspector",
@@ -29,7 +29,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/after/inspector@swag-drop.png",
       "title": "Tap a researcher: the inspector opens",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/compare/inspector@swag-drop.png",
-      "changed": 0.3796929012345679
+      "changed": 0.38067283950617287
     },
     {
       "scene": "event",
@@ -38,7 +38,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/after/event@swag-drop.png",
       "title": "An event card lands (the Water Discourse)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/compare/event@swag-drop.png",
-      "changed": 0.749349537037037
+      "changed": 0.7494081790123457
     },
     {
       "scene": "menu",
@@ -47,7 +47,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/after/menu@swag-drop.png",
       "title": "The Start menu / build bar open",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/compare/menu@swag-drop.png",
-      "changed": 0.36720138888888887
+      "changed": 0.3673348765432099
     },
     {
       "scene": "phone",
@@ -56,7 +56,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/after/phone@swag-drop.png",
       "title": "The same campus on a phone (390x844)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/compare/phone@swag-drop.png",
-      "changed": 0.4383559667031231
+      "changed": 0.43830963665086886
     },
     {
       "scene": "photo",
