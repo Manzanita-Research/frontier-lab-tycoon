@@ -11,7 +11,7 @@
     "dev": "vite --host 0.0.0.0",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host 0.0.0.0 --port 4173",
-    "typecheck": "tsc --noEmit && pnpm --filter @flt/mod-sdk typecheck",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p worker && pnpm --filter @flt/mod-sdk typecheck",
     "test": "vitest run && node --test packages/flt-mod-cli/*.test.mjs drama/*.test.mjs",
     "test:watch": "vitest",
     "check": "pnpm typecheck && pnpm test && pnpm build",

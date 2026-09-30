@@ -44,8 +44,9 @@ export function authOptions(env: Env, database: BetterAuthOptions["database"] = 
     },
     user: {
       additionalFields: {
-        // The Hugging Face username, for "Founded by @you" (FLT-67 §6); never an email.
-        handle: { type: "string", required: false, input: false },
+        // The Hugging Face username, for "Founded by @you" (FLT-67 §6); never an email. Set from the profile at each
+        // sign-in; players can't edit it (or anything else) because /update-user is off below.
+        handle: { type: "string", required: false },
       },
       deleteUser: {
         enabled: true,
@@ -65,6 +66,8 @@ export function authOptions(env: Env, database: BetterAuthOptions["database"] = 
       useSecureCookies: protocol === "https",
       defaultCookieAttributes: { sameSite: "lax", httpOnly: true, secure: protocol === "https" },
     },
+    // A profile is what Hugging Face says it is: no editing, no second provider linked by hand, no email flows.
+    disabledPaths: ["/update-user", "/change-email", "/link-social", "/unlink-account"],
     telemetry: { enabled: false },
   };
 }
