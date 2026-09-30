@@ -10,7 +10,7 @@ import { DEFAULT_RISK, setRisk } from "../sim/disasters/driver";
 import { buildingAt } from "../sim/pathfind";
 import { canPlace } from "../sim/commands";
 import { tick } from "../sim/tick";
-import { createMidgameScenario, MIDGAME_CAMERA, midgameOpeningNews } from "../sim/scenarios/midgame";
+import { createMidgameScenario, MIDGAME_CAMERA, midgameOpeningNews, midgameOpeningThoughts } from "../sim/scenarios/midgame";
 import type { Tone } from "../sim/types";
 import { framesBrowser } from "./frames";
 import { SPEEDS, type Speed, type Tool } from "./hud";
@@ -23,6 +23,10 @@ export const debugParams = midgame ? { ...params, focus: params.focus ?? MIDGAME
 
 /** The one live World. The renderer reads `sim.world` and `sim.alpha` straight from useFrame. */
 export const sim = midgame ? new SimHandle(createMidgameScenario(), true) : createSimHandle(debugParams);
+if (midgame) {
+  sim.newsStartId = midgameOpeningNews(sim.world)[0]!.id;
+  sim.openingThoughts = { tick: sim.world.tick, thoughts: midgameOpeningThoughts(sim.world) };
+}
 // A new lab plays on "rare" (the sim itself starts with random disasters off, so tests are unaffected); `?risk=` overrides.
 if (!midgame && !debugParams.risk) setRisk(sim.world, DEFAULT_RISK);
 
@@ -34,7 +38,6 @@ const runtime = Atom.runtime(Layer.mergeAll(simLayer(sim), framesBrowser));
 const first = sim.report(true, true)!;
 if (midgame) {
   // Presentation only: open the ticker on the selected real headline, and skip historical construction toasts.
-  first.news = midgameOpeningNews(sim.world);
   first.toasts = [];
 }
 export const app = createActorAtoms(runtime, appMachine, { input: { speed: initialSpeed, first } });

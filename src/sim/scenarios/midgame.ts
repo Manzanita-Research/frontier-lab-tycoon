@@ -1,6 +1,7 @@
 // A scripted player, not a save-file fixture: every building, hire and release goes through the ordinary sim.
 import { BUILDINGS, type PlaceableKind } from "../../content/buildings";
 import { eventById } from "../../content/events";
+import { THOUGHTS } from "../../content/thoughts";
 import { canPlace, type Command } from "../commands";
 import { openEventOf } from "../events";
 import { outcomeOf } from "../goals";
@@ -8,15 +9,33 @@ import { buildingAt, isPathTile, rectContains } from "../pathfind";
 import { enableLeapfrog } from "../race/leapfrog/driver";
 import { createInitialState } from "../state";
 import { applyNow, tick, TICKS_PER_DAY } from "../tick";
-import type { GameState } from "../types";
+import type { GameState, Thought, WalkerKind } from "../types";
 
 export const MIDGAME_SEED = 48;
 export const MIDGAME_CAMERA = { focus: [11.5, 14.5] as [number, number], zoom: 43 };
-/** The chosen pair-launch joke starts the tape. Keep the real ids in order so new news joins normally on resume. */
+/** Start the tape on the chosen real SOTA joke; original ids let new headlines join normally on resume. */
 export function midgameOpeningNews(s: GameState) {
-  const chosen = s.news.find((n) => n.day === s.leapfrog.last?.day && n.text.includes("answers") && n.text.includes("within 24 hours"));
+  const chosen = s.news.find((n) => n.day === s.leapfrog.last?.day && n.text.includes("GPQA-Diamond-Encrusted has a new champion"));
   if (!chosen) throw new Error("Mid-game opening headline is missing");
   return s.news.filter((n) => n.id >= chosen.id);
+}
+
+/** Read-only opening overlay. Existing content on real outdoor speakers; never write it into the World. */
+export function midgameOpeningThoughts(s: GameState): Thought[] {
+  const picks: { kind: WalkerKind; text: string; near: [number, number] }[] = [
+    { kind: "researcher", text: "The loss went down. I refuse to touch anything.", near: [11, 12] },
+    { kind: "agent", text: "I calculated my water usage. I'd rather not say.", near: [15, 16] },
+    { kind: "protester", text: "Someone hand me a water. Not from them.", near: [10, 21] },
+  ];
+  const chosen: number[] = [];
+  return picks.map((pick, i) => {
+    const line = THOUGHTS.find((t) => t.kind === pick.kind && t.text === pick.text);
+    const speaker = s.walkers.filter((w) => w.kind === pick.kind && w.machine.value !== "inside" && !chosen.includes(w.id))
+      .sort((a, b) => Math.hypot(a.x - pick.near[0], a.z - pick.near[1]) - Math.hypot(b.x - pick.near[0], b.z - pick.near[1]) || a.id - b.id)[0];
+    if (!line || !speaker) throw new Error(`Mid-game opening thought is missing: ${pick.kind}`);
+    chosen.push(speaker.id);
+    return { id: -(i + 1), walkerId: speaker.id, kind: pick.kind, text: line.text, expiresTick: s.tick + 1 };
+  });
 }
 
 function pave(s: GameState, plaza = false) {
@@ -80,8 +99,8 @@ export function createMidgameScenario(): GameState {
     }
     if (s.day === 350 && s.tick % TICKS_PER_DAY === 0) pave(s, true);
     tick(s, cmds);
-    // Y2 · Feb 29, the day-after counter-launch. The three ordinary bubbles at this tick were curated in the capture.
-    if (s.day === 418 && s.tick % TICKS_PER_DAY === 10) return s;
+    // Y2 · Mar 7, a fresh SOTA claim, just after the SRE finishes the repair.
+    if (s.tick === 426 * TICKS_PER_DAY + 8) return s;
   }
   throw new Error("Mid-game scenario could not reach its opening moment");
 }
