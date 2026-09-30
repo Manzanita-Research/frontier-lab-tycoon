@@ -85,19 +85,17 @@ function Beats({ intro, toGame }: { intro: Intro; toGame: () => void }) {
   const beat = beatOf(snap.value);
   const { context } = snap;
   const send = intro.send;
-  const root = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (beat === "game") toGame();
   }, [beat, toGame]);
 
   // The prefetched game module listens for clicks on window (its coach marks); the intro's clicks stay the intro's.
+  // Stopped at document: React listens on the root element, below it, so the intro's own buttons still get them.
   useEffect(() => {
-    const el = root.current;
-    if (!el) return;
     const stop = (e: Event) => e.stopPropagation();
-    el.addEventListener("click", stop);
-    return () => el.removeEventListener("click", stop);
+    document.addEventListener("click", stop);
+    return () => document.removeEventListener("click", stop);
   }, []);
 
   // Keys: any key skips while the intro is playing itself; while you're reading, the arrows turn pages and Esc goes back.
@@ -125,7 +123,7 @@ function Beats({ intro, toGame }: { intro: Intro; toGame: () => void }) {
   const item = context.item ? ITEMS.find((i) => i.id === context.item) : null;
 
   return (
-    <div ref={root} className={`intro intro--${beat}`}>
+    <div className={`intro intro--${beat}`}>
       {context.still ? (
         <Suspense fallback={<Curtain text="" />}>
           <Still intro={intro} manual={context.item === "manual"} />

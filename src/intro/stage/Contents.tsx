@@ -1,13 +1,13 @@
 // What's in the box, as a flat lay on the demo counter. Each item damps toward its place: inside the box before the
 // unwrap, on the counter after, held up close when focused, and (the disc) into the kiosk's drawer when you insert it.
-import { useFrame, type ThreeEvent } from "@react-three/fiber";
+import { useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import * as THREE from "three";
 import { paintCard, paintDisc, paintEula, paintFloppy, paintInsert, paintOverlay } from "../art";
 import { ITEMS, type ItemId } from "../content";
 import { Book3D } from "./Book3D";
 import { Coa } from "./Coa";
-import { ITEM_SIZE, REST } from "./items";
+import { ITEM_SIZE, REST, REST_TALL } from "./items";
 import { canvasTexture, DRAWER_IN_Z, DRAWER_OUT_Z, DRAWER_Y, dampTo, flat, frameDt, HOLD, pose, TOWER, TRAY, useClock, type Pose, type StageProps } from "./rig";
 
 type Props = StageProps & { weightsKey: string };
@@ -55,6 +55,7 @@ function Item({ id, order, beat, context, send, children }: StageProps & { id: I
   const ref = useRef<THREE.Group>(null);
   const [hover, setHover] = useState(false);
   const held = beat === "focus" && context.item === id;
+  const tall = useThree((s) => s.size.width < s.size.height);
   const pickable = beat === "open" || beat === "focus";
   const inTray = useMemo(() => flat(TRAY.x, TRAY.y - 0.02 + order * 0.003, TRAY.z, 0), [order]);
   const holdPose = useMemo(() => pose(HOLD, id === "manual" ? -0.08 : -0.12, 0, 0), [id]);
@@ -72,7 +73,7 @@ function Item({ id, order, beat, context, send, children }: StageProps & { id: I
     const c = clock.current;
     const dt = frameDt(c, raw);
     let lambda = 7;
-    const rest = REST[id];
+    const rest = (tall ? REST_TALL : REST)[id];
     if (beat === "unwrapping") {
       // The lid comes off at ~1.0 s; then everything slides out, one after another.
       const go = c.t > 1.15 + order * 0.09;

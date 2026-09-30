@@ -168,8 +168,10 @@ function CameraRig({ beat, context }: { beat: string; context: IntroContext }) {
         // On a wide screen the whole view slides right, clear of the contents list.
         const dx = aspect < 1 ? 0 : -0.14;
         goalLook.set(TRAY.x + dx, 0.9, TRAY.z + 0.02);
-        const d = fit(aspect < 1 ? 0.95 : 1.35, 1.0, aspect);
-        pos.set(TRAY.x + dx * 2, 0.9 + d * 0.72, TRAY.z + d * 0.7);
+        // A phone looks down from higher up, so the spread fills a tall screen instead of a band across it.
+        const d = aspect < 1 ? fit(0.74, 0.9, aspect) : fit(1.35, 1.0, aspect);
+        const tilt = aspect < 1 ? [0.97, 0.26] : [0.72, 0.7];
+        pos.set(TRAY.x + dx * 2, 0.9 + d * tilt[0]!, TRAY.z + d * tilt[1]!);
         lambda = beat === "unwrapping" ? 2.4 : 3.2;
         break;
       }

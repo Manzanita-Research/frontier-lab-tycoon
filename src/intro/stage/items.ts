@@ -27,6 +27,18 @@ export const REST: Record<ItemId, Pose> = {
   inserts: flat(1.74, Y, 0.97, -0.18),
 };
 
+/** The flat lay on a portrait screen: everything packed round the tray, so a phone can see it all at once. */
+export const REST_TALL: Record<ItemId, Pose> = {
+  overlay: flat(2.15, Y, 0.24, 0.02),
+  eula: flat(1.9, Y, 0.35, 0.1),
+  disc: flat(2.4, Y + 0.001, 0.36, 0),
+  manual: flat(1.9, Y + 0.004, 0.64, 0.04),
+  coa: flat(2.4, Y, 0.56, Math.PI / 2 - 0.08),
+  floppies: flat(2.41, Y, 0.76, -0.1),
+  inserts: flat(1.92, Y, 0.93, -0.14),
+  card: flat(2.26, Y, 0.95, 0.1),
+};
+
 /** How much room an item needs on screen when held up (the manual opens into a spread). */
 export function itemFrame(item: ItemId | null, page: number, sheets: number): [number, number] {
   if (!item) return [0.4, 0.3];
