@@ -100,14 +100,17 @@ console.log(report.days, replay.days); // 365, 365
 It composes services, validates assets/references, then runs 365 actual days
 and a deterministic replay. The CLI adds `xstate/graph` structural arc traversal.
 It explores every transition alternative with guards/actions omitted; it cannot
-prove that a guarded transition will occur. Named action parameters are currently
-JSON data whose runtime semantics await M1b.
+prove that a guarded transition will occur. The loader checks every guard and
+action's parameters against the sim's Vocabulary (`src/sim/verbs.ts`), with a
+did-you-mean for typos.
 
-**M1a coverage:** existing rival personality/starting stats and goal targets can
-be injected into today's World. All other modified sections appear in the
-checker's **M1b deferred** list. New names, headlines, cards, arcs and skins are
-validated but not executed by that bridge. Live `?mod=` loading, runtime content
-lookups and game hot-reload are M1b. `flt-mod dev` currently only serves the data.
+**Coverage (M1b, FLT-37):** the 365 days run the real sim with the resolved
+definition: rivals, buildings, the ladder, the coach, goals, names, headlines,
+thoughts, cards, arcs, disasters, benchmarks and mishaps all execute, and the
+report names the state each arc ended in. `walkerKinds`, `endings`, `tips` and
+`tables`, and a manifest's `skin`, `assets` and `audio`, validate but are not read
+yet; the report lists them. Load a mod in the game with `?mod=<url>`; `flt-mod dev`
+serves one on `http://localhost:5174/mod.json` (reload to pick up edits).
 
 Shared mods are data; shared script execution is a later sandbox milestone.
 The SDK/CLI stay private in this repo and are not published.

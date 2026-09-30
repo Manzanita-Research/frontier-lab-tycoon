@@ -10,7 +10,7 @@ import { enableLeapfrog } from "./race/leapfrog/driver";
 import { openEventOf } from "./events";
 import { createInitialState } from "./state";
 import { answer } from "./testkit";
-import { tick } from "./tick";
+import { applyNow, tick } from "./tick";
 import type { GameState } from "./types";
 import { GUARD_NAMES, VERB_NAMES } from "./verbs";
 import { ACTION_NAMES as SDK_ACTIONS, GUARD_NAMES as SDK_GUARDS } from "../../packages/flt-mod-sdk/src/index";
@@ -105,6 +105,30 @@ describe("mod arcs (FLT-37)", () => {
     // A deterministic arc leaves the random stream alone: the lab's own dice fall where they did.
     const calm = await resolve([mod("calm", { arcs: { add: [{ id: "calm", initial: "on", states: { on: { on: { DAY: { actions: [{ type: "flag.set", params: { name: "calm" } }] } } } } }] } })]);
     expect(playTo(createInitialState(4, "campus", calm), 20, calm).rngState).toBe(playTo(createInitialState(4, "campus"), 20).rngState);
+  });
+
+  it("counts after/every in midnights, and can pull staff off their posts and send them back", async () => {
+    const drip: ArcData = {
+      id: "drip", initial: "idle",
+      states: {
+        idle: { on: { DAY: { target: "drill", guard: [{ type: "day.after", params: { day: 1 } }, { type: "stat.gte", params: { stat: "janitor", value: 1 } }], actions: [{ type: "staff.divert", params: { job: "janitor", to: "gate" } }] } } },
+        drill: { on: { DAY: [
+          { target: "over", guard: { type: "after", params: { days: 3 } }, actions: [{ type: "staff.release" }] },
+          { guard: { type: "every", params: { days: 1 } }, actions: [{ type: "news", params: { text: "Steve drill, day {cash}" } }] },
+        ] } },
+        over: { type: "final" },
+      },
+    };
+    const def = await resolve([mod("drip", { arcs: { add: [drip] } })]);
+    const s = createInitialState(5, "campus", def);
+    applyNow(s, [{ type: "hire", job: "janitor" }, { type: "hire", job: "janitor" }], def);
+    playTo(s, 2, def);
+    expect(s.modArcs?.drip?.value).toBe("drill");
+    expect(s.staff.filter((o) => o.job === "janitor").every((o) => o.divert?.owner === "drip")).toBe(true);
+    playTo(s, 5, def);
+    expect(s.modArcs?.drip?.value).toBe("over");
+    expect(s.news.filter((n) => n.text.startsWith("Steve drill"))).toHaveLength(2);
+    expect(s.staff.some((o) => o.divert?.owner === "drip")).toBe(false);
   });
 
   it("the starter template's arc opens its card after day 20", async () => {

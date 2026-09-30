@@ -15,7 +15,7 @@ import { baseContent } from "./base-game";
 import { ModError } from "./schema";
 
 /** Sections the sim reads at runtime, and sections a mod may carry that nothing executes yet. */
-export const EXECUTED_SECTIONS = ["progression", "coach", "buildings", "rivals", "headlines", "thoughts", "events", "arcs", "goals", "names"] as const;
+export const EXECUTED_SECTIONS = ["progression", "coach", "buildings", "rivals", "headlines", "thoughts", "events", "arcs", "goals", "names", "disasters", "benchmarks", "mishaps"] as const;
 export const INERT_SECTIONS = ["walkerKinds", "endings", "tips", "tables"] as const;
 
 export interface Coverage {

@@ -17,6 +17,7 @@ import { Schema } from "effect";
 import { setupEffect } from "@xstate/effect";
 import type { AnyStateMachine } from "xstate";
 import type { ArcData, NamedCallData } from "../mods/schema";
+import { TICKS_PER_DAY } from "./constants";
 import { defs } from "./defs";
 import type { Call, Json } from "./disasters/types";
 import { step, type Stepped } from "./machines/run";
@@ -25,7 +26,7 @@ import type { GameState } from "./types";
 import { flagsIn, normalize, passes, runVerb, STATS, statsIn, usesChance, type GuardEnv } from "./verbs";
 
 type ArcNode = ArcData["states"][string];
-type Transition = { target?: string; guard?: Call; actions?: readonly Call[] };
+type Transition = { target?: string; guard?: Call | Call[]; actions?: readonly Call[] };
 
 const Numbers = Schema.Record(Schema.String, Schema.Number);
 const beat = { tick: Schema.Number, day: Schema.Number, roll: Schema.Number, stats: Numbers, flags: Numbers };
@@ -90,8 +91,9 @@ const chainOf = (path: string): string[] => {
 function transitionsOf(node: ArcNode, kind: string): Transition[] {
   const raw = node.on?.[kind];
   if (raw === undefined) return [];
-  const list = (Array.isArray(raw) ? raw : [raw]) as readonly (string | { target?: string; guard?: NamedCallData; actions?: readonly NamedCallData[] })[];
-  return list.map((t) => (typeof t === "string" ? { target: t } : { target: t.target, guard: t.guard && asCall(t.guard), actions: t.actions?.map(asCall) }));
+  const list = (Array.isArray(raw) ? raw : [raw]) as readonly (string | { target?: string; guard?: NamedCallData | readonly NamedCallData[]; actions?: readonly NamedCallData[] })[];
+  const guardOf = (g: NamedCallData | readonly NamedCallData[] | undefined) => (g === undefined ? undefined : Array.isArray(g) ? g.map(asCall) : asCall(g as NamedCallData));
+  return list.map((t) => (typeof t === "string" ? { target: t } : { target: t.target, guard: guardOf(t.guard), actions: t.actions?.map(asCall) }));
 }
 
 function emitAll(enq: Enq, calls: readonly (NamedCallData | Call)[] | undefined) {
@@ -129,7 +131,7 @@ function compile(arc: ArcData): Compiled {
   const leaves = new Set<string>();
   const done = new Set<string>();
   for (const [path, node] of nodes) {
-    for (const kind of Object.keys(node.on ?? {})) for (const t of transitionsOf(node, kind)) if (t.guard) guards.push(t.guard);
+    for (const kind of Object.keys(node.on ?? {})) for (const t of transitionsOf(node, kind)) if (t.guard) guards.push(...[t.guard].flat());
     if (node.states) continue;
     const key = flat(path);
     leaves.add(key);
@@ -142,7 +144,8 @@ function compile(arc: ArcData): Compiled {
     const handler = (kind: "DAY" | "CHOSE") => ({ context, event }: { context: ModArcStored["context"]; event: ArcEvent }, enq: Enq) => {
       const env: GuardEnv = {
         tick: event.tick, day: event.day, roll: event.roll, stats: event.stats, flags: event.flags,
-        ctx: { enteredTick: context.enteredTick, progress: 0, hours: 0 },
+        // An arc only hears midnights and answers, so it counts `after`/`every` from the start of the day it began.
+        ctx: { enteredTick: context.enteredTick - (context.enteredTick % TICKS_PER_DAY), progress: 0, hours: 0 },
         ...(event.type === "CHOSE" ? { card: event.card, choice: event.choice } : {}),
       };
       for (const from of chain) {

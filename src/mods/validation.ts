@@ -125,7 +125,9 @@ export function validateArc(arc: ArcData, vocabulary: VocabularyApi, path: strin
           targets.push(full);
         }
         if (typeof transition !== "string") {
-          if (transition.guard) call(transition.guard, vocabulary.guards, `${at}.guard`);
+          const guard = transition.guard;
+          if (Array.isArray(guard)) guard.forEach((g: NamedCallData, j) => call(g, vocabulary.guards, `${at}.guard[${j}]`));
+          else if (guard) call(guard as NamedCallData, vocabulary.guards, `${at}.guard`);
           for (const [j, action] of (transition.actions ?? []).entries()) call(action, vocabulary.effects, `${at}.actions[${j}]`);
         }
       }

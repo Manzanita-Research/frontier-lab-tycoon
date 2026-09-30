@@ -4,18 +4,21 @@ _FLT-15. Written by the FLT lead (Opus 5.5). Companion: `docs/EFFECT-FOR-MODDERS
 
 **The test:** someone asks their coding agent *"make me a Frontier Lab Tycoon mod where the protesters are all golden retrievers"*, gets a working mod in minutes, and sends a friend a link that opens the game with it loaded.
 
-## Current implementation (M1a + M2)
+## Current implementation (M1a + M1b + M2)
 
-This page describes the intended design. M1a foundations and the private M2 kit
-are available; live loading and full content execution await M1b. See
-`src/mods/README.md` for the precise coverage. Start with `pnpm create-mod my-mod`,
+This page describes the intended design. M1a foundations, M1b live integration
+(FLT-37) and the private M2 kit are in: a mod loads with `?mod=<url>` on any build
+(`?mod=/mods/examples/every-lab-is-steve/mod.json` renames the Arena), its content
+runs in the sim, and the Frontier 95 Mod Manager (Start, Mods…) lists what loaded
+and why anything failed. Mod skins, assets and audio are validated but not applied
+yet. See `src/mods/README.md` for the precise coverage. Start with `pnpm create-mod my-mod`,
 then `pnpm --dir my-mod test`. From the game checkout, `pnpm flt-mod check <path>`,
 `pnpm flt-mod bundle <dir>` and `pnpm flt-mod dev <dir>` use the private source-linked
 kit. The scaffold includes the mod-authoring skill and every v1 content section.
 Copy optional `mod.example.ts` to `mod.ts` to use `@flt/mod-sdk`; directory commands prefer it, while the
 scaffold test checks `mod.json`. Bundle with an explicit `mod.json` output to
 regenerate that file. Local assets are inlined; remote assets are rejected.
-`dev` serves CORS on 5174 and prints the future game link; game hot-reload is M1b.
+`dev` serves CORS on 5174 and prints the game link (`?mod=http://localhost:5174/mod.json`); reload the page to pick up edits (no hot reload).
 
 ## 1. Principle: data first, code last
 

@@ -78,7 +78,8 @@ export const EventCard = Schema.Struct({
 export type EventData = typeof EventCard.Type;
 
 export const NamedCall = Schema.Union([text, Schema.Struct({ type: text, params: Schema.optionalKey(Schema.Record(Schema.String, Schema.Json)) })]);
-const Transition = Schema.Union([text, Schema.Struct({ target: Schema.optionalKey(text), guard: Schema.optionalKey(NamedCall), actions: Schema.optionalKey(Schema.Array(NamedCall)) })]);
+// A guard, or a list of guards that must all hold.
+const Transition = Schema.Union([text, Schema.Struct({ target: Schema.optionalKey(text), guard: Schema.optionalKey(Schema.Union([NamedCall, Schema.Array(NamedCall)])), actions: Schema.optionalKey(Schema.Array(NamedCall)) })]);
 export type NamedCallData = typeof NamedCall.Type;
 interface ArcNodeData {
   readonly type?: "final";

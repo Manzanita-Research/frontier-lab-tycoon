@@ -319,16 +319,18 @@ function addEffect(env: VerbEnv, kind: TimedEffect["kind"], value: number, days:
 
 /** Pull `fraction` of a job off their posts to a place, and keep pulling: new hires of the job are drawn in too. */
 export function enforceDiverts(state: GameState, run: DisasterRun) {
-  for (const d of run.diverts) {
-    const crewOf = staffOf(state, d.job).filter((s) => s.machine.value !== "leaving");
-    const want = Math.ceil(crewOf.length * d.fraction - 1e-9);
-    let have = crewOf.filter((s) => s.divert?.owner === run.id && s.divert.to === d.to).length;
-    for (const s of crewOf) {
-      if (have >= want) break;
-      if (s.divert) continue;
-      divertStaff(s, run.id, d.to, d.jog);
-      have++;
-    }
+  for (const d of run.diverts) divertSome(state, run.id, d);
+}
+
+function divertSome(state: GameState, owner: string, d: DisasterRun["diverts"][number]) {
+  const crewOf = staffOf(state, d.job).filter((s) => s.machine.value !== "leaving");
+  const want = Math.ceil(crewOf.length * d.fraction - 1e-9);
+  let have = crewOf.filter((s) => s.divert?.owner === owner && s.divert.to === d.to).length;
+  for (const s of crewOf) {
+    if (have >= want) break;
+    if (s.divert) continue;
+    divertStaff(s, owner, d.to, d.jog);
+    have++;
   }
 }
 
@@ -358,7 +360,7 @@ export const VERBS: Record<string, VerbDef> = {
     },
   },
   "staff.divert": {
-    doc: "Pull `fraction` of a job off their posts and jog them to `to` (a building kind, `$target`, `$office` or `gate`) with a red \"!\". Their posts go unstaffed until `staff.release`, and new hires of the job are drawn in too.",
+    doc: "Pull `fraction` of a job off their posts and jog them to `to` (a building kind, `$target`, `$office` or `gate`) with a red \"!\". Their posts go unstaffed until `staff.release`; in a disaster, new hires of the job are drawn in too (a mod arc pulls whoever is on staff now).",
     spec: { job: "string", to: "string", fraction: "number?", jog: "number?" },
     verify: (p) => (["janitor", "sre", "comms", "security"].includes(p.job as string) ? null : "`job` is janitor, sre, comms or security"),
     run: (env, p) => {
@@ -366,8 +368,10 @@ export const VERBS: Record<string, VerbDef> = {
       const b = p.to === "gate" ? null : buildingRef(env, p.to as string);
       const to = b ? b.id : 0;
       const d = { job: p.job as StaffJob, to, fraction: num(p.fraction, 1), jog: num(p.jog, 1.8) };
-      if (run) run.diverts = [...run.diverts.filter((o) => o.job !== d.job), d];
-      if (run) enforceDiverts(state, run);
+      if (run) {
+        run.diverts = [...run.diverts.filter((o) => o.job !== d.job), d];
+        enforceDiverts(state, run);
+      } else if (ownerOf(env)) divertSome(state, ownerOf(env), d);
     },
   },
   "staff.release": {
