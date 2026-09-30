@@ -11,7 +11,7 @@ describe("placeBalloon", () => {
     const p = placeBalloon(start, box, view, { margin: { bottom: 52 } });
     expect(p.side).toBe("top");
     expect(p.y + box.h).toBeLessThanOrEqual(start.y);
-    const menuItem = { x: 40, y: 620, w: 320, h: 32 };
+    const menuItem = { x: 40, y: 520, w: 320, h: 32 };
     const q = placeBalloon(menuItem, box, view, { margin: { bottom: 52 } });
     expect(q.side).toBe("right");
     expect(q.x).toBeGreaterThanOrEqual(menuItem.x + menuItem.w);
