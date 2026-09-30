@@ -5,12 +5,15 @@
 // not). Signed, each clause's calls run as timed effects owned by "capture" (the race reads them in `race/rules.ts`).
 // Every day the law stands, journalists may open the file properties: the odds grow with the clauses' shame, the heat
 // and the distrust (or another pack sets `capture:leak`). Exposed, the law is struck (`effects.end`) and the auditors take note.
+// FLT-56: the roll no longer exposes the law on the spot. A reporter starts asking (a beat and a toast), and the story
+// runs `warning.days` later unless the lab buries it (`buryLeak`: money, Capture and a little heat, dearer each time, and
+// each burial makes the next leak likelier). Another pack handing over the file still exposes it at once.
 import { eventById } from "../../content/events";
 import type { RivalId } from "../../content/rivals";
 import { defs } from "../defs";
 import { arcMachine } from "../machines/arc";
 import { initialStored, step } from "../machines/run";
-import { fillTemplate } from "../format";
+import { fillTemplate, formatMoney } from "../format";
 import { addNews, addToast } from "../news";
 import { openEventOf } from "../events";
 import { createRng, type Rng } from "../rng";
@@ -27,7 +30,10 @@ import { CAPTURE_STATS, freshBill, stepBill } from "./machine";
 import { picks } from "../picks";
 
 const R = CAPTURE.rules;
+const W = R.warning;
 const OWNER = "capture";
+/** The reporter and the bury are about you, and need you (FLT-51). */
+const TAG = { source: "politics", importance: "you" } as const;
 const CARD_IDS = CAPTURE.content.events.add.map((e) => e.id);
 // Lazy, like the yacht's (FLT-52): verbs -> commands -> this driver is a cycle, so nothing from verbs runs at load.
 let measure: string[] | undefined;
@@ -38,6 +44,14 @@ const armCard = (id: string) => {
   const def = eventById(id)!;
   return initialStored(arcMachine, { choices: def.choices.length, cooldownDays: def.cooldown ?? 0, openedDay: null });
 };
+/** The law's life in days: the chart's sunset (the `after` guard on the way out of "law"). */
+const SUNSET_DAYS = (() => {
+  const on = (CAPTURE.chart.states.law as { on?: Record<string, unknown> }).on?.DAY;
+  for (const t of (Array.isArray(on) ? on : on ? [on] : []) as { guard?: { type?: string; params?: { days?: unknown } } }[]) {
+    if (t.guard?.type === "after" && typeof t.guard.params?.days === "number") return t.guard.params.days;
+  }
+  return 180;
+})();
 const releases = (s: GameState) => Object.fromEntries(s.race.rivals.map((r) => [r.context.id, r.context.releases]));
 
 export function enableCapture(s: GameState) {
@@ -58,6 +72,8 @@ export function disableCapture(s: GameState) {
   b.machine = freshBill(s.tick);
   b.draft = [];
   b.floorDay = null;
+  delete b.warned;
+  delete b.buried;
   for (const key of PICKS) delete s.flags[PICK_PREFIX + key];
   for (const id of CARD_IDS) s.arcs[id] = armCard(id);
 }
@@ -109,6 +125,8 @@ function arrived(s: GameState, rng: Rng, to: string) {
   if (to === "law") {
     b.lawDay = s.day;
     b.seen = releases(s);
+    delete b.warned;
+    delete b.buried;
     const env = { state: s, rng, run: null, owner: OWNER, vars: vars(s) };
     if (!clauses.length) addNews(s, fillTemplate(R.empty, vars(s)), "joke");
     for (const id of clauses) for (const call of clauseById(id)!.effects) runVerb(env, call as Call);
@@ -116,6 +134,7 @@ function arrived(s: GameState, rng: Rng, to: string) {
   if (to === "exposed") openCard(s, EXPOSED_CARD);
   const outcome = ENDED[to];
   if (outcome) {
+    delete b.warned;
     b.history = [...b.history, { day: s.day, act: b.act, clauses: [...clauses], outcome }].slice(-8);
     b.floorDay = null;
   }
@@ -136,13 +155,82 @@ export function applyCaptureChoices(s: GameState) {
   }
 }
 
-/** A day's odds that someone reads the file properties. */
+const shameOf = (ids: readonly string[]) => ids.reduce((n, id) => n + (clauseById(id)?.shame ?? 0), 0);
+
+/** A day's odds that someone reads the file properties of a law this shameless, at today's heat and trust. */
+function oddsFor(s: GameState, shame: number): number {
+  const k = R.backfire;
+  return Math.min(1, k.base * Math.max(1, shame) * (1 + Math.max(0, s.disasters.heat) / k.heatScale) * (1 + (50 - s.disasters.trust) / k.trustScale));
+}
+
+/** A day's odds that someone reads the file properties (every burial adds `warning.shame`). */
 export function leakOdds(s: GameState): number {
   const b = s.bill;
   if (!b || b.machine.value !== "law") return 0;
-  const shame = b.machine.context.clauses.reduce((n, id) => n + (clauseById(id)?.shame ?? 0), 0);
-  const k = R.backfire;
-  return Math.min(1, k.base * Math.max(1, shame) * (1 + Math.max(0, s.disasters.heat) / k.heatScale) * (1 + (50 - s.disasters.trust) / k.trustScale));
+  return oddsFor(s, shameOf(b.machine.context.clauses) + (b.buried ?? 0) * W.shame);
+}
+
+/**
+ * FLT-56, the draft's leak-risk meter: the odds someone reads the file properties before the law sunsets, if the
+ * clauses ticked now became law today (at today's heat and trust). While the law stands: over the days it has left.
+ */
+export function projectedLeak(s: GameState): number {
+  const b = s.bill;
+  if (!b) return 0;
+  const stage = b.machine.value;
+  if (stage === "invited") return 1 - (1 - oddsFor(s, shameOf(b.draft))) ** SUNSET_DAYS;
+  if (stage !== "law") return 0;
+  const left = Math.max(0, SUNSET_DAYS - (b.lawDay === null ? 0 : s.day - b.lawDay));
+  return 1 - (1 - leakOdds(s)) ** left;
+}
+
+/** What burying the story costs now: dearer each time. */
+export function buryCost(s: GameState): number {
+  return Math.round(W.cost * W.costGrowth ** (s.bill?.buried ?? 0));
+}
+
+/** Days until the reporter's story runs (null: nobody is asking). */
+export function leakDaysLeft(s: GameState): number | null {
+  const b = s.bill;
+  return b?.warned === undefined || b.machine.value !== "law" ? null : Math.max(0, b.warned + W.days - s.day);
+}
+
+/** A reporter starts asking: the beat at the gate, a toast, and the clock. */
+function warn(s: GameState, rng: Rng) {
+  const b = s.bill!;
+  b.warned = s.day;
+  const v = { ...vars(s), reporter: R.reporter, days: String(W.days) };
+  addToast(s, fillTemplate(W.toast, v), "bad", TAG);
+  runVerb({ state: s, rng, run: null, owner: OWNER, vars: v }, { type: "camera.beat", params: { kind: "leak", caption: W.caption, sub: W.sub, on: "gate", zoom: 1.3, hold: 5 } });
+}
+
+/** A reporter starts asking now, whatever the dice say (the staged moment and tests). */
+export function warnLeak(s: GameState) {
+  const b = s.bill;
+  if (!b?.enabled || b.machine.value !== "law" || b.warned !== undefined) return;
+  const rng = createRng(b.rngState);
+  warn(s, rng);
+  b.rngState = rng.state();
+}
+
+/** Bury the story the reporter is chasing. Refused (with a toast) without the cash. Returns whether it was buried. */
+export function buryLeak(s: GameState): boolean {
+  const b = s.bill;
+  if (!b?.enabled || b.machine.value !== "law" || b.warned === undefined) return false;
+  const cost = buryCost(s);
+  if (s.cash < cost) return addToast(s, fillTemplate(W.broke, { cost: formatMoney(cost) }), "bad", TAG), false;
+  const rng = createRng(b.rngState);
+  s.cash -= cost;
+  s.ledger = { ...s.ledger, expenses: s.ledger.expenses + cost, net: s.ledger.net - cost };
+  const env = { state: s, rng, run: null, owner: OWNER, vars: { ...vars(s), reporter: R.reporter } };
+  runVerb(env, { type: "capture.delta", params: { amount: -W.capture } });
+  runVerb(env, { type: "heat.delta", params: { amount: W.heat } });
+  delete b.warned;
+  b.buried = (b.buried ?? 0) + 1;
+  addNews(s, fillTemplate(rng.pick(W.buried), env.vars), "joke");
+  addToast(s, fillTemplate(W.buriedToast, { cost: formatMoney(buryCost(s)) }), "neutral", TAG);
+  b.rngState = rng.state();
+  return true;
 }
 
 /** The roll call on the bill: the Senate's, if the Promise Tracker counted it since the bill went to the floor. */
@@ -199,7 +287,10 @@ export function dailyCapture(s: GameState) {
     // Another pack (an audit, a subpoena) may hand the journalists the file: the `capture:leak` flag.
     const handed = s.flags["capture:leak"] !== undefined;
     delete s.flags["capture:leak"];
-    stats.leaked = rng.next() < leakOdds(s) || handed ? 1 : 0;
+    const hit = rng.next() < leakOdds(s);
+    const due = b.warned !== undefined && s.day - b.warned >= W.days;
+    stats.leaked = handed || due ? 1 : 0;
+    if (hit && !stats.leaked && b.warned === undefined) warn(s, rng);
   }
   send(s, rng, { type: "DAY", tick: s.tick, day: s.day, roll: 0, stats });
   // The draft or the leak may have waited behind another card.

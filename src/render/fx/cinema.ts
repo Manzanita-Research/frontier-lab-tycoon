@@ -56,10 +56,13 @@ export class Cinema {
     return this.phase !== "idle" && this.shot.hold === null && !this.released;
   }
 
-  /** Start a shot from `view`. A shot in progress keeps its original home; an open-ended one isn't interrupted by a timed one. */
-  focus(view: View, shot: Shot) {
+  /**
+   * Start a shot from `view`. A shot in progress keeps its original home; an open-ended one isn't interrupted by a timed
+   * one. True if the camera took the shot.
+   */
+  focus(view: View, shot: Shot): boolean {
     if (this.phase !== "idle") {
-      if (this.holdingOpen && shot.hold !== null) return;
+      if (this.holdingOpen && shot.hold !== null) return false;
     } else this.home = { ...view };
     this.shot = { back: true, ...shot };
     // Zoom is relative to where the player had it, so back-to-back shots don't compound.
@@ -68,6 +71,13 @@ export class Cinema {
     this.phase = "in";
     this.timer = 0;
     this.released = false;
+    return true;
+  }
+
+  /** Move the subject of the shot in progress (a beat following people as they walk). Zoom and timing are kept. */
+  retarget(x: number, z: number) {
+    if (this.phase !== "in" && this.phase !== "hold") return;
+    this.goal = { ...this.goal, x: clampPan(x), z: clampPan(z) };
   }
 
   /** The open-ended hold is over (the card was answered): ease back. */

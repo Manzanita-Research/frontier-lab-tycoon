@@ -28,6 +28,8 @@ export interface NeoLab {
   rival: RivalStored;
   /** The pack's words for its news: releases, poaches, the nemesis turn. */
   lines: { release: string[]; poach: string[]; nemesis: string[]; goodwill: string[] };
+  /** FLT-56: the seed round it raised, in $B. Missing for older saves and for Poaching War labs (they get the default). */
+  seed?: number;
 }
 
 export interface NeoLabsState {
@@ -39,3 +41,12 @@ export interface NeoLabsState {
 
 export type Personality = typeof PersonalitySchema.Type;
 export const isNeoId = (id: string) => id.startsWith("neo:");
+
+/**
+ * FLT-56: what the lab is "worth", in $B, for the balloon over its campus. Zero product, so it is the seed round
+ * times the hype, and nothing else. Pure; the renderer and the view-model call it.
+ */
+export function neoValuation(lab: Pick<NeoLab, "seed" | "rival">): number {
+  const seed = lab.seed ?? 2;
+  return Math.round(seed * (1 + Math.max(0, lab.rival.context.hype) / 12) * 10) / 10;
+}

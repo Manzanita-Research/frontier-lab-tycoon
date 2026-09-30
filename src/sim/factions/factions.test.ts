@@ -20,6 +20,7 @@ import { dailyFactions, setSafetySpend, settleFactions } from "./driver";
 import { safetyDrag } from "./stance";
 import { stageFactions, type FactionMoment } from "./demo";
 import { factionsView } from "./view";
+import { issueStatement, STATEMENT } from "./statement";
 import { CLOSED_CAREFUL, COMPROMISE, OPEN_FAST, runFactions, factionsTable, type FactionsReport } from "./headless";
 
 // Pinned v6 graph typing does not model emitted events; same adapter as machines/graph.test.ts.
@@ -345,5 +346,68 @@ describe("debug moments (?moment=factions|counterprotest|argue)", () => {
     const pair = s.thoughts.filter((t) => t.faction && t.expiresTick > s.tick);
     expect(pair.map((t) => t.faction)).toEqual(["accelerationists", "doomers"]);
     expect(pair[1]!.replyTo).toBe(pair[0]!.walkerId);
+  });
+});
+
+describe("the Comms statement (FLT-56)", () => {
+  const discourse = (seed = 3) => {
+    const s = createTestCampus(seed);
+    for (let i = 0; i < 12 * TICKS_PER_DAY; i++) tick(s, answer(s));
+    stageFactions(s, "factions");
+    s.cash = 200_000;
+    return s;
+  };
+
+  it("calms the faction addressed, snubs its feuds, costs money, makes the news and plays a beat at the gate", () => {
+    const s = discourse();
+    const doom = meterOf(s, "doomers");
+    const safety = meterOf(s, "safetyists");
+    const cash = s.cash;
+    const news = s.news.length;
+    expect(issueStatement(s, "doomers")).toBe(true);
+    expect(s.cash).toBe(cash - STATEMENT.cost);
+    // No Comms Rep: the intern writes it, and it lands softer.
+    expect(meterOf(s, "doomers")).toBeCloseTo(Math.min(100, doom + STATEMENT.calmUnstaffed));
+    expect(meterOf(s, "safetyists")).toBeCloseTo(Math.max(-100, safety - STATEMENT.backlash));
+    expect(s.news.length).toBeGreaterThanOrEqual(news + 2);
+    expect(s.news.some((n) => n.text.includes("addresses the Doomers in"))).toBe(true);
+    const beat = s.disasters.cues.find((c) => c.type === "beat");
+    expect(beat).toMatchObject({ beat: "statement", caption: expect.stringContaining("Doomers") });
+    expect((beat as { sub: string }).sub).toMatch(/^".+"$/);
+    expect(s.toasts.at(-1)!.text).toContain("intern");
+  });
+
+  it("waits out its cooldown, refuses when broke, and lands harder with a Comms Rep", () => {
+    const s = discourse();
+    issueStatement(s, "doomers");
+    const cash = s.cash;
+    expect(issueStatement(s, "doomers")).toBe(false);
+    expect(s.cash).toBe(cash);
+    expect(factionsView(s).statement.wait).toBe(STATEMENT.cooldownDays);
+    const t = discourse();
+    t.cash = STATEMENT.cost - 1;
+    expect(issueStatement(t, "doomers")).toBe(false);
+    const u = discourse();
+    hire(u, "comms");
+    expect(u.staff.some((st) => st.job === "comms")).toBe(true);
+    const before = meterOf(u, "doomers");
+    issueStatement(u, "doomers");
+    expect(meterOf(u, "doomers")).toBeCloseTo(Math.min(100, before + STATEMENT.calm));
+    expect(factionsView(u).statement.staffed).toBe(true);
+  });
+
+  it("stages three crowds in three colours and the statement beat (?moment=statement), the same way every time", () => {
+    const stage = () => {
+      const s = createTestCampus(3);
+      for (let i = 0; i < 12 * TICKS_PER_DAY; i++) tick(s, answer(s));
+      stageFactions(s, "statement");
+      return s;
+    };
+    const s = stage();
+    const gate = factionsView(s).gate;
+    expect(gate.map((g) => g.id)).toEqual(expect.arrayContaining(["", "truthers-truthers", "doomers"]));
+    expect(new Set(gate.map((g) => g.color)).size).toBe(gate.length);
+    expect(s.disasters.cues.some((c) => c.type === "beat" && c.beat === "statement")).toBe(true);
+    expect(JSON.stringify(stage())).toBe(JSON.stringify(s));
   });
 });

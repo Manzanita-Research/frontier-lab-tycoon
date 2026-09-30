@@ -1,6 +1,6 @@
 ---
 name: flt-modding
-description: Create, edit, validate, bundle and load data mods for Frontier Lab Tycoon, including headline packs, rival renames, entity thoughts, buildings, cards, JSON story arcs, disasters, Release Leapfrog benchmarks and mishaps. Use for FLT mod.json or mod.ts authoring, Daily Drama content packs, and loading a mod with ?mod=.
+description: Create, edit, validate, bundle and load data mods for Frontier Lab Tycoon, including headline packs, rival renames, entity thoughts, buildings, cards, JSON story arcs, disasters, Release Leapfrog benchmarks and mishaps, and presentation (mod skins, bundled images/fonts/.glb, sound cues, and walker looks such as golden retriever protesters). Use for FLT mod.json or mod.ts authoring, Daily Drama content packs, and loading a mod with ?mod=.
 ---
 
 # Frontier Lab Tycoon modding
@@ -17,9 +17,12 @@ params**, card ids and arc graphs, then plays seed 42 for 365 days **in the real
 sim with your definition**, twice, answering every card, and compares the World
 byte for byte. The report says which sections executed, which state each arc ended
 in, and which sections validate but nothing reads yet (`walkerKinds`, `endings`,
-`tips`, `tables`; a manifest's `skin`, `assets` and `audio` are not applied either).
-A green check proves the content runs; it does not prove how it looks. For that,
-load it in the game.
+`tips`, `tables`). It also checks the presentation half (`skin`, `assets`, `audio`,
+`looks`; see "Presentation" below): the 2 MB asset cap, no remote files, every asset
+a look or skin names, the skin's tokens, strings and CSS, and that every `sound.cue`
+the mod plays exists. It prints one line each for `Assets:`, `Skin:`, `Sound:` and
+`Look:`. A green check proves the content runs and the looks are well-formed; it does
+not prove how they look. For that, load it in the game.
 
 ## Loading a mod: `?mod=`
 
@@ -52,21 +55,21 @@ To look at a late-game mod straight away without changing the ladder, add
 `?mod=/mods/examples/every-lab-is-steve/mod.json&scenario=midgame`.
 
 **The starter `mod.json` shows every section, not every effect.** Its `walkerKinds`
-"Golden Retriever" sprite, `endings`, `tips` and `skin` validate but change nothing on
-screen yet, and `names.DOG_NAMES` is a pool nothing draws from (only the name pools
-listed below are read). Delete what you don't use; `check` lists the sections left
-that nothing reads.
+entry, `endings` and `tips` validate but change nothing on screen yet, and
+`names.DOG_NAMES` is a pool nothing draws from (only the name pools listed below are
+read). Its `looks`, `audio` and `skin` do show. Delete what you don't use; `check`
+lists the sections left that nothing reads.
 
 A mod that fails to fetch or decode is skipped and the rest still load; if the set
 fails to compose, the game starts unmodded. Either way the reason is listed in the
-Mod Manager (Frontier 95: Start menu, **Mods…**), which also lists what loaded.
+Mod Manager (Frontier 95: Start → Settings → **Mods…**), which also lists what loaded.
 Nothing is installed: remove the parameter and reload to play the base game. A
 saved run records its mods' ids, versions and content hash.
 
 ## Contract and canonical ids
 
 Manifest: `apiVersion: 1`, kebab-case `id`, nonempty `name`, `version`; optional
-`author`, `description`, `content`, `skin`, `assets`, `audio`. Unknown keys fail.
+`author`, `description`, `content`, `skin`, `assets`, `audio`, `looks`. Unknown keys fail.
 Each content section accepts `add`, `override`, `remove` in that order. Adds need
 complete entries and unused ids; overrides need existing ids; removes list existing
 ids. Fields merge only at the top level: nested objects/arrays replace whole fields.
@@ -96,9 +99,10 @@ missing-id/duplicate-add errors. Buildings require **id equal to kind**.
 - Entities (`walkerKinds` is a historical section name): `researcher`, `agent`,
   `visitor`, `protester` (rename one with `override`; `add` is for new ids). Keep
   `presentation: walker | flow | sprite | offmap` separate from mechanics. Don't
-  assume every actor walks. **Validated but not read yet: a mod cannot change how a
-  walker looks or what it is called on the map.** Make a crowd feel different through
-  its thoughts, headlines, toasts, cards and arcs.
+  assume every actor walks. `walkerKinds` is validated but not read yet. **To change
+  how walkers look, use the top-level `looks` section** (see "Presentation"), not
+  `walkerKinds`. Pair it with thoughts, headlines and arcs so the crowd also *sounds*
+  different.
 - Thought conditions: `always`, `noKombucha`, `lowCash`, `training`, `justReleased`,
   `highHype`, `unreachable`, `crowded`, `discourse`, `protest`, `night`, `era1`,
   `era2`, `era3`, `era4`, `openDrop`, `unpowered`, `top`, `rankFell` (use SDK
@@ -111,6 +115,8 @@ missing-id/duplicate-add errors. Buildings require **id equal to kind**.
   `{"chance":0.5}`. Text fills `{lab}`, `{model}`, `{rival}`, `{cash}`.
 - Legacy anonymous line keys: `base-headlines-N`, `base-thoughts-N` (zero-based
   indices for the pinned content version). Prefer unique add ids for portable packs.
+  The base protesters' own thoughts are `base-thoughts-74` to `base-thoughts-78`:
+  remove them when your crowd should only think your lines.
 
 ### Cards
 
@@ -197,7 +203,7 @@ counts `security`, `sre`, `comms`, `janitor`, and `sreAttending`. (`burning` and
 | `rival.leap` | `relative`, `open?` | the most open-weights rival jumps to (1 + `relative`) × your capability; `open` ships open weights |
 | `camera.focus` | `on` (`gate`, `$office` or a kind), `zoom?` (times closer, default 1.3; 1 = no zoom), `hold?` (seconds, default 2.4) | flies the camera there (not in photo mode) |
 | `shake` | `strength` (0 to 1) | shakes the screen |
-| `sound.cue` | `cue` (`alarm`, `card`, `era`, `release`) | plays a cue |
+| `sound.cue` | `cue`: a base cue (`alarm`, `card`, `era`, `release`, `place`, `coin`, `bulldoze`, `choice`, `breakdown`, `protest.chant`, `protest.grow`, `ui.click`) or one the mod adds under `audio.cues` | plays a cue (respects the player's mute and volume) |
 | `investigate.start` | `id`, `days`, `job`, `to` | starts an inquiry; advanced, read by the collusion system |
 
 **Always give timed effects `days` from an arc.** Without `days` they last until the
@@ -221,14 +227,101 @@ arc calls `effects.end`, which, if it never does, is forever. `$target` and
   relative odds, `voice` the share-of-voice hit (negative hurts). If you also add a
   card `stream:<id>`, it follows the headline.
 
+## Presentation: skin, assets, sound and looks
+
+Four top-level sections change how the game looks and sounds. **None of it reaches the
+sim:** a mod with only these sections replays byte-identical to the base game.
+
+**`looks`: how walkers look.** Keys are targets, values are looks.
+
+- Targets:
+  - a walker kind: `protester`, `visitor`, `researcher`, `agent`
+  - a kind and role: `visitor:Journalist`, `visitor:Venture Capitalist`, `researcher:<a RESEARCHER_ROLES value>`
+  - a faction crowd: `faction:<id>`. The ids are `accelerationists`, `safetyists`, `doomers`, `ethicists`, `open-weights`, `vcs`, `wonks`, `luddites`, `normies`. A faction look covers the protesters who came with that faction and anyone who sided with it.
+  - Lookup order: `kind:role`, then `faction:<id>`, then `kind`.
+- A look has **exactly one** of:
+  - **`recipe`:** 1 to 16 primitive parts. Each part is `{shape, size, at, color}`.
+    - `shape`: `box`, `sphere`, `capsule`, `cone` or `cylinder`.
+    - `size` is `[x, y, z]` in tiles and `at` is the part's centre.
+    - `color` is `"#rrggbb"`, or `"coat"` for a per-walker colour from the look's `coats` list.
+    - Optional: `rotate` (degrees about x, y, z), `shade` (-1 to 1, darker or lighter), and `motion`:
+      - `wag`: a tail
+      - `nod`: a head
+      - `flop`: an ear
+      - `sway`
+      - `step` / `step-alt`: legs, in turn, while walking
+    - `pivot` is where the motion turns, as an offset from `at`. For a leg, `[0, half its height, 0]` is the hip.
+    - **Axes:** y is up, the ground is y = 0, and **the walker faces +z** (head at +z, tail at -z). A person is about 1.25 tall; a dog about 0.9.
+  - **`sprite`:** an image asset id. It is drawn as a camera-facing billboard, `size` [w, h] in tiles (default 0.9 × 1.2).
+  - **`glb`:** a model asset id, fitted to 1.2 tall (times `scale`) and stood on the ground.
+  - **`tint`:** `{body?, head?}` colours on the base figure (the cheapest change).
+- Optional fields:
+  - `coats`: 1 to 16 colours. Each walker gets one; this also tints a sprite.
+  - `scale`
+  - `gait`: `walk`, `trot`, `hop` or `float`
+  - `label`: what the inspector calls one ("Golden Retriever")
+  - `signs`: 1 to 12 placards of up to 40 characters, **protesters and faction looks only**. A tint with signs gives the base protesters your placards. A smaller look carries smaller placards; `signHeight` overrides the height.
+- Performance: every part is one instanced draw for the whole crowd, so 16 parts cost the same for 5 walkers as for 500.
+
+**`assets`: images, fonts and `.glb` models the mod ships.**
+
+- Format: an id mapped to a file next to `mod.json` (`{"dog.png":"dog.png"}`). `check` and `bundle` inline it as a data URL, and the game serves it as a `blob:` URL.
+- Allowed types: PNG, JPEG, WebP, GIF, WOFF/WOFF2/TTF/OTF and GLB.
+- **2 MB per mod in total.**
+- Remote URLs (`https://…`) and paths outside the mod folder are refused with an error.
+- Looks name assets by id (`"sprite":"dog.png"`, `"glb":"dog.glb"`); so do the skin's CSS `url(dog.png)`, `fonts` and `preview`. A skin may also carry its own `skin.assets` map.
+
+```jsonc
+{"assets":{"pup.png":"pup.png","pup.glb":"models/pup.glb"},
+ "looks":{"visitor:Journalist":{"sprite":"pup.png","size":[0.8,0.9],"label":"Press Pup"},"researcher":{"glb":"pup.glb","scale":0.8}}}
+```
+
+**`audio.cues`: sounds.** A cue is a name and 1 to 32 synthesised notes.
+
+- Note fields:
+  - `at`: seconds from the start, 0 to 5
+  - `hz`, and an optional `endHz` to slide to (20 to 20000)
+  - `duration`: seconds, up to 5
+  - `gain`: 0 to 1; the base game's cues sit around 0.05 to 0.15
+  - `wave`: `sine`, `square`, `sawtooth`, `triangle` or `noise`
+- Naming a base cue replaces it (`card`, `release`, `coin`, …, see `sound.cue` above). Three hooks are moments with a name:
+  - `protest.chant`: every 0.7 s while more than ten protesters are at the gate
+  - `protest.grow`: when the crowd at the gate grows; silent in the base game
+  - `ui.click`: any HUD button; silent in the base game
+- A new name (`"my.bark"`) is played from arcs with `{"type":"sound.cue","params":{"cue":"my.bark"}}`.
+- Everything respects the player's mute and volume.
+
+**`skin`: a mod skin.**
+
+- Shape: `{id, name, extends?, activate?, tokens?, strings?, css?, fonts?, preview?}`.
+  - `id` must be new (not `base`, `frontier-95`, …).
+  - `extends` starts from a built-in skin (`frontier-95` is the default game look; `base` otherwise).
+- How the player gets it:
+  - It shows in the skin picker (Frontier 95: Start → Settings → Display Properties).
+  - `?skin=<id>` opens with it on.
+  - With `"activate": true`, a mod-loaded game asks the player ("Windows has found new skin…") before putting it on.
+- `tokens` are design tokens:
+  - colours: `color.bg`, `color.panel`, `color.panelAlt`, `color.inset`, `color.text`, `color.textDim`, `color.line`, `color.accent`, `color.accentText`, `color.good`, `color.bad`, `color.warn`, `color.info`, `color.titlebar`, `color.titlebarText`, `color.selection`, `color.selectionText`, `color.highlight`, `color.meterFrom`, `color.meterTo`
+  - `font.ui`, `font.display`
+  - your own tokens start with `x.`, or use raw `--custom-property` names
+  - In Frontier 95 the titlebars, the selection and the Start menu take `color.titlebar` / `color.selection`.
+- `strings` relabel UI copy by key. Unknown keys fail. Some keys: `build.menuTitle` (Build), `speed.pause`, `speed.1`, `speed.3`, `speed.10`, `ticker.label` (NEWS), `thoughts.title`, `stats.cash`, `stats.hype`, `stats.vibes`.
+- `css` is flat rules only:
+  - It is scoped under the skin (`:root`/`body` become the skin root).
+  - No `@` rules: `@import` is stripped and the others fail.
+  - No nesting, escapes, `:has`/`:is`/`:not`, or image functions.
+  - `url()` may name only the mod's assets.
+- Strings always render as text, never HTML.
+
 ## Worked examples
 
 Each JSON block is a complete **content patch** (put it under `content` in the
-manifest); example 7 is a top-level skin fragment. Minimal envelope:
+manifest); example 7 is top-level presentation (`skin`, `audio`, `looks` beside
+`content`). Minimal envelope:
 `{"apiVersion":1,"id":"my-mod","name":"My Mod","version":"1.0.0","content":{…}}`.
 All names must be parody: no real companies, products, people or nationalities.
 Local assets map ids to relative files; bundle inlines PNG/JPEG/WebP/GIF, fonts or
-GLB into data URLs (2 MiB aggregate; no remote assets).
+GLB into data URLs (2 MB per mod; no remote assets).
 
 1. Rename rivals using their ids, not their display names. Visible on the Arena board.
 ```json
@@ -265,10 +358,23 @@ GLB into data URLs (2 MiB aggregate; no remote assets).
     "on":{"DAY":[{"target":"over","guard":{"type":"after","params":{"days":7}}},{"guard":{"type":"every","params":{"days":1}},"actions":[{"type":"cash.delta","params":{"amount":-200}}]}]}},
   "over":{"type":"final","entry":[{"type":"news","params":{"text":"Biscuits restored at {lab}; morale returns to baseline anxiety","tone":"good"}}]}}}]}}
 ```
-7. A skin tweak (top-level fragment). Flat CSS only, no imports or remote URLs.
-Validated, but the game does not apply mod skins yet.
+7. Presentation: protesters become sheep with placards, a bleat when the crowd grows,
+agents tinted gold, and a skin the game offers to put on. Top-level sections, beside `content`.
 ```json
-{"skin":{"id":"golden-hour","name":"Golden Hour","tokens":{"--accent":"#d8ac48"},"css":".fetch-note { color: #d8ac48; }"}}
+{"looks":{"protester":{"label":"Sheep","coats":["#f4f1e8","#e8e2d0","#fbfaf5"],"gait":"trot","signs":["BAA-D ALIGNMENT","FLEECE THE WEIGHTS"],"recipe":[
+   {"shape":"sphere","size":[0.6,0.5,0.8],"at":[0,0.55,0],"color":"coat"},
+   {"shape":"sphere","size":[0.26,0.28,0.32],"at":[0,0.72,0.44],"color":"#3a2f2a","pivot":[0,-0.1,-0.12],"motion":"nod"},
+   {"shape":"box","size":[0.16,0.05,0.08],"at":[0.16,0.76,0.4],"color":"#3a2f2a","pivot":[-0.06,0,0],"motion":"flop"},
+   {"shape":"box","size":[0.16,0.05,0.08],"at":[-0.16,0.76,0.4],"color":"#3a2f2a","pivot":[0.06,0,0],"motion":"flop"},
+   {"shape":"cylinder","size":[0.08,0.36,0.08],"at":[0.15,0.18,0.22],"color":"#3a2f2a","pivot":[0,0.16,0],"motion":"step"},
+   {"shape":"cylinder","size":[0.08,0.36,0.08],"at":[-0.15,0.18,0.22],"color":"#3a2f2a","pivot":[0,0.16,0],"motion":"step-alt"},
+   {"shape":"cylinder","size":[0.08,0.36,0.08],"at":[0.15,0.18,-0.22],"color":"#3a2f2a","pivot":[0,0.16,0],"motion":"step-alt"},
+   {"shape":"cylinder","size":[0.08,0.36,0.08],"at":[-0.15,0.18,-0.22],"color":"#3a2f2a","pivot":[0,0.16,0],"motion":"step"},
+   {"shape":"sphere","size":[0.12,0.12,0.12],"at":[0,0.62,-0.42],"color":"coat","shade":0.1,"motion":"wag"}]},
+  "agent":{"tint":{"body":"#d9a441"}}},
+ "audio":{"cues":{"protest.grow":[{"at":0,"hz":420,"endHz":380,"duration":0.35,"gain":0.1,"wave":"triangle"},{"at":0.05,"hz":1200,"duration":0.2,"gain":0.02,"wave":"noise"}],
+  "flock.bleat":[{"at":0,"hz":520,"endHz":470,"duration":0.4,"gain":0.1,"wave":"sawtooth"}]}},
+ "skin":{"id":"wool-95","name":"Wool 95","extends":"frontier-95","activate":true,"tokens":{"color.titlebar":"#8a7f6a","color.selection":"#8a7f6a"},"strings":{"build.menuTitle":"Graze","ticker.label":"Baa News »"},"css":".fetch-note { color: #8a7f6a; }"}}
 ```
 8. A new disaster with one card (it rolls on its own after day 30).
 ```json

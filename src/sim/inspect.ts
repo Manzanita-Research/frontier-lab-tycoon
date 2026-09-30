@@ -31,6 +31,8 @@ export interface Inspect {
   history: [string, string, string];
   /** FLT-33: the faction they side with (the crowd they came with, for a protester). Absent for nobody's. */
   faction?: string;
+  /** FLT-56: a protester's crowd (their faction's colours), absent for the water crowd. */
+  crowd?: string;
 }
 
 const plural = (n: number, one: string, many: string) => (n === 1 ? `1 ${one}` : `${n} ${many}`);
@@ -117,5 +119,6 @@ export function inspectWalker(state: GameState, id: number): Inspect | null {
     thought: state.thoughts.find((t) => t.walkerId === w.id)?.text ?? thoughtOf(state, w),
     history: historyOf(state, w),
     ...((w.crowd ?? w.faction) ? { faction: w.crowd ?? w.faction } : {}),
+    ...(w.crowd ? { crowd: w.crowd } : {}),
   };
 }

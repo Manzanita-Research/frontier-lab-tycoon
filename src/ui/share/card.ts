@@ -570,6 +570,14 @@ function drawPanel(ctx: Ctx, th: CardTheme, e: EndingVM, x: number, y: number, w
   roundRect(ctx, x, cy, lw, 30, 15);
   ctx.fill();
   text(ctx, label, x + 12, cy + 21, `800 17px ${th.ui}`, contrastOn(th.accent));
+  // Lab #2 (FLT-57): beside the pill if it fits, under it if not.
+  if (e.labNumber > 1) {
+    const no = `Lab #${e.labNumber}`;
+    ctx.font = `800 17px ${th.ui}`;
+    const beside = lw + 12 + ctx.measureText(no).width <= w;
+    if (!beside) cy += 34;
+    text(ctx, no, beside ? x + w : x, cy + 21, `800 17px ${th.ui}`, th.dim, beside ? "right" : "left");
+  }
   cy += 46;
   // The era strip.
   const cells = Array.from(e.strip.replace(/️/g, ""));
@@ -594,7 +602,8 @@ function drawPanel(ctx: Ctx, th: CardTheme, e: EndingVM, x: number, y: number, w
   cy += size + 22;
   // The stats.
   const rows = Math.max(1, e.stats.length);
-  const footer = 54;
+  const social = (e.streak ? 30 : 0) + (e.versus ? 26 : 0);
+  const footer = 54 + social;
   const rowH = Math.min(44, (y + h - footer - cy) / rows);
   for (const st of e.stats) {
     ctx.fillStyle = th.line;
@@ -605,9 +614,45 @@ function drawPanel(ctx: Ctx, th: CardTheme, e: EndingVM, x: number, y: number, w
     text(ctx, st.text, x + w, cy + rowH * 0.7, `800 ${Math.round(rowH * 0.62)}px ${th.numbers}`, th.text, "right");
     cy += rowH;
   }
+  // The streak and the head-to-head (FLT-57).
+  let fy = y + h - 54 - social + 4;
+  if (e.streak) {
+    flame(ctx, x, fy, 22);
+    text(ctx, e.streak.text, x + 28, fy + 20, `800 19px ${th.ui}`, th.text);
+    fy += 30;
+  }
+  if (e.versus) {
+    const color = e.versus.verdict === "win" ? "#1f9a4f" : e.versus.verdict === "lose" ? "#d0402f" : th.dim;
+    const t = fit(e.versus.text, w, 1, [17, 15, 13], (str, size) => {
+      ctx.font = `800 ${size}px ${th.ui}`;
+      return ctx.measureText(str).width;
+    });
+    text(ctx, t.lines[0] ?? "", x, fy + 18, `800 ${t.size}px ${th.ui}`, color);
+  }
   // Where to play.
   text(ctx, e.daily ?? "Frontier Lab Tycoon", x, y + h - 26, `800 16px ${th.ui}`, th.text);
   text(ctx, e.daily ? "Same lab, same seed. Beat me." : "A game about running a frontier lab.", x, y + h - 6, `15px ${th.ui}`, th.dim);
+}
+
+/** A flame, painted (an emoji depends on the machine's fonts): `size` tall, its top-left at x, y. */
+function flame(ctx: Ctx, x: number, y: number, size: number) {
+  const tongue = (scale: number, color: string) => {
+    const w = size * 0.8 * scale;
+    const h = size * scale;
+    const cx = x + size * 0.4;
+    const by = y + size;
+    ctx.beginPath();
+    ctx.moveTo(cx, by);
+    ctx.bezierCurveTo(cx - w * 0.6, by, cx - w * 0.55, by - h * 0.5, cx - w * 0.1, by - h);
+    ctx.bezierCurveTo(cx + w * 0.05, by - h * 0.6, cx + w * 0.3, by - h * 0.75, cx + w * 0.3, by - h * 0.55);
+    ctx.bezierCurveTo(cx + w * 0.6, by - h * 0.35, cx + w * 0.55, by, cx, by);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+  };
+  tongue(1, "#f0521c");
+  tongue(0.72, "#ff9d1f");
+  tongue(0.42, "#ffe45c");
 }
 
 /** Black or white, whichever reads on `hex`. */

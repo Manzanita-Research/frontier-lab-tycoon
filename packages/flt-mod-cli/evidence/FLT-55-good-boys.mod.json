@@ -1,0 +1,75 @@
+{
+  "apiVersion": 1,
+  "id": "good-boys",
+  "name": "Good Boys",
+  "version": "1.0.0",
+  "description": "Every protester at the gate is a golden retriever.",
+  "looks": {
+    "protester": {
+      "label": "Golden Retriever",
+      "coats": ["#d9a441", "#e3b45c", "#c98b32", "#edc77a"],
+      "gait": "trot",
+      "signs": ["WOOF LIES", "GOOD BOY TRUTH NOW", "WHO'S A GOOD MODEL", "TREATS NOT TOKENS"],
+      "recipe": [
+        {"shape": "sphere", "size": [0.44, 0.44, 0.9], "at": [0, 0.5, 0], "color": "coat"},
+        {"shape": "sphere", "size": [0.34, 0.34, 0.36], "at": [0, 0.8, 0.46], "color": "coat", "pivot": [0, -0.12, -0.12], "motion": "nod"},
+        {"shape": "box", "size": [0.16, 0.14, 0.2], "at": [0, 0.74, 0.66], "color": "coat", "shade": 0.2, "pivot": [0, -0.06, -0.32], "motion": "nod"},
+        {"shape": "sphere", "size": [0.08, 0.07, 0.07], "at": [0, 0.78, 0.77], "color": "#221710", "pivot": [0, -0.1, -0.43], "motion": "nod"},
+        {"shape": "box", "size": [0.08, 0.24, 0.14], "at": [0.19, 0.76, 0.42], "color": "coat", "shade": -0.3, "pivot": [0, 0.1, 0], "motion": "flop"},
+        {"shape": "box", "size": [0.08, 0.24, 0.14], "at": [-0.19, 0.76, 0.42], "color": "coat", "shade": -0.3, "pivot": [0, 0.1, 0], "motion": "flop"},
+        {"shape": "cylinder", "size": [0.11, 0.34, 0.11], "at": [0.13, 0.17, 0.26], "color": "coat", "pivot": [0, 0.15, 0], "motion": "step"},
+        {"shape": "cylinder", "size": [0.11, 0.34, 0.11], "at": [-0.13, 0.17, 0.26], "color": "coat", "pivot": [0, 0.15, 0], "motion": "step-alt"},
+        {"shape": "cylinder", "size": [0.11, 0.34, 0.11], "at": [0.13, 0.17, -0.26], "color": "coat", "pivot": [0, 0.15, 0], "motion": "step-alt"},
+        {"shape": "cylinder", "size": [0.11, 0.34, 0.11], "at": [-0.13, 0.17, -0.26], "color": "coat", "pivot": [0, 0.15, 0], "motion": "step"},
+        {"shape": "capsule", "size": [0.1, 0.4, 0.1], "at": [0, 0.66, -0.52], "color": "coat", "rotate": [-40, 0, 0], "pivot": [0, -0.15, 0.1], "motion": "wag"}
+      ]
+    }
+  },
+  "audio": {
+    "cues": {
+      "good.woof": [
+        {"at": 0, "hz": 320, "endHz": 520, "duration": 0.05, "gain": 0.12, "wave": "sawtooth"},
+        {"at": 0.05, "hz": 520, "endHz": 220, "duration": 0.12, "gain": 0.12, "wave": "square"}
+      ],
+      "protest.grow": [
+        {"at": 0, "hz": 320, "endHz": 520, "duration": 0.05, "gain": 0.12, "wave": "sawtooth"},
+        {"at": 0.05, "hz": 520, "endHz": 220, "duration": 0.12, "gain": 0.12, "wave": "square"},
+        {"at": 0.25, "hz": 340, "endHz": 540, "duration": 0.05, "gain": 0.12, "wave": "sawtooth"},
+        {"at": 0.3, "hz": 540, "endHz": 230, "duration": 0.12, "gain": 0.12, "wave": "square"}
+      ]
+    }
+  },
+  "content": {
+    "progression": {
+      "override": [
+        {"id": "garage", "level": 1, "name": "Garage", "buildings": ["hall", "cluster"], "staff": [], "systems": ["protests"], "panels": [], "goal": {"text": "Ship your first model", "metric": "models", "target": 1}}
+      ]
+    },
+    "thoughts": {
+      "add": [
+        {"id": "gb-1", "kind": "protester", "when": "always", "text": "Who's a good model? Not yours."},
+        {"id": "gb-2", "kind": "protester", "when": "protest", "text": "Ball. BALL. Also, accountability."},
+        {"id": "gb-3", "kind": "protester", "when": "always", "text": "I have sniffed your training data. Concerning."}
+      ]
+    },
+    "headlines": {
+      "add": [
+        {"id": "gb-h1", "text": "Golden retrievers picket {lab}; demands include belly rubs and a pause", "tone": "joke"},
+        {"id": "gb-h2", "trigger": "protest", "text": "Protest at {lab} escalates to coordinated tail-wagging", "tone": "joke"}
+      ]
+    },
+    "arcs": {
+      "add": [
+        {"id": "gb-arrival", "initial": "waiting", "states": {
+          "waiting": {"on": {"DAY": {"target": "picketing", "actions": [
+            {"type": "discourse.delta", "params": {"amount": 16}},
+            {"type": "toast", "params": {"text": "Good boys have arrived at the gate. They have demands.", "tone": "neutral"}},
+            {"type": "sound.cue", "params": {"cue": "good.woof"}},
+            {"type": "camera.focus", "params": {"on": "gate"}}
+          ]}}},
+          "picketing": {"type": "final"}
+        }}
+      ]
+    }
+  }
+}

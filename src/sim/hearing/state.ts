@@ -35,4 +35,6 @@ export interface HearingState {
   seen: Record<string, number>;
   /** Past hearings, newest last (the last 12). FLT-19 and FLT-22 read the latest. */
   history: HearingRecord[];
+  /** A verdict whose aftermath (FLT-56: the clip, the beat, the burst of headlines) waits for the lab to leave the building. */
+  aftermath?: string;
 }

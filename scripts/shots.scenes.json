@@ -228,6 +228,53 @@
       "auction",
       "auction-broke"
     ],
+    "flt-57": [
+      "end-acquihired",
+      "end-acquihired-almanac",
+      "end-acquihired-phone",
+      "end-card",
+      "end-card-lab2",
+      "end-versus",
+      "end-versus-phone",
+      "friend",
+      "friend-almanac",
+      "friend-phone",
+      "memo-countdown",
+      "memo-countdown-almanac",
+      "memo-race",
+      "memo-slow-phone"
+    ],
+    "flt-55": [
+      "gate",
+      "gate-mod",
+      "gate-phone",
+      "gate-mod-phone",
+      "gate-mod-offer",
+      "gate-mod-skin"
+    ],
+    "circus-juice": [
+      "c56-conga",
+      "c56-conga-phone",
+      "c56-campus",
+      "c56-poach-sirocco",
+      "c56-huddle",
+      "c56-huddle-phone",
+      "c56-plaque",
+      "c56-viral",
+      "c56-viral-phone",
+      "c56-marchers",
+      "c56-marchers-phone",
+      "c56-gate",
+      "c56-gate-karaoke",
+      "c56-statement",
+      "c56-statement-phone",
+      "c56-risk",
+      "c56-risk-phone",
+      "c56-leak",
+      "c56-leak-phone",
+      "c56-leak-senate",
+      "c56-stakes"
+    ],
     "flt63": [
       "flt63-facilities",
       "flt63-run",
@@ -2914,6 +2961,675 @@
         }
       ]
     },
+    "end-acquihired": {
+      "title": "FLT-57: Acqui-hired ends on Found a new lab (three perks), with a 7-day streak",
+      "query": {
+        "warp": null,
+        "moment": "front-acquihired",
+        "streak": 7
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "end-acquihired-almanac": {
+      "title": "FLT-57: the same ending in Field Almanac (the base Ending slot)",
+      "query": {
+        "warp": null,
+        "moment": "front-acquihired",
+        "streak": 7,
+        "skin": "field-almanac"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "end-acquihired-phone": {
+      "title": "FLT-57: Acqui-hired on a phone, scrolled to What now",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "moment": "front-acquihired",
+        "streak": 7
+      },
+      "steps": [
+        {
+          "wait": 7000
+        },
+        {
+          "eval": "() => { const el = document.querySelector('.f95-end-next, .ending-next, .f95-end-run, .ending-side'); if (el) el.scrollIntoView({ block: 'start' }); }"
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "end-card": {
+      "title": "FLT-57: the share card with a streak flame (Frontier 95)",
+      "query": {
+        "warp": null,
+        "moment": "front-acquihired",
+        "streak": 7
+      },
+      "steps": [
+        {
+          "wait": 7000
+        },
+        {
+          "eval": "() => { const img = document.querySelector('.f95-end-card, .ending-card-preview'); if (!img) return; Object.assign(img.style, { position: 'fixed', inset: '0', margin: 'auto', width: 'min(1200px, 100vw)', height: 'auto', zIndex: '9999', boxShadow: '0 0 0 100vmax #222' }); }"
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "end-card-lab2": {
+      "title": "FLT-57: a second lab's share card: Lab #2 and the streak (Field Almanac)",
+      "query": {
+        "warp": null,
+        "moment": "lab2",
+        "streak": 12,
+        "skin": "field-almanac"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        },
+        {
+          "eval": "() => { const img = document.querySelector('.f95-end-card, .ending-card-preview'); if (!img) return; Object.assign(img.style, { position: 'fixed', inset: '0', margin: 'auto', width: 'min(1200px, 100vw)', height: 'auto', zIndex: '9999', boxShadow: '0 0 0 100vmax #222' }); }"
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "end-versus": {
+      "title": "FLT-57: a friend's run on the same seed: the verdict and Keep regulating",
+      "query": {
+        "warp": null,
+        "moment": "front-captured",
+        "seed": 48,
+        "vs": "acquihired.180.60.4",
+        "streak": 3
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "end-versus-phone": {
+      "title": "FLT-57: the verdict on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "moment": "front-captured",
+        "seed": 48,
+        "vs": "acquihired.180.60.4",
+        "streak": 3
+      },
+      "steps": [
+        {
+          "wait": 7000
+        },
+        {
+          "eval": "() => { const el = document.querySelector('.f95-end-next, .ending-next, .f95-end-run, .ending-side'); if (el) el.scrollIntoView({ block: 'start' }); }"
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "friend": {
+      "title": "FLT-57: a friend's link: 'Your friend's lab was Captured on day 212. Beat it?'",
+      "query": {
+        "vs": "captured.212.88.7"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "friend-almanac": {
+      "title": "FLT-57: the friend banner in Field Almanac",
+      "query": {
+        "vs": "captured.212.88.7",
+        "skin": "field-almanac"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "friend-phone": {
+      "title": "FLT-57: the friend banner on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "vs": "captured.212.88.7"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "memo-countdown": {
+      "title": "FLT-57: The Memo, three days out (Frontier 95: a very slow file copy)",
+      "query": {
+        "warp": null,
+        "moment": "memo-countdown"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "memo-countdown-almanac": {
+      "title": "FLT-57: The Memo's countdown in Field Almanac",
+      "query": {
+        "warp": null,
+        "moment": "memo-countdown",
+        "skin": "field-almanac"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "memo-race": {
+      "title": "FLT-57: after the Memo: the Race extra edition, three staff quoted",
+      "query": {
+        "warp": null,
+        "moment": "memo-race"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "memo-slow-phone": {
+      "title": "FLT-57: the Slow Down extra edition on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "moment": "memo-slow"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "gate": {
+      "title": "FLT-55: the gate with protesters, no mod (the base game: must be unchanged)",
+      "query": {
+        "discourse": 32,
+        "focus": "12.5,20",
+        "zoom": 80,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "skipTutorial"
+            }
+          }
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "gate-mod": {
+      "title": "FLT-55: the same gate with ?mod= golden retrievers (main applies the mod's content only; the branch draws its looks)",
+      "query": {
+        "discourse": 32,
+        "focus": "12.5,20",
+        "zoom": 80,
+        "skin": "frontier-95",
+        "mod": "/mods/examples/golden-retriever-protest/mod.json"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "skipTutorial"
+            }
+          }
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "gate-phone": {
+      "title": "FLT-55: the gate on a phone, no mod",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "discourse": 32,
+        "focus": "12.5,20",
+        "zoom": 70,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "skipTutorial"
+            }
+          }
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "gate-mod-phone": {
+      "title": "FLT-55: the gate on a phone with ?mod= golden retrievers",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "discourse": 32,
+        "focus": "12.5,20",
+        "zoom": 70,
+        "skin": "frontier-95",
+        "mod": "/mods/examples/golden-retriever-protest/mod.json"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "skipTutorial"
+            }
+          }
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "gate-mod-offer": {
+      "title": "FLT-55: a mod that asks for its skin: the Found New Skin box (no ?skin=)",
+      "query": {
+        "discourse": 32,
+        "focus": "12.5,20",
+        "zoom": 80,
+        "skin": null,
+        "mod": "/mods/examples/golden-retriever-protest/mod.json"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "skipTutorial"
+            }
+          }
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "gate-mod-skin": {
+      "title": "FLT-55: ?skin=good-boy-95, the mod's skin (Fetch, Sit/Walkies/Zoomies, Bark Bark News)",
+      "query": {
+        "discourse": 32,
+        "focus": "12.5,20",
+        "zoom": 80,
+        "skin": "good-boy-95",
+        "mod": "/mods/examples/golden-retriever-protest/mod.json"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "skipTutorial"
+            }
+          }
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "c56-conga": {
+      "title": "FLT-56: the star walks out, and the team follows in a conga line (camera beat)",
+      "query": {
+        "warp": null,
+        "moment": "defection-exit",
+        "beat": 1
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "c56-conga-phone": {
+      "title": "FLT-56: the conga beat on a phone",
+      "query": {
+        "warp": null,
+        "moment": "defection-exit",
+        "beat": 1
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 1200
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "c56-campus": {
+      "title": "FLT-56: the neo lab's campus beyond the fence, balloon and empty plinth",
+      "query": {
+        "warp": null,
+        "moment": "defection-arena",
+        "leapfrog": "off",
+        "focus": "16,25",
+        "zoom": 70
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "c56-poach-sirocco": {
+      "title": "FLT-56: a poaching offer in Sirocco's own voice",
+      "query": {
+        "warp": null,
+        "moment": "poach-offer:sirocco",
+        "leapfrog": "off"
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "c56-huddle": {
+      "title": "FLT-56: the auditors huddle before the report (camera beat)",
+      "query": {
+        "warp": null,
+        "scenario": "midgame",
+        "seed": 48,
+        "moment": "audit-huddle",
+        "beat": 1
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "c56-huddle-phone": {
+      "title": "FLT-56: the huddle beat on a phone",
+      "query": {
+        "warp": null,
+        "scenario": "midgame",
+        "seed": 48,
+        "moment": "audit-huddle",
+        "beat": 1
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "c56-plaque": {
+      "title": "FLT-56: the grade plaque by the gate, two days after the report",
+      "query": {
+        "warp": null,
+        "scenario": "midgame",
+        "seed": 48,
+        "moment": "audit-graded",
+        "focus": "14.3,24.3",
+        "zoom": 110
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "c56-viral": {
+      "title": "FLT-56: the hearing clip goes viral (camera beat, ticker burst, Network Traffic)",
+      "query": {
+        "warp": null,
+        "moment": "hearing-viral",
+        "beat": 1
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "c56-viral-phone": {
+      "title": "FLT-56: the viral beat on a phone",
+      "query": {
+        "warp": null,
+        "moment": "hearing-viral",
+        "beat": 1
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "c56-gate": {
+      "title": "FLT-56: marchers in their faction's colours and signs, and the gate legend with its Statement buttons",
+      "query": {
+        "moment": "counterprotest",
+        "zoom": 80,
+        "focus": "12,21"
+      },
+      "steps": [
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "c56-gate-karaoke": {
+      "title": "FLT-56: the gate legend in a base-slot skin (Karaoke Night)",
+      "query": {
+        "moment": "counterprotest",
+        "skin": "karaoke-night"
+      },
+      "steps": [
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "c56-statement": {
+      "title": "FLT-56: Comms issues a statement to the Doomers (camera beat at the gate)",
+      "query": {
+        "warp": null,
+        "moment": "statement",
+        "beat": 1
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "c56-statement-phone": {
+      "title": "FLT-56: the statement beat on a phone",
+      "query": {
+        "warp": null,
+        "moment": "statement",
+        "beat": 1
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "c56-risk": {
+      "title": "FLT-56: the draft's leak-risk meter (Metadata risk) under the clauses",
+      "query": {
+        "moment": "bill",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "c56-risk-phone": {
+      "title": "FLT-56: the draft's leak-risk meter on a phone",
+      "query": {
+        "moment": "bill",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "c56-leak": {
+      "title": "FLT-56: a reporter is asking about the file (camera beat with a Bury button)",
+      "query": {
+        "moment": "bill-leak",
+        "warp": null,
+        "beat": 1
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "c56-leak-phone": {
+      "title": "FLT-56: the leak-warning beat on a phone",
+      "query": {
+        "moment": "bill-leak",
+        "warp": null,
+        "beat": 1
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "c56-leak-senate": {
+      "title": "FLT-56: the law's row in the Senate window: the reporter's clock and Bury it",
+      "query": {
+        "moment": "bill-leak",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 600
+        },
+        {
+          "click": "[data-testid=\"start-button\"]",
+          "optional": true
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": "[data-coach=\"build:senate\"]",
+          "optional": true
+        },
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "c56-stakes": {
+      "title": "FLT-56: a small motion with stakes (what passing and failing do), on the whip card",
+      "query": {
+        "moment": "vote",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "c56-marchers": {
+      "title": "FLT-56 review: the counter-protest at the default zoom in photo mode (no legend), caps and boards in each faction's colour",
+      "query": {
+        "moment": "counterprotest",
+        "focus": "12,21",
+        "photo": 1
+      },
+      "steps": [
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "c56-marchers-phone": {
+      "title": "FLT-56 review: the counter-protest at the default zoom, in photo mode on a phone",
+      "query": {
+        "moment": "counterprotest",
+        "focus": "12,21",
+        "photo": 1
+      },
+      "steps": [
+        {
+          "wait": 600
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
     "flt63-facilities": {
       "title": "FLT-63: Start ▸ Facilities ▸ open (the buildings, grouped)",
       "steps": [
@@ -2987,7 +3703,32 @@
           "wait": 300
         },
         {
-          "drag": [[12, 21], [12, 20], [12, 19], [12, 18], [12, 17], [12, 16]],
+          "drag": [
+            [
+              12,
+              21
+            ],
+            [
+              12,
+              20
+            ],
+            [
+              12,
+              19
+            ],
+            [
+              12,
+              18
+            ],
+            [
+              12,
+              17
+            ],
+            [
+              12,
+              16
+            ]
+          ],
           "hold": true
         },
         {

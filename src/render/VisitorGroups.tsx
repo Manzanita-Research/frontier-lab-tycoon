@@ -56,7 +56,8 @@ export function VisitorGroups() {
     for (const g of w.groups ?? []) {
       const look = groupKind(g.kind)?.look;
       const phase = g.machine.value;
-      const standing = phase === "inspecting" || phase === "evaluating";
+      const huddling = phase === "huddling";
+      const standing = phase === "inspecting" || phase === "evaluating" || huddling;
       for (const m of g.members) {
         if (n >= CAP) break;
         const x = m.px + (m.x - m.px) * a - HALF;
@@ -65,24 +66,26 @@ export function VisitorGroups() {
         const p = m.id * 1.7;
         const bob = (moving ? Math.abs(Math.sin(t * 10 + p)) * 0.045 : Math.sin(t * 1.3 + p) * 0.01) * S;
         // At a stop: scribble. The clipboard dips and shakes, the head nods at it.
-        const write = standing ? Math.max(0, Math.sin(t * 2.2 + p)) : 0;
-        const nod = standing ? 0.18 + write * 0.2 : 0;
+        // In a huddle (FLT-56) they lean in and write twice as fast.
+        const write = standing ? Math.max(0, Math.sin(t * (huddling ? 4.4 : 2.2) + p)) : 0;
+        const nod = standing ? 0.18 + write * 0.2 + (huddling ? 0.2 : 0) : 0;
+        const lean = huddling ? 0.22 : 0;
         const yaw = m.dir;
         const fx = Math.sin(yaw);
         const fz = Math.cos(yaw);
         const i = n++;
-        set(body.current, i, x, 0.26 * S + bob, z, yaw);
+        set(body.current, i, x, 0.26 * S + bob, z, yaw, lean);
         body.current?.setColorAt(i, colorOf(look, "shirt", "#f3efe4"));
-        set(vest.current, i, x, 0.33 * S + bob, z, yaw);
+        set(vest.current, i, x + fx * lean * 0.08, 0.33 * S + bob, z + fz * lean * 0.08, yaw, lean);
         vest.current?.setColorAt(i, colorOf(look, "vest", "#39b54a"));
-        set(stripe.current, i, x, 0.3 * S + bob, z, yaw);
+        set(stripe.current, i, x + fx * lean * 0.07, 0.3 * S + bob, z + fz * lean * 0.07, yaw, lean);
         stripe.current?.setColorAt(i, colorOf(look, "stripe", "#e9f36a"));
-        set(head.current, i, x + fx * nod * 0.12, 0.66 * S + bob, z + fz * nod * 0.12, yaw, nod);
+        set(head.current, i, x + fx * (nod * 0.12 + lean * 0.3), (0.66 - lean * 0.08) * S + bob, z + fz * (nod * 0.12 + lean * 0.3), yaw, nod);
         head.current?.setColorAt(i, skins[(m.id * 5) % skins.length]!);
         // The clipboard: out in front at chest height, tilted up to read; lower and shaking while they write.
         const reach = 0.21 * S;
         const by = (standing ? 0.42 - write * 0.03 : 0.38) * S + bob;
-        const shake = standing ? Math.sin(t * 22 + p) * 0.04 * write : 0;
+        const shake = standing ? Math.sin(t * (huddling ? 30 : 22) + p) * 0.04 * write : 0;
         const bx = x + fx * reach + Math.cos(yaw) * 0.05 * S;
         const bz = z + fz * reach - Math.sin(yaw) * 0.05 * S;
         const tilt = standing ? -0.75 : -0.35;
