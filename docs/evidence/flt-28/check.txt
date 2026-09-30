@@ -1,0 +1,167 @@
+
+> frontier-lab-tycoon@0.0.0 check /root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_ycybuwshp6-1/project-proj-dvb9hes55f
+> pnpm typecheck && pnpm test && pnpm build
+
+
+> frontier-lab-tycoon@0.0.0 typecheck /root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_ycybuwshp6-1/project-proj-dvb9hes55f
+> tsc --noEmit && pnpm --filter @flt/mod-sdk typecheck
+
+
+> @flt/mod-sdk@0.0.0 typecheck /root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_ycybuwshp6-1/project-proj-dvb9hes55f/packages/flt-mod-sdk
+> tsc --noEmit -p tsconfig.json
+
+
+> frontier-lab-tycoon@0.0.0 test /root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_ycybuwshp6-1/project-proj-dvb9hes55f
+> vitest run && node --test packages/flt-mod-cli/*.test.mjs
+
+
+ RUN  v5.0.2 /root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_ycybuwshp6-1/project-proj-dvb9hes55f
+
+
+ Test Files  46 passed (46)
+      Tests  598 passed (598)
+   Start at  04:59:19
+   Duration  124.89s (tests 65%, import 31%, transform 4%, worker 1%)
+
+    Isolate  46 workers spawned · ~226ms startup each (spawn + environment, per file)
+             at least ~10.15s faster with isolate: false — reuses workers across files instead of one per file
+
+TAP version 13
+# [vite] connected.
+# Subtest: private modder kit works against the actual game contract
+    # Subtest: both M1a examples replay 365 actual days
+    ok 1 - both M1a examples replay 365 actual days
+      ---
+      duration_ms: 8171.074659
+      type: 'test'
+      ...
+    # Subtest: SDK, typed template and every section validate
+    ok 2 - SDK, typed template and every section validate
+      ---
+      duration_ms: 1400.425
+      type: 'test'
+      ...
+    # Subtest: skill's ten JSON examples are actual valid manifests
+    ok 3 - skill's ten JSON examples are actual valid manifests
+      ---
+      duration_ms: 60.868657
+      type: 'test'
+      ...
+    # Subtest: scaffold test command and inlined bundle work outside the workspace
+    ok 4 - scaffold test command and inlined bundle work outside the workspace
+      ---
+      duration_ms: 1341.309141
+      type: 'test'
+      ...
+# [vite] connected.
+# [vite] connected.
+    # Subtest: dev serves CORS JSON, rereads edits and confines files
+    ok 5 - dev serves CORS JSON, rereads edits and confines files
+      ---
+      duration_ms: 127.108222
+      type: 'test'
+      ...
+    # Subtest: installed workspace bins run through pnpm's symlink paths
+    ok 6 - installed workspace bins run through pnpm's symlink paths
+      ---
+      duration_ms: 7412.741066
+      type: 'test'
+      ...
+    1..6
+ok 1 - private modder kit works against the actual game contract
+  ---
+  duration_ms: 18643.246085
+  type: 'test'
+  ...
+# Subtest: graph explores guarded alternatives, nesting and ancestor transitions
+ok 2 - graph explores guarded alternatives, nesting and ancestor transitions
+  ---
+  duration_ms: 3.710027
+  type: 'test'
+  ...
+1..2
+# tests 8
+# suites 0
+# pass 8
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 19354.680895
+
+> frontier-lab-tycoon@0.0.0 build /root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_ycybuwshp6-1/project-proj-dvb9hes55f
+> tsc --noEmit && vite build
+
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 1173 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                                      0.49 kB │ gzip:   0.31 kB
+dist/assets/pixelify-sans-latin-400-normal-DLrIX9QE.woff2            7.69 kB
+dist/assets/w95fa-DxtS-rFC.woff2                                     7.88 kB
+dist/assets/pixelify-sans-latin-700-normal-D3Xxx3QE.woff2            7.90 kB
+dist/assets/figtree-latin-700-normal-th6qEP7c.woff2                 11.38 kB
+dist/assets/figtree-latin-400-normal-g7Dtegnw.woff2                 11.38 kB
+dist/assets/jersey-10-latin-400-normal-DrL73VYW.woff2               13.28 kB
+dist/assets/nunito-latin-700-normal-Dort48En.woff2                  16.23 kB
+dist/assets/nunito-latin-800-normal-Dz8SOQK_.woff2                  16.52 kB
+dist/assets/nunito-latin-600-normal-Br8yIETf.woff2                  16.56 kB
+dist/assets/nunito-latin-900-normal-BVB1fGs6.woff2                  16.68 kB
+dist/assets/tinos-latin-400-normal-rilFpyjL.woff2                   17.85 kB
+dist/assets/vt323-latin-400-normal-wDgJuOC9.woff2                   17.94 kB
+dist/assets/fraunces-latin-400-normal-6IfK1voy.woff2                17.97 kB
+dist/assets/fraunces-latin-700-normal-CEOla-zY.woff2                18.21 kB
+dist/assets/tinos-latin-700-normal-qGf2y18O.woff2                   18.90 kB
+dist/assets/comic-neue-latin-700-normal-NE4Vcoll.woff2              19.24 kB
+dist/assets/comic-neue-latin-400-normal-BdhG8RSD.woff2              19.57 kB
+dist/assets/nunito-latin-700-normal-OcDqTBcA.woff                   19.99 kB
+dist/assets/nunito-latin-800-normal-D-J0wlBY.woff                   20.36 kB
+dist/assets/nunito-latin-900-normal-CVn49sIn.woff                   20.47 kB
+dist/assets/nunito-latin-600-normal-Cd0eNu1l.woff                   20.49 kB
+dist/assets/jetbrains-mono-latin-400-normal-V6pRDFza.woff2          21.17 kB
+dist/assets/jetbrains-mono-latin-700-normal-BYuf6tUa.woff2          21.91 kB
+dist/assets/bricolage-grotesque-latin-400-normal-A6LyuA6R.woff2     22.36 kB
+dist/assets/bricolage-grotesque-latin-700-normal-gtcctNPv.woff2     22.38 kB
+dist/assets/preview-C0wdYnFC.jpg                                    32.24 kB
+dist/assets/preview-Cp_EBMvB.jpg                                    33.59 kB
+dist/assets/preview-CR6vLLsc.jpg                                    34.79 kB
+dist/assets/preview-BqvhgOYe.jpg                                    35.48 kB
+dist/assets/preview-JLEOhQHT.jpg                                    35.80 kB
+dist/assets/preview-FVCwR5ne.jpg                                    36.75 kB
+dist/assets/index-BDmhxJl0.css                                      56.49 kB │ gzip:  12.56 kB
+dist/assets/w95fa-CloBxLX4.js                                        0.06 kB │ gzip:   0.08 kB
+dist/assets/tinos-latin-400-normal-CGki6lLT.js                       0.08 kB │ gzip:   0.10 kB
+dist/assets/tinos-latin-700-normal-C3a1gDVj.js                       0.08 kB │ gzip:   0.10 kB
+dist/assets/vt323-latin-400-normal-Cb9HH0kt.js                       0.08 kB │ gzip:   0.10 kB
+dist/assets/figtree-latin-400-normal-DAgvdur_.js                     0.08 kB │ gzip:   0.10 kB
+dist/assets/figtree-latin-700-normal-BI6WsTE6.js                     0.08 kB │ gzip:   0.10 kB
+dist/assets/fraunces-latin-400-normal-C4wo1MNs.js                    0.08 kB │ gzip:   0.10 kB
+dist/assets/fraunces-latin-700-normal-BaaHg6b3.js                    0.08 kB │ gzip:   0.10 kB
+dist/assets/jersey-10-latin-400-normal-wiOXW4kA.js                   0.08 kB │ gzip:   0.10 kB
+dist/assets/jersey-10-latin-400-normal-Cqlej-y9.js                   0.08 kB │ gzip:   0.10 kB
+dist/assets/jersey-10-latin-400-normal-B_E5JS1R.js                   0.08 kB │ gzip:   0.10 kB
+dist/assets/jersey-10-latin-400-normal-GOyOg-r9.js                   0.08 kB │ gzip:   0.10 kB
+dist/assets/comic-neue-latin-400-normal-D7M9W_jn.js                  0.08 kB │ gzip:   0.10 kB
+dist/assets/comic-neue-latin-700-normal-C-X42g8L.js                  0.08 kB │ gzip:   0.10 kB
+dist/assets/pixelify-sans-latin-400-normal-Df2de7J1.js               0.09 kB │ gzip:   0.11 kB
+dist/assets/pixelify-sans-latin-700-normal-CJoeRrm5.js               0.09 kB │ gzip:   0.11 kB
+dist/assets/jetbrains-mono-latin-400-normal-O3LrBRVL.js              0.09 kB │ gzip:   0.11 kB
+dist/assets/jetbrains-mono-latin-700-normal-DSxuREiw.js              0.09 kB │ gzip:   0.10 kB
+dist/assets/bricolage-grotesque-latin-400-normal-BQWte9S0.js         0.09 kB │ gzip:   0.11 kB
+dist/assets/bricolage-grotesque-latin-700-normal-MUEMjYzE.js         0.09 kB │ gzip:   0.11 kB
+dist/assets/skin-BNnSF2_-.js                                         1.83 kB │ gzip:   0.67 kB
+dist/assets/skin-CSw0Gyz3.js                                         1.92 kB │ gzip:   0.63 kB
+dist/assets/skin-BOdUDGIp.js                                         1.99 kB │ gzip:   0.58 kB
+dist/assets/skin-DKpXs2wE.js                                         2.16 kB │ gzip:   0.62 kB
+dist/assets/skin-BNeW4dZG.js                                         2.33 kB │ gzip:   0.55 kB
+dist/assets/skin-Bzj2EwfJ.js                                        42.20 kB │ gzip:   7.50 kB
+dist/assets/slots-CPv5tRt8.js                                       53.59 kB │ gzip:  14.21 kB
+dist/assets/PhotoFX-V7ESz5eB.js                                     88.81 kB │ gzip:  24.95 kB
+dist/assets/index-CVadi2bc.js                                    1,849.35 kB │ gzip: 556.74 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 11.54s

@@ -19,6 +19,6 @@ Normal ticks with Release Leapfrog on; the bot builds revenue, compute, halls an
 
 Seed 1 Selective replay: complete JSON World equal.
 
-30-paper daily driver: 949.8 µs/day; view: 7.2 µs/snapshot. Measured on 1-vCPU Modal; daily budget 6 ms (doubled under CI). No per-tick publication work.
+30-paper daily driver: 854.1 µs/day; view: 13.9 µs/snapshot. Measured on 1-vCPU Modal; daily budget 6 ms (doubled under CI). No per-tick publication work.
 
 Closed retains drafts and accumulates publication pressure for FLT-26. Explicit publish commands can override defaults. Best-paper awards exist in the snapshot; the campus trophy and papers panel belong to the following UI task.
