@@ -94,6 +94,32 @@ describe("app machine", () => {
     }).pipe(provide(handle));
   });
 
+  it.effect("a spending proposal pauses at the chosen speed, then cancellation resumes without a catch-up bill", () => {
+    const handle = new SimHandle(createInitialState(1));
+    handle.world.cash = 100_000;
+    handle.applyNow([{ type: "skipTutorial" }]);
+    return Effect.gen(function* () {
+      const { actor, sim, pump } = yield* boot(3);
+      yield* pump(1); // let the manual frame stream subscribe before queuing the proposal
+      yield* send(actor, { type: "COMMAND", command: { type: "hire", job: "sre" } });
+      yield* pump(4);
+      expect(actor.getSnapshot().context.snap.pendingConfirm?.kind).toBe("hire");
+      const heldAt = sim.world.tick;
+      const cash = sim.world.cash;
+      yield* pump(80);
+      expect(sim.world.tick).toBe(heldAt);
+      expect(sim.world.cash).toBe(cash);
+      expect(sim.world.staff).toHaveLength(0);
+      expect(actor.getSnapshot().context.speed).toBe(3);
+      yield* send(actor, { type: "COMMAND", command: { type: "cancelConfirm" } });
+      yield* pump(4);
+      expect(actor.getSnapshot().context.snap.pendingConfirm).toBeNull();
+      expect(sim.world.tick - heldAt).toBeGreaterThan(0);
+      expect(sim.world.tick - heldAt).toBeLessThanOrEqual(6);
+      expect(actor.getSnapshot().context.speed).toBe(3);
+    }).pipe(provide(handle));
+  });
+
   it.effect("runs 3x speed three ticks per frame and stops advancing when paused", () => {
     const handle = handleFor();
     return Effect.gen(function* () {

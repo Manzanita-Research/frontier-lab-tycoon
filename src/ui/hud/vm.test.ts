@@ -85,7 +85,13 @@ describe("hudViewModel", () => {
 
   it("describes the objectives", () => {
     expect(vm.objectives.total).toBe(3);
-    expect(vm.objectives.items.every((g) => g.progress.length > 0 && g.ratio >= 0 && g.ratio <= 1)).toBe(true);
+    expect(vm.objectives.items.every((g) => g.ratio >= 0 && g.ratio <= 1)).toBe(true);
+    // The release goal names the run in flight and carries its own count, so it has no separate progress line.
+    const release = vm.objectives.items.find((g) => g.id === "release")!;
+    expect(release.label).toBe(input.snap.releaseGoal);
+    expect(release.label).toMatch(/^Ship 3 models \(\d\/3\), next: /);
+    expect(release.progress).toBe("");
+    expect(vm.objectives.items.filter((g) => g.id !== "release").every((g) => g.progress.length > 0)).toBe(true);
     expect(vm.objectives.daysLeft).toBeGreaterThan(0);
   });
 

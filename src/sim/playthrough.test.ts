@@ -13,6 +13,7 @@ import { createInitialState } from "./state";
 import { countOf, findSpot, layPaths } from "./testkit";
 import { TICKS_PER_DAY, tick } from "./tick";
 import type { GameState } from "./types";
+import { pendingConfirmOf } from "./guardrails";
 
 const RESERVE = 400_000;
 
@@ -54,7 +55,13 @@ export function playBot(seed: number, opts: { halls?: number; days?: number; kee
   for (let i = 0; i < maxTicks && outcomeOf(s) !== "lost"; i++) {
     const cmds: Command[] = [];
     const open = openEventOf(s);
-    if (open) {
+    // This established growth bot approves its planned spending while preserving the cash reserve.
+    // The separate first-run pacing bot declines confirmations rather than playing this aggressively.
+    if (pendingConfirmOf(s)) {
+      const pending = pendingConfirmOf(s)!;
+      cmds.push(s.cash >= pending.cost + RESERVE ? { ...pending.command, confirmed: true } : { type: "cancelConfirm" });
+    }
+    else if (open) {
       cards[open.id] = (cards[open.id] ?? 0) + 1;
       cmds.push({ type: "chooseEvent", eventId: open.id, choiceIndex: choice(s, open.id) });
     } else if (i % (TICKS_PER_DAY * 4) === 2) {

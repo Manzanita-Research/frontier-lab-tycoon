@@ -52,6 +52,10 @@ export interface FixtureOptions {
   photo?: boolean;
   staff?: boolean;
   outcome?: "won" | "lost" | null;
+  /** A spend waiting for a yes or a no. */
+  confirm?: boolean;
+  /** Standing warnings. */
+  warnings?: string[];
   width?: number;
   height?: number;
   skins?: Partial<SkinPickerVM>;
@@ -61,7 +65,10 @@ export function fixtureSnapshot(o: FixtureOptions = {}): Snapshot {
   const w = o.world ?? fixtureWorld();
   const selected = o.selected === undefined ? (w.walkers.find((x) => x.kind === "researcher")?.id ?? null) : o.selected;
   const snap = makeSnapshot(w, undefined, { selected, follow: false, highlight: null });
-  return { ...snap, event: o.event ? { id: o.event, day: snap.day } : snap.event, outcome: o.outcome ?? snap.outcome };
+  const pendingConfirm = o.confirm
+    ? { kind: "hire" as const, cost: 4_000, runwayAfter: 1.8, message: "This leaves 1.8 months of runway. The board will have questions.", command: { type: "hire" as const, job: "sre" as const } }
+    : snap.pendingConfirm;
+  return { ...snap, event: o.event ? { id: o.event, day: snap.day } : snap.event, outcome: o.outcome ?? snap.outcome, pendingConfirm, warnings: o.warnings ?? snap.warnings };
 }
 
 export function fixtureInput(o: FixtureOptions = {}): HudInput {

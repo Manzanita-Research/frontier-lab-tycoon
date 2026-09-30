@@ -10,6 +10,7 @@ try {
   const { pacingCommands } = await server.ssrLoadModule("/src/sim/pacing.ts");
   const { openEventOf } = await server.ssrLoadModule("/src/sim/events.ts");
   const { runwayMonths } = await server.ssrLoadModule("/src/sim/format.ts");
+  const { pendingConfirmOf } = await server.ssrLoadModule("/src/sim/guardrails.ts");
   const rows = [];
   const milestones = [];
   for (const seed of [1, 2, 3]) {
@@ -19,7 +20,7 @@ try {
       const open = openEventOf(s);
       if (open) { events++; firstEvent ??= s.day; }
       const daily = s.day !== lastDay;
-      const cmds = open || daily ? pacingCommands(s) : [];
+      const cmds = open || daily || pendingConfirmOf(s) ? pacingCommands(s) : [];
       lastDay = s.day;
       tick(s, cmds);
       minimumCash = Math.min(minimumCash, s.cash);
@@ -32,7 +33,7 @@ try {
     }
     milestones.push(`- Seed ${seed}: first release day ${firstRelease}; first card day ${firstEvent}; minimum cash $${(minimumCash / 1e6).toFixed(2)}M; ${events} cards in year 1.`);
   }
-  const report = `# FLT-16 pacing report\n\nThree seeds × 365 days, clean starts, all builds and wages paid. At 1× a day takes 6 seconds; days 10, 50 and 100 are minutes 1, 5 and 10 of running time. Menus/tutorial reading add real time and do not consume runway. The bot lays connected paths, builds hall day 10 / gateway day 13, hires SRE day 15, adds needs buildings and demos, and keeps a $400K construction reserve. It bids low at compute auctions, powers any won Datacenter, and answers other cards sensibly; no debug knobs, free buildings or injected visitors.\n\n${milestones.join("\n")}\n\n| Seed | Day | Cash | Runway | Visitors | Researchers | Capability | Cards so far |\n|---|---:|---:|---:|---:|---:|---:|---:|\n${rows.map(row => `| ${row.join(" | ")} |`).join("\n")}\n`;
+  const report = `# FLT-16 pacing report\n\nThree seeds × 365 days, clean starts, all builds and wages paid. At 1× a day takes 6 seconds; days 10, 50 and 100 are minutes 1, 5 and 10 of running time. Menus/tutorial reading add real time and do not consume runway. The bot lays connected paths, builds hall day 10 / gateway day 13, hires SRE day 15, adds needs buildings and demos, and keeps a $400K construction reserve. It declines any proposal below three months of runway. It bids low at compute auctions, powers any won Datacenter, and answers other cards sensibly; no debug knobs, free buildings or injected visitors.\n\n${milestones.join("\n")}\n\n| Seed | Day | Cash | Runway | Visitors | Researchers | Capability | Cards so far |\n|---|---:|---:|---:|---:|---:|---:|---:|\n${rows.map(row => `| ${row.join(" | ")} |`).join("\n")}\n`;
   console.log(report);
   const outIndex = process.argv.indexOf("--out");
   if (outIndex >= 0) { const out = process.argv[outIndex + 1]; await mkdir(dirname(out), { recursive: true }); await writeFile(out, report); }

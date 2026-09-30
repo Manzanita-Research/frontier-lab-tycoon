@@ -24,6 +24,8 @@ describe("pauseReasonOf", () => {
     expect(pauseReasonOf(ctx({ selected: 4 }))).toBe("inspector");
     expect(pauseReasonOf(ctx({ event: { id: "waterDiscourse", day: 3 } }))).toBe("card");
     expect(pauseReasonOf(ctx({ outcome: "won" }))).toBe("card");
+    // A spend waiting for a yes or a no is a card too: it says "Paused" itself.
+    expect(pauseReasonOf(ctx({ snap: { ...campus, pendingConfirm: { kind: "hire", cost: 4000, runwayAfter: 1.8, message: "m", command: { type: "hire", job: "sre" } } } }))).toBe("card");
     expect(pauseReasonOf(ctx({ outcome: "won", outcomeDismissed: true }))).toBeNull();
   });
 

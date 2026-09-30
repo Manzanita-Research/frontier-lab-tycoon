@@ -4,20 +4,22 @@ import { chooseEvent } from "./events";
 import { addToast, pushNews } from "./news";
 import { clearSlop } from "./slop";
 import { canHire, clearZone, fire, hire, paintZone } from "./staff";
-import { buildingAt, edgeTiles, inBounds, isPathTile, rectContains, rectsOverlap, tileIndex } from "./pathfind";
+import { buildingAt, edgeTiles, inBounds, isPathTile, rectContains, rectsOverlap, tileIndex, gateAccessTiles } from "./pathfind";
+import { guardSpending, clearConfirm, hallBuilt } from "./guardrails";
 import type { Rng } from "./rng";
 import type { GameState, Rect, StaffJob } from "./types";
 import { continueTutorial } from "./tutorial";
 
 export type Command =
-  | { type: "placePath"; x: number; z: number }
-  | { type: "placeBuilding"; kind: BuildingKind; x: number; z: number }
+  | { type: "placePath"; x: number; z: number; confirmed?: boolean }
+  | { type: "placeBuilding"; kind: BuildingKind; x: number; z: number; confirmed?: boolean }
+  | { type: "cancelConfirm" }
   | { type: "bulldoze"; x: number; z: number }
   | { type: "startTraining" }
   | { type: "continueTutorial" }
   | { type: "skipTutorial" }
   /** Put someone on the payroll (FLT-10): they walk in through the gate. */
-  | { type: "hire"; job: StaffJob }
+  | { type: "hire"; job: StaffJob; confirmed?: boolean }
   | { type: "fire"; id: number }
   /** Paint (`on`) or erase one tile of a staffer's patrol zone; `clearZone` wipes it. */
   | { type: "paintZone"; id: number; x: number; z: number; on: boolean }
@@ -48,6 +50,7 @@ export function canPlace(state: GameState, kind: BuildingKind | "path", x: numbe
   const def = BUILDINGS[kind];
   if (!isUnlocked(state, kind)) return no("Win a compute auction to unlock this");
   const rect: Rect = { x, z, w: def.size[0], d: def.size[1] };
+  if (gateAccessTiles(state).some(([gx, gz]) => rectContains(rect, gx, gz))) return no("Keep the entrance access clear; it belongs to the queue to somewhere.");
   if (!inBounds(state, x, z) || !inBounds(state, x + rect.w - 1, z + rect.d - 1)) return no("Out of bounds");
   if (rectsOverlap(rect, state.gate) || state.buildings.some((b) => rectsOverlap(rect, b))) {
     return no("Something's already there");
@@ -60,8 +63,9 @@ export function canPlace(state: GameState, kind: BuildingKind | "path", x: numbe
   return { ok: true };
 }
 
-export function placeBuilding(state: GameState, rng: Rng, kind: BuildingKind, x: number, z: number) {
+export function placeBuilding(state: GameState, rng: Rng, kind: BuildingKind, x: number, z: number, confirmed = false) {
   if (!canPlace(state, kind, x, z).ok) return;
+  if (!guardSpending(state, { type: "placeBuilding", kind, x, z, confirmed })) return;
   const def = BUILDINGS[kind];
   state.cash -= buildPrice(state, kind);
   delete state.flags[`free:${kind}`];
@@ -70,6 +74,7 @@ export function placeBuilding(state: GameState, rng: Rng, kind: BuildingKind, x:
   state.flags.firstBuild ??= state.day;
   const first = state.flags[`built:${kind}`] === undefined;
   state.flags[`built:${kind}`] = state.day;
+  if (kind === "hall") hallBuilt(state);
   if (first) {
     state.hype = Math.min(100, state.hype + 1);
     pushNews(state, rng, `built:${kind}`);
@@ -96,7 +101,7 @@ export function applyCommands(state: GameState, commands: readonly Command[], rn
   for (const c of commands) {
     switch (c.type) {
       case "placePath":
-        if (canPlace(state, "path", c.x, c.z).ok) {
+        if (canPlace(state, "path", c.x, c.z).ok && guardSpending(state, c)) {
           state.cash -= PATH_PRICE;
           state.grid.paths[tileIndex(state, c.x, c.z)] = true;
           state.version++;
@@ -105,7 +110,7 @@ export function applyCommands(state: GameState, commands: readonly Command[], rn
         }
         break;
       case "placeBuilding":
-        placeBuilding(state, rng, c.kind, c.x, c.z);
+        placeBuilding(state, rng, c.kind, c.x, c.z, c.confirmed);
         break;
       case "bulldoze":
         bulldoze(state, c.x, c.z);
@@ -114,10 +119,13 @@ export function applyCommands(state: GameState, commands: readonly Command[], rn
         chooseEvent(state, rng, c.eventId, c.choiceIndex);
         break;
       case "hire":
-        if (canHire(state, c.job).ok) {
+        if (canHire(state, c.job).ok && guardSpending(state, c)) {
           hire(state, c.job);
           if (c.job === "janitor" || c.job === "sre") state.flags.firstSupportHire ??= state.day;
         }
+        break;
+      case "cancelConfirm":
+        clearConfirm(state);
         break;
       case "continueTutorial":
         continueTutorial(state);

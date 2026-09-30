@@ -246,3 +246,20 @@
     padding: 2px;
   }
 }
+
+/* ---- a standing warning ("your entrance isn't connected"): it stays until it is fixed ---- */
+.toast.warn {
+  background: color-mix(in srgb, var(--flt-color-bad) 16%, var(--flt-color-panel));
+  border-color: var(--flt-color-bad);
+  text-align: left;
+  animation: none;
+}
+.confirm-facts {
+  margin: 4px 0 12px;
+  font-size: 14px;
+  color: var(--flt-color-textDim);
+}
+.confirm-card .choices {
+  display: grid;
+  gap: 8px;
+}

@@ -23,7 +23,7 @@ import type { NewsItem, Tone, WalkerKind } from "../../sim/types";
 import { trendOf, VIBES_MAX, WEIGHTS } from "../../sim/vibes";
 import { SKIN_API_VERSION } from "./types";
 import type {
-  ArenaVM, AssistantVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, EditionRowVM, EventVM, HudVM, InspectorVM, NeedVM, NewsroomVM,
+  ArenaVM, AssistantVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HudVM, InspectorVM, NeedVM, NewsroomVM,
   ObjectivesVM, OutcomeVM, PaperVM, PauseReasonVM, PauseVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, ThoughtRowVM, TrainingVM, WalkerKindVM,
 } from "./types";
 
@@ -179,7 +179,9 @@ function objectivesOf(s: Snapshot): ObjectivesVM {
     deadline: formatDate(SCENARIO.deadlineDay),
     items: s.goals.map((g) => {
       const def = goalDefs.get(g.id)!;
-      return { id: g.id, label: def.label, progress: goalProgressText(def, g.value), ratio: Math.max(0, Math.min(1, g.value / g.target)), met: g.met };
+      // The release goal names the run actually training ("Ship 3 models (0/3), next: Frontier-2"), so its own progress line goes.
+      const release = g.id === "release";
+      return { id: g.id, label: release ? s.releaseGoal : def.label, progress: release ? "" : goalProgressText(def, g.value), ratio: Math.max(0, Math.min(1, g.value / g.target)), met: g.met };
     }),
   };
 }
@@ -448,9 +450,12 @@ function photoOf(i: HudInput): PhotoVM {
   };
 }
 
+/** A toast that says what a standing warning already says is the warning: it is shown once. */
+const spokenToasts = (i: HudInput) => i.toasts.filter((t) => !i.snap.warnings.includes(t.text));
+
 /** One standing hint at a time, and none while a toast or the tutorial is talking; the gateway hint is redundant once a toast has said it. */
 function standingHints(i: HudInput): HudVM["hints"] {
-  if (i.toasts.length > 0 || i.snap.assistant) return [];
+  if (spokenToasts(i).length > 0 || i.snap.assistant) return [];
   return !i.snap.hasGateway && !i.toldGateway ? ["gateway"] : i.tapHint ? ["tap"] : [];
 }
 
@@ -466,6 +471,19 @@ function assistantOf(snap: Snapshot): AssistantVM | null {
     paused: a.paused,
     waitingForBuild: snap.firstBuildPending,
     canSkip: a.canSkip,
+  };
+}
+
+function confirmOf(s: Snapshot): ConfirmVM | null {
+  const p = s.pendingConfirm;
+  if (!p) return null;
+  return {
+    kind: p.kind,
+    cost: p.cost,
+    costText: p.cost > 0 ? formatMoney(p.cost) : "free",
+    runwayAfter: p.runwayAfter,
+    runwayText: p.runwayAfter === null ? "∞" : `${p.runwayAfter.toFixed(1)} mo`,
+    message: p.message,
   };
 }
 
@@ -488,11 +506,13 @@ export function hudViewModel(i: HudInput): HudVM {
     staff: staffOf(i),
     bubbles: bubblesOf(i),
     ticker: i.news.slice(-TICKER_ITEMS).map((n) => ({ id: n.id, text: n.text, tone: n.tone })),
-    toasts: i.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })),
+    toasts: spokenToasts(i).map((t) => ({ id: t.id, text: t.text, tone: t.tone })),
     // One hint at a time, and none while a toast is talking; the gateway hint is redundant once a toast has said it.
     hints: standingHints(i),
     assistant: assistantOf(i.snap),
     pause: pauseOf(i.pauseReason),
+    warnings: [...i.snap.warnings],
+    confirm: confirmOf(i.snap),
     event,
     thoughtsPanel: thoughtsOf(i),
     arena: arenaOf(i),

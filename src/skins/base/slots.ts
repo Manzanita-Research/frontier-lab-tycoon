@@ -12,6 +12,7 @@ import { Assistant } from "./slots/Assistant";
 import { BuildBar } from "./slots/BuildBar";
 import { Bubble } from "./slots/Bubble";
 import { EraCard } from "./slots/EraCard";
+import { Confirm } from "./slots/Confirm";
 import { EventCard } from "./slots/EventCard";
 import { FrontPage } from "./slots/FrontPage";
 import { GroupChat } from "./slots/GroupChat";
@@ -36,6 +37,6 @@ import { Layout } from "./Layout";
 
 export const baseSlots: SlotComponents = {
   Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, Bubble, ThoughtsPanel, Ticker, Toast, Assistant,
-  EventCard, Arena, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, NewsControls,
+  EventCard, Confirm, Arena, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, NewsControls,
   NewsArrival, NewsRoom, Mixer,
 };

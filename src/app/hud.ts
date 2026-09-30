@@ -8,8 +8,10 @@ import { computePerDay, trainingEtaDays } from "../sim/training";
 import { openEventOf } from "../sim/events";
 import { opsView, type OpsView } from "../sim/opsView";
 import { raceView, type RaceView } from "../sim/race/view";
-import { outcomeOf } from "../sim/goals";
+import { outcomeOf, releaseGoalText } from "../sim/goals";
+import { estimateLedger } from "../sim/economy";
 import { assistantOf, type AssistantMessage } from "../sim/tutorial";
+import { pendingConfirmOf, persistentWarnings, type PendingConfirm } from "../sim/guardrails";
 import type { Building, GameState, GoalProgress, OpenEvent, Outcome, Pop, Thought, Tone, Vibes } from "../sim/types";
 
 export type Tool = "path" | PlaceableKind | "bulldoze";
@@ -83,6 +85,9 @@ export interface Snapshot {
   ops: OpsView;
   assistant: AssistantMessage | null;
   firstBuildPending: boolean;
+  pendingConfirm: PendingConfirm | null;
+  warnings: string[];
+  releaseGoal: string;
 }
 
 export interface UiToast {
@@ -102,14 +107,15 @@ function speakersOf(s: GameState): Record<number, string> {
 }
 
 export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO_SELECTION): Snapshot {
+  const books = estimateLedger(s);
   return {
     tick: s.tick,
     day: s.day,
     cash: s.cash,
-    net: s.ledger.net,
-    income: s.ledger.income,
-    expenses: s.ledger.expenses,
-    runway: runwayMonths(s.cash, s.ledger.net),
+    net: books.net,
+    income: books.income,
+    expenses: books.expenses,
+    runway: runwayMonths(s.cash, books.net),
     capability: s.capability,
     hype: s.hype,
     vibes: { ...s.vibes },
@@ -140,5 +146,8 @@ export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO
     ops: opsView(s),
     assistant: assistantOf(s),
     firstBuildPending: assistantOf(s) !== null && s.flags.firstBuild === undefined,
+    pendingConfirm: pendingConfirmOf(s),
+    warnings: persistentWarnings(s),
+    releaseGoal: releaseGoalText(s),
   };
 }

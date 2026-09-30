@@ -232,6 +232,12 @@ If your slot needs copy that has no key, write it into the slot (as Frontier 95 
 | `ticker.aria` | News ticker |
 | `hint.gateway` | Build an API Gateway next to a path to start earning. |
 | `hint.tap` | Tap anyone to read their mind. |
+| `confirm.stripe` | Board memo |
+| `confirm.title` | Spend it anyway? |
+| `confirm.cost` | Cost |
+| `confirm.runway` | Runway after |
+| `confirm.ok` | Do it anyway |
+| `confirm.cancel` | Keep the runway |
 | `assistant.title` | Assistant |
 | `assistant.step` | Step {n} of {total} |
 | `assistant.next` | Next |
@@ -331,9 +337,10 @@ A slot is a React component. Each gets **its slice of the view-model plus `actio
 | `Bubble` | `{ bubble, actions }` | **One** thought bubble. The game pins whatever you render to the walker on every frame, so do not position it. **The root element must have the class `bubble`**: photo mode copies it onto the picture. |
 | `ThoughtsPanel` | `{ rows, layout, actions }` | Everybody's thoughts, counted; `actions.highlight(row.key)` lights up who thinks it. On a phone (`layout.compact`) the base folds it to an icon. |
 | `Ticker` | `{ items, actions }` | The news tape. Use `kit`'s `<Marquee items>`. |
-| `Toast` | `{ toast, actions }` | One toast. `toast.tone === "hint"` is a standing hint (not dismissable). |
+| `Toast` | `{ toast, actions }` | One toast. `toast.tone === "hint"` is a standing hint and `"warn"` a standing warning (both not dismissable: a warning like "your entrance isn't connected" stays until it is fixed). Frontier 95 has no `Toasts` dock: its paperclip draws `vm.warnings` itself. |
 | `Assistant` | `{ vm, actions }` | The helper that delivers the guided opening: `vm.assistant` is the current step (`message`, `number` of `total`, `paused` while it waits for **Next**, `canSkip`), and `actions.continueTutorial()` / `actions.skipTutorial()` answer it. Draw the sentence, a Next button while `paused`, and a **Skip tutorial** that never hides. Frontier 95's paperclip hosts toasts in the same balloon (they queue under the message); the base draws a card above the build bar. It is `null` once the tutorial is done or skipped. |
 | `EventCard` | `{ event, actions }` | The modal news card. `actions.choose(event.id, i)`; the 1–3 keys are handled by the game. |
+| `Confirm` | `{ confirm, actions }` | A modal: a spend (a hire, a build, a path) that would leave the lab under three months of runway, held for a yes or a no. `confirm.message`, `costText` and `runwayText` say what it is; `actions.confirmSpend()` goes ahead, `actions.cancelSpend()` keeps the runway (make that the default: focus it, and Escape or a click outside give it). Time is held while it is up. Frontier 95's is a Win95 warning box. |
 | `Arena` | `{ arena, actions }` | The R&D multiplier and era, and the Frontier Arena leaderboard (`arena.open` folded or open; `actions.toggleArena()`). |
 | `EraCard` | `{ era, actions }` | The full-screen era title card. `actions.continueEra()`; Enter, Space and (after 0.7 s) any key work. |
 | `FrontPage` | `{ paper, actions }` | The weekly paper. |
@@ -403,7 +410,7 @@ interface HudVM {
   stats; training; objectives;           // numbers and text, already formatted ("$4.04M", "5.0 mo")
   inspector: InspectorVM | null;         // null when nobody is selected
   buildItems; buildTip;                  // the palette, and the tooltip for the tool in hand
-  speed; bubbles; ticker; toasts; hints; assistant; pause; // assistant: the tutorial step (null when done); pause: whether time is held and why; hints: at most one of "gateway" | "tap", and none while a toast is up (their copy is strings hint.gateway / hint.tap)
+  speed; bubbles; ticker; toasts; hints; assistant; pause; warnings; confirm; // assistant: the tutorial step (null when done); pause: whether time is held and why; warnings: standing problems (`toast` tone "warn" in the base's stack); confirm: a spend waiting for a yes or no; hints: at most one of "gateway" | "tap", and none while a toast is up (their copy is strings hint.gateway / hint.tap)
   event: EventVM | null;                 // a modal card; the era card is separate:
   eraCard: EraCardVM | null;
   thoughtsPanel; arena; outcome;
@@ -414,7 +421,7 @@ interface HudVM {
 
 Numbers come as numbers (`cash.value`) **and** formatted text (`cash.text`), so you can roll an odometer and still have a caption. Colours the game owns (the walker's `portrait.body`, an Arena lab's `color`) come as CSS colour strings.
 
-`HudActions` is everything a skin can ask for: `place(kind)`, `setSpeed(n)`, `togglePause()`, `choose(eventId, i)`, `continueEra()`, `select(id)`, `follow(id, on?)`, `closeInspector()`, `highlight(key)`, the payroll (`closeStaff`, `hire(job)`, `fire(id)`, `paintZone(id | null)`, `clearZone(id)`), `dismissToast(id)`, the tutorial (`continueTutorial()`, `skipTutorial()`), `holdTime(id, open)` (use the kit's `useAutoPause`), `toggleArena()`, `keepPlaying()`, `newLab()`, the news-room ones (`openNews`, `viewNews`, `closeNews`, `skipNews`, `revealChat`), sound (`openMixer`, `closeMixer`, `setMuted`, `setVolume`, `playCue`), photo mode (`setPhoto`, `setPhotoTime`, `takePhoto`) and skins (`openSkinPicker`, `previewSkin`, `applySkin`, `cancelSkinPicker`, `setReducedMotion`). Each is safe to call at any time; the game ignores what does not apply.
+`HudActions` is everything a skin can ask for: `place(kind)`, `setSpeed(n)`, `togglePause()`, `choose(eventId, i)`, `continueEra()`, `select(id)`, `follow(id, on?)`, `closeInspector()`, `highlight(key)`, the payroll (`closeStaff`, `hire(job)`, `fire(id)`, `paintZone(id | null)`, `clearZone(id)`), `dismissToast(id)`, the tutorial (`continueTutorial()`, `skipTutorial()`), the spend check (`confirmSpend()`, `cancelSpend()`), `holdTime(id, open)` (use the kit's `useAutoPause`), `toggleArena()`, `keepPlaying()`, `newLab()`, the news-room ones (`openNews`, `viewNews`, `closeNews`, `skipNews`, `revealChat`), sound (`openMixer`, `closeMixer`, `setMuted`, `setVolume`, `playCue`), photo mode (`setPhoto`, `setPhotoTime`, `takePhoto`) and skins (`openSkinPicker`, `previewSkin`, `applySkin`, `cancelSkinPicker`, `setReducedMotion`). Each is safe to call at any time; the game ignores what does not apply.
 
 Changing the contract: keep changes **additive** (new fields, new actions) and add a fixture to `src/ui/hud/fixtures.ts` + a test in `vm.test.ts`. A breaking change means bumping `SKIN_API_VERSION` and every `skin.json`.
 

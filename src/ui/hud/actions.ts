@@ -39,6 +39,12 @@ export const hudActions: HudActions = {
   dismissToast: (id) => send({ type: "DISMISS_TOAST", id }),
   continueTutorial: () => send({ type: "COMMAND", command: { type: "continueTutorial" } }),
   skipTutorial: () => send({ type: "COMMAND", command: { type: "skipTutorial" } }),
+  // The spend is kept in the snapshot: "do it anyway" sends the same command again, marked confirmed.
+  confirmSpend: () => {
+    const pending = appNow()?.snap.pendingConfirm;
+    if (pending) send({ type: "COMMAND", command: { ...pending.command, confirmed: true } });
+  },
+  cancelSpend: () => send({ type: "COMMAND", command: { type: "cancelConfirm" } }),
   holdTime: (id, open) => send({ type: "SET_OVERLAY", id, open }),
   toggleArena: () => registry.set(arenaOpenAtom, !(registry.get(arenaOpenAtom) ?? arenaOpenByDefault(appNow()?.snap.assistant != null))),
   keepPlaying: () => send({ type: "KEEP_PLAYING" }),

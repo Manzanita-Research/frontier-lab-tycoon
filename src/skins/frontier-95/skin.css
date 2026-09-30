@@ -1231,8 +1231,12 @@
     &.good {
       color: var(--flt-color-good);
     }
-    &.hint {
+    &.hint,
+    &.warn {
       cursor: default;
+    }
+    &.warn {
+      color: var(--flt-color-bad);
     }
     + .f95-toast {
       border-top: 1px dotted #808080;
@@ -1448,6 +1452,10 @@
         color: var(--flt-color-textDim);
       }
     }
+  }
+  .f95-confirm-facts {
+    margin-top: 6px !important;
+    color: var(--flt-color-textDim);
   }
   .f95-paddles {
     display: flex;

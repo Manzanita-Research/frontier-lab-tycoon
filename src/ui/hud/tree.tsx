@@ -14,7 +14,9 @@ export function Docked({ vm, actions }: { vm: HudVM; actions: HudActions }) {
   const { Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, ThoughtsPanel, Ticker, Toast, Assistant, Arena, NewsControls, NewsArrival, PhotoButton } = slots;
   // One toast at a time, the newest winning; a standing hint only shows while nobody is talking.
   const newest = vm.toasts.at(-1);
-  const stack: ToastVM[] = newest ? [newest] : vm.hints.map((h, i): ToastVM => ({ id: -1 - i, text: t(`hint.${h}`), tone: "hint" }));
+  const talking: ToastVM[] = newest ? [newest] : vm.hints.map((h, i): ToastVM => ({ id: -1 - i, text: t(`hint.${h}`), tone: "hint" }));
+  // Standing warnings come first and stay until whatever causes them is fixed.
+  const stack: ToastVM[] = [...vm.warnings.map((text, i): ToastVM => ({ id: -100 - i, text, tone: "warn" })), ...talking];
   const nodes: Record<DockedSlot, ReactNode> = {
     Stats: <Stats stats={vm.stats} layout={vm.layout} actions={actions} />,
     // The "no Training Hall" reminder waits until the opening asks for one: minute zero is a path and a gate, and calm.
@@ -47,10 +49,11 @@ export function Docked({ vm, actions }: { vm: HudVM; actions: HudActions }) {
 }
 
 export function Modals({ vm, actions }: { vm: HudVM; actions: HudActions }) {
-  const { EventCard, EraCard, Outcome, NewsRoom, Mixer, SkinPicker } = useSkin().slots;
+  const { EventCard, Confirm, EraCard, Outcome, NewsRoom, Mixer, SkinPicker } = useSkin().slots;
   return (
     <>
       {vm.event && <EventCard event={vm.event} actions={actions} />}
+      {vm.confirm && <Confirm confirm={vm.confirm} actions={actions} />}
       {vm.eraCard && <EraCard era={vm.eraCard} actions={actions} />}
       {vm.outcome && <Outcome outcome={vm.outcome} actions={actions} />}
       {vm.newsroom.view && <NewsRoom newsroom={vm.newsroom} actions={actions} />}

@@ -1,5 +1,6 @@
 // Message boxes and the paperclip: bubbles, toasts, event cards, the era blue screen, the outcome card, the assistant.
 import { useEffect, useState } from "react";
+import { Dialog } from "../kit";
 import { useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import { Btn, Win } from "./parts";
@@ -25,13 +26,13 @@ export function Bubble({ bubble }: SlotPropsMap["Bubble"]) {
   );
 }
 
-const TONE_ICON = { bad: "warn", good: "info", joke: "info", neutral: "info", hint: "info" } as const;
+const TONE_ICON = { bad: "warn", good: "info", joke: "info", neutral: "info", hint: "info", warn: "warn" } as const;
 
 export function Toast({ toast, actions }: SlotPropsMap["Toast"]) {
-  if (toast.tone === "hint") {
+  if (toast.tone === "hint" || toast.tone === "warn") {
     return (
-      <div className="f95-toast hint">
-        <Ico name="info" size={18} />
+      <div className={`f95-toast ${toast.tone}`} role={toast.tone === "warn" ? "status" : undefined}>
+        <Ico name={TONE_ICON[toast.tone]} size={18} />
         <span>{toast.text}</span>
       </div>
     );
@@ -64,7 +65,9 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
   // One at a time, the newest toast winning; the game only sends a hint while nobody is talking.
   const hints = vm.hints;
   const toasts = vm.toasts.slice(-1);
-  const busy = lesson !== null || toasts.length > 0 || hints.length > 0;
+  // Standing warnings ("your entrance isn't connected") stay in the balloon until they are fixed.
+  const warnings = vm.warnings;
+  const busy = lesson !== null || warnings.length > 0 || toasts.length > 0 || hints.length > 0;
   const held = vm.pause.auto && vm.pause.reason !== "card" ? vm.pause.reason : null;
 
   // When it is quiet, the clip offers a tip every so often (never on a phone, where the campus needs the room).
@@ -131,6 +134,12 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
               )}
             </div>
           )}
+          {warnings.map((w) => (
+            <div key={w} className="f95-toast warn" role="status">
+              <Ico name="warn" size={18} />
+              <span>{w}</span>
+            </div>
+          ))}
           {hints.map((h) => (
             <div key={h} className="f95-toast hint">
               <Ico name="info" size={18} />
@@ -191,6 +200,39 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
 }
 
 const ICON_BY_TONE = { bad: "error", joke: "warn", good: "info", neutral: "info" } as const;
+
+/**
+ * "This leaves 1.8 months of runway": a Win95 warning box. Yes does it; No (the default, and Escape, and the close box, and a
+ * click outside) keeps the runway. Time is held while it is up.
+ */
+export function Confirm({ confirm, actions }: SlotPropsMap["Confirm"]) {
+  const t = useT();
+  const no = () => actions.cancelSpend();
+  return (
+    <Dialog label="Lab Manager" close={no} layerClass="f95-layer f95-dim" dialogClass="f95-dialogbox">
+      <Win className="f95-msgbox tone-bad" title="Lab Manager" icon="warn" buttons={[{ g: "close", label: "No", onClick: no }]} role="alertdialog" label="Lab Manager: are you sure?">
+        <div className="f95-msgbody">
+          <Ico name="warn" size={36} />
+          <div>
+            <p>{confirm.message}</p>
+            <p className="f95-confirm-facts">
+              {t("confirm.cost")}: {confirm.costText} · {t("confirm.runway")}: {confirm.runwayText}
+              <br />
+              Are you sure you want to do this?
+            </p>
+          </div>
+        </div>
+        <div className="f95-row">
+          <Btn onClick={() => actions.confirmSpend()}>Yes</Btn>
+          <Btn def autoFocus onClick={no}>
+            No
+          </Btn>
+        </div>
+        <div className="f95-status">{t("event.paused")}</div>
+      </Win>
+    </Dialog>
+  );
+}
 
 /** A Win95 message box: an icon, the news, and the choices as buttons, the first one being the default. */
 export function EventCard({ event, actions }: SlotPropsMap["EventCard"]) {

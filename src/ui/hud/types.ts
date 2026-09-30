@@ -229,11 +229,31 @@ export interface TickerItemVM {
 export interface ToastVM {
   id: number;
   text: string;
-  /** "hint" is a standing tip ("Build an API Gateway...") that is not dismissed, only goes away when it comes true. */
-  tone: ToneVM | "hint";
+  /**
+   * "hint" is a standing tip ("Build an API Gateway...") that is not dismissed, only goes away when it comes true.
+   * "warn" is a standing warning ("Your entrance isn't connected...") that stays until the cause is fixed.
+   */
+  tone: ToneVM | "hint" | "warn";
 }
 
 export type HintId = "gateway" | "tap";
+
+/**
+ * A spend the game wants confirmed before it goes through: it would leave the lab under three months of runway. Time is held
+ * (a "card" pause) until it is answered, with `confirmSpend()` (do it anyway) or `cancelSpend()`.
+ */
+export interface ConfirmVM {
+  kind: "hire" | "build";
+  cost: number;
+  /** "$600K", or "free". */
+  costText: string;
+  /** Months of runway it would leave, or null (no burn). */
+  runwayAfter: number | null;
+  /** "1.8 mo" */
+  runwayText: string;
+  /** "This leaves 1.8 months of runway. The board will have questions." */
+  message: string;
+}
 
 /**
  * The guided opening, one step at a time. `highlight` is what the step points at: "build:path", "build:hall",
@@ -487,6 +507,10 @@ export interface HudVM {
   /** The tutorial's current step, or null once it is done or skipped. */
   assistant: AssistantVM | null;
   pause: PauseVM;
+  /** Standing warnings ("Your entrance isn't connected...", low runway with ways out): they stay until fixed. */
+  warnings: string[];
+  /** A spend waiting for a yes or a no (also holds time). */
+  confirm: ConfirmVM | null;
   event: EventVM | null;
   thoughtsPanel: ThoughtRowVM[];
   arena: ArenaVM;
@@ -519,6 +543,9 @@ export interface HudActions {
   /** The tutorial: Next (also done by picking the highlighted build tool) and Skip. */
   continueTutorial(): void;
   skipTutorial(): void;
+  /** Answer `vm.confirm`: go ahead with the spend, or keep the runway. */
+  confirmSpend(): void;
+  cancelSpend(): void;
   /** Hold time while a panel of yours is open (`id` names it; `false` lets go). Use `useAutoPause` from the kit. */
   holdTime(id: string, open: boolean): void;
   toggleArena(): void;

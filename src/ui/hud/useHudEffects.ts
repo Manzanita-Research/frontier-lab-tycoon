@@ -49,7 +49,7 @@ function useHotkeys(vm: HudVM) {
         }
         return;
       }
-      if (st.outcome !== "playing" && !st.outcomeDismissed) return;
+      if ((st.outcome !== "playing" && !st.outcomeDismissed) || st.snap.pendingConfirm) return;
       if (e.key === " ") {
         e.preventDefault();
         // A focused button would also treat Space as a click.
@@ -70,7 +70,7 @@ function usePhotoKeys(vm: HudVM) {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
       if (e.key === "p" || e.key === "P") {
         const st = appNow();
-        if (!st?.event && (st?.outcome === "playing" || st?.outcomeDismissed)) togglePhoto();
+        if (!st?.event && !st?.snap.pendingConfirm && (st?.outcome === "playing" || st?.outcomeDismissed)) togglePhoto();
       } else if (!fx.photo) return;
       else if (e.key === "Escape") setPhoto(false);
       else if (e.key === "Enter") void takePhoto();
@@ -84,7 +84,7 @@ function usePhotoKeys(vm: HudVM) {
     if (debugParams.photo) setPhoto(true);
   }, []);
   // A card turning up means the game needs the player: leave photo mode rather than hide it.
-  const needsPlayer = vm.event !== null || vm.eraCard !== null || vm.outcome !== null;
+  const needsPlayer = vm.event !== null || vm.eraCard !== null || vm.outcome !== null || vm.confirm !== null;
   useEffect(() => {
     if (needsPlayer) setPhoto(false);
   }, [needsPlayer]);

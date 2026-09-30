@@ -16,6 +16,7 @@ import { isOpsMoment, stageOps } from "../sim/opsDemo";
 import { walkersThinking } from "../sim/mind";
 import { makeSnapshot, NO_SELECTION, type Snapshot, type UiSelection, type UiToast } from "./hud";
 import { continueTutorial } from "../sim/tutorial";
+import { stageFirstRun } from "../sim/firstRunDemo";
 
 /** What the loop tells the app after touching the World. `snap`, `news` and `toasts` come with a publish. */
 export interface SyncReport {
@@ -88,7 +89,8 @@ export function createSimHandle(dbg: Pick<DebugParams, "seed" | "warp" | "agents
   const sim = createInitialState(dbg.seed);
   if (dbg.warp > 0 || dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0 || dbg.moment) continueTutorial(sim, true);
   for (let i = 0; i < dbg.warp * TICKS_PER_DAY; i++) tick(sim);
-  if (isMoment(dbg.moment)) stageMoment(sim, dbg.moment);
+  if (dbg.moment === "jem-opening" || dbg.moment === "jem-confirm") stageFirstRun(sim, dbg.moment);
+  else if (isMoment(dbg.moment)) stageMoment(sim, dbg.moment);
   else if (isOpsMoment(dbg.moment)) stageOps(sim, dbg.moment);
   if (dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0) {
     const rng = createRng(sim.rngState);

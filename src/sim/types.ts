@@ -10,6 +10,7 @@ import type { StaffStored } from "./machines/staff";
 import type { TrainingStored } from "./machines/training";
 import type { WalkerStored } from "./machines/walker";
 import type { TutorialStored } from "./machines/tutorial";
+import type { GuardrailsStored } from "./machines/guardrails";
 
 export type { BuildingKind, NeedKey };
 export type WalkerKind = "researcher" | "agent" | "visitor" | "protester";
@@ -271,4 +272,6 @@ export interface GameState {
   staff: Staffer[];
   /** FLT-16: absent on older saves; those keep playing without onboarding. */
   tutorial?: TutorialStored;
+  /** Additive save field: pre-purchase confirmations and persistent entrance/runway warnings. */
+  guardrails?: GuardrailsStored;
 }

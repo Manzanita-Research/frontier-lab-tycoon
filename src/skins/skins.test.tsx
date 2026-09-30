@@ -53,6 +53,8 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
       return { vm: main, actions };
     case "EventCard":
       return { event: vms.event!.event!, actions };
+    case "Confirm":
+      return { confirm: vms.confirm!.confirm!, actions };
     case "Arena":
       return { arena: main.arena, actions };
     case "EraCard":
@@ -89,6 +91,8 @@ const vms: Record<string, HudVM> = {
   openingPhone: openingOf({ width: 390, height: 844 }),
   main: vmOf({ tool: "cluster" }),
   event: vmOf({ event: "waterDiscourse" }),
+  confirm: vmOf({ confirm: true }),
+  warned: vmOf({ warnings: ["Your entrance isn't connected to any paths. Visitors are forming a very orderly queue to nowhere."] }),
   auction: vmOf({ event: "computeAuction" }),
   era: vmOf({ event: "era2" }),
   outcome: vmOf({ outcome: "won" }),
@@ -214,6 +218,30 @@ describe.each([BASE_ID, ...usable])("skin %s", (id) => {
     }
     expect(speed({ paused: true, reason: "card", auto: true })).toBe(none);
     expect(speed({ paused: true, reason: "player", auto: false })).toBe(none);
+  });
+
+  it("asks before a spend that leaves under three months of runway, and offers the safe answer first", async () => {
+    const { skin } = await prepareSkin(id);
+    const vm = vms.confirm!;
+    expect(vm.confirm).toMatchObject({ kind: "hire", costText: "$4K", runwayText: "1.8 mo" });
+    const out = html(skin, <Modals vm={vm} actions={actions} />);
+    expect(out).toContain(escape(vm.confirm!.message));
+    expect(out).toContain(escape(vm.confirm!.costText));
+    expect(out).toContain(escape(vm.confirm!.runwayText));
+    expect(out).toContain('role="dialog"'.replace("dialog", out.includes('role="alertdialog"') ? "alertdialog" : "dialog"));
+    // No card when nothing is waiting.
+    expect(html(skin, <Modals vm={vms.main!} actions={actions} />)).not.toContain(escape(vm.confirm!.message));
+  });
+
+  it("keeps standing warnings on screen (once, even if a toast says the same thing)", async () => {
+    const { skin } = await prepareSkin(id);
+    const vm = vms.warned!;
+    const out = html(skin, <Docked vm={vm} actions={actions} />);
+    for (const w of vm.warnings) expect(out).toContain(escape(w));
+    expect(vm.warnings).toHaveLength(1);
+    const echoed = hudViewModel({ ...fixtureInput({ warnings: vm.warnings }), toasts: [{ id: 5, text: vm.warnings[0]!, tone: "bad" }] });
+    expect(echoed.toasts).toEqual([]);
+    expect(html(skin, <Docked vm={echoed} actions={actions} />).split(escape(vm.warnings[0]!)).length - 1).toBe(1);
   });
 
   it("queues a toast under the lesson instead of talking over it", async () => {

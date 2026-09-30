@@ -48,6 +48,7 @@ function view(s: GameState) {
     ledger: s.ledger,
     training: s.training.context,
     tutorial: s.tutorial,
+    guardrails: s.guardrails,
     models: s.models,
     goals: s.goals.context.goals,
     flags: sorted(flagsOf(s)),
@@ -139,7 +140,8 @@ function play(seed: number, ticks: number, checkpoints: number[]): Record<number
     if (i === 900) cmds.push({ type: "hire", job: "security" }, { type: "hire", job: "comms" });
     if (i === 1000) for (const x of [8, 9, 10]) cmds.push({ type: "paintZone", id: s.staff[0]!.id, x, z: 16, on: true });
     if (i === 700) cmds.push({ type: "bulldoze", x: 13, z: 16 });
-    tick(s, cmds);
+    // This stress script deliberately approves its own spending; ordinary play uses the 3-month dialog.
+    tick(s, cmds.map((c) => c.type === "placeBuilding" || c.type === "placePath" || c.type === "hire" ? { ...c, confirmed: true } : c));
     if (checkpoints.includes(i + 1)) out[i + 1] = digest(s);
   }
   return out;
@@ -150,14 +152,16 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // FLT-16 intentionally re-records these for the quiet start, daily attraction-driven arrivals, delayed pressure,
 // tutorial state and the paid opening paths. Movement uses sqrt for bounded tile distances (same geometry,
 // deterministic floating-point differences). Each seed is independently replayed and JSON round-tripped.
+// The playtest follow-up fixes unzoned staff patrol (new seeded route draws), records guardrails,
+// and explicitly confirms the busy-player stress purchases so dialogs cannot freeze this replay.
 // Recorded from the pre-port sim (origin/flt-3-slice-2 @ 8f9750a; sorted-flags projection), re-recorded by FLT-9 and
 // again by FLT-10. FLT-9 changes the game on purpose: rivals, the Arena, eras, the R&D multiplier (training runs faster), bigger
 // leaps per release, Training Halls that convert 30 compute a day, and a compute auction on day 40 that this
 // script answers like any other card. The port itself was verified against the original numbers in FLT-3.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "9f9a88dc", 800: "7aff03f5", 1600: "1eb17b88", 2400: "697cf047", 3200: "6ce3410d", 4000: "89026325" },
-  2: { 200: "d03070d0", 800: "c23fd0e0", 1600: "ec05daa5", 2400: "1a679737", 3200: "18cbae5f", 4000: "bbb2cbdf" },
-  3: { 200: "f6864d9b", 800: "e741d981", 1600: "071bc6fe", 2400: "e8fb88a7", 3200: "051d55b6", 4000: "291a7978" },
+  1: { 200: "b501ed67", 800: "cd638c69", 1600: "211c7ff0", 2400: "3bcab8cc", 3200: "4c393abf", 4000: "58eb49df" },
+  2: { 200: "cb6fd307", 800: "a33df4f0", 1600: "c71a8775", 2400: "1a2fac0e", 3200: "2aa16b41", 4000: "4092bb36" },
+  3: { 200: "1ba636c4", 800: "7bd152ce", 1600: "a9cfc9cb", 2400: "c43fda8e", 3200: "9dc8b895", 4000: "ce9b2b9d" },
 };
 
 describe("golden runs", () => {
