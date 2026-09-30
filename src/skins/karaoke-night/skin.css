@@ -2960,6 +2960,10 @@
       bottom: calc(var(--kn-ticker-h) + var(--kn-tray-h) + 12px);
       z-index: 9;
     }
+    /* ...and over the arcade too while it is open (its row is as tall again as the BUILD button). */
+    .kn-hud:has([data-coach-panel]) .kn-toasts-host {
+      bottom: calc(var(--kn-ticker-h) + var(--kn-tray-h) + 12px + 114px);
+    }
     /* The standing hint steps aside while the contestant sheet is up. */
     .kn-hud:has(.kn-card.sheet) .kn-toast.hint {
       display: none;

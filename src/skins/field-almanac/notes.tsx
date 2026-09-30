@@ -50,7 +50,7 @@ export function Objectives({ objectives, progress, visible = ALL_VISIBLE, layout
   if (goal && !visible.arena) {
     // The one goal in front of you, ticked off by hand when it is done; the year's objectives come with the race.
     return (
-      <section className="fa-objectives open" aria-label={t("objectives.goal")} {...coach.attrs("goals")} role="status">
+      <section className="fa-objectives fa-goal-one" aria-label={t("objectives.goal")} {...coach.attrs("goals")} role="status">
         <div className="fa-obj-head">
           <span className="fa-sc">{t("objectives.goal")}</span>
         </div>

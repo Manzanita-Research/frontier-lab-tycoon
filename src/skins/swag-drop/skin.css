@@ -2786,6 +2786,12 @@
     .sd-deckwrap {
       bottom: calc(52px + env(safe-area-inset-bottom));
       padding: 0 8px;
+      align-items: flex-end;
+    }
+    /* the tip and the open deck use the width; the Build key sits at the right with the sound keys at its left */
+    .sd-deckwrap .sd-tip,
+    .sd-deckwrap .sd-deck:not(.sd-deck-closed) {
+      align-self: center;
     }
     .sd-deck {
       gap: 8px;
@@ -2806,7 +2812,7 @@
     }
     .sd-dock {
       left: 8px;
-      bottom: calc(176px + env(safe-area-inset-bottom));
+      bottom: calc(52px + env(safe-area-inset-bottom));
     }
     .sd-lanyard {
       position: fixed;
