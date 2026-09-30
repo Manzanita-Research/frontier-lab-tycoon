@@ -30,12 +30,19 @@ export function validateContent(content: ContentApi, vocabulary: VocabularyApi):
     known(line.kind, kinds, `content.thoughts[${i}].kind`);
     known(line.when, [...conditions], `content.thoughts[${i}].when`);
   });
-  content.events.forEach((event, i) => event.choices.forEach((choice, j) => choice.effects.forEach((effect, k) => {
+  content.events.forEach((event, i) => {
+    if (!("choices" in event)) { validateArc(event, vocabulary, `content.events[${i}]`); return; }
+    event.choices.forEach((choice, j) => choice.effects.forEach((effect, k) => {
     const path = `content.events[${i}].choices[${j}].effects[${k}]`;
     if (effect.type === "place") known(effect.kind, buildings, `${path}.kind`);
     if (effect.type === "thought" && effect.kind) known(effect.kind, kinds, `${path}.kind`);
     if ((effect.type === "discourse" || effect.type === "protesters") && effect.add === undefined && effect.set === undefined) throw new ModError({ path, detail: "expected add or set" });
-  })));
+    }));
+  });
+  const eventIds = new Set(content.events.map((event) => event.id));
+  content.arcs.forEach((arc, i) => {
+    if (eventIds.has(arc.id)) throw new ModError({ path: `content.arcs[${i}].id`, detail: `id "${arc.id}" is already in events` });
+  });
   content.arcs.forEach((arc, i) => validateArc(arc, vocabulary, `content.arcs[${i}]`));
 }
 

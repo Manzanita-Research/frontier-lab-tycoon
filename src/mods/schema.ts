@@ -30,7 +30,13 @@ export const Rival = Schema.Struct({
 });
 export type RivalData = typeof Rival.Type;
 // Legacy lines have no id. Keep their data exact; contentKey supplies stable base keys without changing them.
-export const Headline = Schema.Struct({ id: Schema.optionalKey(id), trigger: text, text, tone });
+export const GuardCondition = Schema.Union([
+  Schema.Struct({ "stat.gte": Schema.Tuple([text, number]) }),
+  Schema.Struct({ "flag.is": Schema.Tuple([text, Schema.Boolean]) }),
+  Schema.Struct({ "day.after": nonnegative }),
+  Schema.Struct({ chance: fraction }),
+]);
+export const Headline = Schema.Struct({ id: Schema.optionalKey(id), trigger: text, text, tone, when: Schema.optionalKey(GuardCondition) });
 export type HeadlineData = typeof Headline.Type;
 export const Thought = Schema.Struct({ id: Schema.optionalKey(id), kind: text, when: text, text });
 export type ThoughtData = typeof Thought.Type;
@@ -90,13 +96,18 @@ export const Tip = Schema.Struct({ id, text, when: Schema.optionalKey(text) });
 export const NamePool = Schema.Struct({ id, values: strings });
 export const Goal = Schema.Struct({ id, metric: Schema.Literals(["runs", "revenue", "hype", "era", "arena"]), label: text, target: nonnegative, unit: Schema.Literals(["runs", "money", "points", "era", "rank"]) });
 
-function patch<S extends Schema.Struct<Schema.Struct.Fields>>(schema: S) {
+function patch<const Fields extends Schema.Struct.Fields & { readonly id: Schema.Constraint }>(schema: Schema.Struct<Fields>) {
   return Schema.Struct({
     add: Schema.optionalKey(Schema.Array(schema)),
-    override: Schema.optionalKey(Schema.Array(schema.mapFields((fields) => ({ ...Struct.map(fields, Schema.optionalKey), id })))),
+    override: Schema.optionalKey(Schema.Array(Schema.Struct({ id, ...Struct.map(Struct.omit(schema.fields, ["id"]), Schema.optionalKey) }))),
     remove: Schema.optionalKey(Schema.Array(id)),
   });
 }
+const PartialEvent = Schema.Struct({ id, ...Struct.map(Struct.omit(EventCard.fields, ["id"]), Schema.optionalKey) });
+const PartialArc = Schema.Struct({ id, ...Struct.map(Struct.omit(Arc.fields, ["id"]), Schema.optionalKey) });
+/** events accepts today's choice cards and the documented data-only statecharts. arcs is also an explicit section. */
+export const EventOrArc = Schema.Union([EventCard, Arc]);
+const EventPatch = Schema.Struct({ add: Schema.optionalKey(Schema.Array(EventOrArc)), override: Schema.optionalKey(Schema.Array(Schema.Union([PartialEvent, PartialArc]))), remove: Schema.optionalKey(Schema.Array(id)) });
 // Adds need an id even where the original game uses a dictionary or anonymous lines.
 const identifiedBuilding = Schema.Struct({ id, ...Building.fields });
 const identifiedHeadline = Schema.Struct({ ...Headline.fields, id, trigger: Schema.optionalKey(text) });
@@ -104,7 +115,7 @@ const identifiedThought = Schema.Struct({ ...Thought.fields, id });
 export const ContentPatch = Schema.Struct({
   buildings: Schema.optionalKey(patch(identifiedBuilding)), rivals: Schema.optionalKey(patch(Rival)),
   headlines: Schema.optionalKey(patch(identifiedHeadline)), thoughts: Schema.optionalKey(patch(identifiedThought)),
-  events: Schema.optionalKey(patch(EventCard)), arcs: Schema.optionalKey(patch(Arc)),
+  events: Schema.optionalKey(EventPatch), arcs: Schema.optionalKey(patch(Arc)),
   walkerKinds: Schema.optionalKey(patch(EntityKind)), endings: Schema.optionalKey(patch(Ending)),
   tips: Schema.optionalKey(patch(Tip)), names: Schema.optionalKey(patch(NamePool)), goals: Schema.optionalKey(patch(Goal)),
 });
@@ -139,7 +150,7 @@ export function suggest(word: string, candidates: readonly string[]): string {
   const best = candidates.map((value) => ({ value, distance: distance(word, value) })).sort((a, b) => a.distance - b.distance)[0];
   return best && best.distance <= 2 ? ` (did you mean "${best.value}"?)` : "";
 }
-const fieldNames = ["apiVersion", "id", "name", "version", "author", "description", "skin", "content", "assets", "audio", "add", "override", "remove", ...Object.keys(ContentPatch.fields), ...Object.keys(Rival.fields), ...Object.keys(Building.fields), ...Object.keys(SkinData.fields), "choices", "effects", "type", "amount", "cash", "hype", "discourse", "protesters", "flag", "news", "thought", "place", "race", "text", "tone", "trigger", "when", "presentation"];
+const fieldNames = ["apiVersion", "id", "name", "version", "author", "description", "skin", "content", "assets", "audio", "add", "override", "remove", ...Object.keys(ContentPatch.fields), ...Object.keys(Rival.fields), ...Object.keys(Building.fields), ...Object.keys(SkinData.fields), "choices", "effects", "type", "amount", "cash", "hype", "discourse", "protesters", "flag", "news", "thought", "place", "race", "text", "tone", "trigger", "when", "presentation", "good", "bad", "neutral", "joke", "walker", "flow", "sprite", "offmap", "initial", "states", "entry", "exit", "on", "guard", "actions", "target", "params"];
 function pathString(path: ReadonlyArray<PropertyKey | { readonly key: PropertyKey }>): string {
   return path.reduce<string>((s, part) => {
     const key = typeof part === "object" ? part.key : part;
@@ -153,7 +164,12 @@ export const decodeManifest = Effect.fn("Mods.decodeManifest")(function* (input:
       const details = issues.map((issue) => {
         const path = issue.path ?? [];
         const last = path[path.length - 1];
-        const word = typeof last === "string" ? last : "";
+        let value: unknown = input;
+        for (const part of path) {
+          const key = typeof part === "object" ? part.key : part;
+          value = typeof value === "object" && value !== null ? Reflect.get(value, key) : undefined;
+        }
+        const word = issue.message.includes("Unexpected") ? typeof last === "string" ? last : "" : typeof value === "string" ? value : "";
         return `${pathString(path)}: ${issue.message}${suggest(word, fieldNames)}`;
       });
       return new ModError({ path: "$", detail: details.join("\n") });

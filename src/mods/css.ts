@@ -1,13 +1,15 @@
 import { ModError } from "./schema";
+import { validateAssets } from "./assets";
 
 /** Conservative shared-skin CSS subset. Reject ambiguous syntax rather than letting the browser recover it.
  * No nesting, escapes, comments, at-rules (except stripped @import), or network-bearing image functions.
  * Built-in skins are trusted separately and can use richer CSS. */
 export function sanitizeCss(css: string, skinId: string, assets: Readonly<Record<string, string>>): string {
+  validateAssets(assets);
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(skinId)) throw new ModError({ path: "skin.id", detail: "expected a kebab-case skin id" });
   if (/[\\\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(css)) throw new ModError({ path: "skin.css", detail: "CSS escapes and control characters are not supported" });
   let clean = css.replace(/\/\*[\s\S]*?\*\//g, "").replace(/@import\s+(?:[^;{}]*);/gi, "");
-  if (/@|image-set\s*\(|expression\s*\(|-moz-binding|behavior\s*:/i.test(clean)) throw new ModError({ path: "skin.css", detail: "at-rules and executable/network image functions are not supported" });
+  if (/@|(?:image-set|image|src|paint|expression)\s*\(|-moz-binding|behavior\s*:|__FLT_ASSET_|\/\*|\*\//i.test(clean)) throw new ModError({ path: "skin.css", detail: "at-rules, ambiguous syntax and executable/network image functions are not supported" });
   // Every URL must name a bundled asset. Remote, data and pre-existing blob URLs from CSS are forbidden.
   clean = clean.replace(/url\s*\(\s*(?:"([^"\n]*)"|'([^'\n]*)'|([^()\s"']+))\s*\)/gi, (_, a: string | undefined, b: string | undefined, c: string | undefined) => {
     const id = a ?? b ?? c ?? "";
