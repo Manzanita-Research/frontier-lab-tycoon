@@ -3,6 +3,7 @@ import { RIVAL_DEFS } from "../../content/rivals";
 import { arenaScore, YOU } from "../../content/rivals";
 import { initialStored } from "../machines/run";
 import type { GameState } from "../types";
+import { collusionScore } from "../collusion/scores";
 import { eraMachine, type EraStored } from "./era";
 import { rivalMachine, type RivalStored } from "./rival";
 
@@ -52,9 +53,10 @@ export interface RaceState {
 export const AUCTION_FIRST_DAY = 40;
 
 /** Your row is last among equals: ties go to the lab with the better press. */
-export function rankBoard(state: Pick<GameState, "capability" | "hype">, rivals: RivalStored[]): BoardRow[] {
+export function rankBoard(state: Pick<GameState, "capability" | "hype"> & Partial<Pick<GameState, "collusion" | "day">>, rivals: RivalStored[]): BoardRow[] {
   const rows: BoardRow[] = rivals.map((r) => ({ id: r.context.id, score: arenaScore(r.context.capability, r.context.hype) }));
-  rows.push({ id: YOU, score: arenaScore(state.capability, state.hype) });
+  const score = collusionScore({ collusion: state.collusion, day: state.day ?? 0 }, arenaScore(state.capability, state.hype));
+  if (score !== null) rows.push({ id: YOU, score });
   return rows.sort((a, b) => b.score - a.score);
 }
 

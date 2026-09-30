@@ -1,5 +1,6 @@
 // The fixed-step loop: apply queued commands, move everyone, run the daily systems at midnight.
 import { applyCommands, type Command } from "./commands";
+import { applyCollusionChoices, dailyCollusion, updateCollusion } from "./collusion/driver";
 import { TICKS_PER_DAY } from "./constants";
 import { dailyBreakdowns } from "./breakdowns";
 import { dailyDisasters, updateDisasters } from "./disasters/driver";
@@ -28,6 +29,7 @@ export { TICKS_PER_DAY };
 export function tick(state: GameState, commands: readonly Command[] = []) {
   const rng = createRng(state.rngState);
   applyCommands(state, commands, rng);
+  applyCollusionChoices(state);
   if (openEventOf(state) || state.goals.value === "lost") {
     state.rngState = rng.state();
     return;
@@ -36,6 +38,7 @@ export function tick(state: GameState, commands: readonly Command[] = []) {
   updateWalkers(state, rng);
   updateProtesters(state, rng);
   updateStaff(state, rng);
+  updateCollusion(state);
   updateDisasters(state);
   if (state.tick % TICKS_PER_DAY === 0) {
     state.day++;
@@ -48,6 +51,7 @@ export function tick(state: GameState, commands: readonly Command[] = []) {
     dailyNews(state, rng);
     dailySlop(state, rng);
     dailyCrowd(state, rng);
+    dailyCollusion(state);
     dailyRace(state, rng);
     dailyLeapfrog(state, rng);
     dailyThoughts(state, rng);
@@ -61,5 +65,6 @@ export function tick(state: GameState, commands: readonly Command[] = []) {
 export function applyNow(state: GameState, commands: readonly Command[]) {
   const rng = createRng(state.rngState);
   applyCommands(state, commands, rng);
+  applyCollusionChoices(state);
   state.rngState = rng.state();
 }

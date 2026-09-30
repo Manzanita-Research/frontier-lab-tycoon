@@ -3,7 +3,10 @@ import { RIVAL_BY_ID, YOU, type RivalId } from "../../content/rivals";
 import type { GameState } from "../types";
 import { rankBoard, ranksOf, type BoardRow } from "./state";
 
-export const rankOf = (board: BoardRow[]): number => board.findIndex((r) => r.id === YOU) + 1;
+export const rankOf = (board: BoardRow[]): number => {
+  const index = board.findIndex((r) => r.id === YOU);
+  return index < 0 ? board.length + 1 : index + 1;
+};
 
 /** Re-rank the Arena: rivals as they are, you as you are today. Remembers last week for the arrows. */
 export function refreshBoard(state: GameState) {

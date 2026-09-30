@@ -1,5 +1,6 @@
 // Everything in GameState is plain and JSON-serializable.
 import type { BuildingKind } from "../content/buildings";
+import type { CollusionState, Investigation } from "./collusion/state";
 import type { NeedKey } from "../content/needs";
 import type { DisastersState } from "./disasters/types";
 import type { ArcStored } from "./machines/arc";
@@ -276,4 +277,8 @@ export interface GameState {
   staff: Staffer[];
   /** Disasters (FLT-17): the random-disaster setting, the ones in play, timed effects, and the cues the renderer reads. */
   disasters: DisastersState;
+  /** FLT-18: opt-in Swarm pack; absent preserves legacy saves and baseline runs. */
+  collusion?: CollusionState;
+  /** Generic inquiries started by the Vocabulary; the owning machine completes them. */
+  investigations?: Record<string, Investigation>;
 }
