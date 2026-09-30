@@ -1,7 +1,7 @@
 // Every skin renders every slot from a fixture view-model without throwing, and its files are what the format says.
 import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { fixtureDrama, fixtureInput, FIXTURE_CHAT, FIXTURE_PAPER } from "../ui/hud/fixtures";
+import { fixtureDefection, fixtureInput, FIXTURE_CHAT, FIXTURE_PAPER } from "../ui/hud/fixtures";
 import { Docked, Modals, PhotoLayer } from "../ui/hud/tree";
 import type { HudActions, HudVM } from "../ui/hud/types";
 import { hudViewModel } from "../ui/hud/vm";
@@ -75,7 +75,7 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
       return { event: vms.hearing!.event!, hearing: vms.hearing!.event!.hearing!, actions };
     case "LeakedChat":
       return { event: vms.leak!.event!, leak: vms.leak!.event!.leak!, actions };
-    case "Drama":
+    case "DramaCard":
       return { event: vms.resign!.event!, drama: vms.resign!.event!.drama!, actions };
     case "Bill":
       return { event: vms.bill!.event!, bill: vms.bill!.event!.bill!, actions };
@@ -130,6 +130,10 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
       return { event: vms.caught!.event!, report: vms.caught!.event!.report!, actions };
     case "AuditPin":
       return { audit: vms.evals!.audit, actions };
+    case "DramaButton":
+      return { drama: vms.dramaFresh!.drama, actions };
+    case "Drama":
+      return { drama: vms.drama!.drama, actions };
   }
 }
 
@@ -178,11 +182,11 @@ const vms: Record<string, HudVM> = {
   dz: vmOf({ disaster: true }),
   dzMenu: vmOf({ disaster: true, disastersOpen: true }),
   dzPhone: vmOf({ disaster: true, width: 390, height: 844 }),
-  vcChat: vmOf({ world: fixtureDrama("defection-chat") }),
-  resign: vmOf({ world: fixtureDrama("defection-card") }),
-  manifesto: vmOf({ world: fixtureDrama("defection-manifesto") }),
-  nemesis: vmOf({ world: fixtureDrama("defection-arena") }),
-  poach: vmOf({ world: fixtureDrama("poach-offer") }),
+  vcChat: vmOf({ world: fixtureDefection("defection-chat") }),
+  resign: vmOf({ world: fixtureDefection("defection-card") }),
+  manifesto: vmOf({ world: fixtureDefection("defection-manifesto") }),
+  nemesis: vmOf({ world: fixtureDefection("defection-arena") }),
+  poach: vmOf({ world: fixtureDefection("poach-offer") }),
   // Evals Without Borders (FLT-19): the warning card, the sign over the gate, the tour, their evals, the report card.
   notice: vmOf({ audit: "audit-notice" }),
   countdown: vmOf({ audit: "audit-countdown" }),
@@ -191,6 +195,11 @@ const vms: Record<string, HudVM> = {
   report: vmOf({ audit: "audit-report" }),
   caught: vmOf({ audit: "audit-caught" }),
   reportPhone: vmOf({ audit: "audit-caught", width: 390, height: 844 }),
+  drama: vmOf({ drama: "feed" }),
+  dramaFresh: vmOf({ drama: "fresh" }),
+  dramaIntro: vmOf({ drama: "intro" }),
+  dramaEmpty: vmOf({ drama: "empty" }),
+  dramaPhone: vmOf({ drama: "feed", width: 390, height: 844 }),
 };
 
 const usable = catalog.filter((e) => e.ok).map((e) => e.folder);
@@ -390,6 +399,18 @@ describe.each([BASE_ID, ...usable])("skin %s", (id) => {
     for (const b of vms.help!.help!.buildings) expect(help).toContain(escape(b.line));
     expect(help).not.toContain(escape(vmOf({ level: 5, help: true }).help!.buildings.find((b) => b.kind === "demo")!.line));
     expect(help).toContain(escape(skin.strings["help.replay"]!));
+  });
+
+  it("has a Today's Drama button from the first day, and a window with the pack, the archive and the now-playing card", async () => {
+    const { skin } = await prepareSkin(id);
+    for (const vm of [vms.garage!, vms.phone!, vms.dramaFresh!]) expect(html(skin, <Docked vm={vm} actions={actions} />), `${id}: the button`).toMatch(/Drama/);
+    const feed = html(skin, <Modals vm={vms.drama!} actions={actions} />);
+    for (const p of [vms.drama!.drama.latest!, ...vms.drama!.drama.archive]) expect(feed).toContain(escape(p.title));
+    for (const line of vms.drama!.drama.latest!.teasers) expect(feed).toContain(escape(line));
+    const intro = html(skin, <Modals vm={vms.dramaIntro!} actions={actions} />);
+    expect(intro).toContain(escape(vms.dramaIntro!.drama.on!.title));
+    expect(intro).toContain(escape(vms.dramaIntro!.drama.on!.event!.title));
+    expect(html(skin, <Modals vm={vms.dramaEmpty!} actions={actions} />).length).toBeGreaterThan(100);
   });
 
   it("uses the skin's own strings", async () => {

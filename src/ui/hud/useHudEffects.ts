@@ -7,6 +7,7 @@ import { useAutoPause } from "../../app/hooks";
 import type { Snapshot } from "../../app/hud";
 import { TOOLS } from "../../app/hud";
 import { playCue } from "../../audio/state";
+import { startDrama } from "../../drama/state";
 import { NewsDesk } from "../../newsroom/desk";
 import { frontPage, recap } from "../../newsroom/edition";
 import { loadRoom, pressCamera, publish, resetRoom, roomAtom, viewRoom } from "../../newsroom/state";
@@ -179,6 +180,7 @@ function useOverlays(vm: HudVM) {
   useAutoPause("senate", vm.senate.open);
   useAutoPause("mixer", vm.sound.open);
   useAutoPause("arena", vm.arena.open && vm.layout.compact);
+  useAutoPause("drama", vm.drama.open);
 }
 
 export function useHudEffects(vm: HudVM, snap: Snapshot) {
@@ -187,4 +189,5 @@ export function useHudEffects(vm: HudVM, snap: Snapshot) {
   usePhotoKeys(vm);
   useChatPlayback();
   useNewsDesk(snap);
+  useEffect(startDrama, []);
 }

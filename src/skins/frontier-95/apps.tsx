@@ -7,6 +7,8 @@ import type { SlotPropsMap } from "../types";
 import { Ico } from "./icons";
 import { Btn, Tabs, Win } from "./parts";
 import { EXAMPLE_MOD } from "../base/slots/ModManager";
+import { dramaComing } from "../base/slots/Drama";
+import type { DramaPackVM } from "../../ui/hud/types";
 
 /** The weekly paper, in a 1996 browser. */
 export function FrontPage({ paper, actions }: SlotPropsMap["FrontPage"]) {
@@ -253,10 +255,13 @@ export function ModManager({ mods, actions }: SlotPropsMap["ModManager"]) {
             ) : (
               mods.list.map((m) => (
                 <div key={m.id} role="listitem">
-                  <Ico name="doc" size={18} />
+                  <Ico name={m.drama ? "drama" : "doc"} size={18} />
                   <b>{m.name}</b>
                   <span>{m.version}</span>
                   <span className="hash">#{m.hash}</span>
+                  <Btn className="f95-modoff" onClick={() => actions.removeMod(m.id)} title="Reloads without it: a new lab">
+                    {m.drama ? "Switch off" : "Remove"}
+                  </Btn>
                   {m.description && <small>{m.description}</small>}
                 </div>
               ))
@@ -321,6 +326,142 @@ export function ModSkinOffer({ offer, actions }: SlotPropsMap["ModSkinOffer"]) {
             Yes
           </Btn>
           <Btn onClick={no}>No</Btn>
+        </div>
+      </Win>
+    </Dialog>
+  );
+}
+
+/** One pack on the Drama channel: the story, the first headlines, what's in it. */
+function DramaStory({ pack }: { pack: DramaPackVM }) {
+  return (
+    <div className="f95-drama-story inset">
+      <h2>{pack.title}</h2>
+      <p className="dek">{pack.description}</p>
+      {pack.teasers.length > 0 && (
+        <ul>
+          {pack.teasers.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+        </ul>
+      )}
+      <small>{dramaComing(pack)}</small>
+    </div>
+  );
+}
+
+/**
+ * Start ▸ Programs ▸ Today's Drama: a 1995 "channel" that pushes one small mod a day. Playing one reloads with it (a new
+ * lab); the one playing is switched off here or in Add/Remove Mods. Just after a pack loads, it's the "On Air" card instead.
+ */
+export function Drama({ drama, actions }: SlotPropsMap["Drama"]) {
+  const on = drama.on;
+  const latest = drama.latest;
+  const unlisted = on && ![latest, ...drama.archive].some((p) => p?.on);
+  const banner = (text: string, date?: string) => (
+    <div className="f95-drama-banner">
+      <b>{text}</b>
+      {date && <span>{date}</span>}
+    </div>
+  );
+  if (drama.intro && on) {
+    return (
+      <Dialog label="Today's Drama is on air" close={actions.closeDrama} layerClass="f95-layer f95-dim" dialogClass="f95-dialogbox">
+        <Win className="f95-drama intro" title="Today's Drama - On Air" icon="drama" buttons={[{ g: "close", label: "Close", onClick: () => actions.closeDrama() }]}>
+          {banner("ON AIR", on.dateText)}
+          <div className="f95-mixbody">
+            <p className="f95-drama-now">Now playing in this lab:</p>
+            <DramaStory pack={on} />
+            <p>The rivals have read the news too. Your staff certainly have.</p>
+          </div>
+          <div className="f95-row">
+            <Btn def onClick={() => actions.closeDrama()}>
+              Let's go
+            </Btn>
+            <Btn onClick={() => actions.removeMod(on.id)}>Switch it off</Btn>
+          </div>
+        </Win>
+      </Dialog>
+    );
+  }
+  return (
+    <Dialog label="Today's Drama" close={actions.closeDrama} layerClass="f95-layer f95-dim" dialogClass="f95-dialogbox">
+      <Win className="f95-drama" title="Today's Drama - Channel Viewer" icon="drama" buttons={[{ g: "close", label: "Close", onClick: () => actions.closeDrama() }]}>
+        {banner(latest && latest.ago === "today" ? "TODAY'S DRAMA" : "LATEST DRAMA", latest ? `${latest.dateText} · ${latest.ago}` : undefined)}
+        <div className="f95-mixbody">
+          {unlisted && (
+            <p>
+              Playing <b>{on.title}</b>.{" "}
+              <button type="button" className="f95-link" onClick={() => actions.removeMod(on.id)}>
+                Switch it off
+              </button>
+            </p>
+          )}
+          {drama.status === "loading" && !latest && <p>Dialling the drama wire at 28.8 kbps…</p>}
+          {drama.status === "error" && !latest && (
+            <p>
+              <Ico name="error" size={16} /> The drama wire is busy. Somewhere, a lab is getting away with something.
+            </p>
+          )}
+          {drama.status === "ready" && !latest && <p>No drama published yet. The labs are behaving. Suspicious.</p>}
+          {latest && <DramaStory pack={latest} />}
+          {latest && (
+            <div className="f95-row left">
+              {latest.on ? (
+                <>
+                  <span className="f95-drama-live">● Playing in this lab</span>
+                  <Btn onClick={() => actions.removeMod(latest.id)}>Switch it off</Btn>
+                </>
+              ) : (
+                <>
+                  <Btn def onClick={() => actions.playDrama(latest.id)}>
+                    {on ? "Swap it in" : "Play it"}
+                  </Btn>
+                  <small>Starts a new lab: mods load before the first brick. Your current lab will be fine. Probably.</small>
+                </>
+              )}
+            </div>
+          )}
+          {drama.archive.length > 0 && (
+            <fieldset className="f95-drama-archive">
+              <legend>Previously on Today's Drama</legend>
+              <div className="inset f95-modlist" role="list" aria-label="Past packs">
+                {drama.archive.map((p) => (
+                  <div key={p.id} role="listitem">
+                    <Ico name="doc" size={18} />
+                    <b>{p.title}</b>
+                    <span>{p.dateText}</span>
+                    {p.on ? (
+                      <span className="f95-drama-live">● On</span>
+                    ) : (
+                      <Btn className="f95-modoff" onClick={() => actions.playDrama(p.id)} aria-label={`Play ${p.title}`}>
+                        Play
+                      </Btn>
+                    )}
+                    <small>{p.summary}</small>
+                  </div>
+                ))}
+              </div>
+            </fieldset>
+          )}
+          <small>
+            One small mod a day, written from the morning's AI news and checked by a human before it airs. Parody names only.{" "}
+            <button
+              type="button"
+              className="f95-link"
+              onClick={() => {
+                actions.closeDrama();
+                actions.openMods();
+              }}
+            >
+              Add/Remove Mods…
+            </button>
+          </small>
+        </div>
+        <div className="f95-row">
+          <Btn def={!latest || latest.on} onClick={() => actions.closeDrama()}>
+            Close
+          </Btn>
         </div>
       </Win>
     </Dialog>

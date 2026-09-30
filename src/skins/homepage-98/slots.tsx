@@ -4,8 +4,8 @@
 import type { SkinSlots } from "../types";
 import { Layout } from "./Layout";
 import { Arena, Inspector, Objectives, Stats, ThoughtsPanel, Training } from "./pages";
-import { BuildBar, NewsControls, PhotoButton, Speed, Ticker } from "./webring";
+import { BuildBar, DramaButton, NewsControls, PhotoButton, Speed, Ticker } from "./webring";
 import { Bubble, EraCard, EventCard, NewsArrival, Outcome, Toast } from "./popups";
 
-const slots: SkinSlots = { Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Bubble, ThoughtsPanel, Ticker, Toast, EventCard, Arena, EraCard, Outcome, NewsControls, NewsArrival, PhotoButton };
+const slots: SkinSlots = { Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Bubble, ThoughtsPanel, Ticker, Toast, EventCard, Arena, EraCard, Outcome, NewsControls, NewsArrival, PhotoButton, DramaButton };
 export default slots;

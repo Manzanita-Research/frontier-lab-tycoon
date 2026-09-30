@@ -22,6 +22,7 @@ export function Layout({ slots }: SlotPropsMap["Layout"]) {
             {slots.Speed}
             <div className="gc-tools2">
               {slots.NewsControls}
+              {slots.DramaButton}
               {slots.PhotoButton}
             </div>
           </div>

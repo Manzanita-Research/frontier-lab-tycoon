@@ -1,5 +1,5 @@
 /* Drama cards (FLT-26 Defection, FLT-20 Poaching War): the document the card is about. */
-.drama-card .card-body {
+.drama-doc-card .card-body {
   max-height: min(84vh, 760px);
   overflow-y: auto;
 }
@@ -90,3 +90,54 @@
 .bubble.speech {
   border-radius: 10px;
 }
+
+/* Today's Drama (FLT-34): a tabloid pill by the News Room, and the card it opens. */
+.drama-button { display:inline-flex; align-items:center; gap:6px; align-self:flex-end; border:0; padding:8px 12px; border-radius:9px; font:800 14px Nunito, sans-serif; color:var(--flt-color-text); cursor:pointer; pointer-events:auto; }
+.drama-button svg { display:block; color:#bb3e2e; }
+.drama-button:hover { background:var(--flt-color-panelAlt); }
+.drama-button.fresh svg { animation:drama-shout 1.6s ease-in-out 3; }
+.drama-badge { background:#d4382a; color:#fff6e0; padding:2px 6px; border-radius:5px; font-size:10px; letter-spacing:.6px; margin-left:2px; }
+.drama-badge.on { background:#302d26; color:#ffd84a; }
+body.photo .drama-button { display:none; }
+@keyframes drama-shout { 0%,100% { transform:none; } 20% { transform:rotate(-14deg) scale(1.15); } 40% { transform:rotate(10deg) scale(1.15); } 60% { transform:none; } }
+
+.drama-backdrop .news-dialog { max-width:520px; }
+.drama-box { padding:0 20px 18px; }
+.drama-box .news-toolbar { padding:12px 0; margin-bottom:12px; }
+.drama-box .news-toolbar b { color:#d4382a; letter-spacing:.4px; text-transform:uppercase; }
+.drama-card, .drama-intro { position:relative; background:#fffaf0; border:2px solid #302d26; box-shadow:5px 5px 0 #302d26; padding:14px 16px 16px; font-family:Georgia,"Times New Roman",serif; }
+.drama-card.on { box-shadow:5px 5px 0 #d4382a; }
+.drama-kicker { display:flex; justify-content:space-between; gap:10px; font:800 11px Nunito,sans-serif; text-transform:uppercase; letter-spacing:.6px; color:#8b7860; }
+.drama-kicker span:first-child { background:#d4382a; color:#fff6e0; padding:2px 7px; }
+.drama-card h2, .drama-intro h2 { margin:10px 0 6px; font-size:30px; line-height:1.05; letter-spacing:-.8px; font-weight:900; }
+.drama-dek { margin:0 0 10px; font-size:15px; font-style:italic; color:#4d4436; }
+.drama-teasers { list-style:none; margin:0 0 10px; padding:0; display:grid; gap:6px; border-top:1px solid #c9bba0; padding-top:9px; }
+.drama-teasers li { font-size:13px; line-height:1.3; padding-left:14px; position:relative; }
+.drama-teasers li::before { content:"■"; position:absolute; left:0; top:1px; font-size:8px; color:#d4382a; }
+.drama-coming { margin:0 0 12px; font:700 12px Nunito,sans-serif; color:#6d5d48; }
+.drama-actions { display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; font-family:Nunito,sans-serif; }
+.drama-actions small { flex:1 1 180px; color:#8b7860; font-size:10px; line-height:1.3; }
+.drama-play { background:#d4382a; color:#fff6e0; border:0; border-radius:7px; padding:9px 18px; font:900 14px Nunito,sans-serif; cursor:pointer; box-shadow:0 3px 0 #8c2219; }
+.drama-play:active { transform:translateY(2px); box-shadow:0 1px 0 #8c2219; }
+.drama-quiet, .drama-note button, .drama-foot button { background:transparent; border:0; padding:4px 0; font:800 12px Nunito,sans-serif; color:#8c5a2f; text-decoration:underline; cursor:pointer; }
+.drama-live { font:800 12px Nunito,sans-serif; color:#d4382a; }
+.drama-stamp { position:absolute; top:-12px; right:14px; transform:rotate(4deg); background:#302d26; color:#ffd84a; font:900 13px Nunito,sans-serif; letter-spacing:2px; padding:4px 10px; border-radius:4px; box-shadow:0 0 0 2px #ffd84a inset; animation:drama-blink 1.2s steps(2) infinite; }
+@keyframes drama-blink { 50% { color:#d4382a; } }
+.drama-note { font:700 13px Nunito,sans-serif; color:#6d5d48; margin:4px 0 12px; }
+.drama-archive { margin-top:18px; font-family:Nunito,sans-serif; }
+.drama-archive h3 { font:900 11px Nunito,sans-serif; text-transform:uppercase; letter-spacing:.8px; color:#8b7860; margin:0 0 6px; }
+.drama-archive ol { list-style:none; margin:0; padding:0; display:grid; gap:6px; }
+.drama-archive li { display:flex; align-items:center; justify-content:space-between; gap:10px; background:#f3e8d2; border-radius:8px; padding:8px 10px; }
+.drama-archive li b { display:block; font:900 14px Georgia,serif; }
+.drama-archive li small { color:#8b7860; font-size:10px; }
+.drama-archive li button { background:#5c4835; color:#fff2d9; border:0; border-radius:6px; padding:6px 12px; font:800 12px Nunito,sans-serif; cursor:pointer; }
+.drama-archive li em { color:#d4382a; font:800 11px Nunito,sans-serif; font-style:normal; }
+.drama-foot { display:block; margin-top:16px; color:#8b7860; font-size:10px; line-height:1.4; }
+.drama-foot button { font-size:10px; }
+.mod-off { float:right; background:transparent; border:0; padding:0 0 0 8px; font:800 11px Nunito,sans-serif; color:#8c5a2f; text-decoration:underline; cursor:pointer; }
+@media(max-width:700px) {
+  .drama-button { font-size:12px; padding:6px 8px; }
+  .drama-card h2, .drama-intro h2 { font-size:24px; }
+  .drama-box { padding:0 12px 14px; }
+}
+@media(prefers-reduced-motion:reduce) { .drama-button.fresh svg, .drama-stamp { animation:none; } }

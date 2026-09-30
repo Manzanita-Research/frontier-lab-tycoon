@@ -597,7 +597,7 @@ export interface EventVM {
   /** The leaked group chat, on the yacht's leak card. */
   leak?: LeakVM | null;
   /** The document a drama card is about: the resignation letter, the recruiter's email, the manifesto. */
-  drama?: DramaVM | null;
+  drama?: DramaDocVM | null;
   /** The auditors' report card (FLT-19), on its `report` card. */
   report?: ReportCardVM | null;
   /** The bill, on Regulatory Capture's draft and leak cards. */
@@ -607,7 +607,7 @@ export interface EventVM {
 }
 
 /** A drama card's document (Defection, the Poaching War). Every string is filled in; `lines` are paragraphs. */
-export interface DramaVM {
+export interface DramaDocVM {
   /** letter: a resignation letter someone is still drafting. email: a recruiter's offer. manifesto: a new lab's one-pager. */
   style: "letter" | "email" | "manifesto";
   /** What the file would be called ("resignation_DRAFT_v7.doc", "MANIFESTO.txt"). */
@@ -1145,6 +1145,8 @@ export interface ModInfoVM {
   source: string;
   /** Content hash of its manifest (8 hex digits), saved with the run. */
   hash: string;
+  /** A Daily Drama pack (FLT-34): the Today's Drama window describes it. */
+  drama?: boolean;
 }
 
 /** Start ▸ Settings ▸ Mods… (FLT-37): what `?mod=` loaded, what clashed and what failed. Mods only load from the URL. */
@@ -1158,6 +1160,51 @@ export interface ModsVM {
   errors: string[];
   /** Hash of the whole resolved content, or null when running the base game. */
   contentHash: string | null;
+}
+
+/** One published Daily Drama pack (FLT-34): a small parody mod about the day's industry news, merged after review. */
+export interface DramaPackVM {
+  id: string;
+  /** "2026-09-29" */
+  date: string;
+  /** "Tue 29 Sep" */
+  dateText: string;
+  /** "today", "yesterday", "3 days ago" */
+  ago: string;
+  /** "The Perk Arms Race" */
+  title: string;
+  /** Two sentences on what happened. */
+  description: string;
+  /** Up to three of its headlines, ready to read. */
+  teasers: string[];
+  /** Its event card, and the first day it can turn up (`null` when that isn't a plain day). */
+  event: { title: string; day: number | null } | null;
+  /** "1 event card · 8 headlines · 7 thoughts · 1 rival tweak" */
+  summary: string;
+  /** Loaded in this run. */
+  on: boolean;
+}
+
+/**
+ * Today's Drama (FLT-34): the published feed, and the pack this run has loaded. A pack loads through `?mod=` like any
+ * mod, so playing one starts a new lab (`actions.playDrama(id)`), and switching it off is the Mod Manager's
+ * `actions.removeMod(id)`.
+ */
+export interface DramaVM {
+  /** The Today's Drama window is open. */
+  open: boolean;
+  /** "idle" before anyone asked, "loading", "ready", or "error" when the feed could not be read. */
+  status: "idle" | "loading" | "ready" | "error";
+  /** The newest published pack, or null (none published yet, or not fetched yet). */
+  latest: DramaPackVM | null;
+  /** The older packs, newest first (only once the window has fetched them). */
+  archive: DramaPackVM[];
+  /** The pack loaded in this run, or null. */
+  on: DramaPackVM | null;
+  /** The newest pack is neither loaded nor looked at yet: badge the button. */
+  fresh: boolean;
+  /** The window opened by itself because a pack just loaded: say what's coming, not what's on offer. */
+  intro: boolean;
 }
 
 export interface SkinPickerVM {
@@ -1326,6 +1373,8 @@ export interface HudVM {
   mods: ModsVM;
   /** Disasters (FLT-32): `enabled: false` until the lab earns them. */
   disasters: DisastersVM;
+  /** Today's Drama (FLT-34). */
+  drama: DramaVM;
   layout: LayoutVM;
 }
 
@@ -1429,4 +1478,11 @@ export interface HudActions {
   // Mods.
   openMods(): void;
   closeMods(): void;
+  /** Switch a loaded mod off: the page reloads without it (a new lab, like loading one). */
+  removeMod(id: string): void;
+  // Today's Drama (FLT-34).
+  openDrama(): void;
+  closeDrama(): void;
+  /** Load a published Drama pack by id (reloads with it in `?mod=`: a new lab). */
+  playDrama(id: string): void;
 }

@@ -929,7 +929,7 @@
             {
               "on": "safety-",
               "amount": 0,
-              "text": "You don't have a governance framework. You have a Slack channel."
+              "text": "You don't have a governance framework. You have a #governance channel."
             }
           ],
           "cheers": [

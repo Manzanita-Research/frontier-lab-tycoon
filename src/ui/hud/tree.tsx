@@ -8,7 +8,7 @@ import type { EventVM, HudActions, HudVM, ToastVM } from "./types";
 export function Docked({ vm, actions }: { vm: HudVM; actions: HudActions }) {
   const { slots } = useSkin();
   const t = useT();
-  const { Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, ThoughtsPanel, Ticker, Toast, Assistant, Arena, Benchmarks, Voice, Factions, NewsControls, NewsArrival, PhotoButton, Papers, DisasterAlert } = slots;
+  const { Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, ThoughtsPanel, Ticker, Toast, Assistant, Arena, Benchmarks, Voice, Factions, NewsControls, NewsArrival, PhotoButton, Papers, DisasterAlert, DramaButton } = slots;
   // One toast at a time, the newest winning; a standing hint only shows while nobody is talking.
   const newest = vm.toasts.at(-1);
   const talking: ToastVM[] = newest ? [newest] : vm.hints.map((h, i): ToastVM => ({ id: -1 - i, text: t(`hint.${h}`), tone: "hint" }));
@@ -42,6 +42,8 @@ export function Docked({ vm, actions }: { vm: HudVM; actions: HudActions }) {
     PhotoButton: <PhotoButton photo={vm.photoMode} actions={actions} />,
     Papers: vm.papers.enabled && vm.visible.papers ? <Papers papers={vm.papers} layout={vm.layout} actions={actions} /> : null,
     DisasterAlert: vm.disasters.enabled ? <DisasterAlert disasters={vm.disasters} layout={vm.layout} actions={actions} /> : null,
+    // Like any mod, not earned on the ladder: there from the start.
+    DramaButton: <DramaButton drama={vm.drama} actions={actions} />,
   };
   return (
     <CoachProvider value={vm.coach?.target ?? null}>
@@ -50,14 +52,14 @@ export function Docked({ vm, actions }: { vm: HudVM; actions: HudActions }) {
   );
 }
 
-type ModalSlots = Pick<SlotComponents, "EventCard" | "Livestream" | "Hearing" | "LeakedChat" | "Drama" | "ReportCard" | "Bill" | "PromiseTracker">;
+type ModalSlots = Pick<SlotComponents, "EventCard" | "Livestream" | "Hearing" | "LeakedChat" | "DramaCard" | "ReportCard" | "Bill" | "PromiseTracker">;
 
 /** A card opens in the slot its kind asks for: the livestream, the witness table, the leaked chat, a drama document, the auditors' report, the bill, the Promise Tracker, or the plain card. */
-function EventModal({ vm, event, actions, slots: { EventCard, Livestream, Hearing, LeakedChat, Drama, ReportCard, Bill, PromiseTracker } }: { vm: HudVM; event: EventVM; actions: HudActions; slots: ModalSlots }) {
+function EventModal({ vm, event, actions, slots: { EventCard, Livestream, Hearing, LeakedChat, DramaCard, ReportCard, Bill, PromiseTracker } }: { vm: HudVM; event: EventVM; actions: HudActions; slots: ModalSlots }) {
   if (event.stream) return <Livestream event={event} stream={event.stream} actions={actions} />;
   if (event.hearing) return <Hearing event={event} hearing={event.hearing} actions={actions} />;
   if (event.leak) return <LeakedChat event={event} leak={event.leak} actions={actions} />;
-  if (event.drama) return <Drama event={event} drama={event.drama} actions={actions} />;
+  if (event.drama) return <DramaCard event={event} drama={event.drama} actions={actions} />;
   if (event.report) return <ReportCard event={event} report={event.report} actions={actions} />;
   if (event.bill) return <Bill event={event} bill={event.bill} actions={actions} />;
   if (event.tracker) return <PromiseTracker event={event} tracker={event.tracker} bill={vm.senate.bill} layout={vm.layout} actions={actions} />;
@@ -65,13 +67,13 @@ function EventModal({ vm, event, actions, slots: { EventCard, Livestream, Hearin
 }
 
 export function Modals({ vm, actions }: { vm: HudVM; actions: HudActions }) {
-  const { EventCard, Livestream, Hearing, LeakedChat, Drama, ReportCard, Bill, PromiseTracker, Confirm, UnlockCard, HowToPlay, EraCard, Outcome, NewsRoom, Mixer, ModManager, ModSkinOffer, SkinPicker, PaperMoment, CrumbWiki, DisasterMenu } = useSkin().slots;
+  const { EventCard, Livestream, Hearing, LeakedChat, DramaCard, ReportCard, Bill, PromiseTracker, Confirm, UnlockCard, HowToPlay, EraCard, Outcome, NewsRoom, Mixer, ModManager, ModSkinOffer, SkinPicker, PaperMoment, CrumbWiki, DisasterMenu, Drama } = useSkin().slots;
   return (
     <>
       {vm.senate.open && vm.senate.tracker && !vm.event?.tracker && (
         <PromiseTracker event={null} tracker={vm.senate.tracker} bill={vm.senate.bill} layout={vm.layout} actions={actions} />
       )}
-      {vm.event && <EventModal vm={vm} event={vm.event} actions={actions} slots={{ EventCard, Livestream, Hearing, LeakedChat, Drama, ReportCard, Bill, PromiseTracker }} />}
+      {vm.event && <EventModal vm={vm} event={vm.event} actions={actions} slots={{ EventCard, Livestream, Hearing, LeakedChat, DramaCard, ReportCard, Bill, PromiseTracker }} />}
       {vm.confirm && <Confirm confirm={vm.confirm} actions={actions} />}
       {vm.crumbWiki && <CrumbWiki key={vm.crumbWiki.key} wiki={vm.crumbWiki} actions={actions} />}
       {!vm.crumbWiki && vm.paperMoment && <PaperMoment key={vm.paperMoment.key} moment={vm.paperMoment} actions={actions} />}
@@ -82,6 +84,7 @@ export function Modals({ vm, actions }: { vm: HudVM; actions: HudActions }) {
       {vm.outcome && <Outcome outcome={vm.outcome} actions={actions} />}
       {vm.newsroom.view && <NewsRoom newsroom={vm.newsroom} actions={actions} />}
       {vm.sound.open && <Mixer sound={vm.sound} actions={actions} />}
+      {vm.drama.open && <Drama drama={vm.drama} actions={actions} />}
       {vm.mods.open && <ModManager mods={vm.mods} actions={actions} />}
       {vm.skins.open && <SkinPicker skins={vm.skins} actions={actions} />}
       {vm.skins.offer && !vm.skins.open && <ModSkinOffer offer={vm.skins.offer} actions={actions} />}

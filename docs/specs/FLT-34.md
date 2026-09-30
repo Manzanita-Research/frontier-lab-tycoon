@@ -37,3 +37,16 @@ Label: explore. Copied from the task description on 2026-09-30.
 5. Write `drama/AUTOMATION.md`: the exact bb automation (a daily schedule plus the prompt) for the lead to create **after Jem OKs the first PR**. Don't create the automation yourself.
 6. Part 2 comes after FLT-37 (M1b): `mods/drama/latest.json` served by the public Worker, and a "Today's Drama" button that loads it via `?mod=`.
 
+
+---
+**Part 2 (Sep 30): the Today's Drama button and the published feed.** Stacked on FLT-37 (mods live) and the part 1 PR.
+1. Publish `mods/drama/index.json` and `mods/drama/latest.json`, served by the public Worker as static assets. **Only merged, Jem-approved packs**: an unmerged Drama PR never appears.
+2. A **"Today's Drama" button in every skin** (in Frontier 95: Start ▸ Programs ▸ Today's Drama; the base skin has the fallback). It loads the latest pack through the mod loader (`?mod=`), shows a short "what's today's drama" card, and can be switched off in the Mod Manager.
+3. An archive list of past packs.
+4. Gate it like any mod: no ladder rung.
+5. Until the first Drama PR is approved, tests and screenshots use a fixture pack. Never fetch or display unmerged Drama PR content.
+
+**How it is built** (see `drama/README.md` ▸ Publishing):
+- "Approved" means "merged into main". `scripts/drama-feed.mjs` reads the packs from **main's git tree** (`origin/main`, else `main`), never from the working tree, so a Drama PR's preview, a local branch or an edit to an old pack cannot put unmerged copy on the page. With no main to read, the feed is empty. The deploy job checks out with `fetch-depth: 0` so it has main.
+- The build writes `/mods/drama/{index.json,latest.json,<date>/mod.json}`, and the rehearsal feed from `drama/fixtures/feed/` goes to `/mods/drama-fixture/...`. `?drama=fixture` reads the rehearsal feed.
+- Playing a pack reloads with `?mod=/mods/drama/<date>/mod.json`, which starts a new lab, because mods load before the first brick. There is one Drama pack at a time. Switching it off is the Mod Manager's "Switch off", or the button in the Drama window.

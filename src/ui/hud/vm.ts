@@ -31,9 +31,9 @@ import { collusionOf, crumbWikiOf, investigationOf } from "./collusion";
 import { factionChips, factionsOf } from "./factions";
 import type { FactionChipVM } from "./types";
 import type {
-  ArenaRowVM, DramaVM,
+  ArenaRowVM, DramaDocVM,
   ArenaVM, AuditVM, BillVM, SenateVM, TrackerVM, GoalVM, ReportCardVM, ToneVM, BenchCellVM, DisasterRunVM, DisastersVM, DisasterStageVM, MeterVM, RiskVM, UnderstaffedVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HearingMoveVM, HearingVM, HudVM, LeakVM, SenatorVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
-  ModsVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, ResponseVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, StreamVM, ThoughtRowVM, TrainingVM, TrendVM, VoiceVM, WalkerKindVM,
+  DramaVM, ModsVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, ResponseVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, StreamVM, ThoughtRowVM, TrainingVM, TrendVM, VoiceVM, WalkerKindVM,
 } from "./types";
 import { defs } from "../../sim/defs";
 
@@ -41,6 +41,8 @@ import { defs } from "../../sim/defs";
 export const SHIPPED_DAYS = 3;
 /** No `?mod=`: the base game, the Mod Manager shut. */
 export const NO_MODS_VM: ModsVM = { open: false, list: [], conflicts: [], errors: [], contentHash: null };
+/** Nothing fetched from the Drama feed yet, no pack loaded, the window shut. */
+export const NO_DRAMA_VM: DramaVM = { open: false, status: "idle", latest: null, archive: [], on: null, fresh: false, intro: false };
 /** The newest headlines a ticker carries. */
 export const TICKER_ITEMS = 24;
 
@@ -86,6 +88,8 @@ export interface HudInput {
   skins: SkinPickerVM;
   /** The Mod Manager. Optional: none means no mods and the window shut. */
   mods?: ModsVM;
+  /** Today's Drama (FLT-34). Optional: none means nothing fetched and the window shut. */
+  drama?: DramaVM;
   viewport: { width: number; height: number };
 }
 
@@ -353,7 +357,7 @@ function bubblesOf(i: HudInput, chips: ReadonlyMap<string, FactionChipVM>): Bubb
 }
 
 /** A drama card's document, filled in from the pack's template. */
-function dramaOf(id: string, vars: Record<string, string>): DramaVM | null {
+function dramaOf(id: string, vars: Record<string, string>): DramaDocVM | null {
   const l = DRAMA_LETTERS.get(id);
   if (!l) return null;
   const f = (s: string) => fillTemplate(s, vars);
@@ -979,6 +983,7 @@ export function hudViewModel(i: HudInput): HudVM {
     skins: i.skins,
     mods: i.mods ?? NO_MODS_VM,
     disasters: disastersOf(i, play.visible.disasters),
+    drama: i.drama ?? NO_DRAMA_VM,
     layout: { width: i.viewport.width, height: i.viewport.height, phone: i.viewport.width <= 480, compact: i.viewport.width <= 640, tall: i.viewport.height >= 800 },
   };
 }

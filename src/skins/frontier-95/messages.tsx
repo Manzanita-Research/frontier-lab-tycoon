@@ -63,6 +63,8 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
   const [tipsOff, setTipsOff] = useState(readTipsOff);
   const [tip, setTip] = useState<number | null>(null);
   const [reply, setReply] = useState<string | null>(null);
+  // Today's Drama: the pack the clip has been told "no thanks" about (it asks again when a newer one lands).
+  const [dramaNo, setDramaNo] = useState<string | null>(null);
   const phone = vm.layout.compact;
   // One at a time, the newest toast winning; the game only sends a hint while nobody is talking.
   const hints = vm.hints;
@@ -119,6 +121,19 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
           {toasts.map((toast) => (
             <Toast key={toast.id} toast={toast} actions={actions} />
           ))}
+        </div>
+      )}
+      {!busy && tip === null && !phone && vm.drama.fresh && vm.drama.latest && dramaNo !== vm.drama.latest.id && (
+        <div className="f95-balloon tipballoon" role="status">
+          <b>It looks like the AI industry is fighting again!</b> Would you like to see Today's Drama? ({vm.drama.latest.title})
+          <div className="f95-options">
+            <button type="button" className="a" onClick={() => actions.openDrama()}>
+              Show me the drama
+            </button>
+            <button type="button" onClick={() => setDramaNo(vm.drama.latest?.id ?? null)}>
+              No, I'm trying to run a lab
+            </button>
+          </div>
         </div>
       )}
       {!busy && tip !== null && (
