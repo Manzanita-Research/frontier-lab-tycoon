@@ -81,6 +81,11 @@
     ]
   },
   "scenes": {
+    "midgame": {
+      "title": "FLT-48 Part A: the scripted mid-game campus, paused near Y2 Mar",
+      "query": { "scenario": "midgame", "warp": null, "seed": 48, "focus": "11.5,14.5", "zoom": 43, "skin": "frontier-95" },
+      "steps": []
+    },
     "overview": {
       "title": "The campus, mid-morning, paused",
       "steps": []
