@@ -34,6 +34,7 @@
     "@react-three/postprocessing": "3.1.3",
     "@xstate/effect": "0.1.0-alpha.5",
     "effect": "4.0.0-rc.118",
+    "koota": "0.6.6",
     "postprocessing": "6.39.5",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
@@ -43,6 +44,7 @@
   },
   "devDependencies": {
     "@effect/vitest": "4.0.0-rc.118",
+    "@flt/mod-cli": "workspace:*",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
     "@types/three": "^0.180.0",
@@ -50,7 +52,6 @@
     "playwright": "1.63.0",
     "typescript": "~5.9.2",
     "vite": "^7.1.0",
-    "vitest": "5.0.2",
-    "@flt/mod-cli": "workspace:*"
+    "vitest": "5.0.2"
   }
 }

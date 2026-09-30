@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "koota": {
+      "source": "pmndrs/koota",
+      "sourceType": "github",
+      "skillPath": "skills/koota/SKILL.md",
+      "computedHash": "a32ea2b46508e12f95d3a8a8dd4c76fffd80c4c1cbb6d2d47ba61a557e67cb46"
+    }
+  }
+}
