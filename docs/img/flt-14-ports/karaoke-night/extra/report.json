@@ -1,0 +1,61 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "deb7d601138ef4e226ba7cb77768f05d8f3aaa87"
+  },
+  "head": {
+    "branch": "flt-14-port-karaoke-night",
+    "sha": "dcf74bb",
+    "dirty": true
+  },
+  "seconds": 164.694,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "release",
+      "skin": "karaoke-night",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/karaoke-night/extra/before/release@karaoke-night.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/karaoke-night/extra/after/release@karaoke-night.png",
+      "title": "A model release: confetti, the camera swoops to the Hall",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/karaoke-night/extra/compare/release@karaoke-night.png",
+      "changed": 0.8690609567901234
+    },
+    {
+      "scene": "leap-shipnow",
+      "skin": "karaoke-night",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/karaoke-night/extra/before/leap-shipnow@karaoke-night.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/karaoke-night/extra/after/leap-shipnow@karaoke-night.png",
+      "title": "Release Leapfrog: \"Ship now at 94% ready\" (a rival just dropped)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/karaoke-night/extra/compare/leap-shipnow@karaoke-night.png",
+      "changed": 0.8830547839506173
+    },
+    {
+      "scene": "leap-chart",
+      "skin": "karaoke-night",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/karaoke-night/extra/before/leap-chart@karaoke-night.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/karaoke-night/extra/after/leap-chart@karaoke-night.png",
+      "title": "Release Leapfrog: the presenter shows the wrong chart",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/karaoke-night/extra/compare/leap-chart@karaoke-night.png",
+      "changed": 0.8721697530864198
+    },
+    {
+      "scene": "leap-phone",
+      "skin": "karaoke-night",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/karaoke-night/extra/before/leap-phone@karaoke-night.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/karaoke-night/extra/after/leap-phone@karaoke-night.png",
+      "title": "Release Leapfrog: the forced-response card on a phone",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/karaoke-night/extra/compare/leap-phone@karaoke-night.png",
+      "changed": 0.8211181492283388
+    },
+    {
+      "scene": "photo",
+      "skin": "karaoke-night",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/karaoke-night/extra/before/photo@karaoke-night.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/karaoke-night/extra/after/photo@karaoke-night.png",
+      "title": "Photo mode",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/karaoke-night/extra/compare/photo@karaoke-night.png",
+      "changed": 0.02519598765432099
+    }
+  ],
+  "errors": []
+}
