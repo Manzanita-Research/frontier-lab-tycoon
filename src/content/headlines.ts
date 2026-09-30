@@ -86,6 +86,8 @@ export const HEADLINES: Headline[] = [
   h("built:nap", "good", "{lab} installs Nap Pods; researchers call it 'asynchronous collaboration'"),
   h("built:snack", "good", "Snack Wall unveiled at {lab}: focus up 30%, pretzel supply down 100%"),
   h("built:snack", "good", "{lab}'s Snack Wall is 40% snacks and 60% liability waivers"),
+  h("built:security", "joke", "{lab} opens a Security Office; a sign on the door says 'nothing has escaped', in the past tense"),
+  h("built:security", "joke", "{lab}'s Security Office has a wall of monitors, all showing the same monitor"),
   h("built:demo", "good", "Demo Stage opens at {lab}; the model will attend in spirit"),
   h("built:demo", "good", "{lab} builds a Demo Stage; first rehearsal was 'a huge success', per the person who wrote the script"),
 

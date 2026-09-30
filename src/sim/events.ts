@@ -10,6 +10,7 @@ import { buildingAt, inBounds, isPathTile, rectContains } from "./pathfind";
 import { clampDiscourse, syncProtesters } from "./protest";
 import { eraDef } from "../content/eras";
 import { applyRaceAction } from "./race/actions";
+import { applyLeapfrogEffect } from "./race/leapfrog/actions";
 import { eraOfState } from "./race/race";
 import { raceVars } from "./race/finance";
 import { modeOf } from "./walkers";
@@ -116,6 +117,11 @@ function applyEffect(state: GameState, rng: Rng, e: Effect, vars: Record<string,
       break;
     case "race":
       applyRaceAction(state, rng, e.action);
+      break;
+    case "voice":
+    case "trust":
+    case "leapfrog":
+      applyLeapfrogEffect(state, rng, e);
       break;
   }
 }

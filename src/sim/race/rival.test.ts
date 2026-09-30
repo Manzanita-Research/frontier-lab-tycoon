@@ -9,7 +9,7 @@ const ctx = (id: keyof typeof RIVAL_BY_ID, over: Partial<RivalContext> = {}): Ri
   const d = RIVAL_BY_ID[id];
   return { id, personality: d.personality, capability: d.startCapability, hype: d.startHype, baseHype: d.startHype, weeks: 0, releases: 0, open: false, momentum: 1, model: "", lastRelease: -1, ...over };
 };
-const week = (over: Record<string, unknown> = {}) => ({ type: "WEEK" as const, week: 1, aggro: 1, pace: 1, chase: 1, lengthRoll: 0.5, gainRoll: 0.5, openRoll: 0.5, poachRoll: 0.99, name: "Model-1", ...over });
+const week = (over: Record<string, unknown> = {}) => ({ type: "WEEK" as const, week: 1, aggro: 1, pace: 1, chase: 1, lengthRoll: 0.5, gainRoll: 0.5, openRoll: 0.5, poachRoll: 0.99, name: "Model-1", hold: false, ...over });
 const fresh = (id: keyof typeof RIVAL_BY_ID, over: Partial<RivalContext> = {}) => initialStored(rivalMachine, ctx(id, over));
 
 describe("rival machine", () => {

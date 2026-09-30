@@ -1,0 +1,11 @@
+{
+  "name": "starter-mod",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node ../../packages/flt-mod-cli/cli.mjs check mod.json"
+  },
+  "devDependencies": {
+    "@flt/mod-sdk": "workspace:*"
+  }
+}
