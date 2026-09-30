@@ -3,6 +3,7 @@ import { BUILDINGS } from "../content/buildings";
 import { REVENUE_PER_CAPABILITY, RESEARCHER_SALARY, TICKS_PER_DAY } from "./constants";
 import { step } from "./machines/run";
 import { economyMachine } from "./machines/economy";
+import { revenueEffect, upkeepFactor } from "./disasters/driver";
 import { addToast, pushNews } from "./news";
 import { isReachable } from "./pathfind";
 import { addIncident } from "./vibes";
@@ -21,9 +22,9 @@ export function hypeResting(state: GameState): number {
 export function estimateLedger(state: GameState, researchers = state.walkers.filter((w) => w.kind === "researcher").length): Ledger {
   let expenses = researchers * RESEARCHER_SALARY + payroll(state);
   let income = 0;
-  const factor = revenueFactor(state);
+  const factor = revenueFactor(state) * revenueEffect(state);
   for (const b of state.buildings) {
-    expenses += BUILDINGS[b.kind].upkeepPerDay;
+    expenses += BUILDINGS[b.kind].upkeepPerDay * upkeepFactor(state, b.kind);
     // A gateway that is down earns nothing (and the status page says all is well).
     if (b.kind !== "gateway" || b.broken || !isReachable(state, b)) continue;
     const amount = Math.round(state.capability * REVENUE_PER_CAPABILITY * factor);

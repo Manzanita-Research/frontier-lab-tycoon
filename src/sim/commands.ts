@@ -1,5 +1,9 @@
 // Player actions. They are queued and applied at the start of the next tick.
 import { BUILDINGS, BULLDOZE_REFUND, PATH_PRICE, type BuildingKind } from "../content/buildings";
+import { publishPaper, setPublicationPolicy } from "./race/papers/driver";
+import type { PublicationPolicy } from "./race/papers/policy";
+import { setRisk, triggerDisaster } from "./disasters/driver";
+import type { Risk } from "./disasters/types";
 import { chooseEvent } from "./events";
 import { addToast, pushNews } from "./news";
 import { clearSlop } from "./slop";
@@ -14,6 +18,8 @@ export type Command =
   | { type: "placePath"; x: number; z: number; confirmed?: boolean }
   | { type: "placeBuilding"; kind: BuildingKind; x: number; z: number; confirmed?: boolean }
   | { type: "cancelConfirm" }
+  | { type: "setPublicationPolicy"; policy: PublicationPolicy }
+  | { type: "publishPaper"; id: number; route: "preprint" | "review" }
   | { type: "bulldoze"; x: number; z: number }
   | { type: "startTraining" }
   | { type: "continueTutorial" }
@@ -24,7 +30,11 @@ export type Command =
   /** Paint (`on`) or erase one tile of a staffer's patrol zone; `clearZone` wipes it. */
   | { type: "paintZone"; id: number; x: number; z: number; on: boolean }
   | { type: "clearZone"; id: number }
-  | { type: "chooseEvent"; eventId: string; choiceIndex: number };
+  | { type: "chooseEvent"; eventId: string; choiceIndex: number }
+  /** Trigger a disaster on purpose (the Disasters menu, after its confirmation; the `?disaster=` hook). A refusal is a toast. */
+  | { type: "disaster"; id: string }
+  /** The random-disaster setting: off, rare, normal or chaos. */
+  | { type: "setRisk"; risk: Risk };
 
 export type PlaceResult = { ok: true } | { ok: false; reason: string };
 
@@ -141,6 +151,20 @@ export function applyCommands(state: GameState, commands: readonly Command[], rn
         break;
       case "clearZone":
         clearZone(state, c.id);
+        break;
+      case "setPublicationPolicy":
+        setPublicationPolicy(state, c.policy, rng);
+        break;
+      case "publishPaper":
+        publishPaper(state, c.id, c.route, rng);
+        break;
+      case "disaster": {
+        const r = triggerDisaster(state, c.id, { forced: true });
+        if (!r.ok) addToast(state, r.reason, "bad");
+        break;
+      }
+      case "setRisk":
+        setRisk(state, c.risk);
         break;
       case "startTraining":
         if (!state.buildings.some((b) => b.kind === "hall")) addToast(state, "Build a Training Hall first.", "bad");

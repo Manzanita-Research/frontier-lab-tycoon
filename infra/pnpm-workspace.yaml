@@ -1,0 +1,4 @@
+# Infrastructure keeps its own lockfile and installs separately in Deploy CI.
+# Stop pnpm from discovering the game's parent mod-authoring workspace.
+packages:
+  - .

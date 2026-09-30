@@ -14,6 +14,8 @@ import type { Rng } from "../rng";
 import type { GameState } from "../types";
 import { resign } from "../walkers";
 import { refreshBoard } from "./arena";
+import { queueFinished, pushVoice } from "./leapfrog/ops";
+import { LEAPFROG } from "../../content/leapfrog";
 import { eraMachine, eraNumber } from "./era";
 import { fundingDue, openDropActive, OPEN_DROP_DAYS, raceVars } from "./finance";
 import { rdMultiplier } from "./rd";
@@ -79,7 +81,7 @@ export function dailyRace(state: GameState, rng: Rng) {
 export const chase = (mine: number, theirs: number): number => Math.max(0.55, Math.min(1.6, Math.sqrt(mine / Math.max(1, theirs))));
 
 /** Model name for a rival's next release. Always exactly one draw, so the stream doesn't depend on who ships. */
-function modelName(def: RivalDef, nth: number, rng: Rng): string {
+export function modelName(def: RivalDef, nth: number, rng: Rng): string {
   if (!def.models) {
     rng.next();
     return "";
@@ -109,6 +111,8 @@ export function weekly(state: GameState, rng: Rng) {
       openRoll: rng.next(),
       poachRoll: rng.next(),
       name: modelName(def, before.context.releases + 1, rng),
+      // Release Leapfrog: labs with a product finish models privately and the calendar picks their launch day.
+      hold: state.leapfrog.enabled && def.models !== null,
     };
     const { stored, effects } = step(rivalMachine, before, event);
     race.rivals[i] = stored;
@@ -133,25 +137,39 @@ export function weekly(state: GameState, rng: Rng) {
   if (rng.chance(0.4)) raceNews(state, rng, `era:${eraOfState(state)}` as NewsTrigger);
 }
 
+/**
+ * A rival's model goes public: the headline, and the open-weights check (a free model near yours eats your revenue).
+ * `quiet` skips the headline (Release Leapfrog's day-after answers have their own).
+ */
+export function announceRelease(state: GameState, rng: Rng, def: RivalDef, e: Extract<RivalEffect, { type: "RELEASED" }>, quiet = false) {
+  const race = state.race;
+  const vars = { rival: def.name, model: e.model, lab: state.labName };
+  const ahead = e.capability > state.capability;
+  const lines = !def.models ? (def.headlines.stunt ?? []) : e.open && def.headlines.open && rng.chance(0.5) ? def.headlines.open : def.headlines.release;
+  if (!quiet && lines.length > 0) addNews(state, fillTemplate(rng.pick(lines), vars), !def.models ? "joke" : ahead ? "bad" : "neutral");
+
+  const close = e.capability >= state.capability * DROP_FLOOR && e.capability <= state.capability * DROP_CEILING;
+  if (e.open && def.models && close && state.ledger.income > 0 && !openDropActive(state) && state.day - race.lastDrop >= DROP_GAP_DAYS) {
+    race.openDrop = { until: state.day + OPEN_DROP_DAYS, rival: def.id, model: e.model };
+    race.lastDrop = state.day;
+    state.flags["offer:openWeights"] = state.day;
+    raceNews(state, rng, "openDrop", { rival: def.name, model: e.model });
+    addToast(state, `${def.name} just dropped ${e.model} for free. Revenue -30% for ${OPEN_DROP_DAYS} days.`, "bad");
+  }
+}
+
 function applyRival(state: GameState, rng: Rng, def: RivalDef, e: RivalEffect) {
   const race = state.race;
   switch (e.type) {
-    case "RELEASED": {
-      const vars = { rival: def.name, model: e.model, lab: state.labName };
-      const ahead = e.capability > state.capability;
-      const lines = !def.models ? (def.headlines.stunt ?? []) : e.open && def.headlines.open && rng.chance(0.5) ? def.headlines.open : def.headlines.release;
-      if (lines.length > 0) addNews(state, fillTemplate(rng.pick(lines), vars), !def.models ? "joke" : ahead ? "bad" : "neutral");
-
-      const close = e.capability >= state.capability * DROP_FLOOR && e.capability <= state.capability * DROP_CEILING;
-      if (pressureReady(state) && e.open && def.models && close && state.ledger.income > 0 && !openDropActive(state) && state.day - race.lastDrop >= DROP_GAP_DAYS) {
-        race.openDrop = { until: state.day + OPEN_DROP_DAYS, rival: def.id, model: e.model };
-        race.lastDrop = state.day;
-        state.flags["offer:openWeights"] = state.day;
-        raceNews(state, rng, "openDrop", { rival: def.name, model: e.model });
-        addToast(state, `${def.name} just dropped ${e.model} for free. Revenue -30% for ${OPEN_DROP_DAYS} days.`, "bad");
-      }
+    case "RELEASED":
+      announceRelease(state, rng, def, e);
+      // A lab with no product has only stunts, which are the whole of its news cycle.
+      if (!def.models) pushVoice(state, def.id, LEAPFROG.rules.voice.stuntPush);
       return;
-    }
+    case "FINISHED":
+      // Release Leapfrog: the model waits in the queue for a launch date.
+      queueFinished(state, e);
+      return;
     case "POACH": {
       // The poached researcher hands in the box like any quitter (FLT-8): box, gate, headline, a dent in the Vibes.
       const staff = state.walkers.filter((w) => w.kind === "researcher" && w.machine.value !== "leaving" && w.machine.value !== "quitting");

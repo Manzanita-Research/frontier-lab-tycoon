@@ -54,14 +54,19 @@ export const breakdownChance = (reliability: number, utilisation: number): numbe
 
 export const brokenBuildings = (state: GameState): Building[] => state.buildings.filter((b) => b.broken);
 
-/** Fire in the cluster, an outage at the gateway: the headline, the status page joke, the toast, and the ripple through the crowd. */
-function breakDown(state: GameState, rng: Rng, b: Building) {
+/** The state change of a breakdown, with no words: the building is out, the walkers re-plan, the Vibes take a dent. Disasters (FLT-17) use it too. */
+export function breakBuilding(state: GameState, b: Building) {
   b.broken = true;
   b.brokenTick = state.tick;
   state.version++;
   state.flags.breakdowns = (state.flags.breakdowns ?? 0) + 1;
   state.flags.lastBreakdown = b.id;
   addIncident(state, 0.12);
+}
+
+/** Fire in the cluster, an outage at the gateway: the headline, the status page joke, the toast, and the ripple through the crowd. */
+function breakDown(state: GameState, rng: Rng, b: Building) {
+  breakBuilding(state, b);
   pushNews(state, rng, `breakdown:${b.kind}` as NewsTrigger);
   // The status page is never wrong, because it is never updated.
   if (b.kind === "cluster" || b.kind === "gateway" || b.kind === "hall" || b.kind === "datacenter") pushNews(state, rng, "statusPage");
