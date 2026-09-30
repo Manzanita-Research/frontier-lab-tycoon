@@ -112,12 +112,8 @@
     "x.ink": "#111111"
   },
   "strings": {
-    "build.facilities": "EXHIBITS",
-    "build.run": "GO TO…",
     "run.title": "Go to",
     "run.prompt": "Type where you want to go! The disc takes you there.",
-    "run.open": "Go to:",
-    "run.ok": "GO!",
     "build.group.compute": "Big Machines",
     "build.group.research": "Science Stuff",
     "build.group.amenities": "Fun Stuff",

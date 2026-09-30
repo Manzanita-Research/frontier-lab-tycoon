@@ -82,7 +82,7 @@ describe("Discovery Disc '96", () => {
 
   it("the open tray is buttons with a picture each, a price and the hotkey, then the locked stamps, then Help", () => {
     const teasers = [{ label: "2 more", hint: "Ship your first model" }];
-    // The top row is the tools, EXHIBITS, GO TO… and Help; EXHIBITS is a back stamp, every building and the locked one (FLT-63).
+    // The top row is the tools, Facilities, Run… and Help; Facilities is a back stamp, every building and the locked one (FLT-63).
     const top = html(<Stamps items={vm.buildItems} teasers={teasers} onPick={() => undefined} onHelp={() => undefined} actions={actions} />);
     const exhibits = html(<Stamps items={vm.buildItems} teasers={teasers} onPick={() => undefined} onHelp={() => undefined} actions={actions} view="facilities" />);
     const out = top + exhibits;

@@ -86,7 +86,7 @@ describe("Karaoke Night", () => {
 
   it("the arcade has a round button with an LCD tag for each tool, and greys out what you cannot afford", () => {
     const items = vm.buildItems.map((it, i) => (i === 1 ? { ...it, affordable: false, selected: false } : it));
-    // The top row is the tools, the Songbook, Request… and Help; the Songbook is a back button and every building (FLT-63).
+    // The top row is the tools, Facilities, Run… and Help; Facilities is a back button and every building (FLT-63).
     const top = html(<Arcade items={items} teasers={[]} actions={actions} done={() => {}} />);
     const book = html(<Arcade items={items} teasers={[]} actions={actions} done={() => {}} view="facilities" />);
     const out = top + book;

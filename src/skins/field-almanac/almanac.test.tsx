@@ -142,13 +142,13 @@ describe("Field Almanac", () => {
   });
 
   it("the shelf has an engraving, a price and the hotkey for every tool, and Bulldoze is Clear land", () => {
-    // The top shelf is the tools, the Field Guide, the Index and Help; the Field Guide is a back engraving and every building (FLT-63).
+    // The top shelf is the tools, Facilities, Run… and Help; Facilities is a back engraving and every building (FLT-63).
     const top = html(<Shelf items={vm.buildItems} teasers={[]} actions={actions} done={() => {}} />);
     const guide = html(<Shelf items={vm.buildItems} teasers={[]} actions={actions} done={() => {}} view="facilities" />);
     const out = top + guide;
     expect(out.match(/fa-well/g)?.length).toBe(vm.buildItems.length + 4);
     expect(top).toContain('data-testid="start-facilities"');
-    expect(top).toContain("Field Guide");
+    expect(top).toContain("Facilities");
     expect(guide).toContain("Plate I.");
     expect(out).toContain("Clear land");
     expect(out).toContain('aria-pressed="true"'); // the tool in hand

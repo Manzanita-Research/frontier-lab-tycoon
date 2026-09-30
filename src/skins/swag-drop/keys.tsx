@@ -50,8 +50,8 @@ const RunGlyph = () => (
 );
 
 /**
- * What is inside the open deck. The top row is the tools (Path, Bulldoze), the Fn key (Facilities: the buildings, in
- * labelled clusters of keys) and Launch… (the widgets, in a Run box), then Help. `done` shuts the deck.
+ * What is inside the open deck. The top row is the tools (Path, Bulldoze), Facilities (the buildings, in
+ * labelled clusters of keys) and Run… (the widgets, in a Run box), then Help. `done` shuts the deck.
  */
 export function Deck({ items, teasers = [], widgets = [], actions, done, view }: Pick<SlotPropsMap["BuildBar"], "items" | "teasers" | "actions" | "widgets"> & { done: () => void; view?: StartView }) {
   const t = useT();

@@ -3158,7 +3158,7 @@
   }
 }
 
-/* ---- FLT-63: the arcade's Songbook (Facilities) rows and the Request… box (Run) ---- */
+/* ---- FLT-63: the arcade's Facilities rows and the Run… box ---- */
 [data-skin="karaoke-night"] {
   .kn-tray.view-facilities {
     align-items: flex-end;

@@ -122,12 +122,8 @@
   "strings": {
     "build.facilitiesCount": "{n} songs",
     "build.runCount": "{n} on tap",
-    "build.facilities": "Songbook",
-    "build.run": "Request…",
     "run.title": "Request a song",
     "run.prompt": "Write a widget on the slip like a song title. The KJ cues it up.",
-    "run.open": "Song:",
-    "run.ok": "Cue it",
     "build.group.compute": "Power Ballads",
     "build.group.research": "Chart Toppers",
     "build.group.amenities": "Crowd Pleasers",

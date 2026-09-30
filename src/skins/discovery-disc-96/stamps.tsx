@@ -140,8 +140,8 @@ export function StampArt({ kind }: { kind: string }) {
 }
 
 /**
- * The open tray. The top row is the tools (Path, Bulldoze), EXHIBITS (Facilities: the buildings, one labelled drawer per
- * group, then the ones still in the box) and GO TO… (the widgets, in a Run box), then Help.
+ * The open tray. The top row is the tools (Path, Bulldoze), Facilities (the buildings, one labelled drawer per
+ * group, then the ones still in the box) and Run… (the widgets, in a Run box), then Help.
  */
 export function Stamps({ items, teasers, widgets = [], onPick, onHelp, actions, view }: { items: SlotPropsMap["BuildBar"]["items"]; teasers: NonNullable<SlotPropsMap["BuildBar"]["teasers"]>; widgets?: WidgetVM[]; onPick: () => void; onHelp: () => void; actions: SlotPropsMap["BuildBar"]["actions"]; view?: StartView }) {
   const t = useT();

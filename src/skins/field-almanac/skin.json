@@ -133,11 +133,8 @@
     "shadow.pop": "0 6px 14px -8px rgba(34, 49, 58, 0.5)"
   },
   "strings": {
-    "build.facilities": "Field Guide",
-    "build.run": "Index…",
     "run.title": "Index",
     "run.prompt": "Look up a widget by name, and the almanac turns to its page.",
-    "run.open": "Look up:",
     "build.facilitiesCount": "{n} plates",
     "build.runCount": "{n} entries",
     "build.groupNo": "Plate {n}.",

@@ -14,17 +14,17 @@ const vm = (): HudVM => hudViewModel(fixtureInput({ width: 1440, height: 900 }))
 const html = (skin: LoadedSkin, node: React.ReactNode) => renderToString(<SkinProvider skin={skin}>{node}</SkinProvider>).replace(/<!-- -->/g, "");
 
 describe("homepage-98", () => {
-  it("the open ring is the tools, the Sitemap and Go to URL… on top, and every building behind the Sitemap (FLT-63)", async () => {
+  it("the open ring is the tools, Facilities and Run… on top, and every building behind Facilities (FLT-63)", async () => {
     const { skin } = await prepareSkin("homepage-98");
     const v = vm();
     const top = html(skin, <Ring items={v.buildItems} teasers={[]} widgets={v.widgets} actions={actions} done={() => undefined} />);
     const map = html(skin, <Ring items={v.buildItems} teasers={[]} widgets={v.widgets} actions={actions} done={() => undefined} view="facilities" />);
     expect(top).toContain('data-testid="start-facilities"');
-    expect(top).toContain("Sitemap");
-    expect(top).toContain("Go to URL…");
+    expect(top).toContain("Facilities");
+    expect(top).toContain("Run…");
     for (const it of v.buildItems) expect(top + map).toContain(`data-coach="build:${it.kind}"`);
     const run = html(skin, <Ring items={v.buildItems} teasers={[]} widgets={v.widgets} actions={actions} done={() => undefined} view="run" />);
-    expect(run).toContain("Address:");
+    expect(run).toContain("Best viewed at 800×600");
     expect(run).toContain('data-testid="run-input"');
   });
 

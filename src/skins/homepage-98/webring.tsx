@@ -96,8 +96,8 @@ export function BuildBar({ items, tip, teasers = [], widgets = [], actions }: Sl
 }
 
 /**
- * The open ring. The top row is the tools (Path, Bulldoze), the Sitemap (Facilities: the buildings, a heading per
- * section like any good homepage) and Go to URL… (the widgets, in an address bar), then Help.
+ * The open ring. The top row is the tools (Path, Bulldoze), Facilities (the buildings, a heading per
+ * section like any good homepage) and Run… (the widgets, in an address bar), then Help.
  */
 export function Ring({ items, teasers = [], widgets = [], actions, done, strip, view }: Pick<SlotPropsMap["BuildBar"], "items" | "teasers" | "actions" | "widgets"> & { done: () => void; strip?: RefObject<HTMLDivElement | null>; view?: StartView }) {
   const t = useT();

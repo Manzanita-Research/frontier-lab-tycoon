@@ -2141,7 +2141,7 @@
   }
 }
 
-/* ---- FLT-63: the Sitemap (Facilities) with a heading per section, and Go to URL… as an address bar ---- */
+/* ---- FLT-63: Facilities with a heading per section, and Go to URL… as an address bar ---- */
 [data-skin="homepage-98"] {
   .gc-row.view-facilities {
     align-items: flex-end;
@@ -2195,7 +2195,7 @@
 }
 [data-skin="homepage-98"] {
   @media (max-width: 640px) {
-    /* On a phone the Sitemap and the address bar take a full line under the arrows. */
+    /* On a phone Facilities and the address bar take a full line under the arrows. */
     .gc-row.view-facilities,
     .gc-row.view-run {
       grid-column: 1 / -1;

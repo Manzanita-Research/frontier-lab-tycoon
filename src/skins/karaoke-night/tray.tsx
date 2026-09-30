@@ -1,6 +1,6 @@
 // The arcade: every build tool is a round button with a little LCD under it for the name and the price. The tool in hand
 // is pressed down and ringed in white; one you cannot afford goes grey. The whole row sits behind one BUILD button you press
-// (the tools, the Songbook of buildings and Request… for the widgets, then Help; FLT-63).
+// (the tools, Facilities for the buildings and Run… for the widgets, then Help; FLT-63).
 import { useState, type CSSProperties } from "react";
 import { RunBox, useCoach, useStartMenu, useT, type StartView } from "../kit";
 import type { SlotPropsMap } from "../types";
@@ -39,8 +39,8 @@ const BackIcon = () => (
 );
 
 /**
- * What is inside the open arcade. The top row is the tools (Path, Bulldoze), the Songbook (Facilities: the buildings, in
- * labelled rows) and Request… (the widgets, in a Run box), then Help. `done` shuts it.
+ * What is inside the open arcade. The top row is the tools (Path, Bulldoze), Facilities (the buildings, in
+ * labelled rows) and Run… (the widgets, in a Run box), then Help. `done` shuts it.
  */
 export function Arcade({ items, teasers = [], widgets = [], actions, done, view }: Pick<SlotPropsMap["BuildBar"], "items" | "teasers" | "actions" | "widgets"> & { done: () => void; view?: StartView }) {
   const t = useT();

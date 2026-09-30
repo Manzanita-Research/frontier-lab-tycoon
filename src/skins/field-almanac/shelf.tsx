@@ -36,8 +36,8 @@ const BackIcon = () => (
 );
 
 /**
- * What is inside the open shelf. The top shelf is the tools (Path, Clear land), the Field Guide (Facilities: the
- * buildings, one captioned plate per group) and the Index (Run…: the widgets), then Help. `done` shuts the shelf.
+ * What is inside the open shelf. The top shelf is the tools (Path, Clear land), Facilities (the
+ * buildings, one captioned plate per group) and Run… (the widgets), then Help. `done` shuts the shelf.
  */
 export function Shelf({ items, teasers = [], widgets = [], actions, done, view }: Pick<SlotPropsMap["BuildBar"], "items" | "teasers" | "actions" | "widgets"> & { done: () => void; view?: StartView }) {
   const t = useT();
