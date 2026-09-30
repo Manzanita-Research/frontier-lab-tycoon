@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { BASE_STRINGS, BASE_TOKENS, REQUIRED_TOKENS, fillString, tokenVar, validateManifest } from "./schema";
-import { BASE_ID, DEFAULT_SKIN, catalog, initialSkinId, tokenSheet } from "./registry";
+import { BASE_ID, DEFAULT_SKIN, catalog, bootChoice, tokenSheet } from "./registry";
 import { SLOT_NAMES } from "./types";
 import { docs, read, sources } from "./files";
 
@@ -121,9 +121,9 @@ describe("the token and string contract", () => {
     expect(tokenSheet(BASE_ID, {})).not.toContain("data-skin=");
   });
   it("picks the starting skin from ?skin=, then storage, then the default", () => {
-    expect(initialSkinId("?skin=homepage-98", "swag-drop")).toBe("homepage-98");
-    expect(initialSkinId("", "swag-drop")).toBe("swag-drop");
-    expect(initialSkinId("?debug=1", null)).toBe(DEFAULT_SKIN);
+    expect(bootChoice("?skin=homepage-98", "base")).toEqual({ id: "homepage-98", notice: false });
+    expect(bootChoice("", "base")).toEqual({ id: "base", notice: false });
+    expect(bootChoice("?debug=1", null)).toEqual({ id: DEFAULT_SKIN, notice: false });
     expect(DEFAULT_SKIN).toBe("frontier-95");
   });
   it("keeps the slot list and the docs in step", () => {

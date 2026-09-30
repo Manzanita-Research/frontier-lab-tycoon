@@ -1,7 +1,7 @@
 // The keyboard on the desk: the build palette, the speed keys, the camera and the news/sound/skin dock, all keycaps.
 // A keycap is a cream face over a darker front band; pressing it sinks it (CSS: `.on` and `:active`).
 import { useState, type ReactNode } from "react";
-import { ALL_VISIBLE, DramaIcon, useCoach, useT } from "../kit";
+import { ALL_VISIBLE, DramaIcon, SpeedGlyph, useCoach, useT } from "../kit";
 import type { SlotPropsMap } from "../types";
 import { Glyph, KEY_ICONS } from "./icons";
 
@@ -138,7 +138,7 @@ export function BuildBar({ items, tip, teasers = [], actions }: SlotPropsMap["Bu
   );
 }
 
-/** Pause / 1× / 3× / 10× as four keys in a dark tray. The camera key (PhotoButton) sits in the fifth space. */
+/** Pause / ▶ / ▶▶ / ▶▶▶ (1×, 3×, 10×) as four keys in a dark tray. The camera key (PhotoButton) sits in the fifth space. */
 export function Speed({ speed, actions }: SlotPropsMap["Speed"]) {
   const t = useT();
   const coach = useCoach();
@@ -154,7 +154,7 @@ export function Speed({ speed, actions }: SlotPropsMap["Speed"]) {
                   <i />
                 </span>
               ) : (
-                t(`speed.short.${o.value}`)
+                <SpeedGlyph value={o.value} />
               )
             }
           />

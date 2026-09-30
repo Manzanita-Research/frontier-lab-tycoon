@@ -135,9 +135,9 @@ describe("Karaoke Night", () => {
     expect(out).toMatch(/^<div class="bubble /);
   });
 
-  it("the deck uses the skin's tape words for the speed keys", () => {
+  it("the deck keeps the plain speed labels on its tape keys", () => {
     const out = html(<slot.Speed speed={vm.speed} stats={vm.stats} actions={actions} />);
-    for (const word of ["Stop", "Play", "Fast forward", "Encore"]) expect(out).toContain(`aria-label="${word}"`);
+    for (const word of ["Pause", "1× speed", "3× speed", "10× speed"]) expect(out).toContain(`aria-label="${word}"`);
   });
 
   it("draws every icon itself: no emoji and no glyph a font might not have, in any of its source", () => {

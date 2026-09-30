@@ -172,7 +172,7 @@ export function Stamps({ items, teasers, onPick, onHelp, actions }: { items: Slo
   );
 }
 
-/** The tray: a starry blue box of rubber stamps behind a red "BUILD STAMPS" tab you press to open it. Number keys 1 to 9 pick a stamp. */
+/** The tray: a starry blue box of rubber stamps behind a red Start tab you press to open it (the coach says "Click Start", so it says Start). Number keys 1 to 9 pick a stamp. */
 export function BuildBar({ items, tip, teasers = [], layout, actions }: SlotPropsMap["BuildBar"]) {
   const t = useT();
   const coach = useCoach();
@@ -193,7 +193,7 @@ export function BuildBar({ items, tip, teasers = [], layout, actions }: SlotProp
       )}
       <div className={`dd-tray ${open ? "" : "closed"}`} data-coach-panel={open ? "" : undefined}>
         <button type="button" className="dd-tray-label" aria-expanded={open} onClick={() => toggle(!open)} {...coach.attrs("start", !open && inside)}>
-          {t("build.menuTitle")}
+          {t("build.open")}
           {held && !open ? ` · ${held.short}` : ""}
         </button>
         {open && <Stamps items={items} teasers={teasers} onPick={() => toggle(false)} onHelp={() => { actions.openHelp(); toggle(false); }} actions={actions} />}

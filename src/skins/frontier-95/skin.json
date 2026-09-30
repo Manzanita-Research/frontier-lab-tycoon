@@ -70,10 +70,6 @@
     "training.eta": "about {n} days remaining",
     "inspector.title": "Properties of {name}",
     "build.menuTitle": "Start",
-    "speed.pause": "Rest",
-    "speed.1": "Steady",
-    "speed.3": "Strenuous",
-    "speed.10": "Grueling",
     "ticker.label": "PointPast News »",
     "thoughts.title": "Thoughts",
     "assistant.title": "Assistant: it looks like you're building a superintelligence"

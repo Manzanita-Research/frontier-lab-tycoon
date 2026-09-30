@@ -42,11 +42,25 @@ export const catalog: readonly CatalogEntry[] = buildCatalog(manifests);
 
 export const previewOf = (folder: string, manifest: SkinManifest) => previewUrls[`/src/skins/${folder}/${manifest.preview}`] ?? "";
 
-/** The skins the player can pick, for the Display picker. */
+/** The base as a pick of its own: the warm, chunky toy look the game started with. */
+export const CLASSIC: SkinInfoVM = {
+  id: BASE_ID,
+  name: "Classic",
+  author: "Frontier Lab Tycoon",
+  description: "The warm, chunky toy look the lab started with. No windows, no Start menu jokes, just the diorama.",
+  version: "1.0.0",
+  preview: previewUrls["/src/skins/base/assets/preview.jpg"] ?? "",
+};
+
+/** Can the player pick this skin in the Display picker? The base (Classic) always; a skin when it is valid and not `unlisted`. */
+export const isListed = (id: string, entries: readonly CatalogEntry[] = catalog) => id === BASE_ID || entries.some((e) => e.folder === id && e.ok && !e.manifest?.unlisted);
+
+/** The skins the player can pick, for the Display picker: Frontier 95 first, the listed skins, then Classic. `?skin=<id>` still reaches the rest. */
 export function skinList(entries: readonly CatalogEntry[] = catalog): SkinInfoVM[] {
-  return entries
-    .filter((e) => e.ok && e.manifest)
+  const listed = entries
+    .filter((e) => e.ok && e.manifest && !e.manifest.unlisted)
     .map((e) => ({ id: e.folder, name: e.manifest!.name, author: e.manifest!.author, description: e.manifest!.description, version: e.manifest!.version, preview: previewOf(e.folder, e.manifest!) }));
+  return [...listed, CLASSIC];
 }
 
 /** Skins that were found but refused, with why. */
@@ -160,8 +174,30 @@ export async function applyPrepared(p: Prepared): Promise<void> {
   }
 }
 
-/** Which skin to start with: `?skin=`, then localStorage, then the default. `base` is accepted for debugging. */
-export function initialSkinId(search: string, stored: string | null): string {
-  const q = new URLSearchParams(search).get("skin");
-  return q || stored || DEFAULT_SKIN;
+/** The one-off notice for a player whose saved skin was hidden (FLT-71). */
+export const MIGRATED_NOTICE = "Frontier 95 is back as your desktop.";
+
+export interface BootChoice {
+  /** The skin to show on this visit. */
+  id: string;
+  /** Write this as the saved pick (an old pick of a hidden skin becomes the default, once), or leave storage alone. */
+  save?: string;
+  /** Tell the player their desktop changed. */
+  notice: boolean;
 }
+
+/**
+ * Which skin to start with: `?skin=`, then the saved pick, then the default. `?skin=` lasts for the visit and is never
+ * saved here. A saved pick of a skin that is now `unlisted` is moved to the default, with a notice when that is what shows.
+ */
+export function bootChoice(search: string, stored: string | null, entries: readonly CatalogEntry[] = catalog): BootChoice {
+  const q = new URLSearchParams(search).get("skin");
+  if (stored && entries.some((e) => e.folder === stored && e.manifest?.unlisted)) {
+    const id = q || DEFAULT_SKIN;
+    return { id, save: DEFAULT_SKIN, notice: id === DEFAULT_SKIN };
+  }
+  return { id: q || stored || DEFAULT_SKIN, notice: false };
+}
+
+/** What the picker's OK saves: the skin showing, if the player could have picked it there. A `?skin=` visit to a hidden skin never sticks. */
+export const pickToSave = (active: string, entries: readonly CatalogEntry[] = catalog): string | null => (isListed(active, entries) ? active : null);

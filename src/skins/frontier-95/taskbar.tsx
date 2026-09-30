@@ -256,7 +256,7 @@ export function BuildBar({ items, tip, teasers = [], disasters, actions }: SlotP
 
 const SPEED_GLYPHS: Record<number, number> = { 1: 1, 3: 2, 10: 3 };
 
-/** Speed in the tray, labelled with pace words as tooltips (Rest, Steady, Strenuous, Grueling), and the clock. */
+/** Speed in the tray: pause and one, two, three triangles (the coach says "Press ▶▶"), plain tooltips, and the clock. */
 export function Speed({ speed, stats, actions }: SlotPropsMap["Speed"]) {
   const t = useT();
   const coach = useCoach();

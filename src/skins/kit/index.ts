@@ -5,6 +5,7 @@ export { Portrait } from "./Portrait";
 export { Senator } from "./Senator";
 export { Dialog } from "./Dialog";
 export { DramaIcon } from "./DramaIcon";
+export { SpeedGlyph } from "./SpeedGlyph";
 export { money } from "./format";
 export { reducedMotion } from "./motion";
 export { useT, useSlots, useSkin, useCoach, type CoachApi } from "../context";
