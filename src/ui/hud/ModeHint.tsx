@@ -56,7 +56,7 @@ export function ModeHint({ mode, actions }: { mode: PlaceModeVM | null; actions:
       <button type="button" className="mode-done" data-mode={mode.kind} onClick={() => (mode.kind === "zone" ? actions.paintZone(null) : actions.place(null))} aria-label={`${t(line, name)}: ${t("mode.done")}`}>
         <span className="mode-done-name">{mode.name}</span>
         <b>
-          {t("mode.done")} <span aria-hidden>✕</span>
+          {t("mode.done")} <span aria-hidden>×</span>
         </b>
       </button>
     );

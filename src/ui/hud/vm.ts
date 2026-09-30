@@ -310,6 +310,7 @@ function buildOf(i: HudInput): { items: BuildItemVM[]; tip: BuildTipVM | null } 
       isBulldoze: false,
       isPath: false,
       panel: true,
+      group: "offices",
     });
   }
   const t = i.tool;

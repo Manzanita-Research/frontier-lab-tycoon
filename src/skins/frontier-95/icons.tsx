@@ -56,6 +56,7 @@ export function IconSprite() {
         <symbol id="f95i-megaphone" viewBox="0 0 24 24" {...S}><path d="M3 10h4l11-6v16L7 14H3z" fill="#e00000" stroke="#000" /><path d="M7 10v4" stroke="#000" /><path d="M6 14l2 7h3l-1-6" fill="#c0c0c0" stroke="#000" /><path d="M20 9h3M20 12h3M20 15h3" stroke="#000" /></symbol>
         <symbol id="f95i-chart" viewBox="0 0 24 24" {...S}><rect x="2" y="3" width="20" height="18" fill="#fff" stroke="#000" /><path d="M5 17l4-6 4 3 6-8" fill="none" stroke="#e00000" strokeWidth="2" /></symbol>
         <symbol id="f95i-drama" viewBox="0 0 24 24" {...S}><path d="M2 9h4l10-6v18L6 15H2z" fill="#e00000" stroke="#000" /><path d="M6 9v6" stroke="#000" /><path d="M6 15l2 6h3l-1.500-6" fill="#ffe000" stroke="#000" /><path d="M19 8l3-2M19 12h4M19 16l3 2" stroke="#000" strokeWidth="1.500" /></symbol>
+        <symbol id="f95i-run" viewBox="0 0 24 24" {...S}><rect x="2" y="3" width="16" height="13" fill="#fff" stroke="#000" /><rect x="2" y="3" width="16" height="3" fill="#000080" stroke="#000" /><path d="M11 13h6v-3l6 5-6 5v-3h-6z" fill="#00a000" stroke="#000" /></symbol>
         <symbol id="f95i-programs" viewBox="0 0 24 24" {...S}><path d="M1 6h8l2 2h10v13H1z" fill="#ffe000" stroke="#000" /><rect x="8" y="10" width="13" height="10" fill="#c0c0c0" stroke="#000" /><rect x="8" y="10" width="13" height="2.500" fill="#000080" /></symbol>
       </defs>
     </svg>

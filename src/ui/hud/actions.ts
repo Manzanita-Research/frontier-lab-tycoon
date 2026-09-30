@@ -154,6 +154,9 @@ export const hudActions: HudActions = {
   // FLT-63: Run…. Opens (never shuts) what the host owns, then tells the skin, whose slots keep the rest (a folded window, a tab).
   openWidget: (id) => {
     if (!WIDGET_IDS.includes(id)) return;
+    // A window is opening over the map: put the tool down first, so nothing is left half-held under it (FLT-63).
+    const now = appNow();
+    if (now?.tool || now?.zone) send({ type: "SET_TOOL", tool: null });
     const open = {
       arena: () => registry.set(arenaOpenAtom, true),
       benchmarks: () => registry.set(arenaOpenAtom, true),

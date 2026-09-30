@@ -39,13 +39,13 @@
   }
 }
 
-/* Touch: no Esc, no right-click, so a thumb-sized Done. */
+/* Touch: no Esc, no right-click, so a thumb-sized Done, floating over the map on the right where the thumb is and the
+   HUD is not (the bottom is the build tip's, the top the lab's). */
 .mode-done {
   position: fixed;
   z-index: 40;
-  left: 50%;
-  translate: -50% 0;
-  bottom: calc(84px + env(safe-area-inset-bottom));
+  right: calc(10px + env(safe-area-inset-right));
+  top: 46%;
   display: inline-flex;
   align-items: center;
   gap: 10px;
