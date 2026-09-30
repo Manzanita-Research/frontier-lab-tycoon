@@ -4,7 +4,7 @@
 // path tiles that are slopped, and it is 15% of what the Vibes are made of (sim/vibes.ts).
 import { pushNews, addToast } from "./news";
 import type { Rng } from "./rng";
-import type { GameState } from "./types";
+import type { GameState, Walker } from "./types";
 
 export const SLOP_MAX = 3;
 /** Agents this far gone start dropping slop. */
@@ -17,10 +17,17 @@ export const SLOP_DRIFT = 0.6;
 export const slopInterval = (drift: number): number => (drift >= 0.9 ? 7 : drift >= 0.75 ? 14 : 21);
 /** Above this share of the path tiles slopped, the ticker notices. */
 export const SLOP_NEWS_SHARE = 0.2;
-/** Ticks the thought "I stepped in slop" lasts after leaving the puddle. */
-export const MESS_TICKS = 6;
-/** While the thought lasts, happiness is this much lower (sim/needs.ts): standing in slop is miserable, but it wears off. */
-export const MESS_UNHAPPINESS = 0.12;
+/**
+ * "Mess" is how much slop a walker has been through lately, 0 to 1: it builds while they stand in it (more per level of
+ * depth) and wears off slowly once they are clear. It is a smooth quantity on purpose: the daily mood check reads happiness
+ * at midnight, and an on/off flag would flip whole crowds between slumped and content from one day to the next.
+ */
+export const MESS_GAIN = 0.03;
+export const MESS_DECAY = 0.004;
+/** A walker with this much mess on them thinks "This path is covered in slop." */
+export const MESS_THOUGHT = 0.08;
+/** At full mess, happiness is this much lower (sim/needs.ts). */
+export const MESS_UNHAPPINESS = 0.08;
 
 export const newSlop = (w: number, h: number): number[] => new Array<number>(w * h).fill(0);
 
@@ -64,23 +71,25 @@ const tileOf = (state: GameState, x: number, z: number): number => {
   return tx < 0 || tz < 0 || tx >= state.grid.w || tz >= state.grid.h ? -1 : tz * state.grid.w + tx;
 };
 
-/** Per tick: drifted agents drop slop where they stand (on a path), and anyone else on a puddle gets grumpier. */
-export function updateSlop(state: GameState) {
-  const { slop, grid } = state;
-  for (const w of state.walkers) {
-    if (w.kind === "agent") {
-      if (w.drift <= SLOP_DRIFT || w.machine.value === "inside" || (state.tick + w.id) % slopInterval(w.drift) !== 0) continue;
-      const i = tileOf(state, w.x, w.z);
-      if (i < 0 || !grid.paths[i] || (slop[i] ?? 0) >= SLOP_MAX) continue;
-      slop[i] = (slop[i] ?? 0) + 1;
-      state.flags.slopRev = (state.flags.slopRev ?? 0) + 1;
-      continue;
-    }
-    if (w.kind !== "researcher" && w.kind !== "visitor") continue;
-    if (w.mess > 0) w.mess--;
-    if (w.machine.value === "inside") continue;
-    if ((slop[tileOf(state, w.x, w.z)] ?? 0) > 0) w.mess = MESS_TICKS;
+/** Called for a drifted-enough agent whose turn it is (see `slopInterval`): a little slop where they stand, if that is a path. */
+export function dropSlop(state: GameState, w: Walker) {
+  // (Every interval is a multiple of 7, so most agents are ruled out by the caller's `(tick + id) % 7` alone.)
+  if (w.drift <= SLOP_DRIFT || w.machine.value === "inside" || (state.tick + w.id) % slopInterval(w.drift) !== 0) return;
+  const i = tileOf(state, w.x, w.z);
+  if (i < 0 || !state.grid.paths[i] || (state.slop[i] ?? 0) >= SLOP_MAX) return;
+  state.slop[i] = (state.slop[i] ?? 0) + 1;
+  state.flags.slopRev = (state.flags.slopRev ?? 0) + 1;
+}
+
+/** Called once a tick for every researcher and visitor: mess builds while they stand in slop and wears off once they are clear. */
+export function messTick(state: GameState, w: Walker) {
+  if (w.machine.value === "inside") {
+    if (w.mess > 0) w.mess = Math.max(0, w.mess - MESS_DECAY);
+    return;
   }
+  const level = state.slop[tileOf(state, w.x, w.z)] ?? 0;
+  if (level > 0) w.mess = Math.min(1, w.mess + MESS_GAIN * level);
+  else if (w.mess > 0) w.mess = Math.max(0, w.mess - MESS_DECAY);
 }
 
 /** Mop one level off a tile; returns whether anything was there to mop. */

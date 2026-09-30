@@ -6,14 +6,20 @@ import type { GameState, Point } from "./types";
 
 /** How many tiles a line can stretch over before the rest just stack at the end. */
 const MAX_CHAIN = 12;
-/** Two people to a tile, this far either side of its middle along the line. */
-const SLOT_OFFSET = 0.25;
+/** People in a line stand this far apart (tiles): walkers are drawn 1.6x life size, so a half tile is a scrum. */
+export const SLOT_SPACING = 0.66;
+/** The front of the line stands this far from the door's edge of its tile. */
+const FRONT = 0.3;
 
 export interface Chain {
   /** The tiles, entrance first, each next to the last. */
   tiles: number[];
   /** Unit vector along the line at each tile, pointing away from the building. */
   dirs: Point[];
+  /** The line as a path to walk along: the door end of the entrance tile, then each tile's middle. */
+  pts: Point[];
+  /** Where each place in the line is (0 is the front); the last place is where everybody beyond the end of the path stacks up. */
+  slots: Point[];
 }
 
 const chains = new WeakMap<GameState, { version: number; byKey: Map<number, Chain> }>();
@@ -54,42 +60,54 @@ export function chainFor(state: GameState, id: number, tile: number): Chain | nu
     tiles.push(i);
     dirs.push([dx, dz]);
   }
-  const chain = { tiles, dirs };
+  const cx = (i: number) => (i % state.grid.w) + 0.5;
+  const cz = (i: number) => Math.floor(i / state.grid.w) + 0.5;
+  const pts: Point[] = [[cx(tile) + edge.dx * 0.5, cz(tile) + edge.dz * 0.5], ...tiles.map((i): Point => [cx(i), cz(i)])];
+  const chain: Chain = { tiles, dirs, pts, slots: [] };
+  // Every place a person can stand along the path, worked out once (a busy line asks for them hundreds of times a tick).
+  let length = 0;
+  for (let i = 1; i < pts.length; i++) length += Math.hypot(pts[i]![0] - pts[i - 1]![0], pts[i]![1] - pts[i - 1]![1]);
+  for (let n = 0; FRONT + n * SLOT_SPACING <= length + 1e-9; n++) chain.slots.push(along(chain, FRONT + n * SLOT_SPACING));
+  if (chain.slots.length === 0) chain.slots.push(pts[0]!);
   cache.byKey.set(key, chain);
   return chain;
 }
 
-/** The direction the line runs at tile `t`: the way it goes on to the next tile (or, at the end, the way it came). */
-const along = (chain: Chain, t: number): Point => chain.dirs[Math.min(chain.tiles.length - 1, t + 1)]!;
+/** The point `d` tiles along the line from the door (the last stretch is extended, so a line longer than the path just stacks up). */
+function along(chain: Chain, d: number): Point {
+  const pts = chain.pts;
+  let left = d;
+  for (let i = 1; i < pts.length; i++) {
+    const [ax, az] = pts[i - 1]!;
+    const [bx, bz] = pts[i]!;
+    const len = Math.hypot(bx - ax, bz - az);
+    if (left <= len || i === pts.length - 1) return [ax + ((bx - ax) * Math.min(left, len)) / (len || 1), az + ((bz - az) * Math.min(left, len)) / (len || 1)];
+    left -= len;
+  }
+  return pts[0]!;
+}
 
-/** Where the nth person in the line stands (0 is at the door). Past the end of the chain they stack up. */
-export function slotPoint(state: GameState, chain: Chain, n: number): Point {
-  const last = chain.tiles.length - 1;
-  const t = Math.min(last, n >> 1);
-  const sub = t === last && n >> 1 > last ? 1 : n & 1;
-  const i = chain.tiles[t]!;
-  const [dx, dz] = along(chain, t);
-  const cx = (i % state.grid.w) + 0.5;
-  const cz = Math.floor(i / state.grid.w) + 0.5;
-  const k = sub === 0 ? -SLOT_OFFSET : SLOT_OFFSET;
-  return [cx + dx * k, cz + dz * k];
+/** Where the nth person in the line stands (0 is at the door); a line longer than the path stacks up at the end of it. */
+export function slotPoint(_state: GameState, chain: Chain, n: number): Point {
+  return chain.slots[Math.min(n, chain.slots.length - 1)]!;
 }
 
 /** The route from slot `from` to slot `to` along the line: each slot in turn, so it follows the corners. */
 export function slotRoute(state: GameState, chain: Chain, from: number, to: number): Point[] {
+  const last = chain.slots.length - 1;
+  const a = Math.min(from, last);
+  const b = Math.min(to, last);
   const out: Point[] = [];
-  const step = to >= from ? 1 : -1;
-  for (let n = from + step; n !== to + step; n += step) out.push(slotPoint(state, chain, n));
+  const step = b >= a ? 1 : -1;
+  // (Past the end of the path everybody shares the last place, so the walk stops there.)
+  for (let n = a + step; n !== b + step; n += step) out.push(slotPoint(state, chain, n));
+  if (out.length === 0) out.push(slotPoint(state, chain, b));
   return out;
 }
 
 /** The direction someone in the line faces: at the front, the door; everyone else, the person ahead of them. */
 export function faceDoor(state: GameState, chain: Chain, n: number): number {
-  if (n <= 0) {
-    const [dx, dz] = chain.dirs[0]!;
-    return Math.atan2(-dx, -dz);
-  }
-  const [ax, az] = slotPoint(state, chain, n - 1);
   const [bx, bz] = slotPoint(state, chain, n);
+  const [ax, az] = n <= 0 ? chain.pts[0]! : slotPoint(state, chain, n - 1);
   return Math.hypot(ax - bx, az - bz) < 1e-6 ? Math.atan2(-chain.dirs[0]![0], -chain.dirs[0]![1]) : Math.atan2(ax - bx, az - bz);
 }

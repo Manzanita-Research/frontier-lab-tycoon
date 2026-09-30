@@ -42,7 +42,7 @@ export function tickNeeds(w: Walker, capability: number) {
 
 /** Happiness, 0 to 1, from the needs: researchers 40% energy, 35% focus, 25% calm; visitors half patience, half wonder. Fresh from a puddle of slop, a little less. */
 export function happinessOf(w: Walker): number {
-  const slop = w.mess > 0 ? MESS_UNHAPPINESS : 0;
+  const slop = MESS_UNHAPPINESS * w.mess;
   switch (w.kind) {
     case "researcher":
       return Math.max(0, 0.4 * w.energy + 0.35 * w.focus + 0.25 * (1 - w.fomo) - slop);

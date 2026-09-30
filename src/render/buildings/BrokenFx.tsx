@@ -53,7 +53,7 @@ export function BrokenFx({ id, kind, w, d }: { id: number; kind: BuildingKind; w
       {spots.map(([x, z], i) => (
         <group key={i} position={[x, 0, z]}>
           <mesh ref={(m) => void (flames.current[i] = m)} position={[0, ROOF[kind], 0]}>
-            <coneGeometry args={[0.17, 0.6, 7]} />
+            <coneGeometry args={[0.2, 0.55, 8]} />
             <meshBasicMaterial color="#ff7a1a" toneMapped={false} />
           </mesh>
           <mesh ref={(m) => void (inner.current[i] = m)} position={[0, ROOF[kind], 0.02]}>

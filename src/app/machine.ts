@@ -233,7 +233,8 @@ export const appMachine = setupEffect({
       if (context.hover?.x === event.hover?.x && context.hover?.z === event.hover?.z) return;
       return { context: { ...context, hover: event.hover } };
     },
-    COMMAND: ({ context, event }) => ({ context: { ...context, queue: [...context.queue, event.command] } }),
+    // A player command publishes the snapshot on the very next frame, so a hire or a painted tile shows straight away.
+    COMMAND: ({ context, event }) => ({ context: { ...context, queue: [...context.queue, event.command], lastPublishAt: 0 } }),
     CHOOSE: ({ context, event }) => {
       if (!context.event) return;
       const command: Command = { type: "chooseEvent", eventId: context.event.id, choiceIndex: event.choiceIndex };

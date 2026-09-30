@@ -44,13 +44,13 @@ export function stageOps(s: GameState, moment: OpsMoment) {
       s.cash = 12_000_000;
       s.vibes.value = 610;
       // A quiet morning on the campus: a third of the crowd, so the two people doing the work can be seen doing it.
-      s.walkers = s.walkers.filter((w, i) => (w.kind === "agent" && i % 2 === 0) || i % 4 === 0);
+      s.walkers = s.walkers.filter((w, i) => (w.kind === "agent" && i % 2 === 0) || i % 5 === 0);
       s.thoughts = [];
       slopTheCampus(s, 0.85);
       applyNow(s, [{ type: "hire", job: "janitor" }, { type: "hire", job: "sre" }]);
       const [bot, sre] = s.staff;
       place(s, bot!.id, 8.5, 16.5);
-      place(s, sre!.id, 14.5, 10.5);
+      place(s, sre!.id, 11.5, 16.5);
       const cluster = s.buildings.find((b) => b.kind === "cluster")!;
       cluster.broken = true;
       cluster.reliability = 0.4;
