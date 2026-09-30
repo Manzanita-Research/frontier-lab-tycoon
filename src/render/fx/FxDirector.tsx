@@ -106,6 +106,15 @@ export function FxDirector() {
       case "incidentClosed":
         cinema.release();
         return;
+      case "focus":
+        // A disaster wants to be looked at: a timed shot at the trouble (never over photo mode or an open card's shot).
+        if (!fx.photo) cinema.focus(view(), { x: ev.x, z: ev.z, zoom: ev.zoom, hold: ev.hold });
+        return;
+      case "shake":
+        shake(ev.strength);
+        return;
+      case "cue":
+        return; // the sound layer plays these
       case "placed":
         dustBurst(pool, ev.x, ev.z, Math.max(ev.w, ev.d) * 0.62, 8 + ev.w * ev.d * 3);
         shake(0.1);

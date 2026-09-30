@@ -60,6 +60,7 @@ export function SoundLayer() {
         case "release": sound.cue("release"); break;
         case "incident": sound.cue("card"); break;
         case "incidentClosed": sound.cue("choice"); break;
+        case "cue": if ((CUES as readonly string[]).includes(e.cue)) sound.cue(e.cue as Cue); break;
         case "reset": Object.assign(last.current, soundSnapshot(world)); break;
       }
     }

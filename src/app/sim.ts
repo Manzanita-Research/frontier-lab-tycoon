@@ -9,6 +9,9 @@ import { createRng } from "../sim/rng";
 import { createInitialState } from "../sim/state";
 import { applyNow, tick, TICKS_PER_DAY } from "../sim/tick";
 import { syncProtesters } from "../sim/protest";
+import { setRisk } from "../sim/disasters/driver";
+import { stageDisaster } from "../sim/disasters/demo";
+import { RISKS, type Risk } from "../sim/disasters/types";
 import type { GameState, NewsItem, OpenEvent, Outcome } from "../sim/types";
 import { fillAgents, seedWalkers } from "../sim/walkers";
 import { isMoment, stageMoment } from "../sim/race/demo";
@@ -62,9 +65,11 @@ export class SimHandle {
     if (commands.length > 0) applyNow(this.world, commands);
   }
 
-  /** Start over with a fresh seed. */
+  /** Start over with a fresh seed (the random-disaster setting carries over to the new lab). */
   reset(seed: number) {
+    const risk = this.world.disasters.risk;
     this.world = createInitialState(seed);
+    setRisk(this.world, risk);
     if (this.leapfrog) enableLeapfrog(this.world);
     if (this.papers) enablePapers(this.world);
     this.alpha = 1;
@@ -92,7 +97,9 @@ export class SimHandle {
 }
 
 /** A living campus, warped forward and dressed up per the `?seed=&warp=&agents=&discourse=` debug knobs. */
-export function createSimHandle(dbg: Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & { moment?: string | null; leapfrog?: boolean; papers?: boolean }): SimHandle {
+export function createSimHandle(
+  dbg: Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean },
+): SimHandle {
   const sim = createInitialState(dbg.seed);
   if (dbg.leapfrog) enableLeapfrog(sim);
   if (dbg.papers) enablePapers(sim);
@@ -115,6 +122,10 @@ export function createSimHandle(dbg: Pick<DebugParams, "seed" | "warp" | "agents
     }
     sim.rngState = rng.state();
   }
+  // Disasters (FLT-17): `?risk=` sets the random-disaster setting once the warp is done (the warp itself runs with them off, so a
+  // `?warp=` link is the same lab it always was), and `?disaster=<id>` starts one a moment before the shot.
+  if ((RISKS as readonly string[]).includes(dbg.risk ?? "")) setRisk(sim, dbg.risk as Risk);
+  if (dbg.disaster) stageDisaster(sim, dbg.disaster, dbg.dz ?? 0, dbg.dzPick ?? null);
   return new SimHandle(sim, sim.leapfrog.enabled);
 }
 

@@ -18,7 +18,7 @@ import { mopTile } from "./slop";
 import type { Rng } from "./rng";
 import type { EventFromLogic } from "xstate";
 import type { staffMachine } from "./machines/staff";
-import type { Building, GameState, Point, StaffJob, Staffer } from "./types";
+import type { Building, GameState, Point, Rect, StaffJob, Staffer } from "./types";
 
 /** Look for something to do this often when idle (in ticks). */
 const SCAN_TICKS = 3;
@@ -42,10 +42,10 @@ export const payroll = (state: GameState): number => state.staff.reduce((sum, s)
 export const COMMS_RELIEF = 2;
 
 /** Discourse a day the Comms Reps talk down: nothing when there is nobody to talk to. */
-export const commsRelief = (state: GameState): number => (state.walkers.some((w) => w.kind === "protester") ? COMMS_RELIEF * staffOf(state, "comms").filter((s) => s.machine.value !== "leaving").length : 0);
+export const commsRelief = (state: GameState): number => (state.walkers.some((w) => w.kind === "protester") ? COMMS_RELIEF * staffOf(state, "comms").filter((s) => s.machine.value !== "leaving" && !s.divert).length : 0);
 
-/** How many Security guards are on the fence (the hook FLT-5's escaped agents look for). */
-export const guardsOn = (state: GameState): number => staffOf(state, "security").length;
+/** How many Security guards are on the fence (the hook FLT-5's escaped agents look for). One pulled off by a disaster is not. */
+export const guardsOn = (state: GameState): number => staffOf(state, "security").filter((s) => !s.divert).length;
 
 export const inZone = (s: Staffer, tile: number): boolean => s.zone.length === 0 || s.zone.includes(tile);
 
@@ -98,6 +98,7 @@ export function fire(state: GameState, id: number) {
   const s = state.staff.find((o) => o.id === id);
   if (!s || s.machine.value === "leaving") return;
   send(s, { type: "FIRED" });
+  delete s.divert;
   s.task = 0;
   const g = state.gate;
   const route = routeToRect(state, ...fromTile(state, s), g, true);
@@ -282,9 +283,9 @@ const isTarget = (state: GameState, s: Staffer): boolean => {
   }
 };
 
-/** Move along the route at the job's pace; faces the way they go. */
-function move(s: Staffer) {
-  let budget = STAFF[s.job].speed;
+/** Move along the route at the job's pace (times `mul`: a diverted staffer jogs); faces the way they go. */
+function move(s: Staffer, mul = 1) {
+  let budget = STAFF[s.job].speed * mul;
   while (budget > 1e-9 && s.route.length > 0) {
     const [tx, tz] = s.route[0]!;
     const dx = tx - s.x;
@@ -366,6 +367,11 @@ export function updateStaff(state: GameState, rng: Rng) {
         if (s.route.length === 0) send(s, { type: "ARRIVED" });
         break;
       case "idle":
+        // Pulled off their post: no looking for work, no patrol; straight to where the disaster sent them.
+        if (s.divert) {
+          march(state, s, s.divert);
+          break;
+        }
         if (--s.timer <= 0) {
           s.timer = SCAN_TICKS;
           const job = findJob(state, s);
@@ -423,8 +429,62 @@ export function updateStaff(state: GameState, rng: Rng) {
   if (gone) state.staff = state.staff.filter((s) => !gone.has(s.id));
 }
 
+// ---- Disasters (FLT-17): pulling people off their posts -----------------------------------------------------------
+
+/** A diverted staffer counts as "there" this close (in tiles) to the middle of the building, once their route is spent. */
+const DIVERT_ARRIVED = 1.1;
+
+/** Where a diversion points: the building (a gone one falls back to the gate). */
+export function divertTarget(state: GameState, to: number): { rect: Rect; isGate: boolean; building: Building | null } {
+  const building = to === 0 ? null : (state.buildings.find((b) => b.id === to) ?? null);
+  return building ? { rect: building, isGate: false, building } : { rect: state.gate, isGate: true, building: null };
+}
+
+/** Is this staffer standing at the place they were diverted to? */
+export function atDivert(state: GameState, s: Staffer): boolean {
+  if (!s.divert || s.route.length > 0 || s.machine.value !== "idle") return false;
+  const { rect } = divertTarget(state, s.divert.to);
+  return Math.hypot(rect.x + rect.w / 2 - s.x, rect.z + rect.d / 2 - s.z) <= Math.max(rect.w, rect.d) / 2 + DIVERT_ARRIVED;
+}
+
+/** Route to the diversion if they are not there and not on their way; then jog. */
+function march(state: GameState, s: Staffer, d: NonNullable<Staffer["divert"]>) {
+  if (s.route.length === 0 && !atDivert(state, s)) {
+    const { rect, isGate } = divertTarget(state, d.to);
+    const [fx, fz] = fromTile(state, s);
+    const route = routeToRect(state, fx, fz, rect, isGate);
+    if (route) s.route = route;
+  }
+  move(s, d.jog);
+}
+
+/** Take a staffer off their post. Whatever they were doing is dropped; the post goes unstaffed until they are released. */
+export function divertStaff(s: Staffer, owner: string, to: number, jog: number) {
+  if (s.machine.value === "leaving") return;
+  s.divert = { owner, to, jog };
+  s.task = 0;
+  s.route = [];
+  s.timer = 0;
+  if (s.machine.value === "going" || s.machine.value === "working") send(s, { type: "LOST" });
+}
+
+/** Let everyone `owner` diverted (of one job, or all) go back to work. They stroll off and look for jobs again. */
+export function releaseStaff(state: GameState, owner: string, job?: StaffJob) {
+  for (const s of state.staff) {
+    if (!s.divert || s.divert.owner !== owner || (job && s.job !== job)) continue;
+    delete s.divert;
+    s.route = [];
+    s.timer = 0;
+  }
+}
+
 /** What a staffer is up to, for the panel. */
 export function statusOfStaff(state: GameState, s: Staffer): string {
+  if (s.divert && s.machine.value !== "leaving") {
+    const { building } = divertTarget(state, s.divert.to);
+    const where = building ? BUILDINGS[building.kind].name : "the gate";
+    return atDivert(state, s) ? `On the incident at the ${where}` : `Running to the ${where}`;
+  }
   switch (s.machine.value) {
     case "arriving":
       return "Reporting for duty";
