@@ -5,7 +5,7 @@
   "author": "Frontier Lab Tycoon",
   "version": "1.0.0",
   "description": "The HUD as a frontier lab's desk merch: enamel-pin stats, sticky-note OKRs, keycap build buttons and a terminal ticker.",
-  "preview": "assets/preview.png",
+  "preview": "assets/preview.jpg",
   "slots": [],
   "fonts": [
     {

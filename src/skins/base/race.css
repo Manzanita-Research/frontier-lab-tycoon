@@ -228,23 +228,23 @@
   transition: transform 0.95s cubic-bezier(0.3, 1.35, 0.5, 1), background-color 0.4s;
 }
 .arena-row.you {
-  background: #ffe0b5;
+  background: color-mix(in srgb, var(--flt-color-accent) 24%, var(--flt-color-panel));
   box-shadow: inset 0 0 0 2px var(--orange);
   z-index: 1;
 }
 .arena-row.moved-up {
-  background-color: #cdf3d6;
+  background-color: color-mix(in srgb, var(--flt-color-good) 28%, var(--flt-color-panel));
   animation: row-up 0.8s ease-out;
 }
 .arena-row.moved-down {
-  background-color: #ffd0c6;
+  background-color: color-mix(in srgb, var(--flt-color-bad) 28%, var(--flt-color-panel));
   animation: row-down 0.8s ease-out;
 }
 .arena-row.you.moved-up {
-  background-color: #b9f0c8;
+  background-color: color-mix(in srgb, var(--flt-color-good) 28%, var(--flt-color-panel));
 }
 .arena-row.you.moved-down {
-  background-color: #ffb9a8;
+  background-color: color-mix(in srgb, var(--flt-color-bad) 28%, var(--flt-color-panel));
 }
 @keyframes row-up {
   40% {

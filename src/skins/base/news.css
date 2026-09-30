@@ -1,12 +1,12 @@
 /* Warm paper and an overactive group chat, layered over the toy campus. */
 .news-controls { position:fixed; right:16px; top:160px; z-index:24; display:flex; padding:4px; gap:3px; pointer-events:auto; }
-.news-controls button { border:0; background:transparent; font:800 14px Nunito, sans-serif; color:#483728; padding:8px 10px; cursor:pointer; border-radius:9px; }
-.news-controls button:hover { background:#eadcc2; }
+.news-controls button { border:0; background:transparent; font:800 14px Nunito, sans-serif; color:var(--flt-color-text); padding:8px 10px; cursor:pointer; border-radius:9px; }
+.news-controls button:hover { background:var(--flt-color-panelAlt); }
 .unread-count { background:#bb563e; color:white; padding:2px 6px; border-radius:9px; margin-left:7px; }
 .news-arrival { position:fixed; right:16px; top:215px; z-index:24; max-width:330px; padding:13px; display:flex; flex-wrap:wrap; align-items:center; gap:8px; font-size:13px; pointer-events:auto; }
 .news-arrival span { flex-basis:100%; font-weight:800; }
-.news-arrival button { border:0; border-radius:7px; padding:7px 14px; color:#fff8e8; background:#584230; font:800 12px Nunito, sans-serif; cursor:pointer; }
-.news-arrival button:last-child { background:#e8dbc3; color:#584230; }
+.news-arrival button { border:0; border-radius:7px; padding:7px 14px; color:var(--flt-color-selectionText); background:var(--flt-color-selection); font:800 12px Nunito, sans-serif; cursor:pointer; }
+.news-arrival button:last-child { background:var(--flt-color-panelAlt); color:var(--flt-color-text); }
 .news-backdrop { position:fixed; inset:0; z-index:80; padding:24px; background:#28251c8c; backdrop-filter:blur(5px); display:flex; align-items:center; justify-content:center; pointer-events:auto; }
 .news-dialog { width:min(1080px,100%); max-height:calc(100dvh - 48px); overflow:auto; overscroll-behavior:contain; background:#f5eddc; color:#302d26; border-radius:8px; box-shadow:0 20px 90px #17191477; }
 .news-toolbar { position:sticky; top:0; z-index:2; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 16px; border-bottom:1px solid #c9bba0; background:#f5eddcf5; font:800 12px Nunito,sans-serif; }

@@ -4,14 +4,19 @@
     background: linear-gradient(90deg, var(--flt-color-panel), #fff1a8);
   }
   .vibes-value {
-    font-size: 40px;
+    font-size: 46px;
+  }
+  .stat .value {
+    font-size: 26px;
   }
   .vibes-btn::after {
-    content: "★";
-    color: var(--flt-color-panelAlt);
-    -webkit-text-stroke: 2px var(--flt-color-line);
-    font-size: 26px;
+    content: "";
+    display: inline-block;
+    width: 26px;
+    height: 26px;
     margin-left: 6px;
+    background: var(--flt-color-panelAlt);
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
   }
   .buildbar .tool {
     background: var(--flt-color-inset);

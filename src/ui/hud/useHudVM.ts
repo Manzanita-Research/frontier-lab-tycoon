@@ -1,9 +1,10 @@
 // Gathers what the view-model needs from the app actor and the UI atoms, and builds it. React re-renders the HUD when
 // any of them changes: the snapshot is throttled to about 5 Hz, and the rest change on a click.
 import { useAtomValue } from "@effect/atom-react";
+import { AsyncResult, Atom } from "effect/unstable/reactivity";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { atoms, registry } from "../../app/game";
-import { useApp } from "../../app/hooks";
+import type { Snapshot } from "../../app/hud";
 import { audioReadyAtom, mixerAtom, mixerOpenAtom } from "../../audio/state";
 import { roomAtom } from "../../newsroom/state";
 import { photoAtom } from "../../render/fx/photoState";
@@ -82,19 +83,63 @@ function useArenaMotion(board: readonly { id: string; rank: number }[], rank: nu
     return () => window.clearTimeout(t);
   }, [rank]);
 
-  return { moved, alert, flinch };
+  return useMemo(() => ({ moved, alert, flinch }), [moved, alert, flinch]);
 }
 
-export function useHudVM(): HudVM {
-  const snap = useApp(atoms.snap);
-  const speed = useApp(atoms.speed);
-  const tool = useApp(atoms.tool);
-  const toasts = useApp(atoms.toasts);
-  const news = useApp(atoms.news);
-  const follow = useApp(atoms.follow);
-  const highlight = useApp(atoms.highlight);
-  const selected = useApp(atoms.selected);
-  const outcomeDismissed = useApp(atoms.outcomeDismissed);
+export type AppSource = {
+  snap: Snapshot;
+  speed: Parameters<typeof hudViewModel>[0]["speed"];
+  tool: Parameters<typeof hudViewModel>[0]["tool"];
+  toasts: Parameters<typeof hudViewModel>[0]["toasts"];
+  news: Parameters<typeof hudViewModel>[0]["news"];
+  follow: boolean;
+  highlight: string | null;
+  selected: number | null;
+  outcomeDismissed: boolean;
+};
+
+/** Everything the view-model reads from the app actor, as one atom. */
+const appSourceAtom = Atom.make((get): AsyncResult.AsyncResult<AppSource, never> => {
+  const snap = get(atoms.snap);
+  if (!AsyncResult.isSuccess(snap)) return snap as unknown as AsyncResult.AsyncResult<never, never>;
+  const v = <T,>(a: Atom.Atom<AsyncResult.AsyncResult<T, never>>): T => (get(a) as AsyncResult.Success<T, never>).value;
+  return AsyncResult.success({
+    snap: snap.value,
+    speed: v(atoms.speed),
+    tool: v(atoms.tool),
+    toasts: v(atoms.toasts),
+    news: v(atoms.news),
+    follow: v(atoms.follow),
+    highlight: v(atoms.highlight),
+    selected: v(atoms.selected),
+    outcomeDismissed: v(atoms.outcomeDismissed),
+  });
+});
+
+const sameSource = (a: AppSource, b: AppSource) => (Object.keys(a) as (keyof AppSource)[]).every((k) => Object.is(a[k], b[k]));
+
+/**
+ * The app actor's state, delivered to React only when something the HUD shows has actually changed. (The actor emits
+ * a new machine snapshot on every animation frame; `useAtomSuspense` would re-render the whole HUD for each one. This
+ * compares the pieces and stays put, so the HUD renders about once per snapshot publish, roughly 5 Hz, and never per frame.)
+ */
+export function useAppSource(): AppSource | null {
+  const [src, setSrc] = useState<AppSource | null>(null);
+  useEffect(
+    () =>
+      registry.subscribe(
+        appSourceAtom,
+        (r) => {
+          if (AsyncResult.isSuccess(r)) setSrc((prev) => (prev && sameSource(prev, r.value) ? prev : r.value));
+        },
+        { immediate: true },
+      ),
+    [],
+  );
+  return src;
+}
+
+export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, selected, outcomeDismissed }: AppSource): HudVM {
   const arenaOpen = useAtomValue(arenaOpenAtom);
   const room = useAtomValue(roomAtom);
   const chatCount = useAtomValue(chatCountAtom);
@@ -112,7 +157,7 @@ export function useHudVM(): HudVM {
   const motion = useArenaMotion(snap.race.board, snap.race.rank);
   const list = useMemo(() => skinList(), []);
 
-  return useMemo(
+  const vm = useMemo(
     () =>
       hudViewModel({
         snap,
@@ -142,4 +187,5 @@ export function useHudVM(): HudVM {
       }),
     [snap, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, motion, room, chatCount, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, skinUi, list, viewport, night],
   );
+  return vm;
 }

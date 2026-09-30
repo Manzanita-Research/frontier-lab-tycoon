@@ -16,6 +16,12 @@
   .vibes-label {
     color: var(--flt-color-textDim);
   }
+  .stat .value {
+    font-size: 26px;
+  }
+  .vibes-value {
+    font-size: 44px;
+  }
   .vibes-value,
   .stat .value {
     text-shadow: 0 0 10px color-mix(in srgb, var(--flt-color-numeral) 55%, transparent);

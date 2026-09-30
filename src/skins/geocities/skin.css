@@ -11,7 +11,10 @@
   .vibes-value {
     color: #00ff00;
     letter-spacing: 0.1em;
-    font-size: 30px;
+    font-size: 40px;
+  }
+  .stat .value {
+    font-size: 26px;
   }
   .vibes-label,
   .vibes-arrow {

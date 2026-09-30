@@ -1912,8 +1912,8 @@
         left: 4px;
         right: 4px;
         top: 4px;
-        bottom: calc(var(--taskbar) + 30px + 8px);
         width: auto;
+        max-height: calc(100dvh - var(--taskbar) - 30px - 12px);
         z-index: 20;
         overflow: auto;
       }
@@ -1971,8 +1971,8 @@
       left: 4px;
       right: 4px;
       top: 4px;
-      bottom: calc(var(--taskbar) + 30px + 8px);
       width: auto;
+      max-height: calc(100dvh - var(--taskbar) - 30px - 12px);
       z-index: 20;
       overflow: auto;
     }

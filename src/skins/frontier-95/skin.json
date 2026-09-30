@@ -5,7 +5,7 @@
   "author": "Frontier Lab Tycoon",
   "version": "1.0.0",
   "description": "The lab as a 1995 desktop: Lab Properties, a Start menu, a file-copy dialog for training, and a paperclip that wants to help.",
-  "preview": "assets/preview.png",
+  "preview": "assets/preview.jpg",
   "slots": ["Layout", "Stats", "Training", "Objectives", "Inspector", "BuildBar", "Speed", "Bubble", "ThoughtsPanel", "Ticker", "Toast", "Assistant", "EventCard", "Arena", "EraCard", "FrontPage", "GroupChat", "PhotoButton", "PhotoOverlay", "SkinPicker", "Outcome", "NewsControls", "NewsArrival", "NewsRoom", "Mixer"],
   "fonts": [
     { "family": "W95FA", "src": "assets/fonts/w95fa.woff2", "weight": 400, "style": "normal", "license": "OFL-1.1", "licenseFile": "assets/fonts/w95fa-LICENSE.txt" },

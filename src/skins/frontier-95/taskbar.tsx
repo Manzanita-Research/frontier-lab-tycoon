@@ -40,7 +40,7 @@ function ShutDown({ lab, onClose }: { lab: string; onClose: () => void }) {
     );
   }
   return (
-    <Dialog label="Shut Down Lab" close={onClose} layerClass="f95-layer" dialogClass="f95-dialogbox">
+    <Dialog label="Shut Down Lab" close={onClose} layerClass="f95-layer f95-dim" dialogClass="f95-dialogbox">
       <Win title="Shut Down Lab" buttons={[{ g: "close", label: "Close", onClick: onClose }]} className="f95-shut">
         <div className="f95-shutbody">
           <Ico name="off" size={40} />

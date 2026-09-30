@@ -178,7 +178,7 @@ button {
   margin-top: 6px;
   border: 2px solid var(--ink);
   border-radius: 8px;
-  background: #fff;
+  background: var(--flt-color-inset);
   overflow: hidden;
 }
 .bar span {
@@ -271,7 +271,7 @@ button {
   border-color: color-mix(in srgb, var(--flt-color-line) 40%, transparent);
 }
 .tool.on {
-  background: #fff;
+  background: var(--flt-color-inset);
   border-color: var(--orange);
   transform: translateY(-4px);
   box-shadow: 0 4px 0 var(--orange);
@@ -383,10 +383,10 @@ button {
   animation: toast-in 0.35s cubic-bezier(0.3, 1.6, 0.5, 1);
 }
 .toast.good {
-  background: #dff7dc;
+  background: color-mix(in srgb, var(--flt-color-good) 16%, var(--flt-color-panel));
 }
 .toast.bad {
-  background: #ffe1d6;
+  background: color-mix(in srgb, var(--flt-color-bad) 16%, var(--flt-color-panel));
 }
 @keyframes toast-in {
   from {
@@ -403,7 +403,7 @@ button {
   border: 2.5px solid var(--ink);
   border-radius: 14px;
   background: var(--flt-color-tip);
-  color: var(--ink);
+  color: var(--flt-color-tipText);
   font: 700 12.5px/1.25 var(--font);
   text-align: center;
   box-shadow: 0 3px 0 color-mix(in srgb, var(--flt-color-line) 80%, transparent);
@@ -573,7 +573,7 @@ button {
   place-items: center;
   border: 2.5px solid var(--ink);
   border-radius: 6px;
-  background: #fff;
+  background: var(--flt-color-inset);
   font-size: 15px;
   font-weight: 900;
   line-height: 1;
@@ -634,7 +634,7 @@ button {
 
 /* The persistent first-step hint */
 .toast.hint {
-  background: #fff7dc;
+  background: var(--flt-color-panelAlt);
   animation: toast-in 0.35s cubic-bezier(0.3, 1.6, 0.5, 1), hint-bob 2.4s ease-in-out 0.4s infinite;
 }
 @keyframes hint-bob {
@@ -668,7 +668,7 @@ button {
   overflow: auto;
   border: var(--flt-border-width) var(--flt-border-style) var(--flt-color-line);
   border-radius: 20px;
-  background: #fff6e0;
+  background: var(--flt-color-panelAlt);
   box-shadow: 0 6px 0 color-mix(in srgb, var(--flt-color-line) 85%, transparent), 0 24px 40px color-mix(in srgb, var(--flt-color-line) 35%, transparent);
   animation: card-bounce 0.55s cubic-bezier(0.3, 1.5, 0.45, 1);
 }
@@ -744,13 +744,13 @@ button {
   padding: 10px 14px 10px 10px;
   border: var(--flt-border-width) var(--flt-border-style) var(--flt-color-line);
   border-radius: 14px;
-  background: #fff;
+  background: var(--flt-color-inset);
   text-align: left;
   box-shadow: 0 4px 0 var(--ink);
   transition: transform 0.08s, box-shadow 0.08s, background 0.15s;
 }
 .choice:hover {
-  background: #ffe9b8;
+  background: var(--flt-color-panelAlt);
   transform: translateY(-2px);
   box-shadow: 0 6px 0 var(--ink);
 }
@@ -1153,7 +1153,7 @@ button {
   width: 22px;
   height: 18px;
   border-radius: var(--flt-radius-button);
-  background: #fff;
+  background: var(--flt-color-inset);
   border: 2.5px solid var(--ink);
 }
 .thoughts-icon i {
@@ -1163,7 +1163,7 @@ button {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--flt-color-inset);
   border: 2px solid var(--ink);
 }
 .thoughts-icon i:nth-child(2),
@@ -1195,11 +1195,11 @@ button {
   font-weight: 700;
 }
 .thought-row:hover {
-  background: #fff;
+  background: var(--flt-color-inset);
 }
 .thought-row.on {
   border-color: var(--ink);
-  background: #ffe9a8;
+  background: color-mix(in srgb, var(--flt-color-accent) 28%, var(--flt-color-panel));
   box-shadow: 0 2px 0 color-mix(in srgb, var(--flt-color-line) 80%, transparent);
 }
 .thought-count {
@@ -1303,7 +1303,7 @@ button {
   height: 26px;
   border-radius: 8px;
   border: 2px solid var(--ink);
-  background: #fff;
+  background: var(--flt-color-inset);
   font-size: 17px;
   line-height: 1;
   font-weight: 900;
@@ -1334,7 +1334,7 @@ button {
   height: 10px;
   border-radius: 6px;
   border: 2px solid var(--ink);
-  background: #fff;
+  background: var(--flt-color-inset);
   overflow: hidden;
 }
 .need-bar span {
@@ -1361,7 +1361,7 @@ button {
   line-height: 1.25;
   padding: 6px 9px 7px;
   border-radius: 12px;
-  background: #fff;
+  background: var(--flt-color-inset);
   border: 2px solid var(--ink);
 }
 .insp-thought-label {

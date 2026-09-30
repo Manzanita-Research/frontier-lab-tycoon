@@ -2,9 +2,9 @@
 // the host so every skin gets it and no skin has to (or can) get it wrong.
 import { useAtomValue } from "@effect/atom-react";
 import { useEffect, useRef } from "react";
-import { appNow, atoms, registry, send, sim } from "../../app/game";
+import { appNow, registry, send, sim } from "../../app/game";
+import type { Snapshot } from "../../app/hud";
 import { TOOLS } from "../../app/hud";
-import { useApp } from "../../app/hooks";
 import { playCue } from "../../audio/state";
 import { NewsDesk } from "../../newsroom/desk";
 import { frontPage, recap } from "../../newsroom/edition";
@@ -108,8 +108,7 @@ function useChatPlayback() {
 }
 
 /** The newspaper desk: watches the World for editions to print, and pauses the game while one is being read. */
-function useNewsDesk() {
-  const snap = useApp(atoms.snap);
+function useNewsDesk(snap: Snapshot) {
   const room = useAtomValue(roomAtom);
   const demoOpened = useRef(false);
   const pausedForReading = room.view !== null;
@@ -166,9 +165,9 @@ function useNewsDesk() {
   }, [room.archive]);
 }
 
-export function useHudEffects(vm: HudVM) {
+export function useHudEffects(vm: HudVM, snap: Snapshot) {
   useHotkeys(vm);
   usePhotoKeys(vm);
   useChatPlayback();
-  useNewsDesk();
+  useNewsDesk(snap);
 }
