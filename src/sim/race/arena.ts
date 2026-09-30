@@ -1,7 +1,9 @@
 // The Frontier Arena: a score from capability and hype, re-ranked once a week.
-import { arenaScore, RIVAL_BY_ID, YOU, type RivalId } from "../../content/rivals";
+import { arenaScore, YOU, type RivalId } from "../../content/rivals";
 import type { GameState } from "../types";
 import { rankBoard, ranksOf, type BoardRow } from "./state";
+import { defs } from "../defs";
+import { neoLabById } from "../neolabs/driver";
 
 export const rankOf = (board: BoardRow[]): number => {
   const index = board.findIndex((r) => r.id === YOU);
@@ -53,6 +55,8 @@ export interface BoardView {
   /** Their latest model, if they have one. */
   model: string;
   open: boolean;
+  /** A lab your own people founded (FLT-26, FLT-20): who, why, and whether it has it in for you. */
+  neo?: { founder: string; manifesto: string; nemesis: boolean; friendly: boolean; origin: string; founded: number };
 }
 
 export function boardView(state: GameState): BoardView[] {
@@ -63,7 +67,12 @@ export function boardView(state: GameState): BoardView[] {
     if (row.id === YOU) {
       return { id: YOU, name: state.labName, short: state.labName, color: "#ff8a4c", score: row.score, rank, delta, you: true, model: state.models[state.models.length - 1] ?? "", open: false };
     }
-    const def = RIVAL_BY_ID[row.id as RivalId];
+    const neo = neoLabById(state, row.id);
+    if (neo) {
+      const c = neo.rival.context;
+      return { id: row.id, name: neo.name, short: neo.short, color: neo.color, score: row.score, rank, delta, you: false, model: c.model, open: c.open, neo: { founder: neo.founder, manifesto: neo.manifesto, nemesis: neo.nemesis, friendly: neo.mood === "friendly", origin: neo.origin, founded: neo.founded } };
+    }
+    const def = defs().rivalById[row.id as RivalId];
     const ctx = race.rivals.find((r) => r.context.id === row.id)!.context;
     return { id: row.id, name: def.name, short: def.short, color: def.color, score: row.score, rank, delta, you: false, model: ctx.model, open: ctx.open };
   });

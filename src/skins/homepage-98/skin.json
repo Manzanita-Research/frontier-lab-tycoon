@@ -22,7 +22,7 @@
     "Arena",
     "EraCard",
     "Outcome",
-    "NewsControls",
+    "NewsControls", "DramaButton",
     "NewsArrival",
     "PhotoButton"
   ],

@@ -8,7 +8,6 @@
 //   Comms Rep:   walks up to a protester and hands them a tote bag; each one also takes 2 discourse off every day (protest.ts).
 //   Security:    walks the fence. It is the hook for catching escaped agents (FLT-5): see `guardsOn`.
 import { staffUnlocked } from "./progression";
-import { BUILDINGS } from "../content/buildings";
 import { MAX_PER_JOB, MAX_STAFF, STAFF } from "../content/staff";
 import { repairBuilding } from "./breakdowns";
 import { fillTemplate } from "./format";
@@ -20,6 +19,8 @@ import type { Rng } from "./rng";
 import type { EventFromLogic } from "xstate";
 import type { staffMachine } from "./machines/staff";
 import type { Building, GameState, Point, Rect, StaffJob, Staffer } from "./types";
+import { defs } from "./defs";
+import { toteBagFor } from "./factions/driver";
 
 /** Look for something to do this often when idle (in ticks). */
 const SCAN_TICKS = 3;
@@ -92,7 +93,7 @@ export function hire(state: GameState, job: StaffJob) {
     zone: [],
     machine: staffStart(),
   });
-  addToast(state, fillTemplate(def.hired, { name }), "good");
+  addToast(state, fillTemplate(def.hired, { name }), "good", { source: "staff", importance: "you" });
 }
 
 /** Let someone go: they walk back to the gate with a box. */
@@ -105,7 +106,7 @@ export function fire(state: GameState, id: number) {
   const g = state.gate;
   const route = routeToRect(state, ...fromTile(state, s), g, true);
   s.route = route ?? [[g.x + g.w / 2, g.z]];
-  addToast(state, fillTemplate(STAFF[s.job].fired, { name: s.name }), "neutral");
+  addToast(state, fillTemplate(STAFF[s.job].fired, { name: s.name }), "neutral", { source: "staff", importance: "you" });
 }
 
 /** Paint (or erase) one tile of a staffer's patrol zone. */
@@ -340,6 +341,7 @@ function finish(state: GameState, rng: Rng, s: Staffer) {
       const w = state.walkers.find((o) => o.id === s.task);
       state.flags.totes = (state.flags.totes ?? 0) + 1;
       if (w && state.flags.totes % 3 === 1) pushNews(state, rng, "tote");
+      if (w?.crowd !== undefined) toteBagFor(state, w.crowd);
       break;
     }
   }
@@ -504,7 +506,7 @@ export function releaseStaff(state: GameState, owner: string, job?: StaffJob) {
 export function statusOfStaff(state: GameState, s: Staffer): string {
   if (s.divert && s.machine.value !== "leaving") {
     const { building } = divertTarget(state, s.divert.to);
-    const where = building ? BUILDINGS[building.kind].name : "the gate";
+    const where = building ? defs().buildings[building.kind].name : "the gate";
     return atDivert(state, s) ? `On the incident at the ${where}` : `Running to the ${where}`;
   }
   switch (s.machine.value) {
@@ -520,7 +522,7 @@ export function statusOfStaff(state: GameState, s: Staffer): string {
           return working ? "Mopping slop" : "On the way to a puddle";
         case "sre": {
           const b = state.buildings.find((o) => o.id === s.task);
-          const name = b ? BUILDINGS[b.kind].name : "the incident";
+          const name = b ? defs().buildings[b.kind].name : "the incident";
           return working ? `Fixing the ${name}` : `Running to the ${name}`;
         }
         case "comms":

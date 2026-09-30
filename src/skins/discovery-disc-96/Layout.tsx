@@ -19,14 +19,18 @@ export function Layout({ slots }: SlotPropsMap["Layout"]) {
         {slots.Speed}
         <div className="dd-toolbar">
           {slots.NewsControls}
+          {slots.DramaButton}
           {slots.PhotoButton}
         </div>
         <div className="dd-stack">
           {slots.Staff}
           {slots.Inspector}
+          {slots.DisasterAlert}
           {slots.Arena}
+          {slots.Papers}
           {slots.Benchmarks}
           {slots.Voice}
+          {slots.Factions}
           {slots.ThoughtsPanel}
         </div>
       </div>

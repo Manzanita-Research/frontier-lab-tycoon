@@ -1,6 +1,8 @@
 // Everything that interrupts you: guestbook entries over people's heads, toasts as pop-up windows ("Click here!!!"),
 // the event card, the era card as a prize notification, the win/lose card and "you've got mail".
+import { factionAttrs } from "../kit";
 import { useT } from "../context";
+import { Evidence } from "../kit";
 import type { SlotPropsMap } from "../types";
 import { New, Pop } from "./parts";
 import { Spark } from "./icons";
@@ -8,7 +10,7 @@ import { Spark } from "./icons";
 /** One guestbook entry, pinned to whoever is thinking it. The root keeps the `bubble` class (the game and photo mode look for it). */
 export function Bubble({ bubble }: SlotPropsMap["Bubble"]) {
   return (
-    <div className={`bubble gc-gb bubble-${bubble.kind}`}>
+    <div className={`bubble gc-gb bubble-${bubble.kind}`} {...factionAttrs(bubble.faction)}>
       <b>{bubble.speaker || bubble.kind} wrote:</b>
       {bubble.text}
     </div>
@@ -83,6 +85,7 @@ export function EventCard({ event, actions }: SlotPropsMap["EventCard"]) {
             </tbody>
           </table>
         )}
+        {event.investigation && <Evidence investigation={event.investigation} />}
         <div className="gc-choices">
           {event.choices.map((c, i) => (
             <button key={c.label} type="button" className="gc-fb gc-choice" disabled={!!c.disabled} title={c.disabled} onClick={() => actions.choose(event.id, i)}>

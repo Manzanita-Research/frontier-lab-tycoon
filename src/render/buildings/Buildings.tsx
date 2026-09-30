@@ -1,7 +1,7 @@
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useRef, type ReactNode } from "react";
 import * as THREE from "three";
-import { BUILDINGS, type BuildingKind } from "../../content/buildings";
+import type { BuildingKind } from "../../content/buildings";
 import { atoms, sim as game } from "../../app/game";
 import { useApp } from "../../app/hooks";
 import { rectCenter } from "../coords";
@@ -20,11 +20,14 @@ import { NapModel } from "./NapModel";
 import { SnackModel } from "./SnackModel";
 import { SecurityOfficeModel } from "./SecurityOfficeModel";
 import { DemoModel } from "./DemoModel";
+import { ModModel } from "./ModModel";
 import { BrokenFx } from "./BrokenFx";
+import { defs } from "../../sim/defs";
 
 /** `id` lets a model that reacts to the world (the Demo Stage screen) find its building; the placement ghost has none. */
 export function BuildingModel({ kind, id }: { kind: BuildingKind; id?: number }) {
-  const color = BUILDINGS[kind].color;
+  const def = defs().buildings[kind];
+  const color = def.color;
   switch (kind) {
     case "cluster":
       return <ClusterModel color={color} />;
@@ -50,6 +53,9 @@ export function BuildingModel({ kind, id }: { kind: BuildingKind; id?: number })
       return <SolarFarmModel color={color} />;
     case "security":
       return <SecurityOfficeModel color={color} />;
+    default:
+      // A kind a mod added: no model of its own yet.
+      return <ModModel color={color} size={def.size} />;
   }
 }
 

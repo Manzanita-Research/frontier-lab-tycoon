@@ -5,8 +5,11 @@ import { Skin } from "./services/skin";
 import { Assets } from "./services/assets";
 import { Audio } from "./services/audio";
 import { Vocabulary } from "./services/vocabulary";
-import { Progression, Arc, Building, Ending, EntityKind, EventOrArc, Goal, Headline, ModError, NamePool, Rival, Thought, Tip, decodeManifest, type ModManifest } from "./schema";
+import { Progression, CoachLine, Arc, Building, Disaster, Ending, EntityKind, EventOrArc, Goal, Headline, ModError, NamePool, Rival, Thought, Tip, decodeManifest, type ModManifest } from "./schema";
 import { contentKey, patchById } from "./patch";
+import { BenchmarkSchema, MishapSchema } from "../content/leapfrog";
+import { FactionSchema } from "../content/factions";
+import type { ProgressionLevel } from "../content/progression";
 import { sanitizeCss } from "./css";
 import { validateAssets } from "./assets";
 import { validateContent } from "./validation";
@@ -20,7 +23,8 @@ function applyContent(below: ContentApi, mod: ModManifest): ContentApi {
   for (const row of buildings) if (row.id !== row.kind) throw new ModError({ path: "content.buildings", detail: `building id "${row.id}" must equal kind "${row.kind}"` });
   return {
     ...below,
-    progression: patchById("progression", below.progression, p.progression, (row) => row.id, Schema.decodeUnknownSync(Progression)),
+    progression: patchById("progression", below.progression, p.progression, (row) => row.id, (input) => Schema.decodeUnknownSync(Progression)(input) as ProgressionLevel),
+    coach: patchById("coach", below.coach, p.coach, (row) => row.id, Schema.decodeUnknownSync(CoachLine)),
     buildings: Object.fromEntries(buildings.map(({ id, ...row }) => [id, row])),
     rivals: patchById("rivals", below.rivals, p.rivals, (row) => row.id, Schema.decodeUnknownSync(Rival)),
     headlines: p.headlines ? patchById("headlines", below.headlines.map((row, i) => ({ ...row, id: contentKey("headlines", row, i) })), p.headlines, (row) => row.id, (input) => Schema.decodeUnknownSync(Schema.Struct({ ...Headline.fields, id: Schema.String }))({ trigger: "filler", ...toObject(input) })) : below.headlines,
@@ -32,6 +36,10 @@ function applyContent(below: ContentApi, mod: ModManifest): ContentApi {
     tips: patchById("tips", below.tips, p.tips, (row) => row.id, Schema.decodeUnknownSync(Tip)),
     names: patchById("names", below.names, p.names, (row) => row.id, Schema.decodeUnknownSync(NamePool)),
     goals: patchById("goals", below.goals, p.goals, (row) => row.id, Schema.decodeUnknownSync(Goal)),
+    disasters: patchById("disasters", below.disasters, p.disasters, (row) => row.id, Schema.decodeUnknownSync(Disaster)),
+    benchmarks: patchById("benchmarks", below.benchmarks, p.benchmarks, (row) => row.id, Schema.decodeUnknownSync(BenchmarkSchema)),
+    mishaps: patchById("mishaps", below.mishaps, p.mishaps, (row) => row.id, Schema.decodeUnknownSync(MishapSchema)),
+    factions: patchById("factions", below.factions, p.factions, (row) => row.id, Schema.decodeUnknownSync(FactionSchema)),
   };
 }
 function toObject(value: unknown): object { return typeof value === "object" && value !== null ? value : {}; }

@@ -1056,7 +1056,8 @@
   .sd-right.arena-open .sd-cork-list {
     max-height: 150px;
   }
-  .sd-right.badge-open .sd-cork-list {
+  .sd-right.badge-open .sd-cork-list,
+  .sd-right.dz-on .sd-cork-list {
     max-height: 100px;
   }
   @media (max-height: 999px) {
@@ -1870,6 +1871,12 @@
   }
   .sd-board .dl.down {
     color: var(--flt-color-bad);
+  }
+  /* the rival running your leaked weights (FLT-32): a red sticker */
+  .sd-board .nm em.leak {
+    border-color: var(--flt-color-bad);
+    background: var(--flt-color-bad);
+    color: #fff;
   }
   .sd-board .row.you {
     background: var(--sd-sticky);

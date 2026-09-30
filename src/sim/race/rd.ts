@@ -29,7 +29,7 @@ export function workingCapability(state: Pick<GameState, "capability" | "trainin
   return state.capability + Math.max(0, Math.min(1, progress / cost)) * releaseGain(run);
 }
 
-export function rdMultiplier(state: Pick<GameState, "walkers" | "capability" | "training" | "progression" | "progressionContent">): number {
+export function rdMultiplier(state: Pick<GameState, "walkers" | "capability" | "training" | "progression">): number {
   if (!systemUnlocked(state, "rnd")) return 1;
   let agents = 0;
   let researchers = 0;

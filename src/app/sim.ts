@@ -12,20 +12,27 @@ import { syncProtesters } from "../sim/protest";
 import { setRisk } from "../sim/disasters/driver";
 import { stageDisaster } from "../sim/disasters/demo";
 import { RISKS, type Risk } from "../sim/disasters/types";
-import type { GameState, NewsItem, OpenEvent, Outcome, Thought } from "../sim/types";
+import type { GameState, NewsItem, OpenEvent, Outcome, RunMods, Thought } from "../sim/types";
 import { fillAgents, seedWalkers } from "../sim/walkers";
 import { isMoment, stageMoment } from "../sim/race/demo";
 import { isOpsMoment, stageOps } from "../sim/opsDemo";
 import { isPaperMoment, stagePapers } from "../sim/race/papers/demo";
-import { enablePapers } from "../sim/race/papers/driver";
-import { enableLeapfrog } from "../sim/race/leapfrog/driver";
+import { isFactionMoment, stageFactions } from "../sim/factions/demo";
 import { parseLeapMoment, stageLeapfrog } from "../sim/race/leapfrog/demo";
 import { isCollusionMoment, stageCollusion } from "../sim/collusion/demo";
-import { enableCollusion } from "../sim/collusion/driver";
+import { isCircusMoment, stageCircus } from "../sim/circus/demo";
+import { isDramaMoment, stageDrama } from "../sim/defection/demo";
+import { isAuditMoment, stageAudit } from "../sim/auditors/demo";
+import { isSenateMoment, stageSenate } from "../sim/capture/demo";
 import { walkersThinking } from "../sim/mind";
 import { makeSnapshot, NO_SELECTION, type Snapshot, type UiSelection, type UiToast } from "./hud";
 import { continueTutorial } from "../sim/tutorial";
 import { stageFirstRun } from "../sim/firstRunDemo";
+import { withDefs } from "../sim/defs";
+import { enableEarnedPacks, PACK_OFF_FLAGS } from "../sim/progression";
+import type { GameDefinition } from "../mods/game-definition";
+import { enableEndings } from "../sim/endings/state";
+import { isEndingMoment, stageEndingMoment } from "../sim/endings/demo";
 
 /** What the loop tells the app after touching the World. `snap`, `news` and `toasts` come with a publish. */
 export interface SyncReport {
@@ -58,34 +65,39 @@ export class SimHandle {
   /** A paused scenario's curated bubbles. Ordinary sim bubbles return on the first resumed tick. */
   openingThoughts?: { tick: number; thoughts: Thought[] };
 
-  constructor(world: GameState, leapfrog = false, public papers = world.papers?.enabled ?? false) {
+  /** The endings (FLT-11) are on: a new lab gets them too. */
+  endings: boolean;
+
+  constructor(world: GameState, leapfrog = false, public papers = world.papers?.enabled ?? false, public readonly def: GameDefinition | null = null) {
     this.world = world;
     this.leapfrog = leapfrog;
+    this.endings = !!world.endings;
   }
 
   /** Advance `n` ticks; queued commands apply on the first one. */
   step(n: number, commands: readonly Command[]) {
-    for (let i = 0; i < n; i++) tick(this.world, i === 0 && commands.length > 0 ? commands : undefined);
+    for (let i = 0; i < n; i++) tick(this.world, i === 0 && commands.length > 0 ? commands : undefined, this.def);
   }
 
   /** Apply commands without advancing time (building while paused or with a card open). */
   applyNow(commands: readonly Command[]) {
-    if (commands.length > 0) applyNow(this.world, commands);
+    if (commands.length > 0) applyNow(this.world, commands, this.def);
   }
 
-  /** Start over with a fresh seed (the random-disaster setting carries over to the new lab). */
-  reset(seed: number) {
+  /** Start over with a fresh seed (the random-disaster setting carries over to the new lab). `daily` is Today's lab. */
+  reset(seed: number, daily: string | null = null) {
     this.newsStartId = 0;
     this.openingThoughts = undefined;
     const risk = this.world.disasters.risk;
-    const collusion = this.world.collusion?.enabled;
-    const leapfrogOff = this.world.flags.leapfrogOff;
-    const papersOff = this.world.flags.papersOff;
-    this.world = createInitialState(seed);
+    // The `?<pack>=off` switches carry over, and so do arcs switched off by name (`?water=off` is
+    // `arcOff:water-escalation`); the packs themselves wake again as the new lab earns them.
+    const off = Object.keys(this.world.flags).filter((f) => PACK_OFF_FLAGS.includes(f) || f.startsWith("arcOff:"));
+    const mods = this.world.mods;
+    this.world = createInitialState(seed, "garage", this.def);
+    if (mods) this.world.mods = mods;
     setRisk(this.world, risk);
-    if (leapfrogOff) this.world.flags.leapfrogOff = leapfrogOff;
-    if (collusion) enableCollusion(this.world);
-    if (papersOff) this.world.flags.papersOff = papersOff;
+    for (const f of off) this.world.flags[f] = 1;
+    if (this.endings) enableEndings(this.world, daily);
     this.alpha = 1;
   }
 
@@ -94,6 +106,10 @@ export class SimHandle {
    * changed; a change of card or outcome is always reported. Returns null when there is nothing new.
    */
   report(publishDue: boolean, force = false): SyncReport | null {
+    return withDefs(this.def, () => this.sync(publishDue, force));
+  }
+
+  private sync(publishDue: boolean, force: boolean): SyncReport | null {
     const w = this.world;
     const event = openEventOf(w);
     const outcome = outcomeOf(w);
@@ -111,17 +127,38 @@ export class SimHandle {
   }
 }
 
-/** A living campus, warped forward and dressed up per the `?seed=&warp=&agents=&discourse=` debug knobs. */
-export function createSimHandle(
-  dbg: Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean },
-): SimHandle {
-  const sim = createInitialState(dbg.seed);
+type SimDebug = Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk" | "daily" | "endings">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean; collusion?: boolean; hearing?: boolean; yacht?: boolean; defection?: boolean; poaching?: boolean; auditors?: boolean; capture?: boolean; promises?: boolean; factions?: boolean; water?: boolean };
+
+/**
+ * A living campus, warped forward and dressed up per the `?seed=&warp=&agents=&discourse=` debug knobs.
+ * `def` is the session's resolved mod definition (FLT-37) and `mods` its identity, kept in the World with the run.
+ */
+export function createSimHandle(dbg: SimDebug, def: GameDefinition | null = null, mods: RunMods | null = null): SimHandle {
+  const sim = withDefs(def, () => stage(dbg));
+  if (mods) sim.mods = mods;
+  return new SimHandle(sim, sim.leapfrog.enabled, undefined, def);
+}
+
+function stage(dbg: SimDebug): GameState {
+  // An ending's scene (`?moment=memo|takeover|thanks|front-<id>`) starts from the curated mid-game campus.
+  const sim = isEndingMoment(dbg.moment) ? stageEndingMoment(dbg.moment) : createInitialState(dbg.seed);
+  if (dbg.endings !== false) enableEndings(sim, dbg.daily ?? null);
   if (dbg.leapfrog === false) sim.flags.leapfrogOff = 1;
   if (dbg.papers === false) sim.flags.papersOff = 1;
+  if (dbg.collusion === false) sim.flags.collusionOff = 1;
+  if (dbg.hearing === false) sim.flags.hearingOff = 1;
+  if (dbg.yacht === false) sim.flags.yachtOff = 1;
+  if (dbg.defection === false) sim.flags.defectionOff = 1;
+  if (dbg.poaching === false) sim.flags.poachingOff = 1;
+  if (dbg.auditors === false) sim.flags.auditorsOff = 1;
+  if (dbg.capture === false) sim.flags.captureOff = 1;
+  if (dbg.promises === false) sim.flags.promisesOff = 1;
+  if (dbg.factions === false) sim.flags.factionsOff = 1;
+  if (dbg.water === false) sim.flags["arcOff:water-escalation"] = 1;
   const leap = parseLeapMoment(dbg.moment);
   if (dbg.warp > 0 || dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0 || dbg.moment || dbg.disaster) { continueTutorial(sim, true); delete sim.progression; }
-  if (!sim.progression && dbg.leapfrog) enableLeapfrog(sim);
-  if (!sim.progression && dbg.papers) enablePapers(sim);
+  // No ladder means every system is earned: wake every pack that isn't switched off.
+  if (!sim.progression) enableEarnedPacks(sim);
   for (let i = 0; i < dbg.warp * TICKS_PER_DAY; i++) tick(sim);
   if (dbg.moment === "jem-opening" || dbg.moment === "jem-confirm") stageFirstRun(sim, dbg.moment);
   else if (isMoment(dbg.moment)) stageMoment(sim, dbg.moment);
@@ -129,6 +166,11 @@ export function createSimHandle(
   else if (leap) stageLeapfrog(sim, leap.moment, leap.arg);
   else if (isCollusionMoment(dbg.moment)) stageCollusion(sim, dbg.moment);
   else if (isPaperMoment(dbg.moment)) stagePapers(sim, dbg.moment);
+  else if (isCircusMoment(dbg.moment)) stageCircus(sim, dbg.moment);
+  else if (isDramaMoment(dbg.moment)) stageDrama(sim, dbg.moment);
+  else if (isAuditMoment(dbg.moment)) stageAudit(sim, dbg.moment);
+  else if (isSenateMoment(dbg.moment)) stageSenate(sim, dbg.moment);
+  else if (isFactionMoment(dbg.moment)) stageFactions(sim, dbg.moment);
   if (dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0) {
     const rng = createRng(sim.rngState);
     if (dbg.researchers > 0) seedWalkers(sim, "researcher", dbg.researchers, rng);
@@ -146,7 +188,7 @@ export function createSimHandle(
   // `?warp=` link is the same lab it always was), and `?disaster=<id>` starts one a moment before the shot.
   if ((RISKS as readonly string[]).includes(dbg.risk ?? "")) setRisk(sim, dbg.risk as Risk);
   if (dbg.disaster) stageDisaster(sim, dbg.disaster, dbg.dz ?? 0, dbg.dzPick ?? null);
-  return new SimHandle(sim, sim.leapfrog.enabled);
+  return sim;
 }
 
 export class Sim extends Context.Service<Sim, SimHandle>()("@flt/Sim") {}

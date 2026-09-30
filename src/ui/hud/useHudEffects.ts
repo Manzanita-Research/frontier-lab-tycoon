@@ -7,15 +7,17 @@ import { useAutoPause } from "../../app/hooks";
 import type { Snapshot } from "../../app/hud";
 import { TOOLS } from "../../app/hud";
 import { playCue } from "../../audio/state";
+import { startDrama } from "../../drama/state";
 import { NewsDesk } from "../../newsroom/desk";
 import { frontPage, recap } from "../../newsroom/edition";
 import { loadRoom, pressCamera, publish, resetRoom, roomAtom, viewRoom } from "../../newsroom/state";
 import { fx } from "../../render/fx/state";
 import { debugParams } from "../../app/game";
 import { setPhoto, takePhoto, togglePhoto } from "../juice/photo";
-import { eventById } from "../../content/events";
 import { chatCountAtom } from "./state";
+import { useShareCard, useTakeoverTitle } from "../share/share";
 import type { HudVM } from "./types";
+import { defs } from "../../sim/defs";
 
 const ERA_GRACE_MS = 700;
 const desk = new NewsDesk();
@@ -35,7 +37,7 @@ function useHotkeys(vm: HudVM) {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
       const st = appNow();
       if (!st) return;
-      const def = st.event ? eventById(st.event.id) : undefined;
+      const def = st.event ? defs().eventById(st.event.id) : undefined;
       if (st.event && def) {
         // A card is up: it owns the keyboard. Keys 1 to 3 choose; an era card takes any key once it has landed.
         if (def.kind === "era") {
@@ -175,8 +177,11 @@ function useNewsDesk(snap: Snapshot) {
  */
 function useOverlays(vm: HudVM) {
   useAutoPause("staff", vm.staff.open);
+  useAutoPause("disasters", vm.disasters.open);
+  useAutoPause("senate", vm.senate.open);
   useAutoPause("mixer", vm.sound.open);
   useAutoPause("arena", vm.arena.open && vm.layout.compact);
+  useAutoPause("drama", vm.drama.open);
 }
 
 export function useHudEffects(vm: HudVM, snap: Snapshot) {
@@ -185,4 +190,7 @@ export function useHudEffects(vm: HudVM, snap: Snapshot) {
   usePhotoKeys(vm);
   useChatPlayback();
   useNewsDesk(snap);
+  useEffect(startDrama, []);
+  useShareCard(vm);
+  useTakeoverTitle(vm);
 }

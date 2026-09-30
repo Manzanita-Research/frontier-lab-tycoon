@@ -10,7 +10,7 @@ import { useStackWindow } from "./stack";
 type StatsTab = "general" | "finance" | "arena" | "vibes";
 
 /** "Lab Properties": tabs, a Minesweeper-style LED for Vibes, inset fields and a blocky Hype bar. */
-export function Stats({ stats, layout, visible = ALL_VISIBLE, actions }: SlotPropsMap["Stats"]) {
+export function Stats({ stats, layout, visible = ALL_VISIBLE, disasters, actions }: SlotPropsMap["Stats"]) {
   const t = useT();
   const coach = useCoach();
   const [tab, setTab] = useState<StatsTab>("general");
@@ -110,6 +110,14 @@ export function Stats({ stats, layout, visible = ALL_VISIBLE, actions }: SlotPro
             <dd className={`inset ${stats.cash.negative ? "bad" : ""}`}>{stats.cash.text}</dd>
             <dt>{t("stats.runway")}</dt>
             <dd className={`inset ${stats.runway.warning ? "bad" : ""}`}>{stats.runway.text}</dd>
+            {disasters?.enabled && (
+              <>
+                <dt>{t("disasters.trust")}</dt>
+                <dd className={`inset ${disasters.trust.value < 40 ? "bad" : ""}`}>{disasters.trust.text}</dd>
+                <dt>{t("disasters.heat")}</dt>
+                <dd className={`inset ${disasters.heat.value >= 60 ? "bad" : ""}`}>{disasters.heat.text}</dd>
+              </>
+            )}
           </dl>
         )}
         {tab === "arena" && (
@@ -286,6 +294,13 @@ export function Inspector({ inspector: who, layout, actions }: SlotPropsMap["Ins
                       <div className="r">
                         Badge #{who.badge} · {who.kindLabel} · {who.moodLabel}
                       </div>
+                      {who.faction && (
+                        <div className="r f95-member" data-mood={who.faction.mood}>
+                          <i style={{ background: who.faction.color }} aria-hidden />
+                          Member of: {who.faction.name}
+                          {who.faction.mood !== "calm" ? ` (${who.faction.moodLabel})` : ""}
+                        </div>
+                      )}
                       <div className="bar" aria-hidden />
                     </div>
                   </div>
@@ -379,12 +394,13 @@ export function Arena({ arena, leapfrog, layout, actions }: SlotPropsMap["Arena"
             <span role="columnheader">{t("arena.colDelta")}</span>
           </div>
           {arena.rows.map((r) => (
-            <div key={r.id} className={`f95-lrow ${r.you ? "you" : ""} ${r.moved ? `moved-${r.moved}` : ""}`} role="row" title={r.title}>
+            <div key={r.id} className={`f95-lrow ${r.you ? "you" : ""} ${r.leak ? "leak" : ""} ${r.moved ? `moved-${r.moved}` : ""}`} role="row" title={r.title}>
               <span role="cell">
                 {r.rank}. {r.short}
                 {r.open && <em> (open)</em>}
+                {r.tag && <em className={`f95-tag tag-${r.tag}`}> {r.tagText}</em>}
               </span>
-              <span role="cell">{r.model ?? "—"}</span>
+              <span role="cell">{r.leak ? <em className="f95-leak">{t("arena.leak")}</em> : (r.model ?? "—")}</span>
               <span role="cell">{r.score}</span>
               <span role="cell" className={r.delta > 0 ? "up" : r.delta < 0 ? "down" : ""}>
                 {r.deltaText || "–"}

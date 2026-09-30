@@ -1,14 +1,14 @@
 // RCT footfall: something to see, a reputation, and a campus worth walking around.
-import { BUILDINGS } from "../content/buildings";
 import { getReach } from "./pathfind";
 import type { GameState } from "./types";
+import { defs } from "./defs";
 
 export function visitorDemand(state: GameState): { perDay: number; cap: number } {
   const reach = getReach(state);
   let attractions = 0;
   let campus = 0;
   for (const b of state.buildings) {
-    if (!reach.buildings.has(b.id) || b.broken || BUILDINGS[b.kind].scenery) continue;
+    if (!reach.buildings.has(b.id) || b.broken || defs().buildings[b.kind].scenery) continue;
     campus++;
     if (b.kind === "gateway") attractions += 0.7;
     if (b.kind === "demo") attractions += 2;

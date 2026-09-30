@@ -1,7 +1,7 @@
 // The small controls: the Oregon Trail Pace buttons, the "DID YOU KNOW?" tape, and the row of round sticker buttons
 // (News Room, sound, mixer, skins, camera).
 import { useState } from "react";
-import { ALL_VISIBLE, Marquee } from "../kit";
+import { ALL_VISIBLE, DramaIcon, Marquee } from "../kit";
 import { useCoach, useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import { Icon } from "./art";
@@ -104,5 +104,16 @@ export function NewsArrival({ arrival, actions }: SlotPropsMap["NewsArrival"]) {
         </button>
       </span>
     </aside>
+  );
+}
+
+/** Today's Drama: one more big round button on the toolbar. */
+export function DramaButton({ drama, actions }: SlotPropsMap["DramaButton"]) {
+  const t = useT();
+  return (
+    <button type="button" className={`dd-tool dd-drama${drama.on ? " on" : ""}`} onClick={() => actions.openDrama()} aria-label={t("drama.open")} title={t("drama.button")}>
+      <DramaIcon size={26} stroke={2.2} />
+      {drama.on ? <b className="dd-unread">{t("drama.on")}</b> : drama.fresh && <b className="dd-unread">{t("drama.new")}</b>}
+    </button>
   );
 }

@@ -65,6 +65,18 @@ export default defineMod({
         }
       ]
     },
+    "progression": {
+      "override": [
+        {
+          "id": "business",
+          "buildings": [
+            "gateway",
+            "kombucha",
+            "opinion-booth"
+          ]
+        }
+      ]
+    },
     "thoughts": {
       "add": [
         {

@@ -1,0 +1,837 @@
+{
+  "apiVersion": 1,
+  "id": "base-promises",
+  "name": "The Promise Tracker",
+  "version": "1.0.0",
+  "author": "Frontier Lab Tycoon",
+  "description": "The Hearing's three fictional senators make promises in the headlines, then vote. A Truth-o-meter keeps score; your lobbyists can flip a vote. Every roll call moves regulatory heat. FLT-15 section shape, direct-loaded until M1b.",
+  "content": {
+    "arcs": {
+      "add": [
+        {
+          "id": "promises",
+          "initial": "dormant",
+          "states": {
+            "dormant": {
+              "on": {
+                "DAY": {
+                  "target": "recess",
+                  "guard": {
+                    "type": "stat.gte",
+                    "params": {
+                      "stat": "hearings",
+                      "value": 1
+                    }
+                  },
+                  "actions": [
+                    {
+                      "type": "toast",
+                      "params": {
+                        "text": "New: the Promise Tracker. Three senators, what they promised, how they voted, and a Truth-o-meter.",
+                        "tone": "good",
+                    "importance": "you"
+                      }
+                    },
+                    {
+                      "type": "flag.set",
+                      "params": {
+                        "name": "promises:open"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "recess": {
+              "on": {
+                "DAY": [
+                  {
+                    "target": "campaign",
+                    "guard": {
+                      "type": "stat.gte",
+                      "params": {
+                        "stat": "tabled",
+                        "value": 1
+                      }
+                    }
+                  },
+                  {
+                    "target": "campaign",
+                    "guard": {
+                      "type": "after",
+                      "params": {
+                        "days": 18
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "campaign": {
+              "entry": [
+                {
+                  "type": "sound.cue",
+                  "params": {
+                    "cue": "card"
+                  }
+                }
+              ],
+              "on": {
+                "DAY": {
+                  "target": "rollCall",
+                  "guard": {
+                    "type": "after",
+                    "params": {
+                      "days": 5
+                    }
+                  }
+                }
+              }
+            },
+            "rollCall": {
+              "on": {
+                "DAY": [
+                  {
+                    "target": "passed",
+                    "guard": {
+                      "type": "all",
+                      "params": {
+                        "guards": [
+                          {
+                            "type": "stat.gte",
+                            "params": {
+                              "stat": "counted",
+                              "value": 1
+                            }
+                          },
+                          {
+                            "type": "stat.gte",
+                            "params": {
+                              "stat": "ayes",
+                              "value": 2
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "target": "failed",
+                    "guard": {
+                      "type": "stat.gte",
+                      "params": {
+                        "stat": "counted",
+                        "value": 1
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "passed": {
+              "entry": [
+                {
+                  "type": "sound.cue",
+                  "params": {
+                    "cue": "release"
+                  }
+                }
+              ],
+              "on": {
+                "DAY": {
+                  "target": "recess",
+                  "guard": {
+                    "type": "after",
+                    "params": {
+                      "days": 1
+                    }
+                  }
+                }
+              }
+            },
+            "failed": {
+              "entry": [
+                {
+                  "type": "sound.cue",
+                  "params": {
+                    "cue": "release"
+                  }
+                }
+              ],
+              "on": {
+                "DAY": {
+                  "target": "recess",
+                  "guard": {
+                    "type": "after",
+                    "params": {
+                      "days": 1
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "events": {
+      "add": [
+        {
+          "id": "promises-whip",
+          "title": "Roll call in 5 days",
+          "body": "The Senate votes on {motion}. The senators have made promises. Your lobbyists are standing by.",
+          "tone": "neutral",
+          "kind": "vote",
+          "stripe": "The Promise Tracker",
+          "when": {
+            "flag": "promises:ask:whip",
+            "daysAgo": 0
+          },
+          "cooldown": 0,
+          "choices": [
+            {
+              "label": "Let democracy happen",
+              "hint": "Back to the lab (the tracker stays in the build bar)",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "promises:pick:done"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "promises-rollcall",
+          "title": "The roll call",
+          "body": "The clerk reads the votes. Some of them match the promises.",
+          "tone": "neutral",
+          "kind": "vote",
+          "stripe": "Roll call",
+          "when": {
+            "flag": "promises:ask:rollcall",
+            "daysAgo": 0
+          },
+          "cooldown": 0,
+          "choices": [
+            {
+              "label": "Noted",
+              "hint": "Back to the lab",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "promises:pick:done"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "headlines": {
+      "add": [
+        {
+          "id": "promises-flip-1",
+          "trigger": "flip",
+          "text": "{senator} votes {vote} on {motion}, days after promising the opposite",
+          "tone": "joke"
+        },
+        {
+          "id": "promises-flip-2",
+          "trigger": "flip",
+          "text": "{senator} on {motion}: \"I was for it before I was against it, which was Tuesday\"",
+          "tone": "joke"
+        },
+        {
+          "id": "promises-flip-3",
+          "trigger": "flip",
+          "text": "Truth-o-meter for {senator} slips to \"{truth}\" after a {vote} on {motion}",
+          "tone": "joke"
+        },
+        {
+          "id": "promises-lobbied-1",
+          "trigger": "flipLobbied",
+          "text": "{senator} votes {vote} on {motion} after \"a very informative steak\"",
+          "tone": "joke"
+        },
+        {
+          "id": "promises-lobbied-2",
+          "trigger": "flipLobbied",
+          "text": "{senator} flips on {motion}; aides cite \"new information\", printed on a cheque",
+          "tone": "joke"
+        },
+        {
+          "id": "promises-both-1",
+          "trigger": "both",
+          "text": "{senator} votes {vote} on {motion}; having promised both, rated \"technically true\"",
+          "tone": "joke"
+        },
+        {
+          "id": "promises-kept-1",
+          "trigger": "kept",
+          "text": "{senator} keeps a promise on {motion}; staff unsure how to announce it",
+          "tone": "good"
+        }
+      ]
+    }
+  },
+  "rules": {
+    "promises": {
+      "senators": {
+        "blusterworth": {
+          "lobby": 60000,
+          "line": "Your lobbyist takes Sen. Blusterworth to a steakhouse. He now \"sees both sides\", which he already did."
+        },
+        "quimby": {
+          "lobby": 90000,
+          "line": "Your lobbyist buys a table at Sen. Quimby-Vance's gala for screen-free childhoods. The gala has a very large screen."
+        },
+        "brickman": {
+          "lobby": 25000,
+          "line": "Your lobbyist sponsors Sen. Brickman's stream. He reads the ad in a voice that is almost sincere."
+        }
+      },
+      "lobby": {
+        "capture": 2,
+        "heat": 1
+      },
+      "captureLean": 0.004,
+      "motions": [
+        {
+          "id": "unplug",
+          "title": "The Unplug It Act",
+          "summary": "Every AI must have an off switch big enough to see from space.",
+          "labSide": "nay",
+          "promises": {
+            "blusterworth": {
+              "says": "both",
+              "line": "promises to ban the AI and invest in the AI, in the same sentence"
+            },
+            "quimby": {
+              "says": "aye",
+              "line": "vows to find the plug personally, with a flashlight"
+            },
+            "brickman": {
+              "says": "nay",
+              "line": "tells two million followers the plug is \"honestly kind of cringe\""
+            }
+          },
+          "lean": {
+            "blusterworth": 0.5,
+            "quimby": 0.2,
+            "brickman": 0.65
+          },
+          "pass": [
+            {
+              "type": "news",
+              "params": {
+                "text": "The Unplug It Act passes: {lab} installs a big red switch, then a smaller switch to guard it",
+                "tone": "joke"
+              }
+            },
+            {
+              "type": "heat.delta",
+              "params": {
+                "amount": 8
+              }
+            },
+            {
+              "type": "cost.spike",
+              "params": {
+                "mult": 1.1,
+                "days": 45,
+                "kinds": [
+                  "cluster",
+                  "datacenter"
+                ]
+              }
+            }
+          ],
+          "fail": [
+            {
+              "type": "news",
+              "params": {
+                "text": "The Unplug It Act fails; the plug remains at large",
+                "tone": "joke"
+              }
+            },
+            {
+              "type": "heat.delta",
+              "params": {
+                "amount": -4
+              }
+            }
+          ]
+        },
+        {
+          "id": "disclose",
+          "title": "The Chatbot Disclosure Act",
+          "summary": "Every chatbot must say \"I am a chatbot\" before every sentence, including this one.",
+          "labSide": "nay",
+          "promises": {
+            "blusterworth": {
+              "says": "aye",
+              "line": "promises no chatbot will ever again pretend to be his grandson"
+            },
+            "quimby": {
+              "says": "aye",
+              "line": "promises to make the robots introduce themselves, politely, every time"
+            },
+            "brickman": {
+              "says": "both",
+              "line": "promises to regulate the bots, but not, like, his bots"
+            }
+          },
+          "lean": {
+            "blusterworth": 0.35,
+            "quimby": 0.25,
+            "brickman": 0.55
+          },
+          "pass": [
+            {
+              "type": "news",
+              "params": {
+                "text": "Every chatbot now opens with \"I am a chatbot.\" Average reply grows by four words; {lab}'s API bill grows by 10%",
+                "tone": "joke"
+              }
+            },
+            {
+              "type": "heat.delta",
+              "params": {
+                "amount": 5
+              }
+            },
+            {
+              "type": "revenue.mult",
+              "params": {
+                "mult": 0.9,
+                "days": 30
+              }
+            }
+          ],
+          "fail": [
+            {
+              "type": "news",
+              "params": {
+                "text": "Chatbot Disclosure Act fails; chatbots decline to comment, at length",
+                "tone": "joke"
+              }
+            },
+            {
+              "type": "heat.delta",
+              "params": {
+                "amount": -3
+              }
+            }
+          ]
+        },
+        {
+          "id": "credit",
+          "title": "The Frontier Tax Credit (Mostly Frontier) Act",
+          "summary": "A tax credit for anyone building \"the future\", defined in a footnote as {lab}.",
+          "labSide": "aye",
+          "promises": {
+            "blusterworth": {
+              "says": "aye",
+              "line": "promises \"jobs, jobs, jobs, and also AI\""
+            },
+            "quimby": {
+              "says": "nay",
+              "line": "promises \"not one dime for the robots\""
+            },
+            "brickman": {
+              "says": "aye",
+              "line": "promises to bring the future home, plus a merch drop"
+            }
+          },
+          "lean": {
+            "blusterworth": 0.6,
+            "quimby": 0.3,
+            "brickman": 0.6
+          },
+          "pass": [
+            {
+              "type": "news",
+              "params": {
+                "text": "Tax credit passes: {lab} receives a cheque, and the future is legally defined as {lab}",
+                "tone": "good"
+              }
+            },
+            {
+              "type": "cash.delta",
+              "params": {
+                "amount": 150000
+              }
+            },
+            {
+              "type": "heat.delta",
+              "params": {
+                "amount": 4
+              }
+            }
+          ],
+          "fail": [
+            {
+              "type": "news",
+              "params": {
+                "text": "Frontier Tax Credit fails; {lab} files the cheque under \"next year\"",
+                "tone": "joke"
+              }
+            }
+          ]
+        },
+        {
+          "id": "water",
+          "title": "The Datacenter Water Accountability Act",
+          "summary": "Datacenters must pay for their water, and apologise to it.",
+          "labSide": "nay",
+          "promises": {
+            "blusterworth": {
+              "says": "both",
+              "line": "promises to protect the water and the datacenters that drink it"
+            },
+            "quimby": {
+              "says": "aye",
+              "line": "vows that not one more lake goes to a chatbot"
+            },
+            "brickman": {
+              "says": "aye",
+              "line": "posts a 40-part thread about his reusable bottle"
+            }
+          },
+          "lean": {
+            "blusterworth": 0.5,
+            "quimby": 0.3,
+            "brickman": 0.45
+          },
+          "pass": [
+            {
+              "type": "news",
+              "params": {
+                "text": "Water Accountability Act passes: {lab}'s datacenters write the river a letter, and a cheque",
+                "tone": "joke"
+              }
+            },
+            {
+              "type": "heat.delta",
+              "params": {
+                "amount": 6
+              }
+            },
+            {
+              "type": "cost.spike",
+              "params": {
+                "mult": 1.25,
+                "days": 60,
+                "kinds": [
+                  "datacenter"
+                ]
+              }
+            },
+            {
+              "type": "discourse.delta",
+              "params": {
+                "amount": -8
+              }
+            }
+          ],
+          "fail": [
+            {
+              "type": "news",
+              "params": {
+                "text": "Water Accountability Act fails; the water discourse will be continuing",
+                "tone": "joke"
+              }
+            },
+            {
+              "type": "discourse.delta",
+              "params": {
+                "amount": 6
+              }
+            },
+            {
+              "type": "heat.delta",
+              "params": {
+                "amount": -3
+              }
+            }
+          ]
+        },
+        {
+          "id": "robobills",
+          "title": "The Senate Modernisation (Robots Write The Bills) Act",
+          "summary": "Senate staff may use AI to draft bills. The AI is {lab}'s.",
+          "labSide": "aye",
+          "promises": {
+            "blusterworth": {
+              "says": "aye",
+              "line": "promises bills so long nobody could possibly read them, as is tradition"
+            },
+            "quimby": {
+              "says": "nay",
+              "line": "promises to keep democracy human-written, in cursive"
+            },
+            "brickman": {
+              "says": "aye",
+              "line": "promises to let his chat vote on every draft"
+            }
+          },
+          "lean": {
+            "blusterworth": 0.55,
+            "quimby": 0.35,
+            "brickman": 0.7
+          },
+          "pass": [
+            {
+              "type": "news",
+              "params": {
+                "text": "First AI-drafted bill is 400 pages longer than the last one; nobody can tell the difference",
+                "tone": "joke"
+              }
+            },
+            {
+              "type": "capture.delta",
+              "params": {
+                "amount": 4
+              }
+            },
+            {
+              "type": "hype.delta",
+              "params": {
+                "amount": 4
+              }
+            }
+          ],
+          "fail": [
+            {
+              "type": "news",
+              "params": {
+                "text": "Senate votes to keep writing its own bills; the bills remain exactly as good",
+                "tone": "joke"
+              }
+            }
+          ]
+        },
+        {
+          "id": "deepfake",
+          "title": "The Deepfake Senator Protection Act",
+          "summary": "Deepfakes are banned. Of senators. Everyone else is \"a matter for the states\".",
+          "labSide": "nay",
+          "promises": {
+            "blusterworth": {
+              "says": "aye",
+              "line": "promises to protect voters from \"the fake me\", specifically"
+            },
+            "quimby": {
+              "says": "aye",
+              "line": "promises a law for everyone, by which she means the Senate"
+            },
+            "brickman": {
+              "says": "nay",
+              "line": "admits most of his content is already a deepfake of himself"
+            }
+          },
+          "lean": {
+            "blusterworth": 0.3,
+            "quimby": 0.3,
+            "brickman": 0.7
+          },
+          "pass": [
+            {
+              "type": "news",
+              "params": {
+                "text": "Deepfakes of senators banned; deepfakes of everyone else described as \"a matter for the states\"",
+                "tone": "joke"
+              }
+            },
+            {
+              "type": "heat.delta",
+              "params": {
+                "amount": 3
+              }
+            }
+          ],
+          "fail": [
+            {
+              "type": "news",
+              "params": {
+                "text": "Deepfake Senator Protection Act fails; a deepfake of the chair calls it \"a great day\"",
+                "tone": "joke"
+              }
+            }
+          ]
+        },
+        {
+          "id": "pause",
+          "title": "The Six-Month Pause (Starting Next Year) Act",
+          "summary": "A pause on frontier AI, beginning shortly after the next funding round.",
+          "labSide": "nay",
+          "promises": {
+            "blusterworth": {
+              "says": "both",
+              "line": "promises to pause the AI immediately, starting eventually"
+            },
+            "quimby": {
+              "says": "aye",
+              "line": "promises a real pause, \"not a vibes pause\""
+            },
+            "brickman": {
+              "says": "nay",
+              "line": "tells his chat \"we're so back\", which is the opposite of a pause"
+            }
+          },
+          "lean": {
+            "blusterworth": 0.55,
+            "quimby": 0.2,
+            "brickman": 0.7
+          },
+          "pass": [
+            {
+              "type": "news",
+              "params": {
+                "text": "The Pause passes; it starts next year, which is when it always starts",
+                "tone": "joke"
+              }
+            },
+            {
+              "type": "heat.delta",
+              "params": {
+                "amount": 10
+              }
+            },
+            {
+              "type": "cost.spike",
+              "params": {
+                "mult": 1.1,
+                "days": 30
+              }
+            }
+          ],
+          "fail": [
+            {
+              "type": "news",
+              "params": {
+                "text": "The Pause fails, pending a pause to think about the pause",
+                "tone": "joke"
+              }
+            },
+            {
+              "type": "heat.delta",
+              "params": {
+                "amount": -5
+              }
+            }
+          ]
+        },
+        {
+          "id": "compute",
+          "title": "The Public Compute For Everyone Act",
+          "summary": "Free compute for universities, served by {lab}'s datacenters at list price.",
+          "labSide": "aye",
+          "promises": {
+            "blusterworth": {
+              "says": "aye",
+              "line": "promises compute for every child, and every grandchild, and him"
+            },
+            "quimby": {
+              "says": "aye",
+              "line": "promises \"compute for the people, not the profiteers\""
+            },
+            "brickman": {
+              "says": "nay",
+              "line": "says compute should be \"decentralised\", then cannot explain what that means"
+            }
+          },
+          "lean": {
+            "blusterworth": 0.6,
+            "quimby": 0.45,
+            "brickman": 0.45
+          },
+          "pass": [
+            {
+              "type": "news",
+              "params": {
+                "text": "Public Compute passes: universities get free compute, {lab} gets the invoice for it, at list price",
+                "tone": "good"
+              }
+            },
+            {
+              "type": "cash.delta",
+              "params": {
+                "amount": 80000
+              }
+            },
+            {
+              "type": "trust.delta",
+              "params": {
+                "amount": 2
+              }
+            }
+          ],
+          "fail": [
+            {
+              "type": "news",
+              "params": {
+                "text": "Public Compute fails; universities go back to the one GPU in the basement",
+                "tone": "joke"
+              }
+            }
+          ]
+        }
+      ],
+      "bill": {
+        "title": "the bill",
+        "summary": "The bill {lab} helped draft.",
+        "labSide": "aye",
+        "promises": {
+          "blusterworth": {
+            "says": "nay",
+            "line": "promises never to vote for a bill he has not read"
+          },
+          "quimby": {
+            "says": "nay",
+            "line": "promises to hold {lab} accountable, in the bill {lab} is writing"
+          },
+          "brickman": {
+            "says": "both",
+            "line": "promises to vote whichever way the comments say"
+          }
+        },
+        "lean": {
+          "blusterworth": 0.6,
+          "quimby": 0.3,
+          "brickman": 0.55
+        }
+      },
+      "truth": [
+        {
+          "atLeast": 90,
+          "label": "Gospel"
+        },
+        {
+          "atLeast": 70,
+          "label": "Mostly True"
+        },
+        {
+          "atLeast": 50,
+          "label": "Half-True"
+        },
+        {
+          "atLeast": 30,
+          "label": "Technically True"
+        },
+        {
+          "atLeast": 10,
+          "label": "Creative"
+        },
+        {
+          "atLeast": 0,
+          "label": "Pants Ablaze"
+        }
+      ],
+      "unrated": "Unrated",
+      "passed": "{motion} passes {tally}",
+      "failed": "{motion} fails {tally}"
+    }
+  }
+}

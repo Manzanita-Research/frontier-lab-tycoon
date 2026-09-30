@@ -1,9 +1,10 @@
 // What the Staff panel and the world labels read (FLT-10): a small plain snapshot of the operations side of the World.
-import { BUILDINGS, type BuildingKind } from "../content/buildings";
+import type { BuildingKind } from "../content/buildings";
 import { MAX_PER_JOB, STAFF, STAFF_JOBS } from "../content/staff";
 import { slopStats } from "./slop";
 import { canHire, payroll, statusOfStaff } from "./staff";
 import type { GameState, StaffJob } from "./types";
+import { defs } from "./defs";
 
 export interface StaffRow {
   id: number;
@@ -66,7 +67,7 @@ export function opsView(s: GameState): OpsView {
     }),
     slopPct: Math.round(stats.share * 100),
     slopTiles: stats.tiles,
-    broken: s.buildings.filter((b) => b.broken).map((b) => ({ id: b.id, kind: b.kind, name: BUILDINGS[b.kind].name, sre: s.staff.some((o) => o.job === "sre" && o.task === b.id && (o.machine.value === "going" || o.machine.value === "working")) })),
+    broken: s.buildings.filter((b) => b.broken).map((b) => ({ id: b.id, kind: b.kind, name: defs().buildings[b.kind].name, sre: s.staff.some((o) => o.job === "sre" && o.task === b.id && (o.machine.value === "going" || o.machine.value === "working")) })),
     queues: [...waiting].map(([id, n]) => ({ id, n })),
   };
 }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ALL_VISIBLE, useCoach, useT } from "../kit";
+import { ALL_VISIBLE, DramaIcon, useCoach, useT } from "../kit";
 import type { SlotPropsMap } from "../types";
 import { BubbleIcon, Caret, LeafIcon, LensIcon, LetterIcon, MixerIcon, PauseIcon, SoundIcon } from "./icons";
 
@@ -87,5 +87,19 @@ export function ThoughtsPanel({ rows, layout, actions }: SlotPropsMap["ThoughtsP
         </ul>
       )}
     </section>
+  );
+}
+
+/** Today's Drama: a slip of paper pinned under the tools. */
+export function DramaButton({ drama, actions }: SlotPropsMap["DramaButton"]) {
+  const t = useT();
+  return (
+    <div className="fa-tools fa-paper fa-drama" role="group">
+      <button className="wide" onClick={() => actions.openDrama()} aria-label={t("drama.open")}>
+        <DramaIcon size={18} stroke={2} />
+        <span>{t("drama.button")}</span>
+        {drama.on ? <b className="fa-unread">{t("drama.on")}</b> : drama.fresh && <b className="fa-unread">{t("drama.new")}</b>}
+      </button>
+    </div>
   );
 }

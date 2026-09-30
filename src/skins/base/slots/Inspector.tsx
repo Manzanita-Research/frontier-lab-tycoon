@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Portrait } from "../../kit";
+import { FactionChip, Portrait } from "../../kit";
 import { useT } from "../../context";
 import type { SlotPropsMap } from "../../types";
 
@@ -49,6 +49,7 @@ export function Inspector({ inspector: who, layout, actions }: SlotPropsMap["Ins
           <div className="insp-tags">
             <span className={`tag mood-${who.mood}`}>{who.moodLabel}</span>
             <span className="tag kind">{who.kindLabel}</span>
+            {who.faction && <FactionChip faction={who.faction} />}
           </div>
         </div>
         <button className="insp-x" onClick={() => actions.closeInspector()} aria-label={t("inspector.close")}>

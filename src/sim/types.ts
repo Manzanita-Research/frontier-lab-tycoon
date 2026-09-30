@@ -1,12 +1,24 @@
 // Everything in GameState is plain and JSON-serializable.
 import type { CoachStored } from "./machines/coach";
 import type { ProgressionStored } from "./machines/progression";
-import type { ProgressionLevel, UnlockCard } from "../content/progression";
+import type { UnlockCard } from "../content/progression";
 import type { BuildingKind } from "../content/buildings";
 import type { CollusionState, Investigation } from "./collusion/state";
+import type { HearingState } from "./hearing/state";
+import type { YachtState } from "./yacht/state";
+import type { DefectionState } from "./defection/state";
+import type { NeoLabsState } from "./neolabs/state";
+import type { Meeting } from "./meetings";
+import type { PoachingState } from "./poaching/state";
+import type { AuditorsState } from "./auditors/state";
+import type { VisitorGroup } from "./groups";
+import type { BillState } from "./capture/state";
+import type { PromisesState } from "./promises/state";
 import type { NeedKey } from "../content/needs";
 import type { DisastersState } from "./disasters/types";
+import type { EndingsState } from "./endings/state";
 import type { ArcStored } from "./machines/arc";
+import type { ModArcStored } from "./modArcs";
 import type { EconomyStored } from "./machines/economy";
 import type { GoalsStored } from "./machines/goals";
 import type { MoodStored } from "./machines/mood";
@@ -18,6 +30,7 @@ import type { TrainingStored } from "./machines/training";
 import type { WalkerStored } from "./machines/walker";
 import type { TutorialStored } from "./machines/tutorial";
 import type { GuardrailsStored } from "./machines/guardrails";
+import type { FactionsState } from "./factions/state";
 
 export type { BuildingKind, NeedKey };
 export type WalkerKind = "researcher" | "agent" | "visitor" | "protester";
@@ -121,6 +134,10 @@ export interface Walker {
   qslot: number;
   /** Where the line says they should be standing (recomputed each tick from the join order; `qslot` follows it). Transient. */
   qrank: number;
+  /** FLT-33: the faction they side with ("" for none), given out a few ticks after they arrive. Absent without factions. */
+  faction?: string;
+  /** Protesters: the faction whose crowd they came with. Absent for the water crowd (and every protester without factions). */
+  crowd?: string;
 }
 
 export type StaffJob = "janitor" | "sre" | "comms" | "security";
@@ -168,6 +185,21 @@ export interface Thought {
   kind: WalkerKind;
   text: string;
   expiresTick: number;
+  /** FLT-33: said as a member of this faction (the bubble takes its colour). */
+  faction?: string;
+  /** An answer to what this walker just said: a path argument, or a shout across the gate. */
+  replyTo?: number;
+}
+
+/** A crowd a faction sends to the gate on purpose (the `faction.rally` verb): it stands across the path from `against`. */
+export interface Rally {
+  faction: string;
+  /** The crowds it is there to shout at: these factions' marchers, and the water crowd, move to the far side of the path. */
+  against: string[];
+  /** Its size: this share of the water crowd, and at least `min`. */
+  share: number;
+  min: number;
+  day: number;
 }
 
 export interface Pop {
@@ -178,11 +210,26 @@ export interface Pop {
   tick: number;
 }
 
-/** Drained by the store into UI toasts. */
+/**
+ * Who a toast is from (FLT-51): the system that sent it, or a mod (`mod:<id>`). The app's notice policy reads it to decide which
+ * panel owns the news, and the flood test counts by it.
+ */
+export type NoticeSource =
+  | "leapfrog" | "ops" | "staff" | "economy" | "coach" | "event" | "disaster" | "papers" | "collusion" | "hearing" | "politics"
+  | "defection" | "auditors" | "factions" | "race" | "training" | "crowd" | "build" | "endings" | "mods" | `mod:${string}`;
+
+/** `you`: it is about you, or needs you (a toast). `world`: it happened out there (the ticker, and the panel that owns it). */
+export type Importance = "you" | "world";
+
+/** Drained by the store into UI toasts. `source` and `importance` are optional only so older saves still load (FLT-51). */
 export interface Toast {
   id: number;
   text: string;
   tone: Tone;
+  source?: NoticeSource;
+  importance?: Importance;
+  /** Sent while a player command was applied: the answer to something you just did, so the app shows it at once. */
+  reply?: true;
 }
 
 export interface GoalProgress {
@@ -194,7 +241,18 @@ export interface GoalProgress {
   met: boolean;
 }
 
-export type Outcome = "playing" | "won" | "lost";
+/** "ended": an ending (FLT-11) has reached its front page. */
+export type Outcome = "playing" | "won" | "lost" | "ended";
+
+/** A note on the lab's file for the auditors (FLT-19's report card reads them): which grade, how many grades, why. */
+export interface AuditorNote {
+  day: number;
+  grade: string;
+  amount: number;
+  text: string;
+  /** The machine that filed it ("capture"), or "". */
+  owner: string;
+}
 
 /** The event card that is open right now; the game is paused until the player picks a choice. */
 export interface OpenEvent {
@@ -226,10 +284,18 @@ export interface Ledger {
   net: number;
 }
 
+/** The mods a run was started with (FLT-37): ids, versions and content hashes, so a save or a bug report says what it ran. */
+export interface RunMods {
+  mods: { id: string; version: string; hash: string }[];
+  /** Hash of the whole resolved content the run reads. */
+  contentHash: string;
+}
+
 export interface GameState {
+  /** Absent for an unmodded run, so the base World (and the goldens) are unchanged. */
+  mods?: RunMods;
   coach?: CoachStored;
   progression?: ProgressionStored;
-  progressionContent?: readonly ProgressionLevel[];
   unlockCards?: UnlockCard[];
   seed: number;
   rngState: number;
@@ -277,6 +343,8 @@ export interface GameState {
   goals: GoalsStored;
   /** One machine per event card, by event id. At most one is in `cardOpen`; `tick` does nothing while it is. */
   arcs: Record<string, ArcStored>;
+  /** FLT-37: a mod's story arcs (sim/modArcs.ts), by arc id. Absent until a modded run's first beat. */
+  modArcs?: Record<string, ModArcStored>;
   /** The Race (FLT-9): rival machines, the Arena, the era ratchet, the open-weights drop and the auction clock. */
   race: RaceState;
   /** Release Leapfrog (FLT-27): the release calendar, the benchmark leaderboard, the news cycle, the forced response and the launch livestream. Asleep unless `enabled`. */
@@ -297,6 +365,38 @@ export interface GameState {
   disasters: DisastersState;
   /** FLT-18: opt-in Swarm pack; absent preserves legacy saves and baseline runs. */
   collusion?: CollusionState;
+  /** Regulatory capture, 0 to 100 (the `capture` stat; `capture.delta` moves it). Absent means 0. FLT-21 moves it, FLT-22 reads it. */
+  capture?: number;
+  /** FLT-21 The Hearing: absent until the pack is enabled (Level 5, Scrutiny). */
+  hearing?: HearingState;
+  /** FLT-24 the yacht summit: absent until the pack is enabled (Level 5, Scrutiny). */
+  yacht?: YachtState;
+  /** FLT-22 Regulatory Capture: the bill the lab helps draft. Absent until the pack is enabled (Level 5, Scrutiny). */
+  bill?: BillState;
+  /** FLT-23 the Promise Tracker: the Senate's docket, promises and roll calls. Absent until the pack is enabled (Level 5). */
+  promises?: PromisesState;
+  /** Notes on the lab's file for the auditors (the Vocabulary's `auditor.note`; FLT-22's exposed bill files one). FLT-19 reads them. */
+  auditorNotes?: AuditorNote[];
+  /** FLT-33: the factions (meters, moods, relations, the lab's stance). Absent until Level 4, or with `?factions=off`. */
+  factions?: FactionsState;
+  /** FLT-25: crowds that came to the gate to shout at another crowd (the `faction.rally` verb). Absent until the first. */
+  rallies?: Rally[];
   /** Generic inquiries started by the Vocabulary; the owning machine completes them. */
   investigations?: Record<string, Investigation>;
+  /** FLT-26 Defection: opt-in pack (the ladder turns it on at Scrutiny); absent in legacy saves and baseline runs. */
+  defection?: DefectionState;
+  /** FLT-20 Poaching War: opt-in pack, same rules. */
+  poaching?: PoachingState;
+  /** Labs your own people founded (FLT-26, FLT-20): on the Arena beside the built-in rivals. */
+  neoLabs?: NeoLabsState;
+  /** A visitor talking to one of your people somewhere visible (sim/meetings.ts, the `people.meet` verb). */
+  meetings?: Meeting[];
+  /** FLT-19: visitor groups on campus (auditors today); absent until the first one arrives. */
+  groups?: VisitorGroup[];
+  /** FLT-19: presentation requests by walker kind (`agent: "box"` while the agents hide in cardboard boxes). Never read by sim logic. */
+  disguises?: Record<string, string>;
+  /** FLT-19: the Evals Without Borders pack; absent until enabled. */
+  auditors?: AuditorsState;
+  /** FLT-11: The Memo and the endings; absent until `enableEndings` (older saves and baseline runs keep the win/lose-only game). */
+  endings?: EndingsState;
 }

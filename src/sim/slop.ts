@@ -114,7 +114,7 @@ export function dailySlop(state: GameState, rng: Rng) {
   if (share <= SLOP_NEWS_SHARE || state.day < (state.flags.nextSlopNews ?? 0)) return;
   const pct = String(Math.round(share * 100));
   pushNews(state, rng, "slop", { pct });
-  if (state.flags.nextSlopNews === undefined) addToast(state, `${state.labName} campus now ${pct}% slop by volume. A Janitor Bot is $2K a day.`, "bad");
+  if (state.flags.nextSlopNews === undefined) addToast(state, `${state.labName} campus now ${pct}% slop by volume. A Janitor Bot is $2K a day.`, "bad", { source: "ops", importance: "you" });
   state.flags.nextSlopNews = state.day + NEWS_COOLDOWN_DAYS;
 }
 
@@ -138,5 +138,5 @@ export function firstSpill(state: GameState) {
   if (near.length === 0) return;
   for (const { i } of near) state.slop[i] = Math.max(state.slop[i] ?? 0, FIRST_SPILL.depth);
   state.flags.slopRev = (state.flags.slopRev ?? 0) + 1;
-  addToast(state, bar ? "The Kombucha Bar's culture has escaped onto the paths. It is alive and it is sticky." : "Something sticky is on the paths. Nobody will say what.", "bad");
+  addToast(state, bar ? "The Kombucha Bar's culture has escaped onto the paths. It is alive and it is sticky." : "Something sticky is on the paths. Nobody will say what.", "bad", { source: "ops", importance: "you" });
 }

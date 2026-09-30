@@ -109,6 +109,14 @@ export const ICONS: Record<string, ReactElement> = {
       <circle cx="6" cy="6" r="3" fill="#f2b134" stroke={ink} strokeWidth="1.6" />
     </svg>
   ),
+  security: (
+    <svg {...S}>
+      <rect x="3" y="12" width="26" height="16" rx="1.5" fill="#dfe6fb" stroke={ink} strokeWidth="2" />
+      <path d="M16 3 L25 6.5 V13 C25 19 21 22.5 16 24.5 C11 22.5 7 19 7 13 V6.5 Z" fill="#3b5bdb" stroke={ink} strokeWidth="2" />
+      <path d="M12 13.5 L15 16.5 L20.5 10.5" stroke="#fff" strokeWidth="2.4" fill="none" />
+      <rect x="21" y="22" width="5" height="6" fill="#f2b134" stroke={ink} strokeWidth="1.6" />
+    </svg>
+  ),
   bulldoze: (
     <svg {...S}>
       <rect x="4" y="15" width="16" height="8" rx="2" fill="#ffd24a" stroke={ink} strokeWidth="2" />
@@ -126,6 +134,15 @@ export const ICONS: Record<string, ReactElement> = {
       <rect x="11" y="18.5" width="4" height="2.4" rx="1" fill={ink} />
       <rect x="17" y="18.5" width="4" height="2.4" rx="1" fill={ink} />
       <path d="M8 29 Q16 23 24 29" fill="#ff8a2b" stroke={ink} strokeWidth="2" />
+    </svg>
+  ),
+  senate: (
+    <svg {...S}>
+      <path d="M16 4 V9 M16 4 H21 V7 H16" stroke={ink} strokeWidth="2" fill="#e8574a" />
+      <path d="M9 15 A7 6.5 0 0 1 23 15 Z" fill="#f7eed6" stroke={ink} strokeWidth="2" />
+      <rect x="6" y="15" width="20" height="3" fill="#efe2bd" stroke={ink} strokeWidth="2" />
+      <path d="M9 18 V25 M13.5 18 V25 M18.5 18 V25 M23 18 V25" stroke={ink} strokeWidth="2" />
+      <rect x="4" y="25" width="24" height="3" rx="1" fill="#c9c3b6" stroke={ink} strokeWidth="2" />
     </svg>
   ),
 };

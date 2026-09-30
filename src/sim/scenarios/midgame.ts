@@ -1,36 +1,41 @@
 // A scripted player, not a save-file fixture: every building, hire and release goes through the ordinary sim.
-import { BUILDINGS, type PlaceableKind } from "../../content/buildings";
-import { eventById } from "../../content/events";
-import { THOUGHTS } from "../../content/thoughts";
+import type { PlaceableKind } from "../../content/buildings";
 import { canPlace, type Command } from "../commands";
 import { openEventOf } from "../events";
 import { outcomeOf } from "../goals";
 import { buildingAt, isPathTile, rectContains } from "../pathfind";
-import { enableLeapfrog } from "../race/leapfrog/driver";
 import { createInitialState } from "../state";
 import { applyNow, tick, TICKS_PER_DAY } from "../tick";
 import type { GameState, Thought, WalkerKind } from "../types";
+import { defs } from "../defs";
 
 export const MIDGAME_SEED = 48;
 export const MIDGAME_CAMERA = { focus: [11.5, 14.5] as [number, number], zoom: 43 };
 /** Start the tape on the chosen real SOTA joke; original ids let new headlines join normally on resume. */
 const sotaHeadline = /has a new champion|SOTA|state-of-the-art|posts a new best|tops .*says|leaderboard:/;
+/** FLT-48 hero: a short headline that lands whole in the ticker, from the same week (the SOTA claim follows on the tape). */
+const heroHeadline = /valuation rises \d+% on news that it exists/;
 export function midgameOpeningNews(s: GameState) {
-  const chosen = s.news.find((n) => n.day === s.leapfrog.last?.day && sotaHeadline.test(n.text));
-  if (!chosen) throw new Error("Mid-game opening headline is missing");
+  const sota = s.news.find((n) => n.day === s.leapfrog.last?.day && sotaHeadline.test(n.text));
+  if (!sota) throw new Error("Mid-game opening headline is missing");
+  const hero = s.news.filter((n) => n.id < sota.id && n.day >= sota.day - 7 && heroHeadline.test(n.text)).at(-1);
+  const chosen = hero ?? sota;
   return s.news.filter((n) => n.id >= chosen.id);
 }
 
-/** Read-only opening overlay. Existing content on real outdoor speakers; never write it into the World. */
+/**
+ * Read-only opening overlay. Existing content on real outdoor speakers; never write it into the World.
+ * The speakers stand in the clear part of the hero camera (FLT-48): the top of the protest, its front, and the dome behind it.
+ */
 export function midgameOpeningThoughts(s: GameState): Thought[] {
   const picks: { kind: WalkerKind; text: string; near: [number, number] }[] = [
-    { kind: "researcher", text: "The loss went down. I refuse to touch anything.", near: [11, 12] },
-    { kind: "agent", text: "I calculated my water usage. I'd rather not say.", near: [15, 16] },
-    { kind: "protester", text: "Someone hand me a water. Not from them.", near: [10, 21] },
+    { kind: "researcher", text: "They chant in perfect 4/4. Our uptime isn't even that stable.", near: [13, 20.5] },
+    { kind: "agent", text: "I calculated my water usage. I'd rather not say.", near: [11.5, 12] },
+    { kind: "protester", text: "Someone hand me a water. Not from them.", near: [8.6, 17.2] },
   ];
   const chosen: number[] = [];
   return picks.map((pick, i) => {
-    const line = THOUGHTS.find((t) => t.kind === pick.kind && t.text === pick.text);
+    const line = defs().thoughts.find((t) => t.kind === pick.kind && t.text === pick.text);
     const speaker = s.walkers.filter((w) => w.kind === pick.kind && w.machine.value !== "inside" && !chosen.includes(w.id))
       .sort((a, b) => Math.hypot(a.x - pick.near[0], a.z - pick.near[1]) - Math.hypot(b.x - pick.near[0], b.z - pick.near[1]) || a.id - b.id)[0];
     if (!line || !speaker) throw new Error(`Mid-game opening thought is missing: ${pick.kind}`);
@@ -66,7 +71,7 @@ function build(s: GameState): Command[] {
   else if (n("cluster") < Math.min(5, 2 * halls)) kind = "cluster";
   else if (halls < 5) kind = "hall";
   else if (n("demo") < 1) kind = "demo";
-  if (!kind || s.buildings.length >= 20 || s.cash < BUILDINGS[kind].price + 400_000) return [];
+  if (!kind || s.buildings.length >= 20 || s.cash < defs().buildings[kind].price + 400_000) return [];
   const at = spot(s, kind);
   return at ? [{ type: "placeBuilding", kind, x: at[0], z: at[1] }] : [];
 }
@@ -76,7 +81,7 @@ function answer(s: GameState): Command[] {
   if (!open) return [];
   // Hold the run, bid low at auctions, and leave the Water Discourse unresolved in the world (not a modal).
   const choice = open.id === "shipNow" ? 1 : open.id === "computeAuction" ? 0 : open.id === "waterDiscourse" ? 2 : 0;
-  return [{ type: "chooseEvent", eventId: open.id, choiceIndex: Math.min(choice, eventById(open.id)!.choices.length - 1) }];
+  return [{ type: "chooseEvent", eventId: open.id, choiceIndex: Math.min(choice, defs().eventById(open.id)!.choices.length - 1) }];
 }
 
 export function walkerOnCampus(s: GameState): boolean {
@@ -85,11 +90,9 @@ export function walkerOnCampus(s: GameState): boolean {
 
 export function createMidgameScenario(): GameState {
   const s = createInitialState(MIDGAME_SEED, "campus");
-  // The curated mid-game scenario starts with every system earned. Its paid replay remains unchanged.
-  s.progression = { value: "complete", context: { level: 5 } };
+  // The curated mid-game scenario starts with every system earned (the campus opening already woke every pack).
   s.coach = { value: "skipped", context: { index: 0, elapsed: 0 } };
   s.flags.coachBuildOpened = 0;
-  enableLeapfrog(s);
   pave(s);
   for (let i = 0; s.day < 480 && i < 500 * TICKS_PER_DAY && outcomeOf(s) !== "lost"; i++) {
     let cmds = answer(s);
@@ -104,7 +107,7 @@ export function createMidgameScenario(): GameState {
     if (s.day === 350 && s.tick % TICKS_PER_DAY === 0) pave(s, true);
     // A paid refresh before the curated opening: ordinary demolition refunds and replacement costs.
     if (s.day === 390 && s.tick % TICKS_PER_DAY === 0) {
-      for (const b of [...s.buildings]) if (b.reliability < 0.8 && s.cash > BUILDINGS[b.kind].price + 400_000) {
+      for (const b of [...s.buildings]) if (b.reliability < 0.8 && s.cash > defs().buildings[b.kind].price + 400_000) {
         applyNow(s, [{ type: "bulldoze", x: b.x, z: b.z }, { type: "placeBuilding", kind: b.kind, x: b.x, z: b.z, confirmed: true }]);
       }
     }

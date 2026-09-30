@@ -1,6 +1,6 @@
 // Message boxes and the paperclip: bubbles, toasts, event cards, the era blue screen, the outcome card, the assistant.
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Dialog, placeBalloon } from "../kit";
+import { Dialog, Evidence, factionAttrs, placeBalloon } from "../kit";
 import { useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import { Btn, Win } from "./parts";
@@ -20,8 +20,11 @@ const readTipsOff = () => {
 /** A yellow tooltip with a 1px black border and a bold speaker line. The root keeps the `bubble` class so photo mode can copy it. */
 export function Bubble({ bubble }: SlotPropsMap["Bubble"]) {
   return (
-    <div className={`bubble f95-tip bubble-${bubble.kind}`}>
-      <b>{bubble.speaker || bubble.kind}</b>
+    <div className={`bubble f95-tip bubble-${bubble.kind}${bubble.speech ? " speech" : ""}`} {...factionAttrs(bubble.faction)}>
+      <b>
+        {bubble.speaker || bubble.kind}
+        {bubble.faction && <em className="f95-tipfaction"> ({bubble.faction.short})</em>}
+      </b>
       {bubble.text}
     </div>
   );
@@ -38,6 +41,28 @@ export function Toast({ toast, actions }: SlotPropsMap["Toast"]) {
       </div>
     );
   }
+  if (toast.batch) {
+    // The pile (FLT-51), in the paperclip's own words; the worst of it first, the rest on the ticker.
+    const worst = toast.batch.filter((b) => b.tone === "bad");
+    const lines = [...worst, ...toast.batch.filter((b) => b.tone !== "bad")];
+    const more = lines.length - BATCH_LINES;
+    return (
+      <button type="button" className={`f95-toast f95-batch ${toast.tone}`} onClick={() => actions.dismissToast(toast.id)} title="Click to dismiss">
+        <Ico name={TONE_ICON[toast.tone]} size={18} />
+        <span>
+          <b>It looks like {toast.batch.length} things happened while you were busy.</b>
+          <ul>
+            {lines.slice(0, BATCH_LINES).map((b) => (
+              <li key={b.text} className={b.tone}>
+                {b.text}
+              </li>
+            ))}
+          </ul>
+          {more > 0 && <i>...and {more} more on the ticker. Would you like help with that?</i>}
+        </span>
+      </button>
+    );
+  }
   return (
     <button type="button" className={`f95-toast ${toast.tone}`} onClick={() => actions.dismissToast(toast.id)} title="Click to dismiss">
       <Ico name={TONE_ICON[toast.tone]} size={18} />
@@ -45,6 +70,9 @@ export function Toast({ toast, actions }: SlotPropsMap["Toast"]) {
     </button>
   );
 }
+
+/** A batch lists this many; the rest are on the ticker. */
+const BATCH_LINES = 4;
 
 const REPLIES: Record<string, string> = {
   align: "Alignment: loading. Estimated time remaining: unknown. Would you like to speed this up? (See: Grueling.)",
@@ -60,6 +88,8 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
   const [tipsOff, setTipsOff] = useState(readTipsOff);
   const [tip, setTip] = useState<number | null>(null);
   const [reply, setReply] = useState<string | null>(null);
+  // Today's Drama: the pack the clip has been told "no thanks" about (it asks again when a newer one lands).
+  const [dramaNo, setDramaNo] = useState<string | null>(null);
   const phone = vm.layout.compact;
   // One at a time, the newest toast winning; the game only sends a hint while nobody is talking.
   const hints = vm.hints;
@@ -116,6 +146,19 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
           {toasts.map((toast) => (
             <Toast key={toast.id} toast={toast} actions={actions} />
           ))}
+        </div>
+      )}
+      {!busy && tip === null && !phone && vm.drama.fresh && vm.drama.latest && dramaNo !== vm.drama.latest.id && (
+        <div className="f95-balloon tipballoon" role="status">
+          <b>It looks like the AI industry is fighting again!</b> Would you like to see Today's Drama? ({vm.drama.latest.title})
+          <div className="f95-options">
+            <button type="button" className="a" onClick={() => actions.openDrama()}>
+              Show me the drama
+            </button>
+            <button type="button" onClick={() => setDramaNo(vm.drama.latest?.id ?? null)}>
+              No, I'm trying to run a lab
+            </button>
+          </div>
         </div>
       )}
       {!busy && tip !== null && (
@@ -344,6 +387,7 @@ export function EventCard({ event, actions }: SlotPropsMap["EventCard"]) {
           </div>
         )}
         {event.response && <Gauges response={event.response} />}
+        {event.investigation && <Evidence investigation={event.investigation} />}
         <div className="f95-choices">
           {event.choices.map((c, i) => (
             <Btn key={c.label} def={i === 0} disabled={!!c.disabled} title={c.disabled} onClick={() => actions.choose(event.id, i)} autoFocus={i === 0}>

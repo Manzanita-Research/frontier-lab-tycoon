@@ -2,9 +2,10 @@
 // nothing else in the game: no `src/sim/**`, no store, no three.
 import type { ComponentType, ReactNode } from "react";
 import type {
-  ArenaVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, EraCardVM, EventVM, HudActions, HudVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
-  NewsroomVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StatsVM, ThoughtRowVM, TickerItemVM,
-  StaffVM, TeaserVM, ProgressVM, ToastVM, TrainingVM, UnlockCardVM, VisibleVM, HelpVM,
+  ArenaVM, AuditVM, BillVM, TrackerVM, ReportCardVM, BubbleVM, FactionsVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, DramaDocVM, DramaVM, EraCardVM, EventVM, HearingVM, HudActions, HudVM, LeakVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
+  ModsVM, NewsroomVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StatsVM, ThoughtRowVM, TickerItemVM,
+  StaffVM, TeaserVM, ProgressVM, ToastVM, TrainingVM, UnlockCardVM, VisibleVM, HelpVM, PapersVM, PaperMomentVM, CrumbWikiVM, DisastersVM,
+  EndingVM, TakeoverVM,
 } from "../ui/hud/types";
 import type { Rect } from "./kit/place";
 
@@ -31,7 +32,13 @@ export const SLOT_NAMES = [
   "Arena",
   "Benchmarks",
   "Voice",
+  "Factions",
   "Livestream",
+  "Hearing",
+  "LeakedChat",
+  "DramaCard",
+  "Bill",
+  "PromiseTracker",
   "EraCard",
   "FrontPage",
   "GroupChat",
@@ -39,15 +46,27 @@ export const SLOT_NAMES = [
   "PhotoOverlay",
   "SkinPicker",
   "Outcome",
+  "Ending",
+  "Takeover",
   "NewsControls",
   "NewsArrival",
   "NewsRoom",
   "Mixer",
+  "ModManager",
+  "Papers",
+  "PaperMoment",
+  "CrumbWiki",
+  "DisasterMenu",
+  "DisasterAlert",
+  "ReportCard",
+  "AuditPin",
+  "DramaButton",
+  "Drama",
 ] as const;
 export type SlotName = (typeof SLOT_NAMES)[number];
 
 /** The slots that sit in the HUD all the time, already rendered, for the Layout to place. */
-export const DOCKED_SLOTS = ["Stats", "Training", "Objectives", "Inspector", "BuildBar", "Speed", "Staff", "ThoughtsPanel", "Ticker", "Toasts", "Assistant", "Arena", "Benchmarks", "Voice", "NewsControls", "NewsArrival", "PhotoButton"] as const;
+export const DOCKED_SLOTS = ["Stats", "Training", "Objectives", "Inspector", "BuildBar", "Speed", "Staff", "ThoughtsPanel", "Ticker", "Toasts", "Assistant", "Arena", "Benchmarks", "Voice", "Factions", "NewsControls", "NewsArrival", "PhotoButton", "Papers", "DisasterAlert", "DramaButton"] as const;
 export type DockedSlot = (typeof DOCKED_SLOTS)[number];
 
 /** What the Layout receives: the docked slots as elements (or null when there is nothing to show) plus the whole VM. */
@@ -61,13 +80,13 @@ export interface LayoutProps {
 export interface SlotPropsMap {
   Layout: LayoutProps;
   /** `visible` (absent means everything) says which numbers are earned yet: at level 1 only cash, runway and the date show. */
-  Stats: { stats: StatsVM; layout: LayoutVM; visible?: VisibleVM; actions: HudActions };
+  Stats: { stats: StatsVM; layout: LayoutVM; visible?: VisibleVM; actions: HudActions; /** Trust and regulator heat live here too (FLT-32), once `disasters.enabled`. */ disasters?: DisastersVM };
   Training: { training: TrainingVM; actions: HudActions };
   /** `progress.goal` is the one goal in front of you ("Ship your first model · 0/1"); the scenario list is `objectives`, shown once `visible.arena`. */
   Objectives: { objectives: ObjectivesVM; progress?: ProgressVM; visible?: VisibleVM; layout: LayoutVM; actions: HudActions };
   Inspector: { inspector: InspectorVM; layout: LayoutVM; actions: HudActions };
   /** The build panel: `items` are only what is unlocked, `teasers` the locked ones, one row per milestone ("2 more · Ship your first model"). Report each opening with `actions.buildPanel(true)`. */
-  BuildBar: { items: BuildItemVM[]; tip: BuildTipVM | null; teasers?: TeaserVM[]; layout: LayoutVM; actions: HudActions };
+  BuildBar: { items: BuildItemVM[]; tip: BuildTipVM | null; teasers?: TeaserVM[]; layout: LayoutVM; actions: HudActions; /** For a Start menu with a Disasters entry (FLT-32): `disasters.enabled` says it is earned. */ disasters?: DisastersVM };
   Speed: { speed: SpeedVM; stats: StatsVM; actions: HudActions };
   /** The payroll panel (hire, fire, paint patrol zones). Only rendered while `staff.open`. */
   Staff: { staff: StaffVM; actions: HudActions };
@@ -98,8 +117,33 @@ export interface SlotPropsMap {
   Benchmarks: { leapfrog: LeapfrogVM; layout: LayoutVM; actions: HudActions };
   /** The share-of-voice meter: who has the news cycle, and the last sixty days of it. Docked. */
   Voice: { leapfrog: LeapfrogVM; layout: LayoutVM; actions: HudActions };
+  /**
+   * FLT-33: the discourse. Each faction's meter and mood (and why), the lab's stance on five axes, who is allied or
+   * feuding, who is at the gate, and the safety budget (`actions.setSafetySpend(level)`). Folded to `factions.headline`
+   * until `factions.open` (`actions.toggleFactions()`). Docked; only rendered once `factions.enabled` and `visible.factions`.
+   */
+  Factions: { factions: FactionsVM; layout: LayoutVM; actions: HudActions };
   /** The launch livestream mishap card (the dog, the wrong chart). Opens instead of EventCard for `event.kind === "stream"`; answer it with `actions.choose`. */
   Livestream: { event: EventVM; stream: StreamVM; actions: HudActions };
+  /** The Hearing (FLT-21): a senator's question at the witness table (three senators, the Trust and Capture meters, answers that show what they move), and the gavel with the verdict. Opens instead of EventCard for `event.kind === "hearing"`; answer with `actions.choose`. */
+  Hearing: { event: EventVM; hearing: HearingVM; actions: HudActions };
+  /** The yacht summit's leaked group chat (FLT-24): the rivals' messages with a LEAKED stamp, and the three replies. Opens instead of EventCard for `event.kind === "leak"`; answer with `actions.choose`. */
+  LeakedChat: { event: EventVM; leak: LeakVM; actions: HudActions };
+  /** A drama card (Defection's resignation letter and manifesto, the Poaching War's recruiter email). Opens instead of `EventCard` for `event.kind === "drama"`; answer it with `actions.choose` (up to four choices). */
+  DramaCard: { event: EventVM; drama: DramaDocVM; actions: HudActions };
+  /**
+   * Regulatory Capture's bill (FLT-22): the draft the lab was asked to write (tick clauses with `actions.draftClause`,
+   * up to `bill.pick`), and the leak ("Author: {lab} Legal"). Opens instead of EventCard for `event.kind === "bill"`;
+   * answer with `actions.choose`.
+   */
+  Bill: { event: EventVM; bill: BillVM; actions: HudActions };
+  /**
+   * The Promise Tracker (FLT-23): the motion on the docket and three senators (what they promised, how they lean, the
+   * lobbyists' fee through `actions.lobby`, their Truth-o-meter). Opens instead of EventCard for `event.kind === "vote"`
+   * (answer with `actions.choose`), and as a window from the build palette's "senate" tile with `event` null (close with
+   * `actions.closeSenate`). `bill` is the law in force, if any, for a skin that shows it alongside.
+   */
+  PromiseTracker: { event: EventVM | null; tracker: TrackerVM; bill: BillVM | null; layout: LayoutVM; actions: HudActions };
   EraCard: { era: EraCardVM; actions: HudActions };
   FrontPage: { paper: PaperVM; actions: HudActions };
   GroupChat: { chat: ChatVM; actions: HudActions };
@@ -107,11 +151,42 @@ export interface SlotPropsMap {
   PhotoOverlay: { photo: PhotoVM; actions: HudActions };
   SkinPicker: { skins: SkinPickerVM; actions: HudActions };
   Outcome: { outcome: OutcomeVM; actions: HudActions };
+  /**
+   * How the lab ended (FLT-11): the Frontier Times front page, the run summary and the share card. Modal; time is held.
+   * `actions.shareEnding()` (share sheet on phones, a PNG download elsewhere), `copySummary()`, `keepPlaying()` (only if
+   * `ending.keepPlaying`), `newLab()`, `playDaily()`.
+   */
+  Ending: { ending: EndingVM; layout: LayoutVM; actions: HudActions };
+  /** The Takeover while it plays: "Frontier Lab Tycoon (managed by Frontier-9)", and its last card (`takeover.thanks`). Not modal. */
+  Takeover: { takeover: TakeoverVM; layout: LayoutVM; actions: HudActions };
   /** The News Room button is earned (`visible.news`); mute, the mixer and the skin picker are not. */
   NewsControls: { newsroom: NewsroomVM; sound: SoundVM; skins: SkinPickerVM; visible?: VisibleVM; actions: HudActions };
   NewsArrival: { arrival: NonNullable<NewsroomVM["arrival"]>; actions: HudActions };
   NewsRoom: { newsroom: NewsroomVM; actions: HudActions };
   Mixer: { sound: SoundVM; actions: HudActions };
+  /** Start ▸ Settings ▸ Mods… while `mods.open`: what `?mod=` loaded, clashes and failures. Close with `actions.closeMods()`. */
+  ModManager: { mods: ModsVM; actions: HudActions };
+  /**
+   * Papers (FLT-45): a chip that opens a window with the publication policy and the list; drafts go to arXive or peer review from
+   * here. Docked, and only rendered once earned (`visible.papers` and `papers.enabled`). `papers.open` says which to draw.
+   */
+  Papers: { papers: PapersVM; layout: LayoutVM; actions: HudActions };
+  /** The screenshot moments: the arXive listing, the scoop (their timestamp and yours) and the award certificate. Modal. */
+  PaperMoment: { moment: PaperMomentVM; actions: HudActions };
+  /** The CrumbWiki reveal when the agents' collusion ends: the talk page, the revision history and (exposed) the front page. Modal. */
+  CrumbWiki: { wiki: CrumbWikiVM; actions: HudActions };
+  /** The Disasters menu (FLT-32): the random-disaster setting, and a list to start one from (ask first). Modal, while `disasters.open`; time is held. */
+  DisasterMenu: { disasters: DisastersVM; actions: HudActions };
+  /** What is going wrong now (FLT-32): disasters under way, their stage and cleanup, who is pulled off their post. Docked, once `disasters.enabled`; with nothing running it may be the way into the menu (the base's is), or nothing. */
+  DisasterAlert: { disasters: DisastersVM; layout: LayoutVM; actions: HudActions };
+  /** Evals Without Borders' report card (FLT-19): opens instead of EventCard for `event.kind === "report"`; answer it with `actions.choose`. */
+  ReportCard: { event: EventVM; report: ReportCardVM; actions: HudActions };
+  /** The sign over the auditors (over the gate during the countdown). The game pins it to them every frame; drawn only while `audit.line` is set. */
+  AuditPin: { audit: AuditVM; actions: HudActions };
+  /** Today's Drama (FLT-34): the button that opens the window (`actions.openDrama()`). Docked. `drama.fresh` is a pack the player hasn't opened yet; `drama.on` the one playing. */
+  DramaButton: { drama: DramaVM; actions: HudActions };
+  /** Today's Drama while `drama.open`: the newest pack, the archive, Play (`actions.playDrama(id)`, a new lab) and switch off (`actions.removeMod(on.id)`). `drama.intro` is the "now playing" card for a pack that has just loaded. Close with `actions.closeDrama()`. */
+  Drama: { drama: DramaVM; actions: HudActions };
 }
 
 export type SlotComponents = { [K in SlotName]: ComponentType<SlotPropsMap[K]> };

@@ -5,6 +5,8 @@
 // now also covers the new walker fields and the Vibes. FLT-10 (Operations) did it again: slop, breakdowns (a random
 // draw per building per day), queues you can see, and staff; the script below now hires a few, and the projection
 // covers the slop, the payroll and every building's reliability.
+// FLT-32 put the Security Office on the Scrutiny rung, so its unlock card lists one more item: the digests from the
+// card on (it arrives between ticks 800 and 1600) moved for that alone: same RNG state and world at 4000, one more item.
 //
 // The digest reads the game through `view()`, not the raw state, so the persisted shape can change (machine
 // snapshots, moved fields) without touching the recorded values. Only `view()` follows the shape.
@@ -56,7 +58,8 @@ function view(s: GameState) {
     goals: s.goals.context.goals,
     flags: sorted(flagsOf(s)),
     news: s.news,
-    toasts: s.toasts,
+    // FLT-51 tags toasts (source, importance, reply) for the app; the numbers pinned here are the text, tone and id.
+    toasts: s.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })),
     thoughts: s.thoughts,
     pops: s.pops,
     buildings: s.buildings,
@@ -165,9 +168,26 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // wait for earned levels; the busy-player script first builds a Hall so it can earn access to a Gateway.
 // Path exploration and the Comms break post change deterministic route draws from this new opening.
 // FLT-47 polish rewords three thoughts (parody rule: no real brands); seed 1 shows one at tick 200. Text only, same RNG stream.
+// FLT-37 wakes a system's pack when its rung is earned: Collusion (on Scrutiny, level 5) never started in normal play.
+// Every seed reaches level 5 by tick 980-1120; only checkpoints after that move (seed 3 from 2400, seeds 1 and 2 from 3200).
+// FLT-52 (merge train) adds five more packs to Scrutiny: the Hearing, the yacht summit, Defection, the Poaching War and
+// Evals Without Borders. Level 5 lands at tick 980 (seeds 1, 3) and 1120 (seed 2), so 200 and 800 hold. First tick each
+// pack moves the World (seed 1 / 2 / 3): Poaching 1120 / 1823 / 1683, the yacht 1220 / 1360 / 1220, the Hearing
+// 1380 / 1520 / 1380, Evals Without Borders 3246 / 2183 / 2203, Defection 2626 / 3386 / 2806. So 1600 on moves on every seed.
+// Then Regulatory Capture and the Promise Tracker (FLT-22/23), also on Scrutiny: they arm their card arcs the tick Level 5
+// lands (980 / 1120 / 980) and first move a number or a headline at 1463 / 1603 / 1823 (Capture 1463 / 1603 / 3429,
+// the Promise Tracker 1823 / 1623 / 1823). 200 and 800 still hold.
+// Then the factions and the Water Discourse arc (FLT-33/25). Level 4 lands at 940 / 980 / 880: its rung now names the
+// factions, which wake and first move the World 4 ticks later (944 / 984 / 884). The base-water arc's documentary crew
+// (a new card, Level 5) first moves it at 1963 / 2043 / 2343 (2323 / 2383 / 2403 with the factions off). 200 and 800 hold.
 // FLT-58 moves the ladder on purpose: the first run is a small model (100 compute, not 300), progression is checked every
 // tick, Level 2 counts visitors served, Level 3 scripts the first spill and breakdown, Level 4 seeds the Arena field, and
 // the coach has two more steps. So the opening ships sooner and every later checkpoint follows from that.
+// On the merge train (FLT-52) these are FLT-58's own numbers, digit for digit: under the new ladder this script reaches
+// Level 2 at tick 240 / 240 / 220 and Level 3 at 1380 / 1340 / 1360, and never earns Level 4 in 4000 ticks (its tick-300
+// hires land while staff is still locked, so the ops goal never has its SRE and Janitor). No Race or Scrutiny pack wakes,
+// so none of the wave moves a checkpoint. The wave's packs are pinned by the midgame digest (every pack awake for 480
+// days) and by each pack's own determinism test.
 const GOLDEN: Record<number, Record<number, string>> = {
   1: { 200: "c403ae9a", 800: "c9a777bd", 1600: "927ac8ca", 2400: "5f82d6d0", 3200: "156351fa", 4000: "510c4ee9" },
   2: { 200: "766f3295", 800: "aec1b296", 1600: "7f4c5dc5", 2400: "4e24ec1b", 3200: "49356bf5", 4000: "a8747659" },

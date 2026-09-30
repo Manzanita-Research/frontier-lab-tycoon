@@ -122,6 +122,8 @@ export interface InspectorVM {
   following: boolean;
   /** "0042" */
   badge: string;
+  /** FLT-33: the faction they side with, for a chip on the card. Absent (or null) for nobody's, and before Level 4. */
+  faction?: FactionChipVM | null;
 }
 
 export interface BuildItemVM {
@@ -143,6 +145,8 @@ export interface BuildItemVM {
   built: number;
   isBulldoze: boolean;
   isPath: boolean;
+  /** A tile that opens a window instead of picking a tool ("staff", "senate"): never the tool in your hand. */
+  panel?: boolean;
 }
 
 export interface BuildTipVM {
@@ -172,6 +176,10 @@ export interface BubbleVM {
   /** Who is thinking it (their name). */
   speaker: string;
   text: string;
+  /** Said out loud to the person beside them, not thought (a VC's pitch by the Kombucha Bar): a skin may draw a speech balloon. */
+  speech?: boolean;
+  /** FLT-33: said as a member of this faction: tint the bubble with `faction.color` if you like. Absent for everyone else. */
+  faction?: FactionChipVM | null;
 }
 
 export interface StaffRowVM {
@@ -232,6 +240,12 @@ export interface ToastVM {
    * "warn" is a standing warning ("Your entrance isn't connected...") that stays until the cause is fixed.
    */
   tone: ToneVM | "hint" | "warn";
+  /**
+   * A batch summary (FLT-51): the `you` notices that piled up while the one-per-15-seconds window was shut, oldest first.
+   * `text` already says how many and leads with the worst, so a skin that ignores this still reads fine; a skin with room
+   * can list them.
+   */
+  batch?: { text: string; tone: ToneVM }[];
 }
 
 export type HintId = "gateway" | "tap";
@@ -256,7 +270,7 @@ export interface ConfirmVM {
 // ---- Playable v1: what the player has unlocked, the coach marks, and the "New!" card ----
 
 /** The HUD panels the player earns as the lab grows (a hidden panel is simply not drawn). */
-export type HudPanelId = "revenue" | "vibes" | "arena" | "rnd" | "thoughts" | "news" | "staff" | "events" | "papers" | "disasters";
+export type HudPanelId = "revenue" | "vibes" | "arena" | "rnd" | "thoughts" | "news" | "staff" | "events" | "papers" | "disasters" | "factions";
 export type VisibleVM = Record<HudPanelId, boolean>;
 
 /** What the build panel teases as locked: one row per milestone, how many it unlocks and the goal that earns them ("2 more · Ship your first model"). */
@@ -373,6 +387,208 @@ export interface StreamVM {
   chat: { who: string; text: string }[];
 }
 
+/** One senator at the witness table (FLT-21). `look` is colours for a capsule portrait (the kit's `Senator` draws it). */
+export interface SenatorVM {
+  id: string;
+  name: string;
+  role: string;
+  seat: string;
+  look: { skin: string; suit: string; hair: string; tie: string; glasses: boolean };
+  /** Asking the question on the table now. */
+  asking: boolean;
+  /** How the lab answered them this session ("earnest", "slick", "chaotic"), or null. */
+  answered: string | null;
+}
+
+/** What one answer would move, beside its button: signed points, and arrows ("▲▲", "▼"). */
+export interface HearingMoveVM {
+  meter: "trust" | "capture" | "hype" | "heat";
+  label: string;
+  amount: number;
+  arrows: string;
+  /** Good for the lab's image (more trust, more hype, less heat). Capture is neither: it reads as "sly". */
+  good: boolean | null;
+}
+
+/** The Hearing's card (a question, or the gavel at the end). The card's `choices` are the answers, in order. */
+export interface HearingVM {
+  /** "inSession" while questions are asked; the verdict id ("viral", "captured", "commended", "grilled") at the gavel. */
+  stage: string;
+  topic: string;
+  senators: SenatorVM[];
+  /** The senator asking, or null at the gavel. */
+  asking: SenatorVM | null;
+  /** "Question 2 of 3". */
+  asked: number;
+  total: number;
+  progressText: string;
+  /** The two meters, 0 to 100. */
+  trust: { label: string; value: number; text: string };
+  capture: { label: string; value: number; text: string };
+  /** Per answer (same order as `choices`): its style ("earnest", "slick", "chaotic") and what it would move. */
+  answers: { style: string; moves: HearingMoveVM[] }[];
+  /** At the gavel: how it went. */
+  verdict: { id: string; title: string; line: string } | null;
+}
+
+/** One clause of the bill (FLT-22): the legalese, what it really means, what it does to the race, and how shameless it is (1 to 3). */
+export interface BillClauseVM {
+  id: string;
+  title: string;
+  legal: string;
+  plain: string;
+  effect: string;
+  shame: number;
+  /** Ticked on the draft, or in the bill once it has gone to the floor. */
+  on: boolean;
+}
+/** What the law in force does to one rival: short tags ("grows 45% slower", "ships closed"), empty when untouched. */
+export interface BillRivalVM {
+  id: string;
+  name: string;
+  tags: string[];
+}
+/** Regulatory Capture (FLT-22): the bill the lab was asked to "take a first pass" at. */
+export interface BillVM {
+  /** "invited" (the draft), "floor", "law", "exposed", or a resting stage ("quiet", "declined", "failed", "fallout", "sunset"). */
+  stage: string;
+  act: string;
+  /** "The_Frontier_Freedom_Act_FINAL_v3.doc" */
+  fileName: string;
+  /** Who the file properties say wrote it, and the paper that will read them. */
+  author: string;
+  reporter: string;
+  clauses: BillClauseVM[];
+  /** The draft can be edited (clauses ticked with `actions.draftClause`). */
+  editable: boolean;
+  picked: number;
+  pick: number;
+  /** "1 of 2 clauses" */
+  pickText: string;
+  /** "Draft", "On the floor", "In force · day 21", "Exposed", ... */
+  status: string;
+  /** Ayes out of three at the last roll call ("2–1"), or null. */
+  tally: string | null;
+  /** The chance a day that someone opens the file properties ("0.4% a day"), while the law stands. */
+  leakText: string | null;
+  /** What the law does to each rival, while it stands. */
+  rivals: BillRivalVM[];
+}
+
+/** One senator on the Promise Tracker (FLT-23). */
+export interface TrackerSenatorVM {
+  id: string;
+  name: string;
+  role: string;
+  seat: string;
+  look: { skin: string; suit: string; hair: string; tie: string; glasses: boolean };
+  /** What they promised about the motion on the docket, and the quote from the headline. */
+  said: "aye" | "nay" | "both" | null;
+  saidText: string;
+  line: string;
+  /** How they would vote today ("aye"/"nay"), and the odds they vote the lab's way ("62%"). */
+  leaning: "aye" | "nay" | null;
+  oddsText: string;
+  lobbied: boolean;
+  /** The lobbyists' fee, and whether it can be paid now (in session, not yet lobbied, the lab has the cash). */
+  feeText: string;
+  canLobby: boolean;
+  /** Truth-o-meter: 0 to 100 (null before any vote), its label ("Pants Ablaze") and the score ("3 kept · 5 broken"). */
+  truth: number | null;
+  truthText: string;
+  truthLabel: string;
+  record: string;
+  /** Their last votes, newest last: the motion, what they said, how they voted. */
+  recent: { title: string; said: string; voted: string; kept: boolean; lobbied: boolean }[];
+}
+/** The Promise Tracker (FLT-23): the motion on the docket and three senators' promises, votes and Truth-o-meters. */
+export interface TrackerVM {
+  /** "recess", "campaign", "rollCall", "passed", "failed" (or "dormant"). */
+  stage: string;
+  motion: { id: string; title: string; summary: string; labSide: "aye" | "nay"; labSideText: string } | null;
+  /** "Roll call in 3 days", "In recess", "Passed 2–1" */
+  status: string;
+  /** Lobbying is open: `actions.lobby(id)`. */
+  lobbying: boolean;
+  senators: TrackerSenatorVM[];
+  last: { title: string; passed: boolean; tally: string } | null;
+  held: number;
+}
+/** The Senate window (a build-bar tile opens it once the Promise Tracker is awake). */
+export interface SenateVM {
+  open: boolean;
+  tracker: TrackerVM | null;
+  bill: BillVM | null;
+}
+
+/** The leaked group chat (FLT-24): the yacht's name, the group's, and who said what. */
+export interface LeakVM {
+  yachtName: string;
+  groupName: string;
+  /** "sign", "intern" or "decline": which chat leaked. */
+  rsvp: string;
+  members: string;
+  messages: { from: string; name: string; color: string; you: boolean; system: boolean; time: string; text: string }[];
+}
+
+/** One subject on the auditors' report card. */
+export interface ReportGradeVM {
+  id: string;
+  /** "Eval honesty" */
+  label: string;
+  grade: "A" | "B" | "C" | "D" | "F";
+  /** 0 to 100. */
+  score: number;
+  /** The auditors' remark in the margin ("They brought their own evals. We brought ours. Ours were better."). */
+  comment: string;
+}
+
+/** Evals Without Borders' report card (FLT-19): opens instead of EventCard for `event.kind === "report"`. */
+export interface ReportCardVM {
+  /** "Visit 2 · Day 131" */
+  visitText: string;
+  lab: string;
+  grades: ReportGradeVM[];
+  overall: "A" | "B" | "C" | "D" | "F";
+  /** What the lab chose on the warning card ("Tidied up"), or null. */
+  prepText: string | null;
+  /** A stamp across the card: "CAUGHT HIDING", "SWARM FOUND", or null. */
+  stamp: string | null;
+  caught: boolean;
+  swarm: boolean;
+  /** Where they went, in order ("Compute Cluster", "Kombucha Bar", ...). */
+  inspected: string[];
+  /** What it did to you: ["+4 trust", "−3 heat", "+2 hype"]. */
+  moves: { text: string; tone: ToneVM }[];
+  /** The Frontier Times' headline about it. */
+  headline: string;
+}
+
+/** The auditors on campus, for the pin over their heads (and anything else that wants to know). */
+export interface AuditVM {
+  /** Scrutiny is reached and the auditors exist. */
+  enabled: boolean;
+  /** "quiet" | "notice" | "countdown" | "visit" | "report" */
+  stage: string;
+  /** During the countdown: days until they arrive. */
+  daysLeft: number | null;
+  /** Auditors on campus. */
+  visitors: number;
+  /** "walking" | "inspecting" | "evaluating" | "leaving", or null when nobody is here. */
+  phase: string | null;
+  /** The pin's one line: "Inspecting Kombucha Bar", "Running their own evals", "Arriving in 3 days". Null: no pin. */
+  line: string | null;
+  /** 0 to 1 while they stand at a stop, and "60%". */
+  progress: number | null;
+  progressText: string;
+  /** Stops finished of the plan: "2/4". */
+  stopsText: string;
+  /** They are running their own evals right now. */
+  evals: boolean;
+  /** The agents are in cardboard boxes. */
+  boxed: boolean;
+}
+
 export interface EventVM {
   id: string;
   title: string;
@@ -380,12 +596,40 @@ export interface EventVM {
   tone: ToneVM;
   /** The top-stripe text: "Breaking", "Developing", ... */
   stripe: string;
-  /** "response" and "stream" are Release Leapfrog's cards: `response` / `stream` carry their extra data. */
-  kind: "plain" | "auction" | "response" | "stream";
+  /** "response" and "stream" are Release Leapfrog's cards: `response` / `stream` carry their extra data. "hearing" (FLT-21) and "leak" (FLT-24) carry `hearing` / `leak`; "drama" (FLT-26, FLT-20) carries `drama`; "report" is the auditors' report card (FLT-19, `report`); "bill" (FLT-22) and "vote" (FLT-23) carry `bill` / `tracker`. */
+  kind: "plain" | "auction" | "response" | "stream" | "hearing" | "leak" | "drama" | "report" | "bill" | "vote";
   choices: ChoiceVM[];
   paddles: AuctionPaddleVM[];
   response: ResponseVM | null;
   stream: StreamVM | null;
+  /** The collusion-sign card's evidence (FLT-46). Absent or null on every other card. */
+  investigation?: InvestigationVM | null;
+  /** The Hearing's witness table, on its question and gavel cards (optional: older fixtures leave it out). */
+  hearing?: HearingVM | null;
+  /** The leaked group chat, on the yacht's leak card. */
+  leak?: LeakVM | null;
+  /** The document a drama card is about: the resignation letter, the recruiter's email, the manifesto. */
+  drama?: DramaDocVM | null;
+  /** The auditors' report card (FLT-19), on its `report` card. */
+  report?: ReportCardVM | null;
+  /** The bill, on Regulatory Capture's draft and leak cards. */
+  bill?: BillVM | null;
+  /** The Promise Tracker, on its whip and roll-call cards. */
+  tracker?: TrackerVM | null;
+}
+
+/** A drama card's document (Defection, the Poaching War). Every string is filled in; `lines` are paragraphs. */
+export interface DramaDocVM {
+  /** letter: a resignation letter someone is still drafting. email: a recruiter's offer. manifesto: a new lab's one-pager. */
+  style: "letter" | "email" | "manifesto";
+  /** What the file would be called ("resignation_DRAFT_v7.doc", "MANIFESTO.txt"). */
+  file: string;
+  from: string;
+  to: string;
+  subject: string;
+  lines: string[];
+  /** The sign-off; may contain a line break. */
+  sign: string;
 }
 
 export interface ThoughtRowVM {
@@ -412,6 +656,12 @@ export interface ArenaRowVM {
   color: string;
   moved: "up" | "down" | null;
   title: string;
+  /** Lifted by a weights leak of yours that is still under way (FLT-32): mark it. */
+  leak: boolean;
+  /** A lab your own people founded (FLT-26, FLT-20): NEW for its first two weeks, NEMESIS once it has it in for you, ALUMNI after. */
+  tag?: "new" | "nemesis" | "alumni" | null;
+  /** "NEW", "NEMESIS", "ALUMNI" */
+  tagText?: string;
 }
 
 export interface ArenaVM {
@@ -566,6 +816,79 @@ export interface OutcomeVM {
   note: string;
 }
 
+/** One number on the run summary: "📅 412 days". */
+export interface EndingStatVM {
+  key: "days" | "vibes" | "models" | "protesters" | "escaped";
+  emoji: string;
+  label: string;
+  text: string;
+}
+
+/**
+ * How the lab ended (FLT-11): a Frontier Times front page, the run summary, and the share card. Only while the front
+ * page is up (`outcome === "ended"` and not waved away with Keep watching).
+ */
+export interface EndingVM {
+  /** "takeover" | "regulated" | "acquihired" | "captured" | "pivot" (more may come from mods). */
+  id: string;
+  /** "The Takeover". */
+  title: string;
+  tone: "good" | "bad" | "neutral";
+  /** Keep watching is offered (time goes on); otherwise only New lab / Today's lab. */
+  keepPlaying: boolean;
+  lab: string;
+  paper: {
+    masthead: string;
+    kicker: string;
+    headline: string;
+    deck: string;
+    /** The campus as it looked when the paper went to press (a data URL), or null until the photo is in. */
+    photo: string | null;
+    caption: string;
+    subs: string[];
+    classified: string;
+    /** The last line: "Thanks for playing. We'll take it from here." */
+    signoff: string;
+    /** "Y3 · Mar 4". */
+    date: string;
+    /** "Vol. 3 · No. 64". */
+    issue: string;
+  };
+  /** Days, peak Vibes, models released, peak protesters, agents escaped. */
+  stats: EndingStatVM[];
+  /** 🟦🟦🟩🟨🟥🤖: the run by era, in squares. */
+  strip: string;
+  /** The whole run summary, as `copySummary()` puts it on the clipboard. */
+  summary: string;
+  /** "Today's lab · Sep 30, 2026", or null for an ordinary seed. */
+  daily: string | null;
+  /** The share card (1200×630 PNG): its preview once made, and what the last share did. */
+  share: ShareVM;
+}
+
+export interface ShareVM {
+  /** "idle" | "making" | "ready" (the card is made) | "shared" | "saved" (downloaded) | "copied" (the summary) | "error". */
+  status: "idle" | "making" | "ready" | "shared" | "saved" | "copied" | "error";
+  /** The card, as an object URL, once made. */
+  card: string | null;
+  /** This device shares files (a phone): the button says Share, not Download. */
+  native: boolean;
+  /** A line to show under the buttons ("Saved frontier-lab-takeover.png"), or null. */
+  note: string | null;
+}
+
+/** The Takeover while it plays: the lab is managed by its own model, and the cursor is not yours. */
+export interface TakeoverVM {
+  /** "Frontier-9". */
+  manager: string;
+  /** "Frontier Lab Tycoon (managed by Frontier-9)": the title bar, the tab and the banner. */
+  title: string;
+  /** Buildings the manager has placed. */
+  placed: number;
+  /** The last card: "Thanks for playing. We'll take it from here.", or null before it. */
+  thanks: string | null;
+}
+
 export interface EditionRowVM {
   id: string;
   type: "paper" | "chat";
@@ -622,6 +945,137 @@ export interface NewsroomVM {
   chat: ChatVM | null;
 }
 
+// ---- Papers (FLT-45, for FLT-28): publish or perish. Earned at Level 5 (`visible.papers`).
+
+export type PublicationPolicyVM = "Open" | "Selective" | "Closed";
+
+export interface PaperRowVM {
+  id: string;
+  /** "arXive:0010.04217": a fake-but-stable preprint number. */
+  arxiveId: string;
+  title: string;
+  /** "A. Gradient, K. Backprop, Agent-0042 'Sparky' and 397 others" */
+  byline: string;
+  venue: string;
+  status: "draft" | "review" | "published" | "criticized" | "awarded";
+  /** "Draft", "In review · 12 days", "Published", "Scooped", "Best Paper" */
+  statusText: string;
+  tone: ToneVM;
+  /** 0 to 1 through review, or null. */
+  reviewPct: number | null;
+  /** "1,204 citations" */
+  citationsText: string;
+  award: string | null;
+  scoopedBy: string | null;
+  /** A draft: it can go to arXive now, or into review. */
+  canPublish: boolean;
+}
+
+export interface PublicationPolicyOptionVM {
+  id: PublicationPolicyVM;
+  label: string;
+  blurb: string;
+  active: boolean;
+}
+
+export interface PapersVM {
+  /** false until papers are earned (and when the pack is off): draw nothing. */
+  enabled: boolean;
+  open: boolean;
+  policy: PublicationPolicyVM;
+  policies: PublicationPolicyOptionVM[];
+  /** Reputation points, rounded (it only grows with good papers). */
+  reputation: number;
+  /** "Recruiting pull 1.25×" */
+  recruitingText: string;
+  /** 0 to 1: how loudly the researchers want to publish. */
+  pressure: number;
+  /** "Researchers are restless" and friends. */
+  pressureText: string;
+  /** "2 drafts · 1 in review · 5 out" */
+  summary: string;
+  drafts: number;
+  /** Drafts first, then newest. */
+  papers: PaperRowVM[];
+}
+
+/** The screenshot moments: a preprint on arXive, getting scooped, a Best Paper. Dismissed with `dismissPaperMoment(key)`. */
+export interface PaperMomentVM {
+  key: string;
+  kind: "drop" | "scoop" | "award";
+  paper: PaperRowVM;
+  /** The drop: the arXive listing around yours ("New submissions for Tue"). */
+  listing: { arxiveId: string; title: string; byline: string; you: boolean }[];
+  /** The scoop: whose paper, and the two timestamps ("18 hours before you"). */
+  rival: string | null;
+  theirTitle: string | null;
+  theirStamp: string | null;
+  yourStamp: string | null;
+  gapText: string | null;
+  /** The award's name, for the certificate. */
+  award: string | null;
+  headline: string;
+  /** A line of small print: arXive's load banner on a drop, the certificate's foot on an award. */
+  note: string | null;
+  /** Buttons that only close it, with jokes on them. The last one is the plain close. */
+  buttons: string[];
+}
+
+// ---- Agent collusion (FLT-46, for FLT-18): signs, the investigation and the CrumbWiki reveal.
+
+/** The evidence inside the collusion-sign card (present on `event.investigation` while it is open). */
+export interface InvestigationVM {
+  /** "+14%" */
+  bonusText: string;
+  /** Security staff who would go ("3 guards"), and for how long. */
+  guards: number;
+  guardsText: string;
+  days: number;
+  /** The packet log: "03:12  POST definitely-not-the-internet.local/wiki/Talk:Very_Normal_Sourdough  200 OK". */
+  log: string[];
+  /** One line from Security, straight-faced. */
+  note: string;
+}
+
+/** A page of the wiki the agents have been running. */
+export interface WikiPageVM {
+  name: string;
+  /** Lines of the page. */
+  lines: string[];
+}
+
+/** The reveal once the Swarm ends (contained, partly contained or exposed). Close with `closeCrumbWiki(key)`. */
+export interface CrumbWikiVM {
+  key: string;
+  ending: "contained" | "partlyContained" | "exposed";
+  /** "CrumbWiki: the free sourdough encyclopedia anyone can edit" */
+  site: string;
+  url: string;
+  title: string;
+  /** The banner at the top: what happened. */
+  banner: string;
+  tone: ToneVM;
+  talk: WikiPageVM;
+  /** "rev 3,702 · Agent-0042 'Sparky' · reverted a revert of a revert" */
+  history: string[];
+  heartbeat: string;
+  pages: string[];
+  /** What it cost: "Capability −2", "Results withdrawn for 30 days". */
+  consequences: string[];
+  /** Exposed only: the Frontier Times front page. */
+  frontPage: { masthead: string; headline: string; dek: string; classified: string } | null;
+  closeLabel: string;
+}
+
+/** Collusion signs a skin may show (the world overlay draws the traffic itself). Present while the Swarm is on. */
+export interface CollusionVM {
+  enabled: boolean;
+  /** An inquiry is under way: "Inquiry · day 3 of 7 · 2 guards on site". */
+  inquiry: string | null;
+  /** The agents' night out: "Kombucha After Dark · 12 agents". */
+  gathering: string | null;
+}
+
 export interface SoundVM {
   open: boolean;
   muted: boolean;
@@ -643,6 +1097,103 @@ export interface PhotoVM {
   flash: number;
 }
 
+/** FLT-33: how a faction feels about the lab. `protesting` is "Marching" once protests are unlocked (Level 5), "Furious online" before. */
+export type FactionMoodVM = "calm" | "fan" | "upset" | "protesting";
+
+/** A faction, small: enough for a chip on an inspector card or a tint on a bubble. */
+export interface FactionChipVM {
+  id: string;
+  name: string;
+  /** One short word ("Doom", "VC"). */
+  short: string;
+  /** CSS colour. */
+  color: string;
+  mood: FactionMoodVM;
+  moodLabel: string;
+}
+
+export interface FactionRowVM extends FactionChipVM {
+  /** The one thing they carry (a hoodie, a clipboard, a sandwich board). */
+  prop: string;
+  blurb: string;
+  /** −100 (fed up) to 100 (adoring). */
+  meter: number;
+  /** "+42", "−17". */
+  meterText: string;
+  /** Their latest reason to feel the way they do ("Rushed launch. The timeline in their spreadsheet moved left."), or null. */
+  why: string | null;
+  /** Members on campus, and how many are at the gate with a sign. */
+  members: number;
+  marching: number;
+  /** Followers off the map: "40K", "900K". */
+  audienceText: string;
+}
+
+/** Two factions that are not merely cordial. `schism`: they were allies and have split (the headline). */
+export interface FactionRelationVM {
+  key: string;
+  a: FactionChipVM;
+  b: FactionChipVM;
+  state: "allied" | "feuding";
+  value: number;
+  schism: boolean;
+  /** "Doomers and Safetyists: allies", "Safetyists and Doomers: schism". */
+  text: string;
+}
+
+/** The lab's position on one axis every faction has an opinion about. */
+export interface StanceVM {
+  axis: string;
+  label: string;
+  /** −1 to 1, and the words at each end ("Careful" … "Fast"). */
+  value: number;
+  low: string;
+  high: string;
+}
+
+export interface FactionLogVM {
+  id: number;
+  day: number;
+  text: string;
+  tone: ToneVM;
+  /** The colours of the factions it is about, for dots. */
+  colors: string[];
+}
+
+/** The safety budget: a daily cost, a slower training run, and the Safetyists' attention. */
+export interface SafetyOptionVM {
+  level: number;
+  label: string;
+  costText: string;
+  /** "−12% training" or "". */
+  dragText: string;
+  active: boolean;
+}
+
+/** FLT-33: the discourse. `enabled: false` until Level 4 (and with `?factions=off`); draw nothing then. */
+export interface FactionsVM {
+  enabled: boolean;
+  /** The panel is open (`actions.toggleFactions()`). */
+  open: boolean;
+  /** Protests are unlocked (Level 5): factions march on the gate. */
+  protests: boolean;
+  rows: FactionRowVM[];
+  stance: StanceVM[];
+  relations: FactionRelationVM[];
+  /** Newest first. */
+  log: FactionLogVM[];
+  /** Crowds at the gate right now; the water crowd has id "". */
+  gate: { id: string; name: string; color: string; count: number }[];
+  /** "At the gate: 18 Water Discourse vs 12 Water Truthers Truthers", or "". */
+  gateText: string;
+  /** The folded panel's one line: "2 fans · 3 upset · Doomers marching". */
+  headline: string;
+  /** How many factions are fans, and how many are upset or worse (for a badge). */
+  fans: number;
+  angry: number;
+  safety: { level: number; options: SafetyOptionVM[] };
+}
+
 export interface SkinInfoVM {
   id: string;
   name: string;
@@ -651,6 +1202,79 @@ export interface SkinInfoVM {
   version: string;
   /** URL of the preview image (may be empty). */
   preview: string;
+}
+
+/** One loaded mod, as the Mod Manager lists it. */
+export interface ModInfoVM {
+  id: string;
+  name: string;
+  version: string;
+  author?: string;
+  description?: string;
+  /** The `?mod=` value it came from. */
+  source: string;
+  /** Content hash of its manifest (8 hex digits), saved with the run. */
+  hash: string;
+  /** A Daily Drama pack (FLT-34): the Today's Drama window describes it. */
+  drama?: boolean;
+}
+
+/** Start ▸ Settings ▸ Mods… (FLT-37): what `?mod=` loaded, what clashed and what failed. Mods only load from the URL. */
+export interface ModsVM {
+  open: boolean;
+  /** In load order; later mods win a clash. */
+  list: ModInfoVM[];
+  /** "content.rivals.anthro: every-lab-is-steve, then my-mod (later wins)". */
+  conflicts: string[];
+  /** A mod that failed to load is skipped; the rest still load. */
+  errors: string[];
+  /** Hash of the whole resolved content, or null when running the base game. */
+  contentHash: string | null;
+}
+
+/** One published Daily Drama pack (FLT-34): a small parody mod about the day's industry news, merged after review. */
+export interface DramaPackVM {
+  id: string;
+  /** "2026-09-29" */
+  date: string;
+  /** "Tue 29 Sep" */
+  dateText: string;
+  /** "today", "yesterday", "3 days ago" */
+  ago: string;
+  /** "The Perk Arms Race" */
+  title: string;
+  /** Two sentences on what happened. */
+  description: string;
+  /** Up to three of its headlines, ready to read. */
+  teasers: string[];
+  /** Its event card, and the first day it can turn up (`null` when that isn't a plain day). */
+  event: { title: string; day: number | null } | null;
+  /** "1 event card · 8 headlines · 7 thoughts · 1 rival tweak" */
+  summary: string;
+  /** Loaded in this run. */
+  on: boolean;
+}
+
+/**
+ * Today's Drama (FLT-34): the published feed, and the pack this run has loaded. A pack loads through `?mod=` like any
+ * mod, so playing one starts a new lab (`actions.playDrama(id)`), and switching it off is the Mod Manager's
+ * `actions.removeMod(id)`.
+ */
+export interface DramaVM {
+  /** The Today's Drama window is open. */
+  open: boolean;
+  /** "idle" before anyone asked, "loading", "ready", or "error" when the feed could not be read. */
+  status: "idle" | "loading" | "ready" | "error";
+  /** The newest published pack, or null (none published yet, or not fetched yet). */
+  latest: DramaPackVM | null;
+  /** The older packs, newest first (only once the window has fetched them). */
+  archive: DramaPackVM[];
+  /** The pack loaded in this run, or null. */
+  on: DramaPackVM | null;
+  /** The newest pack is neither loaded nor looked at yet: badge the button. */
+  fresh: boolean;
+  /** The window opened by itself because a pack just loaded: say what's coming, not what's on offer. */
+  intro: boolean;
 }
 
 export interface SkinPickerVM {
@@ -677,6 +1301,91 @@ export interface LayoutVM {
   tall: boolean;
 }
 
+// ---- Disasters (FLT-32): the menu, the alert for what is under way, who it pulled off their post, trust and heat.
+
+export type RiskVM = "off" | "rare" | "normal" | "chaos";
+
+export interface RiskOptionVM {
+  key: RiskVM;
+  label: string;
+  blurb: string;
+  active: boolean;
+}
+
+export interface DisasterTagVM {
+  /** The content's tag ("fire", "rivals", ...): skins pick an icon by it, and show `label` for one they do not know. */
+  key: string;
+  label: string;
+}
+
+/** One row of the Disasters menu. */
+export interface DisasterRowVM {
+  id: string;
+  name: string;
+  blurb: string;
+  tags: DisasterTagVM[];
+  /** Under way right now. */
+  active: boolean;
+  /** Can be started now; if not, `reason` says why. */
+  available: boolean;
+  reason: string | null;
+}
+
+/** Where a disaster is: a skin can colour by it. The content's own state name is `phase`. */
+export type DisasterStageVM = "warning" | "active" | "response" | "aftermath" | "done";
+
+export interface DisasterRunVM {
+  id: string;
+  name: string;
+  phase: string;
+  stage: DisasterStageVM;
+  /** "Warning", "Spreading", "Cleaning up"... */
+  phaseLabel: string;
+  /** One line, in the game's voice, about what is happening now. */
+  line: string;
+  /** Staff-hours done, 0 to 1, while somebody is working on it; null otherwise. */
+  progress: number | null;
+  /** "Security 42%", or null. */
+  progressText: string | null;
+  days: number;
+  daysText: string;
+}
+
+/** A job with people pulled off their post by a disaster: "2 of 3 Security on the swarm. The gate is unguarded." */
+export interface UnderstaffedVM {
+  job: string;
+  title: string;
+  diverted: number;
+  total: number;
+  /** Everyone of the job is away (a gate with no guard, fires nobody fixes). */
+  all: boolean;
+  text: string;
+}
+
+export interface MeterVM {
+  /** 0 to 100 */
+  value: number;
+  /** A word for where it is ("Wary", "Hearings"). */
+  word: string;
+  text: string;
+}
+
+export interface DisastersVM {
+  /** Earned yet (Scrutiny). Draw nothing of this while false. */
+  enabled: boolean;
+  /** The menu is open. */
+  open: boolean;
+  risk: RiskVM;
+  risks: RiskOptionVM[];
+  /** Why random disasters are holding off ("...until your first release"), or null once they can come. */
+  calm: string | null;
+  menu: DisasterRowVM[];
+  running: DisasterRunVM[];
+  understaffed: UnderstaffedVM[];
+  trust: MeterVM;
+  heat: MeterVM;
+}
+
 export interface HudVM {
   apiVersion: typeof SKIN_API_VERSION;
   stats: StatsVM;
@@ -687,6 +1396,8 @@ export interface HudVM {
   buildTip: BuildTipVM | null;
   speed: SpeedVM;
   staff: StaffVM;
+  /** The Senate window: the Promise Tracker and the bill (FLT-22/23). `tracker` is null until the pack wakes. */
+  senate: SenateVM;
   bubbles: BubbleVM[];
   ticker: TickerItemVM[];
   toasts: ToastVM[];
@@ -710,18 +1421,38 @@ export interface HudVM {
   arena: ArenaVM;
   /** Release Leapfrog: the benchmark leaderboard and the share-of-voice meter. `enabled: false` when the pack is off. */
   leapfrog: LeapfrogVM;
+  /** Papers: the panel, the policy and the list. `enabled: false` until earned. */
+  papers: PapersVM;
+  /** A paper moment on screen (the arXive drop, the scoop, the award), or null. */
+  paperMoment: PaperMomentVM | null;
+  /** Agent collusion: the signs, and the CrumbWiki reveal once it ends. */
+  collusion: CollusionVM;
+  crumbWiki: CrumbWikiVM | null;
+  /** FLT-33: the factions and the lab's stance. `enabled: false` until Level 4. */
+  factions: FactionsVM;
   eraCard: EraCardVM | null;
   outcome: OutcomeVM | null;
+  /** Evals Without Borders: the countdown and the tour. */
+  audit: AuditVM;
+  /** How the lab ended: the front page, the run summary and the share card (FLT-11). Null until one comes out. */
+  ending?: EndingVM | null;
+  /** The Takeover under way (or kept watching): who is in charge now. Null otherwise. */
+  takeover?: TakeoverVM | null;
   newsroom: NewsroomVM;
   sound: SoundVM;
   photoMode: PhotoVM;
   skins: SkinPickerVM;
+  mods: ModsVM;
+  /** Disasters (FLT-32): `enabled: false` until the lab earns them. */
+  disasters: DisastersVM;
+  /** Today's Drama (FLT-34). */
+  drama: DramaVM;
   layout: LayoutVM;
 }
 
 /** Everything a skin may ask the game to do. Each one is safe to call at any time; the game ignores what does not apply. */
 export interface HudActions {
-  /** Pick a build tool ("path", "cluster", ..., "bulldoze"). Picking the selected one puts it away; `null` clears. `"staff"` opens or closes the payroll. */
+  /** Pick a build tool ("path", "cluster", ..., "bulldoze"). Picking the selected one puts it away; `null` clears. `"staff"` opens or closes the payroll, `"senate"` the Senate window. */
   place(kind: BuildKindVM | null): void;
   setSpeed(speed: number): void;
   togglePause(): void;
@@ -752,8 +1483,32 @@ export interface HudActions {
   /** Hold time while a panel of yours is open (`id` names it; `false` lets go). Use `useAutoPause` from the kit. */
   holdTime(id: string, open: boolean): void;
   toggleArena(): void;
+  // Papers.
+  togglePapers(): void;
+  setPublicationPolicy(policy: PublicationPolicyVM): void;
+  /** Send a draft to arXive now ("preprint") or into peer review ("review"). */
+  publishPaper(paperId: string, route: "preprint" | "review"): void;
+  dismissPaperMoment(key: string): void;
+  // Agent collusion.
+  closeCrumbWiki(key: string): void;
+  // Disasters (FLT-32).
+  openDisasters(): void;
+  closeDisasters(): void;
+  /** Start one now (ask first: the slot's job). Closes the menu. */
+  triggerDisaster(id: string): void;
+  setRisk(risk: RiskVM): void;
+  /** FLT-33: open or fold the Factions panel. */
+  toggleFactions(): void;
+  /** FLT-33: the safety budget, 0 (none) to 3 (lavish). Costs money every day and slows training; the Safetyists notice. */
+  setSafetySpend(level: number): void;
   keepPlaying(): void;
   newLab(): void;
+  /** Today's lab: a new lab on today's seed, the same campus as everyone else's today. */
+  playDaily?(): void;
+  /** The ending's share card: the Web Share sheet on phones, a PNG download elsewhere. */
+  shareEnding?(): void;
+  /** The run summary onto the clipboard. */
+  copySummary?(): void;
   // The payroll.
   closeStaff(): void;
   hire(job: string): void;
@@ -761,6 +1516,12 @@ export interface HudActions {
   /** Start painting a staffer's patrol zone on the map (`null` stops). */
   paintZone(staffId: number | null): void;
   clearZone(staffId: number): void;
+  // The Senate (FLT-22/23).
+  closeSenate(): void;
+  /** Send the lobbyists to a senator about the motion on the docket. */
+  lobby(senatorId: string): void;
+  /** Tick (or untick) a clause on the bill's draft. */
+  draftClause(clauseId: string, on: boolean): void;
   // The news room.
   openNews(): void;
   /** Open an edition by id, or the archive with "archive". */
@@ -788,4 +1549,14 @@ export interface HudActions {
   /** Go back to the skin the picker opened on and close it. */
   cancelSkinPicker(): void;
   setReducedMotion(on: boolean): void;
+  // Mods.
+  openMods(): void;
+  closeMods(): void;
+  /** Switch a loaded mod off: the page reloads without it (a new lab, like loading one). */
+  removeMod(id: string): void;
+  // Today's Drama (FLT-34).
+  openDrama(): void;
+  closeDrama(): void;
+  /** Load a published Drama pack by id (reloads with it in `?mod=`: a new lab). */
+  playDrama(id: string): void;
 }

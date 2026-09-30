@@ -1,11 +1,15 @@
 import { Layer, Schema, Stream } from "effect";
 import { PROGRESSION } from "../content/progression";
+import { COACH } from "../content/coach";
 import { BUILDINGS, PATH_PRICE, BULLDOZE_REFUND } from "../content/buildings";
 import { EVENTS, EVENT_COOLDOWN_DAYS } from "../content/events";
 import { GOALS } from "../content/goals";
 import { HEADLINES } from "../content/headlines";
 import { THOUGHTS } from "../content/thoughts";
+import { DISASTERS } from "../sim/disasters/pack";
+import { LEAPFROG } from "../content/leapfrog";
 import { RIVAL_DEFS } from "../content/rivals";
+import { BASE_ARCS, FACTIONS } from "../content/factions";
 import * as Names from "../content/names";
 import { MAX_STAFF, MAX_PER_JOB } from "../content/staff";
 import * as Constants from "../sim/constants";
@@ -14,6 +18,7 @@ import { Content, type ContentApi } from "./services/content";
 import { Skin, type SkinApi } from "./services/skin";
 import { Rules, type RulesApi } from "./services/rules";
 import { Vocabulary, type VocabularyApi } from "./services/vocabulary";
+import { vocabulary } from "../sim/verbs";
 import { Assets } from "./services/assets";
 import { Audio } from "./services/audio";
 import { GameEvents } from "./services/game-events";
@@ -22,9 +27,10 @@ import { baseTables } from "./tables";
 import { Note } from "./schema";
 
 export const baseContent: ContentApi = {
-  progression: PROGRESSION,
+  progression: PROGRESSION, coach: COACH,
   buildings: BUILDINGS, rivals: RIVAL_DEFS, headlines: HEADLINES, thoughts: THOUGHTS, events: EVENTS, goals: GOALS,
-  arcs: [], endings: [], tips: [],
+  arcs: BASE_ARCS, endings: [], tips: [], disasters: DISASTERS as unknown as ContentApi["disasters"],
+  benchmarks: LEAPFROG.benchmarks, mishaps: LEAPFROG.mishaps, factions: FACTIONS,
   walkerKinds: [
     { id: "researcher", name: "Researcher", presentation: "walker", needs: ["energy", "focus", "fomo"] },
     { id: "visitor", name: "Visitor", presentation: "walker", needs: ["patience", "impressed"] },
@@ -45,10 +51,8 @@ export const baseRules: RulesApi = {
     key === "TICKS_PER_DAY" ? [value, value] as const : key === "BULLDOZE_REFUND" ? [0, 1] as const : [0, Math.max(1, value * 10)] as const])),
   runCostGrowth: Array.from({ length: 6 }, (_, i) => Constants.runCostGrowth(i + 1)), machinePatches: {},
 };
-export const baseVocabulary: VocabularyApi = {
-  guards: ["stat.gte", "flag.is", "day.after", "chance"],
-  effects: ["effect.cash", "effect.hype", "effect.discourse", "news", "card", "spawn.protesters", "flag.set"],
-};
+/** The sim's real Vocabulary (sim/verbs.ts): the guards and actions a mod arc runs with. */
+export const baseVocabulary: VocabularyApi = { guards: [...vocabulary.guards], effects: [...vocabulary.effects] };
 export function makeBaseGameLayer(skins?: SkinApi) {
   const urls: Readonly<Record<string, string>> = {};
   return Layer.mergeAll(

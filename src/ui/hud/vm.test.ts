@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { BUILDINGS } from "../../content/buildings";
 import { formatMoney } from "../../sim/format";
 import { fixtureInput, fixtureWorld, FIXTURE_CHAT, FIXTURE_PAPER } from "./fixtures";
+import { CALM_START_DAY } from "../../sim/disasters/driver";
 import { SKIN_API_VERSION } from "./types";
 import { hudViewModel, SHIPPED_DAYS, TICKER_ITEMS } from "./vm";
 
@@ -47,7 +48,7 @@ describe("hudViewModel", () => {
 
   it("lists the build palette with prices, hotkeys, affordability and the selected tool", () => {
     const kinds = vm.buildItems.map((b) => b.kind);
-    expect(kinds).toEqual(["path", "cluster", "hall", "gateway", "kombucha", "nap", "snack", "demo", "bulldoze", "staff"]);
+    expect(kinds).toEqual(["path", "cluster", "hall", "gateway", "kombucha", "nap", "snack", "demo", "security", "bulldoze", "staff"]);
     const cluster = vm.buildItems.find((b) => b.kind === "cluster")!;
     expect(cluster).toMatchObject({ name: BUILDINGS.cluster.name, hotkey: 2, selected: true, price: BUILDINGS.cluster.price, priceText: formatMoney(BUILDINGS.cluster.price) });
     expect(vm.buildItems.filter((b) => b.selected)).toHaveLength(1);
@@ -280,4 +281,151 @@ describe("Playable v1: what the lab has earned, the coach, and Help", () => {
     // Instructions, not jokes: the world keeps those.
     for (const line of [...help.loop, ...help.buildings.map((b) => b.line)]) expect(line).not.toMatch(/venture capital into heat|loss goes down/i);
   });
+});
+
+describe("the Disasters view (FLT-32)", () => {
+  const mid = hudViewModel(fixtureInput({ disaster: true, disastersOpen: true }));
+
+  it("is earned at Scrutiny: hidden before it, and the menu cannot open while it is", () => {
+    const four = hudViewModel(fixtureInput({ level: 4, disastersOpen: true }));
+    expect(four.disasters.enabled).toBe(false);
+    expect(four.disasters.open).toBe(false);
+    expect(four.buildItems.map((b) => b.kind)).not.toContain("security");
+    const five = hudViewModel(fixtureInput({ level: 5, disastersOpen: true }));
+    expect(five.disasters.enabled).toBe(true);
+    expect(five.disasters.open).toBe(true);
+    expect(five.buildItems.map((b) => b.kind)).toContain("security");
+  });
+
+  it("offers the four settings with one checked, and every disaster, greyed with a reason while it is under way", () => {
+    expect(mid.disasters.risks.map((r) => r.label)).toEqual(["Off", "Rare", "Normal", "Chaos"]);
+    expect(mid.disasters.risks.filter((r) => r.active).map((r) => r.key)).toEqual([mid.disasters.risk]);
+    const swarm = mid.disasters.menu.find((m) => m.id === "rogueSwarm")!;
+    expect(swarm).toMatchObject({ active: true, available: false });
+    expect(swarm.reason).toMatch(/under way/);
+    expect(mid.disasters.menu.find((m) => m.id === "gpuFire")).toMatchObject({ active: false, available: true });
+    for (const m of mid.disasters.menu) for (const t of m.tags) expect(t.label).not.toBe("");
+  });
+
+  it("says what is going wrong, in the game's voice, with the cleanup's progress", () => {
+    const swarm = mid.disasters.running.find((r) => r.id === "rogueSwarm")!;
+    expect(swarm.stage).toBe("response");
+    expect(swarm.phaseLabel).toBe("Cleaning up");
+    expect(swarm.line).toMatch(/revoking keys/);
+    expect(swarm.progress).toBeGreaterThan(0);
+    expect(swarm.progressText).toMatch(/^Security \d+%$/);
+    expect(mid.disasters.running.find((r) => r.id === "weightsLeak")?.phaseLabel).toBe("Lawyering");
+  });
+
+  it("names who was pulled off their post, and shouts when nobody is left", () => {
+    const sec = mid.disasters.understaffed.find((u) => u.job === "security")!;
+    expect(sec).toMatchObject({ all: true, diverted: sec.total });
+    expect(sec.text).toBe("All Security on the Rogue Agent Swarm. GATE UNGUARDED.");
+    // The map's half: who goes red, and where the swarm's cleanup is (the Security Office).
+    const snap = fixtureInput({ disaster: true }).snap;
+    expect(snap.disasters.divertedIds).toHaveLength(snap.disasters.diverted.reduce((n, d) => n + d.diverted, 0));
+    const site = snap.disasters.sites.find((x) => x.owner === "rogueSwarm" && x.job === "security")!;
+    expect(snap.buildings.find((b) => b.id === site.to)?.kind).toBe("security");
+  });
+
+  it("marks the rival running on your leaked weights in the Arena", () => {
+    const leaked = mid.arena.rows.filter((r) => r.leak);
+    expect(leaked.map((r) => r.id)).toEqual(["sirocco"]);
+    expect(leaked[0]!.title).toMatch(/leaked weights/);
+    expect(hudViewModel(fixtureInput()).arena.rows.some((r) => r.leak)).toBe(false);
+  });
+
+  it("puts a word on trust and heat", () => {
+    expect(mid.disasters.trust.text).toBe(`${mid.disasters.trust.value} · ${mid.disasters.trust.word}`);
+    expect(mid.disasters.heat.word).not.toBe("");
+  });
+
+  it("promises a calm start while the lab has shipped nothing, and says nothing about it when risk is off", () => {
+    const w = fixtureWorld();
+    w.disasters.risk = "rare";
+    w.models = [];
+    expect(hudViewModel(fixtureInput({ world: w })).disasters.calm).not.toBeNull();
+    w.disasters.risk = "off";
+    expect(hudViewModel(fixtureInput({ world: w })).disasters.calm).toBeNull();
+    expect(CALM_START_DAY).toBeGreaterThan(0);
+  });
+});
+
+describe("the discourse (FLT-33)", () => {
+  const fx = hudViewModel(fixtureInput({ factions: true, factionsOpen: true }));
+
+  it("is plain JSON, like the rest of the view-model", () => {
+    assertPlain(fx);
+    assertPlain(hudViewModel(fixtureInput({ factions: true })));
+  });
+
+  it("is off (and draws nothing) until the factions are on", () => {
+    const vm = hudViewModel(fixtureInput());
+    expect(vm.factions.enabled).toBe(false);
+    expect(vm.inspector?.faction ?? null).toBeNull();
+  });
+
+  it("gives every faction a meter, a mood in words and a reason, and says who is at the gate", () => {
+    const f = fx.factions;
+    expect(f.enabled && f.open).toBe(true);
+    expect(f.rows.length).toBeGreaterThanOrEqual(10);
+    for (const r of f.rows) {
+      expect(r.meter).toBeGreaterThanOrEqual(-100);
+      expect(r.meter).toBeLessThanOrEqual(100);
+      expect(r.meterText).toMatch(/^([+−]\d+|0)$/);
+      expect(["Fans", "Upset", "Marching", "Furious online", "Calm"]).toContain(r.moodLabel);
+    }
+    expect(f.fans + f.angry).toBeGreaterThan(0);
+    expect(f.headline).not.toBe("");
+    expect(f.stance.map((s) => s.axis)).toEqual(["speed", "safety", "openness", "fairness", "profit"]);
+    expect(f.safety.options.filter((o) => o.active)).toHaveLength(1);
+    if (f.gate.length) expect(f.gateText).toMatch(/^At the gate: \d+ /);
+  });
+
+  it("puts a schism first among the relations", () => {
+    const rel = fx.factions.relations;
+    const i = rel.findIndex((r) => r.schism);
+    if (i >= 0) expect(rel.slice(0, i).every((r) => r.schism)).toBe(true);
+    expect(rel.every((r) => r.state === "allied" || r.state === "feuding")).toBe(true);
+  });
+
+  it("chips the selected walker and every bubble said as a faction", () => {
+    expect(fx.inspector?.faction).toMatchObject({ id: expect.any(String), color: expect.stringMatching(/^#/) });
+    for (const b of fx.bubbles) if (b.faction) expect(fx.factions.rows.map((r) => r.id)).toContain(b.faction.id);
+  });
+});
+
+describe("endings (FLT-11)", () => {
+  it("shows the last front page only once it's out, as plain JSON, with the five stats and the run summary", () => {
+    const vm = hudViewModel(fixtureInput({ ending: "front-regulated", selected: null }));
+    assertPlain(vm);
+    expect(vm.outcome).toBeNull();
+    expect(vm.ending).toMatchObject({ id: "regulated", title: "Regulated Utility", keepPlaying: true });
+    expect(vm.ending!.paper.masthead).toBe("The Frontier Times");
+    expect(vm.ending!.paper.headline).not.toMatch(/\{\w+\}/);
+    expect(vm.ending!.stats.map((s) => s.key)).toEqual(["days", "vibes", "models", "protesters", "escaped"]);
+    expect(vm.ending!.summary).toContain(vm.ending!.lab);
+    expect(vm.ending!.summary).toContain(vm.ending!.strip);
+    expect(vm.ending!.share).toEqual({ status: "idle", card: null, native: false, note: null });
+    // Dismissed (Keep watching): gone.
+    expect(hudViewModel({ ...fixtureInput({ ending: "front-regulated", selected: null }), outcomeDismissed: true }).ending).toBeNull();
+    // An ordinary game: none.
+    expect(hudViewModel(fixtureInput()).ending).toBeNull();
+  }, 30_000);
+
+  it("names the manager in the title while The Takeover's autopilot builds, then says thanks", () => {
+    const vm = hudViewModel(fixtureInput({ ending: "takeover", selected: null }));
+    expect(vm.ending).toBeNull();
+    expect(vm.takeover).toMatchObject({ title: `Frontier Lab Tycoon (managed by ${vm.takeover!.manager})`, thanks: null });
+    expect(vm.takeover!.placed).toBeGreaterThanOrEqual(2);
+    expect(hudViewModel(fixtureInput({ ending: "thanks", selected: null })).takeover!.thanks).toBe("Thanks for playing. We'll take it from here.");
+  }, 30_000);
+
+  it("passes the share card and the campus photo through", () => {
+    const input = { ...fixtureInput({ ending: "front-acquihired", selected: null }), share: { photo: "data:image/webp;base64,x", status: "ready" as const, card: "blob:card", native: true, note: null } };
+    const vm = hudViewModel(input);
+    expect(vm.ending!.paper.photo).toBe("data:image/webp;base64,x");
+    expect(vm.ending!.share).toEqual({ status: "ready", card: "blob:card", native: true, note: null });
+    expect(vm.ending!.keepPlaying).toBe(false);
+  }, 30_000);
 });

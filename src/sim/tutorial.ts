@@ -40,7 +40,7 @@ export function updateTutorial(state: GameState) {
     const before = state.tutorial!;
     const result = step(tutorialMachine, before, facts);
     state.tutorial = result.stored;
-    for (const e of result.effects) if (e.type === "FINISHED") addToast(state, fillTemplate(TUTORIAL_DONE, { model: state.models[0] ?? "Your model" }), "good");
+    for (const e of result.effects) if (e.type === "FINISHED") addToast(state, fillTemplate(TUTORIAL_DONE, { model: state.models[0] ?? "Your model" }), "good", { source: "coach", importance: "you" });
     if (before.value === result.stored.value) break;
   }
 }

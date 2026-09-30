@@ -1,5 +1,4 @@
 // Runs once per game day: pay the bills, collect the API revenue, let hype drift.
-import { BUILDINGS } from "../content/buildings";
 import { REVENUE_PER_CAPABILITY, RESEARCHER_SALARY, TICKS_PER_DAY } from "./constants";
 import { step } from "./machines/run";
 import { economyMachine } from "./machines/economy";
@@ -12,6 +11,7 @@ import { payroll } from "./staff";
 import { solarHype } from "./race/power";
 import type { Rng } from "./rng";
 import type { GameState, Ledger } from "./types";
+import { defs } from "./defs";
 
 /** Hype settles at 30, higher for a lab with real capability. */
 export function hypeResting(state: GameState): number {
@@ -24,7 +24,7 @@ export function estimateLedger(state: GameState, researchers = state.walkers.fil
   let income = 0;
   const factor = revenueFactor(state) * revenueEffect(state);
   for (const b of state.buildings) {
-    expenses += BUILDINGS[b.kind].upkeepPerDay * upkeepFactor(state, b.kind);
+    expenses += defs().buildings[b.kind].upkeepPerDay * upkeepFactor(state, b.kind);
     // A gateway that is down earns nothing (and the status page says all is well).
     if (b.kind !== "gateway" || b.broken || !isReachable(state, b)) continue;
     const amount = Math.round(state.capability * REVENUE_PER_CAPABILITY * factor);
@@ -58,6 +58,6 @@ export function dailyEconomy(state: GameState, rng: Rng) {
     state.hype = Math.max(0, state.hype - 5);
     addIncident(state, 0.5);
     pushNews(state, rng, "bailout");
-    addToast(state, "Emergency bridge round: +$2M. The board has notes.", "bad");
+    addToast(state, "Emergency bridge round: +$2M. The board has notes.", "bad", { source: "economy", importance: "you" });
   }
 }

@@ -72,6 +72,12 @@ const ART: Record<string, ReactNode> = {
       <circle cx="7" cy="6" r="3.5" fill="#FFD400" stroke={INK} strokeWidth="2" />
     </>
   ),
+  security: (
+    <>
+      <path d="M16 3 26 7v8c0 7-5 11-10 13C11 26 6 22 6 15V7Z" fill="#1A5BD6" strokeWidth="2.5" {...S} />
+      <path d="M11 15l4 4 7-8" fill="none" stroke="#FFD400" strokeWidth="3" />
+    </>
+  ),
   bulldoze: (
     <>
       <rect x="8" y="9" width="15" height="11" fill="#FFD400" strokeWidth="2.5" {...S} />
@@ -100,6 +106,13 @@ const ART: Record<string, ReactNode> = {
       <path d="M8 30q8-8 16 0" fill="#1FA24A" strokeWidth="2.5" {...S} />
     </>
   ),
+  senate: (
+    <>
+      <path d="M9 15a7 6.5 0 0 1 14 0Z" fill="#FFD400" strokeWidth="2.5" {...S} />
+      <path d="M6 15h20v3H6ZM4 25h24v3H4Z" fill="#fff" strokeWidth="2.5" {...S} />
+      <path d="M9 18v7M13.5 18v7M18.5 18v7M23 18v7M16 4v4" fill="none" strokeWidth="2.5" {...S} />
+    </>
+  ),
 };
 
 /** A stamp's picture. An unknown tool gets a gold star, so a new building never draws a hole. */
@@ -122,7 +135,7 @@ export function Stamps({ items, teasers, onPick, onHelp, actions }: { items: Slo
                 key={it.kind}
                 type="button"
                 {...coach.attrs(`build:${it.kind}`)}
-                className={`dd-stamp ${it.selected ? "on" : ""} ${it.affordable ? "" : "poor"} ${it.race ? "race" : ""} ${it.kind === "staff" ? "dd-staff-tool" : ""}`}
+                className={`dd-stamp ${it.selected ? "on" : ""} ${it.affordable ? "" : "poor"} ${it.race ? "race" : ""} ${it.panel ? "dd-staff-tool" : ""}`}
                 onClick={() => {
                   actions.place(it.kind);
                   onPick();
@@ -168,7 +181,7 @@ export function BuildBar({ items, tip, teasers = [], layout, actions }: SlotProp
     setOpen(next);
     actions.buildPanel(next);
   };
-  const held = items.find((it) => it.selected && it.kind !== "staff");
+  const held = items.find((it) => it.selected && !it.panel);
   // While the coach points at a stamp and the tray is shut, the tab stands in for it.
   const inside = coach.intoPanel(items);
   return (

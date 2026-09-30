@@ -32,8 +32,26 @@ export const skinUiAtom = Atom.keepAlive(Atom.make<SkinUi>({ active: "base", pic
 /** The skin's components and copy: what the host renders. Starts as the base until the first skin has loaded. */
 export const loadedSkinAtom = Atom.keepAlive(Atom.make<LoadedSkin>({ id: "base", name: "Base", slots: baseSlots, strings: { ...BASE_STRINGS } }));
 
+/** Is Start ▸ Settings ▸ Mods… open? UI-only state. */
+export const modsOpenAtom = Atom.make(false);
+
 /** Is Help ▸ How to play open? UI-only state. */
 export const helpOpenAtom = Atom.make(false);
 
+/** Is the Disasters menu open (FLT-32)? UI-only state. */
+export const disastersOpenAtom = Atom.make(false);
+
+/** FLT-33: is the Factions panel open? Folded to one line until you ask (a `?moment=factions` link opens it). */
+export const factionsOpenAtom = Atom.make(debugParams.moment === "factions" || debugParams.moment === "counterprotest");
+
 /** Is the Staff panel open? UI-only state, kept as an Effect atom like the rest of what React reads. */
 export const staffOpenAtom = Atom.make(false);
+
+/** Is the Papers window open? Folded to a chip until the player opens it. */
+export const papersOpenAtom = Atom.make(false);
+
+/** Paper moments and CrumbWiki reveals the player has closed this visit (their keys). */
+export const dismissedAtom = Atom.make<readonly string[]>([]);
+
+/** Is the Senate window (the Promise Tracker and the bill, FLT-22/23) open? UI-only state. */
+export const senateOpenAtom = Atom.make(false);

@@ -1,7 +1,7 @@
 // Every skin renders every slot from a fixture view-model without throwing, and its files are what the format says.
 import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { fixtureInput, FIXTURE_CHAT, FIXTURE_PAPER } from "../ui/hud/fixtures";
+import { fixtureDefection, fixtureInput, FIXTURE_CHAT, FIXTURE_PAPER } from "../ui/hud/fixtures";
 import { Docked, Modals, PhotoLayer } from "../ui/hud/tree";
 import type { HudActions, HudVM } from "../ui/hud/types";
 import { hudViewModel } from "../ui/hud/vm";
@@ -67,8 +67,20 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
       return { leapfrog: vms.lf!.leapfrog, layout: vms.lf!.layout, actions };
     case "Voice":
       return { leapfrog: vms.lf!.leapfrog, layout: vms.lf!.layout, actions };
+    case "Factions":
+      return { factions: vms.fx!.factions, layout: vms.fx!.layout, actions };
     case "Livestream":
       return { event: vms.stream!.event!, stream: vms.stream!.event!.stream!, actions };
+    case "Hearing":
+      return { event: vms.hearing!.event!, hearing: vms.hearing!.event!.hearing!, actions };
+    case "LeakedChat":
+      return { event: vms.leak!.event!, leak: vms.leak!.event!.leak!, actions };
+    case "DramaCard":
+      return { event: vms.resign!.event!, drama: vms.resign!.event!.drama!, actions };
+    case "Bill":
+      return { event: vms.bill!.event!, bill: vms.bill!.event!.bill!, actions };
+    case "PromiseTracker":
+      return { event: null, tracker: vms.law!.senate.tracker!, bill: vms.law!.senate.bill, layout: vms.law!.layout, actions };
     case "EraCard":
       return { era: vms.era!.eraCard!, actions };
     case "FrontPage":
@@ -83,6 +95,10 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
       return { skins: { ...main.skins, open: true }, actions };
     case "Outcome":
       return { outcome: vms.outcome!.outcome!, actions };
+    case "Ending":
+      return { ending: vms.ending!.ending!, layout: vms.ending!.layout, actions };
+    case "Takeover":
+      return { takeover: vms.takeover!.takeover!, layout: vms.takeover!.layout, actions };
     case "NewsControls":
       return { newsroom: main.newsroom, sound: main.sound, skins: main.skins, actions };
     case "NewsArrival":
@@ -91,6 +107,35 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
       return { newsroom: vms.archive!.newsroom, actions };
     case "Mixer":
       return { sound: { ...main.sound, open: true }, actions };
+    case "ModManager":
+      return {
+        mods: {
+          open: true,
+          list: [{ id: "every-lab-is-steve", name: "Every Lab Is Named Steve", version: "1.0.0", source: "/mods/examples/every-lab-is-steve/mod.json", hash: "f3b023e9" }],
+          conflicts: ["content.rivals.anthro: a (override), then b (override); b wins"],
+          errors: ["/nope.json: HTTP 404"],
+          contentHash: "02778d7b",
+        },
+        actions,
+      };
+    case "Papers":
+      return { papers: vms.papers!.papers, layout: vms.papers!.layout, actions };
+    case "PaperMoment":
+      return { moment: vms.scoop!.paperMoment!, actions };
+    case "CrumbWiki":
+      return { wiki: vms.scandal!.crumbWiki!, actions };
+    case "DisasterMenu":
+      return { disasters: vms.dzMenu!.disasters, actions };
+    case "DisasterAlert":
+      return { disasters: vms.dz!.disasters, layout: vms.dz!.layout, actions };
+    case "ReportCard":
+      return { event: vms.caught!.event!, report: vms.caught!.event!.report!, actions };
+    case "AuditPin":
+      return { audit: vms.evals!.audit, actions };
+    case "DramaButton":
+      return { drama: vms.dramaFresh!.drama, actions };
+    case "Drama":
+      return { drama: vms.drama!.drama, actions };
   }
 }
 
@@ -106,9 +151,21 @@ const vms: Record<string, HudVM> = {
   warned: hudViewModel({ ...fixtureInput({ warnings: ["Your entrance isn't connected to any paths. Visitors are forming a very orderly queue to nowhere."] }), toasts: [] }),
   lf: vmOf({ leapfrog: true }),
   lfPhone: vmOf({ leapfrog: true, width: 390, height: 844 }),
+  fx: vmOf({ factions: true, factionsOpen: true }),
+  fxFolded: vmOf({ factions: true }),
+  fxPhone: vmOf({ factions: true, factionsOpen: true, width: 390, height: 844 }),
   shipNow: vmOf({ leapfrog: true, event: "shipNow" }),
   stream: vmOf({ leapfrog: true, event: "stream:dog" }),
   auction: vmOf({ event: "computeAuction" }),
+  hearing: vmOf({ circus: "hearing" }),
+  gavel: vmOf({ circus: "hearing-verdict" }),
+  invite: vmOf({ circus: "yacht-invite" }),
+  leak: vmOf({ circus: "yacht-leak" }),
+  bill: vmOf({ senate: "bill" }),
+  law: vmOf({ senate: "bill-law", senateOpen: true }),
+  exposed: vmOf({ senate: "bill-exposed" }),
+  vote: vmOf({ senate: "vote" }),
+  rollcall: vmOf({ senate: "rollcall" }),
   era: vmOf({ event: "era2" }),
   outcome: vmOf({ outcome: "won" }),
   paper: vmOf({ view: FIXTURE_PAPER }),
@@ -118,6 +175,37 @@ const vms: Record<string, HudVM> = {
   phone: vmOf({ width: 390, height: 844 }),
   nobody: vmOf({ selected: null }),
   staff: vmOf({ staff: true }),
+  papers: vmOf({ papers: "panel" }),
+  drop: vmOf({ papers: "drop" }),
+  scoop: vmOf({ papers: "scoop" }),
+  award: vmOf({ papers: "award" }),
+  sign: vmOf({ collusion: "sign" }),
+  scandal: vmOf({ collusion: "scandal" }),
+  dz: vmOf({ disaster: true }),
+  dzMenu: vmOf({ disaster: true, disastersOpen: true }),
+  dzPhone: vmOf({ disaster: true, width: 390, height: 844 }),
+  vcChat: vmOf({ world: fixtureDefection("defection-chat") }),
+  resign: vmOf({ world: fixtureDefection("defection-card") }),
+  manifesto: vmOf({ world: fixtureDefection("defection-manifesto") }),
+  nemesis: vmOf({ world: fixtureDefection("defection-arena") }),
+  poach: vmOf({ world: fixtureDefection("poach-offer") }),
+  // Evals Without Borders (FLT-19): the warning card, the sign over the gate, the tour, their evals, the report card.
+  notice: vmOf({ audit: "audit-notice" }),
+  countdown: vmOf({ audit: "audit-countdown" }),
+  visit: vmOf({ audit: "audit-visit" }),
+  evals: vmOf({ audit: "audit-evals" }),
+  report: vmOf({ audit: "audit-report" }),
+  caught: vmOf({ audit: "audit-caught" }),
+  reportPhone: vmOf({ audit: "audit-caught", width: 390, height: 844 }),
+  drama: vmOf({ drama: "feed" }),
+  dramaFresh: vmOf({ drama: "fresh" }),
+  dramaIntro: vmOf({ drama: "intro" }),
+  dramaEmpty: vmOf({ drama: "empty" }),
+  dramaPhone: vmOf({ drama: "feed", width: 390, height: 844 }),
+  takeover: vmOf({ ending: "takeover", selected: null }),
+  thanks: vmOf({ ending: "thanks", selected: null }),
+  ending: vmOf({ ending: "front-takeover", selected: null }),
+  endingPhone: vmOf({ ending: "front-acquihired", selected: null, width: 390, height: 844 }),
 };
 
 const usable = catalog.filter((e) => e.ok).map((e) => e.folder);
@@ -176,6 +264,62 @@ describe.each([BASE_ID, ...usable])("skin %s", (id) => {
     for (const c of vms.event!.event!.choices) expect(card).toContain(escape(c.label));
     const era = html(skin, <Modals vm={vms.era!} actions={actions} />);
     expect(era).toContain(escape(vms.era!.eraCard!.line));
+  });
+
+  it("draws Papers once earned, and the paper and collusion moments (FLT-45, FLT-46)", async () => {
+    const { skin } = await prepareSkin(id);
+    const panel = html(skin, <Docked vm={vms.papers!} actions={actions} />);
+    expect(vms.papers!.papers.open).toBe(true);
+    expect(panel).toContain(escape(vms.papers!.papers.papers[0]!.title));
+    for (const p of vms.papers!.papers.policies) expect(panel).toContain(escape(p.label));
+    // Not earned yet (Level 4): nothing at all, not even the chip.
+    const locked = hudViewModel({ ...fixtureInput({ papers: "panel", level: 4 }) });
+    expect(html(skin, <Docked vm={locked} actions={actions} />)).not.toContain(escape(vms.papers!.papers.papers[0]!.title));
+    const scoop = html(skin, <Modals vm={vms.scoop!} actions={actions} />);
+    expect(scoop).toContain(escape(vms.scoop!.paperMoment!.rival!));
+    expect(scoop).toContain(escape(vms.scoop!.paperMoment!.gapText!));
+    expect(html(skin, <Modals vm={vms.award!} actions={actions} />)).toContain(escape(vms.award!.paperMoment!.award!));
+    expect(html(skin, <Modals vm={vms.drop!} actions={actions} />)).toContain(escape(vms.drop!.paperMoment!.paper.arxiveId));
+    const sign = html(skin, <Modals vm={vms.sign!} actions={actions} />);
+    expect(sign).toContain(escape(vms.sign!.event!.title));
+    expect(sign).toContain("POST definitely-not-the-internet.local");
+    const scandal = html(skin, <Modals vm={vms.scandal!} actions={actions} />);
+    expect(scandal).toContain(escape(vms.scandal!.crumbWiki!.frontPage!.headline));
+    expect(scandal).toContain("Talk");
+  });
+
+  it("shows the drama cards' documents and all their choices, and says the VC's pitch out loud", async () => {
+    const { skin } = await prepareSkin(id);
+    for (const name of ["resign", "manifesto", "poach"]) {
+      const vm = vms[name]!;
+      expect(vm.event?.kind, name).toBe("drama");
+      const out = html(skin, <Modals vm={vm} actions={actions} />);
+      expect(out, `${id}/${name}`).toContain(escape(vm.event!.title));
+      for (const c of vm.event!.choices) expect(out, `${id}/${name}`).toContain(escape(c.label));
+      expect(out, `${id}/${name}`).toContain(escape(vm.event!.drama!.lines[0]!));
+      expect(out, `${id}/${name} left a placeholder`).not.toMatch(/\{\w+\}/);
+    }
+    expect(vms.resign!.event!.choices).toHaveLength(4);
+    expect(vms.vcChat!.bubbles.filter((b) => b.speech)).toHaveLength(2);
+  });
+
+  it("shows the auditors' report card (every grade, the stamp, the choices) and the sign over their heads", async () => {
+    const { skin } = await prepareSkin(id);
+    for (const key of ["report", "caught", "reportPhone"]) {
+      const vm = vms[key]!;
+      const report = vm.event!.report!;
+      const out = html(skin, <Modals vm={vm} actions={actions} />);
+      for (const g of report.grades) expect(out, `${id}/${key}/${g.id}`).toContain(escape(g.label));
+      for (const c of vm.event!.choices) expect(out).toContain(escape(c.label));
+      if (report.stamp) expect(out).toContain(report.stamp);
+      expect(out).toMatch(/role="(alert)?dialog"/);
+    }
+    const Pin = skin.slots.AuditPin;
+    for (const key of ["countdown", "visit", "evals"]) {
+      const audit = vms[key]!.audit;
+      expect(audit.line, key).toBeTruthy();
+      expect(html(skin, <Pin audit={audit} actions={actions} />)).toContain(escape(audit.line!));
+    }
   });
 
   it("asks before a spend that leaves under three months of runway, in a modal of its own", async () => {
@@ -261,6 +405,32 @@ describe.each([BASE_ID, ...usable])("skin %s", (id) => {
     for (const b of vms.help!.help!.buildings) expect(help).toContain(escape(b.line));
     expect(help).not.toContain(escape(vmOf({ level: 5, help: true }).help!.buildings.find((b) => b.kind === "demo")!.line));
     expect(help).toContain(escape(skin.strings["help.replay"]!));
+  });
+
+  it("has a Today's Drama button from the first day, and a window with the pack, the archive and the now-playing card", async () => {
+    const { skin } = await prepareSkin(id);
+    for (const vm of [vms.garage!, vms.phone!, vms.dramaFresh!]) expect(html(skin, <Docked vm={vm} actions={actions} />), `${id}: the button`).toMatch(/Drama/);
+    const feed = html(skin, <Modals vm={vms.drama!} actions={actions} />);
+    for (const p of [vms.drama!.drama.latest!, ...vms.drama!.drama.archive]) expect(feed).toContain(escape(p.title));
+    for (const line of vms.drama!.drama.latest!.teasers) expect(feed).toContain(escape(line));
+    const intro = html(skin, <Modals vm={vms.dramaIntro!} actions={actions} />);
+    expect(intro).toContain(escape(vms.dramaIntro!.drama.on!.title));
+    expect(intro).toContain(escape(vms.dramaIntro!.drama.on!.event!.title));
+    expect(html(skin, <Modals vm={vms.dramaEmpty!} actions={actions} />).length).toBeGreaterThan(100);
+  });
+
+  it("prints the ending's front page with the run's stats, and The Takeover's title while the autopilot works (FLT-11)", async () => {
+    const { skin } = await prepareSkin(id);
+    for (const vm of [vms.ending!, vms.endingPhone!]) {
+      const out = html(skin, <Modals vm={vm} actions={actions} />);
+      expect(out).toContain(escape(vm.ending!.paper.headline));
+      expect(out).toContain(escape(vm.ending!.lab));
+      for (const st of vm.ending!.stats) expect(out).toContain(escape(st.text));
+      expect(out).toMatch(/role="(alert)?dialog"/);
+    }
+    const t = html(skin, <Modals vm={vms.takeover!} actions={actions} />);
+    expect(t).toContain(escape(vms.takeover!.takeover!.manager));
+    expect(html(skin, <Modals vm={vms.thanks!} actions={actions} />)).toContain(escape(vms.thanks!.takeover!.thanks!));
   });
 
   it("uses the skin's own strings", async () => {

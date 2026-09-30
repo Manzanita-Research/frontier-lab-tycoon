@@ -1,4 +1,4 @@
-// Thought-bubble layout (FLT-10): at most MAX_BUBBLES on screen, the ones closest to the camera win, and bubbles whose
+// Thought-bubble layout (FLT-10): at most MAX_BUBBLES on screen, speech first and then the ones closest to the camera, and bubbles whose
 // screen rectangles would overlap are nudged up until they clear each other. Pure geometry: no three, no DOM.
 
 /** How many thought bubbles may be on screen at once. */
@@ -18,6 +18,8 @@ export interface BubbleIn<T> {
   h: number;
   /** Distance from the camera: smaller is closer (the NDC z of an orthographic view). */
   depth: number;
+  /** Shown ahead of every thought, whatever its depth (two people talking, FLT-26). */
+  first?: boolean;
 }
 
 export interface BubbleOut<T> {
@@ -37,7 +39,7 @@ const boxOf = (p: { x: number; w: number; h: number }, y: number): Box => ({ l: 
 
 /** The bubbles to show, in order of depth, with `y` nudged up where two would overlap. Sorts `list` in place. */
 export function layoutBubbles<I>(list: BubbleIn<I>[], limit = MAX_BUBBLES): BubbleOut<I>[] {
-  list.sort((p, q) => p.depth - q.depth);
+  list.sort((p, q) => Number(!!q.first) - Number(!!p.first) || p.depth - q.depth);
   const out: BubbleOut<I>[] = [];
   const taken: Box[] = [];
   for (const p of list.slice(0, limit)) {

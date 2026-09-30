@@ -1,0 +1,142 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "00b8c60bdeb6679ae2cd69c310664855e2baebc4"
+  },
+  "head": {
+    "branch": "flt-11-endings",
+    "sha": "c98fa08",
+    "dirty": true
+  },
+  "seconds": 462.418,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "memo",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/before/memo.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/after/memo.png",
+      "title": "FLT-11: The Memo, the Era 4 fork (Race or Slow Down)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/compare/memo.png",
+      "changed": 0.28206018518518516
+    },
+    {
+      "scene": "takeover",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/before/takeover.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/after/takeover.png",
+      "title": "FLT-11: The Takeover: the title is not yours, the cursor moves by itself",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/compare/takeover.png",
+      "changed": 0.3170763888888889
+    },
+    {
+      "scene": "takeover-95",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/before/takeover-95.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/after/takeover-95.png",
+      "title": "FLT-11: The Takeover in Frontier 95",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/compare/takeover-95.png",
+      "changed": 0.2926944444444444
+    },
+    {
+      "scene": "thanks",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/before/thanks.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/after/thanks.png",
+      "title": "FLT-11: 'Thanks for playing. We'll take it from here.'",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/compare/thanks.png",
+      "changed": 0.2979791666666667
+    },
+    {
+      "scene": "front-takeover",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/before/front-takeover.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/after/front-takeover.png",
+      "title": "FLT-11: The Takeover's front page and share card",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/compare/front-takeover.png",
+      "changed": 0.5605200617283951
+    },
+    {
+      "scene": "front-regulated",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/before/front-regulated.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/after/front-regulated.png",
+      "title": "FLT-11: Regulated Utility's front page (the campus goes beige)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/compare/front-regulated.png",
+      "changed": 0.6081111111111112
+    },
+    {
+      "scene": "front-acquihired",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/before/front-acquihired.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/after/front-acquihired.png",
+      "title": "FLT-11: Acqui-hired's front page",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/compare/front-acquihired.png",
+      "changed": 0.5583850308641976
+    },
+    {
+      "scene": "front-captured",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/before/front-captured.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/after/front-captured.png",
+      "title": "FLT-11: Captured's front page",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/compare/front-captured.png",
+      "changed": 0.564108024691358
+    },
+    {
+      "scene": "front-pivot",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/before/front-pivot.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/after/front-pivot.png",
+      "title": "FLT-11: The Pivot's front page",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/compare/front-pivot.png",
+      "changed": 0.5500524691358025
+    },
+    {
+      "scene": "front-95",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/before/front-95.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/after/front-95.png",
+      "title": "FLT-11: an ending in Frontier 95 (Internet Exploder + Notepad)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/compare/front-95.png",
+      "changed": 0.5635177469135803
+    },
+    {
+      "scene": "front-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/before/front-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/after/front-phone.png",
+      "title": "FLT-11: an ending on a phone",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/compare/front-phone.png",
+      "changed": 0.699188084821971
+    },
+    {
+      "scene": "front-phone-share",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/before/front-phone-share.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/after/front-phone-share.png",
+      "title": "FLT-11: an ending on a phone, scrolled to Share and the card",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/compare/front-phone-share.png",
+      "changed": 0.7784580447198931
+    },
+    {
+      "scene": "overview",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/before/overview.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/after/overview.png",
+      "title": "The campus, mid-morning, paused",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/compare/overview.png",
+      "changed": 0.19252854938271605
+    },
+    {
+      "scene": "phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/before/phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/after/phone.png",
+      "title": "The same campus on a phone (390x844)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/compare/phone.png",
+      "changed": 0.2207885222991858
+    }
+  ],
+  "errors": []
+}

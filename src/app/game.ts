@@ -10,23 +10,31 @@ import { DEFAULT_RISK, setRisk } from "../sim/disasters/driver";
 import { buildingAt } from "../sim/pathfind";
 import { canPlace } from "../sim/commands";
 import { TICKS_PER_DAY } from "../sim/constants";
+import { withDefs } from "../sim/defs";
 import { tick } from "../sim/tick";
+import { isAuditMoment, stageAudit } from "../sim/auditors/demo";
 import { createMidgameScenario, MIDGAME_CAMERA, midgameOpeningNews, midgameOpeningThoughts } from "../sim/scenarios/midgame";
 import type { Tone } from "../sim/types";
 import { framesBrowser } from "./frames";
 import { SPEEDS, type Speed, type Tool } from "./hud";
 import { appMachine, autoPaused, type AppContext } from "./machine";
 import { createSimHandle, SimHandle, simLayer } from "./sim";
+import { modSession } from "./mods";
 
 const midgame = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("scenario") === "midgame";
 const params = readDebugParams();
 export const debugParams = midgame ? { ...params, focus: params.focus ?? MIDGAME_CAMERA.focus, zoom: params.zoom ?? MIDGAME_CAMERA.zoom } : params;
 
 /** The one live World. The renderer reads `sim.world` and `sim.alpha` straight from useFrame. */
-export const sim = midgame ? new SimHandle(createMidgameScenario(), true) : createSimHandle(debugParams);
+/** `?mod=` was resolved before this module loaded (main.tsx); the World is created from that definition. */
+const mods = modSession();
+export const sim = midgame ? new SimHandle(withDefs(mods.def, createMidgameScenario), true, undefined, mods.def) : createSimHandle(debugParams, mods.def, mods.run);
+if (midgame && mods.run) sim.world.mods = mods.run;
 if (midgame) {
   sim.newsStartId = midgameOpeningNews(sim.world)[0]!.id;
   sim.openingThoughts = { tick: sim.world.tick, thoughts: midgameOpeningThoughts(sim.world) };
+  // FLT-19: the auditors on the mid-game campus (the busiest one there is).
+  if (isAuditMoment(params.moment)) stageAudit(sim.world, params.moment);
 }
 // A new lab plays on "rare" (the sim itself starts with random disasters off, so tests are unaffected); `?risk=` overrides.
 if (!midgame && !debugParams.risk) setRisk(sim.world, DEFAULT_RISK);
@@ -41,6 +49,9 @@ if (midgame) {
   // Presentation only: open the ticker on the selected real headline, and skip historical construction toasts.
   first.toasts = [];
 }
+// Say which mods are running, and whether any failed (the details are in Start ▸ Settings ▸ Mods…). Ids below zero never meet the World's.
+if (mods.mods.length > 0) first.toasts.push({ id: -1, text: `Mods on: ${mods.mods.map((m) => m.name).join(", ")}`, tone: "good", source: "mods", importance: "you" });
+if (mods.errors.length > 0) first.toasts.push({ id: -2, text: `${mods.errors.length === 1 ? "A mod" : `${mods.errors.length} mods`} didn't load. See Start, Settings, Mods…`, tone: "bad", source: "mods", importance: "you" });
 export const app = createActorAtoms(runtime, appMachine, { input: { speed: initialSpeed, first } });
 
 /** Owns the atoms' lifetimes. Mount `app.actor` to start the loop; dispose it to stop everything. */
@@ -80,12 +91,20 @@ export const atoms = {
   highlight: pick((c) => c.highlight),
   race: pick((c) => c.snap.race),
   ops: pick((c) => c.snap.ops),
+  /** Agent collusion's signs for the world overlay (packets, the night gathering, the inquiry). */
+  collusion: pick((c) => c.snap.collusion),
   staffCount: pick((c) => c.snap.ops.staff.length),
   payroll: pick((c) => c.snap.ops.payroll),
+  disasters: pick((c) => c.snap.disasters),
   /** The staffer whose patrol zone is being painted, or null. */
   zone: pick((c) => c.zone),
   /** Template variables for the open card ({valuation}, {bidLow}, {dropRival}, ...). */
   cardVars: pick((c) => c.snap.race.vars),
+  /** The Takeover's manager ("Frontier-9") while the autopilot builds, and how many buildings it has put down. */
+  managedBy: pick((c) => c.snap.endings?.managedBy ?? null),
+  autopilotPlaced: pick((c) => c.snap.endings?.placed ?? 0),
+  /** The endings' presentation cues (the Look), for the scene. */
+  endingLook: pick((c) => c.snap.endings?.look ?? null),
 };
 
 /** The app's context right now, for handlers and frame callbacks that must not subscribe. Null until it has started. */
@@ -155,5 +174,5 @@ if (typeof window !== "undefined" && new URLSearchParams(window.location.search)
   // `disaster(id)` and `risk(setting)` are the dev hooks for FLT-17: the same commands the Disasters menu will send.
   const disaster = (id: string) => send({ type: "COMMAND", command: { type: "disaster", id } });
   const risk = (setting: "off" | "rare" | "normal" | "chaos") => send({ type: "COMMAND", command: { type: "setRisk", risk: setting } });
-  (window as unknown as { __flt: unknown }).__flt = { sim, send, registry, app, tick, disaster, risk };
+  (window as unknown as { __flt: unknown }).__flt = { sim, send, registry, app, tick, disaster, risk, mods };
 }

@@ -1,7 +1,7 @@
 // The lab's home page: the header with the hit counter, Under Construction, My Goals, About Me, the guestbook and the
 // Top Sites table. Everything is a table, a rule or a link, because it is 1998 and CSS is a rumour.
 import { useEffect, useRef, useState } from "react";
-import { ALL_VISIBLE, Odometer, money } from "../kit";
+import { ALL_VISIBLE, FactionChip, Odometer, money } from "../kit";
 import { useCoach, useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import type { StatsVM } from "../../ui/hud/types";
@@ -290,6 +290,11 @@ export function Inspector({ inspector: who, layout, actions }: SlotPropsMap["Ins
               current mood: <MoodFace mood={who.mood} /> {who.moodLabel}
             </div>
             <div>current music: {MUSIC[who.kind]}</div>
+            {who.faction && (
+              <div>
+                current faction: <FactionChip faction={who.faction} className="gc-faction" />
+              </div>
+            )}
             {!short && <div>currently: {who.status}</div>}
           </div>
         </div>
@@ -402,12 +407,13 @@ export function Arena({ arena, actions }: SlotPropsMap["Arena"]) {
             </thead>
             <tbody>
               {rows.map((row) => (
-                <tr key={row.id} className={`${row.you ? "you" : ""} ${row.moved ? `moved-${row.moved}` : ""}`} title={row.title}>
+                <tr key={row.id} className={`${row.you ? "you" : ""} ${row.leak ? "leak" : ""} ${row.moved ? `moved-${row.moved}` : ""}`} title={row.title}>
                   <td>{row.rank}</td>
                   <td className="name">
                     <i style={{ background: row.color }} aria-hidden />
                     {row.short}
                     {row.open && <small> (open)</small>}
+                    {row.leak && <small className="h98-leak"> ({t("arena.leak")})</small>}
                   </td>
                   <td>{row.score}</td>
                   <td className={row.delta > 0 ? "good" : row.delta < 0 ? "bad" : ""}>{row.deltaText}</td>

@@ -13,14 +13,18 @@ export function Layout({ slots }: SlotPropsMap["Layout"]) {
       <IconSprite />
       <div className="f95-left">
         {slots.Stats}
+        {/* on a phone the error box sits under the lab bar; on a desktop, at the top of the side column (CSS picks one) */}
+        {slots.DisasterAlert}
         {slots.Training}
         {slots.Objectives}
       </div>
       <div className="f95-side">
+        {slots.DisasterAlert}
         <WindowStack>
           {slots.Staff}
           {slots.Inspector}
           {slots.Arena}
+          {slots.Papers}
           {slots.ThoughtsPanel}
         </WindowStack>
         {slots.NewsArrival}
@@ -31,7 +35,9 @@ export function Layout({ slots }: SlotPropsMap["Layout"]) {
         {slots.Ticker}
         <div className="f95-tray">
           {slots.Voice}
+          {slots.Factions}
           {slots.NewsControls}
+          {slots.DramaButton}
           {slots.PhotoButton}
           {slots.Speed}
         </div>

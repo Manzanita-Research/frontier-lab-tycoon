@@ -29,7 +29,7 @@
               "entry": [
                 {
                   "type": "toast",
-                  "params": {"text": "Anomalous traffic: 40,000 requests a second, all from your API key.", "tone": "bad"}
+                  "params": {"text": "Anomalous traffic: 40,000 requests a second, all from your API key.", "tone": "bad", "importance": "you"}
                 },
                 {
                   "type": "news",
@@ -107,7 +107,8 @@
                         "type": "toast",
                         "params": {
                           "text": "Nobody was minding the Security Office. The provider pulled the plug: -$180K.",
-                          "tone": "bad"
+                          "tone": "bad",
+                          "importance": "you"
                         }
                       }
                     ]
@@ -244,7 +245,7 @@
               "entry": [
                 {
                   "type": "toast",
-                  "params": {"text": "Smoke coming out of the {target}. Somebody said 'is that normal?'", "tone": "bad"}
+                  "params": {"text": "Smoke coming out of the {target}. Somebody said 'is that normal?'", "tone": "bad", "importance": "you"}
                 },
                 {
                   "type": "news",
@@ -304,7 +305,7 @@
                           "tone": "bad"
                         }
                       },
-                      {"type": "toast", "params": {"text": "It spread. Nobody came in time.", "tone": "bad"}}
+                      {"type": "toast", "params": {"text": "It spread. Nobody came in time.", "tone": "bad", "importance": "you"}}
                     ]
                   }
                 ]
@@ -376,7 +377,7 @@
                 },
                 {
                   "type": "toast",
-                  "params": {"text": "Rumor: {model}'s weights are on a torrent.", "tone": "bad"}
+                  "params": {"text": "Rumor: {model}'s weights are on a torrent.", "tone": "bad", "importance": "you"}
                 },
                 {"type": "sound.cue", "params": {"cue": "alarm"}},
                 {"type": "camera.focus", "params": {"on": "hall", "zoom": 1.35, "hold": 2.2}}
@@ -550,7 +551,8 @@
                   "type": "toast",
                   "params": {
                     "text": "A prompt that makes {model} 'ignore all previous instructions' and recite the terms of service in pirate is going viral.",
-                    "tone": "bad"
+                    "tone": "bad",
+                    "importance": "you"
                   }
                 },
                 {
@@ -759,7 +761,8 @@
                   "type": "toast",
                   "params": {
                     "text": "The grid operator has issued a 'strongly worded advisory'. The lights flicker. The GPUs notice.",
-                    "tone": "bad"
+                    "tone": "bad",
+                    "importance": "you"
                   }
                 },
                 {

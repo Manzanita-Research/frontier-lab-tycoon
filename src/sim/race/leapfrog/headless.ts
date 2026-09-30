@@ -1,8 +1,7 @@
 // A headless Release Leapfrog run: a scripted, sensible player plays a lab for N days with the pack on and the report says
 // what happened (the launch rhythm, the cards, the records, the saturations, the news cycle). Used by the tests and,
 // with LEAPFROG_REPORT=1, to write the sim report that goes in the PR. Not game code.
-import { BUILDINGS, type PlaceableKind } from "../../../content/buildings";
-import { BENCH_BY_ID } from "../../../content/leapfrog";
+import type { PlaceableKind } from "../../../content/buildings";
 import { openEventOf } from "../../events";
 import { pendingConfirmOf } from "../../guardrails";
 import { outcomeOf } from "../../goals";
@@ -16,6 +15,7 @@ import type { GameState } from "../../types";
 import { eraOfState } from "../race";
 import { enableLeapfrog } from "./driver";
 import { leapfrogView, type LeapfrogView } from "./view";
+import { defs } from "../../defs";
 
 const RESERVE = 400_000;
 
@@ -58,6 +58,10 @@ export interface HeadlessOptions {
   off?: boolean;
   /** Hire staff and build like the playthrough bot does; false leaves the lab as it starts. */
   build?: boolean;
+  /** Stage the World before the first tick (FLT-33 turns the factions on and picks a stance here). */
+  setup?: (s: GameState) => void;
+  /** Extra commands for a tick, sent with the bot's own (FLT-33's safety budget and publication policy). */
+  also?: (s: GameState, tick: number) => Command[];
 }
 
 /** Ship when the run is nearly done, hold when it is not, leak never; the auction gets a mid bid, the fountain is built. */
@@ -74,6 +78,7 @@ export function runHeadless(seed: number, opts: HeadlessOptions = {}): HeadlessR
   const s = createInitialState(seed);
   if (!opts.off) enableLeapfrog(s);
   layPaths(s);
+  opts.setup?.(s);
   const cards: Record<string, number> = {};
   const drops: HeadlessDrop[] = [];
   const eras: (number | null)[] = [0, null, null, null];
@@ -108,18 +113,19 @@ export function runHeadless(seed: number, opts: HeadlessOptions = {}): HeadlessR
       else if (clusters + 6 * datacenters < 3 * halls) kind = "cluster";
       else if (halls < Math.min(7, 3 + Math.floor(s.day / 90))) kind = "hall";
       else if (clusters < 12) kind = "cluster";
-      if (kind && s.cash >= BUILDINGS[kind].price + RESERVE) {
+      if (kind && s.cash >= defs().buildings[kind].price + RESERVE) {
         const spot = findSpot(s, kind);
         if (spot) cmds.push({ type: "placeBuilding", kind, x: spot[0], z: spot[1] });
       }
     }
+    if (opts.also) cmds.push(...opts.also(s, i));
     tick(s, cmds);
     const era = eraOfState(s);
     for (let e = 2; e <= era; e++) eras[e - 1] ??= s.day;
     const lf = s.leapfrog;
     if (lf.last !== last && lf.last) {
       last = lf.last;
-      drops.push({ day: lf.last.day, slot: lf.last.slot, lab: lf.last.lab, model: lf.last.model, claims: lf.last.claims.map((c) => `${BENCH_BY_ID[c.bench]?.short ?? c.bench}${c.maxx ? "*" : ""}`) });
+      drops.push({ day: lf.last.day, slot: lf.last.slot, lab: lf.last.lab, model: lf.last.model, claims: lf.last.claims.map((c) => `${defs().benchById[c.bench]?.short ?? c.bench}${c.maxx ? "*" : ""}`) });
     }
   }
   const leads = drops.filter((d) => d.slot === "lead");

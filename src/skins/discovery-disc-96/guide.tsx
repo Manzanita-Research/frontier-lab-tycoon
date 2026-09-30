@@ -1,6 +1,7 @@
 // Chip the guide bot lives in the bottom-left corner and reads out toasts and hints in a speech balloon ("GREAT JOB!").
 // When it's quiet Chip offers a fact now and then; tap the bot for another. Also: the thought bubbles and the toast card.
 import { useEffect, useRef, useState } from "react";
+import { factionAttrs } from "../kit";
 import { useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import type { ToastVM } from "../../ui/hud/types";
@@ -10,7 +11,7 @@ import tipsFile from "./tips.json";
 /** A word balloon: who is thinking it (small, blue), then what they think. The root keeps the `bubble` class for photo mode. */
 export function Bubble({ bubble }: SlotPropsMap["Bubble"]) {
   return (
-    <div className={`bubble dd-bubble bubble-${bubble.kind}`}>
+    <div className={`bubble dd-bubble bubble-${bubble.kind}`} {...factionAttrs(bubble.faction)}>
       <small>{bubble.speaker || bubble.kind}</small>
       {bubble.text}
     </div>

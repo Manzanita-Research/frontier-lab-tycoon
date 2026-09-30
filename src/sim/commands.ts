@@ -1,5 +1,5 @@
 // Player actions. They are queued and applied at the start of the next tick.
-import { BUILDINGS, BULLDOZE_REFUND, PATH_PRICE, type BuildingKind } from "../content/buildings";
+import { BULLDOZE_REFUND, PATH_PRICE, type BuildingKind } from "../content/buildings";
 import { publishPaper, setPublicationPolicy } from "./race/papers/driver";
 import type { PublicationPolicy } from "./race/papers/policy";
 import { setRisk, triggerDisaster } from "./disasters/driver";
@@ -14,7 +14,11 @@ import type { Rng } from "./rng";
 import type { GameState, Rect, StaffJob } from "./types";
 import { buildingUnlocked, systemUnlocked } from "./progression";
 import { coachCommand } from "./coach";
+import { lobbySenator } from "./promises/driver";
+import { draftClause } from "./capture/driver";
 import { continueTutorial } from "./tutorial";
+import { defs } from "./defs";
+import { setSafetySpend } from "./factions/driver";
 
 export type Command =
   | { type: "coachSkip" | "coachReplay" | "coachClick" | "dismissUnlock" | "buildPanelOpened" }
@@ -39,7 +43,13 @@ export type Command =
   /** Trigger a disaster on purpose (the Disasters menu, after its confirmation; the `?disaster=` hook). A refusal is a toast. */
   | { type: "disaster"; id: string }
   /** The random-disaster setting: off, rare, normal or chaos. */
-  | { type: "setRisk"; risk: Risk };
+  | { type: "setRisk"; risk: Risk }
+  /** Send the lab's lobbyists to a senator about the motion on the docket (FLT-23). A refusal is a toast. */
+  | { type: "lobby"; senator: string }
+  /** Tick (`on`) or untick a clause on the bill the lab was asked to draft (FLT-22). */
+  | { type: "draftClause"; clause: string; on: boolean }
+  /** FLT-33: the safety budget, 0 (none) to 3 (lavish). Costs money daily and slows training; the factions notice. */
+  | { type: "setSafetySpend"; level: number };
 
 export type PlaceResult = { ok: true } | { ok: false; reason: string };
 
@@ -47,11 +57,11 @@ const no = (reason: string): PlaceResult => ({ ok: false, reason });
 
 /** What `kind` costs right now: a compute auction win leaves a free voucher for one of them. */
 export function buildPrice(state: GameState, kind: BuildingKind): number {
-  return state.flags[`free:${kind}`] !== undefined ? 0 : BUILDINGS[kind].price;
+  return state.flags[`free:${kind}`] !== undefined ? 0 : defs().buildings[kind].price;
 }
 
 /** Locked buildings (the race's Datacenter and power plants) stay locked until a compute auction is won. */
-export const isUnlocked = (state: GameState, kind: BuildingKind): boolean => buildingUnlocked(state, kind) && (!BUILDINGS[kind].locked || state.flags[`unlocked:${kind}`] !== undefined);
+export const isUnlocked = (state: GameState, kind: BuildingKind): boolean => buildingUnlocked(state, kind) && (!defs().buildings[kind].locked || state.flags[`unlocked:${kind}`] !== undefined);
 
 /** Can `kind` (or a path tile) go at (x, z)? For buildings, (x, z) is the top-left tile of the footprint. */
 export function canPlace(state: GameState, kind: BuildingKind | "path", x: number, z: number): PlaceResult {
@@ -62,10 +72,13 @@ export function canPlace(state: GameState, kind: BuildingKind | "path", x: numbe
     if (state.cash < PATH_PRICE) return no("Not enough cash");
     return { ok: true };
   }
-  const def = BUILDINGS[kind];
+  const buildings = defs().buildings;
+  // A kind this run's definition does not have (a stale link, a mod that is no longer loaded).
+  if (!Object.hasOwn(buildings, kind)) return no("There's no such building here");
+  const def = buildings[kind];
   const rect: Rect = { x, z, w: def.size[0], d: def.size[1] };
   if (gateAccessTiles(state).some(([gx, gz]) => rectContains(rect, gx, gz))) return no("Keep the entrance access clear; it belongs to the queue to somewhere.");
-  if (!isUnlocked(state, kind)) return no(BUILDINGS[kind].locked ? "Win a compute auction to unlock this" : "Meet your next goal to unlock this");
+  if (!isUnlocked(state, kind)) return no(defs().buildings[kind].locked ? "Win a compute auction to unlock this" : "Meet your next goal to unlock this");
   if (!inBounds(state, x, z) || !inBounds(state, x + rect.w - 1, z + rect.d - 1)) return no("Out of bounds");
   if (rectsOverlap(rect, state.gate) || state.buildings.some((b) => rectsOverlap(rect, b))) {
     return no("Something's already there");
@@ -81,7 +94,7 @@ export function canPlace(state: GameState, kind: BuildingKind | "path", x: numbe
 export function placeBuilding(state: GameState, rng: Rng, kind: BuildingKind, x: number, z: number, confirmed = false) {
   if (!canPlace(state, kind, x, z).ok) return;
   if (!guardSpending(state, { type: "placeBuilding", kind, x, z, confirmed })) return;
-  const def = BUILDINGS[kind];
+  const def = defs().buildings[kind];
   state.cash -= buildPrice(state, kind);
   delete state.flags[`free:${kind}`];
   state.buildings.push({ id: state.nextId++, kind, x, z, w: def.size[0], d: def.size[1], placedTick: state.tick, reliability: 1, broken: false, brokenTick: 0 });
@@ -100,7 +113,7 @@ export function placeBuilding(state: GameState, rng: Rng, kind: BuildingKind, x:
 function bulldoze(state: GameState, x: number, z: number) {
   const b = buildingAt(state, x, z);
   if (b) {
-    state.cash += Math.round(BUILDINGS[b.kind].price * BULLDOZE_REFUND);
+    state.cash += Math.round(defs().buildings[b.kind].price * BULLDOZE_REFUND);
     state.buildings = state.buildings.filter((o) => o.id !== b.id);
     state.version++;
     return;
@@ -175,14 +188,23 @@ export function applyCommands(state: GameState, commands: readonly Command[], rn
       case "disaster": {
         if (!systemUnlocked(state, "disasters")) break;
         const r = triggerDisaster(state, c.id, { forced: true });
-        if (!r.ok) addToast(state, r.reason, "bad");
+        if (!r.ok) addToast(state, r.reason, "bad", { source: "disaster", importance: "you" });
         break;
       }
       case "setRisk":
         if (systemUnlocked(state, "disasters")) setRisk(state, c.risk);
         break;
+      case "lobby":
+        if (systemUnlocked(state, "promises")) lobbySenator(state, c.senator);
+        break;
+      case "draftClause":
+        if (systemUnlocked(state, "capture")) draftClause(state, c.clause, c.on);
+        break;
+      case "setSafetySpend":
+        if (state.factions && systemUnlocked(state, "factions")) setSafetySpend(state, c.level);
+        break;
       case "startTraining":
-        if (!state.buildings.some((b) => b.kind === "hall")) addToast(state, "Build a Training Hall first.", "bad");
+        if (!state.buildings.some((b) => b.kind === "hall")) addToast(state, "Build a Training Hall first.", "bad", { source: "build", importance: "you" });
         break;
     }
   }

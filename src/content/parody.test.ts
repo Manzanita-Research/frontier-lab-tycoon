@@ -1,0 +1,41 @@
+// Parody names only (AGENTS.md). Every content string, skin string and window title the game can show: the content
+// tables, the 2D UI and all six skins (code, JSON and CSS), and every base pack under mods/. The defection test keeps
+// its narrower check on its own two packs; this one covers the rest, so a real product name fails wherever it lands.
+const REAL = [
+  "Copilot", "Internet Explorer", "Notepad", "WordPad", "LinkedIn", "Excel", "PowerPoint", "Outlook", "Slack", "Twitter",
+  "Windows 95", "Windows 98", "Clippy", "Microsoft", "OpenAI", "Anthropic", "DeepMind", "Google", "Gmail", "ChatGPT",
+];
+// Our parodies that contain (or sit next to) a real name. They are removed before the scan.
+const ALLOWED = ["Outlook Excess", "WordSad", "WordPerfectly", "NoteBad"];
+
+const sources = import.meta.glob<string>(
+  ["./**/*.{ts,json}", "../ui/**/*.{ts,tsx,json,css}", "../skins/**/*.{ts,tsx,json,css}", "../../mods/base-*/**/*.json", "!**/*.test.{ts,tsx}"],
+  { query: "?raw", import: "default", eager: true },
+);
+const scanned = Object.keys(sources);
+const packs = [...new Set(scanned.flatMap((f) => /^\.\.\/\.\.\/mods\/(base-[^/]+)\//.exec(f)?.[1] ?? []))];
+
+/** Every real name in `text`, once the allowed parodies are taken out. */
+function realNames(text: string): string[] {
+  const clean = ALLOWED.reduce((t, ok) => t.split(ok).join(""), text);
+  return REAL.filter((name) => new RegExp(`\\b${name.replace(" ", "\\s+")}\\b`).test(clean));
+}
+
+describe("parody names only", () => {
+  it("knows a real name from our parodies", () => {
+    expect(realNames('title: "RUN.TXT - Notepad", "Internet Explorer 3.0", "Macrohard Copilot for Copilot"')).toEqual(["Copilot", "Internet Explorer", "Notepad"]);
+    expect(realNames("Outlook Excess, WordSad, WordPerfectly, NoteBad, Internet Exploder 3.0, LinkedOut, Excellent, the outlook")).toEqual([]);
+  });
+  it("reads the content, the UI, all six skins and every base pack", () => {
+    for (const skin of ["base", "frontier-95", "homepage-98", "discovery-disc-96", "field-almanac", "karaoke-night", "swag-drop"]) {
+      expect(scanned.some((f) => f.startsWith(`../skins/${skin}/`)), skin).toBe(true);
+    }
+    expect(sources["../skins/frontier-95/skin.css"]).toContain('[data-skin="frontier-95"]');
+    expect(packs.length).toBeGreaterThanOrEqual(13);
+    for (const p of packs) expect(scanned).toContain(`../../mods/${p}/mod.json`);
+  });
+  it("names no real product, app, site or lab anywhere the player can read", () => {
+    const found = scanned.flatMap((f) => realNames(sources[f]!).map((name) => `${f}: ${name}`));
+    expect(found).toEqual([]);
+  });
+});

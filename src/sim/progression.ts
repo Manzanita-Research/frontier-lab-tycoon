@@ -1,16 +1,27 @@
 import { enableLeapfrog } from "./race/leapfrog/driver";
 import { enablePapers } from "./race/papers/driver";
+import { enableAuditors } from "./auditors/driver";
+import { enableCollusion } from "./collusion/driver";
+import { enableDefection } from "./defection/driver";
+import { enableHearing } from "./hearing/driver";
+import { enablePoaching } from "./poaching/driver";
+import { enableYacht } from "./yacht/driver";
+import { enableFactions } from "./factions/state";
+import type { BuildingKind } from "../content/buildings";
+import { enableCapture } from "./capture/driver";
+import { enablePromises } from "./promises/driver";
 import { seedField } from "./race/arena";
 import { formatMoney } from "./format";
-import { BUILDINGS, type BuildingKind } from "../content/buildings";
 import { STAFF } from "../content/staff";
-import { HUD_PANELS, PROGRESSION, type HudPanel, type Level, type ProgressView, type SystemId } from "../content/progression";
+import { HUD_PANELS, type HudPanel, type Level, type ProgressView, type SystemId } from "../content/progression";
 import { progressionMachine } from "./machines/progression";
 import { step } from "./machines/run";
+import { defs } from "./defs";
 import type { GameState, StaffJob } from "./types";
 
-type ProgressState = Pick<GameState, "progression" | "progressionContent">;
-const rows = (s: ProgressState) => s.progressionContent ?? PROGRESSION;
+type ProgressState = Pick<GameState, "progression">;
+// The ladder is content: a mod can retune a goal or move an unlock (FLT-37).
+const rows = (_s: ProgressState) => defs().progression;
 export const levelOf = (s: ProgressState): Level => (s.progression?.context.level ?? 5) as Level;
 const unlockedRows = (s: ProgressState) => rows(s).filter((r) => r.level <= levelOf(s));
 export const systemUnlocked = (s: ProgressState, id: SystemId): boolean => !s.progression || unlockedRows(s).some((r) => r.systems.includes(id));
@@ -18,8 +29,38 @@ export const staffUnlocked = (s: GameState, job: StaffJob): boolean => !s.progre
 // Offices are hidden infrastructure created by incident verbs, not palette unlocks.
 export const buildingUnlocked = (s: GameState, kind: BuildingKind): boolean => !s.progression ||
   unlockedRows(s).some((r) => r.buildings.includes(kind)) ||
-  (BUILDINGS[kind].office === true && (systemUnlocked(s, "disasters") || systemUnlocked(s, "collusion"))) ||
+  (defs().buildings[kind]?.office === true && (systemUnlocked(s, "disasters") || systemUnlocked(s, "collusion"))) ||
   (levelOf(s) >= 4 && s.flags[`unlocked:${kind}`] !== undefined);
+/**
+ * The systems that are content packs with their own state, and the `?<id>=off` flag that keeps each one asleep.
+ * Earning a system on the ladder switches its pack on (FLT-37); in table order, so collusion finds Leapfrog awake.
+ */
+const PACKS: readonly { id: SystemId; enable: (s: GameState) => void; off: string }[] = [
+  { id: "leapfrog", enable: enableLeapfrog, off: "leapfrogOff" },
+  { id: "papers", enable: enablePapers, off: "papersOff" },
+  { id: "collusion", enable: enableCollusion, off: "collusionOff" },
+  { id: "hearing", enable: enableHearing, off: "hearingOff" },
+  { id: "yacht", enable: enableYacht, off: "yachtOff" },
+  { id: "defection", enable: enableDefection, off: "defectionOff" },
+  { id: "poaching", enable: enablePoaching, off: "poachingOff" },
+  { id: "auditors", enable: enableAuditors, off: "auditorsOff" },
+  { id: "promises", enable: enablePromises, off: "promisesOff" },
+  { id: "capture", enable: enableCapture, off: "captureOff" },
+  { id: "factions", enable: enableFactions, off: "factionsOff" },
+];
+/** The flags behind `?leapfrog=off`, `?papers=off`, `?collusion=off`, `?hearing=off`, `?yacht=off`, `?defection=off`, `?poaching=off`, `?auditors=off`, `?promises=off`, `?capture=off` and `?factions=off`. */
+export const PACK_OFF_FLAGS = PACKS.map((p) => p.off);
+function enablePacks(s: GameState, systems: readonly SystemId[]) {
+  for (const pack of PACKS) if (systems.includes(pack.id) && !s.flags[pack.off]) pack.enable(s);
+}
+/**
+ * Switch on the pack of every system the run has already earned: a new game whose first rung lists one (a mod can
+ * move a system down the ladder), a campus or scenario that starts with the ladder complete, or a debug run with no
+ * ladder at all (everything earned).
+ */
+export function enableEarnedPacks(s: GameState) {
+  enablePacks(s, s.progression ? unlockedRows(s).flatMap((r) => [...r.systems]) : rows(s).flatMap((r) => [...r.systems]));
+}
 /** Days after Level 3 opens that the first thing breaks, so the SRE has a reason to exist (FLT-58). */
 export const FIRST_BREAKDOWN_DAYS = 3;
 /** And the day after it opens, the first slop (sim/slop.ts `firstSpill`), so the Janitor Bot does too. */
@@ -60,12 +101,19 @@ function goalValue(s: GameState) {
 export function progressOf(s: GameState): ProgressView {
   const level = levelOf(s);
   const active = rows(s).find((r) => r.level === level)!;
-  const { current, status } = goalValue(s);
+  const { current, met, status } = goalValue(s);
   return { level, levelName: active.name,
-    unlocked: { buildings: [...new Set([...unlockedRows(s).flatMap((r) => [...r.buildings]), ...Object.keys(BUILDINGS).filter((k) => level >= 4 && s.flags[`unlocked:${k}`] !== undefined) as BuildingKind[]])], staff: unlockedRows(s).flatMap((r) => [...r.staff]), systems: unlockedRows(s).flatMap((r) => [...r.systems]) },
-    goal: { text: active.goal.text, current: active.goal.metric === "arena" ? current : Math.min(current, active.goal.target), target: active.goal.target, status, ...(active.goal.metric === "arena" ? { lowerIsBetter: true } : {}) },
+    unlocked: { buildings: [...new Set([...unlockedRows(s).flatMap((r) => [...r.buildings]), ...defs().buildingKinds.filter((k) => level >= 4 && s.flags[`unlocked:${k}`] !== undefined) as BuildingKind[]])], staff: unlockedRows(s).flatMap((r) => [...r.staff]), systems: unlockedRows(s).flatMap((r) => [...r.systems]) },
+    goal: met && !rows(s).some((r) => r.level > level) ? afterLadder(s)
+      : { text: active.goal.text, current: active.goal.metric === "arena" ? current : Math.min(current, active.goal.target), target: active.goal.target, status, ...(active.goal.metric === "arena" ? { lowerIsBetter: true } : {}) },
     teasers: teasers(s, level),
   };
+}
+/** Past the last rung, with its goal met, the note names the first scenario objective still open; nothing if none is (FLT-48). */
+function afterLadder(s: GameState): ProgressView["goal"] {
+  const open = s.goals.context.goals.find((g) => !g.met);
+  const def = open && defs().goals.find((d) => d.id === open.id);
+  return open && def ? { text: def.label, current: open.value, target: open.target, objective: def.id } : { text: "", current: 0, target: 1 };
 }
 /** What is still locked, one row per milestone that unlocks it ("2 more · Ship your first model"), not one "???" per item. */
 function teasers(s: GameState, level: Level): ProgressView["teasers"] {
@@ -90,13 +138,12 @@ export function updateProgression(s: GameState) {
   s.progression = result.stored;
   for (const event of result.effects) {
     const row = rows(s).find((r) => r.level === event.level)!;
-    if (row.systems.includes("leapfrog") && !s.flags.leapfrogOff) enableLeapfrog(s);
-    if (row.systems.includes("papers") && !s.flags.papersOff) enablePapers(s);
+    enablePacks(s, row.systems);
     // The Race: the field did not stand still while you were in the garage. You start behind most of it.
     if (row.systems.includes("arena")) seedField(s);
     if (row.systems.includes("breakdowns")) s.flags.firstBreakdownDay ??= s.day + FIRST_BREAKDOWN_DAYS;
     if (row.systems.includes("slop")) s.flags.firstSpillDay ??= s.day + FIRST_SPILL_DAYS;
-    const items = [...row.buildings.map((k) => BUILDINGS[k].name), ...row.staff.map((k) => STAFF[k].title), ...row.systems];
+    const items = [...row.buildings.map((k) => defs().buildings[k]?.name ?? k), ...row.staff.map((k) => STAFF[k].title), ...row.systems];
     s.unlockCards ??= [];
     s.unlockCards.push({ id: row.id, title: `New! ${row.name}`, body: row.goal.text, items });
   }

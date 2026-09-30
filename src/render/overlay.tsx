@@ -11,6 +11,8 @@ interface Anchor {
   pos(out: THREE.Vector3): boolean;
   /** Thought bubbles are laid out together (render/bubbles.ts): at most three show, and they nudge apart instead of overlapping. */
   group?: "bubble";
+  /** A bubble that beats thoughts to the three places (speech). */
+  first?: boolean;
   /** The element's size in px, kept current by a ResizeObserver (bubbles only). */
   w: number;
   h: number;
@@ -38,7 +40,7 @@ export function OverlayProjector() {
       v.project(camera);
       const x = (v.x * 0.5 + 0.5) * size.width;
       const y = (-v.y * 0.5 + 0.5) * size.height;
-      if (a.group === "bubble") bubbles.push({ item: a, x, y, w: a.w, h: a.h, depth: v.z });
+      if (a.group === "bubble") bubbles.push({ item: a, x, y, w: a.w, h: a.h, depth: v.z, first: a.first });
       else put(a, x, y);
     }
     if (bubbles.length === 0) return;
@@ -51,13 +53,13 @@ export function OverlayProjector() {
 }
 
 /** Renders `children` pinned to a world position. Lives in the DOM overlay, outside the Canvas. `bubble` joins the thought-bubble layout. */
-export function Anchored({ pos, className, children, bubble }: { pos: Anchor["pos"]; className?: string; children?: ReactNode; bubble?: boolean }) {
+export function Anchored({ pos, className, children, bubble, first }: { pos: Anchor["pos"]; className?: string; children?: ReactNode; bubble?: boolean; first?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
   const posRef = useRef(pos);
   posRef.current = pos;
   useEffect(() => {
     const el = ref.current!;
-    const anchor: Anchor = { el, pos: (out) => posRef.current(out), group: bubble ? "bubble" : undefined, w: 120, h: 40 };
+    const anchor: Anchor = { el, pos: (out) => posRef.current(out), group: bubble ? "bubble" : undefined, first, w: 120, h: 40 };
     let watch: ResizeObserver | null = null;
     if (bubble && typeof ResizeObserver !== "undefined") {
       const inner = el.firstElementChild as HTMLElement | null;
@@ -73,7 +75,7 @@ export function Anchored({ pos, className, children, bubble }: { pos: Anchor["po
       anchors.delete(anchor);
       watch?.disconnect();
     };
-  }, [bubble]);
+  }, [bubble, first]);
   return (
     <div ref={ref} className="anchor">
       <div className={className}>{children}</div>

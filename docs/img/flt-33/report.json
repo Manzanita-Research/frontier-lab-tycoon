@@ -1,0 +1,160 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "00b8c60bdeb6679ae2cd69c310664855e2baebc4"
+  },
+  "head": {
+    "branch": "flt-33-25-factions-protests",
+    "sha": "1afb41e",
+    "dirty": false
+  },
+  "seconds": 291.857,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "factions",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/before/factions.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/after/factions.png",
+      "title": "FLT-33: the Discourse Monitor after a fast, open season (an alliance, a schism, Doomers at the gate)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/compare/factions.png",
+      "changed": 0.2464621913580247
+    },
+    {
+      "scene": "factions-base",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/before/factions-base.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/after/factions-base.png",
+      "title": "FLT-33: the base Factions panel, open",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/compare/factions-base.png",
+      "changed": 0.23292438271604937
+    },
+    {
+      "scene": "factions-karaoke",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/before/factions-karaoke.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/after/factions-karaoke.png",
+      "title": "FLT-33: the discourse in Karaoke Night",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/compare/factions-karaoke.png",
+      "changed": 0.2527600308641975
+    },
+    {
+      "scene": "counterprotest",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/before/counterprotest.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/after/counterprotest.png",
+      "title": "FLT-25: the Water Discourse at its height, the Water Truthers Truthers across the path",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/compare/counterprotest.png",
+      "changed": 0.2599675925925926
+    },
+    {
+      "scene": "argue",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/before/argue.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/after/argue.png",
+      "title": "FLT-33: an Accelerationist and a Doomer pass on a path and say so",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/compare/argue.png",
+      "changed": 0.16937808641975308
+    },
+    {
+      "scene": "factions-chip",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/before/factions-chip.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/after/factions-chip.png",
+      "title": "FLT-33: a researcher's inspector card with their faction chip",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/compare/factions-chip.png",
+      "changed": 0.28791203703703705
+    },
+    {
+      "scene": "factions-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/before/factions-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/after/factions-phone.png",
+      "title": "FLT-33: the Discourse Monitor on a phone",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/compare/factions-phone.png",
+      "changed": 0.562642028192976
+    },
+    {
+      "scene": "factions-base",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/before/factions-base.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/after/factions-base.png",
+      "title": "FLT-33: the base Factions panel, open",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/compare/factions-base.png",
+      "changed": 0.23292438271604937
+    },
+    {
+      "scene": "factions-karaoke",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/before/factions-karaoke.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/after/factions-karaoke.png",
+      "title": "FLT-33: the discourse in Karaoke Night",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/compare/factions-karaoke.png",
+      "changed": 0.2527600308641975
+    },
+    {
+      "scene": "counterprotest",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/before/counterprotest.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/after/counterprotest.png",
+      "title": "FLT-25: the Water Discourse at its height, the Water Truthers Truthers across the path",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/compare/counterprotest.png",
+      "changed": 0.2599675925925926
+    },
+    {
+      "scene": "argue",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/before/argue.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/after/argue.png",
+      "title": "FLT-33: an Accelerationist and a Doomer pass on a path and say so",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/compare/argue.png",
+      "changed": 0.16937808641975308
+    },
+    {
+      "scene": "factions-chip",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/before/factions-chip.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/after/factions-chip.png",
+      "title": "FLT-33: a researcher's inspector card with their faction chip",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/compare/factions-chip.png",
+      "changed": 0.28791203703703705
+    },
+    {
+      "scene": "factions-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/before/factions-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/after/factions-phone.png",
+      "title": "FLT-33: the Discourse Monitor on a phone",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/compare/factions-phone.png",
+      "changed": 0.562642028192976
+    },
+    {
+      "scene": "overview",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/before/overview.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/after/overview.png",
+      "title": "The campus, mid-morning, paused",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/compare/overview.png",
+      "changed": 0.1913996913580247
+    },
+    {
+      "scene": "inspector",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/before/inspector.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/after/inspector.png",
+      "title": "Tap a researcher: the inspector opens",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/compare/inspector.png",
+      "changed": 0.31533873456790124
+    },
+    {
+      "scene": "phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/before/phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/after/phone.png",
+      "title": "The same campus on a phone (390x844)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-33/compare/phone.png",
+      "changed": 0.29859642726941305
+    }
+  ],
+  "errors": []
+}

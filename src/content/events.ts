@@ -6,6 +6,15 @@ import { ERAS } from "./eras";
 import { cardEvents } from "../sim/disasters/pack";
 import { LEAPFROG } from "./leapfrog";
 import { COLLUSION } from "../sim/collusion/pack";
+import { HEARING } from "../sim/hearing/pack";
+import { YACHT } from "../sim/yacht/pack";
+import { DEFECTION, type Letter } from "../sim/defection/pack";
+import { POACHING } from "../sim/poaching/pack";
+import { AUDITORS } from "../sim/auditors/pack";
+import { PROMISES } from "../sim/promises/pack";
+import { CAPTURE } from "../sim/capture/pack";
+import { FACTIONS_PACK, WATER_PACK } from "./factions";
+import { ENDINGS_PACK } from "../sim/endings/pack";
 
 /** What has to be true for an event to fire. `all` combines conditions. */
 export type Condition =
@@ -34,7 +43,10 @@ export type Effect =
   | { type: "voice"; amount: number }
   | { type: "trust"; amount: number }
   /** The forced-response card's three answers (sim/race/leapfrog/actions.ts). */
-  | { type: "leapfrog"; action: LeapfrogAction };
+  | { type: "leapfrog"; action: LeapfrogAction }
+  /** Factions (FLT-33): nudge one faction's meter (−100 to 100), or how two factions feel about each other. */
+  | { type: "faction"; id: string; amount: number }
+  | { type: "relation"; a: string; b: string; amount: number };
 
 export type LeapfrogAction = "shipNow" | "hold" | "leak";
 
@@ -55,100 +67,22 @@ export interface EventDef {
   when: Condition;
   /** Days before the same event may fire again. Defaults to EVENT_COOLDOWN_DAYS. */
   cooldown?: number;
-  /** One to three. */
+  /** One to three (a pack's drama card may have four). */
   choices: EventChoice[];
-  /** Presentation: a full-screen era title card, the auction room, or Leapfrog's forced response and launch livestream. Anything else is the plain card. */
-  kind?: "era" | "auction" | "response" | "stream";
+  /** Presentation: a full-screen era title card, the auction room, Leapfrog's forced response and launch livestream, The Hearing's witness table (FLT-21), the yacht's leaked group chat (FLT-24), a drama card's document (FLT-26, FLT-20) the auditors' report card (FLT-19), the bill FLT-22 drafts or FLT-23's roll call. Anything else is the plain card. */
+  kind?: "era" | "auction" | "response" | "stream" | "hearing" | "leak" | "drama" | "report" | "bill" | "vote";
   /** The stripe text at the top of the card, when it isn't the tone's ("Breaking", "Developing", ...). */
   stripe?: string;
 }
 
 export const EVENT_COOLDOWN_DAYS = 60;
 
-export const EVENTS: EventDef[] = [
-  {
-    id: "waterDiscourse",
-    title: "Viral post: every prompt drinks a bottle of water",
-    body: "A screenshot claims each chatbot reply drinks a whole bottle of water. It has four million shares and zero citations. There are people at your gate now, with signs.",
-    tone: "bad",
-    // The stat only climbs once there is compute to be angry about. Day 60 (two minutes at 1x) keeps the card
-    // off a brand-new campus, so the toy gets a little time before the world pushes back.
-    when: { all: [{ stat: "waterDiscourse", atLeast: 30 }, { stat: "day", atLeast: 60 }] },
-    choices: [
-      {
-        label: "Publish a 90-page water report",
-        hint: "−$150K · discourse −20",
-        effects: [
-          { type: "cash", amount: -150_000 },
-          { type: "discourse", add: -20 },
-          { type: "news", text: "{lab} publishes rigorous water report; nobody reads past the abstract", tone: "joke" },
-        ],
-      },
-      {
-        label: "Build a Transparency Fountain",
-        hint: "−$300K · discourse −35 · hype +5 · free Fountain",
-        effects: [
-          { type: "cash", amount: -300_000 },
-          { type: "discourse", add: -35 },
-          { type: "hype", amount: 5 },
-          { type: "place", kind: "fountain", near: "gate" },
-          { type: "news", text: "{lab} unveils Transparency Fountain: water you can see through, unlike the report", tone: "good" },
-          { type: "thought", kind: "researcher", text: "I drank from the Transparency Fountain. It tasted like accountability.", count: 2 },
-        ],
-      },
-      {
-        label: "Say nothing, ship faster",
-        hint: "hype +3 · discourse +10 · they will notice",
-        effects: [
-          { type: "hype", amount: 3 },
-          { type: "discourse", add: 10 },
-          { type: "flag", name: "ignoredWater" },
-          { type: "news", text: "{lab} declines to comment on water, comments on everything else at length", tone: "joke" },
-        ],
-      },
-    ],
-  },
-  {
-    id: "drumCircle",
-    title: "Protesters now have a drum circle",
-    body: "It started as three people and a bongo. It is now a full ensemble with a lead vocalist, a merch table, and a rhythm section your servers can feel. The sign-making station has a waiting list.",
-    tone: "joke",
-    when: { all: [{ flag: "ignoredWater", daysAgo: 20 }, { stat: "waterDiscourse", atLeast: 40 }] },
-    choices: [
-      {
-        label: "Send an intern with a tambourine",
-        hint: "−$100K · discourse −25",
-        effects: [
-          { type: "cash", amount: -100_000 },
-          { type: "discourse", add: -25 },
-          { type: "flag", name: "ignoredWater", clear: true },
-          { type: "news", text: "{lab} sends intern with tambourine to negotiate; deal reached, key change agreed", tone: "joke" },
-        ],
-      },
-      {
-        label: "Join the drum circle",
-        hint: "hype +6 · discourse +5",
-        effects: [
-          { type: "hype", amount: 6 },
-          { type: "discourse", add: 5 },
-          { type: "flag", name: "ignoredWater", clear: true },
-          { type: "news", text: "{lab} leadership spotted at drum circle: CEO on cowbell, Chief Scientist on 'ambient'", tone: "good" },
-          { type: "thought", kind: "researcher", text: "I've never been so in sync with my team. It's a bad sign.", count: 3 },
-        ],
-      },
-      {
-        label: "Call it a listening session",
-        hint: "−$40K · discourse −12",
-        effects: [
-          { type: "cash", amount: -40_000 },
-          { type: "discourse", add: -12 },
-          { type: "flag", name: "ignoredWater", clear: true },
-          { type: "news", text: "{lab} rebrands protest as 'listening session'; sessions now have catering", tone: "joke" },
-        ],
-      },
-    ],
-  },
-];
+/**
+ * The Water Discourse cards (the viral post, the drum circle, then FLT-25's documentary crew and counter-protest)
+ * live in mods/base-water; they come first, as they always have. Then the Race, Leapfrog, the disasters, the Swarm,
+ * and last the factions' cards (mods/base-factions), which only open when a faction's arc asks for one.
+ */
+export const EVENTS: EventDef[] = [...WATER_PACK.events];
 
 const flagged = (name: string): Condition => ({ flag: name, daysAgo: 0 });
 const done = (name: string): Effect => ({ type: "flag", name, clear: true });
@@ -301,5 +235,21 @@ EVENTS.push(...LEAPFROG.events);
 EVENTS.push(...cardEvents());
 // FLT-18: ordinary cards, dormant until the pack's machine sets their offer flags.
 EVENTS.push(...COLLUSION.content.events.add as EventDef[]);
+// The Circus packs (FLT-21, FLT-24): their cards only open when their own machine asks.
+EVENTS.push(...HEARING.content.events.add as EventDef[]);
+EVENTS.push(...YACHT.content.events.add as EventDef[]);
+// FLT-26 and FLT-20: the drama cards (a resignation letter, a manifesto, a recruiter's offer), dormant until their packs set the flags.
+EVENTS.push(...DEFECTION.content.events.add as EventDef[], ...POACHING.content.events.add as EventDef[]);
+// FLT-19: Evals Without Borders' notice and report card (mods/base-auditors), behind their offer flags like the rest.
+EVENTS.push(...AUDITORS.content.events.add as EventDef[]);
+// FLT-23 and FLT-22: the Senate's whip and roll-call cards and the bill's cards (mods/base-promises, mods/base-capture).
+EVENTS.push(...PROMISES.content.events.add as EventDef[]);
+EVENTS.push(...CAPTURE.content.events.add as EventDef[]);
+// FLT-33 and FLT-25: the factions' and the Water Discourse's cards.
+EVENTS.push(...FACTIONS_PACK.events);
+// FLT-11: The Memo (mods/base-endings), dormant until the endings driver sets `offer:memo` in Era 4.
+EVENTS.push(...ENDINGS_PACK.content.events.add as EventDef[]);
 
 export const eventById = (id: string): EventDef | undefined => EVENTS.find((e) => e.id === id);
+/** How each drama card looks on screen (the letter, the email, the manifesto): templates from the packs, by card id. */
+export const DRAMA_LETTERS: ReadonlyMap<string, Letter> = new Map([...DEFECTION.content.letters.add, ...POACHING.content.letters.add].map((l) => [l.card, l]));

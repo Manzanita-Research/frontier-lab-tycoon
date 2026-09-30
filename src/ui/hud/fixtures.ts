@@ -4,14 +4,32 @@ import { makeSnapshot, type Snapshot } from "../../app/hud";
 import { frontPage, recap, type Edition } from "../../newsroom/edition";
 import { createTestCampus } from "../../sim/testkit";
 import { enableLeapfrog } from "../../sim/race/leapfrog/driver";
+import { stageCircus, type CircusMoment } from "../../sim/circus/demo";
+import { stageSenate, type SenateMoment } from "../../sim/capture/demo";
 import { leapfrogView } from "../../sim/race/leapfrog/view";
-import { answer } from "../../sim/testkit";
-import { tick } from "../../sim/tick";
+import { answer, layPaths, readyForPressure } from "../../sim/testkit";
+import { stageAudit, type AuditMoment } from "../../sim/auditors/demo";
+import { applyNow, tick } from "../../sim/tick";
+import { triggerDisaster } from "../../sim/disasters/driver";
 import type { GameState } from "../../sim/types";
 import { newMotion, stepMotion, type MotionView } from "./leapfrogMotion";
 import type { SkinPickerVM } from "./types";
 import type { HudInput } from "./vm";
 import { playableFixture } from "./previewLadder";
+import { stagePapers } from "../../sim/race/papers/demo";
+import { stageCollusion } from "../../sim/collusion/demo";
+import { createInitialState } from "../../sim/state";
+import { stageDrama, type DramaMoment } from "../../sim/defection/demo";
+import { OPEN_FAST, runFactions } from "../../sim/factions/headless";
+import { dramaViewModel, NO_DRAMA_UI, type FeedPackData } from "../../drama/feed";
+import { stageEndingMoment } from "../../sim/endings/demo";
+
+const staged = new Map<string, GameState>();
+/** An ending's scene (`memo`, `takeover`, `thanks`, `front-<id>`), staged once per test run: they start from the mid-game campus. */
+export function fixtureEnding(moment: string): GameState {
+  if (!staged.has(moment)) staged.set(moment, stageEndingMoment(moment));
+  return staged.get(moment)!;
+}
 
 /** A busy campus a few game days in, with thoughts, a crowd and a run in flight (the real opening is quieter: see `openingWorld`). */
 export function fixtureWorld(days = 12, seed = 3): GameState {
@@ -48,6 +66,70 @@ export function fixtureLeapfrog(days = 48, seed = 3): { world: GameState; motion
   return { world: s, motion: view };
 }
 
+/**
+ * A lab mid-disaster (FLT-32): a Rogue Agent Swarm, its card answered, Security at the Security Office pulling the plug
+ * (so the gate is unguarded), a weights leak lifting a rival on the Arena, and trust and heat moved off their start.
+ */
+export function fixtureDisaster(seed = 3): GameState {
+  const s = fixtureWorld(12, seed);
+  readyForPressure(s);
+  s.cash = 50_000_000;
+  applyNow(s, [{ type: "hire", job: "security" }, { type: "hire", job: "security" }, { type: "hire", job: "sre" }]);
+  for (let i = 0; i < 40; i++) tick(s);
+  triggerDisaster(s, "rogueSwarm");
+  triggerDisaster(s, "weightsLeak");
+  for (let i = 0; i < 1200 && !s.disasters.runs.some((r) => r.id === "rogueSwarm" && r.machine.value.startsWith("cleanup") && r.machine.context.progress > 0.2); i++) tick(s, answer(s));
+  return s;
+}
+
+/** The busy campus with The Hearing or the yacht summit staged on it: the card that moment wants is on screen. */
+export function fixtureCircus(moment: CircusMoment, seed = 3): GameState {
+  const s = fixtureWorld(12, seed);
+  stageCircus(s, moment);
+  return s;
+}
+
+/** A lab staged at one of Defection's or the Poaching War's moments (the VC chat, a card, the exit, the new rival). */
+export function fixtureDefection(moment: DramaMoment, seed = 7): GameState {
+  const s = createInitialState(seed);
+  delete s.progression;
+  delete s.coach;
+  delete s.tutorial;
+  stageDrama(s, moment);
+  return s;
+}
+
+/**
+ * Evals Without Borders (FLT-19) on a small campus: a staged moment, through the same chart, cards and ticks as play.
+ * "audit-countdown" answers the warning card with Prep, so the sign stands over the gate.
+ */
+export function fixtureAudit(moment: AuditMoment | "audit-countdown", seed = 3): GameState {
+  const s = createTestCampus(seed);
+  layPaths(s);
+  readyForPressure(s);
+  s.tick = s.day * 20;
+  stageAudit(s, moment === "audit-countdown" ? "audit-notice" : moment);
+  if (moment === "audit-countdown") applyNow(s, answer(s));
+  return s;
+}
+
+/** A lab staged at one of the Senate's moments (Regulatory Capture's bill, the Promise Tracker's vote). */
+export function fixtureSenate(moment: SenateMoment, seed = 3): GameState {
+  const s = fixtureWorld(12, seed);
+  stageSenate(s, moment);
+  return s;
+}
+
+/**
+ * FLT-33: the headless open + fast lab (sim/factions/headless.ts) with the factions on, 60 days in: fans, upset
+ * factions, relations that have moved, a discourse log and walkers who have picked a side. Cached: it is a real run.
+ */
+let factionsWorld: GameState | null = null;
+export function fixtureFactions(): GameState {
+  factionsWorld ??= runFactions(1, OPEN_FAST, 60).world;
+  return factionsWorld;
+}
+
 export const NO_SKINS: SkinPickerVM = {
   open: false,
   reducedMotion: false,
@@ -69,6 +151,55 @@ const STORIES = [
 export const FIXTURE_PAPER = frontPage(STORIES, 28, "Mostly Harmless Compute");
 export const FIXTURE_CHAT = recap(STORIES, 30, "Mostly Harmless Compute");
 
+/** The rehearsal Drama feed (drama/fixtures/feed), as index.json lists it: newest first. */
+export const FIXTURE_DRAMA_FEED: FeedPackData[] = [
+  {
+    id: "drama-2026-09-29",
+    date: "2026-09-29",
+    title: "The Perk Arms Race",
+    description: "The labs stop competing on models and start competing on snacks. By Friday, one of them is offering a moon.",
+    url: "/mods/drama-fixture/2026-09-29/mod.json",
+    teasers: [
+      "MetaMeta offers researchers a private chef, a private gym and a private moon (moon pending)",
+      "Open-ish AI answers with unlimited nap pods; output flat, dreams 40% more agentic",
+      "Anthropomorphic's only perk is a sincere handwritten letter about your potential; three researchers cry",
+    ],
+    event: { title: "Your Researchers Have Seen the Other Lab's Snack Wall", day: 20 },
+    counts: { events: 1, headlines: 8, thoughts: 7, rivals: 1 },
+  },
+  {
+    id: "drama-2026-09-28",
+    date: "2026-09-28",
+    title: "The Benchmark Bake-Off",
+    description: "Every lab tops a leaderboard today, each on a benchmark it wrote that morning.",
+    url: "/mods/drama-fixture/2026-09-28/mod.json",
+    teasers: ["Open-ish AI sets record on Open-ish Bench, which it released 20 minutes earlier"],
+    event: { title: "A Rival Tops a Benchmark It Invented at Breakfast", day: 20 },
+    counts: { events: 1, headlines: 6, thoughts: 5, rivals: 0 },
+  },
+  {
+    id: "drama-2026-09-27",
+    date: "2026-09-27",
+    title: "The Price War",
+    description: "Every lab halves its prices, then halves them again. By lunch, tokens cost less than the kombucha that made them.",
+    url: "/mods/drama-fixture/2026-09-27/mod.json",
+    teasers: ["Tokens now cheaper than the kombucha used to generate them"],
+    event: { title: "The Price War Reaches Your Pricing Page", day: 20 },
+    counts: { events: 1, headlines: 5, thoughts: 5, rivals: 1 },
+  },
+];
+
+/** Today's Drama in a few moments: the window open on the feed, the "now playing" card, a feed with nothing in it. */
+export function fixtureDrama(kind: "feed" | "intro" | "empty" | "fresh"): NonNullable<HudInput["drama"]> {
+  const href = "https://flt.test/?drama=fixture";
+  const playing = [{ id: "drama-2026-09-29", name: "Daily Drama: The Perk Arms Race", source: FIXTURE_DRAMA_FEED[0]!.url }];
+  const now = new Date(2026, 8, 29, 12);
+  if (kind === "fresh") return dramaViewModel({ ...NO_DRAMA_UI, latest: FIXTURE_DRAMA_FEED[0]! }, [], href, now);
+  if (kind === "empty") return dramaViewModel({ ...NO_DRAMA_UI, open: true, status: "ready", packs: [] }, [], href, now);
+  const ui = { ...NO_DRAMA_UI, open: true, status: "ready" as const, packs: FIXTURE_DRAMA_FEED, latest: FIXTURE_DRAMA_FEED[0]!, seen: "drama-2026-09-28" };
+  return kind === "intro" ? dramaViewModel({ ...ui, intro: true }, playing, href, now) : dramaViewModel(ui, [], href, now);
+}
+
 export interface FixtureOptions {
   /** Playable v1: put the snapshot on this rung of the ladder (absent: everything is earned). */
   level?: 1 | 2 | 3 | 4 | 5;
@@ -77,8 +208,19 @@ export interface FixtureOptions {
   /** The "New!" card is up. */
   unlock?: boolean;
   world?: GameState;
+  /** An Evals Without Borders moment (the world comes from `fixtureAudit`). */
+  audit?: AuditMoment | "audit-countdown";
   /** Release Leapfrog on, 48 days in, with its leaderboard, news cycle and history. */
   leapfrog?: boolean;
+  /** The Hearing (a question, or the gavel) or the yacht summit (the invitation, or the leaked chat) on screen. */
+  circus?: CircusMoment;
+  /** The Senate (FLT-22/23): the bill's draft, the law in force, the leak, the whip count or the roll call. */
+  senate?: SenateMoment;
+  /** The Senate window is open. */
+  senateOpen?: boolean;
+  /** FLT-33: the factions on, 16 days in (a member of one is selected); `factionsOpen` opens the panel. */
+  factions?: boolean;
+  factionsOpen?: boolean;
   selected?: number | null;
   event?: string | null;
   tool?: string | null;
@@ -87,20 +229,40 @@ export interface FixtureOptions {
   photo?: boolean;
   staff?: boolean;
   outcome?: "won" | "lost" | null;
+  /** An ending's scene (FLT-11): `takeover` (the autopilot at work), `thanks`, or `front-<id>` (the last front page). */
+  ending?: string;
   /** A spend waiting for a yes or a no. */
   confirm?: boolean;
   /** Help ▸ How to play is open. */
   help?: boolean;
   /** Standing warnings. */
   warnings?: string[];
+  /** Papers staged as the review moments are (`?moment=paper-*`); "panel" is the scoop's World with the Papers window open. */
+  papers?: "drop" | "scoop" | "award" | "panel";
+  /** Agent collusion staged as its review moments are (`?moment=collusion-*`); "sign" opens the card. */
+  collusion?: "sign" | "traffic" | "scandal";
+  /** Mid-disaster (see `fixtureDisaster`). */
+  disaster?: boolean;
+  /** The Disasters menu is open. */
+  disastersOpen?: boolean;
   width?: number;
   height?: number;
   skins?: Partial<SkinPickerVM>;
+  /** Today's Drama (absent: nothing fetched yet, the window shut). */
+  drama?: "feed" | "intro" | "empty" | "fresh";
+}
+
+/** A World with a papers or collusion moment staged on it, through the same code the `?moment=` links use. */
+export function fixtureStaged(o: Pick<FixtureOptions, "papers" | "collusion">): GameState {
+  const w = createTestCampus(3);
+  if (o.papers) stagePapers(w, o.papers === "panel" ? "paper-scoop" : `paper-${o.papers}`);
+  if (o.collusion) stageCollusion(w, `collusion-${o.collusion}`);
+  return w;
 }
 
 export function fixtureSnapshot(o: FixtureOptions = {}): Snapshot {
-  const w = o.world ?? (o.leapfrog ? fixtureLeapfrog().world : fixtureWorld());
-  const selected = o.selected === undefined ? (w.walkers.find((x) => x.kind === "researcher")?.id ?? null) : o.selected;
+  const w = o.world ?? (o.ending ? fixtureEnding(o.ending) : o.audit ? fixtureAudit(o.audit) : o.leapfrog ? fixtureLeapfrog().world : o.factions ? fixtureFactions() : o.papers || o.collusion ? fixtureStaged(o) : o.disaster ? fixtureDisaster() : o.circus ? fixtureCircus(o.circus) : o.senate ? fixtureSenate(o.senate) : fixtureWorld());
+  const selected = o.selected === undefined ? (w.walkers.find((x) => x.kind === "researcher" && (!o.factions || x.faction))?.id ?? null) : o.selected;
   const snap = makeSnapshot(w, undefined, { selected, follow: false, highlight: null });
   const pendingConfirm = o.confirm
     ? { kind: "hire" as const, cost: 4_000, runwayAfter: 1.8, message: "This leaves 1.8 months of runway. The board will have questions.", command: { type: "hire" as const, job: "sre" as const } }
@@ -130,7 +292,9 @@ export function fixtureInput(o: FixtureOptions = {}): HudInput {
     tapHint: true,
     toldGateway: false,
     staffOpen: o.staff ?? false,
+    senateOpen: o.senateOpen ?? false,
     zone: null,
+    factionsOpen: o.factionsOpen ?? false,
     arena: { open: true, alert: false, flinch: false, moved: {} },
     room: {
       archive: [FIXTURE_PAPER, FIXTURE_CHAT],
@@ -140,10 +304,14 @@ export function fixtureInput(o: FixtureOptions = {}): HudInput {
     },
     chatCount: o.chatCount ?? 2,
     helpOpen: o.help ?? false,
+    papersOpen: o.papers === "panel",
+    dismissed: [],
+    disastersOpen: o.disastersOpen ?? false,
     mixer: { open: false, ready: true, muted: false, master: 0.7, music: 0.3, sfx: 0.65 },
     photo: { on: o.photo ?? false, time: "live", shot: { id: 1, url: "data:image/png;base64,", name: "frontier-lab-tycoon-campus.png" }, flash: 1 },
     skins: { ...NO_SKINS, ...o.skins },
     leapfrog: lf?.motion,
+    drama: o.drama ? fixtureDrama(o.drama) : undefined,
     viewport: { width: o.width ?? 1440, height: o.height ?? 900 },
   };
 }

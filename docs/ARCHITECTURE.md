@@ -402,8 +402,8 @@ flowchart LR
   VOICE -->|"share vs fair"| HYPE["hype nudge, valuation factor"]
 ```
 
-- **The pack** (`mods/base-leapfrog/mod.json`, in the FLT-15 section shape; `src/content/leapfrog.ts` loads it and checks it with Effect Schema, so a typo says `content.mishaps.add[2].weight: Expected number`). It holds the benchmark names and the chain of harder replacements, each lab's strengths, the footnotes, 72 headlines, the seven livestream mishaps (each a card `stream:<id>`), the forced-response card, and every tuning knob under `rules.leapfrog` (cadence, saturation thresholds, news-cycle numbers, response and livestream odds, trust). A mod adds a benchmark, a mishap (an entry plus its `stream:<id>` card) or headline lines without touching the engine. Until FLT-15 M1b lands the loader, this file is imported directly; the switch should be mechanical.
-- **Off by default in `createInitialState`, on in the app.** `enableLeapfrog(state)` is the "pack loaded" switch (`?leapfrog=off` turns it off in the browser). Off means asleep: no dice are drawn and nothing moves, so the goldens and every pre-existing test are untouched. `RaceState` and the rest of the World are unchanged; the pack's state is `GameState.leapfrog`.
+- **The pack** (`mods/base-leapfrog/mod.json`, in the FLT-15 section shape; `src/content/leapfrog.ts` loads it and checks it with Effect Schema, so a typo says `content.mishaps.add[2].weight: Expected number`). It holds the benchmark names and the chain of harder replacements, each lab's strengths, the footnotes, 72 headlines, the seven livestream mishaps (each a card `stream:<id>`), the forced-response card, and every tuning knob under `rules.leapfrog` (cadence, saturation thresholds, news-cycle numbers, response and livestream odds, trust). A mod adds a benchmark, a mishap (an entry plus its `stream:<id>` card) or headline lines without touching the engine. Its benchmarks and mishaps are the base game's `content.benchmarks` and `content.mishaps` (FLT-37), so a mod patches them through the loader and the sim reads them via `defs()`; the rules, labs, footnotes and headlines are still read from the pack.
+- **Asleep until earned.** `enableLeapfrog(state)` is the "pack loaded" switch. Since FLT-37 the ladder flips it, and every other pack switch, when the rung that lists the system is earned (`PACKS` in `src/sim/progression.ts`: Leapfrog on The Race, Papers and Collusion on Scrutiny, the Factions on Level 4). A campus opening or a debug run with no ladder starts with them all awake. `?leapfrog=off`, `?papers=off`, `?collusion=off` and `?factions=off` keep one asleep (`?water=off` switches off the Water Discourse escalation arc alone, as `arcOff:water-escalation`). Asleep means: no dice are drawn and nothing moves, so the goldens and every pre-existing test are untouched. `RaceState` and the rest of the World are unchanged; the pack's state is `GameState.leapfrog`.
 - **Rivals hold their models.** With the pack on, `weekly()` sends `WEEK` with `hold: true` to labs that have a product. The rival machine finishes the run, emits `FINISHED` and changes nothing else; the model waits in `leapfrog.queue` and a `LAUNCH` event (any state) ships it on the calendar's day. So a lab's capability, its model name and the Arena move on launch day, and "one lab drops, the next day another answers" is made of real rival state. A lab with nothing finished ships a **point release** (a small update, e.g. "Chatty-4-plus"); what it paid out is credited against its next finished model, so launching more often does not make a lab grow faster (pack on and off reach the same eras within noise).
 - **Cadence.** A lead drop every 8 to 12 days (times the era's pace: 1, 0.85, 0.7, 0.55), never under 3. Each lead is answered the next day with a chance of 50%, 60%, 70%, 80% by era, by a different lab, weighted toward the strong. Two dice a day are always drawn, so the stream doesn't depend on whether anything dropped.
 - **Benchmarks.** A score is `100 / (1 + (difficulty / (capability x bias)) ^ 2)`: 50% at the difficulty, toward 100 as it grows; Arena Elo is `1000 + 4 cap + 1.5 hype` and never saturates. Each drop claims SOTA on at least one column: if a lab's honest scores top nothing, it **benchmaxxes** the column it is closest on (a custom prompt, best of 64; the score lands just past the standing record, the headline gets a footnote such as "(*pass@256)", and the leaderboard row marks it). Benchmaxxed claims last until the lab's next launch. A column is `crowded` at 91%, **`saturated` at 96.5%**: the headline declares it solved, the pack's harder replacement joins the board (scores back to about a third), a frontier lab, a neo lab, an open-weights lab or a BigCo each react in their own voice, and the old column stops counting for claims and retires three days later.
@@ -418,7 +418,7 @@ flowchart LR
 
 Spec: `docs/specs/FLT-31.md`. 2D only; the sim is untouched (`git diff main -- src/sim` is empty apart from tests reading it).
 
-- **The toast gate** (`src/app/notices.ts`, pure, tested with a fake clock). A launch every ~10 game days is a toast every few real seconds at 3x/10x, so Leapfrog's launches stopped being toasts: a rival launch or answer goes to the leaderboard (its row flashes) and the ticker. A toast is for what matters to the player: a record taken (`X took your record on Y`), a solved benchmark *you* led, a lost #1 (the sim only toasts a fall of two places, so the gate says the one-place case), how your own launch went (counter-launch, launch bug, early release), all at **most one per 20 real seconds**; whatever piled up meanwhile becomes one "4 labs launched and 2 of your records fell while you were busy" toast when the window opens. From 3x up, small news (a flawless livestream, "you own the news cycle") stays in the ticker. Toasts are recognised by their text (the sim is untouched), so `notices.test.ts` runs a year of Leapfrog and fails on any Leapfrog-sounding toast it does not recognise. It sits at the app machine's toast intake (`SYNCED`) because `hudViewModel` is a pure function of its input and cannot hold a real-time window; the same split as `useArenaMotion`. Headless minute, Leapfrog toasts from the sim -> shown: 1x 5 -> 1, 3x 17 -> 2, 10x 72 -> 3.
+- **The toast gate** (`src/app/notices.ts`, pure, tested with a fake clock; FLT-51 replaced the text matching below with tags, see "Notices" at the end). A launch every ~10 game days is a toast every few real seconds at 3x/10x, so Leapfrog's launches stopped being toasts: a rival launch or answer goes to the leaderboard (its row flashes) and the ticker. A toast is for what matters to the player: a record taken (`X took your record on Y`), a solved benchmark *you* led, a lost #1 (the sim only toasts a fall of two places, so the gate says the one-place case), how your own launch went (counter-launch, launch bug, early release), all at **most one per 20 real seconds**; whatever piled up meanwhile becomes one "4 labs launched and 2 of your records fell while you were busy" toast when the window opens. From 3x up, small news (a flawless livestream, "you own the news cycle") stays in the ticker. Toasts are recognised by their text (the sim is untouched), so `notices.test.ts` runs a year of Leapfrog and fails on any Leapfrog-sounding toast it does not recognise. It sits at the app machine's toast intake (`SYNCED`) because `hudViewModel` is a pure function of its input and cannot hold a real-time window; the same split as `useArenaMotion`. Headless minute, Leapfrog toasts from the sim -> shown: 1x 5 -> 1, 3x 17 -> 2, 10x 72 -> 3.
 - **Ticker freshness** (`skins/kit/Marquee.tsx`). A new headline joins just past the right edge of what is on screen, ahead of the replayed filler that used to make it wait a whole tape's length; in a rush only the newest three wait, and the tape speeds up a little while they do (`makeRoom`, `catchUp`, tested).
 - **`vm.leapfrog`** (`LeapfrogVM`): `columns` (short and long name, status, best, holder, `ghost`), `rows` (one per lab, `cells` aligned to the columns: text, `sota`, `maxx`, `flash`), `footnote` (`*pass@256`), the news cycle (`voice.shares`, `series`, `headline`) and the calendar's line. `EventVM.response` carries the forced-response card's live numbers (readiness, ship-now gain, bug odds) and `EventVM.stream` the livestream (caption, viewers, chat, from `content/livestream.ts`).
 - **Real-time flourishes** (`ui/hud/leapfrogMotion.ts`, pure, fed by `useLeapfrogMotion`): a game day lasts 0.2 s at 10x, so the sim's own two-day row flash would be over unseen. This keeps a launching row lit, and a record that changed hands blinking, for 4 real seconds; keeps a benchmark the sim has retired on the board (struck through, SOLVED) for 24 s; and samples the news cycle once a game day for the graph.
@@ -517,3 +517,85 @@ flowchart LR
 | The existing perf tests | unchanged within noise (the 800-walker test reads 0.66 to 0.78 ms on this box for both `main` and the branch, against its 0.5 budget, doubled on CI) |
 
 Determinism: the disasters draw from `state.disasters.rngState`, not the main stream, and tests start with the setting `off`, so the golden digests and the playthrough tests are untouched. A separate test runs 90 days of chaos twice and compares the World byte for byte, and another saves and loads a World mid-swarm.
+
+## The Circus (FLT-21 The Hearing, FLT-24 the yacht summit)
+
+Two packs, `mods/base-hearing` and `mods/base-yacht` (see their READMEs), share one small compiler, `src/sim/circus/chart.ts`. It turns a pack's JSON chart into an XState machine whose guards and actions are the Vocabulary's (`src/sim/verbs.ts`). `compileChart(chart).step(stored, beat)` is a pure `transition()`. It returns the new `{ value, context }` and the `CALL`s it emitted, which the driver runs through `runVerb` in order. Beats are `DAY` (once a day, with pre-rolled dice and measured stats) and `CHOSE` (a card's pick, sent the moment the pick flag appears, paused or not).
+
+- **Vocabulary additions:**
+  - an `all` guard (every sub-guard holds)
+  - a `capture.delta` verb
+  - a `disasters` stat (disasters begun, all time) and a `capture` stat
+
+  `checkChart(chart, localStats)` lets a chart name its own context counters (the Hearing's `sessionTrust`, `chaos`, ...) without them being flagged as unknown.
+- **Gating:** both packs wake at Level 5 Scrutiny (`updateProgression`), each with an off flag (`hearingOff`, `yachtOff`; `?hearing=off`, `?yacht=off`). They are absent on a new World, so a save from before FLT-21 loads unchanged.
+- **Determinism:** each pack has its own random stream. The golden digests from tick 1600 changed only because Level 5 now wakes the packs. With both off flags set, the old digests reproduce exactly.
+- **HUD:** `EventVM.kind` gains `"hearing"` and `"leak"`, carrying `hearing: HearingVM` and `leak: LeakVM`. The modal tree routes them to the `Hearing` and `LeakedChat` slots (the base draws both; Frontier 95 has CapitolCam 1.0 and Chat-o-Matic 95). The kit's `Senator` draws a capsule portrait from a senator's `look` colours.
+
+## The Senate (FLT-22 Regulatory Capture, FLT-23 the Promise Tracker)
+
+Two more Circus packs, `mods/base-capture` and `mods/base-promises` (see their READMEs), are compiled by the same `src/sim/circus/chart.ts` and use The Hearing's three senators. The Tracker is the Senate's floor: motions come up, senators promise, the lab may lobby, and the roll call is rolled. Capture's bill is one of those motions. The bill is tabled with `tableMotion`, heard at the next recess ahead of the docket, and voted with the same dice and lobbying, through the Tracker's `BILL_MOTION`. With the Tracker off, Capture rolls the same `castVotes` itself.
+
+- **Race hooks:**
+  - The Vocabulary gains `rival.growth`, `rival.pace` and `rival.closed`. These are timed effects with a `who` selector: rival ids, `below`, `above`, `open`, and `!x` to exclude.
+  - `src/sim/race/rules.ts` `rivalRules(state, lab)` folds them into three factors. The weekly cycle multiplies a release's gain by `growth`. The launch calendar multiplies the era's pace by `pace`, and `closed` turns open-weights drops into closed ones.
+  - With none in play, every factor is 1 and the race is bit-for-bit unchanged.
+  - A law's clauses are these effects owned by `capture`, and `effects.end` strikes them when the bill is exposed or sunsets.
+- **More Vocabulary:** `auditor.odds` and `auditor.note` (the exposed bill leaves a note on the lab's file for FLT-19's report card, in `state.auditorNotes`) and a `hearings` stat.
+- **Gating:** both wake at Level 5 Scrutiny, each with an off flag (`captureOff`, `promisesOff`; `?capture=off`, `?promises=off`). Neither acts before the lab's first hearing. `s.bill`, `s.promises` and `s.auditorNotes` are optional, so old saves load unchanged.
+- **Determinism:** each pack has its own random stream. The golden digests from tick 1600 changed only because Level 5 now wakes the packs. With the off flags set, the old digests reproduce. The midgame digest changes only by the four new idle card arcs.
+- **Commands:** `lobby { senator }` and `draftClause { clause, on }`. The draft's ticks live in `s.bill.draft` until the lab sends it, and the machine's fold keeps at most `pick` of them.
+- **HUD:**
+  - `EventVM.kind` gains `"bill"` and `"vote"`, carrying `bill: BillVM` and `tracker: TrackerVM`.
+  - `HudVM.senate` is `{ open, tracker, bill }`. The Senate build-bar tile (a `panel: true` tile, like Staff, so every skin keeps it out of the hotbar) opens the Tracker between votes.
+  - The modal tree routes to two new slots, `Bill` and `PromiseTracker`. The base draws both. Frontier 95 draws WordPerfectly 6.0 with track changes, where the margin comments give the plain-English truth and the Properties dialog is the leak, and Excess 95 with PROMISES.XLS.
+
+## Endings (FLT-11): The Memo, five endings, the share card and Today's lab
+
+The pack is `mods/base-endings/` (its README has the table). In one breath: `src/sim/endings/driver.ts` runs once a day to keep the run's peaks, offer The Memo (an ordinary event card) in Era 4 and check each ending's trigger in pack order. The first that holds starts, and its chart (compiled by the disaster compiler, the same Vocabulary) steps once a tick with the pure `transition()` until its final state prints the front page. While an ending runs, or once the Memo is answered, the goals machine is not asked any more: Acqui-hired replaces the bankruptcy loss and The Pivot the deadline loss. The Takeover's autopilot (`autopilot.ts`) builds on a tick counter, draws its picks from the tick's RNG in a fixed order, and declines the player's own build commands. Everything lives in the optional `World.endings` (additive); `enableEndings(world, daily)` switches it on, and the app does that unless `?endings=off`, so baseline runs and the golden digests are unchanged.
+
+- **Read side:** `endingsView(world)` (`view.ts`) gives the front page, the run stats, the era strip, the clipboard summary, the look cues (`beige`, `stickers`, `acquired`, `managedBy`, ...) and `cursorOf()` for the ghost cursor. The HUD's `vm.ending` and `vm.takeover` are plain JSON built from it (slots `Ending` and `Takeover`), and the app atoms `managedBy`, `autopilotPlaced` and `endingLook` feed the world labels (`ui/WorldOverlay.tsx`: gate signs, COMPLIANT stickers, the beige canvas and the ghost cursor, which has its own layer above the HUD).
+- **Share card** (`ui/share/`): when a front page appears, `useShareCard` asks `PressCamera` for a 960×540 photo of the campus (the canvas's CSS filter included, so beige is beige), then `drawCard` paints the 1200×630 PNG in the active skin's tokens and chrome, and prints again when the skin changes. It prints early on purpose, because Web Share only works straight after a tap. Its state is an Effect atom (`shareAtom`, kept alive), passed into the view-model as `vm.ending.share`.
+- **Today's lab:** `src/sim/daily.ts` turns a date key into a seed (pure); the app passes the player's local date for `?seed=daily` or the `DAILY_LAB` event.
+
+## Notices (FLT-51): who is talking, and does it concern you
+
+Spec: `docs/specs/FLT-51.md`. Every toast the sim sends says who sent it and whether it is about the player:
+`addToast(state, text, tone, { source, importance })` (`src/sim/news.ts`), with `Toast.source` (`leapfrog`, `ops`,
+`staff`, `economy`, `coach`, `event`, `disaster`, `race`, `training`, `crowd`, `build`, `politics` (the yacht, Regulatory
+Capture and the Promise Tracker), `factions`, `endings`, `mods` (the app's "Mods on" line), ..., or `mod:<id>`) and
+`Toast.importance` (`you` or `world`, the default). Toasts sent while the tick applies the player's commands or card
+answers are marked `reply` (`replying()` in `tick.ts`). The fields are additive: the golden test pins `{id, text, tone}`,
+and the midgame digest without them is unchanged.
+
+The policy is one pure function at the app machine's toast intake (`gateToasts` in `src/app/notices.ts`, called on
+`SYNCED`):
+
+| Toast | Goes to |
+|---|---|
+| `source: "coach"`, or a `you` reply | the screen, now |
+| `you` | the screen, at most one per 15 real seconds; what piles up meanwhile is one batch toast (`UiToast.batch`, `ToastVM.batch`) |
+| `world` (and anything untagged) | the ticker: the app keeps them as `wire` and merges them into `news` by id (toast and news ids share `nextId`) |
+
+The confirm box is a modal, not a toast, so it never passes through here. Speed does not change the rule: the window is
+real time, so at 3x and 10x the screen gets the same handful of `you` toasts a minute while the ticker carries the rest.
+Mod verbs take `source?` and `importance?` (`toast`, `building.offline`, `building.ensure`); a mod's default source is
+`mod:<id>`, a disaster's `disaster`, a card arc's `event`; an ending's chart says `source: "endings"` itself (it runs with a `run`, like a disaster). `notices.test.ts` runs a year of three seeds and 200 midgame
+days and fails on an untagged toast, a Leapfrog-sounding toast whose source is not `leapfrog`, or two held toasts closer
+than 15 s apart.
+
+### Numbers (1-vCPU Modal box)
+
+Toasts on screen per real minute in `?scenario=midgame` with the FLT-52 wave merged, before (`flt-wave-2`) and after.
+Logic: the real app machine with manual frames (`src/app/noticeRate.report.test.ts`, 3 real minutes a speed, every card
+answered with its first choice); the sim sends the same toasts on both branches. UI: the built game in headless Chromium
+(`scripts/toast-count.mjs --scenario midgame`, 60 s a speed; SwiftShader only manages about 53 game days a minute at 10x).
+
+| Speed | Game days / min | Sim sends / min | Logic: before | Logic: after (of them, answers to your cards) | UI: before | UI: after |
+|---|---|---|---|---|---|---|
+| 1x | 10 | 15.3 | 12.7 | 1.7 (1.0) | 7 | 1 |
+| 3x | 30 | 47.0 | 41.0 | 5.0 (3.0) | 25 | 3 |
+| 10x | 100 | 139.7 | 119.7 | 12.0 (8.3) | 74 | 8 |
+
+Everything that is not an answer to a card is held to four a minute by the window, at any speed. The world notices are
+still there, on the ticker.

@@ -1,4 +1,7 @@
 import { Effect, Schema, SchemaIssue, Struct } from "effect";
+import { BenchmarkSchema, MishapSchema } from "../content/leapfrog";
+import { FactionSchema } from "../content/factions";
+import { HUD_PANELS, SYSTEM_IDS } from "../content/progression";
 
 const text = Schema.NonEmptyString;
 const number = Schema.Finite;
@@ -67,17 +70,23 @@ const EventEffect = Schema.Union([
   Schema.Struct({ type: Schema.Literal("voice"), amount: number }),
   Schema.Struct({ type: Schema.Literal("trust"), amount: number }),
   Schema.Struct({ type: Schema.Literal("leapfrog"), action: Schema.Literals(["shipNow", "hold", "leak"]) }),
+  // Factions (FLT-33): move one faction's meter, or how two factions feel about each other (−100 to 100).
+  Schema.Struct({ type: Schema.Literal("faction"), id, amount: number }),
+  Schema.Struct({ type: Schema.Literal("relation"), a: id, b: id, amount: number }),
 ]);
+/** One answer on a card. Exported so a pack with a bigger card (FLT-26's four-way choice) can reuse it. */
+export const EventChoice = Schema.Struct({ label: text, hint: Schema.String, effects: Schema.Array(EventEffect) });
 export const EventCard = Schema.Struct({
   id, title: text, body: text, tone, when: Condition,
   cooldown: Schema.optionalKey(nonnegative),
-  choices: Schema.Array(Schema.Struct({ label: text, hint: Schema.String, effects: Schema.Array(EventEffect) })).check(Schema.isBetweenLength(1, 3)),
-  kind: Schema.optionalKey(Schema.Literals(["era", "auction", "response", "stream"])), stripe: Schema.optionalKey(text),
+  choices: Schema.Array(EventChoice).check(Schema.isBetweenLength(1, 3)),
+  kind: Schema.optionalKey(Schema.Literals(["era", "auction", "response", "stream", "hearing", "leak", "drama", "report", "bill", "vote"])), stripe: Schema.optionalKey(text),
 });
 export type EventData = typeof EventCard.Type;
 
 export const NamedCall = Schema.Union([text, Schema.Struct({ type: text, params: Schema.optionalKey(Schema.Record(Schema.String, Schema.Json)) })]);
-const Transition = Schema.Union([text, Schema.Struct({ target: Schema.optionalKey(text), guard: Schema.optionalKey(NamedCall), actions: Schema.optionalKey(Schema.Array(NamedCall)) })]);
+// A guard, or a list of guards that must all hold.
+const Transition = Schema.Union([text, Schema.Struct({ target: Schema.optionalKey(text), guard: Schema.optionalKey(Schema.Union([NamedCall, Schema.Array(NamedCall)])), actions: Schema.optionalKey(Schema.Array(NamedCall)) })]);
 export type NamedCallData = typeof NamedCall.Type;
 interface ArcNodeData {
   readonly type?: "final";
@@ -92,9 +101,16 @@ export const ArcNode: Schema.Codec<ArcNodeData> = Schema.suspend(() => Schema.St
   states: Schema.optionalKey(Schema.Record(id, ArcNode)), entry: Schema.optionalKey(Schema.Array(NamedCall)), exit: Schema.optionalKey(Schema.Array(NamedCall)),
   on: Schema.optionalKey(Schema.Record(text, Schema.Union([Transition, Schema.Array(Transition)]))),
 }));
-export const Arc = Schema.Struct({ id, initial: text, states: Schema.Record(id, ArcNode) });
+/** `requires`: systems (content/progression.ts) that must be unlocked before the arc hears anything (FLT-33). */
+export const Arc = Schema.Struct({ id, requires: Schema.optionalKey(Schema.Array(Schema.Literals(SYSTEM_IDS))), initial: text, states: Schema.Record(id, ArcNode) });
 export type ArcData = typeof Arc.Type;
 export const EntityKind = Schema.Struct({ id, name: text, presentation: Schema.Literals(["walker", "flow", "sprite", "offmap"]), needs: strings });
+/** A disaster (FLT-17): a JSON statechart plus its cards. The shape is checked in full by sim/disasters/validate.ts. */
+export const Disaster = Schema.Struct({
+  id, name: text, blurb: text, tags: Schema.optionalKey(strings), odds: Schema.Json, requires: Schema.optionalKey(Schema.Json),
+  target: Schema.optionalKey(Schema.Json), initial: text, states: Schema.Record(Schema.String, Schema.Json), cards: Schema.optionalKey(Schema.Array(Schema.Json)),
+});
+export type DisasterData = typeof Disaster.Type;
 export const Ending = Schema.Struct({ id, title: text, text, when: Condition });
 export const Tip = Schema.Struct({ id, text, when: Schema.optionalKey(text) });
 export const NamePool = Schema.Struct({ id, values: strings });
@@ -118,19 +134,29 @@ const identifiedHeadline = Schema.Struct({ ...Headline.fields, id, trigger: Sche
 const identifiedThought = Schema.Struct({ ...Thought.fields, id });
 export const Progression = Schema.Struct({
   id, level: Schema.Literals([1, 2, 3, 4, 5]), name: text,
-  buildings: Schema.Array(Schema.Literals(["cluster", "hall", "gateway", "kombucha", "nap", "snack", "demo", "fountain", "datacenter", "gas", "solar"])),
+  // Any building kind, including a mod's own (validation checks it exists).
+  buildings: Schema.Array(text),
   staff: Schema.Array(Schema.Literals(["janitor", "sre", "comms", "security"])),
-  systems: Schema.Array(Schema.Literals(["breakdowns", "slop", "leapfrog", "arena", "rnd", "news", "events", "protests", "disasters", "papers", "collusion"])),
-  panels: Schema.Array(Schema.Literals(["revenue", "vibes", "arena", "rnd", "thoughts", "news", "staff", "events", "papers", "disasters"])),
-  goal: Schema.Struct({ text, metric: Schema.Literals(["models", "revenue", "team", "arena"]), target: positive, vibes: Schema.optionalKey(nonnegative) }),
+  systems: Schema.Array(Schema.Literals(SYSTEM_IDS)),
+  panels: Schema.Array(Schema.Literals(HUD_PANELS)),
+  goal: Schema.Struct({ text, metric: Schema.Literals(["models", "revenue", "team", "arena", "business", "ops"]), target: positive, vibes: Schema.optionalKey(nonnegative), visitors: Schema.optionalKey(nonnegative) }),
+});
+export const CoachLine = Schema.Struct({
+  id, text,
+  target: Schema.Literals(["start", "build:path", "build:hall", "training", "build:gateway", "stat:runway", "goals", "map:suggest"]),
+  waitFor: Schema.Literals(["action", "timer"]),
+  trigger: Schema.Literals(["buildPanelOpened", "pathConnected", "hallBuilt", "released", "gatewayBuilt", "timer"]),
 });
 export const ContentPatch = Schema.Struct({
-  progression: Schema.optionalKey(patch(Progression)),
+  progression: Schema.optionalKey(patch(Progression)), coach: Schema.optionalKey(patch(CoachLine)),
   buildings: Schema.optionalKey(patch(identifiedBuilding)), rivals: Schema.optionalKey(patch(Rival)),
   headlines: Schema.optionalKey(patch(identifiedHeadline)), thoughts: Schema.optionalKey(patch(identifiedThought)),
   events: Schema.optionalKey(EventPatch), arcs: Schema.optionalKey(patch(Arc)),
   walkerKinds: Schema.optionalKey(patch(EntityKind)), endings: Schema.optionalKey(patch(Ending)),
   tips: Schema.optionalKey(patch(Tip)), names: Schema.optionalKey(patch(NamePool)), goals: Schema.optionalKey(patch(Goal)),
+  disasters: Schema.optionalKey(patch(Disaster)),
+  benchmarks: Schema.optionalKey(patch(BenchmarkSchema)), mishaps: Schema.optionalKey(patch(MishapSchema)),
+  factions: Schema.optionalKey(patch(FactionSchema)),
 });
 export const SkinData = Schema.Struct({
   id: ModId, name: text, tokens: Schema.optionalKey(record), strings: Schema.optionalKey(record),
@@ -163,7 +189,7 @@ export function suggest(word: string, candidates: readonly string[]): string {
   const best = candidates.map((value) => ({ value, distance: distance(word, value) })).sort((a, b) => a.distance - b.distance)[0];
   return best && best.distance <= 2 ? ` (did you mean "${best.value}"?)` : "";
 }
-const fieldNames = ["apiVersion", "id", "name", "version", "author", "description", "skin", "content", "assets", "audio", "add", "override", "remove", ...Object.keys(ContentPatch.fields), ...Object.keys(Rival.fields), ...Object.keys(Building.fields), ...Object.keys(SkinData.fields), "choices", "effects", "type", "amount", "cash", "hype", "discourse", "protesters", "flag", "news", "thought", "place", "race", "text", "tone", "trigger", "when", "presentation", "good", "bad", "neutral", "joke", "walker", "flow", "sprite", "offmap", "initial", "states", "entry", "exit", "on", "guard", "actions", "target", "params"];
+const fieldNames = ["apiVersion", "id", "name", "version", "author", "description", "skin", "content", "assets", "audio", "add", "override", "remove", ...Object.keys(ContentPatch.fields), ...Object.keys(Rival.fields), ...Object.keys(Building.fields), ...Object.keys(SkinData.fields), "choices", "effects", "type", "amount", "cash", "hype", "discourse", "protesters", "flag", "news", "thought", "place", "race", "text", "tone", "trigger", "when", "presentation", "good", "bad", "neutral", "joke", "walker", "flow", "sprite", "offmap", "initial", "states", "entry", "exit", "on", "guard", "actions", "target", "params", "blurb", "odds", "requires", "cards", "difficulty", "replaces", "weight", "voice", "headline", ...Object.keys(FactionSchema.fields), "faction", "relation"];
 function pathString(path: ReadonlyArray<PropertyKey | { readonly key: PropertyKey }>): string {
   return path.reduce<string>((s, part) => {
     const key = typeof part === "object" ? part.key : part;

@@ -6,11 +6,18 @@ import { mixerOpenAtom, playCue, setMixer } from "../../audio/state";
 import type { Cue } from "../../audio/score";
 import { fx } from "../../render/fx/state";
 import { roomAtom, skipNews, viewRoom } from "../../newsroom/state";
+import { dramaActions } from "../../drama/state";
 import { setPhoto, takePhoto } from "../juice/photo";
-import { arenaOpenAtom, chatCountAtom, helpOpenAtom, photoFlashAtom, photoTimeAtom, staffOpenAtom } from "./state";
+import { copySummary, playDaily, shareEnding } from "../share/share";
+import { arenaOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, senateOpenAtom, staffOpenAtom } from "./state";
 import { skinActions } from "./skinControl";
 import type { StaffJob } from "../../sim/types";
 import type { HudActions } from "./types";
+
+const dismiss = (key: string) => {
+  const seen = registry.get(dismissedAtom);
+  if (!seen.includes(key)) registry.set(dismissedAtom, [...seen.slice(-31), key]);
+};
 
 const TIME_HOURS: Record<string, number | null> = { live: null, day: 13, golden: 18.3, night: 22.5 };
 
@@ -18,6 +25,7 @@ export const hudActions: HudActions = {
   place: (kind) => {
     // "staff" is a tile in the palette that opens the payroll instead of picking a tool.
     if (kind === "staff") return void registry.set(staffOpenAtom, !registry.get(staffOpenAtom));
+    if (kind === "senate") return void registry.set(senateOpenAtom, !registry.get(senateOpenAtom));
     send({ type: "SET_TOOL", tool: kind as Tool | null });
   },
   setSpeed: (n) => {
@@ -55,12 +63,35 @@ export const hudActions: HudActions = {
   buildPanel: (open) => {
     if (open) send({ type: "COMMAND", command: { type: "buildPanelOpened" } });
   },
+  openDisasters: () => registry.set(disastersOpenAtom, true),
+  closeDisasters: () => registry.set(disastersOpenAtom, false),
+  // The sim refuses what cannot happen (with a toast), so the menu can send it as it is.
+  triggerDisaster: (id) => {
+    registry.set(disastersOpenAtom, false);
+    send({ type: "COMMAND", command: { type: "disaster", id } });
+  },
+  setRisk: (risk) => send({ type: "COMMAND", command: { type: "setRisk", risk } }),
   openHelp: () => registry.set(helpOpenAtom, true),
   closeHelp: () => registry.set(helpOpenAtom, false),
   holdTime: (id, open) => send({ type: "SET_OVERLAY", id, open }),
   toggleArena: () => registry.set(arenaOpenAtom, !registry.get(arenaOpenAtom)),
+  togglePapers: () => registry.set(papersOpenAtom, !registry.get(papersOpenAtom)),
+  setPublicationPolicy: (policy) => {
+    if (policy === "Open" || policy === "Selective" || policy === "Closed") send({ type: "COMMAND", command: { type: "setPublicationPolicy", policy } });
+  },
+  publishPaper: (paperId, route) => {
+    const id = Number(paperId);
+    if (Number.isInteger(id) && (route === "preprint" || route === "review")) send({ type: "COMMAND", command: { type: "publishPaper", id, route } });
+  },
+  dismissPaperMoment: dismiss,
+  closeCrumbWiki: dismiss,
+  toggleFactions: () => registry.set(factionsOpenAtom, !registry.get(factionsOpenAtom)),
+  setSafetySpend: (level) => send({ type: "COMMAND", command: { type: "setSafetySpend", level } }),
   keepPlaying: () => send({ type: "KEEP_PLAYING" }),
   newLab: () => send({ type: "NEW_LAB" }),
+  playDaily,
+  shareEnding: () => void shareEnding(),
+  copySummary: () => void copySummary(),
 
   closeStaff: () => {
     send({ type: "SET_ZONE", id: null });
@@ -73,6 +104,10 @@ export const hudActions: HudActions = {
     if (id === null ? painting !== null : id !== painting) send({ type: "SET_ZONE", id });
   },
   clearZone: (id) => send({ type: "COMMAND", command: { type: "clearZone", id } }),
+
+  closeSenate: () => registry.set(senateOpenAtom, false),
+  lobby: (senator) => send({ type: "COMMAND", command: { type: "lobby", senator } }),
+  draftClause: (clause, on) => send({ type: "COMMAND", command: { type: "draftClause", clause, on } }),
 
   openNews: () => viewRoom("archive"),
   viewNews: (idOrArchive) => {
@@ -89,6 +124,10 @@ export const hudActions: HudActions = {
 
   openMixer: () => registry.set(mixerOpenAtom, true),
   closeMixer: () => registry.set(mixerOpenAtom, false),
+  openMods: () => registry.set(modsOpenAtom, true),
+  closeMods: () => registry.set(modsOpenAtom, false),
+  // Today's Drama (FLT-34): the window, and the two reloads that switch a pack on or a mod off.
+  ...dramaActions,
   setMuted: (muted) => setMixer({ muted }),
   setVolume: (channel, value) => setMixer({ [channel]: Math.max(0, Math.min(1, value)) }),
   playCue: (cue) => playCue(cue as Cue),

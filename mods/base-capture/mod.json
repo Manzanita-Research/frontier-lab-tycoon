@@ -1,0 +1,745 @@
+{
+  "apiVersion": 1,
+  "id": "base-capture",
+  "name": "Regulatory Capture",
+  "version": "1.0.0",
+  "author": "Frontier Lab Tycoon",
+  "description": "After a hearing, once Capture is high enough, a Senate staffer asks the lab to draft the bill. Pick two of five clauses; the law slows rivals, closes weights, or pours kombucha. Journalists may read the file properties. FLT-15 section shape, direct-loaded until M1b.",
+  "content": {
+    "arcs": {
+      "add": [
+        {
+          "id": "capture",
+          "initial": "quiet",
+          "states": {
+            "quiet": {
+              "on": {
+                "DAY": {
+                  "target": "invited",
+                  "guard": {
+                    "type": "all",
+                    "params": {
+                      "guards": [
+                        {
+                          "type": "stat.gte",
+                          "params": {
+                            "stat": "hearings",
+                            "value": 1
+                          }
+                        },
+                        {
+                          "type": "stat.gte",
+                          "params": {
+                            "stat": "capture",
+                            "value": 15
+                          }
+                        },
+                        {
+                          "type": "after",
+                          "params": {
+                            "days": 10
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "invited": {
+              "entry": [
+                {
+                  "type": "toast",
+                  "params": {
+                    "text": "A Senate staffer emails {lab}: \"Any chance your team could take a first pass at the bill?\"",
+                    "tone": "good",
+                    "importance": "you"
+                  }
+                },
+                {
+                  "type": "sound.cue",
+                  "params": {
+                    "cue": "card"
+                  }
+                }
+              ],
+              "on": {
+                "CHOSE": [
+                  {
+                    "target": "floor",
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "send"
+                      }
+                    }
+                  },
+                  {
+                    "target": "declined",
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "shred"
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "declined": {
+              "entry": [
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "{lab} declines to write its own regulation; senators unsure what to do with the afternoon",
+                    "tone": "good"
+                  }
+                },
+                {
+                  "type": "trust.delta",
+                  "params": {
+                    "amount": 2
+                  }
+                },
+                {
+                  "type": "capture.delta",
+                  "params": {
+                    "amount": -5
+                  }
+                }
+              ],
+              "on": {
+                "DAY": {
+                  "target": "quiet",
+                  "guard": {
+                    "type": "after",
+                    "params": {
+                      "days": 60
+                    }
+                  }
+                }
+              }
+            },
+            "floor": {
+              "entry": [
+                {
+                  "type": "toast",
+                  "params": {
+                    "text": "{act} goes to a floor vote. Your lobbyists are standing by.",
+                    "tone": "neutral",
+                    "importance": "you"
+                  }
+                },
+                {
+                  "type": "flag.set",
+                  "params": {
+                    "name": "capture:tabled"
+                  }
+                }
+              ],
+              "on": {
+                "DAY": [
+                  {
+                    "target": "law",
+                    "guard": {
+                      "type": "all",
+                      "params": {
+                        "guards": [
+                          {
+                            "type": "stat.gte",
+                            "params": {
+                              "stat": "voted",
+                              "value": 1
+                            }
+                          },
+                          {
+                            "type": "stat.gte",
+                            "params": {
+                              "stat": "ayes",
+                              "value": 2
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "target": "failed",
+                    "guard": {
+                      "type": "stat.gte",
+                      "params": {
+                        "stat": "voted",
+                        "value": 1
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "failed": {
+              "entry": [
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "{act} fails; senators celebrate standing up to a bill they asked for",
+                    "tone": "joke"
+                  }
+                },
+                {
+                  "type": "heat.delta",
+                  "params": {
+                    "amount": 4
+                  }
+                }
+              ],
+              "on": {
+                "DAY": {
+                  "target": "quiet",
+                  "guard": {
+                    "type": "after",
+                    "params": {
+                      "days": 60
+                    }
+                  }
+                }
+              }
+            },
+            "law": {
+              "entry": [
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "{act} is signed into law with 40 pens; {lab} gets one",
+                    "tone": "good"
+                  }
+                },
+                {
+                  "type": "flag.set",
+                  "params": {
+                    "name": "capture:law"
+                  }
+                },
+                {
+                  "type": "camera.focus",
+                  "params": {
+                    "on": "gate",
+                    "zoom": 1.1,
+                    "hold": 2
+                  }
+                },
+                {
+                  "type": "sound.cue",
+                  "params": {
+                    "cue": "release"
+                  }
+                }
+              ],
+              "on": {
+                "DAY": [
+                  {
+                    "target": "exposed",
+                    "guard": {
+                      "type": "stat.gte",
+                      "params": {
+                        "stat": "leaked",
+                        "value": 1
+                      }
+                    }
+                  },
+                  {
+                    "target": "sunset",
+                    "guard": {
+                      "type": "after",
+                      "params": {
+                        "days": 180
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "exposed": {
+              "entry": [
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "LEAKED: {act}'s file properties list its author as \"{lab} Legal\"",
+                    "tone": "bad"
+                  }
+                },
+                {
+                  "type": "trust.delta",
+                  "params": {
+                    "amount": -10
+                  }
+                },
+                {
+                  "type": "heat.delta",
+                  "params": {
+                    "amount": 20
+                  }
+                },
+                {
+                  "type": "capture.delta",
+                  "params": {
+                    "amount": -20
+                  }
+                },
+                {
+                  "type": "auditor.odds",
+                  "params": {
+                    "mult": 2,
+                    "days": 120
+                  }
+                },
+                {
+                  "type": "auditor.note",
+                  "params": {
+                    "grade": "honesty",
+                    "amount": -1,
+                    "text": "Wrote {act}, the law that regulates {lab}. Signed it \"{lab} Legal\"."
+                  }
+                },
+                {
+                  "type": "effects.end",
+                  "params": {}
+                },
+                {
+                  "type": "flag.set",
+                  "params": {
+                    "name": "capture:exposed"
+                  }
+                },
+                {
+                  "type": "shake",
+                  "params": {
+                    "strength": 0.5
+                  }
+                },
+                {
+                  "type": "sound.cue",
+                  "params": {
+                    "cue": "alarm"
+                  }
+                }
+              ],
+              "on": {
+                "CHOSE": [
+                  {
+                    "target": "fallout",
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "intern"
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "{lab} blames an intern for writing federal law; the intern is promoted",
+                          "tone": "joke"
+                        }
+                      },
+                      {
+                        "type": "trust.delta",
+                        "params": {
+                          "amount": -2
+                        }
+                      },
+                      {
+                        "type": "hype.delta",
+                        "params": {
+                          "amount": 3
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "target": "fallout",
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "typo"
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "{lab} calls the authorship \"a typo in the metadata\"; nobody knows what that means",
+                          "tone": "joke"
+                        }
+                      },
+                      {
+                        "type": "heat.delta",
+                        "params": {
+                          "amount": 5
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "target": "fallout",
+                    "guard": {
+                      "type": "choice",
+                      "params": {
+                        "is": "own"
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "{lab}'s CEO: \"Yes, we wrote it. It's a good bill.\" Three senators nod, quietly",
+                          "tone": "joke"
+                        }
+                      },
+                      {
+                        "type": "trust.delta",
+                        "params": {
+                          "amount": 3
+                        }
+                      },
+                      {
+                        "type": "heat.delta",
+                        "params": {
+                          "amount": 8
+                        }
+                      },
+                      {
+                        "type": "capture.delta",
+                        "params": {
+                          "amount": 5
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "fallout": {
+              "on": {
+                "DAY": {
+                  "target": "quiet",
+                  "guard": {
+                    "type": "after",
+                    "params": {
+                      "days": 90
+                    }
+                  }
+                }
+              }
+            },
+            "sunset": {
+              "entry": [
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "{act} sunsets quietly; nobody noticed it was there, which was the point",
+                    "tone": "joke"
+                  }
+                },
+                {
+                  "type": "effects.end",
+                  "params": {}
+                },
+                {
+                  "type": "capture.delta",
+                  "params": {
+                    "amount": 5
+                  }
+                }
+              ],
+              "on": {
+                "DAY": {
+                  "target": "quiet",
+                  "guard": {
+                    "type": "after",
+                    "params": {
+                      "days": 30
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "events": {
+      "add": [
+        {
+          "id": "capture-draft",
+          "title": "Could your team take a first pass at the bill?",
+          "body": "A Senate staffer has emailed over a blank template for {act}, subject line \"quick favour\". Pick two clauses. Nobody ever checks the file properties.",
+          "tone": "neutral",
+          "kind": "bill",
+          "stripe": "Regulatory Capture",
+          "when": {
+            "flag": "capture:ask:draft",
+            "daysAgo": 0
+          },
+          "cooldown": 0,
+          "choices": [
+            {
+              "label": "Send it to the floor",
+              "hint": "Your clauses, then a roll call",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "capture:pick:send"
+                }
+              ]
+            },
+            {
+              "label": "Shred it (for now)",
+              "hint": "Trust +2, Capture −5",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "capture:pick:shred"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "capture-exposed",
+          "title": "The edit history leaked",
+          "body": "A reporter at The Morning Scroll opened the file properties of {act}. Author: {lab} Legal. Last edited from {lab}'s office wifi.",
+          "tone": "bad",
+          "kind": "bill",
+          "stripe": "Exposed",
+          "when": {
+            "flag": "capture:ask:exposed",
+            "daysAgo": 0
+          },
+          "cooldown": 0,
+          "choices": [
+            {
+              "label": "Blame an intern",
+              "hint": "Trust −2, Hype +3",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "capture:pick:intern"
+                }
+              ]
+            },
+            {
+              "label": "\"A typo in the metadata\"",
+              "hint": "Heat +5",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "capture:pick:typo"
+                }
+              ]
+            },
+            {
+              "label": "Own it: it's a good bill",
+              "hint": "Trust +3, Heat +8, Capture +5",
+              "effects": [
+                {
+                  "type": "flag",
+                  "name": "capture:pick:own"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "headlines": {
+      "add": [
+        {
+          "id": "capture-sirocco-boat",
+          "trigger": "boat",
+          "text": "Sirocco ships another open model from its boat; the boat now has a boat",
+          "tone": "joke"
+        },
+        {
+          "id": "capture-closed",
+          "trigger": "closed",
+          "text": "{rival} ships {model} closed, citing \"the permit office's fax machine\"",
+          "tone": "joke"
+        },
+        {
+          "id": "capture-licence",
+          "trigger": "licence",
+          "text": "{rival} still waiting on a Frontier Licence; application is on page 9,000",
+          "tone": "joke"
+        }
+      ]
+    }
+  },
+  "rules": {
+    "capture": {
+      "clauses": [
+        {
+          "id": "threshold",
+          "title": "Licence threshold",
+          "legal": "§2(a) A Frontier Licence shall be required to train any model larger than the largest model of {lab}, plus one (1) FLOP.",
+          "plain": "Labs behind you need a licence to catch up. You are exactly one FLOP under the line.",
+          "effect": "Rivals behind you grow 45% slower",
+          "shame": 3,
+          "effects": [
+            {
+              "type": "rival.growth",
+              "params": {
+                "mult": 0.55,
+                "who": [
+                  "below"
+                ]
+              }
+            },
+            {
+              "type": "news",
+              "params": {
+                "text": "Frontier Licence office opens; queue of rival labs visible from space",
+                "tone": "joke"
+              }
+            }
+          ]
+        },
+        {
+          "id": "permit",
+          "title": "Open weights permit",
+          "legal": "§3 No weights shall be published without a Permit, obtainable in person from an office open on alternate Tuesdays.",
+          "plain": "Open-weights labs have to ship closed. Sirocco moves to a boat.",
+          "effect": "Open labs ship closed; Sirocco sails offshore (slower, still open)",
+          "shame": 2,
+          "effects": [
+            {
+              "type": "rival.closed",
+              "params": {
+                "who": [
+                  "open",
+                  "!sirocco"
+                ]
+              }
+            },
+            {
+              "type": "rival.pace",
+              "params": {
+                "mult": 0.6,
+                "who": [
+                  "sirocco"
+                ]
+              }
+            },
+            {
+              "type": "news",
+              "params": {
+                "text": "Sirocco moves its entire lab onto a boat in international waters; ships open weights \"from the sea\"",
+                "tone": "joke"
+              }
+            }
+          ]
+        },
+        {
+          "id": "kombucha",
+          "title": "Mandatory kombucha standards",
+          "legal": "§4 Every AI laboratory shall serve kombucha meeting the standard in Schedule K. (Schedule K is {lab}'s house recipe.)",
+          "plain": "Every rival spends a quarter learning to ferment.",
+          "effect": "All rivals train 15% slower; +4 hype for the one lab already compliant",
+          "shame": 1,
+          "effects": [
+            {
+              "type": "rival.pace",
+              "params": {
+                "mult": 0.85
+              }
+            },
+            {
+              "type": "hype.delta",
+              "params": {
+                "amount": 4
+              }
+            },
+            {
+              "type": "news",
+              "params": {
+                "text": "Rival labs scramble to meet Schedule K kombucha standards; {lab} somehow already compliant",
+                "tone": "joke"
+              }
+            }
+          ]
+        },
+        {
+          "id": "review",
+          "title": "90-day safety review",
+          "legal": "§5 Every new frontier model shall undergo a ninety (90) day safety review, save for models already deployed by a Licensee.",
+          "plain": "Everyone's next model waits 90 days. Yours is already out.",
+          "effect": "Rivals ahead of you train 35% slower",
+          "shame": 2,
+          "effects": [
+            {
+              "type": "rival.pace",
+              "params": {
+                "mult": 0.65,
+                "who": [
+                  "above"
+                ]
+              }
+            },
+            {
+              "type": "news",
+              "params": {
+                "text": "90-day safety review begins; rival labs discover their models are \"new\"",
+                "tone": "joke"
+              }
+            }
+          ]
+        },
+        {
+          "id": "harbour",
+          "title": "Safe harbour for previews",
+          "legal": "§6 Nothing in this Act applies to a model labelled \"preview\", \"beta\", \"experimental\" or \"just vibes\".",
+          "plain": "Ship everything as a preview. Liability is a state of mind.",
+          "effect": "Your revenue +15%, trust −3",
+          "shame": 2,
+          "effects": [
+            {
+              "type": "revenue.mult",
+              "params": {
+                "mult": 1.15
+              }
+            },
+            {
+              "type": "trust.delta",
+              "params": {
+                "amount": -3
+              }
+            },
+            {
+              "type": "news",
+              "params": {
+                "text": "{lab} renames every product \"preview\"; lawyers call it \"elegant\"",
+                "tone": "joke"
+              }
+            }
+          ]
+        }
+      ],
+      "pick": 2,
+      "actNames": [
+        "The Frontier Safety and Also Innovation Act",
+        "The Responsible Scaling (Of Us) Act",
+        "The Protecting Everyone From Everyone Else Act",
+        "The Extremely Normal AI Act",
+        "The Frontier Freedom (From Competition) Act"
+      ],
+      "floorDays": 5,
+      "backfire": {
+        "base": 0.0008,
+        "heatScale": 50,
+        "trustScale": 100
+      },
+      "author": "{lab} Legal",
+      "reporter": "The Morning Scroll",
+      "empty": "{act} contains no clauses. It passes anyway. Everyone claims victory."
+    }
+  }
+}

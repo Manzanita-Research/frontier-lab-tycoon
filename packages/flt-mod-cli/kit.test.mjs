@@ -13,14 +13,14 @@ test("private modder kit works against the actual game contract", async (t) => {
   const directory = await mkdtemp(resolve(tmpdir(), "flt-kit-test-"));
   try {
     await withGameRuntime(async (runner) => {
-      await t.test("both M1a examples replay 365 actual days", async () => {
+      await t.test("both examples run 365 actual days with their content executed", async () => {
         for (const example of ["every-lab-is-steve", "headline-pack"]) {
           const report = await check(resolve(gameRoot, `mods/examples/${example}/mod.json`), runner);
           assert.equal(report.days, 365);
           assert.equal(report.ticks, 7300);
           assert.ok(report.cardsAnswered > 0);
           assert.equal(report.deterministic, true);
-          assert.ok(report.injection.deferred.length > 0);
+          assert.deepEqual(report.coverage, { executed: [example === "every-lab-is-steve" ? "rivals" : "headlines"], inert: [] });
         }
       });
       await t.test("SDK, typed template and every section validate", async () => {
@@ -30,7 +30,8 @@ test("private modder kit works against the actual game contract", async (t) => {
         assert.deepEqual(loaded.manifest, json);
         assert.deepEqual((await loadManifest(resolve(input, "mod.example.ts"), runner)).manifest, json);
         const report = await check(input, runner);
-        assert.equal(report.arcs[0].states, 2);
+        // The base game has arcs of its own now (FLT-25/33), so find the template's.
+        assert.equal(report.arcs.find((arc) => arc.id === "fetch-arc").states, 2);
         const sdk = await runner.import(resolve(gameRoot, "packages/flt-mod-sdk/src/index.ts"));
         assert.throws(() => sdk.defineMod({ apiVersion: 2, id: "broken", name: "Broken", version: "1" }));
       });
