@@ -15,7 +15,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "check": "pnpm typecheck && pnpm test && pnpm build",
-    "shot": "node scripts/shot.mjs"
+    "shot": "node scripts/shot.mjs",
+    "shots": "node scripts/shots.mjs",
+    "mod:check": "node scripts/flt-mod-check.mjs"
   },
   "dependencies": {
     "@effect/atom-react": "4.0.0-rc.118",

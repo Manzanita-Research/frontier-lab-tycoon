@@ -411,3 +411,32 @@ flowchart LR
 | 700 days, pack on vs off, same seeds | same outcome (won), Era 2 at day 48 to 101 vs 68 to 73, Era 3 at day 487 to 510 vs 466 to 489 |
 
 The full table, the first launches, a leaderboard and a ticker sample are in `docs/evidence/flt-27/report.md` (`LEAPFROG_REPORT=1 pnpm vitest run src/sim/race/leapfrog/report.test.ts`). The 500- and 800-walker perf tests are unchanged (the pack is off in them).
+
+
+## The 2D UI is skinned (FLT-14)
+
+```mermaid
+flowchart LR
+  A["app actor<br/>(snapshot ~5 Hz)"] --> S["useAppSource<br/>(re-renders only when a piece changed)"]
+  U["UI atoms: photo, news room,<br/>mixer, skin picker, staff panel"] --> H
+  S --> H["hudViewModel(input)<br/>pure, unit-tested"]
+  H -->|"HudVM (plain JSON)"| L["active skin's slots<br/>Layout + 25 components"]
+  L -->|"HudActions"| G["send(app, event) / atoms"]
+  R["skins/registry.ts<br/>import.meta.glob: skin.json, skin.css,<br/>slots.tsx, fonts (lazy)"] --> L
+```
+
+- **`src/ui/hud/vm.ts`** is the seam between the game and its skins: one pure function from the snapshot (and a little UI state) to `HudVM`. `src/ui/hud/types.ts` is the contract; it imports nothing from the game. Skins render `vm` and call `actions`; they cannot reach the sim, the store or three (`skins.test.tsx` fails on such an import).
+- **The host** (`HudHost.tsx`, `tree.tsx`) subscribes once (`useAppSource`), builds the view-model, and renders the skin's `Layout` with the docked slots pre-rendered, plus the modal slots and the thought bubbles. The hotkeys, the photo-mode keys, the news desk and the chat playback live in `useHudEffects.ts`, so every skin gets them and none can get them wrong.
+- **Skins** (`src/skins/<id>/`): `skin.json` (tokens, strings, fonts, the slots it replaces) validated by an Effect Schema, `skin.css` scoped under `[data-skin="<id>"]`, an optional `slots.tsx`. The registry loads only the active skin's files and switches live; a refused skin falls back to Frontier 95, then to the base (`docs/SKINS.md`).
+- **The base skin** (`src/skins/base/`) is the previous HUD, moved and made to render from `vm` + `actions`: every slot has a default, and `base.css` reads tokens (`--flt-*`), so the five token-only skins are a `skin.json` and a little CSS.
+
+Measured on the 1-vCPU Modal box (software-rendered WebGL, so about 8 frames per second):
+
+| Measurement | Result |
+|---|---|
+| `hudViewModel` on a 60-day campus | well under 1 ms per call (asserted in `vm.test.ts`); one call per snapshot, about every 200 ms |
+| HUD renders while the game runs at 1× | about 3.5 per second (one per snapshot publish) while 7 to 9 frames a second are drawn, so nothing re-renders per frame. `useAtomSuspense` would have re-rendered the tree on every machine snapshot (about 12 per second here); the host compares the pieces instead |
+| Phone (390×844), nothing open, default hints showing | campus unobstructed: main 61.6%, Frontier 95 57.0% (`scripts/skin-shots.mjs --only e --measure`) |
+| Skin assets | only the active skin's CSS, slots and fonts load; a skin's fonts are 8 to 100 KB of woff2 |
+
+Determinism and the sim are untouched: the only `src/sim/**` change is one read-only helper (`trainingEtaDays`, for the copy dialog's "about 18 days remaining"), and the golden and perf tests are unchanged and green.

@@ -2,12 +2,9 @@ import { RegistryContext } from "@effect/atom-react";
 import { Suspense, useEffect } from "react";
 import { app, registry } from "./app/game";
 import { Scene } from "./render/Scene";
-import { NewsRoom } from "./ui/newsroom/NewsRoom";
-import { HUD } from "./ui/HUD";
+import { HudHost } from "./ui/hud/HudHost";
 import { WorldOverlay } from "./ui/WorldOverlay";
-import { Juice, Sky } from "./ui/juice";
-import "./ui/ui.css";
-import "./ui/compact.css";
+import { Sky } from "./ui/juice";
 
 export function App() {
   // Mounting the actor atom starts the app machine and its frame loop; releasing it stops both.
@@ -18,9 +15,7 @@ export function App() {
         <Sky />
         <Scene />
         <WorldOverlay />
-        <HUD />
-        <Juice />
-        <NewsRoom />
+        <HudHost />
       </Suspense>
     </RegistryContext.Provider>
   );

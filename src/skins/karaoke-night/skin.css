@@ -1,0 +1,84 @@
+/* Karaoke Night (stub): plum stage lighting, pixel display face, a glowing ticker. */
+[data-skin="karaoke-night"] {
+  .panel {
+    background-image: linear-gradient(180deg, color-mix(in srgb, var(--flt-color-accent) 14%, transparent), transparent 40%);
+  }
+  .lab-name,
+  .chip-title b,
+  .obj-title,
+  .thoughts-title,
+  .arena-head b,
+  .insp-name {
+    font-family: var(--flt-font-display);
+    letter-spacing: 0.02em;
+  }
+  .stat .label,
+  .vibes-label {
+    color: var(--flt-color-textDim);
+  }
+  .stat .value {
+    font-size: 26px;
+  }
+  .vibes-value {
+    font-size: 44px;
+  }
+  .vibes-value,
+  .stat .value {
+    text-shadow: 0 0 10px color-mix(in srgb, var(--flt-color-numeral) 55%, transparent);
+  }
+  .bar,
+  .obj-bar,
+  .need-bar,
+  .meter {
+    background: var(--flt-color-inset);
+  }
+  .tool {
+    background: var(--flt-color-panelAlt);
+    color: var(--flt-color-text);
+    border-radius: var(--flt-radius-pill);
+    &.on {
+      background: var(--flt-color-accent);
+      color: var(--flt-color-accentText);
+      box-shadow: 0 0 14px var(--flt-color-accent);
+    }
+  }
+  .ticker {
+    background: var(--flt-color-inset);
+    color: var(--flt-color-text);
+    border-top-color: var(--flt-color-accent);
+    font-family: var(--flt-font-display);
+  }
+  .ticker-tag {
+    background: var(--flt-color-accent);
+    color: var(--flt-color-accentText);
+  }
+  .tick,
+  .tick.neutral {
+    color: var(--flt-color-text);
+    font-size: 17px;
+  }
+  .tick.good {
+    color: var(--flt-color-good);
+  }
+  .tick.bad {
+    color: var(--flt-color-bad);
+  }
+  .speed button {
+    background: var(--flt-color-panelAlt);
+    &.on {
+      background: var(--flt-color-accent);
+      color: var(--flt-color-accentText);
+    }
+  }
+  .bubble {
+    background: var(--flt-color-tip);
+    color: var(--flt-color-tipText);
+    box-shadow: 0 0 0 2px var(--flt-color-accent);
+  }
+  .choice,
+  .thought-row,
+  .arena-row {
+    background: var(--flt-color-panelAlt);
+    color: var(--flt-color-text);
+  }
+}

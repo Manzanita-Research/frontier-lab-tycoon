@@ -72,14 +72,14 @@ This is AI-2027-shaped escalation played as affectionate farce. It punches at in
 - A bright, low-poly toy diorama: warm sun, soft shadows, saturated greens, cream buildings with one accent color each. Not pixel art. **Don't copy** the inspiration image.
 - Researchers are little capsule people in hoodies. Agents are small robots with a **cyan glow**.
 - Juice: squash-and-stretch when something is placed, coin pops, smooth camera.
-- The HUD is warm, chunky and toy-like, readable over the scene, and works on a phone.
+- The HUD is readable over the scene and works on a phone. It is a **skin**: the default is Frontier 95 (a 1995 desktop: Lab Properties, a Start menu, a file-copy dialog for training), and Swag Drop, Karaoke Night, Field Almanac, Discovery Disc '96 and GeoCities ship beside it. The warm, chunky toy look is the base skin (`?skin=base`). See `docs/SKINS.md`.
 
 ## Architecture
 
 - `src/sim/`: pure, deterministic TypeScript (no React/three/DOM, no `Math.random`; use `rng.ts`). Its fixed-step `tick(state)` mutates plain serializable state. Player actions are **commands** applied at the next tick.
 - `src/content/`: data only (buildings, headlines, thoughts, names). Adding a joke never needs an engine change.
 - `src/render/`: R3F scene. It reads sim state in `useFrame` (instanced walkers) and never mutates state directly.
-- `src/ui/`: DOM HUD. It subscribes to a throttled snapshot (~5 Hz), not to every tick.
+- `src/ui/hud/` + `src/skins/`: the DOM HUD. `hudViewModel` builds a plain-JSON view-model from a throttled snapshot (~5 Hz, not every tick) and the active skin's components render it; skins get `vm` + `actions` and nothing else (`docs/SKINS.md`).
 - `src/app/`: the app machine (XState, run by Effect) owns speed, the command queue and the loop, with speed pause/1×/3×/10×; see `docs/ARCHITECTURE.md`. There is no zustand.
 - Performance: 300+ walkers stay smooth on a laptop; instancing only, with no per-walker React components.
 
