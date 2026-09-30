@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Evidence screenshots for FLT-8 (the Crowd): stages a busy campus through the ?debug=1 hook, then shoots it.
+// Evidence screenshots for FLT-8 (the Crowd): stages a busy campus through the ?debug=1&skin=base hook, then shoots it.
 //
 //   pnpm build && (pnpm preview &) && sleep 2
 //   node scripts/crowd-shots.mjs [outDir] [baseUrl]
@@ -20,7 +20,7 @@ async function scene(name, { size = [1440, 900], mobile = false, query = "", sta
   const page = await browser.newPage({ viewport: { width: size[0], height: size[1] }, deviceScaleFactor: mobile ? 2 : 1, isMobile: mobile, hasTouch: mobile });
   page.on("pageerror", (e) => errors.push(`${name}: ${e}`));
   page.on("console", (m) => m.type() === "error" && errors.push(`${name}: ${m.text()}`));
-  await page.goto(`${base}/?debug=1&seed=3&warp=10&speed=1${query}`, { waitUntil: "networkidle" });
+  await page.goto(`${base}/?debug=1&skin=base&seed=3&warp=10&speed=1${query}`, { waitUntil: "networkidle" });
   await page.waitForTimeout(800);
   if (stage) await page.evaluate(stage);
   await page.waitForTimeout(wait);

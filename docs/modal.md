@@ -43,7 +43,7 @@ pnpm shot "http://localhost:4173/?page=gallery" docs/img/gallery.png --size 1440
 pnpm shot "http://localhost:4173/" docs/img/phone.png --size 390x844 --mobile
 ```
 
-WebGL renders through SwiftShader (no GPU), so it's slow but accurate. For a live link, run `bb connect expose 4173` (or 5173 for `pnpm dev`) and share the URL it prints. **Stop the server before you end your turn** unless someone is looking at it right now.
+For before/after pairs of the same scenes on `main` and your branch, run `pnpm shots` instead (see AGENTS.md). WebGL renders through SwiftShader (no GPU), so it's slow but accurate. For a live link, run `bb connect expose 4173` (or 5173 for `pnpm dev`) and share the URL it prints. **Stop the server before you end your turn** unless someone is looking at it right now.
 
 ## Clean up
 

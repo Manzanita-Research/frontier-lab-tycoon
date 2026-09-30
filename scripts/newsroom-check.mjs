@@ -13,7 +13,7 @@ page.on('pageerror', e => errors.push(String(e)));
 const report = { cues: [], beds: [], checks: [], errors };
 const mark = message => { report.checks.push(message); console.log(message); };
 const go = async query => {
-  await page.goto(`${base}/?debug=1&speed=0&${query}`, { waitUntil: 'networkidle' });
+  await page.goto(`${base}/?debug=1&skin=base&speed=0&${query}`, { waitUntil: 'networkidle' });
   await page.waitForFunction(() => window.__sound && window.__press);
   await page.waitForTimeout(600);
 };
@@ -138,7 +138,7 @@ mark('Paper and chat archived and restored after reload; typing dots, all four f
 
 const phone = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
 phone.on('pageerror', e => errors.push(String(e)));
-await phone.goto(`${base}/?debug=1&speed=0&warp=20&newsdemo=chat`, { waitUntil: 'networkidle' });
+await phone.goto(`${base}/?debug=1&skin=base&speed=0&warp=20&newsdemo=chat`, { waitUntil: 'networkidle' });
 await phone.getByRole('button', { name: 'Read all messages', exact: true }).click();
 await phone.waitForFunction(() => [...document.querySelectorAll('.chat-row')].every(el => Number(getComputedStyle(el).opacity) > 0.99));
 await phone.locator(".news-dialog").evaluate(el => { el.scrollTop = 0; });

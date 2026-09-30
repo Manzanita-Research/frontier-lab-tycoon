@@ -5,6 +5,7 @@ import "@fontsource/nunito/latin-700.css";
 import "@fontsource/nunito/latin-800.css";
 import "@fontsource/nunito/latin-900.css";
 import { App } from "./App";
+import { bootSkin } from "./ui/hud/skinControl";
 import "./index.css";
 
 // Standalone demo pages: any file named `*.page.tsx` with a default export is
@@ -28,7 +29,10 @@ const fonts = Promise.race([
   new Promise((done) => setTimeout(done, 1500)),
 ]).catch(() => undefined);
 
-void fonts.then(() =>
+// The HUD's skin (its tokens, fonts and CSS) is ready before the first paint, so there is no flash of the wrong look.
+const skin = Page ? Promise.resolve() : bootSkin();
+
+void Promise.all([fonts, skin]).then(() =>
   createRoot(document.getElementById("root")!).render(
     <StrictMode>
       {Page ? (

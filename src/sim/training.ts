@@ -27,6 +27,20 @@ export function computePerDay(state: GameState): number {
   return state.buildings.filter((b) => b.kind === "cluster" && !b.broken).length * COMPUTE_PER_CLUSTER + datacenterCompute(state);
 }
 
+/**
+ * Days until the current run finishes at today's pace (the HUD's "about 18 days remaining"), or null when nothing is
+ * training. Pure and read-only: it mirrors `dailyTraining`'s arithmetic without touching the World or the rng.
+ */
+export function trainingEtaDays(state: GameState): number | null {
+  const halls = state.buildings.filter((b) => b.kind === "hall").length;
+  if (halls === 0) return null;
+  const spend = Math.min(COMPUTE_PER_HALL * halls, state.compute + computePerDay(state));
+  const gain = spend * (0.75 + 0.25 * morale(state)) * rdMultiplier(state);
+  if (gain <= 0) return null;
+  const { cost, progress } = state.training.context;
+  return Math.max(0, Math.ceil((cost - progress) / gain));
+}
+
 /** Once a game day: clusters fill the stockpile, halls spend it, and the machine decides what that adds up to. */
 export function dailyTraining(state: GameState, rng: Rng) {
   state.compute = Math.min(COMPUTE_CAP, state.compute + computePerDay(state));
