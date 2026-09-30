@@ -72,9 +72,9 @@
 /* ---- every other skin, until it draws its own: a chip and the base event card ---- */
 .flt-account-chip {
   position: fixed;
-  top: max(8px, env(safe-area-inset-top));
-  left: 50%;
-  translate: -50% 0;
+  /* the one corner every skin leaves clear: bottom right, just above the news ticker */
+  right: max(16px, env(safe-area-inset-right));
+  bottom: calc(60px + env(safe-area-inset-bottom));
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -94,6 +94,12 @@
   &:disabled {
     opacity: 0.6;
     cursor: default;
+  }
+  /* phones stack a bar at the bottom in every skin; the right edge just past the middle is open map in all of them */
+  @media (max-width: 560px) {
+    bottom: auto;
+    top: 60%;
+    right: max(10px, env(safe-area-inset-right));
   }
 }
 .flt-account-card {

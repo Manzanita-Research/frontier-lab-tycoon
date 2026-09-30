@@ -92,7 +92,7 @@ function Member({ vm, actions }: AccountSkinProps) {
               Log Off
             </Btn>
             <Btn disabled={vm.busy} onClick={() => actions.open("delete")}>
-              Delete…
+              Delete Account…
             </Btn>
           </div>
         </div>

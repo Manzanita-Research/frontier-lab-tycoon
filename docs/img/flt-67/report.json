@@ -1,0 +1,97 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "5bd2f67e897d5a24f6ea6746bfcf124bbab2cfd9"
+  },
+  "head": {
+    "branch": "flt-67-accounts",
+    "sha": "94367d0",
+    "dirty": true
+  },
+  "seconds": 151.048,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "account-menu",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/before/account-menu.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/after/account-menu.png",
+      "title": "FLT-67: the Start menu, with \"Log On to Frontier Network…\" above Shut Down when accounts are on",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/compare/account-menu.png",
+      "changed": 0.01572993827160494
+    },
+    {
+      "scene": "account-logon",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/before/account-logon.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/after/account-logon.png",
+      "title": "FLT-67: Start ▸ Log On to Frontier Network… (the log-on box)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/compare/account-logon.png",
+      "changed": 0.19231712962962963
+    },
+    {
+      "scene": "account-member",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/before/account-member.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/after/account-member.png",
+      "title": "FLT-67: back from Hugging Face, logged on (the account window). The local server's ?devlogon=1 does the OAuth round trip",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/compare/account-member.png",
+      "changed": 0.0674891975308642
+    },
+    {
+      "scene": "account-member-menu",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/before/account-member-menu.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/after/account-member-menu.png",
+      "title": "FLT-67: logged on, the Start menu says \"Log Off @ada…\"",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/compare/account-member-menu.png",
+      "changed": 0.012604166666666666
+    },
+    {
+      "scene": "account-delete",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/before/account-delete.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/after/account-delete.png",
+      "title": "FLT-67: Delete Account… asks first, No is the default",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/compare/account-delete.png",
+      "changed": 0.06324151234567901
+    },
+    {
+      "scene": "account-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/before/account-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/after/account-phone.png",
+      "title": "FLT-67: the log-on box on a phone",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/compare/account-phone.png",
+      "changed": 0.5561930368209989
+    },
+    {
+      "scene": "account-chip",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/before/account-chip.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/after/account-chip.png",
+      "title": "FLT-67: a skin without its own sign-in yet gets the base \"Log on\" chip, bottom right (Homepage 98; --skin all for every skin)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/compare/account-chip.png",
+      "changed": 0.0014544753086419753
+    },
+    {
+      "scene": "account-chip-logon",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/before/account-chip-logon.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/after/account-chip-logon.png",
+      "title": "FLT-67: the base log-on card (Homepage 98)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/compare/account-chip-logon.png",
+      "changed": 0.9555563271604939
+    },
+    {
+      "scene": "account-chip-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/before/account-chip-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/after/account-chip-phone.png",
+      "title": "FLT-67: the base \"Log on\" chip on a phone (Homepage 98)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/compare/account-chip-phone.png",
+      "changed": 0.0067003888686353145
+    }
+  ],
+  "errors": []
+}

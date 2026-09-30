@@ -9,7 +9,7 @@ const REAL = [
 const ALLOWED = ["Outlook Excess", "WordSad", "WordPerfectly", "NoteBad"];
 
 const sources = import.meta.glob<string>(
-  ["./**/*.{ts,json}", "../ui/**/*.{ts,tsx,json,css}", "../skins/**/*.{ts,tsx,json,css}", "../../mods/base-*/**/*.json", "!**/*.test.{ts,tsx}"],
+  ["./**/*.{ts,json}", "../ui/**/*.{ts,tsx,json,css}", "../skins/**/*.{ts,tsx,json,css}", "../account/**/*.{ts,tsx,css}", "../../mods/base-*/**/*.json", "!**/*.test.{ts,tsx}"],
   { query: "?raw", import: "default", eager: true },
 );
 const scanned = Object.keys(sources);

@@ -234,7 +234,8 @@
       "account-delete",
       "account-phone",
       "account-chip",
-      "account-chip-logon"
+      "account-chip-logon",
+      "account-chip-phone"
     ]
   },
   "scenes": {
@@ -2977,7 +2978,7 @@
       ]
     },
     "account-delete": {
-      "title": "FLT-67: Delete… asks first, No is the default",
+      "title": "FLT-67: Delete Account… asks first, No is the default",
       "query": {
         "devlogon": 1
       },
@@ -3015,7 +3016,10 @@
       ]
     },
     "account-chip": {
-      "title": "FLT-67: a skin without its own sign-in yet gets the base \"Log on\" chip (run with --skin <id>, or --skin all)",
+      "title": "FLT-67: a skin without its own sign-in yet gets the base \"Log on\" chip, bottom right (Homepage 98; --skin all for every skin)",
+      "query": {
+        "skin": "homepage-98"
+      },
       "steps": [
         {
           "wait": 800
@@ -3035,6 +3039,19 @@
           "click": "[data-testid=\"account-chip\"]",
           "optional": true
         },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "account-chip-phone": {
+      "title": "FLT-67: the base \"Log on\" chip on a phone (Homepage 98)",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "skin": "homepage-98"
+      },
+      "steps": [
         {
           "wait": 800
         }
