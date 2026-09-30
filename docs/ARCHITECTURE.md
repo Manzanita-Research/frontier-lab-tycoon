@@ -418,7 +418,7 @@ flowchart LR
 
 Spec: `docs/specs/FLT-31.md`. 2D only; the sim is untouched (`git diff main -- src/sim` is empty apart from tests reading it).
 
-- **The toast gate** (`src/app/notices.ts`, pure, tested with a fake clock). A launch every ~10 game days is a toast every few real seconds at 3x/10x, so Leapfrog's launches stopped being toasts: a rival launch or answer goes to the leaderboard (its row flashes) and the ticker. A toast is for what matters to the player: a record taken (`X took your record on Y`), a solved benchmark *you* led, a lost #1 (the sim only toasts a fall of two places, so the gate says the one-place case), how your own launch went (counter-launch, launch bug, early release), all at **most one per 20 real seconds**; whatever piled up meanwhile becomes one "4 labs launched and 2 of your records fell while you were busy" toast when the window opens. From 3x up, small news (a flawless livestream, "you own the news cycle") stays in the ticker. Toasts are recognised by their text (the sim is untouched), so `notices.test.ts` runs a year of Leapfrog and fails on any Leapfrog-sounding toast it does not recognise. It sits at the app machine's toast intake (`SYNCED`) because `hudViewModel` is a pure function of its input and cannot hold a real-time window; the same split as `useArenaMotion`. Headless minute, Leapfrog toasts from the sim -> shown: 1x 5 -> 1, 3x 17 -> 2, 10x 72 -> 3.
+- **The toast gate** (`src/app/notices.ts`, pure, tested with a fake clock; FLT-51 replaced the text matching below with tags, see "Notices" at the end). A launch every ~10 game days is a toast every few real seconds at 3x/10x, so Leapfrog's launches stopped being toasts: a rival launch or answer goes to the leaderboard (its row flashes) and the ticker. A toast is for what matters to the player: a record taken (`X took your record on Y`), a solved benchmark *you* led, a lost #1 (the sim only toasts a fall of two places, so the gate says the one-place case), how your own launch went (counter-launch, launch bug, early release), all at **most one per 20 real seconds**; whatever piled up meanwhile becomes one "4 labs launched and 2 of your records fell while you were busy" toast when the window opens. From 3x up, small news (a flawless livestream, "you own the news cycle") stays in the ticker. Toasts are recognised by their text (the sim is untouched), so `notices.test.ts` runs a year of Leapfrog and fails on any Leapfrog-sounding toast it does not recognise. It sits at the app machine's toast intake (`SYNCED`) because `hudViewModel` is a pure function of its input and cannot hold a real-time window; the same split as `useArenaMotion`. Headless minute, Leapfrog toasts from the sim -> shown: 1x 5 -> 1, 3x 17 -> 2, 10x 72 -> 3.
 - **Ticker freshness** (`skins/kit/Marquee.tsx`). A new headline joins just past the right edge of what is on screen, ahead of the replayed filler that used to make it wait a whole tape's length; in a rush only the newest three wait, and the tape speeds up a little while they do (`makeRoom`, `catchUp`, tested).
 - **`vm.leapfrog`** (`LeapfrogVM`): `columns` (short and long name, status, best, holder, `ghost`), `rows` (one per lab, `cells` aligned to the columns: text, `sota`, `maxx`, `flash`), `footnote` (`*pass@256`), the news cycle (`voice.shares`, `series`, `headline`) and the calendar's line. `EventVM.response` carries the forced-response card's live numbers (readiness, ship-now gain, bug odds) and `EventVM.stream` the livestream (caption, viewers, chat, from `content/livestream.ts`).
 - **Real-time flourishes** (`ui/hud/leapfrogMotion.ts`, pure, fed by `useLeapfrogMotion`): a game day lasts 0.2 s at 10x, so the sim's own two-day row flash would be over unseen. This keeps a launching row lit, and a record that changed hands blinking, for 4 real seconds; keeps a benchmark the sim has retired on the board (struck through, SOLVED) for 24 s; and samples the news cycle once a game day for the graph.
@@ -517,3 +517,41 @@ flowchart LR
 | The existing perf tests | unchanged within noise (the 800-walker test reads 0.66 to 0.78 ms on this box for both `main` and the branch, against its 0.5 budget, doubled on CI) |
 
 Determinism: the disasters draw from `state.disasters.rngState`, not the main stream, and tests start with the setting `off`, so the golden digests and the playthrough tests are untouched. A separate test runs 90 days of chaos twice and compares the World byte for byte, and another saves and loads a World mid-swarm.
+
+## Notices (FLT-51): who is talking, and does it concern you
+
+Spec: `docs/specs/FLT-51.md`. Every toast the sim sends says who sent it and whether it is about the player:
+`addToast(state, text, tone, { source, importance })` (`src/sim/news.ts`), with `Toast.source` (`leapfrog`, `ops`,
+`staff`, `economy`, `coach`, `event`, `disaster`, `race`, `training`, `crowd`, `build`, ..., or `mod:<id>`) and
+`Toast.importance` (`you` or `world`, the default). Toasts sent while the tick applies the player's commands or card
+answers are marked `reply` (`replying()` in `tick.ts`). The fields are additive: the golden test pins `{id, text, tone}`,
+and the midgame digest without them is unchanged.
+
+The policy is one pure function at the app machine's toast intake (`gateToasts` in `src/app/notices.ts`, called on
+`SYNCED`):
+
+| Toast | Goes to |
+|---|---|
+| `source: "coach"`, or a `you` reply | the screen, now |
+| `you` | the screen, at most one per 15 real seconds; what piles up meanwhile is one batch toast (`UiToast.batch`, `ToastVM.batch`) |
+| `world` (and anything untagged) | the ticker: the app keeps them as `wire` and merges them into `news` by id (toast and news ids share `nextId`) |
+
+The confirm box is a modal, not a toast, so it never passes through here. Speed does not change the rule: the window is
+real time, so at 3x and 10x the screen gets the same handful of `you` toasts a minute while the ticker carries the rest.
+Mod verbs take `source?` and `importance?` (`toast`, `building.offline`, `building.ensure`); a mod's default source is
+`mod:<id>`, a disaster's `disaster`, a card arc's `event`. `notices.test.ts` runs a year of three seeds and 200 midgame
+days and fails on an untagged toast, a Leapfrog-sounding toast whose source is not `leapfrog`, or two held toasts closer
+than 15 s apart.
+
+### Numbers (1-vCPU Modal box)
+
+Toasts on screen per real minute in `?scenario=midgame`, through the real app machine (`src/app/noticeRate.report.test.ts`,
+3 real minutes a speed, cards answered with their first choice). The sim sends the same toasts on both branches.
+
+| Speed | Game days / min | Sim sends / min | Shown before | Shown after |
+|---|---|---|---|---|
+| 1x | 10 | 15.7 | 13.3 | 2.7 |
+| 3x | 30 | 42.0 | 37.3 | 4.0 |
+| 10x | 100 | 136.3 | 117.0 | 7.3 |
+
+At 10x the held `you` toasts are four a minute (the window); the rest are replies to what the player did.

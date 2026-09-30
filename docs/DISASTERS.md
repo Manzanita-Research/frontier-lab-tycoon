@@ -85,9 +85,9 @@ Verbs (run by the driver, in order, after each transition):
 | `auditor.odds` | mult: number, days?: number | Multiply the odds of an external auditor's visit (FLT-19 reads `auditorOdds(state)`) by `mult`. Lasts `days`, or as long as the disaster. |
 | `effects.end` | kind?: string | End this disaster's open-ended effects (the ones with no `days`: drain, spike, revenue, auditor), all of them or one `kind`. Effects with a `days` run their course. |
 | `building.fire` | building: string | Set a building on fire: it is broken (no work, nobody goes in) and burns until an SRE fixes it, as after any breakdown. `building` is `$target`, `$adjacent` or a kind. |
-| `building.offline` | building: string, text?: string | Take a building offline (a flood, an outage): broken like a fire, with a toast instead of a headline. |
+| `building.offline` | building: string, text?: string, source?: string, importance?: string | Take a building offline (a flood, an outage): broken like a fire, with a toast instead of a headline (tagged `you` unless you say otherwise). |
 | `building.wear` | building: string, to: number | Cap a building's reliability at `to` (0 to 1): the scorched cluster is never quite the same. |
-| `building.ensure` | kind: string, text?: string | Make sure a building of `kind` exists: if the lab has none, one arrives free beside the gate (upkeep still applies). |
+| `building.ensure` | kind: string, text?: string, source?: string, importance?: string | Make sure a building of `kind` exists: if the lab has none, one arrives free beside the gate (upkeep still applies). |
 | `hype.delta` | amount: number | Add to hype (0 to 100). |
 | `trust.delta` | amount: number | Add to public trust (0 to 100, starts at 50). |
 | `heat.delta` | amount: number | Add to regulatory heat (0 to 100, starts at 0). FLT-19's auditors read it. |
@@ -98,7 +98,7 @@ Verbs (run by the driver, in order, after each transition):
 | `shake` | strength: number | Shake the screen, `strength` 0 to 1. |
 | `sound.cue` | cue: string | Play a sound cue: `alarm` (FLT-7's breakdown alarm), `card`, `era` or `release`. |
 | `news` | text: string, tone?: string | A ticker headline. `{lab}`, `{model}`, `{rival}`, `{cash}` and `{target}` are filled in, plus whatever the disaster's verbs set (`{leapRival}`). |
-| `toast` | text: string, tone?: string | A toast over the map (same template variables as `news`). |
+| `toast` | text: string, tone?: string, source?: string, importance?: string | A notice (same template variables as `news`). `importance` is `world` (the default: it goes to the ticker) or `you` (a toast over the map, at most one per 15 real seconds, see `src/app/notices.ts`). `source` defaults to `disaster` here (`event` in a card's arc, `mod:<id>` in a mod's). |
 | `card` | id: string | Open one of the disaster's event cards (`cards[].id`); from a mod arc, any card in `content.events` by id, whatever its own `when` says (it waits if another card is open). The machine hears the player's pick as a CHOSE beat. |
 | `flag.set` | name: string | Set a flag to today's day number. |
 | `flag.clear` | name: string | Clear a flag. |

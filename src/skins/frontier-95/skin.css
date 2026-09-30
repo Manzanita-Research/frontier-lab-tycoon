@@ -1248,6 +1248,24 @@
     + .f95-toast {
       border-top: 1px dotted #808080;
     }
+    /* A pile of notices (FLT-51): the header in ink, each line in its own tone. */
+    &.f95-batch {
+      color: inherit;
+      ul {
+        margin: 4px 0 2px;
+        padding-left: 16px;
+        list-style: square;
+      }
+      li.bad {
+        color: var(--flt-color-bad);
+      }
+      li.good {
+        color: var(--flt-color-good);
+      }
+      i {
+        color: #444;
+      }
+    }
   }
   .f95-clip {
     width: 58px;

@@ -2,7 +2,7 @@
 import type { NewsTrigger } from "../content/headlines";
 import type { Rng } from "./rng";
 import { fillTemplate, formatMoney } from "./format";
-import type { GameState, Tone } from "./types";
+import type { GameState, Importance, NoticeSource, Tone } from "./types";
 import { defs, type HeadlineLine } from "./defs";
 import { STATS } from "./verbs";
 
@@ -22,8 +22,21 @@ export function addNews(state: GameState, text: string, tone: Tone) {
   if (state.news.length > 50) state.news.splice(0, state.news.length - 50);
 }
 
-export function addToast(state: GameState, text: string, tone: Tone = "neutral") {
-  state.toasts.push({ id: state.nextId++, text, tone });
+export interface ToastTag {
+  source: NoticeSource;
+  /** Defaults to `world`: only what is about you, or needs you, is a toast (FLT-51; the policy is `src/app/notices.ts`). */
+  importance?: Importance;
+}
+
+export function addToast(state: GameState, text: string, tone: Tone, tag: ToastTag) {
+  state.toasts.push({ id: state.nextId++, text, tone, source: tag.source, importance: tag.importance ?? "world" });
+}
+
+/** Run `f` (applying player commands) and mark every toast it sends as a reply: the app never holds those back. */
+export function replying(state: GameState, f: () => void) {
+  const from = state.toasts.length;
+  f();
+  for (let i = from; i < state.toasts.length; i++) state.toasts[i]!.reply = true;
 }
 
 export function templateVars(state: GameState, vars: NewsVars, rng: Rng): Record<string, string> {

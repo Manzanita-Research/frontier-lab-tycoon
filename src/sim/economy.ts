@@ -58,6 +58,6 @@ export function dailyEconomy(state: GameState, rng: Rng) {
     state.hype = Math.max(0, state.hype - 5);
     addIncident(state, 0.5);
     pushNews(state, rng, "bailout");
-    addToast(state, "Emergency bridge round: +$2M. The board has notes.", "bad");
+    addToast(state, "Emergency bridge round: +$2M. The board has notes.", "bad", { source: "economy", importance: "you" });
   }
 }

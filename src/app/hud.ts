@@ -18,7 +18,7 @@ import { outcomeOf, releaseGoalText } from "../sim/goals";
 import { estimateLedger } from "../sim/economy";
 import { assistantOf, type AssistantMessage } from "../sim/tutorial";
 import { pendingConfirmOf, persistentWarnings, type PendingConfirm } from "../sim/guardrails";
-import type { Building, GameState, GoalProgress, OpenEvent, Outcome, Pop, Thought, Tone, Vibes } from "../sim/types";
+import type { Building, GameState, GoalProgress, OpenEvent, Outcome, Pop, Thought, Tone, Vibes, Importance, NoticeSource } from "../sim/types";
 
 export type Tool = "path" | PlaceableKind | "bulldoze";
 /** Hotkeys 1-9 pick these in order. */
@@ -108,6 +108,12 @@ export interface UiToast {
   id: number;
   text: string;
   tone: Tone;
+  /** The sim's tags (FLT-51); `src/app/notices.ts` routes on them. */
+  source?: NoticeSource;
+  importance?: Importance;
+  reply?: true;
+  /** A batch summary: the `you` toasts that piled up while the window was shut, oldest first. */
+  batch?: readonly { text: string; tone: Tone; source?: NoticeSource }[];
 }
 
 /** Names of the walkers who are thinking out loud, so a bubble can say who said it. */

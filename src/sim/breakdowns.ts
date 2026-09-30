@@ -70,7 +70,7 @@ function breakDown(state: GameState, rng: Rng, b: Building) {
   pushNews(state, rng, `breakdown:${b.kind}` as NewsTrigger);
   // The status page is never wrong, because it is never updated.
   if (b.kind === "cluster" || b.kind === "gateway" || b.kind === "hall" || b.kind === "datacenter") pushNews(state, rng, "statusPage");
-  addToast(state, `${defs().buildings[b.kind].name} is out of order. ${state.staff.some((s) => s.job === "sre") ? "An SRE is on it." : "Hire an SRE."}`, "bad");
+  addToast(state, `${defs().buildings[b.kind].name} is out of order. ${state.staff.some((s) => s.job === "sre") ? "An SRE is on it." : "Hire an SRE."}`, "bad", { source: "ops", importance: state.staff.some((s) => s.job === "sre") ? "world" : "you" });
 }
 
 /** Put a building back in service. */
@@ -111,5 +111,5 @@ function callContractor(state: GameState, rng: Rng, b: Building) {
   state.cash -= CONTRACTOR_FEE;
   repairBuilding(state, b, CONTRACTOR_REPAIRED_TO);
   pushNews(state, rng, "contractor", { amount: formatMoney(CONTRACTOR_FEE) });
-  addToast(state, `A contractor fixed the ${defs().buildings[b.kind].name} for ${formatMoney(CONTRACTOR_FEE)}. It was a wire. An SRE is $4K a day.`, "bad");
+  addToast(state, `A contractor fixed the ${defs().buildings[b.kind].name} for ${formatMoney(CONTRACTOR_FEE)}. It was a wire. An SRE is $4K a day.`, "bad", { source: "ops" });
 }

@@ -56,7 +56,8 @@ function view(s: GameState) {
     goals: s.goals.context.goals,
     flags: sorted(flagsOf(s)),
     news: s.news,
-    toasts: s.toasts,
+    // FLT-51 tags toasts (source, importance, reply) for the app; the numbers pinned here are the text, tone and id.
+    toasts: s.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })),
     thoughts: s.thoughts,
     pops: s.pops,
     buildings: s.buildings,

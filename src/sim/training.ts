@@ -97,6 +97,7 @@ function apply(state: GameState, rng: Rng, e: EmittedFrom<typeof trainingMachine
         state,
         bonus > 0 ? `${e.model} is out! Launch week: +${formatMoney(bonus)}` : `${e.model} is out! Build an API Gateway to sell it.`,
         "good",
+        { source: "training", importance: "you" },
       );
       pushNews(state, rng, "runDone", { model: e.model });
       return;

@@ -8,7 +8,7 @@ import { dailyCrowd } from "./crowd";
 import { dailyEconomy } from "./economy";
 import { dailyEvents, openEventOf } from "./events";
 import { dailyGoals } from "./goals";
-import { dailyNews } from "./news";
+import { dailyNews, replying } from "./news";
 import { dailyPapers } from "./race/papers/driver";
 import { dailyLeapfrog } from "./race/leapfrog/driver";
 import { dailyRace } from "./race/race";
@@ -41,9 +41,9 @@ export function tick(state: GameState, commands: readonly Command[] = [], def?: 
 
 function step(state: GameState, commands: readonly Command[]) {
   const rng = createRng(state.rngState);
-  applyCommands(state, commands, rng);
+  replying(state, () => applyCommands(state, commands, rng));
   if (commands.length > 0) { updateTutorial(state); observeGuardrails(state); }
-  if (systemUnlocked(state, "collusion")) applyCollusionChoices(state);
+  if (systemUnlocked(state, "collusion")) replying(state, () => applyCollusionChoices(state));
   if (pendingConfirmOf(state) || openEventOf(state) || state.goals.value === "lost") {
     state.rngState = rng.state();
     return;
@@ -88,10 +88,10 @@ export function applyNow(state: GameState, commands: readonly Command[], def?: G
 
 function now(state: GameState, commands: readonly Command[]) {
   const rng = createRng(state.rngState);
-  applyCommands(state, commands, rng);
+  replying(state, () => applyCommands(state, commands, rng));
   updateTutorial(state);
   observeGuardrails(state);
-  if (systemUnlocked(state, "collusion")) applyCollusionChoices(state);
+  if (systemUnlocked(state, "collusion")) replying(state, () => applyCollusionChoices(state));
   updateCoach(state);
   state.rngState = rng.state();
 }

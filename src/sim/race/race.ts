@@ -64,7 +64,7 @@ export function dailyRace(state: GameState, rng: Rng) {
   }
 
   if (race.openDrop && state.day >= race.openDrop.until) {
-    addToast(state, `${defs().rivalById[race.openDrop.rival as RivalId]?.name ?? "The rival"}'s free model has settled in. Revenue is back.`, "good");
+    addToast(state, `${defs().rivalById[race.openDrop.rival as RivalId]?.name ?? "The rival"}'s free model has settled in. Revenue is back.`, "good", { source: "race" });
     race.openDrop = null;
   }
   if (state.day > 0 && state.day % 7 === 0) weekly(state, rng);
@@ -125,13 +125,13 @@ export function weekly(state: GameState, rng: Rng) {
   const rank = race.rank;
   if (rank === 1 && before !== 1) {
     raceNews(state, rng, "topOne", { rank: "1" });
-    addToast(state, "#1 on the Frontier Arena! Everyone else is updating the rules.", "good");
+    addToast(state, "#1 on the Frontier Arena! Everyone else is updating the rules.", "good", { source: "race", importance: "you" });
   } else if (rank < before) {
     raceNews(state, rng, "rankUp", { rank: String(rank) });
-    if (before - rank >= 2) addToast(state, `Up ${before - rank} places: #${rank} on the Arena.`, "good");
+    if (before - rank >= 2) addToast(state, `Up ${before - rank} places: #${rank} on the Arena.`, "good", { source: "race" });
   } else if (rank > before) {
     raceNews(state, rng, "rankDown", { rank: String(rank) });
-    if (rank - before >= 2) addToast(state, `Down ${rank - before} places: #${rank} on the Arena.`, "bad");
+    if (rank - before >= 2) addToast(state, `Down ${rank - before} places: #${rank} on the Arena.`, "bad", { source: "race" });
   } else if (rng.chance(0.5)) {
     raceNews(state, rng, "weekly", { rival: defs().rivalById[rng.pick(race.rivals).context.id as RivalId].name });
   }
@@ -155,7 +155,7 @@ export function announceRelease(state: GameState, rng: Rng, def: RivalDef, e: Ex
     race.lastDrop = state.day;
     state.flags["offer:openWeights"] = state.day;
     raceNews(state, rng, "openDrop", { rival: def.name, model: e.model });
-    addToast(state, `${def.name} just dropped ${e.model} for free. Revenue -30% for ${OPEN_DROP_DAYS} days.`, "bad");
+    addToast(state, `${def.name} just dropped ${e.model} for free. Revenue -30% for ${OPEN_DROP_DAYS} days.`, "bad", { source: "race", importance: "you" });
   }
 }
 
@@ -183,7 +183,7 @@ function applyRival(state: GameState, rng: Rng, def: RivalDef, e: RivalEffect) {
       const own = def.headlines.poach;
       if (own && own.length > 0 && rng.chance(0.6)) addNews(state, fillTemplate(rng.pick(own), { rival: def.name, lab: state.labName }), "bad");
       else raceNews(state, rng, "poach", { rival: def.name });
-      addToast(state, `${def.name} poached ${gone.name}. Recruiter fee: $${POACH_FEE / 1000}K.`, "bad");
+      addToast(state, `${def.name} poached ${gone.name}. Recruiter fee: $${POACH_FEE / 1000}K.`, "bad", { source: "race" });
       return;
     }
   }

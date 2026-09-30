@@ -280,13 +280,13 @@ function departVisitor(state: GameState, w: Walker, rng: Rng) {
   const g = state.gate;
   state.pops.push({ id: state.nextId++, x: g.x + g.w / 2, z: g.z, amount, tick: state.tick });
   pushNews(state, rng, "investorPays", { name: w.name, amount: formatMoney(amount) });
-  addToast(state, `${w.name} loved it: ${formatMoney(amount)} in the bank`, "good");
+  addToast(state, `${w.name} loved it: ${formatMoney(amount)} in the bank`, "good", { source: "economy" });
 }
 
 /** They reached the gate with the box: the headline, the toast, the dent in the Vibes. */
 function walkOut(state: GameState, w: Walker, rng: Rng) {
   pushNews(state, rng, "researcherLeft", { name: w.name, their: defs().names.THEIR[w.pro] ?? "their" });
-  addToast(state, `${w.name} handed in the box and left.`, "bad");
+  addToast(state, `${w.name} handed in the box and left.`, "bad", { source: "staff", importance: "you" });
   addIncident(state, 0.15);
 }
 
