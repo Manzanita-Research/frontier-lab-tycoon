@@ -3,7 +3,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { DatabaseSync } from "node:sqlite";
 import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { META_HEADER, type SaveMeta } from "../src/account/contract";
+import { SAVE_MIME, type SaveHead } from "../src/account/contract";
 import { authOptions } from "./auth";
 import type { Env } from "./env";
 import { Jar, ORIGIN, startWorker, type HfProfile } from "./harness";
@@ -48,24 +48,25 @@ async function signIn(code = "good-code") {
   return { jar, authorize, callback };
 }
 
-const meta = (over: Partial<SaveMeta> = {}): SaveMeta => ({
+/** An FLT-65 envelope's head, as `encodeSave` writes it. */
+const head = (over: Partial<SaveHead> = {}): SaveHead => ({
+  kind: "fltsave",
   v: 1,
-  savedAt: 1_760_000_000_000,
+  savedAt: "2026-09-30T18:00:00.000Z",
   seed: 12,
   lab: "Paperclip Maximal",
   day: 400,
-  mods: [{ id: "golden-retriever-protest", version: "1.0.0", hash: "abc123", url: "https://mods.example.test/grp.json" }],
+  tick: 96_000,
+  mods: [{ id: "golden-retriever-protest", version: "1.0.0", hash: "abc123", source: "https://mods.example.test/grp.json" }],
   skin: "frontier-95",
-  device: "laptop-1",
+  enc: "gzip64",
   ...over,
 });
+/** A whole `.fltsave` text, as `serialize(save)` writes it. */
+const fltsave = (over: Record<string, unknown> = {}) => JSON.stringify({ ...head(), state: "H4sIAAAAAAAAA6tWKkotLs0pUbJSMjIwMjI0NDI0MjM3NjU1NjY1MjIzNzA0MjI0NDI0MDI0NDA0NDA0MDA0MDA0NDA0MDAAAA==", ...over });
 
-const put = (jar: Jar, slot: string, body: BodyInit, m: unknown = meta(), headers: Record<string, string> = {}) =>
-  w.fetch(`/api/saves/${slot}`, {
-    method: "PUT",
-    headers: { cookie: jar.header(), origin: ORIGIN, [META_HEADER]: typeof m === "string" ? m : JSON.stringify(m), ...headers },
-    body,
-  });
+const put = (jar: Jar, slot: string, body: BodyInit = fltsave(), headers: Record<string, string> = {}) =>
+  w.fetch(`/api/saves/${slot}`, { method: "PUT", headers: { cookie: jar.header(), origin: ORIGIN, "content-type": SAVE_MIME, ...headers }, body });
 
 describe("Hugging Face sign-in (Better Auth, mocked HF OAuth server)", () => {
   it("asks Hugging Face for openid and profile only, and comes back to this host", async () => {
@@ -148,23 +149,26 @@ describe("routing", () => {
 describe("/api/saves (local D1 + R2)", () => {
   it("needs a session", async () => {
     expect((await w.fetch("/api/saves")).status).toBe(401);
-    expect((await put(new Jar(), "1", "x")).status).toBe(401);
+    expect((await put(new Jar(), "1")).status).toBe(401);
   });
 
-  it("uploads, lists, downloads and deletes a slot", async () => {
+  it("uploads, lists, downloads and deletes a slot: the .fltsave comes back byte for byte", async () => {
     const { jar } = await signIn();
-    const bytes = new Uint8Array([0x1f, 0x8b, 8, 0, 1, 2, 3, 4, 5]);
-    const up = await put(jar, "1", bytes);
+    const text = fltsave();
+    const size = new TextEncoder().encode(text).length;
+    const up = await put(jar, "1", text);
     expect(up.status).toBe(200);
-    expect(await up.json()).toMatchObject({ slot: "1", size: bytes.length, meta: meta() });
+    expect(await up.json()).toMatchObject({ slot: "1", size, head: head() });
 
     const list = (await (await w.fetch("/api/saves", { headers: { cookie: jar.header() } })).json()) as { saves: unknown[] };
-    expect(list.saves).toEqual([expect.objectContaining({ slot: "1", size: bytes.length, meta: meta() })]);
+    expect(list.saves).toEqual([expect.objectContaining({ slot: "1", size, head: head() })]);
+    // The list is just the heads: the packed World never leaves R2 unless a slot is downloaded.
+    expect(JSON.stringify(list)).not.toContain("H4sI");
 
     const down = await w.fetch("/api/saves/1", { headers: { cookie: jar.header() } });
     expect(down.status).toBe(200);
-    expect(new Uint8Array(await down.arrayBuffer())).toEqual(bytes);
-    expect(JSON.parse(down.headers.get(META_HEADER)!)).toEqual(meta());
+    expect(down.headers.get("content-type")).toBe(SAVE_MIME);
+    expect(await down.text()).toBe(text);
 
     const userId = (await w.db.prepare("SELECT id FROM user").first<{ id: string }>())!.id;
     expect(await w.saves.head(`saves/${userId}/1.fltsave`)).not.toBeNull();
@@ -174,26 +178,31 @@ describe("/api/saves (local D1 + R2)", () => {
     expect(await w.saves.head(`saves/${userId}/1.fltsave`)).toBeNull();
   });
 
-  it("validates the slot, the metadata and the size", async () => {
+  it("validates the slot, the envelope and the size", async () => {
     const { jar } = await signIn();
-    expect((await put(jar, "9", "x")).status).toBe(404);
-    expect((await put(jar, "2", "x", "{not json")).status).toBe(400);
-    expect((await put(jar, "2", "x", { ...meta(), v: "one" })).status).toBe(400);
-    expect((await put(jar, "2", "x", { ...meta(), device: "" })).status).toBe(400);
+    expect((await put(jar, "9")).status).toBe(404);
+    expect((await put(jar, "2", "{not json")).status).toBe(400);
+    expect((await put(jar, "2", JSON.stringify({ lab: "no kind" }))).status).toBe(400);
+    expect((await put(jar, "2", fltsave({ kind: "pdf" }))).status).toBe(400);
+    expect((await put(jar, "2", fltsave({ v: "one" }))).status).toBe(400);
+    expect((await put(jar, "2", fltsave({ state: undefined }))).status).toBe(400);
+    expect((await put(jar, "2", fltsave({ lab: "x".repeat(81) }))).status).toBe(400);
     expect((await put(jar, "2", "")).status).toBe(400);
-    expect((await put(jar, "2", new Uint8Array(2 * 1024 * 1024 + 1))).status).toBe(413);
+    expect((await put(jar, "2", fltsave({ state: "A".repeat(2 * 1024 * 1024) }))).status).toBe(413);
+    // A newer save format still uploads: reading it is the client's business.
+    expect((await put(jar, "2", fltsave({ v: 2, enc: "zstd64", extra: true }))).status).toBe(200);
   });
 
   it("refuses a slot rewritten within seconds, and a cross-site write", async () => {
     const { jar } = await signIn();
-    expect((await put(jar, "auto", "one")).status).toBe(200);
-    expect((await put(jar, "auto", "two")).status).toBe(429);
-    expect((await put(jar, "3", "x", meta(), { origin: "https://evil.example.test" })).status).toBe(403);
+    expect((await put(jar, "auto")).status).toBe(200);
+    expect((await put(jar, "auto", fltsave({ day: 401 }))).status).toBe(429);
+    expect((await put(jar, "3", fltsave(), { origin: "https://evil.example.test" })).status).toBe(403);
   });
 
   it("deleting the account wipes its saves from D1 and R2 at once", async () => {
     const { jar } = await signIn();
-    await put(jar, "2", "keep me?");
+    await put(jar, "2");
     const userId = (await w.db.prepare("SELECT id FROM user").first<{ id: string }>())!.id;
     const res = await w.fetch("/api/auth/delete-user", {
       method: "POST",
