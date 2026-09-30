@@ -13,6 +13,7 @@ A disaster is **content**: a JSON statechart in a pack (`mods/base-disasters/mod
 | `src/sim/disasters/validate.ts` | Pack validator: every message starts with the JSON path. `flt-mod check` (FLT-15 M2) will call it. |
 | `src/sim/disasters/pack.ts` | Reads the pack (directly, until FLT-15 M1b's loader lands: then it is `Content.disasters`), and turns its cards into ordinary event cards. |
 | `src/sim/disasters/demo.ts` | Staging for `?disaster=`. |
+| `src/render/buildings/SecurityOfficeModel.tsx`, `StaffCrew.tsx`, `render/fx/watch.ts` | The Security Office model, the red "!" over diverted staff, and the cues (camera, shake, sound) reaching `FxDirector` and `SoundLayer`. Additive; nothing else in `src/render` or `src/ui` changed. |
 
 ## The statechart
 
@@ -140,7 +141,7 @@ The setting is `state.disasters.risk`: `off`, `rare`, `normal`, `chaos` (the `se
 
 - `?disaster=<id>` stages a lab (three Security, two SREs) and starts the disaster; `&dz=<ticks>` runs that many ticks (cards stay open, unless `&dzPick=<n>` answers them); `?risk=off|rare|normal|chaos` sets the setting. Example: `/?seed=3&speed=0&disaster=rogueSwarm&dz=24&dzPick=0`.
 - With `?debug=1`: `window.__flt.disaster("gpuFire")` and `window.__flt.risk("chaos")` send the same commands the Disasters menu will (`{ type: "disaster", id }`, `{ type: "setRisk", risk }`).
-- `scripts/disaster-shots.mjs` drives the screenshots.
+- `pnpm shots --scenes disasters --base origin/main --out docs/img/flt-17` takes the before/after pairs (the scenes are in `scripts/shots.scenes.json`; the same steps stage the same lab on `main`, where the `disaster` command does nothing, so the pairs line up).
 
 ## Hand-offs
 
