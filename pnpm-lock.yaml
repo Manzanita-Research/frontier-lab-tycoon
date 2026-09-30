@@ -51,6 +51,9 @@ importers:
       '@effect/vitest':
         specifier: 4.0.0-rc.118
         version: 4.0.0-rc.118(effect@4.0.0-rc.118)(vitest@5.0.2(vite@7.3.6))
+      '@flt/mod-cli':
+        specifier: workspace:*
+        version: link:packages/flt-mod-cli
       '@types/react':
         specifier: ^19.1.0
         version: 19.3.0

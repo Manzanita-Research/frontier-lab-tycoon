@@ -1,6 +1,6 @@
 import { defineMod } from "@flt/mod-sdk";
 
-// Optional typed version; bundle this directory to regenerate mod.json.
+// Copy to mod.ts and install the SDK to opt in; bundle to regenerate mod.json.
 export default defineMod({
   "apiVersion": 1,
   "id": "starter-mod",

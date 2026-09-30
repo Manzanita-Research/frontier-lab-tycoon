@@ -1,0 +1,30 @@
+{
+  "apiVersion": 1,
+  "id": "golden-retrievers",
+  "name": "Golden Retrievers with Opinions",
+  "version": "1.0.0",
+  "description": "Recasts the existing protester kind as opinionated golden retrievers, with demands for open treats and transparent water bowls.",
+  "content": {
+    "walkerKinds": {
+      "override": [
+        { "id": "protester", "name": "Golden Retriever with Opinions" }
+      ]
+    },
+    "thoughts": {
+      "add": [
+        { "id": "golden-open-treats", "kind": "protester", "when": "always", "text": "I support open treats. I oppose closed doors." },
+        { "id": "golden-fetch-policy", "kind": "protester", "when": "always", "text": "My position on fetch is clear: throw it again." },
+        { "id": "golden-water-transparency", "kind": "protester", "when": "protest", "text": "Water bowl transparency NOW. I can see the bottom." },
+        { "id": "golden-collective-barking", "kind": "protester", "when": "protest", "text": "Collective barking is a right. Belly rubs are a demand." },
+        { "id": "golden-discourse", "kind": "protester", "when": "discourse", "text": "I have read the position paper. It tastes unconvincing." },
+        { "id": "golden-night", "kind": "protester", "when": "night", "text": "The movement will resume after this very principled nap." }
+      ]
+    },
+    "headlines": {
+      "add": [
+        { "id": "golden-protest-march", "trigger": "protest", "text": "Golden retrievers stage a sit-in; organizers admit they already knew sit", "tone": "joke" },
+        { "id": "golden-protest-platform", "trigger": "protest", "text": "United Pawposition demands open treats, longer walks, and accountable ball throwing", "tone": "joke" }
+      ]
+    }
+  }
+}

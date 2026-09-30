@@ -2,7 +2,7 @@
 
 Read the supplied SKILL.md first. Edit mod.json, then run `pnpm test` until green.
 This kit is private and linked to the game checkout; nothing needs publishing.
-If using mod.ts instead, install the linked SDK, edit it, then run
+For TypeScript, copy mod.example.ts to mod.ts, install the linked SDK, edit it, then run
 `flt-mod bundle . mod.json` before the JSON test. Directory commands prefer mod.ts.
 Use `pnpm flt-mod` from the game checkout if the bin is not on PATH.
 

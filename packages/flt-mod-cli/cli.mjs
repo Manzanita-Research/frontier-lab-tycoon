@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { createHash } from "node:crypto";
+import { realpathSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { basename, extname, resolve } from "node:path";
@@ -90,6 +91,6 @@ export async function main(args = process.argv.slice(2)) {
     else console.log(`Bundled ${basename(input)} → ${await bundle(input, output, runner)}`);
   });
 }
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
   main().catch((error) => { console.error(`FAIL ${String(error)}`); process.exitCode = 1; });
 }

@@ -37,17 +37,17 @@ export async function loadManifest(input, runner) {
   if (!manifest || typeof manifest !== "object") throw new Error("expected a manifest object (default export in mod.ts)");
   let assetBytes = 0;
   for (const assets of [manifest.assets, manifest.skin?.assets]) {
-  for (const [id, value] of Object.entries(assets ?? {})) {
-    if (typeof value !== "string") throw new Error(`assets.${id}: expected a path or data URL`);
-    if (value.startsWith("data:")) continue;
-    if (/^[a-z][a-z0-9+.-]*:/i.test(value)) throw new Error(`assets.${id}: remote assets are unsupported`);
-    const assetPath = await inside(dirname(path), value);
-    const mime = mimeTypes[extname(assetPath).toLowerCase()];
-    if (!mime) throw new Error(`assets.${id}: unsupported asset type`);
-    assetBytes += (await stat(assetPath)).size;
-    if (assetBytes > 2 * 1024 * 1024) throw new Error("bundled assets exceed 2 MB per mod");
-    assets[id] = `data:${mime};base64,${(await readFile(assetPath)).toString("base64")}`;
-  }
+    for (const [id, value] of Object.entries(assets ?? {})) {
+      if (typeof value !== "string") throw new Error(`assets.${id}: expected a path or data URL`);
+      if (value.startsWith("data:")) continue;
+      if (/^[a-z][a-z0-9+.-]*:/i.test(value)) throw new Error(`assets.${id}: remote assets are unsupported`);
+      const assetPath = await inside(dirname(path), value);
+      const mime = mimeTypes[extname(assetPath).toLowerCase()];
+      if (!mime) throw new Error(`assets.${id}: unsupported asset type`);
+      assetBytes += (await stat(assetPath)).size;
+      if (assetBytes > 2 * 1024 * 1024) throw new Error("bundled assets exceed 2 MB per mod");
+      assets[id] = `data:${mime};base64,${(await readFile(assetPath)).toString("base64")}`;
+    }
   }
   if (Buffer.byteLength(JSON.stringify(manifest)) > MAX_MANIFEST_BYTES) throw new Error("manifest exceeds 3 MB after bundling");
   return { manifest, path };

@@ -12,7 +12,7 @@ are available; live loading and full content execution await M1b. See
 then `pnpm --dir my-mod test`. From the game checkout, `pnpm flt-mod check <path>`,
 `pnpm flt-mod bundle <dir>` and `pnpm flt-mod dev <dir>` use the private source-linked
 kit. The scaffold includes the mod-authoring skill and every v1 content section.
-Optional `mod.ts` uses `@flt/mod-sdk`; directory commands prefer it, while the
+Copy optional `mod.example.ts` to `mod.ts` to use `@flt/mod-sdk`; directory commands prefer it, while the
 scaffold test checks `mod.json`. Bundle with an explicit `mod.json` output to
 regenerate that file. Local assets are inlined; remote assets are rejected.
 `dev` serves CORS on 5174 and prints the future game link; game hot-reload is M1b.

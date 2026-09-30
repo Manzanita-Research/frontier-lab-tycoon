@@ -9,7 +9,7 @@ Start from the supplied template (`pnpm create-mod my-mod` in the game checkout)
 Edit `mod.json`; run **`flt-mod check` until green**. From the game checkout use
 `pnpm flt-mod check /path/to/mod.json` if the bin is not on PATH. A scaffold's
 `pnpm test` calls that same checker. JSON is the shared format. Optional trusted
-local `mod.ts` exports `defineMod({...})` from `@flt/mod-sdk`; directory commands
+local `mod.ts` (copy the supplied `mod.example.ts`) exports `defineMod({...})` from `@flt/mod-sdk`; directory commands
 prefer it. `flt-mod bundle /path/to/mod mod.json` converts it to JSON.
 
 M1a validates schema/composition/assets and structural arcs, then runs seed 42

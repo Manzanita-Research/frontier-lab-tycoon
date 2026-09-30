@@ -1,5 +1,5 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": { "types": ["vite/client"] },
-  "include": ["src", "../../templates/create-flt-mod/mod.ts"]
+  "include": ["src", "../../templates/create-flt-mod/mod.example.ts"]
 }

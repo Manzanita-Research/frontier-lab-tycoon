@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { test } from "node:test";
 import { mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -27,6 +28,7 @@ test("private modder kit works against the actual game contract", async (t) => {
         const loaded = await loadManifest(input, runner);
         const json = JSON.parse(await readFile(resolve(input, "mod.json"), "utf8"));
         assert.deepEqual(loaded.manifest, json);
+        assert.deepEqual((await loadManifest(resolve(input, "mod.example.ts"), runner)).manifest, json);
         const report = await check(input, runner);
         assert.equal(report.arcs[0].states, 2);
         const sdk = await runner.import(resolve(gameRoot, "packages/flt-mod-sdk/src/index.ts"));
@@ -60,12 +62,13 @@ test("private modder kit works against the actual game contract", async (t) => {
         const image = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=", "base64");
         await writeFile(resolve(destination, "sign.png"), image);
         manifest.assets = { "sign.png": "sign.png" };
-        // Explicit JSON input exercises relative assets; directory input prefers optional TS.
-        await rm(resolve(destination, "mod.ts"));
+        manifest.skin.assets = { "badge.png": "sign.png" };
+        // JSON is the default; an opt-in mod.ts would take precedence.
         await writeFile(jsonPath, JSON.stringify(manifest));
         const bundled = await bundle(destination, undefined, runner);
         const data = JSON.parse(await readFile(bundled, "utf8"));
         assert.equal(data.assets["sign.png"], `data:image/png;base64,${image.toString("base64")}`);
+        assert.equal(data.skin.assets["badge.png"], data.assets["sign.png"]);
         const report = await check(bundled, runner);
         assert.equal(report.days, 365);
         manifest.assets = { "sign.png": "https://tracker.invalid/sign.png" };
@@ -96,6 +99,14 @@ test("private modder kit works against the actual game contract", async (t) => {
         assert.equal((await fetch(`${url}/escape.json`)).status, 400);
         assert.equal((await fetch(`${url}/mod.json`, { method: "OPTIONS" })).status, 204);
       } finally { await new Promise((done) => server.close(done)); }
+    });
+    await t.test("installed workspace bins run through pnpm's symlink paths", () => {
+      const cli = resolve(gameRoot, "node_modules/@flt/mod-cli/cli.mjs");
+      const output = execFileSync(process.execPath, [cli, "check", resolve(gameRoot, "packages/flt-mod-cli/evidence/golden-retrievers.mod.json")], { encoding: "utf8" });
+      assert.match(output, /PASS golden-retrievers.*365 days/);
+      const create = resolve(gameRoot, "node_modules/@flt/mod-cli/create.mjs");
+      const scaffoldOutput = execFileSync(process.execPath, [create, "bin-mod"], { cwd: directory, encoding: "utf8" });
+      assert.match(scaffoldOutput, /Created.*bin-mod/);
     });
   } finally { await rm(directory, { recursive: true, force: true }); }
 });
