@@ -168,10 +168,14 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // FLT-21/24 re-records 1600 on: this script reaches Level 5, which now also wakes The Hearing and the yacht summit
 // (their cards, meters and news). With `hearingOff`/`yachtOff` set (and hidden from the digest) and the two new unlock
 // items dropped, the previous digests reproduce exactly; 200 and 800 are untouched.
+// FLT-22/23 re-records 1600 on again, for the same reason: Level 5 also wakes Regulatory Capture and the Promise
+// Tracker (the unlock card lists them, and the Senate's first recess toast and motions follow the first hearing). With
+// `captureOff`/`promisesOff` set (and hidden from the digest) and those two unlock items dropped, the FLT-21/24 digests
+// reproduce exactly.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "d3826cd0", 800: "ed628bb9", 1600: "32e2c39e", 2400: "b9bb659b", 3200: "70e67c5a", 4000: "e3274d09" },
-  2: { 200: "e548b1af", 800: "552cae60", 1600: "b9dce71f", 2400: "a277a7a1", 3200: "67dc7a54", 4000: "48da9d3f" },
-  3: { 200: "58bb415c", 800: "920699d6", 1600: "15a27ed4", 2400: "07f3512b", 3200: "3a29ed22", 4000: "753ac625" },
+  1: { 200: "d3826cd0", 800: "ed628bb9", 1600: "730688ae", 2400: "eac47088", 3200: "e01b7ce6", 4000: "ed08b681" },
+  2: { 200: "e548b1af", 800: "552cae60", 1600: "dc4dc363", 2400: "16705ded", 3200: "49fa2ead", 4000: "0b5387c0" },
+  3: { 200: "58bb415c", 800: "920699d6", 1600: "08b39d42", 2400: "acb7f415", 3200: "751d6046", 4000: "71164a53" },
 };
 
 describe("golden runs", () => {

@@ -82,6 +82,10 @@ Verbs (run by the driver, in order, after each transition):
 | `cost.spike` | mult: number, days?: number, kinds?: strings | Multiply the upkeep of `kinds` (default: every building) by `mult`. Lasts `days`, or as long as the disaster. |
 | `revenue.mult` | mult: number, days?: number | Multiply the API revenue by `mult` (0 turns the till off). Lasts `days`, or as long as the disaster. |
 | `auditor.odds` | mult: number, days?: number | Multiply the odds of an external auditor's visit (FLT-19 reads `auditorOdds(state)`) by `mult`. Lasts `days`, or as long as the disaster. |
+| `auditor.note` | grade: string, amount: number, text: string | Put a note on the lab's file for the auditors (FLT-19): a mark on one report-card `grade` (`honesty`, ...), `amount` grades up (+) or down (-), and a line of `text`. Stored in `state.auditorNotes` (the last 24). Regulatory Capture's backfire uses it. |
+| `rival.growth` | mult: number, who?: strings, days?: number | Multiply what a release adds for the rival labs in `who` (rival ids, `below` for the labs behind you, `above`, `open` for the open-weights labs, `!id` to leave one out; none means all). Lasts `days`, or as long as its owner. Read by `race/rules.ts`. |
+| `rival.pace` | mult: number, who?: strings, days?: number | Multiply how fast the rival labs in `who` train (0.5 is half speed). Same `who` and `days` as `rival.growth`. |
+| `rival.closed` | who?: strings, days?: number | The rival labs in `who` may not ship open weights (their releases go out closed). Same `who` and `days` as `rival.growth`. |
 | `effects.end` | kind?: string | End this disaster's open-ended effects (the ones with no `days`: drain, spike, revenue, auditor), all of them or one `kind`. Effects with a `days` run their course. |
 | `building.fire` | building: string | Set a building on fire: it is broken (no work, nobody goes in) and burns until an SRE fixes it, as after any breakdown. `building` is `$target`, `$adjacent` or a kind. |
 | `building.offline` | building: string, text?: string | Take a building offline (a flood, an outage): broken like a fire, with a toast instead of a headline. |
@@ -103,7 +107,7 @@ Verbs (run by the driver, in order, after each transition):
 | `flag.set` | name: string | Set a flag to today's day number. |
 | `flag.clear` | name: string | Clear a flag. |
 
-Stats a guard, `requires` or `odds.scale` can read: day, capability, hype, cash, compute, discourse, models, agents, clusters, halls, gateways, gas, solar, datacenters, broken, security, sre, comms, janitor, sreAttending, trust, heat, disasters (begun, all time), capture, burning, adjacent. A mechanic that measures its own stats (The Hearing's session tallies) passes them to `checkCall`/`checkChart` as local names.
+Stats a guard, `requires` or `odds.scale` can read: day, capability, hype, cash, compute, discourse, models, agents, clusters, halls, gateways, gas, solar, datacenters, broken, security, sre, comms, janitor, sreAttending, trust, heat, disasters (begun, all time), capture, hearings (held, all time), burning, adjacent. A mechanic that measures its own stats (The Hearing's session tallies) passes them to `checkCall`/`checkChart` as local names.
 
 Building references in verbs: `$target` (the building the disaster is about), `$adjacent` (the nearest other working building of its kind that this disaster has not touched), `$office` (the Security Office), `gate`, or a building kind. `to`/`on` take the same.
 

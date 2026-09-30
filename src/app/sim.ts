@@ -22,6 +22,7 @@ import { enableLeapfrog } from "../sim/race/leapfrog/driver";
 import { parseLeapMoment, stageLeapfrog } from "../sim/race/leapfrog/demo";
 import { isCollusionMoment, stageCollusion } from "../sim/collusion/demo";
 import { isCircusMoment, stageCircus } from "../sim/circus/demo";
+import { isSenateMoment, stageSenate } from "../sim/capture/demo";
 import { enableCollusion } from "../sim/collusion/driver";
 import { walkersThinking } from "../sim/mind";
 import { makeSnapshot, NO_SELECTION, type Snapshot, type UiSelection, type UiToast } from "./hud";
@@ -82,7 +83,7 @@ export class SimHandle {
     const collusion = this.world.collusion?.enabled;
     const leapfrogOff = this.world.flags.leapfrogOff;
     const papersOff = this.world.flags.papersOff;
-    const { hearingOff, yachtOff } = this.world.flags;
+    const { hearingOff, yachtOff, captureOff, promisesOff } = this.world.flags;
     this.world = createInitialState(seed);
     setRisk(this.world, risk);
     if (leapfrogOff) this.world.flags.leapfrogOff = leapfrogOff;
@@ -90,6 +91,8 @@ export class SimHandle {
     if (papersOff) this.world.flags.papersOff = papersOff;
     if (hearingOff) this.world.flags.hearingOff = hearingOff;
     if (yachtOff) this.world.flags.yachtOff = yachtOff;
+    if (captureOff) this.world.flags.captureOff = captureOff;
+    if (promisesOff) this.world.flags.promisesOff = promisesOff;
     this.alpha = 1;
   }
 
@@ -117,13 +120,15 @@ export class SimHandle {
 
 /** A living campus, warped forward and dressed up per the `?seed=&warp=&agents=&discourse=` debug knobs. */
 export function createSimHandle(
-  dbg: Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean; hearing?: boolean; yacht?: boolean },
+  dbg: Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean; hearing?: boolean; yacht?: boolean; capture?: boolean; promises?: boolean },
 ): SimHandle {
   const sim = createInitialState(dbg.seed);
   if (dbg.leapfrog === false) sim.flags.leapfrogOff = 1;
   if (dbg.papers === false) sim.flags.papersOff = 1;
   if (dbg.hearing === false) sim.flags.hearingOff = 1;
   if (dbg.yacht === false) sim.flags.yachtOff = 1;
+  if (dbg.capture === false) sim.flags.captureOff = 1;
+  if (dbg.promises === false) sim.flags.promisesOff = 1;
   const leap = parseLeapMoment(dbg.moment);
   if (dbg.warp > 0 || dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0 || dbg.moment || dbg.disaster) { continueTutorial(sim, true); delete sim.progression; }
   if (!sim.progression && dbg.leapfrog) enableLeapfrog(sim);
@@ -136,6 +141,7 @@ export function createSimHandle(
   else if (isCollusionMoment(dbg.moment)) stageCollusion(sim, dbg.moment);
   else if (isPaperMoment(dbg.moment)) stagePapers(sim, dbg.moment);
   else if (isCircusMoment(dbg.moment)) stageCircus(sim, dbg.moment);
+  else if (isSenateMoment(dbg.moment)) stageSenate(sim, dbg.moment);
   if (dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0) {
     const rng = createRng(sim.rngState);
     if (dbg.researchers > 0) seedWalkers(sim, "researcher", dbg.researchers, rng);

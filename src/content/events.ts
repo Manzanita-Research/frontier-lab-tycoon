@@ -8,6 +8,8 @@ import { LEAPFROG } from "./leapfrog";
 import { COLLUSION } from "../sim/collusion/pack";
 import { HEARING } from "../sim/hearing/pack";
 import { YACHT } from "../sim/yacht/pack";
+import { PROMISES } from "../sim/promises/pack";
+import { CAPTURE } from "../sim/capture/pack";
 
 /** What has to be true for an event to fire. `all` combines conditions. */
 export type Condition =
@@ -59,8 +61,8 @@ export interface EventDef {
   cooldown?: number;
   /** One to three. */
   choices: EventChoice[];
-  /** Presentation: a full-screen era title card, the auction room, Leapfrog's forced response and launch livestream, The Hearing's witness table (FLT-21) or the yacht's leaked group chat (FLT-24). Anything else is the plain card. */
-  kind?: "era" | "auction" | "response" | "stream" | "hearing" | "leak";
+  /** Presentation: a full-screen era title card, the auction room, Leapfrog's forced response and launch livestream, The Hearing's witness table (FLT-21), the yacht's leaked group chat (FLT-24), the bill FLT-22 drafts or FLT-23's roll call. Anything else is the plain card. */
+  kind?: "era" | "auction" | "response" | "stream" | "hearing" | "leak" | "bill" | "vote";
   /** The stripe text at the top of the card, when it isn't the tone's ("Breaking", "Developing", ...). */
   stripe?: string;
 }
@@ -306,5 +308,7 @@ EVENTS.push(...COLLUSION.content.events.add as EventDef[]);
 // The Circus packs (FLT-21, FLT-24): their cards only open when their own machine asks.
 EVENTS.push(...HEARING.content.events.add as EventDef[]);
 EVENTS.push(...YACHT.content.events.add as EventDef[]);
+EVENTS.push(...PROMISES.content.events.add as EventDef[]);
+EVENTS.push(...CAPTURE.content.events.add as EventDef[]);
 
 export const eventById = (id: string): EventDef | undefined => EVENTS.find((e) => e.id === id);

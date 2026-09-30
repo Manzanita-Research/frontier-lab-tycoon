@@ -72,7 +72,7 @@ export const EventCard = Schema.Struct({
   id, title: text, body: text, tone, when: Condition,
   cooldown: Schema.optionalKey(nonnegative),
   choices: Schema.Array(Schema.Struct({ label: text, hint: Schema.String, effects: Schema.Array(EventEffect) })).check(Schema.isBetweenLength(1, 3)),
-  kind: Schema.optionalKey(Schema.Literals(["era", "auction", "response", "stream", "hearing", "leak"])), stripe: Schema.optionalKey(text),
+  kind: Schema.optionalKey(Schema.Literals(["era", "auction", "response", "stream", "hearing", "leak", "bill", "vote"])), stripe: Schema.optionalKey(text),
 });
 export type EventData = typeof EventCard.Type;
 

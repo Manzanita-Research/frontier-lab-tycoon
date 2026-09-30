@@ -1,3 +1,4 @@
+import { rivalRules } from "./rules";
 import { pressureReady } from "../tutorial";
 // The Race's driver: once a game day it checks the R&D multiplier and the era ratchet, calls the weekly cycle
 // every seventh day (rivals act, the Arena is re-ranked, the news turns) and decides which cards are due
@@ -100,11 +101,13 @@ export function weekly(state: GameState, rng: Rng) {
   for (let i = 0; i < race.rivals.length; i++) {
     const before = race.rivals[i]!;
     const def = RIVAL_BY_ID[before.context.id as RivalId];
+    // FLT-22: a law's clauses (timed effects) may slow a lab, shrink its releases or forbid open weights. All 1 by default.
+    const law = rivalRules(state, before.context);
     const event = {
       type: "WEEK" as const,
       week: race.week,
-      aggro: era.rivalGrowth,
-      pace: era.rivalPace,
+      aggro: era.rivalGrowth * law.growth,
+      pace: era.rivalPace * law.pace,
       chase: chase(state.capability, before.context.capability),
       lengthRoll: rng.next(),
       gainRoll: rng.next(),
@@ -113,6 +116,7 @@ export function weekly(state: GameState, rng: Rng) {
       name: modelName(def, before.context.releases + 1, rng),
       // Release Leapfrog: labs with a product finish models privately and the calendar picks their launch day.
       hold: state.leapfrog.enabled && def.models !== null,
+      closed: law.closed,
     };
     const { stored, effects } = step(rivalMachine, before, event);
     race.rivals[i] = stored;

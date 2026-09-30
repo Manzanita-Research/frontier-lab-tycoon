@@ -2,6 +2,8 @@ import { enableLeapfrog } from "./race/leapfrog/driver";
 import { enablePapers } from "./race/papers/driver";
 import { enableHearing } from "./hearing/driver";
 import { enableYacht } from "./yacht/driver";
+import { enableCapture } from "./capture/driver";
+import { enablePromises } from "./promises/driver";
 import { BUILDINGS, type BuildingKind } from "../content/buildings";
 import { STAFF } from "../content/staff";
 import { HUD_PANELS, PROGRESSION, type HudPanel, type Level, type ProgressView, type SystemId } from "../content/progression";
@@ -60,6 +62,8 @@ export function updateProgression(s: GameState) {
     if (row.systems.includes("papers") && !s.flags.papersOff) enablePapers(s);
     if (row.systems.includes("hearing") && !s.flags.hearingOff) enableHearing(s);
     if (row.systems.includes("yacht") && !s.flags.yachtOff) enableYacht(s);
+    if (row.systems.includes("promises") && !s.flags.promisesOff) enablePromises(s);
+    if (row.systems.includes("capture") && !s.flags.captureOff) enableCapture(s);
     const items = [...row.buildings.map((k) => BUILDINGS[k].name), ...row.staff.map((k) => STAFF[k].title), ...row.systems];
     s.unlockCards ??= [];
     s.unlockCards.push({ id: row.id, title: `New! ${row.name}`, body: row.goal.text, items });

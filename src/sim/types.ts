@@ -6,6 +6,8 @@ import type { BuildingKind } from "../content/buildings";
 import type { CollusionState, Investigation } from "./collusion/state";
 import type { HearingState } from "./hearing/state";
 import type { YachtState } from "./yacht/state";
+import type { BillState } from "./capture/state";
+import type { PromisesState } from "./promises/state";
 import type { NeedKey } from "../content/needs";
 import type { DisastersState } from "./disasters/types";
 import type { ArcStored } from "./machines/arc";
@@ -198,6 +200,16 @@ export interface GoalProgress {
 
 export type Outcome = "playing" | "won" | "lost";
 
+/** A note on the lab's file for the auditors (FLT-19's report card reads them): which grade, how many grades, why. */
+export interface AuditorNote {
+  day: number;
+  grade: string;
+  amount: number;
+  text: string;
+  /** The machine that filed it ("capture"), or "". */
+  owner: string;
+}
+
 /** The event card that is open right now; the game is paused until the player picks a choice. */
 export interface OpenEvent {
   id: string;
@@ -305,6 +317,12 @@ export interface GameState {
   hearing?: HearingState;
   /** FLT-24 the yacht summit: absent until the pack is enabled (Level 5, Scrutiny). */
   yacht?: YachtState;
+  /** FLT-22 Regulatory Capture: the bill the lab helps draft. Absent until the pack is enabled (Level 5, Scrutiny). */
+  bill?: BillState;
+  /** FLT-23 the Promise Tracker: the Senate's docket, promises and roll calls. Absent until the pack is enabled (Level 5). */
+  promises?: PromisesState;
+  /** Notes on the lab's file for the auditors (the Vocabulary's `auditor.note`; FLT-22's exposed bill files one). FLT-19 reads them. */
+  auditorNotes?: AuditorNote[];
   /** Generic inquiries started by the Vocabulary; the owning machine completes them. */
   investigations?: Record<string, Investigation>;
 }

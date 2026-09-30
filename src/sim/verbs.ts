@@ -143,6 +143,8 @@ export const STATS: Record<string, (state: GameState, run: DisasterRun | null) =
   disasters: (s) => s.disasters.started,
   /** Regulatory capture, 0 to 100 (FLT-21's hearings move it; FLT-22 reads it). */
   capture: (s) => s.capture ?? 0,
+  /** Senate hearings the lab has sat through, all time (FLT-21). FLT-22 and FLT-23 wake after the first. */
+  hearings: (s) => s.hearing?.history.length ?? 0,
   /** This disaster's fires (or outages) still going. */
   burning: (s, run) => (run ? run.fires.filter((id) => s.buildings.some((b) => b.id === id && b.broken)).length : 0),
   /** How many other working buildings of the target's kind a fire could spread to. */
@@ -227,6 +229,8 @@ export interface VerbEnv {
   run: DisasterRun | null;
   /** A non-disaster machine can own effects and staff diversions too. */
   owner?: string;
+  /** Extra template variables the owner fills in (`{act}` for FLT-22's bill). */
+  vars?: Record<string, string>;
 }
 
 interface VerbDef {
@@ -285,7 +289,7 @@ function placeOf(env: VerbEnv, on: string): [number, number] | null {
 function say(env: VerbEnv, text: string): string {
   const { state, run } = env;
   const target = run ? state.buildings.find((b) => b.id === run.target) : undefined;
-  const vars: Record<string, string> = { ...templateVars(state, {}, env.rng), ...(run?.vars ?? {}) };
+  const vars: Record<string, string> = { ...templateVars(state, {}, env.rng), ...(run?.vars ?? {}), ...(env.vars ?? {}) };
   if (target) vars.target = BUILDINGS[target.kind].name;
   return fillTemplate(text, vars);
 }
@@ -389,8 +393,33 @@ export const VERBS: Record<string, VerbDef> = {
     spec: { mult: "number", days: "number?" },
     run: (env, p) => addEffect(env, "auditor", p.mult as number, p.days as number | undefined),
   },
+  "auditor.note": {
+    doc: "Put a note on the lab's file for the auditors (FLT-19): a mark on one report-card `grade` (`honesty`, ...), `amount` grades up (+) or down (-), and a line of `text`. FLT-19's grades read `state.auditorNotes`.",
+    spec: { grade: "string", amount: "number", text: "string" },
+    run: (env, p) => {
+      const { state } = env;
+      state.auditorNotes ??= [];
+      state.auditorNotes.push({ day: state.day, grade: p.grade as string, amount: p.amount as number, text: say(env, p.text as string), owner: ownerOf(env) });
+      if (state.auditorNotes.length > 24) state.auditorNotes.splice(0, state.auditorNotes.length - 24);
+    },
+  },
+  "rival.growth": {
+    doc: "Multiply what a release adds for the rival labs in `who` (rival ids, `below` for the labs behind you, `above`, `open` for the open-weights labs, `!id` to leave one out; none means all). Lasts `days`, or as long as its owner.",
+    spec: { mult: "number", who: "strings?", days: "number?" },
+    run: (env, p) => addEffect(env, "rivalGrowth", p.mult as number, p.days as number | undefined, (p.who as string[] | undefined) ?? []),
+  },
+  "rival.pace": {
+    doc: "Multiply how fast the rival labs in `who` train (0.5 is half speed: runs take twice as long). Same `who` and `days` as `rival.growth`.",
+    spec: { mult: "number", who: "strings?", days: "number?" },
+    run: (env, p) => addEffect(env, "rivalPace", p.mult as number, p.days as number | undefined, (p.who as string[] | undefined) ?? []),
+  },
+  "rival.closed": {
+    doc: "The rival labs in `who` may not ship open weights (their releases go out closed, so no open drop eats your revenue). Same `who` and `days` as `rival.growth`.",
+    spec: { who: "strings?", days: "number?" },
+    run: (env, p) => addEffect(env, "rivalClosed", 1, p.days as number | undefined, (p.who as string[] | undefined) ?? []),
+  },
   "effects.end": {
-    doc: "End this disaster's open-ended effects (the ones with no `days`: drain, spike, revenue, auditor), all of them or one `kind`. Effects with a `days` run their course.",
+    doc: "End this owner's open-ended effects (the ones with no `days`: drain, spike, revenue, auditor, the rival rules), all of them or one `kind`. Effects with a `days` run their course.",
     spec: { kind: "string?" },
     run: (env, p) => {
       const owner = ownerOf(env);

@@ -22,7 +22,8 @@ describe("midgame scenario", () => {
     // FLT-49 preserves the full starter-campus preset, completes its ladder, and replays
     // paid confirmations. Changed movement/attendance draws shift the real opening day.
     // FLT-21/24: the completed ladder also wakes The Hearing and the yacht summit.
-    expect(digest(s)).toBe("63200eea");
+    // FLT-22/23: only the four new cards' idle arcs (bill and vote cards) are new; without them the world is "63200eea".
+    expect(digest(s)).toBe("4812b473");
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);

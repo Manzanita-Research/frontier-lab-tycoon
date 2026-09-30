@@ -808,6 +808,12 @@
           "tone": "bad"
         },
         {
+          "id": "hearing-capture",
+          "trigger": "capture",
+          "text": "Senate summons {lab} to explain the law {lab} wrote about {lab}",
+          "tone": "bad"
+        },
+        {
           "id": "hearing-disaster",
           "trigger": "disaster",
           "text": "Senators demand {lab} explain \"the incident\" using small words and a diagram",
@@ -1094,6 +1100,11 @@
           "id": "subpoena",
           "topic": "the yacht",
           "flagPrefix": "subpoena:"
+        },
+        {
+          "id": "capture",
+          "topic": "the bill {lab} wrote",
+          "flagPrefix": "capture:exposed"
         },
         {
           "id": "disaster",

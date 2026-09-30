@@ -3,6 +3,8 @@ import { applyCommands, type Command } from "./commands";
 import { applyCollusionChoices, dailyCollusion, updateCollusion } from "./collusion/driver";
 import { applyHearingChoices, dailyHearing } from "./hearing/driver";
 import { applyYachtChoices, dailyYacht } from "./yacht/driver";
+import { applyPromisesChoices, dailyPromises } from "./promises/driver";
+import { applyCaptureChoices, dailyCapture } from "./capture/driver";
 import { TICKS_PER_DAY } from "./constants";
 import { dailyBreakdowns } from "./breakdowns";
 import { dailyDisasters, updateDisasters } from "./disasters/driver";
@@ -67,6 +69,9 @@ export function tick(state: GameState, commands: readonly Command[] = []) {
     // The Circus (FLT-24, then FLT-21): the yacht first, so a subpoena it files today reaches the Senate today.
     if (systemUnlocked(state, "yacht")) dailyYacht(state);
     if (systemUnlocked(state, "hearing")) dailyHearing(state);
+    // The Senate (FLT-23) before the bill (FLT-22): a roll call counted today is heard by the bill today.
+    if (systemUnlocked(state, "promises")) dailyPromises(state);
+    if (systemUnlocked(state, "capture")) dailyCapture(state);
     dailyThoughts(state, rng);
     dailyGoals(state, rng);
     if (systemUnlocked(state, "events")) dailyEvents(state);
@@ -94,4 +99,6 @@ export function applyNow(state: GameState, commands: readonly Command[]) {
 function applyCircusChoices(state: GameState) {
   if (systemUnlocked(state, "yacht")) applyYachtChoices(state);
   if (systemUnlocked(state, "hearing")) applyHearingChoices(state);
+  if (systemUnlocked(state, "promises")) applyPromisesChoices(state);
+  if (systemUnlocked(state, "capture")) applyCaptureChoices(state);
 }
