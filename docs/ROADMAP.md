@@ -34,7 +34,7 @@ The FLT-13 Fal 3D experiment is done; its recommendation is hybrid, and rolling 
 | # | Task | What | Notes |
 |---|---|---|---|
 | now | FLT-10 | **Operations**: staff, slop, breakdowns, queues | building |
-| now | FLT-14 | **Skin system** + **Frontier 95** default skin; then 5 more skins (Swag Drop, Karaoke Night, Field Almanac, Discovery Disc '96, GeoCities) | Jem approves before merge; the ports run on Codex Sol |
+| now | FLT-14 | **Skin system** + **Frontier 95** default skin; then 5 more skins (Swag Drop, Karaoke Night, Field Almanac, Discovery Disc '96, Homepage '98) | Jem approves before merge; the ports run on Codex Sol |
 | next | FLT-16 | **First-run + pacing**: calm start, RCT-style visitor growth, guided opening | urgent; Jem plays it before merge |
 | then | FLT-15 | **Agent-native modding**: every extension point is an Effect service, every mod a Layer; `?mod=` links; `flt-mod check`; a mod-authoring skill | M1 after the FLT-14 skin format |
 | then | FLT-27 | **Release Leapfrog**, the heartbeat of The Race: rival drops on a relentless paired cadence, a live parody benchmark leaderboard, "ship now at 94% or lose the news cycle", share-of-voice, livestream chaos, benchmark saturation | first after the bones |
