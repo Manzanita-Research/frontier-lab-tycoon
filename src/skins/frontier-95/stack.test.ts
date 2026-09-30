@@ -11,6 +11,7 @@ function stackOf(box: number, inner: number, windows: [id: string, opened: numbe
     folds[id] = vi.fn<() => void>();
     stack.entries.set(id, { minimised, opened, minimise: folds[id]! });
   }
+  stack.clock = windows.length;
   return { stack, folds };
 }
 
@@ -30,15 +31,29 @@ describe("the window stack", () => {
     expect(folds.staff).not.toHaveBeenCalled();
   });
 
-  it("folds one window per shortfall: a second report in the same commit does not fold another", () => {
+  it("folds one window per shortfall: nothing else folds until that fold has landed", () => {
     const { stack, folds } = stackOf(500, 640, [["staff", 3], ["arena", 1], ["thoughts", 2]]);
     stack.fit();
-    stack.fit();
+    stack.fit(); // the resize observer, or another window reporting, before the first fold has landed
     expect(folds.arena).toHaveBeenCalledTimes(1);
-    // Once the first fold has landed and it still does not fit, the next oldest goes.
-    stack.inner = { offsetHeight: 560 } as HTMLDivElement;
-    stack.entries.set("arena", { minimised: true, opened: 1, minimise: folds.arena! });
-    stack.fit();
+    expect(folds.thoughts).not.toHaveBeenCalled();
+    // The fold lands (the Arena reports it is folded) and it now fits: nothing more folds.
+    stack.inner = { offsetHeight: 480 } as HTMLDivElement;
+    stack.report("arena", true, folds.arena!);
+    expect(folds.thoughts).not.toHaveBeenCalled();
+    // If it still does not fit once the first has landed, the next oldest goes.
+    const again = stackOf(500, 640, [["staff", 3], ["arena", 1], ["thoughts", 2]]);
+    again.stack.fit();
+    again.stack.inner = { offsetHeight: 560 } as HTMLDivElement;
+    again.stack.report("arena", true, again.folds.arena!);
+    expect(again.folds.thoughts).toHaveBeenCalledTimes(1);
+  });
+
+  it("gives a window that is opened again the newest stamp, so an older one folds next time", () => {
+    const { stack, folds } = stackOf(500, 640, [["arena", 1, true], ["thoughts", 2], ["staff", 3]]);
+    stack.report("arena", false, folds.arena!);
+    expect(stack.entries.get("arena")!.opened).toBeGreaterThan(stack.entries.get("staff")!.opened);
+    stack.fit(); // now: 640 > 500 with thoughts the oldest open one
     expect(folds.thoughts).toHaveBeenCalledTimes(1);
   });
 

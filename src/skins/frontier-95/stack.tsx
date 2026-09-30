@@ -19,6 +19,10 @@ export interface Stack {
   clock: number;
   box: HTMLDivElement | null;
   inner: HTMLDivElement | null;
+  /** A fold has been asked for and has not landed yet: what is measured is stale, so nothing else may fold for it. */
+  folding: boolean;
+  /** A window says whether it is folded (after every change of that). Clears `folding`, then re-checks the fit. */
+  report(id: string, minimised: boolean, minimise: () => void): void;
   fit(): void;
 }
 
@@ -31,16 +35,30 @@ export function makeStack(): Stack {
     clock: 0,
     box: null,
     inner: null,
+    folding: false,
+    report(id, minimised, minimise) {
+      const before = stack.entries.get(id);
+      const reopened = !minimised && (!before || before.minimised);
+      stack.entries.set(id, { minimised, minimise, opened: reopened ? ++stack.clock : (before?.opened ?? 0) });
+      stack.folding = false;
+      stack.fit();
+    },
     fit() {
       const { box, inner } = stack;
-      if (!box || !inner || inner.offsetHeight <= box.clientHeight + 1) return;
+      if (stack.folding || !box || !inner || inner.offsetHeight <= box.clientHeight + 1) return;
       const open = [...stack.entries.values()].filter((e) => !e.minimised).sort((a, b) => a.opened - b.opened);
       // Never fold the newest (or only) window: it is the one the player just asked for.
       const oldest = open.length > 1 ? open[0] : undefined;
       if (!oldest) return;
-      // Marked at once so two windows reporting in the same commit do not both fold for one shortfall.
+      // One fold per shortfall: until it has landed (its window reports back) the measurement is out of date, and two
+      // windows reporting in the same commit, or the resize observer, would fold a second one for the same gap.
       oldest.minimised = true;
+      stack.folding = true;
       oldest.minimise();
+      // If the fold never lands (the window ignored it), do not block the stack for good.
+      setTimeout(() => {
+        stack.folding = false;
+      }, 250);
     },
   };
   return stack;
@@ -86,11 +104,7 @@ export function useStackWindow(id: string, minimised: boolean, setMinimised: (mi
   const fold = useRef(setMinimised);
   fold.current = setMinimised;
   useLayout(() => {
-    if (!stack) return;
-    const before = stack.entries.get(id);
-    const reopened = !minimised && (!before || before.minimised);
-    stack.entries.set(id, { minimised, minimise: () => fold.current(true), opened: reopened ? ++stack.clock : (before?.opened ?? 0) });
-    stack.fit();
+    stack?.report(id, minimised, () => fold.current(true));
   }, [stack, id, minimised]);
   useLayout(
     () => () => {
