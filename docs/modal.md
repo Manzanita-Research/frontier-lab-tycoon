@@ -18,11 +18,10 @@ bb thread spawn \
 bb tasks attach FLT-n --thread <new thread id>
 ```
 
-- **Model routing (Jem, Sep 30). Always pass `--model` explicitly; the catalog on Modal can be stale:**
-  - **Codex `gpt-6.1-sol`** (`--provider codex --model gpt-6.1-sol --reasoning-level high`; **never** Sol 5.6/6.0 or Astra): backend, logic, the sim, XState/Effect, mods and loader, infra, tests, balance tooling, **and 3D** (scene, models, camera, particles, shaders).
-  - **Claude Sonnet 5.5** (`--provider claude-code --model claude-sonnet-5-5 --reasoning-level xhigh`): **2D UI only** (HUD, skins, panels, dialogs, bubbles, ticker).
-  - **Claude Opus 5.5** (xhigh): the lead only, for direction, specs and review.
-  - **Mixed tasks:** split them, or give the UI part to Sonnet. **Never** Sonnet 5, Opus 5 or older.
+- **Model routing (the charter's "Models" section wins; latest Sep 30). Always pass `--model` explicitly on Modal (its catalog is stale and defaults to Opus 5):**
+  - **FLT builders: Claude Opus 5.5** (`--provider claude-code --model claude-opus-5-5 --reasoning-level high`) implement everything: 2D UI, sim/logic, tests, infra and 3D. Up to 5 Claude builders at once. Sonnet 5.5 (`--model claude-sonnet-5-5`) is fine for small, well-scoped chores.
+  - **The lead: Claude Opus 5.5 at `xhigh`**, for direction, specs and review.
+  - **Codex `gpt-6.1-sol`:** only if Jem asks, or if Claude usage is near the limit (`bb settings usage`). If a machine has no Claude login, say so; **don't fall back to Sol.** **Never** Sonnet 5, Opus 5 or older.
   - **Proving the model:** the builder's first task comment states its exact model. Codex doesn't show the model ID in its prompt, so Sol builders prove it from `~/.codex/sessions/**/*.jsonl` (`grep -rhoE '"model":"[^"]+"' ~/.codex/sessions | sort | uniq -c`).
   - **Codex on Modal:** the image pins Codex CLI 0.159.2, which has Sol 6.1 in its catalog; older versions don't. Fresh machines have **no Codex login** until a durable auth route exists (asked of Jem via desk). Until then, run Sol builders on the already-logged-in machine with `--machine <host> --new-environment worktree`.
 - Start every prompt with the kind (`Kind: explore.`) and `House rules: <charter path>`, then the task key, and tell the builder to read `AGENTS.md` and `docs/DESIGN.md`.
