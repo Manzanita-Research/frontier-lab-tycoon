@@ -45,6 +45,14 @@
       "photo",
       "night",
       "release"
+    ],
+    "skins": [
+      "overview",
+      "inspector",
+      "event",
+      "menu",
+      "phone",
+      "photo"
     ]
   },
   "scenes": {
@@ -74,6 +82,17 @@
         },
         {
           "wait": 800
+        }
+      ]
+    },
+    "menu": {
+      "title": "The Start menu / build bar open",
+      "steps": [
+        {
+          "eval": "(f, w) => { const b = document.querySelector('[data-testid=\"start-button\"]'); if (b) b.click(); else f.send({ type: 'SET_TOOL', tool: 'cluster' }); }"
+        },
+        {
+          "wait": 500
         }
       ]
     },

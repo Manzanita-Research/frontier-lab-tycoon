@@ -27,13 +27,13 @@ pnpm shot <url> <png> # one headless screenshot (Playwright + SwiftShader)
 ### Before/after screenshots: `pnpm shots`
 
 ```sh
-pnpm shots                                   # 4 standard scenes: overview, inspector, event, phone (~2 min on a Modal builder)
+pnpm shots                                   # 4 standard scenes: overview, inspector, event, phone (~2.5 min cold on a Modal builder)
 pnpm shots --scenes overview,ops,night --diff --out docs/img/flt-99
 pnpm shots --skin frontier-95                # a skin on both builds; `--skin all` = a gallery of every skin
 pnpm shots --list                            # every scene and set
 ```
 
-It builds `main` in a temporary worktree (cached by commit in `shots/.cache/`) and your checkout, serves both, and writes `<out>/{before,after,compare}/<scene>.png` plus `report.md`, whose table you paste into the PR body. `shots/` is gitignored scratch; pass `--out docs/img/<task>` and commit that directory so the PR's image links resolve. A scene is data (`?seed`, `?moment=`, `?zoom`, a few steps), so a task adds its own in `scripts/shots.scenes.json`. The game is paused and the news ticker is parked, so a build compared with itself differs by about 0.2% of pixels; a scene under 0.5% is reported as unchanged. Run one at a time (it is CPU-heavy on 1 vCPU).
+It builds `main` in a temporary worktree (cached by commit in `shots/.cache/`) and your checkout, serves both, and writes `<out>/{before,after,compare}/<scene>.png` plus `report.md`, whose table you paste into the PR body. `shots/` is gitignored scratch; pass `--out docs/img/<task>` and commit that directory so the PR's image links resolve. A scene is data (`?seed`, `?moment=`, `?zoom`, a few steps), so a task adds its own in `scripts/shots.scenes.json`. The game is paused and the news ticker is parked, so a build compared with itself differs by about 0.2% of pixels; a scene under 0.5% is reported as unchanged. Every capture and every compare image is checked for blank or single-colour output (a dark frame, a canvas that never drew, images that didn't load), and the run exits 1 with a loud banner if any is: never paste those as evidence. `pnpm shots --verify <png|dir>` runs the same check on existing images. Run one at a time (it is CPU-heavy on 1 vCPU).
 
 ## Architecture in one breath
 
