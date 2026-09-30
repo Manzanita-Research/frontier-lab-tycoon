@@ -24,6 +24,8 @@ import type { NewsItem, Tone, WalkerKind } from "../../sim/types";
 import { trendOf, VIBES_MAX, WEIGHTS } from "../../sim/vibes";
 import { NO_MOTION, type MotionView } from "./leapfrogMotion";
 import { SKIN_API_VERSION } from "./types";
+import { HELP_BUILDINGS, HELP_LOOP, HELP_NUMBERS, HELP_TITLE } from "../../content/help";
+import { playableOf, type PlayableInput } from "./playable";
 import type {
   ArenaVM, BenchCellVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HudVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
   ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, ResponseVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, StreamVM, ThoughtRowVM, TrainingVM, TrendVM, VoiceVM, WalkerKindVM,
@@ -57,6 +59,8 @@ export interface HudInput {
   room: { archive: readonly Edition[]; view: "archive" | Edition | null; unread: readonly string[]; storage: boolean };
   /** How many chat messages have arrived so far. */
   chatCount: number;
+  /** Help ▸ How to play is open. */
+  helpOpen: boolean;
   mixer: { open: boolean; ready: boolean; muted: boolean; master: number; music: number; sfx: number };
   photo: { on: boolean; time: string; shot: { id: number; url: string; name: string } | null; flash: number };
   skins: SkinPickerVM;
@@ -263,7 +267,7 @@ function buildOf(i: HudInput): { items: BuildItemVM[]; tip: BuildTipVM | null } 
   return { items, tip };
 }
 
-function staffOf(i: HudInput): StaffVM {
+function staffOf(i: HudInput, earned: ReadonlySet<string>): StaffVM {
   const ops = i.snap.ops;
   const row = (o: (typeof ops.staff)[number]): StaffRowVM => ({ id: o.id, job: o.job, title: o.title, name: o.name, status: o.status, color: STAFF[o.job].color, zone: o.zone, leaving: o.leaving });
   const painting = i.zone === null ? null : ops.staff.find((o) => o.id === i.zone);
@@ -273,7 +277,8 @@ function staffOf(i: HudInput): StaffVM {
     payroll: ops.payroll,
     payrollText: ops.staff.length > 0 ? `${formatMoney(ops.payroll)}/day` : "nobody on the payroll",
     painting: painting ? row(painting) : null,
-    jobs: ops.jobs.map((j): StaffJobVM => ({ job: j.job, title: j.title, blurb: j.blurb, salary: j.salary, salaryText: `${formatMoney(j.salary)}/day`, count: j.count, max: j.max, canHire: j.canHire, reason: j.reason, color: STAFF[j.job].color })),
+    // Only the kinds of staff the lab has unlocked can be hired.
+    jobs: ops.jobs.filter((j) => earned.has(j.job)).map((j): StaffJobVM => ({ job: j.job, title: j.title, blurb: j.blurb, salary: j.salary, salaryText: `${formatMoney(j.salary)}/day`, count: j.count, max: j.max, canHire: j.canHire, reason: j.reason, color: STAFF[j.job].color })),
     roster: ops.staff.map(row),
     slopPct: ops.slopPct,
     broken: ops.broken.length,
@@ -567,10 +572,13 @@ function photoOf(i: HudInput): PhotoVM {
 /** A toast that says what a standing warning already says is the warning: it is shown once. */
 const spokenToasts = (i: HudInput) => i.toasts.filter((t) => !i.snap.warnings.includes(t.text));
 
-/** One standing hint at a time, and none while a toast is talking; the gateway hint is redundant once a toast has said it. */
-function standingHints(i: HudInput): HudVM["hints"] {
-  if (spokenToasts(i).length > 0) return [];
-  return !i.snap.hasGateway && !i.toldGateway ? ["gateway"] : i.tapHint ? ["tap"] : [];
+/**
+ * One standing hint at a time, and none while a toast is talking or the coach is (it has the floor); the gateway hint is redundant
+ * once a toast has said it, and pointless while the Gateway is still locked.
+ */
+function standingHints(i: HudInput, play: PlayableInput): HudVM["hints"] {
+  if (spokenToasts(i).length > 0 || play.coach) return [];
+  return !i.snap.hasGateway && !i.toldGateway && play.buildings.has("gateway") ? ["gateway"] : i.tapHint ? ["tap"] : [];
 }
 
 function confirmOf(s: Snapshot): ConfirmVM | null {
@@ -586,26 +594,55 @@ function confirmOf(s: Snapshot): ConfirmVM | null {
   };
 }
 
+function helpOf(items: readonly BuildItemVM[]): HudVM["help"] {
+  const buildings = items
+    .filter((it) => !it.isBulldoze && it.kind !== "staff")
+    .map((it) => ({ kind: it.kind, name: it.name, line: HELP_BUILDINGS[it.kind] ?? `${it.name}: ${it.blurb ?? ""}`.trim() }));
+  return { title: HELP_TITLE, loop: [...HELP_LOOP], buildings, numbers: HELP_NUMBERS.map((n) => ({ ...n })) };
+}
+
+/** What the lab has earned: only these tools are in the build panel (the bulldozer always is), and the Staff tile follows the payroll. */
+function earnedItems(items: BuildItemVM[], play: PlayableInput): BuildItemVM[] {
+  return items.filter((it) => (it.isBulldoze ? true : it.kind === "staff" ? play.visible.staff : it.isPath || play.buildings.has(it.kind)));
+}
+
 export function hudViewModel(i: HudInput): HudVM {
+  const play = playableOf(i.snap);
   const build = buildOf(i);
+  const items = earnedItems(build.items, play);
   const { event, era } = eventOf(i);
   return {
-    progress: i.snap.progress, coach: i.snap.coach, unlockCard: i.snap.unlockCard, hud: i.snap.hud,
+    unlockCard: i.snap.unlockCard, hud: i.snap.hud,
     apiVersion: SKIN_API_VERSION,
     stats: statsOf(i),
     training: trainingOf(i.snap),
     objectives: objectivesOf(i.snap),
     inspector: inspectorOf(i.snap.inspect, i.follow, i.snap.labName),
-    buildItems: build.items,
+    buildItems: items,
     buildTip: build.tip,
     speed: speedOf(i.speed),
-    staff: staffOf(i),
+    staff: staffOf(i, play.staff),
     bubbles: bubblesOf(i),
     ticker: i.news.slice(-TICKER_ITEMS).map((n) => ({ id: n.id, text: n.text, tone: n.tone })),
     toasts: spokenToasts(i).map((t) => ({ id: t.id, text: t.text, tone: t.tone })),
     // One hint at a time, and none while a toast is talking; the gateway hint is redundant once a toast has said it.
-    hints: standingHints(i),
+    hints: standingHints(i, play),
     warnings: [...i.snap.warnings],
+    progress: {
+      unlocked: { buildings: [...play.buildings], staff: [...play.staff], systems: [...play.systems] },
+      level: play.level,
+      levelName: play.levelName,
+      goal: {
+        ...play.goal,
+        line: play.goal.text ? `${play.goal.text} · ${Math.min(play.goal.current, play.goal.target)}/${play.goal.target}` : "",
+        ratio: play.goal.target > 0 ? Math.max(0, Math.min(1, play.goal.current / play.goal.target)) : 0,
+      },
+      teasers: play.teasers.map((t) => ({ ...t })),
+    },
+    visible: play.visible,
+    coach: play.coach,
+    unlock: play.unlock,
+    help: i.helpOpen ? helpOf(items) : null,
     confirm: confirmOf(i.snap),
     event,
     thoughtsPanel: thoughtsOf(i),

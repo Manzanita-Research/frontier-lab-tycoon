@@ -986,6 +986,28 @@
     padding: 4px 4px 4px;
     scroll-snap-type: x proximity;
   }
+  .gc-b88.locked {
+    opacity: 0.6;
+    filter: grayscale(1);
+    border-style: dashed;
+    cursor: default;
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  .gc-b88.help {
+    background: #806000;
+  }
+  .gc-b88.locked,
+  .gc-b88.help {
+    .nm {
+      font-size: 14px;
+    }
+    small {
+      font-size: 11px;
+      white-space: normal;
+      line-height: 1;
+    }
+  }
   .gc-b88 {
     position: relative;
     flex: 0 0 auto;
@@ -1763,9 +1785,29 @@
     }
     .gc-nav {
       display: contents;
-      .br,
-      .mid {
+      .br {
         display: none;
+      }
+      /* Between the two arrows: the link that opens the ring (the coach's first target). The rest of the line has no room. */
+      .mid {
+        grid-column: 2;
+        grid-row: 1;
+        display: flex;
+        justify-content: center;
+        font-size: 0;
+        .gc-ringname {
+          display: none;
+        }
+        .gc-build {
+          font-size: 16px;
+          padding: 10px 12px;
+          border: 2px outset #fff;
+          background: #e0e0e0;
+          text-decoration: none;
+          color: #000080;
+          font-weight: 700;
+          text-align: center;
+        }
       }
       .prev,
       .next {

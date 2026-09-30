@@ -101,7 +101,7 @@ describe("the token and string contract", () => {
 
   it("has every required token in the base set, and a reduced variant for every duration", () => {
     for (const k of REQUIRED_TOKENS) expect(BASE_TOKENS, k).toHaveProperty([k]);
-    for (const m of ["fast", "base", "slow"]) expect(BASE_TOKENS).toHaveProperty([`motion.reduced.${m}`]);
+    for (const m of ["fast", "base", "slow", "pulse"]) expect(BASE_TOKENS).toHaveProperty([`motion.reduced.${m}`]);
   });
   it("names CSS variables predictably", () => {
     expect(tokenVar("color.panel")).toBe("--flt-color-panel");

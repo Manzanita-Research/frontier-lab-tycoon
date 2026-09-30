@@ -8,7 +8,7 @@ import { createRng } from "../../rng";
 import { createTestCampus as createInitialState } from "../../testkit";
 import { applyNow, tick } from "../../tick";
 import { dailyWalkers } from "../../walkers";
-import { answer } from "../../testkit";
+import { answer, createTestCampus } from "../../testkit";
 import { stagePapers } from "./demo";
 import { P, PAPERS_PACK } from "./content";
 import { dailyPapers, disablePapers, enablePapers, publishPaper, setPublicationPolicy } from "./driver";
@@ -186,7 +186,7 @@ describe("papers integration", () => {
     const trials = (pull: number) => {
       let count = 0, focus = 0;
       for (let seed = 1; seed <= 200; seed++) {
-        const s = createInitialState(seed);
+        const s = createTestCampus(seed); // a working campus: applicants come for a hall, and the first-run opening has none (FLT-16)
         s.walkers = s.walkers.filter((w) => w.kind !== "researcher");
         s.vibes.value = 700;
         s.recruitingPull = pull;

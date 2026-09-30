@@ -1,18 +1,19 @@
-import { useT } from "../../context";
+import { useCoach, useT } from "../../context";
 import type { SlotPropsMap } from "../../types";
 
 /** The training chip: which model is cooking and how far along it is. */
 export function Training({ training }: SlotPropsMap["Training"]) {
   const t = useT();
+  const coach = useCoach();
   if (!training.hasHall) {
     return (
-      <div className="chip panel">
+      <div className="chip panel" {...coach.attrs("training")}>
         <div className="chip-title">{t("training.noHall")}</div>
       </div>
     );
   }
   return (
-    <div className="chip panel">
+    <div className="chip panel" {...coach.attrs("training")}>
       <div className="chip-title">
         {t("training.title")} <b>{training.name}</b> · {training.pctText}
       </div>

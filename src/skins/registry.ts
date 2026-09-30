@@ -72,7 +72,7 @@ export interface Prepared {
 }
 
 const decl = (tokens: Readonly<Record<string, string>>) => Object.entries(tokens).map(([k, v]) => `${tokenVar(k)}:${v};`).join("");
-const MOTION = ["fast", "base", "slow"];
+const MOTION = ["fast", "base", "slow", "pulse"];
 
 /** The token stylesheet. Reduced motion (the OS setting, or `data-motion="reduced"`) swaps every duration for its reduced variant. */
 export function tokenSheet(id: string, tokens: Readonly<Record<string, string>>): string {

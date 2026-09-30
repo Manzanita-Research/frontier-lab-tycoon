@@ -14,9 +14,10 @@ export function Bubble({ bubble }: SlotPropsMap["Bubble"]) {
   );
 }
 
-const TONE_GLYPH: Record<ToneVM | "hint", keyof typeof GLYPHS> = {
+const TONE_GLYPH: Record<ToneVM | "hint" | "warn", keyof typeof GLYPHS> = {
   good: "star",
   bad: "warn",
+  warn: "warn",
   joke: "laugh",
   neutral: "info",
   hint: "tip",

@@ -1,5 +1,3 @@
-import type { CoachMark } from "../../content/coach";
-import type { ProgressView, UnlockCard, HudPanel } from "../../content/progression";
 // The modding contract: everything a skin may know about the game, as plain JSON, and everything it may ask for.
 //
 // A skin gets `vm` (a slice of `HudVM`) and `actions` (`HudActions`) and nothing else. It never imports `src/sim/**`,
@@ -253,6 +251,75 @@ export interface ConfirmVM {
   runwayText: string;
   /** "This leaves 1.8 months of runway. The board will have questions." */
   message: string;
+}
+
+// ---- Playable v1: what the player has unlocked, the coach marks, and the "New!" card ----
+
+/** The HUD panels the player earns as the lab grows (a hidden panel is simply not drawn). */
+export type HudPanelId = "revenue" | "vibes" | "arena" | "rnd" | "thoughts" | "news" | "staff" | "events" | "papers" | "disasters";
+export type VisibleVM = Record<HudPanelId, boolean>;
+
+/** A locked item the build panel teases: "??? · ship your first model". */
+export interface TeaserVM {
+  label: string;
+  hint: string;
+}
+
+export interface GoalVM {
+  /** "Ship your first model" */
+  text: string;
+  current: number;
+  target: number;
+  /** "Ship your first model · 0/1" */
+  line: string;
+  /** 0 to 1 */
+  ratio: number;
+}
+
+export interface ProgressVM {
+  unlocked: { buildings: string[]; staff: string[]; systems: string[] };
+  /** 1 to 5: "Garage", "Open for business", "Growing team", "The Race", "Scrutiny". */
+  level: number;
+  levelName: string;
+  goal: GoalVM;
+  teasers: TeaserVM[];
+}
+
+/**
+ * One coach mark: a dimmed screen with a spotlight on `[data-coach="<target>"]`, and a line of copy. It waits for the player to do
+ * the thing (never a Continue button, never a pause). `suggest` says where the map's ghost tiles are.
+ */
+export interface CoachVM {
+  id: string;
+  /** 1-based, of `of` ("3 of 7"). */
+  step: number;
+  of: number;
+  text: string;
+  /** "start", "build:path", "build:hall", "training", "build:gateway", "stat:runway", "goals" or "map:suggest". */
+  target: string;
+  /** An "info" line (waitFor "timer") fades on its own; the others wait for the action. */
+  waitFor: "action" | "timer";
+  canSkip: boolean;
+  suggest?: { kind: "path"; tiles: [number, number][] } | { kind: "building"; building: string; x: number; z: number };
+}
+
+/** The small "New!" card that comes with a level-up. */
+export interface UnlockCardVM {
+  id: string;
+  title: string;
+  body: string;
+  items: string[];
+}
+
+/** Help ▸ How to play. Only present while the window is open. */
+export interface HelpVM {
+  title: string;
+  /** The loop in five lines. */
+  loop: string[];
+  /** One line for each building you have unlocked. */
+  buildings: { kind: string; name: string; line: string }[];
+  /** What cash, runway, Vibes and hype mean. */
+  numbers: { name: string; line: string }[];
 }
 
 export interface ChoiceVM {
@@ -607,10 +674,8 @@ export interface LayoutVM {
 }
 
 export interface HudVM {
-  progress: ProgressView;
-  coach: CoachMark | null;
-  unlockCard: UnlockCard | null;
-  hud: { visible: Record<HudPanel, boolean> };
+  unlockCard: UnlockCardVM | null;
+  hud: { visible: VisibleVM };
   apiVersion: typeof SKIN_API_VERSION;
   stats: StatsVM;
   training: TrainingVM;
@@ -626,6 +691,16 @@ export interface HudVM {
   hints: HintId[];
   /** Standing warnings ("Your entrance isn't connected...", low runway with ways out): they stay until fixed. */
   warnings: string[];
+  /** Where the lab is on the ladder, the one goal in front of you, and what the build panel teases. */
+  progress: ProgressVM;
+  /** Which HUD panels are earned yet. Draw only these. */
+  visible: VisibleVM;
+  /** The coach mark on screen, or null (none, skipped, or finished). */
+  coach: CoachVM | null;
+  /** The "New!" card, or null. */
+  unlock: UnlockCardVM | null;
+  /** Help ▸ How to play, while it is open. */
+  help: HelpVM | null;
   /** A spend waiting for a yes or a no (also holds time). */
   confirm: ConfirmVM | null;
   event: EventVM | null;
@@ -644,9 +719,6 @@ export interface HudVM {
 
 /** Everything a skin may ask the game to do. Each one is safe to call at any time; the game ignores what does not apply. */
 export interface HudActions {
-  coachSkip(): void;
-  coachReplay(): void;
-  dismissUnlock(): void;
   openBuild(): void;
   /** Pick a build tool ("path", "cluster", ..., "bulldoze"). Picking the selected one puts it away; `null` clears. `"staff"` opens or closes the payroll. */
   place(kind: BuildKindVM | null): void;
@@ -666,6 +738,16 @@ export interface HudActions {
   /** Answer `vm.confirm`: go ahead with the spend, or keep the runway. */
   confirmSpend(): void;
   cancelSpend(): void;
+  /** The coach: skip it for good, or start it again (Start ▸ Help ▸ Replay tutorial). */
+  coachSkip(): void;
+  coachReplay(): void;
+  /** Close the "New!" card. */
+  dismissUnlock(): void;
+  /** The build panel opened or shut (the coach's first step waits for it opening). Say it whenever yours does. */
+  buildPanel(open: boolean): void;
+  /** Help ▸ How to play. */
+  openHelp(): void;
+  closeHelp(): void;
   /** Hold time while a panel of yours is open (`id` names it; `false` lets go). Use `useAutoPause` from the kit. */
   holdTime(id: string, open: boolean): void;
   toggleArena(): void;

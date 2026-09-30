@@ -1,7 +1,7 @@
 // Frontier 95's windows: Lab Properties, the copy dialog, sticky notes, Properties of a walker, Task Mangler, Thoughts.txt.
 import { useState } from "react";
-import { Odometer, money, useAutoPause, useSlots } from "../kit";
-import { useT } from "../context";
+import { ALL_VISIBLE, Odometer, money, useAutoPause, useSlots } from "../kit";
+import { useCoach, useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import { Ico, PixelPortrait } from "./icons";
 import { Blocks, Btn, Field, Sticker, Tabs, Win } from "./parts";
@@ -10,13 +10,20 @@ import { useStackWindow } from "./stack";
 type StatsTab = "general" | "finance" | "arena" | "vibes";
 
 /** "Lab Properties": tabs, a Minesweeper-style LED for Vibes, inset fields and a blocky Hype bar. */
-export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
+export function Stats({ stats, layout, visible = ALL_VISIBLE, actions }: SlotPropsMap["Stats"]) {
   const t = useT();
+  const coach = useCoach();
   const [tab, setTab] = useState<StatsTab>("general");
   const [collapsed, setCollapsed] = useState(layout.compact);
   useAutoPause(actions, "stats", layout.compact && !collapsed);
   const title = t("stats.window", { lab: stats.labName });
   const trend = { up: "▲", down: "▼", flat: "" }[stats.vibes.trend];
+  const tabs: { id: StatsTab; label: string }[] = [
+    { id: "general", label: t("stats.tab.general") },
+    ...(visible.revenue ? [{ id: "finance" as const, label: t("stats.tab.finance") }] : []),
+    ...(visible.arena || visible.rnd ? [{ id: "arena" as const, label: t("stats.tab.arena") }] : []),
+    ...(visible.vibes ? [{ id: "vibes" as const, label: t("stats.tab.vibes") }] : []),
+  ];
   const led = (
     <span className="f95-led" aria-label={`${t("stats.vibes")} ${stats.vibes.value}`}>
       <Odometer value={stats.vibes.value} format={(n) => String(Math.max(0, Math.round(n))).padStart(3, "0")} flash={false} />
@@ -30,7 +37,12 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
         <button type="button" className="f95-tb f95-strip" onClick={() => setCollapsed(false)} aria-expanded={false} aria-label={`${title}. ${t("stats.vibes")} ${stats.vibes.value}, ${t("stats.cash")} ${stats.cash.text}, ${t("stats.runway")} ${stats.runway.text}. Tap to open.`}>
           <Ico name="hall" size={18} />
           <span className="f95-tt">
-            <b className="f95-strip-led">{String(stats.vibes.value).padStart(3, "0")}</b> {trend} · {stats.cash.text} · <span className={stats.runway.warning ? "warn" : ""}>{stats.runway.text}</span>
+            {visible.vibes && (
+              <>
+                <b className="f95-strip-led">{String(stats.vibes.value).padStart(3, "0")}</b> {trend} ·{" "}
+              </>
+            )}
+            {stats.cash.text} · <span className={stats.runway.warning ? "warn" : ""}>{stats.runway.text}</span>
           </span>
           <span className="f95-b" data-g="max" aria-hidden>
             <span className="f95-glyph" />
@@ -51,35 +63,39 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
         { g: "close", label: "Close", onClick: () => setCollapsed(true) },
       ]}
     >
-      <Tabs
-        label="Lab Properties"
-        active={tab}
-        onChange={setTab}
-        tabs={[
-          { id: "general", label: t("stats.tab.general") },
-          { id: "finance", label: t("stats.tab.finance") },
-          { id: "arena", label: t("stats.tab.arena") },
-          { id: "vibes", label: t("stats.tab.vibes") },
-        ]}
-      />
+      {/* Only what the lab has earned: at level 1 there are no tabs at all, just cash, runway and the date. */}
+      {tabs.length > 1 && <Tabs label="Lab Properties" active={tab} onChange={setTab} tabs={tabs} />}
       <div className="f95-page" role="tabpanel">
         {tab === "general" && (
           <div className="f95-statrow">
-            <Field label={t("stats.vibes")} sub={<>{trend} {stats.date}</>}>
-              {led}
-            </Field>
-            <Field label={t("stats.cash")} sub={<span className={stats.net.good ? "" : "bad"}>{stats.net.good ? "▲" : "▼"} {stats.net.text}</span>}>
+            {visible.vibes && (
+              <Field label={t("stats.vibes")} sub={<>{trend} {stats.date}</>}>
+                {led}
+              </Field>
+            )}
+            <Field label={t("stats.cash")} sub={visible.revenue ? <span className={stats.net.good ? "" : "bad"}>{stats.net.good ? "▲" : "▼"} {stats.net.text}</span> : undefined}>
               <Odometer className={`f95-v inset ${stats.cash.negative ? "bad" : ""}`} value={stats.cash.value} format={money} />
             </Field>
-            <Field label={t("stats.runway")} sub={stats.runway.warning ? "⚠ Low" : "OK"} warn={stats.runway.warning}>
-              <span className={`f95-v inset ${stats.runway.warning ? "bad" : ""}`}>{stats.runway.text}</span>
-            </Field>
-            <Field label={t("stats.capability")} sub={stats.capability.latestModel ?? "No model yet"}>
-              <Odometer className="f95-v inset" value={stats.capability.value} />
-            </Field>
-            <Field label={t("stats.hype")} sub={`${Math.round(stats.hype.value)} / 100`}>
-              <Blocks value={stats.hype.value / 100} label={t("stats.hype")} />
-            </Field>
+            <span {...coach.attrs("stat:runway")} className="f95-coachwrap">
+              <Field label={t("stats.runway")} sub={stats.runway.warning ? "⚠ Low" : "OK"} warn={stats.runway.warning}>
+                <span className={`f95-v inset ${stats.runway.warning ? "bad" : ""}`}>{stats.runway.text}</span>
+              </Field>
+            </span>
+            {!visible.vibes && (
+              <Field label="Date">
+                <span className="f95-v inset">{stats.date}</span>
+              </Field>
+            )}
+            {visible.vibes && (
+              <>
+                <Field label={t("stats.capability")} sub={stats.capability.latestModel ?? "No model yet"}>
+                  <Odometer className="f95-v inset" value={stats.capability.value} />
+                </Field>
+                <Field label={t("stats.hype")} sub={`${Math.round(stats.hype.value)} / 100`}>
+                  <Blocks value={stats.hype.value / 100} label={t("stats.hype")} />
+                </Field>
+              </>
+            )}
           </div>
         )}
         {tab === "finance" && (
@@ -130,7 +146,7 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
           </div>
         )}
       </div>
-      {stats.vibes.value > 600 && <Sticker kind="star">SUPER<br />VIBES</Sticker>}
+      {visible.vibes && stats.vibes.value > 600 && <Sticker kind="star">SUPER<br />VIBES</Sticker>}
     </Win>
   );
 }
@@ -138,9 +154,10 @@ export function Stats({ stats, layout, actions }: SlotPropsMap["Stats"]) {
 /** The file-copy dialog: "Copying the internet into Frontier-3…", with a Cancel that never quite works. */
 export function Training({ training }: SlotPropsMap["Training"]) {
   const t = useT();
+  const coach = useCoach();
   const eta = training.etaDays === null ? "estimating time remaining…" : t("training.eta", { n: training.etaDays });
   return (
-    <Win className="f95-copy" title={training.hasHall ? t("training.window", { name: training.name }) : "Nothing to copy"} icon="doc" buttons={[{ g: "close", label: "Close", disabled: true }]}>
+    <Win className="f95-copy" attrs={coach.attrs("training")} title={training.hasHall ? t("training.window", { name: training.name }) : "Nothing to copy"} icon="doc" buttons={[{ g: "close", label: "Close", disabled: true }]}>
       <div className="f95-copybody">
         {training.hasHall ? (
           <>
@@ -177,12 +194,27 @@ export function Training({ training }: SlotPropsMap["Training"]) {
 }
 
 /** Desktop sticky notes: flat yellow, 1px border. */
-export function Objectives({ objectives, layout, actions }: SlotPropsMap["Objectives"]) {
+export function Objectives({ objectives, progress, visible = ALL_VISIBLE, layout, actions }: SlotPropsMap["Objectives"]) {
   const t = useT();
+  const coach = useCoach();
+  const goal = progress?.goal.line ? progress.goal : null;
+  // The goal in front of you is one sticky note; the scenario checklist waits for the race.
+  const list = !goal || visible.arena;
   const [open, setOpen] = useState(() => !layout.compact);
-  useAutoPause(actions, "objectives", layout.compact && open);
+  useAutoPause(actions, "objectives", list && layout.compact && open);
   return (
     <div className="f95-notes">
+      {goal && (
+        <div className="f95-post goal" {...coach.attrs("goals")} role="status">
+          <small>{t("objectives.goal")}</small>
+          <b>{goal.line}</b>
+          <span className="f95-goalbar" aria-hidden>
+            <i style={{ width: `${goal.ratio * 100}%` }} />
+          </span>
+        </div>
+      )}
+      {list && (
+      <>
       <button type="button" className="f95-post head" onClick={() => setOpen(!open)} aria-expanded={open}>
         <b>{t("objectives.title")}</b>
         <span className="cnt">
@@ -199,12 +231,14 @@ export function Objectives({ objectives, layout, actions }: SlotPropsMap["Object
               <span className="f95-check" aria-hidden />
               <span>
                 {g.label}
-                <small>{g.progress}</small>
+                {g.progress && <small>{g.progress}</small>}
               </span>
             </li>
           ))}
           <li className="f95-post foot">{t("objectives.by", { date: objectives.deadline })}</li>
         </ul>
+      )}
+      </>
       )}
     </div>
   );

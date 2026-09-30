@@ -1,0 +1,48 @@
+{
+  "base": null,
+  "head": {
+    "branch": "flt-50-playable-ui",
+    "sha": "54fd5fa",
+    "dirty": true
+  },
+  "seconds": 48.027,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "coach-start",
+      "skin": "discovery-disc-96",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/discovery-disc-96/after/coach-start@discovery-disc-96.png",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/discovery-disc-96/compare/coach-start@discovery-disc-96.png",
+      "changed": null
+    },
+    {
+      "scene": "coach-path",
+      "skin": "discovery-disc-96",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/discovery-disc-96/after/coach-path@discovery-disc-96.png",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/discovery-disc-96/compare/coach-path@discovery-disc-96.png",
+      "changed": null
+    },
+    {
+      "scene": "level-3",
+      "skin": "discovery-disc-96",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/discovery-disc-96/after/level-3@discovery-disc-96.png",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/discovery-disc-96/compare/level-3@discovery-disc-96.png",
+      "changed": null
+    },
+    {
+      "scene": "phone-start",
+      "skin": "discovery-disc-96",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/discovery-disc-96/after/phone-start@discovery-disc-96.png",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/discovery-disc-96/compare/phone-start@discovery-disc-96.png",
+      "changed": null
+    },
+    {
+      "scene": "phone-path",
+      "skin": "discovery-disc-96",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/discovery-disc-96/after/phone-path@discovery-disc-96.png",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/discovery-disc-96/compare/phone-path@discovery-disc-96.png",
+      "changed": null
+    }
+  ],
+  "errors": []
+}

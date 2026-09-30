@@ -20,6 +20,7 @@ export function Win({
   label,
   onTitleClick,
   role,
+  attrs,
 }: {
   title: ReactNode;
   icon?: string;
@@ -29,9 +30,11 @@ export function Win({
   label?: string;
   onTitleClick?: () => void;
   role?: string;
+  /** Extra attributes for the window (the coach's `data-coach` hooks). */
+  attrs?: Record<string, string | undefined>;
 }) {
   return (
-    <section className={`f95-win ${className}`} aria-label={label ?? (typeof title === "string" ? title : undefined)} role={role}>
+    <section className={`f95-win ${className}`} aria-label={label ?? (typeof title === "string" ? title : undefined)} role={role} {...attrs}>
       <div className={`f95-tb ${onTitleClick ? "clickable" : ""}`} onClick={onTitleClick}>
         {icon && <Ico name={icon} size={18} />}
         <span className="f95-tt">{title}</span>

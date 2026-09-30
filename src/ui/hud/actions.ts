@@ -7,7 +7,7 @@ import type { Cue } from "../../audio/score";
 import { fx } from "../../render/fx/state";
 import { roomAtom, skipNews, viewRoom } from "../../newsroom/state";
 import { setPhoto, takePhoto } from "../juice/photo";
-import { arenaOpenAtom, chatCountAtom, photoFlashAtom, photoTimeAtom, staffOpenAtom } from "./state";
+import { arenaOpenAtom, chatCountAtom, helpOpenAtom, photoFlashAtom, photoTimeAtom, staffOpenAtom } from "./state";
 import { skinActions } from "./skinControl";
 import type { StaffJob } from "../../sim/types";
 import type { HudActions } from "./types";
@@ -15,9 +15,6 @@ import type { HudActions } from "./types";
 const TIME_HOURS: Record<string, number | null> = { live: null, day: 13, golden: 18.3, night: 22.5 };
 
 export const hudActions: HudActions = {
-  coachSkip: () => send({ type: "COMMAND", command: { type: "coachSkip" } }),
-  coachReplay: () => send({ type: "COMMAND", command: { type: "coachReplay" } }),
-  dismissUnlock: () => send({ type: "COMMAND", command: { type: "dismissUnlock" } }),
   openBuild: () => send({ type: "COMMAND", command: { type: "buildPanelOpened" } }),
   place: (kind) => {
     // "staff" is a tile in the palette that opens the payroll instead of picking a tool.
@@ -47,6 +44,20 @@ export const hudActions: HudActions = {
     if (pending) send({ type: "COMMAND", command: { ...pending.command, confirmed: true } });
   },
   cancelSpend: () => send({ type: "COMMAND", command: { type: "cancelConfirm" } }),
+
+  // Coach and unlock-card commands, with Help closing when the coach replays.
+  coachSkip: () => send({ type: "COMMAND", command: { type: "coachSkip" } }),
+  coachReplay: () => {
+    registry.set(helpOpenAtom, false);
+    send({ type: "COMMAND", command: { type: "coachReplay" } });
+  },
+  dismissUnlock: () => send({ type: "COMMAND", command: { type: "dismissUnlock" } }),
+  // The first coach step waits for the build panel to open: tell the game each time it does.
+  buildPanel: (open) => {
+    if (open) send({ type: "COMMAND", command: { type: "buildPanelOpened" } });
+  },
+  openHelp: () => registry.set(helpOpenAtom, true),
+  closeHelp: () => registry.set(helpOpenAtom, false),
   holdTime: (id, open) => send({ type: "SET_OVERLAY", id, open }),
   toggleArena: () => registry.set(arenaOpenAtom, !registry.get(arenaOpenAtom)),
   keepPlaying: () => send({ type: "KEEP_PLAYING" }),

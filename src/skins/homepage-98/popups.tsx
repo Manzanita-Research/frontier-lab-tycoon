@@ -19,16 +19,17 @@ const TITLE = { good: "Congratulations!!!", bad: "WARNING!!!", joke: "Hey, you!"
 
 /** A toast is a pop-up window. Clicking the link (or the box) makes it go away, as promised. */
 export function Toast({ toast, actions }: SlotPropsMap["Toast"]) {
-  if (toast.tone === "hint") {
+  // A hint is a standing tip and a warning a standing problem: neither can be closed, they go when it comes true / is fixed.
+  if (toast.tone === "hint" || toast.tone === "warn") {
     return (
-      <Pop title={TITLE.hint} className="gc-toast hint" role="status">
+      <Pop title={TITLE[toast.tone]} className={`gc-toast ${toast.tone === "warn" ? "bad" : "hint"}`} role="status">
         {toast.text}
       </Pop>
     );
   }
   const close = () => actions.dismissToast(toast.id);
   return (
-    <Pop title={TITLE[toast.tone === "warn" ? "bad" : toast.tone]} className={`gc-toast ${toast.tone}`} role="status" onClose={close}>
+    <Pop title={TITLE[toast.tone]} className={`gc-toast ${toast.tone}`} role="status" onClose={close}>
       <div>{toast.text}</div>
       <button type="button" className="gc-link" onClick={close}>
         Click here!!!
