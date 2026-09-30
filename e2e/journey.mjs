@@ -8,6 +8,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 // limit is game time from the probe; wall-clock limits are only timeouts. A soft failure (a console error, a slow
 // level, a toast storm, an empty or overlapping window) is recorded with a screenshot and the run keeps playing, so one
 // run reports the whole ladder; a hard one (the game lost, time frozen, the wall cap) ends it. Exit 1 if anything failed.
+// Flat moments (a real minute at 1× with nothing new) are reported with a still for the triage list, not failed.
 const arg = (name, fallback) => {
   const at = process.argv.indexOf(`--${name}`);
   return at >= 0 && process.argv[at + 1] ? process.argv[at + 1] : fallback;
@@ -24,6 +25,7 @@ const LEVEL_DAYS = 120; // a level taking longer than this is a balance wall
 const CASH_FLOOR = -2_000_000;
 const TOAST_STORM = 6; // toasts per real minute at 1×
 const LOOK_MS = 60_000; // after each level-up (and the coach), a minute at 1× to read and count toasts
+const FLAT_MS = 60_000; // a real minute at 1× with nothing new (no building, card, level, model or toast) is a flat moment
 const WALL_CAP = Number(arg("minutes", "90")) * 60_000;
 const BEYOND_DAYS = Number(arg("beyond", "0")); // keep playing this many game days at Level 5, for the triage
 const STALL_CAP = 3 * 60_000;
@@ -56,7 +58,7 @@ const page = await browser.newPage({ viewport, deviceScaleFactor: 1 });
 const errors = [];
 page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
 page.on("pageerror", (error) => errors.push(error.message));
-const result = { url: url.href, viewport, levels: [], failures: [], cards: [], held: [], purchases: [], refused: [], ownToasts: [], samples: [], clicks: { ok: 0, forced: 0, gone: 0 } };
+const result = { url: url.href, viewport, levels: [], failures: [], cards: [], held: [], purchases: [], refused: [], ownToasts: [], flat: [], samples: [], clicks: { ok: 0, forced: 0, gone: 0 } };
 let firstClick = 0;
 let start = null;
 let tpd = 20;
@@ -111,17 +113,22 @@ async function press(target) {
 
 // ── the map ─────────────────────────────────────────────────────────────────────────────────────────────────────────
 const HALF = 12;
+/** Where the middle of a footprint lands in CSS pixels, on the canvas or not; null without a camera. */
+function project(view, x, z, w = 1, d = 1) {
+  if (!view?.rect || view.matrix.length !== 16) return null;
+  const m = view.matrix;
+  const X = x + w / 2 - HALF, Z = z + d / 2 - HALF;
+  const cx = m[0] * X + m[8] * Z + m[12], cy = m[1] * X + m[9] * Z + m[13], cw = m[3] * X + m[11] * Z + m[15];
+  return [view.rect.left + ((cx / cw + 1) / 2) * view.rect.width, view.rect.top + ((1 - cy / cw) / 2) * view.rect.height];
+}
 /**
  * The middle of a footprint of w×d tiles at (x, z) on screen, through the camera the probe lends; null off the canvas.
  * The game anchors a building at round(pointer − size/2), so aim at the footprint's middle, not its first tile's.
  */
 function screenOf(view, x, z, w = 1, d = 1) {
-  if (!view?.rect || view.matrix.length !== 16) return null;
-  const m = view.matrix;
-  const X = x + w / 2 - HALF, Z = z + d / 2 - HALF;
-  const cx = m[0] * X + m[8] * Z + m[12], cy = m[1] * X + m[9] * Z + m[13], cw = m[3] * X + m[11] * Z + m[15];
-  const px = view.rect.left + ((cx / cw + 1) / 2) * view.rect.width;
-  const py = view.rect.top + ((1 - cy / cw) / 2) * view.rect.height;
+  const at = project(view, x, z, w, d);
+  if (!at) return null;
+  const [px, py] = at;
   // Keep away from the edges: edge scrolling would move the camera under the pointer.
   return px < 30 || py < 30 || px > view.rect.left + view.rect.width - 30 || py > view.rect.top + view.rect.height - 30 ? null : [px, py];
 }
@@ -168,6 +175,30 @@ function spots(probe, kind) {
 async function onCanvas([px, py]) {
   return page.evaluate(([x, y]) => document.elementFromPoint(x, y)?.tagName === "CANVAS", [px, py]);
 }
+/**
+ * Where to click for a footprint, panning the map with the arrow keys (as a player would) until it sits on clear
+ * canvas, not under a window or off the edge. Null if it cannot be brought into view.
+ */
+async function reveal(x, z, w = 1, d = 1) {
+  for (let i = 0; i < 8; i++) {
+    const p = await probeNow();
+    if (p.pendingConfirm || p.event) return null;
+    const at = screenOf(p.view, x, z, w, d);
+    if (at && (await onCanvas(at))) return at;
+    const raw = project(p.view, x, z, w, d);
+    if (!raw) return null;
+    // Bring it towards the middle of the canvas, which the windows leave clear.
+    const dx = raw[0] - (p.view.rect.left + p.view.rect.width / 2), dy = raw[1] - (p.view.rect.top + p.view.rect.height * 0.55);
+    if (Math.hypot(dx, dy) < 40) return null; // in the middle and still covered: give up on this one
+    const key = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "ArrowRight" : "ArrowLeft") : (dy > 0 ? "ArrowDown" : "ArrowUp");
+    await park();
+    await page.keyboard.down(key);
+    await page.waitForTimeout(Math.min(700, 120 + Math.max(Math.abs(dx), Math.abs(dy))));
+    await page.keyboard.up(key);
+    await page.waitForTimeout(350); // the controls glide to a stop
+  }
+  return null;
+}
 
 // ── the HUD (Frontier 95, the default skin; fallbacks for the base slots) ─────────────────────────────────────────────
 async function openStart() {
@@ -199,10 +230,12 @@ async function setSpeed(speed) {
 }
 
 /** Everything that looks like a window right now: its label, box and whether it has any content below the title bar. */
-async function windows() {
-  return page.evaluate(() => {
+const WIN = "section.f95-win, [role=dialog], [role=alertdialog], .modal-card, [role=status][aria-label^='Assistant']";
+/** Every window on screen, outermost element only. `confirmOpen`: the game has a purchase confirm up (the probe says so). */
+async function windows(confirmOpen = false) {
+  return page.evaluate(([WIN, confirmOpen]) => {
     const seen = [];
-    for (const el of document.querySelectorAll("section.f95-win, [role=dialog], [role=alertdialog], .modal-card, [role=status][aria-label^='Assistant']")) {
+    for (const el of document.querySelectorAll(WIN)) {
       const r = el.getBoundingClientRect();
       const style = getComputedStyle(el);
       if (r.width < 4 || r.height < 4 || style.visibility === "hidden" || style.display === "none" || +style.opacity === 0) continue;
@@ -218,15 +251,23 @@ async function windows() {
       const body = [...el.children].filter((c) => !c.matches(".f95-tb, .f95-title")).map((c) => c.textContent ?? "").join(" ").trim();
       const media = el.querySelector("img, svg, canvas, input, [role=progressbar], ul li");
       const coach = el.matches("[role=status][aria-label^='Assistant']");
-      const confirm = el.matches("[role=alertdialog]") && /are you sure|runway/i.test(el.textContent ?? "");
+      const confirm = confirmOpen && el.matches("[role=alertdialog]");
       return { label: el.getAttribute("aria-label") || title || el.className, title, coach, confirm, empty: body.length < 2 && !media, box: { x: r.left, y: r.top, w: r.width, h: r.height } };
     });
-  });
+  }, [WIN, confirmOpen]);
+}
+/** The label of the window drawn on top at (x, y), or null for the scene. */
+async function topAt(x, y) {
+  return page.evaluate(([WIN, x, y]) => {
+    let el = document.elementFromPoint(x, y)?.closest(WIN);
+    while (el?.parentElement?.closest(WIN)) el = el.parentElement.closest(WIN);
+    return el ? el.getAttribute("aria-label") || el.querySelector(".f95-tb, .f95-title, h2, h3")?.textContent?.trim() || el.className : null;
+  }, [WIN, x, y]);
 }
 function overlap(a, b) {
   const w = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
   const h = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
-  return w > 4 && h > 4 ? { w, h } : null;
+  return w > 4 && h > 4 ? { w, h, x: Math.max(a.x, b.x) + w / 2, y: Math.max(a.y, b.y) + h / 2 } : null;
 }
 /** A persistent HUD panel (the lab window, the goal note) is part of the screen, not a window that appeared. */
 const SKIP_EMPTY = /collapsed|f95-strip/;
@@ -266,9 +307,9 @@ try {
   let levelToasts = 0;
   const cardSeen = new Set();
   const retryAt = new Map(); // want key → game tick
-  let roadIndex = 0;
   let reachedAt = null;
   let lastSample = 0;
+  let flatKey = "", flatSince = Date.now();
 
   for (;;) {
     const now = Date.now();
@@ -302,14 +343,24 @@ try {
     }
 
     // Windows: none empty; nothing on the coach or the confirm.
-    const wins = await windows();
+    const wins = await windows(!!probe.pendingConfirm);
     for (const w of wins) if (w.empty && !SKIP_EMPTY.test(w.label)) await fail("empty window", `"${w.label}" renders empty`, probe);
     for (const key of wins.filter((w) => w.coach || w.confirm)) {
       for (const other of wins) {
         if (other === key || other.coach || other.confirm) continue;
         const o = overlap(key.box, other.box);
-        if (o) await fail("overlap", `${key.coach ? "The coach" : "The confirm"} overlaps "${other.label}" by ${o.w.toFixed(0)}×${o.h.toFixed(0)} px`, probe);
+        if (o) await fail("overlap", `${key.coach ? "The coach" : "The confirm"} and "${other.label}" overlap by ${o.w.toFixed(0)}×${o.h.toFixed(0)} px ("${(await topAt(o.x, o.y)) ?? "the scene"}" on top)`, probe);
       }
+    }
+
+    // Flat moments: reported with a still, not failed (the player may simply be waiting on a model).
+    const change = `${probe.progress.level}|${probe.map.buildings.length}|${probe.models}|${cardSeen.size}|${toastSeen.size}|${probe.event}`;
+    if (change !== flatKey || probe.speed !== 1 || probe.paused) { flatKey = change; flatSince = now; }
+    else if (now - flatSince > FLAT_MS) {
+      const shot = await still(`${out}/moments/flat-${String(result.flat.length + 1).padStart(2, "0")}.png`);
+      result.flat.push({ gameDay: gameDays(probe), level: probe.progress.level, coach: probe.coachId, training: probe.training, shot });
+      log(`Flat: a real minute at 1× with nothing new (level ${probe.progress.level}, game day ${gameDays(probe)}${probe.coachId ? `, coach step ${probe.coachId}` : ""})`);
+      flatSince = now;
     }
 
     // ── level-ups ──
@@ -471,8 +522,8 @@ try {
     for (const [x, z] of options.slice(0, 6)) {
       const fresh = await probeNow();
       if (fresh.pendingConfirm || fresh.event) break;
-      const at = screenOf(fresh.view, x, z, ...(SIZE[kind] ?? [2, 2]));
-      if (!at || !(await onCanvas(at))) continue;
+      const at = await reveal(x, z, ...(SIZE[kind] ?? [2, 2]));
+      if (!at) continue;
       await page.mouse.click(at[0], at[1]);
       await page.waitForTimeout(500);
       const after = await probeNow();
@@ -487,25 +538,26 @@ try {
     const done = (await probeNow()).map.buildings.length > before;
     return done;
   }
+  /** Lay the next n tiles of the planned roads, in order, so the road stays in one piece. */
   async function layRoad(p, n) {
     const g = grid(p);
-    const todo = [];
-    while (roadIndex < ROADS.length && todo.length < n) {
-      const [x, z] = ROADS[roadIndex++];
-      if (!g.isPath(x, z) && !g.taken(x, z)) todo.push([x, z]);
-    }
+    const todo = ROADS.filter(([x, z]) => !g.isPath(x, z) && !g.taken(x, z)).slice(0, n);
     if (!todo.length) return;
     if (!(await pickTool("Path"))) return;
     await page.waitForTimeout(250);
+    let laid = 0;
     for (const [x, z] of todo) {
-      const fresh = await probeNow();
-      const at = screenOf(fresh.view, x, z);
-      if (!at || !(await onCanvas(at))) { roadIndex = Math.max(0, roadIndex - 1); continue; }
+      const at = await reveal(x, z);
+      if (!at) break;
+      const before = (await probeNow()).map.paths.length;
       await page.mouse.click(at[0], at[1]);
       await page.waitForTimeout(250);
+      if ((await probeNow()).map.paths.length <= before) break;
+      laid++;
     }
     await page.keyboard.press("Escape");
-    log(`Laid ${todo.length} path tiles`);
+    if (laid) log(`Laid ${laid} path tiles`);
+    else log(`Could not lay the road at ${todo[0].join(",")}`);
   }
   async function hire(job, p) {
     // Staff toggles the Staff Manager: only open it if it is not already up.
@@ -577,6 +629,9 @@ ${r.failures.map((f) => `- **${f.kind}** (level ${f.level ?? "?"}, game day ${f.
 
 ## Cards answered (${r.cards.length})
 ${r.cards.map((c) => `- day ${c.gameDay}, L${c.level}: ${c.id} → ${c.choice}`).join("\n") || "none"}
+
+## Flat moments: a real minute at 1× with nothing new (${r.flat.length})
+${r.flat.map((f) => `- day ${f.gameDay}, L${f.level}${f.coach ? `, coach step "${f.coach}"` : ""}${f.training ? `, training ${f.training.name} ${f.training.pct}%` : ""}: ${f.shot}`).join("\n") || "none"}
 
 ## Windows that held time on their own (${r.held.length})
 ${r.held.map((h) => `- day ${h.gameDay}, L${h.level}: ${h.overlays}`).join("\n") || "none"}
