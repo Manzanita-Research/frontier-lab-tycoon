@@ -307,6 +307,10 @@
       "overview",
       "event",
       "phone"
+    ],
+    "flt54-tasks": [
+      "flt54-tasks-game",
+      "flt54-tasks-player"
     ]
   },
   "scenes": {
@@ -4059,6 +4063,42 @@
       "steps": [
         {
           "eval": "async (f, w) => { for (let d = 0; d < 30; d++) { f.send({ type: 'CHOOSE', choiceIndex: 0 }); await new Promise((r) => setTimeout(r, 70)); for (let i = 0; i < 20; i++) f.tick(w); await new Promise((r) => setTimeout(r, 240)); } }"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt54-tasks-game": {
+      "title": "FLT-54: the Task Mangler's benchmark table as the game opened it (Release Leapfrog): kept to the right edge",
+      "query": {
+        "moment": "pair",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt54-tasks-player": {
+      "title": "FLT-54: the same Task Mangler folded and opened again by the player: full width, every column",
+      "query": {
+        "moment": "pair",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 800
+        },
+        {
+          "click": ".f95-tasks.open .f95-tb"
+        },
+        {
+          "wait": 400
+        },
+        {
+          "click": ".f95-tasks:not(.open) .f95-tb"
         },
         {
           "wait": 800

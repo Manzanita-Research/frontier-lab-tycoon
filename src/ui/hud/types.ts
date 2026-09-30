@@ -721,6 +721,11 @@ export interface ArenaRowVM {
 
 export interface ArenaVM {
   open: boolean;
+  /**
+   * Open because the game opened it (at the start, or a rank drop called it), not the player (FLT-54): keep it narrow and
+   * at the edge of the screen. Opened by the player, it takes its full width. Optional: the player's.
+   */
+  auto?: boolean;
   /** Headlines about the race since the player last had the Arena open (FLT-54): badge the folded window with a dot and the count. */
   unread?: number;
   alert: boolean;

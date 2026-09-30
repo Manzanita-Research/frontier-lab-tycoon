@@ -11,7 +11,7 @@ import { dramaActions } from "../../drama/state";
 import { setPhoto, takePhoto } from "../juice/photo";
 import { copyLink, copySummary, playDaily, shareEnding } from "../share/share";
 import { dismissChallenge, dismissMemo } from "../share/social";
-import { arenaOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, senateOpenAtom, staffOpenAtom, windowBudgetAtom } from "./state";
+import { arenaChosenAtom, arenaOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, senateOpenAtom, staffOpenAtom, windowBudgetAtom } from "./state";
 import { closeWindow, isUp, restoreWindow } from "./windows";
 import { skinActions } from "./skinControl";
 import { savesActions } from "./saves";
@@ -23,6 +23,12 @@ import { WIDGET_IDS } from "./widgets";
 const dismiss = (key: string) => {
   const seen = registry.get(dismissedAtom);
   if (!seen.includes(key)) registry.set(dismissedAtom, [...seen.slice(-31), key]);
+};
+
+/** The player opens or folds the Arena: one they opened is theirs, at full width (FLT-54). */
+const openArena = (open: boolean) => {
+  registry.set(arenaOpenAtom, open);
+  registry.set(arenaChosenAtom, open);
 };
 
 const TIME_HOURS: Record<string, number | null> = { live: null, day: 13, golden: 18.3, night: 22.5 };
@@ -84,7 +90,7 @@ export const hudActions: HudActions = {
     // Up because a rank drop called it (not the player): folding it closes that moment instead.
     const budget = registry.get(windowBudgetAtom);
     if (!registry.get(arenaOpenAtom) && isUp(budget, "arena")) return void registry.set(windowBudgetAtom, closeWindow(budget, "arena"));
-    registry.set(arenaOpenAtom, !registry.get(arenaOpenAtom));
+    openArena(!registry.get(arenaOpenAtom));
   },
   openTray: (id) => {
     if (id === "papers") return void registry.set(papersOpenAtom, true);
@@ -92,7 +98,7 @@ export const hudActions: HudActions = {
     const budget = registry.get(windowBudgetAtom);
     // The Arena from the taskbar is the player's to keep: open it for good, and let the called moment go.
     if (id === "arena") {
-      registry.set(arenaOpenAtom, true);
+      openArena(true);
       return void registry.set(windowBudgetAtom, closeWindow(budget, "arena"));
     }
     registry.set(windowBudgetAtom, restoreWindow(budget, id));
@@ -192,8 +198,8 @@ export const hudActions: HudActions = {
     const now = appNow();
     if (now?.tool || now?.zone) send({ type: "SET_TOOL", tool: null });
     const open = {
-      arena: () => registry.set(arenaOpenAtom, true),
-      benchmarks: () => registry.set(arenaOpenAtom, true),
+      arena: () => openArena(true),
+      benchmarks: () => openArena(true),
       discourse: () => registry.set(factionsOpenAtom, true),
       papers: () => registry.set(papersOpenAtom, true),
       news: () => viewRoom("archive"),

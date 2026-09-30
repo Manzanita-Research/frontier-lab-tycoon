@@ -79,8 +79,12 @@
     > .f95-win {
       width: min(400px, 100%);
     }
-    /* The benchmark table wants room, but not the middle of a 1440×900 screen (FLT-54): the table scrolls instead. */
+    /* The benchmark table wants room: opened by the player, every column shows. */
     > .f95-tasks.wide {
+      width: 100%;
+    }
+    /* Opened by the game (FLT-54), it keeps to the right edge, out of the middle of a 1440×900 screen: the table scrolls instead. */
+    > .f95-tasks.wide.auto {
       width: min(100%, max(400px, calc(30vw - 10px)));
     }
   }
@@ -3461,7 +3465,8 @@
       min-width: 0;
     }
     .f95-stack > .f95-win,
-    .f95-stack > .f95-tasks.wide {
+    .f95-stack > .f95-tasks.wide,
+    .f95-stack > .f95-tasks.wide.auto {
       width: auto;
     }
     .f95-props,

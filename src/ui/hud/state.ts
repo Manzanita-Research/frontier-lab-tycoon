@@ -10,6 +10,8 @@ import type { SkinOfferVM } from "./types";
 
 /** Open on a desktop-sized screen, folded on a phone or a short window (the Arena chip toggles it either way). */
 export const arenaOpenAtom = Atom.make(typeof window === "undefined" ? true : window.innerWidth > 640 && window.innerHeight >= 800);
+/** The player opened the Arena themselves (FLT-54): it takes its full width. Open on its own (at the start, or a rank drop called it), it keeps to the edge. */
+export const arenaChosenAtom = Atom.make(false);
 
 /** How many messages of the open group chat have arrived. */
 export const chatCountAtom = Atom.make(0);

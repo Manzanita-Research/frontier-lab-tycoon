@@ -75,7 +75,8 @@ export interface HudInput {
   senateOpen?: boolean;
   /** FLT-33: the Factions panel is open. Optional: folded. */
   factionsOpen?: boolean;
-  arena: { open: boolean; alert: boolean; flinch: boolean; moved: Record<string, "up" | "down"> };
+  /** `chosen`: the player opened it (FLT-54). Optional: the game did. */
+  arena: { open: boolean; chosen?: boolean; alert: boolean; flinch: boolean; moved: Record<string, "up" | "down"> };
   /** Release Leapfrog's real-time flourishes (row flashes, blinking badges, solved columns kept on the board, news-cycle history). Optional: none is fine. */
   leapfrog?: MotionView;
   room: { archive: readonly Edition[]; view: "archive" | Edition | null; unread: readonly string[]; storage: boolean };
@@ -635,6 +636,7 @@ function arenaOf(i: HudInput): ArenaVM {
   const leaked = new Set(i.snap.disasters.leaked);
   return {
     open: i.arena.open,
+    auto: i.arena.open && !i.arena.chosen,
     alert: i.arena.alert,
     week: race.week,
     rd: {

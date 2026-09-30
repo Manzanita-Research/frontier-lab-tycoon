@@ -15,7 +15,7 @@ import { shotAtom } from "../juice/photo";
 import { useShareInput } from "../share/share";
 import { useSocialInput } from "../share/social";
 import { newMotion, NO_MOTION, stepMotion, type Motion, type MotionView } from "./leapfrogMotion";
-import { arenaCallAtom, arenaOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, seenNewsAtom, senateOpenAtom, skinUiAtom, staffOpenAtom, windowBudgetAtom } from "./state";
+import { arenaCallAtom, arenaChosenAtom, arenaOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, seenNewsAtom, senateOpenAtom, skinUiAtom, staffOpenAtom, windowBudgetAtom } from "./state";
 import { newestOf, unreadOf, wantsOf, windowed } from "./tray";
 import { autoUp, nextClose, stepBudget } from "./windows";
 import { hudActions } from "./actions";
@@ -174,6 +174,7 @@ export function useAppSource(): AppSource | null {
 
 export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, selected, zone, outcomeDismissed }: AppSource): HudVM {
   const arenaOpen = useAtomValue(arenaOpenAtom);
+  const arenaChosen = useAtomValue(arenaChosenAtom);
   const room = useAtomValue(roomAtom);
   const chatCount = useAtomValue(chatCountAtom);
   const mixer = useAtomValue(mixerAtom);
@@ -243,7 +244,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         senateOpen,
         zone,
         factionsOpen,
-        arena: { open: arenaOpen, alert: motion.alert, flinch: motion.flinch, moved: motion.moved },
+        arena: { open: arenaOpen, chosen: arenaChosen, alert: motion.alert, flinch: motion.flinch, moved: motion.moved },
         leapfrog,
         room,
         chatCount,
@@ -271,7 +272,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         share,
         social,
       }),
-    [share, social, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, beat, skinUi, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, drama, saves],
+    [share, social, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, arenaChosen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, beat, skinUi, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, drama, saves],
   );
   return useWindowBudget(vm, news);
 }

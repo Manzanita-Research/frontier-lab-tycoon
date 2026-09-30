@@ -24,6 +24,20 @@ describe("the window budget in the view-model (FLT-54)", () => {
     expect(shown.tray).toEqual([{ id: "paper", label: "Your paper is out", flashing: true, unread: 0 }]);
   });
 
+  it("marks the Arena the game opened, so a skin keeps it at the edge; the one the player opened is theirs at full width", () => {
+    const input = fixtureInput({ papers: "drop" });
+    const byGame = hudViewModel({ ...input, arena: { ...input.arena, open: true } });
+    expect(byGame.arena.auto).toBe(true);
+    const byPlayer = hudViewModel({ ...input, arena: { ...input.arena, open: true, chosen: true } });
+    expect(byPlayer.arena.auto).toBe(false);
+    expect(windowed(byPlayer, [], none).arena.auto).toBe(false);
+    const folded = { ...byPlayer, arena: { ...byPlayer.arena, open: false, auto: false } };
+    const called = windowed(folded, stepBudget([], [{ id: "arena", key: "drop:1" }], 0), none);
+    expect(called.arena.open).toBe(true);
+    expect(called.arena.auto).toBe(true);
+    expect(windowed(folded, [], none).arena).toMatchObject({ open: false, auto: false });
+  });
+
   it("calls the Arena up on a rank drop only while it is folded", () => {
     const vm = busy();
     expect(wantsOf(vm, "drop:1").some((w) => w.id === "arena")).toBe(vm.visible.arena && !vm.arena.open);

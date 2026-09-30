@@ -60,7 +60,7 @@ export function windowed(vm: HudVM, budget: Budget, unread: Record<NewsPanel, nu
   if (factionsShown && !vm.factions.open && unread.factions > 0) tray.push({ id: "factions", label: "Discourse", flashing: false, unread: unread.factions });
   return {
     ...vm,
-    arena: { ...vm.arena, open: arenaOpen, unread: arenaOpen ? 0 : unread.arena },
+    arena: { ...vm.arena, open: arenaOpen, auto: vm.arena.open ? vm.arena.auto : arenaOpen, unread: arenaOpen ? 0 : unread.arena },
     papers: { ...vm.papers, unread: vm.papers.open ? 0 : unread.papers },
     factions: { ...vm.factions, unread: vm.factions.open ? 0 : unread.factions },
     newsroom: { ...vm.newsroom, arrival: up("news", vm.newsroom.arrival !== null) ? vm.newsroom.arrival : null },
