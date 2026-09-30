@@ -20,7 +20,20 @@ pnpm test             # vitest (sim + content tests)
 pnpm typecheck
 pnpm build            # tsc + vite build into dist/
 pnpm check            # all three: run before every PR
+pnpm shots            # before/after screenshots of main vs your branch (see below)
+pnpm shot <url> <png> # one headless screenshot (Playwright + SwiftShader)
 ```
+
+### Before/after screenshots: `pnpm shots`
+
+```sh
+pnpm shots                                   # 4 standard scenes: overview, inspector, event, phone (~2 min on a Modal builder)
+pnpm shots --scenes overview,ops,night --diff --out docs/img/flt-99
+pnpm shots --skin frontier-95                # a skin on both builds; `--skin all` = a gallery of every skin
+pnpm shots --list                            # every scene and set
+```
+
+It builds `main` in a temporary worktree (cached by commit in `shots/.cache/`) and your checkout, serves both, and writes `<out>/{before,after,compare}/<scene>.png` plus `report.md`, whose table you paste into the PR body. `shots/` is gitignored scratch; pass `--out docs/img/<task>` and commit that directory so the PR's image links resolve. A scene is data (`?seed`, `?moment=`, `?zoom`, a few steps), so a task adds its own in `scripts/shots.scenes.json`. The game is paused and the news ticker is parked, so a build compared with itself differs by about 0.2% of pixels; a scene under 0.5% is reported as unchanged. Run one at a time (it is CPU-heavy on 1 vCPU).
 
 ## Architecture in one breath
 
@@ -52,7 +65,7 @@ Only people (visitors, staff, researchers) are sure to be walkers. Agents, compu
 
 ## PRs
 
-- **Before/after screenshots (Jem's rule).** Any PR that changes something **visible** (the 2D UI, the 3D scene, skins, events, on-screen text) includes **before/after screenshots of the same scene**: same seed, same camera and scene, same viewport, taken from `main` and from your branch. Use `pnpm shots` once it exists (FLT-35); until then use `pnpm shot` with the same URL on both builds. Put them in the PR body as pairs (before | after), plus a phone shot if the layout changed. **Logic-only PRs** show tests or a sim/headless report instead.
+- **Before/after screenshots (Jem's rule).** Any PR that changes something **visible** (the 2D UI, the 3D scene, skins, events, on-screen text) includes **before/after screenshots of the same scene**: same seed, same camera and scene, same viewport, taken from `main` and from your branch. Run **`pnpm shots`** (FLT-35): it builds `main` and your branch, captures the same scenes on both, and prints the markdown table for the PR body. Scenes live in `scripts/shots.scenes.json`, so add your own there. See "Before/after screenshots" below. Put them in the PR body as pairs (before | after), plus a phone shot if the layout changed. **Logic-only PRs** show tests or a sim/headless report instead.
 
 - Open a real PR from your branch into `main`. CI runs typecheck, tests and build.
 - Put evidence in the PR: test output, and for anything visual, a screenshot (see `docs/modal.md` for headless screenshots) or a `bb connect expose` link.
