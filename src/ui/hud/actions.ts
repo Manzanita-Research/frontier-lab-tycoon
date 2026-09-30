@@ -7,6 +7,7 @@ import type { Cue } from "../../audio/score";
 import { fx } from "../../render/fx/state";
 import { roomAtom, skipNews, viewRoom } from "../../newsroom/state";
 import { setPhoto, takePhoto } from "../juice/photo";
+import { copySummary, playDaily, shareEnding } from "../share/share";
 import { arenaOpenAtom, chatCountAtom, helpOpenAtom, photoFlashAtom, photoTimeAtom, staffOpenAtom } from "./state";
 import { skinActions } from "./skinControl";
 import type { StaffJob } from "../../sim/types";
@@ -61,6 +62,9 @@ export const hudActions: HudActions = {
   toggleArena: () => registry.set(arenaOpenAtom, !registry.get(arenaOpenAtom)),
   keepPlaying: () => send({ type: "KEEP_PLAYING" }),
   newLab: () => send({ type: "NEW_LAB" }),
+  playDaily,
+  shareEnding: () => void shareEnding(),
+  copySummary: () => void copySummary(),
 
   closeStaff: () => {
     send({ type: "SET_ZONE", id: null });

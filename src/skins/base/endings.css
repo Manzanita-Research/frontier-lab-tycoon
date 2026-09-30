@@ -29,17 +29,21 @@
 .ending.compact .paper-substories section + section { border-left: 0; padding-left: 0; }
 .ending-page .paper-bottom { grid-template-columns: 1fr; }
 .ending-signoff { margin: 12px 0 0; padding-top: 12px; border-top: 3px double #8b7d66; text-align: center; font: italic 700 clamp(18px, 2vw, 24px) Georgia, serif; }
+.ending-page figure { position: relative; }
 .ending-stamp {
   position: absolute;
-  top: 88px;
-  right: 22px;
+  bottom: 44px;
+  right: 10px;
+  background: #f6efdfcc;
   padding: 6px 14px;
   border: 4px solid #b0302a;
   border-radius: 6px;
   color: #b0302a;
-  font: 900 20px Nunito, sans-serif;
+  font: 900 17px Nunito, sans-serif;
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  max-width: calc(100% - 20px);
   transform: rotate(-9deg);
   opacity: 0.85;
   mix-blend-mode: multiply;
@@ -63,9 +67,9 @@
   max-height: calc(100dvh - 24px);
   overflow: auto;
 }
-.ending.compact .ending-side { position: sticky; bottom: 0; max-height: none; }
+.ending.compact .ending-side { max-height: none; }
 .ending-lab { font: 900 20px/1.1 var(--flt-font-display); }
-.ending-strip { font-size: 22px; letter-spacing: 1px; line-height: 1.2; overflow-wrap: anywhere; }
+.ending-strip { font-size: 15px; letter-spacing: -1px; line-height: 1.2; white-space: nowrap; overflow: hidden; }
 .ending-stats { display: grid; gap: 4px; margin: 0; }
 .ending-stats div { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; }
 .ending-stats dt { color: var(--flt-color-textDim); }
@@ -117,6 +121,7 @@
 .takeover-thanks small { margin-top: 14px; font: 800 16px ui-monospace, Menlo, monospace; color: #9ff7ff; }
 
 /* The autopilot's cursor, pinned to the campus by the game (not a slot: it is the same in every skin). */
+.world.ghost-layer { z-index: 62; }
 .ghost-cursor { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 5; filter: drop-shadow(0 3px 4px #0007); }
 .ghost-cursor svg { display: block; transform-origin: 3px 2px; }
 .ghost-cursor.click svg { animation: ghost-click 0.35s ease-out; }
@@ -136,4 +141,31 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .ending, .ending-stamp, .takeover-banner, .takeover-thanks, .ghost-cursor.click svg { animation: none; }
+}
+
+/* How the campus looks once an ending has it (the scene's labels, the same in every skin). */
+body.ending-beige canvas { filter: sepia(0.55) saturate(0.55) brightness(1.04); }
+.gatesign {
+  padding: 5px 12px;
+  border-radius: 4px;
+  background: #fff;
+  color: #1a1a1a;
+  border: 3px solid #1a1a1a;
+  font: 900 14px system-ui, sans-serif;
+  white-space: nowrap;
+  box-shadow: 0 4px 0 #0005;
+  pointer-events: none;
+}
+.gatesign.acquired { background: #f3f3f3; border-color: #0078d4; color: #0b3d75; font-family: "Segoe UI", system-ui, sans-serif; }
+.gatesign.captured { background: #f4f1e6; border-color: #2f5d8c; color: #2f5d8c; font-family: Georgia, serif; }
+.gatesign.pivot { background: #ff5fa2; color: #fff; transform: rotate(-4deg); }
+.compliant {
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: #e9dfc6;
+  color: #4b5a3a;
+  border: 2px solid #4b5a3a;
+  font: 900 10px ui-monospace, Menlo, monospace;
+  transform: rotate(-6deg);
+  pointer-events: none;
 }

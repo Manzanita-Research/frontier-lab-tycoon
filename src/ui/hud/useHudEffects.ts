@@ -15,6 +15,7 @@ import { debugParams } from "../../app/game";
 import { setPhoto, takePhoto, togglePhoto } from "../juice/photo";
 import { eventById } from "../../content/events";
 import { chatCountAtom } from "./state";
+import { useShareCard, useTakeoverTitle } from "../share/share";
 import type { HudVM } from "./types";
 
 const ERA_GRACE_MS = 700;
@@ -185,4 +186,6 @@ export function useHudEffects(vm: HudVM, snap: Snapshot) {
   usePhotoKeys(vm);
   useChatPlayback();
   useNewsDesk(snap);
+  useShareCard(vm);
+  useTakeoverTitle(vm);
 }

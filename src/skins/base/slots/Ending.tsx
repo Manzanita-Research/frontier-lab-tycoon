@@ -30,6 +30,7 @@ export function Ending({ ending, layout, actions }: SlotPropsMap["Ending"]) {
             <figure>
               {p.photo ? <img src={p.photo} alt={`The ${ending.lab} campus, the day the paper went to press`} /> : <div className="paper-no-photo">Developing the photo…</div>}
               <figcaption>{p.caption}</figcaption>
+              <div className="ending-stamp" aria-hidden>{ending.title}</div>
             </figure>
           </div>
           <div className="paper-substories">
@@ -47,7 +48,6 @@ export function Ending({ ending, layout, actions }: SlotPropsMap["Ending"]) {
             </section>
           </div>
           <p className="ending-signoff">{p.signoff}</p>
-          <div className="ending-stamp" aria-hidden>{ending.title}</div>
         </article>
         <aside className="ending-side">
           <span className="paper-section">{ending.daily ?? "The run"}</span>
@@ -65,7 +65,7 @@ export function Ending({ ending, layout, actions }: SlotPropsMap["Ending"]) {
           </dl>
           <div className="ending-buttons">
             <button className="choice plain primary" onClick={() => actions.shareEnding?.()} disabled={share.status === "making"}>
-              <b>{share.native ? "📤 Share the front page" : "⬇ Download the share card"}</b>
+              <b>{share.native ? "📤 Share the front page" : "⬇ Save the share card"}</b>
             </button>
             <button className="choice plain" onClick={() => actions.copySummary?.()}>
               <b>{share.status === "copied" ? "✓ Copied" : "📋 Copy run summary"}</b>
