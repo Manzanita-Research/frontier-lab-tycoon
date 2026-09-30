@@ -11,6 +11,8 @@ import { STAFF } from "../../content/staff";
 import { eventById } from "../../content/events";
 import { GOALS, SCENARIO, type GoalDef } from "../../content/goals";
 import { FRIENDS } from "../../content/newsroom";
+import { LEAPFROG } from "../../content/leapfrog";
+import { STREAM_FALLBACK, STREAM_LINES } from "../../content/livestream";
 import { ARENA_SIZE } from "../../content/rivals";
 import { CUES } from "../../audio/score";
 import type { Edition } from "../../newsroom/edition";
@@ -20,10 +22,11 @@ import { fillTemplate, formatDate, formatMoney } from "../../sim/format";
 import type { Inspect, NeedBar } from "../../sim/inspect";
 import type { NewsItem, Tone, WalkerKind } from "../../sim/types";
 import { trendOf, VIBES_MAX, WEIGHTS } from "../../sim/vibes";
+import { NO_MOTION, type MotionView } from "./leapfrogMotion";
 import { SKIN_API_VERSION } from "./types";
 import type {
-  ArenaVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HudVM, InspectorVM, NeedVM, NewsroomVM,
-  ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, ThoughtRowVM, TrainingVM, WalkerKindVM,
+  ArenaVM, BenchCellVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HudVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
+  ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, ResponseVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, StreamVM, ThoughtRowVM, TrainingVM, TrendVM, VoiceVM, WalkerKindVM,
 } from "./types";
 
 /** How many game days after a release the "SHIPPED!" sticker stays up. */
@@ -49,6 +52,8 @@ export interface HudInput {
   staffOpen: boolean;
   zone: number | null;
   arena: { open: boolean; alert: boolean; flinch: boolean; moved: Record<string, "up" | "down"> };
+  /** Release Leapfrog's real-time flourishes (row flashes, blinking badges, solved columns kept on the board, news-cycle history). Optional: none is fine. */
+  leapfrog?: MotionView;
   room: { archive: readonly Edition[]; view: "archive" | Edition | null; unread: readonly string[]; storage: boolean };
   /** How many chat messages have arrived so far. */
   chatCount: number;
@@ -309,9 +314,11 @@ function eventOf(i: HudInput): { event: EventVM | null; era: HudVM["eraCard"] } 
       body: fillTemplate(def.body, vars),
       tone: def.tone,
       stripe: def.stripe ?? TONE_LABEL[def.tone],
-      kind: def.kind === "auction" ? "auction" : "plain",
+      kind: def.kind === "auction" || def.kind === "response" || def.kind === "stream" ? def.kind : "plain",
       choices: def.choices.map((c, k) => ({ label: c.label, hint: fillTemplate(c.hint, vars), key: k + 1 })),
       paddles: def.kind === "auction" ? rivals.map((r, k) => ({ id: r.id, name: r.short, color: r.color, number: 200 + ((r.score * 7 + k * 31) % 800) })) : [],
+      response: def.kind === "response" ? responseOf(i.snap, vars) : null,
+      stream: def.kind === "stream" ? streamOf(i.snap, def.id, vars) : null,
     },
   };
 }
@@ -351,6 +358,119 @@ function arenaOf(i: HudInput): ArenaVM {
     })),
   };
 }
+
+const pct = (n: number) => `${Math.round(n * 100)}%`;
+const grouped = (n: number) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+/** The forced-response card's numbers, straight from the snapshot: how baked the run is, what shipping now adds, the bug odds. */
+function responseOf(s: Snapshot, vars: Record<string, string>): ResponseVM {
+  const r = s.leapfrog.response;
+  return {
+    rival: vars.lfRival ?? "A rival",
+    rivalModel: vars.lfModel ?? "their new model",
+    model: s.training.name,
+    ready: r.ready,
+    readyText: pct(r.ready),
+    shipText: `+${r.ship.toFixed(1)}`,
+    holdText: `+${r.hold.toFixed(1)}`,
+    bug: r.bug,
+    bugText: pct(r.bug),
+    holdDays: Number(vars.lfHoldDays ?? 0),
+  };
+}
+
+/** The launch livestream as its audience sees it: who is watching, and what chat is saying about the mishap. */
+function streamOf(s: Snapshot, eventId: string, vars: Record<string, string>): StreamVM {
+  const mishap = eventId.replace(/^stream:/, "");
+  const lines = STREAM_LINES[mishap] ?? STREAM_FALLBACK;
+  const viewers = 4_000 + Math.round(s.hype * 220 + s.leapfrog.voice.yours * 60_000);
+  return {
+    mishap,
+    model: vars.lfMine ?? s.latestModel ?? s.training.name,
+    viewers,
+    viewersText: grouped(viewers),
+    caption: lines.caption,
+    chat: lines.chat.map(([who, text]) => ({ who, text })),
+  };
+}
+
+const scoreText = (kind: "score" | "elo", n: number | null) => (n === null ? "-" : kind === "elo" ? grouped(n) : n.toFixed(1));
+
+/** The benchmark leaderboard and the news-cycle meter: the sim's numbers, worded, plus the real-time flourishes the caller tracked. */
+function leapfrogOf(i: HudInput): LeapfrogVM {
+  const lf = i.snap.leapfrog;
+  const motion = i.leapfrog ?? NO_MOTION;
+  if (!lf.enabled) return OFF_LEAPFROG;
+  const holderShort = (id: string) => (id === "" ? "" : (lf.rows.find((r) => r.id === id)?.short ?? id));
+  const live: BenchColumnVM[] = lf.benchmarks.map((b) => ({ id: b.id, name: b.name, short: b.short, kind: b.kind, status: b.status, bestText: scoreText(b.kind, b.best), holder: holderShort(b.holder), holderYou: b.holder === "you", isNew: b.isNew, ghost: false }));
+  const ghosts: BenchColumnVM[] = motion.ghosts.map((g) => ({ id: g.column.id, name: g.column.name, short: g.column.short, kind: g.column.kind, status: "saturated", bestText: scoreText(g.column.kind, g.column.best), holder: holderShort(g.column.holder), holderYou: g.column.holder === "you", isNew: false, ghost: true }));
+  const columns = [...live, ...ghosts];
+  const flashCells = new Set(motion.flashCells);
+  const flashRows = new Set(motion.flashRows);
+  const rows: LeaderRowVM[] = lf.rows.map((r, at) => {
+    const cells: BenchCellVM[] = [
+      ...lf.benchmarks.map((b, k): BenchCellVM => ({ text: scoreText(b.kind, r.scores[k] ?? null), sota: r.sota[k] ?? false, maxx: r.maxx[k] ?? false, flash: flashCells.has(`${r.id}|${b.id}`) })),
+      ...motion.ghosts.map((g): BenchCellVM => {
+        const c = g.cells[r.id];
+        return { text: scoreText(g.column.kind, c?.score ?? null), sota: c?.sota ?? false, maxx: c?.maxx ?? false, flash: false };
+      }),
+    ];
+    return { id: r.id, rank: at + 1, name: r.name, short: r.short, label: r.you ? "You" : r.short, color: r.color, you: r.you, kind: r.kind, model: r.model || null, cells, wins: r.wins, flash: r.flash || flashRows.has(r.id) };
+  });
+  const hasMaxx = rows.some((r) => r.cells.some((c) => c.maxx));
+  const notes = LEAPFROG.footnotes;
+  const next = lf.next;
+  const drop = lf.drop;
+  return {
+    enabled: true,
+    columns,
+    rows,
+    footnote: notes.length > 0 ? `*${notes[lf.stats.maxxed % notes.length]}` : "*",
+    hasMaxx,
+    solved: lf.stats.solved,
+    drop: drop && { lab: drop.name, model: drop.model, slot: drop.slot, daysAgo: drop.daysAgo, text: drop.slot === "lead" ? `${drop.name} launched ${drop.model}` : `${drop.name} answered with ${drop.model}` },
+    nextText: next.answering ? "An answer lands tomorrow" : next.days <= 1 ? "Next launch tomorrow" : `Next launch in about ${next.days} days`,
+    trust: Math.round(lf.trust),
+    voice: voiceOf(lf, motion),
+    pulse: lf.stats.drops,
+  };
+}
+
+function voiceOf(lf: Snapshot["leapfrog"], motion: MotionView): VoiceVM {
+  const shares = lf.voice.shares.slice().sort((a, b) => b.share - a.share).map((s) => ({ id: s.id, short: s.you ? "You" : (lf.rows.find((r) => r.id === s.id)?.short ?? s.name), color: s.color, share: s.share, pctText: pct(s.share), you: s.you }));
+  const yours = lf.voice.yours;
+  const youOwn = lf.voice.owner === "you";
+  // You, then the three loudest rivals: what fits on a small graph.
+  const plotted = [...shares.filter((s) => s.you), ...shares.filter((s) => !s.you).slice(0, 3)];
+  const history = motion.history;
+  const before = history.length > 6 ? (history[history.length - 7]!.shares.you ?? yours) : yours;
+  const trend: TrendVM = yours - before > 0.02 ? "up" : yours - before < -0.02 ? "down" : "flat";
+  return {
+    shares,
+    yours,
+    yoursText: pct(yours),
+    trend,
+    owner: lf.voice.owner,
+    youOwn,
+    streak: lf.voice.streak,
+    headline: lf.voice.owner === "" ? "The news cycle is up for grabs" : youOwn ? "You own the news cycle" : `${lf.voice.ownerName} owns the news cycle`,
+    series: plotted.map((p) => ({ id: p.id, short: p.short, color: p.color, you: p.you, points: history.map((h) => h.shares[p.id] ?? 0) })),
+  };
+}
+
+const OFF_LEAPFROG: LeapfrogVM = {
+  enabled: false,
+  columns: [],
+  rows: [],
+  footnote: "",
+  hasMaxx: false,
+  solved: 0,
+  drop: null,
+  nextText: "",
+  trust: 0,
+  voice: { shares: [], yours: 0, yoursText: "0%", trend: "flat", owner: "", youOwn: false, streak: 0, headline: "", series: [] },
+  pulse: 0,
+};
 
 function outcomeOf(i: HudInput): OutcomeVM | null {
   const s = i.snap;
@@ -490,6 +610,7 @@ export function hudViewModel(i: HudInput): HudVM {
     event,
     thoughtsPanel: thoughtsOf(i),
     arena: arenaOf(i),
+    leapfrog: leapfrogOf(i),
     eraCard: era,
     outcome: outcomeOf(i),
     newsroom: newsroomOf(i),

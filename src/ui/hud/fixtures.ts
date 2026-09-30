@@ -3,8 +3,12 @@
 import { makeSnapshot, type Snapshot } from "../../app/hud";
 import { frontPage, recap, type Edition } from "../../newsroom/edition";
 import { createTestCampus } from "../../sim/testkit";
+import { enableLeapfrog } from "../../sim/race/leapfrog/driver";
+import { leapfrogView } from "../../sim/race/leapfrog/view";
+import { answer } from "../../sim/testkit";
 import { tick } from "../../sim/tick";
 import type { GameState } from "../../sim/types";
+import { newMotion, stepMotion, type MotionView } from "./leapfrogMotion";
 import type { SkinPickerVM } from "./types";
 import type { HudInput } from "./vm";
 
@@ -13,6 +17,34 @@ export function fixtureWorld(days = 12, seed = 3): GameState {
   const s = createTestCampus(seed);
   for (let i = 0; i < days * 20; i++) tick(s);
   return s;
+}
+
+/**
+ * A campus with Release Leapfrog on, 48 days in: a few launches and records on the board, a news cycle with a history.
+ * Returns the World and the real-time flourishes a HUD would have gathered watching it (flashing rows, a retired
+ * benchmark still on the board), stepped day by day the way the app does.
+ */
+export function fixtureLeapfrog(days = 48, seed = 3): { world: GameState; motion: MotionView } {
+  const s = createTestCampus(seed);
+  enableLeapfrog(s);
+  const m = newMotion();
+  let now = 0;
+  let view: MotionView = stepMotion(m, leapfrogView(s), s.day, now);
+  for (let i = 0; i < days * 20; i++) {
+    tick(s, answer(s));
+    if (i % 20 === 19) {
+      now += 200;
+      view = stepMotion(m, leapfrogView(s), s.day, now);
+    }
+  }
+  const lf = leapfrogView(s);
+  // A solved benchmark that the sim has already retired, still up for its moment: the first column, struck through.
+  const first = lf.benchmarks[0];
+  if (first) {
+    const cells = Object.fromEntries(lf.rows.map((r) => [r.id, { score: r.scores[0] ?? null, sota: r.sota[0] ?? false, maxx: false }]));
+    view = { ...view, ghosts: [{ column: { ...first, id: `${first.id}-retired`, status: "saturated" }, cells, until: now + 20_000 }] };
+  }
+  return { world: s, motion: view };
 }
 
 export const NO_SKINS: SkinPickerVM = {
@@ -38,6 +70,8 @@ export const FIXTURE_CHAT = recap(STORIES, 30, "Mostly Harmless Compute");
 
 export interface FixtureOptions {
   world?: GameState;
+  /** Release Leapfrog on, 48 days in, with its leaderboard, news cycle and history. */
+  leapfrog?: boolean;
   selected?: number | null;
   event?: string | null;
   tool?: string | null;
@@ -56,7 +90,7 @@ export interface FixtureOptions {
 }
 
 export function fixtureSnapshot(o: FixtureOptions = {}): Snapshot {
-  const w = o.world ?? fixtureWorld();
+  const w = o.world ?? (o.leapfrog ? fixtureLeapfrog().world : fixtureWorld());
   const selected = o.selected === undefined ? (w.walkers.find((x) => x.kind === "researcher")?.id ?? null) : o.selected;
   const snap = makeSnapshot(w, undefined, { selected, follow: false, highlight: null });
   const pendingConfirm = o.confirm
@@ -66,7 +100,8 @@ export function fixtureSnapshot(o: FixtureOptions = {}): Snapshot {
 }
 
 export function fixtureInput(o: FixtureOptions = {}): HudInput {
-  const snap = fixtureSnapshot(o);
+  const lf = o.leapfrog ? fixtureLeapfrog() : null;
+  const snap = fixtureSnapshot(lf ? { ...o, world: lf.world } : o);
   return {
     snap,
     speed: 1,
@@ -97,6 +132,7 @@ export function fixtureInput(o: FixtureOptions = {}): HudInput {
     mixer: { open: false, ready: true, muted: false, master: 0.7, music: 0.3, sfx: 0.65 },
     photo: { on: o.photo ?? false, time: "live", shot: { id: 1, url: "data:image/png;base64,", name: "frontier-lab-tycoon-campus.png" }, flash: 1 },
     skins: { ...NO_SKINS, ...o.skins },
+    leapfrog: lf?.motion,
     viewport: { width: o.width ?? 1440, height: o.height ?? 900 },
   };
 }

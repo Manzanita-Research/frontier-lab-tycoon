@@ -5,6 +5,7 @@ import { useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import { Btn, Win } from "./parts";
 import { Ico } from "./icons";
+import { Gauges } from "./leapfrog";
 import tipsFile from "./tips.json";
 
 const TIPS_KEY = "flt.f95.tips";
@@ -221,6 +222,7 @@ export function EventCard({ event, actions }: SlotPropsMap["EventCard"]) {
             ))}
           </div>
         )}
+        {event.response && <Gauges response={event.response} />}
         <div className="f95-choices">
           {event.choices.map((c, i) => (
             <Btn key={c.label} def={i === 0} onClick={() => actions.choose(event.id, i)} autoFocus={i === 0}>

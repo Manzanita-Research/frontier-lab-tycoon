@@ -611,6 +611,90 @@
           "wait": 250
         }
       ]
+    },
+    "leap-board": {
+      "title": "Release Leapfrog: the benchmark leaderboard mid-drop (a lab launched, another answers tomorrow)",
+      "query": {
+        "moment": "pair",
+        "warp": null
+      },
+      "steps": [
+        {
+          "tick": 14
+        },
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "leap-solved": {
+      "title": "Release Leapfrog: a benchmark has just been solved (struck through, stamped SOLVED, a harder one on the board)",
+      "query": {
+        "moment": "solved",
+        "warp": null
+      },
+      "steps": [
+        {
+          "tick": 14
+        },
+        {
+          "send": {
+            "type": "KEEP_PLAYING"
+          }
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "leap-voice": {
+      "title": "Release Leapfrog: the news cycle, 40 days of it (Network Traffic in Frontier 95)",
+      "query": {
+        "moment": "pair",
+        "warp": null
+      },
+      "steps": [
+        {
+          "eval": "async (f, w) => { for (let d = 0; d < 42; d++) { f.send({ type: 'CHOOSE', choiceIndex: 0 }); await new Promise((r) => setTimeout(r, 70)); for (let i = 0; i < 20; i++) f.tick(w); await new Promise((r) => setTimeout(r, 240)); } }"
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "leap-phone-board": {
+      "title": "Release Leapfrog: the leaderboard on a phone (Task Mangler opened)",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "moment": "pair",
+        "warp": null
+      },
+      "steps": [
+        {
+          "tick": 14
+        },
+        {
+          "wait": 800
+        },
+        {
+          "click": ".f95-tasks .f95-tb",
+          "optional": true
+        },
+        {
+          "click": ".bench-head",
+          "optional": true
+        },
+        {
+          "wait": 600
+        }
+      ]
     }
   }
 }

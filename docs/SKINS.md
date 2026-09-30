@@ -247,6 +247,23 @@ If your slot needs copy that has no key, write it into the slot (as Frontier 95 
 | `arena.colModel` | Model |
 | `arena.colScore` | Score |
 | `arena.colDelta` | Δ |
+| `bench.title` | Benchmarks |
+| `bench.tab` | Benchmarks |
+| `bench.colLab` | Lab |
+| `bench.sota` | SOTA |
+| `bench.solved` | SOLVED |
+| `bench.new` | NEW |
+| `bench.empty` | No scores yet. The labs are still cooking. |
+| `voice.title` | News cycle |
+| `voice.you` | You |
+| `voice.graph` | Share of the news cycle, last 60 days |
+| `stream.live` | LIVE |
+| `stream.watching` | {n} watching |
+| `stream.chat` | Chat |
+| `response.ready` | Ready |
+| `response.ship` | Ship now |
+| `response.full` | Full release |
+| `response.bug` | Launch bug odds |
 | `eraCard.bsod` | An era has occurred. |
 | `outcome.keepPlaying` | Keep playing |
 | `outcome.newLab` | New lab |
@@ -328,7 +345,10 @@ A slot is a React component. Each gets **its slice of the view-model plus `actio
 | `Toast` | `{ toast, actions }` | One toast. `toast.tone === "hint"` is a standing hint and `"warn"` a standing warning (both not dismissable: a warning like "your entrance isn't connected" stays until it is fixed). Frontier 95 has no `Toasts` dock: its paperclip draws `vm.warnings` itself. |
 | `Assistant` | `{ vm, actions }` | A helper character that hosts hints, toasts and standing warnings, and asks the spend check (`vm.confirm`: "this leaves 1.8 months of runway", answered with `actions.confirmSpend()` or `actions.cancelSpend()`; make the safe answer the default, and Escape and a click outside give it). Time is held while it is up. The base draws nothing but the spend check (its warnings are `Toast`s); Frontier 95's paperclip lives here. |
 | `EventCard` | `{ event, actions }` | The modal news card. `actions.choose(event.id, i)`; the 1–3 keys are handled by the game. |
-| `Arena` | `{ arena, actions }` | The R&D multiplier and era, and the Frontier Arena leaderboard (`arena.open` folded or open; `actions.toggleArena()`). |
+| `Arena` | `{ arena, leapfrog, layout, actions }` | The R&D multiplier and era, and the Frontier Arena leaderboard (`arena.open` folded or open; `actions.toggleArena()`). It also gets the Release Leapfrog data, so a skin can host the benchmark leaderboard as a tab (Frontier 95's Task Mangler does): compose `useSlots().Benchmarks`. |
+| `Benchmarks` | `{ leapfrog, layout, actions }` | The benchmark leaderboard (Release Leapfrog): labs down the side, benchmarks across, your row highlighted, SOTA badges that blink when a record changes hands, benchmaxxed scores asterisked with the excuse underneath, solved benchmarks struck through and stamped SOLVED. Draw it with `kit`'s `<BenchTable leapfrog>` (semantic `bench-*` classes) or your own. Docked: the base Layout puts it under the Arena; a Layout may skip it if `Arena` hosts it. `null` while the pack is off. |
+| `Voice` | `{ leapfrog, layout, actions }` | The share-of-voice meter: who has the news cycle (`leapfrog.voice`: shares, owner, trend, and `series` for a graph: `kit`'s `<VoiceGraph voice>`). Docked. Frontier 95: a tray icon and a "Network Traffic" window. `null` while the pack is off. |
+| `Livestream` | `{ event, stream, actions }` | The launch livestream mishap card (the dog on stage, the wrong chart). Opens instead of `EventCard` when `event.kind === "stream"`; `stream` has the caption, viewer count and chat lines; answer with `actions.choose`. |
 | `EraCard` | `{ era, actions }` | The full-screen era title card. `actions.continueEra()`; Enter, Space and (after 0.7 s) any key work. |
 | `FrontPage` | `{ paper, actions }` | The weekly paper. |
 | `GroupChat` | `{ chat, actions }` | The monthly recap chat (messages arrive one by one; `chat.typing`). |
@@ -341,7 +361,7 @@ A slot is a React component. Each gets **its slice of the view-model plus `actio
 | `NewsRoom` | `{ newsroom, actions }` | The News Room modal: the archive, and the open paper or chat (compose `useSlots().FrontPage` / `.GroupChat`, or draw your own). |
 | `Mixer` | `{ sound, actions }` | The sound mixer modal. |
 
-The **docked** slots (`Layout` receives them pre-rendered) are `Stats`, `Training`, `Objectives`, `Inspector`, `BuildBar`, `Speed`, `Staff`, `ThoughtsPanel`, `Ticker`, `Toasts` (one `Toast` at a time: the newest toast, or the standing hint when nobody is talking), `Assistant`, `Arena`, `NewsControls`, `NewsArrival` and `PhotoButton`. The modal slots (`EventCard`, `EraCard`, `Outcome`, `NewsRoom`, `Mixer`, `SkinPicker`) and `PhotoOverlay` are rendered by the game when there is something to show.
+The **docked** slots (`Layout` receives them pre-rendered) are `Stats`, `Training`, `Objectives`, `Inspector`, `BuildBar`, `Speed`, `Staff`, `ThoughtsPanel`, `Ticker`, `Toasts` (one `Toast` at a time: the newest toast, or the standing hint when nobody is talking), `Assistant`, `Arena`, `Benchmarks`, `Voice`, `NewsControls`, `NewsArrival` and `PhotoButton`. The modal slots (`EventCard`, `Livestream`, `EraCard`, `Outcome`, `NewsRoom`, `Mixer`, `SkinPicker`) and `PhotoOverlay` are rendered by the game when there is something to show.
 
 ## Writing slots.tsx
 
@@ -368,7 +388,7 @@ const slots: SkinSlots = { Stats };
 export default slots;
 ```
 
-What a slot may import: `react`; `../types` and `../../ui/hud/types` (types only); `../kit` (Odometer, Marquee, Portrait, Dialog, money, reducedMotion, useT, useSlots, useSkin, useAutoPause); files in its own folder. **Nothing else in the game.** Rules for slots:
+What a slot may import: `react`; `../types` and `../../ui/hud/types` (types only); `../kit` (Odometer, Marquee, Portrait, Dialog, BenchTable, VoiceGraph, money, reducedMotion, useT, useSlots, useSkin, useAutoPause); files in its own folder. **Nothing else in the game.** Rules for slots:
 
 - **Render from props.** No reading the store, no timers that touch the game. UI-only state (an open tab, whether the Start menu is open) is `useState` inside the slot.
 - **Do not call `window` during render** (the tests render on the server). Read `layout.compact` / `layout.phone` from the props for responsive defaults; use `useEffect` for anything with the DOM.
@@ -396,6 +416,7 @@ interface HudVM {
   event: EventVM | null;                 // a modal card; the era card is separate:
   eraCard: EraCardVM | null;
   thoughtsPanel; arena; outcome;
+  leapfrog;                              // Release Leapfrog: the benchmark leaderboard (columns, rows, cells) and the share-of-voice meter; `enabled: false` when the pack is off
   newsroom; sound; photoMode; skins;     // the news room (archive, paper, chat), mixer, photo mode, skin picker
   layout: { width, height, phone /* ≤480 */, compact /* ≤640 */, tall /* ≥800 */ };
 }
