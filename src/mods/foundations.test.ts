@@ -133,13 +133,13 @@ describe("mod foundations", () => {
   });
   it("validates named arc vocabulary, missing references and unreachable states", async () => {
     const arc = { id: "steve-arc", initial: "idle", states: { idle: { on: { DAY: { target: "done", guard: { type: "stat.gte", params: { stat: "hype", value: 40 } }, actions: [{ type: "cash.delta", params: { amount: 100 } }] } } }, done: { type: "final" as const } } };
-    expect((await resolve([mod("arcs", { arcs: { add: [arc] } })])).content.arcs).toEqual([arc]);
+    expect((await resolve([mod("arcs", { arcs: { add: [arc] } })])).content.arcs.at(-1)).toEqual(arc);
     expect((await resolve([mod("arcs", { events: { add: [arc] } })])).content.events.at(-1)).toEqual(arc);
     const conditioned = await resolve([mod("conditional", { headlines: { add: [{ id: "discourse-line", text: "The discourse has a streaming deal", tone: "joke", when: { "stat.gte": ["waterDiscourse", 40] } }] } })]);
     expect(conditioned.content.headlines.at(-1)?.when).toEqual({ "stat.gte": ["waterDiscourse", 40] });
     await expect(resolve([mod("arcs", { arcs: { add: [{ ...arc, states: { ...arc.states, lonely: {} } }] } })])).rejects.toThrow("unreachable states: lonely");
     await expect(resolve([mod("arcs", { arcs: { add: [{ ...arc, states: { idle: { entry: ["cash.deltaa"] } } }] } })])).rejects.toThrow('did you mean "cash.delta"');
-    await expect(resolve([mod("arcs", { arcs: { add: [{ ...arc, initial: "missing" }] } })])).rejects.toThrow("content.arcs[0].initial");
+    await expect(resolve([mod("arcs", { arcs: { add: [{ ...arc, initial: "missing" }] } })])).rejects.toThrow(/content\.arcs\[\d+\]\.initial/);
     await expect(Effect.runPromise(decodeManifest({ ...mod("arcs"), content: { arcs: { add: [{ ...arc, states: { idle: { after: { 1000: "done" } } } }] } } }))).rejects.toThrow("after");
   });
   it("accepts an injectable skin registry without pulling React into the pure definition", async () => {

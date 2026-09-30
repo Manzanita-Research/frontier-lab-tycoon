@@ -277,6 +277,12 @@ If your slot needs copy that has no key, write it into the slot (as Frontier 95 
 | `voice.title` | News cycle |
 | `voice.you` | You |
 | `voice.graph` | Share of the news cycle, last 60 days |
+| `factions.title` | The Discourse |
+| `factions.stance` | Where you stand |
+| `factions.relations` | Alliances and feuds |
+| `factions.log` | Lately |
+| `factions.safety` | Safety budget |
+| `factions.none` | Nobody is feuding. Give it a week. |
 | `stream.live` | LIVE |
 | `stream.watching` | {n} watching |
 | `stream.chat` | Chat |
@@ -415,6 +421,7 @@ A slot is a React component. Each gets **its slice of the view-model plus `actio
 | `Arena` | `{ arena, leapfrog, layout, actions }` | The R&D multiplier and era, and the Frontier Arena leaderboard (`arena.open` folded or open; `actions.toggleArena()`). It also gets the Release Leapfrog data, so a skin can host the benchmark leaderboard as a tab (Frontier 95's Task Mangler does): compose `useSlots().Benchmarks`. A row's `tag` / `tagText` (`NEW`, `NEMESIS`, `ALUMNI`) marks a lab your own people founded (Defection, the Poaching War); its `title` is then the lab's manifesto. |
 | `Benchmarks` | `{ leapfrog, layout, actions }` | The benchmark leaderboard (Release Leapfrog): labs down the side, benchmarks across, your row highlighted, SOTA badges that blink when a record changes hands, benchmaxxed scores asterisked with the excuse underneath, solved benchmarks struck through and stamped SOLVED. Draw it with `kit`'s `<BenchTable leapfrog>` (semantic `bench-*` classes) or your own. Docked: the base Layout puts it under the Arena; a Layout may skip it if `Arena` hosts it. `null` while the pack is off. |
 | `Voice` | `{ leapfrog, layout, actions }` | The share-of-voice meter: who has the news cycle (`leapfrog.voice`: shares, owner, trend, and `series` for a graph: `kit`'s `<VoiceGraph voice>`). Docked. Frontier 95: a tray icon and a "Network Traffic" window. `null` while the pack is off. |
+| `Factions` | `{ factions, layout, actions }` | The discourse (FLT-33): every faction's approval meter (`factions.rows`: colour, `meter` −100..100, `mood`, `moodLabel`, `why`, who is marching), the lab's `stance` on five axes, `relations` (allies, feuds, a `schism`, which goes first), `gateText` (who is at the gate), the `log`, and the safety budget (`safety.options`; `actions.setSafetySpend(level)`). `factions.open` folds it; `actions.toggleFactions()` flips it. Docked. `kit` has `<FactionChip>`, `<FactionMeter>`, `<StanceTrack>`, and `factionAttrs(faction)` for a bubble's root (`inspector.faction` and `bubble.faction` are the same chip). Frontier 95: a megaphone in the tray and a "Discourse Monitor" window. `null` until Level 4 (or with `?factions=off`). |
 | `Livestream` | `{ event, stream, actions }` | The launch livestream mishap card (the dog on stage, the wrong chart). Opens instead of `EventCard` when `event.kind === "stream"`; `stream` has the caption, viewer count and chat lines; answer with `actions.choose`. |
 | `Hearing` | `{ event, hearing, actions }` | The Hearing (FLT-21): a question at the witness table, or the gavel. Opens instead of `EventCard` when `event.kind === "hearing"`. `hearing` has the three senators (name, seat, `look` colours for the kit's `Senator` portrait, who is `asking`, how each was `answered`), the Trust and Capture meters, `progressText`, per-answer `moves` (label, arrows, `good`: `null` for Capture, which reads as sly) in the same order as `event.choices`, and `verdict` at the gavel. |
 | `LeakedChat` | `{ event, leak, actions }` | The yacht summit's leaked group chat (FLT-24). Opens instead of `EventCard` when `event.kind === "leak"`. `leak` has the group's name, `members`, and `messages` (`name`, rival `color`, `you` for the player's own lines, `system` for "X joined" lines, `time`, `text`); answer with `actions.choose`. |
@@ -441,7 +448,7 @@ A slot is a React component. Each gets **its slice of the view-model plus `actio
 | `ReportCard` | `{ event, report, actions }` | Evals Without Borders' report card (FLT-19). Opens instead of `EventCard` when `event.kind === "report"`: five subjects graded A to F with a remark each, the `overall` grade, a `stamp` ("CAUGHT HIDING", "SWARM FOUND") or null, what it did to trust, heat and hype (`moves`), and the Frontier Times' `headline`. Answer with `actions.choose`. |
 | `AuditPin` | `{ audit, actions }` | The sign over the auditors' heads (over the gate during the countdown): `audit.line` ("Inspecting the Kombucha Bar"), `stopsText` ("2/4") and a `progress` bar while they stand at a stop (`evals` while they run their own). The game pins it every frame and only draws it while `audit.line` is set. Keep it small: it sits over the 3D scene. |
 
-The **docked** slots (`Layout` receives them pre-rendered) are `Stats`, `Training`, `Objectives`, `Inspector`, `BuildBar`, `Speed`, `Staff`, `ThoughtsPanel`, `Ticker`, `Toasts` (one `Toast` at a time: the newest toast, or the standing hint when nobody is talking), `Assistant`, `Arena`, `Benchmarks`, `Voice`, `Papers`, `NewsControls`, `NewsArrival`, `PhotoButton` and `DisasterAlert`. `AuditPin` is pinned into the scene like `Bubble`. The modal slots (`EventCard`, `Livestream`, `Hearing`, `LeakedChat`, `Drama`, `ReportCard`, `Bill`, `PromiseTracker`, `EraCard`, `Outcome`, `NewsRoom`, `Mixer`, `ModManager`, `SkinPicker`, `PaperMoment`, `CrumbWiki`, `DisasterMenu`) and `PhotoOverlay` are rendered by the game when there is something to show.
+The **docked** slots (`Layout` receives them pre-rendered) are `Stats`, `Training`, `Objectives`, `Inspector`, `BuildBar`, `Speed`, `Staff`, `ThoughtsPanel`, `Ticker`, `Toasts` (one `Toast` at a time: the newest toast, or the standing hint when nobody is talking), `Assistant`, `Arena`, `Benchmarks`, `Voice`, `Factions`, `Papers`, `NewsControls`, `NewsArrival`, `PhotoButton` and `DisasterAlert`. `AuditPin` is pinned into the scene like `Bubble`. The modal slots (`EventCard`, `Livestream`, `Hearing`, `LeakedChat`, `Drama`, `ReportCard`, `Bill`, `PromiseTracker`, `EraCard`, `Outcome`, `NewsRoom`, `Mixer`, `ModManager`, `SkinPicker`, `PaperMoment`, `CrumbWiki`, `DisasterMenu`) and `PhotoOverlay` are rendered by the game when there is something to show.
 
 ## Writing slots.tsx
 
@@ -468,7 +475,7 @@ const slots: SkinSlots = { Stats };
 export default slots;
 ```
 
-What a slot may import: `react`; `../types` and `../../ui/hud/types` (types only); `../kit` (Odometer, Marquee, Portrait, Senator, Dialog, BenchTable, VoiceGraph, money, reducedMotion, useT, useSlots, useSkin, useAutoPause, useCoach, ALL_VISIBLE, placeBalloon); files in its own folder. **Nothing else in the game.** Rules for slots:
+What a slot may import: `react`; `../types` and `../../ui/hud/types` (types only); `../kit` (Odometer, Marquee, Portrait, Senator, Dialog, BenchTable, VoiceGraph, FactionChip, FactionMeter, StanceTrack, factionAttrs, money, reducedMotion, useT, useSlots, useSkin, useAutoPause, useCoach, ALL_VISIBLE, placeBalloon); files in its own folder. **Nothing else in the game.** Rules for slots:
 
 - **Render from props.** No reading the store, no timers that touch the game. UI-only state (an open tab, whether the Start menu is open) is `useState` inside the slot.
 - **Do not call `window` during render** (the tests render on the server). Read `layout.compact` / `layout.phone` from the props for responsive defaults; use `useEffect` for anything with the DOM.

@@ -5,7 +5,7 @@ import { STAFF } from "../../content/staff";
 import type { CoachVM, HudPanelId, UnlockCardVM, VisibleVM } from "./types";
 import { defs } from "../../sim/defs";
 
-export const HUD_PANELS: readonly HudPanelId[] = ["revenue", "vibes", "arena", "rnd", "thoughts", "news", "staff", "events", "papers", "disasters"];
+export const HUD_PANELS: readonly HudPanelId[] = ["revenue", "vibes", "arena", "rnd", "thoughts", "news", "staff", "events", "papers", "disasters", "factions"];
 
 /** The contract, as the logic sends it. */
 export interface PlayableSnapshot {
@@ -44,7 +44,7 @@ const SYSTEM_NAMES: Record<string, string | null> = {
   breakdowns: "Breakdowns", slop: "Slop", leapfrog: "Benchmark leaderboard", arena: "The Arena", rnd: "R&D multiplier", news: "The Frontier Times",
   events: "Event cards", protests: "Protests", disasters: "Disasters", papers: "Papers: publish or perish", collusion: null,
   hearing: "The Hearing", yacht: "The yacht summit", defection: "Defection", poaching: "The Poaching War", auditors: "Evals Without Borders",
-  promises: "The Promise Tracker", capture: "Regulatory Capture",
+  promises: "The Promise Tracker", capture: "Regulatory Capture", factions: "Factions",
 };
 const unlockOf = (card: UnlockCardVM): UnlockCardVM => ({
   ...card,

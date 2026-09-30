@@ -17,6 +17,7 @@ export function Layout({ slots }: SlotPropsMap["Layout"]) {
           {slots.Benchmarks}
           {slots.Voice}
           {slots.Papers}
+          {slots.Factions}
         </div>
         <div className="right-col">
           {slots.Speed}

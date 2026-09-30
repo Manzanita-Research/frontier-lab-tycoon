@@ -122,6 +122,8 @@ export interface InspectorVM {
   following: boolean;
   /** "0042" */
   badge: string;
+  /** FLT-33: the faction they side with, for a chip on the card. Absent (or null) for nobody's, and before Level 4. */
+  faction?: FactionChipVM | null;
 }
 
 export interface BuildItemVM {
@@ -176,6 +178,8 @@ export interface BubbleVM {
   text: string;
   /** Said out loud to the person beside them, not thought (a VC's pitch by the Kombucha Bar): a skin may draw a speech balloon. */
   speech?: boolean;
+  /** FLT-33: said as a member of this faction: tint the bubble with `faction.color` if you like. Absent for everyone else. */
+  faction?: FactionChipVM | null;
 }
 
 export interface StaffRowVM {
@@ -260,7 +264,7 @@ export interface ConfirmVM {
 // ---- Playable v1: what the player has unlocked, the coach marks, and the "New!" card ----
 
 /** The HUD panels the player earns as the lab grows (a hidden panel is simply not drawn). */
-export type HudPanelId = "revenue" | "vibes" | "arena" | "rnd" | "thoughts" | "news" | "staff" | "events" | "papers" | "disasters";
+export type HudPanelId = "revenue" | "vibes" | "arena" | "rnd" | "thoughts" | "news" | "staff" | "events" | "papers" | "disasters" | "factions";
 export type VisibleVM = Record<HudPanelId, boolean>;
 
 /** What the build panel teases as locked: one row per milestone, how many it unlocks and the goal that earns them ("2 more · Ship your first model"). */
@@ -1008,6 +1012,103 @@ export interface PhotoVM {
   flash: number;
 }
 
+/** FLT-33: how a faction feels about the lab. `protesting` is "Marching" once protests are unlocked (Level 5), "Furious online" before. */
+export type FactionMoodVM = "calm" | "fan" | "upset" | "protesting";
+
+/** A faction, small: enough for a chip on an inspector card or a tint on a bubble. */
+export interface FactionChipVM {
+  id: string;
+  name: string;
+  /** One short word ("Doom", "VC"). */
+  short: string;
+  /** CSS colour. */
+  color: string;
+  mood: FactionMoodVM;
+  moodLabel: string;
+}
+
+export interface FactionRowVM extends FactionChipVM {
+  /** The one thing they carry (a hoodie, a clipboard, a sandwich board). */
+  prop: string;
+  blurb: string;
+  /** −100 (fed up) to 100 (adoring). */
+  meter: number;
+  /** "+42", "−17". */
+  meterText: string;
+  /** Their latest reason to feel the way they do ("Rushed launch. The timeline in their spreadsheet moved left."), or null. */
+  why: string | null;
+  /** Members on campus, and how many are at the gate with a sign. */
+  members: number;
+  marching: number;
+  /** Followers off the map: "40K", "900K". */
+  audienceText: string;
+}
+
+/** Two factions that are not merely cordial. `schism`: they were allies and have split (the headline). */
+export interface FactionRelationVM {
+  key: string;
+  a: FactionChipVM;
+  b: FactionChipVM;
+  state: "allied" | "feuding";
+  value: number;
+  schism: boolean;
+  /** "Doomers and Safetyists: allies", "Safetyists and Doomers: schism". */
+  text: string;
+}
+
+/** The lab's position on one axis every faction has an opinion about. */
+export interface StanceVM {
+  axis: string;
+  label: string;
+  /** −1 to 1, and the words at each end ("Careful" … "Fast"). */
+  value: number;
+  low: string;
+  high: string;
+}
+
+export interface FactionLogVM {
+  id: number;
+  day: number;
+  text: string;
+  tone: ToneVM;
+  /** The colours of the factions it is about, for dots. */
+  colors: string[];
+}
+
+/** The safety budget: a daily cost, a slower training run, and the Safetyists' attention. */
+export interface SafetyOptionVM {
+  level: number;
+  label: string;
+  costText: string;
+  /** "−12% training" or "". */
+  dragText: string;
+  active: boolean;
+}
+
+/** FLT-33: the discourse. `enabled: false` until Level 4 (and with `?factions=off`); draw nothing then. */
+export interface FactionsVM {
+  enabled: boolean;
+  /** The panel is open (`actions.toggleFactions()`). */
+  open: boolean;
+  /** Protests are unlocked (Level 5): factions march on the gate. */
+  protests: boolean;
+  rows: FactionRowVM[];
+  stance: StanceVM[];
+  relations: FactionRelationVM[];
+  /** Newest first. */
+  log: FactionLogVM[];
+  /** Crowds at the gate right now; the water crowd has id "". */
+  gate: { id: string; name: string; color: string; count: number }[];
+  /** "At the gate: 18 Water Discourse vs 12 Water Truthers Truthers", or "". */
+  gateText: string;
+  /** The folded panel's one line: "2 fans · 3 upset · Doomers marching". */
+  headline: string;
+  /** How many factions are fans, and how many are upset or worse (for a badge). */
+  fans: number;
+  angry: number;
+  safety: { level: number; options: SafetyOptionVM[] };
+}
+
 export interface SkinInfoVM {
   id: string;
   name: string;
@@ -1195,6 +1296,8 @@ export interface HudVM {
   /** Agent collusion: the signs, and the CrumbWiki reveal once it ends. */
   collusion: CollusionVM;
   crumbWiki: CrumbWikiVM | null;
+  /** FLT-33: the factions and the lab's stance. `enabled: false` until Level 4. */
+  factions: FactionsVM;
   eraCard: EraCardVM | null;
   outcome: OutcomeVM | null;
   /** Evals Without Borders: the countdown and the tour. */
@@ -1256,6 +1359,10 @@ export interface HudActions {
   /** Start one now (ask first: the slot's job). Closes the menu. */
   triggerDisaster(id: string): void;
   setRisk(risk: RiskVM): void;
+  /** FLT-33: open or fold the Factions panel. */
+  toggleFactions(): void;
+  /** FLT-33: the safety budget, 0 (none) to 3 (lavish). Costs money every day and slows training; the Safetyists notice. */
+  setSafetySpend(level: number): void;
   keepPlaying(): void;
   newLab(): void;
   // The payroll.

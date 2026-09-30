@@ -29,6 +29,7 @@ import type { TrainingStored } from "./machines/training";
 import type { WalkerStored } from "./machines/walker";
 import type { TutorialStored } from "./machines/tutorial";
 import type { GuardrailsStored } from "./machines/guardrails";
+import type { FactionsState } from "./factions/state";
 
 export type { BuildingKind, NeedKey };
 export type WalkerKind = "researcher" | "agent" | "visitor" | "protester";
@@ -132,6 +133,10 @@ export interface Walker {
   qslot: number;
   /** Where the line says they should be standing (recomputed each tick from the join order; `qslot` follows it). Transient. */
   qrank: number;
+  /** FLT-33: the faction they side with ("" for none), given out a few ticks after they arrive. Absent without factions. */
+  faction?: string;
+  /** Protesters: the faction whose crowd they came with. Absent for the water crowd (and every protester without factions). */
+  crowd?: string;
 }
 
 export type StaffJob = "janitor" | "sre" | "comms" | "security";
@@ -179,6 +184,21 @@ export interface Thought {
   kind: WalkerKind;
   text: string;
   expiresTick: number;
+  /** FLT-33: said as a member of this faction (the bubble takes its colour). */
+  faction?: string;
+  /** An answer to what this walker just said: a path argument, or a shout across the gate. */
+  replyTo?: number;
+}
+
+/** A crowd a faction sends to the gate on purpose (the `faction.rally` verb): it stands across the path from `against`. */
+export interface Rally {
+  faction: string;
+  /** The crowds it is there to shout at: these factions' marchers, and the water crowd, move to the far side of the path. */
+  against: string[];
+  /** Its size: this share of the water crowd, and at least `min`. */
+  share: number;
+  min: number;
+  day: number;
 }
 
 export interface Pop {
@@ -340,6 +360,10 @@ export interface GameState {
   promises?: PromisesState;
   /** Notes on the lab's file for the auditors (the Vocabulary's `auditor.note`; FLT-22's exposed bill files one). FLT-19 reads them. */
   auditorNotes?: AuditorNote[];
+  /** FLT-33: the factions (meters, moods, relations, the lab's stance). Absent until Level 4, or with `?factions=off`. */
+  factions?: FactionsState;
+  /** FLT-25: crowds that came to the gate to shout at another crowd (the `faction.rally` verb). Absent until the first. */
+  rallies?: Rally[];
   /** Generic inquiries started by the Vocabulary; the owning machine completes them. */
   investigations?: Record<string, Investigation>;
   /** FLT-26 Defection: opt-in pack (the ladder turns it on at Scrutiny); absent in legacy saves and baseline runs. */

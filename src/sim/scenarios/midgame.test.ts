@@ -25,7 +25,8 @@ describe("midgame scenario", () => {
     // FLT-37: the campus it starts from wakes every earned pack, so Papers and Collusion now run in its 480 days too.
     // FLT-52: and the Hearing, the yacht summit, Defection, the Poaching War, Evals Without Borders, Regulatory Capture
     // and the Promise Tracker.
-    expect(digest(s)).toBe("c4d958df");
+    // FLT-33/25: the earned factions wake with the campus and argue all 480 days; the water crowd escalates through its arc.
+    expect(digest(s)).toBe("c4310492");
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);
@@ -35,7 +36,8 @@ describe("midgame scenario", () => {
     expect(s.buildings.length).toBeLessThanOrEqual(20);
     // Operations staff are rendered walkers too; count both populations, rather than inventing agent bonuses.
     expect(s.walkers.length + s.staff.length).toBeGreaterThanOrEqual(150);
-    expect(s.walkers.filter((w) => w.kind === "protester").length).toBe(40);
+    // The water crowd at its cap; FLT-25's counter-protest may have brought the Water Truthers Truthers too.
+    expect(s.walkers.filter((w) => w.kind === "protester" && w.crowd === undefined).length).toBe(40);
     expect(eraOfState(s)).toBe(2);
     const ready = s.training.context.progress / s.training.context.cost;
     expect(ready).toBeGreaterThanOrEqual(0.6);

@@ -19,6 +19,7 @@ import { hearingView, type HearingView } from "../sim/hearing/view";
 import { yachtView, type YachtView } from "../sim/yacht/view";
 import { captureView, type CaptureView } from "../sim/capture/view";
 import { promisesView, type PromisesView } from "../sim/promises/view";
+import { factionsView, type FactionsView } from "../sim/factions/view";
 import { raceView, type RaceView } from "../sim/race/view";
 import { auditView, type AuditView } from "../sim/auditors/view";
 import { memberById } from "../sim/groups";
@@ -122,6 +123,8 @@ export interface Snapshot {
   /** Meetings in progress (a VC and your researcher by the Kombucha Bar, FLT-26): who, and what they say, visitor first. */
   /** Meetings in their talking phase; `names` is who says it, guest (their role, e.g. "Venture Capitalist") then host. */
   chats: { id: number; hostId: number; guestId: number; names: [string, string]; lines: string[] }[];
+  /** FLT-33: the factions' meters, moods and relations, the lab's stance, the gate. `enabled: false` until Level 4. */
+  factions: FactionsView;
   assistant: AssistantMessage | null;
   firstBuildPending: boolean;
   pendingConfirm: PendingConfirm | null;
@@ -253,6 +256,7 @@ export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO
       const host = s.walkers.find((w) => w.id === m.hostId);
       return { id: m.id, hostId: m.hostId, guestId: m.guestId, names: [guest?.role || guest?.name || "", host?.name ?? ""], lines: m.lines.slice() };
     }),
+    factions: factionsView(s),
     assistant: assistantOf(s),
     firstBuildPending: !!s.coach && s.flags.started === undefined && s.flags.firstBuild === undefined,
     pendingConfirm: pendingConfirmOf(s),

@@ -8,6 +8,7 @@ import { Vocabulary } from "./services/vocabulary";
 import { Progression, CoachLine, Arc, Building, Disaster, Ending, EntityKind, EventOrArc, Goal, Headline, ModError, NamePool, Rival, Thought, Tip, decodeManifest, type ModManifest } from "./schema";
 import { contentKey, patchById } from "./patch";
 import { BenchmarkSchema, MishapSchema } from "../content/leapfrog";
+import { FactionSchema } from "../content/factions";
 import type { ProgressionLevel } from "../content/progression";
 import { sanitizeCss } from "./css";
 import { validateAssets } from "./assets";
@@ -38,6 +39,7 @@ function applyContent(below: ContentApi, mod: ModManifest): ContentApi {
     disasters: patchById("disasters", below.disasters, p.disasters, (row) => row.id, Schema.decodeUnknownSync(Disaster)),
     benchmarks: patchById("benchmarks", below.benchmarks, p.benchmarks, (row) => row.id, Schema.decodeUnknownSync(BenchmarkSchema)),
     mishaps: patchById("mishaps", below.mishaps, p.mishaps, (row) => row.id, Schema.decodeUnknownSync(MishapSchema)),
+    factions: patchById("factions", below.factions, p.factions, (row) => row.id, Schema.decodeUnknownSync(FactionSchema)),
   };
 }
 function toObject(value: unknown): object { return typeof value === "object" && value !== null ? value : {}; }
