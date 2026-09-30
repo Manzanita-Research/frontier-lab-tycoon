@@ -9,6 +9,8 @@ export function Layout({ slots }: SlotPropsMap["Layout"]) {
         <div className="left-col">
           {slots.Training}
           {slots.Objectives}
+          {slots.Benchmarks}
+          {slots.Voice}
         </div>
         <div className="right-col">
           {slots.Speed}

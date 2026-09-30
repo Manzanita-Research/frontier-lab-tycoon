@@ -101,5 +101,22 @@
   "stats.moreStats": "More stats",
   "stats.fewerStats": "Fewer stats",
   "inspector.fold": "Fold the card",
-  "inspector.more": "Show more"
+  "inspector.more": "Show more",
+  "bench.title": "Benchmarks",
+  "bench.tab": "Benchmarks",
+  "bench.colLab": "Lab",
+  "bench.sota": "SOTA",
+  "bench.solved": "SOLVED",
+  "bench.new": "NEW",
+  "bench.empty": "No scores yet. The labs are still cooking.",
+  "voice.title": "News cycle",
+  "voice.you": "You",
+  "voice.graph": "Share of the news cycle, last 60 days",
+  "stream.live": "LIVE",
+  "stream.watching": "{n} watching",
+  "stream.chat": "Chat",
+  "response.ready": "Ready",
+  "response.ship": "Ship now",
+  "response.full": "Full release",
+  "response.bug": "Launch bug odds"
 }
