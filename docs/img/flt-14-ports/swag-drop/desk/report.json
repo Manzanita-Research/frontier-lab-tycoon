@@ -5,10 +5,10 @@
   },
   "head": {
     "branch": "flt-14-port-swag-drop",
-    "sha": "c2ec3cb",
+    "sha": "8b405da",
     "dirty": true
   },
-  "seconds": 289.222,
+  "seconds": 297.798,
   "problems": [],
   "rows": [
     {
@@ -18,7 +18,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/desk/after/desk@swag-drop.png",
       "title": "The desk: the event answered, the campus clear",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/desk/compare/desk@swag-drop.png",
-      "changed": 0.3416581790123457
+      "changed": 0.341429012345679
     },
     {
       "scene": "desk-badge",
@@ -27,7 +27,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/desk/after/desk-badge@swag-drop.png",
       "title": "Tap a researcher: the lanyard badge drops and swings",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/desk/compare/desk-badge@swag-drop.png",
-      "changed": 0.3806797839506173
+      "changed": 0.38065432098765434
     },
     {
       "scene": "desk-agent",
@@ -36,7 +36,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/desk/after/desk-agent@swag-drop.png",
       "title": "Tap an agent: the cyan CONTRACTOR (NON-HUMAN) badge",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/desk/compare/desk-agent@swag-drop.png",
-      "changed": 0.3839961419753086
+      "changed": 0.3837206790123457
     },
     {
       "scene": "desk-flip",
@@ -45,7 +45,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/desk/after/desk-flip@swag-drop.png",
       "title": "The badge flipped over: the personnel file",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/desk/compare/desk-flip@swag-drop.png",
-      "changed": 0.3799475308641975
+      "changed": 0.3808634259259259
     },
     {
       "scene": "desk-receipt",
@@ -54,7 +54,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/desk/after/desk-receipt@swag-drop.png",
       "title": "Tap the Vibes pin: where the points came from",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/desk/compare/desk-receipt@swag-drop.png",
-      "changed": 0.3466782407407407
+      "changed": 0.3462739197530864
     },
     {
       "scene": "desk-tool",
@@ -63,7 +63,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/desk/after/desk-tool@swag-drop.png",
       "title": "A keycap sunk: the Compute Cluster is in hand",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/desk/compare/desk-tool@swag-drop.png",
-      "changed": 0.36754475308641976
+      "changed": 0.36624537037037036
     },
     {
       "scene": "desk-era",
@@ -72,7 +72,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/desk/after/desk-era@swag-drop.png",
       "title": "Era 2 lands as an all-hands slide",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/desk/compare/desk-era@swag-drop.png",
-      "changed": 0.969866512345679
+      "changed": 0.9698973765432098
     },
     {
       "scene": "desk-auction",
@@ -81,7 +81,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/desk/after/desk-auction@swag-drop.png",
       "title": "The compute auction as a memo, with a rubber stamp",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/desk/compare/desk-auction@swag-drop.png",
-      "changed": 0.7514567901234568
+      "changed": 0.7519899691358025
     },
     {
       "scene": "desk-phone",
@@ -90,7 +90,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/desk/after/desk-phone@swag-drop.png",
       "title": "The desk on a phone: the event answered",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/desk/compare/desk-phone@swag-drop.png",
-      "changed": 0.43856103414752706
+      "changed": 0.43741797302223845
     },
     {
       "scene": "desk-phone-badge",
@@ -99,7 +99,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/desk/after/desk-phone-badge@swag-drop.png",
       "title": "Tap a researcher on a phone: the badge sheet",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/desk/compare/desk-phone-badge@swag-drop.png",
-      "changed": 0.6219976607121157
+      "changed": 0.6204945922955402
     },
     {
       "scene": "desk-phone-okr",
@@ -108,7 +108,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/desk/after/desk-phone-okr@swag-drop.png",
       "title": "The OKR tab open on a phone",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/desk/compare/desk-phone-okr@swag-drop.png",
-      "changed": 0.6085042228703366
+      "changed": 0.6080432008749544
     },
     {
       "scene": "desk-phone-more",
@@ -117,7 +117,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/desk/after/desk-phone-more@swag-drop.png",
       "title": "The plaque expanded on a phone",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/desk/compare/desk-phone-more@swag-drop.png",
-      "changed": 0.4298912383035606
+      "changed": 0.4389749665816017
     }
   ],
   "errors": []

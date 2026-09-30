@@ -5,10 +5,10 @@
   },
   "head": {
     "branch": "flt-14-port-swag-drop",
-    "sha": "c2ec3cb",
+    "sha": "8b405da",
     "dirty": true
   },
-  "seconds": 165.114,
+  "seconds": 157.586,
   "problems": [
     "photo@swag-drop.png: blank composite: panel 3 is 53% one colour, 12 colours"
   ],
@@ -20,7 +20,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/after/overview@swag-drop.png",
       "title": "The campus, mid-morning, paused",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/compare/overview@swag-drop.png",
-      "changed": 0.341116512345679
+      "changed": 0.3408888888888889
     },
     {
       "scene": "inspector",
@@ -29,7 +29,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/after/inspector@swag-drop.png",
       "title": "Tap a researcher: the inspector opens",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/compare/inspector@swag-drop.png",
-      "changed": 0.38067283950617287
+      "changed": 0.38108256172839505
     },
     {
       "scene": "event",
@@ -38,7 +38,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/after/event@swag-drop.png",
       "title": "An event card lands (the Water Discourse)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/compare/event@swag-drop.png",
-      "changed": 0.7494081790123457
+      "changed": 0.7494251543209877
     },
     {
       "scene": "menu",
@@ -47,7 +47,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/after/menu@swag-drop.png",
       "title": "The Start menu / build bar open",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/compare/menu@swag-drop.png",
-      "changed": 0.3673348765432099
+      "changed": 0.36707793209876544
     },
     {
       "scene": "phone",
@@ -56,7 +56,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/after/phone@swag-drop.png",
       "title": "The same campus on a phone (390x844)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/swag-drop/compare/phone@swag-drop.png",
-      "changed": 0.43830963665086886
+      "changed": 0.4376792441365901
     },
     {
       "scene": "photo",
