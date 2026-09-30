@@ -26,6 +26,9 @@ function tilesBetween(a: { x: number; z: number }, b: { x: number; z: number }) 
 
 export function Placement() {
   const tool = useApp(atoms.tool);
+  // Painting a staffer's patrol zone (FLT-10): a drag paints tiles into it, or, if it starts on a painted tile, erases them.
+  const zone = useApp(atoms.zone);
+  const zoneMode = useRef(true);
   const hover = useApp(atoms.hover);
   const version = useApp(atoms.version);
   const cash = useApp(atoms.cashBucket);
@@ -42,21 +45,43 @@ export function Placement() {
   }, []);
   useEffect(() => {
     painting.current = null;
-  }, [tool]);
+  }, [tool, zone]);
 
   const fromEvent = (e: ThreeEvent<PointerEvent | MouseEvent>) => {
+    if (zone !== null) return { x: Math.floor(e.point.x + HALF), z: Math.floor(e.point.z + HALF) };
     if (!tool) return null;
     return anchor(tool, e.point.x + HALF, e.point.z + HALF);
+  };
+
+  /** One tile of the zone being painted: on or off, as the drag began. */
+  const paint = (x: number, z: number) => {
+    if (zone !== null) send({ type: "COMMAND", command: { type: "paintZone", id: zone, x, z, on: zoneMode.current } });
   };
 
   const onMove = (e: ThreeEvent<PointerEvent>) => {
     const at = fromEvent(e);
     send({ type: "SET_HOVER", hover: at });
-    if (!at || !tool || !painting.current) return;
+    if (!at || !painting.current) return;
+    if (zone !== null) {
+      for (const t of tilesBetween(painting.current, at)) paint(t.x, t.z);
+      painting.current = at;
+      return;
+    }
+    if (!tool) return;
     for (const t of tilesBetween(painting.current, at)) use(tool, t.x, t.z, true);
     painting.current = at;
   };
   const onDown = (e: ThreeEvent<PointerEvent>) => {
+    if (zone !== null && e.button === 0) {
+      const at = fromEvent(e);
+      if (!at) return;
+      const staffer = sim.world.staff.find((s) => s.id === zone);
+      zoneMode.current = !staffer?.zone.includes(at.z * sim.world.grid.w + at.x);
+      painting.current = at;
+      send({ type: "SET_HOVER", hover: at });
+      paint(at.x, at.z);
+      return;
+    }
     if (!tool || (tool !== "path" && tool !== "bulldoze") || e.button !== 0) return;
     const at = fromEvent(e);
     if (!at) return;
@@ -76,6 +101,7 @@ export function Placement() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [tool, hover, version, cash],
   );
+  const zoneCursor = zone !== null && hover ? hover : null;
 
   return (
     <>
@@ -83,6 +109,7 @@ export function Placement() {
         <planeGeometry args={[80, 80]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
+      {zoneCursor && <mesh geometry={boxGeo} material={ghostMaterials.ok} position={[zoneCursor.x + 0.5 - HALF, 0.13, zoneCursor.z + 0.5 - HALF]} scale={[0.96, 0.03, 0.96]} />}
       {ghost && (
         <group position={[rectCenter(ghost.rect)[0], 0, rectCenter(ghost.rect)[1]]}>
           {ghost.kind ? (

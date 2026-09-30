@@ -1,14 +1,31 @@
+import { eraOfState } from "../sim/race/race";
 import type { GameState } from "../sim/types";
-/** Compatibility boundary for the race/operations slices; the current World has neither field yet. */
+
+/** The era the World is in (FLT-9's era machine): "1" to "4". The era sting and the key change of the music follow it. */
 export function worldEra(w: GameState): string {
-  const value: unknown = (w as GameState & { era?: unknown }).era;
-  if (typeof value === "string" || typeof value === "number") return String(value);
-  if (value && typeof value === "object" && "value" in value && (typeof value.value === "string" || typeof value.value === "number")) return String(value.value);
-  return "seed";
+  return String(eraOfState(w));
 }
+
+/** Ids of the buildings that are out of order (FLT-10's breakdowns), for the breakdown alarm: a new id in the list is a new fire. */
 export function breakdownSignature(w: GameState): string {
-  return w.buildings.filter((b) => {
-    const extra = b as typeof b & { broken?: unknown; offline?: unknown };
-    return extra.broken === true || extra.offline === true;
-  }).map((b) => b.id).join(",");
+  return w.buildings.filter((b) => b.broken).map((b) => b.id).join(",");
+}
+
+export interface WorldSound {
+  era: string;
+  broken: string;
+}
+
+export const soundSnapshot = (w: GameState): WorldSound => ({ era: worldEra(w), broken: breakdownSignature(w) });
+
+/**
+ * Which one-shot cues the World's changes since `last` call for: the era sting when the era moves on, the breakdown
+ * alarm when a building that was not broken is. A repair (an id leaving the list) is silent.
+ */
+export function soundCues(last: WorldSound, now: WorldSound): ("era" | "breakdown")[] {
+  const cues: ("era" | "breakdown")[] = [];
+  if (now.era !== last.era) cues.push("era");
+  const before = new Set(last.broken.split(",").filter(Boolean));
+  if (now.broken.split(",").some((id) => id && !before.has(id))) cues.push("breakdown");
+  return cues;
 }

@@ -4,6 +4,7 @@ import { ARENA_SIZE } from "../content/rivals";
 import { formatDate, formatMoney } from "../sim/format";
 import { atoms } from "../app/game";
 import { useApp } from "../app/hooks";
+import { useCompact } from "./useCompact";
 
 const defs = new Map(GOALS.map((g) => [g.id, g]));
 
@@ -29,11 +30,24 @@ function progressText(def: GoalDef, value: number): string {
 export function Objectives() {
   const goals = useApp(atoms.goals);
   const day = useApp(atoms.day);
+  const compact = useCompact();
   const [open, setOpen] = useState(() => window.innerWidth > 640);
   const done = goals.filter((g) => g.met).length;
   const left = Math.max(0, SCENARIO.deadlineDay - day);
+  // On a phone the checklist is an icon button (with how many are done) and opens over the map when tapped.
   return (
-    <div className={`objectives panel ${open ? "open" : ""}`}>
+    <div className={`objectives panel ${open ? "open" : ""} ${compact ? "compact" : ""}`}>
+      {compact && (
+        <button className="icon-btn" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-label={`Objectives, ${done} of ${goals.length} done, ${left} days left`}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3a2a1c" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <rect x="4" y="3" width="16" height="18" rx="3" fill="#fff" />
+            <path d="M8 9l2 2 3.5-3.5M8 16h8" />
+          </svg>
+          <span className="icon-badge">
+            {done}/{goals.length}
+          </span>
+        </button>
+      )}
       <button className="obj-head" onClick={() => setOpen(!open)} aria-expanded={open}>
         <span className="caret" aria-hidden="true" />
         <span className="obj-title">Objectives</span>

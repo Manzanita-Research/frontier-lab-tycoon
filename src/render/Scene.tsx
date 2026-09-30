@@ -12,6 +12,9 @@ import { Lamps } from "./fx/Night";
 import { ParticleLayer } from "./fx/ParticleLayer";
 import { photoAtom } from "./fx/photoState";
 import { Decor, Ground, Paths } from "./Ground";
+import { Fence } from "./Fence";
+import { Slop } from "./Slop";
+import { StaffCrew } from "./StaffCrew";
 import { OverlayProjector } from "./overlay";
 import { Placement } from "./Placement";
 import { Walkers } from "./Walkers";
@@ -51,9 +54,12 @@ export function Scene() {
       <Ground />
       <Decor />
       <Paths />
+      <Slop />
+      <Fence />
       <Lamps />
       <Buildings />
       <Walkers />
+      <StaffCrew />
       <ParticleLayer />
       <OverlayProjector />
       <Placement />
