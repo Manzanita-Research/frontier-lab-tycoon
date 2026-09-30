@@ -67,6 +67,11 @@
       "disaster-leak",
       "disaster-swarm-phone",
       "disaster-leak-phone"
+    ],
+    "collusion": [
+      "collusion-sign",
+      "collusion-phone",
+      "collusion-scandal"
     ]
   },
   "scenes": {
@@ -355,6 +360,44 @@
         },
         {
           "wait": 400
+        }
+      ]
+    },
+    "collusion-sign": {
+      "title": "Agent Collusion: the first Security memo (existing event-card slot)",
+      "query": {
+        "moment": "collusion-sign",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "collusion-phone": {
+      "title": "The same Security memo on a phone",
+      "query": {
+        "moment": "collusion-sign",
+        "warp": null
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "collusion-scandal": {
+      "title": "Agent Collusion: exposed, the existing ticker carries the scandal headline",
+      "query": {
+        "moment": "collusion-scandal",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 800
         }
       ]
     }

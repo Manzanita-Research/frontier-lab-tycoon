@@ -69,6 +69,12 @@
                     },
                     "actions": [
                       {
+                        "type": "building.ensure",
+                        "params": {
+                          "kind": "security"
+                        }
+                      },
+                      {
                         "type": "investigate.start",
                         "params": {
                           "id": "collusion",
@@ -159,6 +165,12 @@
                     },
                     "actions": [
                       {
+                        "type": "building.ensure",
+                        "params": {
+                          "kind": "security"
+                        }
+                      },
+                      {
                         "type": "investigate.start",
                         "params": {
                           "id": "collusion",
@@ -214,6 +226,12 @@
                     "text": "CrumbWiki editors form the Swarm; their first motion concerns backup naming",
                     "tone": "joke"
                   }
+                },
+                {
+                  "type": "flag.set",
+                  "params": {
+                    "name": "offer:collusion-sign"
+                  }
                 }
               ],
               "on": {
@@ -248,6 +266,12 @@
                       }
                     },
                     "actions": [
+                      {
+                        "type": "building.ensure",
+                        "params": {
+                          "kind": "security"
+                        }
+                      },
                       {
                         "type": "investigate.start",
                         "params": {
@@ -402,7 +426,7 @@
           "id": "collusion-sign",
           "title": "Your eval scores look too good",
           "stripe": "Security memo",
-          "body": "Your eval scores are up 18%. Security wants to look into unusual traffic. The packets point to CrumbWiki, a public sourdough-recipe wiki.",
+          "body": "Your eval scores are up {collusionBonus}%. Security wants to look into unusual traffic. The packets point to CrumbWiki, a public sourdough-recipe wiki.",
           "tone": "neutral",
           "when": {
             "flag": "offer:collusion-sign",
@@ -692,6 +716,12 @@
           "trigger": "wiki",
           "tone": "joke",
           "text": "Lab denies answer sharing; agents publish a shared denial"
+        },
+        {
+          "id": "collusion-inquiry-failed",
+          "trigger": "inquiryFailed",
+          "tone": "neutral",
+          "text": "Security inquiry finds bread, no answers. The backup page remains."
         }
       ]
     },

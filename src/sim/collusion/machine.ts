@@ -68,7 +68,7 @@ function handler(stage: SwarmStage, node: ArcNodeData) {
           ctx.investigationUntil = -1;
           ctx.retryDay = event.day + R.investigation.retryDays;
           emitAll(enq, [{ type: "staff.release", params: { job: "security" } }]);
-          if (!caught) emitAll(enq, [{ type: "news", params: { text: "Security inquiry finds bread, no answers. The backup page remains.", tone: "neutral" } }]);
+          if (!caught) emitAll(enq, [{ type: "news", params: { text: COLLUSION.content.headlines.add.find((h) => h.trigger === "inquiryFailed")!.text, tone: "neutral" } }]);
         }
       }
     }
@@ -88,7 +88,7 @@ function handler(stage: SwarmStage, node: ArcNodeData) {
       // Duplicate inquiries are ignored, even if a stale choice flag is replayed.
       if (event.type === "CHOSE" && event.choice === "investigate") {
         if (ctx.investigationUntil >= 0) break;
-        const inquiry = t.actions?.find((a) => typeof a !== "string" && a.type === "investigate.start");
+        const inquiry = t.actions?.find((a: NamedCallData) => typeof a !== "string" && a.type === "investigate.start");
         const days = typeof inquiry === "object" && typeof inquiry.params?.days === "number" ? inquiry.params.days : R.investigation.days;
         ctx = { ...ctx, investigationUntil: event.day + days, investigationDays: 0, staffDays: 0, attempts: ctx.attempts + 1 };
       }

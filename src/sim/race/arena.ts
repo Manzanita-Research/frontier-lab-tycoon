@@ -14,7 +14,7 @@ export function refreshBoard(state: GameState) {
   race.prevRanks = ranksOf(race.board);
   race.board = rankBoard(state, race.rivals);
   const rank = rankOf(race.board);
-  race.rankDelta = race.prevRanks[YOU]! - rank;
+  race.rankDelta = (race.prevRanks[YOU] ?? race.board.length + 1) - rank;
   race.rank = rank;
 }
 

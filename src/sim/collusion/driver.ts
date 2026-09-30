@@ -67,8 +67,6 @@ function send(s: GameState, rng: Rng, event: SwarmEvent) {
   const result = stepSwarm(c.machine, event);
   c.machine = result.stored;
   for (const call of result.calls) {
-    // Office placement is generic FLT-17 content behavior, before the inquiry diverts staff.
-    if (call.verb === "investigate.start") runVerb({ state: s, rng, run: null, owner: OWNER }, { type: "building.ensure", params: { kind: "security" } });
     runVerb({ state: s, rng, run: null, owner: OWNER }, { type: call.verb, params: call.params });
     if (call.verb === "staff.release") delete s.investigations?.[OWNER];
   }
