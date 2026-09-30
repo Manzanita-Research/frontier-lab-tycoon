@@ -205,6 +205,9 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // hires land while staff is still locked, so the ops goal never has its SRE and Janitor). No Race or Scrutiny pack wakes,
 // so none of the wave moves a checkpoint. The wave's packs are pinned by the midgame digest (every pack awake for 480
 // days) and by each pack's own determinism test.
+// Merge train 2: FLT-56 (#68) re-recorded these on the old ladder, where its conga line, the auditors' huddle, the
+// Hearing's docket and the motions' stakes all ran in this script. Under FLT-58's ladder none of those packs wakes
+// here, so FLT-56 moves nothing and the train's values stand; its changes are pinned by the midgame digest.
 // FLT-54 teaches the script the ladder: it hires its Janitor Bot and SRE again the tick Level 3 earns the Staff Manager
 // (1380 / 1340 / 1360), and at Level 4 it climbs the Arena (eight more clusters, halls and a gateway, while it has $1.5M
 // to spare). Level 4 lands at 1670 / 1613 / 1612 and Level 5 at 2240 on every seed (2380 / 2520 / 2380 without the
@@ -213,10 +216,12 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // seed (the Level 3 hires land before it). The rival rename (#71) then moved 2400 on: the packs Level 5 wakes carry the
 // rivals' names and ids; FLT-54's unread badges then tag the Arena, Papers and Discourse headlines with their panel
 // (NewsItem.panel), and the record-taken toasts carry their group (Toast.group, folded by the app): 2400 on again.
+// Merge train 2 then moves the late checkpoints here (4000; 3200 on seed 3): this script reaches Level 5, so FLT-56's packs
+// wake in it, The Memo jumps the card line, and the Promise Tracker's whip and roll-call cards ask the card budget too.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "c403ae9a", 800: "c9a777bd", 1600: "bb207932", 2400: "d4245f34", 3200: "4326019f", 4000: "62cc0481" },
-  2: { 200: "766f3295", 800: "aec1b296", 1600: "1fad47b0", 2400: "b2610444", 3200: "40b53f19", 4000: "c4d06eab" },
-  3: { 200: "b43cb9be", 800: "510d3b99", 1600: "52fba8d3", 2400: "9ceb3027", 3200: "d28ffdac", 4000: "796549f6" },
+  1: { 200: "c403ae9a", 800: "c9a777bd", 1600: "bb207932", 2400: "d4245f34", 3200: "4326019f", 4000: "39a85367" },
+  2: { 200: "766f3295", 800: "aec1b296", 1600: "1fad47b0", 2400: "b2610444", 3200: "40b53f19", 4000: "a22291d9" },
+  3: { 200: "b43cb9be", 800: "510d3b99", 1600: "52fba8d3", 2400: "9ceb3027", 3200: "eca03ede", 4000: "1d8d5c0d" },
 };
 
 describe("golden runs", () => {

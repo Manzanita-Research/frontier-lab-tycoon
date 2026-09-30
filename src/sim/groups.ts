@@ -34,6 +34,8 @@ export interface GroupKind {
     /** Kinds where they run their own evals (a longer dwell with a progress bar). The first one found is the last stop. */
     evalAt: readonly string[];
     evalHours: number;
+    /** After the last stop, a huddle where they stand to compare notes before they go (FLT-56), in hours. None if absent. */
+    huddleHours?: number;
   };
   /** For the renderer: colours and props. The sim never reads it. */
   look: Readonly<Record<string, Json>>;
@@ -66,7 +68,7 @@ export interface VisitorGroup {
   stops: GroupStop[];
   /** Index of the current (or next) stop. */
   at: number;
-  /** The leader's remaining waypoints. */
+  /** The leader's remaining waypoints; while huddling, the one point they huddle round. */
   route: Point[];
   /** The leader's recent positions, newest last: the others walk it. */
   trail: Point[];
@@ -203,7 +205,33 @@ function onward(s: GameState, g: VisitorGroup) {
     }
     g.at++;
   }
-  goHome(s, g);
+  wrapUp(s, g);
+}
+
+/** No more stops: a huddle where they stand, if the kind confers before it goes (FLT-56), then home. */
+function wrapUp(s: GameState, g: VisitorGroup) {
+  const hours = KINDS.get(g.kind)?.route.huddleHours ?? 0;
+  if (hours <= 0) return goHome(s, g);
+  let x = 0;
+  let z = 0;
+  for (const m of g.members) { x += m.x; z += m.z; }
+  g.route = [[x / g.members.length, z / g.members.length]];
+  g.timer = Math.max(1, Math.round(hours * TICKS_PER_HOUR));
+  g.machine = stepGroup(g.machine, { type: "HUDDLE" });
+}
+
+/** A tight ring round the huddle point, everyone facing in. */
+function huddle(g: VisitorGroup, speed: number) {
+  const [cx, cz] = g.route[0] ?? [g.members[0]!.x, g.members[0]!.z];
+  const n = g.members.length;
+  const r = 0.2 + 0.06 * n;
+  g.members.forEach((m, i) => {
+    const a = (i / n) * Math.PI * 2;
+    const tx = cx + Math.sin(a) * r;
+    const tz = cz + Math.cos(a) * r;
+    stepToward(m, tx, tz, speed);
+    if (Math.hypot(tx - m.x, tz - m.z) < 0.05) m.dir = Math.atan2(cx - m.x, cz - m.z);
+  });
 }
 
 function stepToward(m: GroupMember, tx: number, tz: number, budget: number) {
@@ -291,7 +319,7 @@ export function updateGroups(s: GameState) {
         continue;
       }
       const stop = g.stops[g.at];
-      if (!stop) { goHome(s, g); continue; }
+      if (!stop) { wrapUp(s, g); continue; }
       g.timer = stop.ticks;
       g.machine = stepGroup(g.machine, { type: stop.evals ? "EVALS" : "ARRIVED" });
     } else if (phase === "inspecting" || phase === "evaluating") {
@@ -305,6 +333,11 @@ export function updateGroups(s: GameState) {
       g.at++;
       g.trail = [[g.members[0]!.x, g.members[0]!.z]];
       onward(s, g);
+    } else if (phase === "huddling") {
+      huddle(g, speed);
+      if (--g.timer > 0) continue;
+      g.trail = [[g.members[0]!.x, g.members[0]!.z]];
+      goHome(s, g);
     }
   }
   if (groups.some((g) => g.machine.value === "gone")) s.groups = groups.filter((g) => g.machine.value !== "gone");

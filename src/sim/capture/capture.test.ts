@@ -10,7 +10,7 @@ import { applyNow, tick, TICKS_PER_DAY } from "../tick";
 import { checkChart, structural, type Beat } from "../circus/chart";
 import { rivalRules } from "../race/rules";
 import type { GameState } from "../types";
-import { disableCapture, draftClause, leakOdds } from "./driver";
+import { buryCost, buryLeak, disableCapture, draftClause, leakOdds, warnLeak } from "./driver";
 import { runSenateYear } from "./headless";
 import { CAPTURE_STATS, freshBill, stepBill } from "./machine";
 import { CAPTURE, DRAFT_CARD, EXPOSED_CARD, loadCapturePack } from "./pack";
@@ -97,13 +97,26 @@ describe("the bill in play", () => {
     free.disasters.effects = free.disasters.effects.filter((e) => e.owner !== "capture");
     const before = Object.fromEntries(s.race.rivals.map((r) => [r.context.id, { cap: r.context.capability, releases: r.context.releases }]));
     const gained = (w: GameState, ids: string[]) => w.race.rivals.filter((r) => ids.includes(r.context.id)).reduce((n, r) => n + r.context.capability - before[r.context.id]!.cap, 0);
-    run(law, 180);
-    run(free, 180);
+    // Every open lab's release over the year, open or closed: the last one alone is a coin toss (FLT-56 moved it).
+    const watch = (w: GameState) => {
+      const seen = Object.fromEntries(w.race.rivals.map((r) => [r.context.id, r.context.releases]));
+      const shipped: boolean[] = [];
+      for (let d = 0; d < 180; d++) {
+        run(w, 1);
+        for (const r of w.race.rivals) {
+          if (!open.includes(r.context.id) || r.context.releases === seen[r.context.id]) continue;
+          seen[r.context.id] = r.context.releases;
+          shipped.push(r.context.open);
+        }
+      }
+      return shipped;
+    };
+    const shippedLaw = watch(law);
+    const shippedFree = watch(free);
     expect(gained(law, behind)).toBeLessThan(gained(free, behind) * 0.8);
-    const shipped = (w: GameState) => w.race.rivals.filter((r) => open.includes(r.context.id) && r.context.releases > before[r.context.id]!.releases);
-    expect(shipped(law).length).toBeGreaterThan(0);
-    for (const r of shipped(law)) expect(r.context.open).toBe(false);
-    expect(shipped(free).some((r) => r.context.open)).toBe(true);
+    expect(shippedLaw.length).toBeGreaterThan(0);
+    expect(shippedLaw.every((o) => !o)).toBe(true);
+    expect(shippedFree.some((o) => o)).toBe(true);
   }, 30_000);
 
   it("backfires: the file properties leak, the law is struck, trust and the auditors' Honesty grade take the hit", () => {
@@ -131,6 +144,75 @@ describe("the bill in play", () => {
     expect(s.bill!.machine.value).toBe("quiet");
     expect(s.disasters.effects.some((e) => e.owner === "capture")).toBe(false);
     expect(captureView(s).enabled).toBe(false);
+  }, 20_000);
+});
+
+describe("the leak, with a warning (FLT-56)", () => {
+  const W = CAPTURE.rules.warning;
+  it("the draft's meter: shamelessness and heat raise the odds the file leaks before the sunset", () => {
+    const s = createTestCampus(1);
+    stageSenate(s, "bill");
+    const both = captureView(s);
+    expect(both.risk).toBeGreaterThan(0);
+    expect(both.risk).toBeLessThan(1);
+    expect(both.riskLabel).not.toBe("");
+    draftClause(s, "threshold", false);
+    const one = captureView(s).risk;
+    expect(one).toBeLessThan(both.risk);
+    s.disasters.heat = 80;
+    expect(captureView(s).risk).toBeGreaterThan(one);
+  }, 20_000);
+
+  it("a reporter asks first: a beat at the gate, a toast, and the story runs days later", () => {
+    const s = createTestCampus(1);
+    stageSenate(s, "bill-law");
+    warnLeak(s);
+    const v = captureView(s);
+    expect(v.warning).toEqual({ daysLeft: W.days, cost: W.cost });
+    expect(s.disasters.cues.some((c) => c.type === "beat" && c.beat === "leak")).toBe(true);
+    expect(s.toasts.some((t) => t.text.includes(CAPTURE.rules.reporter))).toBe(true);
+    run(s, W.days - 1);
+    expect(s.bill!.machine.value).toBe("law");
+    run(s, 2);
+    expect(s.bill!.machine.value).not.toBe("law");
+    expect(s.bill!.history.at(-1)?.outcome).toBe("exposed");
+    expect(s.bill!.warned).toBeUndefined();
+  }, 30_000);
+
+  it("burying it costs money and Capture, dearer each time, and buried stories grow back", () => {
+    const s = createTestCampus(1);
+    stageSenate(s, "bill-law");
+    s.cash = 10_000_000;
+    s.capture = 30;
+    const odds = leakOdds(s);
+    expect(buryLeak(s)).toBe(false);
+    warnLeak(s);
+    const cash = s.cash;
+    expect(buryLeak(s)).toBe(true);
+    expect(s.news.at(-1)).toMatchObject({ day: s.day, tone: "joke" });
+    expect(s.news.at(-1)!.text).not.toMatch(/\{\w+\}/);
+    expect(s.cash).toBe(cash - W.cost);
+    expect(s.capture).toBe(30 - W.capture);
+    expect(s.bill!.warned).toBeUndefined();
+    expect(captureView(s).warning).toBeNull();
+    expect(buryCost(s)).toBe(W.cost * W.costGrowth);
+    expect(leakOdds(s)).toBeGreaterThan(odds);
+    run(s, W.days + 1);
+    expect(s.bill!.machine.value).toBe("law");
+    // Broke: refused with a toast, and the reporter keeps digging.
+    warnLeak(s);
+    s.cash = 0;
+    expect(buryLeak(s)).toBe(false);
+    expect(s.bill!.warned).toBe(s.day);
+  }, 30_000);
+
+  it("another pack handing over the file still exposes it at once, warning or not", () => {
+    const s = createTestCampus(1);
+    stageSenate(s, "bill-law");
+    warnLeak(s);
+    s.flags["capture:leak"] = s.day;
+    run(s, 1);
+    expect(s.bill!.machine.value).toBe("exposed");
   }, 20_000);
 });
 
@@ -166,7 +248,9 @@ describe("the review links", () => {
     const off = createSimHandle(readDebugParams("?capture=off&promises=off")).world;
     expect(off.flags.captureOff).toBe(1);
     expect(off.flags.promisesOff).toBe(1);
-    expect(SENATE_MOMENTS).toHaveLength(5);
+    expect(SENATE_MOMENTS).toHaveLength(6);
+    const leak = createSimHandle(readDebugParams("?moment=bill-leak")).world;
+    expect(leak.bill?.warned).toBe(leak.day);
     const w = createTestCampus(1);
     wakeSenate(w);
     expect(w.bill?.enabled && w.promises?.enabled).toBe(true);

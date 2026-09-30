@@ -84,8 +84,17 @@ function answer(s: GameState): Command[] {
   return [{ type: "chooseEvent", eventId: open.id, choiceIndex: Math.min(choice, defs().eventById(open.id)!.choices.length - 1) }];
 }
 
+/**
+ * On a path, in a building or in the gate. The water crowd (FLT-33) pickets on the lawn by the gate and walks out past
+ * it on purpose, so a protester only has to be out of the buildings.
+ */
+export function walkerPlaced(s: GameState, w: { kind?: string; x: number; z: number }): boolean {
+  if (w.kind === "protester") return !buildingAt(s, w.x, w.z);
+  return isPathTile(s, Math.floor(w.x), Math.floor(w.z)) || !!buildingAt(s, w.x, w.z) || rectContains(s.gate, w.x, w.z);
+}
+
 export function walkerOnCampus(s: GameState): boolean {
-  return s.walkers.every((w) => isPathTile(s, Math.floor(w.x), Math.floor(w.z)) || !!buildingAt(s, w.x, w.z) || rectContains(s.gate, w.x, w.z));
+  return s.walkers.every((w) => walkerPlaced(s, w));
 }
 
 export function createMidgameScenario(): GameState {

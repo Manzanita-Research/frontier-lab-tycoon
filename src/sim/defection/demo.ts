@@ -1,7 +1,8 @@
 // Review moments for Defection (FLT-26) and the Poaching War (FLT-20): `?moment=defection-chat|defection-card|
-// defection-exit|defection-manifesto|defection-arena|poach-offer`. They use the same card and tick paths as play.
+// defection-exit|defection-manifesto|defection-arena|poach-offer[:<rival id>]`. They use the same card and tick paths as play.
 // No renderer or UI dependencies.
 import { canPlace } from "../commands";
+import { RIVAL_DEFS } from "../../content/rivals";
 import { dailyEvents, openEventOf, unpaced } from "../events";
 import { createRng } from "../rng";
 import { answer } from "../testkit";
@@ -9,12 +10,14 @@ import { applyNow, tick, TICKS_PER_DAY } from "../tick";
 import type { GameState } from "../types";
 import { seedWalkers } from "../walkers";
 import { enablePoaching, offerPoach } from "../poaching/driver";
+import { CARD as POACH_CARD } from "../poaching/pack";
 import { dailyDefection, enableDefection } from "./driver";
 import { CARD, CHOICES, MANIFESTO_CARD, MANIFESTO_CHOICES } from "./pack";
 
 export const DRAMA_MOMENTS = ["defection-chat", "defection-card", "defection-exit", "defection-manifesto", "defection-arena", "poach-offer"] as const;
 export type DramaMoment = (typeof DRAMA_MOMENTS)[number];
-export const isDramaMoment = (m: string | null | undefined): m is DramaMoment => (DRAMA_MOMENTS as readonly unknown[]).includes(m);
+/** `poach-offer:<rival id>` is the offer in that lab's voice (FLT-56). */
+export const isDramaMoment = (m: string | null | undefined): m is DramaMoment => (DRAMA_MOMENTS as readonly unknown[]).includes(m) || !!m?.startsWith("poach-offer:");
 
 /** A lab a year in: paths, a Hall, a gateway, the Kombucha Bar, ten researchers and three releases. */
 function busyLab(s: GameState) {
@@ -57,12 +60,19 @@ const cardIs = (id: string) => (s: GameState) => openEventOf(s)?.id === id;
 export function stageDrama(s: GameState, moment: DramaMoment) {
   unpaced(s);
   busyLab(s);
-  if (moment === "poach-offer") {
+  if (moment.startsWith("poach-offer")) {
+    const id = moment.split(":")[1] ?? "metameta";
+    const rival = RIVAL_DEFS.find((r) => r.id === id) ?? RIVAL_DEFS.find((r) => r.id === "metameta")!;
     enablePoaching(s);
     // The unhappiest few are who MetaMeta calls: make sure somebody is.
     s.walkers.filter((w) => w.kind === "researcher").slice(0, 3).forEach((w) => { w.energy = 0.25; w.focus = 0.3; });
-    offerPoach(s, { from: "metameta", name: "MetaMeta Metaintelligence Labs", short: "MetaMeta" });
+    offerPoach(s, { from: rival.id, name: rival.name, short: rival.short });
     dailyEvents(s);
+    // Whatever else the lab gets asked first (the app's launch livestream, say) is answered: the letter is the card.
+    for (let i = 0; i < 6 && openEventOf(s) && openEventOf(s)!.id !== POACH_CARD; i++) {
+      applyNow(s, answer(s));
+      dailyEvents(s);
+    }
     return;
   }
   enableDefection(s);
@@ -77,6 +87,23 @@ export function stageDrama(s: GameState, moment: DramaMoment) {
   s.defection!.scores[star.id] = 95;
   until(s, cardIs(CARD), 30);
   if (moment === "defection-card") return;
+  // Most of their team is fed up too (FLT-56): the walk-out is a proper conga line.
+  for (const id of s.defection!.subject?.team.slice(0, 4) ?? []) {
+    const w = s.walkers.find((x) => x.id === id);
+    if (w) Object.assign(w, { energy: 0.15, focus: 0.2, fomo: 0.9 });
+  }
+  // And the die agrees: the first nudge of Defection's own stream where three or more walk out with them.
+  const base = s.defection!.rngState;
+  for (let k = 0; k < 16; k++) {
+    const trial = structuredClone(s);
+    trial.defection!.rngState = (base + k * 0x9e3779b9) >>> 0;
+    applyNow(trial, answer(trial, CHOICES.indexOf("goodbye")));
+    tick(trial);
+    if ((trial.defection!.exit?.followerIds.length ?? 0) >= 3) {
+      s.defection!.rngState = (base + k * 0x9e3779b9) >>> 0;
+      break;
+    }
+  }
   applyNow(s, answer(s, CHOICES.indexOf("goodbye")));
   // A few steps: the boxes are out and heading for the gate.
   for (let i = 0; i < 6; i++) tick(s);

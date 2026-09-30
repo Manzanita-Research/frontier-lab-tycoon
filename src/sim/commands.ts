@@ -18,10 +18,11 @@ import type { GameState, Rect, StaffJob } from "./types";
 import { buildingUnlocked, systemUnlocked } from "./progression";
 import { coachCommand } from "./coach";
 import { lobbySenator } from "./promises/driver";
-import { draftClause } from "./capture/driver";
+import { buryLeak, draftClause } from "./capture/driver";
 import { continueTutorial } from "./tutorial";
 import { defs } from "./defs";
 import { setSafetySpend } from "./factions/driver";
+import { issueStatement } from "./factions/statement";
 
 export type Command =
   | { type: "coachSkip" | "coachReplay" | "coachClick" | "dismissUnlock" | "buildPanelOpened" }
@@ -51,10 +52,13 @@ export type Command =
   | { type: "lobby"; senator: string }
   /** Tick (`on`) or untick a clause on the bill the lab was asked to draft (FLT-22). */
   | { type: "draftClause"; clause: string; on: boolean }
+  | { type: "buryLeak" }
   /** FLT-33: the safety budget, 0 (none) to 3 (lavish). Costs money daily and slows training; the factions notice. */
   | { type: "setSafetySpend"; level: number }
   /** FLT-54: the game speed changed (0 never comes: pausing keeps the pace). The card budget stretches with it. */
-  | { type: "setPace"; speed: number };
+  | { type: "setPace"; speed: number }
+  /** FLT-56: Comms addresses a faction (the gate legend's lever). Costs money, then a cooldown; a refusal is a toast. */
+  | { type: "issueStatement"; faction: string };
 
 export type PlaceResult = { ok: true } | { ok: false; reason: string };
 
@@ -210,6 +214,12 @@ export function applyCommands(state: GameState, commands: readonly Command[], rn
         break;
       case "setSafetySpend":
         if (state.factions && systemUnlocked(state, "factions")) setSafetySpend(state, c.level);
+        break;
+      case "buryLeak":
+        if (systemUnlocked(state, "capture")) buryLeak(state);
+        break;
+      case "issueStatement":
+        if (state.factions && systemUnlocked(state, "factions")) issueStatement(state, c.faction);
         break;
       case "startTraining":
         if (!state.buildings.some((b) => b.kind === "hall")) addToast(state, "Build a Training Hall first.", "bad", { source: "build", importance: "you" });

@@ -13,7 +13,7 @@ import { enablePromises } from "./promises/driver";
 import { seedField } from "./race/arena";
 import { formatMoney } from "./format";
 import { STAFF } from "../content/staff";
-import { HUD_PANELS, type HudPanel, type Level, type ProgressView, type SystemId } from "../content/progression";
+import { HUD_PANELS, type HudPanel, type Level, type ProgressionLevel, type ProgressView, type SystemId } from "../content/progression";
 import { progressionMachine } from "./machines/progression";
 import { step } from "./machines/run";
 import { defs } from "./defs";
@@ -29,7 +29,15 @@ const asleep = (s: ProgressState, id: string): boolean => {
   const pending = s.progression?.context.pending;
   return pending !== undefined && pending.some((w) => w.id === id);
 };
-export const systemUnlocked = (s: ProgressState, id: SystemId): boolean => !s.progression || (unlockedRows(s).some((r) => r.systems.includes(id)) && !asleep(s, id));
+// The systems each level has earned, per ladder: the tick asks about thirty times, so work it out once (FLT-39).
+let earned: { ladder: readonly ProgressionLevel[]; byLevel: Set<SystemId>[] } | null = null;
+const systemsAt = (s: ProgressState): Set<SystemId> => {
+  const ladder = rows(s);
+  if (earned?.ladder !== ladder) earned = { ladder, byLevel: [] };
+  const level = levelOf(s);
+  return (earned.byLevel[level] ??= new Set(unlockedRows(s).flatMap((r) => r.systems)));
+};
+export const systemUnlocked = (s: ProgressState, id: SystemId): boolean => !s.progression || (systemsAt(s).has(id) && !asleep(s, id));
 export const staffUnlocked = (s: GameState, job: StaffJob): boolean => !s.progression || unlockedRows(s).some((r) => r.staff.includes(job));
 // Offices are hidden infrastructure created by incident verbs, not palette unlocks.
 export const buildingUnlocked = (s: GameState, kind: BuildingKind): boolean => !s.progression ||
@@ -141,9 +149,13 @@ export function visibleHud(s: GameState): { visible: Record<HudPanel, boolean> }
  */
 export function updateProgression(s: GameState) {
   if (!s.progression || s.progression.value === "complete") return;
+  const waking = s.progression.value === "waking";
+  // FLT-39: an unmet goal leaves the machine as it is and emits nothing (its CHECK returns at once), so the tick skips
+  // transition(). On the top rung (FLT-54) only a wake-up that is due moves it.
+  if (waking ? !(s.progression.context.pending ?? []).some((w) => w.day <= s.day) : levelOf(s) === 5 || !goalValue(s).met) return;
   const top = rows(s).find((r) => r.level === 5);
   const wakes = (top?.wakes ?? []).filter((w) => top!.systems.includes(w.id)).map((w) => ({ id: w.id, after: w.after }));
-  const result = step(progressionMachine, s.progression, { type: "CHECK", met: goalValue(s).met, day: s.day, wakes });
+  const result = step(progressionMachine, s.progression, { type: "CHECK", met: true, day: s.day, wakes });
   s.progression = result.stored;
   for (const event of result.effects) {
     if (event.type === "WOKE") {

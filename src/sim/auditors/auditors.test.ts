@@ -247,7 +247,7 @@ describe("a visit, played", () => {
 });
 
 describe("staged moments", () => {
-  it.each(["audit-notice", "audit-tidy", "audit-visit", "audit-evals", "audit-report", "audit-caught"])("stages %s", (moment) => {
+  it.each(["audit-notice", "audit-tidy", "audit-visit", "audit-evals", "audit-huddle", "audit-report", "audit-caught", "audit-graded"])("stages %s", (moment) => {
     expect(isAuditMoment(moment)).toBe(true);
     const s = createTestCampus(3);
     layPaths(s);
@@ -259,9 +259,12 @@ describe("staged moments", () => {
     else if (moment === "audit-report" || moment === "audit-caught") {
       expect(openEventOf(s)?.id).toBe(REPORT_CARD);
       expect(s.auditors!.report!.caught).toBe(moment === "audit-caught");
+    } else if (moment === "audit-graded") {
+      expect(s.auditors!.machine.value).toBe("quiet");
+      expect(s.auditors!.report).not.toBeNull();
     } else {
       const g = groupsOf(s, OWNER)[0]!;
-      expect(g.machine.value).toBe(moment === "audit-evals" ? "evaluating" : "inspecting");
+      expect(g.machine.value).toBe(moment === "audit-evals" ? "evaluating" : moment === "audit-huddle" ? "huddling" : "inspecting");
       if (moment === "audit-tidy") expect(s.disguises?.agent).toBe("box");
     }
     applyNow(s, answer(s));
@@ -280,4 +283,55 @@ describe("a year with the pack on (headless)", () => {
     expect(off.world.auditors).toBeUndefined();
     expect(off.world.groups ?? []).toHaveLength(0);
   }, 20_000); // Two headless years and a third of one; tick budgets are checked separately.
+});
+
+/** A content line with its `{vars}` filled by anything (and never left unfilled). */
+const template = (text: string) => new RegExp(`^${text.replace(/[.*+?^$()|[\]\\]/g, "\\$&").replace(/\{\w+\}/g, "[^{}]+")}$`);
+
+describe("the huddle and what the grade does next (FLT-56)", () => {
+  it("confers in a ring for an hour with a camera beat on it, and a rival has something to say about the grade", () => {
+    const s = due();
+    const ticks = Math.round((AUDITORS.group.route.huddleHours ?? 0) * 25);
+    let huddled = 0;
+    let spread = 0;
+    let beat: { x: number; z: number; caption: string } | undefined;
+    playVisit(s, "prep", (w) => {
+      const g = groupsOf(w, OWNER)[0];
+      if (g?.machine.value === "huddling") {
+        huddled++;
+        const [cx, cz] = g.route[0]!;
+        spread = Math.max(...g.members.map((m) => Math.hypot(m.x - cx, m.z - cz)));
+        beat ??= w.disasters.cues.find((c) => c.type === "beat" && c.beat === "huddle") as typeof beat;
+        if (beat) expect([beat.x, beat.z]).toEqual([cx, cz]);
+      }
+    });
+    expect(ticks).toBeGreaterThan(0);
+    expect(huddled).toBe(ticks);
+    // A tight ring at the end: nobody more than half a tile from the middle.
+    expect(spread).toBeLessThan(0.5);
+    expect(beat?.caption).toContain("comparing notes");
+    const overall = s.auditors!.history[0]!.overall;
+    const said = AUDITORS.content.headlines.add.filter((h) => h.trigger === `rivals:${overall}`).map((h) => template(h.text));
+    expect(s.news.some((n) => said.some((re) => re.test(n.text)))).toBe(true);
+  });
+
+  it("has visitors quote the grade for a month after the report, and then drop it", () => {
+    const s = due();
+    playVisit(s, "usual");
+    const report = s.auditors!.report!;
+    const quotes = AUDITORS.content.thoughts.add.filter((t) => t.kind === "visitor" && t.when.startsWith("grade:")).map((t) => template(t.text));
+    const quoted = (w: GameState) => w.thoughts.filter((t) => t.kind === "visitor" && quotes.some((re) => re.test(t.text)));
+    let heard = 0;
+    for (let d = 0; d < 12; d++) for (let i = 0; i < 20; i++) {
+      tick(s, answer(s));
+      heard = Math.max(heard, quoted(s).length);
+    }
+    expect(heard).toBeGreaterThan(0);
+    expect(quoted(s).every((t) => !t.text.includes("{"))).toBe(true);
+    // A month on, nobody brings it up.
+    s.day = report.day + (R.gradeTalk?.days ?? 30) + 1;
+    s.thoughts = [];
+    for (let i = 0; i < 20 * 3; i++) tick(s, answer(s));
+    expect(quoted(s)).toEqual([]);
+  });
 });

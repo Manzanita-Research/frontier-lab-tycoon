@@ -1,0 +1,142 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "00b8c60bdeb6679ae2cd69c310664855e2baebc4"
+  },
+  "head": {
+    "branch": "flt-57-endings-2",
+    "sha": "487b50c",
+    "dirty": false
+  },
+  "seconds": 424.019,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "end-acquihired",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/before/end-acquihired.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/after/end-acquihired.png",
+      "title": "FLT-57: Acqui-hired ends on Found a new lab (three perks), with a 7-day streak",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/compare/end-acquihired.png",
+      "changed": 0.5816759259259259
+    },
+    {
+      "scene": "end-acquihired-almanac",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/before/end-acquihired-almanac.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/after/end-acquihired-almanac.png",
+      "title": "FLT-57: the same ending in Field Almanac (the base Ending slot)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/compare/end-acquihired-almanac.png",
+      "changed": 0.6692276234567901
+    },
+    {
+      "scene": "end-acquihired-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/before/end-acquihired-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/after/end-acquihired-phone.png",
+      "title": "FLT-57: Acqui-hired on a phone, scrolled to What now",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/compare/end-acquihired-phone.png",
+      "changed": 0.8158752582330782
+    },
+    {
+      "scene": "end-card",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/before/end-card.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/after/end-card.png",
+      "title": "FLT-57: the share card with a streak flame (Frontier 95)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/compare/end-card.png",
+      "changed": 0.9151859567901235
+    },
+    {
+      "scene": "end-card-lab2",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/before/end-card-lab2.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/after/end-card-lab2.png",
+      "title": "FLT-57: a second lab's share card: Lab #2 and the streak (Field Almanac)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/compare/end-card-lab2.png",
+      "changed": 0.7713641975308642
+    },
+    {
+      "scene": "end-versus",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/before/end-versus.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/after/end-versus.png",
+      "title": "FLT-57: a friend's run on the same seed: the verdict and Keep regulating",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/compare/end-versus.png",
+      "changed": 0.5909020061728395
+    },
+    {
+      "scene": "end-versus-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/before/end-versus-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/after/end-versus-phone.png",
+      "title": "FLT-57: the verdict on a phone",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/compare/end-versus-phone.png",
+      "changed": 0.7851531170251549
+    },
+    {
+      "scene": "friend",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/before/friend.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/after/friend.png",
+      "title": "FLT-57: a friend's link: 'Your friend's lab was Captured on day 212. Beat it?'",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/compare/friend.png",
+      "changed": 0.22760570987654322
+    },
+    {
+      "scene": "friend-almanac",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/before/friend-almanac.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/after/friend-almanac.png",
+      "title": "FLT-57: the friend banner in Field Almanac",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/compare/friend-almanac.png",
+      "changed": 0.934358024691358
+    },
+    {
+      "scene": "friend-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/before/friend-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/after/friend-phone.png",
+      "title": "FLT-57: the friend banner on a phone",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/compare/friend-phone.png",
+      "changed": 0.46119364442824157
+    },
+    {
+      "scene": "memo-countdown",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/before/memo-countdown.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/after/memo-countdown.png",
+      "title": "FLT-57: The Memo, three days out (Frontier 95: a very slow file copy)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/compare/memo-countdown.png",
+      "changed": 0.2847700617283951
+    },
+    {
+      "scene": "memo-countdown-almanac",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/before/memo-countdown-almanac.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/after/memo-countdown-almanac.png",
+      "title": "FLT-57: The Memo's countdown in Field Almanac",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/compare/memo-countdown-almanac.png",
+      "changed": 0.32330555555555557
+    },
+    {
+      "scene": "memo-race",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/before/memo-race.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/after/memo-race.png",
+      "title": "FLT-57: after the Memo: the Race extra edition, three staff quoted",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/compare/memo-race.png",
+      "changed": 0.31912577160493827
+    },
+    {
+      "scene": "memo-slow-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/before/memo-slow-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/after/memo-slow-phone.png",
+      "title": "FLT-57: the Slow Down extra edition on a phone",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-57/compare/memo-slow-phone.png",
+      "changed": 0.5634828047150322
+    }
+  ],
+  "errors": []
+}

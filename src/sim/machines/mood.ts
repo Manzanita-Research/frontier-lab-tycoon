@@ -8,7 +8,7 @@
 // researcher walks out with a box. A day that is not miserable resets the count (leaving `miserable` clears it).
 import { Schema } from "effect";
 import { setupEffect } from "@xstate/effect";
-import type { Stored } from "./run";
+import { remembered, type Stored } from "./run";
 
 /** Days of misery before a researcher hands in the box. */
 export const QUIT_DAYS = 5;
@@ -59,3 +59,6 @@ export type MoodStored = Stored<typeof moodMachine>;
 export type MoodLevel = MoodStored["value"];
 
 export const CONTENT: MoodStored = { value: "content", context: { days: 0 } };
+
+/** `step(moodMachine, ...)`, remembered: there are only a few dozen (mood, days, event) triples (FLT-39). */
+export const stepMood = remembered(moodMachine);

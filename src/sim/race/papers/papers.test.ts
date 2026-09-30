@@ -13,7 +13,7 @@ import { stagePapers } from "./demo";
 import { P, PAPERS_PACK } from "./content";
 import { dailyPapers, disablePapers, enablePapers, publishPaper, setPublicationPolicy } from "./driver";
 import { policyMachine } from "./policy";
-import { publicationMachine } from "./publication";
+import { publicationMachine, quietPaperDay, type PublicationStored } from "./publication";
 import { papersView } from "./view";
 // Pinned v6 graph typing does not model emitted events; same adapter as machines/graph.test.ts.
 function graph(machine: AnyStateMachine, options: Record<string, unknown>) {
@@ -74,6 +74,27 @@ describe("publication statecharts", () => {
     expect(new Set(Object.values(map).map((n) => n.state.value))).toEqual(new Set(Object.keys(publicationMachine.states)));
     const pm = graph(policyMachine, { input: { publishPressure: 0 }, events: (["Open", "Selective", "Closed"] as const).map((policy) => ({ type: "SET", policy })), serializeState: (s: { value: unknown }) => String(s.value) });
     expect(new Set(Object.values(pm).map((n) => n.state.value))).toEqual(new Set(["Open", "Selective", "Closed"]));
+  });
+  it("the quiet day (no transition(), FLT-39) answers as the machine does, whenever it answers", () => {
+    let quiet = 0;
+    for (const value of ["draft", "review", "published", "criticized", "awarded"] as const)
+      for (const dueDay of [null, 10, 70])
+        for (const critiqueDay of [null, 9, 13])
+          for (const scoopedBy of ["", "sirocco"]) {
+            const stored: PublicationStored = { value, context: { ...fresh().context, value: 0.8, citations: 5, dueDay, critiqueDay, scoopedBy } };
+            for (const d of [8, 9, 10, 13, 69, 70, 71])
+              for (const scoopRival of ["", "sirocco"])
+                for (const award of ["", "Golden Footnote"]) {
+                  const event = { day: d, scoopRival, scoopValue: 0.5, award, citationGain: 3, critiqueValue: 0.4 };
+                  const got = quietPaperDay(stored, event);
+                  if (!got) continue;
+                  quiet++;
+                  const want = step(publicationMachine, stored, { type: "DAY", ...event });
+                  expect(want.effects).toEqual([]);
+                  expect(got).toStrictEqual(want.stored);
+                }
+          }
+    expect(quiet).toBeGreaterThan(300);
   });
 });
 

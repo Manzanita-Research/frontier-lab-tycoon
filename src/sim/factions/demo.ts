@@ -1,4 +1,4 @@
-// Debug scenes for the discourse (`?moment=factions|counterprotest|argue`, FLT-33/25): the game is staged a moment
+// Debug scenes for the discourse (`?moment=factions|counterprotest|argue|statement`, FLT-33/25/56): the game is staged a moment
 // before something is worth a screenshot, like sim/opsDemo.ts. Pure sim and deterministic; the game itself never uses it.
 import { unpaced } from "../events";
 import { defs } from "../defs";
@@ -8,11 +8,12 @@ import { createRng } from "../rng";
 import { TICKS_PER_DAY } from "../tick";
 import type { GameState, Walker } from "../types";
 import { exchange, log, pairedThoughts, settleFactions } from "./driver";
+import { issueStatement } from "./statement";
 import { enableFactions, nudgeRelation, pairKey } from "./state";
 import { step } from "../machines/run";
 import { relationMachine } from "./machines";
 
-export const FACTION_MOMENTS = ["factions", "counterprotest", "argue"] as const;
+export const FACTION_MOMENTS = ["factions", "counterprotest", "argue", "statement"] as const;
 export type FactionMoment = (typeof FACTION_MOMENTS)[number];
 export const isFactionMoment = (s: string | null | undefined): s is FactionMoment => !!s && (FACTION_MOMENTS as readonly string[]).includes(s);
 
@@ -98,11 +99,16 @@ export function stageFactions(s: GameState, moment: FactionMoment) {
   if (!s.factions) return;
   stageDiscourse(s);
   if (moment === "argue") stageArgument(s);
-  if (moment === "counterprotest") stageCounterprotest(s);
+  if (moment === "counterprotest" || moment === "statement") stageCounterprotest(s);
   else {
     const rng = createRng(s.rngState);
     syncProtesters(s, rng, true);
     s.rngState = rng.state();
+  }
+  // FLT-56: three crowds in three colours at the gate, and the lab addresses the Doomers (the intern writes it).
+  if (moment === "statement") {
+    s.cash = Math.max(s.cash, 100_000);
+    issueStatement(s, "doomers");
   }
   s.version++;
 }

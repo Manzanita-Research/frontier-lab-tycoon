@@ -253,6 +253,8 @@ export interface FixtureOptions {
   skins?: Partial<SkinPickerVM>;
   /** Today's Drama (absent: nothing fetched yet, the window shut). */
   drama?: "feed" | "intro" | "empty" | "fresh";
+  /** FLT-57: a streak, a friend's challenge (and whether its banner is up), the Memo extra already read. */
+  social?: Partial<NonNullable<HudInput["social"]>>;
 }
 
 /** A World with a papers or collusion moment staged on it, through the same code the `?moment=` links use. */
@@ -316,5 +318,6 @@ export function fixtureInput(o: FixtureOptions = {}): HudInput {
     leapfrog: lf?.motion,
     drama: o.drama ? fixtureDrama(o.drama) : undefined,
     viewport: { width: o.width ?? 1440, height: o.height ?? 900 },
+    social: { streak: 0, challenge: null, challengeOpen: false, memoSeen: null, linkBase: "https://frontier.example/", ...o.social },
   };
 }

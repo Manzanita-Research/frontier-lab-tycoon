@@ -1,17 +1,18 @@
-// Staged moments for links and screenshots (`?moment=audit-*`), through the same chart, cards and ticks as play.
+// Staged moments for links and screenshots (`?moment=audit-*`; FLT-56 adds audit-huddle and audit-graded), through the same chart, cards and ticks as play.
 // No renderer or UI dependencies. Works on any campus; `?scenario=midgame` gives the auditors the most to look at.
 import { TICKS_PER_DAY } from "../constants";
 import { dailyEvents, openEventOf, unpaced } from "../events";
-import { dwellProgress, groupsOf } from "../groups";
+import { TICKS_PER_HOUR } from "../daylight";
+import { dwellProgress, groupKind, groupsOf } from "../groups";
 import { doorPoint } from "../pathfind";
 import { answer, readyForPressure } from "../testkit";
 import { applyNow, tick } from "../tick";
 import type { GameState } from "../types";
 import { dailyAuditors, enableAuditors } from "./driver";
 import { freshAudit } from "./machine";
-import { NOTICE_CARD, OWNER, REPORT_CARD } from "./pack";
+import { NOTICE_CARD, OWNER, REPORT_CARD, REPORT_CHOICES } from "./pack";
 
-export const AUDIT_MOMENTS = ["audit-notice", "audit-tidy", "audit-visit", "audit-evals", "audit-report", "audit-caught"] as const;
+export const AUDIT_MOMENTS = ["audit-notice", "audit-tidy", "audit-visit", "audit-evals", "audit-huddle", "audit-report", "audit-caught", "audit-graded"] as const;
 export type AuditMoment = (typeof AUDIT_MOMENTS)[number];
 export function isAuditMoment(value: string | null | undefined): value is AuditMoment {
   return (AUDIT_MOMENTS as readonly unknown[]).includes(value);
@@ -39,7 +40,7 @@ export function stageAudit(s: GameState, moment: AuditMoment) {
     openCard(s, NOTICE_CARD);
     return;
   }
-  if (moment === "audit-report" || moment === "audit-caught") {
+  if (moment === "audit-report" || moment === "audit-caught" || moment === "audit-graded") {
     const caught = moment === "audit-caught";
     // The tour is over (nobody on campus); the next DAY beat publishes the card.
     a.machine = { value: "visit", context: { ...fresh, prep: caught ? "tidy" : "prep", visitDay: s.day - 20, inspected: 4, caught: caught ? 1 : 0, evals: 1 } };
@@ -47,6 +48,10 @@ export function stageAudit(s: GameState, moment: AuditMoment) {
     if (caught) s.flags["auditors:caught"] = s.day;
     dailyAuditors(s);
     openCard(s, REPORT_CARD);
+    if (moment !== "audit-graded") return;
+    // FLT-56: the card answered and a couple of days on: the plaque is up by the gate and the visitors have heard.
+    applyNow(s, answer(s, REPORT_CHOICES.indexOf("frame")));
+    for (let i = 0; i < 2 * TICKS_PER_DAY; i++) tick(s, answer(s));
     return;
   }
   // A tour: the countdown is up; they come in through the gate on the next DAY beat, then we walk them to the moment.
@@ -58,6 +63,8 @@ export function stageAudit(s: GameState, moment: AuditMoment) {
     const g = groupsOf(w, OWNER)[0];
     if (!g) return true;
     const dwell = dwellProgress(g) ?? 0;
+    // The huddle (FLT-56): once the ring has closed.
+    if (moment === "audit-huddle") return g.machine.value === "huddling" && g.timer <= Math.round((groupKind(g.kind)?.route.huddleHours ?? 1) * TICKS_PER_HOUR) - 8;
     return moment === "audit-evals" ? g.machine.value === "evaluating" && dwell >= 0.45 : g.machine.value === "inspecting" && dwell >= 0.35;
   };
   // Rehearse on a copy for a stop whose door faces the default camera (it looks in from +x/+z), so the auditors are not

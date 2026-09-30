@@ -1,7 +1,7 @@
 // Pure publication lifecycle. Dice and content decisions arrive as events; time is whole game days.
 import { setupEffect } from "@xstate/effect";
 import { Schema } from "effect";
-import type { Stored } from "../../machines/run";
+import { step, type Stored } from "../../machines/run";
 const Context = Schema.Struct({
   importance: Schema.Number, value: Schema.Number, submittedDay: Schema.NullOr(Schema.Number),
   publishedDay: Schema.NullOr(Schema.Number), dueDay: Schema.NullOr(Schema.Number),
@@ -56,3 +56,31 @@ export const publicationMachine = setupEffect({ schemas: {
   },
 });
 export type PublicationStored = Stored<typeof publicationMachine>;
+type PaperDay = typeof Day.Type;
+
+/**
+ * A DAY with nothing to announce, done without `transition()` (FLT-39): a paper under review that is not due, or a
+ * finished one collecting citations. Null when the machine has something to say (a scoop, the verdict, a critique).
+ * Mirrors the branches above exactly (a test checks it against the machine).
+ */
+export function quietPaperDay(stored: PublicationStored, event: PaperDay): PublicationStored | null {
+  const c = stored.context;
+  switch (stored.value) {
+    case "review":
+      if (c.dueDay === null) return { value: "review", context: c };
+      if (event.day === c.dueDay - 1 && event.scoopRival && !c.scoopedBy) return null;
+      return event.day < c.dueDay ? { value: "review", context: c } : null;
+    case "published":
+      return c.critiqueDay === event.day ? null : { value: "published", context: { ...c, citations: c.citations + event.citationGain } };
+    case "criticized":
+    case "awarded":
+      return { value: stored.value, context: { ...c, citations: c.citations + event.citationGain } };
+  }
+  return null;
+}
+
+/** The daily step for one paper: the quiet day when it is one, the machine otherwise. */
+export const dayPaper = (stored: PublicationStored, event: PaperDay) => {
+  const quiet = quietPaperDay(stored, event);
+  return quiet ? { stored: quiet, effects: [] } : step(publicationMachine, stored, { type: "DAY", ...event });
+};

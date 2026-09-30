@@ -240,6 +240,30 @@ describe("app machine", () => {
     }).pipe(provide(handle));
   });
 
+  it.effect("holds the toasts off a camera beat (FLT-56): nothing shows or expires until it ends, then each gets its full time", () => {
+    const handle = handleFor();
+    return Effect.gen(function* () {
+      const { actor } = yield* boot();
+      yield* send(actor, { type: "TOAST", text: "Not enough cash", tone: "bad" });
+      yield* waitFor(actor, (s) => s.context.toasts.length === 1, { timeout: "1 second" });
+      yield* TestClock.adjust("4 seconds");
+      yield* send(actor, { type: "HOLD_TOASTS", on: true });
+      yield* send(actor, { type: "TOAST", text: "Needs a path next to it", tone: "bad" });
+      yield* waitFor(actor, (s) => s.context.held?.length === 2, { timeout: "1 second" });
+      expect(actor.getSnapshot().context.toasts).toHaveLength(0);
+      // A long beat: the one that was showing would have expired by now, and nobody saw the new one.
+      yield* TestClock.adjust("20 seconds");
+      expect(actor.getSnapshot().context.held).toHaveLength(2);
+      yield* send(actor, { type: "HOLD_TOASTS", on: false });
+      yield* waitFor(actor, (s) => s.context.held === null, { timeout: "1 second" });
+      expect(actor.getSnapshot().context.toasts.map((t) => t.text)).toEqual(["Not enough cash", "Needs a path next to it"]);
+      yield* TestClock.adjust("5 seconds");
+      expect(actor.getSnapshot().context.toasts).toHaveLength(2);
+      yield* TestClock.adjust("1 second");
+      yield* waitFor(actor, (s) => s.context.toasts.length === 0, { timeout: "1 second" });
+    }).pipe(provide(handle));
+  });
+
   it.effect("picks a tool, toggles it off on a second pick, and ignores a hover that has not moved", () => {
     const handle = handleFor();
     return Effect.gen(function* () {

@@ -1,11 +1,11 @@
-import { getReach, isReachable, tileIndex, buildingAt, isPathTile, rectContains } from "../pathfind";
+import { getReach, isReachable, tileIndex, isPathTile } from "../pathfind";
 import { openEventOf } from "../events";
 import { outcomeOf } from "../goals";
 import { progressOf } from "../progression";
 import { eraOfState } from "../race/race";
 import { tick } from "../tick";
 import { SimHandle } from "../../app/sim";
-import { createMidgameScenario, MIDGAME_SEED, midgameOpeningNews, midgameOpeningThoughts, walkerOnCampus } from "./midgame";
+import { createMidgameScenario, MIDGAME_SEED, midgameOpeningNews, midgameOpeningThoughts, walkerOnCampus, walkerPlaced } from "./midgame";
 
 // FNV-1a, the same deliberately simple hash used by sim/golden.test.ts, over the entire persisted World.
 function digest(s: unknown): string {
@@ -27,15 +27,19 @@ describe("midgame scenario", () => {
     // and the Promise Tracker.
     // FLT-33/25: the earned factions wake with the campus and argue all 480 days; the water crowd escalates through its arc.
     // FLT-11 adds The Memo's dormant arc (arcs.memo); take it out and the World hashes to the old c4310492.
-    // FLT-51 tags every toast (source, importance, reply); without the tags it is the World FLT-52 pinned, number for number.
-    // FLT-54: the card budget spaces the cards (and the World keeps its pacer), so the whole run moves; the rename (#71) put
-    // Super Super AI (id supersuper) and MetaMeta's full name in the World too. Were 36f6a4a9 / 6c24ddd0 before both.
-    // The unread badges then tag the Arena, Papers and Discourse headlines with their panel (NewsItem.panel);
-    // the quit, poach and record toasts carry their group (Toast.group), and a quit picks its line from QUIT_LINES.
+    // FLT-51 tags every toast (source, importance, reply); the first digest strips the tags (on the train it matched FLT-52).
+    // FLT-56: the auditors huddle before they leave and the grade lingers, which moves the opening a few days, and the
+    // Hearing's twelve new questions change what the senators ask. Phase 2: the motions' passes and fails nudge the
+    // factions and last longer.
+    // Rename (#71): Very Safe SI is Super Super AI (id supersuper) and MetaMeta's full name changed; names and ids are in the World.
+    // FLT-54: the card budget spaces the cards (and the World keeps its pacer), so the whole run moves; the unread badges tag
+    // the Arena, Papers and Discourse headlines with their panel (NewsItem.panel); the quit, poach and record toasts carry
+    // their group (Toast.group), and a quit picks its line from QUIT_LINES. Merge train 2: the Promise Tracker's cards ask
+    // the card budget too.
     expect({
       untagged: digest({ ...s, toasts: s.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) }),
       full: digest(s),
-    }).toEqual({ untagged: "ec5a8e62", full: "758e1278" });
+    }).toEqual({ untagged: "7f58d622", full: "948ca520" });
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);
@@ -67,7 +71,7 @@ describe("midgame scenario", () => {
     expect(walkerOnCampus(s)).toBe(true);
     for (const w of [...s.walkers, ...s.staff]) {
       const x = Math.floor(w.x), z = Math.floor(w.z);
-      expect(isPathTile(s, x, z) || !!buildingAt(s, w.x, w.z) || rectContains(s.gate, w.x, w.z)).toBe(true);
+      expect(walkerPlaced(s, w)).toBe(true);
       if (isPathTile(s, x, z)) expect(getReach(s).tiles[tileIndex(s, x, z)]).toBe(1);
     }
     const resumed = JSON.parse(JSON.stringify(s));

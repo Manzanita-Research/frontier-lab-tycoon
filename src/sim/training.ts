@@ -3,6 +3,7 @@ import type { EmittedFrom, EventFromLogic } from "xstate";
 import { modelName } from "../content/names";
 import { COMPUTE_PER_CLUSTER, COMPUTE_PER_HALL } from "./constants";
 import { computeFactor } from "./disasters/driver";
+import { trainingPace } from "./endings/lineage";
 import { formatMoney } from "./format";
 import { addToast, pushNews } from "./news";
 import { step, type Stepped } from "./machines/run";
@@ -39,7 +40,7 @@ export function trainingEtaDays(state: GameState): number | null {
   const halls = state.buildings.filter((b) => b.kind === "hall").length;
   if (halls === 0) return null;
   const spend = Math.min(COMPUTE_PER_HALL * halls, state.compute + computePerDay(state));
-  const gain = spend * (0.75 + 0.25 * morale(state)) * rdMultiplier(state) * safetyDrag(state);
+  const gain = spend * (0.75 + 0.25 * morale(state)) * rdMultiplier(state) * safetyDrag(state) * trainingPace(state);
   if (gain <= 0) return null;
   const { cost, progress } = state.training.context;
   return Math.max(0, Math.ceil((cost - progress) / gain));
@@ -56,7 +57,7 @@ export function dailyTraining(state: GameState, rng: Rng) {
     state.compute -= spend;
     // The R&D multiplier: agents doing research make every unit of compute go further.
     // FLT-33: a safety budget buys evals with training time (exactly 1 with no budget).
-    gain = spend * (0.75 + 0.25 * morale(state)) * rdMultiplier(state) * safetyDrag(state);
+    gain = spend * (0.75 + 0.25 * morale(state)) * rdMultiplier(state) * safetyDrag(state) * trainingPace(state);
   }
   feed(state, rng, { type: "DAY", halls, gain });
 }

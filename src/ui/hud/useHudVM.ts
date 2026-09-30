@@ -8,10 +8,12 @@ import type { Snapshot } from "../../app/hud";
 import { audioReadyAtom, mixerAtom, mixerOpenAtom } from "../../audio/state";
 import { roomAtom } from "../../newsroom/state";
 import { photoAtom } from "../../render/fx/photoState";
+import { beatAtom } from "../../render/fx/beatState";
 import { skinList } from "../../skins/registry";
 import type { LeapfrogView } from "../../sim/race/leapfrog/view";
 import { shotAtom } from "../juice/photo";
 import { useShareInput } from "../share/share";
+import { useSocialInput } from "../share/social";
 import { newMotion, NO_MOTION, stepMotion, type Motion, type MotionView } from "./leapfrogMotion";
 import { arenaCallAtom, arenaOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, seenNewsAtom, senateOpenAtom, skinUiAtom, staffOpenAtom, windowBudgetAtom } from "./state";
 import { newestOf, unreadOf, wantsOf, windowed } from "./tray";
@@ -177,6 +179,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
   const photoTime = useAtomValue(photoTimeAtom);
   const flash = useAtomValue(photoFlashAtom);
   const shot = useAtomValue(shotAtom);
+  const beat = useAtomValue(beatAtom);
   const skinUi = useAtomValue(skinUiAtom);
   const staffOpen = useAtomValue(staffOpenAtom);
   const senateOpen = useAtomValue(senateOpenAtom);
@@ -188,6 +191,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
   const disastersOpen = useAtomValue(disastersOpenAtom);
   const dramaUi = useAtomValue(dramaAtom);
   const share = useShareInput();
+  const social = useSocialInput();
   const viewport = useViewport();
   const tapHint = useTapHint(selected);
   // "Build an API Gateway..." twice is one hint too many: once a toast has said it, the standing hint is redundant.
@@ -198,6 +202,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
   const leapfrog = useLeapfrogMotion(snap);
   const list = useMemo(() => skinList(), []);
   // The session's mods are fixed at start (main.tsx loads `?mod=` before the game exists); only the window opens and shuts.
+  const lookLabels = useMemo(() => Object.fromEntries(Object.entries(modSession().presentation?.looks ?? {}).flatMap(([target, look]) => (look.label ? [[target, look.label]] : []))), []);
   const mods = useMemo(() => {
     const m = modSession();
     return {
@@ -237,8 +242,10 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         papersOpen,
         dismissed,
         disastersOpen,
+        lookLabels,
         mixer: { open: mixerOpen, ready: audioReady, muted: mixer.muted, master: mixer.master, music: mixer.music, sfx: mixer.sfx },
         photo: { on: photoOn, time: photoTime, shot, flash },
+        beat,
         skins: {
           open: skinUi.picker.open,
           reducedMotion: skinUi.reducedMotion,
@@ -246,13 +253,15 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
           original: skinUi.picker.original,
           list,
           rejected: skinUi.refused,
+          offer: skinUi.offer,
         },
         mods,
         drama,
         viewport,
         share,
+        social,
       }),
-    [share, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, skinUi, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, drama],
+    [share, social, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, beat, skinUi, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, drama],
   );
   return useWindowBudget(vm, news);
 }

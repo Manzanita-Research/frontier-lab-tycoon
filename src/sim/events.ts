@@ -3,7 +3,7 @@ import type { BuildingKind } from "../content/buildings";
 import type { Condition, Effect } from "../content/events";
 import { THOUGHT_TICKS, DISCOURSE_PER_PROTESTER } from "./constants";
 import { fillTemplate } from "./format";
-import { arcMachine } from "./machines/arc";
+import { arcMachine, dayArc } from "./machines/arc";
 import { initialStored, step } from "./machines/run";
 import { EVENT_COOLDOWN_DAYS } from "../content/events";
 import { nudgeFaction, nudgeRelation } from "./factions/state";
@@ -92,7 +92,7 @@ export function dailyEvents(state: GameState) {
     const allowed = pacerAllows(pacerOf(state).context, def.id, card.story, state.day, how);
     const ready = pressureReady(state) && (conditionHolds(state, def.when) || state.flags[askFlag(def.id)] !== undefined);
     const shrug = card.minor && slotFree && (!allowed || pacer.auto);
-    const { stored } = step(arcMachine, state.arcs[def.id]!, { type: "DAY", day: state.day, ready, slotFree: slotFree && (allowed || shrug === true), pace });
+    const stored = dayArc(state.arcs[def.id]!, { type: "DAY", day: state.day, ready, slotFree: slotFree && (allowed || shrug === true), pace });
     state.arcs[def.id] = stored;
     if (stored.value === "cardOpen" && shrug) handled(state, def.id, card.default);
     else if (stored.value === "cardOpen") {

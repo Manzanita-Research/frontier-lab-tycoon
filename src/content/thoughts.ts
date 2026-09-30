@@ -3,6 +3,7 @@
 import type { WalkerKind } from "../sim/types";
 import { NIGHT_THOUGHTS } from "./night";
 import { RACE_THOUGHTS, type RaceThoughtCondition } from "./raceThoughts";
+import { ENDING_RULES } from "../sim/endings/pack";
 
 export type ThoughtCondition =
   | "always"
@@ -20,7 +21,10 @@ export type ThoughtCondition =
   /** After dark: the lamps are on and someone is still at it (content/night.ts). */
   | "night"
   /** The race: the current era, an open-weights drop, an unpowered datacenter, the top of the Arena. */
-  | RaceThoughtCondition;
+  | RaceThoughtCondition
+  /** The Memo came back ticked RACE, or SLOW DOWN (FLT-57; the lines are the endings pack's). */
+  | "memoRace"
+  | "memoSlow";
 
 export interface ThoughtLine {
   kind: WalkerKind;
@@ -120,4 +124,6 @@ export const THOUGHTS: ThoughtLine[] = [
 
   ...NIGHT_THOUGHTS.map((n) => t(n.kind, "night", n.text)),
   ...RACE_THOUGHTS,
+  ...ENDING_RULES.memo.race.thoughts.map((l) => t(l.kind, "memoRace", l.text)),
+  ...ENDING_RULES.memo.slow.thoughts.map((l) => t(l.kind, "memoSlow", l.text)),
 ];

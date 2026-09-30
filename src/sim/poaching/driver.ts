@@ -14,6 +14,7 @@ import type { GameState, Walker } from "../types";
 import { runVerb } from "../verbs";
 import { CARD, CHOICES, PICK_PREFIX, POACHING } from "./pack";
 import type { PoachingStage } from "./state";
+import { picked, picks } from "../picks";
 
 const R = POACHING.rules;
 const OWNER = "poaching";
@@ -76,7 +77,7 @@ export function poachingVars(s: GameState): Record<string, string> {
   const o = p.offer;
   const n = present(s).length || o.targets.length;
   Object.assign(out, {
-    poacher: o.name, poacherShort: o.short, poachCount: String(n), poachFirst: o.names[0] ?? "",
+    poacher: o.name, poacherShort: o.short, poacherId: o.from, poachCount: String(n), poachFirst: o.names[0] ?? "",
     poachNames: o.names.length <= 1 ? (o.names[0] ?? "") : `${o.names.slice(0, -1).join(", ")} and ${o.names[o.names.length - 1]}`,
     poachCost: formatMoney(MATCH_EACH * n),
   });
@@ -125,13 +126,15 @@ function send(s: GameState, rng: Rng, event: ChartEvent) {
   return p.machine.value;
 }
 
+const CHOICE_FLAGS = picks(PICK_PREFIX, CHOICES);
+
 export function applyPoachingChoices(s: GameState) {
   const p = s.poaching;
-  if (!p?.enabled) return;
+  if (!p?.enabled || !picked(s.flags, CHOICE_FLAGS)) return;
   const rng = createRng(p.rngState);
-  for (const choice of CHOICES) {
-    if (s.flags[PICK_PREFIX + choice] === undefined) continue;
-    delete s.flags[PICK_PREFIX + choice];
+  for (const { key: choice, flag } of CHOICE_FLAGS) {
+    if (s.flags[flag] === undefined) continue;
+    delete s.flags[flag];
     if (p.machine.value !== "offered" || !p.offer) continue;
     const foundRoll = rng.next();
     const people = present(s);

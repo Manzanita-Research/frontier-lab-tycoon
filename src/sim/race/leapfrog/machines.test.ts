@@ -3,7 +3,7 @@ import type { AnyStateMachine } from "xstate";
 import { getAdjacencyMap } from "xstate/graph";
 import { initialStored, step } from "../../machines/run";
 import { rivalMachine } from "../rival";
-import { benchMachine, scoreFor } from "./benchmark";
+import { benchMachine, quietScores, scoreFor, type BenchStored } from "./benchmark";
 import { calendarMachine, nextGap } from "./calendar";
 import { livestreamMachine } from "./livestream";
 import { responseMachine } from "./response";
@@ -78,6 +78,25 @@ describe("a benchmark", () => {
     expect(step(benchMachine, fresh(), { type: "SCORES", best: 60.01, holder: "openish", day: 5 }).effects).toEqual([]);
     const own = step(benchMachine, fresh(), { type: "SCORES", best: 64, holder: "openish", day: 5 });
     expect(own.effects).toMatchObject([{ type: "SOTA", lab: "openish", prevHolder: "openish" }]);
+  });
+
+  it("skips transition() only on a re-read where the machine would stay put and say nothing (FLT-39)", () => {
+    let quiet = 0;
+    for (const value of ["live", "crowded", "saturated", "retired"] as const)
+      for (const best of [60, 91, 95, 96.5, 99])
+        for (const holder of ["openish", "anthro"]) {
+          const stored = { value, context: { ...input, best, holder } } as BenchStored;
+          for (const next of [best, best + 0.01, best + 1, best - 1, 91, 96.5])
+            for (const by of ["openish", "anthro"]) {
+              const got = quietScores(stored, { best: next, holder: by });
+              if (!got) continue;
+              quiet++;
+              const want = step(benchMachine, stored, { type: "SCORES", best: next, holder: by, day: 7 });
+              expect(want.effects).toEqual([]);
+              expect(got).toStrictEqual(want.stored);
+            }
+        }
+    expect(quiet).toBeGreaterThan(5); // the shortcut is taken, not just never wrong
   });
 
   it("goes live -> crowded -> saturated as the best score nears 100, announcing each once", () => {

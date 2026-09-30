@@ -14,6 +14,8 @@ import { ParticleLayer } from "./fx/ParticleLayer";
 import { photoAtom } from "./fx/photoState";
 import { Decor, Ground, Paths } from "./Ground";
 import { Fence } from "./Fence";
+import { NeoCampuses } from "./NeoCampuses";
+import { GradePlaque } from "./GradePlaque";
 import { Slop } from "./Slop";
 import { StaffCrew } from "./StaffCrew";
 import { VisitorGroups } from "./VisitorGroups";
@@ -59,6 +61,8 @@ export function Scene() {
       <Paths />
       <Slop />
       <Fence />
+      <NeoCampuses />
+      <GradePlaque />
       <Lamps />
       <Buildings />
       <Walkers />

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { BUILDINGS } from "../../content/buildings";
 import { formatMoney } from "../../sim/format";
-import { fixtureInput, fixtureWorld, FIXTURE_CHAT, FIXTURE_PAPER } from "./fixtures";
+import { fixtureEnding, fixtureInput, fixtureWorld, FIXTURE_CHAT, FIXTURE_PAPER } from "./fixtures";
 import { CALM_START_DAY } from "../../sim/disasters/driver";
 import { SKIN_API_VERSION } from "./types";
 import { hudViewModel, SHIPPED_DAYS, TICKER_ITEMS } from "./vm";
@@ -428,4 +428,63 @@ describe("endings (FLT-11)", () => {
     expect(vm.ending!.share).toEqual({ status: "ready", card: "blob:card", native: true, note: null });
     expect(vm.ending!.keepPlaying).toBe(false);
   }, 30_000);
+});
+
+describe("no dead ends, streaks and friend links (FLT-57)", () => {
+  const friend = (moment: string, over: Partial<{ ending: string; day: number; vibes: number; models: number }> = {}) => ({
+    ending: "captured", day: 212, vibes: 88, models: 7, seed: fixtureEnding(moment).seed, daily: null, ...over,
+  });
+
+  it("the Acqui-hired front page offers a new lab with three perks, and a link that carries the result and nothing else", () => {
+    const vm = hudViewModel(fixtureInput({ ending: "front-acquihired", selected: null }));
+    assertPlain(vm);
+    const e = vm.ending!;
+    expect(e.next).toMatchObject({ action: "refound", label: "Found a new lab" });
+    expect(e.refound!.perks.map((p) => p.id)).toEqual(["founder", "loyal", "seed"]);
+    expect(e.labNumber).toBe(1);
+    expect(e.streak).toBeNull();
+    expect(e.versus).toBeNull();
+    const url = new URL(e.link);
+    expect([...url.searchParams.keys()]).toEqual(["seed", "vs"]);
+    expect(url.searchParams.get("vs")).toMatch(/^acquihired\.\d+\.\d+\.\d+$/);
+    expect(e.link).not.toContain(encodeURIComponent(e.lab.split(" ")[0]!));
+    expect(e.summary.split("\n").at(-1)).toBe(`Beat it: ${e.link}`);
+  });
+
+  it("a second lab says so, and the streak goes on the summary from two days up", () => {
+    const vm = hudViewModel(fixtureInput({ ending: "lab2", selected: null, social: { streak: 7 } }));
+    expect(vm.ending!.labNumber).toBe(2);
+    expect(vm.ending!.refound!.labNumber).toBe(3);
+    expect(vm.ending!.streak).toEqual({ days: 7, text: "7-day streak" });
+    expect(vm.ending!.summary).toContain("🔥 7-day streak");
+    expect(vm.ending!.summary.split("\n")[0]).toContain("Lab #2");
+    expect(hudViewModel(fixtureInput({ ending: "lab2", selected: null, social: { streak: 1 } })).ending!.streak).toBeNull();
+  });
+
+  it("a friend's challenge: a banner on their seed until it's answered, then a verdict on the front page", () => {
+    const c = friend("memo-countdown");
+    const vm = hudViewModel(fixtureInput({ ending: "memo-countdown", selected: null, social: { challenge: c, challengeOpen: true } }));
+    expect(vm.challenge).toEqual({ line: "Your friend's lab was Captured on day 212.", ask: "Beat it?", ending: "Captured", tone: "neutral", stats: "88 peak Vibes · 7 models", daily: null, cta: "Beat it" });
+    expect(hudViewModel(fixtureInput({ ending: "memo-countdown", selected: null, social: { challenge: c, challengeOpen: false } })).challenge).toBeNull();
+    // Another seed is another lab: no banner.
+    expect(hudViewModel(fixtureInput({ ending: "memo-countdown", selected: null, social: { challenge: { ...c, seed: c.seed + 1 }, challengeOpen: true } })).challenge).toBeNull();
+    // Acqui-hired (bad) beats nobody who was Regulated (neutral); against another bad ending, holding out longer wins.
+    const end = (ch: ReturnType<typeof friend>) => hudViewModel(fixtureInput({ ending: "front-acquihired", selected: null, social: { challenge: ch } })).ending!.versus!;
+    expect(end(friend("front-acquihired", { ending: "regulated" }))).toMatchObject({ verdict: "lose", text: "Your friend's lab wins. Rematch?" });
+    expect(end(friend("front-acquihired", { ending: "acquihired", day: 1 }))).toMatchObject({ verdict: "win", line: "Your friend's lab was Acqui-hired on day 1." });
+  });
+
+  it("The Memo: a countdown (hidden under the card itself), then an extra edition once, for a couple of days", () => {
+    const coming = hudViewModel(fixtureInput({ ending: "memo-countdown", selected: null })).memo!;
+    expect(coming).toMatchObject({ phase: "coming", daysLeft: 3, title: "The Memo · 3 days", line: "Legal has read it. Legal has gone home.", extra: null });
+    expect(coming.progress).toBeCloseTo(0.4);
+    expect(hudViewModel(fixtureInput({ ending: "memo", selected: null })).memo).toBeNull();
+    const extra = hudViewModel(fixtureInput({ ending: "memo-race", selected: null })).memo!;
+    expect(extra.phase).toBe("extra");
+    expect(extra.extra!.choice).toBe("Race");
+    expect(extra.extra!.reactions).toHaveLength(3);
+    expect(hudViewModel(fixtureInput({ ending: "memo-race", selected: null, social: { memoSeen: extra.key } })).memo).toBeNull();
+    const later = fixtureInput({ ending: "memo-race", selected: null });
+    expect(hudViewModel({ ...later, snap: { ...later.snap, day: later.snap.day + 3 } }).memo).toBeNull();
+  });
 });

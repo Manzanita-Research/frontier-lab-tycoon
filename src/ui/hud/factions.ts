@@ -8,6 +8,7 @@ import type { FactionChipVM, FactionMoodVM, FactionRowVM, FactionsVM, StanceVM }
 export const NO_FACTIONS_VM: FactionsVM = {
   enabled: false, open: false, protests: false, rows: [], stance: [], relations: [], log: [], gate: [], gateText: "", headline: "", fans: 0, angry: 0,
   safety: { level: 0, options: [] },
+  statement: { ready: false, costText: "", waitText: "", writerText: "" },
 };
 
 /** The words at each end of an axis. */
@@ -77,7 +78,8 @@ export function factionsOf(view: FactionsView | undefined, open: boolean): Facti
     angry.length ? `${angry.length} upset` : "",
     marching.length === 1 ? `${marching[0]!.name} ${view.protests ? "marching" : "furious online"}` : marching.length > 1 ? `${marching.length} ${view.protests ? "marching" : "furious online"}` : "",
   ].filter(Boolean);
-  const gate = view.gate.map((g) => ({ ...g }));
+  const gate = view.gate.map((g) => ({ ...g, addressable: g.id !== "" }));
+  const st = view.statement;
   return {
     enabled: true,
     open,
@@ -100,6 +102,12 @@ export function factionsOf(view: FactionsView | undefined, open: boolean): Facti
         dragText: o.drag > 0 ? `−${Math.round(o.drag * 100)}% training` : "",
         active: level === view.safety.level,
       })),
+    },
+    statement: {
+      ready: st.wait === 0,
+      costText: formatMoney(st.cost),
+      waitText: st.wait === 0 ? "Ready" : `Comms needs ${st.wait} ${st.wait === 1 ? "day" : "days"}`,
+      writerText: st.staffed ? "Your Comms Rep writes it" : "The intern writes it (no Comms Rep)",
     },
   };
 }

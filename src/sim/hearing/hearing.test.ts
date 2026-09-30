@@ -10,6 +10,8 @@ import { enableHearing, disableHearing } from "./driver";
 import { freshHearing, HEARING_STATS, stepHearing } from "./machine";
 import { GAVEL_CARD, HEARING, loadHearingPack } from "./pack";
 import { hearingView } from "./view";
+import { enableLeapfrog } from "../race/leapfrog/driver";
+import { yourShare } from "../race/leapfrog/factors";
 import type { Beat } from "../circus/chart";
 import type { GameState } from "../types";
 import { CARD_GAP_DAYS } from "../../content/cardPacing";
@@ -65,7 +67,8 @@ describe("the Hearing pack", () => {
       expect(eventById(id)?.choices).toHaveLength(3);
       expect(R.senators.some((sen) => sen.id === q.senator)).toBe(true);
     }
-    for (const sen of R.senators) expect(Object.values(R.questions).filter((q) => q.senator === sen.id).length).toBeGreaterThanOrEqual(2);
+    // FLT-56: twelve more, four a senator, so a lab summoned every season hears something new.
+    for (const sen of R.senators) expect(Object.values(R.questions).filter((q) => q.senator === sen.id).length).toBeGreaterThanOrEqual(7);
     expect(eventById(GAVEL_CARD)?.choices).toHaveLength(1);
   });
 });
@@ -147,6 +150,31 @@ describe("a hearing in the game", () => {
     testify(s, ["chaotic", "chaotic", "chaotic"]);
     expect(s.hearing!.machine.value).toBe("viral");
     expect(s.hype).toBeGreaterThan(hype);
+  });
+  it("a viral verdict waits for the lab to leave, then the clip: a beat quoting the CEO, a burst of headlines, the news cycle", () => {
+    const s = staged(5);
+    enableLeapfrog(s);
+    summon(s);
+    testify(s, ["chaotic", "earnest", "chaotic"]);
+    expect(s.hearing!.machine.value).toBe("viral");
+    expect(openEventOf(s)?.id).toBe(GAVEL_CARD);
+    const beats = () => s.disasters.cues.filter((c) => c.type === "beat");
+    expect(beats()).toEqual([]);
+    const c = s.hearing!.machine.context;
+    const quote = eventById(c.docket[2]!)!.choices[PICK.chaotic]!.label;
+    const news = s.news.length;
+    const share = yourShare(s);
+    applyNow(s, answer(s));
+    expect(beats()).toEqual([expect.objectContaining({ beat: "viral", caption: `${s.labName}'s hearing clip is everywhere`, sub: `"${quote}"` })]);
+    const clip = s.news.slice(news);
+    expect(clip).toHaveLength(R.aftermath!.viral!.headlines!.count);
+    expect(new Set(clip.map((n) => n.text)).size).toBe(clip.length);
+    expect(clip.every((n) => !/[{}]/.test(n.text))).toBe(true);
+    expect(yourShare(s)).toBeGreaterThan(share);
+    expect(s.hearing!.aftermath).toBeUndefined();
+    // Once: the next day brings nothing more.
+    runUntil(s, () => false, 1);
+    expect(beats()).toHaveLength(1);
   });
   it("is deterministic for a seed", () => {
     const run = () => {
