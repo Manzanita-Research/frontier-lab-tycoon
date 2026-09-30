@@ -88,6 +88,8 @@ export interface MemoView {
   /** The day it was answered (the HUD keys "seen" on it). */
   day: number;
   chip: string | null;
+  /** The box that was ticked, as printed on the Memo ("Race", "Slow Down"). */
+  label: string | null;
   effects: string[];
   extra: { kicker: string; headline: string; deck: string } | null;
   reactions: MemoState["reactions"];
@@ -99,7 +101,7 @@ export function memoView(state: GameState): MemoView | null {
   const left = memoDaysLeft(state);
   if (left !== null) {
     const line = RULES.countdown[Math.min(RULES.countdown.length - 1, left)] ?? "";
-    return { phase: "coming", daysLeft: left, line, choice: null, day: state.flags[MEMO_OFFER]!, chip: null, effects: [], extra: null, reactions: [] };
+    return { phase: "coming", daysLeft: left, line, choice: null, day: state.flags[MEMO_OFFER]!, chip: null, label: null, effects: [], extra: null, reactions: [] };
   }
   if (!e.memo) return null;
   const fork = memoFork(e.memo.choice);
@@ -111,6 +113,7 @@ export function memoView(state: GameState): MemoView | null {
     choice: e.memo.choice,
     day: e.memo.day,
     chip: fork.chip,
+    label: fork.label,
     effects: [...fork.effects],
     extra: { kicker: fill(fork.extra.kicker), headline: fill(fork.extra.headline), deck: fill(fork.extra.deck) },
     reactions: e.memo.reactions.map((r) => ({ ...r })),

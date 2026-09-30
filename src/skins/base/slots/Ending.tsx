@@ -51,7 +51,10 @@ export function Ending({ ending, layout, actions }: SlotPropsMap["Ending"]) {
         </article>
         <aside className="ending-side">
           <span className="paper-section">{ending.daily ?? "The run"}</span>
-          <b className="ending-lab">{ending.lab}</b>
+          <b className="ending-lab">
+            {ending.lab}
+            {ending.labNumber > 1 && <small className="ending-labno">Lab #{ending.labNumber}</small>}
+          </b>
           <div className="ending-strip" aria-label="The run by era, in squares">{ending.strip}</div>
           <dl className="ending-stats">
             {ending.stats.map((s) => (
@@ -63,20 +66,53 @@ export function Ending({ ending, layout, actions }: SlotPropsMap["Ending"]) {
               </div>
             ))}
           </dl>
+          {(ending.streak || ending.versus) && (
+            <div className="ending-social">
+              {ending.streak && <span className="ending-streak">🔥 {ending.streak.text}</span>}
+              {ending.versus && (
+                <p className={`ending-versus verdict-${ending.versus.verdict}`}>
+                  <small>{ending.versus.line}</small>
+                  <b>{ending.versus.text}</b>
+                </p>
+              )}
+            </div>
+          )}
+          <section className="ending-next" aria-label="What now">
+            <span className="paper-section">What now</span>
+            <p>{ending.next.prompt}</p>
+            {ending.refound ? (
+              <>
+                <b className="ending-next-name">{ending.refound.name}</b>
+                <small className="ending-next-hint">{ending.next.label}, keeping one thing:</small>
+                <div className="ending-perks">
+                  {ending.refound.perks.map((perk, i) => (
+                    <button key={perk.id} className={`choice plain ${i === 0 ? "primary" : ""}`} onClick={() => actions.foundLab?.(perk.id)}>
+                      <b>{perk.label}</b>
+                      <small>{perk.blurb}</small>
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : (
+              ending.keepPlaying && (
+                <button className="choice plain primary" onClick={() => actions.keepPlaying()}>
+                  <b>{ending.next.label}</b>
+                </button>
+              )
+            )}
+          </section>
           <div className="ending-buttons">
-            <button className="choice plain primary" onClick={() => actions.shareEnding?.()} disabled={share.status === "making"}>
+            <button className="choice plain" onClick={() => actions.shareEnding?.()} disabled={share.status === "making"}>
               <b>{share.native ? "📤 Share the front page" : "⬇ Save the share card"}</b>
+            </button>
+            <button className="choice plain" onClick={() => actions.copyLink?.()}>
+              <b>{share.status === "linked" ? "✓ Link copied" : "🔗 Copy a challenge link"}</b>
             </button>
             <button className="choice plain" onClick={() => actions.copySummary?.()}>
               <b>{share.status === "copied" ? "✓ Copied" : "📋 Copy run summary"}</b>
             </button>
-            {ending.keepPlaying && (
-              <button className="choice plain" onClick={() => actions.keepPlaying()}>
-                <b>Keep watching</b>
-              </button>
-            )}
             <button className="choice plain" onClick={() => actions.newLab()}>
-              <b>New lab</b>
+              <b>{ending.refound ? "Start from scratch" : "New lab"}</b>
             </button>
             <button className="choice plain" onClick={() => actions.playDaily?.()}>
               <b>Play today's lab</b>

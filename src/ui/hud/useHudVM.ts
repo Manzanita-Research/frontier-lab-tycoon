@@ -12,6 +12,7 @@ import { skinList } from "../../skins/registry";
 import type { LeapfrogView } from "../../sim/race/leapfrog/view";
 import { shotAtom } from "../juice/photo";
 import { useShareInput } from "../share/share";
+import { useSocialInput } from "../share/social";
 import { newMotion, NO_MOTION, stepMotion, type Motion, type MotionView } from "./leapfrogMotion";
 import { arenaOpenAtom, chatCountAtom, helpOpenAtom, photoFlashAtom, photoTimeAtom, skinUiAtom, staffOpenAtom } from "./state";
 import { playableFixture } from "./previewLadder";
@@ -173,6 +174,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
   const staffOpen = useAtomValue(staffOpenAtom);
   const helpOpen = useAtomValue(helpOpenAtom);
   const share = useShareInput();
+  const social = useSocialInput();
   const viewport = useViewport();
   const tapHint = useTapHint(selected);
   // "Build an API Gateway..." twice is one hint too many: once a toast has said it, the standing hint is redundant.
@@ -217,8 +219,9 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         },
         viewport,
         share,
+        social,
       }),
-    [share, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, motion, leapfrog, room, chatCount, helpOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, skinUi, list, viewport, staffOpen, zone],
+    [share, social, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, motion, leapfrog, room, chatCount, helpOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, skinUi, list, viewport, staffOpen, zone],
   );
   return vm;
 }

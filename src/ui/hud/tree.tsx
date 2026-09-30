@@ -48,7 +48,7 @@ export function Docked({ vm, actions }: { vm: HudVM; actions: HudActions }) {
 }
 
 export function Modals({ vm, actions }: { vm: HudVM; actions: HudActions }) {
-  const { EventCard, Livestream, Confirm, UnlockCard, HowToPlay, EraCard, Outcome, Ending, Takeover, NewsRoom, Mixer, SkinPicker } = useSkin().slots;
+  const { EventCard, Livestream, Confirm, UnlockCard, HowToPlay, EraCard, Outcome, Ending, Takeover, Memo, Challenge, NewsRoom, Mixer, SkinPicker } = useSkin().slots;
   return (
     <>
       {vm.event && (vm.event.stream ? <Livestream event={vm.event} stream={vm.event.stream} actions={actions} /> : <EventCard event={vm.event} actions={actions} />)}
@@ -59,6 +59,8 @@ export function Modals({ vm, actions }: { vm: HudVM; actions: HudActions }) {
       {vm.outcome && <Outcome outcome={vm.outcome} actions={actions} />}
       {vm.takeover && !vm.ending && <Takeover takeover={vm.takeover} layout={vm.layout} actions={actions} />}
       {vm.ending && <Ending ending={vm.ending} layout={vm.layout} actions={actions} />}
+      {vm.memo && <Memo memo={vm.memo} layout={vm.layout} actions={actions} />}
+      {vm.challenge && <Challenge challenge={vm.challenge} layout={vm.layout} actions={actions} />}
       {vm.newsroom.view && <NewsRoom newsroom={vm.newsroom} actions={actions} />}
       {vm.sound.open && <Mixer sound={vm.sound} actions={actions} />}
       {vm.skins.open && <SkinPicker skins={vm.skins} actions={actions} />}

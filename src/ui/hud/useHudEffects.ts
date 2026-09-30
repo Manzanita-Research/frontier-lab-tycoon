@@ -16,6 +16,7 @@ import { setPhoto, takePhoto, togglePhoto } from "../juice/photo";
 import { eventById } from "../../content/events";
 import { chatCountAtom } from "./state";
 import { useShareCard, useTakeoverTitle } from "../share/share";
+import { useStreak } from "../share/social";
 import type { HudVM } from "./types";
 
 const ERA_GRACE_MS = 700;
@@ -188,4 +189,5 @@ export function useHudEffects(vm: HudVM, snap: Snapshot) {
   useNewsDesk(snap);
   useShareCard(vm);
   useTakeoverTitle(vm);
+  useStreak(snap.day);
 }

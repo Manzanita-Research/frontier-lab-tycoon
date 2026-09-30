@@ -2,7 +2,8 @@
 // it, and The Takeover as a title bar that is no longer yours.
 import type { SlotPropsMap } from "../types";
 import { Ico } from "./icons";
-import { Btn, Win } from "./parts";
+import { Blocks, Btn, Win } from "./parts";
+import { useAutoPause } from "../kit";
 
 const SHARE_NOTE: Record<string, string> = { making: "Printing the card… (do not turn off your computer)", error: "General protection fault in PRINTER.DRV. Try again?" };
 
@@ -68,7 +69,10 @@ export function Ending({ ending, layout, actions }: SlotPropsMap["Ending"]) {
         <Win className="f95-end-run" title={`${ending.daily ? "TODAYS_LAB" : "RUN"}.TXT - Notepad`} icon="doc">
           <div className="f95-end-body">
             {ending.daily && <div className="f95-end-daily">{ending.daily}</div>}
-            <b className="f95-end-lab">{ending.lab}</b>
+            <b className="f95-end-lab">
+              {ending.lab}
+              {ending.labNumber > 1 && <small className="f95-end-labno"> · Lab #{ending.labNumber}</small>}
+            </b>
             <div className="f95-end-strip" aria-label="The run by era, in squares">
               {ending.strip}
             </div>
@@ -82,13 +86,48 @@ export function Ending({ ending, layout, actions }: SlotPropsMap["Ending"]) {
                 </div>
               ))}
             </dl>
+            {ending.streak && <div className="f95-end-streak">🔥 {ending.streak.text}</div>}
+            {ending.versus && (
+              <div className={`f95-end-versus inset verdict-${ending.versus.verdict}`}>
+                <small>{ending.versus.line}</small>
+                <b>{ending.versus.text}</b>
+              </div>
+            )}
+            <fieldset className="f95-end-next">
+              <legend>What now?</legend>
+              <p>{ending.next.prompt}</p>
+              {ending.refound ? (
+                <>
+                  <p className="f95-end-nextname">
+                    <Ico name="folder" size={18} /> C:\LABS\{ending.refound.name}
+                  </p>
+                  <div className="f95-choices f95-end-perks" role="group" aria-label={`${ending.next.label}: keep one thing`}>
+                    {ending.refound.perks.map((perk, i) => (
+                      <Btn key={perk.id} def={i === 0} onClick={() => actions.foundLab?.(perk.id)} autoFocus={i === 0 && !layout.compact}>
+                        <span className="k">{i + 1}</span>
+                        <span className="tx">
+                          <b>{perk.label}</b>
+                          <small>{perk.blurb}</small>
+                        </span>
+                      </Btn>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                ending.keepPlaying && (
+                  <Btn def onClick={() => actions.keepPlaying()} autoFocus={!layout.compact}>
+                    {ending.next.label}
+                  </Btn>
+                )
+              )}
+            </fieldset>
             <div className="f95-end-buttons">
-              <Btn def onClick={() => actions.shareEnding?.()} disabled={share.status === "making"} autoFocus={!layout.compact}>
+              <Btn onClick={() => actions.shareEnding?.()} disabled={share.status === "making"}>
                 {share.native ? "Share the front page..." : "Save share card..."}
               </Btn>
+              <Btn onClick={() => actions.copyLink?.()}>{share.status === "linked" ? "Link copied!" : "Copy challenge link"}</Btn>
               <Btn onClick={() => actions.copySummary?.()}>{share.status === "copied" ? "Copied!" : "Copy run summary"}</Btn>
-              {ending.keepPlaying && <Btn onClick={() => actions.keepPlaying()}>Keep watching</Btn>}
-              <Btn onClick={() => actions.newLab()}>New lab</Btn>
+              <Btn onClick={() => actions.newLab()}>{ending.refound ? "Start from scratch" : "New lab"}</Btn>
               <Btn onClick={() => actions.playDaily?.()}>Play today's lab</Btn>
             </div>
             {share.card && <img className="f95-end-card inset" src={share.card} alt="The share card" />}
@@ -131,5 +170,106 @@ export function Takeover({ takeover }: SlotPropsMap["Takeover"]) {
         </div>
       )}
     </>
+  );
+}
+
+/** The Memo (FLT-57), in 1995: a file copy that takes five days, then a late edition in Internet Exploder. */
+export function Memo({ memo, layout, actions }: SlotPropsMap["Memo"]) {
+  const extra = memo.phase === "extra" ? memo.extra : null;
+  useAutoPause(actions, "memo-extra", !!extra);
+  if (!extra) {
+    return (
+      <Win className={`f95-memo-copy ${memo.daysLeft <= 1 ? "soon" : ""}`} title="Copying..." icon="doc" role="status" label={`${memo.title}. ${memo.line}`}>
+        <div className="f95-memo-body">
+          <div className="f95-memo-fly" aria-hidden>
+            <Ico name="folder" size={24} />
+            <span className="f95-memo-paper">
+              <Ico name="doc" size={18} />
+            </span>
+            <Ico name="folder" size={24} />
+          </div>
+          <p>
+            MEMO.DOC <small>From 'Leadership' to 'Your desk'</small>
+          </p>
+          <Blocks value={memo.progress} label={memo.title} tone={memo.daysLeft <= 1 ? "red" : "navy"} />
+          <p className="f95-memo-line">{memo.line}</p>
+          <small className="f95-memo-left">{memo.daysLeft === 0 ? "0 days remaining. It's here." : `${memo.title.replace("The Memo · ", "")} remaining`}</small>
+        </div>
+      </Win>
+    );
+  }
+  return (
+    <div className="f95-layer f95-dim">
+      <Win className={`f95-ie f95-memo-extra ${layout.compact ? "compact" : ""}`} title="The Frontier Times — LATE EDITION — Internet Exploder 3.0" icon="globe" role="dialog" label={extra.headline} buttons={[{ g: "close", label: "Close", onClick: () => actions.dismissMemo?.(memo.key) }]}>
+        <article className="f95-paper inset">
+          <div className="eyebrow">
+            <span>{extra.kicker}</span>
+            <span>The box marked {extra.choice.toUpperCase()}</span>
+            <span>Late edition</span>
+          </div>
+          <h1>{extra.masthead}</h1>
+          <hr />
+          <span className="sec">{extra.kicker}</span>
+          <h2>{extra.headline}</h2>
+          <p>{extra.deck}</p>
+          {extra.reactions.length > 0 && (
+            <>
+              <hr />
+              <span className="sec">Reactions from campus</span>
+              <div className="f95-memo-quotes">
+                {extra.reactions.map((r) => (
+                  <blockquote key={r.name}>
+                    <p>“{r.text}”</p>
+                    <cite>
+                      {r.name}, {r.role}
+                    </cite>
+                  </blockquote>
+                ))}
+              </div>
+            </>
+          )}
+          <hr />
+          <span className="sec">From now on</span>
+          <ul className="f95-memo-effects">
+            {extra.effects.map((e) => (
+              <li key={e}>{e}</li>
+            ))}
+          </ul>
+        </article>
+        <div className="f95-row">
+          <Btn def onClick={() => actions.dismissMemo?.(memo.key)} autoFocus>
+            Back to work
+          </Btn>
+        </div>
+      </Win>
+    </div>
+  );
+}
+
+/** A friend's challenge (FLT-57): a message box, the way 1995 delivered bad news about your friends. */
+export function Challenge({ challenge, layout, actions }: SlotPropsMap["Challenge"]) {
+  useAutoPause(actions, "challenge", true);
+  return (
+    <div className="f95-layer f95-dim">
+      <Win className={`f95-msgbox f95-challenge ${layout.compact ? "compact" : ""}`} title={challenge.daily ? `Challenge - ${challenge.daily}` : "Challenge from a friend"} icon="info" role="dialog" label={`${challenge.line} ${challenge.ask}`}>
+        <div className="f95-msgbody">
+          <Ico name="info" size={36} />
+          <div>
+            <p>{challenge.line}</p>
+            <h2>{challenge.ask}</h2>
+            <div className={`f95-challenge-result tone-${challenge.tone}`}>
+              <span className="f95-end-stamp static">{challenge.ending}</span>
+              <small>{challenge.stats}</small>
+            </div>
+            <small className="f95-challenge-note">Same seed, same campus. Nobody's name in the link.</small>
+          </div>
+        </div>
+        <div className="f95-row">
+          <Btn def onClick={() => actions.dismissChallenge?.()} autoFocus>
+            {challenge.cta}
+          </Btn>
+        </div>
+      </Win>
+    </div>
   );
 }

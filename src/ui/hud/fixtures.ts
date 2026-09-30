@@ -106,6 +106,8 @@ export interface FixtureOptions {
   width?: number;
   height?: number;
   skins?: Partial<SkinPickerVM>;
+  /** FLT-57: a streak, a friend's challenge (and whether its banner is up), the Memo extra already read. */
+  social?: Partial<NonNullable<HudInput["social"]>>;
 }
 
 export function fixtureSnapshot(o: FixtureOptions = {}): Snapshot {
@@ -155,5 +157,6 @@ export function fixtureInput(o: FixtureOptions = {}): HudInput {
     skins: { ...NO_SKINS, ...o.skins },
     leapfrog: lf?.motion,
     viewport: { width: o.width ?? 1440, height: o.height ?? 900 },
+    social: { streak: 0, challenge: null, challengeOpen: false, memoSeen: null, linkBase: "https://frontier.example/", ...o.social },
   };
 }

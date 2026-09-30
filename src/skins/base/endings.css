@@ -169,3 +169,88 @@ body.ending-beige canvas { filter: sepia(0.55) saturate(0.55) brightness(1.04); 
   transform: rotate(-6deg);
   pointer-events: none;
 }
+
+/* FLT-57: what now (a new lab and its perks, or time going on), the streak, a friend's result, The Memo, the challenge. */
+.ending-labno { display: block; margin-top: 2px; font: 800 12px var(--flt-font-ui); letter-spacing: 1px; text-transform: uppercase; color: var(--flt-color-textDim); }
+.ending-social { display: grid; gap: 6px; }
+.ending-streak {
+  justify-self: start;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #ff8a1f22;
+  border: 1px solid #ff8a1f88;
+  font: 900 14px var(--flt-font-ui);
+  animation: streak-flicker 1.6s ease-in-out infinite alternate;
+}
+@keyframes streak-flicker { to { box-shadow: 0 0 12px #ff8a1f66; } }
+.ending-versus { margin: 0; display: grid; gap: 2px; padding: 8px 10px; border-radius: 8px; background: var(--flt-color-inset); }
+.ending-versus small { color: var(--flt-color-textDim); }
+.ending-versus.verdict-win b { color: var(--flt-color-good); }
+.ending-versus.verdict-lose b { color: var(--flt-color-bad); }
+.ending-next { display: grid; gap: 6px; padding: 10px; border-radius: 10px; border: 2px dashed var(--flt-color-accent); }
+.ending-next p { margin: 0; font-size: 14px; }
+.ending-next-name { font: 900 16px/1.15 var(--flt-font-display); }
+.ending-next-hint { color: var(--flt-color-textDim); }
+.ending-perks { display: grid; gap: 6px; }
+.ending-perks .choice, .ending-next > .choice { width: 100%; }
+.ending-perks .choice { display: grid; gap: 2px; text-align: left; }
+.ending-perks .choice small { font-size: 12px; opacity: 0.8; }
+
+.memo-countdown {
+  position: fixed;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 55;
+  display: grid;
+  justify-items: center;
+  gap: 1px;
+  max-width: calc(100vw - 16px);
+  padding: 6px 16px;
+  border-radius: 12px;
+  background: #f6efdf;
+  color: #29251d;
+  border: 2px solid #29251d;
+  box-shadow: 0 6px 20px #0005;
+  pointer-events: none;
+  text-align: center;
+  animation: memo-drop 0.5s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.memo-countdown b { font: 900 15px Georgia, serif; }
+.memo-countdown small { font: italic 12px Georgia, serif; opacity: 0.8; }
+.memo-countdown.soon { border-color: #b0302a; animation: memo-drop 0.5s cubic-bezier(0.3, 1.6, 0.5, 1), memo-shake 2.4s 0.5s infinite; }
+@keyframes memo-drop { from { transform: translate(-50%, -60px); } }
+@keyframes memo-shake { 0%, 90%, 100% { rotate: 0deg; } 93% { rotate: -2deg; } 96% { rotate: 2deg; } }
+.memo-backdrop { z-index: 68; background: #1d1a14b8; overflow: auto; }
+.memo-extra { position: relative; width: min(640px, 100%); max-height: calc(100dvh - 24px); overflow: auto; color: #29251d; box-shadow: 0 24px 80px #0008; animation: ending-press 0.7s cubic-bezier(0.2, 1.3, 0.4, 1); }
+.memo-extra h2 { font: 900 clamp(24px, 3vw, 34px)/1.05 Georgia, serif; margin: 6px 0; }
+.memo-extra-flag { position: absolute; top: 14px; right: -34px; padding: 4px 40px; background: #b0302a; color: #fff; font: 900 12px var(--flt-font-ui); letter-spacing: 2px; text-transform: uppercase; rotate: 35deg; }
+.memo-reactions { display: grid; gap: 8px; margin: 10px 0; }
+.memo-reactions blockquote { margin: 0; padding-left: 10px; border-left: 3px solid #8b7d66; }
+.memo-reactions blockquote p { margin: 0; font: italic 15px Georgia, serif; }
+.memo-reactions cite { font: 700 11px var(--flt-font-ui); font-style: normal; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; }
+.memo-effects ul { margin: 4px 0 12px; padding-left: 18px; }
+.memo-extra > .choice { width: 100%; }
+
+.challenge-backdrop { z-index: 69; background: #1d1a14a0; }
+.challenge {
+  display: grid;
+  gap: 8px;
+  width: min(420px, 100%);
+  padding: 18px;
+  border-radius: 14px;
+  background: var(--flt-color-panel);
+  color: var(--flt-color-text);
+  border: var(--flt-border-width) var(--flt-border-style) var(--flt-color-line);
+  box-shadow: 0 16px 40px #0006;
+  text-align: center;
+  animation: ending-press 0.6s cubic-bezier(0.2, 1.3, 0.4, 1);
+}
+.challenge h2 { margin: 0; font: 900 32px var(--flt-font-display); }
+.challenge-line { margin: 0; font-size: 16px; }
+.challenge-result { display: grid; justify-items: center; gap: 4px; }
+.challenge-stamp { padding: 4px 14px; border: 4px solid #b0302a; border-radius: 6px; color: #b0302a; font: 900 17px Nunito, sans-serif; text-transform: uppercase; letter-spacing: 1px; rotate: -6deg; }
+.challenge.tone-good .challenge-stamp { color: #1f7a45; border-color: #1f7a45; }
+.challenge.tone-neutral .challenge-stamp { color: #2f5d8c; border-color: #2f5d8c; }
+.challenge-note { margin: 0; font-size: 12px; color: var(--flt-color-textDim); }
+.challenge .choice { width: 100%; }

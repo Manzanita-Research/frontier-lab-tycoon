@@ -36,6 +36,7 @@
             "frontPage": { "type": "final" }
           },
           "next": { "action": "keepPlaying", "label": "Keep regulating", "prompt": "You run the Office now. Every lab answers to you, especially yours." },
+          "brag": "was Captured",
           "paper": {
             "kicker": "Regulation",
             "headline": "{lab} Founder Named Chief Regulator; Promises To Be 'Extremely Fair' To {lab}",
@@ -79,6 +80,7 @@
             "frontPage": { "type": "final" }
           },
           "next": { "action": "refound", "label": "Found a new lab", "prompt": "Macrohard kept the campus. You kept the fleece, and one good idea." },
+          "brag": "was Acqui-hired",
           "paper": {
             "kicker": "Deals",
             "headline": "Macrohard Acqui-Hires {lab} For Less Than Its Kombucha Tab",
@@ -139,6 +141,7 @@
             "frontPage": { "type": "final" }
           },
           "next": { "action": "keepPlaying", "label": "Watch {manager} work", "prompt": "{manager} has it from here. You're welcome to watch." },
+          "brag": "was taken over by its own model",
           "paper": {
             "kicker": "Exclusive",
             "headline": "{lab} Wins The Race; The Winner Declines To Give It Back",
@@ -182,6 +185,7 @@
             "frontPage": { "type": "final" }
           },
           "next": { "action": "keepPlaying", "label": "Keep the lights on", "prompt": "Safe, audited and beige. It runs itself now. Nobody minds." },
+          "brag": "became a Regulated Utility",
           "paper": {
             "kicker": "Page 14",
             "headline": "Lab Achieves Safety; Nobody Notices",
@@ -220,6 +224,7 @@
             "frontPage": { "type": "final" }
           },
           "next": { "action": "refound", "label": "Found a new lab", "prompt": "The NFTs didn't sell. The founder still has ideas." },
+          "brag": "pivoted to NFTs",
           "paper": {
             "kicker": "Markets",
             "headline": "{lab} Pivots To Selling AI-Generated NFTs Of Its Own GPUs",

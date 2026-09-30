@@ -3,7 +3,7 @@
 import type { ComponentType, ReactNode } from "react";
 import type {
   ArenaVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, EraCardVM, EventVM, HudActions, HudVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
-  EndingVM, TakeoverVM,
+  EndingVM, TakeoverVM, MemoVM, ChallengeVM,
   NewsroomVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StatsVM, ThoughtRowVM, TickerItemVM,
   StaffVM, TeaserVM, ProgressVM, ToastVM, TrainingVM, UnlockCardVM, VisibleVM, HelpVM,
 } from "../ui/hud/types";
@@ -46,6 +46,8 @@ export const SLOT_NAMES = [
   "NewsArrival",
   "NewsRoom",
   "Mixer",
+  "Memo",
+  "Challenge",
 ] as const;
 export type SlotName = (typeof SLOT_NAMES)[number];
 
@@ -118,6 +120,10 @@ export interface SlotPropsMap {
   Ending: { ending: EndingVM; layout: LayoutVM; actions: HudActions };
   /** The Takeover while it plays: "Frontier Lab Tycoon (managed by Frontier-9)", and its last card (`takeover.thanks`). Not modal. */
   Takeover: { takeover: TakeoverVM; layout: LayoutVM; actions: HudActions };
+  /** The Memo (FLT-57): `memo.phase` "coming" is a small countdown (not modal); "extra" is the extra edition (modal, holds time). */
+  Memo: { memo: MemoVM; layout: LayoutVM; actions: HudActions };
+  /** A friend's challenge (FLT-57): "Your friend's lab was Captured on day 212. Beat it?" Modal, holds time; `actions.dismissChallenge()`. */
+  Challenge: { challenge: ChallengeVM; layout: LayoutVM; actions: HudActions };
   /** The News Room button is earned (`visible.news`); mute, the mixer and the skin picker are not. */
   NewsControls: { newsroom: NewsroomVM; sound: SoundVM; skins: SkinPickerVM; visible?: VisibleVM; actions: HudActions };
   NewsArrival: { arrival: NonNullable<NewsroomVM["arrival"]>; actions: HudActions };

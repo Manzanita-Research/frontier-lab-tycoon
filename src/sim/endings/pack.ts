@@ -42,6 +42,8 @@ const EndingDef = Schema.Struct({
   initial: S,
   states: Schema.Record(S, ArcNode),
   next: Next,
+  /** How a friend's challenge link puts it (FLT-57): "Your friend's lab {brag} on day 212. Beat it?" */
+  brag: S,
   paper: Paper,
 });
 export type EndingDef = typeof EndingDef.Type;

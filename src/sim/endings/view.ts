@@ -59,6 +59,8 @@ export interface EndingsView {
   stats: RunStats;
   /** Today's lab: "Sep 30, 2026", or null for an ordinary seed. */
   daily: string | null;
+  /** Today's lab's date key ("2026-09-30"): what a friend link pins. */
+  dailyKey: string | null;
   seed: number;
   /** One square per stretch of the run, coloured by era, like the thing everyone pastes into the group chat. */
   strip: string;
@@ -157,6 +159,7 @@ export function endingsView(s: GameState): EndingsView | null {
     placed: e.autopilot.placed,
     stats,
     daily,
+    dailyKey: e.daily,
     seed: s.seed,
     strip,
     summary,
