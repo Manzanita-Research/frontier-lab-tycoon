@@ -1,4 +1,7 @@
 // Everything in GameState is plain and JSON-serializable.
+import type { CoachStored } from "./machines/coach";
+import type { ProgressionStored } from "./machines/progression";
+import type { ProgressionLevel, UnlockCard } from "../content/progression";
 import type { BuildingKind } from "../content/buildings";
 import type { CollusionState, Investigation } from "./collusion/state";
 import type { NeedKey } from "../content/needs";
@@ -13,6 +16,8 @@ import type { RaceState } from "./race/state";
 import type { StaffStored } from "./machines/staff";
 import type { TrainingStored } from "./machines/training";
 import type { WalkerStored } from "./machines/walker";
+import type { TutorialStored } from "./machines/tutorial";
+import type { GuardrailsStored } from "./machines/guardrails";
 
 export type { BuildingKind, NeedKey };
 export type WalkerKind = "researcher" | "agent" | "visitor" | "protester";
@@ -222,6 +227,10 @@ export interface Ledger {
 }
 
 export interface GameState {
+  coach?: CoachStored;
+  progression?: ProgressionStored;
+  progressionContent?: readonly ProgressionLevel[];
+  unlockCards?: UnlockCard[];
   seed: number;
   rngState: number;
   tick: number;
@@ -280,6 +289,10 @@ export interface GameState {
   slop: number[];
   /** The payroll: Janitor Bots, SREs, Comms Reps and Security. */
   staff: Staffer[];
+  /** FLT-16: absent on older saves; those keep playing without onboarding. */
+  tutorial?: TutorialStored;
+  /** Additive save field: pre-purchase confirmations and persistent entrance/runway warnings. */
+  guardrails?: GuardrailsStored;
   /** Disasters (FLT-17): the random-disaster setting, the ones in play, timed effects, and the cues the renderer reads. */
   disasters: DisastersState;
   /** FLT-18: opt-in Swarm pack; absent preserves legacy saves and baseline runs. */

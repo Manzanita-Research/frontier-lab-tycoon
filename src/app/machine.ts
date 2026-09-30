@@ -17,7 +17,8 @@ import type { Snapshot, Speed, Tool, UiSelection, UiToast } from "./hud";
 import { gateToasts, newGate, type NoticeGate } from "./notices";
 import { Sim, type SyncReport } from "./sim";
 
-export const TICKS_PER_SECOND = 10;
+/** Twenty sim ticks per day, six real seconds at 1×. */
+export const TICKS_PER_SECOND = 20 / 6;
 export const MAX_CATCHUP_TICKS = 40;
 export const SNAPSHOT_MS = 200;
 export const TOAST_MS = 5200;
@@ -53,6 +54,8 @@ export const AppContext = Schema.Struct({
   highlight: Schema.NullOr(Schema.String),
   /** The staffer whose patrol zone is being painted (their id), if any: dragging on the map paints it. */
   zone: Schema.NullOr(Schema.Number),
+  /** Independently owned menus: closing one cannot resume time beneath another. */
+  overlays: opaque<readonly string[]>(),
 });
 export type AppContext = typeof AppContext.Type;
 
@@ -73,7 +76,18 @@ const outcomeHeld = (c: AppContext) => c.outcome !== "playing" && !c.outcomeDism
 export function phaseFor(c: AppContext): Phase {
   if (c.event) return ".eventOpen";
   if (outcomeHeld(c)) return ".gameOver";
-  return c.speed === 0 ? ".playing.paused" : ".playing.running";
+  return c.speed === 0 || autoPaused(c) ? ".playing.paused" : ".playing.running";
+}
+
+export const autoPaused = (c: AppContext): boolean => c.snap.firstBuildPending || !!c.snap.pendingConfirm;
+
+/** Why time is standing still, for the "Paused" indicator: null while the clock runs. A card beats the pause button, which beats the auto-pauses. */
+export type PauseReason = "card" | "player" | "tutorial" | "build" | "menu" | "inspector";
+export function pauseReasonOf(c: AppContext): PauseReason | null {
+  if (c.event || outcomeHeld(c) || c.snap.pendingConfirm) return "card";
+  if (c.speed === 0) return "player";
+  if (c.snap.firstBuildPending) return "build";
+  return null;
 }
 
 /** The same words twice are one toast (the newer replaces the older); the HUD shows only the newest, so keep just a few. */
@@ -106,6 +120,7 @@ export const appMachine = setupEffect({
       HIGHLIGHT: Schema.Struct({ key: Schema.NullOr(Schema.String) }),
       /** Start (or stop, with null) painting a staffer's patrol zone. */
       SET_ZONE: Schema.Struct({ id: Schema.NullOr(Schema.Number) }),
+      SET_OVERLAY: Schema.Struct({ id: Schema.String, open: Schema.Boolean }),
       DISMISS_TOAST: Schema.Struct({ id: Schema.Number }),
       TOAST_EXPIRED: Schema.Struct({ id: Schema.Number }),
     },
@@ -164,6 +179,7 @@ export const appMachine = setupEffect({
     follow: false,
     highlight: null,
     zone: null,
+    overlays: [],
   }),
   invoke: { src: "frameLoop" },
   initial: "playing",
@@ -173,7 +189,7 @@ export const appMachine = setupEffect({
       states: {
         running: {
           // Booted with the speed at 0 (a `?speed=0` link): start paused.
-          always: ({ context }) => (context.speed === 0 ? { target: "paused" } : undefined),
+          always: ({ context }) => (context.speed === 0 || autoPaused(context) ? { target: "paused" } : undefined),
           on: {
             FRAME: (args, enq) => {
               const { context, event, actions } = args;
@@ -234,23 +250,38 @@ export const appMachine = setupEffect({
       return { context: next, target: phaseFor(next) };
     },
     SET_SPEED: ({ context, event }) => {
-      const next = { ...context, speed: event.speed };
+      // The coach asked for ▶▶ while the first model trains (FLT-58).
+      const saw = event.speed > 1 && context.snap.coach?.id === "speed";
+      const next = { ...context, speed: event.speed, queue: saw ? [...context.queue, { type: "coachSaw", what: "speed" } as const] : context.queue };
       return { context: next, target: phaseFor(next) };
     },
     TOGGLE_PAUSE: ({ context }) => {
       const next = { ...context, speed: (context.speed === 0 ? 1 : 0) as Speed };
       return { context: next, target: phaseFor(next) };
     },
-    SET_TOOL: ({ context, event }) => ({ context: { ...context, tool: context.tool === event.tool ? null : event.tool, hover: null, zone: null } }),
+    SET_TOOL: ({ context, event }) => {
+      const tool = context.tool === event.tool ? null : event.tool;
+      const queue: readonly Command[] = tool ? [...context.queue, { type: "buildPanelOpened" }] : context.queue;
+      return { context: { ...context, tool, hover: null, zone: null, queue, speed: context.snap.firstBuildPending && tool ? 1 : context.speed, lastPublishAt: 0 } };
+    },
+    SET_OVERLAY: ({ context, event }) => {
+      const overlays = context.overlays.filter((id) => id !== event.id);
+      if (event.open) overlays.push(event.id);
+      const build = event.open && /start|build|menu/.test(event.id);
+      const queue: readonly Command[] = build ? [...context.queue, { type: "buildPanelOpened" }] : context.queue;
+      const next = { ...context, overlays, queue, speed: build && context.snap.firstBuildPending ? 1 as Speed : context.speed };
+      return { context: next, target: phaseFor(next) };
+    },
     SET_ZONE: ({ context, event }) => ({ context: { ...context, zone: event.id === context.zone ? null : event.id, tool: null, hover: null } }),
     SET_HOVER: ({ context, event }) => {
       if (context.hover?.x === event.hover?.x && context.hover?.z === event.hover?.z) return;
       return { context: { ...context, hover: event.hover } };
     },
     // A player command publishes the snapshot on the very next frame, so a hire or a painted tile shows straight away.
-    COMMAND: ({ context, event }) => ({ context: { ...context, queue: [...context.queue, event.command], lastPublishAt: 0 } }),
+    COMMAND: ({ context, event }) => ({ context: { ...context, speed: event.command.type === "buildPanelOpened" && context.snap.firstBuildPending ? 1 : context.speed, queue: [...context.queue, event.command], lastPublishAt: 0 } }),
     CHOOSE: ({ context, event }) => {
-      if (!context.event) return;
+      // A greyed-out choice (a bid you can't afford) can't be taken by key either.
+      if (!context.event || context.snap.eventBlocked?.[event.choiceIndex]) return;
       const command: Command = { type: "chooseEvent", eventId: context.event.id, choiceIndex: event.choiceIndex };
       return { context: { ...context, queue: [...context.queue, command] } };
     },
@@ -259,13 +290,18 @@ export const appMachine = setupEffect({
       return { context: next, target: phaseFor(next) };
     },
     // Selection changes reset the publish timer, so the next frame publishes and the card opens straight away.
-    SELECT: ({ context, event }) => ({ context: { ...context, selected: event.id, follow: event.id === context.selected ? context.follow : false, lastPublishAt: 0 } }),
+    SELECT: ({ context, event }) => {
+      // ...and then to read somebody's mind: anybody's card counts (the sim checks it is a person, not a building).
+      const queue: readonly Command[] = event.id !== null && context.snap.coach?.id === "peek" ? [...context.queue, { type: "coachSaw", what: "mind", id: event.id }] : context.queue;
+      const next = { ...context, selected: event.id, follow: event.id === context.selected ? context.follow : false, lastPublishAt: 0, acc: 0, queue };
+      return { context: next, target: phaseFor(next) };
+    },
     SET_FOLLOW: ({ context, event }) => (context.selected === null ? undefined : { context: { ...context, follow: event.follow, lastPublishAt: 0 } }),
     HIGHLIGHT: ({ context, event }) => ({ context: { ...context, highlight: event.key === context.highlight ? null : event.key, lastPublishAt: 0 } }),
     NEW_LAB: (args, enq) => {
       const { context, actions } = args;
       enq(actions.newLab, args);
-      const next = { ...context, queue: [], acc: 0, toasts: [], gate: newGate(), outcomeDismissed: false, speed: 1 as Speed, tool: null, hover: null, selected: null, follow: false, highlight: null, zone: null };
+      const next = { ...context, queue: [], acc: 0, toasts: [], gate: newGate(), outcomeDismissed: false, speed: 1 as Speed, tool: null, hover: null, selected: null, follow: false, highlight: null, zone: null, overlays: [] };
       return { context: next, target: ".playing.running" };
     },
     TOAST: ({ context, event }, enq) => {

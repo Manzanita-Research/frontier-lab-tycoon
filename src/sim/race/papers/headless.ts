@@ -4,7 +4,7 @@ import { openEventOf } from "../../events";
 import { outcomeOf } from "../../goals";
 import { staffOf } from "../../staff";
 import { slopStats } from "../../slop";
-import { createInitialState } from "../../state";
+import { createTestCampus as createInitialState } from "../../testkit";
 import { answer, countOf, findSpot, layPaths } from "../../testkit";
 import { applyNow, tick, TICKS_PER_DAY } from "../../tick";
 import type { Command } from "../../commands";

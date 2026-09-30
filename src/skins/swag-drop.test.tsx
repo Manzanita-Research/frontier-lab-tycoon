@@ -7,6 +7,7 @@ import type { HudActions } from "../ui/hud/types";
 import { hudViewModel } from "../ui/hud/vm";
 import { SkinProvider } from "./context";
 import { prepareSkin } from "./registry";
+import { Deck } from "./swag-drop/keys";
 
 const actions = new Proxy({}, { get: () => () => undefined }) as HudActions;
 const world = fixtureWorld();
@@ -55,12 +56,18 @@ describe("Swag Drop", () => {
 
   it("carries the coach-mark hooks the playable v1 spotlights (a no-op for looks)", async () => {
     const { html, vm } = await render({});
+    const { skin } = await prepareSkin("swag-drop");
     expect(html).toContain('data-coach="start"');
     expect(html).toContain('data-coach="training"');
     expect(html).toContain('data-coach="stat:runway"');
     expect(html).toContain('data-coach="goals"');
-    // One `build:<kind>` per item the VM gives (the palette is filtered by unlock level, so nothing is hard-coded).
-    for (const it of vm.buildItems) expect(html).toContain(`data-coach="build:${it.kind}"`);
+    // One `build:<kind>` per item the VM gives, in the open deck (the palette is filtered by unlock level, so nothing is hard-coded).
+    const deck = renderToString(
+      <SkinProvider skin={skin}>
+        <Deck items={vm.buildItems} teasers={[]} actions={actions} done={() => {}} />
+      </SkinProvider>,
+    );
+    for (const it of vm.buildItems) expect(deck).toContain(`data-coach="build:${it.kind}"`);
   });
 
   it("stamps the event memo by its tone", async () => {

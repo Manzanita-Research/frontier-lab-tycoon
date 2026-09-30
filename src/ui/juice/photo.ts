@@ -21,6 +21,7 @@ export function setPhoto(on: boolean) {
   if (on === isPhoto()) return;
   registry.set(photoAtom, on);
   fx.photo = on;
+  send({ type: "SET_OVERLAY", id: "photo", open: on });
   document.body.classList.toggle("photo", on);
   if (on) {
     cinema.cancel();

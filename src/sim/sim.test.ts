@@ -5,7 +5,7 @@ import { dailyEconomy } from "./economy";
 import { entrances, getReach, isReachable, isPathTile } from "./pathfind";
 import { createRng } from "./rng";
 import { createInitialState } from "./state";
-import { answer } from "./testkit";
+import { answer, createTestCampus } from "./testkit";
 import { TICKS_PER_DAY, tick } from "./tick";
 import { dailyTraining } from "./training";
 import type { GameState } from "./types";
@@ -13,22 +13,22 @@ import type { GameState } from "./types";
 const gatewayAt = (s: GameState) => s.buildings.find((b) => b.kind === "gateway")!;
 
 function withGateway(seed = 1): GameState {
-  const s = createInitialState(seed);
+  const s = createTestCampus(seed);
   tick(s, [{ type: "placeBuilding", kind: "gateway", x: 7, z: 17 }]);
   return s;
 }
 
 describe("initial state", () => {
-  it("starts alive: buildings connected, a crowd on the paths, run 40% done", () => {
+  it("starts quietly: connected compute, three researchers, one agent and no visitors or hall", () => {
     const s = createInitialState(1);
     expect(s.cash).toBe(5_000_000);
     expect(s.capability).toBe(10);
-    expect(s.walkers.filter((w) => w.kind === "researcher")).toHaveLength(8 + 3);
-    expect(s.walkers.filter((w) => w.kind === "agent")).toHaveLength(6 + 5);
-    expect(s.walkers.filter((w) => w.kind === "visitor")).toHaveLength(18);
+    expect(s.walkers.filter((w) => w.kind === "researcher")).toHaveLength(3);
+    expect(s.walkers.filter((w) => w.kind === "agent")).toHaveLength(1);
+    expect(s.walkers.filter((w) => w.kind === "visitor")).toHaveLength(0);
     expect(s.walkers.filter((w) => w.kind === "protester")).toHaveLength(0);
-    expect(s.training.context.progress / s.training.context.cost).toBeCloseTo(0.4);
-    expect(s.buildings.map((b) => b.kind).sort()).toEqual(["cluster", "hall", "kombucha"]);
+    expect(s.training.context.progress / s.training.context.cost).toBe(0);
+    expect(s.buildings.map((b) => b.kind).sort()).toEqual(["cluster"]);
     for (const b of s.buildings) expect(isReachable(s, b)).toBe(true);
     expect(s.thoughts.length).toBeGreaterThan(0);
   });
@@ -36,11 +36,11 @@ describe("initial state", () => {
 
 describe("placement rules", () => {
   it("accepts a gateway next to a path", () => {
-    expect(canPlace(createInitialState(1), "gateway", 7, 17)).toEqual({ ok: true });
+    expect(canPlace(createTestCampus(1), "gateway", 7, 17)).toEqual({ ok: true });
   });
 
   it("rejects out of bounds, overlaps, the gate and buildings with no path", () => {
-    const s = createInitialState(1);
+    const s = createTestCampus(1);
     expect(canPlace(s, "gateway", 23, 23)).toEqual({ ok: false, reason: "Out of bounds" });
     expect(canPlace(s, "gateway", -1, 5)).toEqual({ ok: false, reason: "Out of bounds" });
     expect(canPlace(s, "kombucha", 8, 11)).toEqual({ ok: false, reason: "Something's already there" });
@@ -52,7 +52,7 @@ describe("placement rules", () => {
   });
 
   it("rejects what you can't afford", () => {
-    const s = createInitialState(1);
+    const s = createTestCampus(1);
     s.cash = BUILDINGS.gateway.price - 1;
     expect(canPlace(s, "gateway", 7, 17)).toEqual({ ok: false, reason: "Not enough cash" });
     s.cash = PATH_PRICE - 1;
@@ -60,7 +60,7 @@ describe("placement rules", () => {
   });
 
   it("charges for placement, bumps the version, and refunds 50% on bulldoze", () => {
-    const s = createInitialState(1);
+    const s = createTestCampus(1);
     const v = s.version;
     const hype = s.hype;
     tick(s, [{ type: "placeBuilding", kind: "gateway", x: 7, z: 17 }]);
@@ -74,7 +74,7 @@ describe("placement rules", () => {
   });
 
   it("paints and bulldozes paths", () => {
-    const s = createInitialState(1);
+    const s = createTestCampus(1);
     applyCommands(s, [{ type: "placePath", x: 5, z: 16 }], createRng(1));
     expect(isPathTile(s, 5, 16)).toBe(true);
     applyCommands(s, [{ type: "bulldoze", x: 5, z: 16 }], createRng(1));
@@ -84,7 +84,7 @@ describe("placement rules", () => {
 
 describe("reachability", () => {
   it("finds buildings connected to the gate and loses them when the path is cut", () => {
-    const s = createInitialState(1);
+    const s = createTestCampus(1);
     const bar = s.buildings.find((b) => b.kind === "kombucha")!;
     expect(isReachable(s, bar)).toBe(true);
     expect(entrances(s, bar).length).toBeGreaterThan(0);
@@ -147,14 +147,14 @@ describe("training", () => {
     expect(s.training.context.progress).toBe(p);
   });
 
-  it("finishes run #1 within a minute of real time at 1x (10 ticks per second)", () => {
+  it("finishes run #1 well inside the first ten minutes at 1×", () => {
     const s = withGateway();
     let ticks = 0;
     while (s.models.length === 0 && ticks < 2000) {
       tick(s);
       ticks++;
     }
-    expect(ticks).toBeLessThan(600);
+    expect(ticks).toBeLessThan(2000);
   });
 });
 

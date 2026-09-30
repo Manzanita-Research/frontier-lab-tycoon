@@ -9,10 +9,11 @@ import { outcomeOf } from "./goals";
 import { eraOfState } from "./race/race";
 import { slopStats } from "./slop";
 import { staffOf } from "./staff";
-import { createInitialState } from "./state";
+import { createTestCampus as createInitialState } from "./testkit";
 import { countOf, findSpot, layPaths } from "./testkit";
 import { TICKS_PER_DAY, tick } from "./tick";
 import type { GameState } from "./types";
+import { pendingConfirmOf } from "./guardrails";
 
 const RESERVE = 400_000;
 
@@ -54,7 +55,13 @@ export function playBot(seed: number, opts: { halls?: number; days?: number; kee
   for (let i = 0; i < maxTicks && outcomeOf(s) !== "lost"; i++) {
     const cmds: Command[] = [];
     const open = openEventOf(s);
-    if (open) {
+    // This established growth bot approves its planned spending while preserving the cash reserve.
+    // The separate first-run pacing bot declines confirmations rather than playing this aggressively.
+    if (pendingConfirmOf(s)) {
+      const pending = pendingConfirmOf(s)!;
+      cmds.push(s.cash >= pending.cost + RESERVE ? { ...pending.command, confirmed: true } : { type: "cancelConfirm" });
+    }
+    else if (open) {
       cards[open.id] = (cards[open.id] ?? 0) + 1;
       cmds.push({ type: "chooseEvent", eventId: open.id, choiceIndex: choice(s, open.id) });
     } else if (i % (TICKS_PER_DAY * 4) === 2) {
@@ -140,7 +147,7 @@ describe("a reasonable player", () => {
     const r = playBot(1, { keepPlaying: true, days: SCENARIO.deadlineDay + 40 });
     expect(r.eraDays[3]).not.toBeNull();
     expect(r.eraDays[3]!).toBeLessThan(SCENARIO.deadlineDay + 40);
-  });
+  }, 15_000); // Functional multi-year replay on the shared 1-vCPU builder; perf budgets are separate.
 });
 
 describe("an absent player", () => {

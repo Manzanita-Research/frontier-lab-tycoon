@@ -5,6 +5,7 @@ import { useRef } from "react";
 import { SkinProvider } from "../../skins/context";
 import { hudActions } from "./actions";
 import { BubbleLayer } from "./BubbleLayer";
+import { CoachLayer } from "./CoachLayer";
 import { loadedSkinAtom } from "./state";
 import { Docked, Modals, PhotoLayer } from "./tree";
 import { useHudEffects } from "./useHudEffects";
@@ -31,6 +32,7 @@ function Hud({ source }: { source: AppSource }) {
       <div className="hud-host">
         <Docked vm={vm} actions={hudActions} />
         <Modals vm={vm} actions={hudActions} />
+        <CoachLayer vm={vm} actions={hudActions} />
       </div>
       <PhotoLayer vm={vm} actions={hudActions} />
     </SkinProvider>

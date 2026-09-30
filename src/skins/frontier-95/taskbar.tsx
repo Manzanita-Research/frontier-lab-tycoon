@@ -1,7 +1,7 @@
 // The taskbar: Start (and its menu), quick-launch, the news tape, and the tray (speed, news, sound, camera, clock).
 import { useEffect, useRef, useState } from "react";
-import { Dialog, Marquee } from "../kit";
-import { useT } from "../context";
+import { ALL_VISIBLE, Dialog, Marquee } from "../kit";
+import { useCoach, useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import { Flag, Ico } from "./icons";
 import { Btn, Win } from "./parts";
@@ -69,9 +69,16 @@ function ShutDown({ lab, onClose }: { lab: string; onClose: () => void }) {
 }
 
 /** Start button, its menu (every building, Bulldoze…, Settings, Shut Down Lab…), quick-launch, and the tool in hand. */
-export function BuildBar({ items, tip, actions }: SlotPropsMap["BuildBar"]) {
+export function BuildBar({ items, tip, teasers = [], actions }: SlotPropsMap["BuildBar"]) {
   const t = useT();
-  const [open, setOpen] = useState(false);
+  const coach = useCoach();
+  const [openRaw, setOpenRaw] = useState(false);
+  const open = openRaw;
+  // The first coach step waits for the menu to open, so say so each time it does.
+  const setOpen = (next: boolean) => {
+    setOpenRaw(next);
+    if (next) actions.buildPanel(true);
+  };
   const [settings, setSettings] = useState(false);
   const [confirm, setConfirm] = useState<Confirm>(null);
   const root = useRef<HTMLDivElement>(null);
@@ -108,18 +115,32 @@ export function BuildBar({ items, tip, actions }: SlotPropsMap["BuildBar"]) {
   return (
     <div className="f95-startwrap" ref={root}>
       {open && (
-        <div className="f95-win f95-menu" role="menu" aria-label={t("build.menuTitle")}>
+        <div className="f95-win f95-menu" data-coach-panel role="menu" aria-label={t("build.menuTitle")}>
           <div className="side f95-dither" aria-hidden>
             <b>Frontier</b>95
           </div>
           <ul>
             {buildings.map((it) => (
               <li key={it.kind}>
-                <button type="button" role="menuitem" className={it.selected ? "on" : ""} disabled={!it.affordable && !it.selected} onClick={() => pick(it.kind)}>
+                <button type="button" role="menuitem" {...coach.attrs(`build:${it.kind}`)} className={it.selected ? "on" : ""} disabled={!it.affordable && !it.selected} onClick={() => pick(it.kind)}>
                   <Ico name={it.kind} size={24} />
                   <span>{it.name}</span>
                   <span className="hk">{it.hotkey ?? ""}</span>
                   <span className="p">{it.free ? t("build.free") : it.priceText}</span>
+                </button>
+              </li>
+            ))}
+            {/* What you have not unlocked yet, and what unlocks it. */}
+            {teasers.map((teaser, i) => (
+              <li key={`${teaser.label}-${i}`} className="locked">
+                <button type="button" role="menuitem" disabled aria-disabled title={`${t("build.locked")}: ${teaser.hint}`}>
+                  <Ico name="lock" size={24} />
+                  <span>
+                    {teaser.label}
+                    {teaser.hint && <> · {teaser.hint}</>}
+                  </span>
+                  <span className="hk" />
+                  <span className="p" />
                 </button>
               </li>
             ))}
@@ -134,6 +155,14 @@ export function BuildBar({ items, tip, actions }: SlotPropsMap["BuildBar"]) {
                 </button>
               </li>
             )}
+            <li>
+              <button type="button" role="menuitem" onClick={() => { setOpen(false); actions.openHelp(); }}>
+                <Ico name="help" size={24} />
+                <span>{t("build.help")}…</span>
+                <span className="hk" />
+                <span className="p" />
+              </button>
+            </li>
             <li>
               <button type="button" role="menuitem" aria-expanded={settings} onClick={() => setSettings(!settings)}>
                 <Ico name="display" size={24} />
@@ -172,7 +201,7 @@ export function BuildBar({ items, tip, actions }: SlotPropsMap["BuildBar"]) {
           <b>{tip.name}</b> {tip.text} {tip.upkeepText && <small>{tip.upkeepText}</small>}
         </div>
       )}
-      <button type="button" className={`f95-start ${open ? "on" : ""}`} data-testid="start-button" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}>
+      <button type="button" {...coach.attrs("start", !open && coach.intoPanel(items))} className={`f95-start ${open ? "on" : ""}`} data-testid="start-button" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}>
         <Flag />
         <span>{t("build.menuTitle")}</span>
       </button>
@@ -199,11 +228,12 @@ const SPEED_GLYPHS: Record<number, number> = { 1: 1, 3: 2, 10: 3 };
 /** Speed in the tray, labelled with pace words as tooltips (Rest, Steady, Strenuous, Grueling), and the clock. */
 export function Speed({ speed, stats, actions }: SlotPropsMap["Speed"]) {
   const t = useT();
+  const coach = useCoach();
   return (
     <>
       <div className="f95-speed" role="group" aria-label={t("speed.label")}>
         {speed.options.map((o) => (
-          <button key={o.value} type="button" className={`f95-s ${o.active ? "on" : ""}`} title={t(o.key)} aria-label={t(o.key)} aria-pressed={o.active} onClick={() => actions.setSpeed(o.value)}>
+          <button key={o.value} type="button" className={`f95-s ${o.active ? "on" : ""}`} title={t(o.key)} aria-label={t(o.key)} aria-pressed={o.active} {...(o.value === 3 ? coach.attrs("speed") : {})} onClick={() => actions.setSpeed(o.value)}>
             <svg width="16" height="14" viewBox="0 0 16 14" shapeRendering="crispEdges" aria-hidden>
               {o.value === 0 ? (
                 <>
@@ -237,14 +267,16 @@ export function Ticker({ items }: SlotPropsMap["Ticker"]) {
   );
 }
 
-export function NewsControls({ newsroom, sound, actions }: SlotPropsMap["NewsControls"]) {
+export function NewsControls({ newsroom, sound, visible = ALL_VISIBLE, actions }: SlotPropsMap["NewsControls"]) {
   const t = useT();
   return (
     <>
-      <button type="button" className="f95-s news" onClick={() => actions.openNews()} aria-label={t("news.open")} title={t("news.button")}>
-        <Ico name="news" size={18} />
-        {newsroom.unread > 0 && <b className="f95-badge-n">{newsroom.unread}</b>}
-      </button>
+      {visible.news && (
+        <button type="button" className="f95-s news" onClick={() => actions.openNews()} aria-label={t("news.open")} title={t("news.button")}>
+          <Ico name="news" size={18} />
+          {newsroom.unread > 0 && <b className="f95-badge-n">{newsroom.unread}</b>}
+        </button>
+      )}
       <button type="button" className="f95-s snd" onClick={() => actions.setMuted(!sound.muted)} aria-label={sound.muted ? t("sound.unmute") : t("sound.mute")} aria-pressed={sound.muted} title={sound.muted ? t("sound.unmute") : t("sound.mute")}>
         <Ico name={sound.muted ? "mute" : "sound"} size={18} />
       </button>

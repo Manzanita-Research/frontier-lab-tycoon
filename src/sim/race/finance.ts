@@ -55,6 +55,13 @@ export type Bid = keyof typeof BID_MULTIPLES;
 
 export const bidAmount = (state: GameState, bid: Bid): number => Math.round(auctionUnit(state) * BID_MULTIPLES[bid]);
 
+/**
+ * Why each auction bid can't be made, in choice order, or null (FLT-58): a bid bigger than the cash in the bank is greyed out
+ * with the reason. "Bid low" never is, so the card can always be answered (the sim clamps an offer to the cash anyway).
+ */
+export const auctionBlocked = (state: GameState): (string | null)[] =>
+  (["low", "mid", "all"] as const).map((bid) => (bid !== "low" && bidAmount(state, bid) > state.cash ? `${formatMoney(bidAmount(state, bid))} is more than the ${formatMoney(Math.max(0, state.cash))} you have` : null));
+
 /** The template variables the race's cards and effects use. They never shadow {lab}, {model} or {rival}. */
 export function raceVars(state: GameState): Record<string, string> {
   const { race } = state;

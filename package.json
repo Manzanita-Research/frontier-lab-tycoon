@@ -21,6 +21,8 @@
     "create-mod": "node packages/flt-mod-cli/create.mjs",
     "modkit:check": "pnpm --filter @flt/mod-sdk typecheck && node --test packages/flt-mod-cli/*.test.mjs",
     "shots": "node scripts/shots.mjs",
+    "e2e:stranger": "node e2e/stranger.mjs",
+    "e2e:journey": "node e2e/journey.mjs",
     "drama": "node scripts/drama-run.mjs",
     "drama:lint": "node drama/lint.mjs"
   },

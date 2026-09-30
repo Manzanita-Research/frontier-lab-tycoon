@@ -24,6 +24,8 @@ import { isCollusionMoment, stageCollusion } from "../sim/collusion/demo";
 import { enableCollusion } from "../sim/collusion/driver";
 import { walkersThinking } from "../sim/mind";
 import { makeSnapshot, NO_SELECTION, type Snapshot, type UiSelection, type UiToast } from "./hud";
+import { continueTutorial } from "../sim/tutorial";
+import { stageFirstRun } from "../sim/firstRunDemo";
 
 /** What the loop tells the app after touching the World. `snap`, `news` and `toasts` come with a publish. */
 export interface SyncReport {
@@ -77,11 +79,13 @@ export class SimHandle {
     this.openingThoughts = undefined;
     const risk = this.world.disasters.risk;
     const collusion = this.world.collusion?.enabled;
+    const leapfrogOff = this.world.flags.leapfrogOff;
+    const papersOff = this.world.flags.papersOff;
     this.world = createInitialState(seed);
     setRisk(this.world, risk);
-    if (this.leapfrog) enableLeapfrog(this.world);
+    if (leapfrogOff) this.world.flags.leapfrogOff = leapfrogOff;
     if (collusion) enableCollusion(this.world);
-    if (this.papers) enablePapers(this.world);
+    if (papersOff) this.world.flags.papersOff = papersOff;
     this.alpha = 1;
   }
 
@@ -112,11 +116,15 @@ export function createSimHandle(
   dbg: Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean },
 ): SimHandle {
   const sim = createInitialState(dbg.seed);
-  if (dbg.leapfrog) enableLeapfrog(sim);
-  if (dbg.papers) enablePapers(sim);
-  for (let i = 0; i < dbg.warp * TICKS_PER_DAY; i++) tick(sim);
+  if (dbg.leapfrog === false) sim.flags.leapfrogOff = 1;
+  if (dbg.papers === false) sim.flags.papersOff = 1;
   const leap = parseLeapMoment(dbg.moment);
-  if (isMoment(dbg.moment)) stageMoment(sim, dbg.moment);
+  if (dbg.warp > 0 || dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0 || dbg.moment || dbg.disaster) { continueTutorial(sim, true); delete sim.progression; }
+  if (!sim.progression && dbg.leapfrog) enableLeapfrog(sim);
+  if (!sim.progression && dbg.papers) enablePapers(sim);
+  for (let i = 0; i < dbg.warp * TICKS_PER_DAY; i++) tick(sim);
+  if (dbg.moment === "jem-opening" || dbg.moment === "jem-confirm") stageFirstRun(sim, dbg.moment);
+  else if (isMoment(dbg.moment)) stageMoment(sim, dbg.moment);
   else if (isOpsMoment(dbg.moment)) stageOps(sim, dbg.moment);
   else if (leap) stageLeapfrog(sim, leap.moment, leap.arg);
   else if (isCollusionMoment(dbg.moment)) stageCollusion(sim, dbg.moment);

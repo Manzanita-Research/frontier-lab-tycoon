@@ -3,7 +3,7 @@
 import { describe, expect, it } from "vitest";
 import { enableLeapfrog } from "../../sim/race/leapfrog/driver";
 import { leapfrogView } from "../../sim/race/leapfrog/view";
-import { createInitialState } from "../../sim/state";
+import { createTestCampus as createInitialState } from "../../sim/testkit";
 import { answer } from "../../sim/testkit";
 import { tick } from "../../sim/tick";
 import { fixtureInput, fixtureLeapfrog } from "./fixtures";

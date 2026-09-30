@@ -1,6 +1,11 @@
 // What the HUD reads: a small plain snapshot of the World, refreshed at about 5 Hz instead of every tick.
+import { coachOf } from "../sim/coach";
+import { progressOf, visibleHud } from "../sim/progression";
+import type { CoachMark } from "../content/coach";
+import type { ProgressView, UnlockCard, HudPanel } from "../content/progression";
 import type { PlaceableKind } from "../content/buildings";
 import { runwayMonths } from "../sim/format";
+import { auctionBlocked } from "../sim/race/finance";
 import { protesterCount } from "../sim/protest";
 import { inspectWalker, type Inspect } from "../sim/inspect";
 import { thoughtBoard, type ThoughtRow } from "../sim/mind";
@@ -10,7 +15,10 @@ import { opsView, type OpsView } from "../sim/opsView";
 import { leapfrogView, type LeapfrogView } from "../sim/race/leapfrog/view";
 import { papersView, type PapersView } from "../sim/race/papers/view";
 import { raceView, type RaceView } from "../sim/race/view";
-import { outcomeOf } from "../sim/goals";
+import { outcomeOf, releaseGoalText } from "../sim/goals";
+import { estimateLedger } from "../sim/economy";
+import { assistantOf, type AssistantMessage } from "../sim/tutorial";
+import { pendingConfirmOf, persistentWarnings, type PendingConfirm } from "../sim/guardrails";
 import type { Building, GameState, GoalProgress, OpenEvent, Outcome, Pop, Thought, Tone, Vibes } from "../sim/types";
 
 export type Tool = "path" | PlaceableKind | "bulldoze";
@@ -37,6 +45,10 @@ export const NO_SELECTION: UiSelection = { selected: null, follow: false, highli
 export const BOARD_ROWS = 14;
 
 export interface Snapshot {
+  progress: ProgressView;
+  coach: CoachMark | null;
+  unlockCard: UnlockCard | null;
+  hud: { visible: Record<HudPanel, boolean> };
   tick: number;
   day: number;
   cash: number;
@@ -70,6 +82,8 @@ export interface Snapshot {
   goals: GoalProgress[];
   outcome: Outcome;
   event: OpenEvent | null;
+  /** For the open card, why each choice can't be taken (null if it can): an auction bid you can't afford (FLT-58). */
+  eventBlocked?: (string | null)[];
   protesters: number;
   discourse: number;
   /** The Thoughts panel: everyone's thought, counted, most common first. */
@@ -86,6 +100,11 @@ export interface Snapshot {
   papers: PapersView;
   /** Operations: staff, slop, broken buildings, queues. */
   ops: OpsView;
+  assistant: AssistantMessage | null;
+  firstBuildPending: boolean;
+  pendingConfirm: PendingConfirm | null;
+  warnings: string[];
+  releaseGoal: string;
 }
 
 export interface UiToast {
@@ -105,14 +124,16 @@ function speakersOf(s: GameState): Record<number, string> {
 }
 
 export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO_SELECTION): Snapshot {
+  const books = estimateLedger(s);
   return {
+    progress: progressOf(s), coach: coachOf(s), unlockCard: s.unlockCards?.[0] ?? null, hud: visibleHud(s),
     tick: s.tick,
     day: s.day,
     cash: s.cash,
-    net: s.ledger.net,
-    income: s.ledger.income,
-    expenses: s.ledger.expenses,
-    runway: runwayMonths(s.cash, s.ledger.net),
+    net: books.net,
+    income: books.income,
+    expenses: books.expenses,
+    runway: runwayMonths(s.cash, books.net),
     capability: s.capability,
     hype: s.hype,
     vibes: { ...s.vibes },
@@ -134,6 +155,7 @@ export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO
     goals: s.goals.context.goals.map((g) => ({ ...g })),
     outcome: outcomeOf(s),
     event: openEventOf(s),
+    eventBlocked: openEventOf(s)?.id === "computeAuction" ? auctionBlocked(s) : [],
     protesters: protesterCount(s),
     discourse: s.waterDiscourse,
     board: thoughtBoard(s).slice(0, BOARD_ROWS),
@@ -143,5 +165,10 @@ export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO
     leapfrog: leapfrogView(s),
     papers: papersView(s),
     ops: opsView(s),
+    assistant: assistantOf(s),
+    firstBuildPending: !!s.coach && s.flags.started === undefined && s.flags.firstBuild === undefined,
+    pendingConfirm: pendingConfirmOf(s),
+    warnings: persistentWarnings(s),
+    releaseGoal: releaseGoalText(s),
   };
 }

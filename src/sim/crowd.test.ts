@@ -8,7 +8,7 @@ import { demoOdds, FLOP_SCALE, SHOW_TICKS, showFor } from "./demo";
 import { causeOf, thoughtBoard, thoughtOf, walkersThinking } from "./mind";
 import { applyServes, happinessOf, moodFor, RIVAL_FOMO, tickNeeds } from "./needs";
 import { createRng } from "./rng";
-import { createInitialState } from "./state";
+import { createTestCampus as createInitialState } from "./testkit";
 import { answer, perfBudget } from "./testkit";
 import { tick } from "./tick";
 import type { GameState, Walker } from "./types";
@@ -478,7 +478,8 @@ describe("Vibes", () => {
     expect(visitorCapFor(900)).toBeGreaterThan(visitorCapFor(300));
     expect(visitorChanceFor(900)).toBeGreaterThan(visitorChanceFor(300));
     const arrivals = (vibes: number) => {
-      const s = createInitialState(4);
+      const s = campus("demo");
+      s.day = 60;
       s.walkers = [];
       s.vibes.value = vibes;
       let seen = 0;
@@ -494,19 +495,19 @@ describe("Vibes", () => {
   });
 
   it("brings applicants to the gate when Vibes are above 350 and a hall has room, and only then", () => {
-    const withRoom = () => campus("hall");
+    const withRoom = () => { const s = campus("hall"); s.walkers = s.walkers.filter((w) => w.kind !== "researcher"); seedWalkers(s, "researcher", 3, createRng(99)); return s; };
     const s = withRoom();
-    expect(researcherTarget(s)).toBe(10 + 8);
-    expect(count(s, "researcher")).toBe(11);
+    expect(researcherTarget(s)).toBe(3 + 8);
+    expect(count(s, "researcher")).toBe(3);
     s.vibes.value = 300;
     for (let i = 0; i < 20; i++) dailyWalkers(s, createRng(i));
-    expect(count(s, "researcher")).toBe(11);
+    expect(count(s, "researcher")).toBe(3);
 
     const g = withRoom();
     g.vibes.value = 700;
     const rng = createRng(2);
     for (let i = 0; i < 10; i++) dailyWalkers(g, rng);
-    expect(count(g, "researcher")).toBeGreaterThan(11);
+    expect(count(g, "researcher")).toBeGreaterThan(3);
     expect(count(g, "researcher")).toBeLessThanOrEqual(researcherTarget(g));
     const newcomer = researchers(g).find((w) => w.machine.value === "arriving")!;
     expect(newcomer).toBeDefined();
@@ -517,11 +518,11 @@ describe("Vibes", () => {
     expect(newcomer.z).toBeGreaterThan(g.gate.z - 4);
 
     // Applicants keep coming until the halls are full, and then they stop.
-    const full = createInitialState(1);
+    const full = withRoom();
     full.vibes.value = 900;
     for (let i = 0; i < 40; i++) dailyWalkers(full, createRng(i));
     expect(count(full, "researcher")).toBe(researcherTarget(full));
-    expect(researcherTarget(full)).toBe(14);
+    expect(researcherTarget(full)).toBe(11);
   });
 });
 

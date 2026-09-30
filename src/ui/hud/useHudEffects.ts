@@ -3,6 +3,7 @@
 import { useAtomValue } from "@effect/atom-react";
 import { useEffect, useRef } from "react";
 import { appNow, registry, send, sim } from "../../app/game";
+import { useAutoPause } from "../../app/hooks";
 import type { Snapshot } from "../../app/hud";
 import { TOOLS } from "../../app/hud";
 import { playCue } from "../../audio/state";
@@ -22,6 +23,9 @@ const desk = new NewsDesk();
 /** Build hotkeys (1-9, Space, Esc), and the keys that answer whichever card is up. */
 function useHotkeys(vm: HudVM) {
   const eraOpenedAt = useRef(0);
+  // Only the tools the lab has unlocked answer a number key (the build panel lists exactly these).
+  const earned = useRef<ReadonlySet<string>>(new Set());
+  earned.current = new Set(vm.buildItems.map((b) => b.kind));
   const eraN = vm.eraCard?.n ?? null;
   useEffect(() => {
     if (eraN !== null) eraOpenedAt.current = performance.now();
@@ -48,14 +52,17 @@ function useHotkeys(vm: HudVM) {
         }
         return;
       }
-      if (st.outcome !== "playing" && !st.outcomeDismissed) return;
+      if ((st.outcome !== "playing" && !st.outcomeDismissed) || st.snap.pendingConfirm) return;
       if (e.key === " ") {
         e.preventDefault();
         // A focused button would also treat Space as a click.
         (document.activeElement as HTMLElement | null)?.blur?.();
         send({ type: "TOGGLE_PAUSE" });
       } else if (e.key === "Escape") send({ type: "SET_TOOL", tool: null });
-      else if (/^[1-9]$/.test(e.key)) send({ type: "SET_TOOL", tool: TOOLS[Number(e.key) - 1]! });
+      else if (/^[1-9]$/.test(e.key)) {
+        const tool = TOOLS[Number(e.key) - 1]!;
+        if (earned.current.has(tool)) send({ type: "SET_TOOL", tool });
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -69,7 +76,7 @@ function usePhotoKeys(vm: HudVM) {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
       if (e.key === "p" || e.key === "P") {
         const st = appNow();
-        if (!st?.event && (st?.outcome === "playing" || st?.outcomeDismissed)) togglePhoto();
+        if (!st?.event && !st?.snap.pendingConfirm && (st?.outcome === "playing" || st?.outcomeDismissed)) togglePhoto();
       } else if (!fx.photo) return;
       else if (e.key === "Escape") setPhoto(false);
       else if (e.key === "Enter") void takePhoto();
@@ -83,7 +90,7 @@ function usePhotoKeys(vm: HudVM) {
     if (debugParams.photo) setPhoto(true);
   }, []);
   // A card turning up means the game needs the player: leave photo mode rather than hide it.
-  const needsPlayer = vm.event !== null || vm.eraCard !== null || vm.outcome !== null;
+  const needsPlayer = vm.event !== null || vm.eraCard !== null || vm.outcome !== null || vm.confirm !== null;
   useEffect(() => {
     if (needsPlayer) setPhoto(false);
   }, [needsPlayer]);
@@ -112,6 +119,7 @@ function useNewsDesk(snap: Snapshot) {
   const room = useAtomValue(roomAtom);
   const demoOpened = useRef(false);
   const pausedForReading = room.view !== null;
+  useAutoPause("newsroom", pausedForReading);
   useEffect(() => {
     loadRoom();
   }, []);
@@ -124,13 +132,7 @@ function useNewsDesk(snap: Snapshot) {
     if (result.editions.length) pressCamera.pending.push(result.editions);
   }, [snap]);
   useEffect(() => {
-    if (!pausedForReading) return;
-    const speed = appNow()?.speed ?? 1;
-    send({ type: "SET_SPEED", speed: 0 });
-    playCue("card");
-    return () => {
-      if (appNow()?.speed === 0) send({ type: "SET_SPEED", speed });
-    };
+    if (pausedForReading) playCue("card");
   }, [pausedForReading]);
   useEffect(() => {
     if (!new URLSearchParams(location.search).has("debug")) return;
@@ -165,7 +167,20 @@ function useNewsDesk(snap: Snapshot) {
   }, [room.archive]);
 }
 
+/**
+ * Panels the host owns hold time while they are open: the payroll, the sound mixer and (on a phone, where it covers the
+ * map) the Arena. A slot's own phone sheets (Stats, Objectives, Thoughts) hold it themselves through the kit's
+ * `useAutoPause`; the News Room does it in `useNewsDesk`. The game keeps the ids apart, so closing one never resumes
+ * time beneath another.
+ */
+function useOverlays(vm: HudVM) {
+  useAutoPause("staff", vm.staff.open);
+  useAutoPause("mixer", vm.sound.open);
+  useAutoPause("arena", vm.arena.open && vm.layout.compact);
+}
+
 export function useHudEffects(vm: HudVM, snap: Snapshot) {
+  useOverlays(vm);
   useHotkeys(vm);
   usePhotoKeys(vm);
   useChatPlayback();

@@ -16,6 +16,7 @@ import { raceVars } from "./race/finance";
 import { modeOf } from "./walkers";
 import type { Rng } from "./rng";
 import type { GameState, OpenEvent } from "./types";
+import { pressureReady } from "./tutorial";
 
 export function conditionHolds(state: GameState, c: Condition): boolean {
   if ("all" in c) return c.all.every((sub) => conditionHolds(state, sub));
@@ -41,12 +42,12 @@ export function openEventOf(state: GameState): OpenEvent | null {
  * cooldown is over takes the screen, and the rest wait their turn as `brewing`. The game pauses until it is answered.
  */
 export function dailyEvents(state: GameState) {
-  if (state.goals.value === "lost") return; // a lost game opens no new cards
+  if (state.goals.value === "lost" || (!state.progression && state.day < 40)) return;
   let slotFree = openEventOf(state) === null;
   // Later eras crowd the calendar: cooldowns shrink.
   const pace = eraDef(eraOfState(state)).pace;
   for (const def of EVENTS) {
-    const { stored } = step(arcMachine, state.arcs[def.id]!, { type: "DAY", day: state.day, ready: conditionHolds(state, def.when), slotFree, pace });
+    const { stored } = step(arcMachine, state.arcs[def.id]!, { type: "DAY", day: state.day, ready: pressureReady(state) && conditionHolds(state, def.when), slotFree, pace });
     state.arcs[def.id] = stored;
     if (stored.value === "cardOpen") slotFree = false;
   }

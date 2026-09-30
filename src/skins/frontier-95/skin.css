@@ -45,21 +45,34 @@
     align-items: flex-start;
     gap: 10px;
   }
-  .f95-right {
+  /* The right-hand side: the managed window stack, then (in the same column, so it can never cover a window) the news
+     arrival and the paperclip with its balloon. The stack gets whatever height they leave. */
+  .f95-side {
     position: absolute;
     right: 10px;
     top: 10px;
-    bottom: calc(var(--taskbar) + 10px);
-    /* Wide enough for Task Mangler's Benchmarks tab; every other window keeps its 400px, on the right. */
+    bottom: calc(var(--taskbar) + 6px);
     width: min(600px, calc(100vw - 20px));
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 10px;
+    gap: 8px;
+    pointer-events: none;
+  }
+  .f95-right {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-width: none;
     pointer-events: none;
+  }
+  .f95-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
     > * {
       flex: 0 0 auto;
     }
@@ -413,8 +426,9 @@
       }
     }
     &.burst {
+      /* Below the title bar, so the window's ✕ stays visible (FLT-58). */
       right: -10px;
-      top: -14px;
+      top: 34px;
       padding: 5px 10px;
       background: #e00000;
       color: #fff;
@@ -900,10 +914,11 @@
       color: #444;
     }
     &.arrival {
-      position: absolute;
+      position: relative;
       left: auto;
-      right: 10px;
-      bottom: calc(var(--taskbar) + 8px);
+      bottom: auto;
+      max-width: 100%;
+      flex: none;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
@@ -1124,14 +1139,12 @@
     }
   }
   .f95-assistant {
-    position: absolute;
-    right: 10px;
-    bottom: calc(var(--taskbar) + 6px);
+    flex: none;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
     gap: 14px;
-    width: min(310px, calc(100vw - 20px));
+    width: min(330px, 100%);
     pointer-events: none;
   }
   .f95-balloon {
@@ -1226,8 +1239,12 @@
     &.good {
       color: var(--flt-color-good);
     }
-    &.hint {
+    &.hint,
+    &.warn {
       cursor: default;
+    }
+    &.warn {
+      color: var(--flt-color-bad);
     }
     + .f95-toast {
       border-top: 1px dotted #808080;
@@ -1248,6 +1265,222 @@
     }
     &.wiggle svg {
       animation: frontier-95-wiggle 0.5s steps(4) 3;
+    }
+  }
+
+  /* A folded window is its title bar and nothing else (the Task Mangler's title carries the R&D number). */
+  .f95-tasks:not(.open) > :not(.f95-tb),
+  .f95-thoughts:not(.open) > :not(.f95-tb) {
+    display: none;
+  }
+
+  /* A folded window is its title bar and nothing else (the Task Mangler's title carries the R&D number). */
+  .f95-tasks:not(.open) > :not(.f95-tb),
+  .f95-thoughts:not(.open) > :not(.f95-tb) {
+    display: none;
+  }
+
+  /* ---- Playable v1: the coach, the goal, the locked teasers, the New! box, Help ---- */
+  .f95-coachwrap {
+    display: contents;
+  }
+  .f95-coach {
+    position: fixed;
+    z-index: 44;
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    pointer-events: auto;
+    .f95-balloon {
+      width: 310px;
+      margin: 0;
+      padding: 8px 10px 7px;
+      &::after {
+        right: -8px;
+        bottom: 16px;
+        border: 6px solid transparent;
+        border-left: 8px solid #000;
+        border-right: 0;
+        border-top-width: 6px;
+      }
+    }
+    .f95-clip {
+      display: block;
+      flex: none;
+      width: 44px;
+      height: 50px;
+      pointer-events: none;
+      svg {
+        width: 100%;
+        height: 100%;
+        image-rendering: pixelated;
+      }
+      &.wiggle svg {
+        animation: frontier-95-wiggle 0.5s steps(4) 3;
+      }
+    }
+  }
+  .f95-saying {
+    margin: 2px 0 7px;
+    font-size: 17px;
+    line-height: 1.15;
+  }
+  .f95-coachfoot {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    small {
+      font-size: 14px;
+      color: #444;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+  }
+  .f95-skip {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    font-size: 15px;
+    color: #000080;
+    text-decoration: underline;
+    cursor: pointer;
+    &:hover {
+      color: #0000c0;
+    }
+    &:focus-visible {
+      outline: 1px dotted #000;
+      outline-offset: 2px;
+    }
+  }
+  /* The one goal: a single sticky note with a blocky bar. */
+  .f95-post.goal {
+    display: grid;
+    gap: 2px;
+    width: 100%;
+    /* As wide as the other notes: a long goal wraps instead of stretching the column. */
+    max-width: 250px;
+    padding: 6px 10px 8px;
+    border: 1px solid #000;
+    background: #fff27a;
+    text-align: left;
+    small {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #555;
+    }
+    b {
+      font-size: 17px;
+    }
+    .f95-goalnum {
+      font-size: 15px;
+    }
+  }
+  .f95-goalbar {
+    display: block;
+    height: 10px;
+    margin-top: 4px;
+    border: 1px solid #000;
+    background: #fff;
+    i {
+      display: block;
+      height: 100%;
+      background: repeating-linear-gradient(90deg, #000080 0 8px, transparent 8px 10px);
+    }
+  }
+  .f95-menu li.locked button {
+    color: #7a7a7a;
+    cursor: default;
+    &:hover {
+      background: transparent;
+      color: #7a7a7a;
+    }
+  }
+  .f95-unlock {
+    position: fixed;
+    z-index: 30;
+    top: 38%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(440px, calc(100vw - 20px));
+    pointer-events: auto;
+  }
+  .f95-unlockitems {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px 14px;
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+    li::before {
+      content: "";
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      margin-right: 8px;
+      background: #000080;
+    }
+  }
+  .f95-help {
+    width: min(580px, 100%);
+    max-height: calc(100dvh - 30px);
+    overflow: auto;
+    pointer-events: auto;
+  }
+  .f95-helpbody {
+    margin: 4px;
+    padding: 8px 14px 10px;
+    background: #fff;
+    max-height: min(60vh, 460px);
+    overflow: auto;
+    user-select: text;
+    h3 {
+      margin: 10px 0 3px;
+      font-size: 17px;
+      font-weight: bold;
+      color: #000080;
+      &:first-child {
+        margin-top: 0;
+      }
+    }
+    ol,
+    ul {
+      margin: 0;
+      padding-left: 22px;
+      line-height: 1.2;
+    }
+    li {
+      margin: 2px 0;
+    }
+    dl {
+      margin: 0;
+    }
+    dt {
+      display: inline;
+      font-weight: bold;
+      &::after {
+        content: ":";
+      }
+    }
+    dd {
+      display: inline;
+      margin: 0 0 0 4px;
+    }
+    div {
+      margin: 2px 0;
+    }
+  }
+  @media (max-width: 640px) {
+    .f95-coach.docked {
+      left: 4px;
+      right: 4px;
+      .f95-balloon {
+        flex: 1;
+        width: auto;
+        min-width: 0;
+      }
     }
   }
 
@@ -1322,6 +1555,10 @@
         color: var(--flt-color-textDim);
       }
     }
+  }
+  .f95-confirm-facts {
+    margin-top: 6px !important;
+    color: var(--flt-color-textDim);
   }
   .f95-paddles {
     display: flex;
@@ -2363,11 +2600,11 @@
 
   /* ---- narrower desktops ---- */
   @media (max-width: 1040px) and (min-width: 641px) {
-    .f95-right {
+    .f95-side {
       width: min(560px, calc(100vw - 20px));
-      > .f95-win {
-        width: min(340px, 100%);
-      }
+    }
+    .f95-stack > .f95-win {
+      width: min(340px, 100%);
     }
     .f95-left {
       width: calc(100vw - 370px);
@@ -2427,30 +2664,41 @@
     }
     .f95-post {
       width: 100%;
+      &.goal {
+        max-width: none;
+      }
       &.head {
         min-height: 44px;
         display: flex;
         align-items: center;
       }
     }
+    /* On a phone the side column dissolves: the two folded windows sit in a row above the news strip, and the
+       assistant rides above them (below), so windows and balloon place themselves against the desktop as before. */
+    .f95-side,
+    .f95-stack {
+      display: contents;
+    }
     .f95-right {
+      position: absolute;
       left: 4px;
       right: 4px;
       top: auto;
       bottom: calc(var(--taskbar) + 30px + 8px);
       width: auto;
+      display: flex;
       flex-direction: row;
       align-items: flex-start;
       gap: 4px;
       overflow: visible;
-      > * {
-        flex: 1 1 0;
-        min-width: 0;
-      }
-      > .f95-win,
-      > .f95-tasks.wide {
-        width: auto;
-      }
+    }
+    .f95-stack > * {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+    .f95-stack > .f95-win,
+    .f95-stack > .f95-tasks.wide {
+      width: auto;
     }
     .f95-props,
     .f95-staff,
@@ -2464,10 +2712,6 @@
       max-height: calc(100dvh - var(--taskbar) - 30px - 12px);
       z-index: 20;
       overflow: auto;
-    }
-    .f95-tasks:not(.open) > :not(.f95-tb),
-    .f95-thoughts:not(.open) > :not(.f95-tb) {
-      display: none;
     }
     .f95-long {
       display: none;
@@ -2537,6 +2781,7 @@
       height: 44px;
     }
     .f95-assistant {
+      position: absolute;
       right: 4px;
       bottom: calc(var(--taskbar) + 30px + 52px);
       width: calc(100vw - 8px);
@@ -2547,6 +2792,12 @@
       max-height: 110px;
       overflow: hidden;
     }
+    .f95-tooltip.arrival {
+      position: absolute;
+      right: 4px;
+      bottom: calc(var(--taskbar) + 30px + 52px);
+    }
+
     .f95-clip {
       width: 40px;
       height: 44px;

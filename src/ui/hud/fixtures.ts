@@ -2,19 +2,20 @@
 // UI state a moment needs. Deterministic: the same call gives the same JSON.
 import { makeSnapshot, type Snapshot } from "../../app/hud";
 import { frontPage, recap, type Edition } from "../../newsroom/edition";
+import { createTestCampus } from "../../sim/testkit";
 import { enableLeapfrog } from "../../sim/race/leapfrog/driver";
 import { leapfrogView } from "../../sim/race/leapfrog/view";
-import { createInitialState } from "../../sim/state";
 import { answer } from "../../sim/testkit";
 import { tick } from "../../sim/tick";
 import type { GameState } from "../../sim/types";
 import { newMotion, stepMotion, type MotionView } from "./leapfrogMotion";
 import type { SkinPickerVM } from "./types";
 import type { HudInput } from "./vm";
+import { playableFixture } from "./previewLadder";
 
-/** A campus a few game days in, with thoughts, a crowd and a first release on the books. */
+/** A busy campus a few game days in, with thoughts, a crowd and a run in flight (the real opening is quieter: see `openingWorld`). */
 export function fixtureWorld(days = 12, seed = 3): GameState {
-  const s = createInitialState(seed);
+  const s = createTestCampus(seed);
   for (let i = 0; i < days * 20; i++) tick(s);
   return s;
 }
@@ -25,7 +26,7 @@ export function fixtureWorld(days = 12, seed = 3): GameState {
  * benchmark still on the board), stepped day by day the way the app does.
  */
 export function fixtureLeapfrog(days = 48, seed = 3): { world: GameState; motion: MotionView } {
-  const s = createInitialState(seed);
+  const s = createTestCampus(seed);
   enableLeapfrog(s);
   const m = newMotion();
   let now = 0;
@@ -69,6 +70,12 @@ export const FIXTURE_PAPER = frontPage(STORIES, 28, "Mostly Harmless Compute");
 export const FIXTURE_CHAT = recap(STORIES, 30, "Mostly Harmless Compute");
 
 export interface FixtureOptions {
+  /** Playable v1: put the snapshot on this rung of the ladder (absent: everything is earned). */
+  level?: 1 | 2 | 3 | 4 | 5;
+  /** Which of the seven coach lines is up (0-based), or none. */
+  coach?: number | null;
+  /** The "New!" card is up. */
+  unlock?: boolean;
   world?: GameState;
   /** Release Leapfrog on, 48 days in, with its leaderboard, news cycle and history. */
   leapfrog?: boolean;
@@ -80,6 +87,12 @@ export interface FixtureOptions {
   photo?: boolean;
   staff?: boolean;
   outcome?: "won" | "lost" | null;
+  /** A spend waiting for a yes or a no. */
+  confirm?: boolean;
+  /** Help ▸ How to play is open. */
+  help?: boolean;
+  /** Standing warnings. */
+  warnings?: string[];
   width?: number;
   height?: number;
   skins?: Partial<SkinPickerVM>;
@@ -89,7 +102,11 @@ export function fixtureSnapshot(o: FixtureOptions = {}): Snapshot {
   const w = o.world ?? (o.leapfrog ? fixtureLeapfrog().world : fixtureWorld());
   const selected = o.selected === undefined ? (w.walkers.find((x) => x.kind === "researcher")?.id ?? null) : o.selected;
   const snap = makeSnapshot(w, undefined, { selected, follow: false, highlight: null });
-  return { ...snap, event: o.event ? { id: o.event, day: snap.day } : snap.event, outcome: o.outcome ?? snap.outcome };
+  const pendingConfirm = o.confirm
+    ? { kind: "hire" as const, cost: 4_000, runwayAfter: 1.8, message: "This leaves 1.8 months of runway. The board will have questions.", command: { type: "hire" as const, job: "sre" as const } }
+    : snap.pendingConfirm;
+  const ladder = o.level ? playableFixture(o.level, o.coach ?? null, o.unlock ?? false) : {};
+  return { ...snap, ...ladder, event: o.event ? { id: o.event, day: snap.day } : snap.event, outcome: o.outcome ?? snap.outcome, pendingConfirm, warnings: o.warnings ?? snap.warnings };
 }
 
 export function fixtureInput(o: FixtureOptions = {}): HudInput {
@@ -122,6 +139,7 @@ export function fixtureInput(o: FixtureOptions = {}): HudInput {
       storage: true,
     },
     chatCount: o.chatCount ?? 2,
+    helpOpen: o.help ?? false,
     mixer: { open: false, ready: true, muted: false, master: 0.7, music: 0.3, sfx: 0.65 },
     photo: { on: o.photo ?? false, time: "live", shot: { id: 1, url: "data:image/png;base64,", name: "frontier-lab-tycoon-campus.png" }, flash: 1 },
     skins: { ...NO_SKINS, ...o.skins },

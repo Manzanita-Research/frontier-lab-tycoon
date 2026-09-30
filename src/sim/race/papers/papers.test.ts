@@ -5,10 +5,10 @@ import { createSimHandle } from "../../../app/sim";
 import { makeSnapshot } from "../../../app/hud";
 import { initialStored, step } from "../../machines/run";
 import { createRng } from "../../rng";
-import { createInitialState } from "../../state";
+import { createTestCampus as createInitialState } from "../../testkit";
 import { applyNow, tick } from "../../tick";
 import { dailyWalkers } from "../../walkers";
-import { answer } from "../../testkit";
+import { answer, createTestCampus } from "../../testkit";
 import { stagePapers } from "./demo";
 import { P, PAPERS_PACK } from "./content";
 import { dailyPapers, disablePapers, enablePapers, publishPaper, setPublicationPolicy } from "./driver";
@@ -175,18 +175,18 @@ describe("papers integration", () => {
       }
     }
   });
-  it("app switch and reset preserve enablement, with ?papers=off supported", () => {
+  it("papers waits for Scrutiny in a new lab and reset, with ?papers=off supported", () => {
     const sim = createSimHandle(readDebugParams("?papers=on&leapfrog=off"));
-    expect(sim.world.papers?.enabled).toBe(true);
+    expect(sim.world.papers).toBeUndefined();
     sim.reset(2);
-    expect(sim.world.papers?.enabled).toBe(true);
+    expect(sim.world.papers).toBeUndefined();
     expect(createSimHandle(readDebugParams("?papers=off")).world.papers).toBeUndefined();
   });
   it("the tiny recruitingPull hook brings more and more-focused real applicants for identical gate trials", () => {
     const trials = (pull: number) => {
       let count = 0, focus = 0;
       for (let seed = 1; seed <= 200; seed++) {
-        const s = createInitialState(seed);
+        const s = createTestCampus(seed); // a working campus: applicants come for a hall, and the first-run opening has none (FLT-16)
         s.walkers = s.walkers.filter((w) => w.kind !== "researcher");
         s.vibes.value = 700;
         s.recruitingPull = pull;

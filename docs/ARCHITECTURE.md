@@ -31,6 +31,8 @@ flowchart LR
 |---|---|---|---|---|---|
 | **app** | `src/app/machine.ts` | `playing.{running,paused}`, `eventOpen`, `gameOver` | `FRAME`, `SYNCED`, `SET_SPEED`, `TOGGLE_PAUSE`, `SET_TOOL`, `SET_HOVER`, `COMMAND`, `CHOOSE`, `KEEP_PLAYING`, `NEW_LAB`, `TOAST*` | Effect actions `advance`, `hold`, `newLab`; delayed `TOAST_EXPIRED` | speed, command queue, frame accumulator, tool, hover, toasts, the 5 Hz HUD snapshot |
 | **training** | `src/sim/machines/training.ts` | `idle`, `training`, `releasing` | `DAY {halls, gain}`, `NAMED {name}` | `RELEASED`, `RUN_STARTED` | run, progress, cost, next model name |
+| **tutorial** | `src/sim/machines/tutorial.ts` | `path`, `hall`, `gateway`, `hire`, `release`, `done`, `skipped` | `FACTS`, `CONTINUE`, `SKIP` | `FINISHED` (one launch toast) | acknowledgement of the current step; stored in `World.tutorial` |
+| **guardrails** | `src/sim/machines/guardrails.ts` | `clear`, `confirming` | `REQUEST`, `CLEAR`, `OBSERVE`, `HALL` | low-runway nudge, redundant-Hall hint | exact pending spending command, low-runway and disconnected-gate warning flags; additive optional `World.guardrails` |
 | **economy** | `.../economy.ts` | `solvent`, `runwayWarning`, `bailout`, `bankrupt` | `DAY {cash, day}` | `BAILOUT` | day of the last bridge round |
 | **goals** | `.../goals.ts` | `tracking`, `won`, `lost` (final) | `DAY {day, cash, values}` | `WON`, `LOST` | the three milestones, the day it ended |
 | **arc** (one per event card) | `.../arc.ts` | `calm`, `brewing`, `cardOpen`, `cooldown` | `DAY {day, ready, slotFree, pace}`, `CHOOSE {choiceIndex}` | `RESOLVED` | choices, cooldown days, day last opened |
@@ -74,6 +76,24 @@ stateDiagram-v2
 ```
 
 The target after every event that could change it is one function, `phaseFor(context)`: card open wins, then an undismissed outcome, then speed. A machine booted with speed 0 starts `paused` (an `always` transition).
+
+### First-run pacing (FLT-16)
+
+At 1× the shell feeds 20 ticks per six seconds: one game day. Day/night still spans 30 days (three minutes), with six-hour dawn/dusk blends. A clean lab starts with one connected Compute Cluster, three researchers, one agent and no visitors or Training Hall. The shell opens at speed 1. (FLT-16 held time until the first build and until each tutorial message was acknowledged; FLT-29 turned that off, because FLT-47's coach marks replace the hint. Selecting a step's build tool or sending `continueTutorial` still acknowledges it in the tutorial machine.) The sim itself can still be stepped headlessly; `applyNow` advances tutorial facts for commands made while paused.
+
+`Snapshot.assistant` / `atoms.assistant` expose `{ step, message, highlight, paused, canSkip }`, or `null` on completion/skip/older saves. Content is `content/tutorial.ts`; targets are `build:path`, `build:hall`, `build:gateway`, `staff:hire`, `training`. Send `COMMAND { command: { type: "continueTutorial" } }` for Next and `{ type: "skipTutorial" }` for Skip. FLT-29 owns the assistant skin, pulsing targets, visible Skip and paused indicator; FLT-16 only routes plain messages through the existing hint host.
+
+`SET_OVERLAY { id, open }` holds time for independently owned menus. Existing Staff, News Room, sound mixer, phone stats/Objectives/Thoughts/Arena and photo mode are wired through it; new hosts can use `useAutoPause`. An inspector, event or outcome card also holds time. Closing one overlay preserves both other overlays and the player's selected speed; no catch-up time is banked while held. Desktop readout panels are persistent HUD, rather than modal menus.
+
+Visitor arrivals run once a day. `visitorDemand` combines connected Gateways/Demo Stages/campus size × hype × Vibes, with word of mouth over the first 60 days and a small trickle. Disconnected or broken attractions contribute nothing. Cards wait until day 40; pressure also requires a release and a reachable Gateway (prior revenue proves that introduction, so bulldozing a Gateway cannot disable later fires). `scripts/pacing-report.mjs` uses paid commands over three seeds × 365 days; the actual 1× browser sequence is `scripts/pacing-shots.mjs`, with no debug URL or clock override.
+
+### Playtest guardrails (FLT-16)
+
+The two tiles directly in front of the gate are reserved against building placement even after their paths are removed. Reachability starts there, and the disconnected-entrance warning persists until that approach reaches another path tile. Stranded visitors and staff follow small deterministic routes around the entrance; restoring the path lets their existing machines resume. Unzoned staff patrol the full reachable network (the playtest fixed a dangling `else` that previously left them standing at the gate).
+
+All paid path/build/hire commands forecast runway from fresh `estimateLedger` books, including the new building's upkeep, prospective Hall researchers, hire wages and connected Gateway revenue. Under three months, the command records `Snapshot.pendingConfirm { kind, cost, runwayAfter, message, command }` without spending or consuming RNG; `confirmed: true` on that exact command approves it, and `cancelConfirm` clears it. A hire has zero upfront cost and adds its daily salary. The first proposal wins a burst of unconfirmed commands. The app holds time without changing the selected speed; the pure tick also holds so a saved pending proposal survives load without a surprise bill. Under two months, `Snapshot.warnings` offers the existing 50% bulldoze refund, firing staff and the automatic $2M emergency bridge round at zero cash. Entrance warnings use the same persistent array.
+
+A second Hall gets a one-line hint when existing halls already consume the available compute and there is no stored surplus. `Snapshot.releaseGoal` counts shipped models and uses the training machine's actual next name, rather than promising Frontier-4 while Frontier-2 is running. The legacy HUD only hosts these plain warnings, confirmation controls and the goal label; FLT-29 can consume the same snapshot contract in skins. A paused tutorial hint now includes “Continue →” so the final waiting instruction has an explicit acknowledgement.
 
 ### Water Discourse arc
 
@@ -451,6 +471,26 @@ Measured on the 1-vCPU Modal box (software-rendered WebGL, so about 8 frames per
 | Skin assets | only the active skin's CSS, slots and fonts load; a skin's fonts are 8 to 100 KB of woff2 |
 
 Determinism and the sim are untouched: the only `src/sim/**` change is one read-only helper (`trainingEtaDays`, for the copy dialog's "about 18 days remaining"), and the golden and perf tests are unchanged and green.
+
+### Integration and layout (FLT-29)
+
+FLT-14 (skins) and FLT-16 (first run, pacing) were built in parallel and both rewrote the same HUD. FLT-29 is the merge, and the layout fixes the FLT-14 review asked for.
+
+- **FLT-16's pause wiring lives in the slot system.** `SET_OVERLAY` is `HudActions.holdTime(id, open)`. The panels the host owns (the payroll, the sound mixer, the News Room, the phone Arena) hold time from `useHudEffects`; a slot's own phone sheets (Stats, Objectives, Thoughts) hold it through the kit's `useAutoPause(actions, id, open)`. The game keeps the ids apart, so closing one never resumes time beneath another. The opening's own messages **no longer hold time** (`autoPaused` is a spend check, a selected walker or an open menu; FLT-47's coach marks replace the old tutorial hint).
+- **FLT-16's game contract reaches the skins as plain data**: `vm.confirm` (a spend that would leave under three months of runway: the `Confirm` slot asks it, with the base's as the fallback so no skin can leave the game waiting on a box nobody can answer; `confirmSpend()` sends the command again marked `confirmed`, `cancelSpend()` sends `cancelConfirm`; time is held like a card), `vm.warnings` (standing problems: a `warn` toast in the base's stack, a warning row in the paperclip's balloon; a toast that repeats one is shown once) and `releaseGoal` (the release goal's label in Objectives, which now names the run in flight; its own progress line goes).
+- **Frontier 95's right column is a managed stack** (`skins/frontier-95/stack.tsx`). Windows tile down `.f95-right`; the column shares its height with the news arrival and the paperclip's balloon, so a balloon can never sit on a window, and a `ResizeObserver` folds the window that has been open longest whenever they no longer fit (one fold per shortfall, never the newest window). A folded window is its title bar (the Task Mangler's says the R&D number). On a phone the column dissolves (`display: contents`) and the windows keep their sheets. Toasts, hints and warnings queue inside the balloon.
+- **The base skin's News Room controls and camera button live in the right-hand column** (in the flow, under the speed buttons), so they can no longer sit on the Thoughts header, in the base or in the five skins that use its layout. On a phone the toasts stack just above the build bar.
+- **Merging `main`** (FLT-14 landed as a squash, then FLT-27 and FLT-17): the sim tests of the newer features were written against the old busy opening, so they stage what they need explicitly (`createTestCampus`, `readyForPressure`, and the headless bots answer the spending check like the playthrough bot does). A building the game grants (an incident's free Security Office, the auction's Datacenter) skips the spending check.
+
+### Playable v1: the UI (FLT-50)
+
+FLT-47's plan (a stranger understands the game in five minutes) splits in two. FLT-49 is the logic (the unlock ladder, the coach step machine, wandering people); FLT-50 is what the player sees of it. The UI is built against the **snapshot contract** (`progress`, `coach`, `unlockCard`, `hud.visible`) and reads it defensively (`ui/hud/playable.ts`): a snapshot with no ladder means "everything is earned", so nothing about an older save or a fixture changes.
+
+- **View-model:** `vm.progress` (level, the one goal as a line with a ratio, the build panel's teasers), `vm.visible` (which HUD panels exist yet), `vm.coach`, `vm.unlock`, `vm.help`; `vm.buildItems` and `vm.staff.jobs` are already only what is unlocked. `?debug=1&ladder=N&coach=K&unlock` previews a rung without playing to it (`ui/hud/previewLadder.ts`; also the fixtures and the shots scenes in `scripts/shots.playable.json`).
+- **The coach** is skin independent where it can be. The host (`ui/hud/CoachLayer.tsx`) finds the target as `[data-coach-active]`, dims everything else with an SVG mask and pulses a ring (`color.highlight`, `color.scrim`, `motion.pulse`), following the element with one `requestAnimationFrame` and re-rendering only when a box moves; the skin's `Coach` slot draws the balloon beside it (`kit.placeBalloon`: never on the target, off the whole popup it is in, clear of the taskbar; on a phone it docks away from the target). The dimming never eats a click and the coach never pauses the game. Every skin marks what the coach can point at with the kit's `useCoach` (`data-coach="<id>"`, plus `data-coach-active` on the current one), which is also what the stranger test clicks.
+- **The build panel** is the first coach target: the Start menu in Frontier 95 (unlocked tools, then locked teasers, then Help), a Build button and panel in the base, a tab that opens the tray in Discovery Disc '96 and the WebRing link in Homepage '98. It reports each opening with `actions.buildPanel(true)` (the `buildPanelOpened` command the first coach step waits for). A shut panel stands in as the active target while the coach points at something inside it.
+- **Hidden until earned:** the host leaves the Arena, Thoughts, Staff and news arrival out of the layout, and the training bar until a Training Hall stands; `Stats`, `Objectives` and `NewsControls` get `visible` and hide their own parts. At level 1 only cash, runway, the date, speed, the goal and the ticker show.
+- **New slots** (all with a base default, so a skin that adds nothing still works): `Coach`, `UnlockCard` (the "New!" card), `HowToPlay` (Help; its words are `content/help.ts`) and `Confirm` (FLT-29).
 
 ## Disasters (FLT-17): acts of God as JSON statecharts
 

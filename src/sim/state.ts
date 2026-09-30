@@ -8,6 +8,8 @@ import { arcMachine } from "./machines/arc";
 import { economyMachine } from "./machines/economy";
 import { goalsMachine } from "./machines/goals";
 import { trainingMachine } from "./machines/training";
+import { coachMachine } from "./machines/coach";
+import { progressionMachine } from "./machines/progression";
 import { pushNews } from "./news";
 import { newSlop } from "./slop";
 import { blankVibes, initialVibes } from "./vibes";
@@ -21,10 +23,11 @@ import type { GameState } from "./types";
 export const GRID_SIZE = 24;
 export const START_CASH = 5_000_000;
 const START_CAPABILITY = 10;
-const START_VISITORS = 18;
+/** The garage's first model is a small one (FLT-58): about a minute and a half at 1× on the starting Cluster. */
+export const FIRST_RUN_COST = 100;
 
-/** A living campus at tick 0: gate, paths, one of each core building, a run 40% done, and a crowd mid-stride. */
-export function createInitialState(seed = 1): GameState {
+/** A quiet campus: the gate, a short connected stub, compute, three researchers and one agent. */
+export function createInitialState(seed = 1, opening: "garage" | "campus" = "garage"): GameState {
   const rng = createRng(seed);
   const w = GRID_SIZE;
   const h = GRID_SIZE;
@@ -32,10 +35,13 @@ export function createInitialState(seed = 1): GameState {
   const path = (x: number, z: number) => {
     paths[z * w + x] = true;
   };
-  for (let z = 10; z <= 22; z++) path(11, z);
+  for (let z = 19; z <= 22; z++) path(11, z);
   path(12, 22);
-  for (let x = 6; x <= 17; x++) path(x, 16);
-  for (let x = 8; x <= 15; x++) path(x, 10);
+  if (opening === "campus") {
+    for (let z = 10; z <= 22; z++) path(11, z);
+    for (let x = 6; x <= 17; x++) path(x, 16);
+    for (let x = 8; x <= 15; x++) path(x, 10);
+  }
 
   const state: GameState = {
     seed,
@@ -53,7 +59,7 @@ export function createInitialState(seed = 1): GameState {
     buildings: [],
     walkers: [],
     economy: initialStored(economyMachine, { lastBailout: null }),
-    training: initialStored(trainingMachine, { run: 1, progress: 120, cost: 300, name: modelName(1, rng, 0) }),
+    training: { ...initialStored(trainingMachine, { run: 1, progress: 0, cost: opening === "garage" ? FIRST_RUN_COST : 300, name: modelName(1, rng, 0) }), value: "idle" },
     models: [],
     news: [],
     thoughts: [],
@@ -63,7 +69,7 @@ export function createInitialState(seed = 1): GameState {
     version: 1,
     nextId: 1,
     // The old generic "rival" headlines are retired: the six rival labs of the Race (sim/race) make the real news.
-    flags: { nextFiller: 3, nextRival: 1e9 },
+    flags: { nextFiller: 3, nextRival: 1e9, walkerPathCount: paths.filter(Boolean).length },
     recentThoughts: [],
     agentBonus: 0,
     waterDiscourse: 0,
@@ -72,6 +78,9 @@ export function createInitialState(seed = 1): GameState {
     leapfrog: createLeapfrog(),
     slop: newSlop(w, h),
     staff: [],
+    coach: initialStored(coachMachine, undefined),
+    progression: initialStored(progressionMachine, undefined),
+    unlockCards: [],
     disasters: createDisasters(seed),
     arcs: Object.fromEntries(
       EVENTS.map((def) => [def.id, initialStored(arcMachine, { choices: def.choices.length, cooldownDays: def.cooldown ?? EVENT_COOLDOWN_DAYS, openedDay: null })]),
@@ -83,19 +92,22 @@ export function createInitialState(seed = 1): GameState {
     state.buildings.push({ id: state.nextId++, kind, x, z, w: bw, d: bd, placedTick: 0, reliability: 1, broken: false, brokenTick: 0 });
     state.flags[`built:${kind}`] = 0;
   };
-  put("cluster", 8, 11);
-  put("hall", 12, 11);
-  // Down front, so a gateway dropped beside the spine never hides it from the default camera.
-  put("kombucha", 12, 19);
+  if (opening === "campus") {
+    put("cluster", 8, 11); put("hall", 12, 11); put("kombucha", 12, 19);
+    state.progression = { value: "complete", context: { level: 5 } };
+    state.coach = { value: "skipped", context: { index: 0, elapsed: 0 } };
+    state.flags.coachBuildOpened = 0; state.flags.started = 0;
+    state.training = { ...state.training, value: "training", context: { ...state.training.context, progress: 120 } };
+  } else put("cluster", 9, 19);
 
-  seedWalkers(state, "researcher", researchersAtStart(state), rng);
-  seedWalkers(state, "agent", agentTarget(state), rng);
-  seedWalkers(state, "visitor", START_VISITORS, rng);
+  seedWalkers(state, "researcher", opening === "campus" ? 11 : researchersAtStart(state), rng);
+  seedWalkers(state, "agent", opening === "campus" ? 11 : agentTarget(state), rng);
 
+  if (opening === "campus") seedWalkers(state, "visitor", 18, rng);
   state.vibes = initialVibes(state);
 
   pushNews(state, rng, "start");
-  pushNews(state, rng, "runStarted", { model: state.training.context.name });
+  if (opening === "campus") pushNews(state, rng, "runStarted", { model: state.training.context.name });
   for (let i = 0; i < 3; i++) dailyThoughts(state, rng, true);
 
   state.rngState = rng.state();

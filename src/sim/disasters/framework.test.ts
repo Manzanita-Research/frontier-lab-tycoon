@@ -6,8 +6,8 @@ import { BUILDINGS } from "../../content/buildings";
 import { eventById } from "../../content/events";
 import { canPlace, placeBuilding } from "../commands";
 import { createRng } from "../rng";
-import { createInitialState } from "../state";
-import { perfBudget } from "../testkit";
+import { createTestCampus as createInitialState } from "../testkit";
+import { perfBudget, createTestCampus, layPaths, readyForPressure } from "../testkit";
 import { applyNow, tick } from "../tick";
 import { GUARDS, GUARD_NAMES, STATS, STAT_NAMES, VERBS, VERB_NAMES, checkCall, runVerb, statsIn, vocabulary, type VerbEnv } from "../verbs";
 import type { GameState } from "../types";
@@ -153,7 +153,7 @@ describe("the vocabulary", () => {
   });
 
   it("reads the lab's stats by name", () => {
-    const s = createInitialState(1);
+    const s = createTestCampus(1);
     const read = Object.fromEntries(STAT_NAMES.map((n) => [n, STATS[n]!(s, null)]));
     expect(read.clusters).toBe(1);
     expect(read.halls).toBe(1);
@@ -251,7 +251,8 @@ describe("verbs", () => {
   });
 
   it("building.fire breaks a building and remembers it; wear caps reliability; ensure places a free Security Office once", () => {
-    const s = createInitialState(3);
+    const s = createTestCampus(3);
+    layPaths(s); // the free Security Office arrives beside a path
     s.cash = 1000;
     const cash = s.cash;
     const e = env(s, "x");
@@ -322,7 +323,8 @@ describe("verbs", () => {
   });
 
   it("card sets the offer flag and opens the card at once when the screen is free", () => {
-    const s = createInitialState(1);
+    const s = createTestCampus(1);
+    readyForPressure(s); // cards wait for a first launch and a gateway (FLT-16)
     const e = env(s, "weightsLeak");
     runVerb(e, { type: "card", params: { id: "leak" } });
     expect(e.run!.card).toBe("dz:weightsLeak:leak");

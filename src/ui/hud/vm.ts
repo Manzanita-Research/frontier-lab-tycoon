@@ -24,8 +24,10 @@ import type { NewsItem, Tone, WalkerKind } from "../../sim/types";
 import { trendOf, VIBES_MAX, WEIGHTS } from "../../sim/vibes";
 import { NO_MOTION, type MotionView } from "./leapfrogMotion";
 import { SKIN_API_VERSION } from "./types";
+import { HELP_BUILDINGS, HELP_LOOP, HELP_NUMBERS, HELP_TITLE } from "../../content/help";
+import { playableOf, type PlayableInput } from "./playable";
 import type {
-  ArenaVM, BenchCellVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, EditionRowVM, EventVM, HudVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
+  ArenaVM, BenchCellVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HudVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
   ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, ResponseVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, StreamVM, ThoughtRowVM, TrainingVM, TrendVM, VoiceVM, WalkerKindVM,
 } from "./types";
 
@@ -57,6 +59,8 @@ export interface HudInput {
   room: { archive: readonly Edition[]; view: "archive" | Edition | null; unread: readonly string[]; storage: boolean };
   /** How many chat messages have arrived so far. */
   chatCount: number;
+  /** Help ▸ How to play is open. */
+  helpOpen: boolean;
   mixer: { open: boolean; ready: boolean; muted: boolean; master: number; music: number; sfx: number };
   photo: { on: boolean; time: string; shot: { id: number; url: string; name: string } | null; flash: number };
   skins: SkinPickerVM;
@@ -115,7 +119,8 @@ function statsOf(i: HudInput): StatsVM {
   const s = i.snap;
   const v = s.vibes;
   const race = s.race;
-  const runwayLow = s.runway !== null && s.runway < 6;
+  // "Low" means the same as the spending dialog: under three months (FLT-58: six fired in the first minutes of a healthy lab).
+  const runwayLow = s.runway !== null && s.runway < 3;
   const date = formatDate(s.day);
   return {
     labName: s.labName,
@@ -181,7 +186,9 @@ function objectivesOf(s: Snapshot): ObjectivesVM {
     deadline: formatDate(SCENARIO.deadlineDay),
     items: s.goals.map((g) => {
       const def = goalDefs.get(g.id)!;
-      return { id: g.id, label: def.label, progress: goalProgressText(def, g.value), ratio: Math.max(0, Math.min(1, g.value / g.target)), met: g.met };
+      // The release goal names the run actually training ("Ship 3 models (0/3), next: Frontier-2"), so its own progress line goes.
+      const release = g.id === "release";
+      return { id: g.id, label: release ? s.releaseGoal : def.label, progress: release ? "" : goalProgressText(def, g.value), ratio: Math.max(0, Math.min(1, g.value / g.target)), met: g.met };
     }),
   };
 }
@@ -261,7 +268,7 @@ function buildOf(i: HudInput): { items: BuildItemVM[]; tip: BuildTipVM | null } 
   return { items, tip };
 }
 
-function staffOf(i: HudInput): StaffVM {
+function staffOf(i: HudInput, earned: ReadonlySet<string>): StaffVM {
   const ops = i.snap.ops;
   const row = (o: (typeof ops.staff)[number]): StaffRowVM => ({ id: o.id, job: o.job, title: o.title, name: o.name, status: o.status, color: STAFF[o.job].color, zone: o.zone, leaving: o.leaving });
   const painting = i.zone === null ? null : ops.staff.find((o) => o.id === i.zone);
@@ -271,7 +278,8 @@ function staffOf(i: HudInput): StaffVM {
     payroll: ops.payroll,
     payrollText: ops.staff.length > 0 ? `${formatMoney(ops.payroll)}/day` : "nobody on the payroll",
     painting: painting ? row(painting) : null,
-    jobs: ops.jobs.map((j): StaffJobVM => ({ job: j.job, title: j.title, blurb: j.blurb, salary: j.salary, salaryText: `${formatMoney(j.salary)}/day`, count: j.count, max: j.max, canHire: j.canHire, reason: j.reason, color: STAFF[j.job].color })),
+    // Only the kinds of staff the lab has unlocked can be hired.
+    jobs: ops.jobs.filter((j) => earned.has(j.job)).map((j): StaffJobVM => ({ job: j.job, title: j.title, blurb: j.blurb, salary: j.salary, salaryText: `${formatMoney(j.salary)}/day`, count: j.count, max: j.max, canHire: j.canHire, reason: j.reason, color: STAFF[j.job].color })),
     roster: ops.staff.map(row),
     slopPct: ops.slopPct,
     broken: ops.broken.length,
@@ -313,7 +321,10 @@ function eventOf(i: HudInput): { event: EventVM | null; era: HudVM["eraCard"] } 
       tone: def.tone,
       stripe: def.stripe ?? TONE_LABEL[def.tone],
       kind: def.kind === "auction" || def.kind === "response" || def.kind === "stream" ? def.kind : "plain",
-      choices: def.choices.map((c, k) => ({ label: c.label, hint: fillTemplate(c.hint, vars), key: k + 1 })),
+      choices: def.choices.map((c, k) => {
+        const blocked = i.snap.eventBlocked?.[k];
+        return blocked ? { label: c.label, hint: blocked, key: k + 1, disabled: blocked } : { label: c.label, hint: fillTemplate(c.hint, vars), key: k + 1 };
+      }),
       paddles: def.kind === "auction" ? rivals.map((r, k) => ({ id: r.id, name: r.short, color: r.color, number: 200 + ((r.score * 7 + k * 31) % 800) })) : [],
       response: def.kind === "response" ? responseOf(i.snap, vars) : null,
       stream: def.kind === "stream" ? streamOf(i.snap, def.id, vars) : null,
@@ -562,8 +573,47 @@ function photoOf(i: HudInput): PhotoVM {
   };
 }
 
+/** A toast that says what a standing warning already says is the warning: it is shown once. */
+const spokenToasts = (i: HudInput) => i.toasts.filter((t) => !i.snap.warnings.includes(t.text));
+
+/**
+ * One standing hint at a time, and none while a toast is talking or the coach is (it has the floor); the gateway hint is redundant
+ * once a toast has said it, and pointless while the Gateway is still locked.
+ */
+function standingHints(i: HudInput, play: PlayableInput): HudVM["hints"] {
+  if (spokenToasts(i).length > 0 || play.coach) return [];
+  return !i.snap.hasGateway && !i.toldGateway && play.buildings.has("gateway") ? ["gateway"] : i.tapHint ? ["tap"] : [];
+}
+
+function confirmOf(s: Snapshot): ConfirmVM | null {
+  const p = s.pendingConfirm;
+  if (!p) return null;
+  return {
+    kind: p.kind,
+    cost: p.cost,
+    costText: p.cost > 0 ? formatMoney(p.cost) : "free",
+    runwayAfter: p.runwayAfter,
+    runwayText: p.runwayAfter === null ? "∞" : `${p.runwayAfter.toFixed(1)} mo`,
+    message: p.message,
+  };
+}
+
+function helpOf(items: readonly BuildItemVM[]): HudVM["help"] {
+  const buildings = items
+    .filter((it) => !it.isBulldoze && it.kind !== "staff")
+    .map((it) => ({ kind: it.kind, name: it.name, line: HELP_BUILDINGS[it.kind] ?? `${it.name}: ${it.blurb ?? ""}`.trim() }));
+  return { title: HELP_TITLE, loop: [...HELP_LOOP], buildings, numbers: HELP_NUMBERS.map((n) => ({ ...n })) };
+}
+
+/** What the lab has earned: only these tools are in the build panel (the bulldozer always is), and the Staff tile follows the payroll. */
+function earnedItems(items: BuildItemVM[], play: PlayableInput): BuildItemVM[] {
+  return items.filter((it) => (it.isBulldoze ? true : it.kind === "staff" ? play.visible.staff : it.isPath || play.buildings.has(it.kind)));
+}
+
 export function hudViewModel(i: HudInput): HudVM {
+  const play = playableOf(i.snap);
   const build = buildOf(i);
+  const items = earnedItems(build.items, play);
   const { event, era } = eventOf(i);
   return {
     apiVersion: SKIN_API_VERSION,
@@ -571,15 +621,33 @@ export function hudViewModel(i: HudInput): HudVM {
     training: trainingOf(i.snap),
     objectives: objectivesOf(i.snap),
     inspector: inspectorOf(i.snap.inspect, i.follow, i.snap.labName),
-    buildItems: build.items,
+    buildItems: items,
     buildTip: build.tip,
     speed: speedOf(i.speed),
-    staff: staffOf(i),
+    staff: staffOf(i, play.staff),
     bubbles: bubblesOf(i),
     ticker: i.news.slice(-TICKER_ITEMS).map((n) => ({ id: n.id, text: n.text, tone: n.tone })),
-    toasts: i.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })),
+    toasts: spokenToasts(i).map((t) => ({ id: t.id, text: t.text, tone: t.tone })),
     // One hint at a time, and none while a toast is talking; the gateway hint is redundant once a toast has said it.
-    hints: i.toasts.length > 0 ? [] : !i.snap.hasGateway && !i.toldGateway ? ["gateway"] : i.tapHint ? ["tap"] : [],
+    hints: standingHints(i, play),
+    warnings: [...i.snap.warnings],
+    progress: {
+      level: play.level,
+      levelName: play.levelName,
+      goal: {
+        ...play.goal,
+        // The sim says the progress in words when a count alone would not ("$26K of $40K a day · 3 of 12 visitors").
+        progressText: play.goal.status ?? `${Math.min(play.goal.current, play.goal.target)}/${play.goal.target}`,
+        line: play.goal.text ? `${play.goal.text} · ${play.goal.status ?? `${Math.min(play.goal.current, play.goal.target)}/${play.goal.target}`}` : "",
+        ratio: play.goal.target > 0 ? Math.max(0, Math.min(1, play.goal.lowerIsBetter ? (play.goal.current > 0 ? play.goal.target / play.goal.current : 0) : play.goal.current / play.goal.target)) : 0,
+      },
+      teasers: play.teasers.map((t) => ({ ...t })),
+    },
+    visible: play.visible,
+    coach: play.coach,
+    unlock: play.unlock,
+    help: i.helpOpen ? helpOf(items) : null,
+    confirm: confirmOf(i.snap),
     event,
     thoughtsPanel: thoughtsOf(i),
     arena: arenaOf(i),

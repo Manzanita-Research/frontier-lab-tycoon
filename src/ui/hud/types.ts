@@ -227,17 +227,110 @@ export interface TickerItemVM {
 export interface ToastVM {
   id: number;
   text: string;
-  /** "hint" is a standing tip ("Build an API Gateway...") that is not dismissed, only goes away when it comes true. */
-  tone: ToneVM | "hint";
+  /**
+   * "hint" is a standing tip ("Build an API Gateway...") that is not dismissed, only goes away when it comes true.
+   * "warn" is a standing warning ("Your entrance isn't connected...") that stays until the cause is fixed.
+   */
+  tone: ToneVM | "hint" | "warn";
 }
 
 export type HintId = "gateway" | "tap";
+
+/**
+ * A spend the game wants confirmed before it goes through: it would leave the lab under three months of runway. Time is held
+ * (a "card" pause) until it is answered, with `confirmSpend()` (do it anyway) or `cancelSpend()`.
+ */
+export interface ConfirmVM {
+  kind: "hire" | "build";
+  cost: number;
+  /** "$600K", or "free". */
+  costText: string;
+  /** Months of runway it would leave, or null (no burn). */
+  runwayAfter: number | null;
+  /** "1.8 mo" */
+  runwayText: string;
+  /** "This leaves 1.8 months of runway. The board will have questions." */
+  message: string;
+}
+
+// ---- Playable v1: what the player has unlocked, the coach marks, and the "New!" card ----
+
+/** The HUD panels the player earns as the lab grows (a hidden panel is simply not drawn). */
+export type HudPanelId = "revenue" | "vibes" | "arena" | "rnd" | "thoughts" | "news" | "staff" | "events" | "papers" | "disasters";
+export type VisibleVM = Record<HudPanelId, boolean>;
+
+/** What the build panel teases as locked: one row per milestone, how many it unlocks and the goal that earns them ("2 more · Ship your first model"). */
+export interface TeaserVM {
+  label: string;
+  hint: string;
+}
+
+export interface GoalVM {
+  /** "Ship your first model" */
+  text: string;
+  current: number;
+  target: number;
+  /** "Ship your first model · 0/1" */
+  line: string;
+  /** Just the progress, for a skin that shows it on its own line: "0/1", "$26K of $40K a day · 3 of 12 visitors". */
+  progressText: string;
+  /** 0 to 1 */
+  ratio: number;
+}
+
+export interface ProgressVM {
+  /** 1 to 5: "Garage", "Open for business", "Growing team", "The Race", "Scrutiny". */
+  level: number;
+  levelName: string;
+  goal: GoalVM;
+  teasers: TeaserVM[];
+}
+
+/**
+ * One coach mark: a dimmed screen with a spotlight on `[data-coach="<target>"]`, and a line of copy. It waits for the player to do
+ * the thing (never a Continue button, never a pause). `suggest` says where the map's ghost tiles are.
+ */
+export interface CoachVM {
+  id: string;
+  /** 1-based, of `of` ("3 of 7"). */
+  step: number;
+  of: number;
+  text: string;
+  /** "start", "build:path", "build:hall", "speed", "map:researcher", "training", "build:gateway", "stat:runway", "goals" or "map:suggest". */
+  target: string;
+  /** Dim everything but the target (a build step). Otherwise only the ring shows: nothing is dimmed while you wait. */
+  dim?: boolean;
+  /** An "info" line (waitFor "timer") fades on its own; the others wait for the action. */
+  waitFor: "action" | "timer";
+  canSkip: boolean;
+}
+
+/** The small "New!" card that comes with a level-up. */
+export interface UnlockCardVM {
+  id: string;
+  title: string;
+  body: string;
+  items: string[];
+}
+
+/** Help ▸ How to play. Only present while the window is open. */
+export interface HelpVM {
+  title: string;
+  /** The loop in five lines. */
+  loop: string[];
+  /** One line for each building you have unlocked. */
+  buildings: { kind: string; name: string; line: string }[];
+  /** What cash, runway, Vibes and hype mean. */
+  numbers: { name: string; line: string }[];
+}
 
 export interface ChoiceVM {
   label: string;
   hint: string;
   /** 1 to 3: pressing the key picks it. */
   key: number;
+  /** Why it can't be taken right now (a bid bigger than the bank): draw it greyed out, with this as its hint. */
+  disabled?: string;
 }
 
 export interface AuctionPaddleVM {
@@ -598,6 +691,20 @@ export interface HudVM {
   ticker: TickerItemVM[];
   toasts: ToastVM[];
   hints: HintId[];
+  /** Standing warnings ("Your entrance isn't connected...", low runway with ways out): they stay until fixed. */
+  warnings: string[];
+  /** Where the lab is on the ladder, the one goal in front of you, and what the build panel teases. */
+  progress: ProgressVM;
+  /** Which HUD panels are earned yet. Draw only these. */
+  visible: VisibleVM;
+  /** The coach mark on screen, or null (none, skipped, or finished). */
+  coach: CoachVM | null;
+  /** The "New!" card, or null. */
+  unlock: UnlockCardVM | null;
+  /** Help ▸ How to play, while it is open. */
+  help: HelpVM | null;
+  /** A spend waiting for a yes or a no (also holds time). */
+  confirm: ConfirmVM | null;
   event: EventVM | null;
   thoughtsPanel: ThoughtRowVM[];
   arena: ArenaVM;
@@ -629,6 +736,21 @@ export interface HudActions {
   /** Light up who thinks a Thoughts row (`ThoughtRowVM.key`); again to switch off. */
   highlight(key: string): void;
   dismissToast(id: number): void;
+  /** Answer `vm.confirm`: go ahead with the spend, or keep the runway. */
+  confirmSpend(): void;
+  cancelSpend(): void;
+  /** The coach: skip it for good, or start it again (Start ▸ Help ▸ Replay tutorial). */
+  coachSkip(): void;
+  coachReplay(): void;
+  /** Close the "New!" card. */
+  dismissUnlock(): void;
+  /** The build panel opened or shut (the coach's first step waits for it opening). Say it whenever yours does. */
+  buildPanel(open: boolean): void;
+  /** Help ▸ How to play. */
+  openHelp(): void;
+  closeHelp(): void;
+  /** Hold time while a panel of yours is open (`id` names it; `false` lets go). Use `useAutoPause` from the kit. */
+  holdTime(id: string, open: boolean): void;
   toggleArena(): void;
   keepPlaying(): void;
   newLab(): void;

@@ -20,6 +20,10 @@ import { dailyThoughts } from "./thoughts";
 import { dailyTraining } from "./training";
 import { dailyWalkers, updateWalkers } from "./walkers";
 import type { GameState } from "./types";
+import { updateCoach } from "./coach";
+import { systemUnlocked, updateProgression } from "./progression";
+import { updateTutorial } from "./tutorial";
+import { observeGuardrails, pendingConfirmOf } from "./guardrails";
 
 export { TICKS_PER_DAY };
 
@@ -30,36 +34,41 @@ export { TICKS_PER_DAY };
 export function tick(state: GameState, commands: readonly Command[] = []) {
   const rng = createRng(state.rngState);
   applyCommands(state, commands, rng);
-  applyCollusionChoices(state);
-  if (openEventOf(state) || state.goals.value === "lost") {
+  if (commands.length > 0) { updateTutorial(state); observeGuardrails(state); }
+  if (systemUnlocked(state, "collusion")) applyCollusionChoices(state);
+  if (pendingConfirmOf(state) || openEventOf(state) || state.goals.value === "lost") {
     state.rngState = rng.state();
     return;
   }
   state.tick++;
   updateWalkers(state, rng);
-  updateProtesters(state, rng);
+  if (systemUnlocked(state, "protests")) updateProtesters(state, rng);
   updateStaff(state, rng);
-  updateCollusion(state);
-  updateDisasters(state);
+  if (systemUnlocked(state, "collusion")) updateCollusion(state);
+  if (systemUnlocked(state, "disasters")) updateDisasters(state);
   if (state.tick % TICKS_PER_DAY === 0) {
     state.day++;
-    dailyDisasters(state);
+    if (systemUnlocked(state, "disasters")) dailyDisasters(state);
     dailyEconomy(state, rng);
     dailyTraining(state, rng);
     dailyWalkers(state, rng);
-    dailyBreakdowns(state, rng);
-    dailyDiscourse(state, rng);
+    if (systemUnlocked(state, "breakdowns")) dailyBreakdowns(state, rng);
+    if (systemUnlocked(state, "protests")) dailyDiscourse(state, rng);
     dailyNews(state, rng);
-    dailySlop(state, rng);
+    if (systemUnlocked(state, "slop")) dailySlop(state, rng);
     dailyCrowd(state, rng);
-    dailyCollusion(state);
-    dailyRace(state, rng);
-    dailyLeapfrog(state, rng);
-    dailyPapers(state, rng);
+    if (systemUnlocked(state, "collusion")) dailyCollusion(state);
+    if (systemUnlocked(state, "arena")) dailyRace(state, rng);
+    if (systemUnlocked(state, "leapfrog")) dailyLeapfrog(state, rng);
+    if (systemUnlocked(state, "papers")) dailyPapers(state, rng);
     dailyThoughts(state, rng);
     dailyGoals(state, rng);
-    dailyEvents(state);
-  }
+    if (systemUnlocked(state, "events")) dailyEvents(state);
+    updateProgression(state);
+    updateTutorial(state);
+    observeGuardrails(state);
+  } else updateProgression(state);
+  updateCoach(state, true);
   state.rngState = rng.state();
 }
 
@@ -67,6 +76,9 @@ export function tick(state: GameState, commands: readonly Command[] = []) {
 export function applyNow(state: GameState, commands: readonly Command[]) {
   const rng = createRng(state.rngState);
   applyCommands(state, commands, rng);
-  applyCollusionChoices(state);
+  updateTutorial(state);
+  observeGuardrails(state);
+  if (systemUnlocked(state, "collusion")) applyCollusionChoices(state);
+  updateCoach(state);
   state.rngState = rng.state();
 }

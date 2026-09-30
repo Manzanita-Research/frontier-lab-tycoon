@@ -337,10 +337,10 @@ body.photo .world .reason {
   }
 }
 @media (max-width: 640px) {
+  /* In the flow of the right-hand column (under the News Room controls), not floating over them. */
   .photo-btn {
-    right: 8px;
-    bottom: auto;
-    top: 168px;
+    position: static;
+    align-self: flex-end;
     width: 46px;
     height: 46px;
   }

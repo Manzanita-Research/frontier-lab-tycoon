@@ -7,13 +7,14 @@
 //   SRE:         walks to the nearest broken building and fixes it (2 to 4 game hours once there).
 //   Comms Rep:   walks up to a protester and hands them a tote bag; each one also takes 2 discourse off every day (protest.ts).
 //   Security:    walks the fence. It is the hook for catching escaped agents (FLT-5): see `guardsOn`.
+import { staffUnlocked } from "./progression";
 import { BUILDINGS } from "../content/buildings";
 import { MAX_PER_JOB, MAX_STAFF, STAFF } from "../content/staff";
 import { repairBuilding } from "./breakdowns";
 import { fillTemplate } from "./format";
 import { stepStaff, staffStart } from "./machines/staff";
 import { addToast, pushNews } from "./news";
-import { bfsRoute, entrances, getReach, inBounds, isPathTile, nearestPathTile, routeToRect, tileIndex } from "./pathfind";
+import { bfsRoute, entrances, getReach, inBounds, isPathTile, nearestPathTile, routeToRect, tileIndex, entranceConnected, gateAmble } from "./pathfind";
 import { mopTile } from "./slop";
 import type { Rng } from "./rng";
 import type { EventFromLogic } from "xstate";
@@ -56,6 +57,7 @@ const send = (s: Staffer, event: StaffEvent) => {
 
 /** Can this job be filled right now? A reason if not. */
 export function canHire(state: GameState, job: StaffJob): { ok: true } | { ok: false; reason: string } {
+  if (!staffUnlocked(state, job)) return { ok: false, reason: "Meet your next goal to unlock this job" };
   if (state.staff.length >= MAX_STAFF) return { ok: false, reason: "The office is full" };
   if (staffOf(state, job).length >= MAX_PER_JOB) return { ok: false, reason: `That's plenty of ${STAFF[job].title}s` };
   return { ok: true };
@@ -260,10 +262,20 @@ function patrol(state: GameState, s: Staffer, rng: Rng) {
     s.task = (s.task + 1) % FENCE.length;
     return;
   }
+  if (s.job === "comms" && !state.walkers.some((w) => w.kind === "protester")) {
+    const spot = state.buildings.find((b) => b.kind === "kombucha") ?? state.buildings.find((b) => b.kind === "gateway");
+    const zoned = s.zone.find((i) => getReach(state).tiles[i]);
+    const route = zoned !== undefined ? pathRoute(state, s, new Set([zoned])) : spot ? routeToRect(state, ...fromTile(state, s), spot) : pathRoute(state, s, new Set([tileIndex(state, 11, 19)]));
+    if (route) s.route = route;
+    return;
+  }
   const reach = getReach(state).tiles;
   const tiles: number[] = [];
-  if (s.zone.length > 0) for (const i of s.zone) if (reach[i]) tiles.push(i);
-  else for (let i = 0; i < reach.length; i++) if (reach[i]) tiles.push(i);
+  if (s.zone.length > 0) {
+    for (const i of s.zone) if (reach[i]) tiles.push(i);
+  } else {
+    for (let i = 0; i < reach.length; i++) if (reach[i]) tiles.push(i);
+  }
   if (tiles.length === 0) return;
   const goal = rng.pick(tiles);
   const route = pathRoute(state, s, new Set([goal]));
@@ -318,6 +330,8 @@ function finish(state: GameState, rng: Rng, s: Staffer) {
       if (b?.broken) {
         repairBuilding(state, b);
         state.flags.lastRepaired = b.id;
+        // Level 3's goal wants a fix (FLT-58); counted only while it is the goal.
+        if (state.progression?.context.level === 3) state.flags.repaired = (state.flags.repaired ?? 0) + 1;
         pushNews(state, rng, "repaired");
       }
       break;
@@ -358,9 +372,17 @@ export function updateStaff(state: GameState, rng: Rng) {
     repairStaff(state);
   }
   let gone: Set<number> | null = null;
+  const disconnected = !entranceConnected(state);
   for (const s of state.staff) {
     s.px = s.x;
     s.pz = s.z;
+    if (disconnected && s.machine.value !== "leaving" && !(s.job === "security" && s.zone.length === 0)) {
+      if (s.machine.value === "going" || s.machine.value === "working") send(s, { type: "LOST" });
+      if (s.machine.value === "arriving") send(s, { type: "ARRIVED" });
+      if (s.route.length === 0 || state.tick % 12 === 0) s.route = gateAmble(state, s.id);
+      move(s);
+      continue;
+    }
     switch (s.machine.value) {
       case "arriving":
         move(s);

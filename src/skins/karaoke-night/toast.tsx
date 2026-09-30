@@ -36,6 +36,12 @@ function heading(toast: ToastVM): ReactNode {
           <Note /> TIP <Note />
         </>
       );
+    case "warn":
+      return (
+        <>
+          <Note /> HEADS UP <Note />
+        </>
+      );
     default:
       return (
         <>
@@ -53,7 +59,9 @@ export function Toast({ toast, actions }: SlotPropsMap["Toast"]) {
       <span className="kn-toast-t">{toast.text}</span>
     </>
   );
+  // A tip is a standing hint and a warning a standing problem: neither can be clicked away, they go when it comes true / is fixed.
   if (toast.tone === "hint") return <div className="kn-toast hint">{body}</div>;
+  if (toast.tone === "warn") return <div className="kn-toast bad" role="status">{body}</div>;
   return (
     <button type="button" className={`kn-toast ${toast.tone}`} onClick={() => actions.dismissToast(toast.id)}>
       {body}

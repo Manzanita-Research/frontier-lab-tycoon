@@ -1,0 +1,68 @@
+{
+  "opening": [
+    {
+      "seed": 1,
+      "movementSeconds": 5.1,
+      "releaseDay": 34,
+      "gatewaySeconds": 204,
+      "level": 3,
+      "revenue": 26000,
+      "visitors": 3,
+      "cash": 3011000,
+      "deterministic": true
+    },
+    {
+      "seed": 2,
+      "movementSeconds": 5.1,
+      "releaseDay": 34,
+      "gatewaySeconds": 204,
+      "level": 3,
+      "revenue": 26000,
+      "visitors": 2,
+      "cash": 3019000,
+      "deterministic": true
+    },
+    {
+      "seed": 3,
+      "movementSeconds": 5.1,
+      "releaseDay": 34,
+      "gatewaySeconds": 204,
+      "level": 3,
+      "revenue": 26000,
+      "visitors": 2,
+      "cash": 3014000,
+      "deterministic": true
+    },
+    {
+      "seed": 42,
+      "movementSeconds": 5.1,
+      "releaseDay": 34,
+      "gatewaySeconds": 204,
+      "level": 3,
+      "revenue": 26000,
+      "visitors": 3,
+      "cash": 3011000,
+      "deterministic": true
+    },
+    {
+      "seed": 2027,
+      "movementSeconds": 6.8999999999999995,
+      "releaseDay": 34,
+      "gatewaySeconds": 204,
+      "level": 3,
+      "revenue": 26000,
+      "visitors": 1,
+      "cash": 3011000,
+      "deterministic": true
+    }
+  ],
+  "midgame": {
+    "day": 420,
+    "buildings": 20,
+    "people": 177,
+    "ready": 0.710815928355157,
+    "cash": 15677964,
+    "freshDrop": true,
+    "allRepaired": true
+  }
+}
