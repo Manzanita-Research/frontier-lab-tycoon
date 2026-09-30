@@ -4,6 +4,8 @@ import { applyCollusionChoices, dailyCollusion, updateCollusion } from "./collus
 import { TICKS_PER_DAY } from "./constants";
 import { dailyBreakdowns } from "./breakdowns";
 import { dailyDisasters, updateDisasters } from "./disasters/driver";
+import { declineBuilding } from "./endings/autopilot";
+import { dailyEndings, endingHalts, endingsOwnTheGame, updateEndings } from "./endings/driver";
 import { dailyCrowd } from "./crowd";
 import { dailyEconomy } from "./economy";
 import { dailyEvents, openEventOf } from "./events";
@@ -29,14 +31,16 @@ export { TICKS_PER_DAY };
 
 /**
  * Advance one tick, mutating `state` in place. Same state + same commands = same result.
- * Time stands still while an event card is open (commands still apply, so the answer gets in) and after a loss.
+ * Time stands still while an event card is open (commands still apply, so the answer gets in), after a loss, and after
+ * an ending that doesn't let you carry on.
  */
 export function tick(state: GameState, commands: readonly Command[] = []) {
   const rng = createRng(state.rngState);
+  commands = declineBuilding(state, commands);
   applyCommands(state, commands, rng);
   if (commands.length > 0) { updateTutorial(state); observeGuardrails(state); }
   if (systemUnlocked(state, "collusion")) applyCollusionChoices(state);
-  if (pendingConfirmOf(state) || openEventOf(state) || state.goals.value === "lost") {
+  if (pendingConfirmOf(state) || openEventOf(state) || state.goals.value === "lost" || endingHalts(state)) {
     state.rngState = rng.state();
     return;
   }
@@ -46,6 +50,7 @@ export function tick(state: GameState, commands: readonly Command[] = []) {
   updateStaff(state, rng);
   if (systemUnlocked(state, "collusion")) updateCollusion(state);
   if (systemUnlocked(state, "disasters")) updateDisasters(state);
+  if (state.endings) updateEndings(state, rng);
   if (state.tick % TICKS_PER_DAY === 0) {
     state.day++;
     if (systemUnlocked(state, "disasters")) dailyDisasters(state);
@@ -62,7 +67,8 @@ export function tick(state: GameState, commands: readonly Command[] = []) {
     if (systemUnlocked(state, "leapfrog")) dailyLeapfrog(state, rng);
     if (systemUnlocked(state, "papers")) dailyPapers(state, rng);
     dailyThoughts(state, rng);
-    dailyGoals(state, rng);
+    if (state.endings) dailyEndings(state, rng);
+    if (!endingsOwnTheGame(state)) dailyGoals(state, rng);
     if (systemUnlocked(state, "events")) dailyEvents(state);
     updateProgression(state);
     updateTutorial(state);
@@ -75,7 +81,7 @@ export function tick(state: GameState, commands: readonly Command[] = []) {
 /** Apply commands without advancing time (building while paused). Walkers re-route on the next tick. */
 export function applyNow(state: GameState, commands: readonly Command[]) {
   const rng = createRng(state.rngState);
-  applyCommands(state, commands, rng);
+  applyCommands(state, declineBuilding(state, commands), rng);
   updateTutorial(state);
   observeGuardrails(state);
   if (systemUnlocked(state, "collusion")) applyCollusionChoices(state);

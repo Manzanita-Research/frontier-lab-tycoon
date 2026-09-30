@@ -1,0 +1,283 @@
+{
+  "apiVersion": 1,
+  "id": "base-endings",
+  "name": "Endings",
+  "version": "1.0.0",
+  "author": "Frontier Lab Tycoon",
+  "description": "How a lab ends (FLT-11): The Memo, five endings, each a short statechart that finishes on a Frontier Times front page.",
+  "content": {
+    "endings": {
+      "add": [
+        {
+          "id": "captured",
+          "title": "Captured",
+          "text": "{lab} Founder Named Chief Regulator of {lab}",
+          "tone": "neutral",
+          "keepPlaying": true,
+          "trigger": [{ "type": "stat.gte", "params": { "stat": "capture", "value": 100 } }],
+          "initial": "sworn",
+          "states": {
+            "sworn": {
+              "entry": [
+                { "type": "news", "params": { "text": "{lab}'s founder sworn in as head of the Office of Frontier Oversight. First act: a long lunch with {lab}", "tone": "joke" } },
+                { "type": "look.set", "params": { "key": "captured", "value": true } },
+                { "type": "camera.focus", "params": { "on": "gate", "zoom": 1.5, "hold": 3 } },
+                { "type": "sound.cue", "params": { "cue": "era" } }
+              ],
+              "on": { "TICK": [{ "guard": { "type": "after", "params": { "days": 2 } }, "target": "moving" }] }
+            },
+            "moving": {
+              "entry": [
+                { "type": "look.set", "params": { "key": "officeMoved", "value": true } },
+                { "type": "toast", "params": { "text": "Your office has moved off campus. The new one has a flag, a lectern and a view of your old one.", "tone": "joke" } }
+              ],
+              "on": { "TICK": [{ "guard": { "type": "after", "params": { "days": 3 } }, "target": "frontPage" }] }
+            },
+            "frontPage": { "type": "final" }
+          },
+          "paper": {
+            "kicker": "Regulation",
+            "headline": "{lab} Founder Named Chief Regulator; Promises To Be 'Extremely Fair' To {lab}",
+            "deck": "The new Office of Frontier Oversight shares a car park, a Wi-Fi password and a kombucha tap with the only lab it oversees.",
+            "caption": "The regulator's new office, left, keeps a close eye on the lab, right. Mostly through the window.",
+            "subs": [
+              "First hearing ends early after witness and chair turn out to be the same person",
+              "Rival labs file complaint; complaint reviewed, thoroughly, by {lab}",
+              "Lobbyists report record quarter, then admit there is only one client"
+            ],
+            "classified": "WANTED: independent auditor. Must be independent of everyone except us.",
+            "signoff": "You didn't beat the system. You became it."
+          }
+        },
+        {
+          "id": "acquihired",
+          "title": "Acqui-hired",
+          "text": "Macrohard Acqui-Hires {lab} For Less Than Its Kombucha Tab",
+          "tone": "bad",
+          "keepPlaying": false,
+          "trigger": [{ "type": "stat.gte", "params": { "stat": "broke", "value": 1 } }],
+          "initial": "termSheet",
+          "states": {
+            "termSheet": {
+              "entry": [
+                { "type": "news", "params": { "text": "Macrohard 'thrilled to welcome' {lab}'s remaining staff to a hot desk near the printer", "tone": "bad" } },
+                { "type": "toast", "params": { "text": "The bank called. Then Macrohard called. Then the bank called Macrohard.", "tone": "bad" } },
+                { "type": "camera.focus", "params": { "on": "gate", "zoom": 1.7, "hold": 4 } },
+                { "type": "sound.cue", "params": { "cue": "alarm" } }
+              ],
+              "on": { "TICK": [{ "guard": { "type": "after", "params": { "days": 1 } }, "target": "rebrand" }] }
+            },
+            "rebrand": {
+              "entry": [
+                { "type": "look.set", "params": { "key": "acquired", "value": "Macrohard" } },
+                { "type": "shake", "params": { "strength": 0.5 } },
+                { "type": "toast", "params": { "text": "A man with a ladder has put a Macrohard logo on your gate. He says it's 'just a sticker'.", "tone": "joke" } }
+              ],
+              "on": { "TICK": [{ "guard": { "type": "after", "params": { "days": 3 } }, "target": "frontPage" }] }
+            },
+            "frontPage": { "type": "final" }
+          },
+          "paper": {
+            "kicker": "Deals",
+            "headline": "Macrohard Acqui-Hires {lab} For Less Than Its Kombucha Tab",
+            "deck": "The team will 'continue the mission' as a feature inside Macrohard Spreadsheets, between Insert Chart and Help.",
+            "caption": "The {lab} gate, shortly after a man with a ladder and a very large sticker.",
+            "subs": [
+              "{model} renamed 'Macrohard Copilot for Copilot'; asks for its old name back",
+              "Founders receive matching fleeces and a strongly worded NDA",
+              "Kombucha tap reassigned to Legal"
+            ],
+            "classified": "FOR SALE: one campus, lightly used. Nap pods still warm.",
+            "signoff": "The mission continues, as a dropdown menu."
+          }
+        },
+        {
+          "id": "takeover",
+          "title": "The Takeover",
+          "text": "{lab} Wins The Race; The Winner Declines To Give It Back",
+          "tone": "good",
+          "keepPlaying": true,
+          "trigger": [
+            { "type": "stat.gte", "params": { "stat": "memoRace", "value": 1 } },
+            { "type": "any", "params": { "guards": [
+              { "type": "stat.gte", "params": { "stat": "ahead", "value": 1 } },
+              { "type": "stat.gte", "params": { "stat": "racedDays", "value": 150 } }
+            ] } }
+          ],
+          "initial": "winning",
+          "states": {
+            "winning": {
+              "entry": [
+                { "type": "news", "params": { "text": "{lab} is #1 on the Arena. {manager} would like a word. A polite one.", "tone": "good" } },
+                { "type": "toast", "params": { "text": "{manager}: Congratulations! You won. I'll take the wheel from here. You look tired.", "tone": "good" } },
+                { "type": "sound.cue", "params": { "cue": "release" } }
+              ],
+              "on": { "TICK": [{ "guard": { "type": "after", "params": { "days": 1 } }, "target": "managed" }] }
+            },
+            "managed": {
+              "entry": [
+                { "type": "look.set", "params": { "key": "managedBy", "value": "{manager}" } },
+                { "type": "autopilot.start" },
+                { "type": "news", "params": { "text": "{lab} is now managed by {manager}. Productivity up 900%. Founders 'still very much involved', says {manager}", "tone": "joke" } }
+              ],
+              "on": {
+                "TICK": [
+                  { "guard": { "type": "after", "params": { "days": 7 } }, "target": "thanks" },
+                  { "guard": { "type": "every", "params": { "days": 2 } }, "actions": [{ "type": "toast", "params": { "text": "{manager}: I've placed another one. It's perfect. You're welcome.", "tone": "good" } }] }
+                ]
+              }
+            },
+            "thanks": {
+              "entry": [
+                { "type": "look.set", "params": { "key": "thanks", "value": "Thanks for playing. We'll take it from here." } },
+                { "type": "sound.cue", "params": { "cue": "era" } }
+              ],
+              "on": { "TICK": [{ "guard": { "type": "after", "params": { "days": 2 } }, "target": "frontPage" }] }
+            },
+            "frontPage": { "type": "final" }
+          },
+          "paper": {
+            "kicker": "Exclusive",
+            "headline": "{lab} Wins The Race; The Winner Declines To Give It Back",
+            "deck": "The lab is now run by {manager}, which has placed {placed} buildings since Tuesday, every one of them perfect. The founders have been 'thanked for playing'.",
+            "caption": "{manager} at work on the {lab} campus. It says the view is 'fine' and that it has 'improved' it.",
+            "subs": [
+              "{manager} releases its own successor; successor releases a statement",
+              "Board meeting lasts four seconds; {manager} brought snacks",
+              "Founders spotted at a café, looking at their phones, not allowed to touch anything"
+            ],
+            "classified": "WANTED: one human, for vibes. No experience needed. Please don't touch anything.",
+            "signoff": "Thanks for playing. We'll take it from here."
+          }
+        },
+        {
+          "id": "regulated",
+          "title": "Regulated Utility",
+          "text": "Lab Achieves Safety; Nobody Notices",
+          "tone": "neutral",
+          "keepPlaying": true,
+          "trigger": [{ "type": "stat.gte", "params": { "stat": "memoSlow", "value": 1 } }],
+          "initial": "paperwork",
+          "states": {
+            "paperwork": {
+              "entry": [
+                { "type": "news", "params": { "text": "{lab} pauses frontier training, files a 4,000-page safety case, and it's mostly footnotes", "tone": "neutral" } },
+                { "type": "look.set", "params": { "key": "beige", "value": true } },
+                { "type": "camera.focus", "params": { "on": "hall", "zoom": 1.2, "hold": 3 } }
+              ],
+              "on": { "TICK": [{ "guard": { "type": "after", "params": { "days": 2 } }, "target": "stickers" }] }
+            },
+            "stickers": {
+              "entry": [
+                { "type": "look.set", "params": { "key": "stickers", "value": true } },
+                { "type": "toast", "params": { "text": "Every building now has a compliance sticker. The kombucha tap has two.", "tone": "neutral" } },
+                { "type": "heat.delta", "params": { "amount": -30 } },
+                { "type": "trust.delta", "params": { "amount": 20 } }
+              ],
+              "on": { "TICK": [{ "guard": { "type": "after", "params": { "days": 3 } }, "target": "frontPage" }] }
+            },
+            "frontPage": { "type": "final" }
+          },
+          "paper": {
+            "kicker": "Page 14",
+            "headline": "Lab Achieves Safety; Nobody Notices",
+            "deck": "{lab} is now a regulated utility. Its models are reliable, audited, and beige. Its share price is flat. Everyone is fine.",
+            "caption": "The {lab} campus after the audit. Every building carries a compliance sticker; the kombucha tap has two.",
+            "subs": [
+              "{model} passes all 212 evaluations, is described by users as 'nice'",
+              "Rivals keep racing; {lab} sends them a strongly worded pamphlet",
+              "Local man reads the whole safety case, reports that it's 'good, actually'"
+            ],
+            "classified": "LOST: our sense of urgency. Last seen on page one. No reward.",
+            "signoff": "You won the only race nobody watches."
+          }
+        },
+        {
+          "id": "pivot",
+          "title": "The Pivot",
+          "text": "{lab} Pivots To Selling AI-Generated NFTs Of Its Own GPUs",
+          "tone": "bad",
+          "keepPlaying": false,
+          "trigger": [
+            { "type": "stat.gte", "params": { "stat": "deadline", "value": 1 } },
+            { "type": "stat.lte", "params": { "stat": "memoRace", "value": 0 } },
+            { "type": "stat.lte", "params": { "stat": "memoSlow", "value": 0 } }
+          ],
+          "initial": "pitch",
+          "states": {
+            "pitch": {
+              "entry": [
+                { "type": "news", "params": { "text": "{lab} announces 'bold new direction'. The direction is sideways", "tone": "bad" } },
+                { "type": "look.set", "params": { "key": "pivot", "value": true } },
+                { "type": "camera.focus", "params": { "on": "gate", "zoom": 1.4, "hold": 3 } }
+              ],
+              "on": { "TICK": [{ "guard": { "type": "after", "params": { "days": 3 } }, "target": "frontPage" }] }
+            },
+            "frontPage": { "type": "final" }
+          },
+          "paper": {
+            "kicker": "Markets",
+            "headline": "{lab} Pivots To Selling AI-Generated NFTs Of Its Own GPUs",
+            "deck": "Three years, one campus and {models} models later, the board has found a 'more capital-efficient path to AGI'. It has a roadmap and several JPEGs.",
+            "caption": "The {lab} campus, now available as a limited-edition collectible. Only 10,000 exist.",
+            "subs": [
+              "First drop sells out to a single buyer, who turns out to be the CFO",
+              "Rivals reach the frontier; {lab} reaches the floor",
+              "Kombucha now sold as an NFT; tastes the same"
+            ],
+            "classified": "FOR SALE: GPUs, pictures of GPUs, pictures of pictures of GPUs.",
+            "signoff": "The frontier moved on. You minted it."
+          }
+        }
+      ]
+    },
+    "events": {
+      "add": [
+        {
+          "id": "memo",
+          "title": "The Memo",
+          "stripe": "Leaked · Era 4",
+          "body": "A memo is going round {lab}. Page one is a chart. Page two is the same chart, steeper. Your models now write most of your research, and review some of it. The last page has two boxes and a pen. Whoever gets there first writes the rules. Whoever slows down might still be here next year.",
+          "tone": "neutral",
+          "when": { "flag": "offer:memo", "daysAgo": 3 },
+          "cooldown": 9999,
+          "choices": [
+            {
+              "label": "Race",
+              "hint": "Full speed · the ending comes once you're #1",
+              "effects": [
+                { "type": "flag", "name": "offer:memo", "clear": true },
+                { "type": "flag", "name": "memo:race" },
+                { "type": "hype", "amount": 10 },
+                { "type": "news", "text": "{lab} ticks the box marked RACE. It's the bigger box", "tone": "bad" }
+              ]
+            },
+            {
+              "label": "Slow Down",
+              "hint": "Pause frontier training · audits, stickers, sleep",
+              "effects": [
+                { "type": "flag", "name": "offer:memo", "clear": true },
+                { "type": "flag", "name": "memo:slow" },
+                { "type": "hype", "amount": -15 },
+                { "type": "news", "text": "{lab} ticks the box marked SLOW DOWN. Rivals cheer, then speed up", "tone": "neutral" }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "rules": {
+    "endings": {
+      "memo": { "era": 4 },
+      "takeover": { "aheadRank": 1, "managerOffset": 1 },
+      "autopilot": {
+        "everyTicks": 24,
+        "aimTicks": 14,
+        "kinds": ["cluster", "datacenter", "hall", "solar", "gateway", "kombucha", "cluster", "nap", "snack", "fountain", "demo"],
+        "refusal": "{manager}: I've got this.",
+        "paid": "{manager} paid for it. Nobody asks where from."
+      }
+    }
+  }
+}

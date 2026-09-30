@@ -23,8 +23,9 @@ export function createGoals(): GoalProgress[] {
   return GOALS.map((g) => ({ id: g.id, value: 0, target: g.target, met: false }));
 }
 
-/** The scenario's outcome as the UI knows it: the machine's `tracking` is "playing". */
+/** The scenario's outcome as the UI knows it: the machine's `tracking` is "playing", and an ending's front page (FLT-11) is "ended". */
 export function outcomeOf(state: GameState): Outcome {
+  if (state.endings?.endedDay != null) return "ended";
   return state.goals.value === "tracking" ? "playing" : state.goals.value;
 }
 

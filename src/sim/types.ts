@@ -6,6 +6,7 @@ import type { BuildingKind } from "../content/buildings";
 import type { CollusionState, Investigation } from "./collusion/state";
 import type { NeedKey } from "../content/needs";
 import type { DisastersState } from "./disasters/types";
+import type { EndingsState } from "./endings/state";
 import type { ArcStored } from "./machines/arc";
 import type { EconomyStored } from "./machines/economy";
 import type { GoalsStored } from "./machines/goals";
@@ -194,7 +195,8 @@ export interface GoalProgress {
   met: boolean;
 }
 
-export type Outcome = "playing" | "won" | "lost";
+/** "ended": an ending (FLT-11) has reached its front page. */
+export type Outcome = "playing" | "won" | "lost" | "ended";
 
 /** The event card that is open right now; the game is paused until the player picks a choice. */
 export interface OpenEvent {
@@ -299,4 +301,6 @@ export interface GameState {
   collusion?: CollusionState;
   /** Generic inquiries started by the Vocabulary; the owning machine completes them. */
   investigations?: Record<string, Investigation>;
+  /** FLT-11: The Memo and the endings; absent until `enableEndings` (older saves and baseline runs keep the win/lose-only game). */
+  endings?: EndingsState;
 }

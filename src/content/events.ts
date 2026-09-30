@@ -6,6 +6,7 @@ import { ERAS } from "./eras";
 import { cardEvents } from "../sim/disasters/pack";
 import { LEAPFROG } from "./leapfrog";
 import { COLLUSION } from "../sim/collusion/pack";
+import { ENDINGS_PACK } from "../sim/endings/pack";
 
 /** What has to be true for an event to fire. `all` combines conditions. */
 export type Condition =
@@ -301,5 +302,7 @@ EVENTS.push(...LEAPFROG.events);
 EVENTS.push(...cardEvents());
 // FLT-18: ordinary cards, dormant until the pack's machine sets their offer flags.
 EVENTS.push(...COLLUSION.content.events.add as EventDef[]);
+// FLT-11: The Memo (mods/base-endings), dormant until the endings driver sets `offer:memo` in Era 4.
+EVENTS.push(...ENDINGS_PACK.content.events.add as EventDef[]);
 
 export const eventById = (id: string): EventDef | undefined => EVENTS.find((e) => e.id === id);
