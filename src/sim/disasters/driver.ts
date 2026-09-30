@@ -19,7 +19,9 @@ import { RISKS, type DisasterDef, type DisasterRun, type DisastersState, type Js
 import { validatePack } from "./validate";
 
 /** What a new game starts with. Tests start with disasters off (`createInitialState`), and the app sets this on a new lab. */
-export const DEFAULT_RISK: Risk = "rare";
+// Off until players can see and change the setting (FLT-32 Disasters menu) and the calm-start
+// grace period covers disasters (no random disaster before the first release). Then "rare".
+export const DEFAULT_RISK: Risk = "off";
 
 /**
  * Odds per day that *something* goes wrong, for a lab of average risk (the mean weight of the disasters that could
