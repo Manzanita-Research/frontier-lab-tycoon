@@ -4,9 +4,27 @@
   "name": "Swag Drop",
   "author": "Frontier Lab Tycoon",
   "version": "1.0.0",
-  "description": "The HUD as a frontier lab's desk merch: enamel-pin stats, sticky-note OKRs, keycap build buttons and a terminal ticker.",
+  "description": "The HUD as a frontier lab's desk merch: enamel-pin stats, sticky-note OKRs, keycap build buttons, a lanyard ID badge, a corkboard of thoughts and a terminal ticker.",
   "preview": "assets/preview.jpg",
-  "slots": [],
+  "slots": [
+    "Layout",
+    "Stats",
+    "Training",
+    "Objectives",
+    "Inspector",
+    "BuildBar",
+    "Speed",
+    "Bubble",
+    "ThoughtsPanel",
+    "Ticker",
+    "Toast",
+    "EventCard",
+    "PhotoButton",
+    "NewsControls",
+    "Arena",
+    "EraCard",
+    "Outcome"
+  ],
   "fonts": [
     {
       "family": "Bricolage Grotesque",
@@ -25,6 +43,14 @@
       "licenseFile": "assets/fonts/bricolage-grotesque-LICENSE.txt"
     },
     {
+      "family": "Bricolage Grotesque",
+      "src": "assets/fonts/bricolage-grotesque-latin-800-normal.woff2",
+      "weight": 800,
+      "style": "normal",
+      "license": "OFL-1.1",
+      "licenseFile": "assets/fonts/bricolage-grotesque-LICENSE.txt"
+    },
+    {
       "family": "JetBrains Mono",
       "src": "assets/fonts/jetbrains-mono-latin-400-normal.woff2",
       "weight": 400,
@@ -36,6 +62,14 @@
       "family": "JetBrains Mono",
       "src": "assets/fonts/jetbrains-mono-latin-700-normal.woff2",
       "weight": 700,
+      "style": "normal",
+      "license": "OFL-1.1",
+      "licenseFile": "assets/fonts/jetbrains-mono-LICENSE.txt"
+    },
+    {
+      "family": "JetBrains Mono",
+      "src": "assets/fonts/jetbrains-mono-latin-800-normal.woff2",
+      "weight": 800,
       "style": "normal",
       "license": "OFL-1.1",
       "licenseFile": "assets/fonts/jetbrains-mono-LICENSE.txt"
@@ -72,7 +106,7 @@
     "color.numeralBg": "#FFF8EC",
     "color.titlebar": "#F1E4CF",
     "color.titlebarText": "#1E2A2F",
-    "color.tip": "#FFE27A",
+    "color.tip": "#FFFFFF",
     "color.tipText": "#1E2A2F",
     "color.selection": "#1E2A2F",
     "color.selectionText": "#FFF8EC",
@@ -80,7 +114,7 @@
     "color.meterTo": "#F2B53A",
     "font.ui": "\"Bricolage Grotesque\", system-ui, sans-serif",
     "font.display": "\"Bricolage Grotesque\", system-ui, sans-serif",
-    "font.numbers": "\"JetBrains Mono\", ui-monospace, monospace",
+    "font.numbers": "\"Bricolage Grotesque\", system-ui, sans-serif",
     "font.mono": "\"JetBrains Mono\", ui-monospace, monospace",
     "radius.panel": "14px",
     "radius.button": "10px",
@@ -94,8 +128,11 @@
   "strings": {
     "ticker.label": "$ tail -f news",
     "objectives.title": "OKRs",
-    "training.title": "Shipping",
-    "thoughts.title": "Slack (all channels)",
-    "inspector.follow": "Pin to lanyard"
+    "training.title": "Training run",
+    "thoughts.title": "#all-hands (all channels)",
+    "inspector.follow": "Pin to lanyard",
+    "inspector.following": "Pinned. Tap to unpin",
+    "training.shipped": "SHIPPED!",
+    "hint.tap": "Tap anyone to read their badge."
   }
 }

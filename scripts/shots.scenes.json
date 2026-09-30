@@ -82,6 +82,20 @@
       "collusion-sign",
       "collusion-phone",
       "collusion-scandal"
+    ],
+    "swag-drop": [
+      "desk",
+      "desk-badge",
+      "desk-agent",
+      "desk-flip",
+      "desk-receipt",
+      "desk-tool",
+      "desk-era",
+      "desk-auction",
+      "desk-phone",
+      "desk-phone-badge",
+      "desk-phone-okr",
+      "desk-phone-more"
     ]
   },
   "scenes": {
@@ -558,6 +572,198 @@
         },
         {
           "wait": 600
+        }
+      ]
+    },
+    "desk": {
+      "title": "The desk: the event answered, the campus clear",
+      "steps": [
+        {
+          "click": ".sd-choice, .choice:not(.plain)",
+          "optional": true
+        },
+        {
+          "wait": 700
+        }
+      ]
+    },
+    "desk-badge": {
+      "title": "Tap a researcher: the lanyard badge drops and swings",
+      "steps": [
+        {
+          "click": ".sd-choice, .choice:not(.plain)",
+          "optional": true
+        },
+        {
+          "select": "researcher:Ada Gradient"
+        },
+        {
+          "wait": 2200
+        }
+      ]
+    },
+    "desk-agent": {
+      "title": "Tap an agent: the cyan CONTRACTOR (NON-HUMAN) badge",
+      "steps": [
+        {
+          "click": ".sd-choice, .choice:not(.plain)",
+          "optional": true
+        },
+        {
+          "select": "agent"
+        },
+        {
+          "wait": 2200
+        }
+      ]
+    },
+    "desk-flip": {
+      "title": "The badge flipped over: the personnel file",
+      "steps": [
+        {
+          "click": ".sd-choice, .choice:not(.plain)",
+          "optional": true
+        },
+        {
+          "select": "researcher:Ada Gradient"
+        },
+        {
+          "wait": 1800
+        },
+        {
+          "click": ".sd-face.front .sd-flip",
+          "optional": true
+        },
+        {
+          "wait": 1000
+        }
+      ]
+    },
+    "desk-receipt": {
+      "title": "Tap the Vibes pin: where the points came from",
+      "steps": [
+        {
+          "click": ".sd-choice, .choice:not(.plain)",
+          "optional": true
+        },
+        {
+          "click": ".sd-badge.hero, .vibes-btn",
+          "optional": true
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "desk-tool": {
+      "title": "A keycap sunk: the Compute Cluster is in hand",
+      "steps": [
+        {
+          "click": ".sd-choice, .choice:not(.plain)",
+          "optional": true
+        },
+        {
+          "eval": "(f, w) => f.send({ type: 'SET_TOOL', tool: 'cluster' })"
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "desk-era": {
+      "title": "Era 2 lands as an all-hands slide",
+      "query": {
+        "moment": "era",
+        "warp": null
+      },
+      "steps": [
+        {
+          "tick": 14
+        },
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "desk-auction": {
+      "title": "The compute auction as a memo, with a rubber stamp",
+      "query": {
+        "moment": "auction",
+        "warp": null
+      },
+      "steps": [
+        {
+          "tick": 14
+        },
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "desk-phone": {
+      "title": "The desk on a phone: the event answered",
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "click": ".sd-choice, .choice:not(.plain)",
+          "optional": true
+        },
+        {
+          "wait": 700
+        }
+      ]
+    },
+    "desk-phone-badge": {
+      "title": "Tap a researcher on a phone: the badge sheet",
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "click": ".sd-choice, .choice:not(.plain)",
+          "optional": true
+        },
+        {
+          "select": "researcher:Ada Gradient"
+        },
+        {
+          "wait": 2200
+        }
+      ]
+    },
+    "desk-phone-okr": {
+      "title": "The OKR tab open on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "click": ".sd-choice, .choice:not(.plain)",
+          "optional": true
+        },
+        {
+          "click": ".sd-okr-head, .obj-head",
+          "optional": true
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "desk-phone-more": {
+      "title": "The plaque expanded on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "click": ".sd-choice, .choice:not(.plain)",
+          "optional": true
+        },
+        {
+          "click": ".sd-more, .topbar-toggle",
+          "optional": true
+        },
+        {
+          "wait": 500
         }
       ]
     }
