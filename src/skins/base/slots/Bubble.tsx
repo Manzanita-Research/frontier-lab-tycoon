@@ -9,6 +9,7 @@ export function Bubble({ bubble }: SlotPropsMap["Bubble"]) {
   // Said as a faction (FLT-33): `data-faction` and `--faction` let the CSS give it their colour.
   return (
     <div className={`bubble bubble-${bubble.kind}`} {...factionAttrs(bubble.faction)}>
+      {bubble.faction && <b className="bubble-faction">{bubble.faction.short}</b>}
       {bubble.text}
     </div>
   );

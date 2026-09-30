@@ -21,7 +21,10 @@ const readTipsOff = () => {
 export function Bubble({ bubble }: SlotPropsMap["Bubble"]) {
   return (
     <div className={`bubble f95-tip bubble-${bubble.kind}`} {...factionAttrs(bubble.faction)}>
-      <b>{bubble.speaker || bubble.kind}</b>
+      <b>
+        {bubble.speaker || bubble.kind}
+        {bubble.faction && <em className="f95-tipfaction"> ({bubble.faction.short})</em>}
+      </b>
       {bubble.text}
     </div>
   );

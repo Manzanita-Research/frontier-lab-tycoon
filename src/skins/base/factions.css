@@ -103,10 +103,28 @@
   padding: 7px 10px 8px;
   pointer-events: auto;
 }
+/* Open, it floats over the bottom-left like a popover: the left column is already full of the Race by Level 4. */
 .factions.open {
-  width: 300px;
-  max-height: min(62vh, 560px);
+  position: fixed;
+  left: 12px;
+  bottom: 44px;
+  z-index: 12;
+  width: 310px;
+  max-height: min(calc(100vh - 170px), 600px);
   overflow-y: auto;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.28);
+}
+@media (max-width: 640px) {
+  .factions {
+    width: auto;
+  }
+  .factions.open {
+    left: 8px;
+    right: 8px;
+    bottom: 96px;
+    width: auto;
+    max-height: 58vh;
+  }
 }
 .factions-head {
   display: flex;
@@ -304,6 +322,15 @@
 /* ---- bubbles said as a faction: a stripe in their colour ---- */
 .bubble[data-faction] {
   border-left: 4px solid var(--faction);
+}
+.bubble-faction {
+  display: block;
+  margin-bottom: 1px;
+  color: var(--faction);
+  font-size: 0.78em;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 @media (prefers-reduced-motion: reduce) {

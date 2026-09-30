@@ -2556,6 +2556,15 @@
       color: var(--flt-color-textDim);
     }
   }
+  .bubble.f95-tip[data-faction] {
+    box-shadow: inset 5px 0 0 var(--faction);
+    padding-left: 10px;
+  }
+  .f95-tipfaction {
+    font-style: normal;
+    font-weight: normal;
+    color: var(--flt-color-textDim);
+  }
   .f95-member i {
     display: inline-block;
     width: 10px;

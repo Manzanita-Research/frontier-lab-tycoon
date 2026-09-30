@@ -45,9 +45,9 @@ export function Factions({ factions, layout, actions }: SlotPropsMap["Factions"]
             onChange={setTab}
             tabs={[
               { id: "factions", label: "Factions" },
-              { id: "stance", label: t("factions.stance") },
-              { id: "relations", label: factions.relations.some((r) => r.schism) ? `${t("factions.relations")} •` : t("factions.relations") },
-              { id: "safety", label: t("factions.safety") },
+              { id: "stance", label: "Stance" },
+              { id: "relations", label: factions.relations.some((r) => r.schism) ? "Relations •" : "Relations" },
+              { id: "safety", label: "Safety" },
             ]}
           />
           <div className="f95-page f95-discpage">

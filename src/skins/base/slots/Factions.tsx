@@ -16,7 +16,7 @@ export function Factions({ factions, layout, actions }: SlotPropsMap["Factions"]
         <b>{t("factions.title")}</b>
         <span className="factions-sub">{factions.headline}</span>
         <span className="factions-fold" aria-hidden>
-          {open ? "▾" : "▸"}
+          {open ? "▼" : "▲"}
         </span>
       </button>
       {!open && (
