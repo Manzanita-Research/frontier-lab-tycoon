@@ -160,21 +160,11 @@ export function Icon({ name, size = 24 }: { name: string; size?: number }) {
         <circle cx="17" cy="19" r="2.5" fill="#fff" stroke={INK} strokeWidth="2.2" />
       </>
     ),
-    bolt: <path d="M13 2L4 14h6l-1 8 9-12h-6z" fill="#FFD400" stroke={INK} strokeWidth="2.2" strokeLinejoin="round" />,
     trophy: (
       <>
         <path d="M7 3h10v6a5 5 0 0 1-10 0z" fill="#FFD400" stroke={INK} strokeWidth="2.2" strokeLinejoin="round" />
         <path d="M7 5H3c0 4 1.5 5 4 5M17 5h4c0 4-1.5 5-4 5" fill="none" stroke={INK} strokeWidth="2.2" />
         <path d="M12 14v4M8 21h8l-1-3H9z" fill="#FFD400" stroke={INK} strokeWidth="2.2" strokeLinejoin="round" />
-      </>
-    ),
-    balloon: (
-      <path d="M4 5h16v10h-8l-5 5v-5H4z" fill="#fff" stroke={INK} strokeWidth="2.2" strokeLinejoin="round" />
-    ),
-    list: (
-      <>
-        <rect x="4" y="3" width="16" height="18" rx="2" fill="#fff" stroke={INK} strokeWidth="2.2" />
-        <path d="M8 9l2 2 3.5-3.5M8 16h8" {...line} />
       </>
     ),
     happy: (
