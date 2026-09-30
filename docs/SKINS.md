@@ -1,6 +1,6 @@
 # Making a skin
 
-A **skin** re-dresses the game's whole 2D UI: the stats, the build bar, the thought bubbles, the event cards, the news ticker, all of it. Six ship with the game (Frontier 95, Swag Drop, Karaoke Night, Field Almanac, Discovery Disc '96, GeoCities) and you can add yours by adding a folder. Skins switch **live** (no reload, the game keeps running) and this format is also the first kind of mod (FLT-15).
+A **skin** re-dresses the game's whole 2D UI: the stats, the build bar, the thought bubbles, the event cards, the news ticker, all of it. Six ship with the game (Frontier 95, Swag Drop, Karaoke Night, Field Almanac, Discovery Disc '96, Homepage '98) and you can add yours by adding a folder. Skins switch **live** (no reload, the game keeps running) and this format is also the first kind of mod (FLT-15).
 
 This page is the whole manual. It is written to be read by a person or by an agent that has never seen the repo. If you only read one section, read [the five-minute skin](#the-five-minute-skin).
 

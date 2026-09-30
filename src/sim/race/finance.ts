@@ -5,6 +5,7 @@ import type { GameState } from "../types";
 import { rankOf } from "./arena";
 import { valuationFactor } from "./leapfrog/factors";
 import { leapfrogVars } from "./leapfrog/vars";
+import { evalBonus } from "../collusion/scores";
 
 /** Revenue while an open-weights rival is eating it. */
 export const OPEN_DROP_FACTOR = 0.7;
@@ -63,6 +64,7 @@ export function raceVars(state: GameState): Record<string, string> {
   const rivalScore = drop ? (race.board.find((r) => r.id === drop.rival)?.score ?? 0) : 0;
   const mine = arenaScore(state.capability, state.hype);
   return {
+    collusionBonus: String(Math.round(evalBonus(state) * 100)),
     valuation: formatMoney(valuation(state)),
     revenue: formatMoney(annualRevenue(state)),
     raise: formatMoney(raiseAmount(state)),

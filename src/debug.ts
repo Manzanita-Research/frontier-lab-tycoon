@@ -28,6 +28,8 @@ export interface DebugParams {
   risk: string | null;
   /** Release Leapfrog (FLT-27) is on unless `?leapfrog=off`. */
   leapfrog: boolean;
+  /** Publishing Papers is on unless ?papers=off. */
+  papers: boolean;
 }
 
 export function readDebugParams(search = typeof window === "undefined" ? "" : window.location.search): DebugParams {
@@ -51,5 +53,6 @@ export function readDebugParams(search = typeof window === "undefined" ? "" : wi
     dzPick: num("dzPick"),
     risk: q.get("risk"),
     leapfrog: q.get("leapfrog") !== "off",
+    papers: q.get("papers") !== "off",
   };
 }

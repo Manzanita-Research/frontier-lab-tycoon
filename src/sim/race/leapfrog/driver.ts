@@ -10,6 +10,7 @@ import { step } from "../../machines/run";
 import { addNews, addToast } from "../../news";
 import type { Rng } from "../../rng";
 import { demoOdds } from "../../demo";
+import { collusionScore } from "../../collusion/scores";
 import type { GameState } from "../../types";
 import { addIncident } from "../../vibes";
 import { announceRelease, eraOfState, modelName } from "../race";
@@ -57,7 +58,10 @@ export function shownScore(state: GameState, id: string, def: BenchmarkDef): num
   const real = honestScore(state, id, def);
   if (real === null) return null;
   const maxx = state.leapfrog.labs[id]?.maxx[def.id];
-  return maxx !== undefined ? Math.max(real, maxx) : real;
+  const claim = maxx !== undefined ? Math.max(real, maxx) : real;
+  if (id !== YOU) return claim;
+  const score = collusionScore(state, claim);
+  return score === null ? null : def.kind === "score" ? Math.min(100, score) : score;
 }
 
 /** The best score on a benchmark among everyone but `except`. */

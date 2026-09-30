@@ -1,0 +1,11 @@
+
+> frontier-lab-tycoon@0.0.0 flt-mod /root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_ycybuwshp6-1/project-proj-dvb9hes55f
+> node packages/flt-mod-cli/cli.mjs "check" "mods/base-papers/mod.json"
+
+[vite] connected.
+PASS base-papers@1.0.0: 365 days, 7300 ticks, 17 cards answered, 2 releases
+Replay identical: 55ccd1c9a35a4b933abce882f974e14e2f75e26aece84df1d835525ebac21009; cash $16948233; 1614 ms
+Arc reachability: 0 arcs checked with xstate/graph (structural, guards/actions omitted)
+M1a applied: base simulation only
+M1b deferred: headlines: full runtime lookup awaits M1b; names: full runtime lookup awaits M1b
+Coverage: schema, composition, assets, structural arcs, existing World injection. Deferred content is not executed until M1b.
