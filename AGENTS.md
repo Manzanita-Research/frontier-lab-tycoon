@@ -52,6 +52,8 @@ Only people (visitors, staff, researchers) are sure to be walkers. Agents, compu
 
 ## PRs
 
+- **Before/after screenshots (Jem's rule).** Any PR that changes something **visible** (the 2D UI, the 3D scene, skins, events, on-screen text) includes **before/after screenshots of the same scene**: same seed, same camera and scene, same viewport, taken from `main` and from your branch. Use `pnpm shots` once it exists (FLT-35); until then use `pnpm shot` with the same URL on both builds. Put them in the PR body as pairs (before | after), plus a phone shot if the layout changed. **Logic-only PRs** show tests or a sim/headless report instead.
+
 - Open a real PR from your branch into `main`. CI runs typecheck, tests and build.
 - Put evidence in the PR: test output, and for anything visual, a screenshot (see `docs/modal.md` for headless screenshots) or a `bb connect expose` link.
 - Keep PRs focused on your task's files. If you have to touch another task's area, say so in the PR.
