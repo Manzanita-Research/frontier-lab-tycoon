@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Marquee, reducedMotion } from "../kit";
 import { useT } from "../context";
 import type { SlotPropsMap } from "../types";
+import type { BuildItemVM } from "../../ui/hud/types";
 import { Gci, Spark } from "./icons";
 import { Pop } from "./parts";
 
@@ -24,6 +25,15 @@ const RING: Record<string, string> = {
   staff: "#007060",
 };
 
+/** The tool Prev (-1) or Next (1) lands on: round the ring, skipping the payroll tile and anything you cannot afford. */
+export function ringStep(items: readonly BuildItemVM[], dir: 1 | -1): string | null {
+  const ring = items.filter((i) => i.kind !== "staff" && (i.affordable || i.selected));
+  if (ring.length === 0) return null;
+  const at = ring.findIndex((i) => i.selected);
+  const next = at === -1 ? (dir === 1 ? ring[0]! : ring[ring.length - 1]!) : ring[(at + dir + ring.length) % ring.length]!;
+  return next.kind;
+}
+
 /** The build palette. Prev and Next walk the tool in your hand around the ring, and it never runs out. */
 export function BuildBar({ items, tip, actions }: SlotPropsMap["BuildBar"]) {
   const t = useT();
@@ -38,11 +48,8 @@ export function BuildBar({ items, tip, actions }: SlotPropsMap["BuildBar"]) {
   }, [selected]);
 
   const step = (dir: 1 | -1) => {
-    const ring = items.filter((i) => i.kind !== "staff" && (i.affordable || i.selected));
-    if (ring.length === 0) return;
-    const at = ring.findIndex((i) => i.selected);
-    const next = at === -1 ? (dir === 1 ? ring[0]! : ring[ring.length - 1]!) : ring[(at + dir + ring.length) % ring.length]!;
-    actions.place(next.kind);
+    const kind = ringStep(items, dir);
+    if (kind) actions.place(kind);
   };
 
   return (

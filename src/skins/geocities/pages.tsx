@@ -197,7 +197,8 @@ export function Training({ training }: SlotPropsMap["Training"]) {
 /** "My Goals for Q1!!": the milestones as a bulleted list of links, with a DONE badge on the ones that came true. */
 export function Objectives({ objectives, layout }: SlotPropsMap["Objectives"]) {
   const t = useT();
-  const [open, setOpen] = useState(() => !layout.compact);
+  // Open on a tall desktop; on a laptop or a phone the construction site keeps to itself until you ask.
+  const [open, setOpen] = useState(() => layout.tall && !layout.compact);
   return (
     <section className="gc-goals">
       <hr className="gc-rainbow" />

@@ -56,10 +56,20 @@
   }
   .gc-left {
     width: min(640px, calc(100vw - 24px));
+    max-height: calc(100dvh - var(--gc-bottom) - 12px);
     display: flex;
     flex-direction: column;
     gap: 8px;
     flex: 0 0 auto;
+    > * {
+      flex: 0 0 auto;
+    }
+    > .gc-site {
+      flex: 0 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      scrollbar-width: thin;
+    }
   }
   .gc-right {
     width: 392px;
@@ -2009,9 +2019,12 @@
         inset: -14px -6px;
       }
     }
-    .gc-x {
-      width: 44px;
-      height: 36px;
+    .gc-x > span {
+      /* the close box is small on the page and 44px to a finger */
+      display: block;
+      position: absolute;
+      inset: -14px -12px;
+      font-size: 0;
     }
     .gc-counter {
       padding: 7px 3px;
