@@ -34,7 +34,7 @@ export interface PromisesView {
   enabled: boolean;
   /** "dormant", "recess", "campaign", "rollCall", "passed" or "failed". */
   stage: string;
-  motion: { id: string; title: string; summary: string; labSide: Side } | null;
+  motion: { id: string; title: string; summary: string; labSide: Side; stakes: { pass: string; fail: string } | null } | null;
   /** Days until the roll call, while campaigning. */
   daysUntilVote: number | null;
   /** Lobbying is open (campaign or roll call). */
@@ -56,7 +56,7 @@ export function promisesView(s: GameState): PromisesView {
   const m = live || stage === "passed" || stage === "failed" ? motionOf(c.motion, c.title) : undefined;
   return {
     enabled: true, stage,
-    motion: m ? { id: m.id, title: m.title, summary: fillTemplate(m.summary, { lab: s.labName }), labSide: m.labSide } : null,
+    motion: m ? { id: m.id, title: m.title, summary: fillTemplate(m.summary, { lab: s.labName }), labSide: m.labSide, stakes: m.stakes ? { pass: fillTemplate(m.stakes.pass, { lab: s.labName }), fail: fillTemplate(m.stakes.fail, { lab: s.labName }) } : null } : null,
     daysUntilVote: stage === "campaign" ? Math.max(0, CAMPAIGN_DAYS - Math.floor((s.tick - c.enteredTick) / TICKS_PER_DAY)) : null,
     lobbying: live,
     senators: SENATORS.map((sen) => {

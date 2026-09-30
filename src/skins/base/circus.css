@@ -433,6 +433,63 @@
   color: #a0283a;
   font-weight: 700;
 }
+.bill-risk {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 3px 10px;
+  margin: 10px 0 0;
+  font-size: 12px;
+}
+.bill-risk-label {
+  font-weight: 800;
+}
+.bill-risk-bar {
+  height: 9px;
+  border: 1.5px solid currentColor;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.bill-risk-bar i {
+  display: block;
+  height: 100%;
+  background: #d9a300;
+  transition: width 0.3s ease;
+}
+.bill-risk.hot .bill-risk-bar i {
+  background: #a0283a;
+}
+.bill-risk-text {
+  grid-column: 1 / -1;
+  opacity: 0.85;
+}
+.bill-warning {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin: 6px 0 0;
+  padding: 6px 8px;
+  border: 2px dashed #a0283a;
+  font-size: 12px;
+}
+.bill-warning b {
+  color: #a0283a;
+}
+.bill-warning button {
+  font: inherit;
+  font-weight: 800;
+  padding: 2px 10px;
+  color: #fff;
+  background: #a0283a;
+  border: none;
+  border-radius: var(--flt-radius-button);
+  cursor: pointer;
+}
+.bill-warning button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
 .bill-rivals {
   margin: 4px 0 0;
   padding: 0;
@@ -457,6 +514,20 @@
 .tracker-motion span {
   font-size: 12px;
   opacity: 0.85;
+}
+.tracker-stakes {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1px 8px;
+  margin: 4px 0 0;
+  font-size: 11.5px;
+}
+.tracker-stakes dt {
+  font-weight: 800;
+  opacity: 0.7;
+}
+.tracker-stakes dd {
+  margin: 0;
 }
 .tracker-recess {
   font-style: italic;

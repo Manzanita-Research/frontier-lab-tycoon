@@ -207,7 +207,17 @@
       "c56-huddle-phone",
       "c56-plaque",
       "c56-viral",
-      "c56-viral-phone"
+      "c56-viral-phone",
+      "c56-gate",
+      "c56-gate-karaoke",
+      "c56-statement",
+      "c56-statement-phone",
+      "c56-risk",
+      "c56-risk-phone",
+      "c56-leak",
+      "c56-leak-phone",
+      "c56-leak-senate",
+      "c56-stakes"
     ]
   },
   "scenes": {
@@ -2499,6 +2509,151 @@
       ],
       "viewport": "390x844",
       "mobile": true
+    },
+    "c56-gate": {
+      "title": "FLT-56: marchers in their faction's colours and signs, and the gate legend with its Statement buttons",
+      "query": {
+        "moment": "counterprotest",
+        "zoom": 80,
+        "focus": "12,21"
+      },
+      "steps": [
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "c56-gate-karaoke": {
+      "title": "FLT-56: the gate legend in a base-slot skin (Karaoke Night)",
+      "query": {
+        "moment": "counterprotest",
+        "skin": "karaoke-night"
+      },
+      "steps": [
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "c56-statement": {
+      "title": "FLT-56: Comms issues a statement to the Doomers (camera beat at the gate)",
+      "query": {
+        "warp": null,
+        "moment": "statement",
+        "beat": 1
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "c56-statement-phone": {
+      "title": "FLT-56: the statement beat on a phone",
+      "query": {
+        "warp": null,
+        "moment": "statement",
+        "beat": 1
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "c56-risk": {
+      "title": "FLT-56: the draft's leak-risk meter (Metadata risk) under the clauses",
+      "query": {
+        "moment": "bill",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "c56-risk-phone": {
+      "title": "FLT-56: the draft's leak-risk meter on a phone",
+      "query": {
+        "moment": "bill",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "c56-leak": {
+      "title": "FLT-56: a reporter is asking about the file (camera beat with a Bury button)",
+      "query": {
+        "moment": "bill-leak",
+        "warp": null,
+        "beat": 1
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "c56-leak-phone": {
+      "title": "FLT-56: the leak-warning beat on a phone",
+      "query": {
+        "moment": "bill-leak",
+        "warp": null,
+        "beat": 1
+      },
+      "steps": [
+        {
+          "wait": 1200
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "c56-leak-senate": {
+      "title": "FLT-56: the law's row in the Senate window: the reporter's clock and Bury it",
+      "query": {
+        "moment": "bill-leak",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 600
+        },
+        {
+          "click": "[data-testid=\"start-button\"]",
+          "optional": true
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": "[data-coach=\"build:senate\"]",
+          "optional": true
+        },
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "c56-stakes": {
+      "title": "FLT-56: a small motion with stakes (what passing and failing do), on the whip card",
+      "query": {
+        "moment": "vote",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
     }
   }
 }

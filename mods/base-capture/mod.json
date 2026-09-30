@@ -735,6 +735,43 @@
         "heatScale": 50,
         "trustScale": 100
       },
+      "warning": {
+        "days": 10,
+        "cost": 250000,
+        "costGrowth": 2,
+        "capture": 5,
+        "heat": 2,
+        "shame": 1,
+        "caption": "{reporter} is asking about {act}",
+        "sub": "Someone opened File > Properties. The story runs in {days} days.",
+        "toast": "{reporter} is asking about the file properties of {act}. The story runs in {days} days unless you bury it (Senate window).",
+        "buried": [
+          "{reporter} spikes a story about \"nothing in particular\"; its metadata desk is reassigned to the weather",
+          "{reporter}'s editor takes a sudden sabbatical on a very nice boat",
+          "{reporter} runs a correction to a story nobody has read yet",
+          "Sources say {act}'s file properties now list the author as \"Legal\". Just \"Legal\"."
+        ],
+        "buriedToast": "Buried, for now. Buried stories grow back: the next one costs {cost}.",
+        "broke": "Burying it costs {cost}. The reporter can wait; can you?",
+        "meter": [
+          {
+            "atLeast": 0.6,
+            "label": "Journalists will frame this"
+          },
+          {
+            "atLeast": 0.3,
+            "label": "Somebody will check"
+          },
+          {
+            "atLeast": 0.1,
+            "label": "Nobody reads metadata, mostly"
+          },
+          {
+            "atLeast": 0,
+            "label": "Nobody reads metadata"
+          }
+        ]
+      },
       "author": "{lab} Legal",
       "reporter": "The Morning Scroll",
       "empty": "{act} contains no clauses. It passes anyway. Everyone claims victory."

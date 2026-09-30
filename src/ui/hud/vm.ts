@@ -32,7 +32,7 @@ import { factionChips, factionsOf } from "./factions";
 import type { FactionChipVM } from "./types";
 import type {
   ArenaRowVM, DramaDocVM,
-  ArenaVM, AuditVM, BillVM, SenateVM, TrackerVM, GoalVM, ReportCardVM, ToneVM, BenchCellVM, DisasterRunVM, DisastersVM, DisasterStageVM, MeterVM, RiskVM, UnderstaffedVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HearingMoveVM, HearingVM, HudVM, LeakVM, SenatorVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
+  ArenaVM, AuditVM, BeatVM, BillVM, SenateVM, TrackerVM, GoalVM, ReportCardVM, ToneVM, BenchCellVM, DisasterRunVM, DisastersVM, DisasterStageVM, MeterVM, RiskVM, UnderstaffedVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HearingMoveVM, HearingVM, HudVM, LeakVM, SenatorVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
   DramaVM, ModsVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, ResponseVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, StreamVM, ThoughtRowVM, TrainingVM, TrendVM, VoiceVM, WalkerKindVM,
 } from "./types";
 import { defs } from "../../sim/defs";
@@ -415,6 +415,12 @@ const BILL_STATUS: Record<string, string> = {
   invited: "Draft", declined: "Shredded", floor: "On the floor", failed: "Voted down", law: "In force", exposed: "Exposed", fallout: "Fallout", sunset: "Sunset", quiet: "Nothing on the desk",
 };
 
+/** The button a beat offers while it plays (FLT-56): the leak's "Bury it", while the reporter is still asking. */
+function beatActionOf(kind: string, s: Snapshot): BeatVM["action"] {
+  const w = kind === "leak" ? billOf(s)?.warning : null;
+  return w ? { id: "bury", label: w.buryText, enabled: w.canBury } : null;
+}
+
 /** Regulatory Capture's bill (FLT-22): the draft, the law, and what it does to each rival. */
 export function billOf(s: Snapshot): BillVM | null {
   const b = s.bill;
@@ -444,6 +450,17 @@ export function billOf(s: Snapshot): BillVM | null {
     status: b.stage === "law" && b.lawDays !== null ? `In force · day ${b.lawDays}` : (BILL_STATUS[b.stage] ?? b.stage),
     tally: b.ayes === null ? null : `${b.ayes}–${3 - b.ayes}`,
     leakText: b.stage === "law" ? `${(b.leakOdds * 100).toFixed(b.leakOdds < 0.1 ? 1 : 0)}% a day` : null,
+    risk: b.risk,
+    riskText: `${Math.round(b.risk * 100)}% before the sunset`,
+    riskLabel: b.riskLabel,
+    warning: b.warning
+      ? {
+          text: `${b.reporter} is asking about the file`,
+          daysText: b.warning.daysLeft === 0 ? "The story runs tomorrow" : `The story runs in ${b.warning.daysLeft} day${b.warning.daysLeft === 1 ? "" : "s"}`,
+          buryText: `Bury it (${formatMoney(b.warning.cost)})`,
+          canBury: s.cash >= b.warning.cost,
+        }
+      : null,
     rivals,
   };
 }
@@ -461,7 +478,7 @@ export function trackerOf(s: Snapshot): TrackerVM | null {
     : (TRACKER_STATUS[p.stage] ?? p.stage);
   return {
     stage: p.stage,
-    motion: p.motion ? { ...p.motion, labSideText: `${s.labName} wants ${SIDE_TEXT[p.motion.labSide]}` } : null,
+    motion: p.motion ? { ...p.motion, stakes: p.motion.stakes ? { ...p.motion.stakes } : null, labSideText: `${s.labName} wants ${SIDE_TEXT[p.motion.labSide]}` } : null,
     status,
     lobbying: p.lobbying,
     senators: p.senators.map((sen) => ({
@@ -986,7 +1003,7 @@ export function hudViewModel(i: HudInput): HudVM {
     sound: soundOf(i),
     photoMode: photoOf(i),
     // A card needs the player: the beat makes way. Photo mode hides it with the rest of the HUD.
-    beat: i.beat && !event && !era && !i.photo.on ? { ...i.beat, kicker: BEAT_KICKER[i.beat.kind] ?? "Meanwhile", skipLabel: "Skip »" } : null,
+    beat: i.beat && !event && !era && !i.photo.on ? { ...i.beat, kicker: BEAT_KICKER[i.beat.kind] ?? "Meanwhile", skipLabel: "Skip »", action: beatActionOf(i.beat.kind, i.snap) } : null,
     skins: i.skins,
     mods: i.mods ?? NO_MODS_VM,
     disasters: disastersOf(i, play.visible.disasters),

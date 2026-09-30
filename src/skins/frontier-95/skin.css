@@ -4033,6 +4033,30 @@
   .f95-bill {
     width: min(660px, 100%);
   }
+  .f95-leakrisk {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    margin: 4px 6px 0;
+    font-size: 12px;
+    .f95-prog {
+      flex: 1 1 120px;
+    }
+    &.hot b {
+      color: #c00000;
+    }
+  }
+  .f95-leakwarn {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    margin-top: 3px;
+    b {
+      color: #c00000;
+    }
+  }
   .f95-xls {
     width: min(720px, 100%);
   }
@@ -4214,6 +4238,14 @@
     }
     tr.law td {
       background: #ffe0e0;
+    }
+    .f95-stakes {
+      display: flex;
+      flex-direction: column;
+      margin-top: 2px;
+      b {
+        color: #000080;
+      }
     }
     td.who {
       display: flex;

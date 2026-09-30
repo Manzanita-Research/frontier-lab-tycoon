@@ -74,6 +74,23 @@
 .beat-skip:focus-visible {
   background: color-mix(in srgb, #f6f1e6 16%, transparent);
 }
+.beat-action {
+  background: #b3261e;
+  border-color: #f6f1e6;
+  font-weight: 700;
+}
+.beat-action:hover,
+.beat-action:focus-visible {
+  background: #d23a2f;
+}
+.beat-action:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.beat-leak .beat-kicker::before {
+  content: "! ";
+  color: #ffb4a8;
+}
 .beat-viral .beat-kicker::before {
   content: "● ";
   color: #ff3b30;

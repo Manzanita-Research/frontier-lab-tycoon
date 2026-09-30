@@ -27,8 +27,9 @@ describe("midgame scenario", () => {
     // and the Promise Tracker.
     // FLT-33/25: the earned factions wake with the campus and argue all 480 days; the water crowd escalates through its arc.
     // FLT-56: the auditors huddle before they leave and the grade lingers, which moves the opening a few days, and the
-    // Hearing's twelve new questions change what the senators ask.
-    expect(digest(s)).toBe("ed176ab5");
+    // Hearing's twelve new questions change what the senators ask. Phase 2: the motions' passes and fails nudge the
+    // factions and last longer.
+    expect(digest(s)).toBe("e26bf26e");
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);

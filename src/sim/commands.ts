@@ -15,7 +15,7 @@ import type { GameState, Rect, StaffJob } from "./types";
 import { buildingUnlocked, systemUnlocked } from "./progression";
 import { coachCommand } from "./coach";
 import { lobbySenator } from "./promises/driver";
-import { draftClause } from "./capture/driver";
+import { buryLeak, draftClause } from "./capture/driver";
 import { continueTutorial } from "./tutorial";
 import { defs } from "./defs";
 import { setSafetySpend } from "./factions/driver";
@@ -47,6 +47,7 @@ export type Command =
   | { type: "lobby"; senator: string }
   /** Tick (`on`) or untick a clause on the bill the lab was asked to draft (FLT-22). */
   | { type: "draftClause"; clause: string; on: boolean }
+  | { type: "buryLeak" }
   /** FLT-33: the safety budget, 0 (none) to 3 (lavish). Costs money daily and slows training; the factions notice. */
   | { type: "setSafetySpend"; level: number }
   /** FLT-56: Comms addresses a faction (the gate legend's lever). Costs money, then a cooldown; a refusal is a toast. */
@@ -199,6 +200,9 @@ export function applyCommands(state: GameState, commands: readonly Command[], rn
         break;
       case "setSafetySpend":
         if (state.factions && systemUnlocked(state, "factions")) setSafetySpend(state, c.level);
+        break;
+      case "buryLeak":
+        if (systemUnlocked(state, "capture")) buryLeak(state);
         break;
       case "issueStatement":
         if (state.factions && systemUnlocked(state, "factions")) issueStatement(state, c.faction);

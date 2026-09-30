@@ -185,10 +185,13 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // auditors' own stream: every seed's first visit ends before 3200, so 3200 and 4000 moved and nothing earlier did.
 // Then the Hearing got twelve more questions: the same draw picks a different docket from a longer list, so the first
 // summons (between 800 and 1600 on every seed) asks other things, and 1600 onward moved. The old pack reproduces the old values.
+// Phase 2 made the Promise Tracker's motions matter: every motion names its stakes, and a pass or a fail now nudges the
+// factions and lasts longer (mods/base-promises). The first roll call lands between 1600 and 2400 on every seed, so 2400
+// onward moved. With the old motions the new capture driver (leak meter, warning, bury) reproduces the old values.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "d3826cd0", 800: "ed628bb9", 1600: "5090f149", 2400: "a10524e9", 3200: "7842a0c2", 4000: "334a527f" },
-  2: { 200: "e548b1af", 800: "552cae60", 1600: "031fbba6", 2400: "2ac048c7", 3200: "b5159b68", 4000: "207579df" },
-  3: { 200: "58bb415c", 800: "920699d6", 1600: "1e68dec4", 2400: "104a383c", 3200: "ac609443", 4000: "61e1599f" },
+  1: { 200: "d3826cd0", 800: "ed628bb9", 1600: "5090f149", 2400: "4f7fbe80", 3200: "03219dee", 4000: "c41f0fc2" },
+  2: { 200: "e548b1af", 800: "552cae60", 1600: "031fbba6", 2400: "db5b6feb", 3200: "7c0e1c28", 4000: "badde67b" },
+  3: { 200: "58bb415c", 800: "920699d6", 1600: "1e68dec4", 2400: "db23cad4", 3200: "dafa3df6", 4000: "76e3adb8" },
 };
 
 describe("golden runs", () => {

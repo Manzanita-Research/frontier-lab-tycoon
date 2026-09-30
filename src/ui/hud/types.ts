@@ -459,6 +459,15 @@ export interface BillVM {
   tally: string | null;
   /** The chance a day that someone opens the file properties ("0.4% a day"), while the law stands. */
   leakText: string | null;
+  /**
+   * FLT-56, the leak-risk meter: 0 to 1, the odds the file properties leak before the law sunsets (the draft as ticked,
+   * at today's heat and trust; the law's days left once it stands), its text ("34% before the sunset") and a label.
+   */
+  risk: number;
+  riskText: string;
+  riskLabel: string;
+  /** FLT-56: a reporter is asking about the file ("The story runs in 7 days") and the bury button (`actions.buryLeak`). Null: nobody is. */
+  warning: { text: string; daysText: string; buryText: string; canBury: boolean } | null;
   /** What the law does to each rival, while it stands. */
   rivals: BillRivalVM[];
 }
@@ -493,7 +502,8 @@ export interface TrackerSenatorVM {
 export interface TrackerVM {
   /** "recess", "campaign", "rollCall", "passed", "failed" (or "dormant"). */
   stage: string;
-  motion: { id: string; title: string; summary: string; labSide: "aye" | "nay"; labSideText: string } | null;
+  /** `stakes` (FLT-56): what passing and failing would do, a line each (null: the motion does not say). */
+  motion: { id: string; title: string; summary: string; labSide: "aye" | "nay"; labSideText: string; stakes: { pass: string; fail: string } | null } | null;
   /** "Roll call in 3 days", "In recess", "Passed 2–1" */
   status: string;
   /** Lobbying is open: `actions.lobby(id)`. */
@@ -1015,6 +1025,8 @@ export interface BeatVM {
   /** A second line, or "". */
   sub: string;
   skipLabel: string;
+  /** FLT-56: a button the beat offers while it plays (the leak's "Bury it"): `actions.beatAction(id)`. Null: none. */
+  action: { id: string; label: string; enabled: boolean } | null;
 }
 
 export interface PhotoVM {
@@ -1455,6 +1467,10 @@ export interface HudActions {
   setSafetySpend(level: number): void;
   /** FLT-56: Comms puts out a statement to one faction (the gate legend). Costs money, then a cooldown; the sim may refuse with a toast. */
   issueStatement(faction: string): void;
+  /** FLT-56: bury the story a reporter is chasing about the law (Regulatory Capture). */
+  buryLeak(): void;
+  /** FLT-56: press the button a camera beat offers (`BeatVM.action.id`). */
+  beatAction(id: string): void;
   keepPlaying(): void;
   newLab(): void;
   // The payroll.

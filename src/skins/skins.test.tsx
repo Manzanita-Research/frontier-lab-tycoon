@@ -99,7 +99,7 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
         actions,
       };
     case "Beat":
-      return { beat: { id: 1, kind: "exit", kicker: "Breaking · a departure", caption: "Dr. Ada Gradient is leaving to “focus on safety” (and a $4B seed round)", sub: "Kevin Backprop follows in a conga line, carrying boxes.", skipLabel: "Skip »" }, actions };
+      return { beat: { id: 1, kind: "exit", kicker: "Breaking · a departure", caption: "Dr. Ada Gradient is leaving to “focus on safety” (and a $4B seed round)", sub: "Kevin Backprop follows in a conga line, carrying boxes.", skipLabel: "Skip »", action: null }, actions };
     case "PhotoOverlay":
       return { photo: vms.photo!.photoMode, actions };
     case "SkinPicker":
