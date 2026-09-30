@@ -1,0 +1,74 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "deb7d601138ef4e226ba7cb77768f05d8f3aaa87"
+  },
+  "head": {
+    "branch": "flt-14-port-field-almanac",
+    "sha": "24ce18d",
+    "dirty": true
+  },
+  "seconds": 178.681,
+  "problems": [
+    "photo@field-almanac.png: blank composite: panel 3 is 53% one colour, 8 colours"
+  ],
+  "rows": [
+    {
+      "scene": "overview",
+      "skin": "field-almanac",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/field-almanac/before/overview@field-almanac.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/field-almanac/after/overview@field-almanac.png",
+      "title": "The campus, mid-morning, paused",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/field-almanac/compare/overview@field-almanac.png",
+      "changed": 0.3200401234567901
+    },
+    {
+      "scene": "inspector",
+      "skin": "field-almanac",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/field-almanac/before/inspector@field-almanac.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/field-almanac/after/inspector@field-almanac.png",
+      "title": "Tap a researcher: the inspector opens",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/field-almanac/compare/inspector@field-almanac.png",
+      "changed": 0.3421381172839506
+    },
+    {
+      "scene": "event",
+      "skin": "field-almanac",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/field-almanac/before/event@field-almanac.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/field-almanac/after/event@field-almanac.png",
+      "title": "An event card lands (the Water Discourse)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/field-almanac/compare/event@field-almanac.png",
+      "changed": 0.8429591049382716
+    },
+    {
+      "scene": "menu",
+      "skin": "field-almanac",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/field-almanac/before/menu@field-almanac.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/field-almanac/after/menu@field-almanac.png",
+      "title": "The Start menu / build bar open",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/field-almanac/compare/menu@field-almanac.png",
+      "changed": 0.34470524691358023
+    },
+    {
+      "scene": "phone",
+      "skin": "field-almanac",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/field-almanac/before/phone@field-almanac.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/field-almanac/after/phone@field-almanac.png",
+      "title": "The same campus on a phone (390x844)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/field-almanac/compare/phone@field-almanac.png",
+      "changed": 0.28441639324340745
+    },
+    {
+      "scene": "photo",
+      "skin": "field-almanac",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/field-almanac/before/photo@field-almanac.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/field-almanac/after/photo@field-almanac.png",
+      "title": "Photo mode",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/field-almanac/compare/photo@field-almanac.png",
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 53% one colour, 8 colours",
+      "error": "compare: blank composite: panel 3 is 53% one colour, 8 colours"
+    }
+  ],
+  "errors": []
+}

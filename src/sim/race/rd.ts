@@ -1,5 +1,6 @@
 // The R&D multiplier: how much faster the lab trains than humans alone would.
 //   1 + agents x agentSkill(capability) / max(1, researchers x 10)
+import { systemUnlocked } from "../progression";
 import { releaseGain } from "../machines/training";
 import type { GameState } from "../types";
 
@@ -28,7 +29,8 @@ export function workingCapability(state: Pick<GameState, "capability" | "trainin
   return state.capability + Math.max(0, Math.min(1, progress / cost)) * releaseGain(run);
 }
 
-export function rdMultiplier(state: Pick<GameState, "walkers" | "capability" | "training">): number {
+export function rdMultiplier(state: Pick<GameState, "walkers" | "capability" | "training" | "progression" | "progressionContent">): number {
+  if (!systemUnlocked(state, "rnd")) return 1;
   let agents = 0;
   let researchers = 0;
   for (const w of state.walkers) {

@@ -14,6 +14,7 @@ import type { Command } from "../sim/commands";
 import type { NewsItem, OpenEvent, Outcome, Tone } from "../sim/types";
 import { Frames } from "./frames";
 import type { Snapshot, Speed, Tool, UiSelection, UiToast } from "./hud";
+import { gateToasts, newGate, type NoticeGate } from "./notices";
 import { Sim, type SyncReport } from "./sim";
 
 /** Twenty sim ticks per day, six real seconds at 1×. */
@@ -43,6 +44,8 @@ export const AppContext = Schema.Struct({
   news: opaque<readonly NewsItem[]>(),
   toasts: opaque<readonly UiToast[]>(),
   toastSeq: Schema.Number,
+  /** What Release Leapfrog's launches have held back from the toast stack (see `notices.ts`). */
+  gate: opaque<NoticeGate>(),
   /** The walker whose inspector card is open (their id), if any. */
   selected: Schema.NullOr(Schema.Number),
   /** The camera is following `selected`. */
@@ -76,11 +79,16 @@ export function phaseFor(c: AppContext): Phase {
   return c.speed === 0 || autoPaused(c) ? ".playing.paused" : ".playing.running";
 }
 
-/**
- * What holds time without the player asking: a spend waiting for its yes or no, a selected walker, an open menu. (FLT-16's
- * guided opening also held time until you tapped Next and until the first build; the coach marks that replace it do not.)
- */
-export const autoPaused = (c: AppContext): boolean => !!c.snap.pendingConfirm || c.selected !== null || c.overlays.length > 0;
+export const autoPaused = (c: AppContext): boolean => c.snap.firstBuildPending || !!c.snap.pendingConfirm;
+
+/** Why time is standing still, for the "Paused" indicator: null while the clock runs. A card beats the pause button, which beats the auto-pauses. */
+export type PauseReason = "card" | "player" | "tutorial" | "build" | "menu" | "inspector";
+export function pauseReasonOf(c: AppContext): PauseReason | null {
+  if (c.event || outcomeHeld(c) || c.snap.pendingConfirm) return "card";
+  if (c.speed === 0) return "player";
+  if (c.snap.firstBuildPending) return "build";
+  return null;
+}
 
 /** The same words twice are one toast (the newer replaces the older); the HUD shows only the newest, so keep just a few. */
 const addToasts = (c: AppContext, fresh: readonly UiToast[]) => ({ ...c, toasts: [...c.toasts.filter((t) => !fresh.some((f) => f.text === t.text)), ...fresh].slice(-3) });
@@ -166,6 +174,7 @@ export const appMachine = setupEffect({
     news: input.first.news ?? [],
     toasts: input.first.toasts.slice(-3),
     toastSeq: 1,
+    gate: newGate(),
     selected: null,
     follow: false,
     highlight: null,
@@ -214,9 +223,19 @@ export const appMachine = setupEffect({
   on: {
     SYNCED: ({ context, event }, enq) => {
       const { report, now } = event;
-      const fresh = report.toasts;
+      // Rival launches are for the leaderboard and the ticker: only what matters to the player becomes a toast.
+      const gated = gateToasts(context.gate, report.toasts, {
+        now,
+        speed: context.speed,
+        leapfrog: report.snap?.leapfrog,
+        rank: report.snap ? { prev: context.snap.race.rank, next: report.snap.race.rank, top: report.snap.race.board.find((r) => r.rank === 1)?.short ?? "" } : null,
+        seq: context.toastSeq,
+      });
+      const fresh = gated.toasts;
       const next: AppContext = {
         ...addToasts(context, fresh),
+        gate: gated.gate,
+        toastSeq: gated.seq,
         event: report.event,
         outcome: report.outcome,
         snap: report.snap ?? context.snap,
@@ -240,13 +259,15 @@ export const appMachine = setupEffect({
     },
     SET_TOOL: ({ context, event }) => {
       const tool = context.tool === event.tool ? null : event.tool;
-      const matches = context.snap.assistant?.highlight === `build:${tool}`;
-      return { context: { ...context, tool, hover: null, zone: null, queue: matches ? [...context.queue, { type: "continueTutorial" as const }] : context.queue, lastPublishAt: 0 } };
+      const queue: readonly Command[] = tool ? [...context.queue, { type: "buildPanelOpened" }] : context.queue;
+      return { context: { ...context, tool, hover: null, zone: null, queue, speed: context.snap.firstBuildPending && tool ? 1 : context.speed, lastPublishAt: 0 } };
     },
     SET_OVERLAY: ({ context, event }) => {
       const overlays = context.overlays.filter((id) => id !== event.id);
       if (event.open) overlays.push(event.id);
-      const next = { ...context, overlays, acc: 0 };
+      const build = event.open && /start|build|menu/.test(event.id);
+      const queue: readonly Command[] = build ? [...context.queue, { type: "buildPanelOpened" }] : context.queue;
+      const next = { ...context, overlays, queue, speed: build && context.snap.firstBuildPending ? 1 as Speed : context.speed };
       return { context: next, target: phaseFor(next) };
     },
     SET_ZONE: ({ context, event }) => ({ context: { ...context, zone: event.id === context.zone ? null : event.id, tool: null, hover: null } }),
@@ -255,7 +276,7 @@ export const appMachine = setupEffect({
       return { context: { ...context, hover: event.hover } };
     },
     // A player command publishes the snapshot on the very next frame, so a hire or a painted tile shows straight away.
-    COMMAND: ({ context, event }) => ({ context: { ...context, queue: [...context.queue, event.command], lastPublishAt: 0 } }),
+    COMMAND: ({ context, event }) => ({ context: { ...context, speed: event.command.type === "buildPanelOpened" && context.snap.firstBuildPending ? 1 : context.speed, queue: [...context.queue, event.command], lastPublishAt: 0 } }),
     CHOOSE: ({ context, event }) => {
       if (!context.event) return;
       const command: Command = { type: "chooseEvent", eventId: context.event.id, choiceIndex: event.choiceIndex };
@@ -275,7 +296,7 @@ export const appMachine = setupEffect({
     NEW_LAB: (args, enq) => {
       const { context, actions } = args;
       enq(actions.newLab, args);
-      const next = { ...context, queue: [], acc: 0, toasts: [], outcomeDismissed: false, speed: 1 as Speed, tool: null, hover: null, selected: null, follow: false, highlight: null, zone: null, overlays: [] };
+      const next = { ...context, queue: [], acc: 0, toasts: [], gate: newGate(), outcomeDismissed: false, speed: 1 as Speed, tool: null, hover: null, selected: null, follow: false, highlight: null, zone: null, overlays: [] };
       return { context: next, target: ".playing.running" };
     },
     TOAST: ({ context, event }, enq) => {

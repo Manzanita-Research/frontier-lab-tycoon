@@ -6,7 +6,23 @@
   "version": "1.0.0",
   "description": "A naturalist's field guide to your lab: quiet frosted-paper panels, a soft serif, hairline rules, and the news as dispatches.",
   "preview": "assets/preview.jpg",
-  "slots": [],
+  "slots": [
+    "Layout",
+    "Stats",
+    "Training",
+    "Objectives",
+    "Inspector",
+    "BuildBar",
+    "Speed",
+    "Bubble",
+    "ThoughtsPanel",
+    "Ticker",
+    "Toast",
+    "Benchmarks",
+    "Voice",
+    "NewsControls",
+    "PhotoButton"
+  ],
   "fonts": [
     {
       "family": "Fraunces",
@@ -18,9 +34,25 @@
     },
     {
       "family": "Fraunces",
-      "src": "assets/fonts/fraunces-latin-700-normal.woff2",
-      "weight": 700,
+      "src": "assets/fonts/fraunces-latin-600-normal.woff2",
+      "weight": 600,
       "style": "normal",
+      "license": "OFL-1.1",
+      "licenseFile": "assets/fonts/fraunces-LICENSE.txt"
+    },
+    {
+      "family": "Fraunces",
+      "src": "assets/fonts/fraunces-latin-400-italic.woff2",
+      "weight": 400,
+      "style": "italic",
+      "license": "OFL-1.1",
+      "licenseFile": "assets/fonts/fraunces-LICENSE.txt"
+    },
+    {
+      "family": "Fraunces",
+      "src": "assets/fonts/fraunces-latin-500-italic.woff2",
+      "weight": 500,
+      "style": "italic",
       "license": "OFL-1.1",
       "licenseFile": "assets/fonts/fraunces-LICENSE.txt"
     },
@@ -28,6 +60,14 @@
       "family": "Figtree",
       "src": "assets/fonts/figtree-latin-400-normal.woff2",
       "weight": 400,
+      "style": "normal",
+      "license": "OFL-1.1",
+      "licenseFile": "assets/fonts/figtree-LICENSE.txt"
+    },
+    {
+      "family": "Figtree",
+      "src": "assets/fonts/figtree-latin-600-normal.woff2",
+      "weight": 600,
       "style": "normal",
       "license": "OFL-1.1",
       "licenseFile": "assets/fonts/figtree-LICENSE.txt"
@@ -54,7 +94,7 @@
     "motion.reduced.base": "0ms",
     "motion.reduced.slow": "0ms",
     "font.size": "16px",
-    "font.weight": "700",
+    "font.weight": "400",
     "color.bg": "#E4ECE4",
     "color.panel": "#FBF7EE",
     "color.panelAlt": "#EFE7D6",
@@ -76,27 +116,38 @@
     "color.tipText": "#22313A",
     "color.selection": "#22313A",
     "color.selectionText": "#FBF7EE",
+    "color.highlight": "#B4531A",
     "color.meterFrom": "#6F9B78",
     "color.meterTo": "#C79A2B",
     "font.ui": "\"Figtree\", system-ui, sans-serif",
     "font.display": "\"Fraunces\", Georgia, serif",
     "font.numbers": "\"Fraunces\", Georgia, serif",
     "font.mono": "ui-monospace, Menlo, monospace",
-    "radius.panel": "8px",
-    "radius.button": "6px",
+    "radius.panel": "16px",
+    "radius.button": "10px",
     "radius.pill": "999px",
-    "radius.bubble": "8px",
+    "radius.bubble": "14px",
     "border.width": "1px",
     "border.style": "solid",
-    "shadow.panel": "0 8px 24px rgba(34, 49, 58, 0.16)",
-    "shadow.pop": "0 3px 10px rgba(34, 49, 58, 0.18)"
+    "shadow.panel": "0 1px 0 rgba(255, 255, 255, 0.7) inset, 0 18px 40px -18px rgba(34, 49, 58, 0.45), 0 2px 6px rgba(34, 49, 58, 0.08)",
+    "shadow.pop": "0 6px 14px -8px rgba(34, 49, 58, 0.5)"
   },
   "strings": {
     "ticker.label": "Dispatches",
-    "objectives.title": "Field notes",
-    "training.title": "Under observation:",
+    "objectives.title": "This year's objectives",
+    "training.title": "Field notes",
+    "training.compute": "+{n} compute a day",
     "thoughts.title": "Overheard",
-    "inspector.thinking": "Observed thinking",
-    "inspector.follow": "Track this specimen"
+    "inspector.follow": "Follow",
+    "inspector.thinking": "Overheard",
+    "build.refund": "half back",
+    "build.free": "free",
+    "stats.arenaOn": "on the Arena",
+    "stats.arenaTop": "on top, for now",
+    "event.paused": "At rest",
+    "hint.tap": "Tap anyone to add them to your field notes.",
+    "hint.gateway": "Build an API Gateway beside a path, and the revenue will follow.",
+    "arena.eraPill": "Era {n} · {name}",
+    "bench.title": "Leaderboard"
   }
 }

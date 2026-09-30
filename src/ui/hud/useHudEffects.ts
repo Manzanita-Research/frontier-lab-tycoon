@@ -23,6 +23,9 @@ const desk = new NewsDesk();
 /** Build hotkeys (1-9, Space, Esc), and the keys that answer whichever card is up. */
 function useHotkeys(vm: HudVM) {
   const eraOpenedAt = useRef(0);
+  // Only the tools the lab has unlocked answer a number key (the build panel lists exactly these).
+  const earned = useRef<ReadonlySet<string>>(new Set());
+  earned.current = new Set(vm.buildItems.map((b) => b.kind));
   const eraN = vm.eraCard?.n ?? null;
   useEffect(() => {
     if (eraN !== null) eraOpenedAt.current = performance.now();
@@ -56,7 +59,10 @@ function useHotkeys(vm: HudVM) {
         (document.activeElement as HTMLElement | null)?.blur?.();
         send({ type: "TOGGLE_PAUSE" });
       } else if (e.key === "Escape") send({ type: "SET_TOOL", tool: null });
-      else if (/^[1-9]$/.test(e.key)) send({ type: "SET_TOOL", tool: TOOLS[Number(e.key) - 1]! });
+      else if (/^[1-9]$/.test(e.key)) {
+        const tool = TOOLS[Number(e.key) - 1]!;
+        if (earned.current.has(tool)) send({ type: "SET_TOOL", tool });
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);

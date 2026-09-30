@@ -6,7 +6,7 @@ import { BUILDINGS } from "../../content/buildings";
 import { eventById } from "../../content/events";
 import { canPlace, placeBuilding } from "../commands";
 import { createRng } from "../rng";
-import { createInitialState } from "../state";
+import { createTestCampus as createInitialState } from "../testkit";
 import { perfBudget, createTestCampus, layPaths, readyForPressure } from "../testkit";
 import { applyNow, tick } from "../tick";
 import { GUARDS, GUARD_NAMES, STATS, STAT_NAMES, VERBS, VERB_NAMES, checkCall, runVerb, statsIn, vocabulary, type VerbEnv } from "../verbs";

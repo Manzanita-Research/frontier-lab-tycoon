@@ -197,17 +197,31 @@ export function nearestPathTile(s: GameState, x: number, z: number): Tile | null
  * Waypoints from a position to a building (or the gate): tile centres along the
  * path, then a last "door" point just inside the wall. Null when there is no route.
  */
+// Destination geometry only changes with the World version. Keep route templates outside
+// the persisted sim and hand each walker its own mutable waypoint list.
+const rectRoutes = new WeakMap<GameState, { version: number; targets: WeakMap<Rect, Map<number | string, Point[] | null>> }>();
 export function routeToRect(s: GameState, fromX: number, fromZ: number, target: Rect, isGate = false): Point[] | null {
+  let cache = rectRoutes.get(s);
+  if (!cache || cache.version !== s.version) {
+    cache = { version: s.version, targets: new WeakMap() };
+    rectRoutes.set(s, cache);
+  }
+  let routes = cache.targets.get(target);
+  if (!routes) { routes = new Map(); cache.targets.set(target, routes); }
+  const fx = Math.floor(fromX), fz = Math.floor(fromZ);
+  const key = inBounds(s, fx, fz) ? tileIndex(s, fx, fz) * 2 + Number(isGate) : `${fx},${fz},${Number(isGate)}`;
+  if (routes.has(key)) return routes.get(key)?.map(([x, z]): Point => [x, z]) ?? null;
   const ents = entrances(s, target);
-  if (ents.length === 0) return null;
+  if (ents.length === 0) { routes.set(key, null); return null; }
   const goals = new Set(ents.map((e) => tileIndex(s, e.x, e.z)));
   const tiles = bfsRoute(s, [Math.floor(fromX), Math.floor(fromZ)], goals);
-  if (!tiles) return null;
+  if (!tiles) { routes.set(key, null); return null; }
   const points: Point[] = tiles.map(([x, z]) => [x + 0.5, z + 0.5]);
   const last = tiles[tiles.length - 1]!;
   const edge = ents.find((e) => e.x === last[0] && e.z === last[1])!;
   const reach = isGate ? 0.9 : 0.4;
   points.push([last[0] + 0.5 + edge.dx * reach, last[1] + 0.5 + edge.dz * reach]);
+  routes.set(key, points.map(([x, z]): Point => [x, z]));
   return points;
 }
 

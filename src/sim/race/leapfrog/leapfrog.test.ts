@@ -854,7 +854,7 @@ describe("debug moments (?moment=)", () => {
 });
 
 describe("the app turns the pack on", () => {
-  it("is on in the browser unless ?leapfrog=off, and a new lab gets it too; the tests' handles stay off unless asked", async () => {
+  it("waits for The Race in the browser and after reset; explicit scenes still stage it", async () => {
     const { readDebugParams } = await import("../../../debug");
     const { createSimHandle } = await import("../../../app/sim");
     expect(readDebugParams("").leapfrog).toBe(true);
@@ -862,9 +862,9 @@ describe("the app turns the pack on", () => {
     const base = { seed: 1, warp: 0, agents: 0, discourse: 0, researchers: 0 };
     expect(createSimHandle(base).world.leapfrog.enabled).toBe(false);
     const handle = createSimHandle({ ...base, leapfrog: true });
-    expect(handle.world.leapfrog.enabled).toBe(true);
+    expect(handle.world.leapfrog.enabled).toBe(false);
     handle.reset(5);
-    expect(handle.world.leapfrog.enabled).toBe(true);
+    expect(handle.world.leapfrog.enabled).toBe(false);
     expect(handle.world.seed).toBe(5);
     const staged = createSimHandle({ ...base, leapfrog: true, moment: "stream:dog" });
     expect(staged.world.leapfrog.livestream.context.kind).toBe("dog");

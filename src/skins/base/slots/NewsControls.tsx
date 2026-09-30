@@ -1,4 +1,5 @@
 import { useT } from "../../context";
+import { ALL_VISIBLE } from "../../kit";
 import type { SlotPropsMap } from "../../types";
 
 const svg = { width: 18, height: 18, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2.4, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true } as const;
@@ -32,14 +33,16 @@ const Sparkle = () => (
 );
 
 /** The News Room button (with its unread badge), the mute switch, the mixer, and the way to the skin picker. */
-export function NewsControls({ newsroom, sound, skins, actions }: SlotPropsMap["NewsControls"]) {
+export function NewsControls({ newsroom, sound, skins, visible = ALL_VISIBLE, actions }: SlotPropsMap["NewsControls"]) {
   const t = useT();
   return (
     <div className="news-controls panel">
-      <button onClick={() => actions.openNews()} aria-label={t("news.open")}>
-        <Paper /> <span>{t("news.button")}</span>
-        {newsroom.unread > 0 && <b className="unread-count">{newsroom.unread}</b>}
-      </button>
+      {visible.news && (
+        <button onClick={() => actions.openNews()} aria-label={t("news.open")}>
+          <Paper /> <span>{t("news.button")}</span>
+          {newsroom.unread > 0 && <b className="unread-count">{newsroom.unread}</b>}
+        </button>
+      )}
       <button onClick={() => actions.setMuted(!sound.muted)} aria-label={sound.muted ? t("sound.unmute") : t("sound.mute")} aria-pressed={sound.muted}>
         <Speaker muted={sound.muted} />
       </button>

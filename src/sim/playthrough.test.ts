@@ -9,7 +9,7 @@ import { outcomeOf } from "./goals";
 import { eraOfState } from "./race/race";
 import { slopStats } from "./slop";
 import { staffOf } from "./staff";
-import { createInitialState } from "./state";
+import { createTestCampus as createInitialState } from "./testkit";
 import { countOf, findSpot, layPaths } from "./testkit";
 import { TICKS_PER_DAY, tick } from "./tick";
 import type { GameState } from "./types";
@@ -147,7 +147,7 @@ describe("a reasonable player", () => {
     const r = playBot(1, { keepPlaying: true, days: SCENARIO.deadlineDay + 40 });
     expect(r.eraDays[3]).not.toBeNull();
     expect(r.eraDays[3]!).toBeLessThan(SCENARIO.deadlineDay + 40);
-  });
+  }, 15_000); // Functional multi-year replay on the shared 1-vCPU builder; perf budgets are separate.
 });
 
 describe("an absent player", () => {

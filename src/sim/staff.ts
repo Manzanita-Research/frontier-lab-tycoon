@@ -7,6 +7,7 @@
 //   SRE:         walks to the nearest broken building and fixes it (2 to 4 game hours once there).
 //   Comms Rep:   walks up to a protester and hands them a tote bag; each one also takes 2 discourse off every day (protest.ts).
 //   Security:    walks the fence. It is the hook for catching escaped agents (FLT-5): see `guardsOn`.
+import { staffUnlocked } from "./progression";
 import { BUILDINGS } from "../content/buildings";
 import { MAX_PER_JOB, MAX_STAFF, STAFF } from "../content/staff";
 import { repairBuilding } from "./breakdowns";
@@ -56,6 +57,7 @@ const send = (s: Staffer, event: StaffEvent) => {
 
 /** Can this job be filled right now? A reason if not. */
 export function canHire(state: GameState, job: StaffJob): { ok: true } | { ok: false; reason: string } {
+  if (!staffUnlocked(state, job)) return { ok: false, reason: "Meet your next goal to unlock this job" };
   if (state.staff.length >= MAX_STAFF) return { ok: false, reason: "The office is full" };
   if (staffOf(state, job).length >= MAX_PER_JOB) return { ok: false, reason: `That's plenty of ${STAFF[job].title}s` };
   return { ok: true };
@@ -258,6 +260,13 @@ function patrol(state: GameState, s: Staffer, rng: Rng) {
     const [fx, fz] = FENCE[s.task % FENCE.length]!;
     s.route = [[fx, fz]];
     s.task = (s.task + 1) % FENCE.length;
+    return;
+  }
+  if (s.job === "comms" && !state.walkers.some((w) => w.kind === "protester")) {
+    const spot = state.buildings.find((b) => b.kind === "kombucha") ?? state.buildings.find((b) => b.kind === "gateway");
+    const zoned = s.zone.find((i) => getReach(state).tiles[i]);
+    const route = zoned !== undefined ? pathRoute(state, s, new Set([zoned])) : spot ? routeToRect(state, ...fromTile(state, s), spot) : pathRoute(state, s, new Set([tileIndex(state, 11, 19)]));
+    if (route) s.route = route;
     return;
   }
   const reach = getReach(state).tiles;

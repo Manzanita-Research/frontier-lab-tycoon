@@ -16,6 +16,7 @@ import { Fence } from "./Fence";
 import { Slop } from "./Slop";
 import { StaffCrew } from "./StaffCrew";
 import { OverlayProjector } from "./overlay";
+import { CoachSuggestion } from "./CoachSuggestion";
 import { Placement } from "./Placement";
 import { Walkers } from "./Walkers";
 
@@ -63,6 +64,7 @@ export function Scene() {
       <ParticleLayer />
       <OverlayProjector />
       <Placement />
+      <CoachSuggestion />
       <CameraRig baseZoom={zoom} />
       <PhotoLayer />
       <PressCamera />

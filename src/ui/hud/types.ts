@@ -253,6 +253,75 @@ export interface ConfirmVM {
   message: string;
 }
 
+// ---- Playable v1: what the player has unlocked, the coach marks, and the "New!" card ----
+
+/** The HUD panels the player earns as the lab grows (a hidden panel is simply not drawn). */
+export type HudPanelId = "revenue" | "vibes" | "arena" | "rnd" | "thoughts" | "news" | "staff" | "events" | "papers" | "disasters";
+export type VisibleVM = Record<HudPanelId, boolean>;
+
+/** A locked item the build panel teases: "??? · ship your first model". */
+export interface TeaserVM {
+  label: string;
+  hint: string;
+}
+
+export interface GoalVM {
+  /** "Ship your first model" */
+  text: string;
+  current: number;
+  target: number;
+  /** "Ship your first model · 0/1" */
+  line: string;
+  /** 0 to 1 */
+  ratio: number;
+}
+
+export interface ProgressVM {
+  unlocked: { buildings: string[]; staff: string[]; systems: string[] };
+  /** 1 to 5: "Garage", "Open for business", "Growing team", "The Race", "Scrutiny". */
+  level: number;
+  levelName: string;
+  goal: GoalVM;
+  teasers: TeaserVM[];
+}
+
+/**
+ * One coach mark: a dimmed screen with a spotlight on `[data-coach="<target>"]`, and a line of copy. It waits for the player to do
+ * the thing (never a Continue button, never a pause). `suggest` says where the map's ghost tiles are.
+ */
+export interface CoachVM {
+  id: string;
+  /** 1-based, of `of` ("3 of 7"). */
+  step: number;
+  of: number;
+  text: string;
+  /** "start", "build:path", "build:hall", "training", "build:gateway", "stat:runway", "goals" or "map:suggest". */
+  target: string;
+  /** An "info" line (waitFor "timer") fades on its own; the others wait for the action. */
+  waitFor: "action" | "timer";
+  canSkip: boolean;
+  suggest?: { kind: "path"; tiles: [number, number][] } | { kind: "building"; building: string; x: number; z: number };
+}
+
+/** The small "New!" card that comes with a level-up. */
+export interface UnlockCardVM {
+  id: string;
+  title: string;
+  body: string;
+  items: string[];
+}
+
+/** Help ▸ How to play. Only present while the window is open. */
+export interface HelpVM {
+  title: string;
+  /** The loop in five lines. */
+  loop: string[];
+  /** One line for each building you have unlocked. */
+  buildings: { kind: string; name: string; line: string }[];
+  /** What cash, runway, Vibes and hype mean. */
+  numbers: { name: string; line: string }[];
+}
+
 export interface ChoiceVM {
   label: string;
   hint: string;
@@ -267,6 +336,39 @@ export interface AuctionPaddleVM {
   number: number;
 }
 
+/** The forced-response card ("Ship now at 94% ready or lose the news cycle"), with the live numbers behind its choices. */
+export interface ResponseVM {
+  /** The lab that just launched, and what. */
+  rival: string;
+  rivalModel: string;
+  /** Your run's model, and how baked it is: 0 to 1, and "94%". */
+  model: string;
+  ready: number;
+  readyText: string;
+  /** Capability an early-access preview adds now ("+4.2"), and what the whole release would add ("+6.0"). */
+  shipText: string;
+  holdText: string;
+  /** Odds of an embarrassing launch bug: 0 to 1, and "16%". */
+  bug: number;
+  bugText: string;
+  /** Days a counter-launch has to land. */
+  holdDays: number;
+}
+
+/** The launch livestream mishap card: the dog, the wrong chart, the frozen spinner. */
+export interface StreamVM {
+  /** The mishap's id in the Leapfrog pack ("dog", "wrongChart", ...). Mods add their own. */
+  mishap: string;
+  /** Your model, as the stream is titled. */
+  model: string;
+  viewers: number;
+  viewersText: string;
+  /** The one line a dialog says ("The demo has stopped responding. The dog has not."). */
+  caption: string;
+  /** What chat is saying, oldest first. */
+  chat: { who: string; text: string }[];
+}
+
 export interface EventVM {
   id: string;
   title: string;
@@ -274,9 +376,12 @@ export interface EventVM {
   tone: ToneVM;
   /** The top-stripe text: "Breaking", "Developing", ... */
   stripe: string;
-  kind: "plain" | "auction";
+  /** "response" and "stream" are Release Leapfrog's cards: `response` / `stream` carry their extra data. */
+  kind: "plain" | "auction" | "response" | "stream";
   choices: ChoiceVM[];
   paddles: AuctionPaddleVM[];
+  response: ResponseVM | null;
+  stream: StreamVM | null;
 }
 
 export interface ThoughtRowVM {
@@ -320,6 +425,116 @@ export interface ArenaVM {
     drop: { model: string; daysLeft: number } | null;
   };
   rows: ArenaRowVM[];
+}
+
+// ---- Release Leapfrog (FLT-31): the benchmark leaderboard and the share-of-voice meter.
+
+export interface BenchColumnVM {
+  id: string;
+  /** "MMLU-Pro-Max-Ultra" */
+  name: string;
+  /** "MMLU-PMU": what fits in a column head. */
+  short: string;
+  kind: "score" | "elo";
+  /** live: open. crowded: a photo finish near the ceiling. saturated: declared solved (strike it through, stamp SOLVED). */
+  status: "live" | "crowded" | "saturated";
+  /** The best score on the board, formatted ("87.3", "1,412"). */
+  bestText: string;
+  /** Who holds it: their short name ("" when nobody), and whether that is you. */
+  holder: string;
+  holderYou: boolean;
+  /** A harder replacement that joined in the last few days. */
+  isNew: boolean;
+  /** The sim has already retired it; it stays on the board a few seconds longer so the SOLVED stamp gets seen. */
+  ghost: boolean;
+}
+
+export interface BenchCellVM {
+  /** "87.3", "1,412", or "-" when the lab has no product to score. */
+  text: string;
+  /** Holds the record in this column. */
+  sota: boolean;
+  /** ...and the record was tuned for (a custom prompt, best of 64): show the asterisk. */
+  maxx: boolean;
+  /** The record just changed hands: blink the badge. */
+  flash: boolean;
+}
+
+export interface LeaderRowVM {
+  id: string;
+  /** 1 = leads the most columns. */
+  rank: number;
+  name: string;
+  short: string;
+  /** What a narrow table prints: "You" for your row, else `short`. */
+  label: string;
+  color: string;
+  you: boolean;
+  kind: "you" | "frontier" | "neo" | "open" | "bigco";
+  /** Their latest model, or null when they have no product. */
+  model: string | null;
+  /** One per entry of `columns`, in order. */
+  cells: BenchCellVM[];
+  /** How many columns they lead. */
+  wins: number;
+  /** They launched a moment ago: flash the row. */
+  flash: boolean;
+}
+
+export interface VoiceShareVM {
+  id: string;
+  short: string;
+  color: string;
+  /** 0 to 1; everyone's add up to 1. */
+  share: number;
+  pctText: string;
+  you: boolean;
+}
+
+export interface VoiceSeriesVM {
+  id: string;
+  short: string;
+  color: string;
+  you: boolean;
+  /** Shares (0 to 1) at the end of each of the last game days, oldest first. Empty until the game has run a day. */
+  points: number[];
+}
+
+/** The news cycle: whose launches, stunts and scandals people are talking about. It decays 15% a day. */
+export interface VoiceVM {
+  /** Biggest share first. */
+  shares: VoiceShareVM[];
+  yours: number;
+  yoursText: string;
+  trend: TrendVM;
+  /** Who owns the cycle right now, or "" when it is up for grabs. */
+  owner: string;
+  youOwn: boolean;
+  streak: number;
+  /** "You own the news cycle", "Vast Sea Labs owns the news cycle", "The news cycle is up for grabs". */
+  headline: string;
+  /** You first, then the biggest rivals: what a "Network Traffic" graph plots. */
+  series: VoiceSeriesVM[];
+}
+
+export interface LeapfrogVM {
+  /** false when the pack is off (`?leapfrog=off`): draw nothing. */
+  enabled: boolean;
+  columns: BenchColumnVM[];
+  rows: LeaderRowVM[];
+  /** "*pass@256": the excuse for the latest benchmaxxed record, shown under the table while any cell carries an asterisk. */
+  footnote: string;
+  hasMaxx: boolean;
+  solved: number;
+  /** The latest launch, or null before the first. */
+  drop: { lab: string; model: string; slot: "lead" | "answer"; daysAgo: number; text: string } | null;
+  /** "Next launch in about 6 days" / "An answer lands tomorrow". */
+  nextText: string;
+  /** 0 to 100. */
+  trust: number;
+  voice: VoiceVM;
+  /** Goes up by one with every launch: key an animation on it. */
+  pulse: number;
 }
 
 export interface EraCardVM {
@@ -459,6 +674,8 @@ export interface LayoutVM {
 }
 
 export interface HudVM {
+  unlockCard: UnlockCardVM | null;
+  hud: { visible: VisibleVM };
   apiVersion: typeof SKIN_API_VERSION;
   stats: StatsVM;
   training: TrainingVM;
@@ -474,11 +691,23 @@ export interface HudVM {
   hints: HintId[];
   /** Standing warnings ("Your entrance isn't connected...", low runway with ways out): they stay until fixed. */
   warnings: string[];
+  /** Where the lab is on the ladder, the one goal in front of you, and what the build panel teases. */
+  progress: ProgressVM;
+  /** Which HUD panels are earned yet. Draw only these. */
+  visible: VisibleVM;
+  /** The coach mark on screen, or null (none, skipped, or finished). */
+  coach: CoachVM | null;
+  /** The "New!" card, or null. */
+  unlock: UnlockCardVM | null;
+  /** Help ▸ How to play, while it is open. */
+  help: HelpVM | null;
   /** A spend waiting for a yes or a no (also holds time). */
   confirm: ConfirmVM | null;
   event: EventVM | null;
   thoughtsPanel: ThoughtRowVM[];
   arena: ArenaVM;
+  /** Release Leapfrog: the benchmark leaderboard and the share-of-voice meter. `enabled: false` when the pack is off. */
+  leapfrog: LeapfrogVM;
   eraCard: EraCardVM | null;
   outcome: OutcomeVM | null;
   newsroom: NewsroomVM;
@@ -490,6 +719,7 @@ export interface HudVM {
 
 /** Everything a skin may ask the game to do. Each one is safe to call at any time; the game ignores what does not apply. */
 export interface HudActions {
+  openBuild(): void;
   /** Pick a build tool ("path", "cluster", ..., "bulldoze"). Picking the selected one puts it away; `null` clears. `"staff"` opens or closes the payroll. */
   place(kind: BuildKindVM | null): void;
   setSpeed(speed: number): void;
@@ -508,6 +738,16 @@ export interface HudActions {
   /** Answer `vm.confirm`: go ahead with the spend, or keep the runway. */
   confirmSpend(): void;
   cancelSpend(): void;
+  /** The coach: skip it for good, or start it again (Start ▸ Help ▸ Replay tutorial). */
+  coachSkip(): void;
+  coachReplay(): void;
+  /** Close the "New!" card. */
+  dismissUnlock(): void;
+  /** The build panel opened or shut (the coach's first step waits for it opening). Say it whenever yours does. */
+  buildPanel(open: boolean): void;
+  /** Help ▸ How to play. */
+  openHelp(): void;
+  closeHelp(): void;
   /** Hold time while a panel of yours is open (`id` names it; `false` lets go). Use `useAutoPause` from the kit. */
   holdTime(id: string, open: boolean): void;
   toggleArena(): void;

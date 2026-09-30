@@ -206,3 +206,77 @@ describe("the spend check, the standing warnings and the release goal, as a skin
     expect(hudViewModel({ ...input, toasts: [{ id: 6, text: "Something else", tone: "joke" }] }).toasts.map((t) => t.text)).toEqual(["Something else"]);
   });
 });
+
+describe("Playable v1: what the lab has earned, the coach, and Help", () => {
+  const level = (n: 1 | 2 | 3 | 4 | 5, more: Parameters<typeof fixtureInput>[0] = {}) => hudViewModel(fixtureInput({ level: n, ...more }));
+
+  it("carries no ladder as 'everything is earned': the game plays as it always did", () => {
+    const input = fixtureInput();
+    for (const key of ["progress", "coach", "unlockCard", "hud"]) Reflect.deleteProperty(input.snap, key);
+    const vm = hudViewModel(input);
+    expect(Object.values(vm.visible).every(Boolean)).toBe(true);
+    expect(vm.buildItems.map((b) => b.kind)).toContain("demo");
+    expect(vm.coach).toBeNull();
+    expect(vm.unlock).toBeNull();
+    expect(vm.progress.teasers).toEqual([]);
+    expect(vm.progress.goal.line).toBe("");
+  });
+
+  it("shows only the unlocked tools in the build panel (the bulldozer always), and teases the rest", () => {
+    const one = level(1);
+    expect(one.buildItems.map((b) => b.kind)).toEqual(["path", "cluster", "hall", "bulldoze"]);
+    expect(one.progress.teasers.map((t) => t.hint)).toContain("ship your first model");
+    expect(level(2).buildItems.map((b) => b.kind)).toEqual(["path", "cluster", "hall", "gateway", "kombucha", "bulldoze"]);
+    expect(level(3).buildItems.map((b) => b.kind)).toContain("staff");
+    expect(one.buildItems.map((b) => b.kind)).not.toContain("staff");
+    expect(level(5).progress.teasers).toEqual([]);
+  });
+
+  it("hires only the kinds of staff the lab has unlocked", () => {
+    expect(level(3, { staff: true }).staff.jobs.map((j) => j.job).sort()).toEqual(["janitor", "sre"]);
+    expect(level(5, { staff: true }).staff.jobs.map((j) => j.job).sort()).toEqual(["comms", "janitor", "security", "sre"]);
+  });
+
+  it("says which HUD panels exist yet, rung by rung", () => {
+    expect(Object.values(level(1).visible).some(Boolean)).toBe(false);
+    expect(level(2).visible).toMatchObject({ revenue: true, vibes: true, thoughts: false, arena: false });
+    expect(level(3).visible).toMatchObject({ thoughts: true, staff: true, arena: false, news: false });
+    expect(level(4).visible).toMatchObject({ arena: true, rnd: true, news: true, events: false });
+    expect(Object.values(level(5).visible).every(Boolean)).toBe(true);
+  });
+
+  it("puts the one goal on one line, with a ratio", () => {
+    const g = level(1).progress.goal;
+    expect(g).toMatchObject({ text: "Ship your first model", current: 0, target: 1, line: "Ship your first model · 0/1", ratio: 0 });
+    expect(level(2).progress.goal.line).toBe("Earn $20K a day · 4000/20000");
+    expect(level(2).progress.goal.ratio).toBeCloseTo(0.2);
+  });
+
+  it("passes the coach mark and the New! card through as plain data", () => {
+    const vm = level(1, { coach: 0, unlock: true });
+    expect(vm.coach).toEqual({ id: "start", step: 1, of: 7, text: "Welcome to your lab. Everything you build starts here. Click Start.", target: "start", waitFor: "action", canSkip: true });
+    expect(vm.unlock).toMatchObject({ title: "New items available!", items: ["API Gateway", "Kombucha Bar"] });
+    assertPlain(vm.coach);
+    assertPlain(vm.unlock);
+    expect(level(1).coach).toBeNull();
+  });
+
+  it("holds the standing hints back while the coach speaks, and the Gateway hint while the Gateway is locked", () => {
+    const quiet = { toasts: [] };
+    expect(hudViewModel({ ...fixtureInput({ level: 1 }), ...quiet }).hints).toEqual(["tap"]);
+    expect(hudViewModel({ ...fixtureInput({ level: 1, coach: 1 }), ...quiet }).hints).toEqual([]);
+    expect(hudViewModel({ ...fixtureInput({ level: 2 }), ...quiet, snap: { ...fixtureInput({ level: 2 }).snap, hasGateway: false } }).hints).toEqual(["gateway"]);
+  });
+
+  it("writes Help from what is unlocked: the loop, one plain line per building, what the numbers mean", () => {
+    expect(level(1).help).toBeNull();
+    const help = level(2, { help: true }).help!;
+    expect(help.loop).toHaveLength(5);
+    expect(help.buildings.map((b) => b.kind)).toEqual(["path", "cluster", "hall", "gateway", "kombucha"]);
+    expect(help.buildings.find((b) => b.kind === "gateway")!.line).toMatch(/^API Gateway: sells your models/);
+    expect(help.buildings.map((b) => b.kind)).not.toContain("nap");
+    expect(help.numbers.map((n) => n.name)).toEqual(["Cash", "Runway", "Vibes", "Hype"]);
+    // Instructions, not jokes: the world keeps those.
+    for (const line of [...help.loop, ...help.buildings.map((b) => b.line)]) expect(line).not.toMatch(/venture capital into heat|loss goes down/i);
+  });
+});

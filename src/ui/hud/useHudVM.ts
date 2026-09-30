@@ -3,14 +3,17 @@
 import { useAtomValue } from "@effect/atom-react";
 import { AsyncResult, Atom } from "effect/unstable/reactivity";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { atoms, registry } from "../../app/game";
+import { atoms, debugParams, registry } from "../../app/game";
 import type { Snapshot } from "../../app/hud";
 import { audioReadyAtom, mixerAtom, mixerOpenAtom } from "../../audio/state";
 import { roomAtom } from "../../newsroom/state";
 import { photoAtom } from "../../render/fx/photoState";
 import { skinList } from "../../skins/registry";
+import type { LeapfrogView } from "../../sim/race/leapfrog/view";
 import { shotAtom } from "../juice/photo";
-import { arenaOpenAtom, chatCountAtom, photoFlashAtom, photoTimeAtom, skinUiAtom, staffOpenAtom } from "./state";
+import { newMotion, NO_MOTION, stepMotion, type Motion, type MotionView } from "./leapfrogMotion";
+import { arenaOpenAtom, chatCountAtom, helpOpenAtom, photoFlashAtom, photoTimeAtom, skinUiAtom, staffOpenAtom } from "./state";
+import { playableFixture } from "./previewLadder";
 import type { HudVM } from "./types";
 import { hudViewModel } from "./vm";
 
@@ -86,6 +89,19 @@ function useArenaMotion(board: readonly { id: string; rank: number }[], rank: nu
   return useMemo(() => ({ moved, alert, flinch }), [moved, alert, flinch]);
 }
 
+/**
+ * Release Leapfrog's real-time flourishes: rows that flash for a few seconds after their lab launches, badges that blink
+ * when a record changes hands, solved benchmarks kept on the board a while, and the news cycle's history for the graph.
+ * Advances once per new snapshot (never per render), so it is safe to call from a component that renders often.
+ */
+function useLeapfrogMotion(snap: Snapshot): MotionView {
+  const motion = useRef<Motion | null>(null);
+  const last = useRef<{ lf: LeapfrogView | null; view: MotionView }>({ lf: null, view: NO_MOTION });
+  motion.current ??= newMotion();
+  if (last.current.lf !== snap.leapfrog) last.current = { lf: snap.leapfrog, view: stepMotion(motion.current, snap.leapfrog, snap.day, performance.now()) };
+  return last.current.view;
+}
+
 export type AppSource = {
   snap: Snapshot;
   speed: Parameters<typeof hudViewModel>[0]["speed"];
@@ -154,6 +170,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
   const shot = useAtomValue(shotAtom);
   const skinUi = useAtomValue(skinUiAtom);
   const staffOpen = useAtomValue(staffOpenAtom);
+  const helpOpen = useAtomValue(helpOpenAtom);
   const viewport = useViewport();
   const tapHint = useTapHint(selected);
   // "Build an API Gateway..." twice is one hint too many: once a toast has said it, the standing hint is redundant.
@@ -161,12 +178,15 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
   const newest = toasts.at(-1);
   if (newest && /API Gateway/i.test(newest.text)) toldGateway.current = true;
   const motion = useArenaMotion(snap.race.board, snap.race.rank);
+  const leapfrog = useLeapfrogMotion(snap);
   const list = useMemo(() => skinList(), []);
 
+  // `?debug=1&ladder=N`: show a rung of the ladder without playing up to it (skins, screenshots). Never in a normal game.
+  const shown = useMemo(() => (debugParams.ladder ? { ...snap, ...playableFixture(debugParams.ladder.level, debugParams.ladder.coach, debugParams.ladder.unlock) } : snap), [snap]);
   const vm = useMemo(
     () =>
       hudViewModel({
-        snap,
+        snap: shown,
         speed,
         tool,
         follow,
@@ -179,8 +199,10 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         staffOpen,
         zone,
         arena: { open: arenaOpen, alert: motion.alert, flinch: motion.flinch, moved: motion.moved },
+        leapfrog,
         room,
         chatCount,
+        helpOpen,
         mixer: { open: mixerOpen, ready: audioReady, muted: mixer.muted, master: mixer.master, music: mixer.music, sfx: mixer.sfx },
         photo: { on: photoOn, time: photoTime, shot, flash },
         skins: {
@@ -193,7 +215,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         },
         viewport,
       }),
-    [snap, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, motion, room, chatCount, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, skinUi, list, viewport, staffOpen, zone],
+    [shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, motion, leapfrog, room, chatCount, helpOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, skinUi, list, viewport, staffOpen, zone],
   );
   return vm;
 }

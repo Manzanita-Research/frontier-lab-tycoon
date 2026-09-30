@@ -12,14 +12,17 @@ import { buildingAt, edgeTiles, inBounds, isPathTile, rectContains, rectsOverlap
 import { guardSpending, clearConfirm, hallBuilt } from "./guardrails";
 import type { Rng } from "./rng";
 import type { GameState, Rect, StaffJob } from "./types";
+import { buildingUnlocked, systemUnlocked } from "./progression";
+import { coachCommand } from "./coach";
 import { continueTutorial } from "./tutorial";
 
 export type Command =
-  | { type: "setPublicationPolicy"; policy: PublicationPolicy }
-  | { type: "publishPaper"; id: number; route: "preprint" | "review" }
+  | { type: "coachSkip" | "coachReplay" | "coachClick" | "dismissUnlock" | "buildPanelOpened" }
   | { type: "placePath"; x: number; z: number; confirmed?: boolean }
   | { type: "placeBuilding"; kind: BuildingKind; x: number; z: number; confirmed?: boolean }
   | { type: "cancelConfirm" }
+  | { type: "setPublicationPolicy"; policy: PublicationPolicy }
+  | { type: "publishPaper"; id: number; route: "preprint" | "review" }
   | { type: "bulldoze"; x: number; z: number }
   | { type: "startTraining" }
   | { type: "continueTutorial" }
@@ -46,7 +49,7 @@ export function buildPrice(state: GameState, kind: BuildingKind): number {
 }
 
 /** Locked buildings (the race's Datacenter and power plants) stay locked until a compute auction is won. */
-export const isUnlocked = (state: GameState, kind: BuildingKind): boolean => !BUILDINGS[kind].locked || state.flags[`unlocked:${kind}`] !== undefined;
+export const isUnlocked = (state: GameState, kind: BuildingKind): boolean => buildingUnlocked(state, kind) && (!BUILDINGS[kind].locked || state.flags[`unlocked:${kind}`] !== undefined);
 
 /** Can `kind` (or a path tile) go at (x, z)? For buildings, (x, z) is the top-left tile of the footprint. */
 export function canPlace(state: GameState, kind: BuildingKind | "path", x: number, z: number): PlaceResult {
@@ -58,9 +61,9 @@ export function canPlace(state: GameState, kind: BuildingKind | "path", x: numbe
     return { ok: true };
   }
   const def = BUILDINGS[kind];
-  if (!isUnlocked(state, kind)) return no("Win a compute auction to unlock this");
   const rect: Rect = { x, z, w: def.size[0], d: def.size[1] };
   if (gateAccessTiles(state).some(([gx, gz]) => rectContains(rect, gx, gz))) return no("Keep the entrance access clear; it belongs to the queue to somewhere.");
+  if (!isUnlocked(state, kind)) return no(BUILDINGS[kind].locked ? "Win a compute auction to unlock this" : "Meet your next goal to unlock this");
   if (!inBounds(state, x, z) || !inBounds(state, x + rect.w - 1, z + rect.d - 1)) return no("Out of bounds");
   if (rectsOverlap(rect, state.gate) || state.buildings.some((b) => rectsOverlap(rect, b))) {
     return no("Something's already there");
@@ -85,6 +88,7 @@ export function placeBuilding(state: GameState, rng: Rng, kind: BuildingKind, x:
   const first = state.flags[`built:${kind}`] === undefined;
   state.flags[`built:${kind}`] = state.day;
   if (kind === "hall") hallBuilt(state);
+  if (kind === "gateway") state.flags.firstGateway ??= state.day;
   if (first) {
     state.hype = Math.min(100, state.hype + 1);
     pushNews(state, rng, `built:${kind}`);
@@ -110,6 +114,10 @@ function bulldoze(state: GameState, x: number, z: number) {
 export function applyCommands(state: GameState, commands: readonly Command[], rng: Rng) {
   for (const c of commands) {
     switch (c.type) {
+      case "coachSkip": case "coachReplay": case "coachClick":
+        coachCommand(state, c.type); break;
+      case "dismissUnlock": state.unlockCards?.shift(); break;
+      case "buildPanelOpened": state.flags.started ??= state.tick; state.flags.coachBuildOpened = state.tick; break;
       case "placePath":
         if (canPlace(state, "path", c.x, c.z).ok && guardSpending(state, c)) {
           state.cash -= PATH_PRICE;
@@ -153,18 +161,19 @@ export function applyCommands(state: GameState, commands: readonly Command[], rn
         clearZone(state, c.id);
         break;
       case "setPublicationPolicy":
-        setPublicationPolicy(state, c.policy, rng);
+        if (systemUnlocked(state, "papers")) setPublicationPolicy(state, c.policy, rng);
         break;
       case "publishPaper":
-        publishPaper(state, c.id, c.route, rng);
+        if (systemUnlocked(state, "papers")) publishPaper(state, c.id, c.route, rng);
         break;
       case "disaster": {
+        if (!systemUnlocked(state, "disasters")) break;
         const r = triggerDisaster(state, c.id, { forced: true });
         if (!r.ok) addToast(state, r.reason, "bad");
         break;
       }
       case "setRisk":
-        setRisk(state, c.risk);
+        if (systemUnlocked(state, "disasters")) setRisk(state, c.risk);
         break;
       case "startTraining":
         if (!state.buildings.some((b) => b.kind === "hall")) addToast(state, "Build a Training Hall first.", "bad");
