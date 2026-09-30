@@ -15,9 +15,11 @@ export type Migration = (save: Envelope) => Envelope;
 /**
  * Keyed by the version a step upgrades *from*.
  * - v1 → v2 (#71): the rival `vssi` became `supersuper` ("Super Super AI"); the World step below does the work.
+ * - v2 → v3 (FLT-75): protesters moved out of `walkers` into their own `protesters` rows (they are Koota entities now).
  */
 export const MIGRATIONS: Readonly<Record<number, Migration>> = {
   1: (s) => ({ ...s, v: 2 }),
+  2: (s) => ({ ...s, v: 3 }),
 };
 
 /** Upgrade `save` step by step to `target` (default: the current version). Throws on a gap in the table. */
@@ -46,6 +48,11 @@ export const WORLD_MIGRATIONS: Readonly<Record<number, WorldMigration>> = {
       ["MetaMeta Superintelligence Labs", "MetaMeta Metaintelligence Labs"],
       ["Very Safe SI", "Super Super AI"],
     ]),
+  // FLT-75: the protesters live in Koota now and save as their own rows, in the same Walker shape, in id order.
+  2: (w) => {
+    const walkers = (w.walkers ?? []) as { kind: string }[];
+    return { ...w, walkers: walkers.filter((x) => x.kind !== "protester"), protesters: walkers.filter((x) => x.kind === "protester") };
+  },
 };
 
 /** Run the World steps for a save first written as v`from`. */
