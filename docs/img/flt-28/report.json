@@ -1,0 +1,52 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "1d06715a6c35b93ad0606520f24e060e534f7494"
+  },
+  "head": {
+    "branch": "flt-28-papers-sim",
+    "sha": "a04e987",
+    "dirty": true
+  },
+  "seconds": 138.147,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "paper-drop",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_ycybuwshp6-1/project-proj-dvb9hes55f/docs/img/flt-28/before/paper-drop.png",
+      "after": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_ycybuwshp6-1/project-proj-dvb9hes55f/docs/img/flt-28/after/paper-drop.png",
+      "title": "Publishing Papers: drop through existing ticker and toast",
+      "compare": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_ycybuwshp6-1/project-proj-dvb9hes55f/docs/img/flt-28/compare/paper-drop.png",
+      "changed": 0.013676697530864198
+    },
+    {
+      "scene": "paper-scoop",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_ycybuwshp6-1/project-proj-dvb9hes55f/docs/img/flt-28/before/paper-scoop.png",
+      "after": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_ycybuwshp6-1/project-proj-dvb9hes55f/docs/img/flt-28/after/paper-scoop.png",
+      "title": "Publishing Papers: scoop through existing ticker and toast",
+      "compare": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_ycybuwshp6-1/project-proj-dvb9hes55f/docs/img/flt-28/compare/paper-scoop.png",
+      "changed": 0.02250925925925926
+    },
+    {
+      "scene": "paper-award",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_ycybuwshp6-1/project-proj-dvb9hes55f/docs/img/flt-28/before/paper-award.png",
+      "after": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_ycybuwshp6-1/project-proj-dvb9hes55f/docs/img/flt-28/after/paper-award.png",
+      "title": "Publishing Papers: award through existing ticker and toast",
+      "compare": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_ycybuwshp6-1/project-proj-dvb9hes55f/docs/img/flt-28/compare/paper-award.png",
+      "changed": 0.01800154320987654
+    },
+    {
+      "scene": "paper-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_ycybuwshp6-1/project-proj-dvb9hes55f/docs/img/flt-28/before/paper-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_ycybuwshp6-1/project-proj-dvb9hes55f/docs/img/flt-28/after/paper-phone.png",
+      "title": "Publishing Papers: drop through existing ticker and toast",
+      "compare": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_ycybuwshp6-1/project-proj-dvb9hes55f/docs/img/flt-28/compare/paper-phone.png",
+      "changed": 0.04471153846153846
+    }
+  ],
+  "errors": []
+}
