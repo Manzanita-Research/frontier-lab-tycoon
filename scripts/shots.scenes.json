@@ -211,6 +211,10 @@
       "front-95",
       "front-phone",
       "front-phone-share"
+    ],
+    "notices": [
+      "notice-burst",
+      "notice-burst-base"
     ]
   },
   "scenes": {
@@ -2512,6 +2516,44 @@
         },
         {
           "wait": 500
+        }
+      ]
+    },
+    "notice-burst": {
+      "title": "FLT-51: a busy second on the mid-game campus (nine notices land at once, as at 10x), Frontier 95",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => {\n  const say = (text, tone, source, importance) => w.toasts.push({ id: w.nextId++, text, tone, source, importance });\n  say('API Gateway is out of order. An SRE is on it.', 'bad', 'ops', 'world');\n  say('Lucia Argmax loved it: $160K in the bank', 'good', 'economy', 'world');\n  say('Sirocco launched Gale-4-Turbo. The news cycle is theirs.', 'bad', 'leapfrog', 'world');\n  say('Dmitri Backprop handed in the box and left.', 'bad', 'staff', 'you');\n  say('Demo went flawlessly (it was pre-recorded)', 'good', 'crowd', 'world');\n  say('Sirocco took your record on SWE-VR.', 'bad', 'leapfrog', 'you');\n  say('Kombucha Bar is out of order. An SRE is on it.', 'bad', 'ops', 'world');\n  say('MetaMeta Superintelligence Labs just dropped Superintelligence-Preview-15-Mini for free. Revenue -30% for 30 days.', 'bad', 'race', 'you');\n  say('Up 2 places: #3 on the Arena.', 'good', 'race', 'world');\n  w.version++;\n}"
+        },
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "notice-burst-base": {
+      "title": "FLT-51: the same nine notices, in the base skin",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "base"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => {\n  const say = (text, tone, source, importance) => w.toasts.push({ id: w.nextId++, text, tone, source, importance });\n  say('API Gateway is out of order. An SRE is on it.', 'bad', 'ops', 'world');\n  say('Lucia Argmax loved it: $160K in the bank', 'good', 'economy', 'world');\n  say('Sirocco launched Gale-4-Turbo. The news cycle is theirs.', 'bad', 'leapfrog', 'world');\n  say('Dmitri Backprop handed in the box and left.', 'bad', 'staff', 'you');\n  say('Demo went flawlessly (it was pre-recorded)', 'good', 'crowd', 'world');\n  say('Sirocco took your record on SWE-VR.', 'bad', 'leapfrog', 'you');\n  say('Kombucha Bar is out of order. An SRE is on it.', 'bad', 'ops', 'world');\n  say('MetaMeta Superintelligence Labs just dropped Superintelligence-Preview-15-Mini for free. Revenue -30% for 30 days.', 'bad', 'race', 'you');\n  say('Up 2 places: #3 on the Arena.', 'good', 'race', 'world');\n  w.version++;\n}"
+        },
+        {
+          "wait": 1200
         }
       ]
     }

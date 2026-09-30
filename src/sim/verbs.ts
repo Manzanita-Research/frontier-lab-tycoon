@@ -21,7 +21,7 @@ import { dailyEvents } from "./events";
 import { fillTemplate } from "./format";
 import { groupKind, sendGroupsHome, spawnGroup, visitorCount } from "./groups";
 import { step } from "./machines/run";
-import { addNews, addToast, templateVars } from "./news";
+import { addNews, addToast, templateVars, type ToastTag } from "./news";
 import { clampDiscourse, syncProtesters } from "./protest";
 import { SIGNALS } from "../content/factions";
 import { signalFactions } from "./factions/driver";
@@ -33,7 +33,7 @@ import type { Rng } from "./rng";
 import { atDivert, divertStaff, releaseStaff, staffOf } from "./staff";
 import { callMeeting } from "./meetings";
 import { resign } from "./walkers";
-import type { Building, GameState, StaffJob, Tone } from "./types";
+import type { Building, GameState, Importance, NoticeSource, StaffJob, Tone } from "./types";
 import { defs } from "./defs";
 
 /** A tick is 1.2 game hours (20 to a day). */
@@ -300,6 +300,22 @@ const num = (v: Json | undefined, fallback: number): number => (typeof v === "nu
 const clamp100 = (n: number) => Math.max(0, Math.min(100, n));
 const ownerOf = (env: VerbEnv) => env.run?.id ?? env.owner ?? "";
 
+/** The systems a verb's toast can say it is from (FLT-51), besides a mod's own `mod:<id>`. */
+const SOURCES: readonly NoticeSource[] = ["leapfrog", "ops", "staff", "economy", "coach", "event", "disaster", "papers", "collusion", "hearing", "politics", "defection", "auditors", "factions", "race", "training", "crowd", "build", "endings"];
+const isSource = (v: Json | undefined): v is NoticeSource => typeof v === "string" && ((SOURCES as readonly string[]).includes(v) || /^mod:[\w.-]+$/.test(v));
+/** The base packs that call verbs, and whose notices they are. */
+const PACK_SOURCE: Record<string, NoticeSource> = { collusion: "collusion", hearing: "hearing", yacht: "politics", auditors: "auditors", defection: "defection", poaching: "defection", capture: "politics", promises: "politics" };
+/** A toast verb's `source` and `importance`, as given, or the owner's: a disaster, a base pack, or a mod arc (`mod:<arc id>`). */
+function tagOf(env: VerbEnv, p: Params, importance: Importance = "world"): ToastTag {
+  const source: NoticeSource = isSource(p.source) ? p.source : env.run ? "disaster" : env.owner ? (PACK_SOURCE[env.owner] ?? `mod:${env.owner}`) : "event";
+  return { source, importance: p.importance === "you" || p.importance === "world" ? p.importance : importance };
+}
+const TAG_SPEC = { source: "string?", importance: "string?" } as const;
+const verifyTag = (p: Params): string | null =>
+  p.source !== undefined && !isSource(p.source) ? `\`source\` is ${SOURCES.join(", ")} or mod:<id>`
+  : p.importance !== undefined && p.importance !== "you" && p.importance !== "world" ? "`importance` is you or world"
+  : null;
+
 /** A building named in a statechart: `$target`, `$adjacent`, `$office`, or a kind. Broken ones are last choice. */
 export function buildingRef(env: VerbEnv, ref: string): Building | null {
   const { state, run } = env;
@@ -493,13 +509,14 @@ export const VERBS: Record<string, VerbDef> = {
     },
   },
   "building.offline": {
-    doc: "Take a building offline (a flood, an outage): broken like a fire, with a toast instead of a headline.",
-    spec: BUILDING({ text: "string?" }),
+    doc: "Take a building offline (a flood, an outage): broken like a fire, with a toast instead of a headline (importance `you` unless given).",
+    spec: BUILDING({ text: "string?", ...TAG_SPEC }),
+    verify: verifyTag,
     run: (env, p) => {
       const b = buildingRef(env, p.building as string);
       if (!b || b.broken) return;
       wreck(env, b);
-      addToast(env.state, say(env, typeof p.text === "string" ? p.text : "{target} is offline."), "bad");
+      addToast(env.state, say(env, typeof p.text === "string" ? p.text : "{target} is offline."), "bad", tagOf(env, p, "you"));
     },
   },
   "building.wear": {
@@ -512,8 +529,8 @@ export const VERBS: Record<string, VerbDef> = {
   },
   "building.ensure": {
     doc: "Make sure a building of `kind` exists: if the lab has none, one arrives free beside the gate (upkeep still applies).",
-    spec: { kind: "string", text: "string?" },
-    verify: (p) => (p.kind as string) in defs().buildings ? null : `unknown building "${p.kind as string}"`,
+    spec: { kind: "string", text: "string?", ...TAG_SPEC },
+    verify: (p) => ((p.kind as string) in defs().buildings ? verifyTag(p) : `unknown building "${p.kind as string}"`),
     run: (env, p) => {
       const { state, rng } = env;
       const kind = p.kind as BuildingKind;
@@ -524,8 +541,8 @@ export const VERBS: Record<string, VerbDef> = {
       // Granted by the incident, not asked for: no "the board will have questions" (FLT-16's spending check) on a free building.
       if (at) placeBuilding(state, rng, kind, at[0], at[1], true);
       delete state.flags[`free:${kind}`];
-      if (!at) return void addToast(state, `No room for a ${defs().buildings[kind].name}. The incident room is the gate.`, "neutral");
-      if (typeof p.text === "string") addToast(state, say(env, p.text), "neutral");
+      if (!at) return void addToast(state, `No room for a ${defs().buildings[kind].name}. The incident room is the gate.`, "neutral", tagOf(env, p, "you"));
+      if (typeof p.text === "string") addToast(state, say(env, p.text), "neutral", tagOf(env, p));
     },
   },
   "hype.delta": { doc: "Add to hype (0 to 100).", spec: { amount: "number" }, run: (env, p) => void (env.state.hype = clamp100(env.state.hype + (p.amount as number))) },
@@ -598,7 +615,12 @@ export const VERBS: Record<string, VerbDef> = {
     spec: { text: "string", tone: "string?" },
     run: (env, p) => addNews(env.state, say(env, p.text as string), toneOf(p.tone)),
   },
-  toast: { doc: "A toast over the map (same template variables as `news`).", spec: { text: "string", tone: "string?" }, run: (env, p) => addToast(env.state, say(env, p.text as string), toneOf(p.tone)) },
+  toast: {
+    doc: "A notice (same template variables as `news`). `importance: you` is a toast over the map; `world` (the default) goes to the ticker and the panel that owns `source` (defaults to the disaster, Collusion, or `mod:<arc id>`; any of leapfrog, ops, staff, economy, event, disaster, papers, collusion, hearing, politics, defection, auditors, factions, race, training, crowd, build, endings, or mod:<id>).",
+    spec: { text: "string", tone: "string?", ...TAG_SPEC },
+    verify: verifyTag,
+    run: (env, p) => addToast(env.state, say(env, p.text as string), toneOf(p.tone), tagOf(env, p)),
+  },
   card: {
     doc: "Open an event card: one of the disaster's (`cards[].id`), or from a mod arc any card in `content.events` by id, whatever its `when` says. It waits its turn if another card is open. The machine hears the player's pick as a CHOSE beat.",
     spec: { id: "string" },

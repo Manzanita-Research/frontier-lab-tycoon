@@ -345,5 +345,5 @@ export const disastersView = (state: GameState): RunView[] =>
 
 /** A refusal as a toast (the Disasters menu and the dev hook use it). */
 export function refuse(state: GameState, r: Refusal) {
-  addToast(state, r.reason, "bad");
+  addToast(state, r.reason, "bad", { source: "disaster", importance: "you" });
 }

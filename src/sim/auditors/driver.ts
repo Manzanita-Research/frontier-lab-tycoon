@@ -145,7 +145,7 @@ export function dailyAuditors(s: GameState) {
   // The week before: the staff talk about it, and the boxes talk back.
   const left = daysUntilVisit(s);
   if (left !== null) {
-    if (left === 1) addToast(s, "Evals Without Borders arrive tomorrow. Somebody find the lanyards.");
+    if (left === 1) addToast(s, "Evals Without Borders arrive tomorrow. Somebody find the lanyards.", "neutral", { source: "auditors", importance: "you" });
     const prep = a.machine.context.prep;
     const agents = s.walkers.filter((w) => w.kind === "agent");
     const researchers = s.walkers.filter((w) => w.kind === "researcher");

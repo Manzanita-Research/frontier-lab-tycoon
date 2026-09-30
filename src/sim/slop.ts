@@ -113,6 +113,6 @@ export function dailySlop(state: GameState, rng: Rng) {
   if (share <= SLOP_NEWS_SHARE || state.day < (state.flags.nextSlopNews ?? 0)) return;
   const pct = String(Math.round(share * 100));
   pushNews(state, rng, "slop", { pct });
-  if (state.flags.nextSlopNews === undefined) addToast(state, `${state.labName} campus now ${pct}% slop by volume. A Janitor Bot is $2K a day.`, "bad");
+  if (state.flags.nextSlopNews === undefined) addToast(state, `${state.labName} campus now ${pct}% slop by volume. A Janitor Bot is $2K a day.`, "bad", { source: "ops", importance: "you" });
   state.flags.nextSlopNews = state.day + NEWS_COOLDOWN_DAYS;
 }

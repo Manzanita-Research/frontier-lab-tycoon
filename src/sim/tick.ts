@@ -20,7 +20,7 @@ import { dailyEconomy } from "./economy";
 import { dailyEvents, openEventOf } from "./events";
 import { dailyGoals } from "./goals";
 import { updateGroups } from "./groups";
-import { dailyNews } from "./news";
+import { dailyNews, replying } from "./news";
 import { dailyPapers } from "./race/papers/driver";
 import { dailyLeapfrog } from "./race/leapfrog/driver";
 import { dailyRace } from "./race/race";
@@ -66,14 +66,19 @@ export function tick(state: GameState, commands: readonly Command[] = [], def?: 
 function step(state: GameState, commands: readonly Command[]) {
   probe?.start();
   const rng = createRng(state.rngState);
-  commands = declineBuilding(state, commands);
-  applyCommands(state, commands, rng);
+  replying(state, () => {
+    commands = declineBuilding(state, commands);
+    applyCommands(state, commands, rng);
+  });
   probe?.lap("commands");
   if (commands.length > 0) { updateTutorial(state); observeGuardrails(state); }
-  if (systemUnlocked(state, "collusion")) applyCollusionChoices(state);
-  applyCircusChoices(state);
-  applyPackChoices(state);
-  if (systemUnlocked(state, "auditors")) applyAuditorChoices(state);
+  // Answers to cards are replies too (FLT-51): the toasts they send are never held back.
+  replying(state, () => {
+    if (systemUnlocked(state, "collusion")) applyCollusionChoices(state);
+    applyCircusChoices(state);
+    applyPackChoices(state);
+    if (systemUnlocked(state, "auditors")) applyAuditorChoices(state);
+  });
   probe?.lap("choices");
   if (pendingConfirmOf(state) || openEventOf(state) || state.goals.value === "lost" || endingHalts(state)) {
     state.rngState = rng.state();
@@ -180,13 +185,16 @@ export function applyNow(state: GameState, commands: readonly Command[], def?: G
 
 function now(state: GameState, commands: readonly Command[]) {
   const rng = createRng(state.rngState);
-  applyCommands(state, declineBuilding(state, commands), rng);
+  replying(state, () => applyCommands(state, declineBuilding(state, commands), rng));
   updateTutorial(state);
   observeGuardrails(state);
-  if (systemUnlocked(state, "collusion")) applyCollusionChoices(state);
-  applyCircusChoices(state);
-  applyPackChoices(state);
-  if (systemUnlocked(state, "auditors")) applyAuditorChoices(state);
+  // Answers to cards are replies too (FLT-51): the toasts they send are never held back.
+  replying(state, () => {
+    if (systemUnlocked(state, "collusion")) applyCollusionChoices(state);
+    applyCircusChoices(state);
+    applyPackChoices(state);
+    if (systemUnlocked(state, "auditors")) applyAuditorChoices(state);
+  });
   updateCoach(state);
   state.rngState = rng.state();
 }

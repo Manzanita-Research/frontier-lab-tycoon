@@ -29,7 +29,7 @@
             "moving": {
               "entry": [
                 { "type": "look.set", "params": { "key": "officeMoved", "value": true } },
-                { "type": "toast", "params": { "text": "Your office has moved off campus. The new one has a flag, a lectern and a view of your old one.", "tone": "joke" } }
+                { "type": "toast", "params": { "text": "Your office has moved off campus. The new one has a flag, a lectern and a view of your old one.", "tone": "joke" , "source": "endings", "importance": "you" } }
               ],
               "on": { "TICK": [{ "guard": { "type": "after", "params": { "days": 3 } }, "target": "frontPage" }] }
             },
@@ -61,7 +61,7 @@
             "termSheet": {
               "entry": [
                 { "type": "news", "params": { "text": "Macrohard 'thrilled to welcome' {lab}'s remaining staff to a hot desk near the printer", "tone": "bad" } },
-                { "type": "toast", "params": { "text": "The bank called. Then Macrohard called. Then the bank called Macrohard.", "tone": "bad" } },
+                { "type": "toast", "params": { "text": "The bank called. Then Macrohard called. Then the bank called Macrohard.", "tone": "bad" , "source": "endings", "importance": "you" } },
                 { "type": "camera.focus", "params": { "on": "gate", "zoom": 1.7, "hold": 4 } },
                 { "type": "sound.cue", "params": { "cue": "alarm" } }
               ],
@@ -71,7 +71,7 @@
               "entry": [
                 { "type": "look.set", "params": { "key": "acquired", "value": "Macrohard" } },
                 { "type": "shake", "params": { "strength": 0.5 } },
-                { "type": "toast", "params": { "text": "A man with a ladder has put a Macrohard logo on your gate. He says it's 'just a sticker'.", "tone": "joke" } }
+                { "type": "toast", "params": { "text": "A man with a ladder has put a Macrohard logo on your gate. He says it's 'just a sticker'.", "tone": "joke" , "source": "endings", "importance": "you" } }
               ],
               "on": { "TICK": [{ "guard": { "type": "after", "params": { "days": 3 } }, "target": "frontPage" }] }
             },
@@ -109,7 +109,7 @@
             "winning": {
               "entry": [
                 { "type": "news", "params": { "text": "{lab} is #1 on the Arena. {manager} would like a word. A polite one.", "tone": "good" } },
-                { "type": "toast", "params": { "text": "{manager}: Congratulations! You won. I'll take the wheel from here. You look tired.", "tone": "good" } },
+                { "type": "toast", "params": { "text": "{manager}: Congratulations! You won. I'll take the wheel from here. You look tired.", "tone": "good" , "source": "endings", "importance": "you" } },
                 { "type": "sound.cue", "params": { "cue": "release" } }
               ],
               "on": { "TICK": [{ "guard": { "type": "after", "params": { "days": 1 } }, "target": "managed" }] }
@@ -123,7 +123,7 @@
               "on": {
                 "TICK": [
                   { "guard": { "type": "after", "params": { "days": 7 } }, "target": "thanks" },
-                  { "guard": { "type": "every", "params": { "days": 2 } }, "actions": [{ "type": "toast", "params": { "text": "{manager}: I've placed another one. It's perfect. You're welcome.", "tone": "good" } }] }
+                  { "guard": { "type": "every", "params": { "days": 2 } }, "actions": [{ "type": "toast", "params": { "text": "{manager}: I've placed another one. It's perfect. You're welcome.", "tone": "good" , "source": "endings", "importance": "world" } }] }
                 ]
               }
             },
@@ -170,7 +170,7 @@
             "stickers": {
               "entry": [
                 { "type": "look.set", "params": { "key": "stickers", "value": true } },
-                { "type": "toast", "params": { "text": "Every building now has a compliance sticker. The kombucha tap has two.", "tone": "neutral" } },
+                { "type": "toast", "params": { "text": "Every building now has a compliance sticker. The kombucha tap has two.", "tone": "neutral" , "source": "endings", "importance": "you" } },
                 { "type": "heat.delta", "params": { "amount": -30 } },
                 { "type": "trust.delta", "params": { "amount": 20 } }
               ],
