@@ -13,6 +13,8 @@ import type { GameState, NewsItem, OpenEvent, Outcome } from "../sim/types";
 import { fillAgents, seedWalkers } from "../sim/walkers";
 import { isMoment, stageMoment } from "../sim/race/demo";
 import { isOpsMoment, stageOps } from "../sim/opsDemo";
+import { enableLeapfrog } from "../sim/race/leapfrog/driver";
+import { parseLeapMoment, stageLeapfrog } from "../sim/race/leapfrog/demo";
 import { walkersThinking } from "../sim/mind";
 import { makeSnapshot, NO_SELECTION, type Snapshot, type UiSelection, type UiToast } from "./hud";
 
@@ -40,9 +42,12 @@ export class SimHandle {
   ui: UiSelection = NO_SELECTION;
   /** Walkers behind the lit-up Thoughts row, refreshed with each publish (about 5 Hz). */
   highlightIds: ReadonlySet<number> = new Set();
+  /** Release Leapfrog's pack is loaded (a new lab gets it too). */
+  leapfrog: boolean;
 
-  constructor(world: GameState) {
+  constructor(world: GameState, leapfrog = false) {
     this.world = world;
+    this.leapfrog = leapfrog;
   }
 
   /** Advance `n` ticks; queued commands apply on the first one. */
@@ -58,6 +63,7 @@ export class SimHandle {
   /** Start over with a fresh seed. */
   reset(seed: number) {
     this.world = createInitialState(seed);
+    if (this.leapfrog) enableLeapfrog(this.world);
     this.alpha = 1;
   }
 
@@ -83,11 +89,14 @@ export class SimHandle {
 }
 
 /** A living campus, warped forward and dressed up per the `?seed=&warp=&agents=&discourse=` debug knobs. */
-export function createSimHandle(dbg: Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & { moment?: string | null }): SimHandle {
+export function createSimHandle(dbg: Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & { moment?: string | null; leapfrog?: boolean }): SimHandle {
   const sim = createInitialState(dbg.seed);
+  if (dbg.leapfrog) enableLeapfrog(sim);
   for (let i = 0; i < dbg.warp * TICKS_PER_DAY; i++) tick(sim);
+  const leap = parseLeapMoment(dbg.moment);
   if (isMoment(dbg.moment)) stageMoment(sim, dbg.moment);
   else if (isOpsMoment(dbg.moment)) stageOps(sim, dbg.moment);
+  else if (leap) stageLeapfrog(sim, leap.moment, leap.arg);
   if (dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0) {
     const rng = createRng(sim.rngState);
     if (dbg.researchers > 0) seedWalkers(sim, "researcher", dbg.researchers, rng);
@@ -101,7 +110,7 @@ export function createSimHandle(dbg: Pick<DebugParams, "seed" | "warp" | "agents
     }
     sim.rngState = rng.state();
   }
-  return new SimHandle(sim);
+  return new SimHandle(sim, sim.leapfrog.enabled);
 }
 
 export class Sim extends Context.Service<Sim, SimHandle>()("@flt/Sim") {}

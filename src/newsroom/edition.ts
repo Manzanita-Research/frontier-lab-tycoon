@@ -1,6 +1,7 @@
 // Pure presentation transforms. No sim mutation, random draws, clocks or browser APIs.
 import { EVENTS } from "../content/events";
 import { HEADLINES, type NewsTrigger } from "../content/headlines";
+import { LEAPFROG, type PackTrigger } from "../content/leapfrog";
 import { CLASSIFIEDS, DESK_STORIES, EVENT_STORY_KIND, REACTIONS, STORY_PRIORITY, type Friend, type StoryKind } from "../content/newsroom";
 import { RIVALS } from "../content/names";
 import type { NewsItem } from "../sim/types";
@@ -28,6 +29,16 @@ const triggerKind = (trigger: NewsTrigger): StoryKind => {
     default: return "filler";
   }
 };
+/** Release Leapfrog's headlines: the news cycle's owner makes the front page; solved benchmarks are era-sized news. */
+const packKind = (trigger: PackTrigger): StoryKind => {
+  switch (trigger) {
+    case "cycleOwned": return "cycle";
+    case "saturated": return "era";
+    case "counterStrong": case "counterSoft": case "shipped": case "bug": return "release";
+    case "stunt": case "cycleLost": case "windowClosed": case "crowded": case "flawless": return "filler";
+    default: return "rival";
+  }
+};
 // Recover the content trigger without changing NewsItem (or any shared sim type).
 const pattern = (text: string, kind: StoryKind) => ({
   kind,
@@ -35,6 +46,8 @@ const pattern = (text: string, kind: StoryKind) => ({
 });
 const patterns = [
   ...HEADLINES.map((h) => pattern(h.text, triggerKind(h.trigger))),
+  ...LEAPFROG.headlines.map((h) => pattern(h.text, packKind(h.trigger))),
+  ...LEAPFROG.mishaps.map((m) => pattern(m.headline, "cycle" as StoryKind)),
   ...EVENTS.flatMap((e) => e.choices.flatMap((c) => c.effects.flatMap((f) => f.type === "news" ? [pattern(f.text, EVENT_STORY_KIND[e.id] ?? "filler")] : []))),
 ];
 export function storyFromNews(n: NewsItem): Story {
