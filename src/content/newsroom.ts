@@ -38,4 +38,12 @@ export const STORY_PRIORITY: Record<StoryKind, number> = {
   rival: 60, build: 40, training: 30, filler: 10,
 };
 
-export const EVENT_STORY_KIND: Record<string, StoryKind> = { waterDiscourse: "protest", drumCircle: "protest", shipNow: "rival" };
+// The disasters' cards (FLT-17) are front-page news: the Frontier Times files them with the breakdowns.
+export const EVENT_STORY_KIND: Record<string, StoryKind> = {
+  waterDiscourse: "protest",
+  drumCircle: "protest",
+  shipNow: "rival",
+  "dz:rogueSwarm:alert": "breakdown",
+  "dz:weightsLeak:leak": "breakdown",
+  "dz:viralJailbreak:jailbreak": "breakdown",
+};

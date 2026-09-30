@@ -6,6 +6,7 @@ import type { EventFromLogic } from "xstate";
 import { createActorAtoms } from "@xstate/effect/atom";
 import { AsyncResult, Atom, AtomRegistry } from "effect/unstable/reactivity";
 import { readDebugParams } from "../debug";
+import { DEFAULT_RISK, setRisk } from "../sim/disasters/driver";
 import { buildingAt } from "../sim/pathfind";
 import { canPlace } from "../sim/commands";
 import { tick } from "../sim/tick";
@@ -19,6 +20,8 @@ export const debugParams = readDebugParams();
 
 /** The one live World. The renderer reads `sim.world` and `sim.alpha` straight from useFrame. */
 export const sim = createSimHandle(debugParams);
+// A new lab plays on "rare" (the sim itself starts with random disasters off, so tests are unaffected); `?risk=` overrides.
+if (!debugParams.risk) setRisk(sim.world, DEFAULT_RISK);
 
 const initialSpeed: Speed = (SPEEDS as readonly number[]).includes(debugParams.speed ?? 1) ? ((debugParams.speed ?? 1) as Speed) : 1;
 
@@ -101,5 +104,8 @@ export function use(tool: Tool, x: number, z: number, quiet = false) {
 
 // `?debug=1` exposes the game for probes and screenshot scripts.
 if (typeof window !== "undefined" && new URLSearchParams(window.location.search).has("debug")) {
-  (window as unknown as { __flt: unknown }).__flt = { sim, send, registry, app, tick };
+  // `disaster(id)` and `risk(setting)` are the dev hooks for FLT-17: the same commands the Disasters menu will send.
+  const disaster = (id: string) => send({ type: "COMMAND", command: { type: "disaster", id } });
+  const risk = (setting: "off" | "rare" | "normal" | "chaos") => send({ type: "COMMAND", command: { type: "setRisk", risk: setting } });
+  (window as unknown as { __flt: unknown }).__flt = { sim, send, registry, app, tick, disaster, risk };
 }

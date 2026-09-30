@@ -1,0 +1,74 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "1d06715a6c35b93ad0606520f24e060e534f7494"
+  },
+  "head": {
+    "branch": "flt-14-port-discovery-disc-96",
+    "sha": "bec8c2d",
+    "dirty": false
+  },
+  "seconds": 203.633,
+  "problems": [
+    "photo@discovery-disc-96.png: blank composite: panel 3 is 53% one colour, 11 colours"
+  ],
+  "rows": [
+    {
+      "scene": "overview",
+      "skin": "discovery-disc-96",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/discovery-disc-96/before/overview@discovery-disc-96.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/discovery-disc-96/after/overview@discovery-disc-96.png",
+      "title": "The campus, mid-morning, paused",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/discovery-disc-96/compare/overview@discovery-disc-96.png",
+      "changed": 0.5053564814814815
+    },
+    {
+      "scene": "inspector",
+      "skin": "discovery-disc-96",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/discovery-disc-96/before/inspector@discovery-disc-96.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/discovery-disc-96/after/inspector@discovery-disc-96.png",
+      "title": "Tap a researcher: the inspector opens",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/discovery-disc-96/compare/inspector@discovery-disc-96.png",
+      "changed": 0.5410956790123457
+    },
+    {
+      "scene": "event",
+      "skin": "discovery-disc-96",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/discovery-disc-96/before/event@discovery-disc-96.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/discovery-disc-96/after/event@discovery-disc-96.png",
+      "title": "An event card lands (the Water Discourse)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/discovery-disc-96/compare/event@discovery-disc-96.png",
+      "changed": 0.7000825617283951
+    },
+    {
+      "scene": "menu",
+      "skin": "discovery-disc-96",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/discovery-disc-96/before/menu@discovery-disc-96.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/discovery-disc-96/after/menu@discovery-disc-96.png",
+      "title": "The Start menu / build bar open",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/discovery-disc-96/compare/menu@discovery-disc-96.png",
+      "changed": 0.5232407407407408
+    },
+    {
+      "scene": "phone",
+      "skin": "discovery-disc-96",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/discovery-disc-96/before/phone@discovery-disc-96.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/discovery-disc-96/after/phone@discovery-disc-96.png",
+      "title": "The same campus on a phone (390x844)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/discovery-disc-96/compare/phone@discovery-disc-96.png",
+      "changed": 0.5597650078988942
+    },
+    {
+      "scene": "photo",
+      "skin": "discovery-disc-96",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/discovery-disc-96/before/photo@discovery-disc-96.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/discovery-disc-96/after/photo@discovery-disc-96.png",
+      "title": "Photo mode",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/discovery-disc-96/compare/photo@discovery-disc-96.png",
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 53% one colour, 11 colours",
+      "error": "compare: blank composite: panel 3 is 53% one colour, 11 colours"
+    }
+  ],
+  "errors": []
+}

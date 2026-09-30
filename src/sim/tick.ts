@@ -2,11 +2,13 @@
 import { applyCommands, type Command } from "./commands";
 import { TICKS_PER_DAY } from "./constants";
 import { dailyBreakdowns } from "./breakdowns";
+import { dailyDisasters, updateDisasters } from "./disasters/driver";
 import { dailyCrowd } from "./crowd";
 import { dailyEconomy } from "./economy";
 import { dailyEvents, openEventOf } from "./events";
 import { dailyGoals } from "./goals";
 import { dailyNews } from "./news";
+import { dailyPapers } from "./race/papers/driver";
 import { dailyLeapfrog } from "./race/leapfrog/driver";
 import { dailyRace } from "./race/race";
 import { dailySlop } from "./slop";
@@ -35,8 +37,10 @@ export function tick(state: GameState, commands: readonly Command[] = []) {
   updateWalkers(state, rng);
   updateProtesters(state, rng);
   updateStaff(state, rng);
+  updateDisasters(state);
   if (state.tick % TICKS_PER_DAY === 0) {
     state.day++;
+    dailyDisasters(state);
     dailyEconomy(state, rng);
     dailyTraining(state, rng);
     dailyWalkers(state, rng);
@@ -47,6 +51,7 @@ export function tick(state: GameState, commands: readonly Command[] = []) {
     dailyCrowd(state, rng);
     dailyRace(state, rng);
     dailyLeapfrog(state, rng);
+    dailyPapers(state, rng);
     dailyThoughts(state, rng);
     dailyGoals(state, rng);
     dailyEvents(state);

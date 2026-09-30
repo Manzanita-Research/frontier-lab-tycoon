@@ -20,6 +20,12 @@ export type FxEvent =
   | { type: "earned"; amount: number; x: number; z: number }
   /** The weekly Arena update moved you: `from` and `to` are places (1 is the top). */
   | { type: "rank"; from: number; to: number; x: number; z: number }
+  /** A disaster asked for the camera (FLT-17), in scene coordinates; `hold` is seconds. */
+  | { type: "focus"; x: number; z: number; zoom: number; hold: number | null }
+  /** A disaster shook the screen. */
+  | { type: "shake"; strength: number }
+  /** A disaster asked for a sound cue (an SFX name from audio/score.ts). */
+  | { type: "cue"; cue: string }
   /** A different World (new lab): forget everything. */
   | { type: "reset" };
 
@@ -36,6 +42,7 @@ export function createWatch(): Watch {
   let rank = 0;
   let version = -1;
   let popId = 0;
+  let cueId = 0;
   let paths = new Uint8Array(0);
   let buildings = new Map<number, Building>();
 
@@ -46,6 +53,7 @@ export function createWatch(): Watch {
     rank = w.race.rank;
     version = w.version;
     popId = w.pops.reduce((m, p) => Math.max(m, p.id), 0);
+    cueId = w.disasters.cues.reduce((m, c) => Math.max(m, c.id), 0);
     paths = Uint8Array.from(w.grid.paths, (p) => (p ? 1 : 0));
     buildings = new Map(w.buildings.map((b) => [b.id, b]));
   };
@@ -109,6 +117,14 @@ export function createWatch(): Watch {
             out.push({ type: "path", x: worldX((i % grid.w) + 0.5), z: worldZ(Math.floor(i / grid.w) + 0.5), added: on === 1 });
           }
         }
+      }
+
+      for (const c of w.disasters.cues) {
+        if (c.id <= cueId) continue;
+        cueId = c.id;
+        if (c.type === "focus") out.push({ type: "focus", x: worldX(c.x), z: worldZ(c.z), zoom: c.zoom, hold: c.hold });
+        else if (c.type === "shake") out.push({ type: "shake", strength: c.strength });
+        else out.push({ type: "cue", cue: c.cue });
       }
 
       for (const p of w.pops) {

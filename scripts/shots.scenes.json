@@ -22,7 +22,7 @@
       "seed": 3,
       "speed": 0,
       "hour": 13,
-      "warp": 30
+      "warp": 12
     },
     "frames": 24
   },
@@ -59,6 +59,20 @@
       "leap-dog",
       "leap-chart",
       "leap-phone"
+    ],
+    "disasters": [
+      "disaster-swarm",
+      "disaster-swarm-card",
+      "disaster-fire",
+      "disaster-leak",
+      "disaster-swarm-phone",
+      "disaster-leak-phone"
+    ],
+    "papers": [
+      "paper-drop",
+      "paper-scoop",
+      "paper-award",
+      "paper-phone"
     ],
     "swag-drop": [
       "desk",
@@ -263,6 +277,160 @@
           "wait": 800
         }
       ]
+    },
+    "disaster-swarm": {
+      "title": "Rogue Agent Swarm: Security jogging to the Security Office, posts empty, red \"!\" (FLT-17)",
+      "query": {
+        "warp": null,
+        "zoom": 72,
+        "focus": "11.6,18.4"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { w.cash = Math.max(w.cash, 12e6); const hires = ['security', 'security', 'security', 'sre', 'sre'].map((job) => ({ type: 'hire', job })); for (let i = 0; i < 60; i++) f.tick(w, i === 0 ? hires : []); f.tick(w, [{ type: 'disaster', id: 'rogueSwarm' }]); for (let i = 0; i < 12 && w.tick < 64; i++) f.tick(w, []); f.tick(w, [{ type: 'chooseEvent', eventId: 'dz:rogueSwarm:alert', choiceIndex: 0 }]); for (let i = 0; i < 40 && w.tick < 80; i++) f.tick(w, []); }"
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "disaster-swarm-card": {
+      "title": "The swarm's alert card (FLT-17)",
+      "query": {
+        "warp": null,
+        "zoom": 70,
+        "focus": "11.5,15.5"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { w.cash = Math.max(w.cash, 12e6); const hires = ['security', 'security', 'security', 'sre', 'sre'].map((job) => ({ type: 'hire', job })); for (let i = 0; i < 60; i++) f.tick(w, i === 0 ? hires : []); f.tick(w, [{ type: 'disaster', id: 'rogueSwarm' }]); for (let i = 0; i < 12 && w.tick < 64; i++) f.tick(w, []); for (let i = 0; i < 40 && w.tick < 63; i++) f.tick(w, []); }"
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "disaster-fire": {
+      "title": "GPU Fire: a cluster burns, an SRE runs to it (FLT-17)",
+      "query": {
+        "warp": null,
+        "zoom": 88,
+        "focus": "10.2,14.6"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { w.cash = Math.max(w.cash, 12e6); const hires = ['security', 'security', 'security', 'sre', 'sre'].map((job) => ({ type: 'hire', job })); for (let i = 0; i < 60; i++) f.tick(w, i === 0 ? hires : []); f.tick(w, [{ type: 'disaster', id: 'gpuFire' }]); for (let i = 0; i < 40 && w.tick < 76; i++) f.tick(w, []); }"
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "disaster-leak": {
+      "title": "Weights Leak: Sue, Shrug, or \"It was always going to be open\" (FLT-17)",
+      "query": {
+        "warp": null,
+        "zoom": 70,
+        "focus": "11.5,15.5"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { w.cash = Math.max(w.cash, 12e6); const hires = ['security', 'security', 'security', 'sre', 'sre'].map((job) => ({ type: 'hire', job })); for (let i = 0; i < 60; i++) f.tick(w, i === 0 ? hires : []); f.tick(w, [{ type: 'disaster', id: 'weightsLeak' }]); for (let i = 0; i < 12 && w.tick < 64; i++) f.tick(w, []); for (let i = 0; i < 40 && w.tick < 62; i++) f.tick(w, []); }"
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "disaster-swarm-phone": {
+      "title": "The swarm on a phone (390x844)",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "zoom": 52,
+        "focus": "11.2,17.4"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { w.cash = Math.max(w.cash, 12e6); const hires = ['security', 'security', 'security', 'sre', 'sre'].map((job) => ({ type: 'hire', job })); for (let i = 0; i < 60; i++) f.tick(w, i === 0 ? hires : []); f.tick(w, [{ type: 'disaster', id: 'rogueSwarm' }]); for (let i = 0; i < 12 && w.tick < 64; i++) f.tick(w, []); f.tick(w, [{ type: 'chooseEvent', eventId: 'dz:rogueSwarm:alert', choiceIndex: 0 }]); for (let i = 0; i < 40 && w.tick < 80; i++) f.tick(w, []); }"
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "disaster-leak-phone": {
+      "title": "The leak card on a phone (390x844)",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "zoom": 70,
+        "focus": "11.5,15.5"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { w.cash = Math.max(w.cash, 12e6); const hires = ['security', 'security', 'security', 'sre', 'sre'].map((job) => ({ type: 'hire', job })); for (let i = 0; i < 60; i++) f.tick(w, i === 0 ? hires : []); f.tick(w, [{ type: 'disaster', id: 'weightsLeak' }]); for (let i = 0; i < 12 && w.tick < 64; i++) f.tick(w, []); for (let i = 0; i < 40 && w.tick < 62; i++) f.tick(w, []); }"
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "paper-drop": {
+      "title": "Publishing Papers: drop through existing ticker and toast",
+      "query": {
+        "warp": 0,
+        "moment": "paper-drop",
+        "leapfrog": "off"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { if (w.papers?.enabled) { const n = w.news.at(-1); f.send({ type: 'TOAST', text: n.text, tone: n.tone }); } }"
+        }
+      ]
+    },
+    "paper-scoop": {
+      "title": "Publishing Papers: scoop through existing ticker and toast",
+      "query": {
+        "warp": 0,
+        "moment": "paper-scoop",
+        "leapfrog": "off"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { if (w.papers?.enabled) { const n = w.news.at(-1); f.send({ type: 'TOAST', text: n.text, tone: n.tone }); } }"
+        }
+      ]
+    },
+    "paper-award": {
+      "title": "Publishing Papers: award through existing ticker and toast",
+      "query": {
+        "warp": 0,
+        "moment": "paper-award",
+        "leapfrog": "off"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { if (w.papers?.enabled) { const n = w.news.at(-1); f.send({ type: 'TOAST', text: n.text, tone: n.tone }); } }"
+        }
+      ]
+    },
+    "paper-phone": {
+      "title": "Publishing Papers: drop through existing ticker and toast",
+      "query": {
+        "warp": 0,
+        "moment": "paper-drop",
+        "leapfrog": "off"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { if (w.papers?.enabled) { const n = w.news.at(-1); f.send({ type: 'TOAST', text: n.text, tone: n.tone }); } }"
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
     },
     "desk": {
       "title": "The desk: the event answered, the campus clear",

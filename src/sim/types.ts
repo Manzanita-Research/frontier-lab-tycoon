@@ -1,11 +1,13 @@
 // Everything in GameState is plain and JSON-serializable.
 import type { BuildingKind } from "../content/buildings";
 import type { NeedKey } from "../content/needs";
+import type { DisastersState } from "./disasters/types";
 import type { ArcStored } from "./machines/arc";
 import type { EconomyStored } from "./machines/economy";
 import type { GoalsStored } from "./machines/goals";
 import type { MoodStored } from "./machines/mood";
 import type { LeapfrogState } from "./race/leapfrog/state";
+import type { PapersState } from "./race/papers/state";
 import type { RaceState } from "./race/state";
 import type { StaffStored } from "./machines/staff";
 import type { TrainingStored } from "./machines/training";
@@ -143,6 +145,8 @@ export interface Staffer {
   zone: number[];
   /** The staff machine: arriving, idle, going, working, leaving or gone. */
   machine: StaffStored;
+  /** Pulled off their post by a disaster (FLT-17): they jog to `to` (a building id, 0 for the gate) with a red "!" and stay until released. */
+  divert?: { owner: string; to: number; jog: number };
 }
 
 export interface NewsItem {
@@ -267,8 +271,14 @@ export interface GameState {
   race: RaceState;
   /** Release Leapfrog (FLT-27): the release calendar, the benchmark leaderboard, the news cycle, the forced response and the launch livestream. Asleep unless `enabled`. */
   leapfrog: LeapfrogState;
+  /** FLT-28: absent until enabled, preserving the baseline and old saves. */
+  papers?: PapersState;
+  /** Additive applicant generation hook; absent means 1. */
+  recruitingPull?: number;
   /** Slop on each grid tile (FLT-10), 0 (clean) to 3 (ankle-deep). Drifted agents drop it on the path; Janitor Bots mop it up. */
   slop: number[];
   /** The payroll: Janitor Bots, SREs, Comms Reps and Security. */
   staff: Staffer[];
+  /** Disasters (FLT-17): the random-disaster setting, the ones in play, timed effects, and the cues the renderer reads. */
+  disasters: DisastersState;
 }

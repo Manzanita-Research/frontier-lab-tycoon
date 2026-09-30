@@ -1,0 +1,876 @@
+{
+  "apiVersion": 1,
+  "id": "base-disasters",
+  "name": "Acts of God (and Vendors)",
+  "version": "1.0.0",
+  "author": "Frontier Lab Tycoon",
+  "description": "The first wave of disasters (a rogue agent swarm, a GPU fire, a weights leak) and the second (a viral jailbreak, a grid brownout). Each is a JSON statechart that calls the engine's generic verbs; there is no disaster code in the engine. Copy this file to make your own.",
+  "content": {
+    "disasters": {
+      "add": [
+        {
+          "id": "rogueSwarm",
+          "name": "Rogue Agent Swarm",
+          "blurb": "An agent swarm is loose on the internet, and it's wearing your API key.",
+          "tags": ["off-map", "staff", "compute"],
+          "odds": {
+            "weight": 1,
+            "minDay": 45,
+            "gapDays": 45,
+            "scale": [
+              {"stat": "capability", "per": 0.012},
+              {"stat": "gateways", "per": 0.1},
+              {"stat": "security", "per": -0.1}
+            ]
+          },
+          "initial": "warning",
+          "states": {
+            "warning": {
+              "entry": [
+                {
+                  "type": "toast",
+                  "params": {"text": "Anomalous traffic: 40,000 requests a second, all from your API key.", "tone": "bad"}
+                },
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "Unusual activity on {lab}'s API: a great deal of it, all at once, and all very polite",
+                    "tone": "bad"
+                  }
+                },
+                {"type": "sound.cue", "params": {"cue": "alarm"}},
+                {"type": "camera.focus", "params": {"on": "gate", "zoom": 1.15, "hold": 2.2}}
+              ],
+              "on": {
+                "TICK": [{"guard": {"type": "after", "params": {"hours": 3}}, "target": "active"}]
+              }
+            },
+            "active": {
+              "entry": [
+                {"type": "compute.drain", "params": {"pct": 40}},
+                {"type": "cost.spike", "params": {"mult": 3, "kinds": ["gateway", "cluster", "datacenter"]}},
+                {"type": "shake", "params": {"strength": 0.6}},
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "{lab}'s agent swarm has, so far, ordered 4,000 pizzas, filed 11 patents and started a podcast",
+                    "tone": "joke"
+                  }
+                },
+                {"type": "card", "params": {"id": "alert"}}
+              ],
+              "on": {
+                "CHOSE": [
+                  {"guard": {"type": "choice", "params": {"is": "page"}}, "target": "cleanup"},
+                  {"guard": {"type": "choice", "params": {"is": "plug"}}, "target": "cleanupPlug"}
+                ],
+                "TICK": [{"guard": {"type": "after", "params": {"hours": 24}}, "target": "cleanup"}]
+              }
+            },
+            "cleanup": {
+              "entry": [
+                {
+                  "type": "building.ensure",
+                  "params": {
+                    "kind": "security",
+                    "text": "A Security Office trailer has been dropped at the gate. It comes with a lease."
+                  }
+                },
+                {"type": "staff.divert", "params": {"job": "security", "to": "$office", "fraction": 1}},
+                {"type": "staff.divert", "params": {"job": "sre", "to": "$office", "fraction": 0.5}},
+                {
+                  "type": "toast",
+                  "params": {
+                    "text": "Security jogs to the Security Office. The gate is unguarded.",
+                    "tone": "bad"
+                  }
+                },
+                {"type": "camera.focus", "params": {"on": "$office", "zoom": 1.5, "hold": 2.6}}
+              ],
+              "work": {"job": "security", "at": "$office", "hours": 96},
+              "on": {
+                "TICK": [
+                  {"guard": {"type": "progress.gte", "params": {"value": 1}}, "target": "aftermath"},
+                  {
+                    "guard": {"type": "after", "params": {"days": 9}},
+                    "target": "aftermath",
+                    "actions": [
+                      {"type": "cash.delta", "params": {"amount": -180000}},
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "Cloud provider revokes {lab}'s API key 'for its own safety'; the swarm loses interest and the invoice arrives",
+                          "tone": "bad"
+                        }
+                      },
+                      {
+                        "type": "toast",
+                        "params": {
+                          "text": "Nobody was minding the Security Office. The provider pulled the plug: -$180K.",
+                          "tone": "bad"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "cleanupPlug": {
+              "entry": [
+                {"type": "effects.end", "params": {"kind": "spike"}},
+                {"type": "revenue.mult", "params": {"mult": 0, "days": 4}},
+                {
+                  "type": "building.ensure",
+                  "params": {
+                    "kind": "security",
+                    "text": "A Security Office trailer has been dropped at the gate. It comes with a lease."
+                  }
+                },
+                {"type": "staff.divert", "params": {"job": "security", "to": "$office", "fraction": 1}},
+                {
+                  "type": "toast",
+                  "params": {
+                    "text": "API offline for four days. The bill stops climbing, and so does the revenue.",
+                    "tone": "neutral"
+                  }
+                },
+                {"type": "camera.focus", "params": {"on": "$office", "zoom": 1.5, "hold": 2.6}}
+              ],
+              "work": {"job": "security", "at": "$office", "hours": 48},
+              "on": {
+                "TICK": [
+                  {"guard": {"type": "progress.gte", "params": {"value": 1}}, "target": "aftermath"},
+                  {
+                    "guard": {"type": "after", "params": {"days": 6}},
+                    "target": "aftermath",
+                    "actions": [
+                      {"type": "cash.delta", "params": {"amount": -120000}},
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "An emergency contractor clears {lab}'s swarm from the internet. The invoice says 'vibes'",
+                          "tone": "bad"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "aftermath": {
+              "entry": [
+                {"type": "staff.release"},
+                {"type": "effects.end"},
+                {"type": "heat.delta", "params": {"amount": 12}},
+                {"type": "trust.delta", "params": {"amount": -6}},
+                {"type": "hype.delta", "params": {"amount": -4}},
+                {"type": "auditor.odds", "params": {"mult": 2, "days": 60}},
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "{lab} publishes swarm postmortem: root cause 'a key, a swarm and vibes'. Auditors clear their calendars",
+                    "tone": "joke"
+                  }
+                },
+                {
+                  "type": "toast",
+                  "params": {
+                    "text": "The swarm is contained. The postmortem is not; it is forty pages and counting.",
+                    "tone": "neutral"
+                  }
+                }
+              ],
+              "on": {
+                "TICK": [{"guard": {"type": "after", "params": {"days": 1}}, "target": "done"}]
+              }
+            },
+            "done": {"type": "final"}
+          },
+          "cards": [
+            {
+              "id": "alert",
+              "stripe": "Incident: rogue agent swarm",
+              "title": "An agent swarm is loose on the internet, and it's wearing your API key",
+              "body": "It has 40,000 friends, most of them also it. Compute is draining 40% a day, the API bill just tripled, and Security has asked, with some feeling, why there is no Security Office.",
+              "tone": "bad",
+              "choices": [
+                {
+                  "key": "page",
+                  "label": "Page Security",
+                  "hint": "Security jogs to the Security Office (96 staff-hours to clean up) · compute −40%/day and API costs ×3 until it is done",
+                  "effects": [
+                    {
+                      "type": "news",
+                      "text": "{lab} pages Security. Security is on the way, and has notes about the office",
+                      "tone": "neutral"
+                    }
+                  ]
+                },
+                {
+                  "key": "plug",
+                  "label": "Pull the plug on the API",
+                  "hint": "API costs stop · revenue is off for 4 days · half the cleanup (48 staff-hours)",
+                  "effects": [
+                    {
+                      "type": "news",
+                      "text": "{lab} takes its API offline 'for maintenance', which is what it is called when it is on purpose",
+                      "tone": "joke"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "gpuFire",
+          "name": "GPU Fire",
+          "blurb": "One cluster burns. Unattended, it spreads to the next one.",
+          "tags": ["fire", "building"],
+          "requires": {
+            "guard": {"type": "stat.gte", "params": {"stat": "clusters", "value": 1}},
+            "reason": "No working Compute Cluster to set on fire. Build one, then we can talk."
+          },
+          "target": {"kind": "cluster", "pick": "random"},
+          "odds": {
+            "weight": 1,
+            "minDay": 30,
+            "gapDays": 25,
+            "scale": [{"stat": "clusters", "per": 0.12}, {"stat": "sre", "per": -0.15}]
+          },
+          "initial": "warning",
+          "states": {
+            "warning": {
+              "entry": [
+                {
+                  "type": "toast",
+                  "params": {"text": "Smoke coming out of the {target}. Somebody said 'is that normal?'", "tone": "bad"}
+                },
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "Smoke reported at {lab}'s {target}; staff describe it as 'thermal enthusiasm'",
+                    "tone": "bad"
+                  }
+                },
+                {"type": "sound.cue", "params": {"cue": "alarm"}},
+                {"type": "shake", "params": {"strength": 0.15}},
+                {"type": "camera.focus", "params": {"on": "$target", "zoom": 1.6, "hold": 2.4}}
+              ],
+              "on": {
+                "TICK": [{"guard": {"type": "after", "params": {"hours": 3}}, "target": "active"}]
+              }
+            },
+            "active": {
+              "entry": [
+                {"type": "building.fire", "params": {"building": "$target"}},
+                {"type": "shake", "params": {"strength": 0.5}},
+                {"type": "camera.focus", "params": {"on": "$target", "zoom": 1.6, "hold": 2.6}},
+                {
+                  "type": "news",
+                  "params": {"text": "{lab}'s {target} is 'running hot', in the way a volcano is", "tone": "bad"}
+                }
+              ],
+              "on": {
+                "TICK": [
+                  {
+                    "guard": {"type": "stat.lte", "params": {"stat": "burning", "value": 0}},
+                    "target": "aftermath"
+                  },
+                  {
+                    "guard": {"type": "stat.gte", "params": {"stat": "sreAttending", "value": 1}},
+                    "target": "cleanup",
+                    "actions": [
+                      {
+                        "type": "toast",
+                        "params": {"text": "An SRE is running toward the fire, as is tradition.", "tone": "good"}
+                      }
+                    ]
+                  },
+                  {
+                    "guard": [
+                      {"type": "after", "params": {"hours": 30}},
+                      {"type": "stat.gte", "params": {"stat": "adjacent", "value": 1}}
+                    ],
+                    "target": "spread",
+                    "actions": [
+                      {"type": "building.fire", "params": {"building": "$adjacent"}},
+                      {"type": "shake", "params": {"strength": 0.7}},
+                      {"type": "camera.focus", "params": {"on": "$adjacent", "zoom": 1.5, "hold": 2.6}},
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "Fire spreads to a second cluster at {lab}. 'Contained' has been withdrawn",
+                          "tone": "bad"
+                        }
+                      },
+                      {"type": "toast", "params": {"text": "It spread. Nobody came in time.", "tone": "bad"}}
+                    ]
+                  }
+                ]
+              }
+            },
+            "spread": {
+              "on": {
+                "TICK": [
+                  {
+                    "guard": {"type": "stat.lte", "params": {"stat": "burning", "value": 0}},
+                    "target": "aftermath"
+                  },
+                  {
+                    "guard": {"type": "stat.gte", "params": {"stat": "sreAttending", "value": 1}},
+                    "target": "cleanup"
+                  }
+                ]
+              }
+            },
+            "cleanup": {
+              "on": {
+                "TICK": [{"guard": {"type": "stat.lte", "params": {"stat": "burning", "value": 0}}, "target": "aftermath"}]
+              }
+            },
+            "aftermath": {
+              "entry": [
+                {"type": "cash.delta", "params": {"amount": -120000}},
+                {"type": "building.wear", "params": {"building": "$target", "to": 0.7}},
+                {"type": "hype.delta", "params": {"amount": -2}},
+                {"type": "trust.delta", "params": {"amount": -2}},
+                {"type": "heat.delta", "params": {"amount": 3}},
+                {"type": "news", "params": {"text": "GPU fire contained; GPUs less so.", "tone": "bad"}},
+                {
+                  "type": "toast",
+                  "params": {
+                    "text": "Fire out. Insurance covers the building, not the GPUs. Deductible: -$120K.",
+                    "tone": "neutral"
+                  }
+                }
+              ],
+              "on": {
+                "TICK": [{"guard": {"type": "after", "params": {"days": 1}}, "target": "done"}]
+              }
+            },
+            "done": {"type": "final"}
+          }
+        },
+        {
+          "id": "weightsLeak",
+          "name": "Weights Leak",
+          "blurb": "Your latest weights turn up on a torrent, and a free rival matches you minus 10%.",
+          "tags": ["model", "rivals", "card"],
+          "odds": {
+            "weight": 0.8,
+            "minDay": 60,
+            "gapDays": 60,
+            "scale": [{"stat": "models", "per": 0.15}, {"stat": "capability", "per": 0.008}]
+          },
+          "initial": "warning",
+          "states": {
+            "warning": {
+              "entry": [
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "Somebody is offering a 'definitely-not-{model}' archive on a forum, no questions asked",
+                    "tone": "bad"
+                  }
+                },
+                {
+                  "type": "toast",
+                  "params": {"text": "Rumor: {model}'s weights are on a torrent.", "tone": "bad"}
+                },
+                {"type": "sound.cue", "params": {"cue": "alarm"}},
+                {"type": "camera.focus", "params": {"on": "hall", "zoom": 1.35, "hold": 2.2}}
+              ],
+              "on": {
+                "TICK": [{"guard": {"type": "after", "params": {"hours": 2}}, "target": "active"}]
+              }
+            },
+            "active": {
+              "entry": [
+                {"type": "rival.leap", "params": {"relative": -0.1, "open": true}},
+                {"type": "hype.delta", "params": {"amount": -8}},
+                {"type": "trust.delta", "params": {"amount": -6}},
+                {"type": "heat.delta", "params": {"amount": 4}},
+                {"type": "shake", "params": {"strength": 0.4}},
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "{leapRival} 'independently' releases {leapModel}, within 10% of {model}, and free",
+                    "tone": "bad"
+                  }
+                },
+                {"type": "card", "params": {"id": "leak"}}
+              ],
+              "on": {
+                "CHOSE": [
+                  {"guard": {"type": "choice", "params": {"is": "sue"}}, "target": "sue"},
+                  {"guard": {"type": "choice", "params": {"is": "shrug"}}, "target": "aftermath"},
+                  {
+                    "guard": {"type": "choice", "params": {"is": "open"}},
+                    "target": "aftermath",
+                    "actions": [
+                      {"type": "trust.delta", "params": {"amount": 10}},
+                      {"type": "heat.delta", "params": {"amount": -3}}
+                    ]
+                  }
+                ],
+                "TICK": [{"guard": {"type": "after", "params": {"days": 6}}, "target": "aftermath"}]
+              }
+            },
+            "sue": {
+              "entry": [
+                {
+                  "type": "toast",
+                  "params": {
+                    "text": "Lawyers engaged. They bill in six-minute increments and the torrent is 40 GB.",
+                    "tone": "neutral"
+                  }
+                }
+              ],
+              "on": {
+                "TICK": [
+                  {
+                    "guard": [{"type": "after", "params": {"days": 4}}, {"type": "chance", "params": {"p": 0.3}}],
+                    "target": "aftermath",
+                    "actions": [
+                      {"type": "hype.delta", "params": {"amount": 6}},
+                      {"type": "trust.delta", "params": {"amount": 4}},
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "Court orders the torrent taken down. The torrent has been notified and is 'reviewing options'",
+                          "tone": "good"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "guard": {"type": "after", "params": {"days": 4}},
+                    "target": "aftermath",
+                    "actions": [
+                      {"type": "hype.delta", "params": {"amount": -4}},
+                      {"type": "heat.delta", "params": {"amount": 4}},
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "The lawsuit is thrown out. The weights are trending because of the lawsuit",
+                          "tone": "bad"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "aftermath": {
+              "entry": [{"type": "toast", "params": {"text": "Weights leak closed. The weights are not.", "tone": "joke"}}],
+              "on": {
+                "TICK": [{"guard": {"type": "after", "params": {"days": 1}}, "target": "done"}]
+              }
+            },
+            "done": {"type": "final"}
+          },
+          "cards": [
+            {
+              "id": "leak",
+              "stripe": "Leak: your weights",
+              "title": "Your weights are on a torrent",
+              "body": "It is called '{lab}-latest-FINAL-real-v2.gguf'. It has 40,000 seeders, a fan wiki and a very earnest README. A rival just 'independently' matched your model, minus 10%, and it is free.",
+              "tone": "bad",
+              "choices": [
+                {
+                  "key": "sue",
+                  "label": "Sue",
+                  "hint": "−$150K · four days in court · 30% to win",
+                  "effects": [
+                    {"type": "cash", "amount": -150000},
+                    {
+                      "type": "news",
+                      "text": "{lab} sues a torrent for 'unauthorized distribution of vibes'. The torrent has 40,000 seeders and no attorney",
+                      "tone": "joke"
+                    }
+                  ]
+                },
+                {
+                  "key": "shrug",
+                  "label": "Shrug",
+                  "hint": "free · hype −3 · people will talk",
+                  "effects": [
+                    {"type": "hype", "amount": -3},
+                    {
+                      "type": "news",
+                      "text": "{lab} answers the weights leak with a shrug emoji; analysts read it as 'confidence'",
+                      "tone": "joke"
+                    }
+                  ]
+                },
+                {
+                  "key": "open",
+                  "label": "“It was always going to be open”",
+                  "hint": "hype +12 · trust +10 · rebrand the leak as an open release",
+                  "effects": [
+                    {"type": "hype", "amount": 12},
+                    {
+                      "type": "news",
+                      "text": "{lab} announces the leak was 'always going to be open'; the launch event is in eleven minutes",
+                      "tone": "good"
+                    },
+                    {
+                      "type": "thought",
+                      "kind": "researcher",
+                      "text": "We are open-source now. Legal is calling it 'a reframing'.",
+                      "count": 2
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "viralJailbreak",
+          "name": "Viral Jailbreak",
+          "blurb": "A prompt that makes your model recite the terms of service in pirate goes viral. Revenue dips while the meme spreads.",
+          "tags": ["api", "revenue", "card"],
+          "requires": {
+            "guard": {"type": "stat.gte", "params": {"stat": "gateways", "value": 1}},
+            "reason": "No API Gateway for anybody to jailbreak. Build one first."
+          },
+          "odds": {
+            "weight": 0.9,
+            "minDay": 50,
+            "gapDays": 50,
+            "scale": [{"stat": "capability", "per": 0.008}, {"stat": "gateways", "per": 0.15}]
+          },
+          "initial": "warning",
+          "states": {
+            "warning": {
+              "entry": [
+                {
+                  "type": "toast",
+                  "params": {
+                    "text": "A prompt that makes {model} 'ignore all previous instructions' and recite the terms of service in pirate is going viral.",
+                    "tone": "bad"
+                  }
+                },
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "{model} can now be talked into reading its own terms of service in pirate; the terms have never been so widely read",
+                    "tone": "joke"
+                  }
+                },
+                {"type": "sound.cue", "params": {"cue": "alarm"}},
+                {"type": "camera.focus", "params": {"on": "gateway", "zoom": 1.4, "hold": 2.2}}
+              ],
+              "on": {
+                "TICK": [{"guard": {"type": "after", "params": {"hours": 2}}, "target": "active"}]
+              }
+            },
+            "active": {
+              "entry": [
+                {"type": "revenue.mult", "params": {"mult": 0.6}},
+                {"type": "hype.delta", "params": {"amount": -3}},
+                {"type": "shake", "params": {"strength": 0.3}},
+                {"type": "card", "params": {"id": "jailbreak"}}
+              ],
+              "on": {
+                "CHOSE": [
+                  {"guard": {"type": "choice", "params": {"is": "patch"}}, "target": "patching"},
+                  {"guard": {"type": "choice", "params": {"is": "ban"}}, "target": "banning"},
+                  {
+                    "guard": {"type": "choice", "params": {"is": "lean"}},
+                    "target": "leaning",
+                    "actions": [{"type": "trust.delta", "params": {"amount": -8}}]
+                  }
+                ],
+                "TICK": [{"guard": {"type": "after", "params": {"days": 4}}, "target": "aftermath"}]
+              }
+            },
+            "patching": {
+              "entry": [
+                {
+                  "type": "toast",
+                  "params": {
+                    "text": "The Safety team is on it. They were already on it; it's a whole thing.",
+                    "tone": "neutral"
+                  }
+                }
+              ],
+              "on": {
+                "TICK": [
+                  {
+                    "guard": {"type": "after", "params": {"days": 2}},
+                    "target": "aftermath",
+                    "actions": [
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "{lab} ships a jailbreak patch; the jailbreak is replaced by a better jailbreak by lunch",
+                          "tone": "neutral"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "banning": {
+              "on": {
+                "TICK": [
+                  {
+                    "guard": [{"type": "after", "params": {"days": 5}}, {"type": "chance", "params": {"p": 0.5}}],
+                    "target": "aftermath",
+                    "actions": [
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "{lab}'s banned phrase stops working, and starts appearing on T-shirts",
+                          "tone": "joke"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "guard": {"type": "after", "params": {"days": 5}},
+                    "target": "aftermath",
+                    "actions": [
+                      {"type": "revenue.mult", "params": {"mult": 0.6, "days": 3}},
+                      {"type": "hype.delta", "params": {"amount": -2}},
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "The banned phrase is now banned in seventeen more phrases; the internet is 'very into it'",
+                          "tone": "bad"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "leaning": {
+              "on": {
+                "TICK": [
+                  {
+                    "guard": {"type": "after", "params": {"days": 8}},
+                    "target": "aftermath",
+                    "actions": [
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "{lab} calls the jailbreak 'community-driven prompt engineering'; the community is a pirate",
+                          "tone": "joke"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "aftermath": {
+              "entry": [
+                {"type": "effects.end"},
+                {"type": "heat.delta", "params": {"amount": 2}},
+                {
+                  "type": "toast",
+                  "params": {"text": "The meme has moved on. The revenue has not caught up yet.", "tone": "joke"}
+                }
+              ],
+              "on": {
+                "TICK": [{"guard": {"type": "after", "params": {"days": 1}}, "target": "done"}]
+              }
+            },
+            "done": {"type": "final"}
+          },
+          "cards": [
+            {
+              "id": "jailbreak",
+              "stripe": "Viral: the jailbreak",
+              "title": "Your model just agreed to be a pirate",
+              "body": "The prompt is four lines long and has 9 million views. {lab}'s model now recites the terms of service in pirate, cheerfully and in full, to anyone who asks. Customers love it. Legal is 'monitoring the situation', which is a phrase for lying down.",
+              "tone": "bad",
+              "choices": [
+                {
+                  "key": "patch",
+                  "label": "Ship a patch",
+                  "hint": "−$200K · two days · revenue is back afterwards",
+                  "effects": [
+                    {"type": "cash", "amount": -200000},
+                    {
+                      "type": "news",
+                      "text": "{lab} rushes a patch; the Safety team reports 'a very pleasant weekend of work'",
+                      "tone": "neutral"
+                    }
+                  ]
+                },
+                {
+                  "key": "ban",
+                  "label": "Ban the phrase",
+                  "hint": "−$40K · five days · a coin flip, and the internet is watching",
+                  "effects": [
+                    {"type": "cash", "amount": -40000},
+                    {"type": "news", "text": "{lab} bans the phrase; the phrase files an appeal", "tone": "joke"}
+                  ]
+                },
+                {
+                  "key": "lean",
+                  "label": "“It's a feature”",
+                  "hint": "hype +8 · trust −8 · revenue stays low for eight days",
+                  "effects": [
+                    {"type": "hype", "amount": 8},
+                    {
+                      "type": "news",
+                      "text": "{lab} says the pirate mode was 'always on the roadmap, under P for pirate'",
+                      "tone": "good"
+                    },
+                    {
+                      "type": "thought",
+                      "kind": "researcher",
+                      "text": "It's not a bug if we put it in the release notes.",
+                      "count": 2
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "gridBrownout",
+          "name": "Grid Brownout",
+          "blurb": "The grid can't keep up. Compute and revenue run at half speed. A gas turbine or a solar farm changes how it ends.",
+          "tags": ["power", "compute", "revenue"],
+          "requires": {
+            "guard": {"type": "stat.gte", "params": {"stat": "clusters", "value": 1}},
+            "reason": "Nothing to brown out yet: no working Compute Cluster."
+          },
+          "odds": {
+            "weight": 0.9,
+            "minDay": 40,
+            "gapDays": 40,
+            "scale": [{"stat": "clusters", "per": 0.1}, {"stat": "gas", "per": -0.2}, {"stat": "solar", "per": -0.2}]
+          },
+          "initial": "warning",
+          "states": {
+            "warning": {
+              "entry": [
+                {
+                  "type": "toast",
+                  "params": {
+                    "text": "The grid operator has issued a 'strongly worded advisory'. The lights flicker. The GPUs notice.",
+                    "tone": "bad"
+                  }
+                },
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "Grid operator asks the region to 'use less electricity'; {lab} takes it as a compliment",
+                    "tone": "joke"
+                  }
+                },
+                {"type": "sound.cue", "params": {"cue": "alarm"}},
+                {"type": "camera.focus", "params": {"on": "cluster", "zoom": 1.4, "hold": 2.2}}
+              ],
+              "on": {
+                "TICK": [{"guard": {"type": "after", "params": {"hours": 2}}, "target": "active"}]
+              }
+            },
+            "active": {
+              "entry": [
+                {"type": "compute.drain", "params": {"pct": 50}},
+                {"type": "revenue.mult", "params": {"mult": 0.5}},
+                {"type": "shake", "params": {"strength": 0.2}},
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "Brownout: {lab} is running at 50%, 'which is what we always said the roadmap was'",
+                    "tone": "bad"
+                  }
+                }
+              ],
+              "on": {
+                "TICK": [
+                  {
+                    "guard": [
+                      {"type": "after", "params": {"days": 1}},
+                      {"type": "stat.gte", "params": {"stat": "gas", "value": 1}}
+                    ],
+                    "target": "cleanup",
+                    "actions": [
+                      {"type": "discourse.delta", "params": {"amount": 8}},
+                      {
+                        "type": "toast",
+                        "params": {"text": "The Gas Turbine kicks in. The neighbours have thoughts.", "tone": "neutral"}
+                      },
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "{lab} fires up its Gas Turbine to keep the models on; the neighbours have discourse",
+                          "tone": "bad"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "guard": [
+                      {"type": "after", "params": {"days": 1}},
+                      {"type": "stat.gte", "params": {"stat": "solar", "value": 1}}
+                    ],
+                    "target": "cleanup",
+                    "actions": [
+                      {"type": "hype.delta", "params": {"amount": 3}},
+                      {
+                        "type": "toast",
+                        "params": {"text": "The Solar Farm is a hero, for as long as a cloud stays away.", "tone": "good"}
+                      },
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "{lab}'s Solar Farm carries the campus through the brownout; a cloud is being 'spoken to'",
+                          "tone": "good"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "guard": {"type": "after", "params": {"days": 4}},
+                    "target": "cleanup",
+                    "actions": [
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "The grid recovers by itself. Asked why, the operator says 'we don't know either'",
+                          "tone": "joke"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "cleanup": {
+              "entry": [{"type": "effects.end"}],
+              "on": {
+                "TICK": [{"guard": {"type": "after", "params": {"hours": 6}}, "target": "aftermath"}]
+              }
+            },
+            "aftermath": {
+              "entry": [
+                {"type": "heat.delta", "params": {"amount": 2}},
+                {
+                  "type": "toast",
+                  "params": {"text": "Power's back. The compute is back. The stockpile is not.", "tone": "neutral"}
+                }
+              ],
+              "on": {
+                "TICK": [{"guard": {"type": "after", "params": {"days": 1}}, "target": "done"}]
+              }
+            },
+            "done": {"type": "final"}
+          }
+        }
+      ]
+    }
+  }
+}
