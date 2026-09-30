@@ -12,12 +12,16 @@ import { syncProtesters } from "../sim/protest";
 import { setRisk } from "../sim/disasters/driver";
 import { stageDisaster } from "../sim/disasters/demo";
 import { RISKS, type Risk } from "../sim/disasters/types";
-import type { GameState, NewsItem, OpenEvent, Outcome } from "../sim/types";
+import type { GameState, NewsItem, OpenEvent, Outcome, Thought } from "../sim/types";
 import { fillAgents, seedWalkers } from "../sim/walkers";
 import { isMoment, stageMoment } from "../sim/race/demo";
 import { isOpsMoment, stageOps } from "../sim/opsDemo";
+import { isPaperMoment, stagePapers } from "../sim/race/papers/demo";
+import { enablePapers } from "../sim/race/papers/driver";
 import { enableLeapfrog } from "../sim/race/leapfrog/driver";
 import { parseLeapMoment, stageLeapfrog } from "../sim/race/leapfrog/demo";
+import { isCollusionMoment, stageCollusion } from "../sim/collusion/demo";
+import { enableCollusion } from "../sim/collusion/driver";
 import { walkersThinking } from "../sim/mind";
 import { makeSnapshot, NO_SELECTION, type Snapshot, type UiSelection, type UiToast } from "./hud";
 
@@ -47,8 +51,12 @@ export class SimHandle {
   highlightIds: ReadonlySet<number> = new Set();
   /** Release Leapfrog's pack is loaded (a new lab gets it too). */
   leapfrog: boolean;
+  /** A scripted opening can start the news tape on an existing headline, without rewriting World history. */
+  newsStartId = 0;
+  /** A paused scenario's curated bubbles. Ordinary sim bubbles return on the first resumed tick. */
+  openingThoughts?: { tick: number; thoughts: Thought[] };
 
-  constructor(world: GameState, leapfrog = false) {
+  constructor(world: GameState, leapfrog = false, public papers = world.papers?.enabled ?? false) {
     this.world = world;
     this.leapfrog = leapfrog;
   }
@@ -65,10 +73,15 @@ export class SimHandle {
 
   /** Start over with a fresh seed (the random-disaster setting carries over to the new lab). */
   reset(seed: number) {
+    this.newsStartId = 0;
+    this.openingThoughts = undefined;
     const risk = this.world.disasters.risk;
+    const collusion = this.world.collusion?.enabled;
     this.world = createInitialState(seed);
     setRisk(this.world, risk);
     if (this.leapfrog) enableLeapfrog(this.world);
+    if (collusion) enableCollusion(this.world);
+    if (this.papers) enablePapers(this.world);
     this.alpha = 1;
   }
 
@@ -87,23 +100,27 @@ export class SimHandle {
     this.lastOutcome = outcome;
     if (!publish) return { event, outcome, toasts: [] };
     this.lastVersion = w.version;
-    this.lastSnap = makeSnapshot(w, this.lastSnap, this.ui);
+    const presented = this.openingThoughts?.tick === w.tick ? { ...w, thoughts: this.openingThoughts.thoughts } : w;
+    this.lastSnap = makeSnapshot(presented, this.lastSnap, this.ui);
     this.highlightIds = this.ui.highlight ? walkersThinking(w, this.ui.highlight) : NO_IDS;
-    return { event, outcome, snap: this.lastSnap, news: w.news.slice(), toasts: w.toasts.splice(0).map((t) => ({ ...t })) };
+    return { event, outcome, snap: this.lastSnap, news: w.news.filter((n) => n.id >= this.newsStartId), toasts: w.toasts.splice(0).map((t) => ({ ...t })) };
   }
 }
 
 /** A living campus, warped forward and dressed up per the `?seed=&warp=&agents=&discourse=` debug knobs. */
 export function createSimHandle(
-  dbg: Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk">> & { moment?: string | null; leapfrog?: boolean },
+  dbg: Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean },
 ): SimHandle {
   const sim = createInitialState(dbg.seed);
   if (dbg.leapfrog) enableLeapfrog(sim);
+  if (dbg.papers) enablePapers(sim);
   for (let i = 0; i < dbg.warp * TICKS_PER_DAY; i++) tick(sim);
   const leap = parseLeapMoment(dbg.moment);
   if (isMoment(dbg.moment)) stageMoment(sim, dbg.moment);
   else if (isOpsMoment(dbg.moment)) stageOps(sim, dbg.moment);
   else if (leap) stageLeapfrog(sim, leap.moment, leap.arg);
+  else if (isCollusionMoment(dbg.moment)) stageCollusion(sim, dbg.moment);
+  else if (isPaperMoment(dbg.moment)) stagePapers(sim, dbg.moment);
   if (dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0) {
     const rng = createRng(sim.rngState);
     if (dbg.researchers > 0) seedWalkers(sim, "researcher", dbg.researchers, rng);
