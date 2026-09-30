@@ -1,0 +1,101 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "00b8c60bdeb6679ae2cd69c310664855e2baebc4"
+  },
+  "head": {
+    "branch": "flt-56-circus-juice-2",
+    "sha": "1121b09",
+    "dirty": false
+  },
+  "seconds": 291.759,
+  "problems": [
+    "c56-viral-phone.png: blank composite: panel 3 is 80% one colour, 12 colours"
+  ],
+  "rows": [
+    {
+      "scene": "c56-conga",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/before/c56-conga.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/after/c56-conga.png",
+      "title": "FLT-56: the star walks out, and the team follows in a conga line (camera beat)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/compare/c56-conga.png",
+      "changed": 0.8571288580246914
+    },
+    {
+      "scene": "c56-conga-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/before/c56-conga-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/after/c56-conga-phone.png",
+      "title": "FLT-56: the conga beat on a phone",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/compare/c56-conga-phone.png",
+      "changed": 0.8077811702515494
+    },
+    {
+      "scene": "c56-campus",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/before/c56-campus.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/after/c56-campus.png",
+      "title": "FLT-56: the neo lab's campus beyond the fence, balloon and empty plinth",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/compare/c56-campus.png",
+      "changed": 0.19653086419753085
+    },
+    {
+      "scene": "c56-poach-sirocco",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/before/c56-poach-sirocco.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/after/c56-poach-sirocco.png",
+      "title": "FLT-56: a poaching offer in Sirocco's own voice",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/compare/c56-poach-sirocco.png",
+      "changed": 0.2945300925925926
+    },
+    {
+      "scene": "c56-huddle",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/before/c56-huddle.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/after/c56-huddle.png",
+      "title": "FLT-56: the auditors huddle before the report (camera beat)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/compare/c56-huddle.png",
+      "changed": 0.9168618827160494
+    },
+    {
+      "scene": "c56-huddle-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/before/c56-huddle-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/after/c56-huddle-phone.png",
+      "title": "FLT-56: the huddle beat on a phone",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/compare/c56-huddle-phone.png",
+      "changed": 0.8992853019807996
+    },
+    {
+      "scene": "c56-plaque",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/before/c56-plaque.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/after/c56-plaque.png",
+      "title": "FLT-56: the grade plaque by the gate, two days after the report",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/compare/c56-plaque.png",
+      "changed": 0.3109313271604938
+    },
+    {
+      "scene": "c56-viral",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/before/c56-viral.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/after/c56-viral.png",
+      "title": "FLT-56: the hearing clip goes viral (camera beat, ticker burst, Network Traffic)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/compare/c56-viral.png",
+      "changed": 0.9167932098765432
+    },
+    {
+      "scene": "c56-viral-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/before/c56-viral-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/after/c56-viral-phone.png",
+      "title": "FLT-56: the viral beat on a phone",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-56/compare/c56-viral-phone.png",
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 80% one colour, 12 colours",
+      "error": "compare: blank composite: panel 3 is 80% one colour, 12 colours"
+    }
+  ],
+  "errors": []
+}
