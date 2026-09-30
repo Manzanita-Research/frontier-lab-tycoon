@@ -175,6 +175,7 @@ class Signs {
     this.np = 0;
   }
   draw(w: Walker, p: Pose, bob: number) {
+    if (w.kind !== "protester") return; // a faction look also dresses the visitors who took its side, sign-free
     const wave = Math.sin(p.t * 5 + p.phase) * 0.14;
     m4.compose(pos.set(p.x, this.height - 0.85 * this.k + bob, p.z), quat.identity(), scl.set(1, this.k, 1));
     this.pole.setMatrixAt(this.np++, m4);
@@ -413,7 +414,8 @@ export function buildModLooks(looks: Readonly<Record<string, ResolvedLook>>): Mo
   };
 }
 
-/** A walker's look: its kind and role's, else its kind's. */
+/** A walker's look: its kind and role's, else its faction crowd's (FLT-33), else its kind's. */
 export function lookKey<T>(map: Map<string, T>, w: Walker): T | undefined {
-  return map.get(`${w.kind}:${w.role}`) ?? map.get(w.kind);
+  const side = w.crowd || w.faction;
+  return map.get(`${w.kind}:${w.role}`) ?? (side ? map.get(`faction:${side}`) : undefined) ?? map.get(w.kind);
 }

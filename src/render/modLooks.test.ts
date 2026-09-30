@@ -19,6 +19,14 @@ describe("FLT-55 mod looks", () => {
     expect(lookKey(map, walker(3, "researcher"))).toBeUndefined();
   });
 
+  it("puts a faction crowd's look between a role look and a kind look", () => {
+    const map = new Map([["protester", "dog"], ["faction:doomers", "cat"], ["visitor:Journalist", "press"]]);
+    expect(lookKey(map, { ...walker(1, "protester"), crowd: "doomers" })).toBe("cat");
+    expect(lookKey(map, { ...walker(2, "protester"), crowd: "vcs" })).toBe("dog");
+    expect(lookKey(map, { ...walker(3, "visitor", "Journalist"), faction: "doomers" })).toBe("press");
+    expect(lookKey(map, { ...walker(4, "visitor", "Tourist"), faction: "doomers" })).toBe("cat");
+  });
+
   it("draws a crowd with one instanced mesh per recipe part, coat colours per walker", () => {
     const looks = buildModLooks({ protester: dog, agent: { mod: "m", tint: { body: "#ff00ff" } } });
     const drawer = looks.drawers.get("protester")!;

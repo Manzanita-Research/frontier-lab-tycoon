@@ -9,6 +9,7 @@ import { Vocabulary } from "./services/vocabulary";
 import { Progression, CoachLine, Arc, Building, Disaster, Ending, EntityKind, EventOrArc, Goal, Headline, ModError, NamePool, Rival, Thought, Tip, decodeManifest, suggest, type LookData, type ModManifest, type SkinData } from "./schema";
 import { contentKey, patchById } from "./patch";
 import { BenchmarkSchema, MishapSchema } from "../content/leapfrog";
+import { FactionSchema } from "../content/factions";
 import type { ProgressionLevel } from "../content/progression";
 import { sanitizeCss } from "./css";
 import { ownAsset, validateAssets } from "./assets";
@@ -42,6 +43,7 @@ function applyContent(below: ContentApi, mod: ModManifest): ContentApi {
     disasters: patchById("disasters", below.disasters, p.disasters, (row) => row.id, Schema.decodeUnknownSync(Disaster)),
     benchmarks: patchById("benchmarks", below.benchmarks, p.benchmarks, (row) => row.id, Schema.decodeUnknownSync(BenchmarkSchema)),
     mishaps: patchById("mishaps", below.mishaps, p.mishaps, (row) => row.id, Schema.decodeUnknownSync(MishapSchema)),
+    factions: patchById("factions", below.factions, p.factions, (row) => row.id, Schema.decodeUnknownSync(FactionSchema)),
   };
 }
 function toObject(value: unknown): object { return typeof value === "object" && value !== null ? value : {}; }
@@ -137,8 +139,12 @@ function resolveLook(target: string, look: LookData, own: Readonly<Record<string
   const fail = (detail: string, at = path) => { throw new ModError({ path: at, detail }); };
   const { kinds, roles } = lookTargets(content);
   const [kind = "", role] = target.split(":");
-  if (!kinds.includes(kind)) fail(`unknown walker kind "${kind}"${suggest(kind, kinds)}; looks are for ${kinds.join(", ")}`);
-  if (role !== undefined) {
+  if (kind === "faction") {
+    // A faction crowd (FLT-33): the protesters who came with it, and anyone who has taken its side.
+    const ids = content.factions.map((row) => row.id);
+    if (!role || !ids.includes(role)) fail(`unknown faction "${role ?? ""}"${suggest(role ?? "", ids)}; factions are ${ids.join(", ")}`);
+  } else if (!kinds.includes(kind)) fail(`unknown walker kind "${kind}"${suggest(kind, kinds)}; looks are for ${kinds.join(", ")} or "faction:<id>"`);
+  if (role !== undefined && kind !== "faction") {
     const known = roles[kind];
     if (!known) fail(`"${kind}" has one role; use "${kind}" on its own`);
     else if (!known.includes(role)) fail(`unknown ${kind} role "${role}"${suggest(role, known)}; ${kind} roles are ${known.join(", ")}`);
@@ -153,7 +159,7 @@ function resolveLook(target: string, look: LookData, own: Readonly<Record<string
     const c = look.tint?.[key];
     if (c !== undefined && !HEX.test(c)) fail(`expected a colour like "#d9a441", got "${c}"`, `${path}.tint.${key}`);
   }
-  if (look.signs && kind !== "protester") fail("only protesters carry signs", `${path}.signs`);
+  if (look.signs && kind !== "protester" && kind !== "faction") fail("only protesters (and faction crowds) carry signs", `${path}.signs`);
   const src = look.sprite !== undefined ? ownAsset(own, look.sprite, "image", `${path}.sprite`) : look.glb !== undefined ? ownAsset(own, look.glb, "model", `${path}.glb`) : undefined;
   return { ...look, mod, ...(src ? { src } : {}) };
 }

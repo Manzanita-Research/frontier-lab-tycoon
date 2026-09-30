@@ -2562,6 +2562,184 @@
       }
     }
   }
+  /* The discourse (FLT-33): the tray megaphone, "Discourse Monitor" and the inspector's "Member of" line. */
+  .f95-s.disc.loud svg {
+    animation: frontier-95-wiggle 0.5s steps(2) infinite;
+  }
+  .f95-discn {
+    position: absolute;
+    right: 0;
+    top: 0;
+    min-width: 12px;
+    padding: 0 2px;
+    background: #e00000;
+    color: #fff;
+    font-size: 11px;
+    font-style: normal;
+    line-height: 12px;
+    text-align: center;
+  }
+  .f95-disc {
+    position: fixed;
+    left: 336px;
+    bottom: calc(var(--taskbar) + 8px);
+    width: 340px;
+    z-index: 6;
+    .f95-discpage {
+      padding: 4px;
+      min-height: 210px;
+    }
+    .f95-listwrap {
+      margin: 0;
+      max-height: 260px;
+      overflow: auto;
+    }
+    .f95-lhead,
+    .f95-lrow {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) 92px;
+    }
+    .f95-lrow i,
+    .f95-discrel i {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      margin-right: 5px;
+      border: 1px solid #000;
+      vertical-align: -1px;
+    }
+    .f95-lrow[data-mood="fan"] span:last-child {
+      color: var(--flt-color-good);
+    }
+    .f95-lrow[data-mood="upset"] span:last-child {
+      color: var(--flt-color-bad);
+    }
+    .f95-lrow[data-mood="protesting"] {
+      background: var(--flt-color-selection);
+      color: var(--flt-color-selectionText);
+    }
+    .f95-approval {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .f95-apbar {
+      position: relative;
+      flex: 1;
+      height: 10px;
+      b {
+        position: absolute;
+        top: 2px;
+        bottom: 2px;
+        background: repeating-linear-gradient(90deg, var(--navy) 0 4px, transparent 4px 5px);
+        &.neg {
+          background: repeating-linear-gradient(90deg, #c00000 0 4px, transparent 4px 5px);
+        }
+      }
+    }
+    .faction-stance {
+      font-size: 14px;
+      grid-template-columns: 76px 1fr 76px;
+    }
+    .faction-stance .track {
+      height: 10px;
+      border: 0;
+      border-radius: 0;
+      box-shadow: var(--sunk);
+      background: var(--flt-color-inset);
+    }
+    .faction-stance .track i {
+      width: 10px;
+      height: 16px;
+      margin: -8px 0 0 -5px;
+      border: 0;
+      border-radius: 0;
+      background: var(--g);
+      box-shadow: var(--btn);
+    }
+  }
+  .f95-discstance {
+    display: grid;
+    gap: 8px;
+    padding: 6px 4px;
+  }
+  .f95-discaxis {
+    display: grid;
+    gap: 1px;
+    font-size: 15px;
+  }
+  .f95-discrel {
+    margin: 0;
+    padding: 4px 6px;
+    list-style: none;
+    font-size: 15px;
+    li {
+      display: flex;
+      align-items: center;
+      padding: 1px 0;
+    }
+    b {
+      font-weight: normal;
+      padding: 0 4px;
+    }
+    em {
+      margin-left: auto;
+      font-style: normal;
+    }
+    li.allied em {
+      color: var(--flt-color-good);
+    }
+    li.feuding em,
+    li.schism em {
+      color: var(--flt-color-bad);
+    }
+    li.schism em {
+      font-weight: bold;
+    }
+  }
+  .f95-discnone {
+    margin: 8px 4px;
+    font-size: 15px;
+  }
+  .f95-discsafety {
+    margin: 4px;
+    padding: 6px 10px 8px;
+    border: 0;
+    box-shadow: var(--etched);
+    font-size: 15px;
+    label {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 0;
+      cursor: pointer;
+    }
+    small {
+      font-size: 13px;
+      color: var(--flt-color-textDim);
+    }
+  }
+  .bubble.f95-tip[data-faction] {
+    box-shadow: inset 5px 0 0 var(--faction);
+    padding-left: 10px;
+  }
+  .f95-tipfaction {
+    font-style: normal;
+    font-weight: normal;
+    color: var(--flt-color-textDim);
+  }
+  .f95-member i {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 5px;
+    border: 1px solid #000;
+    vertical-align: -1px;
+  }
+  .f95-member[data-mood="protesting"],
+  .f95-member[data-mood="upset"] {
+    color: var(--flt-color-bad);
+  }
   .f95-gauges {
     display: grid;
     grid-template-columns: 1.35fr 1fr 1fr;
@@ -2883,6 +3061,7 @@
     .f95-dog,
     .f95-dog .tail,
     .f95-dog .legs,
+    .f95-s.disc.loud svg,
     .f95-spin,
     .f95-dz-err,
     .f95-dz-short.all {
@@ -3146,6 +3325,14 @@
       left: 4px;
       right: 4px;
       width: auto;
+    }
+    .f95-disc {
+      left: 4px;
+      right: 4px;
+      width: auto;
+      .f95-listwrap {
+        max-height: 34vh;
+      }
     }
     .f95-paper {
       padding: 10px 12px;

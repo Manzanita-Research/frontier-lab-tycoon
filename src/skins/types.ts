@@ -2,7 +2,7 @@
 // nothing else in the game: no `src/sim/**`, no store, no three.
 import type { ComponentType, ReactNode } from "react";
 import type {
-  ArenaVM, AuditVM, BillVM, TrackerVM, ReportCardVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, DramaVM, EraCardVM, EventVM, HearingVM, HudActions, HudVM, LeakVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
+  ArenaVM, AuditVM, BillVM, TrackerVM, ReportCardVM, BubbleVM, FactionsVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, DramaVM, EraCardVM, EventVM, HearingVM, HudActions, HudVM, LeakVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
   ModsVM, SkinOfferVM, NewsroomVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StatsVM, ThoughtRowVM, TickerItemVM,
   StaffVM, TeaserVM, ProgressVM, ToastVM, TrainingVM, UnlockCardVM, VisibleVM, HelpVM, PapersVM, PaperMomentVM, CrumbWikiVM, DisastersVM,
 } from "../ui/hud/types";
@@ -31,6 +31,7 @@ export const SLOT_NAMES = [
   "Arena",
   "Benchmarks",
   "Voice",
+  "Factions",
   "Livestream",
   "Hearing",
   "LeakedChat",
@@ -61,7 +62,7 @@ export const SLOT_NAMES = [
 export type SlotName = (typeof SLOT_NAMES)[number];
 
 /** The slots that sit in the HUD all the time, already rendered, for the Layout to place. */
-export const DOCKED_SLOTS = ["Stats", "Training", "Objectives", "Inspector", "BuildBar", "Speed", "Staff", "ThoughtsPanel", "Ticker", "Toasts", "Assistant", "Arena", "Benchmarks", "Voice", "NewsControls", "NewsArrival", "PhotoButton", "Papers", "DisasterAlert"] as const;
+export const DOCKED_SLOTS = ["Stats", "Training", "Objectives", "Inspector", "BuildBar", "Speed", "Staff", "ThoughtsPanel", "Ticker", "Toasts", "Assistant", "Arena", "Benchmarks", "Voice", "Factions", "NewsControls", "NewsArrival", "PhotoButton", "Papers", "DisasterAlert"] as const;
 export type DockedSlot = (typeof DOCKED_SLOTS)[number];
 
 /** What the Layout receives: the docked slots as elements (or null when there is nothing to show) plus the whole VM. */
@@ -112,6 +113,12 @@ export interface SlotPropsMap {
   Benchmarks: { leapfrog: LeapfrogVM; layout: LayoutVM; actions: HudActions };
   /** The share-of-voice meter: who has the news cycle, and the last sixty days of it. Docked. */
   Voice: { leapfrog: LeapfrogVM; layout: LayoutVM; actions: HudActions };
+  /**
+   * FLT-33: the discourse. Each faction's meter and mood (and why), the lab's stance on five axes, who is allied or
+   * feuding, who is at the gate, and the safety budget (`actions.setSafetySpend(level)`). Folded to `factions.headline`
+   * until `factions.open` (`actions.toggleFactions()`). Docked; only rendered once `factions.enabled` and `visible.factions`.
+   */
+  Factions: { factions: FactionsVM; layout: LayoutVM; actions: HudActions };
   /** The launch livestream mishap card (the dog, the wrong chart). Opens instead of EventCard for `event.kind === "stream"`; answer it with `actions.choose`. */
   Livestream: { event: EventVM; stream: StreamVM; actions: HudActions };
   /** The Hearing (FLT-21): a senator's question at the witness table (three senators, the Trust and Capture meters, answers that show what they move), and the gavel with the verdict. Opens instead of EventCard for `event.kind === "hearing"`; answer with `actions.choose`. */

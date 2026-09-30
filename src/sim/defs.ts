@@ -18,6 +18,7 @@ import type { ArcData, HeadlineData } from "../mods/schema";
 import { cardEvents, DISASTERS } from "./disasters/pack";
 import type { DisasterDef } from "./disasters/types";
 import { LEAPFROG, type BenchmarkDef, type MishapDef } from "../content/leapfrog";
+import { BASE_ARCS, FACTIONS, type FactionDef } from "../content/factions";
 
 /** The pools behind the procedural names. The algorithms stay in content/names.ts; mods swap the words. */
 export interface NamePools {
@@ -69,11 +70,14 @@ export interface Defs {
   readonly successorOf: (id: string) => BenchmarkDef | undefined;
   readonly mishaps: readonly MishapDef[];
   readonly mishapById: (id: string) => MishapDef | undefined;
+  /** FLT-33: the factions of the discourse, in content order. */
+  readonly factions: readonly FactionDef[];
+  readonly factionById: (id: string) => FactionDef | undefined;
 }
 
 const BASE_ARENA_SIZE = RIVAL_DEFS.length + 1;
 
-function build(source: GameDefinition | null, parts: Omit<Defs, "source" | "buildingKinds" | "placeableKinds" | "raceKinds" | "rivalById" | "arenaSize" | "headlinesFor" | "eventById" | "disasterById" | "starters" | "benchById" | "successorOf" | "mishapById">): Defs {
+function build(source: GameDefinition | null, parts: Omit<Defs, "source" | "buildingKinds" | "placeableKinds" | "raceKinds" | "rivalById" | "arenaSize" | "headlinesFor" | "eventById" | "disasterById" | "starters" | "benchById" | "successorOf" | "mishapById" | "factionById">): Defs {
   const buildingKinds = Object.keys(parts.buildings) as BuildingKind[];
   const byTrigger = new Map<string, HeadlineLine[]>();
   for (const h of parts.headlines) {
@@ -83,6 +87,7 @@ function build(source: GameDefinition | null, parts: Omit<Defs, "source" | "buil
   }
   const events = new Map(parts.events.map((e) => [e.id, e]));
   const disasters = new Map(parts.disasters.map((d) => [d.id, d]));
+  const factions = new Map(parts.factions.map((f) => [f.id, f]));
   return {
     ...parts,
     source,
@@ -98,6 +103,7 @@ function build(source: GameDefinition | null, parts: Omit<Defs, "source" | "buil
     benchById: Object.fromEntries(parts.benchmarks.map((b) => [b.id, b])),
     successorOf: (id) => parts.benchmarks.find((b) => b.replaces === id),
     mishapById: (id) => parts.mishaps.find((m) => m.id === id),
+    factionById: (id) => factions.get(id),
   };
 }
 
@@ -108,7 +114,7 @@ export const BASE_DEFS: Defs = build(null, {
   headlines: HEADLINES,
   thoughts: THOUGHTS,
   events: EVENTS,
-  arcs: [],
+  arcs: BASE_ARCS,
   goals: GOALS,
   names: {
     LAB_NAMES: Names.LAB_NAMES, RIVALS: Names.RIVALS, RIVAL_SHORT: Names.RIVAL_SHORT, FIRST_NAMES: Names.FIRST_NAMES, LAST_NAMES: Names.LAST_NAMES,
@@ -119,6 +125,7 @@ export const BASE_DEFS: Defs = build(null, {
   disasters: DISASTERS,
   benchmarks: LEAPFROG.benchmarks,
   mishaps: LEAPFROG.mishaps,
+  factions: FACTIONS,
 });
 
 const isArc = (entry: object): entry is ArcData => "states" in entry;
@@ -163,6 +170,7 @@ function fromDefinition(def: GameDefinition): Defs {
     disasters,
     benchmarks: c.benchmarks,
     mishaps: c.mishaps,
+    factions: c.factions ?? FACTIONS,
   });
 }
 

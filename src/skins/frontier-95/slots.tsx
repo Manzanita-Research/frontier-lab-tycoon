@@ -11,10 +11,11 @@ import { DisasterAlert, DisasterMenu } from "./disasters";
 import { Bill, Hearing, LeakedChat, PromiseTracker } from "./circus";
 import { Drama } from "./drama";
 import { AuditPin, ReportCard } from "./audit";
+import { Factions } from "./factions";
 
 const slots: SkinSlots = {
   Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, Bubble, ThoughtsPanel, Ticker, Toast, Assistant,
   EventCard, Confirm, Coach, UnlockCard, HowToPlay, Arena, Benchmarks, Voice, Livestream, Hearing, LeakedChat, Drama, Bill, PromiseTracker, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, NewsControls,
-  NewsArrival, NewsRoom, Mixer, ModManager, ModSkinOffer, Papers, PaperMoment, CrumbWiki, DisasterMenu, DisasterAlert, ReportCard, AuditPin,
+  NewsArrival, NewsRoom, Mixer, ModManager, ModSkinOffer, Papers, PaperMoment, CrumbWiki, DisasterMenu, DisasterAlert, ReportCard, AuditPin, Factions,
 };
 export default slots;

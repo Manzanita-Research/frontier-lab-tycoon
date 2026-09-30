@@ -6,6 +6,7 @@ import "./race.css";
 import "./news.css";
 import "./ops.css";
 import "./leapfrog.css";
+import "./factions.css";
 import "./compact.css";
 import "./notices.css";
 import "./playable.css";
@@ -26,6 +27,7 @@ import { Confirm } from "./slots/Confirm";
 import { HowToPlay } from "./slots/HowToPlay";
 import { UnlockCard } from "./slots/UnlockCard";
 import { EventCard } from "./slots/EventCard";
+import { Factions } from "./slots/Factions";
 import { FrontPage } from "./slots/FrontPage";
 import { GroupChat } from "./slots/GroupChat";
 import { Inspector } from "./slots/Inspector";
@@ -64,6 +66,6 @@ import { Layout } from "./Layout";
 
 export const baseSlots: SlotComponents = {
   Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, Bubble, ThoughtsPanel, Ticker, Toast, Assistant,
-  EventCard, Confirm, Coach, UnlockCard, HowToPlay, Arena, Benchmarks, Voice, Livestream, Hearing, LeakedChat, Drama, Bill, PromiseTracker, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, NewsControls,
+  EventCard, Confirm, Coach, UnlockCard, HowToPlay, Arena, Benchmarks, Voice, Factions, Livestream, Hearing, LeakedChat, Drama, Bill, PromiseTracker, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, NewsControls,
   NewsArrival, NewsRoom, Mixer, ModManager, ModSkinOffer, Papers, PaperMoment, CrumbWiki, DisasterMenu, DisasterAlert, ReportCard, AuditPin,
 };

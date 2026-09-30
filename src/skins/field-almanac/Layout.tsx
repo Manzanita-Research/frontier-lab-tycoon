@@ -25,6 +25,7 @@ export function Layout({ vm, slots }: SlotPropsMap["Layout"]) {
         )}
         {!compact && slots.Benchmarks}
         {slots.Voice}
+        {slots.Factions}
       </div>
       <div className="fa-right">
         {(slots.Speed || slots.PhotoButton) && (

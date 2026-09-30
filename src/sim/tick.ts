@@ -36,6 +36,7 @@ import { updateTutorial } from "./tutorial";
 import { observeGuardrails, pendingConfirmOf } from "./guardrails";
 import { defs, withDefs } from "./defs";
 import { dailyModArcs } from "./modArcs";
+import { dailyFactions, updateFactions } from "./factions/driver";
 import type { GameDefinition } from "../mods/game-definition";
 
 export { TICKS_PER_DAY };
@@ -64,6 +65,7 @@ function step(state: GameState, commands: readonly Command[]) {
   state.tick++;
   updateWalkers(state, rng);
   if (systemUnlocked(state, "protests")) updateProtesters(state, rng);
+  if (state.factions && systemUnlocked(state, "factions")) updateFactions(state);
   updateStaff(state, rng);
   updateGroups(state);
   if (systemUnlocked(state, "auditors")) updateAuditors(state);
@@ -90,6 +92,8 @@ function step(state: GameState, commands: readonly Command[]) {
     if (systemUnlocked(state, "poaching")) dailyPoaching(state);
     if (systemUnlocked(state, "leapfrog")) dailyLeapfrog(state, rng);
     if (systemUnlocked(state, "papers")) dailyPapers(state, rng);
+    // FLT-33: the factions first, so the Circus and the Senate hear today's meters (FLT-52).
+    if (state.factions && systemUnlocked(state, "factions")) dailyFactions(state);
     // The Circus (FLT-24, then FLT-21): the yacht first, so a subpoena it files today reaches the Senate today.
     if (systemUnlocked(state, "yacht")) dailyYacht(state);
     if (systemUnlocked(state, "hearing")) dailyHearing(state);

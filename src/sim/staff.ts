@@ -20,6 +20,7 @@ import type { EventFromLogic } from "xstate";
 import type { staffMachine } from "./machines/staff";
 import type { Building, GameState, Point, Rect, StaffJob, Staffer } from "./types";
 import { defs } from "./defs";
+import { toteBagFor } from "./factions/driver";
 
 /** Look for something to do this often when idle (in ticks). */
 const SCAN_TICKS = 3;
@@ -338,6 +339,7 @@ function finish(state: GameState, rng: Rng, s: Staffer) {
       const w = state.walkers.find((o) => o.id === s.task);
       state.flags.totes = (state.flags.totes ?? 0) + 1;
       if (w && state.flags.totes % 3 === 1) pushNews(state, rng, "tote");
+      if (w?.crowd !== undefined) toteBagFor(state, w.crowd);
       break;
     }
   }

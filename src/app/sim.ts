@@ -17,6 +17,7 @@ import { fillAgents, seedWalkers } from "../sim/walkers";
 import { isMoment, stageMoment } from "../sim/race/demo";
 import { isOpsMoment, stageOps } from "../sim/opsDemo";
 import { isPaperMoment, stagePapers } from "../sim/race/papers/demo";
+import { isFactionMoment, stageFactions } from "../sim/factions/demo";
 import { parseLeapMoment, stageLeapfrog } from "../sim/race/leapfrog/demo";
 import { isCollusionMoment, stageCollusion } from "../sim/collusion/demo";
 import { isCircusMoment, stageCircus } from "../sim/circus/demo";
@@ -82,8 +83,9 @@ export class SimHandle {
     this.newsStartId = 0;
     this.openingThoughts = undefined;
     const risk = this.world.disasters.risk;
-    // The `?<pack>=off` switches carry over; the packs themselves wake again as the new lab earns them.
-    const off = PACK_OFF_FLAGS.filter((f) => this.world.flags[f] !== undefined);
+    // The `?<pack>=off` switches carry over, and so do arcs switched off by name (`?water=off` is
+    // `arcOff:water-escalation`); the packs themselves wake again as the new lab earns them.
+    const off = Object.keys(this.world.flags).filter((f) => PACK_OFF_FLAGS.includes(f) || f.startsWith("arcOff:"));
     const mods = this.world.mods;
     this.world = createInitialState(seed, "garage", this.def);
     if (mods) this.world.mods = mods;
@@ -118,7 +120,7 @@ export class SimHandle {
   }
 }
 
-type SimDebug = Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean; collusion?: boolean; hearing?: boolean; yacht?: boolean; defection?: boolean; poaching?: boolean; auditors?: boolean; capture?: boolean; promises?: boolean };
+type SimDebug = Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean; collusion?: boolean; hearing?: boolean; yacht?: boolean; defection?: boolean; poaching?: boolean; auditors?: boolean; capture?: boolean; promises?: boolean; factions?: boolean; water?: boolean };
 
 /**
  * A living campus, warped forward and dressed up per the `?seed=&warp=&agents=&discourse=` debug knobs.
@@ -142,6 +144,8 @@ function stage(dbg: SimDebug): GameState {
   if (dbg.auditors === false) sim.flags.auditorsOff = 1;
   if (dbg.capture === false) sim.flags.captureOff = 1;
   if (dbg.promises === false) sim.flags.promisesOff = 1;
+  if (dbg.factions === false) sim.flags.factionsOff = 1;
+  if (dbg.water === false) sim.flags["arcOff:water-escalation"] = 1;
   const leap = parseLeapMoment(dbg.moment);
   if (dbg.warp > 0 || dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0 || dbg.moment || dbg.disaster) { continueTutorial(sim, true); delete sim.progression; }
   // No ladder means every system is earned: wake every pack that isn't switched off.
@@ -157,6 +161,7 @@ function stage(dbg: SimDebug): GameState {
   else if (isDramaMoment(dbg.moment)) stageDrama(sim, dbg.moment);
   else if (isAuditMoment(dbg.moment)) stageAudit(sim, dbg.moment);
   else if (isSenateMoment(dbg.moment)) stageSenate(sim, dbg.moment);
+  else if (isFactionMoment(dbg.moment)) stageFactions(sim, dbg.moment);
   if (dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0) {
     const rng = createRng(sim.rngState);
     if (dbg.researchers > 0) seedWalkers(sim, "researcher", dbg.researchers, rng);

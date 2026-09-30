@@ -86,8 +86,8 @@ describe("FLT-55 presentation boundary", () => {
   });
 
   it("resolves looks for walker kinds and roles, with one form each", async () => {
-    const got = await looksOf(await decode({ ...base, assets: { "dog.png": png, "dog.glb": glb }, looks: { protester: { ...dog, signs: ["WOOF LIES"] }, "visitor:Journalist": { sprite: "dog.png" }, researcher: { glb: "dog.glb" }, agent: { tint: { body: "#d9a441" } } } }));
-    expect(Object.keys(got.looks).sort()).toEqual(["agent", "protester", "researcher", "visitor:Journalist"]);
+    const got = await looksOf(await decode({ ...base, assets: { "dog.png": png, "dog.glb": glb }, looks: { protester: { ...dog, signs: ["WOOF LIES"] }, "visitor:Journalist": { sprite: "dog.png" }, researcher: { glb: "dog.glb" }, agent: { tint: { body: "#d9a441" } }, "faction:doomers": { ...dog, signs: ["THE END IS WOOF"] } } }));
+    expect(Object.keys(got.looks).sort()).toEqual(["agent", "faction:doomers", "protester", "researcher", "visitor:Journalist"]);
     expect(got.looks.protester).toMatchObject({ mod: "test", signs: ["WOOF LIES"] });
     expect(got.looks["visitor:Journalist"]?.src).toBe(png);
     expect(got.looks.researcher?.src).toBe(glb);
@@ -103,6 +103,8 @@ describe("FLT-55 presentation boundary", () => {
     [{ protester: { recipe: dog.recipe } }, /recipe\[0\]\.color.*needs a "coats" list/],
     [{ protester: { tint: { body: "red" } } }, /looks\.protester\.tint\.body/],
     [{ visitor: { ...dog, signs: ["WOOF"] } }, /looks\.visitor\.signs.*only protesters/],
+    [{ "faction:doomer": dog }, /looks\.faction:doomer.*unknown faction "doomer".*doomers/],
+    [{ faction: dog }, /looks\.faction.*unknown faction ""/],
     [{ protester: { sprite: "dog.glb" } }, /looks\.protester\.sprite.*not an image/],
     [{ protester: { glb: "dog.png" } }, /looks\.protester\.glb.*not a \.glb/],
     [{ protester: { sprite: "cat.png" } }, /looks\.protester\.sprite.*"cat\.png" is not one of this mod's assets/],

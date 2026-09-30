@@ -93,7 +93,7 @@ describe("the playable ladder", () => {
     expect(Object.values(s.arcs).some((a) => a.value === "cardOpen")).toBe(false);
     expect(s.hearing).toBeUndefined(); expect(s.yacht).toBeUndefined();
     expect(s.defection).toBeUndefined(); expect(s.poaching).toBeUndefined(); expect(s.auditors).toBeUndefined();
-    expect(s.promises).toBeUndefined(); expect(s.bill).toBeUndefined();
+    expect(s.promises).toBeUndefined(); expect(s.bill).toBeUndefined(); expect(s.factions).toBeUndefined();
   });
 
   // FLT-52: every pack in the merge train is on the Scrutiny rung, wakes the day it is earned, and has its own off switch.
@@ -120,6 +120,30 @@ describe("the playable ladder", () => {
     // A campus (every rung earned) starts with it awake; a garage without.
     expect(awake(createInitialState(4, "campus"))).toBe(true);
     expect(awake(createInitialState(4))).toBe(false);
+  });
+  // FLT-33 (#59): the factions are on the Race rung instead, a level earlier than the wave.
+  it("wakes the factions at The Race, names them on its New! card, and keeps them asleep with ?factions=off", () => {
+    expect(PROGRESSION.find((r) => r.id === "race")?.systems).toContain("factions");
+    const race = (off: boolean) => {
+      const s = createInitialState(4);
+      if (off) s.flags.factionsOff = 1;
+      s.progression = { value: "growing", context: { level: 3 } };
+      seedWalkers(s, "researcher", 8, createRng(2));
+      s.vibes.value = 500;
+      expect(s.factions).toBeUndefined();
+      updateProgression(s);
+      expect(progressOf(s).level).toBe(4);
+      return s;
+    };
+    const s = race(false);
+    expect(systemUnlocked(s, "factions")).toBe(true);
+    expect(s.factions).toBeDefined();
+    const card = makeSnapshot(s).unlockCard!;
+    expect(card.items).toContain("factions");
+    expect(playableOf({ unlockCard: card }).unlock!.items).toContain("Factions");
+    expect(race(true).factions).toBeUndefined();
+    expect(createInitialState(4, "campus").factions).toBeDefined();
+    expect(createInitialState(4).factions).toBeUndefined();
   });
   it("names every wave pack on the New! card, in words", () => {
     const s = createInitialState(4);

@@ -1,7 +1,7 @@
 // The Inspector as a lanyard ID badge. It drops in on its strap and swings, and flips over to show the personnel file.
 // Agents wear the cyan CONTRACTOR (NON-HUMAN) variant.
 import { useState } from "react";
-import { Portrait, useT } from "../kit";
+import { FactionChip, Portrait, useT } from "../kit";
 import type { InspectorVM, NeedVM, WalkerKindVM } from "../../ui/hud/types";
 import type { SlotPropsMap } from "../types";
 import { Glyph } from "./icons";
@@ -81,6 +81,7 @@ export function Inspector({ inspector: who, layout, actions }: SlotPropsMap["Ins
                   <div className="chips">
                     <span className={`sd-chip mood-${who.mood}`}>{who.moodLabel}</span>
                     <span className="sd-chip b">{who.kindLabel}</span>
+                    {who.faction && <FactionChip faction={who.faction} className="sd-chip sd-faction" />}
                   </div>
                 </div>
               </div>

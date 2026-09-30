@@ -4,7 +4,7 @@
     "",
     "  query    URL params merged over `defaults.query`; a null value removes a default. These are the game's own hooks",
     "           (src/debug.ts): seed, warp (sim days before the first frame), speed (0 = paused), hour, zoom, focus=x,z,",
-    "           photo, moment=<shuffle|era|era3|auction|funding|ops|queue|slop|defection-*|poach-offer>, researchers, agents, discourse, skin.",
+    "           photo, moment=<shuffle|era|era3|auction|funding|ops|queue|slop|defection-*|poach-offer|factions|counterprotest|argue>, researchers, agents, discourse, skin.",
     "  viewport 'WxH' (default 1440x900). mobile: true = a phone: dsf 2, touch (use with 390x844). dsf: 2 = a 2x (retina) desktop capture.",
     "  steps    run in order once the page has drawn `frames` frames (default 24), then it settles again and shoots:",
     "             { \"wait\": ms }",
@@ -162,6 +162,7 @@
       "wave-auditors",
       "wave-promises",
       "senate-draft",
+      "wave-factions",
       "wave-mods",
       "wave-phone"
     ],
@@ -177,6 +178,15 @@
       "senate-rollcall",
       "senate-draft-phone",
       "senate-vote-phone"
+    ],
+    "discourse": [
+      "factions",
+      "factions-base",
+      "factions-karaoke",
+      "counterprotest",
+      "argue",
+      "factions-chip",
+      "factions-phone"
     ]
   },
   "scenes": {
@@ -2002,6 +2012,24 @@
         }
       ]
     },
+    "wave-factions": {
+      "title": "FLT-52 at Level 5: the Discourse Monitor (FLT-33 factions, awake since The Race) opened on the mid-game campus",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "click": ".f95-s.disc:not(.on), .factions:not(.open) .factions-head",
+          "optional": true
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
     "senate-law": {
       "title": "FLT-22/23 The law in force three weeks on, and the Promise Tracker (opened from the Senate tile) whipping the next vote",
       "query": {
@@ -2091,6 +2119,65 @@
           "wait": 900
         }
       ]
+    },
+    "factions": {
+      "title": "FLT-33: the Discourse Monitor after a fast, open season (an alliance, a schism, Doomers at the gate)",
+      "query": {
+        "moment": "factions"
+      },
+      "steps": []
+    },
+    "factions-base": {
+      "title": "FLT-33: the base Factions panel, open",
+      "query": {
+        "moment": "factions",
+        "skin": "base"
+      },
+      "steps": []
+    },
+    "factions-karaoke": {
+      "title": "FLT-33: the discourse in Karaoke Night",
+      "query": {
+        "moment": "factions",
+        "skin": "karaoke-night"
+      },
+      "steps": []
+    },
+    "counterprotest": {
+      "title": "FLT-25: the Water Discourse at its height, the Water Truthers Truthers across the path",
+      "query": {
+        "moment": "counterprotest",
+        "zoom": 80,
+        "focus": "12,21"
+      },
+      "steps": []
+    },
+    "argue": {
+      "title": "FLT-33: an Accelerationist and a Doomer pass on a path and say so",
+      "query": {
+        "moment": "argue"
+      },
+      "steps": []
+    },
+    "factions-chip": {
+      "title": "FLT-33: a researcher's inspector card with their faction chip",
+      "query": {
+        "moment": "argue"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { const r = w.walkers.find((x) => x.kind === \"researcher\" && x.faction && x.machine?.value !== \"inside\"); if (r) f.send({ type: \"SELECT\", id: r.id }); }"
+        }
+      ]
+    },
+    "factions-phone": {
+      "title": "FLT-33: the Discourse Monitor on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "moment": "factions"
+      },
+      "steps": []
     }
   }
 }

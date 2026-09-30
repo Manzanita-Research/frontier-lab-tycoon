@@ -58,6 +58,10 @@ export interface HeadlessOptions {
   off?: boolean;
   /** Hire staff and build like the playthrough bot does; false leaves the lab as it starts. */
   build?: boolean;
+  /** Stage the World before the first tick (FLT-33 turns the factions on and picks a stance here). */
+  setup?: (s: GameState) => void;
+  /** Extra commands for a tick, sent with the bot's own (FLT-33's safety budget and publication policy). */
+  also?: (s: GameState, tick: number) => Command[];
 }
 
 /** Ship when the run is nearly done, hold when it is not, leak never; the auction gets a mid bid, the fountain is built. */
@@ -74,6 +78,7 @@ export function runHeadless(seed: number, opts: HeadlessOptions = {}): HeadlessR
   const s = createInitialState(seed);
   if (!opts.off) enableLeapfrog(s);
   layPaths(s);
+  opts.setup?.(s);
   const cards: Record<string, number> = {};
   const drops: HeadlessDrop[] = [];
   const eras: (number | null)[] = [0, null, null, null];
@@ -113,6 +118,7 @@ export function runHeadless(seed: number, opts: HeadlessOptions = {}): HeadlessR
         if (spot) cmds.push({ type: "placeBuilding", kind, x: spot[0], z: spot[1] });
       }
     }
+    if (opts.also) cmds.push(...opts.also(s, i));
     tick(s, cmds);
     const era = eraOfState(s);
     for (let e = 2; e <= era; e++) eras[e - 1] ??= s.day;

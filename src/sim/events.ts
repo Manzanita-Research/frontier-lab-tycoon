@@ -4,7 +4,9 @@ import type { Condition, Effect } from "../content/events";
 import { THOUGHT_TICKS, DISCOURSE_PER_PROTESTER } from "./constants";
 import { fillTemplate } from "./format";
 import { arcMachine } from "./machines/arc";
-import { step } from "./machines/run";
+import { initialStored, step } from "./machines/run";
+import { EVENT_COOLDOWN_DAYS } from "../content/events";
+import { nudgeFaction, nudgeRelation } from "./factions/state";
 import { addNews, templateVars } from "./news";
 import { buildingAt, inBounds, isPathTile, rectContains } from "./pathfind";
 import { clampDiscourse, syncProtesters } from "./protest";
@@ -50,6 +52,8 @@ export function dailyEvents(state: GameState) {
   // Later eras crowd the calendar: cooldowns shrink.
   const pace = eraDef(eraOfState(state)).pace;
   for (const def of defs().events) {
+    // A save from before a pack added this card (the factions' cards, a mod's) starts its machine now.
+    state.arcs[def.id] ??= initialStored(arcMachine, { choices: def.choices.length, cooldownDays: def.cooldown ?? EVENT_COOLDOWN_DAYS, openedDay: null });
     const { stored } = step(arcMachine, state.arcs[def.id]!, { type: "DAY", day: state.day, ready: pressureReady(state) && (conditionHolds(state, def.when) || state.flags[askFlag(def.id)] !== undefined), slotFree, pace });
     state.arcs[def.id] = stored;
     if (stored.value === "cardOpen") slotFree = false;
@@ -126,6 +130,12 @@ function applyEffect(state: GameState, rng: Rng, e: Effect, vars: Record<string,
     case "trust":
     case "leapfrog":
       applyLeapfrogEffect(state, rng, e);
+      break;
+    case "faction":
+      nudgeFaction(state, e.id, e.amount);
+      break;
+    case "relation":
+      nudgeRelation(state, e.a, e.b, e.amount);
       break;
   }
 }

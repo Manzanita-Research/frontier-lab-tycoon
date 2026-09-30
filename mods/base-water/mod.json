@@ -1,0 +1,727 @@
+{
+  "apiVersion": 1,
+  "id": "base-water",
+  "name": "The Water Discourse",
+  "version": "1.0.0",
+  "author": "Frontier Lab Tycoon",
+  "description": "FLT-25: the Water Discourse arc as a content pack. The viral post and the drum circle (moved here unchanged from content/events.ts), then a documentary crew, then the Water Truthers Truthers turn up for a counter-protest and two crowds shout at each other at the gate. Crowd size follows the discourse; Comms Reps calm both crowds. Needs Level 5 (protests).",
+  "content": {
+    "factions": {
+      "add": [
+        {
+          "id": "truthers-truthers",
+          "name": "Water Truthers Truthers",
+          "short": "Truthers²",
+          "color": "#3fa7d6",
+          "prop": "bottle",
+          "blurb": "They are protesting the water protesters. They have done their own research, which is also a protest. They bring their own water and drink it pointedly.",
+          "beliefs": {
+            "speed": 0.3,
+            "safety": -0.2,
+            "openness": 0.2,
+            "fairness": -0.6,
+            "profit": 0.4
+          },
+          "members": {},
+          "audience": 18,
+          "fan": {
+            "hype": 0.1
+          },
+          "angry": {
+            "discourse": 0.2
+          },
+          "grievances": [
+            {
+              "on": "fountain",
+              "amount": -10,
+              "text": "A Transparency Fountain. 'So you ADMIT there's a water issue.'"
+            },
+            {
+              "on": "solar",
+              "amount": -2,
+              "text": "Solar panels: capitulation to Big Sunlight."
+            }
+          ],
+          "cheers": [
+            {
+              "on": "waterIgnored",
+              "amount": 12,
+              "text": "You said nothing about the water. Finally, a lab that gets it."
+            },
+            {
+              "on": "cluster",
+              "amount": 3,
+              "text": "Another cluster. 'Drink it in,' they say. Nobody laughs."
+            },
+            {
+              "on": "datacenter",
+              "amount": 6,
+              "text": "A datacenter! They've brought a bigger bottle to celebrate."
+            }
+          ],
+          "thoughts": [
+            "I drank the server water. I feel incredible. I can hear colours.",
+            "Citation needed. For all of it. Everything.",
+            "I'm not anti-protest. I'm anti-THAT-protest.",
+            "My water bottle has a water bottle."
+          ],
+          "argue": [
+            "The water is fine.",
+            "Citation needed.",
+            "Have you tried drinking it?"
+          ],
+          "retorts": [
+            "Source?",
+            "The water disagrees.",
+            "Hydrate or debate."
+          ],
+          "duels": [
+            {
+              "vs": "ethicists",
+              "lines": [
+                [
+                  "THE WATER IS FINE!",
+                  "THE WATER IS *LISTENING*!"
+                ],
+                [
+                  "WE ARE THE SOURCES!",
+                  "CITE YOURSELVES, THEN!"
+                ]
+              ]
+            },
+            {
+              "vs": "luddites",
+              "lines": [
+                [
+                  "HAVE YOU TRIED DRINKING IT?",
+                  "I DON'T DRINK ANYTHING WITHOUT A FILTER!"
+                ]
+              ]
+            }
+          ],
+          "chants": [
+            "WHAT DO WE WANT? CITATIONS! WHEN DO WE WANT THEM? PEER-REVIEWED!",
+            "THE WATER IS FINE! THE WATER IS FINE!",
+            "HY-DRATE! DON'T DE-BATE!"
+          ],
+          "signs": [
+            "THE WATER IS FINE",
+            "CITATION NEEDED",
+            "I DRINK SERVER WATER",
+            "HYDRATED & SKEPTICAL",
+            "YOUR SIGN IS WET"
+          ],
+          "headlines": {
+            "fan": [
+              "Water Truthers Truthers name {lab} 'most hydrated lab of the year'"
+            ],
+            "angry": [
+              "Water Truthers Truthers accuse {lab} of 'caving to Big Thirst'"
+            ],
+            "ally": [
+              "Water Truthers Truthers and {other} agree the water is fine, disagree on which water"
+            ],
+            "schism": [
+              "Water Truthers Truthers and {other} split; each side says the other is 'wet'"
+            ]
+          },
+          "relations": {
+            "ethicists": -70,
+            "luddites": -75,
+            "accelerationists": 20
+          },
+          "protests": false
+        }
+      ]
+    },
+    "events": {
+      "add": [
+        {
+          "id": "waterDiscourse",
+          "title": "Viral post: every prompt drinks a bottle of water",
+          "body": "A screenshot claims each chatbot reply drinks a whole bottle of water. It has four million shares and zero citations. There are people at your gate now, with signs.",
+          "tone": "bad",
+          "when": {
+            "all": [
+              {
+                "stat": "waterDiscourse",
+                "atLeast": 30
+              },
+              {
+                "stat": "day",
+                "atLeast": 60
+              }
+            ]
+          },
+          "choices": [
+            {
+              "label": "Publish a 90-page water report",
+              "hint": "−$150K · discourse −20",
+              "effects": [
+                {
+                  "type": "cash",
+                  "amount": -150000
+                },
+                {
+                  "type": "discourse",
+                  "add": -20
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} publishes rigorous water report; nobody reads past the abstract",
+                  "tone": "joke"
+                }
+              ]
+            },
+            {
+              "label": "Build a Transparency Fountain",
+              "hint": "−$300K · discourse −35 · hype +5 · free Fountain",
+              "effects": [
+                {
+                  "type": "cash",
+                  "amount": -300000
+                },
+                {
+                  "type": "discourse",
+                  "add": -35
+                },
+                {
+                  "type": "hype",
+                  "amount": 5
+                },
+                {
+                  "type": "place",
+                  "kind": "fountain",
+                  "near": "gate"
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} unveils Transparency Fountain: water you can see through, unlike the report",
+                  "tone": "good"
+                },
+                {
+                  "type": "thought",
+                  "kind": "researcher",
+                  "text": "I drank from the Transparency Fountain. It tasted like accountability.",
+                  "count": 2
+                }
+              ]
+            },
+            {
+              "label": "Say nothing, ship faster",
+              "hint": "hype +3 · discourse +10 · they will notice",
+              "effects": [
+                {
+                  "type": "hype",
+                  "amount": 3
+                },
+                {
+                  "type": "discourse",
+                  "add": 10
+                },
+                {
+                  "type": "flag",
+                  "name": "ignoredWater"
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} declines to comment on water, comments on everything else at length",
+                  "tone": "joke"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "drumCircle",
+          "title": "Protesters now have a drum circle",
+          "body": "It started as three people and a bongo. It is now a full ensemble with a lead vocalist, a merch table, and a rhythm section your servers can feel. The sign-making station has a waiting list.",
+          "tone": "joke",
+          "when": {
+            "all": [
+              {
+                "flag": "ignoredWater",
+                "daysAgo": 20
+              },
+              {
+                "stat": "waterDiscourse",
+                "atLeast": 40
+              }
+            ]
+          },
+          "choices": [
+            {
+              "label": "Send an intern with a tambourine",
+              "hint": "−$100K · discourse −25",
+              "effects": [
+                {
+                  "type": "cash",
+                  "amount": -100000
+                },
+                {
+                  "type": "discourse",
+                  "add": -25
+                },
+                {
+                  "type": "flag",
+                  "name": "ignoredWater",
+                  "clear": true
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} sends intern with tambourine to negotiate; deal reached, key change agreed",
+                  "tone": "joke"
+                }
+              ]
+            },
+            {
+              "label": "Join the drum circle",
+              "hint": "hype +6 · discourse +5",
+              "effects": [
+                {
+                  "type": "hype",
+                  "amount": 6
+                },
+                {
+                  "type": "discourse",
+                  "add": 5
+                },
+                {
+                  "type": "flag",
+                  "name": "ignoredWater",
+                  "clear": true
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} leadership spotted at drum circle: CEO on cowbell, Chief Scientist on 'ambient'",
+                  "tone": "good"
+                },
+                {
+                  "type": "thought",
+                  "kind": "researcher",
+                  "text": "I've never been so in sync with my team. It's a bad sign.",
+                  "count": 3
+                }
+              ]
+            },
+            {
+              "label": "Call it a listening session",
+              "hint": "−$40K · discourse −12",
+              "effects": [
+                {
+                  "type": "cash",
+                  "amount": -40000
+                },
+                {
+                  "type": "discourse",
+                  "add": -12
+                },
+                {
+                  "type": "flag",
+                  "name": "ignoredWater",
+                  "clear": true
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} rebrands protest as 'listening session'; sessions now have catering",
+                  "tone": "joke"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "documentary",
+          "title": "A documentary crew is filming at your gate",
+          "body": "Working title: THIRST TRAP: The Lab That Drank a Lake. They have a boom mic, a drone and a narrator whose voice alone lowers your share price. The drum circle is doing a second take for them.",
+          "tone": "bad",
+          "stripe": "Developing",
+          "when": {
+            "flag": "ask:documentary",
+            "daysAgo": 0
+          },
+          "cooldown": 1,
+          "choices": [
+            {
+              "label": "Give them the tour",
+              "hint": "hype +4 · discourse −10 · Ethicists +8",
+              "effects": [
+                {
+                  "type": "hype",
+                  "amount": 4
+                },
+                {
+                  "type": "discourse",
+                  "add": -10
+                },
+                {
+                  "type": "faction",
+                  "id": "ethicists",
+                  "amount": 8
+                },
+                {
+                  "type": "news",
+                  "text": "'Thirst Trap' crew tours {lab}; film now has a 20-minute segment on the kombucha tap",
+                  "tone": "joke"
+                }
+              ]
+            },
+            {
+              "label": "No comment, through a lawyer",
+              "hint": "discourse +12 · Ethicists and Luddites −10 · the Truthers² approve",
+              "effects": [
+                {
+                  "type": "discourse",
+                  "add": 12
+                },
+                {
+                  "type": "faction",
+                  "id": "ethicists",
+                  "amount": -10
+                },
+                {
+                  "type": "faction",
+                  "id": "luddites",
+                  "amount": -10
+                },
+                {
+                  "type": "faction",
+                  "id": "truthers-truthers",
+                  "amount": 10
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} lawyer's 'no comment' becomes the documentary's trailer",
+                  "tone": "bad"
+                }
+              ]
+            },
+            {
+              "label": "Offer the director a job",
+              "hint": "−$250K · discourse −20 · Ethicists −6",
+              "effects": [
+                {
+                  "type": "cash",
+                  "amount": -250000
+                },
+                {
+                  "type": "discourse",
+                  "add": -20
+                },
+                {
+                  "type": "faction",
+                  "id": "ethicists",
+                  "amount": -6
+                },
+                {
+                  "type": "news",
+                  "text": "'Thirst Trap' director joins {lab} as Head of Narrative; film recut as a hydration ad",
+                  "tone": "joke"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "truthers",
+          "title": "The Water Truthers Truthers have arrived",
+          "body": "A second crowd is at your gate. They are protesting the protesters. Their signs say THE WATER IS FINE and CITATION NEEDED, and they are drinking bottled water at the first crowd, pointedly. Both sides have a drum. Both sides have started to chant.",
+          "tone": "joke",
+          "stripe": "Counter-protest",
+          "when": {
+            "flag": "ask:truthers",
+            "daysAgo": 0
+          },
+          "cooldown": 1,
+          "choices": [
+            {
+              "label": "Hand out free water to both crowds",
+              "hint": "−$60K · discourse −12 · hype +2",
+              "effects": [
+                {
+                  "type": "cash",
+                  "amount": -60000
+                },
+                {
+                  "type": "discourse",
+                  "add": -12
+                },
+                {
+                  "type": "hype",
+                  "amount": 2
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} hands out free water to both protests; both protests call it 'a statement'",
+                  "tone": "joke"
+                }
+              ]
+            },
+            {
+              "label": "Livestream it",
+              "hint": "hype +8 · discourse +8 · Normies +6",
+              "effects": [
+                {
+                  "type": "hype",
+                  "amount": 8
+                },
+                {
+                  "type": "discourse",
+                  "add": 8
+                },
+                {
+                  "type": "faction",
+                  "id": "normies",
+                  "amount": 6
+                },
+                {
+                  "type": "news",
+                  "text": "{lab} livestreams dueling water protests; peak viewership beats its last product launch",
+                  "tone": "joke"
+                }
+              ]
+            },
+            {
+              "label": "Hire a mediator",
+              "hint": "−$120K · discourse −20 · the two crowds warm up a little",
+              "effects": [
+                {
+                  "type": "cash",
+                  "amount": -120000
+                },
+                {
+                  "type": "discourse",
+                  "add": -20
+                },
+                {
+                  "type": "relation",
+                  "a": "truthers-truthers",
+                  "b": "ethicists",
+                  "amount": 25
+                },
+                {
+                  "type": "news",
+                  "text": "Mediator gets both water protests to agree on one thing: the mediator is thirsty",
+                  "tone": "good"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "arcs": {
+      "add": [
+        {
+          "id": "water-escalation",
+          "requires": [
+            "protests"
+          ],
+          "initial": "quiet",
+          "states": {
+            "quiet": {
+              "on": {
+                "CHOSE": {
+                  "target": "simmering",
+                  "guard": {
+                    "type": "any",
+                    "params": {
+                      "guards": [
+                        {
+                          "type": "answered",
+                          "params": {
+                            "card": "waterDiscourse"
+                          }
+                        },
+                        {
+                          "type": "answered",
+                          "params": {
+                            "card": "drumCircle"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "simmering": {
+              "on": {
+                "DAY": {
+                  "target": "filming",
+                  "guard": [
+                    {
+                      "type": "after",
+                      "params": {
+                        "days": 12
+                      }
+                    },
+                    {
+                      "type": "stat.gte",
+                      "params": {
+                        "stat": "discourse",
+                        "value": 44
+                      }
+                    }
+                  ],
+                  "actions": [
+                    {
+                      "type": "news",
+                      "params": {
+                        "text": "Documentary crew spotted at {lab}'s gate; the drum circle has hired a publicist",
+                        "tone": "bad"
+                      }
+                    },
+                    {
+                      "type": "card",
+                      "params": {
+                        "id": "documentary"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "filming": {
+              "on": {
+                "CHOSE": {
+                  "target": "aired",
+                  "guard": {
+                    "type": "answered",
+                    "params": {
+                      "card": "documentary"
+                    }
+                  }
+                }
+              }
+            },
+            "aired": {
+              "on": {
+                "DAY": {
+                  "target": "counter",
+                  "guard": [
+                    {
+                      "type": "after",
+                      "params": {
+                        "days": 10
+                      }
+                    },
+                    {
+                      "type": "stat.gte",
+                      "params": {
+                        "stat": "discourse",
+                        "value": 36
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "counter": {
+              "entry": [
+                {
+                  "type": "faction.rally",
+                  "params": {
+                    "faction": "truthers-truthers",
+                    "against": [
+                      "ethicists",
+                      "luddites"
+                    ],
+                    "share": 0.6
+                  }
+                },
+                {
+                  "type": "camera.focus",
+                  "params": {
+                    "on": "gate",
+                    "zoom": 1.6,
+                    "hold": 3.2
+                  }
+                },
+                {
+                  "type": "news",
+                  "params": {
+                    "text": "Counter-protest at {lab}: the Water Truthers Truthers say the water is fine, loudly, at the other protest",
+                    "tone": "joke"
+                  }
+                },
+                {
+                  "type": "card",
+                  "params": {
+                    "id": "truthers"
+                  }
+                }
+              ],
+              "on": {
+                "DAY": [
+                  {
+                    "target": "resolved",
+                    "guard": {
+                      "type": "stat.lte",
+                      "params": {
+                        "stat": "discourse",
+                        "value": 16
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "faction.disperse",
+                        "params": {
+                          "faction": "truthers-truthers"
+                        }
+                      },
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "Water Truthers Truthers declare victory over {lab}'s empty gate, go home to hydrate",
+                          "tone": "joke"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "target": "resolved",
+                    "guard": {
+                      "type": "after",
+                      "params": {
+                        "days": 40
+                      }
+                    },
+                    "actions": [
+                      {
+                        "type": "faction.disperse",
+                        "params": {
+                          "faction": "truthers-truthers"
+                        }
+                      },
+                      {
+                        "type": "news",
+                        "params": {
+                          "text": "Both water protests at {lab} break for the season; they share a minibus home",
+                          "tone": "joke"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "resolved": {
+              "on": {
+                "DAY": {
+                  "target": "simmering",
+                  "guard": {
+                    "type": "after",
+                    "params": {
+                      "days": 45
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

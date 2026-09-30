@@ -15,3 +15,4 @@ export { VoiceGraph } from "./VoiceGraph";
 export { Evidence } from "./Evidence";
 export { PaperMomentBody } from "./PaperMomentBody";
 export { CrumbWikiBody, TalkPage } from "./CrumbWikiBody";
+export { FactionChip, FactionMeter, StanceTrack, factionAttrs } from "./Factions";
