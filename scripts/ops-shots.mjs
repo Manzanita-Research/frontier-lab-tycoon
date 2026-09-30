@@ -32,7 +32,7 @@ const page = await ctx.newPage();
 const errors = [];
 page.on("pageerror", (e) => errors.push(String(e)));
 page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
-const go = (q = "") => page.goto(`${base}?debug=1&seed=3&speed=0&hour=13${q}`, { waitUntil: "networkidle" });
+const go = (q = "", hour = 13) => page.goto(`${base}?debug=1&seed=3&speed=0&hour=${hour}${q}`, { waitUntil: "networkidle" });
 const wait = (ms) => page.waitForTimeout(ms);
 const save = async (path) => {
   mkdirSync(dirname(path), { recursive: true });
@@ -46,7 +46,14 @@ switch (mode) {
     await go("&moment=ops&zoom=88&focus=10.6,14.2");
     await wait(2500);
     await page.click(".obj-head");
-    await wait(1000);
+    // Tapping anyone retires the "tap anyone" hint; then let go of them.
+    await page.evaluate(() => {
+      const w = window.__flt.sim.world;
+      window.__flt.send({ type: "SELECT", id: w.walkers[0].id });
+    });
+    await wait(600);
+    await page.evaluate(() => window.__flt.send({ type: "SELECT", id: null }));
+    await wait(1200);
     await save(out);
     break;
   case "moment-wide":
@@ -97,16 +104,21 @@ switch (mode) {
     break;
   }
   case "night":
-    await go("&moment=slop&hour=23&zoom=60&focus=11,15");
+    await go("&moment=slop&zoom=62&focus=11,15", 22.5);
     await wait(1200);
-    await evalw(() => window.__flt.send({ type: "SET_SPEED", speed: 0 }));
     await page.evaluate(() => {
       const w = window.__flt.sim.world;
-      w.tick = Math.round(((23 - 8) / 24) * 600);
+      w.tick = Math.round(((22.5 - 8) / 24) * 600);
       w.day = Math.floor(w.tick / 20);
       w.thoughts = [];
+      w.news = w.news.slice(0, 2);
     });
-    await wait(1500);
+    await page.evaluate(() => window.__flt.send({ type: "SET_SPEED", speed: 1 }));
+    await wait(1800);
+    await page.evaluate(() => window.__flt.send({ type: "SET_SPEED", speed: 0 }));
+    // The Frontier Times arrives on the day the clock jumps to: send it away so the Thoughts panel can be read.
+    await page.locator(".news-arrival button", { hasText: "Skip" }).click({ timeout: 1500 }).catch(() => {});
+    await wait(800);
     await save(out);
     break;
   case "phone":
