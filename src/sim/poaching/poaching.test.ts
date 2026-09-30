@@ -60,7 +60,7 @@ describe("an offer", () => {
     expect(offer.targets.length).toBeLessThanOrEqual(R.targets.big[1]!);
     for (const id of offer.targets) expect(s.thoughts.find((t) => t.walkerId === id)?.text).toMatch(/^⚡/);
     const vars = poachingVars(s);
-    expect(vars.poacher).toBe("MetaMeta Superintelligence Labs");
+    expect(vars.poacher).toBe("MetaMeta Metaintelligence Labs");
     expect(vars.poachCount).toBe(String(offer.targets.length));
     // The card's hints quote the chart's own numbers, nested guards included.
     expect(vars.vibesNeeded).toBe("550");

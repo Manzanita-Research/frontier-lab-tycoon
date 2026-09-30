@@ -60,7 +60,7 @@ export function stageDrama(s: GameState, moment: DramaMoment) {
     enablePoaching(s);
     // The unhappiest few are who MetaMeta calls: make sure somebody is.
     s.walkers.filter((w) => w.kind === "researcher").slice(0, 3).forEach((w) => { w.energy = 0.25; w.focus = 0.3; });
-    offerPoach(s, { from: "metameta", name: "MetaMeta Superintelligence Labs", short: "MetaMeta" });
+    offerPoach(s, { from: "metameta", name: "MetaMeta Metaintelligence Labs", short: "MetaMeta" });
     dailyEvents(s);
     return;
   }
