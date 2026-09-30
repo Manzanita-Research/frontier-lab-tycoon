@@ -3105,6 +3105,8 @@
   }
   .sd-run .runbox-list {
     max-height: min(260px, 38dvh);
+  }
+}
 
 /* The Bird App (FLT-69) as a merch drop: every post a product card, the viral one SOLD OUT on a slapped sticker. */
 [data-skin="swag-drop"] {

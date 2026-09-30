@@ -2213,6 +2213,9 @@
     }
     .gc-section h4 {
       font-size: 12px;
+    }
+  }
+}
 
 /* The Bird App (FLT-69) as a guestbook: every post a signed entry, a flame war in the webmaster's inbox. */
 [data-skin="homepage-98"] {

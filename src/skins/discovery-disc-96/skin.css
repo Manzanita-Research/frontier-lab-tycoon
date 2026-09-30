@@ -3450,6 +3450,8 @@
     .runbox-list {
       max-height: min(220px, 32dvh);
     }
+  }
+}
 
 /* The Bird App (FLT-69) as an encyclopedia: entries on a page, a FUN FACT! burst, a dispute in red ink. */
 [data-skin="discovery-disc-96"] {

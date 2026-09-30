@@ -2815,6 +2815,8 @@
     .runbox-list {
       max-height: min(240px, 34dvh);
     }
+  }
+}
 
 /* The Bird App (FLT-69) as a bird-watching log: ruled sightings in italic ink, a rare sighting stamped in gold. */
 [data-skin="field-almanac"] {

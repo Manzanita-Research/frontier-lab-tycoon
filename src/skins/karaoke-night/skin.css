@@ -3205,6 +3205,9 @@
     }
     .runbox-list {
       max-height: min(240px, 34dvh);
+    }
+  }
+}
 
 /* The Bird App (FLT-69) as a lyric screen: the post on the mic in big sung letters, ENCORE! in neon. */
 [data-skin="karaoke-night"] {
