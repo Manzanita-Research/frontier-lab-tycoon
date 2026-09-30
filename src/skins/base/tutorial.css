@@ -5,20 +5,27 @@
 
 /* ---- the highlight: a ring that pulses on whatever the current step points at ---- */
 .flt-hl {
+  --hl-near: 3px;
+  --hl-far: 7px;
   outline: 3px solid var(--flt-color-highlight);
-  outline-offset: 3px;
+  outline-offset: var(--hl-near);
   animation: flt-hl-pulse var(--flt-motion-pulse) ease-in-out infinite;
 }
 @keyframes flt-hl-pulse {
   0%,
   100% {
-    outline-offset: 3px;
+    outline-offset: var(--hl-near);
     filter: drop-shadow(0 0 0 transparent);
   }
   50% {
-    outline-offset: 7px;
+    outline-offset: var(--hl-far);
     filter: drop-shadow(0 0 7px var(--flt-color-highlight));
   }
+}
+/* The build bar scrolls sideways, which clips anything outside its padding: keep the ring inside it. */
+.buildbar .flt-hl {
+  --hl-near: 0px;
+  --hl-far: 3px;
 }
 
 /* ---- the assistant card ---- */

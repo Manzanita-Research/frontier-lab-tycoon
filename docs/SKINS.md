@@ -384,6 +384,15 @@ What a slot may import: `react`; `../types` and `../../ui/hud/types` (types only
 - Be accessible: real `<button>`s, `aria-label`s on icon-only controls, `role="dialog"` on modals, `aria-pressed` on toggles.
 - Parody names only: no real companies, products or people in anything a player can read.
 
+## The tutorial, highlights and the Paused indicator
+
+Three things in the contract belong to the guided opening. A skin that replaces slots should draw all three; a tokens-and-CSS skin gets them from the base.
+
+- **The lesson** is `vm.assistant` (see the `Assistant` slot). One sentence, `Step {n} of {total}`, a **Next** button only while `assistant.paused` (the game is waiting for it; picking the highlighted tool also answers it), and a **Skip tutorial** that is always there. `actions.continueTutorial()` and `actions.skipTutorial()` answer it. Keep it to the sentence and two buttons: there is no room for more on a phone, and it must sit above the build bar or taskbar without covering the tool it points at.
+- **The highlight** is a class: `const hl = useHighlight();` then give whatever `hl("build:hall")` says is pointed at the class `flt-hl`. The targets are `build:<tool>` (any `BuildItemVM.kind`), `staff:hire` and `training`. The ring and its pulse come from the tokens `color.highlight` and `motion.pulse` (both skinnable, and `motion.reduced.pulse` stops the pulse for reduced-motion players). Override `.flt-hl` in `skin.css` for another look (Frontier 95's is a blinking hard-edged red rectangle). Put the ring *inside* anything that clips (a scrolling bar), and stop it once the tool is in hand. If the thing is inside something that is shut (Frontier 95's Start menu), light the shut thing, then the entry when it opens.
+- **Paused** is `pause` in the `Speed` slot's props (and `vm.pause`). Show a note only when `pause.auto && pause.reason !== "card"`: the game itself is holding time (a message to read, an open menu, a walker's card). Say why with the strings `pause.tutorial`, `pause.build`, `pause.menu` and `pause.inspector`. Do not show it for the pause button (it is already pressed) or a card (it says so itself). Keep it gentle: it is a reassurance, not an alarm.
+- If a panel of your own covers the map while it is open, hold time with the kit's `useAutoPause(actions, "my-panel", open)`.
+
 ## The view-model and actions
 
 `src/ui/hud/types.ts` is the contract; it is short and commented. The top level:

@@ -2258,9 +2258,13 @@
       right: 4px;
       bottom: calc(var(--taskbar) + 30px + 52px);
     }
-    /* The tray icon says it; the phone has no room for the note as well. */
+    /* The tray icon says it; the phone has no room for the note as well. The icon is not a button, so it can be narrow:
+       a full 44px one wraps the tray onto its own row. */
     .f95-holdnote {
       display: none;
+    }
+    .f95-s.f95-paused {
+      width: 20px;
     }
     .f95-clip {
       width: 40px;
