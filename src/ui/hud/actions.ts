@@ -13,6 +13,8 @@ import { arenaOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, faction
 import { skinActions } from "./skinControl";
 import type { StaffJob } from "../../sim/types";
 import type { HudActions } from "./types";
+import { announceWidget } from "../../skins/kit/launcher";
+import { WIDGET_IDS } from "./widgets";
 
 const dismiss = (key: string) => {
   const seen = registry.get(dismissedAtom);
@@ -148,4 +150,26 @@ export const hudActions: HudActions = {
   dismissShot: () => undefined,
 
   ...skinActions,
+
+  // FLT-63: Run…. Opens (never shuts) what the host owns, then tells the skin, whose slots keep the rest (a folded window, a tab).
+  openWidget: (id) => {
+    if (!WIDGET_IDS.includes(id)) return;
+    const open = {
+      arena: () => registry.set(arenaOpenAtom, true),
+      benchmarks: () => registry.set(arenaOpenAtom, true),
+      discourse: () => registry.set(factionsOpenAtom, true),
+      papers: () => registry.set(papersOpenAtom, true),
+      news: () => viewRoom("archive"),
+      staff: () => registry.set(staffOpenAtom, true),
+      senate: () => registry.set(senateOpenAtom, true),
+      disasters: () => registry.set(disastersOpenAtom, true),
+      drama: () => hudActions.openDrama(),
+      mods: () => registry.set(modsOpenAtom, true),
+      display: () => hudActions.openSkinPicker(),
+      sound: () => registry.set(mixerOpenAtom, true),
+      help: () => registry.set(helpOpenAtom, true),
+    }[id];
+    open?.();
+    announceWidget(id);
+  },
 };

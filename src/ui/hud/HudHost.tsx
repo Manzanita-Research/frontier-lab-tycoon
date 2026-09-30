@@ -7,6 +7,7 @@ import { hudActions } from "./actions";
 import { AuditLayer } from "./AuditLayer";
 import { BubbleLayer } from "./BubbleLayer";
 import { CoachLayer } from "./CoachLayer";
+import { ModeHint } from "./ModeHint";
 import { loadedSkinAtom } from "./state";
 import { Docked, Modals, PhotoLayer } from "./tree";
 import { useHudEffects } from "./useHudEffects";
@@ -35,6 +36,7 @@ function Hud({ source }: { source: AppSource }) {
         <Docked vm={vm} actions={hudActions} />
         <Modals vm={vm} actions={hudActions} />
         <CoachLayer vm={vm} actions={hudActions} />
+        <ModeHint mode={vm.mode ?? null} actions={hudActions} />
       </div>
       <PhotoLayer vm={vm} actions={hudActions} />
     </SkinProvider>

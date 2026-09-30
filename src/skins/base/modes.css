@@ -1,0 +1,78 @@
+/* FLT-63: the tool in hand says how to put it down. The host draws these for every skin; tokens make them look like
+   the skin's own tooltips, and a skin can restyle them under its scope. */
+.mode-hint {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  max-width: min(340px, calc(100vw - 16px));
+  padding: 5px 9px 6px;
+  background: var(--flt-color-tip);
+  color: var(--flt-color-tipText);
+  border: 2px solid var(--flt-color-line);
+  border-radius: var(--flt-radius-button);
+  box-shadow: var(--flt-shadow-pop);
+  font-family: var(--flt-font-ui);
+  font-size: 14px;
+  line-height: 1.25;
+  pointer-events: none;
+  white-space: nowrap;
+  will-change: transform;
+  b {
+    font-weight: var(--flt-font-weight);
+  }
+  small {
+    font-size: 12px;
+    font-weight: 400;
+    opacity: 0.85;
+  }
+  /* Off the map (on the HUD, or before the pointer has moved) it waits above the taskbar, in the middle. */
+  &.docked {
+    transform: none !important;
+    top: auto;
+    left: 50%;
+    bottom: calc(76px + env(safe-area-inset-bottom));
+    translate: -50% 0;
+  }
+}
+
+/* Touch: no Esc, no right-click, so a thumb-sized Done. */
+.mode-done {
+  position: fixed;
+  z-index: 40;
+  left: 50%;
+  translate: -50% 0;
+  bottom: calc(84px + env(safe-area-inset-bottom));
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 6px 8px 6px 14px;
+  background: var(--flt-color-panel);
+  color: var(--flt-color-text);
+  border: var(--flt-border-width) solid var(--flt-color-line);
+  border-radius: var(--flt-radius-pill);
+  box-shadow: var(--flt-shadow-panel);
+  font: var(--flt-font-weight) 15px/1.1 var(--flt-font-ui);
+  pointer-events: auto;
+  cursor: pointer;
+  .mode-done-name {
+    max-width: 44vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  b {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 36px;
+    padding: 0 14px;
+    background: var(--flt-color-accent);
+    color: var(--flt-color-accentText);
+    border-radius: var(--flt-radius-pill);
+  }
+}

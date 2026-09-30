@@ -429,3 +429,29 @@ describe("endings (FLT-11)", () => {
     expect(vm.ending!.keepPlaying).toBe(false);
   }, 30_000);
 });
+
+describe("placement modes and the Start menu (FLT-63)", () => {
+  it("names the tool in hand as a mode: a building is one-shot, the path and bulldozer are sticky", () => {
+    expect(hudViewModel(fixtureInput({ tool: "cluster" })).mode).toMatchObject({ kind: "building", tool: "cluster", sticky: false });
+    expect(hudViewModel(fixtureInput({ tool: "path" })).mode).toMatchObject({ kind: "path", sticky: true });
+    expect(hudViewModel(fixtureInput({ tool: null })).mode).toBeNull();
+  });
+
+  it("puts every build item in a Facilities group, with Path and the Staff tile where the menu expects them", () => {
+    const items = hudViewModel(fixtureInput({})).buildItems;
+    expect(items.every((it) => it.group)).toBe(true);
+    expect(items.find((it) => it.isPath)!.group).toBe("tools");
+    expect(items.find((it) => it.kind === "cluster")!.group).toBe("compute");
+    expect(items.find((it) => it.kind === "hall")!.group).toBe("research");
+    expect(items.find((it) => it.kind === "staff")?.group ?? "offices").toBe("offices");
+  });
+
+  it("lists only the widgets the lab has earned, each with a file to type into Run", () => {
+    const widgets = hudViewModel(fixtureInput({})).widgets!;
+    const ids = widgets.map((w) => w.id);
+    expect(ids).toContain("properties");
+    expect(ids).toContain("drama");
+    expect(new Set(widgets.map((w) => w.file)).size).toBe(widgets.length);
+    expect(widgets.every((w) => /^[a-z]+\.[a-z]{3}$/.test(w.file))).toBe(true);
+  });
+});

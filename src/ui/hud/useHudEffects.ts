@@ -71,6 +71,61 @@ function useHotkeys(vm: HudVM) {
   }, []);
 }
 
+/** Put the tool down and stop painting a zone. */
+function endMode() {
+  const c = appNow();
+  if (c?.zone != null) send({ type: "SET_ZONE", id: null });
+  if (c?.tool) send({ type: "SET_TOOL", tool: null });
+}
+const inMode = () => {
+  const c = appNow();
+  return !!c && (c.tool !== null || c.zone !== null);
+};
+const RIGHT_CLICK_SLOP = 6;
+
+/**
+ * FLT-63: Esc and a right-click always end the mode (a tool in hand, a zone being painted), and do nothing else: no
+ * browser context menu, no closing a window or a card behind it. A right-drag still pans the map.
+ */
+function useModeExits() {
+  useEffect(() => {
+    let down: { x: number; y: number } | null = null;
+    let endedAt = -Infinity;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || !inMode()) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      endMode();
+    };
+    const onDown = (e: PointerEvent) => {
+      down = e.button === 2 && inMode() ? { x: e.clientX, y: e.clientY } : null;
+    };
+    const onUp = (e: PointerEvent) => {
+      if (e.button !== 2 || !down) return;
+      const still = Math.hypot(e.clientX - down.x, e.clientY - down.y) <= RIGHT_CLICK_SLOP;
+      down = null;
+      if (still && inMode()) {
+        endMode();
+        endedAt = performance.now();
+      }
+    };
+    // The menu comes on the press on some systems and on the release on others: refuse it either way while in a mode.
+    const onMenu = (e: MouseEvent) => {
+      if (down || inMode() || performance.now() - endedAt < 400) e.preventDefault();
+    };
+    window.addEventListener("keydown", onKey, true);
+    window.addEventListener("pointerdown", onDown, true);
+    window.addEventListener("pointerup", onUp, true);
+    window.addEventListener("contextmenu", onMenu, true);
+    return () => {
+      window.removeEventListener("keydown", onKey, true);
+      window.removeEventListener("pointerdown", onDown, true);
+      window.removeEventListener("pointerup", onUp, true);
+      window.removeEventListener("contextmenu", onMenu, true);
+    };
+  }, []);
+}
+
 /** P toggles photo mode, Enter takes the shot, Esc leaves; while it is on, the tool hotkeys stay quiet. */
 function usePhotoKeys(vm: HudVM) {
   useEffect(() => {
@@ -186,6 +241,7 @@ function useOverlays(vm: HudVM) {
 
 export function useHudEffects(vm: HudVM, snap: Snapshot) {
   useOverlays(vm);
+  useModeExits();
   useHotkeys(vm);
   usePhotoKeys(vm);
   useChatPlayback();

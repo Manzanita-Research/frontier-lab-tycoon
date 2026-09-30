@@ -98,6 +98,23 @@ export function pauseReasonOf(c: AppContext): PauseReason | null {
   return null;
 }
 
+/** Put the tool down and stop painting a zone: the ghost and the hint go with them. */
+const endMode = (c: AppContext): AppContext => (c.tool === null && c.zone === null ? c : { ...c, tool: null, zone: null, hover: null, lastPublishAt: 0 });
+
+/**
+ * Something now needs the player more than the map does (FLT-63): a card, the outcome, a "New!" card, or the coach moving
+ * on to a step that is not about the tool in hand. The mode ends rather than linger half-on behind it.
+ */
+function interrupted(before: AppContext, after: AppContext): boolean {
+  if (after.tool === null && after.zone === null) return false;
+  if (after.event && after.event.id !== before.event?.id) return true;
+  if (after.outcome !== before.outcome && after.outcome !== "playing") return true;
+  if (after.snap.unlockCard && !before.snap.unlockCard) return true;
+  const coach = after.snap.coach;
+  if (coach && coach.id !== before.snap.coach?.id) return coach.target !== `build:${after.tool}` && coach.target !== "map:suggest";
+  return false;
+}
+
 /** The same words twice are one toast (the newer replaces the older); the HUD shows only the newest, so keep just a few. */
 const addToasts = (c: AppContext, fresh: readonly UiToast[]) => ({ ...c, toasts: [...c.toasts.filter((t) => !fresh.some((f) => f.text === t.text)), ...fresh].slice(-3) });
 
@@ -115,6 +132,8 @@ export const appMachine = setupEffect({
       SET_HOVER: Schema.Struct({ hover: opaque<{ x: number; z: number } | null>() }),
       /** A validated player action: place a path or building, or bulldoze. Applied on the next tick. */
       COMMAND: Schema.Struct({ command: opaque<Command>() }),
+      /** A building from the tool in hand (FLT-63): the tool drops once it is down, unless `keep` (Shift held). */
+      PLACE: Schema.Struct({ command: opaque<Command>(), keep: Schema.Boolean }),
       /** Pick a choice on the open event card. */
       CHOOSE: Schema.Struct({ choiceIndex: Schema.Number }),
       KEEP_PLAYING: Schema.Struct({}),
@@ -265,7 +284,7 @@ export const appMachine = setupEffect({
         ...(report.snap && context.zone !== null && !report.snap.ops.staff.some((o) => o.id === context.zone) ? { zone: null } : {}),
       };
       for (const t of fresh) enq.raise({ type: "TOAST_EXPIRED", id: t.id }, { id: `toast:${t.id}`, delay: t.batch ? BATCH_TOAST_MS : TOAST_MS });
-      return { context: next, target: phaseFor(next) };
+      return { context: interrupted(context, next) ? endMode(next) : next, target: phaseFor(next) };
     },
     SET_SPEED: ({ context, event }) => {
       // The coach asked for ▶▶ while the first model trains (FLT-58).
@@ -287,7 +306,9 @@ export const appMachine = setupEffect({
       if (event.open) overlays.push(event.id);
       const build = event.open && /start|build|menu/.test(event.id);
       const queue: readonly Command[] = build ? [...context.queue, { type: "buildPanelOpened" }] : context.queue;
-      const next = { ...context, overlays, queue, speed: build && context.snap.firstBuildPending ? 1 as Speed : context.speed };
+      // A window that covers the map ends the mode (FLT-63); the build menu itself does not: you are picking the next tool.
+      const held = event.open && !build && !context.overlays.includes(event.id) ? endMode(context) : context;
+      const next = { ...held, overlays, queue, speed: build && context.snap.firstBuildPending ? 1 as Speed : context.speed };
       return { context: next, target: phaseFor(next) };
     },
     SET_ZONE: ({ context, event }) => ({ context: { ...context, zone: event.id === context.zone ? null : event.id, tool: null, hover: null } }),
@@ -296,7 +317,13 @@ export const appMachine = setupEffect({
       return { context: { ...context, hover: event.hover } };
     },
     // A player command publishes the snapshot on the very next frame, so a hire or a painted tile shows straight away.
-    COMMAND: ({ context, event }) => ({ context: { ...context, speed: event.command.type === "buildPanelOpened" && context.snap.firstBuildPending ? 1 : context.speed, queue: [...context.queue, event.command], lastPublishAt: 0 } }),
+    // A building drops out of your hand once it is down (FLT-63), from the tool or the coach's tile; paths stay.
+    COMMAND: ({ context, event }) => {
+      const held = event.command.type === "placeBuilding" ? endMode(context) : context;
+      return { context: { ...held, speed: event.command.type === "buildPanelOpened" && context.snap.firstBuildPending ? 1 : context.speed, queue: [...context.queue, event.command], lastPublishAt: 0 } };
+    },
+    // ...unless Shift is held: place another, RCT-style.
+    PLACE: ({ context, event }) => ({ context: { ...(event.keep ? context : endMode(context)), queue: [...context.queue, event.command], lastPublishAt: 0 } }),
     CHOOSE: ({ context, event }) => {
       // A greyed-out choice (a bid you can't afford) can't be taken by key either.
       if (!context.event || context.snap.eventBlocked?.[event.choiceIndex]) return;
