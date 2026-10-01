@@ -73,3 +73,9 @@ export const windowBudgetAtom = Atom.keepAlive(Atom.make<Budget>([]));
 export const seenNewsAtom = Atom.keepAlive(Atom.make<Partial<Record<NewsPanel, number>>>({}));
 /** FLT-54: the rank drop that last called the Arena up (a key), or null. The budget decides whether it opens. */
 export const arenaCallAtom = Atom.make<string | null>(null);
+
+/**
+ * FLT-93: [Show me]'s anchor, while the coach layer is pointing at it (`null`: nobody asked). UI-only: the sim's coach
+ * never hears of it. A `?moment=onboard-hire-sre` link starts on the Hire button.
+ */
+export const guideAtom = Atom.keepAlive(Atom.make<string | null>(debugParams.moment === "onboard-hire-sre" ? "hire:sre" : null));

@@ -74,6 +74,18 @@ export interface ObjectiveVM {
   /** 0 to 1 */
   ratio: number;
   met: boolean;
+  /** FLT-93: what to do about it next and where ([Show me]). Absent once met, or when nothing on screen helps. */
+  showMe?: ShowMeVM;
+}
+
+/**
+ * FLT-93: a goal's next action and the anchor that does it. `label` is the action ("Hire an SRE"); `anchor` is what
+ * `actions.showMe(anchor)` walks to (`hire:sre`, `build:hall`, `app:arena`, `training`, ...). Say where it lives with the
+ * skin's `where.<anchor>` / `where.<kind>` strings (the kit's `useWhere`).
+ */
+export interface ShowMeVM {
+  label: string;
+  anchor: string;
 }
 
 export interface ObjectivesVM {
@@ -354,6 +366,8 @@ export interface GoalVM {
   progressText: string;
   /** 0 to 1 */
   ratio: number;
+  /** FLT-93: the next thing to do for it, and where ([Show me]). Absent when the goal has no steps (a mod's). */
+  showMe?: ShowMeVM;
 }
 
 export interface ProgressVM {
@@ -381,6 +395,11 @@ export interface CoachVM {
   /** An "info" line (waitFor "timer") fades on its own; the others wait for the action. */
   waitFor: "action" | "timer";
   canSkip: boolean;
+  /**
+   * FLT-93: this mark is a [Show me], not a tutorial step: the player asked where something is. No step count and no Skip
+   * tutorial; offer "Got it" (`actions.endShowMe()`). It ends by itself when they click the thing.
+   */
+  guide?: true;
 }
 
 /** The small "New!" card that comes with a level-up. */
@@ -391,6 +410,26 @@ export interface UnlockCardVM {
   items: string[];
   /** FLT-76: the card's joke line, under the goal. Optional: a mod's rung may have none. */
   quip?: string;
+  /**
+   * FLT-93: `items` sorted Build / Hire / New systems / New apps, each line with what it is for and, where there is one, the
+   * anchor [Show me] walks to (`actions.showMe(anchor)`). Empty groups are left out. Optional: a skin may draw `items`.
+   */
+  groups?: UnlockGroupVM[];
+}
+
+export interface UnlockGroupVM {
+  id: "build" | "hire" | "systems" | "apps";
+  /** "Build", "Hire", "New systems", "New apps". */
+  title: string;
+  entries: UnlockEntryVM[];
+}
+
+export interface UnlockEntryVM {
+  /** "Janitor Bot" */
+  name: string;
+  /** What it is for, in one line. Empty for a line that is only a name (the "fresh headache" teaser). */
+  line: string;
+  anchor?: string;
 }
 
 /** Help ▸ How to play. Only present while the window is open. */
@@ -1941,6 +1980,13 @@ export interface HudActions {
   coachReplay(): void;
   /** Close the "New!" card. */
   dismissUnlock(): void;
+  /**
+   * FLT-93: [Show me]. Puts a coach mark on `[data-anchor="<anchor>"]`, opening the menus on the way (the doors marked
+   * `data-anchor-opens`), and closes the New! card if it is up. Safe with an anchor the skin does not have: the balloon
+   * still says where. Ends when the player clicks the thing, or with `endShowMe()`.
+   */
+  showMe(anchor: string): void;
+  endShowMe(): void;
   /** The build panel opened or shut (the coach's first step waits for it opening). Say it whenever yours does. */
   buildPanel(open: boolean): void;
   /** Help ▸ How to play. */

@@ -50,6 +50,9 @@ export function widgetsOf(gate: WidgetGate): WidgetVM[] {
   return WIDGETS.filter((w) => w.when(gate)).map(({ when: _when, aliases = [], ...w }) => ({ ...w, aliases: [...aliases] }));
 }
 
+/** Every widget's name and blurb, earned or not (FLT-93: what [Show me] says about an `app:<id>` anchor). */
+export const WIDGET_ROWS: readonly { id: string; name: string; blurb: string }[] = WIDGETS.map(({ id, name, blurb }) => ({ id, name, blurb }));
+
 /** The ids `openWidget` knows, earned or not. */
 export const WIDGET_IDS: readonly string[] = WIDGETS.map((w) => w.id);
 

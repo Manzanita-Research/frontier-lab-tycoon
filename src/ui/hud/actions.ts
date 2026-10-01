@@ -1,6 +1,6 @@
 // Everything a skin may ask the game to do, wired to the app machine and the UI atoms. Skins get this object and
 // nothing behind it.
-import { appNow, debugParams, registry, send, SLOW_KEY } from "../../app/game";
+import { appNow, debugParams, registry, send, sim, SLOW_KEY } from "../../app/game";
 import { SPEEDS, type Speed, type Tool } from "../../app/hud";
 import { mixerOpenAtom, playCue, setMixer } from "../../audio/state";
 import type { Cue } from "../../audio/score";
@@ -11,7 +11,8 @@ import { dramaActions } from "../../drama/state";
 import { setPhoto, takePhoto } from "../juice/photo";
 import { copyLink, copySummary, playDaily, shareEnding } from "../share/share";
 import { dismissChallenge, dismissMemo } from "../share/social";
-import { arenaChosenAtom, arenaOpenAtom, birdAppOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, senateOpenAtom, staffOpenAtom, windowBudgetAtom } from "./state";
+import { arenaChosenAtom, arenaOpenAtom, birdAppOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, senateOpenAtom, staffOpenAtom, guideAtom, windowBudgetAtom } from "./state";
+import { guardWith } from "./guard";
 import { closeWindow, isUp, restoreWindow } from "./windows";
 import { skinActions } from "./skinControl";
 import { savesActions } from "./saves";
@@ -52,6 +53,10 @@ async function copyText(text: string): Promise<boolean> {
     }
   }
 }
+
+/** FLT-93: a HUD action that must survive its own failure (the FLT-81 rule, on the UI side of the app actor). */
+export const guard = <T>(where: string, f: () => T, fallback: T): T =>
+  guardWith((report) => send({ type: "SNAG", report, now: Date.now() }), where, f, fallback, () => ({ seed: sim.world.seed, tick: sim.world.tick, day: sim.world.day }));
 
 const TIME_HOURS: Record<string, number | null> = { live: null, day: 13, golden: 18.3, night: 22.5 };
 
@@ -107,6 +112,14 @@ export const hudActions: HudActions = {
     send({ type: "COMMAND", command: { type: "coachReplay" } });
   },
   dismissUnlock: () => send({ type: "COMMAND", command: { type: "dismissUnlock" } }),
+  // FLT-93: [Show me]. The New! card steps aside (it is read; the coach layer walks to the anchor), and the coach points.
+  showMe: (anchor) =>
+    guard("showMe", () => {
+      if (typeof anchor !== "string" || !anchor) return;
+      if (appNow()?.snap.unlockCard) send({ type: "COMMAND", command: { type: "dismissUnlock" } });
+      registry.set(guideAtom, anchor);
+    }, undefined),
+  endShowMe: () => guard("endShowMe", () => registry.set(guideAtom, null), undefined),
   // The first coach step waits for the build panel to open: tell the game each time it does.
   buildPanel: (open) => {
     if (open) send({ type: "COMMAND", command: { type: "buildPanelOpened" } });

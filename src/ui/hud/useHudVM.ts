@@ -16,7 +16,7 @@ import { shotAtom } from "../juice/photo";
 import { useShareInput } from "../share/share";
 import { useSocialInput } from "../share/social";
 import { newMotion, NO_MOTION, stepMotion, type Motion, type MotionView } from "./leapfrogMotion";
-import { arenaCallAtom, arenaChosenAtom, arenaOpenAtom, birdAppOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, seenNewsAtom, senateOpenAtom, skinUiAtom, staffOpenAtom, windowBudgetAtom } from "./state";
+import { arenaCallAtom, arenaChosenAtom, arenaOpenAtom, birdAppOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, seenNewsAtom, senateOpenAtom, skinUiAtom, staffOpenAtom, guideAtom, windowBudgetAtom } from "./state";
 import { newestOf, unreadOf, wantsOf, windowed } from "./tray";
 import { autoUp, nextClose, stepBudget } from "./windows";
 import { hudActions } from "./actions";
@@ -203,6 +203,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
   const dismissed = useAtomValue(dismissedAtom);
   const disastersOpen = useAtomValue(disastersOpenAtom);
   const dramaUi = useAtomValue(dramaAtom);
+  const guide = useAtomValue(guideAtom);
   const share = useShareInput();
   const social = useSocialInput();
   const viewport = useViewport();
@@ -285,8 +286,9 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         viewport,
         share,
         social,
+        guide,
       }),
-    [share, social, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, stage, slowForBadNews, tapHint, arenaOpen, arenaChosen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, beat, skinUi, crt, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, birdAppOpen, drama, saves],
+    [guide, share, social, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, stage, slowForBadNews, tapHint, arenaOpen, arenaChosen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, beat, skinUi, crt, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, birdAppOpen, drama, saves],
   );
   return useWindowBudget(vm, news);
 }

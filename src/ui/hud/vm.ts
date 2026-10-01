@@ -35,7 +35,8 @@ import { unreadOf, windowed } from "./tray";
 import type { Budget } from "./windows";
 import { groupOf, modeOf, widgetsOf } from "./widgets";
 import { birdAppOf } from "./birdapp";
-import type { FactionChipVM } from "./types";
+import type { CoachVM, FactionChipVM, ShowMeVM } from "./types";
+import { goalStep, guideText, type Facts } from "./anchors";
 import { challengeLine, challengeQuery, compareRuns, VERDICT_TEXT, type Challenge } from "../share/link";
 import { streakText } from "../share/streak";
 import { ENDING_RULES, endingById } from "../../sim/endings/pack";
@@ -120,6 +121,8 @@ export interface HudInput {
    * the game wants is up and nothing is unread (the host applies the budget itself, after it has stepped it).
    */
   windows?: { budget: Budget; seen: Partial<Record<NewsPanel, number>> };
+  /** FLT-93: [Show me]'s anchor while the coach is pointing at it for the player. Optional: nobody asked. */
+  guide?: string | null;
   /** FLT-57: days played in a row, a friend's challenge from the URL (and whether its banner is up), the Memo extra already read, and this page's address for friend links. Optional: none is fine. */
   social?: { streak: number; challenge: Challenge | null; challengeOpen: boolean; memoSeen: string | null; linkBase: string | null };
 }
@@ -248,7 +251,26 @@ function trainingOf(s: Snapshot, stage: StageView | undefined): TrainingVM {
 const holdRatio = (g: { value: number; target: number; hold?: number; held?: number; met: boolean }) =>
   g.hold && !g.met && g.value >= g.target ? Math.min(1, (g.held ?? 0) / g.hold) : undefined;
 
-function objectivesOf(s: Snapshot): ObjectivesVM {
+/** FLT-93: what the lab has, for a goal step's `until` (snapshots from fixtures may lack `ops`). */
+function factsOf(s: Snapshot): Facts {
+  return { built: new Set((s.buildings ?? []).map((b) => b.kind)), staff: new Set((s.ops?.staff ?? []).map((r) => r.job)) };
+}
+
+/** FLT-93: a goal's [Show me]: its next step's label and anchor. */
+function showMeOf(goalId: string | undefined, facts: Facts): ShowMeVM | undefined {
+  const step = goalStep(goalId, facts);
+  return step ? { label: step.label, anchor: step.anchor } : undefined;
+}
+
+/**
+ * FLT-93: [Show me] is the coach, pointing for the player: same balloon, same ring, one system (FLT-54/91 folded in). It
+ * waits for nothing but the click on the thing (or "Got it"), and it outranks a tutorial step, which carries on after.
+ */
+function guideCoachOf(anchor: string): CoachVM {
+  return { id: `show:${anchor}`, step: 0, of: 0, text: guideText(anchor), target: anchor, waitFor: "action", canSkip: false, guide: true };
+}
+
+function objectivesOf(s: Snapshot, facts: Facts = factsOf(s)): ObjectivesVM {
   const left = Math.max(0, SCENARIO.deadlineDay - s.day);
   return {
     done: s.goals.filter((g) => g.met).length,
@@ -260,7 +282,8 @@ function objectivesOf(s: Snapshot): ObjectivesVM {
       const def = defs().goals.find((d) => d.id === g.id)!;
       // The release goal names the run actually training ("Ship 3 models (0/3), next: Frontier-2"), so its own progress line goes.
       const release = g.id === "release";
-      return { id: g.id, label: release ? s.releaseGoal : def.label, progress: release ? "" : goalProgressText(def, g.value, g.held), ratio: holdRatio(g) ?? Math.max(0, Math.min(1, g.value / g.target)), met: g.met };
+      const showMe = g.met ? undefined : showMeOf(g.id, facts);
+      return { id: g.id, label: release ? s.releaseGoal : def.label, progress: release ? "" : goalProgressText(def, g.value, g.held), ratio: holdRatio(g) ?? Math.max(0, Math.min(1, g.value / g.target)), met: g.met, ...(showMe ? { showMe } : {}) };
     }),
   };
 }
@@ -1158,11 +1181,13 @@ function rawViewModel(i: HudInput): HudVM {
   const { event, era } = waits("card") || waits("era") || outcome ? { event: null, era: null } : eventOf(i);
   // Snapshots from before FLT-33 (fixtures, old links) have no `factions`: that is "off".
   const chips = factionChips(i.snap.factions);
+  const facts = factsOf(i.snap);
+  const goalShowMe = play.goal.text ? showMeOf(play.goalId, facts) : undefined;
   const vm: HudVM = {
     apiVersion: SKIN_API_VERSION,
     stats: statsOf(i),
     training: trainingOf(i.snap, stage),
-    objectives: objectivesOf(i.snap),
+    objectives: objectivesOf(i.snap, facts),
     inspector: inspectorOf(i.snap.inspect, i.follow, i.snap.labName, chips, i.lookLabels),
     buildItems: items,
     buildTip: build.tip,
@@ -1185,11 +1210,11 @@ function rawViewModel(i: HudInput): HudVM {
     progress: {
       level: play.level,
       levelName: play.levelName,
-      goal: goalOf(play.goal),
+      goal: { ...goalOf(play.goal), ...(goalShowMe ? { showMe: goalShowMe } : {}) },
       teasers: play.teasers.map((t) => ({ ...t })),
     },
     visible: play.visible,
-    coach: play.coach,
+    coach: i.guide ? guideCoachOf(i.guide) : play.coach,
     unlock: waits("level") || solo ? null : quipped(play.unlock),
     tray: [],
     help: i.helpOpen ? helpOf(items) : null,
