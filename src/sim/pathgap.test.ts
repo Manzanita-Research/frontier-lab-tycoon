@@ -3,6 +3,7 @@ import { createInitialState } from "./state";
 import { findPathGap, pathGaps } from "./pathgap";
 import { getReach } from "./pathfind";
 import { busyLab } from "./perf/busyLab";
+import { perfBudget } from "./testkit";
 import type { Building, GameState } from "./types";
 
 /** An empty 24×24 lot: the gate at (11..12, 23), its mouth at (11..12, 22), and only the paths and buildings given. */
@@ -112,11 +113,16 @@ describe("findPathGap (FLT-85)", () => {
     const { s } = busyLab();
     // Cut the gate off: every building is stranded.
     for (const [x, z] of [[11, 22], [12, 22]] as const) s.grid.paths[z * s.grid.w + x] = false;
-    s.version++;
-    const t0 = performance.now();
-    const gaps = pathGaps(s);
-    const ms = performance.now() - t0;
+    // The best of three, each on a new version so the cache can't answer: a lone cold call also times the JIT.
+    let gaps = pathGaps(s);
+    let ms = Infinity;
+    for (let i = 0; i < 3; i++) {
+      s.version++;
+      const t0 = performance.now();
+      gaps = pathGaps(s);
+      ms = Math.min(ms, performance.now() - t0);
+    }
     expect(gaps.size).toBe(s.buildings.length);
-    expect(ms / s.buildings.length).toBeLessThan(1);
+    expect(ms / s.buildings.length).toBeLessThan(perfBudget(1));
   });
 });
