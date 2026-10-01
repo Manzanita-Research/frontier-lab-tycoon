@@ -218,10 +218,14 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // (NewsItem.panel), and the record-taken toasts carry their group (Toast.group, folded by the app): 2400 on again.
 // Merge train 2 then moves the late checkpoints here (4000; 3200 on seed 3): this script reaches Level 5, so FLT-56's packs
 // wake in it, The Memo jumps the card line, and the Promise Tracker's whip and roll-call cards ask the card budget too.
+// FLT-69 wakes the Bird App at Level 3 (1380 / 1340 / 1360 here) and moves the Comms Rep from Level 5 to Level 3, so
+// 1600 on moves on every seed (its posts, Aura, headlines and toasts). With `flags.birdappOff` set, and the Comms Rep put
+// back on the Level 5 card (with the Level 3 card's two new items left out), all three seeds reproduce the values above
+// at every checkpoint, digit for digit: the Bird App is the whole difference.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "c403ae9a", 800: "c9a777bd", 1600: "bb207932", 2400: "d4245f34", 3200: "4326019f", 4000: "39a85367" },
-  2: { 200: "766f3295", 800: "aec1b296", 1600: "1fad47b0", 2400: "b2610444", 3200: "40b53f19", 4000: "a22291d9" },
-  3: { 200: "b43cb9be", 800: "510d3b99", 1600: "52fba8d3", 2400: "9ceb3027", 3200: "eca03ede", 4000: "1d8d5c0d" },
+  1: { 200: "c403ae9a", 800: "c9a777bd", 1600: "ec51030b", 2400: "50b6ca63", 3200: "d5e72be3", 4000: "733b0186" },
+  2: { 200: "766f3295", 800: "aec1b296", 1600: "9e386036", 2400: "1c00c918", 3200: "84a6b377", 4000: "54fbf395" },
+  3: { 200: "b43cb9be", 800: "510d3b99", 1600: "c01adf53", 2400: "680003ae", 3200: "89614b0c", 4000: "9ce0bccd" },
 };
 
 describe("golden runs", () => {

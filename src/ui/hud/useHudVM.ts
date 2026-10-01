@@ -15,7 +15,7 @@ import { shotAtom } from "../juice/photo";
 import { useShareInput } from "../share/share";
 import { useSocialInput } from "../share/social";
 import { newMotion, NO_MOTION, stepMotion, type Motion, type MotionView } from "./leapfrogMotion";
-import { arenaCallAtom, arenaChosenAtom, arenaOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, seenNewsAtom, senateOpenAtom, skinUiAtom, staffOpenAtom, windowBudgetAtom } from "./state";
+import { arenaCallAtom, arenaChosenAtom, arenaOpenAtom, birdAppOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, seenNewsAtom, senateOpenAtom, skinUiAtom, staffOpenAtom, windowBudgetAtom } from "./state";
 import { newestOf, unreadOf, wantsOf, windowed } from "./tray";
 import { autoUp, nextClose, stepBudget } from "./windows";
 import { hudActions } from "./actions";
@@ -189,6 +189,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
   const staffOpen = useAtomValue(staffOpenAtom);
   const senateOpen = useAtomValue(senateOpenAtom);
   const factionsOpen = useAtomValue(factionsOpenAtom);
+  const birdAppOpen = useAtomValue(birdAppOpenAtom);
   const helpOpen = useAtomValue(helpOpenAtom);
   const modsOpen = useAtomValue(modsOpenAtom);
   const papersOpen = useAtomValue(papersOpenAtom);
@@ -244,6 +245,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         senateOpen,
         zone,
         factionsOpen,
+        birdAppOpen,
         arena: { open: arenaOpen, chosen: arenaChosen, alert: motion.alert, flinch: motion.flinch, moved: motion.moved },
         leapfrog,
         room,
@@ -272,7 +274,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         share,
         social,
       }),
-    [share, social, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, arenaChosen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, beat, skinUi, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, drama, saves],
+    [share, social, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, arenaChosen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, beat, skinUi, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, birdAppOpen, drama, saves],
   );
   return useWindowBudget(vm, news);
 }
@@ -311,17 +313,17 @@ function useWindowBudget(raw: HudVM, news: AppSource["news"]): HudVM {
   // A panel that is open has read its news.
   useEffect(() => {
     const newest = newestOf(news);
-    const open = { arena: vm.arena.open, papers: vm.papers.open, factions: vm.factions.open };
+    const open = { arena: vm.arena.open, papers: vm.papers.open, factions: vm.factions.open, birdapp: vm.birdapp.open };
     const next = { ...seen };
     let changed = false;
-    for (const p of ["arena", "papers", "factions"] as const) {
+    for (const p of ["arena", "papers", "factions", "birdapp"] as const) {
       if (open[p] && newest[p] !== undefined && newest[p] !== seen[p]) {
         next[p] = newest[p];
         changed = true;
       }
     }
     if (changed) registry.set(seenNewsAtom, next);
-  }, [news, seen, vm.arena.open, vm.papers.open, vm.factions.open]);
+  }, [news, seen, vm.arena.open, vm.papers.open, vm.factions.open, vm.birdapp.open]);
   // The journey test (FLT-53) reads what the budget holds up and what waits on the taskbar.
   useEffect(() => {
     probeHud.windows = () => ({ auto: autoUp(registry.get(windowBudgetAtom)), tray: vm.tray.map((t) => ({ id: t.id, flashing: t.flashing, unread: t.unread })) });

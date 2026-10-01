@@ -22,4 +22,7 @@ export const GROUP_LINES: Record<ToastGroup, string> = {
   quit: "{n} staff handed in the box: {who}.",
   poached: "{n} of your people got poached: {who}. The heart emojis keep coming.",
   record: "Rivals took {n} of your records: {who}.",
+  // The Bird App (FLT-69): a busy midnight on the timeline.
+  viral: "🐦 {n} of your people went viral: {who}.",
+  cancelled: "🐦 {n} of your people got cancelled: {who}. Comms is already typing.",
 };

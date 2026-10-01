@@ -23,6 +23,8 @@ import { continueTutorial } from "./tutorial";
 import { defs } from "./defs";
 import { setSafetySpend } from "./factions/driver";
 import { issueStatement } from "./factions/statement";
+import { setBirdLever } from "./birdapp/driver";
+import type { BirdLever } from "./birdapp/state";
 
 export type Command =
   | { type: "coachSkip" | "coachReplay" | "coachClick" | "dismissUnlock" | "buildPanelOpened" }
@@ -58,7 +60,9 @@ export type Command =
   /** FLT-54: the game speed changed (0 never comes: pausing keeps the pace). The card budget stretches with it. */
   | { type: "setPace"; speed: number }
   /** FLT-56: Comms addresses a faction (the gate legend's lever). Costs money, then a cooldown; a refusal is a toast. */
-  | { type: "issueStatement"; faction: string };
+  | { type: "issueStatement"; faction: string }
+  /** FLT-69: one poster's lever on the Bird App: let them cook, run it by Comms, or please log off. */
+  | { type: "birdLever"; id: number; lever: BirdLever };
 
 export type PlaceResult = { ok: true } | { ok: false; reason: string };
 
@@ -220,6 +224,9 @@ export function applyCommands(state: GameState, commands: readonly Command[], rn
         break;
       case "issueStatement":
         if (state.factions && systemUnlocked(state, "factions")) issueStatement(state, c.faction);
+        break;
+      case "birdLever":
+        if (systemUnlocked(state, "birdapp")) setBirdLever(state, c.id, c.lever);
         break;
       case "startTraining":
         if (!state.buildings.some((b) => b.kind === "hall")) addToast(state, "Build a Training Hall first.", "bad", { source: "build", importance: "you" });

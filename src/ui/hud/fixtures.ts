@@ -26,6 +26,9 @@ import { stageDrama, type DramaMoment } from "../../sim/defection/demo";
 import { OPEN_FAST, runFactions } from "../../sim/factions/headless";
 import { dramaViewModel, NO_DRAMA_UI, type FeedPackData } from "../../drama/feed";
 import { stageEndingMoment } from "../../sim/endings/demo";
+import { stageBird, type BirdDemoMoment } from "../../sim/birdapp/demo";
+import { continueTutorial } from "../../sim/tutorial";
+import { enableEarnedPacks } from "../../sim/progression";
 
 const staged = new Map<string, GameState>();
 /** An ending's scene (`memo`, `takeover`, `thanks`, `front-<id>`), staged once per test run: they start from the mid-game campus. */
@@ -133,6 +136,21 @@ let factionsWorld: GameState | null = null;
 export function fixtureFactions(): GameState {
   factionsWorld ??= runFactions(1, OPEN_FAST, 60).world;
   return factionsWorld;
+}
+
+/** FLT-69: a campus a week into the Bird App, staged as its `?moment=bird|bird-banger|bird-cancel` link is. Cached. */
+const birdWorlds = new Map<BirdDemoMoment, GameState>();
+export function fixtureBird(moment: BirdDemoMoment): GameState {
+  let w = birdWorlds.get(moment);
+  if (!w) {
+    w = createInitialState(3);
+    continueTutorial(w, true);
+    delete w.progression;
+    enableEarnedPacks(w);
+    stageBird(w, moment);
+    birdWorlds.set(moment, w);
+  }
+  return w;
 }
 
 export const NO_SKINS: SkinPickerVM = {
@@ -256,6 +274,9 @@ export interface FixtureOptions {
   /** FLT-33: the factions on, 16 days in (a member of one is selected); `factionsOpen` opens the panel. */
   factions?: boolean;
   factionsOpen?: boolean;
+  /** FLT-69: the Bird App staged at one of its moments; `birdOpen` opens the panel. */
+  bird?: BirdDemoMoment;
+  birdOpen?: boolean;
   selected?: number | null;
   event?: string | null;
   tool?: string | null;
@@ -300,7 +321,7 @@ export function fixtureStaged(o: Pick<FixtureOptions, "papers" | "collusion">): 
 }
 
 export function fixtureSnapshot(o: FixtureOptions = {}): Snapshot {
-  const w = o.world ?? (o.ending ? fixtureEnding(o.ending) : o.audit ? fixtureAudit(o.audit) : o.leapfrog ? fixtureLeapfrog().world : o.factions ? fixtureFactions() : o.papers || o.collusion ? fixtureStaged(o) : o.disaster ? fixtureDisaster() : o.circus ? fixtureCircus(o.circus) : o.senate ? fixtureSenate(o.senate) : fixtureWorld());
+  const w = o.world ?? (o.ending ? fixtureEnding(o.ending) : o.audit ? fixtureAudit(o.audit) : o.leapfrog ? fixtureLeapfrog().world : o.factions ? fixtureFactions() : o.bird ? fixtureBird(o.bird) : o.papers || o.collusion ? fixtureStaged(o) : o.disaster ? fixtureDisaster() : o.circus ? fixtureCircus(o.circus) : o.senate ? fixtureSenate(o.senate) : fixtureWorld());
   const selected = o.selected === undefined ? (w.walkers.find((x) => x.kind === "researcher" && (!o.factions || x.faction))?.id ?? null) : o.selected;
   const snap = makeSnapshot(w, undefined, { selected, follow: false, highlight: null });
   const pendingConfirm = o.confirm
@@ -334,6 +355,7 @@ export function fixtureInput(o: FixtureOptions = {}): HudInput {
     senateOpen: o.senateOpen ?? false,
     zone: null,
     factionsOpen: o.factionsOpen ?? false,
+    birdAppOpen: o.birdOpen ?? false,
     arena: { open: true, alert: false, flinch: false, moved: {} },
     room: {
       archive: [FIXTURE_PAPER, FIXTURE_CHAT],

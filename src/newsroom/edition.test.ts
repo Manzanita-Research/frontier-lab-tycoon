@@ -4,6 +4,7 @@ import { fillTemplate } from "../sim/format";
 import { frontPage, rankStories, recap, storyFromNews, type Story } from "./edition";
 import { NewsDesk } from "./desk";
 import { createInitialState } from "../sim/state";
+import { defs } from "../sim/defs";
 const s = (kind: Story["kind"], day: number, id = day): Story => ({ kind, day, id, text: `${kind} happened ${id}` });
 
 describe("Frontier Times", () => {
@@ -21,6 +22,15 @@ describe("Frontier Times", () => {
     expect(page.sub).toHaveLength(3);
     expect(new Set([page.lead, ...page.sub].map((s) => s.text)).size).toBe(4);
     expect(frontPage([], 7, "Tiny Lab").sub).toHaveLength(3);
+  });
+  it("files the Bird App's bangers and cancels as the news cycle, and a spat as filler (FLT-69)", () => {
+    const d = defs();
+    const vars = { lab: "Lab (v2.1)", name: "Ada Gradient", handle: "@ada", post: "scaling is a vibe", rival: "Macrohard", model: "Frontier-2", queue: "3" };
+    const kinds = (beat: "banger" | "cancelled" | "controversy") =>
+      new Set(d.bird.events(beat, "headline").map((e, i) => storyFromNews({ id: i, day: 1, text: fillTemplate(e.text, vars), tone: "neutral" }).kind));
+    expect(kinds("banger")).toEqual(new Set(["cycle"]));
+    expect(kinds("cancelled")).toEqual(new Set(["cycle"]));
+    expect(kinds("controversy")).toEqual(new Set(["filler"]));
   });
   it("recovers every current headline trigger even with punctuation in model/lab names", () => {
     for (const [id, h] of HEADLINES.entries()) {
