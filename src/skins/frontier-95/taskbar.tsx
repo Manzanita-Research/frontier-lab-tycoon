@@ -6,6 +6,7 @@ import type { SlotPropsMap } from "../types";
 import type { BuildItemVM, WidgetVM } from "../../ui/hud/types";
 import { Ico, SunriseMark } from "./icons";
 import { Btn, Win } from "./parts";
+import { useResetPlaces } from "./drag";
 
 type Confirm = null | "ask" | "off" | "restart";
 
@@ -172,6 +173,7 @@ export function BuildBar({ items, tip, teasers = [], disasters, widgets = [], ac
   const [confirm, setConfirm] = useState<Confirm>(null);
   const [run, setRun] = useState(false);
   const root = useRef<HTMLDivElement>(null);
+  const places = useResetPlaces();
 
   // A tap outside, or Escape, closes the menu.
   useEffect(() => {
@@ -369,6 +371,14 @@ export function BuildBar({ items, tip, teasers = [], disasters, widgets = [], ac
                         <button type="button" role="menuitemcheckbox" aria-checked={speed.slowForBadNews} data-testid="start-slow-bad-news" onClick={() => { setOpen(false); actions.setSlowForBadNews(!speed.slowForBadNews); }}>
                           <span className={`f95-menu-tick${speed.slowForBadNews ? " on" : ""}`} aria-hidden />
                           <span>{t("speed.slowForBadNews")}</span>
+                        </button>
+                      </li>
+                    )}
+                    {places.shown && (
+                      <li>
+                        <button type="button" role="menuitem" data-testid="start-reset-windows" disabled={!places.any} title={places.any ? undefined : "Drag a window by its title bar first"} onClick={() => { setOpen(false); places.reset(); }}>
+                          <Ico name="windows" size={20} />
+                          <span>Reset window positions</span>
                         </button>
                       </li>
                     )}

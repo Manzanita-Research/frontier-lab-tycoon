@@ -15,6 +15,9 @@ export function useSkin(): LoadedSkin {
   return skin;
 }
 
+/** The active skin's id, or null outside a SkinProvider (a slot rendered on its own). */
+export const useSkinId = (): string | null => useContext(SkinContext)?.id ?? null;
+
 /** What the coach is pointing at right now ("start", "build:path", ...), or null. Set by the host from the view-model. */
 const CoachContext = createContext<string | null>(null);
 export const CoachProvider = CoachContext.Provider;
