@@ -1,0 +1,52 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "cb75632cdc81ef270d41e8de5557cd2ffa4af58b"
+  },
+  "head": {
+    "branch": "flt-70-art",
+    "sha": "06ed1ce",
+    "dirty": true
+  },
+  "seconds": 114.456,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "f95-start",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-70-art/taskbar/before/f95-start.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-70-art/taskbar/after/f95-start.png",
+      "title": "FLT-70: the Frontier 95 taskbar with the Start menu open (the Start button's mark)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-70-art/taskbar/compare/f95-start.png",
+      "changed": 0.007909722222222223
+    },
+    {
+      "scene": "f95-start-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-70-art/taskbar/before/f95-start-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-70-art/taskbar/after/f95-start-phone.png",
+      "title": "FLT-70: the Frontier 95 taskbar and Start menu on a phone",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-70-art/taskbar/compare/f95-start-phone.png",
+      "changed": 0.001869911289342569
+    },
+    {
+      "scene": "overview",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-70-art/taskbar/before/overview.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-70-art/taskbar/after/overview.png",
+      "title": "The campus, mid-morning, paused",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-70-art/taskbar/compare/overview.png",
+      "changed": 0.001890432098765432
+    },
+    {
+      "scene": "phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-70-art/taskbar/before/phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-70-art/taskbar/after/phone.png",
+      "title": "The same campus on a phone (390x844)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-70-art/taskbar/compare/phone.png",
+      "changed": 0.0041104629967189206
+    }
+  ],
+  "errors": []
+}

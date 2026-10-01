@@ -177,7 +177,7 @@ async function load(id: string, m: SkinManifest): Promise<Prepared> {
   if (errors.length > 0) throw new SkinRefused(id, errors);
   const slots = { ...baseSlots, ...custom } as SlotComponents;
   return {
-    skin: { id, name: m.name, slots, strings: { ...BASE_STRINGS, ...m.strings } },
+    skin: { id, name: m.name, slots, strings: { ...BASE_STRINGS, ...m.strings }, ...(m.crt ? { crt: m.crt } : {}) },
     tokenCss: tokenSheet(id, m.tokens),
     css,
     fontCss,
@@ -208,7 +208,7 @@ async function loadModSkin({ id, data }: ModSkin): Promise<Prepared> {
   // The browser sniffs the format from the bytes (a `blob:` URL has no extension to go by).
   const fontCss = fonts.map((f) => `@font-face{font-family:"${f.family}";src:url("${f.src}");font-weight:${f.weight ?? 400};font-style:${f.style ?? "normal"};font-display:swap;}`).join("");
   return {
-    skin: { id, name: data.name, slots: parent.skin.slots, strings: { ...parent.skin.strings, ...data.strings } },
+    skin: { id, name: data.name, slots: parent.skin.slots, strings: { ...parent.skin.strings, ...data.strings }, ...(parent.skin.crt ? { crt: parent.skin.crt } : {}) },
     tokenCss: tokenSheet(id, { ...parentTokens, ...named }) + (raw ? `:root[data-skin="${id}"]{${raw}}` : ""),
     css: `${rescope(parent.css)}\n${data.css ?? ""}`,
     fontCss: parent.fontCss + fontCss,

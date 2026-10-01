@@ -1,14 +1,19 @@
-// The demo counter and its kiosk: a beige tower with a CD-ROM drawer, a CRT and a keyboard. The CRT's screen is a
-// shader over a 640x480 canvas: an attract loop until you insert the disc, then the warm-up line, the BIOS POST
-// (which checks this visitor's Model Weights Key) and the Frontier 95 splash.
+// The demo counter and its kiosk: a beige tower with a CD-ROM drawer, a CRT and a keyboard. The CRT shows a 640x480
+// canvas (an attract loop until you insert the disc, then the BIOS POST, which checks this visitor's Model Weights Key,
+// and the Frontier 95 splash) through the game's own tube (FLT-73's CRTPipeline, `src/render/crt`): scanlines, mask,
+// bloom, bow and corners. The screen's shader on top only adds the power: off, and the warm-up line.
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
-import { canvas, paintBios, paintKeyboard, paintSplash, RETRO_FONT, UI_FONT } from "../art";
+import { canvas, paintBios, paintKeyboard, paintSplash, paintSunrise, RETRO_FONT, UI_FONT } from "../art";
+import { CRTPipeline } from "../../render/crt/pipeline";
+import { CRT_LOOKS, monitorOptions } from "../../render/crt/looks";
 import { BIOS } from "../content";
 import { canvasTexture, COUNTER_Y, CRT, DRAWER_IN_Z, DRAWER_OUT_Z, DRAWER_Y, frameDt, k, TOWER, useClock, type StageProps } from "./rig";
 
 const BEIGE = "#e4dcc4";
+/** The tube's picture: 4:3 like the canvas, sharp enough when the camera dives into the glass. */
+const GLASS = [1024, 768] as const;
 
 const screenVertex = /* glsl */ `
 varying vec2 vUv;
@@ -20,19 +25,14 @@ uniform float uOn;
 uniform float uWarm;
 varying vec2 vUv;
 void main() {
-  vec2 p = vUv * 2.0 - 1.0;
-  p *= 1.0 + 0.07 * dot(p, p);
-  vec2 st = p * 0.5 + 0.5;
-  float inside = step(0.0, st.x) * step(st.x, 1.0) * step(0.0, st.y) * step(st.y, 1.0);
-  vec3 col = texture2D(uMap, st).rgb;
-  col *= 0.8 + 0.2 * sin(st.y * 480.0 * 3.14159);
+  vec3 col = texture2D(uMap, vUv).rgb * 1.15;
   // Warming up: a bright line in the middle that opens into the picture.
   float open = smoothstep(0.0, 1.0, uWarm);
-  col *= step(abs(st.y - 0.5), max(open * 0.5, 0.003));
-  col += vec3(0.7, 0.85, 1.0) * exp(-abs(st.y - 0.5) * 260.0) * (1.0 - open) * step(0.01, uWarm) * 3.0;
-  col *= smoothstep(1.35, 0.55, length(p)) * uOn * 1.35;
-  vec3 glass = vec3(0.05, 0.07, 0.06) * (1.0 - 0.4 * length(p));
-  gl_FragColor = vec4((glass + col) * inside, 1.0);
+  col *= step(abs(vUv.y - 0.5), max(open * 0.5, 0.003));
+  col += vec3(0.7, 0.85, 1.0) * exp(-abs(vUv.y - 0.5) * 260.0) * (1.0 - open) * step(0.01, uWarm) * 3.0 * smoothstep(0.48, 0.36, abs(vUv.x - 0.5));
+  vec2 p = vUv * 2.0 - 1.0;
+  vec3 glass = vec3(0.025, 0.032, 0.03) * (1.0 - 0.4 * length(p));
+  gl_FragColor = vec4(glass + col * uOn, 1.0);
   #include <colorspace_fragment>
 }`;
 
@@ -42,22 +42,30 @@ export function Kiosk({ beat, context, send, weightsKey }: StageProps & { weight
   const led = useRef<THREE.MeshStandardMaterial>(null);
   const screen = useMemo(() => {
     const c = canvas(640, 480);
-    const map = canvasTexture(c, 4);
-    map.minFilter = THREE.LinearFilter;
-    map.generateMipmaps = false;
+    // The tube takes a render target, so each new picture is uploaded straight into one (sRGB bytes, as painted). The
+    // canvas's own texture is never drawn, only copied from; the target flips it on the way in, like a texture would.
+    const map = new THREE.Texture(c);
+    const input = new THREE.WebGLRenderTarget(c.width, c.height);
+    input.texture.flipY = true;
+    const glass = new THREE.WebGLRenderTarget(GLASS[0], GLASS[1], { type: THREE.HalfFloatType });
+    // The canvas is already display-ready, so no tone mapping in the tube.
+    const crt = new CRTPipeline({ ...monitorOptions(CRT_LOOKS.subtle, GLASS[0], GLASS[1], 30), toneMap: false });
     const material = new THREE.ShaderMaterial({
       vertexShader: screenVertex,
       fragmentShader: screenFragment,
-      uniforms: { uMap: { value: map }, uOn: { value: 1 }, uWarm: { value: 1 } },
+      uniforms: { uMap: { value: glass.texture }, uOn: { value: 1 }, uWarm: { value: 1 } },
       toneMapped: false,
     });
-    return { c, map, material, last: -1, painted: "" };
+    return { c, map, input, glass, crt, material, painted: "", ready: false };
   }, []);
   const kb = useMemo(() => canvasTexture(paintKeyboard(), 4), []);
   const sign = useMemo(() => canvasTexture(paintTryMe(), 4), []);
   useEffect(
     () => () => {
       screen.map.dispose();
+      screen.input.dispose();
+      screen.glass.dispose();
+      screen.crt.dispose();
       screen.material.dispose();
       kb.dispose();
       sign.dispose();
@@ -105,7 +113,13 @@ export function Kiosk({ beat, context, send, weightsKey }: StageProps & { weight
       const mem = Math.min(BIOS.mem, Math.round((t / 0.8) * BIOS.mem / 16) * 16);
       paintBios(screen.c, t < 0.9 ? 2 : lines + 2, mem, weightsKey);
     } else paintSplash(screen.c, t);
-    screen.map.needsUpdate = true;
+    // Through the tube only when the picture changes (15 times a second at most): it doesn't move by itself.
+    if (!screen.ready) {
+      state.gl.initRenderTarget(screen.input);
+      screen.ready = true;
+    }
+    state.gl.copyTextureToTexture(screen.map, screen.input.texture);
+    screen.crt.render(state.gl, screen.input, screen.glass, { linearOutput: true });
   });
 
   const clickable = beat === "open" || beat === "focus";
@@ -202,18 +216,14 @@ export function Kiosk({ beat, context, send, weightsKey }: StageProps & { weight
   );
 }
 
-/** The kiosk's attract loop: a blinking invitation and a bouncing logo-ish square. */
+/** The kiosk's attract loop: a blinking invitation and Frontier 95's sunrise drifting about. */
 function paintAttract(c: HTMLCanvasElement, time: number) {
   const g = c.getContext("2d")!;
   g.fillStyle = "#000080";
   g.fillRect(0, 0, 640, 480);
   const x = 320 + Math.sin(time * 0.9) * 200;
   const y = 250 + Math.sin(time * 1.3) * 80;
-  const panes = ["#e2533b", "#58b24f", "#3b7be2", "#ffe14d"];
-  panes.forEach((p, i) => {
-    g.fillStyle = p;
-    g.fillRect(x - 40 + (i % 2) * 42, y - 40 + Math.floor(i / 2) * 42, 38, 38);
-  });
+  paintSunrise(g, x, y, 44);
   g.fillStyle = "#ffffff";
   g.textAlign = "center";
   g.font = `400 34px ${RETRO_FONT}`;

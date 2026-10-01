@@ -251,4 +251,6 @@ export interface LoadedSkin {
   slots: SlotComponents;
   /** Base strings with the skin's overrides. */
   strings: Record<string, string>;
+  /** FLT-73: the skin's default CRT tube (skin.json `crt`); absent means off. */
+  crt?: "off" | "subtle" | "full";
 }

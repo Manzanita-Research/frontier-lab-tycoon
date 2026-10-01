@@ -1,6 +1,6 @@
 // 24×24 pixel-art icons as one SVG sprite (rendered once by the Layout) and a tiny component to use them.
 // Flat colours, 1px black outlines, no gradients: the look rules of Frontier 95.
-import type { CSSProperties } from "react";
+import { useId, type CSSProperties } from "react";
 
 const S = { shapeRendering: "crispEdges" } as const;
 
@@ -76,15 +76,33 @@ export function Ico({ name, size = 20, style }: { name: string; size?: number; s
   );
 }
 
-/** The four-colour Start flag. */
-export function Flag() {
+/**
+ * Frontier 95's mark (FLT-70): a sunrise over water in a ring, the same one the box, the BIOS and the splash screen
+ * show (the intro paints it on canvas in `paintSunrise`). Drawn on a 16-unit grid so it reads on the Start button at
+ * 16 to 24 px: flat colours, one ray per gap, the sun's road on the water in three bars.
+ */
+export function SunriseMark({ size = 20 }: { size?: number }) {
+  const clip = `f95-mark-${useId().replace(/:/g, "")}`;
   return (
-    <span className="f95-flag" aria-hidden>
-      <i />
-      <i />
-      <i />
-      <i />
-    </span>
+    <svg className="f95-mark" width={size} height={size} viewBox="0 0 16 16" aria-hidden focusable="false">
+      <defs>
+        <clipPath id={clip}>
+          <circle cx="8" cy="8" r="7" />
+        </clipPath>
+      </defs>
+      <circle cx="8" cy="8" r="7" fill="#008080" />
+      <g clipPath={`url(#${clip})`}>
+        <rect width="16" height="4" fill="#000080" {...S} />
+        <path d="M8 9.5L1 4.5M8 9.5L4 1M8 9.5V0M8 9.5L12 1M8 9.5L15 4.5" stroke="#ffe14d" strokeWidth="1.1" opacity="0.75" />
+        <circle cx="8" cy="9.5" r="3.6" fill="#ffe14d" />
+        <rect y="9.5" width="16" height="7" fill="#000080" {...S} />
+        <rect x="4.5" y="10.5" width="7" height="1" fill="#ffe14d" {...S} />
+        <rect x="5.5" y="12.25" width="5" height="1" fill="#ffe14d" {...S} />
+        <rect x="6.75" y="14" width="2.5" height="0.9" fill="#ffe14d" {...S} />
+      </g>
+      <circle cx="8" cy="8" r="7" fill="none" stroke="#fff" strokeWidth="1" />
+      <circle cx="8" cy="8" r="7.6" fill="none" stroke="#000" strokeWidth="0.6" />
+    </svg>
   );
 }
 
