@@ -1,0 +1,30 @@
+[
+  {
+    "id": "standee",
+    "prompt": "A life-size flat cardboard cut-out standee for a 1990s computer store display: a cheerful cartoon scientist with a big round head, round glasses, messy brown hair and a white lab coat over a red shirt, grinning and giving a big thumbs-up, cut out of thick cardboard with a visible brown cardboard edge, standing on a small square cardboard base. Chunky, toy-like, stylised 3D with bright flat colours and clean simple shapes. No text, no letters, no logos.",
+    "tris": 1600,
+    "fit": [0.62, 1.42, 0.3],
+    "kind": "standee"
+  },
+  {
+    "id": "bin",
+    "prompt": "A square wire-mesh bargain bin on four short legs, as in a 1990s computer store, heaped over the top with loose CD jewel cases and small colourful software boxes in red, yellow, blue, green and purple, a few tumbling over the rim. Chunky, toy-like, stylised 3D with bright flat colours and clean simple shapes. No text, no letters, no logos.",
+    "tris": 2400,
+    "fit": [0.66, 0.6, 0.52],
+    "kind": "bin"
+  },
+  {
+    "id": "mug",
+    "prompt": "A chunky ceramic diner coffee mug with a big round handle, glossy teal glaze outside and cream inside, filled to the brim with dark coffee, a small chip on the rim. Chunky, toy-like, stylised 3D with clean simple shapes. No text, no letters, no logos.",
+    "tris": 1000,
+    "fit": [0.12, 0.1, 0.09],
+    "kind": "mug"
+  },
+  {
+    "id": "floppies",
+    "prompt": "A messy little stack of eight 3.5-inch floppy disks in assorted bright colours (black, blue, red, yellow and green), slightly fanned and twisted, each with a silver metal shutter and a blank white paper label. Chunky, toy-like, stylised 3D with clean simple shapes. No text, no letters, no logos.",
+    "tris": 900,
+    "fit": [0.12, 0.05, 0.12],
+    "kind": "floppies"
+  }
+]
