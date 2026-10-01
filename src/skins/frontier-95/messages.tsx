@@ -69,7 +69,7 @@ export function Toast({ toast, actions }: SlotPropsMap["Toast"]) {
       <span>
         {toast.text}
         {/* FLT-76: why the game slowed down stays until you have read it. */}
-        {toast.pinned && <i className="f95-pinhint">Click to dismiss, or ▶▶▶ to pretend it didn't happen.</i>}
+        {toast.pinned && <i className="f95-pinhint">Click to dismiss, or go back to top speed and pretend it didn't happen.</i>}
       </span>
     </button>
   );

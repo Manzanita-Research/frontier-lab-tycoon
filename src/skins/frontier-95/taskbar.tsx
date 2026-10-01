@@ -367,7 +367,7 @@ export function BuildBar({ items, tip, teasers = [], disasters, widgets = [], ac
                     {speed && (
                       <li>
                         <button type="button" role="menuitemcheckbox" aria-checked={speed.slowForBadNews} data-testid="start-slow-bad-news" onClick={() => { setOpen(false); actions.setSlowForBadNews(!speed.slowForBadNews); }}>
-                          <span className="f95-menu-tick" aria-hidden>{speed.slowForBadNews ? "✓" : ""}</span>
+                          <span className={`f95-menu-tick${speed.slowForBadNews ? " on" : ""}`} aria-hidden />
                           <span>{t("speed.slowForBadNews")}</span>
                         </button>
                       </li>

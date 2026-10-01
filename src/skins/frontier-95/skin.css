@@ -1199,9 +1199,19 @@
       white-space: nowrap;
     }
     /* FLT-76: a checkable entry ("Slow down for bad news") keeps its tick where the others keep their icon. */
+    /* Drawn, not typed: the menu font has no ✓. */
     .f95-menu-tick {
-      text-align: center;
-      font-weight: bold;
+      justify-self: center;
+      &.on::after {
+        content: "";
+        display: block;
+        width: 4px;
+        height: 8px;
+        margin-top: -3px;
+        border: solid currentColor;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+      }
     }
     .hd {
       padding: 5px 8px 2px 10px;
@@ -1563,7 +1573,8 @@
     pointer-events: auto;
   }
   /* FLT-76: the New! card's joke, under what it unlocked. */
-  .f95-quip {
+  /* (Under .f95-msgbody, whose own "p { margin: 0 }" would win otherwise.) */
+  .f95-msgbody p.f95-quip {
     margin: 10px 0 0;
     font-style: italic;
   }
