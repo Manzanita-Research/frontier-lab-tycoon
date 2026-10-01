@@ -7,6 +7,8 @@ import { createRng } from "../../sim/rng";
 import { paintFloor, paintShelfFront, paintSign, paintSpine, paintTalker } from "../art";
 import { SHELF, type ShelfBox } from "../content";
 import { canvasTexture, dampTo, frameDt, pose, SHELF_TOPS, SHELF_W, useClock, type Pose, type StageProps } from "./rig";
+import { FloorProps } from "./Props";
+import { useArt } from "./textures";
 
 const DEPTH = 0.38;
 const TOP = 1.46;
@@ -86,6 +88,7 @@ export function Store({ beat, context, send }: StageProps) {
         <ShelfItem key={b.id} box={b} beat={beat} peeking={context.peek === b.id} anyPeek={!!context.peek} send={send} />
       ))}
       <NextAisle />
+      <FloorProps />
     </group>
   );
 }
@@ -102,14 +105,16 @@ function ShelfItem({ box, beat, peeking, anyPeek, send }: { box: ShelfBox; beat:
   const ref = useRef<THREE.Group>(null);
   const [hover, setHover] = useState(false);
   const [w, h, d] = box.size;
+  const cover = useArt()[`shelf-${box.id}`];
   const materials = useMemo(() => {
-    const front = canvasTexture(paintShelfFront(box), 4);
+    // The printed cover (FLT-89) if the box has one; the art cache owns it, so only a painted front is disposed here.
+    const painted = cover ? null : canvasTexture(paintShelfFront(box), 4);
     const spine = canvasTexture(paintSpine(box.title, box.colors), 2);
     const plain = new THREE.MeshStandardMaterial({ color: box.colors[1], roughness: 0.6 });
     const side = new THREE.MeshStandardMaterial({ map: spine, roughness: 0.55 });
-    const face = new THREE.MeshStandardMaterial({ map: front, roughness: 0.45 });
-    return { list: [side, side, plain, plain, face, plain], dispose: () => [front, spine, plain, side, face].forEach((x) => x.dispose()) };
-  }, [box]);
+    const face = new THREE.MeshStandardMaterial({ map: cover ?? painted, roughness: 0.4 });
+    return { list: [side, side, plain, plain, face, plain], dispose: () => [painted, spine, plain, side, face].forEach((x) => x?.dispose()) };
+  }, [box, cover]);
   useEffect(() => () => materials.dispose(), [materials]);
   const home = useMemo(() => shelfPose(box), [box]);
   const target = useMemo<Pose>(() => ({ p: new THREE.Vector3(), q: new THREE.Quaternion() }), []);
@@ -200,10 +205,6 @@ function NextAisle() {
       <mesh position={[-2.2, TOP / 2, -0.17]}>
         <planeGeometry args={[1.6, TOP]} />
         <meshStandardMaterial color="#9c8360" roughness={0.9} />
-      </mesh>
-      <mesh position={[-1.05, 0.25, 0.85]} rotation={[0, 0.3, 0]}>
-        <cylinderGeometry args={[0.28, 0.24, 0.5, 20, 1, true]} />
-        <meshStandardMaterial color="#c8102e" side={THREE.DoubleSide} roughness={0.6} />
       </mesh>
     </group>
   );

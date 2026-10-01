@@ -28,6 +28,10 @@ export const STORE = {
   sign: "PC CD-ROM · BIG BOX SALE",
   /** The shelf-talker under the hero box. */
   talker: "STAFF PICK: \"I haven't slept.\" — Doug, Store Manager",
+  /** FLT-89: the cardboard scientist's speech balloon, its small print, and the bargain bin's card. */
+  standee: "I've seen the benchmarks!",
+  standeeSmall: "*We wrote them.",
+  bin: { head: "BARGAIN BIN", price: "$4.99", sub: "Last year's models" },
 };
 
 /** Our box. Art direction A (the '96 sim-game look), as a greybox: bright diorama, chrome logo, starbursts. */

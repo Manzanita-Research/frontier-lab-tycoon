@@ -3,7 +3,7 @@
 //
 //   node scripts/art-bake.mjs rects                # find the key-colour placeholders, write src/intro/assets/art.rects.json
 //   node scripts/art-bake.mjs foil                 # crop the foil to the COA strip's aspect (shots/fal/coa-foil-crop.png, for Patina)
-//   node scripts/art-bake.mjs bake                 # composite + convert everything into src/intro/assets/*.webp
+//   node scripts/art-bake.mjs bake [prefix]        # composite + convert everything (or the picks named prefix*) into src/intro/assets/*.webp
 //
 // The art carries flat key colours where something is filled in later: magenta (#FF00FF) for the box back's three
 // screenshot frames and the COA key box, green (#00FF00) for the COA foil strip. Rects are found on the lossless PNG
@@ -78,7 +78,9 @@ if (cmd === "rects") {
   console.log("wrote shots/fal/coa-foil-crop.png");
 } else if (cmd === "bake") {
   const rects = JSON.parse(readFileSync(RECTS, "utf8"));
-  for (const [id, spec] of Object.entries(PICKS.bake)) {
+  // `bake shelf-` bakes only the picks whose name starts with that (the other picks' sources may not be on this machine).
+  const only = process.argv[3] ?? "";
+  for (const [id, spec] of Object.entries(PICKS.bake).filter(([id]) => id.startsWith(only))) {
     if (spec.pack) {
       // Maps: channels packed from Patina's greyscale outputs (three reads roughness from G, metalness from B), or one
       // map as is. Lossless, so lossy chroma never smears a packed channel.
@@ -101,7 +103,14 @@ if (cmd === "rects") {
     }
     const shots = (spec.screens ?? []).map(png);
     const bytes = await page.evaluate(async ([src, spec, shots, rects]) => {
-      const img = await load(src);
+      let img = await load(src);
+      // A crop (x0, y0, x1, y1 of the image) trims a mockup's box edge off art that should be a flat print (FLT-89).
+      if (spec.crop) {
+        const [x0, y0, x1, y1] = spec.crop, cw = Math.round((x1 - x0) * img.width), ch = Math.round((y1 - y0) * img.height);
+        const cc = document.createElement('canvas'); cc.width = cw; cc.height = ch;
+        cc.getContext('2d').drawImage(img, x0 * img.width, y0 * img.height, cw, ch, 0, 0, cw, ch);
+        img = cc;
+      }
       const W = spec.width ?? img.width, H = Math.round((W * img.height) / img.width);
       const c = canvasOf(img, W, H), g = c.getContext('2d');
       const px = (r, grow = 0) => [r.x * W - grow, r.y * H - grow, r.w * W + 2 * grow, r.h * H + 2 * grow];

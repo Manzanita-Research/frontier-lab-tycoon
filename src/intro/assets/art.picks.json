@@ -77,7 +77,91 @@
       "pack": {
         "rgb": "shots/fal/shrinkwrap-1001T0052-0.normal.png"
       }
+    },
+    "shelf-paperclip": {
+      "src": "shots/fal/shelf-paperclip-1001T0749-0.png",
+      "width": 448,
+      "q": 0.78
+    },
+    "shelf-hallucinatica": {
+      "src": "shots/fal/shelf-hallucinatica-1001T0749-0.png",
+      "width": 448,
+      "q": 0.78
+    },
+    "shelf-scaling-trail": {
+      "src": "shots/fal/shelf-scaling-trail-1001T0750-0.png",
+      "width": 448,
+      "q": 0.78
+    },
+    "shelf-pitchdeck": {
+      "src": "shots/fal/shelf-pitchdeck-1001T0750-0.png",
+      "width": 448,
+      "q": 0.78,
+      "crop": [
+        0.018,
+        0.008,
+        0.99,
+        0.99
+      ]
+    },
+    "shelf-benchmark-racer": {
+      "src": "shots/fal/shelf-benchmark-racer-1001T0751-0.png",
+      "width": 448,
+      "q": 0.78
+    },
+    "shelf-flying-gpus": {
+      "src": "shots/fal/shelf-flying-gpus-1001T0752-0.png",
+      "width": 448,
+      "q": 0.78
+    },
+    "shelf-hoodie": {
+      "src": "shots/fal/shelf-hoodie-1001T0752-0.png",
+      "width": 448,
+      "q": 0.78
+    },
+    "shelf-kombucha": {
+      "src": "shots/fal/shelf-kombucha-1001T0753-0.png",
+      "width": 448,
+      "q": 0.78
+    },
+    "shelf-alignment": {
+      "src": "shots/fal/shelf-alignment-1001T0757-0.png",
+      "width": 448,
+      "q": 0.78,
+      "crop": [
+        0.02,
+        0.01,
+        0.985,
+        0.99
+      ]
+    },
+    "shelf-boardroom": {
+      "src": "shots/fal/shelf-boardroom-1001T0754-0.png",
+      "width": 448,
+      "q": 0.78
+    },
+    "shelf-gpu-almanac": {
+      "src": "shots/fal/shelf-gpu-almanac-1001T0755-0.png",
+      "width": 448,
+      "q": 0.78
+    },
+    "shelf-chess-toaster": {
+      "src": "shots/fal/shelf-chess-toaster-1001T0756-0.png",
+      "width": 448,
+      "q": 0.78
     }
   },
-  "shrinkwrap": "shots/fal/shrinkwrap-1001T0052-0.png"
+  "shrinkwrap": "shots/fal/shrinkwrap-1001T0052-0.png",
+  "shelf-paperclip": "shots/fal/shelf-paperclip-1001T0749-0.png",
+  "shelf-hallucinatica": "shots/fal/shelf-hallucinatica-1001T0749-0.png",
+  "shelf-scaling-trail": "shots/fal/shelf-scaling-trail-1001T0750-0.png",
+  "shelf-pitchdeck": "shots/fal/shelf-pitchdeck-1001T0750-0.png",
+  "shelf-benchmark-racer": "shots/fal/shelf-benchmark-racer-1001T0751-0.png",
+  "shelf-flying-gpus": "shots/fal/shelf-flying-gpus-1001T0752-0.png",
+  "shelf-hoodie": "shots/fal/shelf-hoodie-1001T0752-0.png",
+  "shelf-kombucha": "shots/fal/shelf-kombucha-1001T0753-0.png",
+  "shelf-alignment": "shots/fal/shelf-alignment-1001T0757-0.png",
+  "shelf-boardroom": "shots/fal/shelf-boardroom-1001T0754-0.png",
+  "shelf-gpu-almanac": "shots/fal/shelf-gpu-almanac-1001T0755-0.png",
+  "shelf-chess-toaster": "shots/fal/shelf-chess-toaster-1001T0756-0.png"
 }

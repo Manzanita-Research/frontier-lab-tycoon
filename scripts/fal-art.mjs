@@ -10,14 +10,15 @@
 // the picks are converted and copied into src/intro/assets/ by hand. Every call appends a line to
 // docs/evidence/flt-70-art/fal-ledger.jsonl with its endpoint, inputs and cost (Fal's price table; see `cost`).
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { basename, extname } from "node:path";
+import { basename, dirname, extname } from "node:path";
 
 const KEY = process.env.FAL_KEY;
 if (!KEY) throw new Error("FAL_KEY is not set");
 const OUT = "shots/fal";
-const LEDGER = "docs/evidence/flt-70-art/fal-ledger.jsonl";
+// Each task keeps its own ledger (FLT-89: FAL_LEDGER=docs/evidence/flt-89-art/fal-ledger.jsonl), so its budget adds up alone.
+const LEDGER = process.env.FAL_LEDGER ?? "docs/evidence/flt-70-art/fal-ledger.jsonl";
 mkdirSync(OUT, { recursive: true });
-mkdirSync("docs/evidence/flt-70-art", { recursive: true });
+mkdirSync(dirname(LEDGER), { recursive: true });
 
 const [cmd, arg, ...rest] = process.argv.slice(2);
 const opt = (name, fallback) => {

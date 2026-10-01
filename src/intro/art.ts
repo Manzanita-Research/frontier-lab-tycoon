@@ -317,6 +317,60 @@ export function paintTalker(c = canvas(512, 128)): HTMLCanvasElement {
   return c;
 }
 
+/** The cardboard scientist's speech balloon (FLT-89), with a "NEW!" burst on its corner; `back` is its plain card back. */
+export function paintBalloon(back = false, c = canvas(512, 352)): HTMLCanvasElement {
+  const g = ctx2d(c);
+  const { width: W, height: H } = c;
+  g.clearRect(0, 0, W, H);
+  g.fillStyle = back ? "#b08a5c" : "#fff";
+  g.strokeStyle = back ? "#8a6a42" : "#111";
+  g.lineWidth = 8;
+  // The tail points down and right, at the scientist's head.
+  g.beginPath();
+  g.roundRect(W * 0.17, H * 0.14, W * 0.8, H * 0.58, H * 0.14);
+  g.moveTo(W * 0.64, H * 0.71);
+  g.lineTo(W * 0.9, H * 0.97);
+  g.lineTo(W * 0.8, H * 0.71);
+  g.fill();
+  g.stroke();
+  // Paint over the tail's join, so the balloon reads as one outline.
+  g.fillRect(W * 0.64 + 5, H * 0.66, W * 0.16 - 10, H * 0.08);
+  if (back) return c;
+  g.fillStyle = "#111";
+  g.textAlign = "center";
+  g.textBaseline = "middle";
+  fitText(g, STORE.standee, W * 0.6, H * 0.34, W * 0.64, H * 0.17, 900, 2);
+  g.font = `italic 700 ${H * 0.07}px ${UI_FONT}`;
+  g.fillText(STORE.standeeSmall, W * 0.6, H * 0.64);
+  starburst(g, W * 0.13, H * 0.17, H * 0.16, 12, "#c8102e", "#ffe14d");
+  g.fillStyle = "#ffe14d";
+  g.font = `900 ${H * 0.085}px ${UI_FONT}`;
+  g.fillText(HERO.sticker, W * 0.13, H * 0.18);
+  return c;
+}
+
+/** The card on the bargain bin (FLT-89). */
+export function paintBinCard(c = canvas(512, 256)): HTMLCanvasElement {
+  const g = ctx2d(c);
+  const { width: W, height: H } = c;
+  g.fillStyle = "#ffe14d";
+  g.fillRect(0, 0, W, H);
+  g.strokeStyle = "#c8102e";
+  g.lineWidth = 10;
+  g.strokeRect(5, 5, W - 10, H - 10);
+  g.fillStyle = "#c8102e";
+  g.textAlign = "center";
+  g.textBaseline = "middle";
+  fitFont(g, STORE.bin.head, W * 0.86, 900, H * 0.2);
+  g.fillText(STORE.bin.head, W / 2, H * 0.19);
+  g.font = `900 ${H * 0.4}px ${UI_FONT}`;
+  g.fillText(STORE.bin.price, W / 2, H * 0.52);
+  g.fillStyle = "#111";
+  fitFont(g, STORE.bin.sub, W * 0.86, 800, H * 0.13);
+  g.fillText(STORE.bin.sub, W / 2, H * 0.83);
+  return c;
+}
+
 /** The linoleum floor tile. */
 export function paintFloor(c = canvas(256, 256)): HTMLCanvasElement {
   const g = ctx2d(c);

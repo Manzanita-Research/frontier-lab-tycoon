@@ -13,9 +13,11 @@ import { Kiosk } from "./Kiosk";
 import { Store } from "./Store";
 import { BOOT_BEATS, ClockContext, CRT, DURATIONS, fit, FOV, HERO_ON_SHELF, HOLD, k, PRESENT, TRAY, useClock, type Clock } from "./rig";
 import { itemFrame } from "./items";
+import { preloadProps } from "./Props";
 import { preloadArt } from "./textures";
 
 preloadArt();
+preloadProps();
 
 type Props = { intro: Intro; beat: string; context: IntroContext };
 
