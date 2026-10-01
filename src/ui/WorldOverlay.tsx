@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { computeGhost } from "../render/ghost";
 import { HALF, rectCenter, worldX, worldZ } from "../render/coords";
+import { OVER } from "../render/people";
 import { Anchored } from "../render/overlay";
 import { pathGaps, type PathGap } from "../sim/pathgap";
 import { panTo } from "../render/fx/state";
@@ -191,7 +192,7 @@ function StaffTags() {
             const s = sim.world.staff.find((q) => q.id === o.id);
             if (!s) return false;
             const a = sim.alpha;
-            out.set(s.px + (s.x - s.px) * a - HALF, 1.75, s.pz + (s.z - s.pz) * a - HALF);
+            out.set(s.px + (s.x - s.px) * a - HALF, OVER.staffTag, s.pz + (s.z - s.pz) * a - HALF);
             return true;
           }}
         >
@@ -315,7 +316,7 @@ function PeekTag() {
         who.current = w?.id ?? null;
         if (!w) return false;
         const a = sim.alpha;
-        out.set(w.px + (w.x - w.px) * a - HALF, 1.9, w.pz + (w.z - w.pz) * a - HALF);
+        out.set(w.px + (w.x - w.px) * a - HALF, OVER.tag, w.pz + (w.z - w.pz) * a - HALF);
         return true;
       }}
     >
@@ -559,7 +560,7 @@ function GrabTags() {
               const w = sim.world.walkers.find((o) => o.id === id);
               if (!w) return false;
               const a = sim.alpha;
-              out.set(w.px + (w.x - w.px) * a - HALF, held ? 2.75 : 0, w.pz + (w.z - w.pz) * a - HALF);
+              out.set(w.px + (w.x - w.px) * a - HALF, held ? 2.4 : 0, w.pz + (w.z - w.pz) * a - HALF);
               return true;
             }}
           >

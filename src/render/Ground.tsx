@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { createRng } from "../sim/rng";
+import { onPlaza } from "../sim/opening";
 import { GRID_SIZE } from "../sim/state";
 import { atoms, sim } from "../app/game";
 import { useApp } from "../app/hooks";
@@ -49,12 +50,14 @@ export function Ground() {
 
 const PATH_MAX = GRID_SIZE * GRID_SIZE;
 
-/** One raised cream slab per path tile. */
+/** One raised cream slab per path tile (the entrance plaza's are warmer). */
 export function Paths() {
   const version = useApp(atoms.version);
   const ref = useRef<THREE.InstancedMesh>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
   const tints = useMemo(() => [new THREE.Color("#f4e9c9"), new THREE.Color("#efe2bd")], []);
+  // FLT-91: the entrance plaza is laid in warmer pavers, so the front yard reads as a place and not just more path.
+  const pavers = useMemo(() => [new THREE.Color("#ecd2ac"), new THREE.Color("#e4c69c")], []);
 
   useEffect(() => {
     const mesh = ref.current;
@@ -69,13 +72,13 @@ export function Paths() {
       dummy.scale.set(0.97, 0.1, 0.97);
       dummy.updateMatrix();
       mesh.setMatrixAt(n, dummy.matrix);
-      mesh.setColorAt(n, tints[(x + z) % 2]!);
+      mesh.setColorAt(n, (onPlaza(x, z) ? pavers : tints)[(x + z) % 2]!);
       n++;
     }
     mesh.count = n;
     mesh.instanceMatrix.needsUpdate = true;
     if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-  }, [version, dummy, tints]);
+  }, [version, dummy, tints, pavers]);
 
   return (
     <instancedMesh ref={ref} args={[boxGeo, undefined, PATH_MAX]} receiveShadow castShadow frustumCulled={false}>

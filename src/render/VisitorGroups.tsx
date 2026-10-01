@@ -5,11 +5,12 @@ import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeom
 import { sim as game } from "../app/game";
 import { groupKind } from "../sim/groups";
 import { HALF } from "./coords";
+import { CREW } from "./people";
 import { SKIN } from "./look";
 
 const CAP = 32;
 /** The same scale as the crowd and the staff. */
-const S = 1.75;
+const S = CREW;
 const skins = SKIN.map((c) => new THREE.Color(c));
 const dummy = new THREE.Object3D();
 dummy.rotation.order = "YXZ";

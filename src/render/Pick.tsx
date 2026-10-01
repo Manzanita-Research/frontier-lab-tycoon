@@ -4,6 +4,7 @@ import * as THREE from "three";
 import { atoms, send, sim } from "../app/game";
 import { useApp } from "../app/hooks";
 import { HALF } from "./coords";
+import { OVER } from "./people";
 import { onGlass } from "./crt/state";
 
 const v = new THREE.Vector3();
@@ -22,7 +23,7 @@ export function walkerAt(camera: THREE.Camera & { zoom?: number }, size: { width
   for (const w of sim.world.walkers) {
     if (w.machine.value === "inside") continue;
     // The middle of the body, not the feet.
-    v.set(w.px + (w.x - w.px) * a - HALF, 0.55, w.pz + (w.z - w.pz) * a - HALF).project(camera);
+    v.set(w.px + (w.x - w.px) * a - HALF, OVER.pick, w.pz + (w.z - w.pz) * a - HALF).project(camera);
     onGlass(v);
     const d = Math.hypot((v.x * 0.5 + 0.5) * size.width - px, (-v.y * 0.5 + 0.5) * size.height - py);
     if (d < bestD) {
@@ -48,7 +49,7 @@ export function runnerAt(camera: THREE.Camera & { zoom?: number }, size: { width
     if (r.machine.value !== "running" && r.machine.value !== "pacing") continue;
     const w = sim.world.walkers.find((o) => o.id === r.walker);
     if (!w) continue;
-    v.set(w.px + (w.x - w.px) * a - HALF, 0.55, w.pz + (w.z - w.pz) * a - HALF).project(camera);
+    v.set(w.px + (w.x - w.px) * a - HALF, OVER.pick, w.pz + (w.z - w.pz) * a - HALF).project(camera);
     const d = Math.hypot((v.x * 0.5 + 0.5) * size.width - px, (-v.y * 0.5 + 0.5) * size.height - py);
     if (d < bestD) {
       bestD = d;
@@ -64,7 +65,7 @@ function screenOf(camera: THREE.Camera, el: HTMLElement, id: number): [number, n
   if (!w || w.machine.value === "inside") return null;
   const a = sim.alpha;
   const rect = el.getBoundingClientRect();
-  v.set(w.px + (w.x - w.px) * a - HALF, 0.55, w.pz + (w.z - w.pz) * a - HALF).project(camera);
+  v.set(w.px + (w.x - w.px) * a - HALF, OVER.pick, w.pz + (w.z - w.pz) * a - HALF).project(camera);
   onGlass(v);
   return [rect.left + (v.x * 0.5 + 0.5) * rect.width, rect.top + (-v.y * 0.5 + 0.5) * rect.height];
 }

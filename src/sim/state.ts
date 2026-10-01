@@ -18,6 +18,7 @@ import { newSlop } from "./slop";
 import { blankVibes, initialVibes } from "./vibes";
 import { createLeapfrog } from "./race/leapfrog/state";
 import { createRace } from "./race/state";
+import { openingPaths, STUB } from "./opening";
 import { createRng } from "./rng";
 import { dailyThoughts } from "./thoughts";
 import { agentTarget, researchersAtStart, seedWalkers } from "./walkers";
@@ -30,14 +31,17 @@ const START_CAPABILITY = 10;
 export const FIRST_RUN_COST = 100;
 
 /**
- * A quiet campus: the gate, a short connected stub, compute, three researchers and one agent.
+ * A quiet campus: the gate, an entrance plaza and a short walk from it (FLT-91), compute, three researchers and one agent.
  * `def` is the run's resolved mod definition (FLT-37): rivals, goals, event arcs and names come from it.
  */
-export function createInitialState(seed = 1, opening: "garage" | "campus" = "garage", def?: GameDefinition | null): GameState {
+/** How a run starts: the garage, a finished campus, or the garage with the pre-FLT-91 stub for test fixtures (see `STUB`). */
+export type Opening = "garage" | "campus" | "stub";
+
+export function createInitialState(seed = 1, opening: Opening = "garage", def?: GameDefinition | null): GameState {
   return withDefs(def, () => create(seed, opening));
 }
 
-function create(seed: number, opening: "garage" | "campus"): GameState {
+function create(seed: number, opening: Opening): GameState {
   const content = defs();
   const rng = createRng(seed);
   const w = GRID_SIZE;
@@ -46,9 +50,10 @@ function create(seed: number, opening: "garage" | "campus"): GameState {
   const path = (x: number, z: number) => {
     paths[z * w + x] = true;
   };
-  for (let z = 19; z <= 22; z++) path(11, z);
-  path(12, 22);
+  if (opening !== "campus") for (const [x, z] of opening === "stub" ? STUB : openingPaths()) path(x, z);
   if (opening === "campus") {
+    // The finished campus keeps the pre-FLT-91 approach: its spine runs straight to the gate.
+    path(12, 22);
     for (let z = 10; z <= 22; z++) path(11, z);
     for (let x = 6; x <= 17; x++) path(x, 16);
     for (let x = 8; x <= 15; x++) path(x, 10);
@@ -70,7 +75,7 @@ function create(seed: number, opening: "garage" | "campus"): GameState {
     buildings: [],
     walkers: [],
     economy: initialStored(economyMachine, FRESH_ECONOMY),
-    training: { ...initialStored(trainingMachine, { run: 1, progress: 0, cost: opening === "garage" ? FIRST_RUN_COST : 300, name: modelName(1, rng, 0) }), value: "idle" },
+    training: { ...initialStored(trainingMachine, { run: 1, progress: 0, cost: opening !== "campus" ? FIRST_RUN_COST : 300, name: modelName(1, rng, 0) }), value: "idle" },
     models: [],
     news: [],
     thoughts: [],

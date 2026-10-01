@@ -15,7 +15,7 @@ import { MAX_ROUNDS } from "../content/bridgeRounds";
 
 /** Explicit busy campus for existing crowd/render tests; the real opening stays quiet. */
 export function createTestCampus(seed = 1): GameState {
-  const s = createInitialState(seed);
+  const s = createInitialState(seed, "stub");
   delete s.tutorial;
   delete s.coach;
   delete s.progression;

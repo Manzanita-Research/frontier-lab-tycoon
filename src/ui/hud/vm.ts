@@ -393,11 +393,18 @@ function speedOf(value: number, slowForBadNews: boolean): SpeedVM {
   };
 }
 
+/** How long (ticks, about 15 s at 1×) the coached opening thinks one bubble at a time once you've clicked Start. */
+export const OPENING_QUIET_TICKS = 50;
+
 function bubblesOf(i: HudInput, chips: ReadonlyMap<string, FactionChipVM>): BubbleVM[] {
   const chats = i.snap.chats ?? [];
   // Two people talking say their lines out loud instead of thinking: the visitor first, then your researcher.
   const talking = new Set(chats.flatMap((c) => (c.lines.length ? [c.hostId, c.guestId] : [])));
-  const thoughts = i.snap.thoughts.filter((t) => !talking.has(t.walkerId)).map((t): BubbleVM => {
+  // FLT-91: the first frame is the garage and its plaza, not two grey boxes over them. The lab keeps its thoughts to
+  // itself until you click Start, then finds its voice one bubble at a time.
+  const coached = i.snap.coach;
+  const room = coached?.id === "start" ? 0 : coached && i.snap.tick < OPENING_QUIET_TICKS ? 1 : Infinity;
+  const thoughts = i.snap.thoughts.filter((t) => !talking.has(t.walkerId)).slice(0, room).map((t): BubbleVM => {
     const faction = t.faction ? chips.get(t.faction) : undefined;
     return { id: t.id, walkerId: t.walkerId, kind: t.kind, speaker: i.snap.speakers[t.walkerId] ?? "", text: t.text, ...(faction ? { faction } : {}) };
   });
