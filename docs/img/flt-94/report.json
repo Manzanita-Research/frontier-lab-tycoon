@@ -5,12 +5,13 @@
   },
   "head": {
     "branch": "flt-94-quick-launch",
-    "sha": "4761af8",
+    "sha": "b7b5807",
     "dirty": true
   },
-  "seconds": 436.904,
+  "seconds": 484.213,
   "problems": [
-    "flt94-leaderboard-phone.png: blank composite: panel 3 is 41% one colour, 7 colours"
+    "flt94-taskbar-phone.png: blank composite: panel 3 is 31% one colour, 11 colours",
+    "flt94-leaderboard-phone.png: blank composite: panel 3 is 40% one colour, 7 colours"
   ],
   "rows": [
     {
@@ -20,7 +21,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-94/after/flt94-taskbar.png",
       "title": "FLT-94: the taskbar: Start, Quick Launch (applets only), the tray rank",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-94/compare/flt94-taskbar.png",
-      "changed": 0.10309567901234568
+      "changed": 0.10261728395061728
     },
     {
       "scene": "flt94-apps",
@@ -29,7 +30,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-94/after/flt94-apps.png",
       "title": "FLT-94: Quick Launch's » (the applets past the eighth)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-94/compare/flt94-apps.png",
-      "changed": 0.12618364197530865
+      "changed": 0.12562731481481482
     },
     {
       "scene": "flt94-programs",
@@ -38,7 +39,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-94/after/flt94-programs.png",
       "title": "FLT-94: Start ▸ Programs ▸ Facilities ▸ Research",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-94/compare/flt94-programs.png",
-      "changed": 0.24554783950617284
+      "changed": 0.2470956790123457
     },
     {
       "scene": "flt94-palette",
@@ -47,7 +48,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-94/after/flt94-palette.png",
       "title": "FLT-94: the Facilities palette (Quick Launch's first icon)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-94/compare/flt94-palette.png",
-      "changed": 0.15320061728395062
+      "changed": 0.15178935185185186
     },
     {
       "scene": "flt94-leaderboard",
@@ -56,7 +57,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-94/after/flt94-leaderboard.png",
       "title": "FLT-94: the leaderboard applet: Task Mangler left on Benchmarks, then Quick Launch's trophy (main: Run… arena.exe)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-94/compare/flt94-leaderboard.png",
-      "changed": 0.01077391975308642
+      "changed": 0.009873456790123457
     },
     {
       "scene": "flt94-taskbar-phone",
@@ -65,7 +66,9 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-94/after/flt94-taskbar-phone.png",
       "title": "FLT-94: phone: the taskbar never wraps; the rank stays",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-94/compare/flt94-taskbar-phone.png",
-      "changed": 0.025574948353384374
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 31% one colour, 11 colours",
+      "error": "compare: blank composite: panel 3 is 31% one colour, 11 colours"
     },
     {
       "scene": "flt94-tray-phone",
@@ -74,7 +77,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-94/after/flt94-tray-phone.png",
       "title": "FLT-94: phone: the applets ride in the tray's »",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-94/compare/flt94-tray-phone.png",
-      "changed": 0.09603991979584396
+      "changed": 0.08859141450966096
     },
     {
       "scene": "flt94-programs-phone",
@@ -83,7 +86,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-94/after/flt94-programs-phone.png",
       "title": "FLT-94: phone: Start ▸ Programs ▸ Facilities ▸ Research (taps: a phone has no hover)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-94/compare/flt94-programs-phone.png",
-      "changed": 0.04609308542957832
+      "changed": 0.0456282658889294
     },
     {
       "scene": "flt94-palette-phone",
@@ -92,7 +95,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-94/after/flt94-palette-phone.png",
       "title": "FLT-94: phone: the Facilities palette as a sheet",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-94/compare/flt94-palette-phone.png",
-      "changed": 0.7422431340381578
+      "changed": 0.7438722809575891
     },
     {
       "scene": "flt94-leaderboard-phone",
@@ -102,8 +105,8 @@
       "title": "FLT-94: phone: the leaderboard from the tray rank",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-94/compare/flt94-leaderboard-phone.png",
       "changed": null,
-      "composeError": "blank composite: panel 3 is 41% one colour, 7 colours",
-      "error": "compare: blank composite: panel 3 is 41% one colour, 7 colours"
+      "composeError": "blank composite: panel 3 is 40% one colour, 7 colours",
+      "error": "compare: blank composite: panel 3 is 40% one colour, 7 colours"
     }
   ],
   "errors": []
