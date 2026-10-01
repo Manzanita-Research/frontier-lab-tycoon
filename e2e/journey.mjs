@@ -528,7 +528,10 @@ async function phoneChecks(p, force = false) {
   if (!phone || (!force && Date.now() - lastSweep < PHONE_CHECK_MS)) return;
   lastSweep = Date.now();
   const calm = !p.event && !p.pendingConfirm && !p.overlays.length && !p.unlockCard && !(await page.locator("[role=menu]:visible, .mode-done:visible, .f95-bsod-go:visible").count());
+  const t0 = Date.now();
   const { issues, campus } = await sweep(calm);
+  const ms = Date.now() - t0;
+  result.sweeps = { n: (result.sweeps?.n ?? 0) + 1, ms: (result.sweeps?.ms ?? 0) + ms, max: Math.max(result.sweeps?.max ?? 0, ms) };
   for (const i of issues) await fail(i.kind, i.message, p, `${i.kind}:${i.key}`);
   if (campus !== null) {
     result.campus.push({ gameDay: gameDays(p), level: p.progress.level, share: +campus.toFixed(3) });
@@ -972,7 +975,7 @@ function report(r) {
   const kinds = Object.entries(r.failures.reduce((m, f) => ({ ...m, [f.kind]: (m[f.kind] ?? 0) + 1 }), {})).map(([k, n]) => `${k} ×${n}`).join(", ");
   const shares = (r.campus ?? []).map((c) => c.share).sort((a, b) => a - b);
   const pct = (x) => (x === undefined ? "–" : `${Math.round(x * 100)}%`);
-  const touchLine = r.phone ? `\nPhone, touch only: ${r.touch.taps} map taps, ${r.touch.drags} drags, ${r.touch.pinches} pinches, ${r.clicks.ok + r.clicks.forced} control taps; a map tile ${r.touch.tile ?? "?"} px when building; ${r.touch.misplaced} misplaced buildings. Campus share of the screen (HUD only): min ${pct(shares[0])}, median ${pct(shares[Math.floor(shares.length / 2)])} over ${shares.length} looks.\n` : "";
+  const touchLine = r.phone ? `\nPhone, touch only: ${r.touch.taps} map taps, ${r.touch.drags} drags, ${r.touch.pinches} pinches, ${r.clicks.ok + r.clicks.forced} control taps; a map tile ${r.touch.tile ?? "?"} px when building; ${r.touch.misplaced} misplaced buildings. Campus share of the screen (HUD only): min ${pct(shares[0])}, median ${pct(shares[Math.floor(shares.length / 2)])} over ${shares.length} looks. ${r.sweeps?.n ?? 0} sweeps, ${r.sweeps ? Math.round(r.sweeps.ms / r.sweeps.n) : "–"} ms each (max ${r.sweeps?.max ?? "–"}).\n` : "";
   return `# Journey test${r.phone ? " (phone)" : ""}: Level 1 → 5
 
 ${r.passed ? "**Passed**" : "**Failed**"}. Level 5 ${r.reachedLevel5 ? "reached" : "**not** reached"}. ${r.url}, ${r.viewport.width}×${r.viewport.height}, ${r.timing?.wallS ?? "?"} s wall, ${r.timing?.fps ?? "?"} fps.
