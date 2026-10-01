@@ -6,11 +6,12 @@ import { appNow, sim as game } from "../app/game";
 import { STAFF } from "../content/staff";
 import type { StaffJob } from "../sim/types";
 import { HALF } from "./coords";
+import { CREW } from "./people";
 import { SKIN } from "./look";
 
 const CAP = 48;
 /** The same 1.6x as the crowd, so staff read at the default zoom. */
-const S = 1.75;
+const S = CREW;
 const color = (c: string) => new THREE.Color(c);
 const BODY: Record<StaffJob, THREE.Color> = { janitor: color(STAFF.janitor.color), sre: color(STAFF.sre.color), comms: color(STAFF.comms.color), security: color(STAFF.security.color) };
 const skins = SKIN.map(color);
@@ -43,9 +44,9 @@ export function StaffCrew() {
   const botGeo = useMemo(() => new RoundedBoxGeometry(0.34 * S, 0.4 * S, 0.3 * S, 3, 0.07 * S), []);
   const visorGeo = useMemo(() => new THREE.BoxGeometry(0.24 * S, 0.08 * S, 0.06 * S), []);
   const hatGeo = useMemo(() => new THREE.SphereGeometry(0.16 * S, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2), []);
-  const poleGeo = useMemo(() => new THREE.BoxGeometry(0.035, 1, 0.035), []);
-  const mopGeo = useMemo(() => new THREE.BoxGeometry(0.26, 0.09, 0.14), []);
-  const toteGeo = useMemo(() => new RoundedBoxGeometry(0.2, 0.22, 0.08, 2, 0.02), []);
+  const poleGeo = useMemo(() => new THREE.BoxGeometry(0.02 * S, 0.57 * S, 0.02 * S), []);
+  const mopGeo = useMemo(() => new THREE.BoxGeometry(0.15 * S, 0.05 * S, 0.08 * S), []);
+  const toteGeo = useMemo(() => new RoundedBoxGeometry(0.115 * S, 0.125 * S, 0.045 * S, 2, 0.012 * S), []);
 
   useFrame(({ clock }) => {
     const w = game.world;
@@ -83,7 +84,7 @@ export function StaffCrew() {
       if (s.machine.value === "leaving" && !moving) continue;
       if (s.divert && phaseName !== "leaving") {
         // Panic pulse: the "!" hops while they jog to the incident.
-        const top = (s.job === "janitor" ? 1.5 : 2.3) + Math.abs(Math.sin(t * 7 + phase)) * 0.1;
+        const top = (s.job === "janitor" ? 0.86 : 1.31) * S + 0.2 + Math.abs(Math.sin(t * 7 + phase)) * 0.1;
         set(bangStem.current, nbang, x, top + 0.52, z, 0, 0.14, 0.44, 0.14);
         set(bangDot.current, nbang, x, top, z, 0, 0.17, 0.17, 0.17);
         nbang++;
@@ -97,10 +98,10 @@ export function StaffCrew() {
         botVisor.current?.setColorAt(i, VISOR);
         // The mop: a pole held out in front, its head sweeping side to side while it works.
         const sweep = working ? Math.sin(t * 9 + phase) * 0.4 : Math.sin(t * 1.2 + phase) * 0.05;
-        const mx = x + fx * 0.32 + Math.cos(yaw) * sweep * 0.5;
-        const mz = z + fz * 0.32 - Math.sin(yaw) * sweep * 0.5;
-        set(mopPole.current, nm, mx - fx * 0.08, 0.32 + bob * 0.5, mz - fz * 0.08, yaw, 1, 0.7, 1, -0.55 + (working ? 0.15 : 0));
-        set(mopHead.current, nm, mx + fx * 0.06, 0.05 + bob * 0.2, mz + fz * 0.06, yaw + sweep * 0.5);
+        const mx = x + fx * 0.18 * S + Math.cos(yaw) * sweep * 0.29 * S;
+        const mz = z + fz * 0.18 * S - Math.sin(yaw) * sweep * 0.29 * S;
+        set(mopPole.current, nm, mx - fx * 0.046 * S, 0.18 * S + bob * 0.5, mz - fz * 0.046 * S, yaw, 1, 0.7, 1, -0.55 + (working ? 0.15 : 0));
+        set(mopHead.current, nm, mx + fx * 0.035 * S, 0.03 * S + bob * 0.2, mz + fz * 0.035 * S, yaw + sweep * 0.5);
         mopPole.current?.setColorAt(nm, MOP);
         mopHead.current?.setColorAt(nm, MOP);
         nm++;
@@ -118,13 +119,13 @@ export function StaffCrew() {
       set(head.current, i, x + fx * hy * sn, hy * cs + bob, z + fz * hy * sn, yaw);
       head.current?.setColorAt(i, skins[(s.id * 3) % skins.length]!);
       if (s.job === "sre" || s.job === "security") {
-        set(hat.current, nhat, x + fx * (hy + 0.07) * sn, hy * cs + 0.08 * S + bob, z + fz * (hy + 0.07) * sn, yaw, s.job === "sre" ? 1.1 : 1.02, s.job === "sre" ? 1 : 0.65, s.job === "sre" ? 1.1 : 1.15);
+        set(hat.current, nhat, x + fx * (hy + 0.04 * S) * sn, hy * cs + 0.08 * S + bob, z + fz * (hy + 0.04 * S) * sn, yaw, s.job === "sre" ? 1.1 : 1.02, s.job === "sre" ? 1 : 0.65, s.job === "sre" ? 1.1 : 1.15);
         hat.current?.setColorAt(nhat++, s.job === "sre" ? HARDHAT : CAP_NAVY);
       }
       if (s.job === "comms") {
         // A tote bag on the hip that swings; held out when handing one over.
-        const give = working ? 0.28 : 0;
-        set(tote.current, nt, x + fx * (0.16 + give) + Math.cos(yaw) * 0.16, 0.34 * S + bob + Math.sin(t * 6 + phase) * 0.015, z + fz * (0.16 + give) - Math.sin(yaw) * 0.16, yaw, 1, 1, 1, 0, Math.sin(t * 4 + phase) * 0.15);
+        const give = working ? 0.16 * S : 0;
+        set(tote.current, nt, x + fx * (0.09 * S + give) + Math.cos(yaw) * 0.09 * S, 0.34 * S + bob + Math.sin(t * 6 + phase) * 0.015, z + fz * (0.09 * S + give) - Math.sin(yaw) * 0.09 * S, yaw, 1, 1, 1, 0, Math.sin(t * 4 + phase) * 0.15);
         tote.current?.setColorAt(nt++, TOTE);
       }
     }

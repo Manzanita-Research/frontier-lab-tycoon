@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { sim as game } from "../app/game";
 import { HALF } from "./coords";
+import { OVER, PEOPLE } from "./people";
 import { RoundedBoxGeometry } from "three/examples/jsm/geometries/RoundedBoxGeometry.js";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { CHEER_SECONDS, fx } from "./fx/state";
@@ -24,8 +25,10 @@ const CAP = 512;
 /** Every human gets a pair of glasses (one dark strip) so you can see which way they face and when they look around. */
 const EYE_CAP = CAP * 3;
 const SIGN_CAP = 64;
-/** Walkers are drawn 1.6x life size so a crowd reads at the default zoom. */
-const S = 1.6;
+/** How big the crowd is drawn (FLT-91: life size, a third to a half of a tile on screen; see people.ts). */
+const S = PEOPLE;
+/** A placard shrinks less than the person holding it, so "H2O LIES" still reads from the default camera. */
+const PLACARD = 0.8;
 const color = (c: string) => new THREE.Color(c);
 const hoodies = HOODIES.map(color);
 const picket = PICKET.map(color);
@@ -101,7 +104,7 @@ export function Walkers() {
     return { all, byCrowd, bodies, maps: all.map((p) => signTexture(p.text, p.bg, p.ink)) };
   }, []);
   const glowGeo = useMemo(() => new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2), []);
-  const haloGeo = useMemo(() => new THREE.RingGeometry(0.5, 0.72, 28).rotateX(-Math.PI / 2), []);
+  const haloGeo = useMemo(() => new THREE.RingGeometry(0.38 * S, 0.54 * S, 28).rotateX(-Math.PI / 2), []);
   const boardGeo = useMemo(() => new THREE.PlaneGeometry(1.3, 0.73), []);
   const visorGeo = useMemo(() => new THREE.BoxGeometry(0.25 * S, 0.09 * S, 0.07 * S), []);
   const agentGeo = useMemo(() => new RoundedBoxGeometry(0.34 * S, 0.34 * S, 0.3 * S, 3, 0.07 * S), []);
@@ -116,7 +119,7 @@ export function Walkers() {
   }, []);
   const stickGeo = useMemo(() => new THREE.BoxGeometry(0.045, 1, 0.045), []);
   const eyeGeo = useMemo(() => new THREE.BoxGeometry(0.17 * S, 0.042 * S, 0.05 * S), []);
-  const boxGeo = useMemo(() => new RoundedBoxGeometry(0.34, 0.26, 0.3, 2, 0.03), []);
+  const boxGeo = useMemo(() => new RoundedBoxGeometry(0.24 * S, 0.18 * S, 0.21 * S, 2, 0.02 * S), []);
   // Tidy up (FLT-19): an agent hiding in a cardboard box, packing tape across the top, eyes through the hand hole.
   const hideGeo = useMemo(() => new RoundedBoxGeometry(0.46 * S, 0.44 * S, 0.42 * S, 2, 0.02 * S), []);
   const tapeGeo = useMemo(() => new THREE.BoxGeometry(0.47 * S, 0.012 * S, 0.1 * S), []);
@@ -253,7 +256,7 @@ export function Walkers() {
         set(aBody.current, i, x, bob + 0.17 * S * k, z, ry, k, k, k, tilt);
         set(aVisor.current, i, x + Math.sin(ry) * 0.15 * S * k, bob + 0.22 * S * k, z + Math.cos(ry) * 0.15 * S * k, ry, k, k, k, tilt);
         set(aOrb.current, i, x, bob + 0.5 * S * k + Math.sin(t * 6 + phase) * 0.015, z, 0, k, k, k);
-        const pulse = (1.9 + Math.sin(t * 3 + phase) * 0.2) * (1 + env * 0.4) * k;
+        const pulse = (1.2 + Math.sin(t * 3 + phase) * 0.12) * S * (1 + env * 0.4) * k;
         set(aGlow.current, i, x, 0.03, z, 0, pulse, 1, pulse);
         aBody.current?.setColorAt(i, tinted?.body ?? agentLook.body);
         // Drift shows: the era's own colour while aligned, through violet, to hot pink.
@@ -293,15 +296,15 @@ export function Walkers() {
         }
         const wave = Math.sin(t * 5 + phase) * 0.14;
         // The pole runs from the fist up to the board.
-        set(pStick.current, i, x, 1.25 + bob, z, 0, 1, 1, 1);
+        set(pStick.current, i, x, 0.87 * S + bob, z, 0, 1, S, 1);
         const own = signs.byCrowd.get(w.crowd ?? "") ?? signs.byCrowd.get("")!;
         const which = own[w.id % own.length]!;
         const board = boards.current[which];
         if (board) {
           const k = nb[which]!++;
-          signDummy.position.set(x, 2.1 + bob + Math.abs(wave) * 0.15, z);
+          signDummy.position.set(x, 1.375 * S + bob + Math.abs(wave) * 0.15 * PLACARD, z);
           signDummy.rotation.set(0, signYaw, wave);
-          signDummy.scale.set(1, 1, 1);
+          signDummy.scale.setScalar(PLACARD);
           signDummy.updateMatrix();
           board.setMatrixAt(k, signDummy.matrix);
         }
@@ -372,7 +375,7 @@ export function Walkers() {
         const pulse = 1 + Math.sin(t * 5) * 0.08;
         marker.scale.set(pulse, 1, pulse);
         const arrow = marker.children[1];
-        if (arrow) arrow.position.y = 2.15 + Math.abs(Math.sin(t * 4)) * 0.18;
+        if (arrow) arrow.position.y = OVER.arrow + Math.abs(Math.sin(t * 4)) * 0.12;
       }
     }
 
@@ -492,11 +495,11 @@ export function Walkers() {
       {/* The selected walker: a ring at their feet and a bouncing arrow over their head. */}
       <group ref={ring} visible={false}>
         <mesh rotation-x={-Math.PI / 2} position-y={0.05} renderOrder={4}>
-          <ringGeometry args={[0.55, 0.72, 32]} />
+          <ringGeometry args={[0.4 * S, 0.54 * S, 32]} />
           <meshBasicMaterial color={SELECT} toneMapped={false} transparent opacity={0.95} depthWrite={false} />
         </mesh>
-        <mesh rotation-x={Math.PI} position-y={2.15} renderOrder={4}>
-          <coneGeometry args={[0.2, 0.36, 4]} />
+        <mesh rotation-x={Math.PI} position-y={OVER.arrow} renderOrder={4}>
+          <coneGeometry args={[0.16, 0.28, 4]} />
           <meshBasicMaterial color="#ffd24a" toneMapped={false} />
         </mesh>
       </group>
