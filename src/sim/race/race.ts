@@ -152,7 +152,7 @@ export function announceRelease(state: GameState, rng: Rng, def: RivalDef, e: Ex
   const vars = { rival: def.name, model: e.model, lab: state.labName };
   const ahead = e.capability > state.capability;
   const lines = !def.models ? (def.headlines.stunt ?? []) : e.open && def.headlines.open && rng.chance(0.5) ? def.headlines.open : def.headlines.release;
-  if (!quiet && lines.length > 0) addNews(state, fillTemplate(rng.pick(lines), vars), !def.models ? "joke" : ahead ? "bad" : "neutral");
+  if (!quiet && lines.length > 0) addNews(state, fillTemplate(rng.pick(lines), vars), !def.models ? "joke" : ahead ? "bad" : "neutral", "arena");
 
   const close = e.capability >= state.capability * DROP_FLOOR && e.capability <= state.capability * DROP_CEILING;
   if (pressureReady(state) && e.open && def.models && close && state.ledger.income > 0 && !openDropActive(state) && state.day - race.lastDrop >= DROP_GAP_DAYS) {

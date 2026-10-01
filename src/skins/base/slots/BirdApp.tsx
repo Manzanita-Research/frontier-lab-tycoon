@@ -27,6 +27,7 @@ export function BirdApp({ birdapp, layout, actions }: SlotPropsMap["BirdApp"]) {
         <BirdLogo />
         <b>{t("birdapp.title")}</b>
         <span className="birdapp-sub">{birdapp.headline}</span>
+        {!open && (birdapp.unread ?? 0) > 0 && <b className="birdapp-unread" title={`${birdapp.unread} new`}>{birdapp.unread}</b>}
         <span className="birdapp-fold" aria-hidden>
           {open ? "▼" : "▲"}
         </span>

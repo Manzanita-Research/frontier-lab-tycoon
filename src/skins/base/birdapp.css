@@ -242,6 +242,17 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* Headlines since the panel was last open (FLT-54). */
+.birdapp-unread {
+  min-width: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--flt-color-bad);
+  color: #fff;
+  font-size: 11px;
+  line-height: 16px;
+  text-align: center;
+}
 .birdapp-fold {
   opacity: 0.6;
 }

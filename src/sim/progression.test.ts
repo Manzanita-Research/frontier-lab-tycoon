@@ -1,5 +1,5 @@
 import { enableCollusion } from "./collusion/driver";
-import { PROGRESSION } from "../content/progression";
+import { PROGRESSION, SCRUTINY_WAKES } from "../content/progression";
 import { baseContent, baseRules, baseVocabulary } from "../mods/base-game";
 import { withDefs } from "./defs";
 import { makeSnapshot } from "../app/hud";
@@ -14,6 +14,15 @@ import { applyNow, tick } from "./tick";
 import { createRng } from "./rng";
 import { seedWalkers } from "./walkers";
 import { rectContains, routeToRect } from "./pathfind";
+import type { GameState } from "./types";
+
+/** FLT-54: Scrutiny's packs wake one at a time after the rung opens. Run the calendar on until every one is up. */
+function wakeAll(s: GameState, days = 120) {
+  for (let i = 0; i < days && s.progression?.value === "waking"; i++) {
+    s.day++;
+    updateProgression(s);
+  }
+}
 
 describe("the playable ladder", () => {
   it("gates placement and hiring, then unlocks five levels and queues every card", () => {
@@ -45,14 +54,20 @@ describe("the playable ladder", () => {
     expect(s.race.rank).toBeGreaterThan(3);
     s.race.rank = 4; updateProgression(s); expect(progressOf(s).level).toBe(4);
     s.race.rank = 3; updateProgression(s); expect(progressOf(s).level).toBe(5);
-    expect(canHire(s, "security").ok).toBe(true); expect(s.papers?.enabled).toBe(true);
+    expect(canHire(s, "security").ok).toBe(true);
+    // FLT-54: the rung opens with the protests and the event cards; the rest wake one at a time, disasters first.
+    expect(s.papers?.enabled ?? false).toBe(false); expect(s.hearing?.enabled ?? false).toBe(false);
+    expect(systemUnlocked(s, "events")).toBe(true); expect(systemUnlocked(s, "disasters")).toBe(false);
+    wakeAll(s);
+    expect(s.progression?.value).toBe("complete");
+    expect(s.papers?.enabled).toBe(true);
     // Collusion is on the Scrutiny rung, so earning it wakes the pack (it used to stay asleep in normal play).
     expect(s.collusion?.enabled).toBe(true);
     expect(s.hearing?.enabled).toBe(true); expect(s.yacht?.enabled).toBe(true);
     expect(s.auditors?.enabled).toBe(true);
     expect(s.promises?.enabled).toBe(true); expect(s.bill?.enabled).toBe(true);
     s.cash = 350_000; expect(canPlace(s, "security", 12, 19).ok).toBe(true);
-    expect(s.unlockCards?.map((c) => c.id)).toEqual(["business", "team", "race", "scrutiny"]);
+    expect(s.unlockCards?.map((c) => c.id)).toEqual(["business", "team", "race", "scrutiny", ...SCRUTINY_WAKES.filter((w) => !w.silent).map((w) => `wake:${w.id}`)]);
     applyNow(s, [{ type: "dismissUnlock" }]); expect(makeSnapshot(s).unlockCard?.id).toBe("team");
   });
   it("never shows a met last rung: the note moves on to the next open objective, then hides (FLT-48)", () => {
@@ -81,6 +96,7 @@ describe("the playable ladder", () => {
     expect(s.leapfrog.enabled).toBe(false);
     s.race.rank = 3; updateProgression(s);
     expect(progressOf(s).level).toBe(5);
+    wakeAll(s);
     expect(s.papers?.enabled).toBe(true);
     expect(s.collusion?.enabled ?? false).toBe(false);
     const campus = createInitialState(4, "campus");
@@ -104,9 +120,10 @@ describe("the playable ladder", () => {
     expect(s.promises).toBeUndefined(); expect(s.bill).toBeUndefined(); expect(s.factions).toBeUndefined();
   });
 
-  // FLT-52: every pack in the merge train is on the Scrutiny rung, wakes the day it is earned, and has its own off switch.
+  // FLT-52: every pack in the merge train is on the Scrutiny rung and has its own off switch. FLT-54: each wakes on its own
+  // day after the rung opens, with its own New! card.
   const WAVE = ["hearing", "yacht", "defection", "poaching", "auditors", "promises", "capture"] as const;
-  it.each(WAVE)("%s sleeps until Scrutiny, wakes when it is earned, and stays asleep with ?%s=off", (id) => {
+  it.each(WAVE)("%s sleeps until Scrutiny, wakes on its day after it is earned, and stays asleep with ?%s=off", (id) => {
     expect(PROGRESSION.find((r) => r.id === "scrutiny")?.systems).toContain(id);
     // Regulatory Capture keeps its state in `bill`.
     const awake = (s: ReturnType<typeof createInitialState>) => s[id === "capture" ? "bill" : id]?.enabled ?? false;
@@ -117,12 +134,18 @@ describe("the playable ladder", () => {
     expect(awake(s)).toBe(false);
     s.race.rank = 3; updateProgression(s);
     expect(progressOf(s).level).toBe(5);
-    expect(systemUnlocked(s, id)).toBe(true);
+    const wake = SCRUTINY_WAKES.find((w) => w.id === id)!;
+    const opened = s.day;
+    expect(systemUnlocked(s, id)).toBe(false);
+    expect(awake(s)).toBe(false);
+    while (!systemUnlocked(s, id) && s.day < opened + 200) { s.day++; updateProgression(s); }
+    expect(s.day - opened).toBeGreaterThanOrEqual(wake.after);
     expect(awake(s)).toBe(true);
+    expect(s.unlockCards?.at(-1)?.id).toBe(`wake:${id}`);
     const off = createInitialState(4);
     off.flags[`${id}Off`] = 1;
     off.progression = { value: "growing", context: { level: 4 } };
-    off.race.rank = 3; updateProgression(off);
+    off.race.rank = 3; updateProgression(off); wakeAll(off);
     expect(progressOf(off).level).toBe(5);
     expect(awake(off)).toBe(false);
     // A campus (every rung earned) starts with it awake; a garage without.
@@ -154,15 +177,25 @@ describe("the playable ladder", () => {
     expect(createInitialState(4, "campus").factions).toBeDefined();
     expect(createInitialState(4).factions).toBeUndefined();
   });
-  it("names every wave pack on the New! card, in words", () => {
+  it("gives every wave pack its own small New! card, a few days apart, most dramatic first", () => {
     const s = createInitialState(4);
     s.progression = { value: "growing", context: { level: 4 } };
     s.race.rank = 3; updateProgression(s);
     const card = makeSnapshot(s).unlockCard!;
-    for (const id of WAVE) expect(card.items).toContain(id);
-    const shown = playableOf({ unlockCard: card }).unlock!.items;
-    expect(shown).toEqual(expect.arrayContaining(["The Hearing", "The yacht summit", "Defection", "The Poaching War", "Evals Without Borders", "The Promise Tracker", "Regulatory Capture"]));
-    for (const id of WAVE) expect(shown).not.toContain(id);
+    for (const id of WAVE) expect(card.items).not.toContain(id);
+    expect(playableOf({ unlockCard: card }).unlock!.items.length).toBeLessThanOrEqual(8);
+    const woke: { id: string; day: number; title: string }[] = [];
+    const opened = s.day;
+    for (let i = 0; i < 120; i++) {
+      s.day++;
+      const before = s.unlockCards?.length ?? 0;
+      updateProgression(s);
+      for (const c of s.unlockCards!.slice(before)) woke.push({ id: c.id, day: s.day - opened, title: c.title });
+    }
+    expect(woke.map((w) => w.id)).toEqual(expect.arrayContaining(WAVE.map((id) => `wake:${id}`)));
+    expect(woke[0]!.id).toBe("wake:disasters");
+    for (let i = 1; i < woke.length; i++) expect(woke[i]!.day - woke[i - 1]!.day).toBeGreaterThanOrEqual(4);
+    for (const w of woke) expect(w.title).toMatch(/^New! /);
   });
   it("teases what is locked as one row per milestone, not one ??? per item", () => {
     const s = createInitialState(1);

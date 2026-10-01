@@ -2,7 +2,7 @@
 import type { SkinSlots } from "../types";
 import { Layout } from "./Layout";
 import { Arena, Inspector, Objectives, Staff, Stats, ThoughtsPanel, Training } from "./windows";
-import { BuildBar, DramaButton, NewsControls, PhotoButton, Speed, Ticker } from "./taskbar";
+import { BuildBar, DramaButton, NewsControls, PhotoButton, Speed, Ticker, WindowTray } from "./taskbar";
 import { Assistant, Bubble, Coach, Confirm, EraCard, EventCard, HowToPlay, NewsArrival, Outcome, Toast, UnlockCard } from "./messages";
 import { Drama, FrontPage, GroupChat, Mixer, ModManager, ModSkinOffer, NewsRoom, PhotoOverlay, SkinPicker } from "./apps";
 import { Benchmarks, Livestream, Voice } from "./leapfrog";
@@ -19,6 +19,6 @@ import { Challenge, Ending, Memo, Takeover } from "./ending";
 const slots: SkinSlots = {
   Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, Bubble, ThoughtsPanel, Ticker, Toast, Assistant,
   EventCard, Confirm, Coach, UnlockCard, HowToPlay, Arena, Benchmarks, Voice, Livestream, Hearing, LeakedChat, DramaCard, Bill, PromiseTracker, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, Ending, Takeover, NewsControls,
-  NewsArrival, NewsRoom, Mixer, ModManager, ModSkinOffer, Papers, PaperMoment, CrumbWiki, DisasterMenu, DisasterAlert, ReportCard, AuditPin, Factions, GateLegend, BirdApp, DramaButton, Drama, Memo, Challenge, Welcome, SaveLoad,
+  NewsArrival, NewsRoom, Mixer, ModManager, ModSkinOffer, Papers, PaperMoment, CrumbWiki, DisasterMenu, DisasterAlert, ReportCard, AuditPin, Factions, GateLegend, BirdApp, DramaButton, Drama, Memo, Challenge, Welcome, SaveLoad, WindowTray,
 };
 export default slots;

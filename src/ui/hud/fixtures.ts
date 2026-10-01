@@ -11,6 +11,7 @@ import { answer, layPaths, readyForPressure } from "../../sim/testkit";
 import { stageAudit, type AuditMoment } from "../../sim/auditors/demo";
 import { applyNow, tick } from "../../sim/tick";
 import { triggerDisaster } from "../../sim/disasters/driver";
+import { unpaced } from "../../sim/events";
 import type { GameState } from "../../sim/types";
 import { newMotion, stepMotion, type MotionView } from "./leapfrogMotion";
 import type { SkinPickerVM } from "./types";
@@ -81,6 +82,8 @@ export function fixtureDisaster(seed = 3): GameState {
   s.cash = 50_000_000;
   applyNow(s, [{ type: "hire", job: "security" }, { type: "hire", job: "security" }, { type: "hire", job: "sre" }]);
   for (let i = 0; i < 40; i++) tick(s);
+  // A staged moment: both disasters' cards back to back, no card budget (FLT-54).
+  unpaced(s);
   triggerDisaster(s, "rogueSwarm");
   triggerDisaster(s, "weightsLeak");
   for (let i = 0; i < 1200 && !s.disasters.runs.some((r) => r.id === "rogueSwarm" && r.machine.value.startsWith("cleanup") && r.machine.context.progress > 0.2); i++) tick(s, answer(s));

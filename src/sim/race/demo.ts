@@ -1,6 +1,7 @@
 // Debug scenes for the race (`?moment=shuffle|era|era3|auction|funding`): the game is staged a moment before
 // something happens, so a link or a screenshot script lands right on it. Pure sim: it only moves the World along,
 // deterministically, the way a player could have; it isn't used by the game itself.
+import { unpaced } from "../events";
 import { canPlace } from "../commands";
 import type { RivalContext, RivalStored } from "./rival";
 import { applyNow, tick, TICKS_PER_DAY } from "../tick";
@@ -45,6 +46,7 @@ function withRevenue(s: GameState) {
 }
 
 export function stageMoment(s: GameState, moment: Moment) {
+  unpaced(s);
   switch (moment) {
     case "shuffle": {
       // Week 1: you are on top. A moment before week 2, three labs surge, and Sirocco is about to drop a free model.

@@ -148,6 +148,8 @@ export const Progression = Schema.Struct({
   systems: Schema.Array(Schema.Literals(SYSTEM_IDS)),
   panels: Schema.Array(Schema.Literals(HUD_PANELS)),
   goal: Schema.Struct({ text, metric: Schema.Literals(["models", "revenue", "team", "arena", "business", "ops"]), target: positive, vibes: Schema.optionalKey(nonnegative), visitors: Schema.optionalKey(nonnegative) }),
+  // FLT-54: systems that wake later than the rung, each with its own small New! card.
+  wakes: Schema.optionalKey(Schema.Array(Schema.Struct({ id: Schema.Literals(SYSTEM_IDS), after: nonnegative, title: Schema.String, body: Schema.String, silent: Schema.optionalKey(Schema.Boolean) }))),
 });
 export const CoachLine = Schema.Struct({
   id, text,

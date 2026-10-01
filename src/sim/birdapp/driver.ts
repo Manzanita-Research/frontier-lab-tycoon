@@ -166,7 +166,7 @@ function settle(s: GameState, b: BirdAppState, rng: Rng, staff: Map<number, Walk
         const { effects } = applyPoster(p, { type: "BANGER", promote: tier === "occasional" && p.followers >= R.bigAt });
         if (w) think(s, rng, w.id, effects.some((e) => e.type === "PROMOTED") ? "promoted" : "banger", true);
         headline(s, rng, "banger", who, "good");
-        addToast(s, `🐦 @${post.handle} went viral: "${post.text}"`, "good", { source: OWNER, importance: "you" });
+        addToast(s, `🐦 @${post.handle} went viral: "${post.text}"`, "good", { source: OWNER, importance: "you", group: { kind: "viral", who: `@${post.handle}` } });
         break;
       }
       case "controversy": {
@@ -198,7 +198,7 @@ function settle(s: GameState, b: BirdAppState, rng: Rng, staff: Map<number, Walk
         b.queue.push({ post: post.id, by: post.by, kind: "cancelled", day: s.day });
         if (w) think(s, rng, w.id, "cancelled", true);
         headline(s, rng, "cancelled", who, "bad");
-        addToast(s, `🐦 @${post.handle} is cancelled. Comms has it in the queue`, "bad", { source: OWNER, importance: "you" });
+        addToast(s, `🐦 @${post.handle} is cancelled. Comms has it in the queue`, "bad", { source: OWNER, importance: "you", group: { kind: "cancelled", who: `@${post.handle}` } });
         break;
     }
   }
@@ -208,7 +208,7 @@ function settle(s: GameState, b: BirdAppState, rng: Rng, staff: Map<number, Walk
 
 function headline(s: GameState, rng: Rng, beat: BirdOutcome, who: { name: string; handle: string; text: string }, tone: "good" | "bad") {
   const text = pickEvent(rng, beat, "headline");
-  if (text) addNews(s, fillTemplate(text, vars(s, who)), tone);
+  if (text) addNews(s, fillTemplate(text, vars(s, who)), tone, "birdapp");
 }
 
 /** Step a poster's machine and do what it asks. Returns what it emitted. */
@@ -272,7 +272,7 @@ function cancelFate(s: GameState, b: BirdAppState, rng: Rng, id: number, fate: "
     } else if (e.type === "LEFT" && w) {
       s.flags[`quietExit:${w.id}`] = s.day;
       const text = pickEvent(rng, "leave", "headline");
-      if (text) addNews(s, fillTemplate(text, vars(s, { name: w.name, handle: p.handle })), "bad");
+      if (text) addNews(s, fillTemplate(text, vars(s, { name: w.name, handle: p.handle })), "bad", "birdapp");
       resign(s, w, rng);
     } else if (e.type === "DEMOTED") {
       // Still here, still posting, and every rival's recruiter knows the name now.
@@ -378,7 +378,7 @@ function logoffDay(s: GameState, b: BirdAppState, rng: Rng, staff: Map<number, W
     w.focus = Math.max(0, w.focus - R.logoff.focus * (heavy ? 2 : 1));
     if (heavy && p.offDays >= R.logoff.quitAfter && rng.chance(R.logoff.quitChance)) {
       s.flags[`quietExit:${w.id}`] = s.day;
-      addNews(s, `${w.name} leaves ${s.labName} "to post full time"`, "bad");
+      addNews(s, `${w.name} leaves ${s.labName} "to post full time"`, "bad", "birdapp");
       addToast(s, `🐦 @${p.handle} quit: they would rather post than work here`, "bad", { source: OWNER, importance: "you" });
       resign(s, w, rng);
     }

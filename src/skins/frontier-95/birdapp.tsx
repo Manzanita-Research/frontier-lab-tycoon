@@ -32,6 +32,8 @@ export function BirdApp({ birdapp, layout, actions }: SlotPropsMap["BirdApp"]) {
   const who = birdapp.posters.find((p) => p.id === buddy) ?? birdapp.posters[0] ?? null;
   const drowning = comms.desk === "drowning";
   const loud = drowning || !!birdapp.spotlight;
+  // Folded, the bird counts headlines you haven't read (FLT-54); otherwise the posts still live.
+  const unread = open ? 0 : (birdapp.unread ?? 0);
   return (
     <>
       <button
@@ -40,13 +42,19 @@ export function BirdApp({ birdapp, layout, actions }: SlotPropsMap["BirdApp"]) {
         onClick={() => actions.toggleBirdApp()}
         aria-pressed={open}
         aria-label={`${t("birdapp.title")}: ${birdapp.headline}`}
-        title={`Bird Reader: ${birdapp.headline}`}
+        title={unread > 0 ? `Bird Reader: ${unread} new` : `Bird Reader: ${birdapp.headline}`}
       >
         <Ico name="bird" size={18} />
-        {birdapp.live.length > 0 && (
-          <i className="f95-birdn" aria-hidden>
-            {birdapp.live.length}
+        {unread > 0 ? (
+          <i className="f95-birdn unread" aria-hidden>
+            {unread}
           </i>
+        ) : (
+          birdapp.live.length > 0 && (
+            <i className="f95-birdn" aria-hidden>
+              {birdapp.live.length}
+            </i>
+          )
         )}
       </button>
       {open && (

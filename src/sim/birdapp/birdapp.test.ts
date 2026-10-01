@@ -153,6 +153,17 @@ describe("a year on the timeline", () => {
     days(d, 80);
     expect(d.birdapp).toEqual(c.birdapp);
   });
+  it("its toasts fold by group and its headlines badge the folded app (FLT-54)", () => {
+    const s = lab();
+    const seen: GameState["toasts"] = [];
+    days(s, 150, (x) => seen.push(...x.toasts.filter((t) => !seen.includes(t))));
+    const viral = seen.filter((t) => t.text.includes("went viral"));
+    const cancelled = seen.filter((t) => t.text.includes("is cancelled"));
+    expect(viral.length + cancelled.length).toBeGreaterThan(0);
+    for (const t of viral) expect(t.group).toEqual({ kind: "viral", who: expect.stringMatching(/^@/) });
+    for (const t of cancelled) expect(t.group).toEqual({ kind: "cancelled", who: expect.stringMatching(/^@/) });
+    expect(s.news.some((n) => n.panel === "birdapp")).toBe(true);
+  });
   it("a post's outcome and engagement are rolled when it is scheduled, and it only lands at the next midnight", () => {
     const s = lab();
     days(s, 30);

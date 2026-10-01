@@ -1,7 +1,7 @@
 // Review moments for Regulatory Capture (FLT-22) and the Promise Tracker (FLT-23): the same card and tick paths as
 // play, run until the card the shot wants is on screen. No renderer or UI dependencies.
 import { eventById } from "../../content/events";
-import { openEventOf } from "../events";
+import { openEventOf, unpaced } from "../events";
 import { answer, readyForPressure } from "../testkit";
 import { applyNow, tick, TICKS_PER_DAY } from "../tick";
 import type { GameState } from "../types";
@@ -52,6 +52,7 @@ export function lobbyAll(s: GameState) {
  * "rollcall": the roll call after that, with the flipped vote.
  */
 export function stageSenate(s: GameState, moment: SenateMoment) {
+  unpaced(s);
   s.cash = Math.max(s.cash, 2_000_000);
   if (moment === "vote" || moment === "rollcall") {
     wakeSenate(s, 0);

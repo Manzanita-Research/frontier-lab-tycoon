@@ -32,6 +32,7 @@ export function Layout({ slots }: SlotPropsMap["Layout"]) {
       </div>
       <div className="f95-taskbar">
         {slots.BuildBar}
+        {slots.WindowTray}
         {slots.Ticker}
         <div className="f95-tray">
           {slots.Voice}

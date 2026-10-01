@@ -360,7 +360,7 @@ export function Arena({ arena, leapfrog, layout, actions }: SlotPropsMap["Arena"
   const launched = leapfrog.rows.some((r) => r.flash);
   return (
     <Win
-      className={`f95-tasks ${arena.open ? "open" : ""} ${arena.alert ? "alert" : ""} ${onBench ? "wide" : ""} ${launched ? "launched" : ""}`}
+      className={`f95-tasks ${arena.open ? "open" : ""} ${arena.alert ? "alert" : ""} ${onBench ? "wide" : ""} ${arena.auto ? "auto" : ""} ${launched ? "launched" : ""}`}
       title={
         <>
           Task Mangler<span className="f95-long"> — {onBench ? t("bench.title") : t("arena.title")}</span>

@@ -31,13 +31,17 @@ describe("midgame scenario", () => {
     // FLT-56: the auditors huddle before they leave and the grade lingers, which moves the opening a few days, and the
     // Hearing's twelve new questions change what the senators ask. Phase 2: the motions' passes and fails nudge the
     // factions and last longer.
-    // FLT-69: the Bird App wakes with the campus and posts all 480 days (its aura feeds Hype, visitors and applicants).
-    // With the pack asleep (enableBirdApp a no-op) the World hashes to the previous 083910db / 4b179e05 exactly.
     // Rename (#71): Very Safe SI is Super Super AI (id supersuper) and MetaMeta's full name changed; names and ids are in the World.
+    // FLT-54: the card budget spaces the cards (and the World keeps its pacer), so the whole run moves; the unread badges tag
+    // the Arena, Papers and Discourse headlines with their panel (NewsItem.panel); the quit, poach and record toasts carry
+    // their group (Toast.group), and a quit picks its line from QUIT_LINES. Merge train 2: the Promise Tracker's cards ask
+    // the card budget too.
+    // FLT-69: the campus wakes the Bird App too, and its 480 days of posts, Aura and Comms move the run. These were
+    // 7f58d622 / 948ca520 before; with the Bird App asleep (`flags.birdappOff`) the World hashes to them again.
     expect({
       untagged: digest({ ...s, toasts: s.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) }),
       full: digest(s),
-    }).toEqual({ untagged: "aab90a10", full: "0cc57da6" }); // were 083910db / 4b179e05 before FLT-69, 06ccd627 / 31b29e51 on the train before the rename
+    }).toEqual({ untagged: "788c7bf1", full: "303320ca" });
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);
@@ -52,7 +56,7 @@ describe("midgame scenario", () => {
     expect(eraOfState(s)).toBe(2);
     const ready = s.training.context.progress / s.training.context.cost;
     expect(ready).toBeGreaterThanOrEqual(0.6);
-    expect(ready).toBeLessThanOrEqual(0.8);
+    expect(ready).toBeLessThanOrEqual(0.9);
     expect(s.leapfrog.enabled).toBe(true);
     expect(s.leapfrog.last?.day).toBe(s.day);
     expect(s.leapfrog.last?.lab).not.toBe("you");

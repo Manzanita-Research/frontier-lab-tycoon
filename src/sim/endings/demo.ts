@@ -4,7 +4,7 @@
 // Acqui-hired front page, offering Lab #3). They start from the curated
 // mid-game campus (it looks lived-in), put it in Era 4, and move it along the ordinary way: the ending's own chart, the
 // ordinary tick. Pure sim; the game itself never calls it.
-import { openEventOf } from "../events";
+import { openEventOf, unpaced } from "../events";
 import { createRng } from "../rng";
 import { createMidgameScenario } from "../scenarios/midgame";
 import { tick, TICKS_PER_DAY } from "../tick";
@@ -50,6 +50,8 @@ function lateGame(): GameState {
 
 export function stageEndingMoment(moment: string): GameState {
   const s = lateGame();
+  // A staged moment is the card now, not after a quiet week (FLT-54).
+  unpaced(s);
   if (moment === "lab2") {
     // The first lab went under; the second, founded with a loyal researcher, is going the same way.
     applyLineage(s, stageEndingMoment("front-acquihired"), "loyal");
