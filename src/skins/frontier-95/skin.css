@@ -3407,8 +3407,11 @@
         font-size: 13px;
         white-space: nowrap;
       }
-      &.shipped svg {
-        animation: frontier-95-wiggle 0.5s steps(4) 2;
+      &.shipped {
+        flex: none;
+        svg {
+          animation: frontier-95-wiggle 0.5s steps(4) 2;
+        }
       }
     }
     .goal {
@@ -3421,15 +3424,20 @@
       padding: 0 6px;
       background: #fff27a;
       box-shadow: 1px 1px 0 rgb(0 0 0 / 0.35);
-      .tx {
-        flex: 1;
+      .tx,
+      b {
         min-width: 0;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
       }
+      .tx {
+        flex: 1 1 auto;
+      }
+      /* the count gives way to the goal first: "$0 of $40K a day · 0 of 12 visitors" can have the rest of the bar */
       b {
-        flex: none;
+        flex: 0 1 auto;
+        max-width: 45%;
         font-family: var(--flt-font-numbers);
       }
     }
