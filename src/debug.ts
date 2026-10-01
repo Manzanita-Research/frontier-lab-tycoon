@@ -23,7 +23,7 @@ export interface DebugParams {
   photo: boolean;
   /** Hold a camera beat (FLT-56) until it is skipped, and replay the latest one the staged moment left behind: `?moment=defection-exit&beat`. */
   beat: boolean;
-  /** Stage a moment for a link or a screenshot: a race one (shuffle, era, era3, auction, funding: sim/race/demo.ts) an operations one (ops, queue, slop: sim/opsDemo.ts), a Release Leapfrog one (shipnow, pair, stream[:mishap], solved: sim/race/leapfrog/demo.ts), a Circus one (hearing, hearing-verdict, yacht-invite, yacht-leak: sim/circus/demo.ts) or a drama one (defection-chat, defection-card, defection-exit, defection-manifesto, defection-arena, poach-offer: sim/defection/demo.ts) or a Senate one (bill, bill-law, bill-leak, bill-exposed, vote, rollcall: sim/capture/demo.ts) or a discourse one (factions, counterprotest, argue: sim/factions/demo.ts). */
+  /** Stage a moment for a link or a screenshot: a race one (shuffle, era, era3, auction, funding: sim/race/demo.ts) an operations one (ops, queue, slop: sim/opsDemo.ts), a Release Leapfrog one (shipnow, pair, stream[:mishap], solved: sim/race/leapfrog/demo.ts), a Circus one (hearing, hearing-verdict, yacht-invite, yacht-leak: sim/circus/demo.ts) or a drama one (defection-chat, defection-card, defection-exit, defection-manifesto, defection-arena, poach-offer: sim/defection/demo.ts) or a Senate one (bill, bill-law, bill-leak, bill-exposed, vote, rollcall: sim/capture/demo.ts) or a discourse one (factions, counterprotest, argue: sim/factions/demo.ts) or one of FLT-76's beats (beats-pileup, badnews, logo, offsite: sim/beatsDemo.ts). */
   moment: string | null;
   /** Extra researchers on top of the hall-driven count (for Thoughts-panel and queue screenshots). */
   researchers: number;
@@ -57,6 +57,8 @@ export interface DebugParams {
   birdapp: boolean;
   /** The Water Discourse escalation (FLT-25) runs unless `?water=off` (the plain water crowd stays). */
   water: boolean;
+  /** The Sandbox Escape (FLT-59) wakes at Level 5 unless `?escape=off`. */
+  escape: boolean;
   /**
    * Preview a rung of the Playable v1 ladder without playing to it (screenshots, skins): `?debug=1&ladder=1` is level 1,
    * `&coach=0` puts the first of the seven coach lines up, `&unlock` the "New!" card. Only with `debug`.
@@ -107,6 +109,7 @@ export function readDebugParams(search = typeof window === "undefined" ? "" : wi
     factions: q.get("factions") !== "off",
     birdapp: q.get("birdapp") !== "off",
     water: q.get("water") !== "off",
+    escape: q.get("escape") !== "off",
     ladder: q.has("debug") && num("ladder") !== null && num("ladder")! >= 1 && num("ladder")! <= 5 ? { level: Math.round(num("ladder")!) as 1 | 2 | 3 | 4 | 5, coach: num("coach"), unlock: q.has("unlock") } : null,
   };
 }

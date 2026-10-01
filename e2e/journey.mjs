@@ -9,14 +9,26 @@ import { mkdir, writeFile } from "node:fs/promises";
 // level, a toast storm, an empty or overlapping window) is recorded with a screenshot and the run keeps playing, so one
 // run reports the whole ladder; a hard one (the game lost, time frozen, the wall cap) ends it. Exit 1 if anything failed.
 // Flat moments (a real minute at 1× with nothing new) are reported with a still for the triage list, not failed.
+//
+// `--phone` (FLT-61): the same player on a 390×844 touch screen, touch only: taps, a one-finger drag to pan, a pinch to
+// zoom. No pointer hover and no keyboard. On top of the desktop checks it fails on what makes a phone hard to play: a
+// tappable thing under 32 px, a window wider than the screen or with its close button off it, the coach off-screen,
+// text under 11 px, a control only hover reveals, a map that needs precision taps, the campus under 40% of the screen,
+// and a card whose buttons need a scroll. Both modes fail on "[app] … action failed" in the console (the FLT-81 guard).
 const arg = (name, fallback) => {
   const at = process.argv.indexOf(`--${name}`);
   return at >= 0 && process.argv[at + 1] ? process.argv[at + 1] : fallback;
 };
 const urlArg = arg("url");
-if (!urlArg) throw new Error("Usage: pnpm e2e:journey --url <preview URL> [--minutes 90] [--beyond <game days after Level 5>]");
+if (!urlArg) throw new Error("Usage: pnpm e2e:journey --url <preview URL> [--phone] [--skin <id>] [--minutes 90] [--beyond <game days after Level 5>]");
+const phone = process.argv.includes("--phone");
 const url = new URL(urlArg);
 if (url.search || url.hash) throw new Error("The journey must open a URL with no params or hash");
+// A skin other than the default (FLT-61 does a first minute on Base with `--skin base --minutes 1.5`): the coach is
+// skin-agnostic, the Start menu the policy builds with is Frontier 95's.
+const skin = arg("skin");
+const opened = new URL(url);
+if (skin) opened.searchParams.set("skin", skin);
 const out = process.env.FLT_E2E_OUT ?? "e2e/results/journey";
 await mkdir(`${out}/levels`, { recursive: true });
 await mkdir(`${out}/moments`, { recursive: true });
@@ -32,7 +44,14 @@ const BEYOND_DAYS = Number(arg("beyond", "0")); // keep playing this many game d
 const STALL_CAP = 3 * 60_000;
 const HELD_MS = 4000; // a window that holds time this long, that the policy did not open, gets closed
 const CLICK_MS = 5000;
-const viewport = process.env.CI ? { width: 1280, height: 800 } : { width: 1440, height: 900 };
+const viewport = phone ? { width: 390, height: 844 } : process.env.CI ? { width: 1280, height: 800 } : { width: 1440, height: 900 };
+// FLT-61's phone thresholds.
+const TAP_MIN = 32; // px: anything tappable, and a map tile to build on without a precision tap
+const TEXT_MIN = 11; // px
+const CAMPUS_MIN = 0.4; // of the screen showing the map, with nothing but the HUD up
+const PHONE_CHECK_MS = 3000; // the DOM sweeps are heavy: at most this often
+// A finger lands near where it aims, not on it: each tap on the map is off by one of these (px), in turn.
+const JITTER = [[0, 0], [5, -4], [-6, 3], [4, 6], [-3, -6], [6, 2]];
 
 // What the sensible player builds at each level, as totals (a kind already built counts). Hires are "staff:<job>".
 // Level 1 is the coach's. Level 2 wants revenue and visitors (Gateways, a Kombucha Bar), 3 wants an SRE and a Janitor for
@@ -56,11 +75,17 @@ const PRICES = { cluster: 600_000, hall: 900_000, gateway: 400_000, kombucha: 12
 const SIZE = { cluster: [2, 2], hall: [3, 3], gateway: [2, 2], kombucha: [1, 1], nap: [2, 1], snack: [1, 1], demo: [2, 2], security: [2, 2] };
 
 const browser = await chromium.launch({ headless: true, args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--no-sandbox"] });
-const page = await browser.newPage({ viewport, deviceScaleFactor: 1 });
+const context = await browser.newContext({ viewport, deviceScaleFactor: 1, ...(phone ? { isMobile: true, hasTouch: true } : {}) });
+const page = await context.newPage();
+const cdp = phone ? await context.newCDPSession(page) : null;
 const errors = [];
-page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
+const appFailed = []; // FLT-81/84: "[app] … action failed", whatever its console level
+page.on("console", (message) => {
+  if (/\[app\].*action failed/i.test(message.text())) appFailed.push(message.text());
+  else if (message.type() === "error") errors.push(message.text());
+});
 page.on("pageerror", (error) => errors.push(error.message));
-const result = { url: url.href, viewport, levels: [], failures: [], cards: [], held: [], purchases: [], refused: [], ownToasts: [], flat: [], samples: [], clicks: { ok: 0, forced: 0, gone: 0 } };
+const result = { url: opened.href, viewport, phone, touch: { taps: 0, drags: 0, pinches: 0, tile: null, misplaced: 0 }, campus: [], levels: [], failures: [], cards: [], held: [], purchases: [], refused: [], ownToasts: [], flat: [], samples: [], clicks: { ok: 0, forced: 0, gone: 0 } };
 let firstClick = 0;
 let start = null;
 let tpd = 20;
@@ -70,8 +95,8 @@ const log = (text) => console.log(`[${wallS().toFixed(0).padStart(5)} s] ${text}
 const slug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60);
 const probeNow = () => page.evaluate(() => window.__fltProbe());
 
-/** Park the pointer on the taskbar: off the map (no hover ghost) and away from the canvas edge (no edge scrolling). */
-const park = () => page.mouse.move(viewport.width * 0.45, viewport.height - 20);
+/** Park the pointer on the taskbar: off the map (no hover ghost) and away from the canvas edge (no edge scrolling). A finger has no pointer to park. */
+const park = async () => { if (!phone) await page.mouse.move(viewport.width * 0.45, viewport.height - 20); };
 /** A shots-style still: the pointer parked, then the whole page. */
 async function still(path) {
   await park();
@@ -81,8 +106,7 @@ async function still(path) {
 
 const failedKinds = new Set();
 /** A soft failure: a screenshot, then keep playing. Each kind + detail is reported once. */
-async function fail(kind, message, probe) {
-  const key = `${kind}:${message}`;
+async function fail(kind, message, probe, key = `${kind}:${message}`) {
   if (failedKinds.has(key)) return;
   failedKinds.add(key);
   const shot = await still(`${out}/moments/fail-${String(result.failures.length + 1).padStart(2, "0")}-${slug(kind)}.png`).catch(() => null);
@@ -92,7 +116,8 @@ async function fail(kind, message, probe) {
 
 async function press(target) {
   try {
-    await target.click({ timeout: CLICK_MS });
+    if (phone) await target.tap({ timeout: CLICK_MS });
+    else await target.click({ timeout: CLICK_MS });
     result.clicks.ok++;
     return true;
   } catch (error) {
@@ -103,7 +128,8 @@ async function press(target) {
     return false;
   }
   try {
-    await target.click({ force: true, timeout: CLICK_MS });
+    if (phone) await target.tap({ force: true, timeout: CLICK_MS });
+    else await target.click({ force: true, timeout: CLICK_MS });
     result.clicks.forced++;
     return true;
   } catch (error) {
@@ -111,6 +137,85 @@ async function press(target) {
     result.clicks.gone++;
     return false;
   }
+}
+
+// ── touch (FLT-61) ──────────────────────────────────────────────────────────────────────────────────────────────────
+// Real touch events through CDP: the map's controls read pointer events of type "touch", as on a phone.
+const touch = (type, points) => cdp.send("Input.dispatchTouchEvent", { type, touchPoints: points.map(([x, y], id) => ({ x, y, id, radiusX: 6, radiusY: 6, force: 1 })) });
+async function drag(x, y, dx, dy, steps = 12) {
+  await touch("touchStart", [[x, y]]);
+  for (let i = 1; i <= steps; i++) {
+    await touch("touchMove", [[x + (dx * i) / steps, y + (dy * i) / steps]]);
+    await page.waitForTimeout(16);
+  }
+  await touch("touchEnd", []);
+  result.touch.drags++;
+}
+async function pinch(x, y, from, to, steps = 12) {
+  await touch("touchStart", [[x - from, y], [x + from, y]]);
+  for (let i = 1; i <= steps; i++) {
+    const d = from + ((to - from) * i) / steps;
+    await touch("touchMove", [[x - d, y], [x + d, y]]);
+    await page.waitForTimeout(16);
+  }
+  await touch("touchEnd", []);
+  result.touch.pinches++;
+}
+/** A tap on the map, or a click on a desktop. */
+async function tapAt(x, y) {
+  if (phone) {
+    await page.touchscreen.tap(x, y);
+    result.touch.taps++;
+  } else await page.mouse.click(x, y);
+}
+/** Put down the tool in hand: Escape on a desktop, the Done ✕ button on a phone (FLT-63). */
+async function putDown() {
+  if (!phone) return page.keyboard.press("Escape");
+  const done = page.locator(".mode-done:visible").first();
+  if (await done.count()) await press(done);
+}
+/** Close the window on top: Escape on a desktop, its ✕ on a phone. */
+async function closeTop() {
+  if (!phone) return page.keyboard.press("Escape");
+  const close = page.locator("section.f95-win:visible [data-g=close], [role=dialog]:visible [data-g=close]").last();
+  if (await close.count()) await press(close);
+}
+/** The size of one map tile on screen, in px (the shorter of its two sides). */
+function tilePx(view) {
+  const a = project(view, 11, 11), b = project(view, 12, 11), c = project(view, 11, 12);
+  return a && b && c ? Math.min(Math.hypot(b[0] - a[0], b[1] - a[1]), Math.hypot(c[0] - a[0], c[1] - a[1])) : 0;
+}
+/** Where a phone's Done ✕ button (FLT-63) will be once a tool is in hand: the right edge, 46% down. */
+const underDone = ([x, y]) => phone && x > viewport.width * 0.45 && y > viewport.height * 0.38 && y < viewport.height * 0.6;
+/** A point near the middle of the map that only the canvas covers, for a finger to land on; null if there is none. */
+async function clearSpot() {
+  for (const [fx, fy] of [[0.5, 0.5], [0.5, 0.4], [0.5, 0.6], [0.3, 0.5], [0.7, 0.5], [0.5, 0.3], [0.5, 0.7]]) {
+    const at = [viewport.width * fx, viewport.height * fy];
+    if (await onCanvas(at)) return at;
+  }
+  return null;
+}
+/**
+ * Pinch in until a tile is TAP_MIN px across, so a building lands where a finger aims. The pinch is counted: needing it
+ * is the phone's cost. A map that the maximum zoom still leaves under TAP_MIN is a failure (only precision taps place).
+ */
+async function zoomForTaps() {
+  for (let i = 0; i < 4; i++) {
+    const p = await probeNow();
+    const px = tilePx(p.view);
+    result.touch.tile = +px.toFixed(1);
+    if (px >= TAP_MIN) return true;
+    const at = await clearSpot();
+    if (!at) return false;
+    // Fingers 2·from apart move to 2·to apart; keep them on screen.
+    const span = Math.min(at[0], viewport.width - at[0]) - 10;
+    await pinch(at[0], at[1], 30, Math.min(span, 30 * Math.min(2.2, (TAP_MIN + 4) / Math.max(1, px))));
+    await page.waitForTimeout(400);
+  }
+  const px = tilePx((await probeNow()).view);
+  result.touch.tile = +px.toFixed(1);
+  if (px < TAP_MIN) await fail("precision", `A map tile is ${px.toFixed(0)} px across at the closest a pinch goes: placing a building needs a precision tap`, await probeNow());
+  return px >= TAP_MIN;
 }
 
 // ── the map ─────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -186,12 +291,23 @@ async function reveal(x, z, w = 1, d = 1) {
     const p = await probeNow();
     if (p.pendingConfirm || p.event) return null;
     const at = screenOf(p.view, x, z, w, d);
-    if (at && (await onCanvas(at))) return at;
+    if (at && !underDone(at) && (await onCanvas(at))) return at;
     const raw = project(p.view, x, z, w, d);
     if (!raw) return null;
-    // Bring it towards the middle of the canvas, which the windows leave clear.
-    const dx = raw[0] - (p.view.rect.left + p.view.rect.width / 2), dy = raw[1] - (p.view.rect.top + p.view.rect.height * 0.55);
+    // Bring it towards the middle of the canvas, which the windows leave clear. A phone's Done ✕ button (FLT-63) sits at the
+    // right edge, 46% down, while a tool is in hand: aim left of and below it there.
+    const [ax, ay] = phone ? [0.4, 0.6] : [0.5, 0.55];
+    const dx = raw[0] - (p.view.rect.left + p.view.rect.width * ax), dy = raw[1] - (p.view.rect.top + p.view.rect.height * ay);
     if (Math.hypot(dx, dy) < 40) return null; // in the middle and still covered: give up on this one
+    if (phone) {
+      // Drag the map under a finger: the spot moves with it, towards the middle.
+      const from = await clearSpot();
+      if (!from) return null;
+      const k = Math.min(1, 220 / Math.hypot(dx, dy));
+      await drag(from[0], from[1], -dx * k, -dy * k);
+      await page.waitForTimeout(450); // the controls glide to a stop
+      continue;
+    }
     const key = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "ArrowRight" : "ArrowLeft") : (dy > 0 ? "ArrowDown" : "ArrowUp");
     await park();
     await page.keyboard.down(key);
@@ -211,7 +327,7 @@ async function openStart() {
   return page.locator("[role=menu]:visible").first();
 }
 async function closeStart() {
-  if (await page.locator("[role=menu]:visible").count()) await page.keyboard.press("Escape");
+  if (!phone && (await page.locator("[role=menu]:visible").count())) await page.keyboard.press("Escape");
   if (await page.locator("[role=menu]:visible").count()) await press(page.locator("[data-testid=start-button]").first());
 }
 async function pickTool(name) {
@@ -286,11 +402,148 @@ const centre = () => ({ x: viewport.width * 0.3, y: viewport.height * 0.3, w: vi
 const OVERLAP_MS = 500; // how long the coach (or a confirm) may sit on a window before it is an overlap
 const CARD_SPAN_DAYS = 5; // FLT-54: after Level 5, at most one card per this many game days
 
+// ── the phone checks (FLT-61) ────────────────────────────────────────────────────────────────────────────────────────
+/**
+ * One sweep of the page for what makes a phone hard to play. Each issue has a stable key (the element, not where it
+ * happens to be), so it is filed once. `campus` is the share of the screen the map shows through, when asked for.
+ */
+async function sweep(withCampus) {
+  return page.evaluate(([WIN, TAP_MIN, TEXT_MIN, withCampus]) => {
+    const vw = innerWidth, vh = innerHeight;
+    const issues = [];
+    const seen = (el) => el.checkVisibility?.({ opacityProperty: true, visibilityProperty: true }) ?? true;
+    const onScreen = (r) => r.right > 0 && r.bottom > 0 && r.left < vw && r.top < vh && r.width > 0 && r.height > 0;
+    const inside = (r) => r.left >= -1 && r.top >= -1 && r.right <= vw + 1 && r.bottom <= vh + 1;
+    const name = (el) => (el.getAttribute("aria-label") || el.getAttribute("title") || el.textContent || "").trim().replace(/\s+/g, " ").slice(0, 40) || `<${el.tagName.toLowerCase()} class="${String(el.className).slice(0, 40)}">`;
+    const where = (el) => {
+      const win = el.closest(WIN);
+      return win ? (win.getAttribute("aria-label") || win.querySelector(".f95-tb, .f95-title, h2, h3")?.textContent?.trim() || String(win.className).split(" ")[0]).slice(0, 40) : "the HUD";
+    };
+    const stable = (text) => text.replace(/[-−+$€]?[\d][\d.,]*\s*[%KMB×]?/g, "#").replace(/\b(rising|falling|steady)\b/g, "~"); // a live readout keeps its key
+    const sig = (el) => `${el.tagName.toLowerCase()}.${String(el.className).trim().split(/\s+/).slice(0, 2).join(".")}`;
+    const scroller = (el) => {
+      for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) {
+        const st = getComputedStyle(a);
+        if (/(auto|scroll)/.test(st.overflowY + st.overflowX) && (a.scrollHeight > a.clientHeight + 1 || a.scrollWidth > a.clientWidth + 1)) return a;
+      }
+      return null;
+    };
+    // Anything tappable under TAP_MIN px (on screen, visible, not disabled).
+    const TAPPABLE = "button, a[href], input:not([type=hidden]), select, textarea, summary, [role=button], [role=menuitem], [role=tab], [role=link], [role=checkbox], [role=switch], [role=option], [role=slider]";
+    for (const el of document.querySelectorAll(TAPPABLE)) {
+      if (el.disabled || el.closest("[inert], [aria-hidden=true]") || !seen(el)) continue;
+      const r = el.getBoundingClientRect();
+      if (r.width < 1 || r.height < 1) continue;
+      // A control pushed past the edge of the screen (not one a scroll brings back, like a long menu's) can't be tapped.
+      if (!inside(r) && !scroller(el) && !el.closest("[role=menu]")) {
+        issues.push({ kind: "off-screen control", key: `${stable(where(el))}|${stable(name(el))}`, message: `"${name(el)}" in ${where(el)} is at ${Math.round(r.left)}…${Math.round(r.right)} × ${Math.round(r.top)}…${Math.round(r.bottom)}, ${onScreen(r) ? "partly" : "wholly"} off the ${vw}×${vh} screen` });
+        if (!onScreen(r)) continue;
+      }
+      if (r.width >= TAP_MIN && r.height >= TAP_MIN) continue;
+      issues.push({ kind: "small target", key: `${stable(where(el))}|${stable(name(el))}`, message: `"${name(el)}" in ${where(el)} is ${Math.round(r.width)}×${Math.round(r.height)} px` });
+    }
+    // Windows wider than the screen, or with the close button off it; a card whose buttons need a scroll.
+    for (const win of document.querySelectorAll(WIN)) {
+      if (win.parentElement?.closest(WIN) || !seen(win)) continue;
+      const r = win.getBoundingClientRect();
+      if (r.width < 4 || r.height < 4) continue;
+      const label = where(win);
+      const coach = win.matches("[role=status][aria-label^='Assistant']");
+      if (coach) {
+        if (!inside(r)) issues.push({ kind: "coach off-screen", key: "coach", message: `The coach balloon is at ${Math.round(r.left)},${Math.round(r.top)} ${Math.round(r.width)}×${Math.round(r.height)}, past the ${vw}×${vh} screen` });
+        continue;
+      }
+      if (r.left < -1 || r.right > vw + 1) issues.push({ kind: "wide window", key: label, message: `"${label}" spans x ${Math.round(r.left)}…${Math.round(r.right)} on a ${vw} px screen` });
+      for (const close of win.querySelectorAll("[data-g=close], [aria-label^=Close i]")) {
+        const c = close.getBoundingClientRect();
+        if (seen(close) && !inside(c)) issues.push({ kind: "close off-screen", key: label, message: `The close button of "${label}" is at ${Math.round(c.left)},${Math.round(c.top)}, off the screen` });
+      }
+      for (const b of win.querySelectorAll("button, [role=button]")) {
+        if (b.disabled || !seen(b) || b.matches("[data-g]")) continue;
+        const br = b.getBoundingClientRect();
+        if (br.width < 1 || br.height < 1) continue;
+        const sc = scroller(b);
+        const box = sc ? sc.getBoundingClientRect() : null;
+        const hidden = !inside(br) || (box && (br.top < box.top - 1 || br.bottom > box.bottom + 1 || br.left < box.left - 1 || br.right > box.right + 1));
+        if (hidden) issues.push({ kind: "scroll to reach", key: `${stable(label)}|${stable(name(b))}`, message: `"${name(b)}" in "${label}" is ${sc ? "scrolled out of its window" : "off the screen"} (${Math.round(br.left)},${Math.round(br.top)})` });
+      }
+    }
+    // Text under TEXT_MIN px.
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const small = new Map();
+    for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+      const t = n.textContent.trim();
+      const el = n.parentElement;
+      if (!t || !el || el.closest("script, style, svg, canvas")) continue;
+      const size = parseFloat(getComputedStyle(el).fontSize);
+      if (!(size < TEXT_MIN)) continue;
+      const k = `${stable(where(el))}|${sig(el)}|${size}`;
+      if (small.has(k) || !seen(el) || !onScreen(el.getBoundingClientRect())) continue;
+      small.set(k, { kind: "small text", key: k, message: `${size} px text in ${where(el)} (${sig(el)}): "${t.slice(0, 40)}"` });
+    }
+    issues.push(...small.values());
+    // Controls only hover reveals: a :hover rule (that applies on this screen) that shows something now hidden.
+    const rules = [];
+    const walk = (list) => {
+      for (const rule of list) {
+        if (rule.media && !matchMedia(rule.media.mediaText).matches) continue;
+        if (rule.selectorText?.includes(":hover")) rules.push(rule);
+        if (rule.cssRules) walk(rule.cssRules);
+      }
+    };
+    for (const sheet of document.styleSheets) { try { walk(sheet.cssRules); } catch { /* another origin's sheet */ } }
+    for (const rule of rules) {
+      const st = rule.style;
+      const reveals = (st.display && st.display !== "none") || st.visibility === "visible" || (st.opacity && +st.opacity > 0.5) || (st.pointerEvents && st.pointerEvents !== "none");
+      if (!reveals) continue;
+      for (const sel of rule.selectorText.split(",").filter((x) => x.includes(":hover") && !x.includes(":not(:hover"))) {
+        let els;
+        try { els = [...document.querySelectorAll(sel.replace(/:hover/g, ""))]; } catch { continue; }
+        const shut = els.find((el) => !seen(el) && (el.closest(WIN) || el.matches(TAPPABLE) || el.querySelector(TAPPABLE)) && el.parentElement && seen(el.parentElement));
+        if (shut) issues.push({ kind: "hover only", key: sel.trim(), message: `"${sel.trim()}" only shows on hover (${name(shut)} in ${where(shut)})` });
+      }
+    }
+    // ... or a React handler that only listens for the pointer coming over it (nothing to tap, focus or press).
+    for (const el of document.body.querySelectorAll("*")) {
+      const key = Object.keys(el).find((k) => k.startsWith("__reactProps$"));
+      const props = key && el[key];
+      if (!props || !(props.onMouseEnter || props.onPointerEnter || props.onMouseOver || props.onPointerOver)) continue;
+      if (props.onClick || props.onPointerDown || props.onMouseDown || props.onTouchStart || props.onFocus || !seen(el) || !onScreen(el.getBoundingClientRect())) continue;
+      if (el.closest(TAPPABLE) || el.querySelector(TAPPABLE)) continue; // a menu row that opens on hover, around a button that opens on a tap
+      issues.push({ kind: "hover only", key: `react|${where(el)}|${sig(el)}`, message: `${sig(el)} ("${name(el)}") in ${where(el)} reacts to the pointer coming over it, with nothing to tap` });
+    }
+    // The campus: the share of the screen where the map shows through.
+    let campus = null;
+    if (withCampus) {
+      let hit = 0, all = 0;
+      for (let y = 6; y < vh; y += 12) for (let x = 6; x < vw; x += 12) { all++; if (document.elementFromPoint(x, y)?.tagName === "CANVAS") hit++; }
+      campus = hit / all;
+    }
+    return { issues, campus };
+  }, [WIN, TAP_MIN, TEXT_MIN, withCampus]);
+}
+let lastSweep = 0;
+/** File what a sweep finds; the campus share is measured only with nothing but the HUD up (no card, menu, tool or window the policy opened). */
+async function phoneChecks(p, force = false) {
+  if (!phone || (!force && Date.now() - lastSweep < PHONE_CHECK_MS)) return;
+  lastSweep = Date.now();
+  const calm = !p.event && !p.pendingConfirm && !p.overlays.length && !p.unlockCard && !(await page.locator("[role=menu]:visible, .mode-done:visible, .f95-bsod-go:visible").count());
+  const t0 = Date.now();
+  const { issues, campus } = await sweep(calm);
+  const ms = Date.now() - t0;
+  result.sweeps = { n: (result.sweeps?.n ?? 0) + 1, ms: (result.sweeps?.ms ?? 0) + ms, max: Math.max(result.sweeps?.max ?? 0, ms) };
+  for (const i of issues) await fail(i.kind, i.message, p, `${i.kind}:${i.key}`);
+  if (campus !== null) {
+    result.campus.push({ gameDay: gameDays(p), level: p.progress.level, share: +campus.toFixed(3) });
+    if (campus < CAMPUS_MIN) await fail("campus hidden", `The map shows through ${(campus * 100).toFixed(0)}% of the screen (under ${CAMPUS_MIN * 100}%) with nothing but the HUD up: ${(await windows()).map((w) => w.label).join(", ")}`, p, `campus:${p.progress.level}`);
+  }
+}
+
 // ── the run ─────────────────────────────────────────────────────────────────────────────────────────────────────────
 let probe = null;
 const outcome = { reached: false };
 try {
-  await page.goto(url.href, { waitUntil: "networkidle", timeout: 120_000 });
+  await page.goto(opened.href, { waitUntil: "networkidle", timeout: 120_000 });
   await page.waitForFunction(() => typeof window.__fltProbe === "function", { timeout: 60_000 });
   const first = await probeNow();
   if (first.speed !== 1 || !first.paused) throw new Error("Opening must be paused at 1×");
@@ -340,6 +593,8 @@ try {
 
     // ── checks ──
     if (errors.length) await fail("console error", errors.splice(0).join("; ").slice(0, 400), probe);
+    if (appFailed.length) await fail("action failed", appFailed.splice(0).join("; ").slice(0, 400), probe);
+    await phoneChecks(probe);
     if (probe.cash < CASH_FLOOR) await fail("cash floor", `Cash ${probe.cash} below ${CASH_FLOOR}`, probe);
     if (probe.outcome?.outcome === "lost" && !probe.outcome.dismissed) throw new Error(`The game was lost at game day ${gameDays(probe)} (level ${probe.progress.level})`);
     if (probe.tick !== lastTick) { lastTick = probe.tick; lastTickAt = now; }
@@ -374,7 +629,8 @@ try {
       result.maxAuto = Math.max(result.maxAuto ?? 0, auto.length);
       if (auto.length > 2 && !centreSeen.has("budget")) { centreSeen.add("budget"); await fail("window budget", `${auto.length} windows the game opened are up at once: ${auto.join(", ")}`, probe); }
       for (const w of wins) {
-        if (w.modal || w.coach || w.confirm || (staffLeftOpen && /staff/i.test(w.label)) || !overlap(w.box, centre()) || centreSeen.has(w.label)) continue;
+        // On a phone every window spans the screen: the campus share (phoneChecks) stands in for the centre rule.
+        if (phone || w.modal || w.coach || w.confirm || (staffLeftOpen && /staff/i.test(w.label)) || !overlap(w.box, centre()) || centreSeen.has(w.label)) continue;
         centreSeen.add(w.label);
         await fail("campus centre", `"${w.label}" covers the campus centre (${Math.round(w.box.x)},${Math.round(w.box.y)} ${Math.round(w.box.w)}×${Math.round(w.box.h)})`, probe);
       }
@@ -443,10 +699,17 @@ try {
       // The coach's own steps go ahead, as the stranger does; anything else keeps the runway and tries later.
       const dialog = page.locator("[role=alertdialog]:visible, [role=dialog]:visible").filter({ hasText: /runway/i }).first();
       const coachStep = !coachDone;
+      await phoneChecks(probe, true);
       result.refused.push({ gameDay: gameDays(probe), kind: probe.pendingConfirm.kind, message: probe.pendingConfirm.message, went: coachStep });
       const button = coachStep ? dialog.getByRole("button", { name: /^(OK|Go ahead|Build anyway|Hire anyway)$/i }).first() : dialog.getByRole("button", { name: /^(Cancel|Keep the runway)$/i }).first();
       if (await button.count()) await press(button);
-      else await page.keyboard.press("Escape");
+      else if (!phone) await page.keyboard.press("Escape");
+      else await fail("dead end", `The ${probe.pendingConfirm.kind} confirm has no button to tap`, probe);
+      await page.waitForTimeout(300);
+      continue;
+    }
+    // FLT-76: a card can wait its turn behind a ship or a level-up (the moment queue); it is open in the sim but not on screen yet.
+    if (probe.event && (probe.stage ?? []).some((k) => k === "card" || k === "era")) {
       await page.waitForTimeout(300);
       continue;
     }
@@ -455,6 +718,7 @@ try {
       const choice = dialog.locator(".f95-choices button, button.choice, .choices button").first();
       if (!cardSeen.has(probe.event)) {
         cardSeen.add(probe.event);
+        await phoneChecks(probe, true);
         const shot = await still(`${out}/moments/card-${slug(probe.event)}.png`);
         result.cards.push({ id: probe.event, gameDay: gameDays(probe), level: probe.progress.level, choice: (await choice.textContent().catch(() => ""))?.trim().replace(/\s+/g, " ").slice(0, 80), shot });
         log(`Card ${probe.event}: first choice`);
@@ -490,7 +754,7 @@ try {
           result.held.push({ overlays: held, gameDay: gameDays(probe), level: probe.progress.level, shot });
           log(`Time held by ${held}: closing it`);
         }
-        await page.keyboard.press("Escape");
+        if (!phone) await page.keyboard.press("Escape");
         const close = page.locator("section.f95-win:visible [data-g=close], [role=dialog]:visible [data-g=close]").last();
         if (await close.count()) await press(close);
         heldSince = 0;
@@ -514,7 +778,7 @@ try {
         lastCoachClick = Date.now();
       }
       // Close the mind-read the peek opened, once it has been read.
-      if (peeked && probe.coachId !== "peek") { peeked = false; await page.waitForTimeout(1500); await page.keyboard.press("Escape"); }
+      if (peeked && probe.coachId !== "peek") { peeked = false; await page.waitForTimeout(1500); await closeTop(); }
       await page.waitForTimeout(250);
       continue;
     }
@@ -573,25 +837,42 @@ try {
       await layRoad(p, 4);
       return false;
     }
-    if (!(await pickTool(NAMES[kind]))) return false;
+    // A phone pans with no tool in hand (one finger on a tool would build or paint), so it picks the tool per spot.
+    if (phone && !(await zoomForTaps())) return false;
+    if (!phone && !(await pickTool(NAMES[kind]))) return false;
     await page.waitForTimeout(250);
     const before = p.map.buildings.length;
+    const size = SIZE[kind] ?? [2, 2];
     for (const [x, z] of options.slice(0, 6)) {
       const fresh = await probeNow();
       if (fresh.pendingConfirm || fresh.event) break;
-      const at = await reveal(x, z, ...(SIZE[kind] ?? [2, 2]));
+      let at = await reveal(x, z, ...size);
       if (!at) continue;
-      await page.mouse.click(at[0], at[1]);
+      if (phone) {
+        if (!(await pickTool(NAMES[kind]))) return false;
+        await page.waitForTimeout(300);
+        at = screenOf((await probeNow()).view, x, z, ...size);
+        if (!at || !(await onCanvas(at))) { await putDown(); continue; }
+        const [jx, jy] = JITTER[result.touch.taps % JITTER.length];
+        at = [at[0] + jx, at[1] + jy];
+      }
+      await tapAt(at[0], at[1]);
       await page.waitForTimeout(500);
       const after = await probeNow();
       if (after.pendingConfirm) break; // the confirm is answered by the main loop
       if (after.map.buildings.length > before) {
+        const built = after.map.buildings.find((b) => b.kind === kind && !p.map.buildings.some((o) => o.x === b.x && o.z === b.z));
+        if (built && (built.x !== x || built.z !== z)) {
+          result.touch.misplaced++;
+          if (phone) await fail("precision", `A tap aimed at ${x},${z} built the ${NAMES[kind]} at ${built.x},${built.z} (tile ${result.touch.tile} px)`, after, `precision:misplaced:${kind}`);
+        }
         result.purchases.push({ gameDay: gameDays(after), level: after.progress.level, kind, x, z, cash: after.cash });
         log(`Built ${NAMES[kind]} at ${x},${z} (game day ${gameDays(after)}, cash ${(after.cash / 1e6).toFixed(2)}M)`);
         break;
       }
+      if (phone) await putDown();
     }
-    await page.keyboard.press("Escape");
+    await putDown();
     const done = (await probeNow()).map.buildings.length > before;
     return done;
   }
@@ -600,21 +881,36 @@ try {
     const g = grid(p);
     const todo = ROADS.filter(([x, z]) => !g.isPath(x, z) && !g.taken(x, z)).slice(0, n);
     if (!todo.length) return;
+    if (phone && !(await zoomForTaps())) return;
     if (!(await pickTool("Path"))) return;
     await page.waitForTimeout(250);
     let laid = 0;
+    let why = "";
     for (const [x, z] of todo) {
-      const at = await reveal(x, z);
-      if (!at) break;
+      let at;
+      if (phone) {
+        // One finger paints with the Path tool in hand: put it down to pan, then pick it up again.
+        at = screenOf((await probeNow()).view, x, z);
+        if (!at || !(await onCanvas(at))) {
+          await putDown();
+          at = await reveal(x, z);
+          if (!at) { why = "could not pan it into view"; break; }
+          if (!(await pickTool("Path"))) { why = "no Path tool"; break; }
+          await page.waitForTimeout(250);
+          at = screenOf((await probeNow()).view, x, z);
+          if (!at || !(await onCanvas(at))) { why = `covered with the tool in hand (${at ? await topAt(...at) ?? (await page.evaluate(([x, y]) => document.elementFromPoint(x, y)?.className, at)) : "off the map"})`; break; }
+        }
+      } else at = await reveal(x, z);
+      if (!at) { why ||= "could not bring it into view"; break; }
       const before = (await probeNow()).map.paths.length;
-      await page.mouse.click(at[0], at[1]);
+      await tapAt(at[0], at[1]);
       await page.waitForTimeout(250);
-      if ((await probeNow()).map.paths.length <= before) break;
+      if ((await probeNow()).map.paths.length <= before) { why = `the tap at ${at.map(Math.round).join(",")} laid nothing`; break; }
       laid++;
     }
-    await page.keyboard.press("Escape");
+    await putDown();
     if (laid) log(`Laid ${laid} path tiles`);
-    else log(`Could not lay the road at ${todo[0].join(",")}`);
+    else log(`Could not lay the road at ${todo[0].join(",")}: ${why}`);
   }
   async function hire(job, p) {
     // Staff toggles the Staff Manager: only open it if it is not already up.
@@ -681,18 +977,22 @@ try {
 function report(r) {
   const money = (n) => (n === null || n === undefined ? "–" : `${n < 0 ? "−" : ""}$${(Math.abs(n) / 1e6).toFixed(2)}M`);
   const rows = r.levels.map((l) => `| ${l.level} ${l.name} | ${l.gameDay} | ${l.levelDays ?? "–"}${l.window ? ` (${l.window[0]}–${l.window[1]})` : ""} | ${(l.wallS / 60).toFixed(1)} min | ${money(l.cash)} | ${l.runway === null || l.runway === undefined ? "∞" : `${l.runway.toFixed(1)} mo`} | ${l.toastsPerMinute} | ${l.windows.join("; ").slice(0, 120)} |`);
-  return `# Journey test: Level 1 → 5
+  const kinds = Object.entries(r.failures.reduce((m, f) => ({ ...m, [f.kind]: (m[f.kind] ?? 0) + 1 }), {})).map(([k, n]) => `${k} ×${n}`).join(", ");
+  const shares = (r.campus ?? []).map((c) => c.share).sort((a, b) => a - b);
+  const pct = (x) => (x === undefined ? "–" : `${Math.round(x * 100)}%`);
+  const touchLine = r.phone ? `\nPhone, touch only: ${r.touch.taps} map taps, ${r.touch.drags} drags, ${r.touch.pinches} pinches, ${r.clicks.ok + r.clicks.forced} control taps; a map tile ${r.touch.tile ?? "?"} px when building; ${r.touch.misplaced} misplaced buildings. Campus share of the screen (HUD only): min ${pct(shares[0])}, median ${pct(shares[Math.floor(shares.length / 2)])} over ${shares.length} looks. ${r.sweeps?.n ?? 0} sweeps, ${r.sweeps ? Math.round(r.sweeps.ms / r.sweeps.n) : "–"} ms each (max ${r.sweeps?.max ?? "–"}).\n` : "";
+  return `# Journey test${r.phone ? " (phone)" : ""}: Level 1 → 5
 
 ${r.passed ? "**Passed**" : "**Failed**"}. Level 5 ${r.reachedLevel5 ? "reached" : "**not** reached"}. ${r.url}, ${r.viewport.width}×${r.viewport.height}, ${r.timing?.wallS ?? "?"} s wall, ${r.timing?.fps ?? "?"} fps.
-${r.error ? `\nStopped: ${r.error}\n` : ""}
+${r.error ? `\nStopped: ${r.error}\n` : ""}${touchLine}
 | Level | Game day | Days on the last level (window) | Wall | Cash | Runway | Toasts/min (last level) | Open windows |
 |---|---:|---:|---:|---:|---:|---:|---|
 ${rows.join("\n")}
 
 Final: ${JSON.stringify(r.final)}
 
-## Failures (${r.failures.length})
-${r.failures.map((f) => `- **${f.kind}** (level ${f.level ?? "?"}, game day ${f.gameDay ?? "?"}): ${f.message}`).join("\n") || "none"}
+## Failures (${r.failures.length}${kinds ? `: ${kinds}` : ""})
+${r.failures.map((f) => `- **${f.kind}** (level ${f.level ?? "?"}, game day ${f.gameDay ?? "?"}): ${f.message}${f.shot ? ` ([shot](${f.shot.split("/").slice(-2).join("/")}))` : ""}`).join("\n") || "none"}
 
 ${r.afterLevel5 ? `After Level 5: ${r.afterLevel5.days} game days, ${r.afterLevel5.cards} cards (tightest gap ${r.afterLevel5.tightestGap ?? "n/a"} days), at most ${r.afterLevel5.maxAuto} windows the game opened at once.\n` : ""}
 ## Cards answered (${r.cards.length})

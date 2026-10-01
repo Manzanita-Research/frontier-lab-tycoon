@@ -91,7 +91,7 @@ describe("machine graphs", () => {
   });
 
   it("a walker can reach every phase from a fresh spawn, and only `gone` is final", () => {
-    const events = ["ARRIVED", "QUEUED", "ADMITTED", "GAVE_UP", "QUIT", "LINGER", "NEXT", "TOUR_DONE", "CHOSE_BUILDING", "CHOSE_WANDER", "PROTEST_STARTED", "SENT_HOME", "EXITED"].map((type) => ({ type }));
+    const events = ["ARRIVED", "QUEUED", "ADMITTED", "GAVE_UP", "QUIT", "LINGER", "NEXT", "TOUR_DONE", "CHOSE_BUILDING", "CHOSE_WANDER", "PROTEST_STARTED", "SENT_HOME", "EXITED", "BREAKOUT", "RETURNED", "ESCAPED"].map((type) => ({ type }));
     const r = explore(walkerMachine, { events });
     expect(r.unreachable).toEqual([]);
     expect(r.deadEnds).toEqual([]);

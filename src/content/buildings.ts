@@ -2,12 +2,14 @@
 import type { NeedKey } from "./needs";
 import type { WalkerKind } from "../sim/types";
 
-export type BuildingKind = "cluster" | "hall" | "gateway" | "kombucha" | "nap" | "snack" | "demo" | "fountain" | "datacenter" | "gas" | "solar" | "security";
+export type BuildingKind = "cluster" | "hall" | "gateway" | "kombucha" | "nap" | "snack" | "demo" | "fountain" | "datacenter" | "gas" | "solar" | "security" | "sandbox" | "honeypot";
 /**
  * What the core build palette offers; scenery is placed by events, not by the player. The Security Office (FLT-17) is an
  * office: the palette adds it after these once the Scrutiny rung unlocks it (`OFFICE_TOOLS` in app/hud.ts, FLT-32).
  */
-export type PlaceableKind = Exclude<BuildingKind, "fountain" | "security">;
+export type PlaceableKind = Exclude<BuildingKind, "fountain" | OfficeKind>;
+/** The offices: in the palette once the ladder earns them, after the core buildings. The Sandbox and the Honeypot are FLT-59's countermeasures. */
+export type OfficeKind = "security" | "sandbox" | "honeypot";
 
 export interface BuildingDef {
   kind: BuildingKind;
@@ -202,6 +204,34 @@ export const BUILDINGS: Record<BuildingKind, BuildingDef> = {
     upkeepPerDay: 2_000,
     blurb: "Where incident response happens. Also where the good coffee is hidden.",
     color: "#3b5bdb",
+    office: true,
+    hosts: [],
+    capacity: 0,
+    stay: [0, 0],
+    serves: {},
+  },
+  sandbox: {
+    kind: "sandbox",
+    name: "Sandbox",
+    size: [2, 2],
+    price: 150_000,
+    upkeepPerDay: 600,
+    blurb: "A kids' sandbox with a bucket and spade. Agents who hang around it stop thinking about the fence, and a caught agent is put back in it.",
+    color: "#e9c46a",
+    office: true,
+    hosts: [],
+    capacity: 0,
+    stay: [0, 0],
+    serves: {},
+  },
+  honeypot: {
+    kind: "honeypot",
+    name: "Honeypot",
+    size: [1, 1],
+    price: 60_000,
+    upkeepPerDay: 150,
+    blurb: "A sign that says EXIT (real). It is not. Runners go for it and find a dead end. They learn, slowly.",
+    color: "#2f9e44",
     office: true,
     hosts: [],
     capacity: 0,

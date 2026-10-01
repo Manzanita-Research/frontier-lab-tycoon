@@ -36,7 +36,7 @@ describe("the pack (mods/base-endings)", () => {
   });
 
   it("ships the five endings whose triggers exist, each chart reaching its front page", () => {
-    expect(ENDINGS.map((e) => e.id)).toEqual(["captured", "acquihired", "takeover", "regulated", "pivot"]);
+    expect(ENDINGS.map((e) => e.id)).toEqual(["captured", "escaped", "acquihired", "takeover", "regulated", "pivot"]);
     for (const e of ENDINGS) {
       const chart = chartOf(e);
       const seen = new Set<string>([chart.initial]);

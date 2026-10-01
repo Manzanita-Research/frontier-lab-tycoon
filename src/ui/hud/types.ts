@@ -218,6 +218,8 @@ export interface SpeedVM {
   value: number;
   paused: boolean;
   options: SpeedOptionVM[];
+  /** FLT-76: the "Slow down for bad news" setting (on by default); `setSlowForBadNews` changes it. */
+  slowForBadNews: boolean;
 }
 
 export interface BubbleVM {
@@ -297,6 +299,11 @@ export interface ToastVM {
    * can list them.
    */
   batch?: { text: string; tone: ToneVM }[];
+  /**
+   * FLT-76: it stays until the player dismisses it (or speeds up again): why the game just dropped to 1× for bad news.
+   * It is always the last toast, so a skin that shows only the newest shows it.
+   */
+  pinned?: true;
   /**
    * FLT-84: the game hit a bug, caught it and kept going. Say so in the skin's voice (strings `snag.text`, `snag.copy`)
    * and offer `copySnag(id)`, which puts a bug report (the error, its stack, seed, tick, build, skin) on the clipboard.
@@ -382,6 +389,8 @@ export interface UnlockCardVM {
   title: string;
   body: string;
   items: string[];
+  /** FLT-76: the card's joke line, under the goal. Optional: a mod's rung may have none. */
+  quip?: string;
 }
 
 /** Help ▸ How to play. Only present while the window is open. */
@@ -2000,6 +2009,8 @@ export interface HudActions {
   /** Go back to the skin the picker opened on and close it. */
   cancelSkinPicker(): void;
   setReducedMotion(on: boolean): void;
+  /** FLT-76: at ▶▶ and ▶▶▶, drop to 1× when something sharp goes wrong (remembered on this device). */
+  setSlowForBadNews(on: boolean): void;
   /** FLT-55: say yes to a mod's skin offer (it shows, and is remembered for that mod). */
   acceptSkinOffer(): void;
   /** Say no: the skin stays in the picker, and this mod will not ask again. */

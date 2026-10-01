@@ -2,6 +2,7 @@ import { COACH } from "../content/coach";
 import { coachOf } from "./coach";
 import { createInitialState } from "./state";
 import { applyNow, tick } from "./tick";
+import { answer } from "./testkit";
 
 const paths = [18, 17, 16].map((z) => ({ type: "placePath" as const, x: 11, z }));
 describe("the coach", () => {
@@ -26,7 +27,8 @@ describe("the coach", () => {
     expect(coachOf(s)?.id).toBe("peek");
     applyNow(s, [{ type: "coachSaw", what: "mind", id: s.walkers.find((w) => w.kind === "researcher")!.id }]);
     expect(coachOf(s)?.id).toBe("training");
-    for (let i = 0; i < 800 && !s.models.length; i++) tick(s);
+    // The Logo (FLT-76) asks while the first model trains: answer it, or the clock stands still.
+    for (let i = 0; i < 800 && !s.models.length; i++) tick(s, answer(s));
     expect(s.models.length).toBe(1);
     expect(coachOf(s)?.id).toBe("gateway");
     applyNow(s, [{ type: "placeBuilding", kind: "gateway", x: 12, z: 20 }]);
@@ -63,7 +65,7 @@ describe("the coach", () => {
     const s = createInitialState(3);
     applyNow(s, [...paths, { type: "placeBuilding", kind: "hall", x: 12, z: 16 }]);
     const loaded = JSON.parse(JSON.stringify(s));
-    for (let i = 0; i < 1000; i++) { tick(s); tick(loaded); }
+    for (let i = 0; i < 1000; i++) { tick(s, answer(s)); tick(loaded, answer(loaded)); }
     expect(loaded).toEqual(s); expect(s.models.length).toBeGreaterThan(0);
   });
 });

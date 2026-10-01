@@ -19,6 +19,7 @@ export function UnlockCard({ unlock, actions }: SlotPropsMap["UnlockCard"]) {
             ))}
           </ul>
         )}
+        {unlock.quip && <p className="unlock-quip">{unlock.quip}</p>}
         <button type="button" className="unlock-ok" autoFocus onClick={() => actions.dismissUnlock()}>
           {t("unlock.ok")}
         </button>

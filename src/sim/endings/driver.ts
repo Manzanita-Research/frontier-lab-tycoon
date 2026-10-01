@@ -48,6 +48,9 @@ export const ENDING_STATS: Record<string, (state: GameState) => number> = {
     const rank = (s as { escape?: { rank?: number } }).escape?.rank;
     return rank !== undefined && rank <= ENDING_RULES.takeover.aheadRank ? 1 : 0;
   },
+  /** FLT-59: agents that got over the fence this run, and 1 once the newest frontier model's agent got out in Era 4. */
+  escaped: (s) => s.escape?.escaped ?? 0,
+  frontierEscaped: (s) => (s.escape?.frontierOut ? 1 : 0),
 };
 export const ENDING_STAT_NAMES = Object.keys(ENDING_STATS);
 

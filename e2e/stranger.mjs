@@ -136,6 +136,16 @@ try {
     }
     if (now - firstClick > WALL_CAP) throw new Error(`Timed out after ${WALL_CAP / 60_000} minutes at game day ${days(probe).toFixed(2)} (coach ${probe.coachId}); passed so far: ${Object.keys(result.checks).join(", ") || "none"}`);
 
+    // FLT-76: the first decision (the Logo) opens while the first model trains and stops the clock until it is answered.
+    // A stranger reads it and picks the first choice, like anyone would; a card still waiting its turn is left alone.
+    if (probe.event && !(probe.stage ?? []).length && now - lastClick >= 600) {
+      const choice = page.locator("[role=dialog]:visible, [role=alertdialog]:visible").last().locator(".f95-choices button, button.choice, .choices button").first();
+      if (await choice.count()) {
+        result.cards = [...(result.cards ?? []), { id: probe.event, ...stamp(probe) }];
+        await press(choice);
+        lastClick = Date.now();
+      }
+    }
     // Training waits for release; runway/goals wait for their timers. Start, construction marks, ▶▶ and the researcher
     // the coach points at (FLT-58) ask for a click.
     if (now - lastClick >= 600 && ["start", "path", "hall", "speed", "peek", "gateway"].includes(probe.coachId)) {

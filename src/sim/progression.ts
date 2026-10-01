@@ -8,6 +8,7 @@ import { enablePoaching } from "./poaching/driver";
 import { enableBirdApp } from "./birdapp/driver";
 import { enableYacht } from "./yacht/driver";
 import { enableFactions } from "./factions/state";
+import { enableEscape } from "./escape/driver";
 import type { BuildingKind } from "../content/buildings";
 import { enableCapture } from "./capture/driver";
 import { enablePromises } from "./promises/driver";
@@ -62,8 +63,9 @@ const PACKS: readonly { id: SystemId; enable: (s: GameState) => void; off: strin
   { id: "capture", enable: enableCapture, off: "captureOff" },
   { id: "factions", enable: enableFactions, off: "factionsOff" },
   { id: "birdapp", enable: enableBirdApp, off: "birdappOff" },
+  { id: "escape", enable: enableEscape, off: "escapeOff" },
 ];
-/** The flags behind `?leapfrog=off`, `?papers=off`, `?collusion=off`, `?hearing=off`, `?yacht=off`, `?defection=off`, `?poaching=off`, `?auditors=off`, `?promises=off`, `?capture=off`, `?factions=off` and `?birdapp=off`. */
+/** The flags behind `?leapfrog=off`, `?papers=off`, `?collusion=off`, `?hearing=off`, `?yacht=off`, `?defection=off`, `?poaching=off`, `?auditors=off`, `?promises=off`, `?capture=off`, `?factions=off`, `?birdapp=off` and `?escape=off`. */
 export const PACK_OFF_FLAGS = PACKS.map((p) => p.off);
 function enablePacks(s: GameState, systems: readonly SystemId[]) {
   for (const pack of PACKS) if (systems.includes(pack.id) && !s.flags[pack.off]) pack.enable(s);
@@ -172,6 +174,8 @@ export function updateProgression(s: GameState) {
     if (row.systems.includes("arena")) seedField(s);
     if (row.systems.includes("breakdowns")) s.flags.firstBreakdownDay ??= s.day + FIRST_BREAKDOWN_DAYS;
     if (row.systems.includes("slop")) s.flags.firstSpillDay ??= s.day + FIRST_SPILL_DAYS;
+    // The day Scrutiny began: a card can count from it (FLT-76's offsite, when the staggered wake-ups have all played).
+    if (row.level === 5) s.flags.scrutinyDay ??= s.day;
     const items = [...row.buildings.map((k) => defs().buildings[k]?.name ?? k), ...row.staff.map((k) => STAFF[k].title), ...now, ...(later.size > 0 ? [WAKE_TEASER] : [])];
     s.unlockCards ??= [];
     s.unlockCards.push({ id: row.id, title: `New! ${row.name}`, body: row.goal.text, items });

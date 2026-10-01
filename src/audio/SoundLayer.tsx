@@ -60,9 +60,10 @@ export function SoundLayer() {
           return [mode, { meanMs: ms.reduce((a, b) => a + b, 0) / ms.length, p50: at(0.5), p99: at(0.99), maxMs: ms.at(-1)!, voicesPerSecond: band.costReport()[mode]!.voicesPerSecond }];
         })),
         // FLT-66: the band rendered offline (`[{ at: 0, mode: "zoomies" }]`, seconds, skin), as base64 float32 samples for a WAV.
+        // FLT-80: `solo: "choir"` renders the zoomies choir on its own, for the words check.
         modes: MODES,
-        renderMusic: async (takes: { at: number; mode: (typeof MODES)[number] }[], seconds: number, skin = "base", era = "1") => {
-          const buffer = await renderMusic(takes, seconds, { flavour: flavourFor(skin), era });
+        renderMusic: async (takes: { at: number; mode: (typeof MODES)[number] }[], seconds: number, skin = "base", era = "1", solo?: "choir") => {
+          const buffer = await renderMusic(takes, seconds, { flavour: flavourFor(skin), era }, undefined, undefined, solo);
           const bytes = new Uint8Array(buffer.getChannelData(0).buffer);
           let binary = "";
           for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));

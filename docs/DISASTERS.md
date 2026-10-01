@@ -117,6 +117,7 @@ Verbs (run by the driver, in order, after each transition):
 | `visitors.leave` |  | The calling machine's visiting groups cut the tour short and head for the gate. |
 | `walkers.disguise` | kind: string, as: string | Draw every walker of `kind` as `as` (the renderer knows `box`: a cardboard box). Presentation only; the sim is unchanged. |
 | `walkers.reveal` | kind: string | Undo `walkers.disguise` for `kind`. |
+| `spawn.escape` | count?: number, now?: boolean | The most drifted agent starts thinking about the fence (FLT-59, `docs/specs/FLT-59.md`); with `count` above 1, a jailbreak: that many, each for a different fence. With `now` it skips the brooding and starts pacing. Nothing unless the Sandbox Escape pack is awake. |
 | `faction.delta` | faction: string, amount: number, text?: string | Nudge a faction's meter now (its mood catches up at midnight); `text` becomes the reason the Factions panel quotes. Nothing while the factions are off. |
 | `relation.delta` | a: string, b: string, amount: number | Nudge how two factions feel about each other. A pair that was allied and falls to −55 is a schism. |
 | `faction.signal` | signal: string | Tell every faction something happened (`lobby`, `hearing`, `release`, ...: `SIGNALS` in content/factions.ts). Their grievances and cheers react at midnight. |

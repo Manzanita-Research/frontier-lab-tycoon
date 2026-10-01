@@ -55,6 +55,8 @@ export interface GateEnv {
   rank: { prev: number; next: number; top: string } | null;
   /** The next free UI toast id. */
   seq: number;
+  /** An ending has the screen to itself (FLT-76, `moments.ts`): the window stays shut and the pile waits. */
+  shut?: boolean;
 }
 
 /** A world notice on the ticker: a news item that remembers who sent it. */
@@ -132,7 +134,7 @@ export function gateToasts(gate: NoticeGate, fresh: readonly UiToast[], env: Gat
     hold({ id: 1_000_000 + seq++, text: `You lost #1 on the Arena${env.rank.top ? ` to ${env.rank.top}` : ""}.`, tone: "bad", source: "leapfrog", importance: "you" });
   }
 
-  const open = gate.lastAt === null || env.now - gate.lastAt >= TOAST_WINDOW_MS;
+  const open = !env.shut && (gate.lastAt === null || env.now - gate.lastAt >= TOAST_WINDOW_MS);
   if (!open || held.length === 0) return { gate: held === gate.held ? gate : { lastAt: gate.lastAt, held }, toasts: out, wire, seq };
   const pile = held;
   const c = coalesce(pile, () => 1_000_000 + seq++);
@@ -153,15 +155,6 @@ export function gateToasts(gate: NoticeGate, fresh: readonly UiToast[], env: Gat
   // Everything a line stands for is on the ticker to read: the pile behind a summary, and the names behind a folded group.
   if (held.length > 1 || c.folded.length > 0) for (const t of pile) wire.push({ id: t.id, day: env.day, text: t.text, tone: t.tone, source: t.source });
   return { gate: { lastAt: env.now, held: [] }, toasts: out, wire, seq };
-}
-
-/**
- * The game just ended (won, lost, an ending's front page): the outcome card is the moment and stands alone (FLT-86). What
- * was on screen, waiting for the window, or came with the same publish goes to the ticker instead. A batch summary's
- * pile is already there, so the summary itself is dropped.
- */
-export function quietForOutcome(toasts: readonly UiToast[], day: number): WireItem[] {
-  return toasts.filter((t) => !t.batch).map((t) => ({ id: t.id, day, text: t.text, tone: t.tone, source: t.source }));
 }
 
 /** The ticker's items: the sim's headlines and the app's world notices, in the order they happened (ids share one counter). */

@@ -14,6 +14,7 @@ import { withDefs } from "../sim/defs";
 import { tick } from "../sim/tick";
 import { isAuditMoment, stageAudit } from "../sim/auditors/demo";
 import { isMoneyMoment } from "../sim/moneyDemo";
+import { startsFast } from "../sim/beatsDemo";
 import { createMidgameScenario, MIDGAME_CAMERA, midgameOpeningNews, midgameOpeningThoughts } from "../sim/scenarios/midgame";
 import type { Tone } from "../sim/types";
 import { framesBrowser } from "./frames";
@@ -46,7 +47,9 @@ if (midgame) {
 // A new lab plays on "rare" (the sim itself starts with random disasters off, so tests are unaffected); `?risk=` overrides.
 if (!midgame && !debugParams.risk) setRisk(sim.world, DEFAULT_RISK);
 
-const initialSpeed: Speed = midgame ? 0 : (SPEEDS as readonly number[]).includes(debugParams.speed ?? 1) ? ((debugParams.speed ?? 1) as Speed) : 1;
+// FLT-76's ▶▶▶ beats (`?moment=beats-pileup|badnews`) start at 10× unless `?speed=` says otherwise.
+const askedSpeed = debugParams.speed ?? (startsFast(debugParams.moment) ? 10 : 1);
+const initialSpeed: Speed = midgame ? 0 : (SPEEDS as readonly number[]).includes(askedSpeed) ? (askedSpeed as Speed) : 1;
 
 /**
  * Saving (FLT-65): the slots in localStorage, or with `?saves=demo|window` a pretend shelf in memory (screenshots;
@@ -73,8 +76,17 @@ if (midgame) {
 // Say which mods are running, and whether any failed (the details are in Start ▸ Settings ▸ Mods…). Ids below zero never meet the World's.
 if (mods.mods.length > 0) first.toasts.push({ id: -1, text: `Mods on: ${mods.mods.map((m) => m.name).join(", ")}`, tone: "good", source: "mods", importance: "you" });
 if (mods.errors.length > 0) first.toasts.push({ id: -2, text: `${mods.errors.length === 1 ? "A mod" : `${mods.errors.length} mods`} didn't load. See Start, Settings, Mods…`, tone: "bad", source: "mods", importance: "you" });
+/** FLT-76: "Slow down for bad news", remembered on this device (on unless it was switched off). */
+export const SLOW_KEY = "flt.slowForBadNews";
+const slowForBadNews = (() => {
+  try {
+    return typeof localStorage === "undefined" || localStorage.getItem(SLOW_KEY) !== "off";
+  } catch {
+    return true;
+  }
+})();
 /** The actor's input. The watchdog swaps in the live World's report before it restarts the actor (FLT-81). */
-const input: { speed: Speed; first: typeof first; snagAt?: number | null } = { speed: initialSpeed, first };
+const input: { speed: Speed; first: typeof first; slowForBadNews: boolean; snagAt?: number | null } = { speed: initialSpeed, first, slowForBadNews };
 export const app = createActorAtoms(runtime, appMachine, { input });
 /** A notice for the first frame, from before the app mounts (the skin migration, FLT-71): the actor starts with it, like the mods line. */
 export const bootNotice = (text: string, tone: Tone = "neutral") => void first.toasts.push({ id: -3, text, tone, importance: "you" });
@@ -93,6 +105,7 @@ export function startApp(): () => void {
     snapshot: app.snapshot,
     restart: (last, error) => {
       input.speed = last.speed;
+      input.slowForBadNews = last.slowForBadNews;
       input.first = sim.report(true, true)!;
       input.snagAt = last.snagAt;
       registry.refresh(app.actor);
@@ -121,6 +134,9 @@ export const atoms = {
   tool: pick((c) => c.tool),
   hover: pick((c) => c.hover),
   toasts: pick((c) => c.toasts),
+  /** FLT-76: the big moments still waiting their turn (same object until it changes), and the bad-news setting. */
+  stage: pick((c) => c.stage),
+  slowForBadNews: pick((c) => c.slowForBadNews),
   outcomeDismissed: pick((c) => c.outcomeDismissed),
   version: pick((c) => c.snap.version),
   cash: pick((c) => c.snap.cash),
@@ -159,6 +175,11 @@ export const atoms = {
   autopilotPlaced: pick((c) => c.snap.endings?.placed ?? 0),
   /** The endings' presentation cues (the Look), for the scene. */
   endingLook: pick((c) => c.snap.endings?.look ?? null),
+  /**
+   * The agents running for the fence (`12r`) or in the hand (`12c`) right now (FLT-59), comma-separated: a string, so it
+   * only changes when they do.
+   */
+  runners: pick((c) => c.snap.escape?.runners.filter((r) => r.phase === "running" || r.phase === "carried").map((r) => `${r.walker}${r.phase[0]}`).join(",") ?? ""),
 };
 
 /** The app's context right now, for handlers and frame callbacks that must not subscribe. Null until it has started. */
@@ -220,6 +241,8 @@ if (typeof window !== "undefined") {
       staff: w.staff.filter((p) => p.machine.value !== "leaving" && p.machine.value !== "gone").map((p) => p.job),
       training: snap ? { name: snap.training.name, pct: snap.training.pct, etaDays: snap.training.etaDays } : null,
       event: snap?.event?.id ?? null, unlockCard: snap?.unlockCard?.title ?? null,
+      // FLT-76: the big moments the HUD is still holding back (a card here is open in the sim but not on screen yet).
+      stage: c ? [...c.stage.waiting] : [],
       pendingConfirm: snap?.pendingConfirm ? { kind: snap.pendingConfirm.kind, message: snap.pendingConfirm.message } : null,
       outcome: c ? { outcome: c.outcome, dismissed: c.outcomeDismissed } : null, overlays: c ? [...c.overlays] : [], warnings: snap ? [...snap.warnings] : [],
       toasts: c ? c.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) : [],

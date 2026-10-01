@@ -38,13 +38,21 @@ describe("midgame scenario", () => {
     // the card budget too.
     // FLT-69: the campus wakes the Bird App too, and its 480 days of posts, Aura and Comms move the run. These were
     // 7f58d622 / 948ca520 before; with the Bird App asleep (`flags.birdappOff`) the World hashes to them again.
-    // FLT-86: the economy keeps its rounds, stake and overdraft day, and the goals their hold; the campus dips below $0 on
-    // day 55 and its script signs round 1 for 10% of the lab (it used to get the old free bailout), so revenue is 90% of
-    // what it was from then on, and the objective-met and round toasts join the run. These were 788c7bf1 / 303320ca.
+    // FLT-59: and the Sandbox Escape. Nobody guards this fence. These were 788c7bf1 / 303320ca; with the Scrutiny row put
+    // back as it was (no Sandbox, Honeypot or escape) the World hashes to them again.
+    // A card due mid-chase now waits for the chase to end (FLT-59: the run is never paused); 57d87789 / 9eb5bf9e before.
+    // FLT-76 adds two dormant arcs: the Logo's (arcs.theLogo, a Level 1 card this campus is past) and the offsite's
+    // (arcs.offsite, which counts from flags.scrutinyDay, and this preset never sets it). Those two entries are the whole
+    // difference from 34526cc6 / 2660ed8e.
+    // FLT-86: the economy keeps its rounds, stake and overdraft day, the goals their hold, and the four money cards arm
+    // their arcs. With those projected out (and the toasts), the run hashes as 0dbef5e6 / 4592192e did, day for day,
+    // through day 54. On day 55 the campus dips below $0 and its script signs round 1 for 10% of the lab where it used to
+    // get the free bailout, so revenue is 90% of what it was from then on. The opening also waits for nobody to be out
+    // of the Sandbox (FLT-59): with the run moved, an agent was over the fence at the old opening tick, 3 ticks earlier.
     expect({
       untagged: digest({ ...s, toasts: s.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) }),
       full: digest(s),
-    }).toEqual({ untagged: "17c0dc43", full: "9ae26a38" });
+    }).toEqual({ untagged: "6b07586a", full: "931e5673" });
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);

@@ -323,7 +323,7 @@ describe.each([BASE_ID, ...usable])("skin %s", (id) => {
     const won = vmOf({ event: "waterDiscourse", outcome: "won" });
     const alone = html(skin, <Modals vm={won} actions={actions} />);
     expect(alone).toContain(escape(won.outcome!.headline));
-    expect(alone).not.toContain(escape(won.event!.title));
+    expect(alone).not.toContain(escape(vmOf({ event: "waterDiscourse" }).event!.title));
   });
 
   it("draws Papers once earned, and the paper and collusion moments (FLT-45, FLT-46)", async () => {

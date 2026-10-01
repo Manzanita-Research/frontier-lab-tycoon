@@ -98,6 +98,21 @@ export const KEY_ICONS: Record<string, ReactElement> = {
       <path d="M11 15l4 4 7-8" fill="none" stroke="#fff" strokeWidth="2.6" />
     </svg>
   ),
+  sandbox: (
+    <svg {...K}>
+      <path d="M3 19 16 13l13 6-13 7Z" fill="#FFD166" stroke="currentColor" strokeWidth={W} />
+      <path d="M8 12l1.5 6h5l1.5-6Z" fill="#E5484D" stroke="currentColor" strokeWidth={W} />
+      <path d="M23 4v12" stroke="currentColor" strokeWidth={W} />
+      <path d="M21 16h4l-1 4h-2Z" fill="#7FB2F0" stroke="currentColor" strokeWidth={W} />
+    </svg>
+  ),
+  honeypot: (
+    <svg {...K}>
+      <path d="M16 15v13" stroke="currentColor" strokeWidth={W} />
+      <rect x="3" y="4" width="26" height="11" rx="2" fill="#3DBE7A" stroke="currentColor" strokeWidth={W} />
+      <path d="M7 9.5h13m-3.5-3 3.5 3-3.5 3" fill="none" stroke="#fff" strokeWidth="2.4" />
+    </svg>
+  ),
   bulldoze: (
     <svg {...K}>
       <rect x="9" y="10" width="14" height="10" rx="2" fill="#FFD166" stroke="currentColor" strokeWidth={W} />

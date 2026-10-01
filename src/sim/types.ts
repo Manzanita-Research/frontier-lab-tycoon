@@ -8,6 +8,7 @@ import type { CollusionState, Investigation } from "./collusion/state";
 import type { HearingState } from "./hearing/state";
 import type { YachtState } from "./yacht/state";
 import type { DefectionState } from "./defection/state";
+import type { EscapeState } from "./escape/state";
 import type { NeoLabsState } from "./neolabs/state";
 import type { Meeting } from "./meetings";
 import type { BirdAppState } from "./birdapp/state";
@@ -173,6 +174,8 @@ export interface Staffer {
   machine: StaffStored;
   /** Pulled off their post by a disaster (FLT-17): they jog to `to` (a building id, 0 for the gate) with a red "!" and stay until released. */
   divert?: { owner: string; to: number; jog: number };
+  /** Chasing a runner (FLT-59 Sandbox Escape): a security guard jogs at `jog` times their speed toward (x, z), which sim/escape moves every tick. */
+  chase?: { runner: number; x: number; z: number; jog: number };
 }
 
 /** The panel a headline is about, so the HUD can badge it when the news only reached the ticker (FLT-54). */
@@ -223,7 +226,7 @@ export interface Pop {
  */
 export type NoticeSource =
   | "leapfrog" | "ops" | "staff" | "economy" | "coach" | "event" | "disaster" | "papers" | "collusion" | "hearing" | "politics"
-  | "defection" | "auditors" | "factions" | "race" | "training" | "crowd" | "build" | "endings" | "mods" | "birdapp" | "goals" | `mod:${string}`;
+  | "defection" | "auditors" | "factions" | "race" | "training" | "crowd" | "build" | "endings" | "escape" | "mods" | "birdapp" | "goals" | `mod:${string}`;
 
 /** `you`: it is about you, or needs you (a toast). `world`: it happened out there (the ticker, and the panel that owns it). */
 export type Importance = "you" | "world";
@@ -419,6 +422,8 @@ export interface GameState {
   investigations?: Record<string, Investigation>;
   /** FLT-26 Defection: opt-in pack (the ladder turns it on at Scrutiny); absent in legacy saves and baseline runs. */
   defection?: DefectionState;
+  /** FLT-59 The Sandbox Escape: opt-in pack (mods/base-escape), wakes at Level 5. */
+  escape?: EscapeState;
   /** FLT-20 Poaching War: opt-in pack, same rules. */
   poaching?: PoachingState;
   /** FLT-69 the Bird App: researchers who post. Absent until the pack wakes (Level 3), or with `?birdapp=off`. */

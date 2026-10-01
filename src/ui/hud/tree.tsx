@@ -22,7 +22,7 @@ export function Docked({ vm, actions }: { vm: HudVM; actions: HudActions }) {
     Training: vm.training.hasHall ? <Training training={vm.training} actions={actions} /> : null,
     Objectives: <Objectives objectives={vm.objectives} progress={vm.progress} visible={vm.visible} layout={vm.layout} actions={actions} />,
     Inspector: vm.inspector ? <Inspector inspector={vm.inspector} layout={vm.layout} actions={actions} /> : null,
-    BuildBar: <BuildBar items={vm.buildItems} tip={vm.buildTip} teasers={vm.progress.teasers} layout={vm.layout} actions={actions} disasters={vm.disasters} widgets={vm.widgets ?? []} mode={vm.mode ?? null} />,
+    BuildBar: <BuildBar items={vm.buildItems} tip={vm.buildTip} teasers={vm.progress.teasers} layout={vm.layout} actions={actions} disasters={vm.disasters} widgets={vm.widgets ?? []} mode={vm.mode ?? null} speed={vm.speed} />,
     Speed: <Speed speed={vm.speed} stats={vm.stats} actions={actions} />,
     Staff: vm.staff.open && vm.visible.staff ? <Staff staff={vm.staff} actions={actions} /> : null,
     ThoughtsPanel: vm.visible.thoughts ? <ThoughtsPanel rows={vm.thoughtsPanel} layout={vm.layout} actions={actions} /> : null,
@@ -77,8 +77,7 @@ export function Modals({ vm, actions }: { vm: HudVM; actions: HudActions }) {
       {vm.senate.open && vm.senate.tracker && !vm.event?.tracker && (
         <PromiseTracker event={null} tracker={vm.senate.tracker} bill={vm.senate.bill} layout={vm.layout} actions={actions} />
       )}
-      {/* The outcome card stands alone (FLT-86): a card that opened the same night waits behind it for "Keep playing". */}
-      {vm.event && !vm.outcome && <EventModal vm={vm} event={vm.event} actions={actions} slots={{ EventCard, Livestream, Hearing, LeakedChat, DramaCard, ReportCard, Bill, PromiseTracker }} />}
+      {vm.event && <EventModal vm={vm} event={vm.event} actions={actions} slots={{ EventCard, Livestream, Hearing, LeakedChat, DramaCard, ReportCard, Bill, PromiseTracker }} />}
       {vm.confirm && <Confirm confirm={vm.confirm} actions={actions} />}
       {vm.crumbWiki && <CrumbWiki key={vm.crumbWiki.key} wiki={vm.crumbWiki} actions={actions} />}
       {!vm.crumbWiki && vm.paperMoment && <PaperMoment key={vm.paperMoment.key} moment={vm.paperMoment} actions={actions} />}
@@ -95,7 +94,7 @@ export function Modals({ vm, actions }: { vm: HudVM; actions: HudActions }) {
       {vm.sound.open && <Mixer sound={vm.sound} actions={actions} />}
       {vm.drama.open && <Drama drama={vm.drama} actions={actions} />}
       {vm.mods.open && <ModManager mods={vm.mods} actions={actions} />}
-      {vm.skins.open && <SkinPicker skins={vm.skins} actions={actions} />}
+      {vm.skins.open && <SkinPicker skins={vm.skins} actions={actions} speed={vm.speed} />}
       {vm.skins.offer && !vm.skins.open && <ModSkinOffer offer={vm.skins.offer} actions={actions} />}
       {vm.saves.welcome && !vm.saves.open && <Welcome welcome={vm.saves.welcome} saves={vm.saves} actions={actions} />}
       {(vm.saves.open || vm.saves.modPrompt || vm.saves.dragging) && <SaveLoad saves={vm.saves} actions={actions} />}

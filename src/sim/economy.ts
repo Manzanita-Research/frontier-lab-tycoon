@@ -4,7 +4,7 @@ import { initialStored, step } from "./machines/run";
 import { economyMachine, FRESH_ECONOMY, type EconomyStored } from "./machines/economy";
 import { arcMachine } from "./machines/arc";
 import { BRIDGE_PICK, BRIDGE_ROUNDS, MAX_ROUNDS, OVERDRAFT_CARD, RECOVERED_TOAST, OVERDRAWN_TOAST, bridgeCardId, roundsLeftText } from "../content/bridgeRounds";
-import { openEventOf } from "./events";
+import { openEventOf, screenHeld } from "./events";
 import { fillTemplate } from "./format";
 import { revenueEffect, upkeepFactor } from "./disasters/driver";
 import { addNews, addToast } from "./news";
@@ -92,9 +92,12 @@ export function stakeFactor(state: GameState): number {
 
 const armed = (id: string) => initialStored(arcMachine, { choices: defs().eventById(id)!.choices.length, cooldownDays: 0, openedDay: null });
 
-/** The round on the table, or the bank's letter, takes the screen at once if nothing else has it: money doesn't wait in line. */
+/**
+ * The round on the table, or the bank's letter, takes the screen at once if nothing else has it: money doesn't wait in
+ * line. Except for a runner on the fence (FLT-59): the run is never paused, so the card comes up at the next close after it.
+ */
 function openMoneyCard(state: GameState) {
-  if (openEventOf(state)) return;
+  if (openEventOf(state) || screenHeld(state)) return;
   const e = state.economy;
   const id = e.value === "offered" ? bridgeCardId(e.context.rounds + 1) : e.value === "overdrawn" && state.flags[`offer:${OVERDRAFT_CARD}`] !== undefined ? OVERDRAFT_CARD : null;
   if (!id || !defs().eventById(id)) return;

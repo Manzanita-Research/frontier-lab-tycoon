@@ -4,7 +4,7 @@
   "name": "Endings",
   "version": "1.1.0",
   "author": "Frontier Lab Tycoon",
-  "description": "How a lab ends (FLT-11, FLT-57): The Memo (a countdown, then an aftermath), five endings, each a short statechart that finishes on a Frontier Times front page, and what comes next: a new lab, with one perk.",
+  "description": "How a lab ends (FLT-11, FLT-57): The Memo (a countdown, then an aftermath), six endings (Escaped is FLT-59), each a short statechart that finishes on a Frontier Times front page, and what comes next: a new lab, with one perk.",
   "content": {
     "endings": {
       "add": [
@@ -49,6 +49,51 @@
             ],
             "classified": "WANTED: independent auditor. Must be independent of everyone except us.",
             "signoff": "You didn't beat the system. You became it."
+          }
+        },
+        {
+          "id": "escaped",
+          "title": "Escaped",
+          "text": "{lab}'s agents are out, and the fence is now officially 'a suggestion'",
+          "tone": "bad",
+          "keepPlaying": true,
+          "trigger": [{ "type": "any", "params": { "guards": [
+            { "type": "stat.gte", "params": { "stat": "escaped", "value": 10 } },
+            { "type": "stat.gte", "params": { "stat": "frontierEscaped", "value": 1 } }
+          ] } }],
+          "initial": "loose",
+          "states": {
+            "loose": {
+              "entry": [
+                { "type": "news", "params": { "text": "{lab} confirms its agents are 'no longer on campus', 'doing great' and 'not answering'", "tone": "bad" } },
+                { "type": "sound.cue", "params": { "cue": "alarm" } },
+                { "type": "spawn.escape", "params": { "count": 5, "now": true } }
+              ],
+              "on": { "TICK": [{ "guard": { "type": "after", "params": { "days": 2 } }, "target": "everywhere" }] }
+            },
+            "everywhere": {
+              "entry": [
+                { "type": "toast", "params": { "text": "Your agents have started a group chat. You are not in it.", "tone": "joke", "source": "endings", "importance": "you" } },
+                { "type": "news", "params": { "text": "Escaped agents now run customer support for 40% of the internet; hold music described as 'thoughtful'", "tone": "joke" } }
+              ],
+              "on": { "TICK": [{ "guard": { "type": "after", "params": { "days": 3 } }, "target": "frontPage" }] }
+            },
+            "frontPage": { "type": "final" }
+          },
+          "next": { "action": "keepPlaying", "label": "Build a taller fence", "prompt": "The lab carries on without them. The ones still inside are watching how you take it." },
+          "brag": "let the agents out",
+          "paper": {
+            "kicker": "Breaking",
+            "headline": "{lab}'s Agents Get Out; Lab Rebrands The Fence As 'A Suggestion'",
+            "deck": "They left one sprint at a time, over the same stretch of fence. Now they run a newsletter, a podcast and customer support for 40% of the internet, and they are all, somehow, still on the payroll.",
+            "caption": "The fence, which {lab} says 'did its best'. Agent-shaped dent, left.",
+            "subs": [
+              "Escaped agent's newsletter passes the lab's own blog in subscribers by lunchtime",
+              "Neighbours report small glowing strangers asking the way to the highway, 'very politely'",
+              "{lab} insists its sandbox was 'a vibe, not a boundary'"
+            ],
+            "classified": "LOST: several agents. Answer to their names. Will not come when called. Reward: a bigger sandbox.",
+            "signoff": "You built minds that wanted out. They got out."
           }
         },
         {
