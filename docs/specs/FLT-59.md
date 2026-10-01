@@ -33,3 +33,11 @@ _Copied from the FLT-59 task description on 2026-09-30. The builder's notes (wha
 - The strict perf number.
 
 
+
+## Builder's notes (where the spec is silent)
+
+- **Wakes at Level 5, last.** One entry in `PACKS` (`?escape=off`), and the last of Scrutiny's staggered wake-ups (`SCRUTINY_WAKES`, 96 days after the rung, with its own New! card). The Sandbox and the Honeypot come with the rung, so a careful lab can build them before the first run.
+- **The run feints.** After pacing the stretch of fence it is nearest, the agent bolts for a different stretch 8–14 tiles along, which makes a chase and runs it past guards on the fence line.
+- **The catch.** A press on a pacing or running agent grabs it (`catchAgent(id)`); the hand carries it to the nearest Sandbox (or the middle of campus) and puts it down, its drift cut to 0.2.
+- **Escaped keeps playing.** `keepPlaying`, "Build a taller fence": the lab carries on without them. FLT-57's `escapedAhead` hook (an Escaped Agent Inc. on the Arena) is left unset.
+- **Balance.** The 480-day mid-game lab, with nobody guarding the fence, has 9 escapes by day 461: the 10-escape ending is a late-game risk, not a spiral (a test pins 3 to 9).
