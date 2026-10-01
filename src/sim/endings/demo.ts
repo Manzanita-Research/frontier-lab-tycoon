@@ -81,6 +81,7 @@ export function stageEndingMoment(moment: string): GameState {
   s.flags["memo:offered"] = s.day;
   s.flags[id === "regulated" ? MEMO_SLOW : MEMO_RACE] = s.day;
   if (id === "captured") s.capture = 100;
+  if (id === "escaped" && s.escape) s.escape.escaped = Math.max(s.escape.escaped, 10);
   start(s, id);
   if (moment === "takeover") {
     // Two buildings down, the cursor halfway to the third.

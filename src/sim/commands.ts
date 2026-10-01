@@ -26,6 +26,7 @@ import { setSafetySpend } from "./factions/driver";
 import { issueStatement } from "./factions/statement";
 import { setBirdLever } from "./birdapp/driver";
 import type { BirdLever } from "./birdapp/state";
+import { catchAgent } from "./escape/driver";
 
 export type Command =
   | { type: "coachSkip" | "coachReplay" | "coachClick" | "dismissUnlock" | "buildPanelOpened" }
@@ -70,7 +71,9 @@ export type Command =
    */
   | { type: "addMod"; mod: LiveMod; run: RunMods; news: LiveModNews }
   /** FLT-78: a data-only mod leaves the running lab: its cards are cancelled (an open one closes), its lines stop. */
-  | { type: "removeMod"; id: string; cards: string[]; run: RunMods | null };
+  | { type: "removeMod"; id: string; cards: string[]; run: RunMods | null }
+  /** FLT-59: pick up an agent that is pacing the fence or running for it (walker id) and carry it back to the sandbox. */
+  | { type: "catchAgent"; id: number };
 
 export type PlaceResult = { ok: true } | { ok: false; reason: string };
 
@@ -241,6 +244,9 @@ export function applyCommands(state: GameState, commands: readonly Command[], rn
         break;
       case "removeMod":
         removeLiveMod(state, c.id, c.cards, c.run);
+        break;
+      case "catchAgent":
+        if (systemUnlocked(state, "escape")) catchAgent(state, c.id);
         break;
       case "startTraining":
         if (!state.buildings.some((b) => b.kind === "hall")) addToast(state, "Build a Training Hall first.", "bad", { source: "build", importance: "you" });

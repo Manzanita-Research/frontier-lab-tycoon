@@ -3,6 +3,7 @@
 // "23 researchers: 'The kombucha is warm and so is my equity.'". Lines rotate every couple of game days.
 // Templates: {lab} {rival}. Parody only.
 
+import { escapeLines } from "./escape";
 import { NIGHT_THOUGHTS } from "./night";
 import { SLOP_LINES } from "./ops";
 import type { WalkerKind } from "../sim/types";
@@ -41,6 +42,7 @@ export type Cause =
   | "agent.night"
   | "agent.drifting"
   | "agent.drifted"
+  | "agent.fence"
   | "protester.chant";
 
 export const CAUSES: Record<Cause, CauseLines> = {
@@ -228,6 +230,8 @@ export const CAUSES: Record<Cause, CauseLines> = {
       "Ask me nicely. Then ask me again. Then I'll think about it.",
     ],
   },
+  // The Sandbox Escape (FLT-59): the lines live in mods/base-escape.
+  "agent.fence": { spread: 2, lines: escapeLines("pace") },
 
   // Protesters
   "protester.chant": {

@@ -79,6 +79,21 @@ const ART: Record<string, ReactNode> = {
       <path d="M11 15l4 4 7-8" fill="none" stroke="#FFD400" strokeWidth="3" />
     </>
   ),
+  sandbox: (
+    <>
+      <path d="M3 18 16 12l13 6-13 7Z" fill="#FFD400" strokeWidth="2.5" {...S} />
+      <path d="M8 13l2 6h5l2-6Z" fill="#E4222B" strokeWidth="2" {...S} />
+      <path d="M23 5v11" fill="none" strokeWidth="2.5" {...S} />
+      <path d="M21 16h4l-1 4h-2Z" fill="#1A5BD6" strokeWidth="2" {...S} />
+    </>
+  ),
+  honeypot: (
+    <>
+      <path d="M16 15v13" fill="none" strokeWidth="3" {...S} />
+      <rect x="3" y="4" width="26" height="11" fill="#00A651" strokeWidth="2.5" {...S} />
+      <path d="M7 9.5h13m-3.5-3 3.5 3-3.5 3" fill="none" stroke="#fff" strokeWidth="2.2" />
+    </>
+  ),
   bulldoze: (
     <>
       <rect x="8" y="9" width="15" height="11" fill="#FFD400" strokeWidth="2.5" {...S} />

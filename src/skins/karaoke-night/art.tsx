@@ -151,6 +151,8 @@ export const BUTTON_COLOURS: Record<string, [face: string, rim: string]> = {
   gas: ["#C79BFF", "#8B5FCF"],
   solar: ["#FFE87A", "#C9B03A"],
   security: ["#6C8CFF", "#3B55C9"],
+  sandbox: ["#FFC96B", "#C98F2A"],
+  honeypot: ["#5CE08A", "#23A052"],
   staff: ["#6FE3FF", "#2A9FC2"],
   senate: ["#FFD36F", "#C2902A"],
   bulldoze: ["#B9B0C9", "#7D728F"],
@@ -262,6 +264,25 @@ export function BuildIcon({ kind }: { kind: string }) {
         <>
           <path d="M16 3l10 4v8c0 7-5 11-10 13C11 26 6 22 6 15V7z" fill={W} />
           <path d="M11 15l4 4 7-8" fill="none" stroke={INK} strokeWidth="2.6" />
+        </>
+      );
+      break;
+    case "sandbox":
+      art = (
+        <>
+          <path d="M3 20l13-6 13 6-13 7z" fill={W} />
+          <path d="M8 12l1.5 6h5l1.5-6z" fill={W} />
+          <path d="M23 4v12" stroke={W} strokeWidth="2.4" />
+          <path d="M21 15h4l-1 4h-2z" fill={W} />
+        </>
+      );
+      break;
+    case "honeypot":
+      art = (
+        <>
+          <path d="M15 14h2v14h-2z" fill={W} />
+          <rect x="3" y="4" width="26" height="11" rx="2" fill={W} />
+          <path d="M7 9.5h13m-3.5-3 3.5 3-3.5 3" fill="none" stroke={INK} strokeWidth="2.2" />
         </>
       );
       break;

@@ -1,6 +1,6 @@
 # Endings (FLT-11, FLT-57)
 
-How a lab ends: **The Memo** (an ordinary event card, offered once in Era 4) and five endings. Each ending is a short statechart in the disaster format (`docs/DISASTERS.md`: the same compiler, the same Vocabulary of guards and verbs) whose final state is a *Frontier Times* front page. The pack is direct-loaded by `src/sim/endings/pack.ts` (like `base-leapfrog`) until FLT-15 connects `content.endings` to the loader; its decoder and `validateEndings()` check it in the tests.
+How a lab ends: **The Memo** (an ordinary event card, offered once in Era 4) and six endings. Each ending is a short statechart in the disaster format (`docs/DISASTERS.md`: the same compiler, the same Vocabulary of guards and verbs) whose final state is a *Frontier Times* front page. The pack is direct-loaded by `src/sim/endings/pack.ts` (like `base-leapfrog`) until FLT-15 connects `content.endings` to the loader; its decoder and `validateEndings()` check it in the tests.
 
 | Ending | Trigger (`trigger`, all must hold, checked daily in pack order) | What the campus does |
 | --- | --- | --- |
@@ -9,8 +9,9 @@ How a lab ends: **The Memo** (an ordinary event card, offered once in Era 4) and
 | **The Takeover** | `memoRace ≥ 1` and (`ahead ≥ 1` or `racedDays ≥ 150`) | the autopilot: your next model builds for you, declines your buildings, pays for its own; the title is no longer yours |
 | **Regulated Utility** | `memoSlow ≥ 1` | beige, a COMPLIANT sticker on every building, still open |
 | **The Pivot** | `deadline ≥ 1` with the Memo unanswered: the old deadline loss | a NOW PIVOTING sign |
+| **Escaped** (FLT-59) | `escaped ≥ 10` (agents over the fence this run, from the Sandbox Escape) or `frontierEscaped ≥ 1` (an agent of your newest model got out in Era 4). With the pack asleep (`?escape=off`) both read 0 | one last jailbreak (`spawn.escape`, five at once) while the paper goes to press; the lab plays on |
 
-Escaped is not here yet: there is no Sandbox Escape to trigger it. The hook is ready: the `escapedAhead` stat (`src/sim/endings/driver.ts`) is 1 once a future `World.escape.rank` is at or above `takeover.aheadRank`, and 0 until something sets it. Adding the ending is a new entry in `content.endings.add` with `"trigger": [{ "stat": "escapedAhead", "gte": 1 }]`, a chart, a `paper`, a `next` and a `brag`. Nothing fakes it in the meantime.
+Escaped (FLT-59) took only a new entry in `content.endings.add`, a trigger over two new stats in `ENDING_STATS` (`escaped`, `frontierEscaped`; `src/sim/endings/driver.ts`), a chart, a `paper`, a `next` and a `brag`. FLT-57's other hook, `escapedAhead` (1 once a future `World.escape.rank`, an escaped agent's own lab, is at or above `takeover.aheadRank`), is still unset: the Sandbox Escape has no Escaped Agent Inc. on the Arena yet.
 
 ## The pieces
 
@@ -28,4 +29,4 @@ Escaped is not here yet: there is no Sandbox Escape to trigger it. The hook is r
 
 ## Review
 
-`?debug=1&speed=0&moment=<m>` stages each moment from the curated mid-game: `memo`, `memo-countdown`, `memo-race`, `memo-slow`, `lab2` (a second lab's Acqui-hired front page), `takeover`, `thanks`, `front-takeover`, `front-regulated`, `front-acquihired`, `front-captured`, `front-pivot`. `pnpm shots --scenes endings` captures them all. `src/sim/endings/endings.test.ts` plays to each ending. `src/sim/endings/sequel.test.ts` covers FLT-57: next actions, the sequel names and perks, the Memo countdown and aftermath, Captured from the Capture meter and the Escaped hook.
+`?debug=1&speed=0&moment=<m>` stages each moment from the curated mid-game: `memo`, `memo-countdown`, `memo-race`, `memo-slow`, `lab2` (a second lab's Acqui-hired front page), `takeover`, `thanks`, `front-takeover`, `front-regulated`, `front-acquihired`, `front-captured`, `front-escaped`, `front-pivot`. `pnpm shots --scenes endings` captures them all. `src/sim/endings/endings.test.ts` plays to each ending. `src/sim/endings/sequel.test.ts` covers FLT-57: next actions, the sequel names and perks, the Memo countdown and aftermath, Captured from the Capture meter and the Escaped hook.
