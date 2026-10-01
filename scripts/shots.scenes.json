@@ -417,6 +417,20 @@
       "flt91-day5",
       "flt91-day5-phone"
     ],
+    "flt-94": [
+      "flt94-taskbar",
+      "flt94-apps",
+      "flt94-programs",
+      "flt94-palette",
+      "flt94-palette-end",
+      "flt94-leaderboard",
+      "flt94-taskbar-phone",
+      "flt94-tray-phone",
+      "flt94-programs-phone",
+      "flt94-palette-phone",
+      "flt94-palette-end-phone",
+      "flt94-leaderboard-phone"
+    ],
     "flt-95": [
       "box-take",
       "box-back",
@@ -426,17 +440,10 @@
       "help-box",
       "saves-welcome"
     ],
-    "flt-94": [
-      "flt94-taskbar",
-      "flt94-apps",
-      "flt94-programs",
-      "flt94-palette",
-      "flt94-leaderboard",
-      "flt94-taskbar-phone",
-      "flt94-tray-phone",
-      "flt94-programs-phone",
-      "flt94-palette-phone",
-      "flt94-leaderboard-phone"
+    "flt-93-moments": [
+      "flt93-onboard-growing-team",
+      "flt93-onboard-hire-sre",
+      "flt93-onboard-race"
     ],
     "flt-93": [
       "flt93-card",
@@ -444,10 +451,9 @@
       "flt93-hire",
       "flt93-hire-phone"
     ],
-    "flt-93-moments": [
-      "flt93-onboard-growing-team",
-      "flt93-onboard-hire-sre",
-      "flt93-onboard-race"
+    "flt-93-arena": [
+      "flt93-arena",
+      "flt93-arena-phone"
     ]
   },
   "scenes": {
@@ -5948,151 +5954,6 @@
         }
       ]
     },
-    "box-take": {
-      "title": "FLT-95: 4.5 s after you take the box off the shelf (before: it is already tearing open; after: it waits in your hands)",
-      "query": {
-        "intro": 1,
-        "seed": 7,
-        "debug": null,
-        "speed": null,
-        "hour": null,
-        "warp": null
-      },
-      "ready": "!!window.__intro",
-      "steps": [
-        {
-          "wait": 3500
-        },
-        {
-          "click": ".intro-cta",
-          "timeout": 15000
-        },
-        {
-          "wait": 4500
-        }
-      ]
-    },
-    "box-back": {
-      "title": "FLT-95: take the box, then Flip to back (before: there is no flip; the box is open by now)",
-      "query": {
-        "intro": 1,
-        "seed": 7,
-        "debug": null,
-        "speed": null,
-        "hour": null,
-        "warp": null
-      },
-      "ready": "!!window.__intro",
-      "steps": [
-        {
-          "wait": 3500
-        },
-        {
-          "click": ".intro-cta",
-          "timeout": 15000
-        },
-        {
-          "wait": 6000
-        },
-        {
-          "click": ".intro-flip",
-          "optional": true,
-          "timeout": 20000
-        },
-        {
-          "wait": 5000
-        }
-      ]
-    },
-    "box-disc": {
-      "title": "FLT-95: the box is open, click the disc (before: Insert disc goes straight into the drive; after: you pick it up and read it)",
-      "query": {
-        "intro": 1,
-        "seed": 7,
-        "debug": null,
-        "speed": null,
-        "hour": null,
-        "warp": null,
-        "beat": "open"
-      },
-      "ready": "!!window.__intro",
-      "steps": [
-        {
-          "wait": 3500
-        },
-        {
-          "click": ".intro-contents .intro-primary",
-          "timeout": 15000
-        },
-        {
-          "wait": 3000
-        }
-      ]
-    },
-    "box-disc-phone": {
-      "title": "FLT-95: the disc in your hand, on a phone (a 1997 CD-ROM: rainbow tracks, clear hub, the printed label)",
-      "query": {
-        "intro": 1,
-        "seed": 7,
-        "debug": null,
-        "speed": null,
-        "hour": null,
-        "warp": null,
-        "beat": "open"
-      },
-      "ready": "!!window.__intro",
-      "steps": [
-        {
-          "wait": 3500
-        },
-        {
-          "click": ".intro-contents .intro-primary",
-          "timeout": 15000
-        },
-        {
-          "wait": 3000
-        }
-      ],
-      "viewport": "390x844",
-      "mobile": true
-    },
-    "box-take-phone": {
-      "title": "FLT-95: the box in your hands, on a phone",
-      "query": {
-        "intro": 1,
-        "seed": 7,
-        "debug": null,
-        "speed": null,
-        "hour": null,
-        "warp": null
-      },
-      "viewport": "390x844",
-      "mobile": true,
-      "ready": "!!window.__intro",
-      "steps": [
-        {
-          "wait": 3500
-        },
-        {
-          "click": ".intro-cta",
-          "timeout": 15000
-        },
-        {
-          "wait": 4500
-        }
-      ]
-    },
-    "help-box": {
-      "title": "FLT-95: Help ▸ How to play has \"Take the box off the shelf again\"",
-      "steps": [
-        {
-          "eval": "async () => { const z = (ms) => new Promise((r) => setTimeout(r, ms)); document.querySelector('[data-testid=start-button]')?.click(); await z(300); [...document.querySelectorAll('[role=menuitem]')].find((b) => /Help/.test(b.textContent))?.click(); }"
-        },
-        {
-          "wait": 800
-        }
-      ]
-    },
     "flt94-taskbar": {
       "title": "FLT-94: the taskbar: Start, Quick Launch (applets only), the tray rank",
       "query": {
@@ -6182,6 +6043,33 @@
         },
         {
           "wait": 600
+        }
+      ]
+    },
+    "flt94-palette-end": {
+      "title": "FLT-94: the Facilities palette (Quick Launch's first icon), scrolled to the end",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "click": "[data-anchor=\"app:facilities\"]",
+          "optional": true
+        },
+        {
+          "wait": 600
+        },
+        {
+          "eval": "(f, w) => { for (const s of ['.f95-palette .f95-ptiles', '.f95-palette']) { const l = document.querySelector(s); if (l) l.scrollTop = 1e5; } }",
+          "optional": true
+        },
+        {
+          "wait": 300
         }
       ]
     },
@@ -6330,6 +6218,35 @@
         }
       ]
     },
+    "flt94-palette-end-phone": {
+      "title": "FLT-94: phone: the Facilities palette as a sheet, scrolled to the end",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "click": "[data-anchor=\"app:facilities\"]",
+          "optional": true
+        },
+        {
+          "wait": 600
+        },
+        {
+          "eval": "(f, w) => { for (const s of ['.f95-palette .f95-ptiles', '.f95-palette']) { const l = document.querySelector(s); if (l) l.scrollTop = 1e5; } }",
+          "optional": true
+        },
+        {
+          "wait": 300
+        }
+      ]
+    },
     "flt94-leaderboard-phone": {
       "title": "FLT-94: phone: the leaderboard from the tray rank",
       "query": {
@@ -6374,35 +6291,162 @@
         }
       ]
     },
-    "flt93-card": {
-      "title": "FLT-93: Level 2 met, the \"Growing team\" New! card (both builds: the same world, staged by eval)",
+    "box-take": {
+      "title": "FLT-95: 4.5 s after you take the box off the shelf (before: it is already tearing open; after: it waits in your hands)",
+      "query": {
+        "intro": 1,
+        "seed": 7,
+        "debug": null,
+        "speed": null,
+        "hour": null,
+        "warp": null
+      },
+      "ready": "!!window.__intro",
       "steps": [
         {
-          "eval": "(f, w) => { w.progression = { value: 'growing', context: { level: 2 } }; w.flags.visitorsServed = 12; w.ledger = { ...w.ledger, income: 41500 }; w.cash = Math.max(w.cash, 1400000); w.unlockCards = []; }"
+          "wait": 3500
         },
         {
-          "tick": 1
+          "click": ".intro-cta",
+          "timeout": 15000
+        },
+        {
+          "wait": 4500
+        }
+      ]
+    },
+    "box-back": {
+      "title": "FLT-95: take the box, then Flip to back (before: there is no flip; the box is open by now)",
+      "query": {
+        "intro": 1,
+        "seed": 7,
+        "debug": null,
+        "speed": null,
+        "hour": null,
+        "warp": null
+      },
+      "ready": "!!window.__intro",
+      "steps": [
+        {
+          "wait": 3500
+        },
+        {
+          "click": ".intro-cta",
+          "timeout": 15000
+        },
+        {
+          "wait": 6000
+        },
+        {
+          "click": ".intro-flip",
+          "optional": true,
+          "timeout": 20000
+        },
+        {
+          "wait": 5000
+        }
+      ]
+    },
+    "box-disc": {
+      "title": "FLT-95: the box is open, click the disc (before: Insert disc goes straight into the drive; after: you pick it up and read it)",
+      "query": {
+        "intro": 1,
+        "seed": 7,
+        "debug": null,
+        "speed": null,
+        "hour": null,
+        "warp": null,
+        "beat": "open"
+      },
+      "ready": "!!window.__intro",
+      "steps": [
+        {
+          "wait": 3500
+        },
+        {
+          "click": ".intro-contents .intro-primary",
+          "timeout": 15000
+        },
+        {
+          "wait": 3000
+        }
+      ]
+    },
+    "box-disc-phone": {
+      "title": "FLT-95: the disc in your hand, on a phone (a 1997 CD-ROM: rainbow tracks, clear hub, the printed label)",
+      "query": {
+        "intro": 1,
+        "seed": 7,
+        "debug": null,
+        "speed": null,
+        "hour": null,
+        "warp": null,
+        "beat": "open"
+      },
+      "ready": "!!window.__intro",
+      "steps": [
+        {
+          "wait": 3500
+        },
+        {
+          "click": ".intro-contents .intro-primary",
+          "timeout": 15000
+        },
+        {
+          "wait": 3000
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "box-take-phone": {
+      "title": "FLT-95: the box in your hands, on a phone",
+      "query": {
+        "intro": 1,
+        "seed": 7,
+        "debug": null,
+        "speed": null,
+        "hour": null,
+        "warp": null
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "ready": "!!window.__intro",
+      "steps": [
+        {
+          "wait": 3500
+        },
+        {
+          "click": ".intro-cta",
+          "timeout": 15000
+        },
+        {
+          "wait": 4500
+        }
+      ]
+    },
+    "help-box": {
+      "title": "FLT-95: Help ▸ How to play has \"Take the box off the shelf again\"",
+      "steps": [
+        {
+          "eval": "async () => { const z = (ms) => new Promise((r) => setTimeout(r, ms)); document.querySelector('[data-testid=start-button]')?.click(); await z(300); [...document.querySelectorAll('[role=menuitem]')].find((b) => /Help/.test(b.textContent))?.click(); }"
         },
         {
           "wait": 800
         }
       ]
     },
-    "flt93-card-phone": {
-      "title": "FLT-93: the \"Growing team\" New! card on a phone",
+    "flt93-onboard-hire-sre": {
+      "title": "FLT-93: ?moment=onboard-hire-sre (a link Jem can open; main has no such moment)",
+      "query": {
+        "moment": "onboard-hire-sre",
+        "warp": null
+      },
       "steps": [
         {
-          "eval": "(f, w) => { w.progression = { value: 'growing', context: { level: 2 } }; w.flags.visitorsServed = 12; w.ledger = { ...w.ledger, income: 41500 }; w.cash = Math.max(w.cash, 1400000); w.unlockCards = []; }"
-        },
-        {
-          "tick": 1
-        },
-        {
-          "wait": 800
+          "wait": 1500
         }
-      ],
-      "viewport": "390x844",
-      "mobile": true
+      ]
     },
     "flt93-hire": {
       "title": "FLT-93: Level 3's goal (hire an SRE) with the card read; the branch presses the goal's [Show me]",
@@ -6426,6 +6470,18 @@
           "click": "[data-showme=\"hire:sre\"]",
           "optional": true
         },
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "flt93-onboard-growing-team": {
+      "title": "FLT-93: ?moment=onboard-growing-team (a link Jem can open; main has no such moment)",
+      "query": {
+        "moment": "onboard-growing-team",
+        "warp": null
+      },
+      "steps": [
         {
           "wait": 1500
         }
@@ -6467,30 +6523,6 @@
       "viewport": "390x844",
       "mobile": true
     },
-    "flt93-onboard-growing-team": {
-      "title": "FLT-93: ?moment=onboard-growing-team (a link Jem can open; main has no such moment)",
-      "query": {
-        "moment": "onboard-growing-team",
-        "warp": null
-      },
-      "steps": [
-        {
-          "wait": 1500
-        }
-      ]
-    },
-    "flt93-onboard-hire-sre": {
-      "title": "FLT-93: ?moment=onboard-hire-sre (a link Jem can open; main has no such moment)",
-      "query": {
-        "moment": "onboard-hire-sre",
-        "warp": null
-      },
-      "steps": [
-        {
-          "wait": 1500
-        }
-      ]
-    },
     "flt93-onboard-race": {
       "title": "FLT-93: ?moment=onboard-race (a link Jem can open; main has no such moment)",
       "query": {
@@ -6502,6 +6534,101 @@
           "wait": 1500
         }
       ]
+    },
+    "flt93-card": {
+      "title": "FLT-93: Level 2 met, the \"Growing team\" New! card (both builds: the same world, staged by eval)",
+      "steps": [
+        {
+          "eval": "(f, w) => { w.progression = { value: 'growing', context: { level: 2 } }; w.flags.visitorsServed = 12; w.ledger = { ...w.ledger, income: 41500 }; w.cash = Math.max(w.cash, 1400000); w.unlockCards = []; }"
+        },
+        {
+          "tick": 1
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt93-card-phone": {
+      "title": "FLT-93: the \"Growing team\" New! card on a phone",
+      "steps": [
+        {
+          "eval": "(f, w) => { w.progression = { value: 'growing', context: { level: 2 } }; w.flags.visitorsServed = 12; w.ledger = { ...w.ledger, income: 41500 }; w.cash = Math.max(w.cash, 1400000); w.unlockCards = []; }"
+        },
+        {
+          "tick": 1
+        },
+        {
+          "wait": 800
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "flt93-arena": {
+      "title": "FLT-93: ?moment=onboard-race, card read, the goal's Show Me…: the arrow on Quick Launch's 24 px trophy",
+      "query": {
+        "moment": "onboard-race",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 1200
+        },
+        {
+          "eval": "(f, w) => { w.unlockCards = []; }"
+        },
+        {
+          "tick": 1
+        },
+        {
+          "wait": 800
+        },
+        {
+          "click": "[data-showme=\"app:arena\"]",
+          "optional": true
+        },
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "flt93-arena-phone": {
+      "title": "FLT-93: the same on a phone: the tray's #rank stands in for the leaderboard",
+      "query": {
+        "moment": "onboard-race",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 1200
+        },
+        {
+          "eval": "(f, w) => { w.unlockCards = []; }"
+        },
+        {
+          "tick": 1
+        },
+        {
+          "wait": 800
+        },
+        {
+          "click": ".f95-foldbar",
+          "optional": true
+        },
+        {
+          "wait": 400
+        },
+        {
+          "click": "[data-showme=\"app:arena\"]",
+          "optional": true
+        },
+        {
+          "wait": 1500
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
     }
   }
 }

@@ -7,7 +7,7 @@ import { useT } from "../context";
 import type { HudActions, HudVM, WidgetVM } from "../../ui/hud/types";
 import { Ico } from "./icons";
 import { openPalette, palette, usePalette } from "./palette";
-import { IN_TRAY, QUICK_SHOWN, quickLaunch, rankChip, type QuickApp } from "./quick";
+import { IN_TRAY, QUICK_ICON, QUICK_SHOWN, quickLaunch, rankChip, type QuickApp } from "./quick";
 
 function useLaunch(actions: HudActions) {
   const paletteOpen = usePalette();
@@ -24,7 +24,7 @@ const DOORS: Record<string, ReturnType<typeof door>> = { facilities: door("build
 function AppButton({ app, on, onClick, className = "f95-qb" }: { app: QuickApp; on: boolean; onClick: () => void; className?: string }) {
   return (
     <button type="button" className={`${className}${on ? " on" : ""}`} data-anchor={app.anchor} {...DOORS[app.id]} title={app.tip} aria-label={app.name} aria-pressed={app.id === "facilities" ? on : undefined} onClick={onClick}>
-      <Ico name={app.icon} size={16} />
+      <Ico name={app.icon} size={QUICK_ICON} />
     </button>
   );
 }
