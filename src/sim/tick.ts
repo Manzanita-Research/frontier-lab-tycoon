@@ -172,7 +172,9 @@ function step(state: GameState, commands: readonly Command[]) {
     probe?.lap("daily:modArcs");
     if (systemUnlocked(state, "auditors")) dailyAuditors(state);
     probe?.lap("daily:auditors");
-    if (systemUnlocked(state, "events")) dailyEvents(state);
+    // A card a mod brought mid-game (FLT-78) comes even before the ladder opens the rest: it was asked for.
+    const cards = systemUnlocked(state, "events");
+    if (cards || state.modsAdded) dailyEvents(state, cards);
     probe?.lap("daily:events");
     updateProgression(state);
     updateTutorial(state);

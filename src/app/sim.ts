@@ -73,20 +73,44 @@ export class SimHandle {
   /** The World a save put here (FLT-65), so the News Room reopens its archive instead of wiping it. */
   loaded: GameState | null = null;
 
-  constructor(world: GameState, leapfrog = false, public papers = world.papers?.enabled ?? false, public readonly def: GameDefinition | null = null) {
+  /** Definitions waiting for their `addMod`/`removeMod` command (FLT-78), by `defKey`. */
+  private staged = new Map<string, GameDefinition | null>();
+
+  constructor(world: GameState, leapfrog = false, public papers = world.papers?.enabled ?? false, public def: GameDefinition | null = null) {
     this.world = world;
     this.leapfrog = leapfrog;
     this.endings = !!world.endings;
   }
 
+  /**
+   * The definition the lab runs with once this `addMod`/`removeMod` command applies (FLT-78). It is swapped in on the
+   * command's own tick, so the tick before still ran the old one and a replay of the commands is the same lab.
+   */
+  stageDef(command: Extract<Command, { type: "addMod" | "removeMod" }>, def: GameDefinition | null) {
+    this.staged.set(defKey(command), def);
+  }
+
+  private swapDefs(commands: readonly Command[]) {
+    for (const c of commands) {
+      if (c.type !== "addMod" && c.type !== "removeMod") continue;
+      const key = defKey(c);
+      if (!this.staged.has(key)) continue;
+      this.def = this.staged.get(key)!;
+      this.staged.delete(key);
+    }
+  }
+
   /** Advance `n` ticks; queued commands apply on the first one. */
   step(n: number, commands: readonly Command[]) {
+    if (n > 0) this.swapDefs(commands);
     for (let i = 0; i < n; i++) tick(this.world, i === 0 && commands.length > 0 ? commands : undefined, this.def);
   }
 
   /** Apply commands without advancing time (building while paused or with a card open). */
   applyNow(commands: readonly Command[]) {
-    if (commands.length > 0) applyNow(this.world, commands, this.def);
+    if (commands.length === 0) return;
+    this.swapDefs(commands);
+    applyNow(this.world, commands, this.def);
   }
 
   /** Start over with a fresh seed (the random-disaster setting carries over to the new lab). `daily` is Today's lab. */
@@ -117,7 +141,8 @@ export class SimHandle {
    * Carry on from a save (FLT-65): the World replaces the live one as it is, so the next tick is the tick it would
    * have been. The handle's own switches follow the World (a save knows whether its packs are on).
    */
-  load(world: GameState) {
+  load(world: GameState, def: GameDefinition | null) {
+    this.def = def;
     this.newsStartId = 0;
     this.openingThoughts = undefined;
     this.world = world;
@@ -221,6 +246,8 @@ function stage(dbg: SimDebug): GameState {
   if (dbg.disaster) stageDisaster(sim, dbg.disaster, dbg.dz ?? 0, dbg.dzPick ?? null);
   return sim;
 }
+
+const defKey = (c: Extract<Command, { type: "addMod" | "removeMod" }>) => (c.type === "addMod" ? `add:${c.mod.id}` : `remove:${c.id}`);
 
 export class Sim extends Context.Service<Sim, SimHandle>()("@flt/Sim") {}
 

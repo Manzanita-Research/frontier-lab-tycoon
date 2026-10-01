@@ -83,7 +83,7 @@ describe("saving from the app (FLT-65)", () => {
       const other = createTestCampus(9);
       runDays(other, 5);
       const at = other.tick;
-      yield* send(actor, { type: "LOAD_LAB", world: other });
+      yield* send(actor, { type: "LOAD_LAB", world: other, def: null });
       yield* pump(1);
       expect(sim.world).toBe(other);
       yield* pump(20);

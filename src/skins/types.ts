@@ -225,7 +225,7 @@ export interface SlotPropsMap {
    * (`unread`: a dot and the count). `actions.openTray(id)`. Docked; null while `tray` is empty.
    */
   WindowTray: { tray: TrayItemVM[]; layout: LayoutVM; actions: HudActions };
-  /** Today's Drama while `drama.open`: the newest pack, the archive, Play (`actions.playDrama(id)`, a new lab) and switch off (`actions.removeMod(on.id)`). `drama.intro` is the "now playing" card for a pack that has just loaded. Close with `actions.closeDrama()`. */
+  /** Today's Drama while `drama.open`: the newest pack, the archive, "Add to my lab" (`actions.playDrama(id)`: into the lab on screen, no reload; `drama.adding` while it fetches, `drama.problem` if it didn't) and Remove (`actions.removeMod(on.id)`). `drama.intro` is the "on air" card for a lab that started with a pack. Close with `actions.closeDrama()`. */
   Drama: { drama: DramaVM; actions: HudActions };
   /**
    * "Welcome back" (FLT-65), while `saves.welcome` is set: `actions.continueSave()` loads the autosave, `actions.dismissWelcome()`

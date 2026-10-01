@@ -5,7 +5,8 @@ import { Effect } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { useEffect } from "react";
 import { registry, saveDesk, savesReady, send, sim } from "../../app/game";
-import { modSession } from "../../app/mods";
+import { modSession, type ModSession } from "../../app/mods";
+import { installSession, matchSave } from "../../app/liveMods";
 import { welcomesYou, type SaveResult } from "../../app/saves";
 import { downloadSave, encodeSave, isSlot, loadWorld, readSaveFile, saveFileName, type SaveError, type SaveFile, type SaveMeta, type SlotId, type SlotListing } from "../../save";
 import { formatDate } from "../../sim/format";
@@ -39,14 +40,18 @@ const say = (text: string, tone: ToneVM, patch: Partial<SavesUi> = {}) => refres
 const fail = (e: SaveError) => say(e.message, "bad");
 const slotName = (slot: SlotId) => (slot === "auto" ? "the autosave" : `slot ${slot}`);
 
-/** Put the save's World in play: the machine swaps it in, the save's skin comes back, and the window closes. */
-function finish(save: SaveFile) {
+/**
+ * Put the save's World in play: the machine swaps it in, the save's skin comes back, and the window closes. `session`
+ * is the mods it plays with when they differ from this tab's (FLT-78: mods it had added mid-game come back).
+ */
+function finish(save: SaveFile, session?: ModSession) {
   return loadWorld(save).pipe(
     Effect.match({
       onFailure: fail,
       onSuccess: (world) => {
         saveDesk.held = false;
-        send({ type: "LOAD_LAB", world });
+        if (session && session !== modSession()) installSession(session);
+        send({ type: "LOAD_LAB", world, def: modSession().def });
         void restoreSaveSkin(save.skin);
         say(`Loaded "${save.lab}", ${formatDate(save.day)}.`, "good", { open: false, welcome: null, prompt: null });
         send({ type: "TOAST", text: `Welcome back to ${save.lab}. It's ${formatDate(save.day)}.`, tone: "good" });
@@ -55,14 +60,22 @@ function finish(save: SaveFile) {
   );
 }
 
-/** Load a save, asking first when it was made with different mods. */
+/**
+ * Load a save, asking first when it was made with different mods. Mods added mid-game (FLT-78) don't ask: the save's
+ * come back and this lab's go, by themselves.
+ */
 function begin(save: SaveFile) {
-  const vm = modMismatch(save, modSession().mods);
-  if (vm) {
-    set({ prompt: { save, vm }, busy: false });
-    return Effect.void;
-  }
-  return finish(save);
+  return Effect.promise(() => matchSave(save)).pipe(
+    Effect.flatMap((matched) => {
+      const session = matched.ok ? matched.session : modSession();
+      const vm = modMismatch(save, session.mods);
+      if (vm) {
+        set({ prompt: { save, vm }, busy: false });
+        return Effect.void;
+      }
+      return finish(save, session);
+    }),
+  );
 }
 
 const run = (effect: Effect.Effect<unknown, SaveError>) => {

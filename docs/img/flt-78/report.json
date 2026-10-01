@@ -1,0 +1,89 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "8fb8e5824cd81bd868d054b893df970b64ec2e2a"
+  },
+  "head": {
+    "branch": "flt-78-drama-hotload",
+    "sha": "8fbac39",
+    "dirty": false
+  },
+  "seconds": 218.361,
+  "problems": [
+    "drama-added.png: blank composite: panel 3 is 27% one colour, 11 colours",
+    "drama-added-phone.png: blank composite: panel 3 is 35% one colour, 8 colours",
+    "drama-intro.png: blank composite: panel 3 is 32% one colour, 6 colours"
+  ],
+  "rows": [
+    {
+      "scene": "drama-window",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/flt-78-drama-hotload/docs/img/flt-78/before/drama-window.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/flt-78-drama-hotload/docs/img/flt-78/after/drama-window.png",
+      "title": "FLT-34: Today's Drama: the latest pack's card and the archive",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/flt-78-drama-hotload/docs/img/flt-78/compare/drama-window.png",
+      "changed": 0.04118827160493827
+    },
+    {
+      "scene": "drama-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/flt-78-drama-hotload/docs/img/flt-78/before/drama-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/flt-78-drama-hotload/docs/img/flt-78/after/drama-phone.png",
+      "title": "FLT-34: Today's Drama on a phone (390x844)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/flt-78-drama-hotload/docs/img/flt-78/compare/drama-phone.png",
+      "changed": 0.1512455948474906
+    },
+    {
+      "scene": "drama-base",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/flt-78-drama-hotload/docs/img/flt-78/before/drama-base.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/flt-78-drama-hotload/docs/img/flt-78/after/drama-base.png",
+      "title": "FLT-34: the base skin's Today's Drama button and card",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/flt-78-drama-hotload/docs/img/flt-78/compare/drama-base.png",
+      "changed": 0.022290895061728395
+    },
+    {
+      "scene": "drama-playing",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/flt-78-drama-hotload/docs/img/flt-78/before/drama-playing.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/flt-78-drama-hotload/docs/img/flt-78/after/drama-playing.png",
+      "title": "FLT-34: the window with a pack playing, and Mods… offering to switch it off",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/flt-78-drama-hotload/docs/img/flt-78/compare/drama-playing.png",
+      "changed": 0.01717206790123457
+    },
+    {
+      "scene": "drama-added",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/flt-78-drama-hotload/docs/img/flt-78/before/drama-added.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/flt-78-drama-hotload/docs/img/flt-78/after/drama-added.png",
+      "title": "FLT-78: Today's Drama added to the lab on screen: In your lab ✓, Remove, and the ticker says so",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/flt-78-drama-hotload/docs/img/flt-78/compare/drama-added.png",
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 27% one colour, 11 colours",
+      "error": "compare: blank composite: panel 3 is 27% one colour, 11 colours"
+    },
+    {
+      "scene": "drama-added-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/flt-78-drama-hotload/docs/img/flt-78/before/drama-added-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/flt-78-drama-hotload/docs/img/flt-78/after/drama-added-phone.png",
+      "title": "FLT-78: Today's Drama added, on a phone (390x844)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/flt-78-drama-hotload/docs/img/flt-78/compare/drama-added-phone.png",
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 35% one colour, 8 colours",
+      "error": "compare: blank composite: panel 3 is 35% one colour, 8 colours"
+    },
+    {
+      "scene": "drama-intro",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/flt-78-drama-hotload/docs/img/flt-78/before/drama-intro.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/flt-78-drama-hotload/docs/img/flt-78/after/drama-intro.png",
+      "title": "FLT-34: a Drama pack has just loaded (fixture feed): the ON AIR card says what's coming",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/flt-78-drama-hotload/docs/img/flt-78/compare/drama-intro.png",
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 32% one colour, 6 colours",
+      "error": "compare: blank composite: panel 3 is 32% one colour, 6 colours"
+    }
+  ],
+  "errors": []
+}
