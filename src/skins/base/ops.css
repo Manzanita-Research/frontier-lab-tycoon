@@ -167,7 +167,7 @@
   border-radius: 9px;
   background: var(--cream);
   color: var(--ink);
-  font: 900 10.5px var(--font);
+  font: 900 11px var(--font);
   white-space: nowrap;
   box-shadow: 0 2px 0 color-mix(in srgb, var(--flt-color-line) 75%, transparent);
   pointer-events: none;
@@ -187,6 +187,13 @@
   cursor: pointer;
   pointer-events: auto;
   box-shadow: 0 2px 0 color-mix(in srgb, var(--flt-color-line) 75%, transparent);
+}
+/* FLT-87: big enough for a thumb. */
+@media (pointer: coarse) {
+  .peektag button {
+    min-height: 32px;
+    padding: 4px 12px;
+  }
 }
 .stafftag.job-sre {
   background: #ffc978;

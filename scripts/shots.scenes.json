@@ -346,6 +346,14 @@
       "escape-carry-phone",
       "front-escaped",
       "front-escaped-phone"
+    ],
+    "flt-87": [
+      "flt87-phone-l1",
+      "flt87-phone-l4",
+      "flt87-phone-l5",
+      "flt87-phone-new",
+      "flt87-phone-mid",
+      "flt87-phone-more"
     ]
   },
   "scenes": {
@@ -4837,6 +4845,98 @@
       "steps": [
         {
           "wait": 6500
+        }
+      ]
+    },
+    "flt87-phone-l1": {
+      "title": "FLT-87: Level 1 on a phone, the coach's first step",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt87-phone-l4": {
+      "title": "FLT-87: Level 4 (The Race) on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "ladder": 4,
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt87-phone-l5": {
+      "title": "FLT-87: Level 5 (Scrutiny) on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "ladder": 5,
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt87-phone-new": {
+      "title": "FLT-87: Level 4 earned on a phone: the New! card and its windows' title buttons",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "ladder": 4,
+        "unlock": 1,
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt87-phone-mid": {
+      "title": "FLT-87: the midgame on a phone: a training run, the goal and a full tray",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "scenario": "midgame",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt87-phone-more": {
+      "title": "FLT-87: the midgame on a phone, the fold open and the tray's » panel up",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "scenario": "midgame",
+        "warp": null
+      },
+      "steps": [
+        {
+          "click": ".f95-foldbar",
+          "optional": true
+        },
+        {
+          "click": ".f95-chev",
+          "optional": true
+        },
+        {
+          "wait": 500
         }
       ]
     }
