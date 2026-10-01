@@ -6092,15 +6092,16 @@
 
 /* ---- FLT-94: Quick Launch (applets only), the Facilities palette, the tray's rank ---- */
 [data-skin="frontier-95"] {
-  /* Quick Launch: 16 px icons on flat buttons that rise under the pointer, the way the real one did. */
+  /* Quick Launch: 24 px icons (the sprite's own grid, so no blur) on flat buttons as tall as Start, that rise under the
+     pointer, the way the real one did. The 42 px taskbar already holds them. */
   .f95-qs {
     position: relative;
     align-items: center;
     gap: 0;
   }
   .f95-qb {
-    width: 26px;
-    height: 26px;
+    width: 32px;
+    height: 32px;
     background: transparent;
     box-shadow: none;
     &:hover:not(.on) {
@@ -6108,7 +6109,7 @@
     }
   }
   .f95-qmore {
-    width: 18px;
+    width: 20px;
     font: bold 15px/1 var(--flt-font-ui);
     color: inherit;
   }

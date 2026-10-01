@@ -53,6 +53,12 @@ describe("Frontier 95's Quick Launch (FLT-94)", () => {
     const buttons = [...qs.matchAll(/<button[^>]*>/g)].map((m) => m[0]);
     expect(buttons.length).toBeGreaterThan(3);
     for (const b of buttons) expect(b, b).toMatch(/title="[^"]{4,}"/);
+    // 24 px, the sprite's own grid (Jem on #110), on a desktop and a phone alike.
+    for (const html of [qs, block(render(vmOf({ ...PHONE, leapfrog: true })), "f95-qs")]) {
+      const icons = [...html.matchAll(/<svg class="f95-ico" width="(\d+)" height="(\d+)"/g)];
+      expect(icons.length).toBeGreaterThan(0);
+      for (const m of icons) expect([m[1], m[2]]).toEqual(["24", "24"]);
+    }
   });
 
   it("keeps eight on a desktop and puts the rest behind its »", () => {

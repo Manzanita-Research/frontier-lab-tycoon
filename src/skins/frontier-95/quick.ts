@@ -14,7 +14,7 @@ export interface QuickApp {
   icon: string;
 }
 
-/** The order, and the 16 px icon and the 1995 name each applet goes by here. Ids missing from `vm.widgets` are not earned yet. */
+/** The order, and the icon and the 1995 name each applet goes by here. Ids missing from `vm.widgets` are not earned yet. */
 export const QUICK: readonly { id: string; name: string; icon: string }[] = [
   { id: "facilities", name: "Facilities", icon: "build" },
   { id: "staff", name: "Staff Manager", icon: "staff" },
@@ -48,6 +48,9 @@ export function quickLaunch(widgets: readonly WidgetVM[] = []): QuickApp[] {
 
 /** The applets that also have a tray icon of their own: a phone's tray does not show them twice. */
 export const IN_TRAY = new Set(["bird", "news", "drama"]);
+
+/** Quick Launch's icon size: 24 px, the sprite's own grid, so they draw pixel for pixel (Jem's call on #110). */
+export const QUICK_ICON = 24;
 
 /** How many sit on a desktop taskbar before the rest go behind its » (Windows did the same when you dragged too many on). */
 export const QUICK_SHOWN = 8;
