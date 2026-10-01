@@ -338,7 +338,41 @@ async function closeStart() {
   if (!phone && (await page.locator("[role=menu]:visible").count())) await page.keyboard.press("Escape");
   if (await page.locator("[role=menu]:visible").count()) await press(page.locator("[data-testid=start-button]").first());
 }
+/** FLT-94: open an applet by its Quick Launch icon (on a phone most wait behind the tray's », `apps`). False if there is none. */
+async function launchApp(id) {
+  const icon = () => page.locator(`[data-anchor="app:${id}"]:visible`).first();
+  if (!(await icon().count())) {
+    const more = page.locator('[data-anchor="apps"]:visible').first();
+    if (!(await more.count())) return false;
+    await press(more);
+    await page.waitForTimeout(250);
+  }
+  if (!(await icon().count())) return false;
+  return press(icon());
+}
+/** FLT-94: Frontier 95 builds from the Facilities palette: open it (Quick Launch), pick the tile, put the palette away. Null: no palette here. */
+async function pickFromPalette(kind) {
+  const tile = () => page.locator(`section.f95-palette [data-anchor="build:${kind}"]:visible`).first();
+  if (!(await tile().count())) {
+    if (!(await page.locator('[data-anchor="app:facilities"]:visible').count())) return null;
+    await launchApp("facilities");
+    await page.waitForTimeout(300);
+  }
+  const ok = (await tile().count()) > 0 && (await tile().isEnabled()) && (await press(tile()));
+  // A phone's palette shuts itself on a pick; on a desktop it stays up (it's a toolbox), and the player puts it away.
+  const close = page.locator("section.f95-palette:visible [data-g=close]").first();
+  if (await close.count()) await press(close);
+  return ok;
+}
+const KIND_OF = { "Compute Cluster": "cluster", "Training Hall": "hall", "API Gateway": "gateway", "Kombucha Bar": "kombucha", "Nap Pods": "nap", "Snack Wall": "snack", "Demo Stage": "demo", "Security Office": "security" };
 async function pickTool(name) {
+  // FLT-94: a building is a tile in the Facilities palette and hiring is the Staff Manager applet; Path stays on top of
+  // Start. A skin without them (`--skin base`) keeps FLT-63's Start ▸ Facilities ▸.
+  if (name === "Staff" && ((await launchApp("staff")) || (await pickFromPalette("staff")))) return true;
+  if (KIND_OF[name]) {
+    const picked = await pickFromPalette(KIND_OF[name]);
+    if (picked !== null) return picked;
+  }
   const menu = await openStart();
   let item = menu.getByRole("menuitem").filter({ hasText: name }).first();
   // FLT-63: buildings live in Start ▸ Facilities ▸ (Path and Bulldoze stay on top).
