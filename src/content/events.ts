@@ -73,6 +73,11 @@ export interface EventDef {
   kind?: "era" | "auction" | "response" | "stream" | "hearing" | "leak" | "drama" | "report" | "bill" | "vote";
   /** The stripe text at the top of the card, when it isn't the tone's ("Breaking", "Developing", ...). */
   stripe?: string;
+  /**
+   * A card for the first minutes (FLT-76): it opens on Level 1, before the ladder opens the rest, once its `when` holds,
+   * without waiting for the pressure the other cards wait for. Never again after Level 1.
+   */
+  early?: true;
 }
 
 export const EVENT_COOLDOWN_DAYS = 60;
@@ -229,6 +234,50 @@ const RACE_EVENTS: EventDef[] = [
 ];
 
 EVENTS.push(...RACE_EVENTS);
+
+/**
+ * FLT-76: the first decision. PLAY IT reached Level 3 in under four minutes without choosing anything, so while the first
+ * model trains, somebody asks about the logo. Cheap, small, and nothing rides on it (except everything, says Marketing).
+ */
+EVENTS.push({
+  id: "theLogo",
+  early: true,
+  stripe: "Brand emergency",
+  title: "Your first model needs a logo",
+  body: "Marketing (one person, who is also Facilities) has three options and a deadline they made up. Slide 2 of the investor deck has a hole in it the exact shape of a logo.",
+  tone: "neutral",
+  // Two days after the first path: the Hall is up and the first model is training.
+  when: { flag: "firstPath", daysAgo: 2 },
+  cooldown: 99_999,
+  choices: [
+    {
+      label: "The swirl",
+      hint: "free · hype +1 · it looks like everyone else's, which is the point",
+      effects: [
+        { type: "hype", amount: 1 },
+        { type: "news", text: "{lab} unveils its logo: a swirl. Industry observers confirm it is a swirl." },
+      ],
+    },
+    {
+      label: "A swirlier swirl",
+      hint: "−$8K · hype +4 · the designer has been up for two days",
+      effects: [
+        { type: "cash", amount: -8_000 },
+        { type: "hype", amount: 4 },
+        { type: "news", text: "{lab}'s new logo is a swirl with more swirl in it. The designer is said to be resting." },
+        { type: "thought", kind: "researcher", text: "The new logo looks like a cinnamon roll having a breakthrough.", count: 2 },
+      ],
+    },
+    {
+      label: "An asterisk",
+      hint: "free · hype +2 · terms and conditions apply",
+      effects: [
+        { type: "hype", amount: 2 },
+        { type: "news", text: "{lab} picks an asterisk for a logo. Readers search the page for the footnote. There is no footnote." },
+      ],
+    },
+  ],
+});
 // Release Leapfrog's cards live in its pack (mods/base-leapfrog); they only ever open once its systems set their flags.
 EVENTS.push(...LEAPFROG.events);
 // FLT-17: the cards the disasters open (mods/base-disasters). They wait for their offer flag like the Race's cards do.

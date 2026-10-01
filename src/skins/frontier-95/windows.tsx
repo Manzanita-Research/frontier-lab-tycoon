@@ -349,9 +349,15 @@ export function Arena({ arena, leapfrog, layout, actions }: SlotPropsMap["Arena"
   const t = useT();
   const { Benchmarks } = useSlots();
   const rd = arena.rd;
-  useStackWindow("arena", !arena.open, (minimised) => {
-    if (minimised === arena.open) actions.toggleArena();
-  });
+  // The narrow Task Mangler the game opened (for a launch) is not the one that folds to make room (FLT-76).
+  useStackWindow(
+    "arena",
+    !arena.open,
+    (minimised) => {
+      if (minimised === arena.open) actions.toggleArena();
+    },
+    arena.auto && arena.open,
+  );
   const bench = leapfrog.enabled;
   // With Release Leapfrog on, the leaderboard is the live part of the race: it opens first, and the tab lights up on a launch.
   const [tab, setTab] = useState<"perf" | "bench">("bench");

@@ -222,10 +222,13 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // 1600 on moves on every seed (its posts, Aura, headlines and toasts). With `flags.birdappOff` set, and the Comms Rep put
 // back on the Level 5 card (with the Level 3 card's two new items left out), all three seeds reproduce the values above
 // at every checkpoint, digit for digit: the Bird App is the whole difference.
+// FLT-76 asks the first decision on Level 1: the Logo opens two days after the first path, while the first model trains,
+// and this script answers it like any other card, so every
+// checkpoint moves. With the card kept shut (`firstMinutes` false), all three seeds reproduce the values above.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "c403ae9a", 800: "c9a777bd", 1600: "ec51030b", 2400: "50b6ca63", 3200: "d5e72be3", 4000: "733b0186" },
-  2: { 200: "766f3295", 800: "aec1b296", 1600: "9e386036", 2400: "1c00c918", 3200: "84a6b377", 4000: "54fbf395" },
-  3: { 200: "b43cb9be", 800: "510d3b99", 1600: "c01adf53", 2400: "680003ae", 3200: "89614b0c", 4000: "9ce0bccd" },
+  1: { 200: "5e0738a0", 800: "e319dc92", 1600: "d666ee36", 2400: "5514cbc2", 3200: "48f62238", 4000: "db39899a" },
+  2: { 200: "8e0d811a", 800: "857cc831", 1600: "c749a1dc", 2400: "86de5923", 3200: "2cdb0b43", 4000: "0f914291" },
+  3: { 200: "71a54b51", 800: "c5845aae", 1600: "317aaba3", 2400: "92927fae", 3200: "249e9ca2", 4000: "082c8fec" },
 };
 
 describe("golden runs", () => {

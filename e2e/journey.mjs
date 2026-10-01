@@ -450,6 +450,11 @@ try {
       await page.waitForTimeout(300);
       continue;
     }
+    // FLT-76: a card can wait its turn behind a ship or a level-up (the moment queue); it is open in the sim but not on screen yet.
+    if (probe.event && (probe.stage ?? []).some((k) => k === "card" || k === "era")) {
+      await page.waitForTimeout(300);
+      continue;
+    }
     if (probe.event) {
       const dialog = page.locator("[role=dialog]:visible, [role=alertdialog]:visible").last();
       const choice = dialog.locator(".f95-choices button, button.choice, .choices button").first();
