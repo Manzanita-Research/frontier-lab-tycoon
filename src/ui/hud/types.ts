@@ -150,6 +150,10 @@ export interface BuildItemVM {
   name: string;
   short: string;
   blurb: string | null;
+  /** FLT-94: what it is for, plainly ("Makes the compute your Training Halls turn into models."), for a build palette. Absent: use `blurb`. */
+  does?: string | null;
+  /** FLT-94: "$5K/day upkeep", or null for a tool or a tile that opens a window. */
+  upkeepText?: string | null;
   price: number;
   priceText: string;
   free: boolean;

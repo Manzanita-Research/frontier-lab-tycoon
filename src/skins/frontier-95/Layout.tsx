@@ -1,4 +1,6 @@
 import { IconSprite } from "./icons";
+import { Facilities } from "./palette";
+import { QuickTray, TrayRank } from "./quicklaunch";
 import { Fold, TrayMore } from "./phone";
 import { WindowStack } from "./stack";
 import type { SlotPropsMap } from "../types";
@@ -10,8 +12,12 @@ import type { SlotPropsMap } from "../types";
  *
  * On a phone (FLT-87) the campus comes first: Training, the goal and the Objectives fold into one strip, and the taskbar
  * keeps to one row, the tray icons and waiting windows that don't fit behind a » button.
+ *
+ * FLT-94: Quick Launch beside Start holds the applets (the Facilities palette first), the palette tops the window stack
+ * while it is open, and the tray shows the lab's rank, which opens the leaderboard. On a phone only the palette stays by
+ * Start; the other applets join the tray icons behind the », and the rank stays out.
  */
-export function Layout({ vm, slots }: SlotPropsMap["Layout"]) {
+export function Layout({ vm, actions, slots }: SlotPropsMap["Layout"]) {
   const phone = vm.layout.compact;
   return (
     <div className="f95-desktop">
@@ -35,6 +41,7 @@ export function Layout({ vm, slots }: SlotPropsMap["Layout"]) {
       <div className="f95-side">
         {slots.DisasterAlert}
         <WindowStack>
+          <Facilities vm={vm} actions={actions} />
           {slots.Staff}
           {slots.Inspector}
           {slots.Arena}
@@ -49,8 +56,9 @@ export function Layout({ vm, slots }: SlotPropsMap["Layout"]) {
         {!phone && slots.WindowTray}
         {slots.Ticker}
         <div className="f95-tray">
+          <TrayRank vm={vm} actions={actions} />
           {phone ? (
-            <TrayMore>
+            <TrayMore anchor="apps">
               {slots.WindowTray}
               {slots.Voice}
               {slots.Factions}
@@ -58,6 +66,7 @@ export function Layout({ vm, slots }: SlotPropsMap["Layout"]) {
               {slots.NewsControls}
               {slots.DramaButton}
               {slots.PhotoButton}
+              <QuickTray vm={vm} actions={actions} />
             </TrayMore>
           ) : (
             <>

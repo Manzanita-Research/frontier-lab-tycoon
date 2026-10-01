@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { anchorSelector } from "./anchors";
 import { guardWith } from "./guard";
 import { arrowPlace, MAX_CLICKS, newWalk, walkStep, type Page, type PageEl } from "./showMe";
 
@@ -82,6 +83,10 @@ describe("[Show me]'s walk (FLT-93)", () => {
     const quiet = vi.spyOn(console, "error").mockImplementation(() => {});
     expect(guardWith(() => { throw new Error("no"); }, "x", () => { throw new Error("yes"); }, 7)).toBe(7);
     quiet.mockRestore();
+  });
+
+  it("finds an anchor by its id, or by a control that stands in for it", () => {
+    expect(anchorSelector("app:arena", (x) => x)).toBe('[data-anchor="app:arena"], [data-anchor-also~="app:arena"]');
   });
 });
 

@@ -1,12 +1,14 @@
-// The taskbar: Start (and its menu), quick-launch, the news tape, and the tray (speed, news, sound, camera, clock).
+// The taskbar: Start (and its menu), Quick Launch (quicklaunch.tsx), the news tape, and the tray (speed, news, sound, camera, clock).
 import { useEffect, useRef, useState } from "react";
-import { ALL_VISIBLE, anchor, coachInFacilities, Dialog, door, facilityGroups, Marquee, useRunBox } from "../kit";
+import { ALL_VISIBLE, anchor, coachInFacilities, Dialog, facilityGroups, Marquee, useRunBox } from "../kit";
 import { useCoach, useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import type { BuildItemVM, WidgetVM } from "../../ui/hud/types";
 import { Ico, SunriseMark } from "./icons";
 import { Btn, Win } from "./parts";
 import { useResetPlaces } from "./drag";
+import { openPalette, usePalette } from "./palette";
+import { QuickLaunch } from "./quicklaunch";
 
 type Confirm = null | "ask" | "off" | "restart";
 
@@ -72,7 +74,7 @@ function ShutDown({ lab, onClose }: { lab: string; onClose: () => void }) {
 
 /** Where Frontier 95 draws each Run… widget from its own sprite. */
 const WIDGET_ICONS: Record<string, string> = {
-  properties: "info", finance: "chart", arena: "globe", benchmarks: "chart", thoughts: "chat", traffic: "net", discourse: "megaphone",
+  properties: "info", finance: "chart", arena: "trophy", bird: "bird", benchmarks: "chart", thoughts: "chat", traffic: "net", discourse: "megaphone",
   papers: "doc", news: "news", staff: "staff", senate: "senate", disasters: "siren", drama: "drama", saves: "floppy", mods: "programs", display: "display",
   sound: "sound", help: "help",
 };
@@ -151,23 +153,35 @@ function RunDialog({ widgets, onRun, onClose }: { widgets: WidgetVM[]; onRun: (i
   );
 }
 
-type Fly = null | "facilities" | "programs" | "settings";
+type Fly = null | "programs" | "settings";
 
 /**
- * Start button and its menu (FLT-63): Path and Bulldoze… on top, every building in Facilities ▸ (grouped, like Programs
- * in the real thing), the widgets in Programs ▸ and behind Run…, then Help, Settings ▸ and Shut Down Lab…. A flyout opens
- * on hover or click; on a phone it opens in place instead.
+ * Start button and its menu. FLT-94: building is an app now. Facilities… (the palette, also first on Quick Launch) and
+ * the two tools, Path and Bulldoze…, sit on top; every building is also in Programs ▸ Facilities ▸, one submenu per
+ * kind, five clicks deep the way 1995 intended; the applets follow in Programs ▸ and behind Run…; then Help, Settings ▸
+ * and Shut Down Lab…. A flyout opens on hover or click; on a phone it opens in place instead.
  */
-export function BuildBar({ items, tip, teasers = [], disasters, widgets = [], actions, speed }: SlotPropsMap["BuildBar"]) {
+export function BuildBar({ items, tip, teasers = [], disasters, widgets = [], layout, actions, speed }: SlotPropsMap["BuildBar"]) {
   const t = useT();
   const coach = useCoach();
+  const paletteOpen = usePalette();
   const [openRaw, setOpenRaw] = useState(false);
   const open = openRaw;
   const [fly, setFly] = useState<Fly>(null);
+  // Inside Programs ▸: the Facilities ▸ folder, and which kind's submenu is out.
+  const [folder, setFolder] = useState(false);
+  const [kind, setKind] = useState<string | null>(null);
+  const flyTo = (next: Fly) => {
+    setFly(next);
+    if (next !== "programs") {
+      setFolder(false);
+      setKind(null);
+    }
+  };
   // The first coach step waits for the menu to open, so say so each time it does.
   const setOpen = (next: boolean) => {
     setOpenRaw(next);
-    setFly(null);
+    flyTo(null);
     if (next) actions.buildPanel(true);
   };
   const [confirm, setConfirm] = useState<Confirm>(null);
@@ -191,21 +205,16 @@ export function BuildBar({ items, tip, teasers = [], disasters, widgets = [], ac
   }, [open]);
 
   // On a phone a flyout opens in place and the menu grows upward: bring its entry to the top of the (scrolling) menu.
+  const deepest = kind ? `kind-${kind}` : folder ? "facilities" : fly;
   useEffect(() => {
-    const li = fly ? root.current?.querySelector<HTMLElement>(`[data-fly="${fly}"]`) : null;
+    const li = deepest ? root.current?.querySelector<HTMLElement>(`[data-fly="${deepest}"]`) : null;
     const sub = li?.querySelector<HTMLElement>(".f95-fly");
     if (li && sub && getComputedStyle(sub).position === "static") li.scrollIntoView({ block: "start" });
-  }, [fly]);
+  }, [deepest]);
 
   const { tools, groups } = facilityGroups(items);
   const path = tools.find((i) => i.isPath);
   const bulldoze = tools.find((i) => i.isBulldoze);
-  const quick = items
-    .filter((i) => !i.isPath && !i.isBulldoze && !i.panel)
-    .map((it, order) => ({ it, order }))
-    .sort((a, b) => b.it.built - a.it.built || a.order - b.order)
-    .slice(0, 3)
-    .map((x) => x.it);
   const held = items.find((i) => i.selected && !i.panel);
   const pick = (kind: string) => {
     actions.place(kind);
@@ -216,21 +225,30 @@ export function BuildBar({ items, tip, teasers = [], disasters, widgets = [], ac
     setRun(false);
     actions.openWidget(id);
   };
-  // The coach points at a building while Facilities ▸ is shut: its entry stands in, so the spotlight has something to light.
-  const facCoach = fly !== "facilities" && coach.intoPanel(items) && coachInFacilities(coach.target, items);
+  const palette = () => {
+    setOpen(false);
+    openPalette(actions);
+  };
+  // The coach points at a building: with the menu open, Facilities… stands in for it (the palette has the tile).
+  const building = coach.intoPanel(items) && coachInFacilities(coach.target, items);
   // Hover opens a flyout (a mouse only: a tap is a click); a click only ever opens, so hover-then-click never shuts it.
-  const flyProps = (id: Exclude<Fly, null>) => ({
-    onPointerEnter: (e: React.PointerEvent) => e.pointerType === "mouse" && setFly(id),
-  });
-  const hoverShut = { onPointerEnter: (e: React.PointerEvent) => e.pointerType === "mouse" && setFly(null) };
-  const opener = (id: Exclude<Fly, null>) => ({ role: "menuitem", "aria-haspopup": "menu" as const, "aria-expanded": fly === id, className: fly === id ? "on" : "", onClick: () => setFly(id) });
+  const mouse = (e: React.PointerEvent) => e.pointerType === "mouse";
+  const flyProps = (id: Exclude<Fly, null>) => ({ onPointerEnter: (e: React.PointerEvent) => mouse(e) && flyTo(id) });
+  const hoverShut = { onPointerEnter: (e: React.PointerEvent) => mouse(e) && flyTo(null) };
+  const opener = (on: boolean, onClick: () => void) => ({ role: "menuitem", "aria-haspopup": "menu" as const, "aria-expanded": on, className: on ? "on" : "", onClick });
   const row = (it: BuildItemVM, size = 24) => (
-    <button type="button" role="menuitem" {...coach.attrs(`build:${it.kind}`)} {...(it.kind === "staff" ? door("hire:*") : {})} className={it.selected ? "on" : ""} disabled={!it.affordable && !it.selected} onClick={() => pick(it.kind)}>
+    <button type="button" role="menuitem" {...coach.attrs(`build:${it.kind}`)} className={it.selected ? "on" : ""} disabled={!it.affordable && !it.selected} title={it.does ?? undefined} onClick={() => pick(it.kind)}>
       <Ico name={it.kind} size={size} />
       <span>{it.name}</span>
       <span className="hk">{it.hotkey ?? ""}</span>
       <span className="p">{it.free ? t("build.free") : it.priceText}</span>
     </button>
+  );
+  const arrow = (
+    <>
+      <span className="hk" />
+      <span className="p arrow" aria-hidden />
+    </>
   );
 
   return (
@@ -241,6 +259,14 @@ export function BuildBar({ items, tip, teasers = [], disasters, widgets = [], ac
             <b>Frontier</b>95
           </div>
           <ul>
+            <li {...hoverShut}>
+              <button type="button" role="menuitem" {...coach.attrs("start:palette", building)} className={paletteOpen ? "on" : ""} title="Every building, what it costs and what it's for" onClick={palette}>
+                <Ico name="build" size={24} />
+                <span>{t("build.facilities")}…</span>
+                <span className="hk" />
+                <span className="p" />
+              </button>
+            </li>
             {path && <li {...hoverShut}>{row(path)}</li>}
             {bulldoze && (
               <li {...hoverShut}>
@@ -253,61 +279,78 @@ export function BuildBar({ items, tip, teasers = [], disasters, widgets = [], ac
               </li>
             )}
             <li className="sep" role="separator" />
-            <li className="fly" data-fly="facilities" {...flyProps("facilities")}>
-              <button type="button" {...opener("facilities")} {...coach.attrs("start:facilities", facCoach)} {...door("build:*", "hire:*")} data-testid="start-facilities">
-                <Ico name="folder" size={24} />
-                <span>{t("build.facilities")}</span>
-                <span className="hk" />
-                <span className="p arrow" aria-hidden />
-              </button>
-              {fly === "facilities" && (
-                <div className="f95-win f95-fly f95-facilities" role="menu" aria-label={t("build.facilities")} data-coach-panel>
-                  {groups.map((g) => (
-                    <ul key={g.id} role="group" aria-label={t(`build.group.${g.id}`)}>
-                      <li className="hd" role="presentation">
-                        {t(`build.group.${g.id}`)}
-                      </li>
-                      {g.items.map((it) => (
-                        <li key={it.kind}>{row(it, 20)}</li>
-                      ))}
-                    </ul>
-                  ))}
-                  {teasers.length > 0 && (
-                    <ul role="group" aria-label={t("build.locked")} className="locked-group">
-                      <li className="hd" role="presentation">
-                        {t("build.locked")}
-                      </li>
-                      {teasers.map((teaser, i) => (
-                        <li key={`${teaser.label}-${i}`} className="locked">
-                          <button type="button" role="menuitem" disabled aria-disabled title={`${t("build.locked")}: ${teaser.hint}`}>
-                            <Ico name="lock" size={20} />
-                            <span>
-                              {teaser.label}
-                              {teaser.hint && <> · {teaser.hint}</>}
-                            </span>
-                            <span className="hk" />
-                            <span className="p" />
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              )}
-            </li>
             <li className="fly" data-fly="programs" {...flyProps("programs")}>
-              <button type="button" {...opener("programs")} {...door("app:*")}>
+              <button type="button" data-anchor="start:programs" {...opener(fly === "programs", () => flyTo("programs"))}>
                 <Ico name="programs" size={24} />
                 <span>Programs</span>
-                <span className="hk" />
-                <span className="p arrow" aria-hidden />
+                {arrow}
               </button>
               {fly === "programs" && (
-                <div className="f95-win f95-fly" role="menu" aria-label="Programs">
+                <div className="f95-win f95-fly f95-programs" role="menu" aria-label="Programs">
                   <ul>
+                    <li className="fly" data-fly="facilities" onPointerEnter={(e) => mouse(e) && setFolder(true)}>
+                      <button type="button" data-testid="start-facilities" {...coach.attrs("start:facilities")} {...opener(folder, () => setFolder(true))}>
+                        <Ico name="folder" size={20} />
+                        <span>{t("build.facilities")}</span>
+                        {arrow}
+                      </button>
+                      {folder && (
+                        <div className="f95-win f95-fly" role="menu" aria-label={t("build.facilities")}>
+                          <ul>
+                            {groups.map((g) => (
+                              <li key={g.id} className="fly" data-fly={`kind-${g.id}`} onPointerEnter={(e) => mouse(e) && setKind(g.id)}>
+                                <button type="button" data-anchor={`start:facilities:${g.id}`} {...opener(kind === g.id, () => setKind(g.id))}>
+                                  <Ico name="folder" size={20} />
+                                  <span>{t(`build.group.${g.id}`)}</span>
+                                  {arrow}
+                                </button>
+                                {kind === g.id && (
+                                  <div className="f95-win f95-fly" role="menu" aria-label={t(`build.group.${g.id}`)} data-coach-panel>
+                                    <ul>
+                                      {g.items.map((it) => (
+                                        <li key={it.kind}>{row(it, 20)}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                              </li>
+                            ))}
+                            {teasers.length > 0 && (
+                              <li className="fly" data-fly="kind-locked" onPointerEnter={(e) => mouse(e) && setKind("locked")}>
+                                <button type="button" data-anchor="start:facilities:locked" {...opener(kind === "locked", () => setKind("locked"))}>
+                                  <Ico name="lock" size={20} />
+                                  <span>{t("build.locked")}</span>
+                                  {arrow}
+                                </button>
+                                {kind === "locked" && (
+                                  <div className="f95-win f95-fly" role="menu" aria-label={t("build.locked")}>
+                                    <ul>
+                                      {teasers.map((teaser, i) => (
+                                        <li key={`${teaser.label}-${i}`} className="locked">
+                                          <button type="button" role="menuitem" disabled aria-disabled title={`${t("build.locked")}: ${teaser.hint}`}>
+                                            <Ico name="lock" size={20} />
+                                            <span>
+                                              {teaser.label}
+                                              {teaser.hint && <> · {teaser.hint}</>}
+                                            </span>
+                                            <span className="hk" />
+                                            <span className="p" />
+                                          </button>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                              </li>
+                            )}
+                          </ul>
+                        </div>
+                      )}
+                    </li>
+                    <li className="sep" role="separator" onPointerEnter={(e) => mouse(e) && setFolder(false)} />
                     {widgets.map((w) => (
-                      <li key={w.id}>
-                        <button type="button" role="menuitem" title={w.blurb} {...anchor(`app:${w.id}`)} {...(w.id === "staff" ? door("hire:*") : {})} onClick={() => launch(w.id)}>
+                      <li key={w.id} onPointerEnter={(e) => mouse(e) && (setFolder(false), setKind(null))}>
+                        <button type="button" role="menuitem" title={w.blurb} {...anchor(`app:${w.id}`)} onClick={() => launch(w.id)}>
                           <Ico name={widgetIcon(w)} size={20} />
                           <span>{w.id === "drama" ? t("drama.button") : w.name}</span>
                         </button>
@@ -339,7 +382,7 @@ export function BuildBar({ items, tip, teasers = [], disasters, widgets = [], ac
               </button>
             </li>
             <li className="fly" data-fly="settings" {...flyProps("settings")}>
-              <button type="button" {...opener("settings")}>
+              <button type="button" {...opener(fly === "settings", () => flyTo("settings"))}>
                 <Ico name="display" size={24} />
                 <span>{t("build.settings")}</span>
                 <span className="hk" />
@@ -409,17 +452,12 @@ export function BuildBar({ items, tip, teasers = [], disasters, widgets = [], ac
           <b>{tip.name}</b> {tip.text} {tip.upkeepText && <small>{tip.upkeepText}</small>}
         </div>
       )}
-      <button type="button" {...coach.attrs("start", !open && coach.intoPanel(items))} className={`f95-start ${open ? "on" : ""}`} data-testid="start-button" {...door("build:*", "hire:*", "app:*")} aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}>
+      {/* With the palette open the coach points into it, not at Start. */}
+      <button type="button" {...coach.attrs("start", !open && !paletteOpen && coach.intoPanel(items))} className={`f95-start ${open ? "on" : ""}`} data-testid="start-button" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}>
         <SunriseMark />
         <span>{t("build.menuTitle")}</span>
       </button>
-      <span className="f95-qs" role="group" aria-label="Quick launch">
-        {quick.map((it) => (
-          <button key={it.kind} type="button" className={`f95-qb ${it.selected ? "on" : ""}`} title={`${it.name} (${it.priceText})`} aria-label={it.name} aria-pressed={it.selected} disabled={!it.affordable && !it.selected} onClick={() => actions.place(it.kind)}>
-            <Ico name={it.kind} size={20} />
-          </button>
-        ))}
-      </span>
+      <QuickLaunch widgets={widgets} staffOpen={items.some((i) => i.kind === "staff" && i.selected)} phone={layout.compact} actions={actions} />
       {held && (
         <button type="button" className="f95-task on" onClick={() => actions.place(null)} title="Put the tool away (Esc)">
           <Ico name={held.kind} size={16} />

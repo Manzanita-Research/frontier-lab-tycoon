@@ -253,6 +253,7 @@ export const hudActions: HudActions = {
     const open = {
       arena: () => openArena(true),
       benchmarks: () => openArena(true),
+      bird: () => registry.set(birdAppOpenAtom, true),
       discourse: () => registry.set(factionsOpenAtom, true),
       papers: () => registry.set(papersOpenAtom, true),
       news: () => viewRoom("archive"),

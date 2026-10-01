@@ -12,6 +12,11 @@ import { WIDGET_ROWS } from "./widgets";
 /** The attribute every anchor carries, and the one a door carries (its space-separated patterns). */
 export const ANCHOR = "data-anchor";
 export const DOOR = "data-anchor-opens";
+/** A control that stands in for these anchors too (space-separated): the tray's rank chip is also `app:arena`. */
+export const ALSO = "data-anchor-also";
+
+/** The CSS selector for `id`'s anchor, or a stand-in for it. `escape` is `CSS.escape` (a parameter, so this stays DOM-free). */
+export const anchorSelector = (id: string, escape: (s: string) => string): string => `[${ANCHOR}="${escape(id)}"], [${ALSO}~="${escape(id)}"]`;
 
 /** `hire:*` opens `hire:sre`; `*` opens anything; anything else is exact. */
 export function doorMatches(pattern: string, id: string): boolean {

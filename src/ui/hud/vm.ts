@@ -312,6 +312,21 @@ function inspectorOf(who: Inspect | null, following: boolean, lab: string, chips
   };
 }
 
+/** FLT-94: what a tool is for, plainly, for the build palette: the Help line without its "Name: ", else the joke. */
+const TOOL_DOES: Record<string, string> = {
+  path: "How people get around. Every door has to reach the gate along one.",
+  bulldoze: "Knocks a building down. You get half your money back.",
+};
+function doesOf(t: Tool): string | null {
+  if (TOOL_DOES[t]) return TOOL_DOES[t]!;
+  const help = HELP_BUILDINGS[t];
+  if (help) {
+    const does = help.slice(help.indexOf(":") + 1).trim();
+    return does.charAt(0).toUpperCase() + does.slice(1);
+  }
+  return t === "path" || t === "bulldoze" ? null : (defs().buildings[t]?.blurb ?? null);
+}
+
 function buildOf(i: HudInput): { items: BuildItemVM[]; tip: BuildTipVM | null } {
   const s = i.snap;
   const race = s.race;
@@ -327,6 +342,8 @@ function buildOf(i: HudInput): { items: BuildItemVM[]; tip: BuildTipVM | null } 
       name: toolName(t),
       short: SHORT[t],
       blurb: t === "path" || t === "bulldoze" ? null : defs().buildings[t].blurb,
+      does: doesOf(t),
+      upkeepText: t === "path" || t === "bulldoze" || !defs().buildings[t].upkeepPerDay ? null : `${formatMoney(defs().buildings[t].upkeepPerDay)}/day upkeep`,
       price,
       priceText: t === "bulldoze" ? "refund 50%" : isFree ? "FREE" : formatMoney(price),
       free: isFree,
@@ -346,6 +363,8 @@ function buildOf(i: HudInput): { items: BuildItemVM[]; tip: BuildTipVM | null } 
     name: "Staff",
     short: `Staff${ops.staff.length > 0 ? ` (${ops.staff.length})` : ""}`,
     blurb: "Hire Janitor Bots, SREs, Comms Reps and Security.",
+    does: "Hire the people who keep the lights on: cleaners, SREs, Comms and Security.",
+    upkeepText: null,
     price: 0,
     priceText: ops.staff.length > 0 ? `${formatMoney(ops.payroll)}/day` : "hire",
     free: false,
@@ -367,6 +386,8 @@ function buildOf(i: HudInput): { items: BuildItemVM[]; tip: BuildTipVM | null } 
       name: "Senate",
       short: "Senate",
       blurb: "Three senators, their promises, and what it costs to change their minds.",
+      does: "Three senators, their promises, and what it costs to change their minds.",
+      upkeepText: null,
       price: 0,
       priceText: s.bill.stage === "invited" ? "draft due" : due ? "vote soon" : "in recess",
       free: false,
@@ -1256,6 +1277,7 @@ function rawViewModel(i: HudInput): HudVM {
     papers: vm.papers.enabled && vm.visible.papers,
     senate: items.some((it) => it.kind === "senate"),
     disasters: vm.disasters.enabled,
+    birdapp: vm.birdapp.enabled && vm.visible.birdapp,
   });
   return vm;
 }

@@ -2,7 +2,7 @@
 // behind another): click the door that opens it, look again next time, and light the door meanwhile so the player sees
 // where the pointer is going. Nothing left to click (the player shut the menu again): light the way in and wait. The
 // page is an interface so the walk is tested without a DOM; `domPage()` is the real one.
-import { ANCHOR, DOOR, nextDoor, standInDoor, type DoorSeen } from "./anchors";
+import { anchorSelector, DOOR, nextDoor, standInDoor, type DoorSeen } from "./anchors";
 import type { Rect } from "../../skins/kit/place";
 
 /** A control on the page, as the walk sees it. `key` is its identity across looks (the element). */
@@ -83,14 +83,14 @@ const visible = (els: Iterable<HTMLElement>): PageEl[] => [...els].flatMap((el) 
 
 export function domPage(root: ParentNode = document): Page {
   return {
-    anchors: (id) => visible(root.querySelectorAll<HTMLElement>(`[${ANCHOR}="${CSS.escape(id)}"]`)),
+    anchors: (id) => visible(root.querySelectorAll<HTMLElement>(anchorSelector(id, CSS.escape))),
     doors: () => visible(root.querySelectorAll<HTMLElement>(`[${DOOR}]`)),
   };
 }
 
 /** The anchor (or something inside it) was the thing the player clicked: the walk is over. */
 export const clickedAnchor = (target: EventTarget | null, id: string): boolean =>
-  typeof Element !== "undefined" && target instanceof Element && target.closest(`[${ANCHOR}="${CSS.escape(id)}"]`) !== null;
+  typeof Element !== "undefined" && target instanceof Element && target.closest(anchorSelector(id, CSS.escape)) !== null;
 
 // ---- The arrow --------------------------------------------------------------------------------------------------
 

@@ -291,6 +291,7 @@ If your slot needs copy that has no key, write it into the slot (as Frontier 95 
 | `where.build` | the build menu |
 | `where.hire` | the Staff panel |
 | `where.app` | the apps menu |
+| `where.app:arena` | the Arena |
 | `where.app:bird` | the bird in the corner |
 | `where.training` | the training bar |
 | `where.speed` | the speed buttons |

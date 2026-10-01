@@ -69,7 +69,7 @@ const ITEMS = ":scope > button, :scope > .f95-waiting > button";
  * `data-over` and hidden, and the » button shows them in a little panel above the taskbar. The slots stay where React put
  * them (their windows are inside them), so only attributes and two CSS variables are written here.
  */
-export function TrayMore({ children }: { children: ReactNode }) {
+export function TrayMore({ children, anchor }: { children: ReactNode; /** FLT-94: the »'s `data-anchor` ("apps": the applets wait here). */ anchor?: string }) {
   const box = useRef<HTMLDivElement>(null);
   const [over, setOver] = useState(0);
   const [open, setOpen] = useState(false);
@@ -81,8 +81,14 @@ export function TrayMore({ children }: { children: ReactNode }) {
     if (!row) return;
     const items = [...row.querySelectorAll<HTMLElement>(ITEMS)];
     for (const el of items) el.removeAttribute("data-over");
-    const top = row.getBoundingClientRect().top;
-    const spill = items.filter((el) => el.offsetParent !== null && el.getBoundingClientRect().top > top + 4);
+    const { top, left } = row.getBoundingClientRect();
+    // An icon spills if it wrapped, or (FLT-94: the tray rank and Quick Launch take room) if the row is narrower than
+    // even the first one and it hangs off the left, under Start.
+    const spill = items.filter((el) => {
+      if (el.offsetParent === null) return false;
+      const at = el.getBoundingClientRect();
+      return at.top > top + 4 || at.left < left - 1;
+    });
     const cols = Math.min(4, spill.length);
     spill.forEach((el, i) => {
       el.setAttribute("data-over", "");
@@ -124,7 +130,7 @@ export function TrayMore({ children }: { children: ReactNode }) {
         {children}
       </div>
       {over > 0 && (
-        <button type="button" className={`f95-s f95-chev${shown ? " on" : ""}`} aria-label={`${over} more`} title={`${over} more`} aria-expanded={shown} aria-pressed={shown} {...door("app:*")} onClick={() => setOpen(!shown)}>
+        <button type="button" className={`f95-s f95-chev${shown ? " on" : ""}`} data-anchor={anchor} aria-label={`${over} more`} title={`${over} more`} aria-expanded={shown} aria-pressed={shown} {...door("app:*", "tray:*", "hire:*")} onClick={() => setOpen(!shown)}>
           »
         </button>
       )}

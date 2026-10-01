@@ -8,6 +8,9 @@ export const anchor = (id: string): { "data-anchor": string } => ({ "data-anchor
 /** A control that reveals these anchors when clicked (`build:*`, `hire:*`, an exact id). */
 export const door = (...opens: string[]): { "data-anchor-opens": string } => ({ "data-anchor-opens": opens.join(" ") });
 
+/** A control that is also the way to these anchors, standing in for them (the tray's rank chip opens the leaderboard, as `app:arena` does). */
+export const standsFor = (...ids: string[]): { "data-anchor-also": string } => ({ "data-anchor-also": ids.join(" ") });
+
 /**
  * Where an anchor lives, in the skin's words: `where.<id>` ("where.hire:sre"), then `where.<kind>` ("where.hire"), from
  * the skin's strings. Null: the skin has nothing to say, and [Show me] does the talking.

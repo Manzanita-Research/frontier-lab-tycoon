@@ -7,7 +7,7 @@ import { flushSync } from "react-dom";
 import { useSkin } from "../../skins/context";
 import type { Rect } from "../../skins/kit/place";
 import type { HudActions, HudVM } from "./types";
-import { ANCHOR } from "./anchors";
+import { anchorSelector } from "./anchors";
 import { guard } from "./guard";
 import { arrowPlace, clickedAnchor, domCovers, domPage, newWalk, walkStep, type ArrowPoint } from "./showMe";
 
@@ -18,7 +18,7 @@ const sameRect = (a: Rect | null, b: Rect | null) => (a === null || b === null ?
 /** The popup (marked `data-coach-panel`) a target sits in, if any: a balloon must keep off all of it, not just off the target. */
 function measurePanel(target: string, guide = false): Rect | null {
   if (typeof document === "undefined" || target === "map:suggest") return null;
-  const marked = guide ? `[${ANCHOR}="${CSS.escape(target)}"]` : "[data-coach-active]";
+  const marked = guide ? anchorSelector(target, CSS.escape) : "[data-coach-active]";
   const panel = document.querySelector<HTMLElement>(marked)?.closest<HTMLElement>("[data-coach-panel]");
   if (!panel) return null;
   const b = panel.getBoundingClientRect();
