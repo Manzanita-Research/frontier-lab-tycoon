@@ -49,6 +49,23 @@ function withMods(href: string, keep: (source: string) => boolean, add?: string)
 /** The link that plays `packUrl`: other mods stay, any other Drama pack goes (one drama at a time), the rest of the address too. */
 export const withDrama = (href: string, packUrl: string): string => withMods(href, (m) => dramaPath(m, href) === null, packUrl);
 
+/**
+ * Hotfix for "Play it" wiping labs: a Drama lab is a NEW lab, so it must never autosave over the player's lab.
+ * `autosave=off` makes it a staged link (no autosave, no "Welcome back"); the player's lab stays in the autosave.
+ */
+export const withoutAutosave = (href: string): string => {
+  const url = new URL(href);
+  url.searchParams.set("autosave", "off");
+  return url.href;
+};
+
+/** What "Play it" asks before it reloads into a new lab. */
+export const DRAMA_PLAY_CONFIRM =
+  "Play it starts a NEW lab with today's Drama.\n\n" +
+  "Your current lab won't be touched: it stays in your autosave (Start > Save / Load). " +
+  "To keep your very latest progress, press Cancel and save first (Ctrl+S).\n\n" +
+  "Start a new lab?";
+
 /** The link without one `mod=` value. */
 export const withoutMod = (href: string, source: string): string => withMods(href, (m) => m !== source);
 
