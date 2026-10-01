@@ -186,6 +186,8 @@ const vms: Record<string, HudVM> = {
   bird: vmOf({ bird: "bird", birdOpen: true }),
   birdFolded: vmOf({ bird: "bird-banger" }),
   birdCancel: vmOf({ bird: "bird-cancel", birdOpen: true, width: 390, height: 844 }),
+  birdRivals: vmOf({ bird: "bird-rivals", birdOpen: true }),
+  birdRivalsPhone: vmOf({ bird: "bird-rivals-ratio", birdOpen: true, width: 390, height: 844 }),
   shipNow: vmOf({ leapfrog: true, event: "shipNow" }),
   stream: vmOf({ leapfrog: true, event: "stream:dog" }),
   auction: vmOf({ event: "computeAuction" }),

@@ -20,7 +20,7 @@ import type { GameState, Walker } from "../types";
 import { resign } from "../walkers";
 import { commsMachine, posterStored, stepComms, stepPoster, type PosterTier } from "./machines";
 import { BIRD as R } from "./pack";
-import { dailyBirdRivals, dunkLanded, enableBirdRivals, type Scheduler } from "./rivals";
+import { dailyBirdRivals, dunk, dunkLanded, enableBirdRivals, type Scheduler } from "./rivals";
 import type { BirdAppState, BirdLever, BirdPostRecord, Poster } from "./state";
 
 export const OWNER = "birdapp";
@@ -445,6 +445,17 @@ function rivalScheduler(s: GameState, b: BirdAppState): Scheduler {
     b.rngState = rng.state();
     return post;
   };
+}
+
+/** For the debug scenes (demo.ts): one of your posters dunks on `lab` now, to land as `outcome` at the next settle. */
+export function dunkNow(s: GameState, lab: string, outcome: "banger" | "flop"): BirdPostRecord | null {
+  const b = s.birdapp;
+  const r = b?.enabled ? b.rivals : undefined;
+  if (!b || !r) return null;
+  const rng = createRng(r.rngState);
+  const post = dunk(s, b, r, rng, lab, rivalScheduler(s, b), outcome);
+  r.rngState = rng.state();
+  return post;
 }
 
 /**

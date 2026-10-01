@@ -49,7 +49,7 @@ describe("midgame scenario", () => {
     expect({
       untagged: digest({ ...s, toasts: s.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) }),
       full: digest(s),
-    }).toEqual({ untagged: "7fcc5559", full: "194bcc23" });
+    }).toEqual({ untagged: "0dc8266c", full: "b66641be" });
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);

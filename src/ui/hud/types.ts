@@ -1375,6 +1375,14 @@ export interface BirdPostVM {
   replyTo: string | null;
   /** "3am", "launch day"... or "". */
   momentText: string;
+  /** FLT-92: whose post: one of your researchers' (`us`, the default) or a rival lab's (`them`). */
+  side?: "us" | "them";
+  /** The rival lab it is from (its short name and colour), on theirs; null on yours. */
+  lab?: { id: string; name: string; color: string } | null;
+  /** A quote-post: whose post it quotes ("@handle") and what that said. */
+  quote?: { handle: string; text: string } | null;
+  /** A small tag for what the post is about: "Dunk on Sirocco", "#1 on the Arena", "Subtweet", "About your launch"... or "". */
+  beatText?: string;
 }
 
 /** One of the three levers on a poster, with its trade-off printed on the button. */
@@ -1451,6 +1459,12 @@ export interface BirdAppVM {
   tally: string;
   /** The newest post that landed a banger or a cancel (for a moment's sticker), or null. */
   spotlight: BirdPostVM | null;
+  /**
+   * FLT-92: the rival labs post on the timeline too (their posts are in `live` and `log`, `side: "them"`). `on: false` with
+   * `?birdrivals=off`. `quiet`: labs sulking after an Arena slide ("Sirocco is taking a few days offline"). `labs`: who
+   * posts, for a legend. The panel's Everyone / Us / Them filter is the skin's own state.
+   */
+  rivals?: { on: boolean; quiet: string[]; tally: string; labs: { id: string; name: string; color: string }[] };
 }
 
 /** FLT-33: the discourse. `enabled: false` until Level 4 (and with `?factions=off`); draw nothing then. */

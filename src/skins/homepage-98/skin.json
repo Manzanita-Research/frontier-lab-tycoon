@@ -146,6 +146,9 @@
     "birdapp.outcome.controversy": "Flame war",
     "birdapp.outcome.ratioed": "Flamed",
     "birdapp.outcome.cancelled": "BANNED",
-    "birdapp.outcome.live": "NEW!"
+    "birdapp.outcome.live": "NEW!",
+    "birdapp.filter.all": "Everyone",
+    "birdapp.filter.us": "Our guestbook",
+    "birdapp.filter.them": "Their guestbooks"
   }
 }

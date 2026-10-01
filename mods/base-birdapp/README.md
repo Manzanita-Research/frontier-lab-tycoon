@@ -50,3 +50,16 @@ Capacity is `comms.founder` plus `comms.perRep` per Comms Rep. A controversy cos
 `birdView(world)` goes into the snapshot, and `hudViewModel` turns it into `HudVM.birdapp` (`BirdAppVM`). One docked skin slot, **BirdApp**. The base panel is a chip that opens into the timeline, the posters and the Comms desk. Frontier 95 draws a bird in the tray and **Bird Reader 1.0**, a newsreader crossed with a buddy list. The other skins restyle the base panel with their own strings: a guestbook (Homepage '98), a birding log (Field Almanac), an encyclopedia (Discovery Disc '96), a lyric screen (Karaoke Night) and a merch drop (Swag Drop).
 
 Debug scenes: `?moment=bird` (the reader open on a week of posts), `?moment=bird-banger` (a post going viral), `?moment=bird-cancel` (the desk drowning). They are staged by `src/sim/birdapp/demo.ts` through the driver's own code paths. The `pnpm shots` sets are `birdapp` and `birdapp-skins`.
+
+## Rival labs (FLT-92)
+
+The rival labs post too. Each lab has two or three invented **voices** (`kind: "voice"`): a CEO who vagueposts, a researcher who is so back, a launch-teaser account and a safety lead who threads. `lab: "any"` voices (handle `{lab}_ceo`, `{lab}_so_back`) stand in for a lab without its own. What they say is a `kind: "rival"` row per beat, role and (optionally) lab, with `{you}`, `{me}`, `{rival}`, `{model}` and `#{rank}` filled in.
+
+- **Their own beats:** `idle`, `teaser` (a run is a week out), `release`, `top` (#1 on the Arena), `climb`, `drop` (down 3 places: one line, then `silenceDays` of nothing, then `back`), and `subtweet` (another lab shipped).
+- **Yours:** `launch`, `leak`, `cancel`, `escape`, `hearing` and `raise`. Up to `reactors` labs answer each one; the first answer each day is a toast about you.
+- **Both ways:** `dunk` is one of *your* posters on a lab that slid (or whose post got ratioed); if it lands as a banger it is +`dunk.aura` Aura. `ratio` is a rival CEO quote-posting one of your ratioed posts: −`ratio.hype` Hype.
+- **Numbers:** `rules.birdapp.rivals` (posts a day, odds, the silence, the dunk and the ratio).
+- **Off switch:** `?birdrivals=off`. They run on their own random stream after the lab's own midnight, so turning them off leaves everything else as it was.
+- **Mods:** add `voice` and `rival` rows through `add`, and a Daily Drama pack or arc can make a lab post with the `birdapp.rival` verb.
+- **UI:** their posts sit in the same timeline with the lab's colour, and an Everyone / Us / Them filter. In Frontier 95, From carries a colour square, the preview gets Organization and Keywords headers, and a ratio quotes your post as `> wrote:`.
+- **Debug scenes:** `?moment=bird-rivals` (a day of it all), `bird-rivals-dunk`, `bird-rivals-ratio` and `bird-rivals-launch`. The `pnpm shots` set is `flt-92`.

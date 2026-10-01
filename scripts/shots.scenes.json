@@ -329,6 +329,20 @@
       "bird-karaoke",
       "bird-swag"
     ],
+    "flt-92": [
+      "bird-rivals",
+      "bird-rivals-them",
+      "bird-rivals-dunk",
+      "bird-rivals-ratio",
+      "bird-rivals-launch",
+      "bird-rivals-phone",
+      "bird-rivals-base",
+      "bird-rivals-homepage",
+      "bird-rivals-almanac",
+      "bird-rivals-disc",
+      "bird-rivals-karaoke",
+      "bird-rivals-swag"
+    ],
     "path-gap": [
       "nopath",
       "nopath-tool",
@@ -4385,6 +4399,162 @@
       "title": "FLT-69: Swag Drop's Bird App: a merch drop",
       "query": {
         "moment": "bird-banger",
+        "warp": null,
+        "skin": "swag-drop"
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-rivals": {
+      "title": "FLT-92: the rival labs on Bird Reader 1.0: a #1, a slide and its silence, a teaser, your launch, a dunk and a ratio",
+      "query": {
+        "moment": "bird-rivals",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-rivals-them": {
+      "title": "FLT-92: View: Them, only the rival labs (and who is sulking)",
+      "query": {
+        "moment": "bird-rivals",
+        "warp": null
+      },
+      "steps": [
+        {
+          "click": ".f95-bird-view button:nth-of-type(3)",
+          "optional": true
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "bird-rivals-dunk": {
+      "title": "FLT-92: a dunk on a rival's Arena slide lands (+3 Aura)",
+      "query": {
+        "moment": "bird-rivals-dunk",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-rivals-ratio": {
+      "title": "FLT-92: a rival CEO quote-posts your post into a ratio (−2 Hype)",
+      "query": {
+        "moment": "bird-rivals-ratio",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-rivals-launch": {
+      "title": "FLT-92: every rival lab has something to say about your launch",
+      "query": {
+        "moment": "bird-rivals-launch",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-rivals-phone": {
+      "title": "FLT-92: the rivals on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "moment": "bird-rivals",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-rivals-base": {
+      "title": "FLT-92: the base Bird App with the rivals: lab chips, the Everyone/Us/Them filter, the quote",
+      "query": {
+        "moment": "bird-rivals",
+        "warp": null,
+        "skin": "base"
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-rivals-homepage": {
+      "title": "FLT-92: Homepage '98: their guestbooks",
+      "query": {
+        "moment": "bird-rivals",
+        "warp": null,
+        "skin": "homepage-98"
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-rivals-almanac": {
+      "title": "FLT-92: Field Almanac: invasive species",
+      "query": {
+        "moment": "bird-rivals",
+        "warp": null,
+        "skin": "field-almanac"
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-rivals-disc": {
+      "title": "FLT-92: Discovery Disc '96: other labs",
+      "query": {
+        "moment": "bird-rivals",
+        "warp": null,
+        "skin": "discovery-disc-96"
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-rivals-karaoke": {
+      "title": "FLT-92: Karaoke Night: other tables",
+      "query": {
+        "moment": "bird-rivals",
+        "warp": null,
+        "skin": "karaoke-night"
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-rivals-swag": {
+      "title": "FLT-92: Swag Drop: knockoffs",
+      "query": {
+        "moment": "bird-rivals",
         "warp": null,
         "skin": "swag-drop"
       },

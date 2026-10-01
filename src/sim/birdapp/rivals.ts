@@ -80,19 +80,26 @@ function vars(s: GameState, beat: Beat, handle = ""): Record<string, string> {
   return {
     you: s.labName, lab: s.labName, me: labShort(beat.lab), rival, handle,
     model: beat.model ?? (beat.beat === "launch" ? (s.models[s.models.length - 1] ?? "the new model") : "the new model"),
-    rank: beat.rank !== undefined ? `#${beat.rank}` : "",
+    rank: beat.rank !== undefined ? String(beat.rank) : "?",
   };
 }
 
+/** Lines nobody has said yet today (all of them, if everyone has): two labs never post the same joke on one afternoon. */
+function unsaid<L extends { id: string }>(r: BirdRivalsState, lines: readonly L[]): readonly L[] {
+  const said = new Set(r.posts.filter((p) => !p.settled).map((p) => p.line));
+  const fresh = lines.filter((l) => !said.has(l.id));
+  return fresh.length > 0 ? fresh : lines;
+}
+
 /** Who at the lab says it, and what: the beat's usual role first if it has a line, else any voice that has one. */
-function pickVoiceLine(rng: Rng, lab: string, beat: RivalBeat, only?: RivalRole): { voice: BirdVoice; line: BirdRivalLine } | null {
+function pickVoiceLine(r: BirdRivalsState, rng: Rng, lab: string, beat: RivalBeat, only?: RivalRole): { voice: BirdVoice; line: BirdRivalLine } | null {
   const bird = defs().bird;
   const voices = bird.voicesFor(lab).filter((v) => (only ? v.role === only : true) && bird.rivalLines(beat, v.role, lab).length > 0);
   if (voices.length === 0) return null;
   const first = FIRST[beat];
   const preferred = first ? voices.filter((v) => v.role === first) : [];
   const voice = preferred.length > 0 && rng.chance(0.7) ? rng.pick(preferred) : rng.pick(voices);
-  return { voice, line: rng.pick(bird.rivalLines(beat, voice.role, lab)) };
+  return { voice, line: rng.pick(unsaid(r, bird.rivalLines(beat, voice.role, lab))) };
 }
 
 // ---- Posting
@@ -124,7 +131,7 @@ function post(s: GameState, r: BirdRivalsState, rng: Rng, beat: Beat, voice: Bir
 
 /** One beat's post, if the lab has anything to say. Returns it. */
 function say(s: GameState, r: BirdRivalsState, rng: Rng, beat: Beat, tick: number, only?: RivalRole): RivalPostRecord | null {
-  const pick = pickVoiceLine(rng, beat.lab, beat.beat, only);
+  const pick = pickVoiceLine(r, rng, beat.lab, beat.beat, only);
   return pick ? post(s, r, rng, beat, pick.voice, pick.line, tick) : null;
 }
 
@@ -209,7 +216,7 @@ function beatsToday(s: GameState, r: BirdRivalsState, rng: Rng): { beats: Beat[]
 }
 
 /** One of your posters dunks on a lab: the big accounts first. Forced to land or flop now; settle() pays the Aura. */
-function dunk(s: GameState, b: BirdAppState, r: BirdRivalsState, rng: Rng, lab: string, schedule: Scheduler): BirdPostRecord | null {
+export function dunk(s: GameState, b: BirdAppState, r: BirdRivalsState, rng: Rng, lab: string, schedule: Scheduler, forced?: "banger" | "flop"): BirdPostRecord | null {
   const lines = defs().bird.rivalLines("dunk", "us", lab);
   const active = Object.values(b.posters).filter((p) => (p.machine.value === "big" || p.machine.value === "occasional") && p.lever !== "logoff");
   if (lines.length === 0 || active.length === 0) return null;
@@ -218,7 +225,8 @@ function dunk(s: GameState, b: BirdAppState, r: BirdRivalsState, rng: Rng, lab: 
   const w = s.walkers.find((x) => x.id === p.id);
   if (!w) return null;
   const line = rng.pick(lines);
-  const outcome = rng.chance(R.rivals.dunk.banger) ? "banger" : "flop";
+  const roll = rng.chance(R.rivals.dunk.banger) ? "banger" : "flop";
+  const outcome = forced ?? roll;
   const rec = schedule(p.id, w.name, fillTemplate(line.text, vars(s, { lab, beat: "dunk", about: lab })), line.id, s.tick + rng.int(2, 6), outcome);
   if (rec) {
     rec.dunk = lab;
@@ -228,11 +236,11 @@ function dunk(s: GameState, b: BirdAppState, r: BirdRivalsState, rng: Rng, lab: 
 }
 
 /** A rival CEO quote-posts one of your ratioed posts into the ground. Back-dated to just after it, and already landed. */
-function ratio(s: GameState, r: BirdRivalsState, rng: Rng, mine: BirdPostRecord): RivalPostRecord | null {
+export function ratio(s: GameState, r: BirdRivalsState, rng: Rng, mine: BirdPostRecord): RivalPostRecord | null {
   const labs = defs().rivals.map((d) => d.id).filter((lab) => !isQuiet(r, lab));
   if (labs.length === 0) return null;
   const lab = rng.pick(labs);
-  const pick = pickVoiceLine(rng, lab, "ratio", "ceo") ?? pickVoiceLine(rng, lab, "ratio");
+  const pick = pickVoiceLine(r, rng, lab, "ratio", "ceo") ?? pickVoiceLine(r, rng, lab, "ratio");
   if (!pick) return null;
   const rec = post(s, r, rng, { lab, beat: "ratio" }, pick.voice, pick.line, Math.min(s.tick - 1, mine.tick + rng.int(1, 3)), "banger");
   rec.settled = true;
@@ -283,7 +291,7 @@ export function dailyBirdRivals(s: GameState, b: BirdAppState, landed: readonly 
       if (!rng.chance(Math.min(1, R.rivals.idle * (voice.rate ?? 1)))) continue;
       const lines = defs().bird.rivalLines("idle", voice.role, lab);
       if (lines.length === 0) continue;
-      post(s, r, rng, { lab, beat: "idle" }, voice, rng.pick(lines), s.tick + rng.int(1, TICKS_PER_DAY - 2));
+      post(s, r, rng, { lab, beat: "idle" }, voice, rng.pick(unsaid(r, lines)), s.tick + rng.int(1, TICKS_PER_DAY - 2));
       made++;
     }
   }
@@ -294,6 +302,11 @@ export function dailyBirdRivals(s: GameState, b: BirdAppState, landed: readonly 
   for (const mine of landed) if (mine.outcome === "ratioed" && rng.chance(R.rivals.ratio.chance)) ratio(s, r, rng, mine);
   r.seen = { ...snapshotSeen(s), teased: r.seen.teased };
   r.rngState = rng.state();
+}
+
+/** For the debug scenes (demo.ts): `lab` slid, and goes quiet until `until`. */
+export function silenceLab(r: BirdRivalsState, lab: string, until: number) {
+  r.labs[lab] = stepLabFeed(feedOf(r, lab), { type: "DROP", until }).stored;
 }
 
 /** settle() calls this for a landed dunk: the Aura on top of the banger's, and a toast that is about you. */
@@ -309,13 +322,14 @@ export function dunkLanded(s: GameState, b: BirdAppState, mine: BirdPostRecord) 
  * rival id (any lab that is posting, without one); `text` is what it says (a line for `beat`, without); `role` picks
  * the voice. Nothing while the rivals are off.
  */
-export function rivalPostNow(s: GameState, rng: Rng, o: { lab?: string; beat?: RivalBeat; text?: string; role?: RivalRole; about?: string; outcome?: Outcome; tick?: number }): RivalPostRecord | null {
+export function rivalPostNow(s: GameState, rng: Rng, o: { lab?: string; beat?: RivalBeat; text?: string; role?: RivalRole; about?: string; model?: string; outcome?: Outcome; tick?: number }): RivalPostRecord | null {
   const r = s.birdapp?.enabled ? s.birdapp.rivals : undefined;
   if (!r) return null;
   const open = defs().rivals.map((d) => d.id).filter((lab) => !isQuiet(r, lab));
   const lab = o.lab && defs().rivalById[o.lab as RivalId] ? o.lab : open.length > 0 ? rng.pick(open) : undefined;
   if (!lab) return null;
-  const beat: Beat = { lab, beat: o.beat ?? "idle", ...(o.about ? { about: o.about } : {}) };
+  const rank = ranksOf(s.race.board)[lab];
+  const beat: Beat = { lab, beat: o.beat ?? "idle", ...(o.about ? { about: o.about } : {}), ...(o.model ? { model: o.model } : {}), ...(rank !== undefined ? { rank } : {}) };
   const tick = o.tick ?? s.tick + 1;
   if (o.text !== undefined) {
     const voices = defs().bird.voicesFor(lab).filter((v) => !o.role || v.role === o.role);
@@ -325,6 +339,6 @@ export function rivalPostNow(s: GameState, rng: Rng, o: { lab?: string; beat?: R
     rec.beat = o.beat ?? "drama";
     return rec;
   }
-  const pick = pickVoiceLine(rng, lab, beat.beat, o.role) ?? pickVoiceLine(rng, lab, beat.beat);
+  const pick = pickVoiceLine(r, rng, lab, beat.beat, o.role) ?? pickVoiceLine(r, rng, lab, beat.beat);
   return pick ? post(s, r, rng, beat, pick.voice, pick.line, tick, o.outcome) : null;
 }

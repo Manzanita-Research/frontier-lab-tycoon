@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AuraSpark, BirdMeter, BirdPostCard } from "../../kit";
+import { AuraSpark, BirdFilter, BirdMeter, BirdPostCard, onSide, type BirdSide } from "../../kit";
 import { useT } from "../../context";
 import type { SlotPropsMap } from "../../types";
 
@@ -14,6 +14,12 @@ type Tab = "timeline" | "posters" | "comms";
 export function BirdApp({ birdapp, layout, actions }: SlotPropsMap["BirdApp"]) {
   const t = useT();
   const [tab, setTab] = useState<Tab>("timeline");
+  // FLT-92: Everyone / Us / Them, once the rival labs post.
+  const [side, setSide] = useState<BirdSide>("all");
+  const rivals = birdapp.rivals?.on ? birdapp.rivals : null;
+  const shown = onSide(rivals ? side : "all");
+  const live = birdapp.live.filter(shown);
+  const log = birdapp.log.filter(shown);
   const { open, comms } = birdapp;
   const tabs: { id: Tab; label: string }[] = [
     { id: "timeline", label: t("birdapp.timeline") },
@@ -65,14 +71,22 @@ export function BirdApp({ birdapp, layout, actions }: SlotPropsMap["BirdApp"]) {
           </div>
           {tab === "timeline" && (
             <div className="birdapp-feed" role="tabpanel">
+              {rivals && <BirdFilter value={side} onChange={setSide} />}
+              {rivals && side !== "us" && rivals.quiet.length > 0 && (
+                <p className="birdapp-quietlabs">
+                  {rivals.quiet.map((q) => (
+                    <span key={q}>{q}</span>
+                  ))}
+                </p>
+              )}
               {birdapp.typing && <p className="birdapp-typing">{birdapp.typing}</p>}
-              {birdapp.live.length === 0 && birdapp.log.length === 0 && <p className="birdapp-empty">{t("birdapp.empty")}</p>}
-              {birdapp.live.length > 0 && <h4>{t("birdapp.live")}</h4>}
-              {birdapp.live.map((p) => (
+              {live.length === 0 && log.length === 0 && <p className="birdapp-empty">{t("birdapp.empty")}</p>}
+              {live.length > 0 && <h4>{t("birdapp.live")}</h4>}
+              {live.map((p) => (
                 <BirdPostCard key={p.id} post={p} />
               ))}
-              {birdapp.log.length > 0 && <h4>{t("birdapp.log")}</h4>}
-              {birdapp.log.slice(0, layout.compact ? 4 : 8).map((p) => (
+              {log.length > 0 && <h4>{t("birdapp.log")}</h4>}
+              {log.slice(0, layout.compact ? 4 : 8).map((p) => (
                 <BirdPostCard key={p.id} post={p} compact />
               ))}
             </div>
@@ -129,7 +143,10 @@ export function BirdApp({ birdapp, layout, actions }: SlotPropsMap["BirdApp"]) {
               )}
             </div>
           )}
-          <p className="birdapp-tally">{birdapp.tally}</p>
+          <p className="birdapp-tally">
+            {birdapp.tally}
+            {rivals && rivals.tally && ` · ${rivals.tally}`}
+          </p>
         </div>
       )}
     </section>
