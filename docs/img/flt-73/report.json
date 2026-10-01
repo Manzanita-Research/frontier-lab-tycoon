@@ -1,0 +1,122 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "dc7c3d81a89cf4f45c9d23022366e50e699a1aa0"
+  },
+  "head": {
+    "branch": "flt-73-crt",
+    "sha": "526eba8",
+    "dirty": false
+  },
+  "seconds": 372.049,
+  "problems": [
+    "crt-off.png: blank composite: panel 3 is 26% one colour, 6 colours",
+    "crt-phone-off.png: blank composite: panel 3 is 28% one colour, 7 colours"
+  ],
+  "rows": [
+    {
+      "scene": "crt-off",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/before/crt-off.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/after/crt-off.png",
+      "title": "FLT-73: the campus through the off tube (Frontier 95)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/compare/crt-off.png",
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 26% one colour, 6 colours",
+      "error": "compare: blank composite: panel 3 is 26% one colour, 6 colours"
+    },
+    {
+      "scene": "crt-midgame-off",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/before/crt-midgame-off.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/after/crt-midgame-off.png",
+      "title": "FLT-73: the busy mid-game campus, off tube",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/compare/crt-midgame-off.png",
+      "changed": 0.01010570987654321
+    },
+    {
+      "scene": "crt-phone-off",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/before/crt-phone-off.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/after/crt-phone-off.png",
+      "title": "FLT-73: a phone (390x844), off tube",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/compare/crt-phone-off.png",
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 28% one colour, 7 colours",
+      "error": "compare: blank composite: panel 3 is 28% one colour, 7 colours"
+    },
+    {
+      "scene": "crt-subtle",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/before/crt-subtle.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/after/crt-subtle.png",
+      "title": "FLT-73: the campus through the subtle tube (Frontier 95)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/compare/crt-subtle.png",
+      "changed": 0.098125
+    },
+    {
+      "scene": "crt-midgame-subtle",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/before/crt-midgame-subtle.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/after/crt-midgame-subtle.png",
+      "title": "FLT-73: the busy mid-game campus, subtle tube",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/compare/crt-midgame-subtle.png",
+      "changed": 0.13536033950617285
+    },
+    {
+      "scene": "crt-phone-subtle",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/before/crt-phone-subtle.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/after/crt-phone-subtle.png",
+      "title": "FLT-73: a phone (390x844), subtle tube",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/compare/crt-phone-subtle.png",
+      "changed": 0.05933892331996597
+    },
+    {
+      "scene": "crt-full",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/before/crt-full.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/after/crt-full.png",
+      "title": "FLT-73: the campus through the full tube (Frontier 95)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/compare/crt-full.png",
+      "changed": 0.19367746913580247
+    },
+    {
+      "scene": "crt-midgame-full",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/before/crt-midgame-full.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/after/crt-midgame-full.png",
+      "title": "FLT-73: the busy mid-game campus, full tube",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/compare/crt-midgame-full.png",
+      "changed": 0.19141666666666668
+    },
+    {
+      "scene": "crt-phone-full",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/before/crt-phone-full.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/after/crt-phone-full.png",
+      "title": "FLT-73: a phone (390x844), full tube",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/compare/crt-phone-full.png",
+      "changed": 0.15752825373678453
+    },
+    {
+      "scene": "crt-settings",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/before/crt-settings.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/after/crt-settings.png",
+      "title": "FLT-73: Display Properties ▸ Settings, the picture tube",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/compare/crt-settings.png",
+      "changed": 0.21245833333333333
+    },
+    {
+      "scene": "crt-settings-base",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/before/crt-settings-base.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/after/crt-settings-base.png",
+      "title": "FLT-73: the base skin picker with the tube setting",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-73/compare/crt-settings-base.png",
+      "changed": 0.12993287037037038
+    }
+  ],
+  "errors": []
+}
