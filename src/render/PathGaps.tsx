@@ -14,9 +14,9 @@ import { boxGeo } from "./materials";
 
 const MAX = GRID_SIZE * GRID_SIZE;
 const arrowGeo = new THREE.ConeGeometry(0.2, 0.42, 4).rotateX(Math.PI);
-const joinMat = new THREE.MeshBasicMaterial({ color: "#ffd23f", transparent: true, opacity: 0.6, depthWrite: false, toneMapped: false });
+const joinMat = new THREE.MeshBasicMaterial({ color: "#ffcc1f", transparent: true, opacity: 0.8, depthWrite: false, toneMapped: false });
 const stubMat = new THREE.MeshBasicMaterial({ color: "#ff7a66", transparent: true, opacity: 0.6, depthWrite: false, toneMapped: false });
-const netMat = new THREE.MeshBasicMaterial({ color: "#5fe08a", transparent: true, opacity: 0.32, depthWrite: false, toneMapped: false });
+const netMat = new THREE.MeshBasicMaterial({ color: "#3fdc7e", transparent: true, opacity: 0.55, depthWrite: false, toneMapped: false });
 const arrowMat = new THREE.MeshBasicMaterial({ color: "#ff5d4d", toneMapped: false });
 
 /** Lays `tiles` out as slabs `h` thick on one instanced mesh, centred `y` up. */
@@ -70,7 +70,9 @@ export function PathGaps() {
     const t = clock.elapsedTime;
     // The ghost breathes: brighter with the path tool in hand, so it reads as "here".
     const beat = 0.5 + 0.5 * Math.sin(t * 5);
-    joinMat.opacity = placing ? 0.45 + 0.5 * beat : 0.3 + 0.4 * beat;
+    joinMat.opacity = placing ? 0.6 + 0.4 * beat : 0.45 + 0.45 * beat;
+    const j = joinRef.current;
+    if (j) j.scale.y = 1 + 0.6 * beat;
     const g = arrows.current;
     if (g) g.children.forEach((c, i) => (c.position.y = 0.75 + 0.14 * Math.abs(Math.sin(t * 4 + i))));
   });

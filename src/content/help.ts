@@ -42,3 +42,6 @@ export const HELP_BUILDINGS: Record<string, string> = {
 export const NO_PATH_RULE = "Buildings don't count as path. Connect the door to the gate.";
 /** The flag's second line: how far the building is from the gate's paths. */
 export const noPathShort = (tiles: number) => (tiles === 0 ? "Boxed in" : `${tiles} tile${tiles === 1 ? "" : "s"} short`);
+/** Over the join tile while the path tool is in hand. */
+export const NO_PATH_HERE = "Path here";
+export const NO_PATH_HERE_MANY = "Path along here";

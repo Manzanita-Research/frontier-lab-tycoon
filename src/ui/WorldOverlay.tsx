@@ -4,7 +4,7 @@ import { HALF, rectCenter, worldX, worldZ } from "../render/coords";
 import { Anchored } from "../render/overlay";
 import { pathGaps, type PathGap } from "../sim/pathgap";
 import { panTo } from "../render/fx/state";
-import { NO_PATH_RULE, noPathShort } from "../content/help";
+import { NO_PATH_HERE, NO_PATH_HERE_MANY, NO_PATH_RULE, noPathShort } from "../content/help";
 import type { Rect } from "../sim/types";
 import { formatMoney } from "../sim/format";
 import { atoms, send, sim, toast } from "../app/game";
@@ -81,6 +81,7 @@ function NoPath() {
   const version = useApp(atoms.version);
   const coach = useApp(atoms.coach);
   const tool = useApp(atoms.tool);
+  const quiet = useApp(atoms.toasts).length === 0;
   const stranded = useMemo(() => {
     const gaps = pathGaps(sim.world);
     return buildings.flatMap((b) => {
@@ -90,13 +91,14 @@ function NoPath() {
     // `version` is what invalidates reachability.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [buildings, version]);
-  // The rule, once, when nothing else is talking over it (Frontier 95's paperclip hides toasts while the coach is up).
+  // The rule, once, when nothing else is talking over it: Frontier 95's paperclip hides toasts while the coach is up and
+  // shows only the newest, so it waits for a clear screen. The flag's tooltip says it too, for anyone who missed it.
   useEffect(() => {
-    if (stranded.length === 0 || coach || toldThisVisit || told()) return;
+    if (stranded.length === 0 || coach || !quiet || toldThisVisit || told()) return;
     toldThisVisit = true;
     tell();
     toast(NO_PATH_RULE);
-  }, [stranded.length, coach]);
+  }, [stranded.length, coach, quiet]);
   const show = (b: Rect, gap: PathGap) => {
     // Halfway between the building and the far end of the gap, so both are on screen.
     const [cx, cz] = rectCenter(b);
@@ -117,12 +119,30 @@ function NoPath() {
             return true;
           }}
         >
-          <button type="button" className="nopath-flag" title="Show me the gap" onClick={() => show(b, gap)}>
+          <button type="button" className="nopath-flag" title={`${NO_PATH_RULE} Click to see the gap.`} onClick={() => show(b, gap)}>
             No path!
             <small>{noPathShort(gap.join.length)}</small>
           </button>
         </Anchored>
       ))}
+      {/* With the path tool in hand, the tile that joins it says so. */}
+      {tool === "path" &&
+        stranded.map(({ b, gap }) => {
+          const at = gap.join[Math.floor((gap.join.length - 1) / 2)];
+          if (!at) return null;
+          return (
+            <Anchored
+              key={`here-${b.id}`}
+              className="nopath-here"
+              pos={(out) => {
+                out.set(worldX(at[0] + 0.5), 0.5, worldZ(at[1] + 0.5));
+                return true;
+              }}
+            >
+              {gap.join.length === 1 ? NO_PATH_HERE : NO_PATH_HERE_MANY}
+            </Anchored>
+          );
+        })}
     </>
   );
 }
