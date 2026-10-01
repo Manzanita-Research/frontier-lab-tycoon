@@ -3844,7 +3844,8 @@
     .f95-skip {
       min-height: 32px;
     }
-    .f95-tooltip.arrival .f95-btn {
+    .f95-tooltip.arrival .f95-btn,
+    .f95-hire .f95-btn {
       min-height: 32px;
     }
     .f95-tooltip.arrival {

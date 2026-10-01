@@ -188,8 +188,8 @@
   pointer-events: auto;
   box-shadow: 0 2px 0 color-mix(in srgb, var(--flt-color-line) 75%, transparent);
 }
-/* FLT-87: big enough for a thumb. */
-@media (pointer: coarse) {
+/* FLT-87: big enough for a thumb (a phone-sized window counts, whatever the pointer says). */
+@media (pointer: coarse), (max-width: 640px) {
   .peektag button {
     min-height: 32px;
     padding: 4px 12px;

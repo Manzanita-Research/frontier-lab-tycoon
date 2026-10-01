@@ -180,6 +180,14 @@ async function closeTop() {
   const close = page.locator("section.f95-win:visible [data-g=close], [role=dialog]:visible [data-g=close]").last();
   if (await close.count()) await press(close);
 }
+/** Close the Inspector the coach's peek opened by its own ✕ (the paperclip or a card can be above it); true once it is gone. */
+async function closeInspector() {
+  if (!phone) return page.keyboard.press("Escape").then(() => true);
+  const close = page.locator("section.f95-props:visible [data-g=close]").first();
+  if (await close.count()) await press(close);
+  await page.waitForTimeout(300);
+  return !(await page.locator("section.f95-props:visible").count());
+}
 /** The size of one map tile on screen, in px (the shorter of its two sides). */
 function tilePx(view) {
   const a = project(view, 11, 11), b = project(view, 12, 11), c = project(view, 11, 12);
@@ -524,6 +532,7 @@ async function sweep(withCampus) {
 }
 let lastSweep = 0;
 let peeked = false; // the Inspector the policy opened at the coach's "peek", until it closes it
+let peekTries = 0;
 /** File what a sweep finds; the campus share is measured only with nothing but the HUD up (no card, menu, tool or window the policy opened). */
 async function phoneChecks(p, force = false) {
   if (!phone || (!force && Date.now() - lastSweep < PHONE_CHECK_MS)) return;
@@ -777,8 +786,15 @@ try {
         else if (await active.count()) await press(active);
         lastCoachClick = Date.now();
       }
-      // Close the mind-read the peek opened, once it has been read.
-      if (peeked && probe.coachId !== "peek") { peeked = false; await page.waitForTimeout(1500); await closeTop(); }
+      // Close the mind-read the peek opened, once it has been read; try again if something landed on it (then give up, and let the campus check see it).
+      if (peeked && probe.coachId !== "peek") {
+        await page.waitForTimeout(peekTries ? 300 : 1500);
+        if ((await closeInspector()) || ++peekTries >= 5) {
+          if (peekTries >= 5) log("The peek's Inspector would not close");
+          peeked = false;
+          peekTries = 0;
+        }
+      }
       await page.waitForTimeout(250);
       continue;
     }
