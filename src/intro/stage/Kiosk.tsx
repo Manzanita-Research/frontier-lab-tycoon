@@ -10,6 +10,7 @@ import { CRTPipeline } from "../../render/crt/pipeline";
 import { CRT_LOOKS, monitorOptions } from "../../render/crt/looks";
 import { BIOS } from "../content";
 import { canvasTexture, COUNTER_Y, CRT, DRAWER_IN_Z, DRAWER_OUT_Z, DRAWER_Y, frameDt, k, TOWER, useClock, type StageProps } from "./rig";
+import { CounterProps } from "./Props";
 
 const BEIGE = "#e4dcc4";
 /** The tube's picture: 4:3 like the canvas, sharp enough when the camera dives into the glass. */
@@ -212,6 +213,7 @@ export function Kiosk({ beat, context, send, weightsKey }: StageProps & { weight
         <boxGeometry args={[0.46, 0.012, 0.16]} />
         <meshStandardMaterial color="#cfc6ab" roughness={0.8} />
       </mesh>
+      <CounterProps />
     </group>
   );
 }

@@ -14,7 +14,7 @@ from pathlib import Path
 
 import bmesh
 import bpy
-from mathutils import Vector
+from mathutils import Matrix, Vector
 
 # ---------------------------------------------------------------- arguments
 argv = sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else []
@@ -229,9 +229,8 @@ if ROT_Y_ARG == "auto":
 else:
     ROT_Y = float(ROT_Y_ARG)
 if ROT_Y:
-    bpy.ops.object.mode_set(mode="OBJECT")
-    obj.rotation_euler[2] = math.radians(ROT_Y)
-    bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
+    # Straight on the mesh: transform_apply only touches the selection, which may not hold obj by now.
+    obj.data.transform(Matrix.Rotation(math.radians(ROT_Y), 4, "Z"))
 mesh = obj.data
 bmin = Vector((min(v.co[i] for v in mesh.vertices) for i in range(3)))
 bmax = Vector((max(v.co[i] for v in mesh.vertices) for i in range(3)))

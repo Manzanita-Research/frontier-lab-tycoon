@@ -7,6 +7,7 @@ import { createRng } from "../../sim/rng";
 import { paintFloor, paintShelfFront, paintSign, paintSpine, paintTalker } from "../art";
 import { SHELF, type ShelfBox } from "../content";
 import { canvasTexture, dampTo, frameDt, pose, SHELF_TOPS, SHELF_W, useClock, type Pose, type StageProps } from "./rig";
+import { FloorProps } from "./Props";
 import { useArt } from "./textures";
 
 const DEPTH = 0.38;
@@ -87,6 +88,7 @@ export function Store({ beat, context, send }: StageProps) {
         <ShelfItem key={b.id} box={b} beat={beat} peeking={context.peek === b.id} anyPeek={!!context.peek} send={send} />
       ))}
       <NextAisle />
+      <FloorProps />
     </group>
   );
 }
@@ -203,10 +205,6 @@ function NextAisle() {
       <mesh position={[-2.2, TOP / 2, -0.17]}>
         <planeGeometry args={[1.6, TOP]} />
         <meshStandardMaterial color="#9c8360" roughness={0.9} />
-      </mesh>
-      <mesh position={[-1.05, 0.25, 0.85]} rotation={[0, 0.3, 0]}>
-        <cylinderGeometry args={[0.28, 0.24, 0.5, 20, 1, true]} />
-        <meshStandardMaterial color="#c8102e" side={THREE.DoubleSide} roughness={0.6} />
       </mesh>
     </group>
   );
