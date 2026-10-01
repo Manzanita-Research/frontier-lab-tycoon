@@ -132,6 +132,8 @@ export const AppContext = Schema.Struct({
   marks: opaque<Marks>(),
   /** When the last snag toast went up (FLT-84, Clock milliseconds), so there is at most one a minute. */
   snagAt: Schema.NullOr(Schema.Number),
+  /** The speed an agent's run for the fence (FLT-59) dropped the game from to 1x, restored when the chase is over. */
+  chaseSpeed: opaque<Speed | null>(),
 });
 export type AppContext = typeof AppContext.Type;
 
@@ -187,6 +189,16 @@ function interrupted(before: AppContext, after: AppContext): boolean {
   const coach = after.snap.coach;
   if (coach && coach.id !== before.snap.coach?.id) return coach.target !== `build:${after.tool}` && coach.target !== "map:suggest";
   return false;
+}
+
+/**
+ * An agent running for the fence (FLT-59) drops the game to 1x so the player can catch it, and the speed comes back when
+ * the chase is over. Touching the speed or the pause button in between is the player's call: the old speed is forgotten.
+ */
+export function chaseSpeedOf(c: Pick<AppContext, "speed" | "chaseSpeed">, chase: boolean): Pick<AppContext, "speed" | "chaseSpeed"> {
+  if (chase && c.chaseSpeed === null && c.speed > 1) return { speed: 1 as Speed, chaseSpeed: c.speed };
+  if (!chase && c.chaseSpeed !== null) return { speed: c.chaseSpeed, chaseSpeed: null };
+  return { speed: c.speed, chaseSpeed: c.chaseSpeed };
 }
 
 /**
@@ -344,6 +356,7 @@ export const appMachine = setupEffect({
     slowForBadNews: input.slowForBadNews ?? true,
     marks: marksOf(lookOf(input.first.snap!)),
     snagAt: input.snagAt ?? null,
+    chaseSpeed: null,
   }),
   invoke: { src: "frameLoop" },
   initial: "playing",
@@ -410,14 +423,17 @@ export const appMachine = setupEffect({
       });
       let seq = gated.seq;
       // FLT-76: at ▶▶ or ▶▶▶, sharp bad news drops the game to 1× and pins a toast that says why.
-      let { speed, queue, marks } = context;
+      // A chase (FLT-59) drops it to 1× too and gives the speed back after: bad news is measured from then, as from any speed-up.
+      let { speed, queue, marks, chaseSpeed } = context;
       const slowed: UiToast[] = [];
       if (report.snap) {
         const look = report.snap;
-        const sharp = guarded("badNews", () => sharpNews(context.marks, lookOf(look), context.slowForBadNews && context.speed > 1 && !context.rebased), { marks: context.marks, lines: [] });
+        ({ speed, chaseSpeed } = chaseSpeedOf(context, !!look.escape?.chase));
+        const sharp = guarded("badNews", () => sharpNews(context.marks, lookOf(look), context.slowForBadNews && context.speed > 1 && speed > 1 && !context.rebased), { marks: context.marks, lines: [] });
         marks = sharp.marks;
         if (sharp.lines.length > 0) {
           speed = 1;
+          chaseSpeed = null;
           queue = [...queue, { type: "setPace", speed: 1 }];
           slowed.push({ id: 1_000_000 + seq++, text: slowText(sharp.lines), tone: "bad", importance: "you", pinned: true });
         }
@@ -435,6 +451,7 @@ export const appMachine = setupEffect({
         stage: guarded("stage", () => stageOf(moments, now, context.stage), context.stage),
         rebased: context.rebased && !report.snap,
         speed,
+        chaseSpeed,
         queue,
         marks,
         event: report.event,
@@ -469,11 +486,11 @@ export const appMachine = setupEffect({
       // Bad news is measured from here (FLT-76); speeding up again is "seen it": the pinned toast goes.
       const marks = event.speed === context.speed ? context.marks : marksOf(lookOf(context.snap));
       const toasts = event.speed > 1 ? context.toasts.filter((t) => !t.pinned) : context.toasts;
-      const next = { ...context, speed: event.speed, queue, marks, toasts };
+      const next = { ...context, speed: event.speed, chaseSpeed: null, queue, marks, toasts };
       return { context: next, target: phaseFor(next) };
     },
     TOGGLE_PAUSE: ({ context }) => {
-      const next = { ...context, speed: (context.speed === 0 ? 1 : 0) as Speed };
+      const next = { ...context, speed: (context.speed === 0 ? 1 : 0) as Speed, chaseSpeed: null };
       return { context: next, target: phaseFor(next) };
     },
     SET_TOOL: ({ context, event }) => {
@@ -585,7 +602,7 @@ export const appMachine = setupEffect({
 const lifeOf = (t: UiToast) => (t.snag ? SNAG_TOAST_MS : t.batch ? BATCH_TOAST_MS : TOAST_MS);
 
 /** The app's side of a new lab: nothing queued, nothing selected, running at 1x. */
-const freshLab = (context: AppContext): AppContext => ({ ...context, queue: [], acc: 0, toasts: [], held: null, gate: newGate(), wire: [], headlines: [], outcomeDismissed: false, speed: 1, tool: null, hover: null, selected: null, follow: false, highlight: null, zone: null, overlays: [], moments: newMoments(), stage: NO_STAGE, rebased: true });
+const freshLab = (context: AppContext): AppContext => ({ ...context, queue: [], acc: 0, toasts: [], held: null, gate: newGate(), wire: [], headlines: [], outcomeDismissed: false, speed: 1, tool: null, hover: null, selected: null, follow: false, highlight: null, zone: null, overlays: [], moments: newMoments(), stage: NO_STAGE, rebased: true, chaseSpeed: null });
 
 /** The selection as the sim handle wants it. */
 const uiOf = (c: AppContext): UiSelection => ({ selected: c.selected, follow: c.follow, highlight: c.highlight });

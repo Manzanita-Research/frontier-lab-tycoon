@@ -42,6 +42,8 @@ export function causeOf(w: Walker, night = false): Cause {
       if (w.impressed < 0.22) return "visitor.unimpressed";
       return night ? "visitor.night" : "visitor.meh";
     case "agent":
+      // At the fence (FLT-59): pacing it, running for it, or being carried back from it.
+      if (phase === "escaping") return "agent.fence";
       return w.drift < 0.3 ? (night ? "agent.night" : "agent.aligned") : w.drift < 0.65 ? "agent.drifting" : "agent.drifted";
     default:
       return "protester.chant";

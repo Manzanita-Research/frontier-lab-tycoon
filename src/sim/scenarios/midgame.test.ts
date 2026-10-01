@@ -38,13 +38,16 @@ describe("midgame scenario", () => {
     // the card budget too.
     // FLT-69: the campus wakes the Bird App too, and its 480 days of posts, Aura and Comms move the run. These were
     // 7f58d622 / 948ca520 before; with the Bird App asleep (`flags.birdappOff`) the World hashes to them again.
+    // FLT-59: and the Sandbox Escape. Nobody guards this fence. These were 788c7bf1 / 303320ca; with the Scrutiny row put
+    // back as it was (no Sandbox, Honeypot or escape) the World hashes to them again.
+    // A card due mid-chase now waits for the chase to end (FLT-59: the run is never paused); 57d87789 / 9eb5bf9e before.
     // FLT-76 adds two dormant arcs: the Logo's (arcs.theLogo, a Level 1 card this campus is past) and the offsite's
     // (arcs.offsite, which counts from flags.scrutinyDay, and this preset never sets it). Those two entries are the whole
-    // difference from 788c7bf1 / 303320ca.
+    // difference from 34526cc6 / 2660ed8e.
     expect({
       untagged: digest({ ...s, toasts: s.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) }),
       full: digest(s),
-    }).toEqual({ untagged: "bc29a343", full: "2ff88304" });
+    }).toEqual({ untagged: "0dbef5e6", full: "4592192e" });
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);

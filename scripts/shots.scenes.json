@@ -213,6 +213,7 @@
       "front-regulated",
       "front-acquihired",
       "front-captured",
+      "front-escaped",
       "front-pivot",
       "front-95",
       "front-phone",
@@ -333,6 +334,18 @@
       "nopath-tool",
       "nopath-click",
       "nopath-phone"
+    ],
+    "flt-59": [
+      "escape-warning",
+      "escape-run",
+      "escape-follow",
+      "escape-carry",
+      "escape-jailbreak",
+      "escape-honeypot",
+      "escape-run-phone",
+      "escape-carry-phone",
+      "front-escaped",
+      "front-escaped-phone"
     ],
     "beats": [
       "overview",
@@ -4693,6 +4706,147 @@
         },
         {
           "wait": 600
+        }
+      ]
+    },
+    "escape-warning": {
+      "title": "FLT-59: the warning. A drifted agent paces the fence, thinking about it",
+      "query": {
+        "warp": null,
+        "moment": "escape-warning",
+        "focus": "8.2,22.4",
+        "zoom": 72
+      },
+      "steps": [
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "escape-run": {
+      "title": "FLT-59: the run. Trail, GRAB IT, guards jogging, camera on the runner",
+      "query": {
+        "warp": null,
+        "moment": "escape-run",
+        "focus": "7.2,21.4",
+        "zoom": 72
+      },
+      "steps": [
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "escape-carry": {
+      "title": "FLT-59: the pick-up. The hand carries it back to the Sandbox",
+      "query": {
+        "warp": null,
+        "moment": "escape-carry",
+        "focus": "9.4,17.8",
+        "zoom": 72
+      },
+      "steps": [
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "escape-jailbreak": {
+      "title": "FLT-59: a jailbreak. Four at once, each for a different fence",
+      "query": {
+        "warp": null,
+        "moment": "escape-jailbreak",
+        "focus": "10.5,17",
+        "zoom": 46
+      },
+      "steps": [
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "escape-honeypot": {
+      "title": "FLT-59: the Honeypot. EXIT (real)",
+      "query": {
+        "warp": null,
+        "moment": "escape-honeypot",
+        "focus": "12,16.5",
+        "zoom": 46
+      },
+      "steps": [
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "escape-run-phone": {
+      "title": "FLT-59: the run on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "moment": "escape-run",
+        "focus": "7.2,21.4",
+        "zoom": 44
+      },
+      "steps": [
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "escape-carry-phone": {
+      "title": "FLT-59: the pick-up on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "moment": "escape-carry",
+        "focus": "9.4,17.8",
+        "zoom": 44
+      },
+      "steps": [
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "front-escaped": {
+      "title": "FLT-59: the Escaped ending's front page",
+      "query": {
+        "warp": null,
+        "moment": "front-escaped"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "front-escaped-phone": {
+      "title": "FLT-59: the Escaped front page on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "moment": "front-escaped"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "escape-follow": {
+      "title": "FLT-59: live, unpaused. It bolts, the game drops to 1x and the camera goes after it",
+      "query": {
+        "warp": null,
+        "moment": "escape-warning",
+        "speed": 1
+      },
+      "steps": [
+        {
+          "wait": 6500
         }
       ]
     },

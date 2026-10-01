@@ -26,6 +26,7 @@ import { modArcsHeard } from "./modArcs";
 import { pacerAllows, pacerMachine, type Pacing, type PacerStored } from "./machines/cardPace";
 import { HANDLED, paceOfCard } from "../content/cardPacing";
 import { createRng, type Rng } from "./rng";
+import { isChase } from "./escape/machine";
 
 export function conditionHolds(state: GameState, c: Condition): boolean {
   if ("all" in c) return c.all.every((sub) => conditionHolds(state, sub));
@@ -46,6 +47,9 @@ export function openEventOf(state: GameState): OpenEvent | null {
   return null;
 }
 
+/** A runner on the fence has the screen (FLT-59): no card opens mid-chase to pause it; they wait in line for it to end. */
+export const screenHeld = (state: GameState): boolean => !!state.escape?.runners.some((r) => isChase(r.machine.value));
+
 /** The card budget's machine, started the first time it is needed (a save from before FLT-54 has none). */
 export function pacerOf(state: GameState): PacerStored {
   return (state.pacer ??= initialStored(pacerMachine, undefined));
@@ -63,7 +67,7 @@ export function notePacer(state: GameState) {
 /** May a pack's own driver put `id` up today (the next question of a sitting, a bill's draft)? If not, it waits in line. */
 export function cardAllowed(state: GameState, id: string, how: "urgent" | "chain" | "normal" = "chain"): boolean {
   const pacer = pacerOf(state);
-  if (pacerAllows(pacer.context, id, paceOfCard(id).story, state.day, how)) return true;
+  if (!screenHeld(state) && pacerAllows(pacer.context, id, paceOfCard(id).story, state.day, how)) return true;
   state.pacer = step(pacerMachine, pacer, { type: "JOIN", id, day: state.day }).stored;
   return false;
 }
@@ -82,7 +86,7 @@ export function dailyEvents(state: GameState, unlocked = true) {
   const first = early && firstMinutes(state);
   if (early && !state.modsAdded && !first) return;
   notePacer(state);
-  let slotFree = openEventOf(state) === null;
+  let slotFree = openEventOf(state) === null && !screenHeld(state);
   // Later eras crowd the calendar: cooldowns shrink.
   const pace = eraDef(eraOfState(state)).pace;
   const pacer = pacerOf(state).context;

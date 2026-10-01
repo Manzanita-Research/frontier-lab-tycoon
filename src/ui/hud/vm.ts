@@ -155,7 +155,7 @@ const NOUN: Record<WalkerKind, [string, string]> = {
   visitor: ["visitor", "visitors"],
   protester: ["protester", "protesters"],
 };
-const SHORT: Record<Tool, string> = { path: "Path", cluster: "Cluster", hall: "Training Hall", gateway: "Gateway", kombucha: "Kombucha", nap: "Nap Pods", snack: "Snack Wall", demo: "Demo Stage", datacenter: "Datacenter", gas: "Gas Turbine", solar: "Solar Farm", security: "Security", bulldoze: "Bulldoze" };
+const SHORT: Record<Tool, string> = { path: "Path", cluster: "Cluster", hall: "Training Hall", gateway: "Gateway", kombucha: "Kombucha", nap: "Nap Pods", snack: "Snack Wall", demo: "Demo Stage", datacenter: "Datacenter", gas: "Gas Turbine", solar: "Solar Farm", security: "Security", sandbox: "Sandbox", honeypot: "Honeypot", bulldoze: "Bulldoze" };
 const CUE_LABEL: Record<string, string> = { place: "Place", coin: "Coin", bulldoze: "Bulldoze", card: "News card", choice: "Choice", release: "Release", era: "New era", breakdown: "Alarm" };
 export const PHOTO_TIMES = [
   { key: "live", label: "Live" },

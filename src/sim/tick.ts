@@ -27,6 +27,7 @@ import { dailyLeapfrog } from "./race/leapfrog/driver";
 import { dailyRace } from "./race/race";
 import { dailySlop } from "./slop";
 import { updateStaff } from "./staff";
+import { dailyEscape, updateEscape } from "./escape/driver";
 import { dailyDiscourse, updateProtesters } from "./protest";
 import { createRng } from "./rng";
 import { dailyThoughts } from "./thoughts";
@@ -97,6 +98,8 @@ function step(state: GameState, commands: readonly Command[]) {
   probe?.lap("factions");
   updateStaff(state, rng);
   probe?.lap("staff");
+  if (systemUnlocked(state, "escape")) updateEscape(state);
+  probe?.lap("escape");
   updateGroups(state);
   probe?.lap("groups");
   if (systemUnlocked(state, "auditors")) updateAuditors(state);
@@ -162,6 +165,9 @@ function step(state: GameState, commands: readonly Command[]) {
     probe?.lap("daily:promises");
     if (systemUnlocked(state, "capture")) dailyCapture(state);
     probe?.lap("daily:capture");
+    // FLT-59: before the day's bubbles, so an agent brooding about the fence has the floor.
+    if (systemUnlocked(state, "escape")) dailyEscape(state);
+    probe?.lap("daily:escape");
     dailyThoughts(state, rng);
     probe?.lap("daily:thoughts");
     if (state.endings) dailyEndings(state, rng);

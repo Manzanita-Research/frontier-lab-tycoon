@@ -553,6 +553,27 @@ button {
   border-bottom: 0;
   transform: translateX(-50%);
 }
+/* An agent running for the fence (FLT-59): loud, and it jitters, because it is in a hurry. */
+.grabit {
+  transform: translate(-50%, 12px);
+  padding: 3px 9px;
+  border: 2.5px solid var(--ink);
+  border-radius: var(--flt-radius-button);
+  background: #ff4f8a;
+  color: #fff;
+  font: 900 13px var(--font);
+  white-space: nowrap;
+  pointer-events: none;
+  animation: bob 0.35s ease-in-out infinite;
+}
+/* The hand, holding an agent by the scruff on the way back to the Sandbox. */
+.grabhand {
+  transform: translate(-50%, -50%) rotate(12deg);
+  font-size: 44px;
+  line-height: 1;
+  pointer-events: none;
+  filter: drop-shadow(2px 3px 0 rgb(0 0 0 / 0.35));
+}
 @keyframes bob {
   50% {
     translate: 0 -5px;

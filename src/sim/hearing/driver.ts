@@ -7,7 +7,7 @@ import { arcMachine } from "../machines/arc";
 import { initialStored, step } from "../machines/run";
 import { fillTemplate } from "../format";
 import { addNews } from "../news";
-import { cardAllowed, openEventOf } from "../events";
+import { cardAllowed, openEventOf, screenHeld } from "../events";
 import { createRng, type Rng } from "../rng";
 import { runVerb, STATS } from "../verbs";
 import type { Beat } from "../circus/chart";
@@ -143,8 +143,7 @@ function runAftermath(s: GameState, rng: Rng) {
 
 /** Put a card on screen now (a hearing does not wait for midnight), if nothing else has it. */
 function openCard(s: GameState, id: string) {
-  const open = openEventOf(s);
-  if (open) return;
+  if (openEventOf(s) || screenHeld(s)) return;
   s.arcs[id] = step(arcMachine, armCard(id), { type: "DAY", day: s.day, ready: true, slotFree: true, pace: 1 }).stored;
 }
 /**

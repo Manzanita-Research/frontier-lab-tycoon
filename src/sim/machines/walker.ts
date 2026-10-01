@@ -10,6 +10,8 @@
 //   (anywhere on foot or inside) --TOUR_DONE--> leaving --EXITED--> gone
 //   (anywhere on foot or inside) --QUIT--> quitting (walks out the gate with a box) --EXITED--> gone
 //   arriving | wandering --PROTEST_STARTED--> picketing (protester) --SENT_HOME--> leaving
+//   (anywhere on foot or inside) --BREAKOUT--> escaping (an agent the Sandbox Escape drives) --RETURNED--> choosing
+//                                                                                          --ESCAPED---> gone
 //
 // The need a walker is seeking (`seeking(need)`) is `Walker.need`: the state says they are on their way, the need says
 // what for. Purely declarative on purpose: this is the one machine that runs hundreds of times a tick, and in XState v6
@@ -57,6 +59,12 @@ export const walkerMachine = setupEffect({
       SENT_HOME: Schema.Struct({}),
       /** Reached the gate on the way out. */
       EXITED: Schema.Struct({}),
+      /** A drifted agent heads for the fence (FLT-59): the escape driver moves it from here on, not the walker loop. */
+      BREAKOUT: Schema.Struct({}),
+      /** Caught (picked up, tackled or trapped) and put back: pick the next stop. */
+      RETURNED: Schema.Struct({}),
+      /** Over the fence and off the map. */
+      ESCAPED: Schema.Struct({}),
     },
   },
 }).createMachine({
@@ -64,17 +72,17 @@ export const walkerMachine = setupEffect({
   initial: "arriving",
   states: {
     /** Just turned up (through the gate, or at the start of the game) and on the way to a first stop. */
-    arriving: { on: { ARRIVED: { target: "inside" }, QUEUED: { target: "queuing" }, NEXT: { target: "choosing" }, TOUR_DONE: { target: "leaving" }, QUIT: { target: "quitting" }, PROTEST_STARTED: { target: "picketing" } } },
+    arriving: { on: { ARRIVED: { target: "inside" }, QUEUED: { target: "queuing" }, NEXT: { target: "choosing" }, TOUR_DONE: { target: "leaving" }, QUIT: { target: "quitting" }, PROTEST_STARTED: { target: "picketing" }, BREAKOUT: { target: "escaping" } } },
     /** Walking to a building for a need (or the day job). */
-    seeking: { on: { ARRIVED: { target: "inside" }, QUEUED: { target: "queuing" }, NEXT: { target: "choosing" }, TOUR_DONE: { target: "leaving" }, QUIT: { target: "quitting" } } },
+    seeking: { on: { ARRIVED: { target: "inside" }, QUEUED: { target: "queuing" }, NEXT: { target: "choosing" }, TOUR_DONE: { target: "leaving" }, QUIT: { target: "quitting" }, BREAKOUT: { target: "escaping" } } },
     /** At a full building's door, waiting for a spot until patience runs out. */
-    queuing: { on: { ADMITTED: { target: "inside" }, GAVE_UP: { target: "choosing" }, NEXT: { target: "choosing" }, TOUR_DONE: { target: "leaving" }, QUIT: { target: "quitting" } } },
+    queuing: { on: { ADMITTED: { target: "inside" }, GAVE_UP: { target: "choosing" }, NEXT: { target: "choosing" }, TOUR_DONE: { target: "leaving" }, QUIT: { target: "quitting" }, BREAKOUT: { target: "escaping" } } },
     /** In a building until the stay is over. */
-    inside: { on: { LINGER: { target: "loitering" }, NEXT: { target: "choosing" }, TOUR_DONE: { target: "leaving" }, QUIT: { target: "quitting" } } },
+    inside: { on: { LINGER: { target: "loitering" }, NEXT: { target: "choosing" }, TOUR_DONE: { target: "leaving" }, QUIT: { target: "quitting" }, BREAKOUT: { target: "escaping" } } },
     /** Standing around outside the last building. */
-    loitering: { on: { NEXT: { target: "choosing" }, TOUR_DONE: { target: "leaving" }, QUIT: { target: "quitting" } } },
+    loitering: { on: { NEXT: { target: "choosing" }, TOUR_DONE: { target: "leaving" }, QUIT: { target: "quitting" }, BREAKOUT: { target: "escaping" } } },
     /** Ambling to a random path tile, or waiting there. */
-    wandering: { on: { NEXT: { target: "choosing" }, TOUR_DONE: { target: "leaving" }, QUIT: { target: "quitting" }, PROTEST_STARTED: { target: "picketing" } } },
+    wandering: { on: { NEXT: { target: "choosing" }, TOUR_DONE: { target: "leaving" }, QUIT: { target: "quitting" }, PROTEST_STARTED: { target: "picketing" }, BREAKOUT: { target: "escaping" } } },
     /** A stop is being picked; the driver answers in the same tick. */
     choosing: { on: { CHOSE_BUILDING: { target: "seeking" }, CHOSE_WANDER: { target: "wandering" } } },
     /** Heading for the gate. */
@@ -83,6 +91,8 @@ export const walkerMachine = setupEffect({
     quitting: { on: { EXITED: { target: "gone" } } },
     /** A protester at their spot near the gate. */
     picketing: { on: { SENT_HOME: { target: "leaving" } } },
+    /** Pacing the fence, running for it, carried or pinned: sim/escape moves the walker, sim/walkers leaves it alone. */
+    escaping: { on: { RETURNED: { target: "choosing" }, ESCAPED: { target: "gone" } } },
     /** Off the map. */
     gone: { type: "final" },
   },

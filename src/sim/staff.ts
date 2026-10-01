@@ -391,6 +391,12 @@ export function updateStaff(state: GameState, rng: Rng) {
         if (s.route.length === 0) send(s, { type: "ARRIVED" });
         break;
       case "idle":
+        // After an escaping agent (FLT-59): straight at it, jogging; sim/escape moves the point and calls it off.
+        if (s.chase) {
+          s.route = [[s.chase.x, s.chase.z]];
+          move(s, s.chase.jog);
+          break;
+        }
         // Pulled off their post: no looking for work, no patrol; straight to where the disaster sent them.
         if (s.divert) {
           march(state, s, s.divert);
@@ -504,6 +510,7 @@ export function releaseStaff(state: GameState, owner: string, job?: StaffJob) {
 
 /** What a staffer is up to, for the panel. */
 export function statusOfStaff(state: GameState, s: Staffer): string {
+  if (s.chase && s.machine.value !== "leaving") return "Chasing an agent";
   if (s.divert && s.machine.value !== "leaving") {
     const { building } = divertTarget(state, s.divert.to);
     const where = building ? defs().buildings[building.kind].name : "the gate";

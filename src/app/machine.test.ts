@@ -549,4 +549,32 @@ describe("app machine", () => {
       expect(c.toasts.some((t) => t.pinned)).toBe(false);
     }).pipe(provide(handle));
   });
+
+  it.effect("shares the speed with FLT-59's chase: bad news during a chase (at 1×) pins nothing, and is measured afresh once the chase gives ▶▶▶ back", () => {
+    const handle = handleFor();
+    return Effect.gen(function* () {
+      const { actor, pump } = yield* boot(10);
+      const snap = actor.getSnapshot().context.snap;
+      const at = (trust: number, chase: boolean) => ({ ...snap, disasters: { ...snap.disasters, trust }, escape: { ...snap.escape!, chase } as typeof snap.escape });
+      const synced = (s: typeof snap, now: number) => send(actor, { type: "SYNCED", report: { event: null, outcome: "playing" as const, snap: s, toasts: [] }, now });
+      const trust = snap.disasters.trust;
+      yield* synced(at(trust, true), 1_000);
+      yield* pump(0);
+      let c = actor.getSnapshot().context;
+      expect([c.speed, c.chaseSpeed]).toEqual([1, 10]);
+      // Trust falls during the chase: the game is already at 1×.
+      yield* synced(at(trust - 30, true), 2_000);
+      yield* synced(at(trust - 30, false), 3_000);
+      yield* pump(0);
+      c = actor.getSnapshot().context;
+      expect([c.speed, c.chaseSpeed]).toEqual([10, null]);
+      expect(c.toasts.some((t) => t.pinned)).toBe(false);
+      // From here it is watched again, from the trust the chase left.
+      yield* synced(at(trust - 45, false), 4_000);
+      yield* pump(0);
+      c = actor.getSnapshot().context;
+      expect(c.speed).toBe(1);
+      expect(c.toasts.find((t) => t.pinned)?.text).toBe(`Slowed to 1× for bad news: public trust fell from ${Math.round(trust - 30)} to ${Math.round(trust - 45)}.`);
+    }).pipe(provide(handle));
+  });
 });

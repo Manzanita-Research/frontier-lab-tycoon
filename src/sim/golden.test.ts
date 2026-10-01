@@ -222,15 +222,18 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // 1600 on moves on every seed (its posts, Aura, headlines and toasts). With `flags.birdappOff` set, and the Comms Rep put
 // back on the Level 5 card (with the Level 3 card's two new items left out), all three seeds reproduce the values above
 // at every checkpoint, digit for digit: the Bird App is the whole difference.
+// FLT-59 adds the Sandbox Escape to Scrutiny: the Level 5 card names the Sandbox, the Honeypot and the escape, and the
+// pack wakes last (96 days after the rung). The card is in the World, so 2400 on moves on every seed. With the Scrutiny
+// row put back as it was (no Sandbox, no Honeypot, no escape) all three seeds reproduce the values above, digit for digit.
 // FLT-76 asks the first decision on Level 1: the Logo opens two days after the first path, while the first model trains,
-// and this script answers it like any other card, so every
-// checkpoint moves. With the card kept shut (`firstMinutes` false), all three seeds reproduce the values above.
-// Then the offsite (FLT-76's minor beat 106 days into Scrutiny) adds flags.scrutinyDay on the tick Level 5 lands (2240),
-// so 2400 on moves; the card itself would open on day 218, past these 4000 ticks. Without the flag, every value holds.
+// and this script answers it like any other card, so every checkpoint moves. Then the offsite (FLT-76's minor beat 106
+// days into Scrutiny) adds flags.scrutinyDay on the tick Level 5 lands (2240); the card itself would open on day 218, past
+// these 4000 ticks. With the card kept shut (`firstMinutes` false) and without the flag, all three seeds reproduce FLT-59's
+// values (c403ae9a… / 766f3295… / b43cb9be…).
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "5e0738a0", 800: "e319dc92", 1600: "d666ee36", 2400: "4efc049f", 3200: "f68901eb", 4000: "06932fbf" },
-  2: { 200: "8e0d811a", 800: "857cc831", 1600: "c749a1dc", 2400: "88fb2e1f", 3200: "8761890f", 4000: "96b86bb9" },
-  3: { 200: "71a54b51", 800: "c5845aae", 1600: "317aaba3", 2400: "28a2819d", 3200: "b5bbe8c1", 4000: "7e0f0fd5" },
+  1: { 200: "5e0738a0", 800: "e319dc92", 1600: "d666ee36", 2400: "ee22342a", 3200: "15ff6c72", 4000: "d44774d4" },
+  2: { 200: "8e0d811a", 800: "857cc831", 1600: "c749a1dc", 2400: "a61834ba", 3200: "40c75dd6", 4000: "cc186590" },
+  3: { 200: "71a54b51", 800: "c5845aae", 1600: "317aaba3", 2400: "5ac62c34", 3200: "d05b8a54", 4000: "d46780de" },
 };
 
 describe("golden runs", () => {
