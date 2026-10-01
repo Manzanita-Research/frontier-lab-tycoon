@@ -176,6 +176,8 @@ const vms: Record<string, HudVM> = {
   help: vmOf({ level: 2, help: true }),
   // Nobody else is talking: a skin with one speech balloon (Chip, in Discovery Disc) shows a standing warning when it is quiet.
   warned: hudViewModel({ ...fixtureInput({ warnings: ["Your entrance isn't connected to any paths. Visitors are forming a very orderly queue to nowhere."] }), toasts: [] }),
+  snag: vmOf({ snag: true }),
+  snagCoached: vmOf({ level: 1, coach: 0, snag: true }),
   lf: vmOf({ leapfrog: true }),
   lfPhone: vmOf({ leapfrog: true, width: 390, height: 844 }),
   fx: vmOf({ factions: true, factionsOpen: true }),
@@ -292,6 +294,17 @@ describe.each([BASE_ID, ...usable])("skin %s", (id) => {
       ));
       expect(out.length, `${id}/${name}`).toBeGreaterThan(200);
       expect(out, `${id}/${name}`).not.toMatch(/undefined|\[object Object\]|NaN/);
+    }
+  });
+
+  it("says a caught error once, in its own voice, with Copy details: beside the newest toast, coach or no coach (FLT-84)", async () => {
+    const { skin } = await prepareSkin(id);
+    const said = escape(skin.strings["snag.text"]!);
+    for (const name of ["snag", "snagCoached"]) {
+      const out = html(skin, <Docked vm={vms[name]!} actions={actions} />);
+      expect(out.split(said).length - 1, `${id}/${name}`).toBe(1);
+      expect(out, `${id}/${name}`).toContain(escape(skin.strings["snag.copy"]!));
+      expect(out, `${id}/${name}: the report stays on the clipboard`).not.toContain("snag report");
     }
   });
 

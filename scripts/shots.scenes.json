@@ -327,6 +327,10 @@
       "bird-disc",
       "bird-karaoke",
       "bird-swag"
+    ],
+    "snag": [
+      "snag",
+      "snag-phone"
     ]
   },
   "scenes": {
@@ -4362,6 +4366,30 @@
       "steps": [
         {
           "wait": 500
+        }
+      ]
+    },
+    "snag": {
+      "title": "FLT-84: a caught error raises the recovery toast (a real throw in the paused-input path)",
+      "steps": [
+        {
+          "eval": "(f) => { const real = f.sim.applyNow.bind(f.sim); f.sim.applyNow = () => { f.sim.applyNow = real; throw new Error('the Training Hall caught fire mid-function (staged for the screenshot)'); }; f.send({ type: 'COMMAND', command: { type: 'coachClick' } }); }"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "snag-phone": {
+      "title": "FLT-84: the recovery toast on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "eval": "(f) => { const real = f.sim.applyNow.bind(f.sim); f.sim.applyNow = () => { f.sim.applyNow = real; throw new Error('the Training Hall caught fire mid-function (staged for the screenshot)'); }; f.send({ type: 'COMMAND', command: { type: 'coachClick' } }); }"
+        },
+        {
+          "wait": 800
         }
       ]
     }

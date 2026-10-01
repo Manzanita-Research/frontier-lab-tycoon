@@ -179,6 +179,8 @@ export interface UiToast {
   group?: Toast["group"];
   /** A batch summary: the `you` toasts that piled up while the window was shut, oldest first. */
   batch?: readonly { text: string; tone: Tone; source?: NoticeSource }[];
+  /** FLT-84: the game caught a bug and carried on. The bug report "Copy details" puts on the clipboard. */
+  snag?: string;
 }
 
 function disastersOf(s: GameState): DisastersSnapshot {

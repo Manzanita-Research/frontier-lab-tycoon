@@ -125,11 +125,13 @@ describe("the watchdog (FLT-81)", () => {
       registry,
       snapshot: app.snapshot,
       log: (...args) => void logged.push(args),
-      restart: (last) => {
+      restart: (last, error) => {
         restarted.push(handle.world.tick);
         input.speed = last.speed;
         input.first = handle.report(true, true)!;
         registry.refresh(app.actor);
+        // As game.ts does (FLT-84): the new actor raises the recovery toast.
+        registry.set(app.send, { type: "SNAG", report: String(error), now: 1 });
       },
     });
     try {
@@ -150,6 +152,8 @@ describe("the watchdog (FLT-81)", () => {
       // The same lab, at the speed the player had, taking input again.
       expect(handle.world.day).toBeGreaterThanOrEqual(day);
       expect(context()?.speed).toBe(3);
+      // ...and says so, once (FLT-84).
+      expect(context()?.toasts.filter((t) => t.snag)).toHaveLength(1);
       registry.set(app.send, { type: "TOGGLE_PAUSE" });
       await pump(3);
       expect(context()?.speed).toBe(0);

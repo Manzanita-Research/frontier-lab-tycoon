@@ -31,6 +31,28 @@ const openArena = (open: boolean) => {
   registry.set(arenaChosenAtom, open);
 };
 
+/** Text onto the clipboard: the async API where the page may use it, else the old select-and-copy. */
+async function copyText(text: string): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    const area = document.createElement("textarea");
+    area.value = text;
+    area.setAttribute("readonly", "");
+    area.style.cssText = "position:fixed;left:-9999px;top:0";
+    document.body.appendChild(area);
+    area.select();
+    try {
+      return document.execCommand("copy");
+    } catch {
+      return false;
+    } finally {
+      area.remove();
+    }
+  }
+}
+
 const TIME_HOURS: Record<string, number | null> = { live: null, day: 13, golden: 18.3, night: 22.5 };
 
 export const hudActions: HudActions = {
@@ -57,6 +79,12 @@ export const hudActions: HudActions = {
   closeInspector: () => send({ type: "SELECT", id: null }),
   highlight: (key) => send({ type: "HIGHLIGHT", key }),
   dismissToast: (id) => send({ type: "DISMISS_TOAST", id }),
+  copySnag: async (id) => {
+    const report = appNow()?.toasts.find((t) => t.id === id)?.snag;
+    if (!report) return false;
+    console.info(report);
+    return copyText(report);
+  },
   // The spend is kept in the snapshot: "do it anyway" sends the same command again, marked confirmed.
   confirmSpend: () => {
     const pending = appNow()?.snap.pendingConfirm;
