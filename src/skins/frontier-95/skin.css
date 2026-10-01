@@ -848,25 +848,9 @@
       background: repeating-conic-gradient(var(--lt) 0 25%, var(--g) 0 50%) 0 0 / 2px 2px;
     }
   }
-  .f95-flag {
-    width: 22px;
-    height: 20px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1px;
-    transform: skewX(-8deg);
-    i:nth-child(1) {
-      background: #e00;
-    }
-    i:nth-child(2) {
-      background: #0a0;
-    }
-    i:nth-child(3) {
-      background: #00c;
-    }
-    i:nth-child(4) {
-      background: #fc0;
-    }
+  .f95-mark {
+    flex: none;
+    display: block;
   }
   .f95-qs {
     display: flex;
