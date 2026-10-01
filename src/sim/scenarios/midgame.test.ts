@@ -38,10 +38,13 @@ describe("midgame scenario", () => {
     // the card budget too.
     // FLT-69: the campus wakes the Bird App too, and its 480 days of posts, Aura and Comms move the run. These were
     // 7f58d622 / 948ca520 before; with the Bird App asleep (`flags.birdappOff`) the World hashes to them again.
+    // FLT-86: the economy keeps its rounds, stake and overdraft day, and the goals their hold; the campus dips below $0 on
+    // day 55 and its script signs round 1 for 10% of the lab (it used to get the old free bailout), so revenue is 90% of
+    // what it was from then on, and the objective-met and round toasts join the run. These were 788c7bf1 / 303320ca.
     expect({
       untagged: digest({ ...s, toasts: s.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) }),
       full: digest(s),
-    }).toEqual({ untagged: "788c7bf1", full: "303320ca" });
+    }).toEqual({ untagged: "17c0dc43", full: "9ae26a38" });
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);

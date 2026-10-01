@@ -222,10 +222,16 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // 1600 on moves on every seed (its posts, Aura, headlines and toasts). With `flags.birdappOff` set, and the Comms Rep put
 // back on the Level 5 card (with the Level 3 card's two new items left out), all three seeds reproduce the values above
 // at every checkpoint, digit for digit: the Bird App is the whole difference.
+// FLT-86 (money and the win) moves every checkpoint, for two reasons and no others. The projection now shows each goal's
+// `hold`/`held` (the Arena objective is "hold Top 3 for 30 days"), which is in the World from tick 0. With those two
+// fields projected out, 200, 800 and 1600 hold digit for digit on all three seeds, and so does the RNG stream. From
+// 2400 on, the toasts move: each objective met is now its own toast (Ship 3 models at 2240 / 2180 / 2200), and the
+// runway nudge names the rounds left (first at 2660 / 2400 / 2160). The economy stays solvent in all three runs, so no
+// emergency round or overdraft plays here; the Arena hold starts at 3720 / 3460 / 3420 and none of the runs wins.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "c403ae9a", 800: "c9a777bd", 1600: "ec51030b", 2400: "50b6ca63", 3200: "d5e72be3", 4000: "733b0186" },
-  2: { 200: "766f3295", 800: "aec1b296", 1600: "9e386036", 2400: "1c00c918", 3200: "84a6b377", 4000: "54fbf395" },
-  3: { 200: "b43cb9be", 800: "510d3b99", 1600: "c01adf53", 2400: "680003ae", 3200: "89614b0c", 4000: "9ce0bccd" },
+  1: { 200: "3f4fd2bd", 800: "dc366b08", 1600: "76a936ba", 2400: "479044a7", 3200: "084d095f", 4000: "52af1738" },
+  2: { 200: "dea9d38a", 800: "be21520f", 1600: "a3d9bdf7", 2400: "93adfe59", 3200: "92555421", 4000: "785dd901" },
+  3: { 200: "a651a501", 800: "6e957aa8", 1600: "703f8ee4", 2400: "fe00f7c1", 3200: "9243659f", 4000: "5b111686" },
 };
 
 describe("golden runs", () => {

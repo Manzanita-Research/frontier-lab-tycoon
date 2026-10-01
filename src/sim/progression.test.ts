@@ -76,14 +76,16 @@ describe("the playable ladder", () => {
     const line = () => hudViewModel({ ...fixtureInput(), snap: makeSnapshot(s) }).progress.goal.line;
     expect(line()).toBe("Ship 3 models · 0 of 3");
     s.models.push("A", "B", "C");
-    const set = (patch: Record<string, { value?: number; met?: boolean }>) => {
+    const set = (patch: Record<string, { value?: number; met?: boolean; held?: number }>) => {
       s.goals = { ...s.goals, context: { ...s.goals.context, goals: s.goals.context.goals.map((g) => ({ ...g, ...patch[g.id] })) } };
     };
     set({ release: { met: true }, era: { value: 2 } });
     expect(progressOf(s).goal).toMatchObject({ text: "Reach Era 3: Superhuman Coder", objective: "era" });
     expect(line()).toBe("Reach Era 3: Superhuman Coder · 2/3");
     set({ era: { met: true }, arena: { value: 2 } }); // #6 of 7
-    expect(line()).toBe("Top 3 on the Arena in Era 3 · Arena #6, need top 3");
+    expect(line()).toBe("Hold Top 3 on the Arena for 30 days in Era 3 · Arena #6, need top 3");
+    set({ arena: { value: 6, held: 12 } }); // #2, twelve days into the hold (FLT-86)
+    expect(line()).toBe("Hold Top 3 on the Arena for 30 days in Era 3 · Arena #2 · day 12 of 30");
     set({ arena: { met: true } });
     expect(line()).toBe("");
   });

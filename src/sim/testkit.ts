@@ -10,6 +10,8 @@ import { createRng } from "./rng";
 import { seedWalkers } from "./walkers";
 import { initialVibes } from "./vibes";
 import { pendingConfirmOf } from "./guardrails";
+import { FRESH_ECONOMY } from "./machines/economy";
+import { MAX_ROUNDS } from "../content/bridgeRounds";
 
 /** Explicit busy campus for existing crowd/render tests; the real opening stays quiet. */
 export function createTestCampus(seed = 1): GameState {
@@ -89,6 +91,12 @@ export function layPaths(s: GameState) {
   for (const x of [5, 17]) for (let z = 4; z <= 22; z++) put(x, z);
   for (let z = 4; z <= 22; z++) if (!s.buildings.some((b) => 11 >= b.x && 11 < b.x + b.w && z >= b.z && z < b.z + b.d)) put(11, z);
   s.version++;
+}
+
+/** A lab with every round spent and the bank's last day today: the next midnight is bankruptcy (FLT-86). */
+export function brokeTonight(s: GameState) {
+  s.cash = -100_000;
+  s.economy = { value: "overdrawn", context: { ...FRESH_ECONOMY, rounds: MAX_ROUNDS, overdraftDay: s.day } };
 }
 
 export const price = (kind: PlaceableKind) => defs().buildings[kind].price;

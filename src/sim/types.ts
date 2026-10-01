@@ -223,7 +223,7 @@ export interface Pop {
  */
 export type NoticeSource =
   | "leapfrog" | "ops" | "staff" | "economy" | "coach" | "event" | "disaster" | "papers" | "collusion" | "hearing" | "politics"
-  | "defection" | "auditors" | "factions" | "race" | "training" | "crowd" | "build" | "endings" | "mods" | "birdapp" | `mod:${string}`;
+  | "defection" | "auditors" | "factions" | "race" | "training" | "crowd" | "build" | "endings" | "mods" | "birdapp" | "goals" | `mod:${string}`;
 
 /** `you`: it is about you, or needs you (a toast). `world`: it happened out there (the ticker, and the panel that owns it). */
 export type Importance = "you" | "world";
@@ -251,6 +251,9 @@ export interface GoalProgress {
   target: number;
   /** Milestones latch: once met, they stay met. */
   met: boolean;
+  /** FLT-86: days in a row a hold goal must stay at its target, and the days so far. */
+  hold?: number;
+  held?: number;
 }
 
 /** "ended": an ending (FLT-11) has reached its front page. */

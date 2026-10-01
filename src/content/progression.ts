@@ -60,6 +60,7 @@ export interface ProgressView {
   /** `status` is the goal's progress as the HUD says it ("$26K of $40K a day · 3 of 12 visitors"). */
   /** `lowerIsBetter` for a rank: #6 of a Top 3 goal is half way. */
   /** `objective` is set once the ladder is done: the goal is then that scenario objective (a GoalDef id). */
-  goal: { text: string; current: number; target: number; status?: string; lowerIsBetter?: boolean; objective?: string };
+  /** `held` is that objective's days in a row at its target, for a hold goal (FLT-86). */
+  goal: { text: string; current: number; target: number; status?: string; lowerIsBetter?: boolean; objective?: string; held?: number };
   teasers: { label: string; hint: string }[];
 }

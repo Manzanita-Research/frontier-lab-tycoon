@@ -435,7 +435,8 @@ describe("random disasters", () => {
     expect(s.disasters.runs).toEqual([]);
     expect(s.disasters.effects.filter((e) => e.until < 0)).toEqual([]);
     expect(s.staff.some((o) => o.divert)).toBe(false);
-    expect(s.buildings.filter((b) => b.broken).length).toBeLessThanOrEqual(1);
+    // Ordinary breakdowns go on with risk off, and one SRE fixes one at a time: a couple may be waiting (FLT-86's stream has two).
+    expect(s.buildings.filter((b) => b.broken).length).toBeLessThanOrEqual(2);
   });
 
   it("stays quiet through the first weeks (nothing has a minimum day before 30), and the dice come from their own stream", () => {

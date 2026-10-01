@@ -7,7 +7,7 @@ import { createDisasters } from "./disasters/driver";
 import { createGoals } from "./goals";
 import { initialStored } from "./machines/run";
 import { arcMachine } from "./machines/arc";
-import { economyMachine } from "./machines/economy";
+import { economyMachine, FRESH_ECONOMY } from "./machines/economy";
 import { goalsMachine } from "./machines/goals";
 import { trainingMachine } from "./machines/training";
 import { coachMachine } from "./machines/coach";
@@ -69,7 +69,7 @@ function create(seed: number, opening: "garage" | "campus"): GameState {
     gate: { x: 11, z: 23, w: 2, d: 1 },
     buildings: [],
     walkers: [],
-    economy: initialStored(economyMachine, { lastBailout: null }),
+    economy: initialStored(economyMachine, FRESH_ECONOMY),
     training: { ...initialStored(trainingMachine, { run: 1, progress: 0, cost: opening === "garage" ? FIRST_RUN_COST : 300, name: modelName(1, rng, 0) }), value: "idle" },
     models: [],
     news: [],

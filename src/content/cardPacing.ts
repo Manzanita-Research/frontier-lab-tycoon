@@ -31,6 +31,8 @@ export const CARD_PACING: readonly { match: RegExp; pace: CardPace }[] = [
   { match: /^dz:/, pace: { story: "disaster", urgent: true } },
   // The Memo: the ticker has been counting it down all week, so it lands the first day the desk is free.
   { match: /^memo$/, pace: { urgent: true } },
+  // The money (FLT-86): a round on the table, or the bank's letter. The game is already out of cash; it can't wait for a quiet week.
+  { match: /^(bridge\d|overdraft)$/, pace: { story: "money", urgent: true } },
   // The race's offers: a term sheet that waits behind a documentary crew is a term sheet at the wrong valuation.
   { match: /^(fundingRound|computeAuction|openWeights|shipNow|era\d+)$/, pace: { priority: true } },
   // The factions' asks: colour, not decisions. The lab's intern can sign an open letter.

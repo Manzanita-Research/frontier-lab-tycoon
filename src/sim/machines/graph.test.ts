@@ -5,7 +5,8 @@ import type { AnyStateMachine } from "xstate";
 import { getAdjacencyMap } from "xstate/graph";
 import { EVENTS, EVENT_COOLDOWN_DAYS } from "../../content/events";
 import { arcMachine } from "./arc";
-import { economyMachine } from "./economy";
+import { economyMachine, FRESH_ECONOMY } from "./economy";
+import { MAX_ROUNDS } from "../../content/bridgeRounds";
 import { RIVAL_BY_ID } from "../../content/rivals";
 import { eraMachine } from "../race/era";
 import { rivalMachine } from "../race/rival";
@@ -63,20 +64,25 @@ describe("machine graphs", () => {
     }
   });
 
-  it("the economy reaches solvent, runwayWarning, bailout and bankrupt", () => {
-    const events = [1e6, -1, -3e6, -5e6].flatMap((cash) => [0, 10, 21, 40].map((day) => ({ type: "DAY" as const, cash, day })));
-    const r = explore(economyMachine, { input: { lastBailout: null }, events });
+  it("the economy reaches solvent, offered, funded, overdrawn and bankrupt; only bankrupt is final", () => {
+    const events = [
+      ...[1e6, -1].flatMap((cash) => [0, 10, 40].map((day) => ({ type: "DAY" as const, cash, day }))),
+      { type: "SIGNED" as const, day: 5, equity: 10 },
+    ];
+    // States are told apart by value only, so start one round from the end: offered, signed, then the overdraft.
+    const r = explore(economyMachine, { input: { ...FRESH_ECONOMY, rounds: MAX_ROUNDS - 1 }, events });
     expect(r.unreachable).toEqual([]);
     expect(r.deadEnds).toEqual([]);
+    expect(Object.entries(economyMachine.states).filter(([, s]) => s.type === "final").map(([k]) => k)).toEqual(["bankrupt"]);
   });
 
   it("goals reach won and lost from tracking; only those two are final", () => {
     const goals = [{ id: "a", value: 0, target: 1, met: false }];
     const events = [
-      { type: "DAY" as const, day: 5, cash: 0, values: { a: 0 } },
-      { type: "DAY" as const, day: 5, cash: 0, values: { a: 1 } },
-      { type: "DAY" as const, day: 400, cash: 0, values: { a: 0 } },
-      { type: "DAY" as const, day: 5, cash: -9e9, values: { a: 0 } },
+      { type: "DAY" as const, day: 5, broke: false, values: { a: 0 } },
+      { type: "DAY" as const, day: 5, broke: false, values: { a: 1 } },
+      { type: "DAY" as const, day: 400, broke: false, values: { a: 0 } },
+      { type: "DAY" as const, day: 5, broke: true, values: { a: 0 } },
     ];
     const r = explore(goalsMachine, { input: { goals, outcomeDay: null }, events });
     expect(r.unreachable).toEqual([]);

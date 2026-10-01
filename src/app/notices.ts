@@ -29,7 +29,8 @@ export type Lane = "now" | "toast" | "ticker";
  * older save's) are `world`, the default.
  */
 export function laneOf(t: Pick<UiToast, "reply" | "source" | "importance">): Lane {
-  if (t.source === "coach") return "now";
+  // The coach, and the scenario's objectives (FLT-86): rare, and the point of the game, so never folded into a pile.
+  if (t.source === "coach" || t.source === "goals") return "now";
   if (t.importance !== "you") return "ticker";
   return t.reply ? "now" : "toast";
 }

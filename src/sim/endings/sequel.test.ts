@@ -1,14 +1,12 @@
 // FLT-57: no dead ends. Every ending leads somewhere, the two that stop time found a new lab with one perk, The Memo
 // counts down and leaves an aftermath, Captured fires from the Capture meter, and Escaped has a hook but no fake.
-import { SCENARIO } from "../../content/goals";
 import { eventById } from "../../content/events";
 import { THOUGHTS } from "../../content/thoughts";
-import { BAILOUT_AMOUNT } from "../machines/economy";
 import { openEventOf } from "../events";
 import { activeConditions } from "../thoughts";
 import { createInitialState } from "../state";
 import { createRng } from "../rng";
-import { answer, createTestCampus } from "../testkit";
+import { answer, brokeTonight, createTestCampus } from "../testkit";
 import { createMidgameScenario } from "../scenarios/midgame";
 import { TICKS_PER_DAY, tick } from "../tick";
 import type { GameState } from "../types";
@@ -43,7 +41,7 @@ const midgame = () => {
 /** A lab that went bust: Acqui-hired, front page out, time stopped. */
 function acquihired(seed = 1) {
   const s = staged(seed);
-  s.cash = SCENARIO.brokeBelow - BAILOUT_AMOUNT - 100_000;
+  brokeTonight(s);
   play(s, 30, 0, (w) => w.endings!.endedDay !== null);
   expect(s.endings!.id).toBe("acquihired");
   return s;

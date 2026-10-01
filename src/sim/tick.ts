@@ -17,7 +17,7 @@ import { dailyDisasters, updateDisasters } from "./disasters/driver";
 import { declineBuilding } from "./endings/autopilot";
 import { dailyEndings, endingHalts, endingsOwnTheGame, updateEndings } from "./endings/driver";
 import { dailyCrowd } from "./crowd";
-import { dailyEconomy } from "./economy";
+import { applyBridgeChoices, dailyEconomy } from "./economy";
 import { dailyEvents, notePacer, openEventOf } from "./events";
 import { dailyGoals } from "./goals";
 import { updateGroups } from "./groups";
@@ -75,6 +75,7 @@ function step(state: GameState, commands: readonly Command[]) {
   if (commands.length > 0) { updateTutorial(state); observeGuardrails(state); }
   // Answers to cards are replies too (FLT-51): the toasts they send are never held back.
   replying(state, () => {
+    applyBridgeChoices(state);
     if (systemUnlocked(state, "collusion")) applyCollusionChoices(state);
     applyCircusChoices(state);
     applyPackChoices(state);
@@ -200,6 +201,7 @@ function now(state: GameState, commands: readonly Command[]) {
   observeGuardrails(state);
   // Answers to cards are replies too (FLT-51): the toasts they send are never held back.
   replying(state, () => {
+    applyBridgeChoices(state);
     if (systemUnlocked(state, "collusion")) applyCollusionChoices(state);
     applyCircusChoices(state);
     applyPackChoices(state);

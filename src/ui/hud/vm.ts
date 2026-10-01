@@ -119,8 +119,8 @@ export interface HudInput {
 }
 
 
-/** "Revenue $140K / $250K per day", "Runs 2 / 3", "Hype 47 / 60". */
-export function goalProgressText(def: GoalDef, value: number): string {
+/** "Revenue $140K / $250K per day", "Runs 2 / 3", "Hype 47 / 60", "Arena #2 · day 12 of 30". `held` is a hold goal's days in a row. */
+export function goalProgressText(def: GoalDef, value: number, held = 0): string {
   const shown = Math.min(value, def.target);
   switch (def.unit) {
     case "money":
@@ -133,6 +133,10 @@ export function goalProgressText(def: GoalDef, value: number): string {
       return `Era ${Math.floor(shown)} / ${def.target}`;
     case "rank":
       if (value <= 0) return "Counts from Era 3";
+      if (def.hold !== undefined && value >= def.target) {
+        const rank = `Arena #${defs().arenaSize + 1 - Math.floor(value)}`;
+        return held >= def.hold ? `${rank} (held ${def.hold} days)` : `${rank} · day ${held} of ${def.hold}`;
+      }
       return value >= def.target ? `Arena #${defs().arenaSize + 1 - Math.floor(value)} (top ${defs().arenaSize + 1 - def.target} reached)` : `Arena #${defs().arenaSize + 1 - Math.floor(value)}, need top ${defs().arenaSize + 1 - def.target}`;
   }
 }
@@ -231,6 +235,10 @@ function trainingOf(s: Snapshot): TrainingVM {
   };
 }
 
+/** A hold goal's bar fills with the days held, once it is at its target (FLT-86); before that it shows the climb. */
+const holdRatio = (g: { value: number; target: number; hold?: number; held?: number; met: boolean }) =>
+  g.hold && !g.met && g.value >= g.target ? Math.min(1, (g.held ?? 0) / g.hold) : undefined;
+
 function objectivesOf(s: Snapshot): ObjectivesVM {
   const left = Math.max(0, SCENARIO.deadlineDay - s.day);
   return {
@@ -243,7 +251,7 @@ function objectivesOf(s: Snapshot): ObjectivesVM {
       const def = defs().goals.find((d) => d.id === g.id)!;
       // The release goal names the run actually training ("Ship 3 models (0/3), next: Frontier-2"), so its own progress line goes.
       const release = g.id === "release";
-      return { id: g.id, label: release ? s.releaseGoal : def.label, progress: release ? "" : goalProgressText(def, g.value), ratio: Math.max(0, Math.min(1, g.value / g.target)), met: g.met };
+      return { id: g.id, label: release ? s.releaseGoal : def.label, progress: release ? "" : goalProgressText(def, g.value, g.held), ratio: holdRatio(g) ?? Math.max(0, Math.min(1, g.value / g.target)), met: g.met };
     }),
   };
 }
@@ -1084,10 +1092,10 @@ function helpOf(items: readonly BuildItemVM[]): HudVM["help"] {
 }
 
 /** The note's one goal: the ladder rung's, or once the ladder is done the next open objective ("Top 3 on the Arena in Era 3 · Arena #6, need top 3"). */
-function goalOf({ text, current, target, status, lowerIsBetter, objective }: PlayableInput["goal"]): GoalVM {
+function goalOf({ text, current, target, status, lowerIsBetter, objective, held }: PlayableInput["goal"]): GoalVM {
   const def = objective ? defs().goals.find((d) => d.id === objective) : undefined;
   // The sim says the progress in words when a count alone would not ("$26K of $40K a day · 3 of 12 visitors").
-  const progress = status ?? (def?.unit === "rank" ? goalProgressText(def, current) : `${Math.min(current, target)}/${target}`);
+  const progress = status ?? (def?.unit === "rank" ? goalProgressText(def, current, held) : `${Math.min(current, target)}/${target}`);
   // A rank goal: #6 of a Top 3 is half way.
   const ratio = target > 0 ? Math.max(0, Math.min(1, lowerIsBetter ? (current > 0 ? target / current : 0) : current / target)) : 0;
   return { text, current, target, line: text ? `${text} · ${progress}` : "", progressText: progress, ratio };
