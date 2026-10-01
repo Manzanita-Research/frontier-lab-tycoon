@@ -40,7 +40,7 @@ for (const [side, base] of SIDES) {
     await p.goto(`${base}/box?seed=70&${q}`, { waitUntil: "networkidle" });
     await p.waitForFunction(() => window.__intro, null, { timeout: 90000 });
     await p.waitForTimeout(wait);
-    await p.screenshot({ path: `${out}/${side}/${name}.png`, clip });
+    await p.screenshot({ path: `${out}/${side}/${name}.png`, clip, timeout: 120000 });
     console.log(side, name, errs.slice(0, 2).join(" | "));
     await p.close();
   }
