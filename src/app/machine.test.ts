@@ -421,6 +421,26 @@ describe("app machine", () => {
     }).pipe(provide(handle));
   });
 
+  it.effect("an ending clears the screen for its card, but a snag toast keeps its Copy details button (FLT-76, FLT-84, FLT-86)", () => {
+    const handle = handleFor(1);
+    return Effect.gen(function* () {
+      const { actor, sim, pump } = yield* boot(0);
+      sim.world.toasts.push({ id: 900, text: "Round 1 of 3 signed: +$2M.", tone: "bad", source: "economy", importance: "you", reply: true });
+      yield* pump(4);
+      expect(actor.getSnapshot().context.toasts.map((t) => t.text)).toContain("Round 1 of 3 signed: +$2M.");
+      yield* send(actor, { type: "SNAG", report: "boom", now: 1_000 });
+      // The deadline passes tonight.
+      sim.world.day = SCENARIO.deadlineDay;
+      sim.world.tick = (SCENARIO.deadlineDay + 1) * 20 - 1;
+      yield* send(actor, { type: "SET_SPEED", speed: 1 });
+      yield* pump(4);
+      yield* waitFor(actor, (st) => st.matches("gameOver"), { timeout: "1 second" });
+      const c = actor.getSnapshot().context;
+      expect(c.toasts.map((t) => t.snag)).toEqual(["boom"]);
+      expect(c.stage.solo).toBe(true);
+    }).pipe(provide(handle));
+  });
+
   it.effect("a toast that says the same thing again replaces the older one instead of stacking", () => {
     const handle = handleFor();
     return Effect.gen(function* () {

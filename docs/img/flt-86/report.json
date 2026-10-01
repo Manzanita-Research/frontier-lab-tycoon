@@ -1,0 +1,61 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "2f7d8089d0b52d2b4508760b230e4ace16bc2524"
+  },
+  "head": {
+    "branch": "flt-86-money-win",
+    "sha": "f9be13a",
+    "dirty": true
+  },
+  "seconds": 162.79,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "money-finance",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-86/before/money-finance.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-86/after/money-finance.png",
+      "title": "FLT-86: the money line says net; Finance says Revenue, and what the bailouts cost (the mid-game campus signed round 1)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-86/compare/money-finance.png",
+      "changed": 0.19900154320987654
+    },
+    {
+      "scene": "money-round",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-86/before/money-round.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-86/after/money-round.png",
+      "title": "FLT-86: cash goes below $0 at midnight: round 1 of 3 (main: the board wires $2M, every time, forever)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-86/compare/money-round.png",
+      "changed": 0.4318719135802469
+    },
+    {
+      "scene": "money-last",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-86/before/money-last.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-86/after/money-last.png",
+      "title": "FLT-86: the third time: the last round, on a yacht",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-86/compare/money-last.png",
+      "changed": 0.4250987654320988
+    },
+    {
+      "scene": "money-overdraft",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-86/before/money-overdraft.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-86/after/money-overdraft.png",
+      "title": "FLT-86: no rounds left: the bank's 30 days",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-86/compare/money-overdraft.png",
+      "changed": 0.4225239197530864
+    },
+    {
+      "scene": "money-win",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-86/before/money-win.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-86/after/money-win.png",
+      "title": "FLT-86: the win, with a toast up when it lands (it steps aside to the ticker now)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-86/compare/money-win.png",
+      "changed": 0.6062445987654321
+    }
+  ],
+  "errors": []
+}

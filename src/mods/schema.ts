@@ -115,7 +115,7 @@ export type DisasterData = typeof Disaster.Type;
 export const Ending = Schema.Struct({ id, title: text, text, when: Condition });
 export const Tip = Schema.Struct({ id, text, when: Schema.optionalKey(text) });
 export const NamePool = Schema.Struct({ id, values: strings });
-export const Goal = Schema.Struct({ id, metric: Schema.Literals(["runs", "revenue", "hype", "era", "arena"]), label: text, target: nonnegative, unit: Schema.Literals(["runs", "money", "points", "era", "rank"]) });
+export const Goal = Schema.Struct({ id, metric: Schema.Literals(["runs", "revenue", "hype", "era", "arena"]), label: text, target: nonnegative, unit: Schema.Literals(["runs", "money", "points", "era", "rank"]), hold: Schema.optionalKey(nonnegative), stretch: Schema.optionalKey(text) });
 
 function patch<const Fields extends Schema.Struct.Fields & { readonly id: Schema.Constraint }>(schema: Schema.Struct<Fields>) {
   return Schema.Struct({

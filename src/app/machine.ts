@@ -439,12 +439,12 @@ export const appMachine = setupEffect({
         }
       }
       const fresh = [...gated.toasts, ...out.flatMap((m) => m.toasts), ...slowed];
-      // An ending clears the screen for itself.
+      // An ending clears the screen for itself. A snag toast (FLT-84) stays: it is the app owning up to an error, with a button, not the game's news.
       const ending = out.some((m) => m.kind === "ending");
-      if (ending) for (const t of context.toasts) enq.cancel(`toast:${t.id}`);
+      if (ending) for (const t of context.toasts) if (!t.snag) enq.cancel(`toast:${t.id}`);
       const wire = gated.wire.length > 0 ? [...context.wire, ...gated.wire].slice(-WIRE_MAX) : context.wire;
       const next: AppContext = {
-        ...addToasts(ending ? { ...context, toasts: [] } : context, fresh),
+        ...addToasts(ending ? { ...context, toasts: context.toasts.filter((t) => t.snag) } : context, fresh),
         gate: gated.gate,
         toastSeq: seq,
         moments,

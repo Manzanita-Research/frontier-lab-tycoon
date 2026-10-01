@@ -15,6 +15,7 @@ import { PROMISES } from "../sim/promises/pack";
 import { CAPTURE } from "../sim/capture/pack";
 import { FACTIONS_PACK, WATER_PACK } from "./factions";
 import { ENDINGS_PACK } from "../sim/endings/pack";
+import { BRIDGE_EVENTS } from "./bridgeRounds";
 
 /** What has to be true for an event to fire. `all` combines conditions. */
 export type Condition =
@@ -234,6 +235,8 @@ const RACE_EVENTS: EventDef[] = [
 ];
 
 EVENTS.push(...RACE_EVENTS);
+// FLT-86: the emergency rounds and the bank's letter. The economy opens them itself (sim/economy.ts), before the ladder opens any other card.
+EVENTS.push(...BRIDGE_EVENTS);
 
 /**
  * FLT-76: the first decision. PLAY IT reached Level 3 in under four minutes without choosing anything, so while the first

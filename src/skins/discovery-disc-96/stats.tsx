@@ -94,7 +94,7 @@ export function Stats({ stats, layout, visible = ALL_VISIBLE, actions }: SlotPro
           <Odometer className="n" value={stats.cash.value} format={money} flash={false} />
           <span className="l">
             {t("stats.cash")}
-            {visible.revenue && <span className="net"> · {stats.net.text}</span>}
+            {visible.revenue && <span className="net"> · {stats.net.text} {t("stats.net")}</span>}
           </span>
         </div>
         <div className={`dd-stk dd-circ dd-runway ${rw.warning ? "warn" : ""}`} {...coach.attrs("stat:runway")}>

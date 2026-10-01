@@ -1,9 +1,10 @@
 import type { EventFromLogic } from "xstate";
 import { PATH_PRICE } from "../content/buildings";
 import { STAFF } from "../content/staff";
-import { ENTRANCE_WARNING, REDUNDANT_HALL, RUNWAY_NUDGE, runwayConfirmation } from "../content/guardrails";
+import { ENTRANCE_WARNING, REDUNDANT_HALL, runwayConfirmation } from "../content/guardrails";
+import { MAX_ROUNDS, overdraftWarning, runwayNudge } from "../content/bridgeRounds";
 import type { Command } from "./commands";
-import { estimateLedger } from "./economy";
+import { economyOf, estimateLedger } from "./economy";
 import { runwayMonths } from "./format";
 import { guardrailsMachine } from "./machines/guardrails";
 import { initialStored, step } from "./machines/run";
@@ -27,7 +28,7 @@ function feed(s: GameState, event: EventFromLogic<typeof guardrailsMachine>) {
   const stored = s.guardrails ?? initialStored(guardrailsMachine, { pendingConfirm: null, lowRunway: false, gateDisconnected: false });
   const result = step(guardrailsMachine, stored, event);
   s.guardrails = result.stored;
-  for (const e of result.effects) addToast(s, e.type === "NUDGE" ? RUNWAY_NUDGE : REDUNDANT_HALL, e.type === "NUDGE" ? "bad" : "neutral", { source: e.type === "NUDGE" ? "economy" : "build", importance: "you" });
+  for (const e of result.effects) addToast(s, e.type === "NUDGE" ? runwayNudgeOf(s) : REDUNDANT_HALL, e.type === "NUDGE" ? "bad" : "neutral", { source: e.type === "NUDGE" ? "economy" : "build", importance: "you" });
 }
 export const pendingConfirmOf = (s: GameState): PendingConfirm | null => s.guardrails?.context.pendingConfirm ?? null;
 export function clearConfirm(s: GameState) { if (pendingConfirmOf(s)) feed(s, { type: "CLEAR" }); }
@@ -70,7 +71,13 @@ export function observeGuardrails(s: GameState) {
   const runway = runwayMonths(s.cash, estimateLedger(s).net);
   feed(s, { type: "OBSERVE", lowRunway: runway !== null && runway < 2, gateDisconnected: !entranceConnected(s) });
 }
+/** The low-runway warning says what happens at $0 from here: how many rounds are left, or that it's the bank (FLT-86). */
+export const runwayNudgeOf = (s: GameState) => runwayNudge(MAX_ROUNDS - economyOf(s).context.rounds);
+
 export function persistentWarnings(s: GameState): string[] {
   const c = s.guardrails?.context;
-  return [...(c?.gateDisconnected ? [ENTRANCE_WARNING] : []), ...(c?.lowRunway ? [RUNWAY_NUDGE] : [])];
+  const e = s.economy;
+  // Overdrawn, the bank's countdown says it all; otherwise the runway warning while it is short.
+  const money = e.value === "overdrawn" ? [overdraftWarning((e.context.overdraftDay ?? s.day) - s.day)] : c?.lowRunway ? [runwayNudgeOf(s)] : [];
+  return [...(c?.gateDisconnected ? [ENTRANCE_WARNING] : []), ...money];
 }

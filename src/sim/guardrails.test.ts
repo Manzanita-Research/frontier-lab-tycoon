@@ -7,7 +7,8 @@ import { jemOpeningCommands } from "./firstRunDemo";
 import { newWalker } from "./walkers";
 import { createRng } from "./rng";
 import { pendingConfirmOf, persistentWarnings, spendingForecast } from "./guardrails";
-import { ENTRANCE_WARNING, REDUNDANT_HALL, RUNWAY_NUDGE } from "../content/guardrails";
+import { ENTRANCE_WARNING, REDUNDANT_HALL } from "../content/guardrails";
+import { runwayNudge } from "../content/bridgeRounds";
 import { makeSnapshot } from "../app/hud";
 
 describe("Jem's first run", () => {
@@ -75,7 +76,7 @@ describe("Jem's first run", () => {
     expect(loaded.buildings).toHaveLength(2);
     applyNow(loaded, [{ ...command, confirmed: true }]); // duplicate click cannot purchase the same footprint twice
     expect(loaded.cash).toBe(100_000);
-    expect(persistentWarnings(loaded)).toContain(RUNWAY_NUDGE);
+    expect(persistentWarnings(loaded)).toContain(runwayNudge(3));
   });
 
   it("projects wages and upkeep from fresh books, not a stale paused ledger; cancellation spends nothing", () => {

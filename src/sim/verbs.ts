@@ -377,7 +377,7 @@ function say(env: VerbEnv, text: string): string {
 type CueBody = Cue extends infer C ? (C extends Cue ? Omit<C, "id" | "tick"> : never) : never;
 
 /** Tell the renderer and the sound layer something happened (they poll `state.disasters.cues`). */
-function pushCue(state: GameState, cue: CueBody) {
+export function pushCue(state: GameState, cue: CueBody) {
   const d = state.disasters;
   d.cues.push({ id: state.nextId++, tick: state.tick, ...cue } as Cue);
   if (d.cues.length > 12) d.cues.splice(0, d.cues.length - 12);

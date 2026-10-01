@@ -232,13 +232,21 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // values (c403ae9a… / 766f3295… / b43cb9be…).
 // Jem's labels for the Logo (A butthole / A butthole-ier butthole / Not a butthole) change its news lines, which sit in
 // the World until the ticker rolls them off: 200 to 1600 move, 2400 on hold.
-// FLT-92: the rival labs post on the Bird App too (its own stream, from Level 3), so 1600 on moves on every seed: their
-// posts, the ticker lines and toasts, and the dunks and ratios. With the rivals off (`enableBirdRivals` a no-op) all
-// three seeds reproduce FLT-76's values (c3959cd9… / 728d30e4… / a5bd2a17…), digit for digit.
+// FLT-86 (money and the win) moves every checkpoint, on purpose. The projection shows each goal's `hold`/`held` (the
+// Arena objective is now "hold Top 3 for 30 days"), which is in the World from tick 0. With those two fields projected
+// out and the goals' new toasts (each objective met, the hold starting and slipping) switched off, all three seeds
+// reproduce the values above tick for tick, RNG stream included, until the game itself is meant to differ: seeds 1 and 3
+// win the instant they reach Top 3 (ticks 3480 and 3600), and now start the 30-day hold instead; seed 2 dips below $0
+// at 2680 and gets emergency round 1 (a card, signed for 10% of the lab) where the free bailout used to be. None of the
+// three wins inside 4000 ticks. The goals' toasts take an id each, so with them on, the ids after the first "Objective
+// met" (tick 2200 on seed 1) move too, and so does whatever is picked by id (a faction thread on seed 1 at 2380).
+// FLT-92: the rival labs post on the Bird App too (their own stream, from Level 3), so 1600 on moves on every seed:
+// their posts, the ticker lines and toasts, and the dunks and ratios. With the rivals off (`enableBirdRivals` a no-op)
+// all three seeds reproduce FLT-86's values (af539c00… / 69cae759… / 5277ca60…), digit for digit.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "776c969b", 800: "2994496b", 1600: "17dd136a", 2400: "4f898952", 3200: "7718a7aa", 4000: "1b9600ff" },
-  2: { 200: "125c4ed2", 800: "a4f0d1f1", 1600: "0d175acf", 2400: "1d9322b2", 3200: "3733d454", 4000: "8bcd24e6" },
-  3: { 200: "d02267c3", 800: "d77c1496", 1600: "64be46f1", 2400: "dd562130", 3200: "19922fdf", 4000: "22071ba4" },
+  1: { 200: "72d15c6c", 800: "789162ba", 1600: "826a496b", 2400: "78097402", 3200: "71650e05", 4000: "33dc9fa3" },
+  2: { 200: "97c3299b", 800: "b0c37cae", 1600: "7c2d7fb4", 2400: "9498b5b3", 3200: "3010939a", 4000: "a47a8345" },
+  3: { 200: "cd605dda", 800: "23d1e9c1", 1600: "c072107a", 2400: "8ec7913b", 3200: "ebc9dac7", 4000: "84819774" },
 };
 
 describe("golden runs", () => {

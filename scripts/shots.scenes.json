@@ -376,6 +376,21 @@
       "f95-start-phone",
       "overview",
       "phone"
+    ],
+    "flt86": [
+      "money-finance",
+      "money-round",
+      "money-last",
+      "money-overdraft",
+      "money-win"
+    ],
+    "flt86-links": [
+      "link-round1",
+      "link-lastround",
+      "link-overdraft",
+      "link-bankrupt",
+      "link-stretch",
+      "link-win"
     ]
   },
   "scenes": {
@@ -5307,6 +5322,167 @@
         },
         {
           "wait": 600
+        }
+      ]
+    },
+    "money-finance": {
+      "title": "FLT-86: the money line says net; Finance says Revenue, and what the bailouts cost (the mid-game campus signed round 1)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { document.querySelectorAll('[role=tab]').forEach((t) => /^Finance$/.test(t.textContent.trim()) && t.click()); }"
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "money-round": {
+      "title": "FLT-86: cash goes below $0 at midnight: round 1 of 3 (main: the board wires $2M, every time, forever)",
+      "steps": [
+        {
+          "eval": "(f, w) => { w.cash = -40000; w.tick = (w.day + 1) * 20 - 1; f.tick(w); }"
+        },
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "money-last": {
+      "title": "FLT-86: the third time: the last round, on a yacht",
+      "steps": [
+        {
+          "eval": "(f, w) => { w.cash = -40000; if (w.economy.context.rounds !== undefined) { w.economy.context.rounds = 2; w.economy.context.stake = 75; } w.tick = (w.day + 1) * 20 - 1; f.tick(w); }"
+        },
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "money-overdraft": {
+      "title": "FLT-86: no rounds left: the bank's 30 days",
+      "steps": [
+        {
+          "eval": "(f, w) => { w.cash = -40000; if (w.economy.context.rounds !== undefined) { w.economy.context.rounds = 3; w.economy.context.stake = 55; } w.tick = (w.day + 1) * 20 - 1; f.tick(w); }"
+        },
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "money-win": {
+      "title": "FLT-86: the win, with a toast up when it lands (it steps aside to the ticker now)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { w.toasts.push({ id: 990001, text: 'Kevin Softmax loved it: $160K in the bank', tone: 'good', source: 'crowd', importance: 'you', reply: true }); }"
+        },
+        {
+          "wait": 700
+        },
+        {
+          "eval": "(f, w) => { for (const g of w.goals.context.goals) { g.met = true; g.value = g.target; if (g.hold) g.held = g.hold; } w.goals = { value: 'won', context: { ...w.goals.context, outcomeDay: w.day } }; w.toasts.push({ id: 990002, text: 'Your Arena lead is 40 Elo. The board would like it to be 400.', tone: 'neutral', source: 'leapfrog', importance: 'you' }); w.tick = (w.day + 1) * 20 - 1; f.tick(w); }"
+        },
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "link-round1": {
+      "title": "FLT-86 link: ?moment=money-round1, the first emergency round's card",
+      "query": {
+        "warp": null,
+        "moment": "money-round1",
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "link-lastround": {
+      "title": "FLT-86 link: ?moment=money-lastround, the third and last round",
+      "query": {
+        "warp": null,
+        "moment": "money-lastround",
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "link-overdraft": {
+      "title": "FLT-86 link: ?moment=money-overdraft, the bank's 30 days (Finance tab open)",
+      "query": {
+        "warp": null,
+        "moment": "money-overdraft",
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { document.querySelectorAll('[role=tab]').forEach((t) => /^Finance$/.test(t.textContent.trim()) && t.click()); }"
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "link-bankrupt": {
+      "title": "FLT-86 link: ?moment=money-bankrupt, the end screen",
+      "query": {
+        "warp": null,
+        "moment": "money-bankrupt",
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "link-stretch": {
+      "title": "FLT-86 link: ?moment=money-stretch&beat, the Final stretch beat at 2 of 3",
+      "query": {
+        "warp": null,
+        "moment": "money-stretch",
+        "skin": "frontier-95",
+        "beat": 1
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "link-win": {
+      "title": "FLT-86 link: ?moment=money-win, the win lands live a second after load and stands alone",
+      "query": {
+        "warp": null,
+        "moment": "money-win",
+        "skin": "frontier-95",
+        "speed": 1
+      },
+      "steps": [
+        {
+          "wait": 5000
         }
       ]
     }
