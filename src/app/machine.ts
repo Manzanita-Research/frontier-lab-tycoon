@@ -17,7 +17,7 @@ import type { GameState, NewsItem, OpenEvent, Outcome, Tone } from "../sim/types
 import { Frames } from "./frames";
 import type { Snapshot, Speed, Tool, UiSelection, UiToast } from "./hud";
 import { gateToasts, mergeWire, newGate, WIRE_MAX, type NoticeGate, type WireItem } from "./notices";
-import { enqueue, newMoments, NO_STAGE, release, spot, stageOf, type MomentQueue, type Seen, type StageView } from "./moments";
+import { enqueue, newMoments, NO_STAGE, release, spot, stageOf, type MomentQueue, type Queued, type Seen, type StageView } from "./moments";
 import { lookOf, marksOf, sharpNews, slowText, type Marks } from "./badNews";
 import { Sim, type SyncReport } from "./sim";
 import { Saves, type SaveWhy } from "./saves";
@@ -58,6 +58,20 @@ const survive = <R>(name: string, self: { send: (event: { type: "SNAG"; report: 
       }),
     ),
   );
+
+/**
+ * FLT-76: the moment queue and the bad-news check run inside SYNCED, a transition, where `survive()` cannot reach. If one
+ * throws, it goes to the console like an action's failure and the report goes through as it did before FLT-76 (every
+ * beat at once, no slowdown), rather than end the actor and leave the watchdog to restart it five times a second.
+ */
+function guarded<T>(name: string, f: () => T, fallback: T): T {
+  try {
+    return f();
+  } catch (e) {
+    reportFailure(name, Cause.die(e));
+    return fallback;
+  }
+}
 
 const failures = new Map<string, number>();
 function reportFailure(name: string, cause: Cause.Cause<unknown>) {
@@ -376,8 +390,14 @@ export const appMachine = setupEffect({
       const { report, now } = event;
       const snap = report.snap ?? context.snap;
       // FLT-76: the big moments go on one at a time, a beat apart. Their own toasts (the release, an ending's) come with them.
-      const spotted = context.rebased ? { moments: [], rest: report.toasts } : spot(seenOf(context.snap, context.event, context.outcome), seenOf(snap, report.event, report.outcome), report.toasts);
-      const { queue: moments, out } = release(enqueue(context.moments, spotted.moments, now), now);
+      const { spotted, queue: moments, out } = guarded(
+        "moments",
+        () => {
+          const spotted = context.rebased ? { moments: [], rest: report.toasts } : spot(seenOf(context.snap, context.event, context.outcome), seenOf(snap, report.event, report.outcome), report.toasts);
+          return { spotted, ...release(enqueue(context.moments, spotted.moments, now), now) };
+        },
+        { spotted: { moments: [], rest: report.toasts }, queue: context.moments, out: [] as Queued[] },
+      );
       // One policy for every notice: what is about you is a toast (one per window), the world's news is for the ticker.
       const gated = gateToasts(context.gate, spotted.rest, {
         now,
@@ -393,7 +413,8 @@ export const appMachine = setupEffect({
       let { speed, queue, marks } = context;
       const slowed: UiToast[] = [];
       if (report.snap) {
-        const sharp = sharpNews(context.marks, lookOf(report.snap), context.slowForBadNews && context.speed > 1 && !context.rebased);
+        const look = report.snap;
+        const sharp = guarded("badNews", () => sharpNews(context.marks, lookOf(look), context.slowForBadNews && context.speed > 1 && !context.rebased), { marks: context.marks, lines: [] });
         marks = sharp.marks;
         if (sharp.lines.length > 0) {
           speed = 1;
@@ -411,7 +432,7 @@ export const appMachine = setupEffect({
         gate: gated.gate,
         toastSeq: seq,
         moments,
-        stage: stageOf(moments, now, context.stage),
+        stage: guarded("stage", () => stageOf(moments, now, context.stage), context.stage),
         rebased: context.rebased && !report.snap,
         speed,
         queue,

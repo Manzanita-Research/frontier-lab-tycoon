@@ -10,6 +10,7 @@ import { tick } from "../sim/tick";
 import { createTestCampus, readyForPressure } from "../sim/testkit";
 import type { Speed } from "./hud";
 import { appMachine } from "./machine";
+import { NO_STAGE } from "./moments";
 import { framesManual, ManualFrames } from "./frames";
 import { Sim, simLayer, SimHandle } from "./sim";
 
@@ -470,6 +471,27 @@ describe("app machine", () => {
       yield* send(actor, { type: "CHOOSE", choiceIndex: 0 });
       yield* pump(0);
       expect(actor.getSnapshot().context.queue).toEqual([{ type: "chooseEvent", eventId: "waterDiscourse", choiceIndex: 0 }]);
+    }).pipe(provide(handle));
+  });
+
+  it.effect("survives its own failure: a queue that throws lets the report through unqueued, and the actor carries on", () => {
+    const handle = handleFor();
+    return Effect.gen(function* () {
+      const { actor, pump } = yield* boot(0);
+      const quiet = vi.spyOn(console, "error").mockImplementation(() => {});
+      const before = actor.getSnapshot().context.snap;
+      // A New! card whose id cannot be read: only the queue asks for it.
+      const card = { title: "New! Scrutiny", body: "", items: [], get id(): string { throw new Error("boom"); } };
+      const snap = { ...before, models: before.models + 1, unlockCard: card };
+      const shipped = { id: 900, text: "Frontier-4 is out! Launch week: +$120K", tone: "good" as const, source: "training" as const, importance: "you" as const };
+      yield* send(actor, { type: "SYNCED", report: { event: null, outcome: "playing" as const, snap, toasts: [shipped] }, now: 1000 });
+      yield* pump(0);
+      expect(actor.getSnapshot().status).toBe("active");
+      const c = actor.getSnapshot().context;
+      expect(c.stage).toEqual(NO_STAGE);
+      expect(c.toasts.map((t) => t.text)).toContain(shipped.text);
+      expect(quiet).toHaveBeenCalled();
+      quiet.mockRestore();
     }).pipe(provide(handle));
   });
 
