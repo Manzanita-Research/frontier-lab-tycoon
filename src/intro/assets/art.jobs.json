@@ -177,5 +177,15 @@
     "text": [
       "GENUINE"
     ]
+  },
+  {
+    "id": "shrinkwrap",
+    "size": {
+      "width": 1024,
+      "height": 1024
+    },
+    "quality": "high",
+    "prompt": "A seamless tileable macro studio photograph, straight-on, of crinkled clear plastic shrink wrap film stretched flat over a matte mid-grey card: fine wrinkles, soft creases and a few sharp fold lines catching a soft even light, glossy. Uniform all over, no edges, no corners, no objects, no text.",
+    "text": []
   }
 ]

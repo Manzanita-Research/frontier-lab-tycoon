@@ -82,7 +82,7 @@ if (cmd === "rects") {
     if (spec.pack) {
       // Maps: channels packed from Patina's greyscale outputs (three reads roughness from G, metalness from B), or one
       // map as is. Lossless, so lossy chroma never smears a packed channel.
-      const bytes = await page.evaluate(async ([pack, W]) => {
+      const bytes = await page.evaluate(async ([pack, W, q]) => {
         const out = new ImageData(W, 1);
         let c, g, d;
         for (const [ch, src] of Object.entries(pack)) {
@@ -93,8 +93,8 @@ if (cmd === "rects") {
           else { const o = 'rgb'.indexOf(ch); for (let k = 0; k < s.length; k += 4) d.data[k + o] = s[k]; }
         }
         g.putImageData(d, 0, 0);
-        return toWebp(c, 1); // quality 1 is lossless in Chromium
-      }, [Object.fromEntries(Object.entries(spec.pack).map(([k, v]) => [k, png(v)])), spec.width]);
+        return toWebp(c, q); // quality 1 is lossless in Chromium
+      }, [Object.fromEntries(Object.entries(spec.pack).map(([k, v]) => [k, png(v)])), spec.width, spec.q ?? 1]);
       writeFileSync(`src/intro/assets/${id}.webp`, Buffer.from(bytes));
       console.log(`src/intro/assets/${id}.webp  ${(bytes.length / 1024).toFixed(0)} KB`);
       continue;

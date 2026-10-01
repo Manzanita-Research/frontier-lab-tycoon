@@ -70,6 +70,14 @@
         "r": "shots/fal/coa-foil-crop.height.png",
         "b": "shots/fal/coa-foil-crop.metalness.png"
       }
+    },
+    "shrinkwrap.normal": {
+      "width": 512,
+      "q": 0.85,
+      "pack": {
+        "rgb": "shots/fal/shrinkwrap-1001T0052-0.normal.png"
+      }
     }
-  }
+  },
+  "shrinkwrap": "shots/fal/shrinkwrap-1001T0052-0.png"
 }
