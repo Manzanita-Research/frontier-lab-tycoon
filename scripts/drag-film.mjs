@@ -21,8 +21,10 @@ const query = "?debug=1&seed=3&speed=0&hour=13&warp=12";
 
 const browser = await chromium.launch({ args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
 const failures = [];
+const lines = [];
 const check = (ok, what) => {
-  console.log(`${ok ? "ok  " : "FAIL"} ${what}`);
+  lines.push(`${ok ? "ok  " : "FAIL"} ${what}`);
+  console.log(lines.at(-1));
   if (!ok) failures.push(what);
 };
 const frames = [];
@@ -214,7 +216,7 @@ const h = await sp.evaluate(() => document.body.scrollHeight);
 await sp.setViewportSize({ width: 1440, height: h });
 await sp.screenshot({ path: `${out}/filmstrip.png` });
 await b2.close();
-writeFileSync(`${out}/checks.txt`, failures.length ? `FAILED:\n${failures.join("\n")}\n` : "all checks passed\n");
+writeFileSync(`${out}/checks.txt`, `${lines.join("\n")}\n\n${failures.length ? `${failures.length} check(s) failed` : "all checks passed"}\n`);
 console.log(`\nwrote ${resolve(out)}/filmstrip.png and ${frames.length + 1} frames`);
 console.log(failures.length ? `${failures.length} check(s) failed` : "all checks passed");
 process.exit(failures.length ? 1 : 0);
