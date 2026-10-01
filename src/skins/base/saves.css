@@ -38,6 +38,7 @@
 .welcome-new { border:0; background:transparent; color:#5c4835; font:800 13px Nunito,sans-serif; padding:8px; border-radius:8px; cursor:pointer; }
 .welcome-new:hover { background:#e7dac1; }
 .welcome-box small { color:#8b7860; font-size:10px; }
+.welcome-box-link { border:0; background:transparent; color:#8b7860; font:700 11px Nunito,sans-serif; text-decoration:underline; padding:4px; min-height:32px; cursor:pointer; }
 .saves-what { min-width:0; overflow-wrap:anywhere; }
 @media (max-width:560px) {
   .saves-list li { grid-template-columns:64px minmax(0,1fr); }

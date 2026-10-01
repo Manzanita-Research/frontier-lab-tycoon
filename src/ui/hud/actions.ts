@@ -106,6 +106,7 @@ export const hudActions: HudActions = {
     registry.set(helpOpenAtom, false);
     send({ type: "COMMAND", command: { type: "coachReplay" } });
   },
+  openBox: () => send({ type: "TO_BOX" }),
   dismissUnlock: () => send({ type: "COMMAND", command: { type: "dismissUnlock" } }),
   // The first coach step waits for the build panel to open: tell the game each time it does.
   buildPanel: (open) => {
