@@ -96,6 +96,29 @@ export function guideText(id: string): string {
   return "It's here.";
 }
 
+/** What the player is after, as a verb phrase ("hire an SRE", "build a Training Hall"): a skin's voice can say it its own way. */
+export function guideAsk(id: string): string {
+  const [kind, key = ""] = id.split(":");
+  if (kind === "build") {
+    if (key === "path") return "draw a path";
+    if (key === "bulldoze") return "knock something down";
+    const b = defs().buildings[key as keyof ReturnType<typeof defs>["buildings"]];
+    return b ? `build ${article(b.name)} ${b.name}` : "build something";
+  }
+  if (kind === "hire") {
+    const s = STAFF[key as StaffJob];
+    return s ? `hire ${article(s.title)} ${s.title}` : "hire someone";
+  }
+  if (kind === "app") {
+    if (key === "bird") return "read the Bird App";
+    const w = WIDGET_ROWS.find((r) => r.id === key);
+    return w ? `open ${w.name}` : "open something";
+  }
+  if (id === "training") return "ship a model";
+  if (id === "speed") return "make time go faster";
+  return "find something";
+}
+
 const systemEntry = (id: string): UnlockEntryVM | null => {
   const g = SYSTEM_GUIDES[id as SystemId];
   return g ? { name: g.name, line: g.line, ...(g.anchor ? { anchor: g.anchor } : {}) } : null;

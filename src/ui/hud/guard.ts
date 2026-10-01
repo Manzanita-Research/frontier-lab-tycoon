@@ -20,3 +20,16 @@ export function guardWith<T>(sink: SnagSink, where: string, f: () => T, fallback
     return fallback;
   }
 }
+
+/**
+ * `guardWith`, reporting to the app actor. The game is imported only when something has gone wrong, so the coach layer
+ * and its tests do not boot a game to be safe.
+ */
+export const guard = <T>(where: string, f: () => T, fallback: T): T =>
+  guardWith(
+    (report) =>
+      void import("../../app/game").then(({ send }) => send({ type: "SNAG", report, now: Date.now() }), () => undefined),
+    where,
+    f,
+    fallback,
+  );

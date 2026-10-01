@@ -55,7 +55,7 @@ async function copyText(text: string): Promise<boolean> {
 }
 
 /** FLT-93: a HUD action that must survive its own failure (the FLT-81 rule, on the UI side of the app actor). */
-export const guard = <T>(where: string, f: () => T, fallback: T): T =>
+const guard = <T>(where: string, f: () => T, fallback: T): T =>
   guardWith((report) => send({ type: "SNAG", report, now: Date.now() }), where, f, fallback, () => ({ seed: sim.world.seed, tick: sim.world.tick, day: sim.world.day }));
 
 const TIME_HOURS: Record<string, number | null> = { live: null, day: 13, golden: 18.3, night: 22.5 };

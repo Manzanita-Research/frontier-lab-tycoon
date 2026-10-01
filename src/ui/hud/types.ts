@@ -400,6 +400,8 @@ export interface CoachVM {
    * tutorial; offer "Got it" (`actions.endShowMe()`). It ends by itself when they click the thing.
    */
   guide?: true;
+  /** With `guide`: what the player is after, as a verb phrase ("hire an SRE"), for a skin that says it its own way. */
+  ask?: string;
 }
 
 /** The small "New!" card that comes with a level-up. */

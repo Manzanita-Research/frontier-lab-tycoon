@@ -1,6 +1,6 @@
 // The taskbar: Start (and its menu), quick-launch, the news tape, and the tray (speed, news, sound, camera, clock).
 import { useEffect, useRef, useState } from "react";
-import { ALL_VISIBLE, coachInFacilities, Dialog, facilityGroups, Marquee, useRunBox } from "../kit";
+import { ALL_VISIBLE, anchor, coachInFacilities, Dialog, door, facilityGroups, Marquee, useRunBox } from "../kit";
 import { useCoach, useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import type { BuildItemVM, WidgetVM } from "../../ui/hud/types";
@@ -225,7 +225,7 @@ export function BuildBar({ items, tip, teasers = [], disasters, widgets = [], ac
   const hoverShut = { onPointerEnter: (e: React.PointerEvent) => e.pointerType === "mouse" && setFly(null) };
   const opener = (id: Exclude<Fly, null>) => ({ role: "menuitem", "aria-haspopup": "menu" as const, "aria-expanded": fly === id, className: fly === id ? "on" : "", onClick: () => setFly(id) });
   const row = (it: BuildItemVM, size = 24) => (
-    <button type="button" role="menuitem" {...coach.attrs(`build:${it.kind}`)} className={it.selected ? "on" : ""} disabled={!it.affordable && !it.selected} onClick={() => pick(it.kind)}>
+    <button type="button" role="menuitem" {...coach.attrs(`build:${it.kind}`)} {...(it.kind === "staff" ? door("hire:*") : {})} className={it.selected ? "on" : ""} disabled={!it.affordable && !it.selected} onClick={() => pick(it.kind)}>
       <Ico name={it.kind} size={size} />
       <span>{it.name}</span>
       <span className="hk">{it.hotkey ?? ""}</span>
@@ -254,7 +254,7 @@ export function BuildBar({ items, tip, teasers = [], disasters, widgets = [], ac
             )}
             <li className="sep" role="separator" />
             <li className="fly" data-fly="facilities" {...flyProps("facilities")}>
-              <button type="button" {...opener("facilities")} {...coach.attrs("start:facilities", facCoach)} data-testid="start-facilities">
+              <button type="button" {...opener("facilities")} {...coach.attrs("start:facilities", facCoach)} {...door("build:*", "hire:*")} data-testid="start-facilities">
                 <Ico name="folder" size={24} />
                 <span>{t("build.facilities")}</span>
                 <span className="hk" />
@@ -296,7 +296,7 @@ export function BuildBar({ items, tip, teasers = [], disasters, widgets = [], ac
               )}
             </li>
             <li className="fly" data-fly="programs" {...flyProps("programs")}>
-              <button type="button" {...opener("programs")}>
+              <button type="button" {...opener("programs")} {...door("app:*")}>
                 <Ico name="programs" size={24} />
                 <span>Programs</span>
                 <span className="hk" />
@@ -307,7 +307,7 @@ export function BuildBar({ items, tip, teasers = [], disasters, widgets = [], ac
                   <ul>
                     {widgets.map((w) => (
                       <li key={w.id}>
-                        <button type="button" role="menuitem" title={w.blurb} onClick={() => launch(w.id)}>
+                        <button type="button" role="menuitem" title={w.blurb} {...anchor(`app:${w.id}`)} {...(w.id === "staff" ? door("hire:*") : {})} onClick={() => launch(w.id)}>
                           <Ico name={widgetIcon(w)} size={20} />
                           <span>{w.id === "drama" ? t("drama.button") : w.name}</span>
                         </button>
@@ -409,7 +409,7 @@ export function BuildBar({ items, tip, teasers = [], disasters, widgets = [], ac
           <b>{tip.name}</b> {tip.text} {tip.upkeepText && <small>{tip.upkeepText}</small>}
         </div>
       )}
-      <button type="button" {...coach.attrs("start", !open && coach.intoPanel(items))} className={`f95-start ${open ? "on" : ""}`} data-testid="start-button" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}>
+      <button type="button" {...coach.attrs("start", !open && coach.intoPanel(items))} className={`f95-start ${open ? "on" : ""}`} data-testid="start-button" {...door("build:*", "hire:*", "app:*")} aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}>
         <SunriseMark />
         <span>{t("build.menuTitle")}</span>
       </button>

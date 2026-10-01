@@ -33,6 +33,7 @@ import { stageFirstRun } from "../sim/firstRunDemo";
 import { withDefs } from "../sim/defs";
 import { enableEarnedPacks, PACK_OFF_FLAGS } from "../sim/progression";
 import { BEATS_MOMENTS, isBeatsMoment, keepsLadder, stageBeats } from "../sim/beatsDemo";
+import { isOnboardMoment, ONBOARD_MOMENTS, stageOnboard } from "../sim/onboardDemo";
 import type { GameDefinition } from "../mods/game-definition";
 import { enableEndings } from "../sim/endings/state";
 import { ENDING_MOMENTS, isEndingMoment, stageEndingMoment } from "../sim/endings/demo";
@@ -188,7 +189,7 @@ export class SimHandle {
 export const STAGED_MOMENTS: readonly string[] = [
   "jem-opening", "jem-confirm", ...ENDING_MOMENTS, ...MOMENTS, ...OPS_MOMENTS, ...LEAP_MOMENTS, ...COLLUSION_MOMENTS, ...PAPER_MOMENTS,
   ...CIRCUS_MOMENTS, ...DRAMA_MOMENTS, ...AUDIT_MOMENTS, ...SENATE_MOMENTS, ...FACTION_MOMENTS, ...BIRD_DEMO_MOMENTS, ...ESCAPE_MOMENTS,
-  ...BEATS_MOMENTS, ...MONEY_MOMENTS,
+  ...BEATS_MOMENTS, ...MONEY_MOMENTS, ...ONBOARD_MOMENTS,
 ];
 
 type SimDebug = Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk" | "daily" | "endings">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean; collusion?: boolean; hearing?: boolean; yacht?: boolean; defection?: boolean; poaching?: boolean; auditors?: boolean; capture?: boolean; promises?: boolean; factions?: boolean; birdapp?: boolean; birdrivals?: boolean; water?: boolean; escape?: boolean };
@@ -243,6 +244,7 @@ function stage(dbg: SimDebug): GameState {
   else if (isFactionMoment(dbg.moment)) stageFactions(sim, dbg.moment);
   else if (isBirdMoment(dbg.moment)) stageBird(sim, dbg.moment);
   else if (isBeatsMoment(dbg.moment)) stageBeats(sim, dbg.moment);
+  else if (isOnboardMoment(dbg.moment)) stageOnboard(sim, dbg.moment);
   else if (isEscapeMoment(dbg.moment)) stageEscape(sim, dbg.moment);
   if (dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0) {
     const rng = createRng(sim.rngState);

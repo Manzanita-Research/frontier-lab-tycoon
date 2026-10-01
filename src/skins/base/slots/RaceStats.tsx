@@ -11,6 +11,7 @@ export function RaceStats({ stats, visible, actions }: { stats: StatsVM; visible
       {visible.arena && (
       <button
         className={`stat arena-chip ${a.flinch ? "flinch" : ""} ${a.top ? "top" : ""}`}
+        data-anchor="app:arena"
         onClick={() => actions.toggleArena()}
         aria-expanded={a.open}
         aria-label={`You are number ${a.rank} on the Frontier Arena. Click to ${a.open ? "hide" : "show"} the leaderboard.`}

@@ -2,20 +2,24 @@
 // active skin's `Coach` slot says the line. It steps aside while a card or a dialog is up, and keeps off open windows. Skin
 // independent on purpose: what to light is found by `[data-coach-active]` (every skin marks its targets with the kit's
 // `useCoach`), so a new skin gets the spotlight for free. The dimming never eats a click: the player can always do the thing.
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { useSkin } from "../../skins/context";
 import type { Rect } from "../../skins/kit/place";
 import type { HudActions, HudVM } from "./types";
+import { ANCHOR } from "./anchors";
+import { guard } from "./guard";
+import { clickedAnchor, domPage, newWalk, walkStep } from "./showMe";
 
 const PAD = 7;
 
 const sameRect = (a: Rect | null, b: Rect | null) => (a === null || b === null ? a === b : Math.abs(a.x - b.x) < 1 && Math.abs(a.y - b.y) < 1 && Math.abs(a.w - b.w) < 1 && Math.abs(a.h - b.h) < 1);
 
 /** The popup (marked `data-coach-panel`) a target sits in, if any: a balloon must keep off all of it, not just off the target. */
-function measurePanel(target: string): Rect | null {
+function measurePanel(target: string, guide = false): Rect | null {
   if (typeof document === "undefined" || target === "map:suggest") return null;
-  const panel = document.querySelector<HTMLElement>("[data-coach-active]")?.closest<HTMLElement>("[data-coach-panel]");
+  const marked = guide ? `[${ANCHOR}="${CSS.escape(target)}"]` : "[data-coach-active]";
+  const panel = document.querySelector<HTMLElement>(marked)?.closest<HTMLElement>("[data-coach-panel]");
   if (!panel) return null;
   const b = panel.getBoundingClientRect();
   return b.width > 0 && b.height > 0 ? { x: b.left, y: b.top, w: b.width, h: b.height } : null;
@@ -89,7 +93,7 @@ export function opensWindow(change: WindowChange): boolean {
  * Follow the target (a menu opening, a window moving) without re-rendering per frame: state changes only when a box moves. It
  * looks when the target changes and whenever a window opens, before the frame is painted, and ten times a second besides.
  */
-function useSpotlight(target: string | null): Found {
+function useSpotlight(target: string | null, guide = false): Found {
   const [found, setFound] = useState<Found>(NONE);
   useLayoutEffect(() => {
     if (!target) {
@@ -99,9 +103,14 @@ function useSpotlight(target: string | null): Found {
     let raf = 0;
     let checked = 0;
     let last: Found = NONE;
+    // FLT-93: [Show me] finds its own way to the anchor, clicking the doors on the way (`showMe.ts`). A skin's door that
+    // throws ends the walk where it stands, with a snag toast, not the game.
+    const walk = newWalk();
+    const page = guide ? domPage() : null;
+    const measure = (): Rect | null => (page ? guard("showMe.walk", () => walkStep(target, page, walk).lit, null) : measureTarget(target));
     const look = (now: boolean) => {
-      const rect = measureTarget(target);
-      const panel = rect ? measurePanel(target) : null;
+      const rect = measure();
+      const panel = rect ? measurePanel(target, guide) : null;
       const avoid = measureAvoid();
       if (sameRect(rect, last.rect) && sameRect(panel, last.panel) && sameRects(avoid, last.avoid)) return;
       last = { rect, panel, avoid };
@@ -128,7 +137,7 @@ function useSpotlight(target: string | null): Found {
       cancelAnimationFrame(raf);
       opened?.disconnect();
     };
-  }, [target]);
+  }, [target, guide]);
   return found;
 }
 
@@ -136,8 +145,20 @@ function useSpotlight(target: string | null): Found {
  * The dimming with a hole in it, and the pulsing ring round the hole. The dimming is drawn once (it repaints only when the box
  * moves) and the ring is its own small layer that pulses by transform and opacity, so nothing repaints per frame over the map.
  */
-function Spotlight({ rect, dim }: { rect: Rect; dim: boolean }) {
+/** FLT-93: [Show me]'s arrow sits over the target, or under it when the target is at the top of the screen. */
+const ARROW = 34;
+const arrowBelow = (rect: Rect) => rect.y - PAD - ARROW < 8;
+
+/** The box the balloon must keep off: the lit hole, and the arrow when there is one. */
+function keepOff(rect: Rect, arrow: boolean): Rect {
+  const box = { x: rect.x - PAD, y: rect.y - PAD, w: rect.w + PAD * 2, h: rect.h + PAD * 2 };
+  if (!arrow) return box;
+  return arrowBelow(rect) ? { ...box, h: box.h + ARROW } : { ...box, y: box.y - ARROW, h: box.h + ARROW };
+}
+
+function Spotlight({ rect, dim, arrow = false }: { rect: Rect; dim: boolean; arrow?: boolean }) {
   const hole = { x: rect.x - PAD, y: rect.y - PAD, width: rect.w + PAD * 2, height: rect.h + PAD * 2 };
+  const below = arrowBelow(rect);
   const id = useRef(`coach-hole-${Math.random().toString(36).slice(2, 8)}`).current;
   return (
     <>
@@ -151,6 +172,14 @@ function Spotlight({ rect, dim }: { rect: Rect; dim: boolean }) {
         <rect width="100%" height="100%" style={{ fill: "var(--flt-color-scrim)" }} mask={`url(#${id})`} />
       </svg>}
       <div className="coach-ring" aria-hidden style={{ left: hole.x, top: hole.y, width: hole.width, height: hole.height }} />
+      {arrow && (
+        <div
+          className={`coach-arrow ${below ? "up" : "down"}`}
+          aria-hidden
+          data-testid="coach-arrow"
+          style={{ left: hole.x + hole.width / 2 - ARROW / 2, top: below ? hole.y + hole.height + 2 : hole.y - ARROW - 2, width: ARROW, height: ARROW }}
+        />
+      )}
     </>
   );
 }
@@ -168,15 +197,39 @@ function spotlightTarget(vm: HudVM): string | null {
 /** A card or a dialog has the floor: the coach waits until it is closed rather than talk over it (FLT-58). */
 export const coachWaits = (vm: HudVM): boolean => !!(vm.unlock || vm.event || vm.confirm || vm.eraCard || vm.outcome);
 
+/**
+ * FLT-93: [Show me] is over when the player clicks the thing it points at (the click goes through: they meant it), or
+ * presses Escape. The skin's "Got it" ends it too. A click the walk made itself is not the player's.
+ */
+function useGuideEnds(target: string | null, end: () => void) {
+  useEffect(() => {
+    if (!target || typeof document === "undefined") return;
+    const onClick = (e: MouseEvent) => {
+      if (e.isTrusted && clickedAnchor(e.target, target)) setTimeout(end, 0);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") end();
+    };
+    document.addEventListener("click", onClick, true);
+    document.addEventListener("keydown", onKey, true);
+    return () => {
+      document.removeEventListener("click", onClick, true);
+      document.removeEventListener("keydown", onKey, true);
+    };
+  }, [target, end]);
+}
+
 export function CoachLayer({ vm, actions }: { vm: HudVM; actions: HudActions }) {
   const { Coach } = useSkin().slots;
   const coach = coachWaits(vm) ? null : vm.coach;
-  const { rect, panel, avoid } = useSpotlight(coach ? spotlightTarget(vm) : null);
+  const guide = coach?.guide === true;
+  const { rect, panel, avoid } = useSpotlight(coach ? (guide ? coach.target : spotlightTarget(vm)) : null, guide);
+  useGuideEnds(guide ? coach!.target : null, actions.endShowMe);
   if (!coach) return null;
   return (
     <>
-      {rect && <Spotlight rect={rect} dim={coach.dim === true} />}
-      <Coach coach={coach} anchor={rect && { x: rect.x - PAD, y: rect.y - PAD, w: rect.w + PAD * 2, h: rect.h + PAD * 2 }} panel={panel} avoid={avoid} layout={vm.layout} actions={actions} />
+      {rect && <Spotlight rect={rect} dim={coach.dim === true} arrow={guide} />}
+      <Coach coach={coach} anchor={rect && keepOff(rect, guide)} panel={panel} avoid={avoid} layout={vm.layout} actions={actions} />
     </>
   );
 }

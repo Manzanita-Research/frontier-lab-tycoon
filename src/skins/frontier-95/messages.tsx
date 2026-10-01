@@ -339,9 +339,16 @@ export function Coach({ coach, anchor, panel, avoid, layout, actions }: SlotProp
   return (
     <div key={coach.id} ref={ref} className={`f95-coach ${layout.compact ? "docked" : ""}`} style={layout.compact ? { top: place.y } : { left: place.x, top: place.y }} role="status" aria-live="polite" aria-label={t("assistant.title")}>
       <div className="f95-balloon">
+        {coach.guide && coach.ask && <p className="f95-asking">{t("coach.ask", { ask: coach.ask })}</p>}
         <p className="f95-saying">{coach.text}</p>
         <div className="f95-coachfoot">
-          <small>{t("coach.step", { n: coach.step, total: coach.of })}</small>
+          {coach.guide ? (
+            <button type="button" className="f95-skip" onClick={() => actions.endShowMe()}>
+              {t("coach.gotIt")}
+            </button>
+          ) : (
+            <small>{t("coach.step", { n: coach.step, total: coach.of })}</small>
+          )}
           {coach.canSkip && (
             <button type="button" className="f95-skip" onClick={() => actions.coachSkip()}>
               {t("coach.skip")}
@@ -352,6 +359,38 @@ export function Coach({ coach, anchor, panel, avoid, layout, actions }: SlotProp
       <span className="f95-clip wiggle" aria-hidden>
         <Clip />
       </span>
+    </div>
+  );
+}
+
+/**
+ * FLT-93: what a rung brings, by kind (Build, Hire, New systems, New apps), one line each on what it is for, and a Show me
+ * that puts the card away and has the paperclip walk you to it.
+ */
+function UnlockGroups({ groups, actions }: { groups: NonNullable<SlotPropsMap["UnlockCard"]["unlock"]["groups"]>; actions: SlotPropsMap["UnlockCard"]["actions"] }) {
+  const t = useT();
+  return (
+    <div className="f95-unlockgroups">
+      {groups.map((g) => (
+        <fieldset key={g.id} className={`f95-unlockgroup ${g.id}`}>
+          <legend>{g.title}</legend>
+          <ul>
+            {g.entries.map((e) => (
+              <li key={e.name}>
+                <span className="f95-unlockwhat">
+                  <b>{e.name}</b>
+                  {e.line && <small>{e.line}</small>}
+                </span>
+                {e.anchor && (
+                  <Btn className="f95-showme" data-showme={e.anchor} onClick={() => actions.showMe(e.anchor!)}>
+                    {t("showMe")}
+                  </Btn>
+                )}
+              </li>
+            ))}
+          </ul>
+        </fieldset>
+      ))}
     </div>
   );
 }
@@ -367,12 +406,16 @@ export function UnlockCard({ unlock, actions }: SlotPropsMap["UnlockCard"]) {
           <div>
             <h2>{unlock.title}</h2>
             <p>{unlock.body}</p>
-            {unlock.items.length > 0 && (
-              <ul className="f95-unlockitems">
-                {unlock.items.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
+            {unlock.groups?.length ? (
+              <UnlockGroups groups={unlock.groups} actions={actions} />
+            ) : (
+              unlock.items.length > 0 && (
+                <ul className="f95-unlockitems">
+                  {unlock.items.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              )
             )}
             {unlock.quip && <p className="f95-quip">{unlock.quip}</p>}
           </div>

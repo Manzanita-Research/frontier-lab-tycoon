@@ -36,7 +36,7 @@ import type { Budget } from "./windows";
 import { groupOf, modeOf, widgetsOf } from "./widgets";
 import { birdAppOf } from "./birdapp";
 import type { CoachVM, FactionChipVM, ShowMeVM } from "./types";
-import { goalStep, guideText, type Facts } from "./anchors";
+import { goalStep, guideAsk, guideText, type Facts } from "./anchors";
 import { challengeLine, challengeQuery, compareRuns, VERDICT_TEXT, type Challenge } from "../share/link";
 import { streakText } from "../share/streak";
 import { ENDING_RULES, endingById } from "../../sim/endings/pack";
@@ -267,7 +267,7 @@ function showMeOf(goalId: string | undefined, facts: Facts): ShowMeVM | undefine
  * waits for nothing but the click on the thing (or "Got it"), and it outranks a tutorial step, which carries on after.
  */
 function guideCoachOf(anchor: string): CoachVM {
-  return { id: `show:${anchor}`, step: 0, of: 0, text: guideText(anchor), target: anchor, waitFor: "action", canSkip: false, guide: true };
+  return { id: `show:${anchor}`, step: 0, of: 0, text: guideText(anchor), target: anchor, waitFor: "action", canSkip: false, guide: true, ask: guideAsk(anchor) };
 }
 
 function objectivesOf(s: Snapshot, facts: Facts = factsOf(s)): ObjectivesVM {

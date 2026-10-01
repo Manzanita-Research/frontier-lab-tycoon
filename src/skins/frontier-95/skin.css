@@ -1626,6 +1626,100 @@
       background: #000080;
     }
   }
+  /* FLT-93: the New! card by kind, each line with a Show Me… */
+  .f95-unlockgroups {
+    display: grid;
+    gap: 6px;
+    margin: 8px 0 0;
+    max-height: min(46vh, 380px);
+    overflow: auto;
+  }
+  .f95-unlockgroup {
+    margin: 0;
+    padding: 2px 8px 6px;
+    border: 1px solid #808080;
+    box-shadow: 1px 1px 0 #fff, inset 1px 1px 0 #fff;
+    legend {
+      padding: 0 4px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    ul {
+      display: grid;
+      gap: 5px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  }
+  .f95-unlockwhat {
+    display: grid;
+    flex: 1;
+    min-width: 0;
+    b {
+      font-size: 15px;
+    }
+    small {
+      font-size: 14px;
+      line-height: 1.15;
+      color: #333;
+    }
+  }
+  .f95-btn.f95-showme {
+    flex: none;
+    min-width: 0;
+    padding: 2px 8px;
+    font-size: 14px;
+  }
+  /* The paperclip, when you asked: "It looks like you're trying to hire an SRE." */
+  .f95-asking {
+    margin: 0 0 4px;
+    font-size: 15px;
+    font-weight: bold;
+  }
+  /* The goal note's next step: what, where, and the button. */
+  .f95-nextstep {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    padding-top: 5px;
+    border-top: 1px dashed #b8a640;
+    > span {
+      display: grid;
+      flex: 1;
+      min-width: 0;
+    }
+    b {
+      font-size: 15px;
+    }
+    small {
+      text-transform: none;
+      letter-spacing: 0;
+    }
+  }
+  .f95-post .f95-showme.link {
+    display: block;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    font-size: 14px;
+    color: #000080;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  /* The arrow, in pixels. */
+  .coach-arrow {
+    background: #000;
+    filter: drop-shadow(2px 2px 0 #ffff00);
+    animation-timing-function: steps(2, end);
+  }
   .f95-help {
     width: min(580px, 100%);
     max-height: calc(100dvh - 30px);

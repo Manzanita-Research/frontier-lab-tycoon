@@ -19,14 +19,15 @@ import { seedField } from "./race/arena";
 import { createRng } from "./rng";
 import { before, withRevenue } from "./race/demo";
 import { answer } from "./testkit";
+import { isOnboardMoment } from "./onboardDemo";
 import { applyNow, tick } from "./tick";
 import type { GameState } from "./types";
 
 export const BEATS_MOMENTS = ["beats-pileup", "badnews", "logo", "offsite"] as const;
 export type BeatsMoment = (typeof BEATS_MOMENTS)[number];
 export const isBeatsMoment = (s: string | null | undefined): s is BeatsMoment => !!s && (BEATS_MOMENTS as readonly string[]).includes(s);
-/** These keep the ladder (Level 1 for the logo, Level 4 for the pile-up): staging deletes it for every other moment. */
-export const keepsLadder = (s: string | null | undefined): boolean => s === "beats-pileup" || s === "logo";
+/** These keep the ladder (Level 1 for the logo, Level 4 for the pile-up, FLT-93's onboarding): staging deletes it for every other moment. */
+export const keepsLadder = (s: string | null | undefined): boolean => s === "beats-pileup" || s === "logo" || isOnboardMoment(s);
 /** These are about ▶▶▶: the app starts them at 10× unless `?speed=` says otherwise. */
 export const startsFast = (s: string | null | undefined): boolean => s === "beats-pileup" || s === "badnews";
 

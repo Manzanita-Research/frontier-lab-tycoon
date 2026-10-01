@@ -90,20 +90,5 @@ export const GOAL_STEPS: Readonly<Record<string, readonly GoalStep[]>> = {
   arena: [{ anchor: "app:arena", label: "Open the Arena" }],
 };
 
-/**
- * Where an anchor lives, said in words, for a skin that has none of its own (`where.<anchor>`, then `where.<kind>` in the
- * skin's strings win). A goal note says it under the goal, so the place is named even before you press [Show me].
- */
-export const WHERE: Readonly<Record<string, string>> = {
-  build: "the build menu",
-  "build:path": "the build menu",
-  hire: "the Staff panel",
-  app: "the apps menu",
-  "app:bird": "the bird in the corner",
-  training: "the training bar",
-  speed: "the speed buttons",
-  start: "the build menu",
-};
-
 /** "hire:sre" → "hire". */
 export const anchorKind = (id: string): string => id.split(":")[0] ?? id;

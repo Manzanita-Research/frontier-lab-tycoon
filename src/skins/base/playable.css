@@ -28,6 +28,28 @@
   will-change: transform, opacity;
   animation: coach-pulse var(--flt-motion-pulse) ease-in-out infinite;
 }
+/* FLT-93: [Show me]'s arrow, bobbing at the lit control. A skin can redraw it (Frontier 95's is a pixel arrow). */
+.coach-arrow {
+  position: fixed;
+  z-index: 41;
+  pointer-events: none;
+  background: var(--flt-color-highlight);
+  clip-path: polygon(30% 0, 70% 0, 70% 45%, 100% 45%, 50% 100%, 0 45%, 30% 45%);
+  filter: drop-shadow(0 2px 0 rgb(0 0 0 / 0.45));
+  animation: coach-bob 0.8s ease-in-out infinite;
+  &.up {
+    rotate: 180deg;
+  }
+}
+@keyframes coach-bob {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -6px;
+  }
+}
 @keyframes coach-pulse {
   0%,
   100% {
@@ -354,6 +376,79 @@
   border: 2px solid color-mix(in srgb, var(--flt-color-line) 35%, transparent);
   font-size: 13px;
 }
+/* FLT-93: the New! card by kind, one line each, each with a Show me. */
+.unlock-groups {
+  display: grid;
+  gap: 8px;
+  margin: 2px 0 10px;
+  max-height: min(46vh, 360px);
+  overflow: auto;
+}
+.unlock-group h3 {
+  margin: 0 0 3px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--flt-color-textDim);
+}
+.unlock-group ul {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.unlock-group li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.unlock-what {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  font-size: 13.5px;
+  line-height: 1.25;
+}
+.unlock-what small {
+  font-size: 12.5px;
+  color: var(--flt-color-textDim);
+}
+.show-me {
+  flex: none;
+  padding: 3px 10px;
+  border: var(--flt-border-width) var(--flt-border-style) var(--flt-color-line);
+  border-radius: var(--flt-radius-pill);
+  background: var(--flt-color-panelAlt);
+  color: var(--flt-color-text);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.show-me.link {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-decoration: underline;
+  color: var(--flt-color-accent);
+}
+.goal-next {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 12.5px;
+}
+.goal-next i {
+  color: var(--flt-color-textDim);
+}
+.coach-ask {
+  margin: 0 0 2px;
+  font-weight: 800;
+  font-size: 14px;
+}
 /* FLT-76: the New! card's joke, under what it unlocked. */
 .unlock-body p.unlock-quip {
   font-style: italic;
@@ -471,6 +566,7 @@
 /* Reduced motion: keep the ring (it is the pointer), stop it pulsing; nothing else needs to move. */
 @media (prefers-reduced-motion: reduce) {
   .coach-ring,
+  .coach-arrow,
   .coach,
   .coach-scrim,
   .buildmenu,
@@ -481,6 +577,7 @@
 }
 :root[data-motion="reduced"] {
   .coach-ring,
+  .coach-arrow,
   .coach,
   .coach-scrim,
   .buildmenu,
