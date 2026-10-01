@@ -1678,6 +1678,13 @@
     padding: 1px 6px;
     font-size: 13px;
   }
+  /* A thumb still needs 32 px (FLT-87): small on a desktop, not on a phone. */
+  @media (pointer: coarse) {
+    .f95-btn.f95-showme,
+    .f95-post .f95-showme.link {
+      min-height: 32px;
+    }
+  }
   /* The paperclip, when you asked: "It looks like you're trying to hire an SRE." */
   .f95-asking {
     margin: 0 0 4px;

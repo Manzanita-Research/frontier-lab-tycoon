@@ -567,6 +567,7 @@
 }
 @media (pointer: coarse) {
   .coach-skip,
+  .show-me,
   .unlock-ok,
   .build-open,
   .build-held {

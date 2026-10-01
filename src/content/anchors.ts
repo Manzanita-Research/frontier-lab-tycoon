@@ -50,7 +50,7 @@ export const SYSTEM_GUIDES: Readonly<Record<SystemId, SystemGuide | null>> = {
   yacht: { name: "The yacht summit", group: "systems", line: "A safety summit, on a yacht. The invitation arrives as a card." },
   defection: { name: "Defection", group: "systems", line: "Unhappy researchers start their own lab. Keep them happy." },
   poaching: { name: "The Poaching War", group: "systems", line: "Rivals make offers to your people. The offers arrive as cards." },
-  auditors: { name: "Evals Without Borders", group: "systems", line: "Auditors tour the campus. Tidy up first." },
+  auditors: { name: "Evals Without Borders", group: "systems", line: "Auditors tour the campus. Tidy up first: a Janitor Bot helps.", anchor: "hire:janitor" },
   promises: { name: "The Promise Tracker", group: "apps", line: "Everything you ever promised, and how it went.", anchor: "app:senate" },
   capture: { name: "Regulatory Capture", group: "apps", line: "A bill about AI. You may have opinions on its wording.", anchor: "app:senate" },
   escape: { name: "The Sandbox Escape", group: "systems", line: "Agents run for the fence. Tap a runner, or hire Security.", anchor: "hire:security" },
