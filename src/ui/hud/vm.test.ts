@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { BUILDINGS } from "../../content/buildings";
+import type { CoachMark } from "../../content/coach";
 import { formatMoney } from "../../sim/format";
 import { fixtureEnding, fixtureInput, fixtureSaves, fixtureWorld, FIXTURE_CHAT, FIXTURE_PAPER } from "./fixtures";
 import { CALM_START_DAY } from "../../sim/disasters/driver";
 import { SKIN_API_VERSION } from "./types";
-import { hudViewModel, SHIPPED_DAYS, TICKER_ITEMS } from "./vm";
+import { hudViewModel, OPENING_QUIET_TICKS, SHIPPED_DAYS, TICKER_ITEMS } from "./vm";
 import { agoText, modMismatch, newestSave } from "./saves.vm";
 
 /** Every value in a view-model must survive JSON: that is what makes it a contract a skin can rely on. */
@@ -71,6 +72,17 @@ describe("hudViewModel", () => {
   it("turns thoughts into bubbles with speakers", () => {
     expect(vm.bubbles.length).toBeGreaterThan(0);
     expect(vm.bubbles.every((b) => b.speaker.length > 0 && b.text.length > 0)).toBe(true);
+  });
+
+  it("keeps the opening clear of bubbles: none until Start, then one at a time for the first seconds (FLT-91)", () => {
+    const s = input.snap;
+    const thoughts = [0, 1, 2].map((k) => ({ ...s.thoughts[0]!, id: 900 + k, walkerId: s.thoughts[0]!.walkerId + k }));
+    const start: CoachMark = { id: "start", text: "Click Start.", target: "start", waitFor: "action", dim: true, step: 1, of: 9, canSkip: true };
+    const at = (tick: number, coach: CoachMark | null) => hudViewModel({ ...input, snap: { ...s, tick, thoughts, chats: [], coach } }).bubbles;
+    expect(at(0, start)).toHaveLength(0);
+    expect(at(20, { ...start, id: "path", step: 2 })).toHaveLength(1);
+    expect(at(OPENING_QUIET_TICKS, { ...start, id: "path", step: 2 })).toHaveLength(3);
+    expect(at(20, null)).toHaveLength(3); // a loaded save or a skipped tutorial talks at once
   });
 
   it("carries the training run, the ETA and the SHIPPED! window", () => {
