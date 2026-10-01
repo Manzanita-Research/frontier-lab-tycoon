@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { BUILDINGS } from "../../content/buildings";
 import { formatMoney } from "../../sim/format";
-import { fixtureEnding, fixtureInput, fixtureWorld, FIXTURE_CHAT, FIXTURE_PAPER } from "./fixtures";
+import { fixtureEnding, fixtureInput, fixtureSaves, fixtureWorld, FIXTURE_CHAT, FIXTURE_PAPER } from "./fixtures";
 import { CALM_START_DAY } from "../../sim/disasters/driver";
 import { SKIN_API_VERSION } from "./types";
 import { hudViewModel, SHIPPED_DAYS, TICKER_ITEMS } from "./vm";
-import { agoText, modMismatch } from "./saves.vm";
+import { agoText, modMismatch, newestSave } from "./saves.vm";
 
 /** Every value in a view-model must survive JSON: that is what makes it a contract a skin can rely on. */
 function assertPlain(v: unknown, path = "vm") {
@@ -517,11 +517,25 @@ describe("saves (FLT-65)", () => {
   });
 
   it("says Welcome back with the autosave, and nothing without one", () => {
-    expect(hudViewModel(fixtureInput({ saves: "welcome" })).saves.welcome).toMatchObject({ lab: "Gradient Descent Labs", date: "Y2 · Mar 5" });
+    expect(hudViewModel(fixtureInput({ saves: "welcome" })).saves.welcome).toMatchObject({ lab: "Gradient Descent Labs", date: "Y2 · Mar 5", slot: "auto", label: "Autosave" });
     const none = hudViewModel(fixtureInput());
     expect(none.saves.welcome).toBeNull();
     expect(none.saves.open).toBe(false);
     assertPlain(none.saves);
+  });
+
+  it("offers the newest save, not an older autosave (FLT-82: Continue lost the 25 days saved to a slot)", () => {
+    const shelf = fixtureSaves("window").listing;
+    const auto = shelf[0]!.meta!;
+    // The autosave is 3 hours old; slot 3 holds the same lab 25 days on, saved 20 minutes ago.
+    const later = { ...auto, day: auto.day + 25, savedAt: new Date(Date.parse(auto.savedAt) + 160 * 60_000).toISOString() };
+    const listing = [...shelf.slice(0, 3), { slot: "3" as const, meta: later }];
+    expect(newestSave(listing)).toEqual({ slot: "3", meta: later });
+    const vm = hudViewModel({ ...fixtureInput(), saves: { ...fixtureSaves("welcome"), listing, welcome: newestSave(listing) } });
+    expect(vm.saves.welcome).toMatchObject({ slot: "3", label: "Slot 3", date: "Y2 · Mar 30", ago: "20 minutes ago" });
+    // The autosave when it is the newest; nothing on an empty shelf.
+    expect(newestSave(shelf)).toEqual({ slot: "auto", meta: auto });
+    expect(newestSave(shelf.map((l) => ({ slot: l.slot, meta: null })))).toBeNull();
   });
 
   it("passes the mods question and private browsing through", () => {

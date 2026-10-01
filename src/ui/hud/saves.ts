@@ -8,17 +8,17 @@ import { registry, saveDesk, savesReady, send, sim } from "../../app/game";
 import { modSession, type ModSession } from "../../app/mods";
 import { installSession, matchSave } from "../../app/liveMods";
 import { welcomesYou, type SaveResult } from "../../app/saves";
-import { downloadSave, encodeSave, isSlot, loadWorld, readSaveFile, saveFileName, type SaveError, type SaveFile, type SaveMeta, type SlotId, type SlotListing } from "../../save";
+import { downloadSave, encodeSave, isSlot, loadWorld, readSaveFile, saveFileName, type SaveError, type SaveFile, type SlotId, type SlotListing } from "../../save";
 import { formatDate } from "../../sim/format";
 import { restoreSaveSkin } from "./skinControl";
 import { skinUiAtom } from "./state";
 import type { HudActions, SaveModPromptVM, ToneVM } from "./types";
-import { modMismatch } from "./saves.vm";
+import { modMismatch, newestSave, type ShelfSave } from "./saves.vm";
 
 export interface SavesUi {
   open: boolean;
   listing: readonly SlotListing[];
-  welcome: SaveMeta | null;
+  welcome: ShelfSave | null;
   busy: boolean;
   status: { text: string; tone: ToneVM } | null;
   /** A save waiting on the mods question, and what to ask. */
@@ -125,7 +125,7 @@ export const savesActions: Pick<
     refresh({ open: true });
     run(readSaveFile(file).pipe(Effect.flatMap(({ save }) => begin(save))));
   },
-  continueSave: () => run(saveDesk.store.read("auto").pipe(Effect.flatMap(begin))),
+  continueSave: () => run(saveDesk.store.read(ui().welcome?.slot ?? "auto").pipe(Effect.flatMap(begin))),
   dismissWelcome: () => {
     saveDesk.held = false;
     set({ welcome: null });
@@ -181,10 +181,11 @@ export async function bootSaves(search = location.search) {
     run(load === "pending" ? read.pipe(Effect.ensuring(Effect.sync(() => (saveDesk.store.remove("pending"), refresh())))) : read);
     return;
   }
-  const auto = saveDesk.store.peek("auto").meta;
-  if (auto && (welcomesYou(search) || q.get("saves") === "demo")) {
+  // The newest save, autosave or slot (FLT-82): a player who saved to a slot after the last autosave continues from the slot.
+  const newest = newestSave(saveDesk.store.list());
+  if (newest && (welcomesYou(search) || q.get("saves") === "demo")) {
     saveDesk.held = true;
-    set({ welcome: auto });
+    set({ welcome: newest });
   }
   if (q.get("saves") === "window") refresh({ open: true });
 }

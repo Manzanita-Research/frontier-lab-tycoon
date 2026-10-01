@@ -153,6 +153,26 @@ describe("eras", () => {
     expect(s.thoughts.some((t) => t.text.includes("intern"))).toBe(true);
   });
 
+  it("never opens an earlier era's card once a later era has begun (FLT-82: Era 2's card while in Era 3)", () => {
+    const s = createInitialState(1);
+    s.capability = 200;
+    s.day = 43;
+    dailyRace(s, createRng(1));
+    expect(s.flags["offer:era2"]).toBe(43);
+    // The ladder holds cards until Level 5: Era 2's card is still waiting when the lab reaches Era 3.
+    s.capability = 500;
+    s.day = 44;
+    dailyRace(s, createRng(1));
+    expect(eraOfState(s)).toBe(3);
+    expect(s.flags["offer:era2"]).toBeUndefined();
+    dailyEvents(s);
+    expect(openEventOf(s)?.id).toBe("era3");
+    choose(s, 0);
+    s.day = 45;
+    dailyEvents(s);
+    expect(openEventOf(s)).toBeNull();
+  });
+
   it("has four eras with the names and thresholds from the spec, each with its own agent look", () => {
     expect(ERAS.map((e) => e.name)).toEqual(["Stumbling Agents", "Coding Automation", "Superhuman Coder", "Intelligence Explosion"]);
     expect(ERAS.map((e) => Math.round(e.from))).toEqual([0, 2, 5, 25]);
@@ -233,6 +253,32 @@ describe("the open-weights drop", () => {
     dailyRace(s, fixed(0.5));
     expect(openDropActive(s)).toBe(false);
     expect(revenueFactor(s)).toBe(1);
+  });
+
+  it("takes its card with it when the drop is over before the card's turn comes (FLT-82: a card with no subject)", () => {
+    const s = dropSetup(95);
+    weekly(s, fixed(0.5));
+    expect(s.flags["offer:openWeights"]).toBe(70);
+    // The ladder holds cards until Level 5, so the card can still be waiting when the 30 days are up.
+    s.day = 100;
+    dailyRace(s, fixed(0.5));
+    expect(s.race.openDrop).toBeNull();
+    expect(s.flags["offer:openWeights"]).toBeUndefined();
+    s.day = 101;
+    dailyEvents(s);
+    expect(openEventOf(s)?.id).not.toBe("openWeights");
+  });
+
+  it("names the lab, the model and the gap on its card", () => {
+    const s = dropSetup(95);
+    weekly(s, fixed(0.5));
+    s.day++;
+    dailyEvents(s);
+    expect(openEventOf(s)?.id).toBe("openWeights");
+    const vars = raceView(s).vars;
+    expect(vars.dropRival).toBe("Sirocco");
+    expect(vars.dropModel).not.toBe("");
+    expect(vars.gap).toMatch(/^\d+ points$/);
   });
 
   it("does not fire for a rival far behind you, far ahead of you, or with nothing to lose (no revenue)", () => {

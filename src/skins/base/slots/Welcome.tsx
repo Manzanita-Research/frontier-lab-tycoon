@@ -11,7 +11,7 @@ export function Welcome({ welcome, saves, actions }: SlotPropsMap["Welcome"]) {
         <button className="welcome-continue" onClick={() => actions.continueSave()} disabled={saves.busy}>
           <b>Continue "{welcome.lab}"</b>
           <span>
-            {welcome.date} · saved {welcome.ago}
+            {welcome.date} · {welcome.label}, saved {welcome.ago}
           </span>
         </button>
         <button className="welcome-new" onClick={() => actions.dismissWelcome()} disabled={saves.busy}>

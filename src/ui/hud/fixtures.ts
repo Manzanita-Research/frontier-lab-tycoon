@@ -233,7 +233,7 @@ export function fixtureSaves(kind: "window" | "welcome" | "prompt" | "private"):
       { slot: "2", meta: null, broken: "Scrambled" },
       { slot: "3", meta: null },
     ],
-    welcome: kind === "welcome" ? auto : null,
+    welcome: kind === "welcome" ? { slot: "auto", meta: auto } : null,
     busy: false,
     status: kind === "window" ? { text: 'Saved "Gradient Descent Labs" to slot 1.', tone: "good" } : null,
     modPrompt: kind === "prompt" ? { lab: "Mostly Harmless Compute", missing: ["every-lab-is-steve 1.0.0"], extra: [], canFetch: true } : null,
