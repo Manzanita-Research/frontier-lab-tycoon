@@ -1678,8 +1678,8 @@
     padding: 1px 6px;
     font-size: 13px;
   }
-  /* A thumb still needs 32 px (FLT-87): small on a desktop, not on a phone. */
-  @media (pointer: coarse) {
+  /* A thumb still needs 32 px (FLT-87): small on a desktop, not on a phone (a phone-sized window counts, whatever the pointer says). */
+  @media (pointer: coarse), (max-width: 640px) {
     .f95-btn.f95-showme,
     .f95-post .f95-showme.link {
       min-height: 32px;

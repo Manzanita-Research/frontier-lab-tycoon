@@ -574,6 +574,12 @@
     min-height: 44px;
   }
 }
+/* FLT-87: a phone-sized window counts, whatever the pointer says. */
+@media (max-width: 640px) {
+  .show-me {
+    min-height: 32px;
+  }
+}
 
 /* Reduced motion: keep the ring (it is the pointer), stop it pulsing; nothing else needs to move. */
 @media (prefers-reduced-motion: reduce) {
