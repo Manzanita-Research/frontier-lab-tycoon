@@ -1,0 +1,191 @@
+[
+  {
+    "id": "box-front",
+    "size": {
+      "width": 1040,
+      "height": 1280
+    },
+    "quality": "xhigh",
+    "prompt": "Front cover artwork of a 1996 PC CD-ROM big-box simulation game called Frontier Lab Tycoon, in the style of mid-1990s sim and tycoon game boxes: a bright, saturated, glossy illustration with the look of a pre-rendered 1996 3D diorama, toy-like miniatures on a table, crisp shading. Top third: a big chrome-and-gold bevelled 3D logo with a dark navy outline and a single lens-flare glint, in two lines, 'FRONTIER LAB' above a much larger 'TYCOON'. Under the logo, a slim white ribbon banner carrying the tagline in navy. The main picture: a cheerful isometric bird's-eye view of a tech research campus on green lawns under a cyan sky with puffy white clouds: white geodesic compute domes with spinning rooftop fans, a long blue-glass training hall, a kombucha bar with a striped awning, a red-roofed office, a gate with a little arch, winding paths crowded with dozens of tiny cartoon researchers (pill-shaped little people with round heads, in bright clothes), a small group of protesters holding blank placards, a news van, a helicopter. Lower left: a big jagged yellow starburst with a red outline and the starburst line in bold red, slightly rotated. Lower right: a small silver bevelled compatibility badge with an original emblem (a yellow sun rising over a teal horizon line, inside a circle) next to the words 'Frontier 95' and 'COMPATIBLE'. Bottom edge: a full-width navy band with 'FRONTIER' in yellow at the left and 'PC CD-ROM · AGES 8 TO ADULT' in white at the right. All placards, signs, screens and buildings are blank: no writing on them.",
+    "text": [
+      "FRONTIER LAB",
+      "TYCOON",
+      "Build the lab. Train the model. Face the Senate.",
+      "Over 400 tiny researchers!",
+      "Frontier 95",
+      "COMPATIBLE",
+      "FRONTIER",
+      "PC CD-ROM · AGES 8 TO ADULT"
+    ]
+  },
+  {
+    "id": "box-front-edit",
+    "size": {
+      "width": 1040,
+      "height": 1280
+    },
+    "quality": "xhigh",
+    "refs": [
+      "shots/fal/box-front-1001T0022-0.png"
+    ],
+    "prompt": "Keep this box cover exactly as it is: same layout, logo, tagline ribbon, campus, starburst, badge, bottom band, colours and every word. Change one thing only: remove the white domed government building with columns in the upper right corner, behind the end of the logo, and paint that area as more of the same pine forest and soft green hills meeting the sky. No buildings there.",
+    "text": [
+      "FRONTIER LAB",
+      "TYCOON",
+      "Build the lab. Train the model. Face the Senate.",
+      "Over 400 tiny researchers!",
+      "Frontier 95",
+      "COMPATIBLE",
+      "FRONTIER",
+      "PC CD-ROM · AGES 8 TO ADULT"
+    ]
+  },
+  {
+    "id": "box-back",
+    "size": {
+      "width": 1040,
+      "height": 1280
+    },
+    "quality": "xhigh",
+    "prompt": "Back cover artwork of the same 1996 PC CD-ROM big box, Frontier Lab Tycoon: a deep navy background with a faint starfield and a glowing cyan-and-magenta perspective grid along the very bottom, loud mid-1990s marketing layout. Top: the headline in a chunky italic yellow display face with a red drop shadow. Under it, three screenshot frames in a row across the page, each an identical 4:3 rectangle, perfectly axis-aligned (not rotated, not overlapping), with a 6-pixel white border and a soft drop shadow, and each frame filled with one solid flat pure magenta colour (#FF00FF) with nothing drawn inside it. Below the frames: a feature list, one line each, with small yellow five-point star bullets and white bold rounded type. Then a small grey rounded panel holding the system requirements line in small black type. Bottom row: at the left a white square box with a big black '8+' and, beside it, the age line in white; at the right a white rectangle holding an invented barcode of plain black bars with no digits under it. Along the very bottom edge in small grey type: the publisher line.",
+    "text": [
+      "Build! Train! Get subpoenaed!",
+      "Over 400 tiny researchers, each with a need and an opinion",
+      "Release models with names like Frontier-4.5-Reasoner-Mini-Pro-Preview",
+      "Rival labs, benchmark wars and a yacht summit",
+      "Protesters with hand-lettered signs!",
+      "Requires: a 486FX or better, 8 MB RAM, a CD-ROM drive, and the will to scale.",
+      "8+",
+      "Ages 8 to Adult",
+      "© 1997 Frontier Interactive Entertainment, Inc."
+    ]
+  },
+  {
+    "id": "manual-cover",
+    "size": {
+      "width": 1008,
+      "height": 1296
+    },
+    "quality": "high",
+    "prompt": "Cover of the printed player's guide booklet that came inside the 1996 Frontier Lab Tycoon big box. Same pre-rendered 1996 3D diorama look as the box: a close, low isometric view of one long blue-glass training hall with a white geodesic dome beside it, tiny cartoon researchers (pill-shaped little people with round heads) carrying clipboards and coffee, a little forklift moving a server rack, green lawn, cyan sky. A deep navy frame around the picture. Top: a smaller version of the chrome-and-gold bevelled logo, 'FRONTIER LAB' over 'TYCOON'. Bottom, on the navy: 'Player's Guide' large in yellow rounded bold type, and under it 'Reference Manual for Frontier 95' smaller in white. Small in the lower right corner: 'Version 1.0'. All signs and screens in the picture are blank.",
+    "text": [
+      "FRONTIER LAB",
+      "TYCOON",
+      "Player's Guide",
+      "Reference Manual for Frontier 95",
+      "Version 1.0"
+    ]
+  },
+  {
+    "id": "insert-circus",
+    "size": {
+      "width": 1344,
+      "height": 960
+    },
+    "quality": "high",
+    "prompt": "A glossy promotional insert card from a 1995 edutainment CD-ROM box, advertising an expansion pack: primary colours, chunky rounded cartoon type, a dotted coupon border, clip-art stars and sparkles, and a big-eyed friendly cartoon mascot, the way kids' learning-software catalogues looked. Background sunny yellow with red trim. Big headline at the top. The picture: a smiling cartoon clown in a captain's hat steering a small white yacht where a row of tiny cartoon people in suits sit at a long summit table, with a striped circus tent on the shore. The body text in a dark red rounded face in a white speech-bubble panel. A small red ribbon in a corner reading 'EXPANSION PACK'.",
+    "text": [
+      "The Circus Expansion Pack",
+      "Senate hearings! A safety summit on a yacht! Send in the clowns (they're already here).",
+      "EXPANSION PACK"
+    ]
+  },
+  {
+    "id": "insert-bird",
+    "size": {
+      "width": 1344,
+      "height": 960
+    },
+    "quality": "high",
+    "prompt": "A glossy promotional insert card from a 1995 edutainment CD-ROM box: primary colours, chunky rounded cartoon type, a dotted coupon border, clip-art stars, a big-eyed friendly cartoon mascot, like a kids' learning-software catalogue. Background sky blue with navy trim. Big headline at the top. The picture: a round, cheerful, original cartoon bird (orange and purple, not a blue bird) typing furiously on a beige 1995 desktop computer connected to a boxy external dial-up modem with blinking lights, little angry speech-bubble squiggles with no words floating up from the screen. The body text in navy in a white panel. A small yellow ribbon in a corner reading 'ONLINE EDITION'.",
+    "text": [
+      "Bird App Online Edition",
+      "Post from inside the game! Modem required. 14.4k recommended. Arguments included.",
+      "ONLINE EDITION"
+    ]
+  },
+  {
+    "id": "insert-drama",
+    "size": {
+      "width": 1344,
+      "height": 960
+    },
+    "quality": "high",
+    "prompt": "A glossy promotional insert card from a 1995 edutainment CD-ROM box: bright colours, chunky rounded cartoon type, a dotted coupon border, clip-art sparkles, a big-eyed cartoon mascot, like a kids' learning-software catalogue. Background bubblegum pink with deep magenta trim. Big headline at the top. The picture: a cheerful cartoon paperboy on a bicycle tossing 3.5-inch floppy disks onto doorsteps like newspapers, each blank floppy label just coloured stripes, little gasping cartoon faces peeking out of windows. The body text in deep magenta in a white panel. A small yellow ribbon in a corner reading 'SUBSCRIBE TODAY'.",
+    "text": [
+      "Daily Drama Subscription",
+      "A new scandal every morning, delivered by 3.5\" disk. Cancel anytime (you can't).",
+      "SUBSCRIBE TODAY"
+    ]
+  },
+  {
+    "id": "insert-modules",
+    "size": {
+      "width": 1344,
+      "height": 960
+    },
+    "quality": "high",
+    "prompt": "A glossy promotional insert card from a 1995 edutainment CD-ROM box: bright colours, chunky rounded cartoon type, a dotted coupon border, clip-art stars, like a kids' learning-software catalogue. Background mint green with dark green trim. Big headline at the top. The picture: three small cartoon software boxes standing in a row like trophies, each with a simple blank coloured front (sky blue with a cloud, orange with a chip shape, purple with a gavel shape), the third box has a big diagonal red rubber stamp across it. A grinning cartoon robot mascot with a party hat points at them. The body text in dark green in a white panel.",
+    "text": [
+      "Modules Coming Soon",
+      "Frontier Lab Tycoon: Cloud Tycoon · Chip Fab Frenzy · Ethics Board Deluxe (cancelled).",
+      "CANCELLED"
+    ]
+  },
+  {
+    "id": "insert-rebate",
+    "size": {
+      "width": 1344,
+      "height": 960
+    },
+    "quality": "high",
+    "prompt": "A mail-in rebate coupon slip from a 1996 software box, printed on cheap off-white paper in two inks (teal and black): a dashed cut-here border with a small scissors icon, the big headline in a bold condensed face, the body text below it, then blank form lines labelled 'Name', 'Address' and 'Model weights' with empty underscores, a dotted rectangle in the corner labelled 'Affix UPC here', and tiny fine print along the bottom edge. Slightly bureaucratic and dull on purpose; the joke is in the words.",
+    "text": [
+      "$5 Mail-In Rebate",
+      "Send proof of purchase, the UPC, a notarised vibe check and your weights. Allow 6 to 8 years.",
+      "Name",
+      "Address",
+      "Model weights",
+      "Affix UPC here",
+      "Offer void where sensible. One rebate per singularity."
+    ]
+  },
+  {
+    "id": "coa-paper",
+    "size": {
+      "width": 1344,
+      "height": 960
+    },
+    "quality": "high",
+    "prompt": "A Certificate of Authenticity label from 1996 PC software, printed on pale mint-green security paper the way banknotes are: dense fine guilloche rosettes and interlaced wavy line borders in green and soft peach, a fine microprint line just inside the border. The left 15% of the label, from the top margin to the bottom margin, is one solid flat pure green rectangle (#00FF00) with nothing drawn in it (a foil strip is applied there later). Right of it: the title in large dark green engraved serif type, the product line under it in a smaller dark serif, then the sentence in a plain dark grey type. In the lower middle, one solid flat pure magenta rectangle (#FF00FF), about 55% of the label wide and 18% tall, with nothing drawn in it (the key box is printed there later). At the bottom right, in small dark green type, the maker line. Flat, even, straight-on.",
+    "text": [
+      "Certificate of Authenticity",
+      "Frontier Lab Tycoon for Frontier 95",
+      "This is genuine Frontier software. Do not accept weights without this label.",
+      "Frontier Interactive Entertainment, Inc.",
+      "GENUINE FRONTIER SOFTWARE"
+    ]
+  },
+  {
+    "id": "coa-foil",
+    "size": {
+      "width": 768,
+      "height": 2304
+    },
+    "quality": "high",
+    "prompt": "A macro studio photograph, straight-on and perfectly flat, of a tall narrow strip of silver holographic security foil as used on 1990s software certificates, filling the whole frame edge to edge: deeply embossed relief with crisp edges. Near the top, a round embossed seal with an original emblem, a five-point star inside a ring of tiny stars. Below it, a sun rising over a horizon line in embossed relief. A column of tiny embossed letters repeating the word 'GENUINE' runs down the middle. Fine concentric guilloche rings, rows of tiny raised stars, wavy diffraction lines and a lattice of fine diagonal grooves fill the rest. Neutral bright silver, lit evenly and flatly from the front, no rainbow colours, no coloured reflections, no glare.",
+    "text": [
+      "GENUINE"
+    ]
+  },
+  {
+    "id": "shrinkwrap",
+    "size": {
+      "width": 1024,
+      "height": 1024
+    },
+    "quality": "high",
+    "prompt": "A seamless tileable macro studio photograph, straight-on, of crinkled clear plastic shrink wrap film stretched flat over a matte mid-grey card: fine wrinkles, soft creases and a few sharp fold lines catching a soft even light, glossy. Uniform all over, no edges, no corners, no objects, no text.",
+    "text": []
+  }
+]

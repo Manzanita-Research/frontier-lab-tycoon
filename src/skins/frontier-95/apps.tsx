@@ -565,6 +565,31 @@ export function PhotoOverlay({ photo, actions }: SlotPropsMap["PhotoOverlay"]) {
   );
 }
 
+/**
+ * Display Properties → Settings (FLT-73): the picture tube. The little monitor shows the pick before the big one does
+ * (both change at once, but the little one is cuter). Applies at once and is remembered, like Reduce motion.
+ */
+function TubeSettings({ crt, actions }: { crt: NonNullable<SlotPropsMap["SkinPicker"]["skins"]["crt"]>; actions: SlotPropsMap["SkinPicker"]["actions"] }) {
+  const t = useT();
+  return (
+    <>
+      <div className={`f95-monitor f95-tube-${crt.mode}`} aria-hidden>
+        <span />
+      </div>
+      <fieldset className="f95-tube">
+        <legend>{t("skin.crt")}</legend>
+        {(["off", "subtle", "full"] as const).map((m) => (
+          <label key={m}>
+            <input type="radio" name="f95-tube" checked={crt.mode === m} onChange={() => actions.setCrt(m)} /> {t(`skin.crt.${m}`)}
+            {crt.choice === null && crt.mode === m && <small> {t("skin.crt.default")}</small>}
+          </label>
+        ))}
+      </fieldset>
+      {crt.reduced && <p className="f95-hint">{t("skin.crt.reduced")}</p>}
+    </>
+  );
+}
+
 /** Display Properties → Appearance: pick a scheme (a skin), see it change live, OK to keep it. */
 export function SkinPicker({ skins, actions, speed }: SlotPropsMap["SkinPicker"]) {
   const t = useT();
@@ -585,7 +610,9 @@ export function SkinPicker({ skins, actions, speed }: SlotPropsMap["SkinPicker"]
           ]}
         />
         <div className="f95-page" role="tabpanel">
-          {tab !== "appearance" ? (
+          {tab === "settings" && skins.crt ? (
+            <TubeSettings crt={skins.crt} actions={actions} />
+          ) : tab !== "appearance" ? (
             <p className="f95-hint">Nothing to see here. This monitor is entirely virtual.</p>
           ) : (
             <>

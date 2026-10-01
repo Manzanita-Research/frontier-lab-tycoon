@@ -232,10 +232,18 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // values (c403ae9a… / 766f3295… / b43cb9be…).
 // Jem's labels for the Logo (A butthole / A butthole-ier butthole / Not a butthole) change its news lines, which sit in
 // the World until the ticker rolls them off: 200 to 1600 move, 2400 on hold.
+// FLT-86 (money and the win) moves every checkpoint, on purpose. The projection shows each goal's `hold`/`held` (the
+// Arena objective is now "hold Top 3 for 30 days"), which is in the World from tick 0. With those two fields projected
+// out and the goals' new toasts (each objective met, the hold starting and slipping) switched off, all three seeds
+// reproduce the values above tick for tick, RNG stream included, until the game itself is meant to differ: seeds 1 and 3
+// win the instant they reach Top 3 (ticks 3480 and 3600), and now start the 30-day hold instead; seed 2 dips below $0
+// at 2680 and gets emergency round 1 (a card, signed for 10% of the lab) where the free bailout used to be. None of the
+// three wins inside 4000 ticks. The goals' toasts take an id each, so with them on, the ids after the first "Objective
+// met" (tick 2200 on seed 1) move too, and so does whatever is picked by id (a faction thread on seed 1 at 2380).
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "776c969b", 800: "2994496b", 1600: "c3959cd9", 2400: "ee22342a", 3200: "15ff6c72", 4000: "d44774d4" },
-  2: { 200: "125c4ed2", 800: "a4f0d1f1", 1600: "728d30e4", 2400: "a61834ba", 3200: "40c75dd6", 4000: "cc186590" },
-  3: { 200: "d02267c3", 800: "d77c1496", 1600: "a5bd2a17", 2400: "5ac62c34", 3200: "d05b8a54", 4000: "d46780de" },
+  1: { 200: "72d15c6c", 800: "789162ba", 1600: "af539c00", 2400: "6282fd68", 3200: "49f901d8", 4000: "1c4c9ce7" },
+  2: { 200: "97c3299b", 800: "b0c37cae", 1600: "69cae759", 2400: "3b91b0f7", 3200: "308dd08d", 4000: "1a3e778b" },
+  3: { 200: "cd605dda", 800: "23d1e9c1", 1600: "5277ca60", 2400: "e63341a4", 3200: "07d2978e", 4000: "b6aa2381" },
 };
 
 describe("golden runs", () => {

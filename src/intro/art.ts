@@ -1,7 +1,7 @@
 // Placeholder art for the big box, painted on canvases (the art pass, M1, replaces the hero props with real art).
 // Everything is procedural and seeded, so the shelf ships no image files and looks the same on every visit.
 import { createRng } from "../sim/rng";
-import { BIOS, COA, EULA, HERO, INSERTS, OVERLAY_KEYS, REGISTRATION, SPLASH, STORE, type ShelfBox } from "./content";
+import { BIOS, COA, EULA, HERO, OVERLAY_KEYS, REGISTRATION, SPLASH, STORE, type ShelfBox } from "./content";
 import { CHAPTERS, type Block, type Page } from "./manual";
 
 export const UI_FONT = "Nunito, system-ui, sans-serif";
@@ -169,126 +169,6 @@ function shade(hex: string, k: number): string {
   const gg = Math.round(((n >> 8) & 255) * k);
   const b = Math.round((n & 255) * k);
   return `rgb(${r},${gg},${b})`;
-}
-
-/** Art direction A, the '96 sim-game look: sky, a busy iso campus, a chrome logo, starbursts. 0.8 aspect. */
-export function paintHeroFront(c = canvas(768, 960)): HTMLCanvasElement {
-  const g = ctx2d(c);
-  const { width: W, height: H } = c;
-  const sky = g.createLinearGradient(0, 0, 0, H);
-  sky.addColorStop(0, "#3aa0ff");
-  sky.addColorStop(0.55, "#bfe6ff");
-  sky.addColorStop(0.56, "#58b24f");
-  sky.addColorStop(1, "#3f8f3a");
-  g.fillStyle = sky;
-  g.fillRect(0, 0, W, H);
-  // clouds
-  g.fillStyle = "rgba(255,255,255,0.85)";
-  for (const [x, y, r] of [[120, 300, 40], [170, 290, 55], [230, 305, 38], [560, 250, 36], [610, 240, 50], [660, 255, 34]] as const) {
-    g.beginPath(); g.arc(x * (W / 768), y * (H / 960), r * (W / 768), 0, Math.PI * 2); g.fill();
-  }
-  diorama(g, W * 0.5, H * 0.6, W * 0.062, 7, 120);
-  // title band
-  chromeText(g, "FRONTIER LAB", W / 2, H * 0.14, W * 0.13);
-  chromeText(g, "TYCOON", W / 2, H * 0.27, W * 0.19);
-  g.font = `800 ${W * 0.034}px ${UI_FONT}`;
-  g.fillStyle = "#0b1440";
-  g.textAlign = "center";
-  g.fillText(HERO.tagline, W / 2, H * 0.325);
-  // starburst
-  g.save();
-  g.translate(W * 0.2, H * 0.78);
-  g.rotate(-0.22);
-  starburst(g, 0, 0, W * 0.16, 16, "#ffe14d", "#c8102e");
-  g.fillStyle = "#c8102e";
-  g.textAlign = "center";
-  const words = HERO.starburst.split(" ");
-  g.font = `900 ${W * 0.036}px ${UI_FONT}`;
-  g.fillText(words.slice(0, 2).join(" "), 0, -W * 0.03);
-  g.fillText(words.slice(2, 4).join(" "), 0, W * 0.012);
-  g.fillText(words.slice(4).join(" "), 0, W * 0.054);
-  g.restore();
-  // badge: Frontier 95 compatible
-  g.save();
-  g.translate(W * 0.82, H * 0.86);
-  g.fillStyle = "#c0c0c0";
-  g.fillRect(-W * 0.14, -W * 0.07, W * 0.28, W * 0.14);
-  g.strokeStyle = "#fff"; g.lineWidth = 3; g.strokeRect(-W * 0.14, -W * 0.07, W * 0.28, W * 0.14);
-  g.fillStyle = "#008080";
-  g.fillRect(-W * 0.125, -W * 0.055, W * 0.06, W * 0.06);
-  g.fillStyle = "#000080";
-  g.font = `800 ${W * 0.026}px ${UI_FONT}`;
-  g.textAlign = "left";
-  g.fillText("Frontier 95", -W * 0.055, -W * 0.02);
-  g.font = `700 ${W * 0.021}px ${UI_FONT}`;
-  g.fillStyle = "#000";
-  g.fillText("COMPATIBLE", -W * 0.055, W * 0.012);
-  g.fillText("CD-ROM", -W * 0.125, W * 0.05);
-  g.restore();
-  // bottom band
-  g.fillStyle = "#0b1440";
-  g.fillRect(0, H * 0.94, W, H * 0.06);
-  g.fillStyle = "#ffe14d";
-  g.font = `900 ${W * 0.032}px ${UI_FONT}`;
-  g.textAlign = "left";
-  g.fillText("FRONTIER", W * 0.04, H * 0.978);
-  g.fillStyle = "#fff";
-  g.font = `700 ${W * 0.026}px ${UI_FONT}`;
-  g.textAlign = "right";
-  g.fillText("PC CD-ROM · " + HERO.ages.toUpperCase(), W * 0.96, H * 0.978);
-  return c;
-}
-
-/** The back of our box: screenshots and bullet points. */
-export function paintHeroBack(c = canvas(768, 960)): HTMLCanvasElement {
-  const g = ctx2d(c);
-  const { width: W, height: H } = c;
-  g.fillStyle = "#0b1440";
-  g.fillRect(0, 0, W, H);
-  g.fillStyle = "#ffe14d";
-  g.font = `900 ${W * 0.07}px ${UI_FONT}`;
-  g.textAlign = "center";
-  g.fillText(HERO.back[0]!, W / 2, H * 0.1);
-  // three "screenshots"
-  for (let i = 0; i < 3; i++) {
-    const x = W * 0.06 + i * W * 0.305;
-    g.fillStyle = "#fff";
-    g.fillRect(x - 4, H * 0.14 - 4, W * 0.28 + 8, H * 0.2 + 8);
-    g.save();
-    g.beginPath(); g.rect(x, H * 0.14, W * 0.28, H * 0.2); g.clip();
-    g.fillStyle = "#58b24f"; g.fillRect(x, H * 0.14, W * 0.28, H * 0.2);
-    diorama(g, x + W * 0.14, H * 0.24, W * 0.022, 11 + i, 30);
-    g.restore();
-  }
-  g.textAlign = "left";
-  g.fillStyle = "#fff";
-  let y = H * 0.42;
-  for (const b of HERO.back.slice(1)) {
-    g.fillStyle = "#ffe14d";
-    g.fillText("★", W * 0.06, y);
-    g.fillStyle = "#fff";
-    y += fitText(g, b, W * 0.13, y, W * 0.8, W * 0.042, 800, 2) + H * 0.02;
-  }
-  g.fillStyle = "#c0c0c0";
-  g.font = `700 ${W * 0.026}px ${UI_FONT}`;
-  wrap(g, HERO.requirements, W * 0.88).forEach((l, i) => g.fillText(l, W * 0.06, H * 0.82 + i * W * 0.034));
-  // barcode and rating
-  g.fillStyle = "#fff";
-  g.fillRect(W * 0.62, H * 0.88, W * 0.32, H * 0.08);
-  g.fillStyle = "#000";
-  const rng = createRng(95);
-  for (let x = W * 0.64; x < W * 0.92; x += 4) if (rng.chance(0.6)) g.fillRect(x, H * 0.89, rng.chance(0.3) ? 4 : 2, H * 0.055);
-  g.fillStyle = "#fff";
-  g.fillRect(W * 0.06, H * 0.88, W * 0.1, H * 0.08);
-  g.fillStyle = "#000";
-  g.font = `900 ${W * 0.06}px ${UI_FONT}`;
-  g.textAlign = "center";
-  g.fillText("8+", W * 0.11, H * 0.94);
-  g.font = `800 ${W * 0.03}px ${UI_FONT}`;
-  g.fillStyle = "#fff";
-  g.textAlign = "left";
-  g.fillText(HERO.ages, W * 0.19, H * 0.93);
-  return c;
 }
 
 /** A spine: the title on its side. */
@@ -682,23 +562,6 @@ export function paintEula(c = canvas(420, 600)): HTMLCanvasElement {
   return c;
 }
 
-export function paintInsert(i: number, c = canvas(420, 300)): HTMLCanvasElement {
-  const g = ctx2d(c);
-  const { width: W, height: H } = c;
-  const ins = INSERTS[i % INSERTS.length]!;
-  g.fillStyle = ins.colors[0]!;
-  g.fillRect(0, 0, W, H);
-  g.strokeStyle = ins.colors[1]!;
-  g.lineWidth = 8;
-  g.strokeRect(8, 8, W - 16, H - 16);
-  g.fillStyle = ins.colors[1]!;
-  g.textAlign = "left";
-  const used = fitText(g, ins.title, W * 0.08, H * 0.22, W * 0.84, H * 0.13, 900, 2);
-  g.fillStyle = "#1d1a14";
-  fitText(g, ins.body, W * 0.08, H * 0.28 + used, W * 0.84, H * 0.075, 700, 5, UI_FONT, 1.25);
-  return c;
-}
-
 export function paintOverlay(c = canvas(1024, 160)): HTMLCanvasElement {
   const g = ctx2d(c);
   const { width: W, height: H } = c;
@@ -787,40 +650,25 @@ export function paintKeyboard(c = canvas(512, 160)): HTMLCanvasElement {
   return c;
 }
 
-/** The COA's printed layer: text, microprint and the key, on a transparent canvas the shader lays over the paper. */
-export function paintCoaText(key: string, c = canvas(1400, 1000)): HTMLCanvasElement {
+/**
+ * The COA's printed layer: the label and this visitor's key, on a transparent canvas the shader lays over the paper art.
+ * The rest of the certificate (title, guilloché, microprint) is printed on the art; `box` is its key panel (0..1, y down).
+ */
+export function paintCoaText(key: string, box: { x: number; y: number; w: number; h: number }, c = canvas(1400, 1000)): HTMLCanvasElement {
   const g = ctx2d(c);
   const { width: W, height: H } = c;
   g.clearRect(0, 0, W, H);
-  const x0 = W * 0.22;
-  g.fillStyle = "#12352a";
+  const x = box.x * W + box.w * W * 0.04;
+  const y = box.y * H;
+  const h = box.h * H;
   g.textAlign = "left";
-  g.font = `900 ${H * 0.075}px ${UI_FONT}`;
-  g.fillText(COA.title, x0, H * 0.2);
-  g.font = `800 ${H * 0.042}px ${UI_FONT}`;
-  g.fillText(COA.product, x0, H * 0.28);
-  g.font = `600 ${H * 0.032}px ${UI_FONT}`;
-  wrap(g, COA.line, W * 0.52).forEach((l, i) => g.fillText(l, x0, H * 0.35 + i * H * 0.04));
-  // microprint: a line of tiny repeated text you only read up close
-  g.font = `700 ${H * 0.011}px ${UI_FONT}`;
-  g.fillStyle = "rgba(18,53,42,0.8)";
-  const micro = COA.microprint.repeat(40);
-  for (const y of [0.075, 0.925]) g.fillText(micro, W * 0.05, H * y);
-  // the key box
-  g.fillStyle = "rgba(255,255,255,0.85)";
-  g.fillRect(x0 - W * 0.01, H * 0.62, W * 0.6, H * 0.18);
-  g.strokeStyle = "#12352a";
-  g.lineWidth = 3;
-  g.strokeRect(x0 - W * 0.01, H * 0.62, W * 0.6, H * 0.18);
+  g.textBaseline = "alphabetic";
   g.fillStyle = "#12352a";
-  g.font = `800 ${H * 0.034}px ${UI_FONT}`;
-  g.fillText(COA.keyLabel, x0 + W * 0.01, H * 0.67);
-  fitFont(g, key, W * 0.56, 400, H * 0.058, RETRO_FONT);
+  g.font = `800 ${h * 0.2}px ${UI_FONT}`;
+  g.fillText(COA.keyLabel, x, y + h * 0.36);
+  fitFont(g, key, box.w * W * 0.92, 400, h * 0.36, RETRO_FONT);
   g.fillStyle = "#000";
-  g.fillText(key, x0 + W * 0.01, H * 0.765);
-  g.font = `700 ${H * 0.026}px ${UI_FONT}`;
-  g.fillStyle = "#12352a";
-  g.fillText(COA.maker, x0, H * 0.88);
+  g.fillText(key, x, y + h * 0.8);
   return c;
 }
 
@@ -871,16 +719,8 @@ export function paintSplash(c: HTMLCanvasElement, t: number) {
   for (const [x, y, r] of [[90, 90, 30], [120, 80, 40], [160, 95, 28], [470, 380, 30], [510, 370, 44], [550, 385, 30]] as const) {
     g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
   }
-  // the logo: four tilted panes
-  g.save();
-  g.translate(W / 2 - 150, H / 2 - 20);
-  g.transform(1, -0.12, 0, 1, 0, 0);
-  const panes = ["#e2533b", "#58b24f", "#3b7be2", "#ffe14d"];
-  panes.forEach((p, i) => {
-    g.fillStyle = p;
-    g.fillRect((i % 2) * 44, Math.floor(i / 2) * 44, 40, 40);
-  });
-  g.restore();
+  // the logo: the sunrise
+  paintSunrise(g, W / 2 - 110, H / 2 - 4, 62);
   g.fillStyle = "#fff";
   g.textAlign = "left";
   g.textBaseline = "alphabetic";
@@ -900,4 +740,50 @@ export function paintSplash(c: HTMLCanvasElement, t: number) {
   g.fillStyle = "rgba(255,255,255,0.8)";
   g.font = `400 12px ${RETRO_FONT}`;
   g.fillText(SPLASH.maker, W / 2, H - 40);
+}
+
+/**
+ * Frontier 95's mark: a sun coming up over the water, in a ring. Original (the box's "Frontier 95 compatible" badge
+ * shows the same sunrise), and drawn where a certain four-pane flag would have been.
+ */
+export function paintSunrise(g: CanvasRenderingContext2D, x: number, y: number, r: number) {
+  g.save();
+  g.beginPath();
+  g.arc(x, y, r, 0, Math.PI * 2);
+  g.clip();
+  const sky = g.createLinearGradient(0, y - r, 0, y + r * 0.12);
+  sky.addColorStop(0, "#000080");
+  sky.addColorStop(1, "#008080");
+  g.fillStyle = sky;
+  g.fillRect(x - r, y - r, r * 2, r * 2);
+  const horizon = y + r * 0.12;
+  // rays
+  g.fillStyle = "rgba(255,225,77,0.55)";
+  for (let i = 0; i < 9; i++) {
+    const a = Math.PI + (i + 0.5) * (Math.PI / 9);
+    g.beginPath();
+    g.moveTo(x, horizon);
+    g.arc(x, horizon, r * 1.2, a - 0.07, a + 0.07);
+    g.closePath();
+    g.fill();
+  }
+  // the sun
+  g.fillStyle = "#ffe14d";
+  g.beginPath();
+  g.arc(x, horizon, r * 0.42, Math.PI, 0);
+  g.fill();
+  // the water, and the sun's road across it
+  g.fillStyle = "#000080";
+  g.fillRect(x - r, horizon, r * 2, r);
+  g.fillStyle = "#ffe14d";
+  for (let i = 0; i < 4; i++) {
+    const w = r * (0.7 - i * 0.15);
+    g.fillRect(x - w / 2, horizon + r * (0.1 + i * 0.17), w, r * 0.06);
+  }
+  g.restore();
+  g.strokeStyle = "#fff";
+  g.lineWidth = Math.max(2, r * 0.06);
+  g.beginPath();
+  g.arc(x, y, r - g.lineWidth / 2, 0, Math.PI * 2);
+  g.stroke();
 }

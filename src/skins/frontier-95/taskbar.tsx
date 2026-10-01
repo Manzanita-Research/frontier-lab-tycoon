@@ -4,7 +4,7 @@ import { ALL_VISIBLE, coachInFacilities, Dialog, facilityGroups, Marquee, useRun
 import { useCoach, useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import type { BuildItemVM, WidgetVM } from "../../ui/hud/types";
-import { Flag, Ico } from "./icons";
+import { Ico, SunriseMark } from "./icons";
 import { Btn, Win } from "./parts";
 
 type Confirm = null | "ask" | "off" | "restart";
@@ -400,7 +400,7 @@ export function BuildBar({ items, tip, teasers = [], disasters, widgets = [], ac
         </div>
       )}
       <button type="button" {...coach.attrs("start", !open && coach.intoPanel(items))} className={`f95-start ${open ? "on" : ""}`} data-testid="start-button" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}>
-        <Flag />
+        <SunriseMark />
         <span>{t("build.menuTitle")}</span>
       </button>
       <span className="f95-qs" role="group" aria-label="Quick launch">

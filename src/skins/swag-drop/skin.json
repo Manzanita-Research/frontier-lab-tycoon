@@ -163,6 +163,7 @@
     "birdapp.outcome.controversy": "Recall",
     "birdapp.outcome.ratioed": "Returned",
     "birdapp.outcome.cancelled": "Discontinued",
-    "birdapp.outcome.live": "Dropping"
+    "birdapp.outcome.live": "Dropping",
+    "stats.net": "net-net"
   }
 }

@@ -91,7 +91,7 @@ function goalValue(s: GameState) {
     case "business": {
       const served = s.flags.visitorsServed ?? 0;
       const visitors = goal.visitors ?? 0;
-      const status = `${formatMoney(s.ledger.income)} of ${formatMoney(goal.target)} a day · ${Math.min(served, visitors)} of ${visitors} visitors`;
+      const status = `Revenue ${formatMoney(s.ledger.income)} of ${formatMoney(goal.target)} a day · ${Math.min(served, visitors)} of ${visitors} visitors`;
       // One number for the bar: each half of the goal is worth half of it.
       const current = Math.round(goal.target * (Math.min(1, s.ledger.income / goal.target) + (visitors > 0 ? Math.min(1, served / visitors) : 1)) / 2);
       return { goal, current, status, met: s.ledger.income >= goal.target && served >= visitors };
@@ -108,7 +108,7 @@ function goalValue(s: GameState) {
       return { goal, current, status: `#${current} now`, met: current > 0 && current <= goal.target };
     }
     case "revenue":
-      return { goal, current: s.ledger.income, status: `${formatMoney(s.ledger.income)} of ${formatMoney(goal.target)} a day`, met: s.ledger.income >= goal.target };
+      return { goal, current: s.ledger.income, status: `Revenue ${formatMoney(s.ledger.income)} of ${formatMoney(goal.target)} a day`, met: s.ledger.income >= goal.target };
     default: {
       const current = goal.metric === "models" ? s.models.length : s.walkers.filter((w) => w.kind === "researcher" && w.machine.value !== "quitting").length;
       return { goal, current, status: `${Math.min(current, goal.target)} of ${goal.target}`, met: current >= goal.target && (goal.vibes === undefined || s.vibes.value >= goal.vibes) };
@@ -130,7 +130,7 @@ export function progressOf(s: GameState): ProgressView {
 function afterLadder(s: GameState): ProgressView["goal"] {
   const open = s.goals.context.goals.find((g) => !g.met);
   const def = open && defs().goals.find((d) => d.id === open.id);
-  return open && def ? { text: def.label, current: open.value, target: open.target, objective: def.id } : { text: "", current: 0, target: 1 };
+  return open && def ? { text: def.label, current: open.value, target: open.target, objective: def.id, ...(open.held !== undefined ? { held: open.held } : {}) } : { text: "", current: 0, target: 1 };
 }
 /** What is still locked, one row per milestone that unlocks it ("2 more · Ship your first model"), not one "???" per item. */
 function teasers(s: GameState, level: Level): ProgressView["teasers"] {

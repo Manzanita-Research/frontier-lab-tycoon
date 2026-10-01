@@ -40,6 +40,12 @@ export interface StatsVM {
   capability: { value: number; latestModel: string | null };
   hype: { value: number };
   finance: { income: number; incomeText: string; expenses: number; expensesText: string };
+  /**
+   * FLT-86: what going broke has cost so far. `stake` is the share of the lab (and of its revenue) still yours, "100%"
+   * until an equity round; `roundsLeft` the emergency rounds the board still has ("3 of 3"); `overdraftDays` the days
+   * left before the bank calls, or null when the account is not overdrawn.
+   */
+  money: { stake: number; stakeText: string; roundsLeft: number; roundsText: string; overdraftDays: number | null };
   arena: { rank: number; rankDelta: number; tone: "good" | "bad" | ""; deltaText: string; top: boolean; open: boolean; flinch: boolean };
   rd: { mult: number; multText: string; era: number };
 }
@@ -344,7 +350,7 @@ export interface GoalVM {
   target: number;
   /** "Ship your first model · 0/1" */
   line: string;
-  /** Just the progress, for a skin that shows it on its own line: "0/1", "$26K of $40K a day · 3 of 12 visitors". */
+  /** Just the progress, for a skin that shows it on its own line: "0/1", "Revenue $26K of $40K a day · 3 of 12 visitors". */
   progressText: string;
   /** 0 to 1 */
   ratio: number;
@@ -1688,6 +1694,20 @@ export interface SkinPickerVM {
   rejected: { id: string; errors: string[] }[];
   /** FLT-55: a mod's request to switch to its skin, waiting on the player (the `ModSkinOffer` slot). */
   offer?: SkinOfferVM | null;
+  /** FLT-73: the picture tube (Display Properties → Settings). Absent in old fixtures: treat as off. */
+  crt?: CrtVM;
+}
+
+/** FLT-73: the CRT look over the whole game: a shader on the campus, faint glass over the UI. */
+export interface CrtVM {
+  /** On screen now: the player's pick, else the skin's default. "off" while photo mode is up. */
+  mode: "off" | "subtle" | "full";
+  /** The player's own pick, or null while the skin's default applies. */
+  choice: "off" | "subtle" | "full" | null;
+  /** What the campus is drawn with: the full shader, the one-pass version, or plain (the glass over the UI stays). */
+  tier: "multi" | "lite" | "flat";
+  /** The game turned the campus's shader down to keep the frame rate up. Picking a look again gives it another try. */
+  reduced: boolean;
 }
 
 export interface LayoutVM {
@@ -2003,6 +2023,8 @@ export interface HudActions {
   /** Go back to the skin the picker opened on and close it. */
   cancelSkinPicker(): void;
   setReducedMotion(on: boolean): void;
+  /** FLT-73: pick the picture tube's look (remembered on this device; overrides the skin's default). */
+  setCrt(mode: "off" | "subtle" | "full"): void;
   /** FLT-76: at ▶▶ and ▶▶▶, drop to 1× when something sharp goes wrong (remembered on this device). */
   setSlowForBadNews(on: boolean): void;
   /** FLT-55: say yes to a mod's skin offer (it shows, and is remembered for that mod). */

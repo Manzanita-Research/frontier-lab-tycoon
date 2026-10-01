@@ -3,6 +3,7 @@
 import { bootNotice, registry, send } from "../../app/game";
 import { modSession } from "../../app/mods";
 import { BASE_ID, DEFAULT_SKIN, MIGRATED_NOTICE, MOTION_KEY, STORAGE_KEY, SkinRefused, applyPrepared, bootChoice, modSkin, pickToSave, saveSkinChoice, prepareSkin, registerModSkins, skinList } from "../../skins/registry";
+import { setCrtMode } from "../juice/crt";
 import { loadedSkinAtom, skinUiAtom, type SkinUi } from "./state";
 
 const ui = () => registry.get(skinUiAtom);
@@ -151,5 +152,8 @@ export const skinActions = {
   setReducedMotion(on: boolean) {
     remember(MOTION_KEY, on ? "reduced" : null);
     applyMotion(on);
+  },
+  setCrt(mode: "off" | "subtle" | "full") {
+    setCrtMode(mode);
   },
 };
