@@ -96,8 +96,10 @@ export default function CrtFX({ mode, tier }: { mode: "subtle" | "full"; tier: E
   );
 
   return (
-    // No multisampling on the multi tier: the shader downsamples the scene to its scanline grid, which antialiases it.
-    <EffectComposer multisampling={tier === "multi" ? 0 : 4}>
+    // No multisampling. The multi tier downsamples the scene to its scanline grid, which antialiases it; the lite tier is
+    // the cheap one, and a 4x target cost it more than the shader did (SwiftShader: lite went from the slowest tier to
+    // the fastest without it). Its edges stair-step a little, which on a CRT reads as pixel art.
+    <EffectComposer multisampling={0}>
       <primitive object={(pass ?? lite)!} />
     </EffectComposer>
   );
