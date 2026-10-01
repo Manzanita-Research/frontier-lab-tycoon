@@ -1,0 +1,62 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "4cbc20afc6ba6bbe3e625d47c482897570265aed"
+  },
+  "head": {
+    "branch": "flt-75-koota-experiment",
+    "sha": "8c08b46",
+    "dirty": true
+  },
+  "seconds": 124.949,
+  "problems": [
+    "overview.png: blank composite: panel 3 is 24% one colour, 6 colours",
+    "phone.png: blank composite: panel 3 is 28% one colour, 7 colours",
+    "gate.png: blank composite: panel 3 is 24% one colour, 10 colours"
+  ],
+  "rows": [
+    {
+      "scene": "overview",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-75/before/overview.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-75/after/overview.png",
+      "title": "The campus, mid-morning, paused",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-75/compare/overview.png",
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 24% one colour, 6 colours",
+      "error": "compare: blank composite: panel 3 is 24% one colour, 6 colours"
+    },
+    {
+      "scene": "phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-75/before/phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-75/after/phone.png",
+      "title": "The same campus on a phone (390x844)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-75/compare/phone.png",
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 28% one colour, 7 colours",
+      "error": "compare: blank composite: panel 3 is 28% one colour, 7 colours"
+    },
+    {
+      "scene": "gate",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-75/before/gate.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-75/after/gate.png",
+      "title": "FLT-55: the gate with protesters, no mod (the base game: must be unchanged)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-75/compare/gate.png",
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 24% one colour, 10 colours",
+      "error": "compare: blank composite: panel 3 is 24% one colour, 10 colours"
+    },
+    {
+      "scene": "wag",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-75/before/wag.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-75/after/wag.png",
+      "title": "FLT-75: WagLevel, the golden retrievers' Koota trait from a code companion: a Kombucha Bar by the gate, dogs at full wag say so (main has no wag)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-75/compare/wag.png",
+      "changed": 0.11225308641975308
+    }
+  ],
+  "errors": []
+}

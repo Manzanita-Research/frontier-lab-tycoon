@@ -4011,6 +4011,35 @@
           "wait": 600
         }
       ]
+    },
+    "wag": {
+      "title": "FLT-75: WagLevel, the golden retrievers' Koota trait from a code companion: a Kombucha Bar by the gate, dogs at full wag say so (main has no wag)",
+      "query": {
+        "discourse": 40,
+        "focus": "13,21.5",
+        "zoom": 90,
+        "skin": "frontier-95",
+        "mod": "/mods/examples/golden-retriever-protest/mod.json"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "skipTutorial"
+            }
+          }
+        },
+        {
+          "wait": 300
+        },
+        {
+          "eval": "(f, w) => { w.buildings.push({ id: w.nextId++, kind: 'kombucha', x: 14, z: 21, w: 1, d: 1, placedTick: w.tick - 400, reliability: 1, broken: false, brokenTick: 0 }); w.version++; for (let i = 0; i < 160; i++) f.tick(w); }"
+        },
+        {
+          "wait": 1200
+        }
+      ]
     }
   }
 }
