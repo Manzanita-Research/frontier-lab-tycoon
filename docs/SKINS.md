@@ -266,6 +266,12 @@ If your slot needs copy that has no key, write it into the slot (as Frontier 95 
 | `ticker.aria` | News ticker |
 | `hint.gateway` | Build an API Gateway next to a path to start earning. |
 | `hint.tap` | Tap anyone to read their mind. |
+| `snag.text` | Frontier Lab Tycoon hit a snag and kept going. |
+| `snag.title` | Frontier Lab Tycoon |
+| `snag.copy` | Copy details |
+| `snag.copied` | Copied! |
+| `snag.nocopy` | The clipboard said no. The details are in the console. |
+| `snag.ok` | OK |
 | `confirm.stripe` | Board memo |
 | `confirm.title` | Spend it anyway? |
 | `confirm.cost` | Cost |
@@ -467,7 +473,7 @@ A slot is a React component. Each gets **its slice of the view-model plus `actio
 | `Bubble` | `{ bubble, actions }` | **One** thought bubble. The game pins whatever you render to the walker on every frame, so do not position it. **The root element must have the class `bubble`**: photo mode copies it onto the picture. `bubble.speech` means it is said out loud to the person beside them (a VC's pitch by the Kombucha Bar, FLT-26): draw a speech balloon if your skin tells the two apart. |
 | `ThoughtsPanel` | `{ rows, layout, actions }` | Everybody's thoughts, counted; `actions.highlight(row.key)` lights up who thinks it. On a phone (`layout.compact`) the base folds it to an icon. |
 | `Ticker` | `{ items, actions }` | The news tape. Use `kit`'s `<Marquee items>`. |
-| `Toast` | `{ toast, actions }` | One toast. `toast.tone === "hint"` is a standing hint and `"warn"` a standing warning (both not dismissable: a warning like "your entrance isn't connected" stays until it is fixed). Frontier 95 has no `Toasts` dock: its paperclip draws `vm.warnings` itself. |
+| `Toast` | `{ toast, actions }` | One toast. `toast.tone === "hint"` is a standing hint and `"warn"` a standing warning (both not dismissable: a warning like "your entrance isn't connected" stays until it is fixed). A recovery toast (FLT-84) has `toast.snag`: say `snag.text` instead of `toast.text`, and offer the kit's `SnagCopy` button (it calls `actions.copySnag(id)`); the dock shows it next to the newest toast, not under it. Frontier 95 has no `Toasts` dock: its paperclip draws `vm.warnings` itself, and the snag as an error box of its own. |
 | `Assistant` | `{ vm, actions }` | A helper character that hosts hints, toasts and standing warnings (`vm.warnings`). The base draws nothing here; Frontier 95's paperclip lives here. |
 | `Confirm` | `{ confirm, actions }` | A modal: a spend (a hire, a build, a path) that would leave the lab under three months of runway, held for a yes or a no. `confirm.message`, `costText` and `runwayText` say what it is; `actions.confirmSpend()` goes ahead, `actions.cancelSpend()` keeps the runway (make that the default: focus it, and Escape or a click outside give it). Time is held while it is up. A skin that does not draw its own gets the base's, so the game can never wait on a box nobody can answer. Frontier 95's is a Win95 warning box. |
 | `EventCard` | `{ event, actions }` | The modal news card. `actions.choose(event.id, i)`; the 1–3 keys are handled by the game. |

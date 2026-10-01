@@ -62,7 +62,7 @@ export interface HudInput {
   tool: Tool | null;
   follow: boolean;
   highlight: string | null;
-  toasts: readonly { id: number; text: string; tone: Tone; batch?: readonly { text: string; tone: Tone }[] }[];
+  toasts: readonly { id: number; text: string; tone: Tone; batch?: readonly { text: string; tone: Tone }[]; snag?: string }[];
   news: readonly NewsItem[];
   outcomeDismissed: boolean;
   /** "Tap anyone to read their mind" is still showing. */
@@ -1147,7 +1147,7 @@ function rawViewModel(i: HudInput): HudVM {
     senate: senateOf(i),
     bubbles: bubblesOf(i, chips),
     ticker: i.news.slice(-TICKER_ITEMS).map((n) => ({ id: n.id, text: n.text, tone: n.tone })),
-    toasts: spokenToasts(i).map((t) => (t.batch ? { id: t.id, text: t.text, tone: t.tone, batch: t.batch.map((b) => ({ text: b.text, tone: b.tone })) } : { id: t.id, text: t.text, tone: t.tone })),
+    toasts: spokenToasts(i).map((t) => (t.batch ? { id: t.id, text: t.text, tone: t.tone, batch: t.batch.map((b) => ({ text: b.text, tone: b.tone })) } : t.snag ? { id: t.id, text: t.text, tone: t.tone, snag: true } : { id: t.id, text: t.text, tone: t.tone })),
     // One hint at a time, and none while a toast is talking; the gateway hint is redundant once a toast has said it.
     hints: standingHints(i, play),
     warnings: [...i.snap.warnings],

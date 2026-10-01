@@ -10,6 +10,7 @@ import { tick } from "../sim/tick";
 import { createTestCampus, readyForPressure } from "../sim/testkit";
 import type { Speed } from "./hud";
 import { appMachine } from "./machine";
+import { SNAG_TEXT } from "./snag";
 import { framesManual, ManualFrames } from "./frames";
 import { Sim, simLayer, SimHandle } from "./sim";
 
@@ -427,6 +428,8 @@ describe("app machine", () => {
       sim.world.toasts.push({ id: 900, text: "Round 1 of 3 signed: +$2M.", tone: "bad", source: "economy", importance: "you", reply: true });
       yield* pump(4);
       expect(actor.getSnapshot().context.toasts.map((t) => t.text)).toContain("Round 1 of 3 signed: +$2M.");
+      // A snag toast is the app owning up to an error (FLT-84): it keeps its Copy details button through the ending.
+      yield* send(actor, { type: "SNAG", report: "boom", now: 1_000 });
       // The deadline passes tonight, and a toast comes with it.
       sim.world.day = SCENARIO.deadlineDay;
       sim.world.tick = (SCENARIO.deadlineDay + 1) * 20 - 1;
@@ -435,8 +438,9 @@ describe("app machine", () => {
       yield* pump(4);
       yield* waitFor(actor, (st) => st.matches("gameOver"), { timeout: "1 second" });
       const c = actor.getSnapshot().context;
-      expect(c.toasts).toEqual([]);
+      expect(c.toasts.map((t) => t.snag)).toEqual(["boom"]);
       expect(c.wire.map((w) => w.text)).toEqual(expect.arrayContaining(["Round 1 of 3 signed: +$2M.", "Objective met: Ship 3 models. 1 of 3."]));
+      expect(c.wire.map((w) => w.text)).not.toContain(SNAG_TEXT);
     }).pipe(provide(handle));
   });
 

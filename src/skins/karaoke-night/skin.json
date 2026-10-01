@@ -122,6 +122,11 @@
     "x.keyLo": "#CDBDF5"
   },
   "strings": {
+    "snag.text": "Record scratch! The KJ caught it and the song goes on.",
+    "snag.title": "Record scratch",
+    "snag.copy": "Copy the setlist",
+    "snag.copied": "Copied!",
+    "snag.ok": "Keep singing",
     "build.facilitiesCount": "{n} songs",
     "build.runCount": "{n} on tap",
     "run.title": "Request a song",

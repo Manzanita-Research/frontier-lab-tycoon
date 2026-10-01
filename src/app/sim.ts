@@ -14,17 +14,17 @@ import { stageDisaster } from "../sim/disasters/demo";
 import { RISKS, type Risk } from "../sim/disasters/types";
 import type { GameState, NewsItem, OpenEvent, Outcome, RunMods, Thought } from "../sim/types";
 import { fillAgents, seedWalkers } from "../sim/walkers";
-import { isMoment, stageMoment } from "../sim/race/demo";
-import { isOpsMoment, stageOps } from "../sim/opsDemo";
-import { isPaperMoment, stagePapers } from "../sim/race/papers/demo";
-import { isFactionMoment, stageFactions } from "../sim/factions/demo";
-import { isBirdMoment, stageBird } from "../sim/birdapp/demo";
-import { parseLeapMoment, stageLeapfrog } from "../sim/race/leapfrog/demo";
-import { isCollusionMoment, stageCollusion } from "../sim/collusion/demo";
-import { isCircusMoment, stageCircus } from "../sim/circus/demo";
-import { isDramaMoment, stageDrama } from "../sim/defection/demo";
-import { isAuditMoment, stageAudit } from "../sim/auditors/demo";
-import { isSenateMoment, stageSenate } from "../sim/capture/demo";
+import { isMoment, MOMENTS, stageMoment } from "../sim/race/demo";
+import { isOpsMoment, OPS_MOMENTS, stageOps } from "../sim/opsDemo";
+import { isPaperMoment, PAPER_MOMENTS, stagePapers } from "../sim/race/papers/demo";
+import { FACTION_MOMENTS, isFactionMoment, stageFactions } from "../sim/factions/demo";
+import { BIRD_DEMO_MOMENTS, isBirdMoment, stageBird } from "../sim/birdapp/demo";
+import { LEAP_MOMENTS, parseLeapMoment, stageLeapfrog } from "../sim/race/leapfrog/demo";
+import { COLLUSION_MOMENTS, isCollusionMoment, stageCollusion } from "../sim/collusion/demo";
+import { CIRCUS_MOMENTS, isCircusMoment, stageCircus } from "../sim/circus/demo";
+import { DRAMA_MOMENTS, isDramaMoment, stageDrama } from "../sim/defection/demo";
+import { AUDIT_MOMENTS, isAuditMoment, stageAudit } from "../sim/auditors/demo";
+import { isSenateMoment, SENATE_MOMENTS, stageSenate } from "../sim/capture/demo";
 import { walkersThinking } from "../sim/mind";
 import { makeSnapshot, NO_SELECTION, type Snapshot, type UiSelection, type UiToast } from "./hud";
 import { continueTutorial } from "../sim/tutorial";
@@ -33,7 +33,7 @@ import { withDefs } from "../sim/defs";
 import { enableEarnedPacks, PACK_OFF_FLAGS } from "../sim/progression";
 import type { GameDefinition } from "../mods/game-definition";
 import { enableEndings } from "../sim/endings/state";
-import { isEndingMoment, stageEndingMoment } from "../sim/endings/demo";
+import { ENDING_MOMENTS, isEndingMoment, stageEndingMoment } from "../sim/endings/demo";
 import { applyLineage, perkById } from "../sim/endings/lineage";
 import type { PerkId } from "../sim/endings/pack";
 
@@ -180,6 +180,12 @@ export class SimHandle {
     return { event, outcome, snap: this.lastSnap, news: w.news.filter((n) => n.id >= this.newsStartId), toasts: w.toasts.splice(0).map((t) => ({ ...t })) };
   }
 }
+
+/** Every `?moment=` a staging link knows (a test loads each one, FLT-83). `stream:<mishap>` and `poach-offer:<rival>` also take an argument. */
+export const STAGED_MOMENTS: readonly string[] = [
+  "jem-opening", "jem-confirm", ...ENDING_MOMENTS, ...MOMENTS, ...OPS_MOMENTS, ...LEAP_MOMENTS, ...COLLUSION_MOMENTS, ...PAPER_MOMENTS,
+  ...CIRCUS_MOMENTS, ...DRAMA_MOMENTS, ...AUDIT_MOMENTS, ...SENATE_MOMENTS, ...FACTION_MOMENTS, ...BIRD_DEMO_MOMENTS,
+];
 
 type SimDebug = Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk" | "daily" | "endings">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean; collusion?: boolean; hearing?: boolean; yacht?: boolean; defection?: boolean; poaching?: boolean; auditors?: boolean; capture?: boolean; promises?: boolean; factions?: boolean; birdapp?: boolean; water?: boolean };
 

@@ -1,7 +1,7 @@
 // Chip the guide bot lives in the bottom-left corner and reads out toasts and hints in a speech balloon ("GREAT JOB!").
 // When it's quiet Chip offers a fact now and then; tap the bot for another. Also: the thought bubbles and the toast card.
 import { useEffect, useRef, useState } from "react";
-import { factionAttrs } from "../kit";
+import { factionAttrs, SnagCopy } from "../kit";
 import { useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import type { ToastVM } from "../../ui/hud/types";
@@ -25,6 +25,22 @@ const HEAD: Record<ToastVM["tone"], string> = { good: "GREAT JOB!", bad: "OOPS!"
 const MOOD: Record<ToastVM["tone"], RobotMood> = { good: "cheer", bad: "oops", joke: "happy", neutral: "happy", hint: "think", warn: "oops" };
 
 export function Toast({ toast, actions }: SlotPropsMap["Toast"]) {
+  const t = useT();
+  if (toast.snag) {
+    // FLT-84: the game caught an error and kept going.
+    return (
+      <div className="dd-toast bad snag" role="alert">
+        <b>{t("snag.title")}</b>
+        {t("snag.text")}
+        <span className="snag-row">
+          <SnagCopy id={toast.id} actions={actions} />
+          <button type="button" onClick={() => actions.dismissToast(toast.id)}>
+            {t("snag.ok")}
+          </button>
+        </span>
+      </div>
+    );
+  }
   const body = (
     <>
       <b>{HEAD[toast.tone]}</b>
@@ -43,7 +59,8 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
   const t = useT();
   const [tip, setTip] = useState<number | null>(null);
   const phone = vm.layout.compact;
-  const toast = vm.toasts.at(-1);
+  // A caught error (FLT-84) has the floor until it is dismissed or expires, so its Copy details button stays put.
+  const toast = vm.toasts.find((t) => t.snag) ?? vm.toasts.at(-1);
   // A standing warning ("your entrance isn't connected") speaks whenever nobody else is, until it is fixed.
   const warning = toast ? undefined : vm.warnings[0];
   const hint = toast || warning ? undefined : vm.hints[0];
@@ -79,7 +96,11 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
   let head: string | null = null;
   let mood: RobotMood = "happy";
   let body: string | null = null;
-  if (toast) {
+  if (toast?.snag) {
+    head = t("snag.title");
+    mood = MOOD.bad;
+    body = t("snag.text");
+  } else if (toast) {
     head = HEAD[toast.tone];
     mood = MOOD[toast.tone];
     body = toast.text;
@@ -103,7 +124,18 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
       </button>
       {body && (
         <div className="dd-say" role="status">
-          {toast ? (
+          {toast?.snag ? (
+            <div className="dd-say-body">
+              <b>{head}</b>
+              {body}
+              <span className="snag-row">
+                <SnagCopy id={toast.id} actions={actions} />
+                <button type="button" onClick={() => actions.dismissToast(toast.id)}>
+                  {t("snag.ok")}
+                </button>
+              </span>
+            </div>
+          ) : toast ? (
             <button type="button" className="dd-say-body" onClick={() => actions.dismissToast(toast.id)} title="Got it!">
               <b>{head}</b>
               {body}

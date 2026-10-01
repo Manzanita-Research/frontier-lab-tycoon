@@ -114,6 +114,11 @@
     "shadow.pop": "none"
   },
   "strings": {
+    "snag.text": "This page hit a snag and kept going!!! Please e-mail the webmaster.",
+    "snag.title": "Uh oh!!!",
+    "snag.copy": "Copy details for the webmaster",
+    "snag.copied": "Copied!!!",
+    "snag.ok": "Close",
     "run.title": "Address",
     "run.prompt": "Type a page's address. Best viewed at 800×600.",
     "build.facilitiesCount": "{n} pages",
