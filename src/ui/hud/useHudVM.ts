@@ -7,7 +7,7 @@ import { atoms, debugParams, probeHud, registry, saveDesk } from "../../app/game
 import type { Snapshot } from "../../app/hud";
 import { audioReadyAtom, mixerAtom, mixerOpenAtom } from "../../audio/state";
 import { roomAtom } from "../../newsroom/state";
-import { crtAtom } from "../../render/crt/state";
+import { GAME_CRT, crtAtom } from "../../render/crt/state";
 import { photoAtom } from "../../render/fx/photoState";
 import { beatAtom } from "../../render/fx/beatState";
 import { skinList } from "../../skins/registry";
@@ -270,7 +270,8 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
           list,
           rejected: skinUi.refused,
           offer: skinUi.offer,
-          crt: { mode: crt.mode, choice: crt.choice, tier: crt.tier, reduced: crt.reduced },
+          // No `crt` while the in-game tube is off (FLT-70): the skins show no picture-tube setting.
+          ...(GAME_CRT ? { crt: { mode: crt.mode, choice: crt.choice, tier: crt.tier, reduced: crt.reduced } } : {}),
         },
         mods,
         drama,

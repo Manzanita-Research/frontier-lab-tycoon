@@ -4,6 +4,14 @@ import { Atom } from "effect/unstable/reactivity";
 import type { CrtGovernor } from "./governor";
 import { unwarp, type CrtMode, type CrtTier } from "./looks";
 
+/**
+ * The in-game picture tube's one switch (FLT-70): off. Jem kept the shader for the box's beige PC (the intro's Kiosk
+ * runs CRTPipeline itself and never reads this) and turned the tube over the game off for every skin: no Display
+ * Properties setting, no `?crt=`, no skin default (Frontier 95's `"crt": "subtle"` lies dormant). Everything below
+ * stays wired for the FLT-88 spike, which turns it back on here.
+ */
+export const GAME_CRT = false as boolean;
+
 export interface CrtState {
   /** The look on screen right now: the player's pick, else the skin's default; off while photo mode is up. */
   mode: CrtMode;
