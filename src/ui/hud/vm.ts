@@ -64,7 +64,7 @@ export interface HudInput {
   tool: Tool | null;
   follow: boolean;
   highlight: string | null;
-  toasts: readonly { id: number; text: string; tone: Tone; batch?: readonly { text: string; tone: Tone }[]; pinned?: true }[];
+  toasts: readonly { id: number; text: string; tone: Tone; batch?: readonly { text: string; tone: Tone }[]; pinned?: true; snag?: string }[];
   news: readonly NewsItem[];
   /** FLT-76: the big moments still waiting their turn, an ending's solo and the shipped sticker (`app/moments.ts`). Optional: nothing waiting. */
   stage?: StageView;
@@ -1140,7 +1140,13 @@ function rawViewModel(i: HudInput): HudVM {
     senate: senateOf(i),
     bubbles: bubblesOf(i, chips),
     ticker: i.news.slice(-TICKER_ITEMS).map((n) => ({ id: n.id, text: n.text, tone: n.tone })),
-    toasts: spokenToasts(i).map((t) => ({ id: t.id, text: t.text, tone: t.tone, ...(t.batch ? { batch: t.batch.map((b) => ({ text: b.text, tone: b.tone })) } : {}), ...(t.pinned ? { pinned: true as const } : {}) })),
+    toasts: spokenToasts(i).map((t) => ({
+      id: t.id,
+      text: t.text,
+      tone: t.tone,
+      ...(t.batch ? { batch: t.batch.map((b) => ({ text: b.text, tone: b.tone })) } : t.snag ? { snag: true as const } : {}),
+      ...(t.pinned ? { pinned: true as const } : {}),
+    })),
     // One hint at a time, and none while a toast is talking; the gateway hint is redundant once a toast has said it.
     hints: standingHints(i, play),
     warnings: [...i.snap.warnings],

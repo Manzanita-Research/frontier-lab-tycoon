@@ -328,6 +328,12 @@
       "bird-karaoke",
       "bird-swag"
     ],
+    "path-gap": [
+      "nopath",
+      "nopath-tool",
+      "nopath-click",
+      "nopath-phone"
+    ],
     "beats": [
       "overview",
       "phone",
@@ -4372,6 +4378,321 @@
       "steps": [
         {
           "wait": 500
+        }
+      ]
+    },
+    "snag": {
+      "title": "FLT-84: a caught error raises the recovery toast (a real throw in the paused-input path)",
+      "steps": [
+        {
+          "eval": "(f) => { const real = f.sim.applyNow.bind(f.sim); f.sim.applyNow = () => { f.sim.applyNow = real; throw new Error('the Training Hall caught fire mid-function (staged for the screenshot)'); }; f.send({ type: 'COMMAND', command: { type: 'coachClick' } }); }"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "snag-phone": {
+      "title": "FLT-84: the recovery toast on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "eval": "(f) => { const real = f.sim.applyNow.bind(f.sim); f.sim.applyNow = () => { f.sim.applyNow = real; throw new Error('the Training Hall caught fire mid-function (staged for the screenshot)'); }; f.send({ type: 'COMMAND', command: { type: 'coachClick' } }); }"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "nopath": {
+      "title": "FLT-85: a Training Hall one path tile short of the gate (its path touches the Cluster, which isn't path)",
+      "query": {
+        "focus": "10.4,16.6",
+        "zoom": 70,
+        "birdapp": "off"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 9,
+              "z": 16
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 9,
+              "z": 17
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 9,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 10,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placeBuilding",
+              "kind": "hall",
+              "x": 8,
+              "z": 13
+            }
+          }
+        },
+        {
+          "wait": 400
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "nopath-tool": {
+      "title": "FLT-85: the same, with the path tool in hand: the gate's network lights up and the join tile pulses",
+      "query": {
+        "focus": "10.4,16.6",
+        "zoom": 70,
+        "birdapp": "off"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 9,
+              "z": 16
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 9,
+              "z": 17
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 9,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 10,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placeBuilding",
+              "kind": "hall",
+              "x": 8,
+              "z": 13
+            }
+          }
+        },
+        {
+          "wait": 400
+        },
+        {
+          "send": {
+            "type": "SET_TOOL",
+            "tool": "path"
+          }
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "nopath-click": {
+      "title": "FLT-85: the player clicks the No path! flag: the camera pans to the gap, the path tool is in hand, and the rule is said once (toasts held so the shot catches it)",
+      "query": {
+        "focus": "6,8",
+        "zoom": 70,
+        "birdapp": "off"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 9,
+              "z": 16
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 9,
+              "z": 17
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 9,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 10,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placeBuilding",
+              "kind": "hall",
+              "x": 8,
+              "z": 13
+            }
+          }
+        },
+        {
+          "wait": 400
+        },
+        {
+          "send": {
+            "type": "HOLD_TOASTS",
+            "on": true
+          }
+        },
+        {
+          "eval": "() => document.querySelector('.nopath-flag')?.click()"
+        },
+        {
+          "wait": 2500
+        },
+        {
+          "send": {
+            "type": "HOLD_TOASTS",
+            "on": false
+          }
+        }
+      ]
+    },
+    "nopath-phone": {
+      "title": "FLT-85: the one-tile gap on a phone (390x844)",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "focus": "9.5,14",
+        "zoom": 40,
+        "birdapp": "off"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 9,
+              "z": 16
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 9,
+              "z": 17
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 9,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 10,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placeBuilding",
+              "kind": "hall",
+              "x": 8,
+              "z": 13
+            }
+          }
+        },
+        {
+          "wait": 400
+        },
+        {
+          "wait": 600
         }
       ]
     },

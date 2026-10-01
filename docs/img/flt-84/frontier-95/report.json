@@ -1,0 +1,48 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "2f7d8089d0b52d2b4508760b230e4ace16bc2524"
+  },
+  "head": {
+    "branch": "flt-84-recovery-toast",
+    "sha": "5689c6c",
+    "dirty": false
+  },
+  "seconds": 98.839,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "snag",
+      "skin": "frontier-95",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-84/frontier-95/before/snag@frontier-95.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-84/frontier-95/after/snag@frontier-95.png",
+      "title": "FLT-84: a caught error raises the recovery toast (a real throw in the paused-input path)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-84/frontier-95/compare/snag@frontier-95.png",
+      "changed": 0.045356481481481484
+    },
+    {
+      "scene": "snag-phone",
+      "skin": "frontier-95",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-84/frontier-95/before/snag-phone@frontier-95.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-84/frontier-95/after/snag-phone@frontier-95.png",
+      "title": "FLT-84: the recovery toast on a phone",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-84/frontier-95/compare/snag-phone@frontier-95.png",
+      "changed": 0.15762395187750639
+    },
+    {
+      "scene": "snag-phone",
+      "skin": "frontier-95",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-84/frontier-95/before/snag-phone@frontier-95.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-84/frontier-95/after/snag-phone@frontier-95.png",
+      "title": "FLT-84: the recovery toast on a phone",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-84/frontier-95/compare/snag-phone@frontier-95.png",
+      "changed": 0.15762395187750639
+    }
+  ],
+  "errors": [
+    "before/snag@frontier-95: [app] the hold action failed; the game carries on.\nError: the Training Hall caught fire mid-function (staged for the screenshot)\n    at f.sim.applyNow (eval at <anonymous> (eval at evaluate (:311:30)), <anonymous>:1:105)\n    at http://127.0.0.1:40496/assets/skinControl-Bezq0hdj.js:7:2250\n    at action.hold",
+    "after/snag@frontier-95: [app] the hold action failed; the game carries on.\nError: the Training Hall caught fire mid-function (staged for the screenshot)\n    at f.sim.applyNow (eval at <anonymous> (eval at evaluate (:311:30)), <anonymous>:1:105)\n    at http://127.0.0.1:17842/assets/skinControl-D_rZWiHP.js:9:2319\n    at action.hold",
+    "before/snag-phone@frontier-95: [app] the hold action failed; the game carries on.\nError: the Training Hall caught fire mid-function (staged for the screenshot)\n    at f.sim.applyNow (eval at <anonymous> (eval at evaluate (:311:30)), <anonymous>:1:105)\n    at http://127.0.0.1:40496/assets/skinControl-Bezq0hdj.js:7:2250\n    at action.hold",
+    "after/snag-phone@frontier-95: [app] the hold action failed; the game carries on.\nError: the Training Hall caught fire mid-function (staged for the screenshot)\n    at f.sim.applyNow (eval at <anonymous> (eval at evaluate (:311:30)), <anonymous>:1:105)\n    at http://127.0.0.1:17842/assets/skinControl-D_rZWiHP.js:9:2319\n    at action.hold"
+  ]
+}

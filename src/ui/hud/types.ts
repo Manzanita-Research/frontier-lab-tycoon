@@ -298,6 +298,12 @@ export interface ToastVM {
    * It is always the last toast, so a skin that shows only the newest shows it.
    */
   pinned?: true;
+  /**
+   * FLT-84: the game hit a bug, caught it and kept going. Say so in the skin's voice (strings `snag.text`, `snag.copy`)
+   * and offer `copySnag(id)`, which puts a bug report (the error, its stack, seed, tick, build, skin) on the clipboard.
+   * A skin that ignores this still shows `text`.
+   */
+  snag?: true;
 }
 
 export type HintId = "gateway" | "tap";
@@ -1891,6 +1897,8 @@ export interface HudActions {
   /** Light up who thinks a Thoughts row (`ThoughtRowVM.key`); again to switch off. */
   highlight(key: string): void;
   dismissToast(id: number): void;
+  /** FLT-84: a snag toast's bug report onto the clipboard. Resolves false when the clipboard said no (the console has it too). */
+  copySnag(id: number): Promise<boolean>;
   /** Answer `vm.confirm`: go ahead with the spend, or keep the runway. */
   confirmSpend(): void;
   cancelSpend(): void;

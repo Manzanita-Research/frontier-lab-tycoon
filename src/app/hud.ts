@@ -181,6 +181,8 @@ export interface UiToast {
   batch?: readonly { text: string; tone: Tone; source?: NoticeSource }[];
   /** FLT-76: no timer; it stays until it is dismissed (why the game slowed to 1×). */
   pinned?: true;
+  /** FLT-84: the game caught a bug and carried on. The bug report "Copy details" puts on the clipboard. */
+  snag?: string;
 }
 
 function disastersOf(s: GameState): DisastersSnapshot {

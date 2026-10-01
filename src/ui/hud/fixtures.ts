@@ -255,6 +255,8 @@ export function fixtureDrama(kind: "feed" | "intro" | "empty" | "fresh" | "added
 }
 
 export interface FixtureOptions {
+  /** FLT-84: the game caught an error and kept going (a recovery toast after the two ordinary ones). */
+  snag?: boolean;
   /** Playable v1: put the snapshot on this rung of the ladder (absent: everything is earned). */
   level?: 1 | 2 | 3 | 4 | 5;
   /** Which of the seven coach lines is up (0-based), or none. */
@@ -332,6 +334,9 @@ export function fixtureSnapshot(o: FixtureOptions = {}): Snapshot {
   return { ...snap, ...ladder, event: o.event ? { id: o.event, day: snap.day } : snap.event, outcome: o.outcome ?? snap.outcome, pendingConfirm, warnings: o.warnings ?? snap.warnings };
 }
 
+/** What a recovery toast's Copy details puts on the clipboard (FLT-84). */
+export const FIXTURE_SNAG = "Frontier Lab Tycoon: snag report\nerror: the hall is on fire\ncaught by: hold\nseed: 7\ntick: 1234 (day 12)\nversion: abc1234\nskin: frontier-95\n\nError: the hall is on fire";
+
 export function fixtureInput(o: FixtureOptions = {}): HudInput {
   const lf = o.leapfrog ? fixtureLeapfrog() : null;
   const snap = fixtureSnapshot(lf ? { ...o, world: lf.world } : o);
@@ -344,6 +349,7 @@ export function fixtureInput(o: FixtureOptions = {}): HudInput {
     toasts: [
       { id: 1, text: "Frontier-2 is out! Launch week: +$70K", tone: "good" },
       { id: 2, text: "Hugo Stochastic handed in the box and left.", tone: "bad" },
+      ...(o.snag ? [{ id: 3, text: "Frontier Lab Tycoon hit a snag and kept going.", tone: "bad" as const, snag: FIXTURE_SNAG }] : []),
     ],
     news: [
       { id: 1, day: 3, text: "Mostly Harmless Compute opens its doors with $5M in seed money", tone: "neutral" },

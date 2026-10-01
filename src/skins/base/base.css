@@ -25,6 +25,10 @@ canvas {
   pointer-events: none;
   z-index: 1;
 }
+/* Warnings and placement reasons beat thought bubbles; the HUD host (same z, later in the page) still covers them. */
+.world.world-top {
+  z-index: 2;
+}
 .anchor {
   position: absolute;
   left: 0;
@@ -396,6 +400,27 @@ button {
 .toast.bad {
   background: color-mix(in srgb, var(--flt-color-bad) 16%, var(--flt-color-panel));
 }
+/* The recovery toast (FLT-84): the game caught an error and kept going */
+.toast.snag {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px 10px;
+}
+.toast.snag button {
+  font: inherit;
+  font-size: 13px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--flt-color-line);
+  background: var(--flt-color-panel);
+  color: inherit;
+  cursor: pointer;
+}
+.toast.snag .snag-copy {
+  font-weight: 700;
+}
 @keyframes toast-in {
   from {
     transform: translateY(-16px) scale(0.85);
@@ -482,6 +507,51 @@ button {
   font: 900 12px var(--font);
   white-space: nowrap;
   animation: bob 1s ease-in-out infinite;
+}
+/* FLT-85: the flag is a button (it pans to the gap), and says how far off the gate's paths are. */
+.nopath-flag {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.nopath-flag small {
+  font-size: 0.8em;
+  font-weight: 700;
+  opacity: 0.92;
+}
+.nopath-flag:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+.nopath-here {
+  position: relative;
+  transform: translate(-50%, calc(-100% - 6px));
+  padding: 2px 8px;
+  border: 2px solid var(--ink);
+  border-radius: var(--flt-radius-button);
+  background: #ffcc1f;
+  color: var(--ink);
+  font: 900 11.5px var(--font);
+  white-space: nowrap;
+  animation: bob 0.8s ease-in-out infinite;
+}
+.nopath-here::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  border: 5px solid transparent;
+  border-top-color: var(--ink);
+  border-bottom: 0;
+  transform: translateX(-50%);
 }
 @keyframes bob {
   50% {
@@ -1514,4 +1584,19 @@ button {
   .follow {
     padding: 5px 10px;
   }
+}
+
+/* FLT-84: the recovery toast's buttons in a skin's own toast (every skin gets this; a skin may restyle it) */
+.snag-row {
+  display: flex;
+  flex-basis: 100%;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.snag-row button {
+  font: inherit;
+  font-size: 0.9em;
+  cursor: pointer;
 }

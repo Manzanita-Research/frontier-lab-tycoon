@@ -5,6 +5,7 @@ export { Portrait } from "./Portrait";
 export { Senator } from "./Senator";
 export { Dialog } from "./Dialog";
 export { ImportButton } from "./ImportButton";
+export { SnagCopy } from "./SnagCopy";
 export { DramaIcon } from "./DramaIcon";
 export { SpeedGlyph } from "./SpeedGlyph";
 export { money } from "./format";

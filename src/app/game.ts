@@ -23,6 +23,7 @@ import { modSession } from "./mods";
 import { SaveDesk, Saves, isStagedLink } from "./saves";
 import { demoSaveStore } from "./savesDemo";
 import { watchActor } from "./watchdog";
+import { describe, snagReport } from "./snag";
 import { browserStorage, makeSaveStore } from "../save";
 
 const midgame = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("scenario") === "midgame";
@@ -80,7 +81,7 @@ const slowForBadNews = (() => {
   }
 })();
 /** The actor's input. The watchdog swaps in the live World's report before it restarts the actor (FLT-81). */
-const input = { speed: initialSpeed as Speed, first, slowForBadNews };
+const input: { speed: Speed; first: typeof first; slowForBadNews: boolean; snagAt?: number | null } = { speed: initialSpeed, first, slowForBadNews };
 export const app = createActorAtoms(runtime, appMachine, { input });
 /** A notice for the first frame, from before the app mounts (the skin migration, FLT-71): the actor starts with it, like the mods line. */
 export const bootNotice = (text: string, tone: Tone = "neutral") => void first.toasts.push({ id: -3, text, tone, importance: "you" });
@@ -97,11 +98,15 @@ export function startApp(): () => void {
   const unwatch = watchActor({
     registry,
     snapshot: app.snapshot,
-    restart: (last) => {
+    restart: (last, error) => {
       input.speed = last.speed;
       input.slowForBadNews = last.slowForBadNews;
       input.first = sim.report(true, true)!;
+      input.snagAt = last.snagAt;
       registry.refresh(app.actor);
+      // FLT-84: the new actor tells the player, with the details for a bug report.
+      const w = sim.world;
+      send({ type: "SNAG", report: snagReport({ where: "watchdog", ...describe(error), seed: w.seed, tick: w.tick, day: w.day }), now: Date.now() });
     },
   });
   return () => {

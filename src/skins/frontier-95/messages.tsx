@@ -1,6 +1,6 @@
 // Message boxes and the paperclip: bubbles, toasts, event cards, the era blue screen, the outcome card, the assistant.
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Dialog, Evidence, factionAttrs, placeBalloon } from "../kit";
+import { Dialog, Evidence, factionAttrs, placeBalloon, SnagCopy } from "../kit";
 import { useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import { Btn, Win } from "./parts";
@@ -33,6 +33,7 @@ export function Bubble({ bubble }: SlotPropsMap["Bubble"]) {
 const TONE_ICON = { bad: "warn", good: "info", joke: "info", neutral: "info", hint: "info", warn: "warn" } as const;
 
 export function Toast({ toast, actions }: SlotPropsMap["Toast"]) {
+  if (toast.snag) return <SnagBox toast={toast} actions={actions} />;
   if (toast.tone === "hint" || toast.tone === "warn") {
     return (
       <div className={`f95-toast ${toast.tone}`} role={toast.tone === "warn" ? "status" : undefined}>
@@ -75,6 +76,31 @@ export function Toast({ toast, actions }: SlotPropsMap["Toast"]) {
   );
 }
 
+/**
+ * The recovery toast (FLT-84) as the error box everyone remembers, except this program is not being shut down: it caught the
+ * error and kept going. Its own little window, not the paperclip's balloon, so it shows while the coach is talking too.
+ */
+function SnagBox({ toast, actions }: SlotPropsMap["Toast"]) {
+  const t = useT();
+  const ok = () => actions.dismissToast(toast.id);
+  return (
+    <div className="f95-snag" role="alert">
+      <Win className="f95-msgbox" title={t("snag.title")} icon="error" buttons={[{ g: "close", label: t("snag.ok"), onClick: ok }]}>
+        <div className="f95-msgbody">
+          <Ico name="error" size={36} />
+          <p>{t("snag.text")}</p>
+        </div>
+        <div className="f95-row">
+          <SnagCopy id={toast.id} actions={actions} className="f95-btn" />
+          <Btn def onClick={ok}>
+            {t("snag.ok")}
+          </Btn>
+        </div>
+      </Win>
+    </div>
+  );
+}
+
 /** A batch lists this many; the rest are on the ticker. */
 const BATCH_LINES = 4;
 
@@ -97,7 +123,10 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
   const phone = vm.layout.compact;
   // One at a time, the newest toast winning; the game only sends a hint while nobody is talking.
   const hints = vm.hints;
-  const toasts = vm.toasts.slice(-1);
+  const toasts = vm.toasts.filter((t) => !t.snag).slice(-1);
+  // A caught error (FLT-84) gets its own error box, coach or no coach.
+  const snag = vm.toasts.find((t) => t.snag);
+  const snagBox = snag && <SnagBox toast={snag} actions={actions} />;
   // Standing warnings ("your entrance isn't connected") stay in the balloon until they are fixed.
   const warnings = vm.warnings;
   const busy = warnings.length > 0 || toasts.length > 0 || hints.length > 0;
@@ -130,9 +159,10 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
   const next = () => setTip((i) => ((i ?? 0) + 1) % tipsFile.tips.length);
 
   // While a coach mark is up the paperclip is in the coach's balloon; there is only one of it.
-  if (vm.coach) return null;
+  if (vm.coach) return snagBox ?? null;
   return (
     <div className="f95-assistant" aria-live="polite">
+      {snagBox}
       {busy && (
         <div className="f95-balloon" role="status">
           {warnings.map((w) => (

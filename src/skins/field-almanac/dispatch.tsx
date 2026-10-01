@@ -1,4 +1,4 @@
-import { Marquee, useT } from "../kit";
+import { Marquee, SnagCopy, useT } from "../kit";
 import type { SlotPropsMap } from "../types";
 import { QuillIcon, SealLeaf } from "./icons";
 import { sealInitial } from "./lore";
@@ -26,6 +26,24 @@ export function Ticker({ items }: SlotPropsMap["Ticker"]) {
  * and does not go away when clicked.
  */
 export function Toast({ toast, actions }: SlotPropsMap["Toast"]) {
+  const t = useT();
+  if (toast.snag) {
+    // FLT-84: the game caught an error and kept going.
+    return (
+      <div className="fa-toast fa-paper bad snag" role="alert">
+        <QuillIcon />
+        <span className="fa-toast-text">
+          <b>{t("snag.title")}.</b> {t("snag.text")}
+        </span>
+        <span className="snag-row">
+          <SnagCopy id={toast.id} actions={actions} />
+          <button type="button" onClick={() => actions.dismissToast(toast.id)}>
+            {t("snag.ok")}
+          </button>
+        </span>
+      </div>
+    );
+  }
   // A hint is a standing tip and a warning a standing problem: neither can be waved away, they go when it comes true / is fixed.
   if (toast.tone === "hint" || toast.tone === "warn") {
     return (
