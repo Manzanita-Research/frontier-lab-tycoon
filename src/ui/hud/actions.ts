@@ -111,6 +111,7 @@ export const hudActions: HudActions = {
     registry.set(helpOpenAtom, false);
     send({ type: "COMMAND", command: { type: "coachReplay" } });
   },
+  openBox: () => send({ type: "TO_BOX" }),
   dismissUnlock: () => send({ type: "COMMAND", command: { type: "dismissUnlock" } }),
   // FLT-93: [Show me]. The New! card steps aside (it is read; the coach layer walks to the anchor), and the coach points.
   showMe: (anchor) =>

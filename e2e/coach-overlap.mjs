@@ -1,4 +1,5 @@
 import { chromium } from "playwright";
+import { throughTheBox } from "./box.mjs";
 
 // FLT-77: does the coach balloon sit on the window its own step opens? Follows the coach (as the journey does) to the
 // "read a researcher's mind" step, clicks the researcher, and counts the painted frames in which the balloon covers any
@@ -61,6 +62,8 @@ await page.addInitScript((freeze) => {
 }, !!shot);
 
 await page.goto(url, { waitUntil: "networkidle", timeout: 120_000 });
+// FLT-95: a bare URL opens on the box; this test is about the coach, so skip it as an impatient first-timer would.
+await throughTheBox(page, { skip: true });
 await page.waitForFunction(() => typeof window.__fltProbe === "function", { timeout: 60_000 });
 const probe = () => page.evaluate(() => window.__fltProbe());
 const active = () => page.locator("[data-coach-active]:visible").first();

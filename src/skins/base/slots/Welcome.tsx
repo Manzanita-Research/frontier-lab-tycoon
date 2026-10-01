@@ -19,6 +19,9 @@ export function Welcome({ welcome, saves, actions }: SlotPropsMap["Welcome"]) {
         </button>
         {saves.status && <p className={`saves-status ${saves.status.tone}`}>{saves.status.text}</p>}
         <small>A new lab takes over the autosave after its first month. Keep this one in a slot (Save/Load) if you want both.</small>
+        <button type="button" className="welcome-box-link" onClick={() => actions.openBox()} disabled={saves.busy}>
+          Take the box off the shelf again
+        </button>
       </div>
     </Dialog>
   );

@@ -461,6 +461,7 @@ export function HowToPlay({ help, actions }: SlotPropsMap["HowToPlay"]) {
         </div>
         <div className="f95-row">
           <Btn onClick={() => actions.coachReplay()}>{t("help.replay")}</Btn>
+          <Btn onClick={() => actions.openBox()}>{t("help.box")}</Btn>
           <Btn def autoFocus onClick={() => actions.closeHelp()}>
             {t("help.close")}
           </Btn>

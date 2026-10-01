@@ -76,7 +76,7 @@ export type ItemId = "manual" | "disc" | "floppies" | "card" | "overlay" | "eula
 export const ITEMS: { id: ItemId; name: string; caption: string }[] = [
   { id: "manual", name: "The manual", caption: "140 pages. Two of them printed in time." },
   { id: "coa", name: "Certificate of Authenticity", caption: "Drag to tilt it in the light. Genuine holographic foil. Do not microwave." },
-  { id: "disc", name: "CD-ROM", caption: "Frontier Lab Tycoon for Frontier 95. Do not microwave." },
+  { id: "disc", name: "CD-ROM", caption: "Disc 1 of 1. Gold master. Hold it by the edges, like a model you're about to ship." },
   { id: "floppies", name: "Floppy disks", caption: "Disk 1 of 7. Disks 2 to 7 are the same disk, relabelled for the investors." },
   { id: "card", name: "Registration card", caption: "Mail today for exciting offers from our partners! (You are the partner.)" },
   { id: "overlay", name: "Keyboard overlay", caption: "F1 Help · F2 Pause · F3 Train · F4 Deny Everything" },
@@ -136,12 +136,41 @@ export const BIOS = {
 
 export const SPLASH = { name: "Frontier 95", sub: "Starting Frontier 95...", maker: "Frontier Interactive Entertainment" };
 
+/** FLT-95: the box in your hands. The caption says which face you're looking at; the buttons are Frontier 95's. */
+export const HELD = {
+  captions: {
+    front: "It's heavier than it looks. That's the manual. Drag to turn it.",
+    spine: "The spine. Looks great on a shelf, next to the other ones you never opened.",
+    back: "Every screenshot on the back is from the actual game.* (*A game.)",
+  },
+  left: "Turn left",
+  right: "Turn right",
+  flipToBack: "Flip to back",
+  flipToFront: "Flip to front",
+  open: "Open the box",
+};
+
+/** FLT-95: the disc in your hand. */
+export const DISC = { insert: "Insert and play", back: "Back", pickUp: "Pick up the disc" };
+
+/** What's printed on the disc: two spot colours over the silver, as a 1997 pressing plant would. */
+export const DISC_LABEL = {
+  title: ["FRONTIER", "LAB", "TYCOON"],
+  platform: "CD-ROM for Frontier 95",
+  warning: "Do not microwave",
+  disc: "DISC 1 OF 1",
+  badge: "GOLD MASTER",
+  /** Etched into the mirror band by the pressing plant, as every disc's matrix code is. */
+  matrix: "FLT-95 GM  ·  M1 S1  ·  PRESSED IN THE LAB",
+  rim: "© 1997 Frontier Interactive Entertainment, Inc.  ·  Unauthorized copying voids the alignment  ·  Contains no user-serviceable weights  ·  Made in the Lab",
+};
+
 /** Beat captions (the line at the bottom of the screen). */
 export const CAPTIONS = {
   shelf: "Aisle 7. Pick a box. Any box. (Well, one box.)",
-  pulling: "It's heavier than it looks. That's the manual.",
+  pulling: "Careful. It's the last one on the shelf.",
   unwrapping: "*shrinkwrap noises*",
-  open: "Everything is in here. Insert the disc when you're ready.",
+  open: "Everything is in here. Pick up the disc when you're ready.",
   disc: "Loading. Please don't bump the table.",
   warmup: "The CRT is warming up. Give it a moment. It's from 1995.",
   post: "",

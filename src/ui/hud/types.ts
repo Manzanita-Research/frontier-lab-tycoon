@@ -1984,6 +1984,8 @@ export interface HudActions {
   /** The coach: skip it for good, or start it again (Start ▸ Help ▸ Replay tutorial). */
   coachSkip(): void;
   coachReplay(): void;
+  /** FLT-95: leave for the software shelf and play the box again. The lab is autosaved first; "Welcome back" has it on the way in. */
+  openBox(): void;
   /** Close the "New!" card. */
   dismissUnlock(): void;
   /**

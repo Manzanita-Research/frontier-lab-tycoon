@@ -21,6 +21,7 @@ import { enqueue, newMoments, NO_STAGE, release, spot, stageOf, type MomentQueue
 import { lookOf, marksOf, sharpNews, slowText, type Marks } from "./badNews";
 import { Sim, type SyncReport } from "./sim";
 import { Saves, type SaveWhy } from "./saves";
+import { Door } from "./door";
 import { describe, maySnag, SNAG_TEXT, SNAG_TOAST_MS, snagReport } from "./snag";
 import type { SlotId } from "../save";
 import type { GameDefinition } from "../mods/game-definition";
@@ -266,6 +267,8 @@ export const appMachine = setupEffect({
       TOAST_EXPIRED: Schema.Struct({ id: Schema.Number }),
       /** A guard caught an error and the game carried on (FLT-84): `report` is what "Copy details" copies. */
       SNAG: Schema.Struct({ report: Schema.String, now: Schema.Number }),
+      /** FLT-95: back to the software shelf (Help ▸ "Take the box off the shelf again"). */
+      TO_BOX: Schema.Struct({}),
     },
   },
   actors: { frameLoop },
@@ -324,6 +327,18 @@ export const appMachine = setupEffect({
         const sim = yield* Sim;
         const p = args.params as { slot: SlotId; why: SaveWhy };
         yield* saves.value.save(sim.world, p.slot, p.why, (text, tone) => args.self.send({ type: "TOAST", text, tone }));
+      })),
+    /**
+     * FLT-95: leave for the box, autosaving first (as if the tab were hidden), so the lab is there on the way back in.
+     * Without a Door (tests, a headless shell) there is nowhere to go, so nothing happens.
+     */
+    toBox: (args) =>
+      survive("toBox", args.self, Effect.gen(function* () {
+        const door = yield* Effect.serviceOption(Door);
+        if (Option.isNone(door)) return;
+        const saves = yield* Effect.serviceOption(Saves);
+        if (Option.isSome(saves)) yield* saves.value.save((yield* Sim).world, "auto", "hide", (text, tone) => args.self.send({ type: "TOAST", text, tone }));
+        yield* Effect.sync(door.value.toBox);
       })),
   },
 }).createMachine({
@@ -561,6 +576,9 @@ export const appMachine = setupEffect({
     },
     SAVE: (args, enq) => {
       enq(args.actions.save, { ...args, params: { slot: args.event.slot, why: args.event.why } });
+    },
+    TO_BOX: (args, enq) => {
+      enq(args.actions.toBox, args);
     },
     TOAST: ({ context, event }, enq) => {
       const id = 1_000_000 + context.toastSeq;
