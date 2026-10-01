@@ -16,10 +16,10 @@ const only = arg("only", "").split(",").filter(Boolean);
 const MAKEUP_DB = 15;
 
 const clips = [
-  { name: "1-nap", takes: [{ at: 0, mode: "nap" }], seconds: 10, about: "Paused, or a card is open: a held pad that breathes, and a bell." },
+  { name: "1-nap", takes: [{ at: 0, mode: "nap" }], seconds: 10, about: "Paused, or a card is open: a held pad that breathes (an octave up too, since FLT-80), and a bell." },
   { name: "2-walkies", takes: [{ at: 0, mode: "walkies" }], seconds: 12, about: "1×: the first pass's music, note for note." },
-  { name: "3-fetch", takes: [{ at: 0, mode: "fetch" }], seconds: 12, about: "3×: the same tune jogging: bass, kick, claps, hats, an eighth-note arpeggio." },
-  { name: "4-zoomies", takes: [{ at: 0, mode: "zoomies" }], seconds: 12, about: "10×: 168 bpm hyperpop. The chipmunk choir sings \"ship it\" and \"o-kay!\", the inbox overflows on bar 8." },
+  { name: "3-fetch", takes: [{ at: 0, mode: "fetch" }], seconds: 12, about: "3×: the same tune jogging: bass, kick, claps, hats, an eighth-note arpeggio, and the whistled hook (the choir's tune); bar 8 squeaks." },
+  { name: "4-zoomies", takes: [{ at: 0, mode: "zoomies" }], seconds: 12, about: "10×: 168 bpm hyperpop. The chipmunk choir sings \"ship it\" and \"o-kay! scale, SCAAALE!\", the inbox overflows on bar 8." },
   { name: "5-walkies-to-zoomies", takes: [{ at: 0, mode: "walkies" }, { at: 6.1, mode: "zoomies" }], seconds: 14, about: "The press at 6.1 s (mid-bar): a riser fills the wait, the drop lands on the next bar line." },
   { name: "6-zoomies-to-pause", takes: [{ at: 0, mode: "zoomies" }, { at: 4.9, mode: "nap" }], seconds: 11, about: "Pause at 4.9 s: the tape stops on the next bar line and the nap pad swells in." },
   { name: "7-tour", takes: [{ at: 0, mode: "walkies" }, { at: 5.4, mode: "fetch" }, { at: 11.2, mode: "zoomies" }, { at: 20.4, mode: "fetch" }, { at: 25.1, mode: "walkies" }, { at: 30.3, mode: "nap" }, { at: 35.2, mode: "walkies" }], seconds: 41, about: "1× → 3× → 10× → 3× → 1× → pause → 1×, every press off the beat." },
