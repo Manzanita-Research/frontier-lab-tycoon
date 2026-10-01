@@ -179,6 +179,8 @@ export interface UiToast {
   group?: Toast["group"];
   /** A batch summary: the `you` toasts that piled up while the window was shut, oldest first. */
   batch?: readonly { text: string; tone: Tone; source?: NoticeSource }[];
+  /** FLT-76: no timer; it stays until it is dismissed (why the game slowed to 1×). */
+  pinned?: true;
 }
 
 function disastersOf(s: GameState): DisastersSnapshot {

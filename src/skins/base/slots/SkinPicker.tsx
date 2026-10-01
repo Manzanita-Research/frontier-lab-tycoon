@@ -3,7 +3,7 @@ import { useT } from "../../context";
 import type { SlotPropsMap } from "../../types";
 
 /** Pick a skin: each card previews it live, Apply keeps it, Cancel goes back to the one you came from. */
-export function SkinPicker({ skins, actions }: SlotPropsMap["SkinPicker"]) {
+export function SkinPicker({ skins, actions, speed }: SlotPropsMap["SkinPicker"]) {
   const t = useT();
   return (
     <Dialog label={t("skin.title")} close={actions.cancelSkinPicker} layerClass="news-backdrop" dialogClass="news-dialog">
@@ -37,6 +37,11 @@ export function SkinPicker({ skins, actions }: SlotPropsMap["SkinPicker"]) {
         <label className="skin-motion">
           <input type="checkbox" checked={skins.reducedMotion} onChange={(e) => actions.setReducedMotion(e.target.checked)} /> {t("skin.reduceMotion")}
         </label>
+        {speed && (
+          <label className="skin-motion">
+            <input type="checkbox" checked={speed.slowForBadNews} onChange={(e) => actions.setSlowForBadNews(e.target.checked)} /> {t("speed.slowForBadNews")}
+          </label>
+        )}
         <div className="skin-buttons">
           <button className="choice plain primary" onClick={() => actions.applySkin()}>
             <b>{t("skin.apply")}</b>

@@ -64,9 +64,13 @@ export function Toast({ toast, actions }: SlotPropsMap["Toast"]) {
     );
   }
   return (
-    <button type="button" className={`f95-toast ${toast.tone}`} onClick={() => actions.dismissToast(toast.id)} title="Click to dismiss">
+    <button type="button" className={`f95-toast ${toast.tone}${toast.pinned ? " pinned" : ""}`} onClick={() => actions.dismissToast(toast.id)} title="Click to dismiss">
       <Ico name={TONE_ICON[toast.tone]} size={18} />
-      <span>{toast.text}</span>
+      <span>
+        {toast.text}
+        {/* FLT-76: why the game slowed down stays until you have read it. */}
+        {toast.pinned && <i className="f95-pinhint">Click to dismiss, or ▶▶▶ to pretend it didn't happen.</i>}
+      </span>
     </button>
   );
 }
@@ -311,6 +315,7 @@ export function UnlockCard({ unlock, actions }: SlotPropsMap["UnlockCard"]) {
                 ))}
               </ul>
             )}
+            {unlock.quip && <p className="f95-quip">{unlock.quip}</p>}
           </div>
         </div>
         <div className="f95-row">

@@ -13,7 +13,7 @@ export function Toast({ toast, actions }: SlotPropsMap["Toast"]) {
     );
   }
   return (
-    <button className={`toast panel ${toast.tone}`} onClick={() => actions.dismissToast(toast.id)}>
+    <button className={`toast panel ${toast.tone}${toast.pinned ? " pinned" : ""}`} onClick={() => actions.dismissToast(toast.id)}>
       {toast.text}
     </button>
   );

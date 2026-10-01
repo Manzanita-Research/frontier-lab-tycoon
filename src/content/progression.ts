@@ -53,6 +53,16 @@ export const PROGRESSION: readonly ProgressionLevel[] = [
   { id: "scrutiny", level: 5, name: "Scrutiny", buildings: ["demo", "security"], staff: ["security"], systems: ["protests", "events", "disasters", "papers", "collusion", "hearing", "yacht", "defection", "poaching", "auditors", "promises", "capture"], panels: ["events", "papers", "disasters"], goal: { text: "Ship 3 models", metric: "models", target: 3 }, wakes: SCRUTINY_WAKES },
 ];
 export interface UnlockCard { id: string; title: string; body: string; items: string[] }
+/**
+ * FLT-76: every New! card gets a joke under its goal (the staggered Scrutiny cards are jokes already). Presentation only:
+ * the HUD adds it by the rung's id, so the sim's cards (and the golden World) are unchanged. A mod's own rung has none.
+ */
+export const UNLOCK_QUIPS: Readonly<Record<string, string>> = {
+  business: "You have a product now. Legal would like to know what it does.",
+  team: "You're hiring. The job ad says \"fast-paced\", which is the legal term for \"on fire\".",
+  race: "There's a leaderboard now. Nobody in this building will ever be calm again.",
+  scrutiny: "People have started reading your blog posts. Carefully. With highlighters.",
+};
 export interface ProgressView {
   level: Level;
   levelName: string;

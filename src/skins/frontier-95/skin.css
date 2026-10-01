@@ -1198,6 +1198,11 @@
       grid-template-columns: 30px minmax(0, 1fr) 20px auto;
       white-space: nowrap;
     }
+    /* FLT-76: a checkable entry ("Slow down for bad news") keeps its tick where the others keep their icon. */
+    .f95-menu-tick {
+      text-align: center;
+      font-weight: bold;
+    }
     .hd {
       padding: 5px 8px 2px 10px;
       font-size: 13px;
@@ -1385,6 +1390,16 @@
         color: #444;
       }
     }
+    /* FLT-76: the game slowed to 1× for this, and it stays until it is read. */
+    &.pinned {
+      font-weight: bold;
+      .f95-pinhint {
+        display: block;
+        margin-top: 3px;
+        font-weight: normal;
+        color: #444;
+      }
+    }
   }
   .f95-clip {
     width: 58px;
@@ -1546,6 +1561,11 @@
     width: min(440px, calc(30vw - 24px), calc(100vw - 20px));
     min-width: min(300px, calc(100vw - 20px));
     pointer-events: auto;
+  }
+  /* FLT-76: the New! card's joke, under what it unlocked. */
+  .f95-quip {
+    margin: 10px 0 0;
+    font-style: italic;
   }
   .f95-unlockitems {
     display: grid;

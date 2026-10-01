@@ -70,8 +70,17 @@ if (midgame) {
 // Say which mods are running, and whether any failed (the details are in Start ▸ Settings ▸ Mods…). Ids below zero never meet the World's.
 if (mods.mods.length > 0) first.toasts.push({ id: -1, text: `Mods on: ${mods.mods.map((m) => m.name).join(", ")}`, tone: "good", source: "mods", importance: "you" });
 if (mods.errors.length > 0) first.toasts.push({ id: -2, text: `${mods.errors.length === 1 ? "A mod" : `${mods.errors.length} mods`} didn't load. See Start, Settings, Mods…`, tone: "bad", source: "mods", importance: "you" });
+/** FLT-76: "Slow down for bad news", remembered on this device (on unless it was switched off). */
+export const SLOW_KEY = "flt.slowForBadNews";
+const slowForBadNews = (() => {
+  try {
+    return typeof localStorage === "undefined" || localStorage.getItem(SLOW_KEY) !== "off";
+  } catch {
+    return true;
+  }
+})();
 /** The actor's input. The watchdog swaps in the live World's report before it restarts the actor (FLT-81). */
-const input = { speed: initialSpeed as Speed, first };
+const input = { speed: initialSpeed as Speed, first, slowForBadNews };
 export const app = createActorAtoms(runtime, appMachine, { input });
 /** A notice for the first frame, from before the app mounts (the skin migration, FLT-71): the actor starts with it, like the mods line. */
 export const bootNotice = (text: string, tone: Tone = "neutral") => void first.toasts.push({ id: -3, text, tone, importance: "you" });
@@ -90,6 +99,7 @@ export function startApp(): () => void {
     snapshot: app.snapshot,
     restart: (last) => {
       input.speed = last.speed;
+      input.slowForBadNews = last.slowForBadNews;
       input.first = sim.report(true, true)!;
       registry.refresh(app.actor);
     },
@@ -114,6 +124,9 @@ export const atoms = {
   tool: pick((c) => c.tool),
   hover: pick((c) => c.hover),
   toasts: pick((c) => c.toasts),
+  /** FLT-76: the big moments still waiting their turn (same object until it changes), and the bad-news setting. */
+  stage: pick((c) => c.stage),
+  slowForBadNews: pick((c) => c.slowForBadNews),
   outcomeDismissed: pick((c) => c.outcomeDismissed),
   version: pick((c) => c.snap.version),
   cash: pick((c) => c.snap.cash),
@@ -213,6 +226,8 @@ if (typeof window !== "undefined") {
       staff: w.staff.filter((p) => p.machine.value !== "leaving" && p.machine.value !== "gone").map((p) => p.job),
       training: snap ? { name: snap.training.name, pct: snap.training.pct, etaDays: snap.training.etaDays } : null,
       event: snap?.event?.id ?? null, unlockCard: snap?.unlockCard?.title ?? null,
+      // FLT-76: the big moments the HUD is still holding back (a card here is open in the sim but not on screen yet).
+      stage: c ? [...c.stage.waiting] : [],
       pendingConfirm: snap?.pendingConfirm ? { kind: snap.pendingConfirm.kind, message: snap.pendingConfirm.message } : null,
       outcome: c ? { outcome: c.outcome, dismissed: c.outcomeDismissed } : null, overlays: c ? [...c.overlays] : [], warnings: snap ? [...snap.warnings] : [],
       toasts: c ? c.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) : [],

@@ -1,6 +1,6 @@
 // Everything a skin may ask the game to do, wired to the app machine and the UI atoms. Skins get this object and
 // nothing behind it.
-import { appNow, debugParams, registry, send } from "../../app/game";
+import { appNow, debugParams, registry, send, SLOW_KEY } from "../../app/game";
 import { SPEEDS, type Speed, type Tool } from "../../app/hud";
 import { mixerOpenAtom, playCue, setMixer } from "../../audio/state";
 import type { Cue } from "../../audio/score";
@@ -57,6 +57,14 @@ export const hudActions: HudActions = {
   closeInspector: () => send({ type: "SELECT", id: null }),
   highlight: (key) => send({ type: "HIGHLIGHT", key }),
   dismissToast: (id) => send({ type: "DISMISS_TOAST", id }),
+  setSlowForBadNews: (on) => {
+    try {
+      localStorage.setItem(SLOW_KEY, on ? "on" : "off");
+    } catch {
+      // Private mode: it holds for this visit.
+    }
+    send({ type: "SET_SLOW_FOR_BAD_NEWS", on });
+  },
   // The spend is kept in the snapshot: "do it anyway" sends the same command again, marked confirmed.
   confirmSpend: () => {
     const pending = appNow()?.snap.pendingConfirm;

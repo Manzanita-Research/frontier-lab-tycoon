@@ -157,7 +157,7 @@ type Fly = null | "facilities" | "programs" | "settings";
  * in the real thing), the widgets in Programs ▸ and behind Run…, then Help, Settings ▸ and Shut Down Lab…. A flyout opens
  * on hover or click; on a phone it opens in place instead.
  */
-export function BuildBar({ items, tip, teasers = [], disasters, widgets = [], actions }: SlotPropsMap["BuildBar"]) {
+export function BuildBar({ items, tip, teasers = [], disasters, widgets = [], actions, speed }: SlotPropsMap["BuildBar"]) {
   const t = useT();
   const coach = useCoach();
   const [openRaw, setOpenRaw] = useState(false);
@@ -364,6 +364,14 @@ export function BuildBar({ items, tip, teasers = [], disasters, widgets = [], ac
                         <span>Mods…</span>
                       </button>
                     </li>
+                    {speed && (
+                      <li>
+                        <button type="button" role="menuitemcheckbox" aria-checked={speed.slowForBadNews} data-testid="start-slow-bad-news" onClick={() => { setOpen(false); actions.setSlowForBadNews(!speed.slowForBadNews); }}>
+                          <span className="f95-menu-tick" aria-hidden>{speed.slowForBadNews ? "✓" : ""}</span>
+                          <span>{t("speed.slowForBadNews")}</span>
+                        </button>
+                      </li>
+                    )}
                     {disasters?.enabled && (
                       <li>
                         <button type="button" role="menuitem" data-testid="start-disasters" onClick={() => { setOpen(false); actions.openDisasters(); }}>

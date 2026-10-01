@@ -54,6 +54,8 @@ export interface GateEnv {
   rank: { prev: number; next: number; top: string } | null;
   /** The next free UI toast id. */
   seq: number;
+  /** An ending has the screen to itself (FLT-76, `moments.ts`): the window stays shut and the pile waits. */
+  shut?: boolean;
 }
 
 /** A world notice on the ticker: a news item that remembers who sent it. */
@@ -131,7 +133,7 @@ export function gateToasts(gate: NoticeGate, fresh: readonly UiToast[], env: Gat
     hold({ id: 1_000_000 + seq++, text: `You lost #1 on the Arena${env.rank.top ? ` to ${env.rank.top}` : ""}.`, tone: "bad", source: "leapfrog", importance: "you" });
   }
 
-  const open = gate.lastAt === null || env.now - gate.lastAt >= TOAST_WINDOW_MS;
+  const open = !env.shut && (gate.lastAt === null || env.now - gate.lastAt >= TOAST_WINDOW_MS);
   if (!open || held.length === 0) return { gate: held === gate.held ? gate : { lastAt: gate.lastAt, held }, toasts: out, wire, seq };
   const pile = held;
   const c = coalesce(pile, () => 1_000_000 + seq++);

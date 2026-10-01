@@ -129,6 +129,8 @@ export type AppSource = {
   selected: number | null;
   zone: number | null;
   outcomeDismissed: boolean;
+  stage: NonNullable<Parameters<typeof hudViewModel>[0]["stage"]>;
+  slowForBadNews: boolean;
 };
 
 /** Everything the view-model reads from the app actor, as one atom. */
@@ -147,6 +149,8 @@ const appSourceAtom = Atom.make((get): AsyncResult.AsyncResult<AppSource, never>
     selected: v(atoms.selected),
     zone: v(atoms.zone),
     outcomeDismissed: v(atoms.outcomeDismissed),
+    stage: v(atoms.stage),
+    slowForBadNews: v(atoms.slowForBadNews),
   });
 });
 
@@ -173,7 +177,7 @@ export function useAppSource(): AppSource | null {
   return src;
 }
 
-export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, selected, zone, outcomeDismissed }: AppSource): HudVM {
+export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, selected, zone, outcomeDismissed, stage, slowForBadNews }: AppSource): HudVM {
   const arenaOpen = useAtomValue(arenaOpenAtom);
   const arenaChosen = useAtomValue(arenaChosenAtom);
   const room = useAtomValue(roomAtom);
@@ -241,6 +245,8 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         toasts,
         news,
         outcomeDismissed,
+        stage,
+        slowForBadNews,
         tapHint,
         toldGateway: toldGateway.current,
         staffOpen,
@@ -276,7 +282,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         share,
         social,
       }),
-    [share, social, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, arenaChosen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, beat, skinUi, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, birdAppOpen, drama, saves],
+    [share, social, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, stage, slowForBadNews, tapHint, arenaOpen, arenaChosen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, beat, skinUi, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, birdAppOpen, drama, saves],
   );
   return useWindowBudget(vm, news);
 }
