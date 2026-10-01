@@ -10,6 +10,9 @@ const ENERGY: Record<Mode, number> = { nap: 0, walkies: 1, fetch: 2, zoomies: 3 
 /** Each mode's bus level: louder as it speeds up (fetch about +3 dB on walkies, the zoomies about +5), never a wall. */
 export const LEVEL: Record<Mode, number> = { nap: 1, walkies: 1, fetch: 1, zoomies: 0.78 };
 
+/** The nap's levels: the pad, the pad an octave up, the bell (FLT-80: just under walkies, as the ear hears them). */
+export const NAP = { low: 0.018, high: 0.015, bell: 0.011, pulse: 1.45 } as const;
+
 /** Paused (by the player, a card or a menu) naps; 1× walks; anything faster fetches; the top speed has the zoomies. */
 export function modeFor(speed: number, paused: boolean, top = 10): Mode {
   if (paused || speed <= 0) return "nap";
@@ -49,18 +52,21 @@ export const formant = (vowel: Vowel, i: number) => FORMANTS[vowel][i]! * HELIUM
 
 export const FLAVOURS = ["classic", "midi", "disco", "folk"] as const;
 export type Flavour = (typeof FLAVOURS)[number];
-/** `talk` is the wave the choir's words voice sings with; "custom" is a 25% pulse (see `voice`), a sound chip's voice. */
-export interface Palette { pad: OscillatorType; lead: OscillatorType; bass: OscillatorType; saw: OscillatorType; chop: OscillatorType; talk: OscillatorType; detune: number; ping: "ping" | "ding" | "chime"; drums: number }
+/**
+ * `talk` is the wave the choir's words voice sings with, `whistle` the one fetch whistles its hook on; "custom" is a
+ * 25% pulse (see `voice`), a sound chip's voice.
+ */
+export interface Palette { pad: OscillatorType; lead: OscillatorType; bass: OscillatorType; saw: OscillatorType; chop: OscillatorType; talk: OscillatorType; whistle: OscillatorType; detune: number; ping: "ping" | "ding" | "chime"; drums: number }
 export const PALETTES: Record<Flavour, Palette> = {
   // The first pass: triangle chords and a square arpeggio. Zoomies gets detuned saws.
-  classic: { pad: "triangle", lead: "square", bass: "triangle", saw: "sawtooth", chop: "sawtooth", talk: "sawtooth", detune: 14, ping: "ping", drums: 1 },
+  classic: { pad: "triangle", lead: "square", bass: "triangle", saw: "sawtooth", chop: "sawtooth", talk: "sawtooth", whistle: "triangle", detune: 14, ping: "ping", drums: 1 },
   // A General MIDI card from 1995: everything is a pulse wave, nothing is detuned, and the inbox goes *ding*. A square
   // can't say words (odd harmonics only), so the choir talks through a thin 25% pulse, like a sound card's speech chip.
-  midi: { pad: "square", lead: "square", bass: "square", saw: "square", chop: "square", talk: "custom", detune: 0, ping: "ding", drums: 0.75 },
+  midi: { pad: "square", lead: "square", bass: "square", saw: "square", chop: "square", talk: "custom", whistle: "custom", detune: 0, ping: "ding", drums: 0.75 },
   // Karaoke night: saws everywhere, a wide chorus, a bright kit.
-  disco: { pad: "sawtooth", lead: "sawtooth", bass: "sawtooth", saw: "sawtooth", chop: "sawtooth", talk: "sawtooth", detune: 22, ping: "ping", drums: 1.2 },
+  disco: { pad: "sawtooth", lead: "sawtooth", bass: "sawtooth", saw: "sawtooth", chop: "sawtooth", talk: "sawtooth", whistle: "sawtooth", detune: 22, ping: "ping", drums: 1.2 },
   // The field guide: soft sines and a kalimba for the inbox.
-  folk: { pad: "sine", lead: "triangle", bass: "sine", saw: "triangle", chop: "square", talk: "sawtooth", detune: 6, ping: "chime", drums: 0.6 },
+  folk: { pad: "sine", lead: "triangle", bass: "sine", saw: "triangle", chop: "square", talk: "sawtooth", whistle: "sine", detune: 6, ping: "chime", drums: 0.6 },
 };
 const SKIN_FLAVOURS: Readonly<Record<string, Flavour>> = { "frontier-95": "midi", "homepage-98": "midi", "discovery-disc-96": "midi", "karaoke-night": "disco", "field-almanac": "folk" };
 /** A skin's flavour of music; a mod's skin, or one nobody has scored, plays the classic band. */
@@ -160,6 +166,19 @@ function sing(s: Syllable, step: number, chord: readonly number[], root: number,
   if (s.coda === "t") out.push(say(vowelAt + sung + 0.03, 4000, 0.012, 0.22, "noise", { filter: "bandpass", q: 0.7 }), say(vowelAt + sung + 0.042, 4500, 0.04, 0.1, "noise", { filter: "highpass", q: 0.7 }));
   return out;
 }
+/**
+ * Fetch's hook (FLT-80): the zoomies choir's tune, whistled with no words, an octave above the jogging arpeggio. You
+ * learn it at 3×, and at 10× the chipmunks sing it back to you. Every eighth bar the dog's toy squeaks twice instead.
+ */
+function whistle(s: Syllable, step: number, chord: readonly number[], root: number, p: Palette): Tone {
+  const tones = [...chord, ...chord.map((n) => n + 12)];
+  const hz = midi(root + 24 + tones[s.deg % tones.length]!);
+  return tone(s.step * step, hz * 0.97, s.len * step * 0.8, 0.019 * level(p.whistle, "triangle"), p.whistle, { endHz: hz, hold: 0.55 });
+}
+function squeak(at: number, hz: number): Tone[] {
+  return [tone(at, hz, 0.09, 0.022, "sine", { endHz: hz * 1.5, attack: 0.02 }), tone(at, hz * 2, 0.06, 0.006, "sine", { endHz: hz * 3 })];
+}
+
 /** The inbox. Classic pings, Frontier 95 dings a little chord, the field guide plucks a kalimba. */
 function ping(at: number, chord: readonly number[], root: number, p: Palette, gain = 0.07): Tone[] {
   const top = root + 36;
@@ -179,9 +198,14 @@ export function barTones({ mode, flavour, era, bar }: BarSpec): Tone[] {
   const out: Tone[] = [];
   switch (mode) {
     case "nap": {
-      // A held pad that breathes in, and now and then one soft bell.
-      for (const n of chord) out.push(tone(0, midi(root + n), beat * 2.4, 0.032 * level(p.pad === "square" ? "triangle" : "sine", "sine"), p.pad === "square" ? "triangle" : "sine", { attack: beat * 0.9 }));
-      if (bar % 2 === 1) out.push(tone(beat, midi(root + 24 + chord[bar % 3]!), 1.6, 0.012, "sine"));
+      // A held pad that breathes in, and now and then one soft bell. FLT-80: the pad also breathes an octave up, where a
+      // laptop speaker (and an ear at background volume) can hear it: FLT-66's 100-200 Hz sines alone felt like silence. Just
+      // the third and the fifth up there: a doubled root sounds like an organ, and the nap stays sparser than walkies.
+      // It sits just under its own flavour's walkies, and Frontier 95's walkies (all squares) is the louder one.
+      const [wave, lift] = p.pad === "square" ? (["triangle", NAP.pulse] as const) : (["sine", 1] as const);
+      for (const n of chord) out.push(tone(0, midi(root + n), beat * 2.4, NAP.low * lift, wave, { attack: beat * 0.9 }));
+      for (const n of chord.slice(1)) out.push(tone(0, midi(root + 12 + n), beat * 2.4, NAP.high * lift, wave, { attack: beat * 1.1 }));
+      if (bar % 2 === 1) out.push(tone(beat, midi(root + 24 + chord[bar % 3]!), 1.6, NAP.bell * lift, "sine"));
       break;
     }
     case "walkies": {
@@ -198,6 +222,12 @@ export function barTones({ mode, flavour, era, bar }: BarSpec): Tone[] {
       out.push(kick(0, 0.13), kick(beat * 2, 0.13));
       out.push(...snare(beat, p, 0.08), ...snare(beat * 3, p, 0.08));
       for (let i = 0; i < 16; i++) out.push(hat(i * step, p, i % 2 ? 0.026 : 0.011));
+      // The hook: the zoomies tune, whistled. On the eighth bar the whistle stops short and the toy squeaks: fetch!
+      const hook = bar % 2 ? HOOK_B : HOOK_A;
+      if (bar % 8 === 7) {
+        for (const s of hook.filter((s) => s.step < 8)) out.push(whistle(s, step, chord, root, p));
+        out.push(...squeak(step * 12, midi(root + 24 + chord[2]!)), ...squeak(step * 14, midi(root + 28 + chord[2]!)));
+      } else for (const s of hook) out.push(whistle(s, step, chord, root, p));
       break;
     }
     case "zoomies": {

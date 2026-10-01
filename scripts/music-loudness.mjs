@@ -2,7 +2,8 @@
 // FLT-80: how loud a clip sounds, not just how much energy it has. RMS says the nap's low sine pad is as loud as
 // walkies; the ear disagrees. This is ITU BS.1770 integrated loudness (K-weighting, 400 ms blocks, the -70 LUFS and
 // -10 LU gates) at 48 kHz, plus the same measure through an A-weighting filter: the music plays at background level,
-// where the ear (and a laptop speaker) barely hears a 130 Hz sine, and BS.1770 doesn't model that.
+// where the ear barely hears a 130 Hz sine, and BS.1770 doesn't model that; and "laptop", A-weighting through a
+// small speaker (a 12 dB/octave roll-off below 200 Hz), which is how most players will hear the nap pad.
 //
 //   node scripts/music-loudness.mjs shots/music-before shots/music-after   # a table per directory of WAVs
 import { readFileSync, readdirSync, statSync } from "node:fs";
@@ -35,6 +36,11 @@ const filter = (x, stages) => {
   }
   return x;
 };
+/** A second-order Butterworth high-pass (RBJ): a laptop speaker's bass roll-off. */
+function speaker(fs, f = 200) {
+  const w0 = (2 * Math.PI * f) / fs, alpha = Math.sin(w0) / Math.SQRT2, c = Math.cos(w0), a0 = 1 + alpha;
+  return [{ b: [(1 + c) / 2 / a0, -(1 + c) / a0, (1 + c) / 2 / a0], a: [(-2 * c) / a0, (1 - alpha) / a0] }];
+}
 /** A 1 kHz sine reads 0 dB through the A-weighting. */
 const A_NORM = (() => {
   const fs = 48000, n = fs;
@@ -44,10 +50,11 @@ const A_NORM = (() => {
   return 0.5 / (e / (n / 2));
 })();
 
-/** Integrated loudness (LUFS) of mono samples at 48 kHz; -Infinity for silence. `weighting: "A"` swaps K for A. */
+/** Integrated loudness (LUFS) of mono samples at 48 kHz; -Infinity for silence. `weighting`: "K" (BS.1770), "A" or "laptop". */
 export function lufs(samples, sampleRate = 48000, weighting = "K") {
   if (sampleRate !== 48000) throw new Error("lufs: weighting coefficients are for 48 kHz");
-  const x = weighting === "A" ? filter(Float64Array.from(samples), aStages(sampleRate)).map((v) => v * Math.sqrt(A_NORM)) : filter(Float64Array.from(samples), STAGES);
+  const stages = weighting === "K" ? STAGES : [...aStages(sampleRate), ...(weighting === "laptop" ? speaker(sampleRate) : [])];
+  const x = filter(Float64Array.from(samples), stages).map((v) => (weighting === "K" ? v : v * Math.sqrt(A_NORM)));
   const block = Math.round(0.4 * sampleRate), hop = Math.round(0.1 * sampleRate);
   const blocks = [];
   for (let i = 0; i + block <= x.length; i += hop) {
@@ -80,13 +87,13 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const dirs = process.argv.slice(2);
   const files = [...new Set(dirs.flatMap((d) => readdirSync(d).filter((f) => f.endsWith(".wav"))))].sort((a, b) => parseInt(a) - parseInt(b));
   console.log(`| Clip | ${dirs.join(" | ")} |\n|---|${dirs.map(() => "---|").join("")}`);
-  // Each cell: K-weighted LUFS / A-weighted.
+  // Each cell: K-weighted LUFS / A-weighted / A-weighted through a laptop speaker.
   for (const f of files) {
     const cells = dirs.map((d) => {
       const p = join(d, f);
       try { statSync(p); } catch { return "-"; }
       const { samples, sampleRate } = readWav(p);
-      return `${lufs(samples, sampleRate).toFixed(1)} / ${lufs(samples, sampleRate, "A").toFixed(1)}`;
+      return ["K", "A", "laptop"].map((w) => lufs(samples, sampleRate, w).toFixed(1)).join(" / ");
     });
     console.log(`| ${f} | ${cells.join(" | ")} |`);
   }
