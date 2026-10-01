@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { FLAVOURS, LEVEL, MODES, barLength, barTones, conduct, flavourFor, type Flavour, meter, modeFor, plan, tapeStop, transition, type Cue, type Fade, type Mode, type Want } from "./music";
+import { FLAVOURS, LEVEL, MODES, PALETTES, SPEAKING, barLength, level, barTones, conduct, flavourFor, type Flavour, meter, modeFor, plan, speaking, tapeStop, transition, type Cue, type Fade, type Mode, type Tone, type Want } from "./music";
 import { CHORDS, eraScore, midi } from "./score";
 
 const ERA = "1";
+/** How loud a gain sounds on its wave, back on the same scale as a triangle (see `level`). */
+const LOUDNESS_OF = (wave: Tone["wave"]) => (wave === "noise" ? 1 : 1 / level(wave as OscillatorType, "triangle"));
 const want = (mode: Mode): Want => ({ mode, flavour: "classic", era: ERA });
 const perSecond = (mode: Mode, flavour: Flavour = "classic") => {
   const tones = Array.from({ length: 8 }, (_, bar) => barTones({ mode, flavour, era: ERA, bar }).length).reduce((a, b) => a + b, 0);
@@ -71,7 +73,10 @@ describe("music follows the game speed (FLT-66)", () => {
     for (const tones of bars) {
       const sung = tones.filter((t) => t.vowel);
       expect(sung.length).toBeGreaterThan(4);
-      expect(Math.min(...sung.map((t) => t.hz))).toBeGreaterThan(midi(eraScore(ERA).root + 12)); // pitched up
+      // The chipmunk is pitched up (FLT-80 sings the words an octave or two under it, so the top line is the chipmunk).
+      const chipmunk = sung.filter((t) => t.hz > SPEAKING);
+      expect(chipmunk.length).toBe(sung.length / 2);
+      expect(Math.min(...chipmunk.map((t) => t.hz))).toBeGreaterThan(midi(eraScore(ERA).root + 12));
       expect(tones.filter((t) => t.wave === "sine" && t.endHz === 42).map((t) => t.at).slice(0, 3)).toEqual([0, beat, beat * 2]);
       expect(tones.filter((t) => (t.attack ?? 0) > beat / 2).length).toBeGreaterThanOrEqual(12); // the sidechain swell
     }
@@ -87,8 +92,105 @@ describe("music follows the game speed (FLT-66)", () => {
     expect(flavourFor("some-mod-skin")).toBe("classic");
     const midiBar = barTones({ mode: "zoomies", flavour: "midi", era: ERA, bar: 1 });
     expect(midiBar.every((t) => !t.detune)).toBe(true);
-    expect(new Set(midiBar.filter((t) => t.wave !== "noise" && t.wave !== "sine" && t.wave !== "triangle").map((t) => t.wave))).toEqual(new Set(["square"]));
+    // Pulse waves only: squares, and the 25% pulse ("custom") the choir talks through (FLT-80).
+    expect(new Set(midiBar.filter((t) => t.wave !== "noise" && t.wave !== "sine" && t.wave !== "triangle").map((t) => t.wave))).toEqual(new Set(["square", "custom"]));
     expect(barTones({ mode: "zoomies", flavour: "classic", era: ERA, bar: 1 })).not.toEqual(midiBar);
+  });
+});
+
+describe("the zoomies choir sings words (FLT-80)", () => {
+  const bar = (n: number, flavour: Flavour = "classic") => barTones({ mode: "zoomies", flavour, era: ERA, bar: n });
+  const choir = (tones: Tone[]) => tones.filter((t) => t.part === "choir");
+  const vowels = (tones: Tone[]) => choir(tones).filter((t) => t.vowel);
+
+  it("holds every sung vowel (a pluck decays before its glide, and reads as a syllable)", () => {
+    for (const n of [0, 1]) for (const t of vowels(bar(n))) expect(t.hold).toBeGreaterThanOrEqual(0.7);
+  });
+
+  it("sings each syllable twice: the chipmunk, and the same line folded into a speaking range for the words", () => {
+    for (const flavour of FLAVOURS) for (const n of [0, 1, 2, 3]) {
+      const sung = vowels(bar(n, flavour));
+      const words = sung.filter((t) => t.hz <= SPEAKING);
+      const chipmunk = sung.filter((t) => t.hz > SPEAKING);
+      expect(words.length).toBe(chipmunk.length);
+      words.forEach((w, i) => {
+        const c = chipmunk[i]!;
+        expect(w.at).toBe(c.at); expect(w.vowel).toBe(c.vowel);
+        expect(Math.log2(c.hz / w.hz) % 1).toBeCloseTo(0, 9); // octaves apart
+        expect(w.hz).toBeGreaterThan(SPEAKING / 2.2);
+        const loud = (t: Tone) => t.gain / level(t.wave as OscillatorType, "sawtooth");
+        expect(loud(w)).toBeGreaterThan(loud(c)); // the words lead
+      });
+    }
+    expect(speaking(1046.5)).toBeCloseTo(261.6, 1);
+    expect(speaking(300)).toBe(300);
+  });
+
+  it("'o-kay' and 'scale' glide: o into u, e into i, and the l at the end of scale", () => {
+    const b = vowels(bar(1));
+    expect(b.filter((t) => t.vowel === "o" && t.to?.join() === "u").length).toBeGreaterThanOrEqual(4);
+    expect(b.filter((t) => t.vowel === "e" && t.to?.join() === "i").length).toBeGreaterThanOrEqual(4);
+    expect(b.filter((t) => t.vowel === "e" && t.to?.join() === "i,l").length).toBeGreaterThanOrEqual(4);
+  });
+
+  it("stops for its consonants: 'ship' closes before the p, and the s of 'scale' before its k", () => {
+    const a = choir(bar(0));
+    const beat = 60 / meter("zoomies", ERA).bpm;
+    // "shi-" is sung from step 0; the p of "-p it" pops on step 2 (a low burst). Between them, silence.
+    const shi = a.filter((t) => t.vowel && t.at < beat / 2);
+    const p = a.find((t) => t.wave === "noise" && t.hz === 700 && t.at >= beat / 2 - 1e-9)!;
+    for (const t of shi) expect(p.at - (t.at + t.duration)).toBeGreaterThan(0.04);
+    const b = choir(bar(1));
+    const s = b.filter((t) => t.wave === "noise" && t.filter === "highpass" && t.hz === 6500);
+    expect(s.length).toBe(2);
+    for (const hiss of s) {
+      const k = b.find((t) => t.wave === "noise" && t.filter === "bandpass" && t.at > hiss.at)!;
+      expect(k.at - (hiss.at + hiss.duration)).toBeGreaterThan(0.025);
+    }
+  });
+});
+
+describe("fetch has a hook, and the nap can be heard (FLT-80)", () => {
+  const bars = (mode: Mode, flavour: Flavour = "classic") => Array.from({ length: 8 }, (_, bar) => barTones({ mode, flavour, era: ERA, bar }));
+  const whistles = (tones: Tone[]) => tones.filter((t) => t.hold === 0.55);
+
+  it("fetch whistles the zoomies choir's tune, note for note, so 10× sings back what 3× taught you", () => {
+    for (const flavour of FLAVOURS) {
+      const fetch = bars("fetch", flavour), zoomies = bars("zoomies", flavour);
+      for (const bar of [0, 1, 2, 3, 4, 5, 6]) {
+        const sung = zoomies[bar]!.filter((t) => t.part === "choir" && t.wave !== "noise" && t.hz > SPEAKING).map((t) => t.hz / 0.94);
+        const whistled = whistles(fetch[bar]!);
+        expect(whistled.map((t) => t.endHz)).toEqual(sung.map((hz) => expect.closeTo(hz, 6)));
+        expect(whistled.every((t) => t.at + t.duration <= barLength(meter("fetch", ERA)))).toBe(true);
+      }
+    }
+  });
+
+  it("every eighth bar the whistle stops at half time and the toy squeaks twice", () => {
+    const [last] = bars("fetch").slice(7);
+    const half = barLength(meter("fetch", ERA)) / 2;
+    expect(whistles(last!).length).toBeGreaterThan(0);
+    expect(whistles(last!).every((t) => t.at < half)).toBe(true);
+    const squeaks = last!.filter((t) => t.wave === "sine" && t.endHz === t.hz * 1.5);
+    expect(new Set(squeaks.map((t) => t.at)).size).toBe(2); // each squeak with its octave sparkle
+    expect(squeaks.every((t) => t.at >= half)).toBe(true);
+  });
+
+  it("the whistle sits above the jog and under the mix: quieter than the arpeggio it rides on", () => {
+    for (const flavour of FLAVOURS) {
+      const bar = bars("fetch", flavour)[0]!;
+      const lead = Math.max(...bar.filter((t) => t.wave === PALETTES[flavour].lead && t.hold === undefined && t.at > 0).map((t) => t.gain * LOUDNESS_OF(t.wave)));
+      for (const t of whistles(bar)) expect(t.gain * LOUDNESS_OF(t.wave)).toBeLessThan(lead);
+    }
+  });
+
+  it("the nap's pad breathes an octave up as well, where a laptop speaker can play it", () => {
+    for (const flavour of FLAVOURS) {
+      const pad = bars("nap", flavour)[0]!.filter((t) => t.at === 0);
+      const low = pad.slice(0, 3), high = pad.slice(3, 5);
+      expect(high.map((t) => t.hz)).toEqual(low.slice(1).map((t) => expect.closeTo(t.hz * 2, 6)));
+      expect(high.every((t) => t.hz > 200)).toBe(true);
+    }
   });
 });
 
