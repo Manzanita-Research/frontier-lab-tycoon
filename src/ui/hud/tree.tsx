@@ -10,10 +10,12 @@ export function Docked({ vm, actions }: { vm: HudVM; actions: HudActions }) {
   const t = useT();
   const { Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, ThoughtsPanel, Ticker, Toast, Assistant, Arena, Benchmarks, Voice, Factions, BirdApp, NewsControls, NewsArrival, PhotoButton, Papers, DisasterAlert, DramaButton, WindowTray } = slots;
   // One toast at a time, the newest winning; a standing hint only shows while nobody is talking.
-  const newest = vm.toasts.at(-1);
+  const newest = vm.toasts.filter((t) => !t.snag).at(-1);
+  // The recovery toast (FLT-84) stands beside it, so the next "Training Hall down" doesn't bury the Copy details button.
+  const snag = vm.toasts.find((t) => t.snag);
   const talking: ToastVM[] = newest ? [newest] : vm.hints.map((h, i): ToastVM => ({ id: -1 - i, text: t(`hint.${h}`), tone: "hint" }));
   // Standing warnings come first and stay until whatever causes them is fixed.
-  const stack: ToastVM[] = [...vm.warnings.map((text, i): ToastVM => ({ id: -100 - i, text, tone: "warn" })), ...talking];
+  const stack: ToastVM[] = [...vm.warnings.map((text, i): ToastVM => ({ id: -100 - i, text, tone: "warn" })), ...(snag ? [snag] : []), ...talking];
   const nodes: Record<DockedSlot, ReactNode> = {
     Stats: <Stats stats={vm.stats} layout={vm.layout} visible={vm.visible} actions={actions} disasters={vm.disasters} />,
     // Hidden until there is something to show: the training bar appears once a Training Hall is up.

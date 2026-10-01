@@ -19,6 +19,7 @@ import type { Snapshot, Speed, Tool, UiSelection, UiToast } from "./hud";
 import { gateToasts, mergeWire, newGate, WIRE_MAX, type NoticeGate, type WireItem } from "./notices";
 import { Sim, type SyncReport } from "./sim";
 import { Saves, type SaveWhy } from "./saves";
+import { describe, maySnag, SNAG_TEXT, SNAG_TOAST_MS, snagReport } from "./snag";
 import type { SlotId } from "../save";
 import type { GameDefinition } from "../mods/game-definition";
 
@@ -36,9 +37,25 @@ export const AUTOSAVE_DAYS = 30;
  * every event after that without a word: the clock stops, ▶ and Save do nothing, and only a reload helps. So each action
  * owns its failure: the cause goes to the console (the first time, then at 10, 100, ... so a bug that fires every frame
  * cannot flood it), and the app carries on. The next frame tries again.
+ * FLT-84: and the player hears about it, once a minute at most, with the details to copy into a bug report (`SNAG`).
  */
-const survive = <R>(name: string, effect: Effect.Effect<void, never, R>) =>
-  effect.pipe(Effect.catchCause((cause) => Effect.sync(() => reportFailure(name, cause))));
+const survive = <R>(name: string, self: { send: (event: { type: "SNAG"; report: string; now: number }) => void }, effect: Effect.Effect<void, never, R>) =>
+  effect.pipe(
+    Effect.catchCause((cause) =>
+      Effect.gen(function* () {
+        reportFailure(name, cause);
+        const sim = yield* Effect.serviceOption(Sim);
+        const now = yield* Clock.currentTimeMillis;
+        // The report is best effort: a second failure here must not be the one that ends the actor.
+        try {
+          const w = Option.isSome(sim) ? sim.value.world : null;
+          self.send({ type: "SNAG", report: snagReport({ where: name, ...describe(Cause.squash(cause)), seed: w?.seed ?? 0, tick: w?.tick ?? 0, day: w?.day ?? 0 }), now });
+        } catch {
+          /* the console has it */
+        }
+      }),
+    ),
+  );
 
 const failures = new Map<string, number>();
 function reportFailure(name: string, cause: Cause.Cause<unknown>) {
@@ -89,10 +106,13 @@ export const AppContext = Schema.Struct({
   zone: Schema.NullOr(Schema.Number),
   /** Independently owned menus: closing one cannot resume time beneath another. */
   overlays: opaque<readonly string[]>(),
+  /** When the last snag toast went up (FLT-84, Clock milliseconds), so there is at most one a minute. */
+  snagAt: Schema.NullOr(Schema.Number),
 });
 export type AppContext = typeof AppContext.Type;
 
-export const AppInput = Schema.Struct({ speed: opaque<Speed>(), first: opaque<SyncReport>() });
+/** `snagAt` carries the snag toasts' minute across a watchdog restart (FLT-84). */
+export const AppInput = Schema.Struct({ speed: opaque<Speed>(), first: opaque<SyncReport>(), snagAt: Schema.optional(Schema.NullOr(Schema.Number)) });
 export type AppInput = typeof AppInput.Type;
 
 /** The animation frames, as machine events. */
@@ -187,13 +207,15 @@ export const appMachine = setupEffect({
       SET_OVERLAY: Schema.Struct({ id: Schema.String, open: Schema.Boolean }),
       DISMISS_TOAST: Schema.Struct({ id: Schema.Number }),
       TOAST_EXPIRED: Schema.Struct({ id: Schema.Number }),
+      /** A guard caught an error and the game carried on (FLT-84): `report` is what "Copy details" copies. */
+      SNAG: Schema.Struct({ report: Schema.String, now: Schema.Number }),
     },
   },
   actors: { frameLoop },
   actions: {
     /** Run `n` ticks (commands on the first), then report. */
     advance: (args) =>
-      survive("advance", Effect.gen(function* () {
+      survive("advance", args.self, Effect.gen(function* () {
         const sim = yield* Sim;
         const p = args.params as { n: number; commands: readonly Command[]; alpha: number; publish: boolean; now: number; ui: UiSelection };
         sim.ui = p.ui;
@@ -204,7 +226,7 @@ export const appMachine = setupEffect({
       })),
     /** Time stands still: apply what was queued, then report. */
     hold: (args) =>
-      survive("hold", Effect.gen(function* () {
+      survive("hold", args.self, Effect.gen(function* () {
         const sim = yield* Sim;
         const p = args.params as { commands: readonly Command[]; publish: boolean; now: number; ui: UiSelection };
         sim.ui = p.ui;
@@ -215,7 +237,7 @@ export const appMachine = setupEffect({
       })),
     /** A new lab, seeded from the clock and the old seed. */
     newLab: (args) =>
-      survive("newLab", Effect.gen(function* () {
+      survive("newLab", args.self, Effect.gen(function* () {
         const sim = yield* Sim;
         const ms = yield* Clock.currentTimeMillis;
         const daily = args.event.type === "DAILY_LAB" ? args.event.daily : null;
@@ -227,7 +249,7 @@ export const appMachine = setupEffect({
       })),
     /** A save's World becomes the live one. */
     loadLab: (args) =>
-      survive("loadLab", Effect.gen(function* () {
+      survive("loadLab", args.self, Effect.gen(function* () {
         const sim = yield* Sim;
         if (args.event.type !== "LOAD_LAB") return;
         sim.load(args.event.world, args.event.def);
@@ -239,7 +261,7 @@ export const appMachine = setupEffect({
      * Without a Saves service (tests, a headless shell) this does nothing.
      */
     save: (args) =>
-      survive("save", Effect.gen(function* () {
+      survive("save", args.self, Effect.gen(function* () {
         const saves = yield* Effect.serviceOption(Saves);
         if (Option.isNone(saves)) return;
         const sim = yield* Sim;
@@ -271,6 +293,7 @@ export const appMachine = setupEffect({
     highlight: null,
     zone: null,
     overlays: [],
+    snagAt: input.snagAt ?? null,
   }),
   invoke: { src: "frameLoop" },
   initial: "playing",
@@ -343,7 +366,7 @@ export const appMachine = setupEffect({
         // The staffer whose zone was being painted has been let go.
         ...(report.snap && context.zone !== null && !report.snap.ops.staff.some((o) => o.id === context.zone) ? { zone: null } : {}),
       };
-      if (!context.held) for (const t of fresh) enq.raise({ type: "TOAST_EXPIRED", id: t.id }, { id: `toast:${t.id}`, delay: t.batch ? BATCH_TOAST_MS : TOAST_MS });
+      if (!context.held) for (const t of fresh) enq.raise({ type: "TOAST_EXPIRED", id: t.id }, { id: `toast:${t.id}`, delay: lifeOf(t) });
       // The autosave: each new month, and the moment the lab ends (won, lost, or one of the endings' front pages).
       // A month is the calendar turning by one; a jump (a save loading, a new lab) is not the player's month ending.
       const why: SaveWhy | null = report.outcome !== "playing" && report.outcome !== context.outcome && context.outcome === "playing" ? "ending"
@@ -437,6 +460,15 @@ export const appMachine = setupEffect({
       if (!context.held) enq.raise({ type: "TOAST_EXPIRED", id }, { id: `toast:${id}`, delay: TOAST_MS });
       return { context: { ...addToasts(context, [{ id, text: event.text, tone: event.tone }]), toastSeq: context.toastSeq + 1 } };
     },
+    // One toast a minute at most, and never two at once: a new snag replaces the one showing (FLT-84).
+    SNAG: ({ context, event }, enq) => {
+      if (!maySnag(context.snagAt, event.now)) return;
+      const id = 1_000_000 + context.toastSeq;
+      const toast: UiToast = { id, text: SNAG_TEXT, tone: "bad", snag: event.report };
+      const calm = { ...context, toasts: context.toasts.filter((t) => !t.snag), held: context.held && context.held.filter((t) => !t.snag) };
+      if (!context.held) enq.raise({ type: "TOAST_EXPIRED", id }, { id: `toast:${id}`, delay: SNAG_TOAST_MS });
+      return { context: { ...addToasts(calm, [toast]), toastSeq: context.toastSeq + 1, snagAt: event.now } };
+    },
     HOLD_TOASTS: ({ context, event }, enq) => {
       if (event.on === !!context.held) return;
       // On: what is showing steps off the shot with the rest of the HUD, and waits with a fresh clock.
@@ -445,7 +477,7 @@ export const appMachine = setupEffect({
         return { context: { ...context, toasts: [], held: context.toasts } };
       }
       const held = context.held ?? [];
-      for (const t of held) enq.raise({ type: "TOAST_EXPIRED", id: t.id }, { id: `toast:${t.id}`, delay: t.batch ? BATCH_TOAST_MS : TOAST_MS });
+      for (const t of held) enq.raise({ type: "TOAST_EXPIRED", id: t.id }, { id: `toast:${t.id}`, delay: lifeOf(t) });
       return { context: { ...context, toasts: merged(context.toasts, held), held: null } };
     },
     DISMISS_TOAST: ({ context, event }, enq) => {
@@ -458,6 +490,9 @@ export const appMachine = setupEffect({
     },
   },
 });
+
+/** How long a toast stays up: a batch summary is a list to read, a snag has a button to reach for. */
+const lifeOf = (t: UiToast) => (t.snag ? SNAG_TOAST_MS : t.batch ? BATCH_TOAST_MS : TOAST_MS);
 
 /** The app's side of a new lab: nothing queued, nothing selected, running at 1x. */
 const freshLab = (context: AppContext): AppContext => ({ ...context, queue: [], acc: 0, toasts: [], held: null, gate: newGate(), wire: [], headlines: [], outcomeDismissed: false, speed: 1, tool: null, hover: null, selected: null, follow: false, highlight: null, zone: null, overlays: [] });

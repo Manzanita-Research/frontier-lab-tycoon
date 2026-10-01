@@ -2,7 +2,7 @@
 // the event card, the era card as a prize notification, the win/lose card and "you've got mail".
 import { factionAttrs } from "../kit";
 import { useT } from "../context";
-import { Evidence } from "../kit";
+import { Evidence, SnagCopy } from "../kit";
 import type { SlotPropsMap } from "../types";
 import { New, Pop } from "./parts";
 import { Spark } from "./icons";
@@ -21,6 +21,16 @@ const TITLE = { good: "Congratulations!!!", bad: "WARNING!!!", joke: "Hey, you!"
 
 /** A toast is a pop-up window. Clicking the link (or the box) makes it go away, as promised. */
 export function Toast({ toast, actions }: SlotPropsMap["Toast"]) {
+  const t = useT();
+  if (toast.snag) {
+    // FLT-84: the game caught an error and kept going.
+    return (
+      <Pop title={t("snag.title")} className="gc-toast bad snag" role="alert" onClose={() => actions.dismissToast(toast.id)}>
+        <div>{t("snag.text")}</div>
+        <SnagCopy id={toast.id} actions={actions} className="gc-link" />
+      </Pop>
+    );
+  }
   // A hint is a standing tip and a warning a standing problem: neither can be closed, they go when it comes true / is fixed.
   if (toast.tone === "hint" || toast.tone === "warn") {
     return (

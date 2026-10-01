@@ -396,6 +396,27 @@ button {
 .toast.bad {
   background: color-mix(in srgb, var(--flt-color-bad) 16%, var(--flt-color-panel));
 }
+/* The recovery toast (FLT-84): the game caught an error and kept going */
+.toast.snag {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px 10px;
+}
+.toast.snag button {
+  font: inherit;
+  font-size: 13px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--flt-color-line);
+  background: var(--flt-color-panel);
+  color: inherit;
+  cursor: pointer;
+}
+.toast.snag .snag-copy {
+  font-weight: 700;
+}
 @keyframes toast-in {
   from {
     transform: translateY(-16px) scale(0.85);
@@ -1514,4 +1535,19 @@ button {
   .follow {
     padding: 5px 10px;
   }
+}
+
+/* FLT-84: the recovery toast's buttons in a skin's own toast (every skin gets this; a skin may restyle it) */
+.snag-row {
+  display: flex;
+  flex-basis: 100%;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.snag-row button {
+  font: inherit;
+  font-size: 0.9em;
+  cursor: pointer;
 }

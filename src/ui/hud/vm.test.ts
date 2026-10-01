@@ -209,6 +209,17 @@ describe("the spend check, the standing warnings and the release goal, as a skin
   });
 });
 
+describe("the recovery toast (FLT-84)", () => {
+  it("marks a caught error's toast as a snag, and keeps the report itself out of the view-model", () => {
+    const vm = hudViewModel(fixtureInput({ snag: true }));
+    const snag = vm.toasts.find((t) => t.snag);
+    expect(snag).toEqual({ id: 3, text: "Frontier Lab Tycoon hit a snag and kept going.", tone: "bad", snag: true });
+    expect(JSON.stringify(vm)).not.toContain("snag report");
+    expect(vm.toasts.filter((t) => !t.snag).every((t) => !("snag" in t))).toBe(true);
+    assertPlain(vm.toasts);
+  });
+});
+
 describe("Playable v1: what the lab has earned, the coach, and Help", () => {
   const level = (n: 1 | 2 | 3 | 4 | 5, more: Parameters<typeof fixtureInput>[0] = {}) => hudViewModel(fixtureInput({ level: n, ...more }));
 
