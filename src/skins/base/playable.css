@@ -354,6 +354,11 @@
   border: 2px solid color-mix(in srgb, var(--flt-color-line) 35%, transparent);
   font-size: 13px;
 }
+/* FLT-76: the New! card's joke, under what it unlocked. */
+.unlock-body p.unlock-quip {
+  font-style: italic;
+  opacity: 0.85;
+}
 .unlock-ok {
   padding: 6px 18px;
   border: var(--flt-border-width) var(--flt-border-style) var(--flt-color-line);

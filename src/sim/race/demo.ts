@@ -19,13 +19,13 @@ function patch(s: GameState, id: string, over: Partial<RivalContext>, value?: st
 }
 
 /** Put the clock `ticks` before the midnight that starts `day`. */
-function before(s: GameState, day: number, ticks: number) {
+export function before(s: GameState, day: number, ticks: number) {
   s.tick = day * TICKS_PER_DAY - ticks;
   s.day = Math.floor(s.tick / TICKS_PER_DAY);
 }
 
 /** A lab with a gateway and revenue, still in Era 1. */
-function withRevenue(s: GameState) {
+export function withRevenue(s: GameState) {
   s.race.nextAuction = 9999;
   delete s.flags["offer:auction"];
   for (let z = 18; z >= 10; z--) applyNow(s, [{ type: "placePath", x: 11, z }]);

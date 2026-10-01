@@ -2,14 +2,14 @@
 import { describe, expect, it, vi, type Mock } from "vitest";
 import { makeStack } from "./stack";
 
-function stackOf(box: number, inner: number, windows: [id: string, opened: number, minimised?: boolean][]) {
+function stackOf(box: number, inner: number, windows: [id: string, opened: number, minimised?: boolean, keep?: boolean][]) {
   const stack = makeStack();
   stack.box = { clientHeight: box } as HTMLDivElement;
   stack.inner = { offsetHeight: inner } as HTMLDivElement;
   const folds: Record<string, Mock<() => void>> = {};
-  for (const [id, opened, minimised = false] of windows) {
+  for (const [id, opened, minimised = false, keep] of windows) {
     folds[id] = vi.fn<() => void>();
-    stack.entries.set(id, { minimised, opened, minimise: folds[id]! });
+    stack.entries.set(id, { minimised, opened, minimise: folds[id]!, keep });
   }
   stack.clock = windows.length;
   return { stack, folds };
@@ -55,6 +55,18 @@ describe("the window stack", () => {
     expect(stack.entries.get("arena")!.opened).toBeGreaterThan(stack.entries.get("staff")!.opened);
     stack.fit(); // now: 640 > 500 with thoughts the oldest open one
     expect(folds.thoughts).toHaveBeenCalledTimes(1);
+  });
+
+  it("passes over a window that asked to be kept (the Task Mangler the game opened) and folds the next oldest", () => {
+    const { stack, folds } = stackOf(500, 512, [["arena", 1, false, true], ["thoughts", 2], ["staff", 3]]);
+    stack.fit();
+    expect(folds.arena).not.toHaveBeenCalled();
+    expect(folds.thoughts).toHaveBeenCalledTimes(1);
+    // Kept and the only other open one is the newest: nothing folds, the column scrolls.
+    const two = stackOf(500, 512, [["arena", 1, false, true], ["staff", 2]]);
+    two.stack.fit();
+    expect(two.folds.arena).not.toHaveBeenCalled();
+    expect(two.folds.staff).not.toHaveBeenCalled();
   });
 
   it("skips windows that are already folded, and never folds the newest or the only open window", () => {

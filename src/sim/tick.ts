@@ -18,7 +18,7 @@ import { declineBuilding } from "./endings/autopilot";
 import { dailyEndings, endingHalts, endingsOwnTheGame, updateEndings } from "./endings/driver";
 import { dailyCrowd } from "./crowd";
 import { dailyEconomy } from "./economy";
-import { dailyEvents, notePacer, openEventOf } from "./events";
+import { dailyEvents, firstMinutes, notePacer, openEventOf } from "./events";
 import { dailyGoals } from "./goals";
 import { updateGroups } from "./groups";
 import { dailyNews, replying } from "./news";
@@ -178,9 +178,10 @@ function step(state: GameState, commands: readonly Command[]) {
     probe?.lap("daily:modArcs");
     if (systemUnlocked(state, "auditors")) dailyAuditors(state);
     probe?.lap("daily:auditors");
-    // A card a mod brought mid-game (FLT-78) comes even before the ladder opens the rest: it was asked for.
+    // A card a mod brought mid-game (FLT-78) comes even before the ladder opens the rest: it was asked for. So does the
+    // first minutes' own card, on Level 1 (FLT-76).
     const cards = systemUnlocked(state, "events");
-    if (cards || state.modsAdded) dailyEvents(state, cards);
+    if (cards || state.modsAdded || firstMinutes(state)) dailyEvents(state, cards);
     probe?.lap("daily:events");
     updateProgression(state);
     updateTutorial(state);

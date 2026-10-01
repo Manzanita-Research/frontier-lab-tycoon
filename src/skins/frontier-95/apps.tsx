@@ -566,7 +566,7 @@ export function PhotoOverlay({ photo, actions }: SlotPropsMap["PhotoOverlay"]) {
 }
 
 /** Display Properties → Appearance: pick a scheme (a skin), see it change live, OK to keep it. */
-export function SkinPicker({ skins, actions }: SlotPropsMap["SkinPicker"]) {
+export function SkinPicker({ skins, actions, speed }: SlotPropsMap["SkinPicker"]) {
   const t = useT();
   const [tab, setTab] = useState<"background" | "saver" | "appearance" | "settings">("appearance");
   const current = skins.list.find((s) => s.id === skins.active) ?? skins.list[0];
@@ -625,6 +625,11 @@ export function SkinPicker({ skins, actions }: SlotPropsMap["SkinPicker"]) {
               <label className="f95-check-row">
                 <input type="checkbox" checked={skins.reducedMotion} onChange={(e) => actions.setReducedMotion(e.target.checked)} /> {t("skin.reduceMotion")}
               </label>
+              {speed && (
+                <label className="f95-check-row">
+                  <input type="checkbox" checked={speed.slowForBadNews} onChange={(e) => actions.setSlowForBadNews(e.target.checked)} /> {t("speed.slowForBadNews")}
+                </label>
+              )}
             </>
           )}
           <div className="f95-row">

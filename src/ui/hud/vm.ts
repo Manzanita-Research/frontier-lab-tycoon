@@ -4,9 +4,11 @@
 // the game is reachable from them, so a change in the sim never breaks a mod and a mod can never touch the sim.
 // Pure: no atoms, no DOM, no clocks, no random numbers. It is unit-tested against fixture snapshots (vm.test.ts).
 import type { Snapshot, Tool } from "../../app/hud";
+import type { StageView } from "../../app/moments";
 import { OFFICE_TOOLS, RACE_TOOLS, SPEEDS, TOOLS } from "../../app/hud";
 import { PATH_PRICE } from "../../content/buildings";
 import { ERAS } from "../../content/eras";
+import { UNLOCK_QUIPS } from "../../content/progression";
 import { STAFF } from "../../content/staff";
 import { dramaLetter } from "../../content/events";
 import { SCENARIO, type GoalDef } from "../../content/goals";
@@ -41,7 +43,7 @@ import type {
   ArenaRowVM, DramaDocVM,
   ArenaVM, AuditVM, BeatVM, BillVM, SenateVM, TrackerVM, GoalVM, ReportCardVM, ToneVM, BenchCellVM, DisasterRunVM, DisastersVM, DisasterStageVM, MeterVM, RiskVM, UnderstaffedVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HearingMoveVM, HearingVM, HudVM, LeakVM, SenatorVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
   DramaVM, ModsVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, ResponseVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, StreamVM, ThoughtRowVM, TrainingVM, TrendVM, VoiceVM, WalkerKindVM,
-  EndingVM, ShareVM, TakeoverVM, MemoVM, ChallengeVM,
+  EndingVM, ShareVM, TakeoverVM, MemoVM, ChallengeVM, UnlockCardVM,
 } from "./types";
 import { defs } from "../../sim/defs";
 import { NO_SAVES_VM, savesViewModel, type SavesInput } from "./saves.vm";
@@ -62,8 +64,12 @@ export interface HudInput {
   tool: Tool | null;
   follow: boolean;
   highlight: string | null;
-  toasts: readonly { id: number; text: string; tone: Tone; batch?: readonly { text: string; tone: Tone }[]; snag?: string }[];
+  toasts: readonly { id: number; text: string; tone: Tone; batch?: readonly { text: string; tone: Tone }[]; pinned?: true; snag?: string }[];
   news: readonly NewsItem[];
+  /** FLT-76: the big moments still waiting their turn, an ending's solo and the shipped sticker (`app/moments.ts`). Optional: nothing waiting. */
+  stage?: StageView;
+  /** FLT-76: the "Slow down for bad news" setting. Optional: on. */
+  slowForBadNews?: boolean;
   outcomeDismissed: boolean;
   /** "Tap anyone to read their mind" is still showing. */
   tapHint: boolean;
@@ -216,7 +222,7 @@ function statsOf(i: HudInput): StatsVM {
   };
 }
 
-function trainingOf(s: Snapshot): TrainingVM {
+function trainingOf(s: Snapshot, stage: StageView | undefined): TrainingVM {
   const pct = Math.floor(s.training.pct * 100);
   return {
     hasHall: s.hasHall,
@@ -226,7 +232,8 @@ function trainingOf(s: Snapshot): TrainingVM {
     pctText: `${pct}%`,
     computePerDay: s.computePerDay,
     etaDays: s.training.etaDays,
-    justShipped: s.lastRelease !== null && s.day - s.lastRelease <= SHIPPED_DAYS && s.models > 0,
+    // FLT-76: the moment queue keeps the sticker up for a few real seconds (3 game days at ▶▶▶ is a blink), and back while the ship waits its turn.
+    justShipped: !!stage?.shipped || (s.lastRelease !== null && s.day - s.lastRelease <= SHIPPED_DAYS && s.models > 0 && !stage?.waiting.includes("ship")),
     latestModel: s.latestModel,
   };
 }
@@ -367,11 +374,12 @@ function staffOf(i: HudInput, earned: ReadonlySet<string>): StaffVM {
   };
 }
 
-function speedOf(value: number): SpeedVM {
+function speedOf(value: number, slowForBadNews: boolean): SpeedVM {
   return {
     value,
     paused: value === 0,
     options: SPEEDS.map((v) => ({ value: v, key: v === 0 ? "speed.pause" : `speed.${v}`, active: v === value })),
+    slowForBadNews,
   };
 }
 
@@ -1051,6 +1059,9 @@ function photoOf(i: HudInput): PhotoVM {
   };
 }
 
+/** A New! card with its joke line (FLT-76). */
+const quipped = (card: UnlockCardVM | null): UnlockCardVM | null => (card && UNLOCK_QUIPS[card.id] && !card.quip ? { ...card, quip: UNLOCK_QUIPS[card.id] } : card);
+
 /** A toast that says what a standing warning already says is the warning: it is shown once. */
 const spokenToasts = (i: HudInput) => i.toasts.filter((t) => !i.snap.warnings.includes(t.text));
 
@@ -1107,24 +1118,35 @@ function rawViewModel(i: HudInput): HudVM {
   const play = playableOf(i.snap);
   const build = buildOf(i);
   const items = earnedItems(build.items, play);
-  const { event, era } = eventOf(i);
+  // FLT-76: a big moment still waiting its turn stays off the screen, and an ending has it to itself.
+  const stage = i.stage;
+  const waits = (kind: StageView["waiting"][number]) => !!stage?.waiting.includes(kind);
+  const solo = !!stage?.solo;
+  const { event, era } = waits("card") || waits("era") ? { event: null, era: null } : eventOf(i);
+  const ending = waits("ending");
   // Snapshots from before FLT-33 (fixtures, old links) have no `factions`: that is "off".
   const chips = factionChips(i.snap.factions);
   const vm: HudVM = {
     apiVersion: SKIN_API_VERSION,
     stats: statsOf(i),
-    training: trainingOf(i.snap),
+    training: trainingOf(i.snap, stage),
     objectives: objectivesOf(i.snap),
     inspector: inspectorOf(i.snap.inspect, i.follow, i.snap.labName, chips, i.lookLabels),
     buildItems: items,
     buildTip: build.tip,
     mode: modeOf(items, i.tool, zoneOf(i)),
-    speed: speedOf(i.speed),
+    speed: speedOf(i.speed, i.slowForBadNews ?? true),
     staff: staffOf(i, play.staff),
     senate: senateOf(i),
     bubbles: bubblesOf(i, chips),
     ticker: i.news.slice(-TICKER_ITEMS).map((n) => ({ id: n.id, text: n.text, tone: n.tone })),
-    toasts: spokenToasts(i).map((t) => (t.batch ? { id: t.id, text: t.text, tone: t.tone, batch: t.batch.map((b) => ({ text: b.text, tone: b.tone })) } : t.snag ? { id: t.id, text: t.text, tone: t.tone, snag: true } : { id: t.id, text: t.text, tone: t.tone })),
+    toasts: spokenToasts(i).map((t) => ({
+      id: t.id,
+      text: t.text,
+      tone: t.tone,
+      ...(t.batch ? { batch: t.batch.map((b) => ({ text: b.text, tone: b.tone })) } : t.snag ? { snag: true as const } : {}),
+      ...(t.pinned ? { pinned: true as const } : {}),
+    })),
     // One hint at a time, and none while a toast is talking; the gateway hint is redundant once a toast has said it.
     hints: standingHints(i, play),
     warnings: [...i.snap.warnings],
@@ -1136,7 +1158,7 @@ function rawViewModel(i: HudInput): HudVM {
     },
     visible: play.visible,
     coach: play.coach,
-    unlock: play.unlock,
+    unlock: waits("level") || solo ? null : quipped(play.unlock),
     tray: [],
     help: i.helpOpen ? helpOf(items) : null,
     confirm: confirmOf(i.snap),
@@ -1146,23 +1168,23 @@ function rawViewModel(i: HudInput): HudVM {
     leapfrog: leapfrogOf(i),
     papers: papersOf(i.snap, play.visible.papers, i.papersOpen ?? false),
     // A card, an era or the ending outranks a paper moment: it waits (the day window allowing) until they close.
-    paperMoment: event || era ? null : paperMomentOf(i.snap, play.visible.papers, i.dismissed ?? []),
+    paperMoment: event || era || solo ? null : paperMomentOf(i.snap, play.visible.papers, i.dismissed ?? []),
     collusion: collusionOf(i.snap),
-    crumbWiki: event || era ? null : crumbWikiOf(i.snap, i.dismissed ?? []),
+    crumbWiki: event || era || solo ? null : crumbWikiOf(i.snap, i.dismissed ?? []),
     factions: factionsOf(i.snap.factions, i.factionsOpen ?? false),
     birdapp: birdAppOf(i.snap, play.visible.birdapp, i.birdAppOpen ?? false),
     eraCard: era,
-    outcome: outcomeOf(i),
+    outcome: ending ? null : outcomeOf(i),
     audit: auditOf(i.snap),
-    ending: endingOf(i),
-    takeover: takeoverOf(i),
+    ending: ending ? null : endingOf(i),
+    takeover: ending ? null : takeoverOf(i),
     memo: memoOf(i),
     challenge: challengeOf(i),
     newsroom: newsroomOf(i),
     sound: soundOf(i),
     photoMode: photoOf(i),
     // A card needs the player: the beat makes way. Photo mode hides it with the rest of the HUD.
-    beat: i.beat && !event && !era && !i.photo.on ? { ...i.beat, kicker: BEAT_KICKER[i.beat.kind] ?? "Meanwhile", skipLabel: "Skip »", action: beatActionOf(i.beat.kind, i.snap) } : null,
+    beat: i.beat && !event && !era && !solo && !i.photo.on ? { ...i.beat, kicker: BEAT_KICKER[i.beat.kind] ?? "Meanwhile", skipLabel: "Skip »", action: beatActionOf(i.beat.kind, i.snap) } : null,
     skins: i.skins,
     mods: i.mods ?? NO_MODS_VM,
     saves: i.saves ? savesViewModel(i.saves, { lab: i.snap.labName, day: i.snap.day }) : { ...NO_SAVES_VM, current: { lab: i.snap.labName, date: formatDate(i.snap.day) } },
