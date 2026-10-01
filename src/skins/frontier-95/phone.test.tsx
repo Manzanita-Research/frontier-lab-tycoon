@@ -54,4 +54,10 @@ describe("Frontier 95 on a phone", () => {
     const blocks = [css.slice(css.indexOf("@media (pointer: coarse)")), css.slice(css.indexOf("@media (max-width: 640px)"))];
     for (const block of blocks) expect(block).toMatch(/\.f95-b \{\s*min-width: 32px;\s*height: 32px;/);
   });
+
+  it("keeps the bill's tilted Properties box off the Inspector, which shares its class", () => {
+    const css = read("frontier-95/skin.css")!;
+    expect(css).not.toMatch(/^\s*\.f95-props \{\s*position: absolute;/m);
+    expect(css).toMatch(/\.f95-docwrap \.f95-props \{\s*position: absolute;/);
+  });
 });
