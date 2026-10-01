@@ -79,6 +79,26 @@ if (cmd === "rects") {
 } else if (cmd === "bake") {
   const rects = JSON.parse(readFileSync(RECTS, "utf8"));
   for (const [id, spec] of Object.entries(PICKS.bake)) {
+    if (spec.pack) {
+      // Maps: channels packed from Patina's greyscale outputs (three reads roughness from G, metalness from B), or one
+      // map as is. Lossless, so lossy chroma never smears a packed channel.
+      const bytes = await page.evaluate(async ([pack, W]) => {
+        const out = new ImageData(W, 1);
+        let c, g, d;
+        for (const [ch, src] of Object.entries(pack)) {
+          const i = await load(src); const H = Math.round((W * i.height) / i.width);
+          if (!c) { c = document.createElement('canvas'); c.width = W; c.height = H; g = c.getContext('2d'); d = g.createImageData(W, H); for (let k = 3; k < d.data.length; k += 4) d.data[k] = 255; }
+          const s = canvasOf(i, W, H).getContext('2d').getImageData(0, 0, W, H).data;
+          if (ch === 'rgb') { for (let k = 0; k < s.length; k += 4) { d.data[k] = s[k]; d.data[k + 1] = s[k + 1]; d.data[k + 2] = s[k + 2]; } }
+          else { const o = 'rgb'.indexOf(ch); for (let k = 0; k < s.length; k += 4) d.data[k + o] = s[k]; }
+        }
+        g.putImageData(d, 0, 0);
+        return toWebp(c, 1); // quality 1 is lossless in Chromium
+      }, [Object.fromEntries(Object.entries(spec.pack).map(([k, v]) => [k, png(v)])), spec.width]);
+      writeFileSync(`src/intro/assets/${id}.webp`, Buffer.from(bytes));
+      console.log(`src/intro/assets/${id}.webp  ${(bytes.length / 1024).toFixed(0)} KB`);
+      continue;
+    }
     const shots = (spec.screens ?? []).map(png);
     const bytes = await page.evaluate(async ([src, spec, shots, rects]) => {
       const img = await load(src);
