@@ -27,7 +27,7 @@ export type ArtKey = keyof typeof COLOUR | keyof typeof DATA;
 const KEYS = [...Object.keys(COLOUR), ...Object.keys(DATA)] as ArtKey[];
 const URLS = KEYS.map((key) => ({ ...COLOUR, ...DATA })[key]);
 
-/** The inserts in the order of `INSERTS` in content.ts. */
+/** The expansion pack inserts, top of the fan first. */
 export const INSERT_ART = ["insertCircus", "insertBird", "insertDrama", "insertModules", "insertRebate"] as const;
 
 /** Start the downloads as soon as the stage's chunk loads, before React gets to the first `useArt`. */

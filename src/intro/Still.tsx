@@ -28,7 +28,7 @@ export default function Still({ intro, manual }: { intro: Intro; manual: boolean
           <p className="still-fine">{HERO.requirements}</p>
           <div className="intro-row">
             <button className="intro-primary still-play" onClick={() => send({ type: "PLAY" })} autoFocus>
-              ▶ Play
+              {"\u25B6\uFE0E"} Play
             </button>
             <button onClick={() => send(manual ? { type: "BACK" } : { type: "FOCUS", item: "manual" })}>{manual ? "Close the manual" : "Read the manual"}</button>
           </div>

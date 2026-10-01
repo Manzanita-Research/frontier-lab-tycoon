@@ -61,26 +61,26 @@ export default function Stage({ intro, beat, context }: Props) {
         <ClockContext.Provider value={clock}>
           {/* Nothing runs (not even the beat clock) until the art is in, so the first frame is the finished scene. */}
           <Suspense fallback={null}>
-          <Director intro={intro} beat={beat} clock={clock} fps={fps} />
-          <CameraRig beat={beat} context={context} />
-          <color attach="background" args={["#23262e"]} />
-          <fog attach="fog" args={["#23262e", 7, 16]} />
-          <hemisphereLight args={["#fff8ec", "#6b6250", 1.1]} />
-          <directionalLight position={[1.5, 4, 3]} intensity={1.6} />
-          <pointLight position={[2.4, 2.2, 1.4]} intensity={4} distance={4} decay={1.4} color="#fff2d8" />
-          <Store beat={beat} context={context} send={intro.send} />
-          <HeroBox beat={beat} context={context} send={intro.send} />
-          <Contents beat={beat} context={context} send={intro.send} weightsKey={intro.params.key} />
-          <Kiosk beat={beat} context={context} send={intro.send} weightsKey={intro.params.key} />
-          {intro.params.fx && (
-            <EffectComposer multisampling={4}>
-              <Bloom mipmapBlur intensity={0.7} luminanceThreshold={1.5} luminanceSmoothing={0.1} />
-              <Noise opacity={0.035} />
-              <Vignette offset={0.3} darkness={0.55} />
-              {/* The composer renders to a target, where three skips tone mapping: put it back, or paper clips to white. */}
-              <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
-            </EffectComposer>
-          )}
+            <Director intro={intro} beat={beat} clock={clock} fps={fps} />
+            <CameraRig beat={beat} context={context} />
+            <color attach="background" args={["#23262e"]} />
+            <fog attach="fog" args={["#23262e", 7, 16]} />
+            <hemisphereLight args={["#fff8ec", "#6b6250", 1.1]} />
+            <directionalLight position={[1.5, 4, 3]} intensity={1.6} />
+            <pointLight position={[2.4, 2.2, 1.4]} intensity={4} distance={4} decay={1.4} color="#fff2d8" />
+            <Store beat={beat} context={context} send={intro.send} />
+            <HeroBox beat={beat} context={context} send={intro.send} />
+            <Contents beat={beat} context={context} send={intro.send} weightsKey={intro.params.key} />
+            <Kiosk beat={beat} context={context} send={intro.send} weightsKey={intro.params.key} />
+            {intro.params.fx && (
+              <EffectComposer multisampling={4}>
+                <Bloom mipmapBlur intensity={0.7} luminanceThreshold={1.5} luminanceSmoothing={0.1} />
+                <Noise opacity={0.035} />
+                <Vignette offset={0.3} darkness={0.55} />
+                {/* The composer renders to a target, where three skips tone mapping: put it back, or paper clips to white. */}
+                <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
+              </EffectComposer>
+            )}
           </Suspense>
         </ClockContext.Provider>
       </Canvas>
