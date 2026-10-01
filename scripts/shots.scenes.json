@@ -2443,6 +2443,58 @@
         }
       ]
     },
+    "drama-added": {
+      "title": "FLT-78: Today's Drama added to the lab on screen: In your lab ✓, Remove, and the ticker says so",
+      "query": {
+        "drama": "fixture"
+      },
+      "steps": [
+        {
+          "wait": 400
+        },
+        {
+          "click": "button[aria-label^=\"Open Today\"]",
+          "optional": true
+        },
+        {
+          "wait": 1500
+        },
+        {
+          "click": "button:has-text(\"Add to my lab\")",
+          "optional": true
+        },
+        {
+          "wait": 2500
+        }
+      ]
+    },
+    "drama-added-phone": {
+      "title": "FLT-78: Today's Drama added, on a phone (390x844)",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "drama": "fixture"
+      },
+      "steps": [
+        {
+          "wait": 400
+        },
+        {
+          "click": "button[aria-label^=\"Open Today\"]",
+          "optional": true
+        },
+        {
+          "wait": 1500
+        },
+        {
+          "click": "button:has-text(\"Add to my lab\")",
+          "optional": true
+        },
+        {
+          "wait": 2500
+        }
+      ]
+    },
     "drama-base": {
       "title": "FLT-34: the base skin's Today's Drama button and card",
       "query": {

@@ -22,8 +22,18 @@ Copy optional `mod.example.ts` to `mod.ts` to use `@flt/mod-sdk`; directory comm
 scaffold test checks `mod.json`. Bundle with an explicit `mod.json` output to
 regenerate that file. Local assets are inlined; remote assets are rejected.
 `dev` serves CORS on 5174 and prints the game link (`?mod=http://localhost:5174/mod.json`); reload the page to pick up edits (no hot reload).
-The Mod Manager's Remove reloads without that mod. Today's Drama (FLT-34) is the first
-published mod feed: merged Daily Drama packs at `/mods/drama/`, loaded by the same `?mod=` (see `drama/README.md` ▸ Publishing).
+Today's Drama (FLT-34) is the first published mod feed: merged Daily Drama packs at `/mods/drama/`, loaded by the same
+`?mod=` (see `drama/README.md` ▸ Publishing).
+
+**Adding a mod to a running lab (FLT-78).** A *data-only* mod (headlines, thoughts, tips, new plain event cards, a rival's
+`tagline`) joins the lab on screen with no reload: `addModLive(source)` in `src/app/liveMods.ts` fetches it, recomposes the
+session's `GameDefinition`, and sends the sim an `addMod` command; the sim swaps to the new definition on that command's
+tick, so a replay with `addMod` at tick T is the same game. The World records it in `modsAdded`
+(`{ id, version, hash, url, tick, day, cards }`), its cards turn up `ARRIVE_DAYS` (2) after, paced like any card, and its
+first plain headline goes on the ticker. `removeMod` takes it out again: its unfired cards are cancelled (an open one closes),
+its headlines and thoughts stop, a rival's tagline reverts. Anything else (a skin, looks, sounds, rules, arcs, rival stats)
+needs a fresh start: `needsRestart(manifest)` says why, and the Mod Manager's Remove for those reloads without the mod.
+`?mod=` links in a fresh tab work as before.
 
 ## 1. Principle: data first, code last
 

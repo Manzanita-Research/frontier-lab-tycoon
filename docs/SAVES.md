@@ -13,12 +13,13 @@ src/ui/hud/saves.ts, saves.vm.ts   the Save/Load window, "Welcome back", the mod
 ```jsonc
 {
   "kind": "fltsave",              // what it is: a random JSON file gets "that isn't a lab save"
-  "v": 2,                         // SAVE_VERSION; see Migrations
+  "v": 3,                         // SAVE_VERSION; see Migrations
   "savedAt": "2026-09-30T12:00:00.000Z",
   "seed": 20240601,
   "lab": "Gradient Descent Labs", // for the menu
   "day": 425, "tick": 8500,       // "Y2 · Mar 5" is formatDate(day)
   "mods": [{ "id": "flt.base-pack", "version": "1.0.0", "hash": "…", "source": "https://…/mod.json" }],
+                                  // a mod added mid-game (FLT-78) also has "tick": when it arrived
   "skin": "frontier-95",          // restored on load, or null
   "enc": "gzip64",                // gzip then base64 (CompressionStream); "json" where the browser has none
   "state": "H4sIAAAA…"            // the World: JSON.stringify(GameState), packed per enc
@@ -69,6 +70,7 @@ It never autosaves on a staged link (`?moment=`, `?scenario=`, `?shot`, …; `is
 - **Save/Load window:** Ctrl+S / ⌘S in every skin, plus a button where the skin has one (Frontier 95: Start ▸ Save / Load…). Save to a slot, open, export, delete, import.
 - **Import:** a file picker, or drop a `.fltsave` anywhere on the page. Errors are friendly ("That isn't a lab save. It isn't even JSON.").
 - **Mods:** a save made with other mods (compared by `id@hash`) asks first. If every missing mod has a `source`, **Reload with its mods** writes the save to `pending` and reloads with those `?mod=` values plus `?load=pending`; boot loads it and removes the slot. Otherwise **Load anyway** (with a warning) or Cancel.
+- **Mods added mid-game** (FLT-78: Today's Drama's "Add to my lab"): the save lists them with their `tick`, and the World with `modsAdded`. Loading one fetches them again and adds them without asking; loading a save without them takes this lab's mid-game mods out first.
 - **Skin:** the save's skin comes back (and is remembered) if this build has it.
 
 `?load=<slot>` loads a slot on boot and strips itself from the URL.
@@ -84,6 +86,7 @@ Adding a version: bump `SAVE_VERSION` in `format.ts`, add `MIGRATIONS[old]` (and
 | From | Step |
 |---|---|
 | v1 → v2 | #71 renamed the rival `vssi` to `supersuper` ("Very Safe SI" to "Super Super AI", and "MetaMeta Superintelligence Labs" to "MetaMeta Metaintelligence Labs"): `WORLD_MIGRATIONS[1]` renames the id and scrubs the old names from text. Tested on the frozen v1 garage, which then plays on for 60 days. |
+| v2 → v3 | FLT-78: a save's mod can carry `tick`, the tick it was added to a running lab (and the World `modsAdded`). Nothing to rewrite: the step only bumps `v`. Frozen: `fixtures/v2-garage-day20.fltsave`. |
 
 ## Demo shelves
 

@@ -243,13 +243,14 @@ export function fixtureSaves(kind: "window" | "welcome" | "prompt" | "private"):
   };
 }
 
-export function fixtureDrama(kind: "feed" | "intro" | "empty" | "fresh"): NonNullable<HudInput["drama"]> {
+export function fixtureDrama(kind: "feed" | "intro" | "empty" | "fresh" | "added"): NonNullable<HudInput["drama"]> {
   const href = "https://flt.test/?drama=fixture";
   const playing = [{ id: "drama-2026-09-29", name: "Daily Drama: The Perk Arms Race", source: FIXTURE_DRAMA_FEED[0]!.url }];
   const now = new Date(2026, 8, 29, 12);
   if (kind === "fresh") return dramaViewModel({ ...NO_DRAMA_UI, latest: FIXTURE_DRAMA_FEED[0]! }, [], href, now);
   if (kind === "empty") return dramaViewModel({ ...NO_DRAMA_UI, open: true, status: "ready", packs: [] }, [], href, now);
   const ui = { ...NO_DRAMA_UI, open: true, status: "ready" as const, packs: FIXTURE_DRAMA_FEED, latest: FIXTURE_DRAMA_FEED[0]!, seen: "drama-2026-09-28" };
+  if (kind === "added") return dramaViewModel(ui, playing, href, now);
   return kind === "intro" ? dramaViewModel({ ...ui, intro: true }, playing, href, now) : dramaViewModel(ui, [], href, now);
 }
 
@@ -305,7 +306,7 @@ export interface FixtureOptions {
   height?: number;
   skins?: Partial<SkinPickerVM>;
   /** Today's Drama (absent: nothing fetched yet, the window shut). */
-  drama?: "feed" | "intro" | "empty" | "fresh";
+  drama?: "feed" | "intro" | "empty" | "fresh" | "added";
   /** FLT-57: a streak, a friend's challenge (and whether its banner is up), the Memo extra already read. */
   social?: Partial<NonNullable<HudInput["social"]>>;
   /** FLT-65: the Save/Load window open on a full shelf, "Welcome back", the question about mods, or no storage at all. */

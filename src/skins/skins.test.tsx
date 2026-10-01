@@ -231,6 +231,7 @@ const vms: Record<string, HudVM> = {
   dramaFresh: vmOf({ drama: "fresh" }),
   dramaIntro: vmOf({ drama: "intro" }),
   dramaEmpty: vmOf({ drama: "empty" }),
+  dramaAdded: vmOf({ drama: "added" }),
   dramaPhone: vmOf({ drama: "feed", width: 390, height: 844 }),
   takeover: vmOf({ ending: "takeover", selected: null }),
   thanks: vmOf({ ending: "thanks", selected: null }),
@@ -458,6 +459,18 @@ describe.each([BASE_ID, ...usable])("skin %s", (id) => {
     expect(intro).toContain(escape(vms.dramaIntro!.drama.on!.title));
     expect(intro).toContain(escape(vms.dramaIntro!.drama.on!.event!.title));
     expect(html(skin, <Modals vm={vms.dramaEmpty!} actions={actions} />).length).toBeGreaterThan(100);
+  });
+
+  it("adds a Drama pack to the lab on screen, and never says it starts a new one (FLT-78)", async () => {
+    const { skin } = await prepareSkin(id);
+    const feed = html(skin, <Modals vm={vms.drama!} actions={actions} />);
+    expect(feed).toContain("Add to my lab");
+    expect(feed).toContain(escape("Arrives in your lab right now. No restart. Probably fine."));
+    expect(feed).not.toMatch(/new lab|Play it|Swap it in/i);
+    const added = html(skin, <Modals vm={vms.dramaAdded!} actions={actions} />);
+    expect(added).toContain("In your lab ✓");
+    expect(added).toContain(">Remove<");
+    expect(added).not.toMatch(/new lab|Add to my lab/i);
   });
 
   it("prints the ending's front page with the run's stats, and The Takeover's title while the autopilot works (FLT-11)", async () => {
