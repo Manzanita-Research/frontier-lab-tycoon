@@ -8,6 +8,7 @@ import { useAtomValue } from "@effect/atom-react";
 import { useEffect, useRef, type ReactNode } from "react";
 import { CRT_LOOKS } from "../../render/crt/looks";
 import { crtAtom, crtView } from "../../render/crt/state";
+import { GlassMeter } from "./Meter";
 import { glassSupport, type DrawableCanvas } from "./support";
 import { GlassTube, type TubeLook } from "./tube";
 import "./glass.css";
@@ -56,11 +57,16 @@ function lookFor(mode: "subtle" | "full", dpr: number, reduced: boolean): TubeLo
     vignette: l.vignette,
     vignetteInner: l.vignetteInner,
     corner: l.css.corner * dpr,
-    bleed: mode === "full" ? 0.3 : 0.16,
+    bleed: cut.has("bleed") ? 0 : mode === "full" ? 0.3 : 0.16,
     roll: reduced ? 0 : l.css.roll,
     flicker: reduced ? 0 : l.css.flicker,
   };
 }
+
+/** `?glasscut=hud,world,bleed` (cost hunting): snapshot the HUD only once, skip the world copy, drop the bleed taps. */
+const query = typeof window === "undefined" ? new URLSearchParams() : new URLSearchParams(window.location.search);
+const meter = query.has("glassmeter");
+const cut = new Set((query.get("glasscut") ?? "").split(","));
 
 /** The 3D world's canvas (R3F's), the one canvas on the page that is not the glass. */
 const worldCanvas = () => document.querySelector<HTMLCanvasElement>("canvas:not(.crt-glass)");
@@ -104,8 +110,14 @@ export function Glass({ back, children }: { back: ReactNode; children: ReactNode
       if (!entry || !css) return;
       const box = entry.devicePixelContentBoxSize?.[0];
       const scale = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = Math.max(1, Math.round(box && scale === window.devicePixelRatio ? box.inlineSize : css.inlineSize * scale));
-      canvas.height = Math.max(1, Math.round(box && scale === window.devicePixelRatio ? box.blockSize : css.blockSize * scale));
+      canvas.width = Math.max(
+        1,
+        Math.round(box && scale === window.devicePixelRatio ? box.inlineSize : css.inlineSize * scale),
+      );
+      canvas.height = Math.max(
+        1,
+        Math.round(box && scale === window.devicePixelRatio ? box.blockSize : css.blockSize * scale),
+      );
       dpr = canvas.width / Math.max(1, css.inlineSize);
       look = lookFor(mode, dpr, !!reducedQuery?.matches);
       glassStats.size = [canvas.width, canvas.height];
@@ -134,7 +146,7 @@ export function Glass({ back, children }: { back: ReactNode; children: ReactNode
           avg(glassStats.sky, performance.now() - t);
         }
         t = performance.now();
-        if (all || changed!.includes(hud)) {
+        if (all || (changed!.includes(hud) && !cut.has("hud"))) {
           tube.element("hud", hud);
           glassStats.hudUploads++;
           avg(glassStats.hud, performance.now() - t);
@@ -145,7 +157,7 @@ export function Glass({ back, children }: { back: ReactNode; children: ReactNode
         }
         t = performance.now();
         const w = worldCanvas();
-        if (w) tube.world(w);
+        if (w && !(cut.has("world") && glassStats.frames > 0)) tube.world(w);
         avg(glassStats.world, performance.now() - t);
         t = performance.now();
         tube.draw(look, (performance.now() - t0) / 1000);
@@ -170,19 +182,28 @@ export function Glass({ back, children }: { back: ReactNode; children: ReactNode
     };
   }, [mode]);
 
-  if (!glassSupport || mode === "off") return <>{children}</>;
+  if (!glassSupport || mode === "off")
+    return (
+      <>
+        {children}
+        {meter && <GlassMeter on={false} />}
+      </>
+    );
   // `layoutsubtree` (Chromium 153+) and `content="drawable"` (157+) both opt the children into layout; `drawable`
   // (157+) marks what can be drawn. Unknown attributes are harmless on the builds that predate them.
   const canvasAttrs = { layoutsubtree: "", content: "drawable" } as object;
   const layerAttrs = { drawable: "" } as object;
   return (
-    <canvas ref={canvasRef} className="crt-glass" {...canvasAttrs}>
-      <div ref={backRef} className="glass-layer glass-back" aria-hidden="true" {...layerAttrs}>
-        {back}
-      </div>
-      <div ref={frontRef} className="glass-layer glass-front" {...layerAttrs}>
-        {children}
-      </div>
-    </canvas>
+    <>
+      <canvas ref={canvasRef} className="crt-glass" {...canvasAttrs}>
+        <div ref={backRef} className="glass-layer glass-back" aria-hidden="true" {...layerAttrs}>
+          {back}
+        </div>
+        <div ref={frontRef} className="glass-layer glass-front" {...layerAttrs}>
+          {children}
+        </div>
+      </canvas>
+      {meter && <GlassMeter on />}
+    </>
   );
 }

@@ -39,7 +39,8 @@ void main() {
   if (any(lessThan(uv, vec2(0.))) || any(greaterThan(uv, vec2(1.)))) { color = vec4(0., 0., 0., 1.); return; }
   // Phosphor bleed: a little of the neighbours on the same line (the beam smears sideways, never up or down).
   vec2 px = vec2(1. / res.x, 0.);
-  vec3 c = layers(uv).rgb * (1. - bleed) + (layers(uv - px).rgb + layers(uv + px).rgb) * (bleed * .5);
+  vec3 c = layers(uv).rgb;
+  if (bleed > 0.) c = c * (1. - bleed) + (layers(uv - px).rgb + layers(uv + px).rgb) * (bleed * .5);
   float l = dot(c, vec3(.2126, .7152, .0722));
   // Scanlines whose gaps close on bright pixels, keeping the average brightness (lite.ts).
   float d = abs(fract(gl_FragCoord.y / pitch) - .5);
@@ -82,17 +83,41 @@ export class GlassTube {
   readonly gl: WebGL2RenderingContext;
   private readonly program: WebGLProgram;
   private readonly u: Uniforms;
-  private readonly tex: { sky: WebGLTexture; world: WebGLTexture; hud: WebGLTexture };
+  private readonly tex: {
+    sky: WebGLTexture;
+    world: WebGLTexture;
+    hud: WebGLTexture;
+  };
   private readonly api: GlassSupport;
   private readonly vao: WebGLVertexArrayObject;
 
   constructor(canvas: HTMLCanvasElement, api: GlassSupport) {
-    const gl = canvas.getContext("webgl2", { alpha: false, antialias: false, premultipliedAlpha: true });
+    const gl = canvas.getContext("webgl2", {
+      alpha: false,
+      antialias: false,
+      premultipliedAlpha: true,
+    });
     if (!gl) throw new Error("glass: no WebGL 2");
     this.gl = gl;
     this.api = api;
     this.program = link(gl, vertex, fragment);
-    const names = ["pitch", "scan", "mask", "curve", "vignette", "vignetteInner", "corner", "bleed", "roll", "flicker", "res", "time", "sky", "world", "hud"] as const;
+    const names = [
+      "pitch",
+      "scan",
+      "mask",
+      "curve",
+      "vignette",
+      "vignetteInner",
+      "corner",
+      "bleed",
+      "roll",
+      "flicker",
+      "res",
+      "time",
+      "sky",
+      "world",
+      "hud",
+    ] as const;
     this.u = Object.fromEntries(names.map((n) => [n, gl.getUniformLocation(this.program, n)])) as Uniforms;
     const make = () => {
       const t = gl.createTexture()!;
@@ -117,7 +142,17 @@ export class GlassTube {
     const tex = gl as unknown as ElementTexturing;
     if (this.api.sub && tex.texElementSubImage2D) {
       const img = (gl.canvas as DrawableCanvas).captureElementImage(el);
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, Math.max(1, Math.round(img.width)), Math.max(1, Math.round(img.height)), 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+      gl.texImage2D(
+        gl.TEXTURE_2D,
+        0,
+        gl.RGBA8,
+        Math.max(1, Math.round(img.width)),
+        Math.max(1, Math.round(img.height)),
+        0,
+        gl.RGBA,
+        gl.UNSIGNED_BYTE,
+        null,
+      );
       img.close?.();
       tex.texElementSubImage2D(gl.TEXTURE_2D, 0, 0, 0, el);
     } else {

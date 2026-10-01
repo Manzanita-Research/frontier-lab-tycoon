@@ -27,13 +27,21 @@ function probe(): GlassSupport | null {
   if (!C || !G || !("requestPaint" in C) || !("onpaint" in C)) return null;
   const sub = "texElementSubImage2D" in G;
   if (!sub && !("texElementImage2D" in G)) return null;
-  return { sub, geometry: "updateElementGeometry" in C, content: "content" in C };
+  return {
+    sub,
+    geometry: "updateElementGeometry" in C,
+    content: "content" in C,
+  };
 }
 
 /** The canvas side of HTML-in-canvas, as far as the glass uses it. */
 export interface DrawableCanvas extends HTMLCanvasElement {
   requestPaint(): void;
-  captureElementImage(el: Element): { width: number; height: number; close?(): void };
+  captureElementImage(el: Element): {
+    width: number;
+    height: number;
+    close?(): void;
+  };
   updateElementGeometry?(el: Element, options: { canvasTransform?: DOMMatrixInit }): void;
 }
 
