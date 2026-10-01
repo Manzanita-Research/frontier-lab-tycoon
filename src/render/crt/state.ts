@@ -7,6 +7,8 @@ import { unwarp, type CrtMode, type CrtTier } from "./looks";
 export interface CrtState {
   /** The look on screen right now: the player's pick, else the skin's default; off while photo mode is up. */
   mode: CrtMode;
+  /** The player's own pick (Display Properties), or null while the skin's default applies. */
+  choice: CrtMode | null;
   /** What the canvas is running (the governor steps it down on a slow machine; a phone starts at lite). */
   tier: CrtTier;
   /** `?crt=` pinned the look and the tier for this visit (screenshots): no governor. */
@@ -16,7 +18,7 @@ export interface CrtState {
 }
 
 // keepAlive: set at boot, before React mounts anything.
-export const crtAtom = Atom.keepAlive(Atom.make<CrtState>({ mode: "off", tier: "multi", pinned: false, reduced: false }));
+export const crtAtom = Atom.keepAlive(Atom.make<CrtState>({ mode: "off", choice: null, tier: "multi", pinned: false, reduced: false }));
 
 /**
  * The bow of the glass the canvas is shown through right now (0 when the canvas is flat), for the code that turns a

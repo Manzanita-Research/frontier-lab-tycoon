@@ -367,6 +367,12 @@ If your slot needs copy that has no key, write it into the slot (as Frontier 95 
 | `skin.apply` | Apply |
 | `skin.cancel` | Cancel |
 | `skin.reduceMotion` | Reduce motion |
+| `skin.crt` | Picture tube |
+| `skin.crt.off` | Off: a flat panel from the future |
+| `skin.crt.subtle` | Subtle: a good monitor on a good desk |
+| `skin.crt.full` | Full: the family TV, VCR on top |
+| `skin.crt.default` | (this look's default) |
+| `skin.crt.reduced` | Your graphics adapter dropped the campus to Economy mode… |
 | `staff.title` | Staff |
 | `staff.painting` | Painting a patrol zone |
 | `staff.hire` | Hire |
@@ -569,7 +575,7 @@ interface HudVM {
 
 Numbers come as numbers (`cash.value`) **and** formatted text (`cash.text`), so you can roll an odometer and still have a caption. Colours the game owns (the walker's `portrait.body`, an Arena lab's `color`) come as CSS colour strings.
 
-`HudActions` is everything a skin can ask for: `place(kind)`, `setSpeed(n)`, `togglePause()`, `choose(eventId, i)`, `continueEra()`, `select(id)`, `follow(id, on?)`, `closeInspector()`, `highlight(key)`, the payroll (`closeStaff`, `hire(job)`, `fire(id)`, `paintZone(id | null)`, `clearZone(id)`), `dismissToast(id)`, the coach and the cards (`coachSkip()`, `coachReplay()`, `dismissUnlock()`, `buildPanel(open)`, `openHelp()`, `closeHelp()`), the spend check (`confirmSpend()`, `cancelSpend()`), `holdTime(id, open)` (use the kit's `useAutoPause`), `toggleArena()`, `keepPlaying()`, `newLab()`, the news-room ones (`openNews`, `viewNews`, `closeNews`, `skipNews`, `revealChat`), sound (`openMixer`, `closeMixer`, `setMuted`, `setVolume`, `playCue`), photo mode (`setPhoto`, `setPhotoTime`, `takePhoto`) skins (`openSkinPicker`, `previewSkin`, `applySkin`, `cancelSkinPicker`, `setReducedMotion`) mods (`openMods`, `closeMods`, `removeMod`) Today's Drama (`openDrama`, `closeDrama`, `playDrama`) and saves (`openSaves`, `closeSaves`, `saveTo`, `loadFrom`, `deleteSave`, `exportSave`, `importSave`, `continueSave`, `dismissWelcome`, `fetchModsAndLoad`, `loadWithoutMods`, `cancelModPrompt`). Each is safe to call at any time; the game ignores what does not apply.
+`HudActions` is everything a skin can ask for: `place(kind)`, `setSpeed(n)`, `togglePause()`, `choose(eventId, i)`, `continueEra()`, `select(id)`, `follow(id, on?)`, `closeInspector()`, `highlight(key)`, the payroll (`closeStaff`, `hire(job)`, `fire(id)`, `paintZone(id | null)`, `clearZone(id)`), `dismissToast(id)`, the coach and the cards (`coachSkip()`, `coachReplay()`, `dismissUnlock()`, `buildPanel(open)`, `openHelp()`, `closeHelp()`), the spend check (`confirmSpend()`, `cancelSpend()`), `holdTime(id, open)` (use the kit's `useAutoPause`), `toggleArena()`, `keepPlaying()`, `newLab()`, the news-room ones (`openNews`, `viewNews`, `closeNews`, `skipNews`, `revealChat`), sound (`openMixer`, `closeMixer`, `setMuted`, `setVolume`, `playCue`), photo mode (`setPhoto`, `setPhotoTime`, `takePhoto`) skins (`openSkinPicker`, `previewSkin`, `applySkin`, `cancelSkinPicker`, `setReducedMotion`, `setCrt(mode)` for the picture tube, whose state is `vm.skins.crt`) mods (`openMods`, `closeMods`, `removeMod`) Today's Drama (`openDrama`, `closeDrama`, `playDrama`) and saves (`openSaves`, `closeSaves`, `saveTo`, `loadFrom`, `deleteSave`, `exportSave`, `importSave`, `continueSave`, `dismissWelcome`, `fetchModsAndLoad`, `loadWithoutMods`, `cancelModPrompt`). Each is safe to call at any time; the game ignores what does not apply.
 
 Changing the contract: keep changes **additive** (new fields, new actions) and add a fixture to `src/ui/hud/fixtures.ts` + a test in `vm.test.ts`. A breaking change means bumping `SKIN_API_VERSION` and every `skin.json`.
 

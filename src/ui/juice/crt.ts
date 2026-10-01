@@ -38,10 +38,10 @@ function recompute(patch: { tier?: CrtTier; reduced?: boolean } = {}) {
   const skinDefault = registry.get(loadedSkinAtom).crt ?? "off";
   const mode: CrtMode = registry.get(photoAtom) ? "off" : (pinnedMode ?? chosen ?? skinDefault);
   const prev = registry.get(crtAtom);
-  const next = { ...prev, mode, pinned, ...patch };
+  const next = { ...prev, mode, choice: chosen, pinned, ...patch };
   // The first time the tube comes on, a governor starts watching the frame rate (the canvas feeds it; see CrtLayer).
   if (mode !== "off" && !pinned && !crtGovernor.current) crtGovernor.current = new CrtGovernor(next.tier);
-  if (next.mode !== prev.mode || next.tier !== prev.tier || next.reduced !== prev.reduced || next.pinned !== prev.pinned) registry.set(crtAtom, next);
+  if ((Object.keys(next) as (keyof typeof next)[]).some((k) => next[k] !== prev[k])) registry.set(crtAtom, next);
 }
 
 /** The player picked a look: remember it, and give the canvas a fresh chance at its best tier. */
@@ -55,9 +55,6 @@ export function setCrtMode(mode: CrtMode) {
   crtGovernor.current = null;
   recompute({ tier: startTier(), reduced: false });
 }
-
-/** The player's own pick, or null while the skin's default applies. */
-export const crtChoice = () => chosen;
 
 // The look follows the skin (its default) and photo mode (off while it is up). Runs once, when the game UI loads.
 if (typeof window !== "undefined") {

@@ -2305,6 +2305,38 @@
   .f95-display {
     width: min(470px, 100%);
   }
+  /* Settings → Picture tube (FLT-73): the little monitor wears the look you picked. */
+  .f95-tube {
+    display: grid;
+    gap: 6px;
+    border: 1px solid var(--sh);
+    box-shadow: 1px 1px 0 var(--hl);
+    margin: 0 0 8px;
+    padding: 8px 10px;
+    small {
+      color: var(--sh);
+    }
+  }
+  .f95-monitor[class*="f95-tube-"] span {
+    background:
+      linear-gradient(transparent 55%, rgb(0 0 0 / 0.12) 55%) 0 0 / 100% var(--tube-pitch, 3px),
+      linear-gradient(160deg, #3a9ad9, #008080 60%, #0b5d3b);
+    border-radius: var(--tube-r, 0);
+    filter: var(--tube-f, none);
+  }
+  .f95-monitor.f95-tube-off span {
+    --tube-pitch: 100%;
+    background: linear-gradient(160deg, #3a9ad9, #008080 60%, #0b5d3b);
+  }
+  .f95-monitor.f95-tube-subtle span {
+    --tube-r: 6px / 8px;
+  }
+  .f95-monitor.f95-tube-full span {
+    --tube-pitch: 4px;
+    --tube-r: 14px / 18px;
+    --tube-f: saturate(1.25) contrast(1.05);
+    box-shadow: var(--sunk), inset 0 0 18px rgb(0 0 0 / 0.55);
+  }
   .f95-mods {
     width: min(460px, 100%);
     p {

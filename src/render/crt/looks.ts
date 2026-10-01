@@ -60,7 +60,7 @@ export const CRT_LOOKS: Record<Exclude<CrtMode, "off">, CrtLook> = {
     curve: 0.012,
     vignette: 0.24,
     vignetteInner: 0.5,
-    css: { scan: 0.05, vignette: 0.05, vignetteInner: 0.6, corner: 12, glowRadius: 2, glowAlpha: 0.28, roll: 0, flicker: 0 },
+    css: { scan: 0.03, vignette: 0.02, vignetteInner: 0.6, corner: 12, glowRadius: 2, glowAlpha: 0.2, roll: 0, flicker: 0 },
     lite: { scan: 0.22, mask: 0.05 },
   },
   // The family TV in 1995, the one with a VCR on top. Same line count as subtle: at 300 lines (a 3px pitch) the
@@ -72,7 +72,7 @@ export const CRT_LOOKS: Record<Exclude<CrtMode, "off">, CrtLook> = {
     curve: 0.03,
     vignette: 0.42,
     vignetteInner: 0.35,
-    css: { scan: 0.07, vignette: 0.05, vignetteInner: 0.5, corner: 26, glowRadius: 3, glowAlpha: 0.45, roll: 0.035, flicker: 0.04 },
+    css: { scan: 0.04, vignette: 0.01, vignetteInner: 0.5, corner: 26, glowRadius: 3, glowAlpha: 0.3, roll: 0.035, flicker: 0.04 },
     lite: { scan: 0.42, mask: 0.12 },
   },
 };
