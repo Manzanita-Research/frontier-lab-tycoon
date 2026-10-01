@@ -1,5 +1,5 @@
 // Paper and stickers: thought bubbles, toasts, the terminal ticker, and the event card as a memo with a rubber stamp.
-import { Evidence, Marquee, factionAttrs, useT } from "../kit";
+import { Evidence, Marquee, SnagCopy, factionAttrs, useT } from "../kit";
 import type { ToneVM } from "../../ui/hud/types";
 import type { SlotPropsMap } from "../types";
 import { Glyph, GLYPHS } from "./icons";
@@ -25,6 +25,24 @@ const TONE_GLYPH: Record<ToneVM | "hint" | "warn", keyof typeof GLYPHS> = {
 
 /** A toast as a sticker: a die-cut white edge round a coloured pill. A tap peels it off (a hint stays until it comes true). */
 export function Toast({ toast, actions }: SlotPropsMap["Toast"]) {
+  const t = useT();
+  if (toast.snag) {
+    // FLT-84: the game caught an error and kept going.
+    return (
+      <div className="sd-sticker bad snag" role="alert">
+        <span className="in">
+          <Glyph name={TONE_GLYPH.bad} />
+          <span className="tx">{t("snag.text")}</span>
+        </span>
+        <span className="snag-row">
+          <SnagCopy id={toast.id} actions={actions} />
+          <button type="button" onClick={() => actions.dismissToast(toast.id)}>
+            {t("snag.ok")}
+          </button>
+        </span>
+      </div>
+    );
+  }
   const inner = (
     <span className="in">
       <Glyph name={TONE_GLYPH[toast.tone]} />

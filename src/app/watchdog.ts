@@ -23,8 +23,8 @@ interface Settled<C> {
 export interface WatchOptions<C> {
   registry: AtomRegistry.AtomRegistry;
   snapshot: Atom.Atom<AsyncResult.AsyncResult<Settled<C>, unknown>>;
-  /** Start a new actor, given the dead one's last context. */
-  restart: (last: C) => void;
+  /** Start a new actor, given the dead one's last context and what killed it. */
+  restart: (last: C, error: unknown) => void;
   now?: () => number;
   log?: (...args: unknown[]) => void;
 }
@@ -48,7 +48,7 @@ export function watchActor<C>({ registry, snapshot, restart, now = Date.now, log
     pending = true;
     queueMicrotask(() => {
       pending = false;
-      restart(context);
+      restart(context, error);
     });
   });
 }

@@ -4,8 +4,13 @@ import react from "@vitejs/plugin-react";
 import { exampleMods } from "./scripts/vite-example-mods.mjs";
 import { dramaFeed } from "./scripts/drama-feed.mjs";
 import { introGuard } from "./scripts/vite-intro-guard.mjs";
+import { buildSha } from "./scripts/build-sha.mjs";
 
 export default defineConfig({
+  // The build's commit, for the recovery toast's Copy details (FLT-84).
+  define: {
+    "import.meta.env.VITE_FLT_SHA": JSON.stringify(buildSha()),
+  },
   plugins: [react(), exampleMods(), dramaFeed(), introGuard()],
   resolve: {
     alias: {

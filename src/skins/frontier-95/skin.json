@@ -64,6 +64,9 @@
     "motion.ease": "steps(2, end)"
   },
   "strings": {
+    "snag.text": "This program has performed an illegal operation and will not be shut down. It hit a snag and kept going.",
+    "snag.copied": "Copied to Clipboard.",
+    "snag.nocopy": "The Clipboard is in use by another program. The details are in the console.",
     "stats.window": "{lab} — Lab Properties",
     "training.window": "Training {name}…",
     "training.copying": "Copying the internet into {name}…",

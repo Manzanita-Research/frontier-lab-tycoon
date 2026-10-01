@@ -1,0 +1,39 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "2f7d8089d0b52d2b4508760b230e4ace16bc2524"
+  },
+  "head": {
+    "branch": "flt-84-recovery-toast",
+    "sha": "5689c6c",
+    "dirty": true
+  },
+  "seconds": 64.385,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "snag",
+      "skin": "base",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-84/base/before/snag@base.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-84/base/after/snag@base.png",
+      "title": "FLT-84: a caught error raises the recovery toast (a real throw in the paused-input path)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-84/base/compare/snag@base.png",
+      "changed": 0.05533410493827161
+    },
+    {
+      "scene": "snag-phone",
+      "skin": "base",
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-84/base/before/snag-phone@base.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-84/base/after/snag-phone@base.png",
+      "title": "FLT-84: the recovery toast on a phone",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-84/base/compare/snag-phone@base.png",
+      "changed": 0.08593693036820998
+    }
+  ],
+  "errors": [
+    "before/snag@base: [app] the hold action failed; the game carries on.\nError: the Training Hall caught fire mid-function (staged for the screenshot)\n    at f.sim.applyNow (eval at <anonymous> (eval at evaluate (:311:30)), <anonymous>:1:105)\n    at http://127.0.0.1:59452/assets/skinControl-Bezq0hdj.js:7:2250\n    at action.hold",
+    "after/snag@base: [app] the hold action failed; the game carries on.\nError: the Training Hall caught fire mid-function (staged for the screenshot)\n    at f.sim.applyNow (eval at <anonymous> (eval at evaluate (:311:30)), <anonymous>:1:105)\n    at http://127.0.0.1:62799/assets/skinControl-D_rZWiHP.js:9:2319\n    at action.hold",
+    "before/snag-phone@base: [app] the hold action failed; the game carries on.\nError: the Training Hall caught fire mid-function (staged for the screenshot)\n    at f.sim.applyNow (eval at <anonymous> (eval at evaluate (:311:30)), <anonymous>:1:105)\n    at http://127.0.0.1:59452/assets/skinControl-Bezq0hdj.js:7:2250\n    at action.hold",
+    "after/snag-phone@base: [app] the hold action failed; the game carries on.\nError: the Training Hall caught fire mid-function (staged for the screenshot)\n    at f.sim.applyNow (eval at <anonymous> (eval at evaluate (:311:30)), <anonymous>:1:105)\n    at http://127.0.0.1:62799/assets/skinControl-D_rZWiHP.js:9:2319\n    at action.hold"
+  ]
+}
