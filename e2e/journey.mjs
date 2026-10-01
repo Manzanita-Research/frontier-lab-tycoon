@@ -20,10 +20,15 @@ const arg = (name, fallback) => {
   return at >= 0 && process.argv[at + 1] ? process.argv[at + 1] : fallback;
 };
 const urlArg = arg("url");
-if (!urlArg) throw new Error("Usage: pnpm e2e:journey --url <preview URL> [--phone] [--minutes 90] [--beyond <game days after Level 5>]");
+if (!urlArg) throw new Error("Usage: pnpm e2e:journey --url <preview URL> [--phone] [--skin <id>] [--minutes 90] [--beyond <game days after Level 5>]");
 const phone = process.argv.includes("--phone");
 const url = new URL(urlArg);
 if (url.search || url.hash) throw new Error("The journey must open a URL with no params or hash");
+// A skin other than the default (FLT-61 does a first minute on Base with `--skin base --minutes 1.5`): the coach is
+// skin-agnostic, the Start menu the policy builds with is Frontier 95's.
+const skin = arg("skin");
+const opened = new URL(url);
+if (skin) opened.searchParams.set("skin", skin);
 const out = process.env.FLT_E2E_OUT ?? "e2e/results/journey";
 await mkdir(`${out}/levels`, { recursive: true });
 await mkdir(`${out}/moments`, { recursive: true });
@@ -80,7 +85,7 @@ page.on("console", (message) => {
   else if (message.type() === "error") errors.push(message.text());
 });
 page.on("pageerror", (error) => errors.push(error.message));
-const result = { url: url.href, viewport, phone, touch: { taps: 0, drags: 0, pinches: 0, tile: null, misplaced: 0 }, campus: [], levels: [], failures: [], cards: [], held: [], purchases: [], refused: [], ownToasts: [], flat: [], samples: [], clicks: { ok: 0, forced: 0, gone: 0 } };
+const result = { url: opened.href, viewport, phone, touch: { taps: 0, drags: 0, pinches: 0, tile: null, misplaced: 0 }, campus: [], levels: [], failures: [], cards: [], held: [], purchases: [], refused: [], ownToasts: [], flat: [], samples: [], clicks: { ok: 0, forced: 0, gone: 0 } };
 let firstClick = 0;
 let start = null;
 let tpd = 20;
@@ -414,6 +419,7 @@ async function sweep(withCampus) {
       const win = el.closest(WIN);
       return win ? (win.getAttribute("aria-label") || win.querySelector(".f95-tb, .f95-title, h2, h3")?.textContent?.trim() || String(win.className).split(" ")[0]).slice(0, 40) : "the HUD";
     };
+    const stable = (text) => text.replace(/[-−+$€]?[\d][\d.,]*\s*[%KMB×]?/g, "#").replace(/\b(rising|falling|steady)\b/g, "~"); // a live readout keeps its key
     const sig = (el) => `${el.tagName.toLowerCase()}.${String(el.className).trim().split(/\s+/).slice(0, 2).join(".")}`;
     const scroller = (el) => {
       for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) {
@@ -430,11 +436,11 @@ async function sweep(withCampus) {
       if (r.width < 1 || r.height < 1) continue;
       // A control pushed past the edge of the screen (not one a scroll brings back, like a long menu's) can't be tapped.
       if (!inside(r) && !scroller(el) && !el.closest("[role=menu]")) {
-        issues.push({ kind: "off-screen control", key: `${where(el)}|${name(el)}`, message: `"${name(el)}" in ${where(el)} is at ${Math.round(r.left)}…${Math.round(r.right)} × ${Math.round(r.top)}…${Math.round(r.bottom)}, ${onScreen(r) ? "partly" : "wholly"} off the ${vw}×${vh} screen` });
+        issues.push({ kind: "off-screen control", key: `${stable(where(el))}|${stable(name(el))}`, message: `"${name(el)}" in ${where(el)} is at ${Math.round(r.left)}…${Math.round(r.right)} × ${Math.round(r.top)}…${Math.round(r.bottom)}, ${onScreen(r) ? "partly" : "wholly"} off the ${vw}×${vh} screen` });
         if (!onScreen(r)) continue;
       }
       if (r.width >= TAP_MIN && r.height >= TAP_MIN) continue;
-      issues.push({ kind: "small target", key: `${where(el)}|${name(el)}`, message: `"${name(el)}" in ${where(el)} is ${Math.round(r.width)}×${Math.round(r.height)} px` });
+      issues.push({ kind: "small target", key: `${stable(where(el))}|${stable(name(el))}`, message: `"${name(el)}" in ${where(el)} is ${Math.round(r.width)}×${Math.round(r.height)} px` });
     }
     // Windows wider than the screen, or with the close button off it; a card whose buttons need a scroll.
     for (const win of document.querySelectorAll(WIN)) {
@@ -459,7 +465,7 @@ async function sweep(withCampus) {
         const sc = scroller(b);
         const box = sc ? sc.getBoundingClientRect() : null;
         const hidden = !inside(br) || (box && (br.top < box.top - 1 || br.bottom > box.bottom + 1 || br.left < box.left - 1 || br.right > box.right + 1));
-        if (hidden) issues.push({ kind: "scroll to reach", key: `${label}|${name(b)}`, message: `"${name(b)}" in "${label}" is ${sc ? "scrolled out of its window" : "off the screen"} (${Math.round(br.left)},${Math.round(br.top)})` });
+        if (hidden) issues.push({ kind: "scroll to reach", key: `${stable(label)}|${stable(name(b))}`, message: `"${name(b)}" in "${label}" is ${sc ? "scrolled out of its window" : "off the screen"} (${Math.round(br.left)},${Math.round(br.top)})` });
       }
     }
     // Text under TEXT_MIN px.
@@ -471,7 +477,7 @@ async function sweep(withCampus) {
       if (!t || !el || el.closest("script, style, svg, canvas")) continue;
       const size = parseFloat(getComputedStyle(el).fontSize);
       if (!(size < TEXT_MIN)) continue;
-      const k = `${where(el)}|${sig(el)}|${size}`;
+      const k = `${stable(where(el))}|${sig(el)}|${size}`;
       if (small.has(k) || !seen(el) || !onScreen(el.getBoundingClientRect())) continue;
       small.set(k, { kind: "small text", key: k, message: `${size} px text in ${where(el)} (${sig(el)}): "${t.slice(0, 40)}"` });
     }
@@ -534,7 +540,7 @@ async function phoneChecks(p, force = false) {
 let probe = null;
 const outcome = { reached: false };
 try {
-  await page.goto(url.href, { waitUntil: "networkidle", timeout: 120_000 });
+  await page.goto(opened.href, { waitUntil: "networkidle", timeout: 120_000 });
   await page.waitForFunction(() => typeof window.__fltProbe === "function", { timeout: 60_000 });
   const first = await probeNow();
   if (first.speed !== 1 || !first.paused) throw new Error("Opening must be paused at 1×");
