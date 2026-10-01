@@ -101,10 +101,9 @@ export function BirdPostCard({ post, compact = false, className = "" }: { post: 
       </span>
       <div className="bird-post-body">
         <header>
-          <b>{post.name}</b> <span className="bird-handle">{post.handle}</span> <span className="bird-time">· {post.time}</span>
           {post.lab && <BirdLabChip lab={post.lab} />}
+          <b>{post.name}</b> <span className="bird-handle">{post.handle}</span> <span className="bird-time">· {post.time}</span>
           {post.momentText && <em className="bird-moment">{post.momentText}</em>}
-          {post.beatText && <em className="bird-beat">{post.beatText}</em>}
         </header>
         {post.replyTo && <small className="bird-replyto">↳ {post.replyTo}</small>}
         <p>{post.text}</p>
@@ -120,6 +119,7 @@ export function BirdPostCard({ post, compact = false, className = "" }: { post: 
           {post.reviewed && <small className="bird-reviewed">{t("birdapp.reviewed")}</small>}
           {post.handledText && <small className="bird-handled">{post.handledText}</small>}
           {post.quote && post.tone === "bad" && <small className="bird-cost">{post.outcomeText}</small>}
+          {post.beatText && <em className="bird-beat">{post.beatText}</em>}
         </footer>
         {!compact && post.reply && <blockquote className="bird-reply">{post.reply}</blockquote>}
       </div>

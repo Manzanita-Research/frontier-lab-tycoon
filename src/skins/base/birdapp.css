@@ -472,6 +472,11 @@
   padding-left: 5px;
   border-left: 3px solid var(--bird-lab, var(--flt-color-line));
 }
+/* Their avatar wears the lab's colour too, so a skin that draws its own card borders still says whose post it is. */
+.bird-post.side-them .bird-av {
+  border-color: var(--bird-lab, var(--flt-color-line));
+  box-shadow: 0 0 0 1.5px var(--bird-lab, transparent);
+}
 .bird-lab {
   display: inline-flex;
   align-items: center;
@@ -488,7 +493,6 @@
   background: var(--bird-lab, var(--flt-color-line));
 }
 .bird-beat {
-  margin-left: 5px;
   padding: 0 4px;
   border: 1px solid currentColor;
   border-radius: 3px;

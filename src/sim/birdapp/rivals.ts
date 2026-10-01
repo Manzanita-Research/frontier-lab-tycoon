@@ -329,7 +329,9 @@ export function rivalPostNow(s: GameState, rng: Rng, o: { lab?: string; beat?: R
   const lab = o.lab && defs().rivalById[o.lab as RivalId] ? o.lab : open.length > 0 ? rng.pick(open) : undefined;
   if (!lab) return null;
   const rank = ranksOf(s.race.board)[lab];
-  const beat: Beat = { lab, beat: o.beat ?? "idle", ...(o.about ? { about: o.about } : {}), ...(o.model ? { model: o.model } : {}), ...(rank !== undefined ? { rank } : {}) };
+  // A release is of the lab's own latest model unless the caller names one.
+  const model = o.model ?? (o.beat === "release" ? s.race.rivals.find((x) => x.context.id === lab)?.context.model || undefined : undefined);
+  const beat: Beat = { lab, beat: o.beat ?? "idle", ...(o.about ? { about: o.about } : {}), ...(model ? { model } : {}), ...(rank !== undefined ? { rank } : {}) };
   const tick = o.tick ?? s.tick + 1;
   if (o.text !== undefined) {
     const voices = defs().bird.voicesFor(lab).filter((v) => !o.role || v.role === o.role);
