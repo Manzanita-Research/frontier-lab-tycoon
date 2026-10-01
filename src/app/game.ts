@@ -189,7 +189,9 @@ if (typeof window !== "undefined") {
       outcome: c ? { outcome: c.outcome, dismissed: c.outcomeDismissed } : null, overlays: c ? [...c.overlays] : [], warnings: snap ? [...snap.warnings] : [],
       toasts: c ? c.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) : [],
       map: { w: w.grid.w, h: w.grid.h, paths: w.grid.paths.flatMap((p, i) => (p ? [i] : [])), gate: { ...w.gate }, buildings: w.buildings.map((b) => ({ id: b.id, kind: b.kind, x: b.x, z: b.z, w: b.w, d: b.d, broken: b.broken })) },
-      view: probeView.view?.() ?? null, windows: probeHud.windows?.() ?? null };
+      view: probeView.view?.() ?? null, windows: probeHud.windows?.() ?? null,
+      // FLT-78: the mods in this lab (and which came mid-game), and the last lines on the ticker.
+      mods: modSession().mods.map((m) => m.id), modsAdded: (w.modsAdded ?? []).map((m) => ({ id: m.id, tick: m.tick, day: m.day })), news: w.news.slice(-12).map((n) => n.text) };
   };
   window.addEventListener("click", () => send({ type: "COMMAND", command: { type: "coachClick" } }));
   // Closing the tab (or switching away from it) autosaves, so a lab is never more than a month behind.

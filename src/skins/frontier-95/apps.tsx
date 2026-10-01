@@ -423,17 +423,19 @@ export function Drama({ drama, actions }: SlotPropsMap["Drama"]) {
                   <Btn onClick={() => actions.removeMod(latest.id)}>Remove</Btn>
                 </>
               ) : (
-                <>
-                  <Btn def onClick={() => actions.playDrama(latest.id)} disabled={!!drama.adding}>
-                    {drama.adding === latest.id ? "Adding…" : "Add to my lab"}
-                  </Btn>
-                  <small>
-                    {DRAMA_ADD_SMALL}
-                    {on ? ` It replaces "${on.title}".` : ""}
-                  </small>
-                </>
+                <Btn def onClick={() => actions.playDrama(latest.id)} disabled={!!drama.adding}>
+                  {drama.adding === latest.id ? "Adding…" : "Add to my lab"}
+                </Btn>
               )}
             </div>
+          )}
+          {latest && !latest.on && (
+            <p className="f95-drama-small">
+              <small>
+                {DRAMA_ADD_SMALL}
+                {on ? ` It replaces "${on.title}".` : ""}
+              </small>
+            </p>
           )}
           {drama.archive.length > 0 && (
             <fieldset className="f95-drama-archive">
