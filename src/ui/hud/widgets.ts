@@ -21,6 +21,7 @@ const WIDGETS: readonly (Row & { when: (w: WidgetGate) => boolean })[] = [
   { id: "finance", name: "Finance", file: "finance.xls", blurb: "Where the money comes from, and where it goes (mostly GPUs).", icon: "finance", aliases: ["money", "cash", "burn"], when: (w) => w.visible.revenue },
   { id: "arena", name: "Frontier Arena", file: "arena.exe", blurb: "The leaderboard. Everyone says they ignore it.", icon: "arena", aliases: ["leaderboard", "rank", "rd"], when: (w) => w.visible.arena || w.visible.rnd },
   { id: "benchmarks", name: "Benchmarks", file: "bench.exe", blurb: "Records, footnotes, and footnotes to the footnotes.", icon: "benchmarks", aliases: ["benchmark", "leapfrog"], when: (w) => w.leapfrog },
+  { id: "bird", name: "Bird App", file: "bird.exe", blurb: "Your researchers, posting. Comms is doing its best.", icon: "bird", aliases: ["birdapp", "posts", "timeline", "posting"], when: (w) => !!w.birdapp },
   { id: "thoughts", name: "Thoughts", file: "thoughts.txt", blurb: "What everyone on campus is thinking. Unfiltered.", icon: "thoughts", aliases: ["thought", "minds"], when: (w) => w.visible.thoughts },
   { id: "traffic", name: "Network Traffic", file: "netstat.exe", blurb: "Share of the news cycle, as a graph that goes up.", icon: "traffic", aliases: ["voice", "netstat", "network"], when: (w) => w.leapfrog },
   { id: "discourse", name: "Discourse Monitor", file: "discourse.exe", blurb: "The factions, the marches and the group chats.", icon: "discourse", aliases: ["factions", "safety"], when: (w) => w.factions },
@@ -44,6 +45,8 @@ export interface WidgetGate {
   papers: boolean;
   senate: boolean;
   disasters: boolean;
+  /** FLT-94: the Bird App is earned (Level 3). */
+  birdapp?: boolean;
 }
 
 export function widgetsOf(gate: WidgetGate): WidgetVM[] {

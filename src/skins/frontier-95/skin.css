@@ -3769,7 +3769,6 @@
     .f95-start {
       height: 44px;
     }
-    .f95-qs,
     .f95-task span,
     .f95-wait span,
     .f95-clock,
@@ -6088,5 +6087,289 @@
   from {
     transform: rotate(-8deg) scale(2);
     opacity: 0;
+  }
+}
+
+/* ---- FLT-94: Quick Launch (applets only), the Facilities palette, the tray's rank ---- */
+[data-skin="frontier-95"] {
+  /* Quick Launch: 24 px icons (the sprite's own grid, so no blur) on flat buttons as tall as Start, that rise under the
+     pointer, the way the real one did. The 42 px taskbar already holds them. */
+  .f95-qs {
+    position: relative;
+    align-items: center;
+    gap: 0;
+  }
+  .f95-qb {
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    box-shadow: none;
+    &:hover:not(.on) {
+      box-shadow: inset 1px 1px 0 var(--hl), inset -1px -1px 0 var(--sh);
+    }
+  }
+  .f95-qmore {
+    width: 20px;
+    font: bold 15px/1 var(--flt-font-ui);
+    color: inherit;
+  }
+  .f95-menu.f95-qmenu {
+    left: auto;
+    right: 0;
+    width: auto;
+    min-width: 220px;
+    ul {
+      padding: 0;
+    }
+    li button {
+      grid-template-columns: 26px minmax(0, 1fr);
+      height: 28px;
+      white-space: nowrap;
+    }
+  }
+  .f95-menu .f95-programs {
+    max-height: calc(100dvh - var(--taskbar, 40px) - 12px);
+  }
+  @media (max-width: 640px) {
+    /* in place on a phone: the whole Start menu scrolls, so Programs ▸ is as long as it needs to be */
+    .f95-menu .f95-programs {
+      max-height: none;
+    }
+  }
+
+  /* The rank: a sunken "#3 ▲" by the clock, green going up, red going down, a trophy at the top. */
+  .f95-rank {
+    flex: none;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin-right: 4px;
+    padding: 0 6px;
+    border: 0;
+    background: var(--flt-color-inset);
+    box-shadow: var(--sunk);
+    font: bold 15px/1 var(--flt-font-ui);
+    color: var(--flt-color-text);
+    cursor: pointer;
+    i {
+      font-style: normal;
+      font-size: 11px;
+    }
+    &.good i {
+      color: #008000;
+    }
+    &.bad i {
+      color: #c00000;
+    }
+    &.flinch {
+      animation: frontier-95-wiggle 0.4s 2;
+    }
+    &:hover {
+      color: var(--navy);
+      text-decoration: underline;
+    }
+  }
+
+  /* Facilities: a grid of tiles, the price on each, what it's for under it; Path and Bulldoze above them. */
+  .f95-stack > .f95-palette {
+    width: min(460px, 100%);
+  }
+  .f95-palette {
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .f95-tools {
+      display: flex;
+      gap: 4px;
+      width: 100%;
+      li {
+        flex: 1;
+      }
+    }
+    .f95-ptiles {
+      width: 100%;
+      /* As tall as the right column allows (the footer stays in view at 1440×900); a long list scrolls, on a 1995
+         scrollbar that shows even where the OS hides them, so the last row reads as "more", not cut off. */
+      max-height: max(240px, calc(100dvh - 310px));
+      overflow-y: auto;
+      padding: 2px 4px 6px;
+      &::-webkit-scrollbar {
+        width: 16px;
+      }
+      &::-webkit-scrollbar-track {
+        background: repeating-conic-gradient(var(--hl) 0 25%, var(--g) 0 50%) 0 0 / 2px 2px;
+      }
+      &::-webkit-scrollbar-thumb {
+        min-height: 24px;
+        background: var(--g);
+        box-shadow: var(--btn);
+      }
+      section > ul {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 4px;
+      }
+      h3 {
+        margin: 6px 0 4px;
+        padding-bottom: 2px;
+        font-size: 13px;
+        color: var(--navy);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        border-bottom: 1px solid var(--sh);
+      }
+    }
+    .f95-status {
+      width: calc(100% - 4px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+  .f95-ptile {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr) auto;
+    grid-template-areas: "i n p" "i d d" "i u b";
+    grid-template-rows: auto 1fr auto;
+    align-items: start;
+    column-gap: 4px;
+    padding: 4px 6px 4px 4px;
+    border: 0;
+    background: var(--g);
+    box-shadow: var(--btn);
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    > svg {
+      grid-area: i;
+      align-self: center;
+    }
+    .n {
+      grid-area: n;
+      font-size: 15px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .p {
+      grid-area: p;
+      font-size: 14px;
+      &.free {
+        color: #008000;
+        font-weight: bold;
+      }
+    }
+    /* Two lines at most, so every tile keeps its upkeep in view; the tile's tooltip has the whole line. */
+    .does {
+      grid-area: d;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      overflow: hidden;
+      font-size: 13px;
+      line-height: 1.15;
+      color: var(--flt-color-textDim);
+    }
+    .up {
+      grid-area: u;
+      font-size: 12px;
+      color: var(--flt-color-textDim);
+    }
+    .up,
+    .built {
+      align-self: end;
+    }
+    .built {
+      grid-area: b;
+      justify-self: end;
+      font-size: 12px;
+      color: var(--navy);
+    }
+    &.tool {
+      grid-template-columns: 24px minmax(0, 1fr) auto;
+      grid-template-areas: "i n p";
+      grid-template-rows: auto;
+      align-items: center;
+    }
+    &:hover:not(:disabled):not(.locked) {
+      outline: 1px dotted #000;
+      outline-offset: -5px;
+    }
+    &.on {
+      box-shadow: var(--pressed);
+      background: repeating-conic-gradient(var(--lt) 0 25%, var(--g) 0 50%) 0 0 / 2px 2px;
+    }
+    &:disabled,
+    &.locked {
+      cursor: default;
+      color: var(--sh);
+      text-shadow: 1px 1px 0 var(--hl);
+      .does,
+      .up {
+        color: var(--sh);
+      }
+      > svg {
+        opacity: 0.55;
+      }
+    }
+    &.locked {
+      box-shadow: var(--etched);
+    }
+  }
+  @media (pointer: coarse) {
+    .f95-qb {
+      width: 44px;
+      height: 44px;
+    }
+  }
+  @media (max-width: 640px) {
+    .f95-qs {
+      padding-left: 2px;
+    }
+    .f95-qb {
+      width: 40px;
+      height: 44px;
+    }
+    .f95-rank {
+      min-width: 40px;
+      height: 40px;
+      justify-content: center;
+      margin-right: 0;
+      padding: 0 4px;
+    }
+    .f95-palette.open {
+      position: fixed;
+      left: 4px;
+      right: 4px;
+      top: 4px;
+      width: auto;
+      max-height: calc(100dvh - var(--taskbar) - 30px - 12px);
+      z-index: 20;
+      overflow: auto;
+      .f95-ptiles {
+        max-height: none;
+      }
+    }
+    .f95-ptile {
+      min-height: 44px;
+    }
+  }
+  @media (max-width: 360px) {
+    .f95-palette .f95-ptiles section > ul {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .f95-rank.flinch {
+      animation: none;
+    }
   }
 }

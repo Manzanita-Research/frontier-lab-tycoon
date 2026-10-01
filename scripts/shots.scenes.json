@@ -417,6 +417,20 @@
       "flt91-day5",
       "flt91-day5-phone"
     ],
+    "flt-94": [
+      "flt94-taskbar",
+      "flt94-apps",
+      "flt94-programs",
+      "flt94-palette",
+      "flt94-palette-end",
+      "flt94-leaderboard",
+      "flt94-taskbar-phone",
+      "flt94-tray-phone",
+      "flt94-programs-phone",
+      "flt94-palette-phone",
+      "flt94-palette-end-phone",
+      "flt94-leaderboard-phone"
+    ],
     "flt-95": [
       "box-take",
       "box-back",
@@ -3912,6 +3926,13 @@
           "wait": 300
         },
         {
+          "click": "[data-anchor=\"start:programs\"]",
+          "optional": true
+        },
+        {
+          "wait": 300
+        },
+        {
           "click": "[data-testid=start-facilities]",
           "optional": true
         },
@@ -4081,6 +4102,13 @@
       "steps": [
         {
           "click": "[data-coach=start]"
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": "[data-anchor=\"start:programs\"]",
+          "optional": true
         },
         {
           "wait": 300
@@ -5905,6 +5933,343 @@
         },
         {
           "eval": "(f, w) => { for (let i = 0; i < 4000 && w.day < 5; i++) { const id = Object.keys(w.arcs).find((k) => w.arcs[k].value === 'cardOpen'); f.tick(w, id ? [{ type: 'chooseEvent', eventId: id, choiceIndex: 0 }] : []); } }"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt94-taskbar": {
+      "title": "FLT-94: the taskbar: Start, Quick Launch (applets only), the tray rank",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "steps": []
+    },
+    "flt94-apps": {
+      "title": "FLT-94: Quick Launch's » (the applets past the eighth)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "click": "[data-anchor=\"apps\"]",
+          "optional": true
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "flt94-programs": {
+      "title": "FLT-94: Start ▸ Programs ▸ Facilities ▸ Research",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "click": "[data-coach=start]"
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": "[data-anchor=\"start:programs\"]",
+          "optional": true
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": "[data-testid=start-facilities]",
+          "optional": true
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": "[data-anchor=\"start:facilities:research\"]",
+          "optional": true
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "flt94-palette": {
+      "title": "FLT-94: the Facilities palette (Quick Launch's first icon)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "click": "[data-anchor=\"app:facilities\"]",
+          "optional": true
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "flt94-palette-end": {
+      "title": "FLT-94: the Facilities palette (Quick Launch's first icon), scrolled to the end",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "click": "[data-anchor=\"app:facilities\"]",
+          "optional": true
+        },
+        {
+          "wait": 600
+        },
+        {
+          "eval": "(f, w) => { for (const s of ['.f95-palette .f95-ptiles', '.f95-palette']) { const l = document.querySelector(s); if (l) l.scrollTop = 1e5; } }",
+          "optional": true
+        },
+        {
+          "wait": 300
+        }
+      ]
+    },
+    "flt94-leaderboard": {
+      "title": "FLT-94: the leaderboard applet: Task Mangler left on Benchmarks, then Quick Launch's trophy (main: Run… arena.exe)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "eval": "() => [...document.querySelectorAll('[role=tab]')].find((b) => b.textContent.startsWith('Benchmarks'))?.click()"
+        },
+        {
+          "wait": 400
+        },
+        {
+          "click": "[data-anchor=\"app:arena\"]",
+          "optional": true
+        },
+        {
+          "wait": 400
+        },
+        {
+          "eval": "(f, w) => { if (!document.querySelector('[data-anchor=\"win:arena\"]')) document.querySelector('[data-coach=start]')?.click(); }"
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": "[data-testid=start-run]",
+          "optional": true
+        },
+        {
+          "wait": 300
+        },
+        {
+          "type": "arena.exe",
+          "into": "[data-testid=run-input]",
+          "enter": true,
+          "optional": true
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt94-taskbar-phone": {
+      "title": "FLT-94: phone: the taskbar never wraps; the rank stays",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": []
+    },
+    "flt94-tray-phone": {
+      "title": "FLT-94: phone: the applets ride in the tray's »",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "click": ".f95-chev",
+          "optional": true
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "flt94-programs-phone": {
+      "title": "FLT-94: phone: Start ▸ Programs ▸ Facilities ▸ Research (taps: a phone has no hover)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "click": "[data-coach=start]"
+        },
+        {
+          "wait": 300
+        },
+        {
+          "eval": "() => document.querySelector('[data-anchor=\"start:programs\"]')?.click()"
+        },
+        {
+          "wait": 300
+        },
+        {
+          "eval": "() => document.querySelector('[data-testid=start-facilities]')?.click()"
+        },
+        {
+          "wait": 300
+        },
+        {
+          "eval": "() => document.querySelector('[data-anchor=\"start:facilities:research\"]')?.click()"
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "flt94-palette-phone": {
+      "title": "FLT-94: phone: the Facilities palette as a sheet",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "click": "[data-anchor=\"app:facilities\"]",
+          "optional": true
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "flt94-palette-end-phone": {
+      "title": "FLT-94: phone: the Facilities palette as a sheet, scrolled to the end",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "click": "[data-anchor=\"app:facilities\"]",
+          "optional": true
+        },
+        {
+          "wait": 600
+        },
+        {
+          "eval": "(f, w) => { for (const s of ['.f95-palette .f95-ptiles', '.f95-palette']) { const l = document.querySelector(s); if (l) l.scrollTop = 1e5; } }",
+          "optional": true
+        },
+        {
+          "wait": 300
+        }
+      ]
+    },
+    "flt94-leaderboard-phone": {
+      "title": "FLT-94: phone: the leaderboard from the tray rank",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "click": "[data-anchor=\"tray:rank\"]",
+          "optional": true
+        },
+        {
+          "wait": 400
+        },
+        {
+          "eval": "(f, w) => { if (!document.querySelector('[data-anchor=\"win:arena\"]')) document.querySelector('[data-coach=start]')?.click(); }"
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": "[data-testid=start-run]",
+          "optional": true
+        },
+        {
+          "wait": 300
+        },
+        {
+          "type": "arena.exe",
+          "into": "[data-testid=run-input]",
+          "enter": true,
+          "optional": true
         },
         {
           "wait": 800

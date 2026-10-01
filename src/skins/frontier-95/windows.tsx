@@ -1,5 +1,5 @@
 // Frontier 95's windows: Lab Properties, the copy dialog, sticky notes, Properties of a walker, Task Mangler, Thoughts.txt.
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ALL_VISIBLE, Odometer, money, useAutoPause, useSlots, useWidget } from "../kit";
 import { useCoach, useT } from "../context";
 import type { SlotPropsMap } from "../types";
@@ -364,9 +364,13 @@ export function Arena({ arena, leapfrog, layout, actions }: SlotPropsMap["Arena"
     arena.auto && arena.open,
   );
   const bench = leapfrog.enabled;
-  // With Release Leapfrog on, the leaderboard is the live part of the race: it opens first, and the tab lights up on a launch.
-  const [tab, setTab] = useState<"perf" | "bench">("bench");
+  // FLT-94: Task Mangler always opens on the leaderboard, whoever opens it (Quick Launch, the tray's rank, the game after a
+  // drop): shutting it goes back to that tab. The benchmark table is a tab away, and its tab lights up on a launch.
+  const [tab, setTab] = useState<"perf" | "bench">("perf");
   useWidget(["arena", "benchmarks"], (id) => setTab(id === "benchmarks" ? "bench" : "perf"));
+  useEffect(() => {
+    if (!arena.open) setTab("perf");
+  }, [arena.open]);
   const onBench = bench && tab === "bench" && arena.open;
   const launched = leapfrog.rows.some((r) => r.flash);
   return (
@@ -379,6 +383,7 @@ export function Arena({ arena, leapfrog, layout, actions }: SlotPropsMap["Arena"
       }
       label="Task Mangler"
       place="arena"
+      attrs={{ "data-anchor": "win:arena" }}
       icon="chart"
       onTitleClick={() => actions.toggleArena()}
       buttons={[{ g: "min", label: arena.open ? "Minimize" : "Restore", onClick: () => actions.toggleArena() }]}
@@ -462,6 +467,11 @@ export function Staff({ staff, actions }: SlotPropsMap["Staff"]) {
   const [tab, setTab] = useState<"hire" | "roster">("hire");
   const [folded, setFolded] = useState(false);
   useStackWindow("staff", folded, setFolded);
+  // FLT-94: Quick Launch's Staff Manager unfolds it, on the Hire tab.
+  useWidget("staff", () => {
+    setFolded(false);
+    setTab("hire");
+  });
   if (staff.painting) {
     const p = staff.painting;
     return (
@@ -484,6 +494,7 @@ export function Staff({ staff, actions }: SlotPropsMap["Staff"]) {
     <Win
       className="f95-staff"
       place="staff"
+      attrs={{ "data-anchor": "win:staff" }}
       title="Staff Manager"
       icon="staff"
       buttons={[
@@ -513,7 +524,7 @@ export function Staff({ staff, actions }: SlotPropsMap["Staff"]) {
                       <b>{j.title}</b> <small>{j.salaryText}</small>
                       <small className="blurb">{j.blurb}</small>
                     </span>
-                    <Btn disabled={!j.canHire} title={j.reason} onClick={() => actions.hire(j.job)}>
+                    <Btn disabled={!j.canHire} title={j.reason} data-anchor={`hire:${j.job}`} onClick={() => actions.hire(j.job)}>
                       {t("staff.hire")}
                       {j.count > 0 ? ` (${j.count})` : ""}
                     </Btn>
