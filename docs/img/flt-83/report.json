@@ -1,0 +1,27 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "8ab0cd7baf3318f4fc2a87574c835e4bef5ef698"
+  },
+  "head": {
+    "branch": "flt-83-moment-queue",
+    "sha": "313e059",
+    "dirty": false
+  },
+  "seconds": 93.894,
+  "problems": [
+    "before/queue: page.waitForFunction: Timeout 60000ms exceeded."
+  ],
+  "rows": [
+    {
+      "scene": "queue",
+      "skin": null,
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-83/after/queue.png",
+      "title": "A full Kombucha Bar and the line down the spine",
+      "error": "before: page.waitForFunction: Timeout 60000ms exceeded."
+    }
+  ],
+  "errors": [
+    "before/queue: TypeError: Cannot read properties of undefined (reading 'id')"
+  ]
+}
