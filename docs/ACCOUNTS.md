@@ -105,7 +105,7 @@ The data lives in memory and is gone when the server stops. Tests: `pnpm exec vi
 
 ```sh
 node scripts/accounts-proof.mjs          # builds origin/main and this checkout with accounts off, compares every file
-# IDENTICAL: all 92 files match between origin/main@941f5ce and … with accounts off
+# IDENTICAL: all 101 files match between origin/main@2a4dac1 and … with accounts off
 ```
 
 `dist/deployment.json` is left out: the deploy writes the commit hash into it. Two things keep the bundle identical,
