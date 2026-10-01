@@ -73,10 +73,10 @@ export function cardAllowed(state: GameState, id: string, how: "urgent" | "chain
  * through takes the screen (an offer on a clock goes ahead of the line); the rest wait their turn as `brewing`. A minor card that would have to wait (or any minor card
  * at 10×) answers itself with its default and says so on the ticker. The game pauses until a card is answered.
  */
-export function dailyEvents(state: GameState) {
+export function dailyEvents(state: GameState, unlocked = true) {
   if (state.goals.value === "lost") return;
-  // Before day 40 a lab without the ladder has no cards, except one a mod brought mid-game (FLT-78): it was asked for.
-  const early = !state.progression && state.day < 40;
+  // Before the ladder opens cards (or before day 40 without it) there are none, except one a mod brought mid-game (FLT-78).
+  const early = !unlocked || (!state.progression && state.day < 40);
   if (early && !state.modsAdded) return;
   notePacer(state);
   let slotFree = openEventOf(state) === null;
