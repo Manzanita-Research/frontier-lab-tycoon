@@ -26,7 +26,7 @@ export function Welcome({ welcome, saves, actions }: SlotPropsMap["Welcome"]) {
               <div>
                 <b>Your lab is where you left it.</b>
                 <p>
-                  <b>{welcome.lab}</b>, {welcome.date}. Saved {welcome.ago} on AUTOSAVE.FLT ({welcome.size}).
+                  <b>{welcome.lab}</b>, {welcome.date}. Saved {welcome.ago} on {fileName(welcome.slot)} ({welcome.size}).
                 </p>
                 <p className="f95-hint">Did you know... time stopped while you were away. Please don't tell the investors.</p>
               </div>

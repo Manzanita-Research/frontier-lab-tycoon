@@ -45,11 +45,12 @@ if (!midgame && !debugParams.risk) setRisk(sim.world, DEFAULT_RISK);
 const initialSpeed: Speed = midgame ? 0 : (SPEEDS as readonly number[]).includes(debugParams.speed ?? 1) ? ((debugParams.speed ?? 1) as Speed) : 1;
 
 /**
- * Saving (FLT-65): the slots in localStorage, or with `?saves=demo|window` a pretend shelf in memory (screenshots).
+ * Saving (FLT-65): the slots in localStorage, or with `?saves=demo|window` a pretend shelf in memory (screenshots;
+ * `&shelf=newer` puts a newer save in slot 2 than the autosave, FLT-82).
  * Staged links never autosave over the player's lab. `savesReady` settles once the shelf can be read.
  */
 const search = typeof window === "undefined" ? "" : window.location.search;
-const shelf = new URLSearchParams(search).has("saves") ? demoSaveStore(mods.def) : { store: makeSaveStore(browserStorage()), ready: Promise.resolve() };
+const shelf = new URLSearchParams(search).has("saves") ? demoSaveStore(mods.def, new URLSearchParams(search).get("shelf") === "newer") : { store: makeSaveStore(browserStorage()), ready: Promise.resolve() };
 export const savesReady = shelf.ready;
 // The session's mods as they are now (FLT-78: mods come and go mid-game); one added mid-game says when, so a load adds it back.
 export const saveDesk = new SaveDesk(shelf.store, !isStagedLink(search) && !new URLSearchParams(search).has("saves"), () => {

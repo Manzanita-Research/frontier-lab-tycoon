@@ -231,6 +231,7 @@
     ],
     "saves": [
       "saves-welcome",
+      "saves-welcome-newer",
       "saves-window",
       "menu",
       "saves-phone"
@@ -3063,6 +3064,50 @@
       "steps": [
         {
           "wait": 800
+        }
+      ]
+    },
+    "saves-welcome-newer": {
+      "title": "FLT-82: Welcome back offers the newest save (slot 2, 25 days on), not the older autosave",
+      "query": {
+        "saves": "demo",
+        "shelf": "newer"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "ticker-new-lab": {
+      "title": "FLT-82: the news ticker a few seconds into a new lab (Today's lab, fixed seed), after a mid-game lab",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "wait": 3000
+        },
+        {
+          "send": {
+            "type": "DAILY_LAB",
+            "daily": "2026-10-01"
+          }
+        },
+        {
+          "wait": 4000
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 500
         }
       ]
     },
