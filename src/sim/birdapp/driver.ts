@@ -20,6 +20,7 @@ import type { GameState, Walker } from "../types";
 import { resign } from "../walkers";
 import { commsMachine, posterStored, stepComms, stepPoster, type PosterTier } from "./machines";
 import { BIRD as R } from "./pack";
+import { dailyBirdRivals, dunkLanded, enableBirdRivals, type Scheduler } from "./rivals";
 import type { BirdAppState, BirdLever, BirdPostRecord, Poster } from "./state";
 
 export const OWNER = "birdapp";
@@ -42,6 +43,7 @@ export function enableBirdApp(s: GameState) {
     tally: { posts: 0, bangers: 0, controversies: 0, ratios: 0, cancels: 0, stuck: 0 }, history: [],
   };
   s.birdapp.enabled = true;
+  enableBirdRivals(s, s.birdapp);
 }
 export function disableBirdApp(s: GameState) {
   if (s.birdapp) s.birdapp.enabled = false;
@@ -166,7 +168,8 @@ function settle(s: GameState, b: BirdAppState, rng: Rng, staff: Map<number, Walk
         const { effects } = applyPoster(p, { type: "BANGER", promote: tier === "occasional" && p.followers >= R.bigAt });
         if (w) think(s, rng, w.id, effects.some((e) => e.type === "PROMOTED") ? "promoted" : "banger", true);
         headline(s, rng, "banger", who, "good");
-        addToast(s, `🐦 @${post.handle} went viral: "${post.text}"`, "good", { source: OWNER, importance: "you", group: { kind: "viral", who: `@${post.handle}` } });
+        // FLT-92: a dunk on a rival that lands says so, with its own Aura.
+        if (!dunkLanded(s, b, post)) addToast(s, `🐦 @${post.handle} went viral: "${post.text}"`, "good", { source: OWNER, importance: "you", group: { kind: "viral", who: `@${post.handle}` } });
         break;
       }
       case "controversy": {
@@ -415,6 +418,7 @@ export function dailyBirdApp(s: GameState) {
   const staff = new Map<number, Walker>();
   for (const w of s.walkers) if (onStaff(w)) staff.set(w.id, w);
   syncPosters(b, rng, staff);
+  const landing = b.rivals ? b.posts.filter((p) => !p.settled) : [];
   settle(s, b, rng, staff);
   breaks(s, b, rng, staff);
   logoffDay(s, b, rng, staff);
@@ -427,6 +431,20 @@ export function dailyBirdApp(s: GameState) {
   b.history.push(b.aura);
   if (b.history.length > 30) b.history.shift();
   b.rngState = rng.state();
+  // FLT-92: the rival labs, on their own stream. A dunk borrows the lab's scheduler (and its dice, after today's).
+  if (b.rivals) dailyBirdRivals(s, b, landing, rivalScheduler(s, b));
+}
+
+/** How the rivals' driver puts a dunk on one of your posters' timeline: schedule(), with the lab's own stream. */
+function rivalScheduler(s: GameState, b: BirdAppState): Scheduler {
+  return (by, name, text, line, tick, outcome) => {
+    const p = b.posters[by];
+    if (!p) return null;
+    const rng = createRng(b.rngState);
+    const post = schedule(s, b, rng, p, name, text, line, 0.5, null, tick, undefined, outcome);
+    b.rngState = rng.state();
+    return post;
+  };
 }
 
 /**

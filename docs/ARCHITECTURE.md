@@ -681,6 +681,7 @@ Spec: `docs/specs/FLT-69.md`. The pack is `mods/base-birdapp/` (its README has t
   - The pack's thoughts, toasts and headlines are its own content events. Toasts carry `source: "birdapp"` (FLT-51).
   - The Frontier Times files bangers and cancels as the news cycle and spats as filler (`src/newsroom/edition.ts`).
 - **Vocabulary:** the `birdapp.post` verb (`docs/DISASTERS.md`) lets a disaster or arc make someone post, with an optional forced outcome.
+- **Rival labs (FLT-92):** `src/sim/birdapp/rivals.ts` runs right after the lab's own midnight, on its own stream (`?birdrivals=off` skips it). Each rival lab has invented voices (`voice` rows) that post `rival` lines on beats the driver spots by diffing the World against `rivals.seen`: their releases and Arena swings, your launches, leaks, cancels, escapes, hearings and raises. A lab that slides 3 places goes quiet (`labFeedMachine`: posting → quiet → posting, "so back"). A dunk by one of your posters that lands is +Aura; a rival CEO quote-posting your ratioed post is −Hype. The `birdapp.rival` verb makes a lab post.
 - **Command:** `birdLever { id, lever }` (`cook`, `comms`, `logoff`).
 - **HUD:**
   - `birdView(world)` goes into the snapshot. `hudViewModel` builds `HudVM.birdapp` (`BirdAppVM`: timeline, posters with their levers and odds, the Comms desk and the viral spotlight) and one **Aura** row in the Vibes breakdown.

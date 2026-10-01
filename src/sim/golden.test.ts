@@ -232,10 +232,13 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // values (c403ae9a… / 766f3295… / b43cb9be…).
 // Jem's labels for the Logo (A butthole / A butthole-ier butthole / Not a butthole) change its news lines, which sit in
 // the World until the ticker rolls them off: 200 to 1600 move, 2400 on hold.
+// FLT-92: the rival labs post on the Bird App too (its own stream, from Level 3), so 1600 on moves on every seed: their
+// posts, the ticker lines and toasts, and the dunks and ratios. With the rivals off (`enableBirdRivals` a no-op) all
+// three seeds reproduce FLT-76's values (c3959cd9… / 728d30e4… / a5bd2a17…), digit for digit.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "776c969b", 800: "2994496b", 1600: "c3959cd9", 2400: "ee22342a", 3200: "15ff6c72", 4000: "d44774d4" },
-  2: { 200: "125c4ed2", 800: "a4f0d1f1", 1600: "728d30e4", 2400: "a61834ba", 3200: "40c75dd6", 4000: "cc186590" },
-  3: { 200: "d02267c3", 800: "d77c1496", 1600: "a5bd2a17", 2400: "5ac62c34", 3200: "d05b8a54", 4000: "d46780de" },
+  1: { 200: "776c969b", 800: "2994496b", 1600: "17dd136a", 2400: "4f898952", 3200: "7718a7aa", 4000: "1b9600ff" },
+  2: { 200: "125c4ed2", 800: "a4f0d1f1", 1600: "0d175acf", 2400: "1d9322b2", 3200: "3733d454", 4000: "8bcd24e6" },
+  3: { 200: "d02267c3", 800: "d77c1496", 1600: "64be46f1", 2400: "dd562130", 3200: "19922fdf", 4000: "22071ba4" },
 };
 
 describe("golden runs", () => {

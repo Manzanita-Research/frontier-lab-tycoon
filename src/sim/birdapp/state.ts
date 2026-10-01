@@ -108,6 +108,8 @@ export interface BirdRivalsState {
     hearing: string;
     funding: number;
     bailout: number;
+    /** The release count a lab last teased at: one teaser a run. */
+    teased: Record<string, number>;
   };
   tally: { posts: number; dunks: number; ratios: number };
 }

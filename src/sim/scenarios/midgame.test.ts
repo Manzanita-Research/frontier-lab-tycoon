@@ -44,10 +44,12 @@ describe("midgame scenario", () => {
     // FLT-76 adds two dormant arcs: the Logo's (arcs.theLogo, a Level 1 card this campus is past) and the offsite's
     // (arcs.offsite, which counts from flags.scrutinyDay, and this preset never sets it). Those two entries are the whole
     // difference from 34526cc6 / 2660ed8e.
+    // FLT-92: the rival labs post on the Bird App for all 480 days (their posts, ticker lines, dunks and ratios). With the
+    // rivals off the World hashes to 0dbef5e6 / 4592192e again.
     expect({
       untagged: digest({ ...s, toasts: s.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) }),
       full: digest(s),
-    }).toEqual({ untagged: "0dbef5e6", full: "4592192e" });
+    }).toEqual({ untagged: "7fcc5559", full: "194bcc23" });
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);

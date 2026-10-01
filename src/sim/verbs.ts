@@ -40,7 +40,8 @@ import type { Building, GameState, Importance, NoticeSource, StaffJob, Tone } fr
 import { startEscape } from "./escape/driver";
 import { defs } from "./defs";
 import { postNow } from "./birdapp/driver";
-import { BIRD_OUTCOMES, type BirdOutcome } from "../content/birdapp";
+import { rivalPostNow } from "./birdapp/rivals";
+import { BIRD_OUTCOMES, RIVAL_BEATS, RIVAL_ROLES, type BirdOutcome, type RivalBeat, type RivalRole } from "../content/birdapp";
 
 /** A tick is 1.2 game hours (20 to a day). */
 export const HOURS_PER_TICK = 24 / TICKS_PER_DAY;
@@ -710,6 +711,20 @@ export const VERBS: Record<string, VerbDef> = {
     spec: { text: "string", spice: "number?", archetype: "string?", outcome: "string?" },
     verify: (p) => (p.outcome === undefined || (BIRD_OUTCOMES as readonly string[]).includes(p.outcome as string) ? null : `unknown outcome "${p.outcome as string}"; outcomes are ${BIRD_OUTCOMES.join(", ")}`),
     run: (env, p) => postNow(env.state, env.rng, { text: say(env, p.text as string), spice: p.spice as number | undefined, archetype: p.archetype as string | undefined, outcome: p.outcome as BirdOutcome | undefined, by: env.people?.[0] }),
+  },
+  "birdapp.rival": {
+    doc: "A rival lab posts on the Bird App within the hour (FLT-92): `lab` (a rival id; any lab that is not sulking, without one) says `text`, or a line of theirs for `beat` (idle, teaser, release, launch, leak, cancel, escape, hearing, raise, ...). `role` (ceo, back, teaser, safety) picks the voice; `outcome` (flop, banger, ratioed) how it lands. Nothing while the Bird App or its rivals are off.",
+    spec: { lab: "string?", text: "string?", beat: "string?", role: "string?", outcome: "string?" },
+    verify: (p) =>
+      p.beat !== undefined && !(RIVAL_BEATS as readonly string[]).includes(p.beat as string) ? `unknown beat "${p.beat as string}"; beats are ${RIVAL_BEATS.join(", ")}`
+      : p.role !== undefined && !(RIVAL_ROLES as readonly string[]).includes(p.role as string) ? `unknown role "${p.role as string}"; roles are ${RIVAL_ROLES.join(", ")}`
+      : p.outcome !== undefined && !["flop", "banger", "ratioed"].includes(p.outcome as string) ? `unknown outcome "${p.outcome as string}"; rival posts are flop, banger or ratioed`
+      : null,
+    run: (env, p) =>
+      void rivalPostNow(env.state, env.rng, {
+        lab: p.lab as string | undefined, text: typeof p.text === "string" ? say(env, p.text) : undefined, beat: p.beat as RivalBeat | undefined,
+        role: p.role as RivalRole | undefined, outcome: p.outcome as "flop" | "banger" | "ratioed" | undefined,
+      }),
   },
   "visitors.arrive": {
     doc: "A visiting group of a kind a pack registered (`content.groups`) comes in through the gate and tours the campus. Owned by the calling machine.",

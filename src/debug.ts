@@ -55,6 +55,8 @@ export interface DebugParams {
   factions: boolean;
   /** The Bird App (FLT-69) wakes at Level 3 unless `?birdapp=off`. */
   birdapp: boolean;
+  /** FLT-92: the rival labs post on it too, unless `?birdrivals=off`. */
+  birdrivals: boolean;
   /** The Water Discourse escalation (FLT-25) runs unless `?water=off` (the plain water crowd stays). */
   water: boolean;
   /** The Sandbox Escape (FLT-59) wakes at Level 5 unless `?escape=off`. */
@@ -108,6 +110,7 @@ export function readDebugParams(search = typeof window === "undefined" ? "" : wi
     promises: q.get("promises") !== "off",
     factions: q.get("factions") !== "off",
     birdapp: q.get("birdapp") !== "off",
+    birdrivals: q.get("birdrivals") !== "off",
     water: q.get("water") !== "off",
     escape: q.get("escape") !== "off",
     ladder: q.has("debug") && num("ladder") !== null && num("ladder")! >= 1 && num("ladder")! <= 5 ? { level: Math.round(num("ladder")!) as 1 | 2 | 3 | 4 | 5, coach: num("coach"), unlock: q.has("unlock") } : null,

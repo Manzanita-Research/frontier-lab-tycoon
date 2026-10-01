@@ -190,7 +190,7 @@ export const STAGED_MOMENTS: readonly string[] = [
   ...BEATS_MOMENTS,
 ];
 
-type SimDebug = Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk" | "daily" | "endings">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean; collusion?: boolean; hearing?: boolean; yacht?: boolean; defection?: boolean; poaching?: boolean; auditors?: boolean; capture?: boolean; promises?: boolean; factions?: boolean; birdapp?: boolean; water?: boolean; escape?: boolean };
+type SimDebug = Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk" | "daily" | "endings">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean; collusion?: boolean; hearing?: boolean; yacht?: boolean; defection?: boolean; poaching?: boolean; auditors?: boolean; capture?: boolean; promises?: boolean; factions?: boolean; birdapp?: boolean; birdrivals?: boolean; water?: boolean; escape?: boolean };
 
 /**
  * A living campus, warped forward and dressed up per the `?seed=&warp=&agents=&discourse=` debug knobs.
@@ -218,6 +218,7 @@ function stage(dbg: SimDebug): GameState {
   if (dbg.promises === false) sim.flags.promisesOff = 1;
   if (dbg.factions === false) sim.flags.factionsOff = 1;
   if (dbg.birdapp === false) sim.flags.birdappOff = 1;
+  if (dbg.birdrivals === false) sim.flags.birdrivalsOff = 1;
   if (dbg.escape === false) sim.flags.escapeOff = 1;
   if (dbg.water === false) sim.flags["arcOff:water-escalation"] = 1;
   const leap = parseLeapMoment(dbg.moment);
