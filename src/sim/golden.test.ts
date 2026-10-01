@@ -225,10 +225,17 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // FLT-59 adds the Sandbox Escape to Scrutiny: the Level 5 card names the Sandbox, the Honeypot and the escape, and the
 // pack wakes last (96 days after the rung). The card is in the World, so 2400 on moves on every seed. With the Scrutiny
 // row put back as it was (no Sandbox, no Honeypot, no escape) all three seeds reproduce the values above, digit for digit.
+// FLT-76 asks the first decision on Level 1: the Logo opens two days after the first path, while the first model trains,
+// and this script answers it like any other card, so every checkpoint moves. Then the offsite (FLT-76's minor beat 106
+// days into Scrutiny) adds flags.scrutinyDay on the tick Level 5 lands (2240); the card itself would open on day 218, past
+// these 4000 ticks. With the card kept shut (`firstMinutes` false) and without the flag, all three seeds reproduce FLT-59's
+// values (c403ae9a… / 766f3295… / b43cb9be…).
+// Jem's labels for the Logo (A butthole / A butthole-ier butthole / Not a butthole) change its news lines, which sit in
+// the World until the ticker rolls them off: 200 to 1600 move, 2400 on hold.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "c403ae9a", 800: "c9a777bd", 1600: "ec51030b", 2400: "2d81c26e", 3200: "4f92ddea", 4000: "26c2f935" },
-  2: { 200: "766f3295", 800: "aec1b296", 1600: "9e386036", 2400: "364d5e7d", 3200: "84be280a", 4000: "860e57b6" },
-  3: { 200: "b43cb9be", 800: "510d3b99", 1600: "c01adf53", 2400: "6a1f7259", 3200: "0909e8f5", 4000: "17bf17c8" },
+  1: { 200: "776c969b", 800: "2994496b", 1600: "c3959cd9", 2400: "ee22342a", 3200: "15ff6c72", 4000: "d44774d4" },
+  2: { 200: "125c4ed2", 800: "a4f0d1f1", 1600: "728d30e4", 2400: "a61834ba", 3200: "40c75dd6", 4000: "cc186590" },
+  3: { 200: "d02267c3", 800: "d77c1496", 1600: "a5bd2a17", 2400: "5ac62c34", 3200: "d05b8a54", 4000: "d46780de" },
 };
 
 describe("golden runs", () => {

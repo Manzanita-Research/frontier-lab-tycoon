@@ -18,6 +18,7 @@ import { raceVars } from "./race/finance";
 import { modeOf } from "./walkers";
 import type { GameState, OpenEvent } from "./types";
 import { pressureReady } from "./tutorial";
+import { levelOf } from "./progression";
 import { arrivingCard } from "./liveMods";
 import { defs } from "./defs";
 import { askFlag } from "./disasters/names";
@@ -79,9 +80,11 @@ export function cardAllowed(state: GameState, id: string, how: "urgent" | "chain
  */
 export function dailyEvents(state: GameState, unlocked = true) {
   if (state.goals.value === "lost") return;
-  // Before the ladder opens cards (or before day 40 without it) there are none, except one a mod brought mid-game (FLT-78).
+  // Before the ladder opens cards (or before day 40 without it) there are none, except one a mod brought mid-game (FLT-78)
+  // and the first minutes' own card on Level 1 (FLT-76).
   const early = !unlocked || (!state.progression && state.day < 40);
-  if (early && !state.modsAdded) return;
+  const first = early && firstMinutes(state);
+  if (early && !state.modsAdded && !first) return;
   notePacer(state);
   let slotFree = openEventOf(state) === null && !screenHeld(state);
   // Later eras crowd the calendar: cooldowns shrink.
@@ -94,14 +97,14 @@ export function dailyEvents(state: GameState, unlocked = true) {
   const waiting: string[] = [];
   for (const { def } of order) {
     const arriving = arrivingCard(state, def.id);
-    if (early && arriving === undefined) continue;
+    if (def.early ? !first : early && arriving === undefined) continue;
     // A save from before a pack added this card (the factions' cards, a mod's) starts its machine now.
     state.arcs[def.id] ??= initialStored(arcMachine, { choices: def.choices.length, cooldownDays: def.cooldown ?? EVENT_COOLDOWN_DAYS, openedDay: null });
     const card = paceOfCard(def.id);
     // A card the player just added (FLT-78) keeps the gap but doesn't queue behind colour: it was asked for.
     const how: Pacing = card.urgent ? "urgent" : card.priority || arriving !== undefined ? "priority" : "normal";
     const allowed = pacerAllows(pacerOf(state).context, def.id, card.story, state.day, how);
-    const ready = arriving ?? (pressureReady(state) && (conditionHolds(state, def.when) || state.flags[askFlag(def.id)] !== undefined));
+    const ready = arriving ?? (def.early ? conditionHolds(state, def.when) : pressureReady(state) && (conditionHolds(state, def.when) || state.flags[askFlag(def.id)] !== undefined));
     const shrug = card.minor && slotFree && (!allowed || pacer.auto);
     const stored = dayArc(state.arcs[def.id]!, { type: "DAY", day: state.day, ready, slotFree: slotFree && (allowed || shrug === true), pace });
     state.arcs[def.id] = stored;
@@ -113,6 +116,9 @@ export function dailyEvents(state: GameState, unlocked = true) {
   }
   state.pacer = step(pacerMachine, pacerOf(state), { type: "WAITING", ids: waiting, day: state.day }).stored;
 }
+
+/** Level 1 of the ladder, where a first-minutes card (`early`) may open (FLT-76). */
+export const firstMinutes = (state: GameState) => state.progression !== undefined && levelOf(state) === 1;
 
 /** A minor card the lab answered without you: its default choice, on its own dice, and one line on the ticker. */
 function handled(state: GameState, id: string, choice: number) {

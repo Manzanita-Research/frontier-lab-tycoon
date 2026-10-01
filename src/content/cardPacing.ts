@@ -40,6 +40,8 @@ export const CARD_PACING: readonly { match: RegExp; pace: CardPace }[] = [
   // The launch livestream's mishap: if it can't be shown on the day, the clip goes straight to the ticker.
   { match: /^stream:/, pace: { story: "stream", minor: true } },
   { match: /^audit-/, pace: { story: "auditors" } },
+  // FLT-76: the quiet stretch's beat. Colour: skipped (the shrug) when there is no room for it.
+  { match: /^offsite$/, pace: { minor: true } },
 ];
 
 const cache = new Map<string, Required<Pick<CardPace, "story" | "default">> & CardPace>();
