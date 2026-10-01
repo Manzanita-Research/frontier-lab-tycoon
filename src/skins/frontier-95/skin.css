@@ -6182,7 +6182,7 @@
         flex: 1;
       }
     }
-    .f95-tiles {
+    .f95-ptiles {
       width: 100%;
       max-height: min(56vh, 520px);
       overflow-y: auto;
@@ -6209,7 +6209,7 @@
       white-space: nowrap;
     }
   }
-  .f95-tile {
+  .f95-ptile {
     position: relative;
     width: 100%;
     height: 100%;
@@ -6323,16 +6323,16 @@
       max-height: calc(100dvh - var(--taskbar) - 30px - 12px);
       z-index: 20;
       overflow: auto;
-      .f95-tiles {
+      .f95-ptiles {
         max-height: none;
       }
     }
-    .f95-tile {
+    .f95-ptile {
       min-height: 44px;
     }
   }
   @media (max-width: 360px) {
-    .f95-palette .f95-tiles section > ul {
+    .f95-palette .f95-ptiles section > ul {
       grid-template-columns: minmax(0, 1fr);
     }
   }

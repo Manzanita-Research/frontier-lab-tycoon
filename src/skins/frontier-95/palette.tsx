@@ -61,7 +61,7 @@ function Palette({ vm, actions }: { vm: HudVM; actions: HudActions }) {
       <li key={it.kind}>
         <button
           type="button"
-          className={`f95-tile${it.selected ? " on" : ""}${it.isPath || it.isBulldoze ? " tool" : ""}`}
+          className={`f95-ptile${it.selected ? " on" : ""}${it.isPath || it.isBulldoze ? " tool" : ""}`}
           data-anchor={`build:${it.kind}`}
           {...coach.attrs(`build:${it.kind}`)}
           aria-pressed={it.panel ? undefined : it.selected}
@@ -106,7 +106,7 @@ function Palette({ vm, actions }: { vm: HudVM; actions: HudActions }) {
           <ul className="f95-tools" role="group" aria-label="Tools">
             {tools.map(tile)}
           </ul>
-          <div className="f95-tiles inset">
+          <div className="f95-ptiles inset">
             {groups.map((g) => (
               <section key={g.id} aria-label={t(`build.group.${g.id}`)}>
                 <h3>{t(`build.group.${g.id}`)}</h3>
@@ -119,7 +119,7 @@ function Palette({ vm, actions }: { vm: HudVM; actions: HudActions }) {
                 <ul>
                   {teasers.map((teaser, i) => (
                     <li key={`${teaser.label}-${i}`}>
-                      <span className="f95-tile locked" title={`${t("build.locked")}: ${teaser.hint}`}>
+                      <span className="f95-ptile locked" title={`${t("build.locked")}: ${teaser.hint}`}>
                         <Ico name="lock" size={32} />
                         <b className="n">{teaser.label}</b>
                         <small className="does">{teaser.hint}</small>
