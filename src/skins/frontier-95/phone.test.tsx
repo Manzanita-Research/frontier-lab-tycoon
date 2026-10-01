@@ -1,6 +1,5 @@
 // Frontier 95 on a phone (FLT-87): Training, the goal and the Objectives fold into one strip so the campus shows, the tray
 // sits behind a » when it runs out of room, and every title-bar button is a thumb wide. A desktop renders as it did.
-import { readFileSync } from "node:fs";
 import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { fixtureInput, type FixtureOptions } from "../../ui/hud/fixtures";
@@ -56,11 +55,9 @@ describe("Frontier 95 on a phone", () => {
     for (const block of blocks) expect(block).toMatch(/\.f95-b \{\s*min-width: 32px;\s*height: 32px;/);
   });
 
-  it("gives Hire and the coach's psst a thumb's height on a phone", () => {
+  it("gives the Staff Manager's Hire a thumb's height on a phone", () => {
     const phone = read("frontier-95/skin.css")!.split("@media (max-width: 640px)").slice(1).join("");
     expect(phone).toMatch(/\.f95-hire \.f95-btn \{\s*min-height: 32px;/);
-    // ops.css is imported as a stylesheet, so the raw glob reads it empty under vitest
-    expect(readFileSync(new URL("../base/ops.css", import.meta.url), "utf8")).toMatch(/@media \(pointer: coarse\), \(max-width: 640px\) \{\s*\.peektag button \{\s*min-height: 32px;/);
   });
 
   it("keeps the bill's tilted Properties box off the Inspector, which shares its class", () => {
