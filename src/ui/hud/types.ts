@@ -1688,6 +1688,20 @@ export interface SkinPickerVM {
   rejected: { id: string; errors: string[] }[];
   /** FLT-55: a mod's request to switch to its skin, waiting on the player (the `ModSkinOffer` slot). */
   offer?: SkinOfferVM | null;
+  /** FLT-73: the picture tube (Display Properties → Settings). Absent in old fixtures: treat as off. */
+  crt?: CrtVM;
+}
+
+/** FLT-73: the CRT look over the whole game: a shader on the campus, faint glass over the UI. */
+export interface CrtVM {
+  /** On screen now: the player's pick, else the skin's default. "off" while photo mode is up. */
+  mode: "off" | "subtle" | "full";
+  /** The player's own pick, or null while the skin's default applies. */
+  choice: "off" | "subtle" | "full" | null;
+  /** What the campus is drawn with: the full shader, the one-pass version, or plain (the glass over the UI stays). */
+  tier: "multi" | "lite" | "flat";
+  /** The game turned the campus's shader down to keep the frame rate up. Picking a look again gives it another try. */
+  reduced: boolean;
 }
 
 export interface LayoutVM {
@@ -2003,6 +2017,8 @@ export interface HudActions {
   /** Go back to the skin the picker opened on and close it. */
   cancelSkinPicker(): void;
   setReducedMotion(on: boolean): void;
+  /** FLT-73: pick the picture tube's look (remembered on this device; overrides the skin's default). */
+  setCrt(mode: "off" | "subtle" | "full"): void;
   /** FLT-76: at ▶▶ and ▶▶▶, drop to 1× when something sharp goes wrong (remembered on this device). */
   setSlowForBadNews(on: boolean): void;
   /** FLT-55: say yes to a mod's skin offer (it shows, and is remembered for that mod). */

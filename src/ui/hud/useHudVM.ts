@@ -7,6 +7,7 @@ import { atoms, debugParams, probeHud, registry, saveDesk } from "../../app/game
 import type { Snapshot } from "../../app/hud";
 import { audioReadyAtom, mixerAtom, mixerOpenAtom } from "../../audio/state";
 import { roomAtom } from "../../newsroom/state";
+import { GAME_CRT, crtAtom } from "../../render/crt/state";
 import { photoAtom } from "../../render/fx/photoState";
 import { beatAtom } from "../../render/fx/beatState";
 import { skinList } from "../../skins/registry";
@@ -191,6 +192,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
   const shot = useAtomValue(shotAtom);
   const beat = useAtomValue(beatAtom);
   const skinUi = useAtomValue(skinUiAtom);
+  const crt = useAtomValue(crtAtom);
   const staffOpen = useAtomValue(staffOpenAtom);
   const senateOpen = useAtomValue(senateOpenAtom);
   const factionsOpen = useAtomValue(factionsOpenAtom);
@@ -274,6 +276,8 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
           list,
           rejected: skinUi.refused,
           offer: skinUi.offer,
+          // No `crt` while the in-game tube is off (FLT-70): the skins show no picture-tube setting.
+          ...(GAME_CRT ? { crt: { mode: crt.mode, choice: crt.choice, tier: crt.tier, reduced: crt.reduced } } : {}),
         },
         mods,
         drama,
@@ -282,7 +286,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         share,
         social,
       }),
-    [share, social, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, stage, slowForBadNews, tapHint, arenaOpen, arenaChosen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, beat, skinUi, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, birdAppOpen, drama, saves],
+    [share, social, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, stage, slowForBadNews, tapHint, arenaOpen, arenaChosen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, beat, skinUi, crt, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, birdAppOpen, drama, saves],
   );
   return useWindowBudget(vm, news);
 }

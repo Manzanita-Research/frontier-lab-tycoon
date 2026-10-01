@@ -66,7 +66,8 @@ describe("parody names only", () => {
     expect(sources["../skins/frontier-95/skin.css"]).toContain('[data-skin="frontier-95"]');
     expect(packs.length).toBeGreaterThanOrEqual(13);
     for (const p of packs) expect(scanned).toContain(`../../mods/${p}/mod.json`);
-    for (const f of ["content.ts", "manual.ts", "art.ts", "Intro.tsx", "stage/Kiosk.tsx"]) expect(scanned).toContain(`../intro/${f}`);
+    // assets/art.jobs.json holds every word printed in the generated art (FLT-70), so the pictures are scanned too.
+    for (const f of ["content.ts", "manual.ts", "art.ts", "Intro.tsx", "stage/Kiosk.tsx", "assets/art.jobs.json"]) expect(scanned).toContain(`../intro/${f}`);
   });
   it("names no real product, app, site or lab anywhere the player can read", () => {
     const found = scanned.flatMap((f) => realNames(sources[f]!, f.startsWith("../intro/") ? [...REAL, ...RETAIL] : REAL).map((name) => `${f}: ${name}`));

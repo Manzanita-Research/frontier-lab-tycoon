@@ -3,10 +3,11 @@
 import { useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import * as THREE from "three";
-import { paintCard, paintDisc, paintEula, paintFloppy, paintInsert, paintOverlay } from "../art";
+import { paintCard, paintDisc, paintEula, paintFloppy, paintOverlay } from "../art";
 import { ITEMS, type ItemId } from "../content";
 import { Book3D } from "./Book3D";
 import { Coa } from "./Coa";
+import { INSERT_ART, useArt } from "./textures";
 import { ITEM_SIZE, REST, REST_TALL } from "./items";
 import { canvasTexture, DRAWER_IN_Z, DRAWER_OUT_Z, DRAWER_Y, dampTo, flat, frameDt, HOLD, pose, TOWER, TRAY, useClock, type Pose, type StageProps } from "./rig";
 
@@ -186,8 +187,8 @@ function Floppies({ w, h, held }: { w: number; h: number; held: boolean }) {
 }
 
 function Inserts({ w, h, held }: { w: number; h: number; held: boolean }) {
-  const maps = useMemo(() => [0, 1, 2, 3, 4].map((i) => canvasTexture(paintInsert(i), 4)), []);
-  useEffect(() => () => maps.forEach((m) => m.dispose()), [maps]);
+  const art = useArt();
+  const maps = INSERT_ART.map((key) => art[key]);
   const refs = useRef<(THREE.Mesh | null)[]>([]);
   const clock = useClock();
   useFrame((_, raw) => {

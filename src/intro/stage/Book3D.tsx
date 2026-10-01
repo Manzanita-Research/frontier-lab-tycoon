@@ -1,12 +1,13 @@
 // The manual as a real little book: six bent sheets that turn around the spine. Each sheet is one strip of geometry
 // bent along its width (the free edge lags behind while it turns), drawn twice: the front page, and the back page with
-// its texture mirrored. Pages are canvases painted from `manual.ts`.
+// its texture mirrored. Pages are canvases painted from `manual.ts`; the front cover is printed art.
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { paintPage } from "../art";
 import { PAGES, SHEETS } from "../manual";
 import { canvasTexture, frameDt, k, useClock } from "./rig";
+import { useArt } from "./textures";
 
 const SEGMENTS = 22;
 const GAP = 0.0025;
@@ -14,11 +15,13 @@ const GAP = 0.0025;
 export function Book3D({ page, w, h }: { page: number; w: number; h: number }) {
   const clock = useClock();
   const group = useRef<THREE.Group>(null);
+  const art = useArt();
   const sheets = useMemo(
     () =>
       Array.from({ length: SHEETS }, (_, i) => {
         const geometry = new THREE.PlaneGeometry(w, h, SEGMENTS, 1);
-        const front = canvasTexture(paintPage(PAGES[i * 2]!, i * 2), 8);
+        const printed = i === 0 && PAGES[0]!.kind === "cover";
+        const front = printed ? art.manualCover : canvasTexture(paintPage(PAGES[i * 2]!, i * 2), 8);
         const back = canvasTexture(paintPage(PAGES[i * 2 + 1]!, i * 2 + 1), 8);
         back.repeat.x = -1;
         back.offset.x = 1;
@@ -27,17 +30,18 @@ export function Book3D({ page, w, h }: { page: number; w: number; h: number }) {
           geometry,
           front: new THREE.MeshStandardMaterial({ map: front, roughness: cover ? 0.45 : 0.9, side: THREE.FrontSide }),
           back: new THREE.MeshStandardMaterial({ map: back, roughness: cover ? 0.45 : 0.9, side: THREE.BackSide }),
+          printed,
           turn: -1,
           stiff: cover ? 0.25 : 0.95,
         };
       }),
-    [w, h],
+    [w, h, art],
   );
   useEffect(
     () => () => {
       for (const s of sheets) {
         s.geometry.dispose();
-        s.front.map?.dispose();
+        if (!s.printed) s.front.map?.dispose();
         s.back.map?.dispose();
         s.front.dispose();
         s.back.dispose();
