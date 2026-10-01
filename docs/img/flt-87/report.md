@@ -1,0 +1,12 @@
+
+| Scene | Before (`main` @ 5eff77d) | After (`flt-87-phone-fixes` @ 0048e3b) |
+|---|---|---|
+| **phone**<br>45.2% px differ | ![phone](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-87-phone-fixes/docs/img/flt-87/before/phone.png?raw=true) | ![phone](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-87-phone-fixes/docs/img/flt-87/after/phone.png?raw=true) |
+| **flt87-phone-l1**<br>33.5% px differ | ![flt87-phone-l1](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-87-phone-fixes/docs/img/flt-87/before/flt87-phone-l1.png?raw=true) | ![flt87-phone-l1](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-87-phone-fixes/docs/img/flt-87/after/flt87-phone-l1.png?raw=true) |
+| **flt87-phone-l4**<br>45.1% px differ | ![flt87-phone-l4](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-87-phone-fixes/docs/img/flt-87/before/flt87-phone-l4.png?raw=true) | ![flt87-phone-l4](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-87-phone-fixes/docs/img/flt-87/after/flt87-phone-l4.png?raw=true) |
+| **flt87-phone-l5**<br>45.0% px differ | ![flt87-phone-l5](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-87-phone-fixes/docs/img/flt-87/before/flt87-phone-l5.png?raw=true) | ![flt87-phone-l5](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-87-phone-fixes/docs/img/flt-87/after/flt87-phone-l5.png?raw=true) |
+| **flt87-phone-new**<br>32.2% px differ | ![flt87-phone-new](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-87-phone-fixes/docs/img/flt-87/before/flt87-phone-new.png?raw=true) | ![flt87-phone-new](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-87-phone-fixes/docs/img/flt-87/after/flt87-phone-new.png?raw=true) |
+| **flt87-phone-mid**<br>34.2% px differ | ![flt87-phone-mid](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-87-phone-fixes/docs/img/flt-87/before/flt87-phone-mid.png?raw=true) | ![flt87-phone-mid](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-87-phone-fixes/docs/img/flt-87/after/flt87-phone-mid.png?raw=true) |
+| **flt87-phone-more**<br>31.4% px differ | ![flt87-phone-more](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-87-phone-fixes/docs/img/flt-87/before/flt87-phone-more.png?raw=true) | ![flt87-phone-more](https://github.com/jem-computer/frontier-lab-tycoon/blob/flt-87-phone-fixes/docs/img/flt-87/after/flt87-phone-more.png?raw=true) |
+
+_pnpm shots: 7 scene(s) in 213.5s (14/14 captures ok)._

@@ -1,0 +1,43 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "0d2b428a33f2d8d8d408e326737445ad1a496af5"
+  },
+  "head": {
+    "branch": "flt-87-phone-fixes",
+    "sha": "6bf2bb6",
+    "dirty": true
+  },
+  "seconds": 83.027,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "overview",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-87/desktop/before/overview.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-87/desktop/after/overview.png",
+      "title": "The campus, mid-morning, paused",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-87/desktop/compare/overview.png",
+      "changed": 0.001169753086419753
+    },
+    {
+      "scene": "inspector",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-87/desktop/before/inspector.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-87/desktop/after/inspector.png",
+      "title": "Tap a researcher: the inspector opens",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-87/desktop/compare/inspector.png",
+      "changed": 0.001132716049382716
+    },
+    {
+      "scene": "event",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-87/desktop/before/event.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-87/desktop/after/event.png",
+      "title": "An event card lands (the Water Discourse)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-87/desktop/compare/event.png",
+      "changed": 0.004206018518518519
+    }
+  ],
+  "errors": []
+}
