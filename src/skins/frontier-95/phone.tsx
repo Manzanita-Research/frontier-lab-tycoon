@@ -62,7 +62,7 @@ const ITEMS = ":scope > button, :scope > .f95-waiting > button";
  * `data-over` and hidden, and the » button shows them in a little panel above the taskbar. The slots stay where React put
  * them (their windows are inside them), so only attributes and two CSS variables are written here.
  */
-export function TrayMore({ children }: { children: ReactNode }) {
+export function TrayMore({ children, anchor }: { children: ReactNode; /** FLT-94: the »'s `data-anchor` ("apps": the applets wait here). */ anchor?: string }) {
   const box = useRef<HTMLDivElement>(null);
   const [over, setOver] = useState(0);
   const [open, setOpen] = useState(false);
@@ -117,7 +117,7 @@ export function TrayMore({ children }: { children: ReactNode }) {
         {children}
       </div>
       {over > 0 && (
-        <button type="button" className={`f95-s f95-chev${shown ? " on" : ""}`} aria-label={`${over} more`} title={`${over} more`} aria-expanded={shown} aria-pressed={shown} onClick={() => setOpen(!shown)}>
+        <button type="button" className={`f95-s f95-chev${shown ? " on" : ""}`} data-anchor={anchor} aria-label={`${over} more`} title={`${over} more`} aria-expanded={shown} aria-pressed={shown} onClick={() => setOpen(!shown)}>
           »
         </button>
       )}

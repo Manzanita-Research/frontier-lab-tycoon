@@ -36,10 +36,11 @@ describe("Frontier 95 on a phone", () => {
     }
   });
 
-  it("puts the tray icons and waiting windows behind the » measure, Speed outside it", () => {
+  it("puts the tray icons and waiting windows behind the » measure, the rank and Speed outside it", () => {
     const out = render({ ...PHONE, leapfrog: true });
     const tray = out.slice(out.indexOf('class="f95-tray"'));
-    expect(tray).toMatch(/^class="f95-tray"><div class="f95-more">/);
+    // FLT-94: the leaderboard rank comes first and never hides.
+    expect(tray).toMatch(/^class="f95-tray"><button[^>]*class="f95-rank[^"]*"[^>]*>.*?<\/button><div class="f95-more">/);
     expect(tray.indexOf("f95-more")).toBeLessThan(tray.indexOf("f95-speed"));
   });
 
