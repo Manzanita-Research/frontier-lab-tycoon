@@ -120,6 +120,12 @@ export class SoundKit {
     this.variation++;
     for (const n of notes) voice(ctx, this.sfx, n, ctx.currentTime + 0.005, this.noise ?? noiseBuffer(ctx));
   }
+  /** Every frame (FLT-66): the band builds the next few voices, a handful at a time rather than a burst. */
+  play() {
+    const ctx = this.ctx;
+    if (!ctx || !this.band || ctx.state !== "running" || this.mixer.muted || this.hidden) return;
+    this.band.pump(ctx.currentTime, 0.3);
+  }
   update(beds: Beds) {
     this.beds = beds;
     const ctx = this.ctx;
@@ -131,7 +137,6 @@ export class SoundKit {
     if (this.mixer.muted || this.hidden) { this.band?.hold(); this.nextBed = now; return; }
     // FLT-66: the band hears the speed and skin now, and plays them from the next bar line.
     this.band?.set({ mode: beds.mode, flavour: beds.flavour, era: beds.era });
-    this.band?.pump(now, 0.25);
     if (now >= this.nextBed) {
       this.nextBed = now + 0.7;
       if (beds.protesters > 10) {

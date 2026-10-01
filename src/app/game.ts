@@ -74,8 +74,6 @@ export const bootNotice = (text: string, tone: Tone = "neutral") => void first.t
 export const registry = AtomRegistry.make();
 
 const pick = <T>(select: (c: AppContext) => T) => app.select((s) => select(s.context));
-/** Time is held: paused by the player, a card, a menu or the outcome screen (the HUD's pause light, and the music's nap). */
-export const timeHeld = (c: AppContext) => c.speed === 0 || autoPaused(c) || !!c.event || (c.outcome !== "playing" && !c.outcomeDismissed);
 
 /** Selector atoms for the HUD and the scene. Values keep their identity until they change. */
 export const atoms = {
@@ -84,7 +82,7 @@ export const atoms = {
   progress: pick((c) => c.snap.progress),
   news: pick((c) => c.news),
   speed: pick((c) => c.speed),
-  paused: pick(timeHeld),
+  paused: pick((c) => c.speed === 0 || autoPaused(c) || !!c.event || (c.outcome !== "playing" && !c.outcomeDismissed)),
   assistant: pick((c) => c.snap.assistant),
   tool: pick((c) => c.tool),
   hover: pick((c) => c.hover),

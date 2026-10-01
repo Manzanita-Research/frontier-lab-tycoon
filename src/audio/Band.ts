@@ -6,6 +6,7 @@ import { voice, whiteNoise } from "./voice";
 /** Main-thread cost per mode: time spent planning and building voices, and how many voices. */
 export interface ModeCost { frames: number; ms: number; maxMs: number; voices: number; seconds: number }
 const zero = (): ModeCost => ({ frames: 0, ms: 0, maxMs: 0, voices: 0, seconds: 0 });
+const VOICES_PER_PUMP = 6;
 const clock = () => (typeof performance === "undefined" ? Date.now() : performance.now());
 
 export class Band {
@@ -47,7 +48,8 @@ export class Band {
     }
     if (p.cues.length) { this.queue.push(...p.cues); this.queue.sort((a, b) => a.tone.at - b.tone.at); }
     let voiced = 0;
-    while (this.queue.length && this.queue[0]!.tone.at < now + horizon) {
+    // At most a few voices a frame, so a downbeat's dozen is spread over the frames before it; one due soon goes now.
+    while (this.queue.length && this.queue[0]!.tone.at < now + horizon && (voiced < VOICES_PER_PUMP || this.queue[0]!.tone.at < now + 0.1)) {
       const cue = this.queue.shift()!;
       // A tone whose moment passed while the page stalled is skipped, not crammed in late.
       if (cue.tone.at < now - 0.05) continue;
