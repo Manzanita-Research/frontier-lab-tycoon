@@ -25,6 +25,10 @@ canvas {
   pointer-events: none;
   z-index: 1;
 }
+/* Warnings and placement reasons beat thought bubbles; the HUD host (same z, later in the page) still covers them. */
+.world.world-top {
+  z-index: 2;
+}
 .anchor {
   position: absolute;
   left: 0;
@@ -482,6 +486,29 @@ button {
   font: 900 12px var(--font);
   white-space: nowrap;
   animation: bob 1s ease-in-out infinite;
+}
+/* FLT-85: the flag is a button (it pans to the gap), and says how far off the gate's paths are. */
+.nopath-flag {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.nopath-flag small {
+  font-size: 0.8em;
+  font-weight: 700;
+  opacity: 0.92;
+}
+.nopath-flag:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
 }
 @keyframes bob {
   50% {
