@@ -180,6 +180,8 @@ function tilePx(view) {
   const a = project(view, 11, 11), b = project(view, 12, 11), c = project(view, 11, 12);
   return a && b && c ? Math.min(Math.hypot(b[0] - a[0], b[1] - a[1]), Math.hypot(c[0] - a[0], c[1] - a[1])) : 0;
 }
+/** Where a phone's Done ✕ button (FLT-63) will be once a tool is in hand: the right edge, 46% down. */
+const underDone = ([x, y]) => phone && x > viewport.width * 0.45 && y > viewport.height * 0.38 && y < viewport.height * 0.6;
 /** A point near the middle of the map that only the canvas covers, for a finger to land on; null if there is none. */
 async function clearSpot() {
   for (const [fx, fy] of [[0.5, 0.5], [0.5, 0.4], [0.5, 0.6], [0.3, 0.5], [0.7, 0.5], [0.5, 0.3], [0.5, 0.7]]) {
@@ -284,11 +286,13 @@ async function reveal(x, z, w = 1, d = 1) {
     const p = await probeNow();
     if (p.pendingConfirm || p.event) return null;
     const at = screenOf(p.view, x, z, w, d);
-    if (at && (await onCanvas(at))) return at;
+    if (at && !underDone(at) && (await onCanvas(at))) return at;
     const raw = project(p.view, x, z, w, d);
     if (!raw) return null;
-    // Bring it towards the middle of the canvas, which the windows leave clear.
-    const dx = raw[0] - (p.view.rect.left + p.view.rect.width / 2), dy = raw[1] - (p.view.rect.top + p.view.rect.height * 0.55);
+    // Bring it towards the middle of the canvas, which the windows leave clear. A phone's Done ✕ button (FLT-63) sits at the
+    // right edge, 46% down, while a tool is in hand: aim left of and below it there.
+    const [ax, ay] = phone ? [0.4, 0.6] : [0.5, 0.55];
+    const dx = raw[0] - (p.view.rect.left + p.view.rect.width * ax), dy = raw[1] - (p.view.rect.top + p.view.rect.height * ay);
     if (Math.hypot(dx, dy) < 40) return null; // in the middle and still covered: give up on this one
     if (phone) {
       // Drag the map under a finger: the spot moves with it, towards the middle.
@@ -499,6 +503,7 @@ async function sweep(withCampus) {
       const props = key && el[key];
       if (!props || !(props.onMouseEnter || props.onPointerEnter || props.onMouseOver || props.onPointerOver)) continue;
       if (props.onClick || props.onPointerDown || props.onMouseDown || props.onTouchStart || props.onFocus || !seen(el) || !onScreen(el.getBoundingClientRect())) continue;
+      if (el.closest(TAPPABLE) || el.querySelector(TAPPABLE)) continue; // a menu row that opens on hover, around a button that opens on a tap
       issues.push({ kind: "hover only", key: `react|${where(el)}|${sig(el)}`, message: `${sig(el)} ("${name(el)}") in ${where(el)} reacts to the pointer coming over it, with nothing to tap` });
     }
     // The campus: the share of the screen where the map shows through.
@@ -866,6 +871,7 @@ try {
     if (!(await pickTool("Path"))) return;
     await page.waitForTimeout(250);
     let laid = 0;
+    let why = "";
     for (const [x, z] of todo) {
       let at;
       if (phone) {
@@ -874,22 +880,23 @@ try {
         if (!at || !(await onCanvas(at))) {
           await putDown();
           at = await reveal(x, z);
-          if (!at || !(await pickTool("Path"))) break;
+          if (!at) { why = "could not pan it into view"; break; }
+          if (!(await pickTool("Path"))) { why = "no Path tool"; break; }
           await page.waitForTimeout(250);
           at = screenOf((await probeNow()).view, x, z);
-          if (!at || !(await onCanvas(at))) break;
+          if (!at || !(await onCanvas(at))) { why = `covered with the tool in hand (${at ? await topAt(...at) ?? (await page.evaluate(([x, y]) => document.elementFromPoint(x, y)?.className, at)) : "off the map"})`; break; }
         }
       } else at = await reveal(x, z);
-      if (!at) break;
+      if (!at) { why ||= "could not bring it into view"; break; }
       const before = (await probeNow()).map.paths.length;
       await tapAt(at[0], at[1]);
       await page.waitForTimeout(250);
-      if ((await probeNow()).map.paths.length <= before) break;
+      if ((await probeNow()).map.paths.length <= before) { why = `the tap at ${at.map(Math.round).join(",")} laid nothing`; break; }
       laid++;
     }
     await putDown();
     if (laid) log(`Laid ${laid} path tiles`);
-    else log(`Could not lay the road at ${todo[0].join(",")}`);
+    else log(`Could not lay the road at ${todo[0].join(",")}: ${why}`);
   }
   async function hire(job, p) {
     // Staff toggles the Staff Manager: only open it if it is not already up.
