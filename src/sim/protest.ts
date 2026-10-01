@@ -228,6 +228,9 @@ function shout(state: GameState, rng: Rng) {
 }
 
 /** March: everyone with a route walks it. Whoever runs out of route is home (or, leaving, through the gate). */
+/** Nothing in the sim watches for changes, so skip Koota's change tracking (and its per-entity AoS snapshot copies). */
+const UNTRACKED = { changeDetection: "never" } as const;
+
 function marchSystem(g: Ground, gone: Set<Entity>) {
   const done: Entity[] = [];
   marching(g).updateEach(([body, route, flow], e) => {
@@ -237,7 +240,7 @@ function marchSystem(g: Ground, gone: Set<Entity>) {
     if (route.length > 0) return;
     if (flow.value === "leaving") gone.add(e);
     else done.push(e);
-  });
+  }, UNTRACKED);
   for (const e of done) {
     e.remove(IsMarching);
     e.add(JustArrived);
@@ -267,7 +270,7 @@ function picketSystem(state: GameState, g: Ground, rng: Rng, gone: Set<Entity>) 
       const tz = picket.homeZ + (rng.next() - 0.5) * 1.2;
       const [gx, gz] = standable(state, tx, tz) ? [tx, tz] : [picket.homeX, picket.homeZ];
       setRoute(e, planRoute(state, body.x, body.z, gx, gz));
-    });
+    }, UNTRACKED);
 }
 
 /** Protesters shuffle around their spot, march in from the gate, and leave the same way. They never enter a building. */
