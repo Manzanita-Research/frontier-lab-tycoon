@@ -194,7 +194,7 @@ function CameraRig({ beat, context }: { beat: string; context: IntroContext }) {
         // (all that small print) comes a little closer.
         const [w, h] = HERO_SIZE;
         const back = beat === "held" && sideOf(context.turn) === "back";
-        const d = aspect < 1 ? fit(w * (back ? 1.12 : 1.3), h * 1.9, aspect) : fit(w * 2.2, h * (back ? 1.3 : 1.55), aspect);
+        const d = aspect < 1 ? fit(w * (back ? 1.12 : 1.3), h * 1.9, aspect) : fit(w * 2.2, h * (back ? 1.4 : 1.55), aspect);
         goalLook.copy(PRESENT);
         goalLook.y -= h * (aspect < 1 ? 0.2 : 0.1);
         pos.copy(PRESENT).add(new THREE.Vector3(0, 0.03, d));

@@ -1,0 +1,70 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "d17e9a7cd7fbe9fa16a71a1723b6715232c61df2"
+  },
+  "head": {
+    "branch": "flt-95-box-intro",
+    "sha": "7575fbc",
+    "dirty": true
+  },
+  "seconds": 350.697,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "box-take",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-95/before/box-take.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-95/after/box-take.png",
+      "title": "FLT-95: 4.5 s after you take the box off the shelf (before: it is already tearing open; after: it waits in your hands)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-95/compare/box-take.png",
+      "changed": 0.8860910493827161
+    },
+    {
+      "scene": "box-back",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-95/before/box-back.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-95/after/box-back.png",
+      "title": "FLT-95: take the box, then Flip to back (before: no flip, the box is open by now)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-95/compare/box-back.png",
+      "changed": 0.8849151234567901
+    },
+    {
+      "scene": "box-disc",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-95/before/box-disc.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-95/after/box-disc.png",
+      "title": "FLT-95: the box is open, click the disc (before: Insert disc goes straight into the drive; after: you pick it up and read it)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-95/compare/box-disc.png",
+      "changed": 0.7732345679012346
+    },
+    {
+      "scene": "box-take-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-95/before/box-take-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-95/after/box-take-phone.png",
+      "title": "FLT-95: the box in your hands, on a phone",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-95/compare/box-take-phone.png",
+      "changed": 0.8102564102564103
+    },
+    {
+      "scene": "help-box",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-95/before/help-box.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-95/after/help-box.png",
+      "title": "FLT-95: Help ▸ How to play has \"Take the box off the shelf again\"",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-95/compare/help-box.png",
+      "changed": 0.0011589506172839507
+    },
+    {
+      "scene": "saves-welcome",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-95/before/saves-welcome.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-95/after/saves-welcome.png",
+      "title": "FLT-65: a returning player's start screen (Welcome back, from a pretend save shelf)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-95/compare/saves-welcome.png",
+      "changed": 0.021739197530864198
+    }
+  ],
+  "errors": []
+}

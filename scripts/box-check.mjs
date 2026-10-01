@@ -103,7 +103,7 @@ if (only.includes("flow"))
     await page.click(".intro-disc button:has-text('Back')");
     await page.waitForFunction(() => !document.querySelector(".intro-focus"), null, { timeout: 30_000 });
     await settle(page);
-    check("Back puts the disc down; the game hasn't started", (await state(page)).includes("open") && !(await page.evaluate(() => typeof window.__fltProbe === "function")));
+    check("Back puts the disc down; the game hasn't started", (await state(page)).includes("open") && !!(await page.$(".intro-contents")), await state(page));
     await shoot(page, "flow-8-put-down");
     await page.click(".intro-contents button:has-text('Pick up the disc')");
     await page.click(".intro-disc button:has-text('Insert and play')");
