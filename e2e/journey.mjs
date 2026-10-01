@@ -711,13 +711,18 @@ try {
       level = probe.progress.level;
       await page.waitForTimeout(600); // let the "New!" card draw
       // An era that turns with the level is a blue screen on purpose: keep it as the era's moment, and show the level past it.
+      // It can draw a beat after the level (FLT-94 saw it land between this check and the still), so look again after.
       const bsodUp = page.locator(".f95-bsod-go:visible").first();
-      if (await bsodUp.count()) {
-        await still(`${out}/moments/era-${level}-${gameDays(probe).toFixed(0)}.png`);
-        await press(bsodUp);
-        await page.waitForTimeout(600);
+      let shot;
+      for (let look = 0; look < 3; look++) {
+        if (await bsodUp.count()) {
+          await still(`${out}/moments/era-${level}-${gameDays(probe).toFixed(0)}.png`);
+          await press(bsodUp);
+          await page.waitForTimeout(600);
+        }
+        shot = await still(`${out}/levels/level-${level}.png`);
+        if (!(await bsodUp.count())) break;
       }
-      const shot = await still(`${out}/levels/level-${level}.png`);
       const [lo, hi] = LEVEL_WINDOW[level] ?? [0, Infinity];
       if (levelDays < lo || levelDays > hi) await fail(levelDays < lo ? "short level" : "slow level", `Level ${level - 1} → ${level} took ${levelDays.toFixed(1)} game days (window ${lo}–${hi})`, probe);
       const row = { level, name: probe.progress.name, gameDay: gameDays(probe), levelDays: +levelDays.toFixed(1), window: [lo, hi], wallS: wallS(), cash: probe.cash, runway: probe.runway, income: probe.income, toastsPerMinute, windows: (await windows()).map((w) => w.label), goal: probe.progress.goal.text, shot };
