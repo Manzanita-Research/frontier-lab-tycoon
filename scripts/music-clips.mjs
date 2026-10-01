@@ -12,7 +12,7 @@ const arg = (name, fallback) => { const i = process.argv.indexOf(`--${name}`); r
 const url = arg("url", "http://localhost:4173/?debug=1&speed=0");
 const out = arg("out", "shots/music");
 // One fixed makeup gain for every clip (the game plays them at master 0.7 × music 0.3), so their loudness compares.
-const MAKEUP_DB = 9;
+const MAKEUP_DB = 15;
 
 const clips = [
   { name: "1-nap", takes: [{ at: 0, mode: "nap" }], seconds: 10, about: "Paused, or a card is open: a held pad that breathes, and a bell." },
