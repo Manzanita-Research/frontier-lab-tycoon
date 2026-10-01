@@ -1,0 +1,52 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "563887e520b87864ec6948cc5b7313340e001428"
+  },
+  "head": {
+    "branch": "flt-91-opening-scale",
+    "sha": "9964562",
+    "dirty": true
+  },
+  "seconds": 110.006,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "flt91-open",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-91/before/flt91-open.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-91/after/flt91-open.png",
+      "title": "FLT-91: the first 10 seconds of a fresh garage (seed 3, the starting camera)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-91/compare/flt91-open.png",
+      "changed": 0.25617283950617287
+    },
+    {
+      "scene": "flt91-open-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-91/before/flt91-open-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-91/after/flt91-open-phone.png",
+      "title": "FLT-91: the first 10 seconds on a phone (390x844)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-91/compare/flt91-open-phone.png",
+      "changed": 0.11632564710171345
+    },
+    {
+      "scene": "flt91-day5",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-91/before/flt91-day5.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-91/after/flt91-day5.png",
+      "title": "FLT-91: day 5, after the coach's path and the first Hall (seed 3, the starting camera)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-91/compare/flt91-day5.png",
+      "changed": 0.28184336419753087
+    },
+    {
+      "scene": "flt91-day5-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-91/before/flt91-day5-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-91/after/flt91-day5-phone.png",
+      "title": "FLT-91: day 5 on a phone (390x844)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-91/compare/flt91-day5-phone.png",
+      "changed": 0.1031162656458865
+    }
+  ],
+  "errors": []
+}

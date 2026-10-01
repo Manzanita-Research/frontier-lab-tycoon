@@ -6,7 +6,7 @@ describe("cameraStart (FLT-87)", () => {
     const { base, zoom, focus } = cameraStart(1440, 900);
     expect(base).toBeCloseTo(1440 / 34);
     expect(zoom).toBe(base);
-    expect(focus).toEqual([11, 12.5]);
+    expect(focus).toEqual([9, 17.5]);
     // Further out than FLT-87's 48, but a tile edge still clears the journey's 32 px tap floor.
     expect(zoom).toBeLessThan(48);
     expect(zoom * Math.sqrt(2 / 3)).toBeGreaterThan(32);

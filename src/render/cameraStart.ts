@@ -2,11 +2,11 @@
 export const PHONE_START = 1.6;
 
 /**
- * Where a desktop looks at first (FLT-91): the middle of the lot, a little toward the gate, so the plaza sits low on the
- * left, the empty lot runs away to the far fence, and there is sky over it. It used to look at the gate and fill the
- * screen with grass edge to edge.
+ * Where a desktop looks at first (FLT-91): just behind the garage, so it sits in the middle with the plaza under it, the
+ * empty lot runs away to the far fence, and there is sky past both edges. Looking at the middle of the lot instead put
+ * the garage down in a corner under the windows, a speck in a field.
  */
-const FOCUS: [number, number] = [11, 12.5];
+const FOCUS: [number, number] = [9, 17.5];
 /** A phone, being closer, looks a little to the gate's right, so the gate, the plaza and the ground to build on are all in view. */
 const PHONE_FOCUS: [number, number] = [9, 18];
 

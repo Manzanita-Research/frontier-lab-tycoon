@@ -400,6 +400,12 @@
       "flt87-phone-mid",
       "flt87-phone-more",
       "flt87-phone-inspector"
+    ],
+    "flt-91": [
+      "flt91-open",
+      "flt91-open-phone",
+      "flt91-day5",
+      "flt91-day5-phone"
     ]
   },
   "scenes": {
@@ -5598,6 +5604,248 @@
       "steps": [
         {
           "select": "researcher:Ada Gradient"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt91-open": {
+      "title": "FLT-91: the first 10 seconds of a fresh garage (seed 3, the starting camera)",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "tick": 33
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "flt91-open-phone": {
+      "title": "FLT-91: the first 10 seconds on a phone (390x844)",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "tick": 33
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "flt91-day5": {
+      "title": "FLT-91: day 5, after the coach's path and the first Hall (seed 3, the starting camera)",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 17
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 16
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placeBuilding",
+              "kind": "hall",
+              "x": 12,
+              "z": 16
+            }
+          }
+        },
+        {
+          "wait": 400
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "eval": "(f, w) => { for (let i = 0; i < 4000 && w.day < 5; i++) { const id = Object.keys(w.arcs).find((k) => w.arcs[k].value === 'cardOpen'); f.tick(w, id ? [{ type: 'chooseEvent', eventId: id, choiceIndex: 0 }] : []); } }"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt91-day5-phone": {
+      "title": "FLT-91: day 5 on a phone (390x844)",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 17
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 16
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placeBuilding",
+              "kind": "hall",
+              "x": 12,
+              "z": 16
+            }
+          }
+        },
+        {
+          "wait": 400
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "eval": "(f, w) => { for (let i = 0; i < 4000 && w.day < 5; i++) { const id = Object.keys(w.arcs).find((k) => w.arcs[k].value === 'cardOpen'); f.tick(w, id ? [{ type: 'chooseEvent', eventId: id, choiceIndex: 0 }] : []); } }"
         },
         {
           "wait": 800
