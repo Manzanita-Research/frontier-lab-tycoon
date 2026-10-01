@@ -160,6 +160,36 @@ if (has("hits")) {
   );
   for (const m of miss) console.log(`  MISS ${m.name} (${m.w}x${m.h}) shifted ${m.off.toFixed(1)}px`);
 }
+const press = opt("press", null);
+if (press) {
+  // A real mouse click where the glass shows the element's centre (`--press ".f95-start"`), then a hover over it.
+  const curve = Number(opt("curve", "0.012"));
+  const at = await page.evaluate(
+    ({ sel, c }) => {
+      const el = document.querySelector(sel);
+      if (!el) return null;
+      const r = el.getBoundingClientRect();
+      const x = ((r.left + r.width / 2) / innerWidth) * 2 - 1;
+      const y = ((r.top + r.height / 2) / innerHeight) * 2 - 1;
+      let dx = x, dy = y;
+      for (let i = 0; i < 4; i++) [dx, dy] = [x / (1 + c * dy * dy), y / (1 + c * dx * dx)];
+      window.__pressed = [];
+      el.addEventListener("click", () => window.__pressed.push("click"), { once: true });
+      el.addEventListener("pointerover", () => window.__pressed.push("pointerover"), { once: true });
+      return [((dx + 1) / 2) * innerWidth, ((dy + 1) / 2) * innerHeight];
+    },
+    { sel: press, c: curve },
+  );
+  if (!at) console.log(`press: ${press} not found`);
+  else {
+    await page.mouse.move(at[0], at[1]);
+    await page.waitForTimeout(300);
+    await page.mouse.down();
+    await page.mouse.up();
+    await page.waitForTimeout(Number(opt("after", "800")));
+    console.log(`press ${press} at shown (${at[0].toFixed(0)},${at[1].toFixed(0)}):`, await page.evaluate(() => window.__pressed.join(",")));
+  }
+}
 const out = opt("out", null);
 if (out) {
   mkdirSync(dirname(out), { recursive: true });
