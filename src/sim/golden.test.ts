@@ -230,10 +230,12 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // days into Scrutiny) adds flags.scrutinyDay on the tick Level 5 lands (2240); the card itself would open on day 218, past
 // these 4000 ticks. With the card kept shut (`firstMinutes` false) and without the flag, all three seeds reproduce FLT-59's
 // values (c403ae9a… / 766f3295… / b43cb9be…).
+// Jem's labels for the Logo (A butthole / A butthole-ier butthole / Not a butthole) change its news lines, which sit in
+// the World until the ticker rolls them off: 200 to 1600 move, 2400 on hold.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "5e0738a0", 800: "e319dc92", 1600: "d666ee36", 2400: "ee22342a", 3200: "15ff6c72", 4000: "d44774d4" },
-  2: { 200: "8e0d811a", 800: "857cc831", 1600: "c749a1dc", 2400: "a61834ba", 3200: "40c75dd6", 4000: "cc186590" },
-  3: { 200: "71a54b51", 800: "c5845aae", 1600: "317aaba3", 2400: "5ac62c34", 3200: "d05b8a54", 4000: "d46780de" },
+  1: { 200: "776c969b", 800: "2994496b", 1600: "c3959cd9", 2400: "ee22342a", 3200: "15ff6c72", 4000: "d44774d4" },
+  2: { 200: "125c4ed2", 800: "a4f0d1f1", 1600: "728d30e4", 2400: "a61834ba", 3200: "40c75dd6", 4000: "cc186590" },
+  3: { 200: "d02267c3", 800: "d77c1496", 1600: "a5bd2a17", 2400: "5ac62c34", 3200: "d05b8a54", 4000: "d46780de" },
 };
 
 describe("golden runs", () => {

@@ -251,29 +251,29 @@ EVENTS.push({
   cooldown: 99_999,
   choices: [
     {
-      label: "The swirl",
+      label: "A butthole",
       hint: "free · hype +1 · it looks like everyone else's, which is the point",
       effects: [
         { type: "hype", amount: 1 },
-        { type: "news", text: "{lab} unveils its logo: a swirl. Industry observers confirm it is a swirl." },
+        { type: "news", text: "{lab} unveils its logo. Industry observers confirm it looks like everyone else's logo." },
       ],
     },
     {
-      label: "A swirlier swirl",
+      label: "A butthole-ier butthole",
       hint: "−$8K · hype +4 · the designer has been up for two days",
       effects: [
         { type: "cash", amount: -8_000 },
         { type: "hype", amount: 4 },
-        { type: "news", text: "{lab}'s new logo is a swirl with more swirl in it. The designer is said to be resting." },
+        { type: "news", text: "{lab}'s new logo is like everyone else's, only more so. The designer is said to be resting." },
         { type: "thought", kind: "researcher", text: "The new logo looks like a cinnamon roll having a breakthrough.", count: 2 },
       ],
     },
     {
-      label: "An asterisk",
-      hint: "free · hype +2 · terms and conditions apply",
+      label: "Not a butthole",
+      hint: "free · hype +2 · nobody will believe you",
       effects: [
         { type: "hype", amount: 2 },
-        { type: "news", text: "{lab} picks an asterisk for a logo. Readers search the page for the footnote. There is no footnote." },
+        { type: "news", text: "{lab}'s new logo is not a butthole, says a press release nobody asked for. Nobody believes it." },
       ],
     },
   ],

@@ -30,7 +30,7 @@ describe("the first decision (the Logo)", () => {
     expect(s.models).toHaveLength(0);
   });
 
-  it("stops the clock like any card, costs $8K for the swirlier swirl, and never asks again", () => {
+  it("stops the clock like any card, costs $8K for the butthole-ier butthole, and never asks again", () => {
     const s = opening();
     for (let i = 0; i < 10 * TICKS_PER_DAY && !openEventOf(s); i++) tick(s);
     const at = s.tick;
