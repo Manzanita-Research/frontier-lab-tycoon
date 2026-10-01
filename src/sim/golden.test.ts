@@ -225,10 +225,12 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // FLT-76 asks the first decision on Level 1: the Logo opens two days after the first path, while the first model trains,
 // and this script answers it like any other card, so every
 // checkpoint moves. With the card kept shut (`firstMinutes` false), all three seeds reproduce the values above.
+// Then the offsite (FLT-76's minor beat 106 days into Scrutiny) adds flags.scrutinyDay on the tick Level 5 lands (2240),
+// so 2400 on moves; the card itself would open on day 218, past these 4000 ticks. Without the flag, every value holds.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "5e0738a0", 800: "e319dc92", 1600: "d666ee36", 2400: "5514cbc2", 3200: "48f62238", 4000: "db39899a" },
-  2: { 200: "8e0d811a", 800: "857cc831", 1600: "c749a1dc", 2400: "86de5923", 3200: "2cdb0b43", 4000: "0f914291" },
-  3: { 200: "71a54b51", 800: "c5845aae", 1600: "317aaba3", 2400: "92927fae", 3200: "249e9ca2", 4000: "082c8fec" },
+  1: { 200: "5e0738a0", 800: "e319dc92", 1600: "d666ee36", 2400: "4efc049f", 3200: "f68901eb", 4000: "06932fbf" },
+  2: { 200: "8e0d811a", 800: "857cc831", 1600: "c749a1dc", 2400: "88fb2e1f", 3200: "8761890f", 4000: "96b86bb9" },
+  3: { 200: "71a54b51", 800: "c5845aae", 1600: "317aaba3", 2400: "28a2819d", 3200: "b5bbe8c1", 4000: "7e0f0fd5" },
 };
 
 describe("golden runs", () => {

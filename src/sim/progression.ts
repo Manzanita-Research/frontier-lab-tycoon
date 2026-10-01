@@ -172,6 +172,8 @@ export function updateProgression(s: GameState) {
     if (row.systems.includes("arena")) seedField(s);
     if (row.systems.includes("breakdowns")) s.flags.firstBreakdownDay ??= s.day + FIRST_BREAKDOWN_DAYS;
     if (row.systems.includes("slop")) s.flags.firstSpillDay ??= s.day + FIRST_SPILL_DAYS;
+    // The day Scrutiny began: a card can count from it (FLT-76's offsite, when the staggered wake-ups have all played).
+    if (row.level === 5) s.flags.scrutinyDay ??= s.day;
     const items = [...row.buildings.map((k) => defs().buildings[k]?.name ?? k), ...row.staff.map((k) => STAFF[k].title), ...now, ...(later.size > 0 ? [WAKE_TEASER] : [])];
     s.unlockCards ??= [];
     s.unlockCards.push({ id: row.id, title: `New! ${row.name}`, body: row.goal.text, items });

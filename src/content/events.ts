@@ -280,6 +280,47 @@ EVENTS.push({
 });
 // Release Leapfrog's cards live in its pack (mods/base-leapfrog); they only ever open once its systems set their flags.
 EVENTS.push(...LEAPFROG.events);
+
+/**
+ * FLT-76 (an FLT-54 follow-up): days 106 to 116 after Level 5 were the quiet stretch, after the last of Scrutiny's
+ * staggered wake-ups. A minor beat for it: if the desk is busy (or the game is at 10×) the lab skips the offsite by itself
+ * and says so on the ticker, so it never holds anything up.
+ */
+EVENTS.push({
+  id: "offsite",
+  stripe: "Calendar invite",
+  title: "The leadership offsite",
+  body: "It has been a hundred days since the outside world started paying attention. HR has booked a cabin, a facilitator and a trust fall that nobody asked for. The facilitator has already sent a pre-read.",
+  tone: "neutral",
+  when: { flag: "scrutinyDay", daysAgo: 106 },
+  cooldown: 99_999,
+  choices: [
+    {
+      label: "Skip it",
+      hint: "free · nothing happens, which is the dream",
+      effects: [{ type: "news", text: "{lab} cancels its leadership offsite. A spokesperson calls it \"a bit much\"." }],
+    },
+    {
+      label: "Go to the cabin",
+      hint: "−$40K · hype +3 · trust +2",
+      effects: [
+        { type: "cash", amount: -40_000 },
+        { type: "hype", amount: 3 },
+        { type: "trust", amount: 2 },
+        { type: "thought", kind: "researcher", text: "Leadership went to a cabin. Leadership came back with a vision board.", count: 2 },
+      ],
+    },
+    {
+      label: "Send the model instead",
+      hint: "free · hype +5 · trust −3",
+      effects: [
+        { type: "hype", amount: 5 },
+        { type: "trust", amount: -3 },
+        { type: "news", text: "{lab} sends its model to the leadership offsite. It wins the trust fall. Nobody catches it." },
+      ],
+    },
+  ],
+});
 // FLT-17: the cards the disasters open (mods/base-disasters). They wait for their offer flag like the Race's cards do.
 EVENTS.push(...cardEvents());
 // FLT-18: ordinary cards, dormant until the pack's machine sets their offer flags.

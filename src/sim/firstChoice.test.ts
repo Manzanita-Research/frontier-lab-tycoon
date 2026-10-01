@@ -1,12 +1,14 @@
 // FLT-76: the first minutes get one decision. The Logo opens on Level 1, two days after the first path (the first model
-// is training by then), long before the ladder opens the other cards, and never comes back.
+// is training by then), long before the ladder opens the other cards, and never comes back. And a minor beat for the
+// quiet stretch 106 days into Scrutiny.
 import { describe, expect, it } from "vitest";
 import { chooseEvent, openEventOf } from "./events";
 import { levelOf } from "./progression";
 import { createRng } from "./rng";
 import { createInitialState } from "./state";
 import { applyNow, tick } from "./tick";
-import { answer } from "./testkit";
+import { answer, createTestCampus, readyForPressure, runDays } from "./testkit";
+import { paceOfCard } from "../content/cardPacing";
 import { TICKS_PER_DAY } from "./constants";
 
 const paths = [18, 17, 16].map((z) => ({ type: "placePath" as const, x: 11, z }));
@@ -53,5 +55,21 @@ describe("the first decision (the Logo)", () => {
     for (let i = 0; i < 10 * TICKS_PER_DAY; i++) tick(s);
     expect(openEventOf(s)).toBeNull();
     expect(s.arcs.theLogo!.context.openedDay).toBeNull();
+  });
+});
+
+describe("the quiet stretch's beat (the offsite)", () => {
+  it("lands 106 days into Scrutiny, as a card or, with no room for it, on the ticker", () => {
+    const s = createTestCampus();
+    readyForPressure(s);
+    s.flags.scrutinyDay = s.day - 104;
+    runDays(s, 1);
+    expect(s.arcs.offsite!.context.openedDay).toBeNull();
+    runDays(s, 3);
+    expect(s.arcs.offsite!.context.openedDay).toBe(s.flags.scrutinyDay + 106);
+  });
+
+  it("is minor: it answers itself (skipping the offsite) rather than wait behind another card", () => {
+    expect(paceOfCard("offsite")).toMatchObject({ minor: true, default: 0 });
   });
 });
