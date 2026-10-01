@@ -24,6 +24,7 @@ export function Papers({ papers, actions }: SlotPropsMap["Papers"]) {
         </>
       }
       label="Publish or Perish"
+      place="papers"
       icon="doc"
       onTitleClick={() => actions.togglePapers()}
       buttons={[{ g: "min", label: papers.open ? "Minimize" : "Restore", onClick: () => actions.togglePapers() }]}

@@ -273,6 +273,7 @@ export function Inspector({ inspector: who, layout, actions }: SlotPropsMap["Ins
   return (
     <Win
       className="f95-props"
+      place="inspector"
       title={t("inspector.title", { name: who.name })}
       icon="info"
       buttons={[
@@ -377,6 +378,7 @@ export function Arena({ arena, leapfrog, layout, actions }: SlotPropsMap["Arena"
         </>
       }
       label="Task Mangler"
+      place="arena"
       icon="chart"
       onTitleClick={() => actions.toggleArena()}
       buttons={[{ g: "min", label: arena.open ? "Minimize" : "Restore", onClick: () => actions.toggleArena() }]}
@@ -438,7 +440,7 @@ export function ThoughtsPanel({ rows, layout, actions }: SlotPropsMap["ThoughtsP
   useStackWindow("thoughts", !open, (minimised) => setOpen(!minimised));
   useWidget("thoughts", () => setOpen(true));
   return (
-    <Win className={`f95-thoughts ${open ? "open" : ""}`} title={`${t("thoughts.title")}.txt`} icon="doc" onTitleClick={() => setOpen(!open)} buttons={[{ g: "min", label: open ? "Minimize" : "Restore", onClick: () => setOpen(!open) }]}>
+    <Win className={`f95-thoughts ${open ? "open" : ""}`} place="thoughts" title={`${t("thoughts.title")}.txt`} icon="doc" onTitleClick={() => setOpen(!open)} buttons={[{ g: "min", label: open ? "Minimize" : "Restore", onClick: () => setOpen(!open) }]}>
       {open && (
         <ul className="f95-thoughtlist inset">
           {rows.map((r) => (
@@ -463,7 +465,7 @@ export function Staff({ staff, actions }: SlotPropsMap["Staff"]) {
   if (staff.painting) {
     const p = staff.painting;
     return (
-      <Win className="f95-staff painting" title="Patrol zone" icon="staff" buttons={[{ g: "close", label: "Done", onClick: () => actions.paintZone(null) }]}>
+      <Win className="f95-staff painting" place="staff" title="Patrol zone" icon="staff" buttons={[{ g: "close", label: "Done", onClick: () => actions.paintZone(null) }]}>
         <div className="f95-page">
           <p className="f95-paintmsg">
             <b>{p.name}</b> · drag on the map to paint their patrol zone; drag from a painted tile to erase. {p.zone > 0 ? `${p.zone} tiles.` : "Empty means the whole campus."}
@@ -481,6 +483,7 @@ export function Staff({ staff, actions }: SlotPropsMap["Staff"]) {
   return (
     <Win
       className="f95-staff"
+      place="staff"
       title="Staff Manager"
       icon="staff"
       buttons={[

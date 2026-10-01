@@ -117,6 +117,27 @@
       cursor: pointer;
     }
   }
+  /* FLT-90: a window drags by its title bar (not on a phone: `.drag` is only set on a wide screen). A pen or a finger on
+     a tablet drags it too, instead of scrolling the page. */
+  .f95-win.drag > .f95-tb {
+    touch-action: none;
+  }
+  /* What moves while you drag: a dotted outline, inverted against whatever is under it, as in 1995. The window follows
+     when you let go. */
+  .f95-ghost {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 1000;
+    pointer-events: none;
+    box-sizing: border-box;
+    padding: 4px;
+    background: repeating-conic-gradient(#fff 0 25%, transparent 0 50%) 0 0 / 2px 2px;
+    mix-blend-mode: difference;
+    mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+  }
   .f95-strip {
     cursor: pointer;
   }
@@ -822,6 +843,8 @@
     gap: 6px;
     padding: 0 4px;
     pointer-events: auto;
+    /* Always on top, as in 1995: a window dragged down the screen (FLT-90) goes behind it, never over the Start button. */
+    z-index: 30;
   }
   .f95-startwrap {
     position: relative;

@@ -586,6 +586,10 @@ The lab starts small and grows (`vm.progress`, `vm.visible`), and a coach teache
 
 If a panel of your own covers the map while it is open (a phone sheet, a menu), hold time with the kit's `useAutoPause(actions, "my-panel", open)`: the game keeps the ids apart, so closing one panel never resumes time beneath another. The panels the host owns (the payroll, the sound mixer, the News Room, the phone Arena) hold it for you.
 
+## Windows that drag (Frontier 95)
+
+Every Frontier 95 `Win` drags by its title bar on a desktop (FLT-90): an outline moves while the button is down, the window jumps to it on release, and Esc cancels. The pure rules are in `src/skins/frontier-95/places.ts` (clamp a place to the screen, remember places per skin under `flt.windows.<skin>`, front-to-back order) and the pointer handling is in `drag.tsx`. A window's id is its `place` prop, or its first class if it has none: give a stack window the same `place` as its `useStackWindow` id, so the right column knows to leave a moved window alone. `place={false}` keeps a window still. Message and error boxes drag but are not remembered, nested windows move with their parent, and at 640 px and under nothing drags and saved places wait for a wider screen. Start ▸ Settings ▸ Reset window positions forgets them. A skin that copies `Win` gets all of this; a skin of its own draws its windows however it likes.
+
 ## The view-model and actions
 
 `src/ui/hud/types.ts` is the contract; it is short and commented. The top level:
