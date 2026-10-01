@@ -62,12 +62,16 @@ export function dailyRace(state: GameState, rng: Rng) {
   race.era = stored;
   for (const e of effects) {
     state.flags[`offer:era${e.era}`] = state.day;
+    // An earlier era's card still waiting (the ladder holds cards until Level 5) is old news: this era's card replaces it.
+    for (let k = 2; k < e.era; k++) delete state.flags[`offer:era${k}`];
     raceNews(state, rng, `eraReached:${e.era}` as NewsTrigger);
   }
 
   if (race.openDrop && state.day >= race.openDrop.until) {
     addToast(state, `${defs().rivalById[race.openDrop.rival as RivalId]?.name ?? "The rival"}'s free model has settled in. Revenue is back.`, "good", { source: "race" });
     race.openDrop = null;
+    // A card still waiting for its turn (the ladder holds cards until Level 5) would be about a drop that is over.
+    delete state.flags["offer:openWeights"];
   }
   if (state.day > 0 && state.day % 7 === 0) weekly(state, rng);
 

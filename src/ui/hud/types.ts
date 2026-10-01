@@ -1559,6 +1559,14 @@ export interface SaveSummaryVM {
   mods: string[];
 }
 
+/** "Welcome back" (FLT-82): the newest save on the shelf, whichever slot it is in. */
+export interface WelcomeVM extends SaveSummaryVM {
+  /** "auto", "1", "2", "3": where it is, and what `continueSave` loads. */
+  slot: string;
+  /** "Autosave", "Slot 2" */
+  label: string;
+}
+
 /** One row of the Save/Load window: the autosave or a manual slot. */
 export interface SaveSlotVM {
   /** "auto", "1", "2", "3": what `saveTo`, `loadFrom`, `deleteSave` and `exportSave` take. */
@@ -1591,8 +1599,8 @@ export interface SavesVM {
   slots: SaveSlotVM[];
   /** The lab playing now: what Save writes. */
   current: { lab: string; date: string };
-  /** "Welcome back": the autosave to continue, or null. Time holds while it is up. */
-  welcome: SaveSummaryVM | null;
+  /** "Welcome back": the newest save to continue (the autosave or a slot), or null. Time holds while it is up. */
+  welcome: WelcomeVM | null;
   /** A load, save or import is under way. */
   busy: boolean;
   /** What just happened ("Saved to slot 2.", "That file isn't a lab save."), or null. */

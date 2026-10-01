@@ -30,6 +30,46 @@ export function makeRoom(items: readonly TapeItem[], offset: number, viewport: n
 export const catchUp = (waiting: number): number => 1 + Math.min(1, waiting * 0.4);
 
 /**
+ * What the tape has taken in, and what is new in the latest items. Another lab's news (a new lab, a loaded save) starts
+ * the tape over (FLT-82): its ids restart lower, so its headlines would wait behind the old lab's last id while the old
+ * lab's replayed forever. A lab's tape always shares a headline with what came before (the ticker carries the newest
+ * two dozen); another lab's shares none, or reuses an id for a different line.
+ */
+export class Tape {
+  /** Every headline taken in, oldest first: the filler that keeps the tape full. */
+  history: TickerItemVM[] = [];
+  private seen = new Map<number, string>();
+  private seenId = 0;
+
+  take(items: readonly TickerItemVM[]): { reset: boolean; fresh: TickerItemVM[] } {
+    const reset = this.seen.size > 0 && !this.continues(items);
+    if (reset) {
+      this.history = [];
+      this.seen.clear();
+      this.seenId = 0;
+    }
+    const fresh = items.filter((n) => n.id > this.seenId);
+    for (const n of fresh) {
+      this.seenId = Math.max(this.seenId, n.id);
+      this.seen.set(n.id, n.text);
+      this.history.push(n);
+    }
+    return { reset, fresh };
+  }
+
+  private continues(items: readonly TickerItemVM[]): boolean {
+    let shared = false;
+    for (const n of items) {
+      const said = this.seen.get(n.id);
+      if (said === undefined) continue;
+      if (said !== n.text) return false;
+      shared = true;
+    }
+    return shared;
+  }
+}
+
+/**
  * An endless news tape, driven by hand so new headlines join without restarting it. Put it inside a box with
  * `overflow: hidden` (the "view"); the track it draws is `position: relative; display: flex` and moves with a
  * transform, one `<span class="tick {tone}">` per headline. Style `.tick` in your skin.css.
@@ -44,8 +84,8 @@ export function Marquee({ items, pxPerSecond = 70, className = "marquee-track" }
   useLayoutEffect(() => {
     const el = track.current;
     if (!el) return;
-    const history: TickerItemVM[] = [];
-    let seenId = 0;
+    const tape = new Tape();
+    let taken: readonly TickerItemVM[] | null = null;
     let cycle = 0;
     let offset = 0;
     let last = performance.now();
@@ -63,10 +103,16 @@ export function Marquee({ items, pxPerSecond = 70, className = "marquee-track" }
       const dt = Math.min(0.1, (now - last) / 1000);
       last = now;
       const viewport = el.parentElement!.clientWidth;
-      const fresh = latest.current.filter((n) => n.id > seenId);
+      const { reset, fresh } = taken === latest.current ? { reset: false, fresh: [] } : tape.take(latest.current);
+      taken = latest.current;
+      if (reset) {
+        // Another lab: its news starts on a clean tape, as it did when the tape mounted.
+        el.replaceChildren();
+        offset = 0;
+        cycle = 0;
+        started = false;
+      }
       if (fresh.length > 0) {
-        seenId = Math.max(seenId, ...fresh.map((n) => n.id));
-        history.push(...fresh);
         // The first frame's headlines are old news (whatever the game had said before the tape mounted): filler, not fresh.
         if (started) {
           const kids = Array.from(el.children) as HTMLElement[];
@@ -78,7 +124,7 @@ export function Marquee({ items, pxPerSecond = 70, className = "marquee-track" }
       started = true;
       // Never let the tape run dry: replay old headlines behind the new ones.
       let guard = 0;
-      while (el.scrollWidth - offset < viewport * 1.5 && history.length > 0 && guard++ < 8) add(history[cycle++ % history.length]!, true);
+      while (el.scrollWidth - offset < viewport * 1.5 && tape.history.length > 0 && guard++ < 8) add(tape.history[cycle++ % tape.history.length]!, true);
       const waiting = Array.from(el.children).filter((k) => (k as HTMLElement).dataset.replay !== "1" && (k as HTMLElement).offsetLeft >= offset + viewport).length;
       offset += dt * pxPerSecond * catchUp(waiting);
       let first = el.firstElementChild as HTMLElement | null;
