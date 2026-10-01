@@ -121,7 +121,7 @@ function Director({ intro, beat, clock, fps }: { intro: Intro; beat: string; clo
 
   useEffect(() => {
     const w = window as unknown as { __intro?: unknown };
-    w.__intro = { send: intro.send, state: () => intro.now()?.value, fps: () => meter.current.fps, info: () => ({ calls: meter.current.calls, triangles: meter.current.tris }) };
+    w.__intro = { send: intro.send, state: () => intro.now()?.value, context: () => intro.now()?.context, fps: () => meter.current.fps, info: () => ({ calls: meter.current.calls, triangles: meter.current.tris }) };
     return () => void delete w.__intro;
   }, [intro, gl]);
 

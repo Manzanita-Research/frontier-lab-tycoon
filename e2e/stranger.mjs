@@ -1,7 +1,9 @@
 import { chromium } from "playwright";
 import { mkdir, writeFile } from "node:fs/promises";
+import { throughTheBox } from "./box.mjs";
 
-// A stranger opens the preview with no params and clicks only what the coach points at. Every check is measured in
+// A stranger opens the preview with no params, plays the box on the shelf (FLT-95: a first visit's front door), and then
+// clicks only what the coach points at. Every check is measured in
 // game time (the probe's tick), so a slow runner that draws fewer frames still plays the same game. Wall-clock limits
 // are only timeouts: a frozen world still fails, because its game time never moves.
 const at = process.argv.indexOf("--url");
@@ -66,6 +68,9 @@ async function press(target) {
 
 try {
   await page.goto(url.href, { waitUntil: "networkidle", timeout: 120_000 });
+  result.box = await throughTheBox(page);
+  if (result.box.door !== "box") throw new Error("A first visit to the bare root must open on the box");
+  if (errors.length) throw new Error(`Console errors in the box: ${errors.join("; ")}`);
   await page.waitForFunction(() => typeof window.__fltProbe === "function", { timeout: 60_000 });
   const first = await page.evaluate(() => window.__fltProbe());
   if (first.speed !== 1 || !first.paused) throw new Error("Opening must be paused at 1×");
