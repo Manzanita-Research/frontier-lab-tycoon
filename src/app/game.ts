@@ -67,6 +67,8 @@ if (midgame) {
 if (mods.mods.length > 0) first.toasts.push({ id: -1, text: `Mods on: ${mods.mods.map((m) => m.name).join(", ")}`, tone: "good", source: "mods", importance: "you" });
 if (mods.errors.length > 0) first.toasts.push({ id: -2, text: `${mods.errors.length === 1 ? "A mod" : `${mods.errors.length} mods`} didn't load. See Start, Settings, Mods…`, tone: "bad", source: "mods", importance: "you" });
 export const app = createActorAtoms(runtime, appMachine, { input: { speed: initialSpeed, first } });
+/** A notice for the first frame, from before the app mounts (the skin migration, FLT-71): the actor starts with it, like the mods line. */
+export const bootNotice = (text: string, tone: Tone = "neutral") => void first.toasts.push({ id: -3, text, tone, importance: "you" });
 
 /** Owns the atoms' lifetimes. Mount `app.actor` to start the loop; dispose it to stop everything. */
 export const registry = AtomRegistry.make();
@@ -161,6 +163,8 @@ export function use(tool: Tool, x: number, z: number, quiet = false, keep = fals
  * What the camera shows, for the probe: the view-projection matrix (column-major) and the canvas rect in CSS pixels.
  * The scene lends it (`render/ProbeView`), so an e2e player can find a tile wherever the director has moved the camera.
  */
+/** FLT-54: the HUD's window budget for the probe (what the game holds up, what waits on the taskbar); set by the HUD host. */
+export const probeHud: { windows: (() => { auto: string[]; tray: { id: string; flashing: boolean; unread: number }[] }) | null } = { windows: null };
 export const probeView: { view: (() => { matrix: number[]; rect: { left: number; top: number; width: number; height: number } }) | null } = { view: null };
 
 // Always-on read-only contract: copied values, no URL switches or mutation handles.
@@ -183,7 +187,7 @@ if (typeof window !== "undefined") {
       outcome: c ? { outcome: c.outcome, dismissed: c.outcomeDismissed } : null, overlays: c ? [...c.overlays] : [], warnings: snap ? [...snap.warnings] : [],
       toasts: c ? c.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) : [],
       map: { w: w.grid.w, h: w.grid.h, paths: w.grid.paths.flatMap((p, i) => (p ? [i] : [])), gate: { ...w.gate }, buildings: w.buildings.map((b) => ({ id: b.id, kind: b.kind, x: b.x, z: b.z, w: b.w, d: b.d, broken: b.broken })) },
-      view: probeView.view?.() ?? null };
+      view: probeView.view?.() ?? null, windows: probeHud.windows?.() ?? null };
   };
   window.addEventListener("click", () => send({ type: "COMMAND", command: { type: "coachClick" } }));
   // Closing the tab (or switching away from it) autosaves, so a lab is never more than a month behind.

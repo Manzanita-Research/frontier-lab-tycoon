@@ -159,7 +159,7 @@ describe("The Memo: a countdown, then an aftermath", () => {
       const s = midgame();
       play(s, 1);
       offerMemo(s);
-      play(s, 7, index, (w) => w.endings!.memo !== undefined);
+      play(s, 12, index, (w) => w.endings!.memo !== undefined); // FLT-54: the card budget can hold it a few days on "It's on your desk."
       const e = s.endings!;
       expect(e.memo!.choice).toBe(choice);
       const fork = ENDING_RULES.memo[choice];
@@ -188,7 +188,7 @@ describe("The Memo: a countdown, then an aftermath", () => {
     s.waterDiscourse = 60;
     play(s, 1);
     offerMemo(s);
-    play(s, 7, 1, (w) => w.endings!.memo !== undefined);
+    play(s, 12, 1, (w) => w.endings!.memo !== undefined);
     const before = s.waterDiscourse;
     play(s, 10, 1);
     expect(s.waterDiscourse).toBeLessThan(before - 15);

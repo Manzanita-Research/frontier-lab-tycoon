@@ -79,8 +79,13 @@
     > .f95-win {
       width: min(400px, 100%);
     }
+    /* The benchmark table wants room: opened by the player, every column shows. */
     > .f95-tasks.wide {
       width: 100%;
+    }
+    /* Opened by the game (FLT-54), it keeps to the right edge, out of the middle of a 1440×900 screen: the table scrolls instead. */
+    > .f95-tasks.wide.auto {
+      width: min(100%, max(400px, calc(30vw - 10px)));
     }
   }
 
@@ -903,6 +908,65 @@
     background: repeating-conic-gradient(var(--lt) 0 25%, var(--g) 0 50%) 0 0 / 2px 2px;
     white-space: nowrap;
   }
+  /* FLT-54: windows waiting their turn, as taskbar buttons that flash navy (the way a 1995 program asked for you), and
+     folded windows with unread news (a red dot and the count). */
+  .f95-waiting {
+    display: flex;
+    gap: 3px;
+    min-width: 0;
+    flex: 0 1 auto;
+    overflow: hidden;
+  }
+  .f95-wait {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    height: 32px;
+    max-width: 190px;
+    padding: 0 8px;
+    border: 0;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    background: var(--g);
+    box-shadow: var(--btn);
+    white-space: nowrap;
+    pointer-events: auto;
+    span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    &.flashing {
+      animation: f95-wait-flash 1s steps(1, end) infinite;
+    }
+    &:active {
+      box-shadow: var(--pressed);
+    }
+  }
+  @keyframes f95-wait-flash {
+    50% {
+      background: var(--navy);
+      color: var(--flt-color-accentText);
+    }
+  }
+  .f95-unread {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    color: var(--flt-color-bad);
+    &::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--flt-color-bad);
+    }
+  }
+  &[data-motion="reduced"] .f95-wait.flashing {
+    animation: none;
+    background: var(--navy);
+    color: var(--flt-color-accentText);
+  }
   .f95-tooltip {
     position: absolute;
     bottom: calc(100% + 6px);
@@ -1472,13 +1536,15 @@
       color: #7a7a7a;
     }
   }
+  /* Just above the taskbar, off the campus (FLT-54: nothing the game opens by itself covers the middle of the screen). */
   .f95-unlock {
     position: fixed;
     z-index: 30;
-    top: 38%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: min(440px, calc(100vw - 20px));
+    /* FLT-54: bottom left, below the goal note, and no wider than the edge of the campus (the middle 40% stays clear). */
+    bottom: calc(var(--taskbar) + 12px);
+    left: 12px;
+    width: min(440px, calc(30vw - 24px), calc(100vw - 20px));
+    min-width: min(300px, calc(100vw - 20px));
     pointer-events: auto;
   }
   .f95-unlockitems {
@@ -3399,7 +3465,8 @@
       min-width: 0;
     }
     .f95-stack > .f95-win,
-    .f95-stack > .f95-tasks.wide {
+    .f95-stack > .f95-tasks.wide,
+    .f95-stack > .f95-tasks.wide.auto {
       width: auto;
     }
     .f95-props,
@@ -3448,6 +3515,11 @@
       row-gap: 0;
       padding: 0 4px 4px;
     }
+    .f95-unlock {
+      left: 10px;
+      width: calc(100vw - 20px);
+      min-width: 0;
+    }
     .f95-news {
       order: -1;
       flex: 1 1 100%;
@@ -3464,6 +3536,7 @@
     }
     .f95-qs,
     .f95-task span,
+    .f95-wait span,
     .f95-clock,
     .f95-s.snd {
       display: none;

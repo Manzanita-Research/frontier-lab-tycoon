@@ -1,0 +1,38 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "4cbc20afc6ba6bbe3e625d47c482897570265aed"
+  },
+  "head": {
+    "branch": "flt-54-pacing",
+    "sha": "f09c17a",
+    "dirty": true
+  },
+  "seconds": 60.35,
+  "problems": [
+    "flt54-tasks-player.png: blank composite: panel 3 is 21% one colour, 9 colours"
+  ],
+  "rows": [
+    {
+      "scene": "flt54-tasks-game",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-54/tasks/before/flt54-tasks-game.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-54/tasks/after/flt54-tasks-game.png",
+      "title": "FLT-54: the Task Mangler's benchmark table as the game opened it (Release Leapfrog): kept to the right edge",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-54/tasks/compare/flt54-tasks-game.png",
+      "changed": 0.14772685185185186
+    },
+    {
+      "scene": "flt54-tasks-player",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-54/tasks/before/flt54-tasks-player.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-54/tasks/after/flt54-tasks-player.png",
+      "title": "FLT-54: the same Task Mangler folded and opened again by the player: full width, every column",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-54/tasks/compare/flt54-tasks-player.png",
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 21% one colour, 9 colours",
+      "error": "compare: blank composite: panel 3 is 21% one colour, 9 colours"
+    }
+  ],
+  "errors": []
+}

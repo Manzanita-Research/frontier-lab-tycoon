@@ -80,7 +80,7 @@ src/skins/<id>/
     fonts/         # woff2 / woff / ttf / otf, each with its licence text beside it
     ...            # images, icons; reference them from skin.css with url(./assets/x.png)
 src/skins/base/    # the base skin: tokens.json, strings.json, base.css, and a complete set of slots
-src/skins/kit/     # helpers a skin may import (Odometer, Marquee, Portrait, Senator, Dialog, money, reducedMotion)
+src/skins/kit/     # helpers a skin may import (Odometer, Marquee, Portrait, Senator, Dialog, SpeedGlyph, money, reducedMotion)
 src/skins/schema.ts, registry.ts, types.ts   # the loader; you do not edit these
 ```
 
@@ -95,8 +95,9 @@ Only the **active** skin's CSS, slots and fonts are loaded (Vite splits them int
 | `name`, `author`, `description` | string | Shown in the skin picker. |
 | `version` | `"1.2.3"` | Semver. |
 | `preview` | `"assets/preview.<ext>"` | Picker thumbnail. |
+| `unlisted` | `true` (optional) | Keeps the skin out of the player's picker until it passes a taste review. It still loads with `?skin=<id>`. Unhiding is deleting the line. |
 | `tokens` | `{ "color.panel": "#fff", ... }` | See [Tokens](#tokens). All **required** tokens must be present; the rest fall back to the base. Names must be known tokens, or your own under the `x.` prefix (`"x.sparkle": "#f0f"` → `--flt-x-sparkle`). |
-| `strings` | `{ "speed.pause": "Rest" }` | Relabels UI copy. Keys must exist in the [strings table](#strings). |
+| `strings` | `{ "help.title": "Field Guide" }` | Relabels UI copy. Keys must exist in the [strings table](#strings). Titles and body copy only: see [Rules](#rules) for control labels. |
 | `fonts` | `[{ family, src, weight?, style?, license, licenseFile }]` | Bundled files only. `src` and `licenseFile` are paths inside the skin folder. Licence must be OFL, Apache, MIT or CC0. |
 | `slots` | `["Stats", ...]` | The slots your `slots.tsx` replaces. `[]` for a tokens+CSS skin. Must match the exports of `slots.tsx` exactly. |
 
@@ -171,7 +172,7 @@ Tokens are CSS custom properties named `--flt-<category>-<name>` (`color.panel` 
 
 ## Strings
 
-Skins may re-label copy by key: `"speed.pause": "Rest"`, `"inspector.title": "Properties of {name}"`, `"ticker.label": "PointPast News »"`. `{name}`-style placeholders are filled in by the game (keep them). A slot reads a string with `const t = useT(); t("speed.pause")` or `t("inspector.title", { name })`. **Game content (headlines, thoughts, event text) is not a skin concern**: it comes through the view-model and is the same in every skin.
+Skins may re-label copy by key: `"inspector.title": "Properties of {name}"`, `"ticker.label": "PointPast News »"`. `{name}`-style placeholders are filled in by the game (keep them). A slot reads a string with `const t = useT(); t("speed.pause")` or `t("inspector.title", { name })`. **Game content (headlines, thoughts, event text) is not a skin concern**: it comes through the view-model and is the same in every skin.
 
 If your slot needs copy that has no key, write it into the slot (as Frontier 95 does for its Shut Down dialog); do not invent keys in `skin.json` (unknown keys are refused).
 
@@ -487,12 +488,13 @@ A slot is a React component. Each gets **its slice of the view-model plus `actio
 | `GateLegend` | `{ factions, actions }` | Who is at the gate (FLT-56): one row per crowd in `factions.gate` (its `color`, `count` and `name`; the water crowd has id `""`), so a mixed protest sorts itself out. An `addressable` row offers the Comms lever, `actions.issueStatement(id)`: it costs `factions.statement.costText`, is off while `!factions.statement.ready` (`waitText` says how long), and `writerText` says who writes it. The game pins it over the lawn inside the gate while a faction marches there. Keep it small: it sits over the 3D scene. |
 | `DramaButton` | `{ drama, actions }` | Today's Drama (FLT-34), shown from day one in every skin: `actions.openDrama()`. Badge it when `drama.fresh` (a pack the player hasn't looked at) or `drama.on` (one is playing). Frontier 95 also files it under Start ▸ Programs. |
 | `Drama` | `{ drama, actions }` | The Today's Drama window, while `drama.open`: `drama.latest` as a short card (title, `dateText`, `ago`, `teasers`, `summary`, `event`), `drama.archive` (older packs), `drama.on` (the pack playing in this lab), `drama.status` (`loading` / `error` / `ready`; an empty ready feed is normal). `drama.intro` means a pack has just loaded: say what's coming. `playDrama(id)` starts a new lab with it, `closeDrama()` closes and clears the NEW badge. |
+| `WindowTray` | `{ tray, layout, actions }` | The taskbar's waiting room (FLT-54). The game opens at most **two** windows by itself at a time (the Arena on a rank drop, the paper boy, a New! card, a paper moment, the CrumbWiki); one that comes while two are up waits here as a button with `flashing` set: make it flash (Frontier 95: a navy taskbar button, the way a 1995 program asked for you). A window the game opened closes itself after about 20 seconds unless it holds time. Folded panels whose news only reached the ticker (the Arena, Papers, Factions) are listed too, with `unread` set: draw a small dot and the count. `actions.openTray(id)` brings the window up or opens the panel. Docked; `null` while `tray` is empty. The Arena, Papers and Factions VMs also carry `unread`, for a skin that badges the folded window itself. `arena.auto` is set while the Arena is open because the game opened it (at the start, or a rank drop) rather than the player: keep it narrow and at the edge of the screen then, and give the one the player opened its full width (Frontier 95 caps the Task Mangler's benchmark table only while `auto`). |
 | `Memo` | `{ memo, layout, actions }` | The Memo (FLT-57). `memo.phase` `"coming"`: a countdown (`title`, today's `line`, `daysLeft`, `progress` 0 to 1), not modal, out of the way at the top. `"extra"`: the extra edition once a box is ticked (`extra.headline`, `deck`, `choice`, the three `reactions` with names, the lingering `effects`): modal, holds time (`useAutoPause`), closed with `dismissMemo(memo.key)`. |
 | `Challenge` | `{ challenge, layout, actions }` | A friend's link opened the game on their seed (FLT-57): `challenge.line` ("Your friend's lab was Captured on day 212."), `ask`, their `ending` (and `tone`) and `stats`. Modal, holds time, one button labelled `cta` that calls `dismissChallenge()`. |
 | `Welcome` | `{ welcome, saves, actions }` | "Welcome back" (FLT-65), while `saves.welcome` is set: a returning player's autosave (`welcome.lab`, `date`, `ago`). `continueSave()` loads it, `dismissWelcome()` plays the new lab instead. Say plainly that a new lab takes over the autosave after a month. Time is held. |
 | `SaveLoad` | `{ saves, actions }` | The Save/Load window (FLT-65), rendered while `saves.open`, `saves.modPrompt` or `saves.dragging`. `saves.slots` is the autosave then slots 1 to 3 (`save` is null when empty, `broken` when unreadable): `saveTo(slot)` (not the autosave), `loadFrom(slot)`, `exportSave(slot)`, `deleteSave(slot)`. `exportSave("current")` and `importSave(file)` (the kit's `ImportButton`) move a lab as a `.fltsave` file. With `saves.modPrompt`, ask first: `fetchModsAndLoad()` (only if `canFetch`), `loadWithoutMods()`, `cancelModPrompt()`. With only `saves.dragging`, show where to drop a file. `saves.available` is false in private browsing: the slots are off, files still work. Time is held. Open it with `openSaves()` from somewhere in your chrome (Ctrl+S / ⌘S opens it in every skin). |
 
-The **docked** slots (`Layout` receives them pre-rendered) are `Stats`, `Training`, `Objectives`, `Inspector`, `BuildBar`, `Speed`, `Staff`, `ThoughtsPanel`, `Ticker`, `Toasts` (one `Toast` at a time: the newest toast, or the standing hint when nobody is talking), `Assistant`, `Arena`, `Benchmarks`, `Voice`, `Factions`, `Papers`, `NewsControls`, `NewsArrival`, `PhotoButton`, `DisasterAlert` and `DramaButton`. `AuditPin` and `GateLegend` are pinned into the scene like `Bubble`. The modal slots (`EventCard`, `Livestream`, `Hearing`, `LeakedChat`, `DramaCard`, `ReportCard`, `Bill`, `PromiseTracker`, `EraCard`, `Outcome`, `Ending`, `Takeover`, `Memo`, `Challenge`, `NewsRoom`, `Mixer`, `ModManager`, `ModSkinOffer`, `Drama`, `SkinPicker`, `PaperMoment`, `CrumbWiki`, `DisasterMenu`, `Welcome`, `SaveLoad`) and `PhotoOverlay` and `Beat` are rendered by the game when there is something to show.
+The **docked** slots (`Layout` receives them pre-rendered) are `Stats`, `Training`, `Objectives`, `Inspector`, `BuildBar`, `Speed`, `Staff`, `ThoughtsPanel`, `Ticker`, `Toasts` (one `Toast` at a time: the newest toast, or the standing hint when nobody is talking), `Assistant`, `Arena`, `Benchmarks`, `Voice`, `Factions`, `Papers`, `NewsControls`, `NewsArrival`, `PhotoButton`, `DisasterAlert`, `DramaButton` and `WindowTray`. `AuditPin` and `GateLegend` are pinned into the scene like `Bubble`. The modal slots (`EventCard`, `Livestream`, `Hearing`, `LeakedChat`, `DramaCard`, `ReportCard`, `Bill`, `PromiseTracker`, `EraCard`, `Outcome`, `Ending`, `Takeover`, `Memo`, `Challenge`, `NewsRoom`, `Mixer`, `ModManager`, `ModSkinOffer`, `Drama`, `SkinPicker`, `PaperMoment`, `CrumbWiki`, `DisasterMenu`, `Welcome`, `SaveLoad`) and `PhotoOverlay` and `Beat` are rendered by the game when there is something to show.
 
 ## Writing slots.tsx
 
@@ -603,13 +605,16 @@ node scripts/skin-shots.mjs docs/img/my-skin --skin midnight             # the s
 node scripts/skin-shots.mjs /tmp/m --skin midnight --only e --measure    # phone, and how much campus is left visible
 ```
 
-Which skin loads: `?skin=<id>`, then `localStorage["flt.skin"]` (set by the picker's OK), then `frontier-95`. `?skin=base` loads the bare base skin, which is handy for debugging a skin against its foundation. Switching in the picker is live and does not reset the game.
+Which skin loads: `?skin=<id>`, then `localStorage["flt.skin"]` (set by the picker's OK), then `frontier-95`. A `?skin=` link is for that visit only: it is never saved unless the player picks that skin in the picker, and an unlisted skin is never saved at all. `?skin=base` loads the bare base skin, which is handy for debugging a skin against its foundation. Switching in the picker is live and does not reset the game.
+
+The picker lists the skins without `unlisted` (today Frontier 95) and then **Classic**, the base skin. A saved pick of an unlisted skin (from before FLT-71 hid five of them) is rewritten to `frontier-95` once, with the notice "Frontier 95 is back as your desktop." (`bootChoice` in `registry.ts`; `src/skins/picker.test.ts`). Loading a save puts its skin back (a listed skin, Classic, or a mod's skin while its mod is loaded); a save made in a hidden skin gets Frontier 95 instead (`saveSkinChoice`). The notice is shown at most once per profile.
 
 The six standard scenes (a: overview 1440×900, b: inspector open, c: the Water Discourse card, d: build bar / Start menu open, e: phone 390×844, f: photo mode) are the evidence every skin PR carries.
 
 ## Rules
 
 - **Parody names only.** No real companies, products or people in anything a player can read (Frontier 95 says "Internet Exploder", "ICU", "Task Mangler", "Paint Job"; the mockups' real names never reach the screen).
+- **Core controls keep their plain names in every skin:** Start, OK, Cancel, Pause, the speed buttons (drawn with the kit's `SpeedGlyph`, one to three triangles), Build, Settings, Help, Close. The coach says "Click Start", so the button says Start. Put the flavour in titles, tooltips and body copy. `src/skins/controls.test.tsx` checks the strings and the buttons the coach points at.
 - Skins never import the sim, the store or three.
 - Bundle fonts with licences; no hot-linking; no remote assets.
 - Keep the contrast, tap-target, focus and reduced-motion rules above.

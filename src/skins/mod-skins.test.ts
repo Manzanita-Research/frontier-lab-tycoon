@@ -18,6 +18,8 @@ describe("mod skins (FLT-55)", () => {
     const listed = skinList().find((s) => s.id === "good-boy-95");
     expect(listed).toMatchObject({ name: "Good Boy 95", author: "Golden Retriever Protest", mod: "Golden Retriever Protest", version: "1.0.0", description: "Every window is a good window." });
     expect(skinList().some((s) => s.id === "base-game")).toBe(false);
+    // FLT-71: the five unlisted skins stay out, but a mod's skin is always pickable, after Frontier 95 and Classic.
+    expect(skinList().map((s) => s.id)).toEqual(["frontier-95", "base", "good-boy-95"]);
 
     const parent = await prepareSkin("frontier-95");
     const p = await prepareSkin("good-boy-95");

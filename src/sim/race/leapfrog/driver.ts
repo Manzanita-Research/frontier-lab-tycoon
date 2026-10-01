@@ -40,7 +40,7 @@ export function packNews(state: GameState, rng: Rng, trigger: PackTrigger, vars:
     const h = rng.pick(pool);
     const text = fillTemplate(h.text, all);
     if (attempt < 3 && shown.has(text)) continue;
-    addNews(state, text, h.tone);
+    addNews(state, text, h.tone, "arena");
     return text;
   }
   return null;
@@ -315,7 +315,11 @@ export function handleDrop(state: GameState, rng: Rng, slot: "lead" | "answer") 
     const fn = claim.maxx ? ` (*${rng.pick(LEAPFROG.footnotes)})` : "";
     packNews(state, rng, "sota", { rival: def.name, model: pending.model, bench, fn });
   }
-  for (const c of claims) if (c.prevHolder === YOU) addToast(state, `${def.name} took your record on ${defs().benchById[c.bench]?.short ?? c.bench}.`, "bad", { source: "leapfrog", importance: "you" });
+  for (const c of claims) {
+    if (c.prevHolder !== YOU) continue;
+    const short = defs().benchById[c.bench]?.short ?? c.bench;
+    addToast(state, `${def.name} took your record on ${short}.`, "bad", { source: "leapfrog", importance: "you", group: { kind: "record", who: short } });
+  }
   addToast(state, slot === "lead" ? `${def.name} launched ${pending.model}. The news cycle is theirs.` : `${def.name} answers ${leadName} a day later: ${pending.model}.`, "bad", { source: "leapfrog" });
 
   pushVoice(state, pending.id, slot === "lead" ? R.voice.leadPush : R.voice.answerPush);
@@ -441,7 +445,7 @@ function livestream(state: GameState, rng: Rng, model: string, ready: number, fo
     if (!def) continue;
     // A mod's mishap may have no card of its own (`stream:<id>`): then it is only the headline.
     if (defs().eventById(`stream:${def.id}`)) state.flags[`offer:stream:${def.id}`] = state.day;
-    addNews(state, fillTemplate(def.headline, { lab: state.labName, model }), "joke");
+    addNews(state, fillTemplate(def.headline, { lab: state.labName, model }), "joke", "arena");
     addIncident(state, L.mishapIncident);
     pushVoice(state, YOU, def.voice);
   }
