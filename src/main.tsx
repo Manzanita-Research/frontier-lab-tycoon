@@ -6,6 +6,7 @@ import "@fontsource/nunito/latin-800.css";
 import "@fontsource/nunito/latin-900.css";
 import { loadModSession, setModSession } from "./app/mods";
 import { setSessionDefinition } from "./sim/defs";
+import { installSystems } from "./sim/ecs/systems";
 import "./index.css";
 
 // Standalone demo pages: any file named `*.page.tsx` with a default export is
@@ -37,6 +38,7 @@ const mods = Page
   : loadModSession(window.location.search, { baseUrl: window.location.href }).then((session) => {
       setModSession(session);
       setSessionDefinition(session.def);
+      installSystems(session.systems);
     });
 
 // The HUD's skin (its tokens, fonts and CSS) is ready before the first paint, so there is no flash of the wrong look.

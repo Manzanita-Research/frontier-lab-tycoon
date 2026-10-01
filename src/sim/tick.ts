@@ -27,6 +27,7 @@ import { dailyRace } from "./race/race";
 import { dailySlop } from "./slop";
 import { updateStaff } from "./staff";
 import { dailyDiscourse, updateProtesters } from "./protest";
+import { runSystems } from "./ecs/systems";
 import { createRng } from "./rng";
 import { dailyThoughts } from "./thoughts";
 import { dailyTraining } from "./training";
@@ -88,7 +89,10 @@ function step(state: GameState, commands: readonly Command[]) {
   probe?.lap("pause");
   updateWalkers(state, rng);
   probe?.lap("walkers");
-  if (systemUnlocked(state, "protests")) updateProtesters(state, rng);
+  if (systemUnlocked(state, "protests")) {
+    updateProtesters(state, rng);
+    runSystems(state, "protesters");
+  }
   probe?.lap("protesters");
   if (state.factions && systemUnlocked(state, "factions")) updateFactions(state);
   probe?.lap("factions");

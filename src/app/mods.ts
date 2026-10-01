@@ -10,6 +10,8 @@ import { ModError, type ModManifest } from "../mods/schema";
 import { browserObjectUrls, materialise, resolvePresentation, type ObjectUrls, type Presentation } from "../mods/presentation";
 import type { RunMods } from "../sim/types";
 import type { Note } from "../audio/score";
+import { resolveSystems, withCompanions } from "../mods/companions";
+import type { EcsSystem } from "../sim/ecs/systems";
 
 export interface LoadedMod {
   id: string;
@@ -37,9 +39,11 @@ export interface ModSession {
   presentation: Presentation | null;
   /** The mods' own sound cues (added, or replacing the base's), later mods winning. The base game's are in `src/audio/score.ts`. */
   cues: Readonly<Record<string, readonly Note[]>>;
+  /** FLT-75: the ECS systems the mods' bundled companions add (`src/mods/companions.ts`); `installSystems` takes them. */
+  systems: readonly EcsSystem[];
 }
 
-export const NO_MODS: ModSession = { def: null, mods: [], conflicts: [], errors: [], run: null, presentation: null, cues: {} };
+export const NO_MODS: ModSession = { def: null, mods: [], conflicts: [], errors: [], run: null, presentation: null, cues: {}, systems: [] };
 
 /** Owns the session's `blob:` URLs: they are revoked when the page goes away for good (not into the back/forward cache). */
 const assetScope = Effect.runSync(Scope.make());
@@ -69,12 +73,13 @@ export async function loadModSession(search: string, options: { baseUrl?: string
     const { layer, conflicts } = composeMods(manifests.map((m) => m.manifest));
     const def = await Effect.runPromise(resolveGameDefinition(layer));
     const resolved = await Effect.runPromise(resolvePresentation(layer));
+    const systems = await Effect.runPromise(resolveSystems(withCompanions(layer, manifests.map((m) => m.manifest.id))));
     const { presentation } = await Effect.runPromise(Scope.provide(materialise(resolved, options.objectUrls ?? browserObjectUrls), options.scope ?? assetScope));
     const mods = manifests.map(({ manifest, source }) => ({
       id: manifest.id, name: manifest.name, version: manifest.version, author: manifest.author, description: manifest.description, source, hash: contentHash(manifest),
       ...(manifest.skin ? { skin: manifest.skin.id } : {}),
     }));
-    return { def, mods, conflicts, errors, run: { mods: mods.map(({ id, version, hash }) => ({ id, version, hash })), contentHash: contentHash(def.content) }, presentation, cues: Object.assign({}, ...manifests.map((m) => m.manifest.audio?.cues ?? {})) };
+    return { def, mods, conflicts, errors, run: { mods: mods.map(({ id, version, hash }) => ({ id, version, hash })), contentHash: contentHash(def.content) }, presentation, cues: Object.assign({}, ...manifests.map((m) => m.manifest.audio?.cues ?? {})), systems };
   } catch (error) {
     return { ...NO_MODS, errors: [...errors, `${manifests.map((m) => m.manifest.id).join(" + ")}: ${describe(error)}`] };
   }

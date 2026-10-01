@@ -22,6 +22,7 @@ import { vocabulary } from "../sim/verbs";
 import { Assets } from "./services/assets";
 import { Audio } from "./services/audio";
 import { Looks } from "./services/looks";
+import { Systems } from "./services/systems";
 import { GameEvents } from "./services/game-events";
 import { readSkinRegistry } from "./skin-adapter";
 import { baseTables } from "./tables";
@@ -66,6 +67,8 @@ export function makeBaseGameLayer(skins?: SkinApi) {
       .map(([cue, notes]) => [cue, Schema.decodeUnknownSync(Schema.Array(Note))(JSON.parse(JSON.stringify(notes)))])), music: [], chords: structuredClone(CHORDS) })),
     // Walker looks (FLT-55): the base game draws its own people, so it has none.
     Layer.sync(Looks, () => ({ looks: {} })),
+    // FLT-75: Koota systems a code mod runs in the tick. The base game's own live in the sim.
+    Layer.succeed(Systems, { systems: [] }),
     Layer.succeed(GameEvents, { stream: Stream.empty }),
   );
 }
