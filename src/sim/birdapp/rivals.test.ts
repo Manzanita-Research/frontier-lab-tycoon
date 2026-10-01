@@ -130,8 +130,7 @@ describe("who posts when", () => {
     const s = lab();
     withRules({ subtweet: 1 }, () => {
       const x = s.race.rivals.find((r) => r.context.id === "openish")!;
-      x.context.releases++;
-      x.context.model = "Chatty 7o";
+      x.context = { ...x.context, releases: x.context.releases + 1, model: "Chatty 7o" };
       midnight(s);
     });
     const posts = today(s);
@@ -209,7 +208,7 @@ describe("who posts when", () => {
     midnight(s);
     const x = s.race.rivals.find((r) => r.context.id === "sirocco")!;
     x.value = "training" as never;
-    x.context.weeks = 1;
+    x.context = { ...x.context, weeks: 1 };
     withRules({ teaser: 1, idle: 0 }, () => {
       midnight(s);
       expect(today(s).filter((p) => p.beat === "teaser").map((p) => p.lab)).toContain("sirocco");
