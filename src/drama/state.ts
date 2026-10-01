@@ -5,7 +5,7 @@ import { Effect, Schema } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { registry } from "../app/game";
 import { modSession } from "../app/mods";
-import { feedBase, FeedIndex, FeedLatest, loadedDrama, NO_DRAMA_UI, withDrama, withoutMod, type DramaUi } from "./feed";
+import { DRAMA_PLAY_CONFIRM, feedBase, FeedIndex, FeedLatest, loadedDrama, NO_DRAMA_UI, withDrama, withoutAutosave, withoutMod, type DramaUi } from "./feed";
 
 // keepAlive: the boot hook sets it before anything reads it.
 export const dramaAtom = Atom.keepAlive(Atom.make<DramaUi>({ ...NO_DRAMA_UI, seen: readSeen() }));
@@ -107,8 +107,11 @@ export const dramaActions = {
     const ui = registry.get(dramaAtom);
     const pack = (ui.packs ?? []).concat(ui.latest ? [ui.latest] : []).find((p) => p.id === id);
     if (!pack) return;
+    // Hotfix (FLT-78 does the full fix): this reloads into a NEW lab. Ask first, and keep the Drama lab from
+    // autosaving over the player's lab.
+    if (typeof window.confirm === "function" && !window.confirm(DRAMA_PLAY_CONFIRM)) return;
     markSeen();
-    location.assign(withDrama(location.href, pack.url));
+    location.assign(withoutAutosave(withDrama(location.href, pack.url)));
   },
   /** A new lab without that mod. */
   removeMod: (id: string) => {

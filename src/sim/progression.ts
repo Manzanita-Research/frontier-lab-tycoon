@@ -5,6 +5,7 @@ import { enableCollusion } from "./collusion/driver";
 import { enableDefection } from "./defection/driver";
 import { enableHearing } from "./hearing/driver";
 import { enablePoaching } from "./poaching/driver";
+import { enableBirdApp } from "./birdapp/driver";
 import { enableYacht } from "./yacht/driver";
 import { enableFactions } from "./factions/state";
 import type { BuildingKind } from "../content/buildings";
@@ -60,8 +61,9 @@ const PACKS: readonly { id: SystemId; enable: (s: GameState) => void; off: strin
   { id: "promises", enable: enablePromises, off: "promisesOff" },
   { id: "capture", enable: enableCapture, off: "captureOff" },
   { id: "factions", enable: enableFactions, off: "factionsOff" },
+  { id: "birdapp", enable: enableBirdApp, off: "birdappOff" },
 ];
-/** The flags behind `?leapfrog=off`, `?papers=off`, `?collusion=off`, `?hearing=off`, `?yacht=off`, `?defection=off`, `?poaching=off`, `?auditors=off`, `?promises=off`, `?capture=off` and `?factions=off`. */
+/** The flags behind `?leapfrog=off`, `?papers=off`, `?collusion=off`, `?hearing=off`, `?yacht=off`, `?defection=off`, `?poaching=off`, `?auditors=off`, `?promises=off`, `?capture=off`, `?factions=off` and `?birdapp=off`. */
 export const PACK_OFF_FLAGS = PACKS.map((p) => p.off);
 function enablePacks(s: GameState, systems: readonly SystemId[]) {
   for (const pack of PACKS) if (systems.includes(pack.id) && !s.flags[pack.off]) pack.enable(s);

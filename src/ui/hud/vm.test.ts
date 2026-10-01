@@ -396,6 +396,51 @@ describe("the discourse (FLT-33)", () => {
   });
 });
 
+describe("the Bird App (FLT-69)", () => {
+  const fx = hudViewModel(fixtureInput({ bird: "bird", birdOpen: true }));
+  const cancel = hudViewModel(fixtureInput({ bird: "bird-cancel", birdOpen: true }));
+
+  it("is plain JSON, and off (drawing nothing, no Aura row) until the Bird App is awake", () => {
+    assertPlain(fx);
+    assertPlain(cancel);
+    const vm = hudViewModel(fixtureInput());
+    expect(vm.birdapp.enabled).toBe(false);
+    expect(vm.stats.vibes.rows.map((r) => r.label)).not.toContain("Aura");
+  });
+
+  it("shows live posts climbing, a landed log with outcomes, and a viral sticker only on bangers", () => {
+    const b = fx.birdapp;
+    expect(b.enabled && b.open).toBe(true);
+    expect(b.live.length).toBeGreaterThan(0);
+    expect(b.live.every((p) => p.outcome === "live" && p.outcomeText === "")).toBe(true);
+    expect(b.log.every((p) => p.outcome !== "live")).toBe(true);
+    for (const p of [...b.live, ...b.log]) if (p.viral) expect(p.outcome === "banger" || p.outcome === "live").toBe(true);
+    expect(b.log.some((p) => p.outcome === "banger" && p.viral)).toBe(true);
+    expect(b.auraHistory.length).toBeGreaterThan(1);
+    expect(b.aura).toBeGreaterThanOrEqual(0);
+    expect(b.aura).toBeLessThanOrEqual(100);
+  });
+
+  it("gives every poster a banger/cancel meter and three levers, one active, the trade-off on each", () => {
+    for (const p of fx.birdapp.posters) {
+      expect(p.levers.map((l) => l.id)).toEqual(["cook", "comms", "logoff"]);
+      expect(p.levers.filter((l) => l.active)).toHaveLength(1);
+      expect(p.levers.every((l) => l.tradeoff !== "")).toBe(true);
+      expect(p.banger + p.cancel).toBeLessThanOrEqual(1);
+    }
+  });
+
+  it("puts one Aura row in the Vibes breakdown", () => {
+    expect(fx.stats.vibes.rows.filter((r) => r.label === "Aura")).toHaveLength(1);
+  });
+
+  it("shows the Comms desk drowning, with a queue, when the cancels pile up", () => {
+    expect(cancel.birdapp.comms.desk).toBe("drowning");
+    expect(cancel.birdapp.comms.queue.some((q) => q.kind === "cancelled")).toBe(true);
+    expect(cancel.birdapp.log.some((p) => p.outcome === "cancelled")).toBe(true);
+  });
+});
+
 describe("endings (FLT-11)", () => {
   it("shows the last front page only once it's out, as plain JSON, with the five stats and the run summary", () => {
     const vm = hudViewModel(fixtureInput({ ending: "front-regulated", selected: null }));

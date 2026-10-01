@@ -50,6 +50,8 @@ const patternsOf = (d = defs()) => (built?.from === d ? built.patterns : (built 
   ...LEAPFROG.headlines.map((h) => pattern(h.text, packKind(h.trigger))),
   ...LEAPFROG.mishaps.map((m) => pattern(m.headline, "cycle" as StoryKind)),
   ...d.events.flatMap((e) => e.choices.flatMap((c) => c.effects.flatMap((f) => f.type === "news" ? [pattern(f.text, EVENT_STORY_KIND[e.id] ?? "filler")] : []))),
+  // The Bird App (FLT-69): a banger or a cancel is the news cycle; a spat is filler.
+  ...(["banger", "cancelled", "controversy"] as const).flatMap((beat) => d.bird.events(beat, "headline").map((e) => pattern(e.text, beat === "controversy" ? "filler" : "cycle"))),
 ] }).patterns);
 export function storyFromNews(n: NewsItem): Story {
   const match = patternsOf().find((p) => p.re.test(n.text));

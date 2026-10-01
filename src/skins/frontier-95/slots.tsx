@@ -13,11 +13,12 @@ import { DramaCard } from "./drama";
 import { SaveLoad, Welcome } from "./saves";
 import { AuditPin, ReportCard } from "./audit";
 import { Factions, GateLegend } from "./factions";
+import { BirdApp } from "./birdapp";
 import { Challenge, Ending, Memo, Takeover } from "./ending";
 
 const slots: SkinSlots = {
   Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, Bubble, ThoughtsPanel, Ticker, Toast, Assistant,
   EventCard, Confirm, Coach, UnlockCard, HowToPlay, Arena, Benchmarks, Voice, Livestream, Hearing, LeakedChat, DramaCard, Bill, PromiseTracker, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, Ending, Takeover, NewsControls,
-  NewsArrival, NewsRoom, Mixer, ModManager, ModSkinOffer, Papers, PaperMoment, CrumbWiki, DisasterMenu, DisasterAlert, ReportCard, AuditPin, Factions, GateLegend, DramaButton, Drama, Memo, Challenge, Welcome, SaveLoad, WindowTray,
+  NewsArrival, NewsRoom, Mixer, ModManager, ModSkinOffer, Papers, PaperMoment, CrumbWiki, DisasterMenu, DisasterAlert, ReportCard, AuditPin, Factions, GateLegend, BirdApp, DramaButton, Drama, Memo, Challenge, Welcome, SaveLoad, WindowTray,
 };
 export default slots;

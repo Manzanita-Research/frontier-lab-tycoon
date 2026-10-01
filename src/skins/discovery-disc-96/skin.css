@@ -3452,3 +3452,40 @@
     }
   }
 }
+
+/* The Bird App (FLT-69) as an encyclopedia: entries on a page, a FUN FACT! burst, a dispute in red ink. */
+[data-skin="discovery-disc-96"] {
+  .birdapp-head b {
+    font-family: var(--dd-display, var(--flt-font-display));
+    letter-spacing: 0.02em;
+  }
+  .birdapp h4 {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 3px;
+    background: var(--dd-blue);
+    color: #fff;
+    opacity: 1;
+  }
+  .birdapp .bird-post {
+    padding-left: 4px;
+    border-left: 4px solid var(--dd-yellow);
+    border-bottom-style: dotted;
+  }
+  .birdapp .bird-post.tone-bad {
+    border-left-color: var(--dd-red);
+  }
+  .birdapp .bird-post.tone-good {
+    border-left-color: var(--dd-green);
+  }
+  .birdapp-aurabar i {
+    background: repeating-linear-gradient(90deg, var(--dd-orange) 0 8px, var(--dd-yellow) 8px 16px);
+  }
+  .birdapp .bird-viral {
+    padding: 3px 8px;
+    border: 0;
+    background: var(--dd-yellow);
+    color: var(--dd-ink);
+    clip-path: polygon(0 20%, 12% 0, 30% 14%, 50% 0, 70% 14%, 88% 0, 100% 20%, 92% 50%, 100% 80%, 88% 100%, 70% 86%, 50% 100%, 30% 86%, 12% 100%, 0 80%, 8% 50%);
+  }
+}

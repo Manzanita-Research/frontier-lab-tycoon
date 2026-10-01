@@ -21,7 +21,8 @@
     "Toast",
     "EventCard",
     "PhotoButton",
-    "NewsControls", "DramaButton",
+    "NewsControls",
+    "DramaButton",
     "Arena",
     "EraCard",
     "Outcome"
@@ -139,6 +140,24 @@
     "inspector.follow": "Pin to lanyard",
     "inspector.following": "Pinned. Tap to unpin",
     "training.shipped": "SHIPPED!",
-    "hint.tap": "Tap anyone to read their badge."
+    "hint.tap": "Tap anyone to read their badge.",
+    "birdapp.title": "Merch Drop",
+    "birdapp.aura": "Hype stock",
+    "birdapp.timeline": "Drops",
+    "birdapp.posters": "Collabs",
+    "birdapp.comms": "Returns desk",
+    "birdapp.live": "DROPPING NOW",
+    "birdapp.log": "Past drops",
+    "birdapp.empty": "Nothing dropped yet. Restocking.",
+    "birdapp.quiet": "No returns today. The desk is folding tees.",
+    "birdapp.viral": "SOLD OUT",
+    "birdapp.ratio": "resellers circling",
+    "birdapp.reviewed": "QA'd by Comms",
+    "birdapp.outcome.flop": "Clearance bin",
+    "birdapp.outcome.banger": "Instant classic",
+    "birdapp.outcome.controversy": "Recall",
+    "birdapp.outcome.ratioed": "Returned",
+    "birdapp.outcome.cancelled": "Discontinued",
+    "birdapp.outcome.live": "Dropping"
   }
 }

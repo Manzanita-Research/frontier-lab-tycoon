@@ -36,10 +36,12 @@ describe("midgame scenario", () => {
     // the Arena, Papers and Discourse headlines with their panel (NewsItem.panel); the quit, poach and record toasts carry
     // their group (Toast.group), and a quit picks its line from QUIT_LINES. Merge train 2: the Promise Tracker's cards ask
     // the card budget too.
+    // FLT-69: the campus wakes the Bird App too, and its 480 days of posts, Aura and Comms move the run. These were
+    // 7f58d622 / 948ca520 before; with the Bird App asleep (`flags.birdappOff`) the World hashes to them again.
     expect({
       untagged: digest({ ...s, toasts: s.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) }),
       full: digest(s),
-    }).toEqual({ untagged: "7f58d622", full: "948ca520" });
+    }).toEqual({ untagged: "788c7bf1", full: "303320ca" });
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);

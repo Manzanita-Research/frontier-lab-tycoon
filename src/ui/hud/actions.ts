@@ -11,7 +11,7 @@ import { dramaActions } from "../../drama/state";
 import { setPhoto, takePhoto } from "../juice/photo";
 import { copyLink, copySummary, playDaily, shareEnding } from "../share/share";
 import { dismissChallenge, dismissMemo } from "../share/social";
-import { arenaChosenAtom, arenaOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, senateOpenAtom, staffOpenAtom, windowBudgetAtom } from "./state";
+import { arenaChosenAtom, arenaOpenAtom, birdAppOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, senateOpenAtom, staffOpenAtom, windowBudgetAtom } from "./state";
 import { closeWindow, isUp, restoreWindow } from "./windows";
 import { skinActions } from "./skinControl";
 import { savesActions } from "./saves";
@@ -114,6 +114,10 @@ export const hudActions: HudActions = {
   dismissPaperMoment: dismiss,
   closeCrumbWiki: dismiss,
   toggleFactions: () => registry.set(factionsOpenAtom, !registry.get(factionsOpenAtom)),
+  toggleBirdApp: () => registry.set(birdAppOpenAtom, !registry.get(birdAppOpenAtom)),
+  setBirdLever: (id, lever) => {
+    if (Number.isInteger(id) && (lever === "cook" || lever === "comms" || lever === "logoff")) send({ type: "COMMAND", command: { type: "birdLever", id, lever } });
+  },
   setSafetySpend: (level) => send({ type: "COMMAND", command: { type: "setSafetySpend", level } }),
   issueStatement: (faction) => send({ type: "COMMAND", command: { type: "issueStatement", faction } }),
   buryLeak: () => send({ type: "COMMAND", command: { type: "buryLeak" } }),
