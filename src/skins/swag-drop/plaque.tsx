@@ -122,7 +122,7 @@ export function Stats({ stats, layout, visible = ALL_VISIBLE, actions }: SlotPro
           label={t("stats.cash")}
           rim={stats.cash.negative ? "bad" : "gold"}
           className="pin-cash"
-          tag={visible.revenue ? <Odometer className={`sd-delta ${stats.net.good ? "good" : "bad"}`} value={stats.net.value} format={signed} flash={false} /> : undefined}
+          tag={visible.revenue ? <Odometer className={`sd-delta ${stats.net.good ? "good" : "bad"}`} value={stats.net.value} format={(n) => `${signed(n)} ${t("stats.net")}`} flash={false} /> : undefined}
         >
           <Odometer className={`sd-num ${stats.cash.negative ? "bad" : ""}`} value={stats.cash.value} format={money} />
         </Pin>

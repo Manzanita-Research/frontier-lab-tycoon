@@ -78,7 +78,7 @@ export function Stats({ stats, layout, visible = ALL_VISIBLE, disasters, actions
                 {led}
               </Field>
             )}
-            <Field label={t("stats.cash")} sub={visible.revenue ? <span className={stats.net.good ? "" : "bad"}>{stats.net.good ? "▲" : "▼"} {stats.net.text}</span> : undefined}>
+            <Field label={t("stats.cash")} sub={visible.revenue ? <span className={stats.net.good ? "" : "bad"}>{stats.net.good ? "▲" : "▼"} {stats.net.text} {t("stats.net")}</span> : undefined}>
               <Odometer className={`f95-v inset ${stats.cash.negative ? "bad" : ""}`} value={stats.cash.value} format={money} />
             </Field>
             <span {...coach.attrs("stat:runway")} className="f95-coachwrap">
@@ -105,7 +105,7 @@ export function Stats({ stats, layout, visible = ALL_VISIBLE, disasters, actions
         )}
         {tab === "finance" && (
           <dl className="f95-facts">
-            <dt>Income</dt>
+            <dt>Revenue</dt>
             <dd className="inset">{stats.finance.incomeText}/day</dd>
             <dt>Expenses</dt>
             <dd className="inset">{stats.finance.expensesText}/day</dd>
@@ -115,6 +115,10 @@ export function Stats({ stats, layout, visible = ALL_VISIBLE, disasters, actions
             <dd className={`inset ${stats.cash.negative ? "bad" : ""}`}>{stats.cash.text}</dd>
             <dt>{t("stats.runway")}</dt>
             <dd className={`inset ${stats.runway.warning ? "bad" : ""}`}>{stats.runway.text}</dd>
+            <dt>Still yours</dt>
+            <dd className={`inset ${stats.money.stake < 100 ? "bad" : ""}`}>{stats.money.stakeText}</dd>
+            <dt>Bailouts left</dt>
+            <dd className={`inset ${stats.money.roundsLeft === 0 ? "bad" : ""}`}>{stats.money.overdraftDays === null ? stats.money.roundsText : `none · bank in ${stats.money.overdraftDays} d`}</dd>
             {disasters?.enabled && (
               <>
                 <dt>{t("disasters.trust")}</dt>

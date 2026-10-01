@@ -44,10 +44,15 @@ describe("midgame scenario", () => {
     // FLT-76 adds two dormant arcs: the Logo's (arcs.theLogo, a Level 1 card this campus is past) and the offsite's
     // (arcs.offsite, which counts from flags.scrutinyDay, and this preset never sets it). Those two entries are the whole
     // difference from 34526cc6 / 2660ed8e.
+    // FLT-86: the economy keeps its rounds, stake and overdraft day, the goals their hold, and the four money cards arm
+    // their arcs. With those projected out (and the toasts), the run hashes as 0dbef5e6 / 4592192e did, day for day,
+    // through day 54. On day 55 the campus dips below $0 and its script signs round 1 for 10% of the lab where it used to
+    // get the free bailout, so revenue is 90% of what it was from then on. The opening also waits for nobody to be out
+    // of the Sandbox (FLT-59): with the run moved, an agent was over the fence at the old opening tick, 3 ticks earlier.
     expect({
       untagged: digest({ ...s, toasts: s.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) }),
       full: digest(s),
-    }).toEqual({ untagged: "0dbef5e6", full: "4592192e" });
+    }).toEqual({ untagged: "6b07586a", full: "931e5673" });
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);

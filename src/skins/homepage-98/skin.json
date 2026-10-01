@@ -146,6 +146,7 @@
     "birdapp.outcome.controversy": "Flame war",
     "birdapp.outcome.ratioed": "Flamed",
     "birdapp.outcome.cancelled": "BANNED",
-    "birdapp.outcome.live": "NEW!"
+    "birdapp.outcome.live": "NEW!",
+    "stats.net": "take-home"
   }
 }

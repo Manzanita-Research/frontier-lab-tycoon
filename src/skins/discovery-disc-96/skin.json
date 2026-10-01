@@ -159,6 +159,7 @@
     "birdapp.outcome.controversy": "Disputed",
     "birdapp.outcome.ratioed": "Citation needed",
     "birdapp.outcome.cancelled": "Deleted",
-    "birdapp.outcome.live": "Now writing"
+    "birdapp.outcome.live": "Now writing",
+    "stats.net": "after the bills"
   }
 }

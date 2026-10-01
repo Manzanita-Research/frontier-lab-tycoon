@@ -40,6 +40,12 @@ export interface StatsVM {
   capability: { value: number; latestModel: string | null };
   hype: { value: number };
   finance: { income: number; incomeText: string; expenses: number; expensesText: string };
+  /**
+   * FLT-86: what going broke has cost so far. `stake` is the share of the lab (and of its revenue) still yours, "100%"
+   * until an equity round; `roundsLeft` the emergency rounds the board still has ("3 of 3"); `overdraftDays` the days
+   * left before the bank calls, or null when the account is not overdrawn.
+   */
+  money: { stake: number; stakeText: string; roundsLeft: number; roundsText: string; overdraftDays: number | null };
   arena: { rank: number; rankDelta: number; tone: "good" | "bad" | ""; deltaText: string; top: boolean; open: boolean; flinch: boolean };
   rd: { mult: number; multText: string; era: number };
 }
@@ -344,7 +350,7 @@ export interface GoalVM {
   target: number;
   /** "Ship your first model · 0/1" */
   line: string;
-  /** Just the progress, for a skin that shows it on its own line: "0/1", "$26K of $40K a day · 3 of 12 visitors". */
+  /** Just the progress, for a skin that shows it on its own line: "0/1", "Revenue $26K of $40K a day · 3 of 12 visitors". */
   progressText: string;
   /** 0 to 1 */
   ratio: number;
