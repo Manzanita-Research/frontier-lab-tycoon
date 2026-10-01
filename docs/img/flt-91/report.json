@@ -1,14 +1,14 @@
 {
   "base": {
     "ref": "origin/main",
-    "sha": "bad2e5588320faf8ef39cc42f620835515ca1224"
+    "sha": "afc24eef101bee54c9d706df88933bc9edfd38db"
   },
   "head": {
     "branch": "flt-91-opening-scale",
-    "sha": "e4951b5",
+    "sha": "84fa4f0",
     "dirty": false
   },
-  "seconds": 125.752,
+  "seconds": 126.25,
   "problems": [],
   "rows": [
     {
@@ -18,7 +18,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-91/after/flt91-open.png",
       "title": "FLT-91: the first 10 seconds of a fresh garage (seed 3, the starting camera)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-91/compare/flt91-open.png",
-      "changed": 0.2566288580246914
+      "changed": 0.2400679012345679
     },
     {
       "scene": "flt91-open-phone",
@@ -27,7 +27,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-91/after/flt91-open-phone.png",
       "title": "FLT-91: the first 10 seconds on a phone (390x844)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-91/compare/flt91-open-phone.png",
-      "changed": 0.11628311459472597
+      "changed": 0.020401932191031716
     },
     {
       "scene": "flt91-day5",
@@ -36,7 +36,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-91/after/flt91-day5.png",
       "title": "FLT-91: day 5, after the coach's path and the first Hall (seed 3, the starting camera)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-91/compare/flt91-day5.png",
-      "changed": 0.2819074074074074
+      "changed": 0.2818672839506173
     },
     {
       "scene": "flt91-day5-phone",
@@ -45,7 +45,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-91/after/flt91-day5-phone.png",
       "title": "FLT-91: day 5 on a phone (390x844)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-91/compare/flt91-day5-phone.png",
-      "changed": 0.10309120184712602
+      "changed": 0.10318234293352777
     }
   ],
   "errors": []
