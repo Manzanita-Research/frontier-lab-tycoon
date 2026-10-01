@@ -20,6 +20,7 @@ import { gateToasts, mergeWire, newGate, WIRE_MAX, type NoticeGate, type WireIte
 import { Sim, type SyncReport } from "./sim";
 import { Saves, type SaveWhy } from "./saves";
 import type { SlotId } from "../save";
+import type { GameDefinition } from "../mods/game-definition";
 
 export { TICKS_PER_SECOND };
 export const MAX_CATCHUP_TICKS = 40;
@@ -146,8 +147,8 @@ export const appMachine = setupEffect({
       CHOOSE: Schema.Struct({ choiceIndex: Schema.Number }),
       KEEP_PLAYING: Schema.Struct({}),
       NEW_LAB: Schema.Struct({}),
-      /** Carry on from a save (FLT-65): the decoded World replaces the live one. */
-      LOAD_LAB: Schema.Struct({ world: opaque<GameState>() }),
+      /** Carry on from a save (FLT-65): the decoded World replaces the live one, run with `def` (FLT-78: its mods may differ). */
+      LOAD_LAB: Schema.Struct({ world: opaque<GameState>(), def: opaque<GameDefinition | null>() }),
       /** Write the World to a save slot now: the autosave (`why`: month, hide, ending) or a slot the player picked. */
       SAVE: Schema.Struct({ slot: opaque<SlotId>(), why: opaque<SaveWhy>() }),
       /** Today's lab: a new lab on the date's seed ("2026-09-30"), the same campus for everyone that day. */
@@ -211,7 +212,7 @@ export const appMachine = setupEffect({
       Effect.gen(function* () {
         const sim = yield* Sim;
         if (args.event.type !== "LOAD_LAB") return;
-        sim.load(args.event.world);
+        sim.load(args.event.world, args.event.def);
         const report = sim.report(true, true);
         if (report) args.self.send({ type: "SYNCED", report, now: 0 });
       }),

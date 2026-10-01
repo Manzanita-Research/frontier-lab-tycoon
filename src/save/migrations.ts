@@ -15,9 +15,11 @@ export type Migration = (save: Envelope) => Envelope;
 /**
  * Keyed by the version a step upgrades *from*.
  * - v1 → v2 (#71): the rival `vssi` became `supersuper` ("Super Super AI"); the World step below does the work.
+ * - v2 → v3 (FLT-78): a mod can be added mid-game; `mods[].tick` says when. A v2 save's mods all came with the lab.
  */
 export const MIGRATIONS: Readonly<Record<number, Migration>> = {
   1: (s) => ({ ...s, v: 2 }),
+  2: (s) => ({ ...s, v: 3 }),
 };
 
 /** Upgrade `save` step by step to `target` (default: the current version). Throws on a gap in the table. */

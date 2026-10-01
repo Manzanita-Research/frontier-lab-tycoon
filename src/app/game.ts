@@ -51,9 +51,11 @@ const initialSpeed: Speed = midgame ? 0 : (SPEEDS as readonly number[]).includes
 const search = typeof window === "undefined" ? "" : window.location.search;
 const shelf = new URLSearchParams(search).has("saves") ? demoSaveStore(mods.def) : { store: makeSaveStore(browserStorage()), ready: Promise.resolve() };
 export const savesReady = shelf.ready;
-export const saveDesk = new SaveDesk(shelf.store, !isStagedLink(search) && !new URLSearchParams(search).has("saves"), () =>
-  mods.mods.map(({ id, version, hash, source }) => ({ id, version, hash, source })),
-);
+// The session's mods as they are now (FLT-78: mods come and go mid-game); one added mid-game says when, so a load adds it back.
+export const saveDesk = new SaveDesk(shelf.store, !isStagedLink(search) && !new URLSearchParams(search).has("saves"), () => {
+  const added = new Map((sim.world.modsAdded ?? []).map((m) => [m.id, m.tick]));
+  return modSession().mods.map(({ id, version, hash, source }) => ({ id, version, hash, source, ...(added.has(id) ? { tick: added.get(id)! } : {}) }));
+});
 
 const runtime = Atom.runtime(Layer.mergeAll(simLayer(sim), framesBrowser, Layer.succeed(Saves, saveDesk)));
 

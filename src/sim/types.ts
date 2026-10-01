@@ -303,9 +303,26 @@ export interface RunMods {
   contentHash: string;
 }
 
+/**
+ * A data-only mod added to a running lab (FLT-78): Today's Drama's "Add to my lab". The tick it arrived is when the
+ * lab's definition changed, so a replay (and a save) knows it; `cards` are the event cards it brought.
+ */
+export interface AddedMod {
+  id: string;
+  version: string;
+  hash: string;
+  /** Where it was fetched from (a `?mod=` value), so a save can fetch it again. */
+  url: string;
+  tick: number;
+  day: number;
+  cards: string[];
+}
+
 export interface GameState {
   /** Absent for an unmodded run, so the base World (and the goldens) are unchanged. */
   mods?: RunMods;
+  /** FLT-78: mods added mid-game, oldest first. Absent until the first one. */
+  modsAdded?: AddedMod[];
   coach?: CoachStored;
   progression?: ProgressionStored;
   /** FLT-54: the card budget (sim/machines/cardPace.ts). Absent until the first daily check that looks at it. */

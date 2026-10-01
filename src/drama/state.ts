@@ -1,11 +1,12 @@
 // Today's Drama (FLT-34), the impure half: fetch the published feed from this site, remember what the player has seen,
-// and play a pack. Playing means loading it like any mod, through `?mod=`: mods are read once, before the game exists,
-// so a pack starts a new lab (there is no save to carry over), and switching it off is the Mod Manager's Remove.
+// and add a pack to the lab on screen (FLT-78: no reload, no new lab; see `src/app/liveMods.ts`). Taking it out again
+// is the Mod Manager's Remove. A `?mod=` link to a pack still starts a lab with it, as before.
 import { Effect, Schema } from "effect";
 import { Atom } from "effect/unstable/reactivity";
 import { registry } from "../app/game";
 import { modSession } from "../app/mods";
-import { DRAMA_PLAY_CONFIRM, feedBase, FeedIndex, FeedLatest, loadedDrama, NO_DRAMA_UI, withDrama, withoutAutosave, withoutMod, type DramaUi } from "./feed";
+import { addModLive, removeModLive } from "../app/liveMods";
+import { dramaPath, feedBase, FeedIndex, FeedLatest, loadedDrama, NO_DRAMA_UI, withoutMod, type DramaUi } from "./feed";
 
 // keepAlive: the boot hook sets it before anything reads it.
 export const dramaAtom = Atom.keepAlive(Atom.make<DramaUi>({ ...NO_DRAMA_UI, seen: readSeen() }));
@@ -102,20 +103,24 @@ export const dramaActions = {
     markSeen();
     update((ui) => ({ ...ui, open: false, intro: false }));
   },
-  /** A new lab with this pack (and any other mods still on); another Drama pack makes way for it. */
+  /** Add this pack to the lab on screen; another Drama pack makes way for it. The window stays open and says it's in. */
   playDrama: (id: string) => {
     const ui = registry.get(dramaAtom);
     const pack = (ui.packs ?? []).concat(ui.latest ? [ui.latest] : []).find((p) => p.id === id);
-    if (!pack) return;
-    // Hotfix (FLT-78 does the full fix): this reloads into a NEW lab. Ask first, and keep the Drama lab from
-    // autosaving over the player's lab.
-    if (typeof window.confirm === "function" && !window.confirm(DRAMA_PLAY_CONFIRM)) return;
+    if (!pack || ui.adding) return;
     markSeen();
-    location.assign(withoutAutosave(withDrama(location.href, pack.url)));
+    update((u) => ({ ...u, adding: id, problem: null, intro: false }));
+    void addModLive(pack.url, (source) => dramaPath(source, location.href) !== null).then((r) =>
+      update((u) => ({ ...u, adding: null, problem: r.ok ? null : r.reason })),
+    );
   },
-  /** A new lab without that mod. */
+  /** Take a mod out: a data-only one leaves the lab on screen; one that needs a fresh start reloads without it. */
   removeMod: (id: string) => {
     const mod = modSession().mods.find((m) => m.id === id);
-    if (mod) location.assign(withoutMod(location.href, mod.source));
+    if (!mod) return;
+    void removeModLive(id).then((done) => {
+      if (done) update((u) => ({ ...u }));
+      else location.assign(withoutMod(location.href, mod.source));
+    });
   },
 };

@@ -1525,6 +1525,8 @@ export interface ModInfoVM {
   hash: string;
   /** A Daily Drama pack (FLT-34): the Today's Drama window describes it. */
   drama?: boolean;
+  /** FLT-78: why Remove needs a fresh start (it reloads into a new lab), e.g. "Brings a look or sounds: needs a fresh start." Absent for a data-only mod, which Remove takes out of the running lab. */
+  needsRestart?: string;
 }
 
 /** Start ▸ Settings ▸ Mods… (FLT-37): what `?mod=` loaded, what clashed and what failed. Mods only load from the URL. */
@@ -1626,9 +1628,8 @@ export interface DramaPackVM {
 }
 
 /**
- * Today's Drama (FLT-34): the published feed, and the pack this run has loaded. A pack loads through `?mod=` like any
- * mod, so playing one starts a new lab (`actions.playDrama(id)`), and switching it off is the Mod Manager's
- * `actions.removeMod(id)`.
+ * Today's Drama (FLT-34): the published feed, and the pack this lab has. `actions.playDrama(id)` adds a pack to the lab
+ * on screen (FLT-78: no reload, no new lab), and `actions.removeMod(id)` takes it out again.
  */
 export interface DramaVM {
   /** The Today's Drama window is open. */
@@ -1645,6 +1646,10 @@ export interface DramaVM {
   fresh: boolean;
   /** The window opened by itself because a pack just loaded: say what's coming, not what's on offer. */
   intro: boolean;
+  /** FLT-78: the id of the pack being added right now (fetching it), or null. */
+  adding?: string | null;
+  /** FLT-78: why the last add didn't happen, or null. */
+  problem?: string | null;
 }
 
 export interface SkinPickerVM {
@@ -1980,12 +1985,12 @@ export interface HudActions {
   // Mods.
   openMods(): void;
   closeMods(): void;
-  /** Switch a loaded mod off: the page reloads without it (a new lab, like loading one). */
+  /** Switch a mod off. A data-only one leaves the lab on screen (FLT-78); one with `needsRestart` reloads without it (a new lab). */
   removeMod(id: string): void;
   // Today's Drama (FLT-34).
   openDrama(): void;
   closeDrama(): void;
-  /** Load a published Drama pack by id (reloads with it in `?mod=`: a new lab). */
+  /** Add a published Drama pack to the lab on screen, by id (FLT-78): no reload, no new lab. Another Drama pack makes way. */
   playDrama(id: string): void;
   // Saves (FLT-65). `slot` is a SaveSlotVM's `slot`.
   openSaves(): void;

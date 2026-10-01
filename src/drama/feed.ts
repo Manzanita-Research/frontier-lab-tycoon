@@ -46,25 +46,8 @@ function withMods(href: string, keep: (source: string) => boolean, add?: string)
   return url.href;
 }
 
-/** The link that plays `packUrl`: other mods stay, any other Drama pack goes (one drama at a time), the rest of the address too. */
+/** A link that starts a lab with `packUrl`: other mods stay, any other Drama pack goes (one drama at a time), the rest of the address too. */
 export const withDrama = (href: string, packUrl: string): string => withMods(href, (m) => dramaPath(m, href) === null, packUrl);
-
-/**
- * Hotfix for "Play it" wiping labs: a Drama lab is a NEW lab, so it must never autosave over the player's lab.
- * `autosave=off` makes it a staged link (no autosave, no "Welcome back"); the player's lab stays in the autosave.
- */
-export const withoutAutosave = (href: string): string => {
-  const url = new URL(href);
-  url.searchParams.set("autosave", "off");
-  return url.href;
-};
-
-/** What "Play it" asks before it reloads into a new lab. */
-export const DRAMA_PLAY_CONFIRM =
-  "Play it starts a NEW lab with today's Drama.\n\n" +
-  "Your current lab won't be touched: it stays in your autosave (Start > Save / Load). " +
-  "To keep your very latest progress, press Cancel and save first (Ctrl+S).\n\n" +
-  "Start a new lab?";
 
 /** The link without one `mod=` value. */
 export const withoutMod = (href: string, source: string): string => withMods(href, (m) => m !== source);
@@ -110,9 +93,12 @@ export interface DramaUi {
   /** The newest pack the player has already looked at (kept across visits). */
   seen: string | null;
   intro: boolean;
+  /** FLT-78: the pack being fetched to add to the lab, and why the last add didn't happen. */
+  adding: string | null;
+  problem: string | null;
 }
 
-export const NO_DRAMA_UI: DramaUi = { open: false, status: "idle", latest: null, packs: null, seen: null, intro: false };
+export const NO_DRAMA_UI: DramaUi = { open: false, status: "idle", latest: null, packs: null, seen: null, intro: false, adding: null, problem: null };
 
 /** A mod this run loaded, as far as Today's Drama cares. */
 export interface LoadedModRef {
@@ -122,7 +108,7 @@ export interface LoadedModRef {
   source: string;
 }
 
-/** The Drama pack among the run's mods (at most one: playing a pack swaps out any other), with its site path. */
+/** The Drama pack among the lab's mods (at most one: adding a pack swaps out any other), with its site path. */
 export function loadedDrama(mods: readonly LoadedModRef[], href: string): (LoadedModRef & { path: string }) | null {
   for (const m of mods) {
     const path = dramaPath(m.source, href);
@@ -163,5 +149,7 @@ export function dramaViewModel(ui: DramaUi, mods: readonly LoadedModRef[], href:
     on,
     fresh: latest !== null && latest.id !== ui.seen && !(on && on.id === latest.id),
     intro: ui.open && ui.intro && on !== null,
+    adding: ui.adding,
+    problem: ui.problem,
   };
 }
