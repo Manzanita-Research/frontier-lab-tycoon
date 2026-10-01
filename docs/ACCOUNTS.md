@@ -75,9 +75,10 @@ Slots are FLT-65's: `auto`, `1`, `2`, `3`. The body is FLT-65's `.fltsave` text 
 ([SAVES.md](SAVES.md)); the Worker validates the envelope's head with Effect Schema (`src/account/contract.ts`) and
 stores the bytes untouched, so a newer save version uploads without a Worker deploy.
 
-**Not wired yet:** the game doesn't call these routes yet. Uploading, the cloud slots in the save dialog and
-"Continue from the cloud" come with FLT-65's save UI. Until then, logging on is a page navigation and restarts an
-unsaved lab.
+**Not wired yet:** the game doesn't call these routes yet. FLT-65's save UI (local autosave, three slots, export)
+has landed; uploading, cloud slots in its Save / Load window and "Continue from the cloud" are the follow-up. Logging on
+is a page navigation; FLT-65 autosaves when the page hides, so the lab should be offered back with "Continue" (not yet
+checked end to end).
 
 ## Adding GitHub (or another provider)
 
