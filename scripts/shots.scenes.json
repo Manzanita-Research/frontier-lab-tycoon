@@ -11,11 +11,12 @@
     "             { \"select\": \"researcher\" | \"researcher:Ada Gradient\" }   tap a walker (opens the inspector)",
     "             { \"send\": { ...event } }                                    window.__flt.send(event)",
     "             { \"tick\": n }                                               n sim ticks",
-    "             { \"click\": \"css selector\", \"optional\": true }",
+    "             { \"click\": \"css selector\", \"optional\": true, \"timeout\": ms }",
     "             { \"eval\": \"(f, w) => { ... }\" }                            f = window.__flt, w = f.sim.world",
     "             { \"type\": \"text\", \"into\": \"css selector\", \"enter\": true }       fill a field (FLT-63: the Run box)",
     "             { \"drag\": [[x, z], ...], \"hold\": true }                       a real mouse drag over tiles; hold = button still down",
     "  storage  { key: value } put in localStorage before the page loads (a returning player's saved pick, e.g. \"flt.skin\").",
+    "  ready    a JS expression that is true once the page is ready to shoot (default: the game's World is up). FLT-95's box scenes use `!!window.__intro`.",
     "  sets     named lists for --scenes (`standard` is the default; `all` is every scene)."
   ],
   "defaults": {
@@ -429,6 +430,15 @@
       "flt94-palette-phone",
       "flt94-palette-end-phone",
       "flt94-leaderboard-phone"
+    ],
+    "flt-95": [
+      "box-take",
+      "box-back",
+      "box-disc",
+      "box-disc-phone",
+      "box-take-phone",
+      "help-box",
+      "saves-welcome"
     ]
   },
   "scenes": {
@@ -6260,6 +6270,151 @@
           "into": "[data-testid=run-input]",
           "enter": true,
           "optional": true
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "box-take": {
+      "title": "FLT-95: 4.5 s after you take the box off the shelf (before: it is already tearing open; after: it waits in your hands)",
+      "query": {
+        "intro": 1,
+        "seed": 7,
+        "debug": null,
+        "speed": null,
+        "hour": null,
+        "warp": null
+      },
+      "ready": "!!window.__intro",
+      "steps": [
+        {
+          "wait": 3500
+        },
+        {
+          "click": ".intro-cta",
+          "timeout": 15000
+        },
+        {
+          "wait": 4500
+        }
+      ]
+    },
+    "box-back": {
+      "title": "FLT-95: take the box, then Flip to back (before: there is no flip; the box is open by now)",
+      "query": {
+        "intro": 1,
+        "seed": 7,
+        "debug": null,
+        "speed": null,
+        "hour": null,
+        "warp": null
+      },
+      "ready": "!!window.__intro",
+      "steps": [
+        {
+          "wait": 3500
+        },
+        {
+          "click": ".intro-cta",
+          "timeout": 15000
+        },
+        {
+          "wait": 6000
+        },
+        {
+          "click": ".intro-flip",
+          "optional": true,
+          "timeout": 20000
+        },
+        {
+          "wait": 5000
+        }
+      ]
+    },
+    "box-disc": {
+      "title": "FLT-95: the box is open, click the disc (before: Insert disc goes straight into the drive; after: you pick it up and read it)",
+      "query": {
+        "intro": 1,
+        "seed": 7,
+        "debug": null,
+        "speed": null,
+        "hour": null,
+        "warp": null,
+        "beat": "open"
+      },
+      "ready": "!!window.__intro",
+      "steps": [
+        {
+          "wait": 3500
+        },
+        {
+          "click": ".intro-contents .intro-primary",
+          "timeout": 15000
+        },
+        {
+          "wait": 3000
+        }
+      ]
+    },
+    "box-disc-phone": {
+      "title": "FLT-95: the disc in your hand, on a phone (a 1997 CD-ROM: rainbow tracks, clear hub, the printed label)",
+      "query": {
+        "intro": 1,
+        "seed": 7,
+        "debug": null,
+        "speed": null,
+        "hour": null,
+        "warp": null,
+        "beat": "open"
+      },
+      "ready": "!!window.__intro",
+      "steps": [
+        {
+          "wait": 3500
+        },
+        {
+          "click": ".intro-contents .intro-primary",
+          "timeout": 15000
+        },
+        {
+          "wait": 3000
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "box-take-phone": {
+      "title": "FLT-95: the box in your hands, on a phone",
+      "query": {
+        "intro": 1,
+        "seed": 7,
+        "debug": null,
+        "speed": null,
+        "hour": null,
+        "warp": null
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "ready": "!!window.__intro",
+      "steps": [
+        {
+          "wait": 3500
+        },
+        {
+          "click": ".intro-cta",
+          "timeout": 15000
+        },
+        {
+          "wait": 4500
+        }
+      ]
+    },
+    "help-box": {
+      "title": "FLT-95: Help ▸ How to play has \"Take the box off the shelf again\"",
+      "steps": [
+        {
+          "eval": "async () => { const z = (ms) => new Promise((r) => setTimeout(r, ms)); document.querySelector('[data-testid=start-button]')?.click(); await z(300); [...document.querySelectorAll('[role=menuitem]')].find((b) => /Help/.test(b.textContent))?.click(); }"
         },
         {
           "wait": 800

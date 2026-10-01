@@ -118,7 +118,7 @@ export interface SlotPropsMap {
   Coach: { coach: CoachVM; anchor: Rect | null; panel?: Rect | null; avoid?: Rect[]; layout: LayoutVM; actions: HudActions };
   /** The small "New!" card that comes with a level-up. */
   UnlockCard: { unlock: UnlockCardVM; actions: HudActions };
-  /** Help ▸ How to play: one window. `actions.closeHelp()`, and `actions.coachReplay()` for "Replay tutorial". */
+  /** Help ▸ How to play: one window. `actions.closeHelp()`, and `actions.coachReplay()` for "Replay tutorial", `actions.openBox()` for "Take the box off the shelf again" (FLT-95). */
   HowToPlay: { help: HelpVM; actions: HudActions };
   /** The R&D multiplier, era and the Arena. Also gets the Release Leapfrog data, so a skin can host the leaderboard in a tab (Frontier 95's Task Mangler does): compose `useSlots().Benchmarks`. */
   Arena: { arena: ArenaVM; leapfrog: LeapfrogVM; layout: LayoutVM; actions: HudActions };
@@ -229,7 +229,7 @@ export interface SlotPropsMap {
   Drama: { drama: DramaVM; actions: HudActions };
   /**
    * "Welcome back" (FLT-65), while `saves.welcome` is set: `actions.continueSave()` loads it (the newest save, from `welcome.slot`), `actions.dismissWelcome()`
-   * plays the new lab behind it. Modal; time is held.
+   * plays the new lab behind it. Modal; time is held. `actions.openBox()` (FLT-95) goes back to the software shelf.
    */
   Welcome: { welcome: WelcomeVM; saves: SavesVM; actions: HudActions };
   /**

@@ -23,6 +23,7 @@ import { appMachine, autoPaused, type AppContext } from "./machine";
 import { createSimHandle, SimHandle, simLayer } from "./sim";
 import { modSession } from "./mods";
 import { SaveDesk, Saves, isStagedLink } from "./saves";
+import { doorBrowser } from "./door";
 import { demoSaveStore } from "./savesDemo";
 import { watchActor } from "./watchdog";
 import { describe, snagReport } from "./snag";
@@ -65,7 +66,7 @@ export const saveDesk = new SaveDesk(shelf.store, !isStagedLink(search) && !new 
   return modSession().mods.map(({ id, version, hash, source }) => ({ id, version, hash, source, ...(added.has(id) ? { tick: added.get(id)! } : {}) }));
 });
 
-const runtime = Atom.runtime(Layer.mergeAll(simLayer(sim), framesBrowser, Layer.succeed(Saves, saveDesk)));
+const runtime = Atom.runtime(Layer.mergeAll(simLayer(sim), framesBrowser, Layer.succeed(Saves, saveDesk), doorBrowser));
 
 /** The app actor's atoms: `snapshot`, `send`, and `select` for derived values. */
 const first = sim.report(true, true)!;

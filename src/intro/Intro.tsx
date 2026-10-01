@@ -4,8 +4,9 @@ import { RegistryContext, useAtomSuspense } from "@effect/atom-react";
 import { lazy, Suspense, useEffect, useRef, useState, type ComponentType } from "react";
 import type { LoadGame } from "./boot";
 import type { Intro } from "./actor";
-import { beatOf } from "./machine";
-import { CAPTIONS, ITEMS, SHELF, type ItemId } from "./content";
+import { beatOf, sideOf } from "./machine";
+import { CAPTIONS, DISC, HELD, ITEMS, SHELF, type ItemId } from "./content";
+import { BOX_SEEN_KEY } from "../introRoute";
 import { PAGES } from "./manual";
 import "./intro.css";
 
@@ -35,13 +36,23 @@ export function IntroRoot({ intro, loadGame }: { intro: Intro; loadGame: LoadGam
     if (onGame.current) return;
     onGame.current = true;
     const g = loadGame();
+    // FLT-95: from now on the root opens on the game (a returning player gets "Welcome back" there, not the shelf).
+    try {
+      window.localStorage.setItem(BOX_SEEN_KEY, "1");
+    } catch {
+      // Storage blocked: the box will greet this visitor again next time, which is no hardship.
+    }
     void Promise.all([g.skin.then((m) => m.bootSkin()), g.App]).then(([, Game]) => {
       const q = new URLSearchParams(window.location.search);
       for (const k of ["intro", "beat", "sheet", "tilt", "fx", "fps", "motion", "hold"]) q.delete(k);
       const search = q.toString();
-      history.pushState({ flt: "game" }, "", `/${search ? `?${search}` : ""}`);
-      // Back returns to the shelf: the game owns the page from here, so the simplest honest way back is a reload.
-      window.addEventListener("popstate", () => window.location.reload(), { once: true });
+      const url = `/${search ? `?${search}` : ""}`;
+      if (window.location.pathname.replace(/\/+$/, "") === "/box" || window.location.search !== (search ? `?${search}` : "")) {
+        history.pushState({ flt: "game" }, "", url);
+        // Back returns to the shelf: the game owns the page from here, so the simplest honest way back is a reload.
+        window.addEventListener("popstate", () => window.location.reload(), { once: true });
+      }
+      // A first visit at the root is already at the game's URL: Back leaves the site, as it should.
       document.title = prevTitle.current;
       setApp(() => Game);
       window.setTimeout(() => setGone(true), 60);
@@ -99,10 +110,18 @@ function Beats({ intro, toGame }: { intro: Intro; toGame: () => void }) {
   }, []);
 
   // Keys: any key skips while the intro is playing itself; while you're reading, the arrows turn pages and Esc goes back.
+  // FLT-95: with the box in your hands, the arrows turn it, F flips it and Enter opens it; nothing else skips.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey || ["Tab", "Shift", "Control", "Alt", "Meta", "CapsLock"].includes(e.key)) return;
       const onButton = document.activeElement instanceof HTMLButtonElement && (e.key === "Enter" || e.key === " ");
+      if (beat === "held") {
+        if (onButton) return;
+        if (e.key === "ArrowLeft" || e.key === "ArrowRight") send({ type: "TURN", by: e.key === "ArrowRight" ? 1 : -1 });
+        else if (e.key === "f" || e.key === "F") send({ type: "FLIP" });
+        else if (e.key === "Enter") send({ type: "OPEN" });
+        return;
+      }
       if (beat === "open" || beat === "focus" || beat === "still") {
         if (beat === "focus" && context.item === "manual" && (e.key === "ArrowRight" || e.key === "ArrowLeft")) send({ type: "PAGE", delta: e.key === "ArrowRight" ? 1 : -1 });
         else if (e.key === "Escape" && beat === "focus") send({ type: "BACK" });
@@ -119,7 +138,9 @@ function Beats({ intro, toGame }: { intro: Intro; toGame: () => void }) {
   if (beat === "game") return <Curtain text="Starting Frontier 95..." />;
 
   const peek = context.peek ? SHELF.find((b) => b.id === context.peek) : null;
-  const caption = (CAPTIONS as Record<string, string>)[beat] ?? "";
+  const side = sideOf(context.turn);
+  const caption = beat === "held" ? HELD.captions[side] : ((CAPTIONS as Record<string, string>)[beat] ?? "");
+  const holdingDisc = beat === "focus" && context.item === "disc";
   const item = context.item ? ITEMS.find((i) => i.id === context.item) : null;
 
   return (
@@ -165,6 +186,25 @@ function Beats({ intro, toGame }: { intro: Intro; toGame: () => void }) {
         </div>
       )}
 
+      {beat === "held" && (
+        <div className="intro-hold" role="group" aria-label="The box in your hands">
+          <div className="intro-row">
+            <button className="intro-turn" onClick={() => send({ type: "TURN", by: -1 })} aria-label={HELD.left} title={HELD.left}>
+              ◀
+            </button>
+            <button className="intro-flip" onClick={() => send({ type: "FLIP" })}>
+              {side === "back" ? HELD.flipToFront : HELD.flipToBack}
+            </button>
+            <button className="intro-turn" onClick={() => send({ type: "TURN", by: 1 })} aria-label={HELD.right} title={HELD.right}>
+              ▶
+            </button>
+          </div>
+          <button className="intro-primary intro-open" onClick={() => send({ type: "OPEN" })}>
+            {HELD.open} ►
+          </button>
+        </div>
+      )}
+
       {(beat === "open" || beat === "focus") && (
         <nav className="intro-contents" aria-label="What's in the box">
           <h2>In the box</h2>
@@ -173,9 +213,11 @@ function Beats({ intro, toGame }: { intro: Intro; toGame: () => void }) {
               {i.name}
             </button>
           ))}
-          <button className="intro-primary" onClick={() => send({ type: "INSERT" })}>
-            Insert disc ►
-          </button>
+          {!holdingDisc && (
+            <button className="intro-primary" onClick={() => send({ type: "INSERT" })}>
+              {DISC.pickUp} ►
+            </button>
+          )}
         </nav>
       )}
 
@@ -193,7 +235,16 @@ function Beats({ intro, toGame }: { intro: Intro; toGame: () => void }) {
               </button>
             </div>
           )}
-          <button onClick={() => send({ type: "BACK" })}>Back to the box</button>
+          {item.id === "disc" ? (
+            <div className="intro-row intro-disc">
+              <button className="intro-primary" onClick={() => send({ type: "INSERT" })} autoFocus>
+                {DISC.insert} ►
+              </button>
+              <button onClick={() => send({ type: "BACK" })}>{DISC.back}</button>
+            </div>
+          ) : (
+            <button onClick={() => send({ type: "BACK" })}>Back to the box</button>
+          )}
         </div>
       )}
 

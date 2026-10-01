@@ -1,5 +1,5 @@
 import { getNextTransitions, initialTransition, transition } from "xstate";
-import { beatOf, introMachine, START_BEATS, type IntroInput } from "./machine";
+import { beatOf, introMachine, sideOf, START_BEATS, type IntroInput } from "./machine";
 import { SHEETS } from "./manual";
 import { weightsKey, visitorSeed } from "./key";
 
@@ -9,14 +9,16 @@ const run = (s: Snap, ...events: Parameters<typeof transition<typeof introMachin
 const SETTLED = { type: "SETTLED" } as const;
 
 describe("the big box flow", () => {
-  it("goes shelf → pull → unwrap → contents → manual → disc → BIOS → splash → the game", () => {
+  it("goes shelf → pull → hold → open → manual → disc → BIOS → splash → the game", () => {
     let s = boot();
     expect(s.value).toBe("shelf");
     s = run(s, { type: "PEEK", id: "paperclip" });
     expect(s.context.peek).toBe("paperclip");
     s = run(s, { type: "PICK" });
     expect([s.value, s.context.peek]).toEqual(["pulling", null]);
-    s = run(s, SETTLED, SETTLED);
+    s = run(s, SETTLED);
+    expect(s.value).toBe("held");
+    s = run(s, { type: "OPEN" }, SETTLED);
     expect(s.value).toBe("open");
     s = run(s, { type: "FOCUS", item: "manual" }, { type: "PAGE", delta: 1 }, { type: "PAGE", delta: 1 });
     expect([s.value, s.context.item, s.context.page]).toEqual(["focus", "manual", 2]);
@@ -24,7 +26,7 @@ describe("the big box flow", () => {
     expect([s.context.item, s.context.page]).toEqual(["coa", 0]);
     s = run(s, { type: "BACK" });
     expect([s.value, s.context.item]).toEqual(["open", null]);
-    s = run(s, { type: "INSERT" });
+    s = run(s, { type: "FOCUS", item: "disc" }, { type: "INSERT" });
     const beats = [beatOf(s.value)];
     for (let i = 0; i < 5; i++) {
       s = run(s, SETTLED);
@@ -34,16 +36,74 @@ describe("the big box flow", () => {
     expect(s.status).toBe("done");
   });
 
+  describe("FLT-95: the box waits for you", () => {
+    const held = () => run(boot(), { type: "PICK" }, SETTLED);
+
+    it("holds on the front until you open it: time alone never opens it", () => {
+      let s = held();
+      expect([s.value, s.context.turn, sideOf(s.context.turn)]).toEqual(["held", 0, "front"]);
+      s = run(s, SETTLED, SETTLED, SETTLED);
+      expect(s.value).toBe("held");
+    });
+
+    it("turns an eighth at a time either way, and flips to the back and round to the front", () => {
+      let s = held();
+      s = run(s, { type: "TURN", by: 1 });
+      expect([s.context.turn, sideOf(s.context.turn)]).toEqual([1, "front"]);
+      s = run(s, { type: "TURN", by: 1 });
+      expect(sideOf(s.context.turn)).toBe("spine");
+      s = run(s, { type: "TURN", by: -3 });
+      expect([s.context.turn, sideOf(s.context.turn)]).toEqual([-1, "front"]);
+      s = run(s, { type: "FLIP" });
+      expect([s.context.turn, sideOf(s.context.turn)]).toEqual([4, "back"]);
+      // Flipping again keeps turning the same way, round to the front: the box never spins back on itself.
+      s = run(s, { type: "FLIP" });
+      expect([s.context.turn, sideOf(s.context.turn)]).toEqual([8, "front"]);
+      // A drag can turn it several eighths at once; a silly number is clamped to a full turn.
+      expect(run(s, { type: "TURN", by: 3 }).context.turn).toBe(11);
+      expect(run(s, { type: "TURN", by: 500 }).context.turn).toBe(16);
+      expect(run(s, { type: "TURN", by: Number.NaN }).context.turn).toBe(8);
+    });
+
+    it("opens from any side, and the box lands front up", () => {
+      const s = run(held(), { type: "FLIP" }, { type: "OPEN" });
+      expect(s.value).toBe("unwrapping");
+      expect(run(s, SETTLED).value).toBe("open");
+    });
+
+    it("reads ◀ ▶, Flip and Open only while the box is in your hands", () => {
+      for (const start of ["open", "coa"] as const) {
+        const s = boot({ start });
+        for (const e of [{ type: "TURN", by: 1 }, { type: "FLIP" }, { type: "OPEN" }] as const) expect(run(s, e).value).toEqual(s.value);
+      }
+    });
+  });
+
+  describe("FLT-95: the disc", () => {
+    it("clicking the disc picks it up; Back puts it down and you can keep exploring", () => {
+      let s = run(boot({ start: "open" }), { type: "FOCUS", item: "disc" });
+      expect([s.value, s.context.item]).toEqual(["focus", "disc"]);
+      s = run(s, { type: "BACK" });
+      expect([s.value, s.context.item]).toEqual(["open", null]);
+      s = run(s, { type: "FOCUS", item: "eula" }, { type: "FOCUS", item: "disc" });
+      expect([s.value, s.context.item]).toEqual(["focus", "disc"]);
+      s = run(s, { type: "FOCUS", item: "inserts" });
+      expect([s.value, s.context.item]).toEqual(["focus", "inserts"]);
+    });
+
+    it("Insert and play only inserts the disc you are holding; elsewhere it picks the disc up first", () => {
+      expect(run(boot({ start: "open" }), { type: "INSERT" }).context.item).toBe("disc");
+      expect(run(boot({ start: "coa" }), { type: "INSERT" }).context.item).toBe("disc");
+      const s = run(boot({ start: "cd" }), { type: "INSERT" });
+      expect([beatOf(s.value), s.context.item]).toEqual(["disc", null]);
+    });
+  });
+
   it("keeps the manual's pages between the covers", () => {
     let s = run(boot({ start: "manual" }), { type: "PAGE", delta: -5 });
     expect(s.context.page).toBe(0);
     s = run(s, ...Array.from({ length: SHEETS + 3 }, () => ({ type: "PAGE", delta: 1 }) as const));
     expect(s.context.page).toBe(SHEETS);
-  });
-
-  it("clicking the disc in the box starts the boot", () => {
-    expect(beatOf(run(boot({ start: "open" }), { type: "FOCUS", item: "disc" }).value)).toBe("disc");
-    expect(beatOf(run(boot({ start: "coa" }), { type: "FOCUS", item: "disc" }).value)).toBe("disc");
   });
 
   it("Skip intro → works from every beat", () => {
@@ -55,10 +115,10 @@ describe("the big box flow", () => {
         every.add(beatOf(s.value));
         expect(run(s, { type: "SKIP" }).value).toBe("game");
         expect(run(s, { type: "PLAY" }).value).toBe("game");
-        s = run(s, s.value === "shelf" ? { type: "PICK" } : s.value === "open" || s.value === "focus" ? { type: "INSERT" } : SETTLED);
+        s = run(s, s.value === "shelf" ? { type: "PICK" } : s.value === "held" ? { type: "OPEN" } : s.value === "open" || s.value === "focus" ? { type: "INSERT" } : SETTLED);
       }
     }
-    expect([...every].sort()).toEqual(["disc", "dive", "focus", "open", "post", "pulling", "shelf", "splash", "unwrapping", "warmup"]);
+    expect([...every].sort()).toEqual(["disc", "dive", "focus", "held", "open", "post", "pulling", "shelf", "splash", "unwrapping", "warmup"]);
   });
 
   it("reduced motion is a still box: Play goes to the game, the manual is text", () => {
@@ -71,7 +131,9 @@ describe("the big box flow", () => {
   });
 
   it("review links open on any beat", () => {
-    expect(START_BEATS.map((start) => beatOf(boot({ start }).value))).toEqual(["shelf", "open", "focus", "focus", "focus", "focus", "disc", "post", "splash"]);
+    expect(START_BEATS.map((start) => beatOf(boot({ start }).value))).toEqual(["shelf", "held", "held", "open", "focus", "focus", "focus", "focus", "focus", "disc", "post", "splash"]);
+    expect(boot({ start: "back" }).context.turn).toBe(4);
+    expect(boot({ start: "cd" }).context.item).toBe("disc");
     expect(boot({ start: "manual", page: 3 }).context.page).toBe(3);
   });
 
