@@ -2,9 +2,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { computeGhost } from "../render/ghost";
 import { HALF, rectCenter, worldX, worldZ } from "../render/coords";
 import { Anchored } from "../render/overlay";
-import { getReach } from "../sim/pathfind";
+import { pathGaps, type PathGap } from "../sim/pathgap";
+import { panTo } from "../render/fx/state";
+import { NO_PATH_HERE, NO_PATH_HERE_MANY, NO_PATH_RULE, noPathShort } from "../content/help";
+import type { Rect } from "../sim/types";
 import { formatMoney } from "../sim/format";
-import { atoms, send, sim } from "../app/game";
+import { atoms, send, sim, toast } from "../app/game";
 import { useApp } from "../app/hooks";
 import { GATHERING_SIGN, GATHERING_SUB, INQUIRY_SIGN, WIKI_HOST } from "../content/crumbwiki";
 import { COLLUSION } from "../sim/collusion/pack";
@@ -51,18 +54,62 @@ function CoinPops() {
   );
 }
 
-/** Buildings nobody can walk to say so. */
+/** Said once per browser: the first time a building has No path!, the rule behind it (FLT-85). */
+const TOLD_KEY = "flt.told.nopath";
+const told = () => {
+  try {
+    return localStorage.getItem(TOLD_KEY) !== null;
+  } catch {
+    return false;
+  }
+};
+const tell = () => {
+  try {
+    localStorage.setItem(TOLD_KEY, "1");
+  } catch {
+    // Storage that says no: it is said again next visit, which is fine.
+  }
+};
+let toldThisVisit = false;
+
+/**
+ * Buildings nobody can walk to say so (FLT-85: and how far off they are). Clicking the flag pans to the gap and hands you
+ * the path tool; the scene draws the gap itself (render/PathGaps).
+ */
 function NoPath() {
   const buildings = useApp(atoms.buildings);
   const version = useApp(atoms.version);
+  const coach = useApp(atoms.coach);
+  const tool = useApp(atoms.tool);
+  const quiet = useApp(atoms.toasts).length === 0;
   const stranded = useMemo(() => {
-    const reach = getReach(sim.world);
-    return buildings.filter((b) => !reach.buildings.has(b.id));
+    const gaps = pathGaps(sim.world);
+    return buildings.flatMap((b) => {
+      const gap = gaps.get(b.id);
+      return gap ? [{ b, gap }] : [];
+    });
     // `version` is what invalidates reachability.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [buildings, version]);
+  // The rule, once, when nothing else is talking over it: Frontier 95's paperclip hides toasts while the coach is up and
+  // shows only the newest, so it waits for a clear screen. The flag's tooltip says it too, for anyone who missed it.
+  useEffect(() => {
+    if (stranded.length === 0 || coach || !quiet || toldThisVisit || told()) return;
+    toldThisVisit = true;
+    tell();
+    toast(NO_PATH_RULE);
+  }, [stranded.length, coach, quiet]);
+  const show = (b: Rect, gap: PathGap) => {
+    // Halfway between the building and the far end of the gap, so both are on screen.
+    const [cx, cz] = rectCenter(b);
+    const end = gap.join.at(-1) ?? gap.door;
+    if (end) panTo((cx + worldX(end[0] + 0.5)) / 2, (cz + worldZ(end[1] + 0.5)) / 2);
+    else panTo(cx, cz);
+    if (tool !== "path" && gap.join.length > 0) send({ type: "SET_TOOL", tool: "path" });
+  };
   return (
     <>
-      {stranded.map((b) => (
+      {stranded.map(({ b, gap }) => (
         <Anchored
           key={b.id}
           className="nopath"
@@ -72,9 +119,30 @@ function NoPath() {
             return true;
           }}
         >
-          No path!
+          <button type="button" className="nopath-flag" title={`${NO_PATH_RULE} Click to see the gap.`} onClick={() => show(b, gap)}>
+            No path!
+            <small>{noPathShort(gap.join.length)}</small>
+          </button>
         </Anchored>
       ))}
+      {/* With the path tool in hand, the tile that joins it says so. */}
+      {tool === "path" &&
+        stranded.map(({ b, gap }) => {
+          const at = gap.join[Math.floor((gap.join.length - 1) / 2)];
+          if (!at) return null;
+          return (
+            <Anchored
+              key={`here-${b.id}`}
+              className="nopath-here"
+              pos={(out) => {
+                out.set(worldX(at[0] + 0.5), 0.5, worldZ(at[1] + 0.5));
+                return true;
+              }}
+            >
+              {gap.join.length === 1 ? NO_PATH_HERE : NO_PATH_HERE_MANY}
+            </Anchored>
+          );
+        })}
     </>
   );
 }
@@ -478,15 +546,18 @@ export function WorldOverlay() {
         <NameTag />
         <PeekTag />
         <CoinPops />
-        <NoPath />
         <BrokenLabels />
         <StaffTags />
         <QueueLabels />
         <CollusionSigns />
         <NeoBalloons />
         <DisasterLabels />
-        <Reason />
         <EndingLabels />
+      </div>
+      {/* Warnings beat thoughts (FLT-85): above the thought bubbles, still under the HUD's windows. */}
+      <div className="world world-top">
+        <NoPath />
+        <Reason />
       </div>
       {/* Above the HUD: it is using your mouse now. */}
       <div className="world ghost-layer">

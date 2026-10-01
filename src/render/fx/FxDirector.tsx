@@ -5,7 +5,7 @@ import type { OrthographicCamera } from "three";
 import { HALF, rectCenter } from "../coords";
 import { chaseHour, hourAt, nightAmount } from "./clock";
 import { ashPuff, blowout, coinFountain, confettiBurst, droplet, dustBurst, ember, firefly, flame, particles as pool, slopGlint, smokePuff, sparkle, star, suds, toteBurst } from "./particles";
-import { cinema, fx, shake } from "./state";
+import { cinema, fx, setViewSource, shake } from "./state";
 import { GAS_STACK, GAS_STACK_TOP } from "../buildings/GasTurbineModel";
 import { currentLoad } from "./utilisation";
 import { ROOF } from "../buildings/BrokenFx";
@@ -50,6 +50,11 @@ export function FxDirector() {
     const target = (controls as unknown as { target: THREE.Vector3 } | null)?.target;
     return { x: target?.x ?? 0, z: target?.z ?? 0, zoom: (camera as OrthographicCamera).zoom };
   };
+  useEffect(() => {
+    setViewSource(view);
+    return () => setViewSource(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [get]);
 
   /**
    * Where to aim the camera so the subject lands `up` of a screen height above the middle (an event card covers the
