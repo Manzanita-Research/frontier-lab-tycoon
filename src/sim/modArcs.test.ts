@@ -161,7 +161,8 @@ describe("mod arcs (FLT-37)", () => {
 
   it("the starter template's arc opens its card after day 20", async () => {
     const def = await resolve([starter]);
-    const s = playTo(createInitialState(1, "campus", def), 25, def);
+    // A campus is busy: the card waits its turn in FLT-54's card budget behind the yacht's invitation.
+    const s = playTo(createInitialState(1, "campus", def), 30, def);
     expect(s.modArcs?.["fetch-arc"]?.value).toBe("resolved");
     expect(s.flags["ball-thrown"]).toBeDefined();
   });

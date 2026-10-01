@@ -15,7 +15,7 @@ import type { GameState, Toast } from "../sim/types";
 import { framesManual, ManualFrames } from "./frames";
 import type { UiToast } from "./hud";
 import { appMachine } from "./machine";
-import { gateToasts, laneOf, mergeWire, newGate, summaryText, TOAST_WINDOW_MS, type GateEnv, type NoticeGate } from "./notices";
+import { gateToasts, laneOf, mergeWire, namesText, newGate, summaryText, TOAST_WINDOW_MS, type GateEnv, type NoticeGate } from "./notices";
 import { createSimHandle, Sim, simLayer } from "./sim";
 
 let nextId = 1;
@@ -127,6 +127,31 @@ describe("gateToasts", () => {
     const good = you("SOLD! $2M for a Datacenter.", { tone: "good" });
     expect(summaryText([good, you("Kevin Backprop handed in the box and left.")])).toBe("2 things happened while you were busy. Top of the pile: Kevin Backprop handed in the box and left.");
     expect(summaryText([good, you("Up 2 places.", { tone: "good" })])).toBe("2 things happened while you were busy. Top of the pile: Up 2 places.");
+  });
+});
+
+describe("coalescing (FLT-54)", () => {
+  const quit = (name: string, line = "handed in the box and left.") => you(`${name} ${line}`, { source: "staff", group: { kind: "quit", who: name } });
+
+  it("folds a pile of one kind into one line that names them all, and keeps each line for the ticker", () => {
+    const [a, b, c] = [quit("Priya Residual"), quit("Kevin Backprop", "left. The desk plant stays; it has equity."), quit("Dana Gradient")];
+    const r = play([{ at: 0, toasts: [a, b, c] }]);
+    expect(r.shown[0]).toEqual(["3 staff handed in the box: Priya Residual, Kevin Backprop and Dana Gradient."]);
+    expect(r.ticker).toEqual([a.text, b.text, c.text]);
+  });
+
+  it("leads a mixed pile with the folded line, and leaves a group of one in its own words", () => {
+    const sold = you("SOLD! $2M for a Datacenter.", { tone: "good", source: "race" });
+    const r = play([{ at: 0, toasts: [you("First.", { tone: "good" })] }, { at: 1_000, toasts: [sold, quit("Priya Residual"), quit("Kevin Backprop")] }, { at: TOAST_WINDOW_MS }]);
+    expect(r.shown[2]).toEqual(["2 things happened while you were busy. Top of the pile: 2 staff handed in the box: Priya Residual and Kevin Backprop."]);
+    expect(play([{ at: 0, toasts: [quit("Priya Residual")] }]).shown[0]).toEqual(["Priya Residual handed in the box and left."]);
+  });
+
+  it("says a long list short", () => {
+    expect(namesText(["A"])).toBe("A");
+    expect(namesText(["A", "B"])).toBe("A and B");
+    expect(namesText(["A", "B", "C", "D"])).toBe("A, B, C and D");
+    expect(namesText(["A", "B", "C", "D", "E"])).toBe("A, B, C and 2 more");
   });
 });
 
