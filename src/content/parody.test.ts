@@ -26,6 +26,8 @@ const RETAIL = [
   "Egghead", "CompUSA", "Babbage's", "Scholastic", "Broderbund", "Sierra", "American Megatrends", "AMIBIOS", "Award BIOS",
   "Phoenix BIOS", "Intel", "Pentium", "Sound Blaster", "IBM", "Compaq", "Packard Bell", "After Dark", "Windows", "Energy Star",
   "Microsoft Office", "Norton", "Lotus",
+  // The shelf's covers (FLT-89) parody these boxes, so the printed words must not name them.
+  "Flying Toasters", "Space Cadet", "Chessmaster", "Battle Chess", "Farmer's Almanac", "Farmers' Almanac", "Print Shop", "Need for Speed", "Grolier",
 ];
 // Our parodies that contain (or sit next to) a real name. They are removed before the scan.
 const ALLOWED = ["Outlook Excess", "WordSad", "WordPerfectly", "NoteBad"];

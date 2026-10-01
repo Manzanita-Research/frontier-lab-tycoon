@@ -19,13 +19,20 @@ import insertRebate from "../assets/insert-rebate.webp";
 import manualCover from "../assets/manual-cover.webp";
 import shrinkwrapNormal from "../assets/shrinkwrap.normal.webp";
 
-/** Colour art (sRGB) first, then data maps (linear: packed channels and normals). */
-const COLOUR = { boxFront, boxBack, manualCover, coaPaper, coaFoil, insertCircus, insertBird, insertDrama, insertModules, insertRebate };
-const DATA = { boxFrontOrm, coaFoilHrm, shrinkwrapNormal };
-export type ArtKey = keyof typeof COLOUR | keyof typeof DATA;
+/** The other boxes' covers (FLT-89), `shelf-<box id>.webp`: a box with no cover keeps its painted front. */
+const SHELF_COVERS = Object.fromEntries(
+  Object.entries(import.meta.glob<string>("../assets/shelf-*.webp", { eager: true, import: "default" })).map(([path, url]) => [path.slice(path.lastIndexOf("/") + 1, -5), url]),
+) as Record<`shelf-${string}`, string>;
 
-const KEYS = [...Object.keys(COLOUR), ...Object.keys(DATA)] as ArtKey[];
-const URLS = KEYS.map((key) => ({ ...COLOUR, ...DATA })[key]);
+/** Colour art (sRGB) first, then data maps (linear: packed channels and normals). */
+const COLOUR = { boxFront, boxBack, manualCover, coaPaper, coaFoil, insertCircus, insertBird, insertDrama, insertModules, insertRebate, ...SHELF_COVERS };
+const DATA = { boxFrontOrm, coaFoilHrm, shrinkwrapNormal };
+export type ArtKey = Exclude<keyof typeof COLOUR, `shelf-${string}`> | keyof typeof DATA;
+type Art = Record<ArtKey, THREE.Texture> & Partial<Record<`shelf-${string}`, THREE.Texture>>;
+
+const ALL: Record<string, string> = { ...COLOUR, ...DATA };
+const KEYS = Object.keys(ALL) as (keyof Art)[];
+const URLS = KEYS.map((key) => ALL[key]!);
 
 /** The expansion pack inserts, top of the fan first. */
 export const INSERT_ART = ["insertCircus", "insertBird", "insertDrama", "insertModules", "insertRebate"] as const;
@@ -34,12 +41,12 @@ export const INSERT_ART = ["insertCircus", "insertBird", "insertDrama", "insertM
 export const preloadArt = () => useLoader.preload(THREE.TextureLoader, URLS);
 
 /** Every art texture, by name (suspends until they're all in). */
-export function useArt(): Record<ArtKey, THREE.Texture> {
+export function useArt(): Art {
   const textures = useLoader(THREE.TextureLoader, URLS);
   const gl = useThree((s) => s.gl);
   return useMemo(() => {
     const aniso = Math.min(8, gl.capabilities.getMaxAnisotropy());
-    const out = {} as Record<ArtKey, THREE.Texture>;
+    const out = {} as Art;
     KEYS.forEach((key, i) => {
       const t = textures[i]!;
       // Runs before the first upload (or again on the same values), so no needsUpdate.
