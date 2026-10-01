@@ -4512,7 +4512,7 @@
       ]
     },
     "nopath-click": {
-      "title": "FLT-85: the player clicks the No path! flag: the camera pans to the gap and the path tool is in hand",
+      "title": "FLT-85: the player clicks the No path! flag: the camera pans to the gap, the path tool is in hand, and the rule is said once (toasts held so the shot catches it)",
       "query": {
         "focus": "6,8",
         "zoom": 70,
@@ -4574,10 +4574,22 @@
           "wait": 400
         },
         {
+          "send": {
+            "type": "HOLD_TOASTS",
+            "on": true
+          }
+        },
+        {
           "eval": "() => document.querySelector('.nopath-flag')?.click()"
         },
         {
           "wait": 2500
+        },
+        {
+          "send": {
+            "type": "HOLD_TOASTS",
+            "on": false
+          }
         }
       ]
     },
