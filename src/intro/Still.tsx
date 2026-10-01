@@ -1,20 +1,11 @@
 // Reduced motion (FLT-70): no 3D, no camera moves. The box on a plain shelf, its back, a Play button, and the manual
 // as plain text for anyone who wants to read it.
-import { useEffect, useRef } from "react";
 import type { Intro } from "./actor";
-import { paintHeroFront } from "./art";
+import boxFront from "./assets/box-front.webp";
 import { HERO, STORE } from "./content";
 import { PAGES, type Block } from "./manual";
 
 export default function Still({ intro, manual }: { intro: Intro; manual: boolean }) {
-  const front = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const c = paintHeroFront();
-    c.className = "still-box-art";
-    c.setAttribute("role", "img");
-    c.setAttribute("aria-label", `${HERO.title}: the box`);
-    front.current?.replaceChildren(c);
-  }, []);
   const send = intro.send;
 
   return (
@@ -23,7 +14,9 @@ export default function Still({ intro, manual }: { intro: Intro; manual: boolean
         <b>{STORE.name}</b> <span>{STORE.aisle}</span>
       </header>
       <main className="still-main">
-        <div className="still-box" ref={front} />
+        <div className="still-box">
+          <img className="still-box-art" src={boxFront} alt={`${HERO.title}: the box`} />
+        </div>
         <section className="still-back">
           <h1>{HERO.title}</h1>
           <p className="still-tag">{HERO.tagline}</p>

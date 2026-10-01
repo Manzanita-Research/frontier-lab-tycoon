@@ -3,7 +3,7 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Bloom, EffectComposer, Noise, ToneMapping, Vignette } from "@react-three/postprocessing";
 import { ToneMappingMode } from "postprocessing";
-import { useEffect, useMemo, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import type { Intro } from "../actor";
 import type { IntroContext } from "../machine";
@@ -13,6 +13,9 @@ import { Kiosk } from "./Kiosk";
 import { Store } from "./Store";
 import { BOOT_BEATS, ClockContext, CRT, DURATIONS, fit, FOV, HERO_ON_SHELF, HOLD, k, PRESENT, TRAY, useClock, type Clock } from "./rig";
 import { itemFrame } from "./items";
+import { preloadArt } from "./textures";
+
+preloadArt();
 
 type Props = { intro: Intro; beat: string; context: IntroContext };
 
@@ -56,6 +59,8 @@ export default function Stage({ intro, beat, context }: Props) {
     <div ref={wrap} style={{ position: "absolute", inset: 0, cursor: coa ? "grab" : undefined }}>
       <Canvas dpr={[1, 2]} camera={{ fov: FOV, near: 0.05, far: 40, position: [0, 1.1, 2.3] }} gl={{ antialias: !intro.params.fx, powerPreference: "high-performance" }}>
         <ClockContext.Provider value={clock}>
+          {/* Nothing runs (not even the beat clock) until the art is in, so the first frame is the finished scene. */}
+          <Suspense fallback={null}>
           <Director intro={intro} beat={beat} clock={clock} fps={fps} />
           <CameraRig beat={beat} context={context} />
           <color attach="background" args={["#23262e"]} />
@@ -76,6 +81,7 @@ export default function Stage({ intro, beat, context }: Props) {
               <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
             </EffectComposer>
           )}
+          </Suspense>
         </ClockContext.Provider>
       </Canvas>
       <div ref={fps} className="intro-fps" hidden={!intro.params.fps} />

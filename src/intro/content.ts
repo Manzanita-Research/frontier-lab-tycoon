@@ -71,7 +71,7 @@ export type ItemId = "manual" | "disc" | "floppies" | "card" | "overlay" | "eula
 /** What is in the box, in the order the Contents list shows it. */
 export const ITEMS: { id: ItemId; name: string; caption: string }[] = [
   { id: "manual", name: "The manual", caption: "140 pages. Two of them printed in time." },
-  { id: "coa", name: "Certificate of Authenticity", caption: "Drag to tilt it in the light. Genuine foil. Genuinely placeholder foil." },
+  { id: "coa", name: "Certificate of Authenticity", caption: "Drag to tilt it in the light. Genuine holographic foil. Do not microwave." },
   { id: "disc", name: "CD-ROM", caption: "Frontier Lab Tycoon for Frontier 95. Do not microwave." },
   { id: "floppies", name: "Floppy disks", caption: "Disk 1 of 7. Disks 2 to 7 are the same disk, relabelled for the investors." },
   { id: "card", name: "Registration card", caption: "Mail today for exciting offers from our partners! (You are the partner.)" },
