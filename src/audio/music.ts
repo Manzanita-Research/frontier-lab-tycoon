@@ -17,40 +17,58 @@ export function modeFor(speed: number, paused: boolean, top = 10): Mode {
   return speed > 1 ? "fetch" : "walkies";
 }
 
-export type Vowel = "a" | "e" | "i" | "o" | "u";
+/** The choir's vowels, plus `l` (a vowel as far as the formants care): "ih" is the i in "ship it". */
+export type Vowel = "a" | "e" | "i" | "ih" | "o" | "u" | "l";
 /** A note with the extras music needs: a slow attack (the sidechain swell), detune, a noise filter, a sung vowel. */
 export interface Tone extends Note {
   attack?: number;
   detune?: number;
   filter?: BiquadFilterType;
   q?: number;
+  /** Stay at full gain for this fraction of the note, then release. Without it a tone decays from its peak, a pluck:
+   * FLT-66's choir did, so its vowels were gone before their glides, and read as syllables, not words (FLT-80). */
+  hold?: number;
+  /** Sung through three formant filters; `to` glides them through more vowels over the note ("o-kay" is o→u, e→i). */
   vowel?: Vowel;
+  to?: Vowel[];
+  /** Which part of the band plays it: the choir's tones (vowels and consonants) can be rendered on their own. */
+  part?: "choir";
 }
-/** Formants (Hz) of a voice that has inhaled helium: real F1/F2 scaled up, so the chops sound pitched-up, not just high. */
-export const FORMANTS: Record<Vowel, readonly [number, number]> = { a: [1080, 1620], e: [540, 2700], i: [400, 3100], o: [610, 1080], u: [440, 950] };
+/**
+ * F1, F2, F3 (Hz) of each vowel in a real voice; the choir scales them up a little, as if it had inhaled helium.
+ * Three formants that glide are what turn a vowel into a word; two that sat still read as "aah" and "eeh" (FLT-80).
+ */
+export const HELIUM = 1.2;
+export const FORMANTS: Record<Vowel, readonly [number, number, number]> = {
+  a: [730, 1090, 2440], e: [480, 2000, 2600], i: [280, 2300, 3000], ih: [390, 1990, 2550], o: [500, 880, 2400], u: [320, 870, 2240], l: [400, 800, 2600],
+};
+/** Formant `i` (0 to 2) of a vowel as the choir sings it. */
+export const formant = (vowel: Vowel, i: number) => FORMANTS[vowel][i]! * HELIUM;
 
 // ---- Flavours: each skin keeps its own instruments. ----
 
 export const FLAVOURS = ["classic", "midi", "disco", "folk"] as const;
 export type Flavour = (typeof FLAVOURS)[number];
-export interface Palette { pad: OscillatorType; lead: OscillatorType; bass: OscillatorType; saw: OscillatorType; chop: OscillatorType; detune: number; ping: "ping" | "ding" | "chime"; drums: number }
+/** `talk` is the wave the choir's words voice sings with; "custom" is a 25% pulse (see `voice`), a sound chip's voice. */
+export interface Palette { pad: OscillatorType; lead: OscillatorType; bass: OscillatorType; saw: OscillatorType; chop: OscillatorType; talk: OscillatorType; detune: number; ping: "ping" | "ding" | "chime"; drums: number }
 export const PALETTES: Record<Flavour, Palette> = {
   // The first pass: triangle chords and a square arpeggio. Zoomies gets detuned saws.
-  classic: { pad: "triangle", lead: "square", bass: "triangle", saw: "sawtooth", chop: "sawtooth", detune: 14, ping: "ping", drums: 1 },
-  // A General MIDI card from 1995: everything is a pulse wave, nothing is detuned, and the inbox goes *ding*.
-  midi: { pad: "square", lead: "square", bass: "square", saw: "square", chop: "square", detune: 0, ping: "ding", drums: 0.75 },
+  classic: { pad: "triangle", lead: "square", bass: "triangle", saw: "sawtooth", chop: "sawtooth", talk: "sawtooth", detune: 14, ping: "ping", drums: 1 },
+  // A General MIDI card from 1995: everything is a pulse wave, nothing is detuned, and the inbox goes *ding*. A square
+  // can't say words (odd harmonics only), so the choir talks through a thin 25% pulse, like a sound card's speech chip.
+  midi: { pad: "square", lead: "square", bass: "square", saw: "square", chop: "square", talk: "custom", detune: 0, ping: "ding", drums: 0.75 },
   // Karaoke night: saws everywhere, a wide chorus, a bright kit.
-  disco: { pad: "sawtooth", lead: "sawtooth", bass: "sawtooth", saw: "sawtooth", chop: "sawtooth", detune: 22, ping: "ping", drums: 1.2 },
+  disco: { pad: "sawtooth", lead: "sawtooth", bass: "sawtooth", saw: "sawtooth", chop: "sawtooth", talk: "sawtooth", detune: 22, ping: "ping", drums: 1.2 },
   // The field guide: soft sines and a kalimba for the inbox.
-  folk: { pad: "sine", lead: "triangle", bass: "sine", saw: "triangle", chop: "square", detune: 6, ping: "chime", drums: 0.6 },
+  folk: { pad: "sine", lead: "triangle", bass: "sine", saw: "triangle", chop: "square", talk: "sawtooth", detune: 6, ping: "chime", drums: 0.6 },
 };
 const SKIN_FLAVOURS: Readonly<Record<string, Flavour>> = { "frontier-95": "midi", "homepage-98": "midi", "discovery-disc-96": "midi", "karaoke-night": "disco", "field-almanac": "folk" };
 /** A skin's flavour of music; a mod's skin, or one nobody has scored, plays the classic band. */
 export const flavourFor = (skin: string): Flavour => SKIN_FLAVOURS[skin] ?? "classic";
 
 /** How loud a wave sounds next to a triangle, so a flavour that swaps instruments keeps the mix where it was. */
-const LOUDNESS: Record<OscillatorType, number> = { sine: 0.8, triangle: 1, square: 1.7, sawtooth: 1.6, custom: 1 };
-const level = (wave: OscillatorType, base: OscillatorType) => LOUDNESS[base] / LOUDNESS[wave];
+const LOUDNESS: Record<OscillatorType, number> = { sine: 0.8, triangle: 1, square: 1.7, sawtooth: 1.6, custom: 1.4 };
+export const level = (wave: OscillatorType, base: OscillatorType) => LOUDNESS[base] / LOUDNESS[wave];
 
 // ---- Meters ----
 
@@ -78,33 +96,68 @@ const kick = (at: number, gain = 0.18): Tone => tone(at, 150, 0.22, gain, "sine"
 const snare = (at: number, p: Palette, gain = 0.14): Tone[] => [tone(at, 2200 * p.drums, 0.11, gain, "noise", { filter: "bandpass", q: 0.9, endHz: 1500 * p.drums }), tone(at, 230, 0.07, gain * 0.8, "triangle", { endHz: 170 })];
 const hat = (at: number, p: Palette, gain = 0.03, duration = 0.035): Tone => tone(at, 7600 * p.drums, duration, gain, "noise", { filter: "highpass", q: 0.7 });
 
-/** A syllable for the chipmunk choir: an optional consonant onset, a vowel, an optional consonant coda. */
-interface Syllable { step: number; len: number; deg: number; vowel: Vowel; onset?: "sh" | "p" | "k"; coda?: "t" }
-// Bar A: "ship it, ship it, ship-ship-ship it". Bar B: "o-kay! o-kay! ay-ay-ay-ay" (agreeable, as one is at 2 a.m.).
+/**
+ * A syllable for the chipmunk choir: an optional consonant onset, a vowel (gliding through `to`), an optional coda.
+ * FLT-80: three words the ear can catch: "ship it", "o-kay!" and "scale". A `p` or `t` is a closure (a gap) and a burst;
+ * `k` a burst and a breath; `sh` and `s` hiss in their own bands; `sk` is the s, then a k with no breath.
+ */
+export type Onset = "sh" | "s" | "sk" | "p" | "k";
+interface Syllable { step: number; len: number; deg: number; vowel: Vowel; to?: Vowel[]; onset?: Onset; coda?: "t"; closes?: boolean; up?: boolean }
+// Bar A: "ship it, ship it, ship-ship-ship it". Bar B: "o-kay! o-kay! scale, SCAAALE!" (agreeable, as one is at 2 a.m.).
 const HOOK_A: Syllable[] = [
-  { step: 0, len: 2, deg: 3, vowel: "i", onset: "sh" }, { step: 2, len: 2, deg: 2, vowel: "i", onset: "p", coda: "t" },
-  { step: 6, len: 2, deg: 3, vowel: "i", onset: "sh" }, { step: 8, len: 2, deg: 2, vowel: "i", onset: "p", coda: "t" },
-  { step: 11, len: 1, deg: 2, vowel: "i", onset: "sh" }, { step: 12, len: 1, deg: 3, vowel: "i", onset: "sh" }, { step: 13, len: 1, deg: 4, vowel: "i", onset: "sh" },
-  { step: 14, len: 2, deg: 5, vowel: "i", onset: "p", coda: "t" },
+  { step: 0, len: 2, deg: 3, vowel: "ih", onset: "sh", closes: true }, { step: 2, len: 2, deg: 2, vowel: "ih", onset: "p", coda: "t" },
+  { step: 6, len: 2, deg: 3, vowel: "ih", onset: "sh", closes: true }, { step: 8, len: 2, deg: 2, vowel: "ih", onset: "p", coda: "t" },
+  { step: 11, len: 1, deg: 2, vowel: "ih", onset: "sh", closes: true }, { step: 12, len: 1, deg: 3, vowel: "ih", onset: "sh", closes: true }, { step: 13, len: 1, deg: 4, vowel: "ih", onset: "sh", closes: true },
+  { step: 14, len: 2, deg: 5, vowel: "ih", onset: "p", coda: "t" },
 ];
 const HOOK_B: Syllable[] = [
-  { step: 0, len: 1, deg: 2, vowel: "o" }, { step: 1, len: 3, deg: 4, vowel: "e", onset: "k" },
-  { step: 4, len: 1, deg: 2, vowel: "o" }, { step: 5, len: 3, deg: 3, vowel: "e", onset: "k" },
-  ...[12, 13, 14, 15].map((step, i): Syllable => ({ step, len: 1, deg: 1 + i, vowel: "a" })),
+  { step: 0, len: 1, deg: 2, vowel: "o", to: ["u"] }, { step: 1, len: 3, deg: 4, vowel: "e", to: ["i"], onset: "k" },
+  { step: 4, len: 1, deg: 2, vowel: "o", to: ["u"] }, { step: 5, len: 3, deg: 3, vowel: "e", to: ["i"], onset: "k" },
+  { step: 9, len: 3, deg: 3, vowel: "e", to: ["i", "l"], onset: "sk" }, { step: 12, len: 4, deg: 5, vowel: "e", to: ["i", "l"], onset: "sk", up: true },
 ];
+/**
+ * The consonants, tuned against a speech recogniser on a prototype of this voice: what each hisses or pops (Hz, seconds,
+ * gain, filter, Q, swell), and how long the vowel waits. An "sh" swells in (a burst reads as a k), an "s" is a real
+ * high-pass hiss, and they are loud: at FLT-66's level the recogniser heard "yippee" for "ship it".
+ */
+type Noise = [at: number, hz: number, length: number, gain: number, filter: BiquadFilterType, q: number, swell?: number];
+const ONSETS: Record<Onset, { noise: Noise[]; wait: number }> = {
+  sh: { noise: [[0, 3800, 0.085, 0.16, "bandpass", 1, 0.035]], wait: 0.06 },
+  s: { noise: [[0, 6500, 0.07, 0.12, "highpass", 0.7, 0.02]], wait: 0.065 },
+  // The s, a closure (silence), then a k with no breath, low (about the next vowel's F2): without the gap it's "stay".
+  sk: { noise: [[0, 6500, 0.055, 0.12, "highpass", 0.7, 0.02], [0.085, 1900, 0.022, 0.18, "bandpass", 2.5]], wait: 0.1 },
+  p: { noise: [[0, 700, 0.012, 0.16, "bandpass", 0.7], [0.012, 1800, 0.03, 0.05, "bandpass", 1]], wait: 0.03 },
+  k: { noise: [[0, 2400, 0.018, 0.16, "bandpass", 2], [0.018, 2700, 0.035, 0.06, "bandpass", 1.2]], wait: 0.045 },
+};
+/**
+ * The choir is two voices in octaves. The chipmunk sings FLT-66's line, up where a voice has no vowels left (at
+ * 1 kHz the first formant is below the note). Under it, the same line folded down by octaves into a speaking range
+ * carries the words: its harmonics are close enough together to spell out the formants and their glides.
+ */
+export const SPEAKING = 420;
+export const speaking = (hz: number) => { while (hz > SPEAKING) hz /= 2; return hz; };
+/** Chipmunk on top, words underneath: how loud each sings, and the whole choir in the mix (held vowels are loud). */
+const CHOIR = { chipmunk: 0.18, words: 0.26, volume: 0.5 } as const;
 function sing(s: Syllable, step: number, chord: readonly number[], root: number, p: Palette): Tone[] {
   const tones = [...chord, ...chord.map((n) => n + 12)];
   const hz = midi(root + 24 + tones[s.deg % tones.length]!);
   const at = s.step * step;
-  const duration = s.len * step * 0.9;
+  // A syllable before a "p" stops short: the closure (a gap) is what keeps "ship it" from reading as one rude word.
+  const duration = s.len * step * (s.closes ? 0.7 : 0.9);
   const out: Tone[] = [];
-  if (s.onset === "sh") out.push(tone(at, 3200, 0.055, 0.07, "noise", { filter: "highpass", q: 0.8 }));
-  if (s.onset === "p") out.push(tone(at, 700, 0.018, 0.08, "noise", { filter: "lowpass" }));
-  if (s.onset === "k") out.push(tone(at, 2600, 0.022, 0.06, "noise", { filter: "bandpass", q: 1.5 }));
-  const vowelAt = at + (s.onset ? 0.03 : 0);
-  // A pitch-corrected scoop up into the note: the hyperpop hiccup.
-  out.push(tone(vowelAt, hz * 0.94, Math.max(0.05, duration - (vowelAt - at)), 0.32 * level(p.chop, "sawtooth"), p.chop, { endHz: hz, vowel: s.vowel }));
-  if (s.coda === "t") out.push(tone(at + duration, 5200, 0.02, 0.05, "noise", { filter: "highpass" }));
+  const say = (at: number, hz: number, duration: number, gain: number, wave: Tone["wave"], extra: Partial<Tone> = {}): Tone => ({ at, hz, duration, gain: gain * CHOIR.volume, wave, part: "choir", ...extra });
+  const onset = s.onset && ONSETS[s.onset];
+  for (const [after, nhz, length, gain, filter, q, swell] of onset?.noise ?? []) out.push(say(at + after, nhz, length, gain, "noise", { filter, q, ...(swell && { attack: swell, hold: 0.6 }) }));
+  const vowelAt = at + (onset?.wait ?? 0);
+  const sung = Math.max(0.05, duration - (vowelAt - at) - (s.coda ? 0.045 : 0));
+  // A pitch-corrected scoop up into the note (the hyperpop hiccup), or the long "SCAAALE" yelping up a tone.
+  const end = s.up ? hz * 2 ** (2 / 12) : hz;
+  const low = speaking(hz) / hz;
+  for (const [octave, gain, wave] of [[1, CHOIR.chipmunk, p.chop], [low, CHOIR.words, p.talk]] as const) {
+    out.push(say(vowelAt, hz * 0.94 * octave, sung, gain * level(wave, "sawtooth"), wave, { endHz: end * octave, vowel: s.vowel, hold: 0.75, ...(s.to && { to: s.to }) }));
+  }
+  // The final t: a short closure, a click and a hiss.
+  if (s.coda === "t") out.push(say(vowelAt + sung + 0.03, 4000, 0.012, 0.22, "noise", { filter: "bandpass", q: 0.7 }), say(vowelAt + sung + 0.042, 4500, 0.04, 0.1, "noise", { filter: "highpass", q: 0.7 }));
   return out;
 }
 /** The inbox. Classic pings, Frontier 95 dings a little chord, the field guide plucks a kalimba. */
