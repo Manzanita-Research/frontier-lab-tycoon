@@ -3434,9 +3434,9 @@
       .tx {
         flex: 1 1 auto;
       }
-      /* the count gives way to the goal first: "$0 of $40K a day · 0 of 12 visitors" can have the rest of the bar */
+      /* the count keeps its size, up to under half the chip: "$0 of $40K a day · 0 of 12 visitors" gives way to the goal */
       b {
-        flex: 0 1 auto;
+        flex: none;
         max-width: 45%;
         font-family: var(--flt-font-numbers);
       }
