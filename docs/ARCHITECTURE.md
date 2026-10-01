@@ -354,6 +354,25 @@ Decisions worth knowing:
 
 Measured on the 1-vCPU Modal box: a full pool of 2,000 particles updates in 0.08 ms per frame, watching a 429-walker World costs 0.0005 ms per frame, and the SwiftShader frame time of the whole game is unchanged against the FLT-4 build (mean 117 ms with juice vs 126 to 132 ms without, both rasteriser-bound).
 
+### The picture tube (FLT-73)
+
+A CRT over the whole game, set in Display Properties ▸ Settings (off / subtle / full; Frontier 95 defaults to subtle through its `skin.json` `"crt"`). It has two layers that agree on pitch, bow, vignette and corners (`src/render/crt/looks.ts`):
+
+```mermaid
+flowchart LR
+  P["Display Properties<br/>setCrt(mode)"] --> C["ui/juice/crt.ts<br/>pick ▸ skin default ▸ off<br/>(?crt= pins; photo mode = off)"]
+  C -->|crtAtom| L["CrtLayer (in the Canvas)<br/>feeds the governor"]
+  L -->|"multi / lite"| FX["CrtFX (lazy)<br/>EffectComposer: CRTPass or LiteCrtEffect"]
+  C -->|crtAtom| T["Tube.tsx + crt.css<br/>scanlines, vignette, corners, glow over the DOM"]
+```
+
+- **The canvas** goes through the ported [crt-shader](https://github.com/OutThisLife/crt-shader) pipeline (MIT, see `docs/CREDITS.md`). The pipeline downsamples the scene to one row per scanline, then runs horizontal, vertical and optics stages. The prepare stage tone-maps the campus with ACES itself and lays it over the sky by alpha, so the sky keeps its colours the way three leaves an sRGB `scene.background`. The optics stage bows the picture. `CRTPipeline` also renders to a texture, for FLT-70's monitor (`src/render/crt/README.md`).
+- **The DOM** gets a `pointer-events: none` layer with low-opacity scanlines at the same pitch, a vignette, rounded corners and a faint same-colour text glow. There is no blur and no distortion on text. Full adds a slow roll band and a flicker; reduce motion turns both off.
+- **Clicks and labels follow the bow.** `crtEvents` warps the pointer before R3F raycasts. Labels and the tap target unwarp their projected point with `onGlass()`. The camera rig needs nothing: it centres what it focuses on, and the bow leaves the centre where it is.
+- **Tiers and the governor.** multi (the 4-stage pipeline, no MSAA: the downsample antialiases) → lite (one full-resolution pass) → flat (CSS only). A phone starts at lite. If the mean frame time is over 20 ms with the tube on, `CrtGovernor` steps down a tier. If the step didn't cut the frame time by 12%, it steps back up and stops, since the tube was not the cost. The pixel ratio is capped at 1.25 while the shader is on.
+- **Readability.** `src/render/crt/contrast.test.ts` holds every skin's text pairs to WCAG AA (4.5:1) under the darkest pixel the glass makes: a scanline gap at the vignette's corner. It also checks that the glow stays faint. Frontier 95, where the tube is on by default, must still pass when the glow's halo is counted against the background.
+- **Debug.** `?crt=off|subtle|full` and `?crttier=multi|lite|flat` pin the look and tier for a visit, with no governor. `window.__crt` reports the tier, the pixel ratio and the shader's input size. With `?debug=1` it also reports `gpuMs`, the pass's own GPU time, from `EXT_disjoint_timer_query_webgl2` where Chrome exposes it. `node scripts/crt-frames.mjs` prints the frame-time table (`CRT_GPU=1` runs it on a real GPU).
+
 ## The Race (FLT-9): rivals, the Arena, eras
 
 ```mermaid
