@@ -4,7 +4,7 @@ import { chromium } from "playwright";
 // "read a researcher's mind" step, clicks the researcher, and counts the painted frames in which the balloon covers any
 // window over the next few seconds (the peek step and the step after it). The journey forgives an overlap under 500 ms;
 // this counts every frame, so a balloon that waits for its next look to step aside shows up here.
-//   node e2e/coach-overlap.mjs --url http://localhost:4173/ [--viewport 1280x800] [--shot out.png]
+//   pnpm e2e:coach --url http://localhost:4173/ [--viewport 1280x800] [--shot out.png]
 // --shot holds requestAnimationFrame the moment the Properties window goes in, so the still is that window's first frame:
 // whatever the balloon did before the paint (and nothing after) is in it.
 const arg = (name, fallback) => {
@@ -12,7 +12,7 @@ const arg = (name, fallback) => {
   return at >= 0 && process.argv[at + 1] ? process.argv[at + 1] : fallback;
 };
 const url = arg("url");
-if (!url) throw new Error("Usage: node e2e/coach-overlap.mjs --url <preview URL> [--viewport 1280x800] [--shot out.png]");
+if (!url) throw new Error("Usage: pnpm e2e:coach --url <preview URL> [--viewport 1280x800] [--shot out.png]");
 const [width, height] = arg("viewport", "1280x800").split("x").map(Number);
 const shot = arg("shot");
 
