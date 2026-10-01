@@ -9,7 +9,7 @@ import { canvas, paintBios, paintKeyboard, paintSplash, paintSunrise, RETRO_FONT
 import { CRTPipeline } from "../../render/crt/pipeline";
 import { CRT_LOOKS, monitorOptions } from "../../render/crt/looks";
 import { BIOS } from "../content";
-import { canvasTexture, COUNTER_Y, CRT, DRAWER_IN_Z, DRAWER_OUT_Z, DRAWER_Y, frameDt, k, TOWER, useClock, type StageProps } from "./rig";
+import { BOX_TIMES, canvasTexture, COUNTER_Y, CRT, DRAWER_IN_Z, DRAWER_OUT_Z, DRAWER_Y, frameDt, k, TOWER, useClock, type StageProps } from "./rig";
 import { CounterProps } from "./Props";
 
 const BEIGE = "#e4dcc4";
@@ -80,7 +80,7 @@ export function Kiosk({ beat, context, send, weightsKey }: StageProps & { weight
     const t = c.t;
     const u = screen.material.uniforms;
     // The drawer: out while the disc goes in, then shut.
-    const out = beat === "disc" && t > 0.3 && t < 1.6;
+    const out = beat === "disc" && t > BOX_TIMES.drawer[0] && t < BOX_TIMES.drawer[1];
     if (drawer.current) drawer.current.position.z += ((out ? DRAWER_OUT_Z : DRAWER_IN_Z) - drawer.current.position.z) * k(9, dt);
     if (led.current) led.current.emissiveIntensity = beat === "disc" || beat === "warmup" || beat === "post" ? (Math.sin(state.clock.elapsedTime * 30) > 0 ? 3 : 0.3) : 0.3;
 
@@ -127,6 +127,7 @@ export function Kiosk({ beat, context, send, weightsKey }: StageProps & { weight
   const onClick = (e: ThreeEvent<MouseEvent>) => {
     if (!clickable) return;
     e.stopPropagation();
+    // FLT-95: the disc in your hand goes in; otherwise this picks it up first (the machine decides).
     send({ type: "INSERT" });
   };
   void context;

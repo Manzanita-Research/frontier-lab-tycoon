@@ -467,6 +467,14 @@ describe.each([BASE_ID, ...usable])("skin %s", (id) => {
     for (const b of vms.help!.help!.buildings) expect(help).toContain(escape(b.line));
     expect(help).not.toContain(escape(vmOf({ level: 5, help: true }).help!.buildings.find((b) => b.kind === "demo")!.line));
     expect(help).toContain(escape(skin.strings["help.replay"]!));
+    // FLT-95: the box is one click away from Help.
+    expect(help).toContain(escape(skin.strings["help.box"]!));
+  });
+
+  it("offers the box again from Welcome back (FLT-95)", async () => {
+    const { skin } = await prepareSkin(id);
+    const welcome = html(skin, <skin.slots.Welcome welcome={vms.welcome!.saves.welcome!} saves={vms.welcome!.saves} actions={actions} />);
+    expect(welcome).toContain("Take the box off the shelf again");
   });
 
   it("has a Today's Drama button from the first day, and a window with the pack, the archive and the now-playing card", async () => {

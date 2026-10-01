@@ -1,8 +1,10 @@
 import { chromium } from "playwright";
 import { execFileSync } from "node:child_process";
 import { mkdir, writeFile } from "node:fs/promises";
+import { throughTheBox } from "./box.mjs";
 
-// The journey (FLT-53): a new player opens the game with no params, follows the coach at 1×, then plays a simple,
+// The journey (FLT-53): a new player opens the game with no params, plays the box on the shelf (FLT-95; tapped on a
+// phone; a `--skin` link goes straight to the game), follows the coach at 1×, then plays a simple,
 // sensible policy up the ladder to Level 5: build what the goal needs, hire staff, answer every card with its first
 // choice, and run at 3× between goals (after a minute at 1× to read each "New!" card). Like the stranger test, every
 // limit is game time from the probe; wall-clock limits are only timeouts. A soft failure (a console error, a slow
@@ -554,6 +556,8 @@ let probe = null;
 const outcome = { reached: false };
 try {
   await page.goto(opened.href, { waitUntil: "networkidle", timeout: 120_000 });
+  result.box = await throughTheBox(page, { tap: phone });
+  if (!skin && result.box.door !== "box") throw new Error("A first visit to the bare root must open on the box");
   await page.waitForFunction(() => typeof window.__fltProbe === "function", { timeout: 60_000 });
   const first = await probeNow();
   if (first.speed !== 1 || !first.paused) throw new Error("Opening must be paused at 1×");

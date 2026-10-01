@@ -6,7 +6,7 @@ import "@fontsource/nunito/latin-800.css";
 import "@fontsource/nunito/latin-900.css";
 import { loadModSession, setModSession } from "./app/mods";
 import { setSessionDefinition } from "./sim/defs";
-import { isIntroRoute } from "./introRoute";
+import { door } from "./introRoute";
 import "./index.css";
 
 // Standalone demo pages: any file named `*.page.tsx` with a default export is
@@ -43,8 +43,16 @@ const loadGame = () => {
   return (game = { skin: mods.then(() => import("./ui/hud/skinControl")), App: mods.then(() => import("./App")).then((m) => m.App) });
 };
 
-// The software-shelf intro (FLT-70) is its own chunk, at `/box` and `?intro=1` only. It boots the game itself.
-const intro = !Page && isIntroRoute(window.location);
+// The software-shelf intro (FLT-70) is its own chunk: at `/box`, `?intro=1`, and (FLT-95) a first visit to the bare root.
+// It boots the game itself.
+const localStore = (() => {
+  try {
+    return window.localStorage;
+  } catch {
+    return null;
+  }
+})();
+const intro = !Page && door(window.location, localStore) === "box";
 const root = createRoot(document.getElementById("root")!);
 if (intro) void Promise.all([fonts, import("./intro/boot")]).then(([, m]) => m.mountIntro(root, loadGame));
 else {
