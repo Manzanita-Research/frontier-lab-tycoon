@@ -76,7 +76,7 @@ export function stageOps(s: GameState, moment: OpsMoment) {
       if (!bar) return;
       s.walkers = s.walkers.filter((w, i) => w.kind === "researcher" || i % 5 === 0);
       s.thoughts = [];
-      for (let i = 0; i < 6; i++) seedWalkers(s, "researcher", 1, createRng(11 + i));
+      for (let i = 0; i < 9; i++) seedWalkers(s, "researcher", 1, createRng(11 + i));
       const rs = s.walkers.filter((w) => w.kind === "researcher");
       for (let i = 0; i < 16; i++) {
         const w = rs[i];

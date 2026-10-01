@@ -1,15 +1,16 @@
 // FLT-91: the garage's front yard. A fresh lab used to start with five tiles of path, most of them hidden behind the
-// gate's arch, and Jem saw "two path tiles". Now the gate opens onto a little paved plaza that runs along the fence and
-// spreads out in front of the Cluster, and a short walk runs up from it. The coach still asks for the path to the Hall.
-// The plaza stays off the tiles right of the walk (x 12+, z 21 and up): that's where the first Hall and Gateway go.
+// gate's arch, and Jem saw "two path tiles". Now the gate opens onto a little paved plaza along the fence, and a short
+// walk runs up from it to the Cluster. The camera looks in from the gate's right, so that is where the plaza spreads:
+// beside the gate on the fence row, where nothing ever stood, and one row in. It keeps off row 21 and those behind it,
+// where the first Hall and Gateway go, and the coach still asks for the path to the Hall.
 
-/** The entrance plaza, as rects: the front row along the fence, and a second row in front of the Cluster. */
+/** The entrance plaza, as rects: the row inside the gate, and the fence row beside it. */
 export const PLAZA = [
-  { x: 8, z: 22, w: 7, d: 1 },
-  { x: 8, z: 21, w: 4, d: 1 },
+  { x: 10, z: 22, w: 7, d: 1 },
+  { x: 13, z: 23, w: 4, d: 1 },
 ] as const;
-/** The walk up from the plaza, past the Cluster, ending where the coach's suggested path begins. */
-export const WALK = { x: 11, z0: 19, z1: 20 } as const;
+/** The walk up from the plaza to the Cluster, ending where the coach's suggested path begins. */
+export const WALK = { x: 11, z0: 19, z1: 21 } as const;
 
 /** Is (x, z) on the entrance plaza (the renderer paves it differently)? */
 export const onPlaza = (x: number, z: number) => PLAZA.some((r) => x >= r.x && x < r.x + r.w && z >= r.z && z < r.z + r.d);

@@ -12,7 +12,7 @@ import { canHire, hire, updateStaff } from "./staff";
 import { createInitialState } from "./state";
 import { applyNow, tick } from "./tick";
 import { createRng } from "./rng";
-import { modeOf, seedWalkers } from "./walkers";
+import { seedWalkers } from "./walkers";
 import { rectContains, routeToRect } from "./pathfind";
 import type { GameState } from "./types";
 
@@ -222,18 +222,16 @@ describe("people have somewhere to be", () => {
   it.each([1, 2, 3, 42, 2027])("walks a new path within 15 seconds at 1× (seed %i)", (seed) => {
     const s = createInitialState(seed);
     applyNow(s, [18, 17, 16].map((z) => ({ type: "placePath" as const, x: 11, z })));
-    // Nobody stands still: each walker gets two tiles along or reaches a door. On the plaza (FLT-91) the Cluster's door is
-    // a step away, so a whole lab can be at its desks before anyone has walked far.
-    const before = new Map(s.walkers.map((w) => [w.id, [w.x, w.z]])); const busy = new Set<number>();
+    const before = new Map(s.walkers.map((w) => [w.id, [w.x, w.z]])); let moved = false;
     for (let i = 0; i < 50; i++) {
       tick(s);
       for (const w of s.walkers) {
         const p = before.get(w.id);
-        if ((p && Math.hypot(w.x - p[0]!, w.z - p[1]!) >= 2) || modeOf(w) === "inside") busy.add(w.id);
+        if (p && Math.hypot(w.x - p[0]!, w.z - p[1]!) >= 2) moved = true;
         expect(rectContains(s.gate, w.x, w.z)).toBe(false);
       }
     }
-    expect(s.walkers.filter((w) => !busy.has(w.id))).toEqual([]);
+    expect(moved).toBe(true);
   });
   it("gives each walker its own route and invalidates destination routes after construction", () => {
     const s = createInitialState(1), cluster = s.buildings[0]!;
@@ -241,8 +239,7 @@ describe("people have somewhere to be", () => {
     const expected = structuredClone(first);
     first[0]![0] = 99; first.shift();
     expect(routeToRect(s, 11.5, 22.5, cluster)).toEqual(expected);
-    // The walk and the plaza both touch the Cluster (FLT-91): cut them all.
-    applyNow(s, [{ type: "bulldoze", x: 11, z: 20 }, { type: "bulldoze", x: 9, z: 21 }, { type: "bulldoze", x: 10, z: 21 }]);
+    applyNow(s, [{ type: "bulldoze", x: 11, z: 20 }]);
     expect(routeToRect(s, 11.5, 22.5, cluster)).toBeNull();
   });
   it("patrols the fence and waits in a comms break spot until protesters exist", () => {

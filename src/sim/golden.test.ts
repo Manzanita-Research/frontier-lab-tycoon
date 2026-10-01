@@ -243,14 +243,14 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // FLT-92: the rival labs post on the Bird App too (their own stream, from Level 3), so 1600 on moves on every seed:
 // their posts, the ticker lines and toasts, and the dunks and ratios. With the rivals off (`enableBirdRivals` a no-op)
 // all three seeds reproduce FLT-86's values (af539c00… / 69cae759… / 5277ca60…), digit for digit.
-// FLT-91: a garage starts on an entrance plaza and a short walk (13 tiles) instead of a five-tile stub, so every
+// FLT-91: a garage starts on an entrance plaza and a short walk (14 tiles) instead of a five-tile stub, so every
 // checkpoint moves on every seed: the opening researchers are seeded on different tiles (their own RNG draws), the
-// plaza is in the World from tick 0, and the coach's path step counts 13 + 3 tiles instead of 5 + 3. With `openingPaths()`
+// plaza is in the World from tick 0, and the coach's path step counts 14 + 3 tiles instead of 5 + 3. With `openingPaths()`
 // returning the old stub, all three seeds reproduce FLT-92's values (72d15c6c… / 97c3299b… / cd605dda…) digit for digit.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "9b59107a", 800: "5a4bea93", 1600: "a32e6fda", 2400: "7e97772d", 3200: "3cbca202", 4000: "ee524a05" },
-  2: { 200: "44ff02c8", 800: "43797cb8", 1600: "df937735", 2400: "5471bf76", 3200: "bf2b2a5b", 4000: "d437ef77" },
-  3: { 200: "e8a3ff6c", 800: "e839cd03", 1600: "fc6b2bdd", 2400: "823c8553", 3200: "3ba958c6", 4000: "84097aa5" },
+  1: { 200: "7566b028", 800: "4c87ace4", 1600: "f2254ab6", 2400: "e521939b", 3200: "b1e0fe8f", 4000: "52512aac" },
+  2: { 200: "3263645c", 800: "31bf7516", 1600: "d4438b25", 2400: "9fa821a1", 3200: "b4ee6965", 4000: "feb5a25d" },
+  3: { 200: "09887c12", 800: "40547ab6", 1600: "2af29753", 2400: "a0a69cf1", 3200: "08505149", 4000: "d7fa34a4" },
 };
 
 describe("golden runs", () => {

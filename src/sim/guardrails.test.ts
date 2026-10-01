@@ -51,10 +51,13 @@ describe("Jem's first run", () => {
     expect(visitors).toHaveLength(4);
     expect(new Set([...visitors, ...s.staff].map((p) => `${p.x.toFixed(2)},${p.z.toFixed(2)}`)).size).toBeGreaterThan(4);
     expect(visitors.every((p) => p.z > 21 && p.z < 24)).toBe(true);
+    const stranded = s.staff.map((p) => [p.x, p.z]);
     applyNow(s, [{ type: "placePath", x: 11, z: 22 }]);
     for (let i = 0; i < 60; i++) tick(s);
     expect(persistentWarnings(s)).not.toContain(ENTRANCE_WARNING);
-    expect(s.staff.some((p) => p.z < 22)).toBe(true);
+    // Someone walks off again, onto the network the gate reaches (the entrance plaza since FLT-91, not only the campus).
+    const reach = getReach(s).tiles;
+    expect(s.staff.some((p, i) => Math.hypot(p.x - stranded[i]![0]!, p.z - stranded[i]![1]!) > 0.5 && reach[Math.floor(p.z) * s.grid.w + Math.floor(p.x)])).toBe(true);
     expect(getReach(s).buildings.size).toBe(1);
   });
 
