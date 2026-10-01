@@ -1,9 +1,15 @@
-import { CHORDS, CUES, HOOKS, cueNotes, eraScore, hookNotes, midi, type Cue, type Hook, type Note } from "./score";
+import { Band, limiter } from "./Band";
+import { flavourFor, modeFor, type Flavour, type Mode } from "./music";
+import { CUES, HOOKS, cueNotes, hookNotes, type Cue, type Hook, type Note } from "./score";
+import { noiseBuffer, voice } from "./voice";
 
 export interface Mixer { master: number; music: number; sfx: number; muted: boolean }
 export const DEFAULT_MIXER: Mixer = { master: 0.7, music: 0.3, sfx: 0.65, muted: false };
-export interface Beds { crowd: number; protesters: number; training: number | null; night: number; era: string }
-const SILENT: Beds = { crowd: 0, protesters: 0, training: null, night: 0, era: "seed" };
+/** `mode` and `flavour` (FLT-66): what the band plays, from the game speed and the skin. */
+export interface Beds { crowd: number; protesters: number; training: number | null; night: number; era: string; mode: Mode; flavour: Flavour }
+const SILENT: Beds = { crowd: 0, protesters: 0, training: null, night: 0, era: "seed", mode: "walkies", flavour: "classic" };
+/** The band's mode and flavour for a speed (0 = paused), whether time is held, and the skin. */
+export const musicFor = (speed: number, paused: boolean, skin: string) => ({ mode: modeFor(speed, paused), flavour: flavourFor(skin) });
 const clamp = (v: number) => Math.max(0, Math.min(1, v));
 
 export function readMixer(raw: string | null): Mixer {
@@ -16,45 +22,6 @@ export function readMixer(raw: string | null): Mixer {
   } catch { return { ...DEFAULT_MIXER }; }
 }
 
-function noiseBuffer(ctx: BaseAudioContext) {
-  const buffer = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
-  const data = buffer.getChannelData(0);
-  let brown = 0;
-  for (let i = 0; i < data.length; i++) {
-    brown = (brown + (Math.random() * 2 - 1) * 0.04) / 1.02;
-    data[i] = brown * 3.5;
-  }
-  return buffer;
-}
-
-/** Click-free envelopes. Each voice releases and disconnects its nodes on completion. */
-function voice(ctx: BaseAudioContext, bus: AudioNode, n: Note, at: number, noise: AudioBuffer) {
-  const start = at + n.at;
-  const envelope = ctx.createGain();
-  envelope.gain.setValueAtTime(0.0001, start);
-  envelope.gain.exponentialRampToValueAtTime(Math.max(0.0002, n.gain), start + 0.008);
-  envelope.gain.exponentialRampToValueAtTime(0.0001, start + n.duration);
-  envelope.connect(bus);
-  if (n.wave === "noise") {
-    const source = ctx.createBufferSource();
-    const filter = ctx.createBiquadFilter();
-    source.buffer = noise;
-    filter.type = "lowpass";
-    filter.frequency.setValueAtTime(n.hz, start);
-    filter.frequency.exponentialRampToValueAtTime(n.endHz ?? n.hz, start + n.duration);
-    source.connect(filter).connect(envelope);
-    source.onended = () => { source.disconnect(); filter.disconnect(); envelope.disconnect(); };
-    source.start(start); source.stop(start + n.duration + 0.02);
-  } else {
-    const source = ctx.createOscillator();
-    source.type = n.wave;
-    source.frequency.setValueAtTime(n.hz, start);
-    source.frequency.exponentialRampToValueAtTime(n.endHz ?? n.hz, start + n.duration);
-    source.connect(envelope);
-    source.onended = () => { source.disconnect(); envelope.disconnect(); };
-    source.start(start); source.stop(start + n.duration + 0.02);
-  }
-}
 export function synthCue(ctx: BaseAudioContext, bus: AudioNode, cue: Cue, variation = 0, noise = noiseBuffer(ctx)) {
   synthNotes(ctx, bus, cueNotes(cue, variation), noise);
 }
@@ -81,9 +48,9 @@ export class SoundKit {
   private hum: OscillatorNode | null = null;
   private noise: AudioBuffer | null = null;
   private continuous: (OscillatorNode | AudioBufferSourceNode)[] = [];
-  private nextBeat = 0;
-  private beat = 0;
+  private band: Band | null = null;
   private nextBed = 0;
+  private syllable = 0;
   private variation = 0;
   private lastCue = new Map<string, number>();
   private overrides: Readonly<Record<string, readonly Note[]>> = {};
@@ -102,11 +69,10 @@ export class SoundKit {
         if (!ctor) return false;
         const ctx = this.ctx = new ctor();
         this.master = ctx.createGain(); this.music = ctx.createGain(); this.sfx = ctx.createGain();
-        const limiter = ctx.createDynamicsCompressor();
-        limiter.threshold.value = -12; limiter.knee.value = 12; limiter.ratio.value = 8;
         this.music.connect(this.master); this.sfx.connect(this.master);
-        this.master.connect(limiter).connect(ctx.destination);
+        this.master.connect(limiter(ctx)).connect(ctx.destination);
         this.noise = noiseBuffer(ctx);
+        this.band = new Band(ctx, this.music, { mode: this.beds.mode, flavour: this.beds.flavour, era: this.beds.era });
         const source = ctx.createBufferSource();
         source.buffer = this.noise; source.loop = true;
         const filter = ctx.createBiquadFilter(); filter.type = "bandpass"; filter.frequency.value = 480; filter.Q.value = 0.8;
@@ -116,7 +82,7 @@ export class SoundKit {
         this.training = ctx.createGain(); this.training.gain.value = 0;
         this.hum.connect(this.training).connect(this.sfx); this.hum.start();
         this.continuous = [source, this.hum];
-        this.nextBeat = ctx.currentTime; this.nextBed = ctx.currentTime;
+        this.nextBed = ctx.currentTime;
         this.setMixer(this.mixer);
       }
       if (this.ctx.state === "suspended" && !this.hidden) await this.ctx.resume();
@@ -154,6 +120,12 @@ export class SoundKit {
     this.variation++;
     for (const n of notes) voice(ctx, this.sfx, n, ctx.currentTime + 0.005, this.noise ?? noiseBuffer(ctx));
   }
+  /** Every frame (FLT-66): the band builds the next few voices, a handful at a time rather than a burst. */
+  play() {
+    const ctx = this.ctx;
+    if (!ctx || !this.band || ctx.state !== "running" || this.mixer.muted || this.hidden) return;
+    this.band.pump(ctx.currentTime, 0.3);
+  }
   update(beds: Beds) {
     this.beds = beds;
     const ctx = this.ctx;
@@ -162,20 +134,9 @@ export class SoundKit {
     this.crowd?.gain.setTargetAtTime(clamp(beds.crowd) * 0.18, now, 0.25);
     this.training?.gain.setTargetAtTime(beds.training === null ? 0 : 0.028, now, 0.2);
     this.hum?.frequency.setTargetAtTime(80 + clamp(beds.training ?? 0) * 220, now, 0.2);
-    if (this.mixer.muted || this.hidden) { this.nextBeat = now; this.nextBed = now; return; }
-    const score = eraScore(beds.era);
-    const beatLength = 60 / score.bpm;
-    if (this.nextBeat < now - 0.25) this.nextBeat = now; // No catch-up burst after a background tab.
-    while (this.nextBeat < now + 0.22) {
-      const chord = CHORDS[Math.floor(this.beat / 4) % 4]!;
-      const root = score.root;
-      if (this.beat % 4 === 0) {
-        for (const n of chord) voice(ctx, this.music, { at: 0, hz: midi(root + n), duration: beatLength * 3.8, gain: 0.045, wave: "triangle" }, this.nextBeat, this.noise);
-      }
-      const step = chord[this.beat % 3]!;
-      voice(ctx, this.music, { at: 0, hz: midi(root + step + 12), duration: beatLength * 0.6, gain: 0.03, wave: "square" }, this.nextBeat, this.noise);
-      this.nextBeat += beatLength; this.beat++;
-    }
+    if (this.mixer.muted || this.hidden) { this.band?.hold(); this.nextBed = now; return; }
+    // FLT-66: the band hears the speed and skin now, and plays them from the next bar line.
+    this.band?.set({ mode: beds.mode, flavour: beds.flavour, era: beds.era });
     if (now >= this.nextBed) {
       this.nextBed = now + 0.7;
       if (beds.protesters > 10) {
@@ -184,10 +145,10 @@ export class SoundKit {
       }
       if (beds.night > 0.1) for (let i = 0; i < 3; i++) voice(ctx, this.sfx, { at: i * 0.055, hz: 4200 + i * 120, duration: 0.035, gain: beds.night * 0.014, wave: "sine" }, now + 0.01, this.noise);
       // Short pitched noise syllables make the crowd more than a static hiss.
-      if (beds.crowd > 0.02) voice(ctx, this.sfx, { at: 0, hz: 350 + (this.beat % 3) * 120, duration: 0.22, gain: clamp(beds.crowd) * 0.06, wave: "noise" }, now + 0.01, this.noise);
+      if (beds.crowd > 0.02) voice(ctx, this.sfx, { at: 0, hz: 350 + (this.syllable++ % 3) * 120, duration: 0.22, gain: clamp(beds.crowd) * 0.06, wave: "noise" }, now + 0.01, this.noise);
     }
   }
-  get diagnostics() { return { status: this.status, mixer: this.mixer, beds: this.beds, beat: this.beat, cues: Object.fromEntries(this.lastCue), humHz: this.hum?.frequency.value, crowdGain: this.crowd?.gain.value, masterGain: this.master?.gain.value }; }
+  get diagnostics() { return { status: this.status, mixer: this.mixer, beds: this.beds, music: this.band && { playing: this.band.playing, want: this.band.want, bar: this.band.bar, bpm: this.band.bpm, queued: this.band.pending, cost: this.band.costReport() }, cues: Object.fromEntries(this.lastCue), humHz: this.hum?.frequency.value, crowdGain: this.crowd?.gain.value, masterGain: this.master?.gain.value }; }
   dispose() {
     this.disposed = true;
     this.continuous.forEach((s) => { s.stop(); s.disconnect(); });
