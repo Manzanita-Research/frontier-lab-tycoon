@@ -327,6 +327,13 @@
       "bird-disc",
       "bird-karaoke",
       "bird-swag"
+    ],
+    "flt86": [
+      "money-finance",
+      "money-round",
+      "money-last",
+      "money-overdraft",
+      "money-win"
     ]
   },
   "scenes": {
@@ -4362,6 +4369,81 @@
       "steps": [
         {
           "wait": 500
+        }
+      ]
+    },
+    "money-finance": {
+      "title": "FLT-86: the money line says net; Finance says Revenue, and what the bailouts cost (the mid-game campus signed round 1)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { document.querySelectorAll('[role=tab]').forEach((t) => /^Finance$/.test(t.textContent.trim()) && t.click()); }"
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "money-round": {
+      "title": "FLT-86: cash goes below $0 at midnight: round 1 of 3 (main: the board wires $2M, every time, forever)",
+      "steps": [
+        {
+          "eval": "(f, w) => { w.cash = -40000; w.tick = (w.day + 1) * 20 - 1; f.tick(w); }"
+        },
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "money-last": {
+      "title": "FLT-86: the third time: the last round, on a yacht",
+      "steps": [
+        {
+          "eval": "(f, w) => { w.cash = -40000; if (w.economy.context.rounds !== undefined) { w.economy.context.rounds = 2; w.economy.context.stake = 75; } w.tick = (w.day + 1) * 20 - 1; f.tick(w); }"
+        },
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "money-overdraft": {
+      "title": "FLT-86: no rounds left: the bank's 30 days",
+      "steps": [
+        {
+          "eval": "(f, w) => { w.cash = -40000; if (w.economy.context.rounds !== undefined) { w.economy.context.rounds = 3; w.economy.context.stake = 55; } w.tick = (w.day + 1) * 20 - 1; f.tick(w); }"
+        },
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "money-win": {
+      "title": "FLT-86: the win, with a toast up when it lands (it steps aside to the ticker now)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { w.toasts.push({ id: 990001, text: 'Kevin Softmax loved it: $160K in the bank', tone: 'good', source: 'crowd', importance: 'you', reply: true }); }"
+        },
+        {
+          "wait": 700
+        },
+        {
+          "eval": "(f, w) => { for (const g of w.goals.context.goals) { g.met = true; g.value = g.target; if (g.hold) g.held = g.hold; } w.goals = { value: 'won', context: { ...w.goals.context, outcomeDay: w.day } }; w.toasts.push({ id: 990002, text: 'Your Arena lead is 40 Elo. The board would like it to be 400.', tone: 'neutral', source: 'leapfrog', importance: 'you' }); w.tick = (w.day + 1) * 20 - 1; f.tick(w); }"
+        },
+        {
+          "wait": 1200
         }
       ]
     }
