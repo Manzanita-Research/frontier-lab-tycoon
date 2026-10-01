@@ -347,6 +347,16 @@
       "front-escaped",
       "front-escaped-phone"
     ],
+    "beats": [
+      "overview",
+      "phone",
+      "beats-logo",
+      "beats-logo-phone",
+      "beats-unlock",
+      "beats-badnews",
+      "beats-badnews-phone",
+      "beats-settings"
+    ],
     "flt-87": [
       "flt87-phone-l1",
       "flt87-phone-l4",
@@ -4846,6 +4856,260 @@
       "steps": [
         {
           "wait": 6500
+        }
+      ]
+    },
+    "beats-logo": {
+      "title": "FLT-76: the first decision, two days after the first path (Level 1, the first model training)",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "11.5,16",
+        "zoom": 55
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 17
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 16
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placeBuilding",
+              "kind": "hall",
+              "x": 12,
+              "z": 16
+            }
+          }
+        },
+        {
+          "wait": 400
+        },
+        {
+          "eval": "(f, w) => { for (let i = 0; i < 3 * 20; i++) f.tick(w); }"
+        },
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "beats-logo-phone": {
+      "title": "FLT-76: the Logo on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "11.5,16",
+        "zoom": 40
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 17
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 16
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placeBuilding",
+              "kind": "hall",
+              "x": 12,
+              "z": 16
+            }
+          }
+        },
+        {
+          "wait": 400
+        },
+        {
+          "eval": "(f, w) => { for (let i = 0; i < 3 * 20; i++) f.tick(w); }"
+        },
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "beats-unlock": {
+      "title": "FLT-76: a New! card with its joke line (Level 4, The Race)",
+      "steps": [
+        {
+          "eval": "(f, w) => { w.unlockCards = [{ id: 'race', title: 'New! The Race', body: 'Top 3 on the Arena', items: ['Arena', 'R&D', 'News', 'Factions'] }]; f.tick(w); }"
+        },
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "beats-badnews": {
+      "title": "FLT-76: at ▶▶▶ public trust falls 30 points: the game drops to 1× and pins what happened",
+      "steps": [
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 10
+          }
+        },
+        {
+          "wait": 600
+        },
+        {
+          "eval": "(f, w) => { w.disasters.trust = Math.max(0, w.disasters.trust - 30); }"
+        },
+        {
+          "wait": 1200
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "beats-badnews-phone": {
+      "title": "FLT-76: the bad-news slowdown on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 10
+          }
+        },
+        {
+          "wait": 600
+        },
+        {
+          "eval": "(f, w) => { w.disasters.trust = Math.max(0, w.disasters.trust - 30); }"
+        },
+        {
+          "wait": 1200
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "beats-settings": {
+      "title": "FLT-76: Start ▸ Settings ▸ Slow down for bad news (on by default)",
+      "steps": [
+        {
+          "click": "[data-testid=start-button]"
+        },
+        {
+          "click": ".f95-startwrap button[role=menuitem]:has-text(\"Settings\")",
+          "optional": true
+        },
+        {
+          "wait": 600
         }
       ]
     },
