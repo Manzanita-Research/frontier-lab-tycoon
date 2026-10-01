@@ -1,0 +1,34 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "babb740d8cda4c2161ce857838435028a0504551"
+  },
+  "head": {
+    "branch": "flt-70-bigbox",
+    "sha": "bbfa1eb",
+    "dirty": true
+  },
+  "seconds": 49.699,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "overview",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-70/before/overview.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-70/after/overview.png",
+      "title": "The campus, mid-morning, paused",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-70/compare/overview.png",
+      "changed": 0.0013148148148148149
+    },
+    {
+      "scene": "phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-70/before/phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-70/after/phone.png",
+      "title": "The same campus on a phone (390x844)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-70/compare/phone.png",
+      "changed": 0.000023544780653785393
+    }
+  ],
+  "errors": []
+}

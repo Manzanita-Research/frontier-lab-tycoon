@@ -26,6 +26,8 @@ export interface ContentApi {
   readonly mishaps: ReadonlyArray<import("../../content/leapfrog").MishapDef>;
   /** FLT-33's factions (mods/base-factions, plus mods/base-water's counter-protesters). */
   readonly factions: ReadonlyArray<import("../../content/factions").FactionDef>;
+  /** FLT-69's Bird App: archetypes, posts and reactions (mods/base-birdapp). */
+  readonly birdapp: ReadonlyArray<import("../../content/birdapp").BirdRow>;
   readonly tables: typeof baseTables;
 }
 export class Content extends Context.Service<Content, ContentApi>()("@flt/Content") {}

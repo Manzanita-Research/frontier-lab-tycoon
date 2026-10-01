@@ -6,7 +6,8 @@ import { defs } from "./defs";
 import { NEEDS, NEEDS_BY_KIND, type NeedKey } from "../content/needs";
 import { CROWDING_PROTESTERS, MAX_AGENTS, WALK_SPEED } from "./constants";
 import { showFor } from "./demo";
-import { formatMoney } from "./format";
+import { QUIT_LINES } from "../content/toastGroups";
+import { fillTemplate, formatMoney } from "./format";
 import { addToast, pushNews } from "./news";
 import { applyServes, gainOf, MIN_GAIN, mostUrgent, tickNeeds, urgencyOf } from "./needs";
 import { addIncident, APPLICANT_VIBES } from "./vibes";
@@ -30,6 +31,7 @@ import {
 import type { EventFromLogic } from "xstate";
 import { stepWalker, tourDone, walkerMachine, type WalkerPhase } from "./machines/walker";
 import type { Rng } from "./rng";
+import { auraApplicants } from "./birdapp/effects";
 import { TARGET_GATE, TARGET_WANDER, type Building, type GameState, type Point, type Walker, type WalkerKind, type WalkerMode } from "./types";
 
 /** Chance that a walker leaving a building hangs around outside it for a bit instead of rushing off. */
@@ -292,7 +294,8 @@ function walkOut(state: GameState, w: Walker, rng: Rng) {
     return;
   }
   pushNews(state, rng, "researcherLeft", { name: w.name, their: defs().names.THEIR[w.pro] ?? "their" });
-  addToast(state, `${w.name} handed in the box and left.`, "bad", { source: "staff", importance: "you" });
+  const line = QUIT_LINES[w.id % QUIT_LINES.length]!;
+  addToast(state, fillTemplate(line, { name: w.name, their: defs().names.THEIR[w.pro] ?? "their" }), "bad", { source: "staff", importance: "you", group: { kind: "quit", who: w.name } });
   addIncident(state, 0.15);
 }
 
@@ -710,7 +713,7 @@ function admitApplicants(state: GameState, rng: Rng, researchers: number) {
   if (vibes <= APPLICANT_VIBES || room <= 0) return;
   const batch = Math.min(room, 1 + Math.floor((vibes - APPLICANT_VIBES) / 300));
   for (let i = 0; i < batch; i++) {
-    if (!rng.chance(Math.min(1, (0.5 + vibes / 2000) * (state.recruitingPull ?? 1)))) continue;
+    if (!rng.chance(Math.min(1, (0.5 + vibes / 2000) * (state.recruitingPull ?? 1) * auraApplicants(state)))) continue;
     const w = spawnFromGate(state, "researcher", rng);
     if (w && state.recruitingPull !== undefined) w.focus = Math.min(1, w.focus + Math.max(0, state.recruitingPull - 1) * 0.1);
     if (w && rng.chance(0.35)) pushNews(state, rng, "applicant", { name: w.name });

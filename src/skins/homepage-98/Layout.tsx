@@ -23,6 +23,7 @@ export function Layout({ slots }: SlotPropsMap["Layout"]) {
             <div className="gc-tools2">
               {slots.NewsControls}
               {slots.DramaButton}
+              {slots.WindowTray}
               {slots.PhotoButton}
             </div>
           </div>
@@ -33,6 +34,7 @@ export function Layout({ slots }: SlotPropsMap["Layout"]) {
           {slots.Benchmarks}
           {slots.Voice}
           {slots.Factions}
+          {slots.BirdApp}
           {slots.ThoughtsPanel}
         </div>
       </div>

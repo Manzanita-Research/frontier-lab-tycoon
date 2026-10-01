@@ -79,8 +79,13 @@
     > .f95-win {
       width: min(400px, 100%);
     }
+    /* The benchmark table wants room: opened by the player, every column shows. */
     > .f95-tasks.wide {
       width: 100%;
+    }
+    /* Opened by the game (FLT-54), it keeps to the right edge, out of the middle of a 1440×900 screen: the table scrolls instead. */
+    > .f95-tasks.wide.auto {
+      width: min(100%, max(400px, calc(30vw - 10px)));
     }
   }
 
@@ -903,6 +908,65 @@
     background: repeating-conic-gradient(var(--lt) 0 25%, var(--g) 0 50%) 0 0 / 2px 2px;
     white-space: nowrap;
   }
+  /* FLT-54: windows waiting their turn, as taskbar buttons that flash navy (the way a 1995 program asked for you), and
+     folded windows with unread news (a red dot and the count). */
+  .f95-waiting {
+    display: flex;
+    gap: 3px;
+    min-width: 0;
+    flex: 0 1 auto;
+    overflow: hidden;
+  }
+  .f95-wait {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    height: 32px;
+    max-width: 190px;
+    padding: 0 8px;
+    border: 0;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    background: var(--g);
+    box-shadow: var(--btn);
+    white-space: nowrap;
+    pointer-events: auto;
+    span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    &.flashing {
+      animation: f95-wait-flash 1s steps(1, end) infinite;
+    }
+    &:active {
+      box-shadow: var(--pressed);
+    }
+  }
+  @keyframes f95-wait-flash {
+    50% {
+      background: var(--navy);
+      color: var(--flt-color-accentText);
+    }
+  }
+  .f95-unread {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    color: var(--flt-color-bad);
+    &::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--flt-color-bad);
+    }
+  }
+  &[data-motion="reduced"] .f95-wait.flashing {
+    animation: none;
+    background: var(--navy);
+    color: var(--flt-color-accentText);
+  }
   .f95-tooltip {
     position: absolute;
     bottom: calc(100% + 6px);
@@ -1472,13 +1536,15 @@
       color: #7a7a7a;
     }
   }
+  /* Just above the taskbar, off the campus (FLT-54: nothing the game opens by itself covers the middle of the screen). */
   .f95-unlock {
     position: fixed;
     z-index: 30;
-    top: 38%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: min(440px, calc(100vw - 20px));
+    /* FLT-54: bottom left, below the goal note, and no wider than the edge of the campus (the middle 40% stays clear). */
+    bottom: calc(var(--taskbar) + 12px);
+    left: 12px;
+    width: min(440px, calc(30vw - 24px), calc(100vw - 20px));
+    min-width: min(300px, calc(100vw - 20px));
     pointer-events: auto;
   }
   .f95-unlockitems {
@@ -3431,7 +3497,8 @@
       min-width: 0;
     }
     .f95-stack > .f95-win,
-    .f95-stack > .f95-tasks.wide {
+    .f95-stack > .f95-tasks.wide,
+    .f95-stack > .f95-tasks.wide.auto {
       width: auto;
     }
     .f95-props,
@@ -3480,6 +3547,11 @@
       row-gap: 0;
       padding: 0 4px 4px;
     }
+    .f95-unlock {
+      left: 10px;
+      width: calc(100vw - 20px);
+      min-width: 0;
+    }
     .f95-news {
       order: -1;
       flex: 1 1 100%;
@@ -3496,6 +3568,7 @@
     }
     .f95-qs,
     .f95-task span,
+    .f95-wait span,
     .f95-clock,
     .f95-s.snd {
       display: none;
@@ -5282,5 +5355,409 @@
 @keyframes frontier-95-fly {
   to {
     left: calc(100% - 40px);
+  }
+}
+/* The Bird App (FLT-69): the tray bird and "Bird Reader 1.0", a newsreader crossed with a buddy list. */
+[data-skin="frontier-95"] {
+  .f95-s.bird.loud svg {
+    animation: frontier-95-flap 0.4s steps(2) infinite;
+  }
+  .f95-birdn {
+    position: absolute;
+    right: 0;
+    top: 0;
+    min-width: 12px;
+    padding: 0 2px;
+    background: #0080ff;
+    color: #fff;
+    font-size: 11px;
+    font-style: normal;
+    line-height: 12px;
+    text-align: center;
+    &.unread {
+      background: var(--flt-color-bad);
+    }
+  }
+  /* Where the Discourse Monitor opens, in the clear space under Lab Properties; with the Monitor open too, one column further in. */
+  .f95-bird {
+    position: fixed;
+    left: 336px;
+    bottom: calc(var(--taskbar) + 8px);
+    width: 430px;
+    max-height: calc(100vh - var(--taskbar) - 60px);
+    display: flex;
+    flex-direction: column;
+    z-index: 6;
+    .f95-menubar {
+      font-size: 15px;
+    }
+    .f95-status {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+  }
+  .f95-bird-aura {
+    display: grid;
+    gap: 3px;
+    padding: 2px 6px 4px;
+  }
+  .f95-bird-aurarow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    .f95-prog {
+      flex: 1;
+    }
+  }
+  .f95-bird-spark {
+    display: inline-grid;
+    place-items: center;
+    padding: 1px 3px;
+    background: #000;
+    color: #00ff00;
+    .bird-spark {
+      display: block;
+    }
+  }
+  .f95-bird-moments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    span {
+      padding: 0 5px;
+      background: var(--flt-color-tip);
+      box-shadow: inset 0 0 0 1px #000;
+      font-size: 14px;
+    }
+  }
+  .f95-birdpage {
+    min-height: 0;
+    overflow: auto;
+    padding: 4px;
+  }
+  .f95-bird-list,
+  .f95-bird-buddies,
+  .f95-bird-queue {
+    margin: 0;
+    max-height: 170px;
+    overflow: auto;
+  }
+  .f95-bird-list {
+    .f95-lhead,
+    .f95-lrow {
+      grid-template-columns: 12px minmax(0, 1fr) minmax(0, 0.8fr) 44px 38px;
+      gap: 5px;
+    }
+    .f95-lrow {
+      cursor: pointer;
+      &.outcome-live {
+        font-weight: bold;
+      }
+      &.outcome-flop {
+        color: var(--flt-color-textDim);
+      }
+      &.outcome-banger .mark {
+        color: #c08000;
+      }
+      &.outcome-controversy .mark,
+      &.outcome-ratioed .mark,
+      &.outcome-cancelled .mark,
+      &.ratioing .replies {
+        color: var(--flt-color-bad);
+      }
+      &.outcome-cancelled span:nth-child(2) {
+        text-decoration: line-through;
+      }
+      &.you,
+      &.you .mark,
+      &.you .replies {
+        color: var(--flt-color-selectionText);
+      }
+    }
+    .num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+  .f95-bird-empty {
+    margin: 6px;
+    font-size: 15px;
+    color: var(--flt-color-textDim);
+  }
+  .f95-bird-preview {
+    position: relative;
+    margin: 4px 0 0;
+    padding: 5px 8px 6px;
+    font-size: 15px;
+    background: var(--flt-color-inset);
+    .f95-bird-hdr {
+      display: grid;
+      padding-bottom: 3px;
+      border-bottom: 1px solid #808080;
+      font-size: 14px;
+      span {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+    }
+    &.outcome-cancelled .f95-bird-text {
+      text-decoration: line-through;
+      text-decoration-color: #c00000;
+    }
+    blockquote {
+      margin: 4px 0 0;
+      color: #0000c0;
+      font-size: 14px;
+    }
+    .f95-sticker.burst {
+      top: auto;
+      right: 6px;
+      bottom: 4px;
+      padding: 2px 8px;
+      font-size: 16px;
+      animation: frontier-95-birdstamp 0.3s steps(3);
+    }
+  }
+  .f95-bird-text {
+    margin: 5px 0;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+  .f95-bird-counts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 10px;
+    font-size: 14px;
+    .bad {
+      color: var(--flt-color-bad);
+    }
+    small {
+      color: var(--flt-color-textDim);
+      font-size: 13px;
+    }
+  }
+  .f95-bird-outcome {
+    padding: 0 5px;
+    font-weight: normal;
+    box-shadow: inset 0 0 0 1px currentColor;
+    &.tone-good {
+      color: var(--flt-color-good);
+    }
+    &.tone-bad {
+      color: var(--flt-color-bad);
+    }
+    &.tone-joke {
+      color: var(--flt-color-warn);
+    }
+    &.tone-neutral {
+      color: var(--flt-color-textDim);
+    }
+  }
+  .f95-bird-typing {
+    margin: 4px 2px 0;
+    font-size: 14px;
+    font-style: italic;
+    color: var(--flt-color-textDim);
+  }
+  .f95-disc ~ .f95-bird {
+    left: 688px;
+  }
+  .f95-bird-group {
+    display: block;
+    padding: 1px 4px;
+    font-weight: normal;
+    font-size: 14px;
+    color: var(--flt-color-textDim);
+    &::before {
+      content: "";
+      display: inline-block;
+      margin: 0 5px 2px 2px;
+      border: 4px solid transparent;
+      border-top: 5px solid #000;
+      border-bottom: 0;
+    }
+  }
+  .f95-bird-buddy {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 1px 6px 1px 14px;
+    font-size: 15px;
+    cursor: pointer;
+    .nm {
+      flex: 1;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    small {
+      color: var(--flt-color-textDim);
+    }
+    /* The status flower: green online, yellow away, grey offline, red when every recruiter has the name. */
+    .flower {
+      flex: none;
+      width: 10px;
+      height: 10px;
+      background: #00c000;
+      box-shadow: inset 0 0 0 1px #000;
+      clip-path: polygon(50% 0, 65% 30%, 100% 35%, 72% 60%, 80% 100%, 50% 80%, 20% 100%, 28% 60%, 0 35%, 35% 30%);
+    }
+    &.tier-occasional .flower {
+      background: #00a0ff;
+    }
+    &.tier-break .flower {
+      background: #ffd400;
+    }
+    &.tier-recluse {
+      color: #808080;
+      .flower {
+        background: #a0a0a0;
+      }
+    }
+    &.hot .flower {
+      background: #e00000;
+    }
+    &.you {
+      background: var(--flt-color-selection);
+      color: var(--flt-color-selectionText);
+      small {
+        color: inherit;
+      }
+    }
+  }
+  .f95-bird-policy {
+    margin: 6px 0 0;
+    padding: 4px 10px 6px;
+    border: 0;
+    box-shadow: var(--etched);
+    font-size: 15px;
+    legend {
+      padding: 0 3px;
+      max-width: 100%;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    label {
+      display: grid;
+      grid-template-columns: auto auto 1fr;
+      align-items: baseline;
+      gap: 6px;
+      padding: 2px 0;
+      cursor: pointer;
+      small {
+        text-align: right;
+        color: var(--flt-color-textDim);
+        font-size: 13px;
+      }
+    }
+    .bad {
+      color: var(--flt-color-bad);
+      font-weight: normal;
+    }
+  }
+  .f95-bird-who {
+    margin: 0 0 4px;
+    font-size: 14px;
+  }
+  .f95-bird-meter {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    .bird-meter {
+      height: 10px;
+      border: 0;
+      border-radius: 0;
+      box-shadow: var(--sunk);
+      background: var(--flt-color-inset);
+    }
+    .bird-meter::after {
+      width: 1px;
+      background: #000;
+    }
+    .bird-meter .banger {
+      background: repeating-linear-gradient(90deg, #008000 0 4px, transparent 4px 5px);
+    }
+    .bird-meter .cancel {
+      background: repeating-linear-gradient(90deg, #c00000 0 4px, transparent 4px 5px);
+    }
+  }
+  .f95-bird-metertext {
+    display: block;
+    margin: 1px 0 3px;
+    text-align: center;
+    color: var(--flt-color-textDim);
+    font-size: 13px;
+  }
+  .f95-bird-comms {
+    display: grid;
+    gap: 6px;
+  }
+  .f95-bird-drown {
+    padding: 4px 4px 2px;
+    gap: 10px;
+    align-items: center;
+    font-size: 15px;
+  }
+  .f95-bird-desk {
+    display: block;
+    padding: 2px 6px;
+    background: var(--flt-color-inset);
+  }
+  .f95-bird.drowning .f95-bird-desk {
+    color: var(--flt-color-bad);
+  }
+  .f95-bird-fire {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr);
+    align-items: center;
+    gap: 6px;
+    padding: 2px 4px;
+    font-size: 15px;
+    b {
+      font-weight: normal;
+    }
+    span {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    &.cancelled b {
+      color: var(--flt-color-bad);
+    }
+  }
+  @media (max-width: 640px) {
+    .f95-bird {
+      left: 4px;
+      right: 4px;
+      width: auto;
+      max-height: 62vh;
+      .f95-bird-list,
+      .f95-bird-buddies {
+        max-height: 22vh;
+      }
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .f95-s.bird.loud svg,
+    .f95-bird-preview .f95-sticker.burst {
+      animation: none;
+    }
+  }
+}
+@keyframes frontier-95-flap {
+  50% {
+    transform: translateY(-2px) rotate(-8deg);
+  }
+}
+@keyframes frontier-95-birdstamp {
+  from {
+    transform: rotate(-8deg) scale(2);
+    opacity: 0;
   }
 }

@@ -38,6 +38,8 @@ import { congaLine } from "./conga";
 import { resign } from "./walkers";
 import type { Building, GameState, Importance, NoticeSource, StaffJob, Tone } from "./types";
 import { defs } from "./defs";
+import { postNow } from "./birdapp/driver";
+import { BIRD_OUTCOMES, type BirdOutcome } from "../content/birdapp";
 
 /** A tick is 1.2 game hours (20 to a day). */
 export const HOURS_PER_TICK = 24 / TICKS_PER_DAY;
@@ -701,6 +703,12 @@ export const VERBS: Record<string, VerbDef> = {
         w.focus = Math.max(0, Math.min(1, w.focus + a));
       }
     },
+  },
+  "birdapp.post": {
+    doc: "Someone at the lab posts `text` on the Bird App within the hour (FLT-69): the beat's first person if they post, else one of `archetype` (oracle, hype, duo, thread, leaderboard, doomer, anon), else anyone who posts. It lands at midnight: `outcome` (flop, banger, controversy, ratioed, cancelled) says how, or the odds for its `spice` (0 to 1, default 0.5) do. Nothing while the Bird App is asleep.",
+    spec: { text: "string", spice: "number?", archetype: "string?", outcome: "string?" },
+    verify: (p) => (p.outcome === undefined || (BIRD_OUTCOMES as readonly string[]).includes(p.outcome as string) ? null : `unknown outcome "${p.outcome as string}"; outcomes are ${BIRD_OUTCOMES.join(", ")}`),
+    run: (env, p) => postNow(env.state, env.rng, { text: say(env, p.text as string), spice: p.spice as number | undefined, archetype: p.archetype as string | undefined, outcome: p.outcome as BirdOutcome | undefined, by: env.people?.[0] }),
   },
   "visitors.arrive": {
     doc: "A visiting group of a kind a pack registered (`content.groups`) comes in through the gate and tours the campus. Owned by the calling machine.",

@@ -300,6 +300,33 @@
       "migrated",
       "picker"
     ],
+    "flt54": [
+      "flt54-l4",
+      "flt54-l5",
+      "flt54-busy",
+      "overview",
+      "event",
+      "phone"
+    ],
+    "flt54-tasks": [
+      "flt54-tasks-game",
+      "flt54-tasks-player"
+    ],
+    "birdapp": [
+      "bird",
+      "bird-banger",
+      "bird-cancel",
+      "bird-buddies",
+      "bird-phone"
+    ],
+    "birdapp-skins": [
+      "bird-base",
+      "bird-homepage",
+      "bird-almanac",
+      "bird-disc",
+      "bird-karaoke",
+      "bird-swag"
+    ],
     "flt-73": [
       "crt-off",
       "crt-midgame-off",
@@ -4022,6 +4049,235 @@
         },
         {
           "wait": 600
+        }
+      ]
+    },
+    "flt54-l4": {
+      "title": "FLT-54: Level 4 (The Race) earned: the New! card and the windows at 1440x900",
+      "query": {
+        "ladder": 4,
+        "unlock": 1,
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt54-l5": {
+      "title": "FLT-54: Level 5 (Scrutiny) earned: the New! card and the windows at 1440x900",
+      "query": {
+        "ladder": 5,
+        "unlock": 1,
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt54-busy": {
+      "title": "FLT-54: thirty busy mid-game days, cards answered, then paused: what the game left open",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "eval": "async (f, w) => { for (let d = 0; d < 30; d++) { f.send({ type: 'CHOOSE', choiceIndex: 0 }); await new Promise((r) => setTimeout(r, 70)); for (let i = 0; i < 20; i++) f.tick(w); await new Promise((r) => setTimeout(r, 240)); } }"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt54-tasks-game": {
+      "title": "FLT-54: the Task Mangler's benchmark table as the game opened it (Release Leapfrog): kept to the right edge",
+      "query": {
+        "moment": "pair",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt54-tasks-player": {
+      "title": "FLT-54: the same Task Mangler folded and opened again by the player: full width, every column",
+      "query": {
+        "moment": "pair",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 800
+        },
+        {
+          "click": ".f95-tasks.open .f95-tb"
+        },
+        {
+          "wait": 400
+        },
+        {
+          "click": ".f95-tasks:not(.open) .f95-tb"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "bird": {
+      "title": "FLT-69: Bird Reader 1.0 open on the timeline: today's posts climbing, the week's log, the preview pane",
+      "query": {
+        "moment": "bird",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-banger": {
+      "title": "FLT-69: a banger going viral (the VIRAL! burst, the tray bird flapping)",
+      "query": {
+        "moment": "bird-banger",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-cancel": {
+      "title": "FLT-69: a cancel that stuck: the Comms Desk drowning, the queue",
+      "query": {
+        "moment": "bird-cancel",
+        "warp": null
+      },
+      "steps": [
+        {
+          "click": ".f95-bird .f95-tab:nth-child(3)",
+          "optional": true
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "bird-buddies": {
+      "title": "FLT-69: the Contact List (tiers as ICQ groups) and a Posting Policy with the three levers",
+      "query": {
+        "moment": "bird",
+        "warp": null
+      },
+      "steps": [
+        {
+          "click": ".f95-bird .f95-tab:nth-child(2)",
+          "optional": true
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "bird-phone": {
+      "title": "FLT-69: Bird Reader on a phone, the cancel moment",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "moment": "bird-cancel",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-base": {
+      "title": "FLT-69: the base Bird App panel, open",
+      "query": {
+        "moment": "bird",
+        "warp": null,
+        "skin": "base"
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-homepage": {
+      "title": "FLT-69: Homepage '98's Bird App: sign our guestbook",
+      "query": {
+        "moment": "bird-banger",
+        "warp": null,
+        "skin": "homepage-98"
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-almanac": {
+      "title": "FLT-69: Field Almanac's Bird App: a birding log",
+      "query": {
+        "moment": "bird-banger",
+        "warp": null,
+        "skin": "field-almanac"
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-disc": {
+      "title": "FLT-69: Discovery Disc '96's Bird App: an encyclopedia",
+      "query": {
+        "moment": "bird-banger",
+        "warp": null,
+        "skin": "discovery-disc-96"
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-karaoke": {
+      "title": "FLT-69: Karaoke Night's Bird App: the lyric screen",
+      "query": {
+        "moment": "bird-banger",
+        "warp": null,
+        "skin": "karaoke-night"
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-swag": {
+      "title": "FLT-69: Swag Drop's Bird App: a merch drop",
+      "query": {
+        "moment": "bird-banger",
+        "warp": null,
+        "skin": "swag-drop"
+      },
+      "steps": [
+        {
+          "wait": 500
         }
       ]
     },

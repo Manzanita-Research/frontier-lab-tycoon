@@ -10,6 +10,7 @@ import { Progression, CoachLine, Arc, Building, Disaster, Ending, EntityKind, Ev
 import { contentKey, patchById } from "./patch";
 import { BenchmarkSchema, MishapSchema } from "../content/leapfrog";
 import { FactionSchema } from "../content/factions";
+import { BirdRowSchema } from "../content/birdapp";
 import type { ProgressionLevel } from "../content/progression";
 import { sanitizeCss } from "./css";
 import { ownAsset, validateAssets } from "./assets";
@@ -44,6 +45,7 @@ function applyContent(below: ContentApi, mod: ModManifest): ContentApi {
     benchmarks: patchById("benchmarks", below.benchmarks, p.benchmarks, (row) => row.id, Schema.decodeUnknownSync(BenchmarkSchema)),
     mishaps: patchById("mishaps", below.mishaps, p.mishaps, (row) => row.id, Schema.decodeUnknownSync(MishapSchema)),
     factions: patchById("factions", below.factions, p.factions, (row) => row.id, Schema.decodeUnknownSync(FactionSchema)),
+    birdapp: patchById("birdapp", below.birdapp, p.birdapp, (row) => row.id, Schema.decodeUnknownSync(BirdRowSchema)),
   };
 }
 function toObject(value: unknown): object { return typeof value === "object" && value !== null ? value : {}; }

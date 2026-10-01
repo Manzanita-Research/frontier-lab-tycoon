@@ -2,6 +2,7 @@
 import { getReach } from "./pathfind";
 import type { GameState } from "./types";
 import { defs } from "./defs";
+import { auraVisitors } from "./birdapp/effects";
 
 export function visitorDemand(state: GameState): { perDay: number; cap: number } {
   const reach = getReach(state);
@@ -15,7 +16,8 @@ export function visitorDemand(state: GameState): { perDay: number; cap: number }
   }
   const paths = reach.tiles.reduce((n, on) => n + on, 0);
   const size = Math.max(0, campus - 1) * 0.08 + Math.max(0, paths - 5) * 0.006;
-  const reputation = (0.4 + state.hype / 50) * (state.vibes.value / 600);
+  // FLT-69: the lab's Aura on the Bird App brings people to see it.
+  const reputation = (0.4 + state.hype / 50) * (state.vibes.value / 600) * auraVisitors(state);
   // Word of mouth takes time, even when the slide deck says exponential growth.
   const wordOfMouth = Math.min(1, state.day / 60);
   const draw = (0.025 + attractions + size) * reputation * 0.4;

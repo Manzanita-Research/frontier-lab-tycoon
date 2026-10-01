@@ -4,7 +4,10 @@ import { publishPaper, setPublicationPolicy } from "./race/papers/driver";
 import type { PublicationPolicy } from "./race/papers/policy";
 import { setRisk, triggerDisaster } from "./disasters/driver";
 import type { Risk } from "./disasters/types";
-import { chooseEvent } from "./events";
+import { chooseEvent, pacerOf } from "./events";
+import { paceFor, pacerMachine } from "./machines/cardPace";
+import { step } from "./machines/run";
+import { TICKS_PER_DAY, TICKS_PER_SECOND } from "./constants";
 import { addToast, pushNews } from "./news";
 import { clearSlop } from "./slop";
 import { canHire, clearZone, fire, hire, paintZone } from "./staff";
@@ -20,6 +23,8 @@ import { continueTutorial } from "./tutorial";
 import { defs } from "./defs";
 import { setSafetySpend } from "./factions/driver";
 import { issueStatement } from "./factions/statement";
+import { setBirdLever } from "./birdapp/driver";
+import type { BirdLever } from "./birdapp/state";
 
 export type Command =
   | { type: "coachSkip" | "coachReplay" | "coachClick" | "dismissUnlock" | "buildPanelOpened" }
@@ -52,8 +57,12 @@ export type Command =
   | { type: "buryLeak" }
   /** FLT-33: the safety budget, 0 (none) to 3 (lavish). Costs money daily and slows training; the factions notice. */
   | { type: "setSafetySpend"; level: number }
+  /** FLT-54: the game speed changed (0 never comes: pausing keeps the pace). The card budget stretches with it. */
+  | { type: "setPace"; speed: number }
   /** FLT-56: Comms addresses a faction (the gate legend's lever). Costs money, then a cooldown; a refusal is a toast. */
-  | { type: "issueStatement"; faction: string };
+  | { type: "issueStatement"; faction: string }
+  /** FLT-69: one poster's lever on the Bird App: let them cook, run it by Comms, or please log off. */
+  | { type: "birdLever"; id: number; lever: BirdLever };
 
 export type PlaceResult = { ok: true } | { ok: false; reason: string };
 
@@ -204,6 +213,9 @@ export function applyCommands(state: GameState, commands: readonly Command[], rn
       case "draftClause":
         if (systemUnlocked(state, "capture")) draftClause(state, c.clause, c.on);
         break;
+      case "setPace":
+        state.pacer = step(pacerMachine, pacerOf(state), { type: "PACE", ...paceFor(c.speed, TICKS_PER_SECOND, TICKS_PER_DAY) }).stored;
+        break;
       case "setSafetySpend":
         if (state.factions && systemUnlocked(state, "factions")) setSafetySpend(state, c.level);
         break;
@@ -212,6 +224,9 @@ export function applyCommands(state: GameState, commands: readonly Command[], rn
         break;
       case "issueStatement":
         if (state.factions && systemUnlocked(state, "factions")) issueStatement(state, c.faction);
+        break;
+      case "birdLever":
+        if (systemUnlocked(state, "birdapp")) setBirdLever(state, c.id, c.lever);
         break;
       case "startTraining":
         if (!state.buildings.some((b) => b.kind === "hall")) addToast(state, "Build a Training Hall first.", "bad", { source: "build", importance: "you" });

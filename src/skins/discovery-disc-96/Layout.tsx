@@ -20,6 +20,7 @@ export function Layout({ slots }: SlotPropsMap["Layout"]) {
         <div className="dd-toolbar">
           {slots.NewsControls}
           {slots.DramaButton}
+          {slots.WindowTray}
           {slots.PhotoButton}
         </div>
         <div className="dd-stack">
@@ -31,6 +32,7 @@ export function Layout({ slots }: SlotPropsMap["Layout"]) {
           {slots.Benchmarks}
           {slots.Voice}
           {slots.Factions}
+          {slots.BirdApp}
           {slots.ThoughtsPanel}
         </div>
       </div>

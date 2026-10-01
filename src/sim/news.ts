@@ -2,7 +2,7 @@
 import type { NewsTrigger } from "../content/headlines";
 import type { Rng } from "./rng";
 import { fillTemplate, formatMoney } from "./format";
-import type { GameState, Importance, NoticeSource, Tone } from "./types";
+import type { GameState, Importance, NewsPanel, NoticeSource, Toast, Tone } from "./types";
 import { defs, type HeadlineLine } from "./defs";
 import { STATS } from "./verbs";
 
@@ -17,8 +17,9 @@ export interface NewsVars {
   pct?: string;
 }
 
-export function addNews(state: GameState, text: string, tone: Tone) {
-  state.news.push({ id: state.nextId++, day: state.day, text, tone });
+/** `panel`: the HUD panel the headline is about (the Arena, Papers, the discourse), for its unread badge. */
+export function addNews(state: GameState, text: string, tone: Tone, panel?: NewsPanel) {
+  state.news.push({ id: state.nextId++, day: state.day, text, tone, ...(panel ? { panel } : {}) });
   if (state.news.length > 50) state.news.splice(0, state.news.length - 50);
 }
 
@@ -26,10 +27,12 @@ export interface ToastTag {
   source: NoticeSource;
   /** Defaults to `world`: only what is about you, or needs you, is a toast (FLT-51; the policy is `src/app/notices.ts`). */
   importance?: Importance;
+  /** A toast that comes in bursts (FLT-54): the app folds a pile of one group into one line. */
+  group?: Toast["group"];
 }
 
 export function addToast(state: GameState, text: string, tone: Tone, tag: ToastTag) {
-  state.toasts.push({ id: state.nextId++, text, tone, source: tag.source, importance: tag.importance ?? "world" });
+  state.toasts.push({ id: state.nextId++, text, tone, source: tag.source, importance: tag.importance ?? "world", ...(tag.group ? { group: tag.group } : {}) });
 }
 
 /** Run `f` (applying player commands) and mark every toast it sends as a reply: the app never holds those back. */

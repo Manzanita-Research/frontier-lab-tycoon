@@ -5,6 +5,7 @@ import { enableCollusion } from "./collusion/driver";
 import { enableDefection } from "./defection/driver";
 import { enableHearing } from "./hearing/driver";
 import { enablePoaching } from "./poaching/driver";
+import { enableBirdApp } from "./birdapp/driver";
 import { enableYacht } from "./yacht/driver";
 import { enableFactions } from "./factions/state";
 import type { BuildingKind } from "../content/buildings";
@@ -24,6 +25,11 @@ type ProgressState = Pick<GameState, "progression">;
 const rows = (_s: ProgressState) => defs().progression;
 export const levelOf = (s: ProgressState): Level => (s.progression?.context.level ?? 5) as Level;
 const unlockedRows = (s: ProgressState) => rows(s).filter((r) => r.level <= levelOf(s));
+/** Earned but not awake yet: the top rung wakes its packs one at a time (FLT-54). */
+const asleep = (s: ProgressState, id: string): boolean => {
+  const pending = s.progression?.context.pending;
+  return pending !== undefined && pending.some((w) => w.id === id);
+};
 // The systems each level has earned, per ladder: the tick asks about thirty times, so work it out once (FLT-39).
 let earned: { ladder: readonly ProgressionLevel[]; byLevel: Set<SystemId>[] } | null = null;
 const systemsAt = (s: ProgressState): Set<SystemId> => {
@@ -32,7 +38,7 @@ const systemsAt = (s: ProgressState): Set<SystemId> => {
   const level = levelOf(s);
   return (earned.byLevel[level] ??= new Set(unlockedRows(s).flatMap((r) => r.systems)));
 };
-export const systemUnlocked = (s: ProgressState, id: SystemId): boolean => !s.progression || systemsAt(s).has(id);
+export const systemUnlocked = (s: ProgressState, id: SystemId): boolean => !s.progression || (systemsAt(s).has(id) && !asleep(s, id));
 export const staffUnlocked = (s: GameState, job: StaffJob): boolean => !s.progression || unlockedRows(s).some((r) => r.staff.includes(job));
 // Offices are hidden infrastructure created by incident verbs, not palette unlocks.
 export const buildingUnlocked = (s: GameState, kind: BuildingKind): boolean => !s.progression ||
@@ -55,8 +61,9 @@ const PACKS: readonly { id: SystemId; enable: (s: GameState) => void; off: strin
   { id: "promises", enable: enablePromises, off: "promisesOff" },
   { id: "capture", enable: enableCapture, off: "captureOff" },
   { id: "factions", enable: enableFactions, off: "factionsOff" },
+  { id: "birdapp", enable: enableBirdApp, off: "birdappOff" },
 ];
-/** The flags behind `?leapfrog=off`, `?papers=off`, `?collusion=off`, `?hearing=off`, `?yacht=off`, `?defection=off`, `?poaching=off`, `?auditors=off`, `?promises=off`, `?capture=off` and `?factions=off`. */
+/** The flags behind `?leapfrog=off`, `?papers=off`, `?collusion=off`, `?hearing=off`, `?yacht=off`, `?defection=off`, `?poaching=off`, `?auditors=off`, `?promises=off`, `?capture=off`, `?factions=off` and `?birdapp=off`. */
 export const PACK_OFF_FLAGS = PACKS.map((p) => p.off);
 function enablePacks(s: GameState, systems: readonly SystemId[]) {
   for (const pack of PACKS) if (systems.includes(pack.id) && !s.flags[pack.off]) pack.enable(s);
@@ -67,7 +74,7 @@ function enablePacks(s: GameState, systems: readonly SystemId[]) {
  * ladder at all (everything earned).
  */
 export function enableEarnedPacks(s: GameState) {
-  enablePacks(s, s.progression ? unlockedRows(s).flatMap((r) => [...r.systems]) : rows(s).flatMap((r) => [...r.systems]));
+  enablePacks(s, s.progression ? unlockedRows(s).flatMap((r) => r.systems.filter((id) => !asleep(s, id))) : rows(s).flatMap((r) => [...r.systems]));
 }
 /** Days after Level 3 opens that the first thing breaks, so the SRE has a reason to exist (FLT-58). */
 export const FIRST_BREAKDOWN_DAYS = 3;
@@ -111,7 +118,7 @@ export function progressOf(s: GameState): ProgressView {
   const active = rows(s).find((r) => r.level === level)!;
   const { current, met, status } = goalValue(s);
   return { level, levelName: active.name,
-    unlocked: { buildings: [...new Set([...unlockedRows(s).flatMap((r) => [...r.buildings]), ...defs().buildingKinds.filter((k) => level >= 4 && s.flags[`unlocked:${k}`] !== undefined) as BuildingKind[]])], staff: unlockedRows(s).flatMap((r) => [...r.staff]), systems: unlockedRows(s).flatMap((r) => [...r.systems]) },
+    unlocked: { buildings: [...new Set([...unlockedRows(s).flatMap((r) => [...r.buildings]), ...defs().buildingKinds.filter((k) => level >= 4 && s.flags[`unlocked:${k}`] !== undefined) as BuildingKind[]])], staff: unlockedRows(s).flatMap((r) => [...r.staff]), systems: unlockedRows(s).flatMap((r) => r.systems.filter((id) => !asleep(s, id))) },
     goal: met && !rows(s).some((r) => r.level > level) ? afterLadder(s)
       : { text: active.goal.text, current: active.goal.metric === "arena" ? current : Math.min(current, active.goal.target), target: active.goal.target, status, ...(active.goal.metric === "arena" ? { lowerIsBetter: true } : {}) },
     teasers: teasers(s, level),
@@ -133,29 +140,52 @@ function teasers(s: GameState, level: Level): ProgressView["teasers"] {
   });
 }
 export function visibleHud(s: GameState): { visible: Record<HudPanel, boolean> } {
-  const panels = unlockedRows(s).flatMap((r) => [...r.panels]);
+  // A panel named after a system that is still asleep (Papers, Disasters) waits for it.
+  const panels = unlockedRows(s).flatMap((r) => r.panels.filter((p) => !asleep(s, p)));
   return { visible: Object.fromEntries(HUD_PANELS.map((p) => [p, !s.progression || panels.includes(p)])) as Record<HudPanel, boolean> };
 }
 /**
  * One card per earned level, in order, even when several facts become true on one day. Checked every tick, so the goal line
- * moves on the tick a goal is met.
+ * moves on the tick a goal is met. On the top rung the machine then wakes the rung's staggered systems (FLT-54), one a day at
+ * most, each with its own small New! card.
  */
 export function updateProgression(s: GameState) {
-  if (!s.progression || levelOf(s) === 5) return;
-  const { met } = goalValue(s);
-  // FLT-39: an unmet goal leaves the machine as it is and emits nothing (its CHECK returns at once), so the tick skips transition().
-  if (!met) return;
-  const result = step(progressionMachine, s.progression, { type: "CHECK", met });
+  if (!s.progression || s.progression.value === "complete") return;
+  const waking = s.progression.value === "waking";
+  // FLT-39: an unmet goal leaves the machine as it is and emits nothing (its CHECK returns at once), so the tick skips
+  // transition(). On the top rung (FLT-54) only a wake-up that is due moves it.
+  if (waking ? !(s.progression.context.pending ?? []).some((w) => w.day <= s.day) : levelOf(s) === 5 || !goalValue(s).met) return;
+  const top = rows(s).find((r) => r.level === 5);
+  const wakes = (top?.wakes ?? []).filter((w) => top!.systems.includes(w.id)).map((w) => ({ id: w.id, after: w.after }));
+  const result = step(progressionMachine, s.progression, { type: "CHECK", met: true, day: s.day, wakes });
   s.progression = result.stored;
   for (const event of result.effects) {
+    if (event.type === "WOKE") {
+      wake(s, event.id as SystemId);
+      continue;
+    }
     const row = rows(s).find((r) => r.level === event.level)!;
-    enablePacks(s, row.systems);
+    const later = new Set(row.level === 5 ? wakes.map((w) => w.id) : []);
+    const now = row.systems.filter((id) => !later.has(id));
+    enablePacks(s, now);
     // The Race: the field did not stand still while you were in the garage. You start behind most of it.
     if (row.systems.includes("arena")) seedField(s);
     if (row.systems.includes("breakdowns")) s.flags.firstBreakdownDay ??= s.day + FIRST_BREAKDOWN_DAYS;
     if (row.systems.includes("slop")) s.flags.firstSpillDay ??= s.day + FIRST_SPILL_DAYS;
-    const items = [...row.buildings.map((k) => defs().buildings[k]?.name ?? k), ...row.staff.map((k) => STAFF[k].title), ...row.systems];
+    const items = [...row.buildings.map((k) => defs().buildings[k]?.name ?? k), ...row.staff.map((k) => STAFF[k].title), ...now, ...(later.size > 0 ? [WAKE_TEASER] : [])];
     s.unlockCards ??= [];
     s.unlockCards.push({ id: row.id, title: `New! ${row.name}`, body: row.goal.text, items });
   }
+}
+
+/** The last line of the top rung's card when the rest of it wakes later. */
+export const WAKE_TEASER = "…and a fresh headache every ten days or so";
+
+/** A staggered system's turn: its pack comes on, and (unless it is a secret) it gets a small New! card of its own. */
+function wake(s: GameState, id: SystemId) {
+  enablePacks(s, [id]);
+  const def = rows(s).find((r) => r.level === 5)?.wakes?.find((w) => w.id === id);
+  if (!def || def.silent) return;
+  s.unlockCards ??= [];
+  s.unlockCards.push({ id: `wake:${id}`, title: def.title, body: def.body, items: [] });
 }

@@ -3107,3 +3107,41 @@
     max-height: min(260px, 38dvh);
   }
 }
+
+/* The Bird App (FLT-69) as a merch drop: every post a product card, the viral one SOLD OUT on a slapped sticker. */
+[data-skin="swag-drop"] {
+  .birdapp-head b {
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .birdapp .bird-post {
+    margin: 5px 0;
+    padding: 6px;
+    border: 2px solid var(--sd-ink);
+    border-radius: 4px;
+    background: var(--sd-paper);
+    box-shadow: var(--sd-hard-sm);
+  }
+  .birdapp .bird-outcome {
+    border-radius: 2px;
+    background: var(--sd-sticky);
+    color: var(--sd-ink);
+    border-color: var(--sd-ink);
+  }
+  .birdapp-aurabar i {
+    background: repeating-linear-gradient(45deg, var(--sd-gold) 0 6px, var(--sd-ink) 6px 8px);
+  }
+  .birdapp .bird-viral {
+    border: 2px solid var(--sd-ink);
+    border-radius: 2px;
+    background: var(--sd-bad);
+    color: #fff;
+    transform: rotate(8deg);
+    animation: swag-drop-slap 0.3s ease-out;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .birdapp .bird-viral {
+      animation: none;
+    }
+  }
+}

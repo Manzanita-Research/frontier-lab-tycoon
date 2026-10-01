@@ -18,11 +18,13 @@ export function Layout({ slots }: SlotPropsMap["Layout"]) {
           {slots.Voice}
           {slots.Papers}
           {slots.Factions}
+          {slots.BirdApp}
         </div>
         <div className="right-col">
           {slots.Speed}
           {slots.NewsControls}
           {slots.DramaButton}
+          {slots.WindowTray}
           {slots.NewsArrival}
           {slots.PhotoButton}
           {slots.DisasterAlert}

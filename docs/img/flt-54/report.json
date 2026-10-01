@@ -1,0 +1,80 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "842add9ad50ac8b6d8b6e8d77d3eeb302237f1e7"
+  },
+  "head": {
+    "branch": "flt-54-pacing",
+    "sha": "fbf2f31",
+    "dirty": false
+  },
+  "seconds": 256.406,
+  "problems": [
+    "flt54-l4.png: blank composite: panel 3 is 24% one colour, 12 colours",
+    "flt54-l5.png: blank composite: panel 3 is 24% one colour, 13 colours",
+    "phone.png: blank composite: panel 3 is 28% one colour, 7 colours"
+  ],
+  "rows": [
+    {
+      "scene": "flt54-l4",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-54/before/flt54-l4.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-54/after/flt54-l4.png",
+      "title": "FLT-54: Level 4 (The Race) earned: the New! card and the windows at 1440x900",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-54/compare/flt54-l4.png",
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 24% one colour, 12 colours",
+      "error": "compare: blank composite: panel 3 is 24% one colour, 12 colours"
+    },
+    {
+      "scene": "flt54-l5",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-54/before/flt54-l5.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-54/after/flt54-l5.png",
+      "title": "FLT-54: Level 5 (Scrutiny) earned: the New! card and the windows at 1440x900",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-54/compare/flt54-l5.png",
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 24% one colour, 13 colours",
+      "error": "compare: blank composite: panel 3 is 24% one colour, 13 colours"
+    },
+    {
+      "scene": "flt54-busy",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-54/before/flt54-busy.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-54/after/flt54-busy.png",
+      "title": "FLT-54: thirty busy mid-game days, cards answered, then paused: what the game left open",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-54/compare/flt54-busy.png",
+      "changed": 0.3496496913580247
+    },
+    {
+      "scene": "overview",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-54/before/overview.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-54/after/overview.png",
+      "title": "The campus, mid-morning, paused",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-54/compare/overview.png",
+      "changed": 0.11909953703703703
+    },
+    {
+      "scene": "event",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-54/before/event.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-54/after/event.png",
+      "title": "An event card lands (the Water Discourse)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-54/compare/event.png",
+      "changed": 0.13079783950617285
+    },
+    {
+      "scene": "phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-54/before/phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-54/after/phone.png",
+      "title": "The same campus on a phone (390x844)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-54/compare/phone.png",
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 28% one colour, 7 colours",
+      "error": "compare: blank composite: panel 3 is 28% one colour, 7 colours"
+    }
+  ],
+  "errors": []
+}
