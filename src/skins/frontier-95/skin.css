@@ -843,6 +843,8 @@
     gap: 6px;
     padding: 0 4px;
     pointer-events: auto;
+    /* Always on top, as in 1995: a window dragged down the screen (FLT-90) goes behind it, never over the Start button. */
+    z-index: 30;
   }
   .f95-startwrap {
     position: relative;
