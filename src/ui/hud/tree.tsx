@@ -77,7 +77,8 @@ export function Modals({ vm, actions }: { vm: HudVM; actions: HudActions }) {
       {vm.senate.open && vm.senate.tracker && !vm.event?.tracker && (
         <PromiseTracker event={null} tracker={vm.senate.tracker} bill={vm.senate.bill} layout={vm.layout} actions={actions} />
       )}
-      {vm.event && <EventModal vm={vm} event={vm.event} actions={actions} slots={{ EventCard, Livestream, Hearing, LeakedChat, DramaCard, ReportCard, Bill, PromiseTracker }} />}
+      {/* The outcome card stands alone (FLT-86): a card that opened the same night waits behind it for "Keep playing". */}
+      {vm.event && !vm.outcome && <EventModal vm={vm} event={vm.event} actions={actions} slots={{ EventCard, Livestream, Hearing, LeakedChat, DramaCard, ReportCard, Bill, PromiseTracker }} />}
       {vm.confirm && <Confirm confirm={vm.confirm} actions={actions} />}
       {vm.crumbWiki && <CrumbWiki key={vm.crumbWiki.key} wiki={vm.crumbWiki} actions={actions} />}
       {!vm.crumbWiki && vm.paperMoment && <PaperMoment key={vm.paperMoment.key} moment={vm.paperMoment} actions={actions} />}

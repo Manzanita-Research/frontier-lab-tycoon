@@ -13,6 +13,7 @@ import { TICKS_PER_DAY } from "../sim/constants";
 import { withDefs } from "../sim/defs";
 import { tick } from "../sim/tick";
 import { isAuditMoment, stageAudit } from "../sim/auditors/demo";
+import { isMoneyMoment } from "../sim/moneyDemo";
 import { createMidgameScenario, MIDGAME_CAMERA, midgameOpeningNews, midgameOpeningThoughts } from "../sim/scenarios/midgame";
 import type { Tone } from "../sim/types";
 import { framesBrowser } from "./frames";
@@ -28,7 +29,8 @@ import { browserStorage, makeSaveStore } from "../save";
 
 const midgame = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("scenario") === "midgame";
 const params = readDebugParams();
-export const debugParams = midgame ? { ...params, focus: params.focus ?? MIDGAME_CAMERA.focus, zoom: params.zoom ?? MIDGAME_CAMERA.zoom } : params;
+// FLT-86's `?moment=money-*` links are on the mid-game campus too, so they get its camera.
+export const debugParams = midgame || isMoneyMoment(params.moment) ? { ...params, focus: params.focus ?? MIDGAME_CAMERA.focus, zoom: params.zoom ?? MIDGAME_CAMERA.zoom } : params;
 
 /** The one live World. The renderer reads `sim.world` and `sim.alpha` straight from useFrame. */
 /** `?mod=` was resolved before this module loaded (main.tsx); the World is created from that definition. */

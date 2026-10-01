@@ -319,6 +319,11 @@ describe.each([BASE_ID, ...usable])("skin %s", (id) => {
     for (const c of vms.event!.event!.choices) expect(card).toContain(escape(c.label));
     const era = html(skin, <Modals vm={vms.era!} actions={actions} />);
     expect(era).toContain(escape(vms.era!.eraCard!.line));
+    // The win stands alone (FLT-86): a card that opened the same night waits for "Keep playing".
+    const won = vmOf({ event: "waterDiscourse", outcome: "won" });
+    const alone = html(skin, <Modals vm={won} actions={actions} />);
+    expect(alone).toContain(escape(won.outcome!.headline));
+    expect(alone).not.toContain(escape(won.event!.title));
   });
 
   it("draws Papers once earned, and the paper and collusion moments (FLT-45, FLT-46)", async () => {

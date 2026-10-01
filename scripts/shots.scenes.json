@@ -340,6 +340,14 @@
       "nopath-tool",
       "nopath-click",
       "nopath-phone"
+    ],
+    "flt86-links": [
+      "link-round1",
+      "link-lastround",
+      "link-overdraft",
+      "link-bankrupt",
+      "link-stretch",
+      "link-win"
     ]
   },
   "scenes": {
@@ -4765,6 +4773,92 @@
         },
         {
           "wait": 600
+        }
+      ]
+    },
+    "link-round1": {
+      "title": "FLT-86 link: ?moment=money-round1, the first emergency round's card",
+      "query": {
+        "warp": null,
+        "moment": "money-round1",
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "link-lastround": {
+      "title": "FLT-86 link: ?moment=money-lastround, the third and last round",
+      "query": {
+        "warp": null,
+        "moment": "money-lastround",
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "link-overdraft": {
+      "title": "FLT-86 link: ?moment=money-overdraft, the bank's 30 days (Finance tab open)",
+      "query": {
+        "warp": null,
+        "moment": "money-overdraft",
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { document.querySelectorAll('[role=tab]').forEach((t) => /^Finance$/.test(t.textContent.trim()) && t.click()); }"
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "link-bankrupt": {
+      "title": "FLT-86 link: ?moment=money-bankrupt, the end screen",
+      "query": {
+        "warp": null,
+        "moment": "money-bankrupt",
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "link-stretch": {
+      "title": "FLT-86 link: ?moment=money-stretch&beat, the Final stretch beat at 2 of 3",
+      "query": {
+        "warp": null,
+        "moment": "money-stretch",
+        "skin": "frontier-95",
+        "beat": 1
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "link-win": {
+      "title": "FLT-86 link: ?moment=money-win, the win lands live a second after load and stands alone",
+      "query": {
+        "warp": null,
+        "moment": "money-win",
+        "skin": "frontier-95",
+        "speed": 1
+      },
+      "steps": [
+        {
+          "wait": 5000
         }
       ]
     }
