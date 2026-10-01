@@ -8,6 +8,7 @@ import { ProbeView } from "./ProbeView";
 import { Buildings } from "./buildings/Buildings";
 import { CrtLayer } from "./crt/CrtLayer";
 import { crtEvents } from "./crt/events";
+import { glassSupport } from "../ui/glass/support";
 import { CAMERA_OFFSET, CameraRig } from "./fx/CameraRig";
 import { FxDirector } from "./fx/FxDirector";
 import { Lighting } from "./fx/Lighting";
@@ -53,7 +54,8 @@ export function Scene() {
       orthographic
       shadows
       dpr={[1, 1.75]}
-      gl={{ antialias: true, alpha: true }}
+      // FLT-88: the glass copies this canvas in its own paint step, after the browser may have taken the frame.
+      gl={{ antialias: true, alpha: true, preserveDrawingBuffer: glassSupport !== null }}
       events={crtEvents}
       camera={{ position: CAMERA_OFFSET.toArray(), zoom, near: -100, far: 200 }}
     >
