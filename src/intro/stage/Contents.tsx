@@ -1,5 +1,6 @@
 // What's in the box, as a flat lay on the demo counter. Each item damps toward its place: inside the box before the
 // unwrap, on the counter after, held up close when focused, and (the disc) into the kiosk's drawer when you insert it.
+// FLT-95: the disc held up close turns slowly under the light before you choose to put it in.
 import { useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import * as THREE from "three";
@@ -9,11 +10,11 @@ import { Book3D } from "./Book3D";
 import { Coa } from "./Coa";
 import { INSERT_ART, useArt } from "./textures";
 import { ITEM_SIZE, REST, REST_TALL } from "./items";
-import { canvasTexture, DRAWER_IN_Z, DRAWER_OUT_Z, DRAWER_Y, dampTo, flat, frameDt, HOLD, pose, TOWER, TRAY, useClock, type Pose, type StageProps } from "./rig";
+import { BOX_TIMES, canvasTexture, DRAWER_IN_Z, DRAWER_OUT_Z, DRAWER_Y, dampTo, ease, flat, frameDt, HOLD, pose, TOWER, TRAY, useClock, type Pose, type StageProps } from "./rig";
 
 type Props = StageProps & { weightsKey: string };
 
-const HIDDEN_BEATS = new Set(["shelf", "pulling"]);
+const HIDDEN_BEATS = new Set(["shelf", "pulling", "held"]);
 const IN_KIOSK = new Set(["warmup", "post", "splash", "dive"]);
 
 export function Contents({ beat, context, send, weightsKey }: Props) {
@@ -61,6 +62,8 @@ function Item({ id, order, beat, context, send, children }: StageProps & { id: I
   const inTray = useMemo(() => flat(TRAY.x, TRAY.y - 0.02 + order * 0.003, TRAY.z, 0), [order]);
   const holdPose = useMemo(() => pose(HOLD, id === "manual" ? -0.08 : -0.12, 0, 0), [id]);
   const target = useMemo<Pose>(() => ({ p: new THREE.Vector3(), q: new THREE.Quaternion() }), []);
+  const turn = useMemo(() => new THREE.Quaternion(), []);
+  const euler = useMemo(() => new THREE.Euler(), []);
 
   useEffect(() => {
     if (!hover || !pickable) return;
@@ -68,7 +71,7 @@ function Item({ id, order, beat, context, send, children }: StageProps & { id: I
     return () => void (document.body.style.cursor = "");
   }, [hover, pickable]);
 
-  useFrame((_, raw) => {
+  useFrame((state, raw) => {
     const o = ref.current;
     if (!o) return;
     const c = clock.current;
@@ -76,16 +79,23 @@ function Item({ id, order, beat, context, send, children }: StageProps & { id: I
     let lambda = 7;
     const rest = (tall ? REST_TALL : REST)[id];
     if (beat === "unwrapping") {
-      // The lid comes off at ~1.0 s; then everything slides out, one after another.
-      const go = c.t > 1.15 + order * 0.09;
+      // The lid comes off; then everything slides out, one after another, each one eased off the mark.
+      const at = BOX_TIMES.itemsOut + order * BOX_TIMES.itemGap;
+      const go = c.t > at;
       target.p.copy(go ? rest.p : inTray.p);
       target.q.copy(go ? rest.q : inTray.q);
-      if (go) target.p.y += 0.06 * Math.max(0, 1 - (c.t - 1.15 - order * 0.09) * 2);
-      lambda = 6;
+      if (go) target.p.y += 0.06 * Math.max(0, 1 - (c.t - at) * 1.2);
+      lambda = go ? 4.5 * ease(c.t - at, 0.4) : 6;
     } else if (held) {
       target.p.copy(holdPose.p);
       target.q.copy(holdPose.q);
-      lambda = 6;
+      if (id === "disc") {
+        // The disc turns slowly under the light, never so far that the label stops being readable.
+        const time = state.clock.elapsedTime;
+        turn.setFromEuler(euler.set(Math.sin(time * 0.37) * 0.16, Math.sin(time * 0.52) * 0.55, 0));
+        target.q.multiply(turn);
+      }
+      lambda = 4;
     } else if (id === "disc" && (beat === "disc" || IN_KIOSK.has(beat))) {
       discPath(beat === "disc" ? c.t : 99, target);
       lambda = 9;
@@ -124,9 +134,10 @@ function discPath(t: number, out: Pose) {
   const lying = flat(0, 0, 0, 0).q;
   out.q.copy(lying);
   const x = TOWER.x;
-  if (t < 0.55) out.p.set(2.75, DRAWER_Y + 0.12, 0.6);
-  else if (t < 1.15) out.p.set(x, DRAWER_Y + 0.07, DRAWER_OUT_Z);
-  else if (t < 1.55) out.p.set(x, DRAWER_Y + 0.008, DRAWER_OUT_Z);
+  const [over, down, inside] = BOX_TIMES.disc;
+  if (t < over) out.p.set(2.75, DRAWER_Y + 0.12, 0.6);
+  else if (t < down) out.p.set(x, DRAWER_Y + 0.07, DRAWER_OUT_Z);
+  else if (t < inside) out.p.set(x, DRAWER_Y + 0.008, DRAWER_OUT_Z);
   else out.p.set(x, DRAWER_Y + 0.008, DRAWER_IN_Z);
 }
 

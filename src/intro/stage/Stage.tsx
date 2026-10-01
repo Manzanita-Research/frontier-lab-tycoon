@@ -11,7 +11,8 @@ import { Contents } from "./Contents";
 import { HeroBox } from "./HeroBox";
 import { Kiosk } from "./Kiosk";
 import { Store } from "./Store";
-import { BOOT_BEATS, ClockContext, CRT, DURATIONS, fit, FOV, HERO_ON_SHELF, HOLD, k, PRESENT, TRAY, useClock, type Clock } from "./rig";
+import { BOOT_BEATS, BOX_TIMES, ClockContext, CRT, DURATIONS, EIGHTH, fit, FOV, HERO_ON_SHELF, HERO_SIZE, HOLD, k, PRESENT, TRAY, useClock, type Clock } from "./rig";
+import { sideOf } from "../machine";
 import { itemFrame } from "./items";
 import { preloadProps } from "./Props";
 import { preloadArt } from "./textures";
@@ -22,15 +23,18 @@ preloadProps();
 type Props = { intro: Intro; beat: string; context: IntroContext };
 
 export default function Stage({ intro, beat, context }: Props) {
-  const clock = useRef<Clock>({ beat, t: 0, snap: true, tilt: new THREE.Vector2(...(intro.params.tilt ?? [0, 0])), dragging: false });
+  const clock = useRef<Clock>({ beat, t: 0, snap: true, tilt: new THREE.Vector2(...(intro.params.tilt ?? [0, 0])), dragging: false, spin: 0, spinSent: 0 });
   const fps = useRef<HTMLDivElement>(null);
   const wrap = useRef<HTMLDivElement>(null);
 
-  // Drag anywhere to tilt the certificate while it is held up (works the same with a finger).
+  // Drag anywhere to tilt the certificate while it is held up, or (FLT-95) to turn the box in your hands. Works the
+  // same with a finger: a swipe across a phone is about half a turn.
   const coa = beat === "focus" && context.item === "coa";
+  const held = beat === "held";
+  const send = intro.send;
   useEffect(() => {
     const el = wrap.current;
-    if (!el || !coa) return;
+    if (!el || (!coa && !held)) return;
     let last: { x: number; y: number } | null = null;
     const down = (e: PointerEvent) => {
       last = { x: e.clientX, y: e.clientY };
@@ -38,27 +42,43 @@ export default function Stage({ intro, beat, context }: Props) {
     };
     const move = (e: PointerEvent) => {
       if (!last) return;
-      const t = clock.current.tilt;
-      t.y = THREE.MathUtils.clamp(t.y + (e.clientX - last.x) * 0.006, -0.6, 0.6);
-      t.x = THREE.MathUtils.clamp(t.x + (e.clientY - last.y) * 0.006, -0.6, 0.6);
+      const c = clock.current;
+      if (held) c.spin += ((e.clientX - last.x) * Math.PI) / Math.max(320, Math.min(720, window.innerWidth * 0.8));
+      else {
+        c.tilt.y = THREE.MathUtils.clamp(c.tilt.y + (e.clientX - last.x) * 0.006, -0.6, 0.6);
+        c.tilt.x = THREE.MathUtils.clamp(c.tilt.x + (e.clientY - last.y) * 0.006, -0.6, 0.6);
+      }
       last = { x: e.clientX, y: e.clientY };
     };
     const up = () => {
+      if (!last) return;
       last = null;
-      clock.current.dragging = false;
+      const c = clock.current;
+      c.dragging = false;
+      if (!held) return;
+      // Let go: it settles on the nearest eighth of a turn, and the machine hears how far it went.
+      const by = THREE.MathUtils.clamp(Math.round(c.spin / EIGHTH), -8, 8);
+      c.spin = 0;
+      if (by === 0) return;
+      c.spinSent = by;
+      send({ type: "TURN", by });
     };
     el.addEventListener("pointerdown", down);
     window.addEventListener("pointermove", move);
     window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", up);
     return () => {
       el.removeEventListener("pointerdown", down);
       window.removeEventListener("pointermove", move);
       window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointercancel", up);
+      clock.current.dragging = false;
+      clock.current.spin = 0;
     };
-  }, [coa]);
+  }, [coa, held, send]);
 
   return (
-    <div ref={wrap} style={{ position: "absolute", inset: 0, cursor: coa ? "grab" : undefined }}>
+    <div ref={wrap} style={{ position: "absolute", inset: 0, cursor: coa || held ? "grab" : undefined }}>
       <Canvas dpr={[1, 2]} camera={{ fov: FOV, near: 0.05, far: 40, position: [0, 1.1, 2.3] }} gl={{ antialias: !intro.params.fx, powerPreference: "high-performance" }}>
         <ClockContext.Provider value={clock}>
           {/* Nothing runs (not even the beat clock) until the art is in, so the first frame is the finished scene. */}
@@ -163,14 +183,24 @@ function CameraRig({ beat, context }: { beat: string; context: IntroContext }) {
         break;
       }
       case "pulling":
-        if (t < 0.45) {
+      case "held": {
+        if (beat === "pulling" && t < BOX_TIMES.pullOut) {
           goalLook.copy(HERO_ON_SHELF);
           pos.copy(HERO_ON_SHELF).add(new THREE.Vector3(0, 0.12, fit(0.9, 0.8, aspect)));
-        } else {
-          goalLook.copy(PRESENT);
-          pos.copy(PRESENT).add(new THREE.Vector3(0, 0.08, fit(0.7, 0.6, aspect)));
+          lambda = 2.2;
+          break;
         }
+        // FLT-95: the box fills the middle of the screen, a little high, clear of the buttons under it; the back
+        // (all that small print) comes a little closer.
+        const [w, h] = HERO_SIZE;
+        const back = beat === "held" && sideOf(context.turn) === "back";
+        const d = aspect < 1 ? fit(w * (back ? 1.12 : 1.3), h * 1.9, aspect) : fit(w * 2.2, h * (back ? 1.3 : 1.55), aspect);
+        goalLook.copy(PRESENT);
+        goalLook.y -= h * (aspect < 1 ? 0.2 : 0.1);
+        pos.copy(PRESENT).add(new THREE.Vector3(0, 0.03, d));
+        lambda = beat === "pulling" ? 1.8 : 2.4;
         break;
+      }
       case "unwrapping":
       case "open": {
         // On a wide screen the whole view slides right, clear of the contents list.
@@ -180,7 +210,7 @@ function CameraRig({ beat, context }: { beat: string; context: IntroContext }) {
         const d = aspect < 1 ? fit(0.74, 0.9, aspect) : fit(1.35, 1.0, aspect);
         const tilt = aspect < 1 ? [0.97, 0.26] : [0.72, 0.7];
         pos.set(TRAY.x + dx * 2, 0.9 + d * tilt[0]!, TRAY.z + d * tilt[1]!);
-        lambda = beat === "unwrapping" ? 2.4 : 3.2;
+        lambda = beat === "unwrapping" ? 1.5 : 3.2;
         break;
       }
       case "focus": {

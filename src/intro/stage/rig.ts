@@ -5,8 +5,30 @@ import * as THREE from "three";
 import type { IntroEvent } from "../actor";
 import type { IntroContext } from "../machine";
 
-/** How long each scripted beat runs, in seconds. The rest wait for the player. */
-export const DURATIONS: Record<string, number> = { pulling: 1.8, unwrapping: 2.1, disc: 2.2, warmup: 1.4, post: 4.4, splash: 2.8, dive: 1.2 };
+/**
+ * FLT-95: the box's scripted moves (the pull, the unwrap, the disc going in) run at 1.7× FLT-70's timings, and every
+ * move eases in (`ease`), so you can watch them happen. The CRT's boot keeps its own pace.
+ */
+export const PACE = 1.7;
+
+/** The box's timeline, in seconds into its beat. */
+export const BOX_TIMES = {
+  /** Pulling: leaning out of the shelf, then up into your hands. */
+  pullOut: 0.45 * PACE,
+  /** Unwrapping: the shrinkwrap tears over this span, then the lid lifts off and is laid down. */
+  wrapTear: 0.55 * PACE,
+  lidOff: 1.0 * PACE,
+  lidDown: 1.45 * PACE,
+  /** Then everything slides out, one after another. */
+  itemsOut: 1.15 * PACE,
+  itemGap: 0.09 * PACE,
+  /** The disc: over the drawer, down into it, in with it. The drawer is out over `drawer`. */
+  disc: [0.55 * PACE, 1.15 * PACE, 1.55 * PACE],
+  drawer: [0.3 * PACE, 1.6 * PACE],
+} as const;
+
+/** How long each scripted beat runs, in seconds. The rest (the shelf, the box in your hands, the flat lay) wait for the player. */
+export const DURATIONS: Record<string, number> = { pulling: 1.8 * PACE, unwrapping: 2.1 * PACE, disc: 2.2 * PACE, warmup: 1.4, post: 4.4, splash: 2.8, dive: 1.2 };
 
 export const BOOT_BEATS = new Set(["disc", "warmup", "post", "splash", "dive"]);
 
@@ -18,6 +40,8 @@ export const COUNTER_Y = 0.9;
 export const HERO_ON_SHELF = new THREE.Vector3(0, SHELF_TOPS[1] + HERO_SIZE[1] / 2 + 0.002, 0.03);
 /** Where the box is held up for a look on the way to the counter. */
 export const PRESENT = new THREE.Vector3(0.95, 1.22, 1.05);
+/** One eighth of a turn of the box in your hands (`context.turn` counts these). */
+export const EIGHTH = Math.PI / 4;
 /** The opened box lies here on the counter. */
 export const TRAY = new THREE.Vector3(2.15, COUNTER_Y + HERO_SIZE[2] / 2, 0.6);
 export const LID_REST = new THREE.Vector3(2.62, COUNTER_Y + 0.008, 0.26);
@@ -40,6 +64,15 @@ export function fit(w: number, h: number, aspect: number, fov = FOV): number {
 
 // ---- Damping ----
 export const k = (lambda: number, dt: number) => 1 - Math.exp(-lambda * dt);
+
+/**
+ * FLT-95: a move that starts `t` seconds ago eases in: its damping rate grows from a crawl to full over `over` seconds
+ * (smoothstep), so nothing leaps off the mark. Damping already eases it out at the other end.
+ */
+export function ease(t: number, over = 0.6): number {
+  const x = Math.min(1, Math.max(0, t / over));
+  return 0.06 + 0.94 * x * x * (3 - 2 * x);
+}
 
 export type Pose = { p: THREE.Vector3; q: THREE.Quaternion };
 const euler = new THREE.Euler();
@@ -66,6 +99,9 @@ export type Clock = {
   /** The COA's tilt, from dragging (x, y radians). */
   tilt: THREE.Vector2;
   dragging: boolean;
+  /** FLT-95: the box in your hands, while a drag turns it: radians past `context.turn`, and eighths already sent. */
+  spin: number;
+  spinSent: number;
 };
 
 export type StageProps = { beat: string; context: IntroContext; send: (e: IntroEvent) => void };

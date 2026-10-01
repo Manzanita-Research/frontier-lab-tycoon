@@ -35,7 +35,7 @@
   border: 0;
   border-radius: 0;
   padding: 7px 14px 6px;
-  min-height: 30px;
+  min-height: 32px;
   box-shadow: var(--f95-btn);
   cursor: pointer;
 }
@@ -112,6 +112,38 @@
 .intro button.intro-cta:active {
   padding: 11px 17px 8px 19px;
 }
+/* FLT-95: the box in your hands: ◀ Flip ▶ in a row, and Open under them. */
+.intro-hold {
+  position: fixed;
+  left: 50%;
+  bottom: calc(64px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: max-content;
+}
+.intro-hold .intro-row {
+  flex-wrap: nowrap;
+}
+.intro button.intro-turn {
+  min-width: 44px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.intro button.intro-flip {
+  min-width: 150px;
+}
+.intro button.intro-open {
+  font-size: 18px;
+  padding: 10px 22px 9px;
+}
+.intro-disc {
+  justify-content: center;
+}
+
 /* Captions are Frontier 95's tooltips. */
 .intro-caption,
 .intro-focus p {
@@ -314,6 +346,17 @@
     top: auto;
     bottom: 80px;
     transform: none;
+  }
+  /* Thumbs: every control in the box's hands is at least 44 px tall. */
+  .intro-hold {
+    bottom: calc(84px + env(safe-area-inset-bottom));
+  }
+  .intro-hold button,
+  .intro-disc button {
+    min-height: 44px;
+  }
+  .intro button.intro-turn {
+    min-width: 52px;
   }
 }
 

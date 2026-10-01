@@ -1,12 +1,13 @@
-// Our box: on the shelf at eye level, then held up (front, then back), laid on the counter, shrinkwrap off, lid off.
-// It is a tray and a lid from the start, so opening it is just the lid leaving.
+// Our box: on the shelf at eye level, then in your hands (FLT-95: front first, and it waits while you turn it and read
+// the back), laid on the counter, shrinkwrap off, lid off. It is a tray and a lid from the start, so opening it is just
+// the lid leaving.
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { paintSpine, paintSticker } from "../art";
 import { HERO } from "../content";
 import { useArt, useRoomEnv } from "./textures";
-import { canvasTexture, dampTo, flat, frameDt, HERO_ON_SHELF, HERO_SIZE, LID_REST, pose, PRESENT, TRAY, useClock, type Pose, type StageProps } from "./rig";
+import { BOX_TIMES, canvasTexture, dampTo, EIGHTH, ease, flat, frameDt, HERO_ON_SHELF, HERO_SIZE, k, LID_REST, pose, PRESENT, TRAY, useClock, type Pose, type StageProps } from "./rig";
 
 const [W, H, D] = HERO_SIZE;
 const LID = 0.012;
@@ -73,6 +74,10 @@ export function HeroBox({ beat, context, send }: StageProps) {
   const lifted = useMemo(() => flat(TRAY.x + 0.05, TRAY.y + 0.2, TRAY.z - 0.1, 0.2), []);
   const lidRest = useMemo(() => flat(LID_REST.x, LID_REST.y, LID_REST.z, -0.35), []);
   const onCounter = useMemo(() => flat(TRAY.x, TRAY.y, TRAY.z, 0), []);
+  /** The yaw the box in your hands shows (radians), smoothed toward `context.turn` (and a drag's spin), never wrapped. */
+  const yaw = useRef(0);
+  const seenTurn = useRef(context.turn);
+  const euler = useMemo(() => new THREE.Euler(), []);
 
   useEffect(() => {
     if (!hover || beat !== "shelf") return;
@@ -87,6 +92,11 @@ export function HeroBox({ beat, context, send }: StageProps) {
     const c = clock.current;
     const dt = frameDt(c, raw);
     const t = c.t;
+    // A drag's eighths have arrived as `context.turn`: stop adding them on top.
+    if (context.turn !== seenTurn.current) {
+      seenTurn.current = context.turn;
+      c.spinSent = 0;
+    }
     let lambda = 6;
     switch (beat) {
       case "shelf":
@@ -99,41 +109,50 @@ export function HeroBox({ beat, context, send }: StageProps) {
         }
         break;
       case "pulling":
-        if (t < 0.45) {
+      case "held": {
+        const out = beat === "pulling" && t < BOX_TIMES.pullOut;
+        if (out) {
           target.p.copy(shelfPose.p).add(new THREE.Vector3(0, 0.03, 0.32));
           target.q.identity();
         } else {
+          // In your hands, front first: it turns as far as you turn it, and sways a little, like a held thing does.
+          const turned = beat === "held" ? (context.turn + c.spinSent) * EIGHTH + c.spin : 0;
+          yaw.current += (turned - yaw.current) * (c.snap ? 1 : k(c.dragging ? 16 : 4.5, dt));
+          const sway = Math.sin(state.clock.elapsedTime * 0.7) * 0.025;
           target.p.copy(PRESENT);
-          target.q.setFromEuler(new THREE.Euler(0, t < 1.15 ? -0.28 : Math.PI - 0.28, 0));
+          target.p.y += Math.sin(state.clock.elapsedTime * 0.9) * 0.004;
+          target.q.setFromEuler(euler.set(-0.06 + sway * 0.5, yaw.current + sway, 0));
         }
-        lambda = t < 0.45 ? 9 : 5;
+        // Eased off the mark; quick once it's yours, so a turn follows your finger.
+        lambda = out ? 6 * ease(t) : beat === "held" ? 10 : 4 * ease(t - BOX_TIMES.pullOut);
         break;
+      }
       default:
         target.p.copy(onCounter.p);
         target.q.copy(onCounter.q);
-        lambda = 5;
+        lambda = beat === "unwrapping" ? 3.5 * ease(t, 0.8) : 5;
     }
     dampTo(b, target, lambda, dt);
 
     // The lid rides on the box until the unwrap takes it off.
-    const off = !(beat === "shelf" || beat === "pulling" || (beat === "unwrapping" && t < 1.0));
+    const off = !(beat === "shelf" || beat === "pulling" || beat === "held" || (beat === "unwrapping" && t < BOX_TIMES.lidOff));
     if (!off) {
       m.compose(b.position, b.quaternion, b.scale).multiply(lidLocal);
       m.decompose(l.position, l.quaternion, l.scale);
     } else {
-      const src = beat === "unwrapping" && t < 1.45 ? lifted : lidRest;
+      const src = beat === "unwrapping" && t < BOX_TIMES.lidDown ? lifted : lidRest;
       lidTarget.p.copy(src.p);
       lidTarget.q.copy(src.q);
-      dampTo(l, lidTarget, 7, dt);
+      dampTo(l, lidTarget, beat === "unwrapping" ? 5 * ease(t - BOX_TIMES.lidOff, 0.4) : 7, dt);
     }
 
-    // The shrinkwrap: on until the unwrap tears it (0.55 to 1.0 s), then gone for good.
+    // The shrinkwrap: on until the unwrap tears it (from `wrapTear`, over most of a second), then gone for good.
     const w = wrap.current;
     if (w) {
-      const gone = beat !== "shelf" && beat !== "pulling" && !(beat === "unwrapping" && t < 0.55);
+      const gone = beat !== "shelf" && beat !== "pulling" && beat !== "held" && !(beat === "unwrapping" && t < BOX_TIMES.wrapTear);
       const mat = art.wrap;
       const aim = gone ? 0 : WRAP;
-      mat.opacity += (aim - mat.opacity) * (c.snap ? 1 : 1 - Math.exp(-6 * dt));
+      mat.opacity += (aim - mat.opacity) * (c.snap ? 1 : 1 - Math.exp(-3.5 * dt));
       w.scale.setScalar(1 + ((WRAP - mat.opacity) / WRAP) * 0.14);
       w.visible = mat.opacity > 0.01;
     }
