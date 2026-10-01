@@ -8,7 +8,7 @@
 // Effect actions do the impure part through the Sim service and report back with SYNCED, which is where card and
 // outcome changes move the machine. Player input is just an event: choosing a card is `CHOOSE`, and the machine
 // forwards it into the sim as a `chooseEvent` command on the next tick.
-import { Clock, Effect, Option, Schema, Stream } from "effect";
+import { Cause, Clock, Effect, Option, Schema, Stream } from "effect";
 import { fromEffectEventStream, setupEffect } from "@xstate/effect";
 import type { Command } from "../sim/commands";
 import { dailySeed } from "../sim/daily";
@@ -30,6 +30,24 @@ export const TOAST_MS = 5200;
 export const BATCH_TOAST_MS = 9000;
 /** The autosave runs when the calendar turns a month (30 game days: three minutes at 1×). */
 export const AUTOSAVE_DAYS = 30;
+
+/**
+ * FLT-81: an action that throws must not take the app down with it. XState ends an actor whose action fails, and drops
+ * every event after that without a word: the clock stops, ▶ and Save do nothing, and only a reload helps. So each action
+ * owns its failure: the cause goes to the console (the first time, then at 10, 100, ... so a bug that fires every frame
+ * cannot flood it), and the app carries on. The next frame tries again.
+ */
+const survive = <R>(name: string, effect: Effect.Effect<void, never, R>) =>
+  effect.pipe(Effect.catchCause((cause) => Effect.sync(() => reportFailure(name, cause))));
+
+const failures = new Map<string, number>();
+function reportFailure(name: string, cause: Cause.Cause<unknown>) {
+  const pretty = Cause.pretty(cause);
+  const key = `${name}: ${pretty.split("\n")[0]}`;
+  const n = (failures.get(key) ?? 0) + 1;
+  failures.set(key, n);
+  if (Number.isInteger(Math.log10(n))) console.error(`[app] the ${name} action failed${n > 1 ? ` (${n} times)` : ""}; the game carries on.\n${pretty}`);
+}
 
 /** A type-only schema: the context carries these shapes as they are, with nothing to validate at runtime. */
 const opaque = <T>() => Schema.declare<T>((_value): _value is T => true);
@@ -175,7 +193,7 @@ export const appMachine = setupEffect({
   actions: {
     /** Run `n` ticks (commands on the first), then report. */
     advance: (args) =>
-      Effect.gen(function* () {
+      survive("advance", Effect.gen(function* () {
         const sim = yield* Sim;
         const p = args.params as { n: number; commands: readonly Command[]; alpha: number; publish: boolean; now: number; ui: UiSelection };
         sim.ui = p.ui;
@@ -183,10 +201,10 @@ export const appMachine = setupEffect({
         sim.alpha = p.alpha;
         const report = sim.report(p.publish);
         if (report) args.self.send({ type: "SYNCED", report, now: p.now });
-      }),
+      })),
     /** Time stands still: apply what was queued, then report. */
     hold: (args) =>
-      Effect.gen(function* () {
+      survive("hold", Effect.gen(function* () {
         const sim = yield* Sim;
         const p = args.params as { commands: readonly Command[]; publish: boolean; now: number; ui: UiSelection };
         sim.ui = p.ui;
@@ -194,10 +212,10 @@ export const appMachine = setupEffect({
         sim.applyNow(p.commands);
         const report = sim.report(p.publish);
         if (report) args.self.send({ type: "SYNCED", report, now: p.now });
-      }),
+      })),
     /** A new lab, seeded from the clock and the old seed. */
     newLab: (args) =>
-      Effect.gen(function* () {
+      survive("newLab", Effect.gen(function* () {
         const sim = yield* Sim;
         const ms = yield* Clock.currentTimeMillis;
         const daily = args.event.type === "DAILY_LAB" ? args.event.daily : null;
@@ -206,28 +224,28 @@ export const appMachine = setupEffect({
         else sim.reset(seed, daily);
         const report = sim.report(true, true);
         if (report) args.self.send({ type: "SYNCED", report, now: 0 });
-      }),
+      })),
     /** A save's World becomes the live one. */
     loadLab: (args) =>
-      Effect.gen(function* () {
+      survive("loadLab", Effect.gen(function* () {
         const sim = yield* Sim;
         if (args.event.type !== "LOAD_LAB") return;
         sim.load(args.event.world, args.event.def);
         const report = sim.report(true, true);
         if (report) args.self.send({ type: "SYNCED", report, now: 0 });
-      }),
+      })),
     /**
      * Save the World as it stands (copied in one synchronous stringify, so ticks can carry on while it compresses).
      * Without a Saves service (tests, a headless shell) this does nothing.
      */
     save: (args) =>
-      Effect.gen(function* () {
+      survive("save", Effect.gen(function* () {
         const saves = yield* Effect.serviceOption(Saves);
         if (Option.isNone(saves)) return;
         const sim = yield* Sim;
         const p = args.params as { slot: SlotId; why: SaveWhy };
         yield* saves.value.save(sim.world, p.slot, p.why, (text, tone) => args.self.send({ type: "TOAST", text, tone }));
-      }),
+      })),
   },
 }).createMachine({
   context: ({ input }) => ({

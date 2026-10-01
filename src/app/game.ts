@@ -22,6 +22,7 @@ import { createSimHandle, SimHandle, simLayer } from "./sim";
 import { modSession } from "./mods";
 import { SaveDesk, Saves, isStagedLink } from "./saves";
 import { demoSaveStore } from "./savesDemo";
+import { watchActor } from "./watchdog";
 import { browserStorage, makeSaveStore } from "../save";
 
 const midgame = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("scenario") === "midgame";
@@ -69,12 +70,35 @@ if (midgame) {
 // Say which mods are running, and whether any failed (the details are in Start ▸ Settings ▸ Mods…). Ids below zero never meet the World's.
 if (mods.mods.length > 0) first.toasts.push({ id: -1, text: `Mods on: ${mods.mods.map((m) => m.name).join(", ")}`, tone: "good", source: "mods", importance: "you" });
 if (mods.errors.length > 0) first.toasts.push({ id: -2, text: `${mods.errors.length === 1 ? "A mod" : `${mods.errors.length} mods`} didn't load. See Start, Settings, Mods…`, tone: "bad", source: "mods", importance: "you" });
-export const app = createActorAtoms(runtime, appMachine, { input: { speed: initialSpeed, first } });
+/** The actor's input. The watchdog swaps in the live World's report before it restarts the actor (FLT-81). */
+const input = { speed: initialSpeed as Speed, first };
+export const app = createActorAtoms(runtime, appMachine, { input });
 /** A notice for the first frame, from before the app mounts (the skin migration, FLT-71): the actor starts with it, like the mods line. */
 export const bootNotice = (text: string, tone: Tone = "neutral") => void first.toasts.push({ id: -3, text, tone, importance: "you" });
 
 /** Owns the atoms' lifetimes. Mount `app.actor` to start the loop; dispose it to stop everything. */
 export const registry = AtomRegistry.make();
+
+/**
+ * Start the app: mount the actor (its frame loop with it) and its watchdog. Returns the stop. If the actor dies on a
+ * bug, the watchdog builds a new one on the same World, at the speed the player had (FLT-81).
+ */
+export function startApp(): () => void {
+  const unmount = registry.mount(app.actor);
+  const unwatch = watchActor({
+    registry,
+    snapshot: app.snapshot,
+    restart: (last) => {
+      input.speed = last.speed;
+      input.first = sim.report(true, true)!;
+      registry.refresh(app.actor);
+    },
+  });
+  return () => {
+    unwatch();
+    unmount();
+  };
+}
 
 const pick = <T>(select: (c: AppContext) => T) => app.select((s) => select(s.context));
 
@@ -176,7 +200,10 @@ if (typeof window !== "undefined") {
     const w = sim.world;
     const c = appNow();
     const snap = c?.snap;
-    return { date: w.day, day: w.day, tick: w.tick, ticksPerDay: TICKS_PER_DAY, paused: c ? c.speed === 0 || autoPaused(c) || !!c.event : true, speed: c?.speed ?? initialSpeed,
+    // FLT-81: whether the app actor is taking input ("active"), and what stopped it if not.
+    const result = registry.get(app.snapshot);
+    const actor = AsyncResult.isSuccess(result) ? { status: result.value.status, error: result.value.status === "error" ? String(result.value.error) : null } : { status: "starting", error: null };
+    return { actor, date: w.day, day: w.day, tick: w.tick, ticksPerDay: TICKS_PER_DAY, paused: c ? c.speed === 0 || autoPaused(c) || !!c.event : true, speed: c?.speed ?? initialSpeed,
       walkers: [...w.walkers.map((p) => ({ id: p.id, kind: p.kind, x: p.x, z: p.z, mode: p.machine.value })), ...w.staff.map((p) => ({ id: p.id, kind: p.job, x: p.x, z: p.z, mode: p.machine.value }))],
       gate: { x: w.gate.x, z: w.gate.z }, coachId: c?.snap.coach?.id ?? null,
       // FLT-53, the journey test: what the HUD shows, and the map a player sees, as plain copies.

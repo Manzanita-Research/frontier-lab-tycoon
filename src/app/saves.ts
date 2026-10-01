@@ -1,7 +1,7 @@
 // The app's side of saving (FLT-65): the Saves service the app machine's `save` action writes through, and the rules
 // for when a link may autosave or greet you with "Continue". The format itself is `src/save/`.
 import { Context, Effect } from "effect";
-import { encodeSave, makeSaveStore, type SaveError, type SaveMeta, type SaveMod, type SaveStore, type SlotId } from "../save";
+import { encodeSave, makeSaveStore, saveError, type SaveError, type SaveMeta, type SaveMod, type SaveStore, type SlotId } from "../save";
 import type { GameState, Tone } from "../sim/types";
 
 /** Why a save is being written: the three autosave moments, or the player's own Save. */
@@ -60,6 +60,9 @@ export class SaveDesk {
     // The World is copied (stringified) before anything yields.
     return encodeSave(world, { mods: this.mods(), skin: this.skin() }).pipe(
       Effect.flatMap((save) => this.store.write(slot, save)),
+      // A bug (a World that won't stringify, a store that throws) is answered like any failure: the Save window waits
+      // for this result, and without one it said "Reading drive A:…" for ever (FLT-81).
+      Effect.catchDefect((defect) => Effect.fail(saveError("storage", `This save couldn't be written: ${defect instanceof Error ? defect.message : String(defect)}`))),
       Effect.match({
         onSuccess: (meta) => {
           if (why === "manual") toast(`Saved "${meta.lab}" to ${slot === "auto" ? "the autosave" : `slot ${slot}`}.`, "good");
