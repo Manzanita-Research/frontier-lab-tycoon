@@ -1,12 +1,15 @@
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import { Vector3 } from "three";
-import { registry, sim } from "../app/game";
+import { appNow, registry, sim, timeHeld } from "../app/game";
 import { createWatch } from "../render/fx/watch";
 import { fx } from "../render/fx/state";
 import { worldX, worldZ } from "../render/coords";
 import { modSession } from "../app/mods";
-import { SoundKit, synthNotes } from "./SoundKit";
+import { skinUiAtom } from "../ui/hud/state";
+import { renderMusic } from "./Band";
+import { MODES, flavourFor } from "./music";
+import { SoundKit, musicFor, synthNotes } from "./SoundKit";
 import { audioReadyAtom, bindSound, mixerAtom } from "./state";
 import { soundCues, soundSnapshot } from "./world";
 import { CUES, HOOKS } from "./score";
@@ -44,6 +47,12 @@ export function SoundLayer() {
           let energy = 0; let peak = 0;
           for (const x of data) { energy += x * x; peak = Math.max(peak, Math.abs(x)); }
           return { cue, variation, rms: Math.sqrt(energy / data.length), peak, duration: buffer.duration };
+        },
+        // FLT-66: the band rendered offline (`[{ at: 0, mode: "zoomies" }]`, seconds, skin), as raw samples for a WAV.
+        modes: MODES,
+        renderMusic: async (takes: { at: number; mode: (typeof MODES)[number] }[], seconds: number, skin = "base", era = "1") => {
+          const buffer = await renderMusic(takes, seconds, { flavour: flavourFor(skin), era });
+          return { sampleRate: buffer.sampleRate, samples: Array.from(buffer.getChannelData(0)) };
         },
       } });
     }
@@ -97,7 +106,9 @@ export function SoundLayer() {
       sound.cue("protest.grow");
     }
     last.current.protesters = protesters;
-    sound.update({ crowd: Math.min(1, density / 60), protesters, training: running ? training.progress / training.cost : null, night: fx.night, era });
+    const app = appNow();
+    const music = musicFor(app?.speed ?? 1, app ? timeHeld(app) : false, registry.get(skinUiAtom).active);
+    sound.update({ crowd: Math.min(1, density / 60), protesters, training: running ? training.progress / training.cost : null, night: fx.night, era, ...music });
   });
   return null;
 }
