@@ -34,7 +34,7 @@ export function Fold({ vm, children }: { vm: HudVM; children: ReactNode }) {
   const list = !goal || vm.visible.arena;
   const said = [training.hasHall ? `${t("training.title")} ${training.pctText}` : null, goal?.line, list ? `${t("objectives.title")} ${objectives.done}/${objectives.total}` : null].filter(Boolean).join(" · ");
   return (
-    <div className={`f95-fold${shown ? " open" : ""}`}>
+    <div className={`f95-fold${shown ? " open" : ""}${shown && !open ? " coached" : ""}`}>
       <button type="button" className="f95-foldbar" aria-expanded={shown} aria-label={said} title={said} onClick={() => setOpen(!shown)}>
         {training.hasHall && (
           <span className={`run${training.justShipped ? " shipped" : ""}`}>

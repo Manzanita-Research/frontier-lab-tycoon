@@ -1692,6 +1692,10 @@
     font-weight: bold;
   }
   /* The goal note's next step: what, where, and the button. */
+  /* The tutorial opened the phone's fold to point at the goal: its balloon is talking, so the note keeps to the goal and leaves the map room. */
+  .f95-fold.coached .f95-post .f95-nextstep {
+    display: none;
+  }
   .f95-post .f95-nextstep {
     display: flex;
     align-items: center;
