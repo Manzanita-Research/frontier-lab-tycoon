@@ -11,6 +11,14 @@ export function noiseBuffer(ctx: BaseAudioContext) {
   return buffer;
 }
 
+/** White noise for the band's hats, snares and consonants: the brown `noiseBuffer` has almost nothing above 5 kHz. */
+export function whiteNoise(ctx: BaseAudioContext) {
+  const buffer = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+  return buffer;
+}
+
 /**
  * Click-free envelopes. Each voice releases and disconnects its nodes on completion. A cue is a plain `Note`; music's
  * `Tone`s may also swell in slowly (`attack`), detune, pick the noise filter, or sing a vowel through two formant filters.
@@ -18,6 +26,8 @@ export function noiseBuffer(ctx: BaseAudioContext) {
 export function voice(ctx: BaseAudioContext, bus: AudioNode, n: Tone, at: number, noise: AudioBuffer) {
   const start = at + n.at;
   const envelope = ctx.createGain();
+  // A gain starts at 1: a source that starts between two samples can leak one loud sample before `start`, so close it now.
+  envelope.gain.value = 0;
   envelope.gain.setValueAtTime(0.0001, start);
   envelope.gain.exponentialRampToValueAtTime(Math.max(0.0002, n.gain), start + (n.attack === undefined ? 0.008 : Math.min(Math.max(0.008, n.attack), n.duration * 0.92)));
   envelope.gain.exponentialRampToValueAtTime(0.0001, start + n.duration);

@@ -72,7 +72,7 @@ export class SoundKit {
         this.music.connect(this.master); this.sfx.connect(this.master);
         this.master.connect(limiter(ctx)).connect(ctx.destination);
         this.noise = noiseBuffer(ctx);
-        this.band = new Band(ctx, this.music, this.noise, { mode: this.beds.mode, flavour: this.beds.flavour, era: this.beds.era });
+        this.band = new Band(ctx, this.music, { mode: this.beds.mode, flavour: this.beds.flavour, era: this.beds.era });
         const source = ctx.createBufferSource();
         source.buffer = this.noise; source.loop = true;
         const filter = ctx.createBiquadFilter(); filter.type = "bandpass"; filter.frequency.value = 480; filter.Q.value = 0.8;

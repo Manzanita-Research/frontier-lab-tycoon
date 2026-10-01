@@ -48,11 +48,14 @@ export function SoundLayer() {
           for (const x of data) { energy += x * x; peak = Math.max(peak, Math.abs(x)); }
           return { cue, variation, rms: Math.sqrt(energy / data.length), peak, duration: buffer.duration };
         },
-        // FLT-66: the band rendered offline (`[{ at: 0, mode: "zoomies" }]`, seconds, skin), as raw samples for a WAV.
+        // FLT-66: the band rendered offline (`[{ at: 0, mode: "zoomies" }]`, seconds, skin), as base64 float32 samples for a WAV.
         modes: MODES,
         renderMusic: async (takes: { at: number; mode: (typeof MODES)[number] }[], seconds: number, skin = "base", era = "1") => {
           const buffer = await renderMusic(takes, seconds, { flavour: flavourFor(skin), era });
-          return { sampleRate: buffer.sampleRate, samples: Array.from(buffer.getChannelData(0)) };
+          const bytes = new Uint8Array(buffer.getChannelData(0).buffer);
+          let binary = "";
+          for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+          return { sampleRate: buffer.sampleRate, float32: btoa(binary) };
         },
       } });
     }

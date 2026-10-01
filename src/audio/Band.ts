@@ -1,7 +1,7 @@
 // FLT-66: the band. One gain bus per mode under the music bus, so a switch is two gain ramps at the bar line, and a
 // queue of planned tones that become voices a fraction of a second before they sound (a few nodes per frame, no bursts).
 import { MODES, conduct, meter, plan, type Conductor, type Cue, type Mode, type Want } from "./music";
-import { noiseBuffer, voice } from "./voice";
+import { voice, whiteNoise } from "./voice";
 
 /** Main-thread cost per mode: time spent planning and building voices, and how many voices. */
 export interface ModeCost { frames: number; ms: number; maxMs: number; voices: number; seconds: number }
@@ -14,7 +14,7 @@ export class Band {
   private queue: Cue[] = [];
   private last = -1;
   readonly cost: Record<Mode, ModeCost> = { nap: zero(), walkies: zero(), fetch: zero(), zoomies: zero() };
-  constructor(private ctx: BaseAudioContext, out: AudioNode, private noise: AudioBuffer, want: Want) {
+  constructor(private ctx: BaseAudioContext, out: AudioNode, want: Want, private noise = whiteNoise(ctx)) {
     const bus = () => { const g = ctx.createGain(); g.gain.value = 0; g.connect(out); return g; };
     this.buses = { nap: bus(), walkies: bus(), fetch: bus(), zoomies: bus(), fx: bus() };
     this.buses.fx.gain.value = 1;
@@ -87,7 +87,7 @@ export async function renderMusic(takes: readonly Take[], seconds: number, want:
   const music = ctx.createGain(); const master = ctx.createGain();
   music.gain.value = levels.music; master.gain.value = levels.master;
   music.connect(master).connect(limiter(ctx)).connect(ctx.destination);
-  const band = new Band(ctx, music, noiseBuffer(ctx), { ...want, mode: takes[0]?.mode ?? "walkies" });
+  const band = new Band(ctx, music, { ...want, mode: takes[0]?.mode ?? "walkies" });
   // The same 60 Hz pump the game runs, so the clip hears exactly when a press would have been heard.
   for (let t = 0; t < seconds; t += 1 / 60) {
     for (const take of takes) if (take.at <= t) band.set({ ...want, mode: take.mode });

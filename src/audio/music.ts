@@ -7,6 +7,8 @@ import { CHORDS, eraScore, midi, type Note } from "./score";
 export const MODES = ["nap", "walkies", "fetch", "zoomies"] as const;
 export type Mode = (typeof MODES)[number];
 const ENERGY: Record<Mode, number> = { nap: 0, walkies: 1, fetch: 2, zoomies: 3 };
+/** Each mode's bus level: louder as it speeds up (fetch about +3 dB on walkies, the zoomies about +5), never a wall. */
+export const LEVEL: Record<Mode, number> = { nap: 1, walkies: 1, fetch: 1, zoomies: 0.78 };
 
 /** Paused (by the player, a card or a menu) naps; 1× walks; anything faster fetches; the top speed has the zoomies. */
 export function modeFor(speed: number, paused: boolean, top = 10): Mode {
@@ -40,7 +42,7 @@ export const PALETTES: Record<Flavour, Palette> = {
   // Karaoke night: saws everywhere, a wide chorus, a bright kit.
   disco: { pad: "sawtooth", lead: "sawtooth", bass: "sawtooth", saw: "sawtooth", chop: "sawtooth", detune: 22, ping: "ping", drums: 1.2 },
   // The field guide: soft sines and a kalimba for the inbox.
-  folk: { pad: "sine", lead: "triangle", bass: "sine", saw: "triangle", chop: "triangle", detune: 6, ping: "chime", drums: 0.6 },
+  folk: { pad: "sine", lead: "triangle", bass: "sine", saw: "triangle", chop: "square", detune: 6, ping: "chime", drums: 0.6 },
 };
 const SKIN_FLAVOURS: Readonly<Record<string, Flavour>> = { "frontier-95": "midi", "homepage-98": "midi", "discovery-disc-96": "midi", "karaoke-night": "disco", "field-almanac": "folk" };
 /** A skin's flavour of music; a mod's skin, or one nobody has scored, plays the classic band. */
@@ -72,8 +74,8 @@ const chordOf = (bar: number) => CHORDS[bar % CHORDS.length]!;
 const tone = (at: number, hz: number, duration: number, gain: number, wave: Tone["wave"], extra: Partial<Tone> = {}): Tone => ({ at, hz, duration, gain, wave, ...extra });
 
 // Drums are plain tones too: a kick is a sine that dives, a snare and hats are filtered noise.
-const kick = (at: number, gain = 0.3): Tone => tone(at, 150, 0.22, gain, "sine", { endHz: 42 });
-const snare = (at: number, p: Palette, gain = 0.09): Tone[] => [tone(at, 2200 * p.drums, 0.11, gain, "noise", { filter: "bandpass", q: 0.9, endHz: 1500 * p.drums }), tone(at, 230, 0.07, gain * 0.8, "triangle", { endHz: 170 })];
+const kick = (at: number, gain = 0.18): Tone => tone(at, 150, 0.22, gain, "sine", { endHz: 42 });
+const snare = (at: number, p: Palette, gain = 0.14): Tone[] => [tone(at, 2200 * p.drums, 0.11, gain, "noise", { filter: "bandpass", q: 0.9, endHz: 1500 * p.drums }), tone(at, 230, 0.07, gain * 0.8, "triangle", { endHz: 170 })];
 const hat = (at: number, p: Palette, gain = 0.03, duration = 0.035): Tone => tone(at, 7600 * p.drums, duration, gain, "noise", { filter: "highpass", q: 0.7 });
 
 /** A syllable for the chipmunk choir: an optional consonant onset, a vowel, an optional consonant coda. */
@@ -101,12 +103,12 @@ function sing(s: Syllable, step: number, chord: readonly number[], root: number,
   if (s.onset === "k") out.push(tone(at, 2600, 0.022, 0.06, "noise", { filter: "bandpass", q: 1.5 }));
   const vowelAt = at + (s.onset ? 0.03 : 0);
   // A pitch-corrected scoop up into the note: the hyperpop hiccup.
-  out.push(tone(vowelAt, hz * 0.94, Math.max(0.05, duration - (vowelAt - at)), 0.16 * level(p.chop, "sawtooth"), p.chop, { endHz: hz, vowel: s.vowel }));
+  out.push(tone(vowelAt, hz * 0.94, Math.max(0.05, duration - (vowelAt - at)), 0.32 * level(p.chop, "sawtooth"), p.chop, { endHz: hz, vowel: s.vowel }));
   if (s.coda === "t") out.push(tone(at + duration, 5200, 0.02, 0.05, "noise", { filter: "highpass" }));
   return out;
 }
 /** The inbox. Classic pings, Frontier 95 dings a little chord, the field guide plucks a kalimba. */
-function ping(at: number, chord: readonly number[], root: number, p: Palette, gain = 0.05): Tone[] {
+function ping(at: number, chord: readonly number[], root: number, p: Palette, gain = 0.07): Tone[] {
   const top = root + 36;
   if (p.ping === "ding") return [0, 1, 2].map((i) => tone(at + i * 0.045, midi(top + chord[i]!), 0.35, gain * 0.8, "triangle"));
   if (p.ping === "chime") return [tone(at, midi(top + chord[2]!), 0.4, gain, "sine"), tone(at, midi(top + chord[2]!) * 2.76, 0.12, gain * 0.35, "sine")];
@@ -140,18 +142,18 @@ export function barTones({ mode, flavour, era, bar }: BarSpec): Tone[] {
       for (const n of chord) out.push(tone(0, midi(root + n), beat * 3.8, 0.034 * level(p.pad, "triangle"), p.pad));
       for (let i = 0; i < 8; i++) out.push(tone(i * step * 2, midi(root + chord[(bar * 8 + i) % 3]! + (i % 4 === 3 ? 24 : 12)), step * 1.4, 0.024 * level(p.lead, "square"), p.lead));
       for (let i = 0; i < 8; i++) out.push(tone(i * step * 2, midi(root - 12 + chord[0]!), step * 1.6, (i % 2 ? 0.05 : 0.075) * level(p.bass, "triangle"), p.bass));
-      out.push(kick(0, 0.22), kick(beat * 2, 0.22));
-      out.push(...snare(beat, p, 0.05), ...snare(beat * 3, p, 0.05));
+      out.push(kick(0, 0.13), kick(beat * 2, 0.13));
+      out.push(...snare(beat, p, 0.08), ...snare(beat * 3, p, 0.08));
       for (let i = 0; i < 16; i++) out.push(hat(i * step, p, i % 2 ? 0.026 : 0.011));
       break;
     }
     case "zoomies": {
       const glitch = bar % 4 === 3;
       // Four on the floor, except where the drummer's laptop crashes into a stutter.
-      for (let b = 0; b < (glitch ? 3 : 4); b++) out.push(kick(b * beat, 0.32));
-      if (bar % 2 === 1) out.push(kick(beat * 3.5, 0.2));
+      for (let b = 0; b < (glitch ? 3 : 4); b++) out.push(kick(b * beat));
+      if (bar % 2 === 1) out.push(kick(beat * 3.5, 0.11));
       out.push(...snare(beat, p), ...(glitch ? [] : snare(beat * 3, p)));
-      if (glitch) for (let i = 0; i < 8; i++) out.push(...snare(beat * 3 + i * step / 2, p, 0.035 + i * 0.008).map((t) => ({ ...t, hz: t.hz * (1 + i * 0.12), duration: step / 2 })));
+      if (glitch) for (let i = 0; i < 8; i++) out.push(...snare(beat * 3 + i * step / 2, p, 0.05 + i * 0.012).map((t) => ({ ...t, hz: t.hz * (1 + i * 0.12), duration: step / 2 })));
       for (let i = 0; i < 16; i++) out.push(hat(i * step, p, i % 4 === 2 ? 0.035 : 0.014, i % 4 === 2 ? 0.06 : 0.03));
       // Sidechain pumping: every beat the chord swells back in after the kick ducks it.
       for (let b = 0; b < 4; b++) for (const n of chord) for (const d of p.detune ? [-p.detune, p.detune] : [0]) {
@@ -161,7 +163,7 @@ export function barTones({ mode, flavour, era, bar }: BarSpec): Tone[] {
       for (let b = 0; b < 4; b++) out.push(tone(b * beat + step * 2, midi(root - 12 + chord[0]!), step * 1.8, 0.07 * level(p.bass, "triangle"), p.bass, { attack: 0.01 }));
       for (const s of bar % 2 ? HOOK_B : HOOK_A) out.push(...sing(s, step, chord, root, p));
       // The inbox: a ping on the and-of-four every other bar, and a cascade every eighth bar.
-      if (bar % 8 === 7) for (const [i, at] of [7, 9, 11, 12, 13, 14].entries()) out.push(...ping(at * step, chord, root + i, p, 0.03 + i * 0.004));
+      if (bar % 8 === 7) for (const [i, at] of [7, 9, 11, 12, 13, 14].entries()) out.push(...ping(at * step, chord, root + i, p, 0.04 + i * 0.006));
       else if (bar % 2 === 1) out.push(...ping(step * 14, chord, root, p));
       // A bit-crushed blip: the sound of a stack trace scrolling past.
       if (bar % 4 === 1) out.push(tone(step * 15, 3000, step, 0.025, "square", { endHz: 180 }));
@@ -222,7 +224,7 @@ export function plan(c: Conductor, now: number, horizon: number): Plan {
   if (!lane || lane.start < now - 0.25) {
     const bar = lane?.bar ?? 0;
     lane = { ...want, bar, start: now };
-    for (const bus of MODES) fades.push(bus === want.mode ? { bus, at: now, from: 0, to: 1, over: 0.3 } : { bus, at: now, from: 0, to: 0, over: 0 });
+    for (const bus of MODES) fades.push(bus === want.mode ? { bus, at: now, from: 0, to: LEVEL[bus], over: 0.3 } : { bus, at: now, from: 0, to: 0, over: 0 });
   }
   while (lane.start < now + horizon) {
     if (want.mode !== lane.mode) {
@@ -231,7 +233,7 @@ export function plan(c: Conductor, now: number, horizon: number): Plan {
         const played = t.tape ? tapeStop(tone, t.fadeOut) : tone.at < t.fadeOut ? tone : null;
         if (played) cues.push({ bus: lane.mode, tone: { ...played, at: lane.start + played.at } });
       }
-      fades.push({ bus: lane.mode, at: lane.start, from: 1, to: 0, over: t.fadeOut }, { bus: want.mode, at: lane.start, from: 0, to: 1, over: t.fadeIn });
+      fades.push({ bus: lane.mode, at: lane.start, from: LEVEL[lane.mode], to: 0, over: t.fadeOut }, { bus: want.mode, at: lane.start, from: 0, to: LEVEL[want.mode], over: t.fadeIn });
       if (want.mode === "zoomies") cues.push({ bus: "fx", tone: tone(lane.start, 6400, 1.2, 0.08, "noise", { filter: "highpass", q: 0.5, endHz: 3000 }) });
     }
     lane = { ...want, bar: lane.bar, start: lane.start };

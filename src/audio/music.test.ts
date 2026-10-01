@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FLAVOURS, MODES, barLength, barTones, conduct, flavourFor, type Flavour, meter, modeFor, plan, tapeStop, transition, type Cue, type Fade, type Mode, type Want } from "./music";
+import { FLAVOURS, LEVEL, MODES, barLength, barTones, conduct, flavourFor, type Flavour, meter, modeFor, plan, tapeStop, transition, type Cue, type Fade, type Mode, type Want } from "./music";
 import { CHORDS, eraScore, midi } from "./score";
 
 const ERA = "1";
@@ -102,8 +102,8 @@ describe("switching speed waits for the next bar line (FLT-66)", () => {
     const zoomies = cues.filter((c) => c.bus === "zoomies");
     expect(Math.min(...zoomies.map((c) => c.tone.at))).toBeCloseTo(line, 9);
     const t = transition("walkies", "zoomies", ERA);
-    expect(fades).toContainEqual({ bus: "walkies", at: line, from: 1, to: 0, over: t.fadeOut });
-    expect(fades).toContainEqual({ bus: "zoomies", at: line, from: 0, to: 1, over: t.fadeIn });
+    expect(fades).toContainEqual({ bus: "walkies", at: line, from: LEVEL.walkies, to: 0, over: t.fadeOut });
+    expect(fades).toContainEqual({ bus: "zoomies", at: line, from: 0, to: LEVEL.zoomies, over: t.fadeIn });
     // The walkies band plays on under its fade, then stops.
     const tail = cues.filter((c) => c.bus === "walkies" && c.tone.at >= line);
     expect(tail.length).toBeGreaterThan(0);
