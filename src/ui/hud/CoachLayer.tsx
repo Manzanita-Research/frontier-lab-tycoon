@@ -2,7 +2,8 @@
 // active skin's `Coach` slot says the line. It steps aside while a card or a dialog is up, and keeps off open windows. Skin
 // independent on purpose: what to light is found by `[data-coach-active]` (every skin marks its targets with the kit's
 // `useCoach`), so a new skin gets the spotlight for free. The dimming never eats a click: the player can always do the thing.
-import { useEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { useSkin } from "../../skins/context";
 import type { Rect } from "../../skins/kit/place";
 import type { HudActions, HudVM } from "./types";
@@ -61,33 +62,72 @@ interface Found {
   avoid: Rect[];
 }
 
-/** Follow the target (a menu opening, a window moving) without re-rendering per frame: state changes only when a box moves. */
+const NONE: Found = { rect: null, panel: null, avoid: [] };
+
+/** What a DOM change looks like to the coach (a `MutationRecord`, cut down so it is tested without a DOM). */
+export interface WindowChange {
+  target: { nodeType: number; matches?(selector: string): boolean };
+  addedNodes: ArrayLike<{ nodeType: number; matches?(selector: string): boolean; querySelector?(selector: string): unknown }>;
+}
+
+/**
+ * A window opened, or one folded or unfolded (its body came or went): the coach must look again before the frame is painted, or
+ * its balloon sits on that window until the next look (FLT-77: the Properties window the "read a researcher's mind" step opens).
+ * Changes inside a window (a stat ticking, a tab) are left to the ten looks a second.
+ */
+export function opensWindow(change: WindowChange): boolean {
+  const AVOID = "[data-coach-avoid]";
+  if (change.target.nodeType === 1 && change.target.matches?.(AVOID)) return true;
+  for (let i = 0; i < change.addedNodes.length; i++) {
+    const node = change.addedNodes[i]!;
+    if (node.nodeType === 1 && (node.matches?.(AVOID) || node.querySelector?.(AVOID))) return true;
+  }
+  return false;
+}
+
+/**
+ * Follow the target (a menu opening, a window moving) without re-rendering per frame: state changes only when a box moves. It
+ * looks when the target changes and whenever a window opens, before the frame is painted, and ten times a second besides.
+ */
 function useSpotlight(target: string | null): Found {
-  const [found, setFound] = useState<Found>({ rect: null, panel: null, avoid: [] });
-  useEffect(() => {
+  const [found, setFound] = useState<Found>(NONE);
+  useLayoutEffect(() => {
     if (!target) {
-      setFound({ rect: null, panel: null, avoid: [] });
+      setFound(NONE);
       return;
     }
     let raf = 0;
     let checked = 0;
-    let last: Found = { rect: null, panel: null, avoid: [] };
+    let last: Found = NONE;
+    const look = (now: boolean) => {
+      const rect = measureTarget(target);
+      const panel = rect ? measurePanel(target) : null;
+      const avoid = measureAvoid();
+      if (sameRect(rect, last.rect) && sameRect(panel, last.panel) && sameRects(avoid, last.avoid)) return;
+      last = { rect, panel, avoid };
+      // A window just opened: move the balloon in this frame, not the next one.
+      if (now) flushSync(() => setFound(last));
+      else setFound(last);
+    };
     // Ten looks a second are plenty to follow a menu or a window; asking the layout every frame costs the map frames on a slow machine.
-    const frame = (now: number) => {
-      if (now - checked >= 90) {
-        checked = now;
-        const rect = measureTarget(target);
-        const panel = rect ? measurePanel(target) : null;
-        const avoid = measureAvoid();
-        if (!sameRect(rect, last.rect) || !sameRect(panel, last.panel) || !sameRects(avoid, last.avoid)) {
-          last = { rect, panel, avoid };
-          setFound(last);
-        }
+    const frame = (t: number) => {
+      if (t - checked >= 90) {
+        checked = t;
+        look(false);
       }
       raf = requestAnimationFrame(frame);
     };
+    // A new step knows where the windows are in its first frame (in a layout effect, a state change lands before the paint).
+    look(false);
     raf = requestAnimationFrame(frame);
-    return () => cancelAnimationFrame(raf);
+    const opened = typeof MutationObserver === "undefined" ? null : new MutationObserver((changes) => {
+      if (changes.some(opensWindow)) look(true);
+    });
+    opened?.observe(document.body, { childList: true, subtree: true });
+    return () => {
+      cancelAnimationFrame(raf);
+      opened?.disconnect();
+    };
   }, [target]);
   return found;
 }
