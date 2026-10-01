@@ -1,14 +1,14 @@
 {
   "base": {
     "ref": "origin/main",
-    "sha": "babb740d8cda4c2161ce857838435028a0504551"
+    "sha": "4cbc20afc6ba6bbe3e625d47c482897570265aed"
   },
   "head": {
     "branch": "flt-67-accounts",
-    "sha": "777ce62",
+    "sha": "9457d26",
     "dirty": true
   },
-  "seconds": 68.542,
+  "seconds": 103.944,
   "problems": [],
   "rows": [
     {
@@ -18,7 +18,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/off/after/overview.png",
       "title": "The campus, mid-morning, paused",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/off/compare/overview.png",
-      "changed": 0.001121141975308642
+      "changed": 0.0012708333333333332
     },
     {
       "scene": "inspector",
@@ -27,7 +27,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/off/after/inspector.png",
       "title": "Tap a researcher: the inspector opens",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/off/compare/inspector.png",
-      "changed": 0.00045138888888888887
+      "changed": 0.0010185185185185184
     },
     {
       "scene": "event",
@@ -36,7 +36,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/off/after/event.png",
       "title": "An event card lands (the Water Discourse)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/off/compare/event.png",
-      "changed": 0.001841820987654321
+      "changed": 0.002341820987654321
     },
     {
       "scene": "phone",
@@ -45,7 +45,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/off/after/phone.png",
       "title": "The same campus on a phone (390x844)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-67/off/compare/phone.png",
-      "changed": 0.000030380362133916635
+      "changed": 0.0021987787094422165
     }
   ],
   "errors": []
