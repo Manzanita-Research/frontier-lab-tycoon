@@ -44,7 +44,8 @@ export const PRESENT = new THREE.Vector3(0.95, 1.22, 1.05);
 export const EIGHTH = Math.PI / 4;
 /** The opened box lies here on the counter. */
 export const TRAY = new THREE.Vector3(2.15, COUNTER_Y + HERO_SIZE[2] / 2, 0.6);
-export const LID_REST = new THREE.Vector3(2.62, COUNTER_Y + 0.008, 0.26);
+/** The lid, face up beside the tray. It is as deep as the box (FLT-95: a cap over the whole box), so it stands that high. */
+export const LID_REST = new THREE.Vector3(2.62, COUNTER_Y + HERO_SIZE[2] / 2 + 0.001, 0.26);
 /** Items held up close float here, facing +z. */
 export const HOLD = new THREE.Vector3(2.15, 1.3, 1.0);
 /** The kiosk's CRT screen (centre, size) and the CD-ROM drawer. */
@@ -81,7 +82,8 @@ export function pose(p: THREE.Vector3 | [number, number, number], rx = 0, ry = 0
 }
 /** Move an object toward a pose. `lambda` is how quickly (about 1/seconds). */
 export function dampTo(o: THREE.Object3D, target: Pose, lambda: number, dt: number) {
-  const a = k(lambda, dt);
+  // A snap lands at once, even where the rate is still easing up from nothing (0 × Infinity would be NaN).
+  const a = dt === Infinity ? 1 : k(lambda, dt);
   o.position.lerp(target.p, a);
   o.quaternion.slerp(target.q, a);
 }
@@ -102,6 +104,8 @@ export type Clock = {
   /** FLT-95: the box in your hands, while a drag turns it: radians past `context.turn`, and eighths already sent. */
   spin: number;
   spinSent: number;
+  /** FLT-95: where the box is this frame, so the contents shut inside it ride along until the lid is off. */
+  tray: THREE.Vector3;
 };
 
 export type StageProps = { beat: string; context: IntroContext; send: (e: IntroEvent) => void };

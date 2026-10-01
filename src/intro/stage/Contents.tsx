@@ -6,13 +6,14 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import * as THREE from "three";
 import { paintCard, paintEula, paintFloppy, paintOverlay } from "../art";
 import { ITEMS, type ItemId } from "../content";
+import { contentsHidden } from "./box";
 import { Book3D } from "./Book3D";
 import { Coa } from "./Coa";
 import { Disc } from "./Disc";
 import { discTurn } from "./disc";
 import { INSERT_ART, useArt } from "./textures";
 import { ITEM_SIZE, REST, REST_TALL } from "./items";
-import { BOX_TIMES, canvasTexture, DRAWER_IN_Z, DRAWER_OUT_Z, DRAWER_Y, dampTo, ease, flat, frameDt, HOLD, pose, TOWER, TRAY, useClock, type Pose, type StageProps } from "./rig";
+import { BOX_TIMES, canvasTexture, DRAWER_IN_Z, DRAWER_OUT_Z, DRAWER_Y, dampTo, ease, flat, frameDt, HOLD, pose, TOWER, useClock, type Pose, type StageProps } from "./rig";
 
 type Props = StageProps & { weightsKey: string };
 
@@ -61,7 +62,9 @@ function Item({ id, order, beat, context, send, children }: StageProps & { id: I
   const held = beat === "focus" && context.item === id;
   const tall = useThree((s) => s.size.width < s.size.height);
   const pickable = beat === "open" || beat === "focus";
-  const inTray = useMemo(() => flat(TRAY.x, TRAY.y - 0.02 + order * 0.003, TRAY.z, 0), [order]);
+  /** Where it lies in the box, stacked by `order`: on top of `clock.tray`, which follows the box until the lid is off. */
+  const inTray = useMemo(() => flat(0, -0.02 + order * 0.003, 0, 0), [order]);
+  const placed = useRef(false);
   const holdPose = useMemo(() => pose(HOLD, id === "manual" ? -0.08 : -0.12, 0, 0), [id]);
   const target = useMemo<Pose>(() => ({ p: new THREE.Vector3(), q: new THREE.Quaternion() }), []);
   const turn = useMemo(() => new THREE.Quaternion(), []);
@@ -77,14 +80,20 @@ function Item({ id, order, beat, context, send, children }: StageProps & { id: I
     const o = ref.current;
     if (!o) return;
     const c = clock.current;
-    const dt = frameDt(c, raw);
+    // Shut in the box, it is out of sight and goes wherever the box goes; and on its first frame it starts where it
+    // belongs, never flying in from the middle of the room.
+    const hidden = contentsHidden(beat, c.t);
+    o.visible = !hidden;
+    const dt = hidden || !placed.current ? Infinity : frameDt(c, raw);
+    placed.current = true;
     let lambda = 7;
     const rest = (tall ? REST_TALL : REST)[id];
     if (beat === "unwrapping") {
       // The lid comes off; then everything slides out, one after another, each one eased off the mark.
       const at = BOX_TIMES.itemsOut + order * BOX_TIMES.itemGap;
       const go = c.t > at;
-      target.p.copy(go ? rest.p : inTray.p);
+      if (go) target.p.copy(rest.p);
+      else target.p.copy(inTray.p).add(c.tray);
       target.q.copy(go ? rest.q : inTray.q);
       if (go) target.p.y += 0.06 * Math.max(0, 1 - (c.t - at) * 1.2);
       lambda = go ? 4.5 * ease(c.t - at, 0.4) : 6;

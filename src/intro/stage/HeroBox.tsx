@@ -1,16 +1,15 @@
 // Our box: on the shelf at eye level, then in your hands (FLT-95: front first, and it waits while you turn it and read
-// the back), laid on the counter, shrinkwrap off, lid off. It is a tray and a lid from the start, so opening it is just
-// the lid leaving.
+// the back), laid on the counter, shrinkwrap off, lid off. It is a tray inside a lid from the start, so opening it is
+// just the lid leaving. The lid is a printed cap over the whole box (./box), so closed it is one seamless volume.
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
-import { paintSpine, paintSticker } from "../art";
-import { HERO } from "../content";
+import { paintBoxSide, paintBoxTop, paintSticker } from "../art";
+import { LID_FACES, TRAY_INSET, WRAP_GAP, type LidFace } from "./box";
 import { useArt, useRoomEnv } from "./textures";
 import { BOX_TIMES, canvasTexture, dampTo, EIGHTH, ease, flat, frameDt, HERO_ON_SHELF, HERO_SIZE, k, LID_REST, pose, PRESENT, TRAY, useClock, type Pose, type StageProps } from "./rig";
 
 const [W, H, D] = HERO_SIZE;
-const LID = 0.012;
 const WALL = 0.004;
 /** The shrinkwrap's strength while it's on (its opacity; it fades to nothing as it comes off). */
 const WRAP = 0.85;
@@ -25,10 +24,12 @@ export function HeroBox({ beat, context, send }: StageProps) {
   const printed = useArt();
   const env = useRoomEnv();
   const art = useMemo(() => {
-    const spine = canvasTexture(paintSpine(HERO.title, ["#3aa0ff", "#0b1440", "#ffe14d"]), 4);
+    const spine = canvasTexture(paintBoxSide(), 4);
+    const topArt = canvasTexture(paintBoxTop(), 4);
     const fresh = canvasTexture(paintSticker("new"), 4);
     const price = canvasTexture(paintSticker("price"), 4);
     const side = new THREE.MeshStandardMaterial({ map: spine, roughness: 0.55 });
+    const top = new THREE.MeshStandardMaterial({ map: topArt, roughness: 0.55 });
     const plain = new THREE.MeshStandardMaterial({ color: "#0b1440", roughness: 0.6 });
     const inner = new THREE.MeshStandardMaterial({ color: "#f3efe2", roughness: 0.95 });
     // Glossy printed card: Patina's roughness map (ink vs. varnish) under a clear coat that catches the room.
@@ -57,7 +58,7 @@ export function HeroBox({ beat, context, send }: StageProps) {
       blending: THREE.AdditiveBlending,
       depthWrite: false,
     });
-    return { spine, fresh, price, side, plain, inner, frontMat, backMat, wrap };
+    return { spine, topArt, fresh, price, side, top, plain, inner, frontMat, backMat, wrap };
   }, [printed, env]);
   useEffect(
     () => () => {
@@ -68,8 +69,6 @@ export function HeroBox({ beat, context, send }: StageProps) {
 
   const shelfPose = useMemo(() => pose(HERO_ON_SHELF), []);
   const target = useMemo<Pose>(() => ({ p: new THREE.Vector3(), q: new THREE.Quaternion() }), []);
-  const lidLocal = useMemo(() => new THREE.Matrix4().makeTranslation(0, 0, D / 2 - LID / 2), []);
-  const m = useMemo(() => new THREE.Matrix4(), []);
   const lidTarget = useMemo<Pose>(() => ({ p: new THREE.Vector3(), q: new THREE.Quaternion() }), []);
   const lifted = useMemo(() => flat(TRAY.x + 0.05, TRAY.y + 0.2, TRAY.z - 0.1, 0.2), []);
   const lidRest = useMemo(() => flat(LID_REST.x, LID_REST.y, LID_REST.z, -0.35), []);
@@ -134,11 +133,13 @@ export function HeroBox({ beat, context, send }: StageProps) {
     }
     dampTo(b, target, lambda, dt);
 
-    // The lid rides on the box until the unwrap takes it off.
+    // Where the contents are while they're shut in (they ride with the box until the lid is off).
+    c.tray.copy(b.position);
+    // The lid is the box until the unwrap takes it off.
     const off = !(beat === "shelf" || beat === "pulling" || beat === "held" || (beat === "unwrapping" && t < BOX_TIMES.lidOff));
     if (!off) {
-      m.compose(b.position, b.quaternion, b.scale).multiply(lidLocal);
-      m.decompose(l.position, l.quaternion, l.scale);
+      l.position.copy(b.position);
+      l.quaternion.copy(b.quaternion);
     } else {
       const src = beat === "unwrapping" && t < BOX_TIMES.lidDown ? lifted : lidRest;
       lidTarget.p.copy(src.p);
@@ -152,8 +153,8 @@ export function HeroBox({ beat, context, send }: StageProps) {
       const gone = beat !== "shelf" && beat !== "pulling" && beat !== "held" && !(beat === "unwrapping" && t < BOX_TIMES.wrapTear);
       const mat = art.wrap;
       const aim = gone ? 0 : WRAP;
+      // It fades where it is, tight to the box (it used to swell as it went, and floated off the box on the table).
       mat.opacity += (aim - mat.opacity) * (c.snap ? 1 : 1 - Math.exp(-3.5 * dt));
-      w.scale.setScalar(1 + ((WRAP - mat.opacity) / WRAP) * 0.14);
       w.visible = mat.opacity > 0.01;
     }
   });
@@ -172,45 +173,45 @@ export function HeroBox({ beat, context, send }: StageProps) {
     onPointerOut: () => setHover(false),
   };
 
-  const trayDepth = D - LID;
-  const tz = -LID / 2;
+  // The tray: four walls and a back (the box's bottom on the counter), a hair inside the lid, lined inside.
+  const tw = W - TRAY_INSET * 2;
+  const th = H - TRAY_INSET * 2;
+  const td = D - TRAY_INSET * 2;
+  const lidFace: Record<LidFace, THREE.Material> = { side: art.side, top: art.top, front: art.frontMat, back: art.backMat };
   return (
     <>
       <group ref={box} {...events} name="Frontier Lab Tycoon (the box)">
-        {/* The tray: a back (with the back-of-box art), four walls and a paper lining. */}
-        <group position={[0, 0, tz]}>
-          <mesh position={[0, 0, -trayDepth / 2 + WALL / 2]} material={[art.plain, art.plain, art.plain, art.plain, art.inner, art.backMat]}>
-            <boxGeometry args={[W, H, WALL]} />
+        <mesh position={[0, 0, -td / 2 + WALL / 2]} material={[art.plain, art.plain, art.plain, art.plain, art.inner, art.backMat]}>
+          <boxGeometry args={[tw, th, WALL]} />
+        </mesh>
+        {[-1, 1].map((s) => (
+          <mesh key={`x${s}`} position={[(s * (tw - WALL)) / 2, 0, 0]} material={s > 0 ? [art.plain, art.inner, art.plain, art.plain, art.inner, art.plain] : [art.inner, art.plain, art.plain, art.plain, art.inner, art.plain]}>
+            <boxGeometry args={[WALL, th, td]} />
           </mesh>
-          {[-1, 1].map((s) => (
-            <mesh key={`x${s}`} position={[(s * (W - WALL)) / 2, 0, 0]} material={[art.side, art.inner, art.plain, art.plain, art.plain, art.plain]}>
-              <boxGeometry args={[WALL, H, trayDepth]} />
-            </mesh>
-          ))}
-          {[-1, 1].map((s) => (
-            <mesh key={`y${s}`} position={[0, (s * (H - WALL)) / 2, 0]} material={[art.plain, art.plain, art.side, art.inner, art.plain, art.plain]}>
-              <boxGeometry args={[W - WALL * 2, WALL, trayDepth]} />
-            </mesh>
-          ))}
-          <mesh position={[0, 0, -trayDepth / 2 + WALL + 0.001]}>
-            <planeGeometry args={[W - WALL * 2, H - WALL * 2]} />
-            <meshStandardMaterial color="#ffe14d" roughness={1} />
+        ))}
+        {[-1, 1].map((s) => (
+          <mesh key={`y${s}`} position={[0, (s * (th - WALL)) / 2, 0]} material={s > 0 ? [art.plain, art.plain, art.plain, art.inner, art.inner, art.plain] : [art.plain, art.plain, art.inner, art.plain, art.inner, art.plain]}>
+            <boxGeometry args={[tw - WALL * 2, WALL, td]} />
           </mesh>
-        </group>
+        ))}
+        <mesh position={[0, 0, -td / 2 + WALL + 0.001]}>
+          <planeGeometry args={[tw - WALL * 2, th - WALL * 2]} />
+          <meshStandardMaterial color="#ffe14d" roughness={1} />
+        </mesh>
         <mesh ref={wrap} name="shrinkwrap" material={art.wrap}>
-          <boxGeometry args={[W + 0.006, H + 0.006, D + 0.006]} />
+          <boxGeometry args={[W + WRAP_GAP * 2, H + WRAP_GAP * 2, D + WRAP_GAP * 2]} />
         </mesh>
       </group>
       <group ref={lid} {...events}>
-        <mesh material={[art.side, art.side, art.side, art.side, art.frontMat, art.plain]}>
-          <boxGeometry args={[W, H, LID]} />
+        <mesh material={LID_FACES.map((f) => lidFace[f])}>
+          <boxGeometry args={[W, H, D]} />
         </mesh>
         {/* Stickers sit on the campus art, clear of the title, the starburst and the badge. */}
-        <mesh position={[W * 0.37, H * 0.17, LID / 2 + 0.0015]} rotation={[0, 0, 0.2]}>
+        <mesh position={[W * 0.37, H * 0.17, D / 2 + 0.0015]} rotation={[0, 0, 0.2]}>
           <planeGeometry args={[0.065, 0.065]} />
           <meshStandardMaterial map={art.fresh} transparent alphaTest={0.3} roughness={0.4} />
         </mesh>
-        <mesh position={[W * 0.38, -H * 0.2, LID / 2 + 0.0015]} rotation={[0, 0, -0.08]}>
+        <mesh position={[W * 0.38, -H * 0.2, D / 2 + 0.0015]} rotation={[0, 0, -0.08]}>
           <planeGeometry args={[0.055, 0.055]} />
           <meshStandardMaterial map={art.price} transparent alphaTest={0.3} roughness={0.4} />
         </mesh>

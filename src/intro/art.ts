@@ -194,6 +194,67 @@ export function paintSpine(title: string, colors: [string, string, string], c = 
   return c;
 }
 
+/** Our box's colours round the sides: the spine's sky-to-navy, with the title in sunrise yellow. */
+const BOX_SIDE: [string, string, string] = ["#3aa0ff", "#0b1440", "#ffe14d"];
+
+/**
+ * FLT-95: our box's sides (both alike, the spine's art grown to the whole face): the Frontier 95 sunrise at the top,
+ * the title up the middle, the CD-ROM band at the foot. Sized to a side's face (depth × height, 1:4).
+ */
+export function paintBoxSide(c = canvas(256, 1024)): HTMLCanvasElement {
+  const g = ctx2d(c);
+  const { width: W, height: H } = c;
+  const grad = g.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, BOX_SIDE[0]);
+  grad.addColorStop(1, BOX_SIDE[1]);
+  g.fillStyle = grad;
+  g.fillRect(0, 0, W, H);
+  paintSunrise(g, W / 2, W * 0.5, W * 0.3);
+  g.save();
+  g.translate(W / 2, H * 0.53);
+  g.rotate(-Math.PI / 2);
+  g.textAlign = "center";
+  g.textBaseline = "middle";
+  fitFont(g, HERO.title, H * 0.62, 900, W * 0.36);
+  g.lineJoin = "round";
+  g.lineWidth = W * 0.05;
+  g.strokeStyle = "#0b1440";
+  g.strokeText(HERO.title, 0, 0);
+  g.fillStyle = BOX_SIDE[2];
+  g.fillText(HERO.title, 0, 0);
+  g.restore();
+  g.fillStyle = "#000080";
+  g.fillRect(0, H * 0.9, W, H * 0.1);
+  g.fillStyle = "#fff";
+  g.textAlign = "center";
+  g.textBaseline = "middle";
+  fitFont(g, "PC CD-ROM", W * 0.8, 900, W * 0.16);
+  g.fillText("PC CD-ROM", W / 2, H * 0.95);
+  return c;
+}
+
+/** FLT-95: our box's top (and bottom): the title across it, the sunrise at one end. Sized to the face (width × depth). */
+export function paintBoxTop(c = canvas(1040, 320)): HTMLCanvasElement {
+  const g = ctx2d(c);
+  const { width: W, height: H } = c;
+  const grad = g.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, BOX_SIDE[0]);
+  grad.addColorStop(1, BOX_SIDE[1]);
+  g.fillStyle = grad;
+  g.fillRect(0, 0, W, H);
+  paintSunrise(g, H * 0.55, H / 2, H * 0.34);
+  g.textAlign = "center";
+  g.textBaseline = "middle";
+  fitFont(g, HERO.title, W - H * 1.3, 900, H * 0.36);
+  g.lineJoin = "round";
+  g.lineWidth = H * 0.05;
+  g.strokeStyle = "#0b1440";
+  g.strokeText(HERO.title, W / 2 + H * 0.35, H / 2);
+  g.fillStyle = BOX_SIDE[2];
+  g.fillText(HERO.title, W / 2 + H * 0.35, H / 2);
+  return c;
+}
+
 /** Someone else's box on the shelf: gradient, a motif, a big title, a CD-ROM band. */
 export function paintShelfFront(box: ShelfBox, c = canvas(384, 480)): HTMLCanvasElement {
   const g = ctx2d(c);

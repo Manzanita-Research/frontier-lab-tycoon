@@ -23,7 +23,7 @@ preloadProps();
 type Props = { intro: Intro; beat: string; context: IntroContext };
 
 export default function Stage({ intro, beat, context }: Props) {
-  const clock = useRef<Clock>({ beat, t: 0, snap: true, tilt: new THREE.Vector2(...(intro.params.tilt ?? [0, 0])), dragging: false, spin: 0, spinSent: 0 });
+  const clock = useRef<Clock>({ beat, t: 0, snap: true, tilt: new THREE.Vector2(...(intro.params.tilt ?? [0, 0])), dragging: false, spin: 0, spinSent: 0, tray: new THREE.Vector3() });
   const fps = useRef<HTMLDivElement>(null);
   const wrap = useRef<HTMLDivElement>(null);
 
