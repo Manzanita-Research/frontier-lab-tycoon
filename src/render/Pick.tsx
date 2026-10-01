@@ -4,6 +4,7 @@ import * as THREE from "three";
 import { atoms, send, sim } from "../app/game";
 import { useApp } from "../app/hooks";
 import { HALF } from "./coords";
+import { onGlass } from "./crt/state";
 
 const v = new THREE.Vector3();
 /** How far, in pixels per unit of zoom, a tap can land from a walker's middle and still count (a fingertip needs 24 at least). */
@@ -22,6 +23,7 @@ export function walkerAt(camera: THREE.Camera & { zoom?: number }, size: { width
     if (w.machine.value === "inside") continue;
     // The middle of the body, not the feet.
     v.set(w.px + (w.x - w.px) * a - HALF, 0.55, w.pz + (w.z - w.pz) * a - HALF).project(camera);
+    onGlass(v);
     const d = Math.hypot((v.x * 0.5 + 0.5) * size.width - px, (-v.y * 0.5 + 0.5) * size.height - py);
     if (d < bestD) {
       bestD = d;
@@ -63,6 +65,7 @@ function screenOf(camera: THREE.Camera, el: HTMLElement, id: number): [number, n
   const a = sim.alpha;
   const rect = el.getBoundingClientRect();
   v.set(w.px + (w.x - w.px) * a - HALF, 0.55, w.pz + (w.z - w.pz) * a - HALF).project(camera);
+  onGlass(v);
   return [rect.left + (v.x * 0.5 + 0.5) * rect.width, rect.top + (-v.y * 0.5 + 0.5) * rect.height];
 }
 

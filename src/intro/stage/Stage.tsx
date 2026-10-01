@@ -3,7 +3,7 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Bloom, EffectComposer, Noise, ToneMapping, Vignette } from "@react-three/postprocessing";
 import { ToneMappingMode } from "postprocessing";
-import { useEffect, useMemo, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import type { Intro } from "../actor";
 import type { IntroContext } from "../machine";
@@ -13,6 +13,9 @@ import { Kiosk } from "./Kiosk";
 import { Store } from "./Store";
 import { BOOT_BEATS, ClockContext, CRT, DURATIONS, fit, FOV, HERO_ON_SHELF, HOLD, k, PRESENT, TRAY, useClock, type Clock } from "./rig";
 import { itemFrame } from "./items";
+import { preloadArt } from "./textures";
+
+preloadArt();
 
 type Props = { intro: Intro; beat: string; context: IntroContext };
 
@@ -56,26 +59,29 @@ export default function Stage({ intro, beat, context }: Props) {
     <div ref={wrap} style={{ position: "absolute", inset: 0, cursor: coa ? "grab" : undefined }}>
       <Canvas dpr={[1, 2]} camera={{ fov: FOV, near: 0.05, far: 40, position: [0, 1.1, 2.3] }} gl={{ antialias: !intro.params.fx, powerPreference: "high-performance" }}>
         <ClockContext.Provider value={clock}>
-          <Director intro={intro} beat={beat} clock={clock} fps={fps} />
-          <CameraRig beat={beat} context={context} />
-          <color attach="background" args={["#23262e"]} />
-          <fog attach="fog" args={["#23262e", 7, 16]} />
-          <hemisphereLight args={["#fff8ec", "#6b6250", 1.1]} />
-          <directionalLight position={[1.5, 4, 3]} intensity={1.6} />
-          <pointLight position={[2.4, 2.2, 1.4]} intensity={4} distance={4} decay={1.4} color="#fff2d8" />
-          <Store beat={beat} context={context} send={intro.send} />
-          <HeroBox beat={beat} context={context} send={intro.send} />
-          <Contents beat={beat} context={context} send={intro.send} weightsKey={intro.params.key} />
-          <Kiosk beat={beat} context={context} send={intro.send} weightsKey={intro.params.key} />
-          {intro.params.fx && (
-            <EffectComposer multisampling={4}>
-              <Bloom mipmapBlur intensity={0.7} luminanceThreshold={1.5} luminanceSmoothing={0.1} />
-              <Noise opacity={0.035} />
-              <Vignette offset={0.3} darkness={0.55} />
-              {/* The composer renders to a target, where three skips tone mapping: put it back, or paper clips to white. */}
-              <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
-            </EffectComposer>
-          )}
+          {/* Nothing runs (not even the beat clock) until the art is in, so the first frame is the finished scene. */}
+          <Suspense fallback={null}>
+            <Director intro={intro} beat={beat} clock={clock} fps={fps} />
+            <CameraRig beat={beat} context={context} />
+            <color attach="background" args={["#23262e"]} />
+            <fog attach="fog" args={["#23262e", 7, 16]} />
+            <hemisphereLight args={["#fff8ec", "#6b6250", 1.1]} />
+            <directionalLight position={[1.5, 4, 3]} intensity={1.6} />
+            <pointLight position={[2.4, 2.2, 1.4]} intensity={4} distance={4} decay={1.4} color="#fff2d8" />
+            <Store beat={beat} context={context} send={intro.send} />
+            <HeroBox beat={beat} context={context} send={intro.send} />
+            <Contents beat={beat} context={context} send={intro.send} weightsKey={intro.params.key} />
+            <Kiosk beat={beat} context={context} send={intro.send} weightsKey={intro.params.key} />
+            {intro.params.fx && (
+              <EffectComposer multisampling={4}>
+                <Bloom mipmapBlur intensity={0.7} luminanceThreshold={1.5} luminanceSmoothing={0.1} />
+                <Noise opacity={0.035} />
+                <Vignette offset={0.3} darkness={0.55} />
+                {/* The composer renders to a target, where three skips tone mapping: put it back, or paper clips to white. */}
+                <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
+              </EffectComposer>
+            )}
+          </Suspense>
         </ClockContext.Provider>
       </Canvas>
       <div ref={fps} className="intro-fps" hidden={!intro.params.fps} />

@@ -2,6 +2,8 @@ import { Dialog } from "../../kit";
 import { useT } from "../../context";
 import type { SlotPropsMap } from "../../types";
 
+const CRT_CHOICES = ["off", "subtle", "full"] as const;
+
 /** Pick a skin: each card previews it live, Apply keeps it, Cancel goes back to the one you came from. */
 export function SkinPicker({ skins, actions, speed }: SlotPropsMap["SkinPicker"]) {
   const t = useT();
@@ -37,6 +39,17 @@ export function SkinPicker({ skins, actions, speed }: SlotPropsMap["SkinPicker"]
         <label className="skin-motion">
           <input type="checkbox" checked={skins.reducedMotion} onChange={(e) => actions.setReducedMotion(e.target.checked)} /> {t("skin.reduceMotion")}
         </label>
+        {skins.crt && (
+          <fieldset className="skin-crt">
+            <legend>{t("skin.crt")}</legend>
+            {CRT_CHOICES.map((m) => (
+              <label key={m}>
+                <input type="radio" name="skin-crt" checked={skins.crt!.mode === m} onChange={() => actions.setCrt(m)} /> {t(`skin.crt.${m}`)}
+              </label>
+            ))}
+            {skins.crt.reduced && <small>{t("skin.crt.reduced")}</small>}
+          </fieldset>
+        )}
         {speed && (
           <label className="skin-motion">
             <input type="checkbox" checked={speed.slowForBadNews} onChange={(e) => actions.setSlowForBadNews(e.target.checked)} /> {t("speed.slowForBadNews")}

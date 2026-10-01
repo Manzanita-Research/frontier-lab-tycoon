@@ -4,6 +4,7 @@ import { useFrame } from "@react-three/fiber";
 import { useEffect, useRef, type ReactNode } from "react";
 import * as THREE from "three";
 import { layoutBubbles, type BubbleIn } from "./bubbles";
+import { onGlass } from "./crt/state";
 
 interface Anchor {
   el: HTMLElement;
@@ -39,7 +40,7 @@ export function OverlayProjector() {
         a.el.style.display = "none";
         continue;
       }
-      v.project(camera);
+      onGlass(v.project(camera));
       const x = (v.x * 0.5 + 0.5) * size.width;
       const y = (-v.y * 0.5 + 0.5) * size.height;
       if (a.group === "bubble") bubbles.push({ item: a, x, y, w: a.w, h: a.h, depth: v.z, first: a.first });

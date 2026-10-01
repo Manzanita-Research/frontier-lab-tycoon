@@ -3,13 +3,16 @@
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
-import { paintHeroBack, paintHeroFront, paintSpine, paintSticker } from "../art";
+import { paintSpine, paintSticker } from "../art";
 import { HERO } from "../content";
+import { useArt, useRoomEnv } from "./textures";
 import { canvasTexture, dampTo, flat, frameDt, HERO_ON_SHELF, HERO_SIZE, LID_REST, pose, PRESENT, TRAY, useClock, type Pose, type StageProps } from "./rig";
 
 const [W, H, D] = HERO_SIZE;
 const LID = 0.012;
 const WALL = 0.004;
+/** The shrinkwrap's strength while it's on (its opacity; it fades to nothing as it comes off). */
+const WRAP = 0.85;
 
 export function HeroBox({ beat, context, send }: StageProps) {
   const clock = useClock();
@@ -18,20 +21,43 @@ export function HeroBox({ beat, context, send }: StageProps) {
   const wrap = useRef<THREE.Mesh>(null);
   const [hover, setHover] = useState(false);
 
+  const printed = useArt();
+  const env = useRoomEnv();
   const art = useMemo(() => {
-    const front = canvasTexture(paintHeroFront(), 8);
-    const back = canvasTexture(paintHeroBack(), 8);
     const spine = canvasTexture(paintSpine(HERO.title, ["#3aa0ff", "#0b1440", "#ffe14d"]), 4);
     const fresh = canvasTexture(paintSticker("new"), 4);
     const price = canvasTexture(paintSticker("price"), 4);
-    const glare = canvasTexture(paintGlare(), 2);
     const side = new THREE.MeshStandardMaterial({ map: spine, roughness: 0.55 });
     const plain = new THREE.MeshStandardMaterial({ color: "#0b1440", roughness: 0.6 });
     const inner = new THREE.MeshStandardMaterial({ color: "#f3efe2", roughness: 0.95 });
-    const frontMat = new THREE.MeshStandardMaterial({ map: front, roughness: 0.42 });
-    const backMat = new THREE.MeshStandardMaterial({ map: back, roughness: 0.5 });
-    return { front, back, spine, fresh, price, glare, side, plain, inner, frontMat, backMat };
-  }, []);
+    // Glossy printed card: Patina's roughness map (ink vs. varnish) under a clear coat that catches the room.
+    const frontMat = new THREE.MeshPhysicalMaterial({
+      map: printed.boxFront,
+      roughnessMap: printed.boxFrontOrm,
+      roughness: 1,
+      clearcoat: 0.7,
+      clearcoatRoughness: 0.2,
+      envMap: env,
+      envMapIntensity: 0.45,
+    });
+    const backMat = new THREE.MeshPhysicalMaterial({ map: printed.boxBack, roughness: 0.45, clearcoat: 0.5, clearcoatRoughness: 0.25, envMap: env, envMapIntensity: 0.35 });
+    // The shrinkwrap only adds light: a grey mirror crinkled by a normal map (Patina, from a photo of crinkled film),
+    // so it shows as the room's reflections breaking up across the box and nothing else.
+    const wrap = new THREE.MeshStandardMaterial({
+      color: "#43474d",
+      metalness: 1,
+      roughness: 0.14,
+      normalMap: printed.shrinkwrapNormal,
+      normalScale: new THREE.Vector2(0.6, 0.6),
+      envMap: env,
+      envMapIntensity: 0.8,
+      transparent: true,
+      opacity: WRAP,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    return { spine, fresh, price, side, plain, inner, frontMat, backMat, wrap };
+  }, [printed, env]);
   useEffect(
     () => () => {
       for (const v of Object.values(art)) v.dispose();
@@ -105,10 +131,10 @@ export function HeroBox({ beat, context, send }: StageProps) {
     const w = wrap.current;
     if (w) {
       const gone = beat !== "shelf" && beat !== "pulling" && !(beat === "unwrapping" && t < 0.55);
-      const mat = w.material as THREE.MeshBasicMaterial;
-      const aim = gone ? 0 : 0.55;
+      const mat = art.wrap;
+      const aim = gone ? 0 : WRAP;
       mat.opacity += (aim - mat.opacity) * (c.snap ? 1 : 1 - Math.exp(-6 * dt));
-      w.scale.setScalar(1 + (0.55 - mat.opacity) * 0.25);
+      w.scale.setScalar(1 + ((WRAP - mat.opacity) / WRAP) * 0.14);
       w.visible = mat.opacity > 0.01;
     }
   });
@@ -152,48 +178,24 @@ export function HeroBox({ beat, context, send }: StageProps) {
             <meshStandardMaterial color="#ffe14d" roughness={1} />
           </mesh>
         </group>
-        <mesh ref={wrap} name="shrinkwrap">
+        <mesh ref={wrap} name="shrinkwrap" material={art.wrap}>
           <boxGeometry args={[W + 0.006, H + 0.006, D + 0.006]} />
-          <meshBasicMaterial map={art.glare} transparent opacity={0.55} blending={THREE.AdditiveBlending} depthWrite={false} toneMapped={false} />
         </mesh>
       </group>
       <group ref={lid} {...events}>
         <mesh material={[art.side, art.side, art.side, art.side, art.frontMat, art.plain]}>
           <boxGeometry args={[W, H, LID]} />
         </mesh>
-        <mesh position={[W * 0.36, H * 0.07, LID / 2 + 0.0015]} rotation={[0, 0, 0.2]}>
-          <planeGeometry args={[0.075, 0.075]} />
+        {/* Stickers sit on the campus art, clear of the title, the starburst and the badge. */}
+        <mesh position={[W * 0.37, H * 0.17, LID / 2 + 0.0015]} rotation={[0, 0, 0.2]}>
+          <planeGeometry args={[0.065, 0.065]} />
           <meshStandardMaterial map={art.fresh} transparent alphaTest={0.3} roughness={0.4} />
         </mesh>
-        <mesh position={[-W * 0.3, -H * 0.4, LID / 2 + 0.0015]} rotation={[0, 0, -0.08]}>
-          <planeGeometry args={[0.07, 0.07]} />
+        <mesh position={[W * 0.38, -H * 0.2, LID / 2 + 0.0015]} rotation={[0, 0, -0.08]}>
+          <planeGeometry args={[0.055, 0.055]} />
           <meshStandardMaterial map={art.price} transparent alphaTest={0.3} roughness={0.4} />
         </mesh>
       </group>
     </>
   );
-}
-
-/** Shrinkwrap glare: a few soft diagonal streaks on black, added on top of the box. */
-function paintGlare(): HTMLCanvasElement {
-  const c = document.createElement("canvas");
-  c.width = 256;
-  c.height = 256;
-  const g = c.getContext("2d")!;
-  g.fillStyle = "#000";
-  g.fillRect(0, 0, 256, 256);
-  for (const [x, w, a] of [[40, 30, 0.35], [95, 10, 0.5], [170, 45, 0.2], [215, 6, 0.6]] as const) {
-    const grad = g.createLinearGradient(x - w, 0, x + w, 0);
-    grad.addColorStop(0, "rgba(255,255,255,0)");
-    grad.addColorStop(0.5, `rgba(255,255,255,${a})`);
-    grad.addColorStop(1, "rgba(255,255,255,0)");
-    g.save();
-    g.translate(128, 128);
-    g.rotate(-0.5);
-    g.translate(-128, -128);
-    g.fillStyle = grad;
-    g.fillRect(x - w - 80, -80, w * 2, 420);
-    g.restore();
-  }
-  return c;
 }

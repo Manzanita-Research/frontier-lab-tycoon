@@ -357,6 +357,12 @@
       "beats-badnews-phone",
       "beats-settings"
     ],
+    "flt-70-mark": [
+      "f95-start",
+      "f95-start-phone",
+      "overview",
+      "phone"
+    ],
     "flt86": [
       "money-finance",
       "money-round",
@@ -5113,6 +5119,36 @@
         {
           "click": ".f95-startwrap button[role=menuitem]:has-text(\"Settings\")",
           "optional": true
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "f95-start": {
+      "title": "FLT-70: the Frontier 95 taskbar with the Start menu open (the Start button's mark)",
+      "query": {
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "click": "[data-testid=start-button]"
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "f95-start-phone": {
+      "title": "FLT-70: the Frontier 95 taskbar and Start menu on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "click": "[data-testid=start-button]"
         },
         {
           "wait": 600

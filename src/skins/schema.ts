@@ -76,6 +76,8 @@ export const SkinManifest = Schema.Struct({
   slots: Schema.Array(Schema.String),
   /** Kept out of the player's Display picker (still reachable with `?skin=<id>`) until it passes a taste review. Unhiding is deleting this line. */
   unlisted: Schema.optionalKey(Schema.Boolean),
+  /** FLT-73: the CRT tube this skin is seen through until the player picks one in Display Properties ("off" if absent). */
+  crt: Schema.optionalKey(Schema.Literals(["off", "subtle", "full"])),
 });
 export type SkinManifest = typeof SkinManifest.Type;
 

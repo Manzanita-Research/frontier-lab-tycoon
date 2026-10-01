@@ -71,22 +71,13 @@ export type ItemId = "manual" | "disc" | "floppies" | "card" | "overlay" | "eula
 /** What is in the box, in the order the Contents list shows it. */
 export const ITEMS: { id: ItemId; name: string; caption: string }[] = [
   { id: "manual", name: "The manual", caption: "140 pages. Two of them printed in time." },
-  { id: "coa", name: "Certificate of Authenticity", caption: "Drag to tilt it in the light. Genuine foil. Genuinely placeholder foil." },
+  { id: "coa", name: "Certificate of Authenticity", caption: "Drag to tilt it in the light. Genuine holographic foil. Do not microwave." },
   { id: "disc", name: "CD-ROM", caption: "Frontier Lab Tycoon for Frontier 95. Do not microwave." },
   { id: "floppies", name: "Floppy disks", caption: "Disk 1 of 7. Disks 2 to 7 are the same disk, relabelled for the investors." },
   { id: "card", name: "Registration card", caption: "Mail today for exciting offers from our partners! (You are the partner.)" },
   { id: "overlay", name: "Keyboard overlay", caption: "F1 Help · F2 Pause · F3 Train · F4 Deny Everything" },
   { id: "eula", name: "End User License Agreement", caption: "By breaking this seal you agree the model may be smarter than you." },
   { id: "inserts", name: "Expansion pack inserts", caption: "Collect them all! Some of them exist!" },
-];
-
-/** The paper inserts that fall out of the box (C's edutainment look, B's rebate jokes). */
-export const INSERTS = [
-  { title: "The Circus Expansion Pack", body: "Senate hearings! A safety summit on a yacht! Send in the clowns (they're already here).", colors: ["#ffe14d", "#c8102e"] },
-  { title: "Bird App Online Edition", body: "Post from inside the game! Modem required. 14.4k recommended. Arguments included.", colors: ["#9fd8ff", "#0b3d91"] },
-  { title: "Daily Drama Subscription", body: "A new scandal every morning, delivered by 3.5\" disk. Cancel anytime (you can't).", colors: ["#ffd1e8", "#8a0a4a"] },
-  { title: "Modules Coming Soon", body: "Frontier Lab Tycoon: Cloud Tycoon · Chip Fab Frenzy · Ethics Board Deluxe (cancelled).", colors: ["#d9f5c5", "#2d5a12"] },
-  { title: "$5 Mail-In Rebate", body: "Send proof of purchase, the UPC, a notarised vibe check and your weights. Allow 6 to 8 years.", colors: ["#ffffff", "#006b5a"] },
 ];
 
 export const REGISTRATION = {
