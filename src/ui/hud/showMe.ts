@@ -118,7 +118,12 @@ export function arrowPlace(hole: Rect, size: number, view: { w: number; h: numbe
   return { point, at: at[point] };
 }
 
-/** The page's answer for `covers`: a button, link or anchor under the arrow that is not the lit thing itself. */
+/**
+ * The page's answer for `covers`: a control under the arrow (a button, link, field, tab or menu item) that is not the lit thing
+ * itself. Not any `data-anchor`: a whole window is one (`win:staff`), and inside it everywhere would look covered.
+ */
+const CONTROL = "button, a, input, select, textarea, [role=button], [role=tab], [role=menuitem]";
+
 export function domCovers(hole: Rect): (at: Rect) => boolean {
   return (at) => {
     if (typeof document === "undefined") return false;
@@ -128,7 +133,7 @@ export function domCovers(hole: Rect): (at: Rect) => boolean {
       [at.x + at.w - 4, at.y + at.h - 4],
     ] as const;
     return probes.some(([x, y]) => {
-      const hit = document.elementFromPoint(x, y)?.closest("button, a, input, select, [data-anchor]");
+      const hit = document.elementFromPoint(x, y)?.closest(CONTROL);
       if (!hit) return false;
       const b = hit.getBoundingClientRect();
       const mx = b.left + b.width / 2;

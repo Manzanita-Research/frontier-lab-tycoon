@@ -64,9 +64,12 @@ interface Found {
   rect: Rect | null;
   panel: Rect | null;
   avoid: Rect[];
+  /** [Show me]'s arrow. Placed on every look, not once: a window's rows can land under it after the target is lit. */
+  arrow: Arrow | null;
 }
 
-const NONE: Found = { rect: null, panel: null, avoid: [] };
+const NONE: Found = { rect: null, panel: null, avoid: [], arrow: null };
+const sameArrow = (a: Arrow | null, b: Arrow | null) => (a === null || b === null ? a === b : a.point === b.point && sameRect(a.at, b.at));
 
 /** What a DOM change looks like to the coach (a `MutationRecord`, cut down so it is tested without a DOM). */
 export interface WindowChange {
@@ -112,8 +115,9 @@ function useSpotlight(target: string | null, guide = false): Found {
       const rect = measure();
       const panel = rect ? measurePanel(target, guide) : null;
       const avoid = measureAvoid();
-      if (sameRect(rect, last.rect) && sameRect(panel, last.panel) && sameRects(avoid, last.avoid)) return;
-      last = { rect, panel, avoid };
+      const arrow = guide && rect ? arrowFor(rect) : null;
+      if (sameRect(rect, last.rect) && sameRect(panel, last.panel) && sameRects(avoid, last.avoid) && sameArrow(arrow, last.arrow)) return;
+      last = { rect, panel, avoid, arrow };
       // A window just opened: move the balloon in this frame, not the next one.
       if (now) flushSync(() => setFound(last));
       else setFound(last);
@@ -230,10 +234,9 @@ export function CoachLayer({ vm, actions }: { vm: HudVM; actions: HudActions }) 
   const { Coach } = useSkin().slots;
   const coach = coachWaits(vm) ? null : vm.coach;
   const guide = coach?.guide === true;
-  const { rect, panel, avoid } = useSpotlight(coach ? (guide ? coach.target : spotlightTarget(vm)) : null, guide);
+  const { rect, panel, avoid, arrow } = useSpotlight(coach ? (guide ? coach.target : spotlightTarget(vm)) : null, guide);
   useGuideEnds(guide ? coach!.target : null, actions.endShowMe);
   if (!coach) return null;
-  const arrow = guide && rect ? arrowFor(rect) : null;
   return (
     <>
       {rect && <Spotlight rect={rect} dim={coach.dim === true} arrow={arrow} />}
