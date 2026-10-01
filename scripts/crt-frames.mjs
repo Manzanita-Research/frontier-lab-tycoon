@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 // FLT-73: frame times with the picture tube off, subtle and full, on each canvas tier, as a markdown table.
+// Needs the in-game tube on: set GAME_CRT in src/render/crt/state.ts to true first (FLT-70 turned it off).
 //
 //   pnpm build && (pnpm preview &) && sleep 2
 //   node scripts/crt-frames.mjs                 (headless SwiftShader: relative numbers, the GPU is the CPU)

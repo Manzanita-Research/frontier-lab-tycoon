@@ -1,4 +1,20 @@
-import { FORMANTS, type Tone } from "./music";
+import { formant, type Tone } from "./music";
+
+/** A 25% pulse wave (a "custom" oscillator): every harmonic but each fourth, so formants have something to shape. */
+const pulses = new WeakMap<BaseAudioContext, PeriodicWave>();
+function pulse(ctx: BaseAudioContext) {
+  let wave = pulses.get(ctx);
+  if (!wave) {
+    const real = new Float32Array(48); const imag = new Float32Array(48);
+    for (let n = 1; n < 48; n++) real[n] = (2 / (n * Math.PI)) * Math.sin(n * Math.PI * 0.25);
+    wave = ctx.createPeriodicWave(real, imag);
+    pulses.set(ctx, wave);
+  }
+  return wave;
+}
+
+/** F1 is broad, F2 and F3 narrower, like a voice's. */
+const FORMANT_Q = [4, 8, 10] as const;
 
 export function noiseBuffer(ctx: BaseAudioContext) {
   const buffer = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
@@ -21,7 +37,8 @@ export function whiteNoise(ctx: BaseAudioContext) {
 
 /**
  * Click-free envelopes. Each voice releases and disconnects its nodes on completion. A cue is a plain `Note`; music's
- * `Tone`s may also swell in slowly (`attack`), detune, pick the noise filter, or sing a vowel through two formant filters.
+ * `Tone`s may also swell in slowly (`attack`), hold (`hold`), detune, pick the noise filter, or sing a vowel through three formant
+ * filters that glide through the tone's `to` vowels (FLT-80: that glide is what makes "o-kay" a word).
  */
 export function voice(ctx: BaseAudioContext, bus: AudioNode, n: Tone, at: number, noise: AudioBuffer) {
   const start = at + n.at;
@@ -29,7 +46,10 @@ export function voice(ctx: BaseAudioContext, bus: AudioNode, n: Tone, at: number
   // A gain starts at 1: a source that starts between two samples can leak one loud sample before `start`, so close it now.
   envelope.gain.value = 0;
   envelope.gain.setValueAtTime(0.0001, start);
-  envelope.gain.exponentialRampToValueAtTime(Math.max(0.0002, n.gain), start + (n.attack === undefined ? 0.008 : Math.min(Math.max(0.008, n.attack), n.duration * 0.92)));
+  const peak = start + (n.attack === undefined ? 0.008 : Math.min(Math.max(0.008, n.attack), n.duration * 0.92));
+  envelope.gain.exponentialRampToValueAtTime(Math.max(0.0002, n.gain), peak);
+  // A held tone (a sung vowel) stays up until its release; anything else decays from the peak, like a pluck.
+  if (n.hold) envelope.gain.setValueAtTime(Math.max(0.0002, n.gain), Math.max(peak, start + n.duration * n.hold));
   envelope.gain.exponentialRampToValueAtTime(0.0001, start + n.duration);
   envelope.connect(bus);
   if (n.wave === "noise") {
@@ -45,13 +65,18 @@ export function voice(ctx: BaseAudioContext, bus: AudioNode, n: Tone, at: number
     source.start(start); source.stop(start + n.duration + 0.02);
   } else {
     const source = ctx.createOscillator();
-    source.type = n.wave;
+    if (n.wave === "custom") source.setPeriodicWave(pulse(ctx)); else source.type = n.wave;
     if (n.detune) source.detune.value = n.detune;
     source.frequency.setValueAtTime(n.hz, start);
     source.frequency.exponentialRampToValueAtTime(n.endHz ?? n.hz, start + n.duration);
-    const formants = n.vowel ? FORMANTS[n.vowel].map((hz, i) => {
+    const vowels = n.vowel ? [n.vowel, ...(n.to ?? [])] : [];
+    const formants = n.vowel ? FORMANT_Q.map((q, i) => {
       const filter = ctx.createBiquadFilter();
-      filter.type = "bandpass"; filter.frequency.value = hz; filter.Q.value = i ? 7 : 5;
+      filter.type = "bandpass"; filter.Q.value = q;
+      filter.frequency.setValueAtTime(formant(n.vowel!, i), start);
+      // Hold the first vowel a moment, then glide through the rest, arriving at the last one at 80% of the note.
+      if (vowels.length > 1) filter.frequency.setValueAtTime(formant(n.vowel!, i), start + n.duration * 0.2);
+      vowels.slice(1).forEach((v, k, rest) => filter.frequency.linearRampToValueAtTime(formant(v, i), start + n.duration * (0.2 + (0.6 * (k + 1)) / rest.length)));
       source.connect(filter).connect(envelope);
       return filter;
     }) : [];

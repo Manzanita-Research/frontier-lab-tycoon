@@ -1,14 +1,14 @@
 {
   "base": {
     "ref": "origin/main",
-    "sha": "5eff77df82143336212e0b5349eff49a8b7a0a2a"
+    "sha": "cb75632cdc81ef270d41e8de5557cd2ffa4af58b"
   },
   "head": {
     "branch": "flt-70-art",
-    "sha": "cf24bf1",
+    "sha": "06ed1ce",
     "dirty": true
   },
-  "seconds": 124.832,
+  "seconds": 114.456,
   "problems": [],
   "rows": [
     {
@@ -18,7 +18,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-70-art/taskbar/after/f95-start.png",
       "title": "FLT-70: the Frontier 95 taskbar with the Start menu open (the Start button's mark)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-70-art/taskbar/compare/f95-start.png",
-      "changed": 0.06480015432098765
+      "changed": 0.007909722222222223
     },
     {
       "scene": "f95-start-phone",
@@ -27,7 +27,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-70-art/taskbar/after/f95-start-phone.png",
       "title": "FLT-70: the Frontier 95 taskbar and Start menu on a phone",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-70-art/taskbar/compare/f95-start-phone.png",
-      "changed": 0.04473812127840564
+      "changed": 0.001869911289342569
     },
     {
       "scene": "overview",
@@ -36,7 +36,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-70-art/taskbar/after/overview.png",
       "title": "The campus, mid-morning, paused",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-70-art/taskbar/compare/overview.png",
-      "changed": 0.09893981481481481
+      "changed": 0.001890432098765432
     },
     {
       "scene": "phone",
@@ -45,7 +45,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-70-art/taskbar/after/phone.png",
       "title": "The same campus on a phone (390x844)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-70-art/taskbar/compare/phone.png",
-      "changed": 0.06108123708834609
+      "changed": 0.0041104629967189206
     }
   ],
   "errors": []

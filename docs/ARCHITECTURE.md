@@ -356,6 +356,8 @@ Measured on the 1-vCPU Modal box: a full pool of 2,000 particles updates in 0.08
 
 ### The picture tube (FLT-73)
 
+**Off in the game for now (FLT-70).** Jem kept the shader only for the box's beige PC (`src/intro/stage/Kiosk.tsx` runs `CRTPipeline` itself). `GAME_CRT` in `src/render/crt/state.ts` is `false`, so the look is always off for every skin, `?crt=`/`?crttier=` are ignored, no pick is read or saved, and the HUD passes no `vm.skins.crt` (Display Properties ▸ Settings shows nothing). Frontier 95's `"crt": "subtle"` stays in its `skin.json`, inert. Everything below is still wired; the FLT-88 spike turns it back on by flipping that one constant (and `src/render/crt/off.test.ts` with it).
+
 A CRT over the whole game, set in Display Properties ▸ Settings (off / subtle / full; Frontier 95 defaults to subtle through its `skin.json` `"crt"`). It has two layers that agree on pitch, bow, vignette and corners (`src/render/crt/looks.ts`):
 
 ```mermaid

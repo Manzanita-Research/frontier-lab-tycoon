@@ -41,10 +41,13 @@ describe("midgame scenario", () => {
     // FLT-59: and the Sandbox Escape. Nobody guards this fence. These were 788c7bf1 / 303320ca; with the Scrutiny row put
     // back as it was (no Sandbox, Honeypot or escape) the World hashes to them again.
     // A card due mid-chase now waits for the chase to end (FLT-59: the run is never paused); 57d87789 / 9eb5bf9e before.
+    // FLT-76 adds two dormant arcs: the Logo's (arcs.theLogo, a Level 1 card this campus is past) and the offsite's
+    // (arcs.offsite, which counts from flags.scrutinyDay, and this preset never sets it). Those two entries are the whole
+    // difference from 34526cc6 / 2660ed8e.
     expect({
       untagged: digest({ ...s, toasts: s.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) }),
       full: digest(s),
-    }).toEqual({ untagged: "34526cc6", full: "2660ed8e" });
+    }).toEqual({ untagged: "0dbef5e6", full: "4592192e" });
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);

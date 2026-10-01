@@ -7,7 +7,7 @@ import { atoms, debugParams, probeHud, registry, saveDesk } from "../../app/game
 import type { Snapshot } from "../../app/hud";
 import { audioReadyAtom, mixerAtom, mixerOpenAtom } from "../../audio/state";
 import { roomAtom } from "../../newsroom/state";
-import { crtAtom } from "../../render/crt/state";
+import { GAME_CRT, crtAtom } from "../../render/crt/state";
 import { photoAtom } from "../../render/fx/photoState";
 import { beatAtom } from "../../render/fx/beatState";
 import { skinList } from "../../skins/registry";
@@ -130,6 +130,8 @@ export type AppSource = {
   selected: number | null;
   zone: number | null;
   outcomeDismissed: boolean;
+  stage: NonNullable<Parameters<typeof hudViewModel>[0]["stage"]>;
+  slowForBadNews: boolean;
 };
 
 /** Everything the view-model reads from the app actor, as one atom. */
@@ -148,6 +150,8 @@ const appSourceAtom = Atom.make((get): AsyncResult.AsyncResult<AppSource, never>
     selected: v(atoms.selected),
     zone: v(atoms.zone),
     outcomeDismissed: v(atoms.outcomeDismissed),
+    stage: v(atoms.stage),
+    slowForBadNews: v(atoms.slowForBadNews),
   });
 });
 
@@ -174,7 +178,7 @@ export function useAppSource(): AppSource | null {
   return src;
 }
 
-export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, selected, zone, outcomeDismissed }: AppSource): HudVM {
+export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, selected, zone, outcomeDismissed, stage, slowForBadNews }: AppSource): HudVM {
   const arenaOpen = useAtomValue(arenaOpenAtom);
   const arenaChosen = useAtomValue(arenaChosenAtom);
   const room = useAtomValue(roomAtom);
@@ -243,6 +247,8 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         toasts,
         news,
         outcomeDismissed,
+        stage,
+        slowForBadNews,
         tapHint,
         toldGateway: toldGateway.current,
         staffOpen,
@@ -270,7 +276,8 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
           list,
           rejected: skinUi.refused,
           offer: skinUi.offer,
-          crt: { mode: crt.mode, choice: crt.choice, tier: crt.tier, reduced: crt.reduced },
+          // No `crt` while the in-game tube is off (FLT-70): the skins show no picture-tube setting.
+          ...(GAME_CRT ? { crt: { mode: crt.mode, choice: crt.choice, tier: crt.tier, reduced: crt.reduced } } : {}),
         },
         mods,
         drama,
@@ -279,7 +286,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         share,
         social,
       }),
-    [share, social, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, arenaChosen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, beat, skinUi, crt, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, birdAppOpen, drama, saves],
+    [share, social, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, stage, slowForBadNews, tapHint, arenaOpen, arenaChosen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, beat, skinUi, crt, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, birdAppOpen, drama, saves],
   );
   return useWindowBudget(vm, news);
 }

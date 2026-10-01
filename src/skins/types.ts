@@ -95,7 +95,7 @@ export interface SlotPropsMap {
   Objectives: { objectives: ObjectivesVM; progress?: ProgressVM; visible?: VisibleVM; layout: LayoutVM; actions: HudActions };
   Inspector: { inspector: InspectorVM; layout: LayoutVM; actions: HudActions };
   /** The build panel: `items` are only what is unlocked, `teasers` the locked ones, one row per milestone ("2 more · Ship your first model"). Report each opening with `actions.buildPanel(true)`. */
-  BuildBar: { items: BuildItemVM[]; tip: BuildTipVM | null; teasers?: TeaserVM[]; layout: LayoutVM; actions: HudActions; /** For a Start menu with a Disasters entry (FLT-32): `disasters.enabled` says it is earned. */ disasters?: DisastersVM; /** FLT-63: what "Run…" can open (`vm.widgets`). */ widgets?: WidgetVM[]; /** FLT-63: the mode the pointer is in, so the tool in hand can say how to put it down. */ mode?: PlaceModeVM | null };
+  BuildBar: { items: BuildItemVM[]; tip: BuildTipVM | null; teasers?: TeaserVM[]; layout: LayoutVM; actions: HudActions; /** For a Start menu with a Disasters entry (FLT-32): `disasters.enabled` says it is earned. */ disasters?: DisastersVM; /** FLT-63: what "Run…" can open (`vm.widgets`). */ widgets?: WidgetVM[]; /** FLT-63: the mode the pointer is in, so the tool in hand can say how to put it down. */ mode?: PlaceModeVM | null; /** FLT-76: for a Settings menu with "Slow down for bad news". */ speed?: SpeedVM };
   Speed: { speed: SpeedVM; stats: StatsVM; actions: HudActions };
   /** The payroll panel (hire, fire, paint patrol zones). Only rendered while `staff.open`. */
   Staff: { staff: StaffVM; actions: HudActions };
@@ -177,7 +177,7 @@ export interface SlotPropsMap {
    * `factions.statement.costText` and is off while `!factions.statement.ready`.
    */
   GateLegend: { factions: FactionsVM; actions: HudActions };
-  SkinPicker: { skins: SkinPickerVM; actions: HudActions };
+  SkinPicker: { skins: SkinPickerVM; actions: HudActions; /** FLT-76: for the "Slow down for bad news" box next to Reduce motion. */ speed?: SpeedVM };
   Outcome: { outcome: OutcomeVM; actions: HudActions };
   /**
    * How the lab ended (FLT-11): the Frontier Times front page, the run summary and the share card. Modal; time is held.
