@@ -6104,7 +6104,7 @@
       ]
     },
     "flt94-programs-phone": {
-      "title": "FLT-94: phone: Start ▸ Programs ▸ Facilities ▸ Research",
+      "title": "FLT-94: phone: Start ▸ Programs ▸ Facilities ▸ Research (taps: a phone has no hover)",
       "query": {
         "scenario": "midgame",
         "warp": null,
@@ -6123,22 +6123,19 @@
           "wait": 300
         },
         {
-          "click": "[data-anchor=\"start:programs\"]",
-          "optional": true
+          "eval": "() => document.querySelector('[data-anchor=\"start:programs\"]')?.click()"
         },
         {
           "wait": 300
         },
         {
-          "click": "[data-testid=start-facilities]",
-          "optional": true
+          "eval": "() => document.querySelector('[data-testid=start-facilities]')?.click()"
         },
         {
           "wait": 300
         },
         {
-          "click": "[data-anchor=\"start:facilities:research\"]",
-          "optional": true
+          "eval": "() => document.querySelector('[data-anchor=\"start:facilities:research\"]')?.click()"
         },
         {
           "wait": 600

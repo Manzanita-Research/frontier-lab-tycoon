@@ -6129,6 +6129,12 @@
   .f95-menu .f95-programs {
     max-height: calc(100dvh - var(--taskbar, 40px) - 12px);
   }
+  @media (max-width: 640px) {
+    /* in place on a phone: the whole Start menu scrolls, so Programs ▸ is as long as it needs to be */
+    .f95-menu .f95-programs {
+      max-height: none;
+    }
+  }
 
   /* The rank: a sunken "#3 ▲" by the clock, green going up, red going down, a trophy at the top. */
   .f95-rank {

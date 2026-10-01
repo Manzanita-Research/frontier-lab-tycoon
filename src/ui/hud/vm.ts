@@ -297,7 +297,10 @@ const TOOL_DOES: Record<string, string> = {
 function doesOf(t: Tool): string | null {
   if (TOOL_DOES[t]) return TOOL_DOES[t]!;
   const help = HELP_BUILDINGS[t];
-  if (help) return help.slice(help.indexOf(":") + 1).trim();
+  if (help) {
+    const does = help.slice(help.indexOf(":") + 1).trim();
+    return does.charAt(0).toUpperCase() + does.slice(1);
+  }
   return t === "path" || t === "bulldoze" ? null : (defs().buildings[t]?.blurb ?? null);
 }
 

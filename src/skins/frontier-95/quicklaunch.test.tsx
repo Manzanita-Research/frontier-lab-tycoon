@@ -112,9 +112,10 @@ describe("Frontier 95's Facilities palette (FLT-94)", () => {
     for (const it of vm.buildItems) expect(ids, it.kind).toContain(`build:${it.kind}`);
     expect(ids).toEqual(expect.arrayContaining(["build:path", "build:bulldoze", "build:staff", "build:hall"]));
     const hall = vm.buildItems.find((i) => i.kind === "hall")!;
-    expect(hall.does).toBe(HELP_BUILDINGS.hall!.replace(/^[^:]+:\s*/, ""));
+    expect(hall.does?.toLowerCase()).toBe(HELP_BUILDINGS.hall!.replace(/^[^:]+:\s*/, "").toLowerCase());
+    expect(hall.does).toMatch(/^[A-Z]/);
     expect(out).toContain(hall.priceText);
-    expect(out).toContain("trains your models");
+    expect(out).toContain("Trains your models");
     expect(vm.buildItems.find((i) => i.kind === "cluster")!.upkeepText).toMatch(/\/day upkeep$/);
   });
 
