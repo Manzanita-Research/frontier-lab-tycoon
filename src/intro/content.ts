@@ -153,6 +153,18 @@ export const HELD = {
 /** FLT-95: the disc in your hand. */
 export const DISC = { insert: "Insert and play", back: "Back", pickUp: "Pick up the disc" };
 
+/** What's printed on the disc: two spot colours over the silver, as a 1997 pressing plant would. */
+export const DISC_LABEL = {
+  title: ["FRONTIER", "LAB", "TYCOON"],
+  platform: "CD-ROM for Frontier 95",
+  warning: "Do not microwave",
+  disc: "DISC 1 OF 1",
+  badge: "GOLD MASTER",
+  /** Etched into the mirror band by the pressing plant, as every disc's matrix code is. */
+  matrix: "FLT-95 GM  ·  M1 S1  ·  PRESSED IN THE LAB",
+  rim: "© 1997 Frontier Interactive Entertainment, Inc.  ·  Unauthorized copying voids the alignment  ·  Contains no user-serviceable weights  ·  Made in the Lab",
+};
+
 /** Beat captions (the line at the bottom of the screen). */
 export const CAPTIONS = {
   shelf: "Aisle 7. Pick a box. Any box. (Well, one box.)",

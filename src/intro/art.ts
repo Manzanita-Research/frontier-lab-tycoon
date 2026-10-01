@@ -1,7 +1,7 @@
 // Placeholder art for the big box, painted on canvases (the art pass, M1, replaces the hero props with real art).
 // Everything is procedural and seeded, so the shelf ships no image files and looks the same on every visit.
 import { createRng } from "../sim/rng";
-import { BIOS, COA, EULA, HERO, OVERLAY_KEYS, REGISTRATION, SPLASH, STORE, type ShelfBox } from "./content";
+import { BIOS, COA, DISC_LABEL, EULA, HERO, OVERLAY_KEYS, REGISTRATION, SPLASH, STORE, type ShelfBox } from "./content";
 import { CHAPTERS, type Block, type Page } from "./manual";
 
 export const UI_FONT = "Nunito, system-ui, sans-serif";
@@ -662,30 +662,158 @@ export function paintFloppy(n: number, c = canvas(256, 256)): HTMLCanvasElement 
 }
 
 /** The CD label: a circle, with a hole. */
-export function paintDisc(c = canvas(512, 512)): HTMLCanvasElement {
+/**
+ * The disc's printed label (FLT-95), on a transparent canvas the disc's shader lays over the silver: a few spot colours
+ * screened straight onto the disc, as a 1997 pressing plant would. The top half is the sunrise (the hub is the sun,
+ * coming up behind the title); the bottom half is ink on bare silver, so the data's rainbow shows through around it.
+ * `inner` and `outer` are the printable band, as fractions of the disc's radius.
+ */
+export function paintDisc(inner: number, outer: number, c = canvas(1024, 1024)): HTMLCanvasElement {
   const g = ctx2d(c);
-  const { width: W } = c;
-  const r = W / 2;
-  const grad = g.createLinearGradient(0, 0, W, W);
-  grad.addColorStop(0, "#3aa0ff");
-  grad.addColorStop(0.5, "#ffe14d");
-  grad.addColorStop(1, "#58b24f");
-  g.fillStyle = grad;
-  g.beginPath(); g.arc(r, r, r, 0, Math.PI * 2); g.fill();
-  g.fillStyle = "#0b1440";
+  const W = c.width;
+  const o = W / 2;
+  const R = W / 2;
+  const NAVY = "#000080";
+  const GOLD = "#ffe14d";
+  const horizon = o + R * 0.04;
+  g.clearRect(0, 0, W, W);
+  const band = () => {
+    g.beginPath();
+    g.arc(o, o, R * outer, 0, Math.PI * 2);
+    g.arc(o, o, R * inner, 0, Math.PI * 2, true);
+  };
+
+  g.save();
+  band();
+  g.clip();
+  // The sky, down to the horizon, with a scatter of stars still out.
+  const sky = g.createLinearGradient(0, o - R, 0, horizon);
+  sky.addColorStop(0, "#00004a");
+  sky.addColorStop(0.6, NAVY);
+  sky.addColorStop(1, "#008080");
+  g.fillStyle = sky;
+  g.fillRect(0, 0, W, horizon);
+  const rng = createRng(95);
+  g.fillStyle = "#fff6d6";
+  for (let i = 0; i < 70; i++) {
+    const x = rng.next() * W;
+    const y = rng.next() * (horizon - R * 0.5);
+    g.fillRect(x, y, R * 0.006, R * 0.006);
+  }
+  // The rays, and the sun coming up behind the hub.
+  g.fillStyle = "rgba(255,225,77,0.32)";
+  for (let i = 0; i < 13; i++) {
+    const a = Math.PI + (i + 0.5) * (Math.PI / 13);
+    g.beginPath();
+    g.moveTo(o, horizon);
+    g.arc(o, horizon, R, a - 0.05, a + 0.05);
+    g.closePath();
+    g.fill();
+  }
+  g.fillStyle = "#ff9f1c";
+  g.beginPath();
+  g.arc(o, horizon, R * 0.6, Math.PI, 0);
+  g.fill();
+  g.fillStyle = GOLD;
+  g.beginPath();
+  g.arc(o, horizon, R * 0.57, Math.PI, 0);
+  g.fill();
+  // The horizon, and the sun's road across the water, printed straight onto the silver.
+  g.fillRect(0, horizon, W, R * 0.018);
+  g.fillStyle = NAVY;
+  for (let i = 0; i < 3; i++) g.fillRect(0, horizon + R * (0.06 + i * 0.055), W, R * (0.014 - i * 0.003));
+  g.restore();
+
+  // The title, round the top.
+  g.font = `900 ${R * 0.13}px ${UI_FONT}`;
+  g.lineJoin = "round";
+  g.lineWidth = R * 0.022;
+  g.strokeStyle = "#00003a";
+  arcText(g, DISC_LABEL.title.join(" "), o, o, R * 0.79, true, (ch, x, y) => {
+    g.strokeText(ch, x, y);
+    g.fillStyle = "#fff6d6";
+    g.fillText(ch, x, y);
+  });
+
+  // Below the hub, ink on silver: the platform, the badges either side, the warning.
+  g.fillStyle = NAVY;
   g.textAlign = "center";
-  g.font = `900 ${W * 0.075}px ${UI_FONT}`;
-  g.fillText("FRONTIER LAB", r, r * 0.5);
-  g.fillText("TYCOON", r, r * 0.66);
-  g.font = `800 ${W * 0.035}px ${UI_FONT}`;
-  g.fillText("CD-ROM for Frontier 95", r, r * 1.5);
-  g.fillText("Do not microwave", r, r * 1.62);
-  g.fillStyle = "#d8dde6";
-  g.beginPath(); g.arc(r, r, r * 0.3, 0, Math.PI * 2); g.fill();
-  g.globalCompositeOperation = "destination-out";
-  g.beginPath(); g.arc(r, r, r * 0.08, 0, Math.PI * 2); g.fill();
-  g.globalCompositeOperation = "source-over";
+  g.textBaseline = "middle";
+  fitFont(g, DISC_LABEL.platform, R * 1.2, 900, R * 0.082);
+  g.fillText(DISC_LABEL.platform, o, o + R * 0.64);
+  paintSunrise(g, o - R * 0.66, o + R * 0.3, R * 0.13);
+  const bw = R * 0.34;
+  const bh = R * 0.17;
+  const bx = o + R * 0.66 - bw / 2;
+  const by = o + R * 0.3 - bh / 2;
+  g.fillStyle = NAVY;
+  g.beginPath();
+  g.roundRect(bx, by, bw, bh, R * 0.03);
+  g.fill();
+  g.fillStyle = GOLD;
+  fitFont(g, DISC_LABEL.disc, bw * 0.84, 900, R * 0.05);
+  g.fillText(DISC_LABEL.disc, bx + bw / 2, by + bh * 0.33);
+  fitFont(g, DISC_LABEL.badge, bw * 0.84, 800, R * 0.042);
+  g.fillText(DISC_LABEL.badge, bx + bw / 2, by + bh * 0.7);
+  // "Do not microwave", with the sign: a microwave, struck through.
+  g.fillStyle = NAVY;
+  g.font = `800 ${R * 0.05}px ${UI_FONT}`;
+  const warnW = g.measureText(DISC_LABEL.warning).width;
+  const icon = R * 0.075;
+  const wy = o + R * 0.78;
+  const ix = o - (warnW + icon * 1.3) / 2;
+  g.fillText(DISC_LABEL.warning, ix + icon * 1.3 + warnW / 2, wy);
+  g.lineWidth = R * 0.008;
+  g.strokeStyle = NAVY;
+  g.strokeRect(ix, wy - icon * 0.35, icon, icon * 0.7);
+  g.fillRect(ix + icon * 0.12, wy - icon * 0.22, icon * 0.5, icon * 0.44);
+  g.beginPath();
+  g.arc(ix + icon * 0.82, wy, icon * 0.07, 0, Math.PI * 2);
+  g.fill();
+  g.strokeStyle = "#d4202a";
+  g.lineWidth = R * 0.012;
+  g.beginPath();
+  g.arc(ix + icon / 2, wy, icon * 0.62, 0, Math.PI * 2);
+  g.moveTo(ix + icon / 2 - icon * 0.44, wy - icon * 0.44);
+  g.lineTo(ix + icon / 2 + icon * 0.44, wy + icon * 0.44);
+  g.stroke();
+
+  // The matrix code, etched faintly into the mirror band inside the print.
+  g.fillStyle = "rgba(40,44,56,0.4)";
+  g.font = `700 ${R * 0.024}px ${UI_FONT}`;
+  arcText(g, DISC_LABEL.matrix, o, o, R * (inner - 0.06), true, (ch, x, y) => g.fillText(ch, x, y));
+  // The microprint round the rim, and the plant's keylines at either edge of the print.
+  g.fillStyle = NAVY;
+  g.font = `700 ${R * 0.03}px ${UI_FONT}`;
+  arcText(g, DISC_LABEL.rim, o, o, R * 0.9, false, (ch, x, y) => g.fillText(ch, x, y));
+  g.strokeStyle = NAVY;
+  g.lineWidth = R * 0.006;
+  for (const at of [inner + 0.008, outer - 0.004]) {
+    g.beginPath();
+    g.arc(o, o, R * at, 0, Math.PI * 2);
+    g.stroke();
+  }
   return c;
+}
+
+/** Text set round a circle about (cx, cy), upright: over the top (reading outward from `radius`), or under the bottom. */
+function arcText(g: CanvasRenderingContext2D, text: string, cx: number, cy: number, radius: number, top: boolean, draw: (ch: string, x: number, y: number) => void) {
+  const chars = [...text];
+  const widths = chars.map((ch) => g.measureText(ch).width);
+  let at = -widths.reduce((a, b) => a + b, 0) / radius / 2;
+  g.save();
+  g.translate(cx, cy);
+  g.textAlign = "center";
+  g.textBaseline = top ? "alphabetic" : "top";
+  chars.forEach((ch, i) => {
+    const a = at + widths[i]! / 2 / radius;
+    g.save();
+    g.rotate(top ? a : -a);
+    draw(ch, 0, top ? -radius : radius);
+    g.restore();
+    at += widths[i]! / radius;
+  });
+  g.restore();
 }
 
 export function paintKeyboard(c = canvas(512, 160)): HTMLCanvasElement {

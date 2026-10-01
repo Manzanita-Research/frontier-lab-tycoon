@@ -1,13 +1,15 @@
 // What's in the box, as a flat lay on the demo counter. Each item damps toward its place: inside the box before the
 // unwrap, on the counter after, held up close when focused, and (the disc) into the kiosk's drawer when you insert it.
-// FLT-95: the disc held up close turns slowly under the light before you choose to put it in.
+// FLT-95: the disc held up close turns slowly under the light before you choose to put it in, and you can tilt it yourself.
 import { useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import * as THREE from "three";
-import { paintCard, paintDisc, paintEula, paintFloppy, paintOverlay } from "../art";
+import { paintCard, paintEula, paintFloppy, paintOverlay } from "../art";
 import { ITEMS, type ItemId } from "../content";
 import { Book3D } from "./Book3D";
 import { Coa } from "./Coa";
+import { Disc } from "./Disc";
+import { discTurn } from "./disc";
 import { INSERT_ART, useArt } from "./textures";
 import { ITEM_SIZE, REST, REST_TALL } from "./items";
 import { BOX_TIMES, canvasTexture, DRAWER_IN_Z, DRAWER_OUT_Z, DRAWER_Y, dampTo, ease, flat, frameDt, HOLD, pose, TOWER, TRAY, useClock, type Pose, type StageProps } from "./rig";
@@ -90,12 +92,12 @@ function Item({ id, order, beat, context, send, children }: StageProps & { id: I
       target.p.copy(holdPose.p);
       target.q.copy(holdPose.q);
       if (id === "disc") {
-        // The disc turns slowly under the light, never so far that the label stops being readable.
-        const time = state.clock.elapsedTime;
-        turn.setFromEuler(euler.set(Math.sin(time * 0.37) * 0.16, Math.sin(time * 0.52) * 0.55, 0));
+        // The disc turns slowly under the light, or the way you tilt it, never so far that the label stops being readable.
+        const by = discTurn(state.clock.elapsedTime, c.tilt, c.dragging);
+        turn.setFromEuler(euler.set(by.x, by.y, 0));
         target.q.multiply(turn);
       }
-      lambda = 4;
+      lambda = id === "disc" && c.dragging ? 10 : 4;
     } else if (id === "disc" && (beat === "disc" || IN_KIOSK.has(beat))) {
       discPath(beat === "disc" ? c.t : 99, target);
       lambda = 9;
@@ -149,23 +151,6 @@ function Paper({ w, h, paint }: { w: number; h: number; paint: () => HTMLCanvasE
       <planeGeometry args={[w, h]} />
       <meshStandardMaterial map={map} roughness={0.85} side={THREE.DoubleSide} />
     </mesh>
-  );
-}
-
-function Disc({ r }: { r: number }) {
-  const map = useMemo(() => canvasTexture(paintDisc(), 8), []);
-  useEffect(() => () => map.dispose(), [map]);
-  return (
-    <group>
-      <mesh position={[0, 0, 0.0008]}>
-        <circleGeometry args={[r, 48]} />
-        <meshStandardMaterial map={map} transparent alphaTest={0.5} roughness={0.5} />
-      </mesh>
-      <mesh rotation={[0, Math.PI, 0]}>
-        <ringGeometry args={[r * 0.08, r, 48]} />
-        <meshStandardMaterial color="#d7dde6" metalness={0.6} roughness={0.15} />
-      </mesh>
-    </group>
   );
 }
 

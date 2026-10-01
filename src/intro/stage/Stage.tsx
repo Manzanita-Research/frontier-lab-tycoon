@@ -27,14 +27,14 @@ export default function Stage({ intro, beat, context }: Props) {
   const fps = useRef<HTMLDivElement>(null);
   const wrap = useRef<HTMLDivElement>(null);
 
-  // Drag anywhere to tilt the certificate while it is held up, or (FLT-95) to turn the box in your hands. Works the
-  // same with a finger: a swipe across a phone is about half a turn.
-  const coa = beat === "focus" && context.item === "coa";
+  // Drag anywhere to tilt the certificate (or, FLT-95, the disc) while it is held up, or to turn the box in your hands.
+  // Works the same with a finger: a swipe across a phone is about half a turn.
+  const tilting = beat === "focus" && (context.item === "coa" || context.item === "disc") ? context.item : null;
   const held = beat === "held";
   const send = intro.send;
   useEffect(() => {
     const el = wrap.current;
-    if (!el || (!coa && !held)) return;
+    if (!el || (!tilting && !held)) return;
     let last: { x: number; y: number } | null = null;
     const down = (e: PointerEvent) => {
       last = { x: e.clientX, y: e.clientY };
@@ -74,11 +74,13 @@ export default function Stage({ intro, beat, context }: Props) {
       window.removeEventListener("pointercancel", up);
       clock.current.dragging = false;
       clock.current.spin = 0;
+      // Each thing you pick up starts level: the disc doesn't inherit the certificate's tilt.
+      clock.current.tilt.set(0, 0);
     };
-  }, [coa, held, send]);
+  }, [tilting, held, send]);
 
   return (
-    <div ref={wrap} style={{ position: "absolute", inset: 0, cursor: coa || held ? "grab" : undefined }}>
+    <div ref={wrap} style={{ position: "absolute", inset: 0, cursor: tilting || held ? "grab" : undefined }}>
       <Canvas dpr={[1, 2]} camera={{ fov: FOV, near: 0.05, far: 40, position: [0, 1.1, 2.3] }} gl={{ antialias: !intro.params.fx, powerPreference: "high-performance" }}>
         <ClockContext.Provider value={clock}>
           {/* Nothing runs (not even the beat clock) until the art is in, so the first frame is the finished scene. */}
