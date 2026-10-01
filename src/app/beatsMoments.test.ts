@@ -1,6 +1,6 @@
 // FLT-76's staged beats (`?moment=beats-pileup|badnews|logo|offsite`): each lands on its beat, the way a link opens it.
 import { describe, expect, it } from "vitest";
-import { BADNEWS_LEAD } from "../sim/beatsDemo";
+import { BADNEWS_LEAD, PILEUP_LEAD_DAYS } from "../sim/beatsDemo";
 import { openEventOf } from "../sim/events";
 import { levelOf } from "../sim/progression";
 import { answer } from "../sim/testkit";
@@ -10,18 +10,22 @@ import { createSimHandle } from "./sim";
 const staged = (moment: string, seed = 1) => createSimHandle({ seed, warp: 0, agents: 0, discourse: 0, researchers: 0, moment }).world;
 
 describe("FLT-76 beats moments", () => {
-  it("beats-pileup: one tick ships a model and reaches Level 5; a card opens the next midnight", () => {
+  it("beats-pileup: the Monday midnight ships a model and reaches Level 5; a card opens the one after", () => {
     const s = staged("beats-pileup");
     const models = s.models.length;
     expect(levelOf(s)).toBe(4);
     expect(openEventOf(s)).toBeNull();
-    tick(s);
+    for (let i = 0; i < PILEUP_LEAD_DAYS * TICKS_PER_DAY && s.models.length === models; i++) {
+      expect(levelOf(s)).toBe(4);
+      tick(s);
+    }
     expect(s.models.length).toBe(models + 1);
+    expect(s.day % 7).toBe(0); // the Monday re-rank's midnight
     expect(levelOf(s)).toBe(5);
     expect(s.race.rank).toBeLessThanOrEqual(3);
     expect(s.unlockCards?.map((c) => c.title)).toContain("New! Scrutiny");
     for (let i = 0; i < TICKS_PER_DAY && !openEventOf(s); i++) tick(s);
-    expect(openEventOf(s)).not.toBeNull();
+    expect(openEventOf(s)?.id).toBe("computeAuction");
   });
 
   it.each([1, 3])("badnews (seed %i): no card in the way, then the caught report takes 10+ points of trust", (seed) => {

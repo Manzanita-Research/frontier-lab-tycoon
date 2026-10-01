@@ -65,14 +65,37 @@ export function Toast({ toast, actions }: SlotPropsMap["Toast"]) {
     );
   }
   return (
-    <button type="button" className={`f95-toast ${toast.tone}${toast.pinned ? " pinned" : ""}`} onClick={() => actions.dismissToast(toast.id)} title="Click to dismiss">
+    <button type="button" className={`f95-toast ${toast.tone}`} onClick={() => actions.dismissToast(toast.id)} title="Click to dismiss">
       <Ico name={TONE_ICON[toast.tone]} size={18} />
-      <span>
-        {toast.text}
-        {/* FLT-76: why the game slowed down stays until you have read it. */}
-        {toast.pinned && <i className="f95-pinhint">Click to dismiss, or go back to top speed and pretend it didn't happen.</i>}
-      </span>
+      <span>{toast.text}</span>
     </button>
+  );
+}
+
+/**
+ * Why the game just dropped to 1× (FLT-76) is not a balloon you might miss at 10×: it is a message box of its own, coach or
+ * no coach, and it stays until it is read. "Pretend it didn't happen" goes back to top speed (which also closes it).
+ */
+function SlowBox({ toast, actions }: SlotPropsMap["Toast"]) {
+  const ok = () => actions.dismissToast(toast.id);
+  return (
+    <div className="f95-slowbox" role="alert">
+      <Win className="f95-msgbox" title="Speed Governor" icon="warn" buttons={[{ g: "close", label: "OK", onClick: ok }]}>
+        <div className="f95-msgbody">
+          <Ico name="warn" size={36} />
+          <div>
+            <p className="f95-slowtext">{toast.text}</p>
+            <p className="f95-slowwhy">Frontier 95 has slowed your lab down so you can look at it. Looking is optional.</p>
+          </div>
+        </div>
+        <div className="f95-row">
+          <Btn onClick={() => actions.setSpeed(10)}>Pretend it didn't happen</Btn>
+          <Btn def onClick={ok}>
+            OK
+          </Btn>
+        </div>
+      </Win>
+    </div>
   );
 }
 
@@ -123,10 +146,16 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
   const phone = vm.layout.compact;
   // One at a time, the newest toast winning; the game only sends a hint while nobody is talking.
   const hints = vm.hints;
-  const toasts = vm.toasts.filter((t) => !t.snag).slice(-1);
-  // A caught error (FLT-84) gets its own error box, coach or no coach.
+  const toasts = vm.toasts.filter((t) => !t.snag && !t.pinned).slice(-1);
+  // A caught error (FLT-84) gets its own error box, coach or no coach; so does the bad news that slowed the game (FLT-76).
   const snag = vm.toasts.find((t) => t.snag);
-  const snagBox = snag && <SnagBox toast={snag} actions={actions} />;
+  const slow = vm.toasts.filter((t) => t.pinned).at(-1);
+  const snagBox = (snag || slow) && (
+    <>
+      {slow && <SlowBox toast={slow} actions={actions} />}
+      {snag && <SnagBox toast={snag} actions={actions} />}
+    </>
+  );
   // Standing warnings ("your entrance isn't connected") stay in the balloon until they are fixed.
   const warnings = vm.warnings;
   const busy = warnings.length > 0 || toasts.length > 0 || hints.length > 0;

@@ -1,7 +1,7 @@
 // Staged moments for FLT-76's beats (`?moment=beats-pileup|badnews|logo|offsite`): links Jem can open on a phone, no
 // console. Pure sim, like the other demos: the World is moved along the way a player could have, a moment before the beat.
 //
-//   beats-pileup  Level 4, one tick before a midnight that ships a model and re-ranks the Arena, which puts you in the top
+//   beats-pileup  Level 4, a couple of seconds (at ▶▶▶) before a midnight that ships a model and re-ranks the Arena, which puts you in the top
 //                 three (Level 5's New! card); the next midnight a card opens. Played at ▶▶▶ (the app starts it there).
 //   badnews       the auditors are on campus, about to catch the boxes; a few seconds at ▶▶▶ later the report costs
 //                 about 16 points of public trust, and the game drops to 1× with the pinned toast.
@@ -30,6 +30,8 @@ export const keepsLadder = (s: string | null | undefined): boolean => s === "bea
 /** These are about ▶▶▶: the app starts them at 10× unless `?speed=` says otherwise. */
 export const startsFast = (s: string | null | undefined): boolean => s === "beats-pileup" || s === "badnews";
 
+/** Midnights before the pile-up's (the last one ships): about 1.8 seconds at ▶▶▶. */
+export const PILEUP_LEAD_DAYS = 3;
 /** Ticks of lead before the bad news: about four seconds at ▶▶▶ (10 × 20/6 ticks a second). */
 export const BADNEWS_LEAD = 130;
 
@@ -39,6 +41,12 @@ function openNow(s: GameState, id: string) {
   const def = eventById(id)!;
   const armed = s.arcs[id] ?? initialStored(arcMachine, { choices: def.choices.length, cooldownDays: def.cooldown ?? 0, openedDay: null });
   s.arcs[id] = step(arcMachine, armed, { type: "DAY", day: s.day, ready: true, slotFree: true, pace: 1 }).stored;
+}
+
+/** withRevenue's lab has Frontier-2 to Frontier-4: the run in the hall is the next one, named the way play names it. */
+function nextRun(s: GameState) {
+  const run = Math.max(s.training.context.run, s.models.length + 1);
+  s.training.context = { ...s.training.context, run, name: modelName(run, createRng(s.seed), s.day) };
 }
 
 /** Move the clock on whole days (the hour stays). */
@@ -57,17 +65,27 @@ export function stageBeats(s: GameState, moment: BeatsMoment) {
       // Let the hall start a run (a day or two), then the Race opens as it does at Level 4: you at #6.
       for (let i = 0; i < 3 * TICKS_PER_DAY && s.training.value === "idle"; i++) tick(s, answer(s));
       seedField(s);
-      // A week on, one tick before the Monday re-rank: the run is a hair from done. At midnight it ships, the re-rank that
-      // follows puts the new model in the top three (Level 5's New! card), and the cards the ladder held back (an era's,
-      // the auction booked for that midnight) open the next one.
+      // A week on, a few days before the Monday re-rank, with the run nearly done. The Monday midnight ships it, the re-rank
+      // that follows puts the new model in the top three (Level 5's New! card), and the auction booked for that midnight,
+      // held back by the ladder, opens its card the next one. A couple of seconds' lead at ▶▶▶, so the page has settled.
       const monday = (Math.floor(s.day / 7) + 2) * 7;
-      before(s, monday, 1);
+      before(s, monday, PILEUP_LEAD_DAYS * TICKS_PER_DAY - 1);
       s.compute = Math.max(s.compute, 400);
-      // The lab already has Frontier-2 to Frontier-4 (withRevenue): this run is the next one, named the way play names it.
-      const run = Math.max(s.training.context.run, s.models.length + 1);
-      s.training.context = { ...s.training.context, progress: s.training.context.cost - 1, run, name: modelName(run, createRng(s.seed), s.day) };
+      nextRun(s);
       s.race.nextAuction = monday;
       delete s.flags["offer:auction"];
+      // A lab with three models is already in Era 2 (the new model would push the R&D multiplier over the line, and an
+      // era's card is a full-screen takeover, not the beat to watch).
+      s.race.era = { value: "era2", context: { peak: Math.max(s.race.era.context.peak, 2) } };
+      for (const flag of Object.keys(s.flags)) if (flag.startsWith("offer:era")) delete s.flags[flag];
+      // A day's training is about a run's cost here, so the run is sized to it: a rehearsal on a copy (with a run that
+      // can't finish) measures what the midnights before Monday add and what Monday's adds, and the run ends halfway into Monday's.
+      const copy = structuredClone(s);
+      copy.training.context = { ...copy.training.context, cost: 1e9 };
+      while (copy.tick < monday * TICKS_PER_DAY - 1) tick(copy);
+      const sunday = copy.training.context.progress;
+      tick(copy);
+      s.training.context = { ...s.training.context, cost: Math.ceil(sunday + (copy.training.context.progress - sunday) / 2) };
       return;
     }
     case "badnews": {
@@ -96,6 +114,7 @@ export function stageBeats(s: GameState, moment: BeatsMoment) {
     }
     case "offsite": {
       withRevenue(s);
+      nextRun(s);
       if (s.day < 120) laterBy(s, 120 - s.day);
       s.flags.scrutinyDay = s.day - 106;
       openNow(s, "offsite");

@@ -1400,16 +1400,6 @@
         color: #444;
       }
     }
-    /* FLT-76: the game slowed to 1× for this, and it stays until it is read. */
-    &.pinned {
-      font-weight: bold;
-      .f95-pinhint {
-        display: block;
-        margin-top: 3px;
-        font-weight: normal;
-        color: #444;
-      }
-    }
   }
   .f95-clip {
     width: 58px;
@@ -1590,6 +1580,28 @@
   }
   .f95-snag .f95-msgbody p {
     margin: 0;
+  }
+  /* FLT-76: the game slowed to 1× for bad news. Over the paperclip, beside whatever card the news brought (cards open in
+     the middle), and clear of the snag's spot. */
+  .f95-slowbox {
+    position: fixed;
+    z-index: 96;
+    right: 10px;
+    bottom: calc(var(--taskbar) + 96px);
+    width: min(420px, calc(100vw - 20px));
+    pointer-events: auto;
+    .f95-msgbody p {
+      margin: 0;
+    }
+    .f95-slowtext {
+      font-size: 15px;
+      font-weight: bold;
+      color: var(--flt-color-bad);
+    }
+    .f95-slowwhy {
+      margin-top: 6px;
+      color: #444;
+    }
   }
   .f95-unlockitems {
     display: grid;
