@@ -4,7 +4,7 @@
 
 | # | endpoint | what | cost (USD) |
 |---|---|---|---|
-| 1–12 | Sunburst text-to-image (high quality) | the twelve shelf covers, one each | 0.7997 |
+| 1–12 | Sunburst text-to-image (high quality) | the twelve shelf covers, one each | 0.8077 |
 | 13 | Sunburst text-to-image | `shelf-alignment` re-roll (came back as a box mockup with a perspective edge) | 0.0664 |
 | 14 | Sunburst text-to-image | `shelf-pitchdeck` re-roll (same: a mockup edge) | 0.0686 |
 | 15 | Tripo H3.1 text-to-3D | standee | 0.40 (est.) |
