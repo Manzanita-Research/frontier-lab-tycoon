@@ -63,10 +63,9 @@ export function stageBeats(s: GameState, moment: BeatsMoment) {
       const monday = (Math.floor(s.day / 7) + 2) * 7;
       before(s, monday, 1);
       s.compute = Math.max(s.compute, 400);
-      s.training.context.progress = s.training.context.cost - 1;
       // The lab already has Frontier-2 to Frontier-4 (withRevenue): this run is the next one, named the way play names it.
       const run = Math.max(s.training.context.run, s.models.length + 1);
-      s.training.context = { ...s.training.context, run, name: modelName(run, createRng(s.seed), s.day) };
+      s.training.context = { ...s.training.context, progress: s.training.context.cost - 1, run, name: modelName(run, createRng(s.seed), s.day) };
       s.race.nextAuction = monday;
       delete s.flags["offer:auction"];
       return;
