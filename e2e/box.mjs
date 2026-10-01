@@ -4,6 +4,8 @@
 // SwiftShader draws a few frames a second and the box's beats run on its clock, so the waits are long.
 
 const STEP_MS = 120_000;
+/** The game is on screen: its probe is up (the box prefetches the game, so the probe alone says nothing) and the box is gone. */
+const inGame = () => typeof window.__fltProbe === "function" && !document.querySelector(".intro, .intro-curtain:not(.intro-curtain--gone), .still");
 
 /**
  * Wait for whichever door this visit came in by, play the box if it is the box, and resolve once the game's probe is up.
@@ -12,7 +14,7 @@ const STEP_MS = 120_000;
 export async function throughTheBox(page, { skip = false, tap = false, log = console.log } = {}) {
   const door = await Promise.race([
     page.locator(".intro").first().waitFor({ timeout: STEP_MS }).then(() => "box"),
-    page.waitForFunction(() => typeof window.__fltProbe === "function", null, { timeout: STEP_MS }).then(() => "game"),
+    page.waitForFunction(inGame, null, { timeout: STEP_MS }).then(() => "game"),
   ]);
   if (door === "game") return { door, ms: 0 };
   const t0 = Date.now();
@@ -29,7 +31,7 @@ export async function throughTheBox(page, { skip = false, tap = false, log = con
     await press(".intro-contents button:has-text('Pick up the disc')", "picked up the disc");
     await press(".intro-disc button:has-text('Insert and play')", "inserted it");
   }
-  await page.waitForFunction(() => typeof window.__fltProbe === "function", null, { timeout: STEP_MS });
+  await page.waitForFunction(inGame, null, { timeout: STEP_MS });
   const ms = Date.now() - t0;
   log(`Box: in the game after ${(ms / 1000).toFixed(1)} s`);
   return { door, skipped: skip, ms };
