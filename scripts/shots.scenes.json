@@ -421,6 +421,7 @@
       "box-take",
       "box-back",
       "box-disc",
+      "box-disc-phone",
       "box-take-phone",
       "help-box",
       "saves-welcome"
@@ -5990,6 +5991,33 @@
           "wait": 3000
         }
       ]
+    },
+    "box-disc-phone": {
+      "title": "FLT-95: the disc in your hand, on a phone (a 1997 CD-ROM: rainbow tracks, clear hub, the printed label)",
+      "query": {
+        "intro": 1,
+        "seed": 7,
+        "debug": null,
+        "speed": null,
+        "hour": null,
+        "warp": null,
+        "beat": "open"
+      },
+      "ready": "!!window.__intro",
+      "steps": [
+        {
+          "wait": 3500
+        },
+        {
+          "click": ".intro-contents .intro-primary",
+          "timeout": 15000
+        },
+        {
+          "wait": 3000
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
     },
     "box-take-phone": {
       "title": "FLT-95: the box in your hands, on a phone",
