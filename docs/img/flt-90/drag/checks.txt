@@ -1,0 +1,30 @@
+ok   an outline appears while dragging
+ok   the window itself stays put until the button comes up (outline drag)
+ok   the window lands where the outline was (390,310)
+ok   the outline is gone after the drop
+ok   it keeps its width
+ok   the left column closes up behind the moved window
+ok   Task Mangler moves down (948,510)
+ok   a drag is not a click: Task Mangler did not fold
+ok   the window dragged last is in front
+ok   clicking a window brings it to the front
+ok   the minimize button on a moved window still minimizes it
+ok   Esc cancels the drag: the window stays where it was
+ok   flung off the top right, its title bar stays on screen (1376,0)
+ok   Lab Properties is where it was after a reload
+ok   Task Mangler is where it was after a reload
+ok   on a 900×600 screen Task Mangler is pulled back in (948,510 → 836,510)
+ok   back on the big screen it is where it was put
+ok   Reset window positions is enabled once something has moved
+ok   after Reset, Lab Properties is back where the game puts it
+ok   after Reset, Task Mangler is back in the column
+ok   Reset forgets the saved positions
+ok   with nothing moved, Reset is greyed out
+ok   an error box drags out of the way (560,389 → 200,575)
+ok   letting go over the backdrop does not dismiss it
+ok   a message box's place is not saved
+ok   on a phone no window is draggable
+ok   on a phone saved desktop positions are not applied
+ok   no page errors
+
+all checks passed

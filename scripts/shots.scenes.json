@@ -401,6 +401,15 @@
       "flt87-phone-more",
       "flt87-phone-inspector"
     ],
+    "flt-90": [
+      "flt90-moved",
+      "flt90-settings",
+      "flt90-phone",
+      "overview",
+      "inspector",
+      "event",
+      "phone"
+    ],
     "flt-91": [
       "flt91-open",
       "flt91-open-phone",
@@ -5609,6 +5618,46 @@
           "wait": 800
         }
       ]
+    },
+    "flt90-moved": {
+      "title": "FLT-90: a returning player's desk: Lab Properties, Task Mangler and Thoughts.txt dragged where they left them (localStorage)",
+      "storage": {
+        "flt.windows.frontier-95": "{\"f95-lab\": {\"x\": 420, \"y\": 300, \"w\": 600}, \"arena\": {\"x\": 930, \"y\": 420, \"w\": 422}, \"thoughts\": {\"x\": 440, \"y\": 130, \"w\": 400}}"
+      },
+      "steps": [
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "flt90-settings": {
+      "title": "FLT-90: Start ▸ Settings ▸ Reset window positions (enabled: a window has been moved)",
+      "storage": {
+        "flt.windows.frontier-95": "{\"f95-lab\": {\"x\": 420, \"y\": 300, \"w\": 600}, \"arena\": {\"x\": 930, \"y\": 420, \"w\": 422}, \"thoughts\": {\"x\": 440, \"y\": 130, \"w\": 400}}"
+      },
+      "steps": [
+        {
+          "click": "[data-coach=start]"
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": "[data-fly=settings] > button"
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "flt90-phone": {
+      "title": "FLT-90: the same saved positions on a phone: nothing moves, FLT-87's layout stands",
+      "viewport": "390x844",
+      "mobile": true,
+      "storage": {
+        "flt.windows.frontier-95": "{\"f95-lab\": {\"x\": 420, \"y\": 300, \"w\": 600}, \"arena\": {\"x\": 930, \"y\": 420, \"w\": 422}, \"thoughts\": {\"x\": 440, \"y\": 130, \"w\": 400}}"
+      },
+      "steps": []
     },
     "flt91-open": {
       "title": "FLT-91: the first 10 seconds of a fresh garage (seed 3, the starting camera)",
