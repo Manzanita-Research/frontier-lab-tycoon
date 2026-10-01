@@ -1629,14 +1629,14 @@
   /* FLT-93: the New! card by kind, each line with a Show Me… */
   .f95-unlockgroups {
     display: grid;
-    gap: 6px;
+    gap: 4px;
     margin: 8px 0 0;
-    max-height: min(46vh, 380px);
+    max-height: min(52vh, 420px);
     overflow: auto;
   }
   .f95-unlockgroup {
     margin: 0;
-    padding: 2px 8px 6px;
+    padding: 0 6px 4px;
     border: 1px solid #808080;
     box-shadow: 1px 1px 0 #fff, inset 1px 1px 0 #fff;
     legend {
@@ -1646,7 +1646,7 @@
     }
     ul {
       display: grid;
-      gap: 5px;
+      gap: 2px;
       margin: 0;
       padding: 0;
       list-style: none;
@@ -1654,27 +1654,29 @@
     li {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
+      min-height: 22px;
     }
   }
+  /* One line each: the name, then what it is for, in the same run of text. */
   .f95-unlockwhat {
-    display: grid;
     flex: 1;
     min-width: 0;
+    font-size: 13px;
+    line-height: 1.2;
+    color: #333;
     b {
-      font-size: 15px;
-    }
-    small {
+      margin-right: 5px;
       font-size: 14px;
-      line-height: 1.15;
-      color: #333;
+      color: #000;
     }
   }
   .f95-btn.f95-showme {
     flex: none;
     min-width: 0;
-    padding: 2px 8px;
-    font-size: 14px;
+    min-height: 0;
+    padding: 1px 6px;
+    font-size: 13px;
   }
   /* The paperclip, when you asked: "It looks like you're trying to hire an SRE." */
   .f95-asking {
@@ -1683,7 +1685,7 @@
     font-weight: bold;
   }
   /* The goal note's next step: what, where, and the button. */
-  .f95-nextstep {
+  .f95-post .f95-nextstep {
     display: flex;
     align-items: center;
     gap: 8px;

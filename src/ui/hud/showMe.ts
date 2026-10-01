@@ -91,3 +91,49 @@ export function domPage(root: ParentNode = document): Page {
 /** The anchor (or something inside it) was the thing the player clicked: the walk is over. */
 export const clickedAnchor = (target: EventTarget | null, id: string): boolean =>
   typeof Element !== "undefined" && target instanceof Element && target.closest(`[${ANCHOR}="${CSS.escape(id)}"]`) !== null;
+
+// ---- The arrow --------------------------------------------------------------------------------------------------
+
+/** Which way the arrow points: `down` sits above the lit thing, `up` below it, `right` to its left, `left` to its right. */
+export type ArrowPoint = "down" | "up" | "right" | "left";
+const ARROW_ORDER: readonly ArrowPoint[] = ["down", "up", "right", "left"];
+
+/**
+ * Where [Show me]'s arrow goes round the lit box: above it first, then below, left and right, the first that is on screen
+ * and does not sit on another control (`covers` asks the page; an arrow over the next row's Hire button points at the wrong
+ * one). None clear: the first on screen.
+ */
+export function arrowPlace(hole: Rect, size: number, view: { w: number; h: number }, covers: (at: Rect) => boolean): { point: ArrowPoint; at: Rect } {
+  const cx = hole.x + hole.w / 2 - size / 2;
+  const cy = hole.y + hole.h / 2 - size / 2;
+  const at: Record<ArrowPoint, Rect> = {
+    down: { x: cx, y: hole.y - size - 2, w: size, h: size },
+    up: { x: cx, y: hole.y + hole.h + 2, w: size, h: size },
+    right: { x: hole.x - size - 2, y: cy, w: size, h: size },
+    left: { x: hole.x + hole.w + 2, y: cy, w: size, h: size },
+  };
+  const onScreen = (r: Rect) => r.x >= 4 && r.y >= 4 && r.x + r.w <= view.w - 4 && r.y + r.h <= view.h - 4;
+  const fits = ARROW_ORDER.filter((p) => onScreen(at[p]));
+  const point = fits.find((p) => !covers(at[p])) ?? fits[0] ?? "down";
+  return { point, at: at[point] };
+}
+
+/** The page's answer for `covers`: a button, link or anchor under the arrow that is not the lit thing itself. */
+export function domCovers(hole: Rect): (at: Rect) => boolean {
+  return (at) => {
+    if (typeof document === "undefined") return false;
+    const probes = [
+      [at.x + at.w / 2, at.y + at.h / 2],
+      [at.x + 4, at.y + 4],
+      [at.x + at.w - 4, at.y + at.h - 4],
+    ] as const;
+    return probes.some(([x, y]) => {
+      const hit = document.elementFromPoint(x, y)?.closest("button, a, input, select, [data-anchor]");
+      if (!hit) return false;
+      const b = hit.getBoundingClientRect();
+      const mx = b.left + b.width / 2;
+      const my = b.top + b.height / 2;
+      return !(mx >= hole.x && mx <= hole.x + hole.w && my >= hole.y && my <= hole.y + hole.h);
+    });
+  };
+}

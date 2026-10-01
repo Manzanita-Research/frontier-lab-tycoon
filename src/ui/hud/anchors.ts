@@ -145,7 +145,7 @@ export function unlockGroupsOf(card: { id: string; items: readonly string[] }, l
     }
     const staff = staffByTitle.get(item);
     if (staff) {
-      by.hire.push({ name: staff.title, line: `${staff.duty}. ${staff.blurb}`, anchor: `hire:${staff.job}` });
+      by.hire.push({ name: staff.title, line: `${staff.duty}.`, anchor: `hire:${staff.job}` });
       continue;
     }
     if (item in SYSTEM_GUIDES) {

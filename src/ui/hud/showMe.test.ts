@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { guardWith } from "./guard";
-import { MAX_CLICKS, newWalk, walkStep, type Page, type PageEl } from "./showMe";
+import { arrowPlace, MAX_CLICKS, newWalk, walkStep, type Page, type PageEl } from "./showMe";
 
 /**
  * A tiny Frontier 95 as the walk sees it: Start opens a menu with Facilities ▸, which shows the Staff entry, which opens the
@@ -82,5 +82,30 @@ describe("[Show me]'s walk (FLT-93)", () => {
     const quiet = vi.spyOn(console, "error").mockImplementation(() => {});
     expect(guardWith(() => { throw new Error("no"); }, "x", () => { throw new Error("yes"); }, 7)).toBe(7);
     quiet.mockRestore();
+  });
+});
+
+describe("[Show me]'s arrow", () => {
+  const view = { w: 1440, h: 900 };
+  const hole = { x: 1350, y: 140, w: 60, h: 30 };
+
+  it("sits above the lit thing when it can, pointing down at it", () => {
+    expect(arrowPlace(hole, 34, view, () => false)).toEqual({ point: "down", at: { x: 1363, y: 104, w: 34, h: 34 } });
+  });
+
+  it("moves off another control: the next row's Hire button above sends it to the left", () => {
+    const hireAbove = (at: { y: number; h: number }) => at.y + at.h <= hole.y;
+    const hireBelowToo = (at: { y: number; h: number }) => hireAbove(at) || at.y >= hole.y + hole.h;
+    expect(arrowPlace(hole, 34, view, hireAbove).point).toBe("up");
+    expect(arrowPlace(hole, 34, view, hireBelowToo).point).toBe("right");
+  });
+
+  it("stays on screen: the Start button in the corner gets it from above, a top-edge control from below", () => {
+    expect(arrowPlace({ x: 2, y: 860, w: 70, h: 34 }, 34, view, () => false).point).toBe("down");
+    expect(arrowPlace({ x: 600, y: 2, w: 60, h: 30 }, 34, view, () => false).point).toBe("up");
+  });
+
+  it("falls back to the first place on screen when every place covers something", () => {
+    expect(arrowPlace(hole, 34, view, () => true).point).toBe("down");
   });
 });

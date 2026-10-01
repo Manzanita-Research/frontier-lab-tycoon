@@ -37,8 +37,19 @@
   clip-path: polygon(30% 0, 70% 0, 70% 45%, 100% 45%, 50% 100%, 0 45%, 30% 45%);
   filter: drop-shadow(0 2px 0 rgb(0 0 0 / 0.45));
   animation: coach-bob 0.8s ease-in-out infinite;
+  /* The shape points down; the others turn it, and it bobs toward what it points at. */
+  --bob: 0 4px;
   &.up {
     rotate: 180deg;
+    --bob: 0 -4px;
+  }
+  &.right {
+    rotate: -90deg;
+    --bob: 4px 0;
+  }
+  &.left {
+    rotate: 90deg;
+    --bob: -4px 0;
   }
 }
 @keyframes coach-bob {
@@ -47,7 +58,7 @@
     translate: 0 0;
   }
   50% {
-    translate: 0 -6px;
+    translate: var(--bob);
   }
 }
 @keyframes coach-pulse {

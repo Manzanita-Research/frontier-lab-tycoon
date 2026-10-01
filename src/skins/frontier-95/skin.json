@@ -80,12 +80,12 @@
     "coach.ask": "It looks like you're trying to {ask}.",
     "coach.gotIt": "Got it",
     "showMe": "Show Me…",
-    "where.build": "Start ▸ Facilities",
-    "where.hire": "Start ▸ Facilities ▸ Staff Manager",
-    "where.app": "Start ▸ Programs",
+    "where.build": "Start > Facilities",
+    "where.hire": "Start > Facilities > Staff Manager",
+    "where.app": "Start > Programs",
     "where.app:bird": "the bird in the tray",
     "where.training": "the Training window",
-    "where.speed": "the ▶ buttons on the taskbar",
+    "where.speed": "the speed buttons on the taskbar",
     "where.start": "the Start button"
   }
 }

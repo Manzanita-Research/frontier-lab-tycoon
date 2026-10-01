@@ -379,7 +379,7 @@ function UnlockGroups({ groups, actions }: { groups: NonNullable<SlotPropsMap["U
               <li key={e.name}>
                 <span className="f95-unlockwhat">
                   <b>{e.name}</b>
-                  {e.line && <small>{e.line}</small>}
+                  {e.line}
                 </span>
                 {e.anchor && (
                   <Btn className="f95-showme" data-showme={e.anchor} onClick={() => actions.showMe(e.anchor!)}>

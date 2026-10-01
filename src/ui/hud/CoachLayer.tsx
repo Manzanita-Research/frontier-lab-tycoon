@@ -9,7 +9,7 @@ import type { Rect } from "../../skins/kit/place";
 import type { HudActions, HudVM } from "./types";
 import { ANCHOR } from "./anchors";
 import { guard } from "./guard";
-import { clickedAnchor, domPage, newWalk, walkStep } from "./showMe";
+import { arrowPlace, clickedAnchor, domCovers, domPage, newWalk, walkStep, type ArrowPoint } from "./showMe";
 
 const PAD = 7;
 
@@ -145,20 +145,27 @@ function useSpotlight(target: string | null, guide = false): Found {
  * The dimming with a hole in it, and the pulsing ring round the hole. The dimming is drawn once (it repaints only when the box
  * moves) and the ring is its own small layer that pulses by transform and opacity, so nothing repaints per frame over the map.
  */
-/** FLT-93: [Show me]'s arrow sits over the target, or under it when the target is at the top of the screen. */
+/** FLT-93: [Show me]'s arrow: above the target, or wherever round it is on screen and off the other controls. */
 const ARROW = 34;
-const arrowBelow = (rect: Rect) => rect.y - PAD - ARROW < 8;
+type Arrow = { point: ArrowPoint; at: Rect };
 
-/** The box the balloon must keep off: the lit hole, and the arrow when there is one. */
-function keepOff(rect: Rect, arrow: boolean): Rect {
-  const box = { x: rect.x - PAD, y: rect.y - PAD, w: rect.w + PAD * 2, h: rect.h + PAD * 2 };
-  if (!arrow) return box;
-  return arrowBelow(rect) ? { ...box, h: box.h + ARROW } : { ...box, y: box.y - ARROW, h: box.h + ARROW };
+function arrowFor(rect: Rect): Arrow {
+  const hole = { x: rect.x - PAD, y: rect.y - PAD, w: rect.w + PAD * 2, h: rect.h + PAD * 2 };
+  const view = typeof window === "undefined" ? { w: 1440, h: 900 } : { w: window.innerWidth, h: window.innerHeight };
+  return guard("showMe.arrow", () => arrowPlace(hole, ARROW, view, domCovers(hole)), arrowPlace(hole, ARROW, view, () => false));
 }
 
-function Spotlight({ rect, dim, arrow = false }: { rect: Rect; dim: boolean; arrow?: boolean }) {
+/** The box the balloon must keep off: the lit hole, and the arrow when there is one. */
+function keepOff(rect: Rect, arrow: Arrow | null): Rect {
+  const box = { x: rect.x - PAD, y: rect.y - PAD, w: rect.w + PAD * 2, h: rect.h + PAD * 2 };
+  if (!arrow) return box;
+  const x = Math.min(box.x, arrow.at.x);
+  const y = Math.min(box.y, arrow.at.y);
+  return { x, y, w: Math.max(box.x + box.w, arrow.at.x + arrow.at.w) - x, h: Math.max(box.y + box.h, arrow.at.y + arrow.at.h) - y };
+}
+
+function Spotlight({ rect, dim, arrow = null }: { rect: Rect; dim: boolean; arrow?: Arrow | null }) {
   const hole = { x: rect.x - PAD, y: rect.y - PAD, width: rect.w + PAD * 2, height: rect.h + PAD * 2 };
-  const below = arrowBelow(rect);
   const id = useRef(`coach-hole-${Math.random().toString(36).slice(2, 8)}`).current;
   return (
     <>
@@ -174,10 +181,10 @@ function Spotlight({ rect, dim, arrow = false }: { rect: Rect; dim: boolean; arr
       <div className="coach-ring" aria-hidden style={{ left: hole.x, top: hole.y, width: hole.width, height: hole.height }} />
       {arrow && (
         <div
-          className={`coach-arrow ${below ? "up" : "down"}`}
+          className={`coach-arrow ${arrow.point}`}
           aria-hidden
           data-testid="coach-arrow"
-          style={{ left: hole.x + hole.width / 2 - ARROW / 2, top: below ? hole.y + hole.height + 2 : hole.y - ARROW - 2, width: ARROW, height: ARROW }}
+          style={{ left: arrow.at.x, top: arrow.at.y, width: arrow.at.w, height: arrow.at.h }}
         />
       )}
     </>
@@ -226,10 +233,11 @@ export function CoachLayer({ vm, actions }: { vm: HudVM; actions: HudActions }) 
   const { rect, panel, avoid } = useSpotlight(coach ? (guide ? coach.target : spotlightTarget(vm)) : null, guide);
   useGuideEnds(guide ? coach!.target : null, actions.endShowMe);
   if (!coach) return null;
+  const arrow = guide && rect ? arrowFor(rect) : null;
   return (
     <>
-      {rect && <Spotlight rect={rect} dim={coach.dim === true} arrow={guide} />}
-      <Coach coach={coach} anchor={rect && keepOff(rect, guide)} panel={panel} avoid={avoid} layout={vm.layout} actions={actions} />
+      {rect && <Spotlight rect={rect} dim={coach.dim === true} arrow={arrow} />}
+      <Coach coach={coach} anchor={rect && keepOff(rect, arrow)} panel={panel} avoid={avoid} layout={vm.layout} actions={actions} />
     </>
   );
 }

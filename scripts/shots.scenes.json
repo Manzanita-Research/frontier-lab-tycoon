@@ -415,6 +415,17 @@
       "flt91-open-phone",
       "flt91-day5",
       "flt91-day5-phone"
+    ],
+    "flt-93": [
+      "flt93-card",
+      "flt93-card-phone",
+      "flt93-hire",
+      "flt93-hire-phone"
+    ],
+    "flt-93-moments": [
+      "flt93-onboard-growing-team",
+      "flt93-onboard-hire-sre",
+      "flt93-onboard-race"
     ]
   },
   "scenes": {
@@ -5898,6 +5909,135 @@
         },
         {
           "wait": 800
+        }
+      ]
+    },
+    "flt93-card": {
+      "title": "FLT-93: Level 2 met, the \"Growing team\" New! card (both builds: the same world, staged by eval)",
+      "steps": [
+        {
+          "eval": "(f, w) => { w.progression = { value: 'growing', context: { level: 2 } }; w.flags.visitorsServed = 12; w.ledger = { ...w.ledger, income: 41500 }; w.cash = Math.max(w.cash, 1400000); w.unlockCards = []; }"
+        },
+        {
+          "tick": 1
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt93-card-phone": {
+      "title": "FLT-93: the \"Growing team\" New! card on a phone",
+      "steps": [
+        {
+          "eval": "(f, w) => { w.progression = { value: 'growing', context: { level: 2 } }; w.flags.visitorsServed = 12; w.ledger = { ...w.ledger, income: 41500 }; w.cash = Math.max(w.cash, 1400000); w.unlockCards = []; }"
+        },
+        {
+          "tick": 1
+        },
+        {
+          "wait": 800
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "flt93-hire": {
+      "title": "FLT-93: Level 3's goal (hire an SRE) with the card read; the branch presses the goal's [Show me]",
+      "steps": [
+        {
+          "eval": "(f, w) => { w.progression = { value: 'growing', context: { level: 2 } }; w.flags.visitorsServed = 12; w.ledger = { ...w.ledger, income: 41500 }; w.cash = Math.max(w.cash, 1400000); w.unlockCards = []; }"
+        },
+        {
+          "tick": 1
+        },
+        {
+          "eval": "(f, w) => { w.unlockCards = []; }"
+        },
+        {
+          "tick": 1
+        },
+        {
+          "wait": 800
+        },
+        {
+          "click": "[data-showme=\"hire:sre\"]",
+          "optional": true
+        },
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "flt93-hire-phone": {
+      "title": "FLT-93: [Show me] Hire an SRE on a phone: open the strip under the lab bar, then Show Me…",
+      "steps": [
+        {
+          "eval": "(f, w) => { w.progression = { value: 'growing', context: { level: 2 } }; w.flags.visitorsServed = 12; w.ledger = { ...w.ledger, income: 41500 }; w.cash = Math.max(w.cash, 1400000); w.unlockCards = []; }"
+        },
+        {
+          "tick": 1
+        },
+        {
+          "eval": "(f, w) => { w.unlockCards = []; }"
+        },
+        {
+          "tick": 1
+        },
+        {
+          "wait": 800
+        },
+        {
+          "click": ".f95-foldbar",
+          "optional": true
+        },
+        {
+          "wait": 400
+        },
+        {
+          "click": "[data-showme=\"hire:sre\"]",
+          "optional": true
+        },
+        {
+          "wait": 1500
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "flt93-onboard-growing-team": {
+      "title": "FLT-93: ?moment=onboard-growing-team (a link Jem can open; main has no such moment)",
+      "query": {
+        "moment": "onboard-growing-team",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "flt93-onboard-hire-sre": {
+      "title": "FLT-93: ?moment=onboard-hire-sre (a link Jem can open; main has no such moment)",
+      "query": {
+        "moment": "onboard-hire-sre",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "flt93-onboard-race": {
+      "title": "FLT-93: ?moment=onboard-race (a link Jem can open; main has no such moment)",
+      "query": {
+        "moment": "onboard-race",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 1500
         }
       ]
     }
