@@ -1,0 +1,134 @@
+{
+  "standee": {
+    "prop": "standee",
+    "raw": "shots/fal3d/standee-1001T0821.glb",
+    "raw_bytes": 41518960,
+    "blender_bytes": 263892,
+    "final_bytes": 69600,
+    "raw_tris": 1429393,
+    "raw_verts": 740000,
+    "decimated_tris": 2576,
+    "final_tris": 2576,
+    "final_size_game_xyz": [
+      0.367,
+      0.5,
+      0.255
+    ],
+    "scale_applied": 0.49965,
+    "had_texture": true,
+    "exposure_gain": 1.435,
+    "rot_y": -90,
+    "palette_faces": {
+      "cream": 75,
+      "cream-dark": 13,
+      "ink": 327,
+      "white": 340,
+      "steel-light": 2,
+      "steel": 8,
+      "steel-dark": 45,
+      "cardboard": 734,
+      "cardboard-dark": 458,
+      "skin": 346,
+      "hair": 217,
+      "red": 11
+    }
+  },
+  "bin": {
+    "prop": "bin",
+    "raw": "shots/fal3d/bin-1001T0835.glb",
+    "raw_bytes": 41297472,
+    "blender_bytes": 226400,
+    "final_bytes": 59556,
+    "raw_tris": 1416276,
+    "raw_verts": 735100,
+    "decimated_tris": 2208,
+    "final_tris": 2208,
+    "final_size_game_xyz": [
+      0.484,
+      0.501,
+      0.72
+    ],
+    "scale_applied": 0.72071,
+    "had_texture": true,
+    "exposure_gain": 2.417,
+    "rot_y": 0,
+    "palette_faces": {
+      "cream": 10,
+      "cream-dark": 88,
+      "ink": 17,
+      "white": 21,
+      "steel-light": 165,
+      "steel": 56,
+      "steel-dark": 81,
+      "red": 532,
+      "yellow": 288,
+      "navy": 69,
+      "blue": 186,
+      "green": 221,
+      "purple": 284,
+      "pink": 74,
+      "black": 116
+    }
+  },
+  "mug": {
+    "prop": "mug",
+    "raw": "shots/fal3d/mug-1001T0832.glb",
+    "raw_bytes": 42797936,
+    "blender_bytes": 226276,
+    "final_bytes": 58728,
+    "raw_tris": 1494604,
+    "raw_verts": 762943,
+    "decimated_tris": 2208,
+    "final_tris": 2208,
+    "final_size_game_xyz": [
+      0.111,
+      0.091,
+      0.12
+    ],
+    "scale_applied": 0.11977,
+    "had_texture": true,
+    "exposure_gain": 1.521,
+    "rot_y": 0,
+    "palette_faces": {
+      "cream": 600,
+      "cream-dark": 9,
+      "teal": 704,
+      "teal-dark": 650,
+      "coffee": 245
+    }
+  },
+  "floppies": {
+    "prop": "floppies",
+    "raw": "shots/fal3d/floppies-1001T0835.glb",
+    "raw_bytes": 43103000,
+    "blender_bytes": 188876,
+    "final_bytes": 51716,
+    "raw_tris": 1460777,
+    "raw_verts": 770209,
+    "decimated_tris": 1840,
+    "final_tris": 1840,
+    "final_size_game_xyz": [
+      0.104,
+      0.07,
+      0.11
+    ],
+    "scale_applied": 0.10973,
+    "had_texture": true,
+    "exposure_gain": 2.179,
+    "rot_y": 0,
+    "palette_faces": {
+      "cream": 16,
+      "cream-dark": 83,
+      "ink": 86,
+      "white": 77,
+      "steel-light": 61,
+      "steel": 183,
+      "steel-dark": 278,
+      "black": 131,
+      "blue": 344,
+      "red": 221,
+      "yellow": 170,
+      "green": 190
+    }
+  }
+}

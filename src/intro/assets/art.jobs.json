@@ -187,5 +187,182 @@
     "quality": "high",
     "prompt": "A seamless tileable macro studio photograph, straight-on, of crinkled clear plastic shrink wrap film stretched flat over a matte mid-grey card: fine wrinkles, soft creases and a few sharp fold lines catching a soft even light, glossy. Uniform all over, no edges, no corners, no objects, no text.",
     "text": []
+  },
+  {
+    "id": "shelf-paperclip",
+    "size": {
+      "width": 1008,
+      "height": 1312
+    },
+    "quality": "high",
+    "prompt": "Front cover artwork of a 1997 PC CD-ROM big-box game, the kind sold in a computer store aisle: a bold, glossy, saturated full-bleed illustration that reads clearly from across the store, with the title huge in the top third. Mid-1990s box-art conventions: bevelled or chrome 3D lettering with a thick dark outline, a jagged starburst sticker, and a thin band along the bottom edge. Palette: sunflower yellow and hot orange with brown-black ink. The picture: a pre-rendered 1996-style 3D scene of a gleaming chrome paperclip the size of a skyscraper towering over a tiny cheerful factory; conveyor belts pour rivers of paperclips over the horizon, and a small planet in the orange sky is already half made of paperclips. Title in fat chrome letters, 'PAPERCLIP MAXIMIZER' over two lines, with 'DELUXE' in red script on a gold ribbon. A yellow starburst with the line 'Now with 10,000,000 clips!'. Bottom band in brown-black with 'PC CD-ROM' in yellow. Every sign, screen, page and slide in the picture is blank: no other writing.",
+    "text": [
+      "PAPERCLIP MAXIMIZER",
+      "DELUXE",
+      "Now with 10,000,000 clips!",
+      "PC CD-ROM"
+    ]
+  },
+  {
+    "id": "shelf-hallucinatica",
+    "size": {
+      "width": 1008,
+      "height": 1312
+    },
+    "quality": "high",
+    "prompt": "Front cover artwork of a 1997 PC CD-ROM big-box game, the kind sold in a computer store aisle: a bold, glossy, saturated full-bleed illustration that reads clearly from across the store, with the title huge in the top third. Mid-1990s box-art conventions: bevelled or chrome 3D lettering with a thick dark outline, a jagged starburst sticker, and a thin band along the bottom edge. Palette: deep midnight navy and gold, with cream lettering, like a serious multimedia reference disc. The picture: a big shining compact disc floating in starry navy space, surrounded by a swirl of small framed picture thumbnails of confidently wrong facts: a dinosaur riding a bicycle, an upside-down pyramid, a moon with a round door in it, a knight using a laptop, a whale in a top hat. Title in engraved gold serif capitals, 'ENCYCLOPEDIA' small above a large 'HALLUCINATICA', with '97' in a gold medallion. A gold seal sticker reading 'Several are true.'. Bottom band in black with 'MULTIMEDIA EDITION' and 'PC CD-ROM' in gold. Every sign, screen, page and slide in the picture is blank: no other writing.",
+    "text": [
+      "ENCYCLOPEDIA",
+      "HALLUCINATICA",
+      "97",
+      "Several are true.",
+      "MULTIMEDIA EDITION",
+      "PC CD-ROM"
+    ]
+  },
+  {
+    "id": "shelf-scaling-trail",
+    "size": {
+      "width": 1008,
+      "height": 1312
+    },
+    "quality": "high",
+    "prompt": "Front cover artwork of a 1997 PC CD-ROM big-box game, the kind sold in a computer store aisle: a bold, glossy, saturated full-bleed illustration that reads clearly from across the store, with the title huge in the top third. Mid-1990s box-art conventions: bevelled or chrome 3D lettering with a thick dark outline, a jagged starburst sticker, and a thin band along the bottom edge. Palette: prairie green, dusty olive and cream, framed like a classic 8-bit educational adventure. The picture, in chunky early-90s pixel art inside a cream rounded frame: a covered wagon pulled by two oxen across a prairie at sunset, its canvas bulging with stacked computer graphics cards, about to ford a wide river; a signpost with blank boards, distant mesas. Title in big cream pixel lettering with a dark green drop shadow, 'THE SCALING LAW TRAIL' on two lines. A small red tombstone-shaped sticker reading 'You have died of overfitting.'. Bottom band in dark green with 'PC CD-ROM' in cream. Every sign, screen, page and slide in the picture is blank: no other writing.",
+    "text": [
+      "THE SCALING LAW TRAIL",
+      "You have died of overfitting.",
+      "PC CD-ROM"
+    ]
+  },
+  {
+    "id": "shelf-pitchdeck",
+    "size": {
+      "width": 1040,
+      "height": 1312
+    },
+    "quality": "high",
+    "prompt": "Front cover artwork of a 1997 PC CD-ROM big-box game, the kind sold in a computer store aisle: a bold, glossy, saturated full-bleed illustration that reads clearly from across the store, with the title huge in the top third. Mid-1990s box-art conventions: bevelled or chrome 3D lettering with a thick dark outline, a jagged starburst sticker, and a thin band along the bottom edge. Palette: crisp white and pale corporate blue with navy ink, like a 1997 office-software box. The picture: a shiny pre-rendered 3D bar chart whose bars climb steeply up and to the right into a giant swooping hockey-stick arrow that bursts off the top corner of the box; little clip-art business people in suits leap for joy on the bars, and a floating window shows a blank slide. Title in bold navy italic sans-serif, 'PITCH DECK PUBLISHER', with a big glossy blue '4.0'. A red starburst with 'Over 900 charts!'. Bottom band in navy with 'PC CD-ROM' in white. Every sign, screen, page and slide in the picture is blank: no other writing.",
+    "text": [
+      "PITCH DECK PUBLISHER",
+      "4.0",
+      "Over 900 charts!",
+      "PC CD-ROM"
+    ]
+  },
+  {
+    "id": "shelf-benchmark-racer",
+    "size": {
+      "width": 1008,
+      "height": 1312
+    },
+    "quality": "high",
+    "prompt": "Front cover artwork of a 1997 PC CD-ROM big-box game, the kind sold in a computer store aisle: a bold, glossy, saturated full-bleed illustration that reads clearly from across the store, with the title huge in the top third. Mid-1990s box-art conventions: bevelled or chrome 3D lettering with a thick dark outline, a jagged starburst sticker, and a thin band along the bottom edge. Palette: racing red and black with screaming yellow. The picture: a sleek original low-poly futuristic race car with no decals or numbers, drifting at speed on a race track whose surface is printed like a giant multiple-choice exam answer sheet (rows of filled and empty bubbles), with motion-blur streaks and a chequered finish line. Title in chrome and yellow italic racing letters with speed lines, 'BENCHMARK RACER' and a huge flaming '2000'. A yellow starburst with 'Tune for the test!'. Bottom band in black with 'PC CD-ROM' in yellow. Every sign, screen, page and slide in the picture is blank: no other writing.",
+    "text": [
+      "BENCHMARK RACER",
+      "2000",
+      "Tune for the test!",
+      "PC CD-ROM"
+    ]
+  },
+  {
+    "id": "shelf-flying-gpus",
+    "size": {
+      "width": 1072,
+      "height": 1312
+    },
+    "quality": "high",
+    "prompt": "Front cover artwork of a 1997 PC CD-ROM big-box game, the kind sold in a computer store aisle: a bold, glossy, saturated full-bleed illustration that reads clearly from across the store, with the title huge in the top third. Mid-1990s box-art conventions: bevelled or chrome 3D lettering with a thick dark outline, a jagged starburst sticker, and a thin band along the bottom edge. Palette: pitch black and deep indigo with electric cyan and hot pink. The picture: a black night sky full of stars, and a flock of chunky computer graphics cards with fluffy white feathered wings flying in formation across it, cooling fans spinning, a few trailing little flames and heat shimmer. Title in glowing cyan neon outline lettering, 'FLYING GPUs', with 'SCREENSAVER PACK' smaller in pink. A pink circular sticker reading 'Vol. 2: They Run Hot'. Bottom band in indigo with 'PC CD-ROM' in cyan. Every sign, screen, page and slide in the picture is blank: no other writing.",
+    "text": [
+      "FLYING GPUs",
+      "SCREENSAVER PACK",
+      "Vol. 2: They Run Hot",
+      "PC CD-ROM"
+    ]
+  },
+  {
+    "id": "shelf-hoodie",
+    "size": {
+      "width": 1040,
+      "height": 1312
+    },
+    "quality": "high",
+    "prompt": "Front cover artwork of a 1997 PC CD-ROM big-box game, the kind sold in a computer store aisle: a bold, glossy, saturated full-bleed illustration that reads clearly from across the store, with the title huge in the top third. Mid-1990s box-art conventions: bevelled or chrome 3D lettering with a thick dark outline, a jagged starburst sticker, and a thin band along the bottom edge. Palette: many greys, charcoal and slate, with white lettering and a single small orange accent. The picture: a pre-rendered 1996 3D design studio: a smiling mannequin in a plain grey zip hoodie and a lanyard with a blank badge stands on a turntable, surrounded by a colour swatch fan showing dozens of nearly identical greys, and a grid of grey hoodies on hangers. Title in bold white extended capitals, 'HOODIE DESIGNER', with 'STUDIO' in a slim orange box. A white starburst with 'Over 400 greys!'. Bottom band in charcoal with 'PC CD-ROM' in white. Every sign, screen, page and slide in the picture is blank: no other writing.",
+    "text": [
+      "HOODIE DESIGNER",
+      "STUDIO",
+      "Over 400 greys!",
+      "PC CD-ROM"
+    ]
+  },
+  {
+    "id": "shelf-kombucha",
+    "size": {
+      "width": 1008,
+      "height": 1312
+    },
+    "quality": "high",
+    "prompt": "Front cover artwork of a 1997 PC CD-ROM big-box game, the kind sold in a computer store aisle: a bold, glossy, saturated full-bleed illustration that reads clearly from across the store, with the title huge in the top third. Mid-1990s box-art conventions: bevelled or chrome 3D lettering with a thick dark outline, a jagged starburst sticker, and a thin band along the bottom edge. Palette: bubblegum pink, raspberry and deep plum, with gold. The picture: epic fantasy strategy box art: a sparkling castle built from giant glass fermenting jars full of fizzy pink tea, bubbles rising like fireworks, flags on the towers, and a jolly floating round jelly-like culture wearing a tiny gold crown, ruling over a cheering army of little bottles. Title in ornate gold fantasy lettering with a plum outline, 'KOMBUCHA KINGDOM' on two lines. A gold shield sticker reading 'Ferment an empire'. Bottom band in plum with 'PC CD-ROM' in gold. Every sign, screen, page and slide in the picture is blank: no other writing.",
+    "text": [
+      "KOMBUCHA KINGDOM",
+      "Ferment an empire",
+      "PC CD-ROM"
+    ]
+  },
+  {
+    "id": "shelf-alignment",
+    "size": {
+      "width": 1008,
+      "height": 1312
+    },
+    "quality": "high",
+    "prompt": "Front cover artwork of a 1997 PC CD-ROM big-box game, the kind sold in a computer store aisle: a bold, glossy, saturated full-bleed illustration that reads clearly from across the store, with the title huge in the top third. Mid-1990s box-art conventions: bevelled or chrome 3D lettering with a thick dark outline, a jagged starburst sticker, and a thin band along the bottom edge. Palette: sky blue and royal blue with lemon yellow, like a cheerful 1990s edutainment box. The picture: a friendly round cartoon robot with big eyes, sitting at a wooden school desk with an apple on it, raising one hand very eagerly, with a big thought bubble full of question marks; behind it a blank green chalkboard and a gold star. Title in chunky bouncy yellow letters with a blue outline, 'ALIGNMENT ADVENTURE!'. A red apple-shaped sticker reading 'Grades 3 to PhD'. Bottom band in royal blue with 'PC CD-ROM' in yellow. Every sign, screen, page and slide in the picture is blank: no other writing.",
+    "text": [
+      "ALIGNMENT ADVENTURE!",
+      "Grades 3 to PhD",
+      "PC CD-ROM"
+    ]
+  },
+  {
+    "id": "shelf-boardroom",
+    "size": {
+      "width": 1008,
+      "height": 1312
+    },
+    "quality": "high",
+    "prompt": "Front cover artwork of a 1997 PC CD-ROM big-box game, the kind sold in a computer store aisle: a bold, glossy, saturated full-bleed illustration that reads clearly from across the store, with the title huge in the top third. Mid-1990s box-art conventions: bevelled or chrome 3D lettering with a thick dark outline, a jagged starburst sticker, and a thin band along the bottom edge. Palette: deep purple and black with neon magenta and electric lime. The picture: a pre-rendered 1996 3D pinball table shaped like a long glossy boardroom table, with leather office chairs as bumpers, flippers at the bottom, ramps shaped like rising arrows, and a chrome pinball wearing a tiny necktie flying through the air with sparks. Title in neon magenta 3D letters with a lime glow, '3D BOARDROOM' above a huge 'PINBALL'. A lime starburst with 'Tilt the board!'. Bottom band in black with 'PC CD-ROM' in magenta. Every sign, screen, page and slide in the picture is blank: no other writing.",
+    "text": [
+      "3D BOARDROOM",
+      "PINBALL",
+      "Tilt the board!",
+      "PC CD-ROM"
+    ]
+  },
+  {
+    "id": "shelf-gpu-almanac",
+    "size": {
+      "width": 1040,
+      "height": 1312
+    },
+    "quality": "high",
+    "prompt": "Front cover artwork of a 1997 PC CD-ROM big-box game, the kind sold in a computer store aisle: a bold, glossy, saturated full-bleed illustration that reads clearly from across the store, with the title huge in the top third. Mid-1990s box-art conventions: bevelled or chrome 3D lettering with a thick dark outline, a jagged starburst sticker, and a thin band along the bottom edge. Palette: aged parchment cream, tan and sepia brown ink, like a vintage almanac printed with woodcut engravings, a little faded. The picture: a detailed woodcut-style engraving of a farmer in a straw hat harvesting computer graphics cards from neat rows in a field, as if they were cabbages; a crescent moon with a face, a weather vane, and a ring of moon phases around the scene. Title in old-fashioned brown wood-type capitals, 'THE GPU MINER'S ALMANAC'. A round red-brown seal reading '1997 Edition'. Bottom band in sepia with 'PC CD-ROM' in cream. Every sign, screen, page and slide in the picture is blank: no other writing.",
+    "text": [
+      "THE GPU MINER'S ALMANAC",
+      "1997 Edition",
+      "PC CD-ROM"
+    ]
+  },
+  {
+    "id": "shelf-chess-toaster",
+    "size": {
+      "width": 1008,
+      "height": 1312
+    },
+    "quality": "high",
+    "prompt": "Front cover artwork of a 1997 PC CD-ROM big-box game, the kind sold in a computer store aisle: a bold, glossy, saturated full-bleed illustration that reads clearly from across the store, with the title huge in the top third. Mid-1990s box-art conventions: bevelled or chrome 3D lettering with a thick dark outline, a jagged starburst sticker, and a thin band along the bottom edge. Palette: graphite, black and warm gold, dramatic and moody like a serious chess program box. The picture: a dramatic spot-lit chessboard; on one side a chrome 1950s-style two-slot toaster with glowing orange slots stares down the board like a grandmaster, and its chess pieces are made of toast; a single drop of sweat on a lone pawn. Title in elegant gold bevelled capitals, 'CHESS VS. THE TOASTER'. A gold starburst with 'It has been practising'. Bottom band in black with 'PC CD-ROM' in gold. Every sign, screen, page and slide in the picture is blank: no other writing.",
+    "text": [
+      "CHESS VS. THE TOASTER",
+      "It has been practising",
+      "PC CD-ROM"
+    ]
   }
 ]

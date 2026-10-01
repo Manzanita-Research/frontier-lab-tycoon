@@ -14,6 +14,8 @@ const DESK = [1440, 900];
 const PHONE = [390, 844];
 const SCENES = [
   ["shelf", "beat=shelf", DESK, 7000],
+  // FLT-89: three covers up close (the top shelf at 2x, clipped).
+  ["closeup", "beat=shelf", DESK, 7000, { scale: 2, clip: { x: 478, y: 240, width: 352, height: 146 } }],
   ["open", "beat=open", DESK, 7000],
   ["manual", "beat=manual", DESK, 8000],
   ["coa-tilt-a", "beat=coa&tilt=0.35,-0.45", DESK, 8000],
@@ -31,14 +33,14 @@ const SIDES = [
 const b = await chromium.launch({ args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
 for (const [side, base] of SIDES) {
   mkdirSync(`${out}/${side}`, { recursive: true });
-  for (const [name, q, [w, h], wait] of SCENES) {
-    const p = await b.newPage({ viewport: { width: w, height: h } });
+  for (const [name, q, [w, h], wait, { scale = 1, clip } = {}] of SCENES) {
+    const p = await b.newPage({ viewport: { width: w, height: h }, deviceScaleFactor: scale });
     const errs = [];
     p.on("pageerror", (e) => errs.push(String(e)));
     await p.goto(`${base}/box?seed=70&${q}`, { waitUntil: "networkidle" });
     await p.waitForFunction(() => window.__intro, null, { timeout: 90000 });
     await p.waitForTimeout(wait);
-    await p.screenshot({ path: `${out}/${side}/${name}.png` });
+    await p.screenshot({ path: `${out}/${side}/${name}.png`, clip, timeout: 120000 });
     console.log(side, name, errs.slice(0, 2).join(" | "));
     await p.close();
   }
