@@ -174,7 +174,7 @@ function Beats({ intro, toGame }: { intro: Intro; toGame: () => void }) {
             </button>
           ))}
           <button className="intro-primary" onClick={() => send({ type: "INSERT" })}>
-            Insert disc {"\u25B6\uFE0E"}
+            Insert disc ►
           </button>
         </nav>
       )}
