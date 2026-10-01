@@ -24,7 +24,8 @@
     "Voice",
     "EraCard",
     "Outcome",
-    "NewsControls", "DramaButton",
+    "NewsControls",
+    "DramaButton",
     "NewsArrival",
     "PhotoButton"
   ],
@@ -148,6 +149,24 @@
     "bench.title": "High Scores",
     "voice.title": "Applause",
     "stream.live": "ON AIR",
-    "stream.chat": "Requests"
+    "stream.chat": "Requests",
+    "birdapp.title": "Bird App Karaoke",
+    "birdapp.aura": "Applause",
+    "birdapp.timeline": "Now singing",
+    "birdapp.posters": "Singers",
+    "birdapp.comms": "Sound desk",
+    "birdapp.live": "ON MIC",
+    "birdapp.log": "Setlist",
+    "birdapp.empty": "The mic's open. Nobody's up yet.",
+    "birdapp.quiet": "The sound desk is calm. Somebody's tuning a tambourine.",
+    "birdapp.viral": "ENCORE!",
+    "birdapp.ratio": "booing from the back",
+    "birdapp.reviewed": "screened by the sound desk",
+    "birdapp.outcome.flop": "Off key",
+    "birdapp.outcome.banger": "Standing ovation",
+    "birdapp.outcome.controversy": "Feedback",
+    "birdapp.outcome.ratioed": "Booed",
+    "birdapp.outcome.cancelled": "Mic cut",
+    "birdapp.outcome.live": "On mic"
   }
 }

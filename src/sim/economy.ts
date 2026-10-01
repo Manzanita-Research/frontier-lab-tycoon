@@ -12,10 +12,11 @@ import { solarHype } from "./race/power";
 import type { Rng } from "./rng";
 import type { GameState, Ledger } from "./types";
 import { defs } from "./defs";
+import { auraHype } from "./birdapp/effects";
 
 /** Hype settles at 30, higher for a lab with real capability. */
 export function hypeResting(state: GameState): number {
-  return Math.min(75, 30 + state.capability * 0.5) + solarHype(state);
+  return Math.min(75, 30 + state.capability * 0.5) + solarHype(state) + auraHype(state);
 }
 
 /** Shared books for the daily close and the pre-purchase forecast; never uses yesterday's stale ledger. */

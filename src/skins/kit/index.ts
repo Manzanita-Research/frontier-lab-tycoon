@@ -22,3 +22,4 @@ export { FactionChip, FactionMeter, StanceTrack, factionAttrs } from "./Factions
 export { facilityGroups, coachInFacilities, useStartMenu, useWidget, runFile, type FacilityGroup, type RunResult, type StartView } from "./launcher";
 export { RunBox, useRunBox, type RunBoxState } from "./RunBox";
 export { useJumpTo } from "./jump";
+export { AuraSpark, BirdCounts, BirdMeter, BirdPostCard } from "./BirdApp";

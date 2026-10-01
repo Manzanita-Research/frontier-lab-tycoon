@@ -10,6 +10,7 @@ import type { YachtState } from "./yacht/state";
 import type { DefectionState } from "./defection/state";
 import type { NeoLabsState } from "./neolabs/state";
 import type { Meeting } from "./meetings";
+import type { BirdAppState } from "./birdapp/state";
 import type { PoachingState } from "./poaching/state";
 import type { AuditorsState } from "./auditors/state";
 import type { VisitorGroup } from "./groups";
@@ -175,7 +176,7 @@ export interface Staffer {
 }
 
 /** The panel a headline is about, so the HUD can badge it when the news only reached the ticker (FLT-54). */
-export type NewsPanel = "arena" | "papers" | "factions";
+export type NewsPanel = "arena" | "papers" | "factions" | "birdapp";
 
 export interface NewsItem {
   id: number;
@@ -222,13 +223,13 @@ export interface Pop {
  */
 export type NoticeSource =
   | "leapfrog" | "ops" | "staff" | "economy" | "coach" | "event" | "disaster" | "papers" | "collusion" | "hearing" | "politics"
-  | "defection" | "auditors" | "factions" | "race" | "training" | "crowd" | "build" | "endings" | "mods" | `mod:${string}`;
+  | "defection" | "auditors" | "factions" | "race" | "training" | "crowd" | "build" | "endings" | "mods" | "birdapp" | `mod:${string}`;
 
 /** `you`: it is about you, or needs you (a toast). `world`: it happened out there (the ticker, and the panel that owns it). */
 export type Importance = "you" | "world";
 
 /** Toasts of one kind that come in bursts (FLT-54): the app folds a pile of them into one line naming them all. */
-export type ToastGroup = "quit" | "poached" | "record";
+export type ToastGroup = "quit" | "poached" | "record" | "viral" | "cancelled";
 
 /** Drained by the store into UI toasts. `source` and `importance` are optional only so older saves still load (FLT-51). */
 export interface Toast {
@@ -400,6 +401,8 @@ export interface GameState {
   defection?: DefectionState;
   /** FLT-20 Poaching War: opt-in pack, same rules. */
   poaching?: PoachingState;
+  /** FLT-69 the Bird App: researchers who post. Absent until the pack wakes (Level 3), or with `?birdapp=off`. */
+  birdapp?: BirdAppState;
   /** Labs your own people founded (FLT-26, FLT-20): on the Arena beside the built-in rivals. */
   neoLabs?: NeoLabsState;
   /** A visitor talking to one of your people somewhere visible (sim/meetings.ts, the `people.meet` verb). */

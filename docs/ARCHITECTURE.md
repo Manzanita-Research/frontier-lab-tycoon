@@ -658,3 +658,33 @@ answered with its first choice); the sim sends the same toasts on both branches.
 
 Everything that is not an answer to a card is held to four a minute by the window, at any speed. The world notices are
 still there, on the ticker.
+
+## The Bird App (FLT-69): researchers who post
+
+Spec: `docs/specs/FLT-69.md`. The pack is `mods/base-birdapp/` (its README has the rules), and the sim lives in `src/sim/birdapp/`. `dailyBirdApp` runs once a day at midnight (`tick.ts`, behind `systemUnlocked(state, "birdapp")`) on the pack's own random stream. Everything lives in the optional `World.birdapp` (additive). `enableBirdApp(world)` wakes it at Level 3 through `PACKS`, and `?birdapp=off` sets `flags.birdappOff`.
+
+- **Machines** (`machines.ts`, pure `transition()`, stored as `{ value, context }`):
+  - `posterMachine`: recluse, occasional, big, break, gone, one per researcher. It emits `PROMOTED`, `DEMOTED`, `BREAK`, `LEFT` and `BACK`, which the driver turns into toasts, thoughts and headlines.
+  - `commsMachine`: calm, busy, drowning. It emits `DROWNING` and `SURFACED`.
+  - The outcome of every post is rolled when it is scheduled, and so are its final numbers. Transitions never draw.
+- **Midnight, in order** (`driver.ts`):
+  1. profile new researchers;
+  2. land yesterday's posts;
+  3. schedule today's (tier rate × moment, capped at `maxPosts`);
+  4. the Comms desk reviews the "Run it by Comms" posts, then works the queue, and unreached fires stick;
+  5. the log-off lever's focus cost and quits;
+  6. ease Aura toward the posters' floor.
+- **Hooks into other systems.** Each is the identity while the pack is asleep:
+  - `effects.ts`: `auraHype` (economy), `auraVisitors` (attendance), `auraApplicants` (walker spawns) and `poachAppeal` (poaching's pick).
+  - Each landed post nudges its archetype's factions.
+  - A stuck cancel adds to the defection score and stokes the Water Discourse.
+  - The pack's thoughts, toasts and headlines are its own content events. Toasts carry `source: "birdapp"` (FLT-51).
+  - The Frontier Times files bangers and cancels as the news cycle and spats as filler (`src/newsroom/edition.ts`).
+- **Vocabulary:** the `birdapp.post` verb (`docs/DISASTERS.md`) lets a disaster or arc make someone post, with an optional forced outcome.
+- **Command:** `birdLever { id, lever }` (`cook`, `comms`, `logoff`).
+- **HUD:**
+  - `birdView(world)` goes into the snapshot. `hudViewModel` builds `HudVM.birdapp` (`BirdAppVM`: timeline, posters with their levers and odds, the Comms desk and the viral spotlight) and one **Aura** row in the Vibes breakdown.
+  - It has one slot, `BirdApp`, and the kit gives `BirdMeter`, `AuraSpark`, `BirdCounts` and `BirdPostCard`.
+  - Frontier 95 draws Bird Reader 1.0. The other skins restyle the base panel.
+- **Scenes:** `?moment=bird|bird-banger|bird-cancel` (staged by `demo.ts` through the driver's own code). The `pnpm shots` sets are `birdapp` and `birdapp-skins`.
+- **Determinism:** the golden digests from tick 1600 changed only because Level 3 now wakes the pack and brings the Comms Rep forward from Level 5. With `birdappOff`, the old digests reproduce (the provenance is in `golden.test.ts`).

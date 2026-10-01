@@ -8,6 +8,7 @@ import { applyDefectionChoices, dailyDefection, updateDefection } from "./defect
 import { updateMeetings } from "./meetings";
 import { dailyNeoLabs } from "./neolabs/driver";
 import { applyPoachingChoices, dailyPoaching } from "./poaching/driver";
+import { dailyBirdApp } from "./birdapp/driver";
 import { applyPromisesChoices, dailyPromises } from "./promises/driver";
 import { applyCaptureChoices, dailyCapture } from "./capture/driver";
 import { TICKS_PER_DAY } from "./constants";
@@ -145,6 +146,9 @@ function step(state: GameState, commands: readonly Command[]) {
     probe?.lap("daily:leapfrog");
     if (systemUnlocked(state, "papers")) dailyPapers(state, rng);
     probe?.lap("daily:papers");
+    // FLT-69: after the news (a rival's drop is today's topic), before the factions (they hear today's controversies).
+    if (systemUnlocked(state, "birdapp")) dailyBirdApp(state);
+    probe?.lap("daily:birdapp");
     // FLT-33: the factions first, so the Circus and the Senate hear today's meters (FLT-52).
     if (state.factions && systemUnlocked(state, "factions")) dailyFactions(state);
     probe?.lap("daily:factions");
