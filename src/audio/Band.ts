@@ -1,6 +1,6 @@
 // FLT-66: the band. One gain bus per mode under the music bus, so a switch is two gain ramps at the bar line, and a
 // queue of planned tones that become voices a fraction of a second before they sound (a few nodes per frame, no bursts).
-import { MODES, conduct, meter, plan, type Conductor, type Cue, type Mode, type Want } from "./music";
+import { MODES, conduct, meter, plan, type Conductor, type Cue, type Mode, type Tone, type Want } from "./music";
 import { voice, whiteNoise } from "./voice";
 
 /** Main-thread cost per mode: time spent planning and building voices, and how many voices. */
@@ -15,7 +15,8 @@ export class Band {
   private queue: Cue[] = [];
   private last = -1;
   readonly cost: Record<Mode, ModeCost> = { nap: zero(), walkies: zero(), fetch: zero(), zoomies: zero() };
-  constructor(private ctx: BaseAudioContext, out: AudioNode, want: Want, private noise = whiteNoise(ctx)) {
+  /** `solo`: voice only that part of the band (an offline stem, e.g. the choir for the words check). */
+  constructor(private ctx: BaseAudioContext, out: AudioNode, want: Want, private noise = whiteNoise(ctx), private solo?: Tone["part"]) {
     const bus = () => { const g = ctx.createGain(); g.gain.value = 0; g.connect(out); return g; };
     this.buses = { nap: bus(), walkies: bus(), fetch: bus(), zoomies: bus(), fx: bus() };
     this.buses.fx.gain.value = 1;
@@ -52,7 +53,7 @@ export class Band {
     while (this.queue.length && this.queue[0]!.tone.at < now + horizon && (voiced < VOICES_PER_PUMP || this.queue[0]!.tone.at < now + 0.1)) {
       const cue = this.queue.shift()!;
       // A tone whose moment passed while the page stalled is skipped, not crammed in late.
-      if (cue.tone.at < now - 0.05) continue;
+      if (cue.tone.at < now - 0.05 || (this.solo && cue.tone.part !== this.solo)) continue;
       voice(this.ctx, this.buses[cue.bus], { ...cue.tone, at: 0 }, cue.tone.at, this.noise);
       voiced++;
     }
@@ -84,12 +85,12 @@ export interface Take { at: number; mode: Mode }
  * Render the band to a buffer with an OfflineAudioContext, through the same buses, voices and limiter as the game,
  * at the given mixer levels. The show-and-tell clips and the bar-sync evidence come from here.
  */
-export async function renderMusic(takes: readonly Take[], seconds: number, want: Omit<Want, "mode">, levels = { master: 0.7, music: 0.3 }, sampleRate = 48000) {
+export async function renderMusic(takes: readonly Take[], seconds: number, want: Omit<Want, "mode">, levels = { master: 0.7, music: 0.3 }, sampleRate = 48000, solo?: Tone["part"]) {
   const ctx = new OfflineAudioContext(1, Math.ceil(seconds * sampleRate), sampleRate);
   const music = ctx.createGain(); const master = ctx.createGain();
   music.gain.value = levels.music; master.gain.value = levels.master;
   music.connect(master).connect(limiter(ctx)).connect(ctx.destination);
-  const band = new Band(ctx, music, { ...want, mode: takes[0]?.mode ?? "walkies" });
+  const band = new Band(ctx, music, { ...want, mode: takes[0]?.mode ?? "walkies" }, undefined, solo);
   // The same 60 Hz pump the game runs, so the clip hears exactly when a press would have been heard.
   for (let t = 0; t < seconds; t += 1 / 60) {
     for (const take of takes) if (take.at <= t) band.set({ ...want, mode: take.mode });
