@@ -8,7 +8,7 @@ import { arcMachine } from "../machines/arc";
 import { initialStored, step } from "../machines/run";
 import { fillTemplate, formatMoney } from "../format";
 import { addNews, addToast, type ToastTag } from "../news";
-import { openEventOf } from "../events";
+import { cardAllowed, openEventOf } from "../events";
 import { createRng, type Rng } from "../rng";
 import { runVerb, STATS } from "../verbs";
 import { chartStats, type Beat } from "../circus/chart";
@@ -86,9 +86,12 @@ export function castVotes(s: GameState, rng: Rng, m: MotionLike, lobbied: readon
   return votes;
 }
 
-/** Put a card on screen now, if nothing else has it. */
+/**
+ * Put a card on screen now, if nothing else has it and the card budget allows (FLT-54: a card waiting in line, like The
+ * Memo, goes first; the tracker in the build bar says the same thing, so a skipped card loses nothing).
+ */
 function openCard(s: GameState, id: string) {
-  if (openEventOf(s)) return;
+  if (openEventOf(s) || !cardAllowed(s, id, "chain")) return;
   s.arcs[id] = step(arcMachine, armCard(id), { type: "DAY", day: s.day, ready: true, slotFree: true, pace: 1 }).stored;
 }
 

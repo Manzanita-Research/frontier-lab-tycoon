@@ -88,7 +88,7 @@ describe("migrations", () => {
   });
 
   // v2 → v3 (FLT-75): protesters leave `walkers` for their own rows, and come back as Koota entities that play on
-  // exactly as main played the same save on: main loaded this file, ran 30 days and hashed the World to 2228a4c8.
+  // exactly as main played the same save on: main loaded this file, ran 30 days and hashed the World to 12251259 (at d889b59; 2228a4c8 at 4cbc20a).
   it("v2 → v3: the frozen protest's crowd moves into `protesters`, and plays on to main's World", async () => {
     const { save, world } = await run(decodeSave(V2_PROTEST));
     expect(save.v).toBe(3);
@@ -99,7 +99,7 @@ describe("migrations", () => {
     const json = JSON.stringify(legacyWorld(world));
     let h = 0x811c9dc5;
     for (let i = 0; i < json.length; i++) h = Math.imul(h ^ json.charCodeAt(i), 0x01000193) >>> 0;
-    expect(h.toString(16).padStart(8, "0")).toBe("2228a4c8");
+    expect(h.toString(16).padStart(8, "0")).toBe("12251259");
     // And a v3 save of it round-trips: rows out, Koota entities back in, the same World.
     const again = await run(decodeSave(serialize(await run(encodeSave(world)))));
     expect(JSON.stringify(again.world)).toBe(JSON.stringify(world));

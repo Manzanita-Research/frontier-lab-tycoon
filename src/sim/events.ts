@@ -16,13 +16,15 @@ import { applyLeapfrogEffect } from "./race/leapfrog/actions";
 import { eraOfState } from "./race/race";
 import { raceVars } from "./race/finance";
 import { modeOf } from "./walkers";
-import type { Rng } from "./rng";
 import type { GameState, OpenEvent } from "./types";
 import { pressureReady } from "./tutorial";
 import { defs } from "./defs";
 import { askFlag } from "./disasters/names";
 import { modArcsHeard } from "./modArcs";
 import { people } from "./ecs/protesters";
+import { pacerAllows, pacerMachine, type Pacing, type PacerStored } from "./machines/cardPace";
+import { HANDLED, paceOfCard } from "../content/cardPacing";
+import { createRng, type Rng } from "./rng";
 
 export function conditionHolds(state: GameState, c: Condition): boolean {
   if ("all" in c) return c.all.every((sub) => conditionHolds(state, sub));
@@ -43,22 +45,71 @@ export function openEventOf(state: GameState): OpenEvent | null {
   return null;
 }
 
+/** The card budget's machine, started the first time it is needed (a save from before FLT-54 has none). */
+export function pacerOf(state: GameState): PacerStored {
+  return (state.pacer ??= initialStored(pacerMachine, undefined));
+}
+
+/** Counts the card on screen against the budget once, whoever opened it (the daily check, a hearing, a roll call). */
+export function notePacer(state: GameState) {
+  const open = openEventOf(state);
+  if (!open) return;
+  const pacer = pacerOf(state);
+  if (pacer.context.seen === `${open.id}@${open.day}`) return;
+  state.pacer = step(pacerMachine, pacer, { type: "OPENED", id: open.id, story: paceOfCard(open.id).story, day: open.day }).stored;
+}
+
+/** May a pack's own driver put `id` up today (the next question of a sitting, a bill's draft)? If not, it waits in line. */
+export function cardAllowed(state: GameState, id: string, how: "urgent" | "chain" | "normal" = "chain"): boolean {
+  const pacer = pacerOf(state);
+  if (pacerAllows(pacer.context, id, paceOfCard(id).story, state.day, how)) return true;
+  state.pacer = step(pacerMachine, pacer, { type: "JOIN", id, day: state.day }).stored;
+  return false;
+}
+
 /**
- * The daily check. Every arc hears about it, in content order; the first whose condition holds and whose
- * cooldown is over takes the screen, and the rest wait their turn as `brewing`. The game pauses until it is answered.
+ * The daily check (FLT-54: through the card budget). Every arc hears about it: disasters first, then the waiting line oldest
+ * first, then the rest in content order. The first whose condition holds, whose cooldown is over and whom the budget lets
+ * through takes the screen (an offer on a clock goes ahead of the line); the rest wait their turn as `brewing`. A minor card that would have to wait (or any minor card
+ * at 10×) answers itself with its default and says so on the ticker. The game pauses until a card is answered.
  */
 export function dailyEvents(state: GameState) {
   if (state.goals.value === "lost" || (!state.progression && state.day < 40)) return;
+  notePacer(state);
   let slotFree = openEventOf(state) === null;
   // Later eras crowd the calendar: cooldowns shrink.
   const pace = eraDef(eraOfState(state)).pace;
-  for (const def of defs().events) {
+  const pacer = pacerOf(state).context;
+  const events = defs().events;
+  const place = (id: string) => pacer.queue.findIndex((q) => q.id === id);
+  const rank = (id: string) => (paceOfCard(id).urgent ? -2 : paceOfCard(id).priority ? -1 : place(id) >= 0 ? place(id) : pacer.queue.length);
+  const order = events.map((def, i) => ({ def, i, r: rank(def.id) })).sort((a, b) => a.r - b.r || a.i - b.i);
+  const waiting: string[] = [];
+  for (const { def } of order) {
     // A save from before a pack added this card (the factions' cards, a mod's) starts its machine now.
     state.arcs[def.id] ??= initialStored(arcMachine, { choices: def.choices.length, cooldownDays: def.cooldown ?? EVENT_COOLDOWN_DAYS, openedDay: null });
-    const stored = dayArc(state.arcs[def.id]!, { type: "DAY", day: state.day, ready: pressureReady(state) && (conditionHolds(state, def.when) || state.flags[askFlag(def.id)] !== undefined), slotFree, pace });
+    const card = paceOfCard(def.id);
+    const how: Pacing = card.urgent ? "urgent" : card.priority ? "priority" : "normal";
+    const allowed = pacerAllows(pacerOf(state).context, def.id, card.story, state.day, how);
+    const ready = pressureReady(state) && (conditionHolds(state, def.when) || state.flags[askFlag(def.id)] !== undefined);
+    const shrug = card.minor && slotFree && (!allowed || pacer.auto);
+    const stored = dayArc(state.arcs[def.id]!, { type: "DAY", day: state.day, ready, slotFree: slotFree && (allowed || shrug === true), pace });
     state.arcs[def.id] = stored;
-    if (stored.value === "cardOpen") slotFree = false;
+    if (stored.value === "cardOpen" && shrug) handled(state, def.id, card.default);
+    else if (stored.value === "cardOpen") {
+      slotFree = false;
+      notePacer(state);
+    } else if (stored.value === "brewing") waiting.push(def.id);
   }
+  state.pacer = step(pacerMachine, pacerOf(state), { type: "WAITING", ids: waiting, day: state.day }).stored;
+}
+
+/** A minor card the lab answered without you: its default choice, on its own dice, and one line on the ticker. */
+function handled(state: GameState, id: string, choice: number) {
+  const def = defs().eventById(id)!;
+  const pick = def.choices[choice] ? choice : 0;
+  chooseEvent(state, createRng((Math.imul(state.seed, 2654435761) ^ Math.imul(state.day + 1, 40503)) >>> 0 || 1), id, pick);
+  addNews(state, fillTemplate(HANDLED, { title: def.title, choice: def.choices[pick]!.label }), "neutral");
 }
 
 /**
@@ -157,4 +208,9 @@ export function chooseEvent(state: GameState, rng: Rng, eventId: string, choiceI
     syncProtesters(state, rng);
     if (defs().arcs.length > 0) modArcsHeard(state, rng, eventId, effects[0]!.choiceIndex);
   }
+}
+
+/** A staged moment (`?moment=`, a pack's review link) plays its cards back to back, as it always did: no card budget. */
+export function unpaced(state: GameState) {
+  state.pacer = step(pacerMachine, pacerOf(state), { type: "PACE", gap: 0, storyGap: 0, auto: false }).stored;
 }

@@ -12,6 +12,7 @@ import { Clock, Effect, Option, Schema, Stream } from "effect";
 import { fromEffectEventStream, setupEffect } from "@xstate/effect";
 import type { Command } from "../sim/commands";
 import { dailySeed } from "../sim/daily";
+import { TICKS_PER_SECOND } from "../sim/constants";
 import type { GameState, NewsItem, OpenEvent, Outcome, Tone } from "../sim/types";
 import { Frames } from "./frames";
 import type { Snapshot, Speed, Tool, UiSelection, UiToast } from "./hud";
@@ -20,8 +21,7 @@ import { Sim, type SyncReport } from "./sim";
 import { Saves, type SaveWhy } from "./saves";
 import type { SlotId } from "../save";
 
-/** Twenty sim ticks per day, six real seconds at 1×. */
-export const TICKS_PER_SECOND = 20 / 6;
+export { TICKS_PER_SECOND };
 export const MAX_CATCHUP_TICKS = 40;
 export const SNAPSHOT_MS = 200;
 export const TOAST_MS = 5200;
@@ -235,7 +235,7 @@ export const appMachine = setupEffect({
     hover: null,
     outcomeDismissed: false,
     acc: 0,
-    queue: [],
+    queue: input.speed > 1 ? [{ type: "setPace", speed: input.speed }] : [],
     lastPublishAt: 0,
     event: input.first.event,
     outcome: input.first.outcome,
@@ -335,7 +335,11 @@ export const appMachine = setupEffect({
     SET_SPEED: ({ context, event }) => {
       // The coach asked for ▶▶ while the first model trains (FLT-58).
       const saw = event.speed > 1 && context.snap.coach?.id === "speed";
-      const next = { ...context, speed: event.speed, queue: saw ? [...context.queue, { type: "coachSaw", what: "speed" } as const] : context.queue };
+      const queue: Command[] = [...context.queue];
+      if (saw) queue.push({ type: "coachSaw", what: "speed" });
+      // The card budget (FLT-54) is counted in game days; the sim hears the speed so a card stays ~20 real seconds from the last.
+      if (event.speed > 0 && event.speed !== context.speed) queue.push({ type: "setPace", speed: event.speed });
+      const next = { ...context, speed: event.speed, queue };
       return { context: next, target: phaseFor(next) };
     },
     TOGGLE_PAUSE: ({ context }) => {

@@ -1,4 +1,4 @@
-// FLT-51's evidence, not a CI test: toasts per real minute in `?scenario=midgame` at 1x, 3x and 10x, through the real app
+// FLT-51's evidence, not a CI test: toasts (and, since FLT-54, cards) per real minute in `?scenario=midgame` at 1x, 3x and 10x, through the real app
 // machine (manual frames at 30 fps, cards answered with their first choice, as a player who clicks through would).
 // It only uses what the app has always had (appMachine, SimHandle, framesManual, the midgame scenario), so the same file
 // runs on the branch FLT-51 started from for the "before" numbers:
@@ -46,6 +46,9 @@ function measure(speed: 1 | 3 | 10) {
     const shown: string[] = [];
     // Answers to the cards this player clicks (never held back), counted apart from the rest.
     let replies = 0;
+    // Cards on screen: each new one the player has to answer.
+    let cards = 0;
+    let open: string | null = null;
     const startDay = handle.world.day;
     for (let f = 0; f < MINUTES * 60 * FPS; f++) {
       frames.emit(1 / FPS);
@@ -56,12 +59,14 @@ function measure(speed: 1 | 3 | 10) {
         shown.push(t.text);
         if ((t as { reply?: true }).reply) replies++;
       }
+      if (c.event && c.event.id !== open) cards++;
+      open = c.event?.id ?? null;
       if (c.event) actor.send({ type: "CHOOSE", choiceIndex: 0 });
     }
     const days = handle.world.day - startDay;
     const perMin = (n: number) => (n / MINUTES).toFixed(1);
     console.log(
-      `NOTICE_RATE ${speed}x: ${MINUTES} real min, ${days} game days | sim sent ${raw} (${perMin(raw)}/min) | toasts shown ${shown.length} (${perMin(shown.length)}/min), of them replies ${replies} (${perMin(replies)}/min)\n` +
+      `NOTICE_RATE ${speed}x: ${MINUTES} real min, ${days} game days | sim sent ${raw} (${perMin(raw)}/min) | toasts shown ${shown.length} (${perMin(shown.length)}/min), of them replies ${replies} (${perMin(replies)}/min) | cards ${cards} (${perMin(cards)}/min)\n` +
         `  by source: ${JSON.stringify(bySource)}\n  shown: ${JSON.stringify(shown.slice(0, 40))}`,
     );
   }).pipe(Effect.provide(Layer.mergeAll(simLayer(handle), framesManual)));

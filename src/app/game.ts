@@ -164,6 +164,8 @@ export function use(tool: Tool, x: number, z: number, quiet = false, keep = fals
  * What the camera shows, for the probe: the view-projection matrix (column-major) and the canvas rect in CSS pixels.
  * The scene lends it (`render/ProbeView`), so an e2e player can find a tile wherever the director has moved the camera.
  */
+/** FLT-54: the HUD's window budget for the probe (what the game holds up, what waits on the taskbar); set by the HUD host. */
+export const probeHud: { windows: (() => { auto: string[]; tray: { id: string; flashing: boolean; unread: number }[] }) | null } = { windows: null };
 export const probeView: { view: (() => { matrix: number[]; rect: { left: number; top: number; width: number; height: number } }) | null } = { view: null };
 
 // Always-on read-only contract: copied values, no URL switches or mutation handles.
@@ -186,7 +188,7 @@ if (typeof window !== "undefined") {
       outcome: c ? { outcome: c.outcome, dismissed: c.outcomeDismissed } : null, overlays: c ? [...c.overlays] : [], warnings: snap ? [...snap.warnings] : [],
       toasts: c ? c.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) : [],
       map: { w: w.grid.w, h: w.grid.h, paths: w.grid.paths.flatMap((p, i) => (p ? [i] : [])), gate: { ...w.gate }, buildings: w.buildings.map((b) => ({ id: b.id, kind: b.kind, x: b.x, z: b.z, w: b.w, d: b.d, broken: b.broken })) },
-      view: probeView.view?.() ?? null };
+      view: probeView.view?.() ?? null, windows: probeHud.windows?.() ?? null };
   };
   window.addEventListener("click", () => send({ type: "COMMAND", command: { type: "coachClick" } }));
   // Closing the tab (or switching away from it) autosaves, so a lab is never more than a month behind.

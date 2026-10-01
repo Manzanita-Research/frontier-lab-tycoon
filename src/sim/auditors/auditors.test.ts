@@ -4,7 +4,7 @@ import { getShortestPaths } from "xstate/graph";
 import { eventById } from "../../content/events";
 import { PROGRESSION } from "../../content/progression";
 import type { Call } from "../disasters/types";
-import { openEventOf } from "../events";
+import { openEventOf, unpaced } from "../events";
 import { groupKind, groupsOf } from "../groups";
 import { answer, createTestCampus, layPaths, readyForPressure } from "../testkit";
 import { applyNow, tick } from "../tick";
@@ -35,6 +35,8 @@ function due(seed = 3): GameState {
   s.tick = s.day * 20;
   enableAuditors(s);
   s.auditors!.machine = at("quiet", { nextDay: s.day + 1 });
+  // The visit, not FLT-54's card budget (its own tests are in events.test.ts): cards open the day they are due.
+  unpaced(s);
   return s;
 }
 

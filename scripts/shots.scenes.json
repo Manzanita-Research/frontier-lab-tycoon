@@ -299,6 +299,18 @@
       "fresh",
       "migrated",
       "picker"
+    ],
+    "flt54": [
+      "flt54-l4",
+      "flt54-l5",
+      "flt54-busy",
+      "overview",
+      "event",
+      "phone"
+    ],
+    "flt54-tasks": [
+      "flt54-tasks-game",
+      "flt54-tasks-player"
     ]
   },
   "scenes": {
@@ -4009,6 +4021,87 @@
         },
         {
           "wait": 600
+        }
+      ]
+    },
+    "flt54-l4": {
+      "title": "FLT-54: Level 4 (The Race) earned: the New! card and the windows at 1440x900",
+      "query": {
+        "ladder": 4,
+        "unlock": 1,
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt54-l5": {
+      "title": "FLT-54: Level 5 (Scrutiny) earned: the New! card and the windows at 1440x900",
+      "query": {
+        "ladder": 5,
+        "unlock": 1,
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt54-busy": {
+      "title": "FLT-54: thirty busy mid-game days, cards answered, then paused: what the game left open",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "eval": "async (f, w) => { for (let d = 0; d < 30; d++) { f.send({ type: 'CHOOSE', choiceIndex: 0 }); await new Promise((r) => setTimeout(r, 70)); for (let i = 0; i < 20; i++) f.tick(w); await new Promise((r) => setTimeout(r, 240)); } }"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt54-tasks-game": {
+      "title": "FLT-54: the Task Mangler's benchmark table as the game opened it (Release Leapfrog): kept to the right edge",
+      "query": {
+        "moment": "pair",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt54-tasks-player": {
+      "title": "FLT-54: the same Task Mangler folded and opened again by the player: full width, every column",
+      "query": {
+        "moment": "pair",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 800
+        },
+        {
+          "click": ".f95-tasks.open .f95-tb"
+        },
+        {
+          "wait": 400
+        },
+        {
+          "click": ".f95-tasks:not(.open) .f95-tb"
+        },
+        {
+          "wait": 800
         }
       ]
     },

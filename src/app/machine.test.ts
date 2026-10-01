@@ -4,7 +4,7 @@ import { Effect, Layer } from "effect";
 import { TestClock } from "effect/testing";
 import { createEffectActor, send, waitFor } from "@xstate/effect";
 import { SCENARIO } from "../content/goals";
-import { openEventOf } from "../sim/events";
+import { openEventOf, unpaced } from "../sim/events";
 import { createInitialState } from "../sim/state";
 import { tick } from "../sim/tick";
 import { createTestCampus, readyForPressure } from "../sim/testkit";
@@ -184,6 +184,13 @@ describe("app machine", () => {
       const { actor, sim, pump } = yield* boot();
       yield* pump(50);
       yield* waitFor(actor, (s) => s.matches("eventOpen"), { timeout: "1 second" });
+      // FLT-54: the race's compute auction (an offer on a clock) goes ahead of the water; the budget is off for this test.
+      if (openEventOf(sim.world)?.id === "computeAuction") {
+        unpaced(sim.world);
+        yield* send(actor, { type: "CHOOSE", choiceIndex: 0 });
+        yield* pump(50);
+        yield* waitFor(actor, (s) => s.matches("eventOpen"), { timeout: "1 second" });
+      }
       expect(openEventOf(sim.world)?.id).toBe("waterDiscourse");
       const heldAt = sim.world.tick;
       yield* pump(5);

@@ -1,6 +1,7 @@
 // Everything in GameState is plain and JSON-serializable.
 import type { CoachStored } from "./machines/coach";
 import type { ProgressionStored } from "./machines/progression";
+import type { PacerStored } from "./machines/cardPace";
 import type { UnlockCard } from "../content/progression";
 import type { BuildingKind } from "../content/buildings";
 import type { CollusionState, Investigation } from "./collusion/state";
@@ -173,11 +174,15 @@ export interface Staffer {
   divert?: { owner: string; to: number; jog: number };
 }
 
+/** The panel a headline is about, so the HUD can badge it when the news only reached the ticker (FLT-54). */
+export type NewsPanel = "arena" | "papers" | "factions";
+
 export interface NewsItem {
   id: number;
   day: number;
   text: string;
   tone: Tone;
+  panel?: NewsPanel;
 }
 
 export interface Thought {
@@ -222,6 +227,9 @@ export type NoticeSource =
 /** `you`: it is about you, or needs you (a toast). `world`: it happened out there (the ticker, and the panel that owns it). */
 export type Importance = "you" | "world";
 
+/** Toasts of one kind that come in bursts (FLT-54): the app folds a pile of them into one line naming them all. */
+export type ToastGroup = "quit" | "poached" | "record";
+
 /** Drained by the store into UI toasts. `source` and `importance` are optional only so older saves still load (FLT-51). */
 export interface Toast {
   id: number;
@@ -231,6 +239,8 @@ export interface Toast {
   importance?: Importance;
   /** Sent while a player command was applied: the answer to something you just did, so the app shows it at once. */
   reply?: true;
+  /** Which burst it belongs to, and the name it adds to the pile (FLT-54; `content/toastGroups.ts`). */
+  group?: { kind: ToastGroup; who: string };
 }
 
 export interface GoalProgress {
@@ -297,6 +307,8 @@ export interface GameState {
   mods?: RunMods;
   coach?: CoachStored;
   progression?: ProgressionStored;
+  /** FLT-54: the card budget (sim/machines/cardPace.ts). Absent until the first daily check that looks at it. */
+  pacer?: PacerStored;
   unlockCards?: UnlockCard[];
   seed: number;
   rngState: number;

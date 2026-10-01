@@ -7,7 +7,7 @@ import { arcMachine } from "../machines/arc";
 import { initialStored, step } from "../machines/run";
 import { fillTemplate } from "../format";
 import { addNews } from "../news";
-import { openEventOf } from "../events";
+import { cardAllowed, openEventOf } from "../events";
 import { createRng, type Rng } from "../rng";
 import { runVerb, STATS } from "../verbs";
 import type { Beat } from "../circus/chart";
@@ -147,11 +147,14 @@ function openCard(s: GameState, id: string) {
   if (open) return;
   s.arcs[id] = step(arcMachine, armCard(id), { type: "DAY", day: s.day, ready: true, slotFree: true, pace: 1 }).stored;
 }
-/** In session, the next question is the card on screen. */
+/**
+ * In session, the next question is the card on screen, once the card budget allows (FLT-54): each a
+ * few days apart while the committee "recesses to review the testimony". The gavel follows the last answer: it is its result.
+ */
 function nextQuestion(s: GameState) {
   const c = s.hearing!.machine.context;
   const id = c.docket[c.answers.length];
-  if (id && eventById(id)) openCard(s, id);
+  if (id && eventById(id) && cardAllowed(s, id, "chain")) openCard(s, id);
 }
 
 const PICK_FLAGS = picks(PICK_PREFIX, [...ANSWER_KEYS, "leave"] as const);

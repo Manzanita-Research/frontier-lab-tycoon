@@ -3,7 +3,7 @@
 // No renderer or UI dependencies.
 import { canPlace } from "../commands";
 import { RIVAL_DEFS } from "../../content/rivals";
-import { dailyEvents, openEventOf } from "../events";
+import { dailyEvents, openEventOf, unpaced } from "../events";
 import { createRng } from "../rng";
 import { answer } from "../testkit";
 import { applyNow, tick, TICKS_PER_DAY } from "../tick";
@@ -58,6 +58,7 @@ function until(s: GameState, done: (s: GameState) => boolean, days: number) {
 const cardIs = (id: string) => (s: GameState) => openEventOf(s)?.id === id;
 
 export function stageDrama(s: GameState, moment: DramaMoment) {
+  unpaced(s);
   busyLab(s);
   if (moment.startsWith("poach-offer")) {
     const id = moment.split(":")[1] ?? "metameta";

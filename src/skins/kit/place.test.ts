@@ -70,4 +70,19 @@ describe("placeBalloon", () => {
     const none = placeBalloon(null, box, view, { avoid: [corner] });
     expect(overlaps(none, corner)).toBe(false);
   });
+
+  it("finds a clear spot when every side of the target is on a window (FLT-54: the Properties window at Level 2)", () => {
+    // The journey's case: a researcher's Properties window beside the target, the lab's window and Training on the left.
+    const anchor = { x: 1100, y: 420, w: 200, h: 40 };
+    const windows = [
+      { x: 700, y: 300, w: 380, h: 300 },
+      { x: 1100, y: 200, w: 330, h: 200 },
+      { x: 1100, y: 480, w: 330, h: 300 },
+      { x: 10, y: 40, w: 300, h: 500 },
+    ];
+    const p = placeBalloon(anchor, box, view, { avoid: windows, margin: { bottom: 52 } });
+    for (const w of windows) expect(overlaps(p, w)).toBe(false);
+    expect(overlaps(p, anchor)).toBe(false);
+    expect(p.y + box.h).toBeLessThanOrEqual(view.h - 52);
+  });
 });

@@ -86,7 +86,7 @@ function headline(state: GameState, rng: Rng, pool: readonly string[], tone: Ton
     model: state.models[state.models.length - 1] ?? state.training.context.name,
     other: other?.name ?? "everyone else",
   });
-  addNews(state, text, tone);
+  addNews(state, text, tone, "factions");
 }
 
 /** What happened since the last midnight, as signals (content/factions.ts SIGNALS). */
@@ -293,7 +293,7 @@ function opEds(state: GameState, f: FactionsState, rng: Rng, all: readonly Facti
   const [said, reply] = exchange(rng, a, b);
   f.lastOpEd = state.day;
   f.counts.opEds++;
-  addNews(state, `Dueling op-eds. ${a.name}: "${said}" ${b.name}: "${reply}"`, "joke");
+  addNews(state, `Dueling op-eds. ${a.name}: "${said}" ${b.name}: "${reply}"`, "joke", "factions");
   log(state, f, `${a.name} and ${b.name} trade op-eds about ${state.labName}.`, "joke", [a.id, b.id]);
 }
 

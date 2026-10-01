@@ -11,6 +11,8 @@
 // with a fake clock; the app machine calls it where toasts come in. `hudViewModel` has to stay a pure function of its
 // input, so it cannot hold a 15-second window itself.
 import type { LeapfrogView } from "../sim/race/leapfrog/view";
+import { GROUP_LINES } from "../content/toastGroups";
+import { fillTemplate } from "../sim/format";
 import type { NewsItem, NoticeSource, Tone } from "../sim/types";
 import type { UiToast } from "./hud";
 
@@ -77,6 +79,37 @@ export function summaryText(held: readonly UiToast[]): string {
   return `${plural(held.length, "thing", "things")} happened while you were busy. Top of the pile: ${headlineOf(held).text}`;
 }
 
+/** "A", "A and B", "A, B and C", "A, B, C and 2 more". */
+export function namesText(names: readonly string[]): string {
+  const shown = names.length > 4 ? [...names.slice(0, 3), `${names.length - 3} more`] : names;
+  return shown.length < 2 ? (shown[0] ?? "") : `${shown.slice(0, -1).join(", ")} and ${shown[shown.length - 1]}`;
+}
+
+/**
+ * Fold a pile's toasts of one group (FLT-54) into one line where the first of them was: "3 staff handed in the box:
+ * Priya Residual, Kevin Backprop and Dana Gradient." A group of one keeps its own words. `folded` is what went in, for
+ * the ticker.
+ */
+export function coalesce(held: readonly UiToast[], nextId: () => number): { held: UiToast[]; folded: UiToast[] } {
+  const out: UiToast[] = [];
+  const folded: UiToast[] = [];
+  for (const t of held) {
+    const kind = t.group?.kind;
+    if (!kind) out.push(t);
+    else if (out.some((o) => o.group?.kind === kind)) continue;
+    else {
+      const pile = held.filter((h) => h.group?.kind === kind);
+      if (pile.length === 1) out.push(t);
+      else {
+        folded.push(...pile);
+        const text = fillTemplate(GROUP_LINES[kind], { n: String(pile.length), who: namesText(pile.map((h) => h.group!.who)) });
+        out.push({ id: nextId(), text, tone: t.tone, source: t.source, importance: "you", group: t.group });
+      }
+    }
+  }
+  return { held: out, folded };
+}
+
 /** Sort a publish's toasts into what is shown now, what waits for the window, and what is for the ticker. */
 export function gateToasts(gate: NoticeGate, fresh: readonly UiToast[], env: GateEnv): Gated {
   const out: UiToast[] = [];
@@ -100,6 +133,9 @@ export function gateToasts(gate: NoticeGate, fresh: readonly UiToast[], env: Gat
 
   const open = gate.lastAt === null || env.now - gate.lastAt >= TOAST_WINDOW_MS;
   if (!open || held.length === 0) return { gate: held === gate.held ? gate : { lastAt: gate.lastAt, held }, toasts: out, wire, seq };
+  const pile = held;
+  const c = coalesce(pile, () => 1_000_000 + seq++);
+  held = c.held;
   if (held.length === 1) {
     out.push(held[0]!);
   } else {
@@ -112,8 +148,9 @@ export function gateToasts(gate: NoticeGate, fresh: readonly UiToast[], env: Gat
       importance: "you",
       batch: held.map((t) => ({ text: t.text, tone: t.tone, source: t.source })),
     });
-    for (const t of held) wire.push({ id: t.id, day: env.day, text: t.text, tone: t.tone, source: t.source });
   }
+  // Everything a line stands for is on the ticker to read: the pile behind a summary, and the names behind a folded group.
+  if (held.length > 1 || c.folded.length > 0) for (const t of pile) wire.push({ id: t.id, day: env.day, text: t.text, tone: t.tone, source: t.source });
   return { gate: { lastAt: env.now, held: [] }, toasts: out, wire, seq };
 }
 
