@@ -1,8 +1,10 @@
 // Frontier 95's Bird App (FLT-69): a bird in the tray (it flaps when a post of yours goes viral or Comms is drowning)
 // and "Bird Reader 1.0", a newsreader crossed with a buddy list: the timeline as a message list over a preview pane,
 // the posters as a contact list with a Posting Policy for whoever is selected, and the Comms desk as a queue.
-import { useState } from "react";
-import { AuraSpark, BirdMeter } from "../kit";
+// FLT-92: the rival labs' posts are in the same list, each From marked with its lab's colour, an Organization header in
+// the preview and the quoted post as "> wrote:"; a View bar switches Everyone / Us / Them.
+import { useState, type CSSProperties } from "react";
+import { AuraSpark, BIRD_SIDES, BirdMeter, onSide, type BirdSide } from "../kit";
 import { useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import type { BirdPostVM, BirdPosterVM } from "../../ui/hud/types";
@@ -26,9 +28,11 @@ export function BirdApp({ birdapp, layout, actions }: SlotPropsMap["BirdApp"]) {
   const [tab, setTab] = useState<Tab>("timeline");
   const [picked, setPicked] = useState<string | null>(null);
   const [buddy, setBuddy] = useState<number | null>(null);
+  const [side, setSide] = useState<BirdSide>("all");
   const { open, comms } = birdapp;
-  const posts = [...birdapp.live, ...birdapp.log];
-  const sel = posts.find((p) => p.id === picked) ?? birdapp.spotlight ?? posts[0] ?? null;
+  const rivals = birdapp.rivals?.on ? birdapp.rivals : null;
+  const posts = [...birdapp.live, ...birdapp.log].filter(onSide(rivals ? side : "all"));
+  const sel = posts.find((p) => p.id === picked) ?? (birdapp.spotlight && onSide(side)(birdapp.spotlight) ? birdapp.spotlight : null) ?? posts[0] ?? null;
   const who = birdapp.posters.find((p) => p.id === buddy) ?? birdapp.posters[0] ?? null;
   const drowning = comms.desk === "drowning";
   const loud = drowning || !!birdapp.spotlight;
@@ -109,6 +113,17 @@ export function BirdApp({ birdapp, layout, actions }: SlotPropsMap["BirdApp"]) {
           <div className="f95-page f95-birdpage">
             {tab === "timeline" && (
               <>
+                {rivals && (
+                  <div className="f95-bird-view" role="radiogroup" aria-label={t("birdapp.filter")}>
+                    <span aria-hidden>View:</span>
+                    {BIRD_SIDES.map((id) => (
+                      <button key={id} type="button" role="radio" aria-checked={side === id} className={`f95-btn ${side === id ? "on" : ""}`} onClick={() => setSide(id)}>
+                        {t(`birdapp.filter.${id}`)}
+                      </button>
+                    ))}
+                    {side !== "us" && rivals.quiet.length > 0 && <small className="f95-bird-away">{rivals.quiet.join(" · ")}</small>}
+                  </div>
+                )}
                 <div className="f95-listwrap inset f95-bird-list" role="listbox" aria-label="Timeline">
                   <div className="f95-lhead" aria-hidden>
                     <span />
@@ -124,13 +139,16 @@ export function BirdApp({ birdapp, layout, actions }: SlotPropsMap["BirdApp"]) {
                       role="option"
                       aria-selected={sel?.id === p.id}
                       tabIndex={0}
-                      className={`f95-lrow outcome-${p.outcome} ${sel?.id === p.id ? "you" : ""} ${p.ratioing ? "ratioing" : ""}`}
+                      className={`f95-lrow outcome-${p.outcome} ${sel?.id === p.id ? "you" : ""} ${p.ratioing ? "ratioing" : ""} ${p.lab ? "them" : ""}`}
                       onClick={() => setPicked(p.id)}
                       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setPicked(p.id)}
                     >
                       <span className="mark">{MARK[p.outcome]}</span>
-                      <span>{p.replyTo ? `Re: ${p.text}` : p.text}</span>
-                      <span>{p.handle}</span>
+                      <span>{p.replyTo ? `Re: ${p.text}` : p.quote ? `Fwd: ${p.text}` : p.text}</span>
+                      <span>
+                        {p.lab && <i className="f95-labsq" style={{ "--bird-lab": p.lab.color } as CSSProperties} title={p.lab.name} aria-label={p.lab.name} />}
+                        {p.handle}
+                      </span>
                       <span className="num">{p.likesText}</span>
                       <span className="num replies">{p.repliesText}</span>
                     </div>
@@ -225,7 +243,10 @@ export function BirdApp({ birdapp, layout, actions }: SlotPropsMap["BirdApp"]) {
               </div>
             )}
           </div>
-          <div className="f95-status">{birdapp.tally}</div>
+          <div className="f95-status">
+            {birdapp.tally}
+            {rivals && ` · ${rivals.tally}`}
+          </div>
         </Win>
       )}
     </>
@@ -241,6 +262,11 @@ function Preview({ post }: { post: BirdPostVM }) {
         <span>
           <b>From:</b> {post.name} &lt;{post.handle}&gt;
         </span>
+        {post.lab && (
+          <span>
+            <b>Organization:</b> <i className="f95-labsq" style={{ "--bird-lab": post.lab.color } as CSSProperties} aria-hidden /> {post.lab.name}
+          </span>
+        )}
         <span>
           <b>Date:</b> {post.time}
           {post.momentText && ` (${post.momentText})`}
@@ -250,8 +276,20 @@ function Preview({ post }: { post: BirdPostVM }) {
             <b>In-Reply-To:</b> {post.replyTo}
           </span>
         )}
+        {post.beatText && (
+          <span>
+            <b>Keywords:</b> {post.beatText}
+          </span>
+        )}
       </div>
       <p className="f95-bird-text">{post.text}</p>
+      {post.quote && (
+        <blockquote className="f95-bird-quote">
+          {post.quote.handle} wrote:
+          <br />
+          &gt; {post.quote.text}
+        </blockquote>
+      )}
       <div className="f95-bird-counts">
         <span>{post.likesText} likes</span>
         <span>{post.repostsText} reposts</span>
@@ -260,6 +298,7 @@ function Preview({ post }: { post: BirdPostVM }) {
         {post.outcome === "live" && post.ratioing && <b className="f95-bird-outcome tone-joke">{t("birdapp.ratio")}</b>}
         {post.reviewed && <small>{t("birdapp.reviewed")}</small>}
         {post.handledText && <small>{post.handledText}</small>}
+        {post.quote && post.tone === "bad" && <b className="f95-bird-outcome tone-bad">{post.outcomeText}</b>}
       </div>
       {post.reply && <blockquote>&gt; {post.reply}</blockquote>}
       {post.viral && <Sticker kind="burst">{t("birdapp.viral")}!</Sticker>}

@@ -240,10 +240,13 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // at 2680 and gets emergency round 1 (a card, signed for 10% of the lab) where the free bailout used to be. None of the
 // three wins inside 4000 ticks. The goals' toasts take an id each, so with them on, the ids after the first "Objective
 // met" (tick 2200 on seed 1) move too, and so does whatever is picked by id (a faction thread on seed 1 at 2380).
+// FLT-92: the rival labs post on the Bird App too (their own stream, from Level 3), so 1600 on moves on every seed:
+// their posts, the ticker lines and toasts, and the dunks and ratios. With the rivals off (`enableBirdRivals` a no-op)
+// all three seeds reproduce FLT-86's values (af539c00… / 69cae759… / 5277ca60…), digit for digit.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "72d15c6c", 800: "789162ba", 1600: "af539c00", 2400: "6282fd68", 3200: "49f901d8", 4000: "1c4c9ce7" },
-  2: { 200: "97c3299b", 800: "b0c37cae", 1600: "69cae759", 2400: "3b91b0f7", 3200: "308dd08d", 4000: "1a3e778b" },
-  3: { 200: "cd605dda", 800: "23d1e9c1", 1600: "5277ca60", 2400: "e63341a4", 3200: "07d2978e", 4000: "b6aa2381" },
+  1: { 200: "72d15c6c", 800: "789162ba", 1600: "826a496b", 2400: "78097402", 3200: "71650e05", 4000: "33dc9fa3" },
+  2: { 200: "97c3299b", 800: "b0c37cae", 1600: "7c2d7fb4", 2400: "9498b5b3", 3200: "3010939a", 4000: "a47a8345" },
+  3: { 200: "cd605dda", 800: "23d1e9c1", 1600: "c072107a", 2400: "8ec7913b", 3200: "ebc9dac7", 4000: "84819774" },
 };
 
 describe("golden runs", () => {

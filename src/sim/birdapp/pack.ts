@@ -39,6 +39,23 @@ const Rules = Schema.Struct({
   cancel: Schema.Struct({ discourse: N, controversyDiscourse: N, leave: N, breakDays: N, contained: N, defection: N }),
   /** "Please log off": focus lost a day, and after `quitAfter` days a big account may quit. */
   logoff: Schema.Struct({ focus: N, quitAfter: N, quitChance: N }),
+  /** FLT-92 the rival labs' posts. */
+  rivals: Schema.Struct({
+    /** Rival posts a day, every lab together, and the chance a voice posts on a quiet day (times its `rate`). */
+    maxPosts: N, idle: N,
+    /** The chance a lab answers a beat about you, and how many labs at most; the chance another lab subtweets a release; the chance a teaser account counts down. */
+    react: N, reactors: N, subtweet: N, teaser: N,
+    /** A lab that falls `dropPlaces` on the Arena goes quiet for `silenceDays`; one that climbs `climbPlaces` brags. */
+    silenceDays: N, dropPlaces: N, climbPlaces: N,
+    /** How a rival post lands: banger and ratioed odds (the rest flop), and a loud beat's banger odds (a release, #1). */
+    outcomes: Schema.Struct({ banger: N, ratioed: N, loud: N }),
+    /** One of your posters dunks on a lab's slide: the chance someone does, the chance it lands, and the Aura a landed dunk adds on top of the banger's. */
+    dunk: Schema.Struct({ chance: N, banger: N, aura: N }),
+    /** A rival CEO quote-posts one of your ratioed posts: the chance it was them, and the Hype it costs. */
+    ratio: Schema.Struct({ chance: N, hype: N }),
+    /** How many landed rival posts the log keeps. */
+    log: N,
+  }),
 });
 export type BirdRules = typeof Rules.Type;
 export const loadBirdRules = (input: unknown): BirdRules => Schema.decodeUnknownSync(Schema.Struct({ rules: Schema.Struct({ birdapp: Rules }) }))(input).rules.birdapp;

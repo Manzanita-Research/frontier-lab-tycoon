@@ -5523,6 +5523,45 @@
       font-variant-numeric: tabular-nums;
     }
   }
+  /* FLT-92: Everyone / Us / Them, and the rival labs' colours */
+  .f95-bird-view {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    margin: 0 0 4px;
+    font-size: 14px;
+    .f95-btn {
+      min-width: 0;
+      padding: 1px 8px;
+      font-size: 14px;
+      &.on {
+        box-shadow: var(--inset, inset 1px 1px #808080, inset -1px -1px #fff);
+        font-weight: bold;
+      }
+    }
+  }
+  .f95-bird-away {
+    flex-basis: 100%;
+    color: var(--flt-color-textDim);
+    font-style: italic;
+    font-size: 13px;
+  }
+  .f95-labsq {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    margin-right: 4px;
+    vertical-align: baseline;
+    background: var(--bird-lab, #808080);
+    box-shadow: inset 0 0 0 1px #000;
+  }
+  .f95-bird-preview .f95-bird-quote {
+    margin: 2px 0 4px;
+    padding-left: 6px;
+    border-left: 2px solid #808080;
+    color: #606060;
+  }
   .f95-bird-empty {
     margin: 6px;
     font-size: 15px;

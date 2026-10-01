@@ -49,10 +49,12 @@ describe("midgame scenario", () => {
     // through day 54. On day 55 the campus dips below $0 and its script signs round 1 for 10% of the lab where it used to
     // get the free bailout, so revenue is 90% of what it was from then on. The opening also waits for nobody to be out
     // of the Sandbox (FLT-59): with the run moved, an agent was over the fence at the old opening tick, 3 ticks earlier.
+    // FLT-92: the rival labs post on the Bird App for all 480 days (their posts, ticker lines, dunks and ratios). With the
+    // rivals off the World hashes to 6b07586a / 931e5673 again.
     expect({
       untagged: digest({ ...s, toasts: s.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) }),
       full: digest(s),
-    }).toEqual({ untagged: "6b07586a", full: "931e5673" });
+    }).toEqual({ untagged: "4d6d37dc", full: "067dd01c" });
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);

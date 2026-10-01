@@ -183,6 +183,9 @@
     "birdapp.outcome.ratioed": "Mobbed",
     "birdapp.outcome.cancelled": "Flushed out",
     "birdapp.outcome.live": "In song",
-    "stats.net": "net, all told"
+    "stats.net": "net, all told",
+    "birdapp.filter.all": "All birds",
+    "birdapp.filter.us": "Native species",
+    "birdapp.filter.them": "Invasive species"
   }
 }
