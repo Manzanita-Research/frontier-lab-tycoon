@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 import { applyNow, tick } from "../../sim/tick";
 import { createTestCampus as createInitialState } from "../../sim/testkit";
 import { TICKS_PER_DAY } from "../../sim/constants";
-import { createWatch } from "./watch";
+import { escapeLab } from "../../sim/escape/demo";
+import { catchAgent, startEscape } from "../../sim/escape/driver";
+import { answer } from "../../sim/testkit";
+import { createWatch, type FxEvent } from "./watch";
 
 describe("watching the sim for juice", () => {
   it("records a baseline on the first poll and is quiet while nothing changes", () => {
@@ -75,5 +78,27 @@ describe("watching the sim for juice", () => {
     watch.poll(w);
     watch.poll(w);
     expect(JSON.stringify(w)).toBe(before);
+  });
+
+  it("reports the Sandbox Escape's beats: the bolt, the grab and the drop (FLT-59)", () => {
+    const w = createInitialState(3);
+    escapeLab(w);
+    const watch = createWatch();
+    watch.poll(w);
+    const [r] = startEscape(w, { pace: true });
+    const seen: FxEvent[] = [];
+    for (let i = 0; i < 400 && r!.machine.value !== "running"; i++) {
+      tick(w, answer(w));
+      seen.push(...watch.poll(w));
+    }
+    expect(seen.filter((e) => e.type === "escape")).toEqual([expect.objectContaining({ beat: "bolt", walker: r!.walker })]);
+    catchAgent(w, r!.walker);
+    expect(watch.poll(w)).toEqual([expect.objectContaining({ type: "escape", beat: "grab" })]);
+    const after: FxEvent[] = [];
+    for (let i = 0; i < 40; i++) {
+      tick(w, answer(w));
+      after.push(...watch.poll(w));
+    }
+    expect(after.filter((e) => e.type === "escape")).toEqual([expect.objectContaining({ beat: "drop", walker: r!.walker })]);
   });
 });

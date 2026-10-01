@@ -25,6 +25,7 @@ import { CIRCUS_MOMENTS, isCircusMoment, stageCircus } from "../sim/circus/demo"
 import { DRAMA_MOMENTS, isDramaMoment, stageDrama } from "../sim/defection/demo";
 import { AUDIT_MOMENTS, isAuditMoment, stageAudit } from "../sim/auditors/demo";
 import { isSenateMoment, SENATE_MOMENTS, stageSenate } from "../sim/capture/demo";
+import { ESCAPE_MOMENTS, isEscapeMoment, stageEscape } from "../sim/escape/demo";
 import { walkersThinking } from "../sim/mind";
 import { makeSnapshot, NO_SELECTION, type Snapshot, type UiSelection, type UiToast } from "./hud";
 import { continueTutorial } from "../sim/tutorial";
@@ -184,10 +185,10 @@ export class SimHandle {
 /** Every `?moment=` a staging link knows (a test loads each one, FLT-83). `stream:<mishap>` and `poach-offer:<rival>` also take an argument. */
 export const STAGED_MOMENTS: readonly string[] = [
   "jem-opening", "jem-confirm", ...ENDING_MOMENTS, ...MOMENTS, ...OPS_MOMENTS, ...LEAP_MOMENTS, ...COLLUSION_MOMENTS, ...PAPER_MOMENTS,
-  ...CIRCUS_MOMENTS, ...DRAMA_MOMENTS, ...AUDIT_MOMENTS, ...SENATE_MOMENTS, ...FACTION_MOMENTS, ...BIRD_DEMO_MOMENTS,
+  ...CIRCUS_MOMENTS, ...DRAMA_MOMENTS, ...AUDIT_MOMENTS, ...SENATE_MOMENTS, ...FACTION_MOMENTS, ...BIRD_DEMO_MOMENTS, ...ESCAPE_MOMENTS,
 ];
 
-type SimDebug = Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk" | "daily" | "endings">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean; collusion?: boolean; hearing?: boolean; yacht?: boolean; defection?: boolean; poaching?: boolean; auditors?: boolean; capture?: boolean; promises?: boolean; factions?: boolean; birdapp?: boolean; water?: boolean };
+type SimDebug = Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk" | "daily" | "endings">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean; collusion?: boolean; hearing?: boolean; yacht?: boolean; defection?: boolean; poaching?: boolean; auditors?: boolean; capture?: boolean; promises?: boolean; factions?: boolean; birdapp?: boolean; water?: boolean; escape?: boolean };
 
 /**
  * A living campus, warped forward and dressed up per the `?seed=&warp=&agents=&discourse=` debug knobs.
@@ -215,6 +216,7 @@ function stage(dbg: SimDebug): GameState {
   if (dbg.promises === false) sim.flags.promisesOff = 1;
   if (dbg.factions === false) sim.flags.factionsOff = 1;
   if (dbg.birdapp === false) sim.flags.birdappOff = 1;
+  if (dbg.escape === false) sim.flags.escapeOff = 1;
   if (dbg.water === false) sim.flags["arcOff:water-escalation"] = 1;
   const leap = parseLeapMoment(dbg.moment);
   if (dbg.warp > 0 || dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0 || dbg.moment || dbg.disaster) { continueTutorial(sim, true); delete sim.progression; }
@@ -233,6 +235,7 @@ function stage(dbg: SimDebug): GameState {
   else if (isSenateMoment(dbg.moment)) stageSenate(sim, dbg.moment);
   else if (isFactionMoment(dbg.moment)) stageFactions(sim, dbg.moment);
   else if (isBirdMoment(dbg.moment)) stageBird(sim, dbg.moment);
+  else if (isEscapeMoment(dbg.moment)) stageEscape(sim, dbg.moment);
   if (dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0) {
     const rng = createRng(sim.rngState);
     if (dbg.researchers > 0) seedWalkers(sim, "researcher", dbg.researchers, rng);

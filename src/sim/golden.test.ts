@@ -222,10 +222,13 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // 1600 on moves on every seed (its posts, Aura, headlines and toasts). With `flags.birdappOff` set, and the Comms Rep put
 // back on the Level 5 card (with the Level 3 card's two new items left out), all three seeds reproduce the values above
 // at every checkpoint, digit for digit: the Bird App is the whole difference.
+// FLT-59 adds the Sandbox Escape to Scrutiny: the Level 5 card names the Sandbox, the Honeypot and the escape, and the
+// pack wakes last (96 days after the rung). The card is in the World, so 2400 on moves on every seed. With the Scrutiny
+// row put back as it was (no Sandbox, no Honeypot, no escape) all three seeds reproduce the values above, digit for digit.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "c403ae9a", 800: "c9a777bd", 1600: "ec51030b", 2400: "50b6ca63", 3200: "d5e72be3", 4000: "733b0186" },
-  2: { 200: "766f3295", 800: "aec1b296", 1600: "9e386036", 2400: "1c00c918", 3200: "84a6b377", 4000: "54fbf395" },
-  3: { 200: "b43cb9be", 800: "510d3b99", 1600: "c01adf53", 2400: "680003ae", 3200: "89614b0c", 4000: "9ce0bccd" },
+  1: { 200: "c403ae9a", 800: "c9a777bd", 1600: "ec51030b", 2400: "2d81c26e", 3200: "4f92ddea", 4000: "26c2f935" },
+  2: { 200: "766f3295", 800: "aec1b296", 1600: "9e386036", 2400: "364d5e7d", 3200: "84be280a", 4000: "860e57b6" },
+  3: { 200: "b43cb9be", 800: "510d3b99", 1600: "c01adf53", 2400: "6a1f7259", 3200: "0909e8f5", 4000: "17bf17c8" },
 };
 
 describe("golden runs", () => {

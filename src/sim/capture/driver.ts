@@ -15,7 +15,7 @@ import { arcMachine } from "../machines/arc";
 import { initialStored, step } from "../machines/run";
 import { fillTemplate, formatMoney } from "../format";
 import { addNews, addToast } from "../news";
-import { cardAllowed, openEventOf } from "../events";
+import { cardAllowed, openEventOf, screenHeld } from "../events";
 import { createRng, type Rng } from "../rng";
 import { runVerb, STATS } from "../verbs";
 import { chartStats, type Beat } from "../circus/chart";
@@ -91,7 +91,7 @@ export function draftClause(s: GameState, clause: string, on: boolean): boolean 
 
 /** Put a card on screen now, if nothing else has it. The invitation waits for the card budget (FLT-54); the exposé does not. */
 function openCard(s: GameState, id: string) {
-  if (openEventOf(s) || (id === DRAFT_CARD && !cardAllowed(s, id, "normal"))) return;
+  if (openEventOf(s) || screenHeld(s) || (id === DRAFT_CARD && !cardAllowed(s, id, "normal"))) return;
   s.arcs[id] = step(arcMachine, armCard(id), { type: "DAY", day: s.day, ready: true, slotFree: true, pace: 1 }).stored;
 }
 

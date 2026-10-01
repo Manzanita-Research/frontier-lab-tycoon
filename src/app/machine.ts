@@ -108,6 +108,8 @@ export const AppContext = Schema.Struct({
   overlays: opaque<readonly string[]>(),
   /** When the last snag toast went up (FLT-84, Clock milliseconds), so there is at most one a minute. */
   snagAt: Schema.NullOr(Schema.Number),
+  /** The speed an agent's run for the fence (FLT-59) dropped the game from to 1x, restored when the chase is over. */
+  chaseSpeed: opaque<Speed | null>(),
 });
 export type AppContext = typeof AppContext.Type;
 
@@ -158,6 +160,16 @@ function interrupted(before: AppContext, after: AppContext): boolean {
   const coach = after.snap.coach;
   if (coach && coach.id !== before.snap.coach?.id) return coach.target !== `build:${after.tool}` && coach.target !== "map:suggest";
   return false;
+}
+
+/**
+ * An agent running for the fence (FLT-59) drops the game to 1x so the player can catch it, and the speed comes back when
+ * the chase is over. Touching the speed or the pause button in between is the player's call: the old speed is forgotten.
+ */
+export function chaseSpeedOf(c: Pick<AppContext, "speed" | "chaseSpeed">, chase: boolean): Pick<AppContext, "speed" | "chaseSpeed"> {
+  if (chase && c.chaseSpeed === null && c.speed > 1) return { speed: 1 as Speed, chaseSpeed: c.speed };
+  if (!chase && c.chaseSpeed !== null) return { speed: c.chaseSpeed, chaseSpeed: null };
+  return { speed: c.speed, chaseSpeed: c.chaseSpeed };
 }
 
 /** The same words twice are one toast (the newer replaces the older); the HUD shows only the newest, so keep just a few. */
@@ -294,6 +306,7 @@ export const appMachine = setupEffect({
     zone: null,
     overlays: [],
     snagAt: input.snagAt ?? null,
+    chaseSpeed: null,
   }),
   invoke: { src: "frameLoop" },
   initial: "playing",
@@ -350,6 +363,7 @@ export const appMachine = setupEffect({
       const wire = gated.wire.length > 0 ? [...context.wire, ...gated.wire].slice(-WIRE_MAX) : context.wire;
       const next: AppContext = {
         ...addToasts(context, fresh),
+        ...(report.snap ? chaseSpeedOf(context, !!report.snap.escape?.chase) : {}),
         gate: gated.gate,
         toastSeq: gated.seq,
         event: report.event,
@@ -381,11 +395,11 @@ export const appMachine = setupEffect({
       if (saw) queue.push({ type: "coachSaw", what: "speed" });
       // The card budget (FLT-54) is counted in game days; the sim hears the speed so a card stays ~20 real seconds from the last.
       if (event.speed > 0 && event.speed !== context.speed) queue.push({ type: "setPace", speed: event.speed });
-      const next = { ...context, speed: event.speed, queue };
+      const next = { ...context, speed: event.speed, chaseSpeed: null, queue };
       return { context: next, target: phaseFor(next) };
     },
     TOGGLE_PAUSE: ({ context }) => {
-      const next = { ...context, speed: (context.speed === 0 ? 1 : 0) as Speed };
+      const next = { ...context, speed: (context.speed === 0 ? 1 : 0) as Speed, chaseSpeed: null };
       return { context: next, target: phaseFor(next) };
     },
     SET_TOOL: ({ context, event }) => {
@@ -495,7 +509,7 @@ export const appMachine = setupEffect({
 const lifeOf = (t: UiToast) => (t.snag ? SNAG_TOAST_MS : t.batch ? BATCH_TOAST_MS : TOAST_MS);
 
 /** The app's side of a new lab: nothing queued, nothing selected, running at 1x. */
-const freshLab = (context: AppContext): AppContext => ({ ...context, queue: [], acc: 0, toasts: [], held: null, gate: newGate(), wire: [], headlines: [], outcomeDismissed: false, speed: 1, tool: null, hover: null, selected: null, follow: false, highlight: null, zone: null, overlays: [] });
+const freshLab = (context: AppContext): AppContext => ({ ...context, queue: [], acc: 0, toasts: [], held: null, gate: newGate(), wire: [], headlines: [], outcomeDismissed: false, speed: 1, tool: null, hover: null, selected: null, follow: false, highlight: null, zone: null, overlays: [], chaseSpeed: null });
 
 /** The selection as the sim handle wants it. */
 const uiOf = (c: AppContext): UiSelection => ({ selected: c.selected, follow: c.follow, highlight: c.highlight });

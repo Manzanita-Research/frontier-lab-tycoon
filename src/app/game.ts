@@ -157,6 +157,11 @@ export const atoms = {
   autopilotPlaced: pick((c) => c.snap.endings?.placed ?? 0),
   /** The endings' presentation cues (the Look), for the scene. */
   endingLook: pick((c) => c.snap.endings?.look ?? null),
+  /**
+   * The agents running for the fence (`12r`) or in the hand (`12c`) right now (FLT-59), comma-separated: a string, so it
+   * only changes when they do.
+   */
+  runners: pick((c) => c.snap.escape?.runners.filter((r) => r.phase === "running" || r.phase === "carried").map((r) => `${r.walker}${r.phase[0]}`).join(",") ?? ""),
 };
 
 /** The app's context right now, for handlers and frame callbacks that must not subscribe. Null until it has started. */

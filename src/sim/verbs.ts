@@ -37,6 +37,7 @@ import { callMeeting } from "./meetings";
 import { congaLine } from "./conga";
 import { resign } from "./walkers";
 import type { Building, GameState, Importance, NoticeSource, StaffJob, Tone } from "./types";
+import { startEscape } from "./escape/driver";
 import { defs } from "./defs";
 import { postNow } from "./birdapp/driver";
 import { BIRD_OUTCOMES, type BirdOutcome } from "../content/birdapp";
@@ -308,7 +309,7 @@ const clamp100 = (n: number) => Math.max(0, Math.min(100, n));
 const ownerOf = (env: VerbEnv) => env.run?.id ?? env.owner ?? "";
 
 /** The systems a verb's toast can say it is from (FLT-51), besides a mod's own `mod:<id>`. */
-const SOURCES: readonly NoticeSource[] = ["leapfrog", "ops", "staff", "economy", "coach", "event", "disaster", "papers", "collusion", "hearing", "politics", "defection", "auditors", "factions", "race", "training", "crowd", "build", "endings"];
+const SOURCES: readonly NoticeSource[] = ["leapfrog", "ops", "staff", "economy", "coach", "event", "disaster", "papers", "collusion", "hearing", "politics", "defection", "auditors", "factions", "race", "training", "crowd", "build", "endings", "escape"];
 const isSource = (v: Json | undefined): v is NoticeSource => typeof v === "string" && ((SOURCES as readonly string[]).includes(v) || /^mod:[\w.-]+$/.test(v));
 /** The base packs that call verbs, and whose notices they are. */
 const PACK_SOURCE: Record<string, NoticeSource> = { collusion: "collusion", hearing: "hearing", yacht: "politics", auditors: "auditors", defection: "defection", poaching: "defection", capture: "politics", promises: "politics" };
@@ -733,6 +734,11 @@ export const VERBS: Record<string, VerbDef> = {
       delete d[p.kind as string];
       if (Object.keys(d).length === 0) delete env.state.disguises;
     },
+  },
+  "spawn.escape": {
+    doc: "The most drifted agent (with `count` above 1, a jailbreak: that many, each for a different fence) starts thinking about the fence; with `now`, it skips the brooding and goes straight to pacing. Needs the Sandbox Escape pack awake.",
+    spec: { count: "number?", now: "boolean?" },
+    run: (env, p) => void startEscape(env.state, { count: (p.count as number | undefined) ?? 1, pace: p.now === true }),
   },
   "faction.delta": {
     doc: "Nudge a faction's meter (−100 to 100) now; its mood catches up at midnight. Nothing while the factions are off.",
