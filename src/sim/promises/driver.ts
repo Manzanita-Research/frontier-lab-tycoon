@@ -8,7 +8,7 @@ import { arcMachine } from "../machines/arc";
 import { initialStored, step } from "../machines/run";
 import { fillTemplate, formatMoney } from "../format";
 import { addNews, addToast, type ToastTag } from "../news";
-import { cardAllowed, openEventOf } from "../events";
+import { cardAllowed, openEventOf, screenHeld } from "../events";
 import { createRng, type Rng } from "../rng";
 import { runVerb, STATS } from "../verbs";
 import { chartStats, type Beat } from "../circus/chart";
@@ -91,7 +91,7 @@ export function castVotes(s: GameState, rng: Rng, m: MotionLike, lobbied: readon
  * Memo, goes first; the tracker in the build bar says the same thing, so a skipped card loses nothing).
  */
 function openCard(s: GameState, id: string) {
-  if (openEventOf(s) || !cardAllowed(s, id, "chain")) return;
+  if (openEventOf(s) || screenHeld(s) || !cardAllowed(s, id, "chain")) return;
   s.arcs[id] = step(arcMachine, armCard(id), { type: "DAY", day: s.day, ready: true, slotFree: true, pace: 1 }).stored;
 }
 

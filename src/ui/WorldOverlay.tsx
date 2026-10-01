@@ -539,7 +539,8 @@ function EndingLabels() {
 }
 
 /**
- * An agent running for the fence says what to do about it, and one in the hand has the hand over it (FLT-59). The
+ * An agent running for the fence says what to do about it (at its feet: its thought bubble has the space over its head),
+ * and one in the hand has the hand over it (FLT-59). The
  * grab itself is in Pick.tsx; the lift is in Walkers.tsx.
  */
 function GrabTags() {
@@ -558,7 +559,7 @@ function GrabTags() {
               const w = sim.world.walkers.find((o) => o.id === id);
               if (!w) return false;
               const a = sim.alpha;
-              out.set(w.px + (w.x - w.px) * a - HALF, held ? 2.75 : 2.3, w.pz + (w.z - w.pz) * a - HALF);
+              out.set(w.px + (w.x - w.px) * a - HALF, held ? 2.75 : 0, w.pz + (w.z - w.pz) * a - HALF);
               return true;
             }}
           >

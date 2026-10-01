@@ -555,7 +555,7 @@ button {
 }
 /* An agent running for the fence (FLT-59): loud, and it jitters, because it is in a hurry. */
 .grabit {
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, 12px);
   padding: 3px 9px;
   border: 2.5px solid var(--ink);
   border-radius: var(--flt-radius-button);

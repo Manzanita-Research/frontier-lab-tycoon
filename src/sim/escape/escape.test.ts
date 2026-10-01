@@ -16,6 +16,9 @@ import type { Runner } from "./state";
 import escapeJson from "../../../mods/base-escape/mod.json";
 import { createMidgameScenario } from "../scenarios/midgame";
 import { SCRUTINY_WAKES } from "../../content/progression";
+import { defs } from "../defs";
+import { askFlag } from "../disasters/names";
+import { cardAllowed, dailyEvents, openEventOf } from "../events";
 
 const R = ESCAPE.rules;
 
@@ -169,6 +172,52 @@ describe("the run", () => {
     until(s, () => s.escape!.runners.length === 0, R.honeypot.trappedTicks + 2);
     expect(s.escape!.trapped).toBe(1);
     expect(s.escape!.escaped).toBe(0);
+  });
+});
+
+describe("the screen", () => {
+  /** A lab mid-chase, and the same lab with nobody out, with every card asking for the screen today. */
+  function asking() {
+    const s = lab();
+    noGuards(s);
+    // Past the first-cards gate (day 40, a model earning).
+    s.day = 60;
+    s.flags.firstRevenue = 0;
+    const [r] = startEscape(s, { pace: true });
+    until(s, () => phase(r!) === "running", 200);
+    const calm = structuredClone(s);
+    disableEscape(calm);
+    for (const w of [s, calm]) {
+      delete w.pacer;
+      for (const def of defs().events) w.flags[askFlag(def.id)] = 0;
+    }
+    return { s, calm, r: r! };
+  }
+
+  it("holds every card while a runner is out, so nothing pauses the chase", () => {
+    const { s, calm } = asking();
+    expect(cardAllowed(structuredClone(calm), defs().events[0]!.id)).toBe(true);
+    dailyEvents(calm);
+    expect(openEventOf(calm)).not.toBeNull();
+    expect(cardAllowed(s, defs().events[0]!.id)).toBe(false);
+    dailyEvents(s);
+    expect(openEventOf(s)).toBeNull();
+  });
+
+  it("plays the whole chase through without a card, and lets the card through once it is over", () => {
+    const { s, r } = asking();
+    let interrupted = 0;
+    for (let i = 0; i < 4000 && chasing(s); i++) {
+      if (openEventOf(s)) interrupted++;
+      tick(s, answer(s));
+    }
+    expect(interrupted).toBe(0);
+    expect(phase(r)).not.toBe("running");
+    for (let i = 0; i < 10 * TICKS_PER_DAY && !openEventOf(s); i++) {
+      for (const def of defs().events) s.flags[askFlag(def.id)] = 0;
+      tick(s, []);
+    }
+    expect(openEventOf(s)).not.toBeNull();
   });
 });
 
