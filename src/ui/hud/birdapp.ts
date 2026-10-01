@@ -4,11 +4,11 @@
 import type { Snapshot } from "../../app/hud";
 import { clockLabel, hourAt } from "../../render/fx/clock";
 import { TICKS_PER_DAY } from "../../sim/constants";
-import type { BirdPostView, BirdPosterView } from "../../sim/birdapp/view";
+import type { BirdPostView, BirdPosterView, RivalPostView } from "../../sim/birdapp/view";
 import type { BirdAppVM, BirdLeverVM, BirdPostVM, BirdPosterVM } from "./types";
 
-/** How many landed posts the log shows. */
-const LOG = 12;
+/** How many landed posts the log shows (yours and, FLT-92, the rival labs'). */
+const LOG = 16;
 const OUTCOME_TEXT = { flop: "Flopped", banger: "Banger", controversy: "Discourse", ratioed: "Ratioed", cancelled: "Cancelled" } as const;
 const OUTCOME_TONE = { flop: "neutral", banger: "good", controversy: "bad", ratioed: "joke", cancelled: "bad" } as const;
 const MOMENT_TEXT = { launch: "Launch day", rivalDrop: "Rival drop", water: "Water discourse", hearing: "Hearing week", night: "3am posting" } as const;
@@ -24,21 +24,64 @@ export function countText(n: number): string {
 const pct = (x: number) => `${Math.round(x * 100)}%`;
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 
+/** FLT-92: the tag on a rival post (and on a dunk of yours). */
+const BEAT_TEXT: Record<RivalPostView["beat"], string> = {
+  idle: "", teaser: "Teaser", release: "Release", top: "#1 on the Arena", climb: "Climbing the Arena", drop: "Slid on the Arena", back: "So back",
+  subtweet: "Subtweet", launch: "About your launch", leak: "About your leak", cancel: "About the cancel", escape: "About the escape",
+  hearing: "About the hearing", raise: "About your raise", ratio: "Quote-post", dunk: "", reply: "", drama: "",
+};
+
 /** How far along a post is, 0 when it goes up to 1 at the midnight it lands. */
-function progress(p: BirdPostView, tick: number): number {
+function progress(p: Pick<BirdPostView, "tick" | "settled">, tick: number): number {
   if (p.settled) return 1;
   const lands = (Math.floor(p.tick / TICKS_PER_DAY) + 1) * TICKS_PER_DAY;
   return Math.max(0, Math.min(1, (tick - p.tick) / Math.max(1, lands - p.tick)));
 }
 
-export function birdPost(p: BirdPostView, tick: number): BirdPostVM {
+/** The numbers so far: they climb toward where the post lands, along a curve that depends on how. */
+function climb(p: Pick<BirdPostView, "tick" | "settled" | "outcome" | "likes" | "reposts" | "replies">, tick: number) {
   const f = progress(p, tick);
   const loud = p.outcome === "ratioed" || p.outcome === "controversy" || p.outcome === "cancelled";
   const likeCurve = p.outcome === "banger" ? f ** 2.2 : p.outcome === "flop" ? 1 - (1 - f) ** 3 : f ** 0.8;
   const replyCurve = loud ? Math.sqrt(f) : f;
-  const likes = Math.round(p.likes * likeCurve);
-  const reposts = Math.round(p.reposts * likeCurve);
-  const replies = Math.round(p.replies * replyCurve);
+  return { f, likes: Math.round(p.likes * likeCurve), reposts: Math.round(p.reposts * likeCurve), replies: Math.round(p.replies * replyCurve) };
+}
+
+/** FLT-92: a rival lab's post, the same card as yours with the lab's colour, the quote and the beat's tag. */
+export function birdRivalPost(p: RivalPostView, tick: number): BirdPostVM {
+  const { f, likes, reposts, replies } = climb(p, tick);
+  const ratio = p.ratioHype > 0;
+  return {
+    id: `r${p.id}`,
+    name: p.name,
+    handle: `@${p.handle}`,
+    glyph: p.glyph,
+    archetype: `rival-${p.role}`,
+    text: p.text,
+    time: clockLabel(hourAt(p.tick)),
+    likes, reposts, replies,
+    likesText: countText(likes),
+    repostsText: countText(reposts),
+    repliesText: countText(replies),
+    outcome: p.settled ? p.outcome : "live",
+    outcomeText: ratio ? `Ratioed ${p.quote?.handle ? `@${p.quote.handle}` : "you"} · −${p.ratioHype} Hype` : p.settled ? OUTCOME_TEXT[p.outcome] : "",
+    tone: ratio ? "bad" : p.settled ? OUTCOME_TONE[p.outcome] : "neutral",
+    viral: p.outcome === "banger" && (p.settled || f > 0.6),
+    ratioing: replies > likes && replies > 2,
+    reply: replies > 0 ? p.reply : "",
+    reviewed: false,
+    handledText: "",
+    replyTo: null,
+    momentText: "",
+    side: "them",
+    lab: { id: p.lab, name: p.labName, color: p.color },
+    quote: p.quote ? { handle: `@${p.quote.handle}`, text: p.quote.text } : null,
+    beatText: BEAT_TEXT[p.beat],
+  };
+}
+
+export function birdPost(p: BirdPostView, tick: number, labName?: (id: string) => string): BirdPostVM {
+  const { f, likes, reposts, replies } = climb(p, tick);
   const outcome = p.settled ? p.outcome : "live";
   return {
     id: String(p.id),
@@ -62,6 +105,10 @@ export function birdPost(p: BirdPostView, tick: number): BirdPostVM {
     handledText: p.handled === "contained" ? "Comms got to it" : p.handled === "stuck" ? "It stuck" : "",
     replyTo: p.replyTo ? `@${p.replyTo}` : null,
     momentText: p.moment ? MOMENT_TEXT[p.moment] : "",
+    side: "us",
+    lab: null,
+    quote: null,
+    beatText: p.dunk ? `Dunk on ${labName?.(p.dunk) ?? p.dunk}` : "",
   };
 }
 
@@ -97,9 +144,19 @@ export function birdAppOf(snap: Snapshot, earned: boolean, open: boolean): BirdA
   const enabled = !!v?.enabled && earned;
   if (!v || !enabled) return OFF;
   const tick = v.tick;
-  const live = v.posts.filter((p) => !p.settled).reverse().map((p) => birdPost(p, tick));
+  // FLT-92: the rival labs' posts on the same timeline, newest first (a quote-post is dated just after what it quotes).
+  const rv = v.rivals;
+  const rivals = rv?.on ? rv.posts : [];
+  const labName = (id: string) => rivals.find((p) => p.lab === id)?.labName ?? rv?.quiet.find((q) => q.lab === id)?.name ?? id;
+  const merged = <A extends { tick: number; id: number }, B extends { tick: number; id: number }>(a: A[], b: B[], ma: (x: A) => BirdPostVM, mb: (x: B) => BirdPostVM) =>
+    [...a.map((x) => ({ tick: x.tick, id: x.id, vm: () => ma(x) })), ...b.map((x) => ({ tick: x.tick, id: -x.id, vm: () => mb(x) }))]
+      .sort((x, y) => y.tick - x.tick || y.id - x.id);
+  const ours = (p: BirdPostView) => birdPost(p, tick, labName);
+  const theirs = (p: RivalPostView) => birdRivalPost(p, tick);
+  const live = merged(v.posts.filter((p) => !p.settled), rivals.filter((p) => !p.settled), ours, theirs).map((x) => x.vm());
   const landed = v.posts.filter((p) => p.settled).reverse();
-  const log = landed.slice(0, LOG).map((p) => birdPost(p, tick));
+  const log = merged(landed, rivals.filter((p) => p.settled), ours, theirs).slice(0, LOG).map((x) => x.vm());
+  const next = [v.next, rv?.on ? rv.next : null].filter((n) => n !== null && n !== undefined).sort((a, b) => a.ticks - b.ticks)[0] ?? null;
   const fresh = landed.find((p) => (p.outcome === "banger" || p.outcome === "cancelled") && v.day - (Math.floor(p.tick / TICKS_PER_DAY) + 1) <= 1);
   const weight = v.comms.queue.reduce((n, f) => n + (f.kind === "cancelled" ? 2 : 1), 0);
   const aura = Math.round(v.aura);
@@ -114,7 +171,7 @@ export function birdAppOf(snap: Snapshot, earned: boolean, open: boolean): BirdA
     auraHistory: v.history.map((x) => Math.round(x)),
     moments: v.moments.map((m) => MOMENT_TEXT[m]),
     live,
-    typing: v.next && v.next.ticks <= 3 ? `@${v.next.handle} is typing…` : null,
+    typing: next && next.ticks <= 3 ? `@${next.handle} is typing…` : null,
     log,
     posters: v.posters.map(birdPoster),
     postersText: `${v.posters.length} of ${plural(v.posterCount, "researcher")}`,
@@ -131,8 +188,22 @@ export function birdAppOf(snap: Snapshot, earned: boolean, open: boolean): BirdA
       load: v.comms.drownAt > 0 ? Math.min(1, weight / v.comms.drownAt) : 0,
     },
     tally: `${plural(t.posts, "post")} · ${plural(t.bangers, "banger")} · ${plural(t.cancels, "cancel")}`,
-    spotlight: fresh ? birdPost(fresh, tick) : null,
+    spotlight: fresh ? ours(fresh) : null,
+    rivals: rv?.on
+      ? {
+          on: true,
+          quiet: rv.quiet.map((q) => `${q.name} is taking a few days offline${q.until - v.day > 0 ? ` (back in ${plural(q.until - v.day, "day")})` : ""}`),
+          tally: `${plural(rv.tally.posts, "rival post")} · ${plural(rv.tally.dunks, "dunk")} · ${plural(rv.tally.ratios, "ratio")}`,
+          labs: rivalLabs(rivals),
+        }
+      : { on: false, quiet: [], tally: "", labs: [] },
   };
+}
+
+function rivalLabs(posts: RivalPostView[]) {
+  const seen = new Map<string, { id: string; name: string; color: string }>();
+  for (const p of posts) if (!seen.has(p.lab)) seen.set(p.lab, { id: p.lab, name: p.labName, color: p.color });
+  return [...seen.values()];
 }
 
 const OFF: BirdAppVM = {

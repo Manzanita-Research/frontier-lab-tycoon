@@ -3,6 +3,10 @@
 // controversies move), a `post` (a line one archetype says, or `any` of them, maybe only at a moment) or an `event`
 // (what someone thinks, replies or headlines when a post lands). mods/base-birdapp is the base game's; a Daily Drama
 // pack adds posts for the day's news with one `add`, or has the timeline react with the `birdapp.post` verb.
+// FLT-92 adds the rival labs' side, `birdapp.rivals`: a `voice` (one of a lab's invented accounts: its CEO, its "we're so
+// back" researcher, its launch teaser, its safety lead) and a `rival` line (what a voice says on a beat: a release of its
+// own, an Arena swing, your launch, your leak, a cancel, an escape, a hearing, a raise). A pack adds rival posts the same
+// way, with one `add`, or has a lab post today with the `birdapp.rival` verb.
 // The engine side is src/sim/birdapp; the numbers are in that pack's `rules.birdapp`.
 import { Schema } from "effect";
 import pack from "../../mods/base-birdapp/mod.json";
@@ -66,7 +70,48 @@ export const BirdEventSchema = Schema.Struct({
   /** `{name}`, `{handle}`, `{lab}`, `{post}` and `{queue}` are filled in. */
   text: Text,
 });
-export const BirdRowSchema = Schema.Union([BirdArchetypeSchema, BirdPostSchema, BirdEventSchema]);
+
+/** FLT-92: who posts for a rival lab. The CEO vagueposts, the researcher is so back, the teaser account counts down, the safety lead threads. */
+export const RIVAL_ROLES = ["ceo", "back", "teaser", "safety"] as const;
+export type RivalRole = (typeof RIVAL_ROLES)[number];
+/**
+ * What a rival lab posts about. Its own: `idle` (a quiet day), `teaser` (a launch is close), `release`, `top` (#1 on the
+ * Arena), `climb`, `drop` (fell 3 places: one line, then silence), `back` (the silence ends), `subtweet` (another lab
+ * shipped). Yours: `launch`, `leak`, `cancel`, `escape`, `hearing`, `raise`, `ratio` (their CEO quote-posts one of your
+ * posts into a ratio). `dunk` is the other way round: one of *your* posters on a lab's slide. `reply` is the top reply
+ * under a rival post.
+ */
+export const RIVAL_BEATS = ["idle", "teaser", "release", "top", "climb", "drop", "back", "subtweet", "launch", "leak", "cancel", "escape", "hearing", "raise", "ratio", "dunk", "reply"] as const;
+export type RivalBeat = (typeof RIVAL_BEATS)[number];
+
+export const BirdVoiceSchema = Schema.Struct({
+  kind: Schema.Literal("voice"),
+  id: Id,
+  /** A rival id (`defs().rivals`), or `any`: a voice every lab without one of that role borrows, its handle after the lab's name. */
+  lab: Id,
+  role: Schema.Literals(RIVAL_ROLES),
+  name: Text,
+  /** Without the @. An `any` voice's is a suffix: Sirocco's `_ceo` posts as @sirocco_ceo. */
+  handle: Stem,
+  followers: Schema.Finite.check(Schema.isGreaterThanOrEqualTo(0)),
+  /** How often they post on a quiet day, against the rest (1 = as often). */
+  rate: Schema.optionalKey(Schema.Finite.check(Schema.isGreaterThanOrEqualTo(0))),
+  glyph: Schema.optionalKey(Text),
+});
+export const BirdRivalLineSchema = Schema.Struct({
+  kind: Schema.Literal("rival"),
+  id: Id,
+  on: Schema.Literals(RIVAL_BEATS),
+  /** Only this role says it (`us`: one of your posters, for a dunk). Any role, without one. */
+  role: Schema.optionalKey(Schema.Literals([...RIVAL_ROLES, "us"])),
+  /** Only this lab's voices say it. */
+  lab: Schema.optionalKey(Id),
+  /** `{you}` (your lab), `{me}` (the lab posting), `{rival}` (the lab it is about), `{model}`, `{handle}` and `{rank}` are filled in. */
+  text: Text,
+});
+export const BirdRowSchema = Schema.Union([BirdArchetypeSchema, BirdPostSchema, BirdEventSchema, BirdVoiceSchema, BirdRivalLineSchema]);
+export type BirdVoice = Schema.Schema.Type<typeof BirdVoiceSchema>;
+export type BirdRivalLine = Schema.Schema.Type<typeof BirdRivalLineSchema>;
 export type BirdArchetype = Schema.Schema.Type<typeof BirdArchetypeSchema>;
 export type BirdPost = Schema.Schema.Type<typeof BirdPostSchema>;
 export type BirdEvent = Schema.Schema.Type<typeof BirdEventSchema>;
@@ -84,6 +129,12 @@ export interface BirdContent {
   /** Posts by archetype id, the `any` ones in each. */
   postsFor: (archetype: string) => readonly BirdPost[];
   events: (beat: BirdBeat, channel: BirdEvent["channel"]) => readonly BirdEvent[];
+  /** FLT-92: every rival voice, in content order. */
+  voices: readonly BirdVoice[];
+  /** A lab's voices: its own, then an `any` voice for each role it has none of. */
+  voicesFor: (lab: string) => readonly BirdVoice[];
+  /** The rival lines for a beat that this role at this lab may say. */
+  rivalLines: (beat: RivalBeat, role: RivalRole | "us", lab: string) => readonly BirdRivalLine[];
 }
 const sorted = new WeakMap<readonly BirdRow[], BirdContent>();
 export function birdContent(rows: readonly BirdRow[]): BirdContent {
@@ -102,10 +153,33 @@ export function birdContent(rows: readonly BirdRow[]): BirdContent {
     if (pool) pool.push(e);
     else byBeat.set(key, [e]);
   }
+  const voices = rows.filter((r): r is BirdVoice => r.kind === "voice");
+  const lines = rows.filter((r): r is BirdRivalLine => r.kind === "rival");
+  const byLab = new Map<string, BirdVoice[]>();
+  const voicesFor = (lab: string) => {
+    let hit = byLab.get(lab);
+    if (!hit) {
+      const own = voices.filter((v) => v.lab === lab);
+      hit = [...own, ...voices.filter((v) => v.lab === "any" && !own.some((o) => o.role === v.role))];
+      byLab.set(lab, hit);
+    }
+    return hit;
+  };
+  const byLine = new Map<string, BirdRivalLine[]>();
+  const rivalLines = (beat: RivalBeat, role: RivalRole | "us", lab: string) => {
+    const key = `${beat}:${role}:${lab}`;
+    let hit = byLine.get(key);
+    if (!hit) {
+      hit = lines.filter((l) => l.on === beat && (l.role === undefined ? role !== "us" : l.role === role) && (l.lab === undefined || l.lab === lab));
+      byLine.set(key, hit);
+    }
+    return hit;
+  };
   hit = {
     archetypes, archetypeById: new Map(archetypes.map((a) => [a.id, a])), posts,
     postsFor: (id) => byArchetype.get(id) ?? any,
     events: (beat, channel) => byBeat.get(`${beat}:${channel}`) ?? [],
+    voices, voicesFor, rivalLines,
   };
   sorted.set(rows, hit);
   return hit;

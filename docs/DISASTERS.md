@@ -130,6 +130,7 @@ Verbs (run by the driver, in order, after each transition):
 | `people.pay` | each: number | Take `each` from the bank for everyone the beat is about (a matched offer). |
 | `people.cheer` | amount: number | Lift the energy and focus of everyone the beat is about. |
 | `birdapp.post` | text: string, spice?: number, archetype?: string, outcome?: string | Someone at the lab posts `text` on the Bird App within the hour (FLT-69): the beat's first person if they post, else one of `archetype`, else anyone who posts. It lands at midnight: `outcome` (flop, banger, controversy, ratioed, cancelled) decides how, or the odds for its `spice` (0 to 1, default 0.5) do. Nothing while the Bird App is asleep. |
+| `birdapp.rival` | lab?: string, text?: string, beat?: string, role?: string, outcome?: string | A rival lab posts on the Bird App within the hour (FLT-92): `lab` (a rival id; any lab that isn't sulking, without one) says `text`, or one of its lines for `beat` (idle, teaser, release, launch, leak, cancel, escape, hearing, raise, ...). `role` (ceo, back, teaser, safety) picks the voice, and `outcome` (flop, banger, ratioed) decides how it lands. Nothing while the Bird App or its rivals are off. |
 
 The `people.*` verbs act on the people a pack's driver names for the beat (`VerbEnv.people`, main person first); a disaster names nobody, so they do nothing there. A driver can also hand the beat template variables (`VerbEnv.vars`, e.g. FLT-26's `{defName}`, FLT-22's `{act}`).
 

@@ -11,6 +11,10 @@
 //   any --QUIT--> gone (final)
 //
 // The Comms desk: calm <-> busy <-> drowning (emits DROWNING on the way in, SURFACED on the way out).
+//
+// A rival lab's feed (FLT-92):
+//
+//   posting --DROP (fell on the Arena)--> quiet (emits SILENT) --DAY, day >= until--> posting (emits BACK)
 import { Schema } from "effect";
 import { setupEffect } from "@xstate/effect";
 import { remembered, step, type Stored } from "../machines/run";
@@ -157,3 +161,46 @@ export type CommsStored = Stored<typeof commsMachine>;
 export type CommsDesk = CommsStored["value"];
 /** One a day, and (queue, limit) are small numbers: remembered. */
 export const stepComms = remembered(commsMachine);
+
+export const labFeedMachine = setupEffect({
+  schemas: {
+    context: Schema.Struct({ until: Schema.Number }),
+    input: Schema.Struct({}),
+    events: {
+      /** It fell down the Arena: one last line, then nothing until `until`. */
+      DROP: Schema.Struct({ until: Schema.Number }),
+      /** A midnight while it is quiet. */
+      DAY: Schema.Struct({ day: Schema.Number }),
+    },
+    emitted: {
+      SILENT: Schema.Struct({ until: Schema.Number }),
+      /** The silence is over: someone is so back. */
+      BACK: Schema.Struct({}),
+    },
+  },
+}).createMachine({
+  context: { until: 0 },
+  initial: "posting",
+  states: {
+    posting: {
+      on: {
+        DROP: ({ event }, enq) => {
+          enq.emit({ type: "SILENT", until: event.until });
+          return { target: "quiet", context: { until: event.until } };
+        },
+      },
+    },
+    quiet: {
+      on: {
+        DAY: ({ context, event }, enq) => {
+          if (event.day < context.until) return undefined;
+          enq.emit({ type: "BACK" });
+          return { target: "posting", context: { until: 0 } };
+        },
+      },
+    },
+  },
+});
+export type LabFeedStored = Stored<typeof labFeedMachine>;
+/** A handful of labs, once a day: remembered. */
+export const stepLabFeed = remembered(labFeedMachine);

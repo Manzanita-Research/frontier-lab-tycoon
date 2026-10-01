@@ -19,6 +19,9 @@ import { SCRUTINY_WAKES } from "../../content/progression";
 import { defs } from "../defs";
 import { askFlag } from "../disasters/names";
 import { cardAllowed, dailyEvents, openEventOf } from "../events";
+import { dailyEconomy } from "../economy";
+import { createRng } from "../rng";
+import { bridgeCardId } from "../../content/bridgeRounds";
 
 const R = ESCAPE.rules;
 
@@ -218,6 +221,24 @@ describe("the screen", () => {
       tick(s, []);
     }
     expect(openEventOf(s)).not.toBeNull();
+  });
+
+  it("holds an emergency round's card too: it comes up at the first close after the chase (FLT-86)", () => {
+    const { s, calm } = asking();
+    for (const w of [s, calm]) w.cash = -1_000_000;
+    dailyEconomy(calm, createRng(1));
+    expect(openEventOf(calm)?.id).toBe(bridgeCardId(1));
+    dailyEconomy(s, createRng(1));
+    expect(s.economy.value).toBe("offered");
+    expect(openEventOf(s)).toBeNull();
+    for (let i = 0; i < 4000 && chasing(s); i++) {
+      expect(openEventOf(s)).toBeNull();
+      tick(s, []);
+    }
+    expect(chasing(s)).toBe(false);
+    s.cash = -1_000_000;
+    for (let i = 0; i < 2 * TICKS_PER_DAY && openEventOf(s)?.id !== bridgeCardId(1); i++) tick(s, answer(s));
+    expect(openEventOf(s)?.id).toBe(bridgeCardId(1));
   });
 });
 

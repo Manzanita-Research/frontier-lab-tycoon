@@ -2,6 +2,7 @@
   "stats.window": "{lab}",
   "stats.vibes": "Vibes",
   "stats.cash": "Cash",
+  "stats.net": "net",
   "stats.runway": "Runway",
   "stats.capability": "Capability",
   "stats.hype": "Hype",
@@ -256,5 +257,9 @@
   "birdapp.outcome.controversy": "Discourse",
   "birdapp.outcome.ratioed": "Ratioed",
   "birdapp.outcome.cancelled": "Cancelled",
-  "birdapp.outcome.live": "Live"
+  "birdapp.outcome.live": "Live",
+  "birdapp.filter": "Show",
+  "birdapp.filter.all": "Everyone",
+  "birdapp.filter.us": "Us",
+  "birdapp.filter.them": "Them"
 }

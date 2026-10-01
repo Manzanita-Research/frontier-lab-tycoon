@@ -36,6 +36,7 @@ import { BEATS_MOMENTS, isBeatsMoment, keepsLadder, stageBeats } from "../sim/be
 import type { GameDefinition } from "../mods/game-definition";
 import { enableEndings } from "../sim/endings/state";
 import { ENDING_MOMENTS, isEndingMoment, stageEndingMoment } from "../sim/endings/demo";
+import { isMoneyMoment, MONEY_MOMENTS, stageMoneyMoment } from "../sim/moneyDemo";
 import { applyLineage, perkById } from "../sim/endings/lineage";
 import type { PerkId } from "../sim/endings/pack";
 
@@ -187,10 +188,10 @@ export class SimHandle {
 export const STAGED_MOMENTS: readonly string[] = [
   "jem-opening", "jem-confirm", ...ENDING_MOMENTS, ...MOMENTS, ...OPS_MOMENTS, ...LEAP_MOMENTS, ...COLLUSION_MOMENTS, ...PAPER_MOMENTS,
   ...CIRCUS_MOMENTS, ...DRAMA_MOMENTS, ...AUDIT_MOMENTS, ...SENATE_MOMENTS, ...FACTION_MOMENTS, ...BIRD_DEMO_MOMENTS, ...ESCAPE_MOMENTS,
-  ...BEATS_MOMENTS,
+  ...BEATS_MOMENTS, ...MONEY_MOMENTS,
 ];
 
-type SimDebug = Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk" | "daily" | "endings">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean; collusion?: boolean; hearing?: boolean; yacht?: boolean; defection?: boolean; poaching?: boolean; auditors?: boolean; capture?: boolean; promises?: boolean; factions?: boolean; birdapp?: boolean; water?: boolean; escape?: boolean };
+type SimDebug = Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk" | "daily" | "endings">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean; collusion?: boolean; hearing?: boolean; yacht?: boolean; defection?: boolean; poaching?: boolean; auditors?: boolean; capture?: boolean; promises?: boolean; factions?: boolean; birdapp?: boolean; birdrivals?: boolean; water?: boolean; escape?: boolean };
 
 /**
  * A living campus, warped forward and dressed up per the `?seed=&warp=&agents=&discourse=` debug knobs.
@@ -203,8 +204,8 @@ export function createSimHandle(dbg: SimDebug, def: GameDefinition | null = null
 }
 
 function stage(dbg: SimDebug): GameState {
-  // An ending's scene (`?moment=memo|takeover|thanks|front-<id>`) starts from the curated mid-game campus.
-  const sim = isEndingMoment(dbg.moment) ? stageEndingMoment(dbg.moment) : createInitialState(dbg.seed);
+  // An ending's scene (`?moment=memo|takeover|thanks|front-<id>`) and FLT-86's money ones (`money-*`) start from the curated mid-game campus.
+  const sim = isEndingMoment(dbg.moment) ? stageEndingMoment(dbg.moment) : isMoneyMoment(dbg.moment) ? stageMoneyMoment(dbg.moment) : createInitialState(dbg.seed);
   if (dbg.endings !== false) enableEndings(sim, dbg.daily ?? null);
   if (dbg.leapfrog === false) sim.flags.leapfrogOff = 1;
   if (dbg.papers === false) sim.flags.papersOff = 1;
@@ -218,6 +219,7 @@ function stage(dbg: SimDebug): GameState {
   if (dbg.promises === false) sim.flags.promisesOff = 1;
   if (dbg.factions === false) sim.flags.factionsOff = 1;
   if (dbg.birdapp === false) sim.flags.birdappOff = 1;
+  if (dbg.birdrivals === false) sim.flags.birdrivalsOff = 1;
   if (dbg.escape === false) sim.flags.escapeOff = 1;
   if (dbg.water === false) sim.flags["arcOff:water-escalation"] = 1;
   const leap = parseLeapMoment(dbg.moment);

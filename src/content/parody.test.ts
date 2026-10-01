@@ -3,6 +3,8 @@
 // its narrower check on its own two packs; this one covers the rest, so a real product name fails wherever it lands.
 import { BIRDAPP, birdContent } from "./birdapp";
 import { makeHandle } from "../sim/birdapp/driver";
+import { labSlug } from "../sim/birdapp/rivals";
+import { RIVAL_DEFS } from "./rivals";
 import { createRng } from "../sim/rng";
 
 const REAL = [
@@ -17,6 +19,9 @@ const REAL_HANDLES = [
   "openai", "anthropic", "deepmind", "google", "microsoft", "nvidia", "meta_ai", "xai", "mistral", "huggingface", "chatgpt",
   "gpt4", "gpt5", "claude", "gemini", "llama", "grok", "copilot", "twitter", "tweet", "bluesky", "mastodon", "reddit",
   "sama", "altman", "elon", "musk", "zuck", "amodei", "hassabis", "karpathy", "lecun", "hinton", "sutskever", "bengio",
+  // FLT-92: the rival labs' voices are CEOs and researchers, so the real ones' names and handles too.
+  "dario", "demis", "satya", "nadella", "zuckerberg", "jensen", "suleyman", "ilya", "murati", "brockman", "pichai", "sundar",
+  "roon", "leike", "yudkowsky", "eliezer", "gwern", "kokotajlo", "aschenbrenner",
   "american", "chinese", "british", "french", "german", "russian", "indian", "canadian", "japanese", "korean",
 ];
 // The software shelf (FLT-70) parodies a 1997 software store, so it also must not name the real ones: the publishers,
@@ -84,5 +89,19 @@ describe("parody names only", () => {
     const quoted = BIRDAPP.flatMap((r) => ("text" in r ? r.text.match(/@\w+/g) ?? [] : []));
     const found = [...handles, ...quoted].flatMap((h) => realHandle(h).map((name) => `${h}: ${name}`));
     expect(found).toEqual([]);
+  });
+  it("the rival labs' voices, names and handles, are invented too (FLT-92)", () => {
+    const bird = birdContent(BIRDAPP);
+    expect(bird.voices.length).toBeGreaterThanOrEqual(12);
+    // An `any` voice's handle is the lab's name and a suffix: check what it actually becomes, for every lab.
+    const handles = RIVAL_DEFS.flatMap((d) => bird.voicesFor(d.id).map((v) => (v.lab === "any" ? `${labSlug(d.short)}${v.handle}` : v.handle)));
+    const names = bird.voices.map((v) => v.name);
+    const found = [
+      ...handles.flatMap((h) => realHandle(h).map((name) => `@${h}: ${name}`)),
+      // A name word by word ("Prudence Longform" squashed has an "elon" in it; neither word does).
+      ...names.flatMap((n) => [...n.split(/\s+/).flatMap(realHandle), ...realNames(n)].map((name) => `${n}: ${name}`)),
+    ];
+    expect(found).toEqual([]);
+    expect(new Set(handles).size).toBe(handles.length);
   });
 });

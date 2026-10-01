@@ -2,7 +2,7 @@ import { MapControls } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef, type ComponentRef } from "react";
 import * as THREE from "three";
-import { appNow, atoms, debugParams } from "../../app/game";
+import { appNow, atoms } from "../../app/game";
 import { useApp } from "../../app/hooks";
 import { HALF } from "../coords";
 import { PAN_LIMIT, shakeOffset } from "./cinema";
@@ -36,7 +36,7 @@ const _hit = new THREE.Vector3();
  * arrow keys, edge scrolling, double-click (or double-tap) to focus, Q/E quarter turns, the cinematic shots that
  * FxDirector asks for, and screen shake. Any input from the player cancels a shot in progress.
  */
-export function CameraRig({ baseZoom }: { baseZoom: number }) {
+export function CameraRig({ baseZoom, focus }: { baseZoom: number; focus: [number, number] }) {
   const controls = useRef<ComponentRef<typeof MapControls>>(null);
   const camera = useThree((s) => s.camera);
   const gl = useThree((s) => s.gl);
@@ -128,7 +128,7 @@ export function CameraRig({ baseZoom }: { baseZoom: number }) {
     const c = controls.current;
     if (!c) return;
     // Open on the campus rather than the middle of the lawn.
-    const [fx0, fz0] = debugParams.focus ?? [10.8, 16.2];
+    const [fx0, fz0] = focus;
     c.target.set(fx0 - HALF, 0, fz0 - HALF);
     c.object.position.copy(c.target).add(CAMERA_OFFSET);
     c.update();

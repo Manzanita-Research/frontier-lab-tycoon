@@ -1,8 +1,42 @@
 // The Bird App's small parts (FLT-69), for any skin: a poster's banger↔cancel meter, the Aura sparkline, a post's
 // likes/reposts/replies, and one post as a card. Semantic `bird-*` classes, styled by the base (base/birdapp.css) so a
-// skin that uses them looks right before it restyles them.
+// skin that uses them looks right before it restyles them. FLT-92: a rival lab's post wears its lab's colour
+// (`--bird-lab`), a chip with the lab's name, the beat's tag and the post it quotes; BirdFilter is the Everyone / Us /
+// Them switch (the skin keeps which is on).
+import type { CSSProperties } from "react";
 import type { BirdPostVM, BirdPosterVM } from "../../ui/hud/types";
 import { useT } from "../context";
+
+/** FLT-92: which posts the timeline shows. */
+export type BirdSide = "all" | "us" | "them";
+export const BIRD_SIDES: readonly BirdSide[] = ["all", "us", "them"];
+/** A post's side: a post from before FLT-92 (no `side`) is one of ours. */
+export const sideOf = (p: Pick<BirdPostVM, "side">): "us" | "them" => p.side ?? "us";
+export const onSide = (side: BirdSide) => (p: Pick<BirdPostVM, "side">) => side === "all" || sideOf(p) === side;
+
+/** Everyone / Us / Them, as a row of three toggles. Labels are `birdapp.filter.*`. */
+export function BirdFilter({ value, onChange, className = "" }: { value: BirdSide; onChange: (side: BirdSide) => void; className?: string }) {
+  const t = useT();
+  return (
+    <div className={`bird-filter ${className}`} role="radiogroup" aria-label={t("birdapp.filter")}>
+      {BIRD_SIDES.map((id) => (
+        <button key={id} type="button" role="radio" aria-checked={value === id} className={value === id ? "on" : ""} onClick={() => onChange(id)}>
+          {t(`birdapp.filter.${id}`)}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** The rival lab's chip: its colour and short name. */
+export function BirdLabChip({ lab, className = "" }: { lab: NonNullable<BirdPostVM["lab"]>; className?: string }) {
+  return (
+    <span className={`bird-lab ${className}`} style={{ "--bird-lab": lab.color } as CSSProperties} title={lab.name}>
+      <i aria-hidden />
+      {lab.name}
+    </span>
+  );
+}
 
 /** Odds as a bar that grows left (banger, green) and right (cancel, red) from the middle; 25% fills a side. */
 export function BirdMeter({ poster, className = "" }: { poster: Pick<BirdPosterVM, "banger" | "cancel" | "meterText" | "name">; className?: string }) {
@@ -56,23 +90,36 @@ function CountIcon({ d }: { d: string }) {
 export function BirdPostCard({ post, compact = false, className = "" }: { post: BirdPostVM; compact?: boolean; className?: string }) {
   const t = useT();
   return (
-    <article className={`bird-post ${className} outcome-${post.outcome} tone-${post.tone} ${post.viral ? "viral" : ""}`} aria-label={`${post.handle}: ${post.text}`}>
+    <article
+      className={`bird-post ${className} outcome-${post.outcome} tone-${post.tone} ${post.viral ? "viral" : ""} side-${sideOf(post)}`}
+      data-lab={post.lab?.id}
+      style={post.lab ? ({ "--bird-lab": post.lab.color } as CSSProperties) : undefined}
+      aria-label={`${post.lab ? `${post.lab.name}, ` : ""}${post.handle}: ${post.text}`}
+    >
       <span className="bird-av" aria-hidden>
         {post.glyph}
       </span>
       <div className="bird-post-body">
         <header>
+          {post.lab && <BirdLabChip lab={post.lab} />}
           <b>{post.name}</b> <span className="bird-handle">{post.handle}</span> <span className="bird-time">· {post.time}</span>
           {post.momentText && <em className="bird-moment">{post.momentText}</em>}
         </header>
         {post.replyTo && <small className="bird-replyto">↳ {post.replyTo}</small>}
         <p>{post.text}</p>
+        {post.quote && (
+          <blockquote className="bird-quote">
+            <b>{post.quote.handle}</b> {post.quote.text}
+          </blockquote>
+        )}
         <footer>
           <BirdCounts post={post} />
           {post.outcome !== "live" && <span className={`bird-outcome tone-${post.tone}`}>{t(`birdapp.outcome.${post.outcome}`)}</span>}
           {post.outcome === "live" && post.ratioing && <span className="bird-outcome tone-joke">{t("birdapp.ratio")}</span>}
           {post.reviewed && <small className="bird-reviewed">{t("birdapp.reviewed")}</small>}
           {post.handledText && <small className="bird-handled">{post.handledText}</small>}
+          {post.quote && post.tone === "bad" && <small className="bird-cost">{post.outcomeText}</small>}
+          {post.beatText && <em className="bird-beat">{post.beatText}</em>}
         </footer>
         {!compact && post.reply && <blockquote className="bird-reply">{post.reply}</blockquote>}
       </div>

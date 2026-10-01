@@ -5,6 +5,9 @@ import { describe, expect, it } from "vitest";
 import shots from "../../scripts/shots.scenes.json";
 import { defs } from "../sim/defs";
 import { TICKS_PER_DAY } from "../sim/tick";
+import { openEventOf } from "../sim/events";
+import { outcomeOf } from "../sim/goals";
+import { tick } from "../sim/tick";
 import { answer } from "../sim/testkit";
 import { fixtureInput } from "../ui/hud/fixtures";
 import { hudViewModel } from "../ui/hud/vm";
@@ -34,6 +37,44 @@ describe("every ?moment= staging link loads", () => {
     expect(bar).toBeDefined();
     const queuing = w.walkers.filter((x) => x.targetId === bar!.id && x.machine.value === "queuing").length;
     expect(queuing).toBeGreaterThanOrEqual(4);
+  });
+
+  describe("FLT-86's money links land on their beat", () => {
+    const staged = (moment: string) => createSimHandle({ seed: 1, warp: 0, agents: 0, discourse: 0, researchers: 0, moment }).world;
+    it("money-round1: the first round's card, with no rounds signed", () => {
+      const w = staged("money-round1");
+      expect(openEventOf(w)?.id).toBe("bridge1");
+      expect(w.economy.context).toMatchObject({ rounds: 0, stake: 100 });
+    });
+    it("money-lastround: the third and last round's card", () => {
+      const w = staged("money-lastround");
+      expect(openEventOf(w)?.id).toBe("bridge3");
+      expect(w.economy.context.rounds).toBe(2);
+    });
+    it("money-overdraft: the bank's card, and its 30 days counting", () => {
+      const w = staged("money-overdraft");
+      expect(openEventOf(w)?.id).toBe("overdraft");
+      expect(w.economy.value).toBe("overdrawn");
+      expect(w.economy.context.overdraftDay).toBe(w.day + 30);
+    });
+    it("money-bankrupt: the game is over", () => {
+      const w = staged("money-bankrupt");
+      expect(w.economy.value).toBe("bankrupt");
+      expect(outcomeOf(w)).not.toBe("playing");
+    });
+    it("money-stretch: two of three met tonight, and the Final stretch beat left to replay", () => {
+      const w = staged("money-stretch");
+      expect(w.goals.context.goals.filter((g) => g.met).map((g) => g.id).sort()).toEqual(["era", "release"]);
+      expect(w.disasters.cues.some((c) => c.type === "beat" && c.beat === "stretch")).toBe(true);
+    });
+    it("money-win: still playing on load with a toast up, and won at the next midnight", () => {
+      const w = staged("money-win");
+      expect(outcomeOf(w)).toBe("playing");
+      expect(w.toasts.some((t) => t.importance === "you")).toBe(true);
+      const day = w.day;
+      while (w.day === day) tick(w);
+      expect(outcomeOf(w)).toBe("won");
+    });
   });
 
   it("every moment a screenshot scene uses is one the game knows", () => {

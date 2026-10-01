@@ -452,6 +452,46 @@ describe("the Bird App (FLT-69)", () => {
   });
 });
 
+describe("the rival labs on the Bird App (FLT-92)", () => {
+  const rivals = hudViewModel(fixtureInput({ bird: "bird-rivals", birdOpen: true }));
+  const dunk = hudViewModel(fixtureInput({ bird: "bird-rivals-dunk", birdOpen: true }));
+  const ratio = hudViewModel(fixtureInput({ bird: "bird-rivals-ratio", birdOpen: true }));
+  const launch = hudViewModel(fixtureInput({ bird: "bird-rivals-launch", birdOpen: true }));
+  const all = (vm: typeof rivals) => [...vm.birdapp.live, ...vm.birdapp.log];
+
+  it("merges their posts into one timeline, newest first, each with a side and their lab's colour", () => {
+    assertPlain(rivals);
+    const b = rivals.birdapp;
+    expect(b.rivals?.on).toBe(true);
+    for (const list of [b.live, b.log]) {
+      expect(list.some((p) => p.side === "them")).toBe(true);
+      expect(list.some((p) => p.side === "us")).toBe(true);
+    }
+    for (const p of all(rivals)) {
+      if (p.side === "them") expect(p.lab).toMatchObject({ name: expect.any(String), color: expect.stringMatching(/^#/) });
+      else expect(p.lab ?? null).toBeNull();
+      expect(p.text).not.toMatch(/\{\w+\}|##/);
+    }
+    expect(new Set(all(rivals).map((p) => p.id)).size).toBe(all(rivals).length);
+    expect(b.rivals!.labs.length).toBeGreaterThan(0);
+    expect(b.rivals!.quiet.join(" ")).toMatch(/taking a few days offline/);
+    expect(b.rivals!.tally).toMatch(/rival posts? · 1 dunk · 1 ratio/);
+  });
+
+  it("dunks with +Aura in the spotlight, and the ratio quotes your post with its Hype cost", () => {
+    expect(dunk.birdapp.spotlight).toMatchObject({ side: "us", outcome: "banger", beatText: expect.stringMatching(/^Dunk on /) });
+    const q = all(ratio).find((p) => p.quote);
+    expect(q).toMatchObject({ side: "them", outcome: "banger", tone: "bad", outcomeText: expect.stringMatching(/^Ratioed @.+ · −2 Hype$/) });
+    expect(all(ratio).some((p) => p.side === "us" && p.outcome === "ratioed" && `@${q!.quote!.handle.replace(/^@/, "")}`.endsWith(p.handle.replace(/^@/, "")))).toBe(true);
+  });
+
+  it("answers your launch with a row of rival reactions", () => {
+    const them = launch.birdapp.live.filter((p) => p.side === "them");
+    expect(them.length).toBeGreaterThanOrEqual(4);
+    expect(new Set(them.map((p) => p.lab?.id)).size).toBeGreaterThanOrEqual(4);
+  });
+});
+
 describe("endings (FLT-11)", () => {
   it("shows the last front page only once it's out, as plain JSON, with the five stats and the run summary", () => {
     const vm = hudViewModel(fixtureInput({ ending: "front-regulated", selected: null }));

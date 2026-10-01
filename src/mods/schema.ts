@@ -1,7 +1,7 @@
 import { Effect, Schema, SchemaIssue, Struct } from "effect";
 import { BenchmarkSchema, MishapSchema } from "../content/leapfrog";
 import { FactionSchema } from "../content/factions";
-import { BirdArchetypeSchema, BirdEventSchema, BirdPostSchema, BirdRowSchema } from "../content/birdapp";
+import { BirdArchetypeSchema, BirdEventSchema, BirdPostSchema, BirdRivalLineSchema, BirdRowSchema, BirdVoiceSchema } from "../content/birdapp";
 import { HUD_PANELS, SYSTEM_IDS } from "../content/progression";
 
 const text = Schema.NonEmptyString;
@@ -115,7 +115,7 @@ export type DisasterData = typeof Disaster.Type;
 export const Ending = Schema.Struct({ id, title: text, text, when: Condition });
 export const Tip = Schema.Struct({ id, text, when: Schema.optionalKey(text) });
 export const NamePool = Schema.Struct({ id, values: strings });
-export const Goal = Schema.Struct({ id, metric: Schema.Literals(["runs", "revenue", "hype", "era", "arena"]), label: text, target: nonnegative, unit: Schema.Literals(["runs", "money", "points", "era", "rank"]) });
+export const Goal = Schema.Struct({ id, metric: Schema.Literals(["runs", "revenue", "hype", "era", "arena"]), label: text, target: nonnegative, unit: Schema.Literals(["runs", "money", "points", "era", "rank"]), hold: Schema.optionalKey(nonnegative), stretch: Schema.optionalKey(text) });
 
 function patch<const Fields extends Schema.Struct.Fields & { readonly id: Schema.Constraint }>(schema: Schema.Struct<Fields>) {
   return Schema.Struct({
@@ -133,7 +133,7 @@ const partialOf = <const F extends Schema.Struct.Fields>(fields: F) => Schema.St
 /** FLT-69: the Bird App's rows are archetypes, posts and reactions, told apart by `kind`. */
 const BirdPatch = Schema.Struct({
   add: Schema.optionalKey(Schema.Array(BirdRowSchema)),
-  override: Schema.optionalKey(Schema.Array(Schema.Union([partialOf(BirdArchetypeSchema.fields), partialOf(BirdPostSchema.fields), partialOf(BirdEventSchema.fields)]))),
+  override: Schema.optionalKey(Schema.Array(Schema.Union([partialOf(BirdArchetypeSchema.fields), partialOf(BirdPostSchema.fields), partialOf(BirdEventSchema.fields), partialOf(BirdVoiceSchema.fields), partialOf(BirdRivalLineSchema.fields)]))),
   remove: Schema.optionalKey(Schema.Array(id)),
 });
 // Adds need an id even where the original game uses a dictionary or anonymous lines.

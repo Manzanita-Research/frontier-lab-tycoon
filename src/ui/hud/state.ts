@@ -51,8 +51,9 @@ export const disastersOpenAtom = Atom.make(false);
 /** FLT-33: is the Factions panel open? Folded to one line until you ask (a `?moment=factions` link opens it). */
 export const factionsOpenAtom = Atom.make(debugParams.moment === "factions" || debugParams.moment === "counterprotest");
 
-/** FLT-69: is the Bird App open? Folded to a chip until you ask (a `?moment=bird|bird-banger|bird-cancel` link opens it). */
-export const birdAppOpenAtom = Atom.keepAlive(Atom.make(debugParams.moment === "bird" || debugParams.moment === "bird-banger" || debugParams.moment === "bird-cancel"));
+/** FLT-69: is the Bird App open? Folded to a chip until you ask (a `?moment=bird…` link opens it, FLT-92's rival ones too). */
+const BIRD_OPEN = ["bird", "bird-banger", "bird-cancel", "bird-rivals", "bird-rivals-dunk", "bird-rivals-ratio", "bird-rivals-launch"];
+export const birdAppOpenAtom = Atom.keepAlive(Atom.make(BIRD_OPEN.includes(debugParams.moment ?? "")));
 
 /** Is the Staff panel open? UI-only state, kept as an Effect atom like the rest of what React reads. */
 export const staffOpenAtom = Atom.make(false);

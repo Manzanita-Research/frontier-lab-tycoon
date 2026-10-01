@@ -186,6 +186,8 @@ const vms: Record<string, HudVM> = {
   bird: vmOf({ bird: "bird", birdOpen: true }),
   birdFolded: vmOf({ bird: "bird-banger" }),
   birdCancel: vmOf({ bird: "bird-cancel", birdOpen: true, width: 390, height: 844 }),
+  birdRivals: vmOf({ bird: "bird-rivals", birdOpen: true }),
+  birdRivalsPhone: vmOf({ bird: "bird-rivals-ratio", birdOpen: true, width: 390, height: 844 }),
   shipNow: vmOf({ leapfrog: true, event: "shipNow" }),
   stream: vmOf({ leapfrog: true, event: "stream:dog" }),
   auction: vmOf({ event: "computeAuction" }),
@@ -319,6 +321,11 @@ describe.each([BASE_ID, ...usable])("skin %s", (id) => {
     for (const c of vms.event!.event!.choices) expect(card).toContain(escape(c.label));
     const era = html(skin, <Modals vm={vms.era!} actions={actions} />);
     expect(era).toContain(escape(vms.era!.eraCard!.line));
+    // The win stands alone (FLT-86): a card that opened the same night waits for "Keep playing".
+    const won = vmOf({ event: "waterDiscourse", outcome: "won" });
+    const alone = html(skin, <Modals vm={won} actions={actions} />);
+    expect(alone).toContain(escape(won.outcome!.headline));
+    expect(alone).not.toContain(escape(vmOf({ event: "waterDiscourse" }).event!.title));
   });
 
   it("draws Papers once earned, and the paper and collusion moments (FLT-45, FLT-46)", async () => {

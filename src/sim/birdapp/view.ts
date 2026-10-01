@@ -1,6 +1,7 @@
 // What the HUD reads of the Bird App (FLT-69): plain JSON for the snapshot. Only posts that are up (their tick has
 // come) are in it, plus who is typing next; the view-model (ui/hud/birdapp.ts) lets the numbers tick up.
-import type { BirdMoment, BirdOutcome } from "../../content/birdapp";
+import type { BirdMoment, BirdOutcome, RivalBeat, RivalRole } from "../../content/birdapp";
+import type { RivalId } from "../../content/rivals";
 import { defs } from "../defs";
 import type { GameState } from "../types";
 import { posterOdds } from "./driver";
@@ -33,6 +34,68 @@ export interface BirdPostView {
   viral: boolean;
   handled: "contained" | "stuck" | null;
   replyTo: string | null;
+  /** FLT-92: a dunk on this rival lab (its id), or null. */
+  dunk: string | null;
+}
+
+/** FLT-92: one post by a rival lab's voice. */
+export interface RivalPostView {
+  id: number;
+  lab: string;
+  labName: string;
+  /** The lab's colour (content/rivals.ts). */
+  color: string;
+  role: RivalRole;
+  name: string;
+  handle: string;
+  glyph: string;
+  text: string;
+  tick: number;
+  beat: RivalBeat | "drama";
+  outcome: "flop" | "banger" | "ratioed";
+  settled: boolean;
+  likes: number;
+  reposts: number;
+  replies: number;
+  reply: string;
+  quote: { handle: string; text: string } | null;
+  /** The Hype a ratio cost you, or 0. */
+  ratioHype: number;
+}
+
+/** FLT-92: the rival labs' side. `on: false` with `?birdrivals=off` (and in saves from before it). */
+export interface BirdRivalsView {
+  on: boolean;
+  posts: RivalPostView[];
+  /** Labs sulking after an Arena slide: name, colour, and the day the silence ends. */
+  quiet: { lab: string; name: string; color: string; until: number }[];
+  next: { handle: string; name: string; ticks: number } | null;
+  tally: { posts: number; dunks: number; ratios: number };
+}
+
+function rivalsView(s: GameState): BirdRivalsView {
+  const r = s.birdapp?.rivals;
+  if (!r) return NO_RIVALS;
+  const d = defs();
+  const voices = new Map(d.bird.voices.map((v) => [v.id, v]));
+  const labOf = (id: string) => d.rivalById[id as RivalId];
+  const posts: RivalPostView[] = [];
+  let next: BirdRivalsView["next"] = null;
+  for (const p of r.posts) {
+    if (p.tick > s.tick) {
+      if (!next || p.tick - s.tick < next.ticks) next = { handle: p.handle, name: p.name, ticks: p.tick - s.tick };
+      continue;
+    }
+    posts.push({
+      id: p.id, lab: p.lab, labName: labOf(p.lab)?.short ?? p.lab, color: labOf(p.lab)?.color ?? "#888888", role: p.role, name: p.name, handle: p.handle,
+      glyph: voices.get(p.voice)?.glyph ?? "🐦", text: p.text, tick: p.tick, beat: p.beat, outcome: p.outcome, settled: p.settled, likes: p.likes,
+      reposts: p.reposts, replies: p.replies, reply: p.reply, quote: p.quote ? { handle: p.quote.handle, text: p.quote.text } : null, ratioHype: p.ratio?.hype ?? 0,
+    });
+  }
+  const quiet = Object.entries(r.labs)
+    .filter(([, f]) => f.value === "quiet")
+    .map(([lab, f]) => ({ lab, name: labOf(lab)?.short ?? lab, color: labOf(lab)?.color ?? "#888888", until: f.context.until }));
+  return { on: true, posts, quiet, next, tally: r.tally };
 }
 
 export interface BirdPosterView {
@@ -64,6 +127,7 @@ export function birdView(s: GameState) {
     id: p.id, by: p.by, name: p.name, handle: p.handle, archetype: p.archetype, glyph: glyph(p.archetype), text: p.text, tick: p.tick,
     spice: p.spice, moment: p.moment, reviewed: p.reviewed, outcome: p.outcome, settled: p.settled, likes: p.likes, reposts: p.reposts,
     replies: p.replies, reply: p.reply, viral: p.viral, handled: p.handled ?? null, replyTo: p.replyTo !== undefined ? (handleOf.get(p.replyTo) ?? null) : null,
+    dunk: p.dunk ?? null,
   });
   let next: { handle: string; name: string; ticks: number } | null = null;
   const up: BirdPostView[] = [];
@@ -110,13 +174,16 @@ export function birdView(s: GameState) {
       drownAt: R.comms.drown + b.capacity.size,
     },
     tally: b.tally,
+    rivals: rivalsView(s),
   };
 }
 export type BirdView = ReturnType<typeof birdView>;
 
+const NO_RIVALS: BirdRivalsView = { on: false, posts: [], quiet: [], next: null, tally: { posts: 0, dunks: 0, ratios: 0 } };
 const OFF = {
   enabled: false, day: 0, tick: 0, aura: 0, history: [] as number[], effects: { hype: 0, visitors: 1, applicants: 1 }, moments: [] as BirdMoment[],
   posts: [] as BirdPostView[], next: null as { handle: string; name: string; ticks: number } | null, posters: [] as BirdPosterView[], posterCount: 0,
   comms: { desk: "calm" as "calm" | "busy" | "drowning", queue: [] as { post: number; handle: string; kind: "controversy" | "cancelled"; daysLeft: number }[], used: 0, size: 0, drownAt: 0 },
   tally: { posts: 0, bangers: 0, controversies: 0, ratios: 0, cancels: 0, stuck: 0 },
+  rivals: NO_RIVALS,
 };

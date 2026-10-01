@@ -26,6 +26,7 @@ import { CoachSuggestion } from "./CoachSuggestion";
 import { PathGaps } from "./PathGaps";
 import { Placement } from "./Placement";
 import { Walkers } from "./Walkers";
+import { cameraStart } from "./cameraStart";
 
 // Postprocessing is a chunk of its own, fetched the first time photo mode opens and mounted only while it is on.
 const PhotoFX = lazy(() => import("./fx/PhotoFX"));
@@ -39,15 +40,8 @@ function PhotoLayer() {
   ) : null;
 }
 
-function initialZoom() {
-  const w = window.innerWidth;
-  const h = window.innerHeight;
-  // Roughly a building per eighth of the screen width at 1440x900, with the whole gate-to-hall campus still in view.
-  return debugParams.zoom ?? (w < 700 ? w / 16 : Math.min(w / 30, h / 17.5));
-}
-
 export function Scene() {
-  const zoom = useRef(initialZoom()).current;
+  const start = useRef(cameraStart(window.innerWidth, window.innerHeight, debugParams)).current;
   return (
     <Canvas
       orthographic
@@ -55,7 +49,7 @@ export function Scene() {
       dpr={[1, 1.75]}
       gl={{ antialias: true, alpha: true }}
       events={crtEvents}
-      camera={{ position: CAMERA_OFFSET.toArray(), zoom, near: -100, far: 200 }}
+      camera={{ position: CAMERA_OFFSET.toArray(), zoom: start.zoom, near: -100, far: 200 }}
     >
       <FxDirector />
       <SoundLayer />
@@ -77,7 +71,7 @@ export function Scene() {
       <OverlayProjector />
       <Placement />
       <CoachSuggestion />
-      <CameraRig baseZoom={zoom} />
+      <CameraRig baseZoom={start.base} focus={start.focus} />
       <PhotoLayer />
       <CrtLayer />
       <PressCamera />
