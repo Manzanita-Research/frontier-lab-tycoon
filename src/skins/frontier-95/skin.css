@@ -6190,9 +6190,22 @@
     }
     .f95-ptiles {
       width: 100%;
-      max-height: min(56vh, 520px);
+      /* As tall as the right column allows (the footer stays in view at 1440×900); a long list scrolls, on a 1995
+         scrollbar that shows even where the OS hides them, so the last row reads as "more", not cut off. */
+      max-height: max(240px, calc(100dvh - 310px));
       overflow-y: auto;
       padding: 2px 4px 6px;
+      &::-webkit-scrollbar {
+        width: 16px;
+      }
+      &::-webkit-scrollbar-track {
+        background: repeating-conic-gradient(var(--hl) 0 25%, var(--g) 0 50%) 0 0 / 2px 2px;
+      }
+      &::-webkit-scrollbar-thumb {
+        min-height: 24px;
+        background: var(--g);
+        box-shadow: var(--btn);
+      }
       section > ul {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -6221,7 +6234,7 @@
     height: 100%;
     display: grid;
     grid-template-columns: 36px minmax(0, 1fr) auto;
-    grid-template-areas: "i n p" "i d d" "i u u";
+    grid-template-areas: "i n p" "i d d" "i u b";
     grid-template-rows: auto 1fr auto;
     align-items: start;
     column-gap: 4px;
@@ -6252,8 +6265,14 @@
         font-weight: bold;
       }
     }
+    /* Two lines at most, so every tile keeps its upkeep in view; the tile's tooltip has the whole line. */
     .does {
       grid-area: d;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      overflow: hidden;
       font-size: 13px;
       line-height: 1.15;
       color: var(--flt-color-textDim);
@@ -6263,10 +6282,13 @@
       font-size: 12px;
       color: var(--flt-color-textDim);
     }
+    .up,
     .built {
-      position: absolute;
-      right: 6px;
-      bottom: 4px;
+      align-self: end;
+    }
+    .built {
+      grid-area: b;
+      justify-self: end;
       font-size: 12px;
       color: var(--navy);
     }

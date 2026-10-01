@@ -421,11 +421,13 @@
       "flt94-apps",
       "flt94-programs",
       "flt94-palette",
+      "flt94-palette-end",
       "flt94-leaderboard",
       "flt94-taskbar-phone",
       "flt94-tray-phone",
       "flt94-programs-phone",
       "flt94-palette-phone",
+      "flt94-palette-end-phone",
       "flt94-leaderboard-phone"
     ]
   },
@@ -6019,6 +6021,33 @@
         }
       ]
     },
+    "flt94-palette-end": {
+      "title": "FLT-94: the Facilities palette (Quick Launch's first icon), scrolled to the end",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "click": "[data-anchor=\"app:facilities\"]",
+          "optional": true
+        },
+        {
+          "wait": 600
+        },
+        {
+          "eval": "(f, w) => { for (const s of ['.f95-palette .f95-ptiles', '.f95-palette']) { const l = document.querySelector(s); if (l) l.scrollTop = 1e5; } }",
+          "optional": true
+        },
+        {
+          "wait": 300
+        }
+      ]
+    },
     "flt94-leaderboard": {
       "title": "FLT-94: the leaderboard applet: Task Mangler left on Benchmarks, then Quick Launch's trophy (main: Run… arena.exe)",
       "query": {
@@ -6161,6 +6190,35 @@
         },
         {
           "wait": 600
+        }
+      ]
+    },
+    "flt94-palette-end-phone": {
+      "title": "FLT-94: phone: the Facilities palette as a sheet, scrolled to the end",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "click": "[data-anchor=\"app:facilities\"]",
+          "optional": true
+        },
+        {
+          "wait": 600
+        },
+        {
+          "eval": "(f, w) => { for (const s of ['.f95-palette .f95-ptiles', '.f95-palette']) { const l = document.querySelector(s); if (l) l.scrollTop = 1e5; } }",
+          "optional": true
+        },
+        {
+          "wait": 300
         }
       ]
     },
