@@ -25,7 +25,7 @@ export const HELP_NUMBERS: readonly { name: string; line: string }[] = [
  * a building added by a mod with no line here falls back to its blurb.
  */
 export const HELP_BUILDINGS: Record<string, string> = {
-  path: "Path: how people get around. Everything you build has to touch one.",
+  path: "Path: how people get around. Everything you build has to touch one, and that path has to reach the gate. Buildings don't count as path: a red No path! flag means a door can't reach the gate. Click the flag to see the gap.",
   cluster: "Compute Cluster: makes the compute your Training Halls turn into models.",
   hall: "Training Hall: trains your models. Your researchers work here.",
   gateway: "API Gateway: sells your models to customers. It is where your income comes from.",
@@ -37,3 +37,11 @@ export const HELP_BUILDINGS: Record<string, string> = {
   gas: "Gas Turbine: power for a Datacenter.",
   solar: "Solar Farm: cleaner power for a Datacenter.",
 };
+
+/** FLT-85: the rule, said once, the first time a building has No path!. */
+export const NO_PATH_RULE = "Buildings don't count as path. Connect the door to the gate.";
+/** The flag's second line: how far the building is from the gate's paths. */
+export const noPathShort = (tiles: number) => (tiles === 0 ? "Boxed in" : `${tiles} tile${tiles === 1 ? "" : "s"} short`);
+/** Over the join tile while the path tool is in hand. */
+export const NO_PATH_HERE = "Path here";
+export const NO_PATH_HERE_MANY = "Path along here";
