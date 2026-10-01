@@ -5,6 +5,7 @@ import { isCrtMode, type CrtMode, type CrtTier, CRT_TIERS } from "../../render/c
 import { CrtGovernor } from "../../render/crt/governor";
 import { crtAtom, crtGovernor } from "../../render/crt/state";
 import { photoAtom } from "../../render/fx/photoState";
+import { glassSupport } from "../glass/support";
 import { loadedSkinAtom } from "../hud/state";
 
 const KEY = "flt.crt";
@@ -36,7 +37,8 @@ const pinned = pinnedMode !== null || pinnedTier !== null;
 
 function recompute(patch: { tier?: CrtTier; reduced?: boolean } = {}) {
   const skinDefault = registry.get(loadedSkinAtom).crt ?? "off";
-  const mode: CrtMode = registry.get(photoAtom) ? "off" : (pinnedMode ?? chosen ?? skinDefault);
+  // FLT-88: the CRT only exists where HTML-in-canvas lets it cover the UI too. Elsewhere it stays off: the plain DOM.
+  const mode: CrtMode = !glassSupport || registry.get(photoAtom) ? "off" : (pinnedMode ?? chosen ?? skinDefault);
   const prev = registry.get(crtAtom);
   const next = { ...prev, mode, choice: chosen, pinned, ...patch };
   // The first time the tube comes on, a governor starts watching the frame rate (the canvas feeds it; see CrtLayer).

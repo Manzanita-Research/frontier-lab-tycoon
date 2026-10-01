@@ -1,0 +1,24 @@
+/* The glass (FLT-88): a full-screen canvas whose children are the sky and the 2D UI. It takes no pointer itself;
+   the UI's own `pointer-events: auto` bits still hit (the canvas hit-tests its drawable children). */
+.crt-glass {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  pointer-events: none;
+  display: block;
+}
+
+/* The canvas lays its children out as static blocks, one under the other: each layer is a viewport-sized box, and
+   the first one gives its height back so both start at the top. `contain` makes each layer the containing block of
+   the UI's position: fixed boxes, so they land where they would on the page. */
+.glass-layer {
+  width: 100vw;
+  height: 100vh;
+  contain: strict;
+  pointer-events: none;
+}
+.glass-back {
+  margin-bottom: -100vh;
+}

@@ -23,8 +23,9 @@ export const crtAtom = Atom.keepAlive(Atom.make<CrtState>({ mode: "off", choice:
 /**
  * The bow of the glass the canvas is shown through right now (0 when the canvas is flat), for the code that turns a
  * pointer into a scene position or a scene position into a label's place. CrtFX writes it; see `warp` in looks.ts.
+ * `glass` (FLT-88): the tube is HTML-in-canvas, which bends the labels along with the world, so they stay flat.
  */
-export const crtView = { curve: 0 };
+export const crtView = { curve: 0, glass: false };
 
 /** A projected point (normalised device coordinates, as `Vector3.project` leaves it) moved to where the bowed glass shows it. */
 export function onGlass<V extends { x: number; y: number }>(v: V): V {
