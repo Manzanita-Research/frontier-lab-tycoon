@@ -1547,6 +1547,19 @@
     min-width: min(300px, calc(100vw - 20px));
     pointer-events: auto;
   }
+  /* FLT-84: the recovery toast, an error box over the bottom of the campus (not the paperclip's balloon) */
+  .f95-snag {
+    position: fixed;
+    z-index: 35;
+    bottom: calc(var(--taskbar) + 12px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(380px, calc(100vw - 20px));
+    pointer-events: auto;
+  }
+  .f95-snag .f95-msgbody p {
+    margin: 0;
+  }
   .f95-unlockitems {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -4767,6 +4780,9 @@
   .f95-drama-live {
     color: #c00000;
     font-weight: 700;
+  }
+  .f95-drama-small {
+    margin: 2px 0 6px;
   }
   .f95-drama-archive .f95-modlist {
     display: block;

@@ -1,7 +1,7 @@
 // Render-side juice state: plain mutable fields that useFrame callbacks read and the FxDirector writes.
 // It is not React state on purpose (nothing re-renders at 60 Hz) and it never feeds back into the sim.
 import { readDebugParams } from "../../debug";
-import { Cinema } from "./cinema";
+import { Cinema, type View } from "./cinema";
 import { START_HOUR } from "./clock";
 
 export const fx = {
@@ -29,3 +29,13 @@ export const cinema = new Cinema();
 
 /** Screen shake: small for placing, big for incidents. */
 export const shake = (strength: number) => cinema.shake(strength);
+
+/** The camera's view right now, for shots asked for from outside the Canvas. FxDirector keeps it current. */
+let viewNow: (() => View) | null = null;
+export const setViewSource = (source: (() => View) | null) => void (viewNow = source);
+
+/** Pan the camera onto a spot on the campus and leave it there, like a double-click (the No path! flag, FLT-85). */
+export function panTo(x: number, z: number): boolean {
+  if (!viewNow || fx.photo) return false;
+  return cinema.focus(viewNow(), { x, z, zoom: 1, hold: 0, back: false, rate: 4 });
+}

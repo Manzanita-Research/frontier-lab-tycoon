@@ -114,6 +114,11 @@
     "x.ink": "#111111"
   },
   "strings": {
+    "snag.title": "Whoopsie-daisy!",
+    "snag.text": "Oopsie! The disc skipped, but the robot caught it and kept going.",
+    "snag.copy": "Copy details for a grown-up",
+    "snag.copied": "Copied! Great job!",
+    "snag.ok": "Okay!",
     "run.title": "Go to",
     "run.prompt": "Type where you want to go! The disc takes you there.",
     "build.group.compute": "Big Machines",

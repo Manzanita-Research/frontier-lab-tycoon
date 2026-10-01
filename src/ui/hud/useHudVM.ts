@@ -21,6 +21,7 @@ import { newestOf, unreadOf, wantsOf, windowed } from "./tray";
 import { autoUp, nextClose, stepBudget } from "./windows";
 import { hudActions } from "./actions";
 import { modSession } from "../../app/mods";
+import { modsRevision } from "../../app/liveMods";
 import { dramaPath, dramaViewModel } from "../../drama/feed";
 import { dramaAtom } from "../../drama/state";
 import { playableFixture } from "./previewLadder";
@@ -209,7 +210,8 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
   const motion = useArenaMotion(snap.race.board, snap.race.rank);
   const leapfrog = useLeapfrogMotion(snap);
   const list = useMemo(() => skinList(), []);
-  // The session's mods are fixed at start (main.tsx loads `?mod=` before the game exists); only the window opens and shuts.
+  // `?mod=` loads before the game exists (main.tsx); a data-only mod can come or go mid-game too (FLT-78), and says so.
+  const modsRev = useAtomValue(modsRevision);
   const lookLabels = useMemo(() => Object.fromEntries(Object.entries(modSession().presentation?.looks ?? {}).flatMap(([target, look]) => (look.label ? [[target, look.label]] : []))), []);
   const mods = useMemo(() => {
     const m = modSession();
@@ -220,8 +222,8 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
       errors: [...m.errors],
       contentHash: m.run?.contentHash ?? null,
     };
-  }, [modsOpen]);
-  const drama = useMemo(() => dramaViewModel(dramaUi, modSession().mods, location.href, new Date()), [dramaUi]);
+  }, [modsOpen, modsRev]);
+  const drama = useMemo(() => dramaViewModel(dramaUi, modSession().mods, location.href, new Date()), [dramaUi, modsRev]);
   const savesUi = useAtomValue(savesAtom);
   const saves = useMemo((): SavesInput => {
     const { prompt, listing, ...rest } = savesUi;

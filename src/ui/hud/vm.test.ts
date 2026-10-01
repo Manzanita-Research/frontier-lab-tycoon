@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { BUILDINGS } from "../../content/buildings";
 import { formatMoney } from "../../sim/format";
-import { fixtureEnding, fixtureInput, fixtureWorld, FIXTURE_CHAT, FIXTURE_PAPER } from "./fixtures";
+import { fixtureEnding, fixtureInput, fixtureSaves, fixtureWorld, FIXTURE_CHAT, FIXTURE_PAPER } from "./fixtures";
 import { CALM_START_DAY } from "../../sim/disasters/driver";
 import { SKIN_API_VERSION } from "./types";
 import { hudViewModel, SHIPPED_DAYS, TICKER_ITEMS } from "./vm";
-import { agoText, modMismatch } from "./saves.vm";
+import { agoText, modMismatch, newestSave } from "./saves.vm";
 
 /** Every value in a view-model must survive JSON: that is what makes it a contract a skin can rely on. */
 function assertPlain(v: unknown, path = "vm") {
@@ -49,7 +49,7 @@ describe("hudViewModel", () => {
 
   it("lists the build palette with prices, hotkeys, affordability and the selected tool", () => {
     const kinds = vm.buildItems.map((b) => b.kind);
-    expect(kinds).toEqual(["path", "cluster", "hall", "gateway", "kombucha", "nap", "snack", "demo", "security", "bulldoze", "staff"]);
+    expect(kinds).toEqual(["path", "cluster", "hall", "gateway", "kombucha", "nap", "snack", "demo", "security", "sandbox", "honeypot", "bulldoze", "staff"]);
     const cluster = vm.buildItems.find((b) => b.kind === "cluster")!;
     expect(cluster).toMatchObject({ name: BUILDINGS.cluster.name, hotkey: 2, selected: true, price: BUILDINGS.cluster.price, priceText: formatMoney(BUILDINGS.cluster.price) });
     expect(vm.buildItems.filter((b) => b.selected)).toHaveLength(1);
@@ -206,6 +206,17 @@ describe("the spend check, the standing warnings and the release goal, as a skin
     expect(echoed.toasts).toEqual([]);
     // Other toasts are untouched.
     expect(hudViewModel({ ...input, toasts: [{ id: 6, text: "Something else", tone: "joke" }] }).toasts.map((t) => t.text)).toEqual(["Something else"]);
+  });
+});
+
+describe("the recovery toast (FLT-84)", () => {
+  it("marks a caught error's toast as a snag, and keeps the report itself out of the view-model", () => {
+    const vm = hudViewModel(fixtureInput({ snag: true }));
+    const snag = vm.toasts.find((t) => t.snag);
+    expect(snag).toEqual({ id: 3, text: "Frontier Lab Tycoon hit a snag and kept going.", tone: "bad", snag: true });
+    expect(JSON.stringify(vm)).not.toContain("snag report");
+    expect(vm.toasts.filter((t) => !t.snag).every((t) => !("snag" in t))).toBe(true);
+    assertPlain(vm.toasts);
   });
 });
 
@@ -517,11 +528,25 @@ describe("saves (FLT-65)", () => {
   });
 
   it("says Welcome back with the autosave, and nothing without one", () => {
-    expect(hudViewModel(fixtureInput({ saves: "welcome" })).saves.welcome).toMatchObject({ lab: "Gradient Descent Labs", date: "Y2 · Mar 5" });
+    expect(hudViewModel(fixtureInput({ saves: "welcome" })).saves.welcome).toMatchObject({ lab: "Gradient Descent Labs", date: "Y2 · Mar 5", slot: "auto", label: "Autosave" });
     const none = hudViewModel(fixtureInput());
     expect(none.saves.welcome).toBeNull();
     expect(none.saves.open).toBe(false);
     assertPlain(none.saves);
+  });
+
+  it("offers the newest save, not an older autosave (FLT-82: Continue lost the 25 days saved to a slot)", () => {
+    const shelf = fixtureSaves("window").listing;
+    const auto = shelf[0]!.meta!;
+    // The autosave is 3 hours old; slot 3 holds the same lab 25 days on, saved 20 minutes ago.
+    const later = { ...auto, day: auto.day + 25, savedAt: new Date(Date.parse(auto.savedAt) + 160 * 60_000).toISOString() };
+    const listing = [...shelf.slice(0, 3), { slot: "3" as const, meta: later }];
+    expect(newestSave(listing)).toEqual({ slot: "3", meta: later });
+    const vm = hudViewModel({ ...fixtureInput(), saves: { ...fixtureSaves("welcome"), listing, welcome: newestSave(listing) } });
+    expect(vm.saves.welcome).toMatchObject({ slot: "3", label: "Slot 3", date: "Y2 · Mar 30", ago: "20 minutes ago" });
+    // The autosave when it is the newest; nothing on an empty shelf.
+    expect(newestSave(shelf)).toEqual({ slot: "auto", meta: auto });
+    expect(newestSave(shelf.map((l) => ({ slot: l.slot, meta: null })))).toBeNull();
   });
 
   it("passes the mods question and private browsing through", () => {

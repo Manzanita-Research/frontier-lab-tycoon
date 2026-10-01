@@ -291,6 +291,12 @@ export interface ToastVM {
    * can list them.
    */
   batch?: { text: string; tone: ToneVM }[];
+  /**
+   * FLT-84: the game hit a bug, caught it and kept going. Say so in the skin's voice (strings `snag.text`, `snag.copy`)
+   * and offer `copySnag(id)`, which puts a bug report (the error, its stack, seed, tick, build, skin) on the clipboard.
+   * A skin that ignores this still shows `text`.
+   */
+  snag?: true;
 }
 
 export type HintId = "gateway" | "tap";
@@ -1525,6 +1531,8 @@ export interface ModInfoVM {
   hash: string;
   /** A Daily Drama pack (FLT-34): the Today's Drama window describes it. */
   drama?: boolean;
+  /** FLT-78: why Remove needs a fresh start (it reloads into a new lab), e.g. "Brings a look or sounds: needs a fresh start." Absent for a data-only mod, which Remove takes out of the running lab. */
+  needsRestart?: string;
 }
 
 /** Start ▸ Settings ▸ Mods… (FLT-37): what `?mod=` loaded, what clashed and what failed. Mods only load from the URL. */
@@ -1555,6 +1563,14 @@ export interface SaveSummaryVM {
   skin: string | null;
   /** Ids of the mods it was made with. */
   mods: string[];
+}
+
+/** "Welcome back" (FLT-82): the newest save on the shelf, whichever slot it is in. */
+export interface WelcomeVM extends SaveSummaryVM {
+  /** "auto", "1", "2", "3": where it is, and what `continueSave` loads. */
+  slot: string;
+  /** "Autosave", "Slot 2" */
+  label: string;
 }
 
 /** One row of the Save/Load window: the autosave or a manual slot. */
@@ -1589,8 +1605,8 @@ export interface SavesVM {
   slots: SaveSlotVM[];
   /** The lab playing now: what Save writes. */
   current: { lab: string; date: string };
-  /** "Welcome back": the autosave to continue, or null. Time holds while it is up. */
-  welcome: SaveSummaryVM | null;
+  /** "Welcome back": the newest save to continue (the autosave or a slot), or null. Time holds while it is up. */
+  welcome: WelcomeVM | null;
   /** A load, save or import is under way. */
   busy: boolean;
   /** What just happened ("Saved to slot 2.", "That file isn't a lab save."), or null. */
@@ -1626,9 +1642,8 @@ export interface DramaPackVM {
 }
 
 /**
- * Today's Drama (FLT-34): the published feed, and the pack this run has loaded. A pack loads through `?mod=` like any
- * mod, so playing one starts a new lab (`actions.playDrama(id)`), and switching it off is the Mod Manager's
- * `actions.removeMod(id)`.
+ * Today's Drama (FLT-34): the published feed, and the pack this lab has. `actions.playDrama(id)` adds a pack to the lab
+ * on screen (FLT-78: no reload, no new lab), and `actions.removeMod(id)` takes it out again.
  */
 export interface DramaVM {
   /** The Today's Drama window is open. */
@@ -1645,6 +1660,10 @@ export interface DramaVM {
   fresh: boolean;
   /** The window opened by itself because a pack just loaded: say what's coming, not what's on offer. */
   intro: boolean;
+  /** FLT-78: the id of the pack being added right now (fetching it), or null. */
+  adding?: string | null;
+  /** FLT-78: why the last add didn't happen, or null. */
+  problem?: string | null;
 }
 
 export interface SkinPickerVM {
@@ -1883,6 +1902,8 @@ export interface HudActions {
   /** Light up who thinks a Thoughts row (`ThoughtRowVM.key`); again to switch off. */
   highlight(key: string): void;
   dismissToast(id: number): void;
+  /** FLT-84: a snag toast's bug report onto the clipboard. Resolves false when the clipboard said no (the console has it too). */
+  copySnag(id: number): Promise<boolean>;
   /** Answer `vm.confirm`: go ahead with the spend, or keep the runway. */
   confirmSpend(): void;
   cancelSpend(): void;
@@ -1996,12 +2017,12 @@ export interface HudActions {
   // Mods.
   openMods(): void;
   closeMods(): void;
-  /** Switch a loaded mod off: the page reloads without it (a new lab, like loading one). */
+  /** Switch a mod off. A data-only one leaves the lab on screen (FLT-78); one with `needsRestart` reloads without it (a new lab). */
   removeMod(id: string): void;
   // Today's Drama (FLT-34).
   openDrama(): void;
   closeDrama(): void;
-  /** Load a published Drama pack by id (reloads with it in `?mod=`: a new lab). */
+  /** Add a published Drama pack to the lab on screen, by id (FLT-78): no reload, no new lab. Another Drama pack makes way. */
   playDrama(id: string): void;
   // Saves (FLT-65). `slot` is a SaveSlotVM's `slot`.
   openSaves(): void;

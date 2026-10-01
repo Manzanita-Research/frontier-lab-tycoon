@@ -34,7 +34,7 @@ function recorder() {
   return { ctx: ctx as unknown as CanvasRenderingContext2D, texts };
 }
 
-const MOMENTS = ["front-takeover", "front-regulated", "front-acquihired", "front-captured", "front-pivot"];
+const MOMENTS = ["front-takeover", "front-regulated", "front-acquihired", "front-captured", "front-escaped", "front-pivot"];
 const endings = new Map<string, EndingVM>();
 const ending = (moment: string) => endings.get(moment)!;
 

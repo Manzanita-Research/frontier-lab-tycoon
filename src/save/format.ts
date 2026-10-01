@@ -4,19 +4,23 @@
 import { Schema } from "effect";
 
 /** The envelope's version. Bump it (and add a step to `migrations.ts`) whenever an old save would load wrong. */
-export const SAVE_VERSION = 2;
+export const SAVE_VERSION = 3;
 /** Every save says what it is, so a random JSON file gets a friendly "that isn't a lab" instead of a crash. */
 export const SAVE_KIND = "fltsave";
 /** The file extension and the MIME type a download uses. */
 export const SAVE_EXT = ".fltsave";
 export const SAVE_MIME = "application/x-fltsave+json";
 
-/** A mod the run was playing with. `source` is its `?mod=` value, so a load can fetch it again. */
+/**
+ * A mod the run was playing with. `source` is its `?mod=` value, so a load can fetch it again. `tick` (v3, FLT-78) is
+ * when it was added to the running lab; absent for a mod the lab started with. A load adds such a mod back by itself.
+ */
 export const SaveMod = Schema.Struct({
   id: Schema.String,
   version: Schema.String,
   hash: Schema.String,
   source: Schema.optionalKey(Schema.String),
+  tick: Schema.optionalKey(Schema.Finite),
 });
 export interface SaveMod extends Schema.Schema.Type<typeof SaveMod> {}
 

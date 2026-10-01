@@ -8,6 +8,7 @@ import type { CollusionState, Investigation } from "./collusion/state";
 import type { HearingState } from "./hearing/state";
 import type { YachtState } from "./yacht/state";
 import type { DefectionState } from "./defection/state";
+import type { EscapeState } from "./escape/state";
 import type { NeoLabsState } from "./neolabs/state";
 import type { Meeting } from "./meetings";
 import type { BirdAppState } from "./birdapp/state";
@@ -173,6 +174,8 @@ export interface Staffer {
   machine: StaffStored;
   /** Pulled off their post by a disaster (FLT-17): they jog to `to` (a building id, 0 for the gate) with a red "!" and stay until released. */
   divert?: { owner: string; to: number; jog: number };
+  /** Chasing a runner (FLT-59 Sandbox Escape): a security guard jogs at `jog` times their speed toward (x, z), which sim/escape moves every tick. */
+  chase?: { runner: number; x: number; z: number; jog: number };
 }
 
 /** The panel a headline is about, so the HUD can badge it when the news only reached the ticker (FLT-54). */
@@ -223,7 +226,7 @@ export interface Pop {
  */
 export type NoticeSource =
   | "leapfrog" | "ops" | "staff" | "economy" | "coach" | "event" | "disaster" | "papers" | "collusion" | "hearing" | "politics"
-  | "defection" | "auditors" | "factions" | "race" | "training" | "crowd" | "build" | "endings" | "mods" | "birdapp" | `mod:${string}`;
+  | "defection" | "auditors" | "factions" | "race" | "training" | "crowd" | "build" | "endings" | "escape" | "mods" | "birdapp" | `mod:${string}`;
 
 /** `you`: it is about you, or needs you (a toast). `world`: it happened out there (the ticker, and the panel that owns it). */
 export type Importance = "you" | "world";
@@ -303,9 +306,26 @@ export interface RunMods {
   contentHash: string;
 }
 
+/**
+ * A data-only mod added to a running lab (FLT-78): Today's Drama's "Add to my lab". The tick it arrived is when the
+ * lab's definition changed, so a replay (and a save) knows it; `cards` are the event cards it brought.
+ */
+export interface AddedMod {
+  id: string;
+  version: string;
+  hash: string;
+  /** Where it was fetched from (a `?mod=` value), so a save can fetch it again. */
+  url: string;
+  tick: number;
+  day: number;
+  cards: string[];
+}
+
 export interface GameState {
   /** Absent for an unmodded run, so the base World (and the goldens) are unchanged. */
   mods?: RunMods;
+  /** FLT-78: mods added mid-game, oldest first. Absent until the first one. */
+  modsAdded?: AddedMod[];
   coach?: CoachStored;
   progression?: ProgressionStored;
   /** FLT-54: the card budget (sim/machines/cardPace.ts). Absent until the first daily check that looks at it. */
@@ -399,6 +419,8 @@ export interface GameState {
   investigations?: Record<string, Investigation>;
   /** FLT-26 Defection: opt-in pack (the ladder turns it on at Scrutiny); absent in legacy saves and baseline runs. */
   defection?: DefectionState;
+  /** FLT-59 The Sandbox Escape: opt-in pack (mods/base-escape), wakes at Level 5. */
+  escape?: EscapeState;
   /** FLT-20 Poaching War: opt-in pack, same rules. */
   poaching?: PoachingState;
   /** FLT-69 the Bird App: researchers who post. Absent until the pack wakes (Level 3), or with `?birdapp=off`. */

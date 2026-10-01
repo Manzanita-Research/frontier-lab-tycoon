@@ -23,6 +23,7 @@ import { StaffCrew } from "./StaffCrew";
 import { VisitorGroups } from "./VisitorGroups";
 import { OverlayProjector } from "./overlay";
 import { CoachSuggestion } from "./CoachSuggestion";
+import { PathGaps } from "./PathGaps";
 import { Placement } from "./Placement";
 import { Walkers } from "./Walkers";
 
@@ -62,6 +63,7 @@ export function Scene() {
       <Ground />
       <Decor />
       <Paths />
+      <PathGaps />
       <Slop />
       <Fence />
       <NeoCampuses />

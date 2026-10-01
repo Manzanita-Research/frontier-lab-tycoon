@@ -217,7 +217,7 @@ export const FIXTURE_DRAMA_FEED: FeedPackData[] = [
 export const FIXTURE_NOW = Date.parse("2026-09-30T15:00:00Z");
 
 const fixtureMeta = (lab: string, day: number, hoursAgo: number, size: number, skin: string | null, mods: string[] = []): SaveMeta => ({
-  kind: "fltsave", v: 2, savedAt: new Date(FIXTURE_NOW - hoursAgo * 3_600_000).toISOString(), seed: 7, lab, day, tick: day * 20, enc: "gzip64", skin, size,
+  kind: "fltsave", v: 3, savedAt: new Date(FIXTURE_NOW - hoursAgo * 3_600_000).toISOString(), seed: 7, lab, day, tick: day * 20, enc: "gzip64", skin, size,
   mods: mods.map((id) => ({ id, version: "1.0.0", hash: "f3b023e9" })),
 });
 
@@ -233,7 +233,7 @@ export function fixtureSaves(kind: "window" | "welcome" | "prompt" | "private"):
       { slot: "2", meta: null, broken: "Scrambled" },
       { slot: "3", meta: null },
     ],
-    welcome: kind === "welcome" ? auto : null,
+    welcome: kind === "welcome" ? { slot: "auto", meta: auto } : null,
     busy: false,
     status: kind === "window" ? { text: 'Saved "Gradient Descent Labs" to slot 1.', tone: "good" } : null,
     modPrompt: kind === "prompt" ? { lab: "Mostly Harmless Compute", missing: ["every-lab-is-steve 1.0.0"], extra: [], canFetch: true } : null,
@@ -243,17 +243,20 @@ export function fixtureSaves(kind: "window" | "welcome" | "prompt" | "private"):
   };
 }
 
-export function fixtureDrama(kind: "feed" | "intro" | "empty" | "fresh"): NonNullable<HudInput["drama"]> {
+export function fixtureDrama(kind: "feed" | "intro" | "empty" | "fresh" | "added"): NonNullable<HudInput["drama"]> {
   const href = "https://flt.test/?drama=fixture";
   const playing = [{ id: "drama-2026-09-29", name: "Daily Drama: The Perk Arms Race", source: FIXTURE_DRAMA_FEED[0]!.url }];
   const now = new Date(2026, 8, 29, 12);
   if (kind === "fresh") return dramaViewModel({ ...NO_DRAMA_UI, latest: FIXTURE_DRAMA_FEED[0]! }, [], href, now);
   if (kind === "empty") return dramaViewModel({ ...NO_DRAMA_UI, open: true, status: "ready", packs: [] }, [], href, now);
   const ui = { ...NO_DRAMA_UI, open: true, status: "ready" as const, packs: FIXTURE_DRAMA_FEED, latest: FIXTURE_DRAMA_FEED[0]!, seen: "drama-2026-09-28" };
+  if (kind === "added") return dramaViewModel(ui, playing, href, now);
   return kind === "intro" ? dramaViewModel({ ...ui, intro: true }, playing, href, now) : dramaViewModel(ui, [], href, now);
 }
 
 export interface FixtureOptions {
+  /** FLT-84: the game caught an error and kept going (a recovery toast after the two ordinary ones). */
+  snag?: boolean;
   /** Playable v1: put the snapshot on this rung of the ladder (absent: everything is earned). */
   level?: 1 | 2 | 3 | 4 | 5;
   /** Which of the seven coach lines is up (0-based), or none. */
@@ -305,7 +308,7 @@ export interface FixtureOptions {
   height?: number;
   skins?: Partial<SkinPickerVM>;
   /** Today's Drama (absent: nothing fetched yet, the window shut). */
-  drama?: "feed" | "intro" | "empty" | "fresh";
+  drama?: "feed" | "intro" | "empty" | "fresh" | "added";
   /** FLT-57: a streak, a friend's challenge (and whether its banner is up), the Memo extra already read. */
   social?: Partial<NonNullable<HudInput["social"]>>;
   /** FLT-65: the Save/Load window open on a full shelf, "Welcome back", the question about mods, or no storage at all. */
@@ -331,6 +334,9 @@ export function fixtureSnapshot(o: FixtureOptions = {}): Snapshot {
   return { ...snap, ...ladder, event: o.event ? { id: o.event, day: snap.day } : snap.event, outcome: o.outcome ?? snap.outcome, pendingConfirm, warnings: o.warnings ?? snap.warnings };
 }
 
+/** What a recovery toast's Copy details puts on the clipboard (FLT-84). */
+export const FIXTURE_SNAG = "Frontier Lab Tycoon: snag report\nerror: the hall is on fire\ncaught by: hold\nseed: 7\ntick: 1234 (day 12)\nversion: abc1234\nskin: frontier-95\n\nError: the hall is on fire";
+
 export function fixtureInput(o: FixtureOptions = {}): HudInput {
   const lf = o.leapfrog ? fixtureLeapfrog() : null;
   const snap = fixtureSnapshot(lf ? { ...o, world: lf.world } : o);
@@ -343,6 +349,7 @@ export function fixtureInput(o: FixtureOptions = {}): HudInput {
     toasts: [
       { id: 1, text: "Frontier-2 is out! Launch week: +$70K", tone: "good" },
       { id: 2, text: "Hugo Stochastic handed in the box and left.", tone: "bad" },
+      ...(o.snag ? [{ id: 3, text: "Frontier Lab Tycoon hit a snag and kept going.", tone: "bad" as const, snag: FIXTURE_SNAG }] : []),
     ],
     news: [
       { id: 1, day: 3, text: "Mostly Harmless Compute opens its doors with $5M in seed money", tone: "neutral" },

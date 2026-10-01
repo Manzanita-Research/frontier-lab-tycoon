@@ -18,12 +18,14 @@ import { raceVars } from "./race/finance";
 import { modeOf } from "./walkers";
 import type { GameState, OpenEvent } from "./types";
 import { pressureReady } from "./tutorial";
+import { arrivingCard } from "./liveMods";
 import { defs } from "./defs";
 import { askFlag } from "./disasters/names";
 import { modArcsHeard } from "./modArcs";
 import { pacerAllows, pacerMachine, type Pacing, type PacerStored } from "./machines/cardPace";
 import { HANDLED, paceOfCard } from "../content/cardPacing";
 import { createRng, type Rng } from "./rng";
+import { isChase } from "./escape/machine";
 
 export function conditionHolds(state: GameState, c: Condition): boolean {
   if ("all" in c) return c.all.every((sub) => conditionHolds(state, sub));
@@ -44,6 +46,9 @@ export function openEventOf(state: GameState): OpenEvent | null {
   return null;
 }
 
+/** A runner on the fence has the screen (FLT-59): no card opens mid-chase to pause it; they wait in line for it to end. */
+export const screenHeld = (state: GameState): boolean => !!state.escape?.runners.some((r) => isChase(r.machine.value));
+
 /** The card budget's machine, started the first time it is needed (a save from before FLT-54 has none). */
 export function pacerOf(state: GameState): PacerStored {
   return (state.pacer ??= initialStored(pacerMachine, undefined));
@@ -61,7 +66,7 @@ export function notePacer(state: GameState) {
 /** May a pack's own driver put `id` up today (the next question of a sitting, a bill's draft)? If not, it waits in line. */
 export function cardAllowed(state: GameState, id: string, how: "urgent" | "chain" | "normal" = "chain"): boolean {
   const pacer = pacerOf(state);
-  if (pacerAllows(pacer.context, id, paceOfCard(id).story, state.day, how)) return true;
+  if (!screenHeld(state) && pacerAllows(pacer.context, id, paceOfCard(id).story, state.day, how)) return true;
   state.pacer = step(pacerMachine, pacer, { type: "JOIN", id, day: state.day }).stored;
   return false;
 }
@@ -72,10 +77,13 @@ export function cardAllowed(state: GameState, id: string, how: "urgent" | "chain
  * through takes the screen (an offer on a clock goes ahead of the line); the rest wait their turn as `brewing`. A minor card that would have to wait (or any minor card
  * at 10×) answers itself with its default and says so on the ticker. The game pauses until a card is answered.
  */
-export function dailyEvents(state: GameState) {
-  if (state.goals.value === "lost" || (!state.progression && state.day < 40)) return;
+export function dailyEvents(state: GameState, unlocked = true) {
+  if (state.goals.value === "lost") return;
+  // Before the ladder opens cards (or before day 40 without it) there are none, except one a mod brought mid-game (FLT-78).
+  const early = !unlocked || (!state.progression && state.day < 40);
+  if (early && !state.modsAdded) return;
   notePacer(state);
-  let slotFree = openEventOf(state) === null;
+  let slotFree = openEventOf(state) === null && !screenHeld(state);
   // Later eras crowd the calendar: cooldowns shrink.
   const pace = eraDef(eraOfState(state)).pace;
   const pacer = pacerOf(state).context;
@@ -85,12 +93,15 @@ export function dailyEvents(state: GameState) {
   const order = events.map((def, i) => ({ def, i, r: rank(def.id) })).sort((a, b) => a.r - b.r || a.i - b.i);
   const waiting: string[] = [];
   for (const { def } of order) {
+    const arriving = arrivingCard(state, def.id);
+    if (early && arriving === undefined) continue;
     // A save from before a pack added this card (the factions' cards, a mod's) starts its machine now.
     state.arcs[def.id] ??= initialStored(arcMachine, { choices: def.choices.length, cooldownDays: def.cooldown ?? EVENT_COOLDOWN_DAYS, openedDay: null });
     const card = paceOfCard(def.id);
-    const how: Pacing = card.urgent ? "urgent" : card.priority ? "priority" : "normal";
+    // A card the player just added (FLT-78) keeps the gap but doesn't queue behind colour: it was asked for.
+    const how: Pacing = card.urgent ? "urgent" : card.priority || arriving !== undefined ? "priority" : "normal";
     const allowed = pacerAllows(pacerOf(state).context, def.id, card.story, state.day, how);
-    const ready = pressureReady(state) && (conditionHolds(state, def.when) || state.flags[askFlag(def.id)] !== undefined);
+    const ready = arriving ?? (pressureReady(state) && (conditionHolds(state, def.when) || state.flags[askFlag(def.id)] !== undefined));
     const shrug = card.minor && slotFree && (!allowed || pacer.auto);
     const stored = dayArc(state.arcs[def.id]!, { type: "DAY", day: state.day, ready, slotFree: slotFree && (allowed || shrug === true), pace });
     state.arcs[def.id] = stored;

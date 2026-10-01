@@ -43,6 +43,14 @@ describe("walker machine", () => {
     expect(go("leaving", "EXITED")).toBe("gone");
   });
 
+  it("hands a drifted agent to the escape driver from anywhere on foot or inside, and back (FLT-59)", () => {
+    for (const from of ["arriving", "seeking", "queuing", "inside", "loitering", "wandering"] as const) expect(go(from, "BREAKOUT"), from).toBe("escaping");
+    expect(go("escaping", "RETURNED")).toBe("choosing");
+    expect(go("escaping", "ESCAPED")).toBe("gone");
+    for (const ignored of ["NEXT", "QUIT", "TOUR_DONE", "ARRIVED", "EXITED"]) expect(go("escaping", ignored), ignored).toBe("escaping");
+    for (const from of ["leaving", "quitting", "picketing", "choosing"] as const) expect(go(from, "BREAKOUT"), from).toBe(from);
+  });
+
   it("ignores events that make no sense in a phase", () => {
     expect(go("inside", "ARRIVED")).toBe("inside");
     expect(go("leaving", "NEXT")).toBe("leaving");
@@ -61,7 +69,7 @@ describe("walker machine", () => {
   });
 
   it("stepWalker answers exactly what the machine does, for every phase and event", () => {
-    const events = ["ARRIVED", "QUEUED", "ADMITTED", "GAVE_UP", "QUIT", "LINGER", "NEXT", "TOUR_DONE", "CHOSE_BUILDING", "CHOSE_WANDER", "PROTEST_STARTED", "SENT_HOME", "EXITED"];
+    const events = ["ARRIVED", "QUEUED", "ADMITTED", "GAVE_UP", "QUIT", "LINGER", "NEXT", "TOUR_DONE", "CHOSE_BUILDING", "CHOSE_WANDER", "PROTEST_STARTED", "SENT_HOME", "EXITED", "BREAKOUT", "RETURNED", "ESCAPED"];
     for (const value of Object.keys(walkerMachine.states) as WalkerPhase[]) {
       for (const type of events) {
         const viaMachine = step(walkerMachine, at(value), { type } as never).stored;

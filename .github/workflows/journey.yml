@@ -15,6 +15,11 @@ on:
         description: "Wall-clock cap, in minutes"
         required: false
         default: "60"
+      phone:
+        description: "Play on a phone (FLT-61): 390×844, touch only, with the phone checks"
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
@@ -38,7 +43,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
       - name: Play Level 1 to 5
-        run: pnpm e2e:journey --url "$JOURNEY_URL" --minutes "$JOURNEY_MINUTES"
+        run: pnpm e2e:journey --url "$JOURNEY_URL" --minutes "$JOURNEY_MINUTES" ${{ inputs.phone && '--phone' || '' }}
         env:
           JOURNEY_URL: ${{ inputs.url || 'https://flt-prod.manzanita.workers.dev' }}
           JOURNEY_MINUTES: ${{ inputs.minutes || '60' }}
@@ -48,5 +53,5 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: journey-${{ github.run_id }}
+          name: journey${{ inputs.phone && '-phone' || '' }}-${{ github.run_id }}
           path: e2e/results/journey/

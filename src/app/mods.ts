@@ -22,6 +22,14 @@ export interface LoadedMod {
   hash: string;
   /** FLT-55: the id of the skin it brings, if any. */
   skin?: string;
+  /** FLT-78: why it can't come or go mid-game (it needs a fresh start). Absent for a data-only mod. */
+  needsRestart?: string;
+}
+
+/** A fetched manifest and its `?mod=` value. */
+export interface SessionManifest {
+  manifest: ModManifest;
+  source: string;
 }
 
 export interface ModSession {
@@ -37,9 +45,11 @@ export interface ModSession {
   presentation: Presentation | null;
   /** The mods' own sound cues (added, or replacing the base's), later mods winning. The base game's are in `src/audio/score.ts`. */
   cues: Readonly<Record<string, readonly Note[]>>;
+  /** FLT-78: the manifests behind `def`, in order, so a mod can be added or removed mid-game and the set recomposed. */
+  manifests: readonly SessionManifest[];
 }
 
-export const NO_MODS: ModSession = { def: null, mods: [], conflicts: [], errors: [], run: null, presentation: null, cues: {} };
+export const NO_MODS: ModSession = { def: null, mods: [], conflicts: [], errors: [], run: null, presentation: null, cues: {}, manifests: [] };
 
 /** Owns the session's `blob:` URLs: they are revoked when the page goes away for good (not into the back/forward cache). */
 const assetScope = Effect.runSync(Scope.make());
@@ -66,17 +76,76 @@ export async function loadModSession(search: string, options: { baseUrl?: string
   }
   if (manifests.length === 0) return { ...NO_MODS, errors };
   try {
-    const { layer, conflicts } = composeMods(manifests.map((m) => m.manifest));
-    const def = await Effect.runPromise(resolveGameDefinition(layer));
+    const { layer } = composeMods(manifests.map((m) => m.manifest));
     const resolved = await Effect.runPromise(resolvePresentation(layer));
     const { presentation } = await Effect.runPromise(Scope.provide(materialise(resolved, options.objectUrls ?? browserObjectUrls), options.scope ?? assetScope));
-    const mods = manifests.map(({ manifest, source }) => ({
-      id: manifest.id, name: manifest.name, version: manifest.version, author: manifest.author, description: manifest.description, source, hash: contentHash(manifest),
-      ...(manifest.skin ? { skin: manifest.skin.id } : {}),
-    }));
-    return { def, mods, conflicts, errors, run: { mods: mods.map(({ id, version, hash }) => ({ id, version, hash })), contentHash: contentHash(def.content) }, presentation, cues: Object.assign({}, ...manifests.map((m) => m.manifest.audio?.cues ?? {})) };
+    return { ...(await compose(manifests)), errors, presentation, cues: Object.assign({}, ...manifests.map((m) => m.manifest.audio?.cues ?? {})) };
   } catch (error) {
     return { ...NO_MODS, errors: [...errors, `${manifests.map((m) => m.manifest.id).join(" + ")}: ${describe(error)}`] };
+  }
+}
+
+/** The definition, mod list and RunMods for a set of manifests. Throws when they don't compose. */
+async function compose(manifests: readonly SessionManifest[]): Promise<Pick<ModSession, "def" | "mods" | "conflicts" | "run" | "manifests">> {
+  if (manifests.length === 0) return { def: null, mods: [], conflicts: [], run: null, manifests: [] };
+  const { layer, conflicts } = composeMods(manifests.map((m) => m.manifest));
+  const def = await Effect.runPromise(resolveGameDefinition(layer));
+  const mods = manifests.map(({ manifest, source }) => {
+    const restart = needsRestart(manifest);
+    return {
+      id: manifest.id, name: manifest.name, version: manifest.version, author: manifest.author, description: manifest.description, source, hash: contentHash(manifest),
+      ...(manifest.skin ? { skin: manifest.skin.id } : {}),
+      ...(restart ? { needsRestart: restart } : {}),
+    };
+  });
+  return { def, mods, conflicts, run: { mods: mods.map(({ id, version, hash }) => ({ id, version, hash })), contentHash: contentHash(def.content) }, manifests };
+}
+
+/** What a mod may touch and still join (or leave) a running lab: words and cards, nothing the World is built from. */
+const LIVE_SECTIONS = new Set(["headlines", "thoughts", "events", "rivals", "tips"]);
+/** A rival's fields a mod may change mid-game: what it says about itself. */
+const LIVE_RIVAL_FIELDS = new Set(["id", "tagline"]);
+
+/**
+ * FLT-78: null when the mod is data-only (it can be added to a running lab, and removed from one); otherwise why it
+ * needs a fresh start, in the Mod Manager's words.
+ */
+export function needsRestart(manifest: ModManifest): string | null {
+  if (manifest.skin || manifest.assets || manifest.audio || manifest.looks) return "Brings a look or sounds: needs a fresh start.";
+  const content = manifest.content ?? {};
+  for (const [section, patch] of Object.entries(content)) {
+    if (patch === undefined) continue;
+    if (!LIVE_SECTIONS.has(section)) return `Changes ${section}: needs a fresh start.`;
+  }
+  const events = content.events;
+  if (events?.override?.length || events?.remove?.length || events?.add?.some((e) => !("choices" in e))) return "Changes how events work: needs a fresh start.";
+  const rivals = content.rivals;
+  if (rivals?.add?.length || rivals?.remove?.length || rivals?.override?.some((r) => Object.keys(r).some((k) => !LIVE_RIVAL_FIELDS.has(k)))) return "Changes the rival labs: needs a fresh start.";
+  return null;
+}
+
+/** The event cards a mod adds (what a mid-game add schedules, and a remove cancels). */
+export const cardsOf = (manifest: ModManifest): string[] => (manifest.content?.events?.add ?? []).flatMap((e) => ("choices" in e ? [e.id] : []));
+
+/** The session with one more mod (last, so it wins its conflicts). Throws when it doesn't compose. */
+export async function withMod(session: ModSession, added: SessionManifest): Promise<ModSession> {
+  const manifests = [...session.manifests.filter((m) => m.manifest.id !== added.manifest.id), added];
+  return { ...session, ...(await compose(manifests)) };
+}
+
+/** The session without a mod. */
+export async function withoutModId(session: ModSession, id: string): Promise<ModSession> {
+  return { ...session, ...(await compose(session.manifests.filter((m) => m.manifest.id !== id))) };
+}
+
+/** One `?mod=` value, fetched and checked. */
+export async function fetchOne(source: string, options: { baseUrl?: string; fetcher?: typeof fetch } = {}): Promise<SessionManifest> {
+  const [link] = parseModLinks(`?${new URLSearchParams({ mod: source })}`, options.baseUrl);
+  if (!link) throw new Error(`${source}: not a mod link`);
+  try {
+    return { manifest: await Effect.runPromise(fetchMod(link, options.fetcher ?? fetch)), source };
+  } catch (error) {
+    throw new Error(`${source}: ${describe(error)}`);
   }
 }
 
