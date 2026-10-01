@@ -165,6 +165,25 @@ await page.click("[data-fly=settings] > button");
 await settle();
 check(await page.$eval("[data-testid=start-reset-windows]", (e) => e.disabled), "with nothing moved, Reset is greyed out");
 await page.keyboard.press("Escape");
+
+// A message box drags too (Run… an unknown program), but is not remembered: the next one opens in the middle.
+await page.click("[data-testid=start-button]");
+await page.click("[data-testid=start-run]");
+await page.fill("[data-testid=run-input]", "agi.exe");
+await page.keyboard.press("Enter");
+await page.waitForSelector("section.f95-errbox", { timeout: 10_000 });
+await settle();
+const card0 = await rect("section.f95-errbox");
+await page.mouse.move(card0.x + 60, card0.y + 14);
+await page.mouse.down();
+await page.mouse.move(card0.x - 300, card0.y + 200, { steps: 8 });
+await page.mouse.up();
+await settle();
+const card1 = await rect("section.f95-errbox");
+check(Math.abs(card1.x - (card0.x - 360)) <= 1 && Math.abs(card1.y - (card0.y + 186)) <= 1, `an error box drags out of the way (${card0.x},${card0.y} → ${card1.x},${card1.y})`);
+check((await page.$("section.f95-errbox")) !== null, "letting go over the backdrop does not dismiss it");
+check((await page.evaluate(() => localStorage.getItem("flt.windows.frontier-95"))) === null, "a message box's place is not saved");
+await shot("8b-errbox", "An error box dragged aside");
 await ctx.close();
 
 // A phone: the title bar does not drag, saved desktop positions are not applied, and the Reset item is not offered.
