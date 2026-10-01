@@ -13,6 +13,7 @@ import { TICKS_PER_DAY } from "../sim/constants";
 import { withDefs } from "../sim/defs";
 import { tick } from "../sim/tick";
 import { isAuditMoment, stageAudit } from "../sim/auditors/demo";
+import { startsFast } from "../sim/beatsDemo";
 import { createMidgameScenario, MIDGAME_CAMERA, midgameOpeningNews, midgameOpeningThoughts } from "../sim/scenarios/midgame";
 import type { Tone } from "../sim/types";
 import { framesBrowser } from "./frames";
@@ -44,7 +45,9 @@ if (midgame) {
 // A new lab plays on "rare" (the sim itself starts with random disasters off, so tests are unaffected); `?risk=` overrides.
 if (!midgame && !debugParams.risk) setRisk(sim.world, DEFAULT_RISK);
 
-const initialSpeed: Speed = midgame ? 0 : (SPEEDS as readonly number[]).includes(debugParams.speed ?? 1) ? ((debugParams.speed ?? 1) as Speed) : 1;
+// FLT-76's ▶▶▶ beats (`?moment=beats-pileup|badnews`) start at 10× unless `?speed=` says otherwise.
+const askedSpeed = debugParams.speed ?? (startsFast(debugParams.moment) ? 10 : 1);
+const initialSpeed: Speed = midgame ? 0 : (SPEEDS as readonly number[]).includes(askedSpeed) ? (askedSpeed as Speed) : 1;
 
 /**
  * Saving (FLT-65): the slots in localStorage, or with `?saves=demo|window` a pretend shelf in memory (screenshots;
