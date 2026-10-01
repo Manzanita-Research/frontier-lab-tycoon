@@ -16,7 +16,7 @@ import { TICKS_PER_SECOND } from "../sim/constants";
 import type { GameState, NewsItem, OpenEvent, Outcome, Tone } from "../sim/types";
 import { Frames } from "./frames";
 import type { Snapshot, Speed, Tool, UiSelection, UiToast } from "./hud";
-import { gateToasts, mergeWire, newGate, WIRE_MAX, type NoticeGate, type WireItem } from "./notices";
+import { gateToasts, mergeWire, newGate, quietForOutcome, WIRE_MAX, type NoticeGate, type WireItem } from "./notices";
 import { Sim, type SyncReport } from "./sim";
 import { Saves, type SaveWhy } from "./saves";
 import type { SlotId } from "../save";
@@ -323,11 +323,17 @@ export const appMachine = setupEffect({
         rank: report.snap ? { prev: context.snap.race.rank, next: report.snap.race.rank, top: report.snap.race.board.find((r) => r.rank === 1)?.short ?? "" } : null,
         seq: context.toastSeq,
       });
-      const fresh = gated.toasts;
-      const wire = gated.wire.length > 0 ? [...context.wire, ...gated.wire].slice(-WIRE_MAX) : context.wire;
+      // The game just ended: the outcome card stands alone (FLT-86), so every toast steps aside to the ticker.
+      const ended = report.outcome !== "playing" && context.outcome === "playing";
+      const day = report.snap?.day ?? context.snap.day;
+      const quiet = ended ? quietForOutcome([...context.toasts, ...(context.held ?? []), ...gated.gate.held, ...gated.toasts], day) : [];
+      if (ended) for (const t of context.toasts) enq.cancel(`toast:${t.id}`);
+      const fresh = ended ? [] : gated.toasts;
+      const wireIn = [...gated.wire, ...quiet];
+      const wire = wireIn.length > 0 ? [...context.wire, ...wireIn].slice(-WIRE_MAX) : context.wire;
       const next: AppContext = {
-        ...addToasts(context, fresh),
-        gate: gated.gate,
+        ...(ended ? { ...context, toasts: [], held: context.held ? [] : null } : addToasts(context, fresh)),
+        gate: ended ? { lastAt: gated.gate.lastAt, held: [] } : gated.gate,
         toastSeq: gated.seq,
         event: report.event,
         outcome: report.outcome,

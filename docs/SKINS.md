@@ -181,6 +181,7 @@ If your slot needs copy that has no key, write it into the slot (as Frontier 95 
 | `stats.window` | {lab} |
 | `stats.vibes` | Vibes |
 | `stats.cash` | Cash |
+| `stats.net` | net (after the money line's per-day number: "+$12K/day net") |
 | `stats.runway` | Runway |
 | `stats.capability` | Capability |
 | `stats.hype` | Hype |

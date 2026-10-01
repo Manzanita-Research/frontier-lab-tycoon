@@ -27,7 +27,8 @@ import { auditView, type AuditView } from "../sim/auditors/view";
 import { neoCampusView, sameCampuses, type NeoCampusView } from "../sim/neolabs/view";
 import { memberById } from "../sim/groups";
 import { outcomeOf, releaseGoalText } from "../sim/goals";
-import { estimateLedger } from "../sim/economy";
+import { economyOf, estimateLedger } from "../sim/economy";
+import { MAX_ROUNDS } from "../content/bridgeRounds";
 import { assistantOf, type AssistantMessage } from "../sim/tutorial";
 import { pendingConfirmOf, persistentWarnings, type PendingConfirm } from "../sim/guardrails";
 import { calmStart, CALM_START_DAY, disasterMenu, disastersView, type MenuRow, type RunView } from "../sim/disasters/driver";
@@ -72,6 +73,8 @@ export interface Snapshot {
   income: number;
   expenses: number;
   runway: number | null;
+  /** FLT-86: the share of the lab still yours (0-100), emergency rounds signed, and the overdraft's last day (or null). */
+  money: { stake: number; rounds: number; maxRounds: number; overdraftDay: number | null };
   capability: number;
   hype: number;
   vibes: Vibes;
@@ -229,6 +232,11 @@ function neoOf(s: GameState, prev?: Snapshot): NeoCampusView[] {
   return prev && sameCampuses(prev.neo, next) ? prev.neo : next;
 }
 
+function moneyOf(s: GameState): Snapshot["money"] {
+  const { rounds, stake, overdraftDay } = economyOf(s).context;
+  return { stake, rounds, maxRounds: MAX_ROUNDS, overdraftDay };
+}
+
 export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO_SELECTION): Snapshot {
   const books = estimateLedger(s);
   return {
@@ -240,6 +248,7 @@ export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO
     income: books.income,
     expenses: books.expenses,
     runway: runwayMonths(s.cash, books.net),
+    money: moneyOf(s),
     capability: s.capability,
     hype: s.hype,
     vibes: { ...s.vibes },

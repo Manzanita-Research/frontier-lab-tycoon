@@ -57,7 +57,7 @@ export interface ProgressView {
   level: Level;
   levelName: string;
   unlocked: { buildings: BuildingKind[]; staff: StaffJob[]; systems: SystemId[] };
-  /** `status` is the goal's progress as the HUD says it ("$26K of $40K a day · 3 of 12 visitors"). */
+  /** `status` is the goal's progress as the HUD says it ("Revenue $26K of $40K a day · 3 of 12 visitors"). */
   /** `lowerIsBetter` for a rank: #6 of a Top 3 goal is half way. */
   /** `objective` is set once the ladder is done: the goal is then that scenario objective (a GoalDef id). */
   /** `held` is that objective's days in a row at its target, for a hold goal (FLT-86). */

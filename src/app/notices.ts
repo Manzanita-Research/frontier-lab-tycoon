@@ -155,6 +155,15 @@ export function gateToasts(gate: NoticeGate, fresh: readonly UiToast[], env: Gat
   return { gate: { lastAt: env.now, held: [] }, toasts: out, wire, seq };
 }
 
+/**
+ * The game just ended (won, lost, an ending's front page): the outcome card is the moment and stands alone (FLT-86). What
+ * was on screen, waiting for the window, or came with the same publish goes to the ticker instead. A batch summary's
+ * pile is already there, so the summary itself is dropped.
+ */
+export function quietForOutcome(toasts: readonly UiToast[], day: number): WireItem[] {
+  return toasts.filter((t) => !t.batch).map((t) => ({ id: t.id, day, text: t.text, tone: t.tone, source: t.source }));
+}
+
 /** The ticker's items: the sim's headlines and the app's world notices, in the order they happened (ids share one counter). */
 export function mergeWire(news: readonly NewsItem[], wire: readonly WireItem[]): readonly NewsItem[] {
   if (wire.length === 0) return news;

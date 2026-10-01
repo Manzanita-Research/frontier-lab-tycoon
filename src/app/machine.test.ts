@@ -420,6 +420,26 @@ describe("app machine", () => {
     }).pipe(provide(handle));
   });
 
+  it.effect("the outcome card stands alone: the toasts on screen and those that come with it go to the ticker (FLT-86)", () => {
+    const handle = handleFor(1);
+    return Effect.gen(function* () {
+      const { actor, sim, pump } = yield* boot(0);
+      sim.world.toasts.push({ id: 900, text: "Round 1 of 3 signed: +$2M.", tone: "bad", source: "economy", importance: "you", reply: true });
+      yield* pump(4);
+      expect(actor.getSnapshot().context.toasts.map((t) => t.text)).toContain("Round 1 of 3 signed: +$2M.");
+      // The deadline passes tonight, and a toast comes with it.
+      sim.world.day = SCENARIO.deadlineDay;
+      sim.world.tick = (SCENARIO.deadlineDay + 1) * 20 - 1;
+      sim.world.toasts.push({ id: 901, text: "Objective met: Ship 3 models. 1 of 3.", tone: "good", source: "goals", importance: "you" });
+      yield* send(actor, { type: "SET_SPEED", speed: 1 });
+      yield* pump(4);
+      yield* waitFor(actor, (st) => st.matches("gameOver"), { timeout: "1 second" });
+      const c = actor.getSnapshot().context;
+      expect(c.toasts).toEqual([]);
+      expect(c.wire.map((w) => w.text)).toEqual(expect.arrayContaining(["Round 1 of 3 signed: +$2M.", "Objective met: Ship 3 models. 1 of 3."]));
+    }).pipe(provide(handle));
+  });
+
   it.effect("a toast that says the same thing again replaces the older one instead of stacking", () => {
     const handle = handleFor();
     return Effect.gen(function* () {

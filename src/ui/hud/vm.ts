@@ -142,7 +142,7 @@ export function goalProgressText(def: GoalDef, value: number, held = 0): string 
 }
 
 /** The top bar of a camera beat (FLT-56), by kind. */
-const BEAT_KICKER: Record<string, string> = { exit: "Breaking · a departure", huddle: "The auditors are conferring", viral: "Live · trending now", statement: "A statement from Comms", leak: "Someone is asking about the file" };
+const BEAT_KICKER: Record<string, string> = { stretch: "Final stretch", exit: "Breaking · a departure", huddle: "The auditors are conferring", viral: "Live · trending now", statement: "A statement from Comms", leak: "Someone is asking about the file" };
 
 const TONE_LABEL = { bad: "Breaking", joke: "Developing", good: "Good news", neutral: "Update" } as const;
 const MOOD = { content: "Content", slumped: "Slumped", miserable: "Miserable", resigned: "Resigned" } as const;
@@ -206,7 +206,9 @@ function statsOf(i: HudInput): StatsVM {
     runway: { months: s.runway, text: s.runway === null ? "∞" : `${s.runway.toFixed(1)} mo`, warning: runwayLow },
     capability: { value: s.capability, latestModel: s.latestModel },
     hype: { value: s.hype },
-    finance: { income: s.ledger.income, incomeText: formatMoney(s.ledger.income), expenses: s.ledger.expenses, expensesText: formatMoney(s.ledger.expenses) },
+    // The same books as the net (today's estimate), so Income − Expenses is the Net on the line below it.
+    finance: { income: s.income, incomeText: formatMoney(s.income), expenses: s.expenses, expensesText: formatMoney(s.expenses) },
+    money: moneyOf(s),
     arena: {
       rank: race.rank,
       rankDelta: race.rankDelta,
@@ -858,6 +860,17 @@ const OFF_LEAPFROG: LeapfrogVM = {
   pulse: 0,
 };
 
+function moneyOf(s: Snapshot): StatsVM["money"] {
+  const left = Math.max(0, s.money.maxRounds - s.money.rounds);
+  return {
+    stake: s.money.stake,
+    stakeText: `${Math.round(s.money.stake)}%`,
+    roundsLeft: left,
+    roundsText: `${left} of ${s.money.maxRounds}`,
+    overdraftDays: s.money.overdraftDay === null ? null : Math.max(0, s.money.overdraftDay - s.day),
+  };
+}
+
 function outcomeOf(i: HudInput): OutcomeVM | null {
   const s = i.snap;
   // An ending is its own card: the front page (endingOf).
@@ -876,6 +889,8 @@ function outcomeOf(i: HudInput): OutcomeVM | null {
       { label: "Capability", text: String(Math.round(s.capability)), bad: false },
       { label: "Hype", text: String(Math.round(s.hype)), bad: false },
       { label: "Models", text: String(s.models), bad: false },
+      // FLT-86: what the emergency rounds cost, if any were signed.
+      ...(s.money.rounds > 0 ? [{ label: "Still yours", text: `${Math.round(s.money.stake)}%`, bad: s.money.stake < 100 }, { label: "Bailouts", text: `${s.money.rounds} of ${s.money.maxRounds}`, bad: true }] : []),
     ],
     note: won ? "All three milestones met." : `${met} of ${s.goals.length} milestones met.`,
   };
@@ -1094,7 +1109,7 @@ function helpOf(items: readonly BuildItemVM[]): HudVM["help"] {
 /** The note's one goal: the ladder rung's, or once the ladder is done the next open objective ("Top 3 on the Arena in Era 3 · Arena #6, need top 3"). */
 function goalOf({ text, current, target, status, lowerIsBetter, objective, held }: PlayableInput["goal"]): GoalVM {
   const def = objective ? defs().goals.find((d) => d.id === objective) : undefined;
-  // The sim says the progress in words when a count alone would not ("$26K of $40K a day · 3 of 12 visitors").
+  // The sim says the progress in words when a count alone would not ("Revenue $26K of $40K a day · 3 of 12 visitors").
   const progress = status ?? (def?.unit === "rank" ? goalProgressText(def, current, held) : `${Math.min(current, target)}/${target}`);
   // A rank goal: #6 of a Top 3 is half way.
   const ratio = target > 0 ? Math.max(0, Math.min(1, lowerIsBetter ? (current > 0 ? target / current : 0) : current / target)) : 0;

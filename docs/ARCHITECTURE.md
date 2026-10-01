@@ -33,8 +33,8 @@ flowchart LR
 | **training** | `src/sim/machines/training.ts` | `idle`, `training`, `releasing` | `DAY {halls, gain}`, `NAMED {name}` | `RELEASED`, `RUN_STARTED` | run, progress, cost, next model name |
 | **tutorial** | `src/sim/machines/tutorial.ts` | `path`, `hall`, `gateway`, `hire`, `release`, `done`, `skipped` | `FACTS`, `CONTINUE`, `SKIP` | `FINISHED` (one launch toast) | acknowledgement of the current step; stored in `World.tutorial` |
 | **guardrails** | `src/sim/machines/guardrails.ts` | `clear`, `confirming` | `REQUEST`, `CLEAR`, `OBSERVE`, `HALL` | low-runway nudge, redundant-Hall hint | exact pending spending command, low-runway and disconnected-gate warning flags; additive optional `World.guardrails` |
-| **economy** | `.../economy.ts` | `solvent`, `runwayWarning`, `bailout`, `bankrupt` | `DAY {cash, day}` | `BAILOUT` | day of the last bridge round |
-| **goals** | `.../goals.ts` | `tracking`, `won`, `lost` (final) | `DAY {day, cash, values}` | `WON`, `LOST` | the three milestones, the day it ended |
+| **economy** | `.../economy.ts` | `solvent`, `offered`, `funded`, `overdrawn`, `bankrupt` (final) | `DAY {cash, day}`, `SIGNED {day, equity}` | `OFFER`, `FUNDED`, `WITHDRAWN`, `OVERDRAWN`, `RECOVERED`, `BANKRUPT` | rounds signed (of 3), the stake still yours, the overdraft's last day |
+| **goals** | `.../goals.ts` | `tracking`, `won`, `lost` (final) | `DAY {day, broke, values}` | `MET`, `STRETCH`, `HOLDING`, `SLIPPED`, `WON`, `LOST` | the three milestones (a hold goal counts its days in a row), the day it ended |
 | **arc** (one per event card) | `.../arc.ts` | `calm`, `brewing`, `cardOpen`, `cooldown` | `DAY {day, ready, slotFree, pace}`, `CHOOSE {choiceIndex}` | `RESOLVED` | choices, cooldown days, day last opened |
 | **walker** (one per walker) | `.../walker.ts` | `arriving`, `seeking`, `queuing`, `inside`, `loitering`, `wandering`, `choosing`, `leaving`, `quitting`, `picketing`, `gone` (final) | `ARRIVED`, `QUEUED`, `ADMITTED`, `GAVE_UP`, `LINGER`, `NEXT`, `TOUR_DONE`, `QUIT`, `CHOSE_BUILDING`, `CHOSE_WANDER`, `PROTEST_STARTED`, `SENT_HOME`, `EXITED` | none: the driver acts on the state entered | nothing (the need a walker is seeking, `visits` and `step` stay plain walker fields) |
 | **rival** (one per rival lab) | `src/sim/race/rival.ts` | `idle`, `training`, `releasing`, `cooldown` | `WEEK {aggro, pace, chase, four dice, name}`, `SHOCK {capability, hype, momentum}` | `RELEASED`, `POACH` | personality, capability, hype, weeks left, open weights?, momentum, latest model |
@@ -196,12 +196,16 @@ stateDiagram-v2
   direction LR
   state "economy" as E {
     [*] --> solvent
-    solvent --> runwayWarning: DAY [cash < 0, cooldown]
-    solvent --> bailout: DAY [cash < 0, due] / BAILOUT
-    runwayWarning --> bailout: DAY [cash < 0, due] / BAILOUT
-    bailout --> solvent: DAY [cash ≥ 0]
-    runwayWarning --> solvent: DAY [cash ≥ 0]
-    solvent --> bankrupt: DAY [cash < -$2M after any round]
+    solvent --> offered: DAY [cash < 0, rounds < 3] / OFFER
+    offered --> funded: SIGNED / FUNDED
+    offered --> solvent: DAY [cash ≥ 0] / WITHDRAWN
+    funded --> solvent: DAY [cash ≥ 0]
+    funded --> offered: DAY [cash < 0, rounds < 3] / OFFER
+    solvent --> overdrawn: DAY [cash < 0, rounds = 3] / OVERDRAWN
+    funded --> overdrawn: DAY [cash < 0, rounds = 3] / OVERDRAWN
+    overdrawn --> solvent: DAY [cash ≥ 0] / RECOVERED
+    overdrawn --> bankrupt: DAY [30 days up] / BANKRUPT
+    bankrupt --> [*]
   }
 ```
 
@@ -210,8 +214,9 @@ stateDiagram-v2
   direction LR
   state "goals" as G {
     [*] --> tracking
+    tracking --> tracking: DAY [one more met] / MET, STRETCH at 2 of 3; HOLDING, SLIPPED for a hold goal
     tracking --> won: DAY [all milestones met] / WON
-    tracking --> lost: DAY [day ≥ 360 or cash < -$2M] / LOST
+    tracking --> lost: DAY [day ≥ deadline or broke] / LOST
   }
   state "training" as T {
     [*] --> training
@@ -232,7 +237,7 @@ stateDiagram-v2
 A sim machine never touches the World and never draws random numbers:
 
 1. **State in the World is `{ value, context }`** (JSON). `step(machine, stored, event)` in `src/sim/machines/run.ts` rebuilds a live snapshot with `machine.resolveState`, calls `transition()`, and returns the next `{ value, context }` plus the emitted events in order. The World never holds a live snapshot, so `JSON.parse(JSON.stringify(world))` deep-equals it.
-2. **The driver applies effects.** `training.ts` turns `RELEASED` into capability, hype, cash, a toast and a headline; `economy.ts` turns `BAILOUT` into +$2M and a headline; and so on. It applies them in the order they were emitted, which is the order the pre-port code ran them in.
+2. **The driver applies effects.** `training.ts` turns `RELEASED` into capability, hype, cash, a toast and a headline; `economy.ts` turns `OFFER` into an emergency-round card and `FUNDED` into the round's money, terms and headline (FLT-86); and so on. It applies them in the order they were emitted, which is the order the pre-port code ran them in.
 3. **Randomness is pre-rolled.** After a training release the machine waits in `releasing`; the driver rolls the next model name *after* the release effects and *before* the next run's, then sends `NAMED`. That is exactly where the old loop drew, so the RNG stream is unchanged.
 
 ## Numbers (measured on the 1-vCPU Modal box, Node 22)

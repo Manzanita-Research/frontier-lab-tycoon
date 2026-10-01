@@ -39,7 +39,7 @@ describe("the playable ladder", () => {
     expect(makeSnapshot(s).hud.visible).toMatchObject({ revenue: true, vibes: true, staff: false, news: false });
     // Level 2 asks for both halves: the money and the visitors shown round.
     s.ledger.income = 40_000; s.flags.visitorsServed = 11; updateProgression(s); expect(progressOf(s).level).toBe(2);
-    expect(progressOf(s).goal.status).toBe("$40K of $40K a day · 11 of 12 visitors");
+    expect(progressOf(s).goal.status).toBe("Revenue $40K of $40K a day · 11 of 12 visitors");
     s.flags.visitorsServed = 12; updateProgression(s); expect(progressOf(s).level).toBe(3);
     expect(canHire(s, "sre").ok).toBe(true); expect(systemUnlocked(s, "breakdowns")).toBe(true);
     // Level 3: the first spill and the first breakdown are booked for right after it opens, so the hires have work.

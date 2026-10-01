@@ -167,6 +167,7 @@
     "birdapp.outcome.controversy": "Feedback",
     "birdapp.outcome.ratioed": "Booed",
     "birdapp.outcome.cancelled": "Mic cut",
-    "birdapp.outcome.live": "On mic"
+    "birdapp.outcome.live": "On mic",
+    "stats.net": "after the bar tab"
   }
 }
