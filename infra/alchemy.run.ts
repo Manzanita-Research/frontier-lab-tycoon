@@ -5,6 +5,7 @@ import * as Output from "alchemy/Output";
 import * as Config from "effect/Config";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
+import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { AUTH_HOSTS, AUTH_MIGRATIONS, AUTH_WORKER_MAIN, authEnabled } from "./auth.ts";
 
@@ -22,24 +23,9 @@ export default Alchemy.Stack(
 
     // Custom domains (app., the apex and www) are attached to flt-prod in the Cloudflare dashboard, not here.
     // Never set `domain` on this Worker: omitted = unmanaged, so Alchemy preserves dashboard-added domains.
-    // The apex and www get a temporary 302 to app. from EDGE_SCRIPT below (the big box, FLT-70, takes the apex later).
-    const APP_HOST = "app.frontierlabtycoon.com";
-    const REDIRECT_HOSTS = ["frontierlabtycoon.com", "www.frontierlabtycoon.com"];
-    const EDGE_SCRIPT = `const REDIRECT_HOSTS = new Set(${JSON.stringify(REDIRECT_HOSTS)});
-export default {
-  async fetch(request, env) {
-    const url = new URL(request.url);
-    if (REDIRECT_HOSTS.has(url.hostname)) {
-      // 302, not 301: browsers cache 301s forever, and the apex becomes the big-box shelf later.
-      return new Response(null, {
-        status: 302,
-        headers: { Location: "https://${APP_HOST}" + url.pathname + url.search, "Cache-Control": "no-store" },
-      });
-    }
-    return env.ASSETS.fetch(request);
-  },
-};
-`;
+    // The apex and www get a temporary 302 to app. from the edge script (infra/edge.mjs, the big box, FLT-70, takes the
+    // apex later); link-preview crawlers get the page's tags there instead (FLT-99). It is uploaded as it is, unbundled.
+    const EDGE_SCRIPT = readFileSync(fileURLToPath(new URL("./edge.mjs", import.meta.url)), "utf8");
 
     // One app, one Worker. Prod deploys the app Worker (APP_WORKER) itself. Each PR stage deploys a
     // Cloudflare Workers *Preview* of that same Worker, served at https://pr-N-flt-prod.<subdomain>.workers.dev.
