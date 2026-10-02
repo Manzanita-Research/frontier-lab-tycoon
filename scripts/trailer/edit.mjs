@@ -10,12 +10,14 @@
 //   segments: [{ src: "box-pick" (a clip name, .mp4/.png path, or a card name), in: s, dur: s,
 //               zoom: [from, to] (a slow push), at: [fx, fy] (zoom focus, 0..1), flash: true (cut in from white),
 //               gray: true, eq: "brightness=-0.1:saturation=0.8", fadeIn/fadeOut: s,
-//               fit: "cover" | "contain" (for --size other than 16:9: crop to fill, or letterbox on a blur) }]
-//   cards: { name: { html: "<div>...</div>", css: "..." } }   drawn once at the output size, cached by content
+//               fit: "cover" | "contain" (for --size other than 16:9: crop to fill, or letterbox on a blur),
+//               scale: k (contain only: the frame at k× the width, cropped around `at`, so a HUD window stays legible),
+//               portrait: { ...overrides for a 9:16 / 1:1 cut } }]
+//   cards: { name: { html: "<div>...</div>", css: "...", portrait: { html?, css? } } }   drawn once at the output size, cached by content
 //   music: { file, gain: dB, duck: dB under the voice, fadeOut: s }
 //   voice: [{ file: "shots/trailer/voice/x.mp3", at: s, gain: dB }]
 //   captions: { from: "voice" (word timestamps from voice[0]'s .json) | [{ start, end, text }], style: "tv" | "trailer" | "infomercial",
-//               fix: { "A.I.": "AI" }, maxWords: 5 }
+//               fix: { "A.I.": "AI" }, maxWords: 5, until: s (no lines that start later, e.g. over the end card) }
 //   supers: [{ start, end, text, x, y, size, color, rotate, box: true, star: true }]   big on-screen words (ASS)
 //   look: "vhs" | null
 import { chromium } from "playwright";
@@ -39,7 +41,8 @@ const portrait = W / H < 16 / 9 - 0.01;
 const CARD_BASE = `html,body{margin:0;width:${W}px;height:${H}px;overflow:hidden}body{font-family:"Liberation Sans",Arial,sans-serif}`;
 async function renderCards() {
   const cards = Object.entries(edl.cards ?? {});
-  const todo = cards.map(([name, c]) => {
+  const todo = cards.map(([name, card]) => {
+    const c = cardAt(card);
     const html = `<!doctype html><style>${CARD_BASE}${c.css ?? ""}</style>${c.html}`;
     const hash = createHash("sha256").update(html).digest("hex").slice(0, 10);
     return { name, html, file: join(work, `card-${name}-${W}x${H}-${hash}.png`) };
@@ -59,8 +62,9 @@ async function renderCards() {
 function frame(clip, t) {
   return execFileSync("ffmpeg", ["-loglevel", "error", "-ss", String(t), "-i", join(clipsDir, `${clip}.mp4`), "-frames:v", "1", "-f", "image2pipe", "-vcodec", "png", "-"], { maxBuffer: 64 << 20 });
 }
+const cardAt = (card) => (portrait && card.portrait ? { ...card, ...card.portrait } : card);
 const cardFile = (name) => {
-  const c = edl.cards[name];
+  const c = cardAt(edl.cards[name]);
   const html = `<!doctype html><style>${CARD_BASE}${c.css ?? ""}</style>${c.html}`;
   return join(work, `card-${name}-${W}x${H}-${createHash("sha256").update(html).digest("hex").slice(0, 10)}.png`);
 };
@@ -102,7 +106,7 @@ function captionEvents(cap) {
     if (/[.!?,…]$|\.\.\.$/.test(w.w) || line.length >= max) { lines.push(line); line = []; }
   }
   if (line.length) lines.push(line);
-  return lines.map((l, i) => {
+  return lines.filter((l) => cap.until == null || l[0].start < cap.until).map((l, i) => {
     const next = lines[i + 1];
     const end = next && next[0].start - l.at(-1).end < 0.6 ? next[0].start : l.at(-1).end + 0.35;
     return { start: l[0].start, end, text: l.map((w) => w.w).join(" "), karaoke: l };
@@ -145,7 +149,7 @@ function writeAss() {
 
 // ---- The cut. ----
 await renderCards();
-const segs = edl.segments;
+const segs = edl.segments.map((s) => (portrait && s.portrait ? { ...s, ...s.portrait } : s));
 const inputs = []; const filters = []; let total = 0;
 segs.forEach((s, i) => {
   const isCard = edl.cards?.[s.src];
@@ -161,14 +165,16 @@ segs.forEach((s, i) => {
   if (portrait && (s.fit ?? "contain") === "contain" && !isCard) {
     filters.push(`[${i}:v]split[a${i}][b${i}]`);
     filters.push(`[a${i}]scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},boxblur=30:2,eq=brightness=-0.15[bg${i}]`);
-    filters.push(`[b${i}]scale=${W}:-2[fg${i}]`);
+    const fw = 2 * Math.round((W * (s.scale ?? 1)) / 2);
+    filters.push(`[b${i}]scale=${fw}:-2,crop=${W}:ih:(iw-${W})*${fx}:0[fg${i}]`);
     filters.push(`[bg${i}][fg${i}]overlay=0:(H-h)/2*0.8,setsar=1[f${i}]`);
   } else if (!isCard && Math.abs(ar - 16 / 9) > 0.01) {
     filters.push(`[${i}:v]scale=-2:${H},crop=${W}:${H}:(iw-${W})*${fx}:0,setsar=1[f${i}]`);
   } else filters.push(`[${i}:v]scale=${W}:${H},setsar=1[f${i}]`);
   if (z0 !== 1 || z1 !== 1) {
-    const z = `(${z0}+(${z1}-${z0})*t/${s.dur})`;
-    chain.push(`scale=w='2*trunc(${W}*${z}/2)':h='2*trunc(${H}*${z}/2)':eval=frame:flags=lanczos`, `crop=${W}:${H}:'(iw-${W})*${fx}':'(ih-${H})*${fy}'`);
+    // zoompan, one output frame per input frame: a crop that changes size each frame would lose its focus point.
+    const z = `${z0}+(${z1}-${z0})*on/${Math.round(s.dur * FPS)}`;
+    chain.push(`fps=${FPS}`, `zoompan=z='${z}':x='(iw-iw/zoom)*${fx}':y='(ih-ih/zoom)*${fy}':d=1:s=${W}x${H}:fps=${FPS}`);
   }
   if (s.gray) chain.push("hue=s=0", "eq=contrast=1.1");
   if (s.eq) chain.push(`eq=${s.eq}`);
