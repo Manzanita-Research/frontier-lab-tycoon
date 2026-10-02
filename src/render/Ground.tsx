@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { createRng } from "../sim/rng";
-import { onPlaza } from "../sim/opening";
+import { PLAZA, onPlaza } from "../sim/opening";
 import { GRID_SIZE } from "../sim/state";
 import { atoms, sim } from "../app/game";
 import { useApp } from "../app/hooks";
@@ -91,6 +91,13 @@ export function Paths() {
 /** Which neo lab lot (FLT-56) a tree or bush stands on, or -1. */
 const lotAt = (x: number, z: number) => NEO_LOTS.findIndex(([lx, lz]) => Math.abs(x - lx) < NEO_LOT_HALF[0] && Math.abs(z - lz) < NEO_LOT_HALF[1]);
 
+/**
+ * FLT-96: the strip of verge between the camera and the entrance plaza. Its trees stood right in front of the benches
+ * by the fence, so they are never planted (the bushes and rocks stay, and the dice are drawn all the same).
+ */
+const PLAZA_FRONT = { x0: worldX(Math.min(...PLAZA.map((r) => r.x))), x1: worldX(Math.max(...PLAZA.map((r) => r.x + r.w))) + 0.6 };
+const inFrontOfPlaza = (x: number, z: number) => z > HALF && x > PLAZA_FRONT.x0 && x < PLAZA_FRONT.x1;
+
 export function Decor() {
   // Trees on a lot a neo lab has built on are felled (scaled to nothing: the instance counts never change).
   const built = useApp(atoms.neo).length;
@@ -129,7 +136,8 @@ export function Decor() {
     const put = (mesh: THREE.InstancedMesh | null, i: number, x: number, y: number, z: number, sx: number, sy: number, color?: THREE.Color) => {
       if (!mesh) return;
       const lot = lotAt(x, z);
-      const felled = (lot >= 0 && lot < built) || (plaque && Math.hypot(x - PLAQUE_AT[0], z - PLAQUE_AT[1]) < 1.5);
+      const tree = mesh === trunk.current || mesh === low.current || mesh === high.current;
+      const felled = (lot >= 0 && lot < built) || (plaque && Math.hypot(x - PLAQUE_AT[0], z - PLAQUE_AT[1]) < 1.5) || (tree && inFrontOfPlaza(x, z));
       d.position.set(x, y, z);
       d.scale.set(felled ? 0 : sx, felled ? 0 : sy, felled ? 0 : sx);
       d.rotation.y = i * 1.7;
