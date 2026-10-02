@@ -24,6 +24,7 @@ import { VisitorGroups } from "./VisitorGroups";
 import { OverlayProjector } from "./overlay";
 import { CoachSuggestion } from "./CoachSuggestion";
 import { PathGaps } from "./PathGaps";
+import { PlazaProps } from "./PlazaProps";
 import { Placement } from "./Placement";
 import { Walkers } from "./Walkers";
 import { cameraStart } from "./cameraStart";
@@ -63,6 +64,7 @@ export function Scene() {
       <NeoCampuses />
       <GradePlaque />
       <Lamps />
+      <PlazaProps />
       <Buildings />
       <Walkers />
       <StaffCrew />

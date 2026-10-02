@@ -454,6 +454,12 @@
     "flt-93-arena": [
       "flt93-arena",
       "flt93-arena-phone"
+    ],
+    "flt-96": [
+      "flt91-open",
+      "flt91-open-phone",
+      "flt96-plaza",
+      "flt96-plaza-hall"
     ]
   },
   "scenes": {
@@ -6629,6 +6635,93 @@
       ],
       "viewport": "390x844",
       "mobile": true
+    },
+    "flt96-plaza": {
+      "title": "FLT-96: the entrance plaza up close on a fresh garage (seed 3): benches, planters and the welcome sign",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "15,22.5",
+        "zoom": 110
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "tick": 33
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "flt96-plaza-hall": {
+      "title": "FLT-96: the first Hall built against the plaza: the bench in front of its door makes way",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "14,21.5",
+        "zoom": 80
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placeBuilding",
+              "kind": "hall",
+              "x": 12,
+              "z": 19
+            }
+          }
+        },
+        {
+          "wait": 400
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "tick": 33
+        },
+        {
+          "wait": 800
+        }
+      ]
     }
   }
 }

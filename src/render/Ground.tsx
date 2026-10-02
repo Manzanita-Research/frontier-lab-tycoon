@@ -7,6 +7,7 @@ import { atoms, sim } from "../app/game";
 import { useApp } from "../app/hooks";
 import { HALF, NEO_LOT_HALF, NEO_LOTS, PLAQUE_AT, worldX, worldZ } from "./coords";
 import { boxGeo, CREAM, std } from "./materials";
+import { PLAZA_PROPS } from "./plaza";
 
 const BOARD = 28;
 const RIM = (BOARD - GRID_SIZE) / 2;
@@ -91,6 +92,16 @@ export function Paths() {
 /** Which neo lab lot (FLT-56) a tree or bush stands on, or -1. */
 const lotAt = (x: number, z: number) => NEO_LOTS.findIndex(([lx, lz]) => Math.abs(x - lx) < NEO_LOT_HALF[0] && Math.abs(z - lz) < NEO_LOT_HALF[1]);
 
+/**
+ * FLT-96: the strip of verge between the camera and the plaza's props. Its trees stood right in front of the benches
+ * by the fence (and in the welcome sign), so they are never planted; the bushes and rocks stay, and the dice are the same.
+ */
+const PROPS_FRONT = {
+  x0: worldX(Math.min(...PLAZA_PROPS.map((p) => p.at[0] - p.half[0]))) - 0.6,
+  x1: worldX(Math.max(...PLAZA_PROPS.map((p) => p.at[0] + p.half[0]))) + 0.6,
+};
+const inFrontOfProps = (x: number, z: number) => z > HALF && x > PROPS_FRONT.x0 && x < PROPS_FRONT.x1;
+
 export function Decor() {
   // Trees on a lot a neo lab has built on are felled (scaled to nothing: the instance counts never change).
   const built = useApp(atoms.neo).length;
@@ -129,7 +140,8 @@ export function Decor() {
     const put = (mesh: THREE.InstancedMesh | null, i: number, x: number, y: number, z: number, sx: number, sy: number, color?: THREE.Color) => {
       if (!mesh) return;
       const lot = lotAt(x, z);
-      const felled = (lot >= 0 && lot < built) || (plaque && Math.hypot(x - PLAQUE_AT[0], z - PLAQUE_AT[1]) < 1.5);
+      const tree = mesh === trunk.current || mesh === low.current || mesh === high.current;
+      const felled = (lot >= 0 && lot < built) || (plaque && Math.hypot(x - PLAQUE_AT[0], z - PLAQUE_AT[1]) < 1.5) || (tree && inFrontOfProps(x, z));
       d.position.set(x, y, z);
       d.scale.set(felled ? 0 : sx, felled ? 0 : sy, felled ? 0 : sx);
       d.rotation.y = i * 1.7;
