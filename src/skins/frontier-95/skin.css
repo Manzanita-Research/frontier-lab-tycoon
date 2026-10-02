@@ -1626,6 +1626,128 @@
       background: #000080;
     }
   }
+  /* FLT-93: the New! card by kind, each line with a Show Me… */
+  .f95-unlockgroups {
+    display: grid;
+    gap: 4px 10px;
+    margin: 8px 0 0;
+    max-height: min(52vh, 420px);
+    overflow: auto;
+    /* Jem: Build + Hire on the left, New systems + New apps on the right, so the card stays under the goal note. */
+    &.two {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .f95-unlockcol {
+    display: grid;
+    align-content: start;
+    gap: 4px;
+  }
+  .f95-unlock.wide {
+    width: min(600px, calc(100vw - 24px));
+    .f95-msgbox {
+      width: 100%;
+    }
+  }
+  .f95-unlockgroup {
+    margin: 0;
+    padding: 0 6px 4px;
+    border: 1px solid #808080;
+    box-shadow: 1px 1px 0 #fff, inset 1px 1px 0 #fff;
+    legend {
+      padding: 0 4px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    ul {
+      display: grid;
+      gap: 2px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    li {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 22px;
+    }
+  }
+  /* One line each: the name, then what it is for, in the same run of text. */
+  .f95-unlockwhat {
+    flex: 1;
+    min-width: 0;
+    font-size: 13px;
+    line-height: 1.2;
+    color: #333;
+    b {
+      margin-right: 5px;
+      font-size: 14px;
+      color: #000;
+    }
+  }
+  .f95-btn.f95-showme {
+    flex: none;
+    min-width: 0;
+    min-height: 0;
+    padding: 1px 6px;
+    font-size: 13px;
+  }
+  /* A thumb still needs 32 px (FLT-87): small on a desktop, not on a phone (a phone-sized window counts, whatever the pointer says). */
+  @media (pointer: coarse), (max-width: 640px) {
+    .f95-btn.f95-showme,
+    .f95-post .f95-showme.link {
+      min-height: 32px;
+    }
+  }
+  /* The paperclip, when you asked: "It looks like you're trying to hire an SRE." */
+  .f95-asking {
+    margin: 0 0 4px;
+    font-size: 15px;
+    font-weight: bold;
+  }
+  /* The goal note's next step: what, where, and the button. */
+  /* The tutorial opened the phone's fold to point at the goal: its balloon is talking, so the note keeps to the goal and leaves the map room. */
+  .f95-fold.coached .f95-post .f95-nextstep {
+    display: none;
+  }
+  .f95-post .f95-nextstep {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    padding-top: 5px;
+    border-top: 1px dashed #b8a640;
+    > span {
+      display: grid;
+      flex: 1;
+      min-width: 0;
+    }
+    b {
+      font-size: 15px;
+    }
+    small {
+      text-transform: none;
+      letter-spacing: 0;
+    }
+  }
+  .f95-post .f95-showme.link {
+    display: block;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    font-size: 14px;
+    color: #000080;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  /* The arrow, in pixels. */
+  .coach-arrow {
+    background: #000;
+    filter: drop-shadow(2px 2px 0 #ffff00);
+    animation-timing-function: steps(2, end);
+  }
   .f95-help {
     width: min(580px, 100%);
     max-height: calc(100dvh - 30px);
@@ -3750,10 +3872,14 @@
       row-gap: 0;
       padding: 0 4px 4px;
     }
-    .f95-unlock {
+    .f95-unlock,
+    .f95-unlock.wide {
       left: 10px;
       width: calc(100vw - 20px);
       min-width: 0;
+    }
+    .f95-unlockgroups.two {
+      grid-template-columns: 1fr;
     }
     .f95-news {
       order: -1;

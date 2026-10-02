@@ -2,6 +2,7 @@
 // applets and nothing else (building tools live in the Facilities palette and Start ▸ Programs ▸ Facilities). A desktop
 // shows eight and keeps the rest behind a »; a phone keeps only the palette by Start, and the rest ride in the tray's ».
 import { useEffect, useRef, useState } from "react";
+import { door, standsFor } from "../kit";
 import { useT } from "../context";
 import type { HudActions, HudVM, WidgetVM } from "../../ui/hud/types";
 import { Ico } from "./icons";
@@ -17,9 +18,12 @@ function useLaunch(actions: HudActions) {
   };
 }
 
+// FLT-93: [Show me] finds a building through the palette and a Hire button through the Staff Manager.
+const DOORS: Record<string, ReturnType<typeof door>> = { facilities: door("build:*"), staff: door("hire:*") };
+
 function AppButton({ app, on, onClick, className = "f95-qb" }: { app: QuickApp; on: boolean; onClick: () => void; className?: string }) {
   return (
-    <button type="button" className={`${className}${on ? " on" : ""}`} data-anchor={app.anchor} title={app.tip} aria-label={app.name} aria-pressed={app.id === "facilities" ? on : undefined} onClick={onClick}>
+    <button type="button" className={`${className}${on ? " on" : ""}`} data-anchor={app.anchor} {...DOORS[app.id]} title={app.tip} aria-label={app.name} aria-pressed={app.id === "facilities" ? on : undefined} onClick={onClick}>
       <Ico name={app.icon} size={QUICK_ICON} />
     </button>
   );
@@ -55,7 +59,7 @@ export function QuickLaunch({ widgets, staffOpen, phone, actions }: { widgets: r
       ))}
       {rest.length > 0 && (
         <>
-          <button type="button" className={`f95-qb f95-qmore${more ? " on" : ""}`} data-anchor="apps" title={`${rest.length} more`} aria-label={`${rest.length} more apps`} aria-haspopup="menu" aria-expanded={more} onClick={() => setMore(!more)}>
+          <button type="button" className={`f95-qb f95-qmore${more ? " on" : ""}`} data-anchor="apps" {...door("app:*")} title={`${rest.length} more`} aria-label={`${rest.length} more apps`} aria-haspopup="menu" aria-expanded={more} onClick={() => setMore(!more)}>
             »
           </button>
           {more && (
@@ -104,6 +108,7 @@ export function TrayRank({ vm, actions }: { vm: HudVM; actions: HudActions }) {
       type="button"
       className={`f95-rank${arena.tone ? ` ${arena.tone}` : ""}${arena.top ? " top" : ""}${arena.flinch ? " flinch" : ""}`}
       data-anchor="tray:rank"
+      {...standsFor("app:arena")}
       title={chip.tip}
       aria-label={`${t("stats.arena")} ${chip.text}${chip.arrow === "▲" ? ", up" : chip.arrow === "▼" ? ", down" : ""}. Open the leaderboard`}
       onClick={() => actions.openWidget("arena")}

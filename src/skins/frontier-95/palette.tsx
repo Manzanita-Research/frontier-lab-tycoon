@@ -3,7 +3,7 @@
 // It is an applet (Quick Launch, Start ▸ Facilities…), so building is two clicks away: open it, pick a tile. On a desktop
 // it stays open while you build, the way a 1999 construction window did; on a phone it gets out of the way of the map.
 import { useState, useSyncExternalStore } from "react";
-import { facilityGroups } from "../kit";
+import { door, facilityGroups } from "../kit";
 import { useCoach, useT } from "../context";
 import type { BuildItemVM, HudActions, HudVM } from "../../ui/hud/types";
 import { Ico } from "./icons";
@@ -62,8 +62,8 @@ function Palette({ vm, actions }: { vm: HudVM; actions: HudActions }) {
         <button
           type="button"
           className={`f95-ptile${it.selected ? " on" : ""}${it.isPath || it.isBulldoze ? " tool" : ""}`}
-          data-anchor={`build:${it.kind}`}
           {...coach.attrs(`build:${it.kind}`)}
+          {...(it.kind === "staff" ? door("hire:*") : {})}
           aria-pressed={it.panel ? undefined : it.selected}
           disabled={!it.affordable && !it.selected}
           title={`${label} (${price})${it.does ? `: ${it.does}` : ""}`}

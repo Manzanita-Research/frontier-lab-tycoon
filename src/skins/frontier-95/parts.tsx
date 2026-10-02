@@ -89,11 +89,11 @@ export function Blocks({ value, label, tone = "navy", className = "" }: { value:
   );
 }
 
-export function Tabs<T extends string>({ tabs, active, onChange, label }: { tabs: { id: T; label: string }[]; active: T; onChange: (id: T) => void; label: string }) {
+export function Tabs<T extends string>({ tabs, active, onChange, label }: { tabs: { id: T; label: string; attrs?: Record<string, string> }[]; active: T; onChange: (id: T) => void; label: string }) {
   return (
     <div className="f95-tabs" role="tablist" aria-label={label}>
       {tabs.map((t) => (
-        <button key={t.id} type="button" role="tab" aria-selected={active === t.id} className={`f95-tab ${active === t.id ? "on" : ""}`} onClick={() => onChange(t.id)}>
+        <button key={t.id} type="button" role="tab" {...t.attrs} aria-selected={active === t.id} className={`f95-tab ${active === t.id ? "on" : ""}`} onClick={() => onChange(t.id)}>
           {t.label}
         </button>
       ))}

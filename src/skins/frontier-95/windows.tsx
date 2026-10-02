@@ -1,8 +1,9 @@
 // Frontier 95's windows: Lab Properties, the copy dialog, sticky notes, Properties of a walker, Task Mangler, Thoughts.txt.
 import { useEffect, useState } from "react";
-import { ALL_VISIBLE, Odometer, money, useAutoPause, useSlots, useWidget } from "../kit";
+import { ALL_VISIBLE, anchor, door, Odometer, money, useAutoPause, useSlots, useWhere, useWidget } from "../kit";
 import { useCoach, useT } from "../context";
 import type { SlotPropsMap } from "../types";
+import type { ShowMeVM } from "../../ui/hud/types";
 import { Ico, PixelPortrait } from "./icons";
 import { Blocks, Btn, Field, Sticker, Tabs, Win } from "./parts";
 import { useStackWindow } from "./stack";
@@ -210,6 +211,23 @@ export function Training({ training }: SlotPropsMap["Training"]) {
   );
 }
 
+/** FLT-93: the goal's next step, where it lives, and a Show Me… that has the paperclip walk you there. */
+function NextStep({ showMe, actions }: { showMe: ShowMeVM; actions: SlotPropsMap["Objectives"]["actions"] }) {
+  const t = useT();
+  const where = useWhere()(showMe.anchor);
+  return (
+    <span className="f95-nextstep">
+      <span>
+        <b>{showMe.label}</b>
+        {where && <small>{t("showMe.where", { where })}</small>}
+      </span>
+      <Btn className="f95-showme" data-showme={showMe.anchor} onClick={() => actions.showMe(showMe.anchor)}>
+        {t("showMe")}
+      </Btn>
+    </span>
+  );
+}
+
 /** Desktop sticky notes: flat yellow, 1px border. */
 export function Objectives({ objectives, progress, visible = ALL_VISIBLE, layout, actions }: SlotPropsMap["Objectives"]) {
   const t = useT();
@@ -229,6 +247,7 @@ export function Objectives({ objectives, progress, visible = ALL_VISIBLE, layout
           <span className="f95-goalbar" aria-hidden>
             <i style={{ width: `${goal.ratio * 100}%` }} />
           </span>
+          {goal.showMe && <NextStep showMe={goal.showMe} actions={actions} />}
         </div>
       )}
       {list && (
@@ -250,6 +269,11 @@ export function Objectives({ objectives, progress, visible = ALL_VISIBLE, layout
               <span>
                 {g.label}
                 {g.progress && <small>{g.progress}</small>}
+                {g.showMe && (
+                  <button type="button" className="f95-showme link" data-showme={g.showMe.anchor} onClick={() => actions.showMe(g.showMe!.anchor)}>
+                    {t("showMe")}
+                  </button>
+                )}
               </span>
             </li>
           ))}
@@ -510,7 +534,7 @@ export function Staff({ staff, actions }: SlotPropsMap["Staff"]) {
             active={tab}
             onChange={setTab}
             tabs={[
-              { id: "hire", label: "Hire" },
+              { id: "hire", label: "Hire", attrs: door("hire:*") },
               { id: "roster", label: `Roster (${staff.count})` },
             ]}
           />
@@ -524,7 +548,7 @@ export function Staff({ staff, actions }: SlotPropsMap["Staff"]) {
                       <b>{j.title}</b> <small>{j.salaryText}</small>
                       <small className="blurb">{j.blurb}</small>
                     </span>
-                    <Btn disabled={!j.canHire} title={j.reason} data-anchor={`hire:${j.job}`} onClick={() => actions.hire(j.job)}>
+                    <Btn disabled={!j.canHire} title={j.reason} {...anchor(`hire:${j.job}`)} onClick={() => actions.hire(j.job)}>
                       {t("staff.hire")}
                       {j.count > 0 ? ` (${j.count})` : ""}
                     </Btn>

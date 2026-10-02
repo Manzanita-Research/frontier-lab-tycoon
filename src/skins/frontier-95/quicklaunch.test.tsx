@@ -49,7 +49,7 @@ describe("Frontier 95's Quick Launch (FLT-94)", () => {
     expect(ids[0]).toBe("app:facilities");
     expect(ids).toEqual(expect.arrayContaining(["app:arena", "app:finance", "app:thoughts", "app:news"]));
     for (const id of ids) expect(id, id).toMatch(/^(app:[a-z]+|apps)$/);
-    expect(qs).not.toContain("build:");
+    expect(qs).not.toMatch(/data-anchor="build:/);
     const buttons = [...qs.matchAll(/<button[^>]*>/g)].map((m) => m[0]);
     expect(buttons.length).toBeGreaterThan(3);
     for (const b of buttons) expect(b, b).toMatch(/title="[^"]{4,}"/);
@@ -144,5 +144,23 @@ describe("Frontier 95's Staff Manager (FLT-94)", () => {
     const out = render(vm);
     expect(out).toContain('data-anchor="win:staff"');
     for (const j of vm.staff.jobs) expect(out, j.job).toContain(`data-anchor="hire:${j.job}"`);
+  });
+});
+
+describe("[Show me]'s way in through Quick Launch (FLT-93)", () => {
+  const opens = (out: string, id: string) => out.match(new RegExp(`<button[^>]*data-anchor="${id}"[^>]*>`))?.[0].match(/data-anchor-opens="([^"]+)"/)?.[1];
+
+  it("finds a building through the palette, a Hire button through the Staff Manager and the rest through »", () => {
+    const vm = vmOf({ leapfrog: true });
+    const out = render(vm);
+    expect(opens(out, "app:facilities")).toBe("build:*");
+    expect(opens(out, "app:staff")).toBe("hire:*");
+    if (quickLaunch(vm.widgets).length > QUICK_SHOWN) expect(opens(out, "apps")).toBe("app:*");
+    // Start opens nothing for [Show me]: Quick Launch is one click nearer.
+    expect(out.match(/<button[^>]*data-testid="start-button"[^>]*>/)?.[0]).not.toContain("data-anchor-opens");
+  });
+
+  it("lets the tray's rank stand in for the leaderboard", () => {
+    expect(render(vmOf({ leapfrog: true }))).toMatch(/<button[^>]*data-anchor="tray:rank"[^>]*data-anchor-also="app:arena"/);
   });
 });

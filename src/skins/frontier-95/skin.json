@@ -76,6 +76,17 @@
     "build.menuTitle": "Start",
     "ticker.label": "PointPast News »",
     "thoughts.title": "Thoughts",
-    "assistant.title": "Assistant: it looks like you're building a superintelligence"
+    "assistant.title": "Assistant: it looks like you're building a superintelligence",
+    "coach.ask": "It looks like you're trying to {ask}.",
+    "coach.gotIt": "Got it",
+    "showMe": "Show Me…",
+    "where.build": "Quick Launch > Facilities",
+    "where.hire": "Quick Launch > Staff Manager",
+    "where.app": "Quick Launch, or the tray's »",
+    "where.app:arena": "the tray's #rank, or the trophy on Quick Launch",
+    "where.app:bird": "the bird in the tray",
+    "where.training": "the Training window",
+    "where.speed": "the speed buttons on the taskbar",
+    "where.start": "the Start button"
   }
 }

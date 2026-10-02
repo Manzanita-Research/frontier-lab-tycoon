@@ -472,6 +472,16 @@ async function sweep(withCampus) {
       }
       return null;
     };
+    // Why a control is small (FLT-93): its own min-height, line and padding, and an ancestor that scales it, if one does.
+    const why = (el) => {
+      const cs = getComputedStyle(el);
+      const scaled = [];
+      for (let a = el; a && a !== document.body; a = a.parentElement) {
+        const st = getComputedStyle(a);
+        if (st.zoom !== "1" || st.scale !== "none" || /^matrix\((?!1, 0, 0, 1,)/.test(st.transform)) scaled.push(`${sig(a)} ${st.transform !== "none" ? st.transform : st.scale !== "none" ? `scale ${st.scale}` : `zoom ${st.zoom}`}`);
+      }
+      return ` (min-height ${cs.minHeight}, line ${cs.lineHeight}, padding ${cs.padding}, font ${cs.fontFamily.split(",")[0]}${scaled.length ? `; scaled by ${scaled.join(" < ")}` : ""})`;
+    };
     // Anything tappable under TAP_MIN px (on screen, visible, not disabled).
     const TAPPABLE = "button, a[href], input:not([type=hidden]), select, textarea, summary, [role=button], [role=menuitem], [role=tab], [role=link], [role=checkbox], [role=switch], [role=option], [role=slider]";
     for (const el of document.querySelectorAll(TAPPABLE)) {
@@ -483,8 +493,12 @@ async function sweep(withCampus) {
         issues.push({ kind: "off-screen control", key: `${stable(where(el))}|${stable(name(el))}`, message: `"${name(el)}" in ${where(el)} is at ${Math.round(r.left)}…${Math.round(r.right)} × ${Math.round(r.top)}…${Math.round(r.bottom)}, ${onScreen(r) ? "partly" : "wholly"} off the ${vw}×${vh} screen` });
         if (!onScreen(r)) continue;
       }
-      if (r.width >= TAP_MIN && r.height >= TAP_MIN) continue;
-      issues.push({ kind: "small target", key: `${stable(where(el))}|${stable(name(el))}`, message: `"${name(el)}" in ${where(el)} is ${Math.round(r.width)}×${Math.round(r.height)} px` });
+      // A button squishes while pressed (juice.css's :active), and a tap leaves it pressed for a beat: size it at rest (FLT-93).
+      const own = /^matrix\(([^,]+), [^,]+, [^,]+, ([^,]+),/.exec(getComputedStyle(el).transform);
+      const [w, h] = own ? [r.width / (Math.abs(+own[1]) || 1), r.height / (Math.abs(+own[2]) || 1)] : [r.width, r.height];
+      const slack = own ? 0.5 : 0; // the division rounds
+      if (w >= TAP_MIN - slack && h >= TAP_MIN - slack) continue;
+      issues.push({ kind: "small target", key: `${stable(where(el))}|${stable(name(el))}`, message: `"${name(el)}" in ${where(el)} is ${Math.round(w)}×${Math.round(h)} px${why(el)}` });
     }
     // Windows wider than the screen, or with the close button off it; a card whose buttons need a scroll.
     for (const win of document.querySelectorAll(WIN)) {
@@ -573,7 +587,8 @@ let peekTries = 0;
 async function phoneChecks(p, force = false) {
   if (!phone || (!force && Date.now() - lastSweep < PHONE_CHECK_MS)) return;
   lastSweep = Date.now();
-  const calm = !peeked && !p.event && !p.pendingConfirm && !p.overlays.length && !p.unlockCard && !(await page.locator("[role=menu]:visible, .mode-done:visible, .f95-bsod-go:visible").count());
+  // The probe reads the app's snapshot and the HUD the 5 Hz one, so a New! card just dismissed is still on screen for a beat (FLT-93).
+  const calm = !peeked && !p.event && !p.pendingConfirm && !p.overlays.length && !p.unlockCard && !(await page.locator("[role=menu]:visible, .mode-done:visible, .f95-bsod-go:visible, .f95-unlock:visible, .unlock-card:visible").count());
   const t0 = Date.now();
   const { issues, campus } = await sweep(calm);
   const ms = Date.now() - t0;

@@ -43,6 +43,7 @@ export function BirdApp({ birdapp, layout, actions }: SlotPropsMap["BirdApp"]) {
       <button
         type="button"
         className={`f95-s bird ${open ? "on" : ""} ${loud ? "loud" : ""}`}
+        data-anchor="app:bird"
         onClick={() => actions.toggleBirdApp()}
         aria-pressed={open}
         aria-label={`${t("birdapp.title")}: ${birdapp.headline}`}

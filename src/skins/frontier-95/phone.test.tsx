@@ -31,7 +31,8 @@ describe("Frontier 95 on a phone", () => {
   it("opens the fold when the coach points inside it (the fixture's training and goals lines)", () => {
     for (const step of [3, 6]) {
       const out = render({ ...PHONE, level: 1, coach: step });
-      expect(out, `coach step ${step}`).toContain('class="f95-fold open"');
+      // "coached": the tutorial opened it, so the goal note leaves out its next step (FLT-93) and the map keeps its room.
+      expect(out, `coach step ${step}`).toContain('class="f95-fold open coached"');
       expect(out, `coach step ${step}`).toContain("f95-foldbody");
     }
   });

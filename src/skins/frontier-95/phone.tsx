@@ -4,6 +4,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { useCoach, useT } from "../context";
 import type { HudVM } from "../../ui/hud/types";
+import { door } from "../kit";
 import { Blocks } from "./parts";
 import { Ico } from "./icons";
 
@@ -22,12 +23,18 @@ export function Fold({ vm, children }: { vm: HudVM; children: ReactNode }) {
   const coach = useCoach();
   const [open, setOpen] = useState(false);
   const shown = open || POINTS_INSIDE.has(coach.target ?? "");
+  // FLT-93: when the coach moves on to something outside (a [Show me] from the goal note), the strip folds out of its way.
+  const was = useRef(coach.target);
+  useEffect(() => {
+    if (coach.target !== was.current && coach.target && !POINTS_INSIDE.has(coach.target)) setOpen(false);
+    was.current = coach.target;
+  }, [coach.target]);
   const { training, objectives, progress } = vm;
   const goal = progress.goal.line ? progress.goal : null;
   const list = !goal || vm.visible.arena;
   const said = [training.hasHall ? `${t("training.title")} ${training.pctText}` : null, goal?.line, list ? `${t("objectives.title")} ${objectives.done}/${objectives.total}` : null].filter(Boolean).join(" · ");
   return (
-    <div className={`f95-fold${shown ? " open" : ""}`}>
+    <div className={`f95-fold${shown ? " open" : ""}${shown && !open ? " coached" : ""}`}>
       <button type="button" className="f95-foldbar" aria-expanded={shown} aria-label={said} title={said} onClick={() => setOpen(!shown)}>
         {training.hasHall && (
           <span className={`run${training.justShipped ? " shipped" : ""}`}>
@@ -123,7 +130,7 @@ export function TrayMore({ children, anchor }: { children: ReactNode; /** FLT-94
         {children}
       </div>
       {over > 0 && (
-        <button type="button" className={`f95-s f95-chev${shown ? " on" : ""}`} data-anchor={anchor} aria-label={`${over} more`} title={`${over} more`} aria-expanded={shown} aria-pressed={shown} onClick={() => setOpen(!shown)}>
+        <button type="button" className={`f95-s f95-chev${shown ? " on" : ""}`} data-anchor={anchor} aria-label={`${over} more`} title={`${over} more`} aria-expanded={shown} aria-pressed={shown} {...door("app:*", "tray:*", "hire:*")} onClick={() => setOpen(!shown)}>
           »
         </button>
       )}

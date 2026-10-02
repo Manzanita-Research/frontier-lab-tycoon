@@ -29,7 +29,7 @@ export function BirdApp({ birdapp, layout, actions }: SlotPropsMap["BirdApp"]) {
   const spot = birdapp.spotlight;
   return (
     <section className={`birdapp panel ${open ? "open" : ""}`} data-desk={comms.desk} aria-label={t("birdapp.title")}>
-      <button type="button" className="birdapp-head" onClick={() => actions.toggleBirdApp()} aria-expanded={open} title={birdapp.headline}>
+      <button type="button" className="birdapp-head" data-anchor="app:bird" onClick={() => actions.toggleBirdApp()} aria-expanded={open} title={birdapp.headline}>
         <BirdLogo />
         <b>{t("birdapp.title")}</b>
         <span className="birdapp-sub">{birdapp.headline}</span>

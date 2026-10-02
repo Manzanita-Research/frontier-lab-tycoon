@@ -1,6 +1,6 @@
 // The taskbar: Start (and its menu), Quick Launch (quicklaunch.tsx), the news tape, and the tray (speed, news, sound, camera, clock).
 import { useEffect, useRef, useState } from "react";
-import { ALL_VISIBLE, coachInFacilities, Dialog, facilityGroups, Marquee, useRunBox } from "../kit";
+import { ALL_VISIBLE, anchor, coachInFacilities, Dialog, facilityGroups, Marquee, useRunBox } from "../kit";
 import { useCoach, useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import type { BuildItemVM, WidgetVM } from "../../ui/hud/types";
@@ -237,7 +237,7 @@ export function BuildBar({ items, tip, teasers = [], disasters, widgets = [], la
   const hoverShut = { onPointerEnter: (e: React.PointerEvent) => mouse(e) && flyTo(null) };
   const opener = (on: boolean, onClick: () => void) => ({ role: "menuitem", "aria-haspopup": "menu" as const, "aria-expanded": on, className: on ? "on" : "", onClick });
   const row = (it: BuildItemVM, size = 24) => (
-    <button type="button" role="menuitem" data-anchor={`build:${it.kind}`} {...coach.attrs(`build:${it.kind}`)} className={it.selected ? "on" : ""} disabled={!it.affordable && !it.selected} title={it.does ?? undefined} onClick={() => pick(it.kind)}>
+    <button type="button" role="menuitem" {...coach.attrs(`build:${it.kind}`)} className={it.selected ? "on" : ""} disabled={!it.affordable && !it.selected} title={it.does ?? undefined} onClick={() => pick(it.kind)}>
       <Ico name={it.kind} size={size} />
       <span>{it.name}</span>
       <span className="hk">{it.hotkey ?? ""}</span>
@@ -260,7 +260,7 @@ export function BuildBar({ items, tip, teasers = [], disasters, widgets = [], la
           </div>
           <ul>
             <li {...hoverShut}>
-              <button type="button" role="menuitem" data-anchor="start:palette" {...coach.attrs("start:palette", building)} className={paletteOpen ? "on" : ""} title="Every building, what it costs and what it's for" onClick={palette}>
+              <button type="button" role="menuitem" {...coach.attrs("start:palette", building)} className={paletteOpen ? "on" : ""} title="Every building, what it costs and what it's for" onClick={palette}>
                 <Ico name="build" size={24} />
                 <span>{t("build.facilities")}…</span>
                 <span className="hk" />
@@ -270,7 +270,7 @@ export function BuildBar({ items, tip, teasers = [], disasters, widgets = [], la
             {path && <li {...hoverShut}>{row(path)}</li>}
             {bulldoze && (
               <li {...hoverShut}>
-                <button type="button" role="menuitem" data-anchor="build:bulldoze" {...coach.attrs(`build:${bulldoze.kind}`)} className={bulldoze.selected ? "on" : ""} onClick={() => pick(bulldoze.kind)}>
+                <button type="button" role="menuitem" {...coach.attrs(`build:${bulldoze.kind}`)} className={bulldoze.selected ? "on" : ""} onClick={() => pick(bulldoze.kind)}>
                   <Ico name="bulldoze" size={24} />
                   <span>{t("build.bulldoze")}…</span>
                   <span className="hk">{bulldoze.hotkey ?? ""}</span>
@@ -289,7 +289,7 @@ export function BuildBar({ items, tip, teasers = [], disasters, widgets = [], la
                 <div className="f95-win f95-fly f95-programs" role="menu" aria-label="Programs">
                   <ul>
                     <li className="fly" data-fly="facilities" onPointerEnter={(e) => mouse(e) && setFolder(true)}>
-                      <button type="button" data-anchor="start:facilities" data-testid="start-facilities" {...coach.attrs("start:facilities")} {...opener(folder, () => setFolder(true))}>
+                      <button type="button" data-testid="start-facilities" {...coach.attrs("start:facilities")} {...opener(folder, () => setFolder(true))}>
                         <Ico name="folder" size={20} />
                         <span>{t("build.facilities")}</span>
                         {arrow}
@@ -350,7 +350,7 @@ export function BuildBar({ items, tip, teasers = [], disasters, widgets = [], la
                     <li className="sep" role="separator" onPointerEnter={(e) => mouse(e) && setFolder(false)} />
                     {widgets.map((w) => (
                       <li key={w.id} onPointerEnter={(e) => mouse(e) && (setFolder(false), setKind(null))}>
-                        <button type="button" role="menuitem" data-anchor={`app:${w.id}`} title={w.blurb} onClick={() => launch(w.id)}>
+                        <button type="button" role="menuitem" title={w.blurb} {...anchor(`app:${w.id}`)} onClick={() => launch(w.id)}>
                           <Ico name={widgetIcon(w)} size={20} />
                           <span>{w.id === "drama" ? t("drama.button") : w.name}</span>
                         </button>
@@ -453,7 +453,7 @@ export function BuildBar({ items, tip, teasers = [], disasters, widgets = [], la
         </div>
       )}
       {/* With the palette open the coach points into it, not at Start. */}
-      <button type="button" data-anchor="start" {...coach.attrs("start", !open && !paletteOpen && coach.intoPanel(items))} className={`f95-start ${open ? "on" : ""}`} data-testid="start-button" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}>
+      <button type="button" {...coach.attrs("start", !open && !paletteOpen && coach.intoPanel(items))} className={`f95-start ${open ? "on" : ""}`} data-testid="start-button" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(!open)}>
         <SunriseMark />
         <span>{t("build.menuTitle")}</span>
       </button>
