@@ -6933,12 +6933,14 @@
       ]
     },
     "flt98-built": {
-      "title": "FLT-98: the Hall built on its stake and a Gateway built elsewhere: both stakes are pulled up, the rest stand",
+      "title": "FLT-98: the coach's path and Hall built: the path misses every stake, the Hall's stake is pulled up, the rest stand",
       "query": {
         "warp": null,
         "seed": 3,
         "speed": 0,
-        "hour": 13
+        "hour": 13,
+        "focus": "12.5,18",
+        "zoom": 90
       },
       "steps": [
         {
@@ -6946,6 +6948,17 @@
             "type": "COMMAND",
             "command": {
               "type": "coachSkip"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
             }
           }
         },
@@ -6965,24 +6978,62 @@
           "send": {
             "type": "COMMAND",
             "command": {
-              "type": "placeBuilding",
-              "kind": "hall",
-              "x": 12,
+              "type": "placePath",
+              "x": 11,
+              "z": 15
+            }
+          }
+        },
+        {
+          "wait": 150
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
               "z": 16
             }
           }
         },
         {
-          "wait": 400
+          "wait": 150
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 17
+            }
+          }
+        },
+        {
+          "wait": 150
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 18
+            }
+          }
+        },
+        {
+          "wait": 150
         },
         {
           "send": {
             "type": "COMMAND",
             "command": {
               "type": "placeBuilding",
-              "kind": "gateway",
-              "x": 17,
-              "z": 21
+              "kind": "hall",
+              "x": 12,
+              "z": 16
             }
           }
         },
