@@ -1,4 +1,5 @@
 import type { Player } from "./api";
+import type { CloudActions, CloudVM } from "./cloud/controller";
 
 /**
  * The sign-in's slot contract (FLT-67): what each skin's `AccountSkin` gets, shaped like a HUD slot (plain data plus
@@ -32,4 +33,7 @@ export interface AccountActions {
 export interface AccountSkinProps {
   vm: AccountVM;
   actions: AccountActions;
+  /** Cloud saves (a member's): the ☁ slots in the Save window, uploads, and "Continue from the cloud". */
+  cloud: CloudVM;
+  cloudActions: CloudActions;
 }

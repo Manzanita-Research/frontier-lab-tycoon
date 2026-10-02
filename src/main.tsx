@@ -54,7 +54,15 @@ const localStore = (() => {
 })();
 const intro = !Page && door(window.location, localStore) === "box";
 const root = createRoot(document.getElementById("root")!);
-if (intro) void Promise.all([fonts, import("./intro/boot")]).then(([, m]) => m.mountIntro(root, loadGame));
+// Accounts (FLT-67, see below): when the intro hands over to the game, the account boots with the game's skin.
+const fromBox: typeof loadGame =
+  import.meta.env.VITE_FLT_AUTH === "on"
+    ? () => {
+        const g = loadGame();
+        return { ...g, skin: g.skin.then((m) => ({ ...m, bootSkin: () => m.bootSkin().then(() => import("./account/boot")).then((a) => a.bootAccount()) })) };
+      }
+    : loadGame;
+if (intro) void Promise.all([fonts, import("./intro/boot")]).then(([, m]) => m.mountIntro(root, fromBox));
 else {
   // The HUD's skin (its tokens, fonts and CSS) is ready before the first paint, so there is no flash of the wrong look.
   const skin = Page ? Promise.resolve() : loadGame().skin.then((m) => m.bootSkin());
@@ -74,8 +82,8 @@ else {
   );
 
   // Accounts (FLT-67): compiled in only when the prod deploy builds with VITE_FLT_AUTH=on (docs/ACCOUNTS.md). Otherwise
-  // this statement and everything under src/account/ are dropped from the bundle, which stays byte-identical. The /box
-  // intro leaves it out; the log-on UI shows up on the next load of the game itself.
+  // this statement, `fromBox` above and everything under src/account/ are dropped from the bundle, which stays
+  // byte-identical.
   if (import.meta.env.VITE_FLT_AUTH === "on" && !Page) {
     void Promise.all([skin, app]).then(() => import("./account/boot")).then((m) => m.bootAccount());
   }

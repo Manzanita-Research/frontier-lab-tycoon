@@ -80,12 +80,19 @@ export async function deleteAccount(): Promise<"deleted" | "stale" | "failed"> {
   }
 }
 
-/** Reads and removes `?logon=` (and Better Auth's `error` params) from the address bar. */
+/**
+ * The Worker sends a logged-on player who opens the bare root to `/?member=1`, so the front door is the game (where
+ * their cloud lab is waiting) and not the shelf, even on a computer with no saves (`worker/index.ts`).
+ */
+export const MEMBER_PARAM = "member";
+
+/** Reads and removes `?logon=` (and Better Auth's `error` params, and `?member=`) from the address bar. */
 export function takeReturn(): "ok" | "failed" | null {
   const url = new URL(window.location.href);
   const outcome = url.searchParams.get(RETURN_PARAM);
-  if (outcome !== "ok" && outcome !== "failed") return null;
-  for (const key of [RETURN_PARAM, "error", "error_description"]) url.searchParams.delete(key);
+  const keys = outcome === "ok" || outcome === "failed" ? [RETURN_PARAM, "error", "error_description", MEMBER_PARAM] : [MEMBER_PARAM];
+  if (!keys.some((k) => url.searchParams.has(k))) return null;
+  for (const key of keys) url.searchParams.delete(key);
   window.history.replaceState(window.history.state, "", url.pathname + url.search + url.hash);
-  return outcome;
+  return outcome === "ok" || outcome === "failed" ? outcome : null;
 }

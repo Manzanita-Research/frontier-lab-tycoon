@@ -1,14 +1,16 @@
 import { Dialog } from "../../skins/kit/Dialog";
 import type { AccountSkinProps } from "../types";
+import { BaseCloud } from "./base-cloud";
 
 /**
  * The sign-in for skins that haven't drawn their own yet: a small "Log on" chip in a corner and the base event-card
  * look for the windows, so it takes each skin's tokens (colours, fonts, radii) without knowing anything about it.
  */
-export function BaseAccount({ vm, actions }: AccountSkinProps) {
+export function BaseAccount({ vm, actions, cloud, cloudActions }: AccountSkinProps) {
   const player = vm.status === "member" ? vm.player : null;
   return (
     <>
+      <BaseCloud cloud={cloud} actions={cloudActions} />
       <button
         type="button"
         className="flt-account-chip"
@@ -40,6 +42,7 @@ export function BaseAccount({ vm, actions }: AccountSkinProps) {
               <>
                 <h2>{player.name}</h2>
                 <p>You are logged on{player.handle ? ` as @${player.handle}` : ""} with Hugging Face.</p>
+                {cloud.status && <p className="flt-account-fine">{cloud.status.text}</p>}
               </>
             )}
             {vm.open === "delete" && (

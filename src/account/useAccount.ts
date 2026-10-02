@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { deleteAccount, getPlayer, logOff, logOn, takeReturn } from "./api";
+import { markAway } from "./cloud/controller";
 import type { AccountActions, AccountVM } from "./types";
 
 export const PRIVACY =
@@ -30,6 +31,7 @@ export function useAccount(): { vm: AccountVM; actions: AccountActions } {
       close: () => patch({ open: null, notice: null, busy: false }),
       logOn: () => {
         patch({ busy: true, notice: null });
+        markAway();
         void logOn().then((notice) => notice && patch({ busy: false, notice }));
       },
       logOff: () => {

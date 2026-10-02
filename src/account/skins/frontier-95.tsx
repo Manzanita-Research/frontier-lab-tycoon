@@ -1,17 +1,18 @@
-import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Ico } from "../../skins/frontier-95/icons";
 import { Btn, Win } from "../../skins/frontier-95/parts";
 import { Dialog } from "../../skins/kit/Dialog";
+import { useHost } from "../host";
 import type { AccountSkinProps } from "../types";
+import { Frontier95Cloud } from "./frontier-95-cloud";
 
 /**
  * Frontier 95's sign-in (FLT-67): "Log On to Frontier Network…" in the Start menu, just above Shut Down, the way a
  * networked desktop in 1998 had "Log Off Ada…" there. It opens a network log-on box; once you're on, the same item
  * says "Log Off @you…" and opens your account.
  */
-export function Frontier95Account({ vm, actions }: AccountSkinProps) {
-  const item = useStartMenuItem();
+export function Frontier95Account({ vm, actions, cloud, cloudActions }: AccountSkinProps) {
+  const item = useHost(startMenuSpot, "flt-account-item", "li");
   const member = vm.status === "member" && vm.player;
   const label = member ? `Log Off ${vm.player?.handle ? `@${vm.player.handle}` : vm.player?.name}…` : "Log On to Frontier Network…";
   return (
@@ -35,9 +36,10 @@ export function Frontier95Account({ vm, actions }: AccountSkinProps) {
           </button>,
           item,
         )}
-      {vm.open === "logon" && <LogOn {...{ vm, actions }} />}
-      {vm.open === "member" && <Member {...{ vm, actions }} />}
-      {vm.open === "delete" && <ConfirmDelete {...{ vm, actions }} />}
+      <Frontier95Cloud cloud={cloud} actions={cloudActions} handle={vm.player?.handle ? `@${vm.player.handle}` : (vm.player?.name ?? "")} />
+      {vm.open === "logon" && <LogOn {...{ vm, actions, cloud, cloudActions }} />}
+      {vm.open === "member" && <Member {...{ vm, actions, cloud, cloudActions }} />}
+      {vm.open === "delete" && <ConfirmDelete {...{ vm, actions, cloud, cloudActions }} />}
     </>
   );
 }
@@ -68,7 +70,7 @@ function LogOn({ vm, actions }: AccountSkinProps) {
   );
 }
 
-function Member({ vm, actions }: AccountSkinProps) {
+function Member({ vm, actions, cloud }: AccountSkinProps) {
   const player = vm.player;
   if (!player) return null;
   return (
@@ -81,6 +83,7 @@ function Member({ vm, actions }: AccountSkinProps) {
               You are logged on as <b>{player.name}</b>
               {player.handle && <> (@{player.handle})</>}.
             </p>
+            {cloud.status && <p className="f95-logon-fine">{cloud.status.text}</p>}
             {vm.notice && <Notice text={vm.notice} />}
             <p className="f95-logon-fine">{vm.privacy}</p>
           </div>
@@ -137,36 +140,12 @@ function Notice({ text }: { text: string }) {
 
 const START_MENU = ".f95-startwrap .f95-menu > ul";
 
-/**
- * A list item of our own in the open Start menu, kept just above its last item (Shut Down Lab…) as the menu's
- * submenus open and close. The menu belongs to the skin; this only adds to it, so builds without accounts are
- * untouched (when accounts are on for good, the item moves into the skin's BuildBar).
- */
-function useStartMenuItem(): HTMLLIElement | null {
-  const [item, setItem] = useState<HTMLLIElement | null>(null);
-  useEffect(() => {
-    const li = document.createElement("li");
-    li.className = "flt-account-item";
-    const place = () => {
-      const ul = document.querySelector<HTMLUListElement>(START_MENU);
-      if (!ul) {
-        li.remove();
-        setItem(null);
-        return;
-      }
-      const last = [...ul.children].filter((c) => c !== li).at(-1) ?? null;
-      if (li.parentElement !== ul || li.nextElementSibling !== last) ul.insertBefore(li, last);
-      setItem(li);
-    };
-    const watch = new MutationObserver(place);
-    watch.observe(document.body, { childList: true, subtree: true });
-    place();
-    return () => {
-      watch.disconnect();
-      li.remove();
-    };
-  }, []);
-  return item;
+/** Our item in the open Start menu, kept just above its last item (Shut Down Lab…) as its submenus open and close. */
+function startMenuSpot() {
+  const ul = document.querySelector(START_MENU);
+  if (!ul) return null;
+  const last = [...ul.children].filter((c) => !c.classList.contains("flt-account-item")).at(-1) ?? null;
+  return { parent: ul, before: last };
 }
 
 /** The Start button toggles its menu: a click closes it the way the player would. */
