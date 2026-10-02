@@ -16,6 +16,9 @@ import { NEO_BALLOON_SUB } from "../content/neocampus";
 import { balloonAt, balloonRadius } from "../render/NeoCampuses";
 import { BUILDINGS } from "../content/buildings";
 import { cursorOf } from "../sim/endings/view";
+import { useAtomValue } from "@effect/atom-react";
+import { STAKES, STAKE_SIGN_Y, stakeHoverAtom } from "../render/lot";
+import { STAKE_WORDS } from "../content/lot";
 
 interface Live {
   id: number;
@@ -433,6 +436,27 @@ function NeoBalloons() {
   );
 }
 
+/** FLT-98: the mouse is resting on a survey stake's sign (desktop only): what it says, in full. */
+function StakeHint() {
+  const id = useAtomValue(stakeHoverAtom);
+  const stake = id ? STAKES.find((s) => s.id === id) : undefined;
+  const words = id ? STAKE_WORDS[id] : undefined;
+  if (!stake || !words) return null;
+  return (
+    <Anchored
+      key={id}
+      className="stakehint"
+      clamp
+      pos={(out) => {
+        out.set(worldX(stake.at[0]), STAKE_SIGN_Y + 0.42, worldZ(stake.at[1]));
+        return true;
+      }}
+    >
+      <span>{words.full}</span>
+    </Anchored>
+  );
+}
+
 /**
  * The Takeover (FLT-11): the lab's own model has the mouse. A cursor glides from one build to the next, hops over the
  * campus on the way, and clicks when the building lands. Read straight from the World each frame, like the walkers.
@@ -585,6 +609,7 @@ export function WorldOverlay() {
         <QueueLabels />
         <CollusionSigns />
         <NeoBalloons />
+        <StakeHint />
         <DisasterLabels />
         <EndingLabels />
         <GrabTags />

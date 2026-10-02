@@ -25,6 +25,7 @@ import { OverlayProjector } from "./overlay";
 import { CoachSuggestion } from "./CoachSuggestion";
 import { PathGaps } from "./PathGaps";
 import { PlazaProps } from "./PlazaProps";
+import { LotProps } from "./LotProps";
 import { Placement } from "./Placement";
 import { Walkers } from "./Walkers";
 import { cameraStart } from "./cameraStart";
@@ -65,6 +66,7 @@ export function Scene() {
       <GradePlaque />
       <Lamps />
       <PlazaProps />
+      <LotProps />
       <Buildings />
       <Walkers />
       <StaffCrew />
