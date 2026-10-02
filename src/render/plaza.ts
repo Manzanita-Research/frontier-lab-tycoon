@@ -16,7 +16,7 @@ export interface PlazaProp {
   yaw: number;
   /** Its footprint on the ground, half-extents along x and z. The props test checks the model fits in it. */
   half: readonly [number, number];
-  /** The plaza tiles it stands on. */
+  /** The plaza tiles it stands on; none for the sign, which stands on the verge outside the fence, off the board. */
   on: readonly (readonly [number, number])[];
   /** The side it backs onto: across it there must be nothing anyone walks to, or it makes way. */
   back: readonly [number, number];
@@ -27,17 +27,18 @@ const NORTH = [0, -1] as const;
 const EAST = [1, 0] as const;
 
 /**
- * Along the fence a bench, a planter and a bench, looking into the plaza. On its far side a bench and the welcome sign,
- * either side of the lamp at (14, 22), looking back at the gate (and the camera). At its east end a planter. The lamps
- * and the Security guard's beat (the fence row, and the gate's side of row 22) are left clear: the props test checks it.
+ * Along the fence a bench, a planter and a bench, looking into the plaza. On its far side a bench, beside the lamp at
+ * (14, 22), looking back at the gate (and the camera), and at its east end a planter. The lamps and the Security guard's
+ * beat (the fence row, and the gate's side of row 22) are left clear: the props test checks it. The welcome sign stands
+ * by the road out, just west of the gate, where it is never in anyone's way and never has to move.
  */
 export const PLAZA_PROPS: readonly PlazaProp[] = [
   { id: "bench-fence-w", kind: "bench", at: [14.5, 23.87], yaw: Math.PI, half: [0.32, 0.085], on: [[14, 23]], back: SOUTH },
   { id: "planter-fence", kind: "planter", at: [15.5, 23.87], yaw: 0, half: [0.27, 0.085], on: [[15, 23]], back: SOUTH },
   { id: "bench-fence-e", kind: "bench", at: [16.5, 23.87], yaw: Math.PI, half: [0.32, 0.085], on: [[16, 23]], back: SOUTH },
   { id: "bench-north", kind: "bench", at: [13.5, 22.13], yaw: 0, half: [0.32, 0.085], on: [[13, 22]], back: NORTH },
-  { id: "sign", kind: "sign", at: [16, 22.12], yaw: 0, half: [0.66, 0.05], on: [[15, 22], [16, 22]], back: NORTH },
   { id: "planter-east", kind: "planter", at: [16.87, 22.55], yaw: Math.PI / 2, half: [0.085, 0.27], on: [[16, 22]], back: EAST },
+  { id: "sign", kind: "sign", at: [10.2, 24.85], yaw: 0, half: [0.66, 0.05], on: [], back: NORTH },
 ];
 
 interface Ground {

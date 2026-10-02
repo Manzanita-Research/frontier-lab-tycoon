@@ -8,6 +8,7 @@ import { createRng } from "../sim/rng";
 import { FENCE } from "../sim/staff";
 import { createInitialState } from "../sim/state";
 import { lampSpots } from "./fx/Night";
+import { HALF, NEO_LOTS, NEO_LOT_HALF, PLAQUE_AT } from "./coords";
 import { CREW, PEOPLE } from "./people";
 import { PLAZA_PROPS, plazaProps, type PlazaProp } from "./plaza";
 import { benchGeometry, planterGeometry, signFaceGeometry, signGeometry, triangles } from "./plazaGeo";
@@ -43,7 +44,7 @@ describe("the plaza's starter props", () => {
   });
 
   it("keep inside their tiles, on the verge side, out of every lane and spot a walker can stand in", () => {
-    for (const p of PLAZA_PROPS) {
+    for (const p of PLAZA_PROPS.filter((o) => o.on.length > 0)) {
       const f = footprint(p);
       const xs = p.on.map(([x]) => x);
       const zs = p.on.map(([, z]) => z);
@@ -65,6 +66,25 @@ describe("the plaza's starter props", () => {
         for (const zone of zones) expect(overlaps(f, zone), `${p.id} in a lane of ${x},${z}`).toBe(false);
       }
     }
+  });
+
+  it("the welcome sign stands off the board, by the road out, clear of the walkers leaving, the plaque and the neo lots", () => {
+    const sign = PLAZA_PROPS.find((p) => p.kind === "sign")!;
+    const f = footprint(sign);
+    const s = createInitialState(3);
+    expect(f.z0).toBeGreaterThan(s.grid.h); // outside the fence: no tile of yours
+    expect(f.z1).toBeLessThan(s.grid.h + 2); // on the board's rim
+    // The road out is the gate's width (Ground.tsx), and everyone leaving walks down it.
+    expect(f.x1).toBeLessThan(s.gate.x - 0.1);
+    const scene = { x0: f.x0 - HALF, x1: f.x1 - HALF, z0: f.z0 - HALF, z1: f.z1 - HALF };
+    expect(Math.hypot(PLAQUE_AT[0] - Math.max(scene.x0, Math.min(PLAQUE_AT[0], scene.x1)), PLAQUE_AT[1] - Math.max(scene.z0, Math.min(PLAQUE_AT[1], scene.z1)))).toBeGreaterThan(1);
+    for (const [lx, lz] of NEO_LOTS) {
+      expect(overlaps(scene, { x0: lx - NEO_LOT_HALF[0], x1: lx + NEO_LOT_HALF[0], z0: lz - NEO_LOT_HALF[1], z1: lz + NEO_LOT_HALF[1] }), `lot ${lx}`).toBe(false);
+    }
+    // Always up: nothing you build can come between it and the road.
+    s.cash = 1e9;
+    for (let x = 0; x < s.grid.w; x++) applyCommands(s, [{ type: "placePath", x, z: 21 }], createRng(1));
+    expect(plazaProps(s).map((p) => p.id)).toContain("sign");
   });
 
   it("leave the Security guard's beat and the lamps alone", () => {
@@ -101,7 +121,7 @@ describe("the plaza's starter props", () => {
   it("take no tile from you: every tile the player could pave or build on still can be", () => {
     const s = createInitialState(3);
     s.cash = 1e9;
-    for (const p of PLAZA_PROPS) {
+    for (const p of PLAZA_PROPS.filter((o) => o.on.length > 0)) {
       const [x, z] = p.on[0]!;
       const [bx, bz] = [x + p.back[0], z + p.back[1]];
       if (bz >= s.grid.h) continue; // the fence
@@ -118,13 +138,14 @@ describe("the plaza's starter props", () => {
     expect(canPlace(s, "hall", 12, 19).ok).toBe(true);
     applyCommands(s, [{ type: "placeBuilding", kind: "hall", x: 12, z: 19 }], rng);
     expect(shown()).not.toContain("bench-north");
+    expect(shown()).toContain("planter-east");
+    // A path on east from the plaza's end, past the planter.
+    applyCommands(s, [{ type: "placePath", x: 17, z: 22 }], rng);
+    expect(shown()).not.toContain("planter-east");
     expect(shown()).toContain("sign");
-    // A path off the plaza behind the sign.
-    applyCommands(s, [{ type: "placePath", x: 16, z: 21 }], rng);
-    expect(shown()).not.toContain("sign");
     // Bulldoze the plaza tile a bench stands on: it goes with it.
     applyCommands(s, [{ type: "bulldoze", x: 14, z: 23 }], rng);
-    expect(shown()).toEqual(["planter-fence", "bench-fence-e", "planter-east"]);
+    expect(shown()).toEqual(["planter-fence", "bench-fence-e", "sign"]);
   });
 });
 
