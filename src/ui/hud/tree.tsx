@@ -8,19 +8,21 @@ import type { EventVM, HudActions, HudVM, ToastVM } from "./types";
 export function Docked({ vm, actions }: { vm: HudVM; actions: HudActions }) {
   const { slots } = useSkin();
   const t = useT();
-  const { Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, ThoughtsPanel, Ticker, Toast, Assistant, Arena, Benchmarks, Voice, Factions, NewsControls, NewsArrival, PhotoButton, Papers, DisasterAlert, DramaButton, WindowTray } = slots;
+  const { Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, ThoughtsPanel, Ticker, Toast, Assistant, Arena, Benchmarks, Voice, Factions, BirdApp, NewsControls, NewsArrival, PhotoButton, Papers, DisasterAlert, DramaButton, WindowTray } = slots;
   // One toast at a time, the newest winning; a standing hint only shows while nobody is talking.
-  const newest = vm.toasts.at(-1);
+  const newest = vm.toasts.filter((t) => !t.snag).at(-1);
+  // The recovery toast (FLT-84) stands beside it, so the next "Training Hall down" doesn't bury the Copy details button.
+  const snag = vm.toasts.find((t) => t.snag);
   const talking: ToastVM[] = newest ? [newest] : vm.hints.map((h, i): ToastVM => ({ id: -1 - i, text: t(`hint.${h}`), tone: "hint" }));
   // Standing warnings come first and stay until whatever causes them is fixed.
-  const stack: ToastVM[] = [...vm.warnings.map((text, i): ToastVM => ({ id: -100 - i, text, tone: "warn" })), ...talking];
+  const stack: ToastVM[] = [...vm.warnings.map((text, i): ToastVM => ({ id: -100 - i, text, tone: "warn" })), ...(snag ? [snag] : []), ...talking];
   const nodes: Record<DockedSlot, ReactNode> = {
     Stats: <Stats stats={vm.stats} layout={vm.layout} visible={vm.visible} actions={actions} disasters={vm.disasters} />,
     // Hidden until there is something to show: the training bar appears once a Training Hall is up.
     Training: vm.training.hasHall ? <Training training={vm.training} actions={actions} /> : null,
     Objectives: <Objectives objectives={vm.objectives} progress={vm.progress} visible={vm.visible} layout={vm.layout} actions={actions} />,
     Inspector: vm.inspector ? <Inspector inspector={vm.inspector} layout={vm.layout} actions={actions} /> : null,
-    BuildBar: <BuildBar items={vm.buildItems} tip={vm.buildTip} teasers={vm.progress.teasers} layout={vm.layout} actions={actions} disasters={vm.disasters} widgets={vm.widgets ?? []} mode={vm.mode ?? null} />,
+    BuildBar: <BuildBar items={vm.buildItems} tip={vm.buildTip} teasers={vm.progress.teasers} layout={vm.layout} actions={actions} disasters={vm.disasters} widgets={vm.widgets ?? []} mode={vm.mode ?? null} speed={vm.speed} />,
     Speed: <Speed speed={vm.speed} stats={vm.stats} actions={actions} />,
     Staff: vm.staff.open && vm.visible.staff ? <Staff staff={vm.staff} actions={actions} /> : null,
     ThoughtsPanel: vm.visible.thoughts ? <ThoughtsPanel rows={vm.thoughtsPanel} layout={vm.layout} actions={actions} /> : null,
@@ -37,6 +39,7 @@ export function Docked({ vm, actions }: { vm: HudVM; actions: HudActions }) {
     Benchmarks: vm.leapfrog.enabled ? <Benchmarks leapfrog={vm.leapfrog} layout={vm.layout} actions={actions} /> : null,
     Voice: vm.leapfrog.enabled ? <Voice leapfrog={vm.leapfrog} layout={vm.layout} actions={actions} /> : null,
     Factions: vm.factions.enabled && vm.visible.factions ? <Factions factions={vm.factions} layout={vm.layout} actions={actions} /> : null,
+    BirdApp: vm.birdapp.enabled && vm.visible.birdapp ? <BirdApp birdapp={vm.birdapp} layout={vm.layout} actions={actions} /> : null,
     NewsControls: <NewsControls newsroom={vm.newsroom} sound={vm.sound} skins={vm.skins} visible={vm.visible} actions={actions} />,
     NewsArrival: vm.newsroom.arrival && vm.visible.news ? <NewsArrival arrival={vm.newsroom.arrival} actions={actions} /> : null,
     PhotoButton: <PhotoButton photo={vm.photoMode} actions={actions} />,
@@ -91,7 +94,7 @@ export function Modals({ vm, actions }: { vm: HudVM; actions: HudActions }) {
       {vm.sound.open && <Mixer sound={vm.sound} actions={actions} />}
       {vm.drama.open && <Drama drama={vm.drama} actions={actions} />}
       {vm.mods.open && <ModManager mods={vm.mods} actions={actions} />}
-      {vm.skins.open && <SkinPicker skins={vm.skins} actions={actions} />}
+      {vm.skins.open && <SkinPicker skins={vm.skins} actions={actions} speed={vm.speed} />}
       {vm.skins.offer && !vm.skins.open && <ModSkinOffer offer={vm.skins.offer} actions={actions} />}
       {vm.saves.welcome && !vm.saves.open && <Welcome welcome={vm.saves.welcome} saves={vm.saves} actions={actions} />}
       {(vm.saves.open || vm.saves.modPrompt || vm.saves.dragging) && <SaveLoad saves={vm.saves} actions={actions} />}

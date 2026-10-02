@@ -167,7 +167,7 @@
   border-radius: 9px;
   background: var(--cream);
   color: var(--ink);
-  font: 900 10.5px var(--font);
+  font: 900 11px var(--font);
   white-space: nowrap;
   box-shadow: 0 2px 0 color-mix(in srgb, var(--flt-color-line) 75%, transparent);
   pointer-events: none;
@@ -176,8 +176,10 @@
 .peektag {
   transform: translate(-50%, -100%);
 }
+/* FLT-87's thumb size everywhere (FLT-93), not only under the phone media query. */
 .peektag button {
-  padding: 2px 9px;
+  min-height: 32px;
+  padding: 4px 12px;
   border: 2px solid var(--ink);
   border-radius: 11px;
   background: var(--cream);

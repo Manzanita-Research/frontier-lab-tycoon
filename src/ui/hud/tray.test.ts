@@ -10,7 +10,7 @@ const busy = (): HudVM => {
   const vm = hudViewModel(fixtureInput({ papers: "drop" }));
   return { ...vm, unlock: { id: "wake:hearing", title: "New! The Hearing", body: "The Senate would like a word.", items: [] }, newsroom: { ...vm.newsroom, arrival: { id: "ed-9", type: "paper", text: "The Frontier Times is here." } } };
 };
-const none = { arena: 0, papers: 0, factions: 0 };
+const none = { arena: 0, papers: 0, factions: 0, birdapp: 0 };
 
 describe("the window budget in the view-model (FLT-54)", () => {
   it("asks for what the game opened, and hides the third behind a flashing taskbar button", () => {
@@ -52,7 +52,7 @@ describe("the window budget in the view-model (FLT-54)", () => {
       { id: 2, day: 3, text: "Weather", tone: "neutral" },
       { id: 3, day: 4, text: "Rival tops a benchmark", tone: "bad", panel: "arena" },
     ];
-    expect(unreadOf(news, {})).toEqual({ arena: 2, papers: 0, factions: 0 });
+    expect(unreadOf(news, {})).toEqual({ arena: 2, papers: 0, factions: 0, birdapp: 0 });
     expect(unreadOf(news, { arena: 1 }).arena).toBe(1);
     expect(newestOf(news)).toEqual({ arena: 3 });
     const vm = busy();
@@ -62,5 +62,18 @@ describe("the window budget in the view-model (FLT-54)", () => {
     const open = windowed({ ...vm, arena: { ...vm.arena, open: true }, visible: { ...vm.visible, arena: true } }, [], unreadOf(news, {}));
     expect(open.tray.some((t) => t.id === "arena")).toBe(false);
     expect(open.arena.unread).toBe(0);
+  });
+
+  it("badges the folded Bird App without opening it or queueing a window (FLT-69)", () => {
+    const news: NewsItem[] = [
+      { id: 1, day: 3, text: "@tensor_tim went viral", tone: "good", panel: "birdapp" },
+      { id: 2, day: 4, text: "@tensor_tim is cancelled", tone: "bad", panel: "birdapp" },
+    ];
+    const vm = busy();
+    const folded = windowed({ ...vm, birdapp: { ...vm.birdapp, open: false } }, [], unreadOf(news, { birdapp: 1 }));
+    expect(folded.birdapp.unread).toBe(1);
+    expect(folded.birdapp.open).toBe(false);
+    expect(folded.tray.some((t) => (t.id as string) === "birdapp")).toBe(false);
+    expect(windowed({ ...vm, birdapp: { ...vm.birdapp, open: true } }, [], unreadOf(news, {})).birdapp.unread).toBe(0);
   });
 });

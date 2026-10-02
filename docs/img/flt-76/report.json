@@ -1,0 +1,88 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "2f7d8089d0b52d2b4508760b230e4ace16bc2524"
+  },
+  "head": {
+    "branch": "flt-76-beats",
+    "sha": "da622ac",
+    "dirty": true
+  },
+  "seconds": 197.11,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "overview",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-76/before/overview.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-76/after/overview.png",
+      "title": "The campus, mid-morning, paused",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-76/compare/overview.png",
+      "changed": 0.0016010802469135802
+    },
+    {
+      "scene": "phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-76/before/phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-76/after/phone.png",
+      "title": "The same campus on a phone (390x844)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-76/compare/phone.png",
+      "changed": 0.0019633309029043625
+    },
+    {
+      "scene": "beats-logo",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-76/before/beats-logo.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-76/after/beats-logo.png",
+      "title": "FLT-76: the first decision, two days after the first path (Level 1, the first model training)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-76/compare/beats-logo.png",
+      "changed": 0.5210046296296297
+    },
+    {
+      "scene": "beats-logo-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-76/before/beats-logo-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-76/after/beats-logo-phone.png",
+      "title": "FLT-76: the Logo on a phone",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-76/compare/beats-logo-phone.png",
+      "changed": 0.6318781139871187
+    },
+    {
+      "scene": "beats-unlock",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-76/before/beats-unlock.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-76/after/beats-unlock.png",
+      "title": "FLT-76: a New! card with its joke line (Level 4, The Race)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-76/compare/beats-unlock.png",
+      "changed": 0.02432098765432099
+    },
+    {
+      "scene": "beats-badnews",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-76/before/beats-badnews.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-76/after/beats-badnews.png",
+      "title": "FLT-76: at ▶▶▶ public trust falls 30 points: the game drops to 1× and pins what happened",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-76/compare/beats-badnews.png",
+      "changed": 0.005671296296296297
+    },
+    {
+      "scene": "beats-badnews-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-76/before/beats-badnews-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-76/after/beats-badnews-phone.png",
+      "title": "FLT-76: the bad-news slowdown on a phone",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-76/compare/beats-badnews-phone.png",
+      "changed": 0.010558694859642727
+    },
+    {
+      "scene": "beats-settings",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-76/before/beats-settings.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-76/after/beats-settings.png",
+      "title": "FLT-76: Start ▸ Settings ▸ Slow down for bad news (on by default)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-76/compare/beats-settings.png",
+      "changed": 0.00739891975308642
+    }
+  ],
+  "errors": []
+}

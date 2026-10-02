@@ -122,7 +122,15 @@ describe("goals", () => {
     ]);
     s.race.rank = 3;
     dailyGoals(s, rng);
-    expect(s.goals.context.goals[2]).toMatchObject({ value: 5, met: true });
+    expect(s.goals.context.goals[2]).toMatchObject({ value: 5, held: 1, met: false }); // day 1 of the 30-day hold (FLT-86)
+    s.race.rank = 4;
+    dailyGoals(s, rng);
+    expect(s.goals.context.goals[2]).toMatchObject({ held: 0, met: false }); // slipped: the count starts again
+    s.race.rank = 3;
+    for (let d = 0; d < 29; d++) dailyGoals(s, rng);
+    expect(s.goals.context.goals[2]).toMatchObject({ held: 29, met: false });
+    dailyGoals(s, rng);
+    expect(s.goals.context.goals[2]).toMatchObject({ value: 5, held: 30, met: true });
     s.race.era = { value: "era2", context: { peak: 6 } }; // a milestone latched stays ticked whatever the metric does
     s.race.rank = 6;
     s.models = [];
@@ -135,6 +143,8 @@ describe("goals", () => {
     s.models = ["a", "b", "c"];
     s.race.era = { value: "era3", context: { peak: 6 } };
     s.race.rank = 2;
+    for (let d = 0; d < 29; d++) dailyGoals(s, createRng(1));
+    expect(outcomeOf(s)).toBe("playing"); // the Arena hold is 30 days
     dailyGoals(s, createRng(1));
     expect(outcomeOf(s)).toBe("won");
     expect(s.news.at(-1)!.text).toContain("raising the milestones");
@@ -152,10 +162,9 @@ describe("goals", () => {
     expect(s.news.at(-1)!.text).toContain("NFTs of its own GPUs");
   });
 
-  it("loses when cash sinks below -$2M, and freezes time afterwards", () => {
+  it("loses when the bank calls (every round spent, the overdraft run out), and freezes time afterwards", () => {
     const s = createInitialState(1);
-    s.cash = -2_500_000;
-    s.economy = { ...s.economy, context: { lastBailout: s.day } }; // the bridge round already happened
+    s.economy = { value: "bankrupt", context: { ...s.economy.context, rounds: 3 } };
     dailyGoals(s, createRng(1));
     expect(outcomeOf(s)).toBe("lost");
     const t = s.tick;

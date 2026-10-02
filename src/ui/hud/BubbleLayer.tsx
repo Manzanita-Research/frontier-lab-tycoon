@@ -1,6 +1,7 @@
 import { sim } from "../../app/game";
 import { memberById } from "../../sim/groups";
 import { HALF } from "../../render/coords";
+import { OVER } from "../../render/people";
 import { Anchored } from "../../render/overlay";
 import { useSlots } from "../../skins/context";
 import type { HudActions, HudVM } from "./types";
@@ -25,11 +26,11 @@ export function BubbleLayer({ bubbles, actions }: { bubbles: HudVM["bubbles"]; a
               // A visitor group's member (an auditor): not a walker, but the same interpolation.
               const m = memberById(sim.world, b.walkerId)?.member;
               if (!m) return false;
-              out.set(m.px + (m.x - m.px) * a - HALF, 1.25, m.pz + (m.z - m.pz) * a - HALF);
+              out.set(m.px + (m.x - m.px) * a - HALF, OVER.memberBubble, m.pz + (m.z - m.pz) * a - HALF);
               return true;
             }
             if (w.machine.value === "inside") return false;
-            out.set(w.px + (w.x - w.px) * a - HALF, w.kind === "agent" ? 0.95 : 1.1, w.pz + (w.z - w.pz) * a - HALF);
+            out.set(w.px + (w.x - w.px) * a - HALF, w.kind === "agent" ? OVER.agentBubble : OVER.bubble, w.pz + (w.z - w.pz) * a - HALF);
             return true;
           }}
         >

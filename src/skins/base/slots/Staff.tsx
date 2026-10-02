@@ -46,7 +46,7 @@ export function Staff({ staff, actions }: SlotPropsMap["Staff"]) {
                 {j.blurb}
               </span>
             </span>
-            <button className="mini primary" disabled={!j.canHire} title={j.reason} onClick={() => actions.hire(j.job)}>
+            <button className="mini primary" disabled={!j.canHire} title={j.reason} data-anchor={`hire:${j.job}`} onClick={() => actions.hire(j.job)}>
               {t("staff.hire")}
               {j.count > 0 ? ` (${j.count})` : ""}
             </button>

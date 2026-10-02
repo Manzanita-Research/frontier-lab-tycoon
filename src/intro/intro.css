@@ -1,11 +1,26 @@
-/* The big box (FLT-70): the DOM over the shelf. Bright, chunky, 1996. */
+/* The big box (FLT-70): the DOM over the shelf, in Frontier 95's clothes (its skin tokens, copied as literals: the
+   intro doesn't load the skin system, and the skin's variables only exist under [data-skin]). */
 .intro {
+  --f95-face: #c0c0c0;
+  --f95-light: #dfdfdf;
+  --f95-hilite: #fff;
+  --f95-shade: #808080;
+  --f95-dark: #000;
+  --f95-navy: #000080;
+  --f95-tip: #ffffe1;
+  --f95-raised: inset -1px -1px 0 var(--f95-dark), inset 1px 1px 0 var(--f95-light), inset -2px -2px 0 var(--f95-shade), inset 2px 2px 0 var(--f95-hilite);
+  --f95-btn: inset -1px -1px 0 var(--f95-dark), inset 1px 1px 0 var(--f95-hilite), inset -2px -2px 0 var(--f95-shade), inset 2px 2px 0 var(--f95-light);
+  --f95-pressed: inset 1px 1px 0 var(--f95-dark), inset -1px -1px 0 var(--f95-hilite), inset 2px 2px 0 var(--f95-shade);
+  --f95-sunken: inset 1px 1px 0 var(--f95-shade), inset -1px -1px 0 var(--f95-hilite), inset 2px 2px 0 var(--f95-dark), inset -2px -2px 0 var(--f95-light);
+  --f95-font: W95FA, Tahoma, sans-serif;
   position: fixed;
   inset: 0;
   overflow: hidden;
   background: #1b1d24;
-  font-family: Nunito, system-ui, sans-serif;
-  color: #1d1a14;
+  font-family: var(--f95-font);
+  color: #000;
+  -webkit-font-smoothing: none;
+  font-smooth: never;
   user-select: none;
   -webkit-user-select: none;
   touch-action: none;
@@ -14,42 +29,45 @@
   display: block;
 }
 .intro button {
-  font: 800 15px/1 Nunito, system-ui, sans-serif;
-  color: #0b1440;
-  background: #fffdf2;
-  border: 3px solid #0b1440;
-  border-radius: 10px;
-  padding: 10px 14px;
-  box-shadow: 0 4px 0 #0b1440;
+  font: 400 16px/1 var(--f95-font);
+  color: #000;
+  background: var(--f95-face);
+  border: 0;
+  border-radius: 0;
+  padding: 7px 14px 6px;
+  min-height: 32px;
+  box-shadow: var(--f95-btn);
   cursor: pointer;
-  transition: transform 80ms, box-shadow 80ms;
 }
-.intro button:hover {
-  background: #fff6c2;
-}
-.intro button:active {
-  transform: translateY(3px);
-  box-shadow: 0 1px 0 #0b1440;
+.intro button:active:not(:disabled) {
+  box-shadow: var(--f95-pressed);
+  padding: 8px 13px 5px 15px;
 }
 .intro button:disabled {
-  opacity: 0.4;
+  color: var(--f95-shade);
+  text-shadow: 1px 1px 0 var(--f95-hilite);
   cursor: default;
 }
 .intro button:focus-visible {
-  outline: 3px solid #ffe14d;
-  outline-offset: 3px;
+  outline: 1px dotted #000;
+  outline-offset: -5px;
 }
+/* The default button: Frontier 95 rings it in black. */
 .intro button.intro-primary {
-  background: #ffe14d;
-  color: #c8102e;
+  box-shadow: 0 0 0 1px #000, var(--f95-btn);
+  font-weight: 700;
+}
+.intro button.intro-primary:active:not(:disabled) {
+  box-shadow: 0 0 0 1px #000, var(--f95-pressed);
 }
 .intro button[aria-pressed="true"] {
-  background: #0b1440;
-  color: #ffe14d;
+  background: var(--f95-navy);
+  color: #fff;
+  box-shadow: var(--f95-pressed);
 }
 .intro-row {
   display: flex;
-  gap: 10px;
+  gap: 6px;
   align-items: center;
   flex-wrap: wrap;
 }
@@ -60,15 +78,14 @@
   right: 14px;
   z-index: 20;
 }
-.intro .intro-skip {
-  background: rgba(255, 253, 242, 0.92);
-}
+/* The store's own sign, not the computer's: it stays loud. */
 .intro-store {
   position: fixed;
   top: max(14px, env(safe-area-inset-top));
   left: 14px;
   z-index: 10;
   font: 900 18px/1 Nunito, system-ui, sans-serif;
+  -webkit-font-smoothing: auto;
   color: #fff;
   background: #c8102e;
   padding: 8px 12px;
@@ -88,8 +105,57 @@
   z-index: 10;
   white-space: nowrap;
 }
-.intro .intro-cta:active {
-  transform: translate(-50%, 3px);
+.intro button.intro-cta {
+  font-size: 18px;
+  padding: 10px 18px 9px;
+}
+.intro button.intro-cta:active {
+  padding: 11px 17px 8px 19px;
+}
+/* FLT-95: the box in your hands: ◀ Flip ▶ in a row, and Open under them. */
+.intro-hold {
+  position: fixed;
+  left: 50%;
+  bottom: calc(64px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: max-content;
+}
+.intro-hold .intro-row {
+  flex-wrap: nowrap;
+}
+.intro button.intro-turn {
+  min-width: 44px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.intro button.intro-flip {
+  min-width: 150px;
+}
+.intro button.intro-open {
+  font-size: 18px;
+  padding: 10px 22px 9px;
+}
+.intro-disc {
+  justify-content: center;
+}
+
+/* Captions are Frontier 95's tooltips. */
+.intro-caption,
+.intro-focus p {
+  margin: 0;
+  text-align: center;
+  font: 400 17px/1.3 var(--f95-font);
+  color: #000;
+  background: var(--f95-tip);
+  border: 1px solid #000;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.35);
+  padding: 5px 10px;
+  pointer-events: none;
 }
 .intro-caption {
   position: fixed;
@@ -97,29 +163,33 @@
   bottom: calc(18px + env(safe-area-inset-bottom));
   transform: translateX(-50%);
   z-index: 10;
-  margin: 0;
   width: max-content;
   max-width: min(720px, 92vw);
-  text-align: center;
-  font: 800 17px/1.3 Nunito, system-ui, sans-serif;
-  color: #fff;
-  background: rgba(11, 20, 64, 0.82);
-  padding: 8px 14px;
-  border-radius: 8px;
-  pointer-events: none;
 }
 
-.intro-card {
-  background: #fffdf2;
-  border: 3px solid #0b1440;
-  border-radius: 12px;
-  box-shadow: 0 6px 0 #0b1440;
-  padding: 16px 18px;
+/* Windows: a raised grey frame, a navy title bar (the h2), the body below it. */
+.intro-card,
+.intro-contents {
+  background: var(--f95-face);
+  box-shadow: var(--f95-raised);
+  padding: 3px;
 }
-.intro-card h2 {
-  margin: 0 0 4px;
-  font: 900 22px/1.1 Nunito, system-ui, sans-serif;
-  color: #0b1440;
+.intro-card h2,
+.intro-contents h2 {
+  margin: 0 0 6px;
+  padding: 4px 6px 3px;
+  font: 700 15px/1 var(--f95-font);
+  color: #fff;
+  background: linear-gradient(90deg, var(--f95-navy), #1084d0);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.intro-card > :not(h2) {
+  margin-left: 8px;
+  margin-right: 8px;
+}
+.intro-card > :last-child {
+  margin-bottom: 8px;
 }
 .intro-peek {
   position: fixed;
@@ -131,11 +201,11 @@
 }
 .intro-peek p {
   margin: 8px 0;
-  font-weight: 700;
-  line-height: 1.35;
+  line-height: 1.3;
 }
 .intro-peek-sub {
-  color: #c8102e;
+  color: var(--f95-navy);
+  font-weight: 700;
 }
 .intro-peek-nfs {
   display: inline-block;
@@ -143,7 +213,7 @@
   border: 2px solid #c8102e;
   color: #c8102e;
   padding: 2px 8px;
-  font-weight: 900 !important;
+  font-weight: 700 !important;
 }
 
 .intro-contents {
@@ -153,26 +223,19 @@
   z-index: 10;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
   width: 230px;
-  padding: 12px;
-  background: rgba(255, 253, 242, 0.94);
-  border: 3px solid #0b1440;
-  border-radius: 12px;
 }
 .intro-contents h2 {
-  margin: 0 0 2px;
-  font: 900 13px/1 Nunito, system-ui, sans-serif;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #c8102e;
+  margin-bottom: 4px;
 }
 .intro-contents button {
   text-align: left;
-  padding: 7px 10px;
-  font-size: 14px;
-  box-shadow: 0 2px 0 #0b1440;
-  border-width: 2px;
+  margin: 0 4px;
+}
+.intro-contents button:last-child {
+  margin: 6px 4px 6px;
+  text-align: center;
 }
 .intro-focus {
   position: fixed;
@@ -188,22 +251,17 @@
   max-width: min(640px, 92vw);
 }
 .intro-focus p {
-  margin: 0;
-  text-align: center;
-  font: 800 16px/1.3 Nunito, system-ui, sans-serif;
-  color: #fff;
-  background: rgba(11, 20, 64, 0.82);
-  padding: 7px 12px;
-  border-radius: 8px;
+  font-size: 16px;
 }
+/* The page number: a sunken read-only field. */
 .intro-folio {
   min-width: 180px;
   text-align: center;
-  font: 900 14px/1.3 Nunito, system-ui, sans-serif;
-  color: #fff;
-  background: rgba(11, 20, 64, 0.82);
-  padding: 6px 10px;
-  border-radius: 8px;
+  font: 400 15px/1.3 var(--f95-font);
+  color: #000;
+  background: #fff;
+  box-shadow: var(--f95-sunken);
+  padding: 6px 10px 5px;
 }
 
 .intro-curtain {
@@ -213,6 +271,7 @@
   display: grid;
   place-items: center;
   font: 400 20px/1 W95FA, "Courier New", monospace;
+  -webkit-font-smoothing: none;
   color: #fff;
   pointer-events: none;
   transition: opacity 600ms ease-out;
@@ -250,7 +309,7 @@
   pointer-events: none;
 }
 
-/* Phones: the contents list becomes a strip along the top. */
+/* Phones: the contents list becomes a strip along the top (the title bar goes). */
 @media (max-width: 720px) {
   .intro-contents {
     left: 8px;
@@ -259,14 +318,16 @@
     width: auto;
     flex-direction: row;
     overflow-x: auto;
-    padding: 8px;
+    padding: 4px;
   }
   .intro-contents h2 {
     display: none;
   }
-  .intro-contents button {
+  .intro-contents button,
+  .intro-contents button:last-child {
     flex: none;
     white-space: nowrap;
+    margin: 0;
   }
   .intro-store {
     font-size: 15px;
@@ -279,12 +340,23 @@
   }
   .intro-caption,
   .intro-focus p {
-    font-size: 14px;
+    font-size: 15px;
   }
   .intro-peek {
     top: auto;
     bottom: 80px;
     transform: none;
+  }
+  /* Thumbs: every control in the box's hands is at least 44 px tall. */
+  .intro-hold {
+    bottom: calc(84px + env(safe-area-inset-bottom));
+  }
+  .intro-hold button,
+  .intro-disc button {
+    min-height: 44px;
+  }
+  .intro button.intro-turn {
+    min-width: 52px;
   }
 }
 

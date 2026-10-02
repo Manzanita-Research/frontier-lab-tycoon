@@ -67,12 +67,16 @@ export function stageOps(s: GameState, moment: OpsMoment) {
       return;
     }
     case "queue": {
-      // The Snack Wall and the Kombucha Bar are full, and the line down the spine is a good deal longer than the bar.
+      // The Kombucha Bar is full, and the line down the spine is a good deal longer than the bar.
       s.cash = 12_000_000;
-      const bar = s.buildings.find((b) => b.kind === "kombucha")!;
+      // A new lab is a garage with one cluster (FLT-47), so build the bar where the old opening campus had it, beside the spine.
+      if (!s.buildings.some((b) => b.kind === "kombucha")) applyNow(s, [{ type: "placeBuilding", kind: "kombucha", x: 12, z: 19 }]);
+      const bar = s.buildings.find((b) => b.kind === "kombucha");
+      // A staging link never takes the game down: no bar, no line (moments.test.ts says when that happens).
+      if (!bar) return;
       s.walkers = s.walkers.filter((w, i) => w.kind === "researcher" || i % 5 === 0);
       s.thoughts = [];
-      for (let i = 0; i < 6; i++) seedWalkers(s, "researcher", 1, createRng(11 + i));
+      for (let i = 0; i < 9; i++) seedWalkers(s, "researcher", 1, createRng(11 + i));
       const rs = s.walkers.filter((w) => w.kind === "researcher");
       for (let i = 0; i < 16; i++) {
         const w = rs[i];

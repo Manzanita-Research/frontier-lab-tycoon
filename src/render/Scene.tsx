@@ -6,6 +6,8 @@ import { SoundLayer } from "../audio/SoundLayer";
 import { PressCamera } from "./PressCamera";
 import { ProbeView } from "./ProbeView";
 import { Buildings } from "./buildings/Buildings";
+import { CrtLayer } from "./crt/CrtLayer";
+import { crtEvents } from "./crt/events";
 import { CAMERA_OFFSET, CameraRig } from "./fx/CameraRig";
 import { FxDirector } from "./fx/FxDirector";
 import { Lighting } from "./fx/Lighting";
@@ -21,8 +23,12 @@ import { StaffCrew } from "./StaffCrew";
 import { VisitorGroups } from "./VisitorGroups";
 import { OverlayProjector } from "./overlay";
 import { CoachSuggestion } from "./CoachSuggestion";
+import { PathGaps } from "./PathGaps";
+import { PlazaProps } from "./PlazaProps";
+import { LotProps } from "./LotProps";
 import { Placement } from "./Placement";
 import { Walkers } from "./Walkers";
+import { cameraStart } from "./cameraStart";
 
 // Postprocessing is a chunk of its own, fetched the first time photo mode opens and mounted only while it is on.
 const PhotoFX = lazy(() => import("./fx/PhotoFX"));
@@ -36,22 +42,16 @@ function PhotoLayer() {
   ) : null;
 }
 
-function initialZoom() {
-  const w = window.innerWidth;
-  const h = window.innerHeight;
-  // Roughly a building per eighth of the screen width at 1440x900, with the whole gate-to-hall campus still in view.
-  return debugParams.zoom ?? (w < 700 ? w / 16 : Math.min(w / 30, h / 17.5));
-}
-
 export function Scene() {
-  const zoom = useRef(initialZoom()).current;
+  const start = useRef(cameraStart(window.innerWidth, window.innerHeight, debugParams)).current;
   return (
     <Canvas
       orthographic
       shadows
       dpr={[1, 1.75]}
       gl={{ antialias: true, alpha: true }}
-      camera={{ position: CAMERA_OFFSET.toArray(), zoom, near: -100, far: 200 }}
+      events={crtEvents}
+      camera={{ position: CAMERA_OFFSET.toArray(), zoom: start.zoom, near: -100, far: 200 }}
     >
       <FxDirector />
       <SoundLayer />
@@ -59,11 +59,14 @@ export function Scene() {
       <Ground />
       <Decor />
       <Paths />
+      <PathGaps />
       <Slop />
       <Fence />
       <NeoCampuses />
       <GradePlaque />
       <Lamps />
+      <PlazaProps />
+      <LotProps />
       <Buildings />
       <Walkers />
       <StaffCrew />
@@ -72,8 +75,9 @@ export function Scene() {
       <OverlayProjector />
       <Placement />
       <CoachSuggestion />
-      <CameraRig baseZoom={zoom} />
+      <CameraRig baseZoom={start.base} focus={start.focus} />
       <PhotoLayer />
+      <CrtLayer />
       <PressCamera />
       <ProbeView />
     </Canvas>

@@ -4,9 +4,11 @@
 // the game is reachable from them, so a change in the sim never breaks a mod and a mod can never touch the sim.
 // Pure: no atoms, no DOM, no clocks, no random numbers. It is unit-tested against fixture snapshots (vm.test.ts).
 import type { Snapshot, Tool } from "../../app/hud";
+import type { StageView } from "../../app/moments";
 import { OFFICE_TOOLS, RACE_TOOLS, SPEEDS, TOOLS } from "../../app/hud";
 import { PATH_PRICE } from "../../content/buildings";
 import { ERAS } from "../../content/eras";
+import { UNLOCK_QUIPS } from "../../content/progression";
 import { STAFF } from "../../content/staff";
 import { dramaLetter } from "../../content/events";
 import { SCENARIO, type GoalDef } from "../../content/goals";
@@ -32,7 +34,9 @@ import { factionChips, factionsOf } from "./factions";
 import { unreadOf, windowed } from "./tray";
 import type { Budget } from "./windows";
 import { groupOf, modeOf, widgetsOf } from "./widgets";
-import type { FactionChipVM } from "./types";
+import { birdAppOf } from "./birdapp";
+import type { CoachVM, FactionChipVM, ShowMeVM } from "./types";
+import { goalStep, guideAsk, guideText, type Facts } from "./anchors";
 import { challengeLine, challengeQuery, compareRuns, VERDICT_TEXT, type Challenge } from "../share/link";
 import { streakText } from "../share/streak";
 import { ENDING_RULES, endingById } from "../../sim/endings/pack";
@@ -40,7 +44,7 @@ import type {
   ArenaRowVM, DramaDocVM,
   ArenaVM, AuditVM, BeatVM, BillVM, SenateVM, TrackerVM, GoalVM, ReportCardVM, ToneVM, BenchCellVM, DisasterRunVM, DisastersVM, DisasterStageVM, MeterVM, RiskVM, UnderstaffedVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HearingMoveVM, HearingVM, HudVM, LeakVM, SenatorVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
   DramaVM, ModsVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, ResponseVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, StreamVM, ThoughtRowVM, TrainingVM, TrendVM, VoiceVM, WalkerKindVM,
-  EndingVM, ShareVM, TakeoverVM, MemoVM, ChallengeVM,
+  EndingVM, ShareVM, TakeoverVM, MemoVM, ChallengeVM, UnlockCardVM,
 } from "./types";
 import { defs } from "../../sim/defs";
 import { NO_SAVES_VM, savesViewModel, type SavesInput } from "./saves.vm";
@@ -61,8 +65,12 @@ export interface HudInput {
   tool: Tool | null;
   follow: boolean;
   highlight: string | null;
-  toasts: readonly { id: number; text: string; tone: Tone; batch?: readonly { text: string; tone: Tone }[] }[];
+  toasts: readonly { id: number; text: string; tone: Tone; batch?: readonly { text: string; tone: Tone }[]; pinned?: true; snag?: string }[];
   news: readonly NewsItem[];
+  /** FLT-76: the big moments still waiting their turn, an ending's solo and the shipped sticker (`app/moments.ts`). Optional: nothing waiting. */
+  stage?: StageView;
+  /** FLT-76: the "Slow down for bad news" setting. Optional: on. */
+  slowForBadNews?: boolean;
   outcomeDismissed: boolean;
   /** "Tap anyone to read their mind" is still showing. */
   tapHint: boolean;
@@ -75,6 +83,8 @@ export interface HudInput {
   senateOpen?: boolean;
   /** FLT-33: the Factions panel is open. Optional: folded. */
   factionsOpen?: boolean;
+  /** FLT-69: the Bird App is open. Optional: folded. */
+  birdAppOpen?: boolean;
   /** `chosen`: the player opened it (FLT-54). Optional: the game did. */
   arena: { open: boolean; chosen?: boolean; alert: boolean; flinch: boolean; moved: Record<string, "up" | "down"> };
   /** Release Leapfrog's real-time flourishes (row flashes, blinking badges, solved columns kept on the board, news-cycle history). Optional: none is fine. */
@@ -111,13 +121,15 @@ export interface HudInput {
    * the game wants is up and nothing is unread (the host applies the budget itself, after it has stepped it).
    */
   windows?: { budget: Budget; seen: Partial<Record<NewsPanel, number>> };
+  /** FLT-93: [Show me]'s anchor while the coach is pointing at it for the player. Optional: nobody asked. */
+  guide?: string | null;
   /** FLT-57: days played in a row, a friend's challenge from the URL (and whether its banner is up), the Memo extra already read, and this page's address for friend links. Optional: none is fine. */
   social?: { streak: number; challenge: Challenge | null; challengeOpen: boolean; memoSeen: string | null; linkBase: string | null };
 }
 
 
-/** "Revenue $140K / $250K per day", "Runs 2 / 3", "Hype 47 / 60". */
-export function goalProgressText(def: GoalDef, value: number): string {
+/** "Revenue $140K / $250K per day", "Runs 2 / 3", "Hype 47 / 60", "Arena #2 · day 12 of 30". `held` is a hold goal's days in a row. */
+export function goalProgressText(def: GoalDef, value: number, held = 0): string {
   const shown = Math.min(value, def.target);
   switch (def.unit) {
     case "money":
@@ -130,12 +142,16 @@ export function goalProgressText(def: GoalDef, value: number): string {
       return `Era ${Math.floor(shown)} / ${def.target}`;
     case "rank":
       if (value <= 0) return "Counts from Era 3";
+      if (def.hold !== undefined && value >= def.target) {
+        const rank = `Arena #${defs().arenaSize + 1 - Math.floor(value)}`;
+        return held >= def.hold ? `${rank} (held ${def.hold} days)` : `${rank} · day ${held} of ${def.hold}`;
+      }
       return value >= def.target ? `Arena #${defs().arenaSize + 1 - Math.floor(value)} (top ${defs().arenaSize + 1 - def.target} reached)` : `Arena #${defs().arenaSize + 1 - Math.floor(value)}, need top ${defs().arenaSize + 1 - def.target}`;
   }
 }
 
 /** The top bar of a camera beat (FLT-56), by kind. */
-const BEAT_KICKER: Record<string, string> = { exit: "Breaking · a departure", huddle: "The auditors are conferring", viral: "Live · trending now", statement: "A statement from Comms", leak: "Someone is asking about the file" };
+const BEAT_KICKER: Record<string, string> = { stretch: "Final stretch", exit: "Breaking · a departure", huddle: "The auditors are conferring", viral: "Live · trending now", statement: "A statement from Comms", leak: "Someone is asking about the file" };
 
 const TONE_LABEL = { bad: "Breaking", joke: "Developing", good: "Good news", neutral: "Update" } as const;
 const MOOD = { content: "Content", slumped: "Slumped", miserable: "Miserable", resigned: "Resigned" } as const;
@@ -146,7 +162,7 @@ const NOUN: Record<WalkerKind, [string, string]> = {
   visitor: ["visitor", "visitors"],
   protester: ["protester", "protesters"],
 };
-const SHORT: Record<Tool, string> = { path: "Path", cluster: "Cluster", hall: "Training Hall", gateway: "Gateway", kombucha: "Kombucha", nap: "Nap Pods", snack: "Snack Wall", demo: "Demo Stage", datacenter: "Datacenter", gas: "Gas Turbine", solar: "Solar Farm", security: "Security", bulldoze: "Bulldoze" };
+const SHORT: Record<Tool, string> = { path: "Path", cluster: "Cluster", hall: "Training Hall", gateway: "Gateway", kombucha: "Kombucha", nap: "Nap Pods", snack: "Snack Wall", demo: "Demo Stage", datacenter: "Datacenter", gas: "Gas Turbine", solar: "Solar Farm", security: "Security", sandbox: "Sandbox", honeypot: "Honeypot", bulldoze: "Bulldoze" };
 const CUE_LABEL: Record<string, string> = { place: "Place", coin: "Coin", bulldoze: "Bulldoze", card: "News card", choice: "Choice", release: "Release", era: "New era", breakdown: "Alarm" };
 export const PHOTO_TIMES = [
   { key: "live", label: "Live" },
@@ -190,6 +206,8 @@ function statsOf(i: HudInput): StatsVM {
         { label: "Calm baseline", note: "10%", fill: 1, points: pts(WEIGHTS.penalties) },
         { label: "Incidents", note: "quits, flops, bailouts", fill: v.incident, points: -pts((WEIGHTS.penalties * v.incident) / 2) + 0 },
         { label: "Protesters at the gate", note: null, fill: v.protest, points: -pts((WEIGHTS.penalties * v.protest) / 2) + 0 },
+        // FLT-69: the Bird App's Aura, the part of Hype the posters hold up (already counted in the Hype row).
+        ...(s.birdapp?.enabled ? [{ label: "Aura", note: `the Bird App: +${Math.round(s.birdapp.effects.hype)} of the Hype`, fill: s.birdapp.aura / 100, points: pts((WEIGHTS.hype * s.birdapp.effects.hype) / 100) }] : []),
       ],
     },
     cash: { value: s.cash, text: formatMoney(s.cash), negative: s.cash < 0 },
@@ -197,7 +215,9 @@ function statsOf(i: HudInput): StatsVM {
     runway: { months: s.runway, text: s.runway === null ? "∞" : `${s.runway.toFixed(1)} mo`, warning: runwayLow },
     capability: { value: s.capability, latestModel: s.latestModel },
     hype: { value: s.hype },
-    finance: { income: s.ledger.income, incomeText: formatMoney(s.ledger.income), expenses: s.ledger.expenses, expensesText: formatMoney(s.ledger.expenses) },
+    // The same books as the net (today's estimate), so Income − Expenses is the Net on the line below it.
+    finance: { income: s.income, incomeText: formatMoney(s.income), expenses: s.expenses, expensesText: formatMoney(s.expenses) },
+    money: moneyOf(s),
     arena: {
       rank: race.rank,
       rankDelta: race.rankDelta,
@@ -211,7 +231,7 @@ function statsOf(i: HudInput): StatsVM {
   };
 }
 
-function trainingOf(s: Snapshot): TrainingVM {
+function trainingOf(s: Snapshot, stage: StageView | undefined): TrainingVM {
   const pct = Math.floor(s.training.pct * 100);
   return {
     hasHall: s.hasHall,
@@ -221,12 +241,36 @@ function trainingOf(s: Snapshot): TrainingVM {
     pctText: `${pct}%`,
     computePerDay: s.computePerDay,
     etaDays: s.training.etaDays,
-    justShipped: s.lastRelease !== null && s.day - s.lastRelease <= SHIPPED_DAYS && s.models > 0,
+    // FLT-76: the moment queue keeps the sticker up for a few real seconds (3 game days at ▶▶▶ is a blink), and back while the ship waits its turn.
+    justShipped: !!stage?.shipped || (s.lastRelease !== null && s.day - s.lastRelease <= SHIPPED_DAYS && s.models > 0 && !stage?.waiting.includes("ship")),
     latestModel: s.latestModel,
   };
 }
 
-function objectivesOf(s: Snapshot): ObjectivesVM {
+/** A hold goal's bar fills with the days held, once it is at its target (FLT-86); before that it shows the climb. */
+const holdRatio = (g: { value: number; target: number; hold?: number; held?: number; met: boolean }) =>
+  g.hold && !g.met && g.value >= g.target ? Math.min(1, (g.held ?? 0) / g.hold) : undefined;
+
+/** FLT-93: what the lab has, for a goal step's `until` (snapshots from fixtures may lack `ops`). */
+function factsOf(s: Snapshot): Facts {
+  return { built: new Set((s.buildings ?? []).map((b) => b.kind)), staff: new Set((s.ops?.staff ?? []).map((r) => r.job)) };
+}
+
+/** FLT-93: a goal's [Show me]: its next step's label and anchor. */
+function showMeOf(goalId: string | undefined, facts: Facts): ShowMeVM | undefined {
+  const step = goalStep(goalId, facts);
+  return step ? { label: step.label, anchor: step.anchor } : undefined;
+}
+
+/**
+ * FLT-93: [Show me] is the coach, pointing for the player: same balloon, same ring, one system (FLT-54/91 folded in). It
+ * waits for nothing but the click on the thing (or "Got it"), and it outranks a tutorial step, which carries on after.
+ */
+function guideCoachOf(anchor: string): CoachVM {
+  return { id: `show:${anchor}`, step: 0, of: 0, text: guideText(anchor), target: anchor, waitFor: "action", canSkip: false, guide: true, ask: guideAsk(anchor) };
+}
+
+function objectivesOf(s: Snapshot, facts: Facts = factsOf(s)): ObjectivesVM {
   const left = Math.max(0, SCENARIO.deadlineDay - s.day);
   return {
     done: s.goals.filter((g) => g.met).length,
@@ -238,7 +282,8 @@ function objectivesOf(s: Snapshot): ObjectivesVM {
       const def = defs().goals.find((d) => d.id === g.id)!;
       // The release goal names the run actually training ("Ship 3 models (0/3), next: Frontier-2"), so its own progress line goes.
       const release = g.id === "release";
-      return { id: g.id, label: release ? s.releaseGoal : def.label, progress: release ? "" : goalProgressText(def, g.value), ratio: Math.max(0, Math.min(1, g.value / g.target)), met: g.met };
+      const showMe = g.met ? undefined : showMeOf(g.id, facts);
+      return { id: g.id, label: release ? s.releaseGoal : def.label, progress: release ? "" : goalProgressText(def, g.value, g.held), ratio: holdRatio(g) ?? Math.max(0, Math.min(1, g.value / g.target)), met: g.met, ...(showMe ? { showMe } : {}) };
     }),
   };
 }
@@ -267,6 +312,21 @@ function inspectorOf(who: Inspect | null, following: boolean, lab: string, chips
   };
 }
 
+/** FLT-94: what a tool is for, plainly, for the build palette: the Help line without its "Name: ", else the joke. */
+const TOOL_DOES: Record<string, string> = {
+  path: "How people get around. Every door has to reach the gate along one.",
+  bulldoze: "Knocks a building down. You get half your money back.",
+};
+function doesOf(t: Tool): string | null {
+  if (TOOL_DOES[t]) return TOOL_DOES[t]!;
+  const help = HELP_BUILDINGS[t];
+  if (help) {
+    const does = help.slice(help.indexOf(":") + 1).trim();
+    return does.charAt(0).toUpperCase() + does.slice(1);
+  }
+  return t === "path" || t === "bulldoze" ? null : (defs().buildings[t]?.blurb ?? null);
+}
+
 function buildOf(i: HudInput): { items: BuildItemVM[]; tip: BuildTipVM | null } {
   const s = i.snap;
   const race = s.race;
@@ -282,6 +342,8 @@ function buildOf(i: HudInput): { items: BuildItemVM[]; tip: BuildTipVM | null } 
       name: toolName(t),
       short: SHORT[t],
       blurb: t === "path" || t === "bulldoze" ? null : defs().buildings[t].blurb,
+      does: doesOf(t),
+      upkeepText: t === "path" || t === "bulldoze" || !defs().buildings[t].upkeepPerDay ? null : `${formatMoney(defs().buildings[t].upkeepPerDay)}/day upkeep`,
       price,
       priceText: t === "bulldoze" ? "refund 50%" : isFree ? "FREE" : formatMoney(price),
       free: isFree,
@@ -301,6 +363,8 @@ function buildOf(i: HudInput): { items: BuildItemVM[]; tip: BuildTipVM | null } 
     name: "Staff",
     short: `Staff${ops.staff.length > 0 ? ` (${ops.staff.length})` : ""}`,
     blurb: "Hire Janitor Bots, SREs, Comms Reps and Security.",
+    does: "Hire the people who keep the lights on: cleaners, SREs, Comms and Security.",
+    upkeepText: null,
     price: 0,
     priceText: ops.staff.length > 0 ? `${formatMoney(ops.payroll)}/day` : "hire",
     free: false,
@@ -322,6 +386,8 @@ function buildOf(i: HudInput): { items: BuildItemVM[]; tip: BuildTipVM | null } 
       name: "Senate",
       short: "Senate",
       blurb: "Three senators, their promises, and what it costs to change their minds.",
+      does: "Three senators, their promises, and what it costs to change their minds.",
+      upkeepText: null,
       price: 0,
       priceText: s.bill.stage === "invited" ? "draft due" : due ? "vote soon" : "in recess",
       free: false,
@@ -362,19 +428,27 @@ function staffOf(i: HudInput, earned: ReadonlySet<string>): StaffVM {
   };
 }
 
-function speedOf(value: number): SpeedVM {
+function speedOf(value: number, slowForBadNews: boolean): SpeedVM {
   return {
     value,
     paused: value === 0,
     options: SPEEDS.map((v) => ({ value: v, key: v === 0 ? "speed.pause" : `speed.${v}`, active: v === value })),
+    slowForBadNews,
   };
 }
+
+/** How long (ticks, about 15 s at 1×) the coached opening thinks one bubble at a time once you've clicked Start. */
+export const OPENING_QUIET_TICKS = 50;
 
 function bubblesOf(i: HudInput, chips: ReadonlyMap<string, FactionChipVM>): BubbleVM[] {
   const chats = i.snap.chats ?? [];
   // Two people talking say their lines out loud instead of thinking: the visitor first, then your researcher.
   const talking = new Set(chats.flatMap((c) => (c.lines.length ? [c.hostId, c.guestId] : [])));
-  const thoughts = i.snap.thoughts.filter((t) => !talking.has(t.walkerId)).map((t): BubbleVM => {
+  // FLT-91: the first frame is the garage and its plaza, not two grey boxes over them. The lab keeps its thoughts to
+  // itself until you click Start, then finds its voice one bubble at a time.
+  const coached = i.snap.coach;
+  const room = coached?.id === "start" ? 0 : coached && i.snap.tick < OPENING_QUIET_TICKS ? 1 : Infinity;
+  const thoughts = i.snap.thoughts.filter((t) => !talking.has(t.walkerId)).slice(0, room).map((t): BubbleVM => {
     const faction = t.faction ? chips.get(t.faction) : undefined;
     return { id: t.id, walkerId: t.walkerId, kind: t.kind, speaker: i.snap.speakers[t.walkerId] ?? "", text: t.text, ...(faction ? { faction } : {}) };
   });
@@ -845,6 +919,17 @@ const OFF_LEAPFROG: LeapfrogVM = {
   pulse: 0,
 };
 
+function moneyOf(s: Snapshot): StatsVM["money"] {
+  const left = Math.max(0, s.money.maxRounds - s.money.rounds);
+  return {
+    stake: s.money.stake,
+    stakeText: `${Math.round(s.money.stake)}%`,
+    roundsLeft: left,
+    roundsText: `${left} of ${s.money.maxRounds}`,
+    overdraftDays: s.money.overdraftDay === null ? null : Math.max(0, s.money.overdraftDay - s.day),
+  };
+}
+
 function outcomeOf(i: HudInput): OutcomeVM | null {
   const s = i.snap;
   // An ending is its own card: the front page (endingOf).
@@ -863,6 +948,8 @@ function outcomeOf(i: HudInput): OutcomeVM | null {
       { label: "Capability", text: String(Math.round(s.capability)), bad: false },
       { label: "Hype", text: String(Math.round(s.hype)), bad: false },
       { label: "Models", text: String(s.models), bad: false },
+      // FLT-86: what the emergency rounds cost, if any were signed.
+      ...(s.money.rounds > 0 ? [{ label: "Still yours", text: `${Math.round(s.money.stake)}%`, bad: s.money.stake < 100 }, { label: "Bailouts", text: `${s.money.rounds} of ${s.money.maxRounds}`, bad: true }] : []),
     ],
     note: won ? "All three milestones met." : `${met} of ${s.goals.length} milestones met.`,
   };
@@ -1046,6 +1133,9 @@ function photoOf(i: HudInput): PhotoVM {
   };
 }
 
+/** A New! card with its joke line (FLT-76). */
+const quipped = (card: UnlockCardVM | null): UnlockCardVM | null => (card && UNLOCK_QUIPS[card.id] && !card.quip ? { ...card, quip: UNLOCK_QUIPS[card.id] } : card);
+
 /** A toast that says what a standing warning already says is the warning: it is shown once. */
 const spokenToasts = (i: HudInput) => i.toasts.filter((t) => !i.snap.warnings.includes(t.text));
 
@@ -1079,10 +1169,10 @@ function helpOf(items: readonly BuildItemVM[]): HudVM["help"] {
 }
 
 /** The note's one goal: the ladder rung's, or once the ladder is done the next open objective ("Top 3 on the Arena in Era 3 · Arena #6, need top 3"). */
-function goalOf({ text, current, target, status, lowerIsBetter, objective }: PlayableInput["goal"]): GoalVM {
+function goalOf({ text, current, target, status, lowerIsBetter, objective, held }: PlayableInput["goal"]): GoalVM {
   const def = objective ? defs().goals.find((d) => d.id === objective) : undefined;
-  // The sim says the progress in words when a count alone would not ("$26K of $40K a day · 3 of 12 visitors").
-  const progress = status ?? (def?.unit === "rank" ? goalProgressText(def, current) : `${Math.min(current, target)}/${target}`);
+  // The sim says the progress in words when a count alone would not ("Revenue $26K of $40K a day · 3 of 12 visitors").
+  const progress = status ?? (def?.unit === "rank" ? goalProgressText(def, current, held) : `${Math.min(current, target)}/${target}`);
   // A rank goal: #6 of a Top 3 is half way.
   const ratio = target > 0 ? Math.max(0, Math.min(1, lowerIsBetter ? (current > 0 ? target / current : 0) : current / target)) : 0;
   return { text, current, target, line: text ? `${text} · ${progress}` : "", progressText: progress, ratio };
@@ -1102,36 +1192,51 @@ function rawViewModel(i: HudInput): HudVM {
   const play = playableOf(i.snap);
   const build = buildOf(i);
   const items = earnedItems(build.items, play);
-  const { event, era } = eventOf(i);
+  // FLT-76: a big moment still waiting its turn stays off the screen, and an ending has it to itself.
+  const stage = i.stage;
+  const waits = (kind: StageView["waiting"][number]) => !!stage?.waiting.includes(kind);
+  const solo = !!stage?.solo;
+  const ending = waits("ending");
+  const outcome = ending ? null : outcomeOf(i);
+  // The outcome card stands alone (FLT-86): a card that opened the same night waits behind it for "Keep playing".
+  const { event, era } = waits("card") || waits("era") || outcome ? { event: null, era: null } : eventOf(i);
   // Snapshots from before FLT-33 (fixtures, old links) have no `factions`: that is "off".
   const chips = factionChips(i.snap.factions);
+  const facts = factsOf(i.snap);
+  const goalShowMe = play.goal.text ? showMeOf(play.goalId, facts) : undefined;
   const vm: HudVM = {
     apiVersion: SKIN_API_VERSION,
     stats: statsOf(i),
-    training: trainingOf(i.snap),
-    objectives: objectivesOf(i.snap),
+    training: trainingOf(i.snap, stage),
+    objectives: objectivesOf(i.snap, facts),
     inspector: inspectorOf(i.snap.inspect, i.follow, i.snap.labName, chips, i.lookLabels),
     buildItems: items,
     buildTip: build.tip,
     mode: modeOf(items, i.tool, zoneOf(i)),
-    speed: speedOf(i.speed),
+    speed: speedOf(i.speed, i.slowForBadNews ?? true),
     staff: staffOf(i, play.staff),
     senate: senateOf(i),
     bubbles: bubblesOf(i, chips),
     ticker: i.news.slice(-TICKER_ITEMS).map((n) => ({ id: n.id, text: n.text, tone: n.tone })),
-    toasts: spokenToasts(i).map((t) => (t.batch ? { id: t.id, text: t.text, tone: t.tone, batch: t.batch.map((b) => ({ text: b.text, tone: b.tone })) } : { id: t.id, text: t.text, tone: t.tone })),
+    toasts: spokenToasts(i).map((t) => ({
+      id: t.id,
+      text: t.text,
+      tone: t.tone,
+      ...(t.batch ? { batch: t.batch.map((b) => ({ text: b.text, tone: b.tone })) } : t.snag ? { snag: true as const } : {}),
+      ...(t.pinned ? { pinned: true as const } : {}),
+    })),
     // One hint at a time, and none while a toast is talking; the gateway hint is redundant once a toast has said it.
     hints: standingHints(i, play),
     warnings: [...i.snap.warnings],
     progress: {
       level: play.level,
       levelName: play.levelName,
-      goal: goalOf(play.goal),
+      goal: { ...goalOf(play.goal), ...(goalShowMe ? { showMe: goalShowMe } : {}) },
       teasers: play.teasers.map((t) => ({ ...t })),
     },
     visible: play.visible,
-    coach: play.coach,
-    unlock: play.unlock,
+    coach: i.guide ? guideCoachOf(i.guide) : play.coach,
+    unlock: waits("level") || solo ? null : quipped(play.unlock),
     tray: [],
     help: i.helpOpen ? helpOf(items) : null,
     confirm: confirmOf(i.snap),
@@ -1141,22 +1246,23 @@ function rawViewModel(i: HudInput): HudVM {
     leapfrog: leapfrogOf(i),
     papers: papersOf(i.snap, play.visible.papers, i.papersOpen ?? false),
     // A card, an era or the ending outranks a paper moment: it waits (the day window allowing) until they close.
-    paperMoment: event || era ? null : paperMomentOf(i.snap, play.visible.papers, i.dismissed ?? []),
+    paperMoment: event || era || solo ? null : paperMomentOf(i.snap, play.visible.papers, i.dismissed ?? []),
     collusion: collusionOf(i.snap),
-    crumbWiki: event || era ? null : crumbWikiOf(i.snap, i.dismissed ?? []),
+    crumbWiki: event || era || solo ? null : crumbWikiOf(i.snap, i.dismissed ?? []),
     factions: factionsOf(i.snap.factions, i.factionsOpen ?? false),
+    birdapp: birdAppOf(i.snap, play.visible.birdapp, i.birdAppOpen ?? false),
     eraCard: era,
-    outcome: outcomeOf(i),
+    outcome,
     audit: auditOf(i.snap),
-    ending: endingOf(i),
-    takeover: takeoverOf(i),
+    ending: ending ? null : endingOf(i),
+    takeover: ending ? null : takeoverOf(i),
     memo: memoOf(i),
     challenge: challengeOf(i),
     newsroom: newsroomOf(i),
     sound: soundOf(i),
     photoMode: photoOf(i),
     // A card needs the player: the beat makes way. Photo mode hides it with the rest of the HUD.
-    beat: i.beat && !event && !era && !i.photo.on ? { ...i.beat, kicker: BEAT_KICKER[i.beat.kind] ?? "Meanwhile", skipLabel: "Skip »", action: beatActionOf(i.beat.kind, i.snap) } : null,
+    beat: i.beat && !event && !era && !solo && !i.photo.on ? { ...i.beat, kicker: BEAT_KICKER[i.beat.kind] ?? "Meanwhile", skipLabel: "Skip »", action: beatActionOf(i.beat.kind, i.snap) } : null,
     skins: i.skins,
     mods: i.mods ?? NO_MODS_VM,
     saves: i.saves ? savesViewModel(i.saves, { lab: i.snap.labName, day: i.snap.day }) : { ...NO_SAVES_VM, current: { lab: i.snap.labName, date: formatDate(i.snap.day) } },
@@ -1171,6 +1277,7 @@ function rawViewModel(i: HudInput): HudVM {
     papers: vm.papers.enabled && vm.visible.papers,
     senate: items.some((it) => it.kind === "senate"),
     disasters: vm.disasters.enabled,
+    birdapp: vm.birdapp.enabled && vm.visible.birdapp,
   });
   return vm;
 }

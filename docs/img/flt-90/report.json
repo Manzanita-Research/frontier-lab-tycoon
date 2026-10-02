@@ -1,0 +1,95 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "563887e520b87864ec6948cc5b7313340e001428"
+  },
+  "head": {
+    "branch": "flt-90-drag-windows",
+    "sha": "384dce5",
+    "dirty": false
+  },
+  "seconds": 195.161,
+  "problems": [
+    "flt90-phone.png: blank composite: panel 3 is 28% one colour, 6 colours",
+    "overview.png: blank composite: panel 3 is 25% one colour, 6 colours",
+    "inspector.png: blank composite: panel 3 is 24% one colour, 6 colours",
+    "event.png: blank composite: panel 3 is 23% one colour, 11 colours",
+    "phone.png: blank composite: panel 3 is 29% one colour, 6 colours"
+  ],
+  "rows": [
+    {
+      "scene": "flt90-moved",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/before/flt90-moved.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/after/flt90-moved.png",
+      "title": "FLT-90: a returning player's desk: Lab Properties, Task Mangler and Thoughts.txt dragged where they left them (localStorage)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/compare/flt90-moved.png",
+      "changed": 0.45457947530864196
+    },
+    {
+      "scene": "flt90-settings",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/before/flt90-settings.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/after/flt90-settings.png",
+      "title": "FLT-90: Start ▸ Settings ▸ Reset window positions (enabled: a window has been moved)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/compare/flt90-settings.png",
+      "changed": 0.45662654320987656
+    },
+    {
+      "scene": "flt90-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/before/flt90-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/after/flt90-phone.png",
+      "title": "FLT-90: the same saved positions on a phone: nothing moves, FLT-87's layout stands",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/compare/flt90-phone.png",
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 28% one colour, 6 colours",
+      "error": "compare: blank composite: panel 3 is 28% one colour, 6 colours"
+    },
+    {
+      "scene": "overview",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/before/overview.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/after/overview.png",
+      "title": "The campus, mid-morning, paused",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/compare/overview.png",
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 25% one colour, 6 colours",
+      "error": "compare: blank composite: panel 3 is 25% one colour, 6 colours"
+    },
+    {
+      "scene": "inspector",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/before/inspector.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/after/inspector.png",
+      "title": "Tap a researcher: the inspector opens",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/compare/inspector.png",
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 24% one colour, 6 colours",
+      "error": "compare: blank composite: panel 3 is 24% one colour, 6 colours"
+    },
+    {
+      "scene": "event",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/before/event.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/after/event.png",
+      "title": "An event card lands (the Water Discourse)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/compare/event.png",
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 23% one colour, 11 colours",
+      "error": "compare: blank composite: panel 3 is 23% one colour, 11 colours"
+    },
+    {
+      "scene": "phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/before/phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/after/phone.png",
+      "title": "The same campus on a phone (390x844)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/compare/phone.png",
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 29% one colour, 6 colours",
+      "error": "compare: blank composite: panel 3 is 29% one colour, 6 colours"
+    }
+  ],
+  "errors": []
+}

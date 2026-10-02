@@ -1,5 +1,6 @@
 // FLT-65, the app's side of saving: the machine autosaves when the month turns and when the lab ends, a manual SAVE
 // writes the slot it names, LOAD_LAB swaps a save's World in, and staged links never autosave.
+// FLT-95: TO_BOX (Help ▸ "Take the box off the shelf again") saves before it leaves.
 import { it } from "@effect/vitest";
 import { Effect, Layer } from "effect";
 import { createEffectActor, send } from "@xstate/effect";
@@ -11,6 +12,7 @@ import { appMachine } from "./machine";
 import { framesManual, ManualFrames } from "./frames";
 import { isStagedLink, makeSaveDesk, Saves, welcomesYou, type SaveResult } from "./saves";
 import { Sim, simLayer, SimHandle } from "./sim";
+import { Door } from "./door";
 
 /** A campus a few ticks before the calendar turns to its second month. */
 function lateInMonth(seed = 1) {
@@ -83,7 +85,7 @@ describe("saving from the app (FLT-65)", () => {
       const other = createTestCampus(9);
       runDays(other, 5);
       const at = other.tick;
-      yield* send(actor, { type: "LOAD_LAB", world: other });
+      yield* send(actor, { type: "LOAD_LAB", world: other, def: null });
       yield* pump(1);
       expect(sim.world).toBe(other);
       yield* pump(20);
@@ -135,5 +137,49 @@ describe("which links save and greet", () => {
     expect(welcomesYou("?load=pending")).toBe(false);
     expect(welcomesYou("?saves=demo")).toBe(false);
     expect(isStagedLink("?seed=42")).toBe(false);
+  });
+});
+
+describe("back to the box (FLT-95)", () => {
+  it.effect("TO_BOX autosaves the lab first, then walks out through the Door", () => {
+    const t = setup();
+    const seen: Array<boolean> = [];
+    const door = Layer.succeed(Door, { toBox: () => void seen.push(t.storage.map.has("flt.save.auto")) });
+    return Effect.gen(function* () {
+      const { actor, pump, settle } = yield* boot;
+      yield* send(actor, { type: "TO_BOX" });
+      yield* pump(2);
+      yield* settle;
+      yield* pump(2);
+      expect(t.results.map((r) => [r.slot, r.why])).toEqual([["auto", "hide"]]);
+      // The save is on disk before the page goes.
+      expect(seen).toEqual([true]);
+    }).pipe(Effect.provide(Layer.mergeAll(simLayer(t.handle), framesManual, Layer.succeed(Saves, t.desk), door)));
+  });
+
+  it.effect("a door that jams is a snag, not a dead app", () => {
+    const t = setup();
+    const door = Layer.succeed(Door, { toBox: () => { throw new Error("the shelf is locked"); } });
+    return Effect.gen(function* () {
+      const { actor, pump, settle } = yield* boot;
+      yield* send(actor, { type: "TO_BOX" });
+      yield* pump(2);
+      yield* settle;
+      yield* pump(2);
+      expect(actor.getSnapshot().status).toBe("active");
+      expect(actor.getSnapshot().context.toasts.some((x) => x.snag)).toBe(true);
+    }).pipe(Effect.provide(Layer.mergeAll(simLayer(t.handle), framesManual, Layer.succeed(Saves, t.desk), door)));
+  });
+
+  it.effect("without a Door (tests, the headless shell) TO_BOX does nothing", () => {
+    const t = setup();
+    return Effect.gen(function* () {
+      const { actor, pump, settle } = yield* boot;
+      yield* send(actor, { type: "TO_BOX" });
+      yield* pump(2);
+      yield* settle;
+      expect(t.results).toEqual([]);
+      expect(actor.getSnapshot().status).toBe("active");
+    }).pipe(t.provide);
   });
 });

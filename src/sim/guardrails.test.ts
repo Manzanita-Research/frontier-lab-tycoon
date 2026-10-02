@@ -7,7 +7,8 @@ import { jemOpeningCommands } from "./firstRunDemo";
 import { newWalker } from "./walkers";
 import { createRng } from "./rng";
 import { pendingConfirmOf, persistentWarnings, spendingForecast } from "./guardrails";
-import { ENTRANCE_WARNING, REDUNDANT_HALL, RUNWAY_NUDGE } from "../content/guardrails";
+import { ENTRANCE_WARNING, REDUNDANT_HALL } from "../content/guardrails";
+import { runwayNudge } from "../content/bridgeRounds";
 import { makeSnapshot } from "../app/hud";
 
 describe("Jem's first run", () => {
@@ -50,10 +51,13 @@ describe("Jem's first run", () => {
     expect(visitors).toHaveLength(4);
     expect(new Set([...visitors, ...s.staff].map((p) => `${p.x.toFixed(2)},${p.z.toFixed(2)}`)).size).toBeGreaterThan(4);
     expect(visitors.every((p) => p.z > 21 && p.z < 24)).toBe(true);
+    const stranded = s.staff.map((p) => [p.x, p.z]);
     applyNow(s, [{ type: "placePath", x: 11, z: 22 }]);
     for (let i = 0; i < 60; i++) tick(s);
     expect(persistentWarnings(s)).not.toContain(ENTRANCE_WARNING);
-    expect(s.staff.some((p) => p.z < 22)).toBe(true);
+    // Someone walks off again, onto the network the gate reaches (the entrance plaza since FLT-91, not only the campus).
+    const reach = getReach(s).tiles;
+    expect(s.staff.some((p, i) => Math.hypot(p.x - stranded[i]![0]!, p.z - stranded[i]![1]!) > 0.5 && reach[Math.floor(p.z) * s.grid.w + Math.floor(p.x)])).toBe(true);
     expect(getReach(s).buildings.size).toBe(1);
   });
 
@@ -75,7 +79,7 @@ describe("Jem's first run", () => {
     expect(loaded.buildings).toHaveLength(2);
     applyNow(loaded, [{ ...command, confirmed: true }]); // duplicate click cannot purchase the same footprint twice
     expect(loaded.cash).toBe(100_000);
-    expect(persistentWarnings(loaded)).toContain(RUNWAY_NUDGE);
+    expect(persistentWarnings(loaded)).toContain(runwayNudge(3));
   });
 
   it("projects wages and upkeep from fresh books, not a stale paused ledger; cancellation spends nothing", () => {

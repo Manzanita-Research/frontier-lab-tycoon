@@ -19,6 +19,7 @@ import { cardEvents, DISASTERS } from "./disasters/pack";
 import type { DisasterDef } from "./disasters/types";
 import { LEAPFROG, type BenchmarkDef, type MishapDef } from "../content/leapfrog";
 import { BASE_ARCS, FACTIONS, type FactionDef } from "../content/factions";
+import { BIRDAPP, birdContent, type BirdContent, type BirdRow } from "../content/birdapp";
 
 /** The pools behind the procedural names. The algorithms stay in content/names.ts; mods swap the words. */
 export interface NamePools {
@@ -73,11 +74,14 @@ export interface Defs {
   /** FLT-33: the factions of the discourse, in content order. */
   readonly factions: readonly FactionDef[];
   readonly factionById: (id: string) => FactionDef | undefined;
+  /** FLT-69: the Bird App's archetypes, posts and reactions, as rows and sorted by kind. */
+  readonly birdapp: readonly BirdRow[];
+  readonly bird: BirdContent;
 }
 
 const BASE_ARENA_SIZE = RIVAL_DEFS.length + 1;
 
-function build(source: GameDefinition | null, parts: Omit<Defs, "source" | "buildingKinds" | "placeableKinds" | "raceKinds" | "rivalById" | "arenaSize" | "headlinesFor" | "eventById" | "disasterById" | "starters" | "benchById" | "successorOf" | "mishapById" | "factionById">): Defs {
+function build(source: GameDefinition | null, parts: Omit<Defs, "source" | "buildingKinds" | "placeableKinds" | "raceKinds" | "rivalById" | "arenaSize" | "headlinesFor" | "eventById" | "disasterById" | "starters" | "benchById" | "successorOf" | "mishapById" | "factionById" | "bird">): Defs {
   const buildingKinds = Object.keys(parts.buildings) as BuildingKind[];
   const byTrigger = new Map<string, HeadlineLine[]>();
   for (const h of parts.headlines) {
@@ -104,6 +108,7 @@ function build(source: GameDefinition | null, parts: Omit<Defs, "source" | "buil
     successorOf: (id) => parts.benchmarks.find((b) => b.replaces === id),
     mishapById: (id) => parts.mishaps.find((m) => m.id === id),
     factionById: (id) => factions.get(id),
+    bird: birdContent(parts.birdapp),
   };
 }
 
@@ -126,6 +131,7 @@ export const BASE_DEFS: Defs = build(null, {
   benchmarks: LEAPFROG.benchmarks,
   mishaps: LEAPFROG.mishaps,
   factions: FACTIONS,
+  birdapp: BIRDAPP,
 });
 
 const isArc = (entry: object): entry is ArcData => "states" in entry;
@@ -171,6 +177,7 @@ function fromDefinition(def: GameDefinition): Defs {
     benchmarks: c.benchmarks,
     mishaps: c.mishaps,
     factions: c.factions ?? FACTIONS,
+    birdapp: c.birdapp ?? BIRDAPP,
   });
 }
 

@@ -10,6 +10,7 @@ import { tick } from "../sim/tick";
 import { createTestCampus, readyForPressure } from "../sim/testkit";
 import type { Speed } from "./hud";
 import { appMachine } from "./machine";
+import { NO_STAGE } from "./moments";
 import { framesManual, ManualFrames } from "./frames";
 import { Sim, simLayer, SimHandle } from "./sim";
 
@@ -420,6 +421,26 @@ describe("app machine", () => {
     }).pipe(provide(handle));
   });
 
+  it.effect("an ending clears the screen for its card, but a snag toast keeps its Copy details button (FLT-76, FLT-84, FLT-86)", () => {
+    const handle = handleFor(1);
+    return Effect.gen(function* () {
+      const { actor, sim, pump } = yield* boot(0);
+      sim.world.toasts.push({ id: 900, text: "Round 1 of 3 signed: +$2M.", tone: "bad", source: "economy", importance: "you", reply: true });
+      yield* pump(4);
+      expect(actor.getSnapshot().context.toasts.map((t) => t.text)).toContain("Round 1 of 3 signed: +$2M.");
+      yield* send(actor, { type: "SNAG", report: "boom", now: 1_000 });
+      // The deadline passes tonight.
+      sim.world.day = SCENARIO.deadlineDay;
+      sim.world.tick = (SCENARIO.deadlineDay + 1) * 20 - 1;
+      yield* send(actor, { type: "SET_SPEED", speed: 1 });
+      yield* pump(4);
+      yield* waitFor(actor, (st) => st.matches("gameOver"), { timeout: "1 second" });
+      const c = actor.getSnapshot().context;
+      expect(c.toasts.map((t) => t.snag)).toEqual(["boom"]);
+      expect(c.stage.solo).toBe(true);
+    }).pipe(provide(handle));
+  });
+
   it.effect("a toast that says the same thing again replaces the older one instead of stacking", () => {
     const handle = handleFor();
     return Effect.gen(function* () {
@@ -431,6 +452,149 @@ describe("app machine", () => {
       const texts = actor.getSnapshot().context.toasts.map((t) => t.text);
       expect(texts.filter((t) => t.startsWith("Frontier-2 is out"))).toHaveLength(1);
       expect(texts).toHaveLength(1);
+    }).pipe(provide(handle));
+  });
+
+  // FLT-76: the PLAY IT second. Level 5, Frontier-4 SHIPPED and the Open-weights card all came in one report.
+  it.effect("plays a level-up, a ship and a card that arrive together one at a time, a beat apart, and the card can't be answered unseen", () => {
+    const handle = handleFor();
+    return Effect.gen(function* () {
+      const { actor, pump } = yield* boot(0);
+      const snap = actor.getSnapshot().context.snap;
+      const report = {
+        event: { id: "waterDiscourse", day: snap.day },
+        outcome: "playing" as const,
+        snap: { ...snap, models: snap.models + 1, unlockCard: { id: "scrutiny", title: "New! Scrutiny", body: "", items: [] } },
+        toasts: [
+          { id: 900, text: "Frontier-4 is out! Launch week: +$120K", tone: "good" as const, source: "training" as const, importance: "you" as const },
+          { id: 901, text: "Frontier-4 tops the coding board.", tone: "good" as const, source: "race" as const, importance: "you" as const },
+        ],
+      };
+      yield* send(actor, { type: "SYNCED", report, now: 1000 });
+      yield* pump(0);
+      let c = actor.getSnapshot().context;
+      expect(c.stage).toEqual({ waiting: ["level", "card"], solo: false, shipped: true });
+      expect(c.toasts.map((t) => t.text)).toContain("Frontier-4 is out! Launch week: +$120K");
+      yield* send(actor, { type: "CHOOSE", choiceIndex: 0 });
+      yield* pump(0);
+      expect(actor.getSnapshot().context.queue).toEqual([]);
+      yield* send(actor, { type: "SYNCED", report: { ...report, toasts: [] }, now: 3400 });
+      yield* pump(0);
+      expect(actor.getSnapshot().context.stage.waiting).toEqual(["level", "card"]);
+      yield* send(actor, { type: "SYNCED", report: { ...report, toasts: [] }, now: 3600 });
+      yield* pump(0);
+      expect(actor.getSnapshot().context.stage.waiting).toEqual(["card"]);
+      yield* send(actor, { type: "SYNCED", report: { ...report, toasts: [] }, now: 6000 });
+      yield* pump(0);
+      c = actor.getSnapshot().context;
+      expect(c.stage.waiting).toEqual([]);
+      yield* send(actor, { type: "CHOOSE", choiceIndex: 0 });
+      yield* pump(0);
+      expect(actor.getSnapshot().context.queue).toEqual([{ type: "chooseEvent", eventId: "waterDiscourse", choiceIndex: 0 }]);
+    }).pipe(provide(handle));
+  });
+
+  it.effect("survives its own failure: a queue that throws lets the report through unqueued, and the actor carries on", () => {
+    const handle = handleFor();
+    return Effect.gen(function* () {
+      const { actor, pump } = yield* boot(0);
+      const quiet = vi.spyOn(console, "error").mockImplementation(() => {});
+      const before = actor.getSnapshot().context.snap;
+      // A New! card whose id cannot be read: only the queue asks for it.
+      const card = { title: "New! Scrutiny", body: "", items: [], get id(): string { throw new Error("boom"); } };
+      const snap = { ...before, models: before.models + 1, unlockCard: card };
+      const shipped = { id: 900, text: "Frontier-4 is out! Launch week: +$120K", tone: "good" as const, source: "training" as const, importance: "you" as const };
+      yield* send(actor, { type: "SYNCED", report: { event: null, outcome: "playing" as const, snap, toasts: [shipped] }, now: 1000 });
+      yield* pump(0);
+      expect(actor.getSnapshot().status).toBe("active");
+      const c = actor.getSnapshot().context;
+      expect(c.stage).toEqual(NO_STAGE);
+      expect(c.toasts.map((t) => t.text)).toContain(shipped.text);
+      expect(quiet).toHaveBeenCalled();
+      quiet.mockRestore();
+    }).pipe(provide(handle));
+  });
+
+  it.effect("gives an ending the screen to itself: the Takeover is never folded into a batch, and what came with it waits", () => {
+    const handle = handleFor();
+    return Effect.gen(function* () {
+      const { actor, pump } = yield* boot(0);
+      const snap = actor.getSnapshot().context.snap;
+      const takeover = "Frontier-9: Congratulations! You won. I'll take the wheel from here. You look tired.";
+      const record = { id: 901, text: "New benchmark record!", tone: "good" as const, source: "race" as const, importance: "you" as const };
+      const report = { event: null, outcome: "playing" as const, snap, toasts: [record, { id: 902, text: takeover, tone: "good" as const, source: "endings" as const, importance: "you" as const }] };
+      yield* send(actor, { type: "SYNCED", report, now: 20_000 });
+      yield* pump(0);
+      let c = actor.getSnapshot().context;
+      expect(c.toasts.map((t) => t.text)).toEqual([takeover]);
+      expect(c.stage.solo).toBe(true);
+      yield* send(actor, { type: "SYNCED", report: { ...report, toasts: [] }, now: 26_000 });
+      yield* pump(0);
+      expect(actor.getSnapshot().context.toasts.map((t) => t.text)).toEqual([takeover]);
+      // The solo is over: the record comes out on its own.
+      yield* send(actor, { type: "SYNCED", report: { ...report, toasts: [] }, now: 27_100 });
+      yield* pump(0);
+      c = actor.getSnapshot().context;
+      expect(c.stage.solo).toBe(false);
+      expect(c.toasts.map((t) => t.text)).toContain("New benchmark record!");
+      expect(c.toasts.every((t) => !t.batch)).toBe(true);
+    }).pipe(provide(handle));
+  });
+
+  it.effect("drops to 1× for sharp bad news at top speed and pins a toast saying why; ▶▶▶ again clears it; the setting turns it off", () => {
+    const handle = handleFor();
+    return Effect.gen(function* () {
+      const { actor, sim, pump } = yield* boot(10);
+      yield* pump(4);
+      sim.world.disasters.trust -= 30;
+      yield* pump(4);
+      let c = actor.getSnapshot().context;
+      expect(c.speed).toBe(1);
+      const pin = c.toasts.find((t) => t.pinned)!;
+      expect(pin.text).toMatch(/^Slowed to 1× for bad news: public trust fell from \d+ to \d+\.$/);
+      // Pinned: it outlasts a toast's time, and stays the newest when others come.
+      yield* TestClock.adjust("10 seconds");
+      yield* send(actor, { type: "TOAST", text: "Not enough cash", tone: "bad" });
+      yield* pump(0);
+      expect(actor.getSnapshot().context.toasts.at(-1)!.id).toBe(pin.id);
+      yield* send(actor, { type: "SET_SPEED", speed: 10 });
+      yield* pump(0);
+      expect(actor.getSnapshot().context.toasts.some((t) => t.pinned)).toBe(false);
+      yield* send(actor, { type: "SET_SLOW_FOR_BAD_NEWS", on: false });
+      yield* pump(0);
+      sim.world.disasters.trust -= 15;
+      yield* pump(4);
+      c = actor.getSnapshot().context;
+      expect(c.speed).toBe(10);
+      expect(c.toasts.some((t) => t.pinned)).toBe(false);
+    }).pipe(provide(handle));
+  });
+
+  it.effect("shares the speed with FLT-59's chase: bad news during a chase (at 1×) pins nothing, and is measured afresh once the chase gives ▶▶▶ back", () => {
+    const handle = handleFor();
+    return Effect.gen(function* () {
+      const { actor, pump } = yield* boot(10);
+      const snap = actor.getSnapshot().context.snap;
+      const at = (trust: number, chase: boolean) => ({ ...snap, disasters: { ...snap.disasters, trust }, escape: { ...snap.escape!, chase } as typeof snap.escape });
+      const synced = (s: typeof snap, now: number) => send(actor, { type: "SYNCED", report: { event: null, outcome: "playing" as const, snap: s, toasts: [] }, now });
+      const trust = snap.disasters.trust;
+      yield* synced(at(trust, true), 1_000);
+      yield* pump(0);
+      let c = actor.getSnapshot().context;
+      expect([c.speed, c.chaseSpeed]).toEqual([1, 10]);
+      // Trust falls during the chase: the game is already at 1×.
+      yield* synced(at(trust - 30, true), 2_000);
+      yield* synced(at(trust - 30, false), 3_000);
+      yield* pump(0);
+      c = actor.getSnapshot().context;
+      expect([c.speed, c.chaseSpeed]).toEqual([10, null]);
+      expect(c.toasts.some((t) => t.pinned)).toBe(false);
+      // From here it is watched again, from the trust the chase left.
+      yield* synced(at(trust - 45, false), 4_000);
+      yield* pump(0);
+      c = actor.getSnapshot().context;
+      expect(c.speed).toBe(1);
+      expect(c.toasts.find((t) => t.pinned)?.text).toBe(`Slowed to 1× for bad news: public trust fell from ${Math.round(trust - 30)} to ${Math.round(trust - 45)}.`);
     }).pipe(provide(handle));
   });
 });

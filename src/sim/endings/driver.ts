@@ -36,8 +36,8 @@ export const ENDING_STATS: Record<string, (state: GameState) => number> = {
   memoSlow: (s) => (flagDay(s, MEMO_SLOW) !== undefined ? 1 : 0),
   /** Days since you ticked Race (0 if you didn't). */
   racedDays: (s) => (flagDay(s, MEMO_RACE) !== undefined ? s.day - flagDay(s, MEMO_RACE)! : 0),
-  /** The goals' two losses, as 1 or 0: cash under the floor, and the deadline come without a win. */
-  broke: (s) => (s.cash < SCENARIO.brokeBelow ? 1 : 0),
+  /** The goals' two losses, as 1 or 0: the bank called Macrohard (FLT-86: the overdraft ran out), and the deadline come without a win. */
+  broke: (s) => (s.economy.value === "bankrupt" ? 1 : 0),
   deadline: (s) => (s.day >= SCENARIO.deadlineDay && s.goals.value !== "won" ? 1 : 0),
   won: (s) => (s.goals.value === "won" ? 1 : 0),
   /**
@@ -48,6 +48,9 @@ export const ENDING_STATS: Record<string, (state: GameState) => number> = {
     const rank = (s as { escape?: { rank?: number } }).escape?.rank;
     return rank !== undefined && rank <= ENDING_RULES.takeover.aheadRank ? 1 : 0;
   },
+  /** FLT-59: agents that got over the fence this run, and 1 once the newest frontier model's agent got out in Era 4. */
+  escaped: (s) => s.escape?.escaped ?? 0,
+  frontierEscaped: (s) => (s.escape?.frontierOut ? 1 : 0),
 };
 export const ENDING_STAT_NAMES = Object.keys(ENDING_STATS);
 

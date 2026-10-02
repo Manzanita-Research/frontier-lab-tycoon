@@ -7,6 +7,7 @@ import { atoms, debugParams, probeHud, registry, saveDesk } from "../../app/game
 import type { Snapshot } from "../../app/hud";
 import { audioReadyAtom, mixerAtom, mixerOpenAtom } from "../../audio/state";
 import { roomAtom } from "../../newsroom/state";
+import { GAME_CRT, crtAtom } from "../../render/crt/state";
 import { photoAtom } from "../../render/fx/photoState";
 import { beatAtom } from "../../render/fx/beatState";
 import { skinList } from "../../skins/registry";
@@ -15,11 +16,12 @@ import { shotAtom } from "../juice/photo";
 import { useShareInput } from "../share/share";
 import { useSocialInput } from "../share/social";
 import { newMotion, NO_MOTION, stepMotion, type Motion, type MotionView } from "./leapfrogMotion";
-import { arenaCallAtom, arenaChosenAtom, arenaOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, seenNewsAtom, senateOpenAtom, skinUiAtom, staffOpenAtom, windowBudgetAtom } from "./state";
+import { arenaCallAtom, arenaChosenAtom, arenaOpenAtom, birdAppOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, seenNewsAtom, senateOpenAtom, skinUiAtom, staffOpenAtom, guideAtom, windowBudgetAtom } from "./state";
 import { newestOf, unreadOf, wantsOf, windowed } from "./tray";
 import { autoUp, nextClose, stepBudget } from "./windows";
 import { hudActions } from "./actions";
 import { modSession } from "../../app/mods";
+import { modsRevision } from "../../app/liveMods";
 import { dramaPath, dramaViewModel } from "../../drama/feed";
 import { dramaAtom } from "../../drama/state";
 import { playableFixture } from "./previewLadder";
@@ -128,6 +130,8 @@ export type AppSource = {
   selected: number | null;
   zone: number | null;
   outcomeDismissed: boolean;
+  stage: NonNullable<Parameters<typeof hudViewModel>[0]["stage"]>;
+  slowForBadNews: boolean;
 };
 
 /** Everything the view-model reads from the app actor, as one atom. */
@@ -146,6 +150,8 @@ const appSourceAtom = Atom.make((get): AsyncResult.AsyncResult<AppSource, never>
     selected: v(atoms.selected),
     zone: v(atoms.zone),
     outcomeDismissed: v(atoms.outcomeDismissed),
+    stage: v(atoms.stage),
+    slowForBadNews: v(atoms.slowForBadNews),
   });
 });
 
@@ -172,7 +178,7 @@ export function useAppSource(): AppSource | null {
   return src;
 }
 
-export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, selected, zone, outcomeDismissed }: AppSource): HudVM {
+export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, selected, zone, outcomeDismissed, stage, slowForBadNews }: AppSource): HudVM {
   const arenaOpen = useAtomValue(arenaOpenAtom);
   const arenaChosen = useAtomValue(arenaChosenAtom);
   const room = useAtomValue(roomAtom);
@@ -186,15 +192,18 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
   const shot = useAtomValue(shotAtom);
   const beat = useAtomValue(beatAtom);
   const skinUi = useAtomValue(skinUiAtom);
+  const crt = useAtomValue(crtAtom);
   const staffOpen = useAtomValue(staffOpenAtom);
   const senateOpen = useAtomValue(senateOpenAtom);
   const factionsOpen = useAtomValue(factionsOpenAtom);
+  const birdAppOpen = useAtomValue(birdAppOpenAtom);
   const helpOpen = useAtomValue(helpOpenAtom);
   const modsOpen = useAtomValue(modsOpenAtom);
   const papersOpen = useAtomValue(papersOpenAtom);
   const dismissed = useAtomValue(dismissedAtom);
   const disastersOpen = useAtomValue(disastersOpenAtom);
   const dramaUi = useAtomValue(dramaAtom);
+  const guide = useAtomValue(guideAtom);
   const share = useShareInput();
   const social = useSocialInput();
   const viewport = useViewport();
@@ -206,7 +215,8 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
   const motion = useArenaMotion(snap.race.board, snap.race.rank);
   const leapfrog = useLeapfrogMotion(snap);
   const list = useMemo(() => skinList(), []);
-  // The session's mods are fixed at start (main.tsx loads `?mod=` before the game exists); only the window opens and shuts.
+  // `?mod=` loads before the game exists (main.tsx); a data-only mod can come or go mid-game too (FLT-78), and says so.
+  const modsRev = useAtomValue(modsRevision);
   const lookLabels = useMemo(() => Object.fromEntries(Object.entries(modSession().presentation?.looks ?? {}).flatMap(([target, look]) => (look.label ? [[target, look.label]] : []))), []);
   const mods = useMemo(() => {
     const m = modSession();
@@ -217,8 +227,8 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
       errors: [...m.errors],
       contentHash: m.run?.contentHash ?? null,
     };
-  }, [modsOpen]);
-  const drama = useMemo(() => dramaViewModel(dramaUi, modSession().mods, location.href, new Date()), [dramaUi]);
+  }, [modsOpen, modsRev]);
+  const drama = useMemo(() => dramaViewModel(dramaUi, modSession().mods, location.href, new Date()), [dramaUi, modsRev]);
   const savesUi = useAtomValue(savesAtom);
   const saves = useMemo((): SavesInput => {
     const { prompt, listing, ...rest } = savesUi;
@@ -238,12 +248,15 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         toasts,
         news,
         outcomeDismissed,
+        stage,
+        slowForBadNews,
         tapHint,
         toldGateway: toldGateway.current,
         staffOpen,
         senateOpen,
         zone,
         factionsOpen,
+        birdAppOpen,
         arena: { open: arenaOpen, chosen: arenaChosen, alert: motion.alert, flinch: motion.flinch, moved: motion.moved },
         leapfrog,
         room,
@@ -264,6 +277,8 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
           list,
           rejected: skinUi.refused,
           offer: skinUi.offer,
+          // No `crt` while the in-game tube is off (FLT-70): the skins show no picture-tube setting.
+          ...(GAME_CRT ? { crt: { mode: crt.mode, choice: crt.choice, tier: crt.tier, reduced: crt.reduced } } : {}),
         },
         mods,
         drama,
@@ -271,8 +286,9 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         viewport,
         share,
         social,
+        guide,
       }),
-    [share, social, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, tapHint, arenaOpen, arenaChosen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, beat, skinUi, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, drama, saves],
+    [guide, share, social, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, stage, slowForBadNews, tapHint, arenaOpen, arenaChosen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, beat, skinUi, crt, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, birdAppOpen, drama, saves],
   );
   return useWindowBudget(vm, news);
 }
@@ -311,17 +327,17 @@ function useWindowBudget(raw: HudVM, news: AppSource["news"]): HudVM {
   // A panel that is open has read its news.
   useEffect(() => {
     const newest = newestOf(news);
-    const open = { arena: vm.arena.open, papers: vm.papers.open, factions: vm.factions.open };
+    const open = { arena: vm.arena.open, papers: vm.papers.open, factions: vm.factions.open, birdapp: vm.birdapp.open };
     const next = { ...seen };
     let changed = false;
-    for (const p of ["arena", "papers", "factions"] as const) {
+    for (const p of ["arena", "papers", "factions", "birdapp"] as const) {
       if (open[p] && newest[p] !== undefined && newest[p] !== seen[p]) {
         next[p] = newest[p];
         changed = true;
       }
     }
     if (changed) registry.set(seenNewsAtom, next);
-  }, [news, seen, vm.arena.open, vm.papers.open, vm.factions.open]);
+  }, [news, seen, vm.arena.open, vm.papers.open, vm.factions.open, vm.birdapp.open]);
   // The journey test (FLT-53) reads what the budget holds up and what waits on the taskbar.
   useEffect(() => {
     probeHud.windows = () => ({ auto: autoUp(registry.get(windowBudgetAtom)), tray: vm.tray.map((t) => ({ id: t.id, flashing: t.flashing, unread: t.unread })) });

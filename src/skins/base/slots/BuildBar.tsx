@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ICONS } from "../icons";
 import { useCoach, useT } from "../../context";
-import { coachInFacilities, facilityGroups, RunBox } from "../../kit";
+import { coachInFacilities, door, facilityGroups, RunBox } from "../../kit";
 import type { SlotPropsMap } from "../../types";
 import type { BuildItemVM } from "../../../ui/hud/types";
 
@@ -78,6 +78,7 @@ export function BuildBar({ items, tip, teasers = [], widgets = [], actions }: Sl
       key={it.kind}
       role="menuitem"
       {...coach.attrs(`build:${it.kind}`)}
+      {...(it.kind === "staff" ? door("hire:*") : {})}
       className={`tool ${it.panel ? "staff-tool" : ""} ${it.race ? "race" : ""} ${it.selected ? "on" : ""} ${it.affordable ? "" : "broke"}`}
       onClick={() => {
         actions.place(it.kind);
@@ -113,7 +114,7 @@ export function BuildBar({ items, tip, teasers = [], widgets = [], actions }: Sl
           {view === "top" && (
             <div className="buildmenu-grid">
               {tools.map(tile)}
-              <button role="menuitem" className="tool folder-tool" data-testid="start-facilities" {...coach.attrs("start:facilities", coachInFacilities(coach.target, items) && inside)} onClick={() => setView("facilities")}>
+              <button role="menuitem" className="tool folder-tool" data-testid="start-facilities" {...coach.attrs("start:facilities", coachInFacilities(coach.target, items) && inside)} {...door("build:*", "hire:*")} onClick={() => setView("facilities")}>
                 <span className="hot">▸</span>
                 <span className="icon">
                   <Folder />
@@ -187,7 +188,7 @@ export function BuildBar({ items, tip, teasers = [], widgets = [], actions }: Sl
         </div>
       )}
       <div className="buildbar panel bar-closed">
-        <button type="button" className={`build-open ${open ? "on" : ""}`} aria-expanded={open} aria-haspopup="menu" onClick={() => toggle(!open)} {...coach.attrs("start", !open && inside)}>
+        <button type="button" className={`build-open ${open ? "on" : ""}`} aria-expanded={open} aria-haspopup="menu" onClick={() => toggle(!open)} {...coach.attrs("start", !open && inside)} {...door("build:*", "hire:*")}>
           <Hammer />
           <span>{t("build.open")}</span>
         </button>

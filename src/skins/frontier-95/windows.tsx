@@ -1,8 +1,9 @@
 // Frontier 95's windows: Lab Properties, the copy dialog, sticky notes, Properties of a walker, Task Mangler, Thoughts.txt.
-import { useState } from "react";
-import { ALL_VISIBLE, Odometer, money, useAutoPause, useSlots, useWidget } from "../kit";
+import { useEffect, useState } from "react";
+import { ALL_VISIBLE, anchor, door, Odometer, money, useAutoPause, useSlots, useWhere, useWidget } from "../kit";
 import { useCoach, useT } from "../context";
 import type { SlotPropsMap } from "../types";
+import type { ShowMeVM } from "../../ui/hud/types";
 import { Ico, PixelPortrait } from "./icons";
 import { Blocks, Btn, Field, Sticker, Tabs, Win } from "./parts";
 import { useStackWindow } from "./stack";
@@ -78,7 +79,7 @@ export function Stats({ stats, layout, visible = ALL_VISIBLE, disasters, actions
                 {led}
               </Field>
             )}
-            <Field label={t("stats.cash")} sub={visible.revenue ? <span className={stats.net.good ? "" : "bad"}>{stats.net.good ? "▲" : "▼"} {stats.net.text}</span> : undefined}>
+            <Field label={t("stats.cash")} sub={visible.revenue ? <span className={stats.net.good ? "" : "bad"}>{stats.net.good ? "▲" : "▼"} {stats.net.text} {t("stats.net")}</span> : undefined}>
               <Odometer className={`f95-v inset ${stats.cash.negative ? "bad" : ""}`} value={stats.cash.value} format={money} />
             </Field>
             <span {...coach.attrs("stat:runway")} className="f95-coachwrap">
@@ -105,7 +106,7 @@ export function Stats({ stats, layout, visible = ALL_VISIBLE, disasters, actions
         )}
         {tab === "finance" && (
           <dl className="f95-facts">
-            <dt>Income</dt>
+            <dt>Revenue</dt>
             <dd className="inset">{stats.finance.incomeText}/day</dd>
             <dt>Expenses</dt>
             <dd className="inset">{stats.finance.expensesText}/day</dd>
@@ -115,6 +116,10 @@ export function Stats({ stats, layout, visible = ALL_VISIBLE, disasters, actions
             <dd className={`inset ${stats.cash.negative ? "bad" : ""}`}>{stats.cash.text}</dd>
             <dt>{t("stats.runway")}</dt>
             <dd className={`inset ${stats.runway.warning ? "bad" : ""}`}>{stats.runway.text}</dd>
+            <dt>Still yours</dt>
+            <dd className={`inset ${stats.money.stake < 100 ? "bad" : ""}`}>{stats.money.stakeText}</dd>
+            <dt>Bailouts left</dt>
+            <dd className={`inset ${stats.money.roundsLeft === 0 ? "bad" : ""}`}>{stats.money.overdraftDays === null ? stats.money.roundsText : `none · bank in ${stats.money.overdraftDays} d`}</dd>
             {disasters?.enabled && (
               <>
                 <dt>{t("disasters.trust")}</dt>
@@ -206,6 +211,23 @@ export function Training({ training }: SlotPropsMap["Training"]) {
   );
 }
 
+/** FLT-93: the goal's next step, where it lives, and a Show Me… that has the paperclip walk you there. */
+function NextStep({ showMe, actions }: { showMe: ShowMeVM; actions: SlotPropsMap["Objectives"]["actions"] }) {
+  const t = useT();
+  const where = useWhere()(showMe.anchor);
+  return (
+    <span className="f95-nextstep">
+      <span>
+        <b>{showMe.label}</b>
+        {where && <small>{t("showMe.where", { where })}</small>}
+      </span>
+      <Btn className="f95-showme" data-showme={showMe.anchor} onClick={() => actions.showMe(showMe.anchor)}>
+        {t("showMe")}
+      </Btn>
+    </span>
+  );
+}
+
 /** Desktop sticky notes: flat yellow, 1px border. */
 export function Objectives({ objectives, progress, visible = ALL_VISIBLE, layout, actions }: SlotPropsMap["Objectives"]) {
   const t = useT();
@@ -225,6 +247,7 @@ export function Objectives({ objectives, progress, visible = ALL_VISIBLE, layout
           <span className="f95-goalbar" aria-hidden>
             <i style={{ width: `${goal.ratio * 100}%` }} />
           </span>
+          {goal.showMe && <NextStep showMe={goal.showMe} actions={actions} />}
         </div>
       )}
       {list && (
@@ -246,6 +269,11 @@ export function Objectives({ objectives, progress, visible = ALL_VISIBLE, layout
               <span>
                 {g.label}
                 {g.progress && <small>{g.progress}</small>}
+                {g.showMe && (
+                  <button type="button" className="f95-showme link" data-showme={g.showMe.anchor} onClick={() => actions.showMe(g.showMe!.anchor)}>
+                    {t("showMe")}
+                  </button>
+                )}
               </span>
             </li>
           ))}
@@ -269,6 +297,7 @@ export function Inspector({ inspector: who, layout, actions }: SlotPropsMap["Ins
   return (
     <Win
       className="f95-props"
+      place="inspector"
       title={t("inspector.title", { name: who.name })}
       icon="info"
       buttons={[
@@ -349,13 +378,23 @@ export function Arena({ arena, leapfrog, layout, actions }: SlotPropsMap["Arena"
   const t = useT();
   const { Benchmarks } = useSlots();
   const rd = arena.rd;
-  useStackWindow("arena", !arena.open, (minimised) => {
-    if (minimised === arena.open) actions.toggleArena();
-  });
+  // The narrow Task Mangler the game opened (for a launch) is not the one that folds to make room (FLT-76).
+  useStackWindow(
+    "arena",
+    !arena.open,
+    (minimised) => {
+      if (minimised === arena.open) actions.toggleArena();
+    },
+    arena.auto && arena.open,
+  );
   const bench = leapfrog.enabled;
-  // With Release Leapfrog on, the leaderboard is the live part of the race: it opens first, and the tab lights up on a launch.
-  const [tab, setTab] = useState<"perf" | "bench">("bench");
+  // FLT-94: Task Mangler always opens on the leaderboard, whoever opens it (Quick Launch, the tray's rank, the game after a
+  // drop): shutting it goes back to that tab. The benchmark table is a tab away, and its tab lights up on a launch.
+  const [tab, setTab] = useState<"perf" | "bench">("perf");
   useWidget(["arena", "benchmarks"], (id) => setTab(id === "benchmarks" ? "bench" : "perf"));
+  useEffect(() => {
+    if (!arena.open) setTab("perf");
+  }, [arena.open]);
   const onBench = bench && tab === "bench" && arena.open;
   const launched = leapfrog.rows.some((r) => r.flash);
   return (
@@ -367,6 +406,8 @@ export function Arena({ arena, leapfrog, layout, actions }: SlotPropsMap["Arena"
         </>
       }
       label="Task Mangler"
+      place="arena"
+      attrs={{ "data-anchor": "win:arena" }}
       icon="chart"
       onTitleClick={() => actions.toggleArena()}
       buttons={[{ g: "min", label: arena.open ? "Minimize" : "Restore", onClick: () => actions.toggleArena() }]}
@@ -428,7 +469,7 @@ export function ThoughtsPanel({ rows, layout, actions }: SlotPropsMap["ThoughtsP
   useStackWindow("thoughts", !open, (minimised) => setOpen(!minimised));
   useWidget("thoughts", () => setOpen(true));
   return (
-    <Win className={`f95-thoughts ${open ? "open" : ""}`} title={`${t("thoughts.title")}.txt`} icon="doc" onTitleClick={() => setOpen(!open)} buttons={[{ g: "min", label: open ? "Minimize" : "Restore", onClick: () => setOpen(!open) }]}>
+    <Win className={`f95-thoughts ${open ? "open" : ""}`} place="thoughts" title={`${t("thoughts.title")}.txt`} icon="doc" onTitleClick={() => setOpen(!open)} buttons={[{ g: "min", label: open ? "Minimize" : "Restore", onClick: () => setOpen(!open) }]}>
       {open && (
         <ul className="f95-thoughtlist inset">
           {rows.map((r) => (
@@ -450,10 +491,15 @@ export function Staff({ staff, actions }: SlotPropsMap["Staff"]) {
   const [tab, setTab] = useState<"hire" | "roster">("hire");
   const [folded, setFolded] = useState(false);
   useStackWindow("staff", folded, setFolded);
+  // FLT-94: Quick Launch's Staff Manager unfolds it, on the Hire tab.
+  useWidget("staff", () => {
+    setFolded(false);
+    setTab("hire");
+  });
   if (staff.painting) {
     const p = staff.painting;
     return (
-      <Win className="f95-staff painting" title="Patrol zone" icon="staff" buttons={[{ g: "close", label: "Done", onClick: () => actions.paintZone(null) }]}>
+      <Win className="f95-staff painting" place="staff" title="Patrol zone" icon="staff" buttons={[{ g: "close", label: "Done", onClick: () => actions.paintZone(null) }]}>
         <div className="f95-page">
           <p className="f95-paintmsg">
             <b>{p.name}</b> · drag on the map to paint their patrol zone; drag from a painted tile to erase. {p.zone > 0 ? `${p.zone} tiles.` : "Empty means the whole campus."}
@@ -471,6 +517,8 @@ export function Staff({ staff, actions }: SlotPropsMap["Staff"]) {
   return (
     <Win
       className="f95-staff"
+      place="staff"
+      attrs={{ "data-anchor": "win:staff" }}
       title="Staff Manager"
       icon="staff"
       buttons={[
@@ -486,7 +534,7 @@ export function Staff({ staff, actions }: SlotPropsMap["Staff"]) {
             active={tab}
             onChange={setTab}
             tabs={[
-              { id: "hire", label: "Hire" },
+              { id: "hire", label: "Hire", attrs: door("hire:*") },
               { id: "roster", label: `Roster (${staff.count})` },
             ]}
           />
@@ -500,7 +548,7 @@ export function Staff({ staff, actions }: SlotPropsMap["Staff"]) {
                       <b>{j.title}</b> <small>{j.salaryText}</small>
                       <small className="blurb">{j.blurb}</small>
                     </span>
-                    <Btn disabled={!j.canHire} title={j.reason} onClick={() => actions.hire(j.job)}>
+                    <Btn disabled={!j.canHire} title={j.reason} {...anchor(`hire:${j.job}`)} onClick={() => actions.hire(j.job)}>
                       {t("staff.hire")}
                       {j.count > 0 ? ` (${j.count})` : ""}
                     </Btn>

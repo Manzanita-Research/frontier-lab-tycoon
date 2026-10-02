@@ -28,6 +28,10 @@ export const STORE = {
   sign: "PC CD-ROM · BIG BOX SALE",
   /** The shelf-talker under the hero box. */
   talker: "STAFF PICK: \"I haven't slept.\" — Doug, Store Manager",
+  /** FLT-89: the cardboard scientist's speech balloon, its small print, and the bargain bin's card. */
+  standee: "I've seen the benchmarks!",
+  standeeSmall: "*We wrote them.",
+  bin: { head: "BARGAIN BIN", price: "$4.99", sub: "Last year's models" },
 };
 
 /** Our box. Art direction A (the '96 sim-game look), as a greybox: bright diorama, chrome logo, starbursts. */
@@ -71,22 +75,13 @@ export type ItemId = "manual" | "disc" | "floppies" | "card" | "overlay" | "eula
 /** What is in the box, in the order the Contents list shows it. */
 export const ITEMS: { id: ItemId; name: string; caption: string }[] = [
   { id: "manual", name: "The manual", caption: "140 pages. Two of them printed in time." },
-  { id: "coa", name: "Certificate of Authenticity", caption: "Drag to tilt it in the light. Genuine foil. Genuinely placeholder foil." },
-  { id: "disc", name: "CD-ROM", caption: "Frontier Lab Tycoon for Frontier 95. Do not microwave." },
+  { id: "coa", name: "Certificate of Authenticity", caption: "Drag to tilt it in the light. Genuine holographic foil. Do not microwave." },
+  { id: "disc", name: "CD-ROM", caption: "Disc 1 of 1. Gold master. Hold it by the edges, like a model you're about to ship." },
   { id: "floppies", name: "Floppy disks", caption: "Disk 1 of 7. Disks 2 to 7 are the same disk, relabelled for the investors." },
   { id: "card", name: "Registration card", caption: "Mail today for exciting offers from our partners! (You are the partner.)" },
   { id: "overlay", name: "Keyboard overlay", caption: "F1 Help · F2 Pause · F3 Train · F4 Deny Everything" },
   { id: "eula", name: "End User License Agreement", caption: "By breaking this seal you agree the model may be smarter than you." },
   { id: "inserts", name: "Expansion pack inserts", caption: "Collect them all! Some of them exist!" },
-];
-
-/** The paper inserts that fall out of the box (C's edutainment look, B's rebate jokes). */
-export const INSERTS = [
-  { title: "The Circus Expansion Pack", body: "Senate hearings! A safety summit on a yacht! Send in the clowns (they're already here).", colors: ["#ffe14d", "#c8102e"] },
-  { title: "Bird App Online Edition", body: "Post from inside the game! Modem required. 14.4k recommended. Arguments included.", colors: ["#9fd8ff", "#0b3d91"] },
-  { title: "Daily Drama Subscription", body: "A new scandal every morning, delivered by 3.5\" disk. Cancel anytime (you can't).", colors: ["#ffd1e8", "#8a0a4a"] },
-  { title: "Modules Coming Soon", body: "Frontier Lab Tycoon: Cloud Tycoon · Chip Fab Frenzy · Ethics Board Deluxe (cancelled).", colors: ["#d9f5c5", "#2d5a12"] },
-  { title: "$5 Mail-In Rebate", body: "Send proof of purchase, the UPC, a notarised vibe check and your weights. Allow 6 to 8 years.", colors: ["#ffffff", "#006b5a"] },
 ];
 
 export const REGISTRATION = {
@@ -141,12 +136,41 @@ export const BIOS = {
 
 export const SPLASH = { name: "Frontier 95", sub: "Starting Frontier 95...", maker: "Frontier Interactive Entertainment" };
 
+/** FLT-95: the box in your hands. The caption says which face you're looking at; the buttons are Frontier 95's. */
+export const HELD = {
+  captions: {
+    front: "It's heavier than it looks. That's the manual. Drag to turn it.",
+    spine: "The spine. Looks great on a shelf, next to the other ones you never opened.",
+    back: "Every screenshot on the back is from the actual game.* (*A game.)",
+  },
+  left: "Turn left",
+  right: "Turn right",
+  flipToBack: "Flip to back",
+  flipToFront: "Flip to front",
+  open: "Open the box",
+};
+
+/** FLT-95: the disc in your hand. */
+export const DISC = { insert: "Insert and play", back: "Back", pickUp: "Pick up the disc" };
+
+/** What's printed on the disc: two spot colours over the silver, as a 1997 pressing plant would. */
+export const DISC_LABEL = {
+  title: ["FRONTIER", "LAB", "TYCOON"],
+  platform: "CD-ROM for Frontier 95",
+  warning: "Do not microwave",
+  disc: "DISC 1 OF 1",
+  badge: "GOLD MASTER",
+  /** Etched into the mirror band by the pressing plant, as every disc's matrix code is. */
+  matrix: "FLT-95 GM  ·  M1 S1  ·  PRESSED IN THE LAB",
+  rim: "© 1997 Frontier Interactive Entertainment, Inc.  ·  Unauthorized copying voids the alignment  ·  Contains no user-serviceable weights  ·  Made in the Lab",
+};
+
 /** Beat captions (the line at the bottom of the screen). */
 export const CAPTIONS = {
   shelf: "Aisle 7. Pick a box. Any box. (Well, one box.)",
-  pulling: "It's heavier than it looks. That's the manual.",
+  pulling: "Careful. It's the last one on the shelf.",
   unwrapping: "*shrinkwrap noises*",
-  open: "Everything is in here. Insert the disc when you're ready.",
+  open: "Everything is in here. Pick up the disc when you're ready.",
   disc: "Loading. Please don't bump the table.",
   warmup: "The CRT is warming up. Give it a moment. It's from 1995.",
   post: "",

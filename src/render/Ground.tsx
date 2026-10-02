@@ -1,35 +1,33 @@
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { createRng } from "../sim/rng";
+import { onPlaza } from "../sim/opening";
 import { GRID_SIZE } from "../sim/state";
 import { atoms, sim } from "../app/game";
 import { useApp } from "../app/hooks";
 import { HALF, NEO_LOT_HALF, NEO_LOTS, PLAQUE_AT, worldX, worldZ } from "./coords";
 import { boxGeo, CREAM, std } from "./materials";
+import { BOARD, LAWN_PX, RIM, lawnPixels } from "./lawn";
+import { TRUCK } from "./lot";
+import { PLAZA_PROPS } from "./plaza";
 
-const BOARD = 28;
-const RIM = (BOARD - GRID_SIZE) / 2;
-
+/** The mowed lawn (lawn.ts) as a texture: its rows run north to south, and the plane's v runs south to north. */
 function grassTexture() {
-  const canvas = document.createElement("canvas");
-  canvas.width = canvas.height = BOARD;
-  const g = canvas.getContext("2d")!;
-  for (let x = 0; x < BOARD; x++) {
-    for (let z = 0; z < BOARD; z++) {
-      const inside = x >= RIM && z >= RIM && x < BOARD - RIM && z < BOARD - RIM;
-      const alt = (x + z) % 2 === 0;
-      g.fillStyle = inside ? (alt ? "#79bf55" : "#72b84f") : alt ? "#6aac4b" : "#66a748";
-      g.fillRect(x, z, 1, 1);
-    }
-  }
-  const tex = new THREE.CanvasTexture(canvas);
+  const px = lawnPixels();
+  const n = BOARD * LAWN_PX;
+  const flipped = new Uint8Array(px.length);
+  for (let r = 0; r < n; r++) flipped.set(px.subarray(r * n * 4, (r + 1) * n * 4), (n - 1 - r) * n * 4);
+  const tex = new THREE.DataTexture(flipped, n, n, THREE.RGBAFormat);
   tex.colorSpace = THREE.SRGBColorSpace;
-  tex.magFilter = THREE.NearestFilter;
-  tex.minFilter = THREE.NearestFilter;
+  tex.magFilter = THREE.LinearFilter;
+  tex.minFilter = THREE.LinearMipmapLinearFilter;
+  tex.generateMipmaps = true;
+  tex.anisotropy = 4;
+  tex.needsUpdate = true;
   return tex;
 }
 
-/** The diorama board: a checkered lawn on a slab of soil. */
+/** The diorama board: a mowed lawn on a slab of soil. */
 export function Ground() {
   const map = useMemo(grassTexture, []);
   return (
@@ -49,12 +47,14 @@ export function Ground() {
 
 const PATH_MAX = GRID_SIZE * GRID_SIZE;
 
-/** One raised cream slab per path tile. */
+/** One raised cream slab per path tile (the entrance plaza's are warmer). */
 export function Paths() {
   const version = useApp(atoms.version);
   const ref = useRef<THREE.InstancedMesh>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
   const tints = useMemo(() => [new THREE.Color("#f4e9c9"), new THREE.Color("#efe2bd")], []);
+  // FLT-91: the entrance plaza is laid in warmer pavers, so the front yard reads as a place and not just more path.
+  const pavers = useMemo(() => [new THREE.Color("#ecd2ac"), new THREE.Color("#e4c69c")], []);
 
   useEffect(() => {
     const mesh = ref.current;
@@ -69,13 +69,13 @@ export function Paths() {
       dummy.scale.set(0.97, 0.1, 0.97);
       dummy.updateMatrix();
       mesh.setMatrixAt(n, dummy.matrix);
-      mesh.setColorAt(n, tints[(x + z) % 2]!);
+      mesh.setColorAt(n, (onPlaza(x, z) ? pavers : tints)[(x + z) % 2]!);
       n++;
     }
     mesh.count = n;
     mesh.instanceMatrix.needsUpdate = true;
     if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-  }, [version, dummy, tints]);
+  }, [version, dummy, tints, pavers]);
 
   return (
     <instancedMesh ref={ref} args={[boxGeo, undefined, PATH_MAX]} receiveShadow castShadow frustumCulled={false}>
@@ -87,6 +87,18 @@ export function Paths() {
 /** Trees, bushes and rocks on the rim of the board. Static, seeded locally so it never touches the sim. */
 /** Which neo lab lot (FLT-56) a tree or bush stands on, or -1. */
 const lotAt = (x: number, z: number) => NEO_LOTS.findIndex(([lx, lz]) => Math.abs(x - lx) < NEO_LOT_HALF[0] && Math.abs(z - lz) < NEO_LOT_HALF[1]);
+
+/**
+ * FLT-96: the strip of verge between the camera and the plaza's props. Its trees stood right in front of the benches
+ * by the fence (and in the welcome sign), so they are never planted; the bushes and rocks stay, and the dice are the same.
+ */
+const PROPS_FRONT = {
+  x0: worldX(Math.min(...PLAZA_PROPS.map((p) => p.at[0] - p.half[0]))) - 0.6,
+  x1: worldX(Math.max(...PLAZA_PROPS.map((p) => p.at[0] + p.half[0]))) + 0.6,
+};
+const inFrontOfProps = (x: number, z: number) => z > HALF && x > PROPS_FRONT.x0 && x < PROPS_FRONT.x1;
+/** FLT-98: nothing grows where the food truck is parked (or close enough to poke through it). */
+const underTruck = (x: number, z: number) => Math.abs(x - TRUCK.at[0]) < TRUCK.half[0] + 0.5 && Math.abs(z - TRUCK.at[1]) < TRUCK.half[1] + 0.5;
 
 export function Decor() {
   // Trees on a lot a neo lab has built on are felled (scaled to nothing: the instance counts never change).
@@ -126,7 +138,8 @@ export function Decor() {
     const put = (mesh: THREE.InstancedMesh | null, i: number, x: number, y: number, z: number, sx: number, sy: number, color?: THREE.Color) => {
       if (!mesh) return;
       const lot = lotAt(x, z);
-      const felled = (lot >= 0 && lot < built) || (plaque && Math.hypot(x - PLAQUE_AT[0], z - PLAQUE_AT[1]) < 1.5);
+      const tree = mesh === trunk.current || mesh === low.current || mesh === high.current;
+      const felled = (lot >= 0 && lot < built) || (plaque && Math.hypot(x - PLAQUE_AT[0], z - PLAQUE_AT[1]) < 1.5) || (tree && inFrontOfProps(x, z)) || underTruck(x, z);
       d.position.set(x, y, z);
       d.scale.set(felled ? 0 : sx, felled ? 0 : sy, felled ? 0 : sx);
       d.rotation.y = i * 1.7;

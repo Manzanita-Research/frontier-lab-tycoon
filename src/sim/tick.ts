@@ -8,6 +8,7 @@ import { applyDefectionChoices, dailyDefection, updateDefection } from "./defect
 import { updateMeetings } from "./meetings";
 import { dailyNeoLabs } from "./neolabs/driver";
 import { applyPoachingChoices, dailyPoaching } from "./poaching/driver";
+import { dailyBirdApp } from "./birdapp/driver";
 import { applyPromisesChoices, dailyPromises } from "./promises/driver";
 import { applyCaptureChoices, dailyCapture } from "./capture/driver";
 import { TICKS_PER_DAY } from "./constants";
@@ -16,8 +17,8 @@ import { dailyDisasters, updateDisasters } from "./disasters/driver";
 import { declineBuilding } from "./endings/autopilot";
 import { dailyEndings, endingHalts, endingsOwnTheGame, updateEndings } from "./endings/driver";
 import { dailyCrowd } from "./crowd";
-import { dailyEconomy } from "./economy";
-import { dailyEvents, notePacer, openEventOf } from "./events";
+import { applyBridgeChoices, dailyEconomy } from "./economy";
+import { dailyEvents, firstMinutes, notePacer, openEventOf } from "./events";
 import { dailyGoals } from "./goals";
 import { updateGroups } from "./groups";
 import { dailyNews, replying } from "./news";
@@ -26,6 +27,7 @@ import { dailyLeapfrog } from "./race/leapfrog/driver";
 import { dailyRace } from "./race/race";
 import { dailySlop } from "./slop";
 import { updateStaff } from "./staff";
+import { dailyEscape, updateEscape } from "./escape/driver";
 import { dailyDiscourse, updateProtesters } from "./protest";
 import { createRng } from "./rng";
 import { dailyThoughts } from "./thoughts";
@@ -74,6 +76,7 @@ function step(state: GameState, commands: readonly Command[]) {
   if (commands.length > 0) { updateTutorial(state); observeGuardrails(state); }
   // Answers to cards are replies too (FLT-51): the toasts they send are never held back.
   replying(state, () => {
+    applyBridgeChoices(state);
     if (systemUnlocked(state, "collusion")) applyCollusionChoices(state);
     applyCircusChoices(state);
     applyPackChoices(state);
@@ -96,6 +99,8 @@ function step(state: GameState, commands: readonly Command[]) {
   probe?.lap("factions");
   updateStaff(state, rng);
   probe?.lap("staff");
+  if (systemUnlocked(state, "escape")) updateEscape(state);
+  probe?.lap("escape");
   updateGroups(state);
   probe?.lap("groups");
   if (systemUnlocked(state, "auditors")) updateAuditors(state);
@@ -145,6 +150,9 @@ function step(state: GameState, commands: readonly Command[]) {
     probe?.lap("daily:leapfrog");
     if (systemUnlocked(state, "papers")) dailyPapers(state, rng);
     probe?.lap("daily:papers");
+    // FLT-69: after the news (a rival's drop is today's topic), before the factions (they hear today's controversies).
+    if (systemUnlocked(state, "birdapp")) dailyBirdApp(state);
+    probe?.lap("daily:birdapp");
     // FLT-33: the factions first, so the Circus and the Senate hear today's meters (FLT-52).
     if (state.factions && systemUnlocked(state, "factions")) dailyFactions(state);
     probe?.lap("daily:factions");
@@ -158,6 +166,9 @@ function step(state: GameState, commands: readonly Command[]) {
     probe?.lap("daily:promises");
     if (systemUnlocked(state, "capture")) dailyCapture(state);
     probe?.lap("daily:capture");
+    // FLT-59: before the day's bubbles, so an agent brooding about the fence has the floor.
+    if (systemUnlocked(state, "escape")) dailyEscape(state);
+    probe?.lap("daily:escape");
     dailyThoughts(state, rng);
     probe?.lap("daily:thoughts");
     if (state.endings) dailyEndings(state, rng);
@@ -168,7 +179,10 @@ function step(state: GameState, commands: readonly Command[]) {
     probe?.lap("daily:modArcs");
     if (systemUnlocked(state, "auditors")) dailyAuditors(state);
     probe?.lap("daily:auditors");
-    if (systemUnlocked(state, "events")) dailyEvents(state);
+    // A card a mod brought mid-game (FLT-78) comes even before the ladder opens the rest: it was asked for. So does the
+    // first minutes' own card, on Level 1 (FLT-76).
+    const cards = systemUnlocked(state, "events");
+    if (cards || state.modsAdded || firstMinutes(state)) dailyEvents(state, cards);
     probe?.lap("daily:events");
     updateProgression(state);
     updateTutorial(state);
@@ -194,6 +208,7 @@ function now(state: GameState, commands: readonly Command[]) {
   observeGuardrails(state);
   // Answers to cards are replies too (FLT-51): the toasts they send are never held back.
   replying(state, () => {
+    applyBridgeChoices(state);
     if (systemUnlocked(state, "collusion")) applyCollusionChoices(state);
     applyCircusChoices(state);
     applyPackChoices(state);

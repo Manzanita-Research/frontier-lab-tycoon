@@ -23,6 +23,8 @@
     "shots": "node scripts/shots.mjs",
     "e2e:stranger": "node e2e/stranger.mjs",
     "e2e:journey": "node e2e/journey.mjs",
+    "e2e:coach": "node e2e/coach-overlap.mjs",
+    "e2e:drama": "node e2e/drama.mjs",
     "drama": "node scripts/drama-run.mjs",
     "drama:lint": "node drama/lint.mjs"
   },

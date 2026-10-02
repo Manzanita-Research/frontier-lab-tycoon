@@ -8,6 +8,7 @@ import type { ResolvedLook } from "../mods/services/looks";
 import type { LookPartData } from "../mods/schema";
 import type { Walker } from "../sim/types";
 import { SIGN_COLORS } from "../content/protest";
+import { HEAD_TOP, MOD_LOOKS } from "./people";
 import { signTexture } from "./signs";
 
 const CAP = 512;
@@ -16,8 +17,8 @@ const SIGN_CAP = 64;
 const MAX_MODEL_MESHES = 16;
 /** How tall a sprite or a model stands when the look does not say: about a person. */
 const PERSON = 1.2;
-/** The top of a base walker's head (1.6x life size): the height a placard is sized for. */
-const PERSON_TOP = 1.25;
+/** The top of a base walker's head: the height a placard is sized for. */
+const PERSON_TOP = HEAD_TOP;
 
 /** Where and how a walker is this frame (the same numbers the base looks use). */
 export interface Pose {
@@ -163,7 +164,7 @@ class Signs {
     height?: number,
   ) {
     this.k = Math.min(1, Math.max(0.6, top / PERSON_TOP));
-    this.height = height ?? top + 0.85 * this.k;
+    this.height = height !== undefined ? height * MOD_LOOKS : top + 0.85 * this.k;
     this.textures = lines.map((text, i) => signTexture(text, SIGN_COLORS[i % SIGN_COLORS.length]!));
     this.boards = this.textures.map((map) => instanced(this.boardGeo, new THREE.MeshBasicMaterial({ map, toneMapped: false, side: THREE.DoubleSide }), SIGN_CAP, false));
     this.pole = instanced(this.poleGeo, new THREE.MeshStandardMaterial({ color: "#8a5a3a", roughness: 0.9 }));
@@ -216,7 +217,7 @@ function bodyMatrix(p: Pose, bob: number, pitch: number, roll: number, k: number
 
 function recipeDrawer(look: ResolvedLook): LookDrawer {
   const group = new THREE.Group();
-  const k = look.scale ?? 1;
+  const k = (look.scale ?? 1) * MOD_LOOKS;
   const coats = look.coats ?? [];
   const parts: Part[] = (look.recipe ?? []).map((part) => {
     const coat = part.color === "coat";
@@ -275,7 +276,7 @@ function spriteDrawer(look: ResolvedLook): LookDrawer {
   const group = new THREE.Group();
   const [w, h] = look.size ?? [PERSON * 0.75, PERSON];
   const coats = look.coats?.map((c) => new THREE.Color(c)) ?? null;
-  const k = look.scale ?? 1;
+  const k = (look.scale ?? 1) * MOD_LOOKS;
   const geo = new THREE.PlaneGeometry(w, h).translate(0, h / 2, 0);
   const material = new THREE.MeshBasicMaterial({ transparent: true, alphaTest: 0.4, side: THREE.DoubleSide, toneMapped: false });
   const texture = new THREE.TextureLoader(sealedManager()).load(look.src ?? "", (tex) => {
@@ -320,7 +321,7 @@ function spriteDrawer(look: ResolvedLook): LookDrawer {
 
 function modelDrawer(look: ResolvedLook): LookDrawer {
   const group = new THREE.Group();
-  const k = look.scale ?? 1;
+  const k = (look.scale ?? 1) * MOD_LOOKS;
   const height = (look.size?.[1] ?? PERSON) * k;
   const meshes: THREE.InstancedMesh[] = [];
   let ready = false;

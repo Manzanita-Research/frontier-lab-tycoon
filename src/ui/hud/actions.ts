@@ -1,6 +1,6 @@
 // Everything a skin may ask the game to do, wired to the app machine and the UI atoms. Skins get this object and
 // nothing behind it.
-import { appNow, debugParams, registry, send } from "../../app/game";
+import { appNow, debugParams, registry, send, sim, SLOW_KEY } from "../../app/game";
 import { SPEEDS, type Speed, type Tool } from "../../app/hud";
 import { mixerOpenAtom, playCue, setMixer } from "../../audio/state";
 import type { Cue } from "../../audio/score";
@@ -11,7 +11,8 @@ import { dramaActions } from "../../drama/state";
 import { setPhoto, takePhoto } from "../juice/photo";
 import { copyLink, copySummary, playDaily, shareEnding } from "../share/share";
 import { dismissChallenge, dismissMemo } from "../share/social";
-import { arenaChosenAtom, arenaOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, senateOpenAtom, staffOpenAtom, windowBudgetAtom } from "./state";
+import { arenaChosenAtom, arenaOpenAtom, birdAppOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, senateOpenAtom, staffOpenAtom, guideAtom, windowBudgetAtom } from "./state";
+import { guardWith } from "./guard";
 import { closeWindow, isUp, restoreWindow } from "./windows";
 import { skinActions } from "./skinControl";
 import { savesActions } from "./saves";
@@ -30,6 +31,32 @@ const openArena = (open: boolean) => {
   registry.set(arenaOpenAtom, open);
   registry.set(arenaChosenAtom, open);
 };
+
+/** Text onto the clipboard: the async API where the page may use it, else the old select-and-copy. */
+async function copyText(text: string): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    const area = document.createElement("textarea");
+    area.value = text;
+    area.setAttribute("readonly", "");
+    area.style.cssText = "position:fixed;left:-9999px;top:0";
+    document.body.appendChild(area);
+    area.select();
+    try {
+      return document.execCommand("copy");
+    } catch {
+      return false;
+    } finally {
+      area.remove();
+    }
+  }
+}
+
+/** FLT-93: a HUD action that must survive its own failure (the FLT-81 rule, on the UI side of the app actor). */
+const guard = <T>(where: string, f: () => T, fallback: T): T =>
+  guardWith((report) => send({ type: "SNAG", report, now: Date.now() }), where, f, fallback, () => ({ seed: sim.world.seed, tick: sim.world.tick, day: sim.world.day }));
 
 const TIME_HOURS: Record<string, number | null> = { live: null, day: 13, golden: 18.3, night: 22.5 };
 
@@ -57,6 +84,20 @@ export const hudActions: HudActions = {
   closeInspector: () => send({ type: "SELECT", id: null }),
   highlight: (key) => send({ type: "HIGHLIGHT", key }),
   dismissToast: (id) => send({ type: "DISMISS_TOAST", id }),
+  setSlowForBadNews: (on) => {
+    try {
+      localStorage.setItem(SLOW_KEY, on ? "on" : "off");
+    } catch {
+      // Private mode: it holds for this visit.
+    }
+    send({ type: "SET_SLOW_FOR_BAD_NEWS", on });
+  },
+  copySnag: async (id) => {
+    const report = appNow()?.toasts.find((t) => t.id === id)?.snag;
+    if (!report) return false;
+    console.info(report);
+    return copyText(report);
+  },
   // The spend is kept in the snapshot: "do it anyway" sends the same command again, marked confirmed.
   confirmSpend: () => {
     const pending = appNow()?.snap.pendingConfirm;
@@ -70,7 +111,16 @@ export const hudActions: HudActions = {
     registry.set(helpOpenAtom, false);
     send({ type: "COMMAND", command: { type: "coachReplay" } });
   },
+  openBox: () => send({ type: "TO_BOX" }),
   dismissUnlock: () => send({ type: "COMMAND", command: { type: "dismissUnlock" } }),
+  // FLT-93: [Show me]. The New! card steps aside (it is read; the coach layer walks to the anchor), and the coach points.
+  showMe: (anchor) =>
+    guard("showMe", () => {
+      if (typeof anchor !== "string" || !anchor) return;
+      if (appNow()?.snap.unlockCard) send({ type: "COMMAND", command: { type: "dismissUnlock" } });
+      registry.set(guideAtom, anchor);
+    }, undefined),
+  endShowMe: () => guard("endShowMe", () => registry.set(guideAtom, null), undefined),
   // The first coach step waits for the build panel to open: tell the game each time it does.
   buildPanel: (open) => {
     if (open) send({ type: "COMMAND", command: { type: "buildPanelOpened" } });
@@ -114,6 +164,10 @@ export const hudActions: HudActions = {
   dismissPaperMoment: dismiss,
   closeCrumbWiki: dismiss,
   toggleFactions: () => registry.set(factionsOpenAtom, !registry.get(factionsOpenAtom)),
+  toggleBirdApp: () => registry.set(birdAppOpenAtom, !registry.get(birdAppOpenAtom)),
+  setBirdLever: (id, lever) => {
+    if (Number.isInteger(id) && (lever === "cook" || lever === "comms" || lever === "logoff")) send({ type: "COMMAND", command: { type: "birdLever", id, lever } });
+  },
   setSafetySpend: (level) => send({ type: "COMMAND", command: { type: "setSafetySpend", level } }),
   issueStatement: (faction) => send({ type: "COMMAND", command: { type: "issueStatement", faction } }),
   buryLeak: () => send({ type: "COMMAND", command: { type: "buryLeak" } }),
@@ -200,6 +254,7 @@ export const hudActions: HudActions = {
     const open = {
       arena: () => openArena(true),
       benchmarks: () => openArena(true),
+      bird: () => registry.set(birdAppOpenAtom, true),
       discourse: () => registry.set(factionsOpenAtom, true),
       papers: () => registry.set(papersOpenAtom, true),
       news: () => viewRoom("archive"),

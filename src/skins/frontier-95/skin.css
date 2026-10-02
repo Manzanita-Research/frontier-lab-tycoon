@@ -117,6 +117,27 @@
       cursor: pointer;
     }
   }
+  /* FLT-90: a window drags by its title bar (not on a phone: `.drag` is only set on a wide screen). A pen or a finger on
+     a tablet drags it too, instead of scrolling the page. */
+  .f95-win.drag > .f95-tb {
+    touch-action: none;
+  }
+  /* What moves while you drag: a dotted outline, inverted against whatever is under it, as in 1995. The window follows
+     when you let go. */
+  .f95-ghost {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 1000;
+    pointer-events: none;
+    box-sizing: border-box;
+    padding: 4px;
+    background: repeating-conic-gradient(#fff 0 25%, transparent 0 50%) 0 0 / 2px 2px;
+    mix-blend-mode: difference;
+    mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+  }
   .f95-strip {
     cursor: pointer;
   }
@@ -822,6 +843,8 @@
     gap: 6px;
     padding: 0 4px;
     pointer-events: auto;
+    /* Always on top, as in 1995: a window dragged down the screen (FLT-90) goes behind it, never over the Start button. */
+    z-index: 30;
   }
   .f95-startwrap {
     position: relative;
@@ -848,25 +871,9 @@
       background: repeating-conic-gradient(var(--lt) 0 25%, var(--g) 0 50%) 0 0 / 2px 2px;
     }
   }
-  .f95-flag {
-    width: 22px;
-    height: 20px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1px;
-    transform: skewX(-8deg);
-    i:nth-child(1) {
-      background: #e00;
-    }
-    i:nth-child(2) {
-      background: #0a0;
-    }
-    i:nth-child(3) {
-      background: #00c;
-    }
-    i:nth-child(4) {
-      background: #fc0;
-    }
+  .f95-mark {
+    flex: none;
+    display: block;
   }
   .f95-qs {
     display: flex;
@@ -1197,6 +1204,21 @@
       height: 28px;
       grid-template-columns: 30px minmax(0, 1fr) 20px auto;
       white-space: nowrap;
+    }
+    /* FLT-76: a checkable entry ("Slow down for bad news") keeps its tick where the others keep their icon. */
+    /* Drawn, not typed: the menu font has no ✓. */
+    .f95-menu-tick {
+      justify-self: center;
+      &.on::after {
+        content: "";
+        display: block;
+        width: 4px;
+        height: 8px;
+        margin-top: -3px;
+        border: solid currentColor;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+      }
     }
     .hd {
       padding: 5px 8px 2px 10px;
@@ -1547,6 +1569,47 @@
     min-width: min(300px, calc(100vw - 20px));
     pointer-events: auto;
   }
+  /* FLT-76: the New! card's joke, under what it unlocked. */
+  /* (Under .f95-msgbody, whose own "p { margin: 0 }" would win otherwise.) */
+  .f95-msgbody p.f95-quip {
+    margin: 10px 0 0;
+    font-style: italic;
+  }
+  /* FLT-84: the recovery toast, an error box over the bottom of the campus (not the paperclip's balloon) */
+  .f95-snag {
+    position: fixed;
+    z-index: 35;
+    bottom: calc(var(--taskbar) + 12px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(380px, calc(100vw - 20px));
+    pointer-events: auto;
+  }
+  .f95-snag .f95-msgbody p {
+    margin: 0;
+  }
+  /* FLT-76: the game slowed to 1× for bad news. Over the paperclip, beside whatever card the news brought (cards open in
+     the middle), and clear of the snag's spot. */
+  .f95-slowbox {
+    position: fixed;
+    z-index: 96;
+    right: 10px;
+    bottom: calc(var(--taskbar) + 96px);
+    width: min(420px, calc(100vw - 20px));
+    pointer-events: auto;
+    .f95-msgbody p {
+      margin: 0;
+    }
+    .f95-slowtext {
+      font-size: 15px;
+      font-weight: bold;
+      color: var(--flt-color-bad);
+    }
+    .f95-slowwhy {
+      margin-top: 6px;
+      color: #444;
+    }
+  }
   .f95-unlockitems {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1562,6 +1625,128 @@
       margin-right: 8px;
       background: #000080;
     }
+  }
+  /* FLT-93: the New! card by kind, each line with a Show Me… */
+  .f95-unlockgroups {
+    display: grid;
+    gap: 4px 10px;
+    margin: 8px 0 0;
+    max-height: min(52vh, 420px);
+    overflow: auto;
+    /* Jem: Build + Hire on the left, New systems + New apps on the right, so the card stays under the goal note. */
+    &.two {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .f95-unlockcol {
+    display: grid;
+    align-content: start;
+    gap: 4px;
+  }
+  .f95-unlock.wide {
+    width: min(600px, calc(100vw - 24px));
+    .f95-msgbox {
+      width: 100%;
+    }
+  }
+  .f95-unlockgroup {
+    margin: 0;
+    padding: 0 6px 4px;
+    border: 1px solid #808080;
+    box-shadow: 1px 1px 0 #fff, inset 1px 1px 0 #fff;
+    legend {
+      padding: 0 4px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    ul {
+      display: grid;
+      gap: 2px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    li {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 22px;
+    }
+  }
+  /* One line each: the name, then what it is for, in the same run of text. */
+  .f95-unlockwhat {
+    flex: 1;
+    min-width: 0;
+    font-size: 13px;
+    line-height: 1.2;
+    color: #333;
+    b {
+      margin-right: 5px;
+      font-size: 14px;
+      color: #000;
+    }
+  }
+  .f95-btn.f95-showme {
+    flex: none;
+    min-width: 0;
+    min-height: 0;
+    padding: 1px 6px;
+    font-size: 13px;
+  }
+  /* A thumb still needs 32 px (FLT-87): small on a desktop, not on a phone (a phone-sized window counts, whatever the pointer says). */
+  @media (pointer: coarse), (max-width: 640px) {
+    .f95-btn.f95-showme,
+    .f95-post .f95-showme.link {
+      min-height: 32px;
+    }
+  }
+  /* The paperclip, when you asked: "It looks like you're trying to hire an SRE." */
+  .f95-asking {
+    margin: 0 0 4px;
+    font-size: 15px;
+    font-weight: bold;
+  }
+  /* The goal note's next step: what, where, and the button. */
+  /* The tutorial opened the phone's fold to point at the goal: its balloon is talking, so the note keeps to the goal and leaves the map room. */
+  .f95-fold.coached .f95-post .f95-nextstep {
+    display: none;
+  }
+  .f95-post .f95-nextstep {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    padding-top: 5px;
+    border-top: 1px dashed #b8a640;
+    > span {
+      display: grid;
+      flex: 1;
+      min-width: 0;
+    }
+    b {
+      font-size: 15px;
+    }
+    small {
+      text-transform: none;
+      letter-spacing: 0;
+    }
+  }
+  .f95-post .f95-showme.link {
+    display: block;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    font-size: 14px;
+    color: #000080;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  /* The arrow, in pixels. */
+  .coach-arrow {
+    background: #000;
+    filter: drop-shadow(2px 2px 0 #ffff00);
+    animation-timing-function: steps(2, end);
   }
   .f95-help {
     width: min(580px, 100%);
@@ -2371,6 +2556,38 @@
   .f95-display {
     width: min(470px, 100%);
   }
+  /* Settings → Picture tube (FLT-73): the little monitor wears the look you picked. */
+  .f95-tube {
+    display: grid;
+    gap: 6px;
+    border: 1px solid var(--sh);
+    box-shadow: 1px 1px 0 var(--hl);
+    margin: 0 0 8px;
+    padding: 8px 10px;
+    small {
+      color: var(--sh);
+    }
+  }
+  .f95-monitor[class*="f95-tube-"] span {
+    background:
+      linear-gradient(transparent 55%, rgb(0 0 0 / 0.12) 55%) 0 0 / 100% var(--tube-pitch, 3px),
+      linear-gradient(160deg, #3a9ad9, #008080 60%, #0b5d3b);
+    border-radius: var(--tube-r, 0);
+    filter: var(--tube-f, none);
+  }
+  .f95-monitor.f95-tube-off span {
+    --tube-pitch: 100%;
+    background: linear-gradient(160deg, #3a9ad9, #008080 60%, #0b5d3b);
+  }
+  .f95-monitor.f95-tube-subtle span {
+    --tube-r: 6px / 8px;
+  }
+  .f95-monitor.f95-tube-full span {
+    --tube-pitch: 4px;
+    --tube-r: 14px / 18px;
+    --tube-f: saturate(1.25) contrast(1.05);
+    box-shadow: var(--sunk), inset 0 0 18px rgb(0 0 0 / 0.55);
+  }
   .f95-mods {
     width: min(460px, 100%);
     p {
@@ -2654,7 +2871,7 @@
       border-radius: 0;
       background: #e00000;
       color: #fff;
-      font-size: 10px;
+      font-size: 11px;
       font-weight: normal;
       line-height: 1.1;
       letter-spacing: 0;
@@ -2693,7 +2910,7 @@
       right: 0;
       border-radius: 0;
       background: #008000;
-      font-size: 10px;
+      font-size: 11px;
     }
     .bench-col.new .bench-name {
       color: inherit;
@@ -3334,6 +3551,148 @@
     .f95-menu li button {
       height: 44px;
     }
+    /* FLT-87: a thumb needs 32 px; the title bar grows to hold them, and the buttons keep their bevel. */
+    .f95-tb {
+      min-height: 36px;
+    }
+    .f95-b {
+      min-width: 32px;
+      height: 32px;
+    }
+    .f95-skip {
+      min-height: 32px;
+    }
+    .f95-tooltip.arrival .f95-btn {
+      min-height: 32px;
+    }
+  }
+
+  /* ---- the phone's fold (FLT-87): Training, the goal and the Objectives as one strip; only a phone renders it ---- */
+  .f95-fold {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    pointer-events: auto;
+  }
+  .f95-foldbar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    height: 44px;
+    padding: 0 8px 0 6px;
+    border: 0;
+    background: var(--g);
+    box-shadow: var(--raised);
+    color: #000;
+    font: inherit;
+    font-size: 15px;
+    text-align: left;
+    cursor: pointer;
+    &:active {
+      box-shadow: var(--pressed);
+    }
+    .run {
+      flex: 0 1 92px;
+      min-width: 52px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      .f95-prog {
+        height: 18px;
+        padding: 2px;
+        i {
+          background: repeating-linear-gradient(90deg, var(--navy) 0 6px, transparent 6px 8px);
+        }
+      }
+      b {
+        color: #000080;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+      &.shipped {
+        flex: none;
+        svg {
+          animation: frontier-95-wiggle 0.5s steps(4) 2;
+        }
+      }
+    }
+    .goal {
+      flex: 1 1 auto;
+      min-width: 0;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 6px;
+      background: #fff27a;
+      box-shadow: 1px 1px 0 rgb(0 0 0 / 0.35);
+      .tx,
+      b {
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .tx {
+        flex: 1 1 auto;
+      }
+      /* the count keeps its size, up to under half the chip: "$0 of $40K a day · 0 of 12 visitors" gives way to the goal */
+      b {
+        flex: none;
+        max-width: 45%;
+        font-family: var(--flt-font-numbers);
+      }
+    }
+    .obj {
+      flex: none;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: bold;
+      &.bad {
+        color: var(--flt-color-bad);
+      }
+      .f95-check {
+        position: relative;
+        width: 16px;
+        height: 16px;
+        background: #fff;
+        box-shadow: inset 1px 1px 0 var(--sh), inset -1px -1px 0 var(--hl), inset 2px 2px 0 #000;
+        &::after {
+          content: "";
+          position: absolute;
+          left: 5px;
+          top: 2px;
+          width: 4px;
+          height: 8px;
+          border: solid #000;
+          border-width: 0 2px 2px 0;
+          transform: rotate(45deg);
+        }
+      }
+    }
+    .chev {
+      flex: none;
+      margin-left: auto;
+      width: 0;
+      height: 0;
+      border: 5px solid transparent;
+      border-top: 6px solid #000;
+      margin-top: 6px;
+    }
+  }
+  .f95-fold.open .f95-foldbar .chev {
+    border-top-color: transparent;
+    border-bottom: 6px solid #000;
+    margin-top: -6px;
+  }
+  .f95-foldbody {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
   }
 
   /* ---- narrower desktops ---- */
@@ -3489,19 +3848,17 @@
     .f95-tasks:not(.open) .f95-tb,
     .f95-thoughts:not(.open) .f95-tb,
     .f95-papers:not(.open) .f95-tb {
-      height: 32px;
-      .f95-b::after {
-        inset: -8px -2px;
-      }
+      height: 36px;
     }
     .f95-tb {
       height: 36px;
     }
+    /* FLT-87: 32 x 32, the size a thumb can find, in a 36 px title bar (the old 40 x 30 missed by two pixels). */
     .f95-b {
-      min-width: 40px;
-      height: 30px;
+      min-width: 32px;
+      height: 32px;
       &::after {
-        inset: -8px -2px;
+        inset: -4px -1px;
       }
     }
     .f95-tab {
@@ -3515,10 +3872,14 @@
       row-gap: 0;
       padding: 0 4px 4px;
     }
-    .f95-unlock {
+    .f95-unlock,
+    .f95-unlock.wide {
       left: 10px;
       width: calc(100vw - 20px);
       min-width: 0;
+    }
+    .f95-unlockgroups.two {
+      grid-template-columns: 1fr;
     }
     .f95-news {
       order: -1;
@@ -3534,7 +3895,6 @@
     .f95-start {
       height: 44px;
     }
-    .f95-qs,
     .f95-task span,
     .f95-wait span,
     .f95-clock,
@@ -3545,14 +3905,72 @@
       height: 44px;
       padding: 0 8px;
     }
+    /* FLT-87: the ticker has its own row and everything else keeps to one: the tray takes what Start leaves, its icons
+       that don't fit wait behind the » button (phone.tsx), and the speed buttons are always there. */
     .f95-tray {
+      position: relative;
+      /* a zero basis, so the row breaks on what the tray needs (Start, », Speed), not on every icon it holds */
+      flex: 1 1 0;
+      min-width: 0;
+      justify-content: flex-end;
       margin-left: auto;
       height: 44px;
       padding: 0 2px;
     }
     .f95-s {
-      width: 44px;
+      flex: none;
+      width: 40px;
       height: 44px;
+    }
+    .f95-speed {
+      flex: none;
+    }
+    .f95-more {
+      flex: 1 1 0;
+      min-width: 0;
+      height: 44px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 2px;
+      .f95-waiting {
+        display: contents;
+      }
+      .f95-wait {
+        flex: none;
+        width: 40px;
+        height: 44px;
+        justify-content: center;
+        padding: 0;
+      }
+      > [data-over],
+      > .f95-waiting > [data-over] {
+        position: absolute;
+        z-index: 2;
+        right: calc(6px + (var(--cols) - 1 - var(--c)) * 42px);
+        bottom: calc(100% + 34px + (var(--rows) - 1 - var(--r)) * 46px);
+        visibility: hidden;
+      }
+      &.open > [data-over],
+      &.open > .f95-waiting > [data-over] {
+        visibility: visible;
+      }
+      /* The panel the hidden icons pop up in, above the ticker, like a tray that ran out of room. */
+      &.open::before {
+        content: "";
+        position: absolute;
+        z-index: 1;
+        right: 2px;
+        bottom: calc(100% + 30px);
+        width: calc(var(--cols) * 42px + 6px);
+        height: calc(var(--rows) * 46px + 6px);
+        background: var(--g);
+        box-shadow: var(--raised);
+      }
+    }
+    .f95-chev {
+      font-size: 20px;
+      font-weight: bold;
     }
     .f95-menu li button {
       height: 44px;
@@ -3568,6 +3986,31 @@
       font-size: 15px;
       max-height: 110px;
       overflow: hidden;
+    }
+    /* FLT-87: a notice is one line on a phone (the ticker has the rest); a pile is its headline. */
+    .f95-toast {
+      align-items: center;
+      min-height: 32px;
+      > span {
+        flex: 1;
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      &.f95-batch {
+        ul,
+        i {
+          display: none;
+        }
+      }
+    }
+    .f95-skip {
+      min-height: 32px;
+    }
+    .f95-tooltip.arrival .f95-btn,
+    .f95-hire .f95-btn {
+      min-height: 32px;
     }
     .f95-tooltip.arrival {
       position: absolute;
@@ -4454,7 +4897,8 @@
       color: #c00000;
     }
   }
-  .f95-props {
+  /* the bill's own Properties box, not the Inspector (which shares the class) */
+  .f95-docwrap .f95-props {
     position: absolute;
     right: 16px;
     bottom: 16px;
@@ -4735,6 +5179,9 @@
   .f95-drama-live {
     color: #c00000;
     font-weight: 700;
+  }
+  .f95-drama-small {
+    margin: 2px 0 6px;
   }
   .f95-drama-archive .f95-modlist {
     display: block;
@@ -5323,5 +5770,732 @@
 @keyframes frontier-95-fly {
   to {
     left: calc(100% - 40px);
+  }
+}
+/* The Bird App (FLT-69): the tray bird and "Bird Reader 1.0", a newsreader crossed with a buddy list. */
+[data-skin="frontier-95"] {
+  .f95-s.bird.loud svg {
+    animation: frontier-95-flap 0.4s steps(2) infinite;
+  }
+  .f95-birdn {
+    position: absolute;
+    right: 0;
+    top: 0;
+    min-width: 12px;
+    padding: 0 2px;
+    background: #0080ff;
+    color: #fff;
+    font-size: 11px;
+    font-style: normal;
+    line-height: 12px;
+    text-align: center;
+    &.unread {
+      background: var(--flt-color-bad);
+    }
+  }
+  /* Where the Discourse Monitor opens, in the clear space under Lab Properties; with the Monitor open too, one column further in. */
+  .f95-bird {
+    position: fixed;
+    left: 336px;
+    bottom: calc(var(--taskbar) + 8px);
+    width: 430px;
+    max-height: calc(100vh - var(--taskbar) - 60px);
+    display: flex;
+    flex-direction: column;
+    z-index: 6;
+    .f95-menubar {
+      font-size: 15px;
+    }
+    .f95-status {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+  }
+  .f95-bird-aura {
+    display: grid;
+    gap: 3px;
+    padding: 2px 6px 4px;
+  }
+  .f95-bird-aurarow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    .f95-prog {
+      flex: 1;
+    }
+  }
+  .f95-bird-spark {
+    display: inline-grid;
+    place-items: center;
+    padding: 1px 3px;
+    background: #000;
+    color: #00ff00;
+    .bird-spark {
+      display: block;
+    }
+  }
+  .f95-bird-moments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    span {
+      padding: 0 5px;
+      background: var(--flt-color-tip);
+      box-shadow: inset 0 0 0 1px #000;
+      font-size: 14px;
+    }
+  }
+  .f95-birdpage {
+    min-height: 0;
+    overflow: auto;
+    padding: 4px;
+  }
+  .f95-bird-list,
+  .f95-bird-buddies,
+  .f95-bird-queue {
+    margin: 0;
+    max-height: 170px;
+    overflow: auto;
+  }
+  .f95-bird-list {
+    .f95-lhead,
+    .f95-lrow {
+      grid-template-columns: 12px minmax(0, 1fr) minmax(0, 0.8fr) 44px 38px;
+      gap: 5px;
+    }
+    .f95-lrow {
+      cursor: pointer;
+      &.outcome-live {
+        font-weight: bold;
+      }
+      &.outcome-flop {
+        color: var(--flt-color-textDim);
+      }
+      &.outcome-banger .mark {
+        color: #c08000;
+      }
+      &.outcome-controversy .mark,
+      &.outcome-ratioed .mark,
+      &.outcome-cancelled .mark,
+      &.ratioing .replies {
+        color: var(--flt-color-bad);
+      }
+      &.outcome-cancelled span:nth-child(2) {
+        text-decoration: line-through;
+      }
+      &.you,
+      &.you .mark,
+      &.you .replies {
+        color: var(--flt-color-selectionText);
+      }
+    }
+    .num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+  /* FLT-92: Everyone / Us / Them, and the rival labs' colours */
+  .f95-bird-view {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    margin: 0 0 4px;
+    font-size: 14px;
+    .f95-btn {
+      min-width: 0;
+      padding: 1px 8px;
+      font-size: 14px;
+      &.on {
+        box-shadow: var(--inset, inset 1px 1px #808080, inset -1px -1px #fff);
+        font-weight: bold;
+      }
+    }
+  }
+  .f95-bird-away {
+    flex-basis: 100%;
+    color: var(--flt-color-textDim);
+    font-style: italic;
+    font-size: 13px;
+  }
+  .f95-labsq {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    margin-right: 4px;
+    vertical-align: baseline;
+    background: var(--bird-lab, #808080);
+    box-shadow: inset 0 0 0 1px #000;
+  }
+  .f95-bird-preview .f95-bird-quote {
+    margin: 2px 0 4px;
+    padding-left: 6px;
+    border-left: 2px solid #808080;
+    color: #606060;
+  }
+  .f95-bird-empty {
+    margin: 6px;
+    font-size: 15px;
+    color: var(--flt-color-textDim);
+  }
+  .f95-bird-preview {
+    position: relative;
+    margin: 4px 0 0;
+    padding: 5px 8px 6px;
+    font-size: 15px;
+    background: var(--flt-color-inset);
+    .f95-bird-hdr {
+      display: grid;
+      padding-bottom: 3px;
+      border-bottom: 1px solid #808080;
+      font-size: 14px;
+      span {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+    }
+    &.outcome-cancelled .f95-bird-text {
+      text-decoration: line-through;
+      text-decoration-color: #c00000;
+    }
+    blockquote {
+      margin: 4px 0 0;
+      color: #0000c0;
+      font-size: 14px;
+    }
+    .f95-sticker.burst {
+      top: auto;
+      right: 6px;
+      bottom: 4px;
+      padding: 2px 8px;
+      font-size: 16px;
+      animation: frontier-95-birdstamp 0.3s steps(3);
+    }
+  }
+  .f95-bird-text {
+    margin: 5px 0;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+  .f95-bird-counts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 10px;
+    font-size: 14px;
+    .bad {
+      color: var(--flt-color-bad);
+    }
+    small {
+      color: var(--flt-color-textDim);
+      font-size: 13px;
+    }
+  }
+  .f95-bird-outcome {
+    padding: 0 5px;
+    font-weight: normal;
+    box-shadow: inset 0 0 0 1px currentColor;
+    &.tone-good {
+      color: var(--flt-color-good);
+    }
+    &.tone-bad {
+      color: var(--flt-color-bad);
+    }
+    &.tone-joke {
+      color: var(--flt-color-warn);
+    }
+    &.tone-neutral {
+      color: var(--flt-color-textDim);
+    }
+  }
+  .f95-bird-typing {
+    margin: 4px 2px 0;
+    font-size: 14px;
+    font-style: italic;
+    color: var(--flt-color-textDim);
+  }
+  .f95-disc ~ .f95-bird {
+    left: 688px;
+  }
+  .f95-bird-group {
+    display: block;
+    padding: 1px 4px;
+    font-weight: normal;
+    font-size: 14px;
+    color: var(--flt-color-textDim);
+    &::before {
+      content: "";
+      display: inline-block;
+      margin: 0 5px 2px 2px;
+      border: 4px solid transparent;
+      border-top: 5px solid #000;
+      border-bottom: 0;
+    }
+  }
+  .f95-bird-buddy {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 1px 6px 1px 14px;
+    font-size: 15px;
+    cursor: pointer;
+    .nm {
+      flex: 1;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    small {
+      color: var(--flt-color-textDim);
+    }
+    /* The status flower: green online, yellow away, grey offline, red when every recruiter has the name. */
+    .flower {
+      flex: none;
+      width: 10px;
+      height: 10px;
+      background: #00c000;
+      box-shadow: inset 0 0 0 1px #000;
+      clip-path: polygon(50% 0, 65% 30%, 100% 35%, 72% 60%, 80% 100%, 50% 80%, 20% 100%, 28% 60%, 0 35%, 35% 30%);
+    }
+    &.tier-occasional .flower {
+      background: #00a0ff;
+    }
+    &.tier-break .flower {
+      background: #ffd400;
+    }
+    &.tier-recluse {
+      color: #808080;
+      .flower {
+        background: #a0a0a0;
+      }
+    }
+    &.hot .flower {
+      background: #e00000;
+    }
+    &.you {
+      background: var(--flt-color-selection);
+      color: var(--flt-color-selectionText);
+      small {
+        color: inherit;
+      }
+    }
+  }
+  .f95-bird-policy {
+    margin: 6px 0 0;
+    padding: 4px 10px 6px;
+    border: 0;
+    box-shadow: var(--etched);
+    font-size: 15px;
+    legend {
+      padding: 0 3px;
+      max-width: 100%;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    label {
+      display: grid;
+      grid-template-columns: auto auto 1fr;
+      align-items: baseline;
+      gap: 6px;
+      padding: 2px 0;
+      cursor: pointer;
+      small {
+        text-align: right;
+        color: var(--flt-color-textDim);
+        font-size: 13px;
+      }
+    }
+    .bad {
+      color: var(--flt-color-bad);
+      font-weight: normal;
+    }
+  }
+  .f95-bird-who {
+    margin: 0 0 4px;
+    font-size: 14px;
+  }
+  .f95-bird-meter {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    .bird-meter {
+      height: 10px;
+      border: 0;
+      border-radius: 0;
+      box-shadow: var(--sunk);
+      background: var(--flt-color-inset);
+    }
+    .bird-meter::after {
+      width: 1px;
+      background: #000;
+    }
+    .bird-meter .banger {
+      background: repeating-linear-gradient(90deg, #008000 0 4px, transparent 4px 5px);
+    }
+    .bird-meter .cancel {
+      background: repeating-linear-gradient(90deg, #c00000 0 4px, transparent 4px 5px);
+    }
+  }
+  .f95-bird-metertext {
+    display: block;
+    margin: 1px 0 3px;
+    text-align: center;
+    color: var(--flt-color-textDim);
+    font-size: 13px;
+  }
+  .f95-bird-comms {
+    display: grid;
+    gap: 6px;
+  }
+  .f95-bird-drown {
+    padding: 4px 4px 2px;
+    gap: 10px;
+    align-items: center;
+    font-size: 15px;
+  }
+  .f95-bird-desk {
+    display: block;
+    padding: 2px 6px;
+    background: var(--flt-color-inset);
+  }
+  .f95-bird.drowning .f95-bird-desk {
+    color: var(--flt-color-bad);
+  }
+  .f95-bird-fire {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr);
+    align-items: center;
+    gap: 6px;
+    padding: 2px 4px;
+    font-size: 15px;
+    b {
+      font-weight: normal;
+    }
+    span {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    &.cancelled b {
+      color: var(--flt-color-bad);
+    }
+  }
+  @media (max-width: 640px) {
+    .f95-bird {
+      left: 4px;
+      right: 4px;
+      width: auto;
+      max-height: 62vh;
+      .f95-bird-list,
+      .f95-bird-buddies {
+        max-height: 22vh;
+      }
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .f95-s.bird.loud svg,
+    .f95-bird-preview .f95-sticker.burst {
+      animation: none;
+    }
+  }
+}
+@keyframes frontier-95-flap {
+  50% {
+    transform: translateY(-2px) rotate(-8deg);
+  }
+}
+@keyframes frontier-95-birdstamp {
+  from {
+    transform: rotate(-8deg) scale(2);
+    opacity: 0;
+  }
+}
+
+/* ---- FLT-94: Quick Launch (applets only), the Facilities palette, the tray's rank ---- */
+[data-skin="frontier-95"] {
+  /* Quick Launch: 24 px icons (the sprite's own grid, so no blur) on flat buttons as tall as Start, that rise under the
+     pointer, the way the real one did. The 42 px taskbar already holds them. */
+  .f95-qs {
+    position: relative;
+    align-items: center;
+    gap: 0;
+  }
+  .f95-qb {
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    box-shadow: none;
+    &:hover:not(.on) {
+      box-shadow: inset 1px 1px 0 var(--hl), inset -1px -1px 0 var(--sh);
+    }
+  }
+  .f95-qmore {
+    width: 20px;
+    font: bold 15px/1 var(--flt-font-ui);
+    color: inherit;
+  }
+  .f95-menu.f95-qmenu {
+    left: auto;
+    right: 0;
+    width: auto;
+    min-width: 220px;
+    ul {
+      padding: 0;
+    }
+    li button {
+      grid-template-columns: 26px minmax(0, 1fr);
+      height: 28px;
+      white-space: nowrap;
+    }
+  }
+  .f95-menu .f95-programs {
+    max-height: calc(100dvh - var(--taskbar, 40px) - 12px);
+  }
+  @media (max-width: 640px) {
+    /* in place on a phone: the whole Start menu scrolls, so Programs ▸ is as long as it needs to be */
+    .f95-menu .f95-programs {
+      max-height: none;
+    }
+  }
+
+  /* The rank: a sunken "#3 ▲" by the clock, green going up, red going down, a trophy at the top. */
+  .f95-rank {
+    flex: none;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin-right: 4px;
+    padding: 0 6px;
+    border: 0;
+    background: var(--flt-color-inset);
+    box-shadow: var(--sunk);
+    font: bold 15px/1 var(--flt-font-ui);
+    color: var(--flt-color-text);
+    cursor: pointer;
+    i {
+      font-style: normal;
+      font-size: 11px;
+    }
+    &.good i {
+      color: #008000;
+    }
+    &.bad i {
+      color: #c00000;
+    }
+    &.flinch {
+      animation: frontier-95-wiggle 0.4s 2;
+    }
+    &:hover {
+      color: var(--navy);
+      text-decoration: underline;
+    }
+  }
+
+  /* Facilities: a grid of tiles, the price on each, what it's for under it; Path and Bulldoze above them. */
+  .f95-stack > .f95-palette {
+    width: min(460px, 100%);
+  }
+  .f95-palette {
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .f95-tools {
+      display: flex;
+      gap: 4px;
+      width: 100%;
+      li {
+        flex: 1;
+      }
+    }
+    .f95-ptiles {
+      width: 100%;
+      /* As tall as the right column allows (the footer stays in view at 1440×900); a long list scrolls, on a 1995
+         scrollbar that shows even where the OS hides them, so the last row reads as "more", not cut off. */
+      max-height: max(240px, calc(100dvh - 310px));
+      overflow-y: auto;
+      padding: 2px 4px 6px;
+      &::-webkit-scrollbar {
+        width: 16px;
+      }
+      &::-webkit-scrollbar-track {
+        background: repeating-conic-gradient(var(--hl) 0 25%, var(--g) 0 50%) 0 0 / 2px 2px;
+      }
+      &::-webkit-scrollbar-thumb {
+        min-height: 24px;
+        background: var(--g);
+        box-shadow: var(--btn);
+      }
+      section > ul {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 4px;
+      }
+      h3 {
+        margin: 6px 0 4px;
+        padding-bottom: 2px;
+        font-size: 13px;
+        color: var(--navy);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        border-bottom: 1px solid var(--sh);
+      }
+    }
+    .f95-status {
+      width: calc(100% - 4px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+  .f95-ptile {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr) auto;
+    grid-template-areas: "i n p" "i d d" "i u b";
+    grid-template-rows: auto 1fr auto;
+    align-items: start;
+    column-gap: 4px;
+    padding: 4px 6px 4px 4px;
+    border: 0;
+    background: var(--g);
+    box-shadow: var(--btn);
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    > svg {
+      grid-area: i;
+      align-self: center;
+    }
+    .n {
+      grid-area: n;
+      font-size: 15px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .p {
+      grid-area: p;
+      font-size: 14px;
+      &.free {
+        color: #008000;
+        font-weight: bold;
+      }
+    }
+    /* Two lines at most, so every tile keeps its upkeep in view; the tile's tooltip has the whole line. */
+    .does {
+      grid-area: d;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      overflow: hidden;
+      font-size: 13px;
+      line-height: 1.15;
+      color: var(--flt-color-textDim);
+    }
+    .up {
+      grid-area: u;
+      font-size: 12px;
+      color: var(--flt-color-textDim);
+    }
+    .up,
+    .built {
+      align-self: end;
+    }
+    .built {
+      grid-area: b;
+      justify-self: end;
+      font-size: 12px;
+      color: var(--navy);
+    }
+    &.tool {
+      grid-template-columns: 24px minmax(0, 1fr) auto;
+      grid-template-areas: "i n p";
+      grid-template-rows: auto;
+      align-items: center;
+    }
+    &:hover:not(:disabled):not(.locked) {
+      outline: 1px dotted #000;
+      outline-offset: -5px;
+    }
+    &.on {
+      box-shadow: var(--pressed);
+      background: repeating-conic-gradient(var(--lt) 0 25%, var(--g) 0 50%) 0 0 / 2px 2px;
+    }
+    &:disabled,
+    &.locked {
+      cursor: default;
+      color: var(--sh);
+      text-shadow: 1px 1px 0 var(--hl);
+      .does,
+      .up {
+        color: var(--sh);
+      }
+      > svg {
+        opacity: 0.55;
+      }
+    }
+    &.locked {
+      box-shadow: var(--etched);
+    }
+  }
+  @media (pointer: coarse) {
+    .f95-qb {
+      width: 44px;
+      height: 44px;
+    }
+  }
+  @media (max-width: 640px) {
+    .f95-qs {
+      padding-left: 2px;
+    }
+    .f95-qb {
+      width: 40px;
+      height: 44px;
+    }
+    .f95-rank {
+      min-width: 40px;
+      height: 40px;
+      justify-content: center;
+      margin-right: 0;
+      padding: 0 4px;
+    }
+    .f95-palette.open {
+      position: fixed;
+      left: 4px;
+      right: 4px;
+      top: 4px;
+      width: auto;
+      max-height: calc(100dvh - var(--taskbar) - 30px - 12px);
+      z-index: 20;
+      overflow: auto;
+      .f95-ptiles {
+        max-height: none;
+      }
+    }
+    .f95-ptile {
+      min-height: 44px;
+    }
+  }
+  @media (max-width: 360px) {
+    .f95-palette .f95-ptiles section > ul {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .f95-rank.flinch {
+      animation: none;
+    }
   }
 }

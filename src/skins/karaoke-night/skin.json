@@ -24,7 +24,8 @@
     "Voice",
     "EraCard",
     "Outcome",
-    "NewsControls", "DramaButton",
+    "NewsControls",
+    "DramaButton",
     "NewsArrival",
     "PhotoButton"
   ],
@@ -121,6 +122,11 @@
     "x.keyLo": "#CDBDF5"
   },
   "strings": {
+    "snag.text": "Record scratch! The KJ caught it and the song goes on.",
+    "snag.title": "Record scratch",
+    "snag.copy": "Copy the setlist",
+    "snag.copied": "Copied!",
+    "snag.ok": "Keep singing",
     "build.facilitiesCount": "{n} songs",
     "build.runCount": "{n} on tap",
     "run.title": "Request a song",
@@ -148,6 +154,28 @@
     "bench.title": "High Scores",
     "voice.title": "Applause",
     "stream.live": "ON AIR",
-    "stream.chat": "Requests"
+    "stream.chat": "Requests",
+    "birdapp.title": "Bird App Karaoke",
+    "birdapp.aura": "Applause",
+    "birdapp.timeline": "Now singing",
+    "birdapp.posters": "Singers",
+    "birdapp.comms": "Sound desk",
+    "birdapp.live": "ON MIC",
+    "birdapp.log": "Setlist",
+    "birdapp.empty": "The mic's open. Nobody's up yet.",
+    "birdapp.quiet": "The sound desk is calm. Somebody's tuning a tambourine.",
+    "birdapp.viral": "ENCORE!",
+    "birdapp.ratio": "booing from the back",
+    "birdapp.reviewed": "screened by the sound desk",
+    "birdapp.outcome.flop": "Off key",
+    "birdapp.outcome.banger": "Standing ovation",
+    "birdapp.outcome.controversy": "Feedback",
+    "birdapp.outcome.ratioed": "Booed",
+    "birdapp.outcome.cancelled": "Mic cut",
+    "birdapp.outcome.live": "On mic",
+    "stats.net": "after the bar tab",
+    "birdapp.filter.all": "Whole bar",
+    "birdapp.filter.us": "Our table",
+    "birdapp.filter.them": "Other tables"
   }
 }

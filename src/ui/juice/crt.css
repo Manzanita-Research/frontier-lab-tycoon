@@ -1,0 +1,79 @@
+/* The CRT tube over the DOM (FLT-73). Everything is faint on purpose: text under it keeps WCAG AA (src/render/crt/looks.ts
+   `worstDarkening`, held by crt.test.ts). No blur, no bend: the canvas bows, the DOM does not. */
+.crt-tube {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  pointer-events: none;
+  overflow: hidden;
+  contain: strict;
+}
+.crt-tube > i {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+/* One dark row per scanline pitch, at the bottom of each line. */
+.crt-scan {
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent calc(var(--crt-pitch) - 1px),
+    rgb(0 0 0 / var(--crt-scan)) calc(var(--crt-pitch) - 1px),
+    rgb(0 0 0 / var(--crt-scan)) var(--crt-pitch)
+  );
+}
+.crt-full .crt-scan {
+  will-change: opacity;
+  animation: crt-flicker 5.3s steps(1, end) infinite;
+}
+@keyframes crt-flicker {
+  0%, 100% { opacity: 1; }
+  37% { opacity: var(--crt-flicker); }
+  38% { opacity: 1; }
+  71% { opacity: var(--crt-flicker); }
+  72.5% { opacity: 1; }
+}
+.crt-vig {
+  background: radial-gradient(ellipse farthest-corner at 50% 50%, transparent var(--crt-vig-inner), rgb(0 0 0 / var(--crt-vig)) 100%);
+}
+/* The bright band a 50 Hz set drags down the picture when the camera films it. */
+.crt-roll {
+  top: -20vh;
+  bottom: auto !important;
+  height: 16vh;
+  background: linear-gradient(to bottom, transparent, rgb(255 255 255 / var(--crt-roll)) 50%, transparent);
+  will-change: transform;
+  animation: crt-roll 11s linear infinite;
+}
+@keyframes crt-roll {
+  from { transform: translateY(0); }
+  to { transform: translateY(140vh); }
+}
+/* The bezel: the inner edge of a black frame with rounded corners (the shadow fills everything outside the radius). */
+.crt-bezel {
+  border-radius: var(--crt-corner);
+  box-shadow: 0 0 0 calc(var(--crt-corner) * 2) #000, inset 0 0 calc(var(--crt-corner) * 0.6) rgb(0 0 0 / 0.35);
+}
+.crt-full .crt-bezel {
+  /* A little glass glare, top left, where the desk lamp is. */
+  background: radial-gradient(ellipse 60% 45% at 18% 8%, rgb(255 255 255 / 0.035), transparent 70%);
+}
+/* Phosphor glow: every glyph bleeds a little of its own colour. text-shadow inherits, so the body carries it. */
+html[data-crt] body {
+  text-shadow: 0 0 var(--crt-glow, 2px) color-mix(in srgb, currentColor var(--crt-glow-alpha, 28%), transparent);
+}
+html[data-motion="reduced"] .crt-tube > i {
+  animation: none;
+}
+html[data-motion="reduced"] .crt-roll {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .crt-tube > i {
+    animation: none;
+  }
+  .crt-roll {
+    display: none;
+  }
+}

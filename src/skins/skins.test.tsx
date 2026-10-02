@@ -69,6 +69,8 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
       return { leapfrog: vms.lf!.leapfrog, layout: vms.lf!.layout, actions };
     case "Factions":
       return { factions: vms.fx!.factions, layout: vms.fx!.layout, actions };
+    case "BirdApp":
+      return { birdapp: vms.bird!.birdapp, layout: vms.bird!.layout, actions };
     case "Livestream":
       return { event: vms.stream!.event!, stream: vms.stream!.event!.stream!, actions };
     case "Hearing":
@@ -174,11 +176,18 @@ const vms: Record<string, HudVM> = {
   help: vmOf({ level: 2, help: true }),
   // Nobody else is talking: a skin with one speech balloon (Chip, in Discovery Disc) shows a standing warning when it is quiet.
   warned: hudViewModel({ ...fixtureInput({ warnings: ["Your entrance isn't connected to any paths. Visitors are forming a very orderly queue to nowhere."] }), toasts: [] }),
+  snag: vmOf({ snag: true }),
+  snagCoached: vmOf({ level: 1, coach: 0, snag: true }),
   lf: vmOf({ leapfrog: true }),
   lfPhone: vmOf({ leapfrog: true, width: 390, height: 844 }),
   fx: vmOf({ factions: true, factionsOpen: true }),
   fxFolded: vmOf({ factions: true }),
   fxPhone: vmOf({ factions: true, factionsOpen: true, width: 390, height: 844 }),
+  bird: vmOf({ bird: "bird", birdOpen: true }),
+  birdFolded: vmOf({ bird: "bird-banger" }),
+  birdCancel: vmOf({ bird: "bird-cancel", birdOpen: true, width: 390, height: 844 }),
+  birdRivals: vmOf({ bird: "bird-rivals", birdOpen: true }),
+  birdRivalsPhone: vmOf({ bird: "bird-rivals-ratio", birdOpen: true, width: 390, height: 844 }),
   shipNow: vmOf({ leapfrog: true, event: "shipNow" }),
   stream: vmOf({ leapfrog: true, event: "stream:dog" }),
   auction: vmOf({ event: "computeAuction" }),
@@ -226,6 +235,7 @@ const vms: Record<string, HudVM> = {
   dramaFresh: vmOf({ drama: "fresh" }),
   dramaIntro: vmOf({ drama: "intro" }),
   dramaEmpty: vmOf({ drama: "empty" }),
+  dramaAdded: vmOf({ drama: "added" }),
   dramaPhone: vmOf({ drama: "feed", width: 390, height: 844 }),
   takeover: vmOf({ ending: "takeover", selected: null }),
   thanks: vmOf({ ending: "thanks", selected: null }),
@@ -289,6 +299,17 @@ describe.each([BASE_ID, ...usable])("skin %s", (id) => {
     }
   });
 
+  it("says a caught error once, in its own voice, with Copy details: beside the newest toast, coach or no coach (FLT-84)", async () => {
+    const { skin } = await prepareSkin(id);
+    const said = escape(skin.strings["snag.text"]!);
+    for (const name of ["snag", "snagCoached"]) {
+      const out = html(skin, <Docked vm={vms[name]!} actions={actions} />);
+      expect(out.split(said).length - 1, `${id}/${name}`).toBe(1);
+      expect(out, `${id}/${name}`).toContain(escape(skin.strings["snag.copy"]!));
+      expect(out, `${id}/${name}: the report stays on the clipboard`).not.toContain("snag report");
+    }
+  });
+
   it("shows the game's facts: lab name, cash, the walker, the card", async () => {
     const { skin } = await prepareSkin(id);
     const main = html(skin, <Docked vm={vms.main!} actions={actions} />);
@@ -300,6 +321,11 @@ describe.each([BASE_ID, ...usable])("skin %s", (id) => {
     for (const c of vms.event!.event!.choices) expect(card).toContain(escape(c.label));
     const era = html(skin, <Modals vm={vms.era!} actions={actions} />);
     expect(era).toContain(escape(vms.era!.eraCard!.line));
+    // The win stands alone (FLT-86): a card that opened the same night waits for "Keep playing".
+    const won = vmOf({ event: "waterDiscourse", outcome: "won" });
+    const alone = html(skin, <Modals vm={won} actions={actions} />);
+    expect(alone).toContain(escape(won.outcome!.headline));
+    expect(alone).not.toContain(escape(vmOf({ event: "waterDiscourse" }).event!.title));
   });
 
   it("draws Papers once earned, and the paper and collusion moments (FLT-45, FLT-46)", async () => {
@@ -441,6 +467,14 @@ describe.each([BASE_ID, ...usable])("skin %s", (id) => {
     for (const b of vms.help!.help!.buildings) expect(help).toContain(escape(b.line));
     expect(help).not.toContain(escape(vmOf({ level: 5, help: true }).help!.buildings.find((b) => b.kind === "demo")!.line));
     expect(help).toContain(escape(skin.strings["help.replay"]!));
+    // FLT-95: the box is one click away from Help.
+    expect(help).toContain(escape(skin.strings["help.box"]!));
+  });
+
+  it("offers the box again from Welcome back (FLT-95)", async () => {
+    const { skin } = await prepareSkin(id);
+    const welcome = html(skin, <skin.slots.Welcome welcome={vms.welcome!.saves.welcome!} saves={vms.welcome!.saves} actions={actions} />);
+    expect(welcome).toContain("Take the box off the shelf again");
   });
 
   it("has a Today's Drama button from the first day, and a window with the pack, the archive and the now-playing card", async () => {
@@ -453,6 +487,18 @@ describe.each([BASE_ID, ...usable])("skin %s", (id) => {
     expect(intro).toContain(escape(vms.dramaIntro!.drama.on!.title));
     expect(intro).toContain(escape(vms.dramaIntro!.drama.on!.event!.title));
     expect(html(skin, <Modals vm={vms.dramaEmpty!} actions={actions} />).length).toBeGreaterThan(100);
+  });
+
+  it("adds a Drama pack to the lab on screen, and never says it starts a new one (FLT-78)", async () => {
+    const { skin } = await prepareSkin(id);
+    const feed = html(skin, <Modals vm={vms.drama!} actions={actions} />);
+    expect(feed).toContain("Add to my lab");
+    expect(feed).toContain(escape("Arrives in your lab right now. No restart. Probably fine."));
+    expect(feed).not.toMatch(/new lab|Play it|Swap it in/i);
+    const added = html(skin, <Modals vm={vms.dramaAdded!} actions={actions} />);
+    expect(added).toContain("In your lab ✓");
+    expect(added).toContain(">Remove<");
+    expect(added).not.toMatch(/new lab|Add to my lab/i);
   });
 
   it("prints the ending's front page with the run's stats, and The Takeover's title while the autopilot works (FLT-11)", async () => {

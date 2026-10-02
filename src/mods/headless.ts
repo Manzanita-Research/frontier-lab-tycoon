@@ -14,9 +14,10 @@ import type { GameDefinition } from "./game-definition";
 import { baseContent } from "./base-game";
 import { ModError } from "./schema";
 import { enableFactions } from "../sim/factions/state";
+import { enableBirdApp } from "../sim/birdapp/driver";
 
 /** Sections the sim reads at runtime, and sections a mod may carry that nothing executes yet. */
-export const EXECUTED_SECTIONS = ["progression", "coach", "buildings", "rivals", "headlines", "thoughts", "events", "arcs", "goals", "names", "disasters", "benchmarks", "mishaps", "factions"] as const;
+export const EXECUTED_SECTIONS = ["progression", "coach", "buildings", "rivals", "headlines", "thoughts", "events", "arcs", "goals", "names", "disasters", "benchmarks", "mishaps", "factions", "birdapp"] as const;
 export const INERT_SECTIONS = ["walkerKinds", "endings", "tips", "tables"] as const;
 
 export interface Coverage {
@@ -53,8 +54,11 @@ export function runHeadless(def: GameDefinition, options: { days?: number; seed?
   const state = createInitialState(seed, "garage", def);
   delete state.progression;
   delete state.coach;
-  // Every system is on without the ladder, the factions (FLT-33) included.
-  withDefs(def, () => enableFactions(state));
+  // Every system is on without the ladder, the factions (FLT-33) and the Bird App (FLT-69) included.
+  withDefs(def, () => {
+    enableFactions(state);
+    enableBirdApp(state);
+  });
   // The quiet opening has no Hall or long paths: pay for the connected campus this harness exercises.
   const setup: Command[] = [...withDefs(def, () => pacingCommands(state)),
     { type: "placeBuilding", kind: "hall", x: 12, z: 11 },

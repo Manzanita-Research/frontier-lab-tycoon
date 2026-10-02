@@ -1,7 +1,7 @@
 // The star that pops up when something happens ("★ NEW RELEASE! ★"), and the thought bubbles over the crowd: white speech
 // boxes with stepped pixel corners and a little header saying who is thinking it.
 import type { ReactNode } from "react";
-import { factionAttrs } from "../kit";
+import { factionAttrs, SnagCopy, useT } from "../kit";
 import type { SlotPropsMap } from "../types";
 import type { ToastVM } from "../../ui/hud/types";
 import { Note, Star } from "./art";
@@ -54,6 +54,22 @@ function heading(toast: ToastVM): ReactNode {
 
 /** One toast. A click dismisses it early (the game also expires each one after about five seconds). */
 export function Toast({ toast, actions }: SlotPropsMap["Toast"]) {
+  const t = useT();
+  if (toast.snag) {
+    // FLT-84: the game caught an error and kept going.
+    return (
+      <div className="kn-toast bad snag" role="alert">
+        <b className="kn-toast-h">{t("snag.title")}</b>
+        <span className="kn-toast-t">{t("snag.text")}</span>
+        <span className="snag-row">
+          <SnagCopy id={toast.id} actions={actions} />
+          <button type="button" onClick={() => actions.dismissToast(toast.id)}>
+            {t("snag.ok")}
+          </button>
+        </span>
+      </div>
+    );
+  }
   const body = (
     <>
       <b className="kn-toast-h">{heading(toast)}</b>

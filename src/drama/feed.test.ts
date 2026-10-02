@@ -1,8 +1,7 @@
 import { Schema } from "effect";
 import { describe, expect, it } from "vitest";
 import { FIXTURE_DRAMA_FEED } from "../ui/hud/fixtures";
-import { agoText, dateText, DRAMA_PLAY_CONFIRM, dramaPath, dramaViewModel, FeedIndex, feedBase, NO_DRAMA_UI, summaryText, withDrama, withoutAutosave, withoutMod } from "./feed";
-import { isStagedLink } from "../app/saves";
+import { agoText, dateText, dramaPath, dramaViewModel, FeedIndex, feedBase, NO_DRAMA_UI, summaryText, withDrama, withoutMod } from "./feed";
 
 const href = "https://flt.test/?seed=7&mod=/mods/other/mod.json&mod=/mods/drama/2026-09-28/mod.json&skin=base";
 const now = new Date(2026, 8, 29, 12);
@@ -90,18 +89,9 @@ describe("dramaViewModel", () => {
     expect(vm.intro).toBe(true);
     expect(dramaViewModel({ ...ready, intro: true }, [], href, now).intro).toBe(false);
   });
-});
 
-describe("Play it never wipes a lab (hotfix)", () => {
-  it("plays the pack on a staged link, so the Drama lab can't autosave over the player's lab", () => {
-    const next = new URL(withoutAutosave(withDrama("https://app.frontierlabtycoon.com/?seed=3", "/mods/drama/2026-09-30/mod.json")));
-    expect(next.searchParams.get("autosave")).toBe("off");
-    expect(next.searchParams.getAll("mod")).toEqual(["/mods/drama/2026-09-30/mod.json"]);
-    expect(next.searchParams.get("seed")).toBe("3");
-    expect(isStagedLink(next.search)).toBe(true);
-  });
-  it("asks before starting a new lab", () => {
-    expect(DRAMA_PLAY_CONFIRM).toMatch(/NEW lab/);
-    expect(DRAMA_PLAY_CONFIRM).toMatch(/autosave/);
+  it("says which pack is on its way in, and why one didn't come (FLT-78)", () => {
+    expect(dramaViewModel(ready, [], href, now)).toMatchObject({ adding: null, problem: null });
+    expect(dramaViewModel({ ...ready, adding: FIXTURE_DRAMA_FEED[0]!.id, problem: "Couldn't fetch it" }, [], href, now)).toMatchObject({ adding: FIXTURE_DRAMA_FEED[0]!.id, problem: "Couldn't fetch it" });
   });
 });

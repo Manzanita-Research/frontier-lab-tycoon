@@ -14,7 +14,8 @@ import { canHire, clearZone, fire, hire, paintZone } from "./staff";
 import { buildingAt, edgeTiles, inBounds, isPathTile, rectContains, rectsOverlap, tileIndex, gateAccessTiles } from "./pathfind";
 import { guardSpending, clearConfirm, hallBuilt } from "./guardrails";
 import type { Rng } from "./rng";
-import type { GameState, Rect, StaffJob } from "./types";
+import type { GameState, Rect, RunMods, StaffJob } from "./types";
+import { addLiveMod, removeLiveMod, type LiveMod, type LiveModNews } from "./liveMods";
 import { buildingUnlocked, systemUnlocked } from "./progression";
 import { coachCommand } from "./coach";
 import { lobbySenator } from "./promises/driver";
@@ -23,6 +24,9 @@ import { continueTutorial } from "./tutorial";
 import { defs } from "./defs";
 import { setSafetySpend } from "./factions/driver";
 import { issueStatement } from "./factions/statement";
+import { setBirdLever } from "./birdapp/driver";
+import type { BirdLever } from "./birdapp/state";
+import { catchAgent } from "./escape/driver";
 
 export type Command =
   | { type: "coachSkip" | "coachReplay" | "coachClick" | "dismissUnlock" | "buildPanelOpened" }
@@ -58,7 +62,18 @@ export type Command =
   /** FLT-54: the game speed changed (0 never comes: pausing keeps the pace). The card budget stretches with it. */
   | { type: "setPace"; speed: number }
   /** FLT-56: Comms addresses a faction (the gate legend's lever). Costs money, then a cooldown; a refusal is a toast. */
-  | { type: "issueStatement"; faction: string };
+  | { type: "issueStatement"; faction: string }
+  /** FLT-69: one poster's lever on the Bird App: let them cook, run it by Comms, or please log off. */
+  | { type: "birdLever"; id: number; lever: BirdLever }
+  /**
+   * FLT-78: a data-only mod joins the running lab. The app swaps in the new definition on this command's tick (see
+   * `SimHandle.stageDef`); the World records it, says so, and schedules its cards from today. `run` is the new RunMods.
+   */
+  | { type: "addMod"; mod: LiveMod; run: RunMods; news: LiveModNews }
+  /** FLT-78: a data-only mod leaves the running lab: its cards are cancelled (an open one closes), its lines stop. */
+  | { type: "removeMod"; id: string; cards: string[]; run: RunMods | null }
+  /** FLT-59: pick up an agent that is pacing the fence or running for it (walker id) and carry it back to the sandbox. */
+  | { type: "catchAgent"; id: number };
 
 export type PlaceResult = { ok: true } | { ok: false; reason: string };
 
@@ -220,6 +235,18 @@ export function applyCommands(state: GameState, commands: readonly Command[], rn
         break;
       case "issueStatement":
         if (state.factions && systemUnlocked(state, "factions")) issueStatement(state, c.faction);
+        break;
+      case "birdLever":
+        if (systemUnlocked(state, "birdapp")) setBirdLever(state, c.id, c.lever);
+        break;
+      case "addMod":
+        addLiveMod(state, c.mod, c.run, c.news);
+        break;
+      case "removeMod":
+        removeLiveMod(state, c.id, c.cards, c.run);
+        break;
+      case "catchAgent":
+        if (systemUnlocked(state, "escape")) catchAgent(state, c.id);
         break;
       case "startTraining":
         if (!state.buildings.some((b) => b.kind === "hall")) addToast(state, "Build a Training Hall first.", "bad", { source: "build", importance: "you" });

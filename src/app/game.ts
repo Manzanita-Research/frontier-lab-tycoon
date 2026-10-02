@@ -13,6 +13,8 @@ import { TICKS_PER_DAY } from "../sim/constants";
 import { withDefs } from "../sim/defs";
 import { tick } from "../sim/tick";
 import { isAuditMoment, stageAudit } from "../sim/auditors/demo";
+import { isMoneyMoment } from "../sim/moneyDemo";
+import { startsFast } from "../sim/beatsDemo";
 import { createMidgameScenario, MIDGAME_CAMERA, midgameOpeningNews, midgameOpeningThoughts } from "../sim/scenarios/midgame";
 import type { Tone } from "../sim/types";
 import { framesBrowser } from "./frames";
@@ -21,12 +23,16 @@ import { appMachine, autoPaused, type AppContext } from "./machine";
 import { createSimHandle, SimHandle, simLayer } from "./sim";
 import { modSession } from "./mods";
 import { SaveDesk, Saves, isStagedLink } from "./saves";
+import { doorBrowser } from "./door";
 import { demoSaveStore } from "./savesDemo";
+import { watchActor } from "./watchdog";
+import { describe, snagReport } from "./snag";
 import { browserStorage, makeSaveStore } from "../save";
 
 const midgame = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("scenario") === "midgame";
 const params = readDebugParams();
-export const debugParams = midgame ? { ...params, focus: params.focus ?? MIDGAME_CAMERA.focus, zoom: params.zoom ?? MIDGAME_CAMERA.zoom } : params;
+// FLT-86's `?moment=money-*` links are on the mid-game campus too, so they get its camera.
+export const debugParams = midgame || isMoneyMoment(params.moment) ? { ...params, focus: params.focus ?? MIDGAME_CAMERA.focus, zoom: params.zoom ?? MIDGAME_CAMERA.zoom } : params;
 
 /** The one live World. The renderer reads `sim.world` and `sim.alpha` straight from useFrame. */
 /** `?mod=` was resolved before this module loaded (main.tsx); the World is created from that definition. */
@@ -42,20 +48,25 @@ if (midgame) {
 // A new lab plays on "rare" (the sim itself starts with random disasters off, so tests are unaffected); `?risk=` overrides.
 if (!midgame && !debugParams.risk) setRisk(sim.world, DEFAULT_RISK);
 
-const initialSpeed: Speed = midgame ? 0 : (SPEEDS as readonly number[]).includes(debugParams.speed ?? 1) ? ((debugParams.speed ?? 1) as Speed) : 1;
+// FLT-76's ▶▶▶ beats (`?moment=beats-pileup|badnews`) start at 10× unless `?speed=` says otherwise.
+const askedSpeed = debugParams.speed ?? (startsFast(debugParams.moment) ? 10 : 1);
+const initialSpeed: Speed = midgame ? 0 : (SPEEDS as readonly number[]).includes(askedSpeed) ? (askedSpeed as Speed) : 1;
 
 /**
- * Saving (FLT-65): the slots in localStorage, or with `?saves=demo|window` a pretend shelf in memory (screenshots).
+ * Saving (FLT-65): the slots in localStorage, or with `?saves=demo|window` a pretend shelf in memory (screenshots;
+ * `&shelf=newer` puts a newer save in slot 2 than the autosave, FLT-82).
  * Staged links never autosave over the player's lab. `savesReady` settles once the shelf can be read.
  */
 const search = typeof window === "undefined" ? "" : window.location.search;
-const shelf = new URLSearchParams(search).has("saves") ? demoSaveStore(mods.def) : { store: makeSaveStore(browserStorage()), ready: Promise.resolve() };
+const shelf = new URLSearchParams(search).has("saves") ? demoSaveStore(mods.def, new URLSearchParams(search).get("shelf") === "newer") : { store: makeSaveStore(browserStorage()), ready: Promise.resolve() };
 export const savesReady = shelf.ready;
-export const saveDesk = new SaveDesk(shelf.store, !isStagedLink(search) && !new URLSearchParams(search).has("saves"), () =>
-  mods.mods.map(({ id, version, hash, source }) => ({ id, version, hash, source })),
-);
+// The session's mods as they are now (FLT-78: mods come and go mid-game); one added mid-game says when, so a load adds it back.
+export const saveDesk = new SaveDesk(shelf.store, !isStagedLink(search) && !new URLSearchParams(search).has("saves"), () => {
+  const added = new Map((sim.world.modsAdded ?? []).map((m) => [m.id, m.tick]));
+  return modSession().mods.map(({ id, version, hash, source }) => ({ id, version, hash, source, ...(added.has(id) ? { tick: added.get(id)! } : {}) }));
+});
 
-const runtime = Atom.runtime(Layer.mergeAll(simLayer(sim), framesBrowser, Layer.succeed(Saves, saveDesk)));
+const runtime = Atom.runtime(Layer.mergeAll(simLayer(sim), framesBrowser, Layer.succeed(Saves, saveDesk), doorBrowser));
 
 /** The app actor's atoms: `snapshot`, `send`, and `select` for derived values. */
 const first = sim.report(true, true)!;
@@ -66,12 +77,49 @@ if (midgame) {
 // Say which mods are running, and whether any failed (the details are in Start ▸ Settings ▸ Mods…). Ids below zero never meet the World's.
 if (mods.mods.length > 0) first.toasts.push({ id: -1, text: `Mods on: ${mods.mods.map((m) => m.name).join(", ")}`, tone: "good", source: "mods", importance: "you" });
 if (mods.errors.length > 0) first.toasts.push({ id: -2, text: `${mods.errors.length === 1 ? "A mod" : `${mods.errors.length} mods`} didn't load. See Start, Settings, Mods…`, tone: "bad", source: "mods", importance: "you" });
-export const app = createActorAtoms(runtime, appMachine, { input: { speed: initialSpeed, first } });
+/** FLT-76: "Slow down for bad news", remembered on this device (on unless it was switched off). */
+export const SLOW_KEY = "flt.slowForBadNews";
+const slowForBadNews = (() => {
+  try {
+    return typeof localStorage === "undefined" || localStorage.getItem(SLOW_KEY) !== "off";
+  } catch {
+    return true;
+  }
+})();
+/** The actor's input. The watchdog swaps in the live World's report before it restarts the actor (FLT-81). */
+const input: { speed: Speed; first: typeof first; slowForBadNews: boolean; snagAt?: number | null } = { speed: initialSpeed, first, slowForBadNews };
+export const app = createActorAtoms(runtime, appMachine, { input });
 /** A notice for the first frame, from before the app mounts (the skin migration, FLT-71): the actor starts with it, like the mods line. */
 export const bootNotice = (text: string, tone: Tone = "neutral") => void first.toasts.push({ id: -3, text, tone, importance: "you" });
 
 /** Owns the atoms' lifetimes. Mount `app.actor` to start the loop; dispose it to stop everything. */
 export const registry = AtomRegistry.make();
+
+/**
+ * Start the app: mount the actor (its frame loop with it) and its watchdog. Returns the stop. If the actor dies on a
+ * bug, the watchdog builds a new one on the same World, at the speed the player had (FLT-81).
+ */
+export function startApp(): () => void {
+  const unmount = registry.mount(app.actor);
+  const unwatch = watchActor({
+    registry,
+    snapshot: app.snapshot,
+    restart: (last, error) => {
+      input.speed = last.speed;
+      input.slowForBadNews = last.slowForBadNews;
+      input.first = sim.report(true, true)!;
+      input.snagAt = last.snagAt;
+      registry.refresh(app.actor);
+      // FLT-84: the new actor tells the player, with the details for a bug report.
+      const w = sim.world;
+      send({ type: "SNAG", report: snagReport({ where: "watchdog", ...describe(error), seed: w.seed, tick: w.tick, day: w.day }), now: Date.now() });
+    },
+  });
+  return () => {
+    unwatch();
+    unmount();
+  };
+}
 
 const pick = <T>(select: (c: AppContext) => T) => app.select((s) => select(s.context));
 
@@ -87,6 +135,9 @@ export const atoms = {
   tool: pick((c) => c.tool),
   hover: pick((c) => c.hover),
   toasts: pick((c) => c.toasts),
+  /** FLT-76: the big moments still waiting their turn (same object until it changes), and the bad-news setting. */
+  stage: pick((c) => c.stage),
+  slowForBadNews: pick((c) => c.slowForBadNews),
   outcomeDismissed: pick((c) => c.outcomeDismissed),
   version: pick((c) => c.snap.version),
   cash: pick((c) => c.snap.cash),
@@ -125,6 +176,11 @@ export const atoms = {
   autopilotPlaced: pick((c) => c.snap.endings?.placed ?? 0),
   /** The endings' presentation cues (the Look), for the scene. */
   endingLook: pick((c) => c.snap.endings?.look ?? null),
+  /**
+   * The agents running for the fence (`12r`) or in the hand (`12c`) right now (FLT-59), comma-separated: a string, so it
+   * only changes when they do.
+   */
+  runners: pick((c) => c.snap.escape?.runners.filter((r) => r.phase === "running" || r.phase === "carried").map((r) => `${r.walker}${r.phase[0]}`).join(",") ?? ""),
 };
 
 /** The app's context right now, for handlers and frame callbacks that must not subscribe. Null until it has started. */
@@ -173,7 +229,10 @@ if (typeof window !== "undefined") {
     const w = sim.world;
     const c = appNow();
     const snap = c?.snap;
-    return { date: w.day, day: w.day, tick: w.tick, ticksPerDay: TICKS_PER_DAY, paused: c ? c.speed === 0 || autoPaused(c) || !!c.event : true, speed: c?.speed ?? initialSpeed,
+    // FLT-81: whether the app actor is taking input ("active"), and what stopped it if not.
+    const result = registry.get(app.snapshot);
+    const actor = AsyncResult.isSuccess(result) ? { status: result.value.status, error: result.value.status === "error" ? String(result.value.error) : null } : { status: "starting", error: null };
+    return { actor, date: w.day, day: w.day, tick: w.tick, ticksPerDay: TICKS_PER_DAY, paused: c ? c.speed === 0 || autoPaused(c) || !!c.event : true, speed: c?.speed ?? initialSpeed,
       walkers: [...w.walkers.map((p) => ({ id: p.id, kind: p.kind, x: p.x, z: p.z, mode: p.machine.value })), ...w.staff.map((p) => ({ id: p.id, kind: p.job, x: p.x, z: p.z, mode: p.machine.value }))],
       gate: { x: w.gate.x, z: w.gate.z }, coachId: c?.snap.coach?.id ?? null,
       // FLT-53, the journey test: what the HUD shows, and the map a player sees, as plain copies.
@@ -183,11 +242,15 @@ if (typeof window !== "undefined") {
       staff: w.staff.filter((p) => p.machine.value !== "leaving" && p.machine.value !== "gone").map((p) => p.job),
       training: snap ? { name: snap.training.name, pct: snap.training.pct, etaDays: snap.training.etaDays } : null,
       event: snap?.event?.id ?? null, unlockCard: snap?.unlockCard?.title ?? null,
+      // FLT-76: the big moments the HUD is still holding back (a card here is open in the sim but not on screen yet).
+      stage: c ? [...c.stage.waiting] : [],
       pendingConfirm: snap?.pendingConfirm ? { kind: snap.pendingConfirm.kind, message: snap.pendingConfirm.message } : null,
       outcome: c ? { outcome: c.outcome, dismissed: c.outcomeDismissed } : null, overlays: c ? [...c.overlays] : [], warnings: snap ? [...snap.warnings] : [],
       toasts: c ? c.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) : [],
       map: { w: w.grid.w, h: w.grid.h, paths: w.grid.paths.flatMap((p, i) => (p ? [i] : [])), gate: { ...w.gate }, buildings: w.buildings.map((b) => ({ id: b.id, kind: b.kind, x: b.x, z: b.z, w: b.w, d: b.d, broken: b.broken })) },
-      view: probeView.view?.() ?? null, windows: probeHud.windows?.() ?? null };
+      view: probeView.view?.() ?? null, windows: probeHud.windows?.() ?? null,
+      // FLT-78: the mods in this lab (and which came mid-game), and the last lines on the ticker.
+      mods: modSession().mods.map((m) => m.id), modsAdded: (w.modsAdded ?? []).map((m) => ({ id: m.id, tick: m.tick, day: m.day })), news: w.news.slice(-12).map((n) => n.text) };
   };
   window.addEventListener("click", () => send({ type: "COMMAND", command: { type: "coachClick" } }));
   // Closing the tab (or switching away from it) autosaves, so a lab is never more than a month behind.

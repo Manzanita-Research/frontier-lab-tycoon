@@ -1,0 +1,100 @@
+{
+ "cards": {
+  "black": {
+   "html": "<div class=\"bg\"></div>",
+   "css": ".bg{position:absolute;inset:0;background:#000}.t{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;color:#fff;font:700 120px 'Liberation Serif';letter-spacing:18px}.t small{font:400 34px 'Liberation Serif';letter-spacing:12px;color:#bbb;margin-top:30px}"
+  },
+  "title": {
+   "html": "<div class=\"bg\"></div><div class=\"t\">FRONTIER LAB TYCOON</div>",
+   "css": ".bg{position:absolute;inset:0;background:#000}.t{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;color:#fff;font:700 120px 'Liberation Serif';letter-spacing:18px}.t small{font:400 34px 'Liberation Serif';letter-spacing:12px;color:#bbb;margin-top:30px}"
+  },
+  "end": {
+   "html": "<div class=\"bg\"></div><div class=\"sun\"></div><div class=\"floor\"></div><div class=\"box\"><img src=\"clip:box-pick@3.4\"></div><div class=\"t\" style=\"top:12%\"><h1>FRONTIER<br>LAB<br>TYCOON</h1></div><div class=\"t free\">Free. In your browser.</div><div class=\"t url\">frontierlabtycoon.com</div><div class=\"tag\">AGES 8 TO ADULT \u00b7 PC CD-ROM NOT REQUIRED</div>",
+   "css": "\n.bg{position:absolute;inset:0;background:linear-gradient(#12052e 0%,#3b0f63 55%,#c2306e 100%)}\n.floor{position:absolute;left:-20%;right:-20%;bottom:-10%;height:46%;transform:perspective(500px) rotateX(62deg);\n background-image:linear-gradient(#ff5fd2 3px,transparent 3px),linear-gradient(90deg,#ff5fd2 3px,transparent 3px);background-size:120px 90px;opacity:.75}\n.sun{position:absolute;right:8%;top:14%;width:420px;height:420px;border-radius:50%;background:linear-gradient(#ffe45c,#ff6a3d);\n -webkit-mask:repeating-linear-gradient(#000 0 34px,transparent 34px 44px);opacity:.9}\n.box{position:absolute;left:5%;top:7%;width:600px;height:860px;overflow:hidden;transform:rotate(-4deg);box-shadow:0 30px 60px rgba(0,0,0,.6);border-radius:6px}\n.box img{position:absolute;left:-645px;top:-62px;width:1920px}\n.t{position:absolute;left:44%;right:4%;color:#fff;text-align:center}\nh1{margin:0;font:italic 900 128px/0.95 \"Liberation Sans\";color:#ffe14a;-webkit-text-stroke:5px #1d0a52;text-shadow:8px 8px 0 #ff3d8b,16px 16px 0 #1d0a52;letter-spacing:-2px}\n.free{top:52%;font:italic 900 92px \"Liberation Sans\";color:#fff;text-shadow:5px 5px 0 #1d0a52}\n.url{top:72%;font:700 60px \"Liberation Mono\";background:#fff;color:#1d0a52;display:inline-block;left:50%;right:auto;padding:10px 34px;border:6px solid #1d0a52;box-shadow:10px 10px 0 #ff3d8b}\n.tag{position:absolute;right:4%;bottom:4%;font:700 30px \"Liberation Sans\";color:#ffe14a;letter-spacing:4px}\n.bar{position:absolute;left:44%;right:4%;top:47%;height:6px;background:#ff3d8b}\n"
+  }
+ },
+ "music": {
+  "file": "shots/trailer/music/nap-zoomies-f95.wav",
+  "gain": 0,
+  "duck": 4
+ },
+ "voice": [
+  {
+   "file": "shots/trailer/voice/trailer-bill.mp3",
+   "at": 1.0
+  }
+ ],
+ "captions": {
+  "from": "voice",
+  "style": "trailer",
+  "fix": {}
+ },
+ "segments": [
+  {
+   "src": "black",
+   "dur": 1.0
+  },
+  {
+   "src": "campus-hero",
+   "in": 0.0,
+   "dur": 5.9,
+   "zoom": [
+    1.0,
+    1.15
+   ],
+   "eq": "brightness=-0.06:contrast=1.08:saturation=0.85",
+   "fadeIn": 0.8
+  },
+  {
+   "src": "shipped",
+   "in": 0.2,
+   "dur": 1.7,
+   "eq": "brightness=-0.06:contrast=1.08:saturation=0.85"
+  },
+  {
+   "src": "bird",
+   "in": 0.2,
+   "dur": 2.5,
+   "zoom": [
+    1.0,
+    1.08
+   ],
+   "eq": "brightness=-0.06:contrast=1.08:saturation=0.85"
+  },
+  {
+   "src": "hearing",
+   "in": 0.2,
+   "dur": 2.6,
+   "zoom": [
+    1.0,
+    1.08
+   ],
+   "eq": "brightness=-0.06:contrast=1.08:saturation=0.85"
+  },
+  {
+   "src": "escape",
+   "in": 0.0,
+   "dur": 2.3,
+   "eq": "brightness=-0.06:contrast=1.08:saturation=0.85"
+  },
+  {
+   "src": "title",
+   "dur": 2.6,
+   "flash": true
+  },
+  {
+   "src": "front-escaped",
+   "in": 0.3,
+   "dur": 3.3,
+   "zoom": [
+    1.0,
+    1.12
+   ]
+  },
+  {
+   "src": "end",
+   "dur": 4.1,
+   "flash": true
+  }
+ ]
+}

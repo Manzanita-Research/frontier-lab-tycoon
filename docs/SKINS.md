@@ -96,6 +96,7 @@ Only the **active** skin's CSS, slots and fonts are loaded (Vite splits them int
 | `version` | `"1.2.3"` | Semver. |
 | `preview` | `"assets/preview.<ext>"` | Picker thumbnail. |
 | `unlisted` | `true` (optional) | Keeps the skin out of the player's picker until it passes a taste review. It still loads with `?skin=<id>`. Unhiding is deleting the line. |
+| `crt` | `"off"`, `"subtle"` or `"full"` (optional) | FLT-73: the CRT tube the skin is seen through until the player picks one in Display Properties → Settings. Frontier 95 says `"subtle"`; absent means off. A mod skin inherits its parent's. **Inert for now:** the in-game tube is off for every skin (FLT-70, `GAME_CRT` in `src/render/crt/state.ts`). |
 | `tokens` | `{ "color.panel": "#fff", ... }` | See [Tokens](#tokens). All **required** tokens must be present; the rest fall back to the base. Names must be known tokens, or your own under the `x.` prefix (`"x.sparkle": "#f0f"` → `--flt-x-sparkle`). |
 | `strings` | `{ "help.title": "Field Guide" }` | Relabels UI copy. Keys must exist in the [strings table](#strings). Titles and body copy only: see [Rules](#rules) for control labels. |
 | `fonts` | `[{ family, src, weight?, style?, license, licenseFile }]` | Bundled files only. `src` and `licenseFile` are paths inside the skin folder. Licence must be OFL, Apache, MIT or CC0. |
@@ -181,6 +182,7 @@ If your slot needs copy that has no key, write it into the slot (as Frontier 95 
 | `stats.window` | {lab} |
 | `stats.vibes` | Vibes |
 | `stats.cash` | Cash |
+| `stats.net` | net (after the money line's per-day number: "+$12K/day net") |
 | `stats.runway` | Runway |
 | `stats.capability` | Capability |
 | `stats.hype` | Hype |
@@ -260,11 +262,18 @@ If your slot needs copy that has no key, write it into the slot (as Frontier 95 
 | `speed.short.1` | 1× |
 | `speed.short.3` | 3× |
 | `speed.short.10` | 10× |
+| `speed.slowForBadNews` | Slow down for bad news |
 | `thoughts.title` | Thoughts |
 | `ticker.label` | NEWS |
 | `ticker.aria` | News ticker |
 | `hint.gateway` | Build an API Gateway next to a path to start earning. |
 | `hint.tap` | Tap anyone to read their mind. |
+| `snag.text` | Frontier Lab Tycoon hit a snag and kept going. |
+| `snag.title` | Frontier Lab Tycoon |
+| `snag.copy` | Copy details |
+| `snag.copied` | Copied! |
+| `snag.nocopy` | The clipboard said no. The details are in the console. |
+| `snag.ok` | OK |
 | `confirm.stripe` | Board memo |
 | `confirm.title` | Spend it anyway? |
 | `confirm.cost` | Cost |
@@ -275,11 +284,24 @@ If your slot needs copy that has no key, write it into the slot (as Frontier 95 
 | `coach.step` | {n} of {total} |
 | `coach.skip` | Skip tutorial |
 | `unlock.ok` | Got it |
+| `coach.gotIt` | Got it |
+| `coach.ask` | You wanted to {ask}. |
+| `showMe` | Show me |
+| `showMe.where` | In {where} |
+| `where.build` | the build menu |
+| `where.hire` | the Staff panel |
+| `where.app` | the apps menu |
+| `where.app:arena` | the Arena |
+| `where.app:bird` | the bird in the corner |
+| `where.training` | the training bar |
+| `where.speed` | the speed buttons |
+| `where.start` | the build menu |
 | `help.title` | How to play |
 | `help.loop` | The loop |
 | `help.buildings` | What you can build |
 | `help.numbers` | The numbers |
 | `help.replay` | Replay tutorial |
+| `help.box` | Take the box off the shelf again |
 | `help.close` | Close |
 | `event.paused` | Paused |
 | `arena.title` | Frontier Arena |
@@ -309,6 +331,31 @@ If your slot needs copy that has no key, write it into the slot (as Frontier 95 
 | `factions.log` | Lately |
 | `factions.safety` | Safety budget |
 | `factions.none` | Nobody is feuding. Give it a week. |
+| `birdapp.title` | The Bird App (FLT-69: the Bird App) |
+| `birdapp.aura` | Aura |
+| `birdapp.timeline` | Timeline |
+| `birdapp.posters` | Posters |
+| `birdapp.comms` | Comms desk |
+| `birdapp.live` | Live |
+| `birdapp.log` | Landed |
+| `birdapp.empty` | Nobody has posted yet. Give it until 3am. |
+| `birdapp.quiet` | The queue is empty. Comms is eating lunch. |
+| `birdapp.viral` | VIRAL |
+| `birdapp.ratio` | ratio forming |
+| `birdapp.reviewed` | cleared by Comms |
+| `birdapp.lever.cook` | Let them cook (FLT-69: the levers' labels; the trade-off comes from the VM) |
+| `birdapp.lever.comms` | Run it by Comms |
+| `birdapp.lever.logoff` | Please log off |
+| `birdapp.outcome.flop` | Flopped |
+| `birdapp.outcome.banger` | Banger |
+| `birdapp.outcome.controversy` | Discourse |
+| `birdapp.outcome.ratioed` | Ratioed |
+| `birdapp.outcome.cancelled` | Cancelled |
+| `birdapp.outcome.live` | Live (a post that has not landed) |
+| `birdapp.filter` | Show (FLT-92: the Everyone / Us / Them filter's label) |
+| `birdapp.filter.all` | Everyone |
+| `birdapp.filter.us` | Us |
+| `birdapp.filter.them` | Them |
 | `gate.title` | At the gate (FLT-56: the GateLegend) |
 | `gate.address` | Statement |
 | `gate.statement` | A statement: |
@@ -366,6 +413,12 @@ If your slot needs copy that has no key, write it into the slot (as Frontier 95 
 | `skin.apply` | Apply |
 | `skin.cancel` | Cancel |
 | `skin.reduceMotion` | Reduce motion |
+| `skin.crt` | Picture tube |
+| `skin.crt.off` | Off: a flat panel from the future |
+| `skin.crt.subtle` | Subtle: a good monitor on a good desk |
+| `skin.crt.full` | Full: the family TV, VCR on top |
+| `skin.crt.default` | (this look's default) |
+| `skin.crt.reduced` | Your graphics adapter dropped the campus to Economy mode… |
 | `staff.title` | Staff |
 | `staff.painting` | Painting a patrol zone |
 | `staff.hire` | Hire |
@@ -437,25 +490,26 @@ A slot is a React component. Each gets **its slice of the view-model plus `actio
 | `Layout` | `{ vm, actions, slots }` | Places the *docked* slots (below). `slots` holds each one already rendered, or `null` when there is nothing to show (no walker selected, no news arrival). A skin that moves things about (Frontier 95 puts the speed buttons in a taskbar tray) is a `Layout`. |
 | `Stats` | `{ stats, layout, visible, actions }` | Lab name, date, Vibes (with its "where the points come from" breakdown), cash, runway, capability, hype, the Arena chip and R&D multiplier. |
 | `Training` | `{ training, actions }` | The current training run, its progress and ETA, "SHIPPED" moment (`training.justShipped`). |
-| `Objectives` | `{ objectives, progress, visible, layout, actions }` | The three scenario milestones and the deadline. |
+| `Objectives` | `{ objectives, progress, visible, layout, actions }` | The three scenario milestones and the deadline. FLT-93: `progress.goal.showMe` and each unmet objective's `showMe` (`{ label, anchor }`) is the next thing to do and where: say `label`, say where with the kit's `useWhere()` (the `where.*` strings), and offer a [Show me] that calls `actions.showMe(anchor)`. |
 | `Inspector` | `{ inspector, actions }` | The card for the tapped walker: portrait, needs, thought, history, Follow. Only rendered when there is a selection. |
-| `BuildBar` | `{ items, tip, teasers, layout, actions }` | The build palette. `items[].kind` is the tool id and the icon id; `actions.place(kind)`. Hotkeys 1–9 are handled by the game. Tiles with `panel: true` (`staff`, and `senate` once the Promise Tracker is awake) open a window instead of picking a tool: never show one as the tool in your hand. |
+| `BuildBar` | `{ items, tip, teasers, layout, speed?, actions }` | The build palette. `items[].kind` is the tool id and the icon id; `actions.place(kind)`. Hotkeys 1–9 are handled by the game. Tiles with `panel: true` (`staff`, and `senate` once the Promise Tracker is awake) open a window instead of picking a tool: never show one as the tool in your hand. FLT-76: a Start menu or settings flyout can offer the "Slow down for bad news" setting (`speed.slowForBadNews`, `actions.setSlowForBadNews(on)`, label `t("speed.slowForBadNews")`). |
 | `Speed` | `{ speed, stats, actions }` | Pause / 1× / 3× / 10×. Label them with `t(option.key)`. |
 | `Staff` | `{ staff, actions }` | The payroll panel: hire, fire, and paint patrol zones (`staff.painting` is the staffer whose zone is being painted on the map). Rendered only while `staff.open`; it opens from the `staff` tile in the build palette (`buildItems` ends with `{ kind: "staff" }`; `actions.place("staff")` toggles the panel), so every `BuildBar` should draw that tile like any other. |
 | `Bubble` | `{ bubble, actions }` | **One** thought bubble. The game pins whatever you render to the walker on every frame, so do not position it. **The root element must have the class `bubble`**: photo mode copies it onto the picture. `bubble.speech` means it is said out loud to the person beside them (a VC's pitch by the Kombucha Bar, FLT-26): draw a speech balloon if your skin tells the two apart. |
 | `ThoughtsPanel` | `{ rows, layout, actions }` | Everybody's thoughts, counted; `actions.highlight(row.key)` lights up who thinks it. On a phone (`layout.compact`) the base folds it to an icon. |
 | `Ticker` | `{ items, actions }` | The news tape. Use `kit`'s `<Marquee items>`. |
-| `Toast` | `{ toast, actions }` | One toast. `toast.tone === "hint"` is a standing hint and `"warn"` a standing warning (both not dismissable: a warning like "your entrance isn't connected" stays until it is fixed). Frontier 95 has no `Toasts` dock: its paperclip draws `vm.warnings` itself. |
+| `Toast` | `{ toast, actions }` | One toast. `toast.tone === "hint"` is a standing hint and `"warn"` a standing warning (both not dismissable: a warning like "your entrance isn't connected" stays until it is fixed). A recovery toast (FLT-84) has `toast.snag`: say `snag.text` instead of `toast.text`, and offer the kit's `SnagCopy` button (it calls `actions.copySnag(id)`); the dock shows it next to the newest toast, not under it. FLT-76: `toast.pinned` has no timer: it says the game slowed to 1× for bad news and stays until it is dismissed or the player speeds up again. Frontier 95 has no `Toasts` dock: its paperclip draws `vm.warnings` itself, the snag as an error box of its own, and a pinned toast as a "Speed Governor" message box (coach or no coach) with "Pretend it didn't happen", which goes back to ▶▶▶. |
 | `Assistant` | `{ vm, actions }` | A helper character that hosts hints, toasts and standing warnings (`vm.warnings`). The base draws nothing here; Frontier 95's paperclip lives here. |
 | `Confirm` | `{ confirm, actions }` | A modal: a spend (a hire, a build, a path) that would leave the lab under three months of runway, held for a yes or a no. `confirm.message`, `costText` and `runwayText` say what it is; `actions.confirmSpend()` goes ahead, `actions.cancelSpend()` keeps the runway (make that the default: focus it, and Escape or a click outside give it). Time is held while it is up. A skin that does not draw its own gets the base's, so the game can never wait on a box nobody can answer. Frontier 95's is a Win95 warning box. |
 | `EventCard` | `{ event, actions }` | The modal news card. `actions.choose(event.id, i)`; the 1–3 keys are handled by the game. |
 | `Coach` | `{ coach, anchor, layout, actions }` | The balloon of a **coach mark** (the paperclip in Frontier 95; a card in the base): `coach.text` (one line), `coach.step` of `coach.of`, and a **Skip tutorial** (`actions.coachSkip()`). No Continue button: it waits for the player to do the thing, and never pauses the game. The host draws the dimming and the ring (and finds what to light: see `useCoach` below); `anchor` is where the lit thing is on screen (`null` if it is not there), so put the balloon beside it, never on it (`placeBalloon` from the kit does that). Not docked: the host renders it over everything. |
-| `UnlockCard` | `{ unlock, actions }` | The small "New!" card that comes with a level-up (`unlock.title`, `body` and the `items` you can build now). `actions.dismissUnlock()` closes it; the game does not wait for it. |
-| `HowToPlay` | `{ help, actions }` | Help ▸ How to play: one window with the loop in five lines (`help.loop`), a line for each unlocked building and what cash, runway, Vibes and hype mean. `actions.coachReplay()` is its "Replay tutorial", `actions.closeHelp()` closes it. |
+| `UnlockCard` | `{ unlock, actions }` | The small "New!" card that comes with a level-up (`unlock.title`, `body` and the `items` you can build now). `actions.dismissUnlock()` closes it; the game does not wait for it. FLT-76: `unlock.quip`, when set, is a joke line to show under the items. FLT-93: `unlock.groups` is the same list sorted Build / Hire / New systems / New apps, each entry with one `line` on what it is for and, when it has a place, an `anchor` for a [Show me] button (`actions.showMe(anchor)`). Draw the groups when they are there. |
+| `HowToPlay` | `{ help, actions }` | Help ▸ How to play: one window with the loop in five lines (`help.loop`), a line for each unlocked building and what cash, runway, Vibes and hype mean. `actions.coachReplay()` is its "Replay tutorial", `actions.openBox()` (FLT-95) its "Take the box off the shelf again" (`help.box`), `actions.closeHelp()` closes it. |
 | `Arena` | `{ arena, leapfrog, layout, actions }` | The R&D multiplier and era, and the Frontier Arena leaderboard (`arena.open` folded or open; `actions.toggleArena()`). It also gets the Release Leapfrog data, so a skin can host the benchmark leaderboard as a tab (Frontier 95's Task Mangler does): compose `useSlots().Benchmarks`. A row's `tag` / `tagText` (`NEW`, `NEMESIS`, `ALUMNI`) marks a lab your own people founded (Defection, the Poaching War); its `title` is then the lab's manifesto. |
 | `Benchmarks` | `{ leapfrog, layout, actions }` | The benchmark leaderboard (Release Leapfrog): labs down the side, benchmarks across, your row highlighted, SOTA badges that blink when a record changes hands, benchmaxxed scores asterisked with the excuse underneath, solved benchmarks struck through and stamped SOLVED. Draw it with `kit`'s `<BenchTable leapfrog>` (semantic `bench-*` classes) or your own. Docked: the base Layout puts it under the Arena; a Layout may skip it if `Arena` hosts it. `null` while the pack is off. |
 | `Voice` | `{ leapfrog, layout, actions }` | The share-of-voice meter: who has the news cycle (`leapfrog.voice`: shares, owner, trend, and `series` for a graph: `kit`'s `<VoiceGraph voice>`). Docked. Frontier 95: a tray icon and a "Network Traffic" window. `null` while the pack is off. |
 | `Factions` | `{ factions, layout, actions }` | The discourse (FLT-33): every faction's approval meter (`factions.rows`: colour, `meter` −100..100, `mood`, `moodLabel`, `why`, who is marching), the lab's `stance` on five axes, `relations` (allies, feuds, a `schism`, which goes first), `gateText` (who is at the gate), the `log`, and the safety budget (`safety.options`; `actions.setSafetySpend(level)`). `factions.open` folds it; `actions.toggleFactions()` flips it. Docked. `kit` has `<FactionChip>`, `<FactionMeter>`, `<StanceTrack>`, and `factionAttrs(faction)` for a bubble's root (`inspector.faction` and `bubble.faction` are the same chip). Frontier 95: a megaphone in the tray and a "Discourse Monitor" window. `null` until Level 4 (or with `?factions=off`). |
+| `BirdApp` | `{ birdapp, layout, actions }` | The Bird App (FLT-69): researchers who post. Folded, `birdapp.headline` and the Aura (`aura` 0..100, `auraText`), plus `spotlight` (the newest banger or cancel, if it is fresh). Open: `auraEffects` and `auraHistory` (30 midnights; `kit` has `<AuraSpark>`), today's `moments`, the `live` posts (their `likes`/`reposts`/`replies` climb toward midnight; `viral` is the sticker, `ratioing` a ratio forming), `typing`, the landed `log` (`outcome`, `outcomeText`, `tone`, `handledText`), the `posters` (tier, followers, the `banger`/`cancel` odds for `<BirdMeter>`, `hot` when a cancel made them a poaching target, and three `levers` with the `tradeoff` to print on each: `actions.setBirdLever(id, lever)`), and the Comms desk (`comms.desk` calm/busy/drowning, `queue`, `capacityText`, `load`). `<BirdPostCard>` draws one post. FLT-92: the rival labs' posts are in the same `live` and `log`. Each post has a `side` (`us`/`them`), and a rival's has its `lab` (`name`, `color`), a `beatText` ("#1 on the Arena", "About your launch") and, for a ratio, the `quote` it quote-posted. `birdapp.rivals` (when `on`) has the sulking labs (`quiet`), a `tally` and the `labs`. The kit's `<BirdFilter>` and `onSide(side)` do Everyone / Us / Them, and `<BirdLabChip>` draws the lab. `birdapp.open` folds it; `actions.toggleBirdApp()` flips it. Docked. Frontier 95: a bird in the tray and "Bird Reader 1.0". `null` until Level 3 (or with `?birdapp=off`). |
 | `Livestream` | `{ event, stream, actions }` | The launch livestream mishap card (the dog on stage, the wrong chart). Opens instead of `EventCard` when `event.kind === "stream"`; `stream` has the caption, viewer count and chat lines; answer with `actions.choose`. |
 | `Hearing` | `{ event, hearing, actions }` | The Hearing (FLT-21): a question at the witness table, or the gavel. Opens instead of `EventCard` when `event.kind === "hearing"`. `hearing` has the three senators (name, seat, `look` colours for the kit's `Senator` portrait, who is `asking`, how each was `answered`), the Trust and Capture meters, `progressText`, per-answer `moves` (label, arrows, `good`: `null` for Capture, which reads as sly) in the same order as `event.choices`, and `verdict` at the gavel. |
 | `LeakedChat` | `{ event, leak, actions }` | The yacht summit's leaked group chat (FLT-24). Opens instead of `EventCard` when `event.kind === "leak"`. `leak` has the group's name, `members`, and `messages` (`name`, rival `color`, `you` for the player's own lines, `system` for "X joined" lines, `time`, `text`); answer with `actions.choose`. |
@@ -467,7 +521,7 @@ A slot is a React component. Each gets **its slice of the view-model plus `actio
 | `GroupChat` | `{ chat, actions }` | The monthly recap chat (messages arrive one by one; `chat.typing`). |
 | `PhotoButton` | `{ photo, actions }` | Enters photo mode (`actions.setPhoto(true)`). |
 | `PhotoOverlay` | `{ photo, actions }` | Photo mode's controls (time of day, shutter, exit) and the "photo saved" thumbnail. Rendered outside the HUD layer so hiding the HUD does not hide it. Draw only at the edges: the campus is the picture. |
-| `SkinPicker` | `{ skins, actions }` | The skin picker. `previewSkin(id)` switches live, `applySkin()` keeps it, `cancelSkinPicker()` goes back. |
+| `SkinPicker` | `{ skins, speed?, actions }` | The skin picker. `previewSkin(id)` switches live, `applySkin()` keeps it, `cancelSkinPicker()` goes back. FLT-76: it can carry the "Slow down for bad news" checkbox (`speed.slowForBadNews`, `actions.setSlowForBadNews(on)`). |
 | `Outcome` | `{ outcome, actions }` | The win / lose card (`keepPlaying`, `newLab`). |
 | `Ending` | `{ ending, layout, actions }` | How the lab ended (FLT-11): the last *Frontier Times* front page (`ending.paper`, its `photo` is your campus), the run summary beside it (`stats`, the era `strip`, `daily`), and the buttons: `shareEnding` (the 1200×630 card; `ending.share` says whether it's the Web Share sheet or a download, and holds the finished card), `copySummary`, `keepPlaying` when `keepPlaying`, `newLab`, `playDaily`. The game draws the share card itself in the skin's colours and chrome. FLT-57: every ending ends on `ending.next` (its `prompt` and `label`): when `ending.refound` is set, one button per `refound.perks` (`foundLab(perk.id)`, label and blurb both shown) under the next lab's `refound.name`; otherwise a `keepPlaying` button labelled `next.label`. Show `labNumber` when it is over 1, `streak.text` when there is one, `versus.text` (and `versus.line`) when a friend's link started this run, and a `copyLink` button (status `"linked"` once copied). |
 | `Takeover` | `{ takeover, layout, actions }` | The Takeover under way: `takeover.title` ("Frontier Lab Tycoon (managed by Frontier-9)") while the lab's own model builds for you, then `takeover.thanks`, the last card. Not modal: keep it out of the way of the ghost cursor. |
@@ -475,7 +529,7 @@ A slot is a React component. Each gets **its slice of the view-model plus `actio
 | `NewsArrival` | `{ arrival, actions }` | "The Frontier Times is here" (`viewNews(id)`, `skipNews()`). |
 | `NewsRoom` | `{ newsroom, actions }` | The News Room modal: the archive, and the open paper or chat (compose `useSlots().FrontPage` / `.GroupChat`, or draw your own). |
 | `Mixer` | `{ sound, actions }` | The sound mixer modal. |
-| `ModManager` | `{ mods, actions }` | Settings ▸ Mods… (FLT-37): what `?mod=` loaded, clashes and failures, while `mods.open`. Close with `actions.closeMods()`; `actions.removeMod(id)` starts a new lab without that mod (`mods.list[i].drama` marks a Today's Drama pack: say "Switch off"). |
+| `ModManager` | `{ mods, actions }` | Settings ▸ Mods… (FLT-37): what `?mod=` loaded, clashes and failures, while `mods.open`. Close with `actions.closeMods()`; `actions.removeMod(id)` takes a data-only mod out of the lab on screen; one with `mods.list[i].needsRestart` (the reason, say it) reloads without it, a new lab (say so: "Remove (new lab)"). `mods.list[i].drama` marks a Today's Drama pack. |
 | `ModSkinOffer` | `{ offer, actions }` | FLT-55: a mod (`?mod=`) brought a skin and asks to put it on (`skins.offer`). Nothing changes until the player answers: `actions.acceptSkinOffer()` shows it, `actions.declineSkinOffer()` (and Escape) keeps the current skin. The answer is remembered for that skin, and `?skin=` never asks. Frontier 95's is a "Found New Skin" box. |
 | `Papers` | `{ papers, layout, actions }` | Publish or Perish (FLT-45): the publication policy (`papers.policies`, `actions.setPublicationPolicy(id)`), reputation, the recruiting perk, the publish-pressure meter and the paper list with **arXive it** / **Peer review** on each draft (`actions.publishPaper(paperId, "preprint" \| "peerReview")`). Folds to a chip (`papers.open`, `actions.togglePapers()`). Docked. Draw only when `papers.enabled && visible.papers` (the host already skips it otherwise); it unlocks at Level 5. |
 | `PaperMoment` | `{ moment, actions }` | The paper screenshot moments: `moment.kind` is `drop` (a fake arXive listing with yours in the middle, `moment.listing`), `scoop` (their title and timestamp beside yours, `gapText`) or `award` (a certificate). The buttons are jokes; any of them calls `actions.dismissPaperMoment(moment.key)`. Holds time while up (`useAutoPause`). |
@@ -487,11 +541,11 @@ A slot is a React component. Each gets **its slice of the view-model plus `actio
 | `Beat` | `{ beat, actions }` | A camera beat (FLT-56): letterbox bars and a caption while the camera makes its move over the running game (a defection's conga line out of the gate, the auditors conferring, the hearing clip going viral). `beat.kicker` for the top bar, `caption` and `sub` for the bottom one, and a `skipLabel` button that calls `actions.skipBeat()` (Esc does it too). Drawn over the docked HUD and under the cards; keep the bars still under reduced motion (the motion tokens do it if you use them). |
 | `GateLegend` | `{ factions, actions }` | Who is at the gate (FLT-56): one row per crowd in `factions.gate` (its `color`, `count` and `name`; the water crowd has id `""`), so a mixed protest sorts itself out. An `addressable` row offers the Comms lever, `actions.issueStatement(id)`: it costs `factions.statement.costText`, is off while `!factions.statement.ready` (`waitText` says how long), and `writerText` says who writes it. The game pins it over the lawn inside the gate while a faction marches there. Keep it small: it sits over the 3D scene. |
 | `DramaButton` | `{ drama, actions }` | Today's Drama (FLT-34), shown from day one in every skin: `actions.openDrama()`. Badge it when `drama.fresh` (a pack the player hasn't looked at) or `drama.on` (one is playing). Frontier 95 also files it under Start ▸ Programs. |
-| `Drama` | `{ drama, actions }` | The Today's Drama window, while `drama.open`: `drama.latest` as a short card (title, `dateText`, `ago`, `teasers`, `summary`, `event`), `drama.archive` (older packs), `drama.on` (the pack playing in this lab), `drama.status` (`loading` / `error` / `ready`; an empty ready feed is normal). `drama.intro` means a pack has just loaded: say what's coming. `playDrama(id)` starts a new lab with it, `closeDrama()` closes and clears the NEW badge. |
+| `Drama` | `{ drama, actions }` | The Today's Drama window, while `drama.open`: `drama.latest` as a short card (title, `dateText`, `ago`, `teasers`, `summary`, `event`), `drama.archive` (older packs), `drama.on` (the pack playing in this lab), `drama.status` (`loading` / `error` / `ready`; an empty ready feed is normal). `drama.intro` means a lab started with a pack: say what's coming. `playDrama(id)` adds the pack to the lab on screen, no reload (FLT-78; the button says "Add to my lab", once added "In your lab ✓" and Remove via `removeMod(on.id)`); `drama.adding` names the pack on its way in, `drama.problem` says why one didn't make it. `closeDrama()` closes and clears the NEW badge. |
 | `WindowTray` | `{ tray, layout, actions }` | The taskbar's waiting room (FLT-54). The game opens at most **two** windows by itself at a time (the Arena on a rank drop, the paper boy, a New! card, a paper moment, the CrumbWiki); one that comes while two are up waits here as a button with `flashing` set: make it flash (Frontier 95: a navy taskbar button, the way a 1995 program asked for you). A window the game opened closes itself after about 20 seconds unless it holds time. Folded panels whose news only reached the ticker (the Arena, Papers, Factions) are listed too, with `unread` set: draw a small dot and the count. `actions.openTray(id)` brings the window up or opens the panel. Docked; `null` while `tray` is empty. The Arena, Papers and Factions VMs also carry `unread`, for a skin that badges the folded window itself. `arena.auto` is set while the Arena is open because the game opened it (at the start, or a rank drop) rather than the player: keep it narrow and at the edge of the screen then, and give the one the player opened its full width (Frontier 95 caps the Task Mangler's benchmark table only while `auto`). |
 | `Memo` | `{ memo, layout, actions }` | The Memo (FLT-57). `memo.phase` `"coming"`: a countdown (`title`, today's `line`, `daysLeft`, `progress` 0 to 1), not modal, out of the way at the top. `"extra"`: the extra edition once a box is ticked (`extra.headline`, `deck`, `choice`, the three `reactions` with names, the lingering `effects`): modal, holds time (`useAutoPause`), closed with `dismissMemo(memo.key)`. |
 | `Challenge` | `{ challenge, layout, actions }` | A friend's link opened the game on their seed (FLT-57): `challenge.line` ("Your friend's lab was Captured on day 212."), `ask`, their `ending` (and `tone`) and `stats`. Modal, holds time, one button labelled `cta` that calls `dismissChallenge()`. |
-| `Welcome` | `{ welcome, saves, actions }` | "Welcome back" (FLT-65), while `saves.welcome` is set: a returning player's autosave (`welcome.lab`, `date`, `ago`). `continueSave()` loads it, `dismissWelcome()` plays the new lab instead. Say plainly that a new lab takes over the autosave after a month. Time is held. |
+| `Welcome` | `{ welcome, saves, actions }` | "Welcome back" (FLT-65), while `saves.welcome` is set: a returning player's autosave (`welcome.lab`, `date`, `ago`). `continueSave()` loads it, `dismissWelcome()` plays the new lab instead, and `openBox()` (FLT-95) goes back to the software shelf (the lab stays saved). Say plainly that a new lab takes over the autosave after a month. Time is held. |
 | `SaveLoad` | `{ saves, actions }` | The Save/Load window (FLT-65), rendered while `saves.open`, `saves.modPrompt` or `saves.dragging`. `saves.slots` is the autosave then slots 1 to 3 (`save` is null when empty, `broken` when unreadable): `saveTo(slot)` (not the autosave), `loadFrom(slot)`, `exportSave(slot)`, `deleteSave(slot)`. `exportSave("current")` and `importSave(file)` (the kit's `ImportButton`) move a lab as a `.fltsave` file. With `saves.modPrompt`, ask first: `fetchModsAndLoad()` (only if `canFetch`), `loadWithoutMods()`, `cancelModPrompt()`. With only `saves.dragging`, show where to drop a file. `saves.available` is false in private browsing: the slots are off, files still work. Time is held. Open it with `openSaves()` from somewhere in your chrome (Ctrl+S / ⌘S opens it in every skin). |
 
 The **docked** slots (`Layout` receives them pre-rendered) are `Stats`, `Training`, `Objectives`, `Inspector`, `BuildBar`, `Speed`, `Staff`, `ThoughtsPanel`, `Ticker`, `Toasts` (one `Toast` at a time: the newest toast, or the standing hint when nobody is talking), `Assistant`, `Arena`, `Benchmarks`, `Voice`, `Factions`, `Papers`, `NewsControls`, `NewsArrival`, `PhotoButton`, `DisasterAlert`, `DramaButton` and `WindowTray`. `AuditPin` and `GateLegend` are pinned into the scene like `Bubble`. The modal slots (`EventCard`, `Livestream`, `Hearing`, `LeakedChat`, `DramaCard`, `ReportCard`, `Bill`, `PromiseTracker`, `EraCard`, `Outcome`, `Ending`, `Takeover`, `Memo`, `Challenge`, `NewsRoom`, `Mixer`, `ModManager`, `ModSkinOffer`, `Drama`, `SkinPicker`, `PaperMoment`, `CrumbWiki`, `DisasterMenu`, `Welcome`, `SaveLoad`) and `PhotoOverlay` and `Beat` are rendered by the game when there is something to show.
@@ -539,11 +593,16 @@ The lab starts small and grows (`vm.progress`, `vm.visible`), and a coach teache
 - **The build menu is a panel you open** (the Start menu in Frontier 95, a Build button and a panel in the base): the unlocked items, then the teasers, then Help (`actions.openHelp()`). Tell the game each time it opens with `actions.buildPanel(true)`: the first coach step waits for it.
 - **One goal** in front of you: `progress.goal.line` ("Ship your first model · 0/1"; `ratio` for a bar). The scenario checklist (`objectives`) only shows once `visible.arena`.
 - **The coach** is drawn by the host (the dimming, the ring round the target, both tokens: `color.highlight`, `color.scrim`, `motion.pulse`) and by your `Coach` slot (the balloon). The target is whatever carries `data-coach-active`. Mark every thing the coach can point at, in **every skin**, with the kit's `useCoach`: `const coach = useCoach(); <button {...coach.attrs("build:path")}>`. The ids are `start` (whatever opens the build panel), `build:<kind>` (each tool), `training` (the training bar), `stat:runway`, `goals` and `map:suggest` (the map's ghost tiles, marked by the game). `coach.attrs(id, alsoActive)` lets a shut container stand in for what is inside it: a closed Start menu is the active target while the coach points at one of its items, so the spotlight never has nothing to light. The stranger test clicks only `[data-coach-active]`, so a skin that forgets the hooks cannot be played by it.
+- **Anchors and [Show me]** (FLT-93). Every control a goal or a New! card can send the player to carries `data-anchor="<id>"` (the kit's `anchor(id)`; `coach.attrs` adds it too): `build:<kind>`, `hire:<job>`, `app:<widget id>` (and `app:bird`), `start`, `training`, `speed`. A control that reveals anchors when clicked (a Start button, a submenu, a tab) is a **door**: `door("build:*", "hire:*")` puts `data-anchor-opens` on it, and it should say when it is open with `aria-expanded`, `aria-selected` or `aria-pressed`. `actions.showMe(anchor)` makes the coach a guide: the host clicks the doors on the way (the most specific, deepest first, never shutting one, six at most), lights the anchor with the ring and an arrow (`.coach-arrow`, restyle it in your CSS), and your `Coach` slot gets `coach.guide` (draw `coach.ask` in your voice, with `strings["coach.ask"]`, and a "Got it" that calls `actions.endShowMe()`). Clicking the anchor or Esc ends it. The ids are listed in `src/content/anchors.ts`; a skin that has no door for an anchor still works, it just lights the nearest door it has.
 - **"New!"** is the `UnlockCard` slot, **Help** is `HowToPlay` (its words are `content/help.ts`).
 
 ## Panels that hold time
 
 If a panel of your own covers the map while it is open (a phone sheet, a menu), hold time with the kit's `useAutoPause(actions, "my-panel", open)`: the game keeps the ids apart, so closing one panel never resumes time beneath another. The panels the host owns (the payroll, the sound mixer, the News Room, the phone Arena) hold it for you.
+
+## Windows that drag (Frontier 95)
+
+Every Frontier 95 `Win` drags by its title bar on a desktop (FLT-90): an outline moves while the button is down, the window jumps to it on release, and Esc cancels. The pure rules are in `src/skins/frontier-95/places.ts` (clamp a place to the screen, remember places per skin under `flt.windows.<skin>`, front-to-back order) and the pointer handling is in `drag.tsx`. A window's id is its `place` prop, or its first class if it has none: give a stack window the same `place` as its `useStackWindow` id, so the right column knows to leave a moved window alone. `place={false}` keeps a window still. Message and error boxes drag but are not remembered, nested windows move with their parent, and at 640 px and under nothing drags and saved places wait for a wider screen. Start ▸ Settings ▸ Reset window positions forgets them. A skin that copies `Win` gets all of this; a skin of its own draws its windows however it likes.
 
 ## The view-model and actions
 
@@ -569,7 +628,7 @@ interface HudVM {
 
 Numbers come as numbers (`cash.value`) **and** formatted text (`cash.text`), so you can roll an odometer and still have a caption. Colours the game owns (the walker's `portrait.body`, an Arena lab's `color`) come as CSS colour strings.
 
-`HudActions` is everything a skin can ask for: `place(kind)`, `setSpeed(n)`, `togglePause()`, `choose(eventId, i)`, `continueEra()`, `select(id)`, `follow(id, on?)`, `closeInspector()`, `highlight(key)`, the payroll (`closeStaff`, `hire(job)`, `fire(id)`, `paintZone(id | null)`, `clearZone(id)`), `dismissToast(id)`, the coach and the cards (`coachSkip()`, `coachReplay()`, `dismissUnlock()`, `buildPanel(open)`, `openHelp()`, `closeHelp()`), the spend check (`confirmSpend()`, `cancelSpend()`), `holdTime(id, open)` (use the kit's `useAutoPause`), `toggleArena()`, `keepPlaying()`, `newLab()`, the news-room ones (`openNews`, `viewNews`, `closeNews`, `skipNews`, `revealChat`), sound (`openMixer`, `closeMixer`, `setMuted`, `setVolume`, `playCue`), photo mode (`setPhoto`, `setPhotoTime`, `takePhoto`) skins (`openSkinPicker`, `previewSkin`, `applySkin`, `cancelSkinPicker`, `setReducedMotion`) mods (`openMods`, `closeMods`, `removeMod`) Today's Drama (`openDrama`, `closeDrama`, `playDrama`) and saves (`openSaves`, `closeSaves`, `saveTo`, `loadFrom`, `deleteSave`, `exportSave`, `importSave`, `continueSave`, `dismissWelcome`, `fetchModsAndLoad`, `loadWithoutMods`, `cancelModPrompt`). Each is safe to call at any time; the game ignores what does not apply.
+`HudActions` is everything a skin can ask for: `place(kind)`, `setSpeed(n)`, `togglePause()`, `choose(eventId, i)`, `continueEra()`, `select(id)`, `follow(id, on?)`, `closeInspector()`, `highlight(key)`, the payroll (`closeStaff`, `hire(job)`, `fire(id)`, `paintZone(id | null)`, `clearZone(id)`), `dismissToast(id)`, the coach and the cards (`coachSkip()`, `coachReplay()`, `openBox()` (FLT-95: back to the software shelf), `dismissUnlock()`, `buildPanel(open)`, `openHelp()`, `closeHelp()`), the spend check (`confirmSpend()`, `cancelSpend()`), `holdTime(id, open)` (use the kit's `useAutoPause`), `toggleArena()`, `keepPlaying()`, `newLab()`, the news-room ones (`openNews`, `viewNews`, `closeNews`, `skipNews`, `revealChat`), sound (`openMixer`, `closeMixer`, `setMuted`, `setVolume`, `playCue`), photo mode (`setPhoto`, `setPhotoTime`, `takePhoto`) skins (`openSkinPicker`, `previewSkin`, `applySkin`, `cancelSkinPicker`, `setReducedMotion`, `setCrt(mode)` for the picture tube, whose state is `vm.skins.crt`; both do nothing and `crt` is absent while the in-game tube is off) mods (`openMods`, `closeMods`, `removeMod`) Today's Drama (`openDrama`, `closeDrama`, `playDrama`) and saves (`openSaves`, `closeSaves`, `saveTo`, `loadFrom`, `deleteSave`, `exportSave`, `importSave`, `continueSave`, `dismissWelcome`, `fetchModsAndLoad`, `loadWithoutMods`, `cancelModPrompt`). Each is safe to call at any time; the game ignores what does not apply.
 
 Changing the contract: keep changes **additive** (new fields, new actions) and add a fixture to `src/ui/hud/fixtures.ts` + a test in `vm.test.ts`. A breaking change means bumping `SKIN_API_VERSION` and every `skin.json`.
 

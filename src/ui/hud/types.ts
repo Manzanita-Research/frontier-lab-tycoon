@@ -40,6 +40,12 @@ export interface StatsVM {
   capability: { value: number; latestModel: string | null };
   hype: { value: number };
   finance: { income: number; incomeText: string; expenses: number; expensesText: string };
+  /**
+   * FLT-86: what going broke has cost so far. `stake` is the share of the lab (and of its revenue) still yours, "100%"
+   * until an equity round; `roundsLeft` the emergency rounds the board still has ("3 of 3"); `overdraftDays` the days
+   * left before the bank calls, or null when the account is not overdrawn.
+   */
+  money: { stake: number; stakeText: string; roundsLeft: number; roundsText: string; overdraftDays: number | null };
   arena: { rank: number; rankDelta: number; tone: "good" | "bad" | ""; deltaText: string; top: boolean; open: boolean; flinch: boolean };
   rd: { mult: number; multText: string; era: number };
 }
@@ -68,6 +74,18 @@ export interface ObjectiveVM {
   /** 0 to 1 */
   ratio: number;
   met: boolean;
+  /** FLT-93: what to do about it next and where ([Show me]). Absent once met, or when nothing on screen helps. */
+  showMe?: ShowMeVM;
+}
+
+/**
+ * FLT-93: a goal's next action and the anchor that does it. `label` is the action ("Hire an SRE"); `anchor` is what
+ * `actions.showMe(anchor)` walks to (`hire:sre`, `build:hall`, `app:arena`, `training`, ...). Say where it lives with the
+ * skin's `where.<anchor>` / `where.<kind>` strings (the kit's `useWhere`).
+ */
+export interface ShowMeVM {
+  label: string;
+  anchor: string;
 }
 
 export interface ObjectivesVM {
@@ -132,6 +150,10 @@ export interface BuildItemVM {
   name: string;
   short: string;
   blurb: string | null;
+  /** FLT-94: what it is for, plainly ("Makes the compute your Training Halls turn into models."), for a build palette. Absent: use `blurb`. */
+  does?: string | null;
+  /** FLT-94: "$5K/day upkeep", or null for a tool or a tile that opens a window. */
+  upkeepText?: string | null;
   price: number;
   priceText: string;
   free: boolean;
@@ -212,6 +234,8 @@ export interface SpeedVM {
   value: number;
   paused: boolean;
   options: SpeedOptionVM[];
+  /** FLT-76: the "Slow down for bad news" setting (on by default); `setSlowForBadNews` changes it. */
+  slowForBadNews: boolean;
 }
 
 export interface BubbleVM {
@@ -291,6 +315,17 @@ export interface ToastVM {
    * can list them.
    */
   batch?: { text: string; tone: ToneVM }[];
+  /**
+   * FLT-76: it stays until the player dismisses it (or speeds up again): why the game just dropped to 1× for bad news.
+   * It is always the last toast, so a skin that shows only the newest shows it.
+   */
+  pinned?: true;
+  /**
+   * FLT-84: the game hit a bug, caught it and kept going. Say so in the skin's voice (strings `snag.text`, `snag.copy`)
+   * and offer `copySnag(id)`, which puts a bug report (the error, its stack, seed, tick, build, skin) on the clipboard.
+   * A skin that ignores this still shows `text`.
+   */
+  snag?: true;
 }
 
 export type HintId = "gateway" | "tap";
@@ -315,7 +350,7 @@ export interface ConfirmVM {
 // ---- Playable v1: what the player has unlocked, the coach marks, and the "New!" card ----
 
 /** The HUD panels the player earns as the lab grows (a hidden panel is simply not drawn). */
-export type HudPanelId = "revenue" | "vibes" | "arena" | "rnd" | "thoughts" | "news" | "staff" | "events" | "papers" | "disasters" | "factions";
+export type HudPanelId = "revenue" | "vibes" | "arena" | "rnd" | "thoughts" | "news" | "staff" | "events" | "papers" | "disasters" | "factions" | "birdapp";
 export type VisibleVM = Record<HudPanelId, boolean>;
 
 /** What the build panel teases as locked: one row per milestone, how many it unlocks and the goal that earns them ("2 more · Ship your first model"). */
@@ -331,10 +366,12 @@ export interface GoalVM {
   target: number;
   /** "Ship your first model · 0/1" */
   line: string;
-  /** Just the progress, for a skin that shows it on its own line: "0/1", "$26K of $40K a day · 3 of 12 visitors". */
+  /** Just the progress, for a skin that shows it on its own line: "0/1", "Revenue $26K of $40K a day · 3 of 12 visitors". */
   progressText: string;
   /** 0 to 1 */
   ratio: number;
+  /** FLT-93: the next thing to do for it, and where ([Show me]). Absent when the goal has no steps (a mod's). */
+  showMe?: ShowMeVM;
 }
 
 export interface ProgressVM {
@@ -362,6 +399,13 @@ export interface CoachVM {
   /** An "info" line (waitFor "timer") fades on its own; the others wait for the action. */
   waitFor: "action" | "timer";
   canSkip: boolean;
+  /**
+   * FLT-93: this mark is a [Show me], not a tutorial step: the player asked where something is. No step count and no Skip
+   * tutorial; offer "Got it" (`actions.endShowMe()`). It ends by itself when they click the thing.
+   */
+  guide?: true;
+  /** With `guide`: what the player is after, as a verb phrase ("hire an SRE"), for a skin that says it its own way. */
+  ask?: string;
 }
 
 /** The small "New!" card that comes with a level-up. */
@@ -370,6 +414,28 @@ export interface UnlockCardVM {
   title: string;
   body: string;
   items: string[];
+  /** FLT-76: the card's joke line, under the goal. Optional: a mod's rung may have none. */
+  quip?: string;
+  /**
+   * FLT-93: `items` sorted Build / Hire / New systems / New apps, each line with what it is for and, where there is one, the
+   * anchor [Show me] walks to (`actions.showMe(anchor)`). Empty groups are left out. Optional: a skin may draw `items`.
+   */
+  groups?: UnlockGroupVM[];
+}
+
+export interface UnlockGroupVM {
+  id: "build" | "hire" | "systems" | "apps";
+  /** "Build", "Hire", "New systems", "New apps". */
+  title: string;
+  entries: UnlockEntryVM[];
+}
+
+export interface UnlockEntryVM {
+  /** "Janitor Bot" */
+  name: string;
+  /** What it is for, in one line. Empty for a line that is only a name (the "fresh headache" teaser). */
+  line: string;
+  anchor?: string;
 }
 
 /** Help ▸ How to play. Only present while the window is open. */
@@ -1320,6 +1386,138 @@ export interface SafetyOptionVM {
   active: boolean;
 }
 
+/** FLT-69: how a post landed. `live`: still going up, not landed yet. */
+export type BirdOutcomeVM = "live" | "flop" | "banger" | "controversy" | "ratioed" | "cancelled";
+
+/** One post on the Bird App timeline. The numbers tick up while it is live and stop where it lands. */
+export interface BirdPostVM {
+  id: string;
+  name: string;
+  /** With the @. */
+  handle: string;
+  /** One character for the avatar. */
+  glyph: string;
+  archetype: string;
+  text: string;
+  /** "3:12 AM". */
+  time: string;
+  likes: number;
+  reposts: number;
+  replies: number;
+  /** "1.2K" and so on, ready to print. */
+  likesText: string;
+  repostsText: string;
+  repliesText: string;
+  outcome: BirdOutcomeVM;
+  /** "Banger", "Ratioed", "Cancelled"... or "" while live. */
+  outcomeText: string;
+  tone: "good" | "bad" | "neutral" | "joke";
+  /** The "viral" sticker: a banger that has landed, or one taking off right now. */
+  viral: boolean;
+  /** Replies are outpacing the likes: a ratio (or worse) forming. */
+  ratioing: boolean;
+  /** The top reply, once there are replies ("" before). */
+  reply: string;
+  /** Comms read it first. */
+  reviewed: boolean;
+  /** "Comms got to it" / "It stuck" / "". */
+  handledText: string;
+  /** "@so_back_twice", when it answers someone (the Duo). */
+  replyTo: string | null;
+  /** "3am", "launch day"... or "". */
+  momentText: string;
+  /** FLT-92: whose post: one of your researchers' (`us`, the default) or a rival lab's (`them`). */
+  side?: "us" | "them";
+  /** The rival lab it is from (its short name and colour), on theirs; null on yours. */
+  lab?: { id: string; name: string; color: string } | null;
+  /** A quote-post: whose post it quotes ("@handle") and what that said. */
+  quote?: { handle: string; text: string } | null;
+  /** A small tag for what the post is about: "Dunk on Sirocco", "#1 on the Arena", "Subtweet", "About your launch"... or "". */
+  beatText?: string;
+}
+
+/** One of the three levers on a poster, with its trade-off printed on the button. */
+export interface BirdLeverVM {
+  id: "cook" | "comms" | "logoff";
+  /** "Let them cook", "Run it by Comms", "Please log off". */
+  label: string;
+  /** "22% banger · 9% cancel", "no posts · −focus". */
+  tradeoff: string;
+  active: boolean;
+}
+
+/** One researcher's posting profile. */
+export interface BirdPosterVM {
+  id: number;
+  name: string;
+  handle: string;
+  glyph: string;
+  archetypeName: string;
+  tier: "recluse" | "occasional" | "big" | "break";
+  /** "Big account", "On a posting break (12 days)". */
+  tierText: string;
+  followersText: string;
+  /** The banger↔cancel meter: their odds on an average post as the lever stands (0 on "Please log off"). */
+  banger: number;
+  cancel: number;
+  /** "19% banger · 7% cancel". */
+  meterText: string;
+  /** Cancelled, still here, and every rival's recruiter knows the name. */
+  hot: boolean;
+  levers: BirdLeverVM[];
+  /** "4 posts · 1 banger · 0 cancels". */
+  record: string;
+}
+
+/** FLT-69: the Bird App panel. `enabled: false` until Level 3 (and with `?birdapp=off`); draw nothing then. */
+export interface BirdAppVM {
+  enabled: boolean;
+  /** The panel is open (`actions.toggleBirdApp()`). */
+  open: boolean;
+  /** Bird App headlines since the panel was last open (FLT-54): the folded button's badge. It never opens itself. */
+  unread?: number;
+  /** The folded chip's line: "3 live · Aura 42". */
+  headline: string;
+  /** 0 to 100. */
+  aura: number;
+  auraText: string;
+  /** What it does right now: "+6 Hype · visitors ×1.10 · applicants ×1.14". */
+  auraEffects: string;
+  /** The last 30 midnights, for a sparkline (0 to 100). */
+  auraHistory: number[];
+  /** Today's moments: "Launch day", "3am", "Water discourse"... */
+  moments: string[];
+  /** Posts that are up and have not landed, newest first. */
+  live: BirdPostVM[];
+  /** "@shipping_tmrw is typing…", or null. */
+  typing: string | null;
+  /** Posts that have landed, newest first. */
+  log: BirdPostVM[];
+  posters: BirdPosterVM[];
+  /** "16 of 23 researchers": the list is the loudest first. */
+  postersText: string;
+  comms: {
+    desk: "calm" | "busy" | "drowning";
+    /** "Calm", "Busy: 3 in the queue", "Drowning: the PR team is underwater". */
+    deskText: string;
+    queue: { id: string; handle: string; kind: "controversy" | "cancelled"; text: string }[];
+    /** "2 of 5 today". */
+    capacityText: string;
+    /** 0 to 1: how full the queue is against where it drowns. */
+    load: number;
+  };
+  /** "142 posts · 12 bangers · 3 cancels". */
+  tally: string;
+  /** The newest post that landed a banger or a cancel (for a moment's sticker), or null. */
+  spotlight: BirdPostVM | null;
+  /**
+   * FLT-92: the rival labs post on the timeline too (their posts are in `live` and `log`, `side: "them"`). `on: false` with
+   * `?birdrivals=off`. `quiet`: labs sulking after an Arena slide ("Sirocco is taking a few days offline"). `labs`: who
+   * posts, for a legend. The panel's Everyone / Us / Them filter is the skin's own state.
+   */
+  rivals?: { on: boolean; quiet: string[]; tally: string; labs: { id: string; name: string; color: string }[] };
+}
+
 /** FLT-33: the discourse. `enabled: false` until Level 4 (and with `?factions=off`); draw nothing then. */
 export interface FactionsVM {
   enabled: boolean;
@@ -1407,6 +1605,8 @@ export interface ModInfoVM {
   hash: string;
   /** A Daily Drama pack (FLT-34): the Today's Drama window describes it. */
   drama?: boolean;
+  /** FLT-78: why Remove needs a fresh start (it reloads into a new lab), e.g. "Brings a look or sounds: needs a fresh start." Absent for a data-only mod, which Remove takes out of the running lab. */
+  needsRestart?: string;
 }
 
 /** Start ▸ Settings ▸ Mods… (FLT-37): what `?mod=` loaded, what clashed and what failed. Mods only load from the URL. */
@@ -1437,6 +1637,14 @@ export interface SaveSummaryVM {
   skin: string | null;
   /** Ids of the mods it was made with. */
   mods: string[];
+}
+
+/** "Welcome back" (FLT-82): the newest save on the shelf, whichever slot it is in. */
+export interface WelcomeVM extends SaveSummaryVM {
+  /** "auto", "1", "2", "3": where it is, and what `continueSave` loads. */
+  slot: string;
+  /** "Autosave", "Slot 2" */
+  label: string;
 }
 
 /** One row of the Save/Load window: the autosave or a manual slot. */
@@ -1471,8 +1679,8 @@ export interface SavesVM {
   slots: SaveSlotVM[];
   /** The lab playing now: what Save writes. */
   current: { lab: string; date: string };
-  /** "Welcome back": the autosave to continue, or null. Time holds while it is up. */
-  welcome: SaveSummaryVM | null;
+  /** "Welcome back": the newest save to continue (the autosave or a slot), or null. Time holds while it is up. */
+  welcome: WelcomeVM | null;
   /** A load, save or import is under way. */
   busy: boolean;
   /** What just happened ("Saved to slot 2.", "That file isn't a lab save."), or null. */
@@ -1508,9 +1716,8 @@ export interface DramaPackVM {
 }
 
 /**
- * Today's Drama (FLT-34): the published feed, and the pack this run has loaded. A pack loads through `?mod=` like any
- * mod, so playing one starts a new lab (`actions.playDrama(id)`), and switching it off is the Mod Manager's
- * `actions.removeMod(id)`.
+ * Today's Drama (FLT-34): the published feed, and the pack this lab has. `actions.playDrama(id)` adds a pack to the lab
+ * on screen (FLT-78: no reload, no new lab), and `actions.removeMod(id)` takes it out again.
  */
 export interface DramaVM {
   /** The Today's Drama window is open. */
@@ -1527,6 +1734,10 @@ export interface DramaVM {
   fresh: boolean;
   /** The window opened by itself because a pack just loaded: say what's coming, not what's on offer. */
   intro: boolean;
+  /** FLT-78: the id of the pack being added right now (fetching it), or null. */
+  adding?: string | null;
+  /** FLT-78: why the last add didn't happen, or null. */
+  problem?: string | null;
 }
 
 export interface SkinPickerVM {
@@ -1542,6 +1753,20 @@ export interface SkinPickerVM {
   rejected: { id: string; errors: string[] }[];
   /** FLT-55: a mod's request to switch to its skin, waiting on the player (the `ModSkinOffer` slot). */
   offer?: SkinOfferVM | null;
+  /** FLT-73: the picture tube (Display Properties → Settings). Absent in old fixtures: treat as off. */
+  crt?: CrtVM;
+}
+
+/** FLT-73: the CRT look over the whole game: a shader on the campus, faint glass over the UI. */
+export interface CrtVM {
+  /** On screen now: the player's pick, else the skin's default. "off" while photo mode is up. */
+  mode: "off" | "subtle" | "full";
+  /** The player's own pick, or null while the skin's default applies. */
+  choice: "off" | "subtle" | "full" | null;
+  /** What the campus is drawn with: the full shader, the one-pass version, or plain (the glass over the UI stays). */
+  tier: "multi" | "lite" | "flat";
+  /** The game turned the campus's shader down to keep the frame rate up. Picking a look again gives it another try. */
+  reduced: boolean;
 }
 
 export interface LayoutVM {
@@ -1702,6 +1927,8 @@ export interface HudVM {
   crumbWiki: CrumbWikiVM | null;
   /** FLT-33: the factions and the lab's stance. `enabled: false` until Level 4. */
   factions: FactionsVM;
+  /** FLT-69: the Bird App. `enabled: false` until Level 3. */
+  birdapp: BirdAppVM;
   eraCard: EraCardVM | null;
   outcome: OutcomeVM | null;
   /** Evals Without Borders: the countdown and the tour. */
@@ -1749,14 +1976,25 @@ export interface HudActions {
   /** Light up who thinks a Thoughts row (`ThoughtRowVM.key`); again to switch off. */
   highlight(key: string): void;
   dismissToast(id: number): void;
+  /** FLT-84: a snag toast's bug report onto the clipboard. Resolves false when the clipboard said no (the console has it too). */
+  copySnag(id: number): Promise<boolean>;
   /** Answer `vm.confirm`: go ahead with the spend, or keep the runway. */
   confirmSpend(): void;
   cancelSpend(): void;
   /** The coach: skip it for good, or start it again (Start ▸ Help ▸ Replay tutorial). */
   coachSkip(): void;
   coachReplay(): void;
+  /** FLT-95: leave for the software shelf and play the box again. The lab is autosaved first; "Welcome back" has it on the way in. */
+  openBox(): void;
   /** Close the "New!" card. */
   dismissUnlock(): void;
+  /**
+   * FLT-93: [Show me]. Puts a coach mark on `[data-anchor="<anchor>"]`, opening the menus on the way (the doors marked
+   * `data-anchor-opens`), and closes the New! card if it is up. Safe with an anchor the skin does not have: the balloon
+   * still says where. Ends when the player clicks the thing, or with `endShowMe()`.
+   */
+  showMe(anchor: string): void;
+  endShowMe(): void;
   /** The build panel opened or shut (the coach's first step waits for it opening). Say it whenever yours does. */
   buildPanel(open: boolean): void;
   /** Help ▸ How to play. */
@@ -1783,6 +2021,10 @@ export interface HudActions {
   setRisk(risk: RiskVM): void;
   /** FLT-33: open or fold the Factions panel. */
   toggleFactions(): void;
+  /** FLT-69: open or fold the Bird App. */
+  toggleBirdApp(): void;
+  /** FLT-69: a poster's lever (`BirdPosterVM.id`): "cook", "comms" or "logoff". */
+  setBirdLever(id: number, lever: BirdLeverVM["id"]): void;
   /** FLT-33: the safety budget, 0 (none) to 3 (lavish). Costs money every day and slows training; the Safetyists notice. */
   setSafetySpend(level: number): void;
   /** FLT-56: Comms puts out a statement to one faction (the gate legend). Costs money, then a cooldown; the sim may refuse with a toast. */
@@ -1849,6 +2091,10 @@ export interface HudActions {
   /** Go back to the skin the picker opened on and close it. */
   cancelSkinPicker(): void;
   setReducedMotion(on: boolean): void;
+  /** FLT-73: pick the picture tube's look (remembered on this device; overrides the skin's default). */
+  setCrt(mode: "off" | "subtle" | "full"): void;
+  /** FLT-76: at ▶▶ and ▶▶▶, drop to 1× when something sharp goes wrong (remembered on this device). */
+  setSlowForBadNews(on: boolean): void;
   /** FLT-55: say yes to a mod's skin offer (it shows, and is remembered for that mod). */
   acceptSkinOffer(): void;
   /** Say no: the skin stays in the picker, and this mod will not ask again. */
@@ -1856,12 +2102,12 @@ export interface HudActions {
   // Mods.
   openMods(): void;
   closeMods(): void;
-  /** Switch a loaded mod off: the page reloads without it (a new lab, like loading one). */
+  /** Switch a mod off. A data-only one leaves the lab on screen (FLT-78); one with `needsRestart` reloads without it (a new lab). */
   removeMod(id: string): void;
   // Today's Drama (FLT-34).
   openDrama(): void;
   closeDrama(): void;
-  /** Load a published Drama pack by id (reloads with it in `?mod=`: a new lab). */
+  /** Add a published Drama pack to the lab on screen, by id (FLT-78): no reload, no new lab. Another Drama pack makes way. */
   playDrama(id: string): void;
   // Saves (FLT-65). `slot` is a SaveSlotVM's `slot`.
   openSaves(): void;

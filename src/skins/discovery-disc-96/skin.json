@@ -22,7 +22,8 @@
     "EventCard",
     "EraCard",
     "Outcome",
-    "NewsControls", "DramaButton",
+    "NewsControls",
+    "DramaButton",
     "NewsArrival",
     "PhotoButton"
   ],
@@ -113,6 +114,11 @@
     "x.ink": "#111111"
   },
   "strings": {
+    "snag.title": "Whoopsie-daisy!",
+    "snag.text": "Oopsie! The disc skipped, but the robot caught it and kept going.",
+    "snag.copy": "Copy details for a grown-up",
+    "snag.copied": "Copied! Great job!",
+    "snag.ok": "Okay!",
     "run.title": "Go to",
     "run.prompt": "Type where you want to go! The disc takes you there.",
     "build.group.compute": "Big Machines",
@@ -135,6 +141,28 @@
     "event.paused": "Pencils down!",
     "arena.title": "The Big Race",
     "outcome.keepPlaying": "Keep exploring",
-    "outcome.newLab": "New adventure"
+    "outcome.newLab": "New adventure",
+    "birdapp.title": "ENCYCLOPEDIA: THE BIRD APP",
+    "birdapp.aura": "Fame Index",
+    "birdapp.timeline": "Entries",
+    "birdapp.posters": "Who's Who",
+    "birdapp.comms": "Fact Checkers",
+    "birdapp.live": "NOW WRITING",
+    "birdapp.log": "Archive",
+    "birdapp.empty": "This article is a stub. You can help by posting!",
+    "birdapp.quiet": "No disputes. Every fact checks out!",
+    "birdapp.viral": "FUN FACT!",
+    "birdapp.ratio": "citation needed",
+    "birdapp.reviewed": "fact-checked",
+    "birdapp.outcome.flop": "Stub",
+    "birdapp.outcome.banger": "Featured article",
+    "birdapp.outcome.controversy": "Disputed",
+    "birdapp.outcome.ratioed": "Citation needed",
+    "birdapp.outcome.cancelled": "Deleted",
+    "birdapp.outcome.live": "Now writing",
+    "stats.net": "after the bills",
+    "birdapp.filter.all": "ALL ARTICLES",
+    "birdapp.filter.us": "OUR LAB",
+    "birdapp.filter.them": "OTHER LABS"
   }
 }

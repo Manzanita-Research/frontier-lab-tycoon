@@ -84,6 +84,20 @@ const TOOLS: Record<string, ReactElement> = {
       <path {...accent(DUSK, 2)} d="M12 15l3 3 6-6" />
     </>
   ),
+  sandbox: (
+    <>
+      <path {...line} d="M4 20 16 14l12 6-12 6Z" />
+      <path {...accent(TERRA)} d="M8 13l1.5 5h4L15 13Z" />
+      <path {...line} d="M22 5v11M20.5 16h3l-.5 3h-2Z" />
+    </>
+  ),
+  honeypot: (
+    <>
+      <path {...line} d="M16 15v12" />
+      <rect {...line} x="5" y="5" width="22" height="10" rx="1.5" />
+      <path {...accent(GOLD, 2)} d="M9 10h11m-3-3 3 3-3 3" />
+    </>
+  ),
   bulldoze: (
     <>
       <rect {...line} x="9" y="10" width="13" height="9" rx="2" />

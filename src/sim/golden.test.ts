@@ -218,10 +218,39 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // (NewsItem.panel), and the record-taken toasts carry their group (Toast.group, folded by the app): 2400 on again.
 // Merge train 2 then moves the late checkpoints here (4000; 3200 on seed 3): this script reaches Level 5, so FLT-56's packs
 // wake in it, The Memo jumps the card line, and the Promise Tracker's whip and roll-call cards ask the card budget too.
+// FLT-69 wakes the Bird App at Level 3 (1380 / 1340 / 1360 here) and moves the Comms Rep from Level 5 to Level 3, so
+// 1600 on moves on every seed (its posts, Aura, headlines and toasts). With `flags.birdappOff` set, and the Comms Rep put
+// back on the Level 5 card (with the Level 3 card's two new items left out), all three seeds reproduce the values above
+// at every checkpoint, digit for digit: the Bird App is the whole difference.
+// FLT-59 adds the Sandbox Escape to Scrutiny: the Level 5 card names the Sandbox, the Honeypot and the escape, and the
+// pack wakes last (96 days after the rung). The card is in the World, so 2400 on moves on every seed. With the Scrutiny
+// row put back as it was (no Sandbox, no Honeypot, no escape) all three seeds reproduce the values above, digit for digit.
+// FLT-76 asks the first decision on Level 1: the Logo opens two days after the first path, while the first model trains,
+// and this script answers it like any other card, so every checkpoint moves. Then the offsite (FLT-76's minor beat 106
+// days into Scrutiny) adds flags.scrutinyDay on the tick Level 5 lands (2240); the card itself would open on day 218, past
+// these 4000 ticks. With the card kept shut (`firstMinutes` false) and without the flag, all three seeds reproduce FLT-59's
+// values (c403ae9a… / 766f3295… / b43cb9be…).
+// Jem's labels for the Logo (A butthole / A butthole-ier butthole / Not a butthole) change its news lines, which sit in
+// the World until the ticker rolls them off: 200 to 1600 move, 2400 on hold.
+// FLT-86 (money and the win) moves every checkpoint, on purpose. The projection shows each goal's `hold`/`held` (the
+// Arena objective is now "hold Top 3 for 30 days"), which is in the World from tick 0. With those two fields projected
+// out and the goals' new toasts (each objective met, the hold starting and slipping) switched off, all three seeds
+// reproduce the values above tick for tick, RNG stream included, until the game itself is meant to differ: seeds 1 and 3
+// win the instant they reach Top 3 (ticks 3480 and 3600), and now start the 30-day hold instead; seed 2 dips below $0
+// at 2680 and gets emergency round 1 (a card, signed for 10% of the lab) where the free bailout used to be. None of the
+// three wins inside 4000 ticks. The goals' toasts take an id each, so with them on, the ids after the first "Objective
+// met" (tick 2200 on seed 1) move too, and so does whatever is picked by id (a faction thread on seed 1 at 2380).
+// FLT-92: the rival labs post on the Bird App too (their own stream, from Level 3), so 1600 on moves on every seed:
+// their posts, the ticker lines and toasts, and the dunks and ratios. With the rivals off (`enableBirdRivals` a no-op)
+// all three seeds reproduce FLT-86's values (af539c00… / 69cae759… / 5277ca60…), digit for digit.
+// FLT-91: a garage starts on an entrance plaza and a short walk (14 tiles) instead of a five-tile stub, so every
+// checkpoint moves on every seed: the opening researchers are seeded on different tiles (their own RNG draws), the
+// plaza is in the World from tick 0, and the coach's path step counts 14 + 3 tiles instead of 5 + 3. With `openingPaths()`
+// returning the old stub, all three seeds reproduce FLT-92's values (72d15c6c… / 97c3299b… / cd605dda…) digit for digit.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "c403ae9a", 800: "c9a777bd", 1600: "bb207932", 2400: "d4245f34", 3200: "4326019f", 4000: "39a85367" },
-  2: { 200: "766f3295", 800: "aec1b296", 1600: "1fad47b0", 2400: "b2610444", 3200: "40b53f19", 4000: "a22291d9" },
-  3: { 200: "b43cb9be", 800: "510d3b99", 1600: "52fba8d3", 2400: "9ceb3027", 3200: "eca03ede", 4000: "1d8d5c0d" },
+  1: { 200: "7566b028", 800: "4c87ace4", 1600: "f2254ab6", 2400: "e521939b", 3200: "b1e0fe8f", 4000: "52512aac" },
+  2: { 200: "3263645c", 800: "31bf7516", 1600: "d4438b25", 2400: "9fa821a1", 3200: "b4ee6965", 4000: "feb5a25d" },
+  3: { 200: "09887c12", 800: "40547ab6", 1600: "2af29753", 2400: "a0a69cf1", 3200: "08505149", 4000: "d7fa34a4" },
 };
 
 describe("golden runs", () => {

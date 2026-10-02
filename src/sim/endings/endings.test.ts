@@ -1,13 +1,12 @@
 // FLT-11: every ending's trigger path, played. The Race and Slow Down forks are a full scripted playthrough (the bot
 // from src/sim/bot.ts) into Era 4, where The Memo opens; the other three are staged on a test campus.
 import { SCENARIO } from "../../content/goals";
-import { BAILOUT_AMOUNT } from "../machines/economy";
 import { eventById } from "../../content/events";
 import { playBot } from "../bot";
 import { openEventOf } from "../events";
 import { outcomeOf } from "../goals";
 import { eraOfState } from "../race/race";
-import { createTestCampus, perfBudget } from "../testkit";
+import { brokeTonight, createTestCampus, perfBudget } from "../testkit";
 import { TICKS_PER_DAY, tick } from "../tick";
 import type { GameState } from "../types";
 import type { Command } from "../commands";
@@ -37,7 +36,7 @@ describe("the pack (mods/base-endings)", () => {
   });
 
   it("ships the five endings whose triggers exist, each chart reaching its front page", () => {
-    expect(ENDINGS.map((e) => e.id)).toEqual(["captured", "acquihired", "takeover", "regulated", "pivot"]);
+    expect(ENDINGS.map((e) => e.id)).toEqual(["captured", "escaped", "acquihired", "takeover", "regulated", "pivot"]);
     for (const e of ENDINGS) {
       const chart = chartOf(e);
       const seen = new Set<string>([chart.initial]);
@@ -119,7 +118,7 @@ describe("The Memo and its fork (a full scripted playthrough)", () => {
 describe("the staged endings", () => {
   it("bankruptcy is Acqui-hired (not the old loss): the Macrohard sticker goes on, then time stops", () => {
     const s = staged();
-    s.cash = SCENARIO.brokeBelow - BAILOUT_AMOUNT - 100_000; // past what a bridge round can fix
+    brokeTonight(s); // every round spent and the bank's 30 days up
     play(s, 30);
     expect(s.endings!.id).toBe("acquihired");
     expect(s.endings!.look.acquired).toBe("Macrohard");
@@ -163,6 +162,9 @@ describe("the staged endings", () => {
   it("the deadline without a win is The Pivot, a front page instead of the old game-over", () => {
     const s = createInitialState(1);
     enableEndings(s);
+    // An absent player runs out of money long before the deadline, and since FLT-86 the board only bails a lab out
+    // three times (then it's Acqui-hired). A lab that never spends a dollar reaches the deadline.
+    s.cash = 1e9;
     play(s, SCENARIO.deadlineDay + 20);
     expect(s.endings!.id).toBe("pivot");
     expect(outcomeOf(s)).toBe("ended");
@@ -172,7 +174,7 @@ describe("the staged endings", () => {
 
   it("the endings switched off leave the old game exactly as it was", () => {
     const s = createTestCampus(1);
-    s.cash = SCENARIO.brokeBelow - BAILOUT_AMOUNT - 100_000; // past what a bridge round can fix
+    brokeTonight(s); // every round spent and the bank's 30 days up
     play(s, 3, 0, (w) => outcomeOf(w) === "lost");
     expect(outcomeOf(s)).toBe("lost");
     expect(s.endings).toBeUndefined();

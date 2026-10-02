@@ -2,7 +2,7 @@
 // nothing else in the game: no `src/sim/**`, no store, no three.
 import type { ComponentType, ReactNode } from "react";
 import type {
-  ArenaVM, AuditVM, BeatVM, BillVM, TrackerVM, ReportCardVM, BubbleVM, FactionsVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, DramaDocVM, DramaVM, SaveSummaryVM, SavesVM, EraCardVM, EventVM, HearingVM, HudActions, HudVM, LeakVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
+  ArenaVM, AuditVM, BeatVM, BirdAppVM, BillVM, TrackerVM, ReportCardVM, BubbleVM, FactionsVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, DramaDocVM, DramaVM, SavesVM, WelcomeVM, EraCardVM, EventVM, HearingVM, HudActions, HudVM, LeakVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
   ModsVM, SkinOfferVM, NewsroomVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StatsVM, ThoughtRowVM, TickerItemVM,
   StaffVM, TeaserVM, ProgressVM, ToastVM, TrainingVM, UnlockCardVM, VisibleVM, HelpVM, PapersVM, PaperMomentVM, CrumbWikiVM, DisastersVM,
   EndingVM, TakeoverVM, TrayItemVM, WidgetVM, PlaceModeVM, MemoVM, ChallengeVM,
@@ -33,6 +33,7 @@ export const SLOT_NAMES = [
   "Benchmarks",
   "Voice",
   "Factions",
+  "BirdApp",
   "Livestream",
   "Hearing",
   "LeakedChat",
@@ -74,7 +75,7 @@ export const SLOT_NAMES = [
 export type SlotName = (typeof SLOT_NAMES)[number];
 
 /** The slots that sit in the HUD all the time, already rendered, for the Layout to place. */
-export const DOCKED_SLOTS = ["Stats", "Training", "Objectives", "Inspector", "BuildBar", "Speed", "Staff", "ThoughtsPanel", "Ticker", "Toasts", "Assistant", "Arena", "Benchmarks", "Voice", "Factions", "NewsControls", "NewsArrival", "PhotoButton", "Papers", "DisasterAlert", "DramaButton", "WindowTray"] as const;
+export const DOCKED_SLOTS = ["Stats", "Training", "Objectives", "Inspector", "BuildBar", "Speed", "Staff", "ThoughtsPanel", "Ticker", "Toasts", "Assistant", "Arena", "Benchmarks", "Voice", "Factions", "BirdApp", "NewsControls", "NewsArrival", "PhotoButton", "Papers", "DisasterAlert", "DramaButton", "WindowTray"] as const;
 export type DockedSlot = (typeof DOCKED_SLOTS)[number];
 
 /** What the Layout receives: the docked slots as elements (or null when there is nothing to show) plus the whole VM. */
@@ -94,7 +95,7 @@ export interface SlotPropsMap {
   Objectives: { objectives: ObjectivesVM; progress?: ProgressVM; visible?: VisibleVM; layout: LayoutVM; actions: HudActions };
   Inspector: { inspector: InspectorVM; layout: LayoutVM; actions: HudActions };
   /** The build panel: `items` are only what is unlocked, `teasers` the locked ones, one row per milestone ("2 more · Ship your first model"). Report each opening with `actions.buildPanel(true)`. */
-  BuildBar: { items: BuildItemVM[]; tip: BuildTipVM | null; teasers?: TeaserVM[]; layout: LayoutVM; actions: HudActions; /** For a Start menu with a Disasters entry (FLT-32): `disasters.enabled` says it is earned. */ disasters?: DisastersVM; /** FLT-63: what "Run…" can open (`vm.widgets`). */ widgets?: WidgetVM[]; /** FLT-63: the mode the pointer is in, so the tool in hand can say how to put it down. */ mode?: PlaceModeVM | null };
+  BuildBar: { items: BuildItemVM[]; tip: BuildTipVM | null; teasers?: TeaserVM[]; layout: LayoutVM; actions: HudActions; /** For a Start menu with a Disasters entry (FLT-32): `disasters.enabled` says it is earned. */ disasters?: DisastersVM; /** FLT-63: what "Run…" can open (`vm.widgets`). */ widgets?: WidgetVM[]; /** FLT-63: the mode the pointer is in, so the tool in hand can say how to put it down. */ mode?: PlaceModeVM | null; /** FLT-76: for a Settings menu with "Slow down for bad news". */ speed?: SpeedVM };
   Speed: { speed: SpeedVM; stats: StatsVM; actions: HudActions };
   /** The payroll panel (hire, fire, paint patrol zones). Only rendered while `staff.open`. */
   Staff: { staff: StaffVM; actions: HudActions };
@@ -117,7 +118,7 @@ export interface SlotPropsMap {
   Coach: { coach: CoachVM; anchor: Rect | null; panel?: Rect | null; avoid?: Rect[]; layout: LayoutVM; actions: HudActions };
   /** The small "New!" card that comes with a level-up. */
   UnlockCard: { unlock: UnlockCardVM; actions: HudActions };
-  /** Help ▸ How to play: one window. `actions.closeHelp()`, and `actions.coachReplay()` for "Replay tutorial". */
+  /** Help ▸ How to play: one window. `actions.closeHelp()`, and `actions.coachReplay()` for "Replay tutorial", `actions.openBox()` for "Take the box off the shelf again" (FLT-95). */
   HowToPlay: { help: HelpVM; actions: HudActions };
   /** The R&D multiplier, era and the Arena. Also gets the Release Leapfrog data, so a skin can host the leaderboard in a tab (Frontier 95's Task Mangler does): compose `useSlots().Benchmarks`. */
   Arena: { arena: ArenaVM; leapfrog: LeapfrogVM; layout: LayoutVM; actions: HudActions };
@@ -131,6 +132,13 @@ export interface SlotPropsMap {
    * until `factions.open` (`actions.toggleFactions()`). Docked; only rendered once `factions.enabled` and `visible.factions`.
    */
   Factions: { factions: FactionsVM; layout: LayoutVM; actions: HudActions };
+  /**
+   * FLT-69: the Bird App. Folded to `birdapp.headline` (and the Aura) until `birdapp.open` (`actions.toggleBirdApp()`);
+   * open, the live timeline with its numbers ticking up, the landed log, every poster's banger↔cancel meter and three
+   * levers (`actions.setBirdLever(id, lever)`, the trade-off printed on each), and the Comms desk's queue. Docked;
+   * only rendered once `birdapp.enabled` and `visible.birdapp`.
+   */
+  BirdApp: { birdapp: BirdAppVM; layout: LayoutVM; actions: HudActions };
   /** The launch livestream mishap card (the dog, the wrong chart). Opens instead of EventCard for `event.kind === "stream"`; answer it with `actions.choose`. */
   Livestream: { event: EventVM; stream: StreamVM; actions: HudActions };
   /** The Hearing (FLT-21): a senator's question at the witness table (three senators, the Trust and Capture meters, answers that show what they move), and the gavel with the verdict. Opens instead of EventCard for `event.kind === "hearing"`; answer with `actions.choose`. */
@@ -169,7 +177,7 @@ export interface SlotPropsMap {
    * `factions.statement.costText` and is off while `!factions.statement.ready`.
    */
   GateLegend: { factions: FactionsVM; actions: HudActions };
-  SkinPicker: { skins: SkinPickerVM; actions: HudActions };
+  SkinPicker: { skins: SkinPickerVM; actions: HudActions; /** FLT-76: for the "Slow down for bad news" box next to Reduce motion. */ speed?: SpeedVM };
   Outcome: { outcome: OutcomeVM; actions: HudActions };
   /**
    * How the lab ended (FLT-11): the Frontier Times front page, the run summary and the share card. Modal; time is held.
@@ -217,13 +225,13 @@ export interface SlotPropsMap {
    * (`unread`: a dot and the count). `actions.openTray(id)`. Docked; null while `tray` is empty.
    */
   WindowTray: { tray: TrayItemVM[]; layout: LayoutVM; actions: HudActions };
-  /** Today's Drama while `drama.open`: the newest pack, the archive, Play (`actions.playDrama(id)`, a new lab) and switch off (`actions.removeMod(on.id)`). `drama.intro` is the "now playing" card for a pack that has just loaded. Close with `actions.closeDrama()`. */
+  /** Today's Drama while `drama.open`: the newest pack, the archive, "Add to my lab" (`actions.playDrama(id)`: into the lab on screen, no reload; `drama.adding` while it fetches, `drama.problem` if it didn't) and Remove (`actions.removeMod(on.id)`). `drama.intro` is the "on air" card for a lab that started with a pack. Close with `actions.closeDrama()`. */
   Drama: { drama: DramaVM; actions: HudActions };
   /**
-   * "Welcome back" (FLT-65), while `saves.welcome` is set: `actions.continueSave()` loads the autosave, `actions.dismissWelcome()`
-   * plays the new lab behind it. Modal; time is held.
+   * "Welcome back" (FLT-65), while `saves.welcome` is set: `actions.continueSave()` loads it (the newest save, from `welcome.slot`), `actions.dismissWelcome()`
+   * plays the new lab behind it. Modal; time is held. `actions.openBox()` (FLT-95) goes back to the software shelf.
    */
-  Welcome: { welcome: SaveSummaryVM; saves: SavesVM; actions: HudActions };
+  Welcome: { welcome: WelcomeVM; saves: SavesVM; actions: HudActions };
   /**
    * The Save/Load window (FLT-65), drawn while `saves.open`, `saves.modPrompt` or `saves.dragging`: the slots (`saveTo`, `loadFrom`,
    * `deleteSave`, `exportSave`), Export and Import (`exportSave("current")`, `importSave(file)`), the question about a save's mods
@@ -243,4 +251,6 @@ export interface LoadedSkin {
   slots: SlotComponents;
   /** Base strings with the skin's overrides. */
   strings: Record<string, string>;
+  /** FLT-73: the skin's default CRT tube (skin.json `crt`); absent means off. */
+  crt?: "off" | "subtle" | "full";
 }

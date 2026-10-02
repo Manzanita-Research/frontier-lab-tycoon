@@ -8,7 +8,7 @@
 // Effect actions do the impure part through the Sim service and report back with SYNCED, which is where card and
 // outcome changes move the machine. Player input is just an event: choosing a card is `CHOOSE`, and the machine
 // forwards it into the sim as a `chooseEvent` command on the next tick.
-import { Clock, Effect, Option, Schema, Stream } from "effect";
+import { Cause, Clock, Effect, Option, Schema, Stream } from "effect";
 import { fromEffectEventStream, setupEffect } from "@xstate/effect";
 import type { Command } from "../sim/commands";
 import { dailySeed } from "../sim/daily";
@@ -17,9 +17,14 @@ import type { GameState, NewsItem, OpenEvent, Outcome, Tone } from "../sim/types
 import { Frames } from "./frames";
 import type { Snapshot, Speed, Tool, UiSelection, UiToast } from "./hud";
 import { gateToasts, mergeWire, newGate, WIRE_MAX, type NoticeGate, type WireItem } from "./notices";
+import { enqueue, newMoments, NO_STAGE, release, spot, stageOf, type MomentQueue, type Queued, type Seen, type StageView } from "./moments";
+import { lookOf, marksOf, sharpNews, slowText, type Marks } from "./badNews";
 import { Sim, type SyncReport } from "./sim";
 import { Saves, type SaveWhy } from "./saves";
+import { Door } from "./door";
+import { describe, maySnag, SNAG_TEXT, SNAG_TOAST_MS, snagReport } from "./snag";
 import type { SlotId } from "../save";
+import type { GameDefinition } from "../mods/game-definition";
 
 export { TICKS_PER_SECOND };
 export const MAX_CATCHUP_TICKS = 40;
@@ -29,6 +34,54 @@ export const TOAST_MS = 5200;
 export const BATCH_TOAST_MS = 9000;
 /** The autosave runs when the calendar turns a month (30 game days: three minutes at 1×). */
 export const AUTOSAVE_DAYS = 30;
+
+/**
+ * FLT-81: an action that throws must not take the app down with it. XState ends an actor whose action fails, and drops
+ * every event after that without a word: the clock stops, ▶ and Save do nothing, and only a reload helps. So each action
+ * owns its failure: the cause goes to the console (the first time, then at 10, 100, ... so a bug that fires every frame
+ * cannot flood it), and the app carries on. The next frame tries again.
+ * FLT-84: and the player hears about it, once a minute at most, with the details to copy into a bug report (`SNAG`).
+ */
+const survive = <R>(name: string, self: { send: (event: { type: "SNAG"; report: string; now: number }) => void }, effect: Effect.Effect<void, never, R>) =>
+  effect.pipe(
+    Effect.catchCause((cause) =>
+      Effect.gen(function* () {
+        reportFailure(name, cause);
+        const sim = yield* Effect.serviceOption(Sim);
+        const now = yield* Clock.currentTimeMillis;
+        // The report is best effort: a second failure here must not be the one that ends the actor.
+        try {
+          const w = Option.isSome(sim) ? sim.value.world : null;
+          self.send({ type: "SNAG", report: snagReport({ where: name, ...describe(Cause.squash(cause)), seed: w?.seed ?? 0, tick: w?.tick ?? 0, day: w?.day ?? 0 }), now });
+        } catch {
+          /* the console has it */
+        }
+      }),
+    ),
+  );
+
+/**
+ * FLT-76: the moment queue and the bad-news check run inside SYNCED, a transition, where `survive()` cannot reach. If one
+ * throws, it goes to the console like an action's failure and the report goes through as it did before FLT-76 (every
+ * beat at once, no slowdown), rather than end the actor and leave the watchdog to restart it five times a second.
+ */
+function guarded<T>(name: string, f: () => T, fallback: T): T {
+  try {
+    return f();
+  } catch (e) {
+    reportFailure(name, Cause.die(e));
+    return fallback;
+  }
+}
+
+const failures = new Map<string, number>();
+function reportFailure(name: string, cause: Cause.Cause<unknown>) {
+  const pretty = Cause.pretty(cause);
+  const key = `${name}: ${pretty.split("\n")[0]}`;
+  const n = (failures.get(key) ?? 0) + 1;
+  failures.set(key, n);
+  if (Number.isInteger(Math.log10(n))) console.error(`[app] the ${name} action failed${n > 1 ? ` (${n} times)` : ""}; the game carries on.\n${pretty}`);
+}
 
 /** A type-only schema: the context carries these shapes as they are, with nothing to validate at runtime. */
 const opaque = <T>() => Schema.declare<T>((_value): _value is T => true);
@@ -70,10 +123,28 @@ export const AppContext = Schema.Struct({
   zone: Schema.NullOr(Schema.Number),
   /** Independently owned menus: closing one cannot resume time beneath another. */
   overlays: opaque<readonly string[]>(),
+  /** FLT-76: the big moments waiting their turn (see `moments.ts`), and what the HUD keeps back meanwhile. */
+  moments: opaque<MomentQueue>(),
+  stage: opaque<StageView>(),
+  /** A new lab or a load: the next snapshot is a different World, so nothing in it is a moment or bad news. */
+  rebased: Schema.Boolean,
+  /** FLT-76: "Slow down for bad news" (a setting, on by default), and the marks it measures from (see `badNews.ts`). */
+  slowForBadNews: Schema.Boolean,
+  marks: opaque<Marks>(),
+  /** When the last snag toast went up (FLT-84, Clock milliseconds), so there is at most one a minute. */
+  snagAt: Schema.NullOr(Schema.Number),
+  /** The speed an agent's run for the fence (FLT-59) dropped the game from to 1x, restored when the chase is over. */
+  chaseSpeed: opaque<Speed | null>(),
 });
 export type AppContext = typeof AppContext.Type;
 
-export const AppInput = Schema.Struct({ speed: opaque<Speed>(), first: opaque<SyncReport>() });
+/** `snagAt` carries the snag toasts' minute across a watchdog restart (FLT-84). */
+export const AppInput = Schema.Struct({
+  speed: opaque<Speed>(),
+  first: opaque<SyncReport>(),
+  slowForBadNews: Schema.optional(Schema.Boolean),
+  snagAt: Schema.optional(Schema.NullOr(Schema.Number)),
+});
 export type AppInput = typeof AppInput.Type;
 
 /** The animation frames, as machine events. */
@@ -121,8 +192,32 @@ function interrupted(before: AppContext, after: AppContext): boolean {
   return false;
 }
 
-/** The same words twice are one toast (the newer replaces the older); the HUD shows only the newest, so keep just a few. */
-const merged = (old: readonly UiToast[], fresh: readonly UiToast[]) => [...old.filter((t) => !fresh.some((f) => f.text === t.text)), ...fresh].slice(-3);
+/**
+ * An agent running for the fence (FLT-59) drops the game to 1x so the player can catch it, and the speed comes back when
+ * the chase is over. Touching the speed or the pause button in between is the player's call: the old speed is forgotten.
+ */
+export function chaseSpeedOf(c: Pick<AppContext, "speed" | "chaseSpeed">, chase: boolean): Pick<AppContext, "speed" | "chaseSpeed"> {
+  if (chase && c.chaseSpeed === null && c.speed > 1) return { speed: 1 as Speed, chaseSpeed: c.speed };
+  if (!chase && c.chaseSpeed !== null) return { speed: c.chaseSpeed, chaseSpeed: null };
+  return { speed: c.speed, chaseSpeed: c.chaseSpeed };
+}
+
+/**
+ * The same words twice are one toast (the newer replaces the older); the HUD shows only the newest, so keep just a few.
+ * A pinned toast (FLT-76: why the game slowed down) stays, last, until it is dismissed.
+ */
+const merged = (old: readonly UiToast[], fresh: readonly UiToast[]) => {
+  const all = [...old.filter((t) => !fresh.some((f) => f.text === t.text)), ...fresh];
+  return [...all.filter((t) => !t.pinned).slice(-3), ...all.filter((t) => t.pinned)];
+};
+/** Start the toasts' clocks (a pinned one has none). */
+const startTimers = (enq: { raise: (event: { type: "TOAST_EXPIRED"; id: number }, options: { id: string; delay: number }) => void }, toasts: readonly UiToast[]) => {
+  for (const t of toasts) if (!t.pinned) enq.raise({ type: "TOAST_EXPIRED", id: t.id }, { id: `toast:${t.id}`, delay: lifeOf(t) });
+};
+/** What a moment is spotted from: the HUD's view and what the sim reported. */
+const seenOf = (snap: Snapshot, event: OpenEvent | null, outcome: Outcome): Seen => ({ models: snap.models, unlock: snap.unlockCard?.id ?? null, event, outcome });
+/** A card (or era) is spotted but not on screen yet: it cannot be answered. */
+const cardWaiting = (c: AppContext) => c.stage.waiting.some((k) => k === "card" || k === "era");
 /** New toasts join the queue while a beat holds them, and the screen otherwise. */
 const addToasts = (c: AppContext, fresh: readonly UiToast[]): AppContext => (c.held ? { ...c, held: merged(c.held, fresh) } : { ...c, toasts: merged(c.toasts, fresh) });
 
@@ -146,8 +241,8 @@ export const appMachine = setupEffect({
       CHOOSE: Schema.Struct({ choiceIndex: Schema.Number }),
       KEEP_PLAYING: Schema.Struct({}),
       NEW_LAB: Schema.Struct({}),
-      /** Carry on from a save (FLT-65): the decoded World replaces the live one. */
-      LOAD_LAB: Schema.Struct({ world: opaque<GameState>() }),
+      /** Carry on from a save (FLT-65): the decoded World replaces the live one, run with `def` (FLT-78: its mods may differ). */
+      LOAD_LAB: Schema.Struct({ world: opaque<GameState>(), def: opaque<GameDefinition | null>() }),
       /** Write the World to a save slot now: the autosave (`why`: month, hide, ending) or a slot the player picked. */
       SAVE: Schema.Struct({ slot: opaque<SlotId>(), why: opaque<SaveWhy>() }),
       /** Today's lab: a new lab on the date's seed ("2026-09-30"), the same campus for everyone that day. */
@@ -166,15 +261,21 @@ export const appMachine = setupEffect({
       /** Start (or stop, with null) painting a staffer's patrol zone. */
       SET_ZONE: Schema.Struct({ id: Schema.NullOr(Schema.Number) }),
       SET_OVERLAY: Schema.Struct({ id: Schema.String, open: Schema.Boolean }),
+      /** The "Slow down for bad news" setting (FLT-76). */
+      SET_SLOW_FOR_BAD_NEWS: Schema.Struct({ on: Schema.Boolean }),
       DISMISS_TOAST: Schema.Struct({ id: Schema.Number }),
       TOAST_EXPIRED: Schema.Struct({ id: Schema.Number }),
+      /** A guard caught an error and the game carried on (FLT-84): `report` is what "Copy details" copies. */
+      SNAG: Schema.Struct({ report: Schema.String, now: Schema.Number }),
+      /** FLT-95: back to the software shelf (Help ▸ "Take the box off the shelf again"). */
+      TO_BOX: Schema.Struct({}),
     },
   },
   actors: { frameLoop },
   actions: {
     /** Run `n` ticks (commands on the first), then report. */
     advance: (args) =>
-      Effect.gen(function* () {
+      survive("advance", args.self, Effect.gen(function* () {
         const sim = yield* Sim;
         const p = args.params as { n: number; commands: readonly Command[]; alpha: number; publish: boolean; now: number; ui: UiSelection };
         sim.ui = p.ui;
@@ -182,10 +283,10 @@ export const appMachine = setupEffect({
         sim.alpha = p.alpha;
         const report = sim.report(p.publish);
         if (report) args.self.send({ type: "SYNCED", report, now: p.now });
-      }),
+      })),
     /** Time stands still: apply what was queued, then report. */
     hold: (args) =>
-      Effect.gen(function* () {
+      survive("hold", args.self, Effect.gen(function* () {
         const sim = yield* Sim;
         const p = args.params as { commands: readonly Command[]; publish: boolean; now: number; ui: UiSelection };
         sim.ui = p.ui;
@@ -193,10 +294,10 @@ export const appMachine = setupEffect({
         sim.applyNow(p.commands);
         const report = sim.report(p.publish);
         if (report) args.self.send({ type: "SYNCED", report, now: p.now });
-      }),
+      })),
     /** A new lab, seeded from the clock and the old seed. */
     newLab: (args) =>
-      Effect.gen(function* () {
+      survive("newLab", args.self, Effect.gen(function* () {
         const sim = yield* Sim;
         const ms = yield* Clock.currentTimeMillis;
         const daily = args.event.type === "DAILY_LAB" ? args.event.daily : null;
@@ -205,28 +306,40 @@ export const appMachine = setupEffect({
         else sim.reset(seed, daily);
         const report = sim.report(true, true);
         if (report) args.self.send({ type: "SYNCED", report, now: 0 });
-      }),
+      })),
     /** A save's World becomes the live one. */
     loadLab: (args) =>
-      Effect.gen(function* () {
+      survive("loadLab", args.self, Effect.gen(function* () {
         const sim = yield* Sim;
         if (args.event.type !== "LOAD_LAB") return;
-        sim.load(args.event.world);
+        sim.load(args.event.world, args.event.def);
         const report = sim.report(true, true);
         if (report) args.self.send({ type: "SYNCED", report, now: 0 });
-      }),
+      })),
     /**
      * Save the World as it stands (copied in one synchronous stringify, so ticks can carry on while it compresses).
      * Without a Saves service (tests, a headless shell) this does nothing.
      */
     save: (args) =>
-      Effect.gen(function* () {
+      survive("save", args.self, Effect.gen(function* () {
         const saves = yield* Effect.serviceOption(Saves);
         if (Option.isNone(saves)) return;
         const sim = yield* Sim;
         const p = args.params as { slot: SlotId; why: SaveWhy };
         yield* saves.value.save(sim.world, p.slot, p.why, (text, tone) => args.self.send({ type: "TOAST", text, tone }));
-      }),
+      })),
+    /**
+     * FLT-95: leave for the box, autosaving first (as if the tab were hidden), so the lab is there on the way back in.
+     * Without a Door (tests, a headless shell) there is nowhere to go, so nothing happens.
+     */
+    toBox: (args) =>
+      survive("toBox", args.self, Effect.gen(function* () {
+        const door = yield* Effect.serviceOption(Door);
+        if (Option.isNone(door)) return;
+        const saves = yield* Effect.serviceOption(Saves);
+        if (Option.isSome(saves)) yield* saves.value.save((yield* Sim).world, "auto", "hide", (text, tone) => args.self.send({ type: "TOAST", text, tone }));
+        yield* Effect.sync(door.value.toBox);
+      })),
   },
 }).createMachine({
   context: ({ input }) => ({
@@ -252,6 +365,13 @@ export const appMachine = setupEffect({
     highlight: null,
     zone: null,
     overlays: [],
+    moments: newMoments(),
+    stage: NO_STAGE,
+    rebased: false,
+    slowForBadNews: input.slowForBadNews ?? true,
+    marks: marksOf(lookOf(input.first.snap!)),
+    snagAt: input.snagAt ?? null,
+    chaseSpeed: null,
   }),
   invoke: { src: "frameLoop" },
   initial: "playing",
@@ -296,20 +416,59 @@ export const appMachine = setupEffect({
     SYNCED: (args, enq) => {
       const { context, event } = args;
       const { report, now } = event;
+      const snap = report.snap ?? context.snap;
+      // FLT-76: the big moments go on one at a time, a beat apart. Their own toasts (the release, an ending's) come with them.
+      const { spotted, queue: moments, out } = guarded(
+        "moments",
+        () => {
+          const spotted = context.rebased ? { moments: [], rest: report.toasts } : spot(seenOf(context.snap, context.event, context.outcome), seenOf(snap, report.event, report.outcome), report.toasts);
+          return { spotted, ...release(enqueue(context.moments, spotted.moments, now), now) };
+        },
+        { spotted: { moments: [], rest: report.toasts }, queue: context.moments, out: [] as Queued[] },
+      );
       // One policy for every notice: what is about you is a toast (one per window), the world's news is for the ticker.
-      const gated = gateToasts(context.gate, report.toasts, {
+      const gated = gateToasts(context.gate, spotted.rest, {
         now,
         day: report.snap?.day ?? context.snap.day,
         leapfrog: report.snap?.leapfrog,
         rank: report.snap ? { prev: context.snap.race.rank, next: report.snap.race.rank, top: report.snap.race.board.find((r) => r.rank === 1)?.short ?? "" } : null,
         seq: context.toastSeq,
+        // An ending has the screen to itself: the rest waits.
+        shut: now < moments.soloUntil,
       });
-      const fresh = gated.toasts;
+      let seq = gated.seq;
+      // FLT-76: at ▶▶ or ▶▶▶, sharp bad news drops the game to 1× and pins a toast that says why.
+      // A chase (FLT-59) drops it to 1× too and gives the speed back after: bad news is measured from then, as from any speed-up.
+      let { speed, queue, marks, chaseSpeed } = context;
+      const slowed: UiToast[] = [];
+      if (report.snap) {
+        const look = report.snap;
+        ({ speed, chaseSpeed } = chaseSpeedOf(context, !!look.escape?.chase));
+        const sharp = guarded("badNews", () => sharpNews(context.marks, lookOf(look), context.slowForBadNews && context.speed > 1 && speed > 1 && !context.rebased), { marks: context.marks, lines: [] });
+        marks = sharp.marks;
+        if (sharp.lines.length > 0) {
+          speed = 1;
+          chaseSpeed = null;
+          queue = [...queue, { type: "setPace", speed: 1 }];
+          slowed.push({ id: 1_000_000 + seq++, text: slowText(sharp.lines), tone: "bad", importance: "you", pinned: true });
+        }
+      }
+      const fresh = [...gated.toasts, ...out.flatMap((m) => m.toasts), ...slowed];
+      // An ending clears the screen for itself. A snag toast (FLT-84) stays: it is the app owning up to an error, with a button, not the game's news.
+      const ending = out.some((m) => m.kind === "ending");
+      if (ending) for (const t of context.toasts) if (!t.snag) enq.cancel(`toast:${t.id}`);
       const wire = gated.wire.length > 0 ? [...context.wire, ...gated.wire].slice(-WIRE_MAX) : context.wire;
       const next: AppContext = {
-        ...addToasts(context, fresh),
+        ...addToasts(ending ? { ...context, toasts: context.toasts.filter((t) => t.snag) } : context, fresh),
         gate: gated.gate,
-        toastSeq: gated.seq,
+        toastSeq: seq,
+        moments,
+        stage: guarded("stage", () => stageOf(moments, now, context.stage), context.stage),
+        rebased: context.rebased && !report.snap,
+        speed,
+        chaseSpeed,
+        queue,
+        marks,
         event: report.event,
         outcome: report.outcome,
         // A new outcome is shown even if the last one was waved away (won, kept playing, and now an ending's front page).
@@ -324,7 +483,7 @@ export const appMachine = setupEffect({
         // The staffer whose zone was being painted has been let go.
         ...(report.snap && context.zone !== null && !report.snap.ops.staff.some((o) => o.id === context.zone) ? { zone: null } : {}),
       };
-      if (!context.held) for (const t of fresh) enq.raise({ type: "TOAST_EXPIRED", id: t.id }, { id: `toast:${t.id}`, delay: t.batch ? BATCH_TOAST_MS : TOAST_MS });
+      if (!context.held) startTimers(enq, fresh);
       // The autosave: each new month, and the moment the lab ends (won, lost, or one of the endings' front pages).
       // A month is the calendar turning by one; a jump (a save loading, a new lab) is not the player's month ending.
       const why: SaveWhy | null = report.outcome !== "playing" && report.outcome !== context.outcome && context.outcome === "playing" ? "ending"
@@ -339,11 +498,14 @@ export const appMachine = setupEffect({
       if (saw) queue.push({ type: "coachSaw", what: "speed" });
       // The card budget (FLT-54) is counted in game days; the sim hears the speed so a card stays ~20 real seconds from the last.
       if (event.speed > 0 && event.speed !== context.speed) queue.push({ type: "setPace", speed: event.speed });
-      const next = { ...context, speed: event.speed, queue };
+      // Bad news is measured from here (FLT-76); speeding up again is "seen it": the pinned toast goes.
+      const marks = event.speed === context.speed ? context.marks : marksOf(lookOf(context.snap));
+      const toasts = event.speed > 1 ? context.toasts.filter((t) => !t.pinned) : context.toasts;
+      const next = { ...context, speed: event.speed, chaseSpeed: null, queue, marks, toasts };
       return { context: next, target: phaseFor(next) };
     },
     TOGGLE_PAUSE: ({ context }) => {
-      const next = { ...context, speed: (context.speed === 0 ? 1 : 0) as Speed };
+      const next = { ...context, speed: (context.speed === 0 ? 1 : 0) as Speed, chaseSpeed: null };
       return { context: next, target: phaseFor(next) };
     },
     SET_TOOL: ({ context, event }) => {
@@ -361,6 +523,7 @@ export const appMachine = setupEffect({
       const next = { ...held, overlays, queue, speed: build && context.snap.firstBuildPending ? 1 as Speed : context.speed };
       return { context: next, target: phaseFor(next) };
     },
+    SET_SLOW_FOR_BAD_NEWS: ({ context, event }) => ({ context: { ...context, slowForBadNews: event.on, marks: marksOf(lookOf(context.snap)) } }),
     SET_ZONE: ({ context, event }) => ({ context: { ...context, zone: event.id === context.zone ? null : event.id, tool: null, hover: null } }),
     SET_HOVER: ({ context, event }) => {
       if (context.hover?.x === event.hover?.x && context.hover?.z === event.hover?.z) return;
@@ -376,7 +539,8 @@ export const appMachine = setupEffect({
     PLACE: ({ context, event }) => ({ context: { ...(event.keep ? context : endMode(context)), queue: [...context.queue, event.command], lastPublishAt: 0 } }),
     CHOOSE: ({ context, event }) => {
       // A greyed-out choice (a bid you can't afford) can't be taken by key either.
-      if (!context.event || context.snap.eventBlocked?.[event.choiceIndex]) return;
+      // ...and nor can a card that is still waiting its turn (FLT-76): it is not on screen yet.
+      if (!context.event || context.snap.eventBlocked?.[event.choiceIndex] || cardWaiting(context)) return;
       const command: Command = { type: "chooseEvent", eventId: context.event.id, choiceIndex: event.choiceIndex };
       return { context: { ...context, queue: [...context.queue, command] } };
     },
@@ -413,10 +577,22 @@ export const appMachine = setupEffect({
     SAVE: (args, enq) => {
       enq(args.actions.save, { ...args, params: { slot: args.event.slot, why: args.event.why } });
     },
+    TO_BOX: (args, enq) => {
+      enq(args.actions.toBox, args);
+    },
     TOAST: ({ context, event }, enq) => {
       const id = 1_000_000 + context.toastSeq;
       if (!context.held) enq.raise({ type: "TOAST_EXPIRED", id }, { id: `toast:${id}`, delay: TOAST_MS });
       return { context: { ...addToasts(context, [{ id, text: event.text, tone: event.tone }]), toastSeq: context.toastSeq + 1 } };
+    },
+    // One toast a minute at most, and never two at once: a new snag replaces the one showing (FLT-84).
+    SNAG: ({ context, event }, enq) => {
+      if (!maySnag(context.snagAt, event.now)) return;
+      const id = 1_000_000 + context.toastSeq;
+      const toast: UiToast = { id, text: SNAG_TEXT, tone: "bad", snag: event.report };
+      const calm = { ...context, toasts: context.toasts.filter((t) => !t.snag), held: context.held && context.held.filter((t) => !t.snag) };
+      if (!context.held) enq.raise({ type: "TOAST_EXPIRED", id }, { id: `toast:${id}`, delay: SNAG_TOAST_MS });
+      return { context: { ...addToasts(calm, [toast]), toastSeq: context.toastSeq + 1, snagAt: event.now } };
     },
     HOLD_TOASTS: ({ context, event }, enq) => {
       if (event.on === !!context.held) return;
@@ -426,7 +602,7 @@ export const appMachine = setupEffect({
         return { context: { ...context, toasts: [], held: context.toasts } };
       }
       const held = context.held ?? [];
-      for (const t of held) enq.raise({ type: "TOAST_EXPIRED", id: t.id }, { id: `toast:${t.id}`, delay: t.batch ? BATCH_TOAST_MS : TOAST_MS });
+      startTimers(enq, held);
       return { context: { ...context, toasts: merged(context.toasts, held), held: null } };
     },
     DISMISS_TOAST: ({ context, event }, enq) => {
@@ -440,8 +616,11 @@ export const appMachine = setupEffect({
   },
 });
 
+/** How long a toast stays up: a batch summary is a list to read, a snag has a button to reach for. */
+const lifeOf = (t: UiToast) => (t.snag ? SNAG_TOAST_MS : t.batch ? BATCH_TOAST_MS : TOAST_MS);
+
 /** The app's side of a new lab: nothing queued, nothing selected, running at 1x. */
-const freshLab = (context: AppContext): AppContext => ({ ...context, queue: [], acc: 0, toasts: [], held: null, gate: newGate(), wire: [], headlines: [], outcomeDismissed: false, speed: 1, tool: null, hover: null, selected: null, follow: false, highlight: null, zone: null, overlays: [] });
+const freshLab = (context: AppContext): AppContext => ({ ...context, queue: [], acc: 0, toasts: [], held: null, gate: newGate(), wire: [], headlines: [], outcomeDismissed: false, speed: 1, tool: null, hover: null, selected: null, follow: false, highlight: null, zone: null, overlays: [], moments: newMoments(), stage: NO_STAGE, rebased: true, chaseSpeed: null });
 
 /** The selection as the sim handle wants it. */
 const uiOf = (c: AppContext): UiSelection => ({ selected: c.selected, follow: c.follow, highlight: c.highlight });

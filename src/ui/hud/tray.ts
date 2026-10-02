@@ -23,7 +23,7 @@ export function wantsOf(vm: HudVM, arenaCall: string | null): Want[] {
 
 /** Headlines about each panel newer than the last one the player saw with it open. */
 export function unreadOf(news: readonly NewsItem[], seen: Partial<Record<NewsPanel, number>>): Record<NewsPanel, number> {
-  const out: Record<NewsPanel, number> = { arena: 0, papers: 0, factions: 0 };
+  const out: Record<NewsPanel, number> = { arena: 0, papers: 0, factions: 0, birdapp: 0 };
   for (const n of news) if (n.panel && n.id > (seen[n.panel] ?? -1)) out[n.panel]++;
   return out;
 }
@@ -63,6 +63,8 @@ export function windowed(vm: HudVM, budget: Budget, unread: Record<NewsPanel, nu
     arena: { ...vm.arena, open: arenaOpen, auto: vm.arena.open ? vm.arena.auto : arenaOpen, unread: arenaOpen ? 0 : unread.arena },
     papers: { ...vm.papers, unread: vm.papers.open ? 0 : unread.papers },
     factions: { ...vm.factions, unread: vm.factions.open ? 0 : unread.factions },
+    // The Bird App never opens itself: its button already sits on the taskbar, so it only carries the count.
+    birdapp: { ...vm.birdapp, unread: vm.birdapp.open ? 0 : unread.birdapp },
     newsroom: { ...vm.newsroom, arrival: up("news", vm.newsroom.arrival !== null) ? vm.newsroom.arrival : null },
     unlock: up("unlock", vm.unlock !== null) ? vm.unlock : null,
     paperMoment: up("paper", vm.paperMoment !== null) ? vm.paperMoment : null,

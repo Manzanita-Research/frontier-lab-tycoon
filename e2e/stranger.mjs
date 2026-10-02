@@ -1,7 +1,9 @@
 import { chromium } from "playwright";
 import { mkdir, writeFile } from "node:fs/promises";
+import { throughTheBox } from "./box.mjs";
 
-// A stranger opens the preview with no params and clicks only what the coach points at. Every check is measured in
+// A stranger opens the preview with no params, plays the box on the shelf (FLT-95: a first visit's front door), and then
+// clicks only what the coach points at. Every check is measured in
 // game time (the probe's tick), so a slow runner that draws fewer frames still plays the same game. Wall-clock limits
 // are only timeouts: a frozen world still fails, because its game time never moves.
 const at = process.argv.indexOf("--url");
@@ -66,6 +68,9 @@ async function press(target) {
 
 try {
   await page.goto(url.href, { waitUntil: "networkidle", timeout: 120_000 });
+  result.box = await throughTheBox(page);
+  if (result.box.door !== "box") throw new Error("A first visit to the bare root must open on the box");
+  if (errors.length) throw new Error(`Console errors in the box: ${errors.join("; ")}`);
   await page.waitForFunction(() => typeof window.__fltProbe === "function", { timeout: 60_000 });
   const first = await page.evaluate(() => window.__fltProbe());
   if (first.speed !== 1 || !first.paused) throw new Error("Opening must be paused at 1×");
@@ -136,6 +141,16 @@ try {
     }
     if (now - firstClick > WALL_CAP) throw new Error(`Timed out after ${WALL_CAP / 60_000} minutes at game day ${days(probe).toFixed(2)} (coach ${probe.coachId}); passed so far: ${Object.keys(result.checks).join(", ") || "none"}`);
 
+    // FLT-76: the first decision (the Logo) opens while the first model trains and stops the clock until it is answered.
+    // A stranger reads it and picks the first choice, like anyone would; a card still waiting its turn is left alone.
+    if (probe.event && !(probe.stage ?? []).length && now - lastClick >= 600) {
+      const choice = page.locator("[role=dialog]:visible, [role=alertdialog]:visible").last().locator(".f95-choices button, button.choice, .choices button").first();
+      if (await choice.count()) {
+        result.cards = [...(result.cards ?? []), { id: probe.event, ...stamp(probe) }];
+        await press(choice);
+        lastClick = Date.now();
+      }
+    }
     // Training waits for release; runway/goals wait for their timers. Start, construction marks, ▶▶ and the researcher
     // the coach points at (FLT-58) ask for a click.
     if (now - lastClick >= 600 && ["start", "path", "hall", "speed", "peek", "gateway"].includes(probe.coachId)) {

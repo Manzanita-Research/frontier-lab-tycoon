@@ -1,12 +1,16 @@
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import { Vector3 } from "three";
-import { registry, sim } from "../app/game";
+import { appNow, registry, sim } from "../app/game";
+import { pauseReasonOf } from "../app/machine";
 import { createWatch } from "../render/fx/watch";
 import { fx } from "../render/fx/state";
 import { worldX, worldZ } from "../render/coords";
 import { modSession } from "../app/mods";
-import { SoundKit, synthNotes } from "./SoundKit";
+import { skinUiAtom } from "../ui/hud/state";
+import { Band, renderMusic } from "./Band";
+import { MODES, flavourFor } from "./music";
+import { SoundKit, musicFor, synthNotes } from "./SoundKit";
 import { audioReadyAtom, bindSound, mixerAtom } from "./state";
 import { soundCues, soundSnapshot } from "./world";
 import { CUES, HOOKS } from "./score";
@@ -45,6 +49,26 @@ export function SoundLayer() {
           for (const x of data) { energy += x * x; peak = Math.max(peak, Math.abs(x)); }
           return { cue, variation, rms: Math.sqrt(energy / data.length), peak, duration: buffer.duration };
         },
+        // FLT-66: the band's own main-thread cost, away from the scene: a pump per 60 Hz frame for `seconds` of each mode.
+        benchMusic: (seconds = 30, skin = "base") => Object.fromEntries(MODES.map((mode) => {
+          const ctx = new OfflineAudioContext(1, 48000, 48000);
+          const band = new Band(ctx, ctx.destination, { mode, flavour: flavourFor(skin), era: "1" });
+          const ms: number[] = [];
+          for (let t = 0; t < seconds; t += 1 / 60) { const t0 = performance.now(); band.pump(t, 0.3); ms.push(performance.now() - t0); }
+          ms.sort((a, b) => a - b);
+          const at = (q: number) => ms[Math.min(ms.length - 1, Math.floor(q * ms.length))]!;
+          return [mode, { meanMs: ms.reduce((a, b) => a + b, 0) / ms.length, p50: at(0.5), p99: at(0.99), maxMs: ms.at(-1)!, voicesPerSecond: band.costReport()[mode]!.voicesPerSecond }];
+        })),
+        // FLT-66: the band rendered offline (`[{ at: 0, mode: "zoomies" }]`, seconds, skin), as base64 float32 samples for a WAV.
+        // FLT-80: `solo: "choir"` renders the zoomies choir on its own, for the words check.
+        modes: MODES,
+        renderMusic: async (takes: { at: number; mode: (typeof MODES)[number] }[], seconds: number, skin = "base", era = "1", solo?: "choir") => {
+          const buffer = await renderMusic(takes, seconds, { flavour: flavourFor(skin), era }, undefined, undefined, solo);
+          const bytes = new Uint8Array(buffer.getChannelData(0).buffer);
+          let binary = "";
+          for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+          return { sampleRate: buffer.sampleRate, float32: btoa(binary) };
+        },
       } });
     }
     return () => {
@@ -74,6 +98,7 @@ export function SoundLayer() {
         case "reset": Object.assign(last.current, soundSnapshot(world)); break;
       }
     }
+    sound.play();
     if (clock.elapsedTime - last.current.sample < 0.2) return;
     last.current.sample = clock.elapsedTime;
     const now = soundSnapshot(world);
@@ -97,7 +122,12 @@ export function SoundLayer() {
       sound.cue("protest.grow");
     }
     last.current.protesters = protesters;
-    sound.update({ crowd: Math.min(1, density / 60), protesters, training: running ? training.progress / training.cost : null, night: fx.night, era });
+    // FLT-66: the band naps when the player pauses or a card is on the table. A menu or the first-build wait holds the
+    // clock too, but that is plumbing, not a mood: the music the player was hearing plays on.
+    const app = appNow();
+    const reason = app && pauseReasonOf(app);
+    const music = musicFor(app?.speed ?? 1, reason === "player" || reason === "card", registry.get(skinUiAtom).active);
+    sound.update({ crowd: Math.min(1, density / 60), protesters, training: running ? training.progress / training.cost : null, night: fx.night, era, ...music });
   });
   return null;
 }

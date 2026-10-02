@@ -5,6 +5,7 @@ export { Portrait } from "./Portrait";
 export { Senator } from "./Senator";
 export { Dialog } from "./Dialog";
 export { ImportButton } from "./ImportButton";
+export { SnagCopy } from "./SnagCopy";
 export { DramaIcon } from "./DramaIcon";
 export { SpeedGlyph } from "./SpeedGlyph";
 export { money } from "./format";
@@ -22,3 +23,5 @@ export { FactionChip, FactionMeter, StanceTrack, factionAttrs } from "./Factions
 export { facilityGroups, coachInFacilities, useStartMenu, useWidget, runFile, type FacilityGroup, type RunResult, type StartView } from "./launcher";
 export { RunBox, useRunBox, type RunBoxState } from "./RunBox";
 export { useJumpTo } from "./jump";
+export { anchor, door, standsFor, useWhere, whereOf } from "./anchor";
+export { AuraSpark, BIRD_SIDES, BirdCounts, BirdFilter, BirdLabChip, BirdMeter, BirdPostCard, onSide, sideOf, type BirdSide } from "./BirdApp";

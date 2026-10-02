@@ -1,0 +1,65 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "22c7b7216462a93697b9446bff9d5bc5a8146aa1"
+  },
+  "head": {
+    "branch": "flt-96-plaza-props",
+    "sha": "2b7f73a",
+    "dirty": false
+  },
+  "seconds": 127.324,
+  "problems": [
+    "flt91-open.png: blank composite: panel 3 is 54% one colour, 8 colours",
+    "flt91-open-phone.png: blank composite: panel 3 is 59% one colour, 7 colours",
+    "flt96-plaza.png: blank composite: panel 3 is 59% one colour, 8 colours",
+    "flt96-plaza-hall.png: blank composite: panel 3 is 57% one colour, 10 colours"
+  ],
+  "rows": [
+    {
+      "scene": "flt91-open",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-96/before/flt91-open.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-96/after/flt91-open.png",
+      "title": "FLT-91: the first 10 seconds of a fresh garage (seed 3, the starting camera)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-96/compare/flt91-open.png",
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 54% one colour, 8 colours",
+      "error": "compare: blank composite: panel 3 is 54% one colour, 8 colours"
+    },
+    {
+      "scene": "flt91-open-phone",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-96/before/flt91-open-phone.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-96/after/flt91-open-phone.png",
+      "title": "FLT-91: the first 10 seconds on a phone (390x844)",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-96/compare/flt91-open-phone.png",
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 59% one colour, 7 colours",
+      "error": "compare: blank composite: panel 3 is 59% one colour, 7 colours"
+    },
+    {
+      "scene": "flt96-plaza",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-96/before/flt96-plaza.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-96/after/flt96-plaza.png",
+      "title": "FLT-96: the entrance plaza up close on a fresh garage (seed 3): benches, planters and the welcome sign",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-96/compare/flt96-plaza.png",
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 59% one colour, 8 colours",
+      "error": "compare: blank composite: panel 3 is 59% one colour, 8 colours"
+    },
+    {
+      "scene": "flt96-plaza-hall",
+      "skin": null,
+      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-96/before/flt96-plaza-hall.png",
+      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-96/after/flt96-plaza-hall.png",
+      "title": "FLT-96: the first Hall built against the plaza: the bench in front of its door makes way",
+      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-96/compare/flt96-plaza-hall.png",
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 57% one colour, 10 colours",
+      "error": "compare: blank composite: panel 3 is 57% one colour, 10 colours"
+    }
+  ],
+  "errors": []
+}

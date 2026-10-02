@@ -7,7 +7,7 @@ import type { SlotPropsMap } from "../types";
 import { Ico } from "./icons";
 import { Btn, Tabs, Win } from "./parts";
 import { EXAMPLE_MOD } from "../base/slots/ModManager";
-import { dramaComing } from "../base/slots/Drama";
+import { DRAMA_ADD_SMALL, dramaComing } from "../base/slots/Drama";
 import type { DramaPackVM } from "../../ui/hud/types";
 
 /** The weekly paper, in a 1996 browser. */
@@ -240,14 +240,17 @@ export function Mixer({ sound, actions }: SlotPropsMap["Mixer"]) {
   );
 }
 
-/** Control Panel ▸ Add/Remove Mods. Nothing can be added from here: in 1995 you edited the address bar, and so do you. */
+/**
+ * Control Panel ▸ Add/Remove Mods. Nothing can be added from here: in 1995 you edited the address bar, and so do you.
+ * Remove takes a data-only mod out of the lab on screen (FLT-78); one that needs a fresh start says so, and reloads.
+ */
 export function ModManager({ mods, actions }: SlotPropsMap["ModManager"]) {
   return (
     <Dialog label="Add/Remove Mods" close={actions.closeMods} layerClass="f95-layer f95-dim" dialogClass="f95-dialogbox">
       <Win className="f95-mods" title="Add/Remove Mods Properties" icon="folder" buttons={[{ g: "close", label: "Close", onClick: () => actions.closeMods() }]}>
         <div className="f95-mixbody">
           <p>
-            Mods load from the address bar: add <code>?mod=</code> and the URL of a <code>mod.json</code>, then reload. Later mods win a clash.
+            Mods load from the address bar: add <code>?mod=</code> and the URL of a <code>mod.json</code>, then reload. Later mods win a clash. Today's Drama adds its packs to the lab on screen, no reload.
           </p>
           <div className="inset f95-modlist" role="list" aria-label="Loaded mods">
             {mods.list.length === 0 ? (
@@ -259,10 +262,11 @@ export function ModManager({ mods, actions }: SlotPropsMap["ModManager"]) {
                   <b>{m.name}</b>
                   <span>{m.version}</span>
                   <span className="hash">#{m.hash}</span>
-                  <Btn className="f95-modoff" onClick={() => actions.removeMod(m.id)} title="Reloads without it: a new lab">
-                    {m.drama ? "Switch off" : "Remove"}
+                  <Btn className="f95-modoff" onClick={() => actions.removeMod(m.id)} title={m.needsRestart ? "Reloads without it: a new lab" : "Takes it out of this lab, no reload"}>
+                    {m.needsRestart ? "Remove (new lab)" : "Remove"}
                   </Btn>
                   {m.description && <small>{m.description}</small>}
+                  {m.needsRestart && <small>{m.needsRestart}</small>}
                 </div>
               ))
             )}
@@ -333,7 +337,7 @@ export function ModSkinOffer({ offer, actions }: SlotPropsMap["ModSkinOffer"]) {
 }
 
 /** One pack on the Drama channel: the story, the first headlines, what's in it. */
-function DramaStory({ pack }: { pack: DramaPackVM }) {
+function DramaStory({ pack, fromStart = false }: { pack: DramaPackVM; fromStart?: boolean }) {
   return (
     <div className="f95-drama-story inset">
       <h2>{pack.title}</h2>
@@ -345,14 +349,15 @@ function DramaStory({ pack }: { pack: DramaPackVM }) {
           ))}
         </ul>
       )}
-      <small>{dramaComing(pack)}</small>
+      <small>{dramaComing(pack, fromStart)}</small>
     </div>
   );
 }
 
 /**
- * Start ▸ Programs ▸ Today's Drama: a 1995 "channel" that pushes one small mod a day. Playing one reloads with it (a new
- * lab); the one playing is switched off here or in Add/Remove Mods. Just after a pack loads, it's the "On Air" card instead.
+ * Start ▸ Programs ▸ Today's Drama: a 1995 "channel" that pushes one small mod a day. "Add to my lab" puts it in the lab
+ * on screen (FLT-78: no reload); it comes out again here or in Add/Remove Mods. A lab that started with one (a `?mod=`
+ * link) opens on the "On Air" card instead.
  */
 export function Drama({ drama, actions }: SlotPropsMap["Drama"]) {
   const on = drama.on;
@@ -371,14 +376,14 @@ export function Drama({ drama, actions }: SlotPropsMap["Drama"]) {
           {banner("ON AIR", on.dateText)}
           <div className="f95-mixbody">
             <p className="f95-drama-now">Now playing in this lab:</p>
-            <DramaStory pack={on} />
+            <DramaStory pack={on} fromStart />
             <p>The rivals have read the news too. Your staff certainly have.</p>
           </div>
           <div className="f95-row">
             <Btn def onClick={() => actions.closeDrama()}>
               Let's go
             </Btn>
-            <Btn onClick={() => actions.removeMod(on.id)}>Switch it off</Btn>
+            <Btn onClick={() => actions.removeMod(on.id)}>Remove</Btn>
           </div>
         </Win>
       </Dialog>
@@ -391,10 +396,15 @@ export function Drama({ drama, actions }: SlotPropsMap["Drama"]) {
         <div className="f95-mixbody">
           {unlisted && (
             <p>
-              Playing <b>{on.title}</b>.{" "}
+              In your lab: <b>{on.title}</b> ✓{" "}
               <button type="button" className="f95-link" onClick={() => actions.removeMod(on.id)}>
-                Switch it off
+                Remove
               </button>
+            </p>
+          )}
+          {drama.problem && (
+            <p role="alert">
+              <Ico name="error" size={16} /> That one didn't make it in. {drama.problem}
             </p>
           )}
           {drama.status === "loading" && !latest && <p>Dialling the drama wire at 28.8 kbps…</p>}
@@ -409,18 +419,23 @@ export function Drama({ drama, actions }: SlotPropsMap["Drama"]) {
             <div className="f95-row left">
               {latest.on ? (
                 <>
-                  <span className="f95-drama-live">● Playing in this lab</span>
-                  <Btn onClick={() => actions.removeMod(latest.id)}>Switch it off</Btn>
+                  <span className="f95-drama-live">In your lab ✓</span>
+                  <Btn onClick={() => actions.removeMod(latest.id)}>Remove</Btn>
                 </>
               ) : (
-                <>
-                  <Btn def onClick={() => actions.playDrama(latest.id)}>
-                    {on ? "Swap it in" : "Play it"}
-                  </Btn>
-                  <small>Starts a new lab: mods load before the first brick. Your current lab will be fine. Probably.</small>
-                </>
+                <Btn def onClick={() => actions.playDrama(latest.id)} disabled={!!drama.adding}>
+                  {drama.adding === latest.id ? "Adding…" : "Add to my lab"}
+                </Btn>
               )}
             </div>
+          )}
+          {latest && !latest.on && (
+            <p className="f95-drama-small">
+              <small>
+                {DRAMA_ADD_SMALL}
+                {on ? ` It replaces "${on.title}".` : ""}
+              </small>
+            </p>
           )}
           {drama.archive.length > 0 && (
             <fieldset className="f95-drama-archive">
@@ -432,10 +447,10 @@ export function Drama({ drama, actions }: SlotPropsMap["Drama"]) {
                     <b>{p.title}</b>
                     <span>{p.dateText}</span>
                     {p.on ? (
-                      <span className="f95-drama-live">● On</span>
+                      <span className="f95-drama-live">In your lab ✓</span>
                     ) : (
-                      <Btn className="f95-modoff" onClick={() => actions.playDrama(p.id)} aria-label={`Play ${p.title}`}>
-                        Play
+                      <Btn className="f95-modoff" onClick={() => actions.playDrama(p.id)} disabled={!!drama.adding} aria-label={`Add ${p.title} to my lab`}>
+                        {drama.adding === p.id ? "Adding…" : "Add"}
                       </Btn>
                     )}
                     <small>{p.summary}</small>
@@ -550,8 +565,33 @@ export function PhotoOverlay({ photo, actions }: SlotPropsMap["PhotoOverlay"]) {
   );
 }
 
+/**
+ * Display Properties → Settings (FLT-73): the picture tube. The little monitor shows the pick before the big one does
+ * (both change at once, but the little one is cuter). Applies at once and is remembered, like Reduce motion.
+ */
+function TubeSettings({ crt, actions }: { crt: NonNullable<SlotPropsMap["SkinPicker"]["skins"]["crt"]>; actions: SlotPropsMap["SkinPicker"]["actions"] }) {
+  const t = useT();
+  return (
+    <>
+      <div className={`f95-monitor f95-tube-${crt.mode}`} aria-hidden>
+        <span />
+      </div>
+      <fieldset className="f95-tube">
+        <legend>{t("skin.crt")}</legend>
+        {(["off", "subtle", "full"] as const).map((m) => (
+          <label key={m}>
+            <input type="radio" name="f95-tube" checked={crt.mode === m} onChange={() => actions.setCrt(m)} /> {t(`skin.crt.${m}`)}
+            {crt.choice === null && crt.mode === m && <small> {t("skin.crt.default")}</small>}
+          </label>
+        ))}
+      </fieldset>
+      {crt.reduced && <p className="f95-hint">{t("skin.crt.reduced")}</p>}
+    </>
+  );
+}
+
 /** Display Properties → Appearance: pick a scheme (a skin), see it change live, OK to keep it. */
-export function SkinPicker({ skins, actions }: SlotPropsMap["SkinPicker"]) {
+export function SkinPicker({ skins, actions, speed }: SlotPropsMap["SkinPicker"]) {
   const t = useT();
   const [tab, setTab] = useState<"background" | "saver" | "appearance" | "settings">("appearance");
   const current = skins.list.find((s) => s.id === skins.active) ?? skins.list[0];
@@ -570,7 +610,9 @@ export function SkinPicker({ skins, actions }: SlotPropsMap["SkinPicker"]) {
           ]}
         />
         <div className="f95-page" role="tabpanel">
-          {tab !== "appearance" ? (
+          {tab === "settings" && skins.crt ? (
+            <TubeSettings crt={skins.crt} actions={actions} />
+          ) : tab !== "appearance" ? (
             <p className="f95-hint">Nothing to see here. This monitor is entirely virtual.</p>
           ) : (
             <>
@@ -610,6 +652,11 @@ export function SkinPicker({ skins, actions }: SlotPropsMap["SkinPicker"]) {
               <label className="f95-check-row">
                 <input type="checkbox" checked={skins.reducedMotion} onChange={(e) => actions.setReducedMotion(e.target.checked)} /> {t("skin.reduceMotion")}
               </label>
+              {speed && (
+                <label className="f95-check-row">
+                  <input type="checkbox" checked={speed.slowForBadNews} onChange={(e) => actions.setSlowForBadNews(e.target.checked)} /> {t("speed.slowForBadNews")}
+                </label>
+              )}
             </>
           )}
           <div className="f95-row">

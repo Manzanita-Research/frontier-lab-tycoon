@@ -2,12 +2,18 @@ import { Dialog } from "../../kit";
 import type { SlotPropsMap } from "../../types";
 import type { DramaPackVM, DramaVM } from "../../../ui/hud/types";
 
-/** What a pack brings, in a sentence a player can read before saying yes. */
-export function dramaComing(p: DramaPackVM): string {
+/**
+ * What a pack brings, in a sentence a player can read before saying yes. Added to a lab, its card turns up within a
+ * few days (FLT-78); `fromStart` is a lab that started with it (a `?mod=` link), where the card keeps its own day.
+ */
+export function dramaComing(p: DramaPackVM, fromStart = false): string {
   const parts = [p.summary];
-  if (p.event) parts.push(`the card "${p.event.title}" turns up${p.event.day !== null ? ` from day ${p.event.day}` : ""}`);
+  if (p.event) parts.push(`the card "${p.event.title}" turns up${fromStart ? (p.event.day !== null ? ` from day ${p.event.day}` : "") : " within a few days"}`);
   return parts.filter(Boolean).join("; ");
 }
+
+/** The words under "Add to my lab" (FLT-78). */
+export const DRAMA_ADD_SMALL = "Arrives in your lab right now. No restart. Probably fine.";
 
 /** The card for one pack: the story, the first headlines, what's in it, and the one button. */
 function PackCard({ pack, drama, actions, lead }: { pack: DramaPackVM; drama: DramaVM; actions: SlotPropsMap["Drama"]["actions"]; lead: string }) {
@@ -31,24 +37,27 @@ function PackCard({ pack, drama, actions, lead }: { pack: DramaPackVM; drama: Dr
       <p className="drama-coming">{dramaComing(pack)}</p>
       {pack.on ? (
         <div className="drama-actions">
-          <span className="drama-live">Playing in this lab.</span>
+          <span className="drama-live">In your lab ✓</span>
           <button className="drama-quiet" onClick={() => actions.removeMod(pack.id)}>
-            Switch it off (new lab)
+            Remove
           </button>
         </div>
       ) : (
         <div className="drama-actions">
-          <button className="drama-play" onClick={() => actions.playDrama(pack.id)}>
-            {drama.on ? "Swap it in" : "Play it"}
+          <button className="drama-play" onClick={() => actions.playDrama(pack.id)} disabled={!!drama.adding}>
+            {drama.adding === pack.id ? "Adding…" : "Add to my lab"}
           </button>
-          <small>Starts a new lab: mods load before the first brick. Your current lab will be fine. Probably.</small>
+          <small>
+            {DRAMA_ADD_SMALL}
+            {drama.on ? ` It replaces "${drama.on.title}".` : ""}
+          </small>
         </div>
       )}
     </article>
   );
 }
 
-/** Today's Drama: the newest published pack, the ones before it, and the "now playing" card when one has just loaded. */
+/** Today's Drama: the newest published pack, the ones before it, and the "on air" card when a lab started with one. */
 export function Drama({ drama, actions }: SlotPropsMap["Drama"]) {
   const on = drama.on;
   // A pack from a shared link may be older than anything in the feed: say it's playing anyway.
@@ -68,14 +77,14 @@ export function Drama({ drama, actions }: SlotPropsMap["Drama"]) {
             <h2>{on.title}</h2>
             <p className="drama-dek">{on.description}</p>
             <p className="drama-coming">
-              Coming up in this lab: {dramaComing(on) || "whatever the industry did today"}. The rivals have read the news too.
+              Coming up in this lab: {dramaComing(on, true) || "whatever the industry did today"}. The rivals have read the news too.
             </p>
             <div className="drama-actions">
               <button className="drama-play" onClick={() => actions.closeDrama()}>
                 Let's go
               </button>
               <button className="drama-quiet" onClick={() => actions.removeMod(on.id)}>
-                Switch it off (new lab)
+                Remove
               </button>
             </div>
           </div>
@@ -83,7 +92,12 @@ export function Drama({ drama, actions }: SlotPropsMap["Drama"]) {
           <>
             {unlisted && (
               <p className="drama-note">
-                Playing <b>{on.title}</b>. <button onClick={() => actions.removeMod(on.id)}>Switch it off</button>
+                In your lab: <b>{on.title}</b> ✓ <button onClick={() => actions.removeMod(on.id)}>Remove</button>
+              </p>
+            )}
+            {drama.problem && (
+              <p className="drama-note" role="alert">
+                That one didn't make it in. {drama.problem}
               </p>
             )}
             {drama.status === "loading" && !drama.latest && <p className="drama-note">Checking the group chats…</p>}
@@ -103,10 +117,10 @@ export function Drama({ drama, actions }: SlotPropsMap["Drama"]) {
                         </small>
                       </span>
                       {p.on ? (
-                        <em>Playing</em>
+                        <em>In your lab ✓</em>
                       ) : (
-                        <button onClick={() => actions.playDrama(p.id)} aria-label={`Play ${p.title}`}>
-                          Play
+                        <button onClick={() => actions.playDrama(p.id)} disabled={!!drama.adding} aria-label={`Add ${p.title} to my lab`}>
+                          {drama.adding === p.id ? "Adding…" : "Add"}
                         </button>
                       )}
                     </li>

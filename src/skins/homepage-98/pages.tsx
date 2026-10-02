@@ -97,7 +97,7 @@ export function Stats({ stats, layout, visible = ALL_VISIBLE, actions }: SlotPro
             </td>
             <td className="v cash">
               <Odometer className={stats.cash.negative ? "bad" : ""} value={stats.cash.value} format={money} />
-              {visible.revenue && <Odometer className={`net ${stats.net.good ? "good" : "bad"}`} value={stats.net.value} format={(n) => `(${n >= 0 ? "+" : "-"}${money(Math.abs(n))}/day)`} flash={false} />}
+              {visible.revenue && <Odometer className={`net ${stats.net.good ? "good" : "bad"}`} value={stats.net.value} format={(n) => `(${n >= 0 ? "+" : "-"}${money(Math.abs(n))}/day ${t("stats.net")})`} flash={false} />}
             </td>
             <td className="k" {...coach.attrs("stat:runway")}>
               <Gci name="hourglass" />

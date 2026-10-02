@@ -1,14 +1,12 @@
 // FLT-57: no dead ends. Every ending leads somewhere, the two that stop time found a new lab with one perk, The Memo
 // counts down and leaves an aftermath, Captured fires from the Capture meter, and Escaped has a hook but no fake.
-import { SCENARIO } from "../../content/goals";
 import { eventById } from "../../content/events";
 import { THOUGHTS } from "../../content/thoughts";
-import { BAILOUT_AMOUNT } from "../machines/economy";
 import { openEventOf } from "../events";
 import { activeConditions } from "../thoughts";
 import { createInitialState } from "../state";
 import { createRng } from "../rng";
-import { answer, createTestCampus } from "../testkit";
+import { answer, brokeTonight, createTestCampus } from "../testkit";
 import { createMidgameScenario } from "../scenarios/midgame";
 import { TICKS_PER_DAY, tick } from "../tick";
 import type { GameState } from "../types";
@@ -43,7 +41,7 @@ const midgame = () => {
 /** A lab that went bust: Acqui-hired, front page out, time stopped. */
 function acquihired(seed = 1) {
   const s = staged(seed);
-  s.cash = SCENARIO.brokeBelow - BAILOUT_AMOUNT - 100_000;
+  brokeTonight(s);
   play(s, 30, 0, (w) => w.endings!.endedDay !== null);
   expect(s.endings!.id).toBe("acquihired");
   return s;
@@ -52,7 +50,7 @@ function acquihired(seed = 1) {
 describe("every ending ends with a next action", () => {
   it("Acqui-hired and The Pivot found a new lab; the endings that keep going say so", () => {
     const next = Object.fromEntries(ENDINGS.map((e) => [e.id, e.next.action]));
-    expect(next).toEqual({ captured: "keepPlaying", acquihired: "refound", takeover: "keepPlaying", regulated: "keepPlaying", pivot: "refound" });
+    expect(next).toEqual({ captured: "keepPlaying", escaped: "keepPlaying", acquihired: "refound", takeover: "keepPlaying", regulated: "keepPlaying", pivot: "refound" });
     // A button that says "keep playing" only where time really does go on.
     for (const e of ENDINGS) expect(e.next.action === "keepPlaying", e.id).toBe(e.keepPlaying);
   });
@@ -206,10 +204,10 @@ describe("Captured and Escaped", () => {
     expect(endingsView(s)!.ending!.next.label).toBe("Keep regulating");
   });
 
-  it("Escaped has a hook (`escapedAhead`) and no fake ending: nothing sets it yet", () => {
+  it("Escaped is FLT-59's (escapes, not the Arena); the `escapedAhead` hook is still unset", () => {
     const s = staged();
     expect(ENDING_STATS.escapedAhead!(s)).toBe(0);
-    expect(ENDINGS.some((e) => e.id === "escaped")).toBe(false);
+    expect(ENDINGS.find((e) => e.id === "escaped")!.next.action).toBe("keepPlaying");
     (s as { escape?: { rank: number } }).escape = { rank: 3 };
     expect(ENDING_STATS.escapedAhead!(s)).toBe(0);
     (s as { escape?: { rank: number } }).escape = { rank: 1 };

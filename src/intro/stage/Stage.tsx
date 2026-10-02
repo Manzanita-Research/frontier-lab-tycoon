@@ -3,7 +3,7 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Bloom, EffectComposer, Noise, ToneMapping, Vignette } from "@react-three/postprocessing";
 import { ToneMappingMode } from "postprocessing";
-import { useEffect, useMemo, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import type { Intro } from "../actor";
 import type { IntroContext } from "../machine";
@@ -11,21 +11,30 @@ import { Contents } from "./Contents";
 import { HeroBox } from "./HeroBox";
 import { Kiosk } from "./Kiosk";
 import { Store } from "./Store";
-import { BOOT_BEATS, ClockContext, CRT, DURATIONS, fit, FOV, HERO_ON_SHELF, HOLD, k, PRESENT, TRAY, useClock, type Clock } from "./rig";
+import { BOOT_BEATS, BOX_TIMES, ClockContext, CRT, DURATIONS, EIGHTH, fit, FOV, HERO_ON_SHELF, HERO_SIZE, HOLD, k, PRESENT, TRAY, useClock, type Clock } from "./rig";
+import { sideOf } from "../machine";
 import { itemFrame } from "./items";
+import { preloadProps } from "./Props";
+import { preloadArt } from "./textures";
+
+preloadArt();
+preloadProps();
 
 type Props = { intro: Intro; beat: string; context: IntroContext };
 
 export default function Stage({ intro, beat, context }: Props) {
-  const clock = useRef<Clock>({ beat, t: 0, snap: true, tilt: new THREE.Vector2(...(intro.params.tilt ?? [0, 0])), dragging: false });
+  const clock = useRef<Clock>({ beat, t: 0, snap: true, tilt: new THREE.Vector2(...(intro.params.tilt ?? [0, 0])), dragging: false, spin: 0, spinSent: 0, tray: new THREE.Vector3() });
   const fps = useRef<HTMLDivElement>(null);
   const wrap = useRef<HTMLDivElement>(null);
 
-  // Drag anywhere to tilt the certificate while it is held up (works the same with a finger).
-  const coa = beat === "focus" && context.item === "coa";
+  // Drag anywhere to tilt the certificate (or, FLT-95, the disc) while it is held up, or to turn the box in your hands.
+  // Works the same with a finger: a swipe across a phone is about half a turn.
+  const tilting = beat === "focus" && (context.item === "coa" || context.item === "disc") ? context.item : null;
+  const held = beat === "held";
+  const send = intro.send;
   useEffect(() => {
     const el = wrap.current;
-    if (!el || !coa) return;
+    if (!el || (!tilting && !held)) return;
     let last: { x: number; y: number } | null = null;
     const down = (e: PointerEvent) => {
       last = { x: e.clientX, y: e.clientY };
@@ -33,49 +42,70 @@ export default function Stage({ intro, beat, context }: Props) {
     };
     const move = (e: PointerEvent) => {
       if (!last) return;
-      const t = clock.current.tilt;
-      t.y = THREE.MathUtils.clamp(t.y + (e.clientX - last.x) * 0.006, -0.6, 0.6);
-      t.x = THREE.MathUtils.clamp(t.x + (e.clientY - last.y) * 0.006, -0.6, 0.6);
+      const c = clock.current;
+      if (held) c.spin += ((e.clientX - last.x) * Math.PI) / Math.max(320, Math.min(720, window.innerWidth * 0.8));
+      else {
+        c.tilt.y = THREE.MathUtils.clamp(c.tilt.y + (e.clientX - last.x) * 0.006, -0.6, 0.6);
+        c.tilt.x = THREE.MathUtils.clamp(c.tilt.x + (e.clientY - last.y) * 0.006, -0.6, 0.6);
+      }
       last = { x: e.clientX, y: e.clientY };
     };
     const up = () => {
+      if (!last) return;
       last = null;
-      clock.current.dragging = false;
+      const c = clock.current;
+      c.dragging = false;
+      if (!held) return;
+      // Let go: it settles on the nearest eighth of a turn, and the machine hears how far it went.
+      const by = THREE.MathUtils.clamp(Math.round(c.spin / EIGHTH), -8, 8);
+      c.spin = 0;
+      if (by === 0) return;
+      c.spinSent = by;
+      send({ type: "TURN", by });
     };
     el.addEventListener("pointerdown", down);
     window.addEventListener("pointermove", move);
     window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", up);
     return () => {
       el.removeEventListener("pointerdown", down);
       window.removeEventListener("pointermove", move);
       window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointercancel", up);
+      clock.current.dragging = false;
+      clock.current.spin = 0;
+      // Each thing you pick up starts level: the disc doesn't inherit the certificate's tilt.
+      clock.current.tilt.set(0, 0);
     };
-  }, [coa]);
+  }, [tilting, held, send]);
 
   return (
-    <div ref={wrap} style={{ position: "absolute", inset: 0, cursor: coa ? "grab" : undefined }}>
+    <div ref={wrap} style={{ position: "absolute", inset: 0, cursor: tilting || held ? "grab" : undefined }}>
       <Canvas dpr={[1, 2]} camera={{ fov: FOV, near: 0.05, far: 40, position: [0, 1.1, 2.3] }} gl={{ antialias: !intro.params.fx, powerPreference: "high-performance" }}>
         <ClockContext.Provider value={clock}>
-          <Director intro={intro} beat={beat} clock={clock} fps={fps} />
-          <CameraRig beat={beat} context={context} />
-          <color attach="background" args={["#23262e"]} />
-          <fog attach="fog" args={["#23262e", 7, 16]} />
-          <hemisphereLight args={["#fff8ec", "#6b6250", 1.1]} />
-          <directionalLight position={[1.5, 4, 3]} intensity={1.6} />
-          <pointLight position={[2.4, 2.2, 1.4]} intensity={4} distance={4} decay={1.4} color="#fff2d8" />
-          <Store beat={beat} context={context} send={intro.send} />
-          <HeroBox beat={beat} context={context} send={intro.send} />
-          <Contents beat={beat} context={context} send={intro.send} weightsKey={intro.params.key} />
-          <Kiosk beat={beat} context={context} send={intro.send} weightsKey={intro.params.key} />
-          {intro.params.fx && (
-            <EffectComposer multisampling={4}>
-              <Bloom mipmapBlur intensity={0.7} luminanceThreshold={1.5} luminanceSmoothing={0.1} />
-              <Noise opacity={0.035} />
-              <Vignette offset={0.3} darkness={0.55} />
-              {/* The composer renders to a target, where three skips tone mapping: put it back, or paper clips to white. */}
-              <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
-            </EffectComposer>
-          )}
+          {/* Nothing runs (not even the beat clock) until the art is in, so the first frame is the finished scene. */}
+          <Suspense fallback={null}>
+            <Director intro={intro} beat={beat} clock={clock} fps={fps} />
+            <CameraRig beat={beat} context={context} />
+            <color attach="background" args={["#23262e"]} />
+            <fog attach="fog" args={["#23262e", 7, 16]} />
+            <hemisphereLight args={["#fff8ec", "#6b6250", 1.1]} />
+            <directionalLight position={[1.5, 4, 3]} intensity={1.6} />
+            <pointLight position={[2.4, 2.2, 1.4]} intensity={4} distance={4} decay={1.4} color="#fff2d8" />
+            <Store beat={beat} context={context} send={intro.send} />
+            <HeroBox beat={beat} context={context} send={intro.send} />
+            <Contents beat={beat} context={context} send={intro.send} weightsKey={intro.params.key} />
+            <Kiosk beat={beat} context={context} send={intro.send} weightsKey={intro.params.key} />
+            {intro.params.fx && (
+              <EffectComposer multisampling={4}>
+                <Bloom mipmapBlur intensity={0.7} luminanceThreshold={1.5} luminanceSmoothing={0.1} />
+                <Noise opacity={0.035} />
+                <Vignette offset={0.3} darkness={0.55} />
+                {/* The composer renders to a target, where three skips tone mapping: put it back, or paper clips to white. */}
+                <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
+              </EffectComposer>
+            )}
+          </Suspense>
         </ClockContext.Provider>
       </Canvas>
       <div ref={fps} className="intro-fps" hidden={!intro.params.fps} />
@@ -93,7 +123,7 @@ function Director({ intro, beat, clock, fps }: { intro: Intro; beat: string; clo
 
   useEffect(() => {
     const w = window as unknown as { __intro?: unknown };
-    w.__intro = { send: intro.send, state: () => intro.now()?.value, fps: () => meter.current.fps, info: () => ({ calls: meter.current.calls, triangles: meter.current.tris }) };
+    w.__intro = { send: intro.send, state: () => intro.now()?.value, context: () => intro.now()?.context, fps: () => meter.current.fps, info: () => ({ calls: meter.current.calls, triangles: meter.current.tris }) };
     return () => void delete w.__intro;
   }, [intro, gl]);
 
@@ -155,14 +185,24 @@ function CameraRig({ beat, context }: { beat: string; context: IntroContext }) {
         break;
       }
       case "pulling":
-        if (t < 0.45) {
+      case "held": {
+        if (beat === "pulling" && t < BOX_TIMES.pullOut) {
           goalLook.copy(HERO_ON_SHELF);
           pos.copy(HERO_ON_SHELF).add(new THREE.Vector3(0, 0.12, fit(0.9, 0.8, aspect)));
-        } else {
-          goalLook.copy(PRESENT);
-          pos.copy(PRESENT).add(new THREE.Vector3(0, 0.08, fit(0.7, 0.6, aspect)));
+          lambda = 2.2;
+          break;
         }
+        // FLT-95: the box fills the middle of the screen, a little high, clear of the buttons under it; the back
+        // (all that small print) comes a little closer.
+        const [w, h] = HERO_SIZE;
+        const back = beat === "held" && sideOf(context.turn) === "back";
+        const d = aspect < 1 ? fit(w * (back ? 1.12 : 1.3), h * 1.9, aspect) : fit(w * 2.2, h * (back ? 1.4 : 1.55), aspect);
+        goalLook.copy(PRESENT);
+        goalLook.y -= h * (aspect < 1 ? 0.2 : 0.1);
+        pos.copy(PRESENT).add(new THREE.Vector3(0, 0.03, d));
+        lambda = beat === "pulling" ? 1.8 : 2.4;
         break;
+      }
       case "unwrapping":
       case "open": {
         // On a wide screen the whole view slides right, clear of the contents list.
@@ -172,7 +212,7 @@ function CameraRig({ beat, context }: { beat: string; context: IntroContext }) {
         const d = aspect < 1 ? fit(0.74, 0.9, aspect) : fit(1.35, 1.0, aspect);
         const tilt = aspect < 1 ? [0.97, 0.26] : [0.72, 0.7];
         pos.set(TRAY.x + dx * 2, 0.9 + d * tilt[0]!, TRAY.z + d * tilt[1]!);
-        lambda = beat === "unwrapping" ? 2.4 : 3.2;
+        lambda = beat === "unwrapping" ? 1.5 : 3.2;
         break;
       }
       case "focus": {

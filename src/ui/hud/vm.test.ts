@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { BUILDINGS } from "../../content/buildings";
+import type { CoachMark } from "../../content/coach";
 import { formatMoney } from "../../sim/format";
-import { fixtureEnding, fixtureInput, fixtureWorld, FIXTURE_CHAT, FIXTURE_PAPER } from "./fixtures";
+import { fixtureEnding, fixtureInput, fixtureSaves, fixtureWorld, FIXTURE_CHAT, FIXTURE_PAPER } from "./fixtures";
 import { CALM_START_DAY } from "../../sim/disasters/driver";
 import { SKIN_API_VERSION } from "./types";
-import { hudViewModel, SHIPPED_DAYS, TICKER_ITEMS } from "./vm";
-import { agoText, modMismatch } from "./saves.vm";
+import { hudViewModel, OPENING_QUIET_TICKS, SHIPPED_DAYS, TICKER_ITEMS } from "./vm";
+import { agoText, modMismatch, newestSave } from "./saves.vm";
 
 /** Every value in a view-model must survive JSON: that is what makes it a contract a skin can rely on. */
 function assertPlain(v: unknown, path = "vm") {
@@ -49,7 +50,7 @@ describe("hudViewModel", () => {
 
   it("lists the build palette with prices, hotkeys, affordability and the selected tool", () => {
     const kinds = vm.buildItems.map((b) => b.kind);
-    expect(kinds).toEqual(["path", "cluster", "hall", "gateway", "kombucha", "nap", "snack", "demo", "security", "bulldoze", "staff"]);
+    expect(kinds).toEqual(["path", "cluster", "hall", "gateway", "kombucha", "nap", "snack", "demo", "security", "sandbox", "honeypot", "bulldoze", "staff"]);
     const cluster = vm.buildItems.find((b) => b.kind === "cluster")!;
     expect(cluster).toMatchObject({ name: BUILDINGS.cluster.name, hotkey: 2, selected: true, price: BUILDINGS.cluster.price, priceText: formatMoney(BUILDINGS.cluster.price) });
     expect(vm.buildItems.filter((b) => b.selected)).toHaveLength(1);
@@ -71,6 +72,17 @@ describe("hudViewModel", () => {
   it("turns thoughts into bubbles with speakers", () => {
     expect(vm.bubbles.length).toBeGreaterThan(0);
     expect(vm.bubbles.every((b) => b.speaker.length > 0 && b.text.length > 0)).toBe(true);
+  });
+
+  it("keeps the opening clear of bubbles: none until Start, then one at a time for the first seconds (FLT-91)", () => {
+    const s = input.snap;
+    const thoughts = [0, 1, 2].map((k) => ({ ...s.thoughts[0]!, id: 900 + k, walkerId: s.thoughts[0]!.walkerId + k }));
+    const start: CoachMark = { id: "start", text: "Click Start.", target: "start", waitFor: "action", dim: true, step: 1, of: 9, canSkip: true };
+    const at = (tick: number, coach: CoachMark | null) => hudViewModel({ ...input, snap: { ...s, tick, thoughts, chats: [], coach } }).bubbles;
+    expect(at(0, start)).toHaveLength(0);
+    expect(at(20, { ...start, id: "path", step: 2 })).toHaveLength(1);
+    expect(at(OPENING_QUIET_TICKS, { ...start, id: "path", step: 2 })).toHaveLength(3);
+    expect(at(20, null)).toHaveLength(3); // a loaded save or a skipped tutorial talks at once
   });
 
   it("carries the training run, the ETA and the SHIPPED! window", () => {
@@ -206,6 +218,17 @@ describe("the spend check, the standing warnings and the release goal, as a skin
     expect(echoed.toasts).toEqual([]);
     // Other toasts are untouched.
     expect(hudViewModel({ ...input, toasts: [{ id: 6, text: "Something else", tone: "joke" }] }).toasts.map((t) => t.text)).toEqual(["Something else"]);
+  });
+});
+
+describe("the recovery toast (FLT-84)", () => {
+  it("marks a caught error's toast as a snag, and keeps the report itself out of the view-model", () => {
+    const vm = hudViewModel(fixtureInput({ snag: true }));
+    const snag = vm.toasts.find((t) => t.snag);
+    expect(snag).toEqual({ id: 3, text: "Frontier Lab Tycoon hit a snag and kept going.", tone: "bad", snag: true });
+    expect(JSON.stringify(vm)).not.toContain("snag report");
+    expect(vm.toasts.filter((t) => !t.snag).every((t) => !("snag" in t))).toBe(true);
+    assertPlain(vm.toasts);
   });
 });
 
@@ -396,6 +419,91 @@ describe("the discourse (FLT-33)", () => {
   });
 });
 
+describe("the Bird App (FLT-69)", () => {
+  const fx = hudViewModel(fixtureInput({ bird: "bird", birdOpen: true }));
+  const cancel = hudViewModel(fixtureInput({ bird: "bird-cancel", birdOpen: true }));
+
+  it("is plain JSON, and off (drawing nothing, no Aura row) until the Bird App is awake", () => {
+    assertPlain(fx);
+    assertPlain(cancel);
+    const vm = hudViewModel(fixtureInput());
+    expect(vm.birdapp.enabled).toBe(false);
+    expect(vm.stats.vibes.rows.map((r) => r.label)).not.toContain("Aura");
+  });
+
+  it("shows live posts climbing, a landed log with outcomes, and a viral sticker only on bangers", () => {
+    const b = fx.birdapp;
+    expect(b.enabled && b.open).toBe(true);
+    expect(b.live.length).toBeGreaterThan(0);
+    expect(b.live.every((p) => p.outcome === "live" && p.outcomeText === "")).toBe(true);
+    expect(b.log.every((p) => p.outcome !== "live")).toBe(true);
+    for (const p of [...b.live, ...b.log]) if (p.viral) expect(p.outcome === "banger" || p.outcome === "live").toBe(true);
+    expect(b.log.some((p) => p.outcome === "banger" && p.viral)).toBe(true);
+    expect(b.auraHistory.length).toBeGreaterThan(1);
+    expect(b.aura).toBeGreaterThanOrEqual(0);
+    expect(b.aura).toBeLessThanOrEqual(100);
+  });
+
+  it("gives every poster a banger/cancel meter and three levers, one active, the trade-off on each", () => {
+    for (const p of fx.birdapp.posters) {
+      expect(p.levers.map((l) => l.id)).toEqual(["cook", "comms", "logoff"]);
+      expect(p.levers.filter((l) => l.active)).toHaveLength(1);
+      expect(p.levers.every((l) => l.tradeoff !== "")).toBe(true);
+      expect(p.banger + p.cancel).toBeLessThanOrEqual(1);
+    }
+  });
+
+  it("puts one Aura row in the Vibes breakdown", () => {
+    expect(fx.stats.vibes.rows.filter((r) => r.label === "Aura")).toHaveLength(1);
+  });
+
+  it("shows the Comms desk drowning, with a queue, when the cancels pile up", () => {
+    expect(cancel.birdapp.comms.desk).toBe("drowning");
+    expect(cancel.birdapp.comms.queue.some((q) => q.kind === "cancelled")).toBe(true);
+    expect(cancel.birdapp.log.some((p) => p.outcome === "cancelled")).toBe(true);
+  });
+});
+
+describe("the rival labs on the Bird App (FLT-92)", () => {
+  const rivals = hudViewModel(fixtureInput({ bird: "bird-rivals", birdOpen: true }));
+  const dunk = hudViewModel(fixtureInput({ bird: "bird-rivals-dunk", birdOpen: true }));
+  const ratio = hudViewModel(fixtureInput({ bird: "bird-rivals-ratio", birdOpen: true }));
+  const launch = hudViewModel(fixtureInput({ bird: "bird-rivals-launch", birdOpen: true }));
+  const all = (vm: typeof rivals) => [...vm.birdapp.live, ...vm.birdapp.log];
+
+  it("merges their posts into one timeline, newest first, each with a side and their lab's colour", () => {
+    assertPlain(rivals);
+    const b = rivals.birdapp;
+    expect(b.rivals?.on).toBe(true);
+    for (const list of [b.live, b.log]) {
+      expect(list.some((p) => p.side === "them")).toBe(true);
+      expect(list.some((p) => p.side === "us")).toBe(true);
+    }
+    for (const p of all(rivals)) {
+      if (p.side === "them") expect(p.lab).toMatchObject({ name: expect.any(String), color: expect.stringMatching(/^#/) });
+      else expect(p.lab ?? null).toBeNull();
+      expect(p.text).not.toMatch(/\{\w+\}|##/);
+    }
+    expect(new Set(all(rivals).map((p) => p.id)).size).toBe(all(rivals).length);
+    expect(b.rivals!.labs.length).toBeGreaterThan(0);
+    expect(b.rivals!.quiet.join(" ")).toMatch(/taking a few days offline/);
+    expect(b.rivals!.tally).toMatch(/rival posts? · 1 dunk · 1 ratio/);
+  });
+
+  it("dunks with +Aura in the spotlight, and the ratio quotes your post with its Hype cost", () => {
+    expect(dunk.birdapp.spotlight).toMatchObject({ side: "us", outcome: "banger", beatText: expect.stringMatching(/^Dunk on /) });
+    const q = all(ratio).find((p) => p.quote);
+    expect(q).toMatchObject({ side: "them", outcome: "banger", tone: "bad", outcomeText: expect.stringMatching(/^Ratioed @.+ · −2 Hype$/) });
+    expect(all(ratio).some((p) => p.side === "us" && p.outcome === "ratioed" && `@${q!.quote!.handle.replace(/^@/, "")}`.endsWith(p.handle.replace(/^@/, "")))).toBe(true);
+  });
+
+  it("answers your launch with a row of rival reactions", () => {
+    const them = launch.birdapp.live.filter((p) => p.side === "them");
+    expect(them.length).toBeGreaterThanOrEqual(4);
+    expect(new Set(them.map((p) => p.lab?.id)).size).toBeGreaterThanOrEqual(4);
+  });
+});
+
 describe("endings (FLT-11)", () => {
   it("shows the last front page only once it's out, as plain JSON, with the five stats and the run summary", () => {
     const vm = hudViewModel(fixtureInput({ ending: "front-regulated", selected: null }));
@@ -472,11 +580,25 @@ describe("saves (FLT-65)", () => {
   });
 
   it("says Welcome back with the autosave, and nothing without one", () => {
-    expect(hudViewModel(fixtureInput({ saves: "welcome" })).saves.welcome).toMatchObject({ lab: "Gradient Descent Labs", date: "Y2 · Mar 5" });
+    expect(hudViewModel(fixtureInput({ saves: "welcome" })).saves.welcome).toMatchObject({ lab: "Gradient Descent Labs", date: "Y2 · Mar 5", slot: "auto", label: "Autosave" });
     const none = hudViewModel(fixtureInput());
     expect(none.saves.welcome).toBeNull();
     expect(none.saves.open).toBe(false);
     assertPlain(none.saves);
+  });
+
+  it("offers the newest save, not an older autosave (FLT-82: Continue lost the 25 days saved to a slot)", () => {
+    const shelf = fixtureSaves("window").listing;
+    const auto = shelf[0]!.meta!;
+    // The autosave is 3 hours old; slot 3 holds the same lab 25 days on, saved 20 minutes ago.
+    const later = { ...auto, day: auto.day + 25, savedAt: new Date(Date.parse(auto.savedAt) + 160 * 60_000).toISOString() };
+    const listing = [...shelf.slice(0, 3), { slot: "3" as const, meta: later }];
+    expect(newestSave(listing)).toEqual({ slot: "3", meta: later });
+    const vm = hudViewModel({ ...fixtureInput(), saves: { ...fixtureSaves("welcome"), listing, welcome: newestSave(listing) } });
+    expect(vm.saves.welcome).toMatchObject({ slot: "3", label: "Slot 3", date: "Y2 · Mar 30", ago: "20 minutes ago" });
+    // The autosave when it is the newest; nothing on an empty shelf.
+    expect(newestSave(shelf)).toEqual({ slot: "auto", meta: auto });
+    expect(newestSave(shelf.map((l) => ({ slot: l.slot, meta: null })))).toBeNull();
   });
 
   it("passes the mods question and private browsing through", () => {

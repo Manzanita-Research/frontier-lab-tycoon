@@ -6,7 +6,8 @@
   "version": "1.0.0",
   "description": "The lab as a 1995 desktop: Lab Properties, a Start menu, a file-copy dialog for training, and a paperclip that wants to help.",
   "preview": "assets/preview.jpg",
-  "slots": ["Layout", "Stats", "Training", "Objectives", "Inspector", "BuildBar", "Speed", "Staff", "Bubble", "ThoughtsPanel", "Ticker", "Toast", "Assistant", "EventCard", "Confirm", "Coach", "UnlockCard", "HowToPlay", "Arena", "Benchmarks", "Voice", "Factions", "Livestream", "Hearing", "LeakedChat", "DramaCard", "Bill", "PromiseTracker", "EraCard", "FrontPage", "GroupChat", "PhotoButton", "PhotoOverlay", "SkinPicker", "Outcome", "Ending", "Takeover", "NewsControls", "NewsArrival", "NewsRoom", "Mixer", "ModManager", "ModSkinOffer", "Papers", "PaperMoment", "CrumbWiki", "DisasterMenu", "DisasterAlert", "ReportCard", "AuditPin", "GateLegend", "DramaButton", "Drama", "Memo", "Challenge", "Welcome", "SaveLoad", "WindowTray"],
+  "crt": "subtle",
+  "slots": ["Layout", "Stats", "Training", "Objectives", "Inspector", "BuildBar", "Speed", "Staff", "Bubble", "ThoughtsPanel", "Ticker", "Toast", "Assistant", "EventCard", "Confirm", "Coach", "UnlockCard", "HowToPlay", "Arena", "Benchmarks", "Voice", "Factions", "BirdApp", "Livestream", "Hearing", "LeakedChat", "DramaCard", "Bill", "PromiseTracker", "EraCard", "FrontPage", "GroupChat", "PhotoButton", "PhotoOverlay", "SkinPicker", "Outcome", "Ending", "Takeover", "NewsControls", "NewsArrival", "NewsRoom", "Mixer", "ModManager", "ModSkinOffer", "Papers", "PaperMoment", "CrumbWiki", "DisasterMenu", "DisasterAlert", "ReportCard", "AuditPin", "GateLegend", "DramaButton", "Drama", "Memo", "Challenge", "Welcome", "SaveLoad", "WindowTray"],
   "fonts": [
     { "family": "W95FA", "src": "assets/fonts/w95fa.woff2", "weight": 400, "style": "normal", "license": "OFL-1.1", "licenseFile": "assets/fonts/w95fa-LICENSE.txt" },
     { "family": "Jersey 10", "src": "assets/fonts/jersey-10-latin-400-normal.woff2", "weight": 400, "style": "normal", "license": "OFL-1.1", "licenseFile": "assets/fonts/jersey-10-LICENSE.txt" }
@@ -64,6 +65,9 @@
     "motion.ease": "steps(2, end)"
   },
   "strings": {
+    "snag.text": "This program has performed an illegal operation and will not be shut down. It hit a snag and kept going.",
+    "snag.copied": "Copied to Clipboard.",
+    "snag.nocopy": "The Clipboard is in use by another program. The details are in the console.",
     "stats.window": "{lab} — Lab Properties",
     "training.window": "Training {name}…",
     "training.copying": "Copying the internet into {name}…",
@@ -72,6 +76,17 @@
     "build.menuTitle": "Start",
     "ticker.label": "PointPast News »",
     "thoughts.title": "Thoughts",
-    "assistant.title": "Assistant: it looks like you're building a superintelligence"
+    "assistant.title": "Assistant: it looks like you're building a superintelligence",
+    "coach.ask": "It looks like you're trying to {ask}.",
+    "coach.gotIt": "Got it",
+    "showMe": "Show Me…",
+    "where.build": "Quick Launch > Facilities",
+    "where.hire": "Quick Launch > Staff Manager",
+    "where.app": "Quick Launch, or the tray's »",
+    "where.app:arena": "the tray's #rank, or the trophy on Quick Launch",
+    "where.app:bird": "the bird in the tray",
+    "where.training": "the Training window",
+    "where.speed": "the speed buttons on the taskbar",
+    "where.start": "the Start button"
   }
 }

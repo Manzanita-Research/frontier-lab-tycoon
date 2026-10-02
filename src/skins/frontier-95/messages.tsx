@@ -1,6 +1,6 @@
 // Message boxes and the paperclip: bubbles, toasts, event cards, the era blue screen, the outcome card, the assistant.
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Dialog, Evidence, factionAttrs, placeBalloon } from "../kit";
+import { Dialog, Evidence, factionAttrs, placeBalloon, SnagCopy } from "../kit";
 import { useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import { Btn, Win } from "./parts";
@@ -33,6 +33,7 @@ export function Bubble({ bubble }: SlotPropsMap["Bubble"]) {
 const TONE_ICON = { bad: "warn", good: "info", joke: "info", neutral: "info", hint: "info", warn: "warn" } as const;
 
 export function Toast({ toast, actions }: SlotPropsMap["Toast"]) {
+  if (toast.snag) return <SnagBox toast={toast} actions={actions} />;
   if (toast.tone === "hint" || toast.tone === "warn") {
     return (
       <div className={`f95-toast ${toast.tone}`} role={toast.tone === "warn" ? "status" : undefined}>
@@ -71,6 +72,58 @@ export function Toast({ toast, actions }: SlotPropsMap["Toast"]) {
   );
 }
 
+/**
+ * Why the game just dropped to 1× (FLT-76) is not a balloon you might miss at 10×: it is a message box of its own, coach or
+ * no coach, and it stays until it is read. "Pretend it didn't happen" goes back to top speed (which also closes it).
+ */
+function SlowBox({ toast, actions }: SlotPropsMap["Toast"]) {
+  const ok = () => actions.dismissToast(toast.id);
+  return (
+    <div className="f95-slowbox" role="alert">
+      <Win className="f95-msgbox" title="Speed Governor" icon="warn" buttons={[{ g: "close", label: "OK", onClick: ok }]}>
+        <div className="f95-msgbody">
+          <Ico name="warn" size={36} />
+          <div>
+            <p className="f95-slowtext">{toast.text}</p>
+            <p className="f95-slowwhy">Frontier 95 has slowed your lab down so you can look at it. Looking is optional.</p>
+          </div>
+        </div>
+        <div className="f95-row">
+          <Btn onClick={() => actions.setSpeed(10)}>Pretend it didn't happen</Btn>
+          <Btn def onClick={ok}>
+            OK
+          </Btn>
+        </div>
+      </Win>
+    </div>
+  );
+}
+
+/**
+ * The recovery toast (FLT-84) as the error box everyone remembers, except this program is not being shut down: it caught the
+ * error and kept going. Its own little window, not the paperclip's balloon, so it shows while the coach is talking too.
+ */
+function SnagBox({ toast, actions }: SlotPropsMap["Toast"]) {
+  const t = useT();
+  const ok = () => actions.dismissToast(toast.id);
+  return (
+    <div className="f95-snag" role="alert">
+      <Win className="f95-msgbox" title={t("snag.title")} icon="error" buttons={[{ g: "close", label: t("snag.ok"), onClick: ok }]}>
+        <div className="f95-msgbody">
+          <Ico name="error" size={36} />
+          <p>{t("snag.text")}</p>
+        </div>
+        <div className="f95-row">
+          <SnagCopy id={toast.id} actions={actions} className="f95-btn" />
+          <Btn def onClick={ok}>
+            {t("snag.ok")}
+          </Btn>
+        </div>
+      </Win>
+    </div>
+  );
+}
+
 /** A batch lists this many; the rest are on the ticker. */
 const BATCH_LINES = 4;
 
@@ -93,7 +146,16 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
   const phone = vm.layout.compact;
   // One at a time, the newest toast winning; the game only sends a hint while nobody is talking.
   const hints = vm.hints;
-  const toasts = vm.toasts.slice(-1);
+  const toasts = vm.toasts.filter((t) => !t.snag && !t.pinned).slice(-1);
+  // A caught error (FLT-84) gets its own error box, coach or no coach; so does the bad news that slowed the game (FLT-76).
+  const snag = vm.toasts.find((t) => t.snag);
+  const slow = vm.toasts.filter((t) => t.pinned).at(-1);
+  const snagBox = (snag || slow) && (
+    <>
+      {slow && <SlowBox toast={slow} actions={actions} />}
+      {snag && <SnagBox toast={snag} actions={actions} />}
+    </>
+  );
   // Standing warnings ("your entrance isn't connected") stay in the balloon until they are fixed.
   const warnings = vm.warnings;
   const busy = warnings.length > 0 || toasts.length > 0 || hints.length > 0;
@@ -126,9 +188,10 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
   const next = () => setTip((i) => ((i ?? 0) + 1) % tipsFile.tips.length);
 
   // While a coach mark is up the paperclip is in the coach's balloon; there is only one of it.
-  if (vm.coach) return null;
+  if (vm.coach) return snagBox ?? null;
   return (
     <div className="f95-assistant" aria-live="polite">
+      {snagBox}
       {busy && (
         <div className="f95-balloon" role="status">
           {warnings.map((w) => (
@@ -194,14 +257,7 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
         title={t("assistant.title")}
         onClick={() => (tip === null ? setTip(tip ?? 0) : closeTip())}
       >
-        <svg viewBox="0 0 29 32" shapeRendering="crispEdges" aria-hidden>
-          <path d="M10 30V8a5 5 0 0 1 10 0v18a3 3 0 0 1-6 0V10" fill="none" stroke="#606060" strokeWidth="2.5" />
-          <circle cx="12" cy="12" r="3" fill="#fff" stroke="#000" />
-          <circle cx="19" cy="12" r="3" fill="#fff" stroke="#000" />
-          <rect x="12" y="11" width="2" height="2" fill="#000" />
-          <rect x="19" y="11" width="2" height="2" fill="#000" />
-          <path d="M9 7l4-2M22 7l-4-2" stroke="#000" />
-        </svg>
+        <Clip />
       </button>
     </div>
   );
@@ -242,16 +298,42 @@ export function Confirm({ confirm, actions }: SlotPropsMap["Confirm"]) {
   );
 }
 
-/** The paperclip's Paperclip SVG, shared by the assistant and the coach. */
+/**
+ * The assistant and the coach (FLT-93): our own paperclip, a parody nod and no one's art. Brass wire, the cardboard scientist's
+ * round black glasses, a Frontier sunrise ID on a lanyard, and an arm holding a clipboard. Pixels on a 29×32 grid so it stays
+ * crisp at 1:1 and at the 2× it is shown at.
+ */
+const WIRE = "M6.5 30V9.5a5 5 0 0 1 10 0v13a3 3 0 0 1-6 0V14";
+const LENS = (x: number) => `M${x} 9h3v1h1v3h-1v1h-3v-1h-1v-3h1z`;
 function Clip() {
   return (
     <svg viewBox="0 0 29 32" shapeRendering="crispEdges" aria-hidden>
-      <path d="M10 30V8a5 5 0 0 1 10 0v18a3 3 0 0 1-6 0V10" fill="none" stroke="#606060" strokeWidth="2.5" />
-      <circle cx="12" cy="12" r="3" fill="#fff" stroke="#000" />
-      <circle cx="19" cy="12" r="3" fill="#fff" stroke="#000" />
-      <rect x="12" y="11" width="2" height="2" fill="#000" />
-      <rect x="19" y="11" width="2" height="2" fill="#000" />
-      <path d="M9 7l4-2M22 7l-4-2" stroke="#000" />
+      <path d={WIRE} fill="none" stroke="#7a4e0a" strokeWidth="3" />
+      <path d={WIRE} fill="none" stroke="#f0c048" strokeWidth="1" />
+      <rect x="16" y="17" width="5" height="3" fill="#7a4e0a" />
+      <rect x="16" y="18" width="5" height="1" fill="#f0c048" />
+      <rect x="7" y="11" width="9" height="1" fill="#000" />
+      <path d={LENS(6)} fill="#000" />
+      <path d={LENS(14)} fill="#000" />
+      <rect x="6" y="10" width="3" height="3" fill="#fff" />
+      <rect x="14" y="10" width="3" height="3" fill="#fff" />
+      <rect x="7" y="11" width="1" height="1" fill="#000" />
+      <rect x="15" y="11" width="1" height="1" fill="#000" />
+      <path d="M6.5 15.5L9.5 20.5M16.5 15.5L13.5 20.5" stroke="#000080" strokeWidth="1" fill="none" />
+      <rect x="8" y="20" width="7" height="8" fill="#000" />
+      <rect x="9" y="21" width="5" height="6" fill="#fff" />
+      <rect x="9" y="21" width="5" height="1" fill="#000080" />
+      <rect x="10" y="23" width="3" height="1" fill="#ff9a1f" />
+      <rect x="9" y="24" width="5" height="1" fill="#ff9a1f" />
+      <rect x="9" y="25" width="5" height="2" fill="#000080" />
+      <rect x="10" y="25" width="3" height="1" fill="#ffe14d" />
+      <rect x="20" y="13" width="8" height="12" fill="#000" />
+      <rect x="21" y="14" width="6" height="10" fill="#a06a30" />
+      <rect x="22" y="16" width="4" height="7" fill="#fff" />
+      <rect x="22" y="18" width="4" height="1" fill="#000080" />
+      <rect x="22" y="20" width="3" height="1" fill="#000080" />
+      <rect x="22" y="12" width="4" height="3" fill="#7a4e0a" />
+      <rect x="23" y="13" width="2" height="1" fill="#f0c048" />
     </svg>
   );
 }
@@ -276,9 +358,16 @@ export function Coach({ coach, anchor, panel, avoid, layout, actions }: SlotProp
   return (
     <div key={coach.id} ref={ref} className={`f95-coach ${layout.compact ? "docked" : ""}`} style={layout.compact ? { top: place.y } : { left: place.x, top: place.y }} role="status" aria-live="polite" aria-label={t("assistant.title")}>
       <div className="f95-balloon">
+        {coach.guide && coach.ask && <p className="f95-asking">{t("coach.ask", { ask: coach.ask })}</p>}
         <p className="f95-saying">{coach.text}</p>
         <div className="f95-coachfoot">
-          <small>{t("coach.step", { n: coach.step, total: coach.of })}</small>
+          {coach.guide ? (
+            <button type="button" className="f95-skip" onClick={() => actions.endShowMe()}>
+              {t("coach.gotIt")}
+            </button>
+          ) : (
+            <small>{t("coach.step", { n: coach.step, total: coach.of })}</small>
+          )}
           {coach.canSkip && (
             <button type="button" className="f95-skip" onClick={() => actions.coachSkip()}>
               {t("coach.skip")}
@@ -293,24 +382,72 @@ export function Coach({ coach, anchor, panel, avoid, layout, actions }: SlotProp
   );
 }
 
+type UnlockGroupVM = NonNullable<SlotPropsMap["UnlockCard"]["unlock"]["groups"]>[number];
+/** Two columns on a desktop (Jem): what you place (Build, Hire) on the left, what the rung switches on on the right. */
+const placed = (g: UnlockGroupVM) => g.id === "build" || g.id === "hire";
+const twoColumns = (groups: readonly UnlockGroupVM[] | undefined) => !!groups?.some(placed) && groups.some((g) => !placed(g));
+
+/**
+ * FLT-93: what a rung brings, by kind (Build, Hire, New systems, New apps), one line each on what it is for, and a Show me
+ * that puts the card away and has the paperclip walk you to it.
+ */
+function UnlockGroups({ groups, actions }: { groups: NonNullable<SlotPropsMap["UnlockCard"]["unlock"]["groups"]>; actions: SlotPropsMap["UnlockCard"]["actions"] }) {
+  const t = useT();
+  const column = (side: readonly UnlockGroupVM[]) => (
+    <div className="f95-unlockcol">
+      {side.map((g) => (
+        <fieldset key={g.id} className={`f95-unlockgroup ${g.id}`}>
+          <legend>{g.title}</legend>
+          <ul>
+            {g.entries.map((e) => (
+              <li key={e.name}>
+                <span className="f95-unlockwhat">
+                  <b>{e.name}</b>
+                  {e.line}
+                </span>
+                {e.anchor && (
+                  <Btn className="f95-showme" data-showme={e.anchor} onClick={() => actions.showMe(e.anchor!)}>
+                    {t("showMe")}
+                  </Btn>
+                )}
+              </li>
+            ))}
+          </ul>
+        </fieldset>
+      ))}
+    </div>
+  );
+  return (
+    <div className={`f95-unlockgroups${twoColumns(groups) ? " two" : ""}`}>
+      {groups.some(placed) && column(groups.filter(placed))}
+      {groups.some((g) => !placed(g)) && column(groups.filter((g) => !placed(g)))}
+    </div>
+  );
+}
+
 /** "New items available!": a Win95 message box, RCT-news style. It does not stop the game or dim it; OK puts it away. */
 export function UnlockCard({ unlock, actions }: SlotPropsMap["UnlockCard"]) {
   const t = useT();
   return (
-    <div className="f95-unlock" role="status">
+    <div className={`f95-unlock${twoColumns(unlock.groups) ? " wide" : ""}`} role="status">
       <Win className="f95-msgbox" title="Frontier 95" icon="info" buttons={[{ g: "close", label: t("unlock.ok"), onClick: () => actions.dismissUnlock() }]} label={unlock.title}>
         <div className="f95-msgbody">
           <Ico name="info" size={36} />
           <div>
             <h2>{unlock.title}</h2>
             <p>{unlock.body}</p>
-            {unlock.items.length > 0 && (
-              <ul className="f95-unlockitems">
-                {unlock.items.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
+            {unlock.groups?.length ? (
+              <UnlockGroups groups={unlock.groups} actions={actions} />
+            ) : (
+              unlock.items.length > 0 && (
+                <ul className="f95-unlockitems">
+                  {unlock.items.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              )
             )}
+            {unlock.quip && <p className="f95-quip">{unlock.quip}</p>}
           </div>
         </div>
         <div className="f95-row">
@@ -354,6 +491,7 @@ export function HowToPlay({ help, actions }: SlotPropsMap["HowToPlay"]) {
         </div>
         <div className="f95-row">
           <Btn onClick={() => actions.coachReplay()}>{t("help.replay")}</Btn>
+          <Btn onClick={() => actions.openBox()}>{t("help.box")}</Btn>
           <Btn def autoFocus onClick={() => actions.closeHelp()}>
             {t("help.close")}
           </Btn>

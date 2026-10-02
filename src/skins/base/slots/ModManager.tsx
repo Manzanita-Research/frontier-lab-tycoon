@@ -4,7 +4,10 @@ import type { SlotPropsMap } from "../../types";
 /** The one example every build ships (FLT-37), so "how do I try a mod?" has a one-click answer. */
 export const EXAMPLE_MOD = "?mod=/mods/examples/every-lab-is-steve/mod.json";
 
-/** Settings ▸ Mods…: what `?mod=` loaded (in order), what clashed, what failed. Mods only come in through the address. */
+/**
+ * Settings ▸ Mods…: the lab's mods (in order), what clashed, what failed. Mods come in through the address, or Today's
+ * Drama (FLT-78). Remove takes a data-only mod out of the lab on screen; one that needs a fresh start says so, and reloads.
+ */
 export function ModManager({ mods, actions }: SlotPropsMap["ModManager"]) {
   return (
     <Dialog label="Mods" close={actions.closeMods} layerClass="news-backdrop mixer-backdrop" dialogClass="news-dialog">
@@ -21,11 +24,12 @@ export function ModManager({ mods, actions }: SlotPropsMap["ModManager"]) {
           <ol className="mod-list">
             {mods.list.map((m) => (
               <li key={m.id}>
-                <button className="mod-off" onClick={() => actions.removeMod(m.id)} title="Reloads without it: a new lab">
-                  {m.drama ? "Switch off" : "Remove"}
+                <button className="mod-off" onClick={() => actions.removeMod(m.id)} title={m.needsRestart ? "Reloads without it: a new lab" : "Takes it out of this lab, no reload"}>
+                  {m.needsRestart ? "Remove (new lab)" : "Remove"}
                 </button>
                 <b>{m.name}</b> <span>v{m.version}</span>
                 {m.description && <small>{m.description}</small>}
+                {m.needsRestart && <small>{m.needsRestart}</small>}
                 <code>
                   {m.id} · #{m.hash}
                 </code>

@@ -21,7 +21,8 @@
     "Toast",
     "Benchmarks",
     "Voice",
-    "NewsControls", "DramaButton",
+    "NewsControls",
+    "DramaButton",
     "PhotoButton"
   ],
   "fonts": [
@@ -134,6 +135,11 @@
     "shadow.pop": "0 6px 14px -8px rgba(34, 49, 58, 0.5)"
   },
   "strings": {
+    "snag.text": "Erratum: a page tore in the field. The almanac pressed on regardless.",
+    "snag.title": "Erratum",
+    "snag.copy": "Copy the field notes",
+    "snag.copied": "Noted.",
+    "snag.ok": "Carry on",
     "run.title": "Index",
     "run.prompt": "Look up a widget by name, and the almanac turns to its page.",
     "build.facilitiesCount": "{n} plates",
@@ -158,6 +164,28 @@
     "hint.tap": "Tap anyone to add them to your field notes.",
     "hint.gateway": "Build an API Gateway beside a path, and the revenue will follow.",
     "arena.eraPill": "Era {n} · {name}",
-    "bench.title": "Leaderboard"
+    "bench.title": "Leaderboard",
+    "birdapp.title": "Birding log",
+    "birdapp.aura": "Plumage",
+    "birdapp.timeline": "Sightings",
+    "birdapp.posters": "Species",
+    "birdapp.comms": "Wardens",
+    "birdapp.live": "In song",
+    "birdapp.log": "Logged",
+    "birdapp.empty": "No birdsong yet. Sit still in the hide.",
+    "birdapp.quiet": "The hide is quiet. The wardens are pouring tea.",
+    "birdapp.viral": "Rare sighting",
+    "birdapp.ratio": "the flock is mobbing",
+    "birdapp.reviewed": "ringed by the wardens",
+    "birdapp.outcome.flop": "Flew off",
+    "birdapp.outcome.banger": "Dawn chorus",
+    "birdapp.outcome.controversy": "Squawking",
+    "birdapp.outcome.ratioed": "Mobbed",
+    "birdapp.outcome.cancelled": "Flushed out",
+    "birdapp.outcome.live": "In song",
+    "stats.net": "net, all told",
+    "birdapp.filter.all": "All birds",
+    "birdapp.filter.us": "Native species",
+    "birdapp.filter.them": "Invasive species"
   }
 }

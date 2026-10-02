@@ -117,6 +117,7 @@ Verbs (run by the driver, in order, after each transition):
 | `visitors.leave` |  | The calling machine's visiting groups cut the tour short and head for the gate. |
 | `walkers.disguise` | kind: string, as: string | Draw every walker of `kind` as `as` (the renderer knows `box`: a cardboard box). Presentation only; the sim is unchanged. |
 | `walkers.reveal` | kind: string | Undo `walkers.disguise` for `kind`. |
+| `spawn.escape` | count?: number, now?: boolean | The most drifted agent starts thinking about the fence (FLT-59, `docs/specs/FLT-59.md`); with `count` above 1, a jailbreak: that many, each for a different fence. With `now` it skips the brooding and starts pacing. Nothing unless the Sandbox Escape pack is awake. |
 | `faction.delta` | faction: string, amount: number, text?: string | Nudge a faction's meter now (its mood catches up at midnight); `text` becomes the reason the Factions panel quotes. Nothing while the factions are off. |
 | `relation.delta` | a: string, b: string, amount: number | Nudge how two factions feel about each other. A pair that was allied and falls to −55 is a schism. |
 | `faction.signal` | signal: string | Tell every faction something happened (`lobby`, `hearing`, `release`, ...: `SIGNALS` in content/factions.ts). Their grievances and cheers react at midnight. |
@@ -128,6 +129,8 @@ Verbs (run by the driver, in order, after each transition):
 | `people.quit` | quiet?: boolean, conga?: boolean | Everyone the beat is about hands in the box and walks out through the gate. With `quiet`, the calling pack writes the exit headline. With `conga`, they leave as a conga line behind the first of them (FLT-56). |
 | `people.pay` | each: number | Take `each` from the bank for everyone the beat is about (a matched offer). |
 | `people.cheer` | amount: number | Lift the energy and focus of everyone the beat is about. |
+| `birdapp.post` | text: string, spice?: number, archetype?: string, outcome?: string | Someone at the lab posts `text` on the Bird App within the hour (FLT-69): the beat's first person if they post, else one of `archetype`, else anyone who posts. It lands at midnight: `outcome` (flop, banger, controversy, ratioed, cancelled) decides how, or the odds for its `spice` (0 to 1, default 0.5) do. Nothing while the Bird App is asleep. |
+| `birdapp.rival` | lab?: string, text?: string, beat?: string, role?: string, outcome?: string | A rival lab posts on the Bird App within the hour (FLT-92): `lab` (a rival id; any lab that isn't sulking, without one) says `text`, or one of its lines for `beat` (idle, teaser, release, launch, leak, cancel, escape, hearing, raise, ...). `role` (ceo, back, teaser, safety) picks the voice, and `outcome` (flop, banger, ratioed) decides how it lands. Nothing while the Bird App or its rivals are off. |
 
 The `people.*` verbs act on the people a pack's driver names for the beat (`VerbEnv.people`, main person first); a disaster names nobody, so they do nothing there. A driver can also hand the beat template variables (`VerbEnv.vars`, e.g. FLT-26's `{defName}`, FLT-22's `{act}`).
 

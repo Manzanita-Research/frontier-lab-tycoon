@@ -1,8 +1,8 @@
 // The Save/Load window's view-model (FLT-65): plain data about the slots in, SavesVM out. Pure, like vm.ts: the clock
 // comes in as `now`, and nothing here reads storage.
-import type { SaveFile, SaveMeta, SlotListing } from "../../save";
+import type { SaveFile, SaveMeta, SlotId, SlotListing } from "../../save";
 import { formatDate } from "../../sim/format";
-import type { SaveModPromptVM, SaveSummaryVM, SavesVM, ToneVM } from "./types";
+import type { SaveModPromptVM, SaveSummaryVM, SavesVM, ToneVM, WelcomeVM } from "./types";
 
 /** Roughly what a browser gives one site (localStorage counts characters; most allow about five million). */
 export const STORAGE_BUDGET = 5_000_000;
@@ -11,8 +11,8 @@ export interface SavesInput {
   open: boolean;
   available: boolean;
   listing: readonly SlotListing[];
-  /** The autosave "Welcome back" offers, or null once answered (or when there is none). */
-  welcome: SaveMeta | null;
+  /** The save "Welcome back" offers (the newest, `newestSave`), or null once answered (or when there is none). */
+  welcome: ShelfSave | null;
   busy: boolean;
   status: { text: string; tone: ToneVM } | null;
   modPrompt: SaveModPromptVM | null;
@@ -20,6 +20,33 @@ export interface SavesInput {
   /** Skin ids to names ("frontier-95" to "Frontier 95"). */
   skinNames: Readonly<Record<string, string>>;
   now: number;
+}
+
+/** A save and the slot it is in. */
+export interface ShelfSave {
+  slot: SlotId;
+  meta: SaveMeta;
+}
+
+const slotLabel = (slot: string) => (slot === "auto" ? "Autosave" : `Slot ${slot}`);
+
+/**
+ * The save "Welcome back" offers (FLT-82): the newest on the shelf, autosave or slot, so Continue never goes back to an
+ * older autosave when the player saved to a slot since. A tie goes to the earlier slot (the autosave first). Null for none.
+ */
+export function newestSave(listing: readonly SlotListing[]): ShelfSave | null {
+  let best: ShelfSave | null = null;
+  let bestAt = -Infinity;
+  for (const l of listing) {
+    if (!l.meta || l.slot === "pending") continue;
+    const at = Date.parse(l.meta.savedAt);
+    const t = Number.isFinite(at) ? at : -Infinity;
+    if (best === null || t > bestAt) {
+      best = { slot: l.slot, meta: l.meta };
+      bestAt = t;
+    }
+  }
+  return best;
 }
 
 export const NO_SAVES_VM: SavesVM = {
@@ -69,6 +96,12 @@ export function saveSummary(meta: SaveMeta, now: number, skinNames: Readonly<Rec
   };
 }
 
+const welcomeOf = (w: ShelfSave, now: number, skinNames: Readonly<Record<string, string>>): WelcomeVM => ({
+  ...saveSummary(w.meta, now, skinNames),
+  slot: w.slot,
+  label: slotLabel(w.slot),
+});
+
 export function savesViewModel(i: SavesInput, current: { lab: string; day: number }): SavesVM {
   const used = i.listing.reduce((n, l) => n + (l.meta?.size ?? 0), 0);
   return {
@@ -76,12 +109,12 @@ export function savesViewModel(i: SavesInput, current: { lab: string; day: numbe
     available: i.available,
     slots: i.listing.map((l) => ({
       slot: l.slot,
-      label: l.slot === "auto" ? "Autosave" : `Slot ${l.slot}`,
+      label: slotLabel(l.slot),
       save: l.meta ? saveSummary(l.meta, i.now, i.skinNames) : null,
       broken: l.broken ?? null,
     })),
     current: { lab: current.lab, date: formatDate(current.day) },
-    welcome: i.welcome ? saveSummary(i.welcome, i.now, i.skinNames) : null,
+    welcome: i.welcome ? welcomeOf(i.welcome, i.now, i.skinNames) : null,
     busy: i.busy,
     status: i.status,
     modPrompt: i.modPrompt,

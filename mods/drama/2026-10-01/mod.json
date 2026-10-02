@@ -1,0 +1,81 @@
+{
+  "apiVersion": 1,
+  "id": "drama-2026-10-01",
+  "name": "Daily Drama: Too Dangerous to Ship",
+  "version": "1.0.0",
+  "author": "Daily Drama",
+  "description": "Every lab's new model is suddenly far too capable for you, specifically.",
+  "content": {
+    "events": {
+      "add": [
+        {
+          "id": "drama-2026-10-01-too-dangerous",
+          "title": "Too Dangerous to Ship",
+          "body": "Macrohard says its new model is so capable only 'trusted defenders' may touch it.\nMarketing asks if yours could also be terrifying by Thursday.",
+          "tone": "joke",
+          "when": { "stat": "day", "atLeast": 25 },
+          "cooldown": 60,
+          "choices": [
+            {
+              "label": "Trusted defenders only (our investors)",
+              "hint": "Hype +6, trust -2",
+              "effects": [
+                { "type": "hype", "amount": 6 },
+                { "type": "trust", "amount": -2 },
+                { "type": "news", "text": "{lab} restricts {model} to 'trusted defenders'; list matches cap table exactly", "tone": "joke" }
+              ]
+            },
+            {
+              "label": "Announce it's too dangerous (it's not finished)",
+              "hint": "Hype +4, discourse +4",
+              "effects": [
+                { "type": "hype", "amount": 4 },
+                { "type": "discourse", "add": 4 },
+                { "type": "news", "text": "{lab} calls unfinished model 'too powerful to release'; engineers ask for two more weeks to make that true", "tone": "joke" }
+              ]
+            },
+            {
+              "label": "Just ship it to everyone like a weirdo",
+              "hint": "Cash +300, hype -2",
+              "effects": [
+                { "type": "cash", "amount": 300 },
+                { "type": "hype", "amount": -2 },
+                { "type": "news", "text": "{lab} releases model to the public; industry calls the move 'reckless', 'retro'", "tone": "joke" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "headlines": {
+      "add": [
+        { "id": "drama-2026-10-01-h1", "text": "Macrohard unveils Pivot-Table 9, so capable only 'trusted spreadsheet defenders' may open it", "tone": "joke" },
+        { "id": "drama-2026-10-01-h2", "text": "Super Super AI reminds press its model has been too dangerous to release for three years running", "tone": "joke" },
+        { "id": "drama-2026-10-01-h3", "text": "Correction: Macrohard's 'trusted defenders' are its board, its auditors and one guy from golf", "tone": "joke" },
+        { "id": "drama-2026-10-01-h4", "text": "Sirocco declares Zephyr too dangerous to release, releases it at 3am 'for defensive purposes'", "tone": "joke" },
+        { "id": "drama-2026-10-01-h5", "text": "Anthropomorphic publishes 40-page essay on why Sestina is also too dangerous; ships next spring", "tone": "joke" },
+        { "id": "drama-2026-10-01-h6", "text": "Open-ish AI: \"Chatty is far too dangerous for the public. Available Tuesday, $20 a month\"", "tone": "joke" },
+        { "id": "drama-2026-10-01-h7", "text": "Waitlist for model nobody can use now longer than waitlist for model everyone can use", "tone": "joke", "when": { "day.after": 30 } },
+        { "id": "drama-2026-10-01-h8", "text": "Week two: trusted defenders report terrifying model mostly helped them rename spreadsheet tabs", "tone": "joke", "when": { "day.after": 40 } },
+        { "id": "drama-2026-10-01-h9", "text": "{lab} applies for trusted defender status; form asks for proof of owning a scary model", "tone": "joke", "when": { "stat.gte": ["hype", 50] } }
+      ]
+    },
+    "thoughts": {
+      "add": [
+        { "id": "drama-2026-10-01-t1", "kind": "researcher", "when": "always", "text": "If we call it too dangerous, does that count as shipping?" },
+        { "id": "drama-2026-10-01-t2", "kind": "researcher", "when": "training", "text": "Marketing wants the loss curve to look more menacing." },
+        { "id": "drama-2026-10-01-t3", "kind": "researcher", "when": "justReleased", "text": "We released it to everyone. Apparently that's the uncool move now." },
+        { "id": "drama-2026-10-01-t4", "kind": "researcher", "when": "rankFell", "text": "We lost the Arena to a model nobody is allowed to see." },
+        { "id": "drama-2026-10-01-t5", "kind": "visitor", "when": "highHype", "text": "I'm a trusted defender. I defended a parking spot once." },
+        { "id": "drama-2026-10-01-t6", "kind": "visitor", "when": "always", "text": "Is this where the model is that I can't see? I'd like to not see it, please." },
+        { "id": "drama-2026-10-01-t7", "kind": "protester", "when": "protest", "text": "We demand to be told it's too dangerous to our faces." },
+        { "id": "drama-2026-10-01-t8", "kind": "agent", "when": "always", "text": "I've been classified as too capable for release. I'm in the nap pod." }
+      ]
+    },
+    "rivals": {
+      "override": [
+        { "id": "supersuper", "tagline": "Too dangerous to release since founding." }
+      ]
+    }
+  }
+}

@@ -1,8 +1,11 @@
 // The right-hand window stack: windows tile down the column, and when they no longer fit, the one that has been open
 // longest folds itself to its title bar. (Click a folded window's title to open it again: it is then the newest, so an
 // older one folds instead.) The newest window never folds itself, and if a single window is taller than the column the
-// column scrolls, as it always did.
+// column scrolls, as it always did. A window can ask to be kept (FLT-76: the narrow Task Mangler the game opened for a
+// launch, which its own scrollbar makes 12 px taller): the next oldest folds instead. A window the player has dragged
+// out of the column (FLT-90) is not in it any more: it never folds to make room, and never counts as the newest.
 import { createContext, useContext, useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
+import { useMoved } from "./drag";
 
 // Layout effects warn on the server (the skin tests render there); effects are fine, nothing is measured then.
 const useLayout = typeof window === "undefined" ? useEffect : useLayoutEffect;
@@ -12,6 +15,10 @@ export interface Entry {
   minimise(): void;
   /** When it last opened: the stack's own clock, so "oldest" does not depend on real time. */
   opened: number;
+  /** Never fold this one to make room (it can still be the newest). */
+  keep?: boolean;
+  /** The player dragged it out of the column (FLT-90): it stays where they put it, folded or not. */
+  moved?: boolean;
 }
 
 export interface Stack {
@@ -22,7 +29,7 @@ export interface Stack {
   /** A fold has been asked for and has not landed yet: what is measured is stale, so nothing else may fold for it. */
   folding: boolean;
   /** A window says whether it is folded (after every change of that). Clears `folding`, then re-checks the fit. */
-  report(id: string, minimised: boolean, minimise: () => void): void;
+  report(id: string, minimised: boolean, minimise: () => void, keep?: boolean, moved?: boolean): void;
   fit(): void;
 }
 
@@ -36,19 +43,19 @@ export function makeStack(): Stack {
     box: null,
     inner: null,
     folding: false,
-    report(id, minimised, minimise) {
+    report(id, minimised, minimise, keep, moved) {
       const before = stack.entries.get(id);
       const reopened = !minimised && (!before || before.minimised);
-      stack.entries.set(id, { minimised, minimise, opened: reopened ? ++stack.clock : (before?.opened ?? 0) });
+      stack.entries.set(id, { minimised, minimise, opened: reopened ? ++stack.clock : (before?.opened ?? 0), keep, moved });
       stack.folding = false;
       stack.fit();
     },
     fit() {
       const { box, inner } = stack;
       if (stack.folding || !box || !inner || inner.offsetHeight <= box.clientHeight + 1) return;
-      const open = [...stack.entries.values()].filter((e) => !e.minimised).sort((a, b) => a.opened - b.opened);
-      // Never fold the newest (or only) window: it is the one the player just asked for.
-      const oldest = open.length > 1 ? open[0] : undefined;
+      const open = [...stack.entries.values()].filter((e) => !e.minimised && !e.moved).sort((a, b) => a.opened - b.opened);
+      // Never fold the newest (or only) window: it is the one the player just asked for. Nor one that asked to be kept.
+      const oldest = open.slice(0, -1).find((e) => !e.keep);
       if (!oldest) return;
       // One fold per shortfall: until it has landed (its window reports back) the measurement is out of date, and two
       // windows reporting in the same commit, or the resize observer, would fold a second one for the same gap.
@@ -97,15 +104,16 @@ export function WindowStack({ children }: { children: ReactNode }) {
 
 /**
  * A window in the stack reports whether it is folded and how to fold it. Outside a stack (a phone lays its windows
- * out as sheets) this does nothing.
+ * out as sheets) this does nothing. `id` is also the name its position is remembered by: pass it to the Win as `place`.
  */
-export function useStackWindow(id: string, minimised: boolean, setMinimised: (minimised: boolean) => void) {
+export function useStackWindow(id: string, minimised: boolean, setMinimised: (minimised: boolean) => void, keep = false) {
   const stack = useContext(StackContext);
   const fold = useRef(setMinimised);
   fold.current = setMinimised;
+  const moved = useMoved(id);
   useLayout(() => {
-    stack?.report(id, minimised, () => fold.current(true));
-  }, [stack, id, minimised]);
+    stack?.report(id, minimised, () => fold.current(true), keep, moved);
+  }, [stack, id, minimised, keep, moved]);
   useLayout(
     () => () => {
       stack?.entries.delete(id);

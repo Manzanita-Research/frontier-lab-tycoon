@@ -48,9 +48,16 @@ export function Coach({ coach, anchor, panel, avoid, layout, actions }: SlotProp
         <Buddy />
       </div>
       <div className="coach-body">
+        {coach.guide && coach.ask && <p className="coach-ask">{t("coach.ask", { ask: coach.ask })}</p>}
         <p className="coach-say">{coach.text}</p>
         <div className="coach-foot">
-          <span className="coach-step">{t("coach.step", { n: coach.step, total: coach.of })}</span>
+          {coach.guide ? (
+            <button type="button" className="coach-skip" onClick={() => actions.endShowMe()}>
+              {t("coach.gotIt")}
+            </button>
+          ) : (
+            <span className="coach-step">{t("coach.step", { n: coach.step, total: coach.of })}</span>
+          )}
           {coach.canSkip && (
             <button type="button" className="coach-skip" onClick={() => actions.coachSkip()}>
               {t("coach.skip")}

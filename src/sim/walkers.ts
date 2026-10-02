@@ -31,6 +31,7 @@ import {
 import type { EventFromLogic } from "xstate";
 import { stepWalker, tourDone, walkerMachine, type WalkerPhase } from "./machines/walker";
 import type { Rng } from "./rng";
+import { auraApplicants } from "./birdapp/effects";
 import { TARGET_GATE, TARGET_WANDER, type Building, type GameState, type Point, type Walker, type WalkerKind, type WalkerMode } from "./types";
 
 /** Chance that a walker leaving a building hangs around outside it for a bit instead of rushing off. */
@@ -266,6 +267,24 @@ function send(state: GameState, w: Walker, rng: Rng, event: EventFromLogic<typeo
       if (before !== "quitting") startLeave(state, w);
       break;
   }
+}
+
+/** A drifted agent heads for the fence (FLT-59): off its route and out of any building, and sim/escape drives it from here. */
+export function breakOut(w: Walker) {
+  w.machine = stepWalker(w.machine, { type: "BREAKOUT" });
+  w.need = "";
+  w.route = [];
+  w.targetId = TARGET_WANDER;
+  w.qtile = -1;
+}
+
+/** Put a caught agent back on the nearest path and let it pick its next stop, as if nothing happened. */
+export function returnWalker(state: GameState, w: Walker, rng: Rng) {
+  const p = nearestPathTile(state, w.x, w.z);
+  if (p) [w.x, w.z] = [p[0] + 0.5, p[1] + 0.5];
+  w.px = w.x;
+  w.pz = w.z;
+  send(state, w, rng, { type: "RETURNED" });
 }
 
 /** A researcher has had enough: box, gate, headline (the headline waits until they reach the gate). */
@@ -524,6 +543,7 @@ function offPath(state: GameState, route: Point[]): boolean {
 function repairWalkers(state: GameState, rng: Rng, grew: boolean) {
   for (const w of state.walkers) {
     if (w.kind === "protester") continue; // they stand on grass; protest.ts looks after them
+    if (w.machine.value === "escaping") continue; // off the paths on purpose; sim/escape looks after them
     if (found(state, w)) w.lost = "";
     if (grew && (w.machine.value === "wandering" || w.machine.value === "loitering")) {
       wander(state, w, rng);
@@ -620,10 +640,13 @@ export function updateWalkers(state: GameState, rng: Rng) {
   const disconnected = !entranceConnected(state);
   const fountains = state.buildings.filter((b) => b.kind === "fountain");
   let gone: Set<number> | null = null;
+  const escaping = (state.escape?.runners.length ?? 0) > 0;
   for (const w of state.walkers) {
     if (w.kind === "protester") {
       continue;
     }
+    // An agent on its way over the fence (FLT-59) is moved by sim/escape until it is caught or gone.
+    if (escaping && w.machine.value === "escaping") continue;
     w.px = w.x;
     w.pz = w.z;
     if (disconnected && w.machine.value !== "inside" && !exiting(w.machine.value)) {
@@ -712,7 +735,7 @@ function admitApplicants(state: GameState, rng: Rng, researchers: number) {
   if (vibes <= APPLICANT_VIBES || room <= 0) return;
   const batch = Math.min(room, 1 + Math.floor((vibes - APPLICANT_VIBES) / 300));
   for (let i = 0; i < batch; i++) {
-    if (!rng.chance(Math.min(1, (0.5 + vibes / 2000) * (state.recruitingPull ?? 1)))) continue;
+    if (!rng.chance(Math.min(1, (0.5 + vibes / 2000) * (state.recruitingPull ?? 1) * auraApplicants(state)))) continue;
     const w = spawnFromGate(state, "researcher", rng);
     if (w && state.recruitingPull !== undefined) w.focus = Math.min(1, w.focus + Math.max(0, state.recruitingPull - 1) * 0.1);
     if (w && rng.chance(0.35)) pushNews(state, rng, "applicant", { name: w.name });

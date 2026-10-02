@@ -37,7 +37,11 @@ import { callMeeting } from "./meetings";
 import { congaLine } from "./conga";
 import { resign } from "./walkers";
 import type { Building, GameState, Importance, NoticeSource, StaffJob, Tone } from "./types";
+import { startEscape } from "./escape/driver";
 import { defs } from "./defs";
+import { postNow } from "./birdapp/driver";
+import { rivalPostNow } from "./birdapp/rivals";
+import { BIRD_OUTCOMES, RIVAL_BEATS, RIVAL_ROLES, type BirdOutcome, type RivalBeat, type RivalRole } from "../content/birdapp";
 
 /** A tick is 1.2 game hours (20 to a day). */
 export const HOURS_PER_TICK = 24 / TICKS_PER_DAY;
@@ -306,7 +310,7 @@ const clamp100 = (n: number) => Math.max(0, Math.min(100, n));
 const ownerOf = (env: VerbEnv) => env.run?.id ?? env.owner ?? "";
 
 /** The systems a verb's toast can say it is from (FLT-51), besides a mod's own `mod:<id>`. */
-const SOURCES: readonly NoticeSource[] = ["leapfrog", "ops", "staff", "economy", "coach", "event", "disaster", "papers", "collusion", "hearing", "politics", "defection", "auditors", "factions", "race", "training", "crowd", "build", "endings"];
+const SOURCES: readonly NoticeSource[] = ["leapfrog", "ops", "staff", "economy", "coach", "event", "disaster", "papers", "collusion", "hearing", "politics", "defection", "auditors", "factions", "race", "training", "crowd", "build", "endings", "escape"];
 const isSource = (v: Json | undefined): v is NoticeSource => typeof v === "string" && ((SOURCES as readonly string[]).includes(v) || /^mod:[\w.-]+$/.test(v));
 /** The base packs that call verbs, and whose notices they are. */
 const PACK_SOURCE: Record<string, NoticeSource> = { collusion: "collusion", hearing: "hearing", yacht: "politics", auditors: "auditors", defection: "defection", poaching: "defection", capture: "politics", promises: "politics" };
@@ -373,7 +377,7 @@ function say(env: VerbEnv, text: string): string {
 type CueBody = Cue extends infer C ? (C extends Cue ? Omit<C, "id" | "tick"> : never) : never;
 
 /** Tell the renderer and the sound layer something happened (they poll `state.disasters.cues`). */
-function pushCue(state: GameState, cue: CueBody) {
+export function pushCue(state: GameState, cue: CueBody) {
   const d = state.disasters;
   d.cues.push({ id: state.nextId++, tick: state.tick, ...cue } as Cue);
   if (d.cues.length > 12) d.cues.splice(0, d.cues.length - 12);
@@ -702,6 +706,26 @@ export const VERBS: Record<string, VerbDef> = {
       }
     },
   },
+  "birdapp.post": {
+    doc: "Someone at the lab posts `text` on the Bird App within the hour (FLT-69): the beat's first person if they post, else one of `archetype` (oracle, hype, duo, thread, leaderboard, doomer, anon), else anyone who posts. It lands at midnight: `outcome` (flop, banger, controversy, ratioed, cancelled) says how, or the odds for its `spice` (0 to 1, default 0.5) do. Nothing while the Bird App is asleep.",
+    spec: { text: "string", spice: "number?", archetype: "string?", outcome: "string?" },
+    verify: (p) => (p.outcome === undefined || (BIRD_OUTCOMES as readonly string[]).includes(p.outcome as string) ? null : `unknown outcome "${p.outcome as string}"; outcomes are ${BIRD_OUTCOMES.join(", ")}`),
+    run: (env, p) => postNow(env.state, env.rng, { text: say(env, p.text as string), spice: p.spice as number | undefined, archetype: p.archetype as string | undefined, outcome: p.outcome as BirdOutcome | undefined, by: env.people?.[0] }),
+  },
+  "birdapp.rival": {
+    doc: "A rival lab posts on the Bird App within the hour (FLT-92): `lab` (a rival id; any lab that is not sulking, without one) says `text`, or a line of theirs for `beat` (idle, teaser, release, launch, leak, cancel, escape, hearing, raise, ...). `role` (ceo, back, teaser, safety) picks the voice; `outcome` (flop, banger, ratioed) how it lands. Nothing while the Bird App or its rivals are off.",
+    spec: { lab: "string?", text: "string?", beat: "string?", role: "string?", outcome: "string?" },
+    verify: (p) =>
+      p.beat !== undefined && !(RIVAL_BEATS as readonly string[]).includes(p.beat as string) ? `unknown beat "${p.beat as string}"; beats are ${RIVAL_BEATS.join(", ")}`
+      : p.role !== undefined && !(RIVAL_ROLES as readonly string[]).includes(p.role as string) ? `unknown role "${p.role as string}"; roles are ${RIVAL_ROLES.join(", ")}`
+      : p.outcome !== undefined && !["flop", "banger", "ratioed"].includes(p.outcome as string) ? `unknown outcome "${p.outcome as string}"; rival posts are flop, banger or ratioed`
+      : null,
+    run: (env, p) =>
+      void rivalPostNow(env.state, env.rng, {
+        lab: p.lab as string | undefined, text: typeof p.text === "string" ? say(env, p.text) : undefined, beat: p.beat as RivalBeat | undefined,
+        role: p.role as RivalRole | undefined, outcome: p.outcome as "flop" | "banger" | "ratioed" | undefined,
+      }),
+  },
   "visitors.arrive": {
     doc: "A visiting group of a kind a pack registered (`content.groups`) comes in through the gate and tours the campus. Owned by the calling machine.",
     spec: { kind: "string" },
@@ -725,6 +749,11 @@ export const VERBS: Record<string, VerbDef> = {
       delete d[p.kind as string];
       if (Object.keys(d).length === 0) delete env.state.disguises;
     },
+  },
+  "spawn.escape": {
+    doc: "The most drifted agent (with `count` above 1, a jailbreak: that many, each for a different fence) starts thinking about the fence; with `now`, it skips the brooding and goes straight to pacing. Needs the Sandbox Escape pack awake.",
+    spec: { count: "number?", now: "boolean?" },
+    run: (env, p) => void startEscape(env.state, { count: (p.count as number | undefined) ?? 1, pace: p.now === true }),
   },
   "faction.delta": {
     doc: "Nudge a faction's meter (−100 to 100) now; its mood catches up at midnight. Nothing while the factions are off.",

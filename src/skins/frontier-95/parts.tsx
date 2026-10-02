@@ -1,6 +1,7 @@
 // The Win95-shaped building blocks every Frontier 95 slot is made of. Classes are styled in skin.css.
 import type { ReactNode } from "react";
 import { Ico } from "./icons";
+import { InWin, useWinDrag } from "./drag";
 
 export interface TitleButton {
   /** min | max | close | help: drawn in CSS so no font has to have the glyph. */
@@ -21,6 +22,7 @@ export function Win({
   onTitleClick,
   role,
   attrs,
+  place,
 }: {
   title: ReactNode;
   icon?: string;
@@ -32,11 +34,26 @@ export function Win({
   role?: string;
   /** Extra attributes for the window (the coach's `data-coach` hooks). */
   attrs?: Record<string, string | undefined>;
+  /**
+   * FLT-90: the name its position is remembered by when the player drags it (by default its first class, `f95-lab`),
+   * or false for a window that must not move. Message boxes drag too, but open in the middle again next time.
+   */
+  place?: string | false;
 }) {
+  const id = place === false ? null : (place ?? className.trim().split(/\s+/)[0] ?? "") || null;
+  const remember = !(role === "alertdialog" || role === "alert" || /\bf95-(msgbox|errbox)\b/.test(className));
+  const drag = useWinDrag(id, remember);
   return (
     // An open window: the coach's balloon keeps off it (FLT-58), unless it is the window the coach is pointing at.
-    <section className={`f95-win ${className}`} aria-label={label ?? (typeof title === "string" ? title : undefined)} role={role} data-coach-avoid="" {...attrs}>
-      <div className={`f95-tb ${onTitleClick ? "clickable" : ""}`} onClick={onTitleClick}>
+    <section
+      className={`f95-win ${className}${drag.on ? " drag" : ""}${drag.moved ? " moved" : ""}`}
+      aria-label={label ?? (typeof title === "string" ? title : undefined)}
+      role={role}
+      data-coach-avoid=""
+      {...attrs}
+      {...drag.win}
+    >
+      <div className={`f95-tb ${onTitleClick ? "clickable" : ""}`} onClick={onTitleClick} {...drag.bar}>
         {icon && <Ico name={icon} size={18} />}
         <span className="f95-tt">{title}</span>
         <span className="f95-btns">
@@ -49,7 +66,7 @@ export function Win({
           ))}
         </span>
       </div>
-      {children}
+      <InWin.Provider value={true}>{children}</InWin.Provider>
     </section>
   );
 }
@@ -72,11 +89,11 @@ export function Blocks({ value, label, tone = "navy", className = "" }: { value:
   );
 }
 
-export function Tabs<T extends string>({ tabs, active, onChange, label }: { tabs: { id: T; label: string }[]; active: T; onChange: (id: T) => void; label: string }) {
+export function Tabs<T extends string>({ tabs, active, onChange, label }: { tabs: { id: T; label: string; attrs?: Record<string, string> }[]; active: T; onChange: (id: T) => void; label: string }) {
   return (
     <div className="f95-tabs" role="tablist" aria-label={label}>
       {tabs.map((t) => (
-        <button key={t.id} type="button" role="tab" aria-selected={active === t.id} className={`f95-tab ${active === t.id ? "on" : ""}`} onClick={() => onChange(t.id)}>
+        <button key={t.id} type="button" role="tab" {...t.attrs} aria-selected={active === t.id} className={`f95-tab ${active === t.id ? "on" : ""}`} onClick={() => onChange(t.id)}>
           {t.label}
         </button>
       ))}

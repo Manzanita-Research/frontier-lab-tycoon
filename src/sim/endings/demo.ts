@@ -64,6 +64,8 @@ export function stageEndingMoment(moment: string): GameState {
   if (moment === "memo-countdown") {
     offerMemo(s);
     until(s, (w) => w.day >= w.flags["memo:offered"]! + 2, 3);
+    // A card that opened at that midnight would hide the countdown: answer it (a tick, not a day).
+    until(s, (w) => !openEventOf(w), 1);
     return s;
   }
   if (moment === "memo-race" || moment === "memo-slow") {
@@ -79,6 +81,7 @@ export function stageEndingMoment(moment: string): GameState {
   s.flags["memo:offered"] = s.day;
   s.flags[id === "regulated" ? MEMO_SLOW : MEMO_RACE] = s.day;
   if (id === "captured") s.capture = 100;
+  if (id === "escaped" && s.escape) s.escape.escaped = Math.max(s.escape.escaped, 10);
   start(s, id);
   if (moment === "takeover") {
     // Two buildings down, the cursor halfway to the third.

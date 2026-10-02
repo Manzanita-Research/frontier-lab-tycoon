@@ -26,7 +26,7 @@ export function Welcome({ welcome, saves, actions }: SlotPropsMap["Welcome"]) {
               <div>
                 <b>Your lab is where you left it.</b>
                 <p>
-                  <b>{welcome.lab}</b>, {welcome.date}. Saved {welcome.ago} on AUTOSAVE.FLT ({welcome.size}).
+                  <b>{welcome.lab}</b>, {welcome.date}. Saved {welcome.ago} on {fileName(welcome.slot)} ({welcome.size}).
                 </p>
                 <p className="f95-hint">Did you know... time stopped while you were away. Please don't tell the investors.</p>
               </div>
@@ -43,6 +43,11 @@ export function Welcome({ welcome, saves, actions }: SlotPropsMap["Welcome"]) {
           </div>
         </div>
         <p className="f95-welcome-small">A new lab writes over AUTOSAVE.FLT after its first month. To keep both, Save it to a slot first (Start, then Save / Load…).</p>
+        <p className="f95-welcome-small">
+          <button type="button" className="f95-link" onClick={() => actions.openBox()} disabled={saves.busy}>
+            Take the box off the shelf again
+          </button>
+        </p>
       </Win>
     </Dialog>
   );

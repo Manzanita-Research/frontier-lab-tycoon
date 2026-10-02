@@ -330,7 +330,7 @@ async function runStep(page, step) {
   if ("eval" in step) return page.evaluate(async (src) => (0, eval)(src)(window.__flt, window.__flt.sim.world), step.eval);
   if ("click" in step) {
     try {
-      return await page.click(step.click, { timeout: step.optional ? 1500 : 5000 });
+      return await page.click(step.click, { timeout: step.timeout ?? (step.optional ? 1500 : 5000) });
     } catch (e) {
       if (!step.optional) throw e;
       return;
@@ -417,7 +417,8 @@ async function capture(side, sceneName, skin) {
       });
       if (scene.storage) await page.addInitScript((kv) => { for (const [k, v] of Object.entries(kv)) localStorage.setItem(k, v); }, scene.storage);
       await page.goto(sceneUrl(side.url, scene, sk), { waitUntil: "networkidle" });
-      await page.waitForFunction(() => window.__flt?.sim?.world, null, { timeout: 60_000 });
+      // A scene that isn't the game (FLT-95: the box) says what "ready" means for it, as a JS expression.
+      await page.waitForFunction(scene.ready ?? (() => window.__flt?.sim?.world), null, { timeout: 60_000 });
       const frames = Number(args.frames ?? scene.frames ?? sceneData.defaults.frames);
       await settleFrames(page, frames);
       for (const step of scene.steps ?? []) await runStep(page, step);

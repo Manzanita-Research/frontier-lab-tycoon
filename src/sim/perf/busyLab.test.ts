@@ -2,6 +2,7 @@
 // profiles ten times as many ticks, for the numbers in docs/ARCHITECTURE.md.
 import { busyLab, profileTable, profileTicks, timeTicks, type BusyLab } from "./busyLab";
 import { perfBudget } from "../testkit";
+import { startEscape } from "../escape/driver";
 
 const env = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env ?? {};
 
@@ -53,5 +54,22 @@ describe("the busy lab: 800 walkers, every pack awake", () => {
     // It looks for a spot for every kind in its rotation, on every tile: once took 10 ms, one tick in 24. FLT-39 measured
     // the worst tick at 0.45 ms; a 1-vCPU Modal box once hit 2.16 ms in this heavy lab, so 3 keeps strict `pnpm check` green.
     expect(endings.maxUs / 1000).toBeLessThan(perfBudget(3));
+  });
+
+  it("keeps a five-agent jailbreak, guards chasing, inside the same budgets (FLT-59)", () => {
+    const lab = busyLab();
+    warm(lab);
+    const { s } = lab;
+    for (const w of s.walkers.filter((x) => x.kind === "agent").slice(0, 40)) w.drift = Math.max(w.drift, 0.9);
+    const runners = startEscape(s, { count: 5, pace: true });
+    expect(runners.length).toBe(5);
+    // Pacing, then the run: profile the chase itself (a run is over in well under 200 ticks).
+    for (let i = 0; i < 400 && !runners.some((r) => r.machine.value === "running"); i++) lab.play();
+    expect(runners.some((r) => r.machine.value === "running")).toBe(true);
+    const p = profileTicks(lab, 100, 100);
+    const escape = p.systems.find((t) => t.system === "escape")!;
+    console.log(`jailbreak: escape ${escape.meanUs.toFixed(1)} µs a tick (worst ${escape.maxUs.toFixed(0)} µs), whole tick ${p.meanUs.toFixed(1)} µs with the stopwatch on`);
+    expect(escape.meanUs / 1000).toBeLessThan(perfBudget(SYSTEM_MS));
+    expect(timeTicks(lab, 3, 60)).toBeLessThan(perfBudget(TICK_MS));
   });
 });

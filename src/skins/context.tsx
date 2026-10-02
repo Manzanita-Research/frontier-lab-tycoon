@@ -15,6 +15,9 @@ export function useSkin(): LoadedSkin {
   return skin;
 }
 
+/** The active skin's id, or null outside a SkinProvider (a slot rendered on its own). */
+export const useSkinId = (): string | null => useContext(SkinContext)?.id ?? null;
+
 /** What the coach is pointing at right now ("start", "build:path", ...), or null. Set by the host from the view-model. */
 const CoachContext = createContext<string | null>(null);
 export const CoachProvider = CoachContext.Provider;
@@ -27,7 +30,7 @@ export interface CoachApi {
    * pointing at. `alsoActive` lets a shut container stand in for what is inside it: a closed Start menu is the active target while
    * the coach points at one of its items, so the spotlight never has nothing to light.
    */
-  attrs(id: string, alsoActive?: boolean): { "data-coach": string; "data-coach-active"?: "" };
+  attrs(id: string, alsoActive?: boolean): { "data-anchor": string; "data-coach": string; "data-coach-active"?: "" };
   /**
    * True while the coach points at a tool in the build panel that is not in hand yet: a shut panel's opener stands in for
    * it (`attrs("start", !open && coach.intoPanel(items))`). Once the tool is picked the next thing to do is on the map, so it stops.
@@ -40,7 +43,8 @@ export function useCoach(): CoachApi {
   const target = useContext(CoachContext);
   return {
     target,
-    attrs: (id, alsoActive = false) => (target === id || alsoActive ? { "data-coach": id, "data-coach-active": "" } : { "data-coach": id }),
+    // Every coach target is an anchor too (FLT-93): [Show me] can point at anything the tutorial can.
+    attrs: (id, alsoActive = false) => (target === id || alsoActive ? { "data-anchor": id, "data-coach": id, "data-coach-active": "" } : { "data-anchor": id, "data-coach": id }),
     intoPanel: (items) => !!target?.startsWith("build:") && !items.some((it) => it.selected && `build:${it.kind}` === target),
   };
 }

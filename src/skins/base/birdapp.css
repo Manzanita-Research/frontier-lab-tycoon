@@ -1,0 +1,555 @@
+/* The Bird App (FLT-69): the panel, and the kit's post card, meter and sparkline that any skin may use. */
+
+/* ---- kit parts ---- */
+.bird-logo {
+  flex: none;
+  color: var(--flt-color-info);
+  vertical-align: -2px;
+}
+.bird-av {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 1.5px solid var(--flt-color-line);
+  border-radius: 50%;
+  background: var(--flt-color-panelAlt);
+  font-size: 14px;
+  line-height: 1;
+}
+.bird-handle,
+.bird-time {
+  font-size: 10.5px;
+  opacity: 0.65;
+}
+.bird-post {
+  position: relative;
+  display: flex;
+  gap: 7px;
+  padding: 6px 4px 6px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--flt-color-line) 25%, transparent);
+  font-size: 11.5px;
+}
+.bird-post-body {
+  flex: 1;
+  min-width: 0;
+}
+.bird-post header {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* Room for the viral sticker in the top corner. */
+.bird-post.viral header {
+  padding-right: 64px;
+}
+.bird-post p {
+  margin: 2px 0 3px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.bird-post footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+.bird-moment {
+  margin-left: 5px;
+  padding: 0 4px;
+  border-radius: 3px;
+  background: var(--flt-color-inset);
+  font-size: 9.5px;
+  font-style: normal;
+  font-weight: 800;
+}
+.bird-replyto {
+  display: block;
+  font-size: 10px;
+  opacity: 0.65;
+}
+.bird-counts {
+  display: inline-flex;
+  gap: 9px;
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.8;
+}
+.bird-ic {
+  margin-right: 2px;
+  vertical-align: -1px;
+}
+.bird-counts.ratioing .replies {
+  color: var(--bad);
+  font-weight: 800;
+  opacity: 1;
+}
+.bird-outcome {
+  padding: 0 5px;
+  border: 1.5px solid currentColor;
+  border-radius: 999px;
+  font-size: 9.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.bird-outcome.tone-good {
+  color: var(--good);
+}
+.bird-outcome.tone-bad {
+  color: var(--bad);
+}
+.bird-outcome.tone-joke {
+  color: var(--orange, #d9822b);
+}
+.bird-outcome.tone-neutral {
+  opacity: 0.6;
+}
+.bird-reviewed,
+.bird-handled {
+  font-size: 9.5px;
+  opacity: 0.7;
+}
+.bird-post.outcome-cancelled p {
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, var(--bad) 70%, transparent);
+}
+.bird-reply {
+  margin: 4px 0 0;
+  padding: 2px 0 2px 7px;
+  border-left: 2px solid color-mix(in srgb, var(--flt-color-line) 35%, transparent);
+  font-size: 10.5px;
+  font-style: italic;
+  opacity: 0.8;
+}
+.bird-viral {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border: 1.5px solid var(--flt-color-line);
+  border-radius: 4px;
+  background: #ffd23f;
+  color: #1a1a1a;
+  font: 900 9.5px/1.3 var(--font, sans-serif);
+  letter-spacing: 0.06em;
+  transform: rotate(-4deg);
+}
+.bird-post .bird-viral {
+  position: absolute;
+  top: 4px;
+  right: 2px;
+  margin: 0;
+  animation: bird-pop 0.35s ease-out;
+}
+@keyframes bird-pop {
+  from {
+    transform: rotate(-4deg) scale(0.2);
+  }
+  70% {
+    transform: rotate(-4deg) scale(1.25);
+  }
+}
+.bird-meter {
+  position: relative;
+  display: block;
+  height: 8px;
+  border: 1.5px solid var(--flt-color-line);
+  border-radius: 5px;
+  background: var(--flt-color-inset);
+  overflow: hidden;
+}
+.bird-meter::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1.5px;
+  background: var(--flt-color-line);
+}
+.bird-meter i {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  transition: width 0.6s ease-out;
+}
+.bird-meter .banger {
+  background: var(--good);
+}
+.bird-meter .cancel {
+  background: var(--bad);
+}
+.bird-spark {
+  width: 60px;
+  height: 16px;
+}
+.bird-spark polyline {
+  stroke: currentColor;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+/* ---- the panel ---- */
+.birdapp {
+  width: 272px;
+  padding: 7px 10px 8px;
+  pointer-events: auto;
+}
+/* Open, it floats like the Discourse's popover, one column further in so the two can be open together. */
+.birdapp.open {
+  position: fixed;
+  left: 332px;
+  bottom: 44px;
+  z-index: 12;
+  width: 350px;
+  max-height: min(calc(100vh - 170px), 620px);
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.28);
+}
+@media (max-width: 640px) {
+  .birdapp {
+    width: auto;
+  }
+  .birdapp.open {
+    left: 8px;
+    right: 8px;
+    bottom: 96px;
+    width: auto;
+    max-height: 60vh;
+  }
+}
+.birdapp-head {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+.birdapp-sub {
+  flex: 1;
+  min-width: 0;
+  font-size: 11px;
+  opacity: 0.7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Headlines since the panel was last open (FLT-54). */
+.birdapp-unread {
+  min-width: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--flt-color-bad);
+  color: #fff;
+  font-size: 11px;
+  line-height: 16px;
+  text-align: center;
+}
+.birdapp-fold {
+  opacity: 0.6;
+}
+.birdapp-aura {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 5px;
+  font-size: 11px;
+}
+.birdapp-auralabel {
+  font-weight: 800;
+}
+.birdapp-aurabar,
+.birdapp-load {
+  position: relative;
+  display: block;
+  flex: 1;
+  height: 8px;
+  border: 1.5px solid var(--flt-color-line);
+  border-radius: 5px;
+  background: var(--flt-color-inset);
+  overflow: hidden;
+}
+.birdapp-aurabar i,
+.birdapp-load i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: linear-gradient(90deg, #7d5cff, #ff5ca8);
+  transition: width 0.6s ease-out;
+}
+.birdapp-load i {
+  background: var(--bad);
+}
+.birdapp-spot {
+  margin: 5px 0 0;
+  font-size: 11px;
+  font-weight: 800;
+}
+.birdapp-spot.tone-good {
+  color: var(--good);
+}
+.birdapp-spot.tone-bad {
+  color: var(--bad);
+}
+.birdapp-effects {
+  margin: 4px 0 0;
+  font-size: 10.5px;
+  opacity: 0.75;
+}
+.birdapp-moments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 5px;
+}
+.birdapp-moments span {
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--orange, #d9822b);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+}
+.birdapp-tabs {
+  display: flex;
+  gap: 2px;
+  margin: 8px 0 2px;
+  border-bottom: 1.5px solid var(--flt-color-line);
+}
+.birdapp-tabs button {
+  padding: 3px 8px;
+  border: 1.5px solid transparent;
+  border-bottom: 0;
+  border-radius: 6px 6px 0 0;
+  background: none;
+  color: inherit;
+  font: 700 11px/1.4 var(--font, sans-serif);
+  opacity: 0.65;
+  cursor: pointer;
+}
+.birdapp-tabs button.on {
+  border-color: var(--flt-color-line);
+  background: var(--flt-color-panelAlt);
+  opacity: 1;
+}
+.birdapp-body h4 {
+  margin: 8px 0 2px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.65;
+}
+.birdapp-typing {
+  margin: 6px 0 0;
+  font-size: 10.5px;
+  font-style: italic;
+  opacity: 0.7;
+}
+.birdapp-typing::after {
+  content: "";
+  animation: bird-dots 1.2s steps(4) infinite;
+}
+@keyframes bird-dots {
+  0% {
+    content: "";
+  }
+  25% {
+    content: ".";
+  }
+  50% {
+    content: "..";
+  }
+  75% {
+    content: "...";
+  }
+}
+.birdapp-empty {
+  margin: 8px 0;
+  font-size: 11px;
+  opacity: 0.7;
+}
+.birdapp-posters,
+.birdapp-queue {
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.birdapp-posters > li {
+  padding: 6px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--flt-color-line) 25%, transparent);
+  font-size: 11px;
+}
+.birdapp-posters > li.hot .bird-av {
+  box-shadow: 0 0 0 2px var(--bad);
+}
+.birdapp-posters > li.tier-recluse,
+.birdapp-posters > li.tier-break {
+  opacity: 0.7;
+}
+.birdapp-who {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.birdapp-who small {
+  display: block;
+  font-size: 10px;
+  opacity: 0.7;
+}
+.birdapp-meterrow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0;
+  font-size: 10px;
+}
+.birdapp-levers {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+}
+.birdapp-levers button {
+  display: flex;
+  flex-direction: column;
+  padding: 2px 4px;
+  border: 1.5px solid var(--flt-color-line);
+  border-radius: 5px;
+  background: var(--flt-color-panelAlt);
+  color: var(--flt-color-text);
+  font: 700 10px/1.25 var(--font, sans-serif);
+  text-align: left;
+  cursor: pointer;
+}
+.birdapp-levers button small {
+  font-size: 9px;
+  font-weight: 600;
+  opacity: 0.75;
+}
+.birdapp-levers button.on {
+  background: var(--flt-color-accent);
+  color: var(--flt-color-accentText);
+}
+.birdapp-count {
+  padding-top: 5px;
+  font-size: 10px;
+  opacity: 0.65;
+}
+.birdapp-comms {
+  display: grid;
+  gap: 4px;
+  padding-top: 6px;
+  font-size: 11px;
+}
+.birdapp-desk {
+  margin: 0;
+  font-weight: 800;
+}
+.birdapp[data-desk="drowning"] .birdapp-desk {
+  color: var(--bad);
+}
+.birdapp-queue li {
+  padding: 2px 0;
+  font-size: 11px;
+}
+.birdapp-queue li.cancelled b {
+  color: var(--bad);
+}
+.birdapp-tally {
+  margin: 6px 0 0;
+  font-size: 10px;
+  opacity: 0.6;
+}
+/* ---- the rival labs (FLT-92) ---- */
+.bird-post.side-them {
+  padding-left: 5px;
+  border-left: 3px solid var(--bird-lab, var(--flt-color-line));
+}
+/* Their avatar wears the lab's colour too, so a skin that draws its own card borders still says whose post it is. */
+.bird-post.side-them .bird-av {
+  border-color: var(--bird-lab, var(--flt-color-line));
+  box-shadow: 0 0 0 1.5px var(--bird-lab, transparent);
+}
+.bird-lab {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-right: 4px;
+  font-size: 9.5px;
+  font-weight: 800;
+  vertical-align: 1px;
+}
+.bird-lab i {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--bird-lab, var(--flt-color-line));
+}
+.bird-beat {
+  padding: 0 4px;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  font-size: 9.5px;
+  font-style: normal;
+  font-weight: 800;
+  opacity: 0.75;
+}
+.bird-quote {
+  margin: 3px 0 4px;
+  padding: 3px 6px;
+  border: 1.5px solid color-mix(in srgb, var(--flt-color-line) 35%, transparent);
+  border-radius: 6px;
+  font-size: 10.5px;
+}
+.bird-quote b {
+  display: block;
+  font-size: 10px;
+  opacity: 0.7;
+}
+.bird-cost {
+  color: var(--bad);
+  font-size: 9.5px;
+  font-weight: 800;
+}
+.bird-filter {
+  display: inline-flex;
+  margin: 6px 0 2px;
+  border: 1.5px solid var(--flt-color-line);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.bird-filter button {
+  padding: 2px 9px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: 700 10.5px/1.4 var(--font, sans-serif);
+  opacity: 0.65;
+  cursor: pointer;
+}
+.bird-filter button + button {
+  border-left: 1.5px solid var(--flt-color-line);
+}
+.bird-filter button.on {
+  background: var(--flt-color-panelAlt);
+  opacity: 1;
+}
+.birdapp-quietlabs {
+  margin: 2px 0;
+  font-size: 10px;
+  font-style: italic;
+  opacity: 0.7;
+}
+@media (prefers-reduced-motion: reduce) {
+  .bird-post .bird-viral,
+  .birdapp-typing::after {
+    animation: none;
+  }
+}

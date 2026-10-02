@@ -9,6 +9,9 @@ import { MIGRATIONS, WORLD_MIGRATIONS, migrate, renameIds, replaceText, type Mig
 // Written once on Sep 30 2026 (FLT-65, v1): `createInitialState(7)`, `runDays(s, 45)`, then
 // `encodeSave(s, { skin: "frontier-95", savedAt: new Date("2026-09-30T12:00:00Z") })`. Frozen: never regenerate it.
 import V1_GARAGE from "./fixtures/v1-garage-day45.fltsave?raw";
+// Written once on Oct 1 2026 (FLT-78, v2): `createInitialState(11)`, `runDays(s, 20)`, then `encodeSave(s, { skin:
+// "frontier-95", savedAt: new Date("2026-10-01T12:00:00Z"), mods: [{ id: "steve", ..., source: "/mods/steve.json" }] })`.
+import V2_GARAGE from "./fixtures/v2-garage-day20.fltsave?raw";
 
 const run = <A, E>(e: Effect.Effect<A, E>) => Effect.runPromise(e);
 
@@ -57,7 +60,7 @@ describe("migrations", () => {
   // v1 → v2 (#71): the rival `vssi` is `supersuper` now. The frozen v1 garage has the old id as values and as keys.
   it("v1 → v2: the frozen garage's `vssi` is `supersuper`, and it plays on", async () => {
     const { save, world } = await run(decodeSave(V1_GARAGE));
-    expect(save.v).toBe(2);
+    expect(save.v).toBe(SAVE_VERSION);
     const json = JSON.stringify(world);
     expect(json).not.toMatch(/"vssi"|Very Safe S|MetaMeta Superintelligence/);
     const known = new Set<string>(RIVAL_DEFS.map((r) => r.id));
@@ -65,6 +68,17 @@ describe("migrations", () => {
     expect(Object.keys(world.race!.prevRanks ?? {})).toContain("supersuper");
     runDays(world, 60);
     expect(world.day).toBe(105);
+  });
+
+  // v2 → v3 (FLT-78): mods can arrive mid-game (`mods[].tick`). A v2 save's mods came with the lab, so none has one.
+  it("v2 → v3: the frozen v2 garage loads with its mods as the lab started with them, and plays on", async () => {
+    const { save, world } = await run(decodeSave(V2_GARAGE));
+    expect(save.v).toBe(SAVE_VERSION);
+    expect(save.mods).toEqual([{ id: "steve", version: "1.0.0", hash: "abc12345", source: "/mods/steve.json" }]);
+    expect(world.modsAdded).toBeUndefined();
+    expect(world.day).toBe(20);
+    runDays(world, 20);
+    expect(world.day).toBe(40);
   });
 
   it("a World step reaches inside the packed World of a save, and no step leaves it alone", async () => {

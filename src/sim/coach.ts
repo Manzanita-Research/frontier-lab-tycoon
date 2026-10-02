@@ -3,9 +3,13 @@ import { canPlace } from "./commands";
 import { progressOf } from "./progression";
 import { coachMachine } from "./machines/coach";
 import { initialStored, step } from "./machines/run";
+import { OPENING_TILES } from "./opening";
 import { entrances, getReach, isReachable } from "./pathfind";
 import type { GameState } from "./types";
 import { defs } from "./defs";
+
+/** The coach's path step is done once three tiles of the player's own join the gate's network. */
+const PATH_ASK = 3;
 
 const lowerFirst = (t: string) => t.charAt(0).toLowerCase() + t.slice(1);
 
@@ -39,7 +43,7 @@ export function updateCoach(s: GameState, ticked = false) {
     if (!line) break;
     const reach: ReturnType<typeof getReach>["tiles"] | null = line.trigger === "pathConnected" ? getReach(s).tiles : null;
     const matches: boolean = line.trigger === "buildPanelOpened" ? s.flags.coachBuildOpened !== undefined || (s.flags.coachReplayAt === undefined && s.flags.firstPath !== undefined)
-      : line.trigger === "pathConnected" ? s.flags.firstPath !== undefined && reach!.filter(Boolean).length >= 8
+      : line.trigger === "pathConnected" ? s.flags.firstPath !== undefined && reach!.filter(Boolean).length >= OPENING_TILES + PATH_ASK
       : line.trigger === "hallBuilt" ? s.buildings.some((b) => b.kind === "hall" && isReachable(s, b))
       // Seen, or overtaken: a model that ships first ends the wait these two fill.
       : line.trigger === "spedUp" ? s.flags.coachSpedUp !== undefined || s.models.length > 0

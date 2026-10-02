@@ -14,25 +14,30 @@ import { stageDisaster } from "../sim/disasters/demo";
 import { RISKS, type Risk } from "../sim/disasters/types";
 import type { GameState, NewsItem, OpenEvent, Outcome, RunMods, Thought } from "../sim/types";
 import { fillAgents, seedWalkers } from "../sim/walkers";
-import { isMoment, stageMoment } from "../sim/race/demo";
-import { isOpsMoment, stageOps } from "../sim/opsDemo";
-import { isPaperMoment, stagePapers } from "../sim/race/papers/demo";
-import { isFactionMoment, stageFactions } from "../sim/factions/demo";
-import { parseLeapMoment, stageLeapfrog } from "../sim/race/leapfrog/demo";
-import { isCollusionMoment, stageCollusion } from "../sim/collusion/demo";
-import { isCircusMoment, stageCircus } from "../sim/circus/demo";
-import { isDramaMoment, stageDrama } from "../sim/defection/demo";
-import { isAuditMoment, stageAudit } from "../sim/auditors/demo";
-import { isSenateMoment, stageSenate } from "../sim/capture/demo";
+import { isMoment, MOMENTS, stageMoment } from "../sim/race/demo";
+import { isOpsMoment, OPS_MOMENTS, stageOps } from "../sim/opsDemo";
+import { isPaperMoment, PAPER_MOMENTS, stagePapers } from "../sim/race/papers/demo";
+import { FACTION_MOMENTS, isFactionMoment, stageFactions } from "../sim/factions/demo";
+import { BIRD_DEMO_MOMENTS, isBirdMoment, stageBird } from "../sim/birdapp/demo";
+import { LEAP_MOMENTS, parseLeapMoment, stageLeapfrog } from "../sim/race/leapfrog/demo";
+import { COLLUSION_MOMENTS, isCollusionMoment, stageCollusion } from "../sim/collusion/demo";
+import { CIRCUS_MOMENTS, isCircusMoment, stageCircus } from "../sim/circus/demo";
+import { DRAMA_MOMENTS, isDramaMoment, stageDrama } from "../sim/defection/demo";
+import { AUDIT_MOMENTS, isAuditMoment, stageAudit } from "../sim/auditors/demo";
+import { isSenateMoment, SENATE_MOMENTS, stageSenate } from "../sim/capture/demo";
+import { ESCAPE_MOMENTS, isEscapeMoment, stageEscape } from "../sim/escape/demo";
 import { walkersThinking } from "../sim/mind";
 import { makeSnapshot, NO_SELECTION, type Snapshot, type UiSelection, type UiToast } from "./hud";
 import { continueTutorial } from "../sim/tutorial";
 import { stageFirstRun } from "../sim/firstRunDemo";
 import { withDefs } from "../sim/defs";
 import { enableEarnedPacks, PACK_OFF_FLAGS } from "../sim/progression";
+import { BEATS_MOMENTS, isBeatsMoment, keepsLadder, stageBeats } from "../sim/beatsDemo";
+import { isOnboardMoment, ONBOARD_MOMENTS, stageOnboard } from "../sim/onboardDemo";
 import type { GameDefinition } from "../mods/game-definition";
 import { enableEndings } from "../sim/endings/state";
-import { isEndingMoment, stageEndingMoment } from "../sim/endings/demo";
+import { ENDING_MOMENTS, isEndingMoment, stageEndingMoment } from "../sim/endings/demo";
+import { isMoneyMoment, MONEY_MOMENTS, stageMoneyMoment } from "../sim/moneyDemo";
 import { applyLineage, perkById } from "../sim/endings/lineage";
 import type { PerkId } from "../sim/endings/pack";
 
@@ -72,20 +77,44 @@ export class SimHandle {
   /** The World a save put here (FLT-65), so the News Room reopens its archive instead of wiping it. */
   loaded: GameState | null = null;
 
-  constructor(world: GameState, leapfrog = false, public papers = world.papers?.enabled ?? false, public readonly def: GameDefinition | null = null) {
+  /** Definitions waiting for their `addMod`/`removeMod` command (FLT-78), by `defKey`. */
+  private staged = new Map<string, GameDefinition | null>();
+
+  constructor(world: GameState, leapfrog = false, public papers = world.papers?.enabled ?? false, public def: GameDefinition | null = null) {
     this.world = world;
     this.leapfrog = leapfrog;
     this.endings = !!world.endings;
   }
 
+  /**
+   * The definition the lab runs with once this `addMod`/`removeMod` command applies (FLT-78). It is swapped in on the
+   * command's own tick, so the tick before still ran the old one and a replay of the commands is the same lab.
+   */
+  stageDef(command: Extract<Command, { type: "addMod" | "removeMod" }>, def: GameDefinition | null) {
+    this.staged.set(defKey(command), def);
+  }
+
+  private swapDefs(commands: readonly Command[]) {
+    for (const c of commands) {
+      if (c.type !== "addMod" && c.type !== "removeMod") continue;
+      const key = defKey(c);
+      if (!this.staged.has(key)) continue;
+      this.def = this.staged.get(key)!;
+      this.staged.delete(key);
+    }
+  }
+
   /** Advance `n` ticks; queued commands apply on the first one. */
   step(n: number, commands: readonly Command[]) {
+    if (n > 0) this.swapDefs(commands);
     for (let i = 0; i < n; i++) tick(this.world, i === 0 && commands.length > 0 ? commands : undefined, this.def);
   }
 
   /** Apply commands without advancing time (building while paused or with a card open). */
   applyNow(commands: readonly Command[]) {
-    if (commands.length > 0) applyNow(this.world, commands, this.def);
+    if (commands.length === 0) return;
+    this.swapDefs(commands);
+    applyNow(this.world, commands, this.def);
   }
 
   /** Start over with a fresh seed (the random-disaster setting carries over to the new lab). `daily` is Today's lab. */
@@ -116,7 +145,8 @@ export class SimHandle {
    * Carry on from a save (FLT-65): the World replaces the live one as it is, so the next tick is the tick it would
    * have been. The handle's own switches follow the World (a save knows whether its packs are on).
    */
-  load(world: GameState) {
+  load(world: GameState, def: GameDefinition | null) {
+    this.def = def;
     this.newsStartId = 0;
     this.openingThoughts = undefined;
     this.world = world;
@@ -155,7 +185,14 @@ export class SimHandle {
   }
 }
 
-type SimDebug = Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk" | "daily" | "endings">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean; collusion?: boolean; hearing?: boolean; yacht?: boolean; defection?: boolean; poaching?: boolean; auditors?: boolean; capture?: boolean; promises?: boolean; factions?: boolean; water?: boolean };
+/** Every `?moment=` a staging link knows (a test loads each one, FLT-83). `stream:<mishap>` and `poach-offer:<rival>` also take an argument. */
+export const STAGED_MOMENTS: readonly string[] = [
+  "jem-opening", "jem-confirm", ...ENDING_MOMENTS, ...MOMENTS, ...OPS_MOMENTS, ...LEAP_MOMENTS, ...COLLUSION_MOMENTS, ...PAPER_MOMENTS,
+  ...CIRCUS_MOMENTS, ...DRAMA_MOMENTS, ...AUDIT_MOMENTS, ...SENATE_MOMENTS, ...FACTION_MOMENTS, ...BIRD_DEMO_MOMENTS, ...ESCAPE_MOMENTS,
+  ...BEATS_MOMENTS, ...MONEY_MOMENTS, ...ONBOARD_MOMENTS,
+];
+
+type SimDebug = Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk" | "daily" | "endings">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean; collusion?: boolean; hearing?: boolean; yacht?: boolean; defection?: boolean; poaching?: boolean; auditors?: boolean; capture?: boolean; promises?: boolean; factions?: boolean; birdapp?: boolean; birdrivals?: boolean; water?: boolean; escape?: boolean };
 
 /**
  * A living campus, warped forward and dressed up per the `?seed=&warp=&agents=&discourse=` debug knobs.
@@ -168,8 +205,8 @@ export function createSimHandle(dbg: SimDebug, def: GameDefinition | null = null
 }
 
 function stage(dbg: SimDebug): GameState {
-  // An ending's scene (`?moment=memo|takeover|thanks|front-<id>`) starts from the curated mid-game campus.
-  const sim = isEndingMoment(dbg.moment) ? stageEndingMoment(dbg.moment) : createInitialState(dbg.seed);
+  // An ending's scene (`?moment=memo|takeover|thanks|front-<id>`) and FLT-86's money ones (`money-*`) start from the curated mid-game campus.
+  const sim = isEndingMoment(dbg.moment) ? stageEndingMoment(dbg.moment) : isMoneyMoment(dbg.moment) ? stageMoneyMoment(dbg.moment) : createInitialState(dbg.seed);
   if (dbg.endings !== false) enableEndings(sim, dbg.daily ?? null);
   if (dbg.leapfrog === false) sim.flags.leapfrogOff = 1;
   if (dbg.papers === false) sim.flags.papersOff = 1;
@@ -182,9 +219,15 @@ function stage(dbg: SimDebug): GameState {
   if (dbg.capture === false) sim.flags.captureOff = 1;
   if (dbg.promises === false) sim.flags.promisesOff = 1;
   if (dbg.factions === false) sim.flags.factionsOff = 1;
+  if (dbg.birdapp === false) sim.flags.birdappOff = 1;
+  if (dbg.birdrivals === false) sim.flags.birdrivalsOff = 1;
+  if (dbg.escape === false) sim.flags.escapeOff = 1;
   if (dbg.water === false) sim.flags["arcOff:water-escalation"] = 1;
   const leap = parseLeapMoment(dbg.moment);
-  if (dbg.warp > 0 || dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0 || dbg.moment || dbg.disaster) { continueTutorial(sim, true); delete sim.progression; }
+  if (dbg.warp > 0 || dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0 || dbg.moment || dbg.disaster) {
+    continueTutorial(sim, true);
+    if (!keepsLadder(dbg.moment)) delete sim.progression;
+  }
   // No ladder means every system is earned: wake every pack that isn't switched off.
   if (!sim.progression) enableEarnedPacks(sim);
   for (let i = 0; i < dbg.warp * TICKS_PER_DAY; i++) tick(sim);
@@ -199,6 +242,10 @@ function stage(dbg: SimDebug): GameState {
   else if (isAuditMoment(dbg.moment)) stageAudit(sim, dbg.moment);
   else if (isSenateMoment(dbg.moment)) stageSenate(sim, dbg.moment);
   else if (isFactionMoment(dbg.moment)) stageFactions(sim, dbg.moment);
+  else if (isBirdMoment(dbg.moment)) stageBird(sim, dbg.moment);
+  else if (isBeatsMoment(dbg.moment)) stageBeats(sim, dbg.moment);
+  else if (isOnboardMoment(dbg.moment)) stageOnboard(sim, dbg.moment);
+  else if (isEscapeMoment(dbg.moment)) stageEscape(sim, dbg.moment);
   if (dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0) {
     const rng = createRng(sim.rngState);
     if (dbg.researchers > 0) seedWalkers(sim, "researcher", dbg.researchers, rng);
@@ -218,6 +265,8 @@ function stage(dbg: SimDebug): GameState {
   if (dbg.disaster) stageDisaster(sim, dbg.disaster, dbg.dz ?? 0, dbg.dzPick ?? null);
   return sim;
 }
+
+const defKey = (c: Extract<Command, { type: "addMod" | "removeMod" }>) => (c.type === "addMod" ? `add:${c.mod.id}` : `remove:${c.id}`);
 
 export class Sim extends Context.Service<Sim, SimHandle>()("@flt/Sim") {}
 

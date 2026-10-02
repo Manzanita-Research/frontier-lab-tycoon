@@ -39,6 +39,9 @@ export function HowToPlay({ help, actions }: SlotPropsMap["HowToPlay"]) {
           <button type="button" className="choice plain" onClick={() => actions.coachReplay()}>
             <b>{t("help.replay")}</b>
           </button>
+          <button type="button" className="choice plain" onClick={() => actions.openBox()}>
+            <b>{t("help.box")}</b>
+          </button>
           <button type="button" className="choice" onClick={() => actions.closeHelp()}>
             <b>{t("help.close")}</b>
           </button>

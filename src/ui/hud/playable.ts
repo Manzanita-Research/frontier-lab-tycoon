@@ -4,8 +4,9 @@
 import { STAFF } from "../../content/staff";
 import type { CoachVM, HudPanelId, UnlockCardVM, VisibleVM } from "./types";
 import { defs } from "../../sim/defs";
+import { unlockGroupsOf } from "./anchors";
 
-export const HUD_PANELS: readonly HudPanelId[] = ["revenue", "vibes", "arena", "rnd", "thoughts", "news", "staff", "events", "papers", "disasters", "factions"];
+export const HUD_PANELS: readonly HudPanelId[] = ["revenue", "vibes", "arena", "rnd", "thoughts", "news", "staff", "events", "papers", "disasters", "factions", "birdapp"];
 
 /** The contract, as the logic sends it. */
 export interface PlayableSnapshot {
@@ -13,7 +14,7 @@ export interface PlayableSnapshot {
     level: number;
     levelName: string;
     unlocked: { buildings: readonly string[]; staff: readonly string[]; systems: readonly string[] };
-    goal: { text: string; current: number; target: number; status?: string; lowerIsBetter?: boolean; objective?: string };
+    goal: { text: string; current: number; target: number; status?: string; lowerIsBetter?: boolean; objective?: string; held?: number };
     teasers: readonly { label: string; hint: string }[];
   };
   coach?: (CoachVM & { suggest?: unknown }) | null;
@@ -27,13 +28,15 @@ export interface PlayableInput {
   buildings: ReadonlySet<string>;
   staff: ReadonlySet<string>;
   systems: readonly string[];
-  goal: { text: string; current: number; target: number; status?: string; lowerIsBetter?: boolean; objective?: string };
+  goal: { text: string; current: number; target: number; status?: string; lowerIsBetter?: boolean; objective?: string; held?: number };
   teasers: readonly { label: string; hint: string }[];
   visible: VisibleVM;
   coach: CoachVM | null;
   unlock: UnlockCardVM | null;
   /** False when the snapshot carried no ladder at all (everything is earned). */
   laddered: boolean;
+  /** FLT-93: whose steps the goal note's [Show me] follows: the rung's id, or the scenario objective's once the ladder is done. */
+  goalId?: string;
 }
 
 /**
@@ -44,10 +47,12 @@ const SYSTEM_NAMES: Record<string, string | null> = {
   breakdowns: "Breakdowns", slop: "Slop", leapfrog: "Benchmark leaderboard", arena: "The Arena", rnd: "R&D multiplier", news: "The Frontier Times",
   events: "Event cards", protests: "Protests", disasters: "Disasters", papers: "Papers: publish or perish", collusion: null,
   hearing: "The Hearing", yacht: "The yacht summit", defection: "Defection", poaching: "The Poaching War", auditors: "Evals Without Borders",
-  promises: "The Promise Tracker", capture: "Regulatory Capture", factions: "Factions",
+  promises: "The Promise Tracker", capture: "Regulatory Capture", factions: "Factions", birdapp: "The Bird App", escape: "The Sandbox Escape",
 };
+// FLT-93: grouped from the raw card, while the systems are still ids.
 const unlockOf = (card: UnlockCardVM): UnlockCardVM => ({
   ...card,
+  groups: unlockGroupsOf(card, defs().progression),
   items: card.items.flatMap((item) => (item in SYSTEM_NAMES ? (SYSTEM_NAMES[item] === null ? [] : [SYSTEM_NAMES[item]!]) : [item])),
 });
 
@@ -71,5 +76,12 @@ export function playableOf(snap: object): PlayableInput {
     coach: coach && { id: coach.id, step: coach.step, of: coach.of, text: coach.text, target: coach.target, waitFor: coach.waitFor, canSkip: coach.canSkip, ...(coach.dim ? { dim: true } : {}) },
     unlock: p.unlockCard ? unlockOf(p.unlockCard) : null,
     laddered: progress !== undefined,
+    ...goalIdOf(progress),
   };
+}
+
+function goalIdOf(progress: PlayableSnapshot["progress"]): { goalId?: string } {
+  if (!progress) return {};
+  const id = progress.goal.objective ?? (progress.goal.text ? defs().progression.find((r) => r.level === progress.level)?.id : undefined);
+  return id ? { goalId: id } : {};
 }

@@ -33,8 +33,8 @@ flowchart LR
 | **training** | `src/sim/machines/training.ts` | `idle`, `training`, `releasing` | `DAY {halls, gain}`, `NAMED {name}` | `RELEASED`, `RUN_STARTED` | run, progress, cost, next model name |
 | **tutorial** | `src/sim/machines/tutorial.ts` | `path`, `hall`, `gateway`, `hire`, `release`, `done`, `skipped` | `FACTS`, `CONTINUE`, `SKIP` | `FINISHED` (one launch toast) | acknowledgement of the current step; stored in `World.tutorial` |
 | **guardrails** | `src/sim/machines/guardrails.ts` | `clear`, `confirming` | `REQUEST`, `CLEAR`, `OBSERVE`, `HALL` | low-runway nudge, redundant-Hall hint | exact pending spending command, low-runway and disconnected-gate warning flags; additive optional `World.guardrails` |
-| **economy** | `.../economy.ts` | `solvent`, `runwayWarning`, `bailout`, `bankrupt` | `DAY {cash, day}` | `BAILOUT` | day of the last bridge round |
-| **goals** | `.../goals.ts` | `tracking`, `won`, `lost` (final) | `DAY {day, cash, values}` | `WON`, `LOST` | the three milestones, the day it ended |
+| **economy** | `.../economy.ts` | `solvent`, `offered`, `funded`, `overdrawn`, `bankrupt` (final) | `DAY {cash, day}`, `SIGNED {day, equity}` | `OFFER`, `FUNDED`, `WITHDRAWN`, `OVERDRAWN`, `RECOVERED`, `BANKRUPT` | rounds signed (of 3), the stake still yours, the overdraft's last day |
+| **goals** | `.../goals.ts` | `tracking`, `won`, `lost` (final) | `DAY {day, broke, values}` | `MET`, `STRETCH`, `HOLDING`, `SLIPPED`, `WON`, `LOST` | the three milestones (a hold goal counts its days in a row), the day it ended |
 | **arc** (one per event card) | `.../arc.ts` | `calm`, `brewing`, `cardOpen`, `cooldown` | `DAY {day, ready, slotFree, pace}`, `CHOOSE {choiceIndex}` | `RESOLVED` | choices, cooldown days, day last opened |
 | **walker** (one per walker) | `.../walker.ts` | `arriving`, `seeking`, `queuing`, `inside`, `loitering`, `wandering`, `choosing`, `leaving`, `quitting`, `picketing`, `gone` (final) | `ARRIVED`, `QUEUED`, `ADMITTED`, `GAVE_UP`, `LINGER`, `NEXT`, `TOUR_DONE`, `QUIT`, `CHOSE_BUILDING`, `CHOSE_WANDER`, `PROTEST_STARTED`, `SENT_HOME`, `EXITED` | none: the driver acts on the state entered | nothing (the need a walker is seeking, `visits` and `step` stay plain walker fields) |
 | **rival** (one per rival lab) | `src/sim/race/rival.ts` | `idle`, `training`, `releasing`, `cooldown` | `WEEK {aggro, pace, chase, four dice, name}`, `SHOCK {capability, hype, momentum}` | `RELEASED`, `POACH` | personality, capability, hype, weeks left, open weights?, momentum, latest model |
@@ -196,12 +196,16 @@ stateDiagram-v2
   direction LR
   state "economy" as E {
     [*] --> solvent
-    solvent --> runwayWarning: DAY [cash < 0, cooldown]
-    solvent --> bailout: DAY [cash < 0, due] / BAILOUT
-    runwayWarning --> bailout: DAY [cash < 0, due] / BAILOUT
-    bailout --> solvent: DAY [cash ≥ 0]
-    runwayWarning --> solvent: DAY [cash ≥ 0]
-    solvent --> bankrupt: DAY [cash < -$2M after any round]
+    solvent --> offered: DAY [cash < 0, rounds < 3] / OFFER
+    offered --> funded: SIGNED / FUNDED
+    offered --> solvent: DAY [cash ≥ 0] / WITHDRAWN
+    funded --> solvent: DAY [cash ≥ 0]
+    funded --> offered: DAY [cash < 0, rounds < 3] / OFFER
+    solvent --> overdrawn: DAY [cash < 0, rounds = 3] / OVERDRAWN
+    funded --> overdrawn: DAY [cash < 0, rounds = 3] / OVERDRAWN
+    overdrawn --> solvent: DAY [cash ≥ 0] / RECOVERED
+    overdrawn --> bankrupt: DAY [30 days up] / BANKRUPT
+    bankrupt --> [*]
   }
 ```
 
@@ -210,8 +214,9 @@ stateDiagram-v2
   direction LR
   state "goals" as G {
     [*] --> tracking
+    tracking --> tracking: DAY [one more met] / MET, STRETCH at 2 of 3; HOLDING, SLIPPED for a hold goal
     tracking --> won: DAY [all milestones met] / WON
-    tracking --> lost: DAY [day ≥ 360 or cash < -$2M] / LOST
+    tracking --> lost: DAY [day ≥ deadline or broke] / LOST
   }
   state "training" as T {
     [*] --> training
@@ -232,7 +237,7 @@ stateDiagram-v2
 A sim machine never touches the World and never draws random numbers:
 
 1. **State in the World is `{ value, context }`** (JSON). `step(machine, stored, event)` in `src/sim/machines/run.ts` rebuilds a live snapshot with `machine.resolveState`, calls `transition()`, and returns the next `{ value, context }` plus the emitted events in order. The World never holds a live snapshot, so `JSON.parse(JSON.stringify(world))` deep-equals it.
-2. **The driver applies effects.** `training.ts` turns `RELEASED` into capability, hype, cash, a toast and a headline; `economy.ts` turns `BAILOUT` into +$2M and a headline; and so on. It applies them in the order they were emitted, which is the order the pre-port code ran them in.
+2. **The driver applies effects.** `training.ts` turns `RELEASED` into capability, hype, cash, a toast and a headline; `economy.ts` turns `OFFER` into an emergency-round card and `FUNDED` into the round's money, terms and headline (FLT-86); and so on. It applies them in the order they were emitted, which is the order the pre-port code ran them in.
 3. **Randomness is pre-rolled.** After a training release the machine waits in `releasing`; the driver rolls the next model name *after* the release effects and *before* the next run's, then sends `NAMED`. That is exactly where the old loop drew, so the RNG stream is unchanged.
 
 ## Numbers (measured on the 1-vCPU Modal box, Node 22)
@@ -353,6 +358,27 @@ Decisions worth knowing:
 - **Debug knobs:** `?hour=22` pins the clock, `?photo` opens photo mode, and with `?debug=1` `window.__fx` exposes `{ fx, cinema, pool }`. `scripts/juice-shots.mjs` scripts the moments a URL can't (a release, a saved photo, frame times).
 
 Measured on the 1-vCPU Modal box: a full pool of 2,000 particles updates in 0.08 ms per frame, watching a 429-walker World costs 0.0005 ms per frame, and the SwiftShader frame time of the whole game is unchanged against the FLT-4 build (mean 117 ms with juice vs 126 to 132 ms without, both rasteriser-bound).
+
+### The picture tube (FLT-73)
+
+**Off in the game for now (FLT-70).** Jem kept the shader only for the box's beige PC (`src/intro/stage/Kiosk.tsx` runs `CRTPipeline` itself). `GAME_CRT` in `src/render/crt/state.ts` is `false`, so the look is always off for every skin, `?crt=`/`?crttier=` are ignored, no pick is read or saved, and the HUD passes no `vm.skins.crt` (Display Properties ▸ Settings shows nothing). Frontier 95's `"crt": "subtle"` stays in its `skin.json`, inert. Everything below is still wired; the FLT-88 spike turns it back on by flipping that one constant (and `src/render/crt/off.test.ts` with it).
+
+A CRT over the whole game, set in Display Properties ▸ Settings (off / subtle / full; Frontier 95 defaults to subtle through its `skin.json` `"crt"`). It has two layers that agree on pitch, bow, vignette and corners (`src/render/crt/looks.ts`):
+
+```mermaid
+flowchart LR
+  P["Display Properties<br/>setCrt(mode)"] --> C["ui/juice/crt.ts<br/>pick ▸ skin default ▸ off<br/>(?crt= pins; photo mode = off)"]
+  C -->|crtAtom| L["CrtLayer (in the Canvas)<br/>feeds the governor"]
+  L -->|"multi / lite"| FX["CrtFX (lazy)<br/>EffectComposer: CRTPass or LiteCrtEffect"]
+  C -->|crtAtom| T["Tube.tsx + crt.css<br/>scanlines, vignette, corners, glow over the DOM"]
+```
+
+- **The canvas** goes through the ported [crt-shader](https://github.com/OutThisLife/crt-shader) pipeline (MIT, see `docs/CREDITS.md`). The pipeline downsamples the scene to one row per scanline, then runs horizontal, vertical and optics stages. The prepare stage tone-maps the campus with ACES itself and lays it over the sky by alpha, so the sky keeps its colours the way three leaves an sRGB `scene.background`. The optics stage bows the picture. `CRTPipeline` also renders to a texture, for FLT-70's monitor (`src/render/crt/README.md`).
+- **The DOM** gets a `pointer-events: none` layer with low-opacity scanlines at the same pitch, a vignette, rounded corners and a faint same-colour text glow. There is no blur and no distortion on text. Full adds a slow roll band and a flicker; reduce motion turns both off.
+- **Clicks and labels follow the bow.** `crtEvents` warps the pointer before R3F raycasts. Labels and the tap target unwarp their projected point with `onGlass()`. The camera rig needs nothing: it centres what it focuses on, and the bow leaves the centre where it is.
+- **Tiers and the governor.** multi (the 4-stage pipeline, no MSAA: the downsample antialiases) → lite (one full-resolution pass) → flat (CSS only). A phone starts at lite. If the mean frame time is over 20 ms with the tube on, `CrtGovernor` steps down a tier. If the step didn't cut the frame time by 12%, it steps back up and stops, since the tube was not the cost. The pixel ratio is capped at 1.25 while the shader is on.
+- **Readability.** `src/render/crt/contrast.test.ts` holds every skin's text pairs to WCAG AA (4.5:1) under the darkest pixel the glass makes: a scanline gap at the vignette's corner. It also checks that the glow stays faint. Frontier 95, where the tube is on by default, must still pass when the glow's halo is counted against the background.
+- **Debug.** `?crt=off|subtle|full` and `?crttier=multi|lite|flat` pin the look and tier for a visit, with no governor. `window.__crt` reports the tier, the pixel ratio and the shader's input size. With `?debug=1` it also reports `gpuMs`, the pass's own GPU time, from `EXT_disjoint_timer_query_webgl2` where Chrome exposes it. `node scripts/crt-frames.mjs` prints the frame-time table (`CRT_GPU=1` runs it on a real GPU).
 
 ## The Race (FLT-9): rivals, the Arena, eras
 
@@ -658,3 +684,35 @@ answered with its first choice); the sim sends the same toasts on both branches.
 
 Everything that is not an answer to a card is held to four a minute by the window, at any speed. The world notices are
 still there, on the ticker.
+
+## The Bird App (FLT-69): researchers who post
+
+Spec: `docs/specs/FLT-69.md`. The pack is `mods/base-birdapp/` (its README has the rules), and the sim lives in `src/sim/birdapp/`. `dailyBirdApp` runs once a day at midnight (`tick.ts`, behind `systemUnlocked(state, "birdapp")`) on the pack's own random stream. Everything lives in the optional `World.birdapp` (additive). `enableBirdApp(world)` wakes it at Level 3 through `PACKS`, and `?birdapp=off` sets `flags.birdappOff`.
+
+- **Machines** (`machines.ts`, pure `transition()`, stored as `{ value, context }`):
+  - `posterMachine`: recluse, occasional, big, break, gone, one per researcher. It emits `PROMOTED`, `DEMOTED`, `BREAK`, `LEFT` and `BACK`, which the driver turns into toasts, thoughts and headlines.
+  - `commsMachine`: calm, busy, drowning. It emits `DROWNING` and `SURFACED`.
+  - The outcome of every post is rolled when it is scheduled, and so are its final numbers. Transitions never draw.
+- **Midnight, in order** (`driver.ts`):
+  1. profile new researchers;
+  2. land yesterday's posts;
+  3. schedule today's (tier rate × moment, capped at `maxPosts`);
+  4. the Comms desk reviews the "Run it by Comms" posts, then works the queue, and unreached fires stick;
+  5. the log-off lever's focus cost and quits;
+  6. ease Aura toward the posters' floor.
+- **Hooks into other systems.** Each is the identity while the pack is asleep:
+  - `effects.ts`: `auraHype` (economy), `auraVisitors` (attendance), `auraApplicants` (walker spawns) and `poachAppeal` (poaching's pick).
+  - Each landed post nudges its archetype's factions.
+  - A stuck cancel adds to the defection score and stokes the Water Discourse.
+  - The pack's thoughts, toasts and headlines are its own content events. Toasts carry `source: "birdapp"` (FLT-51).
+  - The Frontier Times files bangers and cancels as the news cycle and spats as filler (`src/newsroom/edition.ts`).
+- **Vocabulary:** the `birdapp.post` verb (`docs/DISASTERS.md`) lets a disaster or arc make someone post, with an optional forced outcome.
+- **Rival labs (FLT-92):** `src/sim/birdapp/rivals.ts` runs right after the lab's own midnight, on its own stream (`?birdrivals=off` skips it). Each rival lab has invented voices (`voice` rows) that post `rival` lines on beats the driver spots by diffing the World against `rivals.seen`: their releases and Arena swings, your launches, leaks, cancels, escapes, hearings and raises. A lab that slides 3 places goes quiet (`labFeedMachine`: posting → quiet → posting, "so back"). A dunk by one of your posters that lands is +Aura; a rival CEO quote-posting your ratioed post is −Hype. The `birdapp.rival` verb makes a lab post.
+- **Command:** `birdLever { id, lever }` (`cook`, `comms`, `logoff`).
+- **HUD:**
+  - `birdView(world)` goes into the snapshot. `hudViewModel` builds `HudVM.birdapp` (`BirdAppVM`: timeline, posters with their levers and odds, the Comms desk and the viral spotlight) and one **Aura** row in the Vibes breakdown.
+  - It has one slot, `BirdApp`, and the kit gives `BirdMeter`, `AuraSpark`, `BirdCounts` and `BirdPostCard`.
+  - Frontier 95 draws Bird Reader 1.0. The other skins restyle the base panel.
+- **Scenes:** `?moment=bird|bird-banger|bird-cancel` (staged by `demo.ts` through the driver's own code), and FLT-92's `bird-rivals|bird-rivals-dunk|bird-rivals-ratio|bird-rivals-launch`. The `pnpm shots` sets are `birdapp`, `birdapp-skins` and `flt-92`.
+- **Rivals in the HUD (FLT-92):** `birdView` carries `rivals` (their posts, who is sulking, a tally). The view-model merges their posts into the same `live`/`log`, newest first, each `BirdPostVM` with `side` (`us`/`them`), the `lab` (name and colour), a `quote` and a `beatText`. The Everyone / Us / Them filter is local UI state (the kit's `BirdFilter` and `onSide`), so it needs no app action.
+- **Determinism:** the golden digests from tick 1600 changed only because Level 3 now wakes the pack and brings the Comms Rep forward from Level 5. With `birdappOff`, the old digests reproduce (the provenance is in `golden.test.ts`).

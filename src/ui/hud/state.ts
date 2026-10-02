@@ -51,6 +51,10 @@ export const disastersOpenAtom = Atom.make(false);
 /** FLT-33: is the Factions panel open? Folded to one line until you ask (a `?moment=factions` link opens it). */
 export const factionsOpenAtom = Atom.make(debugParams.moment === "factions" || debugParams.moment === "counterprotest");
 
+/** FLT-69: is the Bird App open? Folded to a chip until you ask (a `?moment=bird…` link opens it, FLT-92's rival ones too). */
+const BIRD_OPEN = ["bird", "bird-banger", "bird-cancel", "bird-rivals", "bird-rivals-dunk", "bird-rivals-ratio", "bird-rivals-launch"];
+export const birdAppOpenAtom = Atom.keepAlive(Atom.make(BIRD_OPEN.includes(debugParams.moment ?? "")));
+
 /** Is the Staff panel open? UI-only state, kept as an Effect atom like the rest of what React reads. */
 export const staffOpenAtom = Atom.make(false);
 
@@ -69,3 +73,9 @@ export const windowBudgetAtom = Atom.keepAlive(Atom.make<Budget>([]));
 export const seenNewsAtom = Atom.keepAlive(Atom.make<Partial<Record<NewsPanel, number>>>({}));
 /** FLT-54: the rank drop that last called the Arena up (a key), or null. The budget decides whether it opens. */
 export const arenaCallAtom = Atom.make<string | null>(null);
+
+/**
+ * FLT-93: [Show me]'s anchor, while the coach layer is pointing at it (`null`: nobody asked). UI-only: the sim's coach
+ * never hears of it. A `?moment=onboard-hire-sre` link starts on the Hire button.
+ */
+export const guideAtom = Atom.keepAlive(Atom.make<string | null>(debugParams.moment === "onboard-hire-sre" ? "hire:sre" : null));

@@ -11,11 +11,12 @@
     "             { \"select\": \"researcher\" | \"researcher:Ada Gradient\" }   tap a walker (opens the inspector)",
     "             { \"send\": { ...event } }                                    window.__flt.send(event)",
     "             { \"tick\": n }                                               n sim ticks",
-    "             { \"click\": \"css selector\", \"optional\": true }",
+    "             { \"click\": \"css selector\", \"optional\": true, \"timeout\": ms }",
     "             { \"eval\": \"(f, w) => { ... }\" }                            f = window.__flt, w = f.sim.world",
     "             { \"type\": \"text\", \"into\": \"css selector\", \"enter\": true }       fill a field (FLT-63: the Run box)",
     "             { \"drag\": [[x, z], ...], \"hold\": true }                       a real mouse drag over tiles; hold = button still down",
     "  storage  { key: value } put in localStorage before the page loads (a returning player's saved pick, e.g. \"flt.skin\").",
+    "  ready    a JS expression that is true once the page is ready to shoot (default: the game's World is up). FLT-95's box scenes use `!!window.__intro`.",
     "  sets     named lists for --scenes (`standard` is the default; `all` is every scene)."
   ],
   "defaults": {
@@ -213,6 +214,7 @@
       "front-regulated",
       "front-acquihired",
       "front-captured",
+      "front-escaped",
       "front-pivot",
       "front-95",
       "front-phone",
@@ -231,6 +233,7 @@
     ],
     "saves": [
       "saves-welcome",
+      "saves-welcome-newer",
       "saves-window",
       "menu",
       "saves-phone"
@@ -311,6 +314,162 @@
     "flt54-tasks": [
       "flt54-tasks-game",
       "flt54-tasks-player"
+    ],
+    "birdapp": [
+      "bird",
+      "bird-banger",
+      "bird-cancel",
+      "bird-buddies",
+      "bird-phone"
+    ],
+    "birdapp-skins": [
+      "bird-base",
+      "bird-homepage",
+      "bird-almanac",
+      "bird-disc",
+      "bird-karaoke",
+      "bird-swag"
+    ],
+    "flt-92": [
+      "bird-rivals",
+      "bird-rivals-them",
+      "bird-rivals-dunk",
+      "bird-rivals-ratio",
+      "bird-rivals-launch",
+      "bird-rivals-phone",
+      "bird-rivals-base",
+      "bird-rivals-homepage",
+      "bird-rivals-almanac",
+      "bird-rivals-disc",
+      "bird-rivals-karaoke",
+      "bird-rivals-swag"
+    ],
+    "path-gap": [
+      "nopath",
+      "nopath-tool",
+      "nopath-click",
+      "nopath-phone"
+    ],
+    "flt-59": [
+      "escape-warning",
+      "escape-run",
+      "escape-follow",
+      "escape-carry",
+      "escape-jailbreak",
+      "escape-honeypot",
+      "escape-run-phone",
+      "escape-carry-phone",
+      "front-escaped",
+      "front-escaped-phone"
+    ],
+    "beats": [
+      "overview",
+      "phone",
+      "beats-logo",
+      "beats-logo-phone",
+      "beats-unlock",
+      "beats-badnews",
+      "beats-badnews-phone",
+      "beats-settings"
+    ],
+    "flt-70-mark": [
+      "f95-start",
+      "f95-start-phone",
+      "overview",
+      "phone"
+    ],
+    "flt86": [
+      "money-finance",
+      "money-round",
+      "money-last",
+      "money-overdraft",
+      "money-win"
+    ],
+    "flt86-links": [
+      "link-round1",
+      "link-lastround",
+      "link-overdraft",
+      "link-bankrupt",
+      "link-stretch",
+      "link-win"
+    ],
+    "flt-87": [
+      "flt87-phone-l1",
+      "flt87-phone-l4",
+      "flt87-phone-l5",
+      "flt87-phone-new",
+      "flt87-phone-mid",
+      "flt87-phone-more",
+      "flt87-phone-inspector"
+    ],
+    "flt-90": [
+      "flt90-moved",
+      "flt90-settings",
+      "flt90-phone",
+      "overview",
+      "inspector",
+      "event",
+      "phone"
+    ],
+    "flt-91": [
+      "flt91-open",
+      "flt91-open-phone",
+      "flt91-day5",
+      "flt91-day5-phone"
+    ],
+    "flt-94": [
+      "flt94-taskbar",
+      "flt94-apps",
+      "flt94-programs",
+      "flt94-palette",
+      "flt94-palette-end",
+      "flt94-leaderboard",
+      "flt94-taskbar-phone",
+      "flt94-tray-phone",
+      "flt94-programs-phone",
+      "flt94-palette-phone",
+      "flt94-palette-end-phone",
+      "flt94-leaderboard-phone"
+    ],
+    "flt-95": [
+      "box-take",
+      "box-back",
+      "box-disc",
+      "box-disc-phone",
+      "box-take-phone",
+      "help-box",
+      "saves-welcome"
+    ],
+    "flt-93-moments": [
+      "flt93-onboard-growing-team",
+      "flt93-onboard-hire-sre",
+      "flt93-onboard-race"
+    ],
+    "flt-93": [
+      "flt93-card",
+      "flt93-card-phone",
+      "flt93-hire",
+      "flt93-hire-phone"
+    ],
+    "flt-93-arena": [
+      "flt93-arena",
+      "flt93-arena-phone"
+    ],
+    "flt-96": [
+      "flt91-open",
+      "flt91-open-phone",
+      "flt96-plaza",
+      "flt96-plaza-hall"
+    ],
+    "flt-98": [
+      "flt91-open",
+      "flt91-open-phone",
+      "flt98-lawn",
+      "flt98-lawn-phone",
+      "flt98-stakes",
+      "flt98-truck",
+      "flt98-hover",
+      "flt98-built"
     ],
     "accounts": [
       "account-menu",
@@ -2439,6 +2598,58 @@
         }
       ]
     },
+    "drama-added": {
+      "title": "FLT-78: Today's Drama added to the lab on screen: In your lab ✓, Remove, and the ticker says so",
+      "query": {
+        "drama": "fixture"
+      },
+      "steps": [
+        {
+          "wait": 400
+        },
+        {
+          "click": "button[aria-label^=\"Open Today\"]",
+          "optional": true
+        },
+        {
+          "wait": 1500
+        },
+        {
+          "click": "button:has-text(\"Add to my lab\")",
+          "optional": true
+        },
+        {
+          "wait": 2500
+        }
+      ]
+    },
+    "drama-added-phone": {
+      "title": "FLT-78: Today's Drama added, on a phone (390x844)",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "drama": "fixture"
+      },
+      "steps": [
+        {
+          "wait": 400
+        },
+        {
+          "click": "button[aria-label^=\"Open Today\"]",
+          "optional": true
+        },
+        {
+          "wait": 1500
+        },
+        {
+          "click": "button:has-text(\"Add to my lab\")",
+          "optional": true
+        },
+        {
+          "wait": 2500
+        }
+      ]
+    },
     "drama-base": {
       "title": "FLT-34: the base skin's Today's Drama button and card",
       "query": {
@@ -3007,6 +3218,50 @@
       "steps": [
         {
           "wait": 800
+        }
+      ]
+    },
+    "saves-welcome-newer": {
+      "title": "FLT-82: Welcome back offers the newest save (slot 2, 25 days on), not the older autosave",
+      "query": {
+        "saves": "demo",
+        "shelf": "newer"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "ticker-new-lab": {
+      "title": "FLT-82: the news ticker a few seconds into a new lab (Today's lab, fixed seed), after a mid-game lab",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "wait": 3000
+        },
+        {
+          "send": {
+            "type": "DAILY_LAB",
+            "daily": "2026-10-01"
+          }
+        },
+        {
+          "wait": 4000
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 500
         }
       ]
     },
@@ -3713,6 +3968,13 @@
           "wait": 300
         },
         {
+          "click": "[data-anchor=\"start:programs\"]",
+          "optional": true
+        },
+        {
+          "wait": 300
+        },
+        {
           "click": "[data-testid=start-facilities]",
           "optional": true
         },
@@ -3882,6 +4144,13 @@
       "steps": [
         {
           "click": "[data-coach=start]"
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": "[data-anchor=\"start:programs\"]",
+          "optional": true
         },
         {
           "wait": 300
@@ -4113,6 +4382,2686 @@
         },
         {
           "wait": 800
+        }
+      ]
+    },
+    "bird": {
+      "title": "FLT-69: Bird Reader 1.0 open on the timeline: today's posts climbing, the week's log, the preview pane",
+      "query": {
+        "moment": "bird",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-banger": {
+      "title": "FLT-69: a banger going viral (the VIRAL! burst, the tray bird flapping)",
+      "query": {
+        "moment": "bird-banger",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-cancel": {
+      "title": "FLT-69: a cancel that stuck: the Comms Desk drowning, the queue",
+      "query": {
+        "moment": "bird-cancel",
+        "warp": null
+      },
+      "steps": [
+        {
+          "click": ".f95-bird .f95-tab:nth-child(3)",
+          "optional": true
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "bird-buddies": {
+      "title": "FLT-69: the Contact List (tiers as ICQ groups) and a Posting Policy with the three levers",
+      "query": {
+        "moment": "bird",
+        "warp": null
+      },
+      "steps": [
+        {
+          "click": ".f95-bird .f95-tab:nth-child(2)",
+          "optional": true
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "bird-phone": {
+      "title": "FLT-69: Bird Reader on a phone, the cancel moment",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "moment": "bird-cancel",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-base": {
+      "title": "FLT-69: the base Bird App panel, open",
+      "query": {
+        "moment": "bird",
+        "warp": null,
+        "skin": "base"
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-homepage": {
+      "title": "FLT-69: Homepage '98's Bird App: sign our guestbook",
+      "query": {
+        "moment": "bird-banger",
+        "warp": null,
+        "skin": "homepage-98"
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-almanac": {
+      "title": "FLT-69: Field Almanac's Bird App: a birding log",
+      "query": {
+        "moment": "bird-banger",
+        "warp": null,
+        "skin": "field-almanac"
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-disc": {
+      "title": "FLT-69: Discovery Disc '96's Bird App: an encyclopedia",
+      "query": {
+        "moment": "bird-banger",
+        "warp": null,
+        "skin": "discovery-disc-96"
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-karaoke": {
+      "title": "FLT-69: Karaoke Night's Bird App: the lyric screen",
+      "query": {
+        "moment": "bird-banger",
+        "warp": null,
+        "skin": "karaoke-night"
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-swag": {
+      "title": "FLT-69: Swag Drop's Bird App: a merch drop",
+      "query": {
+        "moment": "bird-banger",
+        "warp": null,
+        "skin": "swag-drop"
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-rivals": {
+      "title": "FLT-92: the rival labs on Bird Reader 1.0: a #1, a slide and its silence, a teaser, your launch, a dunk and a ratio",
+      "query": {
+        "moment": "bird-rivals",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-rivals-them": {
+      "title": "FLT-92: View: Them, only the rival labs (and who is sulking)",
+      "query": {
+        "moment": "bird-rivals",
+        "warp": null
+      },
+      "steps": [
+        {
+          "click": ".f95-bird-view button:nth-of-type(3)",
+          "optional": true
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "bird-rivals-dunk": {
+      "title": "FLT-92: a dunk on a rival's Arena slide lands (+3 Aura)",
+      "query": {
+        "moment": "bird-rivals-dunk",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-rivals-ratio": {
+      "title": "FLT-92: a rival CEO quote-posts your post into a ratio (−2 Hype)",
+      "query": {
+        "moment": "bird-rivals-ratio",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-rivals-launch": {
+      "title": "FLT-92: every rival lab has something to say about your launch",
+      "query": {
+        "moment": "bird-rivals-launch",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-rivals-phone": {
+      "title": "FLT-92: the rivals on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "moment": "bird-rivals",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-rivals-base": {
+      "title": "FLT-92: the base Bird App with the rivals: lab chips, the Everyone/Us/Them filter, the quote",
+      "query": {
+        "moment": "bird-rivals",
+        "warp": null,
+        "skin": "base"
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-rivals-homepage": {
+      "title": "FLT-92: Homepage '98: their guestbooks",
+      "query": {
+        "moment": "bird-rivals",
+        "warp": null,
+        "skin": "homepage-98"
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-rivals-almanac": {
+      "title": "FLT-92: Field Almanac: invasive species",
+      "query": {
+        "moment": "bird-rivals",
+        "warp": null,
+        "skin": "field-almanac"
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-rivals-disc": {
+      "title": "FLT-92: Discovery Disc '96: other labs",
+      "query": {
+        "moment": "bird-rivals",
+        "warp": null,
+        "skin": "discovery-disc-96"
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-rivals-karaoke": {
+      "title": "FLT-92: Karaoke Night: other tables",
+      "query": {
+        "moment": "bird-rivals",
+        "warp": null,
+        "skin": "karaoke-night"
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "bird-rivals-swag": {
+      "title": "FLT-92: Swag Drop: knockoffs",
+      "query": {
+        "moment": "bird-rivals",
+        "warp": null,
+        "skin": "swag-drop"
+      },
+      "steps": [
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "snag": {
+      "title": "FLT-84: a caught error raises the recovery toast (a real throw in the paused-input path)",
+      "steps": [
+        {
+          "eval": "(f) => { const real = f.sim.applyNow.bind(f.sim); f.sim.applyNow = () => { f.sim.applyNow = real; throw new Error('the Training Hall caught fire mid-function (staged for the screenshot)'); }; f.send({ type: 'COMMAND', command: { type: 'coachClick' } }); }"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "snag-phone": {
+      "title": "FLT-84: the recovery toast on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "eval": "(f) => { const real = f.sim.applyNow.bind(f.sim); f.sim.applyNow = () => { f.sim.applyNow = real; throw new Error('the Training Hall caught fire mid-function (staged for the screenshot)'); }; f.send({ type: 'COMMAND', command: { type: 'coachClick' } }); }"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "nopath": {
+      "title": "FLT-85: a Training Hall one path tile short of the gate (its path touches the Cluster, which isn't path)",
+      "query": {
+        "focus": "10.4,16.6",
+        "zoom": 70,
+        "birdapp": "off"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 9,
+              "z": 16
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 9,
+              "z": 17
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 9,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 10,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placeBuilding",
+              "kind": "hall",
+              "x": 8,
+              "z": 13
+            }
+          }
+        },
+        {
+          "wait": 400
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "nopath-tool": {
+      "title": "FLT-85: the same, with the path tool in hand: the gate's network lights up and the join tile pulses",
+      "query": {
+        "focus": "10.4,16.6",
+        "zoom": 70,
+        "birdapp": "off"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 9,
+              "z": 16
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 9,
+              "z": 17
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 9,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 10,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placeBuilding",
+              "kind": "hall",
+              "x": 8,
+              "z": 13
+            }
+          }
+        },
+        {
+          "wait": 400
+        },
+        {
+          "send": {
+            "type": "SET_TOOL",
+            "tool": "path"
+          }
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "nopath-click": {
+      "title": "FLT-85: the player clicks the No path! flag: the camera pans to the gap, the path tool is in hand, and the rule is said once (toasts held so the shot catches it)",
+      "query": {
+        "focus": "6,8",
+        "zoom": 70,
+        "birdapp": "off"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 9,
+              "z": 16
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 9,
+              "z": 17
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 9,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 10,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placeBuilding",
+              "kind": "hall",
+              "x": 8,
+              "z": 13
+            }
+          }
+        },
+        {
+          "wait": 400
+        },
+        {
+          "send": {
+            "type": "HOLD_TOASTS",
+            "on": true
+          }
+        },
+        {
+          "eval": "() => document.querySelector('.nopath-flag')?.click()"
+        },
+        {
+          "wait": 2500
+        },
+        {
+          "send": {
+            "type": "HOLD_TOASTS",
+            "on": false
+          }
+        }
+      ]
+    },
+    "nopath-phone": {
+      "title": "FLT-85: the one-tile gap on a phone (390x844)",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "focus": "9.5,14",
+        "zoom": 40,
+        "birdapp": "off"
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 9,
+              "z": 16
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 9,
+              "z": 17
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 9,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 10,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placeBuilding",
+              "kind": "hall",
+              "x": 8,
+              "z": 13
+            }
+          }
+        },
+        {
+          "wait": 400
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "escape-warning": {
+      "title": "FLT-59: the warning. A drifted agent paces the fence, thinking about it",
+      "query": {
+        "warp": null,
+        "moment": "escape-warning",
+        "focus": "8.2,22.4",
+        "zoom": 72
+      },
+      "steps": [
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "escape-run": {
+      "title": "FLT-59: the run. Trail, GRAB IT, guards jogging, camera on the runner",
+      "query": {
+        "warp": null,
+        "moment": "escape-run",
+        "focus": "7.2,21.4",
+        "zoom": 72
+      },
+      "steps": [
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "escape-carry": {
+      "title": "FLT-59: the pick-up. The hand carries it back to the Sandbox",
+      "query": {
+        "warp": null,
+        "moment": "escape-carry",
+        "focus": "9.4,17.8",
+        "zoom": 72
+      },
+      "steps": [
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "escape-jailbreak": {
+      "title": "FLT-59: a jailbreak. Four at once, each for a different fence",
+      "query": {
+        "warp": null,
+        "moment": "escape-jailbreak",
+        "focus": "10.5,17",
+        "zoom": 46
+      },
+      "steps": [
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "escape-honeypot": {
+      "title": "FLT-59: the Honeypot. EXIT (real)",
+      "query": {
+        "warp": null,
+        "moment": "escape-honeypot",
+        "focus": "12,16.5",
+        "zoom": 46
+      },
+      "steps": [
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "escape-run-phone": {
+      "title": "FLT-59: the run on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "moment": "escape-run",
+        "focus": "7.2,21.4",
+        "zoom": 44
+      },
+      "steps": [
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "escape-carry-phone": {
+      "title": "FLT-59: the pick-up on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "moment": "escape-carry",
+        "focus": "9.4,17.8",
+        "zoom": 44
+      },
+      "steps": [
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "front-escaped": {
+      "title": "FLT-59: the Escaped ending's front page",
+      "query": {
+        "warp": null,
+        "moment": "front-escaped"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "front-escaped-phone": {
+      "title": "FLT-59: the Escaped front page on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "moment": "front-escaped"
+      },
+      "steps": [
+        {
+          "wait": 7000
+        }
+      ]
+    },
+    "escape-follow": {
+      "title": "FLT-59: live, unpaused. It bolts, the game drops to 1x and the camera goes after it",
+      "query": {
+        "warp": null,
+        "moment": "escape-warning",
+        "speed": 1
+      },
+      "steps": [
+        {
+          "wait": 6500
+        }
+      ]
+    },
+    "beats-logo": {
+      "title": "FLT-76: the first decision, two days after the first path (Level 1, the first model training)",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "11.5,16",
+        "zoom": 55
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 17
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 16
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placeBuilding",
+              "kind": "hall",
+              "x": 12,
+              "z": 16
+            }
+          }
+        },
+        {
+          "wait": 400
+        },
+        {
+          "eval": "(f, w) => { for (let i = 0; i < 3 * 20; i++) f.tick(w); }"
+        },
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "beats-logo-phone": {
+      "title": "FLT-76: the Logo on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "11.5,16",
+        "zoom": 40
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 17
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 16
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placeBuilding",
+              "kind": "hall",
+              "x": 12,
+              "z": 16
+            }
+          }
+        },
+        {
+          "wait": 400
+        },
+        {
+          "eval": "(f, w) => { for (let i = 0; i < 3 * 20; i++) f.tick(w); }"
+        },
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "beats-unlock": {
+      "title": "FLT-76: a New! card with its joke line (Level 4, The Race)",
+      "steps": [
+        {
+          "eval": "(f, w) => { w.unlockCards = [{ id: 'race', title: 'New! The Race', body: 'Top 3 on the Arena', items: ['Arena', 'R&D', 'News', 'Factions'] }]; f.tick(w); }"
+        },
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "beats-badnews": {
+      "title": "FLT-76: at ▶▶▶ public trust falls 30 points: the game drops to 1× and pins what happened",
+      "steps": [
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 10
+          }
+        },
+        {
+          "wait": 600
+        },
+        {
+          "eval": "(f, w) => { w.disasters.trust = Math.max(0, w.disasters.trust - 30); }"
+        },
+        {
+          "wait": 1200
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "beats-badnews-phone": {
+      "title": "FLT-76: the bad-news slowdown on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 10
+          }
+        },
+        {
+          "wait": 600
+        },
+        {
+          "eval": "(f, w) => { w.disasters.trust = Math.max(0, w.disasters.trust - 30); }"
+        },
+        {
+          "wait": 1200
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "beats-settings": {
+      "title": "FLT-76: Start ▸ Settings ▸ Slow down for bad news (on by default)",
+      "steps": [
+        {
+          "click": "[data-testid=start-button]"
+        },
+        {
+          "click": ".f95-startwrap button[role=menuitem]:has-text(\"Settings\")",
+          "optional": true
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "f95-start": {
+      "title": "FLT-70: the Frontier 95 taskbar with the Start menu open (the Start button's mark)",
+      "query": {
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "click": "[data-testid=start-button]"
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "f95-start-phone": {
+      "title": "FLT-70: the Frontier 95 taskbar and Start menu on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "click": "[data-testid=start-button]"
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "money-finance": {
+      "title": "FLT-86: the money line says net; Finance says Revenue, and what the bailouts cost (the mid-game campus signed round 1)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { document.querySelectorAll('[role=tab]').forEach((t) => /^Finance$/.test(t.textContent.trim()) && t.click()); }"
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "money-round": {
+      "title": "FLT-86: cash goes below $0 at midnight: round 1 of 3 (main: the board wires $2M, every time, forever)",
+      "steps": [
+        {
+          "eval": "(f, w) => { w.cash = -40000; w.tick = (w.day + 1) * 20 - 1; f.tick(w); }"
+        },
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "money-last": {
+      "title": "FLT-86: the third time: the last round, on a yacht",
+      "steps": [
+        {
+          "eval": "(f, w) => { w.cash = -40000; if (w.economy.context.rounds !== undefined) { w.economy.context.rounds = 2; w.economy.context.stake = 75; } w.tick = (w.day + 1) * 20 - 1; f.tick(w); }"
+        },
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "money-overdraft": {
+      "title": "FLT-86: no rounds left: the bank's 30 days",
+      "steps": [
+        {
+          "eval": "(f, w) => { w.cash = -40000; if (w.economy.context.rounds !== undefined) { w.economy.context.rounds = 3; w.economy.context.stake = 55; } w.tick = (w.day + 1) * 20 - 1; f.tick(w); }"
+        },
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "money-win": {
+      "title": "FLT-86: the win, with a toast up when it lands (it steps aside to the ticker now)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { w.toasts.push({ id: 990001, text: 'Kevin Softmax loved it: $160K in the bank', tone: 'good', source: 'crowd', importance: 'you', reply: true }); }"
+        },
+        {
+          "wait": 700
+        },
+        {
+          "eval": "(f, w) => { for (const g of w.goals.context.goals) { g.met = true; g.value = g.target; if (g.hold) g.held = g.hold; } w.goals = { value: 'won', context: { ...w.goals.context, outcomeDay: w.day } }; w.toasts.push({ id: 990002, text: 'Your Arena lead is 40 Elo. The board would like it to be 400.', tone: 'neutral', source: 'leapfrog', importance: 'you' }); w.tick = (w.day + 1) * 20 - 1; f.tick(w); }"
+        },
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "link-round1": {
+      "title": "FLT-86 link: ?moment=money-round1, the first emergency round's card",
+      "query": {
+        "warp": null,
+        "moment": "money-round1",
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "link-lastround": {
+      "title": "FLT-86 link: ?moment=money-lastround, the third and last round",
+      "query": {
+        "warp": null,
+        "moment": "money-lastround",
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "link-overdraft": {
+      "title": "FLT-86 link: ?moment=money-overdraft, the bank's 30 days (Finance tab open)",
+      "query": {
+        "warp": null,
+        "moment": "money-overdraft",
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "eval": "(f, w) => { document.querySelectorAll('[role=tab]').forEach((t) => /^Finance$/.test(t.textContent.trim()) && t.click()); }"
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "link-bankrupt": {
+      "title": "FLT-86 link: ?moment=money-bankrupt, the end screen",
+      "query": {
+        "warp": null,
+        "moment": "money-bankrupt",
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "link-stretch": {
+      "title": "FLT-86 link: ?moment=money-stretch&beat, the Final stretch beat at 2 of 3",
+      "query": {
+        "warp": null,
+        "moment": "money-stretch",
+        "skin": "frontier-95",
+        "beat": 1
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 1200
+        }
+      ]
+    },
+    "link-win": {
+      "title": "FLT-86 link: ?moment=money-win, the win lands live a second after load and stands alone",
+      "query": {
+        "warp": null,
+        "moment": "money-win",
+        "skin": "frontier-95",
+        "speed": 1
+      },
+      "steps": [
+        {
+          "wait": 5000
+        }
+      ]
+    },
+    "flt87-phone-l1": {
+      "title": "FLT-87: Level 1 on a phone, the coach's first step",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt87-phone-l4": {
+      "title": "FLT-87: Level 4 (The Race) on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "ladder": 4,
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt87-phone-l5": {
+      "title": "FLT-87: Level 5 (Scrutiny) on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "ladder": 5,
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt87-phone-new": {
+      "title": "FLT-87: Level 4 earned on a phone: the New! card and its windows' title buttons",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "ladder": 4,
+        "unlock": 1,
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt87-phone-mid": {
+      "title": "FLT-87: the midgame on a phone: a training run, the goal and a full tray",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "scenario": "midgame",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt87-phone-more": {
+      "title": "FLT-87: the midgame on a phone, the fold open and the tray's » panel up",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "scenario": "midgame",
+        "warp": null
+      },
+      "steps": [
+        {
+          "click": ".f95-foldbar",
+          "optional": true
+        },
+        {
+          "click": ".f95-chev",
+          "optional": true
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "flt87-phone-inspector": {
+      "title": "FLT-87: tap a researcher on a phone: the Inspector is a sheet at the top, buttons in reach",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "ladder": 4,
+        "warp": null
+      },
+      "steps": [
+        {
+          "select": "researcher:Ada Gradient"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt90-moved": {
+      "title": "FLT-90: a returning player's desk: Lab Properties, Task Mangler and Thoughts.txt dragged where they left them (localStorage)",
+      "storage": {
+        "flt.windows.frontier-95": "{\"f95-lab\": {\"x\": 420, \"y\": 300, \"w\": 600}, \"arena\": {\"x\": 930, \"y\": 420, \"w\": 422}, \"thoughts\": {\"x\": 440, \"y\": 130, \"w\": 400}}"
+      },
+      "steps": [
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "flt90-settings": {
+      "title": "FLT-90: Start ▸ Settings ▸ Reset window positions (enabled: a window has been moved)",
+      "storage": {
+        "flt.windows.frontier-95": "{\"f95-lab\": {\"x\": 420, \"y\": 300, \"w\": 600}, \"arena\": {\"x\": 930, \"y\": 420, \"w\": 422}, \"thoughts\": {\"x\": 440, \"y\": 130, \"w\": 400}}"
+      },
+      "steps": [
+        {
+          "click": "[data-coach=start]"
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": "[data-fly=settings] > button"
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "flt90-phone": {
+      "title": "FLT-90: the same saved positions on a phone: nothing moves, FLT-87's layout stands",
+      "viewport": "390x844",
+      "mobile": true,
+      "storage": {
+        "flt.windows.frontier-95": "{\"f95-lab\": {\"x\": 420, \"y\": 300, \"w\": 600}, \"arena\": {\"x\": 930, \"y\": 420, \"w\": 422}, \"thoughts\": {\"x\": 440, \"y\": 130, \"w\": 400}}"
+      },
+      "steps": []
+    },
+    "flt91-open": {
+      "title": "FLT-91: the first 10 seconds of a fresh garage (seed 3, the starting camera)",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "tick": 33
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "flt91-open-phone": {
+      "title": "FLT-91: the first 10 seconds on a phone (390x844)",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "tick": 33
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "flt91-day5": {
+      "title": "FLT-91: day 5, after the coach's path and the first Hall (seed 3, the starting camera)",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 17
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 16
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placeBuilding",
+              "kind": "hall",
+              "x": 12,
+              "z": 16
+            }
+          }
+        },
+        {
+          "wait": 400
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "eval": "(f, w) => { for (let i = 0; i < 4000 && w.day < 5; i++) { const id = Object.keys(w.arcs).find((k) => w.arcs[k].value === 'cardOpen'); f.tick(w, id ? [{ type: 'chooseEvent', eventId: id, choiceIndex: 0 }] : []); } }"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt91-day5-phone": {
+      "title": "FLT-91: day 5 on a phone (390x844)",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 18
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 17
+            }
+          }
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 16
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placeBuilding",
+              "kind": "hall",
+              "x": 12,
+              "z": 16
+            }
+          }
+        },
+        {
+          "wait": 400
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "eval": "(f, w) => { for (let i = 0; i < 4000 && w.day < 5; i++) { const id = Object.keys(w.arcs).find((k) => w.arcs[k].value === 'cardOpen'); f.tick(w, id ? [{ type: 'chooseEvent', eventId: id, choiceIndex: 0 }] : []); } }"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt94-taskbar": {
+      "title": "FLT-94: the taskbar: Start, Quick Launch (applets only), the tray rank",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "steps": []
+    },
+    "flt94-apps": {
+      "title": "FLT-94: Quick Launch's » (the applets past the eighth)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "click": "[data-anchor=\"apps\"]",
+          "optional": true
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "flt94-programs": {
+      "title": "FLT-94: Start ▸ Programs ▸ Facilities ▸ Research",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "click": "[data-coach=start]"
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": "[data-anchor=\"start:programs\"]",
+          "optional": true
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": "[data-testid=start-facilities]",
+          "optional": true
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": "[data-anchor=\"start:facilities:research\"]",
+          "optional": true
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "flt94-palette": {
+      "title": "FLT-94: the Facilities palette (Quick Launch's first icon)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "click": "[data-anchor=\"app:facilities\"]",
+          "optional": true
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "flt94-palette-end": {
+      "title": "FLT-94: the Facilities palette (Quick Launch's first icon), scrolled to the end",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "click": "[data-anchor=\"app:facilities\"]",
+          "optional": true
+        },
+        {
+          "wait": 600
+        },
+        {
+          "eval": "(f, w) => { for (const s of ['.f95-palette .f95-ptiles', '.f95-palette']) { const l = document.querySelector(s); if (l) l.scrollTop = 1e5; } }",
+          "optional": true
+        },
+        {
+          "wait": 300
+        }
+      ]
+    },
+    "flt94-leaderboard": {
+      "title": "FLT-94: the leaderboard applet: Task Mangler left on Benchmarks, then Quick Launch's trophy (main: Run… arena.exe)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "steps": [
+        {
+          "eval": "() => [...document.querySelectorAll('[role=tab]')].find((b) => b.textContent.startsWith('Benchmarks'))?.click()"
+        },
+        {
+          "wait": 400
+        },
+        {
+          "click": "[data-anchor=\"app:arena\"]",
+          "optional": true
+        },
+        {
+          "wait": 400
+        },
+        {
+          "eval": "(f, w) => { if (!document.querySelector('[data-anchor=\"win:arena\"]')) document.querySelector('[data-coach=start]')?.click(); }"
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": "[data-testid=start-run]",
+          "optional": true
+        },
+        {
+          "wait": 300
+        },
+        {
+          "type": "arena.exe",
+          "into": "[data-testid=run-input]",
+          "enter": true,
+          "optional": true
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt94-taskbar-phone": {
+      "title": "FLT-94: phone: the taskbar never wraps; the rank stays",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": []
+    },
+    "flt94-tray-phone": {
+      "title": "FLT-94: phone: the applets ride in the tray's »",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "click": ".f95-chev",
+          "optional": true
+        },
+        {
+          "wait": 500
+        }
+      ]
+    },
+    "flt94-programs-phone": {
+      "title": "FLT-94: phone: Start ▸ Programs ▸ Facilities ▸ Research (taps: a phone has no hover)",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "click": "[data-coach=start]"
+        },
+        {
+          "wait": 300
+        },
+        {
+          "eval": "() => document.querySelector('[data-anchor=\"start:programs\"]')?.click()"
+        },
+        {
+          "wait": 300
+        },
+        {
+          "eval": "() => document.querySelector('[data-testid=start-facilities]')?.click()"
+        },
+        {
+          "wait": 300
+        },
+        {
+          "eval": "() => document.querySelector('[data-anchor=\"start:facilities:research\"]')?.click()"
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "flt94-palette-phone": {
+      "title": "FLT-94: phone: the Facilities palette as a sheet",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "click": "[data-anchor=\"app:facilities\"]",
+          "optional": true
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "flt94-palette-end-phone": {
+      "title": "FLT-94: phone: the Facilities palette as a sheet, scrolled to the end",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "click": "[data-anchor=\"app:facilities\"]",
+          "optional": true
+        },
+        {
+          "wait": 600
+        },
+        {
+          "eval": "(f, w) => { for (const s of ['.f95-palette .f95-ptiles', '.f95-palette']) { const l = document.querySelector(s); if (l) l.scrollTop = 1e5; } }",
+          "optional": true
+        },
+        {
+          "wait": 300
+        }
+      ]
+    },
+    "flt94-leaderboard-phone": {
+      "title": "FLT-94: phone: the leaderboard from the tray rank",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "focus": "11.5,14.5",
+        "zoom": 43,
+        "skin": "frontier-95"
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "click": "[data-anchor=\"tray:rank\"]",
+          "optional": true
+        },
+        {
+          "wait": 400
+        },
+        {
+          "eval": "(f, w) => { if (!document.querySelector('[data-anchor=\"win:arena\"]')) document.querySelector('[data-coach=start]')?.click(); }"
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": "[data-testid=start-run]",
+          "optional": true
+        },
+        {
+          "wait": 300
+        },
+        {
+          "type": "arena.exe",
+          "into": "[data-testid=run-input]",
+          "enter": true,
+          "optional": true
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "box-take": {
+      "title": "FLT-95: 4.5 s after you take the box off the shelf (before: it is already tearing open; after: it waits in your hands)",
+      "query": {
+        "intro": 1,
+        "seed": 7,
+        "debug": null,
+        "speed": null,
+        "hour": null,
+        "warp": null
+      },
+      "ready": "!!window.__intro",
+      "steps": [
+        {
+          "wait": 3500
+        },
+        {
+          "click": ".intro-cta",
+          "timeout": 15000
+        },
+        {
+          "wait": 4500
+        }
+      ]
+    },
+    "box-back": {
+      "title": "FLT-95: take the box, then Flip to back (before: there is no flip; the box is open by now)",
+      "query": {
+        "intro": 1,
+        "seed": 7,
+        "debug": null,
+        "speed": null,
+        "hour": null,
+        "warp": null
+      },
+      "ready": "!!window.__intro",
+      "steps": [
+        {
+          "wait": 3500
+        },
+        {
+          "click": ".intro-cta",
+          "timeout": 15000
+        },
+        {
+          "wait": 6000
+        },
+        {
+          "click": ".intro-flip",
+          "optional": true,
+          "timeout": 20000
+        },
+        {
+          "wait": 5000
+        }
+      ]
+    },
+    "box-disc": {
+      "title": "FLT-95: the box is open, click the disc (before: Insert disc goes straight into the drive; after: you pick it up and read it)",
+      "query": {
+        "intro": 1,
+        "seed": 7,
+        "debug": null,
+        "speed": null,
+        "hour": null,
+        "warp": null,
+        "beat": "open"
+      },
+      "ready": "!!window.__intro",
+      "steps": [
+        {
+          "wait": 3500
+        },
+        {
+          "click": ".intro-contents .intro-primary",
+          "timeout": 15000
+        },
+        {
+          "wait": 3000
+        }
+      ]
+    },
+    "box-disc-phone": {
+      "title": "FLT-95: the disc in your hand, on a phone (a 1997 CD-ROM: rainbow tracks, clear hub, the printed label)",
+      "query": {
+        "intro": 1,
+        "seed": 7,
+        "debug": null,
+        "speed": null,
+        "hour": null,
+        "warp": null,
+        "beat": "open"
+      },
+      "ready": "!!window.__intro",
+      "steps": [
+        {
+          "wait": 3500
+        },
+        {
+          "click": ".intro-contents .intro-primary",
+          "timeout": 15000
+        },
+        {
+          "wait": 3000
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "box-take-phone": {
+      "title": "FLT-95: the box in your hands, on a phone",
+      "query": {
+        "intro": 1,
+        "seed": 7,
+        "debug": null,
+        "speed": null,
+        "hour": null,
+        "warp": null
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "ready": "!!window.__intro",
+      "steps": [
+        {
+          "wait": 3500
+        },
+        {
+          "click": ".intro-cta",
+          "timeout": 15000
+        },
+        {
+          "wait": 4500
+        }
+      ]
+    },
+    "help-box": {
+      "title": "FLT-95: Help ▸ How to play has \"Take the box off the shelf again\"",
+      "steps": [
+        {
+          "eval": "async () => { const z = (ms) => new Promise((r) => setTimeout(r, ms)); document.querySelector('[data-testid=start-button]')?.click(); await z(300); [...document.querySelectorAll('[role=menuitem]')].find((b) => /Help/.test(b.textContent))?.click(); }"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt93-onboard-hire-sre": {
+      "title": "FLT-93: ?moment=onboard-hire-sre (a link Jem can open; main has no such moment)",
+      "query": {
+        "moment": "onboard-hire-sre",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "flt93-hire": {
+      "title": "FLT-93: Level 3's goal (hire an SRE) with the card read; the branch presses the goal's [Show me]",
+      "steps": [
+        {
+          "eval": "(f, w) => { w.progression = { value: 'growing', context: { level: 2 } }; w.flags.visitorsServed = 12; w.ledger = { ...w.ledger, income: 41500 }; w.cash = Math.max(w.cash, 1400000); w.unlockCards = []; }"
+        },
+        {
+          "tick": 1
+        },
+        {
+          "eval": "(f, w) => { w.unlockCards = []; }"
+        },
+        {
+          "tick": 1
+        },
+        {
+          "wait": 800
+        },
+        {
+          "click": "[data-showme=\"hire:sre\"]",
+          "optional": true
+        },
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "flt93-onboard-growing-team": {
+      "title": "FLT-93: ?moment=onboard-growing-team (a link Jem can open; main has no such moment)",
+      "query": {
+        "moment": "onboard-growing-team",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "flt93-hire-phone": {
+      "title": "FLT-93: [Show me] Hire an SRE on a phone: open the strip under the lab bar, then Show Me…",
+      "steps": [
+        {
+          "eval": "(f, w) => { w.progression = { value: 'growing', context: { level: 2 } }; w.flags.visitorsServed = 12; w.ledger = { ...w.ledger, income: 41500 }; w.cash = Math.max(w.cash, 1400000); w.unlockCards = []; }"
+        },
+        {
+          "tick": 1
+        },
+        {
+          "eval": "(f, w) => { w.unlockCards = []; }"
+        },
+        {
+          "tick": 1
+        },
+        {
+          "wait": 800
+        },
+        {
+          "click": ".f95-foldbar",
+          "optional": true
+        },
+        {
+          "wait": 400
+        },
+        {
+          "click": "[data-showme=\"hire:sre\"]",
+          "optional": true
+        },
+        {
+          "wait": 1500
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "flt93-onboard-race": {
+      "title": "FLT-93: ?moment=onboard-race (a link Jem can open; main has no such moment)",
+      "query": {
+        "moment": "onboard-race",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "flt93-card": {
+      "title": "FLT-93: Level 2 met, the \"Growing team\" New! card (both builds: the same world, staged by eval)",
+      "steps": [
+        {
+          "eval": "(f, w) => { w.progression = { value: 'growing', context: { level: 2 } }; w.flags.visitorsServed = 12; w.ledger = { ...w.ledger, income: 41500 }; w.cash = Math.max(w.cash, 1400000); w.unlockCards = []; }"
+        },
+        {
+          "tick": 1
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt93-card-phone": {
+      "title": "FLT-93: the \"Growing team\" New! card on a phone",
+      "steps": [
+        {
+          "eval": "(f, w) => { w.progression = { value: 'growing', context: { level: 2 } }; w.flags.visitorsServed = 12; w.ledger = { ...w.ledger, income: 41500 }; w.cash = Math.max(w.cash, 1400000); w.unlockCards = []; }"
+        },
+        {
+          "tick": 1
+        },
+        {
+          "wait": 800
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "flt93-arena": {
+      "title": "FLT-93: ?moment=onboard-race, card read, the goal's Show Me…: the arrow on Quick Launch's 24 px trophy",
+      "query": {
+        "moment": "onboard-race",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 1200
+        },
+        {
+          "eval": "(f, w) => { w.unlockCards = []; }"
+        },
+        {
+          "tick": 1
+        },
+        {
+          "wait": 800
+        },
+        {
+          "click": "[data-showme=\"app:arena\"]",
+          "optional": true
+        },
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "flt93-arena-phone": {
+      "title": "FLT-93: the same on a phone: the tray's #rank stands in for the leaderboard",
+      "query": {
+        "moment": "onboard-race",
+        "warp": null
+      },
+      "steps": [
+        {
+          "wait": 1200
+        },
+        {
+          "eval": "(f, w) => { w.unlockCards = []; }"
+        },
+        {
+          "tick": 1
+        },
+        {
+          "wait": 800
+        },
+        {
+          "click": ".f95-foldbar",
+          "optional": true
+        },
+        {
+          "wait": 400
+        },
+        {
+          "click": "[data-showme=\"app:arena\"]",
+          "optional": true
+        },
+        {
+          "wait": 1500
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "flt96-plaza": {
+      "title": "FLT-96: the entrance plaza up close on a fresh garage (seed 3): benches, planters and the welcome sign",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "15,22.5",
+        "zoom": 110
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "tick": 33
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "flt96-plaza-hall": {
+      "title": "FLT-96: the first Hall built against the plaza: the bench in front of its door makes way",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "14,21.5",
+        "zoom": 80
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placeBuilding",
+              "kind": "hall",
+              "x": 12,
+              "z": 19
+            }
+          }
+        },
+        {
+          "wait": 400
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "tick": 33
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "flt98-lawn": {
+      "title": "FLT-98: the first 10 seconds of a fresh garage with the tutorial skipped, so the lawn isn't dimmed (seed 3, the starting camera)",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "coachSkip"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "tick": 33
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "flt98-lawn-phone": {
+      "title": "FLT-98: the same on a phone (390x844), tutorial skipped",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "coachSkip"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "tick": 33
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "flt98-stakes": {
+      "title": "FLT-98: survey stakes up close: Training Hall and API Gateway, where the coach builds them",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "12.5,18.5",
+        "zoom": 200
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "coachSkip"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "tick": 33
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "flt98-truck": {
+      "title": "FLT-98: Tensor Tacos, parked on the verge by the gate",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "14,24.6",
+        "zoom": 230
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "coachSkip"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "tick": 33
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "flt98-hover": {
+      "title": "FLT-98: a mouse resting on the Ethics Committee's stake shows its full text (desktop only)",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "5.5,14.5",
+        "zoom": 200
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "coachSkip"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "tick": 33
+        },
+        {
+          "wait": 600
+        },
+        {
+          "eval": "(f, w) => { const c = document.querySelector('canvas'); const r = c.getBoundingClientRect(); c.dispatchEvent(new PointerEvent('pointermove', { pointerType: 'mouse', clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 - 80, bubbles: true })); }"
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "flt98-built": {
+      "title": "FLT-98: the coach's path and Hall built: the path misses every stake, the Hall's stake is pulled up, the rest stand",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "12.5,18",
+        "zoom": 90
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "coachSkip"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 15
+            }
+          }
+        },
+        {
+          "wait": 150
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 16
+            }
+          }
+        },
+        {
+          "wait": 150
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 17
+            }
+          }
+        },
+        {
+          "wait": 150
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 18
+            }
+          }
+        },
+        {
+          "wait": 150
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placeBuilding",
+              "kind": "hall",
+              "x": 12,
+              "z": 16
+            }
+          }
+        },
+        {
+          "wait": 400
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "tick": 33
+        },
+        {
+          "wait": 600
         }
       ]
     },

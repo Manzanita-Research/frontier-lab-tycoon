@@ -11,7 +11,11 @@ describe("365-day papers evidence", () => {
     const rows = [1, 2, 3].flatMap((seed) => [
       runPapersHeadless(seed, "Open", true), runPapersHeadless(seed, "Open"),
       runPapersHeadless(seed, "Selective"), runPapersHeadless(seed, "Closed"),
-    ]);
+    ]).concat(
+      // An award is rare (2 of 16 seeded years); FLT-86's objective toasts moved seeds 1-3 off theirs (the ids shift), so a
+      // year that earns one is added.
+      runPapersHeadless(6, "Selective"),
+    );
     const total = (policy: string, key: "applicants" | "spill" | "scoops" | "awards") => rows.filter((r) => r.policy === policy).reduce((n, r) => n + r[key], 0);
     rows.forEach((r) => expect(r.day, `seed ${r.seed} ${r.policy}: ${r.outcome}`).toBe(365));
     // End-of-year samples include different attendance, spending and RNG histories.
