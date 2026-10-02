@@ -4,6 +4,8 @@
 // The bundle also carries its own commit (VITE_FLT_SHA, FLT-84), so both sides build as the same one, PROOF_SHA,
 // through a throwaway config that wraps each tree's own vite.config.ts and changes only that define.
 //
+// It also checks that no file in the flag-off build names the account API (/api/auth, /api/saves).
+//
 // Usage: node scripts/accounts-proof.mjs [--base <ref>]   (default origin/main; exits 1 if any file differs)
 import { spawnSync, execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -36,6 +38,21 @@ function build(cwd, out) {
   }
 }
 
+/** The flag-off bundle never talks to the account API: no file in it so much as names it. */
+const ACCOUNT_API = /\/api\/(auth|saves)\b/;
+function mentions(dir) {
+  const out = [];
+  const walk = (d) => {
+    for (const f of readdirSync(d)) {
+      const p = join(d, f);
+      if (statSync(p).isDirectory()) walk(p);
+      else if (ACCOUNT_API.test(readFileSync(p, "latin1"))) out.push(relative(dir, p));
+    }
+  };
+  walk(dir);
+  return out;
+}
+
 function hashes(dir) {
   const out = new Map();
   const walk = (d) => {
@@ -63,6 +80,11 @@ try {
   const b = hashes(join(tmp, "head-dist"));
   const diff = [...new Set([...a.keys(), ...b.keys()])].sort().filter((f) => a.get(f) !== b.get(f));
   const head = git("rev-parse", "--short", "HEAD") + (git("status", "--porcelain") ? "+dirty" : "");
+  const api = mentions(join(tmp, "head-dist"));
+  if (api.length) {
+    console.log(`ACCOUNT API IN THE FLAG-OFF BUNDLE: ${api.join(", ")} mention /api/auth or /api/saves`);
+    process.exitCode = 1;
+  } else console.log(`NO ACCOUNT CALLS: none of the ${b.size} files built from ${head} with accounts off mentions /api/auth or /api/saves`);
   if (diff.length) {
     console.log(`DIFFERENT: ${diff.length} of ${Math.max(a.size, b.size)} files differ between ${args.base}@${sha.slice(0, 7)} and ${head}`);
     for (const f of diff) console.log(`  ${f}  ${a.get(f)?.slice(0, 12) ?? "(missing)"}  ${b.get(f)?.slice(0, 12) ?? "(missing)"}`);

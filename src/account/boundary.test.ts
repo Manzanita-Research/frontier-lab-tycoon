@@ -16,19 +16,18 @@ describe("accounts stay behind their flag", () => {
 
   it("is imported only by main.tsx, dynamically, under VITE_FLT_AUTH", () => {
     const into = Object.entries(game).flatMap(([file, code]) => specifiers(code).filter((s) => /(^|\/)account(\/|$)/.test(s)).map((s) => `${file}: ${s}`));
-    expect(into).toEqual(["../main.tsx: ./account/boot", "../main.tsx: ./account/boot"]);
+    expect(into).toEqual(["../main.tsx: ./account/boot", "../main.tsx: ./account/handover", "../main.tsx: ./account/boot"]);
     const main = game["../main.tsx"]!;
-    // Booted with the game, and (fromBox) when the intro hands over to it.
-    expect(main).toMatch(/if \(import\.meta\.env\.VITE_FLT_AUTH === "on"[^\n]*\{\n[^\n]*import\("\.\/account\/boot"\)/);
-    expect(main).toMatch(/const fromBox[^\n]*=\n\s*import\.meta\.env\.VITE_FLT_AUTH === "on"\n\s*\? [^]*?import\("\.\/account\/boot"\)[^]*?\n\s*: loadGame;/);
+    // Booted with the game, or (the /box intro's door) once the intro has handed over to it.
+    const flagged = [...main.matchAll(/\n *if \(import\.meta\.env\.VITE_FLT_AUTH === "on" && (!Page|intro)\) \{\n([^]*?)\n *\}/g)];
+    expect(flagged.map((m) => m[1])).toEqual(["!Page", "intro"]);
+    expect(flagged.map((m) => [...m[2]!.matchAll(/import\("([^"]+)"\)/g)].map((i) => i[1])).flat()).toEqual(["./account/boot", "./account/handover", "./account/boot"]);
   });
 
   it("never imports the sim, the store, the app shell or three", () => {
     const bad = Object.entries(account)
       .filter(([file]) => file !== "./game.ts")
-      .flatMap(([file, code]) =>
-      specifiers(code).filter((s) => /(^|\/)(sim|app|render|store)(\/|$)|^three|^@react-three/.test(s)).map((s) => `${file}: ${s}`),
-    );
+      .flatMap(([file, code]) => specifiers(code).filter((s) => /(^|\/)(sim|app|render|store)(\/|$)|^three|^@react-three/.test(s)).map((s) => `${file}: ${s}`));
     expect(bad).toEqual([]);
   });
 
