@@ -1,3 +1,4 @@
+import { isBareRoot } from "../src/introRoute";
 import { makeAuth } from "./auth";
 import type { Env } from "./env";
 import { handleSaves } from "./saves";
@@ -36,6 +37,19 @@ export default {
     }
 
     if (path === "/api" || path.startsWith("/api/")) return error(404, "not-found", "No such API.");
+
+    // FLT-95 opens the bare root on the software shelf for a browser with no saves. A logged-on player's lab may be in
+    // the cloud instead, so they go to the game, where "Continue from the cloud" is waiting. The account client reads
+    // and removes `?member=1`; it only makes the address something other than bare.
+    if ((request.method === "GET" || request.method === "HEAD") && isBareRoot(url) && /session_token=/.test(request.headers.get("cookie") ?? "")) {
+      const session = await makeAuth(env)
+        .api.getSession({ headers: request.headers })
+        .catch(() => null);
+      if (session) {
+        url.searchParams.set("member", "1");
+        return new Response(null, { status: 302, headers: { Location: `${url.pathname}${url.search}`, "Cache-Control": "no-store" } });
+      }
+    }
     return env.ASSETS.fetch(request);
   },
 } satisfies ExportedHandler<Env>;

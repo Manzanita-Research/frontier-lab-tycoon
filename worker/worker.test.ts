@@ -149,6 +149,21 @@ describe("routing", () => {
     expect(await (await w.fetch("/?seed=12")).text()).toBe("asset /");
   });
 
+  it("sends a logged-on player at the bare root to the game (?member=1), not the shelf; everyone else gets the page", async () => {
+    const { jar } = await signIn();
+    for (const at of ["/", "/?utm_source=newsletter"]) {
+      const res = await w.fetch(at, { headers: { cookie: jar.header() }, redirect: "manual" });
+      expect(res.status).toBe(302);
+      expect(res.headers.get("location")).toBe(at === "/" ? "/?member=1" : "/?utm_source=newsletter&member=1");
+      expect(res.headers.get("cache-control")).toBe("no-store");
+    }
+    // Any other link is already the game's, and a stale cookie is a guest's.
+    expect(await (await w.fetch("/?seed=12", { headers: { cookie: jar.header() }, redirect: "manual" })).text()).toBe("asset /");
+    expect(await (await w.fetch("/box", { headers: { cookie: jar.header() }, redirect: "manual" })).text()).toBe("asset /box");
+    const stale = await w.fetch("/", { headers: { cookie: "better-auth.session_token=nope.nope" }, redirect: "manual" });
+    expect(stale.status).toBe(200);
+  });
+
   it("answers unknown /api paths with a JSON 404, not the game", async () => {
     const res = await w.fetch("/api/nope");
     expect(res.status).toBe(404);

@@ -112,3 +112,36 @@
 .flt-account-notice {
   font-weight: 700;
 }
+
+/* ---- cloud saves (FLT-67): portalled into the game's own Save As / Open and "Welcome back" ---- */
+[data-skin="frontier-95"] {
+  .f95-cloud {
+    border-top: 1px solid var(--dk);
+    box-shadow: inset 0 1px #fff;
+    margin-top: 6px;
+    .f95-savelist {
+      min-height: 66px;
+    }
+  }
+  .f95-cloud-mark {
+    width: 16px;
+    text-align: center;
+    color: #000080;
+  }
+  .f95-cloud-status {
+    margin: 2px 6px 4px;
+  }
+  .f95-cloud-tip {
+    margin-top: 8px;
+  }
+}
+.flt-cloud-list {
+  margin-top: 10px;
+  > .saves-label {
+    display: block;
+    margin-bottom: 4px;
+  }
+}
+.flt-cloud-continue {
+  margin-top: 8px;
+}

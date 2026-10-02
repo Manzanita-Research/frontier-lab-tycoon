@@ -3,7 +3,7 @@ import * as Schema from "effect/Schema";
 import { MAX_SAVE_BYTES, SAVE_MIME, SaveHead, SaveUpload, Slot, type SaveSummary } from "../src/account/contract";
 import type { Env } from "./env";
 
-/** A slot can't be rewritten more often than this (the client throttles autosaves to one per 5 minutes anyway). */
+/** A slot can't be rewritten more often than this (the client sends the autosave at most once a minute, and waits SLOT_GAP_MS between writes to a slot: src/account/cloud/sync.ts). */
 export const MIN_WRITE_GAP_MS = 10_000;
 
 const decodeSlot = Schema.decodeUnknownResult(Slot);

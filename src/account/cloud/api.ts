@@ -28,10 +28,11 @@ const decodeSummary = Schema.decodeUnknownResult(SaveSummary);
 /** fetch's keepalive (a save that goes up as the tab closes) carries at most 64 KiB. */
 export const KEEPALIVE_MAX = 60_000;
 
-export const cloudApi: CloudApi = {
+/** The cloud on `fetcher`: the page's own `fetch` in the game, the Worker under test in the tests. */
+export const makeCloudApi = (fetcher: (path: string, init?: RequestInit) => Promise<Response>): CloudApi => ({
   async list() {
     try {
-      const res = await fetch("/api/saves", { credentials: "same-origin", cache: "no-store" });
+      const res = await fetcher("/api/saves", { credentials: "same-origin", cache: "no-store" });
       if (!res.ok) return null;
       const list = decodeList(await res.json());
       return Result.isFailure(list) ? null : list.success.saves;
@@ -41,7 +42,7 @@ export const cloudApi: CloudApi = {
   },
   async get(slot) {
     try {
-      const res = await fetch(`/api/saves/${slot}`, { credentials: "same-origin", cache: "no-store" });
+      const res = await fetcher(`/api/saves/${slot}`, { credentials: "same-origin", cache: "no-store" });
       return res.ok ? await res.text() : null;
     } catch {
       return null;
@@ -49,7 +50,7 @@ export const cloudApi: CloudApi = {
   },
   async put(slot, text, keepalive) {
     try {
-      const res = await fetch(`/api/saves/${slot}`, {
+      const res = await fetcher(`/api/saves/${slot}`, {
         method: "PUT",
         credentials: "same-origin",
         headers: { "content-type": "application/x-fltsave+json" },
@@ -70,4 +71,6 @@ export const cloudApi: CloudApi = {
       return { kind: "retry" };
     }
   },
-};
+});
+
+export const cloudApi = makeCloudApi((path, init) => fetch(path, init));
