@@ -15,20 +15,22 @@ Actions secrets, and the deploy passes them to Cloudflare by name.
      - `https://flt-prod.manzanita.workers.dev/api/auth/callback/huggingface`
    - Scopes: `openid` and `profile` only. We never ask for `email` (Better Auth gets a placeholder,
      `huggingface-<id>@users.invalid`), nor for any repo, inference or write scope.
-2. **The GitHub Actions secrets** exist (names only; check with `gh secret list --repo jem-computer/frontier-lab-tycoon`):
+   - PR Previews need no redirect URL: they never get accounts (`authEnabled` is prod only).
+2. **The GitHub Actions secrets** exist (names only; check with `gh secret list --repo Manzanita-Research/frontier-lab-tycoon`):
    - `HF_CLIENT_ID`, `HF_CLIENT_SECRET`: from the HF app.
    - `BETTER_AUTH_SECRET`: 32+ random bytes, used to sign session cookies. Changing it later logs everyone out.
 3. **The Cloudflare API token** (`CLOUDFLARE_API_TOKEN`) needs two more account-level permissions on top of the ones in
    [infra/README.md](../infra/README.md): **D1 Edit** and **Workers R2 Storage Edit**. Without them the deploy fails
    at the first new resource and prod stays as it was.
-4. **Flip it:** `gh variable set FLT_AUTH --body on --repo jem-computer/frontier-lab-tycoon`, then run the Deploy
+4. **Flip it:** `gh variable set FLT_AUTH --body on --repo Manzanita-Research/frontier-lab-tycoon`, then run the Deploy
    workflow on `main` (or merge anything). The first deploy creates the D1 database `flt-prod-accounts` (migrated from
    `worker/migrations/`) and the R2 bucket `flt-prod-saves`, swaps the edge script for `worker/index.ts` (the same
    apex/www redirect to `app.`, plus `/api/*`), and rebuilds the site with `VITE_FLT_AUTH=on`, which compiles in the log-on UI.
 5. **Check it:** open `https://app.frontierlabtycoon.com/`, then **Start ▸ Log On to Frontier Network…** (Frontier 95;
    other skins show a small "Log on" chip, bottom right). You should come back from Hugging Face logged on, with your
    name, handle and avatar in the Frontier Network window. `curl -s https://app.frontierlabtycoon.com/api/saves` should
-   answer `401 {"error":"signed-out"}`.
+   answer `401 {"error":"signed-out"}`. Save to a slot, and **Save / Load…** shows it on `\\FRONTIER\LABS` a few
+   seconds later.
 
 **Switching off:** `gh variable set FLT_AUTH --body off` (or delete it) and deploy. The site goes back to the
 edge-script Worker and the log-on UI leaves the bundle. The database and bucket are **kept** (`RemovalPolicy.retain()`),
@@ -75,10 +77,42 @@ Slots are FLT-65's: `auto`, `1`, `2`, `3`. The body is FLT-65's `.fltsave` text 
 ([SAVES.md](SAVES.md)); the Worker validates the envelope's head with Effect Schema (`src/account/contract.ts`) and
 stores the bytes untouched, so a newer save version uploads without a Worker deploy.
 
-**Not wired yet:** the game doesn't call these routes yet. FLT-65's save UI (local autosave, three slots, export)
-has landed; uploading, cloud slots in its Save / Load window and "Continue from the cloud" are the follow-up. Logging on
-is a page navigation; FLT-65 autosaves when the page hides, so the lab should be offered back with "Continue" (not yet
-checked end to end).
+## Cloud saves in the game
+
+All of it is in the flag-on `boot` chunk (`src/account/cloud/`, and `src/account/game.ts`, the one file that reaches
+into the game). No game module changed: the cloud listens to FLT-65's save desk and loads through its import.
+
+- **Uploads** (`cloud/sync.ts`): every local save (autosave, slot, the hide autosave) is written to this computer
+  first, exactly as before; the cloud hears about it afterwards and uploads that slot's bytes 2 s later, so a burst
+  of saves is one upload. The autosave goes up at most once a minute; leaving the page sends it at once (with
+  `keepalive`). A failed upload retries quietly (15 s, 30 s, 1, 2, 4 minutes, then every 5) and says so in one line
+  in the Save / Load window and the Frontier Network window. A 401 stops uploads (logged off elsewhere); a refused
+  save (400/413) is reported and skipped. Nothing ever blocks or delays the local save.
+- **Cloud slots:** Frontier 95's Save As / Open shows the network drive `\\FRONTIER\LABS (@handle)` under the
+  floppy, with ☁ rows (slot, lab, date, when, size) and Open; other skins get a "☁ In the cloud" list under their slots.
+- **Continue from the cloud** (`cloud/offer.ts`): when the newest cloud save is newer than this computer's newest
+  local save and isn't already here, "Welcome back" gets a ☁ Continue from the cloud beside Continue. With no local
+  saves at all, a Welcome back window of its own offers it (and New lab). Until the player answers, nothing uploads.
+  After New lab, a fresh garage can't overwrite the cloud's further-along autosave (it says so); a slot save still
+  goes up.
+- **The trip to Hugging Face** autosaves the lab on screen as the page hides. The log-on click notes the time
+  (sessionStorage), so that autosave doesn't count as "newer than the cloud" when the player comes back.
+- **The box intro** (FLT-95): the Worker sends a logged-on visitor at the bare root `/` to `/?member=1` (a 302,
+  only with a valid session cookie), so a returning cloud player opens on the game, not the shelf, even on a computer
+  with no saves. `member` is removed from the address bar once the account has booted. Strangers and guests see the
+  root exactly as before. When the intro is the door, the account boots once the intro has handed over to the game.
+- **One autosave slot per player:** two computers share the cloud's `auto`. Each upload is the newest local autosave,
+  so the last computer to autosave wins, except that a different lab which is behind (a fresh garage) can't overwrite
+it. Slots 1–3 are only ever written by a slot save.
+
+Tests: `src/account/cloud/cloud.test.ts` (the offer rules, debounce, gaps, retries, the kept autosave, a save during
+an upload), `worker/cloud-roundtrip.test.ts` (log on with HF mocked against the real Worker, save, lose the local
+storage, log on again, the lab comes back byte for byte; and the trip case) and `e2e/accounts.mjs` (the same in a
+browser, through the box, with screenshots):
+
+| Cloud slots | Continue from the cloud (no local saves) | Continue from the cloud (in Welcome back) |
+|---|---|---|
+| ![](img/flt-67/cloud-slots.png) | ![](img/flt-67/cloud-continue-alone.png) | ![](img/flt-67/cloud-continue-welcome.png) |
 
 ## Adding GitHub (or another provider)
 
@@ -96,19 +130,27 @@ VITE_FLT_AUTH=on pnpm exec vite build --outDir dist-accounts --emptyOutDir
 node worker/dev.ts                       # http://localhost:8787/ ; logs you on as "Ada Founder" (@ada)
 # http://localhost:8787/?devlogon=1        arrive already logged on (does the OAuth round trip for you)
 pnpm shots --scenes accounts --after-url http://localhost:8787/   # the before/after set
+pnpm e2e:accounts --out docs/img/flt-67  # (with dev.ts running) log on, save, clear storage, continue from the cloud
 ```
 
 The data lives in memory and is gone when the server stops. Tests: `pnpm exec vitest run worker infra src/account`
-(the mocked HF flow, saves CRUD, validation, privacy, and that nothing answers when the flag is off).
+(the mocked HF flow, saves CRUD, validation, privacy, the cloud client and its round trip, and that nothing answers
+when the flag is off).
 
 ## Proof: off is off
 
 ```sh
 node scripts/accounts-proof.mjs          # builds origin/main and this checkout with accounts off, compares every file
-# IDENTICAL: all 101 files match between origin/main@2a4dac1 and … with accounts off
+# IDENTICAL: all 135 files match between origin/main@ab5e232 and … with accounts off, both built as commit 0000000 (…)
+# NO ACCOUNT CALLS: none of the 135 files built from … with accounts off mentions /api/auth or /api/saves
 ```
 
-`dist/deployment.json` is left out: the deploy writes the commit hash into it. Two things keep the bundle identical,
-and `src/account/boundary.test.ts` guards both: `main.tsx` reaches the account code only through one flagged
-dynamic import, and `scripts/vite-accounts.mjs` resolves that import to an empty stub when the flag is off. Without
-the stub, Rollup still walks the dead import, and the skin modules the account UI imports reorder a shared chunk.
+`dist/deployment.json` is left out: the deploy writes the commit hash into it. The bundle also carries its own commit
+(FLT-84's `VITE_FLT_SHA`, for the recovery toast), so the proof builds both sides as the same commit, `0000000`,
+through a throwaway config that wraps each tree's `vite.config.ts` and changes only that define.
+
+Two things keep the bundle identical, and `src/account/boundary.test.ts` guards both: `main.tsx` reaches the account
+code only through flagged dynamic imports (the boot, and the /box intro's hand-over), and `scripts/vite-accounts.mjs`
+resolves those imports to an empty stub when the flag is off. Without the stub, Rollup still walks the dead imports,
+and the skin modules the account UI imports reorder a shared chunk. The flag-off build never names `/api/auth` or
+`/api/saves`; the proof checks that too.
