@@ -176,10 +176,13 @@
 .peektag {
   transform: translate(-50%, -100%);
 }
-/* FLT-87's thumb size everywhere (FLT-93): a phone journey caught it at 71×28 once, with the phone-only rule not applied. */
+/* FLT-87's thumb size everywhere (FLT-93). A CI phone journey still measured it at 71×28 with min-height set, so the 32 px is
+   built in too: a 20 px line, 4 px padding and 2 px borders, whatever font the machine falls back to. */
 .peektag button {
+  display: inline-block;
   min-height: 32px;
   padding: 4px 12px;
+  line-height: 20px;
   border: 2px solid var(--ink);
   border-radius: 11px;
   background: var(--cream);

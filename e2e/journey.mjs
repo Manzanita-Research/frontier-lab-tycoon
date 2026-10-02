@@ -472,6 +472,16 @@ async function sweep(withCampus) {
       }
       return null;
     };
+    // Why a control is small (FLT-93): its own min-height, line and padding, and an ancestor that scales it, if one does.
+    const why = (el) => {
+      const cs = getComputedStyle(el);
+      const scaled = [];
+      for (let a = el; a && a !== document.body; a = a.parentElement) {
+        const st = getComputedStyle(a);
+        if (st.zoom !== "1" || st.scale !== "none" || /^matrix\((?!1, 0, 0, 1,)/.test(st.transform)) scaled.push(`${sig(a)} ${st.transform !== "none" ? st.transform : st.scale !== "none" ? `scale ${st.scale}` : `zoom ${st.zoom}`}`);
+      }
+      return ` (min-height ${cs.minHeight}, line ${cs.lineHeight}, padding ${cs.padding}, font ${cs.fontFamily.split(",")[0]}${scaled.length ? `; scaled by ${scaled.join(" < ")}` : ""})`;
+    };
     // Anything tappable under TAP_MIN px (on screen, visible, not disabled).
     const TAPPABLE = "button, a[href], input:not([type=hidden]), select, textarea, summary, [role=button], [role=menuitem], [role=tab], [role=link], [role=checkbox], [role=switch], [role=option], [role=slider]";
     for (const el of document.querySelectorAll(TAPPABLE)) {
@@ -484,7 +494,7 @@ async function sweep(withCampus) {
         if (!onScreen(r)) continue;
       }
       if (r.width >= TAP_MIN && r.height >= TAP_MIN) continue;
-      issues.push({ kind: "small target", key: `${stable(where(el))}|${stable(name(el))}`, message: `"${name(el)}" in ${where(el)} is ${Math.round(r.width)}×${Math.round(r.height)} px` });
+      issues.push({ kind: "small target", key: `${stable(where(el))}|${stable(name(el))}`, message: `"${name(el)}" in ${where(el)} is ${Math.round(r.width)}×${Math.round(r.height)} px${why(el)}` });
     }
     // Windows wider than the screen, or with the close button off it; a card whose buttons need a scroll.
     for (const win of document.querySelectorAll(WIN)) {
