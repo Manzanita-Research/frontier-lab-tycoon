@@ -460,6 +460,16 @@
       "flt91-open-phone",
       "flt96-plaza",
       "flt96-plaza-hall"
+    ],
+    "flt-98": [
+      "flt91-open",
+      "flt91-open-phone",
+      "flt98-lawn",
+      "flt98-lawn-phone",
+      "flt98-stakes",
+      "flt98-truck",
+      "flt98-hover",
+      "flt98-built"
     ]
   },
   "scenes": {
@@ -6720,6 +6730,327 @@
         },
         {
           "wait": 800
+        }
+      ]
+    },
+    "flt98-lawn": {
+      "title": "FLT-98: the first 10 seconds of a fresh garage with the tutorial skipped, so the lawn isn't dimmed (seed 3, the starting camera)",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "coachSkip"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "tick": 33
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "flt98-lawn-phone": {
+      "title": "FLT-98: the same on a phone (390x844), tutorial skipped",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13
+      },
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "coachSkip"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "tick": 33
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "flt98-stakes": {
+      "title": "FLT-98: survey stakes up close: Training Hall and API Gateway, where the coach builds them",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "12.5,18.5",
+        "zoom": 200
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "coachSkip"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "tick": 33
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "flt98-truck": {
+      "title": "FLT-98: Tensor Tacos, parked on the verge by the gate",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "14,24.6",
+        "zoom": 230
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "coachSkip"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "tick": 33
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "flt98-hover": {
+      "title": "FLT-98: a mouse resting on the Ethics Committee's stake shows its full text (desktop only)",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "5.5,14.5",
+        "zoom": 200
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "coachSkip"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "tick": 33
+        },
+        {
+          "wait": 600
+        },
+        {
+          "eval": "(f, w) => { const c = document.querySelector('canvas'); const r = c.getBoundingClientRect(); c.dispatchEvent(new PointerEvent('pointermove', { pointerType: 'mouse', clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 - 80, bubbles: true })); }"
+        },
+        {
+          "wait": 400
+        }
+      ]
+    },
+    "flt98-built": {
+      "title": "FLT-98: the coach's path and Hall built: the path misses every stake, the Hall's stake is pulled up, the rest stand",
+      "query": {
+        "warp": null,
+        "seed": 3,
+        "speed": 0,
+        "hour": 13,
+        "focus": "12.5,18",
+        "zoom": 90
+      },
+      "steps": [
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "coachSkip"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "buildPanelOpened"
+            }
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "wait": 250
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 15
+            }
+          }
+        },
+        {
+          "wait": 150
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 16
+            }
+          }
+        },
+        {
+          "wait": 150
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 17
+            }
+          }
+        },
+        {
+          "wait": 150
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placePath",
+              "x": 11,
+              "z": 18
+            }
+          }
+        },
+        {
+          "wait": 150
+        },
+        {
+          "send": {
+            "type": "COMMAND",
+            "command": {
+              "type": "placeBuilding",
+              "kind": "hall",
+              "x": 12,
+              "z": 16
+            }
+          }
+        },
+        {
+          "wait": 400
+        },
+        {
+          "send": {
+            "type": "SET_SPEED",
+            "speed": 0
+          }
+        },
+        {
+          "tick": 33
+        },
+        {
+          "wait": 600
         }
       ]
     }

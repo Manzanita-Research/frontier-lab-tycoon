@@ -5,7 +5,7 @@
 import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 
-type Part = THREE.BufferGeometry;
+export type Part = THREE.BufferGeometry;
 
 const WOOD = "#c98d52";
 const WOOD_DARK = "#a9713f";
@@ -13,7 +13,7 @@ const IRON = "#3d4249";
 const POST = "#6b4a2e";
 
 /** One coloured piece: a geometry moved to `p` (and turned `ry` about y), painted `color` in its vertices. */
-function paint(geo: Part, color: string, p: readonly [number, number, number], ry = 0): Part {
+export function paint(geo: Part, color: string, p: readonly [number, number, number], ry = 0): Part {
   const g = geo.index ? geo.toNonIndexed() : geo;
   g.deleteAttribute("uv");
   g.rotateY(ry);
@@ -26,11 +26,11 @@ function paint(geo: Part, color: string, p: readonly [number, number, number], r
   return g;
 }
 
-const box = (s: readonly [number, number, number], color: string, p: readonly [number, number, number]) => paint(new THREE.BoxGeometry(s[0], s[1], s[2]), color, p);
-const blob = (r: number, color: string, p: readonly [number, number, number], ry = 0) => paint(new THREE.IcosahedronGeometry(r, 0), color, p, ry);
-const bud = (r: number, color: string, p: readonly [number, number, number]) => paint(new THREE.OctahedronGeometry(r, 0), color, p);
+export const box = (s: readonly [number, number, number], color: string, p: readonly [number, number, number]) => paint(new THREE.BoxGeometry(s[0], s[1], s[2]), color, p);
+export const blob = (r: number, color: string, p: readonly [number, number, number], ry = 0) => paint(new THREE.IcosahedronGeometry(r, 0), color, p, ry);
+export const bud = (r: number, color: string, p: readonly [number, number, number]) => paint(new THREE.OctahedronGeometry(r, 0), color, p);
 
-function merge(parts: Part[]): THREE.BufferGeometry {
+export function merge(parts: Part[]): THREE.BufferGeometry {
   const g = mergeGeometries(parts)!;
   for (const p of parts) p.dispose();
   g.computeBoundingBox();

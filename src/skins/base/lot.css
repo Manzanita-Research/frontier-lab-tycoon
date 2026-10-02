@@ -1,0 +1,18 @@
+/* FLT-98: a survey stake's full text, when the mouse rests on its sign (desktop only). */
+.stakehint {
+  pointer-events: none;
+  span {
+    display: block;
+    max-width: 240px;
+    padding: 4px 9px 5px;
+    transform: translate(-50%, -100%);
+    border: 2px solid var(--ink, #3a2a1c);
+    border-left: 6px solid #ff7a1a;
+    border-radius: 4px;
+    background: #fffaf0;
+    color: var(--ink, #3a2a1c);
+    font: 700 13px/1.25 var(--font, system-ui);
+    box-shadow: 0 2px 0 var(--ink, #3a2a1c);
+    text-align: left;
+  }
+}
