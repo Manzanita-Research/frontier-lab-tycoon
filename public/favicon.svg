@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <!-- Frontier 95's mark (FLT-70), the same drawing as SunriseMark in src/skins/frontier-95/icons.tsx. -->
+  <defs><clipPath id="c"><circle cx="8" cy="8" r="7"/></clipPath></defs>
+  <circle cx="8" cy="8" r="7" fill="#008080"/>
+  <g clip-path="url(#c)">
+    <rect width="16" height="4" fill="#000080" shape-rendering="crispEdges"/>
+    <path d="M8 9.5L1 4.5M8 9.5L4 1M8 9.5V0M8 9.5L12 1M8 9.5L15 4.5" stroke="#ffe14d" stroke-width="1.1" opacity="0.75"/>
+    <circle cx="8" cy="9.5" r="3.6" fill="#ffe14d"/>
+    <rect y="9.5" width="16" height="7" fill="#000080" shape-rendering="crispEdges"/>
+    <rect x="4.5" y="10.5" width="7" height="1" fill="#ffe14d" shape-rendering="crispEdges"/>
+    <rect x="5.5" y="12.25" width="5" height="1" fill="#ffe14d" shape-rendering="crispEdges"/>
+    <rect x="6.75" y="14" width="2.5" height="0.9" fill="#ffe14d" shape-rendering="crispEdges"/>
+  </g>
+  <circle cx="8" cy="8" r="7" fill="none" stroke="#fff" stroke-width="1"/>
+  <circle cx="8" cy="8" r="7.6" fill="none" stroke="#000" stroke-width="0.6"/>
+</svg>
