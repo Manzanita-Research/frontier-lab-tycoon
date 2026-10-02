@@ -1,0 +1,155 @@
+[
+ {
+  "name": "box-pick",
+  "url": "/box?beat=shelf",
+  "seconds": 9,
+  "warmup": 3000,
+  "css": "@box",
+  "actions": [
+   {
+    "at": 0.5,
+    "eval": "window.__intro.send({ type: 'PICK' })"
+   },
+   {
+    "at": 4.0,
+    "eval": "window.__intro.send({ type: 'TURN', by: 4 })"
+   },
+   {
+    "at": 7.2,
+    "eval": "window.__intro.send({ type: 'FLIP' })"
+   }
+  ]
+ },
+ {
+  "name": "box-boot",
+  "url": "/box?beat=open",
+  "seconds": 13,
+  "warmup": 3000,
+  "css": "@box",
+  "actions": [
+   {
+    "at": 0.6,
+    "eval": "window.__intro.send({ type: 'INSERT' })"
+   },
+   {
+    "at": 2.6,
+    "eval": "window.__intro.send({ type: 'INSERT' })"
+   }
+  ]
+ },
+ {
+  "name": "campus-hero",
+  "url": "/?moment=takeover&photo&speed=1",
+  "seconds": 6
+ },
+ {
+  "name": "campus-close",
+  "url": "/?moment=money-win&photo&zoom=90&speed=1",
+  "seconds": 5
+ },
+ {
+  "name": "hud-live",
+  "url": "/?moment=takeover&speed=1",
+  "seconds": 4
+ },
+ {
+  "name": "bird",
+  "url": "/?moment=bird-banger&seed=3",
+  "seconds": 4,
+  "viewport": [
+   1024,
+   576
+  ]
+ },
+ {
+  "name": "bird-dunk",
+  "url": "/?moment=bird-rivals-dunk&seed=3",
+  "seconds": 3,
+  "viewport": [
+   1024,
+   576
+  ]
+ },
+ {
+  "name": "hearing",
+  "url": "/?moment=hearing&seed=3",
+  "seconds": 4,
+  "viewport": [
+   1024,
+   576
+  ]
+ },
+ {
+  "name": "leak",
+  "url": "/?moment=yacht-leak&seed=3",
+  "seconds": 3,
+  "viewport": [
+   1024,
+   576
+  ]
+ },
+ {
+  "name": "shipped",
+  "url": "/?moment=era3&seed=3",
+  "seconds": 3,
+  "viewport": [
+   1024,
+   576
+  ]
+ },
+ {
+  "name": "bridge",
+  "url": "/?moment=money-round1",
+  "seconds": 3,
+  "viewport": [
+   1024,
+   576
+  ]
+ },
+ {
+  "name": "escape",
+  "url": "/?moment=escape-run&photo&zoom=85&speed=1",
+  "seconds": 5
+ },
+ {
+  "name": "escape-hud",
+  "url": "/?moment=escape-carry&seed=3",
+  "seconds": 4
+ },
+ {
+  "name": "front-escaped",
+  "url": "/?moment=front-escaped",
+  "seconds": 4
+ },
+ {
+  "name": "front-captured",
+  "url": "/?moment=front-captured",
+  "seconds": 3
+ },
+ {
+  "name": "box-pick2",
+  "url": "/box?beat=shelf",
+  "seconds": 8,
+  "warmup": 3000,
+  "css": "@box",
+  "actions": [
+   {
+    "at": 0.4,
+    "eval": "window.__intro.send({ type: 'PICK' })"
+   },
+   {
+    "at": 4.4,
+    "eval": "window.__intro.send({ type: 'TURN', by: 4 })"
+   }
+  ]
+ },
+ {
+  "name": "bsod",
+  "url": "/?moment=era3&seed=3",
+  "seconds": 5,
+  "viewport": [
+   1024,
+   576
+  ]
+ }
+]
