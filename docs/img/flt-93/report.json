@@ -1,14 +1,14 @@
 {
   "base": {
     "ref": "origin/main",
-    "sha": "d17e9a7cd7fbe9fa16a71a1723b6715232c61df2"
+    "sha": "c5bc38c64269b9341a50cfcce264f5fa33df3593"
   },
   "head": {
     "branch": "flt-93-onboarding",
-    "sha": "c59477c",
-    "dirty": false
+    "sha": "f02785a",
+    "dirty": true
   },
-  "seconds": 107.728,
+  "seconds": 106.246,
   "problems": [],
   "rows": [
     {
@@ -18,7 +18,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-93/after/flt93-card.png",
       "title": "FLT-93: Level 2 met, the \"Growing team\" New! card (both builds: the same world, staged by eval)",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-93/compare/flt93-card.png",
-      "changed": 0.08631018518518518
+      "changed": 0.10863966049382716
     },
     {
       "scene": "flt93-card-phone",
@@ -27,7 +27,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-93/after/flt93-card-phone.png",
       "title": "FLT-93: the \"Growing team\" New! card on a phone",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-93/compare/flt93-card-phone.png",
-      "changed": 0.39476242556811275
+      "changed": 0.3937249362012395
     },
     {
       "scene": "flt93-hire",
@@ -36,7 +36,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-93/after/flt93-hire.png",
       "title": "FLT-93: Level 3's goal (hire an SRE) with the card read; the branch presses the goal's [Show me]",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-93/compare/flt93-hire.png",
-      "changed": 0.14468441358024692
+      "changed": 0.14155864197530865
     },
     {
       "scene": "flt93-hire-phone",
@@ -45,7 +45,7 @@
       "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-93/after/flt93-hire-phone.png",
       "title": "FLT-93: [Show me] Hire an SRE on a phone: open the strip under the lab bar, then Show Me…",
       "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-93/compare/flt93-hire-phone.png",
-      "changed": 0.3717196803985903
+      "changed": 0.3705933284724754
     }
   ],
   "errors": []
