@@ -470,6 +470,17 @@
       "flt98-truck",
       "flt98-hover",
       "flt98-built"
+    ],
+    "accounts": [
+      "account-menu",
+      "account-logon",
+      "account-member",
+      "account-member-menu",
+      "account-delete",
+      "account-phone",
+      "account-chip",
+      "account-chip-logon",
+      "account-chip-phone"
     ]
   },
   "scenes": {
@@ -7051,6 +7062,150 @@
         },
         {
           "wait": 600
+        }
+      ]
+    },
+    "account-menu": {
+      "title": "FLT-67: the Start menu, with \"Log On to Frontier Network…\" above Shut Down when accounts are on",
+      "steps": [
+        {
+          "eval": "(f, w) => document.querySelector('[data-testid=\"start-button\"]')?.click()"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "account-logon": {
+      "title": "FLT-67: Start ▸ Log On to Frontier Network… (the log-on box)",
+      "steps": [
+        {
+          "eval": "(f, w) => document.querySelector('[data-testid=\"start-button\"]')?.click()"
+        },
+        {
+          "wait": 600
+        },
+        {
+          "click": "[data-testid=\"start-account\"]",
+          "optional": true
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "account-member": {
+      "title": "FLT-67: back from Hugging Face, logged on (the account window). The local server's ?devlogon=1 does the OAuth round trip",
+      "query": {
+        "devlogon": 1
+      },
+      "steps": [
+        {
+          "wait": 1500
+        }
+      ]
+    },
+    "account-member-menu": {
+      "title": "FLT-67: logged on, the Start menu says \"Log Off @ada…\"",
+      "query": {
+        "devlogon": 1
+      },
+      "steps": [
+        {
+          "wait": 1200
+        },
+        {
+          "click": ".f95-logon [data-g='close']",
+          "optional": true
+        },
+        {
+          "wait": 300
+        },
+        {
+          "eval": "(f, w) => document.querySelector('[data-testid=\"start-button\"]')?.click()"
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "account-delete": {
+      "title": "FLT-67: Delete Account… asks first, No is the default",
+      "query": {
+        "devlogon": 1
+      },
+      "steps": [
+        {
+          "wait": 1200
+        },
+        {
+          "click": ".f95-logon .f95-logon-buttons .f95-btn:nth-child(3)",
+          "optional": true
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "account-phone": {
+      "title": "FLT-67: the log-on box on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "steps": [
+        {
+          "eval": "(f, w) => document.querySelector('[data-testid=\"start-button\"]')?.click()"
+        },
+        {
+          "wait": 600
+        },
+        {
+          "click": "[data-testid=\"start-account\"]",
+          "optional": true
+        },
+        {
+          "wait": 600
+        }
+      ]
+    },
+    "account-chip": {
+      "title": "FLT-67: a skin without its own sign-in yet gets the base \"Log on\" chip, bottom right (Homepage 98; --skin all for every skin)",
+      "query": {
+        "skin": "homepage-98"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "account-chip-logon": {
+      "title": "FLT-67: the base log-on card (Homepage 98)",
+      "query": {
+        "skin": "homepage-98"
+      },
+      "steps": [
+        {
+          "wait": 600
+        },
+        {
+          "click": "[data-testid=\"account-chip\"]",
+          "optional": true
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "account-chip-phone": {
+      "title": "FLT-67: the base \"Log on\" chip on a phone (Homepage 98)",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "skin": "homepage-98"
+      },
+      "steps": [
+        {
+          "wait": 800
         }
       ]
     }

@@ -7,6 +7,7 @@ import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { AUTH_HOSTS, AUTH_MIGRATIONS, AUTH_WORKER_MAIN, authEnabled } from "./auth.ts";
 
 export default Alchemy.Stack(
   "FrontierLabTycoon",
@@ -32,11 +33,38 @@ export default Alchemy.Stack(
     // declared here, never prod's; keep it that way when D1/R2 arrive (auth and cloud saves are prod-only).
     const APP_WORKER = "flt-prod";
     const revision = yield* Config.String("DEPLOY_REVISION").pipe(Config.withDefault(""));
+
+    // Accounts and cloud saves (FLT-67), prod only, and off until the repo variable FLT_AUTH=on (docs/ACCOUNTS.md).
+    // Off, nothing below is declared and the site is exactly the edge-script Worker above: no D1, no R2, no secrets
+    // read. On, worker/index.ts takes the edge script's place (it runs edge.mjs for everything but /api/* on app.), and the
+    // build turns the log-on UI on. PR Previews never get any of it: `auth` is false off prod.
+    const auth = authEnabled(stack.stage, yield* Config.String("FLT_AUTH").pipe(Config.withDefault("")));
+    const accounts = auth
+      ? {
+          main: fileURLToPath(AUTH_WORKER_MAIN),
+          env: {
+            // Players' data. Named, and kept if the flag is ever switched off again (Alchemy would otherwise delete
+            // what it no longer declares); switching back on adopts the same database and bucket by name.
+            DB: yield* Cloudflare.D1.Database("Accounts", { name: `flt-${stack.stage}-accounts`, migrations: fileURLToPath(AUTH_MIGRATIONS) }).pipe(
+              Alchemy.RemovalPolicy.retain(),
+            ),
+            SAVES: yield* Cloudflare.R2.Bucket("Saves", { name: `flt-${stack.stage}-saves` }).pipe(Alchemy.RemovalPolicy.retain()),
+            AUTH_HOSTS: AUTH_HOSTS.join(","),
+            BETTER_AUTH_SECRET: Config.Redacted("BETTER_AUTH_SECRET"),
+            HF_CLIENT_ID: Config.Redacted("HF_CLIENT_ID"),
+            HF_CLIENT_SECRET: Config.Redacted("HF_CLIENT_SECRET"),
+            // StaticSite hands `env` to the build too: this is what compiles the client's account code in.
+            VITE_FLT_AUTH: "on",
+          },
+        }
+      : undefined;
+
     const site = yield* Cloudflare.Website.StaticSite("Website", {
       cwd: fileURLToPath(new URL("../", import.meta.url)),
       command: "node scripts/build-deployment.mjs",
       outdir: "dist",
-      script: EDGE_SCRIPT,
+      // Accounts on (prod only): worker/index.ts replaces the edge script, running it for everything but /api/*.
+      ...(accounts ?? { script: EDGE_SCRIPT }),
       // Navigations run the edge script first (one invocation per page load); hashed assets stay served directly.
       assets: { notFoundHandling: "single-page-application", runWorkerFirst: ["/*", "!/assets/*"] },
       ...(stack.stage === "prod"

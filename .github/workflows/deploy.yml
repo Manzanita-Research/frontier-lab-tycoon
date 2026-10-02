@@ -91,6 +91,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PULL_REQUEST: ${{ github.event.number }}
           DEPLOY_REVISION: ${{ github.event.pull_request.head.sha || github.sha }}
+          # Accounts (FLT-67, docs/ACCOUNTS.md): off until the repo variable FLT_AUTH=on, and prod only. The secrets
+          # reach only a production deploy with the flag on; everywhere else they are empty strings.
+          FLT_AUTH: ${{ vars.FLT_AUTH }}
+          BETTER_AUTH_SECRET: ${{ vars.FLT_AUTH == 'on' && github.event_name == 'push' && secrets.BETTER_AUTH_SECRET || '' }}
+          HF_CLIENT_ID: ${{ vars.FLT_AUTH == 'on' && github.event_name == 'push' && secrets.HF_CLIENT_ID || '' }}
+          HF_CLIENT_SECRET: ${{ vars.FLT_AUTH == 'on' && github.event_name == 'push' && secrets.HF_CLIENT_SECRET || '' }}
 
       - name: Read the deployed preview URL
         if: github.event_name == 'pull_request' && steps.current.outputs.deploy == 'true'

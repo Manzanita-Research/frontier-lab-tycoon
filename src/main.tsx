@@ -72,4 +72,20 @@ else {
       </StrictMode>,
     ),
   );
+
+  // Accounts (FLT-67): compiled in only when the prod deploy builds with VITE_FLT_AUTH=on (docs/ACCOUNTS.md). Otherwise
+  // this statement, the one below and everything under src/account/ are dropped from the bundle, which stays
+  // byte-identical.
+  if (import.meta.env.VITE_FLT_AUTH === "on" && !Page) {
+    void Promise.all([skin, app]).then(() => import("./account/boot")).then((m) => m.bootAccount());
+  }
+}
+
+// Accounts (FLT-67) when the /box intro is the door: it hands over to the game in the same root, and the account boots
+// once the game's HUD is up. Flag off, this is dropped too.
+if (import.meta.env.VITE_FLT_AUTH === "on" && intro) {
+  void import("./account/handover")
+    .then((h) => h.whenGame())
+    .then(() => import("./account/boot"))
+    .then((m) => m.bootAccount());
 }
