@@ -573,7 +573,8 @@ let peekTries = 0;
 async function phoneChecks(p, force = false) {
   if (!phone || (!force && Date.now() - lastSweep < PHONE_CHECK_MS)) return;
   lastSweep = Date.now();
-  const calm = !peeked && !p.event && !p.pendingConfirm && !p.overlays.length && !p.unlockCard && !(await page.locator("[role=menu]:visible, .mode-done:visible, .f95-bsod-go:visible").count());
+  // The probe reads the app's snapshot and the HUD the 5 Hz one, so a New! card just dismissed is still on screen for a beat (FLT-93).
+  const calm = !peeked && !p.event && !p.pendingConfirm && !p.overlays.length && !p.unlockCard && !(await page.locator("[role=menu]:visible, .mode-done:visible, .f95-bsod-go:visible, .f95-unlock:visible, .unlock-card:visible").count());
   const t0 = Date.now();
   const { issues, campus } = await sweep(calm);
   const ms = Date.now() - t0;
