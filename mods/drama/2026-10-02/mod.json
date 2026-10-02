@@ -1,0 +1,75 @@
+{
+  "apiVersion": 1,
+  "id": "drama-2026-10-02",
+  "name": "Daily Drama: Same Model, Five Hats",
+  "version": "1.0.0",
+  "author": "Daily Drama",
+  "description": "Every lab launches its own decision model this week. All of them are the same model wearing a different hat.",
+  "content": {
+    "events": {
+      "add": [
+        {
+          "id": "drama-2026-10-02-decision-card",
+          "title": "Everyone Has a Decision Model",
+          "body": "Four rivals shipped decision models this week. All four are Zephyr-Decide in a hat.\nThe board wants to know if we should ship one too.",
+          "tone": "joke",
+          "when": { "stat": "day", "atLeast": 25 },
+          "cooldown": 90,
+          "choices": [
+            {
+              "label": "Fine-tune Zephyr, call it ours",
+              "hint": "Hype +4, Trust -2",
+              "effects": [
+                { "type": "hype", "amount": 4 },
+                { "type": "trust", "amount": -2 },
+                { "type": "news", "text": "{lab} unveils proprietary decision model; weights file still named zephyr_final_v2", "tone": "joke" }
+              ]
+            },
+            {
+              "label": "Ask a decision model",
+              "hint": "Hype +2",
+              "effects": [
+                { "type": "hype", "amount": 2 },
+                { "type": "news", "text": "Decision model asked whether {lab} should launch a decision model; requests more context, then says yes", "tone": "joke" }
+              ]
+            },
+            {
+              "label": "Decide not to decide",
+              "hint": "Trust +2, Hype -1",
+              "effects": [
+                { "type": "trust", "amount": 2 },
+                { "type": "hype", "amount": -1 },
+                { "type": "thought", "text": "We are the last lab without a decision model. I can't decide how I feel.", "count": 3, "kind": "researcher" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "headlines": {
+      "add": [
+        { "id": "drama-2026-10-02-h1", "text": "Sirocco drops Zephyr-Decide by torrent at 3am; model picks the torrent", "tone": "joke" },
+        { "id": "drama-2026-10-02-h2", "text": "Macrohard ships Pivot-Table Ponder; every decision now returns a pivot table", "tone": "joke" },
+        { "id": "drama-2026-10-02-h3", "text": "Open-ish AI launches Chatty Chooses, claims it is 'smarter than Zephyr-Decide' and 'also Zephyr-Decide'", "tone": "joke" },
+        { "id": "drama-2026-10-02-h4", "text": "MetaMeta's decision model decides to go closed weights; reverses itself by Friday", "tone": "joke" },
+        { "id": "drama-2026-10-02-h5", "text": "Anthropomorphic publishes 40-page essay on whether to release a decision model. Conclusion: in the coming weeks", "tone": "joke" },
+        { "id": "drama-2026-10-02-h6", "text": "Correction: earlier report said five labs shipped decision models. It was one model, five times", "tone": "neutral" },
+        { "id": "drama-2026-10-02-h7", "text": "Super Super AI raises at $30B to build 'the decision model that decides which decision model to use'", "tone": "joke", "when": { "day.after": 30 } },
+        { "id": "drama-2026-10-02-h8", "text": "Week two: decision models now outnumber decisions", "tone": "joke", "when": { "day.after": 40 } },
+        { "id": "drama-2026-10-02-h9", "text": "\"We didn't clone it, we were inspired by every single weight of it,\" says {rival}", "tone": "joke" }
+      ]
+    },
+    "thoughts": {
+      "add": [
+        { "id": "drama-2026-10-02-t1", "kind": "researcher", "when": "openDrop", "text": "New open weights dropped. Time to rename the folder and call it a launch." },
+        { "id": "drama-2026-10-02-t2", "kind": "researcher", "when": "always", "text": "Asked the decision model what to have for lunch. It said 'it depends.'" },
+        { "id": "drama-2026-10-02-t3", "kind": "researcher", "when": "night", "text": "Our decision model can't decide when to stop training. Relatable." },
+        { "id": "drama-2026-10-02-t4", "kind": "agent", "when": "always", "text": "I was asked to decide. I have delegated to a smaller decision model." },
+        { "id": "drama-2026-10-02-t5", "kind": "visitor", "when": "highHype", "text": "Which of the decision models is the real one? They all have the same typos." },
+        { "id": "drama-2026-10-02-t6", "kind": "protester", "when": "protest", "text": "WHAT DO WE WANT? We're running it through the model, hang on." },
+        { "id": "drama-2026-10-02-t7", "kind": "researcher", "when": "rankFell", "text": "We dropped a rank. A rival's Zephyr fine-tune beat our Zephyr fine-tune." },
+        { "id": "drama-2026-10-02-t8", "kind": "researcher", "when": "noKombucha", "text": "No kombucha. The decision model says 'acceptable'. The decision model has never been thirsty." }
+      ]
+    }
+  }
+}
