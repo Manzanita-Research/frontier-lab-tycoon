@@ -493,8 +493,12 @@ async function sweep(withCampus) {
         issues.push({ kind: "off-screen control", key: `${stable(where(el))}|${stable(name(el))}`, message: `"${name(el)}" in ${where(el)} is at ${Math.round(r.left)}…${Math.round(r.right)} × ${Math.round(r.top)}…${Math.round(r.bottom)}, ${onScreen(r) ? "partly" : "wholly"} off the ${vw}×${vh} screen` });
         if (!onScreen(r)) continue;
       }
-      if (r.width >= TAP_MIN && r.height >= TAP_MIN) continue;
-      issues.push({ kind: "small target", key: `${stable(where(el))}|${stable(name(el))}`, message: `"${name(el)}" in ${where(el)} is ${Math.round(r.width)}×${Math.round(r.height)} px${why(el)}` });
+      // A button squishes while pressed (juice.css's :active), and a tap leaves it pressed for a beat: size it at rest (FLT-93).
+      const own = /^matrix\(([^,]+), [^,]+, [^,]+, ([^,]+),/.exec(getComputedStyle(el).transform);
+      const [w, h] = own ? [r.width / (Math.abs(+own[1]) || 1), r.height / (Math.abs(+own[2]) || 1)] : [r.width, r.height];
+      const slack = own ? 0.5 : 0; // the division rounds
+      if (w >= TAP_MIN - slack && h >= TAP_MIN - slack) continue;
+      issues.push({ kind: "small target", key: `${stable(where(el))}|${stable(name(el))}`, message: `"${name(el)}" in ${where(el)} is ${Math.round(w)}×${Math.round(h)} px${why(el)}` });
     }
     // Windows wider than the screen, or with the close button off it; a card whose buttons need a scroll.
     for (const win of document.querySelectorAll(WIN)) {
