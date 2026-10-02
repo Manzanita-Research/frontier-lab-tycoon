@@ -48,7 +48,7 @@ export interface WorkerOptions {
   host?: string;
   /** The static assets. Tests get a stub that names the path it was asked for. */
   assets?: (req: MfRequest) => MfResponse | Promise<MfResponse>;
-  /** Extra plain-text bindings (the redirect's APP_HOST and REDIRECT_HOSTS, say). */
+  /** Extra plain-text bindings (AUTH_HOSTS for a host that doesn't sign in, say). */
   vars?: Record<string, string>;
 }
 
@@ -101,10 +101,11 @@ export async function startWorker(profile: HfProfile, { host = HOST, assets, var
     }
   }
   const saves = await mf.getR2Bucket("SAVES");
-  // Every request looks like a browser behind Cloudflare, so a test can check that none of it is kept.
+  // Every request looks like a browser behind Cloudflare (unless a test says who it is), so a test can check that none
+  // of it is kept.
   const fetch = (path: string, init: RequestInit = {}) => {
     const headers = new Headers(init.headers);
-    headers.set("user-agent", "Mozilla/5.0 (Frontier 95; Paperclip)");
+    if (!headers.has("user-agent")) headers.set("user-agent", "Mozilla/5.0 (Frontier 95; Paperclip)");
     headers.set("cf-connecting-ip", "203.0.113.7");
     return mf.dispatchFetch(`${origin}${path}`, { ...init, headers } as never) as unknown as Promise<Response>;
   };

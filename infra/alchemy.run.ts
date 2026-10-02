@@ -36,7 +36,7 @@ export default Alchemy.Stack(
 
     // Accounts and cloud saves (FLT-67), prod only, and off until the repo variable FLT_AUTH=on (docs/ACCOUNTS.md).
     // Off, nothing below is declared and the site is exactly the edge-script Worker above: no D1, no R2, no secrets
-    // read. On, worker/index.ts takes the edge script's place (the same apex/www redirect, plus /api/*), and the
+    // read. On, worker/index.ts takes the edge script's place (it runs edge.mjs for everything but /api/* on app.), and the
     // build turns the log-on UI on. PR Previews never get any of it: `auth` is false off prod.
     const auth = authEnabled(stack.stage, yield* Config.String("FLT_AUTH").pipe(Config.withDefault("")));
     const accounts = auth
@@ -50,8 +50,6 @@ export default Alchemy.Stack(
             ),
             SAVES: yield* Cloudflare.R2.Bucket("Saves", { name: `flt-${stack.stage}-saves` }).pipe(Alchemy.RemovalPolicy.retain()),
             AUTH_HOSTS: AUTH_HOSTS.join(","),
-            APP_HOST,
-            REDIRECT_HOSTS: REDIRECT_HOSTS.join(","),
             BETTER_AUTH_SECRET: Config.Redacted("BETTER_AUTH_SECRET"),
             HF_CLIENT_ID: Config.Redacted("HF_CLIENT_ID"),
             HF_CLIENT_SECRET: Config.Redacted("HF_CLIENT_SECRET"),
@@ -65,7 +63,7 @@ export default Alchemy.Stack(
       cwd: fileURLToPath(new URL("../", import.meta.url)),
       command: "node scripts/build-deployment.mjs",
       outdir: "dist",
-      // Accounts on (prod only): worker/index.ts replaces the edge script, doing its redirect plus /api/*.
+      // Accounts on (prod only): worker/index.ts replaces the edge script, running it for everything but /api/*.
       ...(accounts ?? { script: EDGE_SCRIPT }),
       // Navigations run the edge script first (one invocation per page load); hashed assets stay served directly.
       assets: { notFoundHandling: "single-page-application", runWorkerFirst: ["/*", "!/assets/*"] },

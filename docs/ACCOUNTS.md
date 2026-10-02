@@ -24,8 +24,9 @@ Actions secrets, and the deploy passes them to Cloudflare by name.
    at the first new resource and prod stays as it was.
 4. **Flip it:** `gh variable set FLT_AUTH --body on --repo Manzanita-Research/frontier-lab-tycoon`, then run the Deploy
    workflow on `main` (or merge anything). The first deploy creates the D1 database `flt-prod-accounts` (migrated from
-   `worker/migrations/`) and the R2 bucket `flt-prod-saves`, swaps the edge script for `worker/index.ts` (the same
-   apex/www redirect to `app.`, plus `/api/*`), and rebuilds the site with `VITE_FLT_AUTH=on`, which compiles in the log-on UI.
+   `worker/migrations/`) and the R2 bucket `flt-prod-saves`, swaps the edge script for `worker/index.ts` (which
+   answers `/api/*` on `app.` and runs `infra/edge.mjs` itself for everything else: the apex/www redirect, link previews,
+   cache headers), and rebuilds the site with `VITE_FLT_AUTH=on`, which compiles in the log-on UI.
 5. **Check it:** open `https://app.frontierlabtycoon.com/`, then **Start ▸ Log On to Frontier Network…** (Frontier 95;
    other skins show a small "Log on" chip, bottom right). You should come back from Hugging Face logged on, with your
    name, handle and avatar in the Frontier Network window. `curl -s https://app.frontierlabtycoon.com/api/saves` should
@@ -41,7 +42,7 @@ and switching on again adopts them by name, with every account and save still th
 
 | Piece | Off (today) | On (`FLT_AUTH=on`, prod only) |
 |---|---|---|
-| `infra/alchemy.run.ts` | `script: EDGE_SCRIPT`, as on main; PR Previews always | `main: worker/index.ts` in its place (same redirect, `runWorkerFirst` unchanged), + D1 `Accounts`, R2 `Saves`, three secrets |
+| `infra/alchemy.run.ts` | `script: EDGE_SCRIPT`, as on main; PR Previews always | `main: worker/index.ts` in its place (it imports `infra/edge.mjs` for non-API requests, `runWorkerFirst` unchanged), + D1 `Accounts`, R2 `Saves`, three secrets |
 | `.github/workflows/deploy.yml` | `FLT_AUTH` empty; the three secrets resolve to `''` | secrets passed by name, only on `push` (never to a PR preview) |
 | The build | `src/account/` never enters the module graph (`scripts/vite-accounts.mjs`) | `VITE_FLT_AUTH=on` adds a ~10 KB `boot` chunk, loaded after the game |
 | `/api/*` | the SPA fallback, as before | `/api/auth/*` (Better Auth), `/api/saves/*`; any other `/api/` path is a JSON 404 |

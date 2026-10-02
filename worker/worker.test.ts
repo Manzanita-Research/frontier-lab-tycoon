@@ -170,20 +170,26 @@ describe("routing", () => {
     expect(await res.json()).toMatchObject({ error: "not-found" });
   });
 
-  it("does the edge script's job: the apex and www 302 to app., path and query kept, /api included", async () => {
-    const apex = await startWorker(profile, { host: "frontierlabtycoon.test", vars: { APP_HOST: "app.frontierlabtycoon.test", REDIRECT_HOSTS: "frontierlabtycoon.test,www.frontierlabtycoon.test" } });
+  it("runs the edge script (infra/edge.mjs) for the rest: the apex and www 302 to app., /api included; previews and cache headers too", async () => {
+    // The apex isn't a host that signs in, so none of it is the Worker's own.
+    const apex = await startWorker(profile, { host: "frontierlabtycoon.com", vars: { AUTH_HOSTS: "app.frontierlabtycoon.com" } });
     try {
       for (const path of ["/", "/?seed=12", "/api/auth/get-session"]) {
         const res = await apex.fetch(path, { redirect: "manual" });
         expect(res.status).toBe(302);
-        expect(res.headers.get("location")).toBe(`https://app.frontierlabtycoon.test${path}`);
+        expect(res.headers.get("location")).toBe(`https://app.frontierlabtycoon.com${path}`);
         expect(res.headers.get("cache-control")).toBe("no-store");
       }
+      // A link-preview fetcher gets the page itself (FLT-99).
+      const card = await apex.fetch("/", { headers: { "user-agent": "Slackbot-LinkExpanding 1.0" }, redirect: "manual" });
+      expect(card.status).toBe(200);
+      expect(await card.text()).toBe("asset /");
     } finally {
       await apex.mf.dispose();
     }
-    // The game's own host is never redirected.
+    // The game's own host is never redirected, and the stable paths keep FLT-99's day of caching.
     expect((await w.fetch("/", { redirect: "manual" })).status).toBe(200);
+    expect((await w.fetch("/icons/icon-192.png")).headers.get("cache-control")).toBe("public, max-age=86400");
   });
 });
 

@@ -29,7 +29,9 @@ describe("the FLT_AUTH switch", () => {
     // Off (and on every PR Preview), the Worker keeps main's edge script; on, worker/index.ts takes its place.
     expect(stack).toContain("...(accounts ?? { script: EDGE_SCRIPT }),");
     expect(stack.split("script: EDGE_SCRIPT").length - 1).toBe(1);
-    expect(branch).toContain("REDIRECT_HOSTS: REDIRECT_HOSTS.join(\",\")");
+    // On, the Worker runs edge.mjs itself (worker/index.ts), so the redirect and link previews have one home.
+    expect(branch).not.toMatch(/APP_HOST|REDIRECT_HOSTS/);
+    expect(readFileSync(new URL("../worker/index.ts", import.meta.url), "utf8")).toContain('import edge from "../infra/edge.mjs"');
     // The preview branch declares no bindings of its own.
     const preview = stack.slice(stack.indexOf("preview: {"), stack.indexOf("}),", stack.indexOf("preview: {")));
     expect(preview).not.toMatch(/env|DB|SAVES|Redacted|main/);

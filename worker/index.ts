@@ -1,26 +1,23 @@
+import edge from "../infra/edge.mjs";
 import { isBareRoot } from "../src/introRoute";
 import { makeAuth } from "./auth";
 import type { Env } from "./env";
 import { handleSaves } from "./saves";
 
 /**
- * The prod Worker (FLT-67), deployed only when the repo variable `FLT_AUTH=on`, in place of the edge script in
- * `infra/alchemy.run.ts`. It does that script's job first (the apex and www 302 to app.), then answers `/api/auth/*`
- * (Better Auth) and `/api/saves/*` (cloud saves), and hands everything else to the static assets. Cloudflare serves
- * `/assets/*` directly without running it, as it does for the edge script.
+ * The prod Worker (FLT-67), deployed only when the repo variable `FLT_AUTH=on`, in place of the edge script
+ * (`infra/edge.mjs`). On the hosts that sign in (app. and workers.dev) it answers `/api/auth/*` (Better Auth) and
+ * `/api/saves/*` (cloud saves); everything else goes through the edge script itself, so the apex and www still 302 to
+ * app. (link previews excepted) and the icons keep their cache headers. Cloudflare serves `/assets/*` directly without
+ * running it, as it does for the edge script.
  */
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     const path = url.pathname;
 
-    // The edge script's redirect, unchanged: 302, not 301 (browsers cache 301s forever).
-    if (env.APP_HOST && env.REDIRECT_HOSTS?.split(",").includes(url.hostname)) {
-      return new Response(null, {
-        status: 302,
-        headers: { Location: `https://${env.APP_HOST}${url.pathname}${url.search}`, "Cache-Control": "no-store" },
-      });
-    }
+    // Any other host (the apex, www) is the edge script's: it 302s to app., /api included.
+    if (!env.AUTH_HOSTS.split(",").some((h) => h.trim() === url.host)) return edge.fetch(request, env);
 
     if (path === "/api/auth" || path.startsWith("/api/auth/")) return makeAuth(env).handler(request);
 
@@ -50,7 +47,7 @@ export default {
         return new Response(null, { status: 302, headers: { Location: `${url.pathname}${url.search}`, "Cache-Control": "no-store" } });
       }
     }
-    return env.ASSETS.fetch(request);
+    return edge.fetch(request, env);
   },
 } satisfies ExportedHandler<Env>;
 
