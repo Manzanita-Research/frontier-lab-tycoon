@@ -1629,10 +1629,25 @@
   /* FLT-93: the New! card by kind, each line with a Show Me… */
   .f95-unlockgroups {
     display: grid;
-    gap: 4px;
+    gap: 4px 10px;
     margin: 8px 0 0;
     max-height: min(52vh, 420px);
     overflow: auto;
+    /* Jem: Build + Hire on the left, New systems + New apps on the right, so the card stays under the goal note. */
+    &.two {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .f95-unlockcol {
+    display: grid;
+    align-content: start;
+    gap: 4px;
+  }
+  .f95-unlock.wide {
+    width: min(600px, calc(100vw - 24px));
+    .f95-msgbox {
+      width: 100%;
+    }
   }
   .f95-unlockgroup {
     margin: 0;
@@ -3857,10 +3872,14 @@
       row-gap: 0;
       padding: 0 4px 4px;
     }
-    .f95-unlock {
+    .f95-unlock,
+    .f95-unlock.wide {
       left: 10px;
       width: calc(100vw - 20px);
       min-width: 0;
+    }
+    .f95-unlockgroups.two {
+      grid-template-columns: 1fr;
     }
     .f95-news {
       order: -1;

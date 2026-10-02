@@ -363,15 +363,20 @@ export function Coach({ coach, anchor, panel, avoid, layout, actions }: SlotProp
   );
 }
 
+type UnlockGroupVM = NonNullable<SlotPropsMap["UnlockCard"]["unlock"]["groups"]>[number];
+/** Two columns on a desktop (Jem): what you place (Build, Hire) on the left, what the rung switches on on the right. */
+const placed = (g: UnlockGroupVM) => g.id === "build" || g.id === "hire";
+const twoColumns = (groups: readonly UnlockGroupVM[] | undefined) => !!groups?.some(placed) && groups.some((g) => !placed(g));
+
 /**
  * FLT-93: what a rung brings, by kind (Build, Hire, New systems, New apps), one line each on what it is for, and a Show me
  * that puts the card away and has the paperclip walk you to it.
  */
 function UnlockGroups({ groups, actions }: { groups: NonNullable<SlotPropsMap["UnlockCard"]["unlock"]["groups"]>; actions: SlotPropsMap["UnlockCard"]["actions"] }) {
   const t = useT();
-  return (
-    <div className="f95-unlockgroups">
-      {groups.map((g) => (
+  const column = (side: readonly UnlockGroupVM[]) => (
+    <div className="f95-unlockcol">
+      {side.map((g) => (
         <fieldset key={g.id} className={`f95-unlockgroup ${g.id}`}>
           <legend>{g.title}</legend>
           <ul>
@@ -393,13 +398,19 @@ function UnlockGroups({ groups, actions }: { groups: NonNullable<SlotPropsMap["U
       ))}
     </div>
   );
+  return (
+    <div className={`f95-unlockgroups${twoColumns(groups) ? " two" : ""}`}>
+      {groups.some(placed) && column(groups.filter(placed))}
+      {groups.some((g) => !placed(g)) && column(groups.filter((g) => !placed(g)))}
+    </div>
+  );
 }
 
 /** "New items available!": a Win95 message box, RCT-news style. It does not stop the game or dim it; OK puts it away. */
 export function UnlockCard({ unlock, actions }: SlotPropsMap["UnlockCard"]) {
   const t = useT();
   return (
-    <div className="f95-unlock" role="status">
+    <div className={`f95-unlock${twoColumns(unlock.groups) ? " wide" : ""}`} role="status">
       <Win className="f95-msgbox" title="Frontier 95" icon="info" buttons={[{ g: "close", label: t("unlock.ok"), onClick: () => actions.dismissUnlock() }]} label={unlock.title}>
         <div className="f95-msgbody">
           <Ico name="info" size={36} />
