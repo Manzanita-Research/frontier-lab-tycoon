@@ -34,6 +34,7 @@ import type { Rng } from "./rng";
 import { auraApplicants } from "./birdapp/effects";
 import { TARGET_GATE, TARGET_WANDER, type Building, type GameState, type Point, type Walker, type WalkerKind, type WalkerMode } from "./types";
 import { datan2, dhypot } from "./dmath";
+import { HOLDING, lunchSpot, paceNow, waitsForLunch } from "./slopbowl/crowd";
 
 /** Chance that a walker leaving a building hangs around outside it for a bit instead of rushing off. */
 const LOITER_CHANCE = 0.55;
@@ -268,6 +269,32 @@ function send(state: GameState, w: Walker, rng: Rng, event: EventFromLogic<typeo
       if (before !== "quitting") startLeave(state, w);
       break;
   }
+}
+
+/**
+ * FLT-109: whatever they were doing, they drop it and go and wait for lunch at the gate, pacing between spots just inside
+ * it and staring at it when they stop. No dice. They stay in `wandering` with a long timer until the bowls come.
+ */
+function waitForLunch(state: GameState, w: Walker) {
+  const first = w.machine.value !== "wandering" || w.timer < HOLDING;
+  if (w.machine.value !== "wandering") {
+    w.machine = stepWalker(w.machine, { type: "NEXT" });
+    w.machine = stepWalker(w.machine, { type: "CHOSE_WANDER" });
+    w.need = "";
+    w.qtile = -1;
+    w.qslot = -1;
+  }
+  if (first) w.route = [];
+  w.targetId = TARGET_WANDER;
+  w.timer = HOLDING;
+  const g = state.gate;
+  if (w.route.length === 0 && (first || paceNow(state, w))) {
+    const spot = lunchSpot(state, w);
+    const far = Math.abs(w.x - spot[0]) + Math.abs(w.z - spot[1]) > 3;
+    w.route = far ? [...(routeToRect(state, w.x, w.z, g, true) ?? []), spot] : [spot];
+  }
+  if (w.route.length > 0) advance(w);
+  if (w.route.length === 0) w.dir = datan2(g.x + g.w / 2 - w.x, g.z + g.d / 2 - w.z);
 }
 
 /** A drifted agent heads for the fence (FLT-59): off its route and out of any building, and sim/escape drives it from here. */
@@ -642,6 +669,7 @@ export function updateWalkers(state: GameState, rng: Rng) {
   const fountains = state.buildings.filter((b) => b.kind === "fountain");
   let gone: Set<number> | null = null;
   const escaping = (state.escape?.runners.length ?? 0) > 0;
+  const lunch = (state.slopbowl?.crowd ?? 0) > 0;
   for (const w of state.walkers) {
     if (w.kind === "protester") {
       continue;
@@ -665,6 +693,11 @@ export function updateWalkers(state: GameState, rng: Rng) {
     } else if (slopOn) messTick(state, w);
     if (w.kind === "researcher" && fountains.length > 0 && w.machine.value !== "inside") passFountains(w, fountains);
     const phase = w.machine.value;
+    // FLT-109: lunch is late, and they are at the gate waiting for it.
+    if (lunch && !exiting(phase) && phase !== "escaping" && waitsForLunch(state, w)) {
+      waitForLunch(state, w);
+      continue;
+    }
     if (phase === "inside") {
       if (--w.timer <= 0) finishStay(state, w, rng);
       continue;

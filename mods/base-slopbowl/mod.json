@@ -1,0 +1,199 @@
+{
+  "apiVersion": 1,
+  "id": "base-slopbowl",
+  "name": "The Slop Bowl is late",
+  "version": "1.0.0",
+  "author": "Frontier Lab Tycoon",
+  "description": "The lab's lunch order, from the researchers' favourite place, is three hours late. Everyone gets hangry, research goes backwards, the Aura drops, and then the bowls arrive. FLT-109. FLT-15 section shape, direct-loaded.",
+  "content": {
+    "events": {
+      "add": [
+        {
+          "id": "slopbowl",
+          "title": "Lunch is an hour late",
+          "stripe": "Order #1,141 · status: nearby",
+          "body": "The Fancy Healthy Healthy Healthy Healthy Slop Bowl order for the whole lab is an hour late. The tracker shows the driver circling a roundabout. Your researchers are standing at the gate, and the model is getting worse out of spite.",
+          "tone": "bad",
+          "when": { "flag": "offer:slopbowl", "daysAgo": 0 },
+          "cooldown": 30,
+          "choices": [
+            {
+              "label": "Wait. It's worth it.",
+              "hint": "Free · research slides backwards until the bowls come",
+              "effects": [
+                { "type": "flag", "name": "offer:slopbowl", "clear": true },
+                { "type": "flag", "name": "slopbowl:pick:wait" }
+              ]
+            },
+            {
+              "label": "Expense emergency granola",
+              "hint": "−$30K · research slides half as far",
+              "effects": [
+                { "type": "flag", "name": "offer:slopbowl", "clear": true },
+                { "type": "cash", "amount": -30000 },
+                { "type": "flag", "name": "slopbowl:pick:granola" }
+              ]
+            },
+            {
+              "label": "Order a backup bowl from the same place",
+              "hint": "−$15K · it will also be late · two bowls each",
+              "effects": [
+                { "type": "flag", "name": "offer:slopbowl", "clear": true },
+                { "type": "cash", "amount": -15000 },
+                { "type": "flag", "name": "slopbowl:pick:backup" }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "rules": {
+    "slopbowl": {
+      "place": "Fancy Healthy Healthy Healthy Healthy Slop Bowl",
+      "odds": { "perNoon": 0.3, "minResearchers": 4, "firstAfterDays": 10, "gapDays": 45 },
+      "hours": { "due": 12, "hangry": 1, "worse": 2, "arrive": 3, "courierWait": 1, "fed": 2 },
+      "research": { "backwards": 0.75, "granola": 0.5, "catchUp": 1 },
+      "crowd": { "late": 0.35, "hangry": 0.8, "worse": 1, "paceTicks": 14 },
+      "cheer": 0.15,
+      "courier": {
+        "role": "Slop Bowl Courier",
+        "talkTicks": 16,
+        "lines": [
+          "Order for... Fancy Healthy Healthy Healthy Healthy Slop Bowl?",
+          "That's us. It's been three hours.",
+          "Traffic. Also I went to the other lab first.",
+          "Which other lab?",
+          "Can't say. They tipped."
+        ]
+      },
+      "beats": {
+        "late": {
+          "toast": { "text": "Lunch is late. The Fancy Healthy Healthy Healthy Healthy Slop Bowl tracker says the driver is \"nearby\".", "tone": "neutral", "importance": "world" },
+          "thoughts": [
+            "It said noon. It's noon.",
+            "The tracker has said \"nearby\" for a while now.",
+            "I paid extra for the fourth Healthy.",
+            "Lunch should be here by now. I can feel it."
+          ],
+          "thoughtCount": 2
+        },
+        "hangry": {
+          "toast": { "text": "Lunch is an hour late. Your researchers are hangry, and research is going backwards.", "tone": "bad", "importance": "you" },
+          "aura": -3,
+          "news": [
+            "{lab} researchers report \"vibes-based hunger\" as lunch order passes one hour late",
+            "Sources inside {lab}: nobody has trained anything since noon, and several things have been un-trained"
+          ],
+          "thoughts": [
+            "Hangry is a valid research methodology.",
+            "If lunch isn't here soon I'm deleting the eval suite.",
+            "Staring at the gate makes it come faster. That's just science.",
+            "I can smell the bowls from here. I can't, actually. That's the problem.",
+            "I just reverted three commits out of spite. Not mine."
+          ],
+          "thoughtCount": 3,
+          "posts": [
+            "lunch is an hour late and i have started reverting commits. not mine. just commits",
+            "the Fancy Healthy Healthy Healthy Healthy Slop Bowl tracker has said \"nearby\" for 60 minutes. nearby to WHAT",
+            "hot take: hunger is a form of alignment pressure. cold take: where is my bowl",
+            "currently doing gradient ascent on my own frustration",
+            "every model i train while hungry comes out slightly meaner. this is not a metaphor. this is a bug report"
+          ],
+          "postCount": 2,
+          "spice": 0.8,
+          "rivals": [
+            "Our researchers had lunch at noon. Just a reminder that operational excellence starts in the cafeteria.",
+            "Thinking of everyone at {lab} today. We have a chef. Two, actually."
+          ],
+          "rivalCount": 1
+        },
+        "worse": {
+          "aura": -4,
+          "news": [
+            "Lunch delivery to {lab} now two hours late; tracker updates driver status from \"nearby\" to \"spiritually nearby\"",
+            "{lab} training run loses a day of progress as researchers \"forget what a gradient is\" waiting for lunch"
+          ],
+          "thoughts": [
+            "The tracker moved! Away.",
+            "I have un-learned linear algebra.",
+            "One more \"nearby\" and I'm leaving to found a sandwich lab.",
+            "We're pacing in shifts now. I'm on second pacing.",
+            "Is quinoa a seed or a grain? I'd eat either."
+          ],
+          "thoughtCount": 3,
+          "posts": [
+            "two hours. we have started a reading group about the bowls",
+            "just watched a senior researcher try to fine-tune a kombucha",
+            "update: we are now pacing at the gate in shifts",
+            "if the bowls don't come soon i'm open-sourcing the hunger"
+          ],
+          "postCount": 2,
+          "spice": 0.85,
+          "rivals": [
+            "Wishing a speedy lunch to the folks at {lab}. Our evals went up 4% after the salad bar opened. Unrelated, probably.",
+            "Hearing {lab} is training backwards today. Bold research direction.",
+            "Our lunch arrived at 11:58. We also shipped twice before dessert."
+          ],
+          "rivalCount": 2
+        },
+        "arrive": {
+          "beat": {
+            "kind": "cut",
+            "kicker": "LUNCH",
+            "caption": "Three hours late, the Fancy Healthy Healthy Healthy Healthy Slop Bowl arrives",
+            "sub": "One driver. A tower of bowls. No apology.",
+            "zoom": 1.8,
+            "hold": 4
+          },
+          "news": [
+            "Fancy Healthy Healthy Healthy Healthy Slop Bowl reaches {lab} three hours late; researchers call the quinoa \"worth it\" and \"rude\""
+          ],
+          "thoughts": [
+            "IT'S HERE.",
+            "Is that... a bowl?",
+            "I'm not crying, I'm hungry."
+          ],
+          "thoughtCount": 3
+        },
+        "fed": {
+          "toast": { "text": "The bowls are here. Research is going forwards again, fast: nobody focuses like a researcher who has just eaten.", "tone": "good", "importance": "you" },
+          "aura": 2,
+          "thoughts": [
+            "Worth it.",
+            "This is the healthiest I have ever been, for about eleven minutes.",
+            "Four Healthys. I counted.",
+            "I'm going to finish this run. Then this bowl. Then the run again.",
+            "I forgive everyone. Except the tracker."
+          ],
+          "thoughtCount": 3,
+          "posts": [
+            "the bowls are here. i forgive everyone. except the tracker",
+            "post-lunch me would like to apologise for pre-lunch me's last six posts",
+            "update: fed. the model is learning again. so am i"
+          ],
+          "postCount": 1,
+          "spice": 0.3
+        },
+        "granola": {
+          "thoughts": [
+            "This granola is 40% seeds and 60% regret.",
+            "Emergency granola. Tastes like a compliance training.",
+            "It's not lunch. But it's not nothing."
+          ],
+          "thoughtCount": 2
+        },
+        "backup": {
+          "toast": { "text": "Both orders arrived at once. Every researcher has two bowls. The Vibes are immaculate.", "tone": "good", "importance": "world" },
+          "aura": 2,
+          "vibes": 40,
+          "thoughts": [
+            "Two bowls. This is the best day of my career.",
+            "The backup was also three hours late. Consistency is a feature."
+          ],
+          "thoughtCount": 2
+        }
+      }
+    }
+  }
+}

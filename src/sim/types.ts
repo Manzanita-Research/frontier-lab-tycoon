@@ -12,6 +12,7 @@ import type { EscapeState } from "./escape/state";
 import type { NeoLabsState } from "./neolabs/state";
 import type { Meeting } from "./meetings";
 import type { BirdAppState } from "./birdapp/state";
+import type { SlopBowlState } from "./slopbowl/state";
 import type { PoachingState } from "./poaching/state";
 import type { AuditorsState } from "./auditors/state";
 import type { VisitorGroup } from "./groups";
@@ -433,6 +434,8 @@ export interface GameState {
   poaching?: PoachingState;
   /** FLT-69 the Bird App: researchers who post. Absent until the pack wakes (Level 3), or with `?birdapp=off`. */
   birdapp?: BirdAppState;
+  /** FLT-109 the lab's lunch order, three hours late: wakes with the Bird App (Level 3); absent before, or with `?slopbowl=off`. */
+  slopbowl?: SlopBowlState;
   /** Labs your own people founded (FLT-26, FLT-20): on the Arena beside the built-in rivals. */
   neoLabs?: NeoLabsState;
   /** A visitor talking to one of your people somewhere visible (sim/meetings.ts, the `people.meet` verb). */

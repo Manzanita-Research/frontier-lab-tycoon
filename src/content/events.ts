@@ -8,6 +8,7 @@ import { LEAPFROG } from "./leapfrog";
 import { COLLUSION } from "../sim/collusion/pack";
 import { HEARING } from "../sim/hearing/pack";
 import { YACHT } from "../sim/yacht/pack";
+import { SLOPBOWL } from "../sim/slopbowl/pack";
 import { DEFECTION, type Letter } from "../sim/defection/pack";
 import { POACHING } from "../sim/poaching/pack";
 import { AUDITORS } from "../sim/auditors/pack";
@@ -345,6 +346,8 @@ EVENTS.push(...CAPTURE.content.events.add as EventDef[]);
 EVENTS.push(...FACTIONS_PACK.events);
 // FLT-11: The Memo (mods/base-endings), dormant until the endings driver sets `offer:memo` in Era 4.
 EVENTS.push(...ENDINGS_PACK.content.events.add as EventDef[]);
+// FLT-109: the late lunch's card. Its driver puts it up at the hour mark; the daily check never opens it.
+EVENTS.push(...SLOPBOWL.content.events.add as EventDef[]);
 
 export const eventById = (id: string): EventDef | undefined => EVENTS.find((e) => e.id === id);
 /** How each drama card looks on screen (the letter, the email, the manifesto): templates from the packs, by card id. */

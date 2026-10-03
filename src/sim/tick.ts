@@ -9,6 +9,7 @@ import { updateMeetings } from "./meetings";
 import { dailyNeoLabs } from "./neolabs/driver";
 import { applyPoachingChoices, dailyPoaching } from "./poaching/driver";
 import { dailyBirdApp } from "./birdapp/driver";
+import { applySlopBowlChoices, updateSlopBowl } from "./slopbowl/driver";
 import { applyPromisesChoices, dailyPromises } from "./promises/driver";
 import { applyCaptureChoices, dailyCapture } from "./capture/driver";
 import { TICKS_PER_DAY } from "./constants";
@@ -111,6 +112,9 @@ function step(state: GameState, commands: readonly Command[]) {
   probe?.lap("disasters");
   updateMeetings(state);
   probe?.lap("meetings");
+  // FLT-109: after the meetings, so the courier is seen to have handed the bowls over on the tick the talk ends.
+  if (state.slopbowl?.enabled) updateSlopBowl(state);
+  probe?.lap("slopbowl");
   if (systemUnlocked(state, "defection")) updateDefection(state);
   probe?.lap("defection");
   if (state.endings) updateEndings(state, rng);
@@ -226,8 +230,9 @@ function applyCircusChoices(state: GameState) {
   if (systemUnlocked(state, "capture")) applyCaptureChoices(state);
 }
 
-/** Defection and the Poaching War hear the player's pick at once, paused or not (their cards pause the game). */
+/** Defection, the Poaching War and the late lunch hear the player's pick at once, paused or not (their cards pause the game). */
 function applyPackChoices(state: GameState) {
   if (systemUnlocked(state, "defection")) applyDefectionChoices(state);
   if (systemUnlocked(state, "poaching")) applyPoachingChoices(state);
+  if (state.slopbowl?.enabled) applySlopBowlChoices(state);
 }

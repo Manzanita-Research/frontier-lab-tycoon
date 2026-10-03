@@ -15,6 +15,7 @@ import { datacenterCompute } from "./race/power";
 import { rdMultiplier, releaseBoost } from "./race/rd";
 import type { Rng } from "./rng";
 import { safetyDrag } from "./factions/stance";
+import { lunchGain, lunchPace } from "./slopbowl/research";
 import type { GameState } from "./types";
 
 const COMPUTE_CAP = 500;
@@ -40,7 +41,8 @@ export function trainingEtaDays(state: GameState): number | null {
   const halls = state.buildings.filter((b) => b.kind === "hall").length;
   if (halls === 0) return null;
   const spend = Math.min(COMPUTE_PER_HALL * halls, state.compute + computePerDay(state));
-  const gain = spend * (0.75 + 0.25 * morale(state)) * rdMultiplier(state) * safetyDrag(state) * trainingPace(state);
+  // FLT-109: lunch is late, so the run is going backwards (no ETA: "estimating time remaining"), or catching up after.
+  const gain = spend * (0.75 + 0.25 * morale(state)) * rdMultiplier(state) * safetyDrag(state) * trainingPace(state) * lunchPace(state);
   if (gain <= 0) return null;
   const { cost, progress } = state.training.context;
   return Math.max(0, Math.ceil((cost - progress) / gain));
@@ -58,6 +60,8 @@ export function dailyTraining(state: GameState, rng: Rng) {
     // The R&D multiplier: agents doing research make every unit of compute go further.
     // FLT-33: a safety budget buys evals with training time (exactly 1 with no budget).
     gain = spend * (0.75 + 0.25 * morale(state)) * rdMultiplier(state) * safetyDrag(state) * trainingPace(state);
+    // FLT-109: a late lunch takes some of the run back; the bowls give it back (exactly `gain` otherwise).
+    gain = lunchGain(state, gain);
   }
   feed(state, rng, { type: "DAY", halls, gain });
 }

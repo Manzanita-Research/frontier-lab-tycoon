@@ -121,7 +121,8 @@ export function dailyEvents(state: GameState, unlocked = true) {
 export const firstMinutes = (state: GameState) => state.progression !== undefined && levelOf(state) === 1;
 
 /** A minor card the lab answered without you: its default choice, on its own dice, and one line on the ticker. */
-function handled(state: GameState, id: string, choice: number) {
+/** A minor card answered without the player: its default choice, and a line on the ticker saying so. */
+export function handled(state: GameState, id: string, choice: number) {
   const def = defs().eventById(id)!;
   const pick = def.choices[choice] ? choice : 0;
   chooseEvent(state, createRng((Math.imul(state.seed, 2654435761) ^ Math.imul(state.day + 1, 40503)) >>> 0 || 1), id, pick);
