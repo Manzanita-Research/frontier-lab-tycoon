@@ -23,7 +23,11 @@
   },
   "pnpm": {
     "overrides": {
-      "@effect/platform-node-shared": "4.0.0-rc.115"
+      "@effect/platform-node-shared": "4.0.0-rc.115",
+      "hono@^4": ">=4.13.7 <5",
+      "@hono/node-server@^1": ">=1.19.15 <2",
+      "lodash@^4": ">=4.18.0 <5",
+      "valibot@^1": ">=1.4.2 <2"
     }
   }
 }
