@@ -1,4 +1,4 @@
-// Review links for the late lunch (FLT-109): `?moment=slop-late` (day three: the crowd at the gate, two of them on the
+// Review links for the late lunch (FLT-109): `?moment=slop-noon` (just before the order falls due, late), `slop-late` (day three: the crowd at the gate, two of them on the
 // floor, the tracker's ETA slipping, the posts and the rival labs piling on, the run going backwards), `slop-card` (a day
 // late, the card on screen), `slop-arrives` (three days late: the courier at the gate handing the bowls over) and
 // `slop-fed` (everyone eating). Defection's lab a year in, played to noon with the order
@@ -14,10 +14,10 @@ import { answer } from "../testkit";
 import { applyNow, tick } from "../tick";
 import type { GameState } from "../types";
 import { enableBirdApp } from "../birdapp/driver";
-import { enableSlopBowl, LATE_FLAG, offerCard } from "./driver";
+import { enableSlopBowl, isDue, LATE_FLAG, offerCard } from "./driver";
 import { CARD } from "./pack";
 
-export const SLOP_MOMENTS = ["slop-late", "slop-card", "slop-arrives", "slop-fed"] as const;
+export const SLOP_MOMENTS = ["slop-noon", "slop-late", "slop-card", "slop-arrives", "slop-fed"] as const;
 export type SlopMoment = (typeof SLOP_MOMENTS)[number];
 export const isSlopMoment = (m: string | null | undefined): m is SlopMoment => (SLOP_MOMENTS as readonly unknown[]).includes(m);
 
@@ -44,6 +44,11 @@ function stage(s: GameState, moment: SlopMoment) {
   enableSlopBowl(s);
   s.flags[LATE_FLAG] = s.day;
   const stage = (v: string) => (w: GameState) => w.slopbowl!.machine.value === v;
+  // `slop-noon`: a moment before the order falls due (and is late), for a film of the whole thing from the start.
+  if (moment === "slop-noon") {
+    until(s, (w) => isDue(w.tick + 10), 8);
+    return;
+  }
   // Noon on the campus clock: the order falls due, and it is late.
   until(s, stage("late"), 8);
   if (moment === "slop-card") {

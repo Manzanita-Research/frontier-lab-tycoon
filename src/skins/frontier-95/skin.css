@@ -6558,6 +6558,11 @@
 
 /* FLT-109: the late lunch's Order Tracker, a download dialog that never finishes. Top middle, over the campus. */
 [data-skin="frontier-95"] {
+  /* No toast dock in this skin (the paperclip talks), so the tracker can sit at the top. */
+  .lunch-layer { top: 76px; }
+  @media (max-width: 640px) {
+    .lunch-layer { top: 120px; }
+  }
   .f95-win.f95-lunch { width: 400px; max-width: calc(100vw - 16px); }
   .f95-lunch-body { padding: 8px 10px 10px; display: grid; gap: 6px; }
   .f95-lunch-anim { display: flex; align-items: center; gap: 8px; font-size: 22px; }

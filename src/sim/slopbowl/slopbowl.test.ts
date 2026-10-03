@@ -186,7 +186,7 @@ describe("a late lunch in the game", () => {
   });
 
   it("stages its review links", () => {
-    for (const [moment, value] of [["slop-late", "meltdown"], ["slop-card", "hangry"], ["slop-arrives", "arriving"], ["slop-fed", "fed"]] as const) {
+    for (const [moment, value] of [["slop-noon", "quiet"], ["slop-late", "meltdown"], ["slop-card", "hangry"], ["slop-arrives", "arriving"], ["slop-fed", "fed"]] as const) {
       const s = createInitialState(1);
       delete s.progression;
       enableEarnedPacks(s);

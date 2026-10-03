@@ -506,10 +506,12 @@
     ],
     "flt-109": [
       "slop-late",
+      "slop-late-close",
       "slop-card",
       "slop-bird",
       "slop-arrives",
-      "slop-arrives-plain",
+      "slop-fed",
+      "slop-late-classic",
       "slop-late-phone",
       "slop-arrives-phone"
     ]
@@ -7572,12 +7574,25 @@
       ]
     },
     "slop-late": {
-      "title": "FLT-109: two hours late: the lab waits at the gate, research going backwards (\"estimating time remaining\")",
+      "title": "FLT-109: day three: the Order Tracker's ETA slipping, the lab at the gate (two on the floor), research going backwards",
+      "query": {
+        "warp": null,
+        "moment": "slop-late"
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "slop-late-close": {
+      "title": "FLT-109: day three up close: anger marks over the crowd at the gate, two researchers lying on the floor",
       "query": {
         "warp": null,
         "moment": "slop-late",
-        "focus": "12,20",
-        "zoom": 75
+        "focus": "13,19.5",
+        "zoom": 140,
+        "photo": 1
       },
       "steps": [
         {
@@ -7586,7 +7601,7 @@
       ]
     },
     "slop-card": {
-      "title": "FLT-109: lunch is an hour late: the card (Level 5)",
+      "title": "FLT-109: lunch is a day late: the card (Level 5)",
       "query": {
         "warp": null,
         "moment": "slop-card"
@@ -7613,12 +7628,12 @@
       ]
     },
     "slop-arrives": {
-      "title": "FLT-109: three hours late, the courier at the gate (the arrival beat)",
+      "title": "FLT-109: three days late, the courier at the gate with the bag (the arrival beat)",
       "query": {
         "warp": null,
         "moment": "slop-arrives",
         "focus": "12,20",
-        "zoom": 80,
+        "zoom": 90,
         "beat": 1
       },
       "steps": [
@@ -7627,13 +7642,26 @@
         }
       ]
     },
-    "slop-arrives-plain": {
-      "title": "FLT-109: the bowls handed over at the gate, without the letterbox",
+    "slop-fed": {
+      "title": "FLT-109: lunch: bowls in hand at the gate, the tracker says Delivered",
       "query": {
         "warp": null,
-        "moment": "slop-arrives",
-        "focus": "12,20",
-        "zoom": 80
+        "moment": "slop-fed",
+        "focus": "13,19",
+        "zoom": 120
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "slop-late-classic": {
+      "title": "FLT-109: the tracker in the Classic skin (the base slot: a toast-sized card)",
+      "query": {
+        "warp": null,
+        "moment": "slop-late",
+        "skin": "base"
       },
       "steps": [
         {
@@ -7642,7 +7670,7 @@
       ]
     },
     "slop-late-phone": {
-      "title": "FLT-109: two hours late, on a phone",
+      "title": "FLT-109: day three, on a phone",
       "query": {
         "warp": null,
         "moment": "slop-late"
