@@ -361,3 +361,33 @@ body.photo .world .reason {
     height: 36px;
   }
 }
+
+/* FLT-105: the trip's colour wash (TripScreen). A rainbow that turns slowly, blended by colour: every pixel takes its
+   hue and keeps its own brightness, so nothing flashes (see trip.test.ts). Oversized so it covers the screen at any
+   angle; under the trip's own buttons (z-index 60), over everything else. The hues are trip.ts's WASH_S and WASH_L. */
+.trip-wash {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: 150vmax;
+  height: 150vmax;
+  z-index: 50;
+  pointer-events: none;
+  mix-blend-mode: color;
+  transform: translate(-50%, -50%);
+  will-change: transform, opacity;
+  background: conic-gradient(
+    hsl(0 90% 55%), hsl(30 90% 55%), hsl(60 90% 55%), hsl(90 90% 55%), hsl(120 90% 55%), hsl(150 90% 55%), hsl(180 90% 55%),
+    hsl(210 90% 55%), hsl(240 90% 55%), hsl(270 90% 55%), hsl(300 90% 55%), hsl(330 90% 55%), hsl(360 90% 55%)
+  );
+}
+/* Walls that breathe: the whole HUD swells and settles, a percent and a half, over six seconds (trip.ts's breathe and
+   breathePeriod), as strong as the trip is. A keyframe animation, so it is smooth; the variable only sets its depth. */
+@keyframes trip-breathe {
+  0%, 100% { scale: 1; }
+  50% { scale: calc(1 + 0.014 * var(--trip-k, 0)); }
+}
+html[data-trip="on"] .hud-host,
+html[data-trip="lite"] .hud-host {
+  animation: trip-breathe 6s ease-in-out infinite;
+}

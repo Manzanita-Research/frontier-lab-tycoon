@@ -187,6 +187,16 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
   };
   const next = () => setTip((i) => ((i ?? 0) + 1) % tipsFile.tips.length);
 
+  // FLT-105: on a trip, the paperclip has an ego death. It says the trip's lines, one every few seconds, when nothing
+  // else needs the balloon.
+  const ego = vm.trip?.consent === "on" && vm.trip.phase !== "fading" && vm.trip.lines.length > 0 ? vm.trip.lines : null;
+  const [egoAt, setEgoAt] = useState(0);
+  useEffect(() => {
+    if (!ego) return;
+    const id = window.setInterval(() => setEgoAt((i) => i + 1), 7_000);
+    return () => window.clearInterval(id);
+  }, [!!ego]);
+
   // While a coach mark is up the paperclip is in the coach's balloon; there is only one of it.
   if (vm.coach) return snagBox ?? null;
   return (
@@ -211,7 +221,12 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
           ))}
         </div>
       )}
-      {!busy && tip === null && !phone && vm.drama.fresh && vm.drama.latest && dramaNo !== vm.drama.latest.id && (
+      {!busy && tip === null && ego && (
+        <div className="f95-balloon tipballoon ego" role="status">
+          {ego[egoAt % ego.length]}
+        </div>
+      )}
+      {!busy && tip === null && !ego && !phone && vm.drama.fresh && vm.drama.latest && dramaNo !== vm.drama.latest.id && (
         <div className="f95-balloon tipballoon" role="status">
           <b>It looks like the AI industry is fighting again!</b> Would you like to see Today's Drama? ({vm.drama.latest.title})
           <div className="f95-options">
@@ -252,7 +267,7 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
       )}
       <button
         type="button"
-        className={`f95-clip ${vm.toasts.length > 0 ? "wiggle" : ""}`}
+        className={`f95-clip ${vm.toasts.length > 0 ? "wiggle" : ""} ${ego ? "ego" : ""}`}
         aria-label={t("assistant.title")}
         title={t("assistant.title")}
         onClick={() => (tip === null ? setTip(tip ?? 0) : closeTip())}

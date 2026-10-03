@@ -13,6 +13,7 @@ import { loadedSkinAtom } from "./state";
 import { BeatLayer, Docked, Modals, PhotoLayer, TripLayer } from "./tree";
 import { useHudEffects } from "./useHudEffects";
 import { useSaves } from "./saves";
+import { TripScreen } from "../juice/TripScreen";
 import { useAppSource, useHudVM, type AppSource } from "./useHudVM";
 
 /** Everything the 2D UI shows, drawn by the active skin. Waits for the app actor's first state. */
@@ -45,6 +46,7 @@ function Hud({ source }: { source: AppSource }) {
       </div>
       <PhotoLayer vm={vm} actions={hudActions} />
       <TripLayer vm={vm} actions={hudActions} />
+      <TripScreen trip={vm.trip ?? null} />
     </SkinProvider>
   );
 }

@@ -521,7 +521,6 @@ const BILL_STATUS: Record<string, string> = {
   invited: "Draft", declined: "Shredded", floor: "On the floor", failed: "Voted down", law: "In force", exposed: "Exposed", fallout: "Fallout", sunset: "Sunset", quiet: "Nothing on the desk",
 };
 
-/** The button a beat offers while it plays (FLT-56): the leak's "Bury it", while the reporter is still asking. */
 /** FLT-105: the trip, if one is under way. Unanswered, the warning waits for the player; it is gone once the trip is. */
 export function tripOf(i: Pick<HudInput, "snap" | "tripChoice" | "skins">): TripVM | null {
   const t = i.snap.trip;
@@ -538,6 +537,7 @@ export function tripOf(i: Pick<HudInput, "snap" | "tripChoice" | "skins">): Trip
   };
 }
 
+/** The button a beat offers while it plays (FLT-56): the leak's "Bury it", while the reporter is still asking. */
 function beatActionOf(kind: string, s: Snapshot): BeatVM["action"] {
   const w = kind === "leak" ? billOf(s)?.warning : null;
   return w ? { id: "bury", label: w.buryText, enabled: w.canBury } : null;
