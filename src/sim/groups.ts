@@ -13,6 +13,7 @@ import { doorPoint, entrances, getReach, isPathTile, routeToRect, tileIndex } fr
 import { stepGroup, groupStart, type GroupStored } from "./machines/group";
 import type { Rng } from "./rng";
 import type { Building, GameState, Point } from "./types";
+import { datan2, dcos, dhypot, dsin, sq } from "./dmath";
 
 /** What a pack says about a kind of group. Everything specific (names, looks, numbers) is data. */
 export interface GroupKind {
@@ -117,7 +118,7 @@ export function planStops(s: GameState, kind: GroupKind, rng: Rng): GroupStop[] 
     let bestD = Infinity;
     chosen.forEach((b, i) => {
       const [cx, cz] = centre(b);
-      const d = (cx - at[0]) ** 2 + (cz - at[1]) ** 2;
+      const d = sq(cx - at[0]) + sq(cz - at[1]);
       if (d < bestD) { bestD = d; best = i; }
     });
     const b = chosen.splice(best, 1)[0]!;
@@ -180,7 +181,7 @@ function startPoint(s: GameState, g: VisitorGroup): Point {
   let bestD = Infinity;
   for (let dz = -2; dz <= 2; dz++) for (let dx = -2; dx <= 2; dx++) {
     if (!isPathTile(s, fx + dx, fz + dz)) continue;
-    const d = (fx + dx + 0.5 - m.x) ** 2 + (fz + dz + 0.5 - m.z) ** 2;
+    const d = sq(fx + dx + 0.5 - m.x) + sq(fz + dz + 0.5 - m.z);
     if (d < bestD) { bestD = d; best = [fx + dx + 0.5, fz + dz + 0.5]; }
   }
   return best;
@@ -227,19 +228,19 @@ function huddle(g: VisitorGroup, speed: number) {
   const r = 0.2 + 0.06 * n;
   g.members.forEach((m, i) => {
     const a = (i / n) * Math.PI * 2;
-    const tx = cx + Math.sin(a) * r;
-    const tz = cz + Math.cos(a) * r;
+    const tx = cx + dsin(a) * r;
+    const tz = cz + dcos(a) * r;
     stepToward(m, tx, tz, speed);
-    if (Math.hypot(tx - m.x, tz - m.z) < 0.05) m.dir = Math.atan2(cx - m.x, cz - m.z);
+    if (dhypot(tx - m.x, tz - m.z) < 0.05) m.dir = datan2(cx - m.x, cz - m.z);
   });
 }
 
 function stepToward(m: GroupMember, tx: number, tz: number, budget: number) {
   const dx = tx - m.x;
   const dz = tz - m.z;
-  const dist = Math.hypot(dx, dz);
+  const dist = dhypot(dx, dz);
   if (dist < 1e-6) return;
-  if (dist > 0.02) m.dir = Math.atan2(dx, dz);
+  if (dist > 0.02) m.dir = datan2(dx, dz);
   const k = Math.min(1, budget / dist);
   m.x += dx * k;
   m.z += dz * k;
@@ -251,13 +252,13 @@ function lead(g: VisitorGroup, speed: number): boolean {
   let budget = speed;
   while (budget > 1e-9 && g.route.length > 0) {
     const [tx, tz] = g.route[0]!;
-    const dist = Math.hypot(tx - m.x, tz - m.z);
+    const dist = dhypot(tx - m.x, tz - m.z);
     stepToward(m, tx, tz, budget);
     if (dist <= budget) g.route.shift();
     budget -= Math.min(dist, budget);
   }
   const last = g.trail[g.trail.length - 1];
-  if (!last || Math.hypot(last[0] - m.x, last[1] - m.z) > speed * 0.5) {
+  if (!last || dhypot(last[0] - m.x, last[1] - m.z) > speed * 0.5) {
     g.trail.push([m.x, m.z]);
     const keep = g.members.length * GAP + 1;
     if (g.trail.length > keep) g.trail.splice(0, g.trail.length - keep);
@@ -285,8 +286,8 @@ function fanOut(s: GameState, g: VisitorGroup, b: Building, speed: number) {
   const wz = clamp(ez, b.z, b.z + b.d);
   let ax = ex - wx;
   let az = ez - wz;
-  if (Math.hypot(ax, az) < 1e-3) { ax = ex - cx; az = ez - cz; }
-  const len = Math.hypot(ax, az) || 1;
+  if (dhypot(ax, az) < 1e-3) { ax = ex - cx; az = ez - cz; }
+  const len = dhypot(ax, az) || 1;
   // Outward from the wall, and along it.
   const ox = ax / len;
   const oz = az / len;
@@ -294,11 +295,11 @@ function fanOut(s: GameState, g: VisitorGroup, b: Building, speed: number) {
   const n = g.members.length;
   g.members.forEach((m, i) => {
     const side = (i - (n - 1) / 2) * 0.55;
-    const peer = Math.sin(s.tick * 0.07 + i * 2.1) * 0.18;
+    const peer = dsin(s.tick * 0.07 + i * 2.1) * 0.18;
     const tx = door[0] + ox * (0.45 + peer) - oz * side;
     const tz = door[1] + oz * (0.45 + peer) + ox * side;
     stepToward(m, tx, tz, speed);
-    if (Math.hypot(tx - m.x, tz - m.z) < 0.05) m.dir = Math.atan2(cx - m.x, cz - m.z) + Math.sin(s.tick * 0.05 + i) * 0.5;
+    if (dhypot(tx - m.x, tz - m.z) < 0.05) m.dir = datan2(cx - m.x, cz - m.z) + dsin(s.tick * 0.05 + i) * 0.5;
   });
 }
 

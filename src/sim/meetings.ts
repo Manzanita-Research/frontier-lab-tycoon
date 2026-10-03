@@ -7,6 +7,7 @@ import type { Rng } from "./rng";
 import { TARGET_WANDER, type GameState, type Point, type Walker } from "./types";
 import { newWalker } from "./walkers";
 import { TICKS_PER_DAY } from "./constants";
+import { datan2 } from "./dmath";
 
 const HOURS_PER_TICK = 24 / TICKS_PER_DAY;
 
@@ -123,8 +124,8 @@ export function updateMeetings(s: GameState) {
       m.phase = "talking";
       m.until = s.tick + m.length;
       // Face each other.
-      host.dir = Math.atan2(guest.x - host.x, guest.z - host.z);
-      guest.dir = Math.atan2(host.x - guest.x, host.z - guest.z);
+      host.dir = datan2(guest.x - host.x, guest.z - host.z);
+      guest.dir = datan2(host.x - guest.x, host.z - guest.z);
     }
   }
   if (list.some((m) => m.until < 0)) s.meetings = list.filter((m) => m.until >= 0);

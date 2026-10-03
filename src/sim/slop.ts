@@ -5,6 +5,7 @@
 import { pushNews, addToast } from "./news";
 import type { Rng } from "./rng";
 import type { GameState, Walker } from "./types";
+import { sq } from "./dmath";
 
 export const SLOP_MAX = 3;
 /** Agents this far gone start dropping slop. */
@@ -132,7 +133,7 @@ export function firstSpill(state: GameState) {
   const cz = bar ? bar.z + bar.d / 2 : state.gate.z + 0.5;
   const w = state.grid.w;
   const near = state.grid.paths
-    .flatMap((p, i) => (p ? [{ i, d: (i % w + 0.5 - cx) ** 2 + (Math.floor(i / w) + 0.5 - cz) ** 2 }] : []))
+    .flatMap((p, i) => (p ? [{ i, d: sq(i % w + 0.5 - cx) + sq(Math.floor(i / w) + 0.5 - cz) }] : []))
     .sort((a, b) => a.d - b.d || a.i - b.i)
     .slice(0, FIRST_SPILL.tiles);
   if (near.length === 0) return;

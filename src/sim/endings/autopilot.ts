@@ -12,6 +12,7 @@ import type { Rng } from "../rng";
 import type { GameState } from "../types";
 import { ENDING_RULES } from "./pack";
 import type { EndingsState } from "./state";
+import { dhypot } from "../dmath";
 
 /** What `canPlace` would say with a bottomless bank account: the autopilot never runs out of money. */
 function withMoney<T>(state: GameState, f: () => T): T {
@@ -35,7 +36,7 @@ function pathSpot(state: GameState): [number, number] | null {
       for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
         if (!inBounds(state, x - dx, z - dz) || !isPathTile(state, x - dx, z - dz)) continue;
         const straight = inBounds(state, x - 2 * dx, z - 2 * dz) && isPathTile(state, x - 2 * dx, z - 2 * dz);
-        const score = Math.hypot(x + 0.5 - w / 2, z + 0.5 - h / 2) + (straight ? 0 : 6);
+        const score = dhypot(x + 0.5 - w / 2, z + 0.5 - h / 2) + (straight ? 0 : 6);
         if (score < bestScore) {
           bestScore = score;
           best = [x, z];

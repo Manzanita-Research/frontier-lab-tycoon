@@ -33,6 +33,7 @@ import { stepWalker, tourDone, walkerMachine, type WalkerPhase } from "./machine
 import type { Rng } from "./rng";
 import { auraApplicants } from "./birdapp/effects";
 import { TARGET_GATE, TARGET_WANDER, type Building, type GameState, type Point, type Walker, type WalkerKind, type WalkerMode } from "./types";
+import { datan2, dhypot } from "./dmath";
 
 /** Chance that a walker leaving a building hangs around outside it for a bit instead of rushing off. */
 const LOITER_CHANCE = 0.55;
@@ -144,7 +145,7 @@ function bestFor(w: Walker, pool: Building[], need: NeedKey, rng: Rng, minGain =
     if (gain <= 0 || gain < minGain) continue;
     let bonus = 0;
     for (const other of NEEDS_BY_KIND[w.kind]) if (other !== need) bonus += urgencyOf(w, other) * gainOf(def, w, other) * 0.3;
-    const dist = Math.hypot(b.x + b.w / 2 - w.x, b.z + b.d / 2 - w.z);
+    const dist = dhypot(b.x + b.w / 2 - w.x, b.z + b.d / 2 - w.z);
     const score = ((gain + bonus) / (1 + dist / GAIN_DISTANCE)) * (0.9 + rng.next() * 0.2);
     if (score > bestScore) {
       best = b;
@@ -351,7 +352,7 @@ function finishStay(state: GameState, w: Walker, rng: Rng) {
 /** Researchers get a splash of energy the first time they pass within reach of a Fountain. */
 function passFountains(w: Walker, fountains: Building[]) {
   for (const f of fountains) {
-    if (Math.hypot(f.x + f.w / 2 - w.x, f.z + f.d / 2 - w.z) > FOUNTAIN_REACH) continue;
+    if (dhypot(f.x + f.w / 2 - w.x, f.z + f.d / 2 - w.z) > FOUNTAIN_REACH) continue;
     if (w.fountain !== f.id) {
       w.fountain = f.id;
       w.energy = Math.min(1, w.energy + FOUNTAIN_REFRESH);
@@ -503,7 +504,7 @@ function tickQueue(state: GameState, w: Walker, rng: Rng) {
     const chain = chainFor(state, b.id, w.qtile);
     if (chain) {
       const [sx, sz] = slotPoint(state, chain, rank);
-      w.route = w.qslot >= 0 ? slotRoute(state, chain, w.qslot, rank) : Math.hypot(w.x - sx, w.z - sz) < 0.7 ? [[sx, sz]] : slotRoute(state, chain, -1, rank);
+      w.route = w.qslot >= 0 ? slotRoute(state, chain, w.qslot, rank) : dhypot(w.x - sx, w.z - sz) < 0.7 ? [[sx, sz]] : slotRoute(state, chain, -1, rank);
     }
     w.qslot = rank;
   }
@@ -583,7 +584,7 @@ export function advance(w: Walker) {
     const dz = tz - w.z;
     // Tile-space distances are small: avoid hypot's overflow scaling in the hottest 800-walker loop.
     const dist = Math.sqrt(dx * dx + dz * dz);
-    if (dist > 1e-6) w.dir = Math.atan2(dx, dz);
+    if (dist > 1e-6) w.dir = datan2(dx, dz);
     if (dist <= budget) {
       w.x = tx;
       w.z = tz;

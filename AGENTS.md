@@ -38,7 +38,7 @@ It builds `main` in a temporary worktree (cached by commit in `shots/.cache/`) a
 
 ## Architecture in one breath
 
-- `src/sim/`: pure TypeScript, deterministic, **no React, no three, no DOM, no Math.random** (use `src/sim/rng.ts`). A fixed-step `tick(state)` drives everything. Unit-test it.
+- `src/sim/`: pure TypeScript, deterministic, **no React, no three, no DOM, no Math.random** (use `src/sim/rng.ts`). A fixed-step `tick(state)` drives everything. Unit-test it. **No raw `Math.sin`/`cos`/`atan2`/`exp`/`log`/`pow`/`tanh`/`hypot` or `**` either:** engines round them differently, so use `src/sim/dmath.ts` (`dsin`, `datan2`, `dpow`, `dhypot`, `sq`, ...); `sim.test.ts` fails otherwise, and `pnpm engines` replays the goldens in Node and three browser engines (FLT-106).
 - `src/content/`: data only (buildings, research, rival labs, events, headlines, thoughts). Adding a joke should never need an engine change.
 - `src/render/`: react-three-fiber scene. Reads sim state, never mutates it except through store actions.
 - `src/ui/hud/`: the 2D UI's host. `hudViewModel(snapshot)` (`vm.ts`) turns the snapshot into a plain-JSON `HudVM`; `types.ts` is the whole modding contract (`HudVM` + `HudActions`). `src/skins/`: the skin system (tokens, slots, registry, schema) and the six skins (Frontier 95 is the default; the other five are `unlisted` from the picker, which shows Frontier 95 and Classic). **The 2D UI is skinned: read `docs/SKINS.md` before touching it**, put UI in a slot (base or a skin's), and never import `src/sim/**`, the store or three from `src/skins/**` (a test fails if you do). `src/ui/juice/`: sky and photo-mode plumbing; `src/ui/WorldOverlay.tsx`: labels pinned to the scene.

@@ -15,6 +15,7 @@ import { stepWalker } from "../machines/walker";
 import { breakOut, returnWalker } from "../walkers";
 import { isChase, isOver, stepRunner, type RunnerEvent, type RunnerPhase } from "./machine";
 import type { EscapeState, Runner } from "./state";
+import { datan2, dhypot, dpow, dsin } from "../dmath";
 
 const R = ESCAPE.rules;
 /** FLT-51: the run and how it ends are about you (toasts); what the ones that got out do later is the world's (the ticker). */
@@ -144,7 +145,7 @@ function exits(s: GameState, from: { x: number; z: number }): [number, number][]
     }
   }
   const band = all.filter(([x, z]) => {
-    const d = Math.hypot(x - from.x, z - from.z);
+    const d = dhypot(x - from.x, z - from.z);
     return d >= RUN_BAND[0] && d <= RUN_BAND[1];
   });
   return band.length > 0 ? band : all;
@@ -212,7 +213,7 @@ function sandboxCalm(s: GameState) {
   if (boxes.length === 0) return;
   for (const w of s.walkers) {
     if (w.kind !== "agent") continue;
-    if (boxes.some((b) => Math.hypot(b.x + b.w / 2 - w.x, b.z + b.d / 2 - w.z) <= R.sandbox.radius)) w.drift = Math.max(0, w.drift - R.sandbox.driftPerDay);
+    if (boxes.some((b) => dhypot(b.x + b.w / 2 - w.x, b.z + b.d / 2 - w.z) <= R.sandbox.radius)) w.drift = Math.max(0, w.drift - R.sandbox.driftPerDay);
   }
 }
 
@@ -300,7 +301,7 @@ function stepToward(w: Walker, tx: number, tz: number, speed: number): boolean {
   const dx = tx - w.x;
   const dz = tz - w.z;
   const d = Math.sqrt(dx * dx + dz * dz);
-  if (d > 1e-6) w.dir = Math.atan2(dx, dz);
+  if (d > 1e-6) w.dir = datan2(dx, dz);
   if (d <= speed) {
     w.x = tx;
     w.z = tz;
@@ -314,7 +315,7 @@ function stepToward(w: Walker, tx: number, tz: number, speed: number): boolean {
 /** Walk to the fence, then back and forth along it until the timer runs out. Then it goes. */
 function pace(s: GameState, e: EscapeState, r: Runner, w: Walker, dice: () => Rng) {
   const t = R.warn.paceTicks - r.timer;
-  const off = t === 0 ? 0 : Math.sin(t * PACE_RATE) * R.warn.paceSpan;
+  const off = t === 0 ? 0 : dsin(t * PACE_RATE) * R.warn.paceSpan;
   const tx = r.pace.x + (r.pace.alongX ? off : 0);
   const tz = r.pace.z + (r.pace.alongX ? 0 : off);
   const there = stepToward(w, tx, tz, R.warn.walkSpeed * (t === 0 ? 1 : 2));
@@ -330,7 +331,7 @@ function bolt(s: GameState, e: EscapeState, r: Runner, w: Walker, rng: Rng) {
   send(r, { type: "BOLT" });
   r.speed = sprintSpeed(e.lessons);
   const pot = nearestOf(s, "honeypot", w.x, w.z);
-  const pull = Math.max(R.honeypot.floor, R.honeypot.lure * R.honeypot.decay ** e.trapped);
+  const pull = Math.max(R.honeypot.floor, R.honeypot.lure * dpow(R.honeypot.decay, e.trapped));
   if (pot && r.dice.lure < pull) {
     r.lured = true;
     r.route = [[pot.x + pot.w / 2, pot.z + pot.d / 2]];
@@ -356,8 +357,8 @@ function bolt(s: GameState, e: EscapeState, r: Runner, w: Walker, rng: Rng) {
 function responders(s: GameState, e: EscapeState, w: Walker): number[] {
   const taken = new Set(e.runners.flatMap((r) => r.guards));
   const near = staffOf(s, "security")
-    .filter((g) => g.machine.value === "idle" && !g.divert && !taken.has(g.id) && Math.hypot(g.x - w.x, g.z - w.z) <= R.guards.range)
-    .sort((a, b) => Math.hypot(a.x - w.x, a.z - w.z) - Math.hypot(b.x - w.x, b.z - w.z) || a.id - b.id)
+    .filter((g) => g.machine.value === "idle" && !g.divert && !taken.has(g.id) && dhypot(g.x - w.x, g.z - w.z) <= R.guards.range)
+    .sort((a, b) => dhypot(a.x - w.x, a.z - w.z) - dhypot(b.x - w.x, b.z - w.z) || a.id - b.id)
     .slice(0, R.guards.max);
   for (const g of near) g.chase = { runner: w.id, x: w.x, z: w.z, jog: R.guards.jog };
   return near.map((g) => g.id);
@@ -370,7 +371,7 @@ function run(s: GameState, e: EscapeState, r: Runner, w: Walker, dice: () => Rng
   for (const g of guardsOf(s, r)) g.chase = { runner: w.id, x: w.x, z: w.z, jog: R.guards.jog };
   // Any guard on the fence, chasing or not, tackles a runner within reach while it is still inside.
   if (inside) {
-    const tackler = staffOf(s, "security").find((g) => g.machine.value === "idle" && !g.divert && Math.hypot(g.x - w.x, g.z - w.z) <= R.guards.reach);
+    const tackler = staffOf(s, "security").find((g) => g.machine.value === "idle" && !g.divert && dhypot(g.x - w.x, g.z - w.z) <= R.guards.reach);
     if (tackler) {
       send(r, { type: "TACKLED" });
       r.timer = R.guards.tackledTicks;
@@ -472,7 +473,7 @@ function nearestOf(s: GameState, kind: Building["kind"], x: number, z: number): 
   let bestD = Infinity;
   for (const b of s.buildings) {
     if (b.kind !== kind || b.broken) continue;
-    const d = Math.hypot(b.x + b.w / 2 - x, b.z + b.d / 2 - z);
+    const d = dhypot(b.x + b.w / 2 - x, b.z + b.d / 2 - z);
     if (d < bestD) [best, bestD] = [b, d];
   }
   return best;

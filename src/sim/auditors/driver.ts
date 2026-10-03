@@ -20,6 +20,7 @@ import { auditFacts, gradeReport, notesSince } from "./grade";
 import { freshAudit, stepAudit, type AuditEvent } from "./machine";
 import { AUDITORS, NOTICE_CARD, OWNER, PICK_PREFIX, PREP_CHOICES, REPORT_CARD, REPORT_CHOICES, type Grade, type Prep } from "./pack";
 import { picks } from "../picks";
+import { sq } from "../dmath";
 
 const R = AUDITORS.rules;
 const HEADLINES = AUDITORS.content.headlines.add;
@@ -215,7 +216,7 @@ export function updateAuditors(s: GameState) {
     let bestD = 36;
     for (const w of s.walkers) {
       if (w.kind !== "researcher" && !(w.kind === "agent" && s.disguises?.agent)) continue;
-      const d = (w.x - who.x) ** 2 + (w.z - who.z) ** 2;
+      const d = sq(w.x - who.x) + sq(w.z - who.z);
       if (d < bestD) { bestD = d; best = w; }
     }
     if (best) say(s, r, best, best.kind === "agent" ? lines("agent", "box") : lines("researcher", a.machine.context.prep === "tidy" && r.chance(0.5) ? "tidy" : "audit"), R.chat.everyTicks + 15);

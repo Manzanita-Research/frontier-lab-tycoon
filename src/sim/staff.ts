@@ -21,6 +21,7 @@ import type { staffMachine } from "./machines/staff";
 import type { Building, GameState, Point, Rect, StaffJob, Staffer } from "./types";
 import { defs } from "./defs";
 import { toteBagFor } from "./factions/driver";
+import { datan2, dhypot, sq } from "./dmath";
 
 /** Look for something to do this often when idle (in ticks). */
 const SCAN_TICKS = 3;
@@ -154,7 +155,7 @@ const nearestFence = (x: number, z: number): number => {
   let best = 0;
   let bestD = Infinity;
   FENCE.forEach(([fx, fz], i) => {
-    const d = (fx - x) ** 2 + (fz - z) ** 2;
+    const d = sq(fx - x) + sq(fz - z);
     if (d < bestD) {
       bestD = d;
       best = i;
@@ -176,7 +177,7 @@ function janitorJob(state: GameState, s: Staffer): Job | null {
   let bestD = Infinity;
   for (let i = 0; i < state.slop.length; i++) {
     if (!(state.slop[i]! > 0) || !reach[i] || !inZone(s, i) || claimed(state, s, i)) continue;
-    const d = (i % state.grid.w + 0.5 - s.x) ** 2 + (Math.floor(i / state.grid.w) + 0.5 - s.z) ** 2;
+    const d = sq(i % state.grid.w + 0.5 - s.x) + sq(Math.floor(i / state.grid.w) + 0.5 - s.z);
     if (d < bestD) {
       bestD = d;
       best = i;
@@ -196,7 +197,7 @@ function sreJob(state: GameState, s: Staffer): Job | null {
   let bestD = Infinity;
   for (const b of state.buildings) {
     if (!b.broken || !reach.has(b.id) || claimed(state, s, b.id) || !buildingInZone(state, s, b)) continue;
-    const d = (b.x + b.w / 2 - s.x) ** 2 + (b.z + b.d / 2 - s.z) ** 2;
+    const d = sq(b.x + b.w / 2 - s.x) + sq(b.z + b.d / 2 - s.z);
     if (d < bestD) {
       bestD = d;
       best = b;
@@ -213,7 +214,7 @@ function commsJob(state: GameState, s: Staffer): Job | null {
   let bestD = Infinity;
   for (const w of state.walkers) {
     if (w.kind !== "protester" || w.id === s.last || claimed(state, s, w.id)) continue;
-    const d = (w.x - s.x) ** 2 + (w.z - s.z) ** 2;
+    const d = sq(w.x - s.x) + sq(w.z - s.z);
     if (d < bestD) {
       bestD = d;
       best = w;
@@ -226,18 +227,18 @@ function commsJob(state: GameState, s: Staffer): Job | null {
   let goalD = Infinity;
   for (let i = 0; i < reach.length; i++) {
     if (!reach[i] || !inZone(s, i)) continue;
-    const d = (i % state.grid.w + 0.5 - best.x) ** 2 + (Math.floor(i / state.grid.w) + 0.5 - best.z) ** 2;
+    const d = sq(i % state.grid.w + 0.5 - best.x) + sq(Math.floor(i / state.grid.w) + 0.5 - best.z);
     if (d < goalD) {
       goalD = d;
       goal = i;
     }
   }
   // With a patrol zone they only go to protesters who are close to it: it is their patch.
-  if (goal < 0 || (s.zone.length > 0 && goalD > ZONE_REACH ** 2)) return null;
+  if (goal < 0 || (s.zone.length > 0 && goalD > sq(ZONE_REACH))) return null;
   const route = pathRoute(state, s, new Set([goal]));
   if (!route) return null;
   const [gx, gz] = route[route.length - 1]!;
-  const dist = Math.hypot(best.x - gx, best.z - gz);
+  const dist = dhypot(best.x - gx, best.z - gz);
   if (dist > TOTE_REACH) route.push([best.x + ((gx - best.x) / dist) * TOTE_REACH, best.z + ((gz - best.z) / dist) * TOTE_REACH]);
   return { task: best.id, route };
 }
@@ -303,8 +304,8 @@ function move(s: Staffer, mul = 1) {
     const [tx, tz] = s.route[0]!;
     const dx = tx - s.x;
     const dz = tz - s.z;
-    const dist = Math.hypot(dx, dz);
-    if (dist > 1e-6) s.dir = Math.atan2(dx, dz);
+    const dist = dhypot(dx, dz);
+    if (dist > 1e-6) s.dir = datan2(dx, dz);
     if (dist <= budget) {
       s.x = tx;
       s.z = tz;
@@ -423,13 +424,13 @@ export function updateStaff(state: GameState, rng: Rng) {
         move(s);
         if (s.route.length === 0) {
           const w = s.job === "comms" ? state.walkers.find((o) => o.id === s.task) : undefined;
-          if (w && Math.hypot(w.x - s.x, w.z - s.z) > TOTE_TOLERANCE) {
+          if (w && dhypot(w.x - s.x, w.z - s.z) > TOTE_TOLERANCE) {
             s.last = s.task; // they moved: try somebody else, or come back for them
             s.task = 0;
             send(s, { type: "LOST" });
             break;
           }
-          if (w) s.dir = Math.atan2(w.x - s.x, w.z - s.z);
+          if (w) s.dir = datan2(w.x - s.x, w.z - s.z);
           const [lo, hi] = STAFF[s.job].work;
           s.timer = rng.int(lo, hi);
           send(s, { type: "ARRIVED" });
@@ -474,7 +475,7 @@ export function divertTarget(state: GameState, to: number): { rect: Rect; isGate
 export function atDivert(state: GameState, s: Staffer): boolean {
   if (!s.divert || s.route.length > 0 || s.machine.value !== "idle") return false;
   const { rect } = divertTarget(state, s.divert.to);
-  return Math.hypot(rect.x + rect.w / 2 - s.x, rect.z + rect.d / 2 - s.z) <= Math.max(rect.w, rect.d) / 2 + DIVERT_ARRIVED;
+  return dhypot(rect.x + rect.w / 2 - s.x, rect.z + rect.d / 2 - s.z) <= Math.max(rect.w, rect.d) / 2 + DIVERT_ARRIVED;
 }
 
 /** Route to the diversion if they are not there and not on their way; then jog. */

@@ -12,6 +12,7 @@ import type { Rng } from "./rng";
 import type { GameState } from "./types";
 import { modeOf } from "./walkers";
 import { defs } from "./defs";
+import { dhypot } from "./dmath";
 
 export function activeConditions(state: GameState): Set<ThoughtCondition> {
   const c = new Set<ThoughtCondition>(["always"]);
@@ -42,7 +43,7 @@ export function dailyThoughts(state: GameState, rng: Rng, force = false) {
   // Keep bubbles readable: never start one on top of another.
   const speaking = state.walkers.filter((w) => state.thoughts.some((t) => t.walkerId === w.id));
   const clear = (w: (typeof state.walkers)[number]) =>
-    speaking.every((o) => o !== w && Math.hypot(o.x - w.x, o.z - w.z) > 3);
+    speaking.every((o) => o !== w && dhypot(o.x - w.x, o.z - w.z) > 3);
   const candidates = state.walkers.filter((w) => modeOf(w) !== "inside" && clear(w));
   if (candidates.length === 0) return;
   // The first night of a game always has its punchline.
