@@ -53,11 +53,15 @@ for (const shot of shots) {
     let queue = []; let id = 0;
     window.requestAnimationFrame = (cb) => { queue.push([++id, cb]); return id; };
     window.cancelAnimationFrame = (x) => { queue = queue.filter(([i]) => i !== x); };
-    // Callbacks get the page's own (fake) performance.now(), the clock they compare against (FLT-105: the Odometer's roll
-    // read a capture-relative time against it and drew garbage).
-    window.__flushFrame = () => { const t = performance.now(); const run = queue; queue = []; for (const [, cb] of run) cb(t); };
+    // performance.now() follows the capture's clock too (it keeps running in real time under the fake clock), so a
+    // timestamp from rAF and one read by hand agree: FLT-105's Odometer compared the two and drew garbage numbers.
+    const base = performance.now();
+    let at = base;
+    performance.now = () => at;
+    window.__flushFrame = (t) => { at = base + t; const run = queue; queue = []; for (const [, cb] of run) cb(at); };
   });
-  const step = async (ms) => { await page.clock.runFor(ms); await page.evaluate(() => window.__flushFrame()); };
+  let now = 0;
+  const step = async (ms) => { await page.clock.runFor(ms); now += ms; await page.evaluate((t) => window.__flushFrame(t), now); };
   // Warm up in big steps (the sim and the asset loads), then let the network settle.
   for (let t = 0; t < (shot.warmup ?? 4000); t += 100) await step(100);
   await page.waitForLoadState("networkidle").catch(() => {});
