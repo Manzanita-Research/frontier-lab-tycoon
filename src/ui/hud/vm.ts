@@ -152,7 +152,7 @@ export function goalProgressText(def: GoalDef, value: number, held = 0): string 
 }
 
 /** The top bar of a camera beat (FLT-56), by kind. */
-const BEAT_KICKER: Record<string, string> = { stretch: "Final stretch", exit: "Breaking · a departure", huddle: "The auditors are conferring", viral: "Live · trending now", statement: "A statement from Comms", leak: "Someone is asking about the file", fade: "Later that evening" };
+const BEAT_KICKER: Record<string, string> = { stretch: "Final stretch", exit: "Breaking · a departure", huddle: "The auditors are conferring", viral: "Live · trending now", statement: "A statement from Comms", leak: "Someone is asking about the file", fade: "Later that evening", cut: "Meanwhile" };
 
 const TONE_LABEL = { bad: "Breaking", joke: "Developing", good: "Good news", neutral: "Update" } as const;
 const MOOD = { content: "Content", slumped: "Slumped", miserable: "Miserable", resigned: "Resigned" } as const;

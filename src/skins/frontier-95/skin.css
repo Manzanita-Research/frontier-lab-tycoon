@@ -3286,13 +3286,9 @@
       margin: 0 0 4px;
       font-weight: bold;
     }
-    .f95-sankey-plot {
-      overflow-x: auto;
-    }
     .sankey {
       display: block;
       width: 100%;
-      min-width: 480px;
       height: auto;
       font: 12px Tahoma, "MS Sans Serif", sans-serif;
       text {
@@ -3312,6 +3308,13 @@
       }
       .sankey-links path:hover {
         fill-opacity: 0.75;
+      }
+      /* A phone draws the chart at about two thirds size, so its type is set larger to land near 10px. */
+      @media (max-width: 600px) {
+        font-size: 15px;
+        .sankey-sub {
+          font-size: 12px;
+        }
       }
     }
     .f95-sankey-key {

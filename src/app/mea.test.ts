@@ -62,12 +62,12 @@ describe("Maximally Effective Altruists (FLT-101)", () => {
     expect(w.disasters.cues.some((c) => c.type === "sound" && c.cue === "mea.door")).toBe(true);
   });
 
-  it("sock: a sock on the Cluster door, and the fade cuts back to the lab", async () => {
+  it("sock: a sock on the Cluster door, and a plain cut back to the lab to see it", async () => {
     const def = await resolve();
     const w = staged(def, "sock").world;
     const cluster = w.buildings.find((b) => b.kind === "cluster")!;
     expect(w.dressing).toEqual(expect.arrayContaining([expect.objectContaining({ building: cluster.id, prop: "sock" })]));
-    expect(w.disasters.cues.find((c) => c.type === "beat")).toMatchObject({ beat: "fade", kicker: `Meanwhile, back at ${w.labName}` });
+    expect(w.disasters.cues.find((c) => c.type === "beat")).toMatchObject({ beat: "cut", kicker: `Meanwhile, back at ${w.labName}` });
   });
 
   it("leaked: the Sankey leaks, Trust drops, and the card shows the chart in Sankey Panky 95", async () => {

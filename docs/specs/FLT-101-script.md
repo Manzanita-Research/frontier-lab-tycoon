@@ -30,7 +30,7 @@ Base: the PR's Workers Preview (`https://pr-N-flt-prod.manzanita.workers.dev/`),
 | The manor arrives | `?mod=/mods/examples/maximally-effective-altruists/mod.json&moment=arc:mea-story:arrival` |
 | The invitation (choice card) | `?mod=/mods/examples/maximally-effective-altruists/mod.json&moment=arc:mea-story:invited` |
 | Lights out at the manor (fade) | `?mod=/mods/examples/maximally-effective-altruists/mod.json&moment=arc:mea-story:convening` |
-| A sock on the Cluster door (fade) | `?mod=/mods/examples/maximally-effective-altruists/mod.json&moment=arc:mea-story:sock` |
+| A sock on the Cluster door (a cut back to the lab) | `?mod=/mods/examples/maximally-effective-altruists/mod.json&moment=arc:mea-story:sock` |
 | The leaked Sankey (Trust drops) | `?mod=/mods/examples/maximally-effective-altruists/mod.json&moment=arc:mea-story:leaked` |
 | The Bird App piles on | `?mod=/mods/examples/maximally-effective-altruists/mod.json&moment=arc:mea-story:pileon` |
 | The Comms Desk crisis, and the Senate on the ticker | `?mod=/mods/examples/maximally-effective-altruists/mod.json&moment=arc:mea-story:crisis` |
@@ -121,7 +121,7 @@ On DAY after 1 day → **sock**
 `?mod=/mods/examples/maximally-effective-altruists/mod.json&moment=arc:mea-story:sock`
 
 - A sock hangs on the cluster door for 24 hours
-- Camera beat (fade) on cluster: kicker “Meanwhile, back at {lab}”, caption “Someone has hung a sock on the Cluster door.”, sub “Training continues. The GPUs have seen worse.”
+- Camera beat (cut) on cluster: kicker “Meanwhile, back at {lab}”, caption “Someone has hung a sock on the Cluster door.”, sub “Training continues. The GPUs have seen worse.”
 - Toast: “The Cluster is "in a meeting". Please knock, then update the spreadsheet.”
 
 On DAY after 1 day → **leaked**

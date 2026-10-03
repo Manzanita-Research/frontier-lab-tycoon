@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { layoutSankey, SANKEY_H, SANKEY_TOP, SANKEY_W, type SankeyInput } from "./sankey";
+import { layoutSankey, SANKEY_BOTTOM, SANKEY_H, SANKEY_TOP, SANKEY_W, type SankeyInput } from "./sankey";
 
 const chart: SankeyInput = {
   units: "expected hugs",
@@ -49,7 +49,7 @@ describe("layoutSankey (FLT-101)", () => {
       expect(n.x).toBeGreaterThanOrEqual(0);
       expect(n.x + n.w).toBeLessThanOrEqual(SANKEY_W);
       expect(n.y).toBeGreaterThanOrEqual(SANKEY_TOP);
-      expect(n.y + n.h).toBeLessThanOrEqual(SANKEY_H + 0.01);
+      expect(n.y + n.h).toBeLessThanOrEqual(SANKEY_H - SANKEY_BOTTOM + 0.01);
     }
     for (let c = 0; c < s.columns; c++) {
       const col = s.nodes.filter((n) => n.column === c).sort((p, q) => p.y - q.y);

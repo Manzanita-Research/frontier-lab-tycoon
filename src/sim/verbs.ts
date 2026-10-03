@@ -656,7 +656,7 @@ export const VERBS: Record<string, VerbDef> = {
     },
   },
   "camera.beat": {
-    doc: "A camera beat (FLT-56): letterbox bars and a `caption` (with an optional `sub` line; templates, like `news`) while the camera eases to `on` for `hold` seconds. `on` is a place, as for `camera.focus`, `here` (wherever the pack's driver says the beat is, such as the auditors' huddle), or `people`: the beat's people, followed as they walk. `kind` tells the renderer which beat it is (`exit`, `huddle`, `viral`, or `fade`: the screen dims nearly to black, for what happens off camera); `kicker` replaces the top bar's words for the kind. Time keeps running, the player can skip it, and photo mode or reduced motion get the caption without the camera move.",
+    doc: "A camera beat (FLT-56): letterbox bars and a `caption` (with an optional `sub` line; templates, like `news`) while the camera eases to `on` for `hold` seconds. `on` is a place, as for `camera.focus`, `here` (wherever the pack's driver says the beat is, such as the auditors' huddle), or `people`: the beat's people, followed as they walk. `kind` tells the renderer which beat it is (`exit`, `huddle`, `viral`, `fade`: the screen dims nearly to black, for what happens off camera, or `cut`: just the bars, a plain cut to somewhere else); `kicker` replaces the top bar's words for the kind. Time keeps running, the player can skip it, and photo mode or reduced motion get the caption without the camera move.",
     spec: { kind: "string", caption: "string", sub: "string?", kicker: "string?", on: "string", zoom: "number?", hold: "number?" },
     run: (env, p) => {
       const people = p.on === "people" ? (env.people ?? []).filter((id) => env.state.walkers.some((w) => w.id === id)) : [];

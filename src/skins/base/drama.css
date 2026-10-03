@@ -36,9 +36,16 @@
 .sankey {
   display: block;
   width: 100%;
-  min-width: 480px;
   height: auto;
   font: 600 12px Nunito, sans-serif;
+}
+@media (max-width: 600px) {
+  .sankey {
+    font-size: 15px;
+  }
+  .sankey .sankey-sub {
+    font-size: 12px;
+  }
 }
 .sankey text {
   fill: #231f1a;

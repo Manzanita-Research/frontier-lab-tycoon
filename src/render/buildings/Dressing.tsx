@@ -62,7 +62,8 @@ export function DoorProps({ id, w, d }: { id: number; w: number; d: number }) {
   return (
     <group ref={door} position={at} visible={false}>
       <mesh geometry={cylGeo} material={HANDLE} rotation-x={Math.PI / 2} scale={[0.035, 0.08, 0.035]} />
-      <group ref={sock} visible={false} position={[0, 0, 0.05]}>
+      {/* Twice life size, so it reads from the default camera: this is a diorama, and the sock is the joke. */}
+      <group ref={sock} visible={false} position={[0, 0, 0.05]} scale={2}>
         <mesh geometry={boxGeo} material={SOCK_BAND} position={[0, -0.05, 0]} scale={[0.09, 0.05, 0.04]} castShadow />
         <mesh geometry={boxGeo} material={SOCK} position={[0, -0.16, 0]} scale={[0.08, 0.18, 0.035]} castShadow />
         <mesh geometry={boxGeo} material={SOCK_BAND} position={[0, -0.21, 0.001]} scale={[0.082, 0.025, 0.037]} />

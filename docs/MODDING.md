@@ -44,7 +44,7 @@ tells a story over a week of game days with no engine code, using five generic p
   `looks["building:<kind>"]`, a primitive recipe (at most 16 parts, inside the footprint, hex colours or `"coat"`/`"window"`,
   no motion). An arc's `building.ensure` may name a building the mod itself adds.
 - **Set dressing:** `building.lights` (a building's windows go dark for some hours) and `building.prop` (a sock or a
-  do-not-disturb sign on a door), plus `camera.beat` with `kind: "fade"` and a `kicker` for what happens off camera.
+  do-not-disturb sign on a door), plus `camera.beat` with `kind: "fade"` (for what happens off camera) or `"cut"` (a plain cut elsewhere) and a `kicker`.
 - **`vibes.delta`**, beside `hype.delta` and `trust.delta`, so a card's three answers can move the meters their own ways.
 - **`?moment=arc:<arc>:<state>`** stages any mod arc's state on a busy lab (a year in, cards unpaced), with any card it
   opens already open: a one-click link per beat for screenshots and review. The beats and every line are in

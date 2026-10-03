@@ -253,7 +253,7 @@
             "sock": {
               "entry": [
                 {"type": "building.prop", "params": {"building": "cluster", "prop": "sock", "hours": 24}},
-                {"type": "camera.beat", "params": {"kind": "fade", "on": "cluster", "kicker": "Meanwhile, back at {lab}", "caption": "Someone has hung a sock on the Cluster door.", "sub": "Training continues. The GPUs have seen worse.", "zoom": 1.6, "hold": 5}},
+                {"type": "camera.beat", "params": {"kind": "cut", "on": "cluster", "kicker": "Meanwhile, back at {lab}", "caption": "Someone has hung a sock on the Cluster door.", "sub": "Training continues. The GPUs have seen worse.", "zoom": 2.6, "hold": 5}},
                 {"type": "toast", "params": {"text": "The Cluster is \"in a meeting\". Please knock, then update the spreadsheet.", "tone": "joke"}}
               ],
               "on": {"DAY": {"target": "leaked", "guard": {"type": "after", "params": {"days": 1}}}}

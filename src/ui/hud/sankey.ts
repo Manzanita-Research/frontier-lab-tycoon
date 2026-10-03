@@ -10,10 +10,14 @@ export interface SankeyInput {
   flows: readonly { from: string; to: string; value: number }[];
 }
 
-/** The drawing box, in SVG units. Headings sit above SANKEY_TOP. */
-export const SANKEY_W = 600;
-export const SANKEY_H = 300;
+/**
+ * The drawing box, in SVG units: about the width of a card's page, so a skin draws it near 1:1 and the labels stay
+ * readable. Headings sit above SANKEY_TOP; SANKEY_BOTTOM leaves room for the lowest node's sub-label.
+ */
+export const SANKEY_W = 480;
+export const SANKEY_H = 320;
 export const SANKEY_TOP = 22;
+export const SANKEY_BOTTOM = 14;
 const NODE_W = 12;
 const PAD = 10;
 const LABEL_GAP = 5;
@@ -48,7 +52,7 @@ export function layoutSankey(input: SankeyInput): SankeyVM {
 
   const byColumn: SankeyInput["nodes"][number][][] = Array.from({ length: columns }, () => []);
   for (const n of input.nodes) byColumn[Math.min(columnOf(n), deepest)]!.push(n);
-  const height = SANKEY_H - SANKEY_TOP;
+  const height = SANKEY_H - SANKEY_TOP - SANKEY_BOTTOM;
   const scale = Math.min(...byColumn.filter((c) => c.length > 0).map((c) => {
     const total = c.reduce((t, n) => t + value(n.id), 0);
     return total > 0 ? (height - PAD * (c.length - 1)) / total : Infinity;
@@ -97,6 +101,6 @@ export function layoutSankey(input: SankeyInput): SankeyVM {
     const d = `M${x0} ${y0}C${xm} ${y0} ${xm} ${y1} ${x1} ${y1}L${x1} ${r(y1 + w)}C${xm} ${r(y1 + w)} ${xm} ${r(y0 + w)} ${x0} ${r(y0 + w)}Z`;
     return { from: f.from, to: f.to, value: f.value, width: r(w), d, tint: s.tint };
   });
-  const headings = (input.columns ?? []).slice(0, columns).map((text, c) => ({ text, x: r(columns > 1 ? c * gap + (c === columns - 1 ? NODE_W : 0) : SANKEY_W / 2), anchor: c === columns - 1 && columns > 1 ? "end" as const : "start" as const }));
+  const headings = (input.columns ?? []).slice(0, columns).map((text, c) => ({ text, x: r(columns > 1 ? c * gap + (c === columns - 1 ? NODE_W - 2 : 0) : SANKEY_W / 2), anchor: c === columns - 1 && columns > 1 ? "end" as const : "start" as const }));
   return { width: SANKEY_W, height: SANKEY_H, units: input.units, columns, headings, nodes, links };
 }

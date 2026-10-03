@@ -1306,7 +1306,8 @@ export interface SoundVM {
 /**
  * A camera beat (FLT-56) on screen: letterbox bars and a caption while the camera makes its move. Time is still
  * running underneath; `actions.skipBeat()` (or Esc) ends it. `kind` is `exit` (a defection's conga line out of the
- * gate), `huddle` (the auditors conferring before the report card) or `viral` (the hearing clip).
+ * gate), `huddle` (the auditors conferring before the report card), `viral` (the hearing clip), or FLT-101's `fade`
+ * (dimmed nearly to black) and `cut` (just the bars).
  */
 export interface BeatVM {
   id: number;
