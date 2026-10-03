@@ -223,7 +223,7 @@ export const Look = Schema.Struct({
   /** A sprite's width and height in tiles (default 0.9 x 1.2, about a person); a model is fitted to the height. */
   size: Schema.optionalKey(Schema.Tuple([positive, positive])),
   scale: Schema.optionalKey(positive),
-  gait: Schema.optionalKey(Schema.Literals(["walk", "trot", "hop", "float"])),
+  gait: Schema.optionalKey(Schema.Literals(["walk", "trot", "hop", "float", "waddle"])),
   /** Protest placards for this look (protesters only): short lines, 1 to 12 of them. */
   signs: Schema.optionalKey(Schema.Array(text.check(Schema.isMaxLength(40))).check(Schema.isBetweenLength(1, 12))),
   /** Placard height in tiles (default: held up just above the top of the look; a small look gets a smaller placard). */

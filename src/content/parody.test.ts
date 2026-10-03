@@ -36,9 +36,17 @@ const RETAIL = [
 ];
 // Our parodies that contain (or sit next to) a real name. They are removed before the scan.
 const ALLOWED = ["Outlook Excess", "WordSad", "WordPerfectly", "NoteBad"];
+// FLT-102: real people's accounts a mod's style might be named after. Matched anywhere, any case.
+const REAL_ACCOUNTS = ["berduck", "deepfates"];
+// PENDING JEM (FLT-102): duck mode's name is a real account's. It lives in ONE constant (and the JSON bundled from it)
+// until Jem decides: keep it, maybe with a credit line, or rename it to a parody such as "rubba duck mode".
+const PENDING: Readonly<Record<string, readonly string[]>> = {
+  "../../mods/examples/duck-mode/mod.ts": ['export const DUCK = { name: "Berduck Mode", voice: "berduck" } as const;'],
+  "../../mods/examples/duck-mode/mod.json": ['"name": "Berduck Mode"', '"name": "berduck"'],
+};
 
 const sources = import.meta.glob<string>(
-  ["./**/*.{ts,json}", "../ui/**/*.{ts,tsx,json,css}", "../skins/**/*.{ts,tsx,json,css}", "../intro/**/*.{ts,tsx,json,css}", "../account/**/*.{ts,tsx,css}", "../../mods/base-*/**/*.json", "!**/*.test.{ts,tsx}"],
+  ["./**/*.{ts,json}", "../ui/**/*.{ts,tsx,json,css}", "../skins/**/*.{ts,tsx,json,css}", "../intro/**/*.{ts,tsx,json,css}", "../account/**/*.{ts,tsx,css}", "../../mods/base-*/**/*.json", "../../mods/examples/**/*.{ts,json}", "!**/*.test.{ts,tsx}"],
   { query: "?raw", import: "default", eager: true },
 );
 const scanned = Object.keys(sources);
@@ -75,6 +83,14 @@ describe("parody names only", () => {
     for (const p of packs) expect(scanned).toContain(`../../mods/${p}/mod.json`);
     // assets/art.jobs.json holds every word printed in the generated art (FLT-70), so the pictures are scanned too.
     for (const f of ["content.ts", "manual.ts", "art.ts", "Intro.tsx", "stage/Kiosk.tsx", "stage/Props.tsx", "assets/art.jobs.json", "assets/props.jobs.json"]) expect(scanned).toContain(`../intro/${f}`);
+  });
+  it("names no real person's account, outside the one constant waiting on Jem (FLT-102)", () => {
+    expect(scanned).toContain("../../mods/examples/duck-mode/mod.ts");
+    const found = scanned.flatMap((f) => {
+      const text = (PENDING[f] ?? []).reduce((t, ok) => t.split(ok).join(""), sources[f]!).toLowerCase();
+      return REAL_ACCOUNTS.filter((name) => text.includes(name)).map((name) => `${f}: ${name}`);
+    });
+    expect(found).toEqual([]);
   });
   it("names no real product, app, site or lab anywhere the player can read", () => {
     const found = scanned.flatMap((f) => realNames(sources[f]!, f.startsWith("../intro/") ? [...REAL, ...RETAIL] : REAL).map((name) => `${f}: ${name}`));

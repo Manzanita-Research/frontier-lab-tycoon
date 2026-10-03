@@ -16,6 +16,7 @@ import type { ProgressionLevel } from "../content/progression";
 import { sanitizeCss } from "./css";
 import { ownAsset, validateAssets } from "./assets";
 import { VISITOR_ROLES } from "../content/names";
+import { STAFF } from "../content/staff";
 import { validateContent } from "./validation";
 import baseTokens from "../skins/base/tokens.json";
 import baseStrings from "../skins/base/strings.json";
@@ -148,12 +149,22 @@ function resolveLook(target: string, look: LookData, own: Readonly<Record<string
   const fail = (detail: string, at = path) => { throw new ModError({ path: at, detail }); };
   const { kinds, roles } = lookTargets(content);
   const [kind = "", role] = target.split(":");
-  if (kind === "faction") {
+  // FLT-102: the staff by job ("staff:sre") and visitor groups by kind ("group:auditor") wear looks too. Recipes, sprites
+  // and models only: they have no base body to tint.
+  const crew = kind === "staff" || kind === "group";
+  if (crew && look.tint) fail(`"${kind}:" looks draw a whole body; use "recipe", "sprite" or "glb", not "tint"`);
+  if (kind === "staff") {
+    const jobs = Object.keys(STAFF);
+    if (!role || !jobs.includes(role)) fail(`unknown staff job "${role ?? ""}"${suggest(role ?? "", jobs)}; jobs are ${jobs.join(", ")}`);
+  } else if (kind === "group") {
+    // Group kinds come with their packs (the auditors' is "auditor"); a kind nobody calls is simply never drawn.
+    if (!role || !/^[a-z][\w-]*$/.test(role)) fail(`expected "group:<kind>", like "group:auditor"`);
+  } else if (kind === "faction") {
     // A faction crowd (FLT-33): the protesters who came with it, and anyone who has taken its side.
     const ids = content.factions.map((row) => row.id);
     if (!role || !ids.includes(role)) fail(`unknown faction "${role ?? ""}"${suggest(role ?? "", ids)}; factions are ${ids.join(", ")}`);
-  } else if (!kinds.includes(kind)) fail(`unknown walker kind "${kind}"${suggest(kind, kinds)}; looks are for ${kinds.join(", ")} or "faction:<id>"`);
-  if (role !== undefined && kind !== "faction") {
+  } else if (!kinds.includes(kind)) fail(`unknown walker kind "${kind}"${suggest(kind, kinds)}; looks are for ${kinds.join(", ")}, "faction:<id>", "staff:<job>" or "group:<kind>"`);
+  if (role !== undefined && kind !== "faction" && !crew) {
     const known = roles[kind];
     if (!known) fail(`"${kind}" has one role; use "${kind}" on its own`);
     else if (!known.includes(role)) fail(`unknown ${kind} role "${role}"${suggest(role, known)}; ${kind} roles are ${known.join(", ")}`);

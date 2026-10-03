@@ -46,6 +46,7 @@ export function printReport(report) {
   if (p.skin) console.log(`Skin: ${p.skin.id} ("${p.skin.name}", extends ${p.skin.extends})${p.skin.asks ? "; asks the player to put it on" : "; in the picker and at ?skin=" + p.skin.id}`);
   if (p.cues.added.length + p.cues.replaced.length > 0) console.log(`Sound: ${[p.cues.added.length ? `adds ${p.cues.added.join(", ")}` : "", p.cues.replaced.length ? `replaces ${p.cues.replaced.join(", ")}` : ""].filter(Boolean).join("; ")}${p.cues.played.length ? `; arcs play ${p.cues.played.join(", ")}` : ""}`);
   for (const look of p.looks) console.log(`Look: ${look.target} is a ${look.form} (${look.detail})`);
+  if (p.voice) console.log(`Voice: ${p.voice.name} (${p.voice.detail})\n  "${p.voice.sample}"`);
 }
 export async function bundle(directory, output, runner) {
   const { manifest } = await loadManifest(directory, runner);

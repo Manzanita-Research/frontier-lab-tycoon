@@ -27,6 +27,8 @@ import { dramaAtom } from "../../drama/state";
 import { playableFixture } from "./previewLadder";
 import type { HudVM } from "./types";
 import { hudViewModel } from "./vm";
+import { voiceVM } from "./voice";
+import { useFullVoice, useVoiceMoments, voiceMode, voiceSetup } from "./useVoice";
 import { savesAtom } from "./saves";
 import type { SavesInput } from "./saves.vm";
 
@@ -217,7 +219,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
   const list = useMemo(() => skinList(), []);
   // `?mod=` loads before the game exists (main.tsx); a data-only mod can come or go mid-game too (FLT-78), and says so.
   const modsRev = useAtomValue(modsRevision);
-  const lookLabels = useMemo(() => Object.fromEntries(Object.entries(modSession().presentation?.looks ?? {}).flatMap(([target, look]) => (look.label ? [[target, look.label]] : []))), []);
+  const lookLabels = useMemo(() => Object.fromEntries(Object.entries(modSession().presentation?.looks ?? {}).flatMap(([target, look]) => (look.label ? [[target, look.label]] : []))), [modsRev]);
   const mods = useMemo(() => {
     const m = modSession();
     return {
@@ -288,9 +290,14 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         social,
         guide,
       }),
-    [guide, share, social, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, stage, slowForBadNews, tapHint, arenaOpen, arenaChosen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, beat, skinUi, crt, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, birdAppOpen, drama, saves],
+    [guide, share, social, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, stage, slowForBadNews, tapHint, arenaOpen, arenaChosen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, beat, skinUi, crt, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, birdAppOpen, drama, saves, lookLabels],
   );
-  return useWindowBudget(vm, news);
+  // A mod's voice (FLT-102) rewrites the flavour text; without one the view-model passes through untouched.
+  const voice = useMemo(() => voiceSetup(modSession().presentation?.voice, voiceMode()), [modsRev]);
+  const voiced = useMemo(() => (voice ? voiceVM(vm, voice) : vm), [vm, voice]);
+  useVoiceMoments(voice, vm, shown);
+  useFullVoice(voice);
+  return useWindowBudget(voiced, news);
 }
 
 /**
