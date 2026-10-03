@@ -16,17 +16,20 @@ import { shotAtom } from "../juice/photo";
 import { useShareInput } from "../share/share";
 import { useSocialInput } from "../share/social";
 import { newMotion, NO_MOTION, stepMotion, type Motion, type MotionView } from "./leapfrogMotion";
-import { arenaCallAtom, arenaChosenAtom, arenaOpenAtom, birdAppOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, seenNewsAtom, senateOpenAtom, skinUiAtom, staffOpenAtom, guideAtom, windowBudgetAtom } from "./state";
+import { arenaCallAtom, arenaChosenAtom, arenaOpenAtom, birdAppOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modAddingAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, seenNewsAtom, senateOpenAtom, skinUiAtom, staffOpenAtom, guideAtom, voiceModeAtom, windowBudgetAtom } from "./state";
 import { newestOf, unreadOf, wantsOf, windowed } from "./tray";
 import { autoUp, nextClose, stepBudget } from "./windows";
 import { hudActions } from "./actions";
 import { modSession } from "../../app/mods";
 import { modsRevision } from "../../app/liveMods";
+import { EXTRA_MODS } from "../../app/extraMods";
 import { dramaPath, dramaViewModel } from "../../drama/feed";
 import { dramaAtom } from "../../drama/state";
 import { playableFixture } from "./previewLadder";
 import type { HudVM } from "./types";
 import { hudViewModel } from "./vm";
+import { voiceVM } from "./voice";
+import { useFullVoice, useVoiceMoments, voiceSetup } from "./useVoice";
 import { savesAtom } from "./saves";
 import type { SavesInput } from "./saves.vm";
 
@@ -217,17 +220,22 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
   const list = useMemo(() => skinList(), []);
   // `?mod=` loads before the game exists (main.tsx); a data-only mod can come or go mid-game too (FLT-78), and says so.
   const modsRev = useAtomValue(modsRevision);
-  const lookLabels = useMemo(() => Object.fromEntries(Object.entries(modSession().presentation?.looks ?? {}).flatMap(([target, look]) => (look.label ? [[target, look.label]] : []))), []);
+  const lookLabels = useMemo(() => Object.fromEntries(Object.entries(modSession().presentation?.looks ?? {}).flatMap(([target, look]) => (look.label ? [[target, look.label]] : []))), [modsRev]);
+  const modAdding = useAtomValue(modAddingAtom);
+  const voiceMode = useAtomValue(voiceModeAtom);
   const mods = useMemo(() => {
     const m = modSession();
+    const voiced = m.presentation?.voice;
     return {
       open: modsOpen,
       list: m.mods.map((mod) => ({ ...mod, drama: dramaPath(mod.source, location.href) !== null })),
       conflicts: m.conflicts.map((c) => `${c.path}: ${c.earlier} (${c.earlierOperation}), then ${c.later} (${c.laterOperation}); ${c.later} wins`),
       errors: [...m.errors],
       contentHash: m.run?.contentHash ?? null,
+      extras: EXTRA_MODS.map(({ id, name, blurb }) => ({ id, name, blurb, added: m.mods.some((mod) => mod.id === id), adding: modAdding === id })),
+      voice: voiced ? { mod: m.mods.find((mod) => mod.id === voiced.mod)?.name ?? voiced.mod, mode: voiceMode ?? (voiced.full ? "full" : "flavour") } : null,
     };
-  }, [modsOpen, modsRev]);
+  }, [modsOpen, modsRev, modAdding, voiceMode]);
   const drama = useMemo(() => dramaViewModel(dramaUi, modSession().mods, location.href, new Date()), [dramaUi, modsRev]);
   const savesUi = useAtomValue(savesAtom);
   const saves = useMemo((): SavesInput => {
@@ -288,9 +296,14 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         social,
         guide,
       }),
-    [guide, share, social, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, stage, slowForBadNews, tapHint, arenaOpen, arenaChosen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, beat, skinUi, crt, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, birdAppOpen, drama, saves],
+    [guide, share, social, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, stage, slowForBadNews, tapHint, arenaOpen, arenaChosen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, beat, skinUi, crt, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, birdAppOpen, drama, saves, lookLabels],
   );
-  return useWindowBudget(vm, news);
+  // A mod's voice (FLT-102) rewrites the flavour text; without one the view-model passes through untouched.
+  const voice = useMemo(() => voiceSetup(modSession().presentation?.voice, voiceMode, modSession().mods.map((m) => m.name)), [modsRev, voiceMode]);
+  const voiced = useMemo(() => (voice ? voiceVM(vm, voice) : vm), [vm, voice]);
+  useVoiceMoments(voice, vm, shown);
+  useFullVoice(voice);
+  return useWindowBudget(voiced, news);
 }
 
 /**

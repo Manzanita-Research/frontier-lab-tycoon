@@ -1,5 +1,6 @@
 import { Effect } from "effect";
-import { decodeManifest, ModError, type ModManifest } from "./schema";
+import { decodeManifest, ModError, type ModManifest, type VoiceData } from "./schema";
+import { makeVoice } from "./voice";
 import { composeMods } from "./loader";
 import { resolveGameDefinition } from "./game-definition";
 import { runHeadless } from "./headless";
@@ -16,6 +17,8 @@ export interface PresentationReport {
   readonly skin: { readonly id: string; readonly name: string; readonly extends: string; readonly asks: boolean } | null;
   readonly cues: { readonly added: string[]; readonly replaced: string[]; readonly played: string[] };
   readonly looks: { readonly target: string; readonly form: string; readonly detail: string }[];
+  /** FLT-102: the voice's rules and lines, in a line, with a sample of what it does to a sentence. */
+  readonly voice?: { readonly name: string; readonly detail: string; readonly sample: string } | null;
 }
 
 const bytesOf = (url: string) => {
@@ -69,7 +72,20 @@ export async function checkPresentation(manifest: ModManifest): Promise<Presenta
         look.label ? `"${look.label}"` : "",
       ].filter(Boolean).join(", "),
     })),
+    voice: presentation.voice ? voiceReport(presentation.voice) : null,
   };
+}
+
+function voiceReport(voice: VoiceData) {
+  const lines = Object.values(voice.moments ?? {}).reduce((n, list) => n + (list?.length ?? 0), 0);
+  const detail = [
+    `${Object.keys(voice.words ?? {}).length} words`,
+    `${(voice.letters ?? []).length} letter swaps`,
+    voice.leet ? "leet" : "",
+    `${lines} moment lines`,
+    voice.full ? "full by default" : "flavour text only (?voice=full for everything)",
+  ].filter(Boolean).join(", ");
+  return { name: voice.name ?? "a voice", detail, sample: makeVoice(voice)("The researchers think the world is really ready for the release.") };
 }
 
 export async function checkMod(input: unknown) {

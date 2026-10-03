@@ -5,6 +5,7 @@ import { Assets } from "./services/assets";
 import { Audio, type AudioApi } from "./services/audio";
 import { Looks, type ResolvedLook } from "./services/looks";
 import { Skin, type SkinApi } from "./services/skin";
+import { Voice, type ResolvedVoice } from "./services/voice";
 
 export interface Presentation {
   readonly skins: SkinApi;
@@ -12,15 +13,18 @@ export interface Presentation {
   readonly assets: Readonly<Record<string, string>>;
   readonly audio: AudioApi;
   readonly looks: Readonly<Record<string, ResolvedLook>>;
+  /** The mod set's voice (FLT-102), if a mod brings one: the HUD rewrites flavour text with it. */
+  readonly voice?: ResolvedVoice | null;
 }
 
-export function resolvePresentation<E, R>(layer: Layer.Layer<Skin | Assets | Audio | Looks, E, R>) {
+export function resolvePresentation<E, R>(layer: Layer.Layer<Skin | Assets | Audio | Looks | Voice, E, R>) {
   return Effect.gen(function* () {
     const skins = yield* Skin;
     const assets = yield* Assets;
     const audio = yield* Audio;
     const looks = yield* Looks;
-    return structuredClone({ skins, assets: assets.urls, audio, looks: looks.looks }) satisfies Presentation;
+    const { voice } = yield* Voice;
+    return structuredClone({ skins, assets: assets.urls, audio, looks: looks.looks, voice }) satisfies Presentation;
   }).pipe(Effect.provide(layer));
 }
 

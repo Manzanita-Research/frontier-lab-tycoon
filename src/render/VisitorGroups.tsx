@@ -7,6 +7,7 @@ import { groupKind } from "../sim/groups";
 import { HALF } from "./coords";
 import { CREW } from "./people";
 import { SKIN } from "./look";
+import { useSessionLooks } from "./useSessionLooks";
 
 const CAP = 32;
 /** The same scale as the crowd and the staff. */
@@ -40,6 +41,9 @@ export function VisitorGroups() {
   const boardGeo = useMemo(() => new THREE.BoxGeometry(0.2 * S, 0.26 * S, 0.02 * S), []);
   const paperGeo = useMemo(() => new THREE.BoxGeometry(0.16 * S, 0.2 * S, 0.01 * S), []);
   const badgeGeo = useMemo(() => new THREE.BoxGeometry(0.07 * S, 0.09 * S, 0.02 * S), []);
+  // FLT-102: a mod may dress a group kind (`group:auditors`); the rest draw as below.
+  const looks = useSessionLooks("groups");
+  const modded = looks.drawers.size > 0;
 
   useFrame(({ clock }) => {
     const w = game.world;
@@ -54,7 +58,9 @@ export function VisitorGroups() {
       dummy.updateMatrix();
       m.setMatrixAt(i, dummy.matrix);
     };
+    if (modded) looks.drawers.forEach((d) => d.begin());
     for (const g of w.groups ?? []) {
+      const drawer = modded ? looks.drawers.get(`group:${g.kind}`) : undefined;
       const look = groupKind(g.kind)?.look;
       const phase = g.machine.value;
       const huddling = phase === "huddling";
@@ -72,6 +78,7 @@ export function VisitorGroups() {
         const nod = standing ? 0.18 + write * 0.2 + (huddling ? 0.2 : 0) : 0;
         const lean = huddling ? 0.22 : 0;
         const yaw = m.dir;
+        if (drawer?.draw({ id: m.id, kind: "group" }, { x, z, yaw, t, phase: p, walking: moving, hop: 0, land: 0, env: write, signYaw: 0 })) continue;
         const fx = Math.sin(yaw);
         const fz = Math.cos(yaw);
         const i = n++;
@@ -99,6 +106,7 @@ export function VisitorGroups() {
         badge.current?.setColorAt(i, colorOf(look, "lanyard", "#2f6fdf"));
       }
     }
+    if (modded) looks.drawers.forEach((d) => d.end());
     for (const m of [body, vest, stripe, head, board, paper, badge]) {
       const mesh = m.current;
       if (!mesh) continue;
@@ -110,6 +118,7 @@ export function VisitorGroups() {
 
   return (
     <group>
+      {modded && <primitive object={looks.group} />}
       <instancedMesh ref={body} args={[undefined, undefined, CAP]} castShadow frustumCulled={false}>
         <capsuleGeometry args={[0.13 * S, 0.26 * S, 4, 8]} />
         <meshStandardMaterial roughness={0.7} />

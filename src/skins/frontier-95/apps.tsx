@@ -6,7 +6,7 @@ import { useT } from "../context";
 import type { SlotPropsMap } from "../types";
 import { Ico } from "./icons";
 import { Btn, Tabs, Win } from "./parts";
-import { EXAMPLE_MOD } from "../base/slots/ModManager";
+import { EXAMPLE_MOD, VOICE_MODES } from "../base/slots/ModManager";
 import { DRAMA_ADD_SMALL, dramaComing } from "../base/slots/Drama";
 import type { DramaPackVM } from "../../ui/hud/types";
 
@@ -271,6 +271,33 @@ export function ModManager({ mods, actions }: SlotPropsMap["ModManager"]) {
               ))
             )}
           </div>
+          {mods.extras && mods.extras.some((m) => !m.added) && (
+            <div className="inset f95-modlist" role="list" aria-label="Mods you can add">
+              {mods.extras.filter((m) => !m.added).map((m) => (
+                <div key={m.id} role="listitem">
+                  <Ico name="doc" size={18} />
+                  <b>{m.name}</b>
+                  <span />
+                  <span />
+                  <Btn className="f95-modoff" disabled={m.adding} onClick={() => actions.addMod(m.id)} title="Adds it to this lab, no reload">
+                    {m.adding ? "Adding…" : "Add"}
+                  </Btn>
+                  <small>{m.blurb}</small>
+                </div>
+              ))}
+            </div>
+          )}
+          {mods.voice && (
+            // The way out of full voice stays readable, whatever the voice does to the rest of the screen.
+            <fieldset className="f95-tube" data-voice="off">
+              <legend>{mods.voice.mod}'s voice</legend>
+              {VOICE_MODES.map(([m, label]) => (
+                <label key={m}>
+                  <input type="radio" name="f95-voice" checked={mods.voice!.mode === m} onChange={() => actions.setVoice(m)} /> {label}
+                </label>
+              ))}
+            </fieldset>
+          )}
           {mods.conflicts.length > 0 && (
             <fieldset>
               <legend>Clashes</legend>

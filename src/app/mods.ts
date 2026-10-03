@@ -111,7 +111,10 @@ const LIVE_RIVAL_FIELDS = new Set(["id", "tagline"]);
  * needs a fresh start, in the Mod Manager's words.
  */
 export function needsRestart(manifest: ModManifest): string | null {
-  if (manifest.skin || manifest.assets || manifest.audio || manifest.looks) return "Brings a look or sounds: needs a fresh start.";
+  // FLT-102: a look built from primitives (or a tint) and a voice are drawn from the manifest alone, so they come and go
+  // live; a sprite, a model, a skin or sounds bring files the session has to unpack first.
+  const files = Object.values(manifest.looks ?? {}).some((look) => look.sprite !== undefined || look.glb !== undefined);
+  if (manifest.skin || manifest.assets || manifest.audio || files) return "Brings a look or sounds: needs a fresh start.";
   const content = manifest.content ?? {};
   for (const [section, patch] of Object.entries(content)) {
     if (patch === undefined) continue;
@@ -130,12 +133,25 @@ export const cardsOf = (manifest: ModManifest): string[] => (manifest.content?.e
 /** The session with one more mod (last, so it wins its conflicts). Throws when it doesn't compose. */
 export async function withMod(session: ModSession, added: SessionManifest): Promise<ModSession> {
   const manifests = [...session.manifests.filter((m) => m.manifest.id !== added.manifest.id), added];
-  return { ...session, ...(await compose(manifests)) };
+  return { ...session, ...(await compose(manifests)), presentation: await livePresentation(session.presentation, manifests) };
 }
 
 /** The session without a mod. */
 export async function withoutModId(session: ModSession, id: string): Promise<ModSession> {
-  return { ...session, ...(await compose(session.manifests.filter((m) => m.manifest.id !== id))) };
+  const manifests = session.manifests.filter((m) => m.manifest.id !== id);
+  return { ...session, ...(await compose(manifests)), presentation: await livePresentation(session.presentation, manifests) };
+}
+
+/**
+ * FLT-102: the looks and the voice after a mod comes or goes mid-game. A live mod's looks are recipes and tints (no
+ * files), so they are read straight from the manifests; a look with a file can only be a start-up mod's, and keeps the
+ * `blob:` URL it was unpacked to. The skins, assets and sounds stay as they started.
+ */
+async function livePresentation(was: Presentation | null, manifests: readonly SessionManifest[]): Promise<Presentation | null> {
+  if (manifests.length === 0) return was && { ...was, looks: {}, voice: null };
+  const now = await Effect.runPromise(resolvePresentation(composeMods(manifests.map((m) => m.manifest)).layer));
+  const looks = Object.fromEntries(Object.entries(now.looks).map(([target, look]) => [target, look.src !== undefined ? (was?.looks[target] ?? look) : look]));
+  return was ? { ...was, looks, voice: now.voice ?? null } : { ...now, looks };
 }
 
 /** One `?mod=` value, fetched and checked. */
