@@ -23,6 +23,7 @@ import { vocabulary } from "../sim/verbs";
 import { Assets } from "./services/assets";
 import { Audio } from "./services/audio";
 import { Looks } from "./services/looks";
+import { Voice } from "./services/voice";
 import { GameEvents } from "./services/game-events";
 import { readSkinRegistry } from "./skin-adapter";
 import { baseTables } from "./tables";
@@ -67,6 +68,8 @@ export function makeBaseGameLayer(skins?: SkinApi) {
       .map(([cue, notes]) => [cue, Schema.decodeUnknownSync(Schema.Array(Note))(JSON.parse(JSON.stringify(notes)))])), music: [], chords: structuredClone(CHORDS) })),
     // Walker looks (FLT-55): the base game draws its own people, so it has none.
     Layer.sync(Looks, () => ({ looks: {} })),
+    // A mod's voice (FLT-102): the base game speaks as itself.
+    Layer.succeed(Voice, { voice: null }),
     Layer.succeed(GameEvents, { stream: Stream.empty }),
   );
 }

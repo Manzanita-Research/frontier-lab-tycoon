@@ -5,6 +5,7 @@ import { Skin } from "./services/skin";
 import { Assets } from "./services/assets";
 import { Audio } from "./services/audio";
 import { Looks, type ResolvedLook } from "./services/looks";
+import { Voice } from "./services/voice";
 import { Vocabulary } from "./services/vocabulary";
 import { Progression, CoachLine, Arc, Building, Disaster, Ending, EntityKind, EventOrArc, Goal, Headline, ModError, NamePool, Rival, Thought, Tip, decodeManifest, suggest, type LookData, type ModManifest, type SkinData } from "./schema";
 import { contentKey, patchById } from "./patch";
@@ -110,7 +111,13 @@ export function modToLayer(input: ModManifest) {
       return Looks.of({ looks });
     }, catch: asModError });
   }));
-  return Layer.mergeAll(content, assets, skin, audio, looks);
+  // A voice (FLT-102) is plain data the schema already checked; the last mod with one speaks.
+  const voice = Layer.effect(Voice, Effect.gen(function* () {
+    const mod = yield* manifest;
+    const below = yield* Voice;
+    return mod.voice ? Voice.of({ voice: { ...mod.voice, mod: mod.id } }) : below;
+  }));
+  return Layer.mergeAll(content, assets, skin, audio, looks, voice);
 }
 
 const HEX = /^#[0-9a-f]{3}(?:[0-9a-f]{3})?$/i;
@@ -195,6 +202,7 @@ export function conflictReport(mods: readonly ModManifest[]): readonly Conflict[
     for (const key of Object.keys(mod.audio?.cues ?? {})) mark(`audio.cues.${key}`, mod.id, "override");
     if (mod.audio?.music) mark("audio.music", mod.id, "override");
     for (const key of Object.keys(mod.looks ?? {})) mark(`looks.${key}`, mod.id, "override");
+    if (mod.voice) mark("voice", mod.id, "override");
   }
   return report;
 }
