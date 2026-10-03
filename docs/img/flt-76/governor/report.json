@@ -14,19 +14,19 @@
     {
       "scene": "beats-badnews",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-76/governor/before/beats-badnews.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-76/governor/after/beats-badnews.png",
+      "before": "docs/img/flt-76/governor/before/beats-badnews.png",
+      "after": "docs/img/flt-76/governor/after/beats-badnews.png",
       "title": "FLT-76: at ▶▶▶ public trust falls 30 points: the game drops to 1× and pins what happened",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-76/governor/compare/beats-badnews.png",
+      "compare": "docs/img/flt-76/governor/compare/beats-badnews.png",
       "changed": 0.05534876543209877
     },
     {
       "scene": "beats-badnews-phone",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-76/governor/before/beats-badnews-phone.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-76/governor/after/beats-badnews-phone.png",
+      "before": "docs/img/flt-76/governor/before/beats-badnews-phone.png",
+      "after": "docs/img/flt-76/governor/after/beats-badnews-phone.png",
       "title": "FLT-76: the bad-news slowdown on a phone",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-76/governor/compare/beats-badnews-phone.png",
+      "compare": "docs/img/flt-76/governor/compare/beats-badnews-phone.png",
       "changed": 0.21408205735812372
     }
   ],

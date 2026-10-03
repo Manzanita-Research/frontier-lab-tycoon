@@ -1,5 +1,5 @@
 
-> frontier-lab-tycoon@0.0.0 flt-mod /root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_ycybuwshp6-1/project-proj-dvb9hes55f
+> frontier-lab-tycoon@0.0.0 flt-mod .
 > node packages/flt-mod-cli/cli.mjs "check" "mods/base-papers/mod.json"
 
 [vite] connected.

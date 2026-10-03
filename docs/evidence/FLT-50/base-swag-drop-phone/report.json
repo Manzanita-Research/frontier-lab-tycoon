@@ -14,17 +14,17 @@
     {
       "scene": "phone-start",
       "skin": "swag-drop",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop-phone/before/phone-start@swag-drop.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop-phone/after/phone-start@swag-drop.png",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop-phone/compare/phone-start@swag-drop.png",
+      "before": "docs/evidence/FLT-50/base-swag-drop-phone/before/phone-start@swag-drop.png",
+      "after": "docs/evidence/FLT-50/base-swag-drop-phone/after/phone-start@swag-drop.png",
+      "compare": "docs/evidence/FLT-50/base-swag-drop-phone/compare/phone-start@swag-drop.png",
       "changed": 0.8780722141207923
     },
     {
       "scene": "phone-path",
       "skin": "swag-drop",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop-phone/before/phone-path@swag-drop.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop-phone/after/phone-path@swag-drop.png",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop-phone/compare/phone-path@swag-drop.png",
+      "before": "docs/evidence/FLT-50/base-swag-drop-phone/before/phone-path@swag-drop.png",
+      "after": "docs/evidence/FLT-50/base-swag-drop-phone/after/phone-path@swag-drop.png",
+      "compare": "docs/evidence/FLT-50/base-swag-drop-phone/compare/phone-path@swag-drop.png",
       "changed": 0.9295365475756471
     }
   ],

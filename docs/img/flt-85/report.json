@@ -14,37 +14,37 @@
     {
       "scene": "nopath",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-85/before/nopath.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-85/after/nopath.png",
+      "before": "docs/img/flt-85/before/nopath.png",
+      "after": "docs/img/flt-85/after/nopath.png",
       "title": "FLT-85: a Training Hall one path tile short of the gate (its path touches the Cluster, which isn't path)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-85/compare/nopath.png",
+      "compare": "docs/img/flt-85/compare/nopath.png",
       "changed": 0.0083125
     },
     {
       "scene": "nopath-tool",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-85/before/nopath-tool.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-85/after/nopath-tool.png",
+      "before": "docs/img/flt-85/before/nopath-tool.png",
+      "after": "docs/img/flt-85/after/nopath-tool.png",
       "title": "FLT-85: the same, with the path tool in hand: the gate's network lights up and the join tile pulses",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-85/compare/nopath-tool.png",
+      "compare": "docs/img/flt-85/compare/nopath-tool.png",
       "changed": 0.014887345679012346
     },
     {
       "scene": "nopath-click",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-85/before/nopath-click.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-85/after/nopath-click.png",
+      "before": "docs/img/flt-85/before/nopath-click.png",
+      "after": "docs/img/flt-85/after/nopath-click.png",
       "title": "FLT-85: the player clicks the No path! flag: the camera pans to the gap, the path tool is in hand, and the rule is said once (toasts held so the shot catches it)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-85/compare/nopath-click.png",
+      "compare": "docs/img/flt-85/compare/nopath-click.png",
       "changed": 0.23580401234567902
     },
     {
       "scene": "nopath-phone",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-85/before/nopath-phone.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-85/after/nopath-phone.png",
+      "before": "docs/img/flt-85/before/nopath-phone.png",
+      "after": "docs/img/flt-85/after/nopath-phone.png",
       "title": "FLT-85: the one-tile gap on a phone (390x844)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-85/compare/nopath-phone.png",
+      "compare": "docs/img/flt-85/compare/nopath-phone.png",
       "changed": 0.0051950419248997445
     }
   ],

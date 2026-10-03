@@ -14,10 +14,10 @@
     {
       "scene": "midgame",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_f48fpspysg-1/project-proj-dvb9hes55f/docs/img/flt-48/before/midgame.png",
-      "after": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_f48fpspysg-1/project-proj-dvb9hes55f/docs/img/flt-48/after/midgame.png",
+      "before": "docs/img/flt-48/before/midgame.png",
+      "after": "docs/img/flt-48/after/midgame.png",
       "title": "FLT-48 Part A: the scripted mid-game campus, paused near Y2 Mar",
-      "compare": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_f48fpspysg-1/project-proj-dvb9hes55f/docs/img/flt-48/compare/midgame.png",
+      "compare": "docs/img/flt-48/compare/midgame.png",
       "changed": 0.22507947530864197
     }
   ],

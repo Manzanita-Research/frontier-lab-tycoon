@@ -1,6 +1,6 @@
 # FLT-7 · evidence
 
-Captured on the dedicated 1-vCPU Modal builder, Chromium with SwiftShader. Preview: [News Room showroom](https://modal-8--4173.getbb.app/?debug=1&speed=0&warp=20&newsdemo=chat).
+Captured on the dedicated 1-vCPU Modal builder, Chromium with SwiftShader. Preview: the News Room showroom at `<builder>:4173/?debug=1&speed=0&warp=20&newsdemo=chat` (since retired).
 
 `pnpm check`: typecheck passed, **150 tests in 24 files passed**, production build passed. The unchanged 500-walker budget measured **0.197 ms/tick** (limit 0.3). See [check.txt](check.txt) for the full output. Test files run serially to avoid competing workers skewing that budget. The existing large-chunk Vite warning remains.
 

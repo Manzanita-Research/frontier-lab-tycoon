@@ -14,19 +14,19 @@
     {
       "scene": "flt63-facilities",
       "skin": "discovery-disc-96",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/discovery-disc-96/before/flt63-facilities@discovery-disc-96.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/discovery-disc-96/after/flt63-facilities@discovery-disc-96.png",
+      "before": "docs/img/flt-63/discovery-disc-96/before/flt63-facilities@discovery-disc-96.png",
+      "after": "docs/img/flt-63/discovery-disc-96/after/flt63-facilities@discovery-disc-96.png",
       "title": "FLT-63: Start ▸ Facilities ▸ open (the buildings, grouped)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/discovery-disc-96/compare/flt63-facilities@discovery-disc-96.png",
+      "compare": "docs/img/flt-63/discovery-disc-96/compare/flt63-facilities@discovery-disc-96.png",
       "changed": 0.06529783950617284
     },
     {
       "scene": "flt63-run",
       "skin": "discovery-disc-96",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/discovery-disc-96/before/flt63-run@discovery-disc-96.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/discovery-disc-96/after/flt63-run@discovery-disc-96.png",
+      "before": "docs/img/flt-63/discovery-disc-96/before/flt63-run@discovery-disc-96.png",
+      "after": "docs/img/flt-63/discovery-disc-96/after/flt63-run@discovery-disc-96.png",
       "title": "FLT-63: Start ▸ Run… (the widget launcher)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/discovery-disc-96/compare/flt63-run@discovery-disc-96.png",
+      "compare": "docs/img/flt-63/discovery-disc-96/compare/flt63-run@discovery-disc-96.png",
       "changed": 0.1918587962962963
     }
   ],
