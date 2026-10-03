@@ -82,6 +82,12 @@ export interface EventDef {
   early?: true;
   /** A mod's drama document (FLT-101): a letter, email, manifesto or Sankey chart, shown when `kind` is "drama". */
   doc?: EventDocData;
+  /**
+   * How it takes its turn, over what content/cardPacing.ts says for its id (FLT-105): a mod's card can't be listed
+   * there. `now`: the next beat of a story the player is already in (ACID MOD(E)'s breakthrough, mid-trip), no gap;
+   * `urgent`: doesn't wait for a quiet week; `priority`: ahead of the line; `minor`: answers itself rather than wait.
+   */
+  pace?: "now" | "urgent" | "priority" | "minor";
 }
 
 export const EVENT_COOLDOWN_DAYS = 60;

@@ -28,15 +28,16 @@ interface Played {
   tripSeen: GameState["trip"] | null;
   spelled: number;
   jump: number;
-  /** The breakthrough's card was on screen (pass 2). */
+  /** The breakthrough's card was on screen (pass 2), and it opened mid-trip, on the breakthrough's own day. */
   enlightenedCard?: boolean;
+  cardMidTrip?: boolean;
 }
 
 /**
  * Play a modded lab for `days` the way `flt-mod check` does (no ladder, a connected campus: cards open from day 40),
  * answering the offer with `pick` and every other card with its first choice.
  */
-async function play(pick: number, days = 75, enlightened = 0): Promise<Played> {
+async function play(pick: number, days = 75, enlightened = 0, speed = 1): Promise<Played> {
   const def = await definition;
   return withDefs(def, () => {
     const s = createInitialState(42, "garage", def);
@@ -52,8 +53,12 @@ async function play(pick: number, days = 75, enlightened = 0): Promise<Played> {
       const arcBefore = s.modArcs?.["acid-mode"]?.value;
       const cap = s.capability;
       const cmds = answer(s, (id) => (id === "acid-offer" ? pick : id === "acid-enlightened" ? enlightened : 0));
-      if (openEventOf(s)?.id === "acid-enlightened") out.enlightenedCard = true;
-      tick(s, i === 0 ? [...setup, ...cmds] : cmds);
+      if (openEventOf(s)?.id === "acid-enlightened" && !out.enlightenedCard) {
+        out.enlightenedCard = true;
+        out.cardMidTrip = !!s.trip && s.tick < s.trip.end && s.modArcs?.["acid-mode"]?.value === "breakthrough";
+      }
+      // The app tells the card budget the speed (a card is never closer than about 20 real seconds to the last).
+      tick(s, i === 0 ? [...setup, { type: "setPace", speed }, ...cmds] : cmds);
       if (out.offeredDay === null && s.arcs["acid-offer"]?.value === "cardOpen") out.offeredDay = s.day;
       if (s.trip) out.tripSeen ??= structuredClone(s.trip);
       out.spelled = Math.max(out.spelled, s.walkers.filter((w) => w.spell).length);
@@ -107,6 +112,15 @@ describe("ACID MOD(E)", () => {
       expect(said(p.s, re), `answer ${pick}`).toBe(true);
       expect(said(p.s, /Senate subcommittee/)).toBe(true);
       expect(p.s.modArcs!["acid-mode"]!.value).toBe("done");
+    }
+  });
+
+  it("the breakthrough's card jumps the card budget: it opens mid-trip at any speed, not days after the trip", async () => {
+    // Pass 2: a mod card waits behind the budget (5 game days between cards at 1×, 10 at 3×) unless its `pace` says otherwise.
+    for (const speed of [1, 3]) {
+      const p = await play(0, 75, 0, speed);
+      expect(p.enlightenedCard, `${speed}×`).toBe(true);
+      expect(p.cardMidTrip, `${speed}×`).toBe(true);
     }
   });
 

@@ -92,7 +92,7 @@ export function dailyEvents(state: GameState, unlocked = true) {
   const pacer = pacerOf(state).context;
   const events = defs().events;
   const place = (id: string) => pacer.queue.findIndex((q) => q.id === id);
-  const rank = (id: string) => (paceOfCard(id).urgent ? -2 : paceOfCard(id).priority ? -1 : place(id) >= 0 ? place(id) : pacer.queue.length);
+  const rank = (id: string) => (paceOf(id).now ? -3 : paceOf(id).urgent ? -2 : paceOf(id).priority ? -1 : place(id) >= 0 ? place(id) : pacer.queue.length);
   const order = events.map((def, i) => ({ def, i, r: rank(def.id) })).sort((a, b) => a.r - b.r || a.i - b.i);
   const waiting: string[] = [];
   for (const { def } of order) {
@@ -100,9 +100,9 @@ export function dailyEvents(state: GameState, unlocked = true) {
     if (def.early ? !first : early && arriving === undefined) continue;
     // A save from before a pack added this card (the factions' cards, a mod's) starts its machine now.
     state.arcs[def.id] ??= initialStored(arcMachine, { choices: def.choices.length, cooldownDays: def.cooldown ?? EVENT_COOLDOWN_DAYS, openedDay: null });
-    const card = paceOfCard(def.id);
+    const card = paceOf(def.id);
     // A card the player just added (FLT-78) keeps the gap but doesn't queue behind colour: it was asked for.
-    const how: Pacing = card.urgent ? "urgent" : card.priority || arriving !== undefined ? "priority" : "normal";
+    const how: Pacing = card.now ? "now" : card.urgent ? "urgent" : card.priority || arriving !== undefined ? "priority" : "normal";
     const allowed = pacerAllows(pacerOf(state).context, def.id, card.story, state.day, how);
     const ready = arriving ?? (def.early ? conditionHolds(state, def.when) : pressureReady(state) && (conditionHolds(state, def.when) || state.flags[askFlag(def.id)] !== undefined));
     const shrug = card.minor && slotFree && (!allowed || pacer.auto);
@@ -115,6 +115,13 @@ export function dailyEvents(state: GameState, unlocked = true) {
     } else if (stored.value === "brewing") waiting.push(def.id);
   }
   state.pacer = step(pacerMachine, pacerOf(state), { type: "WAITING", ids: waiting, day: state.day }).stored;
+}
+
+/** A card's pacing: its id's rule (content/cardPacing.ts), and what its own definition asks for (a mod's `pace`, FLT-105). */
+function paceOf(id: string) {
+  const rule = paceOfCard(id);
+  const own = defs().eventById(id)?.pace;
+  return own ? { ...rule, [own]: true as const } : rule;
 }
 
 /** Level 1 of the ladder, where a first-minutes card (`early`) may open (FLT-76). */

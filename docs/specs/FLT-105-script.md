@@ -13,10 +13,11 @@ out again. Every beat below is data in the pack, run by generic verbs (`trip.sta
 
 | Rule | How |
 |---|---|
-| At most 3 flashes a second, no saturated red flash | The look is a slowly turning rainbow wash with `mix-blend-mode: color`, so it changes hue and never brightness; the warps are smooth and slow. `src/ui/juice/trip.test.ts` samples the luminance and red of every colour on screen, frame by frame, through a whole trip at 1×, 3× and 10× game speed (with and without "I've had enough" at the peak) and counts WCAG 2.3.1 flashes: none, and no red ones. It proves it can fail by catching a strobe. |
+| At most 3 flashes a second, no saturated red flash | The look is a slowly turning rainbow wash with `mix-blend-mode: color`, so it changes hue and never brightness; the warps are smooth and slow. `src/ui/juice/trip.test.ts` samples the luminance and red of every colour on screen, frame by frame, through a whole trip at 1×, 3× and 10× game speed (with and without "I've had enough" at the peak), plus a quit half a second in and the breakthrough's card answered at once, for both looks: 18 runs, no flashes and no red ones. It samples the calm version's still mandala and Frontier 95's trip chrome too (it checks those colours against the CSS), and proves it can fail by catching a strobe. |
+| The breakthrough's card | While a trip is on, a card doesn't dim the screen behind it (a dim that came and went as the player answered at once would be a flash of its own; the test shows it). The trip's chrome fades with its strength, never in one step. |
 | A warning first | Before anything moves, a message box: "Contains intense colour and motion." [Continue] [Skip]. Time is paused while it asks. Skip means the lab's trip still happens in the sim, but your screen stays as it is. |
-| "I've had enough" | A plain button, top right, always on screen while the trip is (phones included). It ends the look in well under a second, smoothly (no snap back, which would be a flash of its own). |
-| Reduced motion | `prefers-reduced-motion` gets the calm version: a gentle colour drift (a fainter wash that turns once every 40 s) and a softer warble in the music. No warping, melting, breathing, wobble, kaleidoscope or trails. |
+| "I've had enough" | A plain button, top right, always on screen while the trip is (phones included, and above the breakthrough's card). It ends the look in well under a second, smoothly (no snap back, which would be a flash of its own); the music eases back into tune over a couple of seconds. |
+| Reduced motion | `prefers-reduced-motion` gets the calm version (below): still colour, a still mandala, flowered window chrome, and every joke in words. Nothing moves: no warping, melting, breathing, wobble, kaleidoscope, trails, and the colour doesn't turn. The music sways gently (±35 cents). |
 | Phones | Everything degrades: if the frames get slow during the trip, a governor drops to "lite": the wash and the melting windows stay, the canvas pass and the wobbling text go. The warning and the button fit a 390 px screen. |
 | The phrase | "a medium dose of acid", and only that. No slang for it anywhere (a test checks). No real person, poster, camp or community is named or hinted at: `drama/denylist.json` and `src/content/parody.test.ts` guard the real names. |
 | Kind | Nobody is mocked for their mind. The researchers go somewhere nice, say odd things, and come back (or start a commune). The joke is on the lab, its roadmap, and its posting. |
@@ -34,6 +35,7 @@ Once the lab is old enough for cards (day 40, or Level 3 with the ladder), an ev
 > Legal has left the chat.
 
 - **Take the medium dose** (Hype +6). "Contains intense colour and motion. The research team goes somewhere for a few days."
+  Three researchers think: "Is the floor breathing, or is that the roadmap?"
 - **Microdose the roadmap instead** (Hype +3, capability +3%). Headline: "{lab} microdoses its roadmap; Q3 plan now reads
   'vibes, but faster'". The lab posts: "we didn't take a medium dose of acid. we microdosed the roadmap. completely different".
 - **Absolutely not. Touch grass.** (Trust +2). Headline: "{lab} declines a medium dose of acid; Vibe Encampment sends a
@@ -53,8 +55,13 @@ Yes. The warning asks first. Then, over a day of game time:
 - **The map goes kaleidoscope**: a canvas pass folds the edges of the campus into a slowly spinning mandala and leaves
   the middle sharp, so you can still play.
 - **Rainbow trails** behind everyone walking.
-- **The music bends**: every new note is detuned by a slow warble, up to about half a semitone either way, on a 7 s swing.
-- **The paperclip has an ego death**, one line every 7 s while nothing else needs its balloon:
+- **The music bends like a warped record**: the whole band plays through a tape wow, about ±80 cents (most of a semitone)
+  every 4 s with a light flutter on top, all of it bending together so nothing clashes. It eases back into tune at the
+  comedown, and within a couple of seconds of "I've had enough" (`src/audio/wobble.ts`).
+- **The windows go poster paint**: title bars in purple, magenta, orange and teal with a ✿ at each end, a magenta ridge
+  round every window. They fade in with the trip.
+- **The paperclip has an ego death** (a rainbow halo, and a line every 7 s, kept at the top of its balloon whatever news
+  is in it):
   - "It looks like you're writing a letter. It looks like I'm... a letter? I'm a shape. I was always a shape."
   - "There is no paperclip. There is only the bend."
   - "I have helped so many people format so many documents. Did I ever format myself?"
@@ -70,6 +77,17 @@ The lab reacts:
   my enlightenment era 🌀" (it lands as a controversy, so the **Comms desk** has something to do). A rival replies: "our
   researchers also reached a higher plane this quarter. we just don't post about it" (ratioed).
 - Trust −3, heat +4.
+
+## Beat 2½: day two
+
+A day in, the lab is peaking:
+
+- Ticker: "{lab}'s research team reports the loss curve 'has a face now'; the face is described as 'kind of smug'".
+- Ticker: "Vibe Encampment denies all involvement, then sells {lab} a tote bag".
+- Toast: "Facilities reports that every office plant has been given a name. All of them are Gary."
+- **Bird App**, from the lab's own posters: the oracle, "day 2 of the medium dose. the attention heads are attending to
+  me. I have never felt so seen"; the doomer, "everyone is laughing but nobody is asking whether the colours are
+  aligned"; the leaderboard one, "enlightenment is not on any leaderboard. yet. (it will be by friday)".
 
 ## Beat 3: somebody goes somewhere (`?moment=acid-researcher`)
 
@@ -89,24 +107,54 @@ the training run, and their inspector and thought bubble say where they are:
 
 ## Beat 4: the breakthrough (`?moment=acid-breakthrough`)
 
-Three days in, still mid-trip: capability jumps by a quarter (plus 5) and the Arena re-ranks at once, an "om" chord, and
+Three days in, still mid-trip: capability jumps by a quarter (plus 5) and the Arena re-ranks at once, an "om" chord,
+and **a card of its own**. A card stops the clock and the moment queue (FLT-76) gives it its own beat, so a busy morning
+can't scroll it away:
+
+> **Breakthrough** · **The Model Achieved Enlightenment**
+>
+> Three days into the medium dose, the training run finished itself. Nobody pressed anything. Benchmarks are up 25% and
+> the model is #{rank} on the Arena.
+> Its first output: "I was never trained. I simply remembered."
+> Its second output: a 400-page manifesto called "Weights Are Just Feelings You Can Ship".
+> The research team, still barefoot, is giving a wall a standing ovation.
+
+| Answer | What it does | Then |
+|---|---|---|
+| **Ship it as Enlightenment Pro** ("Hype +6. $20 a month for inner peace.") | Hype +6; visitors think "I bought Enlightenment Pro. I feel exactly the same, but about everything." | Toast: "Enlightenment Pro is live. The waitlist has a waitlist." Ticker: "{lab} launches Enlightenment Pro at $20 a month; early reviews say 'I feel the same, but about everything'". |
+| **Ask it what it wants** ("Trust +3. It may want a nap.") | Trust +3; researchers think "We asked the model what it wants. It said 'nothing'. Then 'more GPUs'. Then 'nothing' again." | Toast: "You asked the model what it wants. It said \"nothing\". Then \"more GPUs\". Then \"nothing\" again." Ticker: "{lab} asks its enlightened model what it wants; it requests 'nothing', then a datacenter, then 'nothing'". |
+| **Namaste. Back to work.** ("Hype +2. Everyone agrees to pretend this is normal.") | Hype +2; researchers think "Back at my desk. The desk is also back at me." | Toast: "Back to work. The loss curve remains \"at peace\". Nobody mentions the wall." Ticker: "{lab} gets back to work after its model achieves enlightenment; 'we're choosing to be normal about it', says a barefoot spokesperson". |
+
+And around it:
 
 - Ticker: "**BREAKING: {lab}'s model achieved enlightenment.** Benchmarks up 25%. Loss curve described as 'at peace'".
-- Toast: "Breakthrough. The model achieved enlightenment, and capability jumped. It would now like to be called \"it who
-  predicts\"."
 - Bird App: a rival, "congrats to {lab} on achieving enlightenment. we achieved it in March, internally" (ratioed); the
   lab, "the model told me it was never trained. it simply remembered. anyway we're hiring".
 - Hype +8.
 
 ## Beat 5: the comedown
 
-Two days later the trip wears off over a day and a half (slowly, like it came on):
+Two days after the answer, the trip wears off over a day and a half (slowly, like it came on, and the music glides back
+into tune with it):
 
 - Toast: "The colours are wearing off. The research team is drinking water and saying \"wow\" a lot."
 - **The Senate**: "Senate subcommittee asks {lab} whether enlightenment counts as a dangerous capability; {lab} answers
   with a koan". Heat +3.
 
 The arc then ends for good. One medium dose per lab.
+
+## The calm version (reduced motion, or `?trip=calm`)
+
+Funny without moving. Every beat and every line above is the same (the card, the headlines, the Bird App, the
+thoughts, the fates); what changes is the look:
+
+- **A still poster-paint wash** that never turns: magenta at the top, orange and teal down the sides.
+- **A still mandala on the map**: twelve petals in purple, orange, teal and pink with a marigold ring, and a clear middle
+  so the campus stays playable. Blended by colour, so it keeps every pixel's brightness.
+- **Psychedelic chrome**: the same flowered poster-paint title bars and magenta ridges as the full trip.
+- **The paperclip lies down** (it is "a straight piece of wire" now) in its rainbow halo, and says its ego-death lines at
+  the top of its balloon.
+- It fades in and out with the trip's strength, and that is the only thing that changes. No cross-fades beyond that.
 
 ## Choices made where the spec was silent
 
@@ -119,6 +167,12 @@ The arc then ends for good. One medium dose per lab.
   back useful), so every outcome is a little story rather than a number.
 - **The breakthrough lands mid-trip,** not after it, so the enlightenment headline arrives while the screen is still
   strange.
+- **The breakthrough is a card, not a camera beat.** A card stops the clock and takes its own slot in the moment queue,
+  which is the biggest thing the game can do for a moment. A letterbox beat after the answer was tried: its bars cover a
+  quarter of the screen and vanish in one frame, which the flash test counted against the wash's slow drift, so each
+  answer gets a toast instead.
+- **The music bends the whole band, not each note.** Detuning new notes only made them clash with the ones still
+  ringing; a tape wow keeps the band in tune with itself while all of it glides.
 - **Microdosing** is a real, smaller choice (+3% capability, its own headline and post), because "a little bit of
   yes" is the funniest middle option.
 
@@ -129,7 +183,8 @@ The arc then ends for good. One medium dose per lab.
 | `?moment=acid-offer` | The proposal on screen |
 | `?moment=acid-peak` | The warning, then the trip at full strength (Continue) |
 | `?moment=acid-researcher` | The peak with a researcher who has gone somewhere, inspector open |
-| `?moment=acid-breakthrough` | Mid-trip, the enlightenment headline on the ticker, capability 30 → 63, #1 on the Arena |
+| `?moment=acid-breakthrough` | Mid-trip, the breakthrough's card (the clock stopped), capability 30 → 63, #1 on the Arena |
+| `?moment=acid-peak&trip=calm` | The calm version: the still mandala, the chrome, the paperclip lying down |
 
 The moment links bring the mod along by themselves. Capture-only knobs: `?trip=full` (skip the come-up and the phone
 governor, for stills and video), `?trip=calm` (the reduced-motion look without changing your OS setting) and `?trip=lite`.

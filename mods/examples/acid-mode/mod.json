@@ -53,6 +53,7 @@
           "id": "acid-enlightened",
           "title": "The Model Achieved Enlightenment",
           "stripe": "Breakthrough",
+          "pace": "now",
           "body": "Three days into the medium dose, the training run finished itself. Nobody pressed anything. Benchmarks are up 25% and the model is #{rank} on the Arena.\nIts first output: \"I was never trained. I simply remembered.\"\nIts second output: a 400-page manifesto called \"Weights Are Just Feelings You Can Ship\".\nThe research team, still barefoot, is giving a wall a standing ovation.",
           "tone": "good",
           "when": {"stat": "day", "atLeast": 100000},
