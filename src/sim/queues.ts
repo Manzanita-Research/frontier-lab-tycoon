@@ -3,6 +3,7 @@
 // leaves, and everyone shuffles up. `chainFor` finds the tiles a line stands on, `slotPoint` the spot for the nth person.
 import { entrances, isPathTile, tileIndex } from "./pathfind";
 import type { GameState, Point } from "./types";
+import { datan2, dhypot } from "./dmath";
 
 /** How many tiles a line can stretch over before the rest just stack at the end. */
 const MAX_CHAIN = 12;
@@ -66,7 +67,7 @@ export function chainFor(state: GameState, id: number, tile: number): Chain | nu
   const chain: Chain = { tiles, dirs, pts, slots: [] };
   // Every place a person can stand along the path, worked out once (a busy line asks for them hundreds of times a tick).
   let length = 0;
-  for (let i = 1; i < pts.length; i++) length += Math.hypot(pts[i]![0] - pts[i - 1]![0], pts[i]![1] - pts[i - 1]![1]);
+  for (let i = 1; i < pts.length; i++) length += dhypot(pts[i]![0] - pts[i - 1]![0], pts[i]![1] - pts[i - 1]![1]);
   for (let n = 0; FRONT + n * SLOT_SPACING <= length + 1e-9; n++) chain.slots.push(along(chain, FRONT + n * SLOT_SPACING));
   if (chain.slots.length === 0) chain.slots.push(pts[0]!);
   cache.byKey.set(key, chain);
@@ -80,7 +81,7 @@ function along(chain: Chain, d: number): Point {
   for (let i = 1; i < pts.length; i++) {
     const [ax, az] = pts[i - 1]!;
     const [bx, bz] = pts[i]!;
-    const len = Math.hypot(bx - ax, bz - az);
+    const len = dhypot(bx - ax, bz - az);
     if (left <= len || i === pts.length - 1) return [ax + ((bx - ax) * Math.min(left, len)) / (len || 1), az + ((bz - az) * Math.min(left, len)) / (len || 1)];
     left -= len;
   }
@@ -109,5 +110,5 @@ export function slotRoute(state: GameState, chain: Chain, from: number, to: numb
 export function faceDoor(state: GameState, chain: Chain, n: number): number {
   const [bx, bz] = slotPoint(state, chain, n);
   const [ax, az] = n <= 0 ? chain.pts[0]! : slotPoint(state, chain, n - 1);
-  return Math.hypot(ax - bx, az - bz) < 1e-6 ? Math.atan2(-chain.dirs[0]![0], -chain.dirs[0]![1]) : Math.atan2(ax - bx, az - bz);
+  return dhypot(ax - bx, az - bz) < 1e-6 ? datan2(-chain.dirs[0]![0], -chain.dirs[0]![1]) : datan2(ax - bx, az - bz);
 }

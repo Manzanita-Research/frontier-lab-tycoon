@@ -12,6 +12,12 @@ export function formatMoney(n: number): string {
   return `${sign}$${Math.round(a)}`;
 }
 
+/** 1234567 -> "1,234,567", without Intl (whose output is the engine's ICU's to decide). */
+export function groupThousands(n: number): string {
+  const digits = String(Math.abs(Math.round(n)));
+  return (n < 0 && Math.round(n) !== 0 ? "-" : "") + digits.replace(/\B(?=(\d{3})+$)/g, ",");
+}
+
 /** 30-day months, 12 per year: day 0 is "Y1 · Jan 1". */
 export function formatDate(day: number): string {
   const year = Math.floor(day / 360) + 1;

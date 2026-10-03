@@ -17,6 +17,7 @@ import { dailyBirdApp, dunkNow, enableBirdApp, landNow, makeHandle, postNow } fr
 import { posterStored, stepComms } from "./machines";
 import { ratio, rivalPostNow, silenceLab } from "./rivals";
 import type { BirdPostRecord, Poster, RivalPostRecord } from "./state";
+import { dsin } from "../dmath";
 
 export const BIRD_RIVAL_MOMENTS = ["bird-rivals", "bird-rivals-dunk", "bird-rivals-ratio", "bird-rivals-launch"] as const;
 export const BIRD_DEMO_MOMENTS = ["bird", "bird-banger", "bird-cancel", ...BIRD_RIVAL_MOMENTS] as const;
@@ -210,7 +211,7 @@ export function stageBird(s: GameState, moment: BirdDemoMoment) {
   }
   // A month of Aura behind today: a slow climb, the week's bangers, and (in the cancel scene) the crash.
   const now = b.aura;
-  b.history = Array.from({ length: 30 }, (_, i) => Math.round((20 + (now - 20) * (i / 29) + 6 * Math.sin(i / 2.5)) * 100) / 100);
+  b.history = Array.from({ length: 30 }, (_, i) => Math.round((20 + (now - 20) * (i / 29) + 6 * dsin(i / 2.5)) * 100) / 100);
   b.history[29] = now;
   s.version++;
 }

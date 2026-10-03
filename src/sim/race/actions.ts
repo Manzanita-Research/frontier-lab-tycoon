@@ -14,6 +14,7 @@ import { bidAmount, auctionUnit, BID_MULTIPLES, raiseAmount, type Bid } from "./
 import { eraOfState, raceNews } from "./race";
 import { rivalMachine } from "./rival";
 import { defs } from "../defs";
+import { dhypot } from "../dmath";
 
 /** Days between compute auctions at era 1; later eras run faster. */
 export const AUCTION_GAP_DAYS = 40;
@@ -117,7 +118,7 @@ export function findSpot(state: GameState, kind: BuildingKind): [number, number]
   for (let z = 0; z <= state.grid.h - d; z++) {
     for (let x = 0; x <= gw - w; x++) {
       if (!clear(blocked, gw, x, z, w, d) || !touchesPath(state, x, z, w, d) || !canPlace(state, kind, x, z).ok) continue;
-      const dist = Math.hypot(x + w / 2 - cx, z + d / 2 - cz);
+      const dist = dhypot(x + w / 2 - cx, z + d / 2 - cz);
       if (dist < bestDist) {
         bestDist = dist;
         best = [x, z];

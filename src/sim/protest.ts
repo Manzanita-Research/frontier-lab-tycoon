@@ -10,6 +10,7 @@ import { commsRelief } from "./staff";
 import { defs } from "./defs";
 import { exchange, pairedThoughts } from "./factions/driver";
 import { THOUGHT_TICKS } from "./constants";
+import { dhypot, dpow } from "./dmath";
 
 const DISCOURSE_PER_CLUSTER = 0.5;
 const DISCOURSE_DECAY = 0.3;
@@ -43,7 +44,7 @@ const standable = (state: GameState, x: number, z: number) => {
 const blocked = (state: GameState, x: number, z: number) => !!buildingAt(state, Math.floor(x), Math.floor(z));
 
 function clearLine(state: GameState, ax: number, az: number, bx: number, bz: number): boolean {
-  const steps = Math.max(1, Math.ceil(Math.hypot(bx - ax, bz - az) / 0.25));
+  const steps = Math.max(1, Math.ceil(dhypot(bx - ax, bz - az) / 0.25));
   for (let i = 1; i <= steps; i++) {
     const t = i / steps;
     if (blocked(state, ax + (bx - ax) * t, az + (bz - az) * t)) return false;
@@ -65,7 +66,7 @@ function planRoute(state: GameState, ax: number, az: number, bx: number, bz: num
     ];
     for (const [cx, cz] of corners) {
       if (!inBounds(state, Math.floor(cx), Math.floor(cz)) || blocked(state, cx, cz)) continue;
-      const len = Math.hypot(cx - ax, cz - az) + Math.hypot(bx - cx, bz - cz);
+      const len = dhypot(cx - ax, cz - az) + dhypot(bx - cx, bz - cz);
       if (len < bestLen && clearLine(state, ax, az, cx, cz) && clearLine(state, cx, cz, bx, bz)) {
         best = [cx, cz];
         bestLen = len;
@@ -87,7 +88,7 @@ function pickHome(state: GameState, rng: Rng, side: Side = 0): Point {
   const cx = g.x + g.w / 2;
   for (let i = 0; i < 16; i++) {
     const x = side === 0 ? cx - 0.5 + (rng.next() + rng.next() - 1) * 3.6 : side < 0 ? cx - 1 - rng.next() * 3.5 : cx + 0.6 + rng.next() * 3.4;
-    const z = g.z - 0.45 - Math.pow(rng.next(), 1.4) * 5.2;
+    const z = g.z - 0.45 - dpow(rng.next(), 1.4) * 5.2;
     if (standable(state, x, z)) return [x, z];
   }
   return [side === 0 ? cx - 0.5 : side < 0 ? cx - 2 : cx + 1.5, g.z - 0.8];

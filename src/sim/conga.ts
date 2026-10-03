@@ -2,6 +2,7 @@
 // the gate, `gap` tiles apart, and each follows the rest of that route. They all walk at WALK_SPEED, so the line
 // holds on its own: no per-tick cost, no new walker state. Called once, the tick the card is answered.
 import type { GameState, Point, Walker } from "./types";
+import { datan2, dhypot } from "./dmath";
 
 export const CONGA_GAP = 0.55;
 
@@ -16,7 +17,7 @@ export function congaLine(state: GameState, ids: readonly number[], gap = CONGA_
   const pts: Point[] = lead.route.map((p): Point => [p[0], p[1]]);
   if (pts.length < 2) pts.unshift([lead.x, lead.z]);
   const at = [0];
-  for (let i = 1; i < pts.length; i++) at.push(at[i - 1]! + Math.hypot(pts[i]![0] - pts[i - 1]![0], pts[i]![1] - pts[i - 1]![1]));
+  for (let i = 1; i < pts.length; i++) at.push(at[i - 1]! + dhypot(pts[i]![0] - pts[i - 1]![0], pts[i]![1] - pts[i - 1]![1]));
   const total = at[at.length - 1]!;
   // The leader steps ahead to make room, but never through the gate: they all still have somewhere to walk.
   const front = Math.min((line.length - 1) * gap, Math.max(0, total - gap));
@@ -31,6 +32,6 @@ export function congaLine(state: GameState, ids: readonly number[], gap = CONGA_
     w.x = w.px = ax + (bx - ax) * t;
     w.z = w.pz = az + (bz - az) * t;
     w.route = pts.slice(i + 1).map((p): Point => [p[0], p[1]]);
-    if (Math.hypot(bx - w.x, bz - w.z) > 1e-6) w.dir = Math.atan2(bx - w.x, bz - w.z);
+    if (dhypot(bx - w.x, bz - w.z) > 1e-6) w.dir = datan2(bx - w.x, bz - w.z);
   });
 }

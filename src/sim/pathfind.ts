@@ -1,5 +1,6 @@
 // Grid queries and BFS over path tiles (4-neighbour).
 import type { Building, GameState, Point, Rect } from "./types";
+import { dcos, dsin, sq } from "./dmath";
 
 export type Tile = [number, number];
 
@@ -41,7 +42,7 @@ export function entranceConnected(s: GameState): boolean {
 /** A little deterministic amble across the two reserved entrance tiles; no random draws or teleporting. */
 export function gateAmble(s: GameState, id: number): Point[] {
   const angle = id * 2.399963229728653 + Math.floor(s.tick / 12) * 0.7;
-  return [[s.gate.x + s.gate.w / 2 + Math.cos(angle) * 0.75, s.gate.z - 0.5 + Math.sin(angle) * 0.38]];
+  return [[s.gate.x + s.gate.w / 2 + dcos(angle) * 0.75, s.gate.z - 0.5 + dsin(angle) * 0.38]];
 }
 
 export function buildingAt(s: GameState, x: number, z: number): Building | undefined {
@@ -204,7 +205,7 @@ export function nearestPathTile(s: GameState, x: number, z: number): Tile | null
     if (!s.grid.paths[i]) continue;
     const tx = i % s.grid.w;
     const tz = Math.floor(i / s.grid.w);
-    const d = (tx + 0.5 - x) ** 2 + (tz + 0.5 - z) ** 2;
+    const d = sq(tx + 0.5 - x) + sq(tz + 0.5 - z);
     if (d < bestD) {
       bestD = d;
       best = [tx, tz];

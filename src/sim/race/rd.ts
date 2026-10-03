@@ -3,6 +3,7 @@
 import { systemUnlocked } from "../progression";
 import { releaseGain } from "../machines/training";
 import type { GameState } from "../types";
+import { dpow } from "../dmath";
 
 /** What one agent adds, per ten researchers' worth of work. It grows with capability. */
 export const agentSkill = (capability: number): number => capability / 8;
@@ -13,7 +14,7 @@ export const agentSkill = (capability: number): number => capability / 8;
  * turns "training gets faster" into a takeoff instead of a slow grind.
  */
 export const MAX_RELEASE_BOOST = 4;
-export const releaseBoost = (mult: number): number => Math.min(MAX_RELEASE_BOOST, Math.max(1, mult / 2) ** 0.75);
+export const releaseBoost = (mult: number): number => Math.min(MAX_RELEASE_BOOST, dpow(Math.max(1, mult / 2), 0.75));
 
 export function multiplierFor(agents: number, researchers: number, capability: number): number {
   return 1 + (agents * agentSkill(capability)) / Math.max(1, researchers * 10);

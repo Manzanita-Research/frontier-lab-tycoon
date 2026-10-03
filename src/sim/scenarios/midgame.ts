@@ -8,6 +8,7 @@ import { createInitialState } from "../state";
 import { applyNow, tick, TICKS_PER_DAY } from "../tick";
 import type { GameState, Thought, WalkerKind } from "../types";
 import { defs } from "../defs";
+import { dhypot } from "../dmath";
 
 export const MIDGAME_SEED = 48;
 export const MIDGAME_CAMERA = { focus: [11.5, 14.5] as [number, number], zoom: 43 };
@@ -37,7 +38,7 @@ export function midgameOpeningThoughts(s: GameState): Thought[] {
   return picks.map((pick, i) => {
     const line = defs().thoughts.find((t) => t.kind === pick.kind && t.text === pick.text);
     const speaker = s.walkers.filter((w) => w.kind === pick.kind && w.machine.value !== "inside" && !chosen.includes(w.id))
-      .sort((a, b) => Math.hypot(a.x - pick.near[0], a.z - pick.near[1]) - Math.hypot(b.x - pick.near[0], b.z - pick.near[1]) || a.id - b.id)[0];
+      .sort((a, b) => dhypot(a.x - pick.near[0], a.z - pick.near[1]) - dhypot(b.x - pick.near[0], b.z - pick.near[1]) || a.id - b.id)[0];
     if (!line || !speaker) throw new Error(`Mid-game opening thought is missing: ${pick.kind}`);
     chosen.push(speaker.id);
     return { id: -(i + 1), walkerId: speaker.id, kind: pick.kind, text: line.text, expiresTick: s.tick + 1 };

@@ -12,6 +12,7 @@ import { issueStatement } from "./statement";
 import { enableFactions, nudgeRelation, pairKey } from "./state";
 import { step } from "../machines/run";
 import { relationMachine } from "./machines";
+import { dhypot } from "../dmath";
 
 export const FACTION_MOMENTS = ["factions", "counterprotest", "argue", "statement"] as const;
 export type FactionMoment = (typeof FACTION_MOMENTS)[number];
@@ -59,7 +60,7 @@ function stageArgument(s: GameState) {
   let bestD = Infinity;
   for (let i = 0; i < walking.length; i++) {
     for (let j = i + 1; j < walking.length; j++) {
-      const d = Math.hypot(walking[i]!.x - walking[j]!.x, walking[i]!.z - walking[j]!.z);
+      const d = dhypot(walking[i]!.x - walking[j]!.x, walking[i]!.z - walking[j]!.z);
       if (d > 0.6 && d < bestD) [best, bestD] = [[walking[i]!, walking[j]!], d];
     }
   }
