@@ -150,7 +150,7 @@ describe("ACID MOD(E)", () => {
     it("open the ticker on the beat's headline", async () => {
       expect((await ticker("acid-peak")).some((t) => t.includes("'a medium dose of acid'"))).toBe(true);
       const b = await ticker("acid-breakthrough");
-      expect(b.some((t) => t.includes("model achieved enlightenment"))).toBe(true);
+      expect(b[0]).toContain("model achieved enlightenment");
       expect(b.some((t) => t.includes("'a medium dose of acid'"))).toBe(false);
     });
   });

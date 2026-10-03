@@ -82,7 +82,9 @@ export function stageAcid(s: GameState, moment: AcidMoment) {
   applyNow(s, [{ type: "chooseEvent", eventId: CARD, choiceIndex: 0 }]);
   const at = (value: string) => (x: GameState) => x.modArcs?.[ARC]?.value === value;
   if (moment === "acid-breakthrough") {
-    beatNews.set(s, until(s, at("breakthrough"), 6));
+    // The breakthrough lands on a new day's busy morning (releases, the Arena, offers): the ticker starts at its headline.
+    const from = until(s, at("breakthrough"), 6);
+    beatNews.set(s, s.news.find((n) => n.id >= from && n.text.includes("enlightenment"))?.id ?? from);
     // Whatever else the lab is asked that morning is answered: the screen is the enlightenment's.
     for (let i = 0; i < 6 && openEventOf(s); i++) applyNow(s, answer(s));
     return;
