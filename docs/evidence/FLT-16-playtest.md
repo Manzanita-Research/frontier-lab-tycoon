@@ -23,7 +23,7 @@ The regression test proves every building remains gate-reachable, non-security s
 |---|---|
 | ![Staff moving into campus](FLT-16-playtest/clean-opening.png) | ![Staff have reached the Gateway and halls](FLT-16-playtest/clean-moving.png) |
 
-The live replay is [the Modal preview](https://modal-11--4173.getbb.app/), serving the fixed old-UI branch. Latest main has since landed skins; per the lead, FLT-29 owns integration. No main merge or skin conflict resolution was committed here, and #27's public preview remains its older commit until that integration.
+The live replay was the Modal preview (`<builder>:4173`, since retired), serving the fixed old-UI branch. Latest main has since landed skins; per the lead, FLT-29 owns integration. No main merge or skin conflict resolution was committed here, and #27's public preview remains its older commit until that integration.
 
 ## Pacing compared with the reviewed build
 

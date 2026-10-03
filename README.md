@@ -26,3 +26,27 @@ Every building needs a path touching it, or nobody visits and gateways earn noth
 ### URL knobs (screenshots and stress tests)
 
 `/?seed=3&warp=25&speed=3&zoom=80&focus=12,14&agents=200&debug=1`: seed the lab, pre-simulate `warp` game days, start at a speed, set the camera zoom and focus tile, add extra agents, and (with `debug`) expose `window.__flt` for probes.
+
+## License
+
+The code and the content are licensed separately. Anything not listed below as CC BY-NC 4.0 or third-party is code, under MIT.
+
+**MIT ([LICENSE](LICENSE)): the code.**
+- `src/**` code: `.ts`, `.tsx` and `.css`, including UI labels and other strings that live inside components, and any picture a component draws in code (SVG in a `.tsx`, CSS art).
+- `infra/`, `worker/`, `scripts/`, `e2e/`, `packages/`, `.github/`, `drama/*.mjs` and `drama/automation.sh`, and the build and config files at the root.
+- The docs' prose (`docs/**/*.md`, READMEs).
+
+**CC BY-NC 4.0 ([LICENSE-ASSETS](LICENSE-ASSETS)): the art, the sound and the writing.**
+- Images, audio and music, and 3D models wherever they live: `src/intro/assets/`, `public/` (icons, the link-preview card), and anything generated for the game.
+- Skin art: `src/skins/*/assets/` (except fonts, below), and the skins' copy in `strings.json` and `tips.json`.
+- Game text and content packs: `src/content/` (the game's writing, even though it's stored as `.ts` data; its `*.test.ts` files are code), and `mods/**`, including `mods/examples/`.
+- Daily Drama: the packs in `mods/drama/`, plus the writing in `drama/` (`pick.md`, `glossary.json`, `denylist.json`, `sources.json`).
+- Docs images: `docs/img/`, `docs/evidence/` and `docs/mockups/` screenshots and art.
+
+So you can fork the engine for anything, and you can share, remix and mod the art and jokes for non-commercial use with credit ("Frontier Lab Tycoon by Manzanita Research and contributors").
+
+**Third-party pieces keep their own licences:**
+- Fonts: the licence file next to each font in `src/skins/*/assets/fonts/` (all SIL Open Font License).
+- SCOWL word list: [`drama/words.LICENSE.txt`](drama/words.LICENSE.txt).
+- The CRT shader (MIT): [`src/render/crt/LICENSE`](src/render/crt/LICENSE), credited in [docs/CREDITS.md](docs/CREDITS.md).
+- Kit Langton's Effect skill (MIT): [`.agents/skills/effect/LICENSE`](.agents/skills/effect/LICENSE).

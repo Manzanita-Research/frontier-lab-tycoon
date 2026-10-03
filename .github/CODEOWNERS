@@ -1,0 +1,4 @@
+# Changes to CI, infrastructure and the Worker need the repo admin's review (FLT-103).
+/.github/ @jem-computer
+/infra/ @jem-computer
+/worker/ @jem-computer

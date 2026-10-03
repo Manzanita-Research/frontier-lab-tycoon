@@ -14,19 +14,19 @@
     {
       "scene": "notice-burst",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-51/before/notice-burst.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-51/after/notice-burst.png",
+      "before": "docs/img/flt-51/before/notice-burst.png",
+      "after": "docs/img/flt-51/after/notice-burst.png",
       "title": "FLT-51: a busy second on the mid-game campus (nine notices land at once, as at 10x), Frontier 95",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-51/compare/notice-burst.png",
+      "compare": "docs/img/flt-51/compare/notice-burst.png",
       "changed": 0.04914429012345679
     },
     {
       "scene": "notice-burst-base",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-51/before/notice-burst-base.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-51/after/notice-burst-base.png",
+      "before": "docs/img/flt-51/before/notice-burst-base.png",
+      "after": "docs/img/flt-51/after/notice-burst-base.png",
       "title": "FLT-51: the same nine notices, in the base skin",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-51/compare/notice-burst-base.png",
+      "compare": "docs/img/flt-51/compare/notice-burst-base.png",
       "changed": 0.027391203703703702
     }
   ],

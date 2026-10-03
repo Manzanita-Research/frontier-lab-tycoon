@@ -14,19 +14,19 @@
     {
       "scene": "snag",
       "skin": "base",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-84/base/before/snag@base.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-84/base/after/snag@base.png",
+      "before": "docs/img/flt-84/base/before/snag@base.png",
+      "after": "docs/img/flt-84/base/after/snag@base.png",
       "title": "FLT-84: a caught error raises the recovery toast (a real throw in the paused-input path)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-84/base/compare/snag@base.png",
+      "compare": "docs/img/flt-84/base/compare/snag@base.png",
       "changed": 0.05533410493827161
     },
     {
       "scene": "snag-phone",
       "skin": "base",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-84/base/before/snag-phone@base.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-84/base/after/snag-phone@base.png",
+      "before": "docs/img/flt-84/base/before/snag-phone@base.png",
+      "after": "docs/img/flt-84/base/after/snag-phone@base.png",
       "title": "FLT-84: the recovery toast on a phone",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-84/base/compare/snag-phone@base.png",
+      "compare": "docs/img/flt-84/base/compare/snag-phone@base.png",
       "changed": 0.08593693036820998
     }
   ],

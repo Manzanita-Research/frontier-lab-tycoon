@@ -11,49 +11,49 @@
     {
       "scene": "link-round1",
       "skin": null,
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-86/links/after/link-round1.png",
+      "after": "docs/img/flt-86/links/after/link-round1.png",
       "title": "FLT-86 link: ?moment=money-round1, the first emergency round's card",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-86/links/compare/link-round1.png",
+      "compare": "docs/img/flt-86/links/compare/link-round1.png",
       "changed": null
     },
     {
       "scene": "link-lastround",
       "skin": null,
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-86/links/after/link-lastround.png",
+      "after": "docs/img/flt-86/links/after/link-lastround.png",
       "title": "FLT-86 link: ?moment=money-lastround, the third and last round",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-86/links/compare/link-lastround.png",
+      "compare": "docs/img/flt-86/links/compare/link-lastround.png",
       "changed": null
     },
     {
       "scene": "link-overdraft",
       "skin": null,
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-86/links/after/link-overdraft.png",
+      "after": "docs/img/flt-86/links/after/link-overdraft.png",
       "title": "FLT-86 link: ?moment=money-overdraft, the bank's 30 days (Finance tab open)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-86/links/compare/link-overdraft.png",
+      "compare": "docs/img/flt-86/links/compare/link-overdraft.png",
       "changed": null
     },
     {
       "scene": "link-bankrupt",
       "skin": null,
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-86/links/after/link-bankrupt.png",
+      "after": "docs/img/flt-86/links/after/link-bankrupt.png",
       "title": "FLT-86 link: ?moment=money-bankrupt, the end screen",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-86/links/compare/link-bankrupt.png",
+      "compare": "docs/img/flt-86/links/compare/link-bankrupt.png",
       "changed": null
     },
     {
       "scene": "link-stretch",
       "skin": null,
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-86/links/after/link-stretch.png",
+      "after": "docs/img/flt-86/links/after/link-stretch.png",
       "title": "FLT-86 link: ?moment=money-stretch&beat, the Final stretch beat at 2 of 3",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-86/links/compare/link-stretch.png",
+      "compare": "docs/img/flt-86/links/compare/link-stretch.png",
       "changed": null
     },
     {
       "scene": "link-win",
       "skin": null,
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-86/links/after/link-win.png",
+      "after": "docs/img/flt-86/links/after/link-win.png",
       "title": "FLT-86 link: ?moment=money-win, the win lands live a second after load and stands alone",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-86/links/compare/link-win.png",
+      "compare": "docs/img/flt-86/links/compare/link-win.png",
       "changed": null
     }
   ],

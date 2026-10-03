@@ -14,89 +14,89 @@
     {
       "scene": "coach-start",
       "skin": "swag-drop",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/before/coach-start@swag-drop.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/after/coach-start@swag-drop.png",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/compare/coach-start@swag-drop.png",
+      "before": "docs/evidence/FLT-50/base-swag-drop/before/coach-start@swag-drop.png",
+      "after": "docs/evidence/FLT-50/base-swag-drop/after/coach-start@swag-drop.png",
+      "compare": "docs/evidence/FLT-50/base-swag-drop/compare/coach-start@swag-drop.png",
       "changed": 0.927957561728395
     },
     {
       "scene": "coach-path",
       "skin": "swag-drop",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/before/coach-path@swag-drop.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/after/coach-path@swag-drop.png",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/compare/coach-path@swag-drop.png",
+      "before": "docs/evidence/FLT-50/base-swag-drop/before/coach-path@swag-drop.png",
+      "after": "docs/evidence/FLT-50/base-swag-drop/after/coach-path@swag-drop.png",
+      "compare": "docs/evidence/FLT-50/base-swag-drop/compare/coach-path@swag-drop.png",
       "changed": 0.9148256172839506
     },
     {
       "scene": "coach-hall",
       "skin": "swag-drop",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/before/coach-hall@swag-drop.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/after/coach-hall@swag-drop.png",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/compare/coach-hall@swag-drop.png",
+      "before": "docs/evidence/FLT-50/base-swag-drop/before/coach-hall@swag-drop.png",
+      "after": "docs/evidence/FLT-50/base-swag-drop/after/coach-hall@swag-drop.png",
+      "compare": "docs/evidence/FLT-50/base-swag-drop/compare/coach-hall@swag-drop.png",
       "changed": 0.9292862654320988
     },
     {
       "scene": "coach-training",
       "skin": "swag-drop",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/before/coach-training@swag-drop.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/after/coach-training@swag-drop.png",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/compare/coach-training@swag-drop.png",
+      "before": "docs/evidence/FLT-50/base-swag-drop/before/coach-training@swag-drop.png",
+      "after": "docs/evidence/FLT-50/base-swag-drop/after/coach-training@swag-drop.png",
+      "compare": "docs/evidence/FLT-50/base-swag-drop/compare/coach-training@swag-drop.png",
       "changed": 0.9151643518518519
     },
     {
       "scene": "coach-gateway",
       "skin": "swag-drop",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/before/coach-gateway@swag-drop.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/after/coach-gateway@swag-drop.png",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/compare/coach-gateway@swag-drop.png",
+      "before": "docs/evidence/FLT-50/base-swag-drop/before/coach-gateway@swag-drop.png",
+      "after": "docs/evidence/FLT-50/base-swag-drop/after/coach-gateway@swag-drop.png",
+      "compare": "docs/evidence/FLT-50/base-swag-drop/compare/coach-gateway@swag-drop.png",
       "changed": 0.9222677469135803
     },
     {
       "scene": "coach-goal",
       "skin": "swag-drop",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/before/coach-goal@swag-drop.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/after/coach-goal@swag-drop.png",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/compare/coach-goal@swag-drop.png",
+      "before": "docs/evidence/FLT-50/base-swag-drop/before/coach-goal@swag-drop.png",
+      "after": "docs/evidence/FLT-50/base-swag-drop/after/coach-goal@swag-drop.png",
+      "compare": "docs/evidence/FLT-50/base-swag-drop/compare/coach-goal@swag-drop.png",
       "changed": 0.9128047839506173
     },
     {
       "scene": "new-card",
       "skin": "swag-drop",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/before/new-card@swag-drop.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/after/new-card@swag-drop.png",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/compare/new-card@swag-drop.png",
+      "before": "docs/evidence/FLT-50/base-swag-drop/before/new-card@swag-drop.png",
+      "after": "docs/evidence/FLT-50/base-swag-drop/after/new-card@swag-drop.png",
+      "compare": "docs/evidence/FLT-50/base-swag-drop/compare/new-card@swag-drop.png",
       "changed": 0.45666666666666667
     },
     {
       "scene": "how-to-play",
       "skin": "swag-drop",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/before/how-to-play@swag-drop.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/after/how-to-play@swag-drop.png",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/compare/how-to-play@swag-drop.png",
+      "before": "docs/evidence/FLT-50/base-swag-drop/before/how-to-play@swag-drop.png",
+      "after": "docs/evidence/FLT-50/base-swag-drop/after/how-to-play@swag-drop.png",
+      "compare": "docs/evidence/FLT-50/base-swag-drop/compare/how-to-play@swag-drop.png",
       "changed": 0.9214058641975309
     },
     {
       "scene": "level-3",
       "skin": "swag-drop",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/before/level-3@swag-drop.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/after/level-3@swag-drop.png",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/compare/level-3@swag-drop.png",
+      "before": "docs/evidence/FLT-50/base-swag-drop/before/level-3@swag-drop.png",
+      "after": "docs/evidence/FLT-50/base-swag-drop/after/level-3@swag-drop.png",
+      "compare": "docs/evidence/FLT-50/base-swag-drop/compare/level-3@swag-drop.png",
       "changed": 0.4012469135802469
     },
     {
       "scene": "phone-start",
       "skin": "swag-drop",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/before/phone-start@swag-drop.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/after/phone-start@swag-drop.png",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/compare/phone-start@swag-drop.png",
+      "before": "docs/evidence/FLT-50/base-swag-drop/before/phone-start@swag-drop.png",
+      "after": "docs/evidence/FLT-50/base-swag-drop/after/phone-start@swag-drop.png",
+      "compare": "docs/evidence/FLT-50/base-swag-drop/compare/phone-start@swag-drop.png",
       "changed": 0.9018964941062098
     },
     {
       "scene": "phone-path",
       "skin": "swag-drop",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/before/phone-path@swag-drop.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/after/phone-path@swag-drop.png",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/base-swag-drop/compare/phone-path@swag-drop.png",
+      "before": "docs/evidence/FLT-50/base-swag-drop/before/phone-path@swag-drop.png",
+      "after": "docs/evidence/FLT-50/base-swag-drop/after/phone-path@swag-drop.png",
+      "compare": "docs/evidence/FLT-50/base-swag-drop/compare/phone-path@swag-drop.png",
       "changed": 0.903680580872524
     }
   ],

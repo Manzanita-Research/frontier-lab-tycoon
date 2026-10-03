@@ -14,46 +14,46 @@
     {
       "scene": "overview",
       "skin": "karaoke-night",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/karaoke-night/before/overview@karaoke-night.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/karaoke-night/after/overview@karaoke-night.png",
+      "before": "docs/img/flt-14-ports/karaoke-night/before/overview@karaoke-night.png",
+      "after": "docs/img/flt-14-ports/karaoke-night/after/overview@karaoke-night.png",
       "title": "The campus, mid-morning, paused",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/karaoke-night/compare/overview@karaoke-night.png",
+      "compare": "docs/img/flt-14-ports/karaoke-night/compare/overview@karaoke-night.png",
       "changed": 0.5950972222222223
     },
     {
       "scene": "inspector",
       "skin": "karaoke-night",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/karaoke-night/before/inspector@karaoke-night.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/karaoke-night/after/inspector@karaoke-night.png",
+      "before": "docs/img/flt-14-ports/karaoke-night/before/inspector@karaoke-night.png",
+      "after": "docs/img/flt-14-ports/karaoke-night/after/inspector@karaoke-night.png",
       "title": "Tap a researcher: the inspector opens",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/karaoke-night/compare/inspector@karaoke-night.png",
+      "compare": "docs/img/flt-14-ports/karaoke-night/compare/inspector@karaoke-night.png",
       "changed": 0.6311111111111111
     },
     {
       "scene": "event",
       "skin": "karaoke-night",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/karaoke-night/before/event@karaoke-night.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/karaoke-night/after/event@karaoke-night.png",
+      "before": "docs/img/flt-14-ports/karaoke-night/before/event@karaoke-night.png",
+      "after": "docs/img/flt-14-ports/karaoke-night/after/event@karaoke-night.png",
       "title": "An event card lands (the Water Discourse)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/karaoke-night/compare/event@karaoke-night.png",
+      "compare": "docs/img/flt-14-ports/karaoke-night/compare/event@karaoke-night.png",
       "changed": 0.9211257716049382
     },
     {
       "scene": "menu",
       "skin": "karaoke-night",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/karaoke-night/before/menu@karaoke-night.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/karaoke-night/after/menu@karaoke-night.png",
+      "before": "docs/img/flt-14-ports/karaoke-night/before/menu@karaoke-night.png",
+      "after": "docs/img/flt-14-ports/karaoke-night/after/menu@karaoke-night.png",
       "title": "The Start menu / build bar open",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/karaoke-night/compare/menu@karaoke-night.png",
+      "compare": "docs/img/flt-14-ports/karaoke-night/compare/menu@karaoke-night.png",
       "changed": 0.6101242283950618
     },
     {
       "scene": "phone",
       "skin": "karaoke-night",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/karaoke-night/before/phone@karaoke-night.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/karaoke-night/after/phone@karaoke-night.png",
+      "before": "docs/img/flt-14-ports/karaoke-night/before/phone@karaoke-night.png",
+      "after": "docs/img/flt-14-ports/karaoke-night/after/phone@karaoke-night.png",
       "title": "The same campus on a phone (390x844)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/karaoke-night/compare/phone@karaoke-night.png",
+      "compare": "docs/img/flt-14-ports/karaoke-night/compare/phone@karaoke-night.png",
       "changed": 0.4979554016283874
     }
   ],

@@ -4,11 +4,11 @@ All heavy FLT work (installs, dev servers, builds, tests, screenshots) runs on M
 
 ## Spawn a builder
 
-From a lead thread on the Mini:
+From a lead thread on the Mini (bb sets `$BB_PROJECT_ID` inside a project thread):
 
 ```sh
 bb thread spawn \
-  --project proj_dvb9hes55f \
+  --project "$BB_PROJECT_ID" \
   --environment-provider modal-sandbox \
   --provider claude-code --model claude-sonnet-5-5 --reasoning-level xhigh \
   --permission-mode auto \
@@ -31,7 +31,7 @@ bb tasks attach FLT-n --thread <new thread id>
 ## What a machine has
 
 - Image: bb's default Modal image (Debian bookworm, Node 22.19, pnpm 9.15, git, gh, jq, ripgrep, build-essential, Claude Code) **plus** the Chromium system libraries added for FLT (`bb modal image show`).
-- `GH_TOKEN`: an FLT-only machine variable (`bb machine env list --project proj_dvb9hes55f`), so `git push` and `gh pr create` work. Never print it.
+- `GH_TOKEN`: an FLT-only machine variable (`bb machine env list --project "$BB_PROJECT_ID"`), so `git push` and `gh pr create` work. Never print it.
 - Idle pause after 15 minutes. Pausing snapshots the filesystem, and resuming restores it without rerunning setup. Compute lives at most 24 hours, so pause before then or lose unsaved work.
 
 ## Evidence: screenshots and live links
@@ -69,7 +69,7 @@ Modal bills running sandboxes per second for CPU and memory. A 1-vCPU builder co
 
 ## Credentials (FLT-only machine variables)
 
-`bb machine env list --project proj_dvb9hes55f`:
+`bb machine env list --project "$BB_PROJECT_ID"`:
 - `CLAUDE_CODE_OAUTH_TOKEN`: Claude Code login for builders (from `claude setup-token`). **Cloud machines don't share the Mini's Claude login.** Without it, turns fail with "Not logged in".
 - `GH_TOKEN`: GitHub (repo + workflow). Since the bb server PATH fix, the server's built-in GitHub login also works, so this is a belt-and-braces override.
 
@@ -77,7 +77,7 @@ Modal bills running sandboxes per second for CPU and memory. A 1-vCPU builder co
 
 - **Claude Code version:** Opus 5.5 needs Claude Code ≥ 2.1.280. The Modal image now pins 2.1.284. A thread that started on an older binary keeps failing even after `bb machine provider-cli install <host> claude-code --action update`, because its provider process is cached. Start a fresh thread instead.
 - **Intermittent "Machine bootstrap command failed"** (2 of ~8 launches, no detail in logs). `bb thread retry <id>` fixed it every time.
-- **First pause failed** with `Name resolution failed for target dns:task-….w.modal.host` (the Mini resolves DNS through Tailscale MagicDNS). A retry a few minutes later succeeded, so it's likely negative caching of a brand-new hostname. If pauses keep failing, compute keeps running (and billing) until Modal's 24 h limit, so remove idle machines.
+- **First pause failed** with `Name resolution failed for target dns:<new Modal task host>` (the Mini resolves DNS through Tailscale MagicDNS). A retry a few minutes later succeeded, so it's likely negative caching of a brand-new hostname. If pauses keep failing, compute keeps running (and billing) until Modal's 24 h limit, so remove idle machines.
 - **Pasted secrets can pick up line breaks** (the Claude token did: `401 OAuth access token is invalid`). Strip whitespace before `bb machine env set`.
 - **Sep 29:** bootstrap returned HTTP 500 from `/install/bb-app.tgz`, because the bb server's launchd service had no PATH (`spawn npm ENOENT`). The workshop fixed it.
 - `bb connect expose` links answer 401 to curl. They need a browser that's signed in to bb, which is expected.

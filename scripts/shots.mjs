@@ -622,7 +622,9 @@ const okCount = results.filter((r) => r.ok).length;
 const summary = `_pnpm shots: ${sceneNames.length} scene(s)${skins[0] ? `, ${skins.length} skin(s)` : ""} in ${total} (${okCount}/${results.length} captures ok${problems.length ? `, ${problems.length} PROBLEM(S)` : ""})._`;
 const banner = problems.length ? `\n> **⚠ ${problems.length} blank or failed output(s), do not use these as evidence:**\n${problems.map((p) => `> - ${p}`).join("\n")}\n` : "";
 writeFileSync(join(out, "report.md"), `${banner}\n${md}\n${summary}\n`);
-writeFileSync(join(out, "report.json"), JSON.stringify({ base: baseSpec, head: { branch, sha: headSha, dirty }, seconds: (Date.now() - t0) / 1000, problems, rows, errors: [...new Set(errors)] }, null, 2));
+// Repo-relative paths: report.json gets committed under docs/img/, and the checkout's absolute path names the machine (FLT-103).
+const json = JSON.stringify({ base: baseSpec, head: { branch, sha: headSha, dirty }, seconds: (Date.now() - t0) / 1000, problems, rows, errors: [...new Set(errors)] }, null, 2);
+writeFileSync(join(out, "report.json"), json.split(`${root}/`).join(""));
 console.log(`\n${md}\n${summary}`);
 console.log(`\nfiles: ${relOut}/{before,after,compare}/  ·  report: ${relOut}/report.md`);
 if (ignored) console.log(`note: ${relOut}/ is gitignored, so those image links only work once the files are committed. For a PR, write somewhere committable: pnpm shots --out docs/img/<task>`);

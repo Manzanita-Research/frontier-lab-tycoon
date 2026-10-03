@@ -1,6 +1,6 @@
 # FLT-63: Placement modes (sticky path, one-shot buildings, Esc/right-click, hint) + Start menu (Facilities ▸ submenu, Run… opens widgets), all skins
 
-_Copied from the task description (label: explore). Lead: thr_uzeftrbh67._
+_Copied from the task description (label: explore). Lead: the FLT lead thread._
 
 **Placement modes and the Start menu** (Jem's play-test, items 5 and 6). All six skins. These are UX/visible changes, so before/after screenshots are required.
 
