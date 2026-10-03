@@ -1,0 +1,12 @@
+
+| Scene | Before (`main` @ f7a4da7) | After (`flt-105-acid-mode` @ 2f777a1) |
+|---|---|---|
+| **acid-offer**<br>32.5% px differ | ![acid-offer](https://github.com/Manzanita-Research/frontier-lab-tycoon/blob/flt-105-acid-mode/docs/img/flt-105/before/acid-offer.png?raw=true) | ![acid-offer](https://github.com/Manzanita-Research/frontier-lab-tycoon/blob/flt-105-acid-mode/docs/img/flt-105/after/acid-offer.png?raw=true) |
+| **acid-warning**<br>25.8% px differ | ![acid-warning](https://github.com/Manzanita-Research/frontier-lab-tycoon/blob/flt-105-acid-mode/docs/img/flt-105/before/acid-warning.png?raw=true) | ![acid-warning](https://github.com/Manzanita-Research/frontier-lab-tycoon/blob/flt-105-acid-mode/docs/img/flt-105/after/acid-warning.png?raw=true) |
+| **acid-peak**<br>87.6% px differ | ![acid-peak](https://github.com/Manzanita-Research/frontier-lab-tycoon/blob/flt-105-acid-mode/docs/img/flt-105/before/acid-peak.png?raw=true) | ![acid-peak](https://github.com/Manzanita-Research/frontier-lab-tycoon/blob/flt-105-acid-mode/docs/img/flt-105/after/acid-peak.png?raw=true) |
+| **acid-researcher**<br>87.2% px differ | ![acid-researcher](https://github.com/Manzanita-Research/frontier-lab-tycoon/blob/flt-105-acid-mode/docs/img/flt-105/before/acid-researcher.png?raw=true) | ![acid-researcher](https://github.com/Manzanita-Research/frontier-lab-tycoon/blob/flt-105-acid-mode/docs/img/flt-105/after/acid-researcher.png?raw=true) |
+| **acid-breakthrough**<br>88.9% px differ | ![acid-breakthrough](https://github.com/Manzanita-Research/frontier-lab-tycoon/blob/flt-105-acid-mode/docs/img/flt-105/before/acid-breakthrough.png?raw=true) | ![acid-breakthrough](https://github.com/Manzanita-Research/frontier-lab-tycoon/blob/flt-105-acid-mode/docs/img/flt-105/after/acid-breakthrough.png?raw=true) |
+| **acid-calm**<br>66.5% px differ | ![acid-calm](https://github.com/Manzanita-Research/frontier-lab-tycoon/blob/flt-105-acid-mode/docs/img/flt-105/before/acid-calm.png?raw=true) | ![acid-calm](https://github.com/Manzanita-Research/frontier-lab-tycoon/blob/flt-105-acid-mode/docs/img/flt-105/after/acid-calm.png?raw=true) |
+| **acid-phone**<br>89.3% px differ | ![acid-phone](https://github.com/Manzanita-Research/frontier-lab-tycoon/blob/flt-105-acid-mode/docs/img/flt-105/before/acid-phone.png?raw=true) | ![acid-phone](https://github.com/Manzanita-Research/frontier-lab-tycoon/blob/flt-105-acid-mode/docs/img/flt-105/after/acid-phone.png?raw=true) |
+
+_pnpm shots: 7 scene(s) in 178.3s (14/14 captures ok)._
