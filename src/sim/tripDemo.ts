@@ -5,7 +5,7 @@
 // knows a trip is on, and consent is the player's (ui/juice/tripState.ts). Pure sim and deterministic.
 import { canPlace } from "./commands";
 import { defs } from "./defs";
-import { dailyEvents, openEventOf, unpaced } from "./events";
+import { dailyEvents, openEventOf, repaced, unpaced } from "./events";
 import { createRng } from "./rng";
 import { answer } from "./testkit";
 import { applyNow, tick, TICKS_PER_DAY } from "./tick";
@@ -92,12 +92,16 @@ export function stageAcid(s: GameState, moment: AcidMoment) {
       applyNow(s, answer(s));
       dailyEvents(s);
     }
+    repaced(s);
     return;
   }
   // The peak (and `acid-researcher`, the same afternoon with one of the team tapped): the come-up is a day, so a day and
   // a half in it is at full strength, and the team is somewhere.
   const start = s.trip?.start ?? s.tick;
   until(s, (x) => x.tick >= start + Math.round(1.5 * TICKS_PER_DAY), 3);
+  // Whatever else the lab is asked that afternoon is answered, and the next card waits its turn: the screen is the trip's.
+  for (let i = 0; i < 6 && openEventOf(s); i++) applyNow(s, answer(s));
+  repaced(s);
 }
 
 /** `acid-researcher`'s subject: the first researcher who has gone somewhere (the scene taps them). */

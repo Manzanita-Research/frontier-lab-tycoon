@@ -1,7 +1,7 @@
 // Event cards: checked once a day, one open at a time, resolved by a chooseEvent command.
 import type { BuildingKind } from "../content/buildings";
 import type { Condition, Effect } from "../content/events";
-import { THOUGHT_TICKS, DISCOURSE_PER_PROTESTER } from "./constants";
+import { THOUGHT_TICKS, DISCOURSE_PER_PROTESTER, TICKS_PER_DAY, TICKS_PER_SECOND } from "./constants";
 import { fillTemplate } from "./format";
 import { arcMachine, dayArc } from "./machines/arc";
 import { initialStored, step } from "./machines/run";
@@ -23,7 +23,7 @@ import { arrivingCard } from "./liveMods";
 import { defs } from "./defs";
 import { askFlag } from "./disasters/names";
 import { modArcsHeard } from "./modArcs";
-import { pacerAllows, pacerMachine, type Pacing, type PacerStored } from "./machines/cardPace";
+import { paceFor, pacerAllows, pacerMachine, type Pacing, type PacerStored } from "./machines/cardPace";
 import { HANDLED, paceOfCard } from "../content/cardPacing";
 import { createRng, type Rng } from "./rng";
 import { isChase } from "./escape/machine";
@@ -229,4 +229,9 @@ export function chooseEvent(state: GameState, rng: Rng, eventId: string, choiceI
 /** A staged moment (`?moment=`, a pack's review link) plays its cards back to back, as it always did: no card budget. */
 export function unpaced(state: GameState) {
   state.pacer = step(pacerMachine, pacerOf(state), { type: "PACE", gap: 0, storyGap: 0, auto: false }).stored;
+}
+
+/** ...and once it is on its beat, the lab gets the card budget a game at 1× has, so the next card waits its turn (FLT-105). */
+export function repaced(state: GameState) {
+  state.pacer = step(pacerMachine, pacerOf(state), { type: "PACE", ...paceFor(1, TICKS_PER_SECOND, TICKS_PER_DAY) }).stored;
 }

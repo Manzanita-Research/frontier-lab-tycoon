@@ -60,7 +60,7 @@ export const TRIP_LOOK: TripLook = {
 /** Reduced motion: still colour, still art, and nothing that moves. */
 export const TRIP_CALM: TripLook = {
   ...TRIP_LOOK,
-  wash: 0.32, huePeriod: 0, art: 0.5, breathe: 0, wobble: 0, melt: 0, kaleido: 0, swirl: 0, trails: 0,
+  wash: 0.2, huePeriod: 0, art: 0.75, breathe: 0, wobble: 0, melt: 0, kaleido: 0, swirl: 0, trails: 0,
 };
 /** Where a still wash stands (degrees): magenta at the top, orange and teal down the sides, poster paint. */
 export const CALM_TURN = 290;

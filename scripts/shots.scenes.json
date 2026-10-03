@@ -511,6 +511,7 @@
       "acid-researcher",
       "acid-breakthrough",
       "acid-calm",
+      "acid-calm-card",
       "acid-phone"
     ]
   },
@@ -7594,7 +7595,7 @@
       ]
     },
     "acid-peak": {
-      "title": "FLT-105: the trip at full strength (melting windows, the kaleidoscope, the clip's ego death, I've had enough)",
+      "title": "FLT-105: the trip at full strength (melting windows, the kaleidoscope, poster-paint chrome, the clip's ego death, I've had enough)",
       "query": {
         "moment": "acid-peak",
         "trip": "full"
@@ -7638,7 +7639,7 @@
       ]
     },
     "acid-breakthrough": {
-      "title": "FLT-105: the model achieved enlightenment, mid-trip (the ticker opens on the headline, capability 30 → 63)",
+      "title": "FLT-105: the breakthrough is its own card, mid-trip (the clock stops; capability 30 → 63, #1 on the Arena)",
       "query": {
         "moment": "acid-breakthrough",
         "trip": "full"
@@ -7657,9 +7658,28 @@
       ]
     },
     "acid-calm": {
-      "title": "FLT-105: the reduced-motion trip (colour only: no warping, no melting, no trails)",
+      "title": "FLT-105: the reduced-motion trip (still: a poster-paint mandala on the map, flowered chrome, the clip lying down in its halo)",
       "query": {
         "moment": "acid-peak",
+        "trip": "full,calm"
+      },
+      "steps": [
+        {
+          "wait": 600
+        },
+        {
+          "click": ".f95-tripwarn button:has-text(\"Continue\")",
+          "optional": true
+        },
+        {
+          "wait": 9000
+        }
+      ]
+    },
+    "acid-calm-card": {
+      "title": "FLT-105: the breakthrough's card in the reduced-motion trip",
+      "query": {
+        "moment": "acid-breakthrough",
         "trip": "full,calm"
       },
       "steps": [
