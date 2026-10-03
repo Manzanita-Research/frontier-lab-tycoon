@@ -1,5 +1,5 @@
 // Parody names only (AGENTS.md). Every content string, skin string and window title the game can show: the content
-// tables, the 2D UI and all six skins (code, JSON and CSS), the software-shelf intro, and every base pack under mods/. The defection test keeps
+// tables, the 2D UI and all six skins (code, JSON and CSS), the software-shelf intro, and every base pack and example mod under mods/. The defection test keeps
 // its narrower check on its own two packs; this one covers the rest, so a real product name fails wherever it lands.
 import { BIRDAPP, birdContent } from "./birdapp";
 import { makeHandle } from "../sim/birdapp/driver";
@@ -12,6 +12,10 @@ const REAL = [
   "Windows 95", "Windows 98", "Clippy", "Microsoft", "OpenAI", "Anthropic", "DeepMind", "Google", "Gmail", "ChatGPT",
   // Real labs our old rival names contained (renamed before prod: Super Super AI, MetaMeta Metaintelligence Labs).
   "Safe Superintelligence", "Meta Superintelligence", "SSI",
+  // FLT-101 satirises a movement's culture, never its real people, charities, houses or forums.
+  "Effective Altruism", "Open Philanthropy", "Open Phil", "GiveWell", "80,000 Hours", "Effective Ventures", "Rethink Priorities",
+  "Future of Humanity Institute", "Giving What We Can", "Alameda Research", "Wytham Abbey", "Wytham", "Lighthaven", "LessWrong",
+  "EA Forum", "EA Global", "MacAskill", "Bankman-Fried", "Toby Ord", "Bostrom", "Karnofsky", "Moskovitz", "Peter Singer",
 ];
 // Bird App handles (FLT-69) are lowercase and squashed ("the_weights_whisper"), so they get their own list: real labs,
 // products and apps, real people's names and handles, and nationalities (a handle is an identity; none of ours is real).
@@ -22,6 +26,8 @@ const REAL_HANDLES = [
   // FLT-92: the rival labs' voices are CEOs and researchers, so the real ones' names and handles too.
   "dario", "demis", "satya", "nadella", "zuckerberg", "jensen", "suleyman", "ilya", "murati", "brockman", "pichai", "sundar",
   "roon", "leike", "yudkowsky", "eliezer", "gwern", "kokotajlo", "aschenbrenner",
+  // FLT-101: the Maximally Effective Altruists' posters, likewise.
+  "macaskill", "bankman", "sbf", "bostrom", "karnofsky", "moskovitz", "lesswrong", "givewell",
   "american", "chinese", "british", "french", "german", "russian", "indian", "canadian", "japanese", "korean",
 ];
 // The software shelf (FLT-70) parodies a 1997 software store, so it also must not name the real ones: the publishers,
@@ -38,7 +44,7 @@ const RETAIL = [
 const ALLOWED = ["Outlook Excess", "WordSad", "WordPerfectly", "NoteBad"];
 
 const sources = import.meta.glob<string>(
-  ["./**/*.{ts,json}", "../ui/**/*.{ts,tsx,json,css}", "../skins/**/*.{ts,tsx,json,css}", "../intro/**/*.{ts,tsx,json,css}", "../account/**/*.{ts,tsx,css}", "../../mods/base-*/**/*.json", "!**/*.test.{ts,tsx}"],
+  ["./**/*.{ts,json}", "../ui/**/*.{ts,tsx,json,css}", "../skins/**/*.{ts,tsx,json,css}", "../intro/**/*.{ts,tsx,json,css}", "../account/**/*.{ts,tsx,css}", "../../mods/base-*/**/*.json", "../../mods/examples/**/*.json", "!**/*.test.{ts,tsx}"],
   { query: "?raw", import: "default", eager: true },
 );
 const scanned = Object.keys(sources);
@@ -64,6 +70,7 @@ describe("parody names only", () => {
     // Word boundaries mean "MetaMeta Superintelligence" would slip past this scan (and the Drama lint), which is why
     // MetaMeta's full name was changed by hand (#71): it contained a real lab's name as a substring.
     expect(realNames("Frontier BIOS, a Frontier 486FX, the '96 sim-game look, Intel Inside, a Maxis box", [...REAL, ...RETAIL])).toEqual(["Maxis", "Intel"]);
+    expect(realNames("Utilsbury Manor, the Maximally Effective Altruists, Effective Altruism, a weekend at Wytham Abbey")).toEqual(["Effective Altruism", "Wytham Abbey", "Wytham"]);
     expect(realNames("Very Very Super Super Intelligence, Super Super AI, MetaMeta Metaintelligence Labs, SSID")).toEqual([]);
   });
   it("reads the content, the UI, all six skins and every base pack", () => {
@@ -73,6 +80,7 @@ describe("parody names only", () => {
     expect(sources["../skins/frontier-95/skin.css"]).toContain('[data-skin="frontier-95"]');
     expect(packs.length).toBeGreaterThanOrEqual(13);
     for (const p of packs) expect(scanned).toContain(`../../mods/${p}/mod.json`);
+    expect(scanned).toContain("../../mods/examples/maximally-effective-altruists/mod.json");
     // assets/art.jobs.json holds every word printed in the generated art (FLT-70), so the pictures are scanned too.
     for (const f of ["content.ts", "manual.ts", "art.ts", "Intro.tsx", "stage/Kiosk.tsx", "stage/Props.tsx", "assets/art.jobs.json", "assets/props.jobs.json"]) expect(scanned).toContain(`../intro/${f}`);
   });
