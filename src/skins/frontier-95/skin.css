@@ -6507,7 +6507,8 @@
   &[data-trip="lite"] {
     .f95-win {
       transform-origin: 50% 0;
-      animation: frontier-95-melt 9s ease-in-out infinite;
+      /* Every clock starts part-way in, so no two windows sag together (and a still frame catches them mid-melt). */
+      animation: frontier-95-melt 9s ease-in-out -3.5s infinite;
       &:nth-child(2n) {
         animation-duration: 11s;
         animation-delay: -3s;
@@ -6521,7 +6522,7 @@
   }
   &[data-trip="on"] {
     .f95-tb {
-      animation: frontier-95-wobble 3.4s ease-in-out infinite;
+      animation: frontier-95-wobble 3.4s ease-in-out -0.8s infinite;
     }
     .f95-win :is(p, li, dd, .f95-balloon) {
       animation: frontier-95-wobble 4.1s ease-in-out -1.3s infinite;
@@ -6552,7 +6553,7 @@
   /* The paperclip's ego death: it lets go of being a paperclip, turning slowly over and coming apart a little. */
   &[data-trip="on"] .f95-clip.ego svg,
   &[data-trip="lite"] .f95-clip.ego svg {
-    animation: frontier-95-ego 14s ease-in-out infinite;
+    animation: frontier-95-ego 14s ease-in-out -4s infinite;
   }
   @keyframes frontier-95-ego {
     0%, 100% {

@@ -6,6 +6,9 @@
 //
 // `html[data-trip]`: "on" (everything), "calm" (reduced motion: the colour only), "lite" (a phone that can't keep
 // up: no canvas pass, no trails, no wobbling text). Absent when there is no trip on screen.
+//
+// Debug knobs, comma-separated: `?trip=calm` and `?trip=lite` force those; `?trip=full` (screenshots and the video,
+// on a software renderer at a few frames a second) skips the come-up and the governor. The warning still asks first.
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { reducedMotion } from "../../skins/kit/motion";
@@ -19,7 +22,8 @@ const GOVERNOR_HOLD = 1.5;
 /** How often the CSS variables move (they change slowly; every frame would restyle the whole page for nothing). */
 const VARS_EVERY = 0.1;
 
-const forced = () => (typeof location === "undefined" ? null : new URLSearchParams(location.search).get("trip"));
+/** `?trip=` knobs, comma-separated (`?trip=full,calm`). */
+const forced = () => new Set(typeof location === "undefined" ? [] : (new URLSearchParams(location.search).get("trip") ?? "").split(","));
 
 export function TripScreen({ trip }: { trip: TripVM | null }) {
   const wash = useRef<HTMLDivElement>(null);
@@ -34,7 +38,7 @@ export function TripScreen({ trip }: { trip: TripVM | null }) {
     if (!live) return;
     const root = document.documentElement;
     const force = forced();
-    if (force === "lite") tripNow.lite = true;
+    if (force.has("lite")) tripNow.lite = true;
     let raf = 0;
     let last = performance.now();
     let since = VARS_EVERY;
@@ -43,15 +47,15 @@ export function TripScreen({ trip }: { trip: TripVM | null }) {
     const frame = (now: number) => {
       const dt = Math.min(0.1, (now - last) / 1000);
       last = now;
-      const calm = want.current.calm || force === "calm" || reducedMotion();
+      const calm = want.current.calm || force.has("calm") || reducedMotion();
       const look = calm ? TRIP_CALM : TRIP_LOOK;
-      tripNow.level = slew(tripNow.level, want.current.target, dt, look, want.current.enough);
+      tripNow.level = force.has("full") && !want.current.enough ? want.current.target : slew(tripNow.level, want.current.target, dt, look, want.current.enough);
       tripNow.t += dt;
       tripNow.calm = calm;
       const f = tripFrame(tripNow.t, tripNow.level, look);
       Object.assign(tripNow, { bend: f.bend, kaleido: f.kaleido, spin: f.spin, swirl: f.swirl, breathe: f.breathe, trails: f.trails });
       // The governor: only while the trip is on screen, so a slow phone is judged by the trip's frames.
-      if (tripNow.level > 0.05 && !tripNow.lite) {
+      if (tripNow.level > 0.05 && !tripNow.lite && !force.has("full")) {
         avg += (dt - avg) * 0.1;
         slow = avg > GOVERNOR_DT ? slow + dt : 0;
         if (slow > GOVERNOR_HOLD) tripNow.lite = true;

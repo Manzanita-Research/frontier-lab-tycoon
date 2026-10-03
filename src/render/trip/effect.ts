@@ -1,5 +1,6 @@
-// FLT-105: the trip's canvas pass, one postprocessing Effect. The map turns slowly into a kaleidoscope (mixed in under
-// half, so the campus stays readable), the edges swirl, and the walls breathe: a slow zoom in and out. It only moves
+// FLT-105: the trip's canvas pass, one postprocessing Effect. The map turns slowly into a kaleidoscope (lightly in the
+// middle, so the campus stays readable and keeps its contrast, most of the way at the edges), the edges swirl, and the
+// walls breathe: a slow zoom in and out. It only moves
 // the picture about, never its brightness (trip.ts's `slideSpeed` holds the motion under a slow pan). Like the lite
 // CRT, it tone-maps the scene itself and lays it over the sky, since the canvas is see-through.
 import { BlendFunction, Effect, EffectAttribute } from "postprocessing";
@@ -29,7 +30,7 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
   if (kaleido > .001) {
     float seg = 6.2831853 / segments;
     float k = abs(mod(a + spin, seg) - seg * .5);
-    c = mix(c, look(toUv(vec2(cos(k), sin(k)) * r)), kaleido);
+    c = mix(c, look(toUv(vec2(cos(k), sin(k)) * r)), min(.9, kaleido * (.35 + 1.3 * smoothstep(.2, .75, r))));
   }
   outputColor = vec4(c, 1.);
 }

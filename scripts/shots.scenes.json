@@ -7243,7 +7243,8 @@
     "acid-peak": {
       "title": "FLT-105: the trip at full strength (melting windows, the kaleidoscope, the clip's ego death, I've had enough)",
       "query": {
-        "moment": "acid-peak"
+        "moment": "acid-peak",
+        "trip": "full"
       },
       "steps": [
         {
@@ -7254,14 +7255,15 @@
           "optional": true
         },
         {
-          "wait": 4500
+          "wait": 2500
         }
       ]
     },
     "acid-researcher": {
       "title": "FLT-105: a researcher has gone somewhere (tapped)",
       "query": {
-        "moment": "acid-researcher"
+        "moment": "acid-researcher",
+        "trip": "full"
       },
       "steps": [
         {
@@ -7272,7 +7274,7 @@
           "optional": true
         },
         {
-          "wait": 4500
+          "wait": 2500
         },
         {
           "select": "researcher:Chidi Noisefloor"
@@ -7285,7 +7287,8 @@
     "acid-breakthrough": {
       "title": "FLT-105: the model achieved enlightenment, mid-trip",
       "query": {
-        "moment": "acid-breakthrough"
+        "moment": "acid-breakthrough",
+        "trip": "full"
       },
       "steps": [
         {
@@ -7296,7 +7299,7 @@
           "optional": true
         },
         {
-          "wait": 4500
+          "wait": 2500
         }
       ]
     },
@@ -7304,7 +7307,7 @@
       "title": "FLT-105: the reduced-motion trip (colour only: no warping, no melting, no trails)",
       "query": {
         "moment": "acid-peak",
-        "trip": "calm"
+        "trip": "full,calm"
       },
       "steps": [
         {
@@ -7315,7 +7318,7 @@
           "optional": true
         },
         {
-          "wait": 4500
+          "wait": 2500
         }
       ]
     },
@@ -7324,7 +7327,8 @@
       "viewport": "390x844",
       "mobile": true,
       "query": {
-        "moment": "acid-peak"
+        "moment": "acid-peak",
+        "trip": "full"
       },
       "steps": [
         {
@@ -7334,7 +7338,7 @@
           "eval": "() => [...document.querySelectorAll('.f95-tripwarn button')].find((b) => b.textContent === 'Continue')?.click()"
         },
         {
-          "wait": 4500
+          "wait": 2500
         }
       ]
     }
