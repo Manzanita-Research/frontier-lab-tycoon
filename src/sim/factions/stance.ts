@@ -4,6 +4,7 @@
 import type { Axis } from "../../content/factions";
 import type { GameState } from "../types";
 import type { FactionsState } from "./state";
+import { dtanh } from "../dmath";
 
 const clamp1 = (n: number) => Math.max(-1, Math.min(1, n));
 
@@ -43,12 +44,12 @@ export function readStance(state: GameState, f: FactionsState): Record<Axis, num
   const comms = state.staff.filter((s) => s.job === "comms" && s.machine.value !== "leaving").length;
   const net = state.ledger.net;
   return {
-    speed: clamp1(Math.tanh(f.pace) + training - 0.25 * f.safety),
+    speed: clamp1(dtanh(f.pace) + training - 0.25 * f.safety),
     // A lab that never had an incident and spends nothing on safety is still "a bit cavalier"; a lavish budget carries a lab
     // through a run of bad days, but not an endless one.
-    safety: clamp1(-0.3 + 0.4 * f.safety + talked - 0.5 * Math.tanh(f.trouble / 3)),
-    openness: clamp1((policy === "Open" ? 0.6 : policy === "Closed" ? -0.6 : 0) + Math.tanh(f.openness)),
+    safety: clamp1(-0.3 + 0.4 * f.safety + talked - 0.5 * dtanh(f.trouble / 3)),
+    openness: clamp1((policy === "Open" ? 0.6 : policy === "Closed" ? -0.6 : 0) + dtanh(f.openness)),
     fairness: clamp1(0.3 - state.waterDiscourse / 120 - 0.15 * count("gas") + 0.12 * count("solar") + 0.1 * count("fountain") + 0.15 * comms),
-    profit: clamp1(0.6 * Math.tanh(net / 60_000) + (state.hype / 100) * 0.5 - 0.15),
+    profit: clamp1(0.6 * dtanh(net / 60_000) + (state.hype / 100) * 0.5 - 0.15),
   };
 }

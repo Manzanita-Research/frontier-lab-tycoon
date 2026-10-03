@@ -134,7 +134,7 @@ export function managerName(state: GameState): string {
 }
 
 /** A die for the chart's `chance` guards that leaves the main stream alone (none of the shipped endings roll). */
-const dieOf = (tick: number) => (((tick + 1) * 2654435761) >>> 0) / 2 ** 32;
+const dieOf = (tick: number) => (((tick + 1) * 2654435761) >>> 0) / 4294967296;
 
 function beat(state: GameState) {
   return { type: "TICK" as const, tick: state.tick, day: state.day, roll: dieOf(state.tick), work: 0, stats: statsOf(state) };

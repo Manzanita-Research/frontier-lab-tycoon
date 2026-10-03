@@ -214,6 +214,24 @@ describe("determinism", () => {
       expect(code, file).not.toContain("Math.random");
     }
   });
+
+  // FLT-106: these are "implementation-approximated" in ECMA-262, and Node 22, Node 26, Chrome, Firefox and Safari
+  // really do round them differently (a 1-ulp protester spot split the goldens). src/sim/dmath.ts has versions that
+  // give the same bits everywhere. Math.sqrt, floor, round, min, max, abs and imul are exact, so they stay allowed.
+  it("never calls engine-dependent maths", () => {
+    const banned = [
+      /\bMath\.(sin|cos|tan|asin|acos|atan|atan2|sinh|cosh|tanh|asinh|acosh|atanh|exp|expm1|log|log1p|log2|log10|pow|cbrt|hypot)\b/,
+      /[\w)\]]\s*\*\*\s*[\w(.-]/, // the ** operator: it goes through the engine's pow (use sq() or dpow())
+      /\.toLocale(String|DateString|TimeString)\(|\bIntl\.|\.localeCompare\(/, // ICU-dependent
+      /\bDate\.now\(|\bnew Date\(/,
+    ];
+    const sources = import.meta.glob<string>("./**/*.ts", { query: "?raw", import: "default", eager: true });
+    for (const [file, src] of Object.entries(sources)) {
+      if (file.endsWith(".test.ts") || file === "./dmath.ts" || file.startsWith("./perf/")) continue;
+      const lines = src.split("\n").filter((line) => !/^\s*(\/\/|\*|\/\*)/.test(line));
+      for (const re of banned) expect(lines.filter((line) => re.test(line)), `${file}: ${re}`).toEqual([]);
+    }
+  });
 });
 
 describe("content", () => {

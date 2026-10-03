@@ -28,6 +28,7 @@ import type { GameState } from "../types";
 import { CAPTURE, clauseById, DRAFT_CARD, EXPOSED_CARD, PICK_PREFIX, PICKS } from "./pack";
 import { CAPTURE_STATS, freshBill, stepBill } from "./machine";
 import { picks } from "../picks";
+import { dpow } from "../dmath";
 
 const R = CAPTURE.rules;
 const W = R.warning;
@@ -178,15 +179,15 @@ export function projectedLeak(s: GameState): number {
   const b = s.bill;
   if (!b) return 0;
   const stage = b.machine.value;
-  if (stage === "invited") return 1 - (1 - oddsFor(s, shameOf(b.draft))) ** SUNSET_DAYS;
+  if (stage === "invited") return 1 - dpow(1 - oddsFor(s, shameOf(b.draft)), SUNSET_DAYS);
   if (stage !== "law") return 0;
   const left = Math.max(0, SUNSET_DAYS - (b.lawDay === null ? 0 : s.day - b.lawDay));
-  return 1 - (1 - leakOdds(s)) ** left;
+  return 1 - dpow(1 - leakOdds(s), left);
 }
 
 /** What burying the story costs now: dearer each time. */
 export function buryCost(s: GameState): number {
-  return Math.round(W.cost * W.costGrowth ** (s.bill?.buried ?? 0));
+  return Math.round(W.cost * dpow(W.costGrowth, s.bill?.buried ?? 0));
 }
 
 /** Days until the reporter's story runs (null: nobody is asking). */

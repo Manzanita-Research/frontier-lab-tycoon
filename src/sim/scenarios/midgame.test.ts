@@ -51,10 +51,13 @@ describe("midgame scenario", () => {
     // of the Sandbox (FLT-59): with the run moved, an agent was over the fence at the old opening tick, 3 ticks earlier.
     // FLT-92: the rival labs post on the Bird App for all 480 days (their posts, ticker lines, dunks and ratios). With the
     // rivals off the World hashes to 6b07586a / 931e5673 again.
+    // FLT-106: every engine-dependent Math call (sin, cos, atan2, tanh, pow, hypot, `**`) goes through src/sim/dmath.ts,
+    // so the World is the same on every JS engine; the facings, the faction stances and the walks all move by an ulp or
+    // so and the run follows. 4d6d37dc / 067dd01c before.
     expect({
       untagged: digest({ ...s, toasts: s.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) }),
       full: digest(s),
-    }).toEqual({ untagged: "4d6d37dc", full: "067dd01c" });
+    }).toEqual({ untagged: "2dfae51e", full: "e9b78396" });
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);

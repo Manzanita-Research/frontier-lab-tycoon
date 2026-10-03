@@ -10,6 +10,7 @@ import { endingById } from "./pack";
 import type { Look } from "./state";
 import { labNumberOf, refoundView, type RefoundView } from "./lineage";
 import { memoView, type MemoView } from "./memo";
+import { groupThousands } from "../format";
 
 export interface FrontPage {
   kicker: string;
@@ -91,7 +92,7 @@ export function eraStrip(eraDays: readonly number[], days: number): string {
   return out;
 }
 
-const n = (x: number) => Math.round(x).toLocaleString("en-US");
+const n = (x: number) => groupThousands(x);
 
 export function endingsView(s: GameState): EndingsView | null {
   const e = s.endings;

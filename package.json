@@ -22,6 +22,7 @@
     "create-mod": "node packages/flt-mod-cli/create.mjs",
     "modkit:check": "pnpm --filter @flt/mod-sdk typecheck && node --test packages/flt-mod-cli/*.test.mjs",
     "shots": "node scripts/shots.mjs",
+    "engines": "node scripts/engines.mjs",
     "e2e:stranger": "node e2e/stranger.mjs",
     "e2e:journey": "node e2e/journey.mjs",
     "e2e:coach": "node e2e/coach-overlap.mjs",
@@ -60,5 +61,11 @@
     "typescript": "~5.9.2",
     "vite": "^7.1.0",
     "vitest": "5.0.2"
+  },
+  "pnpm": {
+    "overrides": {
+      "undici@^7": ">=7.29.1 <8",
+      "sharp@^0.35": ">=0.35.4 <0.36"
+    }
   }
 }

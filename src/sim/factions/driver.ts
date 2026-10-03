@@ -18,6 +18,7 @@ import { modeOf } from "../walkers";
 import { factionMoodMachine, quietMoodDay, quietRelationDay, relationMachine } from "./machines";
 import { readStance, SAFETY_COST, SAFETY_DRAG, SAFETY_LABELS, updateStance } from "./stance";
 import { baseRelationOf, nudgeFaction, pairKey, seenNow, type FactionsState } from "./state";
+import { dhypot } from "../dmath";
 
 /** A faction with no `protests` line marches on the gate at this meter. */
 export const DEFAULT_MARCH = -60;
@@ -365,7 +366,7 @@ function argue(state: GameState, f: FactionsState, rng: Rng): boolean {
     let bestD = ARGUE_RANGE;
     for (const b of out) {
       if (b === a || b.faction === a.faction) continue;
-      const d = Math.hypot(b.x - a.x, b.z - a.z);
+      const d = dhypot(b.x - a.x, b.z - a.z);
       if (d >= bestD) continue;
       const rel = f.relations[pairKey(a.faction!, b.faction!)];
       if (!rel || (rel.value !== "feuding" && rel.context.value > -20)) continue;

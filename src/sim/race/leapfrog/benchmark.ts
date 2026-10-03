@@ -9,6 +9,7 @@ import { Schema } from "effect";
 import { setupEffect } from "@xstate/effect";
 import type { BenchmarkDef } from "../../../content/leapfrog";
 import type { Stored } from "../../machines/run";
+import { dpow } from "../../dmath";
 
 export const BenchContext = Schema.Struct({
   id: Schema.String,
@@ -117,7 +118,7 @@ function scored(context: BenchContext, event: { best: number; holder: string; da
 export function scoreFor(def: Pick<BenchmarkDef, "difficulty" | "kind">, slope: number, capability: number, bias: number, hype: number): number {
   const cap = Math.max(0.01, capability * bias);
   if (def.kind === "elo") return Math.round(1000 + 4 * cap + 1.5 * hype);
-  return 100 / (1 + (def.difficulty / cap) ** slope);
+  return 100 / (1 + dpow(def.difficulty / cap, slope));
 }
 
 export const isSolved = (stored: BenchStored): boolean => stored.value === "saturated" || stored.value === "retired";

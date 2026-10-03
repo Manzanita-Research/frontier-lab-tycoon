@@ -10,6 +10,7 @@ import { poachingVars } from "../poaching/driver";
 import { evalBonus } from "../collusion/scores";
 import { defs } from "../defs";
 import { neoLabById } from "../neolabs/driver";
+import { dpow, sq } from "../dmath";
 
 /** Revenue while an open-weights rival is eating it. */
 export const OPEN_DROP_FACTOR = 0.7;
@@ -22,7 +23,7 @@ export const openDropActive = (state: GameState): boolean => state.race.openDrop
 
 /** Multiplies every gateway's revenue. */
 export function revenueFactor(state: GameState): number {
-  return (openDropActive(state) ? OPEN_DROP_FACTOR : 1) * PRICE_CUT_FACTOR ** state.race.priceCuts;
+  return (openDropActive(state) ? OPEN_DROP_FACTOR : 1) * dpow(PRICE_CUT_FACTOR, state.race.priceCuts);
 }
 
 /** The Vibes score (0 to 999, the Crowd's park rating) that gates funding rounds. */
@@ -45,7 +46,7 @@ export const annualRevenue = (state: GameState): number => state.ledger.income *
 /** What investors say the lab is worth: capability squared, hype, and where you sit on the Arena. */
 export function valuation(state: GameState): number {
   const rank = rankOf(state.race.board);
-  return Math.round(state.capability ** 2 * 1_400_000 * (0.5 + state.hype / 100) * Math.max(0.5, 1.6 - 0.13 * rank) * valuationFactor(state));
+  return Math.round(sq(state.capability) * 1_400_000 * (0.5 + state.hype / 100) * Math.max(0.5, 1.6 - 0.13 * rank) * valuationFactor(state));
 }
 
 /** The cash the round brings in: half a percent of the valuation, and never less than two months of gross burn. */

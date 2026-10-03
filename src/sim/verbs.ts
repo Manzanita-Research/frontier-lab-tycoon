@@ -44,6 +44,7 @@ import { postNow } from "./birdapp/driver";
 import { rivalPostNow } from "./birdapp/rivals";
 import { BIRD_OUTCOMES, RIVAL_BEATS, RIVAL_ROLES, type BirdOutcome, type RivalBeat, type RivalRole } from "../content/birdapp";
 import { VIBES_MAX } from "./vibes";
+import { sq } from "./dmath";
 
 /** A tick is 1.2 game hours (20 to a day). */
 export const HOURS_PER_TICK = 24 / TICKS_PER_DAY;
@@ -350,7 +351,7 @@ export function buildingRef(env: VerbEnv, ref: string): Building | null {
       let bestD = Infinity;
       for (const b of state.buildings) {
         if (b.kind !== t.kind || b.id === t.id || b.broken || run!.fires.includes(b.id)) continue;
-        const d = (b.x - t.x) ** 2 + (b.z - t.z) ** 2;
+        const d = sq(b.x - t.x) + sq(b.z - t.z);
         if (d < bestD) {
           bestD = d;
           best = b;
