@@ -24,7 +24,7 @@ export function lunchSpot(s: GameState, w: Walker): Point {
   const turn = Math.floor((s.tick + w.id * 5) / R.crowd.paceTicks);
   const a = w.id * 2.399963229728653 + turn * 1.9;
   const r = 0.55 + 0.45 * share(w.id + turn);
-  return [g.x + g.w / 2 + dcos(a) * 1.9 * r, g.z - 1.1 - (0.5 + 0.5 * dsin(a)) * 1.2 * r];
+  return [g.x + g.w / 2 + dcos(a) * 2.6 * r, g.z - 1.6 - (0.5 + 0.5 * dsin(a)) * 2.2 * r];
 }
 
 /** Time for a new spot (and a fresh look at the gate)? */

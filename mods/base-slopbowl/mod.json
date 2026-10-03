@@ -52,7 +52,7 @@
     "slopbowl": {
       "place": "Fancy Healthy Healthy Healthy Healthy Slop Bowl",
       "odds": { "perNoon": 0.3, "minResearchers": 4, "firstAfterDays": 10, "gapDays": 45 },
-      "hours": { "due": 12, "hangry": 1, "worse": 2, "arrive": 3, "courierWait": 1, "fed": 2 },
+      "hours": { "due": 12, "hangry": 1, "worse": 2, "arrive": 3, "courierWait": 2, "fed": 2 },
       "research": { "backwards": 0.75, "granola": 0.5, "catchUp": 1 },
       "crowd": { "late": 0.35, "hangry": 0.8, "worse": 1, "paceTicks": 14 },
       "cheer": 0.15,

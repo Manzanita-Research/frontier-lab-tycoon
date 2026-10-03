@@ -85,8 +85,12 @@ const CHECKPOINTS = [200, 800, 1600, 2400, 3200, 4000];
 // src/sim/dmath.ts, which gives the same bits everywhere, so the facings (`dir`) move from tick 27 and the rest follows.
 // These values hold on Node 22 and 26, and `pnpm engines` shows the whole World (not just this view) is the same in
 // Chromium 153, Firefox 155 and JavaScriptCore (Bun 1.4) too; CI's engines job adds Playwright's WebKit.
+// FLT-109: the lab's lunch order can run three hours late from Level 3 (1360 here), rolled at each campus noon on the
+// pack's own stream. On seed 1 it does, at noon on tick 3100 (the courier at 3175, fed at 3210): the crowd at the gate, the courier, the run
+// sliding back, so 3200 and 4000 move (d4f484bb / b722d047 before). Seeds 2 and 3 roll at the same noons and never run
+// late, so they hold. With the pack kept asleep all three seeds reproduce the values before, digit for digit.
 const GOLDEN: Record<number, Record<number, string>> = {
-  1: { 200: "04394bba", 800: "4c87ace4", 1600: "325c597f", 2400: "3cbcfb81", 3200: "d4f484bb", 4000: "b722d047" },
+  1: { 200: "04394bba", 800: "4c87ace4", 1600: "325c597f", 2400: "3cbcfb81", 3200: "2384a38d", 4000: "021ecb7f" },
   2: { 200: "3263645c", 800: "a65d0f09", 1600: "a884e14f", 2400: "ecb312da", 3200: "c22499ee", 4000: "ebbd0b3d" },
   3: { 200: "09887c12", 800: "27b8e5f3", 1600: "80714f5a", 2400: "c1f4fb4e", 3200: "3923d6d9", 4000: "060e209d" },
 };

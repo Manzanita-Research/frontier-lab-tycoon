@@ -11,6 +11,8 @@ import { digest } from "../golden";
 import { isDue, LATE_FLAG } from "./driver";
 import { CARD, loadSlopBowlPack, SLOPBOWL } from "./pack";
 import { stageSlopBowl } from "./demo";
+import script from "../../../docs/specs/FLT-109-script.md?raw";
+import pack from "../../../mods/base-slopbowl/mod.json";
 
 const R = SLOPBOWL.rules;
 const NAME = "Fancy Healthy Healthy Healthy Healthy Slop Bowl";
@@ -50,6 +52,17 @@ describe("the Slop Bowl pack", () => {
       expect(R.beats[beat].rivals!.length).toBeGreaterThanOrEqual(R.beats[beat].rivalCount!);
     }
     expect(() => loadSlopBowlPack({})).toThrow();
+  });
+  it("is all in the script (docs/specs/FLT-109-script.md), every line of it", () => {
+    const strings: string[] = [];
+    const walk = (v: unknown, key = "") => {
+      if (typeof v === "string") {
+        if (!["id", "type", "name", "tone", "importance", "kind", "when", "flag"].includes(key)) strings.push(v);
+      } else if (Array.isArray(v)) v.forEach((x) => walk(x, key));
+      else if (v && typeof v === "object") for (const [k, x] of Object.entries(v)) walk(x, k);
+    };
+    walk({ card: pack.content.events.add, rules: pack.rules });
+    for (const line of strings) expect(script, line).toContain(line);
   });
   it("falls due at noon on the campus clock, once a cycle", () => {
     const noons = Array.from({ length: 3000 }, (_, t) => t).filter(isDue);
@@ -109,6 +122,8 @@ describe("a late lunch in the game", () => {
   it("puts its card up an hour late, and the answers matter", () => {
     const run = (pick: number) => {
       const s = lab(2);
+      // Well into a run, so the slide has room (a run just started can only fall back to zero).
+      s.training = { ...s.training, context: { ...s.training.context, progress: s.training.context.cost * 0.6 } };
       s.flags[LATE_FLAG] = s.day;
       until(s, stage("late"), 8);
       for (let i = 0; i < 2 * TICKS_PER_DAY && openEventOf(s)?.id !== CARD; i++) tick(s, openEventOf(s) ? answer(s) : []);

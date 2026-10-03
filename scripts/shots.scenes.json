@@ -503,6 +503,15 @@
       "mea-crisis",
       "mea-leaked-phone",
       "mea-convening-phone"
+    ],
+    "flt-109": [
+      "slop-late",
+      "slop-card",
+      "slop-bird",
+      "slop-arrives",
+      "slop-arrives-plain",
+      "slop-late-phone",
+      "slop-arrives-phone"
     ]
   },
   "scenes": {
@@ -7561,6 +7570,105 @@
           "wait": 800
         }
       ]
+    },
+    "slop-late": {
+      "title": "FLT-109: two hours late: the lab waits at the gate, research going backwards (\"estimating time remaining\")",
+      "query": {
+        "warp": null,
+        "moment": "slop-late",
+        "focus": "12,20",
+        "zoom": 75
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "slop-card": {
+      "title": "FLT-109: lunch is an hour late: the card (Level 5)",
+      "query": {
+        "warp": null,
+        "moment": "slop-card"
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "slop-bird": {
+      "title": "FLT-109: the Bird App: hangry posters and the rival labs piling on",
+      "query": {
+        "warp": null,
+        "moment": "slop-late"
+      },
+      "steps": [
+        {
+          "eval": "() => document.querySelector('[data-anchor=\"app:bird\"]')?.click()"
+        },
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "slop-arrives": {
+      "title": "FLT-109: three hours late, the courier at the gate (the arrival beat)",
+      "query": {
+        "warp": null,
+        "moment": "slop-arrives",
+        "focus": "12,20",
+        "zoom": 80,
+        "beat": 1
+      },
+      "steps": [
+        {
+          "wait": 2600
+        }
+      ]
+    },
+    "slop-arrives-plain": {
+      "title": "FLT-109: the bowls handed over at the gate, without the letterbox",
+      "query": {
+        "warp": null,
+        "moment": "slop-arrives",
+        "focus": "12,20",
+        "zoom": 80
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "slop-late-phone": {
+      "title": "FLT-109: two hours late, on a phone",
+      "query": {
+        "warp": null,
+        "moment": "slop-late"
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "slop-arrives-phone": {
+      "title": "FLT-109: the arrival beat on a phone",
+      "query": {
+        "warp": null,
+        "moment": "slop-arrives",
+        "beat": 1
+      },
+      "steps": [
+        {
+          "wait": 2600
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
     }
   }
 }

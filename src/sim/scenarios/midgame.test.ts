@@ -54,10 +54,13 @@ describe("midgame scenario", () => {
     // FLT-106: every engine-dependent Math call (sin, cos, atan2, tanh, pow, hypot, `**`) goes through src/sim/dmath.ts,
     // so the World is the same on every JS engine; the facings, the faction stances and the walks all move by an ulp or
     // so and the run follows. 4d6d37dc / 067dd01c before.
+    // FLT-109: the late lunch wakes with the campus too, and runs late three times in the 480 days (the crowd at the gate,
+    // the courier, the runs sliding back and catching up). With the pack asleep, and the card's dormant arc (arcs.slopbowl)
+    // taken out, the World hashes to 2dfae51e / e9b78396 again.
     expect({
       untagged: digest({ ...s, toasts: s.toasts.map((t) => ({ id: t.id, text: t.text, tone: t.tone })) }),
       full: digest(s),
-    }).toEqual({ untagged: "2dfae51e", full: "e9b78396" });
+    }).toEqual({ untagged: "1d4ddde8", full: "a97bdcdf" });
   });
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);
