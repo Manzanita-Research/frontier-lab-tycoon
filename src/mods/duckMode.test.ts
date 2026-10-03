@@ -4,6 +4,7 @@ import { Effect } from "effect";
 import { describe, expect, it } from "vitest";
 import source, { DUCK } from "../../mods/examples/duck-mode/mod";
 import bundled from "../../mods/examples/duck-mode/mod.json";
+import readme from "../../mods/examples/duck-mode/README.md?raw";
 import { needsRestart, NO_MODS, withMod, withoutModId } from "../app/mods";
 import { HEADLINES } from "../content/headlines";
 import { composeMods } from "./loader";
@@ -50,6 +51,16 @@ describe("duck mode", () => {
     const removed = await withoutModId(added, manifest.id);
     expect(removed.presentation?.voice ?? null).toBeNull();
     expect(removed.presentation?.looks ?? {}).toEqual({});
+  });
+
+  it("says what its README's before-and-after tables say it says", () => {
+    const [flavour, menus] = readme.split("Full duck, on the menus");
+    const rows = (md: string) => [...md.matchAll(/^\| (.+?) \| (.+?) \|$/gm)].map(([, a, b]) => [a!, b!]).filter(([a]) => a !== "Before" && a !== "---").map((r) => r.map((c) => c.replace(/\\\|/g, "|")));
+    const say = makeVoice(source.voice!);
+    const quiet = makeVoice({ ...source.voice!, emoji: undefined, openers: undefined, ellipsis: 0 });
+    expect(rows(flavour!).length).toBeGreaterThan(10);
+    for (const [before, after] of rows(flavour!)) expect(say(before!)).toBe(after);
+    for (const [before, after] of rows(menus!)) expect(quiet(before!)).toBe(after);
   });
 
   it("turns the game's headlines into duck and keeps every number", () => {

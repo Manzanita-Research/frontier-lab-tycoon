@@ -1,0 +1,70 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "bb2996f486283ece23d35312956a4daa45e84d53"
+  },
+  "head": {
+    "branch": "flt-102-berduck-mode",
+    "sha": "2c9a9e8",
+    "dirty": true
+  },
+  "seconds": 296.437,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "duck-midgame",
+      "skin": null,
+      "before": "docs/img/flt-102/before/duck-midgame.png",
+      "after": "docs/img/flt-102/after/duck-midgame.png",
+      "title": "FLT-102: the mid-game lab in duck mode (?mod=): every walker, the crew and the picket line are rubber ducks; the thoughts and ticker quack",
+      "compare": "docs/img/flt-102/compare/duck-midgame.png",
+      "changed": 0.14971913580246912
+    },
+    {
+      "scene": "duck-sea",
+      "skin": null,
+      "before": "docs/img/flt-102/before/duck-sea.png",
+      "after": "docs/img/flt-102/after/duck-sea.png",
+      "title": "FLT-102: a sea of ducks at the gate, signs and all",
+      "compare": "docs/img/flt-102/compare/duck-sea.png",
+      "changed": 0.1920054012345679
+    },
+    {
+      "scene": "duck-bird",
+      "skin": null,
+      "before": "docs/img/flt-102/before/duck-bird.png",
+      "after": "docs/img/flt-102/after/duck-bird.png",
+      "title": "FLT-102: Bird Reader in duck mode: every poster a duck, every post in duck, the numbers kept",
+      "compare": "docs/img/flt-102/compare/duck-bird.png",
+      "changed": 0.026998456790123457
+    },
+    {
+      "scene": "duck-full",
+      "skin": null,
+      "before": "docs/img/flt-102/before/duck-full.png",
+      "after": "docs/img/flt-102/after/duck-full.png",
+      "title": "FLT-102: full duck (&voice=full): the menus and buttons too",
+      "compare": "docs/img/flt-102/compare/duck-full.png",
+      "changed": 0.17316820987654322
+    },
+    {
+      "scene": "duck-add",
+      "skin": null,
+      "before": "docs/img/flt-102/before/duck-add.png",
+      "after": "docs/img/flt-102/after/duck-add.png",
+      "title": "FLT-102: Add/Remove Mods, mid-game, no ?mod=: Add, and the lab turns into ducks on screen with the voice picker",
+      "compare": "docs/img/flt-102/compare/duck-add.png",
+      "changed": 0.1530594135802469
+    },
+    {
+      "scene": "duck-phone",
+      "skin": null,
+      "before": "docs/img/flt-102/before/duck-phone.png",
+      "after": "docs/img/flt-102/after/duck-phone.png",
+      "title": "FLT-102: the mid-game lab in duck mode on a phone",
+      "compare": "docs/img/flt-102/compare/duck-phone.png",
+      "changed": 0.23840077773727064
+    }
+  ],
+  "errors": []
+}

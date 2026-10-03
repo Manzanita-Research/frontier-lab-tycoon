@@ -31,9 +31,22 @@ session's `GameDefinition`, and sends the sim an `addMod` command; the sim swaps
 tick, so a replay with `addMod` at tick T is the same game. The World records it in `modsAdded`
 (`{ id, version, hash, url, tick, day, cards }`), its cards turn up `ARRIVE_DAYS` (2) after, paced like any card, and its
 first plain headline goes on the ticker. `removeMod` takes it out again: its unfired cards are cancelled (an open one closes),
-its headlines and thoughts stop, a rival's tagline reverts. Anything else (a skin, looks, sounds, rules, arcs, rival stats)
+its headlines and thoughts stop, a rival's tagline reverts. Anything else (a skin, looks with sprites or models, sounds, rules, arcs, rival stats)
 needs a fresh start: `needsRestart(manifest)` says why, and the Mod Manager's Remove for those reloads without the mod.
 `?mod=` links in a fresh tab work as before.
+
+**Voices, crews and live looks (FLT-102).** A manifest's optional `voice` section rewrites the flavour text the player reads
+(thoughts, toasts, the ticker, event cards, the Bird App, the newspaper, the ending paper) by rules: `words` (whole-word swaps),
+`letters` (`{ from, to, odds }`), `leet`, `lowercase`, `ellipsis`, `openers`, `emoji` (`{ list, min, max }`) and a `glyph` that
+replaces every Bird App avatar. It is deterministic (each line seeds its own dice from its own text, never the sim's RNG) and
+keeps numbers, money, percentages, handles, `{placeholders}` and the loaded mods' names. `moments` are the voice's own lines
+for `ship`, `level`, `era`, `leak`, `senate`, `escape` and `ending`, said as a toast when the moment starts. Controls stay
+readable; `full: true` (or `?voice=full`, or the Mods window's voice picker) rewrites the menus and buttons too, by a DOM text
+pass that skips inputs, code and anything under `data-voice="off"`. `looks` can now dress the crew, `staff:<job>`
+(`janitor`, `sre`, `comms`, `security`), and visitor groups, `group:<kind>` (the auditors are `group:auditor`); neither takes a
+tint. A `waddle` gait joins walk/trot/hop/float. Looks made only of recipes, and a voice, no longer need a fresh start: they join
+a running lab and leave it again (sprites, models, skins, sounds still reload). `mods/examples/duck-mode/` uses all of it, and
+its README shows what the voice does.
 
 ## 1. Principle: data first, code last
 
