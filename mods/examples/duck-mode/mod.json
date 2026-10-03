@@ -4,7 +4,7 @@
   "name": "Berduck Mode",
   "version": "1.0.0",
   "author": "Frontier Lab Tycoon",
-  "description": "Everyone in the lab is a rubber duck: researchers, agents, visitors, staff, auditors and the picket line. The thoughts, posts, headlines and papers come out in duck. The buttons and numbers stay readable; add ?voice=full for full duck.",
+  "description": "Everyone in the lab is a rubber duck: researchers, agents, visitors, staff, auditors and the picket line. The thoughts, posts, headlines and papers come out in duck. The buttons and numbers stay readable, unless you pick “Everything, menus too” in Add/Remove Mods (or add ?voice=full).",
   "content": {
     "headlines": {
       "add": [

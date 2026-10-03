@@ -13,19 +13,16 @@ export type VoiceMode = "off" | "flavour" | "full";
 
 export interface VoiceSetup extends VoiceOptions {
   readonly rules: ResolvedVoice;
+  /** Said as they are: the loaded mods' names. */
+  readonly keep: readonly string[];
   /** Menus and buttons too: the DOM pass. */
   readonly full: boolean;
 }
 
-/** `?voice=off|flavour|full` overrides the mod's own default (flavour text only, unless it sets `full`). */
-export function voiceMode(search = location.search): VoiceMode | null {
-  const v = new URLSearchParams(search).get("voice");
-  return v === "off" || v === "flavour" || v === "full" ? v : null;
-}
-
-export function voiceSetup(rules: ResolvedVoice | null | undefined, mode: VoiceMode | null): VoiceSetup | null {
+/** `mode` (`?voice=`, or the Mods window's choice) overrides the mod's own default: flavour text only, unless it sets `full`. */
+export function voiceSetup(rules: ResolvedVoice | null | undefined, mode: VoiceMode | null, keep: readonly string[] = []): VoiceSetup | null {
   if (!rules || mode === "off") return null;
-  return { rules, say: makeVoice(rules), glyph: rules.glyph ?? null, full: mode === "full" || (mode === null && rules.full === true) };
+  return { rules, keep, say: makeVoice(rules, keep), glyph: rules.glyph ?? null, full: mode === "full" || (mode === null && rules.full === true) };
 }
 
 /** Says a voice's own line when a big moment starts, as a toast. Nothing at all without a voice. */
@@ -92,7 +89,7 @@ export function startFullVoice(root: HTMLElement, say: Say): () => void {
 
 /** Full duck: menus, buttons and labels too, in a quieter voice (no emoji or openers on every button). */
 export function useFullVoice(voice: VoiceSetup | null) {
-  const quiet = useMemo(() => (voice?.full ? makeVoice({ ...voice.rules, emoji: undefined, openers: undefined, ellipsis: 0 }) : null), [voice]);
+  const quiet = useMemo(() => (voice?.full ? makeVoice({ ...voice.rules, emoji: undefined, openers: undefined, ellipsis: 0 }, voice.keep) : null), [voice]);
   useEffect(() => {
     if (!quiet) return;
     try {

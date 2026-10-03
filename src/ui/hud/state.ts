@@ -42,6 +42,18 @@ export const loadedSkinAtom = Atom.keepAlive(Atom.make<LoadedSkin>({ id: "base",
 /** Is Start ▸ Settings ▸ Mods… open? UI-only state. */
 export const modsOpenAtom = Atom.make(false);
 
+/** A mod's voice (FLT-102): `null` follows the mod's own default, "full" rewrites menus too. Starts from `?voice=`. */
+export const voiceModeAtom = Atom.keepAlive(Atom.make<"off" | "flavour" | "full" | null>(initialVoiceMode()));
+
+/** Is the Add button busy with a mod (FLT-102)? Its id while it fetches. */
+export const modAddingAtom = Atom.make<string | null>(null);
+
+function initialVoiceMode() {
+  if (typeof location === "undefined") return null;
+  const v = new URLSearchParams(location.search).get("voice");
+  return v === "off" || v === "flavour" || v === "full" ? v : null;
+}
+
 /** Is Help ▸ How to play open? UI-only state. */
 export const helpOpenAtom = Atom.make(false);
 

@@ -47,6 +47,9 @@ export function voiceVM(vm: HudVM, { say, glyph }: VoiceOptions): HudVM {
       live: birdapp.live.map(post),
       log: birdapp.log.map(post),
       posters: birdapp.posters.map((p) => ({ ...p, glyph: face(p.glyph) })),
+      spotlight: birdapp.spotlight ? post(birdapp.spotlight) : null,
+      comms: { ...birdapp.comms, queue: birdapp.comms.queue.map((q) => ({ ...q, text: say(q.text) })) },
+      ...(glyph ? { face: glyph } : {}),
     },
     newsroom: {
       ...newsroom,

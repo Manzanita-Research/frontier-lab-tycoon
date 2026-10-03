@@ -41,7 +41,7 @@ const REAL_ACCOUNTS = ["berduck", "deepfates"];
 // PENDING JEM (FLT-102): duck mode's name is a real account's. It lives in ONE constant (and the JSON bundled from it)
 // until Jem decides: keep it, maybe with a credit line, or rename it to a parody such as "rubba duck mode".
 const PENDING: Readonly<Record<string, readonly string[]>> = {
-  "../../mods/examples/duck-mode/mod.ts": ['export const DUCK = { name: "Berduck Mode", voice: "berduck" } as const;'],
+  "../../mods/examples/duck-mode/name.ts": ['export const DUCK = { name: "Berduck Mode", voice: "berduck" } as const;'],
   "../../mods/examples/duck-mode/mod.json": ['"name": "Berduck Mode"', '"name": "berduck"'],
 };
 

@@ -18,7 +18,7 @@ describe("duck mode", () => {
     expect(bundled).toEqual(JSON.parse(JSON.stringify(source)));
   });
 
-  it("keeps its name in one constant", () => {
+  it("keeps its name in one constant (name.ts)", () => {
     expect(source.name).toBe(DUCK.name);
     expect(source.voice?.name).toBe(DUCK.voice);
     // Nowhere else: rename the constant and the whole mod follows.

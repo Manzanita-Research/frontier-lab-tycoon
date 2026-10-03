@@ -2,12 +2,9 @@
 // recipes of primitives (no files), the voice is rules plus hand-written lines, so it can be added to a running lab.
 // Bundle after editing: pnpm flt-mod bundle mods/examples/duck-mode mods/examples/duck-mode/mod.json
 import { defineMod, type Looks } from "../../../packages/flt-mod-sdk/src/index";
+import { DUCK } from "./name";
 
-/**
- * The mode's name, in ONE place. It is a real account's, a real person's, so the name waits on Jem: keep it (maybe with
- * a credit line), or switch to a parody such as "rubba duck mode". Nothing else in the mod spells it.
- */
-export const DUCK = { name: "Berduck Mode", voice: "berduck" } as const;
+export { DUCK };
 
 type Part = NonNullable<Looks[string]["recipe"]>[number];
 type V3 = readonly [number, number, number];
@@ -110,7 +107,7 @@ export default defineMod({
   name: DUCK.name,
   version: "1.0.0",
   author: "Frontier Lab Tycoon",
-  description: "Everyone in the lab is a rubber duck: researchers, agents, visitors, staff, auditors and the picket line. The thoughts, posts, headlines and papers come out in duck. The buttons and numbers stay readable; add ?voice=full for full duck.",
+  description: "Everyone in the lab is a rubber duck: researchers, agents, visitors, staff, auditors and the picket line. The thoughts, posts, headlines and papers come out in duck. The buttons and numbers stay readable, unless you pick “Everything, menus too” in Add/Remove Mods (or add ?voice=full).",
   looks,
   voice: {
     name: DUCK.voice,

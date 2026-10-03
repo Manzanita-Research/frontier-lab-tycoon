@@ -33,9 +33,16 @@ const MAX_CACHE = 4000;
 
 export type Say = (text: string) => string;
 
-/** The voice as a function. It keeps what it has already said, so a HUD redrawn five times a second costs a lookup. */
-export function makeVoice(rules: VoiceData): Say {
+/**
+ * The voice as a function. It keeps what it has already said, so a HUD redrawn five times a second costs a lookup.
+ * `keep` are names it says as they are (the loaded mods' names: "Mods on: …" still names them).
+ */
+export function makeVoice(rules: VoiceData, keep: readonly string[] = []): Say {
   const cache = new Map<string, string>();
+  // A kept name rides through as a placeholder the KEEP rule leaves alone, then comes back.
+  const kept = [...new Set(keep.filter((k) => k.trim() !== ""))].sort((a, b) => b.length - a.length);
+  const hold = (text: string) => kept.reduce((t, name, i) => t.split(name).join(`{kept${i}}`), text);
+  const give = (text: string) => text.replace(/\{kept(\d+)\}/g, (all, i: string) => kept[Number(i)] ?? all);
   const emoji = rules.emoji?.list ?? [];
   const words = rules.words ?? {};
   const letters = rules.letters ?? [];
@@ -92,7 +99,7 @@ export function makeVoice(rules: VoiceData): Say {
     let out = cache.get(text);
     if (out === undefined) {
       if (cache.size >= MAX_CACHE) cache.clear();
-      cache.set(text, (out = transform(text)));
+      cache.set(text, (out = kept.length > 0 && kept.some((k) => text.includes(k)) ? give(transform(hold(text))) : transform(text)));
     }
     return out;
   };

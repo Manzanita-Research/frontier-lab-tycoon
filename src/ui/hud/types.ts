@@ -1510,6 +1510,8 @@ export interface BirdAppVM {
   tally: string;
   /** The newest post that landed a banger or a cancel (for a moment's sticker), or null. */
   spotlight: BirdPostVM | null;
+  /** FLT-102: a mod's voice gave every poster one face (🦆; it is each post's `glyph` too). A skin that draws no avatars can show this one. */
+  face?: string;
   /**
    * FLT-92: the rival labs post on the timeline too (their posts are in `live` and `log`, `side: "them"`). `on: false` with
    * `?birdrivals=off`. `quiet`: labs sulking after an Arena slide ("Sirocco is taking a few days offline"). `labs`: who
@@ -1620,6 +1622,21 @@ export interface ModsVM {
   errors: string[];
   /** Hash of the whole resolved content, or null when running the base game. */
   contentHash: string | null;
+  /** FLT-102: mods this build ships that `actions.addMod(id)` adds to the lab on screen, no reload. */
+  extras?: ExtraModVM[];
+  /** FLT-102: the voice a mod gave the lab, if any. `actions.setVoice` turns it off, or on for the menus too. */
+  voice?: { mod: string; mode: "off" | "flavour" | "full" } | null;
+}
+
+/** A mod the build ships, offered in Add/Remove Mods (FLT-102). */
+export interface ExtraModVM {
+  id: string;
+  name: string;
+  blurb: string;
+  /** Already in this lab: it is in `list`, with Remove, so a skin need not offer it again. */
+  added: boolean;
+  /** Fetching right now. */
+  adding: boolean;
 }
 
 /** A save, as the Save/Load window and "Welcome back" show it (FLT-65). */
@@ -2104,6 +2121,10 @@ export interface HudActions {
   closeMods(): void;
   /** Switch a mod off. A data-only one leaves the lab on screen (FLT-78); one with `needsRestart` reloads without it (a new lab). */
   removeMod(id: string): void;
+  /** FLT-102: add one of `mods.extras` to the lab on screen, by id (no reload). A refusal arrives as a toast. */
+  addMod(id: string): void;
+  /** FLT-102: a mod's voice off, on for flavour text ("flavour"), or on for the menus and buttons too ("full"). */
+  setVoice(mode: "off" | "flavour" | "full"): void;
   // Today's Drama (FLT-34).
   openDrama(): void;
   closeDrama(): void;

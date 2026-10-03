@@ -34,6 +34,13 @@ describe("a voice", () => {
     expect(first).toMatch(/r/);
   });
 
+  it("says the names it is asked to keep as they are (the loaded mods': \"Mods on: …\")", () => {
+    const keeping = makeVoice(duckish, ["Rubber Lab Mode", "Lab"]);
+    const out = keeping("Mods on: Rubber Lab Mode, and the Lab is real");
+    expect(out).toContain("Rubber Lab Mode");
+    expect(out).toMatch(/^mods on: Rubber Lab Mode, and da Lab is weaw/);
+  });
+
   it("leaves numbers, prices, percentages, handles and tags alone", () => {
     const out = say("Revenue $1.2M, 45% trust, Frontier-4.5 from @lab_rules #ai on Day 12.");
     for (const kept of ["$1.2M,", "45%", "Frontier-4.5", "@lab_rules", "#ai", "12"]) expect(out).toContain(kept);

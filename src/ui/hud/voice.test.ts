@@ -52,6 +52,10 @@ describe("a voice on the HUD", () => {
       expect(p.text).toMatch(duck);
       expect(p.likesText).toBe(vm.birdapp.live.concat(vm.birdapp.log).find((q) => q.id === p.id)!.likesText);
     }
+    // The preview's post and a skin with no avatars of its own get the duck too.
+    if (out.birdapp.spotlight) expect(out.birdapp.spotlight.text).toMatch(duck);
+    expect(out.birdapp.face).toBe("🦆");
+    expect(vm.birdapp.face).toBeUndefined();
   });
 
   it("is deterministic: the same view-model comes out the same", () => {

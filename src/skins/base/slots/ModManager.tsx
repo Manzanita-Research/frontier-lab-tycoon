@@ -4,6 +4,13 @@ import type { SlotPropsMap } from "../../types";
 /** The one example every build ships (FLT-37), so "how do I try a mod?" has a one-click answer. */
 export const EXAMPLE_MOD = "?mod=/mods/examples/every-lab-is-steve/mod.json";
 
+/** A mod's voice (FLT-102): off, the flavour text, or every word on screen. */
+export const VOICE_MODES = [
+  ["off", "Off"],
+  ["flavour", "Flavour text (the numbers and buttons stay put)"],
+  ["full", "Everything, menus too"],
+] as const;
+
 /**
  * Settings ▸ Mods…: the lab's mods (in order), what clashed, what failed. Mods come in through the address, or Today's
  * Drama (FLT-78). Remove takes a data-only mod out of the lab on screen; one that needs a fresh start says so, and reloads.
@@ -36,6 +43,30 @@ export function ModManager({ mods, actions }: SlotPropsMap["ModManager"]) {
               </li>
             ))}
           </ol>
+        )}
+        {mods.extras && mods.extras.some((m) => !m.added) && (
+          <ol className="mod-list" aria-label="Mods you can add">
+            {mods.extras.filter((m) => !m.added).map((m) => (
+              <li key={m.id}>
+                <button className="mod-off" disabled={m.adding} onClick={() => actions.addMod(m.id)} title="Adds it to this lab, no reload">
+                  {m.adding ? "Adding…" : "Add"}
+                </button>
+                <b>{m.name}</b>
+                <small>{m.blurb}</small>
+              </li>
+            ))}
+          </ol>
+        )}
+        {mods.voice && (
+          // The way out of full voice stays readable, whatever the voice does to the rest of the screen.
+          <div className="mod-note" role="radiogroup" aria-label={`${mods.voice.mod}'s voice`} data-voice="off">
+            <b>{mods.voice.mod}'s voice</b>
+            {VOICE_MODES.map(([m, label]) => (
+              <label key={m}>
+                <input type="radio" name="mod-voice" checked={mods.voice!.mode === m} onChange={() => actions.setVoice(m)} /> {label}
+              </label>
+            ))}
+          </div>
         )}
         {mods.conflicts.length > 0 && (
           <div className="mod-note">
