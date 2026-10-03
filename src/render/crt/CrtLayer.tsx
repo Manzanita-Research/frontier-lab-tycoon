@@ -5,6 +5,7 @@ import { useFrame } from "@react-three/fiber";
 import { Suspense, lazy } from "react";
 import { registry } from "../../app/game";
 import { CRT_TIERS } from "./looks";
+import { glassSupport } from "../../ui/glass/support";
 import { crtAtom, crtGovernor } from "./state";
 
 const CrtFX = lazy(() => import("./CrtFX"));
@@ -13,14 +14,15 @@ export function CrtLayer() {
   const { mode, tier } = useAtomValue(crtAtom);
   useFrame((_, dt) => {
     const g = crtGovernor.current;
-    if (!g || g.settled || mode === "off") return;
+    if (!g || g.settled || mode === "off" || glassSupport) return;
     const was = g.tier;
     const now = g.frame(dt * 1000);
     if (now === was) return;
     const s = registry.get(crtAtom);
     registry.set(crtAtom, { ...s, tier: now, reduced: CRT_TIERS.indexOf(now) > CRT_TIERS.indexOf(g.start) });
   });
-  if (mode === "off" || tier === "flat") return null;
+  // FLT-88: with HTML-in-canvas the glass is the tube (over the UI too), and the scene stays flat under it.
+  if (mode === "off" || tier === "flat" || glassSupport) return null;
   return (
     <Suspense fallback={null}>
       <CrtFX mode={mode} tier={tier} />
