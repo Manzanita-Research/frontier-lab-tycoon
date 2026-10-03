@@ -27,7 +27,7 @@ export type FxEvent =
   /** A disaster asked for a sound cue (an SFX name from audio/score.ts). */
   | { type: "cue"; cue: string }
   /** FLT-56: a camera beat (letterbox, caption, a slow shot), in scene coordinates; `follow` are walker ids to track. */
-  | { type: "beat"; beat: string; caption: string; sub: string; x: number; z: number; zoom: number; hold: number; follow: number[] }
+  | { type: "beat"; beat: string; caption: string; sub: string; x: number; z: number; zoom: number; hold: number; follow: number[]; kicker?: string }
   /**
    * The Sandbox Escape (FLT-59), in scene coordinates: an agent bolts for the fence (`walker` for the camera to follow),
    * the hand picks it up, a guard tackles it, the hand puts it down, or it clears the fence.
@@ -134,7 +134,7 @@ export function createWatch(): Watch {
         cueId = c.id;
         if (c.type === "focus") out.push({ type: "focus", x: worldX(c.x), z: worldZ(c.z), zoom: c.zoom, hold: c.hold });
         else if (c.type === "shake") out.push({ type: "shake", strength: c.strength });
-        else if (c.type === "beat") out.push({ type: "beat", beat: c.beat, caption: c.caption, sub: c.sub, x: worldX(c.x), z: worldZ(c.z), zoom: c.zoom, hold: c.hold, follow: c.follow });
+        else if (c.type === "beat") out.push({ type: "beat", beat: c.beat, caption: c.caption, sub: c.sub, x: worldX(c.x), z: worldZ(c.z), zoom: c.zoom, hold: c.hold, follow: c.follow, ...(c.kicker ? { kicker: c.kicker } : {}) });
         else out.push({ type: "cue", cue: c.cue });
       }
 

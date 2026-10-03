@@ -9,6 +9,8 @@ export interface BeatShown {
   kind: string;
   caption: string;
   sub: string;
+  /** The top bar's words, when the beat brings its own (a mod's `camera.beat`); otherwise the HUD's for its kind. */
+  kicker?: string;
 }
 
 /** The beat on screen, or null. keepAlive: FxDirector sets it whether or not the HUD is subscribed yet. */

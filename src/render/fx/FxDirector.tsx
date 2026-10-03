@@ -148,7 +148,7 @@ export function FxDirector() {
         const hold = debugParams.beat ? null : ev.hold;
         const camera = !fx.photo && !reducedMotion() && cinema.focus(view(), { ...aim(ev.x, ev.z, ev.zoom, 0.06), zoom: ev.zoom, hold, rate: ev.beat === "huddle" ? 0.8 : 2.4 });
         Object.assign(beatRun, { id: beatRun.id + 1, kind: ev.beat, x: ev.x, z: ev.z, follow: ev.follow, zoom: ev.zoom, until: hold === null ? Infinity : fx.time + hold + 2.2, camera, acc: 0 });
-        registry.set(beatAtom, { id: beatRun.id, kind: ev.beat, caption: ev.caption, sub: ev.sub });
+        registry.set(beatAtom, { id: beatRun.id, kind: ev.beat, caption: ev.caption, sub: ev.sub, ...(ev.kicker ? { kicker: ev.kicker } : {}) });
         if (ev.beat === "viral") shake(0.35);
         return;
       }
@@ -263,7 +263,7 @@ export function FxDirector() {
       // `?moment=...&beat`: the staged moment's beat happened before the first frame; play the latest one now.
       replay.current = false;
       const c = [...world.disasters.cues].reverse().find((c) => c.type === "beat");
-      if (c?.type === "beat") handle({ type: "beat", beat: c.beat, caption: c.caption, sub: c.sub, x: worldX(c.x), z: worldZ(c.z), zoom: c.zoom, hold: c.hold, follow: c.follow });
+      if (c?.type === "beat") handle({ type: "beat", beat: c.beat, caption: c.caption, sub: c.sub, x: worldX(c.x), z: worldZ(c.z), zoom: c.zoom, hold: c.hold, follow: c.follow, ...(c.kicker ? { kicker: c.kicker } : {}) });
     }
     if (isBeat()) runBeat(world.walkers, dt);
 

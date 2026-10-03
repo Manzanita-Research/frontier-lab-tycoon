@@ -141,3 +141,24 @@ body.beat .world .nametag {
   pointer-events: none;
   transition: opacity var(--flt-motion-slow, 0.3s) ease, visibility 0s var(--flt-motion-slow, 0.3s);
 }
+/* FLT-101: a fade-to-black beat. The screen dims nearly to black behind the bars, for whatever happens off camera. */
+.beat-fade::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #050407;
+  opacity: 0.86;
+  animation: beat-fade 2.4s var(--flt-motion-ease, ease) both;
+}
+.beat-fade .beat-caption {
+  font-style: italic;
+}
+@keyframes beat-fade {
+  from { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .beat-fade::before { animation: none; }
+}
+:root[data-motion="reduced"] .beat-fade::before {
+  animation: none;
+}

@@ -3,7 +3,7 @@ import { HEADLINES } from "../content/headlines";
 import { THOUGHTS } from "../content/thoughts";
 import type { ContentApi } from "./services/content";
 import type { VocabularyApi } from "./services/vocabulary";
-import { ArcNode, ModError, suggest, type ArcData, type NamedCallData } from "./schema";
+import { ArcNode, ModError, suggest, type ArcData, type EventDocData, type NamedCallData } from "./schema";
 import type { Schema } from "effect";
 import { checkCall, GUARD_NAMES, normalize, VERB_NAMES } from "../sim/verbs";
 import type { Call, DisasterDef } from "../sim/disasters/types";
@@ -49,7 +49,8 @@ export function validateContent(content: ContentApi, vocabulary: VocabularyApi):
   });
   const cards = content.events.filter((event) => "choices" in event).map((event) => event.id);
   content.events.forEach((event, i) => {
-    if (!("choices" in event)) { validateArc(event, vocabulary, `content.events[${i}]`, cards); return; }
+    if (!("choices" in event)) { validateArc(event, vocabulary, `content.events[${i}]`, cards, buildings); return; }
+    if (event.doc) validateDoc(event.doc, event.kind, `content.events[${i}].doc`);
     event.choices.forEach((choice, j) => choice.effects.forEach((effect, k) => {
     const path = `content.events[${i}].choices[${j}].effects[${k}]`;
     if (effect.type === "place") known(effect.kind, buildings, `${path}.kind`);
@@ -61,7 +62,7 @@ export function validateContent(content: ContentApi, vocabulary: VocabularyApi):
   content.arcs.forEach((arc, i) => {
     if (eventIds.has(arc.id)) throw new ModError({ path: `content.arcs[${i}].id`, detail: `id "${arc.id}" is already in events` });
   });
-  content.arcs.forEach((arc, i) => validateArc(arc, vocabulary, `content.arcs[${i}]`, cards));
+  content.arcs.forEach((arc, i) => validateArc(arc, vocabulary, `content.arcs[${i}]`, cards, buildings));
   const benches = content.benchmarks.map((b) => b.id);
   content.benchmarks.forEach((b, i) => { if (b.replaces !== undefined) known(b.replaces, benches, `content.benchmarks[${i}].replaces`); });
   if (!content.benchmarks.some((b) => b.replaces === undefined)) throw new ModError({ path: "content.benchmarks", detail: "at least one benchmark must be in play from the start (no `replaces`)" });
@@ -76,9 +77,22 @@ export function validateContent(content: ContentApi, vocabulary: VocabularyApi):
   }
 }
 
+/** A card's document (FLT-101): only a drama card shows one, and a chart's flows join nodes it has. */
+function validateDoc(doc: EventDocData, kind: string | undefined, path: string) {
+  if (kind !== "drama") throw new ModError({ path, detail: `a document only shows on a card with "kind": "drama" (this card's kind is ${kind ? `"${kind}"` : "unset"})` });
+  if (doc.style !== "sankey") return;
+  const ids = doc.nodes.map((n) => n.id);
+  ids.forEach((id, j) => { if (ids.indexOf(id) !== j) throw new ModError({ path: `${path}.nodes[${j}].id`, detail: `node "${id}" is listed twice` }); });
+  doc.flows.forEach((f, j) => {
+    known(f.from, ids, `${path}.flows[${j}].from`);
+    known(f.to, ids, `${path}.flows[${j}].to`);
+    if (f.from === f.to) throw new ModError({ path: `${path}.flows[${j}]`, detail: "a flow can't go from a node to itself" });
+  });
+}
+
 /** Structural reachability, ignoring guard outcomes. This is validation only, not a second sim engine.
  * Targets use sibling paths (including a compound state's descendants). Delays and inline code have no schema. */
-export function validateArc(arc: ArcData, vocabulary: VocabularyApi, path: string, cards?: readonly string[]): void {
+export function validateArc(arc: ArcData, vocabulary: VocabularyApi, path: string, cards?: readonly string[], buildings?: readonly string[]): void {
   const nodes = new Map<string, Schema.Schema.Type<typeof ArcNode>>();
   const collect = (states: ArcData["states"], parent: string) => {
     for (const [key, node] of Object.entries(states)) {
@@ -94,7 +108,7 @@ export function validateArc(arc: ArcData, vocabulary: VocabularyApi, path: strin
     known(type, names, at);
     const kind = names === vocabulary.guards ? "guard" : "verb";
     if (!(kind === "guard" ? GUARD_NAMES : VERB_NAMES).includes(type)) return;
-    const [first] = checkCall(value as Call, kind, at);
+    const [first] = checkCall(value as Call, kind, at, undefined, buildings);
     if (first) {
       const cut = first.indexOf(": ");
       throw new ModError({ path: first.slice(0, cut), detail: first.slice(cut + 2) });

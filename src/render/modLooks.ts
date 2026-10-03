@@ -407,6 +407,8 @@ export function buildModLooks(looks: Readonly<Record<string, ResolvedLook>>): Mo
   const tints = new Map<string, Tint>();
   const group = new THREE.Group();
   for (const [target, look] of Object.entries(looks)) {
+    // A building's look (FLT-101) is drawn by the building, not here.
+    if (target.startsWith("building:")) continue;
     if (look.tint) {
       tints.set(target, { body: look.tint.body ? new THREE.Color(look.tint.body) : null, head: look.tint.head ? new THREE.Color(look.tint.head) : null });
       continue;

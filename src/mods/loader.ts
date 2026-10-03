@@ -118,7 +118,8 @@ export function modToLayer(input: ModManifest) {
     const below = yield* Voice;
     return mod.voice ? Voice.of({ voice: { ...mod.voice, mod: mod.id } }) : below;
   }));
-  return Layer.mergeAll(content, assets, skin, audio, looks, voice);
+  // Looks read this mod's content (a building look is for a building the mod may add), so they sit on top of it.
+  return Layer.mergeAll(content, assets, skin, audio, looks.pipe(Layer.provide(content)), voice);
 }
 
 const HEX = /^#[0-9a-f]{3}(?:[0-9a-f]{3})?$/i;
@@ -149,6 +150,7 @@ function resolveLook(target: string, look: LookData, own: Readonly<Record<string
   const fail = (detail: string, at = path) => { throw new ModError({ path: at, detail }); };
   const { kinds, roles } = lookTargets(content);
   const [kind = "", role] = target.split(":");
+  if (kind === "building") return buildingLook(role ?? "", look, content, mod, path, fail);
   // FLT-102: the staff by job ("staff:sre") and visitor groups by kind ("group:auditor") wear looks too. Recipes, sprites
   // and models only: they have no base body to tint.
   const crew = kind === "staff" || kind === "group";
@@ -182,6 +184,26 @@ function resolveLook(target: string, look: LookData, own: Readonly<Record<string
   if (look.signs && kind !== "protester" && kind !== "faction") fail("only protesters (and faction crowds) carry signs", `${path}.signs`);
   const src = look.sprite !== undefined ? ownAsset(own, look.sprite, "image", `${path}.sprite`) : look.glb !== undefined ? ownAsset(own, look.glb, "model", `${path}.glb`) : undefined;
   return { ...look, mod, ...(src ? { src } : {}) };
+}
+/**
+ * FLT-101: a building's look, `building:<kind>`: a static recipe in tiles, centred on the footprint. `"coat"` is the
+ * building's own colour and `"window"` its window glass (lit at night). No motion, sprites or models yet.
+ */
+function buildingLook(kind: string, look: LookData, content: ContentApi, mod: string, path: string, fail: (detail: string, at?: string) => never): ResolvedLook {
+  const kinds = Object.keys(content.buildings);
+  if (!kinds.includes(kind)) fail(`unknown building "${kind}"${suggest(kind, kinds)}`);
+  if (!look.recipe) fail("a building's look is a \"recipe\" (sprites, models and tints are for walkers)");
+  const extra = (["sprite", "glb", "tint", "coats", "signs", "gait", "size"] as const).find((key) => look[key] !== undefined);
+  if (extra) fail(`a building's look has no "${extra}"`, `${path}.${extra}`);
+  const [w, d] = content.buildings[kind]!.size;
+  for (const [i, part] of look.recipe!.entries()) {
+    const at = `${path}.recipe[${i}]`;
+    if (part.color !== "coat" && part.color !== "window" && !HEX.test(part.color)) fail(`expected "#rrggbb", "coat" (the building's colour) or "window", got "${part.color}"`, `${at}.color`);
+    if (part.motion) fail("building parts don't move", `${at}.motion`);
+    // Inside the footprint, give or take a tile's tenth, so placement and paths read right.
+    if (Math.abs(part.at[0]) + part.size[0] / 2 > w / 2 + 0.1 || Math.abs(part.at[2]) + part.size[2] / 2 > d / 2 + 0.1) fail(`the part pokes out of the ${w}x${d} footprint`, `${at}.at`);
+  }
+  return { ...look, mod };
 }
 export interface Conflict {
   readonly path: string;

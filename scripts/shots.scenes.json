@@ -490,6 +490,20 @@
       "duck-add",
       "duck-phone"
     ],
+    "flt-101": [
+      "mea-arrival",
+      "mea-invited",
+      "mea-convening",
+      "mea-manor-dark",
+      "mea-sock",
+      "mea-sock-door",
+      "mea-leaked",
+      "mea-leaked-classic",
+      "mea-pileon",
+      "mea-crisis",
+      "mea-leaked-phone",
+      "mea-convening-phone"
+    ],
     "flt-105": [
       "acid-offer",
       "acid-warning",
@@ -7342,6 +7356,216 @@
         "mod": "/mods/examples/duck-mode/mod.json"
       },
       "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "mea-arrival": {
+      "title": "FLT-101: Utilsbury Manor arrives beside the gate (the Maximally Effective Altruists mod)",
+      "query": {
+        "warp": null,
+        "mod": "/mods/examples/maximally-effective-altruists/mod.json",
+        "moment": "arc:mea-story:arrival",
+        "focus": "9.5,14.5",
+        "zoom": 80
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "mea-invited": {
+      "title": "FLT-101: the invitation to the Convening (Attend / Run the numbers first / Decline)",
+      "query": {
+        "warp": null,
+        "mod": "/mods/examples/maximally-effective-altruists/mod.json",
+        "moment": "arc:mea-story:invited"
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "mea-convening": {
+      "title": "FLT-101: later that evening, the manor's lights go off (fade beat)",
+      "query": {
+        "warp": null,
+        "mod": "/mods/examples/maximally-effective-altruists/mod.json",
+        "moment": "arc:mea-story:convening",
+        "beat": 1
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 2600
+        }
+      ]
+    },
+    "mea-manor-dark": {
+      "title": "FLT-101: the manor with its lights off at night, no beat",
+      "query": {
+        "warp": null,
+        "mod": "/mods/examples/maximally-effective-altruists/mod.json",
+        "moment": "arc:mea-story:convening",
+        "hour": 23,
+        "focus": "9.5,14.5",
+        "zoom": 80
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "mea-sock": {
+      "title": "FLT-101: meanwhile, a plain cut back to the lab: a sock on the Cluster door (cut beat)",
+      "query": {
+        "warp": null,
+        "mod": "/mods/examples/maximally-effective-altruists/mod.json",
+        "moment": "arc:mea-story:sock",
+        "beat": 1
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 2600
+        }
+      ]
+    },
+    "mea-leaked": {
+      "title": "FLT-101: the leaked Sankey in Sankey Panky 95 (Trust drops)",
+      "query": {
+        "warp": null,
+        "mod": "/mods/examples/maximally-effective-altruists/mod.json",
+        "moment": "arc:mea-story:leaked"
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "mea-leaked-classic": {
+      "title": "FLT-101: the leaked Sankey in the base Drama slot",
+      "query": {
+        "warp": null,
+        "mod": "/mods/examples/maximally-effective-altruists/mod.json",
+        "moment": "arc:mea-story:leaked",
+        "skin": "base"
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "mea-pileon": {
+      "title": "FLT-101: the Bird App piles on (posters and a rival CEO)",
+      "query": {
+        "warp": null,
+        "mod": "/mods/examples/maximally-effective-altruists/mod.json",
+        "moment": "arc:mea-story:pileon"
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "eval": "() => document.querySelector('[data-anchor=\"app:bird\"]')?.click()"
+        },
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "mea-crisis": {
+      "title": "FLT-101: the Comms Desk's draft statement; the Senate on the ticker",
+      "query": {
+        "warp": null,
+        "mod": "/mods/examples/maximally-effective-altruists/mod.json",
+        "moment": "arc:mea-story:crisis"
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "mea-leaked-phone": {
+      "title": "FLT-101: the leaked Sankey on a phone",
+      "query": {
+        "warp": null,
+        "mod": "/mods/examples/maximally-effective-altruists/mod.json",
+        "moment": "arc:mea-story:leaked"
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 800
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "mea-convening-phone": {
+      "title": "FLT-101: the fade beat on a phone",
+      "query": {
+        "warp": null,
+        "mod": "/mods/examples/maximally-effective-altruists/mod.json",
+        "moment": "arc:mea-story:convening",
+        "beat": 1
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
+        {
+          "wait": 2600
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "mea-sock-door": {
+      "title": "FLT-101: the sock on the Cluster door, close up (no beat)",
+      "query": {
+        "warp": null,
+        "mod": "/mods/examples/maximally-effective-altruists/mod.json",
+        "moment": "arc:mea-story:sock",
+        "focus": "10,20",
+        "zoom": 100
+      },
+      "steps": [
+        {
+          "tick": 2
+        },
         {
           "wait": 800
         }

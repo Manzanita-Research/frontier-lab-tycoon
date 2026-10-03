@@ -20,7 +20,7 @@ export type DramaMoment = (typeof DRAMA_MOMENTS)[number];
 export const isDramaMoment = (m: string | null | undefined): m is DramaMoment => (DRAMA_MOMENTS as readonly unknown[]).includes(m) || !!m?.startsWith("poach-offer:");
 
 /** A lab a year in: paths, a Hall, a gateway, the Kombucha Bar, ten researchers and three releases. */
-function busyLab(s: GameState) {
+export function busyLab(s: GameState) {
   s.cash = 20_000_000;
   for (let z = 18; z >= 10; z--) applyNow(s, [{ type: "placePath", x: 11, z }]);
   for (let x = 6; x <= 17; x++) applyNow(s, [{ type: "placePath", x, z: 16 }]);
