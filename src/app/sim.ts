@@ -26,7 +26,7 @@ import { DRAMA_MOMENTS, isDramaMoment, stageDrama } from "../sim/defection/demo"
 import { AUDIT_MOMENTS, isAuditMoment, stageAudit } from "../sim/auditors/demo";
 import { isSenateMoment, SENATE_MOMENTS, stageSenate } from "../sim/capture/demo";
 import { ESCAPE_MOMENTS, isEscapeMoment, stageEscape } from "../sim/escape/demo";
-import { ACID_MOMENTS, isAcidMoment, stageAcid } from "../sim/tripDemo";
+import { ACID_MOMENTS, acidNewsFrom, isAcidMoment, stageAcid } from "../sim/tripDemo";
 import { walkersThinking } from "../sim/mind";
 import { makeSnapshot, NO_SELECTION, type Snapshot, type UiSelection, type UiToast } from "./hud";
 import { continueTutorial } from "../sim/tutorial";
@@ -202,7 +202,10 @@ type SimDebug = Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "re
 export function createSimHandle(dbg: SimDebug, def: GameDefinition | null = null, mods: RunMods | null = null): SimHandle {
   const sim = withDefs(def, () => stage(dbg));
   if (mods) sim.mods = mods;
-  return new SimHandle(sim, sim.leapfrog.enabled, undefined, def);
+  const handle = new SimHandle(sim, sim.leapfrog.enabled, undefined, def);
+  // ACID MOD(E)'s review links open the ticker on the beat's own headlines.
+  if (isAcidMoment(dbg.moment)) handle.newsStartId = acidNewsFrom(sim);
+  return handle;
 }
 
 function stage(dbg: SimDebug): GameState {

@@ -49,10 +49,19 @@ function lab(s: GameState) {
   }
 }
 
-/** Play on, answering every other card with its first choice, until `done` or `days` run out. */
+/** Play on, answering every other card with its first choice, until `done` or `days` run out; returns the first id of the last tick. */
 function until(s: GameState, done: (s: GameState) => boolean, days: number) {
-  for (let i = 0; i < days * TICKS_PER_DAY && !done(s); i++) tick(s, answer(s));
+  let from = s.nextId;
+  for (let i = 0; i < days * TICKS_PER_DAY && !done(s); i++) {
+    from = s.nextId;
+    tick(s, answer(s));
+  }
+  return from;
 }
+
+/** Where each staged beat's news starts, so the ticker opens on the beat's headline rather than two months of backlog. */
+const beatNews = new WeakMap<GameState, number>();
+export const acidNewsFrom = (s: GameState) => beatNews.get(s) ?? 0;
 
 export function stageAcid(s: GameState, moment: AcidMoment) {
   unpaced(s);
@@ -69,9 +78,15 @@ export function stageAcid(s: GameState, moment: AcidMoment) {
     dailyEvents(s);
   }
   if (moment === "acid-offer") return;
+  beatNews.set(s, s.nextId);
   applyNow(s, [{ type: "chooseEvent", eventId: CARD, choiceIndex: 0 }]);
   const at = (value: string) => (x: GameState) => x.modArcs?.[ARC]?.value === value;
-  if (moment === "acid-breakthrough") return until(s, at("breakthrough"), 6);
+  if (moment === "acid-breakthrough") {
+    beatNews.set(s, until(s, at("breakthrough"), 6));
+    // Whatever else the lab is asked that morning is answered: the screen is the enlightenment's.
+    for (let i = 0; i < 6 && openEventOf(s); i++) applyNow(s, answer(s));
+    return;
+  }
   // The peak (and `acid-researcher`, the same afternoon with one of the team tapped): the come-up is a day, so a day and
   // a half in it is at full strength, and the team is somewhere.
   const start = s.trip?.start ?? s.tick;

@@ -109,7 +109,13 @@ describe("ACID MOD(E)", () => {
   });
 
   describe("its ?moment= links land on their beat", () => {
-    const staged = async (moment: string) => createSimHandle({ seed: 3, warp: 12, agents: 0, discourse: 0, researchers: 0, moment }, await definition).world;
+    const handle = async (moment: string) => createSimHandle({ seed: 3, warp: 12, agents: 0, discourse: 0, researchers: 0, moment }, await definition);
+    const staged = async (moment: string) => (await handle(moment)).world;
+    // The ticker opens on the beat's own news (SimHandle.report filters from newsStartId).
+    const ticker = async (moment: string) => {
+      const h = await handle(moment);
+      return h.world.news.filter((n) => n.id >= h.newsStartId).map((n) => n.text);
+    };
 
     it("bring the mod along unless the address names its own", () => {
       expect(new URLSearchParams(momentSearch("?moment=acid-peak&seed=3")).getAll("mod")).toEqual(["/mods/examples/acid-mode/mod.json"]);
@@ -139,6 +145,13 @@ describe("ACID MOD(E)", () => {
       expect(w.modArcs!["acid-mode"]!.value).toBe("breakthrough");
       expect(w.trip).toBeDefined();
       expect(w.news.some((n) => n.text.includes("model achieved enlightenment"))).toBe(true);
+    });
+
+    it("open the ticker on the beat's headline", async () => {
+      expect((await ticker("acid-peak")).some((t) => t.includes("'a medium dose of acid'"))).toBe(true);
+      const b = await ticker("acid-breakthrough");
+      expect(b.some((t) => t.includes("model achieved enlightenment"))).toBe(true);
+      expect(b.some((t) => t.includes("'a medium dose of acid'"))).toBe(false);
     });
   });
 });
