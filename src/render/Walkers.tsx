@@ -1,5 +1,5 @@
 import { useFrame } from "@react-three/fiber";
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 import * as THREE from "three";
 import { sim as game } from "../app/game";
 import { HALF } from "./coords";
@@ -9,8 +9,8 @@ import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js
 import { CHEER_SECONDS, fx } from "./fx/state";
 import { glowTexture } from "./materials";
 import { signTexture } from "./signs";
-import { buildModLooks, lookKey, type Pose } from "./modLooks";
-import { modSession } from "../app/mods";
+import { lookKey, type Pose } from "./modLooks";
+import { useSessionLooks } from "./useSessionLooks";
 import { beatRun } from "./fx/beatState";
 import { reducedMotion } from "../skins/kit/motion";
 import { Follow } from "./follow";
@@ -124,8 +124,8 @@ export function Walkers() {
   const hideGeo = useMemo(() => new RoundedBoxGeometry(0.46 * S, 0.44 * S, 0.42 * S, 2, 0.02 * S), []);
   const tapeGeo = useMemo(() => new THREE.BoxGeometry(0.47 * S, 0.012 * S, 0.1 * S), []);
   // Mod looks (FLT-55): golden retrievers for protesters and the like. The base game has none, and skips all of it.
-  const looks = useMemo(() => buildModLooks(modSession().presentation?.looks ?? {}), []);
-  useEffect(() => () => looks.dispose(), [looks]);
+  // FLT-102: rebuilt when a mod with looks comes or goes mid-game.
+  const looks = useSessionLooks("walkers");
   const modded = looks.drawers.size > 0 || looks.tints.size > 0;
 
   useFrame(({ clock, camera }) => {

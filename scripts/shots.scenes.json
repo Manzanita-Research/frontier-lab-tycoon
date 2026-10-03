@@ -482,6 +482,14 @@
       "account-chip-logon",
       "account-chip-phone"
     ],
+    "duck": [
+      "duck-midgame",
+      "duck-sea",
+      "duck-bird",
+      "duck-full",
+      "duck-add",
+      "duck-phone"
+    ],
     "flt-101": [
       "mea-arrival",
       "mea-invited",
@@ -7216,6 +7224,127 @@
       "mobile": true,
       "query": {
         "skin": "homepage-98"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "duck-midgame": {
+      "title": "FLT-102: the mid-game lab in duck mode (?mod=): every walker, the crew and the picket line are rubber ducks; the thoughts and ticker quack",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95",
+        "focus": "11.5,14.5",
+        "zoom": 70,
+        "mod": "/mods/examples/duck-mode/mod.json"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "duck-sea": {
+      "title": "FLT-102: a sea of ducks at the gate, signs and all",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95",
+        "focus": "10,17",
+        "zoom": 85,
+        "mod": "/mods/examples/duck-mode/mod.json"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "duck-bird": {
+      "title": "FLT-102: Bird Reader in duck mode: every poster a duck, every post in duck, the numbers kept",
+      "query": {
+        "moment": "bird-rivals",
+        "warp": null,
+        "mod": "/mods/examples/duck-mode/mod.json"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "duck-full": {
+      "title": "FLT-102: full duck (&voice=full): the menus and buttons too",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95",
+        "focus": "11.5,14.5",
+        "zoom": 70,
+        "mod": "/mods/examples/duck-mode/mod.json",
+        "voice": "full"
+      },
+      "steps": [
+        {
+          "wait": 800
+        }
+      ]
+    },
+    "duck-add": {
+      "title": "FLT-102: Add/Remove Mods, mid-game, no ?mod=: Add, and the lab turns into ducks on screen with the voice picker",
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95",
+        "focus": "11.5,14.5",
+        "zoom": 70
+      },
+      "steps": [
+        {
+          "click": "[data-testid=start-button]"
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": "[data-fly=settings]"
+        },
+        {
+          "wait": 300
+        },
+        {
+          "click": "[data-fly=settings] button:has-text('Mods')"
+        },
+        {
+          "wait": 600
+        },
+        {
+          "click": ".f95-mods button:has-text('Add')",
+          "optional": true,
+          "timeout": 3000
+        },
+        {
+          "wait": 4000
+        }
+      ]
+    },
+    "duck-phone": {
+      "title": "FLT-102: the mid-game lab in duck mode on a phone",
+      "viewport": "390x844",
+      "mobile": true,
+      "query": {
+        "scenario": "midgame",
+        "warp": null,
+        "seed": 48,
+        "skin": "frontier-95",
+        "mod": "/mods/examples/duck-mode/mod.json"
       },
       "steps": [
         {

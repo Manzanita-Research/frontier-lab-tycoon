@@ -5,6 +5,7 @@ import { Skin } from "./services/skin";
 import { Assets } from "./services/assets";
 import { Audio } from "./services/audio";
 import { Looks, type ResolvedLook } from "./services/looks";
+import { Voice } from "./services/voice";
 import { Vocabulary } from "./services/vocabulary";
 import { Progression, CoachLine, Arc, Building, Disaster, Ending, EntityKind, EventOrArc, Goal, Headline, ModError, NamePool, Rival, Thought, Tip, decodeManifest, suggest, type LookData, type ModManifest, type SkinData } from "./schema";
 import { contentKey, patchById } from "./patch";
@@ -15,6 +16,7 @@ import type { ProgressionLevel } from "../content/progression";
 import { sanitizeCss } from "./css";
 import { ownAsset, validateAssets } from "./assets";
 import { VISITOR_ROLES } from "../content/names";
+import { STAFF } from "../content/staff";
 import { validateContent } from "./validation";
 import baseTokens from "../skins/base/tokens.json";
 import baseStrings from "../skins/base/strings.json";
@@ -110,8 +112,14 @@ export function modToLayer(input: ModManifest) {
       return Looks.of({ looks });
     }, catch: asModError });
   }));
+  // A voice (FLT-102) is plain data the schema already checked; the last mod with one speaks.
+  const voice = Layer.effect(Voice, Effect.gen(function* () {
+    const mod = yield* manifest;
+    const below = yield* Voice;
+    return mod.voice ? Voice.of({ voice: { ...mod.voice, mod: mod.id } }) : below;
+  }));
   // Looks read this mod's content (a building look is for a building the mod may add), so they sit on top of it.
-  return Layer.mergeAll(content, assets, skin, audio, looks.pipe(Layer.provide(content)));
+  return Layer.mergeAll(content, assets, skin, audio, looks.pipe(Layer.provide(content)), voice);
 }
 
 const HEX = /^#[0-9a-f]{3}(?:[0-9a-f]{3})?$/i;
@@ -143,12 +151,22 @@ function resolveLook(target: string, look: LookData, own: Readonly<Record<string
   const { kinds, roles } = lookTargets(content);
   const [kind = "", role] = target.split(":");
   if (kind === "building") return buildingLook(role ?? "", look, content, mod, path, fail);
-  if (kind === "faction") {
+  // FLT-102: the staff by job ("staff:sre") and visitor groups by kind ("group:auditor") wear looks too. Recipes, sprites
+  // and models only: they have no base body to tint.
+  const crew = kind === "staff" || kind === "group";
+  if (crew && look.tint) fail(`"${kind}:" looks draw a whole body; use "recipe", "sprite" or "glb", not "tint"`);
+  if (kind === "staff") {
+    const jobs = Object.keys(STAFF);
+    if (!role || !jobs.includes(role)) fail(`unknown staff job "${role ?? ""}"${suggest(role ?? "", jobs)}; jobs are ${jobs.join(", ")}`);
+  } else if (kind === "group") {
+    // Group kinds come with their packs (the auditors' is "auditor"); a kind nobody calls is simply never drawn.
+    if (!role || !/^[a-z][\w-]*$/.test(role)) fail(`expected "group:<kind>", like "group:auditor"`);
+  } else if (kind === "faction") {
     // A faction crowd (FLT-33): the protesters who came with it, and anyone who has taken its side.
     const ids = content.factions.map((row) => row.id);
     if (!role || !ids.includes(role)) fail(`unknown faction "${role ?? ""}"${suggest(role ?? "", ids)}; factions are ${ids.join(", ")}`);
-  } else if (!kinds.includes(kind)) fail(`unknown walker kind "${kind}"${suggest(kind, kinds)}; looks are for ${kinds.join(", ")} or "faction:<id>"`);
-  if (role !== undefined && kind !== "faction") {
+  } else if (!kinds.includes(kind)) fail(`unknown walker kind "${kind}"${suggest(kind, kinds)}; looks are for ${kinds.join(", ")}, "faction:<id>", "staff:<job>" or "group:<kind>"`);
+  if (role !== undefined && kind !== "faction" && !crew) {
     const known = roles[kind];
     if (!known) fail(`"${kind}" has one role; use "${kind}" on its own`);
     else if (!known.includes(role)) fail(`unknown ${kind} role "${role}"${suggest(role, known)}; ${kind} roles are ${known.join(", ")}`);
@@ -217,6 +235,7 @@ export function conflictReport(mods: readonly ModManifest[]): readonly Conflict[
     for (const key of Object.keys(mod.audio?.cues ?? {})) mark(`audio.cues.${key}`, mod.id, "override");
     if (mod.audio?.music) mark("audio.music", mod.id, "override");
     for (const key of Object.keys(mod.looks ?? {})) mark(`looks.${key}`, mod.id, "override");
+    if (mod.voice) mark("voice", mod.id, "override");
   }
   return report;
 }

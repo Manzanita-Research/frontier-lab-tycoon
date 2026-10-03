@@ -37,11 +37,17 @@ export interface Pose {
   signYaw: number;
 }
 
+/** Who a look draws: a walker, a staffer or a visitor group's member (FLT-102). Only protesters carry signs. */
+export interface Drawn {
+  readonly id: number;
+  readonly kind: string;
+}
+
 export interface LookDrawer {
   readonly group: THREE.Group;
   begin(): void;
   /** Draw one walker. False when the look cannot draw yet (a model still loading): draw the base look instead. */
-  draw(w: Walker, p: Pose): boolean;
+  draw(w: Drawn, p: Pose): boolean;
   end(): void;
   dispose(): void;
 }
@@ -116,7 +122,7 @@ function motionOf(motion: LookPartData["motion"], p: Pose): [number, number, num
 }
 
 /** Bob (up), pitch (a rocking trot) and roll, by gait. Protesters chant-hop in place; everyone else breathes. */
-function gaitOf(look: ResolvedLook, w: Walker, p: Pose): [number, number, number] {
+function gaitOf(look: ResolvedLook, w: Drawn, p: Pose): [number, number, number] {
   const { t, phase, walking, hop } = p;
   const chant = w.kind === "protester";
   switch (look.gait ?? "walk") {
@@ -124,6 +130,11 @@ function gaitOf(look: ResolvedLook, w: Walker, p: Pose): [number, number, number
       return walking ? [Math.abs(Math.sin(t * 14 + phase)) * 0.07 + hop, Math.sin(t * 14 + phase) * 0.06, 0] : [(chant ? Math.abs(Math.sin(t * 5 + phase)) * 0.06 : 0) + hop, 0, 0];
     case "hop":
       return [(walking ? Math.abs(Math.sin(t * 6 + phase)) * 0.3 : chant ? Math.abs(Math.sin(t * 3 + phase)) * 0.1 : 0) + hop, 0, 0];
+    case "waddle":
+      // FLT-102: side to side on every step, like a duck (or a bath toy that thinks it is one).
+      return walking
+        ? [Math.abs(Math.sin(t * 10 + phase)) * 0.05 + hop, 0, Math.sin(t * 10 + phase) * 0.16]
+        : [(chant ? Math.abs(Math.sin(t * 5 + phase)) * 0.08 : Math.sin(t * 1.3 + phase) * 0.013) + hop, 0, Math.sin(t * 1.6 + phase) * 0.035];
     case "float":
       return [0.15 + Math.sin(t * 2 + phase) * 0.08 + hop, 0, Math.sin(t * 1.3 + phase) * 0.05];
     default:
@@ -175,7 +186,7 @@ class Signs {
     this.counts.fill(0);
     this.np = 0;
   }
-  draw(w: Walker, p: Pose, bob: number) {
+  draw(w: Drawn, p: Pose, bob: number) {
     if (w.kind !== "protester") return; // a faction look also dresses the visitors who took its side, sign-free
     const wave = Math.sin(p.t * 5 + p.phase) * 0.14;
     m4.compose(pos.set(p.x, this.height - 0.85 * this.k + bob, p.z), quat.identity(), scl.set(1, this.k, 1));

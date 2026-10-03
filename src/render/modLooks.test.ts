@@ -3,6 +3,12 @@ import * as THREE from "three";
 import { buildModLooks, lookKey, type Pose } from "./modLooks";
 import type { ResolvedLook } from "../mods/services/looks";
 import type { Walker } from "../sim/types";
+import { Effect } from "effect";
+import duckMod from "../../mods/examples/duck-mode/mod.json";
+import { composeMods } from "../mods/loader";
+import { resolvePresentation } from "../mods/presentation";
+import { decodeManifest } from "../mods/schema";
+import { perfBudget } from "../sim/testkit";
 
 const pose: Pose = { x: 0, z: 0, yaw: 0, t: 1, phase: 0, walking: true, hop: 0, land: 0, env: 0, signYaw: 0 };
 const walker = (id: number, kind: Walker["kind"], role = "") => ({ id, kind, role }) as Walker;
@@ -47,5 +53,29 @@ describe("FLT-55 mod looks", () => {
   it("gives the base game nothing to draw", () => {
     const looks = buildModLooks({});
     expect(looks.drawers.size + looks.tints.size).toBe(0);
+  });
+
+  it("FLT-102: draws 500 waddling ducks, every part, in well under a frame", async () => {
+    const { looks: resolved } = await Effect.runPromise(resolvePresentation(composeMods([await Effect.runPromise(decodeManifest(duckMod))]).layer));
+    // Signs paint on a canvas (no DOM here): the ducks are what's measured.
+    const looks = buildModLooks(Object.fromEntries(Object.entries(resolved).map(([k, { signs: _, ...look }]) => [k, look])));
+    const kinds = ["researcher", "agent", "visitor", "protester"] as const;
+    const crowd = Array.from({ length: 500 }, (_, id) => walker(id, kinds[id % 4]!, id % 8 === 2 ? "Journalist" : ""));
+    const drawers = crowd.map((w) => lookKey(looks.drawers, w)!);
+    const frame = (t: number) => {
+      for (const d of looks.drawers.values()) d.begin();
+      crowd.forEach((w, i) => drawers[i]!.draw(w, { ...pose, x: i % 25, z: i / 25, t, phase: i }));
+      for (const d of looks.drawers.values()) d.end();
+    };
+    frame(0);
+    const times: number[] = [];
+    for (let i = 0; i < 40; i++) {
+      const t0 = performance.now();
+      frame(i / 60);
+      times.push(performance.now() - t0);
+    }
+    times.sort((a, b) => a - b);
+    expect(times[20]!).toBeLessThan(perfBudget(4));
+    looks.dispose();
   });
 });
