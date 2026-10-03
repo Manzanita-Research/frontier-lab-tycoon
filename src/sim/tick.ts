@@ -40,6 +40,7 @@ import { updateTutorial } from "./tutorial";
 import { observeGuardrails, pendingConfirmOf } from "./guardrails";
 import { defs, withDefs } from "./defs";
 import { dailyModArcs } from "./modArcs";
+import { dailyTrip } from "./trip";
 import { dailyFactions, updateFactions } from "./factions/driver";
 import type { GameDefinition } from "../mods/game-definition";
 
@@ -177,6 +178,8 @@ function step(state: GameState, commands: readonly Command[]) {
     probe?.lap("daily:goals");
     if (defs().arcs.length > 0) dailyModArcs(state, rng);
     probe?.lap("daily:modArcs");
+    // FLT-105: no draws unless someone is away.
+    dailyTrip(state, rng);
     if (systemUnlocked(state, "auditors")) dailyAuditors(state);
     probe?.lap("daily:auditors");
     // A card a mod brought mid-game (FLT-78) comes even before the ladder opens the rest: it was asked for. So does the

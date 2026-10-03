@@ -142,6 +142,37 @@ export interface Walker {
   faction?: string;
   /** Protesters: the faction whose crowd they came with. Absent for the water crowd (and every protester without factions). */
   crowd?: string;
+  /** FLT-105: somewhere else for a few days (the `people.spell` verb). Absent for everyone, nearly always. */
+  spell?: Spell;
+}
+
+/** A researcher who has gone somewhere (FLT-105): what they think while there, the day they're due back, and how it ends. */
+export interface Spell {
+  line: string;
+  /** The day it ends. */
+  until: number;
+  /** `back` as they were, `bonus`: back with something useful (capability), `quit`: they don't come back. */
+  fate: SpellFate;
+  /** The headline (quit) or toast (back, bonus) when it ends; `{name}` and `{their}` are filled in. */
+  after?: string;
+  /** Capability, in per cent of today's, that a `bonus` brings back. */
+  bonus?: number;
+  owner: string;
+}
+export type SpellFate = "back" | "bonus" | "quit";
+
+/** FLT-105: the whole lab going somewhere strange for a few days (the `trip.start` verb). The look is presentation's (ui/juice/trip.ts). */
+export interface TripState {
+  /** Whoever started it: a mod arc's id. */
+  owner: string;
+  label: string;
+  /** Ticks: it comes on from `start` over `rise`, holds until `end`, and wears off over `fade`. */
+  start: number;
+  end: number;
+  rise: number;
+  fade: number;
+  /** Lines for the presentation to say while it lasts (Frontier 95's Clip has its ego death in them). */
+  lines: string[];
 }
 
 export type StaffJob = "janitor" | "sre" | "comms" | "security";
@@ -418,6 +449,8 @@ export interface GameState {
   factions?: FactionsState;
   /** FLT-25: crowds that came to the gate to shout at another crowd (the `faction.rally` verb). Absent until the first. */
   rallies?: Rally[];
+  /** FLT-105: a trip under way (or wearing off). Absent otherwise. */
+  trip?: TripState;
   /** Generic inquiries started by the Vocabulary; the owning machine completes them. */
   investigations?: Record<string, Investigation>;
   /** FLT-26 Defection: opt-in pack (the ladder turns it on at Scrutiny); absent in legacy saves and baseline runs. */

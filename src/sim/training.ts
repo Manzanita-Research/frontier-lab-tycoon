@@ -24,7 +24,8 @@ const LAUNCH_BONUS_PER_GAIN = 15_000;
 export function morale(state: GameState): number {
   const rs = state.walkers.filter((w) => w.kind === "researcher");
   if (rs.length === 0) return 0.7;
-  return rs.reduce((sum, w) => sum + happinessOf(w), 0) / rs.length;
+  // Someone away on a spell (FLT-105) is no use to the run, however blissful.
+  return rs.reduce((sum, w) => sum + (w.spell ? 0 : happinessOf(w)), 0) / rs.length;
 }
 
 export function computePerDay(state: GameState): number {

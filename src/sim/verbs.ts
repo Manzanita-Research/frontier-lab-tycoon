@@ -36,7 +36,8 @@ import { atDivert, divertStaff, releaseStaff, staffOf } from "./staff";
 import { callMeeting } from "./meetings";
 import { congaLine } from "./conga";
 import { resign } from "./walkers";
-import type { Building, GameState, Importance, NoticeSource, StaffJob, Tone } from "./types";
+import { boostCapability, castSpells, endTrip, SPELL_FATES, startTrip } from "./trip";
+import type { Building, GameState, Importance, NoticeSource, SpellFate, StaffJob, Tone } from "./types";
 import { startEscape } from "./escape/driver";
 import { defs } from "./defs";
 import { postNow } from "./birdapp/driver";
@@ -705,6 +706,38 @@ export const VERBS: Record<string, VerbDef> = {
         w.focus = Math.max(0, Math.min(1, w.focus + a));
       }
     },
+  },
+  "people.spell": {
+    doc: "Each researcher rolls `chance` (0 to 1) to go somewhere for `minDays` (default half of `days`) to `days` days, up to `max` of them (FLT-105). Each who goes gets one of `lines` (what they think while away, out loud), the same place in `fates` (back, bonus: back with `bonus` per cent capability, default 2, or quit: gone for good) and in `afters` (the toast or, for quit, the headline when it ends; `{name}`, `{their}`). While away they are no use to the training run.",
+    spec: { chance: "number", days: "number", minDays: "number?", max: "number?", lines: "strings", fates: "strings", afters: "strings?", bonus: "number?" },
+    verify: (p) => {
+      const lines = p.lines as string[];
+      const fates = p.fates as string[];
+      const bad = fates.find((f) => !(SPELL_FATES as readonly string[]).includes(f));
+      return lines.length === 0 ? "`lines` needs at least one line"
+        : fates.length !== lines.length ? "`fates` needs one fate per line"
+        : bad !== undefined ? `unknown fate "${bad}"; fates are ${SPELL_FATES.join(", ")}`
+        : p.afters !== undefined && (p.afters as string[]).length !== lines.length ? "`afters` needs one per line (\"\" for the default)"
+        : (p.chance as number) < 0 || (p.chance as number) > 1 ? "`chance` is 0 to 1"
+        : null;
+    },
+    run: (env, p) =>
+      void castSpells(env.state, env.rng, {
+        owner: ownerOf(env), chance: p.chance as number, days: p.days as number, minDays: p.minDays as number | undefined, max: p.max as number | undefined,
+        lines: (p.lines as string[]).map((l) => say(env, l)), fates: p.fates as SpellFate[], afters: p.afters as string[] | undefined, bonus: p.bonus as number | undefined,
+      }),
+  },
+  "trip.start": {
+    doc: "The whole screen goes somewhere strange (FLT-105): it comes on over `rise` days (default 1), lasts `days`, and wears off over `fade` (default 1.5). The player is warned first and can end it at once; reduced motion gets a calm version. `label` names it; `lines` are for the presentation to say (Frontier 95's Clip). Presentation only: the sim just keeps the dates.",
+    spec: { days: "number", rise: "number?", fade: "number?", label: "string?", lines: "strings?" },
+    verify: (p) => ((p.days as number) > 0 && (p.days as number) <= 30 ? null : "`days` is more than 0 and at most 30"),
+    run: (env, p) => startTrip(env.state, { owner: ownerOf(env), days: p.days as number, rise: p.rise as number | undefined, fade: p.fade as number | undefined, label: typeof p.label === "string" ? say(env, p.label) : undefined, lines: (p.lines as string[] | undefined)?.map((l) => say(env, l)) }),
+  },
+  "trip.end": { doc: "The trip starts wearing off now.", spec: {}, run: (env) => endTrip(env.state) },
+  "capability.boost": {
+    doc: "A research breakthrough: capability goes up by `pct` per cent of today's, plus `amount`. The Arena re-ranks at once.",
+    spec: { pct: "number?", amount: "number?" },
+    run: (env, p) => boostCapability(env.state, num(p.pct, 0), num(p.amount, 0)),
   },
   "birdapp.post": {
     doc: "Someone at the lab posts `text` on the Bird App within the hour (FLT-69): the beat's first person if they post, else one of `archetype` (oracle, hype, duo, thread, leaderboard, doomer, anon), else anyone who posts. It lands at midnight: `outcome` (flop, banger, controversy, ratioed, cancelled) says how, or the odds for its `spice` (0 to 1, default 0.5) do. Nothing while the Bird App is asleep.",
