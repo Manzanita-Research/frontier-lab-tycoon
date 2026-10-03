@@ -34,7 +34,7 @@ import type { Rng } from "./rng";
 import { auraApplicants } from "./birdapp/effects";
 import { TARGET_GATE, TARGET_WANDER, type Building, type GameState, type Point, type Walker, type WalkerKind, type WalkerMode } from "./types";
 import { datan2, dhypot } from "./dmath";
-import { HOLDING, lunchSpot, paceNow, waitsForLunch } from "./slopbowl/crowd";
+import { HOLDING, lunchSpot, lyingDown, paceNow, waitsForLunch } from "./slopbowl/crowd";
 
 /** Chance that a walker leaving a building hangs around outside it for a bit instead of rushing off. */
 const LOITER_CHANCE = 0.55;
@@ -288,13 +288,22 @@ function waitForLunch(state: GameState, w: Walker) {
   w.targetId = TARGET_WANDER;
   w.timer = HOLDING;
   const g = state.gate;
-  if (w.route.length === 0 && (first || paceNow(state, w))) {
+  // Day three: some of them lie down where they are, and stay down.
+  if (lyingDown(state, w) && !first) {
+    w.route = [];
+    return;
+  }
+  // Lunch is here: they stop pacing and eat where they stand (the driver sends them back to work after).
+  const eating = state.slopbowl?.machine.value === "fed";
+  if (w.route.length === 0 && !eating && (first || paceNow(state, w))) {
     const spot = lunchSpot(state, w);
     const far = Math.abs(w.x - spot[0]) + Math.abs(w.z - spot[1]) > 3;
     w.route = far ? [...(routeToRect(state, w.x, w.z, g, true) ?? []), spot] : [spot];
   }
+  // Hungry people hurry: twice the pace on the way to the gate.
   if (w.route.length > 0) advance(w);
-  if (w.route.length === 0) w.dir = datan2(g.x + g.w / 2 - w.x, g.z + g.d / 2 - w.z);
+  if (w.route.length > 2) advance(w);
+  if (w.route.length === 0 && !eating) w.dir = datan2(g.x + g.w / 2 - w.x, g.z + g.d / 2 - w.z);
 }
 
 /** A drifted agent heads for the fence (FLT-59): off its route and out of any building, and sim/escape drives it from here. */

@@ -9,7 +9,7 @@ const R = SLOPBOWL.rules;
 /** Hungry: research is going backwards. */
 export const hungry = (sb: SlopBowlState | undefined): boolean => {
   const v = sb?.enabled ? sb.machine.value : "quiet";
-  return v === "hangry" || v === "worse" || v === "arriving";
+  return v === "hangry" || v === "worse" || v === "meltdown" || v === "arriving";
 };
 
 /** How far a day's training goes (training.ts's ETA): backwards while hungry, faster while it is winning lunch back. Read-only. */

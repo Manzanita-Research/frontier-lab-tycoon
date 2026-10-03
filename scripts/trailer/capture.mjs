@@ -53,7 +53,12 @@ for (const shot of shots) {
     let queue = []; let id = 0;
     window.requestAnimationFrame = (cb) => { queue.push([++id, cb]); return id; };
     window.cancelAnimationFrame = (x) => { queue = queue.filter(([i]) => i !== x); };
-    window.__flushFrame = (t) => { const run = queue; queue = []; for (const [, cb] of run) cb(t); };
+    // performance.now() follows the capture's clock too (it keeps running in real time under the fake clock), so a
+    // timestamp from rAF and one read by hand agree: FLT-105's Odometer compared the two and drew garbage numbers.
+    const base = performance.now();
+    let at = base;
+    performance.now = () => at;
+    window.__flushFrame = (t) => { at = base + t; const run = queue; queue = []; for (const [, cb] of run) cb(at); };
   });
   let now = 0;
   const step = async (ms) => { await page.clock.runFor(ms); now += ms; await page.evaluate((t) => window.__flushFrame(t), now); };

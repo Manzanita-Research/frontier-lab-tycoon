@@ -2,7 +2,7 @@
 // nothing else in the game: no `src/sim/**`, no store, no three.
 import type { ComponentType, ReactNode } from "react";
 import type {
-  ArenaVM, AuditVM, BeatVM, BirdAppVM, BillVM, TrackerVM, ReportCardVM, BubbleVM, FactionsVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, DramaDocVM, DramaVM, SavesVM, WelcomeVM, EraCardVM, EventVM, HearingVM, HudActions, HudVM, LeakVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
+  ArenaVM, AuditVM, BeatVM, LunchVM, BirdAppVM, BillVM, TrackerVM, ReportCardVM, BubbleVM, FactionsVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, DramaDocVM, DramaVM, SavesVM, WelcomeVM, EraCardVM, EventVM, HearingVM, HudActions, HudVM, LeakVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
   ModsVM, SkinOfferVM, NewsroomVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StatsVM, ThoughtRowVM, TickerItemVM,
   StaffVM, TeaserVM, ProgressVM, ToastVM, TrainingVM, UnlockCardVM, VisibleVM, HelpVM, PapersVM, PaperMomentVM, CrumbWikiVM, DisastersVM,
   EndingVM, TakeoverVM, TrayItemVM, WidgetVM, PlaceModeVM, MemoVM, ChallengeVM,
@@ -63,6 +63,7 @@ export const SLOT_NAMES = [
   "ReportCard",
   "AuditPin",
   "Beat",
+  "OrderTracker",
   "GateLegend",
   "DramaButton",
   "WindowTray",
@@ -171,6 +172,7 @@ export interface SlotPropsMap {
    * and keep the bars still under reduced motion.
    */
   Beat: { beat: BeatVM; actions: HudActions };
+  OrderTracker: { lunch: LunchVM; layout: LayoutVM; actions: HudActions };
   /**
    * Who is at the gate (FLT-56): the game pins it over the gate while a faction marches there. One row per crowd in
    * `factions.gate` (its colour, count and name); an `addressable` one offers `actions.issueStatement(id)`, which costs

@@ -1,6 +1,7 @@
-// Review links for the late lunch (FLT-109): `?moment=slop-late` (two hours late: the crowd at the gate, the posts, the
-// rival labs piling on, the run going backwards), `slop-card` (an hour late, the card on screen) and `slop-arrives` (three
-// hours late: the courier at the gate handing the bowls over). Defection's lab a year in, played to noon with the order
+// Review links for the late lunch (FLT-109): `?moment=slop-late` (day three: the crowd at the gate, two of them on the
+// floor, the tracker's ETA slipping, the posts and the rival labs piling on, the run going backwards), `slop-card` (a day
+// late, the card on screen), `slop-arrives` (three days late: the courier at the gate handing the bowls over) and
+// `slop-fed` (everyone eating). Defection's lab a year in, played to noon with the order
 // forced late, through the driver's own code paths. Pure sim and deterministic; the game itself never uses it.
 import { TICKS_PER_DAY } from "../constants";
 import { busyLab } from "../defection/demo";
@@ -13,10 +14,10 @@ import { answer } from "../testkit";
 import { applyNow, tick } from "../tick";
 import type { GameState } from "../types";
 import { enableBirdApp } from "../birdapp/driver";
-import { enableSlopBowl, LATE_FLAG } from "./driver";
+import { enableSlopBowl, LATE_FLAG, offerCard } from "./driver";
 import { CARD } from "./pack";
 
-export const SLOP_MOMENTS = ["slop-late", "slop-card", "slop-arrives"] as const;
+export const SLOP_MOMENTS = ["slop-late", "slop-card", "slop-arrives", "slop-fed"] as const;
 export type SlopMoment = (typeof SLOP_MOMENTS)[number];
 export const isSlopMoment = (m: string | null | undefined): m is SlopMoment => (SLOP_MOMENTS as readonly unknown[]).includes(m);
 
@@ -47,16 +48,24 @@ function stage(s: GameState, moment: SlopMoment) {
   until(s, stage("late"), 8);
   if (moment === "slop-card") {
     until(s, (w) => openEventOf(w)?.id === CARD || w.slopbowl!.machine.value !== "late", 3, true);
+    // Staged, another card may have had the screen at that moment: answer it, and the lunch's card goes up now.
+    while (openEventOf(s) && openEventOf(s)!.id !== CARD) applyNow(s, answer(s));
+    if (!openEventOf(s)) offerCard(s, true);
     return;
   }
   if (moment === "slop-late") {
-    until(s, stage("worse"), 4);
-    // Twenty minutes into the second hour: everyone is at the gate, and the posts have been up a while.
-    until(s, (w) => w.tick - w.slopbowl!.machine.context.due >= 58, 2);
+    until(s, stage("meltdown"), 4);
+    // A few hours into the meltdown: everyone at the gate, two on the floor, the posts up a while.
+    until(s, (w) => w.tick - w.slopbowl!.machine.context.due >= 2.5 * TICKS_PER_DAY + 4, 2);
     return;
   }
   until(s, stage("arriving"), 6);
   // The courier walks in from the gate; stop while they hand the bowls over.
   until(s, (w) => talking(w, "slopbowl").length > 0, 2);
+  if (moment === "slop-fed") {
+    until(s, stage("fed"), 3);
+    until(s, () => false, 6 / TICKS_PER_DAY);
+    return;
+  }
   until(s, () => false, 4 / TICKS_PER_DAY);
 }

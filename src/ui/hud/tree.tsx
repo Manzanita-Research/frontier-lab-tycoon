@@ -108,6 +108,16 @@ export function BeatLayer({ vm, actions }: { vm: HudVM; actions: HudActions }) {
   return vm.beat ? <Beat beat={vm.beat} actions={actions} /> : null;
 }
 
+/** FLT-109: the late lunch's delivery tracker, over the docked HUD and under the cards, while an order is out. */
+export function OrderLayer({ vm, actions }: { vm: HudVM; actions: HudActions }) {
+  const { OrderTracker } = useSkin().slots;
+  return vm.lunch ? (
+    <div className="lunch-layer">
+      <OrderTracker key={vm.lunch.id} lunch={vm.lunch} layout={vm.layout} actions={actions} />
+    </div>
+  ) : null;
+}
+
 /** Photo mode's controls and the polaroid: they live outside the HUD layer so hiding the HUD does not hide them. */
 export function PhotoLayer({ vm, actions }: { vm: HudVM; actions: HudActions }) {
   const { PhotoOverlay } = useSkin().slots;

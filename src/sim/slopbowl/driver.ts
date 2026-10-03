@@ -28,11 +28,15 @@ const R = SLOPBOWL.rules;
 const OWNER = "slopbowl";
 /** A Daily Drama pack (or a test) sets this to make the next noon's order late, whatever the odds say. */
 export const LATE_FLAG = "slopbowl:late";
+/** Lunch is at noon on the campus clock. */
+const DUE_HOUR = 12;
 /** The tick of the first campus noon (the clock opens at START_HOUR); the next is a whole cycle later. */
-const NOON = (R.hours.due - START_HOUR) * TICKS_PER_HOUR;
+const NOON = (DUE_HOUR - START_HOUR) * TICKS_PER_HOUR;
+/** The machine is asked every half day while an order is out (the meltdown comes half way through day three). */
+const BEAT_TICKS = TICKS_PER_DAY / 2;
 export const isDue = (tick: number) => tick >= NOON && (tick - NOON) % CYCLE_TICKS === 0;
-/** The bubbles stay up for most of an hour, so each beat's lines replace the last's. */
-const SAY_TICKS = Math.min(THOUGHT_TICKS, TICKS_PER_HOUR + 10);
+/** The bubbles stay up for most of a day, so each beat's lines replace the last's. */
+const SAY_TICKS = Math.min(THOUGHT_TICKS, TICKS_PER_DAY - 2);
 
 const onStaff = (w: Walker) => w.kind === "researcher" && w.machine.value !== "quitting" && w.machine.value !== "leaving" && w.machine.value !== "gone";
 const armCard = () => initialStored(arcMachine, { choices: SLOPBOWL.content.events.add[0]!.choices.length, cooldownDays: SLOPBOWL.content.events.add[0]!.cooldown ?? 30, openedDay: null });
@@ -40,7 +44,7 @@ const armCard = () => initialStored(arcMachine, { choices: SLOPBOWL.content.even
 export function enableSlopBowl(s: GameState) {
   s.slopbowl ??= {
     enabled: true, rngState: (s.seed ^ 0x534c4f50) >>> 0, machine: freshSlopBowl(), wokeDay: s.day, lastDay: null,
-    crowd: 0, owed: 0, courier: null, host: null, said: [], tally: { late: 0, lost: 0 },
+    crowd: 0, owed: 0, courier: null, host: null, said: [], flopped: [], tally: { late: 0, lost: 0 },
   };
   s.slopbowl.enabled = true;
 }
@@ -60,7 +64,7 @@ export function updateSlopBowl(s: GameState) {
     if (!late) return;
   } else if (value === "arriving") {
     delivered = sb.courier === null || !(s.meetings ?? []).some((m) => m.guestId === sb.courier && m.owner === OWNER);
-  } else if ((s.tick - sb.machine.context.due) % TICKS_PER_HOUR !== 0) return;
+  } else if ((s.tick - sb.machine.context.due) % BEAT_TICKS !== 0) return;
   send(s, sb, { type: "TICK", tick: s.tick, late, delivered });
 }
 
@@ -73,8 +77,11 @@ function ready(s: GameState, sb: SlopBowlState): boolean {
 }
 
 function send(s: GameState, sb: SlopBowlState, event: Parameters<typeof stepSlopBowl>[1]) {
+  const before = sb.machine.value;
   const { stored, effects } = stepSlopBowl(sb.machine, event);
   sb.machine = stored;
+  // Lunch is over: everyone who ate at the gate goes back to work.
+  if (before === "fed" && stored.value === "quiet") backToWork(s, sb);
   const rng = createRng(sb.rngState);
   for (const e of effects) play(s, sb, rng, e.beat as SlopBeat);
   sb.rngState = rng.state();
@@ -92,7 +99,7 @@ export function applySlopBowlChoices(s: GameState) {
   }
 }
 
-const CROWD: Partial<Record<SlopBeat, number>> = { late: R.crowd.late, hangry: R.crowd.hangry, worse: R.crowd.worse };
+const CROWD: Partial<Record<SlopBeat, number>> = { late: R.crowd.late, hangry: R.crowd.hangry, worse: R.crowd.worse, meltdown: R.crowd.meltdown };
 
 function play(s: GameState, sb: SlopBowlState, rng: Rng, beat: SlopBeat) {
   const b = R.beats[beat];
@@ -113,6 +120,7 @@ function play(s: GameState, sb: SlopBowlState, rng: Rng, beat: SlopBeat) {
   if (b.vibes) s.vibes.value = Math.max(0, Math.min(VIBES_MAX, s.vibes.value + b.vibes));
   if (b.beat) runVerb({ state: s, rng, run: null, owner: OWNER }, { type: "camera.beat", params: { ...b.beat, on: "gate" } });
   const waiting = s.walkers.filter((w) => onStaff(w) && waitsForLunch(s, w));
+  if (beat === "meltdown") sb.flopped = sample(rng, waiting.map((w) => String(w.id)), R.flop).map(Number);
   if (beat === "arrive") courier(s, sb, rng, waiting);
   if (beat === "fed") fed(s, sb);
   think(s, sb, rng, b.thoughts, b.thoughtCount ?? 0, waiting.length > 0 ? waiting : s.walkers.filter(onStaff));
@@ -159,11 +167,12 @@ function think(s: GameState, sb: SlopBowlState, rng: Rng, pool: readonly string[
  * screen. It is minor colour (FLT-54): when the budget is spent, or at 10×, the chief of staff waits it out for you and
  * the ticker says so. Returns whether it is on screen.
  */
-function offerCard(s: GameState): boolean {
+export function offerCard(s: GameState, staged = false): boolean {
   if (!systemUnlocked(s, "events") || openEventOf(s) || screenHeld(s)) return false;
-  const allowed = !pacerOf(s).context.auto && cardAllowed(s, CARD, "normal");
+  // A staged review link (`?moment=slop-card`) puts it up whatever the budget says.
+  const allowed = staged || (!pacerOf(s).context.auto && cardAllowed(s, CARD, "normal"));
   s.flags[`offer:${CARD}`] = s.day;
-  s.arcs[CARD] = step(arcMachine, s.arcs[CARD] ?? armCard(), { type: "DAY", day: s.day, ready: true, slotFree: true, pace: 1 }).stored;
+  s.arcs[CARD] = step(arcMachine, (staged ? undefined : s.arcs[CARD]) ?? armCard(), { type: "DAY", day: s.day, ready: true, slotFree: true, pace: 1 }).stored;
   if (openEventOf(s)?.id !== CARD) {
     delete s.flags[`offer:${CARD}`];
     return false;
@@ -189,18 +198,21 @@ function courier(s: GameState, sb: SlopBowlState, rng: Rng, waiting: readonly Wa
   sb.host = host.id;
 }
 
-/** The bowls are handed out: everyone back to work, a little brighter, and the lab starts winning back the research. */
+/** The bowls are handed out: everyone gets up off the floor and eats where they are, a little brighter, and the lab starts winning back the research. */
 function fed(s: GameState, sb: SlopBowlState) {
-  const host = sb.host;
-  sb.crowd = 0;
+  sb.flopped = [];
   sb.courier = null;
   sb.host = null;
   for (const w of s.walkers) {
     if (!onStaff(w)) continue;
     w.energy = Math.min(1, w.energy + R.cheer);
     w.focus = Math.min(1, w.focus + R.cheer);
-    // Back to work: whoever was waiting at the gate picks their next stop now (staggered, so they don't leave as one).
-    if (w.id !== host && w.machine.value === "wandering" && w.timer >= HOLDING && w.timer < MEETING_HOLD) w.timer = 1 + (w.id % 6);
   }
+}
+
+/** After lunch: whoever ate at the gate picks their next stop now (staggered, so they don't leave as one). */
+function backToWork(s: GameState, sb: SlopBowlState) {
+  sb.crowd = 0;
+  for (const w of s.walkers) if (onStaff(w) && w.machine.value === "wandering" && w.timer >= HOLDING && w.timer < MEETING_HOLD) w.timer = 1 + (w.id % 6);
 }
 

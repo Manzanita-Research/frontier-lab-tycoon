@@ -82,10 +82,12 @@ import "./tray.css";
 import { Welcome } from "./slots/Welcome";
 import { SaveLoad } from "./slots/SaveLoad";
 import "./saves.css";
+import { OrderTracker } from "./slots/OrderTracker";
+import "./lunch.css";
 import { Layout } from "./Layout";
 
 export const baseSlots: SlotComponents = {
   Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, Bubble, ThoughtsPanel, Ticker, Toast, Assistant,
   EventCard, Confirm, Coach, UnlockCard, HowToPlay, Arena, Benchmarks, Voice, Factions, BirdApp, Livestream, Hearing, LeakedChat, DramaCard, Bill, PromiseTracker, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, Ending, Takeover, NewsControls,
-  NewsArrival, NewsRoom, Mixer, ModManager, ModSkinOffer, Papers, PaperMoment, CrumbWiki, DisasterMenu, DisasterAlert, ReportCard, AuditPin, Beat, GateLegend, DramaButton, Drama, Memo, Challenge, Welcome, SaveLoad, WindowTray,
+  NewsArrival, NewsRoom, Mixer, ModManager, ModSkinOffer, Papers, PaperMoment, CrumbWiki, DisasterMenu, DisasterAlert, ReportCard, AuditPin, Beat, OrderTracker, GateLegend, DramaButton, Drama, Memo, Challenge, Welcome, SaveLoad, WindowTray,
 };

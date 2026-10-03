@@ -16,6 +16,8 @@ export interface SlopBowlState {
   /** The courier (a visitor, walker id) and the researcher who signs for the bowls, while they meet at the gate. */
   courier: number | null;
   host: number | null;
+  /** The researchers lying on the floor at the gate (day three's meltdown) until the bowls come. Absent in a save from before. */
+  flopped?: number[];
   /** The thought bubbles the order put up, so the next beat replaces them. */
   said: number[];
   tally: { late: number; lost: number };

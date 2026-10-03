@@ -26,8 +26,12 @@ const Beat = Schema.Struct({
   /** A camera beat (the `camera.beat` verb's params, `on` the gate). */
   beat: Schema.optionalKey(Schema.Struct({ kind: S, kicker: Schema.optionalKey(S), caption: S, sub: Schema.optionalKey(S), zoom: Schema.optionalKey(N), hold: Schema.optionalKey(N) })),
 });
-export const BEATS = ["late", "hangry", "worse", "arrive", "fed", "granola", "backup"] as const;
+export const BEATS = ["late", "hangry", "worse", "meltdown", "arrive", "fed", "granola", "backup"] as const;
 export type SlopBeat = (typeof BEATS)[number];
+/** The machine's stages while an order is out (quiet has no tracker). */
+export const STAGES = ["late", "hangry", "worse", "meltdown", "arriving", "fed"] as const;
+export type SlopStage = (typeof STAGES)[number];
+const step = () => Schema.Struct({ eta: S, status: S, route: N });
 const Pack = Schema.Struct({
   apiVersion: Schema.Literal(1), id: S, version: S,
   content: Schema.Struct({ events: Schema.Struct({ add: Schema.Array(EventCard) }) }),
@@ -35,12 +39,19 @@ const Pack = Schema.Struct({
     place: S,
     /** A roll at each campus noon: `perNoon`, with `minResearchers` on staff, `firstAfterDays` after the pack wakes, `gapDays` after the last. */
     odds: Schema.Struct({ perNoon: N, minResearchers: N, firstAfterDays: N, gapDays: N }),
-    /** Campus-clock hours: when the order is due, and how late it is at each beat. */
-    hours: Schema.Struct({ due: N, hangry: N, worse: N, arrive: N, courierWait: N, fed: N }),
+    /** Game days late at each beat (the order falls due at noon on the campus clock), how long the courier may take, and lunch. */
+    days: Schema.Struct({ hangry: N, worse: N, meltdown: N, arrive: N, courierWait: N, fed: N }),
     /** While hangry a day's training adds `-backwards` of what it would have (`granola` of that, after the granola); fed, it wins it back at `catchUp` of a day's gain a day. */
     research: Schema.Struct({ backwards: N, granola: N, catchUp: N }),
     /** The share of researchers at the gate in each stage, and how often each one paces to a new spot (ticks). */
-    crowd: Schema.Struct({ late: N, hangry: N, worse: N, paceTicks: N }),
+    crowd: Schema.Struct({ late: N, hangry: N, worse: N, meltdown: N, paceTicks: N }),
+    /** How many of the waiting researchers lie down on the floor at the meltdown. */
+    flop: N,
+    /** The delivery tracker (the OrderTracker slot): its app's name, the order, what it says at each stage, and the day line. */
+    tracker: Schema.Struct({
+      app: S, order: S, day: S,
+      steps: Schema.Struct(Object.fromEntries(STAGES.map((k) => [k, Schema.Struct({ eta: S, status: S, route: N })])) as Record<SlopStage, ReturnType<typeof step>>),
+    }),
     /** Energy and focus everyone gets back with the bowls. */
     cheer: N,
     /** The courier: a visitor with this role, who talks with the researcher who signs for the bowls for `talkTicks`. */

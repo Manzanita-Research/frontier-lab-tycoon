@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { busyLab } from "../defection/demo";
 import { openEventOf, unpaced } from "../events";
-import { hourAt, TICKS_PER_HOUR } from "../daylight";
+import { hourAt } from "../daylight";
+import { slopbowlView } from "./view";
 import { enableEarnedPacks } from "../progression";
 import { createInitialState } from "../state";
 import { answer } from "../testkit";
@@ -72,8 +73,9 @@ describe("the Slop Bowl pack", () => {
 });
 
 describe("a late lunch in the game", () => {
-  it("plays the afternoon: late, hangry, worse, the courier, fed; research slides back and is won back; the Aura drops", () => {
+  it("plays the three days: late, hangry, worse, the meltdown, the courier, fed; research slides back and is won back; the Aura drops", () => {
     const s = lab();
+    s.training = { ...s.training, context: { ...s.training.context, progress: s.training.context.cost * 0.6 } };
     s.flags[LATE_FLAG] = s.day;
     const progress: number[] = [];
     // The Aura each beat moves, measured across the tick it plays (nothing else touches it mid-day).
@@ -90,31 +92,39 @@ describe("a late lunch in the game", () => {
     expect(hourAt(due)).toBe(12);
     expect(s.news.some((n) => n.text.includes(NAME)) || s.toasts.some((t) => t.text.includes(NAME))).toBe(true);
     until(s, stage("hangry"), 2, 0, record);
-    expect(s.tick - due).toBe(R.hours.hangry * TICKS_PER_HOUR);
+    expect(s.tick - due).toBe(R.days.hangry * TICKS_PER_DAY);
+    expect(slopbowlView(s)).toMatchObject({ stage: "hangry", eta: R.tracker.steps.hangry.eta, slipped: [R.tracker.steps.late.eta], backwards: true });
     const before = s.training.context.progress;
     until(s, stage("worse"), 3, 0, record);
-    // Two hours late: (nearly) the whole lab is at the gate, and the rival labs have said something.
-    until(s, (w) => w.tick - due >= 2 * TICKS_PER_HOUR + 12, 1, 0, record);
+    expect(s.thoughts.some((t) => [...R.beats.worse.thoughts!].includes(t.text))).toBe(true);
+    // Two days late: (nearly) the whole lab is at the gate, and the rival labs have said something.
+    until(s, (w) => w.tick - due >= 2 * TICKS_PER_DAY + 8, 1, 0, record);
     const researchers = s.walkers.filter((w) => w.kind === "researcher").length;
     expect(atGate(s)).toBeGreaterThanOrEqual(Math.floor(researchers * 0.6));
     expect(s.birdapp!.rivals!.posts.some((p) => R.beats.worse.rivals!.includes(p.text) || R.beats.hangry.rivals!.includes(p.text))).toBe(true);
     expect(s.birdapp!.posts.some((p) => [...R.beats.hangry.posts!, ...R.beats.worse.posts!].includes(p.text))).toBe(true);
-    expect(s.thoughts.some((t) => [...R.beats.worse.thoughts!].includes(t.text))).toBe(true);
     expect(Math.min(...progress)).toBeLessThan(before);
+    until(s, stage("meltdown"), 2, 0, record);
+    // Day three: some of them lie down on the floor, and the tracker says which day it is.
+    expect(s.slopbowl!.flopped!.length).toBe(R.flop);
+    expect(slopbowlView(s)!.dayLine).toBe(`Day 3 of the ${NAME} being late`);
     until(s, stage("arriving"), 3, 0, record);
-    expect(s.tick - due).toBe(R.hours.arrive * TICKS_PER_HOUR);
+    expect(s.tick - due).toBe(R.days.arrive * TICKS_PER_DAY);
     expect(s.disasters.cues.some((c) => c.type === "beat" && c.caption.includes(NAME))).toBe(true);
     const courier = s.walkers.find((w) => w.role === R.courier.role);
     expect(courier?.kind).toBe("visitor");
     until(s, stage("fed"), 3, 0, record);
     expect(s.slopbowl!.owed).toBeGreaterThan(0);
+    expect(s.slopbowl!.flopped).toEqual([]);
+    expect(slopbowlView(s)).toMatchObject({ delivered: true, eta: R.tracker.steps.fed.eta, backwards: false });
     expect(s.toasts.some((t) => t.text === R.beats.fed.toast!.text) || s.news.length > 0).toBe(true);
     until(s, stage("quiet"), 4, 0, record);
     until(s, (w) => w.slopbowl!.owed === 0, 10, 0, record);
-    // (The bowls give a little back on the tick they land, which may also be a midnight, when the Aura drifts.)
-    expect(moved).toMatchObject({ hangry: R.beats.hangry.aura, worse: R.beats.worse.aura });
-    expect(R.beats.hangry.aura! + R.beats.worse.aura! + R.beats.fed.aura!).toBeLessThan(0);
-    expect(atGate(s)).toBeLessThan(researchers);
+    // (Noon falls on a midnight, so the day beats share their tick with the Bird App's own; the meltdown is mid-day.)
+    expect(moved.meltdown).toBe(R.beats.meltdown.aura);
+    expect(R.beats.hangry.aura! + R.beats.worse.aura! + R.beats.meltdown.aura! + R.beats.fed.aura!).toBeLessThan(0);
+    // Lunch over: nobody is held at the gate any more.
+    expect(s.slopbowl!.crowd).toBe(0);
     // The courier hands the bowls over and goes home.
     until(s, (w) => !w.walkers.some((x) => x.role === R.courier.role), 10);
   });
@@ -176,7 +186,7 @@ describe("a late lunch in the game", () => {
   });
 
   it("stages its review links", () => {
-    for (const [moment, value] of [["slop-late", "worse"], ["slop-card", "hangry"], ["slop-arrives", "arriving"]] as const) {
+    for (const [moment, value] of [["slop-late", "meltdown"], ["slop-card", "hangry"], ["slop-arrives", "arriving"], ["slop-fed", "fed"]] as const) {
       const s = createInitialState(1);
       delete s.progression;
       enableEarnedPacks(s);

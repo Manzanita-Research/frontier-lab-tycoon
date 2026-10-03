@@ -18,6 +18,7 @@ import { papersView, type PapersView } from "../sim/race/papers/view";
 import { collusionView, type CollusionView } from "../sim/collusion/view";
 import { hearingView, type HearingView } from "../sim/hearing/view";
 import { yachtView, type YachtView } from "../sim/yacht/view";
+import { slopbowlView, type SlopBowlView } from "../sim/slopbowl/view";
 import { captureView, type CaptureView } from "../sim/capture/view";
 import { promisesView, type PromisesView } from "../sim/promises/view";
 import { factionsView, type FactionsView } from "../sim/factions/view";
@@ -124,6 +125,8 @@ export interface Snapshot {
   hearing: HearingView;
   /** The yacht summit (FLT-24): the RSVP, the leaked group chat, the ending. */
   yacht: YachtView;
+  /** FLT-109: the late lunch order's tracker, or null. Optional: a fixture from before has none. */
+  slopbowl?: SlopBowlView | null;
   /** Regulatory Capture (FLT-22): the bill the lab was asked to draft, the law in force, the leak odds. */
   bill: CaptureView;
   /** The Promise Tracker (FLT-23): the docket, the senators' promises and votes, the Truth-o-meters. */
@@ -289,6 +292,7 @@ export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO
     collusion: collusionView(s),
     hearing: hearingView(s),
     yacht: yachtView(s),
+    slopbowl: slopbowlView(s),
     bill: captureView(s),
     promises: promisesView(s),
     endings: endingsView(s),

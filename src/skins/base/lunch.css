@@ -1,0 +1,19 @@
+/* FLT-109: the late lunch's delivery tracker. Host-rendered, over the docked HUD, under the cards. */
+.lunch-layer { position: fixed; top: 76px; left: 50%; transform: translateX(-50%); z-index: 30; pointer-events: none; }
+.lunch-layer > * { pointer-events: auto; }
+.lunch-tracker { width: 320px; max-width: calc(100vw - 24px); padding: 10px 12px; display: grid; gap: 4px; font-size: 13px; }
+.lunch-head { display: flex; gap: 8px; align-items: center; }
+.lunch-app { font-weight: 700; }
+.lunch-order { opacity: 0.7; margin-left: auto; }
+.lunch-close { border: 0; background: none; font: inherit; font-size: 16px; line-height: 1; cursor: pointer; padding: 0 2px; }
+.lunch-place { font-size: 11px; opacity: 0.8; }
+.lunch-route { position: relative; height: 6px; margin: 6px 4px; border-radius: 3px; background: linear-gradient(90deg, #5fb83a, #d6d6d6); }
+.lunch-route i { position: absolute; top: 50%; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: #2c7d15; box-shadow: 0 0 0 2px #fff; transition: left 0.8s ease; }
+.lunch-eta { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; }
+.lunch-eta s { opacity: 0.55; }
+.lunch-eta b { font-size: 15px; }
+.lunch-status { font-style: italic; }
+.lunch-day { font-weight: 700; color: #b3261e; }
+.lunch-warn { font-size: 11px; font-weight: 700; color: #b3261e; text-transform: uppercase; letter-spacing: 0.04em; }
+.stage-fed .lunch-eta b { color: #2c7d15; }
+@media (max-width: 640px) { .lunch-layer { top: 120px; } .lunch-tracker { width: 300px; font-size: 12px; } }

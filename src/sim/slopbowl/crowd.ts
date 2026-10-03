@@ -18,6 +18,9 @@ export function waitsForLunch(s: GameState, w: Walker): boolean {
   return !!sb && sb.crowd > 0 && w.kind === "researcher" && w.id !== sb.host && share(w.id) < sb.crowd;
 }
 
+/** On the floor at the gate (day three's meltdown): they stay where they lay down until the bowls come. */
+export const lyingDown = (s: GameState, w: Walker): boolean => !!s.slopbowl?.flopped?.includes(w.id);
+
 /** The spot just inside the gate this researcher paces to now: a new one every `paceTicks`, everyone on their own beat. */
 export function lunchSpot(s: GameState, w: Walker): Point {
   const g = s.gate;
