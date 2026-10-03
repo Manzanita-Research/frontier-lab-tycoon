@@ -1,6 +1,6 @@
 // Event cards: checked once a day, one open at a time, resolved by a chooseEvent command.
 import type { BuildingKind } from "../content/buildings";
-import type { Condition, Effect } from "../content/events";
+import type { Condition, Effect, EventDef } from "../content/events";
 import { THOUGHT_TICKS, DISCOURSE_PER_PROTESTER, TICKS_PER_DAY, TICKS_PER_SECOND } from "./constants";
 import { fillTemplate } from "./format";
 import { arcMachine, dayArc } from "./machines/arc";
@@ -92,15 +92,15 @@ export function dailyEvents(state: GameState, unlocked = true) {
   const pacer = pacerOf(state).context;
   const events = defs().events;
   const place = (id: string) => pacer.queue.findIndex((q) => q.id === id);
-  const rank = (id: string) => (paceOf(id).now ? -3 : paceOf(id).urgent ? -2 : paceOf(id).priority ? -1 : place(id) >= 0 ? place(id) : pacer.queue.length);
-  const order = events.map((def, i) => ({ def, i, r: rank(def.id) })).sort((a, b) => a.r - b.r || a.i - b.i);
+  const rank = (def: EventDef) => { const p = paceOf(def); return p.now ? -3 : p.urgent ? -2 : p.priority ? -1 : place(def.id) >= 0 ? place(def.id) : pacer.queue.length; };
+  const order = events.map((def, i) => ({ def, i, r: rank(def) })).sort((a, b) => a.r - b.r || a.i - b.i);
   const waiting: string[] = [];
   for (const { def } of order) {
     const arriving = arrivingCard(state, def.id);
     if (def.early ? !first : early && arriving === undefined) continue;
     // A save from before a pack added this card (the factions' cards, a mod's) starts its machine now.
     state.arcs[def.id] ??= initialStored(arcMachine, { choices: def.choices.length, cooldownDays: def.cooldown ?? EVENT_COOLDOWN_DAYS, openedDay: null });
-    const card = paceOf(def.id);
+    const card = paceOf(def);
     // A card the player just added (FLT-78) keeps the gap but doesn't queue behind colour: it was asked for.
     const how: Pacing = card.now ? "now" : card.urgent ? "urgent" : card.priority || arriving !== undefined ? "priority" : "normal";
     const allowed = pacerAllows(pacerOf(state).context, def.id, card.story, state.day, how);
@@ -118,10 +118,15 @@ export function dailyEvents(state: GameState, unlocked = true) {
 }
 
 /** A card's pacing: its id's rule (content/cardPacing.ts), and what its own definition asks for (a mod's `pace`, FLT-105). */
-function paceOf(id: string) {
-  const rule = paceOfCard(id);
-  const own = defs().eventById(id)?.pace;
-  return own ? { ...rule, [own]: true as const } : rule;
+const paces = new WeakMap<EventDef, ReturnType<typeof paceOfCard>>();
+function paceOf(def: EventDef) {
+  let pace = paces.get(def);
+  if (!pace) {
+    const rule = paceOfCard(def.id);
+    pace = def.pace ? { ...rule, [def.pace]: true as const } : rule;
+    paces.set(def, pace);
+  }
+  return pace;
 }
 
 /** Level 1 of the ladder, where a first-minutes card (`early`) may open (FLT-76). */
