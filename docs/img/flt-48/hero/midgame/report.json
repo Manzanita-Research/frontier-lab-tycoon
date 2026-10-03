@@ -14,10 +14,10 @@
     {
       "scene": "midgame",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-48/hero/midgame/before/midgame.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-48/hero/midgame/after/midgame.png",
+      "before": "docs/img/flt-48/hero/midgame/before/midgame.png",
+      "after": "docs/img/flt-48/hero/midgame/after/midgame.png",
       "title": "FLT-48 Part A: the scripted mid-game campus, paused near Y2 Mar",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-48/hero/midgame/compare/midgame.png",
+      "compare": "docs/img/flt-48/hero/midgame/compare/midgame.png",
       "changed": 0.04401697530864197
     }
   ],

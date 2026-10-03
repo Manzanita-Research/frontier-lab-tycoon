@@ -4,7 +4,7 @@ A browser tycoon game (React + react-three-fiber) about running a frontier AI la
 
 ## House rules
 
-- The mission-control charter wins over this file: `/Users/jem/.bb-machines/jem.getbb.app/thread-storage/mission-control/CHARTER.md` (readable from the Mini; on Modal, your prompt restates the parts that matter).
+- The mission-control charter wins over this file. Your prompt says where it lives (it's readable from the Mini; on Modal, your prompt restates the parts that matter).
 - **Do the heavy work on Modal, not the Mini.** Installs, dev servers, builds, tests and screenshots happen on cloud machines. `.bb-env-setup.sh` skips `pnpm install` on macOS on purpose. See `docs/modal.md`.
 - One thread = one branch = one worktree. Branch names: `flt-<n>-<slug>` (for example `flt-6-agents`).
 - Every task has one label: `ship`, `explore` or `experiment`. The first playable is `explore` work.
@@ -19,7 +19,8 @@ pnpm dev              # vite on 0.0.0.0:5173; share with `bb connect expose 5173
 pnpm test             # vitest (sim + content tests)
 pnpm typecheck
 pnpm build            # tsc + vite build into dist/
-pnpm check            # all three: run before every PR
+pnpm check            # guard + all three: run before every PR
+pnpm guard            # fails if a tracked file names private infra (bb paths, hosts, project/thread IDs)
 pnpm shots            # before/after screenshots of main vs your branch (see below)
 pnpm shot <url> <png> # one headless screenshot (Playwright + SwiftShader)
 ```

@@ -14,28 +14,28 @@
     {
       "scene": "inspector",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-87/props/before/inspector.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-87/props/after/inspector.png",
+      "before": "docs/img/flt-87/props/before/inspector.png",
+      "after": "docs/img/flt-87/props/after/inspector.png",
       "title": "Tap a researcher: the inspector opens",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-87/props/compare/inspector.png",
+      "compare": "docs/img/flt-87/props/compare/inspector.png",
       "changed": 0.16155555555555556
     },
     {
       "scene": "senate-exposed",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-87/props/before/senate-exposed.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-87/props/after/senate-exposed.png",
+      "before": "docs/img/flt-87/props/before/senate-exposed.png",
+      "after": "docs/img/flt-87/props/after/senate-exposed.png",
       "title": "FLT-22 The leak: someone opened the file properties",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-87/props/compare/senate-exposed.png",
+      "compare": "docs/img/flt-87/props/compare/senate-exposed.png",
       "changed": 0.0014691358024691357
     },
     {
       "scene": "flt87-phone-inspector",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-87/props/before/flt87-phone-inspector.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-87/props/after/flt87-phone-inspector.png",
+      "before": "docs/img/flt-87/props/before/flt87-phone-inspector.png",
+      "after": "docs/img/flt-87/props/after/flt87-phone-inspector.png",
       "title": "FLT-87: tap a researcher on a phone: the Inspector is a sheet at the top, buttons in reach",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-87/props/compare/flt87-phone-inspector.png",
+      "compare": "docs/img/flt-87/props/compare/flt87-phone-inspector.png",
       "changed": 0.7147177664357759
     }
   ],

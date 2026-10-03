@@ -14,28 +14,28 @@
     {
       "scene": "collusion-sign",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_rzw9szbubp-1/project-proj-dvb9hes55f/docs/img/flt-18/before/collusion-sign.png",
-      "after": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_rzw9szbubp-1/project-proj-dvb9hes55f/docs/img/flt-18/after/collusion-sign.png",
+      "before": "docs/img/flt-18/before/collusion-sign.png",
+      "after": "docs/img/flt-18/after/collusion-sign.png",
       "title": "Agent Collusion: the first Security memo (existing event-card slot)",
-      "compare": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_rzw9szbubp-1/project-proj-dvb9hes55f/docs/img/flt-18/compare/collusion-sign.png",
+      "compare": "docs/img/flt-18/compare/collusion-sign.png",
       "changed": 0.15188194444444444
     },
     {
       "scene": "collusion-phone",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_rzw9szbubp-1/project-proj-dvb9hes55f/docs/img/flt-18/before/collusion-phone.png",
-      "after": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_rzw9szbubp-1/project-proj-dvb9hes55f/docs/img/flt-18/after/collusion-phone.png",
+      "before": "docs/img/flt-18/before/collusion-phone.png",
+      "after": "docs/img/flt-18/after/collusion-phone.png",
       "title": "The same Security memo on a phone",
-      "compare": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_rzw9szbubp-1/project-proj-dvb9hes55f/docs/img/flt-18/compare/collusion-phone.png",
+      "compare": "docs/img/flt-18/compare/collusion-phone.png",
       "changed": 0.5003843115809941
     },
     {
       "scene": "collusion-scandal",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_rzw9szbubp-1/project-proj-dvb9hes55f/docs/img/flt-18/before/collusion-scandal.png",
-      "after": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_rzw9szbubp-1/project-proj-dvb9hes55f/docs/img/flt-18/after/collusion-scandal.png",
+      "before": "docs/img/flt-18/before/collusion-scandal.png",
+      "after": "docs/img/flt-18/after/collusion-scandal.png",
       "title": "Agent Collusion: exposed, the existing ticker carries the scandal headline",
-      "compare": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_rzw9szbubp-1/project-proj-dvb9hes55f/docs/img/flt-18/compare/collusion-scandal.png",
+      "compare": "docs/img/flt-18/compare/collusion-scandal.png",
       "changed": 0.09354783950617283
     }
   ],

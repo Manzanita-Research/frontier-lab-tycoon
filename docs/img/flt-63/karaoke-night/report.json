@@ -14,19 +14,19 @@
     {
       "scene": "flt63-facilities",
       "skin": "karaoke-night",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/karaoke-night/before/flt63-facilities@karaoke-night.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/karaoke-night/after/flt63-facilities@karaoke-night.png",
+      "before": "docs/img/flt-63/karaoke-night/before/flt63-facilities@karaoke-night.png",
+      "after": "docs/img/flt-63/karaoke-night/after/flt63-facilities@karaoke-night.png",
       "title": "FLT-63: Start ▸ Facilities ▸ open (the buildings, grouped)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/karaoke-night/compare/flt63-facilities@karaoke-night.png",
+      "compare": "docs/img/flt-63/karaoke-night/compare/flt63-facilities@karaoke-night.png",
       "changed": 0.07781558641975309
     },
     {
       "scene": "flt63-run",
       "skin": "karaoke-night",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/karaoke-night/before/flt63-run@karaoke-night.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/karaoke-night/after/flt63-run@karaoke-night.png",
+      "before": "docs/img/flt-63/karaoke-night/before/flt63-run@karaoke-night.png",
+      "after": "docs/img/flt-63/karaoke-night/after/flt63-run@karaoke-night.png",
       "title": "FLT-63: Start ▸ Run… (the widget launcher)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/karaoke-night/compare/flt63-run@karaoke-night.png",
+      "compare": "docs/img/flt-63/karaoke-night/compare/flt63-run@karaoke-night.png",
       "changed": 0.20483641975308642
     }
   ],

@@ -14,28 +14,28 @@
     {
       "scene": "snag",
       "skin": "frontier-95",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-84/frontier-95/before/snag@frontier-95.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-84/frontier-95/after/snag@frontier-95.png",
+      "before": "docs/img/flt-84/frontier-95/before/snag@frontier-95.png",
+      "after": "docs/img/flt-84/frontier-95/after/snag@frontier-95.png",
       "title": "FLT-84: a caught error raises the recovery toast (a real throw in the paused-input path)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-84/frontier-95/compare/snag@frontier-95.png",
+      "compare": "docs/img/flt-84/frontier-95/compare/snag@frontier-95.png",
       "changed": 0.045356481481481484
     },
     {
       "scene": "snag-phone",
       "skin": "frontier-95",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-84/frontier-95/before/snag-phone@frontier-95.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-84/frontier-95/after/snag-phone@frontier-95.png",
+      "before": "docs/img/flt-84/frontier-95/before/snag-phone@frontier-95.png",
+      "after": "docs/img/flt-84/frontier-95/after/snag-phone@frontier-95.png",
       "title": "FLT-84: the recovery toast on a phone",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-84/frontier-95/compare/snag-phone@frontier-95.png",
+      "compare": "docs/img/flt-84/frontier-95/compare/snag-phone@frontier-95.png",
       "changed": 0.15762395187750639
     },
     {
       "scene": "snag-phone",
       "skin": "frontier-95",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-84/frontier-95/before/snag-phone@frontier-95.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-84/frontier-95/after/snag-phone@frontier-95.png",
+      "before": "docs/img/flt-84/frontier-95/before/snag-phone@frontier-95.png",
+      "after": "docs/img/flt-84/frontier-95/after/snag-phone@frontier-95.png",
       "title": "FLT-84: the recovery toast on a phone",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-84/frontier-95/compare/snag-phone@frontier-95.png",
+      "compare": "docs/img/flt-84/frontier-95/compare/snag-phone@frontier-95.png",
       "changed": 0.15762395187750639
     }
   ],

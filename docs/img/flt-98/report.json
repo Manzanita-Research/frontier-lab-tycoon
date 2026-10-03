@@ -17,10 +17,10 @@
     {
       "scene": "flt91-open",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-98/before/flt91-open.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-98/after/flt91-open.png",
+      "before": "docs/img/flt-98/before/flt91-open.png",
+      "after": "docs/img/flt-98/after/flt91-open.png",
       "title": "FLT-91: the first 10 seconds of a fresh garage (seed 3, the starting camera)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-98/compare/flt91-open.png",
+      "compare": "docs/img/flt-98/compare/flt91-open.png",
       "changed": null,
       "composeError": "blank composite: panel 3 is 54% one colour, 9 colours",
       "error": "compare: blank composite: panel 3 is 54% one colour, 9 colours"
@@ -28,10 +28,10 @@
     {
       "scene": "flt91-open-phone",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-98/before/flt91-open-phone.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-98/after/flt91-open-phone.png",
+      "before": "docs/img/flt-98/before/flt91-open-phone.png",
+      "after": "docs/img/flt-98/after/flt91-open-phone.png",
       "title": "FLT-91: the first 10 seconds on a phone (390x844)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-98/compare/flt91-open-phone.png",
+      "compare": "docs/img/flt-98/compare/flt91-open-phone.png",
       "changed": null,
       "composeError": "blank composite: panel 3 is 59% one colour, 8 colours",
       "error": "compare: blank composite: panel 3 is 59% one colour, 8 colours"
@@ -39,55 +39,55 @@
     {
       "scene": "flt98-lawn",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-98/before/flt98-lawn.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-98/after/flt98-lawn.png",
+      "before": "docs/img/flt-98/before/flt98-lawn.png",
+      "after": "docs/img/flt-98/after/flt98-lawn.png",
       "title": "FLT-98: the first 10 seconds of a fresh garage with the tutorial skipped, so the lawn isn't dimmed (seed 3, the starting camera)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-98/compare/flt98-lawn.png",
+      "compare": "docs/img/flt-98/compare/flt98-lawn.png",
       "changed": 0.1547037037037037
     },
     {
       "scene": "flt98-lawn-phone",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-98/before/flt98-lawn-phone.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-98/after/flt98-lawn-phone.png",
+      "before": "docs/img/flt-98/before/flt98-lawn-phone.png",
+      "after": "docs/img/flt-98/after/flt98-lawn-phone.png",
       "title": "FLT-98: the same on a phone (390x844), tutorial skipped",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-98/compare/flt98-lawn-phone.png",
+      "compare": "docs/img/flt-98/compare/flt98-lawn-phone.png",
       "changed": 0.1867199842022117
     },
     {
       "scene": "flt98-stakes",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-98/before/flt98-stakes.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-98/after/flt98-stakes.png",
+      "before": "docs/img/flt-98/before/flt98-stakes.png",
+      "after": "docs/img/flt-98/after/flt98-stakes.png",
       "title": "FLT-98: survey stakes up close: Training Hall and API Gateway, where the coach builds them",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-98/compare/flt98-stakes.png",
+      "compare": "docs/img/flt-98/compare/flt98-stakes.png",
       "changed": 0.2793912037037037
     },
     {
       "scene": "flt98-truck",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-98/before/flt98-truck.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-98/after/flt98-truck.png",
+      "before": "docs/img/flt-98/before/flt98-truck.png",
+      "after": "docs/img/flt-98/after/flt98-truck.png",
       "title": "FLT-98: Tensor Tacos, parked on the verge by the gate",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-98/compare/flt98-truck.png",
+      "compare": "docs/img/flt-98/compare/flt98-truck.png",
       "changed": 0.13661496913580246
     },
     {
       "scene": "flt98-hover",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-98/before/flt98-hover.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-98/after/flt98-hover.png",
+      "before": "docs/img/flt-98/before/flt98-hover.png",
+      "after": "docs/img/flt-98/after/flt98-hover.png",
       "title": "FLT-98: a mouse resting on the Ethics Committee's stake shows its full text (desktop only)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-98/compare/flt98-hover.png",
+      "compare": "docs/img/flt-98/compare/flt98-hover.png",
       "changed": 0.5612662037037037
     },
     {
       "scene": "flt98-built",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-98/before/flt98-built.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-98/after/flt98-built.png",
+      "before": "docs/img/flt-98/before/flt98-built.png",
+      "after": "docs/img/flt-98/after/flt98-built.png",
       "title": "FLT-98: the Hall built on its stake and a Gateway built elsewhere: both stakes are pulled up, the rest stand",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-98/compare/flt98-built.png",
+      "compare": "docs/img/flt-98/compare/flt98-built.png",
       "changed": 0.154491512345679
     }
   ],
