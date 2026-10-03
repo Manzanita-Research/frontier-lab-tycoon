@@ -204,6 +204,8 @@ export function Assistant({ vm, actions }: SlotPropsMap["Assistant"]) {
       {snagBox}
       {busy && (
         <div className="f95-balloon" role="status">
+          {/* FLT-105 pass 2: the ego death keeps its line on top, so the news can't crowd it out of the balloon. */}
+          {ego && <div className="f95-toast ego">{ego[egoAt % ego.length]}</div>}
           {warnings.map((w) => (
             <div key={w} className="f95-toast warn" role="status">
               <Ico name="warn" size={18} />

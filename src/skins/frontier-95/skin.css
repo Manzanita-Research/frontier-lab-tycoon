@@ -6614,6 +6614,10 @@
       background-image: none;
     }
   }
+  /* Its line, on top of whatever news the balloon holds. */
+  .f95-toast.ego {
+    font-style: italic;
+  }
   /* The paperclip, ego-dead: a still rainbow halo in every mode, and in the calm version it lies down for good. */
   &[data-trip] .f95-clip.ego {
     position: relative;
