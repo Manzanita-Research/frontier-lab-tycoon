@@ -21,6 +21,11 @@ export interface CardPace {
   urgent?: true;
   /** An offer on a clock (money, a launch, an era): keeps the gap, but goes ahead of the line instead of waiting behind colour. */
   priority?: true;
+  /**
+   * The next beat of a story the player is already in (FLT-105: ACID MOD(E)'s breakthrough, three days into the trip the
+   * player said yes to): no gap and no line, only one card at a time. Set by a card's own `pace`, never by an id rule.
+   */
+  now?: true;
   /** The choice a minor card takes by itself (0 if not set): the shrug, not the grand gesture. */
   default?: number;
 }

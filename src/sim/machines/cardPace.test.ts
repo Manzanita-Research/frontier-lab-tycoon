@@ -42,6 +42,14 @@ describe("the card budget (FLT-54)", () => {
     expect(pacerAllows(s.context, "shipNow", "shipNow", 10 + CARD_GAP_DAYS, "priority")).toBe(false);
   });
 
+  it("lets the next beat of a story the player is in (`now`, FLT-105) through at once, at any speed", () => {
+    const ten = paceFor(10, TICKS_PER_SECOND, TICKS_PER_DAY);
+    const s = step(pacerMachine, opened("acid-offer", 60), { type: "PACE", ...ten }).stored;
+    expect(pacerAllows(s.context, "acid-enlightened", "acid", 61)).toBe(false);
+    expect(pacerAllows(s.context, "acid-enlightened", "acid", 61, "urgent")).toBe(false);
+    expect(pacerAllows(s.context, "acid-enlightened", "acid", 61, "now")).toBe(true);
+  });
+
   it("files each card under its story: the rule's, else its id's first word", () => {
     expect(paceOfCard("hearing-gavel").story).toBe("hearing");
     expect(paceOfCard("truthers")).toMatchObject({ story: "water" });

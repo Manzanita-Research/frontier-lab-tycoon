@@ -28,6 +28,7 @@ import { PlazaProps } from "./PlazaProps";
 import { LotProps } from "./LotProps";
 import { Placement } from "./Placement";
 import { Walkers } from "./Walkers";
+import { TripLayer } from "./trip/TripLayer";
 import { cameraStart } from "./cameraStart";
 
 // Postprocessing is a chunk of its own, fetched the first time photo mode opens and mounted only while it is on.
@@ -77,6 +78,7 @@ export function Scene() {
       <CoachSuggestion />
       <CameraRig baseZoom={start.base} focus={start.focus} />
       <PhotoLayer />
+      <TripLayer />
       <CrtLayer />
       <PressCamera />
       <ProbeView />

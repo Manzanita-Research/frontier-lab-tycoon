@@ -10,9 +10,10 @@ import { CoachLayer } from "./CoachLayer";
 import { ModeHint } from "./ModeHint";
 import { GateLayer } from "./GateLayer";
 import { loadedSkinAtom } from "./state";
-import { BeatLayer, Docked, Modals, PhotoLayer } from "./tree";
+import { BeatLayer, Docked, Modals, PhotoLayer, TripLayer } from "./tree";
 import { useHudEffects } from "./useHudEffects";
 import { useSaves } from "./saves";
+import { TripScreen } from "../juice/TripScreen";
 import { useAppSource, useHudVM, type AppSource } from "./useHudVM";
 
 /** Everything the 2D UI shows, drawn by the active skin. Waits for the app actor's first state. */
@@ -44,6 +45,8 @@ function Hud({ source }: { source: AppSource }) {
         <ModeHint mode={vm.mode ?? null} actions={hudActions} />
       </div>
       <PhotoLayer vm={vm} actions={hudActions} />
+      <TripLayer vm={vm} actions={hudActions} />
+      <TripScreen trip={vm.trip ?? null} />
     </SkinProvider>
   );
 }

@@ -37,7 +37,8 @@ export default defineConfig({
     // the box with every other test file, so run the files one at a time and they measure the sim, not the neighbours.
     fileParallelism: false,
     include: ["src/**/*.test.{ts,tsx}", "worker/**/*.test.ts", "infra/*.test.ts"],
-    // The skin tests read each skin's CSS as text (scoping, tokens); everything else stays an empty module.
-    css: { include: [/src\/skins\/[^/]+\/skin\.css/] },
+    // The skin tests read each skin's CSS as text (scoping, tokens), and the trip's flash test reads juice.css (FLT-105);
+    // everything else stays an empty module.
+    css: { include: [/src\/skins\/[^/]+\/skin\.css/, /src\/ui\/juice\/juice\.css/] },
   },
 });

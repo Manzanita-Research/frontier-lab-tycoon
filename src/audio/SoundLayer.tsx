@@ -1,4 +1,5 @@
 import { useFrame } from "@react-three/fiber";
+import { tripNow } from "../ui/juice/tripState";
 import { useEffect, useRef } from "react";
 import { Vector3 } from "three";
 import { appNow, registry, sim } from "../app/game";
@@ -8,7 +9,7 @@ import { fx } from "../render/fx/state";
 import { worldX, worldZ } from "../render/coords";
 import { modSession } from "../app/mods";
 import { skinUiAtom } from "../ui/hud/state";
-import { Band, renderMusic } from "./Band";
+import { Band, renderMusic, renderWowTone, type TripTake } from "./Band";
 import { MODES, flavourFor } from "./music";
 import { SoundKit, musicFor, synthNotes } from "./SoundKit";
 import { audioReadyAtom, bindSound, mixerAtom } from "./state";
@@ -62,8 +63,17 @@ export function SoundLayer() {
         // FLT-66: the band rendered offline (`[{ at: 0, mode: "zoomies" }]`, seconds, skin), as base64 float32 samples for a WAV.
         // FLT-80: `solo: "choir"` renders the zoomies choir on its own, for the words check.
         modes: MODES,
-        renderMusic: async (takes: { at: number; mode: (typeof MODES)[number] }[], seconds: number, skin = "base", era = "1", solo?: "choir") => {
-          const buffer = await renderMusic(takes, seconds, { flavour: flavourFor(skin), era }, undefined, undefined, solo);
+        // FLT-105: `trip` puts the tape wow on the clip: `{ points: [[seconds, level], ...], calm? }`.
+        renderMusic: async (takes: { at: number; mode: (typeof MODES)[number] }[], seconds: number, skin = "base", era = "1", solo?: "choir", trip?: TripTake) => {
+          const buffer = await renderMusic(takes, seconds, { flavour: flavourFor(skin), era }, undefined, undefined, solo, trip);
+          const bytes = new Uint8Array(buffer.getChannelData(0).buffer);
+          let binary = "";
+          for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+          return { sampleRate: buffer.sampleRate, float32: btoa(binary) };
+        },
+        // FLT-105: a 440 Hz sine through the tape wow (same `trip` shape),, for measuring the bend.
+        renderWowTone: async (trip: TripTake, seconds: number, hz = 440) => {
+          const buffer = await renderWowTone(trip, seconds, hz);
           const bytes = new Uint8Array(buffer.getChannelData(0).buffer);
           let binary = "";
           for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
@@ -84,6 +94,7 @@ export function SoundLayer() {
     const sound = kit.current;
     if (!sound) return;
     const world = sim.world;
+    sound.setTrip(tripNow.level, tripNow.calm);
     for (const e of watch.current.poll(world)) {
       switch (e.type) {
         case "placed": sound.cue("place"); break;

@@ -26,7 +26,7 @@
     "ambiguous": ["Turkey", "Chad", "Jordan", "Georgia", "Guinea", "Western", "Asian", "African", "Labour", "Congress", "Senate", "Parliament", "Washington"]
   },
   "media": {
-    "any": ["New York Times", "NYT", "Wall Street Journal", "WSJ", "Washington Post", "Bloomberg", "Reuters", "Associated Press", "Financial Times", "The Economist", "The Verge", "TechCrunch", "Axios", "Politico", "The Information", "Semafor", "Platformer", "Stratechery", "Hacker News", "Ars Technica", "Business Insider", "Forbes", "CNBC", "CNN", "BBC", "Fox News", "MSNBC", "NPR", "404 Media", "SF Standard", "Mission Local", "Substack", "Techmeme", "Hard Fork", "Dwarkesh Podcast", "Latent Space", "LessWrong", "Alignment Forum", "Import AI", "SemiAnalysis", "Simon Willison", "Willison"],
+    "any": ["New York Times", "NYT", "Wall Street Journal", "WSJ", "Washington Post", "Bloomberg", "Reuters", "Associated Press", "Financial Times", "The Economist", "The Verge", "TechCrunch", "Axios", "Politico", "The Information", "Semafor", "Platformer", "Stratechery", "Hacker News", "Ars Technica", "Business Insider", "Forbes", "CNBC", "CNN", "BBC", "Fox News", "MSNBC", "NPR", "404 Media", "SF Standard", "Mission Local", "Substack", "Techmeme", "Hard Fork", "Dwarkesh Podcast", "Latent Space", "LessWrong", "Alignment Forum", "Import AI", "SemiAnalysis", "Simon Willison", "Willison", "Vibecamp", "Vibe Camp", "TPOT", "This Part of Twitter"],
     "capitalised": [],
     "ambiguous": ["Fortune", "Wired", "Pivot", "Lex", "Medium.com", "Interconnects", "Economist"]
   },

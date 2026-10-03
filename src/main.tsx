@@ -4,7 +4,7 @@ import "@fontsource/nunito/latin-600.css";
 import "@fontsource/nunito/latin-700.css";
 import "@fontsource/nunito/latin-800.css";
 import "@fontsource/nunito/latin-900.css";
-import { loadModSession, setModSession } from "./app/mods";
+import { loadModSession, momentSearch, setModSession } from "./app/mods";
 import { setSessionDefinition } from "./sim/defs";
 import { door } from "./introRoute";
 import "./index.css";
@@ -36,7 +36,7 @@ const fonts = Promise.race([
 let game: { skin: Promise<typeof import("./ui/hud/skinControl")>; App: Promise<ComponentType> } | undefined;
 const loadGame = () => {
   if (game) return game;
-  const mods = loadModSession(window.location.search, { baseUrl: window.location.href }).then((session) => {
+  const mods = loadModSession(momentSearch(window.location.search), { baseUrl: window.location.href }).then((session) => {
     setModSession(session);
     setSessionDefinition(session.def);
   });

@@ -34,6 +34,10 @@ const clips = [
   { name: "16-choir", takes: [{ at: 0, mode: "zoomies" }], seconds: 12, solo: "choir", about: "The zoomies choir on its own (no band): can you make out the words?" },
   { name: "17-choir-frontier-95", takes: [{ at: 0, mode: "zoomies" }], seconds: 12, skin: "frontier-95", solo: "choir", about: "Frontier 95's choir on its own." },
   { name: "14-walkies-nap-walkies", takes: [{ at: 0, mode: "walkies" }, { at: 4.9, mode: "nap" }, { at: 12.2, mode: "walkies" }], seconds: 18, about: "1×, Space at 4.9 s (the tape stops into the nap), Space again at 12.2 s." },
+  // FLT-105 pass 2: the trip's tape wow. `trip.points` is the strength over the clip ([seconds, 0 to 1]); in the game it comes from the trip's slew.
+  { name: "18-acid-trip-frontier-95", takes: [{ at: 0, mode: "walkies" }], seconds: 30, skin: "frontier-95", trip: { points: [[0, 0], [3, 0], [8, 1], [20, 1], [27, 0]] }, about: "ACID MOD(E): in tune for 3 s, the wow comes on over 5 s (±80 cents every 4 s, a light flutter), holds, and eases back into tune by 27 s." },
+  { name: "19-acid-enough-frontier-95", takes: [{ at: 0, mode: "walkies" }], seconds: 16, skin: "frontier-95", trip: { points: [[0, 1], [8, 1], [8.4, 0]] }, about: "Full wow, then \"I've had enough\" at 8 s: back in tune within about a second, no swoop." },
+  { name: "20-acid-calm-frontier-95", takes: [{ at: 0, mode: "walkies" }], seconds: 20, skin: "frontier-95", trip: { points: [[0, 0], [2, 0], [6, 1], [14, 1], [18, 0]], calm: true }, about: "The calm (reduced motion) trip: a slower ±35-cent sway, no flutter." },
 ].filter((c) => !only.length || only.includes(c.name));
 
 function wav(samples, sampleRate) {
@@ -56,7 +60,7 @@ mkdirSync(out, { recursive: true });
 const rows = [];
 for (const clip of clips) {
   const started = Date.now();
-  const { sampleRate, float32 } = await page.evaluate(({ takes, seconds, skin, solo }) => window.__sound.renderMusic(takes, seconds, skin, "1", solo), clip);
+  const { sampleRate, float32 } = await page.evaluate(({ takes, seconds, skin, solo, trip }) => window.__sound.renderMusic(takes, seconds, skin, "1", solo, trip), clip);
   const raw = Buffer.from(float32, "base64");
   const samples = new Float32Array(raw.buffer, raw.byteOffset, raw.length / 4);
   let energy = 0; let peak = 0; let silent = 0;

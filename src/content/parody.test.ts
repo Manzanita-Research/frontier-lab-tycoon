@@ -12,6 +12,8 @@ const REAL = [
   "Windows 95", "Windows 98", "Clippy", "Microsoft", "OpenAI", "Anthropic", "DeepMind", "Google", "Gmail", "ChatGPT",
   // Real labs our old rival names contained (renamed before prod: Super Super AI, MetaMeta Metaintelligence Labs).
   "Safe Superintelligence", "Meta Superintelligence", "SSI",
+  // FLT-105: ACID MOD(E)'s gathering is Vibe Encampment, a parody; these are the real one and its corner of the internet.
+  "Vibecamp", "VibeCamp", "Vibe Camp", "TPOT", "This Part of Twitter",
   // FLT-101 satirises a movement's culture, never its real people, charities, houses or forums.
   "Effective Altruism", "Open Philanthropy", "Open Phil", "GiveWell", "80,000 Hours", "Effective Ventures", "Rethink Priorities",
   "Future of Humanity Institute", "Giving What We Can", "Alameda Research", "Wytham Abbey", "Wytham", "Lighthaven", "LessWrong",
@@ -86,6 +88,8 @@ describe("parody names only", () => {
     expect(realNames("Frontier BIOS, a Frontier 486FX, the '96 sim-game look, Intel Inside, a Maxis box", [...REAL, ...RETAIL])).toEqual(["Maxis", "Intel"]);
     expect(realNames("Utilsbury Manor, the Maximally Effective Altruists, Effective Altruism, a weekend at Wytham Abbey")).toEqual(["Effective Altruism", "Wytham Abbey", "Wytham"]);
     expect(realNames("Very Very Super Super Intelligence, Super Super AI, MetaMeta Metaintelligence Labs, SSID")).toEqual([]);
+    expect(realNames("back from Vibecamp, in TPOT, at Vibe  Camp")).toEqual(["Vibecamp", "Vibe Camp", "TPOT"]);
+    expect(realNames("back from Vibe Encampment, in their jhana era")).toEqual([]);
   });
   it("reads the content, the UI, all six skins and every base pack", () => {
     for (const skin of ["base", "frontier-95", "homepage-98", "discovery-disc-96", "field-almanac", "karaoke-night", "swag-drop"]) {
@@ -94,6 +98,7 @@ describe("parody names only", () => {
     expect(sources["../skins/frontier-95/skin.css"]).toContain('[data-skin="frontier-95"]');
     expect(packs.length).toBeGreaterThanOrEqual(13);
     for (const p of packs) expect(scanned).toContain(`../../mods/${p}/mod.json`);
+    expect(scanned).toContain("../../mods/examples/acid-mode/mod.json");
     expect(scanned).toContain("../../mods/examples/maximally-effective-altruists/mod.json");
     // assets/art.jobs.json holds every word printed in the generated art (FLT-70), so the pictures are scanned too.
     for (const f of ["content.ts", "manual.ts", "art.ts", "Intro.tsx", "stage/Kiosk.tsx", "stage/Props.tsx", "assets/art.jobs.json", "assets/props.jobs.json"]) expect(scanned).toContain(`../intro/${f}`);

@@ -1,4 +1,5 @@
 import { Band, limiter } from "./Band";
+import { Wobble } from "./wobble";
 import { flavourFor, modeFor, type Flavour, type Mode } from "./music";
 import { CUES, HOOKS, cueNotes, hookNotes, type Cue, type Hook, type Note } from "./score";
 import { noiseBuffer, voice } from "./voice";
@@ -49,6 +50,7 @@ export class SoundKit {
   private noise: AudioBuffer | null = null;
   private continuous: (OscillatorNode | AudioBufferSourceNode)[] = [];
   private band: Band | null = null;
+  private wobble: Wobble | null = null;
   private nextBed = 0;
   private syllable = 0;
   private variation = 0;
@@ -72,7 +74,9 @@ export class SoundKit {
         this.music.connect(this.master); this.sfx.connect(this.master);
         this.master.connect(limiter(ctx)).connect(ctx.destination);
         this.noise = noiseBuffer(ctx);
-        this.band = new Band(ctx, this.music, { mode: this.beds.mode, flavour: this.beds.flavour, era: this.beds.era });
+        // FLT-105: the trip's tape wow, between the band and the music bus (in tune with no trip on).
+        this.wobble = new Wobble(ctx, this.music);
+        this.band = new Band(ctx, this.wobble.input, { mode: this.beds.mode, flavour: this.beds.flavour, era: this.beds.era });
         const source = ctx.createBufferSource();
         source.buffer = this.noise; source.loop = true;
         const filter = ctx.createBiquadFilter(); filter.type = "bandpass"; filter.frequency.value = 480; filter.Q.value = 0.8;
@@ -120,6 +124,10 @@ export class SoundKit {
     this.variation++;
     for (const n of notes) voice(ctx, this.sfx, n, ctx.currentTime + 0.005, this.noise ?? noiseBuffer(ctx));
   }
+  /** FLT-105: a trip's strength (0 to 1) bends the band through the tape wow; 0 eases it back into tune. */
+  setTrip(level: number, calm: boolean) {
+    this.wobble?.set(level, calm);
+  }
   /** Every frame (FLT-66): the band builds the next few voices, a handful at a time rather than a burst. */
   play() {
     const ctx = this.ctx;
@@ -152,6 +160,7 @@ export class SoundKit {
   dispose() {
     this.disposed = true;
     this.continuous.forEach((s) => { s.stop(); s.disconnect(); });
+    this.wobble?.dispose(); this.wobble = null;
     this.continuous = [];
     void this.ctx?.close().catch(() => {});
     this.ctx = null;
