@@ -1,0 +1,88 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "4198279051e5203cd9089475b65689e75e6d5d66"
+  },
+  "head": {
+    "branch": "flt-105-acid-mode",
+    "sha": "d0d63df",
+    "dirty": true
+  },
+  "seconds": 289.219,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "acid-offer",
+      "skin": null,
+      "before": "docs/img/flt-105/before/acid-offer.png",
+      "after": "docs/img/flt-105/after/acid-offer.png",
+      "title": "FLT-105: Vibe Encampment proposes a medium dose of acid",
+      "compare": "docs/img/flt-105/compare/acid-offer.png",
+      "changed": 0.324545524691358
+    },
+    {
+      "scene": "acid-warning",
+      "skin": null,
+      "before": "docs/img/flt-105/before/acid-warning.png",
+      "after": "docs/img/flt-105/after/acid-warning.png",
+      "title": "FLT-105: the one-line warning before the trip (Continue / Skip)",
+      "compare": "docs/img/flt-105/compare/acid-warning.png",
+      "changed": 0.2499483024691358
+    },
+    {
+      "scene": "acid-peak",
+      "skin": null,
+      "before": "docs/img/flt-105/before/acid-peak.png",
+      "after": "docs/img/flt-105/after/acid-peak.png",
+      "title": "FLT-105: the trip at full strength (melting windows, the kaleidoscope, poster-paint chrome, the clip's ego death, I've had enough)",
+      "compare": "docs/img/flt-105/compare/acid-peak.png",
+      "changed": 0.8687901234567901
+    },
+    {
+      "scene": "acid-researcher",
+      "skin": null,
+      "before": "docs/img/flt-105/before/acid-researcher.png",
+      "after": "docs/img/flt-105/after/acid-researcher.png",
+      "title": "FLT-105: a researcher has gone somewhere (tapped)",
+      "compare": "docs/img/flt-105/compare/acid-researcher.png",
+      "changed": 0.8749675925925926
+    },
+    {
+      "scene": "acid-breakthrough",
+      "skin": null,
+      "before": "docs/img/flt-105/before/acid-breakthrough.png",
+      "after": "docs/img/flt-105/after/acid-breakthrough.png",
+      "title": "FLT-105: the breakthrough is its own card, mid-trip (the clock stops; capability 30 → 63, #1 on the Arena)",
+      "compare": "docs/img/flt-105/compare/acid-breakthrough.png",
+      "changed": 0.8886195987654321
+    },
+    {
+      "scene": "acid-calm",
+      "skin": null,
+      "before": "docs/img/flt-105/before/acid-calm.png",
+      "after": "docs/img/flt-105/after/acid-calm.png",
+      "title": "FLT-105: the reduced-motion trip (still: a poster-paint mandala on the map, flowered chrome, the clip lying down in its halo)",
+      "compare": "docs/img/flt-105/compare/acid-calm.png",
+      "changed": 0.6791358024691359
+    },
+    {
+      "scene": "acid-calm-card",
+      "skin": null,
+      "before": "docs/img/flt-105/before/acid-calm-card.png",
+      "after": "docs/img/flt-105/after/acid-calm-card.png",
+      "title": "FLT-105: the breakthrough's card in the reduced-motion trip",
+      "compare": "docs/img/flt-105/compare/acid-calm-card.png",
+      "changed": 0.7239837962962963
+    },
+    {
+      "scene": "acid-phone",
+      "skin": null,
+      "before": "docs/img/flt-105/before/acid-phone.png",
+      "after": "docs/img/flt-105/after/acid-phone.png",
+      "title": "FLT-105: the trip on a phone (390x844)",
+      "compare": "docs/img/flt-105/compare/acid-phone.png",
+      "changed": 0.8909671588285333
+    }
+  ],
+  "errors": []
+}

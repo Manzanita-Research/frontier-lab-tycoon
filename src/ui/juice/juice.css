@@ -361,3 +361,49 @@ body.photo .world .reason {
     height: 36px;
   }
 }
+
+/* FLT-105: the trip's colour wash (TripScreen). A rainbow that turns slowly, blended by colour: every pixel takes its
+   hue and keeps its own brightness, so nothing flashes (see trip.test.ts). Oversized so it covers the screen at any
+   angle; under the trip's own buttons (z-index 60), over everything else. The hues are trip.ts's WASH_S and WASH_L. */
+.trip-wash {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: 150vmax;
+  height: 150vmax;
+  z-index: 50;
+  pointer-events: none;
+  mix-blend-mode: color;
+  transform: translate(-50%, -50%);
+  will-change: transform, opacity;
+  background: conic-gradient(
+    hsl(0 90% 55%), hsl(30 90% 55%), hsl(60 90% 55%), hsl(90 90% 55%), hsl(120 90% 55%), hsl(150 90% 55%), hsl(180 90% 55%),
+    hsl(210 90% 55%), hsl(240 90% 55%), hsl(270 90% 55%), hsl(300 90% 55%), hsl(330 90% 55%), hsl(360 90% 55%)
+  );
+}
+/* Walls that breathe: the whole HUD swells and settles, a percent and a half, over six seconds (trip.ts's breathe and
+   breathePeriod), as strong as the trip is. A keyframe animation, so it is smooth; the variable only sets its depth. */
+@keyframes trip-breathe {
+  0%, 100% { scale: 1; }
+  50% { scale: calc(1 + 0.014 * var(--trip-k, 0)); }
+}
+html[data-trip="on"] .hud-host,
+html[data-trip="lite"] .hud-host {
+  animation: trip-breathe 6s ease-in-out infinite;
+}
+/* FLT-105 (pass 2): the calm version's still art, a poster-paint mandala on the map (over the scene and its labels,
+   under the HUD). Twelve petals in four paints, rings of marigold, and a clear middle so the campus stays playable.
+   Blended by colour like the wash, so it takes the hue and keeps every pixel's brightness; it never moves (TripScreen
+   only sets its opacity, which follows the trip's strength). Only the calm version shows it: TRIP_LOOK's `art` is 0. */
+.trip-art {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  mix-blend-mode: color;
+  background:
+    repeating-radial-gradient(circle at 50% 55%, transparent 0 9vmin, hsl(45 95% 55%) 9vmin 11vmin, transparent 11vmin 20vmin),
+    repeating-conic-gradient(from 0deg at 50% 55%, hsl(290 85% 55%) 0 7.5deg, hsl(25 95% 55%) 7.5deg 15deg, hsl(175 80% 45%) 15deg 22.5deg, hsl(335 90% 60%) 22.5deg 30deg);
+  -webkit-mask-image: radial-gradient(circle at 50% 55%, transparent 0 14vmin, #000 42vmin);
+  mask-image: radial-gradient(circle at 50% 55%, transparent 0 14vmin, #000 42vmin);
+}

@@ -63,7 +63,7 @@ export function lineFor(state: GameState, cause: Cause, w: Walker): string {
 /** It is dark on campus right now (the campus clock: sim/daylight.ts). */
 export const isNightNow = (state: GameState): boolean => isNight(hourAt(state.tick));
 
-export const thoughtOf = (state: GameState, w: Walker): string => lineFor(state, causeOf(w, isNightNow(state)), w);
+export const thoughtOf = (state: GameState, w: Walker): string => w.spell?.line ?? lineFor(state, causeOf(w, isNightNow(state)), w);
 
 export interface ThoughtRow {
   /** `kind|text`: what the panel highlights by. */

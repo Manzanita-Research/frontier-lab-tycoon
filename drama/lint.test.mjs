@@ -96,13 +96,19 @@ test("the real labs our old rival names contained fail", () => {
   assert.ok(fails("Meta Superintelligence Labs poaches again").length > 0);
 });
 
+test("FLT-105: the real gathering and its corner of the internet fail; Vibe Encampment passes", () => {
+  for (const [text, word] of [["back from Vibecamp", "Vibecamp"], ["everyone at Vibe Camp", "Vibe Camp"], ["big in TPOT", "TPOT"]])
+    assert.ok(fails(text).includes(word), `${text} → ${fails(text)}`);
+  assert.deepEqual(fails("Vibe Encampment proposes a medium dose of acid"), []);
+});
+
 test("ambiguous words warn instead of failing", () => {
   assert.deepEqual(fails("Scale acquires talent"), []);
   assert.deepEqual(warns("Scale acquires talent"), ["Scale"]);
 });
 
 test("the game's own content packs pass", () => {
-  for (const dir of ["base-collusion", "base-disasters", "base-leapfrog", "base-papers"]) {
+  for (const dir of ["base-collusion", "base-disasters", "base-leapfrog", "base-papers", "examples/acid-mode"]) {
     const { mod, names } = readPack(join(root, "mods", dir));
     const report = lintPack(mod, { names });
     assert.deepEqual(report.errors, [], dir);

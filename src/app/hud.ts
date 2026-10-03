@@ -35,7 +35,7 @@ import { assistantOf, type AssistantMessage } from "../sim/tutorial";
 import { pendingConfirmOf, persistentWarnings, type PendingConfirm } from "../sim/guardrails";
 import { calmStart, CALM_START_DAY, disasterMenu, disastersView, type MenuRow, type RunView } from "../sim/disasters/driver";
 import type { Risk } from "../sim/disasters/types";
-import type { Building, GameState, GoalProgress, OpenEvent, Outcome, Pop, StaffJob, Thought, Tone, Vibes, Importance, NoticeSource, Toast } from "../sim/types";
+import type { Building, GameState, GoalProgress, OpenEvent, Outcome, Pop, StaffJob, Thought, Tone, TripState, Vibes, Importance, NoticeSource, Toast } from "../sim/types";
 import { endingsView, type EndingsView } from "../sim/endings/view";
 
 export type Tool = "path" | PlaceableKind | OfficeKind | "bulldoze";
@@ -154,6 +154,8 @@ export interface Snapshot {
   audit: AuditView;
   /** The Sandbox Escape (FLT-59): who is pacing or running, where to, and the tallies. `null` until Level 5 (or `?escape=off`). */
   escape: EscapeView | null;
+  /** FLT-105: a trip under way or wearing off, as the sim keeps it (ticks). Absent otherwise. */
+  trip?: TripState;
 }
 
 /** Disasters (FLT-32): the menu, what is under way, who it has pulled off their post, and the two meters it moves. */
@@ -313,5 +315,6 @@ export function makeSnapshot(s: GameState, prev?: Snapshot, ui: UiSelection = NO
     disasters: disastersOf(s),
     audit: auditView(s),
     escape: escapeView(s),
+    ...(s.trip ? { trip: { ...s.trip, lines: s.trip.lines.slice() } } : {}),
   };
 }

@@ -118,6 +118,12 @@ export function OrderLayer({ vm, actions }: { vm: HudVM; actions: HudActions }) 
   ) : null;
 }
 
+/** A trip's warning and its "I've had enough" button (FLT-105): above everything, photo mode included. */
+export function TripLayer({ vm, actions }: { vm: HudVM; actions: HudActions }) {
+  const { Trip } = useSkin().slots;
+  return vm.trip ? <Trip trip={vm.trip} actions={actions} /> : null;
+}
+
 /** Photo mode's controls and the polaroid: they live outside the HUD layer so hiding the HUD does not hide them. */
 export function PhotoLayer({ vm, actions }: { vm: HudVM; actions: HudActions }) {
   const { PhotoOverlay } = useSkin().slots;

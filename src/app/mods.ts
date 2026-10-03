@@ -57,6 +57,19 @@ if (typeof window !== "undefined") window.addEventListener("pagehide", (event) =
 
 const describe = (error: unknown): string => (error instanceof ModError ? `${error.path}: ${error.detail}` : String(error));
 
+/** Staging links that play an example mod (FLT-105's `?moment=acid-*`) bring it along unless the address names its own mods. */
+const MOMENT_MODS: readonly (readonly [prefix: string, mod: string])[] = [["acid-", "/mods/examples/acid-mode/mod.json"]];
+
+/** The address's search, with the example mod a `?moment=` needs added when it has no `?mod=` of its own. */
+export function momentSearch(search: string): string {
+  const params = new URLSearchParams(search);
+  const moment = params.get("moment");
+  const mod = moment && !params.has("mod") ? MOMENT_MODS.find(([prefix]) => moment.startsWith(prefix))?.[1] : undefined;
+  if (!mod) return search;
+  params.append("mod", mod);
+  return `?${params}`;
+}
+
 export async function loadModSession(search: string, options: { baseUrl?: string; fetcher?: typeof fetch; objectUrls?: ObjectUrls; scope?: Scope.Scope } = {}): Promise<ModSession> {
   if (!new URLSearchParams(search).has("mod")) return NO_MODS;
   const errors: string[] = [];

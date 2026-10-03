@@ -58,10 +58,16 @@ export function dailyThoughts(state: GameState, rng: Rng, force = false) {
   // When someone has a need nagging them (or is walking out with a box), most bubbles go to them, with their own line.
   const onScreen = new Set(state.thoughts.map((t) => t.text));
   const loud = candidates.filter((w) => {
+    // Someone away on a spell (FLT-105) is loudest of all.
+    if (w.spell) return !onScreen.has(w.spell.line);
     const cause = causeOf(w);
     return isLoud(cause) && !onScreen.has(lineFor(state, cause, w));
   });
   const walker = rng.pick(loud.length > 0 && rng.chance(0.7) ? loud : candidates);
+  if (walker.spell) {
+    state.thoughts.push({ id: state.nextId++, walkerId: walker.id, kind: walker.kind, text: walker.spell.line, expiresTick: state.tick + THOUGHT_TICKS });
+    return;
+  }
   const cause = causeOf(walker);
   if (isLoud(cause)) {
     state.thoughts.push({ id: state.nextId++, walkerId: walker.id, kind: walker.kind, text: lineFor(state, cause, walker), expiresTick: state.tick + THOUGHT_TICKS });

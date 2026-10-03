@@ -95,6 +95,8 @@ export const EventCard = Schema.Struct({
   choices: Schema.Array(EventChoice).check(Schema.isBetweenLength(1, 3)),
   kind: Schema.optionalKey(Schema.Literals(["era", "auction", "response", "stream", "hearing", "leak", "drama", "report", "bill", "vote"])), stripe: Schema.optionalKey(text),
   doc: Schema.optionalKey(EventDoc),
+  /** How it takes its turn (FLT-105; content/cardPacing.ts): `now` is the next beat of a story the player is in (no gap), `urgent` doesn't wait for a quiet week, `priority` goes ahead of the line, `minor` answers itself when there's no room. */
+  pace: Schema.optionalKey(Schema.Literals(["now", "urgent", "priority", "minor"])),
 });
 export type EventData = typeof EventCard.Type;
 

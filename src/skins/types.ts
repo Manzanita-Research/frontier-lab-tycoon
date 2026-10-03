@@ -5,7 +5,7 @@ import type {
   ArenaVM, AuditVM, BeatVM, LunchVM, BirdAppVM, BillVM, TrackerVM, ReportCardVM, BubbleVM, FactionsVM, BuildItemVM, BuildTipVM, ChatVM, CoachVM, ConfirmVM, DramaDocVM, DramaVM, SavesVM, WelcomeVM, EraCardVM, EventVM, HearingVM, HudActions, HudVM, LeakVM, InspectorVM, LayoutVM, LeapfrogVM, StreamVM,
   ModsVM, SkinOfferVM, NewsroomVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, SkinPickerVM, SoundVM, SpeedVM, StatsVM, ThoughtRowVM, TickerItemVM,
   StaffVM, TeaserVM, ProgressVM, ToastVM, TrainingVM, UnlockCardVM, VisibleVM, HelpVM, PapersVM, PaperMomentVM, CrumbWikiVM, DisastersVM,
-  EndingVM, TakeoverVM, TrayItemVM, WidgetVM, PlaceModeVM, MemoVM, ChallengeVM,
+  EndingVM, TakeoverVM, TrayItemVM, WidgetVM, PlaceModeVM, MemoVM, ChallengeVM, TripVM,
 } from "../ui/hud/types";
 import type { Rect } from "./kit/place";
 
@@ -64,6 +64,7 @@ export const SLOT_NAMES = [
   "AuditPin",
   "Beat",
   "OrderTracker",
+  "Trip",
   "GateLegend",
   "DramaButton",
   "WindowTray",
@@ -173,6 +174,13 @@ export interface SlotPropsMap {
    */
   Beat: { beat: BeatVM; actions: HudActions };
   OrderTracker: { lunch: LunchVM; layout: LayoutVM; actions: HudActions };
+  /**
+   * A trip (FLT-105). While `trip.consent` is `ask`: the one-line warning with Continue and Skip (hold time with
+   * `useAutoPause` until it is answered: nothing changes on screen before then). While `on`: an "I've had enough" button
+   * (`actions.tripEnough`), always visible, that ends the look at once. Drawn above everything, photo mode included. The
+   * look itself (colour, warping, trails) is the host's; keep this slot still, whatever the trip is doing.
+   */
+  Trip: { trip: TripVM; actions: HudActions };
   /**
    * Who is at the gate (FLT-56): the game pins it over the gate while a faction marches there. One row per crowd in
    * `factions.gate` (its colour, count and name); an `addressable` one offers `actions.issueStatement(id)`, which costs

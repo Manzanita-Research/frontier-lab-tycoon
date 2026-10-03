@@ -1,0 +1,54 @@
+/* FLT-105: the trip's warning line and its "I've had enough" button. Above everything (the look's layers included),
+   plain and still: no animation here, whatever the trip is doing. */
+.trip-warn {
+  position: fixed;
+  left: 50%;
+  top: max(12px, env(safe-area-inset-top));
+  transform: translateX(-50%);
+  z-index: 60;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--flt-space-2);
+  max-width: calc(100vw - 24px);
+  padding: var(--flt-space-2) var(--flt-space-3);
+  background: #0b0b10;
+  color: #f6f1e6;
+  border-radius: var(--flt-radius, 8px);
+  font-family: var(--flt-font-ui);
+  font-size: 14px;
+  box-shadow: 0 6px 24px rgb(0 0 0 / 0.35);
+}
+.trip-warn button,
+.trip-enough {
+  min-height: 36px;
+  padding: 0 var(--flt-space-3);
+  border: 1px solid #f6f1e6;
+  border-radius: var(--flt-radius, 8px);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.trip-warn .trip-go {
+  background: #f6f1e6;
+  color: #0b0b10;
+}
+.trip-enough {
+  position: fixed;
+  right: max(12px, env(safe-area-inset-right));
+  top: max(12px, env(safe-area-inset-top));
+  z-index: 60;
+  background: #0b0b10;
+  color: #f6f1e6;
+  font-family: var(--flt-font-ui);
+  font-size: 14px;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.35);
+}
+/* Pass 2: while a trip is on screen a card doesn't dim the screen behind it. The trip already has the screen, and a
+   dim that came and went as a card was answered would be a flash of its own (trip.test.ts). */
+html[data-trip] .modal-backdrop {
+  background: transparent;
+  backdrop-filter: none;
+}

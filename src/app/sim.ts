@@ -26,6 +26,7 @@ import { DRAMA_MOMENTS, isDramaMoment, stageDrama } from "../sim/defection/demo"
 import { AUDIT_MOMENTS, isAuditMoment, stageAudit } from "../sim/auditors/demo";
 import { isSenateMoment, SENATE_MOMENTS, stageSenate } from "../sim/capture/demo";
 import { ESCAPE_MOMENTS, isEscapeMoment, stageEscape } from "../sim/escape/demo";
+import { ACID_MOMENTS, acidNewsFrom, isAcidMoment, stageAcid } from "../sim/tripDemo";
 import { isArcMoment, stageArcMoment } from "../sim/arcDemo";
 import { walkersThinking } from "../sim/mind";
 import { makeSnapshot, NO_SELECTION, type Snapshot, type UiSelection, type UiToast } from "./hud";
@@ -197,7 +198,7 @@ export class SimHandle {
 export const STAGED_MOMENTS: readonly string[] = [
   "jem-opening", "jem-confirm", ...ENDING_MOMENTS, ...MOMENTS, ...OPS_MOMENTS, ...LEAP_MOMENTS, ...COLLUSION_MOMENTS, ...PAPER_MOMENTS,
   ...CIRCUS_MOMENTS, ...DRAMA_MOMENTS, ...AUDIT_MOMENTS, ...SENATE_MOMENTS, ...FACTION_MOMENTS, ...BIRD_DEMO_MOMENTS, ...ESCAPE_MOMENTS,
-  ...BEATS_MOMENTS, ...MONEY_MOMENTS, ...ONBOARD_MOMENTS, ...SLOP_MOMENTS,
+  ...BEATS_MOMENTS, ...MONEY_MOMENTS, ...ONBOARD_MOMENTS, ...SLOP_MOMENTS, ...ACID_MOMENTS,
 ];
 
 type SimDebug = Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "researchers"> & Partial<Pick<DebugParams, "disaster" | "dz" | "dzPick" | "risk" | "daily" | "endings">> & { moment?: string | null; leapfrog?: boolean; papers?: boolean; collusion?: boolean; hearing?: boolean; yacht?: boolean; defection?: boolean; poaching?: boolean; auditors?: boolean; capture?: boolean; promises?: boolean; factions?: boolean; birdapp?: boolean; birdrivals?: boolean; slopbowl?: boolean; water?: boolean; escape?: boolean };
@@ -209,7 +210,10 @@ type SimDebug = Pick<DebugParams, "seed" | "warp" | "agents" | "discourse" | "re
 export function createSimHandle(dbg: SimDebug, def: GameDefinition | null = null, mods: RunMods | null = null): SimHandle {
   const sim = withDefs(def, () => stage(dbg));
   if (mods) sim.mods = mods;
-  return new SimHandle(sim, sim.leapfrog.enabled, undefined, def);
+  const handle = new SimHandle(sim, sim.leapfrog.enabled, undefined, def);
+  // ACID MOD(E)'s review links open the ticker on the beat's own headlines.
+  if (isAcidMoment(dbg.moment)) handle.newsStartId = acidNewsFrom(sim);
+  return handle;
 }
 
 function stage(dbg: SimDebug): GameState {
@@ -256,6 +260,7 @@ function stage(dbg: SimDebug): GameState {
   else if (isOnboardMoment(dbg.moment)) stageOnboard(sim, dbg.moment);
   else if (isEscapeMoment(dbg.moment)) stageEscape(sim, dbg.moment);
   else if (isSlopMoment(dbg.moment)) stageSlopBowl(sim, dbg.moment);
+  else if (isAcidMoment(dbg.moment)) stageAcid(sim, dbg.moment);
   else if (isArcMoment(dbg.moment)) stageArcMoment(sim, dbg.moment);
   if (dbg.agents > 0 || dbg.discourse > 0 || dbg.researchers > 0) {
     const rng = createRng(sim.rngState);

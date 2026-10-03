@@ -45,8 +45,9 @@ import type {
   ArenaRowVM, DramaDocVM,
   ArenaVM, AuditVM, BeatVM, BillVM, SenateVM, TrackerVM, GoalVM, ReportCardVM, ToneVM, BenchCellVM, DisasterRunVM, DisastersVM, DisasterStageVM, MeterVM, RiskVM, UnderstaffedVM, BenchColumnVM, BubbleVM, BuildItemVM, BuildTipVM, ChatVM, ConfirmVM, EditionRowVM, EventVM, HearingMoveVM, HearingVM, HudVM, LeakVM, SenatorVM, InspectorVM, LeaderRowVM, LeapfrogVM, NeedVM, NewsroomVM,
   DramaVM, ModsVM, ObjectivesVM, OutcomeVM, PaperVM, PhotoVM, ResponseVM, SkinPickerVM, SoundVM, SpeedVM, StaffJobVM, StaffRowVM, StaffVM, StatsVM, StreamVM, ThoughtRowVM, TrainingVM, TrendVM, VoiceVM, WalkerKindVM,
-  EndingVM, ShareVM, TakeoverVM, MemoVM, ChallengeVM, UnlockCardVM,
+  EndingVM, ShareVM, TakeoverVM, MemoVM, ChallengeVM, UnlockCardVM, TripVM,
 } from "./types";
+import { tripTarget } from "../juice/trip";
 import { defs } from "../../sim/defs";
 import { NO_SAVES_VM, savesViewModel, type SavesInput } from "./saves.vm";
 
@@ -107,6 +108,8 @@ export interface HudInput {
   photo: { on: boolean; time: string; shot: { id: number; url: string; name: string } | null; flash: number };
   /** A camera beat's caption (FLT-56). Optional: none. */
   beat?: { id: number; kind: string; caption: string; sub: string; kicker?: string } | null;
+  /** FLT-105: the player's answer to each trip's warning, by trip id. Optional: none yet. */
+  tripChoice?: Readonly<Record<string, "on" | "off">>;
   skins: SkinPickerVM;
   /** The Mod Manager. Optional: none means no mods and the window shut. */
   mods?: ModsVM;
@@ -523,6 +526,22 @@ const SIDE_TEXT = { aye: "Aye", nay: "Nay", both: "Both" } as const;
 const BILL_STATUS: Record<string, string> = {
   invited: "Draft", declined: "Shredded", floor: "On the floor", failed: "Voted down", law: "In force", exposed: "Exposed", fallout: "Fallout", sunset: "Sunset", quiet: "Nothing on the desk",
 };
+
+/** FLT-105: the trip, if one is under way. Unanswered, the warning waits for the player; it is gone once the trip is. */
+export function tripOf(i: Pick<HudInput, "snap" | "tripChoice" | "skins">): TripVM | null {
+  const t = i.snap.trip;
+  if (!t) return null;
+  const id = `${t.owner}:${t.start}`;
+  const tick = i.snap.tick;
+  const consent = i.tripChoice?.[id] ?? "ask";
+  if (consent === "ask" && tick >= t.end) return null;
+  return {
+    id, label: t.label || "A trip", consent, strength: tripTarget(t, tick),
+    phase: tick < t.start + t.rise ? "rising" : tick < t.end ? "peak" : "fading",
+    lines: t.lines.slice(), calm: i.skins.reducedMotion,
+    warning: "Contains intense colour and motion.", continueLabel: "Continue", skipLabel: "Skip", enoughLabel: "I've had enough",
+  };
+}
 
 /** The button a beat offers while it plays (FLT-56): the leak's "Bury it", while the reporter is still asking. */
 function beatActionOf(kind: string, s: Snapshot): BeatVM["action"] {
@@ -1270,6 +1289,7 @@ function rawViewModel(i: HudInput): HudVM {
     photoMode: photoOf(i),
     // A card needs the player: the beat makes way. Photo mode hides it with the rest of the HUD.
     beat: i.beat && !event && !era && !solo && !i.photo.on ? { ...i.beat, kicker: i.beat.kicker || (BEAT_KICKER[i.beat.kind] ?? "Meanwhile"), skipLabel: "Skip »", action: beatActionOf(i.beat.kind, i.snap) } : null,
+    trip: tripOf(i),
     skins: i.skins,
     mods: i.mods ?? NO_MODS_VM,
     saves: i.saves ? savesViewModel(i.saves, { lab: i.snap.labName, day: i.snap.day }) : { ...NO_SAVES_VM, current: { lab: i.snap.labName, date: formatDate(i.snap.day) } },
