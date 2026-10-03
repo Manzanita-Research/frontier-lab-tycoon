@@ -42,6 +42,7 @@ import { defs } from "./defs";
 import { postNow } from "./birdapp/driver";
 import { rivalPostNow } from "./birdapp/rivals";
 import { BIRD_OUTCOMES, RIVAL_BEATS, RIVAL_ROLES, type BirdOutcome, type RivalBeat, type RivalRole } from "../content/birdapp";
+import { VIBES_MAX } from "./vibes";
 
 /** A tick is 1.2 game hours (20 to a day). */
 export const HOURS_PER_TICK = 24 / TICKS_PER_DAY;
@@ -417,6 +418,15 @@ function wreck(env: VerbEnv, b: Building) {
 }
 
 const BUILDING = (spec: Spec): Spec => ({ building: "string", ...spec });
+/** The props `building.prop` can hang on a door (the renderer draws each one). */
+export const PROPS = ["sock", "dnd"] as const;
+const ticksOf = (hours: number) => Math.max(1, Math.round((hours * TICKS_PER_DAY) / 24));
+/** Dress a building (FLT-101): `dark`, or a prop, for `ticks` from now (null takes it off). Old entries are dropped here. */
+function dress(state: GameState, building: number, what: string, ticks: number | null) {
+  const keep = (state.dressing ?? []).filter((d) => d.until > state.tick && !(d.building === building && (what === "dark" ? d.dark : d.prop === what)));
+  if (ticks !== null) keep.push(what === "dark" ? { building, dark: true, until: state.tick + ticks } : { building, prop: what, until: state.tick + ticks });
+  state.dressing = keep;
+}
 
 export const VERBS: Record<string, VerbDef> = {
   "investigate.start": {
@@ -555,6 +565,28 @@ export const VERBS: Record<string, VerbDef> = {
       if (typeof p.text === "string") addToast(state, say(env, p.text), "neutral", tagOf(env, p));
     },
   },
+  "building.lights": {
+    doc: "Turn a building's lights off (the windows go dark, even at night) for `hours` (default 8), or back on with `off: false`. Presentation only: the building keeps working. `building` is `$target` or a kind.",
+    spec: BUILDING({ off: "boolean", hours: "number?" }),
+    run: (env, p) => {
+      const b = buildingRef(env, p.building as string);
+      if (b) dress(env.state, b.id, "dark", p.off === false ? null : ticksOf(num(p.hours, 8)));
+    },
+  },
+  "building.prop": {
+    doc: `Hang a prop on a building's door for \`hours\` (default 24): ${PROPS.map((k) => `\`${k}\``).join(", ")}. Presentation only. \`building\` is \`$target\` or a kind.`,
+    spec: BUILDING({ prop: "string", hours: "number?" }),
+    verify: (p) => ((PROPS as readonly string[]).includes(p.prop as string) ? null : `unknown prop "${p.prop as string}"; props are ${PROPS.join(", ")}`),
+    run: (env, p) => {
+      const b = buildingRef(env, p.building as string);
+      if (b) dress(env.state, b.id, p.prop as string, ticksOf(num(p.hours, 24)));
+    },
+  },
+  "vibes.delta": {
+    doc: "Nudge the Vibes (0 to 999) by `amount` now. The daily reading eases back toward what the lab has earned, so a nudge fades over a few days.",
+    spec: { amount: "number" },
+    run: (env, p) => void (env.state.vibes.value = Math.max(0, Math.min(VIBES_MAX, env.state.vibes.value + (p.amount as number)))),
+  },
   "hype.delta": { doc: "Add to hype (0 to 100).", spec: { amount: "number" }, run: (env, p) => void (env.state.hype = clamp100(env.state.hype + (p.amount as number))) },
   "voice.push": {
     doc: "Put the lab in the news cycle (FLT-56): `amount` more of the share of voice the Leapfrog tracks (a rival's launch pushes 42 to 60). Nothing while the Leapfrog is off.",
@@ -619,8 +651,8 @@ export const VERBS: Record<string, VerbDef> = {
     },
   },
   "camera.beat": {
-    doc: "A camera beat (FLT-56): letterbox bars and a `caption` (with an optional `sub` line; templates, like `news`) while the camera eases to `on` for `hold` seconds. `on` is a place, as for `camera.focus`, `here` (wherever the pack's driver says the beat is, such as the auditors' huddle), or `people`: the beat's people, followed as they walk. `kind` tells the renderer which beat it is (`exit`, `huddle`, `viral`). Time keeps running, the player can skip it, and photo mode or reduced motion get the caption without the camera move.",
-    spec: { kind: "string", caption: "string", sub: "string?", on: "string", zoom: "number?", hold: "number?" },
+    doc: "A camera beat (FLT-56): letterbox bars and a `caption` (with an optional `sub` line; templates, like `news`) while the camera eases to `on` for `hold` seconds. `on` is a place, as for `camera.focus`, `here` (wherever the pack's driver says the beat is, such as the auditors' huddle), or `people`: the beat's people, followed as they walk. `kind` tells the renderer which beat it is (`exit`, `huddle`, `viral`, or `fade`: the screen dims nearly to black, for what happens off camera); `kicker` replaces the top bar's words for the kind. Time keeps running, the player can skip it, and photo mode or reduced motion get the caption without the camera move.",
+    spec: { kind: "string", caption: "string", sub: "string?", kicker: "string?", on: "string", zoom: "number?", hold: "number?" },
     run: (env, p) => {
       const people = p.on === "people" ? (env.people ?? []).filter((id) => env.state.walkers.some((w) => w.id === id)) : [];
       const lead = people.length ? env.state.walkers.find((w) => w.id === people[0]) : undefined;
@@ -629,6 +661,7 @@ export const VERBS: Record<string, VerbDef> = {
       pushCue(env.state, {
         type: "beat", beat: p.kind as string, caption: say(env, p.caption as string), sub: p.sub ? say(env, p.sub as string) : "",
         x: at[0], z: at[1], zoom: num(p.zoom, 1.5), hold: num(p.hold, 4), follow: people,
+        ...(typeof p.kicker === "string" ? { kicker: say(env, p.kicker) } : {}),
       });
     },
   },

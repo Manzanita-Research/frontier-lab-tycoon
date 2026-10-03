@@ -23,6 +23,9 @@ import { SandboxModel } from "./SandboxModel";
 import { HoneypotModel } from "./HoneypotModel";
 import { DemoModel } from "./DemoModel";
 import { ModModel } from "./ModModel";
+import { RecipeModel } from "./RecipeModel";
+import { DoorProps, LightsOut } from "./Dressing";
+import { modSession } from "../../app/mods";
 import { BrokenFx } from "./BrokenFx";
 import { defs } from "../../sim/defs";
 
@@ -59,9 +62,11 @@ export function BuildingModel({ kind, id }: { kind: BuildingKind; id?: number })
       return <SandboxModel color={color} />;
     case "honeypot":
       return <HoneypotModel color={color} />;
-    default:
-      // A kind a mod added: no model of its own yet.
-      return <ModModel color={color} size={def.size} />;
+    default: {
+      // A kind a mod added: its recipe (FLT-101), or the flat-packed kit if it brought none.
+      const recipe = modSession().presentation?.looks[`building:${kind}`]?.recipe;
+      return recipe ? <RecipeModel recipe={recipe} color={color} /> : <ModModel color={color} size={def.size} />;
+    }
   }
 }
 
@@ -127,8 +132,11 @@ export function Buildings() {
         return (
           <group key={b.id} position={[cx, 0, cz]}>
             <Squash delay={b.placedTick === 0 ? 0.25 + i * 0.16 : 0} phase={b.id * 1.9} at={[cx, cz]}>
-              <BuildingModel kind={b.kind} id={b.id} />
+              <LightsOut id={b.id}>
+                <BuildingModel kind={b.kind} id={b.id} />
+              </LightsOut>
             </Squash>
+            <DoorProps id={b.id} w={b.w} d={b.d} />
             <BrokenFx id={b.id} kind={b.kind} w={b.w} d={b.d} />
           </group>
         );

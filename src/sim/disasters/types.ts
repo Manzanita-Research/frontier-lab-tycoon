@@ -177,7 +177,7 @@ export type Cue = { id: number; tick: number } & (
    * FLT-56: a camera beat. Letterbox bars, a caption, a slow shot of (x, z) in tiles, or of `follow` (walker ids) as
    * they walk. `beat` names it for the renderer (`exit`, `huddle`, `viral`, ...). It never pauses time.
    */
-  | { type: "beat"; beat: string; caption: string; sub: string; x: number; z: number; zoom: number; hold: number; follow: number[] }
+  | { type: "beat"; beat: string; caption: string; sub: string; x: number; z: number; zoom: number; hold: number; follow: number[]; kicker?: string }
 );
 
 export interface HistoryRow {

@@ -106,7 +106,7 @@ export interface HudInput {
   mixer: { open: boolean; ready: boolean; muted: boolean; master: number; music: number; sfx: number };
   photo: { on: boolean; time: string; shot: { id: number; url: string; name: string } | null; flash: number };
   /** A camera beat's caption (FLT-56). Optional: none. */
-  beat?: { id: number; kind: string; caption: string; sub: string } | null;
+  beat?: { id: number; kind: string; caption: string; sub: string; kicker?: string } | null;
   skins: SkinPickerVM;
   /** The Mod Manager. Optional: none means no mods and the window shut. */
   mods?: ModsVM;
@@ -152,7 +152,7 @@ export function goalProgressText(def: GoalDef, value: number, held = 0): string 
 }
 
 /** The top bar of a camera beat (FLT-56), by kind. */
-const BEAT_KICKER: Record<string, string> = { stretch: "Final stretch", exit: "Breaking · a departure", huddle: "The auditors are conferring", viral: "Live · trending now", statement: "A statement from Comms", leak: "Someone is asking about the file" };
+const BEAT_KICKER: Record<string, string> = { stretch: "Final stretch", exit: "Breaking · a departure", huddle: "The auditors are conferring", viral: "Live · trending now", statement: "A statement from Comms", leak: "Someone is asking about the file", fade: "Later that evening" };
 
 const TONE_LABEL = { bad: "Breaking", joke: "Developing", good: "Good news", neutral: "Update" } as const;
 const MOOD = { content: "Content", slumped: "Slumped", miserable: "Miserable", resigned: "Resigned" } as const;
@@ -1268,7 +1268,7 @@ function rawViewModel(i: HudInput): HudVM {
     sound: soundOf(i),
     photoMode: photoOf(i),
     // A card needs the player: the beat makes way. Photo mode hides it with the rest of the HUD.
-    beat: i.beat && !event && !era && !solo && !i.photo.on ? { ...i.beat, kicker: BEAT_KICKER[i.beat.kind] ?? "Meanwhile", skipLabel: "Skip »", action: beatActionOf(i.beat.kind, i.snap) } : null,
+    beat: i.beat && !event && !era && !solo && !i.photo.on ? { ...i.beat, kicker: i.beat.kicker || (BEAT_KICKER[i.beat.kind] ?? "Meanwhile"), skipLabel: "Skip »", action: beatActionOf(i.beat.kind, i.snap) } : null,
     skins: i.skins,
     mods: i.mods ?? NO_MODS_VM,
     saves: i.saves ? savesViewModel(i.saves, { lab: i.snap.labName, day: i.snap.day }) : { ...NO_SAVES_VM, current: { lab: i.snap.labName, date: formatDate(i.snap.day) } },
