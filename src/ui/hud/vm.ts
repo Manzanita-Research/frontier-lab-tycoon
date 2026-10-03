@@ -10,7 +10,8 @@ import { PATH_PRICE } from "../../content/buildings";
 import { ERAS } from "../../content/eras";
 import { UNLOCK_QUIPS } from "../../content/progression";
 import { STAFF } from "../../content/staff";
-import { dramaLetter } from "../../content/events";
+import { dramaLetter, type EventDef } from "../../content/events";
+import { layoutSankey } from "./sankey";
 import { SCENARIO, type GoalDef } from "../../content/goals";
 import { FRIENDS } from "../../content/newsroom";
 import { LEAPFROG } from "../../content/leapfrog";
@@ -105,7 +106,7 @@ export interface HudInput {
   mixer: { open: boolean; ready: boolean; muted: boolean; master: number; music: number; sfx: number };
   photo: { on: boolean; time: string; shot: { id: number; url: string; name: string } | null; flash: number };
   /** A camera beat's caption (FLT-56). Optional: none. */
-  beat?: { id: number; kind: string; caption: string; sub: string } | null;
+  beat?: { id: number; kind: string; caption: string; sub: string; kicker?: string } | null;
   skins: SkinPickerVM;
   /** The Mod Manager. Optional: none means no mods and the window shut. */
   mods?: ModsVM;
@@ -151,7 +152,7 @@ export function goalProgressText(def: GoalDef, value: number, held = 0): string 
 }
 
 /** The top bar of a camera beat (FLT-56), by kind. */
-const BEAT_KICKER: Record<string, string> = { stretch: "Final stretch", exit: "Breaking · a departure", huddle: "The auditors are conferring", viral: "Live · trending now", statement: "A statement from Comms", leak: "Someone is asking about the file" };
+const BEAT_KICKER: Record<string, string> = { stretch: "Final stretch", exit: "Breaking · a departure", huddle: "The auditors are conferring", viral: "Live · trending now", statement: "A statement from Comms", leak: "Someone is asking about the file", fade: "Later that evening", cut: "Meanwhile" };
 
 const TONE_LABEL = { bad: "Breaking", joke: "Developing", good: "Good news", neutral: "Update" } as const;
 const MOOD = { content: "Content", slumped: "Slumped", miserable: "Miserable", resigned: "Resigned" } as const;
@@ -460,12 +461,17 @@ function bubblesOf(i: HudInput, chips: ReadonlyMap<string, FactionChipVM>): Bubb
 }
 
 /** A drama card's document, filled in from the pack's template. */
-function dramaOf(id: string, vars: Record<string, string>): DramaDocVM | null {
-  // A poaching offer is in the poacher's own voice (FLT-56).
-  const l = dramaLetter(id, vars.poacherId);
+function dramaOf(def: EventDef, vars: Record<string, string>): DramaDocVM | null {
+  // A poaching offer is in the poacher's own voice (FLT-56). A mod's card brings its own document (FLT-101).
+  const l = dramaLetter(def.id, vars.poacherId) ?? def.doc;
   if (!l) return null;
   const f = (s: string) => fillTemplate(s, vars);
-  return { style: l.style, file: f(l.file), from: f(l.from), to: f(l.to), subject: f(l.subject), lines: l.lines.map(f).filter((x) => x.trim().length > 0), sign: f(l.sign) };
+  const lines = l.lines.map(f).filter((x) => x.trim().length > 0);
+  if (l.style === "sankey") {
+    const chart = layoutSankey({ units: f(l.units), columns: l.columns?.map(f), nodes: l.nodes.map((n) => ({ ...n, label: f(n.label), sub: n.sub && f(n.sub) })), flows: l.flows });
+    return { style: "sankey", file: f(l.file), from: "", to: "", subject: f(l.subject), lines, sign: f(l.sign), chart, ...(l.app ? { app: f(l.app) } : {}) };
+  }
+  return { style: l.style, file: f(l.file), from: f(l.from), to: f(l.to), subject: f(l.subject), lines, sign: f(l.sign), ...("app" in l && l.app ? { app: f(l.app) } : {}) };
 }
 
 function eventOf(i: HudInput): { event: EventVM | null; era: HudVM["eraCard"] } {
@@ -502,7 +508,7 @@ function eventOf(i: HudInput): { event: EventVM | null; era: HudVM["eraCard"] } 
       investigation: investigationOf(i.snap, def.id),
       hearing,
       leak: def.kind === "leak" ? leakOf(i.snap) : null,
-      drama: def.kind === "drama" ? dramaOf(def.id, vars) : null,
+      drama: def.kind === "drama" ? dramaOf(def, vars) : null,
       report: def.kind === "report" ? reportOf(i.snap) : null,
       bill: def.kind === "bill" ? billOf(i.snap) : null,
       tracker: def.kind === "vote" ? trackerOf(i.snap) : null,
@@ -1262,7 +1268,7 @@ function rawViewModel(i: HudInput): HudVM {
     sound: soundOf(i),
     photoMode: photoOf(i),
     // A card needs the player: the beat makes way. Photo mode hides it with the rest of the HUD.
-    beat: i.beat && !event && !era && !solo && !i.photo.on ? { ...i.beat, kicker: BEAT_KICKER[i.beat.kind] ?? "Meanwhile", skipLabel: "Skip »", action: beatActionOf(i.beat.kind, i.snap) } : null,
+    beat: i.beat && !event && !era && !solo && !i.photo.on ? { ...i.beat, kicker: i.beat.kicker || (BEAT_KICKER[i.beat.kind] ?? "Meanwhile"), skipLabel: "Skip »", action: beatActionOf(i.beat.kind, i.snap) } : null,
     skins: i.skins,
     mods: i.mods ?? NO_MODS_VM,
     saves: i.saves ? savesViewModel(i.saves, { lab: i.snap.labName, day: i.snap.day }) : { ...NO_SAVES_VM, current: { lab: i.snap.labName, date: formatDate(i.snap.day) } },

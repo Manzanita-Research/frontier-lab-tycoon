@@ -72,6 +72,8 @@ interface Compiled {
   /** The leaf the arc starts in, and the entry calls of every state on the way down to it. */
   initial: string;
   entry: Call[];
+  /** The entry calls of every state on the way down to a leaf (`a/b`), outermost first: for staging (FLT-101). */
+  entryOf: (leaf: string) => Call[];
   leaves: Set<string>;
   done: Set<string>;
   stats: string[];
@@ -184,6 +186,7 @@ export function compile(arc: ArcData): Compiled {
     machine,
     initial: flat(start),
     entry: [...chainOf(start)].reverse().flatMap((p) => (nodes.get(p)!.entry ?? []).map(asCall)),
+    entryOf: (leaf) => [...chainOf(leaf.replaceAll("/", "."))].reverse().flatMap((p) => (nodes.get(p)?.entry ?? []).map(asCall)),
     leaves,
     done,
     stats: [...statsIn(guards)],
@@ -259,4 +262,18 @@ export function dailyModArcs(state: GameState, rng: Rng) {
 /** The player answered a card: every arc hears CHOSE with the card's id and the choice's position. */
 export function modArcsHeard(state: GameState, rng: Rng, card: string, choiceIndex: number) {
   for (const arc of defs().arcs) hear(state, rng, arc, { type: "CHOSE", card, choice: String(choiceIndex) });
+}
+
+/**
+ * Put an arc in one of its leaf states as if it had just walked in (FLT-101's `?moment=arc:<arc>:<state>`): the World
+ * records the leaf and the entry calls of the states on the way down run, in order. False for an unknown arc or leaf.
+ */
+export function stageModArc(state: GameState, rng: Rng, arcId: string, leaf: string): boolean {
+  const arc = defs().arcs.find((a) => a.id === arcId);
+  if (!arc) return false;
+  const c = compile(arc);
+  if (!c.leaves.has(leaf)) return false;
+  (state.modArcs ??= {})[arc.id] = { value: leaf, context: { enteredTick: state.tick } };
+  runCalls(state, rng, arc.id, c.entryOf(leaf));
+  return true;
 }

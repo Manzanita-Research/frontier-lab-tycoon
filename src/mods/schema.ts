@@ -77,11 +77,24 @@ const EventEffect = Schema.Union([
 ]);
 /** One answer on a card. Exported so a pack with a bigger card (FLT-26's four-way choice) can reuse it. */
 export const EventChoice = Schema.Struct({ label: text, hint: Schema.String, effects: Schema.Array(EventEffect) });
+/**
+ * The document on a `kind: "drama"` card (FLT-101): a letter, an email or a manifesto (Defection's shapes), or a Sankey
+ * chart drawn from nodes and flows. Strings are templates like the card's. `app` names the program it is open in.
+ */
+const DocText = { file: text, app: Schema.optionalKey(text), subject: text, lines: strings, sign: Schema.String };
+export const SankeyNode = Schema.Struct({ id, label: text, sub: Schema.optionalKey(text), column: Schema.optionalKey(nonnegative) });
+export const SankeyFlow = Schema.Struct({ from: id, to: id, value: positive });
+export const EventDoc = Schema.Union([
+  Schema.Struct({ style: Schema.Literals(["letter", "email", "manifesto"]), ...DocText, from: Schema.String, to: Schema.String }),
+  Schema.Struct({ style: Schema.Literal("sankey"), ...DocText, units: text, columns: Schema.optionalKey(Schema.Array(text)), nodes: Schema.Array(SankeyNode).check(Schema.isBetweenLength(2, 24)), flows: Schema.Array(SankeyFlow).check(Schema.isBetweenLength(1, 48)) }),
+]);
+export type EventDocData = typeof EventDoc.Type;
 export const EventCard = Schema.Struct({
   id, title: text, body: text, tone, when: Condition,
   cooldown: Schema.optionalKey(nonnegative),
   choices: Schema.Array(EventChoice).check(Schema.isBetweenLength(1, 3)),
   kind: Schema.optionalKey(Schema.Literals(["era", "auction", "response", "stream", "hearing", "leak", "drama", "report", "bill", "vote"])), stripe: Schema.optionalKey(text),
+  doc: Schema.optionalKey(EventDoc),
 });
 export type EventData = typeof EventCard.Type;
 

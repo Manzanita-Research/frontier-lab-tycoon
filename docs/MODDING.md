@@ -35,6 +35,21 @@ its headlines and thoughts stop, a rival's tagline reverts. Anything else (a ski
 needs a fresh start: `needsRestart(manifest)` says why, and the Mod Manager's Remove for those reloads without the mod.
 `?mod=` links in a fresh tab work as before.
 
+**A story mod (FLT-101).** `?mod=/mods/examples/maximally-effective-altruists/mod.json` is the worked example of a mod that
+tells a story over a week of game days with no engine code, using five generic pieces any mod can use:
+- **A drama card's `doc`** can be a leaked chart: `style: "sankey"` with `nodes` (`id`, `label`, optional `sub`/`column`),
+  `flows` (`from`, `to`, `value`), `units` and `columns` (headings), laid out by `src/ui/hud/sankey.ts` and drawn as SVG
+  (Frontier 95 puts it in "FlowGraph 95", or the doc's own `app`). `{lab}` works in labels, as in any card text.
+- **A building of its own:** `content.buildings.add` (here a `scenery` manor that nobody visits), drawn by
+  `looks["building:<kind>"]`, a primitive recipe (at most 16 parts, inside the footprint, hex colours or `"coat"`/`"window"`,
+  no motion). An arc's `building.ensure` may name a building the mod itself adds.
+- **Set dressing:** `building.lights` (a building's windows go dark for some hours) and `building.prop` (a sock or a
+  do-not-disturb sign on a door), plus `camera.beat` with `kind: "fade"` (for what happens off camera) or `"cut"` (a plain cut elsewhere) and a `kicker`.
+- **`vibes.delta`**, beside `hype.delta` and `trust.delta`, so a card's three answers can move the meters their own ways.
+- **`?moment=arc:<arc>:<state>`** stages any mod arc's state on a busy lab (a year in, cards unpaced), with any card it
+  opens already open: a one-click link per beat for screenshots and review. The beats and every line are in
+  `docs/specs/FLT-101-script.md`.
+
 **Voices, crews and live looks (FLT-102).** A manifest's optional `voice` section rewrites the flavour text the player reads
 (thoughts, toasts, the ticker, event cards, the Bird App, the newspaper, the ending paper) by rules: `words` (whole-word swaps),
 `letters` (`{ from, to, odds }`), `leet`, `lowercase`, `ellipsis`, `openers`, `emoji` (`{ list, min, max }`) and a `glyph` that

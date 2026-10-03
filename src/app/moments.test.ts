@@ -11,6 +11,7 @@ import { tick } from "../sim/tick";
 import { answer } from "../sim/testkit";
 import { fixtureInput } from "../ui/hud/fixtures";
 import { hudViewModel } from "../ui/hud/vm";
+import { isArcMoment, parseArcMoment } from "../sim/arcDemo";
 import { createSimHandle, STAGED_MOMENTS } from "./sim";
 
 const withArgs = () => [...STAGED_MOMENTS, ...defs().mishaps.map((m) => `stream:${m.id}`), ...defs().rivals.map((r) => `poach-offer:${r.id}`)];
@@ -85,6 +86,18 @@ describe("every ?moment= staging link loads", () => {
     };
     walk(shots);
     const known = new Set(withArgs());
-    expect([...used].filter((m) => !known.has(m))).toEqual([]);
+    expect([...used].filter((m) => !known.has(m) && !isArcMoment(m))).toEqual([]);
+  });
+
+  it("every `arc:<arc>:<state>` a scene stages is a state of an arc in the mod that scene loads (FLT-101)", () => {
+    const mods = import.meta.glob<{ content?: { arcs?: { add?: { id: string; states: object }[] } } }>("../../mods/examples/*/mod.json", { import: "default", eager: true });
+    const wrong = Object.entries(shots.scenes).flatMap(([name, scene]) => {
+      const q = (scene as { query?: { moment?: unknown; mod?: unknown } }).query ?? {};
+      if (typeof q.moment !== "string" || !isArcMoment(q.moment)) return [];
+      const { arc, state } = parseArcMoment(q.moment);
+      const arcs = [q.mod].flat().flatMap((url) => mods[`../..${url}`]?.content?.arcs?.add ?? []);
+      return arcs.some((a) => a.id === arc && state in a.states) ? [] : [`${name}: ${q.moment} (mod ${String(q.mod)})`];
+    });
+    expect(wrong).toEqual([]);
   });
 });

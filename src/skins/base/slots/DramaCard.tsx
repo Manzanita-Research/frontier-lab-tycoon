@@ -2,8 +2,9 @@ import { useT } from "../../context";
 import type { DramaDocVM } from "../../../ui/hud/types";
 import type { SlotPropsMap } from "../../types";
 import { Choices } from "./EventCard";
+import { SankeyChart } from "./SankeyChart";
 
-/** The document on a drama card: a letter on paper, an email with its headers, or a manifesto in big type. */
+/** The document on a drama card: a letter on paper, an email with its headers, a manifesto in big type, or a leaked Sankey chart. */
 export function DramaDoc({ drama }: { drama: DramaDocVM }) {
   return (
     <div className={`drama-doc drama-${drama.style}`} aria-label={drama.file}>
@@ -20,7 +21,13 @@ export function DramaDoc({ drama }: { drama: DramaDocVM }) {
           </dd>
         </dl>
       )}
-      {drama.style === "letter" && <div className="drama-subject">{drama.subject}</div>}
+      {(drama.style === "letter" || drama.style === "sankey") && <div className="drama-subject">{drama.subject}</div>}
+      {drama.chart && (
+        <div className="drama-chart">
+          <SankeyChart chart={drama.chart} label={drama.subject} />
+          <small>Band width: {drama.chart.units}</small>
+        </div>
+      )}
       {drama.lines.map((l, i) => (drama.style === "manifesto" && i === 0 ? <h3 key={l}>{l}</h3> : <p key={`${i}:${l}`}>{l}</p>))}
       <p className="drama-sign">{drama.sign}</p>
     </div>

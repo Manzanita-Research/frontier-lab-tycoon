@@ -739,10 +739,13 @@ export interface EventVM {
   tracker?: TrackerVM | null;
 }
 
-/** A drama card's document (Defection, the Poaching War). Every string is filled in; `lines` are paragraphs. */
+/** A drama card's document (Defection, the Poaching War, a mod's card `doc`). Every string is filled in; `lines` are paragraphs. */
 export interface DramaDocVM {
-  /** letter: a resignation letter someone is still drafting. email: a recruiter's offer. manifesto: a new lab's one-pager. */
-  style: "letter" | "email" | "manifesto";
+  /**
+   * letter: a resignation letter someone is still drafting. email: a recruiter's offer. manifesto: a new lab's one-pager.
+   * sankey: a leaked flow chart (FLT-101), drawn from `chart`; `lines` are its footnotes and `subject` its title.
+   */
+  style: "letter" | "email" | "manifesto" | "sankey";
   /** What the file would be called ("resignation_DRAFT_v7.doc", "MANIFESTO.txt"). */
   file: string;
   from: string;
@@ -751,6 +754,22 @@ export interface DramaDocVM {
   lines: string[];
   /** The sign-off; may contain a line break. */
   sign: string;
+  /** The program the document is open in, when the mod names one ("FlowGraph 95"). Skins have their own defaults. */
+  app?: string;
+  /** A sankey document's chart, already laid out (ui/hud/sankey.ts): skins only paint it. */
+  chart?: SankeyVM;
+}
+
+/** A laid-out Sankey chart in SVG units (width × height). A flow and its source share a `tint` (0–5). */
+export interface SankeyVM {
+  width: number;
+  height: number;
+  /** What a flow's thickness counts ("expected hugs"). */
+  units: string;
+  columns: number;
+  headings: { text: string; x: number; anchor: "start" | "end" }[];
+  nodes: { id: string; label: string; sub: string; column: number; value: number; x: number; y: number; w: number; h: number; tint: number; lx: number; ly: number; anchor: "start" | "end" }[];
+  links: { from: string; to: string; value: number; width: number; d: string; tint: number }[];
 }
 
 export interface ThoughtRowVM {
@@ -1287,7 +1306,8 @@ export interface SoundVM {
 /**
  * A camera beat (FLT-56) on screen: letterbox bars and a caption while the camera makes its move. Time is still
  * running underneath; `actions.skipBeat()` (or Esc) ends it. `kind` is `exit` (a defection's conga line out of the
- * gate), `huddle` (the auditors conferring before the report card) or `viral` (the hearing clip).
+ * gate), `huddle` (the auditors conferring before the report card), `viral` (the hearing clip), or FLT-101's `fade`
+ * (dimmed nearly to black) and `cut` (just the bars).
  */
 export interface BeatVM {
   id: number;

@@ -382,6 +382,11 @@ export interface GameState {
   arcs: Record<string, ArcStored>;
   /** FLT-37: a mod's story arcs (sim/modArcs.ts), by arc id. Absent until a modded run's first beat. */
   modArcs?: Record<string, ModArcStored>;
+  /**
+   * FLT-101: set dressing on buildings, for the renderer only (the sim never reads it): lights out, or a prop on the door.
+   * Each entry lasts until tick `until`. Absent until a verb dresses something.
+   */
+  dressing?: Dressing[];
   /** The Race (FLT-9): rival machines, the Arena, the era ratchet, the open-weights drop and the auction clock. */
   race: RaceState;
   /** Release Leapfrog (FLT-27): the release calendar, the benchmark leaderboard, the news cycle, the forced response and the launch livestream. Asleep unless `enabled`. */
@@ -442,4 +447,12 @@ export interface GameState {
   endings?: EndingsState;
   /** FLT-57: a lab founded after the last one ended (Lab #2 on): its number, the founder's name and the perk it kept. Absent on Lab #1. */
   lineage?: Lineage;
+}
+
+/** A building's set dressing (FLT-101): `dark` is lights out; `prop` is something on its door ("sock", "dnd"). */
+export interface Dressing {
+  building: number;
+  dark?: true;
+  prop?: string;
+  until: number;
 }

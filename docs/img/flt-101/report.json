@@ -1,0 +1,131 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "f7a4da7f4131f0fa9e7068b78f10731925024027"
+  },
+  "head": {
+    "branch": "flt-101-mea-mod",
+    "sha": "b978b4c",
+    "dirty": false
+  },
+  "seconds": 359.987,
+  "problems": [
+    "mea-convening.png: blank composite: panel 3 is 93% one colour, 17 colours",
+    "mea-convening-phone.png: blank composite: panel 3 is 98% one colour, 7 colours"
+  ],
+  "rows": [
+    {
+      "scene": "mea-arrival",
+      "skin": null,
+      "before": "docs/img/flt-101/before/mea-arrival.png",
+      "after": "docs/img/flt-101/after/mea-arrival.png",
+      "title": "FLT-101: Utilsbury Manor arrives beside the gate (the Maximally Effective Altruists mod)",
+      "compare": "docs/img/flt-101/compare/mea-arrival.png",
+      "changed": 0.3222962962962963
+    },
+    {
+      "scene": "mea-invited",
+      "skin": null,
+      "before": "docs/img/flt-101/before/mea-invited.png",
+      "after": "docs/img/flt-101/after/mea-invited.png",
+      "title": "FLT-101: the invitation to the Convening (Attend / Run the numbers first / Decline)",
+      "compare": "docs/img/flt-101/compare/mea-invited.png",
+      "changed": 0.3038950617283951
+    },
+    {
+      "scene": "mea-convening",
+      "skin": null,
+      "before": "docs/img/flt-101/before/mea-convening.png",
+      "after": "docs/img/flt-101/after/mea-convening.png",
+      "title": "FLT-101: later that evening, the manor's lights go off (fade beat)",
+      "compare": "docs/img/flt-101/compare/mea-convening.png",
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 93% one colour, 17 colours",
+      "error": "compare: blank composite: panel 3 is 93% one colour, 17 colours"
+    },
+    {
+      "scene": "mea-manor-dark",
+      "skin": null,
+      "before": "docs/img/flt-101/before/mea-manor-dark.png",
+      "after": "docs/img/flt-101/after/mea-manor-dark.png",
+      "title": "FLT-101: the manor with its lights off at night, no beat",
+      "compare": "docs/img/flt-101/compare/mea-manor-dark.png",
+      "changed": 0.33741512345679014
+    },
+    {
+      "scene": "mea-sock",
+      "skin": null,
+      "before": "docs/img/flt-101/before/mea-sock.png",
+      "after": "docs/img/flt-101/after/mea-sock.png",
+      "title": "FLT-101: meanwhile, a plain cut back to the lab: a sock on the Cluster door (cut beat)",
+      "compare": "docs/img/flt-101/compare/mea-sock.png",
+      "changed": 0.8853279320987655
+    },
+    {
+      "scene": "mea-sock-door",
+      "skin": null,
+      "before": "docs/img/flt-101/before/mea-sock-door.png",
+      "after": "docs/img/flt-101/after/mea-sock-door.png",
+      "title": "FLT-101: the sock on the Cluster door, close up (no beat)",
+      "compare": "docs/img/flt-101/compare/mea-sock-door.png",
+      "changed": 0.2581628086419753
+    },
+    {
+      "scene": "mea-leaked",
+      "skin": null,
+      "before": "docs/img/flt-101/before/mea-leaked.png",
+      "after": "docs/img/flt-101/after/mea-leaked.png",
+      "title": "FLT-101: the leaked Sankey in Sankey Panky 95 (Trust drops)",
+      "compare": "docs/img/flt-101/compare/mea-leaked.png",
+      "changed": 0.4174436728395062
+    },
+    {
+      "scene": "mea-leaked-classic",
+      "skin": null,
+      "before": "docs/img/flt-101/before/mea-leaked-classic.png",
+      "after": "docs/img/flt-101/after/mea-leaked-classic.png",
+      "title": "FLT-101: the leaked Sankey in the base Drama slot",
+      "compare": "docs/img/flt-101/compare/mea-leaked-classic.png",
+      "changed": 0.8979891975308641
+    },
+    {
+      "scene": "mea-pileon",
+      "skin": null,
+      "before": "docs/img/flt-101/before/mea-pileon.png",
+      "after": "docs/img/flt-101/after/mea-pileon.png",
+      "title": "FLT-101: the Bird App piles on (posters and a rival CEO)",
+      "compare": "docs/img/flt-101/compare/mea-pileon.png",
+      "changed": 0.31514274691358024
+    },
+    {
+      "scene": "mea-crisis",
+      "skin": null,
+      "before": "docs/img/flt-101/before/mea-crisis.png",
+      "after": "docs/img/flt-101/after/mea-crisis.png",
+      "title": "FLT-101: the Comms Desk's draft statement; the Senate on the ticker",
+      "compare": "docs/img/flt-101/compare/mea-crisis.png",
+      "changed": 0.38074614197530865
+    },
+    {
+      "scene": "mea-leaked-phone",
+      "skin": null,
+      "before": "docs/img/flt-101/before/mea-leaked-phone.png",
+      "after": "docs/img/flt-101/after/mea-leaked-phone.png",
+      "title": "FLT-101: the leaked Sankey on a phone",
+      "compare": "docs/img/flt-101/compare/mea-leaked-phone.png",
+      "changed": 0.767344148742253
+    },
+    {
+      "scene": "mea-convening-phone",
+      "skin": null,
+      "before": "docs/img/flt-101/before/mea-convening-phone.png",
+      "after": "docs/img/flt-101/after/mea-convening-phone.png",
+      "title": "FLT-101: the fade beat on a phone",
+      "compare": "docs/img/flt-101/compare/mea-convening-phone.png",
+      "changed": null,
+      "composeError": "blank composite: panel 3 is 98% one colour, 7 colours",
+      "error": "compare: blank composite: panel 3 is 98% one colour, 7 colours"
+    }
+  ],
+  "errors": []
+}
