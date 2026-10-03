@@ -1,14 +1,20 @@
 // Frontier 95's drama cards (FLT-26 Defection, FLT-20 Poaching War): the resignation draft open in WordSad, the recruiter's
-// message in Outlook Excess and the neo lab's MANIFESTO.txt in NoteBad, with the choices underneath as a message box's buttons.
+// message in Outlook Excess and the neo lab's MANIFESTO.txt in NoteBad, a mod's leaked chart in FlowGraph 95 (FLT-101), with the
+// choices underneath as a message box's buttons.
 import { useT } from "../context";
 import type { DramaDocVM } from "../../ui/hud/types";
 import type { SlotPropsMap } from "../types";
+import { SankeyChart } from "../base/slots/SankeyChart";
 import { Btn, Win } from "./parts";
+
+/** The 16-colour palette's darks, which is what a 1995 charting app would have offered. */
+const INKS = ["#000080", "#008080", "#800080", "#808000", "#800000", "#008000"];
 
 const APP = {
   letter: { app: "WordSad", icon: "doc", menu: ["File", "Edit", "View", "Insert", "Format", "Help"] },
   email: { app: "Message", icon: "chat", menu: ["File", "Edit", "View", "Tools", "Compose", "Help"] },
   manifesto: { app: "NoteBad", icon: "doc", menu: ["File", "Edit", "Search", "Help"] },
+  sankey: { app: "FlowGraph 95", icon: "doc", menu: ["File", "Edit", "View", "Flows", "Chart", "Help"] },
 } as const;
 
 function Page({ drama }: { drama: DramaDocVM }) {
@@ -30,6 +36,23 @@ function Page({ drama }: { drama: DramaDocVM }) {
           <p className="f95-sign">{drama.sign}</p>
         </div>
       </>
+    );
+  }
+  if (drama.style === "sankey" && drama.chart) {
+    return (
+      <div className="f95-page f95-sankey inset">
+        <p className="f95-subject">{drama.subject}</p>
+        <div className="f95-sankey-plot">
+          <SankeyChart chart={drama.chart} inks={INKS} label={drama.subject} />
+        </div>
+        <p className="f95-sankey-key">Band width = {drama.chart.units}</p>
+        <ol className="f95-sankey-notes">
+          {drama.lines.map((l, i) => (
+            <li key={`${i}:${l}`}>{l}</li>
+          ))}
+        </ol>
+        <p className="f95-sign">{drama.sign}</p>
+      </div>
     );
   }
   if (drama.style === "manifesto") {
@@ -65,7 +88,8 @@ function Page({ drama }: { drama: DramaDocVM }) {
 export function DramaCard({ event, drama, actions }: SlotPropsMap["DramaCard"]) {
   const t = useT();
   const app = APP[drama.style];
-  const title = drama.style === "email" ? `${drama.subject} - ${app.app}` : `${drama.file} - ${app.app}`;
+  const appName = drama.app ?? app.app;
+  const title = drama.style === "email" ? `${drama.subject} - ${appName}` : `${drama.file} - ${appName}`;
   return (
     <div className="f95-layer f95-dim">
       <Win
@@ -108,7 +132,7 @@ export function DramaCard({ event, drama, actions }: SlotPropsMap["DramaCard"]) 
           ))}
         </div>
         <div className="f95-status">
-          {drama.style === "email" ? `${drama.file} · 1 unread · ` : drama.style === "letter" ? "Autosaved 38 times · " : "Ln 1, Col 1 · "}
+          {drama.style === "email" ? `${drama.file} · 1 unread · ` : drama.style === "letter" ? "Autosaved 38 times · " : drama.style === "sankey" ? `${drama.chart?.nodes.length ?? 0} nodes · ${drama.chart?.links.length ?? 0} flows · ` : "Ln 1, Col 1 · "}
           {t("event.paused")}
         </div>
       </Win>

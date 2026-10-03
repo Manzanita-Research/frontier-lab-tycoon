@@ -3278,6 +3278,53 @@
       white-space: pre-line;
     }
   }
+  /* FLT-101: a mod's leaked chart, open in FlowGraph 95. */
+  .f95-sankey {
+    padding: 8px 10px;
+    font-size: 14px;
+    .f95-subject {
+      margin: 0 0 4px;
+      font-weight: bold;
+    }
+    .f95-sankey-plot {
+      overflow-x: auto;
+    }
+    .sankey {
+      display: block;
+      width: 100%;
+      min-width: 480px;
+      height: auto;
+      font: 12px Tahoma, "MS Sans Serif", sans-serif;
+      text {
+        fill: #000;
+        paint-order: stroke;
+        stroke: #fff;
+        stroke-width: 3px;
+        stroke-linejoin: round;
+      }
+      .sankey-heading {
+        font-weight: bold;
+        fill: #000080;
+      }
+      .sankey-sub {
+        font-size: 10px;
+        fill: #404040;
+      }
+      .sankey-links path:hover {
+        fill-opacity: 0.75;
+      }
+    }
+    .f95-sankey-key {
+      margin: 2px 0 6px;
+      font-size: 12px;
+      color: #404040;
+    }
+    .f95-sankey-notes {
+      margin: 0 0 6px;
+      padding-left: 20px;
+      font-size: 13px;
+    }
+  }
   .f95-wordbar {
     display: flex;
     align-items: center;

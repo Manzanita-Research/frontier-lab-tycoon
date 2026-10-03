@@ -16,6 +16,7 @@ import { CAPTURE } from "../sim/capture/pack";
 import { FACTIONS_PACK, WATER_PACK } from "./factions";
 import { ENDINGS_PACK } from "../sim/endings/pack";
 import { BRIDGE_EVENTS } from "./bridgeRounds";
+import type { EventDocData } from "../mods/schema";
 
 /** What has to be true for an event to fire. `all` combines conditions. */
 export type Condition =
@@ -79,6 +80,8 @@ export interface EventDef {
    * without waiting for the pressure the other cards wait for. Never again after Level 1.
    */
   early?: true;
+  /** A mod's drama document (FLT-101): a letter, email, manifesto or Sankey chart, shown when `kind` is "drama". */
+  doc?: EventDocData;
 }
 
 export const EVENT_COOLDOWN_DAYS = 60;
