@@ -3,13 +3,17 @@
 import { Effect } from "effect";
 import { describe, expect, it } from "vitest";
 import acid from "../../mods/examples/acid-mode/mod.json";
+import { momentSearch } from "../app/mods";
+import { createSimHandle } from "../app/sim";
 import { defs, withDefs } from "../sim/defs";
+import { openEventOf } from "../sim/events";
 import { enableBirdApp } from "../sim/birdapp/driver";
 import type { Command } from "../sim/commands";
 import { pacingCommands } from "../sim/pacing";
 import { createInitialState } from "../sim/state";
 import { answer } from "../sim/testkit";
 import { tick, TICKS_PER_DAY } from "../sim/tick";
+import { spelledResearcher } from "../sim/tripDemo";
 import type { GameState } from "../sim/types";
 import { resolveGameDefinition } from "./game-definition";
 import { composeMods } from "./loader";
@@ -102,5 +106,39 @@ describe("ACID MOD(E)", () => {
     const a = await play(0, 50);
     const b = await play(0, 50);
     expect(JSON.stringify(a.s)).toBe(JSON.stringify(b.s));
+  });
+
+  describe("its ?moment= links land on their beat", () => {
+    const staged = async (moment: string) => createSimHandle({ seed: 3, warp: 12, agents: 0, discourse: 0, researchers: 0, moment }, await definition).world;
+
+    it("bring the mod along unless the address names its own", () => {
+      expect(new URLSearchParams(momentSearch("?moment=acid-peak&seed=3")).getAll("mod")).toEqual(["/mods/examples/acid-mode/mod.json"]);
+      expect(momentSearch("?moment=acid-peak&mod=/x.json")).toBe("?moment=acid-peak&mod=/x.json");
+      expect(momentSearch("?moment=queue")).toBe("?moment=queue");
+      expect(momentSearch("")).toBe("");
+    });
+
+    it("acid-offer: the proposal is on screen", async () => {
+      const w = await staged("acid-offer");
+      expect(openEventOf(w)?.id).toBe("acid-offer");
+      expect(w.trip).toBeUndefined();
+    });
+
+    it("acid-peak and acid-researcher: a trip at full strength, and somebody somewhere", async () => {
+      for (const moment of ["acid-peak", "acid-researcher"]) {
+        const w = await staged(moment);
+        expect(w.modArcs!["acid-mode"]!.value).toBe("tripping");
+        expect(w.tick - w.trip!.start).toBeGreaterThanOrEqual(w.trip!.rise);
+        expect(w.tick).toBeLessThan(w.trip!.end);
+        expect(spelledResearcher(w)?.spell?.line).toBeTruthy();
+      }
+    });
+
+    it("acid-breakthrough: the model achieved enlightenment, mid-trip", async () => {
+      const w = await staged("acid-breakthrough");
+      expect(w.modArcs!["acid-mode"]!.value).toBe("breakthrough");
+      expect(w.trip).toBeDefined();
+      expect(w.news.some((n) => n.text.includes("model achieved enlightenment"))).toBe(true);
+    });
   });
 });
