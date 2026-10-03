@@ -1,0 +1,16 @@
+Daily Drama 2026-10-03: checker transcript (scripts/drama-run.mjs)
+
+$ flt-mod check mod.json
+PASS drama-2026-10-03@1.0.0: 365 days, 7300 ticks, 51 cards answered, 4 releases
+Replay identical: 2998e5b1afe879476f589b47bb9c380654202dc9473d41e67996d2db0d649890; cash $23353606; 863 ms
+Arc reachability: 10 arcs checked with xstate/graph (structural, guards/actions omitted), 10 of them the base game's, unchanged
+Executed: rivals, headlines, thoughts, events (the real sim ran with your definition)
+
+$ drama lint
+drama-lint mods/drama/2026-10-03: PASS (0 errors, 0 warnings)
+New parody names (the pack's glossary.json): Operation Shrubbery
+
+$ drama shape
+  ✓ one card/arc, 5-10 headlines, 5-10 thoughts, ids prefixed
+
+ALL GREEN
