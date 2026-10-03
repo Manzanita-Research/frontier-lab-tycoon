@@ -84,7 +84,7 @@ export function limiter(ctx: BaseAudioContext) {
 export interface Take { at: number; mode: Mode }
 /** FLT-105: a trip's strength over an offline clip, as `[seconds, level]` points (straight lines between), and whether it is the calm one. */
 export interface TripTake { points: readonly (readonly [number, number])[]; calm?: boolean }
-const levelAt = (points: TripTake["points"], t: number) => {
+export const tripLevelAt = (points: TripTake["points"], t: number) => {
   let k = 0;
   for (let i = 0; i < points.length; i++) {
     const [at, v] = points[i]!;
@@ -102,14 +102,26 @@ export async function renderMusic(takes: readonly Take[], seconds: number, want:
   const music = ctx.createGain(); const master = ctx.createGain();
   music.gain.value = levels.music; master.gain.value = levels.master;
   music.connect(master).connect(limiter(ctx)).connect(ctx.destination);
-  // The trip's tape wow sits between the band and the music bus, as in the game (in tune and dry with no trip).
+  // The trip's tape wow sits between the band and the music bus, as in the game (in tune with no trip).
   const wobble = new Wobble(ctx, music);
   const band = new Band(ctx, wobble.input, { ...want, mode: takes[0]?.mode ?? "walkies" }, undefined, solo);
   // The same 60 Hz pump the game runs, so the clip hears exactly when a press would have been heard.
   for (let t = 0; t < seconds; t += 1 / 60) {
     for (const take of takes) if (take.at <= t) band.set({ ...want, mode: take.mode });
-    if (trip) wobble.set(levelAt(trip.points, t), !!trip.calm, t);
+    if (trip) wobble.set(tripLevelAt(trip.points, t), !!trip.calm, t);
     band.pump(t, 0.2);
   }
+  return ctx.startRendering();
+}
+
+/** FLT-105: a plain sine at `hz` through the trip's tape wow, offline: the evidence for how far and how smoothly it bends. */
+export async function renderWowTone(trip: TripTake, seconds: number, hz = 440, sampleRate = 48000) {
+  const ctx = new OfflineAudioContext(1, Math.ceil(seconds * sampleRate), sampleRate);
+  const wobble = new Wobble(ctx, ctx.destination);
+  const tone = ctx.createOscillator();
+  tone.frequency.value = hz;
+  tone.connect(wobble.input);
+  tone.start();
+  for (let t = 0; t < seconds; t += 1 / 60) wobble.set(tripLevelAt(trip.points, t), !!trip.calm, t);
   return ctx.startRendering();
 }

@@ -74,7 +74,7 @@ export class SoundKit {
         this.music.connect(this.master); this.sfx.connect(this.master);
         this.master.connect(limiter(ctx)).connect(ctx.destination);
         this.noise = noiseBuffer(ctx);
-        // FLT-105: the trip's tape wow, between the band and the music bus (dry and in tune with no trip on).
+        // FLT-105: the trip's tape wow, between the band and the music bus (in tune with no trip on).
         this.wobble = new Wobble(ctx, this.music);
         this.band = new Band(ctx, this.wobble.input, { mode: this.beds.mode, flavour: this.beds.flavour, era: this.beds.era });
         const source = ctx.createBufferSource();
