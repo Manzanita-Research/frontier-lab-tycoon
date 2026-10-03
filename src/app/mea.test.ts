@@ -1,5 +1,6 @@
 // FLT-101: the Maximally Effective Altruists example mod, loaded the way `?mod=` loads it, and every beat's one-click
 // `?moment=arc:mea-story:<state>` link landing on its beat: the card open, the lights out, the sock on the door, the posts up.
+import { readFileSync } from "node:fs";
 import { Effect } from "effect";
 import { describe, expect, it } from "vitest";
 import mea from "../../mods/examples/maximally-effective-altruists/mod.json";
@@ -16,6 +17,10 @@ import { createSimHandle } from "./sim";
 const resolve = async (): Promise<GameDefinition> => Effect.runPromise(resolveGameDefinition(composeMods([await Effect.runPromise(decodeManifest(mea))]).layer));
 const staged = (def: GameDefinition, state: string) => createSimHandle({ seed: 1, warp: 0, agents: 0, discourse: 0, researchers: 0, moment: `arc:mea-story:${state}` }, def);
 const hud = (def: GameDefinition, handle: ReturnType<typeof staged>) => withDefs(def, () => hudViewModel({ ...fixtureInput(), snap: handle.report(true, true)!.snap! }));
+/** Every string a player can read in a mod: its name and description, and every text field under `content`. */
+const NOT_SHOWN = new Set(["id", "kind", "type", "target", "color", "tone", "archetype", "outcome", "role", "on", "building", "prop", "cue", "flag", "style", "is", "card", "initial", "when", "requires", "from", "to"]);
+const shown = (x: unknown, key = ""): string[] =>
+  typeof x === "string" ? (NOT_SHOWN.has(key) ? [] : [x]) : Array.isArray(x) ? x.flatMap((v) => shown(v, key)) : x && typeof x === "object" ? Object.entries(x).flatMap(([k, v]) => shown(v, k)) : [];
 const manorOf = (w: { buildings: { kind: string; id: number }[] }) => w.buildings.find((b) => b.kind === "manor");
 
 describe("Maximally Effective Altruists (FLT-101)", () => {
@@ -98,6 +103,14 @@ describe("Maximally Effective Altruists (FLT-101)", () => {
     expect(openEventOf(h.world)?.id).toBe("mea-statement");
     expect(hud(def, h).event?.drama).toMatchObject({ style: "email", from: "Comms Desk" });
     expect(h.world.news.some((n) => n.text.includes("define \"convening\" under oath"))).toBe(true);
+  });
+
+  it("the script for review lists every line the mod can show (docs/specs/FLT-101-script.md)", () => {
+    const script = readFileSync(new URL("../../docs/specs/FLT-101-script.md", import.meta.url), "utf8");
+    // A drama doc's `from`/`to` are shown, but so are flow ends (node ids); the doc's are checked by hand here.
+    const lines = [mea.name, mea.description, ...shown(mea.content), "Comms Desk", "Everyone at {lab}"];
+    expect(lines.length).toBeGreaterThan(120);
+    expect(lines.filter((l) => !script.includes(l))).toEqual([]);
   });
 
   it("a lab that just plays reaches the end of the story, the same way twice", async () => {
