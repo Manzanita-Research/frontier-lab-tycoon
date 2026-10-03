@@ -20,6 +20,8 @@ import { eraDef } from "../content/eras";
 import { eraOfState } from "../sim/race/race";
 import { ESCAPE } from "../content/escape";
 import type { Runner } from "../sim/escape/state";
+import { lyingDown, waitsForLunch } from "../sim/slopbowl/crowd";
+import { SLOPBOWL } from "../sim/slopbowl/pack";
 
 const CAP = 512;
 /** Every human gets a pair of glasses (one dark strip) so you can see which way they face and when they look around. */
@@ -50,6 +52,9 @@ const LOOKS = [1, 2, 3, 4].map((n) => {
   return { body: new THREE.Color(a.body), visor: new THREE.Color(a.visor), glow: new THREE.Color(a.glow), scale: a.scale, hat: a.hat, halo: a.halo };
 });
 const HAT = new THREE.Color("#ffc21a");
+/** FLT-109: the Slop Bowl courier's role (they carry the bag), and how a hangry researcher lies on the floor (radians). */
+const COURIER = SLOPBOWL.rules.courier.role;
+const FLAT = 1.45;
 
 const dummy = new THREE.Object3D();
 // Yaw first, then lean in the walker's own frame.
@@ -90,6 +95,12 @@ export function Walkers() {
   const boards = useRef<(THREE.InstancedMesh | null)[]>([]);
   const hide = useRef<THREE.InstancedMesh>(null);
   const tape = useRef<THREE.InstancedMesh>(null);
+  // FLT-109: the late lunch. A paper bag on the courier, a bowl (and its greens) in every fed researcher's hands, and a
+  // red anger mark over everyone waiting at the gate.
+  const bags = useRef<THREE.InstancedMesh>(null);
+  const bowls = useRef<THREE.InstancedMesh>(null);
+  const greens = useRef<THREE.InstancedMesh>(null);
+  const angers = useRef<THREE.InstancedMesh>(null);
   const glowMap = useMemo(() => glowTexture("#ffffff"), []);
   // FLT-56: the water crowd's placards and each faction's own, in its colours. A faction's marchers carry theirs.
   const signs = useMemo(() => {
@@ -120,6 +131,10 @@ export function Walkers() {
   const stickGeo = useMemo(() => new THREE.BoxGeometry(0.045, 1, 0.045), []);
   const eyeGeo = useMemo(() => new THREE.BoxGeometry(0.17 * S, 0.042 * S, 0.05 * S), []);
   const boxGeo = useMemo(() => new RoundedBoxGeometry(0.24 * S, 0.18 * S, 0.21 * S, 2, 0.02 * S), []);
+  const bagGeo = useMemo(() => new RoundedBoxGeometry(0.26 * S, 0.32 * S, 0.2 * S, 2, 0.02 * S), []);
+  const bowlGeo = useMemo(() => new THREE.CylinderGeometry(0.13 * S, 0.08 * S, 0.08 * S, 14), []);
+  const greenGeo = useMemo(() => new THREE.SphereGeometry(0.115 * S, 10, 5, 0, Math.PI * 2, 0, Math.PI / 2), []);
+  const angerGeo = useMemo(() => new THREE.BoxGeometry(0.32 * S, 0.08 * S, 0.08 * S), []);
   // Tidy up (FLT-19): an agent hiding in a cardboard box, packing tape across the top, eyes through the hand hole.
   const hideGeo = useMemo(() => new RoundedBoxGeometry(0.46 * S, 0.44 * S, 0.42 * S, 2, 0.02 * S), []);
   const tapeGeo = useMemo(() => new THREE.BoxGeometry(0.47 * S, 0.012 * S, 0.1 * S), []);
@@ -162,10 +177,10 @@ export function Walkers() {
     const runners = sim.escape?.runners;
     const escapes = runners && runners.length > 0 ? new Map<number, Runner>(runners.map((r) => [r.walker, r])) : null;
 
-    const set = (m: THREE.InstancedMesh | null, i: number, x: number, y: number, z: number, ry: number, sx: number, sy: number, sz: number, rx = 0) => {
+    const set = (m: THREE.InstancedMesh | null, i: number, x: number, y: number, z: number, ry: number, sx: number, sy: number, sz: number, rx = 0, rz = 0) => {
       if (!m) return;
       dummy.position.set(x, y, z);
-      dummy.rotation.set(rx, ry, 0);
+      dummy.rotation.set(rx, ry, rz);
       dummy.scale.set(sx, sy, sz);
       dummy.updateMatrix();
       m.setMatrixAt(i, dummy.matrix);
@@ -176,6 +191,15 @@ export function Walkers() {
       if (ne >= EYE_CAP) return;
       set(eyes.current, ne++, x + Math.sin(yaw) * 0.112 * S, y + 0.02 * S, z + Math.cos(yaw) * 0.112 * S, yaw, 1, 1, 1);
     };
+
+    // FLT-109: lunch is late (a crowd at the gate), or here (everyone eating).
+    const lunch = sim.slopbowl?.enabled ? sim.slopbowl : null;
+    const waiting = !!lunch && lunch.crowd > 0;
+    const eating = lunch?.machine.value === "fed";
+    const bagged = !!lunch && lunch.machine.value !== "fed" && lunch.machine.value !== "quiet";
+    let nbag = 0;
+    let nbowl = 0;
+    let nang = 0;
 
     for (const w of sim.walkers) {
       if (w.machine.value === "inside") continue;
@@ -313,13 +337,16 @@ export function Walkers() {
       // Researchers and visitors: an unhappy walker slumps (leans in, head down, a slow shuffle, colours drained),
       // and a researcher on the way out carries a box. A cheer makes everyone hop; idle ones look around and breathe.
       const mood = w.mood.value;
+      // FLT-109: waiting for lunch at the gate: angry, and on day three some of them lie down on the floor.
+      const down = waiting && w.kind === "researcher" && lyingDown(sim, w);
+      const angry = waiting && !eating && !down && w.kind === "researcher" && waitsForLunch(sim, w);
       const slump = mood === "miserable" ? 1 : mood === "slumped" ? 0.7 : 0;
       const pace = slump > 0 ? 6.5 : 10;
       const dancing = conga !== null && conga.includes(w.id);
       const bob = (walking ? Math.abs(Math.sin(t * pace + phase)) * (slump > 0 ? 0.025 : 0.045) : slump > 0 ? 0 : Math.sin(t * 1.3 + phase) * 0.008) * S + hop + (dancing ? kick : 0);
       const squash = (walking && slump === 0 ? 1 + Math.sin(t * 20 + phase) * 0.04 : 1 + breath) - land;
       const wide = 1 + land * 0.6;
-      const lean = slump * 0.42;
+      const lean = down ? FLAT : slump * 0.42;
       const cy = 0.26 * S;
       const hy = 0.66 * S;
       const sn = Math.sin(lean);
@@ -364,6 +391,27 @@ export function Walkers() {
         // A cardboard box held at the chest, bobbing with the walk.
         set(boxes.current, nx++, x + fwx * 0.3 * S, 0.46 * S + bob, z + fwz * 0.3 * S, yaw, 1, 1, 1);
       }
+      if (angry && nang < CAP * 2 - 1) {
+        // A red anger mark over the head, pulsing: two crossed bars, a little to one side.
+        const p = 1 + 0.3 * Math.abs(Math.sin(t * 7 + phase));
+        const ax = headX + fwz * 0.14 * S;
+        const az = headZ - fwx * 0.14 * S;
+        const ay = headY + 0.4 * S;
+        set(angers.current, nang++, ax, ay, az, yaw, p, p, p, 0, 0.785);
+        set(angers.current, nang++, ax, ay, az, yaw, p, p, p, 0, -0.785);
+      }
+      if (bagged && w.kind === "visitor" && w.role === COURIER && bags.current) {
+        // The courier's paper bag of bowls, held at the chest.
+        set(bags.current, nbag++, x + fwx * 0.3 * S, 0.5 * S + bob, z + fwz * 0.3 * S, yaw, 1, 1, 1);
+      }
+      if (eating && w.kind === "researcher" && nbowl < CAP) {
+        // Lunch: a bowl at the chest, lifted to the mouth now and then.
+        const lift = Math.max(0, Math.sin(t * 1.7 + phase)) ** 6 * 0.16 * S;
+        const bx = x + fwx * 0.26 * S;
+        const bz = z + fwz * 0.26 * S;
+        set(bowls.current, nbowl, bx, 0.44 * S + bob + lift, bz, yaw, 1, 1, 1);
+        set(greens.current, nbowl++, bx, 0.48 * S + bob + lift, bz, yaw, 1, 0.55, 1);
+      }
     }
 
     // The selection marker: a ring on the ground under the tapped walker and a bouncing arrow over their head.
@@ -403,6 +451,10 @@ export function Walkers() {
     done(pCap.current, nc);
     done(eyes.current, ne);
     done(boxes.current, nx);
+    done(bags.current, nbag);
+    done(bowls.current, nbowl);
+    done(greens.current, nbowl);
+    done(angers.current, nang);
     done(hide.current, nk);
     done(tape.current, nk);
     done(lit.current, nl);
@@ -485,6 +537,20 @@ export function Walkers() {
       {/* A researcher walking out for good carries a cardboard box. */}
       <instancedMesh ref={boxes} args={[boxGeo, undefined, SIGN_CAP]} castShadow frustumCulled={false}>
         <meshStandardMaterial color="#c99a55" roughness={0.9} />
+      </instancedMesh>
+
+      {/* FLT-109: the courier's bag, lunch in hand, and the hangry crowd's anger marks. */}
+      <instancedMesh ref={bags} args={[bagGeo, undefined, SIGN_CAP]} castShadow frustumCulled={false}>
+        <meshStandardMaterial color="#c8a06a" roughness={0.95} />
+      </instancedMesh>
+      <instancedMesh ref={bowls} args={[bowlGeo, undefined, CAP]} frustumCulled={false}>
+        <meshStandardMaterial color="#f4efe4" roughness={0.6} />
+      </instancedMesh>
+      <instancedMesh ref={greens} args={[greenGeo, undefined, CAP]} frustumCulled={false}>
+        <meshStandardMaterial color="#5fb83a" roughness={0.8} />
+      </instancedMesh>
+      <instancedMesh ref={angers} args={[angerGeo, undefined, CAP * 2]} frustumCulled={false}>
+        <meshBasicMaterial color="#e5322b" toneMapped={false} />
       </instancedMesh>
 
       {/* Everyone thinking the Thoughts row you tapped gets a golden halo. */}

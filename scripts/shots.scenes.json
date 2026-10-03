@@ -504,6 +504,17 @@
       "mea-leaked-phone",
       "mea-convening-phone"
     ],
+    "flt-109": [
+      "slop-late",
+      "slop-late-close",
+      "slop-card",
+      "slop-bird",
+      "slop-arrives",
+      "slop-fed",
+      "slop-late-classic",
+      "slop-late-phone",
+      "slop-arrives-phone"
+    ],
     "flt-105": [
       "acid-offer",
       "acid-warning",
@@ -7571,6 +7582,131 @@
           "wait": 800
         }
       ]
+    },
+    "slop-late": {
+      "title": "FLT-109: day three: the Order Tracker's ETA slipping, the lab at the gate (two on the floor), research going backwards",
+      "query": {
+        "warp": null,
+        "moment": "slop-late"
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "slop-late-close": {
+      "title": "FLT-109: day three up close: anger marks over the crowd at the gate, two researchers lying on the floor",
+      "query": {
+        "warp": null,
+        "moment": "slop-late",
+        "focus": "13,19.5",
+        "zoom": 140,
+        "photo": 1
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "slop-card": {
+      "title": "FLT-109: lunch is a day late: the card (Level 5)",
+      "query": {
+        "warp": null,
+        "moment": "slop-card"
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "slop-bird": {
+      "title": "FLT-109: the Bird App: hangry posters and the rival labs piling on",
+      "query": {
+        "warp": null,
+        "moment": "slop-late"
+      },
+      "steps": [
+        {
+          "eval": "() => document.querySelector('[data-anchor=\"app:bird\"]')?.click()"
+        },
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "slop-arrives": {
+      "title": "FLT-109: three days late, the courier at the gate with the bag (the arrival beat)",
+      "query": {
+        "warp": null,
+        "moment": "slop-arrives",
+        "focus": "12,20",
+        "zoom": 90,
+        "beat": 1
+      },
+      "steps": [
+        {
+          "wait": 2600
+        }
+      ]
+    },
+    "slop-fed": {
+      "title": "FLT-109: lunch: bowls in hand at the gate, the tracker says Delivered",
+      "query": {
+        "warp": null,
+        "moment": "slop-fed",
+        "focus": "13,19",
+        "zoom": 120
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "slop-late-classic": {
+      "title": "FLT-109: the tracker in the Classic skin (the base slot: a toast-sized card)",
+      "query": {
+        "warp": null,
+        "moment": "slop-late",
+        "skin": "base"
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ]
+    },
+    "slop-late-phone": {
+      "title": "FLT-109: day three, on a phone",
+      "query": {
+        "warp": null,
+        "moment": "slop-late"
+      },
+      "steps": [
+        {
+          "wait": 900
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
+    },
+    "slop-arrives-phone": {
+      "title": "FLT-109: the arrival beat on a phone",
+      "query": {
+        "warp": null,
+        "moment": "slop-arrives",
+        "beat": 1
+      },
+      "steps": [
+        {
+          "wait": 2600
+        }
+      ],
+      "viewport": "390x844",
+      "mobile": true
     },
     "acid-offer": {
       "title": "FLT-105: Vibe Encampment proposes a medium dose of acid",

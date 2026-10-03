@@ -3,6 +3,7 @@
 import { busyLab, profileTable, profileTicks, timeTicks, type BusyLab } from "./busyLab";
 import { perfBudget } from "../testkit";
 import { startEscape } from "../escape/driver";
+import { LATE_FLAG } from "../slopbowl/driver";
 
 const env = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env ?? {};
 
@@ -71,5 +72,23 @@ describe("the busy lab: 800 walkers, every pack awake", () => {
     console.log(`jailbreak: escape ${escape.meanUs.toFixed(1)} µs a tick (worst ${escape.maxUs.toFixed(0)} µs), whole tick ${p.meanUs.toFixed(1)} µs with the stopwatch on`);
     expect(escape.meanUs / 1000).toBeLessThan(perfBudget(SYSTEM_MS));
     expect(timeTicks(lab, 3, 60)).toBeLessThan(perfBudget(TICK_MS));
+  });
+
+  it("keeps a late lunch, the whole lab pacing at the gate, inside the same budgets (FLT-109)", () => {
+    const lab = busyLab();
+    warm(lab);
+    const { s } = lab;
+    s.flags[LATE_FLAG] = s.day;
+    // Noon comes round once a cycle (600 ticks): play to two hours late, when everyone is at the gate.
+    for (let i = 0; i < 1300 && s.slopbowl?.machine.value !== "worse"; i++) lab.play();
+    expect(s.slopbowl?.machine.value).toBe("worse");
+    expect(s.slopbowl!.crowd).toBe(1);
+    const p = profileTicks(lab, 20, 20);
+    const lunch = p.systems.find((t) => t.system === "slopbowl")!;
+    const walkers = p.systems.find((t) => t.system === "walkers")!;
+    console.log(`late lunch: slopbowl ${lunch.meanUs.toFixed(1)} µs a tick, walkers ${walkers.meanUs.toFixed(1)} µs, whole tick ${p.meanUs.toFixed(1)} µs with the stopwatch on`);
+    expect(lunch.meanUs / 1000).toBeLessThan(perfBudget(SYSTEM_MS));
+    expect(walkers.meanUs / 1000).toBeLessThan(perfBudget(WALKERS_MS));
+    expect(timeTicks(lab, 3, 20)).toBeLessThan(perfBudget(TICK_MS));
   });
 });

@@ -4,6 +4,7 @@ import type { Walker } from "../sim/types";
 import { VISITOR_ROLES } from "../content/names";
 import { SIGNS, SIGN_COLORS } from "../content/protest";
 import { defs } from "../sim/defs";
+import { SLOPBOWL } from "../sim/slopbowl/pack";
 
 export const HOODIES = ["#e8604c", "#f2b134", "#4f8ff0", "#8b6cf0", "#3fb58a"];
 export const SKIN = ["#f6d2b0", "#e2a978", "#b57a4f", "#8a5a3a", "#f0c39a"];
@@ -13,6 +14,8 @@ export const SUITS: Record<string, string> = {
   [VISITOR_ROLES[1]]: "#9a7a48",
   [VISITOR_ROLES[2]]: "#8a93a3",
   [VISITOR_ROLES[3]]: "#e64f9a",
+  // FLT-109: the courier who brings lunch three hours late, in the place's lettuce green.
+  [SLOPBOWL.rules.courier.role]: "#5fb83a",
 };
 /** The water crowd dresses in water (FLT-56: blue, like its row in the gate legend), so the factions' colours stand out beside it. */
 export const PICKET = ["#3fa7d6", "#2f80c9", "#5bc0eb", "#2a6f97", "#7cc6e8"];

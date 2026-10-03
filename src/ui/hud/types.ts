@@ -2008,6 +2008,8 @@ export interface HudVM {
   photoMode: PhotoVM;
   /** A camera beat's letterbox and caption (FLT-56), or null. */
   beat: BeatVM | null;
+  /** FLT-109: the lab's late lunch order, for the OrderTracker slot. Null (or absent) when no order is out. */
+  lunch?: LunchVM | null;
   /** FLT-105: a trip under way, or null. Optional: none. */
   trip?: TripVM | null;
   skins: SkinPickerVM;
@@ -2202,4 +2204,30 @@ export interface HudActions {
   /** The mods prompt: load it with the mods running now. */
   loadWithoutMods(): void;
   cancelModPrompt(): void;
+}
+
+/**
+ * FLT-109: the delivery tracker for the lab's late lunch (the OrderTracker slot). It opens when the order is late and the
+ * ETA slips at every stage (`slipped` keeps the old ones, oldest first, to strike through); `route` is the courier's dot
+ * between the restaurant (0) and the gate (1), and it goes backwards too. `delivered` once the bowls are in.
+ */
+export interface LunchVM {
+  /** The order: a tracker closed on one order opens again for the next. */
+  id: number;
+  /** The tracker app's name ("Order Tracker") and the order ("Order #1,141"). */
+  app: string;
+  order: string;
+  /** The place, in full. */
+  place: string;
+  stage: "late" | "hangry" | "worse" | "meltdown" | "arriving" | "fed";
+  /** "Day 3 of the Fancy Healthy … being late". */
+  dayLine: string;
+  daysLate: number;
+  eta: string;
+  slipped: string[];
+  status: string;
+  route: number;
+  delivered: boolean;
+  /** Research is going backwards right now (say so). */
+  backwards: boolean;
 }

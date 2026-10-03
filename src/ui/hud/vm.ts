@@ -1279,6 +1279,7 @@ function rawViewModel(i: HudInput): HudVM {
     eraCard: era,
     outcome,
     audit: auditOf(i.snap),
+    lunch: i.snap.slopbowl ? { ...i.snap.slopbowl, slipped: [...i.snap.slopbowl.slipped] } : null,
     ending: ending ? null : endingOf(i),
     takeover: ending ? null : takeoverOf(i),
     memo: memoOf(i),

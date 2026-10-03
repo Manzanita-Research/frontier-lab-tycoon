@@ -10,7 +10,7 @@ import { CoachLayer } from "./CoachLayer";
 import { ModeHint } from "./ModeHint";
 import { GateLayer } from "./GateLayer";
 import { loadedSkinAtom } from "./state";
-import { BeatLayer, Docked, Modals, PhotoLayer, TripLayer } from "./tree";
+import { BeatLayer, Docked, Modals, OrderLayer, PhotoLayer, TripLayer } from "./tree";
 import { useHudEffects } from "./useHudEffects";
 import { useSaves } from "./saves";
 import { TripScreen } from "../juice/TripScreen";
@@ -39,6 +39,7 @@ function Hud({ source }: { source: AppSource }) {
       <GateLayer factions={vm.factions} actions={hudActions} photo={vm.photoMode.on} />
       <div className="hud-host">
         <Docked vm={vm} actions={hudActions} />
+        <OrderLayer vm={vm} actions={hudActions} />
         <BeatLayer vm={vm} actions={hudActions} />
         <Modals vm={vm} actions={hudActions} />
         <CoachLayer vm={vm} actions={hudActions} />

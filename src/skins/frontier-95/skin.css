@@ -6715,3 +6715,39 @@
     }
   }
 }
+
+/* FLT-109: the late lunch's Order Tracker, a download dialog that never finishes. Top middle, over the campus. */
+[data-skin="frontier-95"] {
+  /* No toast dock in this skin (the paperclip talks), so the tracker can sit at the top. */
+  .lunch-layer { top: 76px; }
+  @media (max-width: 640px) {
+    .lunch-layer { top: 120px; }
+  }
+  .f95-win.f95-lunch { width: 400px; max-width: calc(100vw - 16px); }
+  .f95-lunch-body { padding: 8px 10px 10px; display: grid; gap: 6px; }
+  .f95-lunch-anim { display: flex; align-items: center; gap: 8px; font-size: 22px; }
+  .f95-lunch-anim i { flex: 1; text-align: center; font-style: normal; font-size: 14px; letter-spacing: 2px; color: #000080; }
+  .f95-lunch-anim i.going { animation: frontier-95-lunch-dots 1.2s steps(5) infinite; }
+  .f95-lunch-from { margin: 0; }
+  .f95-lunch-rows { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 3px 8px; }
+  .f95-lunch-rows dt { white-space: nowrap; }
+  .f95-lunch-rows dd { margin: 0; display: flex; flex-wrap: wrap; gap: 2px 8px; }
+  .f95-lunch-rows s { color: #808080; }
+  .f95-lunch-day { margin: 0; font-weight: 700; color: #a00000; }
+  .f95-lunch-warn { margin: 0; display: flex; gap: 6px; align-items: center; font-weight: 700; }
+  .f95-lunch.stage-fed .f95-lunch-rows b { color: #006000; }
+  @media (prefers-reduced-motion: reduce) {
+    .f95-lunch-anim i.going { animation: none; }
+  }
+  @media (max-width: 640px) {
+    .f95-win.f95-lunch { width: 300px; }
+    .f95-lunch-anim { display: none; }
+    .f95-lunch-rows { grid-template-columns: 1fr; }
+    .f95-lunch-rows s:not(:last-of-type) { display: none; }
+    .f95-lunch-body { gap: 4px; padding: 6px 8px 8px; }
+  }
+}
+@keyframes frontier-95-lunch-dots {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}

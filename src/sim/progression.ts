@@ -6,6 +6,7 @@ import { enableDefection } from "./defection/driver";
 import { enableHearing } from "./hearing/driver";
 import { enablePoaching } from "./poaching/driver";
 import { enableBirdApp } from "./birdapp/driver";
+import { enableSlopBowl } from "./slopbowl/driver";
 import { enableYacht } from "./yacht/driver";
 import { enableFactions } from "./factions/state";
 import { enableEscape } from "./escape/driver";
@@ -63,9 +64,11 @@ const PACKS: readonly { id: SystemId; enable: (s: GameState) => void; off: strin
   { id: "capture", enable: enableCapture, off: "captureOff" },
   { id: "factions", enable: enableFactions, off: "factionsOff" },
   { id: "birdapp", enable: enableBirdApp, off: "birdappOff" },
+  // FLT-109: the late lunch wakes with the Bird App (its posters are who complain), with a switch of its own.
+  { id: "birdapp", enable: enableSlopBowl, off: "slopbowlOff" },
   { id: "escape", enable: enableEscape, off: "escapeOff" },
 ];
-/** The flags behind `?leapfrog=off`, `?papers=off`, `?collusion=off`, `?hearing=off`, `?yacht=off`, `?defection=off`, `?poaching=off`, `?auditors=off`, `?promises=off`, `?capture=off`, `?factions=off`, `?birdapp=off` and `?escape=off`. */
+/** The flags behind `?leapfrog=off`, `?papers=off`, `?collusion=off`, `?hearing=off`, `?yacht=off`, `?defection=off`, `?poaching=off`, `?auditors=off`, `?promises=off`, `?capture=off`, `?factions=off`, `?birdapp=off`, `?slopbowl=off` and `?escape=off`. */
 export const PACK_OFF_FLAGS = PACKS.map((p) => p.off);
 function enablePacks(s: GameState, systems: readonly SystemId[]) {
   for (const pack of PACKS) if (systems.includes(pack.id) && !s.flags[pack.off]) pack.enable(s);

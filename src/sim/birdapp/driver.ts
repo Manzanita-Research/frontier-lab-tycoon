@@ -45,6 +45,13 @@ export function enableBirdApp(s: GameState) {
   s.birdapp.enabled = true;
   enableBirdRivals(s, s.birdapp);
 }
+/** Nudge the lab's Aura now (FLT-109's late lunch): false, and nothing, while the Bird App is asleep. */
+export function nudgeAura(s: GameState, amount: number): boolean {
+  const b = s.birdapp;
+  if (!b?.enabled) return false;
+  b.aura = clampAura(b.aura + amount);
+  return true;
+}
 export function disableBirdApp(s: GameState) {
   if (s.birdapp) s.birdapp.enabled = false;
 }

@@ -8,6 +8,7 @@ import { Drama, FrontPage, GroupChat, Mixer, ModManager, ModSkinOffer, NewsRoom,
 import { Benchmarks, Livestream, Voice } from "./leapfrog";
 import { CrumbWiki, PaperMoment, Papers } from "./papers";
 import { DisasterAlert, DisasterMenu } from "./disasters";
+import { OrderTracker } from "./lunch";
 import { Bill, Hearing, LeakedChat, PromiseTracker } from "./circus";
 import { DramaCard } from "./drama";
 import { SaveLoad, Welcome } from "./saves";
@@ -20,6 +21,6 @@ import { Trip } from "./trip";
 const slots: SkinSlots = {
   Layout, Stats, Training, Objectives, Inspector, BuildBar, Speed, Staff, Bubble, ThoughtsPanel, Ticker, Toast, Assistant,
   EventCard, Confirm, Coach, UnlockCard, HowToPlay, Arena, Benchmarks, Voice, Livestream, Hearing, LeakedChat, DramaCard, Bill, PromiseTracker, EraCard, FrontPage, GroupChat, PhotoButton, PhotoOverlay, SkinPicker, Outcome, Ending, Takeover, NewsControls,
-  NewsArrival, NewsRoom, Mixer, ModManager, ModSkinOffer, Papers, PaperMoment, CrumbWiki, DisasterMenu, DisasterAlert, ReportCard, AuditPin, Factions, GateLegend, BirdApp, DramaButton, Drama, Memo, Challenge, Welcome, SaveLoad, WindowTray, Trip,
+  NewsArrival, NewsRoom, Mixer, ModManager, ModSkinOffer, Papers, PaperMoment, CrumbWiki, OrderTracker, DisasterMenu, DisasterAlert, ReportCard, AuditPin, Factions, GateLegend, BirdApp, DramaButton, Drama, Memo, Challenge, Welcome, SaveLoad, WindowTray, Trip,
 };
 export default slots;

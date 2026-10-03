@@ -1,0 +1,97 @@
+{
+  "base": {
+    "ref": "origin/main",
+    "sha": "aa86c07523eccb3ed65d80b8b6a14ba188fdcc1f"
+  },
+  "head": {
+    "branch": "flt-109-slop-bowl-late",
+    "sha": "a93ba96",
+    "dirty": true
+  },
+  "seconds": 361.916,
+  "problems": [],
+  "rows": [
+    {
+      "scene": "slop-late",
+      "skin": null,
+      "before": "docs/img/flt-109/before/slop-late.png",
+      "after": "docs/img/flt-109/after/slop-late.png",
+      "title": "FLT-109: day three: the Order Tracker's ETA slipping, the lab at the gate (two on the floor), research going backwards",
+      "compare": "docs/img/flt-109/compare/slop-late.png",
+      "changed": 0.30362114197530865
+    },
+    {
+      "scene": "slop-late-close",
+      "skin": null,
+      "before": "docs/img/flt-109/before/slop-late-close.png",
+      "after": "docs/img/flt-109/after/slop-late-close.png",
+      "title": "FLT-109: day three up close: anger marks over the crowd at the gate, two researchers lying on the floor",
+      "compare": "docs/img/flt-109/compare/slop-late-close.png",
+      "changed": 0.24577237654320988
+    },
+    {
+      "scene": "slop-card",
+      "skin": null,
+      "before": "docs/img/flt-109/before/slop-card.png",
+      "after": "docs/img/flt-109/after/slop-card.png",
+      "title": "FLT-109: lunch is a day late: the card (Level 5)",
+      "compare": "docs/img/flt-109/compare/slop-card.png",
+      "changed": 0.3768989197530864
+    },
+    {
+      "scene": "slop-bird",
+      "skin": null,
+      "before": "docs/img/flt-109/before/slop-bird.png",
+      "after": "docs/img/flt-109/after/slop-bird.png",
+      "title": "FLT-109: the Bird App: hangry posters and the rival labs piling on",
+      "compare": "docs/img/flt-109/compare/slop-bird.png",
+      "changed": 0.39939506172839506
+    },
+    {
+      "scene": "slop-arrives",
+      "skin": null,
+      "before": "docs/img/flt-109/before/slop-arrives.png",
+      "after": "docs/img/flt-109/after/slop-arrives.png",
+      "title": "FLT-109: three days late, the courier at the gate with the bag (the arrival beat)",
+      "compare": "docs/img/flt-109/compare/slop-arrives.png",
+      "changed": 0.9074853395061728
+    },
+    {
+      "scene": "slop-fed",
+      "skin": null,
+      "before": "docs/img/flt-109/before/slop-fed.png",
+      "after": "docs/img/flt-109/after/slop-fed.png",
+      "title": "FLT-109: lunch: bowls in hand at the gate, the tracker says Delivered",
+      "compare": "docs/img/flt-109/compare/slop-fed.png",
+      "changed": 0.34249228395061726
+    },
+    {
+      "scene": "slop-late-classic",
+      "skin": null,
+      "before": "docs/img/flt-109/before/slop-late-classic.png",
+      "after": "docs/img/flt-109/after/slop-late-classic.png",
+      "title": "FLT-109: the tracker in the Classic skin (the base slot: a toast-sized card)",
+      "compare": "docs/img/flt-109/compare/slop-late-classic.png",
+      "changed": 0.24472685185185186
+    },
+    {
+      "scene": "slop-late-phone",
+      "skin": null,
+      "before": "docs/img/flt-109/before/slop-late-phone.png",
+      "after": "docs/img/flt-109/after/slop-late-phone.png",
+      "title": "FLT-109: day three, on a phone",
+      "compare": "docs/img/flt-109/compare/slop-late-phone.png",
+      "changed": 0.39759311580994044
+    },
+    {
+      "scene": "slop-arrives-phone",
+      "skin": null,
+      "before": "docs/img/flt-109/before/slop-arrives-phone.png",
+      "after": "docs/img/flt-109/after/slop-arrives-phone.png",
+      "title": "FLT-109: the arrival beat on a phone",
+      "compare": "docs/img/flt-109/compare/slop-arrives-phone.png",
+      "changed": 0.8966270202940819
+    }
+  ],
+  "errors": []
+}
