@@ -24,18 +24,26 @@ Cost per run: about $0.30 of Opus 5.5 for the author, about 70 s of author time,
 **Script mode** is recommended. The spawn is fully determined by code, and script automations run on the bb server, where `bb thread spawn --environment-provider modal-sandbox` works the same way it does for the lead. (Agent-mode automations can't pick an environment provider, so they would run on the Mini.)
 
 ```sh
-bb automation create --project proj_dvb9hes55f \
+bb automation create --project "$BB_PROJECT_ID" \
   --name "Daily Drama (FLT-34)" \
   --cron "30 7 * * *" --timezone America/Los_Angeles \
   --interpreter bash --timeout 5m \
+  --env-json "{\"FLT_BB_PROJECT\":\"$BB_PROJECT_ID\",\"FLT_CHARTER\":\"<the charter's path on the Mini>\"}" \
   --script-file drama/automation.sh
 ```
 
-Or paste the script inline with `--script "$(cat drama/automation.sh)"`. Check it with `bb automation show <id> --project proj_dvb9hes55f`. To fire one run by hand: `bb automation run <id> --project proj_dvb9hes55f`.
+The script reads two env vars, so the repo names no private paths. It exits 2 with a clear message if one is missing:
+
+- `FLT_BB_PROJECT`: the bb project ID. It falls back to `BB_PROJECT_ID` when bb sets it, but set it explicitly.
+- `FLT_CHARTER`: the mission-control charter's path on the Mini, quoted in the thread's prompt.
+
+`bash drama/automation.sh --dry-run` (with both set) prints the spawn and the prompt without spawning anything. The automation runs a stored copy of the script, so after editing it run `bb automation update <id> --script-file drama/automation.sh` again.
+
+Or paste the script inline with `--script "$(cat drama/automation.sh)"`. Check it with `bb automation show <id> --project "$BB_PROJECT_ID"`. To fire one run by hand: `bb automation run <id> --project "$BB_PROJECT_ID"`.
 
 `drama/automation.sh` does four things:
 
-1. Resolves `bb` (`$BB_CLI` if set, otherwise `bb` on PATH).
+1. Resolves `bb` (`$BB_CLI` if set, otherwise `bb` on PATH), the project and the charter path (from the env above).
 2. Picks today's date in San Francisco.
 3. Spawns the thread: `--environment-provider modal-sandbox --provider claude-code --model claude-opus-5-5 --reasoning-level high --permission-mode auto`, titled `explore · Daily Drama <date>`, with the prompt below. The model is passed explicitly, because Modal's catalog is stale.
 4. Attaches the new thread to FLT-34.
@@ -44,7 +52,7 @@ Or paste the script inline with `--script "$(cat drama/automation.sh)"`. Check i
 
 This is kept in `drama/automation.sh`. Verbatim:
 
-> Kind: explore. House rules: the mission-control charter (on the Mini at /Users/jem/.bb-machines/jem.getbb.app/thread-storage/mission-control/CHARTER.md). Task: **FLT-34 Daily Drama run for {date}.** You are the runner, not the author: the pack is written by the headless author inside the pipeline, from the modding skill alone, and you never edit it by hand.
+> Kind: explore. House rules: the mission-control charter (on the Mini at {$FLT_CHARTER}). Task: **FLT-34 Daily Drama run for {date}.** You are the runner, not the author: the pack is written by the headless author inside the pipeline, from the modding skill alone, and you never edit it by hand.
 >
 > 1. `git fetch origin && git checkout -B drama-run-{date} origin/main`, then `node scripts/drama-run.mjs --date {date}`.
 > 2. If it prints `quiet day, skipped`: `bb tasks comment FLT-34 --body "Daily Drama {date}: skipped (quiet day). <the SKIP reason, one line>"` and stop.
@@ -54,7 +62,7 @@ This is kept in `drama/automation.sh`. Verbatim:
 
 ## Operating it
 
-- **Pause:** `bb automation pause <id> --project proj_dvb9hes55f`. **Resume:** `bb automation resume <id> ...`.
+- **Pause:** `bb automation pause <id> --project "$BB_PROJECT_ID"`. **Resume:** `bb automation resume <id> ...`.
 - **Machines:** each run's Modal machine stays up until its thread is archived. The lead archives finished Drama threads daily (or run `bb machine list --json` and remove any idle machines).
 - **Three-day proof (the spec's "done when"):** three consecutive runs, each a PR that passes `flt-mod check` and the linter, or a documented skip.
 - **Tuning:** the story choice lives in `drama/pick.md` and the feeds in `drama/sources.json`. The linter's knowledge lives in `drama/denylist.json` (add names freely) and `drama/glossary.json`. A Drama PR never edits these files. Tuning PRs go through the lead like any other code.

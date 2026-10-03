@@ -14,19 +14,19 @@
     {
       "scene": "flt63-facilities",
       "skin": "field-almanac",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/field-almanac/before/flt63-facilities@field-almanac.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/field-almanac/after/flt63-facilities@field-almanac.png",
+      "before": "docs/img/flt-63/field-almanac/before/flt63-facilities@field-almanac.png",
+      "after": "docs/img/flt-63/field-almanac/after/flt63-facilities@field-almanac.png",
       "title": "FLT-63: Start ▸ Facilities ▸ open (the buildings, grouped)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/field-almanac/compare/flt63-facilities@field-almanac.png",
+      "compare": "docs/img/flt-63/field-almanac/compare/flt63-facilities@field-almanac.png",
       "changed": 0.048435956790123455
     },
     {
       "scene": "flt63-run",
       "skin": "field-almanac",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/field-almanac/before/flt63-run@field-almanac.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/field-almanac/after/flt63-run@field-almanac.png",
+      "before": "docs/img/flt-63/field-almanac/before/flt63-run@field-almanac.png",
+      "after": "docs/img/flt-63/field-almanac/after/flt63-run@field-almanac.png",
       "title": "FLT-63: Start ▸ Run… (the widget launcher)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/field-almanac/compare/flt63-run@field-almanac.png",
+      "compare": "docs/img/flt-63/field-almanac/compare/flt63-run@field-almanac.png",
       "changed": 0.14437191358024692
     }
   ],

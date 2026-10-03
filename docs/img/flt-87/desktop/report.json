@@ -14,28 +14,28 @@
     {
       "scene": "overview",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-87/desktop/before/overview.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-87/desktop/after/overview.png",
+      "before": "docs/img/flt-87/desktop/before/overview.png",
+      "after": "docs/img/flt-87/desktop/after/overview.png",
       "title": "The campus, mid-morning, paused",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-87/desktop/compare/overview.png",
+      "compare": "docs/img/flt-87/desktop/compare/overview.png",
       "changed": 0.001169753086419753
     },
     {
       "scene": "inspector",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-87/desktop/before/inspector.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-87/desktop/after/inspector.png",
+      "before": "docs/img/flt-87/desktop/before/inspector.png",
+      "after": "docs/img/flt-87/desktop/after/inspector.png",
       "title": "Tap a researcher: the inspector opens",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-87/desktop/compare/inspector.png",
+      "compare": "docs/img/flt-87/desktop/compare/inspector.png",
       "changed": 0.001132716049382716
     },
     {
       "scene": "event",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-87/desktop/before/event.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-87/desktop/after/event.png",
+      "before": "docs/img/flt-87/desktop/before/event.png",
+      "after": "docs/img/flt-87/desktop/after/event.png",
       "title": "An event card lands (the Water Discourse)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-87/desktop/compare/event.png",
+      "compare": "docs/img/flt-87/desktop/compare/event.png",
       "changed": 0.004206018518518519
     }
   ],

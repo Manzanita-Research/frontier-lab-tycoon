@@ -14,73 +14,73 @@
     {
       "scene": "coach-start",
       "skin": "frontier-95",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95/before/coach-start@frontier-95.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95/after/coach-start@frontier-95.png",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95/compare/coach-start@frontier-95.png",
+      "before": "docs/evidence/FLT-50/frontier-95/before/coach-start@frontier-95.png",
+      "after": "docs/evidence/FLT-50/frontier-95/after/coach-start@frontier-95.png",
+      "compare": "docs/evidence/FLT-50/frontier-95/compare/coach-start@frontier-95.png",
       "changed": 0.9739436728395062
     },
     {
       "scene": "coach-path",
       "skin": "frontier-95",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95/before/coach-path@frontier-95.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95/after/coach-path@frontier-95.png",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95/compare/coach-path@frontier-95.png",
+      "before": "docs/evidence/FLT-50/frontier-95/before/coach-path@frontier-95.png",
+      "after": "docs/evidence/FLT-50/frontier-95/after/coach-path@frontier-95.png",
+      "compare": "docs/evidence/FLT-50/frontier-95/compare/coach-path@frontier-95.png",
       "changed": 0.9683094135802469
     },
     {
       "scene": "coach-hall",
       "skin": "frontier-95",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95/before/coach-hall@frontier-95.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95/after/coach-hall@frontier-95.png",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95/compare/coach-hall@frontier-95.png",
+      "before": "docs/evidence/FLT-50/frontier-95/before/coach-hall@frontier-95.png",
+      "after": "docs/evidence/FLT-50/frontier-95/after/coach-hall@frontier-95.png",
+      "compare": "docs/evidence/FLT-50/frontier-95/compare/coach-hall@frontier-95.png",
       "changed": 0.9670092592592593
     },
     {
       "scene": "coach-training",
       "skin": "frontier-95",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95/before/coach-training@frontier-95.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95/after/coach-training@frontier-95.png",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95/compare/coach-training@frontier-95.png",
+      "before": "docs/evidence/FLT-50/frontier-95/before/coach-training@frontier-95.png",
+      "after": "docs/evidence/FLT-50/frontier-95/after/coach-training@frontier-95.png",
+      "compare": "docs/evidence/FLT-50/frontier-95/compare/coach-training@frontier-95.png",
       "changed": 0.949662037037037
     },
     {
       "scene": "coach-gateway",
       "skin": "frontier-95",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95/before/coach-gateway@frontier-95.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95/after/coach-gateway@frontier-95.png",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95/compare/coach-gateway@frontier-95.png",
+      "before": "docs/evidence/FLT-50/frontier-95/before/coach-gateway@frontier-95.png",
+      "after": "docs/evidence/FLT-50/frontier-95/after/coach-gateway@frontier-95.png",
+      "compare": "docs/evidence/FLT-50/frontier-95/compare/coach-gateway@frontier-95.png",
       "changed": 0.966775462962963
     },
     {
       "scene": "coach-goal",
       "skin": "frontier-95",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95/before/coach-goal@frontier-95.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95/after/coach-goal@frontier-95.png",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95/compare/coach-goal@frontier-95.png",
+      "before": "docs/evidence/FLT-50/frontier-95/before/coach-goal@frontier-95.png",
+      "after": "docs/evidence/FLT-50/frontier-95/after/coach-goal@frontier-95.png",
+      "compare": "docs/evidence/FLT-50/frontier-95/compare/coach-goal@frontier-95.png",
       "changed": 0.9740725308641975
     },
     {
       "scene": "new-card",
       "skin": "frontier-95",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95/before/new-card@frontier-95.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95/after/new-card@frontier-95.png",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95/compare/new-card@frontier-95.png",
+      "before": "docs/evidence/FLT-50/frontier-95/before/new-card@frontier-95.png",
+      "after": "docs/evidence/FLT-50/frontier-95/after/new-card@frontier-95.png",
+      "compare": "docs/evidence/FLT-50/frontier-95/compare/new-card@frontier-95.png",
       "changed": 0.47736033950617285
     },
     {
       "scene": "how-to-play",
       "skin": "frontier-95",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95/before/how-to-play@frontier-95.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95/after/how-to-play@frontier-95.png",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95/compare/how-to-play@frontier-95.png",
+      "before": "docs/evidence/FLT-50/frontier-95/before/how-to-play@frontier-95.png",
+      "after": "docs/evidence/FLT-50/frontier-95/after/how-to-play@frontier-95.png",
+      "compare": "docs/evidence/FLT-50/frontier-95/compare/how-to-play@frontier-95.png",
       "changed": 0.5558503086419753
     },
     {
       "scene": "level-3",
       "skin": "frontier-95",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95/before/level-3@frontier-95.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95/after/level-3@frontier-95.png",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95/compare/level-3@frontier-95.png",
+      "before": "docs/evidence/FLT-50/frontier-95/before/level-3@frontier-95.png",
+      "after": "docs/evidence/FLT-50/frontier-95/after/level-3@frontier-95.png",
+      "compare": "docs/evidence/FLT-50/frontier-95/compare/level-3@frontier-95.png",
       "changed": 0.4390763888888889
     }
   ],

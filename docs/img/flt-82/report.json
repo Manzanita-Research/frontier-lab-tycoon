@@ -14,28 +14,28 @@
     {
       "scene": "saves-welcome",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-82/before/saves-welcome.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-82/after/saves-welcome.png",
+      "before": "docs/img/flt-82/before/saves-welcome.png",
+      "after": "docs/img/flt-82/after/saves-welcome.png",
       "title": "FLT-65: a returning player's start screen (Welcome back, from a pretend save shelf)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-82/compare/saves-welcome.png",
+      "compare": "docs/img/flt-82/compare/saves-welcome.png",
       "changed": 0.0011983024691358025
     },
     {
       "scene": "saves-welcome-newer",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-82/before/saves-welcome-newer.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-82/after/saves-welcome-newer.png",
+      "before": "docs/img/flt-82/before/saves-welcome-newer.png",
+      "after": "docs/img/flt-82/after/saves-welcome-newer.png",
       "title": "FLT-82: Welcome back offers the newest save (slot 2, 25 days on), not the older autosave",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-82/compare/saves-welcome-newer.png",
+      "compare": "docs/img/flt-82/compare/saves-welcome-newer.png",
       "changed": 0.0012839506172839506
     },
     {
       "scene": "ticker-new-lab",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-82/before/ticker-new-lab.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-82/after/ticker-new-lab.png",
+      "before": "docs/img/flt-82/before/ticker-new-lab.png",
+      "after": "docs/img/flt-82/after/ticker-new-lab.png",
       "title": "FLT-82: the news ticker a few seconds into a new lab (Today's lab, fixed seed), after a mid-game lab",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-82/compare/ticker-new-lab.png",
+      "compare": "docs/img/flt-82/compare/ticker-new-lab.png",
       "changed": 0.0007368827160493827
     }
   ],

@@ -14,55 +14,55 @@
     {
       "scene": "overview",
       "skin": "homepage-98",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/before/overview@homepage-98.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/after/overview@homepage-98.png",
+      "before": "docs/img/flt-14-ports/homepage-98/before/overview@homepage-98.png",
+      "after": "docs/img/flt-14-ports/homepage-98/after/overview@homepage-98.png",
       "title": "The campus, mid-morning, paused",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/compare/overview@homepage-98.png",
+      "compare": "docs/img/flt-14-ports/homepage-98/compare/overview@homepage-98.png",
       "changed": 0.9708024691358025
     },
     {
       "scene": "inspector",
       "skin": "homepage-98",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/before/inspector@homepage-98.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/after/inspector@homepage-98.png",
+      "before": "docs/img/flt-14-ports/homepage-98/before/inspector@homepage-98.png",
+      "after": "docs/img/flt-14-ports/homepage-98/after/inspector@homepage-98.png",
       "title": "Tap a researcher: the inspector opens",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/compare/inspector@homepage-98.png",
+      "compare": "docs/img/flt-14-ports/homepage-98/compare/inspector@homepage-98.png",
       "changed": 0.9701805555555556
     },
     {
       "scene": "event",
       "skin": "homepage-98",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/before/event@homepage-98.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/after/event@homepage-98.png",
+      "before": "docs/img/flt-14-ports/homepage-98/before/event@homepage-98.png",
+      "after": "docs/img/flt-14-ports/homepage-98/after/event@homepage-98.png",
       "title": "An event card lands (the Water Discourse)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/compare/event@homepage-98.png",
+      "compare": "docs/img/flt-14-ports/homepage-98/compare/event@homepage-98.png",
       "changed": 0.9708935185185186
     },
     {
       "scene": "menu",
       "skin": "homepage-98",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/before/menu@homepage-98.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/after/menu@homepage-98.png",
+      "before": "docs/img/flt-14-ports/homepage-98/before/menu@homepage-98.png",
+      "after": "docs/img/flt-14-ports/homepage-98/after/menu@homepage-98.png",
       "title": "The Start menu / build bar open",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/compare/menu@homepage-98.png",
+      "compare": "docs/img/flt-14-ports/homepage-98/compare/menu@homepage-98.png",
       "changed": 0.970832561728395
     },
     {
       "scene": "phone",
       "skin": "homepage-98",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/before/phone@homepage-98.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/after/phone@homepage-98.png",
+      "before": "docs/img/flt-14-ports/homepage-98/before/phone@homepage-98.png",
+      "after": "docs/img/flt-14-ports/homepage-98/after/phone@homepage-98.png",
       "title": "The same campus on a phone (390x844)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/compare/phone@homepage-98.png",
+      "compare": "docs/img/flt-14-ports/homepage-98/compare/phone@homepage-98.png",
       "changed": 0.9667221108275611
     },
     {
       "scene": "photo",
       "skin": "homepage-98",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/before/photo@homepage-98.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/after/photo@homepage-98.png",
+      "before": "docs/img/flt-14-ports/homepage-98/before/photo@homepage-98.png",
+      "after": "docs/img/flt-14-ports/homepage-98/after/photo@homepage-98.png",
       "title": "Photo mode",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/compare/photo@homepage-98.png",
+      "compare": "docs/img/flt-14-ports/homepage-98/compare/photo@homepage-98.png",
       "changed": 0.9709560185185185
     }
   ],

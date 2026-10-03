@@ -1,6 +1,6 @@
 # FLT-16: a real ten-minute first run
 
-Play [the shared production preview](https://modal-11--4173.getbb.app/) with no URL parameters. It opens paused at 1×. Build the suggested path, then choose each suggested tool; tap the assistant hint to acknowledge an instruction when no build tool is involved. The visible Next/Skip controls and paused indicator are FLT-29's follow-up.
+Play the shared production preview (`<builder>:4173`, since retired) with no URL parameters. It opens paused at 1×. Build the suggested path, then choose each suggested tool; tap the assistant hint to acknowledge an instruction when no build tool is involved. The visible Next/Skip controls and paused indicator are FLT-29's follow-up.
 
 Captured on Modal from commit `95f2406`, September 30, 2026, with default seed 1, a 1440×900 viewport, the default camera and the normal camera director. `scripts/pacing-shots.mjs` drives ordinary UI clicks against the production preview at `http://localhost:4173/`, the same build exposed at the shared URL. Production remains on main while Jem reviews this PR. No query parameters, clock overrides, debug hooks, injected visitors or free buildings. Speed stays at 1×. Later changes only wire News Room/mixer pauses, which were not opened in this sequence; merged main changes add the mod foundation without changing this scene.
 

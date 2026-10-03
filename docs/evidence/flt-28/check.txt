@@ -1,21 +1,21 @@
 
-> frontier-lab-tycoon@0.0.0 check /root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_ycybuwshp6-1/project-proj-dvb9hes55f
+> frontier-lab-tycoon@0.0.0 check .
 > pnpm typecheck && pnpm test && pnpm build
 
 
-> frontier-lab-tycoon@0.0.0 typecheck /root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_ycybuwshp6-1/project-proj-dvb9hes55f
+> frontier-lab-tycoon@0.0.0 typecheck .
 > tsc --noEmit && pnpm --filter @flt/mod-sdk typecheck
 
 
-> @flt/mod-sdk@0.0.0 typecheck /root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_ycybuwshp6-1/project-proj-dvb9hes55f/packages/flt-mod-sdk
+> @flt/mod-sdk@0.0.0 typecheck packages/flt-mod-sdk
 > tsc --noEmit -p tsconfig.json
 
 
-> frontier-lab-tycoon@0.0.0 test /root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_ycybuwshp6-1/project-proj-dvb9hes55f
+> frontier-lab-tycoon@0.0.0 test .
 > vitest run && node --test packages/flt-mod-cli/*.test.mjs
 
 
- RUN  v5.0.2 /root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_ycybuwshp6-1/project-proj-dvb9hes55f
+ RUN  v5.0.2 .
 
 
  Test Files  46 passed (46)
@@ -89,7 +89,7 @@ ok 2 - graph explores guarded alternatives, nesting and ancestor transitions
 # todo 0
 # duration_ms 19354.680895
 
-> frontier-lab-tycoon@0.0.0 build /root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_ycybuwshp6-1/project-proj-dvb9hes55f
+> frontier-lab-tycoon@0.0.0 build .
 > tsc --noEmit && vite build
 
 vite v7.3.6 building client environment for production...

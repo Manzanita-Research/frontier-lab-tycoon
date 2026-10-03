@@ -16,10 +16,10 @@
     {
       "scene": "first-peek",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-93-peek/before/first-peek.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-93-peek/after/first-peek.png",
+      "before": "docs/img/flt-93-peek/before/first-peek.png",
+      "after": "docs/img/flt-93-peek/after/first-peek.png",
       "title": "FLT-58: the first minute after ▶▶: the coach points at a researcher's mind",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-93-peek/compare/first-peek.png",
+      "compare": "docs/img/flt-93-peek/compare/first-peek.png",
       "changed": null,
       "composeError": "blank composite: panel 3 is 42% one colour, 10 colours",
       "error": "compare: blank composite: panel 3 is 42% one colour, 10 colours"

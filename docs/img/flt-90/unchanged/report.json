@@ -14,46 +14,46 @@
     {
       "scene": "overview",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/unchanged/before/overview.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/unchanged/after/overview.png",
+      "before": "docs/img/flt-90/unchanged/before/overview.png",
+      "after": "docs/img/flt-90/unchanged/after/overview.png",
       "title": "The campus, mid-morning, paused",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/unchanged/compare/overview.png",
+      "compare": "docs/img/flt-90/unchanged/compare/overview.png",
       "changed": 0.0013757716049382716
     },
     {
       "scene": "inspector",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/unchanged/before/inspector.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/unchanged/after/inspector.png",
+      "before": "docs/img/flt-90/unchanged/before/inspector.png",
+      "after": "docs/img/flt-90/unchanged/after/inspector.png",
       "title": "Tap a researcher: the inspector opens",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/unchanged/compare/inspector.png",
+      "compare": "docs/img/flt-90/unchanged/compare/inspector.png",
       "changed": 0.0011643518518518517
     },
     {
       "scene": "event",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/unchanged/before/event.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/unchanged/after/event.png",
+      "before": "docs/img/flt-90/unchanged/before/event.png",
+      "after": "docs/img/flt-90/unchanged/after/event.png",
       "title": "An event card lands (the Water Discourse)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/unchanged/compare/event.png",
+      "compare": "docs/img/flt-90/unchanged/compare/event.png",
       "changed": 0.001140432098765432
     },
     {
       "scene": "phone",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/unchanged/before/phone.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/unchanged/after/phone.png",
+      "before": "docs/img/flt-90/unchanged/before/phone.png",
+      "after": "docs/img/flt-90/unchanged/after/phone.png",
       "title": "The same campus on a phone (390x844)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/unchanged/compare/phone.png",
+      "compare": "docs/img/flt-90/unchanged/compare/phone.png",
       "changed": 0.002176752946895127
     },
     {
       "scene": "flt90-phone",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/unchanged/before/flt90-phone.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/unchanged/after/flt90-phone.png",
+      "before": "docs/img/flt-90/unchanged/before/flt90-phone.png",
+      "after": "docs/img/flt-90/unchanged/after/flt90-phone.png",
       "title": "FLT-90: the same saved positions on a phone: nothing moves, FLT-87's layout stands",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-90/unchanged/compare/flt90-phone.png",
+      "compare": "docs/img/flt-90/unchanged/compare/flt90-phone.png",
       "changed": 0.00231042654028436
     }
   ],

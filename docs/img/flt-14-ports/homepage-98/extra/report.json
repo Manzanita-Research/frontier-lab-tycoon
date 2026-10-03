@@ -11,65 +11,65 @@
     {
       "scene": "home",
       "skin": "homepage-98",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/extra/after/home@homepage-98.png",
+      "after": "docs/img/flt-14-ports/homepage-98/extra/after/home@homepage-98.png",
       "title": "The lab's home page (the Livestream card answered)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/extra/compare/home@homepage-98.png",
+      "compare": "docs/img/flt-14-ports/homepage-98/extra/compare/home@homepage-98.png",
       "changed": null
     },
     {
       "scene": "home-inspector",
       "skin": "homepage-98",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/extra/after/home-inspector@homepage-98.png",
+      "after": "docs/img/flt-14-ports/homepage-98/extra/after/home-inspector@homepage-98.png",
       "title": "About Me: tap a researcher",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/extra/compare/home-inspector@homepage-98.png",
+      "compare": "docs/img/flt-14-ports/homepage-98/extra/compare/home-inspector@homepage-98.png",
       "changed": null
     },
     {
       "scene": "home-counter",
       "skin": "homepage-98",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/extra/after/home-counter@homepage-98.png",
+      "after": "docs/img/flt-14-ports/homepage-98/extra/after/home-counter@homepage-98.png",
       "title": "Where the hits come from (tap the hit counter)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/extra/compare/home-counter@homepage-98.png",
+      "compare": "docs/img/flt-14-ports/homepage-98/extra/compare/home-counter@homepage-98.png",
       "changed": null
     },
     {
       "scene": "home-ring",
       "skin": "homepage-98",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/extra/after/home-ring@homepage-98.png",
+      "after": "docs/img/flt-14-ports/homepage-98/extra/after/home-ring@homepage-98.png",
       "title": "The WebRing: a tool in hand",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/extra/compare/home-ring@homepage-98.png",
+      "compare": "docs/img/flt-14-ports/homepage-98/extra/compare/home-ring@homepage-98.png",
       "changed": null
     },
     {
       "scene": "home-egg",
       "skin": "homepage-98",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/extra/after/home-egg@homepage-98.png",
+      "after": "docs/img/flt-14-ports/homepage-98/extra/after/home-egg@homepage-98.png",
       "title": "Best viewed in Netscrape Navigator 3.0 (click the badge)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/extra/compare/home-egg@homepage-98.png",
+      "compare": "docs/img/flt-14-ports/homepage-98/extra/compare/home-egg@homepage-98.png",
       "changed": null
     },
     {
       "scene": "era",
       "skin": "homepage-98",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/extra/after/era@homepage-98.png",
+      "after": "docs/img/flt-14-ports/homepage-98/extra/after/era@homepage-98.png",
       "title": "A new era arrives as the prize popup",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/extra/compare/era@homepage-98.png",
+      "compare": "docs/img/flt-14-ports/homepage-98/extra/compare/era@homepage-98.png",
       "changed": null
     },
     {
       "scene": "phone-home",
       "skin": "homepage-98",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/extra/after/phone-home@homepage-98.png",
+      "after": "docs/img/flt-14-ports/homepage-98/extra/after/phone-home@homepage-98.png",
       "title": "The home page on a phone (390x844)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/extra/compare/phone-home@homepage-98.png",
+      "compare": "docs/img/flt-14-ports/homepage-98/extra/compare/phone-home@homepage-98.png",
       "changed": null
     },
     {
       "scene": "phone-inspector",
       "skin": "homepage-98",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/extra/after/phone-inspector@homepage-98.png",
+      "after": "docs/img/flt-14-ports/homepage-98/extra/after/phone-inspector@homepage-98.png",
       "title": "About Me, as a phone sheet",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-14-ports/homepage-98/extra/compare/phone-inspector@homepage-98.png",
+      "compare": "docs/img/flt-14-ports/homepage-98/extra/compare/phone-inspector@homepage-98.png",
       "changed": null
     }
   ],

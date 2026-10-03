@@ -14,28 +14,28 @@
     {
       "scene": "saves-welcome",
       "skin": "homepage-98",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-65/homepage-98/before/saves-welcome@homepage-98.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-65/homepage-98/after/saves-welcome@homepage-98.png",
+      "before": "docs/img/flt-65/homepage-98/before/saves-welcome@homepage-98.png",
+      "after": "docs/img/flt-65/homepage-98/after/saves-welcome@homepage-98.png",
       "title": "FLT-65: a returning player's start screen (Welcome back, from a pretend save shelf)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-65/homepage-98/compare/saves-welcome@homepage-98.png",
+      "compare": "docs/img/flt-65/homepage-98/compare/saves-welcome@homepage-98.png",
       "changed": 0.9315895061728395
     },
     {
       "scene": "saves-window",
       "skin": "homepage-98",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-65/homepage-98/before/saves-window@homepage-98.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-65/homepage-98/after/saves-window@homepage-98.png",
+      "before": "docs/img/flt-65/homepage-98/before/saves-window@homepage-98.png",
+      "after": "docs/img/flt-65/homepage-98/after/saves-window@homepage-98.png",
       "title": "FLT-65: the Save/Load window on a pretend shelf (autosave, a v1 save, two empty slots)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-65/homepage-98/compare/saves-window@homepage-98.png",
+      "compare": "docs/img/flt-65/homepage-98/compare/saves-window@homepage-98.png",
       "changed": 0.9372029320987655
     },
     {
       "scene": "saves-phone",
       "skin": "homepage-98",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-65/homepage-98/before/saves-phone@homepage-98.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-65/homepage-98/after/saves-phone@homepage-98.png",
+      "before": "docs/img/flt-65/homepage-98/before/saves-phone@homepage-98.png",
+      "after": "docs/img/flt-65/homepage-98/after/saves-phone@homepage-98.png",
       "title": "FLT-65: the Save/Load window on a phone (390x844)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-65/homepage-98/compare/saves-phone@homepage-98.png",
+      "compare": "docs/img/flt-65/homepage-98/compare/saves-phone@homepage-98.png",
       "changed": 0.9221996901203062
     }
   ],
