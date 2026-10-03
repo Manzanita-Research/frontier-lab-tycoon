@@ -4,7 +4,10 @@
 // forced late, through the driver's own code paths. Pure sim and deterministic; the game itself never uses it.
 import { TICKS_PER_DAY } from "../constants";
 import { busyLab } from "../defection/demo";
-import { openEventOf, unpaced } from "../events";
+import { openEventOf, pacerOf, unpaced } from "../events";
+import { pacerMachine } from "../machines/cardPace";
+import { step } from "../machines/run";
+import { CARD_GAP_DAYS, STORY_GAP_DAYS } from "../../content/cardPacing";
 import { talking } from "../meetings";
 import { answer } from "../testkit";
 import { applyNow, tick } from "../tick";
@@ -27,6 +30,12 @@ function until(s: GameState, done: (s: GameState) => boolean, days: number, stop
 }
 
 export function stageSlopBowl(s: GameState, moment: SlopMoment) {
+  stage(s, moment);
+  // Staged, the lab plays on paced as usual: the next card waits its turn instead of landing mid-lunch.
+  s.pacer = step(pacerMachine, pacerOf(s), { type: "PACE", gap: CARD_GAP_DAYS, storyGap: STORY_GAP_DAYS, auto: false }).stored;
+}
+
+function stage(s: GameState, moment: SlopMoment) {
   unpaced(s);
   busyLab(s);
   if (s.flags.slopbowlOff) return;

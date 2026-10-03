@@ -1,6 +1,7 @@
 // A scripted player, not a save-file fixture: every building, hire and release goes through the ordinary sim.
 import type { PlaceableKind } from "../../content/buildings";
 import { canPlace, type Command } from "../commands";
+import { enableSlopBowl } from "../slopbowl/driver";
 import { openEventOf } from "../events";
 import { outcomeOf } from "../goals";
 import { buildingAt, isPathTile, rectContains } from "../pathfind";
@@ -100,6 +101,10 @@ export function walkerOnCampus(s: GameState): boolean {
 
 export function createMidgameScenario(): GameState {
   const s = createInitialState(MIDGAME_SEED, "campus");
+  // FLT-109: the curated campus is the one FLT-86 tuned its money moments on, so its 480 days play without the late
+  // lunch (switched off before the campus opening could wake it); it wakes at the opening, for the player.
+  s.flags.slopbowlOff = 1;
+  delete s.slopbowl;
   // The curated mid-game scenario starts with every system earned (the campus opening already woke every pack).
   s.coach = { value: "skipped", context: { index: 0, elapsed: 0 } };
   s.flags.coachBuildOpened = 0;
@@ -131,7 +136,11 @@ export function createMidgameScenario(): GameState {
     if (s.day >= 420 && s.day <= 480 && ready >= 0.6 && ready <= 0.9 &&
       s.leapfrog.last?.day === s.day && s.leapfrog.last.claims.length &&
       s.buildings.every((b) => !b.broken) && !openEventOf(s) && !s.escape?.runners.length &&
-      s.news.some((n) => n.day === s.day && sotaHeadline.test(n.text))) return s;
+      s.news.some((n) => n.day === s.day && sotaHeadline.test(n.text))) {
+      delete s.flags.slopbowlOff;
+      enableSlopBowl(s);
+      return s;
+    }
   }
   throw new Error(`Mid-game scenario could not reach its opening moment: day ${s.day}, tick ${s.tick}, outcome ${outcomeOf(s)}, cash ${s.cash}, confirm ${JSON.stringify(s.guardrails?.context.pendingConfirm)}, buildings ${s.buildings.map(b => b.kind)}`);
 }
