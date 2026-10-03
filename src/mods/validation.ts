@@ -49,7 +49,7 @@ export function validateContent(content: ContentApi, vocabulary: VocabularyApi):
   });
   const cards = content.events.filter((event) => "choices" in event).map((event) => event.id);
   content.events.forEach((event, i) => {
-    if (!("choices" in event)) { validateArc(event, vocabulary, `content.events[${i}]`, cards); return; }
+    if (!("choices" in event)) { validateArc(event, vocabulary, `content.events[${i}]`, cards, buildings); return; }
     if (event.doc) validateDoc(event.doc, event.kind, `content.events[${i}].doc`);
     event.choices.forEach((choice, j) => choice.effects.forEach((effect, k) => {
     const path = `content.events[${i}].choices[${j}].effects[${k}]`;
@@ -62,7 +62,7 @@ export function validateContent(content: ContentApi, vocabulary: VocabularyApi):
   content.arcs.forEach((arc, i) => {
     if (eventIds.has(arc.id)) throw new ModError({ path: `content.arcs[${i}].id`, detail: `id "${arc.id}" is already in events` });
   });
-  content.arcs.forEach((arc, i) => validateArc(arc, vocabulary, `content.arcs[${i}]`, cards));
+  content.arcs.forEach((arc, i) => validateArc(arc, vocabulary, `content.arcs[${i}]`, cards, buildings));
   const benches = content.benchmarks.map((b) => b.id);
   content.benchmarks.forEach((b, i) => { if (b.replaces !== undefined) known(b.replaces, benches, `content.benchmarks[${i}].replaces`); });
   if (!content.benchmarks.some((b) => b.replaces === undefined)) throw new ModError({ path: "content.benchmarks", detail: "at least one benchmark must be in play from the start (no `replaces`)" });
@@ -92,7 +92,7 @@ function validateDoc(doc: EventDocData, kind: string | undefined, path: string) 
 
 /** Structural reachability, ignoring guard outcomes. This is validation only, not a second sim engine.
  * Targets use sibling paths (including a compound state's descendants). Delays and inline code have no schema. */
-export function validateArc(arc: ArcData, vocabulary: VocabularyApi, path: string, cards?: readonly string[]): void {
+export function validateArc(arc: ArcData, vocabulary: VocabularyApi, path: string, cards?: readonly string[], buildings?: readonly string[]): void {
   const nodes = new Map<string, Schema.Schema.Type<typeof ArcNode>>();
   const collect = (states: ArcData["states"], parent: string) => {
     for (const [key, node] of Object.entries(states)) {
@@ -108,7 +108,7 @@ export function validateArc(arc: ArcData, vocabulary: VocabularyApi, path: strin
     known(type, names, at);
     const kind = names === vocabulary.guards ? "guard" : "verb";
     if (!(kind === "guard" ? GUARD_NAMES : VERB_NAMES).includes(type)) return;
-    const [first] = checkCall(value as Call, kind, at);
+    const [first] = checkCall(value as Call, kind, at, undefined, buildings);
     if (first) {
       const cut = first.indexOf(": ");
       throw new ModError({ path: first.slice(0, cut), detail: first.slice(cut + 2) });

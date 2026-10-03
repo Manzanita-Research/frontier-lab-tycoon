@@ -1,0 +1,383 @@
+{
+  "apiVersion": 1,
+  "id": "maximally-effective-altruists",
+  "name": "Maximally Effective Altruists",
+  "version": "1.0.0",
+  "author": "The Utilsbury Manor Events Committee (Fluid)",
+  "description": "The Maximally Effective Altruists buy the manor next door \"for convening\". There is an invitation, a rota, a Hot Tub, and a leaked Sankey chart of who went where, weighted in expected hugs. PG-13: the lights go out and the camera looks away.",
+  "looks": {
+    "building:manor": {
+      "label": "Utilsbury Manor",
+      "recipe": [
+        {"shape": "box", "size": [2.0, 1.3, 2.2], "at": [-0.45, 0.65, 0.2], "color": "#efe3c8"},
+        {"shape": "box", "size": [2.2, 0.22, 2.4], "at": [-0.45, 1.41, 0.2], "color": "coat"},
+        {"shape": "box", "size": [1.6, 0.36, 1.8], "at": [-0.45, 1.7, 0.2], "color": "coat", "shade": -0.12},
+        {"shape": "box", "size": [0.18, 0.5, 0.18], "at": [-1.2, 1.95, -0.3], "color": "#8a5a44"},
+        {"shape": "box", "size": [0.18, 0.5, 0.18], "at": [0.3, 1.95, -0.3], "color": "#8a5a44"},
+        {"shape": "box", "size": [0.42, 0.62, 0.06], "at": [-0.45, 0.31, 1.32], "color": "#4a2f22"},
+        {"shape": "box", "size": [0.7, 0.08, 0.24], "at": [-0.45, 0.04, 1.42], "color": "#c9bca0"},
+        {"shape": "box", "size": [0.5, 0.32, 0.04], "at": [-1.05, 0.5, 1.31], "color": "window"},
+        {"shape": "box", "size": [0.4, 0.32, 0.04], "at": [0.15, 0.5, 1.31], "color": "window"},
+        {"shape": "box", "size": [1.7, 0.28, 0.04], "at": [-0.45, 1.02, 1.31], "color": "window"},
+        {"shape": "box", "size": [0.8, 0.62, 0.9], "at": [1.05, 0.31, -0.75], "color": "window"},
+        {"shape": "box", "size": [0.86, 0.06, 0.96], "at": [1.05, 0.65, -0.75], "color": "#f2f0e6"},
+        {"shape": "cylinder", "size": [0.8, 0.24, 0.8], "at": [1.05, 0.12, 0.75], "color": "#8a5a44"},
+        {"shape": "cylinder", "size": [0.66, 0.04, 0.66], "at": [1.05, 0.25, 0.75], "color": "#4fc3e8"},
+        {"shape": "cylinder", "size": [0.04, 0.5, 0.04], "at": [-0.45, 2.13, 0.2], "color": "#5a4a3a"},
+        {"shape": "box", "size": [0.3, 0.18, 0.02], "at": [-0.29, 2.28, 0.2], "color": "coat"}
+      ]
+    }
+  },
+  "audio": {
+    "cues": {
+      "mea.door": [
+        {"at": 0, "hz": 90, "endHz": 50, "duration": 0.18, "gain": 0.2, "wave": "sine"},
+        {"at": 0, "hz": 400, "duration": 0.05, "gain": 0.06, "wave": "noise"},
+        {"at": 0.2, "hz": 2200, "endHz": 1800, "duration": 0.03, "gain": 0.05, "wave": "square"},
+        {"at": 0.26, "hz": 1600, "duration": 0.02, "gain": 0.04, "wave": "square"}
+      ]
+    }
+  },
+  "content": {
+    "buildings": {
+      "add": [
+        {
+          "id": "manor",
+          "kind": "manor",
+          "name": "Utilsbury Manor",
+          "size": [3, 3],
+          "price": 0,
+          "upkeepPerDay": 0,
+          "blurb": "Bought \"for convening\". The Convening has a rota, the rota has a rota, and the Hot Tub is classed as wellbeing infrastructure.",
+          "color": "#b0466e",
+          "scenery": true,
+          "hosts": [],
+          "capacity": 0,
+          "stay": [0, 0],
+          "serves": {}
+        }
+      ]
+    },
+    "events": {
+      "add": [
+        {
+          "id": "mea-convening",
+          "stripe": "Invitation · RSVP by midnight",
+          "tone": "neutral",
+          "cooldown": 0,
+          "when": {"flag": "mea:never", "daysAgo": 0},
+          "title": "You're invited to the Convening at Utilsbury Manor.",
+          "body": "The Maximally Effective Altruists are convening this weekend and {lab} is on the list. The invitation is a spreadsheet. It has a tab called Rooming (Fluid), a tab called Hot Tub Rota, and a tab that just says Vibes.",
+          "choices": [
+            {"label": "Attend the Convening", "hint": "Vibes +60 · Hype +8 · bring a towel", "effects": []},
+            {"label": "Run the numbers first", "hint": "Vibes +20 · Hype +3 · the model says go, with error bars", "effects": []},
+            {"label": "Decline (your EV drops)", "hint": "Vibes −40 · Hype −4 · they will tell you by how much", "effects": []}
+          ]
+        },
+        {
+          "id": "mea-leak",
+          "kind": "drama",
+          "stripe": "Leaked · group chat → Bird App",
+          "tone": "bad",
+          "cooldown": 0,
+          "when": {"flag": "mea:never", "daysAgo": 0},
+          "title": "Someone leaked the Convening's Sankey chart.",
+          "body": "It went from a private channel to the Bird App in fourteen minutes. The Hot Tub band is the widest thing on it, and {lab} is on it too. Trust is down.",
+          "doc": {
+            "style": "sankey",
+            "app": "Sankey Panky 95",
+            "file": "Retreat Attendance Flow (FINAL_v7).sankey",
+            "subject": "The Convening at Utilsbury Manor: who went where, weighted in expected hugs",
+            "units": "expected hugs",
+            "columns": ["Who", "Breakout session", "Ended up in"],
+            "nodes": [
+              {"id": "clementine", "label": "Clementine", "sub": "Moral Weights Lead"},
+              {"id": "barnaby", "label": "Barnaby", "sub": "Head of Longtermism"},
+              {"id": "ottoline", "label": "Ottoline", "sub": "Chief of Staff (Vibes)"},
+              {"id": "rafferty", "label": "Rafferty", "sub": "Forecasting Lead"},
+              {"id": "persephone", "label": "Persephone", "sub": "Expected Value Officer"},
+              {"id": "dashiell", "label": "Dashiell", "sub": "Treasurer (Interim)"},
+              {"id": "lab", "label": "{lab}", "sub": "Delegation of two"},
+              {"id": "circle", "label": "Moral Circle Expansion", "sub": "facilitated"},
+              {"id": "speed", "label": "Longtermist Speed-Dating", "sub": "500-year horizon"},
+              {"id": "candour", "label": "Radical Candour Circle", "sub": "shoes off"},
+              {"id": "priors", "label": "Updating Our Priors", "sub": "bring a prior"},
+              {"id": "open", "label": "Open Questions", "sub": "very open"},
+              {"id": "library", "label": "The Library", "sub": "quiet coach"},
+              {"id": "orangery", "label": "The Orangery", "sub": "humid"},
+              {"id": "hottub", "label": "The Hot Tub", "sub": "capacity 6 (revised)"},
+              {"id": "convening", "label": "The Convening Room", "sub": "the original plan"},
+              {"id": "kitchen", "label": "The Kitchen", "sub": "Debate Ongoing"},
+              {"id": "left", "label": "Left Early", "sub": "Prior Commitment"}
+            ],
+            "flows": [
+              {"from": "clementine", "to": "circle", "value": 3},
+              {"from": "clementine", "to": "speed", "value": 2},
+              {"from": "barnaby", "to": "speed", "value": 4},
+              {"from": "barnaby", "to": "priors", "value": 1},
+              {"from": "ottoline", "to": "candour", "value": 3},
+              {"from": "ottoline", "to": "circle", "value": 2},
+              {"from": "rafferty", "to": "priors", "value": 3},
+              {"from": "rafferty", "to": "open", "value": 1},
+              {"from": "persephone", "to": "candour", "value": 2},
+              {"from": "persephone", "to": "speed", "value": 2},
+              {"from": "dashiell", "to": "open", "value": 3},
+              {"from": "lab", "to": "open", "value": 1},
+              {"from": "lab", "to": "circle", "value": 1},
+              {"from": "circle", "to": "library", "value": 2},
+              {"from": "circle", "to": "hottub", "value": 4},
+              {"from": "speed", "to": "orangery", "value": 5},
+              {"from": "speed", "to": "hottub", "value": 3},
+              {"from": "candour", "to": "hottub", "value": 3},
+              {"from": "candour", "to": "convening", "value": 2},
+              {"from": "priors", "to": "convening", "value": 3},
+              {"from": "priors", "to": "kitchen", "value": 1},
+              {"from": "open", "to": "kitchen", "value": 3},
+              {"from": "open", "to": "left", "value": 2}
+            ],
+            "lines": [
+              "Band width is in expected hugs. One expected hug is about 0.7 utils per hour (Appendix Q).",
+              "The Hot Tub reached capacity at 11:04pm. Overflow went to the Orangery, per the rota.",
+              "QALYs (romantic) are estimated, not observed. Error bars on request, not on this slide.",
+              "Counterfactual impact of the Kitchen: none. They were going to argue about shrimp anyway.",
+              "Ottoline's Vibes figures are self-reported. Persephone forecast all of this at 62%."
+            ],
+            "sign": "Clementine, Moral Weights Lead (please do not forward)"
+          },
+          "choices": [
+            {"label": "It's a seating chart", "hint": "Trust −4 · Hype +6 · nobody believes you, everyone shares it", "effects": []},
+            {"label": "Publish the methodology", "hint": "Trust +3 · Hype +10 · Appendix Q goes viral", "effects": []},
+            {"label": "Commission a Sankey of the Sankey", "hint": "Vibes +30 · Trust −2 · the analysts are thrilled", "effects": []}
+          ]
+        },
+        {
+          "id": "mea-statement",
+          "kind": "drama",
+          "stripe": "Comms Desk · Crisis",
+          "tone": "bad",
+          "cooldown": 0,
+          "when": {"flag": "mea:never", "daysAgo": 0},
+          "title": "The Comms Desk has drafted a statement.",
+          "body": "Fourteen drafts in. Draft fourteen is mostly footnotes. The Comms Desk would like to send it and log off.",
+          "doc": {
+            "style": "email",
+            "file": "statement_DRAFT_14.eml",
+            "subject": "RE: RE: RE: the Sankey (statement, FINAL)",
+            "from": "Comms Desk",
+            "to": "Everyone at {lab}",
+            "lines": [
+              "Proposed statement:",
+              "\"{lab} supports its staff's right to convene on weekends. The chart is not to scale.\"",
+              "\"No compute was harmed. The sock on the Cluster door has been returned to its owner.\"",
+              "Legal asks that we stop calling it the Convening. Legal also asks who made the chart, and whether they could make one for Legal."
+            ],
+            "sign": "Comms Desk (logging off at six)"
+          },
+          "choices": [
+            {"label": "Send it", "hint": "Trust +4 · Hype −2 · it reads like a statement", "effects": []},
+            {"label": "Add a footnote", "hint": "Trust +2 · Hype +3 · the footnote has a footnote", "effects": []},
+            {"label": "Let Comms log off", "hint": "Vibes +40 · Trust −3 · the statement goes out as a Sankey", "effects": []}
+          ]
+        }
+      ]
+    },
+    "arcs": {
+      "add": [
+        {
+          "id": "mea-story",
+          "requires": ["events"],
+          "initial": "waiting",
+          "states": {
+            "waiting": {
+              "on": {"DAY": {"target": "arrival", "guard": {"type": "after", "params": {"days": 3}}}}
+            },
+            "arrival": {
+              "entry": [
+                {"type": "building.ensure", "params": {"kind": "manor", "text": "The Maximally Effective Altruists have bought the manor next door. They say it's for convening."}},
+                {"type": "news", "params": {"text": "Maximally Effective Altruists buy Utilsbury Manor \"for convening\"; purchase justified by a 41-tab spreadsheet", "tone": "joke"}},
+                {"type": "camera.focus", "params": {"on": "manor", "zoom": 1.6, "hold": 3}}
+              ],
+              "on": {"DAY": {"target": "invited", "guard": {"type": "after", "params": {"days": 2}}}}
+            },
+            "invited": {
+              "entry": [
+                {"type": "building.ensure", "params": {"kind": "manor"}},
+                {"type": "card", "params": {"id": "mea-convening"}},
+                {"type": "sound.cue", "params": {"cue": "card"}}
+              ],
+              "on": {
+                "CHOSE": [
+                  {
+                    "target": "packing",
+                    "guard": {"type": "choice", "params": {"is": "0", "card": "mea-convening"}},
+                    "actions": [
+                      {"type": "vibes.delta", "params": {"amount": 60}},
+                      {"type": "hype.delta", "params": {"amount": 8}},
+                      {"type": "toast", "params": {"text": "Your delegation packs for the Convening. The packing list is nine pages; page seven is just towels.", "tone": "joke"}}
+                    ]
+                  },
+                  {
+                    "target": "packing",
+                    "guard": {"type": "choice", "params": {"is": "1", "card": "mea-convening"}},
+                    "actions": [
+                      {"type": "vibes.delta", "params": {"amount": 20}},
+                      {"type": "hype.delta", "params": {"amount": 3}},
+                      {"type": "toast", "params": {"text": "You ran the numbers. The model says Attend, with an expected value of \"yes\". Persephone forecast that you'd ask.", "tone": "joke"}}
+                    ]
+                  },
+                  {
+                    "target": "packing",
+                    "guard": {"type": "choice", "params": {"is": "2", "card": "mea-convening"}},
+                    "actions": [
+                      {"type": "vibes.delta", "params": {"amount": -40}},
+                      {"type": "hype.delta", "params": {"amount": -4}},
+                      {"type": "toast", "params": {"text": "Declined. Clementine has updated your EV downward by 0.3 utils, and says it with love.", "tone": "joke"}}
+                    ]
+                  }
+                ]
+              }
+            },
+            "packing": {
+              "on": {"DAY": {"target": "convening"}}
+            },
+            "convening": {
+              "entry": [
+                {"type": "building.ensure", "params": {"kind": "manor"}},
+                {"type": "building.lights", "params": {"building": "manor", "off": true, "hours": 10}},
+                {"type": "camera.beat", "params": {"kind": "fade", "on": "manor", "kicker": "Later that evening, at Utilsbury Manor", "caption": "The lights go off at 11:04pm, exactly as scheduled.", "sub": "Breakout sessions are self-organising. Attendance is tracked in expected hugs.", "zoom": 1.5, "hold": 5}},
+                {"type": "sound.cue", "params": {"cue": "mea.door"}},
+                {"type": "toast", "params": {"text": "A door closes at Utilsbury Manor. The rota marks the room \"in session\".", "tone": "joke"}}
+              ],
+              "on": {"DAY": {"target": "sock", "guard": {"type": "after", "params": {"days": 1}}}}
+            },
+            "sock": {
+              "entry": [
+                {"type": "building.prop", "params": {"building": "cluster", "prop": "sock", "hours": 24}},
+                {"type": "camera.beat", "params": {"kind": "fade", "on": "cluster", "kicker": "Meanwhile, back at {lab}", "caption": "Someone has hung a sock on the Cluster door.", "sub": "Training continues. The GPUs have seen worse.", "zoom": 1.6, "hold": 5}},
+                {"type": "toast", "params": {"text": "The Cluster is \"in a meeting\". Please knock, then update the spreadsheet.", "tone": "joke"}}
+              ],
+              "on": {"DAY": {"target": "leaked", "guard": {"type": "after", "params": {"days": 1}}}}
+            },
+            "leaked": {
+              "entry": [
+                {"type": "building.ensure", "params": {"kind": "manor"}},
+                {"type": "card", "params": {"id": "mea-leak"}},
+                {"type": "trust.delta", "params": {"amount": -8}},
+                {"type": "news", "params": {"text": "LEAKED: a Sankey chart of the Utilsbury Convening, in expected hugs; analysts call the Hot Tub band \"material\"", "tone": "bad"}},
+                {"type": "sound.cue", "params": {"cue": "card"}}
+              ],
+              "on": {
+                "CHOSE": [
+                  {
+                    "target": "pileon",
+                    "guard": {"type": "choice", "params": {"is": "0", "card": "mea-leak"}},
+                    "actions": [
+                      {"type": "trust.delta", "params": {"amount": -4}},
+                      {"type": "hype.delta", "params": {"amount": 6}},
+                      {"type": "news", "params": {"text": "{lab} says the leaked Sankey is \"a seating chart\"; seating chart has a Hot Tub", "tone": "joke"}}
+                    ]
+                  },
+                  {
+                    "target": "pileon",
+                    "guard": {"type": "choice", "params": {"is": "1", "card": "mea-leak"}},
+                    "actions": [
+                      {"type": "trust.delta", "params": {"amount": 3}},
+                      {"type": "hype.delta", "params": {"amount": 10}},
+                      {"type": "news", "params": {"text": "{lab} publishes the Sankey's methodology; Appendix Q, \"What Counts As A Hug\", tops the charts", "tone": "joke"}}
+                    ]
+                  },
+                  {
+                    "target": "pileon",
+                    "guard": {"type": "choice", "params": {"is": "2", "card": "mea-leak"}},
+                    "actions": [
+                      {"type": "vibes.delta", "params": {"amount": 30}},
+                      {"type": "trust.delta", "params": {"amount": -2}},
+                      {"type": "news", "params": {"text": "{lab} commissions a Sankey of the Sankey; the widest band is \"people sharing the Sankey\"", "tone": "joke"}}
+                    ]
+                  }
+                ]
+              }
+            },
+            "pileon": {
+              "entry": [
+                {"type": "birdapp.post", "params": {"archetype": "thread", "outcome": "controversy", "text": "1/ I have read the leaked Sankey so you don't have to. 2/ You should read the Sankey."}},
+                {"type": "birdapp.post", "params": {"archetype": "doomer", "outcome": "ratioed", "text": "The real alignment problem was the rooming spreadsheet all along."}},
+                {"type": "birdapp.post", "params": {"archetype": "hype", "outcome": "banger", "text": "we were in the Library the whole time. the Library was amazing. huge if true"}},
+                {"type": "birdapp.rival", "params": {"role": "ceo", "outcome": "banger", "text": "We also convene. In a conference room. With the lights on."}},
+                {"type": "toast", "params": {"text": "The Sankey is on the Bird App. Your posters have opinions about the Hot Tub band.", "tone": "bad"}}
+              ],
+              "on": {"DAY": {"target": "crisis", "guard": {"type": "after", "params": {"days": 1}}}}
+            },
+            "crisis": {
+              "entry": [
+                {"type": "card", "params": {"id": "mea-statement"}},
+                {"type": "news", "params": {"text": "Senate subcommittee asks {lab} to define \"convening\" under oath; {lab} requests a whiteboard", "tone": "neutral"}},
+                {"type": "sound.cue", "params": {"cue": "card"}}
+              ],
+              "on": {
+                "CHOSE": [
+                  {
+                    "target": "done",
+                    "guard": {"type": "choice", "params": {"is": "0", "card": "mea-statement"}},
+                    "actions": [
+                      {"type": "trust.delta", "params": {"amount": 4}},
+                      {"type": "hype.delta", "params": {"amount": -2}},
+                      {"type": "news", "params": {"text": "{lab} statement on the Convening is \"a statement\", say people who read statements", "tone": "neutral"}}
+                    ]
+                  },
+                  {
+                    "target": "done",
+                    "guard": {"type": "choice", "params": {"is": "1", "card": "mea-statement"}},
+                    "actions": [
+                      {"type": "trust.delta", "params": {"amount": 2}},
+                      {"type": "hype.delta", "params": {"amount": 3}},
+                      {"type": "news", "params": {"text": "{lab} statement footnote has a footnote; the footnote's footnote gets its own Sankey", "tone": "joke"}}
+                    ]
+                  },
+                  {
+                    "target": "done",
+                    "guard": {"type": "choice", "params": {"is": "2", "card": "mea-statement"}},
+                    "actions": [
+                      {"type": "vibes.delta", "params": {"amount": 40}},
+                      {"type": "trust.delta", "params": {"amount": -3}},
+                      {"type": "news", "params": {"text": "{lab} Comms Desk logs off; statement goes out as a Sankey with one band labelled \"no comment\"", "tone": "joke"}}
+                    ]
+                  }
+                ]
+              }
+            },
+            "done": {
+              "type": "final",
+              "entry": [
+                {"type": "toast", "params": {"text": "The next Convening is pencilled in. The rota is already on version three.", "tone": "joke"}}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "headlines": {
+      "add": [
+        {"id": "mea-head-1", "text": "Maximally Effective Altruists announce a Convening; the schedule has a column for vibes (projected)", "tone": "joke"},
+        {"id": "mea-head-2", "text": "Utilsbury Manor files its Hot Tub as \"wellbeing infrastructure\"; filing cleared review", "tone": "joke"},
+        {"id": "mea-head-3", "text": "Study: longtermist couples plan dates 500 years ahead, still late for dinner", "tone": "joke"},
+        {"id": "mea-head-4", "text": "Polycule org chart enters its fourth revision; now has a dotted line to the cat", "tone": "joke"},
+        {"id": "mea-head-5", "text": "Local utilitarian proves the Hot Tub is net positive; the proof is mostly bubbles", "tone": "joke"},
+        {"id": "mea-head-6", "text": "Convening attendees asked to rank their priors, out loud, in the Orangery", "tone": "joke"}
+      ]
+    },
+    "thoughts": {
+      "add": [
+        {"id": "mea-th-1", "kind": "researcher", "when": "always", "text": "I ran the EV on lunch. Lunch wins, but only in expectation."},
+        {"id": "mea-th-2", "kind": "researcher", "when": "always", "text": "We're longtermist. We'll see where things are in 500 years."},
+        {"id": "mea-th-3", "kind": "researcher", "when": "always", "text": "Our relationship has a theory of change now. It's mostly a Gantt chart."},
+        {"id": "mea-th-4", "kind": "researcher", "when": "always", "text": "I put the Hot Tub in the budget as wellbeing infrastructure. It cleared review."},
+        {"id": "mea-th-5", "kind": "researcher", "when": "always", "text": "Is the Convening this weekend? I've pre-registered my hugs."},
+        {"id": "mea-th-6", "kind": "researcher", "when": "always", "text": "Utilsbury Manor has a rota for the rota."},
+        {"id": "mea-th-7", "kind": "researcher", "when": "always", "text": "I tried to schedule a spontaneous moment. Next free slot is Q3."},
+        {"id": "mea-th-8", "kind": "researcher", "when": "night", "text": "The lights at the manor just went out. Right on schedule."},
+        {"id": "mea-th-9", "kind": "visitor", "when": "always", "text": "I came for the tour and got invited to a Convening. Declining, with error bars."}
+      ]
+    }
+  }
+}

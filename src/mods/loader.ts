@@ -110,7 +110,8 @@ export function modToLayer(input: ModManifest) {
       return Looks.of({ looks });
     }, catch: asModError });
   }));
-  return Layer.mergeAll(content, assets, skin, audio, looks);
+  // Looks read this mod's content (a building look is for a building the mod may add), so they sit on top of it.
+  return Layer.mergeAll(content, assets, skin, audio, looks.pipe(Layer.provide(content)));
 }
 
 const HEX = /^#[0-9a-f]{3}(?:[0-9a-f]{3})?$/i;

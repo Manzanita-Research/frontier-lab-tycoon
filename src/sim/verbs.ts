@@ -301,8 +301,13 @@ interface VerbDef {
   doc: string;
   spec: Spec;
   run: (env: VerbEnv, p: Params) => void;
-  verify?: (p: Params) => string | null;
+  verify?: (p: Params, ctx: VerifyCtx) => string | null;
 }
+/** What a verb's check may ask about the content it will run with: a mod's own buildings count before they are installed. */
+interface VerifyCtx {
+  building: (kind: string) => boolean;
+}
+const LIVE: VerifyCtx = { building: (kind) => kind in defs().buildings };
 
 const TONES = ["good", "bad", "neutral", "joke"] as const;
 const toneOf = (v: Json | undefined): Tone => ((TONES as readonly Json[]).includes(v as Json) ? (v as Tone) : "neutral");
@@ -550,7 +555,7 @@ export const VERBS: Record<string, VerbDef> = {
   "building.ensure": {
     doc: "Make sure a building of `kind` exists: if the lab has none, one arrives free beside the gate (upkeep still applies).",
     spec: { kind: "string", text: "string?", ...TAG_SPEC },
-    verify: (p) => ((p.kind as string) in defs().buildings ? verifyTag(p) : `unknown building "${p.kind as string}"`),
+    verify: (p, ctx) => (ctx.building(p.kind as string) ? verifyTag(p) : `unknown building "${p.kind as string}"`),
     run: (env, p) => {
       const { state, rng } = env;
       const kind = p.kind as BuildingKind;
@@ -700,7 +705,7 @@ export const VERBS: Record<string, VerbDef> = {
   "people.meet": {
     doc: "A visitor with `role` walks in from the gate to meet the beat's first person by the first `at` building (a kind) and they talk for `hours`, in view. `lines` is what they say, visitor first, alternating.",
     spec: { role: "string", at: "string", hours: "number", lines: "strings?" },
-    verify: (p) => ((p.at as string) in defs().buildings ? null : `unknown building "${p.at as string}"`),
+    verify: (p, ctx) => (ctx.building(p.at as string) ? null : `unknown building "${p.at as string}"`),
     run: (env, p) => {
       const host = env.people?.[0];
       if (host === undefined) return;
@@ -841,7 +846,8 @@ export function runVerb(env: VerbEnv, call: Call) {
 /** Errors for one call, each starting with the JSON path. Empty when it is fine. */
 const NO_LOCAL: ReadonlySet<string> = new Set();
 /** `local` names stats a mechanic measures itself and passes in its beat (the Circus charts' session tallies). */
-export function checkCall(call: Call, kind: "verb" | "guard", path: string, local: ReadonlySet<string> = NO_LOCAL): string[] {
+/** `buildings`: the building kinds the call will run with, when that is not the live content (a mod being checked). */
+export function checkCall(call: Call, kind: "verb" | "guard", path: string, local: ReadonlySet<string> = NO_LOCAL, buildings?: readonly string[]): string[] {
   if (!isCall(call as Json)) return [`${path}: expected a name or { type, params }`];
   const { type, params } = normalize(call);
   const table = kind === "verb" ? VERBS : GUARDS;
@@ -852,7 +858,7 @@ export function checkCall(call: Call, kind: "verb" | "guard", path: string, loca
   }
   const errors = checkParams(def.spec, params, path);
   if (errors.length === 0) {
-    const why = def.verify?.(params);
+    const why = def.verify?.(params, buildings ? { building: (k) => buildings.includes(k) } : LIVE);
     if (why) errors.push(`${path}: ${why}`);
   }
   if (kind === "guard") {
