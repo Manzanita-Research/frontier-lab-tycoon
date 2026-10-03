@@ -36,14 +36,20 @@ const RETAIL = [
 ];
 // Our parodies that contain (or sit next to) a real name. They are removed before the scan.
 const ALLOWED = ["Outlook Excess", "WordSad", "WordPerfectly", "NoteBad"];
-// FLT-102: real people's accounts a mod's style might be named after. Matched anywhere, any case.
-const REAL_ACCOUNTS = ["berduck", "deepfates"];
-// PENDING JEM (FLT-102): duck mode's name is a real account's. It lives in ONE constant (and the JSON bundled from it)
-// until Jem decides: keep it, maybe with a credit line, or rename it to a parody such as "rubba duck mode".
-const PENDING: Readonly<Record<string, readonly string[]>> = {
-  "../../mods/examples/duck-mode/name.ts": ['export const DUCK = { name: "Berduck Mode", voice: "berduck" } as const;'],
-  "../../mods/examples/duck-mode/mod.json": ['"name": "Berduck Mode"', '"name": "berduck"'],
+// FLT-102: real accounts this mod must never name, stored hashed (sha256 of the lowercase name) so the repo doesn't spell
+// them either. Every word and @handle in the scanned files is hashed and compared. node:crypto through a dynamic import,
+// as props.test does: the app's tsconfig carries no node types.
+const REAL_ACCOUNTS = new Set([
+  "e5bcf591d14985ab567e2ff9030483da3b67e79267baf6d3b3cb2a7a876b514e",
+  "dafc4ca18e48f65c3b7fa06542006090fadbd8509c91ca7a0c692ad76407e039",
+  "29304fbb7e85ed9a19af2ce09b41301889f8994897e8393fab99420c788b8f9c",
+]);
+const { createHash } = (await import(/* @vite-ignore */ ("node:crypto" as string))) as {
+  createHash: (alg: "sha256") => { update: (s: string) => { digest: (enc: "hex") => string } };
 };
+const sha256 = (s: string) => createHash("sha256").update(s).digest("hex");
+/** Every word in `text` that hashes to a real account's name (a handle's @ and _ split it into words). */
+const realAccounts = (text: string) => [...new Set(text.toLowerCase().match(/[a-z0-9]+/g) ?? [])].filter((w) => REAL_ACCOUNTS.has(sha256(w)));
 
 const sources = import.meta.glob<string>(
   ["./**/*.{ts,json}", "../ui/**/*.{ts,tsx,json,css}", "../skins/**/*.{ts,tsx,json,css}", "../intro/**/*.{ts,tsx,json,css}", "../account/**/*.{ts,tsx,css}", "../../mods/base-*/**/*.json", "../../mods/examples/**/*.{ts,json}", "!**/*.test.{ts,tsx}"],
@@ -84,12 +90,10 @@ describe("parody names only", () => {
     // assets/art.jobs.json holds every word printed in the generated art (FLT-70), so the pictures are scanned too.
     for (const f of ["content.ts", "manual.ts", "art.ts", "Intro.tsx", "stage/Kiosk.tsx", "stage/Props.tsx", "assets/art.jobs.json", "assets/props.jobs.json"]) expect(scanned).toContain(`../intro/${f}`);
   });
-  it("names no real person's account, outside the one constant waiting on Jem (FLT-102)", () => {
+  it("names no real person's account (FLT-102)", () => {
     expect(scanned).toContain("../../mods/examples/duck-mode/mod.ts");
-    const found = scanned.flatMap((f) => {
-      const text = (PENDING[f] ?? []).reduce((t, ok) => t.split(ok).join(""), sources[f]!).toLowerCase();
-      return REAL_ACCOUNTS.filter((name) => text.includes(name)).map((name) => `${f}: ${name}`);
-    });
+    expect(realAccounts("duck mode, @duck_mode, rubber ducks")).toEqual([]);
+    const found = scanned.flatMap((f) => realAccounts(sources[f]!).map((w) => `${f}: ${w}`));
     expect(found).toEqual([]);
   });
   it("names no real product, app, site or lab anywhere the player can read", () => {

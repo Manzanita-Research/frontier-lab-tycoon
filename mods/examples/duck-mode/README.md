@@ -21,15 +21,13 @@ the goldens and the replays are untouched.
 - A sea of ducks: `/?scenario=midgame&seed=48&skin=frontier-95&focus=10,17&zoom=85&mod=/mods/examples/duck-mode/mod.json`
 - Full duck: `/?scenario=midgame&seed=48&skin=frontier-95&mod=/mods/examples/duck-mode/mod.json&voice=full`
 
-## The name waits on Jem
+## The name
 
-The mode's display name and its voice's name live in ONE constant, `DUCK` in [`name.ts`](name.ts). The mod, its bundled
-`mod.json` and the Add/Remove Mods entry all read it, and `src/content/parody.test.ts` allows it there and nowhere else,
-marked PENDING JEM. The name is a real account's, so the question for Jem is: keep it (maybe with a credit line), or switch
-to a parody name such as "rubba duck mode"? And does Jem want to give the account's owner a heads-up personally? No one
-has been contacted. To rename it: edit `name.ts`, re-bundle, and drop the PENDING entry.
+In the game it is **wubba ducki3**: the mod's title, its voice, and its entry and voice picker in Add/Remove Mods. The
+name lives in ONE constant, `DUCK` in [`name.ts`](name.ts), and the mod, its bundled `mod.json` and the Add/Remove Mods
+entry all read it. To rename it, edit `name.ts` and re-bundle.
 
-Every duck line here is original. Nothing was copied from the real account or looked up on it.
+Every duck line here is original.
 
 ## How the voice works
 

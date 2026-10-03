@@ -1,7 +1,7 @@
 {
   "apiVersion": 1,
   "id": "duck-mode",
-  "name": "Berduck Mode",
+  "name": "wubba ducki3",
   "version": "1.0.0",
   "author": "Frontier Lab Tycoon",
   "description": "Everyone in the lab is a rubber duck: researchers, agents, visitors, staff, auditors and the picket line. The thoughts, posts, headlines and papers come out in duck. The buttons and numbers stay readable, unless you pick “Everything, menus too” in Add/Remove Mods (or add ?voice=full).",
@@ -3137,7 +3137,7 @@
     }
   },
   "voice": {
-    "name": "berduck",
+    "name": "wubba ducki3",
     "lowercase": true,
     "words": {
       "the": "da",

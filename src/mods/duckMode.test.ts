@@ -20,6 +20,7 @@ describe("duck mode", () => {
   });
 
   it("keeps its name in one constant (name.ts)", () => {
+    expect(DUCK.name).toBe("wubba ducki3");
     expect(source.name).toBe(DUCK.name);
     expect(source.voice?.name).toBe(DUCK.voice);
     // Nowhere else: rename the constant and the whole mod follows.
