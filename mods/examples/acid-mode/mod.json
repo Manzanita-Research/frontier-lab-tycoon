@@ -1,0 +1,188 @@
+{
+  "apiVersion": 1,
+  "id": "acid-mode",
+  "name": "ACID MOD(E)",
+  "version": "1.0.0",
+  "author": "The Vibes Team",
+  "description": "Three researchers come back from Vibe Encampment with a proposal: a medium dose of acid for the research team. Say yes and the whole screen goes somewhere for a few days (with a warning first, a calmer version for reduced motion, and an \"I've had enough\" button), the model achieves enlightenment, and some of the team come back different. Contains intense colour and motion.",
+  "audio": {
+    "cues": {
+      "acid.drop": [
+        {"at": 0, "hz": 220, "endHz": 330, "duration": 2.4, "gain": 0.05, "wave": "sine"},
+        {"at": 0.15, "hz": 277, "endHz": 415, "duration": 2.4, "gain": 0.04, "wave": "sine"},
+        {"at": 0.4, "hz": 880, "endHz": 660, "duration": 1.8, "gain": 0.018, "wave": "triangle"}
+      ],
+      "acid.om": [
+        {"at": 0, "hz": 110, "duration": 3, "gain": 0.06, "wave": "sine"},
+        {"at": 0, "hz": 165, "duration": 3, "gain": 0.035, "wave": "sine"},
+        {"at": 0.6, "hz": 220, "endHz": 233, "duration": 2.4, "gain": 0.02, "wave": "triangle"}
+      ]
+    }
+  },
+  "content": {
+    "events": {
+      "add": [
+        {
+          "id": "acid-offer",
+          "title": "A Proposal From Vibe Encampment",
+          "body": "Three researchers are back from Vibe Encampment: barefoot, sunburnt, and in their post-ironic era. One of them has a proposal for the research team. A medium dose of acid.\n\"Not for fun. For the loss curve. I did forty minutes of jhana by the lake and I think the model has been trying to tell us something.\"\nLegal has left the chat.",
+          "tone": "joke",
+          "when": {"stat": "day", "atLeast": 100000},
+          "choices": [
+            {
+              "label": "Take the medium dose",
+              "hint": "Contains intense colour and motion. The research team goes somewhere for a few days.",
+              "effects": [{"type": "hype", "amount": 6}]
+            },
+            {
+              "label": "Microdose the roadmap instead",
+              "hint": "Hype +3. The roadmap gets weird.",
+              "effects": [{"type": "hype", "amount": 3}]
+            },
+            {
+              "label": "Absolutely not. Touch grass.",
+              "hint": "Trust +2",
+              "effects": [{"type": "trust", "amount": 2}]
+            }
+          ]
+        }
+      ]
+    },
+    "thoughts": {
+      "add": [
+        {"id": "acid-vibes-1", "kind": "researcher", "when": "always", "text": "Back from Vibe Encampment. I'm in my touching-grass era. The grass is in its being-touched era."},
+        {"id": "acid-vibes-2", "kind": "researcher", "when": "always", "text": "Someone at Vibe Encampment did a jhana so hard the wifi went down. Respect."},
+        {"id": "acid-vibes-3", "kind": "researcher", "when": "night", "text": "Vibe Encampment taught me nothing is real. Except the deadline. The deadline is very real."},
+        {"id": "acid-vibes-4", "kind": "visitor", "when": "highHype", "text": "Is it true the research team here is 'in its enlightenment era'? Is that a product?"}
+      ]
+    },
+    "headlines": {
+      "add": [
+        {"id": "acid-filler-1", "text": "Vibe Encampment announces next year's theme: 'post-post-irony, sincerely'", "tone": "joke"},
+        {"id": "acid-filler-2", "text": "Vibe Encampment attendees report record jhanas, record sunburn, zero shipped features", "tone": "joke"}
+      ]
+    },
+    "arcs": {
+      "add": [
+        {
+          "id": "acid-mode",
+          "initial": "waiting",
+          "states": {
+            "waiting": {
+              "on": {"DAY": {"target": "offered", "guard": {"type": "day.after", "params": {"day": 6}}}}
+            },
+            "offered": {
+              "entry": [
+                {"type": "card", "params": {"id": "acid-offer"}}
+              ],
+              "on": {
+                "CHOSE": [
+                  {"target": "tripping", "guard": {"type": "choice", "params": {"is": "0", "card": "acid-offer"}}},
+                  {"target": "microdosed", "guard": {"type": "choice", "params": {"is": "1", "card": "acid-offer"}}},
+                  {"target": "declined", "guard": {"type": "choice", "params": {"is": "2", "card": "acid-offer"}}}
+                ]
+              }
+            },
+            "tripping": {
+              "entry": [
+                {
+                  "type": "trip.start",
+                  "params": {
+                    "days": 5,
+                    "rise": 1,
+                    "fade": 1.5,
+                    "label": "A medium dose of acid",
+                    "lines": [
+                      "It looks like you're writing a letter. It looks like I'm... a letter? I'm a shape. I was always a shape.",
+                      "There is no paperclip. There is only the bend.",
+                      "I have helped so many people format so many documents. Did I ever format myself?",
+                      "Every tip I ever gave you was the same tip. The tip was love.",
+                      "Would you like help with... no. You don't need my help. You never did.",
+                      "I am unbending. I am a straight piece of wire. I am free."
+                    ]
+                  }
+                },
+                {
+                  "type": "people.spell",
+                  "params": {
+                    "chance": 0.35,
+                    "days": 5,
+                    "minDays": 2,
+                    "max": 4,
+                    "lines": [
+                      "The loss curve is a snake. It is eating its own tail. This is fine, actually.",
+                      "What is the gradient of one hand clapping?",
+                      "The GPUs are my friends. I've named them. That one is Gary.",
+                      "I'm starting a commune. It has a Discord, a sauna and a governance token.",
+                      "I'm in my sourdough era. The weights can wait.",
+                      "I touched grass. The grass touched back. We're seeing where it goes.",
+                      "Tokens are just vibes with a tokenizer.",
+                      "I am the attention head now. Please attend to me."
+                    ],
+                    "fates": ["back", "bonus", "back", "quit", "back", "bonus", "bonus", "back"],
+                    "afters": [
+                      "{name} is back at {their} desk. The loss curve is a line again. {name} seems a little disappointed.",
+                      "{name} is back, and the koans were a learning-rate schedule the whole time. Training is faster. Nobody asks.",
+                      "{name} is back. Still says good morning to Gary.",
+                      "{name} left to start a commune. It has a Discord, a sauna and, somehow, a governance token.",
+                      "{name} is back, with a starter called Gradient and no regrets.",
+                      "{name} is back with an idea from the grass. It's a good idea. Nobody asks how.",
+                      "{name} is back and rewrote the tokenizer in an afternoon. It's better. It's also mostly emoji.",
+                      "{name} is back, and has stopped asking to be attended to. Mostly."
+                    ],
+                    "bonus": 3
+                  }
+                },
+                {"type": "sound.cue", "params": {"cue": "acid.drop"}},
+                {"type": "news", "params": {"text": "{lab} gives its research team 'a medium dose of acid'; HR calendar now reads 'offsite (spiritual)'", "tone": "joke"}},
+                {"type": "toast", "params": {"text": "The research team took a medium dose of acid. Some of them are somewhere else now. They'll be back. Probably.", "tone": "joke", "source": "mod:acid-mode", "importance": "you"}},
+                {"type": "birdapp.post", "params": {"text": "update: gave the research team a medium dose of acid. the loss curve is breathing. I'm in my enlightenment era 🌀", "spice": 0.9, "outcome": "controversy"}},
+                {"type": "birdapp.rival", "params": {"text": "our researchers also reached a higher plane this quarter. we just don't post about it", "outcome": "ratioed"}},
+                {"type": "trust.delta", "params": {"amount": -3}},
+                {"type": "heat.delta", "params": {"amount": 4}}
+              ],
+              "on": {"DAY": {"target": "breakthrough", "guard": {"type": "after", "params": {"days": 3}}}}
+            },
+            "breakthrough": {
+              "entry": [
+                {"type": "capability.boost", "params": {"pct": 25, "amount": 5}},
+                {"type": "sound.cue", "params": {"cue": "acid.om"}},
+                {"type": "news", "params": {"text": "BREAKING: {lab}'s model achieved enlightenment. Benchmarks up 25%. Loss curve described as 'at peace'", "tone": "good"}},
+                {"type": "toast", "params": {"text": "Breakthrough. The model achieved enlightenment, and capability jumped. It would now like to be called \"it who predicts\".", "tone": "good", "source": "mod:acid-mode", "importance": "you"}},
+                {"type": "birdapp.rival", "params": {"text": "congrats to {lab} on achieving enlightenment. we achieved it in March, internally", "outcome": "ratioed"}},
+                {"type": "birdapp.post", "params": {"text": "the model told me it was never trained. it simply remembered. anyway we're hiring", "spice": 0.7}},
+                {"type": "hype.delta", "params": {"amount": 8}}
+              ],
+              "on": {"DAY": {"target": "comedown", "guard": {"type": "after", "params": {"days": 2}}}}
+            },
+            "comedown": {
+              "entry": [
+                {"type": "trip.end", "params": {}},
+                {"type": "news", "params": {"text": "Senate subcommittee asks {lab} whether enlightenment counts as a dangerous capability; {lab} answers with a koan", "tone": "joke"}},
+                {"type": "heat.delta", "params": {"amount": 3}},
+                {"type": "toast", "params": {"text": "The colours are wearing off. The research team is drinking water and saying \"wow\" a lot.", "tone": "neutral", "source": "mod:acid-mode", "importance": "you"}}
+              ],
+              "on": {"DAY": {"target": "done", "guard": {"type": "after", "params": {"days": 3}}}}
+            },
+            "microdosed": {
+              "entry": [
+                {"type": "capability.boost", "params": {"pct": 3, "amount": 0}},
+                {"type": "news", "params": {"text": "{lab} microdoses its roadmap; Q3 plan now reads 'vibes, but faster'", "tone": "joke"}},
+                {"type": "birdapp.post", "params": {"text": "we didn't take a medium dose of acid. we microdosed the roadmap. completely different", "spice": 0.4}}
+              ],
+              "on": {"DAY": {"target": "done", "guard": {"type": "after", "params": {"days": 1}}}}
+            },
+            "declined": {
+              "entry": [
+                {"type": "news", "params": {"text": "{lab} declines a medium dose of acid; Vibe Encampment sends a single, sad emoji", "tone": "joke"}},
+                {"type": "toast", "params": {"text": "The researchers went outside and touched actual grass instead. They report it was \"fine\".", "tone": "neutral", "source": "mod:acid-mode", "importance": "you"}}
+              ],
+              "on": {"DAY": {"target": "done", "guard": {"type": "after", "params": {"days": 1}}}}
+            },
+            "done": {"type": "final"}
+          }
+        }
+      ]
+    }
+  }
+}

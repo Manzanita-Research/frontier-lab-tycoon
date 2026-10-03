@@ -12,6 +12,8 @@ const REAL = [
   "Windows 95", "Windows 98", "Clippy", "Microsoft", "OpenAI", "Anthropic", "DeepMind", "Google", "Gmail", "ChatGPT",
   // Real labs our old rival names contained (renamed before prod: Super Super AI, MetaMeta Metaintelligence Labs).
   "Safe Superintelligence", "Meta Superintelligence", "SSI",
+  // FLT-105: ACID MOD(E)'s gathering is Vibe Encampment, a parody; these are the real one and its corner of the internet.
+  "Vibecamp", "VibeCamp", "Vibe Camp", "TPOT", "This Part of Twitter",
 ];
 // Bird App handles (FLT-69) are lowercase and squashed ("the_weights_whisper"), so they get their own list: real labs,
 // products and apps, real people's names and handles, and nationalities (a handle is an identity; none of ours is real).
@@ -38,7 +40,7 @@ const RETAIL = [
 const ALLOWED = ["Outlook Excess", "WordSad", "WordPerfectly", "NoteBad"];
 
 const sources = import.meta.glob<string>(
-  ["./**/*.{ts,json}", "../ui/**/*.{ts,tsx,json,css}", "../skins/**/*.{ts,tsx,json,css}", "../intro/**/*.{ts,tsx,json,css}", "../account/**/*.{ts,tsx,css}", "../../mods/base-*/**/*.json", "!**/*.test.{ts,tsx}"],
+  ["./**/*.{ts,json}", "../ui/**/*.{ts,tsx,json,css}", "../skins/**/*.{ts,tsx,json,css}", "../intro/**/*.{ts,tsx,json,css}", "../account/**/*.{ts,tsx,css}", "../../mods/base-*/**/*.json", "../../mods/examples/acid-mode/**/*.json", "!**/*.test.{ts,tsx}"],
   { query: "?raw", import: "default", eager: true },
 );
 const scanned = Object.keys(sources);
@@ -65,6 +67,8 @@ describe("parody names only", () => {
     // MetaMeta's full name was changed by hand (#71): it contained a real lab's name as a substring.
     expect(realNames("Frontier BIOS, a Frontier 486FX, the '96 sim-game look, Intel Inside, a Maxis box", [...REAL, ...RETAIL])).toEqual(["Maxis", "Intel"]);
     expect(realNames("Very Very Super Super Intelligence, Super Super AI, MetaMeta Metaintelligence Labs, SSID")).toEqual([]);
+    expect(realNames("back from Vibecamp, in TPOT, at Vibe  Camp")).toEqual(["Vibecamp", "Vibe Camp", "TPOT"]);
+    expect(realNames("back from Vibe Encampment, in their jhana era")).toEqual([]);
   });
   it("reads the content, the UI, all six skins and every base pack", () => {
     for (const skin of ["base", "frontier-95", "homepage-98", "discovery-disc-96", "field-almanac", "karaoke-night", "swag-drop"]) {
@@ -73,6 +77,7 @@ describe("parody names only", () => {
     expect(sources["../skins/frontier-95/skin.css"]).toContain('[data-skin="frontier-95"]');
     expect(packs.length).toBeGreaterThanOrEqual(13);
     for (const p of packs) expect(scanned).toContain(`../../mods/${p}/mod.json`);
+    expect(scanned).toContain("../../mods/examples/acid-mode/mod.json");
     // assets/art.jobs.json holds every word printed in the generated art (FLT-70), so the pictures are scanned too.
     for (const f of ["content.ts", "manual.ts", "art.ts", "Intro.tsx", "stage/Kiosk.tsx", "stage/Props.tsx", "assets/art.jobs.json", "assets/props.jobs.json"]) expect(scanned).toContain(`../intro/${f}`);
   });
