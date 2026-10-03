@@ -120,6 +120,10 @@ export class SoundKit {
     this.variation++;
     for (const n of notes) voice(ctx, this.sfx, n, ctx.currentTime + 0.005, this.noise ?? noiseBuffer(ctx));
   }
+  /** FLT-105: bend the band's pitch by `cents` (a trip's warble); 0 puts it back in tune. */
+  setBend(cents: number) {
+    if (this.band) this.band.bend = cents;
+  }
   /** Every frame (FLT-66): the band builds the next few voices, a handful at a time rather than a burst. */
   play() {
     const ctx = this.ctx;

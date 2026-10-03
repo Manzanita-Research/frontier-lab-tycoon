@@ -15,6 +15,8 @@ export class Band {
   private queue: Cue[] = [];
   private last = -1;
   readonly cost: Record<Mode, ModeCost> = { nap: zero(), walkies: zero(), fetch: zero(), zoomies: zero() };
+  /** FLT-105: cents every new voice is bent by (a trip's slow warble). 0: in tune. */
+  bend = 0;
   /** `solo`: voice only that part of the band (an offline stem, e.g. the choir for the words check). */
   constructor(private ctx: BaseAudioContext, out: AudioNode, want: Want, private noise = whiteNoise(ctx), private solo?: Tone["part"]) {
     const bus = () => { const g = ctx.createGain(); g.gain.value = 0; g.connect(out); return g; };
@@ -54,7 +56,7 @@ export class Band {
       const cue = this.queue.shift()!;
       // A tone whose moment passed while the page stalled is skipped, not crammed in late.
       if (cue.tone.at < now - 0.05 || (this.solo && cue.tone.part !== this.solo)) continue;
-      voice(this.ctx, this.buses[cue.bus], { ...cue.tone, at: 0 }, cue.tone.at, this.noise);
+      voice(this.ctx, this.buses[cue.bus], this.bend ? { ...cue.tone, at: 0, detune: (cue.tone.detune ?? 0) + this.bend } : { ...cue.tone, at: 0 }, cue.tone.at, this.noise);
       voiced++;
     }
     const cost = this.cost[mode];

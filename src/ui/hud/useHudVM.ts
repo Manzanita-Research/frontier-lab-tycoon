@@ -10,6 +10,7 @@ import { roomAtom } from "../../newsroom/state";
 import { GAME_CRT, crtAtom } from "../../render/crt/state";
 import { photoAtom } from "../../render/fx/photoState";
 import { beatAtom } from "../../render/fx/beatState";
+import { tripChoiceAtom } from "../juice/tripState";
 import { skinList } from "../../skins/registry";
 import type { LeapfrogView } from "../../sim/race/leapfrog/view";
 import { shotAtom } from "../juice/photo";
@@ -191,6 +192,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
   const flash = useAtomValue(photoFlashAtom);
   const shot = useAtomValue(shotAtom);
   const beat = useAtomValue(beatAtom);
+  const tripChoice = useAtomValue(tripChoiceAtom);
   const skinUi = useAtomValue(skinUiAtom);
   const crt = useAtomValue(crtAtom);
   const staffOpen = useAtomValue(staffOpenAtom);
@@ -269,6 +271,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         mixer: { open: mixerOpen, ready: audioReady, muted: mixer.muted, master: mixer.master, music: mixer.music, sfx: mixer.sfx },
         photo: { on: photoOn, time: photoTime, shot, flash },
         beat,
+        tripChoice,
         skins: {
           open: skinUi.picker.open,
           reducedMotion: skinUi.reducedMotion,
@@ -288,7 +291,7 @@ export function useHudVM({ snap, speed, tool, toasts, news, follow, highlight, s
         social,
         guide,
       }),
-    [guide, share, social, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, stage, slowForBadNews, tapHint, arenaOpen, arenaChosen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, beat, skinUi, crt, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, birdAppOpen, drama, saves],
+    [guide, share, social, shown, speed, tool, follow, highlight, toasts, news, outcomeDismissed, stage, slowForBadNews, tapHint, arenaOpen, arenaChosen, motion, leapfrog, room, chatCount, helpOpen, disastersOpen, mixer, mixerOpen, audioReady, photoOn, photoTime, shot, flash, beat, tripChoice, skinUi, crt, list, mods, viewport, staffOpen, senateOpen, zone, papersOpen, dismissed, factionsOpen, birdAppOpen, drama, saves],
   );
   return useWindowBudget(vm, news);
 }

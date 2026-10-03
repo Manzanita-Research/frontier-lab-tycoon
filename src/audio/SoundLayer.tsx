@@ -1,4 +1,5 @@
 import { useFrame } from "@react-three/fiber";
+import { tripNow } from "../ui/juice/tripState";
 import { useEffect, useRef } from "react";
 import { Vector3 } from "three";
 import { appNow, registry, sim } from "../app/game";
@@ -84,6 +85,7 @@ export function SoundLayer() {
     const sound = kit.current;
     if (!sound) return;
     const world = sim.world;
+    sound.setBend(tripNow.bend);
     for (const e of watch.current.poll(world)) {
       switch (e.type) {
         case "placed": sound.cue("place"); break;

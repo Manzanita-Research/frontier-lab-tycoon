@@ -10,7 +10,7 @@ import { CoachLayer } from "./CoachLayer";
 import { ModeHint } from "./ModeHint";
 import { GateLayer } from "./GateLayer";
 import { loadedSkinAtom } from "./state";
-import { BeatLayer, Docked, Modals, PhotoLayer } from "./tree";
+import { BeatLayer, Docked, Modals, PhotoLayer, TripLayer } from "./tree";
 import { useHudEffects } from "./useHudEffects";
 import { useSaves } from "./saves";
 import { useAppSource, useHudVM, type AppSource } from "./useHudVM";
@@ -44,6 +44,7 @@ function Hud({ source }: { source: AppSource }) {
         <ModeHint mode={vm.mode ?? null} actions={hudActions} />
       </div>
       <PhotoLayer vm={vm} actions={hudActions} />
+      <TripLayer vm={vm} actions={hudActions} />
     </SkinProvider>
   );
 }

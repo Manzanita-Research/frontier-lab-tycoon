@@ -1302,6 +1302,31 @@ export interface BeatVM {
   action: { id: string; label: string; enabled: boolean } | null;
 }
 
+/**
+ * A trip (FLT-105): a mod has sent the whole screen somewhere strange for a few days. The host draws it (colour wash,
+ * warping, trails, the music's bend); a skin draws the one-line warning before it starts and the "I've had enough"
+ * button, always on screen while it lasts. `consent` is the player's answer: `ask` (the warning is up; nothing has
+ * changed yet), `on` (Continue) or `off` (Skip, or had enough: the screen goes back at once; the story carries on).
+ */
+export interface TripVM {
+  /** Changes with each trip. */
+  id: string;
+  label: string;
+  consent: "ask" | "on" | "off";
+  /** How strong the sim says it is now, 0 to 1 (the host eases toward it). */
+  strength: number;
+  phase: "rising" | "peak" | "fading";
+  /** Lines for the skin to say while it lasts (Frontier 95's Clip has its ego death in them). */
+  lines: string[];
+  /** Reduced motion: the calm version (a gentle colour drift, nothing moves). */
+  calm: boolean;
+  /** "Contains intense colour and motion." */
+  warning: string;
+  continueLabel: string;
+  skipLabel: string;
+  enoughLabel: string;
+}
+
 export interface PhotoVM {
   on: boolean;
   /** "live" | "day" | "golden" | "night" | "" (pinned by a link) */
@@ -1946,6 +1971,8 @@ export interface HudVM {
   photoMode: PhotoVM;
   /** A camera beat's letterbox and caption (FLT-56), or null. */
   beat: BeatVM | null;
+  /** FLT-105: a trip under way, or null. Optional: none. */
+  trip?: TripVM | null;
   skins: SkinPickerVM;
   mods: ModsVM;
   /** Saving and loading (FLT-65). */
@@ -2033,6 +2060,11 @@ export interface HudActions {
   buryLeak(): void;
   /** FLT-56: press the button a camera beat offers (`BeatVM.action.id`). */
   beatAction(id: string): void;
+  /** FLT-105: the trip warning's Continue and Skip (`TripVM.id`). */
+  tripContinue(id: string): void;
+  tripSkip(id: string): void;
+  /** FLT-105: "I've had enough": the trip's look ends now (fast, but eased: never a flash). The story carries on. */
+  tripEnough(id: string): void;
   keepPlaying(): void;
   newLab(): void;
   /** Today's lab: a new lab on today's seed, the same campus as everyone else's today. */

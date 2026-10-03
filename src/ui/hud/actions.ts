@@ -9,6 +9,7 @@ import { skipBeat } from "../../render/fx/beat";
 import { roomAtom, skipNews, viewRoom } from "../../newsroom/state";
 import { dramaActions } from "../../drama/state";
 import { setPhoto, takePhoto } from "../juice/photo";
+import { tripChoiceAtom } from "../juice/tripState";
 import { copyLink, copySummary, playDaily, shareEnding } from "../share/share";
 import { dismissChallenge, dismissMemo } from "../share/social";
 import { arenaChosenAtom, arenaOpenAtom, birdAppOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, senateOpenAtom, staffOpenAtom, guideAtom, windowBudgetAtom } from "./state";
@@ -176,6 +177,10 @@ export const hudActions: HudActions = {
     if (id === "bury") send({ type: "COMMAND", command: { type: "buryLeak" } });
     skipBeat();
   },
+  // FLT-105: the trip's look is the player's to refuse, any time; the story carries on either way.
+  tripContinue: (id) => registry.set(tripChoiceAtom, { ...registry.get(tripChoiceAtom), [id]: "on" }),
+  tripSkip: (id) => registry.set(tripChoiceAtom, { ...registry.get(tripChoiceAtom), [id]: "off" }),
+  tripEnough: (id) => registry.set(tripChoiceAtom, { ...registry.get(tripChoiceAtom), [id]: "off" }),
   keepPlaying: () => send({ type: "KEEP_PLAYING" }),
   newLab: () => send({ type: "NEW_LAB" }),
   playDaily,
