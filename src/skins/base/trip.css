@@ -46,3 +46,9 @@
   font-size: 14px;
   box-shadow: 0 4px 16px rgb(0 0 0 / 0.35);
 }
+/* Pass 2: while a trip is on screen a card doesn't dim the screen behind it. The trip already has the screen, and a
+   dim that came and went as a card was answered would be a flash of its own (trip.test.ts). */
+html[data-trip] .modal-backdrop {
+  background: transparent;
+  backdrop-filter: none;
+}

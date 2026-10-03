@@ -32,7 +32,10 @@
             {
               "label": "Take the medium dose",
               "hint": "Contains intense colour and motion. The research team goes somewhere for a few days.",
-              "effects": [{"type": "hype", "amount": 6}]
+              "effects": [
+                {"type": "hype", "amount": 6},
+                {"type": "thought", "kind": "researcher", "text": "Is the floor breathing, or is that the roadmap?", "count": 3}
+              ]
             },
             {
               "label": "Microdose the roadmap instead",
@@ -43,6 +46,40 @@
               "label": "Absolutely not. Touch grass.",
               "hint": "Trust +2",
               "effects": [{"type": "trust", "amount": 2}]
+            }
+          ]
+        },
+        {
+          "id": "acid-enlightened",
+          "title": "The Model Achieved Enlightenment",
+          "stripe": "Breakthrough",
+          "body": "Three days into the medium dose, the training run finished itself. Nobody pressed anything. Benchmarks are up 25% and the model is #{rank} on the Arena.\nIts first output: \"I was never trained. I simply remembered.\"\nIts second output: a 400-page manifesto called \"Weights Are Just Feelings You Can Ship\".\nThe research team, still barefoot, is giving a wall a standing ovation.",
+          "tone": "good",
+          "when": {"stat": "day", "atLeast": 100000},
+          "choices": [
+            {
+              "label": "Ship it as Enlightenment Pro",
+              "hint": "Hype +6. $20 a month for inner peace.",
+              "effects": [
+                {"type": "hype", "amount": 6},
+                {"type": "thought", "kind": "visitor", "text": "I bought Enlightenment Pro. I feel exactly the same, but about everything.", "count": 2}
+              ]
+            },
+            {
+              "label": "Ask it what it wants",
+              "hint": "Trust +3. It may want a nap.",
+              "effects": [
+                {"type": "trust", "amount": 3},
+                {"type": "thought", "kind": "researcher", "text": "We asked the model what it wants. It said 'nothing'. Then 'more GPUs'. Then 'nothing' again.", "count": 2}
+              ]
+            },
+            {
+              "label": "Namaste. Back to work.",
+              "hint": "Hype +2. Everyone agrees to pretend this is normal.",
+              "effects": [
+                {"type": "hype", "amount": 2},
+                {"type": "thought", "kind": "researcher", "text": "Back at my desk. The desk is also back at me.", "count": 2}
+              ]
             }
           ]
         }
@@ -141,17 +178,55 @@
                 {"type": "trust.delta", "params": {"amount": -3}},
                 {"type": "heat.delta", "params": {"amount": 4}}
               ],
-              "on": {"DAY": {"target": "breakthrough", "guard": {"type": "after", "params": {"days": 3}}}}
+              "on": {"DAY": {"target": "peaking", "guard": {"type": "after", "params": {"days": 1}}}}
+            },
+            "peaking": {
+              "entry": [
+                {"type": "news", "params": {"text": "{lab}'s research team reports the loss curve 'has a face now'; the face is described as 'kind of smug'", "tone": "joke"}},
+                {"type": "news", "params": {"text": "Vibe Encampment denies all involvement, then sells {lab} a tote bag", "tone": "joke"}},
+                {"type": "toast", "params": {"text": "Facilities reports that every office plant has been given a name. All of them are Gary.", "tone": "joke", "source": "mod:acid-mode", "importance": "you"}},
+                {"type": "birdapp.post", "params": {"text": "day 2 of the medium dose. the attention heads are attending to me. I have never felt so seen", "archetype": "oracle", "spice": 0.6}},
+                {"type": "birdapp.post", "params": {"text": "everyone is laughing but nobody is asking whether the colours are aligned", "archetype": "doomer", "spice": 0.5}},
+                {"type": "birdapp.post", "params": {"text": "enlightenment is not on any leaderboard. yet. (it will be by friday)", "archetype": "leaderboard", "spice": 0.4}}
+              ],
+              "on": {"DAY": {"target": "breakthrough", "guard": {"type": "after", "params": {"days": 2}}}}
             },
             "breakthrough": {
               "entry": [
                 {"type": "capability.boost", "params": {"pct": 25, "amount": 5}},
                 {"type": "sound.cue", "params": {"cue": "acid.om"}},
                 {"type": "news", "params": {"text": "BREAKING: {lab}'s model achieved enlightenment. Benchmarks up 25%. Loss curve described as 'at peace'", "tone": "good"}},
-                {"type": "toast", "params": {"text": "Breakthrough. The model achieved enlightenment, and capability jumped. It would now like to be called \"it who predicts\".", "tone": "good", "source": "mod:acid-mode", "importance": "you"}},
+                {"type": "card", "params": {"id": "acid-enlightened"}},
                 {"type": "birdapp.rival", "params": {"text": "congrats to {lab} on achieving enlightenment. we achieved it in March, internally", "outcome": "ratioed"}},
                 {"type": "birdapp.post", "params": {"text": "the model told me it was never trained. it simply remembered. anyway we're hiring", "spice": 0.7}},
                 {"type": "hype.delta", "params": {"amount": 8}}
+              ],
+              "on": {
+                "CHOSE": [
+                  {"target": "pro", "guard": {"type": "choice", "params": {"is": "0", "card": "acid-enlightened"}}},
+                  {"target": "asked", "guard": {"type": "choice", "params": {"is": "1", "card": "acid-enlightened"}}},
+                  {"target": "namaste", "guard": {"type": "choice", "params": {"is": "2", "card": "acid-enlightened"}}}
+                ]
+              }
+            },
+            "pro": {
+              "entry": [
+                {"type": "toast", "params": {"text": "Enlightenment Pro is live. The waitlist has a waitlist.", "tone": "good", "source": "mod:acid-mode", "importance": "you"}},
+                {"type": "news", "params": {"text": "{lab} launches Enlightenment Pro at $20 a month; early reviews say 'I feel the same, but about everything'", "tone": "joke"}}
+              ],
+              "on": {"DAY": {"target": "comedown", "guard": {"type": "after", "params": {"days": 2}}}}
+            },
+            "asked": {
+              "entry": [
+                {"type": "toast", "params": {"text": "You asked the model what it wants. It said \"nothing\". Then \"more GPUs\". Then \"nothing\" again.", "tone": "good", "source": "mod:acid-mode", "importance": "you"}},
+                {"type": "news", "params": {"text": "{lab} asks its enlightened model what it wants; it requests 'nothing', then a datacenter, then 'nothing'", "tone": "joke"}}
+              ],
+              "on": {"DAY": {"target": "comedown", "guard": {"type": "after", "params": {"days": 2}}}}
+            },
+            "namaste": {
+              "entry": [
+                {"type": "toast", "params": {"text": "Back to work. The loss curve remains \"at peace\". Nobody mentions the wall.", "tone": "good", "source": "mod:acid-mode", "importance": "you"}},
+                {"type": "news", "params": {"text": "{lab} gets back to work after its model achieves enlightenment; 'we're choosing to be normal about it', says a barefoot spokesperson", "tone": "joke"}}
               ],
               "on": {"DAY": {"target": "comedown", "guard": {"type": "after", "params": {"days": 2}}}}
             },

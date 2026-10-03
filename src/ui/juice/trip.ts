@@ -3,8 +3,9 @@
 // here is presentation: how strong it is right now, and what each effect is doing at this instant.
 //
 // Every effect is driven by the numbers below, and only by them: the CSS (windows that melt, text that wobbles,
-// colour that cycles), the canvas pass (kaleidoscope, swirl, breathing walls), the walkers' trails and the music's
-// pitch bend. So the photosensitivity test (trip.test.ts) can sample exactly what the player will see.
+// colour that cycles), the canvas pass (kaleidoscope, swirl, breathing walls), the walkers' trails and the calm
+// version's still art. So the photosensitivity test (trip.test.ts) can sample exactly what the player will see. The
+// music's tape wow follows the same strength (audio/wobble.ts).
 //
 // Safety, by construction:
 // * No flashing. The colour is a wash that changes each pixel's hue and keeps its brightness (below), turning once
@@ -12,12 +13,15 @@
 //   asserts this look has none at all.
 // * The strength follows the sim's envelope, but slew-limited in wall time, so ▶▶▶ (10×) cannot snap it on or off.
 // * "I've had enough" falls fast but still in a fraction of a second: one change, never a flash.
-// * Reduced motion (`TRIP_CALM`): a gentle colour drift, nothing that moves or warps.
+// * Reduced motion (`TRIP_CALM`): still colour and still art (a poster-paint wash that never turns, a mandala on the
+//   map), nothing that moves or warps. It fades in and out with the strength, and that is all that changes.
 
 export interface TripLook {
-  /** The colour wash's opacity at full strength, and the seconds it takes to turn once (always forward, never back). */
+  /** The colour wash's opacity at full strength, and the seconds it takes to turn once (always forward, never back; 0: it stands still). */
   wash: number;
   huePeriod: number;
+  /** The still mandala over the map (the calm version's art), its opacity at full strength. */
+  art: number;
   /** Breathing walls and windows: scale either way, and the breath's period in seconds. */
   breathe: number;
   breathePeriod: number;
@@ -36,9 +40,6 @@ export interface TripLook {
   swirlPeriod: number;
   /** Walker trails, 0 (none) to 1. */
   trails: number;
-  /** The music's pitch bend, cents either way, and its period. */
-  bend: number;
-  bendPeriod: number;
   /** Strength per second, up and down. `enough` is how fast "I've had enough" takes it away. */
   rise: number;
   fall: number;
@@ -46,22 +47,23 @@ export interface TripLook {
 }
 
 export const TRIP_LOOK: TripLook = {
-  wash: 0.55, huePeriod: 16,
+  wash: 0.55, huePeriod: 16, art: 0,
   breathe: 0.014, breathePeriod: 6,
   wobble: 2.2, wobblePeriod: 3.4,
   melt: 1, meltPeriod: 9,
   kaleido: 0.42, segments: 6, spinPeriod: 48,
   swirl: 0.24, swirlPeriod: 16,
   trails: 1,
-  bend: 45, bendPeriod: 7,
   rise: 0.2, fall: 0.3, enough: 2.5,
 };
 
-/** Reduced motion: colour that drifts, and nothing that moves. */
+/** Reduced motion: still colour, still art, and nothing that moves. */
 export const TRIP_CALM: TripLook = {
   ...TRIP_LOOK,
-  wash: 0.3, huePeriod: 40, breathe: 0, wobble: 0, melt: 0, kaleido: 0, swirl: 0, trails: 0, bend: 20,
+  wash: 0.32, huePeriod: 0, art: 0.5, breathe: 0, wobble: 0, melt: 0, kaleido: 0, swirl: 0, trails: 0,
 };
+/** Where a still wash stands (degrees): magenta at the top, orange and teal down the sides, poster paint. */
+export const CALM_TURN = 290;
 
 /** What the sim says about a trip: ticks it starts and ends, and how long it takes to come on and wear off. */
 export interface TripSpan {
@@ -91,6 +93,8 @@ export interface TripFrame {
   /** The colour wash: its opacity, and how far it has turned (degrees, always forward). */
   wash: number;
   turn: number;
+  /** The still mandala's opacity. */
+  art: number;
   /** Scale either way, for breathing walls and windows. */
   breathe: number;
   /** Amplitudes for the CSS animations (their periods are the look's). */
@@ -101,8 +105,6 @@ export interface TripFrame {
   spin: number;
   swirl: number;
   trails: number;
-  /** Cents. */
-  bend: number;
 }
 
 const wave = (t: number, period: number) => Math.sin((2 * Math.PI * t) / period);
@@ -112,7 +114,8 @@ export function tripFrame(t: number, level: number, look: TripLook): TripFrame {
   const k = Math.max(0, Math.min(1, level));
   return {
     wash: k * look.wash,
-    turn: ((360 * t) / look.huePeriod) % 360,
+    turn: look.huePeriod > 0 ? ((360 * t) / look.huePeriod) % 360 : CALM_TURN,
+    art: k * look.art,
     breathe: 1 + k * look.breathe * wave(t, look.breathePeriod),
     wobble: k * look.wobble,
     melt: k * look.melt,
@@ -120,7 +123,6 @@ export function tripFrame(t: number, level: number, look: TripLook): TripFrame {
     spin: look.kaleido > 0 && look.spinPeriod > 0 ? ((2 * Math.PI * t) / look.spinPeriod) % (2 * Math.PI) : 0,
     swirl: k * look.swirl * wave(t, look.swirlPeriod) || 0,
     trails: k * look.trails,
-    bend: k * look.bend * wave(t, look.bendPeriod),
   };
 }
 
@@ -160,23 +162,31 @@ const setLum = (c: readonly number[], l: number): C3 => {
   return clipColor([c[0]! + d, c[1]! + d, c[2]! + d]);
 };
 
-/** The wash's colour at hue `deg`: `hsl(deg, WASH_S, WASH_L)`, as sRGB 0 to 1. */
-export function washColour(deg: number): C3 {
+/** `hsl(deg, s, l)` (s and l 0 to 1) as sRGB 0 to 1. */
+export function hslColour(deg: number, s: number, l: number): C3 {
   const h = (((deg % 360) + 360) % 360) / 60;
-  const c = (1 - Math.abs(2 * WASH_L - 1)) * WASH_S;
+  const c = (1 - Math.abs(2 * l - 1)) * s;
   const x = c * (1 - Math.abs((h % 2) - 1));
-  const m = WASH_L - c / 2;
+  const m = l - c / 2;
   const [r, g, b] = h < 1 ? [c, x, 0] : h < 2 ? [x, c, 0] : h < 3 ? [0, c, x] : h < 4 ? [0, x, c] : h < 5 ? [x, 0, c] : [c, 0, x];
   return [r + m, g + m, b + m];
 }
+/** The wash's colour at hue `deg`: `hsl(deg, WASH_S, WASH_L)`, as sRGB 0 to 1. */
+export const washColour = (deg: number): C3 => hslColour(deg, WASH_S, WASH_L);
 export const WASH_S = 0.9;
 export const WASH_L = 0.55;
 
-/** An sRGB backdrop colour under the wash of hue `deg` at `opacity`: `mix-blend-mode: color`, then the layer's opacity. */
-export function washed(backdrop: readonly [number, number, number], deg: number, opacity: number): C3 {
-  const blended = setLum(washColour(deg), lum(backdrop));
-  return [0, 1, 2].map((i) => backdrop[i]! + (blended[i]! - backdrop[i]!) * opacity) as C3;
+/** A backdrop under a layer of colour `paint` at `opacity`, blended with `mix-blend-mode: color`. */
+export function blended(backdrop: readonly [number, number, number], paint: readonly number[], opacity: number): C3 {
+  const mixed = setLum(paint, lum(backdrop));
+  return [0, 1, 2].map((i) => backdrop[i]! + (mixed[i]! - backdrop[i]!) * opacity) as C3;
 }
+
+/** An sRGB backdrop colour under the wash of hue `deg` at `opacity`: `mix-blend-mode: color`, then the layer's opacity. */
+export const washed = (backdrop: readonly [number, number, number], deg: number, opacity: number): C3 => blended(backdrop, washColour(deg), opacity);
+
+/** The calm version's still mandala (juice.css `.trip-art`): its paints, `[hue, saturation %, lightness %]`. */
+export const ART_PAINTS: readonly (readonly [number, number, number])[] = [[290, 85, 55], [25, 95, 55], [175, 80, 45], [335, 90, 60], [45, 95, 55]];
 
 /** The hue of the wash at a point `angle` degrees round the middle of the screen (the gradient's own angle). */
 export const washHueAt = (f: Pick<TripFrame, "turn">, angle: number) => angle + f.turn;

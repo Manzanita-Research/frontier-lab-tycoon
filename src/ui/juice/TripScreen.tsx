@@ -4,7 +4,10 @@
 // so it changes hues and never brightness; the rest is CSS (windows that melt, text that wobbles, walls that
 // breathe), driven by a few variables on <html>, and the canvas pass and the trails, which read `tripNow`.
 //
-// `html[data-trip]`: "on" (everything), "calm" (reduced motion: the colour only), "lite" (a phone that can't keep
+// The calm version (reduced motion) stands still: the wash doesn't turn, and a still mandala (`.trip-art`) sits on the
+// map, under the HUD, blended by colour like the wash. Both fade in and out with the strength; nothing else changes.
+//
+// `html[data-trip]`: "on" (everything), "calm" (reduced motion: still colour and art), "lite" (a phone that can't keep
 // up: no canvas pass, no trails, no wobbling text). Absent when there is no trip on screen.
 //
 // Debug knobs, comma-separated: `?trip=calm` and `?trip=lite` force those; `?trip=full` (screenshots and the video,
@@ -27,6 +30,7 @@ const forced = () => new Set(typeof location === "undefined" ? [] : (new URLSear
 
 export function TripScreen({ trip }: { trip: TripVM | null }) {
   const wash = useRef<HTMLDivElement>(null);
+  const art = useRef<HTMLDivElement>(null);
   const want = useRef({ on: false, target: 0, enough: false, calm: false });
   const on = trip?.consent === "on";
   want.current = { on, target: on ? trip.strength : 0, enough: trip?.consent === "off", calm: !!trip?.calm };
@@ -53,7 +57,7 @@ export function TripScreen({ trip }: { trip: TripVM | null }) {
       tripNow.t += dt;
       tripNow.calm = calm;
       const f = tripFrame(tripNow.t, tripNow.level, look);
-      Object.assign(tripNow, { bend: f.bend, kaleido: f.kaleido, spin: f.spin, swirl: f.swirl, breathe: f.breathe, trails: f.trails });
+      Object.assign(tripNow, { kaleido: f.kaleido, spin: f.spin, swirl: f.swirl, breathe: f.breathe, trails: f.trails });
       // The governor: only while the trip is on screen, so a slow phone is judged by the trip's frames.
       if (tripNow.level > 0.05 && !tripNow.lite && !force.has("full")) {
         avg += (dt - avg) * 0.1;
@@ -65,6 +69,7 @@ export function TripScreen({ trip }: { trip: TripVM | null }) {
         el.style.opacity = f.wash.toFixed(3);
         el.style.transform = `translate(-50%, -50%) rotate(${f.turn.toFixed(2)}deg)`;
       }
+      if (art.current) art.current.style.opacity = f.art.toFixed(3);
       since += dt;
       if (since >= VARS_EVERY) {
         since = 0;
@@ -84,7 +89,6 @@ export function TripScreen({ trip }: { trip: TripVM | null }) {
     return () => {
       cancelAnimationFrame(raf);
       tripNow.level = 0;
-      tripNow.bend = 0;
       tripNow.kaleido = 0;
       tripNow.swirl = 0;
       tripNow.trails = 0;
@@ -95,5 +99,11 @@ export function TripScreen({ trip }: { trip: TripVM | null }) {
   }, [live]);
 
   if (!live || typeof document === "undefined") return null;
-  return createPortal(<div ref={wash} className="trip-wash" aria-hidden="true" style={{ opacity: 0 }} />, document.body);
+  return createPortal(
+    <>
+      <div ref={art} className="trip-art" aria-hidden="true" style={{ opacity: 0 }} />
+      <div ref={wash} className="trip-wash" aria-hidden="true" style={{ opacity: 0 }} />
+    </>,
+    document.body,
+  );
 }

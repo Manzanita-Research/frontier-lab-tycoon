@@ -19,6 +19,8 @@ export const isAcidMoment = (m: string | null | undefined): m is AcidMoment => (
 
 const ARC = "acid-mode";
 const CARD = "acid-offer";
+/** The breakthrough's own card (pass 2): `acid-breakthrough` leaves it open. */
+const ENLIGHTENED = "acid-enlightened";
 
 /** A lab a couple of months in: paths, a Hall, a gateway, the Kombucha Bar, a dozen researchers and two releases. */
 function lab(s: GameState) {
@@ -85,8 +87,11 @@ export function stageAcid(s: GameState, moment: AcidMoment) {
     // The breakthrough lands on a new day's busy morning (releases, the Arena, offers): the ticker starts at its headline.
     const from = until(s, at("breakthrough"), 6);
     beatNews.set(s, s.news.find((n) => n.id >= from && n.text.includes("enlightenment"))?.id ?? from);
-    // Whatever else the lab is asked that morning is answered: the screen is the enlightenment's.
-    for (let i = 0; i < 6 && openEventOf(s); i++) applyNow(s, answer(s));
+    // Whatever else the lab is asked that morning is answered: the screen is the enlightenment's card (pass 2).
+    for (let i = 0; i < 6 && openEventOf(s) && openEventOf(s)!.id !== ENLIGHTENED; i++) {
+      applyNow(s, answer(s));
+      dailyEvents(s);
+    }
     return;
   }
   // The peak (and `acid-researcher`, the same afternoon with one of the team tapped): the come-up is a day, so a day and

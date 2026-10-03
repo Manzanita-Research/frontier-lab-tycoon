@@ -85,7 +85,7 @@ export function SoundLayer() {
     const sound = kit.current;
     if (!sound) return;
     const world = sim.world;
-    sound.setBend(tripNow.bend);
+    sound.setTrip(tripNow.level, tripNow.calm);
     for (const e of watch.current.poll(world)) {
       switch (e.type) {
         case "placed": sound.cue("place"); break;

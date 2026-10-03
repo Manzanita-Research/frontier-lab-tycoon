@@ -4,6 +4,7 @@ import { Effect } from "effect";
 import { describe, expect, it } from "vitest";
 import acid from "../../mods/examples/acid-mode/mod.json";
 import { momentSearch } from "../app/mods";
+import { spot } from "../app/moments";
 import { createSimHandle } from "../app/sim";
 import { defs, withDefs } from "../sim/defs";
 import { openEventOf } from "../sim/events";
@@ -14,7 +15,7 @@ import { createInitialState } from "../sim/state";
 import { answer } from "../sim/testkit";
 import { tick, TICKS_PER_DAY } from "../sim/tick";
 import { spelledResearcher } from "../sim/tripDemo";
-import type { GameState } from "../sim/types";
+import type { GameState, OpenEvent } from "../sim/types";
 import { resolveGameDefinition } from "./game-definition";
 import { composeMods } from "./loader";
 import { decodeManifest } from "./schema";
@@ -27,13 +28,15 @@ interface Played {
   tripSeen: GameState["trip"] | null;
   spelled: number;
   jump: number;
+  /** The breakthrough's card was on screen (pass 2). */
+  enlightenedCard?: boolean;
 }
 
 /**
  * Play a modded lab for `days` the way `flt-mod check` does (no ladder, a connected campus: cards open from day 40),
  * answering the offer with `pick` and every other card with its first choice.
  */
-async function play(pick: number, days = 75): Promise<Played> {
+async function play(pick: number, days = 75, enlightened = 0): Promise<Played> {
   const def = await definition;
   return withDefs(def, () => {
     const s = createInitialState(42, "garage", def);
@@ -48,12 +51,13 @@ async function play(pick: number, days = 75): Promise<Played> {
     for (let i = 0; i < days * TICKS_PER_DAY; i++) {
       const arcBefore = s.modArcs?.["acid-mode"]?.value;
       const cap = s.capability;
-      const cmds = answer(s, (id) => (id === "acid-offer" ? pick : 0));
+      const cmds = answer(s, (id) => (id === "acid-offer" ? pick : id === "acid-enlightened" ? enlightened : 0));
+      if (openEventOf(s)?.id === "acid-enlightened") out.enlightenedCard = true;
       tick(s, i === 0 ? [...setup, ...cmds] : cmds);
       if (out.offeredDay === null && s.arcs["acid-offer"]?.value === "cardOpen") out.offeredDay = s.day;
       if (s.trip) out.tripSeen ??= structuredClone(s.trip);
       out.spelled = Math.max(out.spelled, s.walkers.filter((w) => w.spell).length);
-      if (arcBefore === "tripping" && s.modArcs?.["acid-mode"]?.value === "breakthrough") out.jump = s.capability / Math.max(1, cap);
+      if (arcBefore === "peaking" && s.modArcs?.["acid-mode"]?.value === "breakthrough") out.jump = s.capability / Math.max(1, cap);
     }
     return out;
   });
@@ -83,12 +87,27 @@ describe("ACID MOD(E)", () => {
     expect(p.spelled).toBeGreaterThan(0);
     expect(p.jump).toBeGreaterThan(1.2);
     expect(said(p.s, /model achieved enlightenment/)).toBe(true);
+    expect(p.enlightenedCard).toBe(true);
+    expect(said(p.s, /loss curve 'has a face now'/)).toBe(true);
     expect(said(p.s, /medium dose of acid/)).toBe(true);
     expect(said(p.s, /Senate subcommittee/)).toBe(true);
     // Worn off, everyone back (or gone), the story over.
     expect(p.s.trip).toBeUndefined();
     expect(p.s.walkers.some((w) => w.spell)).toBe(false);
     expect(p.s.modArcs!["acid-mode"]!.value).toBe("done");
+  });
+
+  it("the breakthrough is a card of its own: each answer gets its own beat and headline, then the comedown", async () => {
+    // Pass 2: a toast could scroll past on a busy morning; a card stops the clock and gets its own slot in the moment queue.
+    const before = { models: 2, unlock: null, event: null, outcome: "playing" as const };
+    const { moments } = spot(before, { ...before, event: { id: "acid-enlightened", day: 70 } as OpenEvent }, []);
+    expect(moments.map((m) => m.kind)).toEqual(["card"]);
+    for (const [pick, re] of [[0, /Enlightenment Pro/], [1, /what it wants/], [2, /choosing to be normal about it/]] as const) {
+      const p = await play(0, 75, pick);
+      expect(said(p.s, re), `answer ${pick}`).toBe(true);
+      expect(said(p.s, /Senate subcommittee/)).toBe(true);
+      expect(p.s.modArcs!["acid-mode"]!.value).toBe("done");
+    }
   });
 
   it("microdosing the roadmap or saying no: no trip, nobody goes anywhere", async () => {
@@ -133,7 +152,7 @@ describe("ACID MOD(E)", () => {
     it("acid-peak and acid-researcher: a trip at full strength, and somebody somewhere", async () => {
       for (const moment of ["acid-peak", "acid-researcher"]) {
         const w = await staged(moment);
-        expect(w.modArcs!["acid-mode"]!.value).toBe("tripping");
+        expect(["tripping", "peaking"]).toContain(w.modArcs!["acid-mode"]!.value);
         expect(w.tick - w.trip!.start).toBeGreaterThanOrEqual(w.trip!.rise);
         expect(w.tick).toBeLessThan(w.trip!.end);
         expect(spelledResearcher(w)?.spell?.line).toBeTruthy();
@@ -143,6 +162,7 @@ describe("ACID MOD(E)", () => {
     it("acid-breakthrough: the model achieved enlightenment, mid-trip", async () => {
       const w = await staged("acid-breakthrough");
       expect(w.modArcs!["acid-mode"]!.value).toBe("breakthrough");
+      expect(openEventOf(w)?.id).toBe("acid-enlightened");
       expect(w.trip).toBeDefined();
       expect(w.news.some((n) => n.text.includes("model achieved enlightenment"))).toBe(true);
     });

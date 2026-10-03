@@ -9,8 +9,8 @@ export type TripChoice = "on" | "off";
 export const tripChoiceAtom = Atom.keepAlive(Atom.make<Readonly<Record<string, TripChoice>>>({}));
 
 /**
- * This frame's trip, written by TripScreen: its strength after the slew (0 to 1), the clock its waves run on, the music's
- * bend in cents, and whether the phone governor has asked for the lite version (no canvas pass, no trails). The canvas
- * pass, the trails and the music read it.
+ * This frame's trip, written by TripScreen: its strength after the slew (0 to 1), the clock its waves run on, whether it
+ * is the calm one, and whether the phone governor has asked for the lite version (no canvas pass, no trails). The canvas
+ * pass, the trails and the music's tape wow read it.
  */
-export const tripNow = { level: 0, t: 0, calm: false, lite: false, bend: 0, kaleido: 0, spin: 0, swirl: 0, breathe: 1, trails: 0 };
+export const tripNow = { level: 0, t: 0, calm: false, lite: false, kaleido: 0, spin: 0, swirl: 0, breathe: 1, trails: 0 };

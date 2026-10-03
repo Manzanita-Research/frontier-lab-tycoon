@@ -6584,6 +6584,54 @@
       animation: frontier-95-wobble 4.1s ease-in-out -1.3s infinite;
     }
   }
+  /* Pass 2: the psychedelic chrome, still in every mode (the calm version leans on it). Title bars in poster paint
+     with a flower at each end, and windows in a magenta ridge. Each fades in and out with the trip's strength
+     (--trip-k), never in one step. A card doesn't dim the screen: the trip already has it, and a dim that came and
+     went as a card was answered would be a flash of its own (trip.test.ts). */
+  &[data-trip] {
+    .f95-tb {
+      position: relative;
+      isolation: isolate;
+      &::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        opacity: var(--trip-k, 0);
+        background: linear-gradient(90deg, #4a148c, #ad1457 30%, #e65100 55%, #00695c 80%, #283593);
+      }
+    }
+    .f95-tt::before {
+      content: "✿ ";
+    }
+    .f95-tt::after {
+      content: " ✿";
+    }
+    .f95-win {
+      outline: 3px ridge color-mix(in srgb, #c2185b calc(var(--trip-k, 0) * 100%), transparent);
+    }
+    .f95-layer.f95-dim {
+      background-image: none;
+    }
+  }
+  /* The paperclip, ego-dead: a still rainbow halo in every mode, and in the calm version it lies down for good. */
+  &[data-trip] .f95-clip.ego {
+    position: relative;
+    &::before {
+      content: "";
+      position: absolute;
+      inset: -10px;
+      z-index: -1;
+      border-radius: 50%;
+      opacity: var(--trip-k, 0);
+      background: conic-gradient(#e040fb, #ff6e40, #ffd740, #69f0ae, #40c4ff, #e040fb);
+      -webkit-mask-image: radial-gradient(circle, transparent 52%, #000 54% 66%, transparent 68%);
+      mask-image: radial-gradient(circle, transparent 52%, #000 54% 66%, transparent 68%);
+    }
+  }
+  &[data-trip="calm"] .f95-clip.ego svg {
+    rotate: -90deg;
+  }
   /* The trip's warning box (top middle, nothing dimmed) and "I've had enough" (top right, above the wash). Both still. */
   .f95-tripwarn {
     position: fixed;
