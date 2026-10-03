@@ -130,6 +130,8 @@ function propsFor(name: SlotName, vms: Record<string, HudVM>): SlotPropsMap[Slot
           conflicts: ["content.rivals.anthro: a (override), then b (override); b wins"],
           errors: ["/nope.json: HTTP 404"],
           contentHash: "02778d7b",
+          extras: [{ id: "duck-mode", name: "Duck Mode", blurb: "Everyone is a rubber duck.", added: false, adding: false }],
+          voice: { mod: "Duck Mode", mode: "flavour" },
         },
         actions,
       };

@@ -1,6 +1,8 @@
 // Everything a skin may ask the game to do, wired to the app machine and the UI atoms. Skins get this object and
 // nothing behind it.
-import { appNow, debugParams, registry, send, sim, SLOW_KEY } from "../../app/game";
+import { appNow, debugParams, registry, send, sim, SLOW_KEY, toast } from "../../app/game";
+import { EXTRA_MODS } from "../../app/extraMods";
+import { addModLive } from "../../app/liveMods";
 import { SPEEDS, type Speed, type Tool } from "../../app/hud";
 import { mixerOpenAtom, playCue, setMixer } from "../../audio/state";
 import type { Cue } from "../../audio/score";
@@ -12,7 +14,7 @@ import { setPhoto, takePhoto } from "../juice/photo";
 import { tripChoiceAtom } from "../juice/tripState";
 import { copyLink, copySummary, playDaily, shareEnding } from "../share/share";
 import { dismissChallenge, dismissMemo } from "../share/social";
-import { arenaChosenAtom, arenaOpenAtom, birdAppOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, senateOpenAtom, staffOpenAtom, guideAtom, windowBudgetAtom } from "./state";
+import { arenaChosenAtom, arenaOpenAtom, birdAppOpenAtom, chatCountAtom, disastersOpenAtom, dismissedAtom, factionsOpenAtom, helpOpenAtom, modAddingAtom, modsOpenAtom, papersOpenAtom, photoFlashAtom, photoTimeAtom, senateOpenAtom, staffOpenAtom, guideAtom, voiceModeAtom, windowBudgetAtom } from "./state";
 import { guardWith } from "./guard";
 import { closeWindow, isUp, restoreWindow } from "./windows";
 import { skinActions } from "./skinControl";
@@ -225,6 +227,16 @@ export const hudActions: HudActions = {
   closeMixer: () => registry.set(mixerOpenAtom, false),
   openMods: () => registry.set(modsOpenAtom, true),
   closeMods: () => registry.set(modsOpenAtom, false),
+  addMod: (id) => {
+    const extra = EXTRA_MODS.find((m) => m.id === id);
+    if (!extra || registry.get(modAddingAtom)) return;
+    registry.set(modAddingAtom, id);
+    void addModLive(extra.source)
+      .then((r) => r.ok || toast(`${extra.name} couldn't join: ${r.reason}`, "bad"))
+      .catch((e) => toast(`${extra.name} couldn't join: ${e instanceof Error ? e.message : String(e)}`, "bad"))
+      .finally(() => registry.set(modAddingAtom, null));
+  },
+  setVoice: (mode) => registry.set(voiceModeAtom, mode),
   // Today's Drama (FLT-34): the window, and the two reloads that switch a pack on or a mod off.
   ...dramaActions,
   // Saves (FLT-65): the Save/Load window, Welcome back, export and import.

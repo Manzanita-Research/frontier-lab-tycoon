@@ -5928,6 +5928,12 @@
     background: var(--bird-lab, #808080);
     box-shadow: inset 0 0 0 1px #000;
   }
+  /* FLT-102: a mod's voice puts one face on every poster. */
+  .f95-bird-face {
+    margin-right: 3px;
+    font-size: 11px;
+    line-height: 1;
+  }
   .f95-bird-preview .f95-bird-quote {
     margin: 2px 0 4px;
     padding-left: 6px;

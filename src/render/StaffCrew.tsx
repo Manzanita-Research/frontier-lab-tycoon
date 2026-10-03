@@ -8,6 +8,7 @@ import type { StaffJob } from "../sim/types";
 import { HALF } from "./coords";
 import { CREW } from "./people";
 import { SKIN } from "./look";
+import { useSessionLooks } from "./useSessionLooks";
 
 const CAP = 48;
 /** The same 1.6x as the crowd, so staff read at the default zoom. */
@@ -47,6 +48,9 @@ export function StaffCrew() {
   const poleGeo = useMemo(() => new THREE.BoxGeometry(0.02 * S, 0.57 * S, 0.02 * S), []);
   const mopGeo = useMemo(() => new THREE.BoxGeometry(0.15 * S, 0.05 * S, 0.08 * S), []);
   const toteGeo = useMemo(() => new RoundedBoxGeometry(0.115 * S, 0.125 * S, 0.045 * S, 2, 0.012 * S), []);
+  // FLT-102: a mod may dress a job (`staff:sre`); the base staff draw as above.
+  const looks = useSessionLooks("staff");
+  const modded = looks.drawers.size > 0;
 
   useFrame(({ clock }) => {
     const w = game.world;
@@ -67,6 +71,7 @@ export function StaffCrew() {
       dummy.updateMatrix();
       m.setMatrixAt(i, dummy.matrix);
     };
+    if (modded) looks.drawers.forEach((d) => d.begin());
     for (const s of w.staff) {
       const x = s.px + (s.x - s.px) * a - HALF;
       const z = s.pz + (s.z - s.pz) * a - HALF;
@@ -89,6 +94,8 @@ export function StaffCrew() {
         set(bangDot.current, nbang, x, top, z, 0, 0.17, 0.17, 0.17);
         nbang++;
       }
+      const drawer = modded ? looks.drawers.get(`staff:${s.job}`) : undefined;
+      if (drawer?.draw({ id: s.id, kind: "staff" }, { x, z, yaw, t, phase, walking: moving, hop: 0, land: 0, env: working ? 1 : 0, signYaw: 0 })) continue;
       if (s.job === "janitor") {
         const i = nb++;
         const wob = working ? Math.sin(t * 14 + phase) * 0.12 : 0;
@@ -148,6 +155,7 @@ export function StaffCrew() {
       m.instanceMatrix.needsUpdate = true;
       if (m.instanceColor) m.instanceColor.needsUpdate = true;
     };
+    if (modded) looks.drawers.forEach((d) => d.end());
     done(humanBody.current, nh);
     done(head.current, nh);
     done(hat.current, nhat);
@@ -163,6 +171,7 @@ export function StaffCrew() {
 
   return (
     <group>
+      {modded && <primitive object={looks.group} />}
       <instancedMesh ref={humanBody} args={[undefined, undefined, CAP]} castShadow frustumCulled={false}>
         <capsuleGeometry args={[0.13 * S, 0.26 * S, 4, 8]} />
         <meshStandardMaterial roughness={0.7} />

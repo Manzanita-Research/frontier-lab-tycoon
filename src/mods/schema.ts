@@ -223,7 +223,7 @@ export const Look = Schema.Struct({
   /** A sprite's width and height in tiles (default 0.9 x 1.2, about a person); a model is fitted to the height. */
   size: Schema.optionalKey(Schema.Tuple([positive, positive])),
   scale: Schema.optionalKey(positive),
-  gait: Schema.optionalKey(Schema.Literals(["walk", "trot", "hop", "float"])),
+  gait: Schema.optionalKey(Schema.Literals(["walk", "trot", "hop", "float", "waddle"])),
   /** Protest placards for this look (protesters only): short lines, 1 to 12 of them. */
   signs: Schema.optionalKey(Schema.Array(text.check(Schema.isMaxLength(40))).check(Schema.isBetweenLength(1, 12))),
   /** Placard height in tiles (default: held up just above the top of the look; a small look gets a smaller placard). */
@@ -234,12 +234,49 @@ export const Look = Schema.Struct({
 export type LookData = typeof Look.Type;
 /** `looks` keys: a walker kind ("protester"), a kind and a role ("visitor:Journalist"), or a faction crowd ("faction:doomers"). */
 export const LookTarget = text.check(Schema.isPattern(/^[a-z][\w-]*(?::[\w '.-]+)?$/));
+
+/** The moments a voice has its own lines for (FLT-102): a release, a new level, a new era, a leak, the Senate, an escape, an ending. */
+export const VOICE_MOMENTS = ["ship", "level", "era", "leak", "senate", "escape", "ending"] as const;
+export type VoiceMoment = (typeof VOICE_MOMENTS)[number];
+const voiceLine = text.check(Schema.isMaxLength(200));
+const voiceLines = Schema.Array(voiceLine).check(Schema.isBetweenLength(1, 24));
+const smallCount = number.check(Schema.isBetween({ minimum: 0, maximum: 3 }));
+/**
+ * A voice (FLT-102): how a mod rewrites the flavour text the player reads (posts, thoughts, headlines, cards, toasts, the
+ * group chat), as rules rather than code. Presentation only: the same text always comes out the same, and nothing in the
+ * sim or the GameDefinition reads it. Numbers, prices and anything with a digit, `$`, `%`, `@` or `#` are left alone.
+ */
+export const Voice = Schema.Struct({
+  /** Who is talking ("rubber duck"), for the Mod Manager and the moment toasts. */
+  name: Schema.optionalKey(text.check(Schema.isMaxLength(40))),
+  lowercase: Schema.optionalKey(Schema.Boolean),
+  /** Whole-word swaps, keys in lower case: `{ "the": "da", "with": "wif" }`. */
+  words: Schema.optionalKey(Schema.Record(text.check(Schema.isPattern(/^[a-z']+$/)), Schema.String)),
+  /** Letter swaps inside words, in order, each occurrence with its own odds: `{ "from": "r", "to": "w", "odds": 0.8 }`. */
+  letters: Schema.optionalKey(Schema.Array(Schema.Struct({ from: text.check(Schema.isPattern(/^[a-z]+$/)), to: Schema.String, odds: fraction })).check(Schema.isBetweenLength(0, 16))),
+  /** Now and then a word goes l33t: `odds` per word, then each letter in `map` with even odds. */
+  leet: Schema.optionalKey(Schema.Struct({ odds: fraction, map: Schema.Record(text.check(Schema.isPattern(/^[a-z]$/)), text.check(Schema.isMaxLength(2))) })),
+  /** The odds that a sentence ends in "..." instead of "." or "!". */
+  ellipsis: Schema.optionalKey(fraction),
+  /** The odds that a longer line opens with a musing ("hmm... "). */
+  openers: Schema.optionalKey(Schema.Struct({ odds: fraction, lines: Schema.Array(text.check(Schema.isMaxLength(40))).check(Schema.isBetweenLength(1, 16)) })),
+  /** Between `min` and `max` of these at the end of every line. */
+  emoji: Schema.optionalKey(Schema.Struct({ list: Schema.Array(text.check(Schema.isMaxLength(8))).check(Schema.isBetweenLength(1, 12)), min: smallCount, max: smallCount })),
+  /** Every avatar on the Bird App and in the group chat becomes this. */
+  glyph: Schema.optionalKey(text.check(Schema.isMaxLength(8))),
+  /** Hand-written lines for the big moments, one picked per moment (by its day, so a replay picks the same). */
+  moments: Schema.optionalKey(Schema.Struct(Object.fromEntries(VOICE_MOMENTS.map((m) => [m, Schema.optionalKey(voiceLines)])) as { [K in VoiceMoment]: Schema.optionalKey<typeof voiceLines> })),
+  /** Menus, buttons and labels too, not just the flavour text (`?voice=full` or `?voice=flavour` override it). */
+  full: Schema.optionalKey(Schema.Boolean),
+});
+export type VoiceData = typeof Voice.Type;
 export const ModManifest = Schema.Struct({
   apiVersion: Schema.Literal(1), id: ModId, name: text, version: text,
   author: Schema.optionalKey(Schema.String), description: Schema.optionalKey(Schema.String),
   skin: Schema.optionalKey(Schema.NullOr(SkinData)), content: Schema.optionalKey(ContentPatch),
   assets: Schema.optionalKey(record), audio: Schema.optionalKey(AudioSection),
   looks: Schema.optionalKey(Schema.Record(LookTarget, Look)),
+  voice: Schema.optionalKey(Voice),
 });
 export interface ModManifest extends Schema.Schema.Type<typeof ModManifest> {}
 
@@ -259,7 +296,7 @@ export function suggest(word: string, candidates: readonly string[]): string {
   const best = candidates.map((value) => ({ value, distance: distance(word, value) })).sort((a, b) => a.distance - b.distance)[0];
   return best && best.distance <= 2 ? ` (did you mean "${best.value}"?)` : "";
 }
-const fieldNames = ["apiVersion", "id", "name", "version", "author", "description", "skin", "content", "assets", "audio", "looks", "cues", "music", ...Object.keys(Look.fields), ...Object.keys(LookPart.fields), "family", "src", "add", "override", "remove", ...Object.keys(ContentPatch.fields), ...Object.keys(Rival.fields), ...Object.keys(Building.fields), ...Object.keys(SkinData.fields), "choices", "effects", "type", "amount", "cash", "hype", "discourse", "protesters", "flag", "news", "thought", "place", "race", "text", "tone", "trigger", "when", "presentation", "good", "bad", "neutral", "joke", "walker", "flow", "sprite", "offmap", "initial", "states", "entry", "exit", "on", "guard", "actions", "target", "params", "blurb", "odds", "requires", "cards", "difficulty", "replaces", "weight", "voice", "headline", ...Object.keys(FactionSchema.fields), "faction", "relation", ...Object.keys(BirdArchetypeSchema.fields), ...Object.keys(BirdPostSchema.fields), ...Object.keys(BirdEventSchema.fields)];
+const fieldNames = ["apiVersion", "id", "name", "version", "author", "description", "skin", "content", "assets", "audio", "looks", "voice", "cues", "music", ...Object.keys(Look.fields), ...Object.keys(Voice.fields), ...VOICE_MOMENTS, "from", "to", "map", "list", "min", "max", "lines", ...Object.keys(LookPart.fields), "family", "src", "add", "override", "remove", ...Object.keys(ContentPatch.fields), ...Object.keys(Rival.fields), ...Object.keys(Building.fields), ...Object.keys(SkinData.fields), "choices", "effects", "type", "amount", "cash", "hype", "discourse", "protesters", "flag", "news", "thought", "place", "race", "text", "tone", "trigger", "when", "presentation", "good", "bad", "neutral", "joke", "walker", "flow", "sprite", "offmap", "initial", "states", "entry", "exit", "on", "guard", "actions", "target", "params", "blurb", "odds", "requires", "cards", "difficulty", "replaces", "weight", "voice", "headline", ...Object.keys(FactionSchema.fields), "faction", "relation", ...Object.keys(BirdArchetypeSchema.fields), ...Object.keys(BirdPostSchema.fields), ...Object.keys(BirdEventSchema.fields)];
 function pathString(path: ReadonlyArray<PropertyKey | { readonly key: PropertyKey }>): string {
   return path.reduce<string>((s, part) => {
     const key = typeof part === "object" ? part.key : part;

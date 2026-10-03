@@ -148,6 +148,7 @@ export function BirdApp({ birdapp, layout, actions }: SlotPropsMap["BirdApp"]) {
                       <span>{p.replyTo ? `Re: ${p.text}` : p.quote ? `Fwd: ${p.text}` : p.text}</span>
                       <span>
                         {p.lab && <i className="f95-labsq" style={{ "--bird-lab": p.lab.color } as CSSProperties} title={p.lab.name} aria-label={p.lab.name} />}
+                        {birdapp.face && <span className="f95-bird-face" aria-hidden>{birdapp.face}</span>}
                         {p.handle}
                       </span>
                       <span className="num">{p.likesText}</span>
@@ -155,7 +156,7 @@ export function BirdApp({ birdapp, layout, actions }: SlotPropsMap["BirdApp"]) {
                     </div>
                   ))}
                 </div>
-                {sel && <Preview post={sel} />}
+                {sel && <Preview post={sel} face={birdapp.face} />}
                 {birdapp.typing && <p className="f95-bird-typing">{birdapp.typing}</p>}
               </>
             )}
@@ -255,13 +256,14 @@ export function BirdApp({ birdapp, layout, actions }: SlotPropsMap["BirdApp"]) {
 }
 
 /** The preview pane: the post as a newsgroup article, its counts, how it landed, and the top reply quoted. */
-function Preview({ post }: { post: BirdPostVM }) {
+function Preview({ post, face }: { post: BirdPostVM; face?: string }) {
   const t = useT();
   return (
     <article className={`f95-bird-preview inset outcome-${post.outcome}`} aria-label={`${post.handle}: ${post.text}`}>
       <div className="f95-bird-hdr">
         <span>
-          <b>From:</b> {post.name} &lt;{post.handle}&gt;
+          <b>From:</b> {face && <span className="f95-bird-face" aria-hidden>{face}</span>}
+          {post.name} &lt;{post.handle}&gt;
         </span>
         {post.lab && (
           <span>
