@@ -56,9 +56,7 @@ for (const shot of shots) {
     window.__flushFrame = (t) => { const run = queue; queue = []; for (const [, cb] of run) cb(t); };
   });
   let now = 0;
-  // Callbacks get the page's own clock, as a browser's rAF does: anything that times itself from performance.now() (the
-  // HUD's Odometer) would otherwise see a negative elapsed time and roll its number off to minus billions (FLT-109).
-  const step = async (ms) => { await page.clock.runFor(ms); now += ms; await page.evaluate(() => window.__flushFrame(performance.now())); };
+  const step = async (ms) => { await page.clock.runFor(ms); now += ms; await page.evaluate((t) => window.__flushFrame(t), now); };
   // Warm up in big steps (the sim and the asset loads), then let the network settle.
   for (let t = 0; t < (shot.warmup ?? 4000); t += 100) await step(100);
   await page.waitForLoadState("networkidle").catch(() => {});
