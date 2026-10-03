@@ -38,7 +38,7 @@ Effect (ManagedRuntime, browser)
 
 ## How to port (behaviour-preserving first)
 
-1. Branch `flt-3-xstate-effect` from the lead's base branch (named in your prompt). Vendor Kit Langton's Effect skill from trails (Manzanita-Research/trails, branch `bb/add-kit-langton-s-effect-skill-thr_7byngp3nkd`, folder `.agents/skills/effect/` plus the `.claude/skills/effect` link), keeping its LICENSE. Read it before you write Effect code. Add a short "XState + Effect" section to `AGENTS.md` that restates the six rules above.
+1. Branch `flt-3-xstate-effect` from the lead's base branch (named in your prompt). Vendor Kit Langton's Effect skill from trails (Manzanita-Research/trails, the branch that adds Kit Langton's Effect skill, folder `.agents/skills/effect/` plus the `.claude/skills/effect` link), keeping its LICENSE. Read it before you write Effect code. Add a short "XState + Effect" section to `AGENTS.md` that restates the six rules above.
 2. Add the pinned deps. Make sure a hello-world `setupEffect` machine runs under `createEffectActor` in vitest **before** porting anything. If the alpha is broken in a way you can't work around in about 30 minutes, stop and report to the lead (don't silently switch versions).
 3. Port one system at a time, keeping `pnpm check` green after each commit: training → economy → goals → the Water Discourse arc → walkers → app shell/loop → React wiring → remove zustand.
 4. **No new features, and same numbers:** all existing tests pass unchanged, except for rewrites that assert the same behaviour through the machines. A before/after screenshot at the same seed and day should look the same.

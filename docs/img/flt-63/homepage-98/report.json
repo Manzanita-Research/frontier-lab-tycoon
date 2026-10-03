@@ -14,19 +14,19 @@
     {
       "scene": "flt63-facilities",
       "skin": "homepage-98",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/homepage-98/before/flt63-facilities@homepage-98.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/homepage-98/after/flt63-facilities@homepage-98.png",
+      "before": "docs/img/flt-63/homepage-98/before/flt63-facilities@homepage-98.png",
+      "after": "docs/img/flt-63/homepage-98/after/flt63-facilities@homepage-98.png",
       "title": "FLT-63: Start ▸ Facilities ▸ open (the buildings, grouped)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/homepage-98/compare/flt63-facilities@homepage-98.png",
+      "compare": "docs/img/flt-63/homepage-98/compare/flt63-facilities@homepage-98.png",
       "changed": 0.06693595679012346
     },
     {
       "scene": "flt63-run",
       "skin": "homepage-98",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/homepage-98/before/flt63-run@homepage-98.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/homepage-98/after/flt63-run@homepage-98.png",
+      "before": "docs/img/flt-63/homepage-98/before/flt63-run@homepage-98.png",
+      "after": "docs/img/flt-63/homepage-98/after/flt63-run@homepage-98.png",
       "title": "FLT-63: Start ▸ Run… (the widget launcher)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-63/homepage-98/compare/flt63-run@homepage-98.png",
+      "compare": "docs/img/flt-63/homepage-98/compare/flt63-run@homepage-98.png",
       "changed": 0.1836442901234568
     }
   ],

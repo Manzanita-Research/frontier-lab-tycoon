@@ -14,17 +14,17 @@
     {
       "scene": "phone-start",
       "skin": "frontier-95",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95-phone/before/phone-start@frontier-95.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95-phone/after/phone-start@frontier-95.png",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95-phone/compare/phone-start@frontier-95.png",
+      "before": "docs/evidence/FLT-50/frontier-95-phone/before/phone-start@frontier-95.png",
+      "after": "docs/evidence/FLT-50/frontier-95-phone/after/phone-start@frontier-95.png",
+      "compare": "docs/evidence/FLT-50/frontier-95-phone/compare/phone-start@frontier-95.png",
       "changed": 0.9241235265524365
     },
     {
       "scene": "phone-path",
       "skin": "frontier-95",
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95-phone/before/phone-path@frontier-95.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95-phone/after/phone-path@frontier-95.png",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/evidence/FLT-50/frontier-95-phone/compare/phone-path@frontier-95.png",
+      "before": "docs/evidence/FLT-50/frontier-95-phone/before/phone-path@frontier-95.png",
+      "after": "docs/evidence/FLT-50/frontier-95-phone/after/phone-path@frontier-95.png",
+      "compare": "docs/evidence/FLT-50/frontier-95-phone/compare/phone-path@frontier-95.png",
       "changed": 0.9365680823915421
     }
   ],

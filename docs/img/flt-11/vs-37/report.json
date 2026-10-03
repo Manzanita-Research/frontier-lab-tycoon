@@ -14,28 +14,28 @@
     {
       "scene": "overview",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/vs-37/before/overview.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/vs-37/after/overview.png",
+      "before": "docs/img/flt-11/vs-37/before/overview.png",
+      "after": "docs/img/flt-11/vs-37/after/overview.png",
       "title": "The campus, mid-morning, paused",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/vs-37/compare/overview.png",
+      "compare": "docs/img/flt-11/vs-37/compare/overview.png",
       "changed": 0.0013495370370370371
     },
     {
       "scene": "phone",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/vs-37/before/phone.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/vs-37/after/phone.png",
+      "before": "docs/img/flt-11/vs-37/before/phone.png",
+      "after": "docs/img/flt-11/vs-37/after/phone.png",
       "title": "The same campus on a phone (390x844)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/vs-37/compare/phone.png",
+      "compare": "docs/img/flt-11/vs-37/compare/phone.png",
       "changed": 0.0023324523028314496
     },
     {
       "scene": "event",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/vs-37/before/event.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/vs-37/after/event.png",
+      "before": "docs/img/flt-11/vs-37/before/event.png",
+      "after": "docs/img/flt-11/vs-37/after/event.png",
       "title": "An event card lands (the Water Discourse)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-11/vs-37/compare/event.png",
+      "compare": "docs/img/flt-11/vs-37/compare/event.png",
       "changed": 0.004220679012345679
     }
   ],

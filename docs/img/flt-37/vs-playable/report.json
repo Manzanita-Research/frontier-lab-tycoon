@@ -14,37 +14,37 @@
     {
       "scene": "overview",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/vs-playable/before/overview.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/vs-playable/after/overview.png",
+      "before": "docs/img/flt-37/vs-playable/before/overview.png",
+      "after": "docs/img/flt-37/vs-playable/after/overview.png",
       "title": "The campus, mid-morning, paused",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/vs-playable/compare/overview.png",
+      "compare": "docs/img/flt-37/vs-playable/compare/overview.png",
       "changed": 0.0013804012345679012
     },
     {
       "scene": "phone",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/vs-playable/before/phone.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/vs-playable/after/phone.png",
+      "before": "docs/img/flt-37/vs-playable/before/phone.png",
+      "after": "docs/img/flt-37/vs-playable/after/phone.png",
       "title": "The same campus on a phone (390x844)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/vs-playable/compare/phone.png",
+      "compare": "docs/img/flt-37/vs-playable/compare/phone.png",
       "changed": 0.0028337282780410743
     },
     {
       "scene": "mod-steve",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/vs-playable/before/mod-steve.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/vs-playable/after/mod-steve.png",
+      "before": "docs/img/flt-37/vs-playable/before/mod-steve.png",
+      "after": "docs/img/flt-37/vs-playable/after/mod-steve.png",
       "title": "FLT-37: ?mod=every-lab-is-steve, the Arena is three Steves (main ignores ?mod=)",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/vs-playable/compare/mod-steve.png",
+      "compare": "docs/img/flt-37/vs-playable/compare/mod-steve.png",
       "changed": 0.010766975308641975
     },
     {
       "scene": "midgame",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/vs-playable/before/midgame.png",
-      "after": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/vs-playable/after/midgame.png",
+      "before": "docs/img/flt-37/vs-playable/before/midgame.png",
+      "after": "docs/img/flt-37/vs-playable/after/midgame.png",
       "title": "FLT-48 Part A: the scripted mid-game campus, paused near Y2 Mar",
-      "compare": "/root/.bb-machines/jem.getbb.app/checkouts/project-proj-dvb9hes55f/docs/img/flt-37/vs-playable/compare/midgame.png",
+      "compare": "docs/img/flt-37/vs-playable/compare/midgame.png",
       "changed": 0.09351774691358025
     }
   ],

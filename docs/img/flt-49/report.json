@@ -14,37 +14,37 @@
     {
       "scene": "coach-path",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49/before/coach-path.png",
-      "after": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49/after/coach-path.png",
+      "before": "docs/img/flt-49/before/coach-path.png",
+      "after": "docs/img/flt-49/after/coach-path.png",
       "title": "Coach suggests a connected path from the gate",
-      "compare": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49/compare/coach-path.png",
+      "compare": "docs/img/flt-49/compare/coach-path.png",
       "changed": 0.3339320987654321
     },
     {
       "scene": "coach-hall",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49/before/coach-hall.png",
-      "after": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49/after/coach-hall.png",
+      "before": "docs/img/flt-49/before/coach-hall.png",
+      "after": "docs/img/flt-49/after/coach-hall.png",
       "title": "Coach suggests a Training Hall beside the paid path",
-      "compare": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49/compare/coach-hall.png",
+      "compare": "docs/img/flt-49/compare/coach-hall.png",
       "changed": 0.3342407407407407
     },
     {
       "scene": "coach-phone",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49/before/coach-phone.png",
-      "after": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49/after/coach-phone.png",
+      "before": "docs/img/flt-49/before/coach-phone.png",
+      "after": "docs/img/flt-49/after/coach-phone.png",
       "title": "Coach path anchors on a phone",
-      "compare": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49/compare/coach-phone.png",
+      "compare": "docs/img/flt-49/compare/coach-phone.png",
       "changed": 0.19420570543200874
     },
     {
       "scene": "midgame",
       "skin": null,
-      "before": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49/before/midgame.png",
-      "after": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49/after/midgame.png",
+      "before": "docs/img/flt-49/before/midgame.png",
+      "after": "docs/img/flt-49/after/midgame.png",
       "title": "FLT-48 Part A: the scripted mid-game campus, paused near Y2 Mar",
-      "compare": "/root/.bb-machines/jem.getbb.app/plugins/environment-git-worktree/host-data/worktrees/thr_hq44hdra2b-1/project-proj-dvb9hes55f/docs/img/flt-49/compare/midgame.png",
+      "compare": "docs/img/flt-49/compare/midgame.png",
       "changed": 0.16846141975308643
     }
   ],
