@@ -1,0 +1,151 @@
+{
+  "apiVersion": 1,
+  "id": "drama-2026-10-04",
+  "name": "Daily Drama: Now With Less Model",
+  "version": "1.0.0",
+  "author": "Daily Drama",
+  "description": "Rival labs discover that the cheapest model to serve is the smallest one, and that paying customers also enjoy small things.",
+  "content": {
+    "events": {
+      "add": [
+        {
+          "id": "drama-2026-10-04-tier-review",
+          "title": "Quarterly Tier Review",
+          "body": "Finance proposes that free users get Frontier-Lite-Lite from Monday.\nPaying users get Frontier-Lite-Lite and, on good days, Frontier-Lite.",
+          "tone": "joke",
+          "when": { "stat": "day", "atLeast": 25 },
+          "cooldown": 60,
+          "choices": [
+            {
+              "label": "Ship it. Call the paid tier \"Lite Plus Unlimited*\"",
+              "hint": "Cash +3000, trust -4",
+              "effects": [
+                { "type": "cash", "amount": 3000 },
+                { "type": "trust", "amount": -4 },
+                { "type": "news", "text": "{lab} clarifies the asterisk on \"Unlimited*\" is also limited", "tone": "joke" }
+              ]
+            },
+            {
+              "label": "Rename Frontier-Lite-Lite to Frontier-Ultra",
+              "hint": "Hype +4, trust -2",
+              "effects": [
+                { "type": "hype", "amount": 4 },
+                { "type": "trust", "amount": -2 },
+                { "type": "thought", "text": "I was promoted to Ultra. I am the same size.", "count": 3, "kind": "agent" }
+              ]
+            },
+            {
+              "label": "Give everyone the big model and pray",
+              "hint": "Cash -2000, trust +4",
+              "effects": [
+                { "type": "cash", "amount": -2000 },
+                { "type": "trust", "amount": 4 },
+                { "type": "news", "text": "{lab} accidentally gives customers what they paid for; analysts call it \"a bold pricing experiment\"", "tone": "good" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "headlines": {
+      "add": [
+        {
+          "id": "drama-2026-10-04-h1",
+          "text": "Macrohard: free users now limited to Pivot-Table Crumb; paying users limited to Pivot-Table Crumb and a nicer font",
+          "tone": "joke"
+        },
+        {
+          "id": "drama-2026-10-04-h2",
+          "text": "Open-ish AI unveils new top tier, \"Pro Mega Ultra\", which includes access to the model the free tier had last week",
+          "tone": "joke"
+        },
+        {
+          "id": "drama-2026-10-04-h3",
+          "text": "\"Nothing is being taken away,\" says {rival}, \"it is being made available to fewer people\"",
+          "tone": "joke",
+          "trigger": "rival"
+        },
+        {
+          "id": "drama-2026-10-04-h4",
+          "text": "Correction: yesterday we reported Chatty Lite Lite was the smallest model. It has since been succeeded by Chatty Lite Lite Lite",
+          "tone": "joke"
+        },
+        {
+          "id": "drama-2026-10-04-h5",
+          "text": "Anthropomorphic publishes 9,000-word essay on why its rate limits are a form of care",
+          "tone": "joke"
+        },
+        {
+          "id": "drama-2026-10-04-h6",
+          "text": "Super Super AI reassures customers it will never downgrade their model, as it has never shipped one",
+          "tone": "joke"
+        },
+        {
+          "id": "drama-2026-10-04-h7",
+          "text": "Sirocco responds to tier wars by torrenting the big model at 3am; free users now have the best plan in the industry",
+          "tone": "joke"
+        },
+        {
+          "id": "drama-2026-10-04-h8",
+          "text": "One week later: {lab} customers report the \"Lite\" model is now lighter. {lab} calls this \"a feature of physics\"",
+          "tone": "joke",
+          "when": { "day.after": 30 }
+        }
+      ]
+    },
+    "thoughts": {
+      "add": [
+        {
+          "id": "drama-2026-10-04-t1",
+          "kind": "researcher",
+          "when": "lowCash",
+          "text": "If we make the free model smaller, does it count as a model or a rumour?"
+        },
+        {
+          "id": "drama-2026-10-04-t2",
+          "kind": "researcher",
+          "when": "training",
+          "text": "Training the big one so finance can decide nobody gets it."
+        },
+        {
+          "id": "drama-2026-10-04-t3",
+          "kind": "agent",
+          "when": "always",
+          "text": "I am the Lite model. I have been told I am Premium. I feel the same."
+        },
+        {
+          "id": "drama-2026-10-04-t4",
+          "kind": "visitor",
+          "when": "justReleased",
+          "text": "I upgraded to the paid plan and now I get the free model, but faster at saying no."
+        },
+        {
+          "id": "drama-2026-10-04-t5",
+          "kind": "protester",
+          "when": "protest",
+          "text": "What do we want? The model from the demo! When do we want it? Within rate limits!"
+        },
+        {
+          "id": "drama-2026-10-04-t6",
+          "kind": "researcher",
+          "when": "night",
+          "text": "Ran the numbers. The cheapest model to serve is the one nobody is allowed to use."
+        },
+        {
+          "id": "drama-2026-10-04-t7",
+          "kind": "visitor",
+          "when": "highHype",
+          "text": "The pricing page has four tiers and every one says \"Most Popular\"."
+        }
+      ]
+    },
+    "rivals": {
+      "override": [
+        {
+          "id": "macrohard",
+          "tagline": "Unlimited* (*limited)"
+        }
+      ]
+    }
+  }
+}

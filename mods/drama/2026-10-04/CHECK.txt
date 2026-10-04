@@ -1,0 +1,20 @@
+Daily Drama 2026-10-04: checker transcript (scripts/drama-run.mjs)
+
+$ flt-mod check mod.json
+PASS drama-2026-10-04@1.0.0: 365 days, 7300 ticks, 51 cards answered, 4 releases
+Replay identical: df08a78869e7ecc4e9aa6d84502864c407aa8e0e5eb217c3711c40dd14436956; cash $25262878; 697 ms
+Arc reachability: 10 arcs checked with xstate/graph (structural, guards/actions omitted), 10 of them the base game's, unchanged
+Executed: rivals, headlines, thoughts, events (the real sim ran with your definition)
+
+$ drama lint
+drama-lint mods/drama/2026-10-04: PASS (0 errors, 2 warnings)
+  ! glossary.json: "Pivot": might be: Pivot (media)
+      in: Pivot-Table Crumb
+  ! content.headlines.add[0].text: "Pivot": might be: Pivot (media)
+      in: Macrohard: free users now limited to Pivot-Table Crumb; paying users limited to Pivot-Table Crumb and a nicer font
+New parody names (the pack's glossary.json): Pivot-Table Crumb, Lite Plus Unlimited
+
+$ drama shape
+  ✓ one card/arc, 5-10 headlines, 5-10 thoughts, ids prefixed
+
+ALL GREEN
