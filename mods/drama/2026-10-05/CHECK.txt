@@ -1,0 +1,19 @@
+Daily Drama 2026-10-05: checker transcript (scripts/drama-run.mjs)
+
+$ flt-mod check mod.json
+PASS drama-2026-10-05@1.0.0: 365 days, 7300 ticks, 47 cards answered, 4 releases
+Replay identical: 3445baf0d804dac8a00e8d4d1a6516af4faec50f0c6ff52218007b6a6dcf7309; cash $10819825; 665 ms
+Arc reachability: 10 arcs checked with xstate/graph (structural, guards/actions omitted), 10 of them the base game's, unchanged
+Executed: rivals, headlines, thoughts, events (the real sim ran with your definition)
+
+$ drama lint
+drama-lint mods/drama/2026-10-05: PASS (0 errors, 2 warnings)
+  ! content.headlines.add[5].text: "Pivot": might be: Pivot (media)
+      in: Macrohard bundles token overages into spreadsheet software; Pivot-Table now bills per cell
+  ! glossary.json: "Chatty-Thrifty": declared but never used
+New parody names (the pack's glossary.json): none
+
+$ drama shape
+  ✓ one card/arc, 5-10 headlines, 5-10 thoughts, ids prefixed
+
+ALL GREEN

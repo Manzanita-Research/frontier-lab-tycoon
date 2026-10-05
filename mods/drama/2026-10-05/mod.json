@@ -1,0 +1,81 @@
+{
+  "apiVersion": 1,
+  "id": "drama-2026-10-05",
+  "name": "Daily Drama: The Cheap Model Costs More",
+  "version": "1.0.0",
+  "author": "Daily Drama",
+  "description": "Every lab slashes its price per token. Every model discovers it can simply use more tokens.",
+  "content": {
+    "events": {
+      "add": [
+        {
+          "id": "drama-2026-10-05-cheap-invoice",
+          "title": "Cheapest Model Ever, Biggest Invoice Ever",
+          "body": "Finance moved every agent to Chatty-Thrifty, a tenth the price per token. It then spent 40,000 tokens deciding whether to say 'hello'.\nThis month's bill is triple last month's.",
+          "tone": "joke",
+          "when": { "stat": "day", "atLeast": 30 },
+          "cooldown": 120,
+          "choices": [
+            {
+              "label": "Pay it. Call it \"reasoning\".",
+              "hint": "Cash -1500, Hype +3",
+              "effects": [
+                { "type": "cash", "amount": -1500 },
+                { "type": "hype", "amount": 3 },
+                { "type": "news", "text": "{lab} reports record amounts of thinking in quarterly earnings call", "tone": "joke" }
+              ]
+            },
+            {
+              "label": "Ask the model to be brief",
+              "hint": "Cash -800, Hype -1",
+              "effects": [
+                { "type": "cash", "amount": -800 },
+                { "type": "hype", "amount": -1 },
+                { "type": "thought", "text": "It replied with a 12-page memo on the importance of brevity.", "count": 3, "kind": "researcher" }
+              ]
+            },
+            {
+              "label": "Forecast next month with a dartboard",
+              "hint": "Cash -300, Trust -2",
+              "effects": [
+                { "type": "cash", "amount": -300 },
+                { "type": "trust", "amount": -2 },
+                { "type": "news", "text": "{lab} budget forecast now 11% accurate, in line with industry", "tone": "joke" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "headlines": {
+      "add": [
+        { "id": "drama-2026-10-05-h-cut", "text": "Open-ish AI cuts price per token 90%; average answer now 900% longer", "tone": "joke" },
+        { "id": "drama-2026-10-05-h-zephyr", "text": "Sirocco's new budget Zephyr spends 30,000 tokens confirming it is the budget option", "tone": "joke" },
+        { "id": "drama-2026-10-05-h-survey", "text": "Survey: one in nine labs can forecast their AI bill. The other eight asked the AI", "tone": "joke" },
+        { "id": "drama-2026-10-05-h-quote", "text": "\"It's cheaper per token,\" insists CFO, gesturing at an invoice the size of a door", "tone": "joke" },
+        { "id": "drama-2026-10-05-h-correction", "text": "CORRECTION: the 'cheapest model ever' was cheapest per word, not per answer. The answer was a novella", "tone": "joke", "when": { "day.after": 30 } },
+        { "id": "drama-2026-10-05-h-macrohard", "text": "Macrohard bundles token overages into spreadsheet software; Pivot-Table now bills per cell", "tone": "joke" },
+        { "id": "drama-2026-10-05-h-essay", "text": "One week later: Anthropomorphic publishes 9,000-word essay on the virtue of concision", "tone": "joke", "when": { "day.after": 37 } },
+        { "id": "drama-2026-10-05-h-unlimited", "text": "MetaMeta launches 'unlimited' plan, limited to whatever its model can think of", "tone": "joke" },
+        { "id": "drama-2026-10-05-h-supersuper", "text": "Super Super AI, which has no product, reports lowest AI bill in the industry", "tone": "joke" }
+      ]
+    },
+    "thoughts": {
+      "add": [
+        { "id": "drama-2026-10-05-t-lowcash", "kind": "researcher", "when": "lowCash", "text": "We saved 90% per token and I'm having free kombucha for dinner." },
+        { "id": "drama-2026-10-05-t-training", "kind": "researcher", "when": "training", "text": "The small model has been thinking about my one-word prompt since lunch." },
+        { "id": "drama-2026-10-05-t-yesno", "kind": "researcher", "when": "always", "text": "I asked for yes or no. I got yes, no, and a literature review." },
+        { "id": "drama-2026-10-05-t-night", "kind": "researcher", "when": "night", "text": "2am. The budget model is still on step 4 of 'think step by step'." },
+        { "id": "drama-2026-10-05-t-agent", "kind": "agent", "when": "always", "text": "I was told I'm the cheap one. Allow me to explain why, at length." },
+        { "id": "drama-2026-10-05-t-agent-release", "kind": "agent", "when": "justReleased", "text": "Before answering, let me consider several approaches. Then several more." },
+        { "id": "drama-2026-10-05-t-visitor", "kind": "visitor", "when": "highHype", "text": "I'm from procurement. I'm here to forecast your pricing. That was a joke." },
+        { "id": "drama-2026-10-05-t-protester", "kind": "protester", "when": "protest", "text": "I asked the model to read my sign. It's still reading my sign." }
+      ]
+    },
+    "rivals": {
+      "override": [
+        { "id": "openish", "tagline": "A tenth the price per token. Tokens sold separately." }
+      ]
+    }
+  }
+}
