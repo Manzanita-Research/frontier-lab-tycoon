@@ -18,7 +18,7 @@ DATE="$(TZ=America/Los_Angeles date +%F)"
 read -r -d '' PROMPT <<EOF || true
 Kind: explore. House rules: the mission-control charter (on the Mini at ${CHARTER}). Task: **FLT-34 Daily Drama run for ${DATE}.** You are the runner, not the author: the pack is written by the headless author inside the pipeline, from the modding skill alone, and you never edit it by hand.
 
-1. \`git fetch origin && git checkout -B drama-run-${DATE} origin/main\`, then \`node scripts/drama-run.mjs --date ${DATE}\`.
+1. \`git fetch origin && git checkout -B drama-run-${DATE} origin/main\`, then \`node scripts/drama-run.mjs --date ${DATE}\`. The pipeline comments on FLT-34 itself: if it printed \`commented on FLT-34\`, skip the comment steps below. If it printed \`FLT-34 comment (not posted): …\`, post that text yourself, or hand it to the lead if \`bb\` fails for you too.
 2. If it prints \`quiet day, skipped\`: \`bb tasks comment FLT-34 --body "Daily Drama ${DATE}: skipped (quiet day). <the SKIP reason, one line>"\` and stop.
 3. If it prints \`opened <url>\`: \`bb tasks comment FLT-34 --body "Daily Drama ${DATE}: <url>, ready for Jem's review."\` and stop. **Never merge a Drama PR**; Jem reviews every one.
 4. If it prints \`NOT GREEN\`, or the author crashed: run it once more exactly as before (the author starts fresh). If it fails again, comment the last 30 lines of output on FLT-34 as "Daily Drama ${DATE}: failed", and stop. Don't fix the pack yourself, and don't edit drama/**: a hand-made pack would defeat the point.

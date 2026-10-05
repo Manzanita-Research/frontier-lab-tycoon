@@ -13,3 +13,4 @@ coverage/
 
 e2e/results/
 dist-accounts
+/.drama-state/
