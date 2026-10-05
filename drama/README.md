@@ -3,7 +3,8 @@
 Topical mods from the day's AI news. Once a day, one story about industry **dynamics** becomes a small parody content pack: one event card, 5–10 headlines, 5–10 thoughts, and optionally a rival tweak. It lands in `mods/drama/YYYY-MM-DD/` as a PR, and Jem reviews every one before it publishes. Spec: [`docs/specs/FLT-34.md`](../docs/specs/FLT-34.md).
 
 ```sh
-pnpm drama                       # the whole run: fetch → author → check → PR   (node scripts/drama-run.mjs)
+pnpm drama                       # the whole run: fetch → author → check → PR → FLT-34 comment   (node scripts/drama-run.mjs)
+pnpm drama --no-comment          # the same, printing the FLT-34 comment instead of posting it (AUTOMATION.md)
 pnpm drama --no-pr --keep-room   # stop before the PR, keep the author's room to look at
 pnpm drama fetch                 # just the candidates, into drama/.work/<date>/candidates.md
 pnpm drama check <pack dir>      # flt-mod check + linter + shape, the same thing the author calls

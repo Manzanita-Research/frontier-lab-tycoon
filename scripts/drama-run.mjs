@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Daily Drama: one headless run, from today's news to a PR Jem reviews. See drama/AUTOMATION.md.
 //
-//   node scripts/drama-run.mjs [--date YYYY-MM-DD] [--model claude-opus-5-5] [--no-pr] [--keep-room]
+//   node scripts/drama-run.mjs [--date YYYY-MM-DD] [--model claude-opus-5-5] [--no-pr] [--keep-room] [--no-comment]
 //
 // 1. fetch   read drama/sources.json into candidates.md                       (scripts/drama-fetch.mjs)
 // 2. room    build a scratch room OUTSIDE the checkout with only BRIEF.md (drama/pick.md), SKILL.md
@@ -12,6 +12,9 @@
 // 4. check   flt-mod check, the parody linter (drama/lint.mjs) and the pack's shape; transcript → CHECK.txt
 // 5. pr      commit mods/drama/<date>/ on a fresh branch from origin/main (a temporary worktree, so the current
 //            checkout is untouched) and open "Daily Drama: <summary>". The source link lives in the PR body only.
+// 6. report  post the outcome on FLT-34 (`bb tasks comment`): opened, skipped, or failed on the second attempt of the
+//            day (a first failure only says to run the same command again; the count lives in .drama-state/<date>.json).
+//            --no-comment prints the comment instead. A comment that fails to post never fails the run.
 //
 // Steps run alone too: `fetch`, `check <pack dir>`, `pr` (e.g. after a human edits the pack), `body` (rewrite pr-body.md only).
 import { spawn } from "node:child_process";
@@ -43,6 +46,7 @@ function run(command, argv, { cwd = root, input, log, env = process.env, quiet =
     child.stdout.on("data", (c) => { take(c); log?.write?.(c); });
     child.stderr.on("data", (c) => take(c));
     if (input !== undefined) child.stdin.end(input);
+    child.on("error", (error) => ok({ code: -1, out: out + String(error) }));
     child.on("close", (code) => ok({ code, out }));
   });
 }
@@ -277,8 +281,108 @@ async function prStep({ transcript, pr, agent }) {
 }
 
 // ---------------------------------------------------------------------------------------------------------------
+// Report: the run tells FLT-34 how it went, so the runner doesn't need a working `bb` of its own.
 
-async function main() {
+const FAIL_TAIL = 30;
+
+/** The FLT-34 comment for an outcome, in the runner prompt's words (drama/AUTOMATION.md). */
+export function commentText(outcome, day = date) {
+  if (outcome.kind === "skipped") {
+    const reason = outcome.why.replace(/^#.*$/gm, "").replace(/\s+/g, " ").trim();
+    return `Daily Drama ${day}: skipped (quiet day). ${reason}`.trim();
+  }
+  if (outcome.kind === "opened") return `Daily Drama ${day}: ${outcome.url}, ready for Jem's review.`;
+  if (outcome.kind === "failed") return `Daily Drama ${day}: failed\n\n\`\`\`\n${outcome.output ?? ""}\n\`\`\``;
+  throw new Error(`no FLT-34 comment for outcome ${outcome.kind}`);
+}
+
+/** Counts today's failures in the git-ignored .drama-state/<day>.json. Returns this failure's attempt number. */
+export async function recordFailure(stateDir, day = date) {
+  const file = join(stateDir, `${day}.json`);
+  const state = JSON.parse(await readFile(file, "utf8").catch(() => "{}"));
+  const failures = (state.failures ?? 0) + 1;
+  await mkdir(stateDir, { recursive: true });
+  await writeFile(file, JSON.stringify({ ...state, failures }, null, 2) + "\n");
+  return failures;
+}
+
+/** Posts on FLT-34 with `bb` ($BB_CLI if set). Never throws: a comment that can't be posted is printed for the runner. */
+export async function postComment(text, { noComment = false, exec = run, bb = process.env.BB_CLI || "bb", log = console.log } = {}) {
+  if (noComment) { log(`FLT-34 comment (--no-comment, not posted): ${text}`); return false; }
+  let result;
+  try { result = await exec(bb, ["tasks", "comment", "FLT-34", "--body", text], { quiet: true }); }
+  catch (error) { result = { code: -1, out: String(error) }; }
+  if (result.code === 0) { log("commented on FLT-34"); return true; }
+  log(`\`${bb} tasks comment FLT-34\` failed (exit ${result.code}): ${String(result.out ?? "").trim().split("\n").pop()}`);
+  log(`FLT-34 comment (not posted): ${text}`);
+  return false;
+}
+
+/**
+ * Turns the run's outcome into its exit code, and comments on FLT-34 when there's news: opened, skipped, or a failure on
+ * the second attempt. The comment never changes the exit code.
+ */
+export async function report(outcome, { day = date, stateDir = join(root, ".drama-state"), tail = () => "", ...post } = {}) {
+  const log = post.log ?? console.log;
+  if (outcome.kind === "green") return 0; // --no-pr: a local run, no news for FLT-34
+  if (outcome.kind === "failed") {
+    const attempt = await recordFailure(stateDir, day);
+    if (attempt < 2) {
+      log(`drama-run ${day}: NOT GREEN (attempt 1 of 2; run the same command again)`);
+      return 1;
+    }
+    log(`drama-run ${day}: NOT GREEN (attempt ${attempt} of 2), so FLT-34 hears about it`);
+    await postComment(commentText({ kind: "failed", output: tail(FAIL_TAIL) }, day), post);
+    return 1;
+  }
+  await postComment(commentText(outcome, day), post);
+  return 0;
+}
+
+/** Tees stdout and stderr, so a failure comment can quote the last lines of the run. */
+function captureOutput() {
+  let text = "";
+  const restore = [process.stdout, process.stderr].map((stream) => {
+    const write = stream.write;
+    stream.write = (chunk, ...rest) => {
+      text += typeof chunk === "string" ? chunk : Buffer.from(chunk).toString();
+      return write.call(stream, chunk, ...rest);
+    };
+    return () => { stream.write = write; };
+  });
+  return {
+    tail: (n) => text.trimEnd().split("\n").slice(-n).join("\n"),
+    stop: () => restore.forEach((undo) => undo()),
+  };
+}
+
+/** The whole run, from fetch to PR. Returns { kind: "skipped" | "opened" | "failed" | "green", ... }. */
+async function author(steps) {
+  await mkdir(work, { recursive: true });
+  await steps.fetchStep();
+  const room = await buildRoom();
+  const agent = await steps.writeStep(room);
+  const got = await collect(room);
+  if (!has("--keep-room")) await rm(room, { recursive: true, force: true });
+  else say(`room kept at ${room}`);
+  if (got.skipped) {
+    say(`quiet day, skipped:\n${got.why.trim()}`);
+    return { kind: "skipped", why: got.why };
+  }
+  const { ok, transcript, pr } = await checkStep();
+  console.log(transcript);
+  if (!ok) { say(`NOT GREEN, no PR. The pack is in ${relative(root, packDir)}; fix it and run \`node scripts/drama-run.mjs pr --date ${date}\`.`); return { kind: "failed" }; }
+  if (has("--no-pr")) { say(`green; --no-pr, so stopping here. Pack: ${relative(root, packDir)}; PR body would use ${relative(root, join(work, "pr.json"))}`); return { kind: "green" }; }
+  const url = await steps.prStep({ transcript, pr, agent });
+  say(`opened ${url}`);
+  return { kind: "opened", url };
+}
+
+/**
+ * `deps` swaps steps out for a fake author (fetchStep, writeStep, prStep), the `bb` call (exec) or the state directory,
+ * so the run can be exercised without the network, a model or a real comment.
+ */
+export async function main(deps = {}) {
   const command = args[0] && !args[0].startsWith("--") ? args[0] : "all";
   if (command === "check") {
     const dir = resolve(args[1] && !args[1].startsWith("--") ? args[1] : packDir);
@@ -302,23 +406,20 @@ async function main() {
   }
   if (command !== "all") throw new Error(`unknown step ${command}: all | fetch | check [dir] | pr | body`);
 
-  await mkdir(work, { recursive: true });
-  await fetchStep();
-  const room = await buildRoom();
-  const agent = await writeStep(room);
-  const got = await collect(room);
-  if (!has("--keep-room")) await rm(room, { recursive: true, force: true });
-  else say(`room kept at ${room}`);
-  if (got.skipped) {
-    say(`quiet day, skipped:\n${got.why.trim()}`);
-    return 0;
+  const { stateDir, exec, ...steps } = { fetchStep, writeStep, prStep, ...deps };
+  const output = captureOutput();
+  try {
+    let outcome;
+    try {
+      outcome = await author(steps);
+    } catch (error) {
+      console.error(`drama-run ${date}: ${error.stack ?? error}`);
+      outcome = { kind: "failed" };
+    }
+    return await report(outcome, { stateDir, exec, tail: output.tail, noComment: has("--no-comment") });
+  } finally {
+    output.stop();
   }
-  const { ok, transcript, pr } = await checkStep();
-  console.log(transcript);
-  if (!ok) { say(`NOT GREEN, no PR. The pack is in ${relative(root, packDir)}; fix it and run \`node scripts/drama-run.mjs pr --date ${date}\`.`); return 1; }
-  if (has("--no-pr")) { say(`green; --no-pr, so stopping here. Pack: ${relative(root, packDir)}; PR body would use ${relative(root, join(work, "pr.json"))}`); return 0; }
-  say(`opened ${await prStep({ transcript, pr, agent })}`);
-  return 0;
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url))

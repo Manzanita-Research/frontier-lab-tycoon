@@ -13,9 +13,10 @@ node scripts/drama-run.mjs
   write   headless `claude -p --restricted`, no shell, one `check` tool: picks one story (or skips) and writes the pack
   check   flt-mod check + drama/lint.mjs + shape → mods/drama/<date>/CHECK.txt
   pr      branch drama-<date> from origin/main, PR "Daily Drama: <summary>" (source link in the PR body only)
+  report  `bb tasks comment FLT-34`: opened, skipped, or failed on the day's second attempt; prints `commented on FLT-34`
 ```
 
-Then it posts the outcome on FLT-34 and stops. A quiet day posts "skipped" and opens nothing. Jem reviews and merges every Drama PR; nothing auto-publishes (the trust ratchet: after about 20 approvals in a row with no edits, desk asks Jem about auto-publishing).
+The pipeline posts the outcome on FLT-34 itself (FLT-110), so the runner needs no working `bb` of its own (on some machines `bb` can't reach the server from inside Claude Code's sandbox, but the pipeline runs outside it). A quiet day posts "skipped" and opens nothing. Jem reviews and merges every Drama PR; nothing auto-publishes (the trust ratchet: after about 20 approvals in a row with no edits, desk asks Jem about auto-publishing).
 
 Cost per run: about $0.30 of Opus 5.5 for the author, about 70 s of author time, and one Modal machine for a few minutes. The author runs in the same thread, so it uses that machine's Claude login.
 
@@ -48,13 +49,31 @@ Or paste the script inline with `--script "$(cat drama/automation.sh)"`. Check i
 3. Spawns the thread: `--environment-provider modal-sandbox --provider claude-code --model claude-opus-5-5 --reasoning-level high --permission-mode auto`, titled `explore · Daily Drama <date>`, with the prompt below. The model is passed explicitly, because Modal's catalog is stale.
 4. Attaches the new thread to FLT-34.
 
+## The FLT-34 comment
+
+`scripts/drama-run.mjs` ends every full run by commenting on FLT-34 with `$BB_CLI` if set, otherwise `bb`, in the prompt's words below:
+
+| Outcome | Prints | Comment |
+| --- | --- | --- |
+| skipped | `quiet day, skipped` | `Daily Drama <date>: skipped (quiet day). <SKIP.md on one line>` |
+| opened | `opened <url>` | `Daily Drama <date>: <url>, ready for Jem's review.` |
+| first failure of the day (`NOT GREEN`, or the author crashed) | `NOT GREEN (attempt 1 of 2; run the same command again)` | none |
+| second failure | `NOT GREEN (attempt 2 of 2), so FLT-34 hears about it` | `Daily Drama <date>: failed` and the last 30 lines of output |
+| `--no-pr`, green | `green; --no-pr` | none (a local run) |
+
+- A posted comment prints `commented on FLT-34` on its own line, and the runner then skips its own comment step.
+- **Attempts:** the runner retries a failure with the identical command, so the pipeline counts the day's failures in `.drama-state/<date>.json` at the checkout's root. That directory is gitignored; delete it to start the day's count again. A success on either attempt comments as usual.
+- **`--no-comment`** (for local tests) posts nothing and prints `FLT-34 comment (--no-comment, not posted): <text>` instead.
+- **If posting fails,** the run prints `FLT-34 comment (not posted): <text>` and carries on: a comment never changes the exit code (0 for opened or skipped, 1 for a failure). The runner hands that text to the lead.
+- Only the full run comments. The single steps (`fetch`, `check`, `pr`, `body`) don't.
+
 ## The thread's prompt
 
 This is kept in `drama/automation.sh`. Verbatim:
 
 > Kind: explore. House rules: the mission-control charter (on the Mini at {$FLT_CHARTER}). Task: **FLT-34 Daily Drama run for {date}.** You are the runner, not the author: the pack is written by the headless author inside the pipeline, from the modding skill alone, and you never edit it by hand.
 >
-> 1. `git fetch origin && git checkout -B drama-run-{date} origin/main`, then `node scripts/drama-run.mjs --date {date}`.
+> 1. `git fetch origin && git checkout -B drama-run-{date} origin/main`, then `node scripts/drama-run.mjs --date {date}`. The pipeline comments on FLT-34 itself: if it printed `commented on FLT-34`, skip the comment steps below. If it printed `FLT-34 comment (not posted): …`, post that text yourself, or hand it to the lead if `bb` fails for you too.
 > 2. If it prints `quiet day, skipped`: `bb tasks comment FLT-34 --body "Daily Drama {date}: skipped (quiet day). <the SKIP reason, one line>"` and stop.
 > 3. If it prints `opened <url>`: `bb tasks comment FLT-34 --body "Daily Drama {date}: <url>, ready for Jem's review."` and stop. **Never merge a Drama PR**; Jem reviews every one.
 > 4. If it prints `NOT GREEN`, or the author crashed: run it once more exactly as before (the author starts fresh). If it fails again, comment the last 30 lines of output on FLT-34 as "Daily Drama {date}: failed", and stop. Don't fix the pack yourself, and don't edit drama/**: a hand-made pack would defeat the point.
