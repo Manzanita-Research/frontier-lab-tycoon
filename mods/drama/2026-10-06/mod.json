@@ -1,0 +1,107 @@
+{
+  "apiVersion": 1,
+  "id": "drama-2026-10-06",
+  "name": "Daily Drama: Best Open Model (Terms Apply)",
+  "version": "1.0.0",
+  "author": "Daily Drama",
+  "description": "Sirocco drops a trillion-parameter Zephyr at 3am and calls it the best open model, outside of the ones that are better.",
+  "content": {
+    "events": {
+      "add": [
+        {
+          "id": "drama-2026-10-06-trillion-card",
+          "title": "A Trillion Parameters Appeared Overnight",
+          "body": "Sirocco posted a torrent for Zephyr Enormous at 3am: \"the best open model outside of the ones that beat it.\"\nYour researchers want to download it. Your data centre wants to lie down.",
+          "tone": "joke",
+          "when": { "stat": "day", "atLeast": 100000 },
+          "choices": [
+            {
+              "label": "Download all trillion",
+              "hint": "Cash -400, Hype +2",
+              "effects": [
+                { "type": "cash", "amount": -400 },
+                { "type": "hype", "amount": 2 },
+                { "type": "thought", "text": "Downloading at 4 MB/s. See you in spring.", "count": 3, "kind": "researcher" }
+              ]
+            },
+            {
+              "label": "Add a qualifier to our own claim",
+              "hint": "Hype +4, Trust -2",
+              "effects": [
+                { "type": "hype", "amount": 4 },
+                { "type": "trust", "amount": -2 },
+                { "type": "news", "text": "{lab}'s {model} now officially \"best in class, where class excludes anything better\"", "tone": "joke" }
+              ]
+            },
+            {
+              "label": "Ship a bigger number at 3:01am",
+              "hint": "Cash -800, Hype +6",
+              "effects": [
+                { "type": "cash", "amount": -800 },
+                { "type": "hype", "amount": 6 },
+                { "type": "news", "text": "{lab} announces 1.1 trillion parameters; spokesperson confirms 0.1 trillion are vibes", "tone": "joke" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "arcs": {
+      "add": [
+        {
+          "id": "drama-2026-10-06-trillion-arc",
+          "initial": "waiting",
+          "states": {
+            "waiting": {
+              "on": {
+                "DAY": {
+                  "target": "asked",
+                  "guard": { "type": "day.after", "params": { "day": 30 } },
+                  "actions": [
+                    { "type": "news", "params": { "text": "Sirocco drops one-trillion-parameter Zephyr Enormous at 3am via torrent; no blog post, just a magnet link and a wink", "tone": "joke" } },
+                    { "type": "card", "params": { "id": "drama-2026-10-06-trillion-card" } }
+                  ]
+                }
+              }
+            },
+            "asked": {
+              "on": {
+                "CHOSE": [
+                  { "target": "done", "guard": { "type": "choice", "params": { "card": "drama-2026-10-06-trillion-card", "is": "0" } } },
+                  { "target": "done", "guard": { "type": "choice", "params": { "card": "drama-2026-10-06-trillion-card", "is": "1" } } },
+                  { "target": "done", "guard": { "type": "choice", "params": { "card": "drama-2026-10-06-trillion-card", "is": "2" } } }
+                ]
+              }
+            },
+            "done": { "type": "final" }
+          }
+        }
+      ]
+    },
+    "headlines": {
+      "add": [
+        { "id": "drama-2026-10-06-h1", "text": "Sirocco: new Zephyr is \"the best open model outside of the ones that are better\"", "tone": "joke" },
+        { "id": "drama-2026-10-06-h2", "text": "CORRECTION: Zephyr Enormous is best in its weight class. Its weight class is \"one trillion\"", "tone": "joke" },
+        { "id": "drama-2026-10-06-h3", "text": "MetaMeta releases its own open giant 40 minutes later, then closes it \"for the weekend\"", "tone": "joke" },
+        { "id": "drama-2026-10-06-h4", "text": "Hobbyists confirm Zephyr Enormous runs fine at home, provided home has 4,000 GPUs", "tone": "joke" },
+        { "id": "drama-2026-10-06-h5", "text": "Super Super AI announces two trillion parameters it does not have; valuation doubles", "tone": "joke" },
+        { "id": "drama-2026-10-06-h6", "text": "Anthropomorphic publishes 9,000-word essay asking if a trillion is too many; essay ships late", "tone": "joke" },
+        { "id": "drama-2026-10-06-h7", "text": "One week on: Zephyr Enormous download reaches 61%; seeders beg everyone to stop asking", "tone": "joke", "when": { "day.after": 37 } },
+        { "id": "drama-2026-10-06-h8", "text": "{lab} spokesperson: \"{model} is also the best, outside of rankings\"", "tone": "joke", "when": { "stat.gte": ["hype", 40] } },
+        { "id": "drama-2026-10-06-h9", "text": "Macrohard bundles a trillion parameters into a spreadsheet cell; cell now takes 9 minutes to open", "tone": "joke" }
+      ]
+    },
+    "thoughts": {
+      "add": [
+        { "id": "drama-2026-10-06-t1", "kind": "researcher", "when": "always", "text": "Someone posted a trillion parameters at 3am. I have 40 GB free." },
+        { "id": "drama-2026-10-06-t2", "kind": "researcher", "when": "night", "text": "It's 3am. If a torrent link drops I'm not looking. I'm looking." },
+        { "id": "drama-2026-10-06-t3", "kind": "researcher", "when": "openDrop", "text": "Another open drop. My disk just filed a complaint." },
+        { "id": "drama-2026-10-06-t4", "kind": "researcher", "when": "rankFell", "text": "We were best in our class. Then they made the class bigger." },
+        { "id": "drama-2026-10-06-t5", "kind": "agent", "when": "always", "text": "Summarising the Zephyr model card. It is 400 pages of footnotes." },
+        { "id": "drama-2026-10-06-t6", "kind": "visitor", "when": "highHype", "text": "So yours is the best open model? Outside of which ones?" },
+        { "id": "drama-2026-10-06-t7", "kind": "protester", "when": "protest", "text": "A trillion parameters and not one of them for the water." },
+        { "id": "drama-2026-10-06-t8", "kind": "researcher", "when": "training", "text": "Our big run felt big until this morning." }
+      ]
+    }
+  }
+}
