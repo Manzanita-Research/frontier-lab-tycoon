@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Daily Drama: one headless run, from today's news to a PR Jem reviews. See drama/AUTOMATION.md.
 //
-//   node scripts/drama-run.mjs [--date YYYY-MM-DD] [--model claude-opus-5-5] [--no-pr] [--keep-room] [--no-comment]
+//   node scripts/drama-run.mjs [--date YYYY-MM-DD] [--model claude-opus-5-5] [--no-pr] [--keep-room] [--no-comment] [--ci-timeout 25]
 //
 // 1. fetch   read drama/sources.json into candidates.md                       (scripts/drama-fetch.mjs)
 // 2. room    build a scratch room OUTSIDE the checkout with only BRIEF.md (drama/pick.md), SKILL.md
@@ -12,11 +12,14 @@
 // 4. check   flt-mod check, the parody linter (drama/lint.mjs) and the pack's shape; transcript → CHECK.txt
 // 5. pr      commit mods/drama/<date>/ on a fresh branch from origin/main (a temporary worktree, so the current
 //            checkout is untouched) and open "Daily Drama: <summary>". The source link lives in the PR body only.
-// 6. report  post the outcome on FLT-34 (`bb tasks comment`): opened, skipped, or failed on the second attempt of the
+// 6. ci      wait (up to 25 min) for the PR's GitHub checks: green, red (the failing job, its first failing test and a
+//            log excerpt) or still running. Only GitHub's checks make it green; step 4 passing is not CI passing.
+// 7. report  post the outcome on FLT-34 (`bb tasks comment`): opened, skipped, or failed on the second attempt of the
 //            day (a first failure only says to run the same command again; the count lives in .drama-state/<date>.json).
 //            --no-comment prints the comment instead. A comment that fails to post never fails the run.
 //
-// Steps run alone too: `fetch`, `check <pack dir>`, `pr` (e.g. after a human edits the pack), `body` (rewrite pr-body.md only).
+// Steps run alone too: `fetch`, `check <pack dir>`, `pr` (e.g. after a human edits the pack), `body` (rewrite pr-body.md only),
+// `ci [pr]` (wait for an open Drama PR's CI and report it on FLT-34, for a run cut off while it waited).
 import { spawn } from "node:child_process";
 import { createWriteStream, existsSync } from "node:fs";
 import { cp, mkdir, mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
@@ -281,6 +284,119 @@ async function prStep({ transcript, pr, agent }) {
 }
 
 // ---------------------------------------------------------------------------------------------------------------
+// CI (FLT-112): the PR's real GitHub checks. The local checks above passing is not CI passing: on Oct 8 two Drama PRs
+// failed Deploy's `check` while their runners said every check passed.
+
+const CI_TIMEOUT_MIN = 25; // the full CI plus Preview with the stranger takes about 10-15 min
+/** The jobs a Drama PR's CI is green with, in the order the comment names them. */
+export const CI_JOBS = ["check", "engines", "deploy", "stranger"];
+const CI_FIELDS = "name,workflow,state,bucket,link";
+const sleepMs = (ms) => new Promise((ok) => setTimeout(ok, ms));
+const jobName = (c) => (c.workflow ? `${c.workflow} / ${c.name}` : c.name);
+
+/** `gh pr checks --json` output, or [] while GitHub has no checks for the PR yet ("no checks reported"). */
+function parseChecks(out) {
+  const text = String(out ?? "");
+  const start = text.indexOf("[");
+  if (start < 0) return [];
+  try { return JSON.parse(text.slice(start, text.lastIndexOf("]") + 1)); } catch { return []; }
+}
+
+/**
+ * Polls `gh pr checks <pr>` until every check is done and every job in `expect` has reported, or `timeoutMs` passes.
+ * Returns { kind: "done" | "timeout", checks }. Prints a line whenever the count of finished checks changes.
+ */
+export async function waitForChecks(pr, { exec = run, timeoutMs = CI_TIMEOUT_MIN * 60_000, everyMs = 30_000, expect = CI_JOBS, now = Date.now, sleep = sleepMs, log = console.log } = {}) {
+  const start = now();
+  let checks = [];
+  let said = "";
+  for (;;) {
+    checks = parseChecks((await exec("gh", ["pr", "checks", String(pr), "--json", CI_FIELDS], { quiet: true })).out);
+    const pending = checks.filter((c) => c.bucket === "pending");
+    const failed = checks.some((c) => c.bucket === "fail" || c.bucket === "cancel");
+    const missing = expect.filter((name) => !checks.some((c) => c.name === name));
+    if (checks.length && !pending.length && (failed || !missing.length)) return { kind: "done", checks };
+    const status = checks.length ? `CI: ${checks.length - pending.length} of ${checks.length} checks done` : "CI: no checks reported yet";
+    if (status !== said) log((said = status));
+    if (now() - start >= timeoutMs) return { kind: "timeout", checks };
+    await sleep(everyMs);
+  }
+}
+
+const ANSI = /(?:\x1b|\^\[)\[[0-9;]*m/g; // gh writes ESC as a literal "^["
+/** One `gh run view --log-failed` line ("job<TAB>step<TAB>timestamp text") as the text the job printed. */
+const logText = (line) => line.split("\t").slice(line.split("\t").length >= 3 ? 2 : 0).join("\t").replace(/^\uFEFF?\d{4}-\d\d-\d\dT[\d:.]+Z ?/, "").replace(ANSI, "");
+
+/**
+ * The first failing test (vitest's `FAIL  file > name`, node:test's `✖ name`) or else the first `##[error]` in a
+ * `gh run view --log-failed` log, with its test file when the log names one and a short excerpt from that point.
+ */
+export function failureFromLog(raw, { lines: keep = 12 } = {}) {
+  const lines = String(raw ?? "").split("\n").map(logText);
+  const errorAt = lines.findIndex((l) => l.startsWith("##[error]") && !/Process completed with exit code/.test(l));
+  let at = lines.findIndex((l) => /^\s*FAIL\s+\S+ > /.test(l));
+  let test, file;
+  if (at >= 0) {
+    [, file, test] = lines[at].match(/^\s*FAIL\s+(\S+) > (.+)$/);
+    test = `${file} > ${test.trim()}`;
+  } else if ((at = lines.findIndex((l) => /^\s*(✖ |not ok \d+ - )/.test(l) && !/^\s*✖ failing tests:/.test(l))) >= 0) {
+    test = lines[at].replace(/^\s*(✖ |not ok \d+ - )/, "").replace(/ \([\d.]+m?s\)$/, "").trim();
+    file = lines.slice(at).join("\n").match(/(?:test at |file:\/\/\S*?\/)((?:src|drama|mods|scripts|packages|e2e)\/\S+?\.\w+):\d+/)?.[1];
+  }
+  const step = errorAt >= 0 ? lines[errorAt].replace("##[error]", "").trim() : lines.filter((l) => l.trim()).at(-1)?.trim();
+  if (at < 0) at = errorAt >= 0 ? Math.max(0, errorAt - keep + 2) : Math.max(0, lines.length - keep);
+  const excerpt = lines.slice(at, at + keep).join("\n").trim();
+  return { test, file, step, excerpt };
+}
+
+/** Whether a failure looks like the pack's doing or the game's (a perf or timing test elsewhere, say). */
+export function blame({ file, test, excerpt }, day = date) {
+  if (file?.startsWith("drama/") || file?.startsWith("mods/") || excerpt?.includes(`mods/drama/${day}`))
+    return `It touches the pack's own files${file ? ` (${file})` : ""}.`;
+  if (!file) return "The log doesn't name a test file, so it may or may not be the pack.";
+  const timing = /perf|timing|budget|bench|flak/i.test(`${file} ${test}`) ? "a perf or timing test " : "";
+  return `Looks unrelated to the pack: ${file} is ${timing}outside drama/ and mods/, and the pack only adds mods/drama/${day}/.`;
+}
+
+/**
+ * Waits for the PR's GitHub checks and says what they found: { kind: "green", jobs } only when GitHub says every check
+ * passed, { kind: "red", job, what, note, excerpt } with the failing job's log, or { kind: "timeout", minutes }.
+ * Never throws: anything that goes wrong is { kind: "unknown", error }, because the PR is open either way.
+ */
+export async function ciStep(pr, { exec = run, timeoutMs = CI_TIMEOUT_MIN * 60_000, day = date, ...wait } = {}) {
+  try {
+    const minutes = Math.round(timeoutMs / 60_000);
+    const { kind, checks } = await waitForChecks(pr, { exec, timeoutMs, ...wait });
+    const failed = checks.filter((c) => c.bucket === "fail" || c.bucket === "cancel");
+    if (kind === "timeout" && !failed.length)
+      return { kind: "timeout", minutes, waiting: checks.filter((c) => c.bucket === "pending").map(jobName) };
+    // Green means every check named like a CI job passed: Deploy's `check` skipped is not saved by CI's `check` passing.
+    const missing = CI_JOBS.filter((name) => !checks.some((c) => c.name === name)).concat(checks.filter((c) => CI_JOBS.includes(c.name) && c.bucket !== "pass").map(jobName));
+    if (!failed.length && !missing.length) {
+      const passed = [...new Set(checks.filter((c) => c.bucket === "pass").map((c) => c.name))];
+      return { kind: "green", jobs: passed.sort((a, b) => (CI_JOBS.indexOf(a) + 1 || 99) - (CI_JOBS.indexOf(b) + 1 || 99)) };
+    }
+    if (!failed.length) return { kind: "red", job: missing.join(", "), what: "skipped, so CI isn't green", note: "", excerpt: "" };
+    const first = failed[0];
+    const jobId = first.link?.match(/\/job\/(\d+)/)?.[1];
+    const logged = jobId ? await exec("gh", ["run", "view", "--job", jobId, "--log-failed"], { quiet: true }) : { code: -1, out: "" };
+    if (logged.code !== 0) return { kind: "red", job: jobName(first), what: first.state?.toLowerCase() ?? "failed", note: `(couldn't fetch its log: ${first.link ?? "no link"})`, excerpt: "" };
+    const failure = failureFromLog(logged.out);
+    return { kind: "red", job: jobName(first), what: failure.test ?? failure.step ?? "failed", note: blame(failure, day), excerpt: failure.excerpt, others: failed.slice(1).map(jobName) };
+  } catch (error) {
+    return { kind: "unknown", error: String(error?.message ?? error) };
+  }
+}
+
+/** The CI result as one stdout line (the comment carries the excerpt). */
+export function ciLine(ci, url) {
+  if (ci.kind === "green") return `CI: green (${ci.jobs.join(", ")})`;
+  if (ci.kind === "red") return `CI FAILED: ${ci.job} — ${ci.what}${ci.others?.length ? ` (also failed: ${ci.others.join(", ")})` : ""}.${ci.note ? ` ${ci.note}` : ""}`;
+  if (ci.kind === "timeout") return `CI still running after ${ci.minutes} min: ${url}${ci.waiting?.length ? ` (waiting on ${ci.waiting.join(", ")})` : ""}`;
+  return `CI result unknown (${ci.error}): ${url}`;
+}
+
+// ---------------------------------------------------------------------------------------------------------------
 // Report: the run tells FLT-34 how it went, so the runner doesn't need a working `bb` of its own.
 
 const FAIL_TAIL = 30;
@@ -291,7 +407,13 @@ export function commentText(outcome, day = date) {
     const reason = outcome.why.replace(/^#.*$/gm, "").replace(/\s+/g, " ").trim();
     return `Daily Drama ${day}: skipped (quiet day). ${reason}`.trim();
   }
-  if (outcome.kind === "opened") return `Daily Drama ${day}: ${outcome.url}, ready for Jem's review.`;
+  if (outcome.kind === "opened") {
+    const { url, ci } = outcome;
+    if (ci?.kind === "green") return `Daily Drama ${day}: ${url}, ready for Jem's review. ${ciLine(ci)}.`;
+    if (ci?.kind === "red") return `Daily Drama ${day}: ${url}, ${ciLine(ci)}${ci.excerpt ? `\n\n\`\`\`\n${ci.excerpt}\n\`\`\`` : ""}`;
+    if (ci) return `Daily Drama ${day}: ${ciLine(ci, url)}`;
+    return `Daily Drama ${day}: ${url}, opened; CI not checked.`;
+  }
   if (outcome.kind === "failed") return `Daily Drama ${day}: failed\n\n\`\`\`\n${outcome.output ?? ""}\n\`\`\``;
   throw new Error(`no FLT-34 comment for outcome ${outcome.kind}`);
 }
@@ -375,7 +497,16 @@ async function author(steps) {
   if (has("--no-pr")) { say(`green; --no-pr, so stopping here. Pack: ${relative(root, packDir)}; PR body would use ${relative(root, join(work, "pr.json"))}`); return { kind: "green" }; }
   const url = await steps.prStep({ transcript, pr, agent });
   say(`opened ${url}`);
-  return { kind: "opened", url };
+  return { kind: "opened", url, ci: await waitStep(steps, url) };
+}
+
+/** Waits for the PR's CI and prints the result. The PR is open whatever CI says, so this never fails the run. */
+async function waitStep(steps, url) {
+  const minutes = Number(flag("--ci-timeout") ?? CI_TIMEOUT_MIN);
+  say(`waiting for CI on ${url} (up to ${minutes} min)`);
+  const ci = await steps.ciStep(url, { timeoutMs: minutes * 60_000, log: say });
+  say(ciLine(ci, url));
+  return ci;
 }
 
 /**
@@ -404,9 +535,18 @@ export async function main(deps = {}) {
     say(`opened ${await prStep({ transcript, pr, agent })}`);
     return 0;
   }
-  if (command !== "all") throw new Error(`unknown step ${command}: all | fetch | check [dir] | pr | body`);
+  const { stateDir, exec, ...steps } = { fetchStep, writeStep, prStep, ciStep, ...deps };
+  if (command === "ci") {
+    // Waits for an open Drama PR's CI (today's drama-<date> branch, or a PR number or URL) and reports it on FLT-34,
+    // as the full run would have: for a run that was cut off while it waited.
+    const ref = args[1] && !args[1].startsWith("--") ? args[1] : `drama-${date}`;
+    const viewed = await run("gh", ["pr", "view", ref, "--json", "url", "--jq", ".url"], { quiet: true });
+    if (viewed.code !== 0) { say(`no PR for ${ref}: ${viewed.out.trim()}`); return 1; }
+    const url = viewed.out.trim();
+    return await report({ kind: "opened", url, ci: await waitStep(steps, url) }, { stateDir, exec, noComment: has("--no-comment") });
+  }
+  if (command !== "all") throw new Error(`unknown step ${command}: all | fetch | check [dir] | pr | body | ci [pr]`);
 
-  const { stateDir, exec, ...steps } = { fetchStep, writeStep, prStep, ...deps };
   const output = captureOutput();
   try {
     let outcome;
