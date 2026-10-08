@@ -1,7 +1,7 @@
 // FLT-83: `?moment=queue` crashed the game on main, and nothing noticed, because a staging link is only ever opened by
 // hand or by the screenshot script. These load every `?moment=` the code knows the way the game does on boot (stage the
 // World, publish the first snapshot, build the HUD from it) and then play two days, answering any card that opens.
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import shots from "../../scripts/shots.scenes.json";
 import { defs } from "../sim/defs";
 import { TICKS_PER_DAY } from "../sim/tick";
@@ -13,6 +13,11 @@ import { fixtureInput } from "../ui/hud/fixtures";
 import { hudViewModel } from "../ui/hud/vm";
 import { isArcMoment, parseArcMoment } from "../sim/arcDemo";
 import { createSimHandle, STAGED_MOMENTS } from "./sim";
+import { createMidgameScenario } from "../sim/scenarios/midgame";
+
+// FLT-111: the endings' and money's scenes start from the mid-game campus, 480 days played once per file and copied.
+// Play them here, under a hook's own timeout, so the first such scene is no slower than the rest on a slow CI runner.
+beforeAll(() => void createMidgameScenario(), 30_000);
 
 const withArgs = () => [...STAGED_MOMENTS, ...defs().mishaps.map((m) => `stream:${m.id}`), ...defs().rivals.map((r) => `poach-offer:${r.id}`)];
 
