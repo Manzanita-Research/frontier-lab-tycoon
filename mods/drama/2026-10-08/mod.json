@@ -1,0 +1,107 @@
+{
+  "apiVersion": 1,
+  "id": "drama-2026-10-08",
+  "name": "Daily Drama: Universal Agent Season",
+  "version": "1.0.0",
+  "author": "Daily Drama",
+  "description": "Every rival launches the one universal agent for every app in the same week. Each works best inside someone else's.",
+  "content": {
+    "events": {
+      "add": [
+        {
+          "id": "drama-2026-10-08-card",
+          "title": "Universal Agent Season",
+          "body": "Five rivals launched the only universal agent this week, each working best inside the others' apps.\nThe board would like to know where yours is.",
+          "tone": "joke",
+          "when": { "stat": "day", "atLeast": 100000 },
+          "choices": [
+            {
+              "label": "Ship Frontier Everything (multi-day, mostly days)",
+              "hint": "Hype +6, Cash -300",
+              "effects": [
+                { "type": "hype", "amount": 6 },
+                { "type": "cash", "amount": -300 },
+                { "type": "news", "text": "{lab} launches Frontier Everything; first multi-day workflow enters its second week", "tone": "joke" }
+              ]
+            },
+            {
+              "label": "Ship an agent that manages everyone else's agents",
+              "hint": "Hype +3, Trust +2",
+              "effects": [
+                { "type": "hype", "amount": 3 },
+                { "type": "trust", "amount": 2 },
+                { "type": "news", "text": "{lab} unveils middle-management agent; it schedules a sync with all other agents", "tone": "joke" }
+              ]
+            },
+            {
+              "label": "Rename the intern 'Agent' and give them every login",
+              "hint": "Cash +200, Trust -3",
+              "effects": [
+                { "type": "cash", "amount": 200 },
+                { "type": "trust", "amount": -3 },
+                { "type": "thought", "text": "My new job title is Universal Agent. I have eleven browser tabs and no lunch.", "count": 1, "kind": "researcher" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "arcs": {
+      "add": [
+        {
+          "id": "drama-2026-10-08-arc",
+          "initial": "waiting",
+          "states": {
+            "waiting": {
+              "on": {
+                "DAY": {
+                  "target": "asked",
+                  "guard": { "type": "day.after", "params": { "day": 15 } },
+                  "actions": [
+                    { "type": "news", "params": { "text": "Open-ish AI, MetaMeta and Macrohard each launch the only universal agent", "tone": "joke" } },
+                    { "type": "card", "params": { "id": "drama-2026-10-08-card" } }
+                  ]
+                }
+              }
+            },
+            "asked": {
+              "on": {
+                "CHOSE": [
+                  { "target": "done", "guard": { "type": "choice", "params": { "card": "drama-2026-10-08-card", "is": "0" } } },
+                  { "target": "done", "guard": { "type": "choice", "params": { "card": "drama-2026-10-08-card", "is": "1" } } },
+                  { "target": "done", "guard": { "type": "choice", "params": { "card": "drama-2026-10-08-card", "is": "2" } } }
+                ]
+              }
+            },
+            "done": { "type": "final" }
+          }
+        }
+      ]
+    },
+    "headlines": {
+      "add": [
+        { "id": "drama-2026-10-08-h1", "text": "Open-ish AI, MetaMeta and Macrohard each launch the only universal agent", "tone": "joke" },
+        { "id": "drama-2026-10-08-h2", "text": "Macrohard's universal agent ships as a spreadsheet formula; =AGENT() returns #BUSY", "tone": "joke" },
+        { "id": "drama-2026-10-08-h3", "text": "Super Super AI announces universal agent; product to be built by universal agent", "tone": "joke" },
+        { "id": "drama-2026-10-08-h4", "text": "Sirocco drops universal agent by torrent at 3am; agent is now seeding itself", "tone": "joke" },
+        { "id": "drama-2026-10-08-h5", "text": "Correction: yesterday's 'multi-day workflow' was one email that took several days", "tone": "joke" },
+        { "id": "drama-2026-10-08-h6", "text": "Open-ish AI agent buys a sofa, books a flight, still cannot click all the traffic lights", "tone": "joke" },
+        { "id": "drama-2026-10-08-h7", "text": "Anthropomorphic publishes 9,000-word essay on why its agent will arrive after everyone's", "tone": "joke" },
+        { "id": "drama-2026-10-08-h8", "text": "One week on: universal agents now mostly used to manage other universal agents", "tone": "joke", "when": { "day.after": 30 } },
+        { "id": "drama-2026-10-08-h9", "text": "\"It works in every app,\" says MetaMeta, \"especially the ones we haven't bought yet\"", "tone": "joke" }
+      ]
+    },
+    "thoughts": {
+      "add": [
+        { "id": "drama-2026-10-08-t1", "kind": "researcher", "when": "always", "text": "My agent filed a ticket with their agent. Their agent closed it as a duplicate." },
+        { "id": "drama-2026-10-08-t2", "kind": "researcher", "when": "training", "text": "Third universal agent launch this week. I still copy-paste between tabs." },
+        { "id": "drama-2026-10-08-t3", "kind": "researcher", "when": "rankFell", "text": "A rival's agent ships with our app inside it. Partnership or takeover? Asking for a slide." },
+        { "id": "drama-2026-10-08-t4", "kind": "agent", "when": "always", "text": "I can work in every app. I am currently waiting on a captcha." },
+        { "id": "drama-2026-10-08-t5", "kind": "agent", "when": "night", "text": "Day three of my multi-day workflow. Step one remains promising." },
+        { "id": "drama-2026-10-08-t6", "kind": "visitor", "when": "highHype", "text": "Is this the universal agent? Which universal one?" },
+        { "id": "drama-2026-10-08-t7", "kind": "protester", "when": "protest", "text": "Every app has an agent now. Who audits the agent's agent?" },
+        { "id": "drama-2026-10-08-t8", "kind": "researcher", "when": "lowCash", "text": "Ours runs multi-day workflows too. Mostly because the GPUs are rationed." }
+      ]
+    }
+  }
+}
