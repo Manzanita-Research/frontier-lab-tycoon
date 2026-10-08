@@ -18,11 +18,11 @@ DATE="$(TZ=America/Los_Angeles date +%F)"
 read -r -d '' PROMPT <<EOF || true
 Kind: explore. House rules: the mission-control charter (on the Mini at ${CHARTER}). Task: **FLT-34 Daily Drama run for ${DATE}.** You are the runner, not the author: the pack is written by the headless author inside the pipeline, from the modding skill alone, and you never edit it by hand.
 
-1. \`git fetch origin && git checkout -B drama-run-${DATE} origin/main\`, then \`node scripts/drama-run.mjs --date ${DATE}\`. The pipeline comments on FLT-34 itself: if it printed \`commented on FLT-34\`, skip the comment steps below. If it printed \`FLT-34 comment (not posted): …\`, post that text yourself, or hand it to the lead if \`bb\` fails for you too.
+1. \`git fetch origin && git checkout -B drama-run-${DATE} origin/main\`, then \`node scripts/drama-run.mjs --date ${DATE}\` **in the background** (Bash \`run_in_background\`) and wait for it to finish: after opening the PR it waits up to 25 min for GitHub's CI, longer than a foreground command may run. If it was cut off after \`opened <url>\`, run \`node scripts/drama-run.mjs ci --date ${DATE}\` (in the background too) to finish the wait and the report. The pipeline comments on FLT-34 itself: if it printed \`commented on FLT-34\`, skip the comment steps below. If it printed \`FLT-34 comment (not posted): …\`, post that text yourself, or hand it to the lead if \`bb\` fails for you too.
 2. If it prints \`quiet day, skipped\`: \`bb tasks comment FLT-34 --body "Daily Drama ${DATE}: skipped (quiet day). <the SKIP reason, one line>"\` and stop.
-3. If it prints \`opened <url>\`: \`bb tasks comment FLT-34 --body "Daily Drama ${DATE}: <url>, ready for Jem's review."\` and stop. **Never merge a Drama PR**; Jem reviews every one.
+3. If it prints \`opened <url>\`, it then prints the PR's real CI result: \`CI: green (…)\`, \`CI FAILED: <job> — <test>\` or \`CI still running after 25 min\`. Report the CI result the pipeline prints, in its words; **never say every check passed unless it printed \`CI: green\`** (the local checks before the PR are not CI). A red or slow CI is not a pipeline failure: don't run it again and don't fix the PR. Stop there. **Never merge a Drama PR**; Jem reviews every one.
 4. If it prints \`NOT GREEN\`, or the author crashed: run it once more exactly as before (the author starts fresh). If it fails again, comment the last 30 lines of output on FLT-34 as "Daily Drama ${DATE}: failed", and stop. Don't fix the pack yourself, and don't edit drama/**: a hand-made pack would defeat the point.
-5. Don't start dev servers. End your turn with one line: what (the PR, a skip or a failure), and why.
+5. Don't start dev servers. End your turn with one line: what (the PR and its CI result, a skip or a failure), and why.
 EOF
 
 if [ "${1:-}" = "--dry-run" ]; then
