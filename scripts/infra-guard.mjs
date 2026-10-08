@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 // FLT-103: the repo is public, so tracked files must not name our private infrastructure: bb machine paths, the bb
-// host, Modal hosts, bb project and thread IDs, or a home directory. `pnpm guard` (run by `pnpm check` and CI) fails
-// on any of them. Write repo-relative paths, `<builder>`, "the mission-control charter", or read an env var instead.
+// host, Modal hosts, bb project, thread and machine IDs (FLT-113), or a home directory. `pnpm guard` (run by
+// `pnpm check` and CI) fails on any of them. Write repo-relative paths, `<builder>`, "the mission-control charter",
+// or read an env var instead.
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
-export const PATTERN = String.raw`bb-machines|getbb\.app|modal\.host|proj_[a-z0-9]{10}|thr_[a-z0-9]{10}|/Users/jem`;
+export const PATTERN = String.raw`bb-machines|getbb\.app|modal\.host|proj_[a-z0-9]{10}|thr_[a-z0-9]{10}|host_[a-z0-9]{10}|/Users/jem`;
 
 /** Files that may match, and why. Keep it tiny. */
 export const ALLOW = {
