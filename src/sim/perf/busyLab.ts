@@ -83,8 +83,15 @@ export interface TickProfile {
   systems: SystemTiming[];
 }
 
-/** Play `ticks` ticks of the lab (topping it up each `batch` ticks) with the stopwatch on, and total each system. */
-export function profileTicks({ topUp, play }: BusyLab, ticks: number, batch = 200): TickProfile {
+/** What the stopwatch saw: each tick's µs per system (a row per tick, a column per name). */
+export interface Laps {
+  names: string[];
+  rows: Float64Array[];
+  calls: Int32Array;
+}
+
+/** Play `ticks` ticks of the lab (topping it up each `batch` ticks) with the stopwatch on, and keep every lap. */
+export function lapTicks({ topUp, play }: BusyLab, ticks: number, batch = 200): Laps {
   const names: string[] = [];
   const index = new Map<string, number>();
   let row = new Float64Array(64);
@@ -117,6 +124,12 @@ export function profileTicks({ topUp, play }: BusyLab, ticks: number, batch = 20
   } finally {
     setTickProbe(null);
   }
+  return { names, rows, calls };
+}
+
+/** Total each system over the laps. */
+function summarize({ names, rows, calls }: Laps): TickProfile {
+  const ticks = rows.length;
   const p95 = (xs: number[]) => xs.slice().sort((a, b) => a - b)[Math.min(xs.length - 1, Math.floor(xs.length * 0.95))]!;
   const us = (ms: number) => ms * 1000;
   const systems = names.map((system, i): SystemTiming => {
@@ -136,6 +149,54 @@ export function profileTicks({ topUp, play }: BusyLab, ticks: number, batch = 20
     p95Us: us(p95(totals)),
     systems: systems.sort((a, b) => b.meanUs - a.meanUs),
   };
+}
+
+/** Play `ticks` ticks of the lab (topping it up each `batch` ticks) with the stopwatch on, and total each system. */
+export function profileTicks(lab: BusyLab, ticks: number, batch = 200): TickProfile {
+  return summarize(lapTicks(lab, ticks, batch));
+}
+
+/**
+ * FLT-111: each system's best mean over a few windows of the same kind (say, 200 ordinary ticks each). A garbage
+ * collection or a busy neighbour on a shared CI runner lands in whichever system was running at the time, and in one
+ * window, not all of them; a system that really got slower is slower in every window.
+ */
+export function bestOf(profiles: TickProfile[]): TickProfile {
+  const best = new Map<string, SystemTiming>();
+  for (const p of profiles) {
+    for (const t of p.systems) {
+      const b = best.get(t.system);
+      best.set(t.system, b ? { ...b, meanUs: Math.min(b.meanUs, t.meanUs), p95Us: Math.min(b.p95Us, t.p95Us), maxUs: Math.min(b.maxUs, t.maxUs) } : t);
+    }
+  }
+  return {
+    ticks: profiles[0]!.ticks,
+    meanUs: Math.min(...profiles.map((p) => p.meanUs)),
+    p95Us: Math.min(...profiles.map((p) => p.p95Us)),
+    systems: [...best.values()].sort((a, b) => b.meanUs - a.meanUs),
+  };
+}
+
+/**
+ * FLT-111: the best of a few passes over the same scene, tick by tick: each system's time on a pass's tick `t` is its
+ * best over every pass's tick `t`. For a moment that comes once (a late lunch's worst hours), where a whole window's mean
+ * is a handful of beats: one 1.6 ms collection charged to a 20-tick window's beat adds 80 µs to that system's mean. A
+ * pause lands on a different tick each pass; a slower beat is slower on every pass. The passes must line up (each one
+ * starts at the same moment of the scene), so the same tick does the same work.
+ */
+export function bestTicks(passes: Laps[]): TickProfile {
+  const names = [...new Set(passes.flatMap((p) => p.names))];
+  const ticks = Math.min(...passes.map((p) => p.rows.length));
+  const calls = new Int32Array(Math.max(64, names.length));
+  const rows = Array.from({ length: ticks }, () => new Float64Array(names.length).fill(Infinity));
+  for (const p of passes) {
+    names.forEach((name, i) => {
+      const j = p.names.indexOf(name);
+      calls[i] = Math.max(calls[i]!, j < 0 ? 0 : p.calls[j]!);
+      for (let t = 0; t < ticks; t++) rows[t]![i] = Math.min(rows[t]![i]!, j < 0 ? 0 : p.rows[t]![j]!);
+    });
+  }
+  return summarize({ names, rows, calls });
 }
 
 /** The table for the PR and `docs/ARCHITECTURE.md`. */

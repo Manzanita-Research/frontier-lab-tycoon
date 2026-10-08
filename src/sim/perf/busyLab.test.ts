@@ -1,6 +1,8 @@
 // FLT-39: the tick budget with every pack awake, system by system. `--silent=false` prints the table; FLT_PROFILE=1
-// profiles ten times as many ticks, for the numbers in docs/ARCHITECTURE.md.
-import { busyLab, profileTable, profileTicks, timeTicks, type BusyLab } from "./busyLab";
+// profiles one long window instead, for the numbers in docs/ARCHITECTURE.md. FLT-111: every number is a best of
+// several (see `bestOf` and `bestTicks`), so a collection or a busy CI neighbour doesn't fail a budget; a slower system
+// is slower every time, and still does.
+import { bestOf, bestTicks, busyLab, lapTicks, profileTable, profileTicks, timeTicks, type BusyLab, type Laps } from "./busyLab";
 import { perfBudget } from "../testkit";
 import { startEscape } from "../escape/driver";
 import { LATE_FLAG } from "../slopbowl/driver";
@@ -36,7 +38,7 @@ describe("the busy lab: 800 walkers, every pack awake", () => {
     expect(s.walkers.length).toBeGreaterThanOrEqual(800); // still busy: the topping up keeps up with the quitting
     expect(s.endings?.id).toBe("regulated"); // an ending's chart runs every tick
     const best = timeTicks(lab);
-    const p = profileTicks(lab, env.FLT_PROFILE ? 4000 : 400);
+    const p = env.FLT_PROFILE ? profileTicks(lab, 4000) : bestOf([1, 2, 3].map(() => profileTicks(lab, 200)));
     console.log(`busy-lab tick: ${best.toFixed(3)} ms (best of 3 x 200 ticks, stopwatch off)\n${s.walkers.length} walkers at the end, day ${s.day}\n\n${profileTable(p)}`);
     expect(p.systems.length).toBeGreaterThan(30); // every pack ran
     for (const t of p.systems) expect(t.meanUs / 1000, t.system).toBeLessThan(perfBudget(t.system === "walkers" ? WALKERS_MS : SYSTEM_MS));
@@ -78,17 +80,37 @@ describe("the busy lab: 800 walkers, every pack awake", () => {
     const lab = busyLab();
     warm(lab);
     const { s } = lab;
-    s.flags[LATE_FLAG] = s.day;
-    // Noon comes round once a cycle (600 ticks): play to two hours late, when everyone is at the gate.
-    for (let i = 0; i < 1300 && s.slopbowl?.machine.value !== "worse"; i++) lab.play();
-    expect(s.slopbowl?.machine.value).toBe("worse");
-    expect(s.slopbowl!.crowd).toBe(1);
-    const p = profileTicks(lab, 20, 20);
+    // Order it late, and play to two hours late, when everyone is at the gate. Noon comes round once a cycle (600 ticks).
+    const worse = () => {
+      s.flags[LATE_FLAG] = s.day;
+      for (let i = 0; i < 1300 && s.slopbowl?.machine.value !== "worse"; i++) lab.play();
+      expect(s.slopbowl?.machine.value).toBe("worse");
+      expect(s.slopbowl!.crowd).toBe(1);
+    };
+    const fed = () => {
+      for (let i = 0; i < 400 && s.slopbowl?.machine.value !== "quiet"; i++) lab.play();
+      expect(s.slopbowl?.machine.value).toBe("quiet");
+    };
+    // FLT-111: a lunch to warm up first. `warm` never orders one, so the first lunch's beats (the card, the posts, the
+    // courier's meeting) are the compiler's first look at that code: up to a millisecond and a half a beat on one core.
+    worse();
+    fed();
+    // Then the same 20 ticks of three lunches, best of three tick by tick, and the whole tick as the best of the three.
+    const passes: Laps[] = [];
+    let tickMs = Infinity;
+    for (let k = 0; k < 3; k++) {
+      worse();
+      passes.push(lapTicks(lab, 20, 20));
+      tickMs = Math.min(tickMs, timeTicks(lab, 1, 20));
+      fed();
+    }
+    const p = bestTicks(passes);
     const lunch = p.systems.find((t) => t.system === "slopbowl")!;
     const walkers = p.systems.find((t) => t.system === "walkers")!;
-    console.log(`late lunch: slopbowl ${lunch.meanUs.toFixed(1)} µs a tick, walkers ${walkers.meanUs.toFixed(1)} µs, whole tick ${p.meanUs.toFixed(1)} µs with the stopwatch on`);
+    console.log(`late lunch: slopbowl ${lunch.meanUs.toFixed(1)} µs a tick, walkers ${walkers.meanUs.toFixed(1)} µs, whole tick ${p.meanUs.toFixed(1)} µs with the stopwatch on (best of 3 lunches); ${tickMs.toFixed(3)} ms with it off`);
     expect(lunch.meanUs / 1000).toBeLessThan(perfBudget(SYSTEM_MS));
     expect(walkers.meanUs / 1000).toBeLessThan(perfBudget(WALKERS_MS));
-    expect(timeTicks(lab, 3, 20)).toBeLessThan(perfBudget(TICK_MS));
-  });
+    expect(tickMs).toBeLessThan(perfBudget(TICK_MS));
+    // Four lunches and the warm-up play about 4,000 ticks: a few seconds on a slow CI runner.
+  }, 30_000);
 });

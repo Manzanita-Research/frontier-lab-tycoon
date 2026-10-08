@@ -263,7 +263,7 @@ Two design consequences: the World stores `{ value, context }` and rebuilds with
 The Crowd's 800-walker test times the walkers. The **busy lab** (`src/sim/perf/busyLab.ts`) times everything else as well: the same crowd (400 agents, 300 researchers fighting over three small buildings, 110 visitors, 40 protesters) on a campus with the ladder complete, so every system is earned and every pack is awake. It also has the factions marching at a fast lab's pace, six staff, a rogue swarm loose, Evals Without Borders on a tour, and the endings on. The Memo gets Slow Down, so Regulated's chart runs every tick. `tick()` takes an optional stopwatch (`setTickProbe`) that laps after each system; with no stopwatch set, each lap is a null check.
 
 ```sh
-npx vitest run src/sim/perf/busyLab.test.ts --silent=false                 # the table, 400 ticks
+npx vitest run src/sim/perf/busyLab.test.ts --silent=false                 # the table, best of 3 x 200 ticks
 FLT_PROFILE=1 npx vitest run src/sim/perf/busyLab.test.ts --silent=false   # 4000 ticks, for the numbers below
 ```
 
@@ -276,6 +276,8 @@ FLT_PROFILE=1 npx vitest run src/sim/perf/busyLab.test.ts --silent=false   # 400
 A pack that starts eating the budget fails the test by name.
 
 **Warm up before you time.** On one vCPU the JIT compiles on the same core as the tick. With every pack's code to compile, the first thousand ticks of a fresh process run up to 1.5 times slower than the rest, and a second lab built in the same warmed-up process runs its first days about a quarter faster. The test plays 1400 ticks before it starts the clock.
+
+**Take the best of several (FLT-111).** A garbage collection (about 1.6 ms with 800 walkers on one core) lands in whichever system happens to be allocating, so a single window can charge it to a small system and fail that system's budget on a slow CI runner. The table is each system's best mean over three 200-tick windows. A moment that comes once, like the late lunch's worst hours, is played three times over (after one unmeasured lunch to warm up its code) and timed tick by tick, keeping each tick's best (`bestTicks`). A pause lands on a different tick each time; a system that really got slower is slower every time, and still fails.
 
 The table: mean and p95 µs per tick, seed 1, 4000 ticks, 1-vCPU Modal box. "Before" is the train with FLT-11 merged (`212ef6c`), with only the stopwatch and the busy lab added. Systems under 3 µs both times are left out (about 25 µs between them). Each lap carries about 1 µs of stopwatch, so the whole-tick row reads higher than the strict number.
 

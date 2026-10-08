@@ -3,9 +3,10 @@ import { openEventOf } from "../events";
 import { outcomeOf } from "../goals";
 import { progressOf } from "../progression";
 import { eraOfState } from "../race/race";
-import { tick } from "../tick";
+import { tick, TICKS_PER_DAY } from "../tick";
 import { SimHandle } from "../../app/sim";
-import { createMidgameScenario, MIDGAME_SEED, midgameOpeningNews, midgameOpeningThoughts, walkerOnCampus, walkerPlaced } from "./midgame";
+import { answer } from "../testkit";
+import { createMidgameScenario, MIDGAME_SEED, midgameOpeningNews, midgameOpeningThoughts, playMidgameScenario, walkerOnCampus, walkerPlaced } from "./midgame";
 
 // FNV-1a, the same deliberately simple hash used by sim/golden.test.ts, over the entire persisted World.
 function digest(s: unknown): string {
@@ -18,7 +19,7 @@ function digest(s: unknown): string {
 describe("midgame scenario", () => {
   const s = createMidgameScenario();
   it("replays ordinary commands and ticks to the same whole-world golden", () => {
-    const again = createMidgameScenario();
+    const again = playMidgameScenario();
     expect(again).toEqual(s);
     // FLT-49 preserves the full starter-campus preset, completes its ladder, and replays
     // paid confirmations. Changed movement/attendance draws shift the real opening day.
@@ -62,6 +63,19 @@ describe("midgame scenario", () => {
       full: digest(s),
     }).toEqual({ untagged: "2ab01817", full: "a878964f" });
   });
+  it("hands every caller its own copy, which plays on exactly like the 480 days played from scratch (FLT-111)", () => {
+    const copy = createMidgameScenario();
+    expect(copy).not.toBe(s);
+    copy.cash += 1;
+    expect(createMidgameScenario().cash).toBe(s.cash);
+    copy.cash -= 1;
+    const fresh = playMidgameScenario();
+    for (let i = 0; i < 3 * TICKS_PER_DAY; i++) {
+      tick(copy, answer(copy));
+      tick(fresh, answer(fresh));
+    }
+    expect(digest(copy)).toBe(digest(fresh));
+  }, 20_000);
   it("opens near Y2 Mar with a connected busy campus, training and a fresh rival record", () => {
     expect(s.seed).toBe(MIDGAME_SEED);
     expect(s.day).toBeGreaterThanOrEqual(420);
