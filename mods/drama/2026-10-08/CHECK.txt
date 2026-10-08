@@ -1,0 +1,18 @@
+Daily Drama 2026-10-08: checker transcript (scripts/drama-run.mjs)
+
+$ flt-mod check mod.json
+PASS drama-2026-10-08@1.0.0: 365 days, 7300 ticks, 42 cards answered, 4 releases
+Replay identical: d4733d810b538541a99d8c476ec2cc134741100d4d87fba16e8851a8c1bb2bc5; cash $10542113; 661 ms
+Arc reachability: 11 arcs checked with xstate/graph (structural, guards/actions omitted), 10 of them the base game's, unchanged
+  drama-2026-10-08-arc: 3 states, 3 configurations
+Your arcs ran in the sim: drama-2026-10-08-arc ended in "done"
+Executed: headlines, thoughts, events, arcs (the real sim ran with your definition)
+
+$ drama lint
+drama-lint mods/drama/2026-10-08: PASS (0 errors, 0 warnings)
+New parody names (the pack's glossary.json): none
+
+$ drama shape
+  ✓ one card/arc, 5-10 headlines, 5-10 thoughts, ids prefixed
+
+ALL GREEN
