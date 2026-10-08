@@ -1,0 +1,81 @@
+{
+  "apiVersion": 1,
+  "id": "drama-2026-10-07",
+  "name": "Daily Drama: The Absolute Unit",
+  "version": "1.0.0",
+  "author": "Daily Drama",
+  "description": "Sirocco ships a trillion-parameter open-weights model. The weights arrive at the end of the month. Which month is unclear.",
+  "content": {
+    "events": {
+      "add": [
+        {
+          "id": "drama-2026-10-07-unit",
+          "title": "Sirocco Ships an Absolute Unit",
+          "body": "Zephyr Absolute Unit: one trillion parameters, 49 billion awake. API only for now.\nThe open weights are due \"end of the month\". The torrent seeders are refreshing.",
+          "tone": "joke",
+          "when": { "stat": "day", "atLeast": 25 },
+          "cooldown": 60,
+          "choices": [
+            {
+              "label": "Announce Frontier-Chonkier",
+              "hint": "Hype +4, cash -300 for the rename",
+              "effects": [
+                { "type": "hype", "amount": 4 },
+                { "type": "cash", "amount": -300 },
+                { "type": "news", "text": "{lab} answers trillion-parameter rival with Frontier-Chonkier; parameter count 'big, trust us'", "tone": "joke" }
+              ]
+            },
+            {
+              "label": "Promise our weights \"end of next month\"",
+              "hint": "Hype +2, trust -2",
+              "effects": [
+                { "type": "hype", "amount": 2 },
+                { "type": "trust", "amount": -2 },
+                { "type": "flag", "name": "drama-end-of-month" },
+                { "type": "news", "text": "{lab} pledges open weights 'end of next month', outdoing Sirocco by one month", "tone": "joke" }
+              ]
+            },
+            {
+              "label": "Camp by the torrent tracker",
+              "hint": "Discourse -1. Nobody ships anything.",
+              "effects": [
+                { "type": "discourse", "add": -1 },
+                { "type": "thought", "text": "Day 4 at the tracker. 0 seeders. Morale: hopeful.", "count": 3, "kind": "researcher" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "headlines": {
+      "add": [
+        { "id": "drama-2026-10-07-h1", "text": "Sirocco releases trillion-parameter Zephyr Absolute Unit; open weights due 'end of the month', month not specified", "tone": "joke" },
+        { "id": "drama-2026-10-07-h2", "text": "Torrent community gathers outside Sirocco at 3am out of habit; leaves at dawn with nothing", "tone": "joke" },
+        { "id": "drama-2026-10-07-h3", "text": "Correction: Zephyr Absolute Unit has 49B active parameters. The other 951B are 'emotionally present'", "tone": "joke" },
+        { "id": "drama-2026-10-07-h4", "text": "'We are still in the race,' says Sirocco, from the API waitlist", "tone": "joke" },
+        { "id": "drama-2026-10-07-h5", "text": "Arena declares benchmarks saturated; models now graded on an armadillo in fishnet tights jaywalking on the moon", "tone": "joke" },
+        { "id": "drama-2026-10-07-h6", "text": "Open-ish AI responds to trillion-parameter model with Chatty Slightly Larger, shipping Thursday", "tone": "joke" },
+        { "id": "drama-2026-10-07-h7", "text": "Macrohard bundles Zephyr Absolute Unit into a single spreadsheet cell; cell now weighs 2TB", "tone": "joke" },
+        { "id": "drama-2026-10-07-h8", "text": "MetaMeta files trademark for 'Hefty Boi', promises it will be open, then closed, then hefty", "tone": "joke" },
+        { "id": "drama-2026-10-07-h9", "text": "One month later: Zephyr Absolute Unit weights now due 'end of the month' (a different month)", "tone": "joke", "when": { "day.after": 30 } }
+      ]
+    },
+    "thoughts": {
+      "add": [
+        { "id": "drama-2026-10-07-t1", "kind": "researcher", "when": "always", "text": "A trillion parameters, 49 billion awake. Same ratio as our team before coffee." },
+        { "id": "drama-2026-10-07-t2", "kind": "researcher", "when": "night", "text": "It's 3am. I'm refreshing the torrent tracker out of pure muscle memory." },
+        { "id": "drama-2026-10-07-t3", "kind": "researcher", "when": "openDrop", "text": "Sirocco dropped something. Not the weights. Just... something." },
+        { "id": "drama-2026-10-07-t4", "kind": "researcher", "when": "rankFell", "text": "We fell a place on the Arena. To a model named after a body type." },
+        { "id": "drama-2026-10-07-t5", "kind": "researcher", "when": "training", "text": "What if we add a trillion parameters and let most of them nap? Asking for the roadmap." },
+        { "id": "drama-2026-10-07-t6", "kind": "agent", "when": "always", "text": "Nobody has ever called me chonky. They call me 'efficient'. It stings." },
+        { "id": "drama-2026-10-07-t7", "kind": "visitor", "when": "highHype", "text": "Great demo. But is it chonky? My partners are asking about chonk now." },
+        { "id": "drama-2026-10-07-t8", "kind": "protester", "when": "protest", "text": "OPEN WEIGHTS MEANS NOW. NOT 'END OF THE MONTH'." }
+      ]
+    },
+    "rivals": {
+      "override": [
+        { "id": "sirocco", "tagline": "Open weights. End of the month. Some month." }
+      ]
+    }
+  }
+}
