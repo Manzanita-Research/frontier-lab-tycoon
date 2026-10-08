@@ -99,7 +99,22 @@ export function walkerOnCampus(s: GameState): boolean {
   return s.walkers.every((w) => walkerPlaced(s, w));
 }
 
+const played = new WeakMap<object, GameState>();
+
+/**
+ * The curated mid-game campus. FLT-111: its 480 days are played once per set of definitions (a mod changes what they
+ * play into) and every caller gets its own copy: the endings' and money's `?moment=` scenes, the HUD's fixtures and a
+ * dozen tests all start here, and replaying it for each one is what pushed slow CI runners past the test timeouts.
+ */
 export function createMidgameScenario(): GameState {
+  const key = defs();
+  let s = played.get(key);
+  if (!s) played.set(key, (s = playMidgameScenario()));
+  return structuredClone(s);
+}
+
+/** The 480 days themselves, played from scratch (the golden test checks a copy against them). */
+export function playMidgameScenario(): GameState {
   const s = createInitialState(MIDGAME_SEED, "campus");
   // FLT-109: the curated campus is the one FLT-86 tuned its money moments on, so its 480 days play without the late
   // lunch (switched off before the campus opening could wake it); it wakes at the opening, for the player.

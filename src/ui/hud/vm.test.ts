@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import { BUILDINGS } from "../../content/buildings";
 import type { CoachMark } from "../../content/coach";
 import { formatMoney } from "../../sim/format";
@@ -7,6 +7,11 @@ import { CALM_START_DAY } from "../../sim/disasters/driver";
 import { SKIN_API_VERSION } from "./types";
 import { hudViewModel, OPENING_QUIET_TICKS, SHIPPED_DAYS, TICKER_ITEMS } from "./vm";
 import { agoText, modMismatch, newestSave } from "./saves.vm";
+import { createMidgameScenario } from "../../sim/scenarios/midgame";
+
+// FLT-111: the endings' fixtures (The Memo, the front pages, Lab #2) start from the mid-game campus, 480 days played once
+// per file and copied. Play them here, under a hook's own timeout, rather than inside whichever ending test comes first.
+beforeAll(() => void createMidgameScenario(), 30_000);
 
 /** Every value in a view-model must survive JSON: that is what makes it a contract a skin can rely on. */
 function assertPlain(v: unknown, path = "vm") {
