@@ -30,6 +30,7 @@ test("each private name is caught in a tracked file", () => {
     "dns:task-abc.w.modal.host",
     "bb thread spawn --project proj_abcde12345",
     "Lead: thr_abcde12345.",
+    "--machine host_abcde12345",
     "House rules: /Users/jem/CHARTER.md",
   ];
   const dir = repo(Object.fromEntries(leaks.map((l, i) => [`docs/leak-${i}.md`, `${l}\n`])));
@@ -38,7 +39,7 @@ test("each private name is caught in a tracked file", () => {
 
 test("clean files, untracked files and the allowlist pass", () => {
   const dir = repo({
-    "docs/ok.md": "Preview: `<builder>:4173`. Project: `$BB_PROJECT_ID`. A proj_short id and thr_ prose are fine.\n",
+    "docs/ok.md": "Preview: `<builder>:4173`. Project: `$BB_PROJECT_ID`. A proj_short id, thr_ prose and --machine host_stub are fine.\n",
     ...Object.fromEntries(Object.keys(ALLOW).map((f) => [f, "bb-machines getbb.app\n"])),
   });
   writeFileSync(join(dir, "untracked.md"), "/Users/jem\n");
