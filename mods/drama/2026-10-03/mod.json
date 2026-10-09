@@ -1,0 +1,81 @@
+{
+  "apiVersion": 1,
+  "id": "drama-2026-10-03",
+  "name": "Daily Drama: Definitely a Forest",
+  "version": "1.0.0",
+  "author": "Daily Drama",
+  "description": "Every lab disguises its data centre as a forest. The forest draws 300 megawatts and has a badge reader.",
+  "content": {
+    "events": {
+      "add": [
+        {
+          "id": "drama-2026-10-03-forest",
+          "title": "Operation Shrubbery",
+          "body": "Consultants propose disguising your data centre as a forest.\nThe forest will hum, glow amber at night, and need its own substation.",
+          "tone": "joke",
+          "when": { "stat": "day", "atLeast": 40 },
+          "cooldown": 60,
+          "choices": [
+            {
+              "label": "Glue on 40,000 plastic pine cones",
+              "hint": "Discourse -4, cash -1500",
+              "effects": [
+                { "type": "discourse", "add": -4 },
+                { "type": "cash", "amount": -1500 },
+                { "type": "news", "text": "{lab} data centre now 'technically a forest'; local deer file complaint", "tone": "joke" }
+              ]
+            },
+            {
+              "label": "Rebrand it as a kombucha stand",
+              "hint": "Hype +3, discourse -2",
+              "effects": [
+                { "type": "hype", "amount": 3 },
+                { "type": "discourse", "add": -2 },
+                { "type": "thought", "text": "I queued 20 minutes for kombucha and got a GPU warranty.", "count": 3, "kind": "visitor" }
+              ]
+            },
+            {
+              "label": "Leave it a large, honest, warm box",
+              "hint": "Trust +3, discourse +2",
+              "effects": [
+                { "type": "trust", "amount": 3 },
+                { "type": "discourse", "add": 2 },
+                { "type": "thought", "text": "Hate the box. Respect that it admits it's a box.", "count": 3, "kind": "protester" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "headlines": {
+      "add": [
+        { "id": "drama-2026-10-03-h1", "text": "Macrohard unveils new 'forest' with 300 megawatt draw and a badge reader", "tone": "joke" },
+        { "id": "drama-2026-10-03-h2", "text": "Super Super AI's camouflaged data centre so well hidden investors suspect it does not exist", "tone": "joke" },
+        { "id": "drama-2026-10-03-h3", "text": "Hikers report tree that is warm to the touch and asks them to sign an NDA", "tone": "joke" },
+        { "id": "drama-2026-10-03-h4", "text": "Local owl: \"The tree hums. The tree has never once hooted back.\"", "tone": "joke" },
+        { "id": "drama-2026-10-03-h5", "text": "Correction: the 'ancient woodland' near {lab} is 14 months old and on a five-year lease", "tone": "joke" },
+        { "id": "drama-2026-10-03-h6", "text": "Anthropomorphic publishes 40-page essay on the ethics of pretending to be a tree", "tone": "joke" },
+        { "id": "drama-2026-10-03-h7", "text": "MetaMeta offers neighbouring forest $100M to come work as its data centre", "tone": "joke" },
+        { "id": "drama-2026-10-03-h8", "text": "Sirocco open-sources its forest at 3am; anyone can now plant a data centre", "tone": "joke" },
+        { "id": "drama-2026-10-03-h9", "text": "One week on: camouflaged data centre's leaves turn the autumn shade of 'thermal throttling'", "tone": "joke", "when": { "day.after": 30 } }
+      ]
+    },
+    "thoughts": {
+      "add": [
+        { "id": "drama-2026-10-03-t1", "kind": "researcher", "when": "always", "text": "Facilities asked if the cluster could rustle more." },
+        { "id": "drama-2026-10-03-t2", "kind": "researcher", "when": "training", "text": "Training run is fine. The fake birdsong is out of sync again." },
+        { "id": "drama-2026-10-03-t3", "kind": "researcher", "when": "night", "text": "At night the forest blinks green and amber. Nobody mentions it." },
+        { "id": "drama-2026-10-03-t4", "kind": "protester", "when": "protest", "text": "I protested a tree for 40 minutes before it beeped." },
+        { "id": "drama-2026-10-03-t5", "kind": "protester", "when": "always", "text": "Can't find the data centre. Suspect the suspiciously warm hedge." },
+        { "id": "drama-2026-10-03-t6", "kind": "visitor", "when": "always", "text": "Lovely forest. Why does it have a loading dock?" },
+        { "id": "drama-2026-10-03-t7", "kind": "visitor", "when": "highHype", "text": "Asked if the trees have a cap table. They have a cap table." },
+        { "id": "drama-2026-10-03-t8", "kind": "agent", "when": "unpowered", "text": "Note: the forest went dark. Real forests don't do that. Flagging." }
+      ]
+    },
+    "rivals": {
+      "override": [
+        { "id": "macrohard", "name": "Macrohard (Definitely a Forest)" }
+      ]
+    }
+  }
+}
