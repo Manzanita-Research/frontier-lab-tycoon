@@ -3,14 +3,18 @@
 import { Atom } from "effect/unstable/reactivity";
 import type { CrtGovernor } from "./governor";
 import { unwarp, type CrtMode, type CrtTier } from "./looks";
+import { glassSupport } from "../../ui/glass/support";
 
 /**
  * The in-game picture tube's one switch (FLT-70): off. Jem kept the shader for the box's beige PC (the intro's Kiosk
  * runs CRTPipeline itself and never reads this) and turned the tube over the game off for every skin: no Display
  * Properties setting, no `?crt=`, no skin default (Frontier 95's `"crt": "subtle"` lies dormant). Everything below
  * stays wired for the FLT-88 spike, which turns it back on here.
+ *
+ * FLT-88: on only where HTML-in-canvas lets the tube cover the UI too (the glass, `src/ui/glass`). Everywhere else,
+ * including every browser without the flag today, it stays off and the game is the plain DOM UI.
  */
-export const GAME_CRT = false as boolean;
+export const GAME_CRT = glassSupport !== null;
 
 export interface CrtState {
   /** The look on screen right now: the player's pick, else the skin's default; off while photo mode is up. */
@@ -31,8 +35,9 @@ export const crtAtom = Atom.keepAlive(Atom.make<CrtState>({ mode: "off", choice:
 /**
  * The bow of the glass the canvas is shown through right now (0 when the canvas is flat), for the code that turns a
  * pointer into a scene position or a scene position into a label's place. CrtFX writes it; see `warp` in looks.ts.
+ * `glass` (FLT-88): the tube is HTML-in-canvas, which bends the labels along with the world, so they stay flat.
  */
-export const crtView = { curve: 0 };
+export const crtView = { curve: 0, glass: false };
 
 /** A projected point (normalised device coordinates, as `Vector3.project` leaves it) moved to where the bowed glass shows it. */
 export function onGlass<V extends { x: number; y: number }>(v: V): V {
