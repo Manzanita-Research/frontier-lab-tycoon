@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@flt/mod-sdk": "workspace:*",
-    "vite": "7.3.6",
+    "vite": "7.3.7",
     "xstate": "6.0.0-alpha.62"
   }
 }
