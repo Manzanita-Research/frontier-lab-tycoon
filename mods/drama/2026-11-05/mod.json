@@ -1,0 +1,77 @@
+{
+  "apiVersion": 1,
+  "id": "drama-2026-11-05",
+  "name": "Daily Drama: The Four Users of the Agentic Future",
+  "version": "1.0.0",
+  "author": "Daily Drama",
+  "description": "The agentic future has arrived. Four people used it.",
+  "content": {
+    "events": {
+      "add": [
+        {
+          "id": "drama-2026-11-05-four-users",
+          "title": "Agent Adoption Report",
+          "body": "Errand Goblin, your autonomous agent, booked 4 rides in its busiest week.\nOne was the intern. One was the Goblin booking a ride for itself.",
+          "tone": "joke",
+          "when": { "stat": "day", "atLeast": 30 },
+          "cooldown": 120,
+          "choices": [
+            {
+              "label": "Announce \"400% week-on-week growth\"",
+              "hint": "Hype +6, Trust -3",
+              "effects": [
+                { "type": "hype", "amount": 6 },
+                { "type": "trust", "amount": -3 },
+                { "type": "flag", "name": "drama-2026-11-05-growth" },
+                { "type": "news", "text": "{lab} agent usage up 400%; base was one", "tone": "joke" }
+              ]
+            },
+            {
+              "label": "Rebrand it an \"exclusive beta\"",
+              "hint": "Hype +3",
+              "effects": [
+                { "type": "hype", "amount": 3 },
+                { "type": "news", "text": "{lab}'s agent waitlist now longer than its user list, by design", "tone": "joke" }
+              ]
+            },
+            {
+              "label": "Hire all four users",
+              "hint": "Cash -500, Trust +2",
+              "effects": [
+                { "type": "cash", "amount": -500 },
+                { "type": "trust", "amount": 2 },
+                { "type": "thought", "text": "Day one at {lab}. They gave me a badge that just says USER.", "count": 2, "kind": "researcher" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "headlines": {
+      "add": [
+        { "id": "drama-2026-11-05-h1", "text": "{lab}'s Errand Goblin books record four rides in peak week; board calls it \"early traction\"", "tone": "joke" },
+        { "id": "drama-2026-11-05-h2", "text": "Correction: of the four agent bookings reported yesterday, one was the agent booking itself", "tone": "joke" },
+        { "id": "drama-2026-11-05-h3", "text": "Open-ish AI ships 12 new agents this week; combined user base reaches double digits", "tone": "joke" },
+        { "id": "drama-2026-11-05-h4", "text": "Macrohard bundles agent into spreadsheet software; agent books a ride to a pivot table", "tone": "joke" },
+        { "id": "drama-2026-11-05-h5", "text": "Anthropomorphic publishes 40-page essay on whether the agent should book the ride. The ride has left", "tone": "joke" },
+        { "id": "drama-2026-11-05-h6", "text": "Super Super AI raises $30B for an agent that will book rides \"eventually, in principle\"", "tone": "joke" },
+        { "id": "drama-2026-11-05-h7", "text": "Sirocco releases open-weights agent by torrent at 3am; it immediately books itself a ride home", "tone": "joke" },
+        { "id": "drama-2026-11-05-h8", "text": "Analyst: \"The agentic future is here. It is waiting for someone to tap Confirm\"", "tone": "joke", "when": { "day.after": 20 } },
+        { "id": "drama-2026-11-05-h9", "text": "Follow-up: the four people who used an AI agent last week say they \"just wanted to see what happens\"", "tone": "joke", "when": { "day.after": 40 } },
+        { "id": "drama-2026-11-05-h10", "text": "MetaMeta offers $100M to each of the four agent users", "tone": "joke", "trigger": "rival" }
+      ]
+    },
+    "thoughts": {
+      "add": [
+        { "id": "drama-2026-11-05-t1", "kind": "researcher", "when": "always", "text": "I asked the agent to book me a cab. It asked 14 clarifying questions. I walked." },
+        { "id": "drama-2026-11-05-t2", "kind": "researcher", "when": "justReleased", "text": "Launch deck says \"agentic\" 31 times. Dashboard says 4." },
+        { "id": "drama-2026-11-05-t3", "kind": "researcher", "when": "lowCash", "text": "Our runway is long. Our user list is four names long." },
+        { "id": "drama-2026-11-05-t4", "kind": "agent", "when": "always", "text": "Four tasks this week. I'm told that's a record. I am exhausted." },
+        { "id": "drama-2026-11-05-t5", "kind": "agent", "when": "night", "text": "I booked a ride with nobody in it. Still counts as a user." },
+        { "id": "drama-2026-11-05-t6", "kind": "visitor", "when": "always", "text": "I'd use the agent, but tapping the button myself was faster." },
+        { "id": "drama-2026-11-05-t7", "kind": "visitor", "when": "highHype", "text": "Which one's the agent, the one in the hoodie or the one on the slide?" },
+        { "id": "drama-2026-11-05-t8", "kind": "protester", "when": "protest", "text": "Free the four users!" }
+      ]
+    }
+  }
+}
