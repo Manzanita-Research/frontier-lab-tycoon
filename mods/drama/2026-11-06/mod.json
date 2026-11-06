@@ -1,0 +1,74 @@
+{
+  "apiVersion": 1,
+  "id": "drama-2026-11-06",
+  "name": "Daily Drama: Data Centre Seeks One-Bed",
+  "version": "1.0.0",
+  "author": "Daily Drama",
+  "description": "The housing crisis reaches the server racks: every lab's data centre is apartment hunting and nobody will rent to it.",
+  "content": {
+    "events": {
+      "add": [
+        {
+          "id": "drama-2026-11-06-housing",
+          "title": "Data Centre Seeks Housing",
+          "body": "Your new data centre has been turned down by 14 landlords this week.\nThe last one said it 'runs too hot' and asked for three references and a guarantor.",
+          "tone": "joke",
+          "when": { "stat": "day", "atLeast": 30 },
+          "cooldown": 60,
+          "choices": [
+            {
+              "label": "Write it a heartfelt cover letter",
+              "hint": "Hype +3. 'I am quiet, tidy and only draw 40 megawatts.'",
+              "effects": [
+                { "type": "hype", "amount": 3 },
+                { "type": "news", "text": "{lab} data centre's cover letter goes viral: 'I don't throw parties, I AM the party'", "tone": "joke" }
+              ]
+            },
+            {
+              "label": "Offer a year's rent up front, in GPUs",
+              "hint": "Cash -1500. The landlord now runs a frontier lab.",
+              "effects": [
+                { "type": "cash", "amount": -1500 },
+                { "type": "discourse", "add": -2 },
+                { "type": "news", "text": "Landlord accepts {lab}'s GPU deposit, immediately announces own foundation model", "tone": "joke" }
+              ]
+            },
+            {
+              "label": "Let it sleep in the nap pod for now",
+              "hint": "Discourse +2. Researchers will have opinions.",
+              "effects": [
+                { "type": "discourse", "add": 2 },
+                { "type": "thought", "text": "There is a server rack in my nap pod and it snores at 90 decibels.", "count": 3, "kind": "researcher" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "headlines": {
+      "add": [
+        { "id": "drama-2026-11-06-listing", "text": "Data centre, 3 yrs old, seeks 40MW one-bed. Quiet, no pets, runs a little hot", "tone": "joke" },
+        { "id": "drama-2026-11-06-openhouse", "text": "Open house for empty warehouse draws 11 data centres and one very confused couple", "tone": "joke" },
+        { "id": "drama-2026-11-06-landlord", "text": "Landlord turns down {rival}: 'We don't rent to anything that needs a cooling tower'", "tone": "joke", "trigger": "rival" },
+        { "id": "drama-2026-11-06-waitlist", "text": "{lab} data centre now 412th on the waitlist, just behind 411 other data centres", "tone": "joke", "trigger": "built:datacenter" },
+        { "id": "drama-2026-11-06-correction", "text": "CORRECTION: The listing's 'in-unit laundry' was a liquid cooling loop. We regret the damp shirts", "tone": "joke" },
+        { "id": "drama-2026-11-06-metameta", "text": "MetaMeta offers landlords $100M to rent to its data centre; landlords ask to see the data centre's pay stubs", "tone": "joke" },
+        { "id": "drama-2026-11-06-supersuper", "text": "Super Super AI announces $30B data centre with no address, no building and no power. Valuation doubles", "tone": "joke", "when": { "day.after": 20 } },
+        { "id": "drama-2026-11-06-macrohard", "text": "Macrohard solves housing crunch by moving its data centre into a spreadsheet. It now lives in a merged cell", "tone": "joke" },
+        { "id": "drama-2026-11-06-followup", "text": "ONE WEEK LATER: Data centre finds a place. It has 14 roommates and one outlet", "tone": "joke", "when": { "day.after": 40 } }
+      ]
+    },
+    "thoughts": {
+      "add": [
+        { "id": "drama-2026-11-06-commute", "kind": "researcher", "when": "always", "text": "Even the GPUs have a worse commute than me now." },
+        { "id": "drama-2026-11-06-outlet", "kind": "researcher", "when": "unpowered", "text": "The cluster's new place has one outlet and it 'mostly works'. I know the feeling." },
+        { "id": "drama-2026-11-06-crowded", "kind": "researcher", "when": "crowded", "text": "A server rack just asked me if this nap pod is still available." },
+        { "id": "drama-2026-11-06-references", "kind": "agent", "when": "training", "text": "The landlord wants proof of income from my data centre. I AM the income." },
+        { "id": "drama-2026-11-06-sublet", "kind": "agent", "when": "night", "text": "Night shift. Subletting half my context window to cover the rack's rent." },
+        { "id": "drama-2026-11-06-visit", "kind": "visitor", "when": "always", "text": "I came to tour the data centre. They said it's still out apartment hunting." },
+        { "id": "drama-2026-11-06-realtor", "kind": "visitor", "when": "highHype", "text": "My realtor says the server hall has great bones and terrible thermals." },
+        { "id": "drama-2026-11-06-nimby", "kind": "protester", "when": "protest", "text": "Not in my backyard. Not in my front yard. Honestly, not in the cloud either." }
+      ]
+    }
+  }
+}
