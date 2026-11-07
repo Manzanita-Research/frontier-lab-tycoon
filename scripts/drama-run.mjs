@@ -132,12 +132,24 @@ const PROMPT = (day) =>
   `write pack/mod.json (and pack/glossary.json if you invent names), call the check tool until it says ALL GREEN, then write pr.json. ` +
   `Everything you need is in this directory.`;
 
+/**
+ * The headless author's environment. In a bb thread routed through bb's Account Pooler, Claude Code removes
+ * ANTHROPIC_AUTH_TOKEN from tool subprocesses and sets CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST, so a nested `claude` has
+ * no login at all and quits on its first turn with "Not logged in" (Nov 7). bb hands the thread's pool token on as
+ * BB_ACCOUNT_POOL_PARENT_TOKEN for exactly this. Outside a routed thread it's unset, and `claude` uses the machine's login.
+ */
+export function authorEnv(parent = process.env) {
+  const env = { ...parent };
+  delete env.CLAUDECODE; // a nested headless session is intended here
+  if (env.BB_ACCOUNT_POOL_PARENT_TOKEN && !env.ANTHROPIC_AUTH_TOKEN) env.ANTHROPIC_AUTH_TOKEN = env.BB_ACCOUNT_POOL_PARENT_TOKEN;
+  return env;
+}
+
 async function writeStep(room) {
   const model = flag("--model") ?? "claude-opus-5-5";
   const transcriptPath = join(work, "transcript.jsonl");
   const log = createWriteStream(transcriptPath);
-  const env = { ...process.env };
-  delete env.CLAUDECODE; // a nested headless session is intended here
+  const env = authorEnv();
   const mcp = { mcpServers: { drama: { command: process.execPath, args: [join(root, "scripts/drama-mcp.mjs"), join(room, "pack"), "--date", date] } } };
   const base = [
     "--model", model,
@@ -169,6 +181,8 @@ async function writeStep(room) {
   };
   await writeFile(join(work, "agent.json"), JSON.stringify(summary, null, 2) + "\n");
   say(`agent finished (exit ${result.code}, ${summary.turns} turns, ${summary.checks} checks); read: ${summary.reads.join(", ")}`);
+  // A crash on the first turn (no login, no network) leaves no other trace in the run's output.
+  if (result.code !== 0 && summary.result) say(`the agent's last words: ${summary.result.trim().split("\n").slice(-3).join(" / ").slice(0, 300)}`);
   return summary;
 }
 
