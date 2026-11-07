@@ -6,7 +6,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import { aiScore, parseFeed } from "../scripts/drama-fetch.mjs";
-import { blame, CI_JOBS, ciLine, ciStep, commentText, failureFromLog, packText, postComment, report, shapeCheck } from "../scripts/drama-run.mjs";
+import { authorEnv, blame, CI_JOBS, ciLine, ciStep, commentText, failureFromLog, packText, postComment, report, shapeCheck } from "../scripts/drama-run.mjs";
 import { root } from "./lint.mjs";
 
 test("parses RSS items and Atom entries", () => {
@@ -282,4 +282,14 @@ test("a CI wait that breaks is 'unknown', and the run still exits 0 with a comme
   const red = { kind: "red", job: "Deploy / check", what: "x", note: "", excerpt: "" };
   assert.equal(await report({ kind: "opened", url: "u", ci: red }, opts), 0);
   assert.equal(await report({ kind: "failed" }, opts), 1);
+});
+
+test("the headless author signs in through bb's account pool when its thread is routed there", () => {
+  // A routed bb thread: Claude Code has removed ANTHROPIC_AUTH_TOKEN and bb passes the pool token on (Nov 7's "Not logged in").
+  const routed = authorEnv({ CLAUDECODE: "1", ANTHROPIC_BASE_URL: "http://127.0.0.1:1", CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST: "1", BB_ACCOUNT_POOL_PARENT_TOKEN: "pool" });
+  assert.equal(routed.ANTHROPIC_AUTH_TOKEN, "pool");
+  assert.equal(routed.CLAUDECODE, undefined);
+  // Not routed: the machine's own login, untouched. An explicit token is never replaced.
+  assert.equal(authorEnv({ CLAUDECODE: "1" }).ANTHROPIC_AUTH_TOKEN, undefined);
+  assert.equal(authorEnv({ ANTHROPIC_AUTH_TOKEN: "mine", BB_ACCOUNT_POOL_PARENT_TOKEN: "pool" }).ANTHROPIC_AUTH_TOKEN, "mine");
 });
